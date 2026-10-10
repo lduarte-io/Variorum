@@ -52,7 +52,12 @@ Batch 1 implementer (Opus, 2026-10-10, on the Air) — **BATCH 1 CLOSED by the i
 - VX-136: FIX LANDED (PROVISIONAL taste calls — see the member's disposition) — captured first (`TakesMarginGridCaptureTests`, before/after PNGs in `App/Variorum/DerivedData/vx143-screens/`, gitignored), then `TakesMarginGridAlignmentTests` (6 pins) GREEN on the fixed tree (`vx143-green1`); reverts, each discriminating: (a) the default back to one column ⇒ the two default pins RED, choice/rows/doors GREEN (`vx143-rev1`); (b) the row slot removed ⇒ the row pin RED; (c) the stacked doors removed ⇒ the doors pin RED (`vx143-rev2`). The pure row-slot pin is red on the OLD arithmetic by construction (old reserve for the staggered shape = 446, new = 666). Whole-target run green for it (`vx143-full`). DONE.
 - VX-141: FIX LANDED — `NoteBoxSlotTests` RED on the pre-fix tree (`vx143-red1`: slot occupants after the switch `rail → empty → box → box`) and GREEN after (`rail → box → box → box`); behavioural revert (the held slot back to nil) RED again, `rail → empty → box` (`vx143-rev1`). Whole-target run green for it (`vx143-full`). DONE.
 - VX-142: FIX LANDED (PROVISIONAL: no hint survives on the flow) — `ReadFlowHoverHintTests` RED on the pre-fix tree (the composition carried the note's title as the tooltip) and GREEN after; behavioural revert (the `.help` restored) RED again (`vx143-rev1`). Whole-target run green for it (`vx143-full`). DONE.
-- VX-144: NOT-STARTED (batch 2 — screenshot-first, after batch 1)
+- VX-144: see batch 2 below.
+
+Batch 2 implementer (Opus, 2026-10-10, on the Air) — **IN PROGRESS.** No behavioural revert is in flight; tree clean at each commit.
+
+- VX-150: IN-PROGRESS — the trace is written (§ Batch 2 traces); next: the red-on-old pin `WriteTakesPanelKeysTests` (the panel mounted with a stand-in for Write's handler beneath it, a two-block fixture), then the fix in `WriteTakesPanel.handleRouted`, then the behavioural revert.
+- VX-144: NOT-STARTED — capture FIRST (a disabled-by-default harness in the test host, base64 through the log, PNGs into `App/Variorum/DerivedData/vx143-screens/`), the "VX-144 — captures & proposal" section, then STOP for the architect's ruling. No cleanup is designed or built before the ruling.
 
 ## Batch 1 traces (implementer, 2026-10-10 — the mechanism per member, before any code)
 
@@ -109,6 +114,16 @@ Batch 1 implementer (Opus, 2026-10-10, on the Air) — **BATCH 1 CLOSED by the i
 - Every suite this batch added or that pins the touched surfaces passed in that run: VX-135/140/141/142/136's five suites, `WriteTakesPanel (13b 1a)`, the note box's four suites, `13p protection surfaces`, `Take card heights` (L3·L4), `Margin-rail paging`.
 - **The phone:** `xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'` (build only — `StoreLaunchGate.swift` is Shared) — `EXIT 0` (`vx143-ios`).
 - Zero new compiler warnings in the touched files (the one `TakesBoardView` warning in the log is pre-existing, `TakeCardGeometryProbe`).
+
+## Batch 2 traces (implementer, 2026-10-10 — before any code)
+
+**VX-150 — the panel's other take keys act on Write's caret block.** The road is VX-135's: every take key is a menu item (`EditorCommands`) → `ShellActions.dispatch(.takes(…))` → `CommandRouter`'s LIFO stack. Since `0deda5b4` the panel's handler is the top while it is mounted, but it claims ONLY `.takes(.choose)`; every other take key falls through to Write's `EditorView.handleRouted` (`EditorView.swift:309`), whose arms all address Write's CARET (`EditorViewModel.caretBlockID` / `caretVariantID` — the latter is the index entry's variant, i.e. the take Write SHOWS there):
+- **⌃⌘← / ⌃⌘→** (`.stepPrev/.stepNext`) → `openCaretFan()` → `fanPanel = FanPanelState(blockID: caretBlockID)` (`EditorViewModel.swift:3361/3373`; the state's identity IS the block id, `:265`). Caret in the panel's block ⇒ the same id, nothing happens — the ring never moves. Caret in ANOTHER block (the panel opened from a fanned block's ⑂ badge, `EditorView.swift:947`) ⇒ the sheet's item changes identity and the panel is swapped for the CARET block's. No caret ⇒ Write's refusal, under the sheet.
+- **⌘T / ⌥⌘T / ⇧⌥⌘T** (`.branch/.blank/.blankChoose`) → `mintCaretTake` (`:3381`) on `caretBlockID`, branching from `caretVariantID` — another block entirely when the panel came from a ⑂ badge; the receipt lands on Write's status line beneath the sheet; the ring never moves onto a new card. (⇧⌥⌘T is not in the batch brief's list but it is the same take key on the same mechanism, and the panel's own "＋ blank & choose" door advertises it — so it rides this member, recorded here rather than silently.)
+- **⌘⇧A** (`.archive`) → `archiveCaretTake` (`:3437`) archives `caretVariantID` — the take Write shows at the caret, NEVER the take the panel's ring is in, even when the panel IS the caret block's.
+- Not take-family arms of this member, left falling through (observations below): ⌘⇧T (`.toggleFan` — "takes at the block you're in"), ⎋ (`.closeAll`, a no-op in Write by design), ⌘⇧L (`.saveLens`, post-scoped).
+
+Fix shape: the panel's handler claims the take keys against ITS block through the panel's own `TakesViewModel` (the Takes board's arms — `stepTakes`, `archiveFocusedTake`, `branchTakeRevealed`, `newBlankTakeRevealed`, `newBlankTakeAsChosen` — each passing the panel's column so the ring lands on the panel's card); the three post/bloom-scoped keys still fall through to Write.
 
 ## Environment traps (binding for every session in this run)
 
