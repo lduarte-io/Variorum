@@ -38,7 +38,28 @@ enum MCPNoteStructure {
         /// Commits whose text rides whatever the budget (validated to be
         /// commits of THIS note's takes).
         var commitIDs: [String] = []
+        // 13n-b U4 (R-13nb-14's keyboard bar; AF-11 F-4 — explicit call
+        // shapes, never ambient, uniform per rung, R-13nb-17):
+        /// ARCHIVED takes join each block's fan, marked `archived: true`
+        /// (the app's kept-but-out-of-view posture: absent unless asked).
+        var includeArchived = false
+        /// The note's TRAY — its deleted blocks and deleted takes on their
+        /// 30-day clocks (the tray's leaving section, its own queries).
+        var withTray = false
+        /// LINEAGE: each block's direct derived_from / version_of edges, and
+        /// each take's parent (take ancestry).
+        var withLineage = false
+        /// The note's saved LENSES, each with its picks.
+        var withLenses = false
+        /// The note's saved VERSIONS (Note ▸ Versions' listing).
+        var withVersions = false
+        /// The tray's clock (the 30-day window is "now"-relative).
+        var now = Date()
     }
+
+    /// The most deleted blocks, deleted takes, versions and lenses one answer
+    /// carries (each list says `truncated` past it) — ∝ the note, bounded.
+    static let carriageCap = 200
 
     /// The characters of commit text one answer carries before later
     /// commits say `text_omitted` (AF-10 (d)).
@@ -65,14 +86,24 @@ enum MCPNoteStructure {
         for row in try Row.fetchAll(
             db,
             sql: """
-                SELECT v.id, v.block_id, v.label, v.working_text FROM json_each(?) j
+                SELECT v.id, v.block_id, v.label, v.working_text, v.status, v.parent_variant_id
+                FROM json_each(?) j
                 JOIN variant v ON v.block_id = j.value
-                WHERE v.deleted_at IS NULL AND v.status = 'active'
+                WHERE v.deleted_at IS NULL AND (v.status = 'active' OR ?)
                 ORDER BY v.fan_position, v.id
                 """,
-            arguments: [json]) {
+            arguments: [json, options.includeArchived]) {
             takes[row["block_id"], default: []].append(row)
         }
+        let lineage = options.withLineage
+            ? try Self.lineage(db, noteID: noteID, blockIDs: blockIDs, standing: standing)
+            : nil
+        let parents = options.withLineage
+            ? try Self.parents(
+                db, noteID: noteID,
+                parentIDs: takes.values.flatMap { $0.compactMap { $0["parent_variant_id"] as String? } },
+                standing: standing)
+            : [:]
         var comments: [String: [[String: Any]]] = [:]
         for row in try Row.fetchAll(
             db,
@@ -92,10 +123,15 @@ enum MCPNoteStructure {
         for placement in placements {
             let blockID: String = placement["block_id"]
             let fan = takes[blockID] ?? []
-            let ids = Set(fan.map { $0["id"] as String })
+            // The SHOWN take is read over the ACTIVE fan only (AppSpec §7's
+            // fallback: an archived chosen take renders the default) — an
+            // archived take joining the list under `include_archived` never
+            // becomes the one shown.
+            let active = fan.filter { ($0["status"] as String) == "active" }
+            let ids = Set(active.map { $0["id"] as String })
             let chosen: String? = placement["chosen_variant_id"]
             let fallback: String? = placement["default_variant_id"]
-            let shown = [chosen, fallback].compactMap { $0 }.first { ids.contains($0) } ?? fan.first?["id"]
+            let shown = [chosen, fallback].compactMap { $0 }.first { ids.contains($0) } ?? active.first?["id"]
             var entries: [[String: Any]] = []
             var shownText = ""
             for take in fan {
@@ -103,7 +139,11 @@ enum MCPNoteStructure {
                 let text: String = take["working_text"]
                 var entry: [String: Any] = ["take_id": id, "chosen": id == shown, "text": text]
                 if let label: String = take["label"] { entry["label"] = label }
+                if (take["status"] as String) == "archived" { entry["archived"] = true }
                 if let commitLists { entry["commits"] = commitLists[id] ?? [] }
+                if options.withLineage, let parent: String = take["parent_variant_id"] {
+                    for (key, value) in parents[parent] ?? Self.beyondGrantParent { entry[key] = value }
+                }
                 entries.append(entry)
                 if id == shown { shownText = text }
             }
@@ -112,6 +152,7 @@ enum MCPNoteStructure {
                 "comments": comments[blockID] ?? [],
             ]
             if let name: String = placement["name"], !name.isEmpty { entry["name"] = name }
+            if let lineage { entry["lineage"] = lineage[blockID] ?? [] }
             blocks.append(entry)
         }
         var answer: [String: Any] = ["note_id": noteID, "title": title, "blocks": blocks]
@@ -121,6 +162,218 @@ enum MCPNoteStructure {
         }
         if let standing {
             answer["books"] = try books(db, noteID: noteID, standing: standing)
+        }
+        if options.withTray { answer["tray"] = try tray(db, noteID: noteID, now: options.now) }
+        if options.withLenses { answer["lenses"] = try lenses(db, noteID: noteID, blockOrder: blockIDs) }
+        if options.withVersions { answer["versions"] = try versions(db, noteID: noteID) }
+        return answer
+    }
+
+    // MARK: - 13n-b U4: the carriage (AF-11 F-4)
+
+    /// **The note's TRAY** — the leaving section exactly as her tray panel
+    /// lists it (`Queries.trayBlocks` / `trayTakes`: individually deleted,
+    /// inside the 30-day window, no purge intent; a take that died WITH its
+    /// block rides the block's row). `put_back` addresses these ids.
+    static func tray(_ db: Database, noteID: String, now: Date) throws -> [String: Any] {
+        let blocks = try Queries.trayBlocks(db, postID: noteID, now: now, limit: carriageCap + 1)
+        let takes = try Queries.trayTakes(db, postID: noteID, now: now, limit: carriageCap + 1)
+        var answer: [String: Any] = [
+            "blocks": blocks.prefix(carriageCap).map { item -> [String: Any] in
+                ["block_id": item.blockID, "deleted_at": item.deletedAt, "text": item.text ?? ""]
+            },
+            "takes": takes.prefix(carriageCap).map { take -> [String: Any] in
+                var entry: [String: Any] = [
+                    "take_id": take.variantID, "block_id": take.blockID, "deleted_at": take.deletedAt,
+                    "text": take.text,
+                ]
+                if let label = take.label { entry["label"] = label }
+                return entry
+            },
+        ]
+        if blocks.count > carriageCap || takes.count > carriageCap { answer["truncated"] = true }
+        return answer
+    }
+
+    /// **The note's saved LENSES** — each lens's name and its EFFECTIVE picks
+    /// (a pick whose take has since been archived or deleted falls through to
+    /// the note's own chosen take, `effectiveLensSelection`'s rule — counted
+    /// in `dangling_picks`), in the note's block order.
+    static func lenses(_ db: Database, noteID: String, blockOrder: [String]) throws -> [[String: Any]] {
+        let rank = Dictionary(blockOrder.enumerated().map { ($1, $0) }, uniquingKeysWith: { first, _ in first })
+        return try Queries.lenses(db, post: noteID).prefix(carriageCap).map { lens -> [String: Any] in
+            let picks = try Queries.effectiveLensSelection(db, lens: lens.id)
+                .filter { rank[$0.key] != nil }
+                .sorted { (rank[$0.key] ?? 0, $0.key) < (rank[$1.key] ?? 0, $1.key) }
+                .map { ["block_id": $0.key, "take_id": $0.value] }
+            return [
+                "lens_id": lens.id, "name": lens.name, "picks": picks,
+                "dangling_picks": try Queries.danglingLensPicks(db, lens: lens.id).count,
+            ]
+        }
+    }
+
+    /// **The note's saved VERSIONS** — Note ▸ Versions' listing (newest
+    /// first); `read_note`'s `version_id` reads one.
+    static func versions(_ db: Database, noteID: String) throws -> [[String: Any]] {
+        try Queries.noteVersions(db, of: noteID, limit: carriageCap).map { item -> [String: Any] in
+            var entry: [String: Any] = [
+                "version_id": item.postID, "saved_at": DateFormatter.variorumISO8601.string(from: item.savedAt),
+                "block_count": item.blockCount,
+            ]
+            if let preview = item.preview { entry["preview"] = String(preview.prefix(280)) }
+            return entry
+        }
+    }
+
+    /// The ONE uniform stub for a lineage far side beyond the client's grant
+    /// (AF-11 F-4's RIDER): no id, no title, no kind — nothing distinguishes a
+    /// FENCED far side from a merely unshared one, a scrap, or a released
+    /// block of another note. The edge's own relation rides beside it.
+    static func beyondGrant(_ relation: String) -> [String: Any] {
+        ["relation": relation, "beyond_grant": true]
+    }
+
+    /// A take's parent beyond the grant — the same uniform stub's twin.
+    static var beyondGrantParent: [String: Any] { ["parent_beyond_grant": true] }
+
+    /// Where a far-side block lives, as the client may know it.
+    private enum FarSide {
+        case thisNote
+        case releasedOriginal(text: String?)
+        case version(String)
+        case readableNote(String)
+        case beyondGrant
+    }
+
+    /// Classifies far-side blocks for THIS client (`standing`), batched.
+    private static func farSides(
+        _ db: Database, noteID: String, blockIDs: Set<String>, standing: MCPGrantAuthority.Standing?
+    ) throws -> [String: FarSide] {
+        guard !blockIDs.isEmpty else { return [:] }
+        let json = String(decoding: try JSONEncoder().encode(blockIDs.sorted()), as: UTF8.self)
+        let rows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT b.id, b.last_container_id, cb.container_id AS placed, dv.working_text AS text
+                FROM json_each(?) j JOIN block b ON b.id = j.value AND b.deleted_at IS NULL
+                LEFT JOIN container_block cb ON cb.block_id = b.id AND cb.deleted_at IS NULL
+                LEFT JOIN variant dv ON dv.id = b.default_variant_id AND dv.deleted_at IS NULL
+                """,
+            arguments: [json])
+        let homes = Set(rows.compactMap { $0["placed"] as String? }).subtracting([noteID])
+        let facts = try Queries.mcpNoteFacts(db, noteIDs: homes.sorted())
+        var sides: [String: FarSide] = [:]
+        for row in rows {
+            let id: String = row["id"]
+            if let placed: String = row["placed"] {
+                if placed == noteID {
+                    sides[id] = .thisNote
+                } else if try Queries.isVersionHistory(db, placed, of: noteID) {
+                    sides[id] = .version(placed)
+                } else if let standing, MCPGrantAuthority.decide(
+                    standing, note: facts[placed], rung: .read, consumes: false).isAllowed {
+                    sides[id] = .readableNote(placed)
+                } else {
+                    sides[id] = .beyondGrant
+                }
+            } else if (row["last_container_id"] as String?) == noteID {
+                sides[id] = .releasedOriginal(text: row["text"])
+            } else {
+                sides[id] = .beyondGrant
+            }
+        }
+        return sides
+    }
+
+    /// **LINEAGE** — each of the note's blocks' DIRECT live edges
+    /// (`derived_from` both ways and `version_of`), the far side as the client
+    /// may know it: a block of this note, a released original of this note
+    /// (with its text — part of the note's own history), a block of one of
+    /// its saved versions, a block of another note the client can read, or
+    /// the ONE uniform stub. A dead far side is left out (the lineage walks'
+    /// live-endpoint rule). ∝ the note's blocks' edges (both indexes).
+    static func lineage(
+        _ db: Database, noteID: String, blockIDs: [String], standing: MCPGrantAuthority.Standing?
+    ) throws -> [String: [[String: Any]]] {
+        guard !blockIDs.isEmpty else { return [:] }
+        let json = String(decoding: try JSONEncoder().encode(blockIDs), as: UTF8.self)
+        let edges = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT e.id, e.source_block_id, e.target_block_id, e.type, e.origin_op, e.created_at
+                FROM json_each(?) j JOIN edge e ON e.source_block_id = j.value
+                WHERE e.deleted_at IS NULL
+                UNION
+                SELECT e.id, e.source_block_id, e.target_block_id, e.type, e.origin_op, e.created_at
+                FROM json_each(?) j JOIN edge e ON e.target_block_id = j.value
+                WHERE e.deleted_at IS NULL
+                ORDER BY 6, 1
+                """,
+            arguments: [json, json])
+        let mine = Set(blockIDs)
+        var far: Set<String> = []
+        for edge in edges {
+            far.insert(edge["source_block_id"])
+            far.insert(edge["target_block_id"])
+        }
+        let sides = try farSides(db, noteID: noteID, blockIDs: far, standing: standing)
+        var lineage: [String: [[String: Any]]] = [:]
+        for edge in edges {
+            let source: String = edge["source_block_id"]
+            let target: String = edge["target_block_id"]
+            let type: String = edge["type"]
+            for (block, other, relation) in [
+                (source, target, type == "version_of" ? "version_of" : "derived_from"),
+                (target, source, type == "version_of" ? "version_of" : "derived_into"),
+            ] where mine.contains(block) {
+                guard let side = sides[other] else { continue }  // a dead far side
+                var entry: [String: Any]
+                switch side {
+                case .beyondGrant:
+                    lineage[block, default: []].append(beyondGrant(relation))
+                    continue
+                case .thisNote:
+                    entry = ["relation": relation, "block_id": other]
+                case .releasedOriginal(let text):
+                    entry = ["relation": relation, "block_id": other, "released": true, "text": text ?? ""]
+                case .version(let versionID):
+                    entry = ["relation": relation, "block_id": other, "version_id": versionID]
+                case .readableNote(let otherNote):
+                    entry = ["relation": relation, "block_id": other, "note_id": otherNote]
+                }
+                if let op: String = edge["origin_op"] { entry["origin_op"] = op }
+                entry["at"] = edge["created_at"] as String
+                lineage[block, default: []].append(entry)
+            }
+        }
+        return lineage
+    }
+
+    /// **TAKE ANCESTRY** — each parent take's address as the client may know
+    /// it: its id when its block belongs to this note's family (placed here,
+    /// released from here, a version of this note's) or to a note the client
+    /// can read (with that note's id), else the uniform stub's twin.
+    static func parents(
+        _ db: Database, noteID: String, parentIDs: [String], standing: MCPGrantAuthority.Standing?
+    ) throws -> [String: [String: Any]] {
+        guard !parentIDs.isEmpty else { return [:] }
+        let json = String(decoding: try JSONEncoder().encode(Array(Set(parentIDs)).sorted()), as: UTF8.self)
+        let rows = try Row.fetchAll(
+            db,
+            sql: "SELECT v.id, v.block_id FROM json_each(?) j JOIN variant v ON v.id = j.value",
+            arguments: [json])
+        let sides = try farSides(db, noteID: noteID, blockIDs: Set(rows.map { $0["block_id"] as String }),
+                                 standing: standing)
+        var answer: [String: [String: Any]] = [:]
+        for row in rows {
+            let id: String = row["id"]
+            switch sides[row["block_id"] as String] {
+            case .thisNote?, .releasedOriginal?: answer[id] = ["parent_take_id": id]
+            case .version(let versionID)?: answer[id] = ["parent_take_id": id, "parent_version_id": versionID]
+            case .readableNote(let other)?: answer[id] = ["parent_take_id": id, "parent_note_id": other]
+            case .beyondGrant?, nil: answer[id] = beyondGrantParent
+            }
         }
         return answer
     }

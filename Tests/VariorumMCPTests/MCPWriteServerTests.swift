@@ -110,19 +110,34 @@ struct MCPWriteServerTests {
             let branch = try h.operations.branchVariant(one.block.id, from: one.variant.id)
             try h.operations.autosave(branch.id, text: "her other take", charDelta: 3)
             try h.operations.setTakeLabel(branch.id, label: "hers, labeled")
-            let hersTakes = [one.variant.id, two.variant.id, branch.id]
+            // U4 (justified edit — the proof's completeness grows with the
+            // catalog): her TRAY holds a deleted block and a deleted take, so
+            // put_back has something of hers to aim at.
+            let gone = try h.operations.newBlock(in: note.id, text: "her deleted paragraph", registeringUndo: false)
+            try h.operations.deleteBlock(gone.block.id)
+            let deletedTake = try h.operations.branchVariant(two.block.id, from: two.variant.id)
+            try h.operations.deleteVariant(deletedTake.id)
+            let hersTakes = [one.variant.id, two.variant.id, branch.id, gone.variant.id, deletedTake.id]
             func snapshot() throws -> [String] {
                 try h.database.read { db in
                     let takes = try Row.fetchAll(
-                        db, sql: "SELECT * FROM variant WHERE id IN (?, ?, ?) ORDER BY id",
+                        db, sql: "SELECT * FROM variant WHERE id IN (?, ?, ?, ?, ?) ORDER BY id",
                         arguments: StatementArguments(hersTakes)).map(\.description)
                     let placements = try Row.fetchAll(
                         db, sql: "SELECT * FROM container_block ORDER BY id").map(\.description)
                     let blocks = try Row.fetchAll(db, sql: "SELECT * FROM block ORDER BY id").map(\.description)
                     let commits = try Row.fetchAll(db, sql: "SELECT * FROM commit_point ORDER BY id").map(\.description)
-                    return takes + placements + blocks + commits
+                    // U4: her note's date and her book's Collecting columns.
+                    let dates = try String.fetchAll(db, sql: "SELECT COALESCE(entry_date, '-') FROM container ORDER BY id")
+                    let rules = try Row.fetchAll(
+                        db, sql: "SELECT query_spec, auto_tag_ids, intake_seating FROM reading ORDER BY id")
+                        .map(\.description)
+                    let filings = try Row.fetchAll(db, sql: "SELECT section_id FROM reading_post ORDER BY id")
+                        .map(\.description)
+                    return takes + placements + blocks + commits + dates + rules + filings
                 }
             }
+            let chapter = try h.operations.createSection(in: book.id, name: "1")
             let before = try snapshot()
 
             let connection = try await h.connect(as: "claude-code")
@@ -162,6 +177,16 @@ struct MCPWriteServerTests {
             calls.append(("move_block", ["block_id": .string(two.block.id), "before_block_id": .string(one.block.id)]))
             calls.append(("delete_block", ["block_id": .string(two.block.id)]))
             calls.append(("set_block_name", ["block_id": .string(one.block.id), "name": .string("x")]))
+            // U4 (justified edit, the ritual): the carriage's write doors —
+            // edit's put_back and set_entry_date, write new's save_version,
+            // file_note_in_chapter and set_book_rule — each refusing at the rung.
+            calls.append(("put_back", ["block_id": .string(gone.block.id)]))
+            calls.append(("put_back", ["take_id": .string(deletedTake.id)]))
+            calls.append(("set_entry_date", ["note_id": .string(note.id), "entry_date": .string("2019-03-04")]))
+            calls.append(("save_version", ["note_id": .string(note.id)]))
+            calls.append(("file_note_in_chapter", ["note_id": .string(note.id), "book_id": .string(book.id),
+                                                   "section_id": .string(chapter.id)]))
+            calls.append(("set_book_rule", ["book_id": .string(book.id), "rule": .object(["star": .bool(true)])]))
             // And the read rung, for completeness (reads write no take).
             calls.append(("read_note", ["note_id": .string(note.id), "with_ids": .bool(true)]))
             calls.append(("export_note", ["note_id": .string(note.id)]))

@@ -56,4 +56,29 @@ extension Queries {
         }
         return nil
     }
+
+    /// **Where a TRAY item belongs** (13n-b U4 — `put_back`'s address): a
+    /// deleted block's `last_container_id` (the note it was deleted from — the
+    /// tray's own key); nil for a live block or one that remembers no home.
+    public static func mcpTrayHome(block blockID: String, _ db: Database) throws -> String? {
+        try String.fetchOne(
+            db, sql: "SELECT last_container_id FROM block WHERE id = ? AND deleted_at IS NOT NULL",
+            arguments: [blockID])
+    }
+
+    /// A deleted TAKE's home — `trayTakes`' own rule: its live block's live
+    /// placement, else (a released original) the block's `last_container_id`;
+    /// nil for a live take, or one whose block died (it rides its block's
+    /// row — restore the block).
+    public static func mcpTrayHome(take variantID: String, _ db: Database) throws -> String? {
+        try String.fetchOne(
+            db,
+            sql: """
+                SELECT COALESCE(cb.container_id, b.last_container_id) FROM variant v
+                JOIN block b ON b.id = v.block_id AND b.deleted_at IS NULL
+                LEFT JOIN container_block cb ON cb.block_id = b.id AND cb.deleted_at IS NULL
+                WHERE v.id = ? AND v.deleted_at IS NOT NULL
+                """,
+            arguments: [variantID])
+    }
 }

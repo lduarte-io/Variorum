@@ -2625,11 +2625,12 @@ door, the landing roads: `ShellRouter.adopt`, `PostDetailView.jump`,
 | # | Piece | Status |
 |---|---|---|
 | S0 | This record + the FORK message (below) to the orchestrator | DONE (this commit) — forks F-1…F-4 sent; F-1/F-2/F-3 GATE their halves (book-rule WRITE; the offer door's class + chord; show_in_app's shape), F-4 is non-gating (built PROVISIONAL meanwhile) |
-| S1 | Core: `put_back`'s acts (block + take, client-named undo, in-transaction guard), `save_version` relabeled, `set_entry_date` (undo + guard), file-into-chapter (PROVISIONAL), the lockedReading words fix (red-on-old) | NOT-STARTED |
-| S2 | The read carriage on the wire (F-4): tray, lineage + ancestry, archived reach, lenses, versions list/read, book facts on list_books | NOT-STARTED |
-| S3 | The write tools on the wire: put_back · set_entry_date (edit), save_version · file_note_in_chapter (write new) + rung proofs | NOT-STARTED |
-| S4 | Book-rule WRITE (F-1 — waits for the ruling) | BLOCKED on F-1 |
-| S5 | NAVIGATION (F-2/F-3 — the server half + the decision seam may proceed; the app delivery waits for the rulings) | BLOCKED on F-2/F-3 (partly) |
+| S1 | Core: `put_back`'s acts (block + take, client-named undo, in-transaction guard), `save_version` relabeled, `set_entry_date` (undo + guard), file-into-chapter (PROVISIONAL), `set_book_rule` (AF-11 F-1) | DONE (`bcc83cb2`) — `MCPCarriageActsTests` 16/16; the four rule/section setters' row work extracted byte-identically (related core suites 215/40 green) |
+| S2 | The read carriage on the wire (AF-11 F-4): tray, lineage + ancestry (the uniform-stub rider), archived reach, lenses, versions list/read, book facts on list_books | DONE (this commit) — `MCPCarriageServerTests` 9/9 |
+| S3 | The write tools on the wire: put_back · set_entry_date (edit), save_version · file_note_in_chapter · set_book_rule (write new) + rung proofs | DONE (this commit) — the U2 suggest PROOF and the U3 edit-half PROOF grown as the ritual (justified edits); VariorumMCPTests 54/7 |
+| S3b | The J8 `lockedReading` words fix (AF-11 F-1 approved, red-on-old, Mac table) | NOT-STARTED |
+| S4 | Book-rule WRITE (AF-11 F-1) | DONE — folded into S1/S3 |
+| S5 | NAVIGATION (AF-11 F-2/F-3): show_in_app (VariorumMCP decision + hook), the app's delivery (note-at-block / takes / lens / book-chapter), the receipt's "Open ›" + "Show the AI's last change" (⌥⌘O after the sweep) | NOT-STARTED |
 | S6 | End of unit: headless suites, Mac focused suites (stage), the pre-flight walk (stage, both voices), record final | NOT-STARTED |
 
 ### Forks returned to the orchestrator (2026-10-10) — PENDING rulings
@@ -2714,8 +2715,88 @@ door, the landing roads: `ShellRouter.adopt`, `PostDetailView.jump`,
 
 ### PROVISIONALs (for the merge QUESTIONS bundle)
 
-*(accumulating)*
+- **P-13nb-U4-1 — the carriage rides `read_note` params** (AF-11 F-4,
+  concurred PROVISIONAL): `include_archived` · `with_tray` · `with_lineage`
+  · `with_lenses` · `with_versions` · `version_id`, each implying the
+  structured form; none rides the Level 0 text. `version_id` reads a moment
+  on its NOTE's grant (asked only after the note is allowed; another note's
+  moment refuses "isn't a saved version of this note"); a version itself has
+  no facts (the one answer by its own id).
+- **P-13nb-U4-2 — the carriage's words** (P-13nb-U2-5's family, 13s-a
+  sweepable): undo labels "<client>'s put back / version / date / chapter
+  filing / book rule"; receipts "put back a block|a take" · "saved a
+  version" · "dated the note <day>" / "cleared the note's date" · "filed a
+  note under “…”" / "unfiled a note" · "changed what “<book>” collects";
+  the wire's own sentences (`notInTrayWords`, `intakePausedWords`,
+  `legacyTermWords`).
+- **P-13nb-U4-3 — the two U1 list flips** (AF-11 F-4's deliberate flips):
+  `list_books` drops archived books and `list_notes(book_id)` drops
+  archived members unless `include_archived` — and `list_books`' count
+  follows (the count IS the listing's extent either way); reach untouched
+  (an archived note or book answers under its grant by id).
+- **P-13nb-U4-4 — search's `include_archived`** = the facet's letter
+  (`includingArchived`: living AND archived, each passage marked) — built
+  as the brief asked, PROVISIONAL (R-13nb-10 left the archived facet
+  UI-only; the sitting carried the inventory row).
+- **P-13nb-U4-5 — the tray's reach on the wire** is the LEAVING section
+  only (deleted blocks + deleted takes — the brief's "the app's 30-day-clock
+  family"); her tray's preserved originals and archived blocks are NOT a
+  tray read (a released original of the note DOES surface, with its text,
+  as a lineage far side — `with_lineage`). Each list caps at 200 with
+  `truncated`.
+- **P-13nb-U4-6 — `put_back` refuses what her tray does not offer**: a block
+  still deleted must be in its note's tray listing (30 days, no purge
+  intent, never a deleted note's cascade victim) — in the act's transaction;
+  else "That isn't in the note's tray any more…". An item already back is
+  decided on the note it is back in and speaks the op's own "already back".
+- **P-13nb-U4-7 — lineage's shape** (AF-11 F-4 + the RIDER): DIRECT live
+  edges only (`derived_from` / `derived_into` / `version_of`), the far side
+  as the client may know it — a block of this note · a RELEASED ORIGINAL of
+  this note (with its text) · a block of one of its saved versions
+  (`version_id`) · a block of a note the client can read (`note_id`) · else
+  the ONE uniform stub `{"relation": …, "beyond_grant": true}` — no id, no
+  title, no kind, no origin_op, no stamp (pinned byte-identical across a
+  fenced, an unshared and a scrap far side). Take ancestry mirrors it
+  (`parent_take_id`, + `parent_version_id` / `parent_note_id`, else
+  `parent_beyond_grant: true`). A dead far side is left out (the lineage
+  walks' live-endpoint rule).
+- **P-13nb-U4-8 — `set_book_rule`'s shape** (AF-11 F-1): one call = her
+  Save's three optional fields; the three writes in ONE transaction (her
+  Save is three — stricter only in that nothing half-lands); a legacy term
+  in the written rule refuses (`legacyTermWords`); an unreadable stored rule
+  refuses ANY rule write with her editor's own notice while the dial and the
+  outflow still land (her Save's exact behavior — `RuleEditing.needsWrite`);
+  undo restores the three columns and never evicts. Verified, not assumed:
+  her ops and her Edit… door LAND on a finished AND a sealed book
+  (`.editRule` is `always`; no op refuses) — both pinned.
+- **P-13nb-U4-9 — `file_note_in_chapter`** (P-13nb-U3-8's U4 candidate,
+  built PROVISIONAL): write new, scopes book · wing, the book AND the note
+  each decided at write new inside the act's transaction (a note the client
+  cannot reach is never reorganized); `section_id: null` unfiles.
+- **P-13nb-U4-10 — `set_entry_date`** is EDIT (R-13nb-26 (b)), allowed under
+  a seal exactly as her own date door (N34's class); `null` un-dates; a
+  journal-fenced note refuses per the rule (pinned: the fence governs from
+  the moment SHE files the note in a journal book). Watch item, recorded:
+  her op never refuses a day another journal entry already holds (the
+  notebook rule's converged double-create case) — the wire mirrors it.
 
 ### Decisions within the mandate (recorded as they land)
 
-*(accumulating)*
+- **Every new act takes the in-transaction guard** (AF-10 (a) carried):
+  `put_back` re-resolves the item's home on the act's own rows (the tray's
+  `last_container_id` while deleted, its placement once back), decides at
+  EDIT and checks tray membership there; `save_version` decides the note at
+  write new; `set_book_rule` / `file_note_in_chapter` decide the book (and
+  the note) at write new — every once grant spent atomically with its act.
+- **`restoreBlock` / `restoreVariant` gained a defaulted `guardedBy:`**
+  (nil on her doors — the U3 precedent); `performDeleteBlock` /
+  `performDeleteVariant` widened private → internal for `put_back`'s
+  inverse; `assignPostToSection`, `setReadingQuerySpec`,
+  `setReadingOutflow`, `setReadingIntakeSeating` now wrap row functions the
+  MCP acts share — byte-identical behavior (their suites green unmodified).
+- **The answer encoder refuses a non-JSON value** instead of letting
+  `JSONSerialization` raise an Objective-C exception that would take the
+  APP down (found when a `Date` reached it in a test — the server's two
+  `encode`s now check `isValidJSONObject` first).
+- **The harness clock:** `MCPHostHooks.now` (default the wall clock) feeds
+  the tray's 30-day window; the server harness passes its world's "now".

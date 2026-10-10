@@ -105,14 +105,25 @@ public struct MCPHostHooks: Sendable {
     public var onAsk: (@Sendable (MCPAsk) -> Void)?
     /// A write landed (the receipt's signal).
     public var onWrite: (@Sendable (MCPWriteReceipt) -> Void)?
+    /// 13n-b U4: the clock the tray's 30-day window reads (the app's is the
+    /// wall clock; a test's is its world's).
+    public var now: @Sendable () -> Date
 
     public init(
         refusalWords: @escaping @Sendable (Error) -> String? = { _ in nil },
         onAsk: (@Sendable (MCPAsk) -> Void)? = nil,
-        onWrite: (@Sendable (MCPWriteReceipt) -> Void)? = nil
+        onWrite: (@Sendable (MCPWriteReceipt) -> Void)? = nil,
+        now: @escaping @Sendable () -> Date = { Date() }
     ) {
         self.refusalWords = refusalWords
         self.onAsk = onAsk
         self.onWrite = onWrite
+        self.now = now
     }
+}
+
+/// An answer that could not be written as JSON (13n-b U4 — the guard in
+/// front of `JSONSerialization`, whose failure is an uncatchable exception).
+struct MCPAnswerEncodingFailure: Error, CustomStringConvertible {
+    var description: String { "the answer could not be encoded" }
 }

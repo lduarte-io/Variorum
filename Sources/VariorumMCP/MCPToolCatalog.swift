@@ -61,9 +61,13 @@ enum MCPToolCatalog {
     static let suggest: [MCPToolDeclaration] = [addTake, addComment, saveLens]
     static let writeNew: [MCPToolDeclaration] = [
         createNote, importDocument, applyTag, createBook, addNoteToBook, createSection,
+        // U4 — the carriage (R-13nb-18, R-13nb-26 f, P-13nb-U3-8 → PROVISIONAL).
+        saveVersion, fileNoteInChapter, setBookRule,
     ]
     static let edit: [MCPToolDeclaration] = [
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
+        // U4 — the tray's Put back (R-13nb-14) and the date (R-13nb-26 b).
+        putBack, setEntryDate,
     ]
     static let all: [MCPToolDeclaration] = read + suggest + writeNew + edit
 
@@ -81,12 +85,19 @@ enum MCPToolCatalog {
         name: "list_books", rung: .read, title: "List books",
         description: """
             The Variorum books shared with this client (by a book or wing grant, or the open \
-            book): each book's id, name, wing and live note count. Journals and Private books \
-            are never listed. Returns JSON.
+            book): each book's id, name, wing and live note count, and how it collects — its rule \
+            (tags by path: {"tag": "percy"}, {"star": true}, combined with {"and": […]}, {"or": […]}, \
+            {"not": …}), its outflow (the tags notes written there wear), new_matches ("join" or \
+            "wait" at Arrivals), word_target / max_notes, and whether it is finished, sealed, owned \
+            or collecting now. Archived books appear only with include_archived: true. Journals and \
+            Private books are never listed. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
-            "properties": .object([:]),
+            "properties": .object([
+                "include_archived": .object(["type": "boolean",
+                                             "description": "Also list archived books (default false)."]),
+            ]),
             "additionalProperties": false,
         ]),
         scopes: [.book, .wing])
@@ -98,12 +109,14 @@ enum MCPToolCatalog {
             the chapter it is filed under (section_id, section_name) when it has one. With \
             wing_id: that wing's notes, most recently edited first. With neither: every note \
             shared with this client, most recently edited first. Paged — pass next_cursor back \
-            as cursor. Journal entries and Private notes appear only when shared one ask at a \
-            time. Returns JSON.
+            as cursor. Archived notes appear only with include_archived: true (marked archived). \
+            Journal entries and Private notes appear only when shared one ask at a time. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
+                "include_archived": .object(["type": "boolean",
+                                             "description": "Also list archived notes (default false)."]),
                 "book_id": .object(["type": "string", "description": "List this book's notes."]),
                 "wing_id": .object(["type": "string", "description": "List this wing's notes (\"\" is Home)."]),
                 "cursor": .object(["type": "string", "description": "next_cursor from the previous page."]),
@@ -131,7 +144,13 @@ enum MCPToolCatalog {
             (a write with a stale id is refused) — read again to get current ids. with_commits: true \
             adds each take's commits (saved moments), newest first, with their text; past about \
             100,000 characters of commit text, older ones say text_omitted — fetch those by \
-            commit_ids (up to 20 per call).
+            commit_ids (up to 20 per call). More, each by asking: include_archived: true (archived \
+            takes join each block's takes, marked archived); with_tray: true (the note's tray — \
+            deleted blocks and takes, kept 30 days; put_back restores one); with_lineage: true \
+            (each block's lineage — what it was divided, merged or copied from or into — and each \
+            take's parent_take_id; a relative outside what you can read shows only \
+            beyond_grant); with_lenses: true (its saved lenses and the take each shows per block); \
+            with_versions: true (its saved versions — version_id reads one, in either form).
             """,
         inputSchema: .object([
             "type": "object",
@@ -143,6 +162,18 @@ enum MCPToolCatalog {
                                          "description": "Add each take's commits (implies with_ids)."]),
                 "commit_ids": .object(["type": "array", "items": .object(["type": "string"]), "maxItems": 20,
                                        "description": "Commits whose full text to include (implies with_ids)."]),
+                "include_archived": .object(["type": "boolean",
+                                             "description": "Include archived takes (implies with_ids)."]),
+                "with_tray": .object(["type": "boolean",
+                                      "description": "Add the note's tray of deleted things (implies with_ids)."]),
+                "with_lineage": .object(["type": "boolean",
+                                         "description": "Add lineage and take ancestry (implies with_ids)."]),
+                "with_lenses": .object(["type": "boolean",
+                                        "description": "Add the note's saved lenses (implies with_ids)."]),
+                "with_versions": .object(["type": "boolean",
+                                          "description": "Add the note's saved versions (implies with_ids)."]),
+                "version_id": .object(["type": "string",
+                                       "description": "Read this saved version of the note instead."]),
             ]),
             "required": .array(["note_id"]),
             "additionalProperties": false,
@@ -155,7 +186,8 @@ enum MCPToolCatalog {
             Full-text search over the notes and books shared with this client (Variorum's own \
             search: every word must match, "quoted phrases" stay together, #tag/path filters by \
             tag). Narrow with book_id or note_id. include_commits: true also searches commits (saved \
-            moments' text) — those passages carry a commit_id and saved_at. Returns JSON passages: \
+            moments' text) — those passages carry a commit_id and saved_at. include_archived: true \
+            also searches archived notes, books and takes (marked archived). Returns JSON passages: \
             the note, the block, and the words around each match (matches wrapped in **).
             """,
         inputSchema: .object([
@@ -166,6 +198,8 @@ enum MCPToolCatalog {
                 "note_id": .object(["type": "string", "description": "Search only this note."]),
                 "include_commits": .object(["type": "boolean",
                                             "description": "Also search commits (default false)."]),
+                "include_archived": .object(["type": "boolean",
+                                             "description": "Also search archived things (default false)."]),
                 "limit": .object(["type": "integer", "minimum": 1, "maximum": 50,
                                   "description": "Most passages to return (default 20)."]),
             ]),
@@ -528,4 +562,103 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - U4 — the carriage's write tools (R-13nb-14/18, R-13nb-26 b/f; AF-11)
+
+    static let putBack = MCPToolDeclaration(
+        name: "put_back", rung: .edit, title: "Put back from the tray",
+        description: """
+            Put a deleted block (block_id) or a deleted take (take_id) back from its note's tray \
+            (read_note with with_tray: true lists them; they wait there 30 days). A block returns \
+            to its own place in the note; a take to its block's takes. One undo for the author. \
+            Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "block_id": .object(["type": "string", "description": "A deleted block from the tray."]),
+                "take_id": .object(["type": "string", "description": "A deleted take from the tray."]),
+            ]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let setEntryDate = MCPToolDeclaration(
+        name: "set_entry_date", rung: .edit, title: "Set a note's date",
+        description: """
+            Set a note's date (entry_date, yyyy-MM-dd — e.g. bringing in an old journal entry), or \
+            clear it with null. One undo for the author. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note."]),
+                "entry_date": .object(["type": ["string", "null"], "description": "yyyy-MM-dd, or null to clear."]),
+            ]),
+            "required": .array(["note_id", "entry_date"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let saveVersion = MCPToolDeclaration(
+        name: "save_version", rung: .writeNew, title: "Save a version of a note",
+        description: """
+            Save the whole note as it is now as a version (the author's Note ▸ Versions — an \
+            edition she can come back to). Nothing in the note changes. read_note with \
+            with_versions: true lists them. Returns JSON with the version_id.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note."]),
+            ]),
+            "required": .array(["note_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let fileNoteInChapter = MCPToolDeclaration(
+        name: "file_note_in_chapter", rung: .writeNew, title: "File a note under a chapter",
+        description: """
+            File a note that is already in a book under one of that book's chapters (section_id — \
+            from list_notes or create_section), or unfile it with null. Its place in the book is \
+            unchanged. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note (a member of the book)."]),
+                "book_id": .object(["type": "string", "description": "The book."]),
+                "section_id": .object(["type": ["string", "null"], "description": "The chapter, or null to unfile."]),
+            ]),
+            "required": .array(["note_id", "book_id", "section_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    static let setBookRule = MCPToolDeclaration(
+        name: "set_book_rule", rung: .writeNew, title: "Set what a book collects",
+        description: """
+            Change how a book collects, as the author's rule editor does — any of: rule (tags by \
+            path, e.g. {"or": [{"tag": "percy"}, {"tag": "percy/pt-en"}]}; {"star": true} for \
+            starred; {"not": …}; null clears it), outflow (the tag paths notes written in the book \
+            wear; [] clears), new_matches ("join" quietly at the end, or "wait" at Arrivals). A \
+            missing tag is created in the book's wing. A finished or archived book keeps the \
+            change and collects again when the author reopens it. One undo for the author. \
+            Returns JSON with the book's collecting facts.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "book_id": .object(["type": "string", "description": "The book."]),
+                "rule": .object(["description": "The rule (one term), or null to clear."]),
+                "outflow": .object(["type": "array", "items": .object(["type": "string"]),
+                                    "description": "Tag paths, in order."]),
+                "new_matches": .object(["type": "string", "enum": .array(["join", "wait"]),
+                                        "description": "Join quietly at the end, or wait at Arrivals."]),
+            ]),
+            "required": .array(["book_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
 }

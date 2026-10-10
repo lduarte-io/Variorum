@@ -19,6 +19,8 @@ import Testing
 
 /// One live server over an in-memory store, with deterministic ids and clock.
 final class ServerHarness: @unchecked Sendable {
+    /// U4: the harness world's "now" (the core harness's `harnessNow`).
+    static let worldNow = Date(timeIntervalSince1970: 1_782_864_000 + 3_600)
     let database: AppDatabase
     let operations: Operations
     /// U2: the session's undo stack, as the app's runner holds it — the
@@ -59,7 +61,10 @@ final class ServerHarness: @unchecked Sendable {
         host.hooks = MCPHostHooks(
             refusalWords: { error in "Refused: \(error)" },
             onAsk: { ask in asks.withValue { $0.append(ask) } },
-            onWrite: { receipt in receipts.withValue { $0.append(receipt) } })
+            onWrite: { receipt in receipts.withValue { $0.append(receipt) } },
+            // U4: the tray's 30-day window reads the WORLD's clock (fixtures
+            // are stamped from 2026-07-01, an hour in).
+            now: { ServerHarness.worldNow })
         try host.start()
     }
 
@@ -169,10 +174,15 @@ struct MCPServerTests {
         #expect(MCPReadTools.handledToolNames.isDisjoint(with: MCPWriteTools.handledToolNames))
         #expect(Set(MCPToolCatalog.read.map(\.name)) == ["list_books", "list_notes", "read_note", "search", "export_note"])
         #expect(Set(MCPToolCatalog.suggest.map(\.name)) == ["add_take", "add_comment", "save_lens"])
+        // U4 (justified edit, the ritual): the carriage's write tools join
+        // write new (save_version, file_note_in_chapter, set_book_rule) and
+        // edit (put_back, set_entry_date).
         #expect(Set(MCPToolCatalog.writeNew.map(\.name))
-                == ["create_note", "import_document", "apply_tag", "create_book", "add_note_to_book", "create_section"])
+                == ["create_note", "import_document", "apply_tag", "create_book", "add_note_to_book", "create_section",
+                    "save_version", "file_note_in_chapter", "set_book_rule"])
         #expect(Set(MCPToolCatalog.edit.map(\.name))
-                == ["edit_take", "divide_block", "merge_blocks", "move_block", "delete_block", "set_block_name"])
+                == ["edit_take", "divide_block", "merge_blocks", "move_block", "delete_block", "set_block_name",
+                    "put_back", "set_entry_date"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })
@@ -476,14 +486,26 @@ struct MCPServerTests {
             _ = try h.approve("claude-code", book(shared.id))
 
             let books = try json(try await connection.client.callTool(name: "list_books"))["books"] as? [[String: Any]]
-            // The fenced member never lists, so it never counts; the archived
-            // member lists in book order, so it counts. A count that said 3
-            // would disclose a hidden member's existence ambient (journals
-            // are per-ask, never ambient) and break honest counts both ways.
-            #expect(books?.first?["notes"] as? Int == 2, "the count IS the listing's extent")
+            // The fenced member never lists, so it never counts. A count that
+            // said more would disclose a hidden member's existence ambient
+            // (journals are per-ask, never ambient) and break honest counts.
+            // U4 (justified edit — AF-11 F-4's DELIBERATE flip, the ritual):
+            // an ARCHIVED member is out of the listing unless asked (the
+            // facet's resting posture), so by default it neither lists nor
+            // counts; under include_archived it does both — the count stays
+            // the listing's extent either way.
+            #expect(books?.first?["notes"] as? Int == 1, "the count IS the listing's extent")
             let listed = try json(try await connection.client.callTool(
                 name: "list_notes", arguments: ["book_id": .string(shared.id)]))["notes"] as? [[String: Any]]
-            #expect(Set(listed?.compactMap { $0["id"] as? String } ?? []) == [prose.id, archived.id])
+            #expect(Set(listed?.compactMap { $0["id"] as? String } ?? []) == [prose.id])
+            let withArchived = try json(try await connection.client.callTool(
+                name: "list_books", arguments: ["include_archived": .bool(true)]))["books"] as? [[String: Any]]
+            #expect(withArchived?.first?["notes"] as? Int == 2)
+            let listedArchived = try json(try await connection.client.callTool(
+                name: "list_notes", arguments: ["book_id": .string(shared.id), "include_archived": .bool(true)]))["notes"]
+                as? [[String: Any]]
+            #expect(Set(listedArchived?.compactMap { $0["id"] as? String } ?? []) == [prose.id, archived.id])
+            #expect(listedArchived?.first { $0["id"] as? String == archived.id }?["archived"] as? Bool == true)
             await h.hangUp(connection)
         }
     }

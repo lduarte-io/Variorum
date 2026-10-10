@@ -74,10 +74,13 @@ struct MCPWriteTools: Sendable {
         case addNoteToBook(noteID: String, bookID: String, sectionID: String?)
         /// U3: the edit rung's jobs and `create_section` (`MCPWriteTools+Edit`).
         case edit(EditJob)
+        /// U4: the carriage's write tools (`MCPWriteTools+Carriage`).
+        case carriage(CarriageJob)
 
         var tool: String {
             switch self {
             case .edit(let job): job.tool
+            case .carriage(let job): job.tool
             case .addTake: "add_take"
             case .addComment: "add_comment"
             case .saveLens: "save_lens"
@@ -157,6 +160,7 @@ struct MCPWriteTools: Sendable {
                 sectionID: try optionalString(args, "section_id"))
         default:
             if let job = try parseEdit(name, args) { return .edit(job) }
+            if let job = try parseCarriage(name, args) { return .carriage(job) }
             throw ArgumentFailure(message: "Unknown tool: \(name).")
         }
     }
@@ -355,6 +359,8 @@ struct MCPWriteTools: Sendable {
             }
         case .edit(let editJob):
             return try performEdit(editJob, job: job, ops: ops, clientName: clientName)
+        case .carriage(let carriageJob):
+            return try performCarriage(carriageJob, job: job, ops: ops, clientName: clientName)
         }
     }
 
@@ -611,7 +617,13 @@ struct MCPWriteTools: Sendable {
     }
 
     func encode(_ object: [String: Any]) throws -> String {
-        String(decoding: try JSONSerialization.data(
+        // U4: an answer holding a non-JSON value (a `Date`, say) would raise
+        // an Objective-C exception and take the APP down — refuse it as an
+        // error instead.
+        guard JSONSerialization.isValidJSONObject(object) else {
+            throw MCPAnswerEncodingFailure()
+        }
+        return String(decoding: try JSONSerialization.data(
             withJSONObject: object, options: [.sortedKeys, .withoutEscapingSlashes]), as: UTF8.self)
     }
 

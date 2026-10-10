@@ -50,7 +50,7 @@ struct MCPReadTools: Sendable {
         let args = arguments ?? [:]
         do {
             switch name {
-            case MCPToolCatalog.listBooks.name: return try listBooks(clientName: clientName)
+            case MCPToolCatalog.listBooks.name: return try listBooks(args, clientName: clientName)
             case MCPToolCatalog.listNotes.name: return try listNotes(args, clientName: clientName)
             case MCPToolCatalog.readNote.name: return try readNote(args, clientName: clientName, plain: false)
             case MCPToolCatalog.exportNote.name: return try readNote(args, clientName: clientName, plain: true)
@@ -76,15 +76,28 @@ struct MCPReadTools: Sendable {
         // which lives ONLY in the structured form (never the Level 0 text —
         // R-13n-8), so either one implies it.
         var options = MCPNoteStructure.Options()
+        var versionID: String?
         if !plain {
             options.withCommits = try optionalBool(args, "with_commits") ?? false
             options.commitIDs = try optionalStrings(args, "commit_ids") ?? []
             guard options.commitIDs.count <= MCPNoteStructure.maxCommitIDs else {
                 throw ArgumentFailure(message: "commit_ids takes at most \(MCPNoteStructure.maxCommitIDs) ids per call.")
             }
+            // U4 (AF-11 F-4): the carriage, each an explicit ask that implies
+            // the structured form (none of it rides the Level 0 text).
+            options.includeArchived = try optionalBool(args, "include_archived") ?? false
+            options.withTray = try optionalBool(args, "with_tray") ?? false
+            options.withLineage = try optionalBool(args, "with_lineage") ?? false
+            options.withLenses = try optionalBool(args, "with_lenses") ?? false
+            options.withVersions = try optionalBool(args, "with_versions") ?? false
+            options.now = hooks.now()
+            versionID = try optionalString(args, "version_id")
         }
+        let carriage = options.includeArchived || options.withTray || options.withLineage
+            || options.withLenses || options.withVersions
         let withIDs = plain ? false
             : (try optionalBool(args, "with_ids") ?? false) || options.withCommits || !options.commitIDs.isEmpty
+                || carriage
         let act = plain ? MCPToolCatalog.exportNote.name : MCPToolCatalog.readNote.name
         return try database.write { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
@@ -99,10 +112,37 @@ struct MCPReadTools: Sendable {
                 }
                 return MCPAsking(onAsk: hooks.onAsk).refusal(decision, .note, standing: standing, ask: ask)
             }
+            // U4 (AF-11 F-4): a saved VERSION of this note, read on the NOTE's
+            // grant (a moment of a note is that note's past — the note is the
+            // disclosure unit, R-13nb-12). Asked only after the note itself is
+            // allowed, so the words below disclose nothing the client cannot
+            // already read.
+            if let versionID, !(try Queries.isVersionHistory(db, versionID, of: noteID)) {
+                try log(db, clientName, act, "note", noteID, title, allowed: false)
+                return Outcome(text: "version_id isn't a saved version of this note (with_versions lists them).",
+                               isError: true)
+            }
             if consumesOnce, let grantID { try operations.consumeMCPOnceGrant(db, grantID) }
             let text: String
             if plain {
                 text = try Queries.renderedText(db, containerID: noteID)
+            } else if let versionID {
+                if withIDs {
+                    var shaped = try MCPNoteStructure.read(
+                        db, noteID: versionID, calendar: calendar, standing: nil,
+                        options: MCPNoteStructure.Options(
+                            withCommits: options.withCommits, commitIDs: options.commitIDs,
+                            includeArchived: options.includeArchived, withLineage: options.withLineage,
+                            now: options.now))
+                    shaped["version_id"] = versionID
+                    shaped["version_of"] = noteID
+                    shaped["note_id"] = noteID
+                    shaped["saved_at"] = try String.fetchOne(
+                        db, sql: "SELECT created_at FROM container WHERE id = ?", arguments: [versionID])
+                    text = try encode(shaped)
+                } else {
+                    text = try Queries.variorumDocumentText(db, postID: versionID)
+                }
             } else if withIDs {
                 text = try encode(try MCPNoteStructure.read(
                     db, noteID: noteID, calendar: calendar, standing: standing, options: options))
@@ -116,7 +156,12 @@ struct MCPReadTools: Sendable {
 
     // MARK: - list_books
 
-    private func listBooks(clientName: String) throws -> Outcome {
+    private func listBooks(_ args: [String: Value], clientName: String) throws -> Outcome {
+        // U4 (AF-11 F-4): the archived facet's wire form — an ARCHIVED book
+        // is out of the listing unless asked (the app's resting posture: out
+        // of the Bookcase, listed under Archived). Presentation, never reach:
+        // an archived book answers under its grant by id whatever this says.
+        let includeArchived = try optionalBool(args, "include_archived") ?? false
         // F3: the whole answer from one read snapshot; the log in its own
         // short write after.
         let outcome: Outcome = try database.read { db in
@@ -134,11 +179,13 @@ struct MCPReadTools: Sendable {
                            \(Self.resolvedWing("r.wing_id")) AS wing
                     FROM reading r
                     WHERE r.deleted_at IS NULL AND r.kind = 'book'
+                      AND (:archived OR r.archived_at IS NULL)
                       AND (:all OR r.id IN (SELECT value FROM json_each(:books))
                            OR \(Self.resolvedWing("r.wing_id")) IN (SELECT value FROM json_each(:wings)))
                     ORDER BY r.name COLLATE NOCASE, r.id
                     """,
-                arguments: ["all": standing.openBook, "books": try json(bookIDs), "wings": try json(wingIDs)])
+                arguments: ["all": standing.openBook, "books": try json(bookIDs), "wings": try json(wingIDs),
+                            "archived": includeArchived])
             var books: [[String: Any]] = []
             for row in rows {
                 let id: String = row["id"]
@@ -158,20 +205,25 @@ struct MCPReadTools: Sendable {
                         SELECT c.id FROM reading_post rp JOIN container c ON c.id = rp.post_id
                         WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
                           AND c.deleted_at IS NULL AND c.kind = 'post'
+                          AND (? OR c.archived_at IS NULL)
                         """,
-                    arguments: [id])
+                    arguments: [id, includeArchived])
                 let memberFacts = try Queries.mcpNoteFacts(db, noteIDs: memberIDs)
                 let readable = memberIDs.count { memberID in
                     MCPGrantAuthority.decide(
                         standing, note: memberFacts[memberID], rung: .read, consumes: false
                     ).isAllowed
                 }
-                books.append([
+                var entry: [String: Any] = [
                     "id": id, "name": row["name"] as String, "archived": row["archived"] as Bool,
                     "wing": try Queries.mcpScopeTitle(db, kind: .wing, id: wing) ?? Queries.mcpHomeWingName,
                     "wing_id": wing,
                     "notes": readable,
-                ])
+                ]
+                // U4 (R-13nb-26 f): what the book collects and how it stands —
+                // readable books only (this loop's own decision above).
+                for (key, value) in try MCPBookFacts.facts(db, readingID: id) { entry[key] = value }
+                books.append(entry)
             }
             return Outcome(text: try encode(["books": books]), isError: false)
         }
@@ -192,6 +244,10 @@ struct MCPReadTools: Sendable {
         guard bookID == nil || wingID == nil else {
             throw ArgumentFailure(message: "Pass book_id or wing_id, not both.")
         }
+        // U4 (AF-11 F-4): archived notes join only when asked — the facet's
+        // resting posture on every listing, a book's archived members
+        // included (her Index never shows them; her archived line does).
+        let includeArchived = try optionalBool(args, "include_archived") ?? false
         // Round 1 F5: a cursor resumes only the listing ORDER that minted it
         // — book order's key is a position, the recency listings' a stamp;
         // crossed, the keyset comparison pages garbage. Same words as an
@@ -208,16 +264,18 @@ struct MCPReadTools: Sendable {
                 let decision = MCPGrantAuthority.decide(
                     standing, book: try Queries.mcpBookFacts(db, readingID: bookID), rung: .read)
                 guard decision.isAllowed else { return refusal(decision, .book) }
-                page = try bookPage(db, bookID: bookID, after: cursor, limit: limit)
+                page = try bookPage(db, bookID: bookID, includeArchived: includeArchived, after: cursor, limit: limit)
             } else if let wingID {
                 let decision = MCPGrantAuthority.decideWing(standing, wingID: wingID, rung: .read)
                 guard decision.isAllowed else { return refusal(decision, .wing) }
-                page = try recencyPage(db, wingID: wingID, candidates: nil, after: cursor, limit: limit)
+                page = try recencyPage(
+                    db, wingID: wingID, candidates: nil, includeArchived: includeArchived, after: cursor, limit: limit)
             } else {
                 guard standing.state == .approved else {
                     return refusal(MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: false), .note)
                 }
-                page = try sharedPage(db, standing: standing, after: cursor, limit: limit)
+                page = try sharedPage(
+                    db, standing: standing, includeArchived: includeArchived, after: cursor, limit: limit)
             }
             let full = page.count == limit
             let facts = try Queries.mcpNoteFacts(db, noteIDs: page.map(\.id))
@@ -233,6 +291,7 @@ struct MCPReadTools: Sendable {
                     note["section_id"] = section.id
                     note["section_name"] = section.name
                 }
+                if row.archived { note["archived"] = true }
                 notes.append(note)
             }
             var answer: [String: Any] = ["notes": notes]
@@ -254,15 +313,19 @@ struct MCPReadTools: Sendable {
         /// LISTED book (book-order listings only; a dangling pointer reads
         /// unsectioned).
         var section: (id: String, name: String)? = nil
+        /// U4: an archived note (listed only under `include_archived`).
+        var archived = false
     }
 
     /// A book's live member notes in book order, keyset-paged on
     /// `(position, post id)` — ∝ the page.
-    private func bookPage(_ db: Database, bookID: String, after cursor: PageCursor?, limit: Int) throws -> [PageRow] {
+    private func bookPage(
+        _ db: Database, bookID: String, includeArchived: Bool, after cursor: PageCursor?, limit: Int
+    ) throws -> [PageRow] {
         try Row.fetchAll(
             db,
             sql: """
-                SELECT c.id, c.title, c.entry_date, c.created_at,
+                SELECT c.id, c.title, c.entry_date, c.created_at, c.archived_at IS NOT NULL AS archived,
                        COALESCE(c.last_touched_at, c.created_at) AS touched, rp.position,
                        s.id AS section_id, s.name AS section_name
                 FROM reading_post rp JOIN container c ON c.id = rp.post_id
@@ -270,15 +333,18 @@ struct MCPReadTools: Sendable {
                   ON s.id = rp.section_id AND s.deleted_at IS NULL AND s.reading_id = rp.reading_id
                 WHERE rp.reading_id = :book AND rp.deleted_at IS NULL AND rp.status = 'member'
                   AND c.deleted_at IS NULL AND c.kind = 'post'
+                  AND (:archived OR c.archived_at IS NULL)
                   AND (:after IS NULL OR (rp.position, c.id) > (:after, :afterID))
                 ORDER BY rp.position, c.id
                 LIMIT :limit
                 """,
-            arguments: ["book": bookID, "after": cursor?.key, "afterID": cursor?.id ?? "", "limit": limit]
+            arguments: ["book": bookID, "after": cursor?.key, "afterID": cursor?.id ?? "", "limit": limit,
+                        "archived": includeArchived]
         ).map { row in
             PageRow(id: row["id"], title: displayTitle(row), touched: row["touched"],
                     cursor: PageCursor(shape: .book, key: row["position"], id: row["id"]),
-                    section: (row["section_id"] as String?).map { ($0, row["section_name"] as String) })
+                    section: (row["section_id"] as String?).map { ($0, row["section_name"] as String) },
+                    archived: row["archived"])
         }
     }
 
@@ -286,12 +352,19 @@ struct MCPReadTools: Sendable {
     /// a whole wing through the recency index, or — when `candidates` is
     /// given — only those ids (cost ∝ the candidates, never the corpus).
     private func recencyPage(
-        _ db: Database, wingID: String?, candidates: [String]?, after cursor: PageCursor?, limit: Int
+        _ db: Database, wingID: String?, candidates: [String]?, includeArchived: Bool = false,
+        after cursor: PageCursor?, limit: Int
     ) throws -> [PageRow] {
         var clauses: [String] = [
-            "c.deleted_at IS NULL", "c.kind = 'post'", "c.archived_at IS NULL",
+            "c.deleted_at IS NULL", "c.kind = 'post'",
             "(:after IS NULL OR (COALESCE(c.last_touched_at, c.created_at), c.id) < (:after, :afterID))",
         ]
+        // The living corpus by default; U4's `include_archived` lifts the
+        // archive fence — never the version fence (a saved version is born
+        // archived, `archived_at = created_at`, and lists under no facet).
+        clauses.append(includeArchived
+            ? "NOT (c.archived_at IS NOT NULL AND c.archived_at = c.created_at)"
+            : "c.archived_at IS NULL")
         var arguments: [String: (any DatabaseValueConvertible)?] = [
             "after": cursor?.key, "afterID": cursor?.id ?? "", "limit": limit,
         ]
@@ -311,7 +384,7 @@ struct MCPReadTools: Sendable {
         return try Row.fetchAll(
             db,
             sql: """
-                SELECT c.id, c.title, c.entry_date, c.created_at,
+                SELECT c.id, c.title, c.entry_date, c.created_at, c.archived_at IS NOT NULL AS archived,
                        COALESCE(c.last_touched_at, c.created_at) AS touched
                 FROM \(source)
                 WHERE \(clauses.joined(separator: " AND "))
@@ -321,7 +394,8 @@ struct MCPReadTools: Sendable {
             arguments: StatementArguments(arguments)
         ).map { row in
             PageRow(id: row["id"], title: displayTitle(row), touched: row["touched"],
-                    cursor: PageCursor(shape: .recency, key: row["touched"], id: row["id"]))
+                    cursor: PageCursor(shape: .recency, key: row["touched"], id: row["id"]),
+                    archived: row["archived"])
         }
     }
 
@@ -329,11 +403,13 @@ struct MCPReadTools: Sendable {
     /// the reached wings' notes by recency; otherwise the grants' own
     /// candidates (shared notes + the shared books' members).
     private func sharedPage(
-        _ db: Database, standing: MCPGrantAuthority.Standing, after cursor: PageCursor?, limit: Int
+        _ db: Database, standing: MCPGrantAuthority.Standing, includeArchived: Bool,
+        after cursor: PageCursor?, limit: Int
     ) throws -> [PageRow] {
         let live = standing.liveGrants
         if standing.openBook {
-            return try recencyPage(db, wingID: nil, candidates: nil, after: cursor, limit: limit)
+            return try recencyPage(
+                db, wingID: nil, candidates: nil, includeArchived: includeArchived, after: cursor, limit: limit)
         }
         let noteIDs = live.filter { $0.scopeKind == .note }.map(\.scopeID)
         let bookIDs = live.filter { $0.scopeKind == .book }.map(\.scopeID)
@@ -350,16 +426,21 @@ struct MCPReadTools: Sendable {
                 arguments: [try json(bookIDs)]))
         }
         if wingIDs.isEmpty {
-            return try recencyPage(db, wingID: nil, candidates: candidates.sorted(), after: cursor, limit: limit)
+            return try recencyPage(
+                db, wingID: nil, candidates: candidates.sorted(), includeArchived: includeArchived,
+                after: cursor, limit: limit)
         }
         // Wing-level reach: the reached wings' notes plus any candidate
         // outside them, merged by recency (each source keyset-paged by the
         // same cursor, so the merge pages exactly).
         var rows: [PageRow] = []
         for wing in wingIDs.sorted() {
-            rows += try recencyPage(db, wingID: wing, candidates: nil, after: cursor, limit: limit)
+            rows += try recencyPage(
+                db, wingID: wing, candidates: nil, includeArchived: includeArchived, after: cursor, limit: limit)
         }
-        rows += try recencyPage(db, wingID: nil, candidates: candidates.sorted(), after: cursor, limit: limit)
+        rows += try recencyPage(
+            db, wingID: nil, candidates: candidates.sorted(), includeArchived: includeArchived,
+            after: cursor, limit: limit)
         var seen = Set<String>()
         return rows
             .sorted { ($0.touched, $0.id) > ($1.touched, $1.id) }
@@ -388,6 +469,12 @@ struct MCPReadTools: Sendable {
         // as every other passage (`passes`), P1 ∝ matches as ever. U1's
         // search-never-reaches-savepoints state flips here, deliberately.
         query.includesSavepoints = try optionalBool(args, "include_commits") ?? false
+        // U4 (AF-11 F-4, PROVISIONAL — R-13nb-10 left the archived facet
+        // UI-only and the sitting carried the inventory row): the archived
+        // facet's wire form, built to the facet's letter — living AND
+        // archived when asked (`includingArchived`), each passage marked.
+        let includeArchived = try optionalBool(args, "include_archived") ?? false
+        if includeArchived { query.visibility = .includingArchived }
         let act = MCPToolCatalog.search.name
         // F3: the whole engine runs on one read snapshot (under the open book
         // it is the heaviest call the server serves — it must never hold the
@@ -509,6 +596,7 @@ struct MCPReadTools: Sendable {
             entry["commit_id"] = passage.sourceID
             if let savedAt = passage.savedAt { entry["saved_at"] = savedAt }
         }
+        if passage.isArchived { entry["archived"] = true }
         return entry
     }
 
@@ -556,7 +644,13 @@ struct MCPReadTools: Sendable {
     }
 
     private func encode(_ object: [String: Any]) throws -> String {
-        String(decoding: try JSONSerialization.data(
+        // U4: an answer holding a non-JSON value (a `Date`, say) would raise
+        // an Objective-C exception and take the APP down — refuse it as an
+        // error instead.
+        guard JSONSerialization.isValidJSONObject(object) else {
+            throw MCPAnswerEncodingFailure()
+        }
+        return String(decoding: try JSONSerialization.data(
             withJSONObject: object, options: [.sortedKeys, .withoutEscapingSlashes]), as: UTF8.self)
     }
 

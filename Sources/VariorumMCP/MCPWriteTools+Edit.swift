@@ -254,12 +254,20 @@ extension MCPWriteTools {
     func guardEdit(
         _ clientName: String, notes: @escaping (Database) throws -> [String?]
     ) -> Operations.WriteGuard {
+        guardNotes(clientName, rung: .edit, notes: notes)
+    }
+
+    /// `guardEdit` at any rung (13n-b U4: `save_version` is write new — the
+    /// same seam, carried to the new acts of this unit).
+    func guardNotes(
+        _ clientName: String, rung: MCPGrantRule.Rung, notes: @escaping (Database) throws -> [String?]
+    ) -> Operations.WriteGuard {
         { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
             var spend = Set<String>()
             for noteID in try notes(db) {
                 let facts = try Queries.mcpNoteFacts(db, noteID: noteID ?? "")
-                let decision = MCPGrantAuthority.decide(standing, note: facts, rung: .edit, consumes: true)
+                let decision = MCPGrantAuthority.decide(standing, note: facts, rung: rung, consumes: true)
                 guard case .allow(let grantID, let consumesOnce) = decision else {
                     throw Self.refused(decision, .note)
                 }

@@ -30,6 +30,8 @@ private func call(
 
 private let editTools: Set<String> = [
     "edit_take", "divide_block", "merge_blocks", "move_block", "delete_block", "set_block_name",
+    // U4 (justified edit, the ritual): the carriage's edit doors.
+    "put_back", "set_entry_date",
 ]
 
 @Suite("13n-b U3 — the MCP server's edit rung end to end", .serialized)
@@ -235,11 +237,16 @@ struct MCPEditServerTests {
             let two = try h.operations.newBlock(in: note.id, text: "Her second.", registeringUndo: false)
             let branch = try h.operations.branchVariant(one.block.id, from: one.variant.id)
             try h.operations.autosave(branch.id, text: "her other take", charDelta: 3)
+            // U4: her tray holds a deleted block and a deleted take.
+            let gone = try h.operations.newBlock(in: note.id, text: "Deleted.", registeringUndo: false)
+            try h.operations.deleteBlock(gone.block.id)
+            let deletedTake = try h.operations.branchVariant(two.block.id, from: two.variant.id)
+            try h.operations.deleteVariant(deletedTake.id)
             func snapshot() throws -> [String] {
                 try h.database.read { db in
                     try ["variant", "container_block", "block", "commit_point"].flatMap { table in
                         try Row.fetchAll(db, sql: "SELECT * FROM \(table) ORDER BY id").map(\.description)
-                    }
+                    } + (try String.fetchAll(db, sql: "SELECT COALESCE(entry_date, '-') FROM container ORDER BY id"))
                 }
             }
             let before = try snapshot()
@@ -254,6 +261,9 @@ struct MCPEditServerTests {
                 ("move_block", ["block_id": .string(two.block.id), "note_id": .string(other.id)]),
                 ("delete_block", ["block_id": .string(two.block.id)]),
                 ("set_block_name", ["block_id": .string(one.block.id), "name": .string("renamed")]),
+                ("put_back", ["block_id": .string(gone.block.id)]),
+                ("put_back", ["take_id": .string(deletedTake.id)]),
+                ("set_entry_date", ["note_id": .string(note.id), "entry_date": .string("2019-03-04")]),
             ]
             #expect(Set(calls.map(\.0)) == editTools, "every edit door was tried")
             _ = try h.approve("claude-code", spec(.suggest, .wing, ""))
