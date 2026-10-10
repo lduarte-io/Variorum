@@ -56,7 +56,7 @@ Batch 1 implementer (Opus, 2026-10-10, on the Air) — **BATCH 1 CLOSED by the i
 
 Batch 2 implementer (Opus, 2026-10-10, on the Air) — **IN PROGRESS.** No behavioural revert is in flight; tree clean at each commit.
 
-- VX-150: IN-PROGRESS — the trace is written (§ Batch 2 traces); next: the red-on-old pin `WriteTakesPanelKeysTests` (the panel mounted with a stand-in for Write's handler beneath it, a two-block fixture), then the fix in `WriteTakesPanel.handleRouted`, then the behavioural revert.
+- VX-150: IN-PROGRESS — trace written (§ Batch 2 traces); pin `WriteTakesPanelKeysTests` committed and RED on the pre-fix tree (`vx143-b2-red`: the four bug tests red — step, ⌘⇧A, the three mints, ⌘T-without-a-ring; Write's stand-in saw every key; the characterization test and VX-135's pin green). Next: the fix in `WriteTakesPanel.handleRouted`, green, then the behavioural revert.
 - VX-144: NOT-STARTED — capture FIRST (a disabled-by-default harness in the test host, base64 through the log, PNGs into `App/Variorum/DerivedData/vx143-screens/`), the "VX-144 — captures & proposal" section, then STOP for the architect's ruling. No cleanup is designed or built before the ruling.
 
 ## Batch 1 traces (implementer, 2026-10-10 — the mechanism per member, before any code)
