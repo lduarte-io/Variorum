@@ -2779,8 +2779,10 @@ door, the landing roads: `ShellRouter.adopt`, `PostDetailView.jump`,
   delete cascade tombstones edges); ANCESTRY answers by the parent's BLOCK —
   a dead block collapses into the stub (omission would mint a liveness
   oracle on unshared notes, against the F-4 rider's spirit), and a dead take
-  on a live block keeps its id (its block is this note's; the id is the
-  tray's own `put_back` address).*
+  on a live block keeps its id — the parent classified by its block AS ANY
+  PARENT IS (this note's block → the id, in-family the tray's own `put_back`
+  address; a readable note's block → id + `parent_note_id`; a block beyond
+  the grant → the stub; the sanity pass's precision, 2026-10-10).*
 - **P-13nb-U4-8 — `set_book_rule`'s shape** (AF-11 F-1): one call = her
   Save's three optional fields; the three writes in ONE transaction (her
   Save is three — stricter only in that nothing half-lands); a legacy term

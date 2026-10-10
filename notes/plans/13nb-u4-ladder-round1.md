@@ -249,3 +249,42 @@ session) made the final calls and implemented the confirmed fixes itself.
   (`mintNoteVersion`).
 - **Copy:** sentence case throughout the new strings; no shouty caps; the one Title Case
   string is a menu verb (the menu's own idiom); all new sentences marked 13s-a-sweepable.
+
+---
+
+## THE IMPLEMENTER SANITY PASS (2026-10-10) — PASS
+
+The U4 implementer's sanity pass over `fce833b1..a7fbeb1a`: **PASS**. All
+seven dispositions verified against the code piece by piece (its report's
+full detail is preserved in the orchestrator session; the load-bearing
+confirmations: the F-1 override defaults nil so her Save keeps backfill,
+pinned; every `reading_post` read in the MCP code and the grant queries
+filter `status='member'`, so the bell closes the read AND count oracles;
+F-2's `spendsAfter: false` keeps the guard's atomic spend; F-4's
+`mountWait` var is main-actor isolated and its pin restores it in a defer
+inside a `.serialized` suite). Nothing of the U4 build broke (headless
+spot-runs 65/8 + 159/15 green on `a7fbeb1a`; fences zero over the fix
+pass). The live-round interaction CONCURRED: the finished-book
+`set_book_rule` leg is unaffected by the bell override (`IntakeDecision`
+opens with `guard intakeRuns(book)` — a finished book sweeps no rows under
+either occasion; `intake_paused` speaks, not `matches_wait`).
+
+**Two sanity-pass wording nits, the orchestrator's call — BOTH FIXED by the
+architect's own hands (the U2 AF-9/N1 precedent; copy truth is the J8
+doctrine):**
+- **`matchesWaitWords` over-claimed** ("(or readable here)" is false for a
+  client whose wing or note grant already reaches a match; already-members
+  stay members; dismissed pairs stay decided — all three over-claims in a
+  sentence said unconditionally). REWORDED to be true in every case:
+  "Saved — this write makes no note a member; undecided matches wait at
+  Arrivals for the author to let in." The pin compares the constant
+  (`MCPCarriageServerTests:472`), so the sentence's SAYING stays pinned;
+  suite 15/15 green after. Still 13s-a sweepable for voice.
+- **P-13nb-U4-7's parenthetical** read as if a dead take's block is always
+  this note's; amended to say the parent is classified by its block AS ANY
+  PARENT IS (this note's → id; a readable note's → id + `parent_note_id`;
+  beyond the grant → the stub).
+
+**ROUND 1 CLOSES.** Next: the fresh round-2 reviewer re-reviews the fixes
+(`fce833b1..HEAD`; the coordinator commits in the range are record-only +
+this copy reword).

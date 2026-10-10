@@ -308,11 +308,13 @@ extension MCPBookFacts {
         + "until the author reopens it."
 
     /// The answer's sentence whenever a rule LANDS on this road (ladder
-    /// round 1, F-1 — P-13nb-U4-16): an agent-written rule's existing matches
-    /// wait at Arrivals for the author; only her seat makes a member. Said
-    /// unconditionally on a landed rule write, never per-match. 13s-a
-    /// sweepable.
+    /// round 1, F-1 — P-13nb-U4-16): an agent-written rule's write seats
+    /// nothing itself; undecided matches bell. Said unconditionally on a
+    /// landed rule write, never per-match — so every clause must be true in
+    /// EVERY case (the sanity-pass rewording: no readability claim — a wing
+    /// or note grant may already reach a match; members stay members;
+    /// dismissed pairs stay decided). 13s-a sweepable.
     static let matchesWaitWords =
-        "Saved — notes that already match this rule wait at Arrivals for the author to let in; "
-        + "they aren't members (or readable here) until she does."
+        "Saved — this write makes no note a member; "
+        + "undecided matches wait at Arrivals for the author to let in."
 }
