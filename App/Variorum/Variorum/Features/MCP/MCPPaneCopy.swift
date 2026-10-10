@@ -301,6 +301,18 @@ nonisolated enum MCPReceiptCopy {
             return n == 1
                 ? "added \(quoted(receipts[0].targetTitle)) to \(quoted(receipts[0].detail))"
                 : "added \(n) notes to books"
+        // 13n-b U3 — the chapter (write new) and the edit rung's acts.
+        case .chapter:
+            return n == 1 ? "made the chapter \(quoted(receipts[0].detail))" : "made \(n) chapters"
+        case .edit: return n == 1 ? "edited a take" : "edited \(n) takes"
+        case .divide: return n == 1 ? "divided a block" : "divided \(n) blocks"
+        case .merge: return n == 1 ? "merged two blocks" : "merged blocks \(n) times"
+        case .move: return n == 1 ? "moved a block" : "moved \(n) blocks"
+        case .delete: return n == 1 ? "deleted a block" : "deleted \(n) blocks"
+        case .blockName:
+            return n == 1
+                ? (receipts[0].detail.map { "named a block \(quoted($0))" } ?? "cleared a block's name")
+                : "named \(n) blocks"
         }
     }
 

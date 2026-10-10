@@ -38,6 +38,10 @@ extension Operations {
     public enum MCPWriteAct: String, Sendable, CaseIterable {
         case take, comment, lens, note, importNote = "import", importBook = "book import", tag, book
         case bookAdd = "add to a book"
+        // 13n-b U3 — the edit rung's acts and the chapter (write new).
+        case chapter
+        case edit, divide, merge, move, delete
+        case blockName = "block name"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
     }
@@ -447,11 +451,27 @@ extension Operations {
     /// tombstoned (member-class — the remove road); a waiting ARRIVAL the add
     /// seated goes back to waiting where it waited. The book's outflow tags
     /// stay (removing from a book never untags). Redo: the same row back.
+    ///
+    /// **`section` (13n-b U3 — R-13nb-11 G-1):** file the new membership
+    /// under that CHAPTER in the same transaction — a live section of THIS
+    /// book (`assignPostToSection`'s checks: `sectionNotFound` /
+    /// `sectionNotInReading`); the entry's exact rows carry it, so undo
+    /// and redo take the chapter with the membership.
     @discardableResult
-    public func addNoteToBook(_ postID: String, book bookID: String, undoLabel: String) throws -> ReadingPost {
+    public func addNoteToBook(
+        _ postID: String, book bookID: String, section sectionID: String? = nil, undoLabel: String
+    ) throws -> ReadingPost {
         let (membership, prior): (ReadingPost, ReadingPost?) = try database.write { db in
             let prior = try livePairRow(db, postID: postID, readingID: bookID)
-            let membership = try addPostToReading(db, postID, to: bookID, at: .end)
+            var membership = try addPostToReading(db, postID, to: bookID, at: .end)
+            if let sectionID {
+                let section = try liveSection(db, sectionID)
+                guard section.readingId == bookID else {
+                    throw OperationError.sectionNotInReading(sectionID: sectionID, readingID: bookID)
+                }
+                membership.sectionId = sectionID
+                try membership.update(db)
+            }
             return (membership, prior)
         }
         let landed = membership

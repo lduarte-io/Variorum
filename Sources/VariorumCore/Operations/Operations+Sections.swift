@@ -23,26 +23,34 @@ extension Operations {
     public func createSection(
         in readingID: String, name: String, at insert: InsertPosition = .end
     ) throws -> ReadingSection {
-        try database.write { db in
-            let reading = try liveReading(db, readingID)
-            guard reading.kind == .book else {
-                throw OperationError.wrongReadingKind(id: readingID, expected: .book)
-            }
-            guard !reading.locked else {
-                throw OperationError.lockedReading(id: readingID)
-            }
-            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else {
-                throw OperationError.invalidSectionName(name: name)
-            }
-            let now = date.now
-            let section = ReadingSection(
-                id: newID(), readingId: readingID, name: trimmed,
-                position: try sectionPosition(db, readingID: readingID, at: insert),
-                createdAt: now, updatedAt: now)
-            try section.insert(db)
-            return section
+        try database.write { db in try insertSection(db, in: readingID, name: name, at: insert) }
+    }
+
+    /// `createSection`'s row, inside a caller's transaction (13n-b U3 — the
+    /// MCP door's `create_section` runs it under its guard and registers its
+    /// own undo entry, `Operations+MCPEdits`). Behaviour byte-unchanged: the
+    /// whole body moved, nothing in it did.
+    func insertSection(
+        _ db: Database, in readingID: String, name: String, at insert: InsertPosition
+    ) throws -> ReadingSection {
+        let reading = try liveReading(db, readingID)
+        guard reading.kind == .book else {
+            throw OperationError.wrongReadingKind(id: readingID, expected: .book)
         }
+        guard !reading.locked else {
+            throw OperationError.lockedReading(id: readingID)
+        }
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            throw OperationError.invalidSectionName(name: name)
+        }
+        let now = date.now
+        let section = ReadingSection(
+            id: newID(), readingId: readingID, name: trimmed,
+            position: try sectionPosition(db, readingID: readingID, at: insert),
+            createdAt: now, updatedAt: now)
+        try section.insert(db)
+        return section
     }
 
     /// Retitle a chapter — allowed under a locked reading (the
