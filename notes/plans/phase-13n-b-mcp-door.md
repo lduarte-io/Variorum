@@ -604,6 +604,16 @@ grant authority · tool projections — never one god server object (P-9).
   the record: a once-suggest grant authorizes ONE write — a take-plus-
   lens flow wants "while connected", and the ask sheet's durations
   already offer exactly that.
+  **AF-7 AMENDED (architect, 2026-10-09 — at the U2 ladder's F4, before
+  dispositions):** the ride-free clause covers READS ONLY. The letter as
+  first written let a once WRITE-NEW grant make unlimited SUGGEST-rung
+  writes "riding free" below its rung — never the intent. Amended rule:
+  a once READ grant is spent by its first content read (unchanged); a
+  once WRITE grant (suggest or write-new) is spent by its FIRST WRITE of
+  ANY rung it authorizes — content reads on the way ride free, writes
+  never do. One write means one write. Pinned both ways at the fix; the
+  P-13nb-U1-2 amended-form record carries this second amendment for her
+  ratification at the merge.
 - **AF-8 — scope confirmations.** The note ⋯ menu's GRANT row ("Allow
   AI here…" — R-13n-11's connected share-a-note) is U3's, as the U1
   not-done list recorded; U2 carries only the Private row there. And the
