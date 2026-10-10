@@ -14,6 +14,7 @@ final class MCPSession: @unchecked Sendable {
     private let transport: MCPSocketTransport
     private let tools: MCPReadTools
     private let writes: MCPWriteTools
+    private let shows: MCPShowTool
     private let database: AppDatabase
     private let operations: Operations
     private let lock = NSLock()
@@ -46,6 +47,9 @@ final class MCPSession: @unchecked Sendable {
         var writes = MCPWriteTools(database: database, grants: operations, executor: executor)
         writes.hooks = hooks
         self.writes = writes
+        var shows = MCPShowTool(database: database, operations: operations)
+        shows.hooks = hooks
+        self.shows = shows
         self.server = Server(
             name: VariorumMCP.serverName, version: version, title: "Variorum",
             instructions: Self.instructions,
@@ -66,9 +70,12 @@ final class MCPSession: @unchecked Sendable {
             }
             // U2: the write rungs run on the session's executor (AF-8);
             // the reads stay where U1 built them.
+            // U4: show_in_app awaits the app's delivery (AF-11 F-3).
             let outcome = MCPWriteTools.handledToolNames.contains(params.name)
                 ? await self.writes.call(params.name, arguments: params.arguments, clientName: name)
-                : self.tools.call(params.name, arguments: params.arguments, clientName: name)
+                : MCPShowTool.handledToolNames.contains(params.name)
+                    ? await self.shows.call(params.name, arguments: params.arguments, clientName: name)
+                    : self.tools.call(params.name, arguments: params.arguments, clientName: name)
             return .init(
                 content: [.text(text: outcome.text, annotations: nil, _meta: nil)], isError: outcome.isError)
         }

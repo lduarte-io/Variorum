@@ -46,7 +46,8 @@ struct MCPWriteServerTests {
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", grant(.suggest, .book, book.id))
             let names = Set(try await connection.client.listTools().tools.map(\.name))
-            #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note",
+            // U4 (justified edit, the ritual): the read rung gains show_in_app.
+            #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app",
                               "add_take", "add_comment", "save_lens"],
                     "a suggest grant lists read + suggest, never a write-new door (P-2)")
 
@@ -187,6 +188,8 @@ struct MCPWriteServerTests {
             calls.append(("file_note_in_chapter", ["note_id": .string(note.id), "book_id": .string(book.id),
                                                    "section_id": .string(chapter.id)]))
             calls.append(("set_book_rule", ["book_id": .string(book.id), "rule": .object(["star": .bool(true)])]))
+            // …and the read rung's navigation tool (it moves a window, never a row).
+            calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).
             calls.append(("read_note", ["note_id": .string(note.id), "with_ids": .bool(true)]))
             calls.append(("export_note", ["note_id": .string(note.id)]))

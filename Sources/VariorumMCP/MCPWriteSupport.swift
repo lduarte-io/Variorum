@@ -81,10 +81,13 @@ public struct MCPWriteReceipt: Sendable, Equatable {
     /// How many rows the act minted where it is more than one (an imported
     /// book's notes).
     public let count: Int
+    /// 13n-b U4 (R-13nb-23 (a), AF-11 F-2): where the receipt's "Open ›"
+    /// takes her — the act's landing, a state her own doors reach.
+    public var show: MCPShowTarget?
 
     public init(
         clientName: String, act: Operations.MCPWriteAct, targetID: String?, targetTitle: String?,
-        detail: String? = nil, count: Int = 1
+        detail: String? = nil, count: Int = 1, show: MCPShowTarget? = nil
     ) {
         self.clientName = clientName
         self.act = act
@@ -92,6 +95,7 @@ public struct MCPWriteReceipt: Sendable, Equatable {
         self.targetTitle = targetTitle
         self.detail = detail
         self.count = count
+        self.show = show
     }
 }
 
@@ -108,17 +112,25 @@ public struct MCPHostHooks: Sendable {
     /// 13n-b U4: the clock the tray's 30-day window reads (the app's is the
     /// wall clock; a test's is its world's).
     public var now: @Sendable () -> Date
+    /// 13n-b U4 (AF-11 F-3): `show_in_app`'s delivery. The app reads where it
+    /// stands ON THE MAIN ACTOR, asks `MCPShowRule.verdict`, delivers ONLY on
+    /// `.navigate` (in that same hop — nothing can move between the look and
+    /// the move), and answers the verdict it applied. Nil = no app around the
+    /// host (a headless host shows nothing).
+    public var show: (@Sendable (MCPShowTarget) async -> MCPShowRule.Verdict)?
 
     public init(
         refusalWords: @escaping @Sendable (Error) -> String? = { _ in nil },
         onAsk: (@Sendable (MCPAsk) -> Void)? = nil,
         onWrite: (@Sendable (MCPWriteReceipt) -> Void)? = nil,
-        now: @escaping @Sendable () -> Date = { Date() }
+        now: @escaping @Sendable () -> Date = { Date() },
+        show: (@Sendable (MCPShowTarget) async -> MCPShowRule.Verdict)? = nil
     ) {
         self.refusalWords = refusalWords
         self.onAsk = onAsk
         self.onWrite = onWrite
         self.now = now
+        self.show = show
     }
 }
 

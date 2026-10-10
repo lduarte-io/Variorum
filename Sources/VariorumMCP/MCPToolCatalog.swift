@@ -69,7 +69,10 @@ enum MCPToolCatalog {
         // U4 — the tray's Put back (R-13nb-14) and the date (R-13nb-26 b).
         putBack, setEntryDate,
     ]
-    static let all: [MCPToolDeclaration] = read + suggest + writeNew + edit
+    /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
+    /// its own handler (it awaits the app), its own list.
+    static let navigation: [MCPToolDeclaration] = [showInApp]
+    static let all: [MCPToolDeclaration] = read + navigation + suggest + writeNew + edit
 
     static func declaration(named name: String) -> MCPToolDeclaration? {
         all.first { $0.name == name }
@@ -661,4 +664,33 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: [.book, .wing])
+
+    // MARK: - U4 — navigation (R-13nb-23 + R-13nb-26 (g); AF-11 F-3)
+
+    static let showInApp = MCPToolDeclaration(
+        name: "show_in_app", rung: .read, title: "Show in Variorum",
+        description: """
+            Move the author's Variorum window to something you want her to see — ONLY when she \
+            asks you to show her, never on your own (it moves nothing unless Variorum is the app \
+            in front, and never raises a window). target "note" (note_id; block_id lands on that \
+            block, and select — words in that block's shown take — selects them with the find \
+            bar ready), "takes" (note_id + block_id: the note's Takes, that block's takes open), \
+            "lens" (note_id + lens_id: the Lenses board showing that lens) or "book" (book_id, \
+            optionally section_id: that chapter). Returns JSON, or why nothing moved.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "target": .object(["type": "string", "enum": .array(["note", "takes", "lens", "book"]),
+                                   "description": "What to show (default note)."]),
+                "note_id": .object(["type": "string"]),
+                "block_id": .object(["type": "string"]),
+                "select": .object(["type": "string", "description": "Words to select in the block's shown take."]),
+                "lens_id": .object(["type": "string"]),
+                "book_id": .object(["type": "string"]),
+                "section_id": .object(["type": "string", "description": "A chapter of the book."]),
+            ]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
 }

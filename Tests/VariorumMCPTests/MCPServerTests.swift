@@ -170,8 +170,14 @@ struct MCPServerTests {
         // ritual): the EDIT rung is served now, so it is declared — and
         // write new gains create_section (R-13nb-11 G-1).
         let declared = Set(MCPToolCatalog.all.map(\.name))
-        #expect(declared == MCPReadTools.handledToolNames.union(MCPWriteTools.handledToolNames))
+        // U4 (justified edit, the ritual): show_in_app is the THIRD handler
+        // (it awaits the app's delivery — AF-11 F-3), read rung.
+        #expect(declared == MCPReadTools.handledToolNames.union(MCPWriteTools.handledToolNames)
+            .union(MCPShowTool.handledToolNames))
         #expect(MCPReadTools.handledToolNames.isDisjoint(with: MCPWriteTools.handledToolNames))
+        #expect(MCPShowTool.handledToolNames.isDisjoint(with: MCPReadTools.handledToolNames.union(MCPWriteTools.handledToolNames)))
+        #expect(MCPToolCatalog.navigation.map(\.name) == ["show_in_app"])
+        #expect(MCPToolCatalog.navigation.allSatisfy { $0.rung == .read })
         #expect(Set(MCPToolCatalog.read.map(\.name)) == ["list_books", "list_notes", "read_note", "search", "export_note"])
         #expect(Set(MCPToolCatalog.suggest.map(\.name)) == ["add_take", "add_comment", "save_lens"])
         // U4 (justified edit, the ritual): the carriage's write tools join
@@ -234,7 +240,8 @@ struct MCPServerTests {
             _ = try h.approve("claude-code", book(shared.id))
 
             let names = Set(try await connection.client.listTools().tools.map(\.name))
-            #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note"])
+            // U4 (justified edit, the ritual): the read rung gains show_in_app.
+            #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app"])
 
             let books = try json(try await connection.client.callTool(name: "list_books"))["books"] as? [[String: Any]]
             #expect(books?.map { $0["id"] as? String } == [shared.id], "only the shared book is listed")

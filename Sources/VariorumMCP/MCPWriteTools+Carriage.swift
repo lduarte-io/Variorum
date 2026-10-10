@@ -137,7 +137,9 @@ extension MCPWriteTools {
                 }
                 return (["block_id": blockID, "note_id": noteID, "landed": where_],
                         MCPWriteReceipt(clientName: clientName, act: .putBack, targetID: noteID,
-                                        targetTitle: title, detail: "a block"))
+                                        targetTitle: title, detail: "a block",
+                                        show: where_ == "unplaced" ? nil
+                                            : .note(noteID: noteID, blockID: blockID, select: nil)))
             }
 
         case .putBackTake(let takeID):
@@ -156,9 +158,13 @@ extension MCPWriteTools {
                         return try Queries.trayTakes(db, postID: home, now: now)
                             .contains { $0.variantID == takeID }
                     })
+                let blockID = try database.read { db in
+                    try String.fetchOne(db, sql: "SELECT block_id FROM variant WHERE id = ?", arguments: [takeID])
+                }
                 return (["take_id": takeID, "note_id": noteID, "archived": status == .archived],
                         MCPWriteReceipt(clientName: clientName, act: .putBack, targetID: noteID,
-                                        targetTitle: title, detail: "a take"))
+                                        targetTitle: title, detail: "a take",
+                                        show: blockID.map { .takes(noteID: noteID, blockID: $0) }))
             }
 
         case .setEntryDate(let noteID, let entryDate):
@@ -169,7 +175,8 @@ extension MCPWriteTools {
                 return (["note_id": noteID, "entry_date": entryDate ?? NSNull(), "changed": changed],
                         changed
                         ? MCPWriteReceipt(clientName: clientName, act: .entryDate, targetID: noteID,
-                                          targetTitle: title, detail: entryDate)
+                                          targetTitle: title, detail: entryDate,
+                                          show: .note(noteID: noteID, blockID: nil, select: nil))
                         : nil)
             }
 
@@ -180,7 +187,8 @@ extension MCPWriteTools {
                     guardedBy: guardNotes(clientName, rung: .writeNew) { _ in [noteID] })
                 return (["note_id": noteID, "version_id": result.post.id,
                          "saved_at": DateFormatter.variorumISO8601.string(from: result.post.createdAt)],
-                        MCPWriteReceipt(clientName: clientName, act: .version, targetID: noteID, targetTitle: title))
+                        MCPWriteReceipt(clientName: clientName, act: .version, targetID: noteID, targetTitle: title,
+                                        show: .note(noteID: noteID, blockID: nil, select: nil)))
             }
 
         case .fileInChapter(let noteID, let bookID, let sectionID):
@@ -203,7 +211,8 @@ extension MCPWriteTools {
                 return (["note_id": noteID, "book_id": bookID, "section_id": sectionID ?? NSNull(), "changed": changed],
                         changed
                         ? MCPWriteReceipt(clientName: clientName, act: .filing, targetID: noteID,
-                                          targetTitle: names.note, detail: names.chapter)
+                                          targetTitle: names.note, detail: names.chapter,
+                                          show: .book(bookID: bookID, sectionID: sectionID))
                         : nil)
             }
 
@@ -231,7 +240,8 @@ extension MCPWriteTools {
                     answer["intake_paused"] = MCPBookFacts.intakePausedWords
                 }
                 return (answer, result.changed
-                        ? MCPWriteReceipt(clientName: clientName, act: .bookRule, targetID: bookID, targetTitle: name)
+                        ? MCPWriteReceipt(clientName: clientName, act: .bookRule, targetID: bookID, targetTitle: name,
+                                          show: .book(bookID: bookID, sectionID: nil))
                         : nil)
             }
         }

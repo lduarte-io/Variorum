@@ -129,7 +129,8 @@ extension MCPWriteTools {
                 if let before = edit.before { answer["before_commit_id"] = before.id }
                 if let after = edit.after { answer["after_commit_id"] = after.id }
                 return (answer, edit.changed
-                        ? MCPWriteReceipt(clientName: clientName, act: .edit, targetID: noteID, targetTitle: title)
+                        ? MCPWriteReceipt(clientName: clientName, act: .edit, targetID: noteID, targetTitle: title,
+                                          show: .note(noteID: noteID, blockID: edit.take.blockId, select: nil))
                         : nil)
             }
 
@@ -148,7 +149,8 @@ extension MCPWriteTools {
                     "note_id": noteID, "first_block_id": result.firstBlockID,
                     "second_block_id": result.secondBlockID, "kept_on_top": result.keptOnTop,
                     "stayed_behind": result.stayedBehind,
-                ], MCPWriteReceipt(clientName: clientName, act: .divide, targetID: noteID, targetTitle: title))
+                ], MCPWriteReceipt(clientName: clientName, act: .divide, targetID: noteID, targetTitle: title,
+                                   show: .note(noteID: noteID, blockID: result.firstBlockID, select: nil)))
             }
 
         case .merge(let first, let second):
@@ -158,7 +160,8 @@ extension MCPWriteTools {
                         [try Queries.mcpContainerOf(block: first, db), try Queries.mcpContainerOf(block: second, db)]
                     })
                 return (["note_id": noteID, "block_id": result.blockID, "carried": result.carried],
-                        MCPWriteReceipt(clientName: clientName, act: .merge, targetID: noteID, targetTitle: title))
+                        MCPWriteReceipt(clientName: clientName, act: .merge, targetID: noteID, targetTitle: title,
+                                        show: .note(noteID: noteID, blockID: result.blockID, select: nil)))
             }
 
         case .move(let blockID, let target):
@@ -204,7 +207,8 @@ extension MCPWriteTools {
                     }
                 }
                 return (["block_id": blockID, "note_id": destination, "from_note_id": noteID],
-                        MCPWriteReceipt(clientName: clientName, act: .move, targetID: noteID, targetTitle: title))
+                        MCPWriteReceipt(clientName: clientName, act: .move, targetID: noteID, targetTitle: title,
+                                        show: .note(noteID: destination, blockID: blockID, select: nil)))
             }
 
         case .delete(let blockID):
@@ -215,7 +219,8 @@ extension MCPWriteTools {
                     })
                 }
                 return (["block_id": blockID, "note_id": noteID, "deleted": true],
-                        MCPWriteReceipt(clientName: clientName, act: .delete, targetID: noteID, targetTitle: title))
+                        MCPWriteReceipt(clientName: clientName, act: .delete, targetID: noteID, targetTitle: title,
+                                        show: .note(noteID: noteID, blockID: nil, select: nil)))
             }
 
         case .name(let blockID, let name):
@@ -230,7 +235,8 @@ extension MCPWriteTools {
                 return (["block_id": blockID, "note_id": noteID, "name": current ?? NSNull(), "changed": changed],
                         changed
                         ? MCPWriteReceipt(clientName: clientName, act: .blockName, targetID: noteID,
-                                          targetTitle: title, detail: current)
+                                          targetTitle: title, detail: current,
+                                          show: .note(noteID: noteID, blockID: blockID, select: nil))
                         : nil)
             }
 
@@ -240,7 +246,8 @@ extension MCPWriteTools {
                     in: bookID, name: name, undoLabel: label(.chapter), guardedBy: guardBook(clientName, bookID))
                 return (["section_id": section.id, "book_id": bookID, "name": section.name],
                         MCPWriteReceipt(clientName: clientName, act: .chapter, targetID: bookID,
-                                        targetTitle: nil, detail: section.name))
+                                        targetTitle: nil, detail: section.name,
+                                        show: .book(bookID: bookID, sectionID: section.id)))
             }
         }
     }

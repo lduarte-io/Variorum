@@ -292,13 +292,15 @@ struct MCPWriteTools: Sendable {
                     toBlock: blockID, text: text, label: Self.aiLabel(client: clientName, own: takeLabel),
                     undoLabel: label(.take))
                 return (["take_id": take.id, "block_id": blockID, "note_id": note],
-                        MCPWriteReceipt(clientName: clientName, act: .take, targetID: note, targetTitle: title))
+                        MCPWriteReceipt(clientName: clientName, act: .take, targetID: note, targetTitle: title,
+                                        show: .takes(noteID: note, blockID: blockID)))
             }
         case .addComment(let blockID, let text):
             return try onBlock(blockID, rung: .suggest, job: job, clientName: clientName) { note, title in
                 let comment = try ops.addComment(toBlock: blockID, text: text, undoLabel: label(.comment))
                 return (["comment_id": comment.id, "block_id": blockID, "note_id": note],
-                        MCPWriteReceipt(clientName: clientName, act: .comment, targetID: note, targetTitle: title))
+                        MCPWriteReceipt(clientName: clientName, act: .comment, targetID: note, targetTitle: title,
+                                        show: .note(noteID: note, blockID: blockID, select: nil)))
             }
         case .saveLens(let noteID, let name, let takeIDs):
             return try onNote(noteID, rung: .suggest, job: job, clientName: clientName) { title in
@@ -306,7 +308,8 @@ struct MCPWriteTools: Sendable {
                 let lens = try ops.saveLens(post: noteID, name: name, picks: picks, undoLabel: label(.lens))
                 return (["lens_id": lens.id, "note_id": noteID],
                         MCPWriteReceipt(clientName: clientName, act: .lens, targetID: noteID,
-                                        targetTitle: title, detail: lens.name))
+                                        targetTitle: title, detail: lens.name,
+                                        show: .lens(noteID: noteID, lensID: lens.id)))
             }
         case .createNote(let title, let payload, let entryDate, let place):
             return try into(place, job: job, clientName: clientName) { destination in
@@ -330,7 +333,8 @@ struct MCPWriteTools: Sendable {
                 let result = try ops.importBook(book, wingId: wingID, undoLabel: label(.importBook))
                 return (["book_id": result.reading.id, "note_ids": result.postIDs, "chapter_ids": result.sectionIDs],
                         MCPWriteReceipt(clientName: clientName, act: .importBook, targetID: result.reading.id,
-                                        targetTitle: result.reading.name, count: result.postIDs.count))
+                                        targetTitle: result.reading.name, count: result.postIDs.count,
+                                        show: .book(bookID: result.reading.id, sectionID: nil)))
             }
         case .applyTag(let noteID, let path):
             return try onNote(noteID, rung: .writeNew, job: job, clientName: clientName) { title in
@@ -340,13 +344,15 @@ struct MCPWriteTools: Sendable {
                 } ?? path
                 return (["tag_id": application.tagId, "tag": tagPath, "note_id": noteID],
                         MCPWriteReceipt(clientName: clientName, act: .tag, targetID: noteID,
-                                        targetTitle: title, detail: tagPath))
+                                        targetTitle: title, detail: tagPath,
+                                        show: .note(noteID: noteID, blockID: nil, select: nil)))
             }
         case .createBook(let name, let wingID):
             return try inWing(wingID, job: job, clientName: clientName) {
                 let book = try ops.createBook(named: name, inWing: wingID, undoLabel: label(.book))
                 return (["book_id": book.id, "name": book.name],
-                        MCPWriteReceipt(clientName: clientName, act: .book, targetID: book.id, targetTitle: book.name))
+                        MCPWriteReceipt(clientName: clientName, act: .book, targetID: book.id, targetTitle: book.name,
+                                        show: .book(bookID: book.id, sectionID: nil)))
             }
         case .addNoteToBook(let noteID, let bookID, let sectionID):
             return try noteIntoBook(noteID, bookID, job: job, clientName: clientName) { title, bookName in
@@ -355,7 +361,8 @@ struct MCPWriteTools: Sendable {
                 if let sectionID { answer["section_id"] = sectionID }
                 return (answer,
                         MCPWriteReceipt(clientName: clientName, act: .bookAdd, targetID: noteID,
-                                        targetTitle: title, detail: bookName))
+                                        targetTitle: title, detail: bookName,
+                                        show: .book(bookID: bookID, sectionID: sectionID)))
             }
         case .edit(let editJob):
             return try performEdit(editJob, job: job, ops: ops, clientName: clientName)
@@ -592,7 +599,8 @@ struct MCPWriteTools: Sendable {
             try Queries.mcpScopeTitle(db, kind: .note, id: minted.post.id, calendar: calendar)
         }
         return (["note_id": minted.post.id, "block_ids": minted.blockIDs, "tag_ids": minted.tagIDs],
-                MCPWriteReceipt(clientName: clientName, act: act, targetID: minted.post.id, targetTitle: title))
+                MCPWriteReceipt(clientName: clientName, act: act, targetID: minted.post.id, targetTitle: title,
+                                show: .note(noteID: minted.post.id, blockID: nil, select: nil)))
     }
 
     /// **The take label on an AI take** (P-13n-3's convention, hers to
