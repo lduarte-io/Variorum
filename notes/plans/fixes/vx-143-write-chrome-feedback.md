@@ -45,12 +45,24 @@ Evidence: pins per member + the orchestrator's hands-on walk on the Air (her gra
 
 ## LIVE STATUS
 
-- VX-135: NOT-STARTED
-- VX-140: NOT-STARTED
-- VX-136: NOT-STARTED
-- VX-141: NOT-STARTED
-- VX-142: NOT-STARTED
+Batch 1 implementer (Opus, 2026-10-10, on the Air). No behavioural revert is in flight. Every app-suite run re-checks `pgrep` first.
+
+- VX-135: IN-PROGRESS — traced (below); pin + fix next.
+- VX-140: IN-PROGRESS — traced (below; tripwire NOT hit — presentation layer only); pin + fix next.
+- VX-136: IN-PROGRESS — reading done; the misalignment needs a capture before a fix is designed (capture harness next).
+- VX-141: IN-PROGRESS — traced (below); pin + fix next.
+- VX-142: IN-PROGRESS — traced (below); pin + fix next.
 - VX-144: NOT-STARTED (batch 2 — screenshot-first, after batch 1)
+
+## Batch 1 traces (implementer, 2026-10-10 — the mechanism per member, before any code)
+
+**VX-135 — ⌘⏎ in Write's take panel.** "Write's take menu" is `WriteTakesPanel` (her own 17o row-8 words call it "the takes menu"; Write opens it as a sheet, `EditorView.swift:186`). ⌘⏎ is the menu bar's Choose Take (`EditorCommands.swift:621`) → `ShellActions.dispatch(.takes(.choose))` → `CommandRouter.dispatch`, a LIFO handler stack (`CommandRouter.swift:687`). The panel registers NO handler, so the top one is Write's `EditorView.handleRouted` (`EditorView.swift:323`), whose `.choose` arm is `model.openCaretFan()` — it re-sets `fanPanel` to the CARET block's panel (same id ⇒ nothing visible) and returns true. The take whose pane is live in the panel (the panel's own `TakesViewModel.focusedPane`) is never chosen. (The sheet window is never registered, so `WindowRegistry.activeRouter` stays the parent window's — the dispatch does arrive; it arrives at the wrong surface.) Fix shape: the panel registers its own routed handler while mounted (it is the last mounted ⇒ LIFO top) whose `.takes(.choose)` arm is `TakesViewModel.chooseFocusedTake()` (→ `ops.chooseVariant`; no ring ⇒ its real refusal speaks); every other command falls through to Write unchanged.
+
+**VX-140 — the Touch ID loop (tripwire NOT hit).** The system sheet's reason "Unlock your Variorum library" is `StoreKeyGuardKeychain.unlockGated` (`StoreKeyGuard.swift:339`), reached ONLY through `StoreLobby.unlockWithBiometrics` (`StoreLaunchGate.swift:642`) from `StoreLockView` — its `.task` auto-ask (`StoreLockView.swift:72`) and its button. `StoreLobby` has no retry-on-cancel, and `AppBootstrap.lock()` no-ops unless `.ready`, so a repeat needs a FRESH lobby mount: every lock occasion mints one. The relock monitors (`ProtectionController.startRelockMonitors`, `:1848`) fire in the BACKGROUND — sleep, screen lock, and the idle clock (default 10 min, `ProtectionDials.defaultIdleMinutes`), which counts Variorum's OWN events only (a local event monitor), so time spent in her terminal IS time away. Each relock → `.locked(lobby)` → `StoreLockView` mounts → `.task` asks at once, frontmost or not → the system sheet appears over whatever app she is in. Answering it unlocks in the background and re-arms the idle clock (`AppBootstrap.finish` → `noteActivity`) without her touching Variorum, so ten minutes later it relocks and asks again: the loop she sees. Also: the once-only guard is per-VIEW `@State` (`autoAsked`), so any re-mount or second main window re-asks. The mechanism lives entirely in the prompt-triggering presentation (`StoreLockView` + the lobby model); `KeychainCustody`, the vault, `StoreKeyGuard` and the relock policy itself are untouched. Fix shape: the auto-ask fires only while the app is ACTIVE; a lobby mounted in the background defers its one ask to the app's next activation (she came back); the "asked" fact moves onto the LOBBY (once per lock occasion, all windows); a cancel spends it — the next ask is her button.
+
+**VX-141 — note→book sidebar jump.** `SidebarView`'s slot is `if let railPostID { rail } else if let noteBox { box }` (`SidebarView.swift:284`). `railPostID` derives from the selection synchronously; `noteBox` (`RootView.noteBoxView`, `:676`) exists only once the BOOK has published its report, which it does from `BookView.onAppear` (`BookView.swift:361`) — i.e. on a LATER pass. So note→book renders a pass with NEITHER: the rail fades out under `.animation(…, value: railPostID)` and the Open strip starts sliding up; a beat later the box arrives under `.animation(…, value: noteBox == nil)` and everything slides back. Book→note is calm because the rail renders in the SAME pass the box leaves (same height, a crossfade). Fix shape: RootView holds the slot while the focused pane's book has not yet spoken — an empty-state box at the rail's height — and tells a book's "no box" word (Read mode, published while it is the shown book) apart from a departing book's clear.
+
+**VX-142 — hover hints over a book's Read prose.** `FlowPostView` — the WHOLE note's prose in the book's Read flow — carries `.help(entry.displayTitle)` (`ReadingFlowView.swift:1255`, born at Phase 13 B3, renamed through the display brain at 13g R1-4): a system tooltip that pops the note's title under the cursor wherever it rests on the text, again after every move. The paged form carries `.help` only on its flip bar (not over prose). Fix shape: the tooltip leaves the prose; no hint survives over the text (PROVISIONAL — see the member's disposition).
 
 ## Environment traps (binding for every session in this run)
 
