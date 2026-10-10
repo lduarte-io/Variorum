@@ -614,6 +614,21 @@ grant authority · tool projections — never one god server object (P-9).
   never do. One write means one write. Pinned both ways at the fix; the
   P-13nb-U1-2 amended-form record carries this second amendment for her
   ratification at the merge.
+- **AF-9 — among equal durations, the call spends the LEAST capability
+  that suffices (architect, 2026-10-09 — the U2 sanity pass's O2;
+  PROVISIONAL class, hers to veto in a word).** F4's fix made WHICH
+  once grant is spent matter for the first time, and `best()` broke
+  duration ties by smallest id — deterministic but arbitrary: a
+  once-write-new grant could be consumed by a suggest-level write while
+  a once-suggest grant sat unspent. Ruled: among sufficient grants of
+  equal duration class, prefer the LOWEST RUNG that suffices, then the
+  NARROWEST scope (note < book < wing), then the smaller id (pure
+  determinism last). Standing-before-once is untouched (its pin
+  stands). The implementer's option (a), its own lean, accepted; one
+  comparator + pins, the ORCHESTRATOR'S OWN small fix (the architect
+  mandate's small-code allowance) so round 2's fresh reviewer covers
+  it. N1 (four stale "at its own rung" comments) rewords in the same
+  pass.
 - **AF-8 — scope confirmations.** The note ⋯ menu's GRANT row ("Allow
   AI here…" — R-13n-11's connected share-a-note) is U3's, as the U1
   not-done list recorded; U2 carries only the Private row there. And the
