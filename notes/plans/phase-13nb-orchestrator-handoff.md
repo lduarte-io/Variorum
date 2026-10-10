@@ -41,13 +41,29 @@ prep (`phase-13nb-format-schema-sitting-prep.md`), four ladder records
   her build ahead of the mirror).
 - **THE SITTING RAN WHOLE** (R-13nb-20…26): no open design questions
   remain in the phase. None.
-- **U3 IN FLIGHT:** a fresh opus-implementer builds the edit-rung spine
-  (its brief = the plan's U3 section). It owes ME one fork: the
-  boundary-marker GLYPH choice (rationale before the format work
-  lands). It runs as this session's background task — its hand-back
-  arrives as an agent message; if the session ever loses track, the
-  U3 UNIT RECORD + `git log` are truth (the resiliency protocol), and
-  ListAgents finds it.
+- **U3 IN FLIGHT, no fork pending:** a fresh opus-implementer builds
+  the edit-rung spine (its brief = the plan's U3 section). Its ONE fork
+  (the boundary-marker glyph + token + grammar) is RULED — **AF-10**
+  (`1d3f4913`): marker `--- next block ---`, `{v:2}` header token
+  (parser-only, capture untouched), the grammar as proposed, and its
+  SEVEN build calls all concurred (the rung-wide in-transaction guard —
+  its move_block-out-of-a-fenced-note disclosure trace; CarryAllMerge
+  moved to core under the 3C PARITY PATTERN — app name kept compiling,
+  zero test edits; text-addressed cuts `second_half_starts_with`;
+  bounded with_commits with the commit_ids fetch; the approved-clients
+  Allow-AI-here submenu, read·once, fenced legal; readable-books-only
+  book facts; the named brackets with the standing dedupe). Progress at
+  this writing (through `902f0d30`): R5/R6 done (either-payload
+  create_note + entry_date validated as a real day) and **R7 done —
+  FORMAT v2 whole** (marker mode iff needed; all 13n-a byte pins green
+  untouched 77/6; BoundaryMarkerTests 9/9 incl. a >1000-note
+  exact-inverse sweep; the plain export pinned clean; the wire leg —
+  read_note/import_document speaking v2 end to end). Earlier pieces
+  (edit_take + brackets + guard, structural tools, commits params,
+  sections) check its UNIT RECORD — do not assume order. It runs as
+  this session's background task; its hand-back arrives as an agent
+  message; if the session loses track, the U3 UNIT RECORD + `git log`
+  are truth, and ListAgents finds it.
 - **Counts at cutover:** core 2,541/292 · VariorumMCPTests 33/4 ·
   workbook 40/6, headless, gated skips only. The one known red on the
   Mac side is **VX-115** (BookCollectingDoorsTests — stale on main
@@ -60,8 +76,8 @@ prep (`phase-13nb-format-schema-sitting-prep.md`), four ladder records
 ## 3. What remains (in order)
 
 1. **U3 closes** → verify its claims (commits, counts, pins, zero
-   Sync/) → rule its glyph fork if still pending → **its live round,
-   MINE** (stage claim; the recipe in §5) → **U3 ladder** (fresh
+   Sync/) → **its live round, MINE** (stage claim; the recipe in §4's
+   machinery notes) → **U3 ladder** (fresh
    fable-reviewer; the cross-model flow VERBATIM: findings → implementer
    agree/dispute → reviewer final-calls + implements its fixes →
    sanity pass → round 2 fresh reviewer).
@@ -183,12 +199,16 @@ prep (`phase-13nb-format-schema-sitting-prep.md`), four ladder records
 > memory repo and `~/dev/variorum` per the bout-start rule if a new
 > day). Read IN FULL: `notes/plans/phase-13nb-orchestrator-handoff.md`
 > (your own handoff — state, remaining work, the taste section), then
-> the plan file's SITTING RECORD + LEDGER
-> (`notes/plans/phase-13n-b-mcp-door.md`). The U3 implementer may have
+> the plan file's SITTING RECORD + LEDGER + AF-10
+> (`notes/plans/phase-13n-b-mcp-door.md`). The U3 implementer was
+> mid-build at the handoff's last update (format v2 done through
+> `902f0d30`; no fork pending — AF-10 ruled everything) and may have
 > reported or still be running — check the U3 UNIT RECORD and
-> `git log --oneline -15` before acting; its glyph fork may await your
-> ruling. Then continue per the handoff §3: U3 close → live round →
-> ladder → U4 → closeout. The author's standing words that bind you:
-> fable-reviewer on every ladder; her etiquette and keyboard-bar
-> rulings are law; point-by-point replies; verbatim-faithful records;
-> the deploy window is HERS.
+> `git log --oneline -15` FIRST; never assume its state. Then continue
+> per the handoff §3: U3 close → verify → its live round (yours, under
+> a stage claim) → U3 ladder (fresh fable-reviewer, the cross-model
+> flow verbatim) → U4 brief per R-13nb-26 e/f/g → U4's round + ladder
+> → closeout with HER deploy window. The author's standing words that
+> bind you: fable-reviewer on every ladder; her etiquette and
+> keyboard-bar rulings are law; point-by-point replies;
+> verbatim-faithful records; the deploy window is HERS.
