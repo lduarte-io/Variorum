@@ -1886,3 +1886,116 @@ STACK MECHANISM ratified as-is and the FACE ticketed — R-13nb-19 below.
   book/chapter** — her pick "those three + book/chapter"; Compare
   targets follow VX-130's app state; the offer door + keyboard road
   and show_in_app with her R-13nb-23 etiquette all ride U4.
+
+---
+
+## THE U3 IMPLEMENTER BRIEF (self-contained; the spawn names this section)
+
+You are the U3 implementer for Variorum phase 13n-b, working in
+`~/dev/variorum-vx-124` on branch `vx-124-13n-b` (NEVER the main
+checkout). Commits say `Part of VX-124`, no attribution trailer, push
+after every commit. `notes/SessionResiliencyProtocol.md` binds you: LIVE
+STATUS in the "U3 UNIT RECORD" section below from your first commit,
+foreground waits only, at most ONE read-only Sonnet for external facts.
+Baseline (U2's ladder close): core 2,541/292 · VariorumMCPTests 33/4 ·
+workbook 40/6, headless.
+
+**Read first (never delegated):** this plan file TOP TO BOTTOM — the
+SITTING RECORD R-13nb-1…26 (your unit's rulings: R-13n-6/7, R-13nb-7/10,
+R-13nb-11, R-13nb-26 a/b/e) and the fork rulings AF-1…AF-9; the memo
+`phase-13nb-memo-wire-document.md`; the prep
+`phase-13nb-format-schema-sitting-prep.md`; ALL FOUR ladder records
+(`13nb-u{1,2}-ladder-round{1,2}.md` — U2's round 1 carries the edit_take
+guard line and the F2 class your unit must not inherit); the U1/U2 unit
+records. Code: `Domain/MCPGrantRule.swift` (spends/best as amended),
+`MCPWriteTools.swift` + `Operations+MCPWrites.swift` (the land shape,
+the once-stamp, the undo registration road), `Domain/VariorumDocument.swift`
++ its tests (the byte pins you must keep green), `SearchQueries.swift`
+(the facet booleans — R-13o-6's posture), the sections op family
+(`Operations+Sections` or grep createSection), `Features/MCP/` (the pane,
+the registry declarations).
+
+**What U3 builds — the edit-rung spine:**
+
+1. **`edit_take` (R-13n-7):** requires `expectedText` (stale refuses as
+   `bufferChangedSinceGesture`); bracketed by the EIGHTH quiet
+   auto-commit occasion — named insurance commits carrying THE CLIENT'S
+   NAME ("before claude-code's edit" / "after claude-code's edit"),
+   insurance-class, never governed by `savepoint_cadence`, deduped like
+   the other occasions; refuses locked takes, sealed posts, fenced
+   notes per the rule. THE GUARD (U2's F2 disposition, ledger row 5):
+   the op takes an injected `(Database) throws -> Void` guard run FIRST
+   inside its own write transaction, re-deciding through `MCPGrantRule`
+   — the decide/act gap closed for the edit rung; retrofitting the
+   eight U2 ops at the same touch is OPTIONAL (your call, note it).
+2. **The structural tools:** `divide_block`, `merge_blocks`,
+   `move_block`, `delete_block` (tombstone-only — the tray catches;
+   deleteBlock's preconditions ride) — thin projections of the existing
+   ops; per-act undo entries named for the client; refusals verbatim;
+   scope checks per call; adjacency/validity the ops' own.
+3. **`with_commits` on read_note's structured view (R-13nb-7):** the
+   commits per take (kind, message, stamps; text with a P1-conscious
+   shape — your call, record it); never ambient, never the text form.
+4. **`include_commits` on search (R-13nb-10):** the + commits facet's
+   wire form, default false, scope-checked per note; U1's
+   search-never-reaches-savepoints state flips DELIBERATELY — update
+   any pin asserting it as the ritual, never work around it.
+5. **Sections (R-13nb-11):** `create_section` + a section arg on
+   `add_note_to_book` + section facts riding list_notes and the wire
+   document; curated books only, the app's own refusals (smart refuse,
+   locked reading freezes structure).
+6. **`create_note` EITHER-PAYLOAD (R-13nb-11 G-2 + R-13nb-26 b):** the
+   text format OR a wire-document subset — multi-paragraph blocks,
+   block names, labeled takes, and `entry_date` (the import-processing
+   case; write-new sets dates on notes it MINTS — `set_entry_date` on
+   existing notes is U4's, edit rung).
+7. **THE BOUNDARY MARKER (R-13nb-26 a + her refinement):** format v2 in
+   `Domain/VariorumDocument` — a format-version token in the braced
+   header; a separator line between blocks (glyph YOUR proposal,
+   hard-wrap-safe, never colliding with prose — record the rationale;
+   I may veto); marker mode EMITTED ONLY when a note holds a
+   multi-paragraph block — single-paragraph notes export BYTE-IDENTICAL
+   to today and every existing byte pin stays green untouched; parsing
+   keys on the token (old files/pastes exactly as today); prose that IS
+   the marker line escapes or refuses fail-honest with the line number;
+   round-trip pins for marker mode (export → parse → serialize
+   byte-identical; a multi-paragraph block comes back ONE block). The
+   PLAIN export (takes dial off) never carries a marker — pinned.
+   `import_document` (wire + file doors) reads v2 for free via the one
+   parser.
+8. **`set_block_name`** (edit rung; the app op's own guards).
+9. **"Allow AI here…"** — the note ⋯ menu's grant row (R-13n-11: shares
+   THAT note, read, once — the quick path; the full sheet stays the
+   pane's); registry-declared.
+10. **The ACTIVITY face:** the pane's activity section over the
+    existing log rows (capped, "all N ›" road — R-13n-10); plus a pass
+    over U1's capped lists confirming every "all N ›" road opens a real
+    full view (the U1 record says what shipped; close any gap).
+
+**Must NOT touch:** `Sources/VariorumCore/Sync/` (ZERO lines this unit —
+anything you think needs one comes to me), custody, the editor seam
+(`EditorTextView`/`BlockRangeIndex`/`PaneSurface` — the landing/navigation
+work is U4's, not yours), `lockstepVersion`, the real store,
+`/Applications`, the mirror artifact. The export pin stands (no export
+writes a row). Sentence case; app voice outside the MCP room (P-13n-1).
+
+**Acceptance (use-shaped):** the verification bar's EDIT half pinned —
+an edit grant's `edit_take` lands bracketed by the named commits (visible
+in Block History), stale `expectedText` refuses, a suggest/write-new
+grant PROVABLY cannot reach edit_take or the structural tools (the U1/U2
+pin discipline); marker round-trip pins + the byte-identity of today's
+exports; headless suites green at the unit's end; your pre-flight walk
+on the dev-store Debug build (stage claim) covering: an edit under
+insurance, one structural act walked back by ⌥⌘Z, a v2 export/import
+round trip through the REAL File ▸ Import door. The REAL-client live
+round (edit + the W-series equivalent) runs with me after your close.
+
+**Forks:** the in-batch rule as ever — propose before building any half
+beyond the recorded rulings; PROVISIONAL-and-log for non-gating
+ambiguity; STOP for anything gating.
+
+---
+
+## U3 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
+
+*(empty — the U3 implementer writes it)*
