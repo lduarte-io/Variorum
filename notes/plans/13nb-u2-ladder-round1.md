@@ -240,3 +240,92 @@ F4/F5 record-wording).** The U2 boundary itself — the suggest proof, the scope
 fence's third leg, AF-7, the ask's no-oracle grammar, the per-act undo — is solid and pinned from
 the pure rule through the ops to a real socket session; F1 is the one real defect, and it sits in
 the lockstep event's blast radius (the §7 classifier families), not in the unit's own code.
+
+## ROUND 1 — IMPLEMENTER RESPONSES (opus-implementer, 2026-10-09 — every finding re-traced against the code at `d24e77b6`; no fix made in this pass)
+
+**Five AGREE, zero disputes.** Nothing here is undefined product behaviour, so nothing is flagged.
+
+- **F1 [MAJOR] — AGREE, severity right.** Re-traced: `guideVerdict`
+  (`SeededFurnitureDedupe.swift:518-544`) and `noteVerdict` (`:699-712`)
+  enumerate their columns, and `ai_private_at` is in neither; the same holds
+  for `SampleLibraryDedupe`'s book read (`:801-815`) and per-note read
+  (`:873-884`). Grep confirms the only readers of the column are
+  `MCPGrantQueries` and `Operations+PrivateMark` (plus the migration and
+  `SyncSchema`). The mechanism holds: the fold keeps the SMALLEST id
+  (`SeededFurnitureDedupe.swift:250`) and the both-pristine sample-library
+  arm does the same, so a mark-only copy with the larger id is tombstoned
+  and the converged library carries no mark. That is a disclosure fence
+  silently cleared, against the "her engagement keeps both" letter —
+  `archived_at`, the same disclosure class, is engagement at every one of
+  these sites. I missed this because my "zero `Sync/`" boundary kept me out
+  of those files, and the v1_25 "no new §7 repair" line spoke only to the
+  merge matrix. Agree with the fix (one engaged/edited leg per classifier:
+  `guideVerdict`, `noteVerdict`, both `SampleLibraryDedupe` reads,
+  optionally `gatheringIsSeedsOwn` as defence), landing BEFORE the deploy
+  window, in the reviewer's hands (AF-4). In the sample-library arm,
+  counting the mark as EDITED also gives the right keeper ("exactly one
+  edited → the EDITED copy kept"), not just both-survive. **One adjacent
+  observation for the reviewer's call (O1, no fix lean):** the
+  membership-moving repairs move the fence's BOOK route with them. The
+  OWNED-exclusivity repair can tombstone a later plain-side membership; if
+  that membership was in a Private book, the note stops being fenced
+  through it. That is "the fence reads current membership" applied to a
+  membership the ownership rules forbade, and the note's OWN mark is never
+  touched by any repair. I judge it as designed, but name it so the
+  boundary is stated.
+- **F2 [MINOR, architectural] — AGREE.** Re-traced: `onBlock` reads the
+  note (`MCPWriteTools.swift:288`), `onNote`/`into`/`inWing` decide on a
+  `database.read`, and the act opens its own write inside `land`. Every
+  app-side writer rides the runner, but the sync engine's apply transaction
+  does not, so a synced mark, move or tombstone can land between the two.
+  Lean: **record for U2** beside P-13nb-U2-8 as its sync twin (additive,
+  labeled, undoable; one in-flight call; the next call refuses). But
+  **U3's edit rung should NOT inherit the gap.** `edit_take` overwrites a
+  take (under insurance), so a write past a just-closed fence costs more.
+  The injected-precondition shape the reviewer named fits there without
+  breaking "ops decide nothing about clients": the op takes a
+  `(Database) throws -> Void` guard, runs it first inside its own
+  transaction, and the guard re-decides through `MCPGrantRule` on facts
+  read in that transaction. `edit_take`'s `expectedText` is already an
+  in-transaction precondition of the same family. Suggest that line for
+  U3's brief; retrofitting the eight U2 ops is optional at the same time.
+- **F3 [NIT] — AGREE, record-only.** One detail sharpens the trace: the
+  success-path `try log(...)` sits INSIDE `land`'s `do`
+  (`MCPWriteTools.swift:438`). A throw there falls into `land`'s own generic
+  `catch`, which logs again as `allowed: false` — so if that second log
+  succeeds, the activity line records a LANDED act as refused, on top of
+  the client's error. Same store-death race and same class; no honest
+  deterministic pin without a fault-injecting stub, so recording follows
+  the ladder's rule. If it is ever closed: move the success log OUT of the
+  act's `do` and make it `try?`, keeping `try` on the refusal logs.
+- **F4 [NIT → reruled by the AF-7 amendment `d24e77b6`] — AGREE, a
+  small fix is owed under the amended letter.** The built
+  `spends(grant, rung, consumes) = once ∧ consumes ∧ rung == grant.rung`
+  (`MCPGrantRule.swift:238-240`) is exactly the hole: under a once
+  WRITE-NEW grant, a suggest-rung write rides free, unbounded, and the pin
+  asserts it (`MCPGrantRuleTests.swift:237-238`). The amended rule in one
+  line: `once ∧ consumes ∧ (grant.rung == .read ? rung == .read : rung >= .suggest)`
+  — a read grant is spent by its content read, a write grant by its first
+  write of any rung, and reads ride free under a write grant. Pins, both
+  ways, for whoever makes the fix:
+  - flip the explicit pin's line 237-238: a suggest write under a once
+    write-new grant SPENDS it (`consumesOnce: true`);
+  - a content read under a once write-new grant still does NOT spend;
+  - restate the sweep's invariant 3 to the amended biconditional (with
+    `grantID == g.id`): `consumesOnce ⇔ consumes ∧ once ∧ live ∧ (g.rung == .read ? asked == .read : asked >= .suggest)`
+    — it should go red on the current expression;
+  - optionally an end-to-end leg in `MCPWriteServerTests`: under a once
+    write-new book grant, `add_take` lands and the following `create_note`
+    refuses.
+
+  `decideWing` and `noteIntoBook` share `spends`, so they follow
+  automatically. My e2e once-suggest pin is unaffected. The record's
+  P-13nb-U1-2 amended form, and my unit record's stated edge ("a
+  once-suggest grant authorizes ONE write"), need the second-amendment
+  wording: a once write grant authorizes ONE write, whatever its rung.
+- **F5 [NIT, record] — AGREE.** The book-specific fence words I added
+  ("That book is a journal. …" / "That book is marked Private — never
+  shared with AI.") make a fenced book distinguishable from an
+  unshared/missing one for a client holding a pre-mark id. Same exposure
+  analysis as U1's F4 (listings drop the book on the next call — pinned).
+  Extend P-13nb-U1-13's text to books; no code change.
