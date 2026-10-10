@@ -138,7 +138,7 @@ struct VariorumApp: App {
             // Check for Updates… door (rendered only where it can act).
             EditorCommands(
                 bootstrap: bootstrap, windows: windows, updates: appDelegate.updates,
-                openDoor: libraryOpen, handOffDoor: handOff)
+                openDoor: libraryOpen, handOffDoor: handOff, mcp: appDelegate.mcp)
         }
         noteWindows
     }
@@ -194,7 +194,8 @@ struct VariorumApp: App {
                         // quit. 13n-b U2 (R-13nb-6): the store's path rides
                         // in so an adopted library's restore hold lands the
                         // server OFF before it could start (ledger row 10).
-                        appDelegate.mcp.attach(session: session, storeURL: bootstrap.liveStoreURL)
+                        appDelegate.mcp.attach(
+                            session: session, storeURL: bootstrap.liveStoreURL, windows: windows)
                         if restoreHold == nil {
                             restoreHold = RestoreHoldModel(storeURL: bootstrap.liveStoreURL)
                         } else {

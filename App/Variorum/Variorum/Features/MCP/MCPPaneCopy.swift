@@ -319,6 +319,9 @@ nonisolated enum MCPAskCopy {
 /// verbatim. A RUN of acts by one client on one target speaks as one line.
 nonisolated enum MCPReceiptCopy {
     static let undoes = "\u{2325}\u{2318}Z undoes"
+    /// 13n-b U4 (R-13nb-23 (a)): the receipt's one-press door — her "… —
+    /// Open ›". App voice (P-13n-1), 13s-a sweepable.
+    static let openDoor = "Open \u{203A}"
 
     static func line(_ run: [MCPWriteReceipt]) -> String {
         guard let first = run.first else { return "" }

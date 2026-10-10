@@ -210,6 +210,18 @@ nonisolated enum TakesLanding: Equatable, Sendable {
     }
 }
 
+/// **A Lenses-board landing** (13n-b U4 — `show_in_app`'s lens target and
+/// a receipt's "Open ›" on a saved lens; AF-11 F-3): show THIS saved lens on
+/// the arriving (or mounted) Lenses board — its column if one shows it, else
+/// a new column (her "+ Column → lens" door), else, with the board's four
+/// columns full, the LAST column swapped for it (her R83 replace-in-place
+/// door — PROVISIONAL). Post-stamped and one round, `TakesLanding`'s
+/// discipline.
+nonisolated struct LensLanding: Equatable, Sendable {
+    let postID: String
+    let lensID: String
+}
+
 // MARK: - Availability context
 
 /// The pure context availability rules read. Assembled by `CommandRouter`
@@ -257,6 +269,9 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// `edit` and honestly grey in `read` (the enabled-into-nil class the
     /// registry exists to kill, from both sides).
     var readEditAttached = false
+    /// 13n-b U4 (AF-11 F-2): a connected AI client's write landed this
+    /// session and has somewhere to show — "Show the AI's Last Change" acts.
+    var aiLastChangeAvailable = false
     /// The structural undo stack has an entry.
     var undoAvailable = false
     /// The structural REDO stack has an entry (13c 1B — A10).
@@ -576,6 +591,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case toggleCanvasBank, returnCardToBank
     // Commit + undo/redo (13c 1B — A10 adds the redo half)
     case commitTake, structuralUndo, structuralRedo
+    /// 13n-b U4 (R-13nb-23 (a), AF-11 F-2): the offer door's KEYBOARD road —
+    /// "Show the AI's Last Change" (⌥⌘O), session-scoped.
+    case showLastAIChange
     // Post scope
     case sealPost
     // Write-editor-scoped doors the menu renders

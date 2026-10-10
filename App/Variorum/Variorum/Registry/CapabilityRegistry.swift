@@ -1050,6 +1050,20 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "⇧⌥⌘Z", takesAccess: .native,
             unavailableNote: "No structural change to redo.",
             availability: { ctx in ctx.redoAvailable ? .act : .unavailable }),
+        // 13n-b U4 — THE OFFER DOOR's KEYBOARD ROAD (R-13nb-23 (a), her
+        // words: "which opening that needs a keyboard shortcut too"; AF-11
+        // F-2). Every AI write receipt carries "Open ›"; this act opens the
+        // most recent one's target THIS SESSION — alive after the line fades
+        // and under receipt_style off (a chord racing a 6-second fade would
+        // be a lying road). App scope, beside its veto (⌥⌘Z) in the Edit
+        // menu; grey until an AI write has landed this session. ⌥⌘O: THE
+        // COLLISION SWEEP is recorded at `EditorCommands.keyEquivalent`.
+        Capability(
+            id: .showLastAIChange, verb: "Show the AI\u{2019}s Last Change", scope: .app,
+            doors: [.menuBar],
+            shortcutLabel: "⌥⌘O", takesAccess: .native,
+            unavailableNote: "No AI change to show yet — nothing a connected client wrote has landed this session.",
+            availability: { ctx in ctx.aiLastChangeAvailable ? .act : .unavailable }),
 
         // MARK: Post scope
         Capability(

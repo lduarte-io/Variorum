@@ -1098,6 +1098,11 @@ struct RootView: View {
                 // named and to no other.
                 revealPostID: bookAscent?.bookID == readingID ? bookAscent?.postID : nil,
                 onRevealConsumed: { bookAscent = nil },
+                // 13n-b U4 (AF-11 F-3): an agent's show / a receipt's "Open ›"
+                // at a chapter — parked on the router, handed to its book.
+                revealSectionID: router.pendingBookChapter?.bookID == readingID
+                    ? router.pendingBookChapter?.sectionID : nil,
+                onRevealSectionConsumed: { router.pendingBookChapter = nil },
                 // 18d batch 1: the book publishes what its sidebar box shows.
                 onNoteBox: { bookID, report, door in
                     adoptNoteBox(bookID, report, door)

@@ -139,3 +139,25 @@ public struct MCPHostHooks: Sendable {
 struct MCPAnswerEncodingFailure: Error, CustomStringConvertible {
     var description: String { "the answer could not be encoded" }
 }
+
+/// **The op refusals only the WIRE can meet, in words** (13n-b U4): errors
+/// whose doors exist only on the connected road — an address a client typed
+/// (a chapter id, a tag path, a note that is not in the book) — said in the
+/// MCP room's technical register (P-13n-1) instead of the raw enum the app's
+/// table would fall back to (the J8 class). The op still decides; this only
+/// words it. Nil = the app's own table speaks (`MCPHostHooks.refusalWords`).
+enum MCPWireRefusalCopy {
+    static func words(_ error: Error) -> String? {
+        guard let error = error as? OperationError else { return nil }
+        switch error {
+        case .postNotInReading:
+            return "That note isn't in this book — add it first (add_note_to_book), then file it."
+        case .sectionNotFound, .sectionNotInReading:
+            return "section_id isn't a chapter of this book (list_notes or create_section gives chapter ids)."
+        case .invalidTagName(let name):
+            return "\u{201C}\(name)\u{201D} isn't a tag path — a path is names joined by /, e.g. \"percy/pt-en\"."
+        default:
+            return nil
+        }
+    }
+}

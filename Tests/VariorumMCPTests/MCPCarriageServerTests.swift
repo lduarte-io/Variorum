@@ -428,6 +428,40 @@ struct MCPCarriageServerTests {
         }
     }
 
+    // MARK: - The wire-only refusals speak words, never an enum
+
+    @Test func theWireOnlyRefusalsSpeakWordsNotAnEnum() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let book = try h.operations.createReading(name: "lessons", kind: .book)
+            let otherBook = try h.operations.createReading(name: "other", kind: .book)
+            let foreignChapter = try h.operations.createSection(in: otherBook.id, name: "x")
+            let member = try h.operations.createPost(title: "member")
+            _ = try h.operations.addPostToReading(member.id, to: book.id)
+            let loose = try h.operations.createPost(title: "loose")
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.writeNew, .wing, ""))
+
+            let notMember = try await call(connection, "file_note_in_chapter", [
+                "note_id": .string(loose.id), "book_id": .string(book.id), "section_id": .null,
+            ])
+            #expect(notMember.isError == true && text(notMember) == MCPWireRefusalCopy.words(
+                OperationError.postNotInReading(postID: loose.id, readingID: book.id)))
+            let wrongChapter = try await call(connection, "file_note_in_chapter", [
+                "note_id": .string(member.id), "book_id": .string(book.id), "section_id": .string(foreignChapter.id),
+            ])
+            #expect(wrongChapter.isError == true && text(wrongChapter).hasPrefix("section_id isn't a chapter of this book"))
+            let blankPath = try await call(connection, "set_book_rule", [
+                "book_id": .string(book.id), "outflow": .array([.string(" / ")]),
+            ])
+            #expect(blankPath.isError == true && text(blankPath).contains("isn't a tag path"))
+            #expect(!text(notMember).contains("Refused:") && !text(wrongChapter).contains("Refused:"))
+            #expect(h.undoStack.depth == 0)
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - The rungs' listing (P-2 on the wire)
 
     @Test func theCarriageToolsAreListedAtTheirRungsOnly() async throws {

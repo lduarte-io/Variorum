@@ -110,6 +110,17 @@ final class MCPDoor {
     nonisolated static let askCap = 8
     var presentedAsk: MCPAsk? { asks.first }
 
+    /// U4 (R-13nb-23 (a), AF-11 F-2) — THE AI's LAST CHANGE this session:
+    /// where the most recent write receipt's "Open ›" goes. Observable, so
+    /// "Show the AI's Last Change" (⌥⌘O) greys and ungreys with it;
+    /// session-scoped (cleared at detach — R-13nb-19's session-bounded twin).
+    private(set) var lastShow: MCPShowTarget?
+    /// U4 (AF-11 F-3): the windows `show_in_app` may move — set at attach.
+    @ObservationIgnored private weak var windows: WindowRegistry?
+    /// U4 (AF-11 F-3): where the app stands, asked ON THE MAIN ACTOR in the
+    /// delivery's own hop (injectable for the pins).
+    @ObservationIgnored var standingProvider: (@MainActor () -> (MCPShowRule.Standing, ShellRouter?))?
+
     /// U2 — the receipt RUN: consecutive acts by one client on one target
     /// within the window speak as one coalesced line (her fact-check's
     /// "added 2 takes and saved the lens …").
@@ -172,7 +183,10 @@ final class MCPDoor {
     /// computed before it (a stale "on") can ever reach `reconcileServer`. A
     /// failed landing keeps the server down for this session (the
     /// conservative direction); the pane still renders.
-    func attach(session: AppSession, storeURL: URL? = nil) {
+    func attach(session: AppSession, storeURL: URL? = nil, windows: WindowRegistry? = nil) {
+        // U4: the windows a show may move (kept across re-attaches of the
+        // same session — the window register outlives a ready).
+        if let windows { self.windows = windows }
         // Idempotent per session: the same ready re-appearing keeps its
         // server and its connections.
         guard session !== self.session else { return }
@@ -180,6 +194,8 @@ final class MCPDoor {
         self.session = session
         database = session.database
         runner = session.runner
+        // U4 (AF-11 F-2): the registry's fact for "Show the AI's Last Change".
+        session.commandRouter.aiLastChangeAvailable = { [weak self] in self?.lastShow != nil }
         guard let storeURL, let hold = LibraryRestoreHold.read(besideStore: storeURL) else {
             observe(session.database)
             return
@@ -220,6 +236,7 @@ final class MCPDoor {
         adoptionLandingPending = false
         asks = []
         receiptRun = []
+        lastShow = nil
         session = nil
         database = nil
         runner = nil
@@ -255,7 +272,12 @@ final class MCPDoor {
             // her": the Mac's own table.
             refusalWords: { OpsRefusalCopy.message(for: $0) },
             onAsk: { [weak self] ask in Task { @MainActor in self?.enqueue(ask) } },
-            onWrite: { [weak self] receipt in Task { @MainActor in self?.speak(receipt) } })
+            onWrite: { [weak self] receipt in Task { @MainActor in self?.speak(receipt) } },
+            // U4 (AF-11 F-3): the move dial's delivery — the rule applied on
+            // the main actor, in the same hop as any move.
+            show: { [weak self] target in
+                await self?.agentShow(target) ?? .refuse(MCPShowRule.unavailableWords)
+            })
         host = fresh
         starting = true
         // The start sweeps the while-connected grants (a write) and binds —
@@ -398,7 +420,61 @@ final class MCPDoor {
             receiptRun = [receipt]
         }
         receiptRunAt = now
-        session.status.receipt(MCPReceiptCopy.line(receiptRun))
+        // U4 (R-13nb-23 (a), AF-11 F-2): the line STAYS A RECEIPT (her
+        // receipt_style governs it) and grows the one-press door — "Open ›"
+        // to the act's landing; the same target is the session's last AI
+        // change, which ⌥⌘O opens after the line has faded (or never showed).
+        if let show = receipt.show { lastShow = show }
+        let door = receipt.show.map { target in
+            StatusCenter.Item.Action(label: MCPReceiptCopy.openDoor) { [weak self] in self?.openShow(target) }
+        }
+        session.status.deliver(MCPReceiptCopy.line(receiptRun), kind: .receipt, action: door)
+    }
+
+    // MARK: - Navigation (U4 — R-13nb-23, AF-11 F-2/F-3)
+
+    /// Where the app stands, read now (main actor): Variorum frontmost
+    /// (`NSApp.isActive`) AND its KEY window a FULL window (one that
+    /// navigates) — the router that window owns rides along.
+    func currentStanding() -> (MCPShowRule.Standing, ShellRouter?) {
+        if let standingProvider { return standingProvider() }
+        guard NSApp.isActive else { return (.notFrontmost, nil) }
+        guard let entry = windows?.entry(for: NSApp.keyWindow), entry.kind == .full else {
+            return (.frontmostOtherWindow, nil)
+        }
+        return (.frontmostMainWindow, entry.router)
+    }
+
+    /// **`show_in_app`'s delivery** — her etiquette FIRST (`MCPShowRule`,
+    /// one pure verdict), and the move only on `.navigate`, into the key
+    /// window, never raising another. Never automatic: only a client's
+    /// explicit call reaches here.
+    func agentShow(_ target: MCPShowTarget) async -> MCPShowRule.Verdict {
+        let (standing, router) = currentStanding()
+        let verdict = MCPShowRule.verdict(standing)
+        guard verdict == .navigate, let session, let router else {
+            return verdict == .navigate ? .refuse(MCPShowRule.unavailableWords) : verdict
+        }
+        await MCPNavigator(session: session).deliver(target, into: router)
+        return .navigate
+    }
+
+    /// HER press — a receipt's "Open ›" or ⌥⌘O: she is at the app, so no
+    /// etiquette gate; the window that can show it is used (and raised when
+    /// a note-only window is key — `creationRouter`, her creation doors'
+    /// own rule).
+    func openShow(_ target: MCPShowTarget) {
+        guard let session, let router = windows?.creationRouter() else { return }
+        Task { @MainActor in await MCPNavigator(session: session).deliver(target, into: router) }
+    }
+
+    /// ⌥⌘O — "Show the AI's Last Change" (session-scoped; grey when none).
+    func showLastChange() {
+        guard let lastShow else {
+            session?.status.refuse(CapabilityRegistry.capability(.showLastAIChange).unavailableNote)
+            return
+        }
+        openShow(lastShow)
     }
 
     // MARK: - The full lists ("all N ›") and the sheet's choices
