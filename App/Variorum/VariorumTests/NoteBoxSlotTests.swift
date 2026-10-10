@@ -197,6 +197,57 @@ struct NoteBoxSlotTests {
         }
     }
 
+    /// **The sanity-pass refinement (round 1): the focus-flip publish fires
+    /// on GAIN only.** The loss side was the sanity pass's concern: two
+    /// panes may legally show the SAME book (the one-note-per-pane rule is
+    /// notes-only — `WorkspaceModel.paneShowing` guards `noteID != nil`) in
+    /// different modes, and `adoptNoteBox` decides by BOOK ID — so a
+    /// departing READ pane's nil, landing after the gaining Outline pane's
+    /// report, would wipe the box under the focused pane. That repro
+    /// depends on the two panes' callback ORDER (unspecified by SwiftUI),
+    /// so this pin holds the RULE itself, deterministically: a pane LOSING
+    /// focus publishes NOTHING (editing modes already speak on loss through
+    /// the report road; Read has nothing to say), and a pane GAINING focus
+    /// speaks exactly once — the no-box word that closes MAJOR-1.
+    /// RED ON OLD (the both-sides publish): the loss flip recorded a nil.
+    @Test func thePaneFocusPublishFiresOnGainOnly() async throws {
+        try await withTwoFinishedBooks { session, readingA, _ in
+            let structure = BookStructureModel(session: session, readingID: readingA)
+            structure.mode = .read
+            let box = PaneFocusBox()
+            let calls = LockIsolated<[String]>([])
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1000, height: 800),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(rootView: GainOnlyHarness(
+                session: session, readingID: readingA, structure: structure, box: box,
+                onNoteBox: { _, report, _ in
+                    calls.withValue { $0.append(report == nil ? "nil" : "report") }
+                }))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1000, height: 800)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting, until: { !calls.value.isEmpty })
+            try #require(!calls.value.isEmpty, "fixture: the mount published its word")
+            calls.setValue([])
+
+            box.focused = false
+            await settle(window, hosting, until: { !calls.value.isEmpty }, maxTurns: 10)
+            #expect(calls.value.isEmpty,
+                    "a pane LOSING focus publishes nothing — a departing same-book Read pane must never wipe the focused pane's box (saw \(calls.value))")
+
+            box.focused = true
+            await settle(window, hosting, until: { !calls.value.isEmpty })
+            #expect(calls.value == ["nil"],
+                    "a Read pane GAINING focus speaks its one no-box word — MAJOR-1's closer (saw \(calls.value))")
+        }
+    }
+
     @Test func goingFromANoteToABookNeverEmptiesTheSlot() async throws {
         try await withBookAndNote { session, readingID, noteID in
             let router = ShellRouter()
@@ -248,5 +299,33 @@ struct NoteBoxSlotTests {
                     "no pass after the switch holds an empty slot (\(after.map(\.rawValue)))")
 #endif
         }
+    }
+}
+
+// MARK: - The gain-only pin's harness (sanity-pass refinement, round 1)
+
+/// The one observable input the harness flips: whether the book's pane is
+/// focused. Flipping it re-renders the harness, which hands `BookView` the
+/// new value — the same road the shell drives in production.
+@MainActor
+@Observable
+private final class PaneFocusBox {
+    var focused = true
+}
+
+/// A direct-hosted `BookView` with an injected `.read` structure (the 13c 2C
+/// injection seam: hosted `.task` callbacks are not owed under the test
+/// host) and a recorder on the note-box channel.
+private struct GainOnlyHarness: View {
+    let session: AppSession
+    let readingID: String
+    let structure: BookStructureModel
+    let box: PaneFocusBox
+    let onNoteBox: (String, NoteBoxReport?, NoteBoxDoor?) -> Void
+
+    var body: some View {
+        BookView(
+            session: session, readingID: readingID, structure: structure,
+            paneFocused: box.focused, onNoteBox: onNoteBox)
     }
 }
