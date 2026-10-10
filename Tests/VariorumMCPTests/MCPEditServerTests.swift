@@ -283,6 +283,30 @@ struct MCPEditServerTests {
         }
     }
 
+    // MARK: - Format v2 on the wire, both ways (R-13nb-26 (a))
+
+    @Test func theWireSpeaksFormatV2BothWaysThroughTheOneParser() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let book = try h.operations.createReading(name: "letters", kind: .book)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.writeNew, .book, book.id))
+            let document = "{v:2} {t:\"to K\"}\n\nDear K,\n\nIt has been a year.\n\n"
+                + VariorumDocument.blockMarker + "\n\nYours."
+            let imported = try await call(connection, "import_document", [
+                "document": .string(document), "book_id": .string(book.id),
+            ])
+            #expect(imported.isError != true, "\(text(imported))")
+            let answer = try json(imported)
+            let noteID = try #require(answer["note_id"] as? String)
+            #expect((answer["block_ids"] as? [String])?.count == 2, "the multi-paragraph block lands as ONE block")
+            let read = try await call(connection, "read_note", ["note_id": .string(noteID)])
+            #expect(text(read) == document, "read_note speaks it back byte for byte")
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - ONCE on the edit rung: spent inside the act's own transaction
 
     @Test func aOnceEditGrantAuthorizesExactlyOneEditCallAndARefusedActNeverSpendsIt() async throws {

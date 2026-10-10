@@ -120,7 +120,9 @@ enum MCPToolCatalog {
             One note in the Variorum document format: a header line with its title and tags \
             ({t:"…"} {#tag/path}), then each block's chosen take as a paragraph, followed — when \
             the block has other takes — by a "--- Alternates for this block ---" section listing \
-            them. Blank lines separate blocks. Returns the text. With with_ids: true it returns \
+            them. Blank lines separate blocks — except in format v2: when a block holds blank lines \
+            of its own, the header starts with {v:2} and a "--- next block ---" line separates the \
+            blocks instead. Returns the text. With with_ids: true it returns \
             JSON instead — the note's blocks in order, each with its block_id, its name if the \
             author named it, the shown take's text, every take (take_id, label, chosen, text) and \
             its comments — the ids add_take, add_comment and save_lens address — plus the note's \
@@ -304,7 +306,8 @@ enum MCPToolCatalog {
         description: """
             Import text in the Variorum document format (what read_note returns): a header \
             {t:"title"} {#tag/path}, paragraphs as blocks, "--- Alternates for this block ---" \
-            sections as extra takes. Either one `document` into a shared book (book_id) or wing \
+            sections as extra takes; with {v:2} first in the header, "--- next block ---" lines \
+            separate the blocks and blank lines stay inside them. Either one `document` into a shared book (book_id) or wing \
             (wing_id), or a whole `book` {name, chapters: [{name, documents}], documents} into a \
             shared wing. One import is one undo for the author. Returns JSON with the new ids.
             """,
