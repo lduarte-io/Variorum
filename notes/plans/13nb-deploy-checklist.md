@@ -1,6 +1,6 @@
 # 13n-b — THE DEPLOY CHECKLIST (marker 12 → 13; the overnight window under R-13nb-28 as amended — mirror → Mac → phone, one sitting, her first rounds at her morning)
 
-**Status: PREPARED, NOT RUN.** The mirror deploy executes under HER EXPLICIT
+**Status: RUN 2026-10-10 (the overnight window) — every leg landed; the §12 record is written; her first rounds pending her morning.** The mirror deploy executes under HER EXPLICIT
 AUTHORIZATION recorded verbatim at R-13nb-28's amendment ("you can also go
 ahead and replace my application when you're done / deploy - I'd like to
 authorize that right now, so you simply use the PAT when it's time. my
