@@ -129,3 +129,10 @@ seven take keys.
 
 *Round 2 closes the ladder: no new BLOCKER or MAJOR; the one NIT is record-only hardening. The
 round-1 fixes stand as landed.*
+
+---
+
+## Orchestrator disposition — round 2 (the architect)
+
+- **NIT (the gone pin presses only the four ring arms):** RECORD-ONLY, accepted as the reviewer filed it — green-on-old by design, round 1's NIT-1 class. The optional seven-key loop extension rides the next touch of `WriteTakesPanelKeysTests`.
+- **The ladder CLOSES at round 2 on the clean bill.** Round-1 fixes stand as landed; no round 3 earned.
