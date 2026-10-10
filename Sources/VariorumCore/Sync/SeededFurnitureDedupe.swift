@@ -225,7 +225,8 @@ extension SyncEngine {
             sql: """
                 SELECT id, wing_id, name, query_spec, shelf_id, starred, owned,
                        locked, sealed_at, archived_at, hide_owned, intake_seating,
-                       auto_tag_ids, grouping_tag_id, word_target, max_posts
+                       auto_tag_ids, grouping_tag_id, word_target, max_posts,
+                       ai_private_at
                 FROM reading
                 WHERE kind = 'gathering' AND deleted_at IS NULL
                 """)
@@ -347,6 +348,10 @@ extension SyncEngine {
         if (row["locked"] as Int? ?? 0) != 0 { return false }
         if (row["sealed_at"] as String?) != nil { return false }
         if (row["archived_at"] as String?) != nil { return false }
+        // 13n-b U2 ladder F1 — pure DEFENSE: gatherings refuse the Private
+        // mark operations-side (`wrongReadingKind`), so a row carrying it is
+        // a peer's bug — a doubt, and any doubt keeps both.
+        if (row["ai_private_at"] as String?) != nil { return false }
         if (row["hide_owned"] as Int?) != nil { return false }
         if (row["intake_seating"] as String?) != nil { return false }
         if let outflow = row["auto_tag_ids"] as String?, !outflow.isEmpty, outflow != "[]" {
@@ -520,7 +525,7 @@ public enum SeededFurnitureClassifier {
             sql: """
                 SELECT locked, sealed_at, owned, archived_at, word_target, max_posts,
                        grouping_tag_id, sort_field, sort_dir, shelf_id, hide_owned,
-                       intake_seating, auto_tag_ids, query_spec, starred
+                       intake_seating, auto_tag_ids, query_spec, starred, ai_private_at
                 FROM reading WHERE id = ?
                 """,
             arguments: [copyID])
@@ -533,6 +538,10 @@ public enum SeededFurnitureClassifier {
         if (book["sealed_at"] as String?) != nil { return .engaged }
         if (book["owned"] as Int? ?? 0) != 0 { return .engaged }
         if (book["archived_at"] as String?) != nil { return .engaged }
+        // 13n-b U2 ladder F1 (R-13nb-4, v1_25): the Private mark is HER
+        // ENGAGEMENT — a disclosure fence a fold must never clear. The same
+        // class as archived_at, read the same way.
+        if (book["ai_private_at"] as String?) != nil { return .engaged }
         // word_target is SEED-AUTHORED (the mint ships 4000) — identity,
         // not engagement (BLOCKER-1): a target she changes differs.
         if (book["max_posts"] as Int?) != nil { return .engaged }
@@ -701,13 +710,16 @@ extension SeededFurnitureClassifier {
         guard let post = try Row.fetchOne(
             db,
             sql: """
-                SELECT title, locked, archived_at, entry_date, floating_notes
+                SELECT title, locked, archived_at, entry_date, floating_notes, ai_private_at
                 FROM container WHERE id = ? AND deleted_at IS NULL
                 """,
             arguments: [postID])
         else { return .straggling }
         if (post["archived_at"] as String?) != nil { return .engaged }
         if (post["entry_date"] as String?) != nil { return .engaged }
+        // 13n-b U2 ladder F1 (R-13nb-4, v1_25): her Private mark is
+        // engagement — the fence must survive every fold.
+        if (post["ai_private_at"] as String?) != nil { return .engaged }
         if let notes = post["floating_notes"] as String?, !notes.isEmpty { return .engaged }
         // The star axis (MAJOR-1 — `starredIDs`' doc carries the rule): a
         // note's star is the synced list; a pool cannot be starred, so a

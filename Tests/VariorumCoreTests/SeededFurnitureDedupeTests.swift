@@ -434,6 +434,69 @@ struct SeededFurnitureDedupeTests {
             "…and the deciding is deterministic on BOTH devices")
     }
 
+    @Test func herPrivateMarkKeepsBothCopiesOnEveryGrain() async throws {
+        // 13n-b U2 ladder round 1, F1 (R-13nb-4 meets the fold's ruled
+        // letter — "HER ENGAGEMENT always keeps both"): the Private mark is
+        // her hand on a copy, and a fold must never clear a disclosure
+        // fence. RED ON OLD: neither `guideVerdict` nor `noteVerdict` read
+        // `ai_private_at` (v1_25), so a marked-but-otherwise-pristine copy
+        // classified foldable, could lose the smaller-id toss, and the mark
+        // folded away silently — the book or note became reachable by
+        // standing MCP grants again, on every device.
+        let (a, b, _) = try pairWithFacts()
+        let noteA = try seedQuicknote(a)
+        _ = try seedQuicknote(b)
+        let guideA = try seedGuide(a)
+        _ = try seedGuide(b)
+        try a.with { ops, _ in
+            try ops.setNotePrivate(noteA, true)
+            try ops.setBookPrivate(guideA.bookID, true)
+        }
+
+        try await converge(a, b)
+
+        #expect(try liveIDs(
+            b, table: "container", where: "title = ?", [Self.quicknoteTitle]).count == 2,
+            "a Private-marked note copy is hers — both stay, the fence stands")
+        #expect(try liveIDs(
+            b, table: "reading", where: "name = ?", [Self.guideName]).count == 2,
+            "a Private-marked guide copy is hers — both stay")
+        let marksStand = try a.with { _, db in
+            try db.read { db in
+                (try Queries.isNotePrivate(db, postID: noteA),
+                 try Queries.isBookPrivate(db, readingID: guideA.bookID))
+            }
+        }
+        #expect(marksStand.0, "and the mark itself survives convergence")
+        #expect(marksStand.1)
+    }
+
+    @Test func aMarkedGatheringRowKeepsBothAsDefense() async throws {
+        // Defense only: gatherings REFUSE the mark operations-side
+        // (`wrongReadingKind`), so this state needs a raw write — a future
+        // peer's bug, not a door. The family's letter is err-toward-keep
+        // ("any doubt keeps both"), so a gathering row CARRYING the column
+        // is not the seed's own. RED ON OLD: the candidates read ignored it
+        // and the marked copy could fold away.
+        let (a, b, _) = try pairWithFacts(guide: false)
+        try seedGatherings(a)
+        let mintsB = try seedGatherings(b)
+        try b.with { _, db in
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE reading SET ai_private_at = '2026-10-09T00:00:00.000Z' WHERE id = ?",
+                    arguments: [mintsB.classics])
+            }
+        }
+
+        try await converge(a, b)
+
+        #expect(try liveGatherings(b, named: Self.classicsName).count == 2,
+                "a marked gathering row is a doubt — both stand")
+        #expect(try liveGatherings(b, named: Self.starredName).count == 1,
+                "the untouched grain still folds")
+    }
+
     @Test func theSameCommentOnADifferentBlockKeepsBoth() async throws {
         // The round-2 MINOR's pin: the comment tuple carries the block's
         // REAL placement index, so an identical comment TEXT attached to a
