@@ -71,8 +71,20 @@ struct MCPReadTools: Sendable {
     private func readNote(_ args: [String: Value], clientName: String, plain: Bool) throws -> Outcome {
         let noteID = try requiredString(args, "note_id")
         // U2 (AF-5): the structured form — the SAME decision, the SAME once
-        // stamp, the SAME transaction; only the answer's shape differs.
-        let withIDs = plain ? false : (try optionalBool(args, "with_ids") ?? false)
+        // stamp, the SAME transaction; only the answer's shape differs. U3
+        // (R-13nb-7): `with_commits` / `commit_ids` ask for commit history,
+        // which lives ONLY in the structured form (never the Level 0 text —
+        // R-13n-8), so either one implies it.
+        var options = MCPNoteStructure.Options()
+        if !plain {
+            options.withCommits = try optionalBool(args, "with_commits") ?? false
+            options.commitIDs = try optionalStrings(args, "commit_ids") ?? []
+            guard options.commitIDs.count <= MCPNoteStructure.maxCommitIDs else {
+                throw ArgumentFailure(message: "commit_ids takes at most \(MCPNoteStructure.maxCommitIDs) ids per call.")
+            }
+        }
+        let withIDs = plain ? false
+            : (try optionalBool(args, "with_ids") ?? false) || options.withCommits || !options.commitIDs.isEmpty
         let act = plain ? MCPToolCatalog.exportNote.name : MCPToolCatalog.readNote.name
         return try database.write { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
@@ -92,7 +104,8 @@ struct MCPReadTools: Sendable {
             if plain {
                 text = try Queries.renderedText(db, containerID: noteID)
             } else if withIDs {
-                text = try encode(try MCPNoteStructure.read(db, noteID: noteID, calendar: calendar))
+                text = try encode(try MCPNoteStructure.read(
+                    db, noteID: noteID, calendar: calendar, standing: standing, options: options))
             } else {
                 text = try Queries.variorumDocumentText(db, postID: noteID)
             }
@@ -212,10 +225,15 @@ struct MCPReadTools: Sendable {
             for row in page {
                 let decision = MCPGrantAuthority.decide(standing, note: facts[row.id], rung: .read, consumes: false)
                 guard decision.isAllowed, let noteFacts = facts[row.id] else { continue }
-                notes.append([
+                var note: [String: Any] = [
                     "id": row.id, "title": row.title, "edited": row.touched,
                     "book_ids": noteFacts.bookIDs.sorted(), "wing_id": noteFacts.wingID,
-                ])
+                ]
+                if let section = row.section {
+                    note["section_id"] = section.id
+                    note["section_name"] = section.name
+                }
+                notes.append(note)
             }
             var answer: [String: Any] = ["notes": notes]
             if full, let last = page.last { answer["next_cursor"] = last.cursor.encoded }
@@ -232,6 +250,10 @@ struct MCPReadTools: Sendable {
         let title: String
         let touched: String
         let cursor: PageCursor
+        /// U3 (R-13nb-11 G-1): the chapter this note is filed under in the
+        /// LISTED book (book-order listings only; a dangling pointer reads
+        /// unsectioned).
+        var section: (id: String, name: String)? = nil
     }
 
     /// A book's live member notes in book order, keyset-paged on
@@ -241,8 +263,11 @@ struct MCPReadTools: Sendable {
             db,
             sql: """
                 SELECT c.id, c.title, c.entry_date, c.created_at,
-                       COALESCE(c.last_touched_at, c.created_at) AS touched, rp.position
+                       COALESCE(c.last_touched_at, c.created_at) AS touched, rp.position,
+                       s.id AS section_id, s.name AS section_name
                 FROM reading_post rp JOIN container c ON c.id = rp.post_id
+                LEFT JOIN reading_section s
+                  ON s.id = rp.section_id AND s.deleted_at IS NULL AND s.reading_id = rp.reading_id
                 WHERE rp.reading_id = :book AND rp.deleted_at IS NULL AND rp.status = 'member'
                   AND c.deleted_at IS NULL AND c.kind = 'post'
                   AND (:after IS NULL OR (rp.position, c.id) > (:after, :afterID))
@@ -252,7 +277,8 @@ struct MCPReadTools: Sendable {
             arguments: ["book": bookID, "after": cursor?.key, "afterID": cursor?.id ?? "", "limit": limit]
         ).map { row in
             PageRow(id: row["id"], title: displayTitle(row), touched: row["touched"],
-                    cursor: PageCursor(shape: .book, key: row["position"], id: row["id"]))
+                    cursor: PageCursor(shape: .book, key: row["position"], id: row["id"]),
+                    section: (row["section_id"] as String?).map { ($0, row["section_name"] as String) })
         }
     }
 
@@ -354,8 +380,14 @@ struct MCPReadTools: Sendable {
         guard bookID == nil || noteID == nil else {
             throw ArgumentFailure(message: "Pass book_id or note_id, not both.")
         }
-        let query = SearchQueryParser.parse(text, typeAhead: false, calendar: calendar)
+        var query = SearchQueryParser.parse(text, typeAhead: false, calendar: calendar)
         guard !query.isEmpty else { throw ArgumentFailure(message: "Give search some words to look for.") }
+        // U3 (R-13nb-10, her correction): the `+ commits` facet's WIRE form —
+        // explicit per call, default OFF (R-VX83's letter: a savepoint never
+        // lists without the facet). Its passages pass the same per-note rule
+        // as every other passage (`passes`), P1 ∝ matches as ever. U1's
+        // search-never-reaches-savepoints state flips here, deliberately.
+        query.includesSavepoints = try optionalBool(args, "include_commits") ?? false
         let act = MCPToolCatalog.search.name
         // F3: the whole engine runs on one read snapshot (under the open book
         // it is the heaviest call the server serves — it must never hold the
@@ -473,6 +505,10 @@ struct MCPReadTools: Sendable {
             entry["book_name"] = passage.homeTitle
         }
         if let blockID = passage.blockID { entry["block_id"] = blockID }
+        if passage.kind == .savepoint {
+            entry["commit_id"] = passage.sourceID
+            if let savedAt = passage.savedAt { entry["saved_at"] = savedAt }
+        }
         return entry
     }
 
@@ -547,6 +583,15 @@ struct MCPReadTools: Sendable {
         guard let value = args[key], value != .null else { return nil }
         guard let bool = value.boolValue else { throw ArgumentFailure(message: "\(key) must be true or false.") }
         return bool
+    }
+
+    private func optionalStrings(_ args: [String: Value], _ key: String) throws -> [String]? {
+        guard let value = args[key], value != .null else { return nil }
+        guard let items = value.arrayValue else { throw ArgumentFailure(message: "\(key) must be an array.") }
+        return try items.map { item in
+            guard let string = item.stringValue else { throw ArgumentFailure(message: "\(key) must hold strings.") }
+            return string
+        }
     }
 
     private func optionalInt(_ args: [String: Value], _ key: String) throws -> Int? {

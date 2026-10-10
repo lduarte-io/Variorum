@@ -94,7 +94,8 @@ enum MCPToolCatalog {
     static let listNotes = MCPToolDeclaration(
         name: "list_notes", rung: .read, title: "List notes",
         description: """
-            Notes this client can read. With book_id: that book's notes in book order. With \
+            Notes this client can read. With book_id: that book's notes in book order, each with \
+            the chapter it is filed under (section_id, section_name) when it has one. With \
             wing_id: that wing's notes, most recently edited first. With neither: every note \
             shared with this client, most recently edited first. Paged — pass next_cursor back \
             as cursor. Journal entries and Private notes appear only when shared one ask at a \
@@ -122,9 +123,13 @@ enum MCPToolCatalog {
             them. Blank lines separate blocks. Returns the text. With with_ids: true it returns \
             JSON instead — the note's blocks in order, each with its block_id, its name if the \
             author named it, the shown take's text, every take (take_id, label, chosen, text) and \
-            its comments — the ids add_take, add_comment and save_lens address. Ids are live: the \
+            its comments — the ids add_take, add_comment and save_lens address — plus the note's \
+            entry_date and the books (and chapters) holding it that you can read. Ids are live: the \
             author's own merges and divides make new blocks, so an id can go stale between calls \
-            (a write with a stale id is refused) — read again to get current ids.
+            (a write with a stale id is refused) — read again to get current ids. with_commits: true \
+            adds each take's commits (saved moments), newest first, with their text; past about \
+            100,000 characters of commit text, older ones say text_omitted — fetch those by \
+            commit_ids (up to 20 per call).
             """,
         inputSchema: .object([
             "type": "object",
@@ -132,6 +137,10 @@ enum MCPToolCatalog {
                 "note_id": .object(["type": "string", "description": "The note's id."]),
                 "with_ids": .object(["type": "boolean",
                                      "description": "Return JSON with block and take ids (default false)."]),
+                "with_commits": .object(["type": "boolean",
+                                         "description": "Add each take's commits (implies with_ids)."]),
+                "commit_ids": .object(["type": "array", "items": .object(["type": "string"]), "maxItems": 20,
+                                       "description": "Commits whose full text to include (implies with_ids)."]),
             ]),
             "required": .array(["note_id"]),
             "additionalProperties": false,
@@ -143,8 +152,9 @@ enum MCPToolCatalog {
         description: """
             Full-text search over the notes and books shared with this client (Variorum's own \
             search: every word must match, "quoted phrases" stay together, #tag/path filters by \
-            tag). Narrow with book_id or note_id. Returns JSON passages: the note, the block, \
-            and the words around each match (matches wrapped in **).
+            tag). Narrow with book_id or note_id. include_commits: true also searches commits (saved \
+            moments' text) — those passages carry a commit_id and saved_at. Returns JSON passages: \
+            the note, the block, and the words around each match (matches wrapped in **).
             """,
         inputSchema: .object([
             "type": "object",
@@ -152,6 +162,8 @@ enum MCPToolCatalog {
                 "query": .object(["type": "string", "description": "What to search for."]),
                 "book_id": .object(["type": "string", "description": "Search only this book."]),
                 "note_id": .object(["type": "string", "description": "Search only this note."]),
+                "include_commits": .object(["type": "boolean",
+                                            "description": "Also search commits (default false)."]),
                 "limit": .object(["type": "integer", "minimum": 1, "maximum": 50,
                                   "description": "Most passages to return (default 20)."]),
             ]),
