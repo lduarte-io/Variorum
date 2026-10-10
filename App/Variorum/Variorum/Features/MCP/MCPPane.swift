@@ -9,8 +9,9 @@
 //  shows a few rows and an "all N ›" road into the whole list — never one
 //  growing pile (R-13n-10). The pane holds no rule: it renders `MCPDoor`'s
 //  snapshot and calls its acts; every door renders its verb from the registry
-//  (P-1) and is walked (`surfaceCapabilities`). The ACTIVITY face is U3's —
-//  the log is already being written.
+//  (P-1) and is walked (`surfaceCapabilities`). U3 adds the ACTIVITY face —
+//  the coarse log's newest lines (a run of one client's same act on one
+//  target reads as one line with a count) and its own "all N ›" road.
 //
 
 import SwiftUI
@@ -44,7 +45,7 @@ struct MCPPane: View {
     }
 
     enum FullList: String, Identifiable {
-        case requests, clients, shared
+        case requests, clients, shared, activity
         var id: String { rawValue }
     }
 
@@ -97,6 +98,14 @@ struct MCPPane: View {
                     get: { door.snapshot.openBook },
                     set: { door.setOpenBook($0) }))
                 quiet(MCPPaneCopy.openBookDetail)
+            }
+            Section(MCPPaneCopy.activitySection) {
+                if door.snapshot.activity.isEmpty {
+                    quiet(MCPPaneCopy.noActivity)
+                } else {
+                    ForEach(door.snapshot.activity) { line in MCPActivityRowView(line: line) }
+                    allRoad(door.snapshot.activityCount, shown: door.snapshot.activity.map(\.count).reduce(0, +), .activity)
+                }
             }
             Section(MCPPaneCopy.connectSection) {
                 Text(MCPPaneCopy.connectSentence)
@@ -283,6 +292,26 @@ struct MCPSharedRowView: View {
     }
 }
 
+/// One line of ACTIVITY (U3): what a client did, and when.
+struct MCPActivityRowView: View {
+    let line: MCPActivityFace.Line
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Text(MCPPaneCopy.activityLine(line))
+                .font(.callout)
+                .foregroundStyle(line.allowed ? .primary : .secondary)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
+            Text(MCPPane.relative(line.at))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+    }
+}
+
 /// THE "ALL N ›" ROAD (R-13n-10): a whole list in its own scrollable sheet.
 struct MCPFullListSheet: View {
     let door: MCPDoor
@@ -293,12 +322,14 @@ struct MCPFullListSheet: View {
     @State private var requests: [MCPClient] = []
     @State private var clients: [MCPDoor.ClientRow] = []
     @State private var shared: [MCPSharedRow] = []
+    @State private var activity: [MCPActivityFace.Line] = []
 
     private var title: String {
         switch list {
         case .requests: MCPPaneCopy.requestsSection
         case .clients: MCPPaneCopy.clientsSection
         case .shared: MCPPaneCopy.sharedSection
+        case .activity: MCPPaneCopy.activitySection
         }
     }
 
@@ -342,6 +373,8 @@ struct MCPFullListSheet: View {
                             door.revoke(grantID: row.grant.id)
                         }
                     }
+                case .activity:
+                    ForEach(activity) { line in MCPActivityRowView(line: line) }
                 }
             }
             .frame(minHeight: 280)
@@ -364,6 +397,7 @@ struct MCPFullListSheet: View {
         case .requests: requests = await door.allPending()
         case .clients: clients = await door.allClients()
         case .shared: shared = await door.allShared()
+        case .activity: activity = await door.allActivity()
         }
     }
 }

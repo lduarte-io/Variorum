@@ -4,8 +4,8 @@
 //
 //  13n-b U1 — THE GRANT SHEET, born with the read rung only (A-9; mockup §3).
 //  Three questions, each a sentence: WHERE (a book · a wing), HOW MUCH (U2:
-//  read · suggest · write new, each with the mockup's sentence — edit arrives
-//  with U3, and a rung the server can't serve isn't offered, P-2), HOW LONG
+//  read · suggest · write new; U3: edit — each with the mockup's sentence;
+//  a rung the server couldn't serve was never offered, P-2), HOW LONG
 //  (once · while connected · always). Its confirm says the whole grant in
 //  words ("Grant suggest in “the lightning thief” while connected").
 //  Opened by Approve… (a connection request — approve and first grant in one
@@ -116,7 +116,6 @@ struct MCPGrantSheet: View {
             .pickerStyle(.radioGroup)
             .labelsHidden()
             quiet(MCPPaneCopy.rungDetail(rung))
-            quiet(MCPPaneCopy.laterRungsNote)
 
             section(MCPPaneCopy.howLongSection)
             Picker(MCPPaneCopy.howLongSection, selection: $duration) {

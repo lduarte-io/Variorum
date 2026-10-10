@@ -55,6 +55,10 @@ final class MCPDoor {
         var clientCount = 0
         var shared: [MCPSharedRow] = []
         var sharedCount = 0
+        /// U3 — the ACTIVITY face: the newest coalesced lines and the log's
+        /// whole row count (the "all N ›" road's N).
+        var activity: [MCPActivityFace.Line] = []
+        var activityCount = 0
     }
 
     /// How many rows each list shows before its "all N ›" road (R-13n-10 —
@@ -62,6 +66,11 @@ final class MCPDoor {
     nonisolated static let pendingCap = 3
     nonisolated static let clientCap = 5
     nonisolated static let sharedCap = 5
+    /// U3 (R-13n-10, PROVISIONAL with U1's caps): the activity list shows
+    /// its newest 5 lines, coalesced from the newest 50 rows; the "all N ›"
+    /// road holds the whole log (capped at 500 rows by the store).
+    nonisolated static let activityCap = 5
+    nonisolated static let activityWindow = 50
 
     private(set) var snapshot = Snapshot()
     private(set) var connected: Set<String> = []
@@ -410,6 +419,11 @@ final class MCPDoor {
         await read { try Queries.mcpSharedRows($0) } ?? []
     }
 
+    /// U3: the whole log (≤ the store's 500-row cap), coalesced.
+    func allActivity() async -> [MCPActivityFace.Line] {
+        await read { MCPActivityFace.lines(try Queries.mcpActivity($0)) } ?? []
+    }
+
     nonisolated struct Choices: Sendable {
         var books: [Queries.MCPGrantableBook] = []
         /// Home first (`''`), then every live wing, with its name.
@@ -443,7 +457,10 @@ final class MCPDoor {
             },
             clientCount: try Queries.mcpClientCount(db, states: [.approved, .denied]),
             shared: try Queries.mcpSharedRows(db, limit: sharedCap),
-            sharedCount: try Queries.mcpSharedCount(db))
+            sharedCount: try Queries.mcpSharedCount(db),
+            activity: Array(MCPActivityFace.lines(try Queries.mcpActivity(db, limit: activityWindow))
+                .prefix(activityCap)),
+            activityCount: try Queries.mcpActivityCount(db))
     }
 
     nonisolated static func liveGrantCount(_ db: Database, clientID: String) throws -> Int {

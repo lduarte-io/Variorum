@@ -2213,6 +2213,14 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: PrivateMarkCopy.bookSheetNote,
             availability: always),
+        // 13n-b U3 — "Allow AI here" (R-13n-11; AF-8/AF-10 (e)): the Private
+        // row's neighbour, the same post scope and note-only availability.
+        Capability(
+            id: .mcpAllowHere, verb: PrivateMarkCopy.allowHere, scope: .post,
+            doors: [.bottomBar],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: PrivateMarkCopy.allowHereNoNote,
+            availability: noteScoped),
     ]
 
     // MARK: - Lookup

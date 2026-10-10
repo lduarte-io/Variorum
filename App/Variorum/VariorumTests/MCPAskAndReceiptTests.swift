@@ -163,7 +163,12 @@ struct MCPAskAndReceiptTests {
     // MARK: - The grant sheet's rungs (mockup §3)
 
     @Test func theGrantSheetOffersTheServedRungsWithTheMockupsSentences() {
-        #expect(MCPPaneCopy.offeredRungs == [.read, .suggest, .writeNew], "edit is U3's — never offered before it serves")
+        // U3 (justified edit, the ritual): the server serves edit now, so the
+        // sheet offers it (U2's pin: "never offered before it serves").
+        #expect(MCPPaneCopy.offeredRungs == [.read, .suggest, .writeNew, .edit])
+        #expect(MCPPaneCopy.rungDetail(.edit)
+                == "it can also edit takes — with a commit before and after every change, so you can always compare and come back",
+                "mockup §3's edit sentence")
         #expect(MCPPaneCopy.rungDetail(.suggest)
                 == "it can add new takes and comments beside your text, and save a lens of its takes — it cannot touch a word you wrote")
         #expect(MCPPaneCopy.rungDetail(.writeNew) == "it can also make new notes, apply tags and build books")

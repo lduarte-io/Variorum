@@ -100,6 +100,57 @@ nonisolated enum MCPPaneCopy {
     static let openBookTitle = "Everything is readable, always"
     static let openBookDetail = "journals still ask every time"
 
+    // MARK: - Activity (13n-b U3 — the coarse log's face; R-13n-10's caps)
+
+    static let activitySection = "Activity"
+    static let noActivity = "Nothing yet \u{2014} every call a client makes is listed here."
+
+    /// One line of the ACTIVITY list (the mockup §2's "claude code added 3
+    /// takes to “…”"): who, what, where — the MCP room's register, direct;
+    /// a refused call says so with the tool's own name.
+    static func activityLine(_ line: MCPActivityFace.Line) -> String {
+        let target = line.targetTitle.map { "\u{201C}\($0)\u{201D}" }
+        guard line.allowed else {
+            let on = target.map { " on \($0)" } ?? ""
+            let times = line.count > 1 ? " (\(line.count) times)" : ""
+            return "\(line.clientName) was refused \(line.act)\(on)\(times)"
+        }
+        return "\(line.clientName) \(activityPhrase(line.act, count: line.count, target: target, kind: line.targetKind))"
+    }
+
+    private static func activityPhrase(_ act: String, count n: Int, target: String?, kind: String?) -> String {
+        let at = target ?? "a note"
+        let times = n > 1 ? " (\(n) times)" : ""
+        switch act {
+        case "list_books": return "listed books" + times
+        case "list_notes":
+            switch kind {
+            case "book": return "listed a book\u{2019}s notes" + times
+            case "wing": return "listed a wing\u{2019}s notes" + times
+            default: return "listed its shared notes" + times
+            }
+        case "read_note": return "read \(at)" + times
+        case "export_note": return "exported \(at)" + times
+        case "search": return "searched" + times
+        case "add_take": return n == 1 ? "added a take to \(at)" : "added \(n) takes to \(at)"
+        case "add_comment": return n == 1 ? "commented in \(at)" : "left \(n) comments in \(at)"
+        case "save_lens": return "saved a lens on \(at)" + times
+        case "create_note": return "made the note \(at)" + times
+        case "import_document": return "imported \(at)" + times
+        case "apply_tag": return "tagged \(at)" + times
+        case "create_book": return "made the book \(at)" + times
+        case "add_note_to_book": return "added \(at) to a book" + times
+        case "create_section": return "added a chapter to \(at)" + times
+        case "edit_take": return n == 1 ? "edited \(at)" : "made \(n) edits in \(at)"
+        case "divide_block": return "divided a block in \(at)" + times
+        case "merge_blocks": return "merged blocks in \(at)" + times
+        case "move_block": return "moved a block in \(at)" + times
+        case "delete_block": return "deleted a block in \(at)" + times
+        case "set_block_name": return "named a block in \(at)" + times
+        default: return "used \(act)" + times
+        }
+    }
+
     // MARK: - Connect a client (R-13nb-5 — "Copy setup command")
 
     static let connectSection = "Connect a client"
@@ -155,9 +206,9 @@ nonisolated enum MCPPaneCopy {
     }
     static let noBooks = "No book can be shared yet (journals are shared one ask at a time)."
     /// HOW MUCH — the rungs the server can serve, each with the mockup §3
-    /// sentence (U2: read · suggest · write new; edit arrives with U3 — a
-    /// rung the server can't serve isn't offered, P-2).
-    static let offeredRungs: [MCPGrantRule.Rung] = [.read, .suggest, .writeNew]
+    /// sentence (U2: read · suggest · write new; U3: edit, now that the
+    /// server serves it — a rung it couldn't serve was never offered, P-2).
+    static let offeredRungs: [MCPGrantRule.Rung] = [.read, .suggest, .writeNew, .edit]
 
     static func rungName(_ rung: MCPGrantRule.Rung) -> String {
         switch rung {
@@ -184,8 +235,6 @@ nonisolated enum MCPPaneCopy {
 
     static let readRung = "Read"
     static let readRungDetail = rungDetail(.read)
-    /// U2: edit is the one rung still to come (U3).
-    static let laterRungsNote = "Edit arrives in a later update."
     static let cancel = "Cancel"
     static let whileConnectedNote = "While connected is offered while this client is connected."
 
@@ -319,5 +368,45 @@ nonisolated enum MCPReceiptCopy {
     private static func joined(_ parts: [String]) -> String {
         guard parts.count > 1 else { return parts.first ?? "" }
         return parts.dropLast().joined(separator: ", ") + " and " + (parts.last ?? "")
+    }
+}
+
+
+/// **THE ACTIVITY FACE's coalescing** (13n-b U3 — R-13n-10: the list stays
+/// legible at length): consecutive log rows by one client, of one act, on one
+/// target, with one outcome, read as ONE line with a count — the mockup's
+/// "added 3 takes to …". Pure: the rows in, newest first; the lines out.
+nonisolated enum MCPActivityFace {
+    struct Line: Equatable, Identifiable, Sendable {
+        /// The newest row's id (stable while the run grows older).
+        let id: Int64
+        let clientName: String
+        let act: String
+        let targetKind: String?
+        let targetID: String?
+        let targetTitle: String?
+        let allowed: Bool
+        let count: Int
+        /// The newest row's stamp.
+        let at: String
+    }
+
+    static func lines(_ rows: [MCPActivityRow]) -> [Line] {
+        var lines: [Line] = []
+        for row in rows {
+            if let last = lines.last, last.clientName == row.clientName, last.act == row.act,
+               last.targetID == row.targetID, last.targetKind == row.targetKind, last.allowed == row.allowed {
+                lines[lines.count - 1] = Line(
+                    id: last.id, clientName: last.clientName, act: last.act, targetKind: last.targetKind,
+                    targetID: last.targetID, targetTitle: last.targetTitle ?? row.targetTitle,
+                    allowed: last.allowed, count: last.count + 1, at: last.at)
+            } else {
+                lines.append(Line(
+                    id: row.id, clientName: row.clientName, act: row.act, targetKind: row.targetKind,
+                    targetID: row.targetID, targetTitle: row.targetTitle, allowed: row.allowed,
+                    count: 1, at: row.at))
+            }
+        }
+        return lines
     }
 }

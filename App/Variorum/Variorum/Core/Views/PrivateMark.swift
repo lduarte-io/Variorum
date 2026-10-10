@@ -17,8 +17,15 @@
 //
 //  The note ▾ menu's line "Shared with AI: …" is the note's face of the
 //  grants that reach it (P-13n-3's word) — read through the same pure rule
-//  the server consults (`Queries.mcpNoteSharing`). Its revoke and the "Allow
-//  AI here…" door are U3's (AF-8).
+//  the server consults (`Queries.mcpNoteSharing`).
+//
+//  13n-b U3 — "ALLOW AI HERE" (R-13n-11's connected push gesture; AF-8 made
+//  it U3's; AF-10 (e) its shape): a submenu of the APPROVED clients that do
+//  not already reach this note; each item shares THIS note, read, ONCE — the
+//  quick path (the full grant sheet stays the pane's). A fenced note is
+//  included (a once note grant is per-ask-legal — R-13n-11's letter). No
+//  client to offer ⇒ the row is not rendered (P-2), and the submenu carries
+//  no ellipsis (the choice the ellipsis promised IS the submenu — HIG).
 //
 
 import GRDB
@@ -54,6 +61,12 @@ nonisolated enum PrivateMarkCopy {
 
     static let markedNote = "Marked Private \u{2014} no AI client can read this note."
     static let clearedNote = "No longer Private."
+
+    /// U3 — "Allow AI here" (the mockup §7's row, its ellipsis dropped for a
+    /// submenu — AF-10 (e)), and what it says once it lands.
+    static let allowHere = "Allow AI here"
+    static let allowHereNoNote = "Allow AI here shares the note you have open \u{2014} open one first."
+    static func allowedOnce(_ client: String) -> String { "\(client) may read this note once." }
     static func markedBook(_ name: String) -> String {
         "\u{201C}\(name)\u{201D} is Private \u{2014} no AI client can read its notes."
     }
@@ -88,13 +101,25 @@ nonisolated struct NotePrivacyState: Equatable, Sendable {
     let throughBooks: [String]
     /// Approved clients reaching it now.
     let sharing: [MCPNoteSharing]
+    /// U3: every APPROVED client, by name — "Allow AI here" offers those
+    /// not already reaching the note.
+    var approvedClients: [String] = []
+
+    /// The clients "Allow AI here" can offer: approved, and not already
+    /// reaching this note (a grant that changes nothing is a door that
+    /// cannot act — P-2).
+    var allowable: [String] {
+        let reaching = Set(sharing.map(\.clientName))
+        return approvedClients.filter { !reaching.contains($0) }
+    }
 
     static func read(_ db: Database, postID: String) throws -> NotePrivacyState {
         NotePrivacyState(
             postID: postID,
             own: try Queries.isNotePrivate(db, postID: postID),
             throughBooks: try Queries.privateBooksHolding(db, postID: postID),
-            sharing: try Queries.mcpNoteSharing(db, noteID: postID))
+            sharing: try Queries.mcpNoteSharing(db, noteID: postID),
+            approvedClients: try Queries.mcpClients(db, states: [.approved]).map(\.name))
     }
 
     /// Only a state loaded for THIS note draws (the wing doors' subject rule).
@@ -113,6 +138,28 @@ enum NotePrivacyAct {
             if wrote { session.status.receipt(on ? PrivateMarkCopy.markedNote : PrivateMarkCopy.clearedNote) }
         } catch {
             session.status.refuse(OpsRefusalCopy.message(for: error))
+        }
+    }
+}
+
+/// U3 — "Allow AI here": one read · once grant on THIS note for the named
+/// approved client, through the grants store's ordinary op (its refusals
+/// spoken on the one status seam — a client denied since, a note gone).
+@MainActor
+enum NoteAllowAct {
+    static func allow(_ clientName: String, postID: String, session: AppSession) async {
+        do {
+            let database = session.database
+            try await session.runner.run { ops in
+                guard let client = try database.read({ try Queries.mcpClient($0, name: clientName) }) else {
+                    throw OperationError.mcpClientNotFound(id: clientName)
+                }
+                _ = try ops.grantMCPAccess(
+                    client.id, .init(rung: .read, scopeKind: .note, scopeID: postID, duration: .once))
+            }
+            session.status.receipt(PrivateMarkCopy.allowedOnce(clientName))
+        } catch {
+            session.status.refuse(MCPPaneCopy.refusal(error))
         }
     }
 }
@@ -139,6 +186,17 @@ struct NotePrivacyMenuItems: View {
             }
             if let shared = PrivateMarkCopy.sharedLine(state.sharing) {
                 Text(shared)
+            }
+            if !state.allowable.isEmpty {
+                Menu(CapabilityRegistry.capability(.mcpAllowHere).verb) {
+                    ForEach(state.allowable, id: \.self) { name in
+                        Button(name) {
+                            let session = session
+                            let postID = postID
+                            Task { await NoteAllowAct.allow(name, postID: postID, session: session) }
+                        }
+                    }
+                }
             }
         }
     }

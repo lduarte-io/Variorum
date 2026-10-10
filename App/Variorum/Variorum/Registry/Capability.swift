@@ -910,4 +910,10 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// sheet's State section (`.surface`). Gatherings and scraps never render
     /// it (the operations refuse them — P-2).
     case markNotePrivate, markBookPrivate
+    /// 13n-b U3 — "ALLOW AI HERE" (R-13n-11's connected push gesture; AF-8,
+    /// AF-10 (e)): the note ▾ menu's submenu of approved clients, each
+    /// sharing THIS note read · once. Rendered beside the Private row in both
+    /// bars (`.bottomBar`), NOTE contexts only, and only when a client is
+    /// there to offer (P-2).
+    case mcpAllowHere
 }

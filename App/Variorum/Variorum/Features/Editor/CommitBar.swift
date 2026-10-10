@@ -156,6 +156,8 @@ struct CommitBar: View {
             .copyForAI,
             // 13n-b U2 (R-13nb-4): the Private row, beside it (NOTE contexts).
             .markNotePrivate,
+            // 13n-b U3: "Allow AI here", the Private row's neighbour.
+            .mcpAllowHere,
             // 18c batch 3 (her U-6): the note ▾ row and the block ▾ row.
             .splitEveryNewlineIntoBlocks, .splitBlockAtNewlines,
             // 13u4 UNIT C2 (her item 9, R-13u4-4): the `block ▾` row,

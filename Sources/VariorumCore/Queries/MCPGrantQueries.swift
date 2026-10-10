@@ -55,6 +55,22 @@ public struct MCPActivityRow: Equatable, Sendable, Identifiable {
     public let targetTitle: String?
     public let allowed: Bool
     public let at: String
+
+    /// 13n-b U3: public so the activity face's coalescing is testable from
+    /// the app's suites.
+    public init(
+        id: Int64, clientName: String, act: String, targetKind: String?, targetID: String?,
+        targetTitle: String?, allowed: Bool, at: String
+    ) {
+        self.id = id
+        self.clientName = clientName
+        self.act = act
+        self.targetKind = targetKind
+        self.targetID = targetID
+        self.targetTitle = targetTitle
+        self.allowed = allowed
+        self.at = at
+    }
 }
 
 /// One live grant as the SHARED WITH AI list shows it.

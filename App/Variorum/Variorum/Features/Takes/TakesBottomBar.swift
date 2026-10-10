@@ -77,6 +77,8 @@ struct TakesBottomBar: View {
             .copyForAI,
             // 13n-b U2 (R-13nb-4): the Private row, beside it.
             .markNotePrivate,
+            // 13n-b U3: "Allow AI here", the Private row's neighbour.
+            .mcpAllowHere,
             // 18c batch 3 (her U-6): Write's bar's two rows, here too.
             .splitEveryNewlineIntoBlocks, .splitBlockAtNewlines,
         ]
