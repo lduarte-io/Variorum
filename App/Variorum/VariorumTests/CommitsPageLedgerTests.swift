@@ -131,6 +131,105 @@ struct CommitsPageLedgerTests {
         }
     }
 
+    // MARK: - Precisions 1–2 — what the row SAYS (the Mac-local face)
+
+    private static let now = Self.date(2026, 10, 10, 9, 0)
+
+    private static func date(_ y: Int, _ m: Int, _ d: Int, _ h: Int, _ min: Int) -> Date {
+        Calendar.current.date(from: DateComponents(
+            year: y, month: m, day: d, hour: h, minute: min))!
+    }
+
+    private static func commit(
+        _ text: String = "The kettle again.", kind: CommitKind = .manual,
+        message: String? = nil, at when: Date = date(2026, 10, 9, 22, 48)
+    ) -> CommitPoint {
+        CommitPoint(
+            id: UUID().uuidString, variantId: "v1", text: text, kind: kind,
+            message: message, createdAt: when)
+    }
+
+    /// "saved by hand" goes (deliberate is the default and earns no words);
+    /// "quiet" stays on automatic commits; "predates a split" stays (it is
+    /// Restore's warning); the year shows only when it is not this year.
+    @Test func theDetailsLineSaysOnlyWhatTellsCommitsApart() {
+        let deliberate = CommitRowFace.details(Self.commit(), predatesSplit: false, now: Self.now)
+        #expect(deliberate.count == 1, "a deliberate commit's line is its stamp alone: \(deliberate)")
+        #expect(!deliberate.joined().contains("saved by hand"))
+        #expect(!deliberate.joined().contains("2026"), "no year in this year: \(deliberate)")
+        #expect(deliberate[0].contains("Oct") && deliberate[0].contains("9"),
+                "…but the month, the day and the time: \(deliberate)")
+
+        let quiet = CommitRowFace.details(
+            Self.commit(kind: .auto), predatesSplit: false, now: Self.now)
+        #expect(quiet.last == "quiet", "an automatic commit keeps its word: \(quiet)")
+
+        let old = CommitRowFace.details(
+            Self.commit(), predatesSplit: true, now: Self.now)
+        #expect(old.last == BlockHistoryCopy.predatesSplitMark, "Restore's warning stays: \(old)")
+
+        let lastYear = CommitRowFace.details(
+            Self.commit(at: Self.date(2025, 12, 30, 8, 5)), predatesSplit: false, now: Self.now)
+        #expect(lastYear[0].contains("2025"), "another year names itself: \(lastYear)")
+        // The phone's face is untouched (precision 7): it still says it.
+        #expect(SavepointRowFace.details(Self.commit(), predatesSplit: false)
+            .contains("saved by hand"))
+    }
+
+    /// ONE line of the first non-blank paragraph, and no ellipsis of the
+    /// face's own — the "…had.…" artifact (a two-line cut at a newline, an
+    /// ellipsis after the period) cannot be produced.
+    @Test func thePreviewIsTheFirstParagraphAndNeverADotEllipsis() {
+        let twoParagraphs = "The keeper climbed the stairs at dusk, counting them as he always had."
+            + "\nBelow, the sea rearranged itself around the rocks, patient and loud."
+        let preview = CommitRowFace.preview(twoParagraphs)
+        #expect(preview == "The keeper climbed the stairs at dusk, counting them as he always had.")
+        #expect(!preview.hasSuffix(".\u{2026}") && !preview.contains("\n"))
+        #expect(CommitRowFace.preview("\n  \nSecond line leads.") == "Second line leads.")
+        #expect(CommitRowFace.preview("") == BlockPastCopy.emptyTake)
+        let long = CommitRowFace.preview(String(repeating: "word. ", count: 80))
+        #expect(long.count <= CommitRowFace.previewCap && !long.hasSuffix("\u{2026}"))
+    }
+
+    // MARK: - Precisions 1 + 3 — the row's anatomy and height
+
+    private static func rowHeight(
+        _ commit: CommitPoint, tokens: VoiceTokens, width: CGFloat = 396
+    ) -> CGFloat {
+        let host = NSHostingController(rootView: CommitRowView(
+            commit: commit, tokens: tokens, predatesSplit: false, now: Self.now,
+            renameOpensField: true, renameAsk: .constant(nil),
+            onName: {}, onRename: { _ in }, onRestore: {}))
+        return host.sizeThatFits(in: NSSize(width: width, height: 10_000)).height
+    }
+
+    /// The two acts are quiet voiced WORDS, and the row is compact at the
+    /// column's default width (420 − the pane's 24 pt of padding) in both
+    /// voices: before the ledger a commit row measured ≈ 90 pt (the
+    /// before-captures — seven commits in an 820-pt pane).
+    @Test func theRowIsCompactAndItsActsAreWords() {
+        for tokens in [VoiceTokens.studyLight, .terminalLight] {
+            let named = Self.commit(
+                "The keeper climbed the stairs at dusk, unhurried, a hand on the cold rail.",
+                message: "before the AI edit")
+            let row = CommitRowView(
+                commit: named, tokens: tokens, predatesSplit: false, now: Self.now,
+                renameOpensField: true, renameAsk: .constant(nil),
+                onName: {}, onRename: { _ in }, onRestore: {})
+            #expect(Self.values(VoicedButtonStyle.self, in: row.body).count == 2,
+                    "Name/Rename and Restore are voiced words")
+            let namedHeight = Self.rowHeight(named, tokens: tokens)
+            let bare = Self.rowHeight(Self.commit(
+                "The keeper climbed the stairs at dusk, unhurried, a hand on the cold rail."),
+                tokens: tokens)
+            print("[VX-144] row heights: named \(namedHeight) · bare \(bare)")
+            // Measured on the Air at the build: 68 / 49 pt in BOTH voices; the
+            // bounds leave 4 pt of OS line-height drift and nothing more.
+            #expect(namedHeight <= 72, "a named commit is three short lines: \(namedHeight)")
+            #expect(bare <= 52, "an unnamed commit is two: \(bare)")
+        }
+    }
+
     // MARK: - Harness
 
     private struct Seeded {
