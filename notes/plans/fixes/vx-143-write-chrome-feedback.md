@@ -56,7 +56,7 @@ Batch 1 implementer (Opus, 2026-10-10, on the Air) — **BATCH 1 CLOSED by the i
 
 Batch 2 implementer (Opus, 2026-10-10, on the Air) — **IN PROGRESS.** No behavioural revert is in flight; tree clean at each commit.
 
-- VX-150: IN-PROGRESS — trace written (§ Batch 2 traces); pin `WriteTakesPanelKeysTests` committed and RED on the pre-fix tree (`vx143-b2-red`: the four bug tests red — step, ⌘⇧A, the three mints, ⌘T-without-a-ring; Write's stand-in saw every key; the characterization test and VX-135's pin green). Next: the fix in `WriteTakesPanel.handleRouted`, green, then the behavioural revert.
+- VX-150: FIX LANDED — `WriteTakesPanel.handleRouted` claims ⌃⌘←/→, ⌘⇧A, ⌘T, ⌥⌘T and ⇧⌥⌘T on the panel's block (the Takes board's arms, the panel's column); ⌘⇧T/⎋/⌘⇧L still reach Write. Pin `WriteTakesPanelKeysTests` (5) GREEN with its neighbours (`vx143-b2-green`: 51 tests / 6 suites — + `WriteTakesPanelChooseTests`, `WriteTakesPanelTests`, `CommandRouterTests`, `TakeCardDoorTests`, `CapabilityRegistryTests`; no skips). The first red run (`vx143-b2-red`) used a fixture whose fan order was wrong (a branch lands right after its source — fixed in the pin, now asserted against the store), so the red-on-old of record is the behavioural revert, NEXT (the handler back to its VX-135 shape = the pre-fix file).
 - VX-144: NOT-STARTED — capture FIRST (a disabled-by-default harness in the test host, base64 through the log, PNGs into `App/Variorum/DerivedData/vx143-screens/`), the "VX-144 — captures & proposal" section, then STOP for the architect's ruling. No cleanup is designed or built before the ruling.
 
 ## Batch 1 traces (implementer, 2026-10-10 — the mechanism per member, before any code)

@@ -187,7 +187,8 @@ struct WriteTakesPanel: View {
         // panel is up it answers ⌘⏎ itself. Write's own handler stands
         // beneath this sheet, and its `.choose` arm OPENS the caret block's
         // panel — already open — so the take whose pane is live here was never
-        // chosen. Registered on appear, the panel is the LIFO top; every other
+        // chosen. Registered on appear, the panel is the LIFO top. VX-150: the
+        // other take keys are claimed too (`handleRouted`); every other
         // command falls through to Write unchanged.
         .onAppear {
             commandToken = session.commandRouter.registerHandler { handleRouted($0) }
@@ -208,15 +209,63 @@ struct WriteTakesPanel: View {
         }
     }
 
-    /// The panel's routed-command handler (VX-135): ⌘⏎ chooses the take the
+    /// The panel's routed-command handler. VX-135: ⌘⏎ chooses the take the
     /// ring is in — `TakesViewModel.chooseFocusedTake`, the Takes board's own
     /// arm, so the operations layer sets the pointer and, with no take
-    /// clicked into, its real refusal speaks in the panel (P-2). Nothing else
-    /// is claimed: the caret family keeps acting on Write's caret block, as
-    /// before.
+    /// clicked into, its real refusal speaks in the panel (P-2).
+    ///
+    /// VX-150: the REST of the take keys are the panel's too, on THIS block.
+    /// Falling through, they reached Write's caret arms beneath the sheet —
+    /// stepping re-opened (or, from a ⑂ badge, swapped in) the caret block's
+    /// panel, the mints grew the caret block from the take Write shows there,
+    /// and ⌘⇧A archived that shown take rather than the one the ring is in.
+    /// Each arm is the Takes board's own body, passed this panel's column so
+    /// the ring lands on a card the panel renders. ⌘⇧T, ⎋ and ⌘⇧L are not
+    /// take acts on a block and still reach Write.
     private func handleRouted(_ command: RoutedCommand) -> Bool {
-        guard case .takes(.choose) = command else { return false }
-        Task { await model.chooseFocusedTake() }
+        guard case .takes(let takes) = command else { return false }
+        switch takes {
+        case .choose:
+            Task { await model.chooseFocusedTake() }
+        case .stepPrev:
+            Task { await model.stepTakes(by: -1) }
+        case .stepNext:
+            Task { await model.stepTakes(by: 1) }
+        case .archive:
+            Task { await model.archiveFocusedTake() }
+        // ⌘T · ⌥⌘T · ⇧⌥⌘T — the growth doors' acts on this block, the ring
+        // following onto the new card. A block that has left the note shows
+        // no doors, so its keys say why rather than grow it.
+        case .branch:
+            guard let slot else { return refuseBlockGone() }
+            // The take the ring is in, else what the block shows (PROVISIONAL
+            // — the Takes bar's "+ take" rule; the dashed door below, which
+            // names ⌘T, copies what's shown).
+            let ring = model.focusedPane.flatMap { $0.blockID == blockID ? $0.variantID : nil }
+            guard let from = ring ?? slot.variantID else {
+                model.refuse("This block has no renderable take to branch from.")
+                return true
+            }
+            Task {
+                await model.branchTakeRevealed(
+                    blockID: blockID, from: from, preferredColumnID: column.id)
+            }
+        case .blank:
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.newBlankTakeRevealed(blockID: blockID, preferredColumnID: column.id) }
+        case .blankChoose:
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.newBlankTakeAsChosen(blockID: blockID, preferredColumnID: column.id) }
+        case .toggleFan, .closeAll, .saveLens:
+            return false
+        }
+        return true
+    }
+
+    /// The panel's own "no longer in the note" line, as a key's refusal (the
+    /// key was the panel's — consumed, never handed down to Write's caret).
+    private func refuseBlockGone() -> Bool {
+        model.refuse("This block is no longer in the note.")
         return true
     }
 

@@ -46,7 +46,8 @@ struct WriteTakesPanelKeysTests {
         let caretBlockID: String
         /// The fanned block the panel shows (opened from its ⑂ badge).
         let panelBlockID: String
-        /// The panel block's takes in fan order; the first is chosen.
+        /// The panel block's takes in fan order (asserted against the store);
+        /// the first is chosen.
         let takeIDs: [String]
     }
 
@@ -85,10 +86,17 @@ struct WriteTakesPanelKeysTests {
         return found
     }
 
-    /// The take whose pane is live in the panel — the ring.
+    /// The take whose pane is live in the panel — the ring (nil unless
+    /// exactly one pane is live).
     private func ringTake(in view: NSView) -> String? {
-        panelPanes(in: view).first(where: \.isEditable)?
-            .identifier?.rawValue.replacingOccurrences(of: "pane:panel|", with: "")
+        let live = livePanes(in: view)
+        return live.count == 1 ? live[0] : nil
+    }
+
+    private func livePanes(in view: NSView) -> [String] {
+        panelPanes(in: view).filter(\.isEditable).compactMap {
+            $0.identifier?.rawValue.replacingOccurrences(of: "pane:panel|", with: "")
+        }
     }
 
     private func takes(_ db: AppDatabase, blockID: String) async throws -> [TakeRow] {
@@ -155,7 +163,9 @@ struct WriteTakesPanelKeysTests {
             let fanned = try ops.newBlock(in: post.id, text: "the shown take")
             let second = try ops.branchVariant(fanned.block.id, from: fanned.variant.id)
             try ops.autosave(second.id, text: "the second take", charDelta: 4)
-            let third = try ops.branchVariant(fanned.block.id, from: fanned.variant.id)
+            // A branch lands right AFTER its source in the fan, so the third
+            // branches from the second to keep the fan in this order.
+            let third = try ops.branchVariant(fanned.block.id, from: second.id)
             try ops.autosave(third.id, text: "the third take", charDelta: 4)
             let fixture = Fixture(
                 session: session, db: db, postID: post.id,
@@ -189,6 +199,8 @@ struct WriteTakesPanelKeysTests {
             window.makeKeyAndOrderFront(nil)
             await settle(window, hosting, until: { panelPanes(in: hosting).count >= 3 })
             #expect(panelPanes(in: hosting).count == 3, "the panel shows the fanned block's three takes")
+            #expect(try await takes(db, blockID: fanned.block.id).map(\.id) == fixture.takeIDs,
+                    "the fixture's fan order is the store's")
 
             try await body(fixture, window, hosting, writeSaw)
         }
@@ -221,7 +233,7 @@ struct WriteTakesPanelKeysTests {
             press(.stepNext, fixture)
             await settle(window, hosting, until: { ringTake(in: hosting) == fixture.takeIDs[1] })
             #expect(ringTake(in: hosting) == fixture.takeIDs[1],
-                    "⌃⌘→ moved the ring to the panel's second take")
+                    "⌃⌘→ moved the ring to the panel's second take (live: \(livePanes(in: hosting)))")
 
             press(.stepNext, fixture)
             await settle(window, hosting, until: { ringTake(in: hosting) == fixture.takeIDs[2] })
@@ -289,7 +301,7 @@ struct WriteTakesPanelKeysTests {
                 return rows.count == 5
             }
             #expect(rows.count == 5, "⌥⌘T grew the panel's block by a blank take (\(rows.count))")
-            let blank = rows.last
+            let blank = rows.first { !fixture.takeIDs.contains($0.id) && $0.id != branched?.id }
             #expect(blank?.text == "", "⌥⌘T's take is blank")
             await settle(window, hosting, until: { ringTake(in: hosting) == blank?.id })
             #expect(ringTake(in: hosting) == blank?.id, "the ring followed onto the blank take")
@@ -303,8 +315,11 @@ struct WriteTakesPanelKeysTests {
                 return rows.count == 6
             }
             #expect(rows.count == 6, "⇧⌥⌘T grew the panel's block (\(rows.count))")
+            let powerTake = rows.first {
+                !fixture.takeIDs.contains($0.id) && $0.id != branched?.id && $0.id != blank?.id
+            }
             let chosenNow = try await chosenVariant(fixture.db, blockID: fixture.panelBlockID)
-            #expect(chosenNow == rows.last?.id && rows.last?.text == "",
+            #expect(powerTake != nil && chosenNow == powerTake?.id && powerTake?.text == "",
                     "⇧⌥⌘T's blank take is the chosen one")
 
             #expect(try await takes(fixture.db, blockID: fixture.caretBlockID).count == 1,
