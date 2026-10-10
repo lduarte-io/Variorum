@@ -45,7 +45,7 @@ Evidence: pins per member + the orchestrator's hands-on walk on the Air (her gra
 
 ## LIVE STATUS
 
-Batch 1 implementer (Opus, 2026-10-10, on the Air). No behavioural revert is in flight. Every app-suite run re-checks `pgrep` first.
+Batch 1 implementer (Opus, 2026-10-10, on the Air). **BEHAVIOURAL REVERTS IN FLIGHT** over the committed tree `96be236e` (uncommitted edits in `WriteTakesPanel.swift`, `StoreLaunchGate.swift`, `RootView.swift`, `ReadingFlowView.swift`, `TakesBoardLayout.swift`, `TakesBoardView.swift` ARE the reverts — restore with `git checkout -- <file>`; never commit them). Every app-suite run re-checks `pgrep` first.
 
 - VX-135: FIX LANDED — pin `WriteTakesPanelChooseTests` RED on the pre-fix tree (run `vx143-red1`: chosen stayed take 1, Write's handler consumed ⌘⏎) and GREEN after (`vx143-green1`); behavioural-revert verification PENDING.
 - VX-140: FIX LANDED (tripwire NOT hit — `StoreLockView` + `StoreLobby` only; `KeychainCustody`, `StoreKeyGuard`, the vault and the relock policy untouched) — `LobbyAutoAskTests.aLobbyMountedInTheBackgroundDoesNotAsk` RED on the pre-fix tree (`vx143-red1`: asked 1× while inactive) and GREEN after; the four new-API arms green; behavioural-revert verification PENDING.
