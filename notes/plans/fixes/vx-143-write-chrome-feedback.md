@@ -182,3 +182,18 @@ Spot-checked, never trusted: the nine commits exist and are pushed (`7c26a583`�
 **The implementer's found-not-fixed items, all ticketed:** VX-150 (take-panel sibling keys act on Write's caret block — JOINS THE RUN, batch 2, same class as VX-135) · VX-151 (StatusSeamVocabularyTests red on main at `DocumentImporter.swift:306/310` — 13n-a residue; BookCollectingDoors' red is already VX-115) · VX-152 (AppBootstrap.lock() reentrancy — custody proper, Fable work, NOT this run) · VX-153 (finished book's box flash on open — pre-existing, Backlog).
 
 Batch 2 members: **VX-144** (the commits page cleanup, screenshot-first) + **VX-150**. Then the fable ladder over the whole diff.
+
+## ARCHITECT RULING — VX-144 direction (orchestrator, overnight)
+
+**Direction A — the quiet ledger — is ruled in** (most spec-defensible: keeps every existing ruling on the pane; B's open-row would narrow her rename-beside-each-commit ruling and C reshapes her sectioning ruling — both go to the handoff as alternatives, not built). Precisions on A, binding for the build:
+
+1. **Row anatomy:** the NAME leads where set, in readable text ink (not the current 11.5 pt whisper); ONE-line first-paragraph preview in muted small type UNDER it (the hierarchy flips — identity loud, prose quiet); compact date line. The ".…" truncation artifact dies with the one-line preview — assert it.
+2. **Date line:** drop "saved by hand" everywhere (deliberate is the default state; it earns no words). KEEP the "quiet" marker on auto commits (kind='auto' is visually muted by spec) and KEEP "predates a split" (it is a restore warning, load-bearing). No year when it is the current year.
+3. **Doors:** Rename/Name and Restore become quiet clickable words (VoiceControls: "chrome is quiet text, never bezels") — everywhere in the pane, the lower sections included.
+4. **Dividers:** hairline between rows, token-sourced.
+5. **Explanations:** NO tooltip (a hover-hidden defining sentence is exactly the hint class she just had removed in VX-142). Instead: the SECTION sentences stay — "Each take's saved moments — Restore loads one back into its buffer" is a commit-DEFINING sentence and says "saved moments" per 13s-b's P-U4-1, it must survive verbatim — and the pane-level blurb ("Everything this block has been…") is dropped on this pane, PROVISIONAL (P-VX144-2).
+6. **The quiet-run row** ("N quiet commits · show") moves onto the voice's tokens.
+7. **Scope fence:** Mac-only; `Shared/SavepointRowFace` and the phone face UNTOUCHED (the parity line will carry it); the word **commit** everywhere a label was (13s-b's vocabulary fence must stay green).
+8. **Pins:** the quiet-run token pin red-on-old; row-anatomy/height pins; the defining-sentence survival pin; the fence suite re-run. Then re-shoot the same ten captures as AFTER.
+
+**VX-150's PROVISIONAL (a) stands as built** (⌘T copies the ring's take, else the shown take — the bottom bar's precedent); logged for her bundle (P-VX150-1).
