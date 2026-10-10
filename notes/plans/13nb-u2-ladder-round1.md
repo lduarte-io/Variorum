@@ -135,9 +135,46 @@ did for notes. **Fix:** extend P-13nb-U1-13's recorded text to books (one line);
 
 ## Implementer responses / dispositions (round 1)
 
-*(To be filled by the cross-model flow: findings go to the implementer verbatim; its agree/dispute
-returns to this reviewer, which makes the final call and implements its confirmed fixes itself —
-F1's fix is Sync/ work and the reviewer's own hands either way, per AF-4.)*
+**FINAL DISPOSITIONS (the reviewer's calls on the implementer's responses — fable-reviewer,
+2026-10-09, the fix pass its own; 5/5 AGREE received at `30f9a07e`, zero disputes; the AF-7
+AMENDMENT `d24e77b6` reruled F4 before dispositions. Every bug-class fix carries a red-on-old pin
+verified BEFORE the fix landed, one commit per fix, pushed; suites green after the pass.)**
+
+| # | Severity | Response | FINAL disposition |
+|---|---|---|---|
+| F1 | MAJOR | AGREE (+ the keeper refinement) | **FIXED (`15933ab4`)** — one engagement/edited leg per classifier, `archived_at`'s exact precedent: `guideVerdict` + `noteVerdict` + the gathering candidates read (pure defense — the ops refuse the mark there; a carrying row is a doubt, and doubt keeps both) in `SeededFurnitureDedupe`, and the book-shape + per-note reads in `SampleLibraryDedupe` — where the mark counts as EDITED, so the MARKED copy is the KEEPER (the implementer's refinement accepted: the right copy, not just both-survive). Four pins RED-ON-OLD verified before the fix (8 issues on the unfixed classifiers — `fenceStands` failing proved the mark itself died; the sample arm kept the WRONG copy): `herPrivateMarkKeepsBothCopiesOnEveryGrain` · `aMarkedGatheringRowKeepsBothAsDefense` · `herPrivateMarkOnTheBookIsEngagementAndTheMarkedCopyIsTheKeeper` · `herPrivateMarkOnAMemberNoteProtectsTheCopyToo`. All fold suites green after (63/6). Sync/ lines the reviewer's own (AF-4); landed BEFORE the deploy window. |
+| F2 | MINOR (arch) | AGREE — record for U2, guard U3 | **RECORDED as P-13nb-U2-8's SYNC TWIN** (the plan's provisional gains the paragraph: the decide/act split is raced only by the sync apply transaction; one in-flight additive call; the very next call refuses) **+ the U3 guard line on ledger row 5**: `edit_take`'s op takes an injected `(Database) throws -> Void` guard run FIRST inside its own write transaction, re-deciding through `MCPGrantRule` on facts read there (`expectedText` is already this precondition class) — the edit rung never inherits the gap; retrofitting the eight U2 ops is optional at the same touch. |
+| F3 | NIT | AGREE — record-only, trace sharpened | **RECORDED** — with the implementer's sharpening adopted: the success log sits inside `land`'s `do`, so a log throw after a landed act ALSO falls into the generic catch, which re-logs the landed act as `allowed: false` — the activity line actively lies, on top of the client's retry-duplicate hazard. Same store-death race; no honest deterministic pin without a fault-injecting stub (the ladder's own rule). The named road if ever closed: the success log out of the `do` as `try?`, refusal logs keeping `try`. |
+| F4 | NIT → fix (reruled by `d24e77b6`) | AGREE — small fix owed under the amendment | **FIXED (`d60c3ad6`)** — `spends` now reads `once ∧ consumes ∧ (grant.rung == .read ? rung == .read : rung >= .suggest)`: a once WRITE grant is spent by its FIRST WRITE of ANY rung it authorizes; reads ride free, writes never do ("one write means one write"). `decideWing`/`noteIntoBook` share `spends` and follow. Pins red-on-old verified before the fix: the flipped explicit pin, the sweep's invariant 3 restated to the amended biconditional (both directions — red across shapes on the old line), and the new e2e `aOnceWriteNewGrantIsSpentByItsFirstWriteOfAnyRung` (read rides free → `add_take` lands and spends → `create_note` refuses). The once-SUGGEST e2e pin unaffected. P-13nb-U1-2's amended form in the plan carries the second-amendment wording for her ratification at the merge. |
+| F5 | NIT | AGREE | **RECORDED** — P-13nb-U1-13's paragraph in the U1 round-1 record EXTENDED to fenced books (dated, marked as the U2 ladder's F5): one record for both shapes in the merge QUESTIONS bundle; no code change. |
+
+**O1 (the implementer's adjacent observation at F1 — the reviewer's call): RECORD-ONLY, AS
+DESIGNED, my own trace.** The OWNED-exclusivity repair (SyncSpec §7, 13i-a R2) tombstones a later
+plain-side membership beside a standing owned claim; when that membership was in a PRIVATE book, the
+note's book-route fence drops with it (its own mark untouched by any repair). Judged correct: the
+tombstoned membership is one the ownership rules FORBADE — the repair converges to what the doors
+would have done knowing the truth (the door would have refused the add: no membership, no fence),
+and a fence kept alive by a dead membership would be a ghost no surface could explain. The boundary,
+stated: **the book-route fence is exactly as durable as the live membership that carries it; the
+note's OWN mark is the durable primitive, and no repair touches it.** If she ever wants a belt, the
+shape is a new ruled behavior (stamp the note's own mark when a repair severs its private-book
+membership) — hers to ask for, never improvised here. No QUESTIONS entry owed (a composition of two
+ruled behaviors, not undefined product behavior).
+
+**Fix-pass verification (2026-10-09, headless — no stage needed; zero Mac-app files touched in the
+pass):** whole package `swift test` green — core **2,538/291** (the pre-pass 2,534 + the four F1
+pins), **VariorumMCPTests 33/4** (32 + the AF-7 e2e pin), workbook **40/6**; only the long-standing
+gated skips. Fix commits `15933ab4` (F1) · `d60c3ad6` (F4) + this records commit, each pushed.
+
+**For round 2, look first at:** (1) F1's legs — each classifier reads `ai_private_at` in the SAME
+SELECT its checks consume (five sites: the gathering candidates, `guideVerdict`, `noteVerdict`, the
+sample book-shape read, the sample per-note read), and the pool grain genuinely needs no leg (pools
+are unmarkable in v1 — the design addendum's restraint); (2) F4's shared `spends` — its three
+consumers (`decide`, `decideWing`, `noteIntoBook`'s two-sided spend) under the amended rule, and
+whether any surviving pin or comment still encodes the OLD "at its own rung" reading; (3) the F1
+pins' fixtures — the marked copy carries NO other engagement, so the pins really isolate the mark;
+(4) the record edits — P-13nb-U2-8's sync twin, P-13nb-U1-2's second-amendment wording,
+P-13nb-U1-13's books extension, ledger row 5's edit_take guard line.
 
 ## Clean bill (load-bearing things specifically checked and found solid)
 

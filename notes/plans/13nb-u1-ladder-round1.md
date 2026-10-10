@@ -138,6 +138,13 @@ construction: listings and search never emit fenced ids, and note text cannot ca
 are a prior per-ask grant on that very note or an id obtained outside Variorum. If she ever wants the
 one-answer doctrine extended to fenced notes, the pin is: read_note on a never-granted journal id answers
 with the not-shared words (red on today's build).
+*(EXTENDED at the U2 ladder round 1, F5 — fable-reviewer, 2026-10-09: the same class now covers FENCED
+BOOKS. U2's book-specific fence words — "That book is a journal. …" / "That book is marked Private —
+never shared with AI." — let a client holding a book UUID from a pre-mark listing tell "live fenced
+book" from "deleted/unshared" ever after. Same exposure analysis: listings drop a fenced book on the
+very next call (pinned — `markingPrivateFencesTheVeryNextCallOfAConnectedClient`), a fenced book never
+raises an ask, and the distinct words carry the ask-the-author road. Kept as built; this paragraph is
+the one record for both shapes in the merge QUESTIONS bundle.)*
 
 **Fix-pass verification (2026-10-09, headless — no stage needed; zero Mac-app files touched in the
 pass):** whole package `swift test` green — core **2,511/287** (the pre-pass baseline held),

@@ -767,7 +767,7 @@ unit record (TCC state is machine-state the next session inherits).
 | 2 | U1 probes (a)(b)(c) → architect rulings on the socket home + the setup press | orchestrator | CLOSED — AF-1…AF-4 + R-13nb-5/6 (her batch) |
 | 3 | U1 ladder (fable-reviewer) | orchestrator | **CLOSED at round 2** — R1 0B/0M/4m/3n, 7/7 AGREE, 5 FIXED by the reviewer (pins revert-verified twice), 2 RECORDED; sanity pass PASS (O1/O2 record-only); R2 CLEAN BILL (0/0/0/2n record-only). Records: `13nb-u1-ladder-round{1,2}.md` |
 | 4 | U2 — suggest + write new + the grant sheet's rungs + the just-in-time ask + the Private faces (R-13nb-4) | U2 implementer | BRIEFED — spawning (the brief below) |
-| 5 | U3 — edit + polish + her live round (+ `with_commits` R-13nb-7, `include_commits` on search R-13nb-10, the set-name tool R-13nb-8, the Allow-AI-here row AF-8) | — | NOT STARTED |
+| 5 | U3 — edit + polish + her live round (+ `with_commits` R-13nb-7, `include_commits` on search R-13nb-10, the set-name tool R-13nb-8, the Allow-AI-here row AF-8; **edit_take carries an in-transaction fence/scope re-check** — the U2 ladder F2's guard, P-13nb-U2-8's sync-twin record) | — | NOT STARTED |
 | 6 | A-4's honest-boundary line → the closeout author checklist (now incl. the grants-ride-copies note under R-13nb-6) | orchestrator | OPEN — standing |
 | 7 | P-13nb-1 (journal predicate) — RATIFIED as R-13nb-1; QUESTIONS entry at merge records the ratification | orchestrator | CLOSED as provisional |
 | 8 | THE PRIVATE MARK (R-13nb-4): v1_25 schema commit + Sync/ classifications + mirror artifact 16 — at the U1/U2 seam, Fable's hands | orchestrator | **DONE** (`304b41d1` — marker 13 client-side; headless whole-package green) |
@@ -1492,6 +1492,20 @@ fixed out of scope).** Session: opus-implementer, 2026-10-09, cut from
   leaves the once grant unspent (one more write possible); the content
   reads keep U1's one-transaction stamp. Inside the serial body nothing
   else can interleave, and a spend never flips a landed act's answer.
+  **ITS SYNC TWIN (the U2 ladder's F2, recorded as the disposition):** a
+  write tool's DECIDE (a read snapshot) and its ACT (the op's own write)
+  are serialized against her gestures and every pane act by the session
+  runner — but NOT against the sync engine's apply transaction, so a
+  synced Private mark, placement move or tombstone landing between the
+  two can let ONE in-flight suggest/write-new act land past a
+  just-closed fence or scope. Bounded: additive writes only (the PROOF
+  class), labeled, undoable; one in-flight call; the very next call
+  refuses. Accepted for U2; **U3's edit rung must NOT inherit the gap**
+  — `edit_take` overwrites text, so its op takes an injected
+  `(Database) throws -> Void` guard run FIRST inside its own write
+  transaction, re-deciding through `MCPGrantRule` on facts read there
+  (`expectedText` is already this precondition class); retrofitting the
+  eight U2 ops with the same seam is optional at the same touch.
 - **P-13nb-U2-9 — the ask queue's shape** (AF-6 marks it PROVISIONAL):
   in memory, deduped per client · target · rung, cap 8 (the oldest waiting
   ask forgotten — never the one on screen); the sheet ARRIVES on the main
