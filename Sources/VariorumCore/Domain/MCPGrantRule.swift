@@ -296,18 +296,34 @@ public enum MCPGrantRule {
     /// Among several sufficient grants, the one that should authorize: a
     /// standing grant before a once grant (so a once grant is never spent
     /// when something else already covers the call), always before while
-    /// connected, then the smaller id (deterministic).
+    /// connected — then, AMONG EQUALS, the LEAST capability that suffices
+    /// (AF-9, the U2 ladder's O2): the lowest rung first, the narrowest
+    /// scope second (note < book < wing), the smaller id last as pure
+    /// determinism. F4's amendment made WHICH once grant a write consumes
+    /// matter; an id coin-flip could spend a once-write-new grant on a
+    /// suggest-level write while a once-suggest grant sat unspent.
     static func best(_ grants: [Grant]) -> Grant? {
-        func weight(_ duration: Duration) -> Int {
+        func durationWeight(_ duration: Duration) -> Int {
             switch duration {
             case .always: 2
             case .connection: 1
             case .once: 0
             }
         }
-        return grants.max { lhs, rhs in
-            let l = weight(lhs.duration), r = weight(rhs.duration)
-            return l == r ? lhs.id > rhs.id : l < r
+        func scopeWeight(_ kind: ScopeKind) -> Int {
+            switch kind {
+            case .note: 0
+            case .book: 1
+            case .wing: 2
+            }
+        }
+        return grants.min { lhs, rhs in
+            let ld = durationWeight(lhs.duration), rd = durationWeight(rhs.duration)
+            if ld != rd { return ld > rd }
+            if lhs.rung != rhs.rung { return lhs.rung < rhs.rung }
+            let ls = scopeWeight(lhs.scopeKind), rs = scopeWeight(rhs.scopeKind)
+            if ls != rs { return ls < rs }
+            return lhs.id < rhs.id
         }
     }
 }

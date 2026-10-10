@@ -380,3 +380,86 @@ struct MCPGrantRuleTests {
         }
     }
 }
+
+// 13n-b U2 ladder, the sanity pass's O2 → AF-9 (the plan's sitting record):
+// among sufficient grants of EQUAL duration class, the call spends the LEAST
+// capability that suffices — the lowest rung first, then the narrowest scope
+// (note < book < wing), then the smaller id as pure determinism. Before this,
+// a duration tie fell to smallest-id alone, so WHICH once grant a write
+// consumed was arbitrary: a once-write-new grant could be spent by a
+// suggest-level write while a once-suggest grant sat unspent.
+@Suite("13n-b U2 — AF-9: the least sufficient capability is spent")
+struct MCPGrantSpendChoiceTests {
+    @Test func aSuggestWriteSpendsTheOnceSuggestGrantNeverTheOnceWriteNewOne() {
+        // The id order is the trap: 'a-writenew' sorts BEFORE 'b-suggest', so
+        // the pre-AF-9 smallest-id tiebreak picked the write-new grant. Red
+        // on the old comparator by construction.
+        let grants = [
+            grant("a-writenew", .writeNew, .book, "book-A", .once),
+            grant("b-suggest", .suggest, .note, "note-1", .once),
+        ]
+        let d = Rule.decide(client: .approved, grants: grants, openBook: false,
+                            target: .note(plainNote), rung: .suggest, consumes: true)
+        guard case .allow(let grantID, let consumesOnce) = d else {
+            Issue.record("expected allow, got \(d)"); return
+        }
+        #expect(grantID == "b-suggest", "the lower sufficient rung is spent")
+        #expect(consumesOnce)
+
+        // Swapped ids: the answer must not move with the UUIDs.
+        let swapped = [
+            grant("a-suggest", .suggest, .note, "note-1", .once),
+            grant("b-writenew", .writeNew, .book, "book-A", .once),
+        ]
+        let d2 = Rule.decide(client: .approved, grants: swapped, openBook: false,
+                             target: .note(plainNote), rung: .suggest, consumes: true)
+        guard case .allow(let grantID2, _) = d2 else {
+            Issue.record("expected allow, got \(d2)"); return
+        }
+        #expect(grantID2 == "a-suggest")
+    }
+
+    @Test func equalRungsSpendTheNarrowerScopeThenTheSmallerID() {
+        // Same rung, different scopes: the note-scoped grant is consumed, the
+        // wing-wide one survives — whatever the id order says.
+        let grants = [
+            grant("a-wing", .suggest, .wing, "", .once),
+            grant("b-note", .suggest, .note, "note-1", .once),
+        ]
+        let d = Rule.decide(client: .approved, grants: grants, openBook: false,
+                            target: .note(plainNote), rung: .suggest, consumes: true)
+        guard case .allow(let grantID, _) = d else {
+            Issue.record("expected allow, got \(d)"); return
+        }
+        #expect(grantID == "b-note", "the narrower scope is spent")
+
+        // Full tie (rung and scope): the smaller id, pure determinism.
+        let tied = [
+            grant("g2", .suggest, .note, "note-1", .once),
+            grant("g1", .suggest, .note, "note-1", .once),
+        ]
+        let d2 = Rule.decide(client: .approved, grants: tied, openBook: false,
+                             target: .note(plainNote), rung: .suggest, consumes: true)
+        guard case .allow(let grantID2, _) = d2 else {
+            Issue.record("expected allow, got \(d2)"); return
+        }
+        #expect(grantID2 == "g1")
+    }
+
+    @Test func aStandingGrantStillOutranksEveryOnceGrantWhateverTheRungs() {
+        // Duration primacy untouched: a wide standing grant covers the call
+        // and no once grant is spent — the U1 pin's letter, re-asserted here
+        // beside the new comparator so the two rules are read together.
+        let grants = [
+            grant("a-once-suggest", .suggest, .note, "note-1", .once),
+            grant("b-standing-wing", .writeNew, .wing, "", .always),
+        ]
+        let d = Rule.decide(client: .approved, grants: grants, openBook: false,
+                            target: .note(plainNote), rung: .suggest, consumes: true)
+        guard case .allow(let grantID, let consumesOnce) = d else {
+            Issue.record("expected allow, got \(d)"); return
+        }
+        #expect(grantID == "b-standing-wing")
+        #expect(!consumesOnce)
+    }
+}
