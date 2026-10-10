@@ -2138,10 +2138,22 @@ orchestrator before the format work and came back RULED whole as AF-10
 - **P-13nb-U3-11 — the commit carriage's field names and units:**
   `with_commits` gives each commit `commit_id · kind · message · created_at ·
   length · text | text_omitted`; the 100k budget counts Swift Characters and
-  fills GREEDILY newest-first (a commit too large for what remains is
-  omitted while a later, smaller one may still ride); `include_commits`'
-  savepoint passages carry `commit_id` + `saved_at` beside the block address.
-  (AF-10 (d) ruled the shape; the names are mine.)
+  fills newest-first, STOPPING at the first commit too large for what
+  remains — every older text is omitted with it, so the carried texts are
+  always a contiguous newest-first prefix, and the omitted ones are fetched
+  by `commit_ids` *(CORRECTED at the U3 ladder round 1, F1 — the record
+  first said "fills GREEDILY … a later, smaller one may still ride", which
+  the code never did and the pin contradicts (`MCPReadCarriageTests`'
+  "older ones wait too"); the built prefix rule is the better contract and
+  matches the catalog's own sentence, so the record moved to the code, both
+  AGREE)*; `include_commits`' savepoint passages carry `commit_id` +
+  `saved_at` beside the block address. (AF-10 (d) ruled the shape; the names
+  are mine.) *(F3 note, same ladder round, record-only: the one SQL fetches
+  every commit's text though only the budget's worth rides — bounded by the
+  note's own history, P1 holds; any future two-pass fetch must keep the
+  Characters unit deliberately — SQLite `length()` counts code points, and
+  the `length` field on OMITTED commits is what forces the full fetch
+  today.)*
 - **P-13nb-U3-12 — the activity face's caps:** the newest 5 coalesced lines
   over the newest 50 rows; "all N ›" — N is the log's ROW count (≤ the
   store's 500-row cap), the sheet coalesced the same way; a refused call
@@ -2189,6 +2201,17 @@ orchestrator before the format work and came back RULED whole as AF-10
   fanless), relabeled by `registeringUndo(as:)` — `withCompound` over the
   act's own registration, never a second inverse. The fanned divide's
   `measured` guard re-checks the shown take's text in-transaction.
+  **AMENDED at the U3 ladder round 1 (F2, the reviewer's fix `a87fc8ec`):**
+  the guards now re-verify the WHOLE composition inside the act's
+  transaction — divide: the fan's ids AND texts (a parked cut is positional)
+  plus the shown take still rendered; merge: both fans' membership and both
+  shown takes, on both roads — so a sync apply landing between the outside
+  fan read and the act (the only interleaver; the serial body) refuses as
+  `bufferChangedSinceGesture` instead of mid-splitting a bystander take at
+  its stale parked cut, cutting the wrong rendered take on the single-take
+  path, or silently stranding an arrived take on a plain merge. Pinned
+  red-on-old through the guardian seam
+  (`aCompositionStaleAtTheActRefusesInsteadOfMisShaping`).
 - **The "after" commit is stamped +1 ms** so `(created_at, id)` always reads
   before → after in Block History.
 - **An AI edit churns like any text edit** (AF-10 (g)): `churnCost` is the
