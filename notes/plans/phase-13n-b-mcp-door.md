@@ -842,8 +842,9 @@ unit record (TCC state is machine-state the next session inherits).
 | 10 | 13x adoption lands MCP OFF (R-13nb-6) — the one toggle-OFF write on the adoption road | U2 (or U1 if the road is open) | OPEN |
 | 11 | Re-verify probe (a) per macOS point release — line joins the closeout ritual note | orchestrator | OPEN — standing |
 | 12 | THE FORMAT-SCHEMA SITTING (R-13nb-13; prep `phase-13nb-format-schema-sitting-prep.md`) | HER | **RAN 2026-10-09/10** — all seven ruled (R-13nb-26 a–g) |
-| 13 | U3 — the edit-rung spine (brief below) | U3 implementer | **UNIT CLOSED** (`146cb7ba` — R0–R9, nine mutation checks, two red-on-old self-review fixes, P-13nb-U3-1…17); live round MET; ladder round 1 next |
-| 14 | U4 — the carriage + book rules + navigation (brief at U3's close) | — | SHAPED by R-13nb-26 e/f/g |
+| 13 | U3 — the edit-rung spine (brief below) | U3 implementer | **CLOSED WHOLE** — built (`146cb7ba`), live round MET (`127c7726`), ladder closed CLEAN at round 2 (R1 0B/0M/2m/2n → 4/4 AGREE → F1 record-fixed + F2 FIXED by the reviewer `a87fc8ec` with the three-leg red-on-old pin + F3 RECORDED + F4 copy-fixed `ff1da3f7` → sanity PASS → R2 clean bill 0/0/0/1n record-only; records `13nb-u3-ladder-round{1,2}.md`); VX-132 born (the harness hang, sample-traced) |
+| 14 | U4 — the carriage + book rules + navigation (brief below) | U4 implementer | BRIEFED — spawning |
+| 15 | U3 round-1's transient core-suite issue (1 unidentified failure, once, not reproduced) | orchestrator | OPEN — watch at the closeout whole-target run |
 
 ---
 
@@ -2396,3 +2397,150 @@ edit + its "after claude-code's edit" commit; the divide fully undone.
 Round captures: the scratchpad's `u3-liveround/cap-01…13` + client
 transcripts `out-s1…s4` (ephemeral; this section is the record). Next:
 ladder round 1 (`fable-reviewer`, the cross-model flow).
+
+## THE U4 IMPLEMENTER BRIEF (self-contained; the spawn names this section)
+
+You are the U4 implementer for Variorum phase 13n-b, working in
+`~/dev/variorum-vx-124` on branch `vx-124-13n-b` (NEVER the main
+checkout). Commits say `Part of VX-124`, no attribution trailer, push
+after every commit. `notes/SessionResiliencyProtocol.md` binds you: LIVE
+STATUS in the "U4 UNIT RECORD" section below from your first commit,
+foreground waits only, at most ONE read-only Sonnet for external facts.
+Baseline (U3's ladder close, `205ab828`): core 2,564/294 ·
+VariorumMCPTests 45/6 · workbook 40/6, headless. Known and ticketed, not
+yours: VX-132 — VariorumMCPTests can hang intermittently (the SDK
+client's connect loop spins if a response never arrives, ~1-in-7 worst
+case); a run stalled far past ~2 s for that target is killed, noted and
+rerun, never chased.
+
+**Read first (never delegated):** this plan file TOP TO BOTTOM — the
+SITTING RECORD R-13nb-1…26 (your unit's rulings: R-13nb-14 the keyboard
+bar, R-13nb-17 narrow-where-it-counts, R-13nb-18 write-new's reach,
+R-13nb-23 NAVIGATION, R-13nb-26 b/d/e/f/g) and the fork rulings
+AF-1…AF-10; the memo `phase-13nb-memo-wire-document.md`; the prep
+`phase-13nb-format-schema-sitting-prep.md` (§2 the inventory, §6b
+navigation); ALL SIX ladder records (`13nb-u{1,2,3}-ladder-round{1,2}.md`
+— U3's round 1 carries F2's composition-guard class your unit must not
+reintroduce); the U1/U2/U3 unit records and live rounds. Code:
+`Domain/MCPGrantRule.swift`, `MCPWriteTools.swift` +
+`MCPWriteTools+Edit.swift` + `Operations+MCPWrites.swift` +
+`Operations+MCPEdits.swift` (the land shape, the guard seam, the
+composition guards), `MCPNoteStructure.swift` (the structured view),
+`MCPReadTools.swift`, `MCPToolCatalog.swift`, the Versions op family
+(`saveNoteVersion` — `notes/plans/post-13l-polish-round.md` is its
+record), the tray reads (`Queries` deleted-blocks/takes families,
+`restoreBlock`), the lens queries (`lens`/`lens_choice`), the 13o
+landing machinery (`LandingTarget`, the search-passage landing road),
+`Features/MCP/` (pane, registry).
+
+**What U4 builds — the carriage + book rules + navigation (R-13nb-26
+e/f/g, R-13nb-23):**
+
+1. **THE TRAY on the wire (R-13nb-14's named IN):** read a note's tray
+   (deleted blocks and takes, the app's 30-day-clock family) behind an
+   explicit call shape; `put_back` on the EDIT rung (the prep §6's cut
+   as ratified) — thin projections of the app's own restore ops,
+   per-act client-named undo, the composition-guard discipline where a
+   restore rearranges existing text.
+2. **VERSIONS (R-13nb-18 + R-13nb-26 d):** `save_version` at WRITE NEW
+   (the `saveNoteVersion` family — a creative act touching no existing
+   text); versions LIST/READ behind explicit call shapes;
+   restore/promote NOT in v1 (ruled — a follow-on ticket at closeout).
+3. **LINEAGE + ANCESTRY (R-13nb-14's named IN):** read-only edge facts
+   (derived_from/version_of) and take-ancestry (parent tree) fields on
+   the structured view — explicit call shapes, never ambient on every
+   read (R-13nb-7's P1 posture).
+4. **ARCHIVED REACH (R-13nb-26 b carrying the inventory):** explicit
+   params mirroring the app's facet posture — archived takes on the
+   structured view, archived notes/books on list shapes. For SEARCH's
+   archived facet: R-13nb-10 left it UI-only and the sitting carried
+   the inventory row — build the list/read params as ruled, and treat
+   a search `include_archived` as PROVISIONAL (build it to match the
+   facet's letter, mark it, log it for the bundle) — it gates nothing.
+5. **LENSES LIST/READ (her pull-in, R-13nb-26 e):** list a note's
+   lenses, read one (name + the chosen takes per block) — read rung,
+   explicit shapes; `save_lens` already exists (U2).
+6. **`set_entry_date` (R-13nb-26 b):** EDIT rung, existing notes, the
+   op-level day-key validation already landed at `45f06ec9` (reuse it
+   — one boundary, one unit).
+7. **BOOK RULES READ + WRITE (R-13nb-26 f):** book info carries
+   rule/outflow/extents facts (readable books only — AF-10 (f)'s
+   letter); WRITE-NEW gains set-rule/set-outflow projections of
+   `setReadingRule`-family ops, validated by the app's OWN refusals
+   (gatherings/finished/sealed/wrong-kind refuse as hers do; the rule
+   grammar's own validation speaks). The ladder watches this power:
+   NO new validation paths, no bypass of any app refusal.
+8. **FILING AN EXISTING MEMBER INTO A CHAPTER — PROVISIONAL
+   (P-13nb-U3-8's U4 candidate):** project `assignPostToSection` at
+   WRITE NEW beside `create_section` (P-13nb-U3-7's class — it
+   reorganizes, creates nothing; curated books only, the app's own
+   refusals). The keyboard bar argues IN; her word was not taken —
+   build it, mark PROVISIONAL, log it in the record for the bundle.
+9. **NAVIGATION (R-13nb-23 + R-13nb-26 g — her etiquette is LAW):**
+   (a) **The OFFER door, the default:** write receipts grow a
+   one-press door ("… — Open ›") reachable from the KEYBOARD too (her
+   words: "which opening that needs a keyboard shortcut too") — the
+   receipt bar's door gets a chord, registry-declared, both voices.
+   (b) **`show_in_app(target)`, the move dial:** navigates the open
+   app — ONLY while Variorum is frontmost (not merely running — her
+   "moving should not be done while you aren't at the app"), NEVER
+   automatic (only a client's explicit call), never cross-app
+   activation, no window raising; when not frontmost the call refuses
+   honestly (or answers as an offer — your call, record it) rather
+   than queuing a surprise. (c) **Targets, v1 (her pick):**
+   note-at-block (the 13o landing road VERBATIM — block id + selected
+   range + the find bar armed + the comfort band; P-4: composition,
+   never decision-bearing broadcasts), lens, takes-board (her added
+   want — the note's Takes mode at a block), book/chapter. Compare
+   targets WAIT for VX-130 (not yours). Side pane NOT v1. (d) **The
+   ceiling rule:** every target is a state her own doors reach; the
+   caret/landing delivery is her one stated exception, already
+   human-reachable via the landing machinery.
+10. **Faces:** any new receipts/copy per P-13nb-U3-14's family (app
+    voice, sentence case, 13s-a-sweepable); the pane untouched unless
+    a new fact needs a face (record if so).
+
+**Must NOT touch:** `Sources/VariorumCore/Sync/` (ZERO lines — anything
+you think needs one comes to me), custody, the editor seam FILES
+(`EditorTextView`/`BlockRangeIndex`/`PaneSurface` — navigation RIDES the
+existing LandingTarget/landing road by composition; if a seam file
+itself must change, STOP and fork to me with `notes/TEXTKIT2_NOTES.md`
+read), `lockstepVersion`, migrations, the real store, `/Applications`,
+the mirror artifact. The export pin stands. The rung is the ONLY read
+dial (R-13nb-17): every new reach is an explicit CALL shape, uniform
+per rung, never per-client configuration.
+
+**Acceptance (use-shaped):** the carriage pinned end to end (tray
+read + put_back lands and undoes client-named; save_version mints the
+classifier shape and versions list/read speak it; lineage/ancestry
+fields exact; archived params honor the facet posture; lenses read;
+set_entry_date validated); book-rule writes land through the app's own
+refusals (a gathering/finished/sealed book refuses byte-exactly as her
+doors do — pinned); rung proofs updated as the ritual (read/suggest
+provably cannot reach the new write tools; the catalog walk current);
+navigation: `show_in_app` refuses when the app is not frontmost
+(pinned at the decision seam), lands at note-block/lens/takes-board/
+book-chapter through the existing road, and the offer door has its
+keyboard chord (registry walk green); headless suites green; your
+pre-flight walk on the dev-store Debug build (stage claim, both
+voices) covering: a tray Put back via wire walked back by ⌥⌘Z, a
+save_version visible in Note ▸ Versions, a book-rule write refused on
+a finished book IN THE APP'S WORDS, one show_in_app landing at a block
+with the app frontmost AND its refusal with the app backgrounded, the
+offer door pressed from the keyboard. The REAL-client live round (the
+W-series equivalent) runs with me after your close; HER Percy-grade
+round is the phase's finale.
+
+**Forks:** the in-batch rule as ever — propose before building any
+half beyond the recorded rulings; PROVISIONAL-and-log for non-gating
+ambiguity; STOP for anything gating. Watch items the ladder will hold
+you to (R-13nb-26 b's rider): a note newly added to a journal book is
+journal-fenced FROM THAT MOMENT (creation lands, then the fence
+governs — no window); the book-rule write power stays inside the app's
+refusals; the etiquette gates are RULINGS, not suggestions.
+
+---
+
+## U4 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
+
+*(seated for the U4 implementer — LIVE STATUS from the first commit)*
