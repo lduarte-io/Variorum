@@ -232,7 +232,8 @@ extension Operations {
     /// **`set_book_rule` — her rule editor's Save, projected** (AF-11 F-1).
     /// The SAME three writes her Save makes, in its order — the join dial,
     /// the outflow, then the rule through its one choke point (an intake
-    /// occasion: backfill on a rule-less book, catch-up on an edit) — and
+    /// occasion — but ALWAYS the belling `.catchUp` class on this road:
+    /// ladder round 1 F-1, P-13nb-U4-16; backfill's seat is hers alone) — and
     /// each only when it CHANGES what is stored (her Save's own tests:
     /// `seating != stored ?? .auto`, the outflow's encoded set,
     /// `RuleEditing.needsWrite`'s structural equality). Stricter than her
@@ -281,7 +282,20 @@ extension Operations {
             if case .some(let term) = write.rule {
                 let resolved = try term.map { try $0.mappingTags(resolve) }
                 if RuleEditing.needsWrite(draft: resolved, stored: reading.querySpec) {
-                    try writeReadingQuerySpec(db, readingID, querySpec: try RuleGrammar.encode(resolved))
+                    // Ladder round 1, F-1 (PROVISIONAL P-13nb-U4-16): an
+                    // AGENT-written rule's sweep always BELLS (`.catchUp`) —
+                    // never backfill-seats. A seat makes matching notes
+                    // MEMBERS, and a book grant reaches members (the
+                    // `reaches` rule), so the backfill arm would let a client
+                    // expand its OWN read reach to every unshared matching
+                    // note in the wing — and the honest member count would
+                    // answer how many notes wear any probed tag. Backfill's
+                    // warrant is "birth = intent", HERS; an agent's matches
+                    // wait at Arrivals, and her seat is the reach-expanding
+                    // act. Her own Save keeps backfill untouched.
+                    try writeReadingQuerySpec(
+                        db, readingID, querySpec: try RuleGrammar.encode(resolved),
+                        sweepOccasion: .catchUp)
                 }
             }
             let landed = try liveReading(db, readingID)

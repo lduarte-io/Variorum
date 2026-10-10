@@ -232,6 +232,12 @@ extension MCPWriteTools {
                 // matches wait for the reopen.
                 if !result.intakeRuns, result.after.querySpec != nil {
                     answer["intake_paused"] = MCPBookFacts.intakePausedWords
+                } else if result.before.querySpec != result.after.querySpec, result.after.querySpec != nil {
+                    // Ladder round 1, F-1 (P-13nb-U4-16): a rule written on
+                    // this road BELLS, never seats — said UNCONDITIONALLY
+                    // whenever a rule landed (a sentence said only when
+                    // something matched would be a match oracle).
+                    answer["matches_wait"] = MCPBookFacts.matchesWaitWords
                 }
                 return (answer, result.changed
                         ? MCPWriteReceipt(clientName: clientName, act: .bookRule, targetID: bookID, targetTitle: name,
@@ -297,4 +303,13 @@ extension MCPBookFacts {
     static let intakePausedWords =
         "Saved — this book isn't collecting right now (it's finished or archived), so new matches wait "
         + "until the author reopens it."
+
+    /// The answer's sentence whenever a rule LANDS on this road (ladder
+    /// round 1, F-1 — P-13nb-U4-16): an agent-written rule's existing matches
+    /// wait at Arrivals for the author; only her seat makes a member. Said
+    /// unconditionally on a landed rule write, never per-match. 13s-a
+    /// sweepable.
+    static let matchesWaitWords =
+        "Saved — notes that already match this rule wait at Arrivals for the author to let in; "
+        + "they aren't members (or readable here) until she does."
 }

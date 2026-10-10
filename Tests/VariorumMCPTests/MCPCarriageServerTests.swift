@@ -391,6 +391,49 @@ struct MCPCarriageServerTests {
         }
     }
 
+    /// Ladder round 1, F-1 (RED-ON-OLD): a client's OWN rule write must never
+    /// expand its reach. On the old code the rule write's backfill SEATED
+    /// every matching note as a MEMBER, a book grant reaches members, and the
+    /// previously-unshared note's full text then answered — and the honest
+    /// member count doubled as a how-many-notes-wear-this-tag oracle. The
+    /// bell override (P-13nb-U4-16): matches wait at Arrivals; only HER seat
+    /// expands reach.
+    @Test func aRuleWriteNeverExpandsTheClientsOwnReach() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let percy = try h.operations.createTag(name: "percy")
+            let hidden = try h.operations.createPost(title: "not shared")
+            _ = try h.operations.newBlock(in: hidden.id, text: "Private by silence.", registeringUndo: false)
+            _ = try h.operations.applyTag(percy.id, toPost: hidden.id)
+            let book = try h.operations.createReading(name: "mine", kind: .book)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.writeNew, .book, book.id))
+
+            #expect(try await call(connection, "read_note", ["note_id": .string(hidden.id)]).isError == true,
+                    "pre-state: the tagged note is beyond the grant")
+            let set = try json(try await call(connection, "set_book_rule", [
+                "book_id": .string(book.id), "rule": .object(["tag": .string("percy")]),
+            ]))
+            #expect(set["changed"] as? Bool == true)
+            #expect(set["matches_wait"] as? String == MCPBookFacts.matchesWaitWords,
+                    "the answer says where the matches went — unconditionally, never per-match")
+            let after = try await call(connection, "read_note", ["note_id": .string(hidden.id)])
+            #expect(after.isError == true && text(after).hasPrefix("That note isn't shared with this client"),
+                    "the rule write BELLED — the grant's reach is unmoved")
+            let status = try await h.database.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT status FROM reading_post WHERE reading_id = ? AND post_id = ?",
+                    arguments: [book.id, hidden.id])
+            }
+            #expect(status == "arrival", "the match waits at Arrivals for HER judgment")
+            let listed = try json(try await call(connection, "list_books", [:]))["books"] as? [[String: Any]]
+            #expect(listed?.first { $0["id"] as? String == book.id }?["notes"] as? Int == 0,
+                    "the member count stays still — no tag-probe oracle")
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - file_note_in_chapter (PROVISIONAL)
 
     @Test func filingAMemberIntoAChapterLandsAndAFinishedBookRefusesInTheOpsWords() async throws {

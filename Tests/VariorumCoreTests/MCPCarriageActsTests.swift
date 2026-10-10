@@ -274,7 +274,13 @@ struct MCPCarriageActsTests {
         }
     }
 
-    @Test func aBookRuleWriteKeepsTheSeatsItsIntakeMade() throws {
+    /// Ladder round 1, F-1 (P-13nb-U4-16 — JUSTIFIED EDIT: the old pin
+    /// asserted the MCP act's backfill SEAT; the act now always BELLS — a
+    /// seat makes matching notes members, a book grant reaches members, so
+    /// the old arm let a client expand its own reach; her Save's backfill is
+    /// untouched, pinned below). The rows the intake made STAY through undo
+    /// (§19: removing a rule never evicts; arrivals keep waiting).
+    @Test func anAgentRuleWritesIntakeBellsAndItsRowsStayThroughUndo() throws {
         try withUndo { ops, stack, db in
             let plain = Operations()
             let percy = try plain.createTag(name: "percy")
@@ -282,13 +288,24 @@ struct MCPCarriageActsTests {
             _ = try plain.applyTag(percy.id, toPost: note.id)
             let book = try plain.createReading(name: "b", kind: .book)
             _ = try ops.setBookRule(book.id, .init(rule: .some(.tag("percy"))), undoLabel: label(.bookRule))
-            let members = { try db.fetchInt(
-                "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL AND status = 'member'",
-                [book.id]) }
-            #expect(try members() == 1, "a rule set on a rule-less book backfills (her choke point's intake)")
+            func rows(_ status: String) throws -> Int {
+                try db.fetchInt(
+                    "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL AND status = ?",
+                    [book.id, status]) ?? 0
+            }
+            #expect(try rows("arrival") == 1, "an agent-written rule BELLS — matches wait at Arrivals")
+            #expect(try rows("member") == 0, "never a seat: a seat would expand the client's own book-grant reach")
             _ = try stack.undo(with: ops)
             #expect(try spec(db, book.id) == nil)
-            #expect(try members() == 1, "seats stay — removing a rule never evicts (§19)")
+            #expect(try rows("arrival") == 1, "the rows its intake made stay — an undo never evicts (§19)")
+
+            // Her own Save keeps BACKFILL: the same first-rule write through
+            // HER op seats (birth = intent — hers).
+            let hers = try plain.createReading(name: "her book", kind: .book)
+            try plain.setReadingQuerySpec(hers.id, querySpec: try RuleGrammar.encode(.tag(percy.id)))
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL AND status = 'member'",
+                [hers.id]) == 1, "her choke point's backfill is untouched")
         }
     }
 
