@@ -66,9 +66,16 @@ enum MCPNoteStructure {
     static let commitTextBudget = 100_000
     static let maxCommitIDs = 20
 
+    /// `versionOf` (ladder round 1, F-3): non-nil when `noteID` is a SAVED
+    /// VERSION being read on its live note's grant — the live note's id. The
+    /// lineage classification then treats the live note (and its released
+    /// originals, and its other saved moments) as the note's own family
+    /// instead of stubbing the very note whose grant authorized the call as
+    /// `beyond_grant`; the `books` answer stays the live-note read's alone.
     static func read(
         _ db: Database, noteID: String, calendar: Calendar,
-        standing: MCPGrantAuthority.Standing? = nil, options: Options = Options()
+        standing: MCPGrantAuthority.Standing? = nil, options: Options = Options(),
+        versionOf liveNoteID: String? = nil
     ) throws -> [String: Any] {
         let title = try Queries.mcpScopeTitle(db, kind: .note, id: noteID, calendar: calendar) ?? ""
         let placements = try Row.fetchAll(
@@ -96,13 +103,13 @@ enum MCPNoteStructure {
             takes[row["block_id"], default: []].append(row)
         }
         let lineage = options.withLineage
-            ? try Self.lineage(db, noteID: noteID, blockIDs: blockIDs, standing: standing)
+            ? try Self.lineage(db, noteID: noteID, blockIDs: blockIDs, standing: standing, versionOf: liveNoteID)
             : nil
         let parents = options.withLineage
             ? try Self.parents(
                 db, noteID: noteID,
                 parentIDs: takes.values.flatMap { $0.compactMap { $0["parent_variant_id"] as String? } },
-                standing: standing)
+                standing: standing, versionOf: liveNoteID)
             : [:]
         var comments: [String: [[String: Any]]] = [:]
         for row in try Row.fetchAll(
@@ -160,7 +167,7 @@ enum MCPNoteStructure {
             db, sql: "SELECT entry_date FROM container WHERE id = ?", arguments: [noteID]), !entryDate.isEmpty {
             answer["entry_date"] = entryDate
         }
-        if let standing {
+        if let standing, liveNoteID == nil {
             answer["books"] = try books(db, noteID: noteID, standing: standing)
         }
         if options.withTray { answer["tray"] = try tray(db, noteID: noteID, now: options.now) }
@@ -247,8 +254,14 @@ enum MCPNoteStructure {
     }
 
     /// Classifies far-side blocks for THIS client (`standing`), batched.
+    /// `liveNoteID` (ladder round 1, F-3) is non-nil on a VERSION read: the
+    /// live note whose grant authorized the call — its blocks address as a
+    /// readable note (never the stub), its other saved moments as versions,
+    /// and its released originals as the family's own (exactly what reading
+    /// the live note with `with_lineage` would disclose).
     private static func farSides(
-        _ db: Database, noteID: String, blockIDs: Set<String>, standing: MCPGrantAuthority.Standing?
+        _ db: Database, noteID: String, blockIDs: Set<String>, standing: MCPGrantAuthority.Standing?,
+        liveNoteID: String? = nil
     ) throws -> [String: FarSide] {
         guard !blockIDs.isEmpty else { return [:] }
         let json = String(decoding: try JSONEncoder().encode(blockIDs.sorted()), as: UTF8.self)
@@ -261,6 +274,9 @@ enum MCPNoteStructure {
                 LEFT JOIN variant dv ON dv.id = b.default_variant_id AND dv.deleted_at IS NULL
                 """,
             arguments: [json])
+        // The family whose versions count as "a saved moment of this note":
+        // the live note on a version read, this note otherwise.
+        let family = liveNoteID ?? noteID
         let homes = Set(rows.compactMap { $0["placed"] as String? }).subtracting([noteID])
         let facts = try Queries.mcpNoteFacts(db, noteIDs: homes.sorted())
         var sides: [String: FarSide] = [:]
@@ -269,7 +285,9 @@ enum MCPNoteStructure {
             if let placed: String = row["placed"] {
                 if placed == noteID {
                     sides[id] = .thisNote
-                } else if try Queries.isVersionHistory(db, placed, of: noteID) {
+                } else if placed == liveNoteID {
+                    sides[id] = .readableNote(placed)
+                } else if try Queries.isVersionHistory(db, placed, of: family) {
                     sides[id] = .version(placed)
                 } else if let standing, MCPGrantAuthority.decide(
                     standing, note: facts[placed], rung: .read, consumes: false).isAllowed {
@@ -277,7 +295,7 @@ enum MCPNoteStructure {
                 } else {
                     sides[id] = .beyondGrant
                 }
-            } else if (row["last_container_id"] as String?) == noteID {
+            } else if let last = row["last_container_id"] as String?, last == noteID || last == liveNoteID {
                 sides[id] = .releasedOriginal(text: row["text"])
             } else {
                 sides[id] = .beyondGrant
@@ -294,7 +312,8 @@ enum MCPNoteStructure {
     /// the ONE uniform stub. A dead far side is left out (the lineage walks'
     /// live-endpoint rule). ∝ the note's blocks' edges (both indexes).
     static func lineage(
-        _ db: Database, noteID: String, blockIDs: [String], standing: MCPGrantAuthority.Standing?
+        _ db: Database, noteID: String, blockIDs: [String], standing: MCPGrantAuthority.Standing?,
+        versionOf liveNoteID: String? = nil
     ) throws -> [String: [[String: Any]]] {
         guard !blockIDs.isEmpty else { return [:] }
         let json = String(decoding: try JSONEncoder().encode(blockIDs), as: UTF8.self)
@@ -317,7 +336,7 @@ enum MCPNoteStructure {
             far.insert(edge["source_block_id"])
             far.insert(edge["target_block_id"])
         }
-        let sides = try farSides(db, noteID: noteID, blockIDs: far, standing: standing)
+        let sides = try farSides(db, noteID: noteID, blockIDs: far, standing: standing, liveNoteID: liveNoteID)
         var lineage: [String: [[String: Any]]] = [:]
         for edge in edges {
             let source: String = edge["source_block_id"]
@@ -355,7 +374,8 @@ enum MCPNoteStructure {
     /// released from here, a version of this note's) or to a note the client
     /// can read (with that note's id), else the uniform stub's twin.
     static func parents(
-        _ db: Database, noteID: String, parentIDs: [String], standing: MCPGrantAuthority.Standing?
+        _ db: Database, noteID: String, parentIDs: [String], standing: MCPGrantAuthority.Standing?,
+        versionOf liveNoteID: String? = nil
     ) throws -> [String: [String: Any]] {
         guard !parentIDs.isEmpty else { return [:] }
         let json = String(decoding: try JSONEncoder().encode(Array(Set(parentIDs)).sorted()), as: UTF8.self)
@@ -364,7 +384,7 @@ enum MCPNoteStructure {
             sql: "SELECT v.id, v.block_id FROM json_each(?) j JOIN variant v ON v.id = j.value",
             arguments: [json])
         let sides = try farSides(db, noteID: noteID, blockIDs: Set(rows.map { $0["block_id"] as String }),
-                                 standing: standing)
+                                 standing: standing, liveNoteID: liveNoteID)
         var answer: [String: [String: Any]] = [:]
         for row in rows {
             let id: String = row["id"]

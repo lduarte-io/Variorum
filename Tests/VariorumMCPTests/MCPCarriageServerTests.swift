@@ -242,6 +242,34 @@ struct MCPCarriageServerTests {
         }
     }
 
+    /// Ladder round 1, F-3 (RED-ON-OLD): a version read's lineage addresses
+    /// the LIVE NOTE the grant covers — on the old code the version branch
+    /// passed no standing, so the very note whose grant authorized the call
+    /// wore the beyond-grant stub (false words, and the moment's most
+    /// interesting far side unreadable).
+    @Test func aVersionReadsLineageAddressesTheLiveNoteItIsAMomentOf() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let note = try h.operations.createPost(title: "doc")
+            let block = try h.operations.newBlock(in: note.id, text: "Edition one.", registeringUndo: false)
+            let version = try h.operations.saveNoteVersion(note.id)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.read, .note, note.id))
+
+            let shaped = try json(try await call(connection, "read_note", [
+                "note_id": .string(note.id), "version_id": .string(version.post.id), "with_lineage": .bool(true),
+            ]))
+            let lineage = try #require(blocks(shaped).first?["lineage"] as? [[String: Any]])
+            let toLive = try #require(lineage.first { $0["relation"] as? String == "version_of" })
+            #expect(toLive["note_id"] as? String == note.id && toLive["block_id"] as? String == block.block.id,
+                    "the live note is addressable from its own moment")
+            #expect(toLive["beyond_grant"] == nil, "never the stub for the note whose grant authorized the call")
+            #expect(shaped["books"] == nil, "a moment is membered nowhere — the books key stays the live read's")
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - Archived reach (the facet's posture) and lenses
 
     @Test func archivedReachMirrorsTheFacetAndLensesRead() async throws {

@@ -128,12 +128,20 @@ struct MCPReadTools: Sendable {
                 text = try Queries.renderedText(db, containerID: noteID)
             } else if let versionID {
                 if withIDs {
+                    // Ladder round 1, F-3: the REAL standing rides in (with
+                    // `versionOf`), so lineage far sides the client can read
+                    // — above all the live note whose grant authorized this
+                    // call — address honestly instead of wearing the
+                    // beyond-grant stub; the `books` answer stays suppressed
+                    // (a moment is membered nowhere, and the key is the live
+                    // read's).
                     var shaped = try MCPNoteStructure.read(
-                        db, noteID: versionID, calendar: calendar, standing: nil,
+                        db, noteID: versionID, calendar: calendar, standing: standing,
                         options: MCPNoteStructure.Options(
                             withCommits: options.withCommits, commitIDs: options.commitIDs,
                             includeArchived: options.includeArchived, withLineage: options.withLineage,
-                            now: options.now))
+                            now: options.now),
+                        versionOf: noteID)
                     shaped["version_id"] = versionID
                     shaped["version_of"] = noteID
                     shaped["note_id"] = noteID
