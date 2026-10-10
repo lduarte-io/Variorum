@@ -354,7 +354,23 @@ struct BookView: View {
             model.onPaneFocusRequest = onPaneFocusRequest
             takeAscentRequest()
         }
-        .onChange(of: paneFocused) { _, focused in model.paneFocused = focused }
+        .onChange(of: paneFocused) { _, focused in
+            model.paneFocused = focused
+            // VX-143 ladder r1 (MAJOR-1): a pane-focus flip re-speaks this
+            // book's note-box word. A READ book's report is nil on BOTH
+            // sides of the flip, so the `.onChange(of: noteBoxReport)`
+            // below never fires for it — and without this publish a Read
+            // book GAINING focus never says "no box" while focused, which
+            // left RootView's held slot (VX-141) standing a phantom empty
+            // box forever (two finished books in a split, focus returned
+            // to the first). Gaining focus says nil-while-focused — the
+            // declined word; losing focus says the departure nil the
+            // report road already says for editing modes. Published AFTER
+            // `model.paneFocused` so the report is computed against the
+            // settled pass, and `publishNoteBox()` alone — the note-place
+            // channel has its own cadence.
+            publishNoteBox()
+        }
         // 18d batch 1 (her U-10): publish this book's note box. `.onAppear`
         // and `.onChange` together, because the box must be right on the
         // book's OPEN and not only after something moves; `.onDisappear`
