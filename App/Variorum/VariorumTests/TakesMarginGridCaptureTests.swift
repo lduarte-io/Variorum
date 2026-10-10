@@ -13,7 +13,14 @@
 //  record can say what moved where.
 //
 //  It writes into the TEST HOST'S OWN TEMP DIRECTORY and prints the path
-//  (`ContextBarCaptureTests`' recorded reason: the host is sandboxed).
+//  (`ContextBarCaptureTests`' recorded reason: the host is sandboxed). On the
+//  Air the host's container is TCC-protected from the shell that runs the
+//  suite, so each PNG ALSO rides out through the log as chunked base64 lines
+//  (`[VX-136-PNG <name> <part>] …`), which the run record's one-liner joins.
+//
+//  DISABLED BY DEFAULT: it asserts nothing, and the base64 would bloat every
+//  whole-target log by ~1.5 MB. To re-shoot, drop the `.disabled` trait and
+//  run it alone (`-only-testing:VariorumTests/TakesMarginGridCaptureTests`).
 //
 
 import AppKit
@@ -26,7 +33,9 @@ import VariorumCore
 @testable import Variorum
 
 @MainActor
-@Suite("Margin grid captures (VX-136)", .serialized)
+@Suite(
+    "Margin grid captures (VX-136)", .serialized,
+    .disabled("a capture harness — drop this trait to re-shoot VX-136's evidence"))
 struct TakesMarginGridCaptureTests {
     static let outputDirectory = FileManager.default.temporaryDirectory
         .appendingPathComponent("variorum-vx136-screens")
@@ -69,6 +78,19 @@ struct TakesMarginGridCaptureTests {
         if let png = rep.representation(using: .png, properties: [:]) {
             try? png.write(to: url)
             print("[VX-136] wrote \(url.path)")
+            // The host's container is TCC-protected from the shell that runs
+            // the suite (measured on the Air, 2026-10-10), so the bytes ALSO
+            // ride out through the log: chunked base64 lines a script joins.
+            let encoded = png.base64EncodedString()
+            var index = encoded.startIndex
+            var part = 0
+            while index < encoded.endIndex {
+                let end = encoded.index(index, offsetBy: 8_000, limitedBy: encoded.endIndex)
+                    ?? encoded.endIndex
+                print("[VX-136-PNG \(name) \(part)] \(encoded[index..<end])")
+                index = end
+                part += 1
+            }
         }
     }
 

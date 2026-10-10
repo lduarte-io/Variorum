@@ -33,7 +33,13 @@ struct TakesBoardView: View {
     /// column (1–3 high) and visible columns (1–2 wide). The rail reserves
     /// this much room while a block's takes are open.
     @AppStorage("takesGridRows") private var gridRows = 2
-    @AppStorage("takesGridCols") private var gridCols = 1
+    /// **VX-136 — the column CHOICE, nil until she makes one.** The ruled
+    /// default (*"two columns when the block has more than 2 takes"*) is
+    /// per BLOCK, so it cannot be a stored number: an unset key — or her
+    /// "auto" — means the default, and a stored 1 or 2 is her choice and
+    /// always wins (R74's machinery, untouched). Same key as before, so a
+    /// choice she already made is still hers.
+    @AppStorage("takesGridCols") private var gridColsChoice: Int?
     @State private var lensNamePrompt = false
     @State private var diffPresentation: TakesDiffPresentation?
     /// 13b 1b: the routed-command registration's lifecycle token.
@@ -117,9 +123,32 @@ struct TakesBoardView: View {
     /// keeps every call site and pin reading unchanged.
     static let railCardHeight: CGFloat = TakesBoardLayout.railCardHeight
 
-    /// R74: the rail's reserved width follows the chosen column count.
+    /// R74: the rail's reserved width follows the column count — since
+    /// VX-136, ONE block's count (her choice, else the ruled default for its
+    /// fan).
+    static func railWidth(columns: Int) -> CGFloat {
+        CGFloat(columns) * railCardWidth + CGFloat(max(columns - 1, 0)) * 6
+    }
+
+    /// The columns this block's rail shows (VX-136 — the one brain the
+    /// pagers ask too).
+    private func railColumns(_ slot: Queries.RenderedBlock) -> Int {
+        model.gridCols(
+            takeCount: model.projection.fans[slot.blockID]?.count ?? 0, slotText: slot.text)
+    }
+
+    /// The widest rail the composition must make room for: her choice where
+    /// she made one; otherwise the widest default among the blocks whose
+    /// rails can be open — the expanded ones, or (follow-the-scroll) every
+    /// fanned block, for the same reason `railEngaged` counts them all: the
+    /// prose must not wobble as blooms come and go with scrolling.
     private var marginRailWidth: CGFloat {
-        CGFloat(gridCols) * Self.railCardWidth + CGFloat(max(gridCols - 1, 0)) * 6
+        if let gridColsChoice { return Self.railWidth(columns: min(max(gridColsChoice, 1), 2)) }
+        let candidates = model.projection.slots.filter { slot in
+            model.followTheScroll ? slot.hasFan : model.expandedBlocks.contains(slot.blockID)
+        }
+        let columns = candidates.map(railColumns).max() ?? 1
+        return Self.railWidth(columns: max(columns, 1))
     }
 
     /// R74's vertical room, HONEST about the fan (13b 3F, AD-7's other
@@ -229,7 +258,7 @@ struct TakesBoardView: View {
         }
         .onChange(of: beneathCount) { _, _ in pushDensity() }
         .onChange(of: gridRows) { _, _ in pushDensity() }
-        .onChange(of: gridCols) { _, _ in pushDensity() }
+        .onChange(of: gridColsChoice) { _, _ in pushDensity() }
         .onDisappear {
             if let commandToken {
                 session.commandRouter.unregisterHandler(commandToken)
@@ -263,7 +292,7 @@ struct TakesBoardView: View {
     private func pushDensity() {
         model.beneathCount = beneathCount
         model.gridRows = gridRows
-        model.gridCols = gridCols
+        model.gridColsChoice = gridColsChoice
     }
 
     /// The board's routed-command handler (13b 1b): the take family as
@@ -424,6 +453,13 @@ struct TakesBoardView: View {
 
     // MARK: - Header
 
+    /// VX-136: the `n wide` menu's words — her choice by its number, the
+    /// ruled default as "auto" (PROVISIONAL).
+    static let gridColsAutoItem = "auto — two past two takes"
+    static func gridColsLabel(_ choice: Int?) -> String {
+        choice.map { "\($0) wide" } ?? "auto wide"
+    }
+
     /// Batch 9 (R101): ONE quiet voiced line — style/density as compact
     /// word-menus, the wash as a chip, expand/close as words, and the
     /// three rare post-level acts folded into a single "post actions"
@@ -456,12 +492,17 @@ struct TakesBoardView: View {
                     }
                 }
                 .help("How many take cards stack vertically in the margin")
-                VoicedMenu(tokens: tokens, label: "\(gridCols) wide") {
+                // VX-136: the ruled default is per block, so it has its own
+                // name here — "auto" — and her picking it gives the choice
+                // back (PROVISIONAL wording; the run record's disposition).
+                VoicedMenu(tokens: tokens, label: Self.gridColsLabel(gridColsChoice)) {
+                    Button(Self.gridColsAutoItem) { gridColsChoice = nil }
                     ForEach(1...2, id: \.self) { n in
-                        Button("\(n) wide") { gridCols = n }
+                        Button("\(n) wide") { gridColsChoice = n }
                     }
                 }
-                .help("How many card columns the margin shows before scrolling")
+                .help("How many card columns the margin shows before scrolling — "
+                    + "auto shows two once a block has more than two takes")
             }
             if model.projection.fanStyle != .slotSplit {
                 VoicedChip(
@@ -904,8 +945,11 @@ struct TakesBoardView: View {
             }
             .frame(maxWidth: 680, alignment: .topLeading)
             if style == .marginGrid, bloomed {
+                // VX-136: this block's OWN column count (her choice, else
+                // the ruled default for its fan).
                 marginRail(slot: slot)
-                    .frame(width: marginRailWidth, alignment: .topLeading)
+                    .frame(width: Self.railWidth(columns: railColumns(slot)), alignment: .topLeading)
+                    .takeRailGeometryProbe(.rail, blockID: slot.blockID)
             }
         }
         .modifier(TakesCalloutFrame(
@@ -1222,7 +1266,7 @@ struct TakesBoardView: View {
                         .menuTitle("Close this fan"))
             }
             if takes.isEmpty {
-                fanFooter(slot: slot)
+                fanFooter(slot: slot, fitsRail: true)
             } else {
                 railCards(takes: takes, slot: slot, rowsPerColumn: rowsPerColumn)
                     .frame(
@@ -1233,8 +1277,11 @@ struct TakesBoardView: View {
                         alignment: .top)
                 // Batch 12 (her "i can't make a new take"): the growth
                 // doors live BELOW the cards, always on screen (R72's
-                // promise; never behind pagination either).
-                fanFooter(slot: slot)
+                // promise; never behind pagination either). VX-136: inside
+                // the rail's own width — the one-line row overran a 1-wide
+                // rail's cards by ~23 pt, so where it does not fit the two
+                // doors stack.
+                fanFooter(slot: slot, fitsRail: true)
             }
         }
     }
@@ -1256,14 +1303,19 @@ struct TakesBoardView: View {
             Array(takes[$0..<min($0 + rowsPerColumn, takes.count)])
         }
         let pageKey = TakesViewModel.railPageKey(slot.blockID)
-        let limit = max(columns.count - gridCols, 0)
+        // VX-136: this block's own column count (the pager's brain too).
+        let shown = railColumns(slot)
+        let limit = max(columns.count - shown, 0)
         let offset = model.pageOffset(pageKey, limit: limit)
+        // VX-136: the grid's ROWS — each card stands in its row's slot, so
+        // row tops line up across columns (and stay put across pages).
+        let rowHeights = model.railRowHeights(takes: takes, rowsPerColumn: rowsPerColumn)
         return VStack(alignment: .leading, spacing: 4) {
             ScrollView(.horizontal) {
                 HStack(alignment: .top, spacing: 6) {
                     ForEach(Array(columns.enumerated()), id: \.offset) { i, column in
                         VStack(spacing: 6) {
-                            ForEach(column, id: \.id) { take in
+                            ForEach(Array(column.enumerated()), id: \.element.id) { row, take in
                                 // QoL batch 2 (L4, her report: the margin
                                 // note is "sticky note sized which isn't
                                 // that helpful for long blocks"): the card
@@ -1283,6 +1335,13 @@ struct TakesBoardView: View {
                                         height: model.marginCardHeight(variantID: take.id),
                                         alignment: .topLeading)
                                     .clipped()
+                                    // VX-136: the card keeps its own height
+                                    // (L4); its ROW's slot says where the next
+                                    // row starts, the same in every column.
+                                    .frame(
+                                        height: rowHeights.indices.contains(row)
+                                            ? rowHeights[row] : nil,
+                                        alignment: .top)
                             }
                         }
                         .frame(width: Self.railCardWidth)
@@ -1295,9 +1354,9 @@ struct TakesBoardView: View {
             .scrollPosition(
                 id: stripBinding(key: pageKey, limit: limit, ids: Array(columns.indices)),
                 anchor: .leading)
-            if columns.count > gridCols {
+            if columns.count > shown {
                 let firstShown = offset * rowsPerColumn + 1
-                let lastShown = min((offset + gridCols) * rowsPerColumn, takes.count)
+                let lastShown = min((offset + shown) * rowsPerColumn, takes.count)
                 pagerLine(
                     pageKey: pageKey, limit: limit, offset: offset,
                     caption: "\(firstShown)–\(lastShown) of \(takes.count)")
@@ -1398,9 +1457,20 @@ struct TakesBoardView: View {
     /// The bloom's footer (13b Stage 3, 3D): the growth doors + — where
     /// archived takes exist — the archived listing's door (N1: the road
     /// back lives in Takes, right under the fan the take left).
-    private func fanFooter(slot: Queries.RenderedBlock) -> some View {
+    private func fanFooter(slot: Queries.RenderedBlock, fitsRail: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            newTakeDoors(slot: slot)
+            if fitsRail {
+                // VX-136: the margin rail's doors fit its width — one line
+                // where the line fits, the two doors stacked where it would
+                // overrun the cards (the 1-wide rail is one card wide).
+                ViewThatFits(in: .horizontal) {
+                    newTakeDoors(slot: slot)
+                    newTakeDoors(slot: slot, stacked: true)
+                }
+                .takeRailGeometryProbe(.doors, blockID: slot.blockID)
+            } else {
+                newTakeDoors(slot: slot)
+            }
             archivedSection(slot: slot)
         }
     }
@@ -1458,8 +1528,15 @@ struct TakesBoardView: View {
     /// where takes are seen). Minting NEVER chooses (R90); the power
     /// variant lives on the keyboard (⇧⌥⌘T). Under a seal the ops refuse
     /// and the refusal speaks.
-    private func newTakeDoors(slot: Queries.RenderedBlock) -> some View {
-        HStack(spacing: 8) {
+    ///
+    /// VX-136: `stacked` puts the two doors one above the other (no `·`
+    /// between them) — the margin rail's form where the line would overrun
+    /// its one-card width. Same doors, same acts, same box.
+    private func newTakeDoors(slot: Queries.RenderedBlock, stacked: Bool = false) -> some View {
+        let layout = stacked
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 5))
+            : AnyLayout(HStackLayout(spacing: 8))
+        return layout {
             Button("＋ new take (branch)") {
                 guard let from = slot.variantID else { return }
                 Task { await model.branchTakeRevealed(blockID: slot.blockID, from: from) }
@@ -1467,7 +1544,9 @@ struct TakesBoardView: View {
             .disabled(slot.variantID == nil)
             .help(CapabilityRegistry.capability(.newTake)
                 .menuTitle("A new take that starts as a copy of what's shown"))
-            Text("·").foregroundStyle(tokens.faint)
+            if !stacked {
+                Text("·").foregroundStyle(tokens.faint)
+            }
             Button("＋ blank take") {
                 Task { await model.newBlankTakeRevealed(blockID: slot.blockID) }
             }
@@ -1814,7 +1893,62 @@ private struct TakeCardGeometryProbe: ViewModifier {
 }
 #endif
 
+/// VX-136's oracle slots — the margin rail and its new-take doors (a
+/// non-DEBUG home, so the probe's signature compiles everywhere; the
+/// `TakeCardProbeSlot` precedent).
+enum TakeRailProbePart: String, Hashable {
+    case rail, doors
+}
+
+#if DEBUG
+/// **VX-136's oracle — the margin rail and its new-take doors, in the
+/// window.** Her report names the doors (*"the new take area"*) against the
+/// cards, so the pin compares two rectangles: the rail's own frame and the
+/// doors' box under it. Scoped by the mounting session like
+/// `TakeCardGeometry` (parallel suites never read each other's), keyed by the
+/// block, last report wins (a block has one rail).
+@MainActor
+enum TakeRailGeometry {
+    typealias Part = TakeRailProbePart
+
+    private static var worlds: [String: [String: CGRect]] = [:]
+
+    static func record(_ part: Part, blockID: String, _ frame: CGRect, in scope: String) {
+        worlds[scope, default: [:]]["\(blockID)|\(part.rawValue)"] = frame
+    }
+
+    static func frame(_ part: Part, blockID: String, in scope: String) -> CGRect? {
+        worlds[scope]?["\(blockID)|\(part.rawValue)"]
+    }
+
+    /// A pin resets ITS OWN scope before its mount, and no other.
+    static func reset(_ scope: String) { worlds[scope] = nil }
+}
+
+private struct TakeRailGeometryProbe: ViewModifier {
+    let part: TakeRailProbePart
+    let blockID: String
+    @Environment(\.debugProbeScope) private var scope
+
+    func body(content: Content) -> some View {
+        content.onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+            TakeRailGeometry.record(part, blockID: blockID, $0, in: scope)
+        }
+    }
+}
+#endif
+
 extension View {
+    /// VX-136's oracle write (a no-op outside DEBUG).
+    @ViewBuilder
+    func takeRailGeometryProbe(_ part: TakeRailProbePart, blockID: String) -> some View {
+        #if DEBUG
+        self.modifier(TakeRailGeometryProbe(part: part, blockID: blockID))
+        #else
+        self
+        #endif
+    }
+
     /// The DEBUG oracle write: this view's frame in the card's own
     /// coordinate space. A no-op outside DEBUG (the `LensesGeometry`
     /// pattern, one surface over).

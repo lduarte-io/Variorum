@@ -68,6 +68,32 @@ final class TakesBoardLayout {
         return min(max(measuredText + cardChromeHeight, railCardHeight), marginCardCapHeight)
     }
 
+    /// **VX-136 (the VX-143 run) — THE GRID'S ROWS.** Her report: *"the margin
+    /// grid items are a little bit weirdly misaligned when you have several"*.
+    /// Each column used to stack its cards at their OWN heights (L4), so the
+    /// second card of one column started wherever the first one ended — with
+    /// two columns on screen (the ruled default past two takes) the rows
+    /// staggered, and nothing lined up across the grid.
+    ///
+    /// A row's slot is the tallest card IN THAT ROW across ALL the block's
+    /// columns — every page, not the visible one, so a row never moves as
+    /// ◀ ▶ turn (13b 3F's steadiness, kept). The cards themselves keep their
+    /// own heights inside their slots (L4's ruled sticky note stays a sticky
+    /// note — `aShortTakesMarginCardStaysASticky`); the slot only says where
+    /// the next row starts. Unmeasured cards read as one card-height, so the
+    /// first bloom degrades to the uniform grid.
+    nonisolated static func railRowHeights(
+        cardTextHeights: [CGFloat?], rowsPerColumn: Int
+    ) -> [CGFloat] {
+        let rows = min(max(rowsPerColumn, 1), max(cardTextHeights.count, 1))
+        guard !cardTextHeights.isEmpty else { return [railCardHeight] }
+        return (0..<rows).map { row in
+            stride(from: row, to: cardTextHeights.count, by: rows).reduce(CGFloat(0)) {
+                max($0, marginCardHeight(measuredText: cardTextHeights[$1]))
+            }
+        }
+    }
+
     /// L4's reserve, reworked from uniform rows × 110 to ACTUAL card
     /// heights bounded by the cap (the ruling's item 6).
     ///
@@ -77,19 +103,36 @@ final class TakesBoardLayout {
     /// the change to variable heights). With no measurements yet it
     /// degrades to `min(cards, rows) × 110 + gaps`, which is byte-identical
     /// to the arithmetic it replaces.
+    ///
+    /// **VX-136: the reserve is the ROWS' sum** — the height the aligned
+    /// grid actually stands at (`railRowHeights`). Wherever a column's
+    /// tallest card sits in the same row as every other column's, that is
+    /// the old tallest-column number to the point; it is larger only where
+    /// two columns' tall cards sit in DIFFERENT rows, which is exactly the
+    /// staggered shape the rows now line up.
     nonisolated static func reservedRailHeight(
         cardTextHeights: [CGFloat?], rowsPerColumn: Int
     ) -> CGFloat {
-        let rows = max(rowsPerColumn, 1)
         guard !cardTextHeights.isEmpty else { return railCardHeight }
-        var tallest: CGFloat = 0
-        for start in stride(from: 0, to: cardTextHeights.count, by: rows) {
-            let column = cardTextHeights[start..<min(start + rows, cardTextHeights.count)]
-            let height = column.reduce(CGFloat(0)) { $0 + marginCardHeight(measuredText: $1) }
-                + CGFloat(max(column.count - 1, 0)) * cardGap
-            tallest = max(tallest, height)
-        }
-        return tallest
+        let rows = railRowHeights(cardTextHeights: cardTextHeights, rowsPerColumn: rowsPerColumn)
+        return rows.reduce(0, +) + CGFloat(max(rows.count - 1, 0)) * cardGap
+    }
+
+    /// **VX-136 — THE RULED DEFAULT** (her sitting, 2026-10-10, the question
+    /// tool's recommended option: *"the margin grid defaults to TWO columns
+    /// when the block has more than 2 takes"*). R74 keeps the choice hers:
+    /// `choice` is what she picked in the `n wide` menu, and it always wins;
+    /// nil — never picked, or "auto" — is the default, decided per BLOCK by
+    /// the size of its fan. The default never shows a column the fan cannot
+    /// fill (three takes in a three-high grid are one column, so one wide).
+    nonisolated static func effectiveGridCols(
+        choice: Int?, takeCount: Int, rowsPerColumn: Int
+    ) -> Int {
+        if let choice { return min(max(choice, 1), 2) }
+        guard takeCount > 2 else { return 1 }
+        let rows = max(rowsPerColumn, 1)
+        let filledColumns = (takeCount + rows - 1) / rows
+        return min(2, max(filledColumns, 1))
     }
 
     /// L3's drag clamp (the `CanvasBoardGeometry.clampedSize` precedent —
@@ -533,7 +576,28 @@ final class TakesBoardLayout {
     /// Density inputs, pushed by the board (models never read @AppStorage).
     var beneathCount = 2
     var gridRows = 2
-    var gridCols = 1
+    /// R74's column CHOICE — nil while she has not picked one (or picked
+    /// "auto"), which is VX-136's ruled default (`effectiveGridCols`).
+    var gridColsChoice: Int?
+
+    /// The pre-VX-136 name, kept as a forward so every pin that sets a
+    /// density reads unchanged (the 3C parity pattern): a SET is her choice.
+    /// The getter answers the choice, or 1 while none is made — a block's
+    /// actual column count is `gridCols(takeCount:slotText:)`, which every
+    /// renderer and pager asks.
+    var gridCols: Int {
+        get { gridColsChoice ?? 1 }
+        set { gridColsChoice = newValue }
+    }
+
+    /// The columns ONE block's rail shows — her choice, else the ruled
+    /// default for its fan (VX-136). One brain for the board's rendering and
+    /// both pagers.
+    func gridCols(takeCount: Int, slotText: String?) -> Int {
+        Self.effectiveGridCols(
+            choice: gridColsChoice, takeCount: takeCount,
+            rowsPerColumn: railRowsPerColumn(slotText: slotText))
+    }
 
     /// R24's strip exception, one brain with the board's chunking.
     func railRowsPerColumn(slotText: String?) -> Int {

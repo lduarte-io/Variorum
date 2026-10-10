@@ -49,7 +49,7 @@ Batch 1 implementer (Opus, 2026-10-10, on the Air). No behavioural revert is in 
 
 - VX-135: FIX LANDED — pin `WriteTakesPanelChooseTests` RED on the pre-fix tree (run `vx143-red1`: chosen stayed take 1, Write's handler consumed ⌘⏎) and GREEN after (`vx143-green1`); behavioural-revert verification PENDING.
 - VX-140: FIX LANDED (tripwire NOT hit — `StoreLockView` + `StoreLobby` only; `KeychainCustody`, `StoreKeyGuard`, the vault and the relock policy untouched) — `LobbyAutoAskTests.aLobbyMountedInTheBackgroundDoesNotAsk` RED on the pre-fix tree (`vx143-red1`: asked 1× while inactive) and GREEN after; the four new-API arms green; behavioural-revert verification PENDING.
-- VX-136: IN-PROGRESS — reading done; the misalignment needs a capture before a fix is designed (capture harness next).
+- VX-136: FIX LANDED (PROVISIONAL taste calls — see the member's disposition) — captured first (`TakesMarginGridCaptureTests`, before/after PNGs in `App/Variorum/DerivedData/vx143-screens/`, gitignored), then `TakesMarginGridAlignmentTests` (6 pins) GREEN on the fixed tree (`vx143-green1`); red evidence by behavioural revert PENDING.
 - VX-141: FIX LANDED — `NoteBoxSlotTests` RED on the pre-fix tree (`vx143-red1`: slot occupants after the switch `rail → empty → box → box`) and GREEN after (`rail → box → box → box`); behavioural-revert verification PENDING.
 - VX-142: FIX LANDED (PROVISIONAL: no hint survives on the flow) — `ReadFlowHoverHintTests` RED on the pre-fix tree (the composition carried the note's title as the tooltip) and GREEN after; behavioural-revert verification PENDING.
 - VX-144: NOT-STARTED (batch 2 — screenshot-first, after batch 1)
