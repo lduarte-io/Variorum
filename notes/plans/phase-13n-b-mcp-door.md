@@ -2543,4 +2543,113 @@ refusals; the etiquette gates are RULINGS, not suggestions.
 
 ## U4 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-*(seated for the U4 implementer — LIVE STATUS from the first commit)*
+**LIVE STATUS — IN PROGRESS.** Session: opus-implementer, 2026-10-10, cut
+from `f4078d61`. Baseline (the brief's): core 2,564/294 · VariorumMCPTests
+45/6 · workbook 40/6, headless. Read whole before the first line of code:
+this plan top to bottom (R-13nb-1…26, AF-1…AF-10, the U1/U2/U3 records and
+live rounds), the memo, the format-schema prep, all six ladder records, the
+13n sitting record, SessionResiliencyProtocol, and the code the brief names
+(+ the tray/versions/lens/lineage queries, the restore ops, the rule-editor
+door, the landing roads: `ShellRouter.adopt`, `PostDetailView.jump`,
+`CommandRouter.pendingTakesLanding`, `TakesViewModel.addLensColumn`,
+`BookViewModel.requestReveal/requestChapterReveal`, `StatusCenter`).
+
+### Pieces
+
+| # | Piece | Status |
+|---|---|---|
+| S0 | This record + the FORK message (below) to the orchestrator | DONE (this commit) — forks F-1…F-4 sent; F-1/F-2/F-3 GATE their halves (book-rule WRITE; the offer door's class + chord; show_in_app's shape), F-4 is non-gating (built PROVISIONAL meanwhile) |
+| S1 | Core: `put_back`'s acts (block + take, client-named undo, in-transaction guard), `save_version` relabeled, `set_entry_date` (undo + guard), file-into-chapter (PROVISIONAL), the lockedReading words fix (red-on-old) | NOT-STARTED |
+| S2 | The read carriage on the wire (F-4): tray, lineage + ancestry, archived reach, lenses, versions list/read, book facts on list_books | NOT-STARTED |
+| S3 | The write tools on the wire: put_back · set_entry_date (edit), save_version · file_note_in_chapter (write new) + rung proofs | NOT-STARTED |
+| S4 | Book-rule WRITE (F-1 — waits for the ruling) | BLOCKED on F-1 |
+| S5 | NAVIGATION (F-2/F-3 — the server half + the decision seam may proceed; the app delivery waits for the rulings) | BLOCKED on F-2/F-3 (partly) |
+| S6 | End of unit: headless suites, Mac focused suites (stage), the pre-flight walk (stage, both voices), record final | NOT-STARTED |
+
+### Forks returned to the orchestrator (2026-10-10) — PENDING rulings
+
+- **F-1 — the book-rule WRITE's refusal set (GATES item 7's write half).**
+  The brief's premise is that "gatherings/finished/sealed/wrong-kind refuse
+  as hers do". Traced: `setReadingQuerySpec`, `setReadingOutflow` and
+  `setReadingIntakeSeating` do NOT refuse a finished or sealed book, and her
+  Book Settings ▸ Edit… door is open on a finished book (13i §5: a finished
+  book's text and rule stay editable; intake pauses and the un-finish
+  catches up). Gatherings are unreachable on the wire entirely (no facts —
+  P-13nb-U1-4 — so the one `notShared` answer; the outflow op's
+  `wrongReadingKind` is never reached). So the only spec-defensible build
+  that adds NO validation path is: **(a, RECOMMENDED)** `set_book_rule` =
+  her rule editor's ONE Save projected — optional `rule` · `outflow` ·
+  `new_matches` in one call, written in her editor's order (dial → outflow →
+  rule) in one runner turn, ONE client-named undo entry (restores the three
+  fields exactly; seats/bells the rule's intake made STAY — §19, the
+  P-13nb-U2-6 precedent); a finished/sealed book's write LANDS as hers does
+  and the answer says intake is paused until she reopens it. Tags addressed
+  by PATH in the stored grammar's own keys (`and`/`or`/`not`/`tag`/`star`,
+  a path where the store holds an id), a missing path minted in the book's
+  wing (her editor's make-in-place, apply_tag's precedent); legacy terms
+  refuse on write (never offered, #166(d)); a malformed stored rule refuses
+  as her editor does. **The walk's "refused on a finished book in the app's
+  words" leg** then rides the finished-book refusal that EXISTS —
+  `create_section` / file-into-chapter (`lockedReading`) — and on the way I
+  found a real J8 defect: `lockedReading` has NO words in `OpsRefusalCopy`,
+  so the wire (U3's `create_section` today, and every Mac door routed
+  through the table) speaks `Refused: lockedReading(id: "…")`. Fix: the
+  Mac table gains the generic sentence her `ReadingsViewModel` already says
+  ("This book is finished — reopen it first; if it's sealed, unseal it."),
+  red-on-old. **(b)** the wire refuses rule writes on finished/sealed books
+  — a NEW validation path the brief forbids; needs her word. **(c)** read
+  facts only, write deferred to a ticket.
+- **F-2 — the OFFER door's class and its chord (GATES the receipt half).**
+  18i's class letter says a message carrying a button is an OFFER (always
+  toasts, never governed by her `receipt_style`). R-13nb-23 (a) puts a door
+  on the WRITE RECEIPTS. **(a, RECOMMENDED)** they stay RECEIPTS (her setting
+  still decides where/whether the line shows — quiet by default) and carry
+  the door: the quiet line and the toast both render "Open ›"; the keyboard
+  chord is a registry act "Show the AI's last change" that opens the most
+  recent MCP write's target THIS SESSION (the receipt's own door, kept after
+  the line fades — a 6-second line is a mouse race for a keyboard user, and
+  under "off" there is no line at all), grey when none; chord candidate
+  ⌥⌘O after a collision sweep (yours to veto). **(b)** they become OFFERS
+  (always toast — her quiet default overridden for AI writes). **(c)** the
+  chord acts only while the line is on screen.
+- **F-3 — show_in_app's shape (GATES the app delivery).** Proposed:
+  READ rung (decided on the target at read, never spending a once grant —
+  showing discloses and changes nothing), listed whenever any read reach
+  exists; targets `note` (+ `block_id`, + optional `select` words → the 13o
+  find seed verbatim: selected + find bar armed + comfort band), `takes`
+  (note + block → her "see takes" road: `pendingTakesLanding.bloom` +
+  `requestMode(.takes)`), `lens` (note + lens id → Lenses mode, the lens's
+  column focused if shown, else appended — her "+ Column → lens" door —
+  and when the board's four columns are full, the LAST column replaced, her
+  R83 swap door; PROVISIONAL), `book` (+ optional `section_id` → Outline's
+  chapter landing, `requestChapterReveal`); a target the client cannot read
+  answers the one `notShared`. **Not frontmost ⇒ an honest refusal** ("The
+  author isn't in Variorum right now — nothing was moved."), never queued;
+  frontmost = `NSApp.isActive` AND the key window is a FULL window (a
+  note-only or quick-note window key ⇒ refuse rather than raise another
+  window — "no window raising"). The pure decision lives in `VariorumMCP`
+  (pinned headless with a fake hook); the app answers the hook.
+- **F-4 — the read carriage's call shapes (NON-gating, built PROVISIONAL).**
+  Every new READ reach rides `read_note`'s structured view as explicit
+  parameters (AF-5's precedent; the memo §4's "the lean tool set's five read
+  tools" unreopened): `with_tray` (deleted blocks + deleted takes, the
+  30-day family), `with_lineage` (direct derived_from/version_of edges per
+  block + `parent_take_id` per take; a peer in a note the client cannot read
+  carries NO ids — AF-10 (f)'s names-stay-with-grants applied to ids),
+  `include_archived` (archived takes, marked), `with_lenses` (every lens:
+  id, name, picks per block), `with_versions` (the note's moments) and
+  `version_id` (read one moment, decided on its NOTE's grant). Book facts
+  (rule/outflow/new matches/extents/finished/sealed/owned) ride
+  `list_books` rows. `include_archived` on `list_books`/`list_notes`/
+  `search` with the FACET's default — archived OUT unless asked — which
+  FLIPS two U1 behaviors deliberately (`list_books` lists archived books
+  today, flagged; `list_notes(book_id)` lists archived members today); pins
+  updated as the ritual.
+
+### PROVISIONALs (for the merge QUESTIONS bundle)
+
+*(accumulating)*
+
+### Decisions within the mandate (recorded as they land)
+
+*(accumulating)*
