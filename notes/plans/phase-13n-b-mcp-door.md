@@ -1852,7 +1852,14 @@ STACK MECHANISM ratified as-is and the FACE ticketed — R-13nb-19 below.
   multi-paragraph block exports in marker mode, declared by a
   format-version token in the braced header; the parser keys on the
   token so old files, pastes and plain markdown import exactly as
-  today. **(b) The eight open inventory rows CARRIED as recommended —
+  today. HER REFINEMENT, same sitting: *"can people export markdown
+  with multi paragraph blocks and still just see the markdown? the
+  same way they can export without takes?"* — YES by the ratified
+  dials: the marker lives ONLY in the Variorum-format (takes-carrying)
+  export; the PLAIN export (takes dial off — rendered prose) never
+  carries a marker, a brace or an Alternates section, whatever the
+  note's block structure; its re-import segments by paragraph exactly
+  as today (plain text was never structure-round-trippable, unchanged). **(b) The eight open inventory rows CARRIED as recommended —
   PLUS the date is SETTABLE.** Her words: *"agents should be able to
   set the date on a note - when I bring in old journals, that'll be a
   necessary part of processing if I want an agent to add years of
