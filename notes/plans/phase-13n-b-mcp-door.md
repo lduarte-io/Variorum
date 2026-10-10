@@ -2038,9 +2038,22 @@ ambiguity; STOP for anything gating.
 
 ## U3 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-**UNIT IN PROGRESS** — opus-implementer, 2026-10-09/10, cut from `03ecb26d`.
+**UNIT CLOSED by the implementer — NOT DONE: (1) the LIVE acceptance leg
+with a REAL client (an edit under insurance + the W-series equivalent over
+Claude Code — the orchestrator's, under a held stage claim; my pre-flight
+drove the REAL embedded shim with a scripted client, `u3-walk`, never Claude
+Code itself); (2) the whole VariorumTests target (only the suites pinning
+every app surface the diff touches ran — 151/12 + the post-fix 67/5, listed
+in R9); (3) the cold ladder; (4) deliberately not built: filing an EXISTING
+member into a chapter on the wire (P-13nb-U3-8 — a U4 candidate),
+`exportBlock` (unchanged — AF-10 records it as a block-level clipboard face),
+and the guard retrofit on U2's eight ops (optional per the brief — not taken,
+P-13nb-U2-8 stands for them).** Session: opus-implementer, 2026-10-09/10, cut
+from `03ecb26d`; closed at the commit carrying this record.
 Baseline (the brief's): core 2,541/292 · VariorumMCPTests 33/4 · workbook
-40/6, headless. Read whole before the first line of code: this plan top to
+40/6, headless. **Finals (headless, the whole package, at the unit's end on
+`2328f26c`): core 2,563/294 · VariorumMCPTests 45/6 · workbook 40/6** — only
+the long-standing gated skips; the Mac app builds on the final tree. Read whole before the first line of code: this plan top to
 bottom (R-13nb-1…26, AF-1…AF-9, the U1/U2 records and live rounds), the
 13n sitting record, the mockups §1–§10, the wire-document memo, the
 format-schema prep, all four ladder records, SessionResiliencyProtocol, and
@@ -2053,18 +2066,254 @@ the orchestrator's handoff `03ecb26d`; the code named in the brief.
 | R0 | This record | DONE (this commit) |
 | R1 | THE BOUNDARY-MARKER FORK → orchestrator (glyph + version token + grammar, with rationale) | RULED — AF-10 (`1d3f4913`): `--- next block ---` + `{v:2}` + the grammar approved as proposed; all seven build calls concurred, the rider on (b) binding (the CarryAllMerge move keeps every existing pin passing UNMODIFIED — zero test edits is the parity proof) |
 | R2 | Core: the in-transaction GUARD seam on the edit-rung ops + `edit_take`'s op (named insurance brackets, `expectedText`, one undo entry) + set-name / create-section / file-into-chapter acts with client-named undo + state-transition tests | DONE (`d2e86599` seam + `1dc13a1a` acts) — `MCPEditActsTests` 11/11; MUTATION-CHECKED: the guard call removed from `performDeleteBlock` → the guard pin red (3 issues), restored |
-| R3 | `CarryAllMerge` moved app → core Domain, byte-unchanged (merge_blocks' keyboard default — the `KeepOnTopDivide` 18c precedent) | DONE (`296c5866`) — same name, public members, zero app-caller and zero test edits (AF-10's rider); Mac app build green; the Mac suites that pin it (`FannedDefaultsTests`, `MergeArrangementTests`) run at R9 — PENDING |
+| R3 | `CarryAllMerge` moved app → core Domain, byte-unchanged (merge_blocks' keyboard default — the `KeepOnTopDivide` 18c precedent) | DONE (`296c5866`) — same name, public members, zero app-caller and zero test edits (AF-10's rider); the parity suites `FannedDefaultsTests`, `FannedDefaultsBoardTests`, `MergeArrangementTests` GREEN UNMODIFIED at R9 |
 | R4 | The EDIT rung on the wire: `edit_take` · `divide_block` · `merge_blocks` · `move_block` · `delete_block` · `set_block_name` (catalog + tools + the guard + receipts) + the PROOF pins (suggest / write new provably cannot reach them) | DONE (`67979514`) — `MCPEditServerTests` 6/6 + the U1 catalog walk and U2 suggest proof updated as the ritual; VariorumMCPTests 39/5. MUTATION-CHECKED (2 breaks, both caught): edit_take's guard dropped → the once grant never spends (2 issues); move's guard deciding the source only → a block escapes into an unshared note (7 issues); restored |
 | R5 | `with_commits` on read_note's structured view · `include_commits` on search · sections (`create_section`, a `section_id` arg on `add_note_to_book`, section facts in list_notes + the wire document) | DONE (`b6bf4762`; `create_section` + `section_id` landed in R4 `67979514`) — `MCPReadCarriageTests` 3/3; MUTATION-CHECKED: `includesSavepoints` forced on → the never-without-the-facet pin red; the readable-books filter removed → the unreached book's name leaks, pin red (4 issues); restored |
-| R6 | `create_note` EITHER payload (the text format or a wire-document subset — multi-paragraph blocks, names, labeled takes, `entry_date`) | DONE (this commit) — `text` (U2's plain prose, unchanged) XOR `blocks` (the wire-document subset) + `entry_date` (a real `yyyy-MM-dd` day) on either; core `createStructuredNote` rides 13n-a's `mintDocument` with a same-transaction `finish` (names, date); pins: `MCPEditActsTests` +1, `MCPEditServerTests` +1 |
-| R7 | THE BOUNDARY MARKER — format v2 in `Domain/VariorumDocument` (marker mode only when needed; byte pins untouched; round-trip pins; the plain export never carries it) | DONE (`252d08e1` + the wire leg, this commit) — every 13n-a byte pin green UNTOUCHED (77/6); `BoundaryMarkerTests` 9/9 incl. the exact-inverse sweep over >1000 marker-mode notes; `import_document`/`read_note` round-trip v2 byte for byte over the socket (`MCPEditServerTests` +1). MUTATION-CHECKED (3 breaks, all caught): marker mode always on → the v1 byte pins red (11 issues across 3 suites); the escape disabled → 3 issues; the after-boundary strip removed → 11 issues; restored |
-| R8 | App faces: the grant sheet's EDIT rung · "Allow AI here" (the note ▾ menu) · the ACTIVITY face + its "all N ›" road · the all-N pass over U1's lists · receipts for the new acts | BUILT (this commit; receipts `1dc13a1a`) — Mac app + test target compile; `MCPEditFacesTests` (4) + the U2 rung pin's ritual update RUN at R9 — PENDING; the walk covers the faces |
-| R9 | End of unit: headless suites, Mac focused suites (stage), the pre-flight walk (stage, both voices) | NOT STARTED |
+| R6 | `create_note` EITHER payload (the text format or a wire-document subset — multi-paragraph blocks, names, labeled takes, `entry_date`) | DONE (`95ef94ba`; the op-level date boundary `45f06ec9`) — `text` (U2's plain prose, unchanged) XOR `blocks` (the wire-document subset) + `entry_date` (a real `yyyy-MM-dd` day) on either; core `createStructuredNote` rides 13n-a's `mintDocument` with a same-transaction `finish` (names, date); pins: `MCPEditActsTests` +1, `MCPEditServerTests` +1 |
+| R7 | THE BOUNDARY MARKER — format v2 in `Domain/VariorumDocument` (marker mode only when needed; byte pins untouched; round-trip pins; the plain export never carries it) | DONE (`252d08e1` + the wire leg `902f0d30`) — every 13n-a byte pin green UNTOUCHED (77/6); `BoundaryMarkerTests` 9/9 incl. the exact-inverse sweep over >1000 marker-mode notes; `import_document`/`read_note` round-trip v2 byte for byte over the socket (`MCPEditServerTests` +1). MUTATION-CHECKED (3 breaks, all caught): marker mode always on → the v1 byte pins red (11 issues across 3 suites); the escape disabled → 3 issues; the after-boundary strip removed → 11 issues; restored |
+| R8 | App faces: the grant sheet's EDIT rung · "Allow AI here" (the note ▾ menu) · the ACTIVITY face + its "all N ›" road · the all-N pass over U1's lists · receipts for the new acts | DONE (`763e3f91`; receipts `1dc13a1a`; walk fixes W-1/W-2 `e7e6b72c`) — `MCPEditFacesTests` 4/4 + the U2 rung pin's ritual update green; walked in both voices (captures 01–16). **The all-N pass:** U1's three capped lists (requests · clients · shared) each already open `MCPFullListSheet` over `allPending`/`allClients`/`allShared` — no gap; the activity road is the fourth on the same sheet |
+| R9 | End of unit: headless suites, Mac focused suites (stage), the pre-flight walk (stage, both voices) | DONE — headless finals above. **Mac (stage held, `-only-testing`):** 151 tests / 12 suites — CapabilityRegistryTests, ChordLegibilityTests, CommitBarLayoutTests, DocumentImportDoorTests, FannedDefaultsTests, FannedDefaultsBoardTests, ImportFacesTests, MCPAskAndReceiptTests, MCPEditFacesTests, MCPPaneTests, MergeArrangementTests, PDFExportFaceTests — the ONE red the RULED flip (`PDFExportFaceTests`' takes-markdown expectation: its fixture's first block holds a blank line, so the takes export is v2 now — updated as a justified edit `ff6fc046`; the rendered and PLAIN expectations, and so the PDF, byte-identical), 10/10 after; post-walk-fix run 67/5 (MCPPaneTests, MCPAskAndReceiptTests, MCPEditFacesTests, SettingsShapeTests, CapabilityRegistryTests), 0 skipped. Two self-review fixes after the walk, each red-on-old: `45f06ec9`, `2328f26c` (below). The pre-flight walk below |
 
 ### Decisions, forks, PROVISIONALs
 
-*(recorded as they land)*
+**The one fork** (the boundary marker + the seven build calls) went to the
+orchestrator before the format work and came back RULED whole as AF-10
+(`1d3f4913`); built as ruled. Everything below is within the mandate.
+
+**PROVISIONALs (for the merge QUESTIONS bundle):**
+
+- **P-13nb-U3-1 — `edit_take` addresses ANY live active take of a reachable
+  note by `take_id`** (chosen or not) and replaces its WHOLE text (`text` =
+  the take's whole new text, `expected_text` = its whole current text);
+  archived, locked and sealed refuse (`editableVariant`). Alternatives: (b)
+  the chosen take only; (c) a span-replace form (old → new substring) —
+  cheaper on the wire for a long take, but a second precondition class.
+- **P-13nb-U3-2 — the bracket commits STAY when ⌥⌘Z walks the edit back**
+  (I5: undo restores the buffer, never the history): Block History keeps
+  "before/after <client>'s edit" over an undone edit — the record of what an
+  AI did and she undid is hers. No alternative keeps I5; stated so she sees
+  the consequence.
+- **P-13nb-U3-3 — a ONCE edit grant is spent by an authorized call that
+  changes nothing** (`edit_take` with the buffer's own text, `set_block_name`
+  to the current name): the guard runs first and stamps before the op sees
+  the no-op; the answer says `changed: false` — no commit, no entry, no
+  receipt. A REFUSED act spends nothing (the rollback takes the stamp with
+  it — pinned). Alternative: (b) spend only on a landed change (the guard
+  would defer its stamp to the op's end).
+- **P-13nb-U3-4 — `move_block` decides the DESTINATION note at EDIT too** (a
+  block arriving rearranges that note's existing text), never at write new.
+  The destination is decided only inside the act's transaction, so its
+  refusal raises no ask (the source's does). Alternatives: (b) the
+  destination at write new; (c) also raise an ask for the destination.
+- **P-13nb-U3-5 — `move_block` refuses a cross-WING move** (in the act's
+  transaction: "That note is in another wing — each wing is a separate
+  library, so a block can't move between them."). Wings isolate totally (the
+  sitting record §9; none of her block doors crosses one, and a block's
+  block-tag rows name its wing's vocabulary). Self-review fix `2328f26c`,
+  red-on-old. Alternative: (b) allow it with the per-item wing doors'
+  tag adoption by path — a new crossing door, hers to rule.
+- **P-13nb-U3-6 — `move_block`'s addressing:** exactly one of
+  `after_block_id` · `before_block_id` · `note_id` (+ `at`: start | end,
+  default end); a same-note target runs `reorder`, a cross-note one
+  `moveBlock`; ONE entry "<client>'s move".
+- **P-13nb-U3-7 — `create_section` sits at WRITE NEW** (scopes book · wing):
+  a chapter adds and changes nothing that exists; it takes the same
+  in-transaction guard as the edit acts (`guardBook`). Alternative: (b) edit
+  (it reorganizes her book).
+- **P-13nb-U3-8 — chapters reach the wire in three places only:**
+  `create_section`, `add_note_to_book`'s `section_id` (filing at ADD time,
+  carried through undo/redo by the entry's exact rows), and the read facts.
+  Filing an EXISTING member into a chapter (`assignPostToSection`) is NOT
+  built — a U4 candidate, her word on whether the wire needs it.
+- **P-13nb-U3-9 — the structured `create_note`'s takes carry their label AS
+  GIVEN** (no "<client> · suggested" stamp — P-13nb-U2-12 marks suggestions
+  on HER blocks; a client-minted note is wholly the client's writing).
+  Empty-text takes drop (`mintDocument`'s rule); `blocks: []` mints an empty
+  note (⌘N's shape, as an empty `text` does). Alternative: (b) stamp the
+  client's name on every take the wire mints.
+- **P-13nb-U3-10 — `entry_date`** is canonical `yyyy-MM-dd`, validated on the
+  wire AND at the op (Phase 9b's day-key boundary — self-review fix
+  `45f06ec9`, red-on-old); create-time only (`set_entry_date` on an existing
+  note is U4's, edit rung).
+- **P-13nb-U3-11 — the commit carriage's field names and units:**
+  `with_commits` gives each commit `commit_id · kind · message · created_at ·
+  length · text | text_omitted`; the 100k budget counts Swift Characters and
+  fills GREEDILY newest-first (a commit too large for what remains is
+  omitted while a later, smaller one may still ride); `include_commits`'
+  savepoint passages carry `commit_id` + `saved_at` beside the block address.
+  (AF-10 (d) ruled the shape; the names are mine.)
+- **P-13nb-U3-12 — the activity face's caps:** the newest 5 coalesced lines
+  over the newest 50 rows; "all N ›" — N is the log's ROW count (≤ the
+  store's 500-row cap), the sheet coalesced the same way; a refused call
+  names its tool verbatim ("claude-code was refused add_take on “ch 8”" —
+  the MCP room's register). Alternatives: (b) N counts lines; (c) a refusal
+  in words ("couldn't add a take").
+- **P-13nb-U3-13 — the activity coalescing rule:** consecutive rows with one
+  client · act · target · outcome read as ONE line with a count, with NO
+  time window (the receipts' 120-s window is a bar rule, not the log's); the
+  stamp shown is the newest row's.
+- **P-13nb-U3-14 — the new acts' words** extend P-13nb-U2-5's family: undo
+  labels "<client>'s edit / divide / merge / move / delete / block name /
+  chapter"; receipts "edited a take" · "divided a block" · "merged two
+  blocks" · "moved a block" · "deleted a block" · "named a block “…”" /
+  "cleared a block's name" · "made the chapter “…”"; the import door's new
+  refusal "it was written by a newer Variorum (format version N) — update
+  Variorum to import it". App voice, 13s-a sweepable.
+- **P-13nb-U3-15 — "Allow AI here" offers the APPROVED clients that do not
+  already reach the note at read** (a client reaching it at any rung is not
+  offered); the receipt "<client> may read this note once." (AF-10 (e) ruled
+  the shape; the words are mine).
+- **P-13nb-U3-16 — the edit tools carry `destructiveHint: true`** (the MCP
+  annotation — every act is undoable and the delete a tombstone, but a
+  client's host may confirm before calling: honest about the rung).
+  Alternative: false (undoable ⇒ not destructive).
+- **P-13nb-U3-17 — the pane's two sentences kept TRUE under edit** (walk
+  W-1/W-2): the subtitle "The local MCP server: which clients may connect,
+  what each may read and change, and the command that sets up Claude Code."
+  and the toggle's "… and AI work lands as takes beside your own — a client
+  changes your text only where you grant it edit, with a commit before and
+  after every change." Her words to re-voice at 13s-a.
+
+**Decisions within the mandate (recorded as they land):**
+
+- **The guard seam is rung-wide on the edit acts** (AF-10 (a)): every edit
+  act is decided TWICE — the snapshot decision speaks refusals and raises
+  asks (`spendsAfter: false`), then `guardEdit` re-resolves every touched
+  note from the act's own rows INSIDE the act's write transaction, decides
+  each at EDIT through the pure rule, and stamps any once grant there,
+  atomic with the act (no crash corner on this rung). `guardedBy:` defaults
+  nil on her doors; no redo carries it; `deleteBlock` threads it through the
+  forward `performDeleteBlock` only.
+- **divide/merge are her keyboard's compositions** (`KeepOnTopDivide` /
+  `CarryAllMerge` over `divideW` / `mergeCeremony`; the plain ops when
+  fanless), relabeled by `registeringUndo(as:)` — `withCompound` over the
+  act's own registration, never a second inverse. The fanned divide's
+  `measured` guard re-checks the shown take's text in-transaction.
+- **The "after" commit is stamped +1 ms** so `(created_at, id)` always reads
+  before → after in Block History.
+- **An AI edit churns like any text edit** (AF-10 (g)): `churnCost` is the
+  inserted + deleted UTF-16 units between the common ends — the editor's
+  delta's whole-buffer equivalent, ∝ the edit. (So an AI rewrite CAN cross
+  her 80% threshold — the suggest takes, P-13nb-U2-7, never do.)
+- **Every MCP write registers one undo entry** (P-13nb-U2-4 carried):
+  `set_block_name` and `create_section` included, though her own name and
+  chapter gestures stay outside the stack.
+
+### The U3 pre-flight walk (dev-store Debug build `DerivedData/vx124-u3`, 2026-10-09 ~21:50–22:45, under my own stage claim — the orchestrator's live real-client round is still owed)
+
+Captures (gitignored): `notes/plans/13n-b-screens/u3/01…16-*.png`; the
+scripted client's transcripts `client/out-01…10-*.txt` + the client itself
+`client/mcpwalk.py` (spawns the REAL embedded shim over stdio, self-named
+`u3-walk`); the real export `files/a letter.md`. Author guard + per-click
+guard throughout; her `/Applications` app never running; my instance quit by
+identity each time.
+
+- **01** `u3-walk` connects → pending, zero tools (`out-01`). **02** Approve…
+  → the sheet's four rungs, Edit's mockup §3 sentence; granted edit on "o
+  ladrão de raios", always. `out-02`: the 19 tools listed under edit;
+  `out-03`: `list_notes` rows carry `section_id`/`section_name` ("1 o
+  semideus"); `out-04`: `read_note with_ids`.
+- **Edit under insurance:** `out-05` — `edit_take` on an existing take
+  (only "after" — the take's last commit already held its old text: the
+  standing dedupe), then the SAME stale read refused in the app's words
+  ("The text changed while that gesture was landing — nothing was altered;
+  try it again on the current text."), then `read_note with_commits`
+  showing the commits. `out-06` — `create_section` "3 cartas" and a
+  structured `create_note` "a letter" (a two-paragraph first block, a "pt"
+  take) filed under it. `out-07`/`out-08` — the note reads back as v2
+  (`{v:2}` + `--- next block ---`); `edit_take` on its never-committed take
+  → BOTH brackets; **05** Block History: "after u3-walk's edit" over
+  "before u3-walk's edit".
+- **A structural act walked back:** `out-08` `divide_block` at "It has been"
+  → **03** landed (and the note now reads v1 — no block holds a blank line,
+  marker mode follows need); ONE ⌥⌘Z → **04** "Undid: u3-walk's divide".
+- **The v2 round trip through the REAL door:** "Markdown with Takes…" wrote
+  `files/a letter.md` (`{v:2}`, the marker, the Alternates section) → File ▸
+  Import… → **06** the Pool note "a letter", block 1/2 holding BOTH
+  paragraphs (one block, as written).
+- **Allow AI here:** **07** the note ▾ submenu on the imported note naming
+  `u3-walk` → **08** "u3-walk may read this note once."; `out-09` lists it,
+  `out-10` reads it once and the second read refuses.
+- **The pane:** **09** `u3-walk` "1 shared place"; **10** the Activity section
+  (coalesced runs, a refusal named by tool); **11** the "all 77 ›" sheet.
+- **Terminal voice:** **12** pane, **13** activity, **14** the grant sheet's
+  Edit rung, **15** the Allow AI here submenu. Voice restored to Study.
+  **16** the pane after the W-1/W-2 fixes.
+
+**The walk's two findings — both FIXED (`e7e6b72c`), pinned where pinnable:**
+1. **W-1** — the pane's subtitle said "what each may read" under write and
+   edit rungs → "what each may read and change" (P-13nb-U3-17).
+2. **W-2** — the toggle's "no client can overwrite your text" became false
+   the moment edit could be granted → says when it can and what guards it
+   (P-13nb-U3-17; `MCPAskAndReceiptTests`' U2 pin updated as the ritual).
+
+**LEFT in the dev store (deliberate, harmless):** the `u3-walk` client
+(approved; edit on "o ladrão de raios", always; its read·once note grant
+spent); the "3 cartas" chapter and the note "a letter" in that book (its
+bracket commits); the imported Pool note "a letter"; the edit on the "o
+museu" note's take (its "after" commit); one quiet insurance commit holding
+stray keystrokes from the walk incident below. `claude-code`'s and
+`u2-walk`'s grants untouched. Server ON, voice Study.
+
+### Open items for the orchestrator
+
+- **The live acceptance leg** (an edit under insurance + the W-series
+  equivalent with a real Claude Code client): register the Debug shim as U1's
+  round did, grant EDIT on a book, have the client `read_note with_ids` →
+  `edit_take` (watch Block History for the two named commits) → a
+  `divide_block` or `move_block` → ⌥⌘Z once in the app. A stale
+  `expected_text` refusal is worth one deliberate call.
+- **QUESTIONS at merge:** P-13nb-U3-1…17.
+- **For the cold reviewer, where to look first:** (a) the guard ordering in
+  `MCPWriteTools+Edit` — snapshot decide (no spend) → the act with
+  `guardEdit` in-transaction (spend atomic); is there any edit act whose
+  WRITING op does not receive the guard, or a path where a refusal thrown
+  inside the guard escapes `land`'s mapping? (b) the fanned compositions in
+  `Operations+MCPEdits` read the fan OUTSIDE the transaction
+  (`liveActiveFan`, `renderedVariant`): a take added by a sync apply between
+  read and act stays on A in lineage (divide-W's parking) or with the
+  released sources (merge) — nothing is lost, but the composition can be one
+  take short; the `measured` guard re-checks only the shown take's text;
+  (c) `editTakeUnderInsurance`'s dedupe (`isDirty`) and its undo's insurance
+  pre-image; (d) format v2's escape and `markedText`'s run boundaries, the
+  header-only version-token reading; (e) the greedy commit budget
+  (P-13nb-U3-11); (f) U2's eight ops still decide-then-act (P-13nb-U2-8,
+  unchanged).
+
+### Self-assessment (the implementer's, before the cold review)
+
+- **The edit-half PROOF is real and mutation-checked:** a client holding
+  suggest or write new on the whole wing calls every edit tool aimed at her
+  takes and blocks; each refuses at the rung, every take, placement, block
+  and commit byte-identical after. Nine deliberate breaks across R2/R4/R5/R7,
+  nine catches (the table above), plus two self-review fixes red-on-old.
+- **What the walk caught that the pins did not:** W-1/W-2 — both copy truths
+  no headless pin reads (a sentence true at U2 that U3 made false).
+- **What self-review caught after the walk:** a permissive day-key door at
+  the op (`45f06ec9`) and a wing crossing (`2328f26c`) — both reachable only
+  through the wire's validation or a two-wing grant, both now refused where
+  the facts are.
+- **Scope held:** zero lines in `Sources/VariorumCore/Sync/`, zero custody,
+  zero editor seam (`EditorTextView`/`BlockRangeIndex`/`PaneSurface`
+  untouched), zero lockstep (no migration, `lockstepVersion` untouched), the
+  export pin intact (no export writes a row), every 13n-a byte pin green
+  UNTOUCHED.
 
 ### Machinery notes
 
-*(recorded as they happen)*
+- **A walk RULE BREACH, recovered:** I typed after a context-menu click
+  without a capture proving the menu had opened; it had not, and the
+  keystrokes landed in the fixture note being walked. Recovered with ⌥⌘Z ×3
+  (the A12 insurance confirm answered "Undo") — the note fully restored, one
+  quiet insurance commit holding the stray text (left, above). The rule
+  exists for exactly this; every later menu step waited on a capture.
+- **Capture geometry:** the displayed captures are scaled 1.38× — screen
+  point = window origin + displayed px × 0.69. Clicking by displayed pixels
+  missed until that was measured.
+- **Quit refused (−128) once:** the just-in-time ask sheet was up; Esc
+  ("Don't allow") dismissed it, then quit by identity.
+- **A personal notification banner** appeared in one full-screen grab; I
+  cropped the window out and deleted the full grab.
+- **The first `edit_take` on "o museu" deduped its "before"** (the take's
+  last commit held its text) — correct behaviour; the walk used a
+  never-committed take on the client's own note to show both brackets.
