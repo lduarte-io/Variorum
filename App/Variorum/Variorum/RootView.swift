@@ -100,6 +100,12 @@ struct RootView: View {
     @State private var noteBoxReport: NoteBoxReport?
     @State private var noteBoxDoor: NoteBoxDoor?
     @State private var noteBoxFacts = NoteBoxFactsModel()
+    /// **VX-141 — the book that has said "no box"** while it was the focused
+    /// pane's book (Read, which shows none). Without this the window cannot
+    /// tell a book that has not spoken YET — whose slot is held — from one
+    /// that has spoken and shows nothing. A book that LEAVES the pane takes
+    /// its word with it, so its next visit holds the slot again.
+    @State private var noteBoxDeclinedBy: String?
 
     struct BookAscent: Equatable {
         let bookID: String
@@ -664,11 +670,32 @@ struct RootView: View {
     private func adoptNoteBox(
         _ bookID: String, _ report: NoteBoxReport?, _ door: NoteBoxDoor?
     ) {
+        // VX-141: a nil from the book the focused pane SHOWS is its "no box"
+        // word (Read); a nil from any other book is a departure (its
+        // `.onDisappear`, or a pane that lost focus) and clears that book's
+        // word. A report is always a "yes".
+        if report == nil {
+            if focusedReadingID == bookID {
+                noteBoxDeclinedBy = bookID
+            } else if noteBoxDeclinedBy == bookID {
+                noteBoxDeclinedBy = nil
+            }
+        } else if noteBoxDeclinedBy == bookID {
+            noteBoxDeclinedBy = nil
+        }
         if report == nil, noteBoxReport != nil, noteBoxReport?.readingID != bookID {
             return
         }
         noteBoxReport = report
         noteBoxDoor = door
+    }
+
+    /// The book the FOCUSED pane is showing, if it is showing one.
+    private var focusedReadingID: String? {
+        guard case .reading(let showing)? =
+                router.workspace.selections[router.workspace.focusedPane]
+        else { return nil }
+        return showing
     }
 
     /// The box's content, or nil when no book in an editing mode is showing —
@@ -679,11 +706,27 @@ struct RootView: View {
         // behind by a book that is no longer on screen — a pane switched to
         // the Library, a second window taking key — can never leak into the
         // one column this window has.
-        guard case .reading(let showing)? =
-                router.workspace.selections[router.workspace.focusedPane],
-              let report = noteBoxReport, report.readingID == showing
-        else { return nil }
+        guard let showing = focusedReadingID else { return nil }
         let tokens = theme.tokens(for: scheme)
+        guard let report = noteBoxReport, report.readingID == showing else {
+            // **VX-141 — THE SLOT IS HELD until the book has spoken.** Her
+            // report: *"there is a jump when you go from a note to a book
+            // (the this note section briefly starts to minimize and then
+            // snaps back)"*. The rail leaves in the very pass the selection
+            // changes, but the book publishes its report from its own
+            // `.onAppear` — a later pass — so the column used to draw a pass
+            // with NOTHING in the slot: the rail's group faded, the Open strip
+            // started up, and the box's arrival sent it back down. Book →
+            // note never did this (the rail renders in the pass the box
+            // leaves). So until the focused book speaks, the slot holds the
+            // box's empty face at the rail's height — what an opening book
+            // shows anyway — and the real report replaces it in place. A book
+            // that has said "no box" (Read) gets none, as before.
+            guard noteBoxDeclinedBy != showing else { return nil }
+            return AnyView(SidebarNoteBox(
+                tokens: tokens, subjectKey: showing, state: .empty,
+                identity: nil, facts: nil, caretLabel: nil))
+        }
         // THE EDITOR UNDER THE CARET (`EditorRouter.editing` — its own
         // comment carries the measured reason it is not `active`). Gated on
         // the note the BOOK reported besides: an editor left standing on
