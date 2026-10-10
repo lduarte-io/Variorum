@@ -2609,8 +2609,21 @@ refusals; the etiquette gates are RULINGS, not suggestions.
 
 ## U4 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-**LIVE STATUS — IN PROGRESS.** Session: opus-implementer, 2026-10-10, cut
-from `f4078d61`. Baseline (the brief's): core 2,564/294 · VariorumMCPTests
+**UNIT CLOSED by the implementer — NOT DONE: (1) the LIVE acceptance leg
+with a REAL client (the W-series equivalent over Claude Code — the
+orchestrator's, under a held stage claim; my pre-flight drove the REAL
+embedded shim with a scripted client, `u3-walk`, never Claude Code itself);
+(2) the whole VariorumTests target (only the 212 tests / 19 suites pinning
+every app surface the diff touches ran, listed in S6); (3) the cold ladder;
+(4) deliberately not built (ruled out of v1 or named follow-ons): restore /
+promote a version on the wire (R-13nb-26 (d)), references read, callout
+carry, deleted comments, Compare targets (VX-130), a side-pane show; the
+tray's preserved-originals and archived-blocks sections as tray reads
+(P-13nb-U4-5 — originals surface through `with_lineage`).** Session:
+opus-implementer, 2026-10-10, cut from `f4078d61`; closed at the commit
+carrying this record. **Finals (headless, the whole package, on `61f9f48e`):
+core 2,580/295 · VariorumMCPTests 61/8 · workbook 40/6** — only the
+long-standing gated skips; the Mac app builds (codesign clean). Baseline (the brief's): core 2,564/294 · VariorumMCPTests
 45/6 · workbook 40/6, headless. Read whole before the first line of code:
 this plan top to bottom (R-13nb-1…26, AF-1…AF-10, the U1/U2/U3 records and
 live rounds), the memo, the format-schema prep, all six ladder records, the
@@ -2628,12 +2641,12 @@ door, the landing roads: `ShellRouter.adopt`, `PostDetailView.jump`,
 | S1 | Core: `put_back`'s acts (block + take, client-named undo, in-transaction guard), `save_version` relabeled, `set_entry_date` (undo + guard), file-into-chapter (PROVISIONAL), `set_book_rule` (AF-11 F-1) | DONE (`bcc83cb2`) — `MCPCarriageActsTests` 16/16; the four rule/section setters' row work extracted byte-identically (related core suites 215/40 green) |
 | S2 | The read carriage on the wire (AF-11 F-4): tray, lineage + ancestry (the uniform-stub rider), archived reach, lenses, versions list/read, book facts on list_books | DONE (this commit) — `MCPCarriageServerTests` 9/9 |
 | S3 | The write tools on the wire: put_back · set_entry_date (edit), save_version · file_note_in_chapter · set_book_rule (write new) + rung proofs | DONE (this commit) — the U2 suggest PROOF and the U3 edit-half PROOF grown as the ritual (justified edits); VariorumMCPTests 54/7 |
-| S3b | The J8 `lockedReading` words fix (AF-11 F-1 approved, red-on-old, Mac table) | NOT-STARTED |
+| S3b | The J8 refusal words (AF-11 F-1 approved): `lockedReading` joins the Mac table (her `ReadingsViewModel`/`DeletionRefusal` sentence) + its put-back twin `blockNotDeleted` joins the shared table ("That block is already back.") | DONE (`2f6cc53d`) — BOTH RED-ON-OLD (`MCPNavigationTests.aFinishedBooksAndAnAlreadyBackBlocksRefusalsSpeakTheAppsWords`: 2 issues on the pre-fix tables — the raw-enum fallback), green after; plus the wire's own words for the op refusals only the connected road meets (`MCPWireRefusalCopy`: postNotInReading · sectionNotFound/NotInReading · invalidTagName — new-door copy, pinned) |
 | S4 | Book-rule WRITE (AF-11 F-1) | DONE — folded into S1/S3 |
-| S5 | NAVIGATION (AF-11 F-2/F-3): show_in_app (VariorumMCP decision + hook), the app's delivery (note-at-block / takes / lens / book-chapter), the receipt's "Open ›" + "Show the AI's last change" (⌥⌘O after the sweep) | NOT-STARTED |
-| S6 | End of unit: headless suites, Mac focused suites (stage), the pre-flight walk (stage, both voices), record final | NOT-STARTED |
+| S5 | NAVIGATION (AF-11 F-2/F-3) | DONE — server half `68bffde8` (`MCPShowRule` + `show_in_app` + `MCPHostHooks.show` + every receipt's `show` target; `MCPShowServerTests` 5/5); app half `da884d05` + pins `2f6cc53d` (`MCPNavigator`, `MCPDoor.agentShow/openShow/showLastChange`, the Lenses/Takes/Book landings, "Open ›" on the receipt, ⌥⌘O; `MCPNavigationTests` 7/7) |
+| S6 | End of unit: headless suites, Mac focused suites (stage), the pre-flight walk (stage, both voices), record final | DONE — headless finals above; **Mac (stage held, `-only-testing`): 212 tests / 19 suites, 0 skipped** — MCPNavigationTests, CapabilityRegistryTests, ChordLegibilityTests, HelperCurrencyTests, MCPPaneTests, MCPAskAndReceiptTests, MCPEditFacesTests, ConfirmationsSettingTests, OpsRefusalTableIntegrityTests, VocabularySweepTests, CommandRoutingTests (+ TakesLandingTests), BookAscentTests, BookOutlineLandingTests, CompareLensesCorrectionTests, ShellDoorOwnershipTests, PaneSplitTests, DoorSetTests, StatusCenterTests, BookViewTests, TrashPurgeDoorsTests, RecoveryDoorsTests, NoteTrayTests, SettingsShapeTests (some names are files holding differently named suites — 19 suites ran); the walk below; one walk fix (W-1, `67e7f2eb`) and one self-review fix (`61f9f48e`, red-on-old) |
 
-### Forks returned to the orchestrator (2026-10-10) — PENDING rulings
+### Forks returned to the orchestrator (2026-10-10) — RULED as AF-11 (`aeea9dbf`), built as ruled
 
 - **F-1 — the book-rule WRITE's refusal set (GATES item 7's write half).**
   The brief's premise is that "gatherings/finished/sealed/wrong-kind refuse
@@ -2773,6 +2786,39 @@ door, the landing roads: `ShellRouter.adopt`, `PostDetailView.jump`,
   built PROVISIONAL): write new, scopes book · wing, the book AND the note
   each decided at write new inside the act's transaction (a note the client
   cannot reach is never reorganized); `section_id: null` unfiles.
+- **P-13nb-U4-11 — the lens target's column rule** (AF-11 F-3, logged as
+  ruled): the lens's column if one shows it; else a new column (her "+
+  Column → lens"); else, four columns full, the LAST column swapped in place
+  (her R83 door) — `TakesViewModel.showLens`, pinned.
+- **P-13nb-U4-12 — show_in_app's words and shape**: READ rung, listed with
+  any read reach, never spending a once grant; a refusal is the whole answer
+  (`MCPShowRule.notFrontmostWords` / `otherWindowWords` /
+  `unavailableWords` — the MCP room's technical register, 13s-a sweepable);
+  frontmost = `NSApp.isActive` AND `NSApp.keyWindow` is a REGISTERED FULL
+  window (`WindowRegistry.entry(for:)` — Settings, a note-only or quick-note
+  window key ⇒ `frontmostOtherWindow`, refused). The tool's description
+  tells the client to call it only when she asks; "never automatic" is
+  enforced as "only an explicit client call" (the server cannot know who
+  asked).
+- **P-13nb-U4-13 — the receipt's door** (AF-11 F-2): the word "Open ›"; the
+  line stays a RECEIPT (quiet / toast / off per her setting); on a crowded
+  bar a door-carrying line truncates in the MIDDLE so "⌥⌘Z undoes" survives
+  (walk W-1); where each act's door goes (`MCPWriteReceipt.show`): a take or
+  a put-back take → the note's Takes at the block; a comment, edit, divide,
+  merge, move, block name, put-back block → the note at the block; a lens →
+  the Lenses board; a note mint, import, tag, version, date, delete → the
+  note; a book mint/import, rule → the book; a chapter, a filing, an add to a
+  book → the book at that chapter. An `.unplaced` put back has no door.
+- **P-13nb-U4-14 — her press raises a window when it must**: a receipt's
+  "Open ›" and ⌥⌘O deliver into `WindowRegistry.creationRouter()` (raising
+  the full window when a note-only window is key — her creation doors' own
+  rule); only the AGENT's show is barred from raising.
+- **P-13nb-U4-15 — "Show the AI's Last Change"** (⌥⌘O, AF-11 F-2): menu
+  verb in Title Case beside ⌥⌘Z in the Edit menu, the ⌘/ helper row "show
+  the AI's last change (what a connected client last wrote)"; app scope,
+  `takesAccess: nil` (the app-scope exemption); session-scoped `lastShow`,
+  alive after the fade and under receipt style off; with none, the
+  unavailable note is spoken.
 - **P-13nb-U4-10 — `set_entry_date`** is EDIT (R-13nb-26 (b)), allowed under
   a seal exactly as her own date door (N34's class); `null` un-dates; a
   journal-fenced note refuses per the rule (pinned: the fence governs from
@@ -2800,3 +2846,159 @@ door, the landing roads: `ShellRouter.adopt`, `PostDetailView.jump`,
   `encode`s now check `isValidJSONObject` first).
 - **The harness clock:** `MCPHostHooks.now` (default the wall clock) feeds
   the tray's 30-day window; the server harness passes its world's "now".
+- **Navigation is composition over her roads, never a new mechanism**
+  (P-4): the note target is `ShellRouter.adopt(_:in:landing:find:)` (the 13o
+  passage road verbatim); takes = open the note (the adoption door), wait
+  for its detail to register (bounded 2 s), then her see-takes pair
+  (`pendingTakesLanding = .bloom` + `requestMode(.takes)`) — a board ALREADY
+  mounted consumes the parked landing on its change
+  (`TakesViewModel.consumePendingTakesLanding`); lens = the same open + a
+  parked, post-stamped `LensLanding` the Lenses board consumes (appear +
+  change), cleared by `registerDetail`/`unregisterDetail`/`noteMode` exactly
+  as `pendingTakesLanding` is; book/chapter = the adoption door to the book
+  + `ShellRouter.pendingBookChapter` handed to `BookView.revealSectionID`,
+  which switches to Outline and calls her one chapter-landing door
+  (`requestChapterReveal`). No editor-seam file touched
+  (`EditorTextView` / `BlockRangeIndex` / `PaneSurface` untouched).
+- **⌥⌘O's collision sweep** is recorded where the chord is bound
+  (`EditorCommands.keyEquivalent`): free across the table, every
+  `.keyboardShortcut(` in `Variorum/` + `Shared/` (no `o` chord at all), the
+  `NSMenuItem` keyEquivalents (none), the key overrides, and the system's
+  global chords / the Cocoa text bindings.
+
+### The U4 pre-flight walk (dev-store Debug build `DerivedData/vx124-u4`, 2026-10-10 ~01:58–02:50, under my own stage claim — the orchestrator's live real-client round is still owed)
+
+Captures (gitignored): `notes/plans/13n-b-screens/u4/01…20-*.png`; the
+scripted client's transcripts `client/out-01…17-*.txt` + the client
+`client/mcpwalk.py` (U3's — spawns the REAL embedded shim over stdio; the
+walk reused the approved `u3-walk` client and its edit-always grant on "o
+ladrão de raios"). Author guard + per-step guard throughout; her
+`/Applications` app never running; my instance quit by identity each time
+(socket gone after). AX + Screen Recording held by this host (probed first).
+
+- **Study.** **01** "o museu" open. `out-05`: `delete_block` (the middle
+  block) → `read_note with_tray` lists it with its text → `put_back` →
+  `landed: its_old_place`; **02** the block back in its own place and the
+  quiet receipt "u3-walk deleted a block and put back a block · ⌥⌘Z undoes
+  Open ›". **03** ONE ⌥⌘Z → "Undid: u3-walk's put back", the block back in
+  the tray (⌫1); **04** a second ⌥⌘Z → "Undid: u3-walk's delete", the note
+  whole (the walk's restore).
+- `out-06`: `save_version` → `with_versions` lists it; **05** Note ▸
+  Versions shows the moment ("Oct 10, 2026 at 2:01 AM · 3 blocks"); **06**
+  ⌥⌘Z → "Undid: u3-walk's version", the pane empty (restored).
+- **show_in_app, frontmost** (`out-07`): **07** posfácio opened in Write
+  with "texto de exemplo" SELECTED and the find bar armed — the 13o road.
+  **Backgrounded** (Finder frontmost, `out-08`): REFUSED "The author isn't
+  at Variorum right now, so nothing was moved — …"; **08** the dev window
+  inactive and unmoved.
+- **The offer door from the keyboard** (`out-09`): on the Bookcase, the AI's
+  `add_take` → **09** "u3-walk made 4 changes · ⌥⌘Z undoes  Open ›"; **09b**
+  the line faded; ⌥⌘O → **10** "o museu" in Takes with that block bloomed
+  and "u3-walk · suggested · walk" at the fan's end; **11** ⌥⌘Z undid the
+  take.
+- **The finished-book refusal in the app's words** (her row menu ▸ Finish,
+  then `out-10`): `file_note_in_chapter` and `create_section` both REFUSED
+  "This book is finished — reopen it first; if it's sealed, unseal it." (the
+  J8 fix, live); `set_book_rule` on the same finished book LANDED with
+  `intake_paused` said (AF-11 F-1's mirror, live); **13** ⌥⌘Z → "Undid:
+  u3-walk's book rule" (`out-11`: rule null again); the book Reopened by her
+  menu (restored).
+- **More targets**: **14** `show_in_app` book + chapter → the book opened in
+  Outline (on this short book every chapter fits the page, so "the chapter
+  at the top" cannot be seen — Outline's own landing, pinned upstream);
+  `save_lens` then **15** `show_in_app` lens → "abertura" on the Lenses board
+  with a "walk lens" column + its receipt; ⌥⌘Z undid the lens.
+- **Terminal.** **16** `show_in_app` at a block with "vasos gregos" selected;
+  **17** an AI comment's receipt — **W-1 found here**; **18** Bookcase,
+  fade, ⌥⌘O → "posfácio" at the block, the AI comment in the gutter; ⌥⌘Z
+  undid it; **19** the Edit menu: "Redo u3-walk's comment ⌥⇧⌘Z" and "Show
+  the AI's Last Change ⌥⌘O". After the W-1 fix (rebuild, relaunch): **20**
+  the same crowded bar reads "u3-walk left…· ⌥⌘Z undoes  Open ›"; undone.
+  Voice restored to Study (read back by AX: Study selected).
+
+**The walk's one finding — FIXED (`67e7f2eb`):**
+- **W-1** — beside a live selection's word count (Terminal, capture 17) the
+  door's width pushed the receipt's tail off the bar: "u3-walk left a
+  comment ·… Open ›" — the "⌥⌘Z undoes" the U2 walk's W-2 protects was the
+  part truncated. A door-carrying receipt now truncates in the MIDDLE
+  (capture 20); door-less receipts keep their tail truncation. Not pinnable
+  headless (a rendered width fact).
+
+**LEFT in the dev store (deliberate, harmless):** nothing of the walk's
+rows — every write was walked back by ⌥⌘Z and the book reopened; the
+`u3-walk` client and its grants as U3 left them; activity lines for the
+walk's calls; "abertura"'s Lenses view memory holds the scratch column the
+undone lens left (local view state); the Open strip's notes. Server ON,
+voice Study.
+
+### Open items for the orchestrator
+
+- **The live acceptance leg** (the W-series equivalent with a real Claude
+  Code client): `read_note with_tray` → `put_back` → ⌥⌘Z; `save_version` →
+  Note ▸ Versions; a finished book's `create_section` refused in the app's
+  words + `set_book_rule` landing with `intake_paused`; `show_in_app` at a
+  block with Variorum in front and again with it behind; an AI write, the
+  line faded, ⌥⌘O.
+- **QUESTIONS at merge:** P-13nb-U4-1…15.
+- **An observation, pre-existing (U2's receipt run), not fixed:** the
+  coalesced run counts acts she has since UNDONE — capture 09 reads "u3-walk
+  made 4 changes" where three of the four had been walked back (an undo
+  never resets `MCPDoor.receiptRun`). J8-adjacent copy truth; a one-line
+  reset on undo, or a ticket — yours to call.
+- **The closeout's canon delta:** AF-11 F-2's 18i nuance (an AI write line
+  is a receipt that carries a door).
+- **Follow-on tickets at closeout** (R-13nb-26 (d)/(e)): restore/promote a
+  version on the wire, references read, callout carry, deleted comments.
+
+### Self-assessment (the implementer's, before the cold review)
+
+- **The carriage reads are pinned end to end and the rider is real:** a
+  fenced, an unshared and a scrap far side produce one byte-identical stub
+  (mutation-checked: a stub that leaks the block id goes red).
+- **Mutation checks (4 breaks, all caught):** `restoreBlock`'s guard call
+  removed → the put-back guard pin red (3 issues); the beyond-grant stub
+  carrying the far block's id → the rider pin red; `show_in_app` spending a
+  once grant → the never-spends pin red (4 issues); `list_books`'
+  `include_archived` defaulting true → the U1 flip pin red. Each restored
+  from the committed tree.
+- **What self-review caught after the walk:** `file_note_in_chapter`'s two
+  sequential in-transaction guards spent a once WING grant in the first and
+  refused the second — a once write-new wing grant could never file a note
+  (`61f9f48e`, red-on-old 2 issues).
+- **What the walk caught that no pin could:** W-1 (a rendered width).
+- **Scope held:** zero lines in `Sources/VariorumCore/Sync/`, `Server/` or
+  `Persistence/` (no migration, `lockstepVersion` untouched), zero custody,
+  zero editor-seam files, the export pin intact, zero trailers (all
+  re-checked over `f4078d61..HEAD`).
+
+**For the cold reviewer, where to look first:** (a) `MCPWriteTools+Carriage`
+— every act's in-transaction guard (`trayGuard`'s home re-resolution on the
+act's own rows, `guardBookAndNote`'s union spend) and whether any write
+reaches past the rung or the scope; (b) `Operations.setBookRule` against her
+Save (`RuleEditorModel.save`): the three writes, their change tests, the ONE
+transaction, the adopt-or-mint path resolution, and the undo's raw column
+restore (no intake, seats stay); (c) `MCPNoteStructure.lineage`/`parents`/
+`farSides` — the far-side classification and the stub's uniformity
+(especially versions: `isVersionHistory` per placed far container); (d)
+`MCPDoor.agentShow` + `currentStanding` + `MCPNavigator.open`'s bounded wait
+(a note that never registers just gives up — the client was already told
+"shown"? NO: `agentShow` awaits the delivery and answers `.navigate` after
+it, but a timed-out open still answers navigate — worth a look); (e) the
+two U1 list flips and the `recencyPage` version fence under
+`include_archived`; (f) the receipt door's shape in `QuietReceiptLine`
+(idle stays zero-width; the middle truncation only when a door rides).
+
+### Machinery notes
+
+- No session death; no other writer in the worktree except the
+  orchestrator's AF-11 ruling commit (`aeea9dbf`, plan file only — pulled
+  with my uncommitted core edits stashed and popped cleanly).
+- Stage: claimed for the first Mac runs, renewed for the walk (150 min),
+  released after the final Mac run. TCC on this host: Accessibility +
+  Screen Recording held (probed before the walk); no prompt raised or
+  answered.
+- Walk lessons: a FULL-SCREEN capture (taken once to see a context menu)
+  showed her desktop — deleted at once, never kept; menus are captured with
+  `screencapture -R` over the menu's AX frame instead (capture 19). The
+  `show_in_app` frontmost leg needs nothing special: a client run from the
+  shell does not activate the terminal.
