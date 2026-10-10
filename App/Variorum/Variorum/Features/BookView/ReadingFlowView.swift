@@ -1253,10 +1253,15 @@ struct FlowPostView: View {
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded
         })
-        // 13g cold review R1-4: the ONE note-naming surface batch 7's sweep
-        // missed (it rendered "" rather than "Untitled", so the grep never
-        // saw it) — the display brain answers here like everywhere else.
-        .help(entry.displayTitle)
+        // VX-142 (the VX-143 run — her report: "hovering with the cursor needs
+        // to not keep showing hints in read mode on a book - covers the text
+        // any time your cursor is over it"): NO hover hint on the prose. This
+        // view IS the note's whole text, so the `.help(entry.displayTitle)`
+        // it carried since Phase 13 B3 dropped the note's title under the
+        // cursor wherever it rested on the page, again after every move. The
+        // page is for reading (R2: a finished book is nothing but the text);
+        // the navigator still names every note. PROVISIONAL that no hint
+        // survives anywhere on the flow — the record's disposition.
         .task(id: entry.postID) {
             // The rendered projection per BLOCK (renderedText semantics —
             // chosen takes; blank takes and gaps contribute nothing), each

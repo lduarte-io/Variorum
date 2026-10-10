@@ -20,6 +20,7 @@
 //
 
 import AppKit
+import Dependencies
 import Foundation
 import SwiftUI
 import Testing
@@ -35,17 +36,24 @@ struct ReadFlowHoverHintTests {
 
     @Test func theFlowsProseCarriesNoHoverHint() async throws {
         let db = try AppDatabase.inMemory()
-        let session = AppSession(database: db)
-        let entry = Queries.ReadingEntry(
-            postID: "vx142-post", title: Self.sentinelTitle,
-            entryDate: nil, sectionPath: nil)
-        #expect(entry.displayTitle == Self.sentinelTitle, "the fixture's title reaches the display brain")
-        let post = FlowPostView(
-            session: session, entry: entry, page: .light,
-            onWake: { _ in }, onLoaded: { _ in })
-        await SurfaceComposition.host(post, size: NSSize(width: 680, height: 400))
-        let composed = SurfaceComposition.text(of: post.body)
-        #expect(!SurfaceComposition.carries(Self.sentinelTitle, in: composed),
-                "the note's prose carries a hover hint naming the note — the tooltip that covers the text")
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let entry = Queries.ReadingEntry(
+                postID: "vx142-post", title: Self.sentinelTitle,
+                entryDate: nil, sectionPath: nil)
+            #expect(entry.displayTitle == Self.sentinelTitle,
+                    "the fixture's title reaches the display brain")
+            let post = FlowPostView(
+                session: session, entry: entry, page: .light,
+                onWake: { _ in }, onLoaded: { _ in })
+            await SurfaceComposition.host(post, size: NSSize(width: 680, height: 400))
+            let composed = SurfaceComposition.text(of: post.body)
+            #expect(!SurfaceComposition.carries(Self.sentinelTitle, in: composed),
+                    "the note's prose carries a hover hint naming the note — the tooltip that covers the text")
+        }
     }
 }
