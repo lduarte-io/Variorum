@@ -22,14 +22,19 @@ nonisolated enum MCPPaneCopy {
 
     /// The toggle (mockup §1, verbatim).
     static let enableTitle = "Enable the MCP server"
-    /// The toggle's sentence — mockup §1 VERBATIM since U2 (P-13nb-U1-12's
-    /// U1-true form retired): the write rungs exist, and AI work lands as
-    /// takes beside her own.
+    /// The toggle's sentence — mockup §1's words, kept TRUE to what the
+    /// server serves (P-13nb-U1-12's rule: U1 trimmed it to the read rung,
+    /// U2 restored the mockup once the write rungs made it true). U3 walk
+    /// finding W-2: "no client can overwrite your text" stopped being true
+    /// the moment edit could be granted, so the clause says when it can —
+    /// and what guards it (R-13n-7's brackets). PROVISIONAL P-13nb-U3-17,
+    /// her words to re-voice at 13s-a.
     static let enableBlurb =
         "Runs a local MCP server while Variorum is open, so clients like Claude Code can read "
         + "and write here through Variorum's own operations. Nothing is readable until you grant "
-        + "it, every grant is revocable, and no client can overwrite your text \u{2014} AI work "
-        + "lands as takes beside your own."
+        + "it, every grant is revocable, and AI work lands as takes beside your own \u{2014} a "
+        + "client changes your text only where you grant it edit, with a commit before and after "
+        + "every change."
 
     /// The status line beside the toggle (mockup §2).
     static func status(_ state: MCPDoor.ServerState) -> String {

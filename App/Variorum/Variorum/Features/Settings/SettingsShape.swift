@@ -105,8 +105,11 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         // 13i-d U6 (a) — found on the walk: the door this names mints a
         // GATHERING (its words are "Make a Gathering…").
         case .tags: "The whole tag hierarchy: create, rename, re-parent, and make a gathering from tags."
-        case .mcp: "The local MCP server: which clients may connect, what they can read, and the command "
-            + "that sets up Claude Code."
+        // 13n-b U3 walk finding W-1: "what they can read" stopped being
+        // true when the write rungs landed (U2) — a client may change what
+        // it is granted now, up to edit.
+        case .mcp: "The local MCP server: which clients may connect, what each may read and change, and the "
+            + "command that sets up Claude Code."
         case .protection: "The passphrase, how the library locks, and the ways back in."
         case .dataSafety: "Backups, how fresh they are, and what restoring one does."
         case .diagnostics: "Crash reports \u{2014} off unless you turn them on, and never sent without you."

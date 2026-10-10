@@ -174,8 +174,11 @@ struct MCPAskAndReceiptTests {
         #expect(MCPPaneCopy.rungDetail(.writeNew) == "it can also make new notes, apply tags and build books")
         #expect(MCPPaneCopy.confirm(verb: "Grant", rung: .suggest, place: "the lightning thief", duration: .connection)
                 == "Grant suggest in “the lightning thief” while connected", "mockup §3's confirm")
-        #expect(MCPPaneCopy.enableBlurb.hasSuffix("AI work lands as takes beside your own."),
-                "mockup §1 verbatim again (P-13nb-U1-12 retired)")
+        // U3 walk W-2 (justified edit, the ritual): the mockup's words stay,
+        // and the sentence stays TRUE now that edit can be granted.
+        #expect(MCPPaneCopy.enableBlurb.contains("AI work lands as takes beside your own"))
+        #expect(MCPPaneCopy.enableBlurb.contains("only where you grant it edit"))
+        #expect(!MCPPaneCopy.enableBlurb.contains("no client can overwrite your text"))
         #expect(MCPPaneCopy.rungWord(.suggest) == "read and suggest")
     }
 
