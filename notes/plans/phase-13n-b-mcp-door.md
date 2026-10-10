@@ -3120,3 +3120,40 @@ a ratified contract line (no longer pending her word at the bundle).
 — P-13nb-U4-13 (the word "Open ›", per-act targets, middle truncation),
 P-13nb-U4-15 (⌥⌘O's verb wording and helper row), and the chord itself
 remains subject to her veto as any chord is.
+
+## R-13nb-28 — HER OVERNIGHT MANDATE (2026-10-10, mid-U4-ladder-round-2)
+
+Her words, verbatim: "excellent. continue the phase overnight, ruling
+provisionally. Please prepare a handoff with explanations on how to test
+and run this for me - I likely won't plan on waking your session again and
+will go through everything with a new issue. I did start some bug tests in
+the background, but told them to not merge to main - you have the stage for
+reinstalling and simply generally, I don'tw ant to disrupt you. if you need
+a fourth review you can have one."
+
+**The orchestrator's reading (each leg provisional where her letter is
+short, for her confirmation in the new issue):**
+- **(a)** The phase CONTINUES overnight under the away-run doctrine:
+  PROVISIONAL-and-continue everything short of an author-only hard stop;
+  everything genuinely hers is HELD and BUNDLED into the handoff checklist.
+- **(b)** The author handoff (`notes/handoffs/phase-13n-b-handoff.md`)
+  gains a first-class **HOW TO TEST AND RUN** section — her own road into
+  the MCP door (setup, grants, rungs, a suggested first round, the suites)
+  — self-contained for a fresh session; her Percy-grade round and the
+  ratification bundle ride a NEW issue; this session is not woken again.
+- **(c)** Her background bug-test sessions are barred (her word) from
+  merging `main`, so the closeout merge is clean to take; the closeout
+  merges the PR per the ritual (merge commit) and hard-stops.
+- **(d)** "You have the stage for reinstalling": the stage is this
+  session's overnight, INCLUDING the install refresh. Read WITH the
+  standing lockstep rule (the §12 pair never splits — an install refresh
+  never strands her build ahead of the mirror): this authorizes the DEPLOY
+  BUNDLE at this window — artifact 16 mirror → installs refresh → the
+  SyncSpec §12 record with the marker verified 13 — IF AND ONLY IF the
+  mirror road is executable without her hands (credentials already seated
+  on this machine). If the mirror needs her hands, BOTH halves stay HELD
+  and the handoff carries the exact two-command window for her. PROVISIONAL
+  — the conservative reading of a one-word grant over a never-pre-authorized
+  event.
+- **(e)** The U4 ladder's cap extends to a FOURTH round at the
+  orchestrator's discretion (the 13x precedent, her word).
