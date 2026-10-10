@@ -64,7 +64,9 @@ struct MCPWriteTools: Sendable {
         case addTake(blockID: String, text: String, label: String?)
         case addComment(blockID: String, text: String)
         case saveLens(noteID: String, name: String, takeIDs: [String])
-        case createNote(title: String?, text: String, place: Place)
+        /// U3 (R-13nb-11 G-2): EITHER payload — plain prose, or the
+        /// wire-document subset — and an optional entry date (R-13nb-26 (b)).
+        case createNote(title: String?, payload: NotePayload, entryDate: String?, place: Place)
         case importNote(VariorumDocument.NamedDocument, place: Place)
         case importBook(VariorumDocument.Book, wingID: String)
         case applyTag(noteID: String, path: String)
@@ -86,6 +88,15 @@ struct MCPWriteTools: Sendable {
             case .addNoteToBook: "add_note_to_book"
             }
         }
+    }
+
+    /// `create_note`'s two payloads (R-13nb-11 G-2).
+    enum NotePayload: Sendable, Equatable {
+        /// Plain prose: each paragraph a block (the bulk rule — paste's road).
+        case text(String)
+        /// The wire-document subset: blocks as given (multi-paragraph
+        /// welcome), with names and labeled takes.
+        case blocks([Operations.MCPNoteBlock])
     }
 
     /// Where a creative act lands.
@@ -119,8 +130,18 @@ struct MCPWriteTools: Sendable {
             return .saveLens(
                 noteID: try requiredString(args, "note_id"), name: try requiredText(args, "name"), takeIDs: takeIDs)
         case MCPToolCatalog.createNote.name:
-            guard let text = try optionalString(args, "text") else { throw ArgumentFailure(message: "text is required.") }
-            return .createNote(title: try optionalString(args, "title"), text: text, place: try place(args))
+            let text = try optionalString(args, "text")
+            let blocksValue = args["blocks"].flatMap { $0 == .null ? nil : $0 }
+            let payload: NotePayload
+            switch (text, blocksValue) {
+            case (let text?, nil): payload = .text(text)
+            case (nil, let value?): payload = .blocks(try noteBlocks(value))
+            case (.some, .some): throw ArgumentFailure(message: "Pass text or blocks, not both.")
+            case (nil, nil): throw ArgumentFailure(message: "Pass text (plain prose) or blocks (structured).")
+            }
+            return .createNote(
+                title: try optionalString(args, "title"), payload: payload,
+                entryDate: try entryDate(args), place: try place(args))
         case MCPToolCatalog.importDocument.name:
             return try parseImport(args)
         case MCPToolCatalog.applyTag.name:
@@ -138,6 +159,51 @@ struct MCPWriteTools: Sendable {
             if let job = try parseEdit(name, args) { return .edit(job) }
             throw ArgumentFailure(message: "Unknown tool: \(name).")
         }
+    }
+
+    /// The structured payload: `[{text, name?, takes?: [{text, label?}]}]`.
+    private func noteBlocks(_ value: Value) throws -> [Operations.MCPNoteBlock] {
+        guard let items = value.arrayValue else { throw ArgumentFailure(message: "blocks must be an array.") }
+        return try items.enumerated().map { index, item in
+            guard let fields = item.objectValue, let text = fields["text"]?.stringValue else {
+                throw ArgumentFailure(message: "blocks[\(index)] needs a text.")
+            }
+            var name: String?
+            if let value = fields["name"], value != .null {
+                guard let string = value.stringValue else {
+                    throw ArgumentFailure(message: "blocks[\(index)].name must be a string.")
+                }
+                name = string
+            }
+            var takes: [VariorumDocument.Take] = []
+            if let value = fields["takes"], value != .null {
+                guard let list = value.arrayValue else {
+                    throw ArgumentFailure(message: "blocks[\(index)].takes must be an array.")
+                }
+                takes = try list.enumerated().map { takeIndex, take in
+                    guard let takeFields = take.objectValue, let takeText = takeFields["text"]?.stringValue else {
+                        throw ArgumentFailure(message: "blocks[\(index)].takes[\(takeIndex)] needs a text.")
+                    }
+                    let label = takeFields["label"]?.stringValue?.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return VariorumDocument.Take(label: (label?.isEmpty ?? true) ? nil : label, text: takeText)
+                }
+            }
+            return Operations.MCPNoteBlock(text: text, name: name, takes: takes)
+        }
+    }
+
+    /// `entry_date`: a real calendar day, `yyyy-MM-dd` — the column's own
+    /// shape (a journal entry's date).
+    private func entryDate(_ args: [String: Value]) throws -> String? {
+        guard let raw = try optionalString(args, "entry_date") else { return nil }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.dateFormat = "yyyy-MM-dd"
+        guard raw.count == 10, let day = formatter.date(from: raw), formatter.string(from: day) == raw else {
+            throw ArgumentFailure(message: "entry_date must be a real day written yyyy-MM-dd (e.g. 2019-03-04).")
+        }
+        return raw
     }
 
     private func place(_ args: [String: Value]) throws -> Place {
@@ -238,9 +304,16 @@ struct MCPWriteTools: Sendable {
                         MCPWriteReceipt(clientName: clientName, act: .lens, targetID: noteID,
                                         targetTitle: title, detail: lens.name))
             }
-        case .createNote(let title, let text, let place):
+        case .createNote(let title, let payload, let entryDate, let place):
             return try into(place, job: job, clientName: clientName) { destination in
-                let minted = try ops.createNote(title: title, text: text, in: destination, undoLabel: label(.note))
+                let minted: Operations.DocumentImport = switch payload {
+                case .text(let text):
+                    try ops.createNote(
+                        title: title, text: text, entryDate: entryDate, in: destination, undoLabel: label(.note))
+                case .blocks(let blocks):
+                    try ops.createStructuredNote(
+                        title: title, entryDate: entryDate, blocks: blocks, in: destination, undoLabel: label(.note))
+                }
                 return try noteAnswer(minted, act: .note, clientName: clientName)
             }
         case .importNote(let named, let place):

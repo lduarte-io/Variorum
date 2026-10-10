@@ -317,6 +317,42 @@ struct MCPEditActsTests {
         }
     }
 
+    // MARK: - create_note's structured payload (R-13nb-11 G-2 + R-13nb-26 (b))
+
+    @Test func aStructuredNoteKeepsAMultiParagraphBlockWholeWithNamesTakesAndItsDate() throws {
+        try withUndo { ops, stack, db in
+            let book = try ops.createReading(name: "journals", kind: .book)
+            let minted = try ops.createStructuredNote(
+                title: "march 4", entryDate: "2019-03-04",
+                blocks: [
+                    .init(text: "First paragraph.\n\nSecond paragraph, same block.", name: "the morning"),
+                    .init(text: "Plain.", takes: [.init(label: "english", text: "Plain, translated.")]),
+                ],
+                in: .book(book.id), undoLabel: label(.note))
+            #expect(minted.blockIDs.count == 2, "a blank line inside a block is content, never a boundary")
+            #expect(try db.fetchString("SELECT entry_date FROM container WHERE id = ?", [minted.post.id]) == "2019-03-04")
+            #expect(try db.fetchString("SELECT name FROM block WHERE id = ?", [minted.blockIDs[0]]) == "the morning")
+            #expect(try db.fetchString("SELECT name FROM block WHERE id = ?", [minted.blockIDs[1]]) == nil)
+            #expect(try db.read { try Queries.renderedText($0, containerID: minted.post.id) }
+                    == "First paragraph.\n\nSecond paragraph, same block.\n\nPlain.")
+            let fan = try db.read { db in
+                try Row.fetchAll(
+                    db, sql: "SELECT label, working_text FROM variant WHERE block_id = ? ORDER BY fan_position",
+                    arguments: [minted.blockIDs[1]])
+            }
+            #expect(fan.map { $0["label"] as String? } == [nil, "english"], "takes join the fan, labeled, unchosen")
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM reading_post WHERE post_id = ? AND deleted_at IS NULL",
+                                    [minted.post.id]) == 1, "it lands in the book")
+            #expect(stack.depth == 1 && stack.topLabel == "claude-code's note")
+            _ = try stack.undo(with: ops)
+            #expect(try db.deletedAt("container", minted.post.id) != nil, "one undo takes the whole note back")
+
+            let plain = try ops.createNote(title: nil, text: "One.", entryDate: "2018-12-31", in: .wing(""),
+                                           undoLabel: label(.note))
+            #expect(try db.fetchString("SELECT entry_date FROM container WHERE id = ?", [plain.post.id]) == "2018-12-31")
+        }
+    }
+
     // MARK: - churn
 
     @Test func anEditsChurnIsWhatChangedBetweenTheCommonEnds() {

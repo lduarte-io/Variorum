@@ -244,6 +244,45 @@ struct MCPEditServerTests {
         }
     }
 
+    // MARK: - create_note's either payload (R-13nb-11 G-2 + R-13nb-26 (b))
+
+    @Test func createNoteTakesTheStructuredPayloadAndItsDateAndReadsBackAsWritten() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let book = try h.operations.createReading(name: "old journals", kind: .book)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.writeNew, .book, book.id))
+            let both = try await call(connection, "create_note", [
+                "text": .string("x"), "blocks": .array([]), "book_id": .string(book.id),
+            ])
+            #expect(both.isError == true && text(both).contains("not both"))
+            let badDate = try await call(connection, "create_note", [
+                "text": .string("x"), "entry_date": .string("2019-02-30"), "book_id": .string(book.id),
+            ])
+            #expect(badDate.isError == true && text(badDate).contains("yyyy-MM-dd"))
+
+            let created = try await call(connection, "create_note", [
+                "title": .string("march 4, 2019"), "entry_date": .string("2019-03-04"), "book_id": .string(book.id),
+                "blocks": .array([
+                    .object(["text": .string("Woke early.\n\nThe kettle, the window."), "name": .string("morning")]),
+                    .object(["text": .string("Went out."),
+                             "takes": .array([.object(["text": .string("Fui embora."), "label": .string("pt")])])]),
+                ]),
+            ])
+            #expect(created.isError != true, "\(text(created))")
+            let noteID = try #require(try json(created)["note_id"] as? String)
+            let read = try json(try await call(connection, "read_note", ["note_id": .string(noteID), "with_ids": .bool(true)]))
+            let blocks = try #require(read["blocks"] as? [[String: Any]])
+            #expect(blocks.map { $0["text"] as? String } == ["Woke early.\n\nThe kettle, the window.", "Went out."])
+            #expect(blocks.first?["name"] as? String == "morning")
+            #expect((blocks.last?["takes"] as? [[String: Any]])?.last?["label"] as? String == "pt")
+            #expect(read["entry_date"] as? String == "2019-03-04")
+            #expect(h.undoStack.topLabel == "claude-code's note")
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - ONCE on the edit rung: spent inside the act's own transaction
 
     @Test func aOnceEditGrantAuthorizesExactlyOneEditCallAndARefusedActNeverSpendsIt() async throws {

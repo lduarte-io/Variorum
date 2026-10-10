@@ -255,19 +255,46 @@ enum MCPToolCatalog {
     static let createNote = MCPToolDeclaration(
         name: "create_note", rung: .writeNew, title: "Create a note",
         description: """
-            Create a new note from plain text (each paragraph becomes a block) inside a shared \
-            book (book_id — it joins the book at its end) or a shared wing (wing_id; "" is Home — \
-            it lands bookless). Returns JSON with the note_id and its block_ids.
+            Create a new note inside a shared book (book_id — it joins the book at its end) or a \
+            shared wing (wing_id; "" is Home — it lands bookless). Give EITHER text (plain prose: \
+            each paragraph becomes a block) OR blocks (structured: each block's text exactly — a \
+            blank line inside it stays inside the one block — with an optional name and labeled \
+            takes, the same shape read_note's with_ids returns). entry_date (yyyy-MM-dd) sets the \
+            note's date, e.g. for old journal entries. Returns JSON with the note_id and its block_ids.
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "title": .object(["type": "string", "description": "The note's title."]),
-                "text": .object(["type": "string", "description": "The note's text."]),
+                "text": .object(["type": "string", "description": "The note's text, as plain prose."]),
+                "blocks": .object([
+                    "type": "array",
+                    "description": "The note's blocks, in order (instead of text).",
+                    "items": .object([
+                        "type": "object",
+                        "properties": .object([
+                            "text": .object(["type": "string", "description": "The block's shown text."]),
+                            "name": .object(["type": "string", "description": "A name for the block."]),
+                            "takes": .object([
+                                "type": "array",
+                                "description": "Other takes, joining the block's fan (never chosen).",
+                                "items": .object([
+                                    "type": "object",
+                                    "properties": .object([
+                                        "text": .object(["type": "string"]),
+                                        "label": .object(["type": "string"]),
+                                    ]),
+                                    "required": .array(["text"]),
+                                ]),
+                            ]),
+                        ]),
+                        "required": .array(["text"]),
+                    ]),
+                ]),
+                "entry_date": .object(["type": "string", "description": "The note's date, yyyy-MM-dd."]),
                 "book_id": .object(["type": "string", "description": "Create it in this book."]),
                 "wing_id": .object(["type": "string", "description": "Create it bookless in this wing."]),
             ]),
-            "required": .array(["text"]),
             "additionalProperties": false,
         ]),
         scopes: [.book, .wing])

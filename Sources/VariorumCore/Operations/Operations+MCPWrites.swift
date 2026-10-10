@@ -255,9 +255,14 @@ extension Operations {
     /// + `Queries.defaultSegmentation` — paste's road, so a client's note
     /// reads exactly as hers would pasted); an empty text mints an empty
     /// note (⌘N's shape). Lands per `destination`; ONE undo entry.
+    ///
+    /// `entryDate` (13n-b U3 — R-13nb-26 (b), her words: *"agents should be
+    /// able to set the date on a note"*): the minted note's date, `yyyy-MM-dd`
+    /// (the caller validates the shape), set in the same transaction.
     @discardableResult
     public func createNote(
-        title: String?, text: String, in destination: MCPNoteDestination, undoLabel: String
+        title: String?, text: String, entryDate: String? = nil, in destination: MCPNoteDestination,
+        undoLabel: String
     ) throws -> DocumentImport {
         try mintNoteEntry(undoLabel: undoLabel) { db in
             let blocks = SegmentationRules
@@ -268,7 +273,60 @@ extension Operations {
                 fallbackTitle: "",
                 document: VariorumDocument.Document(
                     title: (trimmed?.isEmpty ?? true) ? nil : trimmed, tagPaths: [], blocks: blocks))
-        } destination: { destination }
+        } destination: { destination } finish: { db, minted in
+            try stampEntryDate(db, entryDate, on: minted.post.id)
+        }
+    }
+
+    // MARK: - WRITE NEW: a note from the wire document (13n-b U3)
+
+    /// One block of a STRUCTURED note — the wire-document subset (R-13nb-11
+    /// G-2): its shown text (multi-paragraph welcome — a blank line inside it
+    /// is content, never a boundary), an optional name, and labeled takes
+    /// joining its fan unchosen.
+    public struct MCPNoteBlock: Equatable, Sendable {
+        public var text: String
+        public var name: String?
+        public var takes: [VariorumDocument.Take]
+
+        public init(text: String, name: String? = nil, takes: [VariorumDocument.Take] = []) {
+            self.text = text
+            self.name = name
+            self.takes = takes
+        }
+    }
+
+    /// **`create_note`'s structured payload** (R-13nb-11 G-2 + R-13nb-26
+    /// (b)): the note minted through the SAME road as a Level 0 import
+    /// (`mintDocument` — each block's text chosen AND default, its takes at
+    /// the fan's end unchosen with their labels, touch without churn), with
+    /// what the text format cannot carry set in the same transaction: each
+    /// block's NAME and the note's ENTRY DATE. Lands per `destination`
+    /// exactly as `createNote`; ONE undo entry (the minted note, whole).
+    @discardableResult
+    public func createStructuredNote(
+        title: String?, entryDate: String?, blocks: [MCPNoteBlock],
+        in destination: MCPNoteDestination, undoLabel: String
+    ) throws -> DocumentImport {
+        let trimmed = title?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let document = VariorumDocument.NamedDocument(
+            fallbackTitle: "",
+            document: VariorumDocument.Document(
+                title: (trimmed?.isEmpty ?? true) ? nil : trimmed, tagPaths: [],
+                blocks: blocks.map { VariorumDocument.Block(text: $0.text, alternates: $0.takes) }))
+        return try mintNoteEntry(undoLabel: undoLabel) { _ in document } destination: { destination } finish: { db, minted in
+            for (blockID, block) in zip(minted.blockIDs, blocks) {
+                let name = block.name?.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard let name, !name.isEmpty else { continue }
+                try db.execute(sql: "UPDATE block SET name = ? WHERE id = ?", arguments: [name, blockID])
+            }
+            try stampEntryDate(db, entryDate, on: minted.post.id)
+        }
+    }
+
+    private func stampEntryDate(_ db: Database, _ entryDate: String?, on postID: String) throws {
+        guard let entryDate else { return }
+        try db.execute(sql: "UPDATE container SET entry_date = ? WHERE id = ?", arguments: [entryDate, postID])
     }
 
     /// **One Level 0 document as a note** — `importDocument`'s mint (the
@@ -284,10 +342,15 @@ extension Operations {
         try mintNoteEntry(undoLabel: undoLabel, document: { _ in named }, destination: { destination })
     }
 
+    /// `finish` (13n-b U3): what the format cannot carry (block names, the
+    /// entry date), written on the minted rows in the SAME transaction,
+    /// before the note joins a book (so the hand-add's gates see the note
+    /// as it will stand).
     private func mintNoteEntry(
         undoLabel: String,
         document: (Database) throws -> VariorumDocument.NamedDocument,
-        destination: () -> MCPNoteDestination
+        destination: () -> MCPNoteDestination,
+        finish: (Database, MintedDocument) throws -> Void = { _, _ in }
     ) throws -> DocumentImport {
         let result: DocumentImport = try database.write { db in
             let named = try document(db)
@@ -306,6 +369,7 @@ extension Operations {
             }
             let now = date.now
             let minted = try mintDocument(db, named, wingId: wing, now: now)
+            try finish(db, minted)
             if let bookID {
                 // The hand-add's ONE choke point (its capacity and ownership
                 // gates, its outflow) — BEFORE the header's tags, so this
