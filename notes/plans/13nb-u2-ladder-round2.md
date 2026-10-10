@@ -7,6 +7,8 @@
 post-sanity pair `ede179c4` (AF-9 — `best()` spends the least sufficient capability) + `85f2e4c4`
 (N1 comment rewording), with the format-schema sitting prep `91370059` skimmed (prep-for-her-sitting
 material inside the ruled constraint set; no canon claims — nothing to find).
+*(Mid-session arrival, judged the same way: `647fc363` — 34 notes-only lines appended to the same
+sitting-prep file by the orchestrator while this round ran; zero code, zero review impact.)*
 **Anchor:** the round-1 record `13nb-u2-ladder-round1.md` (findings, dispositions, O1/O2, the
 look-first list — each judged independently below), the plan's rulings R-13nb-1…19 + AF-1…AF-9 + THE
 PRIVATE MARK addendum, **SyncSpec §7's two fold paragraphs read in my own context** (the
