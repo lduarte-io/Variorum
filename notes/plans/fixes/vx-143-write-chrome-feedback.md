@@ -223,3 +223,9 @@ Batch 2 members: **VX-144** (the commits page cleanup, screenshot-first) + **VX-
 8. **Pins:** the quiet-run token pin red-on-old; row-anatomy/height pins; the defining-sentence survival pin; the fence suite re-run. Then re-shoot the same ten captures as AFTER.
 
 **VX-150's PROVISIONAL (a) stands as built** (⌘T copies the ring's take, else the shown take — the bottom bar's precedent); logged for her bundle (P-VX150-1).
+
+## Orchestrator verification + acceptance of batch 2 (overnight)
+
+Verified by spot-check: commits `477379cf`…`380bc232` pushed; `CommitsPageLedgerTests` present with red-on-old recorded for the pinnable arms; the vocabulary fences green; `Shared/` untouched (diff file list). AFTER captures reviewed BY EYE by the orchestrator (the held walk's stand-in): the crowded Study-light page now reads name-led, one muted preview line, quiet word-doors, hairline dividers — her complaint's four drivers (button bezels, upside-down type, no separation, over-saying dates) all addressed. **The residual "rail.…" coincidence is RULED (a) — accepted**: the ellipsis is the house at-rest style; an occasional truncation landing after a period is ordinary (P-VX144-5, hers to reverse). The take-heading-now-quieter-than-names observation is recorded for her morning list (one-line tweak if she wants the heading louder).
+
+Batch 2 accepted. Next: the ladder — `fable-reviewer`, round 1, whole run diff (`3caa6be4..HEAD`), findings repo-first in `notes/plans/fixes/vx-143-ladder-r1.md`.
