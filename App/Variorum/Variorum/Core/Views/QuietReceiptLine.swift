@@ -86,7 +86,13 @@ struct QuietReceiptLine: View {
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .lineLimit(1)
-                .truncationMode(.tail)
+                // 13n-b U4 walk W-1: a receipt that carries a door (an AI
+                // write's "Open ›") gives the door its width, so on a crowded
+                // bar it truncates in the MIDDLE — the head says who, the tail
+                // keeps "⌥⌘Z undoes" (the U2 walk's W-2 promise: the undo
+                // hint is never what the truncation eats). Door-less receipts
+                // keep the tail truncation they always had.
+                .truncationMode(item?.action == nil ? .tail : .middle)
                 .multilineTextAlignment(.leading)
                 .textSelection(.enabled)
                 .help(item?.text ?? "")
