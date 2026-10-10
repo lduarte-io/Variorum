@@ -449,14 +449,25 @@ final class MCPDoor {
     /// one pure verdict), and the move only on `.navigate`, into the key
     /// window, never raising another. Never automatic: only a client's
     /// explicit call reaches here.
+    ///
+    /// Ladder round 1, F-4: the delivery's ANSWER is the delivery's TRUTH —
+    /// a takes/lens landing that never arrived (the note's detail did not
+    /// register in time, or she left the app during the wait: the
+    /// `stillStanding` re-check after the suspension) refuses
+    /// `partialShowWords` instead of claiming shown.
     func agentShow(_ target: MCPShowTarget) async -> MCPShowRule.Verdict {
         let (standing, router) = currentStanding()
         let verdict = MCPShowRule.verdict(standing)
         guard verdict == .navigate, let session, let router else {
             return verdict == .navigate ? .refuse(MCPShowRule.unavailableWords) : verdict
         }
-        await MCPNavigator(session: session).deliver(target, into: router)
-        return .navigate
+        let delivered = await MCPNavigator(session: session).deliver(
+            target, into: router,
+            stillStanding: { [weak self] in
+                guard let self else { return false }
+                return MCPShowRule.verdict(self.currentStanding().0) == .navigate
+            })
+        return delivered ? .navigate : .refuse(MCPShowRule.partialShowWords)
     }
 
     /// HER press — a receipt's "Open ›" or ⌥⌘O: she is at the app, so no

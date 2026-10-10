@@ -111,6 +111,44 @@ struct MCPNavigationTests {
         }
     }
 
+    /// Ladder round 1, F-4 (RED-ON-OLD): a show that cannot FINISH answers
+    /// honestly — on the old code a timed-out takes/lens open (and a mid-wait
+    /// app switch) still answered `.navigate`, so the client was told
+    /// shown: true for a half-delivery.
+    @Test func aShowThatCannotFinishRefusesInsteadOfClaimingShown() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let router = ShellRouter()
+
+            // Arm 1 — the note never registers its detail: the bounded wait
+            // runs out (shrunk for the pin) and the answer refuses.
+            let restoreWait = MCPNavigator.mountWait
+            MCPNavigator.mountWait = .milliseconds(40)
+            defer { MCPNavigator.mountWait = restoreWait }
+            door.standingProvider = { (.frontmostMainWindow, router) }
+            #expect(await door.agentShow(.takes(noteID: "n1", blockID: "b1"))
+                    == .refuse(MCPShowRule.partialShowWords))
+            #expect(session.commandRouter.pendingTakesLanding == nil, "no landing parked for a failed show")
+
+            // Arm 2 — she leaves the app during the delivery: the re-check
+            // after the wait's suspension refuses, and nothing more moves.
+            var applied: [PostMode] = []
+            let token = session.commandRouter.registerDetail(postID: "n2", mode: .write) { applied.append($0) }
+            defer { session.commandRouter.unregisterDetail(token) }
+            var standingCalls = 0
+            door.standingProvider = {
+                standingCalls += 1
+                return (standingCalls == 1 ? .frontmostMainWindow : .notFrontmost, router)
+            }
+            #expect(await door.agentShow(.takes(noteID: "n2", blockID: "b2"))
+                    == .refuse(MCPShowRule.partialShowWords))
+            #expect(session.commandRouter.pendingTakesLanding == nil && applied.isEmpty,
+                    "the mode never switched behind her back")
+        }
+    }
+
     // MARK: - The lens board's column rule (PROVISIONAL R83 swap)
 
     @Test func showLensFocusesAppendsThenSwapsTheLastColumn() async throws {

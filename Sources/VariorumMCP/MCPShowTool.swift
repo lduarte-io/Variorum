@@ -61,6 +61,13 @@ public enum MCPShowRule {
         + "bring it forward, then call again."
     public static let unavailableWords =
         "This Variorum can't show things — there is no app window to move."
+    /// Ladder round 1, F-4: a delivery that could not FINISH (the note opened
+    /// but the takes/lens landing never arrived, or the author left the app
+    /// mid-delivery) answers honestly instead of claiming shown. 13s-a
+    /// sweepable.
+    public static let partialShowWords =
+        "Variorum opened the note, but the rest of the show didn't land — nothing more was moved. "
+        + "Call again while the author is at the app."
 }
 
 /// **`show_in_app`** — the READ rung's one navigation tool (AF-11 F-3):

@@ -31,31 +31,49 @@ struct MCPNavigator {
     let session: AppSession
 
     /// How long a takes or lens landing waits for the note it opened to
-    /// register its detail (the next run loop, in practice).
-    static let mountWait: Duration = .seconds(2)
+    /// register its detail (the next run loop, in practice). A var so the
+    /// pins can shrink the timeout (ladder round 1, F-4).
+    static var mountWait: Duration = .seconds(2)
 
-    func deliver(_ target: MCPShowTarget, into router: ShellRouter) async {
+    /// Delivers the target; FALSE when the delivery could not FINISH (ladder
+    /// round 1, F-4): a takes/lens target whose note never registered its
+    /// detail inside `mountWait`, whose mode request was refused, or — the
+    /// re-check after the wait's suspension — the author left the app
+    /// mid-delivery (`stillStanding`, the agent road's etiquette; her own
+    /// press passes the default). The caller answers the client honestly
+    /// instead of claiming shown.
+    @discardableResult
+    func deliver(
+        _ target: MCPShowTarget, into router: ShellRouter,
+        stillStanding: () -> Bool = { true }
+    ) async -> Bool {
         let pane = router.workspace.focusedPane
         switch target {
         case .note(let noteID, let blockID, let select):
             router.adopt(
                 .post(noteID), in: pane, landing: blockID,
                 find: select.map { EditorFindSeed(needle: $0, steps: true) })
+            return true
         case .takes(let noteID, let blockID):
-            guard await open(noteID, in: router) else { return }
+            guard await open(noteID, in: router), stillStanding() else { return false }
             session.commandRouter.pendingTakesLanding = .bloom(postID: noteID, blockID: blockID)
             if !session.commandRouter.requestMode(.takes, postID: noteID) {
                 session.commandRouter.pendingTakesLanding = nil
+                return false
             }
+            return true
         case .lens(let noteID, let lensID):
-            guard await open(noteID, in: router) else { return }
+            guard await open(noteID, in: router), stillStanding() else { return false }
             session.commandRouter.pendingLensLanding = LensLanding(postID: noteID, lensID: lensID)
             if !session.commandRouter.requestMode(.lenses, postID: noteID) {
                 session.commandRouter.pendingLensLanding = nil
+                return false
             }
+            return true
         case .book(let bookID, let sectionID):
             router.pendingBookChapter = sectionID.map { .init(bookID: bookID, sectionID: $0) }
             router.adopt(.reading(bookID), in: pane)
+            return true
         }
     }
 
