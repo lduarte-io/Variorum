@@ -366,3 +366,94 @@ the lockstep event's blast radius (the §7 classifier families), not in the unit
   unshared/missing one for a client holding a pre-mark id. Same exposure
   analysis as U1's F4 (listings drop the book on the next call — pinned).
   Extend P-13nb-U1-13's text to books; no code change.
+
+## ROUND 1 — IMPLEMENTER SANITY PASS (opus-implementer, 2026-10-09, on `87236904`)
+
+**PASS — with one comment-accuracy NIT (N1) and one new observation (O2) for round 2's framing.**
+I read both fix diffs whole (`15933ab4` F1, `d60c3ad6` F4) and the records commit `87236904`. I fixed
+nothing. What I ran, all headless:
+- **The whole package, `swift test` on `87236904`:** core **2,538/291**, VariorumMCPTests **33/4**,
+  workbook **40/6**, gated skips only. This reproduces the reviewer's counts.
+- **An independent red-on-old run.** I exported the `87236904` tree to a scratch directory outside the
+  repo. There I swapped the three fixed files for their pre-fix versions: `15933ab4^`'s two classifiers
+  and `d60c3ad6^`'s `MCPGrantRule.swift`. Then I ran the seven pins. **All seven are red:**
+  - F1, four of four: 2 + 1 + 6 + 6 issues.
+  - F4, three of three: the explicit pin 1 issue, the sweep's invariant 3 30 issues, the e2e 1 issue.
+  - The once-SUGGEST e2e pin is green on both sides, as expected.
+
+  I then deleted the scratch tree. Nothing in the worktree was touched.
+- **A scratch-only probe** of `best()`'s tie-break (O2 below), in the same scratch tree and never committed.
+
+The reviewer's look-first list:
+1. **F1's legs: confirmed.** At all five sites the SELECT carries `ai_private_at`, and the check
+   consumes that same row:
+   - the gathering candidates' row → `gatheringIsSeedsOwn` (:354);
+   - `guideVerdict` (:528 → :544);
+   - `noteVerdict` (:713 → :722);
+   - the sample book-shape read (:805 → :819);
+   - the sample per-note read (:882 → :893).
+
+   The pool grain needs no leg of its own. It routes through `noteVerdict` ("One note's (or pool's)
+   verdict"), so it carries the leg anyway, as defense. Pools are also unmarkable: `setNotePrivate` →
+   `livePost` refuses `wrongContainerKind`.
+2. **F4's shared `spends()`: confirmed.**
+   - It has two call sites, `decide` (:219) and `decideWing` (:262).
+   - The MCP layer never re-derives spending. Every write and read tool consumes the decision's
+     `consumesOnce`: `MCPWriteTools` :319/:384/:410, `noteIntoBook`'s Set-deduped two-sided spend, and
+     `MCPReadTools` :82–90.
+   - A read under a once write grant rides free (`rung == .read`, `grant.rung ≥ .suggest` → false).
+   - `best()` prefers standing grants over once grants (pinned: `aStandingGrantCoversFirst…`), so a
+     once grant is never spent where a standing grant suffices.
+   - No surviving pin encodes the old reading. The rule pins, the sweep and both e2e pins all read the
+     amended rule.
+   - **N1 [NIT, comment accuracy — my own U2 comments].** Four comments still say "at its own rung":
+     - `MCPWriteTools.swift:17` — the struct doc, "AF-7: spent by its first write at its own rung";
+     - `MCPWriteTools.swift:305` — `onNote`'s doc;
+     - `MCPGrantAuthority.swift:58` — the book `decide`'s `consumes` doc;
+     - `MCPWriteServerTests.swift:16` — the file header.
+
+     Behavior follows `spends()`, so these are wording only. The plan's AF-7 heading ("spends AT ITS
+     OWN RUNG: proposal APPROVED") and my F-3 fork text are history with the amendment printed
+     directly beneath them, so they are fine as they stand. **Suggested:** a one-pass rewording at the
+     next touch, to "spent by its first write of any rung it authorizes".
+   - **O2 [observation — a new consequence of F4; undefined behavior, so it goes to the coordinator].**
+     `best()` breaks a tie between grants of equal duration by smallest id, never by rung or scope.
+     - *Before the amendment*, the tie-break never decided what got spent at mismatched rungs, because
+       a higher-rung once grant did not spend on a lower-rung write. That was F4's hole.
+     - *Now* it decides. With a live once-suggest on a note and a live once-write-new on its book, a
+       suggest-rung write spends whichever grant has the smaller UUID.
+     - *The scratch probe:* with ids `a-writenew` / `b-suggest`, `decide` answers
+       `allow(grantID: "a-writenew", consumesOnce: true)`. The write-new is spent and the narrower
+       once-suggest survives. Swap the id order and the suggest is spent.
+     - *From her side:* the choice is deterministic across devices but arbitrary.
+     - *Reachable:* two just-in-time asks she answered "Once" at different rungs or scopes.
+     - *Bounded:* there is no over-reach either way, since each spend allows exactly one write that the
+       spent grant authorized. The cost is losing a write-new grant where a suggest grant would have done.
+
+     Options:
+     - (a) among equal durations, prefer the lowest sufficient rung, then the narrowest scope (spend the
+       least capability that suffices);
+     - (b) prefer the highest rung (spend the most capability — the privacy-conservative reading);
+     - (c) keep smallest-id and record it.
+
+     **My lean is (a).** It is one comparator change in `best()`: `decide` and `decideWing` call it on
+     `sufficient` only, and the open-book branch filters out once grants, so it is unaffected. It would
+     be pinned by a two-once-grants `decide` case. It is product-shaped, so the framing is yours.
+3. **The F1 fixtures isolate the mark: confirmed, statically and dynamically.**
+   - *Statically:* `setNotePrivate` and `setBookPrivate` write only `ai_private_at` + `updated_at`. No
+     classifier reads `updated_at`: the only `updated_at` hits in both files are the classifiers' own
+     tombstone/rewrite UPDATEs. The gathering pin's raw UPDATE writes `ai_private_at` alone.
+   - *Dynamically:* the red-on-old run shows every marked copy folding on the old classifiers.
+   - *One shading, not a defect:* `herPrivateMarkKeepsBothCopiesOnEveryGrain` marks the smaller-id side
+     (A). On old code the marked copies won the toss, so its `marksStand` assertions were green there;
+     its red comes from the two count assertions. The "the mark itself dies" consequence is carried by
+     the two sample pins: there B, the larger-id side, marks, and `fenceStands` is red on old. The class
+     is covered.
+4. **The record edits: all four present and accurate.**
+   - P-13nb-U2-8's sync twin matches my F2 response, including the `edit_take` guard.
+   - Ledger row 5 carries the guard line.
+   - P-13nb-U1-2's amended form carries the "one write means one write" wording.
+   - P-13nb-U1-13's books extension is in the U1 round-1 record. I checked its claims:
+     - "(pinned — `markingPrivateFencesTheVeryNextCallOfAConnectedClient`)": that pin's last leg asserts
+       `list_books` comes back empty after `setBookPrivate`.
+     - "a fenced book never raises an ask": this matches the built guard (`MCPGrantAuthority.swift:186`).
