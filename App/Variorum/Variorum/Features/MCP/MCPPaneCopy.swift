@@ -140,12 +140,16 @@ nonisolated enum MCPPaneCopy {
         case "add_take": return n == 1 ? "added a take to \(at)" : "added \(n) takes to \(at)"
         case "add_comment": return n == 1 ? "commented in \(at)" : "left \(n) comments in \(at)"
         case "save_lens": return "saved a lens on \(at)" + times
-        case "create_note": return "made the note \(at)" + times
-        case "import_document": return "imported \(at)" + times
+        // U3 ladder round 1, F4: a coalesced CREATION run spans different
+        // creations (the log's target is the PLACE, its title the newest
+        // creation's), so a count never rides one creation's title — the
+        // line speaks the count plainly (J8's copy truth; 13s-a-sweepable).
+        case "create_note": return n == 1 ? "made the note \(at)" : "made \(n) notes"
+        case "import_document": return n == 1 ? "imported \(at)" : "imported \(n) documents"
         case "apply_tag": return "tagged \(at)" + times
-        case "create_book": return "made the book \(at)" + times
+        case "create_book": return n == 1 ? "made the book \(at)" : "made \(n) books"
         case "add_note_to_book": return "added \(at) to a book" + times
-        case "create_section": return "added a chapter to \(at)" + times
+        case "create_section": return n == 1 ? "added a chapter to \(at)" : "added \(n) chapters to \(at)"
         case "edit_take": return n == 1 ? "edited \(at)" : "made \(n) edits in \(at)"
         case "divide_block": return "divided a block in \(at)" + times
         case "merge_blocks": return "merged blocks in \(at)" + times

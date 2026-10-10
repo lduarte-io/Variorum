@@ -52,16 +52,25 @@ struct MCPEditFacesTests {
     // MARK: - The activity face (R-13n-10)
 
     @Test func theActivityFaceCoalescesARunAndSaysWhoDidWhatWhere() {
-        // Newest first, as the log reads.
+        // Newest first, as the log reads. (U3 ladder round 1, F4 — justified
+        // edit: a coalesced CREATION run spans different creations, whose log
+        // rows share the PLACE as target but carry each creation's own title,
+        // so the plural line speaks the count plainly, never one title.)
         let lines = MCPActivityFace.lines([
+            row(12, "create_note", target: "b1", title: "note b", kind: "book"),
+            row(11, "create_note", target: "b1", title: "note a", kind: "book"),
+            row(10, "create_section", target: "b1", title: "drafts", kind: "book"),
             row(9, "add_take"), row(8, "add_take"), row(7, "add_take"),
             row(6, "read_note"),
             row(5, "add_take", target: "n2", title: "ch 8", allowed: false),
             row(4, "edit_take"), row(3, "list_notes", target: nil, title: nil, kind: nil),
         ])
-        #expect(lines.map(\.count) == [3, 1, 1, 1, 1], "a run of one client's same act on one target is one line")
-        #expect(lines.first?.id == 9, "the line keeps its newest row's id and stamp")
+        #expect(lines.map(\.count) == [2, 1, 3, 1, 1, 1, 1],
+                "a run of one client's same act on one target is one line")
+        #expect(lines.first?.id == 12, "the line keeps its newest row's id and stamp")
         #expect(lines.map(MCPPaneCopy.activityLine) == [
+            "claude-code made 2 notes",
+            "claude-code added a chapter to \u{201C}drafts\u{201D}",
             "claude-code added 3 takes to \u{201C}ch 7\u{201D}",
             "claude-code read \u{201C}ch 7\u{201D}",
             "claude-code was refused add_take on \u{201C}ch 8\u{201D}",
