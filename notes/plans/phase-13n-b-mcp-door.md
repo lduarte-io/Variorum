@@ -1828,3 +1828,13 @@ STACK MECHANISM ratified as-is and the FACE ticketed — R-13nb-19 below.
   Her words: *"Let's keep your context - I think it's valuable."* This
   session continues as the phase's one orchestrator; no handoff at a
   seam unless forced.
+- **R-13nb-25 (2026-10-09, the once-staleness exchange) — THE TIMEOUT
+  IS ENDORSED, NOT v1.** Her words: *"a user using a 'once' at a time
+  system is probably not expecting that if their agent cancelled their
+  actions, that the next time they ask for something no permission
+  request is needed at all. I suppose it doesn't need to expire in V1
+  but I do think your time out suggestion is good."* Ticket **VX-131**
+  (unspent once grants expire after a window, width hers). For now:
+  *"unspent grants being visible rows in shared with AI is good and
+  enough for now."* AF-9's determinism confirmed necessary either way
+  (her observation: the race exists even with time-limited grants).
