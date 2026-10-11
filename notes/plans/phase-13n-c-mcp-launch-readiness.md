@@ -1621,4 +1621,81 @@ Captures in `notes/plans/13n-c-screens/u5/`.
 
 ## U5 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-*(empty until the U5 implementer's first commit)*
+Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~09:10 MDT). Worktree
+`~/dev/variorum-vx-165`, branch `vx-165-13n-c`. No revert is in flight unless a line below says so.
+The session is LOCKED at start (09:10 MDT: `CGSSessionScreenIsLocked 1`) — the walk and the scratch
+`claude mcp add -s local` run are HELD; offscreen renders stand in only if it is still locked at U5-6,
+and are NOT a walk.
+
+### Pieces
+
+| # | Piece | Status |
+|---|---|---|
+| U5-0 | Preflight read whole (this plan top to bottom incl. D-2, round 5/6, the U1–U4 records; the sitting record R-AIR-13 + rounds 5/6; her kickoff text; the 13n-b handoff §HOW TO TEST AND RUN; `SessionResiliencyProtocol`) + the code the brief names + the traces below + the ONE external fact (Codex CLI, below) | DONE (this commit) |
+| U5-1 | R-AIR-13 — the setup menu: `MCPSetupClient` (Claude Code · Codex · Any MCP client) in `MCPPaneCopy`, each with its text, sentence and receipt; the pane's chooser + the selected text shown verbatim and selectable + the one stdio line; the ONE declared copy act copies the chosen setup; catalog keywords; pins | NOT-STARTED |
+| U5-2 | The AI's advice — `MCPSession.instructions` rewritten (bound ≤ 1,500 characters, pinned; every tool it names exists in the catalog; the format's markers read from `VariorumDocument`; arrives at `initialize` over the wire) + F5 (the false "Every refusal says why." gone) + R2-8 (search serves standing grants only) + the snippets-out server truth pin | NOT-STARTED |
+| U5-3 | The field guide's MCP chapter (`TutorialSeeder.plan` + the seed) + the placement pins updated as the ritual + the truth suite `TutorialMCPChapterTests` (prose · doors tied to their own constants · the truth executed) | NOT-STARTED |
+| U5-4 | Headless finals: `swift build` + core + `VariorumMCPTests` + workbook | NOT-STARTED |
+| U5-5 | Mac suites under a held stage claim (the tutorial/tour suites that read the plan, `MCPPaneTests`, `CapabilityRegistryTests`, `SettingsShapeTests` + every suite over a changed file) | NOT-STARTED |
+| U5-6 | The walk (dev-store Debug, Study + Terminal) → `notes/plans/13n-c-screens/u5/` — or, if still locked, a gated offscreen render of each lesson card and the setup menu (NOT a walk) | NOT-STARTED |
+| U5-7 | The re-seed road + the phone-seeding facts (for the closeout and the MOBILE PARITY line) | NOT-STARTED — the facts are traced below (T-U5-5/6); recorded whole at the close |
+| U5-8 | UNIT CLOSED banner | NOT-STARTED |
+
+### Traces (made before any code — the hallucination guard)
+
+- **T-U5-1 — the guide has no MCP chapter, and its last seat is ruled.** `TutorialSeeder.plan` closes on
+  "keeping it private" (two lessons, `ProtectionCopy` verbatim). Two pins hold that seat:
+  `TutorialPrivacyChapterTests.theChapterIsTwoLessonsInTheRightPlace` (`index == plan.count - 1` and
+  `index == books + 1`) and `TutorialBooksLessonTests.theChapterIsEightLessonsLastInTheGuide`
+  (`plan.dropLast().last` is the books chapter; `plan.last` is privacy). Her ruling behind the seat
+  (R-13s-30, `phase-13s-voice-onboarding.md:171`, verbatim): *"it makes more sense to have the safety
+  after the workflow and the workflow together"*; the 13s-b U3 disposition 4 then wrote "Privacy chapter
+  lands LAST" when nothing came after it. Any seat for a new chapter moves one of these pins (a ritual
+  edit either way).
+- **T-U5-2 — the advice is four sentences, one of them false.** `MCPSession.instructions`
+  (`Sources/VariorumMCP/MCPSession.swift:28`) says nothing of the rungs, live ids, the format's v2
+  marker, `show_in_app`'s etiquette, the fence or snippets, and ends "Every refusal says why." — false
+  since U1's T-2 (a fenced note and a fenced book answer the one not-shared answer; the U1 ladder's F5).
+  No pin bounds its length or ties the tool names it says to the catalog.
+- **T-U5-3 — the setup command speaks to one client.** `MCPPaneCopy.setupCommand` (`:251`) builds
+  `claude mcp add -s user <name> -- "<shim>"`; the pane's "Connect a client" says Claude Code only; the
+  one declared act `.mcpCopySetupCommand` copies it; nothing tells a Codex or other MCP-client user what
+  to do, and nothing says the door is a standard stdio server at one path (R-AIR-13). The `mcpServer`
+  catalog row's keywords find "claude" but not "codex", "json" or "setup".
+- **T-U5-4 — snippets at the door, the fact from code (round 5's, re-verified):**
+  `Queries.mcpNoteFacts` reads only `c.kind = 'post'` (`MCPGrantQueries.swift:~416`), so a scraps group
+  has no facts and every tool answers it as an unshared note; `MCPReadTools.passes` drops a passage whose
+  home has no facts. True — but NO pin says it on the wire (the carriage suite pins only lineage stubs
+  toward a scrap). The docs will say it plainly, so U5 pins it (a server truth pin).
+- **T-U5-5 — the re-seed road (for the closeout).** An EXISTING store's guide is refreshed by exactly ONE
+  product door: Help ▸ Restore Tutorial… (`ShellActions.restoreTutorial` → `TutorialSeeder.discover` →
+  the spoken confirm (`replaceQuestion`/`replaceDetail`) → `TutorialSeeder.restore` (the QUIET facade —
+  nothing on ⌥⌘Z) → `arrangeWelcome`). Launch never re-seeds an existing store (`seedAtBirth` runs only on
+  a fresh birth's arrange-now road). Its cost on a lived-in store: every note tagged exactly `tutorial`,
+  every pool named "tutorial scraps" and every book named "the field guide" are TOMBSTONED (the Trash —
+  recoverable) and a pristine guide is seeded; her own marks inside the old lessons (a starred lesson, a
+  practice book's membership) go with the old copies.
+- **T-U5-6 — the phone.** The phone NEVER seeds the field guide: its own `MobileTutorialSeeder` ("the
+  pocket guide", tag `pocket guide` — deliberately disjoint) has a DEBUG-only door (PROVISIONAL PB1-1) and
+  gets no MCP chapter; the phone has no MCP door. BUT the field guide is ordinary synced rows (the furniture
+  fold `SeededFurnitureDedupe` exists precisely because a guide arrives from another device), so a
+  re-seeded guide reaches her phone by sync, MCP chapter included — the chapter says the door lives on the
+  Mac so it stays true when read on the phone.
+- **T-U5-7 — the U6 gate.** U6 (gatherings under a wing grant, R-AIR-12) has NOT landed at U5 (U6 is
+  NOT-STARTED in the LIVE STATUS table), so the chapter and the advice say nothing of gatherings under a
+  wing grant — **for U6 to add:** one sentence in the "how much, where, how long" lesson and one clause
+  in the advice, with their pins.
+
+### The external fact (the ONE Sonnet lookup — R-AIR-13's Codex syntax; read-only, sources cited)
+
+- **Codex CLI:** `codex mcp add <server-name> [--env VAR=VALUE …] -- <stdio server-command>` — the docs'
+  example `codex mcp add context7 -- npx -y @upstash/context7-mcp`
+  (https://learn.chatgpt.com/docs/extend/mcp?surface=cli — the redirect target of
+  developers.openai.com/codex/mcp). It writes the USER-GLOBAL `~/.codex/config.toml` ("Added global MCP
+  server '{name}'.", `codex-rs/cli/src/mcp_cmd.rs` in github.com/openai/codex); the file form is a
+  `[mcp_servers.<name>]` table with `command` required, `args`/`env` optional
+  (https://learn.chatgpt.com/docs/config-file/config-reference). Server names allow letters, digits and
+  `- _ : @ / .` (`validate_server_name`, the same source) — so `variorum-dev` is legal.
+- **The generic stanza:** `{"mcpServers": {"<name>": {"command": "<absolute path>", "args": [...]}}}`
+  (https://modelcontextprotocol.io/docs/develop/connect-local-servers — "paths … absolute and not
+  relative"; Cursor's `~/.cursor/mcp.json` the same shape, https://cursor.com/docs/context/mcp).
