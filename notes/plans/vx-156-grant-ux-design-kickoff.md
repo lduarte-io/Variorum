@@ -26,6 +26,51 @@ itself is hers, in the morning — this session only PREPARES it.**
   for REAL USERS at launch, which she hopes to do THIS WEEK. Master-plan sequencing
   against 13s-a is hers at the sitting.
 
+## ROUND 2 — her rulings at the Air sitting, 2026-10-11, over PR #147's mockups
+(This section IS the sitting record the 13n-c plan builds from; canon lands at the merge.)
+
+- **R-AIR-3 — the grant confirm's wording:** between the brief's W0 and W1 — her
+  sentence: *"Grant read in “dream journal” always, including to future entries."*
+  The including-future-entries clause shows on EVERY book grant (membership is
+  live — notes added later become visible), not only journal-trait books.
+- **R-AIR-4 — ⌥⌘A's confirmation carries a door:** the receipt lets you open a
+  panel pre-filled on what was just shared, to change its details fast.
+- **R-AIR-5 — the wing switcher:** type to filter; click-without-typing CYCLES;
+  fast to click ("fast navigation is important"); the chord must be easier to
+  type than ⌃⌘W — re-pick from the free rows of the sweep.
+- **R-AIR-6 — one consistent AI-shared ICON, not text:** the Bookcase's "shared
+  with AI" tag is too wordy and conflicts with tags; one icon everywhere, hover
+  names it, click shows the permission; icon language matches the sidebar set
+  (Bookcase/Library/Pool/Snippets); a pending-ask icon in the same family.
+- **R-AIR-7 — the in-note indicator (VX-164):** with MCP on, a note's upper right
+  shows at a glance what an AI can reach — shared icon (click → the permission
+  AND the WHY when reach comes from a wider grant: "readable through the Home
+  wing grant"), lock when Private (click to change), pending-ask. "Never
+  surprised, from within a note."
+- **R-AIR-8 — no "AI" in settings-class wording:** lean "grant MCP permissions"-
+  class copy (final words hers at the copy pass); every share/grant face renders
+  ONLY when at least one approved client exists (extends 13n-b's Allow-AI-here
+  unrendered-when-none, P-2); any zero-state face routes to Settings ▸ MCP —
+  never a dead button.
+- **R-AIR-9 — VX-160 rungs:** R1 (edit at the source + write-new at the
+  destination wing) recommended AND both R1/R2 legal as options depending on
+  what is selected/granted.
+- **R-AIR-10 — VX-159 presets:** the brief §10 shape accepted PROVISIONAL on her
+  "I think it's fine" — presets on the existing tools, id + text addressing.
+- **R-AIR-11 — 13n-c scope:** everything discussed tonight builds EXCEPT what she
+  explicitly excluded: VX-161 stays filed-not-built. (A-4's per-setup secret:
+  decision pending her read of the orchestrator's recommendation.)
+- **Also into VX-156's scope:** last-edited joins the picker context line's
+  fixed order, and a "recently edited" quick section in grant pickers ("that's
+  often what I want"); "while connected"'s wording gets copy OPTIONS at the
+  build (she finds it vague but has no replacement yet).
+- **Open design question for her:** gatherings at the door. Today a gathering is
+  not a grant target and is not listed (code: MCPGrantQueries "a gathering is
+  not a grant target"). Options at the sitting's close: keep them off (grant
+  the wing instead) · list a wing's gatherings as read facts under a wing grant
+  (recommended — reach never exceeds the wing) · make them grantable targets
+  (moving reach — the P-13nb-U4-16 class problem).
+
 ## Mandate
 
 Design-prep for the grant UX round. NO app code, NO canon edits, NO suites, NO walks
