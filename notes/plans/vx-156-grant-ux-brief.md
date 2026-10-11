@@ -19,8 +19,8 @@ below say "mockup §N"). The DRAFT phase plan: `notes/plans/phase-13n-c-mcp-laun
 | P0 | Worktree + preflight (read in full, never delegated) + the skeleton | DONE (`209c11f6`) |
 | P1 | This brief: per-item options, recommendation and why; chord candidates with the sweep evidence; open questions | DONE (`eacf600b`; amended in the P2 checkpoint — the A-4 pane-line gap found, a sixth R-AIR-1 sentence) |
 | P2 | `notes/plans/vx-156-grant-ux-mockups.html` — one self-contained page, Study voice, light and dark, sentence case | DONE (this commit) — §1–§11 per the §16 map; Study tokens verbatim from `VoiceTokens` (light/dark + a forced light/dark pair at §1); tag balance parsed clean, zero external fetches, no all-caps words but the MCP acronym and ruling ids; rendered OFFSCREEN for a check (QuickLook thumbnails of per-section scratchpad copies, light and dark — no browser, no app; the captures stay in the scratchpad), which caught three fixes now in: radio glyphs, the popover truncating the very title it disambiguates, two inherited styles |
-| P3 | `notes/plans/phase-13n-c-mcp-launch-readiness-DRAFT.md` — the DRAFT phase plan | DONE (this commit) — U1 the grant road · U2 the keyboard and the quiet signals · U3 the wing on the wire; candidates VX-159, the A-4 secret, VX-161; sizing said plainly (launch cut U1 + U2, U3 if the week holds); 13s-a sequencing as three options (S1 recommended) |
-| P4 | Final pass: status flipped, PR "VX-156: grant UX design prep" opened | IN-PROGRESS |
+| P3 | `notes/plans/phase-13n-c-mcp-launch-readiness-DRAFT.md` — the DRAFT phase plan | DONE (`6356e5a5`) — U1 the grant road · U2 the keyboard and the quiet signals · U3 the wing on the wire; candidates VX-159, the A-4 secret, VX-161; sizing said plainly (launch cut U1 + U2, U3 if the week holds); 13s-a sequencing as three options (S1 recommended) |
+| P4 | Final pass: status flipped, PR "VX-156: grant UX design prep" opened | DONE — PR #147 (https://github.com/lduarte-io/Variorum/pull/147), merge waits for her sitting. **ROUND CLOSED (hard stop).** |
 
 ## THE SITTING AGENDA (carried verbatim from the kickoff)
 
