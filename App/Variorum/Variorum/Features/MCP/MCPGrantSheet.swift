@@ -134,10 +134,7 @@ struct MCPGrantSheet: View {
                 Button(MCPPaneCopy.cancel, action: done)
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
                     .keyboardShortcut(.cancelAction)
-                Button(MCPPaneCopy.confirm(
-                    verb: CapabilityRegistry.capability(.mcpGrantAccess).verb,
-                    rung: rung, scope: place == .book ? .book : .wing, place: placeName,
-                    duration: duration)) {
+                Button {
                     guard let spec else { return }
                     if target.approving {
                         door.approve(target.client.id, granting: spec)
@@ -145,6 +142,11 @@ struct MCPGrantSheet: View {
                         door.grant(target.client.id, spec)
                     }
                     done()
+                } label: {
+                    ConfirmLabel(parts: MCPPaneCopy.confirmParts(
+                        verb: CapabilityRegistry.capability(.mcpGrantAccess).verb,
+                        rung: rung, scope: place == .book ? .book : .wing, place: placeName,
+                        duration: duration))
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                 .keyboardShortcut(.defaultAction)
@@ -152,7 +154,11 @@ struct MCPGrantSheet: View {
             }
         }
         .padding(20)
-        .frame(width: 520)
+        // 13n-c U1 (R-AIR-3's clause made the confirm longer; the geometry
+        // oracle in the U1 record): 600 leaves Terminal's mono room for every
+        // rung × duration × scope with the clause whole (at 520, 10 of 24
+        // cut it), inside Settings' 720-wide window. U2 rebuilds this sheet.
+        .frame(width: 600)
         .task {
             choices = await door.choices()
             if bookID == nil { bookID = choices.books.first?.id }
@@ -188,6 +194,24 @@ struct MCPGrantSheet: View {
             .foregroundStyle(.secondary)
             .lineLimit(3)
             .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// **The confirm's label** (13n-c U1): the grant sentence on one line (the
+/// voiced button's chrome rule) where ONLY the place compresses — middle-
+/// truncated — so the verb, rung, duration and R-AIR-3's clause always read
+/// whole. The parts are `MCPPaneCopy.confirmParts`; joined they are exactly
+/// `MCPPaneCopy.confirm` (pinned).
+private struct ConfirmLabel: View {
+    let parts: (lead: String, place: String, tail: String)
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Text(parts.lead).layoutPriority(1)
+            Text(parts.place).truncationMode(.middle)
+            Text(parts.tail).layoutPriority(1)
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 

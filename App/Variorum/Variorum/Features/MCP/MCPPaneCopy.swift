@@ -267,8 +267,22 @@ nonisolated enum MCPPaneCopy {
         verb: String, rung: MCPGrantRule.Rung = .read, scope: MCPGrantRule.ScopeKind, place: String,
         duration: MCPGrantRule.Duration
     ) -> String {
-        "\(verb) \(rungName(rung).lowercased()) in \u{201C}\(place)\u{201D} \(durationWord(duration))"
-            + liveReachClause(scope)
+        let parts = confirmParts(verb: verb, rung: rung, scope: scope, place: place, duration: duration)
+        return parts.lead + parts.place + parts.tail
+    }
+
+    /// The confirm in its three parts, so the sheet can let ONLY the place
+    /// compress (13n-c U1, the geometry oracle in the U1 record: a voiced
+    /// button is one line and tail-truncates, which in Terminal's mono cut
+    /// R-AIR-3's clause off — the very words the ruling exists for). The verb,
+    /// rung, duration and clause never truncate; the place, shown whole in
+    /// WHERE just above, takes what room is left.
+    static func confirmParts(
+        verb: String, rung: MCPGrantRule.Rung = .read, scope: MCPGrantRule.ScopeKind, place: String,
+        duration: MCPGrantRule.Duration
+    ) -> (lead: String, place: String, tail: String) {
+        ("\(verb) \(rungName(rung).lowercased()) in \u{201C}", place,
+         "\u{201D} \(durationWord(duration))" + liveReachClause(scope))
     }
 
     /// R-AIR-3's clause (book) and D-3's twin (wing), with its leading comma.

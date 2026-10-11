@@ -200,6 +200,14 @@ struct MCPAskAndReceiptTests {
                 .hasSuffix(", including notes added later"), "D-3's wing twin — \(duration)")
         }
         #expect(MCPPaneCopy.confirm(verb: "Grant", scope: .note, place: "ch 7", duration: .once) == "Grant read in “ch 7” once")
+        // The sheet renders the confirm in three parts so only the place can
+        // compress; joined, they are the sentence exactly.
+        for scope in MCPGrantRule.ScopeKind.allCases {
+            let parts = MCPPaneCopy.confirmParts(verb: "Grant", rung: .edit, scope: scope, place: "x", duration: .connection)
+            #expect(parts.lead + parts.place + parts.tail
+                    == MCPPaneCopy.confirm(verb: "Grant", rung: .edit, scope: scope, place: "x", duration: .connection))
+            #expect(parts.place == "x" && parts.lead == "Grant edit in “")
+        }
     }
 
     @Test func theGrantSheetOffersTheServedRungsWithTheMockupsSentences() {
