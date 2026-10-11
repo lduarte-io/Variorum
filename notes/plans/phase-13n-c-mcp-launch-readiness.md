@@ -2458,7 +2458,7 @@ UNLOCKED at start (`CGSSessionScreenIsLocked` absent), no Variorum instance (`pg
 
 | # | Piece | Status |
 |---|---|---|
-| U6-0 | Preflight read whole (this plan top to bottom incl. every unit record, the Stage B records, the HELD-WALKS RECORD; the sitting record R-AIR-2/-9/-12; the brief §8/§10; mockups §7/§9; the 13n-b AF-6/-7/-9/-10/-11, P-13nb-U2-3/-4/-6/-8, U3-4/-5/-7, R-13nb-23; `SessionResiliencyProtocol`) + the code traces below | IN-PROGRESS — the reading done; the code traces next |
+| U6-0 | Preflight read whole (this plan top to bottom incl. every unit record, the Stage B records, the HELD-WALKS RECORD; the sitting record R-AIR-2/-9/-12; the brief §8/§10; mockups §7/§9; the 13n-b AF-6/-7/-9/-10/-11, P-13nb-U2-3/-4/-6/-8, U3-4/-5/-7, R-13nb-23; `SessionResiliencyProtocol`) + the code traces below | DONE (this commit) |
 | U6-1 | `move_note_to_wing` — core: the MCP road over her `moveNoteToWing` (R1 decided twice, once grants atomic, T1 mirrored, U1's exact-row inverse + redo, ONE client-named entry) + state-transition pins | NOT-STARTED |
 | U6-2 | `move_note_to_wing` — the wire: the tool, the catalog, the answer (left books · tags adopted/made · where it landed), the ask on a short side, refusals byte-for-byte hers; `move_block`'s cross-wing refusal kept | NOT-STARTED |
 | U6-3 | `show_in_app` gains the `wing` target (decided at read with `decideWing`; never spends; "Now in …" names the client) | NOT-STARTED |
@@ -2472,4 +2472,63 @@ UNLOCKED at start (`CGSSessionScreenIsLocked` absent), no Variorum instance (`pg
 
 ### Traces (made before any code — the hallucination guard)
 
-*(being written)*
+- **T-U6-1 — her door, traced (`Operations+WingMove.swift`):** `moveNoteToWing` is ONE `database.write`: `livePost`,
+  `requireLiveWing` (`wingNotFound`), `sameEffectiveWing` (`postAlreadyInWing`), then the ONE primitive `relocateNote`
+  (keeping: []) — every live `reading_post` row of the note in a live reading SEVERED (members AND arrivals; a MEMBER row
+  in a sealed/finished book refuses `readingSealed`/`lockedReading` BEFORE any write), every live `post_tag` on the note
+  and `block_tag` on its PLACED blocks re-pointed by path (old row tombstoned on the act's stamp, a fresh row on the
+  adopted-or-minted destination tag — a row copy, no intake), the note and its versions' `wing_id` := destination. NO undo
+  entry. Her DOOR refuses a frozen book BEFORE the act with `WingCopy.frozen(title, book:)` ("“X” is in “B”, which is
+  finished — reopen it (or unseal it) before moving the note to another wing." — the mockup §9's sentence); that sentence
+  lives in the Mac module, which the server package cannot see; the op's own throw speaks the generic table words.
+- **T-U6-2 — the wire today:** no tool moves a note across wings; `move_block` refuses a cross-wing move in the act's
+  transaction (`otherWingWords`, P-13nb-U3-5 — KEPT). `show_in_app` has four targets (note · takes · lens · book), no
+  wing. `list_books` reads `r.kind = 'book'` only; `list_notes(book_id:)`, `search(book_id:)` and `show_in_app` book go
+  through `mcpBookFacts`, which is books-only by design (a grant TARGET's facts), so a gathering id answers the one
+  not-shared answer; `search`'s `passes` drops a gathering's own name passage the same way. Gatherings assemble through
+  the ONE membership function (`Queries.gatheringMembership`, read by `assembleReading` and the search's `.book(id)`
+  scope) — within their wing, living notes only.
+- **T-U6-3 — R1's two decisions:** the SOURCE through `decide` on the note at EDIT (any note/book/wing grant reaching it;
+  the fence in the rule — a fenced note only by a per-ask note grant); the DESTINATION through `decideWing` at WRITE NEW
+  (only a wing grant on THAT wing; a book grant in it can never name where a bookless note lands; the open book is read
+  only). Re-decided inside the act's own write transaction by a guard on ONE standing read, the once grants of both sides
+  stamped there as a union (`guardBookAndNote`'s shape) — so both spend or neither, and a refused act spends nothing. The
+  snapshot decides first and raises ONE ask, source first (the note at edit), else the wing at write new.
+- **T-U6-4 — U1's exact-row inverse, and why the act must REPORT its rows:** `relocateNote` returns only the severed
+  readings; the inverse needs the exact rows. Wrapped, never re-derived: the act reads the note's live membership rows and
+  live applications (the note + its placed blocks) and its versions' wings BEFORE and AFTER her primitive, inside the one
+  transaction — severed = live-before-dead-after rows, removed applications = live-before-dead-after, added = live-after
+  and not before. Her `moveNoteToWing` body moves verbatim into an in-transaction twin (`moveNoteToWing(_ db:…)`) that the
+  public door and the MCP act both call — her door byte-identical. **Undo:** the added rows tombstoned, the removed rows
+  revived (their tag live, their block still placed in the note, no live twin), the note + versions back to their stored
+  source `wing_id`, the severed rows revived on the stamp that severed them (book live, in the note's wing —
+  `membershipRevivalStaysInOneWing`, no live pair row, a sealed book only for a sealed note — `restoreContainer`'s letter;
+  a FINISHED book takes its row back, R-13id-3), the purge intents voided, the revival pass (`enforceOwnershipAfterRevival`).
+  **Redo:** the mirror on the same rows (the frozen check re-run first — her door's refusal). **Divergence (the edge the
+  ruling did not see):** a note that has since joined a book or taken a tag in the wing it would LEAVE cannot be put back
+  without splitting a book or a vocabulary across wings — the replay REFUSES as a resolvable refusal that keeps the entry
+  (`OperationError.wingMoveChangedSince`, words in the Mac table); a note moved on by her door, trashed, or whose other
+  wing has died makes the entry OBSOLETE (quiet — the 13i-d `membershipRevivalStaysInOneWing` letter). PROVISIONAL
+  P-13nc-U6-3.
+- **T-U6-5 — the frozen refusal in her words:** the server cannot import `WingCopy`; a new `MCPHostHooks.wingMoveFrozenWords`
+  the app wires to `WingCopy.frozen` (ONE source), spoken when the op refuses a frozen member AND the client can READ that
+  book (names stay with grants — AF-10 (f)); otherwise the op table's own words through `refusalWords`. PROVISIONAL
+  P-13nc-U6-4.
+- **T-U6-6 — R-AIR-12's reach, decided by the RULE:** a pure `MCPGrantRule.decideGathering` (always READ, never
+  consuming): a fenced gathering (a stale 'daily' marker or a Private stamp arriving by sync — no op mints either on one)
+  matches nothing; otherwise `decideWing`'s read on the gathering's wing — a live wing grant there, or the open book. A
+  note or book grant never reaches one; no ask is ever raised for one (it can be no grant's scope). Facts from
+  `Queries.mcpGatheringFacts` on the SAME two fence fragments as `mcpBookFacts`/`mcpFencedBookIDs`. Every member decided
+  one by one through `decide` on `mcpNoteFacts` (the honest count: a fenced member never lists, never counts). The read
+  tools that take a book id for READING accept a gathering (list_books · list_notes · search · show_in_app's book target);
+  every write tool keeps refusing it (`mcpBookFacts` nil — the one answer).
+- **T-U6-7 — `show_in_app`'s wing target:** decided at READ through `decideWing` (never spending); a wing that is not live
+  answers the one answer after an allowed decision (no oracle — the decision already implies reach). Delivered as her
+  switcher's own act (`WingState.switchTo` — wings scope listings, editors never close, 17y (f)) with the receipt naming the
+  client (mockup §7: "Now in “variorum” — claude-code showed you this wing."); the target carries the wing's name and the
+  client's (a signal, P-4).
+- **T-U6-8 — the docs:** the guide's lesson 3 "where" card gains the gatherings clause (U5's T-U5-7 hand-off) and lesson 4's
+  wing card the move; the advice gains one clause each under the 2,000 bound; the tool descriptions say gatherings and the
+  wing target. The neutrality, setup-fence and O-4 pins stay green.
+- **D-U6 — zero `Sync/`, schema, migration, custody, editor seam, `lockstepVersion`.** The fence derivation is consumed
+  (`mcpNoteFacts` for every member; `mcpGatheringFacts` reads the same two fragments as `mcpBookFacts`).
