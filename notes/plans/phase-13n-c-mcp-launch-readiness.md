@@ -27,7 +27,7 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | K1 | This plan finalized | DONE (this commit) |
 | U1 | The fence re-key (VX-163) | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U1 record) — owed: the orchestrator's verification + REAL Claude Code live round; the pre-flight walk HELD (locked session); Stage A |
 | U2 | The grant sheet rebuilt | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U2 record) — owed: the orchestrator's verification; the walk HELD (locked session) — offscreen captures stand in, NOT a walk; Stage B |
-| U3 | Grant from where you are + the one icon + the in-note indicator | BRIEFED — implementer spawning |
+| U3 | Grant from where you are + the one icon + the in-note indicator | IN-PROGRESS — the U3 implementer's record (U3 UNIT RECORD) is live |
 | U4 | Asks wait quietly + the keyboard | NOT-STARTED |
 | U5 | The guide, the AI's advice, the setup menu | NOT-STARTED |
 | U6 | The wing on the wire (+ gatherings under a wing grant) | NOT-STARTED |
@@ -1111,4 +1111,71 @@ to look first, self-assessment.
 
 ## U3 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-*(empty until the U3 implementer's first commit)*
+Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~07:00 MDT). Worktree
+`~/dev/variorum-vx-165`, branch `vx-165-13n-c`. No revert is in flight unless a line below says so.
+The session is LOCKED at start (07:03 MDT: `CGSSessionScreenIsLocked 1`, `CGDisplayIsAsleep 1`) — the
+walk is re-checked at U3-10; offscreen renders stand in only if it is still locked, and are NOT a walk.
+
+### Pieces
+
+| # | Piece | Status |
+|---|---|---|
+| U3-0 | Preflight read whole (this plan top to bottom incl. the STANDING BLOCKER + the U1/U2 records; the sitting record R-AIR-4/6/7/8; the brief §3/§4 (+§5/§13); mockups §2/§3 (+§4 for the pending-ask slot); 13n-b P-13nb-U2-10/-11, U3-15, U4-13/-14/-15 + ⌥⌘O's sweep record; `SessionResiliencyProtocol`) + the code the brief names + the traces below | DONE (this commit) |
+| U3-1 | Core: the bulk grant (N notes, ONE transaction, ONE stamp) + `replacing:` (Change… = replace, one transaction) + the pane's exact-stamp GROUPS + the WHY (`MCPGrantRule.reach`, the one `decide`) + the reach reads (note · book) + the chord's derivation (newest grant → client + rung) — state-transition pins headless | NOT-STARTED |
+| U3-2 | The road: `MCPShareRoad` (Core/Views — `canShare` ≥1 approved client · `indicatorOn` server ON + approved · `open` · `sheet` · `revoke`) built by each WINDOW (RootView, NoteWindowView) from the door's narrow observables; `MCPGrantOpening` grows `.notes([ids])`, rung/duration prefill, `replacing`, `origin`; the window-level grant sheet | NOT-STARTED |
+| U3-3 | The four place-doors (registry-declared, rendered only with an approved client): the Library bulk bar, `postRowMenu`, `BookRowMenuTable` + the Bookcase's own book menu, the Book Settings grant row (nested sheet); every string listed | NOT-STARTED |
+| U3-4 | ⌥⌘A — share the note you're in (D1), the Edit menu beside ⌥⌘Z/⌥⌘O, the sweep at the tip recorded at the binding, the helper row; the receipt's two doors (Change… R-AIR-4 · Revoke ›) — `QuietReceiptLine` learns the second door | NOT-STARTED |
+| U3-5 | R-AIR-6 — the ONE icon (2–3 SF Symbol candidates captured; the lead built PROVISIONAL) replacing the Bookcase's text chip; hover names who + how far; the permission popover (client · rung · duration · why · Change… · Revoke) | NOT-STARTED |
+| U3-6 | VX-164 — the in-note indicator at the ContextBar's trailing end (every note mode, both window kinds): shared icon + popover with the why; LOCK when Private (own toggle / the book's name); nothing when neither; only with the server ON and an approved client | NOT-STARTED |
+| U3-7 | The pane's Shared places renders the exact-stamp groups ("3 notes · claude-code · read · while connected", the members under it, Revoke covering all) | NOT-STARTED |
+| U3-8 | Headless finals: `swift build` + core + `VariorumMCPTests` + workbook | NOT-STARTED |
+| U3-9 | Mac suites under a held stage claim (the brief's list + every suite over a changed file) | NOT-STARTED |
+| U3-10 | The walk (dev-store Debug, Study + Terminal) → `notes/plans/13n-c-screens/u3/` — or, if still locked, offscreen captures of the real views (NOT a walk) | NOT-STARTED |
+| U3-11 | UNIT CLOSED banner | NOT-STARTED |
+
+### Traces (made before any code — the hallucination guard)
+
+- **T-U3-1 — no place-door exists, and the main window cannot reach the door.** The grant sheet opens
+  only from the pane (`MCPPane.granting` → `MCPGrantSheet`); U2's `MCPGrantOpening.place` names ONE note,
+  book or wing. The Library bulk bar (`LibraryCatalogView` :673–711) carries Tag / Untag / Delete N notes;
+  `postRowMenu` (:1178) has no share row; `BookRowMenuTable.doors` (`Core/Views/BookRowMenu.swift`) and the
+  Bookcase's own `bookMenu` (`ShelfView` :787) none; `BookSettingsSheet.state` carries only the Private row.
+  `RootView` and `NoteWindowView` take no MCP door — `appDelegate.mcp` reaches only `EditorCommands`, the
+  Settings scene and the ask sheet's `WindowGroup` modifier. So every door needs a road built by the WINDOW
+  (composition — the `checkForUpdatesDoor` / `.environment(wings)` precedent), never a feature holding
+  `MCPDoor`.
+- **T-U3-2 — one grant per call, one row per grant.** `grantMCPAccess` → `insertMCPGrant` writes one row on
+  its own `date.now` in its own transaction; N calls = N stamps = N rows in Shared places (`mcpSharedRows`
+  lists every live grant). The exact-stamp doctrine (`restoreContainer`'s stamp-matched revival, AppSpec §9)
+  is the no-schema road: ONE transaction, ONE clock read, N rows on one `created_at` — grouped on read.
+- **T-U3-3 — the chip says neither who nor how far, and has no click.** `ShelfView` :678–687 draws
+  `SharedWithAICopy.chip` ("shared with AI") from `model.aiShared` (`Queries.mcpReachableBookIDs`, one-shot
+  in `refreshAggregates`); its help is "An MCP client can read this book now — see Settings ▸ MCP." The set
+  is honest under every grant shape (P-13nb-U2-11) but carries ids only.
+- **T-U3-4 — the WHY is already decided, and thrown away.** `MCPGrantRule.decide` returns
+  `.allow(grantID:consumesOnce:)` — the grant that authorizes the call, nil for the open book.
+  `Queries.mcpNoteSharing` keeps only the highest allowed rung per client. The why = that authorizing grant's
+  scope (this note / book "X" / wing "Y" / the open book) — read off `decide` itself, so no parallel rule can
+  exist.
+- **T-U3-5 — the in-note face today is the note ▾ menu's line only** (`PrivateMarkCopy.sharedLine` —
+  "Shared with AI: claude-code (read)"), two clicks deep, no why. The note's upper right: the pane's
+  `ContextBar` (`Workspace/ContextBar.swift`, composed by `PaneHost` for every pane of BOTH window kinds and
+  every note mode) draws ← · book · → · the tray badge and then a `Spacer` — its trailing end is empty. That is
+  chrome (`PaneHost`/`ContextBar`), not the editor seam (`EditorTextView` / `BlockRangeIndex` / `PaneSurface`
+  untouched).
+- **T-U3-6 — a receipt carries ONE door on the quiet slot.** `StatusCenter.deliver` takes `action` +
+  `secondary`, and `StatusToast` draws both; `QuietReceiptLine` draws only `item.action`. R-AIR-4's Change…
+  beside Revoke › needs the quiet slot to draw the second door too (receipt_style's default is quiet).
+- **T-U3-7 — a sheet over a sheet.** `BookSettingsSheet` is itself a sheet (from the Bookcase row, the book
+  masthead and `BookRowDoors`); a grant sheet presented from the WINDOW root while it is up is not a road
+  SwiftUI promises on macOS, so its Share… presents the grant sheet NESTED from the settings sheet's own
+  content (the road builds the view; the feature never names `MCPGrantSheet` or `MCPDoor`).
+- **T-U3-8 — "Change…" must REPLACE, or a lowered rung never lands.** The sheet only ever ADDS a grant
+  (`MCPDoor.grant`; the client row's Change… is additive by design — "a grant is taken away with its own
+  Revoke"). Pre-filled on a grant and confirmed lower (⌥⌘A minted edit · while connected; she changes it to
+  read · once), an additive sheet leaves the edit grant live — her change silently does not take. R-AIR-4 is
+  "to change its details": the grant-specific Change… doors (the receipt's, the popovers') revoke what they
+  name and mint the new grant in ONE transaction; the client row's Change… stays additive (it names no grant).
+  PROVISIONAL (P-13nc-U3-3) + a FABLE-OWED row.
+- **D-U3 — no `Sync/`, no schema, no custody, no editor seam, no fence derivation** (consumed through
+  `mcpNoteFacts` / `mcpBookFacts` / `MCPGrantRule` only — re-verified at close).
