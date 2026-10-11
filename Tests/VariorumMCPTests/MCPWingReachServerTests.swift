@@ -204,6 +204,20 @@ struct MCPWingReachServerTests {
             let shown = try await call(connection, "show_in_app",
                                        ["target": .string("book"), "book_id": .string(g.gathering.id)])
             #expect(shown.isError != true && app.delivered.value.last == .book(bookID: g.gathering.id, sectionID: nil))
+
+            // A FENCED gathering (a stale Private stamp — no op mints one, a
+            // synced row could) is admitted by the wing grant's listing and
+            // refused by the rule (the U6-5 mutation M7 found this case
+            // missing: the listing's prefilter alone had kept it honest).
+            try h.database.write { db in
+                try db.execute(sql: "UPDATE reading SET ai_private_at = '2026-07-01T00:00:00.000Z' WHERE id = ?",
+                               arguments: [g.gathering.id])
+            }
+            #expect(!(try books(try await call(connection, "list_books", [:]))).contains {
+                $0["id"] as? String == g.gathering.id
+            }, "a fenced gathering never lists")
+            let fencedList = try await call(connection, "list_notes", gatheringID)
+            #expect(fencedList.isError == true && text(fencedList) == MCPRefusalCopy.words(.notShared, .book))
             await h.hangUp(connection)
         }
     }
