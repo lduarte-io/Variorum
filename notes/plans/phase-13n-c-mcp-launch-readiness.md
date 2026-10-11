@@ -109,7 +109,7 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | U3 | Grant from where you are + the one icon + the in-note indicator | BUILT + VERIFIED by the orchestrator at `c6d5d23a` (7 commits `4dc0202c..c6d5d23a`: fence diff empty — no Sync/ · Persistence/ · migrations · editor seam; zero trailers; 22 captures read — popover, Bookcase icon, two-door receipt) — icon pick: A `point.3.connected.trianglepath.dotted` KEPT (orchestrator, PROVISIONAL P-13nc-U3-5 — hers at the copy pass); the walk HELD (locked session); Stage B |
 | U4 | Asks wait quietly + the keyboard | BUILT + VERIFIED by the orchestrator at `f1ab4725` (5 commits `a41efc1b..f1ab4725`: fence diff empty — zero `Sources/` lines; zero trailers; captures read — Waiting, ⌘L typed, Bookcase glyphs) — the walk HELD (locked); Stage B |
 | U5 | The guide, the AI's advice, the setup menu | BUILT + VERIFIED by the orchestrator at `065526ce` (8 commits `58b81ec8..065526ce`: fence diff empty — zero `VariorumCore/` lines; zero trailers; captures read — lesson 4, the any-client JSON; the advice read whole) — the walk + the scratch `claude mcp add` HELD (locked); Stage B |
-| U6 | The wing on the wire (+ gatherings under a wing grant) | NEXT — spawns when the walker reports |
+| U6 | The wing on the wire (+ gatherings under a wing grant) | BRIEFED — implementer spawning |
 | U7 | VX-159 — the ceremonies on the wire | FALLS OUT of 13n-c AND of the launch (her word; VX-159 carries no launch label) |
 | U8 | **VX-168** — the per-setup secret (the work R-AIR-14 ruled) | FALLS OUT of 13n-c — **a PRE-LAUNCH GATE, her word 2026-10-11 ~14:15: "U8 done before launch but not before this applications refresh"**; ticket minted with the Pre-launch label; kickoff `notes/plans/vx-168-kickoff-prompt.md` |
 | W | The whole-phase walk + the OPUS UX-REVIEWER WALK (a ladder round) | NOT-STARTED |
@@ -750,11 +750,11 @@ unit record (TCC state is machine-state the next session inherits).
 | 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | BUILT + VERIFIED `f1ab4725` — walk HELD; two order-dependent Mac reds predating U4 ticketed **VX-167** (red identically on U3's tree; green alone) |
 | 7 | U5 — the guide, the advice, the setup menu | U5 implementer | BUILT + VERIFIED `065526ce` — walk HELD; the one cap-test red ("Unable to parse empty data") folded into **VX-132** by comment (Stage B R1 B14) |
 | 8 | Stage B ladder (opus) | orchestrator | **CLOSED at R2** — R1 → fix pass `c6d8509c..9c049c6a` → R2 (0B/0M/1m/4n) → the CLOSE-OUT FIX PASS `6f7fc38f..3e8ccd83` VERIFIED by the orchestrator (zero trailers; the one `Persistence/` line is the purely additive `AppDatabase.observe(tracking:_:)` — no schema, no caller changed, F-22; core 2,623/300 · MCP 82/12 · Mac 537/76 green). The close-out range is not cold-reviewed after R2 (no new B/M earned R3), so **it joins Stage C's review range** and is named there. |
-| 9 | U6 — the wing on the wire | U6 implementer | NOT-STARTED |
+| 9 | U6 — the wing on the wire | U6 implementer | BRIEFED — spawned |
 | 10 | U7 — VX-159 | — | FALLS OUT of the phase and the launch (her word 2026-10-11 ~14:15) — stays VX-159, unlabeled |
 | 11 | Stage C ladder | orchestrator | FOLDED into the one combined fable ladder (the takeover schedule item 3) |
 | 12 | U8 — the secret | — | FALLS OUT → **VX-168** (Pre-launch label; her gate: before launch, not before this refresh); kickoff prompt committed |
-| 13 | The whole-phase walk + the Opus UX-reviewer walk | orchestrator + walker + UX reviewer | **PAUSED at her word** (mid W-4) — W-1/W-2 done, W-3/W-4 partial; D-W1 + D-W2 found (picker defects, unfixed); T-1…T-8 for the UX reviewer; machine state live (claim, Debug app, scratch registration, dev store unrestored) |
+| 13 | The whole-phase walk + the Opus UX-reviewer walk | orchestrator + walker + UX reviewer | **Leg 1 DONE** — WALKS CLOSED at `82ad7478`, VERIFIED by the orchestrator (span `092f0472..82ad7478`: only the four fix surfaces + tests + notes, zero `Sources/`, zero trailers; the fixed pickers read on screen — rows render, the twice-sectioned book draws twice, the note leg's Private/Journal badges show; stage free, dev store restored, no instance). Live rounds (1)–(6) proven on a real client; D-W1…D-W4 fixed red-on-old; taste T-1…T-17 carried to leg 2. **Leg 2 (the Opus UX walk) runs after U6.** NOTE for leg 2: T-17 (a book popover's Revoke taking back the WIDER wing grant) is P-13nc-U3-6/F-14's DESIGNED behavior — the UX reviewer judges the FACE, the combined fable ladder judges the DESIGN; neither re-rules the other. |
 | 14 | Closeout + the conditional refresh | orchestrator | NOT-STARTED |
 | 15 | QUESTIONS #211 — this phase's PROVISIONALs (minted at the merge) | orchestrator | OPEN |
 
@@ -2381,3 +2381,73 @@ repo-first by the orchestrator. The walker's W-3/W-4 details and T-3…T-8 were 
 - **Turn 4** (suggest · always on "Fixture book 008"): `list_notes` → "Fixture 0007 — the long way home"; `read_note with_ids`; `add_take` on block `9CA26ECA…` "The river ran high and brown that evening, and nobody said a word about it." (label "walk") → `{"block_id":"9CA26ECA-BD32-4BA8-B596-5EC697409032","note_id":"6A7C0E74-F6BA-4CC4-AA3D-4570CF9D5AE8","take_id":"9F116F46-1888-49DF-BA6E-97E48B70FB30"}` → the Edit menu "Undo claude-code's take". ($0.082)
 - **Turn 5** ("dream journal" marked Private): `read_note` on the Private probe → the one note answer (an ask queued); `list_notes` on the now-Private book → **"That book isn't shared with this client, or doesn't exist. The author can share it from Variorum ▸ Settings ▸ MCP."** (F-7's one book answer; no ask raised by this read). ($0.063)
 - **Scripted stdio client "walk-request"** (one `initialize` line, then a full session): the connection request face; approved with a once grant; later its `read_note` on the Private probe → the one answer + an ask; Revoked → its marks left.
+
+---
+
+## THE U6 IMPLEMENTER BRIEF (self-contained; the spawn names this section)
+
+You are the U6 implementer for Variorum phase 13n-c, working in `~/dev/variorum-vx-165` on branch
+`vx-165-13n-c` (NEVER the main checkout). Commits say `Part of VX-165` (and `Part of VX-160` /
+`Part of VX-158` where they land those tools), NO attribution trailer, push after every commit.
+`notes/SessionResiliencyProtocol.md` binds you: LIVE STATUS in the "U6 UNIT RECORD" section below
+from your FIRST commit, foreground waits only (a `grep -q … && break; sleep 5` poll loop), no
+subagents.
+
+**Read first, whole, never delegated:** this plan file TOP TO BOTTOM — §3 U6 is your scope,
+verbatim; the sitting record (R-AIR-2's sweep, R-AIR-12); the U1–U5 records + the Stage B fix
+records (the fence derivation, `MCPGrantRule.reach`, the ask road, the neutrality and setup-copy
+pins you must keep green); the walker's HELD-WALKS RECORD (whatever it fixed is under you). Code:
+`Sources/VariorumMCP/MCPWriteTools.swift`, `MCPToolCatalog.swift`, `MCPSession.swift`
+(`instructions` — her RULED bound is 2,000, the constant already moved; ~500 characters of room),
+`MCPShowTool.swift` + `MCPShowRule`, `Sources/VariorumCore/Operations/` (the existing cross-wing
+move door — grep `moveNoteToWing` / `MoveToWing`; its tag adoption and severed-membership rules are
+HERS, R-13ia-1/R-13id-6 — you wrap, never re-derive), `Operations+MCPGrants.swift`,
+`Queries/MCPGrantQueries.swift` (`decideWing`, the fence fragments), `Domain/MCPGrantRule.swift`.
+
+**What U6 builds — §3 U6 verbatim, with these concretions:**
+1. **`move_note_to_wing`** over her existing door, ONE transaction: source decided at EDIT through
+   the ordinary rule; destination through `decideWing` at WRITE NEW on that wing; BOTH re-decided
+   INSIDE the act's transaction; once grants spent atomically (both spend, or neither). Tag
+   adoption mirrors her door (T1). ONE client-named undo entry with an exact-row inverse (wing
+   back for the note and its versions, severed memberships revived on their exact stamp,
+   applications re-pointed back; minted tags stay as vocabulary) plus its exact-row redo (U1).
+   Refusals byte-for-byte hers; `move_block`'s cross-wing refusal stays. A fenced note moves only
+   under a per-ask note grant.
+2. **`show_in_app` gains the `wing` target:** `MCPShowRule` unchanged; decided at read with
+   `decideWing`; never spends a once grant; "Now in …" names the client; refuses honestly behind
+   (R-13nb-23/26g untouched).
+3. **R-AIR-12 — gatherings as read facts under a wing grant:** `list_books` lists the wing's
+   gatherings (kind gathering); their assembly readable with EVERY member filtered through the
+   per-note fence — a fenced member never lists, never counts (the honest-count rule, the one
+   uniform answer). Gatherings stay NON-targets: no grant names one; a book/note grant does not
+   reach a gathering. Consume the ONE fence derivation — never a parallel SQL fence.
+4. **Rung proofs grown as the ritual,** mutation-checked: read/suggest/write-new cannot move a
+   note across wings; a book grant cannot name a destination; a fenced note moves only per-ask.
+5. **The docs catch up (D-2):** the guide chapter's withheld wing-gatherings sentence lands (the
+   U5 record names it) with its truth pin; `MCPSession.instructions` gains the gatherings clause
+   (and the move if it fits) under the 2,000 bound; every sentence true of the build; the
+   neutrality, setup-copy-fence and O-4 pins stay green.
+**FABLE-OWED rows at the moment** (the grant boundary, the new inverse over a cross-library move,
+the gathering reach) — the combined fable ladder that follows you is expected to discharge them,
+but the ledger discipline holds regardless.
+
+**Must NOT touch:** `Sync/`, custody/keychain, the editor seam, migrations, `lockstepVersion`, the
+real store, `/Applications`, the fence derivation (U1's — consume it).
+
+**Acceptance:** `VariorumMCPTests` + core state-transition pins headless, then the whole headless
+package; Mac suites over every changed type under a HELD `Tools/stage` claim, `skipped:` read.
+**The REAL Claude Code live round in her sweep's shape** (the Pro is unlocked): register the tip's
+shim `-s local` in a scratch folder under the session scratchpad ONLY (never `-s user`; remove it
+after), dev store only, under the stage claim — two wing grants; several notes moved Home → a
+second wing; ONE ⌥⌘Z walks one move back with memberships and tags; a finished book's member
+refused in her words; `show_in_app` to a wing frontmost and refused behind; a gathering read under
+a wing grant with a fenced member absent. Record every client turn's exact text. VX-132: a hung
+MCP test run is killed and rerun. Captures in `notes/plans/13n-c-screens/u6/` (gitignored).
+
+**Forks / close:** as the earlier briefs — propose before building beyond the rulings;
+PROVISIONAL-and-log; STOP for gating; the UNIT CLOSED banner (not-done, PROVISIONALs, where a cold
+reviewer should look first, self-assessment).
+
+## U6 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
+
+*(empty until the U6 implementer's first commit)*
