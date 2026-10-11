@@ -30,6 +30,9 @@ struct MCPPane: View {
     @State private var full: FullList?
     /// 13n-c U4 — the ask Waiting's Answer… opened (her press).
     @State private var answering: String?
+    /// 13n-c U5 (R-AIR-13) — the setup menu's chosen client (the pane's
+    /// view state; Claude Code first, as 13n-b shipped it).
+    @State private var setupClient: MCPSetupClient = .claudeCode
     /// 13n-c U2 — the shared rows' distinguishers (the ONE rule over the
     /// offered books — the same label the sheet's picker shows), read once per
     /// change of the shared set, never per render.
@@ -163,26 +166,7 @@ struct MCPPane: View {
                 }
             }
             Section(MCPPaneCopy.connectSection) {
-                Text(MCPPaneCopy.connectSentence)
-                    .font(.callout)
-                    .lineLimit(4)
-                    .fixedSize(horizontal: false, vertical: true)
-                HStack {
-                    Button(Self.verb(.mcpCopySetupCommand)) { door.copySetupCommand() }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                    Spacer(minLength: 0)
-                }
-                if let note = door.note, note.place == .connect {
-                    caption(note.text)
-                }
-                // Shown WHOLE, verbatim and selectable (R-13nb-5) — a Debug
-                // build's DerivedData path runs four lines at this width (the
-                // walk's first finding: three lines clipped it).
-                Text(verbatim: door.setupCommand)
-                    .font(.system(size: 11, design: .monospaced))
-                    .textSelection(.enabled)
-                    .lineLimit(10)
-                    .fixedSize(horizontal: false, vertical: true)
+                MCPSetupMenu(door: door, client: $setupClient, tokens: tokens)
             }
         }
         .formStyle(.grouped)
@@ -347,6 +331,72 @@ struct MCPWaitingRowView: View {
             Button(CapabilityRegistry.capability(.mcpOpenAsk).verb, action: answer)
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
         }
+    }
+}
+
+/// **CONNECT A CLIENT — the setup menu** (13n-c U5 — R-AIR-13; her R-13nb-5
+/// "Copy setup command" grows a per-client menu). Top to bottom: the one
+/// direct line (a standard MCP server over stdio, one program) with its path
+/// shown whole and selectable; the menu — Claude Code · Codex · Any MCP
+/// client, all three in sight (a segmented row: a pop-up would hide two of
+/// the three, the discoverability her mandate asks for); the chosen client's
+/// one sentence; the ONE declared act, which copies the chosen text with its
+/// own receipt beneath it; and that text, verbatim and selectable. Its own
+/// view so the locked-session harness can draw it alone.
+struct MCPSetupMenu: View {
+    let door: MCPDoor
+    @Binding var client: MCPSetupClient
+    let tokens: VoiceTokens
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(MCPPaneCopy.stdioLine)
+                .font(.callout)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(verbatim: MCPDoor.shimPath)
+                .font(.system(size: 11, design: .monospaced))
+                .textSelection(.enabled)
+                .lineLimit(4)
+                .fixedSize(horizontal: false, vertical: true)
+            Picker(MCPPaneCopy.connectSection, selection: $client) {
+                ForEach(MCPSetupClient.allCases) { option in
+                    Text(option.label).tag(option)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .fixedSize()
+            .padding(.top, 4)
+            Text(client.sentence)
+                .font(.callout)
+                .lineLimit(4)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack {
+                Button(CapabilityRegistry.capability(.mcpCopySetupCommand).verb) {
+                    door.copySetupCommand(for: client)
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                Spacer(minLength: 0)
+            }
+            if let note = door.note, note.place == .connect {
+                Text(note.text)
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            // Shown WHOLE, verbatim and selectable (R-13nb-5) — a Debug
+            // build's DerivedData path runs four lines at this width (the
+            // walk's first finding: three lines clipped it); the JSON stanza
+            // is eight lines before the path wraps.
+            Text(verbatim: door.setupText(for: client))
+                .font(.system(size: 11, design: .monospaced))
+                .textSelection(.enabled)
+                .lineLimit(16)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        // A receipt names ONE client's next step — another choice clears it.
+        .onChange(of: client) { _, _ in door.clearConnectNote() }
     }
 }
 

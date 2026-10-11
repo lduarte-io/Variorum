@@ -221,6 +221,12 @@ final class MCPDoor {
         MCPPaneCopy.setupCommand(shimPath: Self.shimPath, isDebugBuild: Self.isDebugBuild)
     }
 
+    /// 13n-c U5 (R-AIR-13): the setup menu's chosen client's text — the
+    /// command or the stanza the pane shows verbatim and copies.
+    func setupText(for client: MCPSetupClient) -> String {
+        client.text(shimPath: Self.shimPath, isDebugBuild: Self.isDebugBuild)
+    }
+
     // MARK: - Attach / detach (A-8)
 
     /// The store is open: observe the grants store; start the server when the
@@ -431,11 +437,20 @@ final class MCPDoor {
     }
 
     /// Copy setup command (R-13nb-5): the command on the clipboard, the
-    /// receipt in the pane's caption.
-    func copySetupCommand(to pasteboard: NSPasteboard = .general) {
+    /// receipt in the pane's caption. 13n-c U5 (R-AIR-13): the setup menu's
+    /// CHOSEN client — Claude Code (the default, its text unchanged), Codex,
+    /// or any MCP client's JSON — each with its own receipt.
+    func copySetupCommand(for client: MCPSetupClient = .claudeCode, to pasteboard: NSPasteboard = .general) {
         pasteboard.clearContents()
-        pasteboard.setString(setupCommand, forType: .string)
-        note = Note(text: MCPPaneCopy.copiedReceipt, place: .connect)
+        pasteboard.setString(setupText(for: client), forType: .string)
+        note = Note(text: client.copiedReceipt, place: .connect)
+    }
+
+    /// 13n-c U5: a copy receipt names ONE client's next step, so choosing
+    /// another client in the menu clears it (a "Copied … Claude Code" caption
+    /// under Codex's text would be a lie). A refusal at the head stays.
+    func clearConnectNote() {
+        if note?.place == .connect { note = nil }
     }
 
     private func act(_ body: @escaping @Sendable (Operations) throws -> Void) {

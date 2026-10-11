@@ -293,10 +293,13 @@ nonisolated enum SettingsCatalog {
         // server toggle and the one open-book switch.
         SettingsRow(
             id: "mcpServer", pane: .mcp, title: MCPPaneCopy.enableTitle,
-            blurb: "A local server for MCP clients such as Claude Code. Off by default; nothing is "
-                + "readable until you grant it. This Mac only.",
+            // 13n-c U5 (R-AIR-13): the setup menu names Codex and any MCP
+            // client's JSON, so the search finds the pane by those words too.
+            blurb: "A local server for MCP clients such as Claude Code or Codex. Off by default; "
+                + "nothing is readable until you grant it. This Mac only.",
             keywords: ["mcp", "ai", "claude", "claude code", "agent", "llm", "model context protocol",
-                       "server", "connect", "client", "share", "grant", "socket"]),
+                       "server", "connect", "client", "share", "grant", "socket",
+                       "codex", "setup", "json", "stdio"]),
         // 13n-c U4 — WAITING (arrival X): where a client's ask waits besides
         // its icon; ⌥⌘, opens the pane there.
         SettingsRow(

@@ -261,6 +261,66 @@ nonisolated enum MCPPaneCopy {
         return "\"\(escaped)\""
     }
 
+    // MARK: - The setup menu (13n-c U5 — R-AIR-13: "Claude Code · Codex · a generic path/JSON shape")
+
+    /// **The one direct line** (R-AIR-13: "the pane says the door is a
+    /// standard MCP stdio server at one binary path"), above the menu, with
+    /// the path itself under it. Direct and technical (R-13n-5); no "AI"
+    /// (R-AIR-8).
+    static let stdioLine =
+        "Variorum's door is a standard MCP server that speaks over stdio: one program, at this path "
+        + "inside the app."
+
+    /// The Codex setup (the U5 record's external fact — `codex mcp add
+    /// <name> -- <command>`, which writes the user-global `~/.codex/config.toml`):
+    /// the same name rule and the same shell quoting as Claude Code's.
+    static func codexCommand(shimPath: String, isDebugBuild: Bool) -> String {
+        "codex mcp add \(serverName(isDebugBuild: isDebugBuild)) -- \(shellQuoted(shimPath))"
+    }
+
+    /// **The generic stanza** — the `mcpServers` JSON shape most MCP clients
+    /// read (modelcontextprotocol.io's local-server page; Cursor's
+    /// `mcp.json`): the absolute path as `command`, no arguments. Written by
+    /// hand so it reads as the docs print it (two-space indent, `"key": value`)
+    /// and the path is never slash-escaped; `jsonQuoted` makes any path legal
+    /// JSON (pinned by parsing it back).
+    static func setupJSON(shimPath: String, isDebugBuild: Bool) -> String {
+        let name = jsonQuoted(serverName(isDebugBuild: isDebugBuild))
+        return """
+            {
+              "mcpServers": {
+                \(name): {
+                  "command": \(jsonQuoted(shimPath)),
+                  "args": []
+                }
+              }
+            }
+            """
+    }
+
+    /// A JSON string literal (RFC 8259 §7): the quote, the backslash and the
+    /// control characters escaped; everything else as written.
+    static func jsonQuoted(_ text: String) -> String {
+        var escaped = "\""
+        for scalar in text.unicodeScalars {
+            switch scalar {
+            case "\"": escaped += "\\\""
+            case "\\": escaped += "\\\\"
+            case "\n": escaped += "\\n"
+            case "\r": escaped += "\\r"
+            case "\t": escaped += "\\t"
+            case _ where scalar.value < 0x20:
+                escaped += String(format: "\\u%04x", scalar.value)
+            default: escaped.unicodeScalars.append(scalar)
+            }
+        }
+        return escaped + "\""
+    }
+
+    /// Copied receipts beside Claude Code's (`copiedReceipt`, unchanged).
+    static let copiedCodexReceipt = "Copied. Run it in a terminal, then start a new Codex session."
+    static let copiedJSONReceipt = "Copied. Paste it into your client's MCP settings, then restart the client."
+
     // MARK: - The "all N" road (R-13n-10)
 
     static func allRoad(_ count: Int) -> String { "all \(count) \u{203A}" }
@@ -517,6 +577,60 @@ nonisolated enum MCPPaneCopy {
         case .mcpClientNotFound?: "That client no longer exists."
         case .mcpGrantNotFound?: "That grant no longer exists."
         default: "Couldn't do that: \(error)"
+        }
+    }
+}
+
+/// **THE SETUP MENU's clients** (13n-c U5 — R-AIR-13, the sitting record round 3:
+/// "Claude Code · Codex · a generic path/JSON shape"). ONE table: the menu's
+/// order, each client's label, its text (the command or the stanza), the
+/// sentence that says how to use it, and the receipt its copy speaks. The ONE
+/// declared act (`.mcpCopySetupCommand`, her R-13nb-5 words) copies whichever
+/// is chosen — choosing is the pane's view state, never a second act.
+nonisolated enum MCPSetupClient: String, CaseIterable, Identifiable, Sendable {
+    case claudeCode, codex, anyClient
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .claudeCode: "Claude Code"
+        case .codex: "Codex"
+        case .anyClient: "Any MCP client"
+        }
+    }
+
+    /// What the chosen client's copy puts on the clipboard (and the pane
+    /// shows verbatim): Claude Code's command unchanged, Codex's command, or
+    /// the generic `mcpServers` stanza. Debug keeps `variorum-dev`
+    /// (P-13nb-U1-10) in all three.
+    func text(shimPath: String, isDebugBuild: Bool) -> String {
+        switch self {
+        case .claudeCode: MCPPaneCopy.setupCommand(shimPath: shimPath, isDebugBuild: isDebugBuild)
+        case .codex: MCPPaneCopy.codexCommand(shimPath: shimPath, isDebugBuild: isDebugBuild)
+        case .anyClient: MCPPaneCopy.setupJSON(shimPath: shimPath, isDebugBuild: isDebugBuild)
+        }
+    }
+
+    /// How to use it — one sentence each (Claude Code's is 13n-b's, unchanged).
+    var sentence: String {
+        switch self {
+        case .claudeCode: MCPPaneCopy.connectSentence
+        case .codex:
+            "Codex registers Variorum with one command. Copy it, run it in a terminal, then start a new "
+                + "Codex session \u{2014} it adds Variorum for every folder (in ~/.codex/config.toml)."
+        case .anyClient:
+            "Most MCP clients read their servers from an \u{201C}mcpServers\u{201D} list in JSON. Paste "
+                + "this into your client's MCP settings and restart it \u{2014} or give a client that "
+                + "asks for a command the path above."
+        }
+    }
+
+    var copiedReceipt: String {
+        switch self {
+        case .claudeCode: MCPPaneCopy.copiedReceipt
+        case .codex: MCPPaneCopy.copiedCodexReceipt
+        case .anyClient: MCPPaneCopy.copiedJSONReceipt
         }
     }
 }

@@ -2190,6 +2190,9 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Shared places are revoked in Settings \u{25B8} MCP.",
             availability: always),
+        // 13n-c U5 (R-AIR-13): ONE act still — the pane's setup menu
+        // (Claude Code · Codex · Any MCP client, `MCPSetupClient`) chooses
+        // WHAT it copies; choosing is view state, never a second act.
         Capability(
             id: .mcpCopySetupCommand, verb: "Copy setup command", scope: .app,
             doors: [.surface],
