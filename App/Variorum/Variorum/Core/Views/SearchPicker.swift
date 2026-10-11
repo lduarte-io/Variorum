@@ -402,6 +402,9 @@ struct SearchPicker: View {
 /// capture harness can draw the open picker offscreen (a popover is another
 /// window) — `initialQuery` is that seam; in use it opens empty.
 struct SearchPickerPanel: View {
+    /// The list's height cap (the popover's scrolling room).
+    static let listHeight: CGFloat = 360
+
     let tokens: VoiceTokens
     let prompt: String
     let emptyText: String
@@ -503,7 +506,7 @@ struct SearchPickerPanel: View {
                     }
                 }
             }
-            .frame(maxHeight: 360)
+            .frame(maxHeight: Self.listHeight)
         }
         .padding(.vertical, 6)
         .frame(width: width)
