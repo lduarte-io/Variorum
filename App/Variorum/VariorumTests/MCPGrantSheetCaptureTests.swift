@@ -95,6 +95,36 @@ struct MCPGrantSheetCaptureTests {
         print("[13NC-U1-PNG-END \(name) \(part)]")
     }
 
+    /// Settings ▸ MCP itself: a journal-TRAIT book granted (R-AIR-1 — the op
+    /// refused it before) listed under Shared, and the open book on with its
+    /// re-keyed sentence.
+    @Test func captureThePaneWithATraitBookSharedAndTheOpenBookOn() async throws {
+        for voice in [ThemeVoice.study, .terminal] {
+            try await withWorld { session in
+                let ops = session.operations
+                let trait = try ops.createReading(name: "dream journal", kind: .book, profile: "journal")
+                let contact = try ops.recordMCPContact(name: "claude-code", version: "2")
+                try ops.approveMCPClient(contact.id, granting: .init(
+                    rung: .read, scopeKind: .book, scopeID: trait.id, duration: .always))
+                try ops.setMCPSwitch(.openBook, on: true)
+                let door = MCPDoor(serverAllowed: false)
+                door.attach(session: session)
+                defer { door.detach() }
+                let (theme, task) = try await startedTheme(session, voice: voice)
+                defer { task.cancel() }
+                for _ in 0..<100 where !door.snapshot.openBook {
+                    pump(0.02)
+                    await Task.yield()
+                }
+                #expect(door.snapshot.openBook, "the snapshot the pane draws reads the open book ON")
+                await capture(
+                    MCPPane(door: door).environment(theme),
+                    size: NSSize(width: 524, height: 980),
+                    name: "u1-pane-\(voice == .study ? "study" : "terminal").png")
+            }
+        }
+    }
+
     /// The sheet as Change… opens it on an approved, connected client: WHERE =
     /// a book (the first offered, a–z), read, always — so the confirm is her
     /// example ("dream journal") or a long name, whole or not.
@@ -109,7 +139,7 @@ struct MCPGrantSheetCaptureTests {
                     _ = try ops.createReading(name: "zz other", kind: .book)
                     let contact = try ops.recordMCPContact(name: "claude-code", version: "2")
                     try ops.approveMCPClient(contact.id, granting: nil)
-                    let client = try #require(try session.database.read { try Queries.mcpClient($0, id: contact.id) })
+                    let client = try #require(try await session.database.read { try Queries.mcpClient($0, id: contact.id) })
                     let door = MCPDoor(serverAllowed: false)
                     door.attach(session: session)
                     defer { door.detach() }
