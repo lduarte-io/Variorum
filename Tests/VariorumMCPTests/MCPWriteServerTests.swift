@@ -188,6 +188,10 @@ struct MCPWriteServerTests {
             calls.append(("file_note_in_chapter", ["note_id": .string(note.id), "book_id": .string(book.id),
                                                    "section_id": .string(chapter.id)]))
             calls.append(("set_book_rule", ["book_id": .string(book.id), "rule": .object(["star": .bool(true)])]))
+            // 13n-c U6 (justified edit, the ritual — the proof's completeness
+            // grows with the catalog): the per-item move across wings, aimed
+            // at her note, refusing at the rung.
+            calls.append(("move_note_to_wing", ["note_id": .string(note.id), "wing_id": .string("")]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).

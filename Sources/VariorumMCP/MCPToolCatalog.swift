@@ -68,6 +68,8 @@ enum MCPToolCatalog {
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
         // U4 — the tray's Put back (R-13nb-14) and the date (R-13nb-26 b).
         putBack, setEntryDate,
+        // 13n-c U6 — the per-item note move across wings (VX-160, R-AIR-2).
+        moveNoteToWing,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -562,6 +564,32 @@ enum MCPToolCatalog {
                 "name": .object(["type": ["string", "null"], "description": "The name (blank or null clears)."]),
             ]),
             "required": .array(["block_id", "name"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// 13n-c U6 (VX-160 — R-AIR-2/-9, the brief §10's R1 · T1 · U1): the
+    /// author's own Move to Wing, on the wire. Listed at EDIT (the source's
+    /// rung) under any scope kind: a client short on the destination's write
+    /// new is still offered it, and its refusal raises that wing's ask.
+    static let moveNoteToWing = MCPToolDeclaration(
+        name: "move_note_to_wing", rung: .edit, title: "Move a note to another wing",
+        description: """
+            Move a note to another wing (wing_id; "" is Home) — each wing is a separate library, \
+            so the note leaves every book it is in here, lands bookless in that wing's Pool, and \
+            its tags come with it (a tag the other wing lacks is made there by its path). Needs \
+            edit on the note and write new on the wing it goes to. A note in a finished or sealed \
+            book can't move until the author reopens it. One undo for the author puts it back, \
+            books and tags too. Returns JSON: where it landed, the books it left (named where you \
+            can read them) and the tags adopted or made.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note to move."]),
+                "wing_id": .object(["type": "string", "description": "The wing it goes to (\"\" is Home)."]),
+            ]),
+            "required": .array(["note_id", "wing_id"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)

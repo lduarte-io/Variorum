@@ -29,6 +29,8 @@ extension MCPWriteTools {
         case delete(blockID: String)
         case name(blockID: String, name: String?)
         case createSection(bookID: String, name: String)
+        /// 13n-c U6 — the per-item note move across wings (`MCPWriteTools+WingMove`).
+        case moveToWing(noteID: String, wingID: String)
 
         var tool: String {
             switch self {
@@ -39,6 +41,7 @@ extension MCPWriteTools {
             case .delete: MCPToolCatalog.deleteBlock.name
             case .name: MCPToolCatalog.setBlockName.name
             case .createSection: MCPToolCatalog.createSection.name
+            case .moveToWing: MCPToolCatalog.moveNoteToWing.name
             }
         }
     }
@@ -105,6 +108,12 @@ extension MCPWriteTools {
             return .name(blockID: try requiredString(args, "block_id"), name: try optionalString(args, "name"))
         case MCPToolCatalog.createSection.name:
             return .createSection(bookID: try requiredString(args, "book_id"), name: try requiredText(args, "name"))
+        case MCPToolCatalog.moveNoteToWing.name:
+            // "" is Home — present but empty is the one legal empty id.
+            guard let wingID = try optionalString(args, "wing_id") else {
+                throw ArgumentFailure(message: "wing_id is required (\"\" is Home).")
+            }
+            return .moveToWing(noteID: try requiredString(args, "note_id"), wingID: wingID)
         default:
             return nil
         }
@@ -249,6 +258,9 @@ extension MCPWriteTools {
                                         targetTitle: nil, detail: section.name,
                                         show: .book(bookID: bookID, sectionID: section.id)))
             }
+
+        case .moveToWing(let noteID, let wingID):
+            return try performWingMove(noteID: noteID, wingID: wingID, job: job, ops: ops, clientName: clientName)
         }
     }
 
