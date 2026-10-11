@@ -1968,4 +1968,71 @@ written at the moment.
 
 ## STAGE B CLOSE-OUT FIX RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-*(empty until the implementer's first commit)*
+Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~12:10 MDT). Worktree `~/dev/variorum-vx-165`,
+branch `vx-165-13n-c`. **No revert is in flight unless a line below says so.** The Mac is unlocked (the brief); no
+Debug-app launch and no walk in this pass (the orchestrator walks after it). Work list = round 2's R2-1…R2-5 + O-4 +
+her 2,000-character bound — nothing beyond it.
+
+| # | Row | Status |
+|---|---|---|
+| CB-0 | Preflight read whole (this plan top to bottom incl. the STAGE B FIX RECORD, O-1…O-4, P-13nc-U5-5's ruled bound; `13nc-stageB-ladder-round1.md`; `13nc-stageB-ladder-round2.md`; `SessionResiliencyProtocol`) + the traces below | DONE (this commit) |
+| BOUND | `MCPSession.instructionsBound` 1,500 → 2,000 (her ruling, P-13nc-U5-5); the pin keeps its form | NOT-STARTED |
+| R2-3 | `MCPWireNeutralityTests`' source net widened to `OpsRefusalCopy.swift`, the copy files the two refusal tables delegate to, and `MCPShim.swift`; the B13 row corrected to name `OpsRefusalCopy` | NOT-STARTED — a guard widening (green on both sides by design; said) |
+| O-4 | Her provider-neutrality sweep: (a) `enableBlurb` · (b) the ⌘/ ⌥⌘Z row · (c) the guide's undo example + name example · (d) the guide's lesson 1 + the two Settings blurbs · (e) the search keywords; the source-sweep pin | NOT-STARTED |
+| R2-5 | `MCPPaneCopy.noActivity` true words ("recently", lesson 6's) + pin | NOT-STARTED |
+| R2-2 | The members sheet: "1 note" singular; a `loaded` flag; a load that comes back empty closes the sheet; pin `membersTitle(1)` | NOT-STARTED |
+| R2-4 | `MCPAskSheet`'s stale comments (the "While connected" header; the W-3 WindowGroup rationale); the system-button choice re-checked and recorded | NOT-STARTED |
+| R2-1 | (a) her open forgetting a gone target's ask speaks a refusal-kind line naming the place, on the seam of the host she pressed in; (b) the queue's targets re-validated in one batch (∝ the queue) so a dead ask's mark leaves without a press — the trigger recorded; pins red-on-old | NOT-STARTED |
+| CB-R | The red-on-old reverts (named here BEFORE each starts; pre-revert copies in the session scratchpad's `cb-prerevert/`) | NOT-STARTED |
+| CB-F | Finals: the whole headless package + the Mac suites over every changed type under a held stage claim | NOT-STARTED |
+| CB-X | CLOSE-OUT FIX PASS CLOSED banner | NOT-STARTED |
+
+### Traces (made before any code — the hallucination guard)
+
+- **T-CB-1 — R2-1 (a), the silent forget.** `MCPAskSheet`'s `.task` calls `MCPDoor.refreshAsk(_:)`; when
+  `askStanding` answers nil (the note/book deleted, a book un-bound to a gathering, a wing deleted) it removes the
+  entry and returns nil — every host's `mcpAskSheet` getter then reads nil and the sheet closes, and NOTHING is said
+  (`MCPDoor.swift` `refreshAsk`: `queue.remove` + `adoptQueue` + `answering.remove`, no status line). Her press opened
+  a door that did nothing, silently — AppSpec §12's "a door that did nothing speaks a refusal". The hosts differ: two
+  WINDOWS (`RootView`/`NoteWindowView` — the session's status seam) and the PANE (Settings has no status seam — the
+  door's own `note` caption at the pane's head, `MCPDoor.Note(place: .top)`); ⌘L's nested road is a window's.
+- **T-CB-2 — R2-1 (b), the mark that outlives its target.** Nothing re-reads a waiting ask until her press: the queue
+  changes only on `enqueue`, `answer`, `deny`/`forgetAsks`, `refreshAsk` and `detach`. A note moved to the Trash, a
+  book deleted or a wing deleted leaves its ask's mark on every face (`askBoard` — the row glyphs, the masthead's
+  `.anyWing` word, Waiting's row) until she presses it. **The trigger, chosen narrowest:** no session-level trash
+  signal exists (the Trash is read only by its own surface), and the wings model is per-window. So the door holds
+  ONE observation, alive ONLY while at least one ask waits, whose fetch IS the re-validation — `askStanding` over
+  every waiting ask in one read (≤ `MCPAskQueue.cap` = 8 asks, each `mcpNoteFacts`/`mcpBookFacts` +
+  `mcpScopeTitle` — the one derivation site, never re-derived). GRDB records the fetch's region COLUMN-grained (the
+  authorizer's reads; an UPDATE event carries its SET columns — `DatabaseRegion.isModified(byEventsOfKind:)`), so it
+  wakes exactly when something the answer depends on is written — a tombstone, a wing's death, a Private mark, a
+  membership, a title — and never on an autosave (`touchContainer` writes `last_touched_at`/`updated_at`, churn its
+  own columns, the buffer `variant` — none read). That covers "when Waiting renders" by construction (Waiting
+  renders only while an ask waits, which is exactly while the watch runs) and "when the store's wings/trash change",
+  including a deletion that arrives by sync. A forget by the watch is SILENT (her press did nothing; the mark
+  leaving IS the change — and an open sheet closes exactly as it does when the ask is answered elsewhere, T-U4-5's
+  idiom); the spoken line is (a)'s, her open's.
+- **T-CB-3 — R2-2.** `MCPPaneCopy.membersTitle(_:)` = `"\(groupTitle(count)) shared in one act"` and `groupTitle`
+  = `"\(count) notes"` — one member reads "1 notes shared in one act". The sheet's title count is
+  `rows.isEmpty ? group.memberCount : rows.count` — before the load AND after a load that came back empty (the last
+  member revoked here) it shows the act's stale count above an empty list (B8's not-loaded-vs-nothing class).
+- **T-CB-4 — R2-3.** The host's `refusalWords` is `{ OpsRefusalCopy.message(for: $0) }` (`MCPDoor.reconcileServer`),
+  the Mac's `Variorum/Registry/OpsRefusalCopy.swift` — consulted FIRST, falling to the shared table; the B13 net read
+  only `Shared/OpsRefusalTable.swift`. The tables delegate to `BookNameCopy`, `BookArchiveCopy`, `CrossBlockRefusal`
+  (shared) and `BlockSelectionCopy` (in `OpsRefusalCopy.swift`), `RecoveryCopy`, `StarCopy` (`StarsModel.swift`);
+  the shim (`Sources/VariorumMCPSocket/MCPShim.swift`) writes its own stderr. All clean today (grep) — a guard.
+- **T-CB-5 — O-4, re-swept at this tip** (every non-comment string literal naming claude/anthropic/codex/openai/
+  chatgpt/gemini/copilot): outside the setup menu — `MCPPaneCopy.enableBlurb` ("clients like Claude Code"),
+  `HelperView`'s ⌥⌘Z row ("Undo claude-code's take"), `TutorialSeeder` lesson 1 ("such as Claude Code or Codex"),
+  lesson 2's limit card ("(claude-code, say)"), lesson 6 ("Undo claude-code's take"), `SettingsShape` `.mcp`'s
+  description (B7's "how to set up Claude Code, Codex or any MCP client") and the `mcpServer` row's blurb ("such as
+  Claude Code or Codex"). The setup menu's own words (`MCPSetupClient`, `setupCommand`, `connectSentence`,
+  `copiedReceipt`, `codexCommand`, `copiedCodexReceipt`), the guide's lesson-2 card that teaches that menu by its
+  labels (the H pattern — never interpolated), and the search keywords are the provider setup her ask excludes.
+  Zero hits in `Sources/` (the wire), `Shared/`, `VariorumMobile/`.
+- **T-CB-6 — R2-4.** `MCPAskSheet`'s header still says "While connected" (the duration reads "Until it disconnects"
+  since U4) and "on the main window"; its buttons' comment gives U2 walk W-3's reason (presented at the WindowGroup
+  level, no theme). Re-checked at this tip: the WindowGroup host is retired (U4), but the two WINDOW hosts attach
+  `.mcpAskSheet` AFTER their `.environment(theme)` (`RootView`, `NoteWindowView`), so the sheet's content still
+  receives no `ThemeStore` there (the palette, What's New and grant sheets each add `.environment(theme)` for exactly
+  this reason); only the pane (inside `AppSettingsView`'s `.environment(theme)`) and ⌘L's nested road carry it.
