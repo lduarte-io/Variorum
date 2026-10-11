@@ -28,8 +28,8 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | U1 | The fence re-key (VX-163) | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U1 record) — owed: the orchestrator's verification + REAL Claude Code live round; the pre-flight walk HELD (locked session); Stage A |
 | U2 | The grant sheet rebuilt | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U2 record) — owed: the orchestrator's verification; the walk HELD (locked session) — offscreen captures stand in, NOT a walk; Stage B |
 | U3 | Grant from where you are + the one icon + the in-note indicator | BUILT + VERIFIED by the orchestrator at `c6d5d23a` (7 commits `4dc0202c..c6d5d23a`: fence diff empty — no Sync/ · Persistence/ · migrations · editor seam; zero trailers; 22 captures read — popover, Bookcase icon, two-door receipt) — icon pick: A `point.3.connected.trianglepath.dotted` KEPT (orchestrator, PROVISIONAL P-13nc-U3-5 — hers at the copy pass); the walk HELD (locked session); Stage B |
-| U4 | Asks wait quietly + the keyboard | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U4 record) — owed: the orchestrator's verification; the walk HELD (locked session) — offscreen captures stand in, NOT a walk; two pre-existing order-dependent reds to ticket; Stage B |
-| U5 | The guide, the AI's advice, the setup menu | NOT-STARTED |
+| U4 | Asks wait quietly + the keyboard | BUILT + VERIFIED by the orchestrator at `f1ab4725` (5 commits `a41efc1b..f1ab4725`: fence diff empty — zero `Sources/` lines; zero trailers; captures read — Waiting, ⌘L typed, Bookcase glyphs) — the walk HELD (locked); Stage B |
+| U5 | The guide, the AI's advice, the setup menu | BRIEFED — implementer spawning |
 | U6 | The wing on the wire (+ gatherings under a wing grant) | NOT-STARTED |
 | U7 | VX-159 — the ceremonies on the wire | NOT-STARTED (may fall out — §4) |
 | U8 | R-AIR-14 — the per-setup secret | NOT-STARTED (LAST; may fall out — §4) |
@@ -151,6 +151,14 @@ HELD and the handoff says so.
   `SampleLibraryDedupe` read the Private mark as ENGAGEMENT (the U2 ladder's F1 fix); neither reads
   the journal fence. R-AIR-1 changes only the MCP fence's derivation (`MCPGrantQueries`), so U1 is
   ZERO `Sync/` lines — the implementer re-verifies and the record says so.
+
+**ORCHESTRATOR FINDING O-1 (U3+U4 captures, 2026-10-11 09:10) — routed to the Stage B fix pass.** At row size U4's
+pending-ask glyph (U3's icon FILLED) and U3's shared icon read as near-twins side by side (`u4-bookcase-study.png`:
+"the lightning thief" wears both and they are hard to tell apart). Her mandate is that the grant UX be CLEAR, so a
+waiting ask must read as different from "shared" at a glance. The fix pass picks a pending glyph whose difference is
+its silhouette, not its fill (candidates for the fixer: a badge dot on the shared icon, `questionmark.circle`,
+`hand.raised`), PROVISIONAL and hers at the copy pass. Not a red-on-old class (taste), so no pin is owed beyond the
+existing glyph pins. FABLE-OWED: no (chrome).
 
 ## ⚠️ STANDING BLOCKER — THE SESSION IS LOCKED (found 04:00, confirmed 04:14 MDT)
 
@@ -617,8 +625,8 @@ unit record (TCC state is machine-state the next session inherits).
 | 3b | **Stage A routed findings** — R1: F2 (R-AIR-3 on the ask road → U2/U4; a ticket if they fall out) · F3 + R2-6 (closeout checklist) · F4 (U2) · F5 + R2-8 (U5) · F6 + R2-7 (her copy pass) · R2: R2-2 + R2-4 (#211, hers) · R2-3 (U2) | U2/U4/U5 + closeout | OPEN — each closes where routed |
 | 4 | U2 — the grant sheet | U2 implementer | BUILT + VERIFIED `49c964ea` — walk HELD |
 | 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | BUILT + VERIFIED `c6d5d23a` — walk HELD (locked); icon A kept PROVISIONAL (orchestrator); UX-walk watch: the icon reads small beside a Terminal-voice book name (capture `u3-bookcase-terminal.png`) — the UX reviewer is asked to judge it |
-| 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | BRIEFED — spawned |
-| 7 | U5 — the guide, the advice, the setup menu | U5 implementer | NOT-STARTED |
+| 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | BUILT + VERIFIED `f1ab4725` — walk HELD; two order-dependent Mac reds predating U4 ticketed **VX-167** (red identically on U3's tree; green alone) |
+| 7 | U5 — the guide, the advice, the setup menu | U5 implementer | BRIEFED — spawned |
 | 8 | Stage B ladder (opus) | orchestrator | NOT-STARTED |
 | 9 | U6 — the wing on the wire | U6 implementer | NOT-STARTED |
 | 10 | U7 — VX-159 | U7 implementer | NOT-STARTED (may fall out) |
@@ -1534,3 +1542,83 @@ UX walk's to judge.
   monitor consumes only the held-⌘ L and Esc while the switcher is up and only OBSERVES ⌘'s release; the
   switcher moved to `Core/Views/` (two features render it); "Switch Wing… ⌘L" is NOT a greyed menu row (it
   read as a dead door) — the word's hover names ⌘L.
+
+---
+
+## THE U5 IMPLEMENTER BRIEF (self-contained; the spawn names this section)
+
+You are the U5 implementer for Variorum phase 13n-c, working in `~/dev/variorum-vx-165` on
+branch `vx-165-13n-c` (NEVER the main checkout). Commits say `Part of VX-165`, NO attribution
+trailer, push after every commit. `notes/SessionResiliencyProtocol.md` binds you: LIVE STATUS in
+the "U5 UNIT RECORD" section below from your FIRST commit, foreground waits only, and at most ONE
+read-only Sonnet subagent for the ONE external fact this unit needs (the current Codex CLI's MCP
+server configuration syntax — its docs, not guesses).
+
+**Read first, whole, never delegated:** this plan file TOP TO BOTTOM — above all D-2 (why the
+guide chapter + the server's instructions), round 5 (snippets OUT at launch, said plainly; Snippets
+the one room shared by every wing), and the U1–U4 records (THE BUILD YOU ARE DOCUMENTING — every
+sentence you write must be true of it); the sitting record (R-AIR-13); her kickoff text at the top
+of this file ("notes / documentation for the user need to be made clear (especially since that's
+what a user's AI might need as advice too)"); `notes/handoffs/phase-13n-b-handoff.md` §HOW TO TEST
+AND RUN (the door's facts in plain words — a good source, re-verified against code). Code:
+`App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift` (the `plan` and the lesson
+content; the books chapter's truth-pin precedent `TutorialBooksChapterTests`), the field guide's
+restore/re-seed door (grep `BirthFurnitureSeeders`, `LaunchFurniture`, "field guide"),
+`Sources/VariorumMCP/MCPSession.swift` (`instructions`), `MCPToolCatalog.swift` (the tool
+descriptions), `Features/MCP/MCPPane.swift` + `MCPPaneCopy.swift` (Copy setup command).
+
+**What U5 builds — §3 U5 items 1–4, with these concretions:**
+1. **The MCP chapter** in the field guide, sentence case, the guide's own card voice, short
+   lessons (her standard: clear for a person who has never heard of MCP; honest, not scary):
+   what it is and that it is off until you turn it on · connecting a client (the setup menu) ·
+   what a client can do — the four rungs in one line each · where (a note, a book, a wing — and
+   that a wing grant covers that wing's gatherings ONLY if U6 has landed when you write; otherwise
+   leave that sentence out and note it in your record for U6 to add) · how long (once · while
+   connected · always) · what always asks (your daily Journal and anything Private) and that
+   snippets aren't reachable at launch · seeing what an AI can reach (the icon, the in-note
+   indicator, Settings ▸ MCP) · asks wait (the glyph, Waiting, ⌥⌘,) · every AI act undoes with
+   ⌥⌘Z naming the client; receipts, Open ›, ⌥⌘O · wings are separate libraries; Snippets is the
+   one shared room. Placement: after the privacy chapter (it closes the guide today) unless a
+   better reading order shows — record why. Every sentence TRUE of the build; a truth-pin suite in
+   the books chapter's form for each checkable claim; `TutorialWalkTests` green.
+2. **`MCPSession.instructions`** — the AI's advice: the same facts, terse, for a model (≤ ~1,500
+   characters — state the bound and pin it): tools appear only for what the author shared; a
+   refusal says why — ask the author rather than retrying around it; the four rungs; ids are live
+   (re-read after a divide/merge); `read_note` speaks the Variorum document format (v2's
+   `--- next block ---` marker); never call `show_in_app` unless the author asks; the daily Journal
+   and Private notes are shared only one ask at a time; snippets are not reachable. Pin that every
+   tool name it mentions exists in the catalog.
+3. **R-AIR-13 — the setup menu:** the pane's "Copy setup command" grows a per-client menu: Claude
+   Code (today's command, unchanged), Codex (the current syntax from your one Sonnet fact-fetch —
+   cite the source in the record), and "Any MCP client (path / JSON)" (the shim's absolute path +
+   a standard `mcpServers` JSON stanza). Each copies with its receipt; the selected one's text is
+   shown verbatim and selectable; one direct line says the door is a standard MCP stdio server at
+   one binary path. Debug keeps the `variorum-dev` name (P-13nb-U1-10). Registry-declared.
+4. **The re-seed road:** record which door refreshes an EXISTING store's field guide to carry the
+   new chapter (the closeout runs it on her real store behind the A1 rail) and whether the phone
+   seeds the guide (the MOBILE PARITY line needs the fact).
+
+**Ladder carry (U1 round 1, F5):** the current `instructions` sentence "Every refusal says why." is no longer true for fenced targets (they answer the one not-shared answer by design) — drop or reword it.
+
+**Ladder carry (U1 round 2, R2-8):** the advice says `search` reaches STANDING grants only (a once grant reads by id, never through search — 13n-b P-13nb-U1-2's spirit).
+
+**Must NOT touch:** `Sync/`, custody/keychain, the editor seam, migrations, `lockstepVersion`, the
+real store, `/Applications`.
+
+**Acceptance:** truth pins + `TutorialWalkTests` + the tour/guide suites that read the plan
+(grep `TutorialSeeder.plan`), `MCPPaneTests`, `CapabilityRegistryTests`, `SettingsShapeTests`, the
+headless package (an `instructions` pin in `VariorumMCPTests`), under a HELD stage claim for the
+Mac runs. Pre-flight WALK, dev-store Debug, Study AND Terminal: the chapter read on screen end to
+end (captures of each lesson), the setup menu's three items and their copied text (verify the JSON
+parses; run the Claude Code command only with `-s local` in a scratch folder and remove it after).
+Captures in `notes/plans/13n-c-screens/u5/`.
+
+**U4's words bind the guide:** the duration is now said "until it disconnects" (P-13nc-U4-1), asks WAIT (no sheet appears by itself — the pending glyph, Settings ▸ MCP ▸ Waiting, ⌥⌘,), ⌘L switches wings. The pending glyph may change in the Stage B fix pass (O-1) — describe it by role ("a small mark beside the place"), never by its shape.
+
+**Locked-session note (standing):** if the Mac's session is locked (the check in U4's brief), HOLD the walk and the scratch-folder `claude mcp add` run; a gated offscreen render harness of each lesson card and the setup menu stands in, said plainly to be NOT a walk. The JSON stanza's parse is pinned headlessly regardless.
+
+**Forks / close:** as the earlier briefs.
+
+## U5 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
+
+*(empty until the U5 implementer's first commit)*
