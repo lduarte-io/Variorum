@@ -156,8 +156,12 @@ extension Operations {
     ///
     /// - **Obsolete (quiet — the 13i-d letter: a replay that would cross wings
     ///   does nothing):** the note is gone (trashed since), it is no longer in
-    ///   the wing the move took it to (her own door moved it on), or the wing
-    ///   it came from is no longer live.
+    ///   the wing the move took it to (her own door moved it on), or EITHER of
+    ///   the entry's wings is no longer live (the combined ladder R1's F1: a
+    ///   dead stood-in wing reads as Home everywhere else, so a replay keyed
+    ///   on its stored id would miss the note's effective — Home — vocabulary
+    ///   and could carry a Home application across wings, or un-obsolete an
+    ///   entry her own door had already moved on).
     /// - **Refused, the entry KEPT (resolvable — PROVISIONAL P-13nc-U6-3):** the
     ///   note has since joined a book (a member or a waiting arrival) or taken a
     ///   tag in the wing it would leave — putting it back would split that book
@@ -174,6 +178,12 @@ extension Operations {
     func revertMCPWingMove(_ rows: WingMoveRows, forwardStamp: String) throws -> String? {
         try database.write { db in
             guard var note = try Container.fetchOne(db, key: rows.postID), note.deletedAt == nil,
+                  // F1 (the combined ladder R1): BOTH wings must be live — a
+                  // dead stood-in wing makes the entry OBSOLETE, never
+                  // "effectively Home" (`sameEffectiveWing` alone would read a
+                  // dead destination as Home, and the stored-id vocabulary
+                  // check below could not see the note's Home applications).
+                  try Queries.wingIsLive(db, id: rows.destinationWing),
                   try sameEffectiveWing(db, note.wingId, rows.destinationWing),
                   try Queries.wingIsLive(db, id: rows.sourceWing)
             else { return nil }
@@ -206,7 +216,8 @@ extension Operations {
     /// **The redo — the same move again, on the same rows.** Returns the stamp
     /// it severed and re-pointed on (the next undo revives exactly those), or
     /// nil when OBSOLETE (the note gone, no longer in the wing it came from, or
-    /// the destination no longer live). Her door's refusal is re-run first: a
+    /// EITHER wing no longer live — F1, the inverse's rule mirrored). Her
+    /// door's refusal is re-run first: a
     /// severed row that is a live MEMBER of a sealed or finished book refuses
     /// (`readingSealed` / `lockedReading` — reopen or unseal, then redo),
     /// keeping the entry. Anything the note joined or was tagged with in its
@@ -214,6 +225,9 @@ extension Operations {
     func reapplyMCPWingMove(_ rows: WingMoveRows, backwardStamp: String?) throws -> String? {
         try database.write { db in
             guard var note = try Container.fetchOne(db, key: rows.postID), note.deletedAt == nil,
+                  // F1: both wings live, as the inverse requires (a dead
+                  // source must not resolve to Home and replay).
+                  try Queries.wingIsLive(db, id: rows.sourceWing),
                   try sameEffectiveWing(db, note.wingId, rows.sourceWing),
                   try Queries.wingIsLive(db, id: rows.destinationWing)
             else { return nil }
@@ -262,6 +276,12 @@ extension Operations {
     /// that is not one of the entry's own, or a live application of a live tag
     /// of the wing the note would LEAVE that is not one of the entry's own
     /// (the note's or a placed block's), refuses the replay.
+    ///
+    /// `leaving` MUST name a LIVE wing — the replays' guards ensure it (F1:
+    /// both of the entry's wings live, else obsolete). A dead id here would
+    /// scope `wingScope` to rows that no longer exist as read (the note's
+    /// effective wing is Home then) and the check would miss the very
+    /// vocabulary it protects.
     private func refuseIfWingMoveChangedSince(
         _ db: Database, _ postID: String, leaving wingID: String,
         knownApplications: Set<WingMoveApplication>, knownMemberships: Set<String>
