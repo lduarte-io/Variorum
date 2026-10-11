@@ -132,6 +132,15 @@ itself is hers, in the morning — this session only PREPARES it.**
   is out of SCOPE twice over — the decisive fence-vs-scope proof re-runs under
   a Home-wing read grant.
 
+## ROUND 6 — her close (2026-10-11, after the orchestrator launched)
+
+- **Snippets stay out of the door for launch — RATIFIED** (no longer a
+  recommendation awaiting the morning): document it plainly in the MCP user
+  docs; the wing-isolation clarity item stands.
+- **The decisive fence tests are HERS, tomorrow morning:** the Home-wing read
+  grant with the journal probe ("crat attack"), and Private-BOOK grant
+  behavior. The 13n-c handoff's checklist carries both.
+
 ## Mandate
 
 Design-prep for the grant UX round. NO app code, NO canon edits, NO suites, NO walks
