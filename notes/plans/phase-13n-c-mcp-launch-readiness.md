@@ -1820,7 +1820,7 @@ FABLE-OWED rows written at the moment; where round 2 should look first.
 ## STAGE B FIX RECORD (LIVE STATUS — the fix implementer owns this section from its first commit)
 
 Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~10:35 MDT). Worktree `~/dev/variorum-vx-165`,
-branch `vx-165-13n-c`. No revert is in flight unless a line below says so. The session is LOCKED at start (10:37 MDT:
+branch `vx-165-13n-c`. No revert is in flight unless a line below says so. *(B13 red-on-old revert IN FLIGHT from 11:0x: the four server files `MCPSession`/`MCPToolCatalog`/`MCPGrantAuthority`/`MCPShowTool.swift` written from `d9ace41d~1`, the pins kept; restore = `git checkout -- Sources/VariorumMCP`, then `git diff Sources` empty.)* The session is LOCKED at start (10:37 MDT:
 `CGSSessionScreenIsLocked 1`) — the walk stays HELD; offscreen captures stand in and are NOT a walk.
 
 | # | Row | Status |
