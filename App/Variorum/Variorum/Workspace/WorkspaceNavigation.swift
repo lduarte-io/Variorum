@@ -278,6 +278,31 @@ nonisolated struct OpenNotes: Equatable {
     /// touches what the strip shows or what ⌘⇧n addresses.
     private(set) var recency: [String] = []
 
+    /// **VX-139 — a strip restored from a previous launch.** Built directly
+    /// rather than by replaying `opened(_:)`, because a replay would order
+    /// the strip by recency and the stored strip's own order — including any
+    /// manual arrangement she left it in — is exactly what is being kept.
+    /// Defensive against a torn store: ids deduped, dead ids dropped by the
+    /// caller's `isLive`, the tracked cap honored, and an id the recency
+    /// list lost re-joins at its back (least recent, so eviction prefers it).
+    init(restoringIDs storedIDs: [String], recency storedRecency: [String],
+         isLive: (String) -> Bool) {
+        var seenID = Set<String>()
+        let kept = Array(
+            storedIDs.filter { isLive($0) && seenID.insert($0).inserted }
+                .prefix(Self.trackedCap))
+        let keptSet = Set(kept)
+        var seenRecency = Set<String>()
+        var restoredRecency = storedRecency.filter {
+            keptSet.contains($0) && seenRecency.insert($0).inserted
+        }
+        for id in kept where !seenRecency.contains(id) { restoredRecency.append(id) }
+        ids = kept
+        recency = restoredRecency
+    }
+
+    init() {}
+
     /// Opening a note: it joins the END of the strip if it is new, and it
     /// becomes the most recent either way. An already-open note does NOT
     /// move — that is the ruled flip.
@@ -366,6 +391,53 @@ nonisolated struct OpenNotes: Equatable {
                 noteID: id, ordinal: ordinal,
                 keyText: ordinal <= Self.ordinalCap ? String(ordinal) : nil)
         }
+    }
+}
+
+// MARK: - VX-139 — the strip remembered across launches
+
+/// **VX-139 — keep tabs open across app close and open** (her ticket ask
+/// verbatim: *"a keep tabs open setting would be super helpful for when the
+/// app closes and opens"*; pulled into the VX-143 run at her word,
+/// 2026-10-11: *"I want it fixed now"*).
+///
+/// A STICKY THIS-MAC preference — the `writeHoverHandles` class: local
+/// `UserDefaults`, never the synced `setting` table. The strip is one
+/// window's chrome on one machine, and its ids would mean nothing to
+/// another device's windows. The round-7.1 "session only, not a setting"
+/// ruling governed the strip's MANUAL REORDER; her VX-139 ask extends the
+/// strip's LIFETIME, and the remembered strip carries whatever order she
+/// left it in — the reading recorded in the run record.
+///
+/// Storage is two parallel string arrays (never titles — navigation state
+/// holds ids only, this file's own rule). `remember` honors the off-switch
+/// LIVE: with the setting off it clears the stored rows instead of writing,
+/// so "off" means off at the very next launch, not two launches later.
+nonisolated enum OpenNotesMemory {
+    /// The off-switch (default ON — the remembered strip is what she asked
+    /// for; the setting exists to turn it off). LOCAL, this Mac.
+    static let settingKey = "keepOpenNotes"
+    static let idsKey = "openNotes.remembered.ids"
+    static let recencyKey = "openNotes.remembered.recency"
+
+    static func isOn(_ defaults: UserDefaults) -> Bool {
+        defaults.object(forKey: settingKey) == nil || defaults.bool(forKey: settingKey)
+    }
+
+    static func remember(_ notes: OpenNotes, in defaults: UserDefaults) {
+        guard isOn(defaults) else { return forget(defaults) }
+        defaults.set(notes.ids, forKey: idsKey)
+        defaults.set(notes.recency, forKey: recencyKey)
+    }
+
+    static func forget(_ defaults: UserDefaults) {
+        defaults.removeObject(forKey: idsKey)
+        defaults.removeObject(forKey: recencyKey)
+    }
+
+    static func stored(_ defaults: UserDefaults) -> (ids: [String], recency: [String]) {
+        (defaults.stringArray(forKey: idsKey) ?? [],
+         defaults.stringArray(forKey: recencyKey) ?? [])
     }
 }
 

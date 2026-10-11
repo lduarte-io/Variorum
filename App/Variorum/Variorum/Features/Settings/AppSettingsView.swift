@@ -436,6 +436,10 @@ private struct GeneralPane: View {
     let session: AppSession
     let appearance: AppearanceController?
     let updates: UpdateChannel?
+    /// VX-139: the Open strip across launches. LOCAL (this Mac's
+    /// UserDefaults, the writeHoverHandles class) — the strip is one
+    /// window's chrome on one machine; the ids never sync.
+    @AppStorage(OpenNotesMemory.settingKey) private var keepOpenNotes = true
 
     var body: some View {
         Form {
@@ -507,6 +511,17 @@ private struct GeneralPane: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            // VX-139 (her ask, pulled into VX-143 at her word): the Open
+            // strip across launches. Beside Confirmations rather than on a
+            // writing pane — it is how the app OPENS, not how a note behaves.
+            Section("Open notes") {
+                Toggle(SettingsCatalog.title("keepOpenNotes"), isOn: $keepOpenNotes)
+                Text("The sidebar's Open section returns as you left it the next time Variorum opens — the notes that still exist, in the same order. Off, each launch starts with an empty list. This Mac only.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(5)
                     .fixedSize(horizontal: false, vertical: true)
             }
             // 13r U3-A — THE CALM-ASKS CADENCE's rule 4: the update ask is

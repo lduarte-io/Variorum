@@ -424,6 +424,9 @@ struct RootView: View {
         // 19f: Help ▸ Send Feedback…'s pre-draft choice, asked of this window.
         .supportChoiceAlert(router.supportChoice)
         .task { await theme.start() }
+        // VX-139: the first full shell restores the remembered Open strip
+        // (one claim per launch; note-only and quick-note windows never ask).
+        .task { await router.workspace.restoreRememberedOpenNotes(session: session) }
         // 13i-d U5: the wing is part of every scoped read's question, so a
         // switch restarts them (snippets — `pool` — are one shared room).
         .task(id: session.wing.currentID) { await library.start() }

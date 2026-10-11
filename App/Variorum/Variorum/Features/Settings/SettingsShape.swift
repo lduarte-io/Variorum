@@ -184,6 +184,14 @@ nonisolated enum SettingsCatalog {
                 + "Refusals always show.",
             keywords: ["toast", "receipt", "message", "quiet", "notification", "banner",
                        "confirmation", "status"]),
+        // VX-139: the Open strip across launches ("tabs" is her own word
+        // for the rows, so search answers it).
+        SettingsRow(
+            id: "keepOpenNotes", pane: .general, title: "Keep open notes across launches",
+            blurb: "The sidebar's Open section returns as you left it when Variorum next "
+                + "opens. This Mac only.",
+            keywords: ["tabs", "tab", "open notes", "strip", "remember", "restore",
+                       "relaunch", "launch", "startup", "reopen", "session"]),
 
         // MARK: Editor
         SettingsRow(

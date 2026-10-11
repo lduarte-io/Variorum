@@ -280,7 +280,10 @@ final class WorkspaceModel {
         var history = self.history(pane)
         history.visit(destination)
         histories[pane] = history
-        if case .post(let id) = destination { openNotes.opened(id) }
+        if case .post(let id) = destination {
+            openNotes.opened(id)
+            rememberOpenNotesIfClaimed()
+        }
         // W20(c): visiting a book floats it in the chooser. Recorded HERE,
         // in the one recording point, for the same reason the strip is —
         // every door already funnels through it, so nothing has to remember.
@@ -338,6 +341,7 @@ final class WorkspaceModel {
     /// returns to the strip the next time it is opened.
     func closeNote(_ id: String) {
         openNotes.close(id)
+        rememberOpenNotesIfClaimed()
     }
 
     /// **NOTES HAVE BEEN DELETED — get off them** (13l Act 2, ledger item 3;
@@ -366,13 +370,88 @@ final class WorkspaceModel {
         let showing = panes.filter { selections[$0]?.noteID.map(gone.contains) == true }
         for pane in showing { select(.library, in: pane) }
         for id in ids { openNotes.close(id) }
+        rememberOpenNotesIfClaimed()
         return !showing.isEmpty
     }
 
-    /// The strip's manual reorder (her round-7 ruling) — session-only, per
-    /// window, never a setting and never persisted.
+    /// The strip's manual reorder (her round-7 ruling). *Since VX-139 the
+    /// remembered strip carries this order too* — her ruling made the
+    /// REORDER a gesture rather than a setting, and her VX-139 ask extends
+    /// the strip's lifetime; keeping her arrangement across that lifetime
+    /// is the reading recorded in the run record.
     func moveOpenNotes(fromOffsets source: IndexSet, toOffset destination: Int) {
         openNotes.move(fromOffsets: source, toOffset: destination)
+        rememberOpenNotesIfClaimed()
+    }
+
+    // MARK: - VX-139 — the strip across launches
+
+    /// Whether THIS window's strip is the remembered one. The first full
+    /// shell to ask claims it for the launch, and only the claimant writes —
+    /// so a second main window can never fight the first over the stored
+    /// rows (it starts empty, as every window always has).
+    private(set) var remembersOpenNotes = false
+
+    /// One claim per launch. Note-only and quick-note windows never ask;
+    /// RootView is the only caller.
+    private static var launchRestoreClaimed = false
+
+    /// Where the claimant writes — injected at the claim so the suites can
+    /// hand a private domain (the `freshTakeCardDefaults` class).
+    private var openNotesDefaults: UserDefaults = .standard
+
+    #if DEBUG
+    /// The suites mint many shells per process; a test world resets the
+    /// launch claim so each one exercises the first-shell road.
+    static func resetOpenNotesLaunchClaimForTesting() { launchRestoreClaimed = false }
+    #endif
+
+    /// **The launch restore (VX-139).** The first full shell claims the
+    /// remembered strip: stored ids filtered to the notes that still LIVE
+    /// (one indexed read, bounded by the tracked cap — cost ∝ the strip,
+    /// never the corpus) and adopted in their stored order. The claimant
+    /// then persists every strip change; `OpenNotesMemory.remember` honors
+    /// the off-switch live, so turning the setting off clears the store at
+    /// the next change rather than one launch late. With the setting off at
+    /// launch nothing is restored — but the claim still lands, so flipping
+    /// it on mid-session starts remembering without a relaunch.
+    func restoreRememberedOpenNotes(
+        session: AppSession, defaults: UserDefaults = .standard
+    ) async {
+        guard !Self.launchRestoreClaimed else { return }
+        Self.launchRestoreClaimed = true
+        remembersOpenNotes = true
+        openNotesDefaults = defaults
+        guard OpenNotesMemory.isOn(defaults) else { return }
+        let stored = OpenNotesMemory.stored(defaults)
+        guard openNotes.ids.isEmpty, !stored.ids.isEmpty else { return }
+        let live = (try? await session.database.read { db in
+            try Self.liveNoteIDs(db, among: stored.ids)
+        }) ?? []
+        openNotes = OpenNotes(
+            restoringIDs: stored.ids, recency: stored.recency,
+            isLive: { live.contains($0) })
+        // Normalize the store to what actually came back (dead rows gone).
+        rememberOpenNotesIfClaimed()
+    }
+
+    /// Tombstone-only liveness: an ARCHIVED note still opens from the
+    /// Library's archived facet, so its row survives the relaunch; a note
+    /// in the Trash does not.
+    nonisolated static func liveNoteIDs(
+        _ db: Database, among ids: [String]
+    ) throws -> Set<String> {
+        guard !ids.isEmpty else { return [] }
+        let marks = Array(repeating: "?", count: ids.count).joined(separator: ",")
+        return try Set(String.fetchAll(
+            db,
+            sql: "SELECT id FROM container WHERE id IN (\(marks)) AND deleted_at IS NULL",
+            arguments: StatementArguments(ids)))
+    }
+
+    private func rememberOpenNotesIfClaimed() {
+        guard remembersOpenNotes else { return }
+        OpenNotesMemory.remember(openNotes, in: openNotesDefaults)
     }
 
     // MARK: - Titles (display only)
