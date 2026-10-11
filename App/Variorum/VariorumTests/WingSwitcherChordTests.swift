@@ -158,6 +158,32 @@ struct WingSwitcherChordTests {
         #expect(!WingSwitcherKeys.consumes(.commandUp, acted: true), "⌘'s release is only observed")
     }
 
+    /// 13n-c held walks D-W4 — the monitor's road from a REAL event. The pin
+    /// above hands `classify` its arguments, so it never touched the NSEvent
+    /// accessor that broke the walk: reading `charactersIgnoringModifiers` on a
+    /// flagsChanged event RAISES (NSInternalInconsistencyException), the app's
+    /// event loop swallowed the throw, and ⌘'s release never reached the
+    /// switcher — holding ⌘ and tapping L stepped, and letting go did nothing.
+    /// (On the pre-fix road this test cannot fail politely: the host dies on
+    /// that same throw — the evidence is recorded in the plan's D-W4 row.)
+    @Test func theMonitorsRoadReadsARealReleaseAndARealTap() throws {
+        func event(_ code: CGKeyCode, down: Bool, _ type: CGEventType, _ flags: CGEventFlags) throws -> NSEvent {
+            let cg = try #require(CGEvent(keyboardEventSource: nil, virtualKey: code, keyDown: down))
+            cg.type = type
+            cg.flags = flags
+            return try #require(NSEvent(cgEvent: cg))
+        }
+        let release = try event(55, down: false, .flagsChanged, [])
+        #expect(release.type == .flagsChanged)
+        #expect(WingSwitcherKeys.key(for: release) == .commandUp, "letting go of ⌘ reaches the switcher")
+        let pressed = try event(55, down: true, .flagsChanged, .maskCommand)
+        #expect(WingSwitcherKeys.key(for: pressed) == nil, "⌘ going down is not a release")
+        let tap = try event(37, down: true, .keyDown, .maskCommand)
+        #expect(WingSwitcherKeys.key(for: tap) == .tapL, "a real ⌘L is a tap")
+        let esc = try event(53, down: true, .keyDown, [])
+        #expect(WingSwitcherKeys.key(for: esc) == .escape)
+    }
+
     // MARK: - The switch speaks; the cycle moves
 
     @Test func aSwitcherSwitchSpeaksNowInAndTheCycleSteps() async throws {

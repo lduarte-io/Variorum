@@ -90,6 +90,14 @@ nonisolated enum WingSwitcherKeys {
     static func consumes(_ key: Key, acted: Bool) -> Bool {
         acted && key != .commandUp
     }
+
+    /// The monitor's ONE road from a real event to a key (13n-c held walks
+    /// D-W4 — pinned with real NSEvents).
+    static func key(for event: NSEvent) -> Key? {
+        classify(
+            type: event.type, characters: event.charactersIgnoringModifiers,
+            keyCode: event.keyCode, flags: event.modifierFlags)
+    }
 }
 
 /// **The switcher's key catcher** — the `PageTurnKeys` / `CommentsPanel`
@@ -129,9 +137,7 @@ struct WingSwitcherKeyCatcher: NSViewRepresentable {
             guard window != nil else { return }
             monitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .flagsChanged]) { [weak self] event in
                 guard let self, let window = self.window, event.window === window,
-                      let key = WingSwitcherKeys.classify(
-                        type: event.type, characters: event.charactersIgnoringModifiers,
-                        keyCode: event.keyCode, flags: event.modifierFlags)
+                      let key = WingSwitcherKeys.key(for: event)
                 else { return event }
                 let acted = self.onKey?(key) ?? false
                 return WingSwitcherKeys.consumes(key, acted: acted) ? nil : event
