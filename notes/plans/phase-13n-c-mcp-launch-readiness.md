@@ -779,6 +779,17 @@ unit record (TCC state is machine-state the next session inherits).
   asks their AI about "until it disconnects" hears the real answer. Judged with her in chat: the two-layer shape
   (guide for the human, advice + tool descriptions for the model) is the right home; this detail was the one gap.
 
+**Second round of picks (same sitting, minutes later):**
+- **P-13nc-U2-2 REVERSED-IN-PANE, RULED:** "I think Shared with AI is fine inside the MCP pane actually. that's a
+  place where it's fair" — the Shared section title RETURNS to **"Shared with AI"**. The ruling's principle: R-AIR-8
+  stands app-wide, with HER CARVE-OUT that inside the MCP pane itself "AI" is fair wording. (Only the section title
+  is ordered changed; the pane's other reworded strings stand unless her copy pass says more.)
+- **P-13nc-SB-2 RULED with a reword:** grey-with-a-note stands, but "masthead" is too opaque — the note loses the
+  word (say where New Wing… lives in plain words, e.g. "under the wing name at the top of the Bookcase"; final
+  words PROVISIONAL for her copy pass).
+- **P-13nc-SB-5 RULED:** speak only on her press (as built).
+- **P-13nc-U4-8 RULED:** Esc answers Don't allow (as built). Off the #211 list.
+
 ## PROVISIONALs (running — logged at the merge as #211)
 
 - **P-13nc-1** — D-1 (the ⌘J edge kept).
