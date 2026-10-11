@@ -209,8 +209,8 @@ struct EditorCommands: Commands {
         //     `CommentsPanel` (⌘⏎, ⎋), `DivideWSheet` (passes every ⌘/⌃
         //     event), `CalmAsks` / `ProtectionController` (observe only),
         //     `PressReporter` / `PaneFocusCatcher` (mouse) — and U4's own
-        //     `WingSwitcherKeys`, which takes ⌘L ONLY while the switcher it
-        //     belongs to is up (the held-⌘ cycle);
+        //     `WingSwitcherKeyCatcher`, which takes ⌘L ONLY in the switcher
+        //     sheet's own window while it is up (the held-⌘ cycle);
         //   · the system hot keys ([.quickNote], ⌃⌥⌘N) and the registry's
         //     declared labels (⌘⇧L only): no ⌘L, no ⌥⌘,;
         //   · the platform: neither is reserved (the brief §13's list).

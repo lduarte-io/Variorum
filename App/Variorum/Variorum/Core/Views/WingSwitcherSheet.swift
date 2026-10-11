@@ -12,8 +12,8 @@
 //  counts — a per-wing note count would scale with the corpus, P1).
 //
 //  The keys the field cannot see — another L while ⌘ is held, ⌘'s release,
-//  Esc — come through ONE local key monitor that lives exactly as long as the
-//  sheet (`WingSwitcherKeys`, the `PageTurnKeys` / `CommentsPanel` shape); it
+//  Esc — come through ONE local key monitor scoped to the sheet's own window
+//  (`WingSwitcherKeyCatcher`, the `PageTurnKeys` / `CommentsPanel` shape); it
 //  CONSUMES the held-⌘ L so the menu's ⌘L never fires twice, and only
 //  observes ⌘'s release. Every decision is the pure brain's
 //  (`WingSwitcherBrain`). A wing row carries its pending-ask glyph; pressed
@@ -56,9 +56,9 @@ final class WingSwitcherModel: Identifiable {
     }
 }
 
-/// The keys only a monitor can see while the switcher is up.
-@MainActor
-final class WingSwitcherKeys {
+/// The keys only a monitor can see while the switcher is up — their pure
+/// classification (pinned) and the monitor that delivers them.
+nonisolated enum WingSwitcherKeys {
     nonisolated enum Key: Equatable, Sendable {
         /// ⌘ held, L tapped (no other modifier).
         case tapL
@@ -68,10 +68,8 @@ final class WingSwitcherKeys {
         case escape
     }
 
-    private var monitor: Any?
-
     /// Pure, so the pins classify synthesized keys without a window.
-    nonisolated static func classify(
+    static func classify(
         type: NSEvent.EventType, characters: String?, keyCode: UInt16, flags: NSEvent.ModifierFlags
     ) -> Key? {
         let held = flags.intersection([.command, .option, .control, .shift])
@@ -87,23 +85,61 @@ final class WingSwitcherKeys {
         }
     }
 
-    func start(_ handle: @escaping (Key) -> Void) {
-        stop()
-        monitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .flagsChanged]) { event in
-            guard let key = Self.classify(
-                type: event.type, characters: event.charactersIgnoringModifiers,
-                keyCode: event.keyCode, flags: event.modifierFlags)
-            else { return event }
-            handle(key)
-            // The held-⌘ L and Esc are the switcher's (the menu's ⌘L must not
-            // fire again); ⌘'s release is only observed.
-            return key == .commandUp ? event : nil
-        }
+    /// Whether a key the switcher saw is CONSUMED: only one it acted on, and
+    /// never ⌘'s release (observed, always passed on).
+    static func consumes(_ key: Key, acted: Bool) -> Bool {
+        acted && key != .commandUp
+    }
+}
+
+/// **The switcher's key catcher** — the `PageTurnKeys` / `CommentsPanel`
+/// shape: a hit-test-transparent view whose local monitor lives exactly as
+/// long as it is in a window and answers ONLY events of ITS window (the
+/// switcher's sheet). So an ask's sheet opened over the switcher (another
+/// window) keeps its own keys — its Esc is its Don't allow — and no other
+/// window's keys are ever the switcher's. The handler says whether it ACTED;
+/// only an acted-on ⌘L or Esc is consumed (the menu's ⌘L must not fire
+/// twice), and ⌘'s release is always passed on.
+struct WingSwitcherKeyCatcher: NSViewRepresentable {
+    let onKey: (WingSwitcherKeys.Key) -> Bool
+
+    func makeNSView(context: Context) -> CatcherView {
+        let view = CatcherView()
+        view.onKey = onKey
+        return view
     }
 
-    func stop() {
-        if let monitor { NSEvent.removeMonitor(monitor) }
-        monitor = nil
+    func updateNSView(_ view: CatcherView, context: Context) {
+        view.onKey = onKey
+    }
+
+    final class CatcherView: NSView {
+        var onKey: ((WingSwitcherKeys.Key) -> Bool)?
+        private var monitor: Any?
+
+        /// Never a click target — the switcher above it keeps every click.
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let monitor {
+                NSEvent.removeMonitor(monitor)
+                self.monitor = nil
+            }
+            guard window != nil else { return }
+            monitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .flagsChanged]) { [weak self] event in
+                guard let self, let window = self.window, event.window === window,
+                      let key = WingSwitcherKeys.classify(
+                        type: event.type, characters: event.charactersIgnoringModifiers,
+                        keyCode: event.keyCode, flags: event.modifierFlags)
+                else { return event }
+                let acted = self.onKey?(key) ?? false
+                return WingSwitcherKeys.consumes(key, acted: acted) ? nil : event
+            }
+        }
+        // (No `deinit`: the view leaves its window before it dies, and
+        // `viewDidMoveToWindow` — called then with a nil window — removes the
+        // monitor; the `PageTurnKeys` note, same reason.)
     }
 }
 
@@ -118,7 +154,6 @@ struct WingSwitcherSheet: View {
     @Environment(\.mcpShareRoad) private var road
     @Environment(\.mcpAskBoard) private var board
     @FocusState private var fieldFocused: Bool
-    @State private var keys = WingSwitcherKeys()
     /// An ask opened from a row's glyph — presented OVER the switcher.
     @State private var nestedAsk: String?
 
@@ -171,18 +206,21 @@ struct WingSwitcherSheet: View {
             road?.askSheet(ask.id)
         }
         .task { fieldFocused = true }
-        .onAppear {
-            keys.start { key in
-                // An ask's sheet over the switcher has the keyboard.
-                guard nestedAsk == nil else { return }
-                switch key {
-                case .tapL: model.tapL()
-                case .commandUp: act(model.brain.commandReleased())
-                case .escape: close()
-                }
+        // The keys only a monitor sees (held-⌘ L, ⌘'s release, Esc) — this
+        // sheet's window's only; an ask's sheet over it is another window.
+        .background(WingSwitcherKeyCatcher { key in
+            switch key {
+            case .tapL:
+                model.tapL()
+                return true
+            case .commandUp:
+                act(model.brain.commandReleased())
+                return false
+            case .escape:
+                close()
+                return true
             }
-        }
-        .onDisappear { keys.stop() }
+        })
     }
 
     private struct NestedAsk: Identifiable {

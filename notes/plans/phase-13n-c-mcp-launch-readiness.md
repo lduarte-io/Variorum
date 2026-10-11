@@ -28,7 +28,7 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | U1 | The fence re-key (VX-163) | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U1 record) — owed: the orchestrator's verification + REAL Claude Code live round; the pre-flight walk HELD (locked session); Stage A |
 | U2 | The grant sheet rebuilt | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U2 record) — owed: the orchestrator's verification; the walk HELD (locked session) — offscreen captures stand in, NOT a walk; Stage B |
 | U3 | Grant from where you are + the one icon + the in-note indicator | BUILT + VERIFIED by the orchestrator at `c6d5d23a` (7 commits `4dc0202c..c6d5d23a`: fence diff empty — no Sync/ · Persistence/ · migrations · editor seam; zero trailers; 22 captures read — popover, Bookcase icon, two-door receipt) — icon pick: A `point.3.connected.trianglepath.dotted` KEPT (orchestrator, PROVISIONAL P-13nc-U3-5 — hers at the copy pass); the walk HELD (locked session); Stage B |
-| U4 | Asks wait quietly + the keyboard | IN-PROGRESS — the U4 implementer (record opened; LIVE STATUS in the U4 UNIT RECORD) |
+| U4 | Asks wait quietly + the keyboard | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U4 record) — owed: the orchestrator's verification; the walk HELD (locked session) — offscreen captures stand in, NOT a walk; two pre-existing order-dependent reds to ticket; Stage B |
 | U5 | The guide, the AI's advice, the setup menu | NOT-STARTED |
 | U6 | The wing on the wire (+ gatherings under a wing grant) | NOT-STARTED |
 | U7 | VX-159 — the ceremonies on the wire | NOT-STARTED (may fall out — §4) |
@@ -1359,6 +1359,65 @@ Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~07:57 MDT). W
 The session is LOCKED at start (07:57 MDT: `CGSSessionScreenIsLocked 1`) — the walk is re-checked at
 U4-10; offscreen renders stand in only if it is still locked, and are NOT a walk.
 
+### UNIT CLOSED (2026-10-11 ~09:20 MDT — the U4 implementer, Opus `claude-opus-5-5`)
+
+**NOT DONE (said first):** (1) **the WALK is HELD** — the session stayed LOCKED (07:57, 08:57 MDT); the offscreen
+renders of the REAL views (U4-10) stand in and are NOT a walk — no press, hover, held key, menu, sheet presentation
+or Settings scroll was exercised; the held-⌘ L cycling and ⌥⌘,'s landing are pinned as state transitions only. The
+brief's walk list and the REAL-client ask leg are owed (U4-10 names every item). (2) **Not built, recorded:** the
+pending glyph on the Library's Timeline rows, its search answer sheet's passages, the sidebar's Open strip and
+Starred note rows (the brief named the Library and Pool note rows, the book TOC, the bars, the Bookcase, the
+switcher, the masthead and the indicator — all built); a "Not now" on the ask's sheet (product — P-13nc-U4-8, a
+#211 question); per-wing counts in ⌘L (P1). (3) **Two pre-existing order-dependent reds** surfaced by the wider
+246-suite run (`LibraryInfiniteScrollTests.aPageLandingReDrawsNoRowAlreadyBuilt`,
+`DestructiveUndoWarningTests.redoNeverAsks`) — reproduced IDENTICALLY on U3's built tree, green alone; for the
+orchestrator to ticket (U4-9). (4) No `notes/QUESTIONS.md` edit (merge-time, #211); no canon edit (P-13nb-U2-9's
+arrival superseded — the closeout's delta: AppSpec §12's MCP line gains "asks wait at their icon and in Waiting").
+Zero `Sync/`, schema, custody, editor seam, `Sources/` (not one package line), `/Applications`; no Variorum
+instance ever ran.
+
+**Commits (branch `vx-165-13n-c`):** `a41efc1b` record opens · `6f39cd18` the build (compiling) · `9b8b5cf2` the pins
++ harness · `246d528a` the ritual the runs found, red-on-old by revert, the calls, F-15/F-16 · this commit (U4-6b,
+the finals, the banner).
+
+**Finals:** headless core **2,619 / 299** · `VariorumMCPTests` **69 / 9** · workbook **40 / 6** — all green ·
+Mac **246 suites / 1,498 tests**, 17 skipped (standing gates), the only reds VX-115's standing pin and the two
+pre-existing order-dependent reds (provenance measured on U3's tree) · after U4-6b the touched suites **68 / 5**
+green · the capture harness green (18 images).
+
+**PROVISIONALs (for #211 at the merge):** P-13nc-U4-1 ("until it disconnects") · -2 (a press answers the oldest)
+· -3 (the masthead wears every wing ask) · -4 (⌘L's release commits only after a held tap) · -5 (the word cycles
+with ≥2 wings; the menu's pick stays silent) · -6 (Waiting only while an ask waits; 3 + all N) · -7 (⌘L is a
+sheet, no counts) · -8 (a QUESTION: no "Not now" on the ask's sheet). **FABLE-OWED rows written at the moment:**
+F-15 (the ask arrival + the answer-once guard + deny-forgets — the answer road mints grants), F-16 (the duration
+word in every grant confirm).
+
+**Where a cold reviewer should look first:** (1) `MCPDoor`'s ask road — `enqueue` / `answer` (the guard: only an
+ask still waiting is answered, T-U4-5) / `deny` (forgetting AFTER the op lands — the async gap: an ask arriving
+for that client in between is not possible by the wire's own rule, MCPAsk is never raised for an unapproved
+client, but confirm) / `detach` / `beginAnswering`–`endAnswering` (the cap's protection: does any path leave an
+id in `answering` forever? the sheet's `onDisappear` and `answer` clear it). (2) The two hosts of an ask's sheet —
+`mcpAskSheet(door:askID:)` in `RootView`, `NoteWindowView` and `MCPPane`, plus the nested road
+(`MCPShareRoad.askSheet` / `answeringAsks`) used by ⌘L's switcher: can one ask be on screen twice, and does every
+host close when it is answered elsewhere (the getter reads the queue)? (3) `WingSwitcherKeyCatcher` (U4-6b's
+rebuild) — the window scoping (`event.window === window`) for flagsChanged, the consumption rule, and that the
+menu's ⌘L request path (`RootView`'s `onChange` → `tapL`) and the monitor never BOTH act on one press. (4)
+`WingSwitcherMenu`'s two faces (≥2 wings: the cycling word + ▾; one wing: the whole label) and that every act
+13i-d drew is still reachable. (5) `AppSettingsView.adoptMCPRequest` + `MCPPane.landAtWaiting` — the two "seen"
+marks on the door (a request adopted by one window and never scrolled? a fresh Settings window vs one already
+up). (6) R-13nb-23/26g: grep that nothing but `answerAsk` sets `mcpAskRequest` (pinned) and that no new code
+path raises a window, toasts or presents on an arrival.
+
+**Self-assessment:** the arrival change is small at its core (one host deleted, one guard, one projection) and
+pinned both as state and as source, with the two real defects the trace found proven red-on-old by revert. The
+face work is wide (nine hosts) but every host draws one shared glyph whose calm state is no view, so the shipped
+layouts are unchanged at rest (the 246-suite run includes the alignment and layout pins). ⌘L's held-key machine
+is pure and exhaustively pinned; its AppKit edge — the key monitor — is the least-proven piece: it can only be
+truly checked under a real keyboard, and reading it after the runs found a defect (U4-6b) the pins could not have
+caught. Least certain: how the held-⌘ cycle FEELS (the sheet's open animation against a quick ⌘L-L-release), and
+whether the filled pending twin is distinguishable enough from the outline shared icon beside it — both the
+UX walk's to judge.
+
 ### Pieces
 
 | # | Piece | Status |
@@ -1372,9 +1431,10 @@ U4-10; offscreen renders stand in only if it is still locked, and are NOT a walk
 | U4-6 | ⌘L — the wing switcher (R-AIR-15): a pure brain (`WingSwitcherBrain` — filter, held-⌘ L cycling, release/return commits, Esc) + the sheet (the ⌘K idiom) + the masthead word's CYCLING click with the ▾ menu beside it, on the Bookcase AND the Library masthead (the switcher moves to `Core/Views`); "Now in …" speaks; the Snippets line; the sweep at the binding | DONE (`6f39cd18`, `9b8b5cf2`) — `WingSwitcherChordTests` 12/1 green: every brain transition (opens on the current wing; held-⌘ L cycles + wraps + release commits; a plain press-release stays for typing; typing filters case- and diacritic-insensitively; return commits / closes on the current; arrows never arm the release; a typed change ends a cycle; a row click), the monitor's key classes (⌘L only — ⇧⌘L / ⌃⌘L / a typed l are not; ⌘'s release; Esc), the spoken switch ("Now in “variorum”." / "Now in Home.", silence on the current) and the cycle, the chord declared/wired/collision-free across every `CapabilityID`, the one view in `Core/Views` on BOTH mastheads with the Snippets line. Captured (`u4-switcher-{open,cycled,typed}-*`, both mastheads). The held-⌘ cycling under a real keyboard is NOT walked (locked) |
 | U4-7 | The shortcuts pane + ⌘/: `HelperView.groups` gains an MCP group (⌥⌘, · ⌥⌘A · ⌥⌘O · ⌥⌘Z's client-named undo) and ⌘L | DONE (`6f39cd18`) — the MCP group (⌥⌘, · ⌥⌘A · ⌥⌘O · ⌥⌘Z quoting the Edit menu's real "Undo claude-code's take" — `MCPWriteAct.undoLabel`) + the ask icon's row; ⌥⌘O/⌥⌘A moved out of Writing (not doubled); ⌘L in Navigation. Pinned (`theHelpersMCPGroupHoldsEveryMCPChord`); the registry's discoverability guard (`everyDeclaredShortcutIsFindableInTheHelper`) and `SettingsShapeTests`' one-list pin green — Settings ▸ Shortcuts and its search read the same list. Captured (`u4-helper-*`) |
 | U4-8 | "While connected" — copy options recorded; the most neutral built PROVISIONAL everywhere the duration is said | DONE (`6f39cd18`, `9b8b5cf2`) — the options in "The calls made in the build" below (P-13nc-U4-1); pinned (`theBoundedDurationSaysWhenItEnds`); four pins updated as the ritual (annotated in place) |
-| U4-9 | Headless finals (`swift build` + core + `VariorumMCPTests` + workbook) + Mac suites under a held stage claim | NOT-STARTED |
-| U4-10 | The walk (dev-store Debug, Study + Terminal) → `notes/plans/13n-c-screens/u4/` — or, if still locked, offscreen captures of the real views (NOT a walk) | NOT-STARTED |
-| U4-11 | UNIT CLOSED banner | NOT-STARTED |
+| U4-6b | **Found by reading my own monitor after the runs (not walked — the session is locked): the ⌘L monitor ate the Esc of an ask's sheet opened OVER the switcher**, and answered keys of ANY window. The trace: `WingSwitcherKeys.start`'s monitor returned `nil` (consumed) for every ⌘L/Esc it classified, even when the sheet's handler declined (`nestedAsk != nil`), so Esc never reached the nested ask sheet's Don't allow; and the local monitor was app-wide, not scoped to the switcher's window | DONE (the closing commit) — rebuilt in the `PageTurnKeys` / `CommentsPanel` shape: `WingSwitcherKeyCatcher`, a hit-test-transparent view whose monitor answers ONLY its own window's events (the switcher's sheet — a nested ask sheet is another window, so its keys pass through), consuming only what the handler ACTED on and never ⌘'s release; the rule extracted pure and pinned (`WingSwitcherKeys.consumes`). Design-class (no red-on-old possible headlessly — the scoping is AppKit's `event.window`); `WingSwitcherChordTests` + the four neighbours 68/5 green |
+| U4-9 | Headless finals (`swift build` + core + `VariorumMCPTests` + workbook) + Mac suites under a held stage claim | DONE — **headless** (on `246d528a`, zero `Sources/` lines in the unit — `git diff --name-only c6d5d23a..HEAD -- Sources Package.swift Tests` empty): `swift build --build-tests` clean; **core 2,619 / 299 · `VariorumMCPTests` 69 / 9 · workbook 40 / 6 — all green** (U3's finals exactly). **Mac** (stage `vx165-u4`, 08:2x→09:1x MDT; no Variorum instance at any point — `pgrep` clean): every suite whose file names a changed type, derived by script — **246 suites / 1,498 tests**, 17 skipped (the standing opt-in/gated tests: the four capture harnesses incl. U4's own, the opt-in oracle and list-face suites), **6 issues in 3 tests, none U4's:** (1) VX-115's standing `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads`; (2) `LibraryInfiniteScrollTests.aPageLandingReDrawsNoRowAlreadyBuilt` ("re-drew 18 / 12 rows"); (3) `DestructiveUndoWarningTests.redoNeverAsks` (3 issues; green in this set's first run). **PROVENANCE, measured:** the IDENTICAL set (minus U4's three new suites, 243 suites / 1,471 tests) run on U3's BUILT tree (`DerivedData/vx165-u3`, `test-without-building` — no U4 code) fails the SAME three tests with the same counts (18 / 12; the redo's 3) — pre-existing, order/parallel-dependent: both read process-global state that parallel suites write (`LibraryPagedNotesProbe.rowBodies` is a static counter; the opt-in oracle suite's own skip note names that class), and both are GREEN ALONE on the U4 tree (12 tests / 2 suites) and the scroll suite green beside the four other catalog-mounting suites (21/5). U3's narrower 88-suite set never hit them. **For the orchestrator to ticket** (implementers don't touch the board): the two order-dependent reds, owner the VX-34 harness-calibration family. The ritual pins the runs found (`BookPanelTests`' declared set, `MCPPaneTests`' catalog rows) updated and annotated (`246d528a`); after U4-6b, `WingSwitcherChordTests`, `MCPAsksWaitTests`, `CapabilityRegistryTests`, `WingSwitcherTests`, `HelperCurrencyTests` re-run 68/5 green |
+| U4-10 | The walk (dev-store Debug, Study + Terminal) → `notes/plans/13n-c-screens/u4/` — or, if still locked, offscreen captures of the real views (NOT a walk) | **WALK HELD — the session is LOCKED** (07:57 and 08:57 MDT: `CGSSessionScreenIsLocked 1`). Unlocking is hers. **What stands in its place — NOT a walk, said plainly:** the gated harness `MCPAsksWaitCaptureTests` (`TEST_RUNNER_VARIORUM_CAPTURE=13nc-u4`) rendered the REAL views offscreen over a seeded in-memory library with four asks waiting (a note ask from two clients, a book ask, a wing ask), light, both voices, into `notes/plans/13n-c-screens/u4/` (gitignored — `git check-ignore` verified; decoded from the log by a scratchpad script): `u4-bookcase-*` (the masthead's CYCLING word "· Home" with the wing ask's glyph and its ▾; the book ask's glyph on "the lightning thief" beside U3's shared icon), `u4-library-*` ("Library · Home ◆ ▾ everything — sortable, searchable" — round 5; the asked note's row glyph), `u4-indicator-*` (the shared icon + the pending glyph at the context bar's trailing end), `u4-pane-*` (Waiting: three rows newest first with ages, Answer…, "all 4 ›", above Clients), `u4-ask-sheet-*` (her press's sheet: the book ask with R-AIR-3's reach line — the F2 carry on screen), `u4-switcher-{open,cycled,typed}-*` (⌘L: the current wing marked, the highlight after one held-⌘ L, "vari" filtered; the foot and the Snippets line), `u4-helper-*` (⌘/: the MCP group + ⌘L). **What the captures showed, for the UX walk:** the FILLED pending twin and the OUTLINE shared icon read very alike side by side at row size (P-13nc-U3-5's family — not re-opened here); Terminal lowercases the foot's key name ("tap l") as it lowercases every chrome key ("⌘k", "⌘j") — the voice's idiom; the helper lowercases every group title ("mcp") — its idiom. **No press, hover, held key, menu, sheet presentation or Settings scroll was exercised.** **OWED to the next unlocked session (the orchestrator's walk + its REAL-client ask leg):** a client's ask arriving while she types in a note (nothing appears; the glyph does — on the note's Library/Pool row, the Book Panel, the bar's note ▾, the indicator), answered from a glyph and another from Waiting; ⌥⌘, landing at Waiting (fresh Settings window and one already open); ⌘L typed-filter commit, held-⌘ L cycling commit, Esc, and an ask answered from a switcher row (its Esc must reach the ask's sheet — U4-6b); the masthead word cycling on BOTH mastheads and the ▾ menu's acts; a denied client's glyphs leaving; the shortcuts pane and ⌘/; both voices, dark appearance |
+| U4-11 | UNIT CLOSED banner | DONE (the closing commit) — atop this record |
 
 ### Traces (made before any code — the hallucination guard)
 

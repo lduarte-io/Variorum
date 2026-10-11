@@ -124,6 +124,13 @@ struct WingSwitcherChordTests {
         #expect(key(.flagsChanged, nil, 55, []) == .commandUp)
         #expect(key(.flagsChanged, nil, 56, [.command, .shift]) == nil, "⌘ still held")
         #expect(key(.keyDown, "\u{1B}", 53, []) == .escape)
+        // Only an acted-on key is consumed, and ⌘'s release never is — so an
+        // ask's sheet over the switcher (another window, never acted on here)
+        // keeps its own Esc.
+        #expect(WingSwitcherKeys.consumes(.tapL, acted: true))
+        #expect(WingSwitcherKeys.consumes(.escape, acted: true))
+        #expect(!WingSwitcherKeys.consumes(.escape, acted: false))
+        #expect(!WingSwitcherKeys.consumes(.commandUp, acted: true), "⌘'s release is only observed")
     }
 
     // MARK: - The switch speaks; the cycle moves
