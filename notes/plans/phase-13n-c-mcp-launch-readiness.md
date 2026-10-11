@@ -25,7 +25,7 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 |---|---|---|
 | K0 | Bout start (pulls, board snapshot `ac32a780`), full preflight, ticket VX-165 + sub-issues, worktree, in-flight row (`fbfbf1a9` on main) | DONE |
 | K1 | This plan finalized | DONE (this commit) |
-| U1 | The fence re-key (VX-163) | NOT-STARTED |
+| U1 | The fence re-key (VX-163) | IN-PROGRESS — the U1 implementer's record below |
 | U2 | The grant sheet rebuilt | NOT-STARTED |
 | U3 | Grant from where you are + the one icon + the in-note indicator | NOT-STARTED |
 | U4 | Asks wait quietly + the keyboard | NOT-STARTED |
@@ -622,4 +622,85 @@ where a cold reviewer should look first, and a self-assessment.
 
 ## U1 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-*(empty until the U1 implementer's first commit)*
+Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11. Worktree `~/dev/variorum-vx-165`,
+branch `vx-165-13n-c`. No revert is in flight unless a line below says so.
+
+### Pieces
+
+| # | Piece | Status |
+|---|---|---|
+| U1-0 | Preflight read whole (this plan, the sitting record, brief §9, mockup §8, 13n-b R-13nb-1/-4 + the U1/U2 fence records + AF-6) + the traces below | DONE (this commit) |
+| U1-1 | The pins, written FIRST and watched RED on the pre-fix tree (core `MCPFenceRekeyTests` + server `MCPFenceRekeyServerTests`) | NOT-STARTED |
+| U1-2 | The derivation narrowed (`MCPGrantQueries` — the ONE site: member leg, book leg, grantable-books filter → `'daily'` only; own-profile leg KEPT, D-1) + doc comments; the old-leg pins updated as the ritual | NOT-STARTED |
+| U1-3 | The wire's one answer for a fenced NOTE (`MCPRefusalCopy.words`) — see TRACE T-2; the old fenced-words pins updated as the ritual | NOT-STARTED |
+| U1-4 | Copy truth (J8): the six sentences (mockup §8's words verbatim) + the wire's own journal sentences + the app-wide grep record | NOT-STARTED |
+| U1-5 | R-AIR-3 — the confirm's clause on every book grant + D-3's wing twin | NOT-STARTED |
+| U1-6 | Mutation checks (widen the leg back; drop the own-profile leg; un-uniform the wire) | NOT-STARTED |
+| U1-7 | Headless finals: `swift build` + core + `VariorumMCPTests` + workbook | NOT-STARTED |
+| U1-8 | Mac suites under a held stage claim (`MCPPaneTests`, `MCPAskAndReceiptTests`, `MCPEditFacesTests`, `SettingsShapeTests`, `CapabilityRegistryTests` + any suite over a changed file) | NOT-STARTED |
+| U1-9 | The pre-flight walk (dev-store Debug, Study + Terminal) → `notes/plans/13n-c-screens/u1/` | NOT-STARTED |
+| U1-10 | UNIT CLOSED banner | NOT-STARTED |
+
+### Traces (made before any code — the hallucination guard)
+
+- **T-1 — R-AIR-1's mechanism (the bug-class shape of "trait books fenced"):** `mcpNoteFacts`
+  (`MCPGrantQueries.swift:290-292`) sets `member_journal` for a live member of ANY live reading with
+  `profile IN ('journal','daily')`; `mcpBookFacts` (`:334`) sets the book's `journal` fact on the
+  same pair; `mcpGrantableBooks` (`:366`) excludes the pair. A trait book (`profile='journal'`,
+  `setJournalTrait`'s toggle) therefore reads `fence = .journal` → `MCPGrantRule.reaches` matches no
+  standing grant for its members (`:278-281`) and nothing for the book (`:288`) →
+  `insertMCPGrant` refuses `mcpGrantScopeFenced` (`Operations+MCPGrants.swift:167`), the sheet never
+  offers it, and a wing grant / the open book skip its members. Narrowing the three sites to
+  `'daily'` is the whole fix; every reader (`insertMCPGrant`, `mcpNoteSharing`,
+  `mcpReachableBookIDs`, Allow-AI-here via `NotePrivacyState.read` → `mcpNoteSharing`, every
+  server tool via `MCPGrantAuthority`) consumes those facts and follows by construction — verified
+  by reading each; none re-derives.
+- **D-1 re-verified:** the only shipped door minting a note with its own `profile='journal'` is
+  `createOrOpenJournalEntry` (`Operations+Container.swift:80`); `createPost`/`newPostInReading`
+  accept a profile but no shipped caller passes `.journal` (BookStructureModel's in-book day
+  entry mints `.generic` on purpose, its `:664` comment); `importPost`/`importDocument` mint
+  `profile: nil`. The copy roads (versions `Operations+Versions.swift:655`, the ownership family
+  copy `Operations+Ownership.swift:90`, the wing copy `Operations+WingMove.swift:196`) carry the
+  source's profile — so a COPY of a ⌘J entry stays fenced (the "more asks, never fewer" direction).
+- **The marker, not the keeper:** the narrowed leg fences EVERY live book wearing `'daily'` (a
+  not-yet-converged stale bearer included), not only `Queries.dailyJournalBookID`'s pick —
+  the conservative direction; `setDailyJournalBook` demotes stale bearers to the trait anyway.
+- **D-5 re-verified:** `Sources/VariorumCore/Sync/` reads `ai_private_at` only, as engagement
+  (`SeededFurnitureDedupe` :229/:354/:528/:544/:713/:722, `SampleLibraryDedupe` :805/:819/:882/:893);
+  no `Sync/` file reads `MCPGrantQueries`, the fence, or a journal profile predicate. U1 is ZERO
+  `Sync/` lines.
+- **T-2 — THE BYTE-IDENTITY DISCREPANCY (found before building; the brief's pin is red on old
+  for a reason the brief does not name):** under a Home-wing read grant, `read_note` on a
+  daily-Journal entry is decided `.ask(.fenced(.journal), offersAlways: false)`
+  (`MCPGrantRule.swift:222-223`), routed through `MCPAsking.refusal` (`MCPReadTools.swift:113`) to
+  `MCPRefusalCopy.words(.fenced(.journal), .note, asked: true)` (`MCPGrantAuthority.swift:118-126,
+  141-149`) = *"That's a journal entry. Journal entries are shared one ask at a time, never by a
+  standing grant; the author hasn't shared this one with this client. Variorum has asked the
+  author — call again once she answers."*; a Private note says *"That note is marked Private —
+  never shared with AI unless the author shares it for one ask. Variorum has asked…"*; a made-up
+  id says the ONE `notShared` answer. **Three different answers — a fenced-vs-unshared oracle.**
+  This contradicts AppSpec §12's contract line ("everything unreachable answers ONE uniform
+  not-shared shape — no fenced-vs-unshared oracle anywhere") and the 13n-b handoff's promise to
+  her ("a fenced note and a merely-unshared note answer byte-identically — no oracle"), and it is
+  exactly what 13n-b's AF-6 ruled ("`rungTooLow` and `fenced` (targets the client legitimately
+  knows exist) gain the said sentence") and four shipped pins assert
+  (`MCPServerTests.journalsNeverRideAStandingGrantOrTheOpenBook` "journal entry";
+  `MCPWriteServerTests.asksRaiseOnlyForTargetsTheClientKnows…` asked-sentence suffix;
+  `MCPCarriageServerTests.setEntryDateLands…` and `.filingAFencedMemberRaisesTheAskAndSaysSo`
+  "That's a journal entry" prefix). Canon and the brief agree; AF-6's fenced clause is the outlier.
+  **DISPOSITION (U1-3 builds it; flagged for the cold review and the FABLE-OWED ledger):** for a NOTE
+  target, `fenced` speaks the ONE `notShared` answer byte-for-byte on every tool (the one words
+  site), and never the asked sentence — the just-in-time ask is STILL queued to her (AF-6's own
+  ask-on-unshared-existing-target posture: "an ask IS queued while the wire stays silent"). This is
+  the brief's order and canon's letter; it reverses AF-6's fenced clause for notes only.
+  **FORKED, NOT BUILT (beyond the brief):** a fenced BOOK still names itself on the wire ("That
+  book is the daily Journal…" / "…marked Private…") — the same oracle class for a book id the
+  client holds; the brief names only notes. Proposal for the orchestrator: (a) uniform for books
+  too (one more case in the same function; the U2 pin `privateRefusal == "That book is marked
+  Private…"` flips) — the canon-letter option; (b) keep (a fenced book id is only ever known to a
+  client that could once read the book or minted it — AF-6's premise); (c) uniform only for the
+  daily Journal. Recommended (a). One more edge, recorded not built: a client holding a per-ask
+  READ grant on a fenced note that asks to SUGGEST gets `notShared` words (before: the fenced
+  words) though it can read the note — honest would be `rungTooLow` + the asked sentence, a
+  three-line change in `MCPGrantRule.decide` (the security rule itself — Fable-owed, so not
+  touched here).
