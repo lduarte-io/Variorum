@@ -169,3 +169,27 @@ with its pin), two MINOR (one a tracked in-phase deferral, one a closeout-checkl
 The fence re-key itself, the one-answer flip and the confirm clause are correct, well-pinned and
 honestly recorded. Per the cross-model flow: F1's fix is mine to implement on the coordinator's
 authorization, with the decide-level and wire pins above, red-on-old verified by revert.
+
+---
+
+## DISPOSITIONS (cross-model flow — written by the ORCHESTRATOR, Opus, because the reviewer died at her Fable limit)
+
+**Machinery, said plainly:** the reviewer (claude-fable-5) received the authorization, BUILT F1
+(`c1047097`, its own commit message records the red-on-old counts: decide-level 4 issues, the
+boundary sweep's new invariant 5, the wire pin 1 issue — all green after) and then terminated at
+the author's Fable usage limit (HTTP 429, `req_011CfvMuXtEEWRkKRbhywDAj`) BEFORE writing this
+section. Per the resiliency protocol's budget-death addendum the remainder runs on Opus and is
+recorded, never retried on Fable. The implementer's verdicts were: AGREE ×6 (with the F1 lapsed-
+grant pin refinement and the F3 nuance below).
+
+| # | Severity | Implementer | Final disposition |
+|---|---|---|---|
+| F1 | MAJOR | AGREE (+ lapsed-grant pin) | **FIXED by the reviewer `c1047097`** — rungTooLow answered before the fence when a LIVE grant reaches the note; offersAlways false on a fenced target; a spent/revoked grant falls through to the one answer (the lapsed-grant pin, per the implementer's refinement). Red-on-old by the reviewer's own revert. The orchestrator's whole-package rerun: PENDING. FABLE-OWED F-10 (the security rule edited — written by Fable, its re-review is Opus's). |
+| F2 | MINOR | AGREE | **DEFERRED, tracked:** U2 (the ask sheet's durations) / U4 (the ask road) carry R-AIR-3's clause onto every ask-road book grant; if either falls out, a named ticket at closeout — the ledger row is added. |
+| F3 | MINOR (doc) | AGREE with nuance | **CLOSEOUT CHECKLIST:** AppSpec §12's "journal-class notes AND anything wearing the Private mark answer only a per-ask note grant" is rewritten to R-AIR-1's keys (the daily Journal's entries + ⌘J entries + Private); §7's v1_25 "journal-class fence" bullet REVIEWED for wording (still true of the Private mark's behaviour — the nuance adopted); beside AF-6's fenced-clause supersession (T-2/F-7). Added to the plan's closeout-delta list. |
+| F4 | NIT | AGREE | **U2's brief:** the confirm's scope becomes an exhaustive switch when U2 adds "A note". |
+| F5 | NIT | AGREE | **U5's brief:** the `instructions` rewrite drops/rewords "Every refusal says why". |
+| F6 | NIT | AGREE | **Copy pass (hers):** the ask lead for a ⌘J entry filed elsewhere — logged under P-13nc-1. |
+
+**Round 2** (a fresh reviewer re-reviewing the fix, `c1047097`): `opus-reviewer` (her Fable budget is
+spent) — recorded in `13nc-u1-ladder-round2.md`.
