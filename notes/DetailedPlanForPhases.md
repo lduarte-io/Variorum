@@ -12,7 +12,6 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| Run: write & chrome feedback (her 2026-10-10 triage, round 1) | VX-143 (members VX-135/136/140/141/142) · `vx-143-write-chrome-feedback` | `~/dev/variorum-vx-143` · the Air (her session grant: the Air runs walks and suites locally this effort) | Kicked off 2026-10-10 (`/architect-phase` triage sitting). Surfaces: the Takes board fan styles (margin grid layout + the ratified two-wide default, the take-menu ⌘⏎ chooser), the sidebar note box (the note→book jump), Read-mode hover hints on a book, and the Touch ID re-prompt loop (VX-140 — ruled in at the sitting: prompt FREQUENCY, not custody; tripwire back to her if the trace reaches `KeychainCustody`/vault handling; NOT the custody slot — 13n-b keeps it). No `Sync/`, no schema. Cold review: `fable-reviewer`, whole diff. Record: `notes/plans/fixes/vx-143-write-chrome-feedback.md`. |
 
 ### Latest closeout
 
