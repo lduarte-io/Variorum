@@ -73,6 +73,33 @@ fix it refuses `wingMoveChangedSince` (or no-ops obsolete). Manifestation 2 pins
 Either half alone closes manifestation 1; the obsolete half also closes 2. Feeds P-13nc-U6-3's #211 entry
 either way (the dead-wing row of that question's table).
 
+**DISPOSITION (CLOSED — the cross-model flow run to the end, 2026-10-11):**
+- **The U6 implementer (Opus) AGREED on both manifestations**, with its own trace confirming the premises
+  (`sameEffectiveWing`'s equal-ids short-circuit; `applyTag` landing a Home tag on a dangling-wing note; no
+  trigger firing on a wing tombstone, so the direct-write staging is the honest sync shape) — and three
+  refinements: (1) the OBSOLETE half is the real fix (both wings live for either replay; conflicts with no
+  revival rule, all of which assume live wings); (2) the effective-wing scoping alone would be WRONG-shaped
+  (in manifestation 2 it would wedge the entry behind a misleading `wingMoveChangedSince` about tags she
+  never applied) and is redundant under the obsolete half; (3) an optional #211 alternative — record the
+  EFFECTIVE source at capture so such an undo lands in Home.
+- **The reviewer's FINAL CALL (Fable 5): the obsolete half, exactly as the implementer refined it** — both
+  replays require BOTH of the entry's wings live (`wingIsLive` on the stood-in wing before `sameEffectiveWing`,
+  and on the target wing as before); the vocabulary scoping is NOT shipped (refinement 2 is right — under the
+  obsolete half it is byte-identical SQL), replaced by a doc precondition on `refuseIfWingMoveChangedSince`
+  ("`leaving` MUST name a LIVE wing — the replays' guards ensure it") so the coupling cannot be silently
+  broken; refinement 3 recorded as the #211 alternative, not built (sync-only).
+- **Built by the reviewer (this session):** pin
+  `MCPWingMoveActsTests.aDeadWingMakesTheReplayObsoleteInEitherDirection` — **RED-ON-OLD, commit `6fac6d5f`,
+  5 issues on the pre-fix tree** (the undo moved the note and carried the live Home application cross-wing —
+  `wing == away` / `tags == before` / `crossWing == 0` all red; the redo moved from a dead source; the
+  door-reachable case revived the let-go membership), the suite's other 10 tests green on both sides (no
+  existing pin tombstones a wing — the implementer's claim, verified). **FIX commit `3122cb2e`**
+  (`Operations+MCPWingMove.swift` only — core, no face): the pin GREEN, `MCPWingMoveActsTests` 11/1 green.
+  **Suite green after:** the whole headless package — core **2,634 / 301** (the baseline + this pin) ·
+  `VariorumMCPTests` **92 / 14** · workbook **40 / 6**, standing skips only; no Mac surface touched, so no
+  stage run owed. The plan's P-13nc-U6-3 entry gained the dead-wing row (the running PROVISIONALs list).
+- Next per the flow: one implementer sanity pass over the fix span, then round 2.
+
 ### F2 — [NIT] · the plan's U6 Pieces table (`phase-13n-c-mcp-launch-readiness.md`, row U6-8) · the cell reads NOT-STARTED while the banner, U6-6 and U6-9 record the Mac run (618/99 `TEST EXECUTE SUCCEEDED`)
 
 The orchestrator's LIVE STATUS already names it "an unflipped row, not missing work" — but the plan is the ONE
