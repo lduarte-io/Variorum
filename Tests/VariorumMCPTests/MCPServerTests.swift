@@ -306,7 +306,11 @@ struct MCPServerTests {
             }
             let refused = try await connection.client.callTool(name: "read_note", arguments: ["note_id": .string(entry.id)])
             #expect(refused.isError == true)
-            #expect(text(refused).contains("journal entry"))
+            // 13n-c U1 (justified edit, the ritual — T-2, AppSpec §12's "no
+            // fenced-vs-unshared oracle anywhere"): the entry answers exactly
+            // as an id that names nothing — it no longer says "journal entry".
+            let nothing = try await connection.client.callTool(name: "read_note", arguments: ["note_id": "nope"])
+            #expect(text(refused) == text(nothing), "a fenced note answers as nothing")
             let found = try json(try await connection.client.callTool(name: "search", arguments: ["query": "lighthouse"]))
             let noteIDs = (found["passages"] as? [[String: Any]])?.compactMap { $0["note_id"] as? String } ?? []
             #expect(noteIDs.contains(prose.id))

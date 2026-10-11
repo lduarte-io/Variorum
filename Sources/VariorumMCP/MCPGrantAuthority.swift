@@ -87,9 +87,19 @@ struct MCPGrantAuthority: Sendable {
 /// **The refusals, as the client reads them** (R-13n-4's "refusals speak to
 /// the client exactly as they speak to you"; technical register inside the
 /// door — P-13n-1). U2 (AF-6): when a just-in-time ask WAS queued in the app,
-/// a `rungTooLow` or `fenced` refusal — a target the client legitimately
-/// knows exists — gains `askedSentence`; `notShared` keeps its ONE answer
-/// byte-for-byte whether or not an ask was raised (no existence oracle).
+/// a `rungTooLow` refusal — a target the client can already reach — gains
+/// `askedSentence`; `notShared` keeps its ONE answer byte-for-byte whether or
+/// not an ask was raised (no existence oracle).
+///
+/// **13n-c U1 (T-2 — AppSpec §12's "no fenced-vs-unshared oracle anywhere";
+/// the brief's byte-identity under a Home-wing read grant):** a FENCED NOTE
+/// answers the ONE `notShared` answer, byte for byte, on every tool — never
+/// its fence's name and never the asked sentence (either would mark a daily
+/// Journal entry or a Private note apart from an id that names nothing). The
+/// ask is still put to HER (AF-6's own silent-ask posture for unshared
+/// targets). This reverses AF-6's "`fenced` gains the said sentence" clause
+/// for notes; a fenced BOOK still names itself (the orchestrator's fork,
+/// recorded in the 13n-c U1 record).
 enum MCPRefusalCopy {
     enum Target: Sendable, Equatable {
         case note, book, wing
@@ -115,35 +125,38 @@ enum MCPRefusalCopy {
                 + "can share it from Variorum \u{25B8} Settings \u{25B8} MCP."
         case .rungTooLow(let granted):
             return "This client may only \(rungWords(granted)) here."
-        case .fenced(.journal):
-            // U2: a BOOK target names itself — a journal book is never a
-            // grant scope; its entries are asked for one at a time.
-            if target == .book {
+        case .fenced(let fence):
+            // 13n-c U1 (T-2): a fenced NOTE (or anything not a book) is the
+            // one answer — exactly what an id naming nothing hears.
+            guard target == .book else { return words(.notShared, target) }
+            // U2: a BOOK target names itself — a fenced book is never a grant
+            // scope (and never raises an ask); its entries are asked for one
+            // at a time.
+            switch fence {
+            case .journal:
                 return "That book is a journal. Its entries are shared one ask at a time, never by a "
                     + "standing grant."
-            }
-            return "That's a journal entry. Journal entries are shared one ask at a time, never by "
-                + "a standing grant; the author hasn't shared this one with this client."
-        case .fenced(.privateMark):
-            if target == .book {
+            case .privateMark:
                 return "That book is marked Private \u{2014} never shared with AI."
             }
-            return "That \(target.noun) is marked Private \u{2014} never shared with AI unless the "
-                + "author shares it for one ask."
         }
     }
 
     /// AF-6's sentence (copy 13s-a-sweepable): said only where an ask was
-    /// actually queued AND the reason is one the client already knows.
+    /// actually queued AND the reason is one the client already knows — a
+    /// rung too low on a target it can reach (13n-c U1: never a fenced one).
     static let askedSentence = "Variorum has asked the author \u{2014} call again once she answers."
 
     /// The words for a refusal, with the asked sentence where it belongs.
     static func words(_ reason: MCPGrantRule.Reason, _ target: Target, asked: Bool) -> String {
         let base = words(reason, target)
         switch reason {
-        case .rungTooLow, .fenced:
+        case .rungTooLow:
             return asked ? base + " " + askedSentence : base
-        case .notShared, .clientPending, .clientDenied:
+        case .fenced, .notShared, .clientPending, .clientDenied:
+            // 13n-c U1 (T-2): `fenced` joins `notShared` — the asked sentence
+            // would mark a fenced note apart from one that does not exist (a
+            // fenced BOOK never raises an ask at all).
             return base
         }
     }
@@ -171,7 +184,8 @@ enum MCPRefusalCopy {
 /// target that EXISTS (the caller passes nil for a missing one) queues the
 /// ask in the app — never for a fenced BOOK, which no grant can name — and
 /// the words gain the asked sentence only for a reason the client already
-/// knows (`rungTooLow`, `fenced`); `notShared` stays the one answer.
+/// knows (`rungTooLow`); `notShared` and a fenced note stay the one answer
+/// (13n-c U1, T-2).
 struct MCPAsking: Sendable {
     let onAsk: (@Sendable (MCPAsk) -> Void)?
 

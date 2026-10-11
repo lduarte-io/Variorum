@@ -307,7 +307,10 @@ struct MCPWriteServerTests {
 
             try h.operations.setNotePrivate(note.id, true)
             let refused = try await call(connection, "read_note", ["note_id": .string(note.id)])
-            #expect(refused.isError == true && text(refused).contains("marked Private"))
+            // 13n-c U1 (justified edit, the ritual — T-2): the mark fences the
+            // very next call with the ONE answer — never "marked Private" (that
+            // would tell the client a fact about the note she withheld).
+            #expect(refused.isError == true && text(refused) == MCPRefusalCopy.words(.notShared, .note))
             #expect(!text(refused).contains("words"))
             #expect(try await call(connection, "add_take", ["block_id": .string(block.block.id), "text": .string("x")]).isError == true)
 
@@ -430,7 +433,10 @@ struct MCPWriteServerTests {
                                                 title: "inside", rung: .suggest, fence: nil))
 
             let fenced = try await call(connection, "read_note", ["note_id": .string(entry.id)])
-            #expect(text(fenced).hasSuffix(MCPRefusalCopy.askedSentence))
+            // 13n-c U1 (justified edit, the ritual — T-2): a fenced note no
+            // longer names its fence or says the asked sentence; it is the ONE
+            // answer — and her sheet still hears the ask.
+            #expect(text(fenced) == missingWords, "a fenced note answers exactly as a missing one")
             #expect(h.asks.value.last?.fence == .journal && h.asks.value.last?.offersAlways == false)
 
             let unsharedWords = text(try await call(connection, "read_note", ["note_id": .string(unshared.id)]))
