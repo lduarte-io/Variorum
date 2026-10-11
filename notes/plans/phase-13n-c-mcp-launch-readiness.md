@@ -670,12 +670,12 @@ unit record (TCC state is machine-state the next session inherits).
 | 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | BUILT + VERIFIED `c6d5d23a` — walk HELD (locked); icon A kept PROVISIONAL (orchestrator); UX-walk watch: the icon reads small beside a Terminal-voice book name (capture `u3-bookcase-terminal.png`) — the UX reviewer is asked to judge it |
 | 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | BUILT + VERIFIED `f1ab4725` — walk HELD; two order-dependent Mac reds predating U4 ticketed **VX-167** (red identically on U3's tree; green alone) |
 | 7 | U5 — the guide, the advice, the setup menu | U5 implementer | BUILT + VERIFIED `065526ce` — walk HELD; the one cap-test red ("Unable to parse empty data") folded into **VX-132** by comment (Stage B R1 B14) |
-| 8 | Stage B ladder (opus) | orchestrator | **CLOSED at R2** — R1 `13nc-stageB-ladder-round1.md` (1M/6m/7n, the fix pass `c6d8509c..9c049c6a`) → R2 `13nc-stageB-ladder-round2.md` (0B/0M/1m/4n, all accepted) → the CLOSE-OUT FIX PASS (R2-1…R2-5 + O-4 + the 2,000 bound) BRIEFED |
+| 8 | Stage B ladder (opus) | orchestrator | **CLOSED at R2** — R1 → fix pass `c6d8509c..9c049c6a` → R2 (0B/0M/1m/4n) → the CLOSE-OUT FIX PASS `6f7fc38f..3e8ccd83` VERIFIED by the orchestrator (zero trailers; the one `Persistence/` line is the purely additive `AppDatabase.observe(tracking:_:)` — no schema, no caller changed, F-22; core 2,623/300 · MCP 82/12 · Mac 537/76 green). The close-out range is not cold-reviewed after R2 (no new B/M earned R3), so **it joins Stage C's review range** and is named there. |
 | 9 | U6 — the wing on the wire | U6 implementer | NOT-STARTED |
 | 10 | U7 — VX-159 | U7 implementer | NOT-STARTED (may fall out) |
 | 11 | Stage C ladder | orchestrator | NOT-STARTED |
 | 12 | U8 — the secret | U8 implementer | NOT-STARTED (may fall out) |
-| 13 | The whole-phase walk + the Opus UX-reviewer walk | orchestrator + UX reviewer | NOT-STARTED |
+| 13 | The whole-phase walk + the Opus UX-reviewer walk | orchestrator + walker + UX reviewer | IN PROGRESS — leg 1 (the HELD unit walks U1–U5 + Stage B faces + the real-client live round) BRIEFED ("THE HELD-WALKS BRIEF"); leg 2, the Opus UX-reviewer walk, runs after U6 over everything |
 | 14 | Closeout + the conditional refresh | orchestrator | NOT-STARTED |
 | 15 | QUESTIONS #211 — this phase's PROVISIONALs (minted at the merge) | orchestrator | OPEN |
 
@@ -2116,3 +2116,60 @@ silent (built: silent) and the placeholder form "‹name›" in the guide's pros
   `.mcpAskSheet` AFTER their `.environment(theme)` (`RootView`, `NoteWindowView`), so the sheet's content still
   receives no `ThemeStore` there (the palette, What's New and grant sheets each add `.environment(theme)` for exactly
   this reason); only the pane (inside `AppSettingsView`'s `.environment(theme)`) and ⌘L's nested road carry it.
+
+---
+
+## THE HELD-WALKS BRIEF (leg 1 of ledger row 13; self-contained; the spawn names this section)
+
+You are the walk implementer for Variorum phase 13n-c, in `~/dev/variorum-vx-165` on branch `vx-165-13n-c` (never the
+main checkout). Every walk the units owed was HELD overnight because the Pro was locked. She unlocked it at 11:31 MDT,
+so you run them now.
+
+**The rules:**
+- Commits say `Part of VX-165` with NO attribution trailer, pushed after each.
+- Keep LIVE STATUS in "HELD-WALKS RECORD" below from your first commit. No subagents.
+
+**Read first, whole, never delegated:** this plan file top to bottom (every unit record's owed-walk list — U1's live
+round, U2's and U3's walk lists, U4-10, U5's, the STAGE B FIX RECORD's and the CLOSE-OUT FIX RECORD's "faces your
+walk should check", S-1 and S-2), then `Tools/WalkKit/README.md`.
+
+**How you walk:**
+- Use the DEV-STORE Debug build only (`io.lduarte.Variorum.debug`), built from the tip with its own DerivedData
+  path, driven by `cliclick` + `Tools/WalkKit/` under a HELD `Tools/stage` claim. Renew it; release at the end.
+- NEVER touch the real store, `/Applications/Variorum.app`, or a running real-store instance (never quit or kill one).
+- She may be at the Mac. If a press lands somewhere unexpected (she moved the mouse or changed focus), STOP that leg,
+  record it, and retry once. Never fight her for the pointer.
+- Walk Study AND Terminal, in light, with dark on the faces that changed. Use U2's scale seed (≥150 books) for the
+  picker legs.
+- Captures go to `notes/plans/13n-c-screens/walk/` (gitignored). READ every capture you take.
+
+**The real-client live round (U1's owed round + U4's ask leg + U5's advice leg):**
+- Register the Debug build's shim with a REAL Claude Code client, `-s local` only, in a scratch folder under the
+  session scratchpad. Never `-s user` (her own registration lives there). Remove it at the end.
+- Drive it with `claude -p` turns. Prove each of these on the dev store:
+  - (1) the advice arrives (the client can state it);
+  - (2) a connection request, approved in the pane;
+  - (3) the U1 fence: a daily-Journal entry and a Private note answer exactly like a missing id; a book grant on a
+    trait journal reads;
+  - (4) an ask arriving while you type in a note: NOTHING appears but the mark, answered from the mark; another
+    answered from Waiting;
+  - (5) ⌥⌘A and its receipt's Change… and Revoke;
+  - (6) a write's undo naming the client.
+- Record every client turn's exact text in the record.
+
+**Findings:**
+- A walk finding that is a clear defect: fix it with a red-on-old pin if bug-class, re-walk that leg, and record it.
+- Anything taste or layout ("hard to find", spacing, looks): record it with its capture, and do NOT redesign. The
+  Opus UX-reviewer walk later judges those.
+- Never touch `Sync/`, custody, the editor seam, migrations or `lockstepVersion`.
+- Mac suites over anything you change, under the claim.
+
+**Close:** a WALKS CLOSED banner with:
+- per leg: walked or not, its evidence, what it found and what it fixed;
+- the live round's transcript pointers;
+- the taste list for the UX reviewer;
+- FABLE-OWED rows for any default's-meaning fix.
+
+## HELD-WALKS RECORD (LIVE STATUS — the walk implementer owns this section from its first commit)
+
+*(empty until the walk implementer's first commit)*
