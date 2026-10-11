@@ -139,6 +139,18 @@ final class MCPDoor {
     /// The asks whose sheet she has OPEN (a glyph's press, Waiting's
     /// Answer…) — the cap never forgets one of these.
     @ObservationIgnored private var answering: Set<String> = []
+    /// **13n-c Stage B R2-1 (b) — THE ASK WATCH:** one observation, alive only
+    /// while an ask waits, whose fetch IS the re-validation (`askStanding`
+    /// over every waiting ask, one read — ∝ the queue, never the corpus),
+    /// NAMED on `reading` + `wing` (`AppDatabase.observe(tracking:_:)`): a
+    /// book's death, un-binding or mark and a wing's death wake it; an
+    /// autosave never does (measured — `RegionObservationTests`: an autosave's
+    /// full-record `container` stamp is indistinguishable from a note's trip
+    /// to the Trash, so a note's death is caught where its mark can still
+    /// show — Waiting's render — and at her press). Restarted (one immediate
+    /// re-validation of EVERY waiting ask) whenever the set of asks changes.
+    @ObservationIgnored private var askWatch: Task<Void, Never>?
+    @ObservationIgnored private var watchedAskIDs: Set<String> = []
     /// The asks kept waiting at once (PROVISIONAL P-13nb-U2-9, with the
     /// queue's shape): past it the oldest waiting one she is not answering is
     /// forgotten.
@@ -301,7 +313,8 @@ final class MCPDoor {
         observation = nil
         stopServer()
         adoptionLandingPending = false
-        // A closed library's asks die with it (and so does every glyph).
+        // A closed library's asks die with it (and so does every glyph — and
+        // the ask watch, which an empty queue stops).
         adoptQueue(MCPAskQueue())
         answering = []
         receiptRun = []
@@ -485,6 +498,71 @@ final class MCPDoor {
         askQueue = queue
         let board = queue.board
         if board != askBoard { askBoard = board }
+        watchAsks()
+    }
+
+    /// (Re)start the ask watch when the set of waiting asks changed; stop it
+    /// when none waits (Stage B R2-1 (b)).
+    private func watchAsks() {
+        let ids = Set(askQueue.entries.map(\.id))
+        guard ids != watchedAskIDs else { return }
+        watchedAskIDs = ids
+        askWatch?.cancel()
+        askWatch = nil
+        guard !ids.isEmpty, let database else { return }
+        let asks = askQueue.entries.map(\.ask)
+        let observed = database.observe(tracking: [Table("reading"), Table("wing")]) { db in
+            try MCPDoor.asksStanding(db, asks)
+        }
+        askWatch = Task { [weak self] in
+            do {
+                for try await standing in observed {
+                    guard let self, !Task.isCancelled else { return }
+                    self.adoptStanding(standing)
+                }
+            } catch {}
+        }
+    }
+
+    /// **One re-validation of every waiting ask, now** (Stage B R2-1 (b) —
+    /// Waiting's render: the one face where a note's dead mark can still
+    /// show). Silent: a gone target's ask is forgotten, a standing one takes
+    /// its fresh picture. One read, ∝ the queue.
+    func revalidateAsks() async {
+        let asks = askQueue.entries.map(\.ask)
+        guard !asks.isEmpty,
+              let standing = await read({ db in try MCPDoor.asksStanding(db, asks) }) else { return }
+        adoptStanding(standing)
+    }
+
+    /// The batch's verdicts, applied to the queue AS IT STANDS NOW (an ask
+    /// answered or forgotten meanwhile is simply not there): gone ⇒ forgotten
+    /// (silently — the mark leaving is the change; an open sheet closes, as
+    /// when its ask is answered elsewhere), standing ⇒ its fresh picture.
+    private func adoptStanding(_ standing: [AskStanding]) {
+        var queue = askQueue
+        var changed = false
+        for verdict in standing {
+            if let fresh = verdict.ask {
+                if queue.refresh(fresh) { changed = true }
+            } else if queue.remove(verdict.id) != nil {
+                answering.remove(verdict.id)
+                changed = true
+            }
+        }
+        if changed { adoptQueue(queue) }
+    }
+
+    /// One waiting ask's verdict: its target as it stands, or nil when gone.
+    nonisolated struct AskStanding: Equatable, Sendable {
+        let id: String
+        let ask: MCPAsk?
+    }
+
+    /// Every waiting ask's verdict in ONE read (≤ `MCPAskQueue.cap`), each
+    /// through `askStanding` — the one derivation site.
+    nonisolated static func asksStanding(_ db: Database, _ asks: [MCPAsk]) throws -> [AskStanding] {
+        try asks.map { AskStanding(id: $0.id, ask: try askStanding(db, $0)) }
     }
 
     /// A client's waiting asks, forgotten whole (T-U4-4).
@@ -530,21 +608,41 @@ final class MCPDoor {
     /// queue's entry takes the fresh payload (its stamp and place kept), and a
     /// target that is gone forgets its ask (the sheet closes — it reads the
     /// queue). Returns the ask as it stands, nil when it no longer waits.
+    ///
+    /// **13n-c Stage B R2-1 (a):** her press opened a sheet that then closed
+    /// because its place is gone — a door that did nothing — so it SAYS so, a
+    /// refusal naming the place (`MCPAskCopy.gone`), on the seam of the host
+    /// she pressed in: a window's status line, or the pane's own caption
+    /// (Settings has no status seam). Said even when the ask watch forgot the
+    /// ask during this read — her press is the one that found nothing.
     @discardableResult
-    func refreshAsk(_ id: String) async -> MCPAsk? {
+    func refreshAsk(_ id: String, from seam: AskSeam = .window) async -> MCPAsk? {
         guard let waiting = ask(id) else { return nil }
         guard let standing = await read({ db in try MCPDoor.askStanding(db, waiting) }) else {
             return ask(id)  // the read failed: nothing learned, nothing changed
         }
         var queue = askQueue
         guard let fresh = standing else {
-            guard queue.remove(id) != nil else { return nil }
-            adoptQueue(queue)
+            if queue.remove(id) != nil { adoptQueue(queue) }
             answering.remove(id)
+            sayGone(waiting, in: seam)
             return nil
         }
         if queue.refresh(fresh) { adoptQueue(queue) }
         return ask(id)
+    }
+
+    /// Where an ask's sheet was opened (Stage B R2-1 (a)): a WINDOW (its
+    /// status seam) or the Settings PANE (no status seam — the door's own
+    /// caption at the pane's head, its refusals' home).
+    nonisolated enum AskSeam: Sendable { case window, pane }
+
+    private func sayGone(_ ask: MCPAsk, in seam: AskSeam) {
+        let words = MCPAskCopy.gone(ask)
+        switch seam {
+        case .window: session?.status.refuse(words)
+        case .pane: note = Note(text: words, place: .top)
+        }
     }
 
     /// An ask's target as it stands now — its title and fence through the

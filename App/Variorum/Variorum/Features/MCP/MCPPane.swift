@@ -123,7 +123,13 @@ struct MCPPane: View {
                     allRoad(door.waiting.count, shown: min(door.waiting.count, MCPDoor.waitingCap), .waiting)
                 }
                 .id(Self.waitingAnchor)
-                .task(id: door.waiting.map(\.id)) { distinguishers = await door.placeDistinguishers() }
+                // Stage B R2-1 (b): Waiting is where a dead note's ask can
+                // still show — its render re-validates every waiting ask in
+                // one batch (silent; a gone one leaves the list).
+                .task(id: door.waiting.map(\.id)) {
+                    await door.revalidateAsks()
+                    distinguishers = await door.placeDistinguishers()
+                }
             }
             if door.snapshot.pendingCount > 0 {
                 Section(MCPPaneCopy.requestsSection) {
@@ -188,7 +194,9 @@ struct MCPPane: View {
         }
         // 13n-c U4: the ask Waiting's Answer… opened (closes by itself once
         // the ask is answered anywhere).
-        .mcpAskSheet(door: door, askID: $answering)
+        // Stage B R2-1 (a): a press here that finds the place gone says so in
+        // the pane's own caption (Settings has no status seam).
+        .mcpAskSheet(door: door, askID: $answering, seam: .pane)
         // 13n-c Stage B R1 B3: a grouped row's "and N more ›".
         .sheet(item: $members) { group in
             MCPSharedMembersSheet(door: door, group: group, tokens: tokens) { members = nil }
@@ -797,7 +805,11 @@ struct MCPFullListSheet: View {
 
     private func reload() async {
         switch list {
-        case .waiting: distinguishers = await door.placeDistinguishers()
+        case .waiting:
+            // Stage B R2-1 (b): the whole Waiting list re-validates as it
+            // renders, as the pane's section does.
+            await door.revalidateAsks()
+            distinguishers = await door.placeDistinguishers()
         case .requests: requests = await door.allPending()
         case .clients: clients = await door.allClients()
         case .shared:

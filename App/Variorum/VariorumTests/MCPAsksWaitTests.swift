@@ -223,15 +223,20 @@ struct MCPAsksWaitTests {
             let ops = Operations()
             let client = try ops.recordMCPContact(name: "claude-code", version: nil)
             try ops.approveMCPClient(client.id, granting: nil)
+            // Stage B R2-1 (A JUSTIFIED EDIT, the ritual): the asks name a REAL
+            // note — the ask watch now re-validates every waiting ask, and an
+            // ask on an id naming nothing (which the wire never raises — AF-6
+            // asks only for targets the client knows exist) is forgotten as gone.
+            let note = try ops.createPost(title: "ch 7")
             let door = MCPDoor(serverAllowed: false)
             door.attach(session: session)
             defer { door.detach() }
-            door.enqueue(ask(id: "n1"))
-            door.enqueue(ask("cursor", id: "n1"))
+            door.enqueue(ask(id: note.id))
+            door.enqueue(ask("cursor", id: note.id))
             door.deny(client.id)
             #expect(try await settle { door.asks.map(\.clientName) == ["cursor"] },
                     "the denied client's asks leave; another client's stay")
-            #expect(door.askBoard.asks(.note("n1")).map(\.clientName) == ["cursor"])
+            #expect(door.askBoard.asks(.note(note.id)).map(\.clientName) == ["cursor"])
         }
     }
 
@@ -329,6 +334,79 @@ struct MCPAsksWaitTests {
             let journal = try #require(await door.refreshAsk(daily.id))
             #expect(journal.fence == .journal && door.durations(for: journal).isEmpty)
             #expect(MCPAskCopy.lead(journal).hasPrefix("This book is your daily Journal now"))
+        }
+    }
+
+    // MARK: - Stage B R2-1 — a dead place's ask: said at her press, gone without one
+
+    /// (a) Her press opened a sheet whose place is gone — the sheet closes, a
+    /// door that did nothing — so it SAYS so, a refusal naming the place, on
+    /// the seam she pressed in: a window's status line, or the pane's caption.
+    @Test func herPressSaysSoWhenThePlaceIsGone() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = Operations()
+            let note = try ops.createPost(title: "ch 7")
+            let book = try ops.createReading(name: "the lightning thief", kind: .book)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let noteAsk = ask(id: note.id, title: "ch 7")
+            let bookAsk = ask(id: book.id, rung: .writeNew, kind: .book, title: "the lightning thief")
+            door.enqueue(noteAsk, now: t0)
+            door.enqueue(bookAsk, now: t0)
+            try ops.deleteContainer(note.id)
+            #expect(await door.refreshAsk(noteAsk.id) == nil, "nothing left to answer")
+            let said = try #require(session.status.spoken, "a press that did nothing says why")
+            #expect(said.text == "\u{201C}ch 7\u{201D} is gone, so claude-code's ask was let go.")
+            #expect(said.kind == .refusal)
+            #expect(said.text == MCPAskCopy.gone(noteAsk))
+            // The pane (Settings has no status seam): its own caption, at the head.
+            try ops.deleteReading(book.id)
+            #expect(await door.refreshAsk(bookAsk.id, from: .pane) == nil)
+            #expect(door.note == MCPDoor.Note(text: MCPAskCopy.gone(bookAsk), place: .top))
+            #expect(MCPAskCopy.gone(ask(kind: .wing, title: "variorum"))
+                    == "The variorum wing is gone, so claude-code's ask was let go.")
+        }
+    }
+
+    /// (b) A place that dies while its ask waits takes the ask's mark with it
+    /// — no press. A book's or a wing's death wakes the ask watch (the
+    /// masthead's wing word wore that mark); a note's death is caught where its
+    /// mark can still show, Waiting, whose render re-validates. Silent: nothing
+    /// is said for a press she never made.
+    @Test func aDeadPlacesMarkLeavesWithoutAPress() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = Operations()
+            let living = try ops.createPost(title: "a note that stays")
+            let doomed = try ops.createPost(title: "a note for the Trash")
+            let book = try ops.createReading(name: "the lightning thief", kind: .book)
+            let wing = try ops.createWing(name: "variorum")
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            door.enqueue(ask(id: living.id, title: "a note that stays"), now: t0)
+            door.enqueue(ask(id: doomed.id, title: "a note for the Trash"), now: t0)
+            door.enqueue(ask(id: book.id, rung: .writeNew, kind: .book, title: "the lightning thief"), now: t0)
+            door.enqueue(ask(id: wing.id, rung: .writeNew, kind: .wing, title: "variorum"), now: t0)
+            try ops.deleteReading(book.id)
+            try ops.deleteWing(wing.id)
+            #expect(try await settle {
+                door.askBoard.asks(.book(book.id)).isEmpty && door.askBoard.wingAsks.isEmpty
+            }, "a book's and a wing's death take their marks — the masthead's included — with no press")
+            #expect(!door.askBoard.asks(.note(living.id)).isEmpty, "a living place's ask stays")
+            // The watch's restarts settle; then a note goes to the Trash. The
+            // watch sleeps through it (a note's death is indistinguishable from
+            // an autosave — RegionObservationTests' measured limit): its row
+            // is gone everywhere, but Waiting still lists it…
+            try await Task.sleep(for: .milliseconds(200))
+            try ops.deleteContainer(doomed.id)
+            try await Task.sleep(for: .milliseconds(200))
+            #expect(door.ask(ask(id: doomed.id).id) != nil, "the watch is autosave-quiet, so it misses a note's death")
+            // …until Waiting renders, which re-validates every waiting ask.
+            await door.revalidateAsks()
+            #expect(door.askBoard.asks(.note(doomed.id)).isEmpty, "Waiting's render: the dead note's row leaves")
+            #expect(door.waiting.map(\.ask.scopeID) == [living.id])
+            #expect(session.status.spoken == nil && door.note == nil, "silent — she pressed nothing")
         }
     }
 

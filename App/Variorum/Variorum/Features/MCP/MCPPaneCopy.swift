@@ -742,6 +742,15 @@ nonisolated enum MCPAskCopy {
 
     static let dontAllow = "Don't allow"
 
+    /// **13n-c Stage B R2-1 (a) — the ask whose place is gone:** her press
+    /// opened a sheet that closed (the note or book deleted, the book now a
+    /// gathering, the wing deleted), so it says why, naming the place — a
+    /// refusal. PROVISIONAL (P-13nc-SB-5), her copy pass.
+    static func gone(_ ask: MCPAsk) -> String {
+        let place = ask.scopeKind == .wing ? "The \(ask.title) wing" : "\u{201C}\(ask.title)\u{201D}"
+        return "\(place) is gone, so \(ask.clientName)'s ask was let go."
+    }
+
     /// The receipt once her answer lands.
     static func granted(_ ask: MCPAsk, duration: MCPGrantRule.Duration) -> String {
         "Allowed \(ask.clientName): \(MCPPaneCopy.rungName(ask.rung).lowercased()) in "

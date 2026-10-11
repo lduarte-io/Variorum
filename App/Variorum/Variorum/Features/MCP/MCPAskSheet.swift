@@ -35,6 +35,9 @@ struct MCPAskSheet: View {
 
     let door: MCPDoor
     let ask: MCPAsk
+    /// 13n-c Stage B R2-1 (a): where she pressed — a window or the pane — so a
+    /// press that finds the place gone says so where she is looking.
+    var seam: MCPDoor.AskSeam = .window
     /// 13n-c U2 — the asked place's distinguisher when its name collides
     /// with another offered place (`PlaceLabels`, the one rule).
     @State private var distinguisher: String?
@@ -101,7 +104,7 @@ struct MCPAskSheet: View {
             // Stage B R1 B2: her open reads the target again (a gone target
             // forgets its ask, and this sheet closes — the hosts read the
             // queue); the answers draw on what it can take NOW.
-            await door.refreshAsk(ask.id)
+            await door.refreshAsk(ask.id, from: seam)
             checked = true
             let labels = await door.placeDistinguishers()
             distinguisher = switch ask.scopeKind {
@@ -122,12 +125,17 @@ extension View {
     /// press opened, presented while it still WAITS — answered anywhere, it
     /// closes here too (the getter reads the queue). Closing it any other way
     /// clears the request; the ask keeps waiting.
-    func mcpAskSheet(door: MCPDoor?, askID: Binding<String?>) -> some View {
+    /// Stage B R2-1 (a): `seam` says where a press that finds the place gone
+    /// is answered — a window's status line (the default), or the pane's
+    /// caption.
+    func mcpAskSheet(
+        door: MCPDoor?, askID: Binding<String?>, seam: MCPDoor.AskSeam = .window
+    ) -> some View {
         sheet(item: Binding(
             get: { askID.wrappedValue.flatMap { id in door?.ask(id) } },
             set: { if $0 == nil { askID.wrappedValue = nil } })
         ) { ask in
-            if let door { MCPAskSheet(door: door, ask: ask) }
+            if let door { MCPAskSheet(door: door, ask: ask, seam: seam) }
         }
     }
 }

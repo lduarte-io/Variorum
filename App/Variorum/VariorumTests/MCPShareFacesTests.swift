@@ -170,8 +170,8 @@ struct MCPShareFacesTests {
             #expect(MCPPaneCopy.groupMoreRoad(MCPSharedGroupView.unnamedMembers(group)) == "and 2 more \u{203A}")
             // R2-2 (A JUSTIFIED EDIT, the ritual): the read answers nil when it
             // FAILED, so a failure is never mistaken for "nothing left".
-            #expect(await door.sharedMembers(group.grantIDs)?.map(\.targetTitle) == titles,
-                    "the road names all five, in the act's order")
+            let members = try #require(await door.sharedMembers(group.grantIDs))
+            #expect(members.map(\.targetTitle) == titles, "the road names all five, in the act's order")
             #expect(await door.allSharedGroups().first?.grantIDs == group.grantIDs,
                     "the all-N list's row opens the same road")
         }
