@@ -85,7 +85,7 @@ itself is hers, in the morning — this session only PREPARES it.**
 - **R-AIR-14 — the per-setup secret BUILDS inside 13n-c** (her call, the dunk
   concern on record), scheduled so the launch never blocks on it; the honest
   pane sentence ships regardless.
-- **R-AIR-15 (PROPOSED, awaiting her yes) — the wing chord is ⌘L:** press opens
+- **R-AIR-15 (RATIFIED — "i like Command L", round 4) — the wing chord is ⌘L:** press opens
   the switcher, typing filters, holding ⌘ and tapping L cycles (the ⌘-tab
   idiom), release/return commits; the masthead switcher clicked without typing
   also cycles. Bare ⌘L verified free at every call site; the build re-verifies
@@ -102,6 +102,13 @@ itself is hers, in the morning — this session only PREPARES it.**
   launch); any remaining Fable budget is reserved for ONE targeted cold
   review of the riskiest diff (fence classifier + secret accept path), not
   spent on orchestration.
+
+- **OPEN (hers, parked for the 13s-a re-voicing sitting) — "wings" vs "a new
+  library":** she suspects "new wing" will confuse people and "new library"
+  would be instantly obvious; she is open. The collision to solve first: the
+  sidebar's Library surface already owns that word (the switcher's current
+  subtitle "Wings — each a separate library" teaches with it). Not a 13n-c
+  item; 13s-a carries the copy sweep and is the natural home.
 
 ## Mandate
 
