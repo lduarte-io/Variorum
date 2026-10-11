@@ -25,7 +25,7 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 |---|---|---|
 | K0 | Bout start (pulls, board snapshot `ac32a780`), full preflight, ticket VX-165 + sub-issues, worktree, in-flight row (`fbfbf1a9` on main) | DONE |
 | K1 | This plan finalized | DONE (this commit) |
-| U1 | The fence re-key (VX-163) | IN-PROGRESS — the U1 implementer's record below |
+| U1 | The fence re-key (VX-163) | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U1 record) — owed: the orchestrator's verification + REAL Claude Code live round; the pre-flight walk HELD (locked session); Stage A |
 | U2 | The grant sheet rebuilt | NOT-STARTED |
 | U3 | Grant from where you are + the one icon + the in-note indicator | NOT-STARTED |
 | U4 | Asks wait quietly + the keyboard | NOT-STARTED |
@@ -491,6 +491,9 @@ per adjudication decision or diff that would ordinarily earn a Fable review.
 | F-2 | (this commit) | D-2 — docs delivery (guide chapter + `instructions`) | product-shaped call made by Opus | — |
 | F-3 | (this commit) | D-3 — R-AIR-3's clause extended to wing confirms and every duration | wording of a disclosure confirm | — |
 | F-4 | (this commit) | D-5 — the Sync/ fold classifiers judged untouched by R-AIR-1 | a Sync/-adjacent trace judged by Opus | — |
+| F-5 | `63e70d67` | U1 — the fence classifier itself: the journal legs re-keyed on `'daily'` (`dailyJournalLegForBook`, three sites) + the ⌘J own-profile leg kept | her protocol names the fence classifier; default's-meaning (written by the U1 implementer, Opus) | — |
+| F-6 | `1a311c8e` | U1 T-2 — a fenced NOTE answers the ONE `notShared` answer on every tool, never the asked sentence (REVERSES 13n-b AF-6's "`fenced` gains the said sentence" for notes; aligns with AppSpec §12's no-oracle line and the brief's byte-identity) | refusal uniformity at the security boundary — a ruled clause reversed on an Opus reading (written by the U1 implementer) | — |
+| F-7 | — (NOT BUILT) | U1 fork — a fenced BOOK still names itself on the wire ("That book is the daily Journal…" / "…marked Private…") | the same oracle class left standing pending the orchestrator's call (options in the U1 record's T-2) | — |
 
 ## 7. Constraints (standing, restated)
 
@@ -546,7 +549,7 @@ unit record (TCC state is machine-state the next session inherits).
 | # | Item | Owner | Status |
 |---|---|---|---|
 | 1 | Kickoff (ticket, worktree, in-flight row, this plan) | orchestrator | DONE |
-| 2 | U1 — the fence re-key | U1 implementer | NOT-STARTED |
+| 2 | U1 — the fence re-key | U1 implementer | IMPLEMENTER CLOSED — the U1 record's banner (the walk HELD by a locked session; fork F-7 open) |
 | 3 | Stage A ladder (fable-reviewer R1) | orchestrator | NOT-STARTED |
 | 4 | U2 — the grant sheet | U2 implementer | NOT-STARTED |
 | 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | NOT-STARTED |
@@ -568,6 +571,8 @@ unit record (TCC state is machine-state the next session inherits).
   first-connect book).
 - **P-13nc-3** — D-3 (R-AIR-3's clause on wing confirms and on every duration).
 - **The snippets call** (round 5) — out at launch, said in the docs; hers in the morning.
+- **P-13nc-U1-1** (U1) — R-AIR-3's confirm is a BUTTON label, so it carries no closing period (her sentence
+  has one; no button in the app does). Alternative: the period, verbatim.
 
 ## UNIT BRIEFS AND RECORDS (written just-in-time below, one per unit)
 
@@ -625,6 +630,56 @@ where a cold reviewer should look first, and a self-assessment.
 Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11. Worktree `~/dev/variorum-vx-165`,
 branch `vx-165-13n-c`. No revert is in flight unless a line below says so.
 
+### UNIT CLOSED (2026-10-11 ~04:25 MDT — the U1 implementer, Opus `claude-opus-5-5`)
+
+**NOT DONE (said first):** (1) **the pre-flight WALK is HELD** — the Mac's session is LOCKED with the
+display asleep (U1-9); offscreen renders of the REAL sheet and pane in both voices stand in and are
+NOT a walk; the dev-store walk and the REAL Claude Code live round are the orchestrator's (the live
+round needs an unlocked screen only for its GUI legs — the wire legs do not). (2) **The fork, not
+built:** a fenced BOOK still names itself on the wire (T-2's options a/b/c; (a) recommended) — FABLE-OWED
+F-7. (3) **Recorded, not built:** a client holding a per-ask READ grant on a fenced note that asks to
+SUGGEST now hears the one `notShared` answer though it can read the note (honest: `rungTooLow` — a
+three-line change inside `MCPGrantRule.decide`, the security rule itself, left for the cold review).
+(4) **The ask sheet** answers a BOOK ask with Once/While connected/Always buttons and no confirm
+sentence — R-AIR-3's clause is not on that road (U2/U4 rebuild the ask road; recorded for them).
+(5) No `notes/QUESTIONS.md` edit (merge-time, #211 — CLAUDE.md's shared-ledger rule); no canon edit
+(T-2 brings the code TO AppSpec §12's line; the 13n-b plan's AF-6 fenced clause is superseded for
+notes — the closeout's delta to record). Zero `Sync/`, schema, custody, editor seam, `/Applications`.
+
+**Commits (branch `vx-165-13n-c`):** `176ea840` record opens · `38900d67` pins RED-first · `63e70d67`
+the re-key + ritual · `1a311c8e` the one answer (T-2) + ritual · `6f573596` copy truth · `e1a9e52a`
+R-AIR-3 · `c3cacc72`/`bc3001de` mutations · `7d64cde3` headless finals · `5fc17dc7`/`216972c7` Mac
+· `23ee0f24` screens ignored · `2ca5cfbb` the clause kept whole (U1-5b) · `4ee62dd2` walk held +
+captures · this commit.
+
+**Finals:** core **2,585 / 296** green (baseline 2,580/295 + 5/1) · `VariorumMCPTests` **68 / 9** green, 0
+skipped (65/8 + 3/1) · workbook **40 / 6** green · Mac (stage `vx165-u1`, closing tree `4ee62dd2`)
+**109 tests / 10 suites, `** TEST SUCCEEDED **`** — 107 ran green, the 2 skips the gated capture harness
+by design (`MCPPaneTests`, `MCPAskAndReceiptTests`, `MCPEditFacesTests`, `SettingsShapeTests`,
+`CapabilityRegistryTests`, `CalmAsksTests`, `CommitVocabularyTests`, `OwnershipBadgeTests`,
+`DiagnosticsPaneTests`, `MCPGrantSheetCaptureTests`).
+
+**PROVISIONALs:** P-13nc-1 (D-1, built — the ⌘J own-profile leg); P-13nc-3 (D-3, built — the wing's
+"…, including notes added later" and the clause on every duration); **P-13nc-U1-1** (no period on the
+confirm button). Implementation decision (not product): the grant sheet 520 → 600 wide + only the
+place compresses (U1-5b's oracle) — U2 owns the row's final design.
+
+**Where a cold reviewer should look first:** (1) `Sources/VariorumMCP/MCPGrantAuthority.swift`
+`MCPRefusalCopy.words` / `words(_:_:asked:)` — T-2's reversal of AF-6 for notes (every tool's refusal
+flows through it; is ANY other road still distinguishing a fenced note? the edit guard's `Refused`,
+`MCPShowTool`, the search note scope were traced to it); (2) `Sources/VariorumCore/Queries/MCPGrantQueries.swift`
+`dailyJournalLegForBook` and its three uses (NULL-safety; the `NOT (…)` in `mcpGrantableBooks`); (3)
+`Tests/VariorumMCPTests/MCPFenceRekeyServerTests.swift` — whether the byte-identity pin covers the tools
+that matter; (4) `MCPGrantSheet.ConfirmLabel` (layout priorities under a one-line voiced button).
+
+**Self-assessment:** the fence change is small, at the one site, and every reader follows by
+construction — traced, pinned red-first, and mutation-checked five ways. The judgment calls are T-2
+(built because the brief orders byte-identity and AppSpec §12 says "anywhere"; it reverses a ruled
+13n-b clause, so it is flagged F-6 rather than presented as settled) and U1-5b (a real defect in my
+own U1-5 — the clause truncated away in Terminal — found by measurement because the walk could not
+run; fixed and rendered). Least certain: whether the orchestrator wants fenced BOOKS uniform too
+(F-7), and how the confirm row should finally look once U2's disambiguators lengthen the place.
+
 ### Pieces
 
 | # | Piece | Status |
@@ -640,7 +695,7 @@ branch `vx-165-13n-c`. No revert is in flight unless a line below says so.
 | U1-7 | Headless finals: `swift build` + core + `VariorumMCPTests` + workbook | DONE (on `bc3001de`'s sources) — `swift build` + `--build-tests` clean; **core 2,585 tests / 296 suites green** (the 13n-b baseline 2,580/295 + `MCPFenceRekeyTests` 5/1; the skips are the standing gated suites — 13o fork measurements, the Supabase integration, the drill-fixture mint, the probes — none of them this unit's); **`VariorumMCPTests` 68/9 green, 0 skipped** (65/8 + `MCPFenceRekeyServerTests` 3/1); **workbook 40/6 green** (its one standing skip line) |
 | U1-8 | Mac suites under a held stage claim (`MCPPaneTests`, `MCPAskAndReceiptTests`, `MCPEditFacesTests`, `SettingsShapeTests`, `CapabilityRegistryTests` + any suite over a changed file) | DONE — stage `vx165-u1` (03:56); `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx165-u1 test` with `-only-testing:` the five + every suite reading a changed app file (`CalmAsksTests`, `CommitVocabularyTests`, `OwnershipBadgeTests`, `DiagnosticsPaneTests`): **107 tests / 9 suites green, 0 skipped** (`** TEST SUCCEEDED **`, 03:56→03:59), the new `theFenceSentencesNameTheDailyJournalNotEveryJournal` + `theConfirmSaysABookOrWingGrantReachesWhatArrivesLater` and the two ritual-updated pins among them |
 | U1-9 | The pre-flight walk (dev-store Debug, Study + Terminal) → `notes/plans/13n-c-screens/u1/` | **HELD — the session is LOCKED** (04:00 MDT: `CGSessionCopyCurrentDictionary` → `CGSSessionScreenIsLocked 1`, `CGDisplayIsAsleep 1`; `screencapture -l` → "could not create image from window" on the launched dev instance, pid 73703; Accessibility + Screen Recording themselves are GRANTED to this host). Unlocking is hers, never a session's; the dev instance was quit by bundle id, `pgrep` clean, the stage released 04:1x. **What stands in its place (NOT a walk — a render of the real views, said plainly):** (1) the geometry ORACLE (U1-5b) — AppKit-measured widths of every confirm at the sheet's room, both voices; (2) the gated capture harness `MCPGrantSheetCaptureTests` (`TEST_RUNNER_VARIORUM_CAPTURE=13nc-u1`, suite-level) rendering the REAL `MCPGrantSheet` and `MCPPane` offscreen over an in-memory store, 2 tests green: `u1-sheet-{study,terminal}-dream.png` — a journal-TRAIT book OFFERED and selected, the confirm "Grant read in “dream journal” always, including to future entries" WHOLE in both voices; `u1-sheet-{study,terminal}-long.png` — Study whole, Terminal "…“the adv…holmes” always, including to future entries" (only the place compresses); `u1-pane-{study,terminal}.png` — the trait book under Shared with AI ("dream journal · book · claude-code · read · always") and the open book's "your daily Journal and anything Private still ask every time". Harness limit, recorded: an `NSSwitch` draws OFF under `cacheDisplay` (the snapshot asserted ON). **OWED to the orchestrator's live round / the next unlocked walk:** the sheet and pane on the dev store in both voices; the wing confirm ("…, including notes added later"); the ask sheet's daily-Journal lead (needs a real ask) |
-| U1-10 | UNIT CLOSED banner | NOT-STARTED |
+| U1-10 | UNIT CLOSED banner | DONE (this commit) — atop this record |
 
 ### Traces (made before any code — the hallucination guard)
 
