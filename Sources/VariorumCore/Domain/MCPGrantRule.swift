@@ -327,6 +327,31 @@ public enum MCPGrantRule {
         return .ask(.notShared, offersAlways: true)
     }
 
+    /// **A GATHERING — read facts under WING-LEVEL reach** (13n-c R-AIR-12, her
+    /// ruling: "granting a wing grants access to everything … unless it's
+    /// deliberately marked private"; gatherings "do NOT become separate grant
+    /// targets"). A gathering is never a grant's scope, so only wing-level
+    /// reach on ITS wing reaches it — `decideWing`'s own READ: a live wing grant
+    /// on that wing at any rung, or the open book. A note or book grant never
+    /// does. Always at READ (a gathering holds nothing to write) and never
+    /// consuming (its facts and its assembly spend no once grant); every MEMBER
+    /// it shows is then decided on its own through `decide`, so the per-note
+    /// fence filters it. A FENCED gathering — a 'daily' marker or a Private
+    /// stamp, which no op mints on one but a stale row could carry — matches
+    /// nothing, the same decision a fenced book gets (the one answer).
+    public static func decideGathering(
+        client: ClientState?, grants: [Grant], openBook: Bool, gathering: BookFacts
+    ) -> Decision {
+        switch client {
+        case .approved: break
+        case .denied: return .refuse(.clientDenied)
+        case .pending, nil: return .refuse(.clientPending)
+        }
+        if let fence = gathering.fence { return .ask(.fenced(fence), offersAlways: false) }
+        return decideWing(
+            client: client, grants: grants, openBook: openBook, wingID: gathering.wingID, rung: .read)
+    }
+
     /// Does this grant's SCOPE reach the target? The fence lives here: a
     /// fenced note is reached only by a per-ask grant naming it (a note
     /// scope, never "always"); a fenced book by nothing.

@@ -449,6 +449,27 @@ extension Queries {
     /// 'daily' marker — R-AIR-1: a journal-TRAIT book is not) or carries the
     /// Private mark (R-13nb-4).
     public static func mcpBookFacts(_ db: Database, readingID: String) throws -> MCPGrantRule.BookFacts? {
+        try mcpReadingFacts(db, readingID: readingID, kind: .book)
+    }
+
+    /// **A GATHERING's facts** (13n-c R-AIR-12 — its reach is the rule's
+    /// `decideGathering`): a live gathering's id and wing, and its fence on the
+    /// SAME two fragments a book's facts read (no op marks a gathering Private
+    /// or daily; a stale synced row could — the conservative direction). nil
+    /// for anything that is not a live gathering: a BOOK answers through
+    /// `mcpBookFacts` and never here, so no grant road can mistake one for the
+    /// other.
+    public static func mcpGatheringFacts(
+        _ db: Database, readingID: String
+    ) throws -> MCPGrantRule.BookFacts? {
+        try mcpReadingFacts(db, readingID: readingID, kind: .gathering)
+    }
+
+    /// The one statement both read (so a book's facts and a gathering's can
+    /// never drift apart).
+    private static func mcpReadingFacts(
+        _ db: Database, readingID: String, kind: ReadingKind
+    ) throws -> MCPGrantRule.BookFacts? {
         guard let row = try Row.fetchOne(
             db,
             sql: """
@@ -456,9 +477,9 @@ extension Queries {
                        \(dailyJournalLegForBook) AS journal,
                        \(privateLegForBook) AS private_mark
                 FROM reading r
-                WHERE r.id = ? AND r.deleted_at IS NULL AND r.kind = 'book'
+                WHERE r.id = ? AND r.deleted_at IS NULL AND r.kind = ?
                 """,
-            arguments: [readingID])
+            arguments: [readingID, kind.rawValue])
         else { return nil }
         return MCPGrantRule.BookFacts(
             id: row["id"], wingID: row["wing"],

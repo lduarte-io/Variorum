@@ -61,22 +61,32 @@ extension Operations {
     /// the symmetric door).
     @discardableResult
     public func moveNoteToWing(_ postID: String, to wingID: String) throws -> NoteWingMove {
-        try database.write { db in
-            let post = try livePost(db, postID)
-            try requireLiveWing(db, wingID)
-            guard try !sameEffectiveWing(db, post.wingId, wingID) else {
-                throw OperationError.postAlreadyInWing(postID: postID, wingID: wingID)
-            }
-            var adoption = TagAdoption(wing: wingID)
-            let severed = try relocateNote(
-                db, postID: postID, to: wingID, keeping: [], adoption: &adoption, now: date.now)
-            var left: [String] = []
-            for reading in severed where !left.contains(reading.name) {
-                left.append(reading.name)
-            }
-            return NoteWingMove(
-                leftBooks: left, adoptedTags: adoption.adopted, mintedTags: adoption.minted)
+        try database.write { db in try moveNoteToWing(db, postID, to: wingID).move }
+    }
+
+    /// **Her door's body, inside the caller's transaction** (13n-c U6 — moved
+    /// here VERBATIM so the MCP door's `move_note_to_wing` wraps the very same
+    /// act and its refusals; her public door above calls it and is
+    /// byte-identical). Returns her answer and the clock read the act stamped
+    /// its tombstones with (`date.now`, read at the same point as before).
+    func moveNoteToWing(
+        _ db: Database, _ postID: String, to wingID: String
+    ) throws -> (move: NoteWingMove, now: Date) {
+        let post = try livePost(db, postID)
+        try requireLiveWing(db, wingID)
+        guard try !sameEffectiveWing(db, post.wingId, wingID) else {
+            throw OperationError.postAlreadyInWing(postID: postID, wingID: wingID)
         }
+        var adoption = TagAdoption(wing: wingID)
+        let now = date.now
+        let severed = try relocateNote(
+            db, postID: postID, to: wingID, keeping: [], adoption: &adoption, now: now)
+        var left: [String] = []
+        for reading in severed where !left.contains(reading.name) {
+            left.append(reading.name)
+        }
+        return (NoteWingMove(
+            leftBooks: left, adoptedTags: adoption.adopted, mintedTags: adoption.minted), now)
     }
 
     /// **THE ONE RELOCATION** (13i-d U5b — U5's note move, extracted so the
