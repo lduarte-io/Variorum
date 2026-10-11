@@ -14,8 +14,19 @@ import Testing
 // Two nets, so a new string cannot slip between them: the VALUES the server
 // sends (the advice, every tool as the SDK encodes it, every refusal sentence
 // the authority and the show rule compose), and a SOURCE sweep of every string
-// literal in the server target plus the op-refusal table the host hands it
-// (`MCPHostHooks.refusalWords` speaks `OpsRefusalCopy` to the client).
+// literal in the server target plus the op-refusal tables the host hands it
+// (`MCPHostHooks.refusalWords` speaks `OpsRefusalCopy.message(for:)` to the
+// client).
+//
+// 13n-c Stage B R2-3 (a guard widening — everything it adds is clean today, so
+// it is green on both sides by design): the source net now reads the FIRST
+// table the wire consults — the Mac's `Variorum/Registry/OpsRefusalCopy.swift`,
+// which falls through to the shared `OpsRefusalTable.swift` — and every copy
+// file either table delegates a refusal sentence to (`BookNameCopy`,
+// `BookArchiveCopy`, `CrossBlockRefusal`, `RecoveryCopy`, `StarCopy`;
+// `BlockSelectionCopy` lives inside `OpsRefusalCopy.swift`), plus the shim's
+// own stderr lines (`MCPShim.swift` — what a client's host logs when the door
+// cannot be reached).
 
 /// A gendered third-person pronoun, as a whole word, any case.
 private func pronouns(in text: String) -> [String] {
@@ -114,15 +125,36 @@ struct MCPWireNeutralityTests {
         #expect(MCPRefusalCopy.askedSentence.contains("once they answer"))
     }
 
+    /// The refusal-copy files the host's `refusalWords` reaches (R2-3): the
+    /// Mac table the wire consults first, the shared table it falls through
+    /// to, and every copy file either delegates a sentence to — plus the
+    /// shim's stderr. Each must exist (a moved file fails here, never slips
+    /// out of the net silently).
+    static let refusalCopyFiles = [
+        "App/Variorum/Variorum/Registry/OpsRefusalCopy.swift",
+        "App/Variorum/Shared/OpsRefusalTable.swift",
+        "App/Variorum/Shared/BookNameCopy.swift",
+        "App/Variorum/Shared/BookArchiveCopy.swift",
+        "App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift",
+        "App/Variorum/Shared/RecoveryCopy.swift",
+        "App/Variorum/Variorum/Features/Stars/StarsModel.swift",
+        "Sources/VariorumMCPSocket/MCPShim.swift",
+    ]
+
     /// The net under the values: every string literal in the server target
-    /// (everything the server can send is written there) and in the op-refusal
-    /// table the host speaks to the client through.
+    /// (everything the server can send is written there), in the op-refusal
+    /// tables the host speaks to the client through and the copy files they
+    /// delegate to, and in the shim (R2-3).
     @Test func everyStringLiteralTheServerCanSendIsNeutral() throws {
         let serverDirectory = repoRoot.appendingPathComponent("Sources/VariorumMCP")
+        let copyFiles = Self.refusalCopyFiles.map { repoRoot.appendingPathComponent($0) }
+        for file in copyFiles {
+            #expect(FileManager.default.fileExists(atPath: file.path), "the net reads \(file.path)")
+        }
         let files = try FileManager.default.contentsOfDirectory(atPath: serverDirectory.path)
             .filter { $0.hasSuffix(".swift") }
             .map { serverDirectory.appendingPathComponent($0) }
-            + [repoRoot.appendingPathComponent("App/Variorum/Shared/OpsRefusalTable.swift")]
+            + copyFiles
         #expect(files.count > 10, "the sweep found the server's files")
         var literals = 0
         for file in files {

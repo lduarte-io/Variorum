@@ -63,8 +63,11 @@ final class MCPSession: @unchecked Sendable {
         Every change you make is one undo for the author, named after you.
         """
 
-    /// The advice's length bound (characters) — stated and pinned.
-    static let instructionsBound = 1_500
+    /// The advice's length bound (characters) — stated and pinned. 13n-c: her
+    /// ruling (P-13nc-U5-5's bound half, 2026-10-11 — "yeah let's do 2,000
+    /// because then we'll have a bit of wiggle room for future updates as
+    /// well"): 1,500 → 2,000.
+    static let instructionsBound = 2_000
 
     init(
         fd: Int32, database: AppDatabase, operations: Operations, version: String,

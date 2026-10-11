@@ -34,7 +34,9 @@ struct MCPAdviceServerTests {
     // MARK: - The advice's letter
 
     @Test func theAdviceIsBoundedAsStated() {
-        #expect(MCPSession.instructionsBound == 1_500)
+        // 13n-c: her ruled bound (P-13nc-U5-5 — 1,500 → 2,000, "a bit of
+        // wiggle room for future updates"); the pin keeps its form.
+        #expect(MCPSession.instructionsBound == 2_000)
         #expect(advice.count <= MCPSession.instructionsBound,
                 "the advice is \(advice.count) characters — a client may carry it in every turn")
         #expect(advice.count > 600, "…and long enough to say what the door is")
