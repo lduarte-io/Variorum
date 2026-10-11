@@ -4,6 +4,28 @@
 file is the kickoff message: a fresh overnight session reads it and runs. The sitting
 itself is hers, in the morning — this session only PREPARES it.**
 
+## RATIFIED at the Air round (2026-10-11, her word in session — canon lands at the build's merge)
+
+- **R-AIR-1 — Journal-trait books may hold standing grants.** Her ruling, superseding
+  the blanket half of R-13n-4's "journals NEVER in a standing grant and never offered
+  always": the never-always fence keys on (a) the **'daily'-marker Journal book** —
+  constitutive, untouched, never offered Always, its entries per-ask only — and
+  (b) **anything wearing the Private mark** (the hard fence, untouched). A journal-
+  TRAIT book (`setJournalTrait`'s toggleable profile) may take standing grants like
+  any book, optionally behind one extra-worded confirm (wording is this round's to
+  design). Her reasoning on record: "for the default command J journal I think it's
+  a fair choice but I am questioning it being applied to all journal style books
+  (especially since it can be turned on and off for any book)." The exact classifier
+  seam is the build's to trace (the U2 fold-classifier site); the ruled OUTCOME is
+  as stated. Ticket: VX-163.
+- **R-AIR-2 — The per-item cross-wing NOTE move ships on the wire** (VX-160): her
+  "I want per item move to be allowed via mcp" stands ratified, and it belongs to
+  the NEXT build group. Shape questions (rung, dual-wing scope semantics, tag
+  adoption) stay on the sitting agenda below.
+- **Context for the plan draft:** the next phase is about making the MCP door ready
+  for REAL USERS at launch, which she hopes to do THIS WEEK. Master-plan sequencing
+  against 13s-a is hers at the sitting.
+
 ## Mandate
 
 Design-prep for the grant UX round. NO app code, NO canon edits, NO suites, NO walks
@@ -53,12 +75,9 @@ here needs them). Work on branch `vx-156-grant-ux-design`; open a PR titled
    recommendation, and the why; chord candidates with sweep evidence; open
    questions. Repo-first, committed per piece with a LIVE STATUS block.
 3. **The sitting agenda at the top of the brief**, carrying (verbatim, hers):
-   - (a) The journal-trait Always question: "for the default command J journal I
-     think it's a fair choice but I am questioning it being applied to all journal
-     style books (especially since it can be turned on and off for any book)."
-     Present both readings of the fence (the trait is a soft fence since
-     `setJournalTrait` is one toggle; the 'daily' book's never-always stands
-     regardless; the Private mark is the hard fence either way).
+   - (a) ~~The journal-trait Always question~~ **RATIFIED as R-AIR-1 above** — the
+     agenda item becomes: the extra-worded confirm's wording (if any) for granting
+     Always on a journal-trait book, presented as drawn options.
    - (b) VX-160's crossing-door shape — per-item NOTE move across wings via MCP
      (rung, scope semantics when source and destination wings differ, the per-item
      doors' tag adoption by path). Her use case: the variorum-wing sweep.
@@ -69,6 +88,14 @@ here needs them). Work on branch `vx-156-grant-ux-design`; open a PR titled
      Present honestly: it defeats client mislabeling/confusion, NOT same-user
      malware (the config file is same-user-readable); the pane's boundary line
      stays true either way.
+
+4. **`notes/plans/phase-13n-c-mcp-launch-readiness-DRAFT.md`** — a DRAFT phase plan
+   (marked DRAFT PENDING THE SITTING; the phase name is hers to keep or change) for
+   the MCP launch-readiness round: the VX-156 round's build, VX-157, VX-158,
+   VX-160 (R-AIR-2), VX-163 (R-AIR-1), with VX-159, VX-161 and the A-4 per-client
+   token listed as CANDIDATES pending her morning nod. Sized in acceptance units
+   per `notes/PhaseSizingGuidance.md`; honest about what fits a this-week launch
+   and what should fall out; sequencing against 13s-a flagged as hers.
 
 ## Rules that bind
 
