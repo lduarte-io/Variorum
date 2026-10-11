@@ -48,6 +48,33 @@ Her refresh condition still names an **OPUS UX-reviewer walk**, so that leg stay
 4. **Rows remaining unreviewed at the closeout stay on VX-166** (the post-phase Fable sweep). The ledger's "Reviewed by"
    column is filled as each review lands, so VX-166 shrinks to what is left.
 
+**THE FABLE ORCHESTRATOR'S SCHEDULE (adopted at the takeover, 2026-10-11 ~14:00 MDT — Fable 5, this section
+supersedes the proposed order above where they differ):**
+1. **The walker finishes** (in flight — D-W1/D-W2 fixes, the picker re-walk, W-4's remainder, W-6…W-10, live rounds
+   (3)–(6), the machine cleanup). Nothing else runs beside it (the cast is strictly sequential).
+2. **U6 builds** (`opus-implementer`): the wing on the wire + gatherings under a wing grant, the advice's gatherings
+   clause (~500 characters of room under her ruled 2,000 bound), the guide's withheld wing sentence (the U5 record
+   names it), O-4's posture kept.
+3. **ONE combined `fable-reviewer` ladder over `33bd8772..<U6 tip>`** — the owed Opus-reviewed span (discharging
+   F-5…F-22's "Reviewed by" column) AND Stage C (U6) in the same ladder, R1 → the cross-model flow → R2.
+   *Why one ladder, not two (the adjustment):* the sequential cast means they could never overlap anyway; the owed
+   span has already survived two full Opus ladders, so Fable's pass over it is a verification sweep that rides the
+   same read; and one ladder returns ~1.5 h to her release goal. The cross-model flow holds for the U6 half
+   (findings verbatim to the U6 implementer, its agree/dispute back, the reviewer finalizes and implements its
+   confirmed fixes itself, suite green, one implementer sanity pass); for the owed half the original implementers
+   are gone, so the reviewer implements its confirmed fixes directly with the orchestrator's dispositions.
+4. **U7 and U8 FALL OUT — decided now, not at midnight.** §4 named this exit at plan time. Her takeover message
+   weighs release-readiness (the refresh + the handoff) over more surface tonight; each would cost an implementer
+   session plus its own Fable ladder. U7 stays VX-159 (already on the board); U8 becomes a named ticket at the
+   closeout (the Linear MCP is disconnected until her re-auth — if it stays down, the handoff carries the mint).
+5. **The Opus UX-reviewer walk** over the whole built surface (her named refresh condition; stays Opus at her word),
+   fed T-1…T-8 + whatever the walker's close adds; then its dispositions and one fix pass if earned.
+6. **Closeout:** merge latest main into the branch; results; master plan + in-flight retirement + closeout
+   paragraph; canon deltas per the checklist; MOBILE PARITY line; QUESTIONS #211; the handoff with her checklist at
+   top (the fence probes, the Help ▸ Restore Tutorial… decision — it is HERS, it trashes the current guide's notes);
+   tickets closed or re-owned; PR; merge commit; push; **the A1 /Applications refresh at a zero-instance window**
+   (never quitting a running real-store instance — if one is live, hold and say so); hard stop. 13s-a stays next.
+
 **Environment facts for the incoming orchestrator:**
 - **The Linear MCP disconnected at her `/login`.** Ticket operations need `mcp__linear-server__authenticate` (her OAuth)
   or the key road. Board facts are in `notes/TICKETS.md` on main. Tickets born this run: VX-167; VX-132 gained a
@@ -76,9 +103,9 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | U3 | Grant from where you are + the one icon + the in-note indicator | BUILT + VERIFIED by the orchestrator at `c6d5d23a` (7 commits `4dc0202c..c6d5d23a`: fence diff empty — no Sync/ · Persistence/ · migrations · editor seam; zero trailers; 22 captures read — popover, Bookcase icon, two-door receipt) — icon pick: A `point.3.connected.trianglepath.dotted` KEPT (orchestrator, PROVISIONAL P-13nc-U3-5 — hers at the copy pass); the walk HELD (locked session); Stage B |
 | U4 | Asks wait quietly + the keyboard | BUILT + VERIFIED by the orchestrator at `f1ab4725` (5 commits `a41efc1b..f1ab4725`: fence diff empty — zero `Sources/` lines; zero trailers; captures read — Waiting, ⌘L typed, Bookcase glyphs) — the walk HELD (locked); Stage B |
 | U5 | The guide, the AI's advice, the setup menu | BUILT + VERIFIED by the orchestrator at `065526ce` (8 commits `58b81ec8..065526ce`: fence diff empty — zero `VariorumCore/` lines; zero trailers; captures read — lesson 4, the any-client JSON; the advice read whole) — the walk + the scratch `claude mcp add` HELD (locked); Stage B |
-| U6 | The wing on the wire (+ gatherings under a wing grant) | NOT-STARTED |
-| U7 | VX-159 — the ceremonies on the wire | NOT-STARTED (may fall out — §4) |
-| U8 | R-AIR-14 — the per-setup secret | NOT-STARTED (LAST; may fall out — §4) |
+| U6 | The wing on the wire (+ gatherings under a wing grant) | NEXT — spawns when the walker reports |
+| U7 | VX-159 — the ceremonies on the wire | FALLS OUT (the Fable orchestrator's takeover schedule, §4's named exit) — stays VX-159 |
+| U8 | R-AIR-14 — the per-setup secret | FALLS OUT (same decision) — a named ticket at the closeout |
 | W | The whole-phase walk + the OPUS UX-REVIEWER WALK (a ladder round) | NOT-STARTED |
 | C | Closeout (+ the /Applications refresh iff her four conditions hold) | NOT-STARTED |
 
@@ -718,9 +745,9 @@ unit record (TCC state is machine-state the next session inherits).
 | 7 | U5 — the guide, the advice, the setup menu | U5 implementer | BUILT + VERIFIED `065526ce` — walk HELD; the one cap-test red ("Unable to parse empty data") folded into **VX-132** by comment (Stage B R1 B14) |
 | 8 | Stage B ladder (opus) | orchestrator | **CLOSED at R2** — R1 → fix pass `c6d8509c..9c049c6a` → R2 (0B/0M/1m/4n) → the CLOSE-OUT FIX PASS `6f7fc38f..3e8ccd83` VERIFIED by the orchestrator (zero trailers; the one `Persistence/` line is the purely additive `AppDatabase.observe(tracking:_:)` — no schema, no caller changed, F-22; core 2,623/300 · MCP 82/12 · Mac 537/76 green). The close-out range is not cold-reviewed after R2 (no new B/M earned R3), so **it joins Stage C's review range** and is named there. |
 | 9 | U6 — the wing on the wire | U6 implementer | NOT-STARTED |
-| 10 | U7 — VX-159 | U7 implementer | NOT-STARTED (may fall out) |
-| 11 | Stage C ladder | orchestrator | NOT-STARTED |
-| 12 | U8 — the secret | U8 implementer | NOT-STARTED (may fall out) |
+| 10 | U7 — VX-159 | — | FALLS OUT — stays VX-159 (the takeover schedule) |
+| 11 | Stage C ladder | orchestrator | FOLDED into the one combined fable ladder (the takeover schedule item 3) |
+| 12 | U8 — the secret | — | FALLS OUT — a named ticket at the closeout (the takeover schedule) |
 | 13 | The whole-phase walk + the Opus UX-reviewer walk | orchestrator + walker + UX reviewer | **PAUSED at her word** (mid W-4) — W-1/W-2 done, W-3/W-4 partial; D-W1 + D-W2 found (picker defects, unfixed); T-1…T-8 for the UX reviewer; machine state live (claim, Debug app, scratch registration, dev store unrestored) |
 | 14 | Closeout + the conditional refresh | orchestrator | NOT-STARTED |
 | 15 | QUESTIONS #211 — this phase's PROVISIONALs (minted at the merge) | orchestrator | OPEN |
