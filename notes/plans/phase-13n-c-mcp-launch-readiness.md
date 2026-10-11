@@ -717,7 +717,7 @@ unit record (TCC state is machine-state the next session inherits).
 - **P-13nc-U5-3** (U5, R-AIR-13) — the setup menu as a segmented row, all three in sight. Alternatives: a pop-up; a
   "Copy setup command ▾" menu button.
 - **P-13nc-U5-4** (U5) — "Any MCP client", and the one button keeping "Copy setup command" when it copies JSON.
-- **P-13nc-U5-5** (U5, D-2) — the advice's 1,500-character bound and its register.
+- **P-13nc-U5-5** (U5, D-2) — the advice's register (provisional). **The BOUND is RULED: 2,000 characters** — her word, 2026-10-11 ~12:00 MDT, relayed in the orchestrator session: "yeah let's do 2,000 because then we'll have a bit of wiggle room for future updates as well". The constant `MCPSession.instructionsBound` moves 1,500 → 2,000 in U6 (U6 edits the advice anyway; changing it now would shift the tree under the running Stage B R2 reviewer). The pin keeps its form.
 - **P-13nc-SB-1** (Stage B B1, F-20) — lesson 1: "Your grants stay on this Mac — they never sync to your other devices. What
   a client reads goes wherever that client sends its work: for most clients, the company that runs its model."
 - **P-13nc-SB-2** (Stage B B6) — ⌘L "Switch Wing…" grey with ONE wing; its note "There is only one wing so far — New Wing… in
