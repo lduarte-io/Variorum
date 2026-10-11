@@ -79,6 +79,11 @@ struct CapabilityRegistryTests {
         // session fact (an MCP write landed), not a mode; without it
         // `.showLastAIChange` would read `.unavailable` everywhere.
         contexts.append(CapabilityContext(mode: nil, aiLastChangeAvailable: true))
+        // 13n-c Stage B R1 B6 (justified edit, the ritual): the WING gate — a
+        // fact about the library (it has a second wing), not a mode; without
+        // it `.switchWing` (⌘L, grey with one wing — P-2) would read
+        // `.unavailable` everywhere the walk looks.
+        contexts.append(CapabilityContext(mode: nil, wingCount: 2))
         return contexts
     }
 
