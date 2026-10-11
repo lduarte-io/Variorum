@@ -53,11 +53,15 @@ struct VersionSchemeTests {
         let project = try String(
             contentsOf: appDir.appendingPathComponent("Variorum.xcodeproj/project.pbxproj"),
             encoding: .utf8)
+        // 13n-b U1 embedded the MCP shim as its own copy phase after
+        // Resources; the stamp stays the LAST phase (the design intent —
+        // after the Info.plist is processed), now after the embed too.
         #expect(project.contains("""
             \t\t\t\tE1C271862FFC2F420084BEA6 /* Resources */,
+            \t\t\t\tE1AC00082F0000000000CC08 /* Embed MCP Shim */,
             \t\t\t\tE1B5A0102F0000000000AA10 /* Stamp Build Number */,
             \t\t\t);
-            """), "the stamp is the Mac target's last phase, right after Resources")
+            """), "the stamp is the Mac target's last phase (after Resources and the shim embed)")
         #expect(project.contains("alwaysOutOfDate = 1;"))
         #expect(project.contains("\"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)\","))
         #expect(project.contains("shellScript = \"\\\"${SRCROOT}/StampBuildNumber.sh\\\"\\n\";"))

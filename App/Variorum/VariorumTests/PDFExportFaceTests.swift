@@ -362,14 +362,27 @@ struct PDFExportFaceTests {
                 The shown take.
                 """)
             // With takes — the ratified Alternates section in place.
+            // 13n-b U3 (justified edit, the ruled flip — R-13nb-26 (a) and
+            // AF-10's export map): this fixture's first block holds a blank
+            // line, so the TAKES-carrying export speaks format v2 — `{v:2}`
+            // leads and `--- next block ---` joins the blocks, so the file
+            // re-imports whole. The plain export above, and therefore the
+            // PDF (which reads the plain projection), are byte-unchanged:
+            // her refinement — the marker never reaches plain markdown.
             #expect(withTakes == """
+                {v:2}
+
                 # Heading
 
                 Some **bold** prose.
 
+                --- next block ---
+
                 > 💡 A framed line.
                 >
                 > And a second.
+
+                --- next block ---
 
                 The shown take.
 

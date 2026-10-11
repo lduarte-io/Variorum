@@ -83,6 +83,16 @@ struct VariorumApp: App {
                         LibraryHandOffSheet(model: model) { handOff.dismiss() }
                     }
                 }
+                // 13n-b U2 (AF-6): THE JUST-IN-TIME ASK — the door's queue,
+                // one ask at a time. The sheet's own buttons answer (Don't
+                // allow is its cancel action); the setter never answers for
+                // her, so a dismissal can only come from an answer.
+                .sheet(item: Binding(
+                    get: { appDelegate.mcp.presentedAsk },
+                    set: { _ in })
+                ) { ask in
+                    MCPAskSheet(door: appDelegate.mcp, ask: ask)
+                }
         }
         .defaultSize(width: 1240, height: 840)
         // 13g L3 + L4 (her WT-3 and WT-4, which the screenshot proved are
@@ -128,7 +138,7 @@ struct VariorumApp: App {
             // Check for Updates… door (rendered only where it can act).
             EditorCommands(
                 bootstrap: bootstrap, windows: windows, updates: appDelegate.updates,
-                openDoor: libraryOpen, handOffDoor: handOff)
+                openDoor: libraryOpen, handOffDoor: handOff, mcp: appDelegate.mcp)
         }
         noteWindows
     }
@@ -174,6 +184,18 @@ struct VariorumApp: App {
                         // ready (this task re-runs after every adoption's
                         // reopen), BEFORE the services guard so a re-ready
                         // always re-reads the marker.
+                        // 13n-b U1 (A-8): the MCP door follows the open
+                        // store — EVERY ready, before the services guard
+                        // (an adoption's reopen re-readies with the services
+                        // standing, and the door must not keep watching the
+                        // old writer); idempotent per session, so a window
+                        // re-appearing never drops a live connection. It
+                        // serves iff its toggle is ON and stops at lock and
+                        // quit. 13n-b U2 (R-13nb-6): the store's path rides
+                        // in so an adopted library's restore hold lands the
+                        // server OFF before it could start (ledger row 10).
+                        appDelegate.mcp.attach(
+                            session: session, storeURL: bootstrap.liveStoreURL, windows: windows)
                         if restoreHold == nil {
                             restoreHold = RestoreHoldModel(storeURL: bootstrap.liveStoreURL)
                         } else {
@@ -229,6 +251,8 @@ struct VariorumApp: App {
                         bootstrap.onWillLock = macWillLock(session: session) {
                             services?.stop()
                             services = nil
+                            // 13n-b U1 (A-8): a locked library serves no one.
+                            appDelegate.mcp.detach()
                         }
                         // pre-13x 2a (decision 18, row 7): the KEYLESS
                         // byte-copy of the closed library at lock time when
@@ -525,6 +549,8 @@ struct VariorumApp: App {
                     // 13r U3-B: Settings ▸ Diagnostics — the ONE crash-
                     // reporting owner (opt-in, default OFF).
                     crashReports: appDelegate.crashReports,
+                    // 13n-b U1: Settings ▸ MCP — the ONE MCP door owner.
+                    mcp: appDelegate.mcp,
                     // 13x U2 row 6: the Restore surface's per-row door —
                     // Settings' OWN presenter (the main scene's sheet and
                     // this one can never both fire).

@@ -125,6 +125,15 @@ final class WindowRegistry {
 
     func kind(of id: UUID) -> Kind? { entries[id]?.kind }
 
+    /// 13n-b U4 (AF-11 F-3): the registered window that IS this AppKit
+    /// window, if any — `show_in_app`'s "is the KEY window a full window"
+    /// asks with `NSApp.keyWindow` (Settings, a sheet's host or no window
+    /// answers nil: not a window that navigates).
+    func entry(for window: NSWindow?) -> (router: ShellRouter, kind: Kind)? {
+        guard let window else { return nil }
+        return entries.values.first { $0.window === window }.map { ($0.router, $0.kind) }
+    }
+
     /// The active window's kind — the sidebar toggle's gate (the Act 10
     /// correction round, batch A): only a FULL window has a sidebar, so the
     /// View-menu item is honestly grey while a note-only window is key.

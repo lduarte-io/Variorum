@@ -46,6 +46,13 @@ struct BookView: View {
     /// opens in, revealed.
     var revealPostID: String?
     var onRevealConsumed: (() -> Void)?
+    /// 13n-b U4 (AF-11 F-3) — a CHAPTER landing: the shell asks this book to
+    /// show a chapter (`show_in_app`'s book target, a receipt's "Open ›").
+    /// One-shot; delivered as Outline's own chapter landing (the mode
+    /// switches to Outline — the navigator's chapter row's surface — and
+    /// `requestChapterReveal` lands it at the top).
+    var revealSectionID: String?
+    var onRevealSectionConsumed: (() -> Void)?
     /// **18d batch 1 (her U-10): what this book's sidebar note box shows.**
     /// A VALUE and a DOOR, published upward — the sidebar never constructs or
     /// holds this book's model, and `RootView` composes the box from what
@@ -104,6 +111,8 @@ struct BookView: View {
         onPaneFocusRequest: (() -> Void)? = nil,
         revealPostID: String? = nil,
         onRevealConsumed: (() -> Void)? = nil,
+        revealSectionID: String? = nil,
+        onRevealSectionConsumed: (() -> Void)? = nil,
         onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)? = nil,
         bookSearch: BookSearchModel? = nil,
         onOpenSearchHit: ((String, String?, EditorFindSeed?) -> Void)? = nil
@@ -115,6 +124,8 @@ struct BookView: View {
         self.onPaneFocusRequest = onPaneFocusRequest
         self.revealPostID = revealPostID
         self.onRevealConsumed = onRevealConsumed
+        self.revealSectionID = revealSectionID
+        self.onRevealSectionConsumed = onRevealSectionConsumed
         self.onNoteBox = onNoteBox
         self.onOpenSearchHit = onOpenSearchHit
         let resolved = model ?? BookViewModel(session: session, readingID: readingID)
@@ -353,6 +364,7 @@ struct BookView: View {
             model.paneFocused = paneFocused
             model.onPaneFocusRequest = onPaneFocusRequest
             takeAscentRequest()
+            takeChapterRequest()
         }
         .onChange(of: paneFocused) { _, focused in
             model.paneFocused = focused
@@ -420,6 +432,8 @@ struct BookView: View {
         // 13f W20(a): the ascent's request, taken once — whether this book
         // was already open (onChange) or opened by the ascent (onAppear).
         .onChange(of: revealPostID) { _, _ in takeAscentRequest() }
+        // 13n-b U4: the chapter landing, taken once (open already or opened by it).
+        .onChange(of: revealSectionID) { _, _ in takeChapterRequest() }
         .overlay(alignment: .bottom) {
             if let error = model.lastError ?? structure.lastError ?? bookSearch.lastError {
                 Text(error)
@@ -1130,6 +1144,15 @@ struct BookView: View {
         guard let revealPostID else { return }
         model.requestReveal(revealPostID)
         onRevealConsumed?()
+    }
+
+    /// 13n-b U4 — the chapter landing, adopted: Outline (her navigator's
+    /// chapter row's own surface) and its one chapter-landing door.
+    private func takeChapterRequest() {
+        guard let revealSectionID else { return }
+        switchMode(to: .outline)
+        model.requestChapterReveal(revealSectionID)
+        onRevealSectionConsumed?()
     }
 
     // MARK: - W21 — the mode click-over CARRIES your place

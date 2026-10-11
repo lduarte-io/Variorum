@@ -10,6 +10,12 @@ let package = Package(
     ],
     products: [
         .library(name: "VariorumCore", targets: ["VariorumCore"]),
+        // 13n-b (A-1): the MCP door's server — linked ONLY by the Mac app
+        // target; the iOS app never carries the SDK.
+        .library(name: "VariorumMCP", targets: ["VariorumMCP"]),
+        // The shim's whole behaviour (A-2) — linked by the Xcode
+        // `variorum-mcp` command-line tool embedded at Contents/MacOS.
+        .library(name: "VariorumMCPSocket", targets: ["VariorumMCPSocket"]),
     ],
     dependencies: [
         // Phase 13p (R13p-11, author-approved): the author's GRDB fork with the
@@ -26,6 +32,15 @@ let package = Package(
         // (spike memo Correction #2 — an unused define invites false dependence).
         .package(url: "https://github.com/lduarte-io/GRDB.swift.git", exact: "7.11.1+sqlcipher.1"),
         .package(url: "https://github.com/pointfreeco/swift-dependencies.git", from: "1.9.0"),
+        // 13n-b (R-13n-2, her approval at the 13n sitting): the official MCP
+        // Swift SDK — the app's second third-party dependency after GRDB.
+        // Pinned EXACT: the SDK is 0.x and churns (the ruling's own words);
+        // `swift package update` must never move it. Its `MCP` library links
+        // swift-system, swift-log and mattt/eventsource; swift-nio and
+        // swift-docc-plugin are fetched for the SDK's own conformance tools
+        // and docs, never linked (the 13n-b plan's U1 record). Licence
+        // notices ride Settings ▸ Acknowledgments (`AcknowledgmentsCopy`).
+        .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", exact: "0.12.1"),
     ],
     targets: [
         // Vendored PHC Argon2 reference implementation (Phase 14b, R-7) —
@@ -92,6 +107,33 @@ let package = Package(
                 .product(name: "GRDB", package: "GRDB.swift"),
             ],
             path: "Tools/StringsWorkbook/Tests"
+        ),
+        // 13n-b (A-1): THE MCP DOOR's server — transport · session · grant
+        // authority · tool projections (P-9: never one god server object).
+        // The grants substrate itself (tables, operations, the pure grant
+        // rule) lives in VariorumCore, headless and SDK-free; this target is
+        // the wire.
+        .target(
+            name: "VariorumMCP",
+            dependencies: [
+                "VariorumCore", "VariorumMCPSocket",
+                .product(name: "MCP", package: "swift-sdk"),
+                .product(name: "GRDB", package: "GRDB.swift"),
+            ]
+        ),
+        // 13n-b (A-2, AF-1): the socket road BOTH ends read — the app's
+        // listener and the `variorum-mcp` shim's connect + byte pump.
+        // Foundation and Darwin only: the shim links this and nothing of
+        // Variorum's (zero store access, zero VariorumCore).
+        .target(name: "VariorumMCPSocket"),
+        .testTarget(
+            name: "VariorumMCPTests",
+            dependencies: [
+                "VariorumMCP", "VariorumMCPSocket", "VariorumCore",
+                .product(name: "MCP", package: "swift-sdk"),
+                .product(name: "GRDB", package: "GRDB.swift"),
+                .product(name: "Dependencies", package: "swift-dependencies"),
+            ]
         ),
         .testTarget(
             name: "VariorumCoreTests",

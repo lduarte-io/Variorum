@@ -217,6 +217,28 @@ extension Operations {
     /// finished book's intake is paused — the un-finish catches it up.
     public func setReadingQuerySpec(_ id: String, querySpec: String?) throws {
         try database.write { db in
+            try writeReadingQuerySpec(db, id, querySpec: querySpec)
+        }
+    }
+
+    /// `setReadingQuerySpec`'s row work inside a caller's transaction
+    /// (13n-b U4 — the MCP book-rule act runs her Save's three writes in ONE
+    /// transaction; byte-identical behaviour).
+    ///
+    /// `sweepOccasion` (13n-b U4 ladder round 1, F-1 — PROVISIONAL
+    /// P-13nb-U4-16, hers at the merge bundle): the caller's OVERRIDE of the
+    /// sweep's occasion classification. Her doors pass nothing — a rule set
+    /// on a rule-less book stays creation-time BACKFILL (seats; birth =
+    /// intent, HER authorship). The MCP book-rule act passes `.catchUp` so an
+    /// AGENT-written rule always BELLS: backfill's warrant is her intent,
+    /// which a client's call does not carry — and a seat would pull every
+    /// matching unshared note into the client's own book-grant reach (the
+    /// pull `noteIntoBook`'s double decision exists to prevent).
+    func writeReadingQuerySpec(
+        _ db: Database, _ id: String, querySpec: String?,
+        sweepOccasion override: IntakeDecision.Occasion? = nil
+    ) throws {
+        do {
             var reading = try liveReading(db, id)
             let previous = reading.querySpec
             let normalized = try normalizedRuleSpec(db, querySpec, wingID: reading.wingId)
@@ -233,7 +255,7 @@ extension Operations {
             try reading.update(db)
             guard reading.kind == .book, reading.querySpec != previous else { return }
             let occasion: IntakeDecision.Occasion =
-                RuleGrammar.read(previous) == .none ? .backfill : .catchUp
+                override ?? (RuleGrammar.read(previous) == .none ? .backfill : .catchUp)
             try intakeSweep(db, book: reading, occasion: occasion, now: now)
         }
     }

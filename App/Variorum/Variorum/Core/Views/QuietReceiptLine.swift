@@ -81,17 +81,40 @@ struct QuietReceiptLine: View {
 
     var body: some View {
         let item = status.quietLine
-        Text(item?.text ?? "")
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
-            .lineLimit(1)
-            .truncationMode(.tail)
-            .multilineTextAlignment(.leading)
-            .textSelection(.enabled)
-            .opacity(item == nil ? 0 : 1)
-            .animation(.easeInOut(duration: 0.18), value: item?.id)
-            .help(item?.text ?? "")
-            .accessibilityHidden(item == nil)
-            .layoutPriority(-1)
+        HStack(spacing: 6) {
+            Text(item?.text ?? "")
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+                // 13n-b U4 walk W-1: a receipt that carries a door (an AI
+                // write's "Open ›") gives the door its width, so on a crowded
+                // bar it truncates in the MIDDLE — the head says who, the tail
+                // keeps "⌥⌘Z undoes" (the U2 walk's W-2 promise: the undo
+                // hint is never what the truncation eats). Door-less receipts
+                // keep the tail truncation they always had.
+                .truncationMode(item?.action == nil ? .tail : .middle)
+                .multilineTextAlignment(.leading)
+                .textSelection(.enabled)
+                .help(item?.text ?? "")
+            // 13n-b U4 (R-13nb-23 (a), AF-11 F-2): a receipt may carry ONE
+            // door — an AI write's "Open ›". Drawn only while such a receipt
+            // speaks, so an idle slot still asks for zero width (the
+            // weightless claim above holds); its keyboard road is ⌥⌘O.
+            if let action = item?.action {
+                Button(action.label) {
+                    status.clear()
+                    action.perform()
+                }
+                .buttonStyle(.plain)
+                .font(tokens.small)
+                .foregroundStyle(tokens.accent)
+                .lineLimit(1)
+                .fixedSize()
+            }
+        }
+        .opacity(item == nil ? 0 : 1)
+        .animation(.easeInOut(duration: 0.18), value: item?.id)
+        .accessibilityHidden(item == nil)
+        .layoutPriority(-1)
     }
 }

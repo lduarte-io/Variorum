@@ -30,6 +30,9 @@ struct MigrationTests {
         // shadows (no `_content` — the text lives in the source rows).
         "search_doc", "search_fts",
         "search_fts_config", "search_fts_data", "search_fts_docsize", "search_fts_idx",
+        // 13n-b (v1_24): the MCP door's LOCAL-ONLY grants store (A-5/A-6) —
+        // no sync_version, no outbox trigger, no §12 event; marker 12.
+        "mcp_client", "mcp_grant", "mcp_activity", "mcp_switch",
     ]
 
     static let expectedIndexes: Set<String> = [
@@ -70,6 +73,9 @@ struct MigrationTests {
         // lookup) + the worn-day arm's partial index over undated live
         // containers. Both LOCAL, no §12 event.
         "uq_search_doc_src", "idx_container_undated_created",
+        // 13n-b (v1_24): the grants store's client identity (a BARE unique —
+        // never synced, never tombstoned) and its per-client grant walk.
+        "uq_mcp_client_name", "idx_mcp_grant_client",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).
@@ -143,11 +149,13 @@ struct MigrationTests {
         try AppDatabase.migrator.migrate(queue)
         let after = try indexes()
         // 13i-a: the full chain past v1_16 now adds v1_17's day-search
-        // index AND v1_18's shelf-order index; 13o: v1_22's two.
+        // index AND v1_18's shelf-order index; 13o: v1_22's two; 13n-b:
+        // v1_24's two grants-store indexes.
         #expect(after.subtracting(before) == [
             "idx_commit_created", "idx_shelf_wing",
             "uq_search_doc_src", "idx_container_undated_created",
-        ], "v1_17 + v1_18 + v1_22 add exactly these indexes")
+            "uq_mcp_client_name", "idx_mcp_grant_client",
+        ], "v1_17 + v1_18 + v1_22 + v1_24 add exactly these indexes")
         #expect(after == Self.expectedIndexes)
     }
 

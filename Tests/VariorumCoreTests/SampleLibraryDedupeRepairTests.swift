@@ -338,6 +338,65 @@ struct SampleLibraryDedupeRepairTests {
         }
     }
 
+    @Test func herPrivateMarkOnTheBookIsEngagementAndTheMarkedCopyIsTheKeeper() async throws {
+        // 13n-b U2 ladder round 1, F1: the Private mark (R-13nb-4, v1_25)
+        // is her hand on a copy — EDITED, so the marked copy is the KEEPER
+        // (the "exactly one edited" arm), never silently retired to an
+        // unmarked twin. RED ON OLD: the book-level read carried no
+        // `ai_private_at`, a marked copy classified pristine, and the mark
+        // — a disclosure fence — folded away with the smaller-id toss.
+        let (a, b, server) = try pairWithFacts()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+
+        // B (the LARGER ids) marks its copy's BOOK Private — the marked
+        // copy must be the keeper even though smaller-id would pick A.
+        try b.with { ops, _ in try ops.setBookPrivate(copyB.bookID, true) }
+
+        try await a.push()
+        try await b.push()
+        try await b.pull()
+        try await a.pull()
+        try await assertFurnitureConverged(a, b, server)
+
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyB.bookID],
+                    "the MARKED copy is kept — the mark is engagement")
+            #expect(try client.db.deletedAt("reading", copyA.bookID) != nil)
+            let fenceStands = try client.with { _, db in
+                try db.read { try Queries.isBookPrivate($0, readingID: copyB.bookID) }
+            }
+            #expect(fenceStands, "and the fence stands on every device")
+        }
+    }
+
+    @Test func herPrivateMarkOnAMemberNoteProtectsTheCopyToo() async throws {
+        // The note-level arm of the same F1 fix: a member note's own mark
+        // is engagement on the copy that holds it. RED ON OLD: the per-note
+        // read carried no `ai_private_at`.
+        let (a, b, server) = try pairWithFacts()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        let marked = copyB.postIDs["A Scandal in Bohemia"]!
+        try b.with { ops, _ in try ops.setNotePrivate(marked, true) }
+
+        try await a.push()
+        try await b.push()
+        try await b.pull()
+        try await a.pull()
+        try await assertFurnitureConverged(a, b, server)
+
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyB.bookID],
+                    "the copy holding her marked note is the keeper")
+            #expect(try client.db.deletedAt("reading", copyA.bookID) != nil)
+            let fenceStands = try client.with { _, db in
+                try db.read { try Queries.isNotePrivate($0, postID: marked) }
+            }
+            #expect(fenceStands)
+        }
+    }
+
     @Test func twoEditedCopiesBothSurvive() async throws {
         // The documented outcome (the §7 concurrent-divide class): an edited
         // copy is NEVER silently retired, so two edited copies coexist and

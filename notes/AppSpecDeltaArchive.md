@@ -171,3 +171,8 @@ Paragraph order is original §14 order (roughly chronological; the 2026-07-05/06
 **Before it — 13r (2026-10-04, `notes/plans/phase-13r-distribution.md` + the handoff's item 6, ruled at the post-close sitting via the question tool): §12's ONE calm-asks contract line (no popup at a first open; the app's own asks wait for days of use and calm moments, always answerable in Settings — R-13r-11/12). The phase's distribution machinery itself (Sparkle, the DMG, the pipeline, the releases) changes no product behavior and lands no other delta; zero schema, marker 12.**
 
 *(Rolled from AppSpec §14 at the 13n-a closeout, 2026-10-09.)*
+
+## Rolled from §14 at the 13n-b closeout (2026-10-10) — the 13o "before it" entry, verbatim
+
+Before it — 13o (2026-10-07, `notes/plans/phase-13o-search.md` — the sitting R-13o-1…12, the mockup rulings R-13o-13…15, §FORK RULINGS, §U3 RULINGS): §6+OverallModel §9's trigger set grows its THIRD mechanical duty (derived-index capture, R-13o-4); §7's local-only derived search family (v1_22 — ZERO lockstep, marker stays 12; `SyncSchema.derivedTables`, exports keep a working index); §12's SEARCH contract line (the one finder, the answer sheet, when ▾, the book 🔍, the association join, the facets, land-at-match); §10 gains the day-RANGE reading on the same union rule. The ladder: two rounds (R1 0B/0M/3m/2n, five findings five AGREEs zero disputes, the reviewer's own fix pass with revert-verified pins; R2 CLEAN BILL). Core finals 2,284/258; the widened Mac closeout run 246/33 + the order-sensitive suite alone. PROVISIONALs at QUESTIONS #201.****
+*(Rolled from AppSpec §14 at the 13n-b closeout, 2026-10-10.)*

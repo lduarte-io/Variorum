@@ -65,6 +65,9 @@ struct AppSettingsView: View {
     /// without the app delegate (a preview, a pin) gets no Diagnostics pane
     /// rather than a second owner minted beside the real one (P-2).
     let crashReports: CrashReporting?
+    /// 13n-b U1: the app's ONE MCP door owner (the app delegate's). nil
+    /// hosts render no MCP pane (P-2).
+    let mcp: MCPDoor?
     @State private var theme: ThemeStore
     @State private var tags: TagsViewModel
     /// The pane on screen. Her "overall one" opens.
@@ -87,6 +90,7 @@ struct AppSettingsView: View {
         appearance: AppearanceController? = nil,
         updates: UpdateChannel? = nil,
         crashReports: CrashReporting? = nil,
+        mcp: MCPDoor? = nil,
         restoreDoor: ((URL) -> Void)? = nil,
         handOffDoor: (() -> Void)? = nil
     ) {
@@ -96,6 +100,7 @@ struct AppSettingsView: View {
         self.appearance = appearance
         self.updates = updates
         self.crashReports = crashReports
+        self.mcp = mcp
         self.restoreDoor = restoreDoor
         self.handOffDoor = handOffDoor
         _theme = State(initialValue: ThemeStore(session: session))
@@ -124,6 +129,7 @@ struct AppSettingsView: View {
         .writing: ["segmentation", "cadence", "pruning"],
         .shortcuts: [],
         .tags: ["tagManager"],
+        .mcp: ["mcpServer", "mcpOpenBook"],
         .protection: ["protection"],
         .dataSafety: ["backups"],
         .diagnostics: ["crashReports"],
@@ -137,6 +143,7 @@ struct AppSettingsView: View {
         SettingsPane.allCases.filter {
             ($0 != .protection || protection != nil)
                 && ($0 != .diagnostics || crashReports != nil)
+                && ($0 != .mcp || mcp != nil)
         }
     }
 
@@ -313,6 +320,12 @@ struct AppSettingsView: View {
             // opt-in at the head, the received reports verbatim under it.
             if let crashReports {
                 DiagnosticsPane(crashReports: crashReports)
+            }
+        case .mcp:
+            // 13n-b U1: the MCP door's pane — the app's ONE door owner, handed
+            // down like `crashReports` (P-1: its acts render from the registry).
+            if let mcp {
+                MCPPane(door: mcp)
             }
         case .acknowledgments:
             // 13p Batch 1 (R13p-11's attribution obligation): the Zetetic

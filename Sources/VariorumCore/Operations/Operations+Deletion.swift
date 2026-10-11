@@ -97,9 +97,13 @@ extension Operations {
     /// when it was deleted comes back archived — into the archived listing,
     /// not the fan — and a receipt that assumed "the fan" was lying for that
     /// row. The door reads the op's own answer instead of assuming one.
+    ///
+    /// `guardedBy` (13n-b U4 — `put_back`): the caller's in-transaction
+    /// precondition (`WriteGuard`), run first; nil on her doors.
     @discardableResult
-    public func restoreVariant(_ id: String) throws -> VariantStatus {
+    public func restoreVariant(_ id: String, guardedBy guardian: WriteGuard? = nil) throws -> VariantStatus {
         try database.write { db in
+            try guardian?(db)
             guard var variant = try Variant.fetchOne(db, key: id) else {
                 throw OperationError.variantNotFound(id: id)
             }
@@ -132,8 +136,10 @@ extension Operations {
 
     /// The row work behind `deleteVariant`, shared with structural REDO
     /// (13c 1B — A10; `quietWhenGone` per `performArchiveVariant`).
+    /// Internal (was private) since 13n-b U4: `put_back`'s inverse
+    /// re-tombstones a put-back take through this exact row work.
     @discardableResult
-    private func performDeleteVariant(_ id: String, quietWhenGone: Bool) throws -> Bool? {
+    func performDeleteVariant(_ id: String, quietWhenGone: Bool) throws -> Bool? {
         try database.write { db in
             let existing = try Variant.fetchOne(db, key: id)
             guard let existing, existing.deletedAt == nil else {
@@ -208,10 +214,15 @@ extension Operations {
     /// HOLDS must pass one instead of checking beforehand: a check made
     /// outside this transaction is a check made against a snapshot, and
     /// `BlockDeletionPrecondition`'s doc comment records what that cost.
+    ///
+    /// `guardedBy` (13n-b U3): the caller's in-transaction precondition
+    /// (`WriteGuard`), run first in the forward act only — the redo below
+    /// is her own press and never carries it.
     public func deleteBlock(
-        _ id: String, requiring precondition: BlockDeletionPrecondition = .none
+        _ id: String, requiring precondition: BlockDeletionPrecondition = .none,
+        guardedBy guardian: WriteGuard? = nil
     ) throws {
-        try performDeleteBlock(id, quietWhenGone: false, requiring: precondition)
+        try performDeleteBlock(id, quietWhenGone: false, requiring: precondition, guardedBy: guardian)
         undoStack?.register(
             label: "Delete Block",
             inverse: { try $0.revertDeleteBlock(id) },
@@ -234,10 +245,14 @@ extension Operations {
 
     /// The row work behind `deleteBlock`, shared with structural REDO
     /// (13c 1B — A10; `quietWhenGone` per `performArchiveVariant`).
-    private func performDeleteBlock(
-        _ id: String, quietWhenGone: Bool, requiring precondition: BlockDeletionPrecondition
+    /// Internal (was private) since 13n-b U4: `put_back`'s inverse
+    /// re-tombstones a put-back block through this exact row work.
+    func performDeleteBlock(
+        _ id: String, quietWhenGone: Bool, requiring precondition: BlockDeletionPrecondition,
+        guardedBy guardian: WriteGuard? = nil
     ) throws {
         try database.write { db in
+            try guardian?(db)
             let existing = try Block.fetchOne(db, key: id)
             guard let existing, existing.deletedAt == nil else {
                 if quietWhenGone { return }

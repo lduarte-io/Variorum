@@ -124,6 +124,9 @@ final class CommandRouter {
         if let landing = pendingTakesLanding, landing.postID != postID {
             pendingTakesLanding = nil
         }
+        if let landing = pendingLensLanding, landing.postID != postID {
+            pendingLensLanding = nil
+        }
         return token
     }
 
@@ -145,6 +148,7 @@ final class CommandRouter {
         // choreography intent's round is over (round-1 MAJOR, half b).
         pendingWriteIntent = nil
         pendingTakesLanding = nil
+        pendingLensLanding = nil
         pendingTrayRequest = nil
         focusedBlockIdentity = nil
         focusedOffset = nil
@@ -456,6 +460,9 @@ final class CommandRouter {
         if pendingTakesLanding != nil, mode != .takes {
             pendingTakesLanding = nil
         }
+        if pendingLensLanding != nil, mode != .lenses {
+            pendingLensLanding = nil
+        }
     }
 
     /// What a stale targeted mode request says (round-1 MAJOR, half a: the
@@ -701,6 +708,9 @@ final class CommandRouter {
     var pendingWriteIntent: WriteIntent?
     /// A fire-and-DO landing in Takes (bloom this block on arrival).
     var pendingTakesLanding: TakesLanding?
+    /// 13n-b U4: a landing on the Lenses board (show this saved lens) —
+    /// observed, so a board already mounted consumes it too.
+    var pendingLensLanding: LensLanding?
 
     // MARK: - Composition wiring (set once by the session)
 
@@ -714,6 +724,9 @@ final class CommandRouter {
     /// full-document editor, never the book/spread/pool inline one (QoL batch
     /// 3, L6; see `CapabilityContext.writeEditorOwnsScrollView`).
     @ObservationIgnored var writeEditorOwnsScrollView: () -> Bool = { false }
+    /// 13n-b U4 (AF-11 F-2): whether the MCP door holds a last AI change
+    /// with somewhere to show (wired by `MCPDoor.attach`).
+    @ObservationIgnored var aiLastChangeAvailable: () -> Bool = { false }
     /// Whether the structural undo stack has an entry (wired to the undo
     /// menu state).
     @ObservationIgnored var undoAvailable: () -> Bool = { false }
@@ -750,6 +763,7 @@ final class CommandRouter {
             writeEditorOwnsScrollView: writeEditorOwnsScrollView(),
             takesBoardAttached: takesBoardAttached,
             readEditAttached: readEditAttached,
+            aiLastChangeAvailable: aiLastChangeAvailable(),
             undoAvailable: undoAvailable(),
             redoAvailable: redoAvailable(),
             openNoteCount: openNoteCount(),

@@ -49,7 +49,10 @@ struct DiagnosticsPaneTests {
 
     @Test func theTenthPaneSitsBetweenDataSafetyAndAcknowledgments() throws {
         let panes = SettingsPane.allCases
-        #expect(panes.count == 10)
+        // 13n-b U1 (a CONSEQUENTIAL pin edit, annotated in place): the MCP
+        // pane is the eleventh — placed beside Tags, so THIS ruling's
+        // neighbours (Data Safety before, Acknowledgments after) still hold.
+        #expect(panes.count == 11)
         let index = try #require(panes.firstIndex(of: .diagnostics))
         #expect(panes[index - 1] == .dataSafety)
         #expect(panes[index + 1] == .acknowledgments)

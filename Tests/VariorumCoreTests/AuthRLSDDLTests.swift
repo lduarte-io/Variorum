@@ -51,6 +51,11 @@ struct AuthRLSDDLTests {
         // 13i-e (the book-archive event, marker 12 — R-13ie-1): ONE additive
         // column on reading (`archived_at`); no table, no RPC change.
         "15_phase13ie_archive.sql",
+        // 13n-b (the private-mark event, marker 13 — R-13nb-4): TWO additive
+        // columns (`container.ai_private_at` + `reading.ai_private_at`,
+        // PLAIN, the archived_at class — the AI fence's third leg); no
+        // table, no RPC change. Deploy is HER closeout window.
+        "16_phase13nb_private.sql",
     ]
 
     /// The DATA RPCs — every function 11 re-creates with `key_proof` beside

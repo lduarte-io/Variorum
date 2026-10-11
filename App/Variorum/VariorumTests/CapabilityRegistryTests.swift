@@ -75,6 +75,10 @@ struct CapabilityRegistryTests {
         // everywhere the walk looks — the hole every gate above opened before
         // its own context joined.
         contexts.append(CapabilityContext(mode: nil, windowKind: .full))
+        // 13n-b U4 (justified edit, the ritual): the AI-last-change gate — a
+        // session fact (an MCP write landed), not a mode; without it
+        // `.showLastAIChange` would read `.unavailable` everywhere.
+        contexts.append(CapabilityContext(mode: nil, aiLastChangeAvailable: true))
         return contexts
     }
 
@@ -517,6 +521,14 @@ struct CapabilityRegistryTests {
             // new line): the BOOKCASE's file drop renders the import door
             // (`.importFiles` — a folder becomes a book).
             .union(ShelfView.surfaceCapabilities)
+            // 13n-b U1 (A JUSTIFIED EDIT, the same class — a new renderer is
+            // a new line): Settings ▸ MCP renders the door's seven acts and
+            // is their ONLY renderer (the grant sheet's confirm included).
+            .union(MCPPane.surfaceCapabilities)
+            // 13n-b U2 (A JUSTIFIED EDIT, the same class — a new renderer is
+            // a new line): the just-in-time ASK SHEET renders its answer and
+            // is its only renderer (AF-6).
+            .union(MCPAskSheet.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

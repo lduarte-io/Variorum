@@ -35,6 +35,8 @@ struct EditorCommands: Commands {
     /// 13x F1 (ladder R1-MAJOR): the hand-off door's presenter — File ▸
     /// Send Library to Another Mac… (deliverable 1's menu face).
     let handOffDoor: LibraryHandOffPresenter
+    /// 13n-b U4 (AF-11 F-2): the MCP door — "Show the AI's Last Change".
+    let mcp: MCPDoor
 
     /// The key window's routing channel — nil only before any window has
     /// registered (the first frames), where every door is already disabled
@@ -93,6 +95,8 @@ struct EditorCommands: Commands {
         .saveNoteVersion,
         .importFiles, .exportLibrary, .exportCaretBlock,
         .structuralUndo, .structuralRedo,
+        // 13n-b U4: the offer door's keyboard road, beside its veto.
+        .showLastAIChange,
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake,
         // 13j J4/J4b: the two ceremony doors, beside the verbs they used to
         // be the default of.
@@ -154,6 +158,18 @@ struct EditorCommands: Commands {
         case .commitTake: ("s", .command)
         case .structuralUndo: ("z", [.command, .option])
         case .structuralRedo: ("z", [.command, .option, .shift])
+        // 13n-b U4 (AF-11 F-2, ⌥⌘O approved subject to this sweep). THE
+        // COLLISION SWEEP'S RESULT — ⌥⌘O is FREE:
+        //   · this table: no `o` chord of any modifier set;
+        //   · every `.keyboardShortcut(` call site in `Variorum/` and
+        //     `Shared/`: no "o" at all (not even ⌘O — the app has no Open…);
+        //   · every `NSMenuItem` keyEquivalent: none set;
+        //   · the key overrides (`performKeyEquivalent`'s ⌘S + the ⌘Z/⌘⇧Z
+        //     hint arm; the Tab/Return `keyDown` pair): no `o`;
+        //   · the system's global chords (Spotlight ⌘Space, ⌥⌘Space, ⌥⌘D,
+        //     ⌥⌘Esc, ⌥⌘H, ⌥⌘M, ⌥⌘W) and the Cocoa text system's default
+        //     bindings: no ⌥⌘O (Finder's ⌥⌘O is Finder's own, app-scoped).
+        case .showLastAIChange: ("o", [.command, .option])
         // 13d batch 4 (A14, her row verbatim: "⌘⇧Enter = new block").
         // ⌘⇧⏎ SUPERSEDES the 13b-4D ⌥⌘N: one act declares one key (P-1),
         // every shortcut is a menu item (R73/R91/R93), and the sweep found
@@ -451,6 +467,11 @@ struct EditorCommands: Commands {
             }
             .keyboardShortcut("z", modifiers: [.command, .option, .shift])
             .disabled(session?.undoMenuState.topRedoLabel == nil)
+            // 13n-b U4 (R-13nb-23 (a), AF-11 F-2): the offer door's keyboard
+            // road — the AI's most recent change this session, shown.
+            Button(verb(.showLastAIChange)) { mcp.showLastChange() }
+                .keyboardShortcut("o", modifiers: [.command, .option])
+                .disabled(!enabled(.showLastAIChange))
         }
         // QoL batch 3 (her L6): the standard Edit ▸ Find submenu — the one
         // slot in this file's menu map that was empty. Deliberately NOT ⌘K's

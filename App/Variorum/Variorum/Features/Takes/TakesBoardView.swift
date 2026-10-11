@@ -256,6 +256,10 @@ struct TakesBoardView: View {
         .onChange(of: themeSettings.followTheScroll) { _, new in
             model.followTheScroll = new
         }
+        // 13n-b U4: a takes landing parked while this board was already up.
+        .onChange(of: session.commandRouter.pendingTakesLanding) { _, _ in
+            model.consumePendingTakesLanding()
+        }
         .onChange(of: beneathCount) { _, _ in pushDensity() }
         .onChange(of: gridRows) { _, _ in pushDensity() }
         .onChange(of: gridColsChoice) { _, _ in pushDensity() }

@@ -6,8 +6,9 @@
 # launching the Debug app, UI-driving test runs, dev-store resets/reseeds, and the
 # /Applications Release refresh. Headless `swift build` / `swift test` never needs it.
 # The lock lives OUTSIDE every worktree (~/.variorum/stage.d) so all sessions on this
-# machine share it. The Air has no stage of its own: it ssh'es to the Pro and claims
-# this one. Claims EXPIRE so a dead session can never wedge the machine; releasing or
+# machine share it, and the lock is PER-MACHINE. The Air defaults to not running stage
+# work and by convention isn't what runs it — the author's explicit say-so only, never
+# a full ban (her ruling 2026-10-10); say-so work claims the Air's own local lock. Claims EXPIRE so a dead session can never wedge the machine; releasing or
 # stealing another session's live claim (--force) is the author's word only.
 #
 # Usage:
