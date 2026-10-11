@@ -275,7 +275,7 @@ extension Queries {
                     stamp = try String.fetchOne(
                         db,
                         sql: """
-                            SELECT MAX(COALESCE(c.last_touched_at, c.created_at))
+                            SELECT \(memberLastEditedSQL)
                             FROM json_each(?) j CROSS JOIN container c ON c.id = j.value
                             """,
                         arguments: [json])
@@ -283,8 +283,7 @@ extension Queries {
             } else {
                 stamp = memberStamps[reading.id]
             }
-            lastEdited[reading.id] = stamp
-                ?? DateFormatter.variorumISO8601.string(from: reading.createdAt)
+            lastEdited[reading.id] = bookLastEdited(memberStamp: stamp, createdAt: reading.createdAt)
         }
         return BookcaseAggregates(
             lastEdited: lastEdited, gatheringCounts: gatheringCounts,
@@ -299,15 +298,51 @@ extension Queries {
     /// text.
     static let wingMemberStampsSQL = """
         SELECT rp.reading_id AS reading_id,
-               MAX(COALESCE(c.last_touched_at, c.created_at)) AS stamp
+               \(memberLastEditedSQL) AS stamp
         FROM reading r
         CROSS JOIN reading_post rp ON rp.reading_id = r.id
-        JOIN container c
-          ON c.id = rp.post_id AND c.deleted_at IS NULL AND c.archived_at IS NULL
+        \(shownMemberNoteJoinSQL)
         WHERE r.wing_id = ? AND r.deleted_at IS NULL
-          AND rp.deleted_at IS NULL AND rp.status = 'member'
+          AND \(liveMemberRowSQL)
         GROUP BY rp.reading_id
         """
+
+    // MARK: - A book's "last edited" and "N notes" — the ONE derivation
+    // (13n-c U2 factored these out of `wingMemberStampsSQL` byte-for-byte in
+    // meaning, so the grant picker's read REUSES the Bookcase's own rather
+    // than re-deriving it — `Queries.mcpGrantableBooks`.)
+
+    /// **A book's LAST EDITED, derived** (the sitting record §22's mechanism
+    /// note — never a synced column): the latest of its shown members' touch
+    /// stamps, `COALESCE(last_touched_at, created_at)` (the Library's own
+    /// stamp). An aggregate over the note aliased `c`.
+    static let memberLastEditedSQL = "MAX(COALESCE(c.last_touched_at, c.created_at))"
+
+    /// **A book's SHOWN member notes** — each a live, UN-archived note
+    /// reached by primary key from its membership row (`rp`), bound as `c`.
+    /// The Bookcase's "N notes" is exactly this set (its held member count
+    /// less the archived ones — a dead note's rows die with it), and "last
+    /// edited" reads its stamps.
+    static let shownMemberNoteJoinSQL = """
+        JOIN container c
+          ON c.id = rp.post_id AND c.deleted_at IS NULL AND c.archived_at IS NULL
+        """
+
+    /// The membership half: a live MEMBER row (an arrival is never a member).
+    static let liveMemberRowSQL = "rp.deleted_at IS NULL AND rp.status = 'member'"
+
+    /// The fallback (PROVISIONAL P-13id-U1-5): a reading with no shown notes
+    /// reads as its own birth, so a brand-new empty book sorts by it rather
+    /// than last.
+    static func bookLastEdited(memberStamp: String?, createdAt: Date) -> String {
+        bookLastEdited(memberStamp: memberStamp, createdAtStamp: DateFormatter.variorumISO8601.string(from: createdAt))
+    }
+
+    /// The same fallback over the stored stamp (the grant picker reads the
+    /// column, not a decoded row).
+    static func bookLastEdited(memberStamp: String?, createdAtStamp: String) -> String {
+        memberStamp ?? createdAtStamp
+    }
 
     /// Word counts of every book's rendered content — curated AND smart
     /// (Stage B review round 2, MAJOR 4 + MINOR skews). ONE-SHOT by
