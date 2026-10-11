@@ -583,6 +583,7 @@ per adjudication decision or diff that would ordinarily earn a Fable review.
 | F-19 | `0a5fd108` | Stage B B2 (extends F-15) — the ask's ANSWER ROAD reads CURRENT facts: her open re-reads the target through `MCPDoor.askStanding` (`mcpNoteFacts`/`mcpBookFacts`), a client's re-raise refreshes the waiting payload (stamp kept), a gone target FORGETS its ask, and a book fenced since offers NO grant (`durations` empty; the lead says why) — the answer road mints grants | the ask arrival/answer is named default's-meaning content (§5); written by the Stage B fix implementer (Opus) | — |
 | F-20 | `e3e50161` | Stage B B1 (MAJOR, F-17's class) — lesson 1's privacy sentence: only the GRANTS stay on this Mac; "What a client reads goes wherever that client sends its work: for most clients, the company that runs its model." (P-13nc-SB-1) | disclosure accuracy at the privacy boundary — the words a user trusts about where her text goes, written by Opus | — |
 | F-21 | `0a5fd108` | Stage B B4 (F-14's class) — Book Settings' grant row gated on the fence's own facts (`BookSettingsModel.isGrantable` = `mcpBookFacts(...).fence == nil`), held with the reach; parity-pinned to `mcpFencedBookIDs` | where a grant door may appear (F-14's class) — Opus | — |
+| F-22 | `4014da37` · `e955a86e` | Stage B close-out R2-1 (extends F-19) — THE ASK WATCH forgets waiting asks without her press: one observation while an ask waits, named on `reading` + `wing` through the new `AppDatabase.observe(tracking:_:)` (constant-region tracking), re-validating every waiting ask through `askStanding` in one read, plus Waiting's render; a gone target's ask leaves silently, and her press on one says so (`MCPAskCopy.gone`); the measured limit (a note's death is indistinguishable from an autosave) pinned in `RegionObservationTests` | the ask arrival/answer road is named default's-meaning content (§5) and this decides when an ask stops waiting; a new Persistence-layer observation API — written by the close-out implementer (Opus) | — |
 
 **⚠️ HER FABLE BUDGET IS SPENT (04:52 MDT, HTTP 429 at the U1 round-1 reviewer's tail).** Fable
 reviewed exactly ONE diff this phase: U1 at `9b1ec3dd..33bd8772` (round 1, `13nc-u1-ladder-round1.md`
@@ -751,6 +752,18 @@ unit record (TCC state is machine-state the next session inherits).
 - **P-13nc-SB-4** (Stage B B2) — a book ask fenced since offers no grant and says "This book is marked Private now, which no
   grant reaches — its notes are shared one ask at a time. Don't allow lets this ask go." (and the daily-Journal twin); B7's
   "…and how to set up Claude Code, Codex or any MCP client." and B9's "Allowing grants it in “X”, …" ride her copy pass.
+- **P-13nc-SB-5** (Stage B close-out R2-1) — a press on an ask whose place is gone says "“X” is gone, so claude-code's ask
+  was let go." (a wing: "The X wing is gone, …") as a refusal — on the window's status line, or the pane's caption when
+  pressed in Settings; a forget by the ask watch or by Waiting's re-validation (a press she never made) is SILENT, and an
+  open sheet closes as when its ask is answered elsewhere. Alternative: speak on every forget.
+- **P-13nc-SB-6** (Stage B close-out O-4, her ask) — app copy names no provider outside the setup menu: the toggle sentence
+  "so MCP clients can read…", lesson 1's "a standard way for AI apps to use another app's tools", lesson 2's limit card
+  without "(claude-code, say)", the two Settings blurbs "any MCP client", and the client-named undo in PLACEHOLDER form —
+  "Undo ‹name›'s take" (the ⌘/ helper and lesson 6); the search keywords add anthropic · openai · chatgpt · gpt · cursor ·
+  gemini · copilot · windsurf · ollama. Alternative (O-4's own suggestion): a multi-provider example list ("any MCP client
+  — Claude Code, Codex, Cursor and others"), which would need the source pin to admit example lists.
+- **P-13nc-SB-7** (Stage B close-out R2-5) — the empty Activity line: "Nothing yet — the calls clients made recently are
+  listed here." (lesson 6's own words).
 - **P-13nc-U4-8** (U4, a QUESTION for #211) — the ask's sheet keeps 13n-b's answers; closing it without granting
   is Don't allow (Esc), which drops the ask until the client re-asks. Options: keep · add "Not now" · Esc keeps it
   waiting.
@@ -1973,6 +1986,64 @@ branch `vx-165-13n-c`. **No revert is in flight unless a line below says so.** *
 Debug-app launch and no walk in this pass (the orchestrator walks after it). Work list = round 2's R2-1…R2-5 + O-4 +
 her 2,000-character bound — nothing beyond it.
 
+### CLOSE-OUT FIX PASS CLOSED (2026-10-11 ~13:45 MDT — the Stage B close-out fix implementer, Opus `claude-opus-5-5`)
+
+**NOT DONE (said first):** (1) **no walk, no Debug-app launch, no capture re-shoot** — the brief gives the walks to the
+orchestrator after this pass; the faces that changed and are owed to its walk: the ask sheet's gone line (a window's
+status line; the pane's caption), the members sheet's "1 note" and its close-on-empty, Waiting's rows leaving a dead
+place, the masthead's wing mark leaving when its wing dies, the ⌘/ helper's and the guide's "Undo ‹name›'s take", the
+Settings ▸ MCP description and toggle sentence, the empty Activity line. (2) **R2-1 (b)'s residue, said:** a note
+deleted while Settings ▸ MCP stays on screen keeps its Waiting row until the pane re-renders or she presses it — and
+the press then says why it did nothing (a). A note's death cannot wake an autosave-quiet watch (measured — T-CB-2,
+`RegionObservationTests`); its mark rides only its own rows elsewhere, which leave with it. (3) **O-4's suggested
+multi-provider wording ("any MCP client — Claude Code, Codex, Cursor and others") was NOT used** — it would break the
+pin O-4 itself names; the copy names no provider, and the list is the recorded alternative for her copy pass. (4) No
+`notes/QUESTIONS.md` edit (merge-time, #211) and no canon edit. **Touched beyond the app, said plainly:** ONE additive
+method in `Sources/VariorumCore/Persistence/AppDatabase.swift` (`observe(tracking:_:)` — no schema, no migration, no
+existing caller changed) and `Sources/VariorumMCP/MCPSession.swift` (the bound). Zero `Sync/`, migration, custody/
+keychain, editor-seam (`EditorTextView`/`BlockRangeIndex`/`PaneSurface`), `lockstepVersion`, real-store or
+`/Applications` lines (`git diff --name-only 6f7fc38f..HEAD` checked); zero trailers; no Variorum instance ever ran.
+
+**Per row:** BOUND DONE `af5956dc` (her ruling — no red-on-old owed) · R2-3 DONE `af5956dc` (a guard widening, green both
+sides — said; shown real by a planted pronoun: new net red, old net green) · O-4 DONE `cfa2a1f0` (headless pin red-on-old
+21 issues at its commit; the Mac ritual + keyword pins red in CB-R) · R2-5 DONE `a399c562` (red in CB-R) · R2-2 DONE
+`a399c562` (red in CB-R) · R2-4 DONE `a399c562` (comments; the system buttons re-checked and KEPT) · R2-1 DONE
+`4014da37` + `e955a86e` (both pins red in CB-R; the road's own pins `RegionObservationTests`). **The Mac red-on-old
+(CB-R):** exactly 8 pins red / 29 issues on the reverted build over the four pin suites, nothing else; restored,
+`cmp`-identical.
+
+**Finals:** headless (whole package, `swift test`) **core 2,623 / 300** (2,620/299 + `RegionObservationTests` 3/1) ·
+**`VariorumMCPTests` 82 / 12** (80/11 + `MCPProviderNeutralityTests` 2/1; no VX-132 stall) · **workbook 40 / 6** — all
+green, the skips the standing gated ones only. **Mac** (stage `vx165-cb`, claimed ~12:45, released ~13:40 MDT;
+`test-without-building` on `DerivedData/vx165-cb`, rebuilt on the restored tree): **76 suites / 537 tests
+`** TEST EXECUTE SUCCEEDED **`, 0 skipped, 0 known issues** — every suite whose file names a type this pass changed
+(the MCP pane, door, ask sheet and copy; `HelperView`; the Settings catalog/search; `TutorialSeeder` — the tour, walk,
+privacy, books and MCP chapter suites among them), derived by script; plus the five gated capture harnesses that name
+them, **6 tests / 5 suites, all skipped by design** (the capture env unset). No baseline red appeared in this set
+(VX-115's and VX-167's pins are outside it).
+
+**PROVISIONALs (for #211 at the merge — also added to the running list):** **P-13nc-SB-5** the gone line and its seam
+· **P-13nc-SB-6** O-4's neutral words · **P-13nc-SB-7** the empty Activity line. **FABLE-OWED row written at the
+moment:** **F-22** (R2-1 — the ask watch forgets waiting asks; extends F-19).
+
+**Where a cold reviewer should look first:** (1) `MCPDoor.watchAsks` / `adoptStanding` / `revalidateAsks` /
+`refreshAsk(_:from:)` — the restart on every id-set change (an `adoptQueue` from inside the watch's own loop cancels
+and restarts it), verdicts applied to the queue as it stands NOW, `answering` cleared on a forget, the gone line said
+even when the watch forgot the ask mid-read; (2) `AppDatabase.observe(tracking:_:)` — constant-region tracking's
+contract (the fetch's own reads untracked) and the measured limit pinned in `RegionObservationTests`
+(`thePlacementTableCannotTellATrashFromAnAutosave` documents GRDB + trigger behaviour — if it ever goes quiet, the
+watch can name `container_block`); (3) `MCPProviderNeutralityTests`' fences and the `keywords:` exemption (a literal
+parser — a provider named in a `keywords: [ … ]` list anywhere is exempt by design); (4) `MCPSharedMembersSheet.load`
+(`sharedMembers` now nil on a failed read) and the close on an empty load.
+
+**Self-assessment:** every row is at its named site with a pin watched red on the pre-fix behaviour (or, for R2-3, the
+bound and R2-4, said plainly to be a guard, a ruling, or comments). The one real surprise was R2-1 (b): my first trace
+claimed GRDB's column-grained regions would keep autosaves out of a watch reading `container`; a probe proved it false
+(a full-record container stamp, plus the cascade trigger's compiled program and the FTS shadow writes, wake any
+observer of those tables), so the design changed to an autosave-quiet watch on `reading` + `wing` plus Waiting's own
+re-validation, and the probe stayed as pins. Least certain: whether she wants a forget she never pressed to stay
+silent (built: silent) and the placeholder form "‹name›" in the guide's prose — both her copy pass's.
+
 | # | Row | Status |
 |---|---|---|
 | CB-0 | Preflight read whole (this plan top to bottom incl. the STAGE B FIX RECORD, O-1…O-4, P-13nc-U5-5's ruled bound; `13nc-stageB-ladder-round1.md`; `13nc-stageB-ladder-round2.md`; `SessionResiliencyProtocol`) + the traces below | DONE (this commit) |
@@ -1984,8 +2055,8 @@ her 2,000-character bound — nothing beyond it.
 | R2-4 | `MCPAskSheet`'s stale comments (the "While connected" header; the W-3 WindowGroup rationale); the system-button choice re-checked and recorded | **DONE** (this commit) — the header says "in the window or pane she pressed in" and "Until it disconnects (… P-13nc-U4-1's words for 13n-b's 'while connected')"; the buttons' comment carries the RE-CHECK (T-CB-6): the WindowGroup host is retired, but the two window hosts attach `.mcpAskSheet` after their `.environment(theme)`, so the sheet gets no `ThemeStore` there and voiced buttons would fall to the mono face — **SYSTEM BUTTONS KEPT, said**. Comments only; no behaviour, no pin owed |
 | R2-1 | (a) her open forgetting a gone target's ask speaks a refusal-kind line naming the place, on the seam of the host she pressed in; (b) the queue's targets re-validated in one batch (∝ the queue) so a dead ask's mark leaves without a press — the trigger recorded; pins red-on-old | **DONE** (`4014da37` the road + this commit; the 4 pin suites 55/55 green on the Mac, 0 skipped; red-on-old PENDING CB-R) — **(a)** `MCPDoor.refreshAsk(_:from:)` — finding the target gone, it forgets the ask AND says `MCPAskCopy.gone` ("“ch 7” is gone, so claude-code's ask was let go." / "The variorum wing is gone, so …" — PROVISIONAL **P-13nc-SB-5**) as a REFUSAL on the seam she pressed in: `AskSeam.window` → the session's status line; `.pane` → the door's caption at the pane's head (Settings has no status seam); said even if the watch forgot the ask during the read (her press is the one that found nothing). `MCPAskSheet.seam` + `mcpAskSheet(door:askID:seam:)` (default `.window`; the pane passes `.pane`). **(b)** the ASK WATCH (`watchAsks`, from `adoptQueue`): alive only while an ask waits, `database.observe(tracking: [reading, wing])` whose fetch is `asksStanding` (every waiting ask through `askStanding` in ONE read — ∝ the queue ≤ 8), restarted (an immediate full re-validation) whenever the set of waiting asks changes, stopped by an empty queue (detach included); `revalidateAsks()` — the same batch one-shot, run by WAITING's render (the pane's section `.task` keyed on the waiting ids, and the all-N sheet's Waiting list); `adoptStanding` applies verdicts to the queue as it stands NOW — gone ⇒ forgotten SILENTLY (an open sheet closes, T-U4-5's idiom), standing ⇒ refreshed. **Pins** (`MCPAsksWaitTests`): `herPressSaysSoWhenThePlaceIsGone` (a note's on the window seam — text + `.refusal` kind; a book's on the pane's caption; the wing words) · `aDeadPlacesMarkLeavesWithoutAPress` (a book's and a wing's death take their marks — the masthead's wing word included — with no press; a living note's stays; the watch SLEEPS through a note's trip to the Trash (the measured limit, at the door) and Waiting's re-validation takes it; silent — no status line, no caption). **Ritual (annotated):** `denyingAClientForgetsItsAsks` asks on a REAL note (an ask on an id naming nothing — which the wire never raises — is now forgotten as gone) |
 | CB-R | The red-on-old reverts (named here BEFORE each starts; pre-revert copies in the session scratchpad's `cb-prerevert/`) | **DONE** (named in `6579efed` before it started) — **THE MAC RED-ON-OLD, by revert** (one combined build: the pre-fix behaviour put back behind the new API shapes — `MCPDoor.swift`: no gone line in `refreshAsk`, `adoptQueue` never starts the watch, `revalidateAsks` inert; `MCPPane.swift`: the old title count (`rows == 0 ? memberCount : rows`) and no close; `MCPPaneCopy.swift`: the old `groupTitle`, `noActivity` and `enableBlurb`; `HelperView.swift` / `SettingsShape.swift` / `TutorialSeeder.swift` from `634558cd`, pre-O-4): over the four pin suites (`MCPAsksWaitTests`, `MCPShareFacesTests`, `MCPSetupMenuTests`, `TutorialMCPChapterTests` — 55 tests) **exactly 8 RED, 29 issues, every other test green** — R2-1 (a) `herPressSaysSoWhenThePlaceIsGone` (1 — the line never said) · R2-1 (b) `aDeadPlacesMarkLeavesWithoutAPress` (3 — the book's and wing's marks stay, the note's survives Waiting) · O-4 (b) `theHelpersMCPGroupHoldsEveryMCPChord` (2) · O-4 (d) `thePanesDescriptionSetsUpAnyClientAndNamesNoProvider` (7) · O-4 (e) `theSearchFindsThePaneWhateverItsClientIsCalled` (6 — chatgpt, openai, anthropic, gemini, copilot, cursor found nothing) · R2-2 `theMembersSheetSaysOneNoteAndClosesWhenNothingIsLeft` (3) · O-4 (d) `lessonOneTheDoorIsShutUntilYouOpenIt` (3) · O-4 (c) + R2-5 `lessonSixSeeingAnsweringUndoing` (4). Restored (`cp` + `cmp`, tree clean). **Headless, already shown:** O-4's source pin red-on-old (21 issues, at its commit); R2-3's widening shown real by a planted pronoun. **Guards, said:** R2-3 (green both sides by design); `RegionObservationTests` (the new API's pins — a new road, no old behaviour to be red on); R2-4 (comments only) |
-| CB-F | Finals: the whole headless package + the Mac suites over every changed type under a held stage claim | NOT-STARTED |
-| CB-X | CLOSE-OUT FIX PASS CLOSED banner | NOT-STARTED |
+| CB-F | Finals: the whole headless package + the Mac suites over every changed type under a held stage claim | **DONE** — headless core 2,623/300 · `VariorumMCPTests` 82/12 · workbook 40/6, all green (standing gated skips only); Mac 76 suites / 537 tests green, 0 skipped, 0 known issues + the five gated capture harnesses 6/5 skipped by design (stage `vx165-cb`, released). **Machinery, said:** the first set run executed 0 tests (zsh does not word-split an unquoted variable — 76 flags arrived as one argument), and the second ran the STALE reverted build (`test-without-building` after the restore) — it showed exactly CB-R's 8 reds; rebuilt on the restored tree, then green |
+| CB-X | CLOSE-OUT FIX PASS CLOSED banner | **DONE** (this commit) — atop this record |
 
 ### Traces (made before any code — the hallucination guard)
 
