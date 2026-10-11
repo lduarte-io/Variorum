@@ -669,7 +669,7 @@ unit record (TCC state is machine-state the next session inherits).
 | 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | BUILT + VERIFIED `c6d5d23a` — walk HELD (locked); icon A kept PROVISIONAL (orchestrator); UX-walk watch: the icon reads small beside a Terminal-voice book name (capture `u3-bookcase-terminal.png`) — the UX reviewer is asked to judge it |
 | 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | BUILT + VERIFIED `f1ab4725` — walk HELD; two order-dependent Mac reds predating U4 ticketed **VX-167** (red identically on U3's tree; green alone) |
 | 7 | U5 — the guide, the advice, the setup menu | U5 implementer | BUILT + VERIFIED `065526ce` — walk HELD; the one cap-test red ("Unable to parse empty data") folded into **VX-132** by comment (Stage B R1 B14) |
-| 8 | Stage B ladder (opus) over `99d739e9..065526ce` | orchestrator | R1 DONE (`13nc-stageB-ladder-round1.md`) → FIX PASS CLOSED `c6d8509c..9c049c6a`, verified by the orchestrator (fence diff empty, zero trailers; 12 pins red-on-old by revert; core 2,620/299 · MCP 80/11 · Mac 1,539/239 with only VX-115 + VX-167 red) → **R2 SPAWNED** over `b6ba61c1..9c049c6a`. Carried to R2/her copy pass: `MCPPaneCopy.noActivity` still says "every call a client makes" (B10's class). U6 NOTE: the advice has ~3 characters left under its 1,500 bound. The gatherings clause needs a trim or her word to raise the bound. |
+| 8 | Stage B ladder (opus) | orchestrator | **CLOSED at R2** — R1 `13nc-stageB-ladder-round1.md` (1M/6m/7n, the fix pass `c6d8509c..9c049c6a`) → R2 `13nc-stageB-ladder-round2.md` (0B/0M/1m/4n, all accepted) → the CLOSE-OUT FIX PASS (R2-1…R2-5 + O-4 + the 2,000 bound) BRIEFED |
 | 9 | U6 — the wing on the wire | U6 implementer | NOT-STARTED |
 | 10 | U7 — VX-159 | U7 implementer | NOT-STARTED (may fall out) |
 | 11 | Stage C ladder | orchestrator | NOT-STARTED |
@@ -1930,3 +1930,42 @@ to her rather than "help" — both the held walk's and her copy pass's to judge.
 | SB-R | **THE MAC RED-ON-OLD, by revert** (one combined build: the pre-fix behaviour put back behind the new API shapes in seven app files + B5's MUTATION — the Library row's door deleted; `scratchpad/sb_revert.py`) | DONE — on the reverted build, the pin suites (`TutorialMCPChapterTests`, `MCPAsksWaitTests`, `MCPShareFacesTests`, `CapabilityRegistryTests`, `WingSwitcherChordTests`, `MCPSetupMenuTests`, `SearchPickerBrainTests`, `MCPGrantSheetTests` — 111 tests): **exactly 12 RED, 34 issues, every other test green** — B1+B10 `lessonOne…` (4) · B10 `lessonSix…` (2) · B2 `aReRaiseRefreshes…` (2), `herOpenReadsTheNoteAgain…` (3), `anAskWhoseTargetIsGone…` (3), `aBookFencedSince…` (6) · B3 `aGroupedRowsRoadNamesEveryMember` (1) · B5 `theLibraryNoteRowMenuRendersItsDeclaredDoors` (1 — the door DELETED, while the union stayed green through the book-row renderers: the reviewer's point, shown) · B6 `switchWingIsUnavailableWithOneWing` (2) · B7 `thePanesDescriptionNamesEverySetup…` (3) · B8 `anEmptyPanelSaysItsOwnSentence…` (2) · B9 `theAskWearsItsDistinguisher…` (5). Restored (`git checkout --`, `cmp`-identical to the copies, tree clean). **Core B3, headless:** `mcpSharedActMembers` set to the old road (the act's group rows) → `MCPShareTests.theActsRoadNamesEveryMemberInItsOrder` **RED, 4 issues**; restored, `MCPShareTests` 15/15 green. **B4 is architectural (green on both sides by design — said in its row); O-1/O-3 are taste guards** |
 | SB-F | Finals: headless package + Mac suites over every changed type (held stage) + the U4/U5 capture re-shoots | **DONE** — stage `vx165-sb` (claimed 11:00, released ~11:45 MDT; no Variorum instance at any point — `pgrep` clean). **Headless (whole package, `swift test`):** core **2,620 / 299** (U5's 2,619/299 + `theActsRoadNamesEveryMemberInItsOrder`) · `VariorumMCPTests` **80 / 11** (76/10 + `MCPWireNeutralityTests` 4/1; no VX-132 stall this time) · workbook **40 / 6** — all green. **Mac (`test-without-building`, 239 suites derived by script — every test file naming a type this pass changed):** first run 1,539 tests, 4 tests red (two baseline; one MINE — `noActIsUnavailableInEveryContext`, fixed as the ritual `8fc848a0`; one tour focus red green alone); **FINAL run on the restored tree: 1,539 tests / 239 suites, the ONLY reds the two baseline ones** — VX-115's standing `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` and VX-167's order-dependent `LibraryInfiniteScrollTests.aPageLandingReDrawsNoRowAlreadyBuilt` (both cards arms); the tour red (`TourEntryTests.helpsDoorStartsTheTour…`, a real-window `firstResponder` assertion) did NOT reproduce in the identical set and is green alone (13/13) — a parallel-window focus flake, no file it mounts changed here (for the orchestrator to fold into VX-167's family if it recurs); 14 skips, all standing gates; 1 known issue (`TakesFindBoardTests`' recorded boundary). **Captures — NOT A WALK (the session stayed LOCKED: 10:37 and through the pass):** the U3, U4 (+ the Stage B shots) and U5 harnesses re-shot, both voices, light, into `notes/plans/13n-c-screens/stageB/` (gitignored — `git check-ignore` verified; 68 images, decoded by a scratchpad script; the units' own folders untouched): `sb-pending-candidates-*`, `sb-shared-act-*`, `sb-shared-members-*`, `sb-ask-fenced-book-*`, and every `u3-*`/`u4-*`/`u5-*` face re-drawn on this tree (read: the new mark on the Bookcase row + masthead, the ask sheet's answers drawn after the read, Book Settings' grant row on the held facts, lesson 1's two sentences, the helper's role row) |
 | SB-X | FIX PASS CLOSED banner | DONE (this commit) — atop this record |
+
+---
+
+## THE STAGE B CLOSE-OUT FIX BRIEF (self-contained; the spawn names this section)
+
+You are the Stage B close-out fix implementer for Variorum phase 13n-c, working in `~/dev/variorum-vx-165` on branch
+`vx-165-13n-c` (never the main checkout). Commits say `Part of VX-165`, carry NO attribution trailer, and are pushed
+after every commit. `notes/SessionResiliencyProtocol.md` binds you: keep LIVE STATUS in the "STAGE B CLOSE-OUT FIX
+RECORD" section below from your first commit; foreground waits only; no subagents.
+
+**Read first, whole, never delegated:** this plan file top to bottom (the U2–U5 records, the STAGE B FIX RECORD,
+the orchestrator findings O-1…O-4, P-13nc-U5-5's ruled bound), `notes/plans/13nc-stageB-ladder-round1.md`, and
+`notes/plans/13nc-stageB-ladder-round2.md`. Round 2's dispositions plus O-4 plus the bound are your whole work
+list; do nothing beyond them.
+
+**The rules:**
+- **Pins:** red-on-old by revert for every bug-class row; R2-3 is a guard widening, said plainly.
+- **The fence:** never re-derive it; R2-1's re-validation consumes `mcpNoteFacts` / `mcpBookFacts` /
+  `mcpScopeTitle`, ∝ the queue.
+- **O-4:** keep the setup menu's Claude Code entry, command, receipt and default exactly as they are (she excluded
+  setup). Add the source-sweep pin O-4 names.
+- **Copy:** sentence case; every new word PROVISIONAL for her copy pass.
+
+**Must NOT touch:** `Sync/`, custody/keychain, the editor seam, migrations, `lockstepVersion`, the real store,
+`/Applications`.
+
+**The Mac is unlocked now.** Mac suites run under a HELD `Tools/stage` claim, released at the end. Do NOT launch
+the Debug app or walk; the orchestrator runs the walks after you. VX-132: if a VariorumMCPTests run hangs, kill it
+and rerun.
+
+**Acceptance:** the whole headless package, plus the Mac suites over every changed type, reading the `skipped:`
+lines.
+
+**Close:** a CLOSE-OUT FIX PASS CLOSED banner — per row: commit and pin evidence, PROVISIONALs, FABLE-OWED rows
+written at the moment.
+
+## STAGE B CLOSE-OUT FIX RECORD (LIVE STATUS — the implementer owns this section from its first commit)
+
+*(empty until the implementer's first commit)*
