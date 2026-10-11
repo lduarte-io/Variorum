@@ -2172,4 +2172,40 @@ walk should check", S-1 and S-2), then `Tools/WalkKit/README.md`.
 
 ## HELD-WALKS RECORD (LIVE STATUS — the walk implementer owns this section from its first commit)
 
-*(empty until the walk implementer's first commit)*
+Walker: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~13:55 MDT). Worktree `~/dev/variorum-vx-165`, branch
+`vx-165-13n-c`, from tip `9615e165`. **No revert is in flight unless a line below says so.** Stage claim name
+`vx165-walk`. Captures in `notes/plans/13n-c-screens/walk/` (gitignored — `git check-ignore` verified, `.gitignore:66`).
+
+**Machine at start (13:55 MDT):** Accessibility + Screen Recording GRANTED to this host (a compiled probe:
+`AXIsProcessTrusted() == true`, `CGPreflightScreenCaptureAccess() == true`; the host is the GUI-born tmux server);
+the session UNLOCKED (`CGSSessionScreenIsLocked` absent, display awake); HID idle 81 min; NO Variorum instance
+running (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty — her real-store app is not open); stage FREE.
+
+**The live round's safety fact, found before it starts:** her `~/.claude.json` carries a USER-scope `variorum`
+server pointing at `/Applications/Variorum.app/Contents/MacOS/variorum-mcp` (her real store). Any `claude -p` turn
+in the scratch folder would load it beside the scratch `-s local` `variorum-dev`. The shim derives its socket from
+its OWN bundle (`MCPDoor.socketDirectory` / `MCPSocketRoad`), so the Debug shim can only ever reach the dev
+container — but her registration would reach her real store IF her app were running. **The belts:** (1) every turn
+is gated on her app ABSENT immediately before it (`pgrep -f '/Applications/Variorum.app/Contents/MacOS'` — the
+guard's own check 0); with her app closed that shim fails to connect at the turn's start (exactly as this
+session's own `variorum` server shows `CONNECTION_CLOSED`); (2) every turn passes `--allowedTools
+"mcp__variorum-dev"` only, so in `-p` mode any other server's tool call is denied; (3) her registration is NEVER
+edited. If her app appears mid-walk, the live round STOPS.
+
+### Legs (LIVE STATUS)
+
+| # | Leg | Status |
+|---|---|---|
+| W-0 | Preflight: this plan whole (every unit's owed-walk list, U1-9 · U2-9 · U3-10 · U4-10 · U5-6, the STAGE B FIX RECORD's S-1/S-2, the CLOSE-OUT record's faces), `Tools/WalkKit/README.md` + `guard.sh`/`click.sh`/`keys.sh`, `SessionResiliencyProtocol`, the ScaleFixture stage/restore; machine checks above | DONE (this commit) |
+| W-1 | Build the tip's Debug app (own DerivedData `App/Variorum/DerivedData/vx165-walk`); the A1 prestage copy + U2's scale seed (`Tools/ScaleFixture/stage.sh notes=520,long=40,books=160,shelves=9`) | NOT-STARTED |
+| W-2 | ZERO approved clients: none of the share faces render (menus, bulk bar, Book Settings row, ⌥⌘A, icons, indicator) + the empty Activity line (U3-10, CB) | NOT-STARTED |
+| W-3 | Live (1)+(2) + U5's setup leg: the setup menu's three choices pressed and copied; the Claude Code command registered `-s local` in a scratch folder; the JSON parsed; Codex not run (no `codex` on this Mac — `which codex` empty); the connection request approved in the pane; the advice stated back | NOT-STARTED |
+| W-4 | U1 + live (3): a journal-TRAIT book granted (R-AIR-3's confirm on screen) and read; a Home-wing READ grant — a daily-Journal entry and a Private note answer byte-equal to a made-up id, their unique words search to zero passages; the wing confirm's clause; the ask sheet's daily-Journal lead | NOT-STARTED |
+| W-5 | U2 on the scaled seed, both voices: a book found by typing, by shelf, a starred one; the two sherlocks told apart and the right one granted (landing in Shared places); a note from Recently edited; a fenced note's honest durations; the WHO row; L1 | NOT-STARTED |
+| W-6 | U3 + live (5): three notes shared from the Library in one act → one pane row → one Revoke; a book shared from its row menu and from Book Settings; the icon's hover + popover; the in-note indicator's why + a Private note's lock; ⌥⌘A with history, without, already reaching; the receipt's Change… and Revoke | NOT-STARTED |
+| W-7 | U4 + live (4): an ask arriving while typing in a note (nothing appears but the mark), answered from the mark; another from Waiting; ⌥⌘, landing at Waiting (S-2: fresh Settings window and one already open); ⌘L typed filter, held-⌘ L cycle, Esc (S-1: a fast ⌘L-L-release); an ask answered from a switcher row; the masthead cycling on BOTH mastheads + the ▾ menu's acts; a denied client's marks leaving; the shortcuts pane + ⌘/ | NOT-STARTED |
+| W-8 | Live (6): a client's write → the Edit menu's undo names the client | NOT-STARTED |
+| W-9 | U5's chapter on screen (both voices) + the close-out faces (the gone line, the members sheet's "1 note", Waiting leaving a dead place, the wing mark leaving, the helper's and the guide's "Undo ‹name›'s take", the pane's description + toggle sentence) | NOT-STARTED |
+| W-10 | Dark appearance on the changed faces | NOT-STARTED |
+| W-11 | Cleanup: `claude mcp remove -s local`; the dev instance quit by identity; the dev store restored (`restore.sh`); voice/appearance as found; the stage released | NOT-STARTED |
+| W-X | WALKS CLOSED banner | NOT-STARTED |
