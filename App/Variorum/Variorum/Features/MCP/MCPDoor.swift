@@ -57,12 +57,22 @@ final class MCPDoor {
         var pendingCount = 0
         var clients: [ClientRow] = []
         var clientCount = 0
-        var shared: [MCPSharedRow] = []
+        /// 13n-c U3: Shared places, ONE ROW PER ACT (`Queries.mcpSharedGroups`
+        /// — a bulk share's N note grants on one stamp read as one row).
+        var sharedGroups: [MCPSharedGroup] = []
+        /// How many ACTS Shared places holds (the "all N ›" road's N).
         var sharedCount = 0
+        /// 13n-c U3 (R-AIR-8): how many clients are APPROVED — every share
+        /// face outside the pane renders only when this is at least one.
+        var approvedCount = 0
         /// U3 — the ACTIVITY face: the newest coalesced lines and the log's
         /// whole row count (the "all N ›" road's N).
         var activity: [MCPActivityFace.Line] = []
         var activityCount = 0
+
+        /// The shown acts' rows (each act's titled members) — the shape the
+        /// pane's pins have read since 13n-b.
+        var shared: [MCPSharedRow] { sharedGroups.flatMap(\.rows) }
     }
 
     /// How many rows each list shows before its "all N ›" road (R-13n-10 —
@@ -78,6 +88,14 @@ final class MCPDoor {
 
     private(set) var snapshot = Snapshot()
     private(set) var connected: Set<String> = []
+    /// 13n-c U3 — THE SHARE FACES' TWO GATES, as NARROW observables (set only
+    /// when they change, so a window composing its `MCPShareRoad` from them
+    /// never re-renders on a snapshot that changed nothing it reads — the
+    /// snapshot itself can re-land at autosave rate while a note grant's
+    /// title is listed). R-AIR-8: at least one APPROVED client. R-AIR-7: the
+    /// server switch ON.
+    private(set) var hasApprovedClient = false
+    private(set) var serverOn = false
     private(set) var serverState: ServerState = .off
     /// The pane's own caption (Settings has no status seam): the last
     /// refusal or receipt, plainly — rendered BESIDE the door that spoke
@@ -89,9 +107,11 @@ final class MCPDoor {
     }
     var note: Note?
 
-    @ObservationIgnored private weak var session: AppSession?
-    @ObservationIgnored private var database: AppDatabase?
-    @ObservationIgnored private var runner: OperationsRunner?
+    // 13n-c U3: readable (never writable) from the share road's acts —
+    // `MCPDoor+Share.swift`, the door's second file.
+    @ObservationIgnored private(set) weak var session: AppSession?
+    @ObservationIgnored private(set) var database: AppDatabase?
+    @ObservationIgnored private(set) var runner: OperationsRunner?
     @ObservationIgnored private var host: MCPServerHost?
     @ObservationIgnored private var observation: Task<Void, Never>?
     /// A start is in flight off the main thread — never start twice.
@@ -225,10 +245,18 @@ final class MCPDoor {
                 for try await snapshot in observed {
                     guard let self else { return }
                     self.snapshot = snapshot
+                    self.adoptGates(snapshot)
                     self.reconcileServer()
                 }
             } catch {}
         }
+    }
+
+    /// The narrow gates follow the snapshot — written only on a change.
+    private func adoptGates(_ snapshot: Snapshot) {
+        let approved = snapshot.approvedCount > 0
+        if hasApprovedClient != approved { hasApprovedClient = approved }
+        if serverOn != snapshot.enabled { serverOn = snapshot.enabled }
     }
 
     /// The store is closing (lock, quit): stop the server — the socket is
@@ -241,6 +269,8 @@ final class MCPDoor {
         asks = []
         receiptRun = []
         lastShow = nil
+        // A locked library shows no share face (R-AIR-8's gate reads no store).
+        if hasApprovedClient { hasApprovedClient = false }
         session = nil
         database = nil
         runner = nil
@@ -349,6 +379,12 @@ final class MCPDoor {
 
     func revoke(grantID: String) {
         act { try $0.revokeMCPGrant(grantID) }
+    }
+
+    /// 13n-c U3: a Shared places row ONE act minted — Revoke covers every
+    /// member, in one act.
+    func revoke(grantIDs: [String]) {
+        act { try $0.revokeMCPGrants(grantIDs) }
     }
 
     /// Copy setup command (R-13nb-5): the command on the clipboard, the
@@ -517,6 +553,11 @@ final class MCPDoor {
         await read { try Queries.mcpSharedRows($0) } ?? []
     }
 
+    /// 13n-c U3: the whole Shared places list, one row per act.
+    func allSharedGroups() async -> [MCPSharedGroup] {
+        await read { try Queries.mcpSharedGroups($0) } ?? []
+    }
+
     /// U3: the whole log (≤ the store's 500-row cap), coalesced.
     func allActivity() async -> [MCPActivityFace.Line] {
         await read { MCPActivityFace.lines(try Queries.mcpActivity($0)) } ?? []
@@ -579,6 +620,22 @@ final class MCPDoor {
         } ?? nil
     }
 
+    /// 13n-c U3 — several notes, named (the Library's "Share N notes…"
+    /// pre-fill): each live note a grant may name, with its title and fence,
+    /// in the order given; a note that is not one is left out. One batched
+    /// facts read (∝ the pick).
+    func namedNotes(_ ids: [String]) async -> [MCPGrantPicker.NoteRow] {
+        await read { db in
+            let facts = try Queries.mcpNoteFacts(db, noteIDs: ids)
+            return try ids.compactMap { id in
+                guard let fact = facts[id],
+                      let title = try Queries.mcpScopeTitle(db, kind: .note, id: id) else { return nil }
+                return MCPGrantPicker.NoteRow(
+                    id: id, title: title, snippet: nil, day: nil, fence: fact.fence, wingID: fact.wingID)
+            }
+        } ?? []
+    }
+
     /// **The distinguishers the pane's rows and the ask sheet wear** — the
     /// ONE rule (`PlaceLabels`) over the OFFERED books and the wings, so a
     /// shared row or an ask names the same book the sheet's picker did.
@@ -603,8 +660,9 @@ final class MCPDoor {
             pendingCount: try Queries.mcpClientCount(db, states: [.pending]),
             clients: try clients.map { client in try clientRow(db, client) },
             clientCount: try Queries.mcpClientCount(db, states: [.approved, .denied]),
-            shared: try Queries.mcpSharedRows(db, limit: sharedCap),
-            sharedCount: try Queries.mcpSharedCount(db),
+            sharedGroups: try Queries.mcpSharedGroups(db, limit: sharedCap),
+            sharedCount: try Queries.mcpSharedGroupCount(db),
+            approvedCount: try Queries.mcpClientCount(db, states: [.approved]),
             activity: Array(MCPActivityFace.lines(try Queries.mcpActivity(db, limit: activityWindow))
                 .prefix(activityCap)),
             activityCount: try Queries.mcpActivityCount(db))

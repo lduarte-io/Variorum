@@ -70,6 +70,15 @@ struct RootView: View {
     /// delegate's ONE model (one per process, every window's Bookcase reads
     /// it); nil in harness mounts, which then draw no offer.
     let tourOffer: TourOfferModel?
+    /// 13n-c U3 — the app's ONE MCP door (the app delegate's; nil in harness
+    /// mounts, which then draw no share face). This window composes its
+    /// `MCPShareRoad` from the door's two narrow gates and presents THE grant
+    /// sheet its doors ask for — no feature below ever holds the door.
+    let mcp: MCPDoor?
+    /// The grant sheet this window is presenting (its road's `open`, ⌥⌘A's
+    /// no-history road and the receipts' Change… all land here through
+    /// `ShellRouter.mcpGrantRequest`).
+    @State private var mcpGrantSheet: MCPGrantOpening?
     /// 13s-b U2 — THE TOUR, while one runs in THIS window (its `engine` is
     /// nil otherwise). Per window by construction (`RootView` is the window);
     /// born at `startTour()`, dropped when the tour finishes or ends. A SLOT
@@ -156,7 +165,8 @@ struct RootView: View {
         hotKeys: GlobalHotKeyCenter = GlobalHotKeyCenter(system: .inert),
         whatsNew: WhatsNewLedger? = nil,
         calmAsks: CalmAskScheduler? = nil,
-        tourOffer: TourOfferModel? = nil
+        tourOffer: TourOfferModel? = nil,
+        mcp: MCPDoor? = nil
     ) {
         self.session = session
         self.services = services
@@ -166,6 +176,7 @@ struct RootView: View {
         self.whatsNew = whatsNew
         self.calmAsks = calmAsks
         self.tourOffer = tourOffer
+        self.mcp = mcp
         _router = State(initialValue: router)
         _library = State(initialValue: LibraryViewModel(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
@@ -187,6 +198,25 @@ struct RootView: View {
     /// walk): the sidebar toggle, a toolbar door since the correction round
     /// made the split ours (row 2).
     static let surfaceCapabilities: [CapabilityID] = [.toggleSidebar]
+
+    /// **13n-c U3 — this window's road to the MCP door** (`MCPShareRoad`):
+    /// the two gates read off the door's NARROW observables (so this body
+    /// re-runs only when a client is first approved / last un-approved, or
+    /// the server switch flips), `open` through the window's own request,
+    /// and the sheet a nested host presents itself (Book Settings, T-U3-7).
+    private var mcpRoad: MCPShareRoad? {
+        guard let mcp else { return nil }
+        let router = router
+        let theme = theme
+        return MCPShareRoad(
+            canShare: mcp.hasApprovedClient,
+            indicatorOn: mcp.hasApprovedClient && mcp.serverOn,
+            open: { router.mcpGrantRequest = $0 },
+            sheet: { opening, done in
+                AnyView(MCPGrantSheet(door: mcp, opening: opening, done: done).environment(theme))
+            },
+            revoke: { mcp.revokeFromReceipt($0) })
+    }
 
     var body: some View {
         // The Act 10 correction round, batch A (row 2): the flat shell —
@@ -329,6 +359,22 @@ struct RootView: View {
                 .environment(theme)
                 .onAppear { whatsNew?.markShown() }
         }
+        // 13n-c U3 — THE GRANT SHEET, opened from a place in this window (a
+        // row menu, the bulk bar, a popover's Change…, ⌥⌘A's no-history road,
+        // a receipt's Change…). One request, one sheet.
+        .sheet(item: $mcpGrantSheet) { opening in
+            if let mcp {
+                MCPGrantSheet(door: mcp, opening: opening) { mcpGrantSheet = nil }
+                    .environment(theme)
+                    .environment(\.mcpShareRoad, mcpRoad)
+            }
+        }
+        .onChange(of: router.mcpGrantRequest) { _, request in
+            guard let request else { return }
+            mcpGrantSheet = request
+            router.mcpGrantRequest = nil
+        }
+        .environment(\.mcpShareRoad, mcpRoad)
         .onChange(of: router.whatsNewRequested) { _, requested in
             guard requested else { return }
             whatsNewShown = true

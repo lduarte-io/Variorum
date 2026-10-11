@@ -238,6 +238,49 @@ nonisolated enum MCPPaneCopy {
     /// 13n-c U2 — the sheet opened from a place (U3's doors), its client
     /// chosen in WHO.
     static let sheetTitleChoosing = "Grant access"
+    /// 13n-c U3: the one title rule — a client named or chosen, and Change…
+    /// (R-AIR-4 — the sheet replaces what it was opened on) says so.
+    static func sheetTitle(client: String?, changing: Bool) -> String {
+        guard changing else { return client.map(sheetTitle) ?? sheetTitleChoosing }
+        return client.map { "Change access \u{2014} \($0)" } ?? "Change access"
+    }
+
+    // MARK: - Several notes (13n-c U3 — the Library's "Share N notes…"; mockup §2)
+
+    static func theseNotes(_ count: Int) -> String {
+        count == 1 ? "This note" : "These \(count) notes"
+    }
+    /// The pick, named — at most three, then "and N more".
+    static func notesList(_ titles: [String]) -> String {
+        let named = titles.prefix(3).joined(separator: " \u{00B7} ")
+        return titles.count > 3 ? "\(named) and \(titles.count - 3) more" : named
+    }
+    /// **Why "always" is not offered** when ANY picked note is fenced (mockup
+    /// §2, verbatim shape: "Always isn't offered: 1 of these notes is a daily
+    /// Journal entry, which is only ever shared one ask at a time.").
+    static func alwaysWithheldAmong(_ fences: [MCPGrantRule.Fence]) -> String {
+        let count = fences.count
+        let journal = fences.allSatisfy { $0 == .journal }
+        let privateOnly = fences.allSatisfy { $0 == .privateMark }
+        let what: String = switch (count == 1, journal, privateOnly) {
+        case (true, true, _): "is a daily Journal entry"
+        case (true, _, true): "is marked Private"
+        case (false, true, _): "are daily Journal entries"
+        case (false, _, true): "are marked Private"
+        default: "are Private or daily Journal entries"
+        }
+        return "Always isn't offered: \(count) of these notes \(what), which "
+            + (count == 1 ? "is" : "are") + " only ever shared one ask at a time."
+    }
+    /// The confirm for several notes: "Grant read on 3 notes while connected"
+    /// (mockup §2) — no quotes (the count is not a name), no clause (notes,
+    /// not a place that grows).
+    static func confirmPartsForNotes(
+        verb: String, rung: MCPGrantRule.Rung, count: Int, duration: MCPGrantRule.Duration
+    ) -> (lead: String, place: String, tail: String) {
+        ("\(verb) \(rungName(rung).lowercased()) on ", count == 1 ? "1 note" : "\(count) notes",
+         " \(durationWord(duration))")
+    }
     static let sheetLead =
         "The client sees what you grant and nothing else. Refusals speak to it exactly as they "
         + "speak to you."

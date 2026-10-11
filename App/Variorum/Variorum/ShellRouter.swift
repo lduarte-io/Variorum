@@ -41,6 +41,11 @@ final class ShellRouter {
     /// The shell answers it with the ONE tour entry the offer line's "yes"
     /// calls (`RootView.startTour()`).
     var tourRequested = false
+    /// 13n-c U3 — THE GRANT SHEET, pre-filled (⌥⌘A's no-history road, the
+    /// receipts' Change…, every place-door through the window's
+    /// `MCPShareRoad`): a REQUEST the window adopts (the sheet is the window's
+    /// to present) — `whatsNewRequested`'s shape, carrying its opening.
+    var mcpGrantRequest: MCPGrantOpening?
     /// **Whether this window's sidebar is on screen** (the Act 10 correction
     /// round, batch A — row 2). The split view used to hold this for us; with
     /// the flat `ShellSplit` it is per-window state here, toggled by the

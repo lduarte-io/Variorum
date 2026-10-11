@@ -36,6 +36,10 @@ struct NoteWindowView: View {
     let session: AppSession
     let windows: WindowRegistry
     let postID: String
+    /// 13n-c U3: the app's MCP door — this window composes its own
+    /// `MCPShareRoad` (the in-note indicator and the note ▾ menus' share
+    /// faces render here too — R118), and presents its own grant sheet.
+    var mcp: MCPDoor? = nil
 
     /// Its own router — and therefore its own workspace, its own context-bar
     /// fold. The same per-window ownership `RootView` gained this batch.
@@ -51,13 +55,30 @@ struct NoteWindowView: View {
     /// already reports it to the registry.
     @State private var window: NSWindow?
     @Environment(\.colorScheme) private var scheme
+    @State private var mcpGrantSheet: MCPGrantOpening?
 
-    init(session: AppSession, windows: WindowRegistry, postID: String) {
+    init(session: AppSession, windows: WindowRegistry, postID: String, mcp: MCPDoor? = nil) {
         self.session = session
         self.windows = windows
         self.postID = postID
+        self.mcp = mcp
         _theme = State(initialValue: ThemeStore(session: session))
         _wings = State(initialValue: WingsModel(session: session))
+    }
+
+    /// 13n-c U3 — this window's `MCPShareRoad` (`RootView.mcpRoad`'s twin).
+    private var mcpRoad: MCPShareRoad? {
+        guard let mcp else { return nil }
+        let router = router
+        let theme = theme
+        return MCPShareRoad(
+            canShare: mcp.hasApprovedClient,
+            indicatorOn: mcp.hasApprovedClient && mcp.serverOn,
+            open: { router.mcpGrantRequest = $0 },
+            sheet: { opening, done in
+                AnyView(MCPGrantSheet(door: mcp, opening: opening, done: done).environment(theme))
+            },
+            revoke: { mcp.revokeFromReceipt($0) })
     }
 
     /// THE MOUNT RULE, the same one fork the shell consults — with the
@@ -110,6 +131,20 @@ struct NoteWindowView: View {
         }
         .environment(theme)
         .environment(wings)
+        // 13n-c U3: this window's road and its grant sheet (RootView's shape).
+        .environment(\.mcpShareRoad, mcpRoad)
+        .sheet(item: $mcpGrantSheet) { opening in
+            if let mcp {
+                MCPGrantSheet(door: mcp, opening: opening) { mcpGrantSheet = nil }
+                    .environment(theme)
+                    .environment(\.mcpShareRoad, mcpRoad)
+            }
+        }
+        .onChange(of: router.mcpGrantRequest) { _, request in
+            guard let request else { return }
+            mcpGrantSheet = request
+            router.mcpGrantRequest = nil
+        }
         .overlay(alignment: .bottom) {
             if let item = session.status.current {
                 StatusToast(

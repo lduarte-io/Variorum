@@ -166,7 +166,9 @@ struct VariorumApp: App {
                     hotKeys: hotKeys, whatsNew: appDelegate.whatsNew,
                     calmAsks: appDelegate.calmAsks,
                     // 13s-b U1a: the first-open tour offer's one model.
-                    tourOffer: appDelegate.tourOffer)
+                    tourOffer: appDelegate.tourOffer,
+                    // 13n-c U3: the share faces' road is built from the door.
+                    mcp: appDelegate.mcp)
                     .onAppear {
                         appDelegate.session = session
                         #if DEBUG
@@ -466,7 +468,7 @@ struct VariorumApp: App {
         WindowGroup(id: EditorCommands.noteWindowGroupID, for: String.self) { $postID in
             switch (bootstrap.state, postID) {
             case (.ready(let session), .some(let postID)):
-                NoteWindowView(session: session, windows: windows, postID: postID)
+                NoteWindowView(session: session, windows: windows, postID: postID, mcp: appDelegate.mcp)
             case (.failed(let error, _), _):
                 // The note window shows the failure plainly; the MAIN
                 // window carries the recovery roads (one unlock surface,

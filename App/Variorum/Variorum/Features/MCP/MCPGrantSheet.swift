@@ -31,19 +31,6 @@
 import SwiftUI
 import VariorumCore
 
-/// **What opens the grant sheet** (13n-c U2 — the opener U3's doors call:
-/// the Library bulk bar, the note and book row menus, Book Settings).
-struct MCPGrantOpening: Identifiable {
-    let id = UUID().uuidString
-    /// Who the grant is for; nil = the sheet asks (WHO).
-    var client: MCPClient?
-    /// A first approval (Approve… on a connection request): the grant rides
-    /// the approve, in one act.
-    var approving = false
-    /// WHERE, pre-filled; nil = the sheet's own default (a book).
-    var place: MCPGrantSheet.Prefill?
-}
-
 struct MCPGrantSheet: View {
     let door: MCPDoor
     let opening: MCPGrantOpening
@@ -51,19 +38,21 @@ struct MCPGrantSheet: View {
 
     enum Place: Hashable {
         case note
+        /// 13n-c U3: several notes, fixed by the opener (the Library's "Share
+        /// N notes…") — WHERE is said, not chosen (mockup §2).
+        case notes
         case book
         case wing
     }
 
-    /// A pre-filled WHERE (U3's doors).
-    enum Prefill: Equatable {
-        case note(String)
-        case book(String)
-        case wing(String)
-    }
+    /// A pre-filled WHERE — `MCPGrantPrefill`, the road's own type since 13n-c
+    /// U3 (`Core/Views/MCPShareRoad.swift`, beside `MCPGrantOpening`).
+    typealias Prefill = MCPGrantPrefill
 
     @State private var place: Place = .book
     @State private var note: MCPGrantPicker.NoteRow?
+    /// 13n-c U3: the several notes a `.notes` opening names, in its order.
+    @State private var notes: [MCPGrantPicker.NoteRow] = []
     @State private var bookID: String?
     @State private var wingID: String = ""
     /// The note leg's wing (the window's current one by default).
@@ -83,6 +72,9 @@ struct MCPGrantSheet: View {
     @State private var now = Date()
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    /// 13n-c U3: the window's road — a place-door's receipt re-opens this
+    /// sheet through it (Change…).
+    @Environment(\.mcpShareRoad) private var road
 
     private var tokens: VoiceTokens { themeStore?.tokens(for: scheme) ?? .fallback(for: scheme) }
 
@@ -99,11 +91,24 @@ struct MCPGrantSheet: View {
     }
 
     /// The fence of the chosen NOTE (a book or wing grant is never fenced —
-    /// the offer leaves fenced books out).
-    private var noteFence: MCPGrantRule.Fence? { place == .note ? note?.fence : nil }
+    /// the offer leaves fenced books out). Several notes: the first fenced
+    /// one's — any one withholds "always" for the whole act.
+    private var noteFence: MCPGrantRule.Fence? {
+        switch place {
+        case .note: note?.fence
+        case .notes: notes.lazy.compactMap(\.fence).first
+        case .book, .wing: nil
+        }
+    }
 
     private var offeredDurations: [MCPGrantRule.Duration] {
         MCPGrantPicker.durations(connected: connected, noteFence: noteFence)
+    }
+
+    /// Whether the confirm can act (P-2: never an enabled dead button).
+    private var canConfirm: Bool {
+        guard client != nil, offeredDurations.contains(duration) else { return false }
+        return place == .notes ? !notes.isEmpty : spec != nil
     }
 
     /// The grant as chosen, or nil while it is incomplete.
@@ -113,6 +118,8 @@ struct MCPGrantSheet: View {
         case .note:
             guard let note else { return nil }
             return .init(rung: rung, scopeKind: .note, scopeID: note.id, duration: duration)
+        case .notes:
+            return nil  // several notes take the bulk act (`submit`)
         case .book:
             guard let book = chosenBook else { return nil }
             return .init(rung: rung, scopeKind: .book, scopeID: book.id, duration: duration)
@@ -125,7 +132,7 @@ struct MCPGrantSheet: View {
     /// clause, a book grant always wears hers.
     private var scope: MCPGrantRule.ScopeKind {
         switch place {
-        case .note: .note
+        case .note, .notes: .note
         case .book: .book
         case .wing: .wing
         }
@@ -134,6 +141,7 @@ struct MCPGrantSheet: View {
     private var placeName: String {
         switch place {
         case .note: note?.title ?? ""
+        case .notes: MCPShareCopy.notesCount(notes.count)
         case .book: chosenBook?.name ?? ""
         case .wing: places.wingName(wingID)
         }
@@ -141,7 +149,7 @@ struct MCPGrantSheet: View {
 
     private var placeDistinguisher: String? {
         switch place {
-        case .note: nil
+        case .note, .notes: nil
         case .book: bookID.flatMap { bookDistinguishers[$0] }
         case .wing: wingDistinguishers[wingID]
         }
@@ -151,7 +159,7 @@ struct MCPGrantSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(opening.client.map { MCPPaneCopy.sheetTitle($0.name) } ?? MCPPaneCopy.sheetTitleChoosing)
+            Text(MCPPaneCopy.sheetTitle(client: opening.client?.name, changing: !opening.replacing.isEmpty))
                 .font(.headline)
                 .lineLimit(1)
             Text(MCPPaneCopy.sheetLead)
@@ -166,14 +174,18 @@ struct MCPGrantSheet: View {
             }
 
             section(MCPPaneCopy.whereSection)
-            Picker(MCPPaneCopy.whereSection, selection: $place) {
-                Text(MCPPaneCopy.aNote).tag(Place.note)
-                Text(MCPPaneCopy.aBook).tag(Place.book)
-                Text(MCPPaneCopy.thisWing).tag(Place.wing)
+            // Several notes are SAID, never re-chosen (mockup §2): the act
+            // they open is the bulk share of exactly these.
+            if place != .notes {
+                Picker(MCPPaneCopy.whereSection, selection: $place) {
+                    Text(MCPPaneCopy.aNote).tag(Place.note)
+                    Text(MCPPaneCopy.aBook).tag(Place.book)
+                    Text(MCPPaneCopy.thisWing).tag(Place.wing)
+                }
+                .pickerStyle(.radioGroup)
+                .horizontalRadioGroupLayout()
+                .labelsHidden()
             }
-            .pickerStyle(.radioGroup)
-            .horizontalRadioGroupLayout()
-            .labelsHidden()
             whereRow
 
             section(MCPPaneCopy.howMuchSection)
@@ -196,9 +208,7 @@ struct MCPGrantSheet: View {
             .pickerStyle(.segmented)
             .labelsHidden()
             .fixedSize()
-            ForEach(MCPGrantPicker.durationWhys(
-                connected: connected, clientChosen: client != nil,
-                note: noteFence.flatMap { fence in note.map { ($0.title, fence) } }), id: \.self) { why in
+            ForEach(durationWhys, id: \.self) { why in
                 quiet(why)
             }
 
@@ -207,23 +217,12 @@ struct MCPGrantSheet: View {
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
                     .keyboardShortcut(.cancelAction)
                 Spacer(minLength: 8)
-                Button {
-                    guard let spec, let client else { return }
-                    if opening.approving {
-                        door.approve(client.id, granting: spec)
-                    } else {
-                        door.grant(client.id, spec)
-                    }
-                    done()
-                } label: {
-                    ConfirmLabel(parts: MCPPaneCopy.confirmParts(
-                        verb: CapabilityRegistry.capability(.mcpGrantAccess).verb,
-                        rung: rung, scope: scope, place: placeName, distinguisher: placeDistinguisher,
-                        duration: duration))
+                Button(action: submit) {
+                    ConfirmLabel(parts: confirmParts)
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                 .keyboardShortcut(.defaultAction)
-                .disabled(spec == nil)
+                .disabled(!canConfirm)
             }
             .padding(.top, 4)
         }
@@ -309,10 +308,77 @@ struct MCPGrantSheet: View {
                 quiet(MCPPaneCopy.aBookDetail(chosenBook?.name))
             }
             quiet(MCPPaneCopy.fencedBooksNote)
+        case .notes:
+            // 13n-c U3 (mockup §2): "These 3 notes — parser notes · grammar
+            // sketch · morning pages — oct 9".
+            Text(MCPPaneCopy.theseNotes(notes.count))
+                .font(.callout)
+                .lineLimit(1)
+            quiet(MCPPaneCopy.notesList(notes.map(\.title)))
         case .wing:
             wingPicker(selection: wingID) { wingID = $0 }
             quiet(MCPPaneCopy.wingDetail(places.wingName(wingID)))
         }
+    }
+
+    // MARK: - The confirm
+
+    /// The one-line whys under HOW LONG — a fenced note's (one, or several
+    /// among the pick: mockup §2's "1 of these notes is a daily Journal
+    /// entry…"), and "while connected" withheld from a client not connected.
+    private var durationWhys: [String] {
+        if place == .notes {
+            let fences = notes.compactMap(\.fence)
+            return (fences.isEmpty ? [] : [MCPPaneCopy.alwaysWithheldAmong(fences)])
+                + MCPGrantPicker.durationWhys(connected: connected, clientChosen: client != nil, note: nil)
+        }
+        return MCPGrantPicker.durationWhys(
+            connected: connected, clientChosen: client != nil,
+            note: noteFence.flatMap { fence in note.map { ($0.title, fence) } })
+    }
+
+    private var confirmParts: (lead: String, place: String, tail: String) {
+        let verb = CapabilityRegistry.capability(.mcpGrantAccess).verb
+        if place == .notes {
+            return MCPPaneCopy.confirmPartsForNotes(verb: verb, rung: rung, count: notes.count, duration: duration)
+        }
+        return MCPPaneCopy.confirmParts(
+            verb: verb, rung: rung, scope: scope, place: placeName, distinguisher: placeDistinguisher,
+            duration: duration)
+    }
+
+    /// How the receipt says the place (a place-door's sheet speaks one).
+    private var receiptPlace: String {
+        switch place {
+        case .note: MCPShareCopy.quoted(placeName)
+        case .notes: MCPShareCopy.notesCount(notes.count)
+        case .book: PlaceLabels.quoted(placeName, distinguisher: placeDistinguisher)
+        case .wing: MCPShareCopy.wingPlace(placeName)
+        }
+    }
+
+    /// The confirm's act: approve-with-grant (the pane's Approve…), the bulk
+    /// share (several notes), or one grant — Change… when the opening names
+    /// grants to replace (T-U3-8). A place-door's sheet speaks its receipt on
+    /// the window's status seam; the pane's keeps its caption.
+    private func submit() {
+        guard canConfirm, let client else { return }
+        let saying = opening.origin == .place ? receiptPlace : nil
+        let change = road?.open
+        if place == .notes {
+            door.grantNotes(
+                client, notes.map(\.id), rung: rung, duration: duration, replacing: opening.replacing,
+                saying: saying, change: change)
+        } else if let spec {
+            if opening.approving {
+                door.approve(client.id, granting: spec)
+            } else if saying == nil, opening.replacing.isEmpty {
+                door.grant(client.id, spec)
+            } else {
+                door.grant(client, spec, replacing: opening.replacing, saying: saying, change: change)
+            }
+        }
+        done()
     }
 
     private func wingPicker(selection: String, pick: @escaping (String) -> Void) -> some View {
@@ -344,13 +410,31 @@ struct MCPGrantSheet: View {
         clients = opening.client == nil ? await loadedClients : []
         if chosenClientID == nil { chosenClientID = clients.first?.id }
         noteWingID = door.currentWingID
+        // 13n-c U3 (R-AIR-4): Change… opens on exactly what was shared.
+        if let pre = opening.rung { rung = pre }
+        if let pre = opening.duration { duration = pre }
+        var single: String?
         switch opening.place {
         case .note(let id)?:
+            single = id
+        case .notes(let ids)? where ids.count == 1:
+            single = ids[0]
+        case .notes(let ids)?:
+            place = .notes
+            notes = await door.namedNotes(ids)
+        default:
+            break
+        }
+        if let single {
             place = .note
-            if let row = await door.grantNote(id) {
+            if let row = await door.grantNote(single) {
                 note = row
                 noteWingID = row.wingID ?? noteWingID
             }
+        }
+        switch opening.place {
+        case .note?, .notes?:
+            break
         case .book(let id)?:
             place = .book
             bookID = id
