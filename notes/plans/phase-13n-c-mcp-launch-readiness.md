@@ -29,7 +29,7 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | U2 | The grant sheet rebuilt | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U2 record) — owed: the orchestrator's verification; the walk HELD (locked session) — offscreen captures stand in, NOT a walk; Stage B |
 | U3 | Grant from where you are + the one icon + the in-note indicator | BUILT + VERIFIED by the orchestrator at `c6d5d23a` (7 commits `4dc0202c..c6d5d23a`: fence diff empty — no Sync/ · Persistence/ · migrations · editor seam; zero trailers; 22 captures read — popover, Bookcase icon, two-door receipt) — icon pick: A `point.3.connected.trianglepath.dotted` KEPT (orchestrator, PROVISIONAL P-13nc-U3-5 — hers at the copy pass); the walk HELD (locked session); Stage B |
 | U4 | Asks wait quietly + the keyboard | BUILT + VERIFIED by the orchestrator at `f1ab4725` (5 commits `a41efc1b..f1ab4725`: fence diff empty — zero `Sources/` lines; zero trailers; captures read — Waiting, ⌘L typed, Bookcase glyphs) — the walk HELD (locked); Stage B |
-| U5 | The guide, the AI's advice, the setup menu | BRIEFED — implementer spawning |
+| U5 | The guide, the AI's advice, the setup menu | BUILT + VERIFIED by the orchestrator at `065526ce` (8 commits `58b81ec8..065526ce`: fence diff empty — zero `VariorumCore/` lines; zero trailers; captures read — lesson 4, the any-client JSON; the advice read whole) — the walk + the scratch `claude mcp add` HELD (locked); Stage B |
 | U6 | The wing on the wire (+ gatherings under a wing grant) | NOT-STARTED |
 | U7 | VX-159 — the ceremonies on the wire | NOT-STARTED (may fall out — §4) |
 | U8 | R-AIR-14 — the per-setup secret | NOT-STARTED (LAST; may fall out — §4) |
@@ -159,6 +159,14 @@ waiting ask must read as different from "shared" at a glance. The fix pass picks
 its silhouette, not its fill (candidates for the fixer: a badge dot on the shared icon, `questionmark.circle`,
 `hand.raised`), PROVISIONAL and hers at the copy pass. Not a red-on-old class (taste), so no pin is owed beyond the
 existing glyph pins. FABLE-OWED: no (chrome).
+
+**ORCHESTRATOR FINDINGS O-2 / O-3 (U5 read, 2026-10-11 10:15) — routed to the Stage B fix pass (held back from the cold
+reviewer: REVIEW_PROMPT forbids framing).**
+- **O-2:** `MCPSession.instructions` calls the author "she"/"her" throughout. Variorum ships to anyone; the advice an AI
+  reads must not assume the user's pronouns. Fix: "the author" / "they" (neutral), within the 1,500 bound, and pin that the
+  advice carries no gendered pronoun. (The guide speaks in "you", which is fine.)
+- **O-3:** the ⌘/ helper's MCP row (U4's) describes the pending glyph by shape ("the filled icon…"); it moves with O-1's
+  glyph change and describes the mark by role instead (U5's own carry note).
 
 ## ⚠️ STANDING BLOCKER — THE SESSION IS LOCKED (found 04:00, confirmed 04:14 MDT)
 
@@ -631,8 +639,8 @@ unit record (TCC state is machine-state the next session inherits).
 | 4 | U2 — the grant sheet | U2 implementer | BUILT + VERIFIED `49c964ea` — walk HELD |
 | 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | BUILT + VERIFIED `c6d5d23a` — walk HELD (locked); icon A kept PROVISIONAL (orchestrator); UX-walk watch: the icon reads small beside a Terminal-voice book name (capture `u3-bookcase-terminal.png`) — the UX reviewer is asked to judge it |
 | 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | BUILT + VERIFIED `f1ab4725` — walk HELD; two order-dependent Mac reds predating U4 ticketed **VX-167** (red identically on U3's tree; green alone) |
-| 7 | U5 — the guide, the advice, the setup menu | U5 implementer | BRIEFED — spawned |
-| 8 | Stage B ladder (opus) | orchestrator | NOT-STARTED |
+| 7 | U5 — the guide, the advice, the setup menu | U5 implementer | BUILT + VERIFIED `065526ce` — walk HELD; watch: `MCPServerTests.connectionsPastTheCapAreRefused…` red once in a whole-package run ("Unable to parse empty data"), green 6× alone + 2 whole-target + the second whole-package run — the VX-132/VX-134 harness family, re-watched at the closeout run |
+| 8 | Stage B ladder (opus) over `99d739e9..065526ce` | orchestrator | ROUND 1 SPAWNED — record `notes/plans/13nc-stageB-ladder-round1.md` |
 | 9 | U6 — the wing on the wire | U6 implementer | NOT-STARTED |
 | 10 | U7 — VX-159 | U7 implementer | NOT-STARTED (may fall out) |
 | 11 | Stage C ladder | orchestrator | NOT-STARTED |
