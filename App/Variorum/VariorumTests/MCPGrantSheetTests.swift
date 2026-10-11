@@ -152,7 +152,7 @@ struct MCPGrantSheetTests {
         #expect(byShelf[2].options.map(\.id) == ["b3", "b2", "b6", "b7"],
                 "inside a shelf the Bookcase's digit-aware a–z (Book 9 before Book 10)")
         let az = layouts[1].sections
-        #expect(az.map(\.title) == ["Recently edited", "Starred", nil])
+        #expect(az.map(\.title) == ["Recently edited", "Starred", "All books"])
         #expect(az[2].options.map(\.id) == ["b1", "b3", "b2", "b4", "b5", "b6", "b7"])
     }
 

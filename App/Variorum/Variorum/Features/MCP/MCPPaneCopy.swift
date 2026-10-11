@@ -283,6 +283,9 @@ nonisolated enum MCPPaneCopy {
     static let recentlyEdited = "Recently edited"
     static let starred = "Starred"
     static let unshelved = "Unshelved"
+    /// The a–z layout's one list (its header — without one it read as
+    /// Starred's continuation in the U2 capture).
+    static let allBooks = "All books"
     /// A shelf section in a wing other than Home names its wing first.
     static func shelfSection(_ shelf: String, glyph: String?, wing: String?) -> String {
         let name = [glyph, shelf].compactMap { $0 }.joined(separator: " ")

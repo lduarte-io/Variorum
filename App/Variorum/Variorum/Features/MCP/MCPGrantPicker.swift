@@ -13,7 +13,7 @@
 //    show only before typing) → one section per shelf in the Bookcase's strip
 //    order, per wing (Home first, then the wings in switcher order; a wing
 //    other than Home names itself in its sections) → Unshelved; and **a–z** —
-//    the same quick sections, then every book in one list. Inside a section,
+//    the same quick sections, then every book in one list ("All books"). Inside a section,
 //    the Bookcase's own a–z (digit-aware). Each row: the name, the
 //    distinguisher (accent) when its name collides, and the context line
 //    (`PlaceLabels`) under it.
@@ -56,7 +56,8 @@ nonisolated enum MCPGrantPicker {
                 title: MCPPaneCopy.unshelvedSection(wing: wingLabel),
                 options: alphabetical(inWing.filter { $0.shelfID == nil }).map(option)))
         }
-        let az = quick + [SearchPickerSection(id: "all", title: nil, options: alphabetical(places.books).map(option))]
+        let az = quick + [SearchPickerSection(
+            id: "all", title: MCPPaneCopy.allBooks, options: alphabetical(places.books).map(option))]
         return [
             SearchPickerArrangement(id: "shelf", label: MCPPaneCopy.byShelf, sections: byShelf),
             SearchPickerArrangement(id: "az", label: MCPPaneCopy.alphabetical, sections: az),
