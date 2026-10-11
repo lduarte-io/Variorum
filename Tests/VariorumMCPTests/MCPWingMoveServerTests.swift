@@ -60,6 +60,11 @@ struct MCPWingMoveServerTests {
         try h.database.read { try String.fetchAll($0, sql: sql, arguments: StatementArguments(arguments)) }
     }
 
+    /// The newest activity row (a sync read).
+    private func lastActivity(_ h: ServerHarness) throws -> MCPActivityRow? {
+        try h.database.read { try Queries.mcpActivity($0, limit: 1) }.first
+    }
+
     private func grantIDs(_ h: ServerHarness) throws -> [String] {
         try h.database.read { try String.fetchAll($0, sql: "SELECT id FROM mcp_grant ORDER BY created_at, id") }
     }
@@ -208,6 +213,12 @@ struct MCPWingMoveServerTests {
             #expect(receipt.detail == "parser notes" && receipt.leftBooks == 2)
             #expect(receipt.show == .note(noteID: w.note.id, blockID: nil, select: nil))
             #expect(h.undoStack.topLabel == "claude-code's wing move", "ONE client-named entry")
+            // D-U6-2 (found walking, the live round): the activity row names
+            // the NOTE it moved — the receipt's title is the destination
+            // wing's (the sweep's coalescing key), never the log's.
+            let logged = try lastActivity(h)
+            #expect(logged?.act == "move_note_to_wing" && logged?.targetID == w.note.id)
+            #expect(logged?.targetTitle == "parser notes", "the row says which note moved")
             await h.hangUp(connection)
         }
     }
