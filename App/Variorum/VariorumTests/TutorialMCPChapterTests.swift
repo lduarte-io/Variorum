@@ -238,6 +238,11 @@ struct TutorialMCPChapterTests {
             #expect(bracket.before.hasPrefix("before") && bracket.after.hasPrefix("after"))
             // Where, and how long — the durations by their own words.
             #expect(text.contains("one note; one book, with its notes now and any added to it later; or a whole wing"))
+            // The wing and the open book never overclaim: the exceptions are
+            // named, and "the next lesson" really is the one that names them.
+            #expect(text.contains("everything in it, except what always asks (the next lesson)"))
+            #expect(text.contains("read everything, always, again except what always asks"))
+            #expect(lessons[3] == "what always asks")
             for duration in MCPGrantRule.Duration.allCases {
                 #expect(text.contains(MCPPaneCopy.durationWord(duration)), "\(duration)'s word")
             }

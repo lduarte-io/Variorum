@@ -2480,9 +2480,9 @@ enum TutorialSeeder {
         _ = try lesson(door, mcpLessons[0], [
             "Variorum can let an AI work in your library, if you want it to. The way "
             + "in is MCP, the Model Context Protocol: a standard way for AI apps such "
-            + "as Claude Code or Codex to use another app's tools. In Variorum that "
-            + "way in is the door, and it stays shut until you open it. It lives on "
-            + "the Mac; the phone has no door.",
+            + "as Claude Code or Codex to use another app's tools. Variorum calls its "
+            + "way in the door, and it stays shut until you open it. It lives on the "
+            + "Mac; the phone has no door.",
 
             "Open it in Settings \u{25B8} MCP (\u{2325}\u{2318}, takes you there) "
             + "with Enable the MCP server. It works only while Variorum is open, and "
@@ -2528,15 +2528,16 @@ enum TutorialSeeder {
             + "after, so you can always compare and come back.",
 
             "Each grant also says where: one note; one book, with its notes now and "
-            + "any added to it later; or a whole wing and everything in it. And for "
+            + "any added to it later; or a whole wing and everything in it, except "
+            + "what always asks (the next lesson). And for "
             + "how long: once, for a single act (one read of a note, or one "
             + "change); until it disconnects, which ends when the client goes away "
             + "(offered while it's connected); or always, until you revoke it.",
 
             "The open book is the widest grant of all: one switch in Settings "
             + "\u{25B8} MCP that lets every approved client read everything, "
-            + "always. It is off to begin with; leave it off unless that is what "
-            + "you mean.",
+            + "always, again except what always asks. It is off to begin with; leave "
+            + "it off unless that is what you mean.",
         ])
 
         _ = try lesson(door, mcpLessons[3], [
