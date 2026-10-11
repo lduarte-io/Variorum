@@ -147,6 +147,35 @@ HELD and the handoff says so.
   the journal fence. R-AIR-1 changes only the MCP fence's derivation (`MCPGrantQueries`), so U1 is
   ZERO `Sync/` lines — the implementer re-verifies and the record says so.
 
+## ⚠️ STANDING BLOCKER — THE SESSION IS LOCKED (found 04:00, confirmed 04:14 MDT)
+
+The Pro's login session is LOCKED (`CGSSessionScreenIsLocked = 1`; the display was asleep at
+04:00). Unlocking is hers. **Consequences, stated plainly:** every GUI walk (each unit's pre-flight
+walk, the orchestrator's walks), the GUI legs of the live rounds (approving a client and minting a
+grant in the pane, watching faces), and the OPUS UX-REVIEWER WALK cannot run until she unlocks —
+so her refresh condition (3)+(4) cannot be met tonight, and **the /Applications refresh is HELD**
+unless she unlocks before the closeout. What still runs: headless suites, the Mac `xcodebuild test`
+suites (they ran green under the lock at U1), offscreen render harnesses (U1's
+`MCPGrantSheetCaptureTests` precedent — real views rendered to PNG, NOT a walk and never called
+one), the cold code ladders. Each unit's record says which of its walk legs are held; the handoff
+carries the held walks as her first morning items.
+
+## ORCHESTRATOR ADJUDICATIONS ON U1 (2026-10-11 ~04:20, Opus — each a FABLE-OWED row)
+
+- **T-2 CONCURRED (F-9):** canon outranks a plan clause — AppSpec §12's "everything unreachable
+  answers ONE uniform not-shared shape — no fenced-vs-unshared oracle anywhere" and the 13n-b
+  handoff's promise to her both say what U1 built; AF-6's "`fenced` gains the said sentence" was
+  the outlier (CLAUDE.md: if code conflicts with the spec, align to the spec). The ask still
+  reaches HER.
+- **F-7 RULED (a) and built by the orchestrator (`df704250`):** a fenced BOOK answers the same one
+  answer (the same canon letter; (b)'s premise — only a client that once read the book knows its
+  id — does not survive a Private mark set after the read, which is exactly the case to protect).
+- **F-8 left UNBUILT on purpose:** the `rungTooLow` edge lives inside `MCPGrantRule.decide`, the
+  security rule itself — Fable's eye first.
+- **The perf-benchmark sighting:** `PerfBenchmarkTests.timelinePageIsFlatOrUnderBudgetInCorpusSize`
+  red once in the whole-package run at `df704250` (load-sensitive wall-clock bound), green alone —
+  not this diff; recorded here as a watch item (VX-34's harness-calibration family).
+
 ## 1. What this phase is
 
 The launch-readiness round for the MCP door — *a real user, with hundreds of books and notes, can
@@ -487,13 +516,15 @@ per adjudication decision or diff that would ordinarily earn a Fable review.
 
 | # | Commit | Diff scope | Why owed | Reviewed by (actual model) |
 |---|---|---|---|---|
-| F-1 | (this commit) | D-1 — the ⌘J edge kept (the note's own `profile='journal'` leg) | default's-meaning: what the fence covers | — |
-| F-2 | (this commit) | D-2 — docs delivery (guide chapter + `instructions`) | product-shaped call made by Opus | — |
-| F-3 | (this commit) | D-3 — R-AIR-3's clause extended to wing confirms and every duration | wording of a disclosure confirm | — |
-| F-4 | (this commit) | D-5 — the Sync/ fold classifiers judged untouched by R-AIR-1 | a Sync/-adjacent trace judged by Opus | — |
+| F-1 | `9b1ec3dd` | D-1 — the ⌘J edge kept (the note's own `profile='journal'` leg) | default's-meaning: what the fence covers | — |
+| F-2 | `9b1ec3dd` | D-2 — docs delivery (guide chapter + `instructions`) | product-shaped call made by Opus | — |
+| F-3 | `9b1ec3dd` | D-3 — R-AIR-3's clause extended to wing confirms and every duration | wording of a disclosure confirm | — |
+| F-4 | `9b1ec3dd` | D-5 — the Sync/ fold classifiers judged untouched by R-AIR-1 | a Sync/-adjacent trace judged by Opus | — |
 | F-5 | `63e70d67` | U1 — the fence classifier itself: the journal legs re-keyed on `'daily'` (`dailyJournalLegForBook`, three sites) + the ⌘J own-profile leg kept | her protocol names the fence classifier; default's-meaning (written by the U1 implementer, Opus) | — |
 | F-6 | `1a311c8e` | U1 T-2 — a fenced NOTE answers the ONE `notShared` answer on every tool, never the asked sentence (REVERSES 13n-b AF-6's "`fenced` gains the said sentence" for notes; aligns with AppSpec §12's no-oracle line and the brief's byte-identity) | refusal uniformity at the security boundary — a ruled clause reversed on an Opus reading (written by the U1 implementer) | — |
-| F-7 | — (NOT BUILT) | U1 fork — a fenced BOOK still names itself on the wire ("That book is the daily Journal…" / "…marked Private…") | the same oracle class left standing pending the orchestrator's call (options in the U1 record's T-2) | — |
+| F-7 | `df704250` | U1 fork RULED (a) by the orchestrator (Opus) and BUILT by its own hands: a fenced BOOK answers the one `notShared` answer too, byte-equal to a book id naming nothing (pins red-on-old, 4 issues) | refusal uniformity at the security boundary, ruled AND written by Opus | — |
+| F-8 | — (recorded, NOT built) | U1 edge: a client holding a per-ask READ grant on a fenced note that asks to SUGGEST hears `notShared` though it can read the note; the honest answer is `rungTooLow` + the asked sentence — a three-line change inside `MCPGrantRule.decide` | the security rule itself — left for Fable's eye, deliberately unbuilt | — |
+| F-9 | (the U1 adjudication commit) | T-2 CONCURRED by the orchestrator (Opus): AppSpec §12's no-oracle contract line outranks 13n-b AF-6's fenced clause (a plan ruling); the visible cost — a client that read a note hears the one answer once she marks it Private — accepted | an Opus concurrence reversing a Fable-ruled clause | — |
 
 ## 7. Constraints (standing, restated)
 
@@ -549,7 +580,7 @@ unit record (TCC state is machine-state the next session inherits).
 | # | Item | Owner | Status |
 |---|---|---|---|
 | 1 | Kickoff (ticket, worktree, in-flight row, this plan) | orchestrator | DONE |
-| 2 | U1 — the fence re-key | U1 implementer | IMPLEMENTER CLOSED — the U1 record's banner (the walk HELD by a locked session; fork F-7 open) |
+| 2 | U1 — the fence re-key | U1 implementer + orchestrator | BUILT + VERIFIED; F-7 ruled (a) and built `df704250`; walk HELD (locked session) |
 | 3 | Stage A ladder (fable-reviewer R1) | orchestrator | NOT-STARTED |
 | 4 | U2 — the grant sheet | U2 implementer | NOT-STARTED |
 | 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | NOT-STARTED |
