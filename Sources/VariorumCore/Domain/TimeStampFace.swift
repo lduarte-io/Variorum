@@ -105,6 +105,17 @@ public enum TimeStampFace {
                          calendar: calendar, locale: locale)
     }
 
+    /// The time of day alone: *9:14 PM* (the locale's own `jmm`), or with
+    /// its seconds (`jmmss`). 13n-c U2 — `PlaceLabels`' made-time rungs
+    /// ("made Oct 9, 9:14 PM"); the same cached formatter as every other
+    /// shape here, so the time reads exactly as the stamps' "today 1:33 AM".
+    public static func time(
+        _ date: Date, seconds: Bool = false,
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> String {
+        formatted(date, template: seconds ? "jmmss" : "jmm", calendar: calendar, locale: locale)
+    }
+
     /// The labelled form for an instant: *edited today 1:33 AM*.
     public static func stamp(
         _ subject: Subject, date: Date, now: Date,
