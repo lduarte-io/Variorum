@@ -168,7 +168,9 @@ reviewer: REVIEW_PROMPT forbids framing).**
 - **O-3:** the ⌘/ helper's MCP row (U4's) describes the pending glyph by shape ("the filled icon…"); it moves with O-1's
   glyph change and describes the mark by role instead (U5's own carry note).
 
-## ⚠️ STANDING BLOCKER — THE SESSION IS LOCKED (found 04:00, confirmed 04:14 MDT)
+## ✅ BLOCKER CLEARED 11:31 MDT. She unlocked the Pro ("pro should be unlocked for all your forseeable needs"). The orchestrator's dev-store check at 11:37: the tip's Debug build opens the dev store normally. Her screenshot of "database could not be opened… key is not available" was the `xcodebuild test` HOST window (Mac suites host on the Debug app, which cannot reach the dev store's key under test), not a defect. The held walks now run after Stage B R2.
+
+## (history) STANDING BLOCKER — THE SESSION WAS LOCKED (found 04:00, confirmed 04:14 MDT)
 
 The Pro's login session is LOCKED (`CGSSessionScreenIsLocked = 1`; the display was asleep at
 04:00). Unlocking is hers. **Consequences, stated plainly:** every GUI walk (each unit's pre-flight
@@ -644,7 +646,7 @@ unit record (TCC state is machine-state the next session inherits).
 | 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | BUILT + VERIFIED `c6d5d23a` — walk HELD (locked); icon A kept PROVISIONAL (orchestrator); UX-walk watch: the icon reads small beside a Terminal-voice book name (capture `u3-bookcase-terminal.png`) — the UX reviewer is asked to judge it |
 | 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | BUILT + VERIFIED `f1ab4725` — walk HELD; two order-dependent Mac reds predating U4 ticketed **VX-167** (red identically on U3's tree; green alone) |
 | 7 | U5 — the guide, the advice, the setup menu | U5 implementer | BUILT + VERIFIED `065526ce` — walk HELD; the one cap-test red ("Unable to parse empty data") folded into **VX-132** by comment (Stage B R1 B14) |
-| 8 | Stage B ladder (opus) over `99d739e9..065526ce` | orchestrator | R1 DONE — `notes/plans/13nc-stageB-ladder-round1.md` (0B/1M/6m/7n/2 spec; all accepted, S-1/S-2 to the walk); the fix pass + O-1…O-3 BRIEFED ("THE STAGE B FIX BRIEF") → R2 |
+| 8 | Stage B ladder (opus) over `99d739e9..065526ce` | orchestrator | R1 DONE (`13nc-stageB-ladder-round1.md`) → FIX PASS CLOSED `c6d8509c..9c049c6a`, verified by the orchestrator (fence diff empty, zero trailers; 12 pins red-on-old by revert; core 2,620/299 · MCP 80/11 · Mac 1,539/239 with only VX-115 + VX-167 red) → **R2 SPAWNED** over `b6ba61c1..9c049c6a`. Carried to R2/her copy pass: `MCPPaneCopy.noActivity` still says "every call a client makes" (B10's class). U6 NOTE: the advice has ~3 characters left under its 1,500 bound. The gatherings clause needs a trim or her word to raise the bound. |
 | 9 | U6 — the wing on the wire | U6 implementer | NOT-STARTED |
 | 10 | U7 — VX-159 | U7 implementer | NOT-STARTED (may fall out) |
 | 11 | Stage C ladder | orchestrator | NOT-STARTED |
