@@ -110,6 +110,9 @@ struct QuietReceiptLine: View {
                 .foregroundStyle(tokens.accent)
                 .lineLimit(1)
                 .fixedSize()
+                // Two doors side by side read as two in a mono voice too (the
+                // U3 capture: Terminal's "Change… Revoke ›" ran together).
+                .padding(.trailing, 4)
             }
             // 13n-b U4 (R-13nb-23 (a), AF-11 F-2): a receipt may carry ONE
             // door — an AI write's "Open ›". Drawn only while such a receipt

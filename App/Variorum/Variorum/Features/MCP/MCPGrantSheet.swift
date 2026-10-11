@@ -167,6 +167,11 @@ struct MCPGrantSheet: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
+            // 13n-c U3 (T-U3-8): Change… says, before she confirms, that the
+            // confirm REPLACES what it was opened on.
+            if !opening.replacing.isEmpty {
+                quiet(MCPPaneCopy.replacesLine)
+            }
 
             if opening.client == nil {
                 section(MCPPaneCopy.whoSection)

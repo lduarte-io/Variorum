@@ -2258,7 +2258,9 @@ nonisolated enum CapabilityRegistry {
         Capability(
             id: .mcpShareBook, verb: MCPShareCopy.shareButton, scope: .book,
             doors: [.surface],
-            shortcutLabel: nil, takesAccess: nil,
+            // R118: Book Settings is the same sheet from every mode — Takes is
+            // never behind Write here (`.markBookPrivate`'s declaration).
+            shortcutLabel: nil, takesAccess: .native,
             unavailableNote: MCPShareCopy.zeroState,
             availability: always),
         // ⌥⌘A — the note the mounted detail holds (`CommandRouter

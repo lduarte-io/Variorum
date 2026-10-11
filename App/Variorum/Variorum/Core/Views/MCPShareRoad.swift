@@ -63,8 +63,15 @@ struct MCPGrantOpening: Identifiable, Equatable {
 }
 
 /// **The faces' one road to the MCP door** (built per window).
+///
+/// EQUATABLE ON ITS TWO GATES ONLY: a window rebuilds the road on every pass of
+/// its body, and an environment value SwiftUI cannot compare reads as CHANGED
+/// every time — which would re-render every surface reading it (the Library,
+/// the Bookcase, each pane's bar) on each of the window's own re-renders. The
+/// closures are the window's own and stable in what they do, so two roads
+/// with the same gates ARE the same road.
 @MainActor
-struct MCPShareRoad {
+struct MCPShareRoad: Equatable {
     /// At least one APPROVED client (R-AIR-8) — every share face's gate.
     let canShare: Bool
     /// The server ON and at least one approved client (R-AIR-7) — the in-note
@@ -78,6 +85,10 @@ struct MCPShareRoad {
     /// Revoke these grants in one act (a popover's Revoke) — awaited, so the
     /// face that asked re-reads after it lands.
     let revoke: ([String]) async -> Void
+
+    nonisolated static func == (lhs: MCPShareRoad, rhs: MCPShareRoad) -> Bool {
+        lhs.canShare == rhs.canShare && lhs.indicatorOn == rhs.indicatorOn
+    }
 }
 
 private struct MCPShareRoadKey: EnvironmentKey {

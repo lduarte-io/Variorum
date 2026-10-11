@@ -328,6 +328,7 @@ struct MCPShareFacesTests {
         #expect(MCPPaneCopy.groupMembers(["a", nil, "c"], total: 7) == "a \u{00B7} (gone) \u{00B7} c and 4 more")
         #expect(MCPPaneCopy.sheetTitle(client: "claude-code", changing: true) == "Change access \u{2014} claude-code")
         #expect(MCPPaneCopy.sheetTitle(client: nil, changing: false) == MCPPaneCopy.sheetTitleChoosing)
+        #expect(MCPPaneCopy.replacesLine == "Confirming replaces the grant you opened this from.")
         // R-AIR-8: the settings-class faces carry no "AI".
         for words in [MCPShareCopy.sharedWithLabel, MCPShareCopy.notShared, MCPShareCopy.shareButton,
                       MCPShareCopy.popoverTitle, MCPShareCopy.openBookNote, MCPShareCopy.zeroState,

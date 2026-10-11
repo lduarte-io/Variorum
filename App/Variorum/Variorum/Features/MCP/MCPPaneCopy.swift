@@ -263,6 +263,10 @@ nonisolated enum MCPPaneCopy {
         return client.map { "Change access \u{2014} \($0)" } ?? "Change access"
     }
 
+    /// Change…'s one line under the title (T-U3-8 said where she decides):
+    /// the confirm REPLACES what the sheet was opened on.
+    static let replacesLine = "Confirming replaces the grant you opened this from."
+
     // MARK: - Several notes (13n-c U3 — the Library's "Share N notes…"; mockup §2)
 
     static func theseNotes(_ count: Int) -> String {

@@ -245,7 +245,11 @@ struct MCPAskAndReceiptTests {
     @Test func thePrivateRowsAreDeclaredWhereTheyRenderInTheAppsWords() {
         #expect(PrivateMarkCopy.rowWords == "Private — never shared with AI", "her word, R-13nb-4 (iv)")
         #expect(CapabilityRegistry.capability(.markNotePrivate).verb == PrivateMarkCopy.rowWords)
-        #expect(CapabilityRegistry.capability(.markNotePrivate).doors == [.bottomBar])
+        // 13n-c U3 (A JUSTIFIED EDIT — a new renderer is a new door): the
+        // in-note indicator's LOCK popover renders the same toggle (R-AIR-7,
+        // VX-164), so the act gains its `.surface` door beside the bars'.
+        #expect(CapabilityRegistry.capability(.markNotePrivate).doors == [.bottomBar, .surface])
+        #expect(MCPNoteIndicator.surfaceCapabilities.contains(.markNotePrivate))
         #expect(CommitBar.renderedCapabilities.contains(.markNotePrivate))
         #expect(TakesBottomBar.renderedCapabilities.contains(.markNotePrivate))
         #expect(CapabilityRegistry.capability(.markBookPrivate).doors == [.surface])
