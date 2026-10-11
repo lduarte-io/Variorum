@@ -2450,4 +2450,26 @@ reviewer should look first, self-assessment).
 
 ## U6 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-*(empty until the U6 implementer's first commit)*
+Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~16:20 MDT). Worktree `~/dev/variorum-vx-165`,
+branch `vx-165-13n-c`, from tip `9fb0a401`. **No revert is in flight unless a line below says so.** The Mac is
+UNLOCKED at start (`CGSSessionScreenIsLocked` absent), no Variorum instance (`pgrep` empty), stage FREE.
+
+### Pieces
+
+| # | Piece | Status |
+|---|---|---|
+| U6-0 | Preflight read whole (this plan top to bottom incl. every unit record, the Stage B records, the HELD-WALKS RECORD; the sitting record R-AIR-2/-9/-12; the brief §8/§10; mockups §7/§9; the 13n-b AF-6/-7/-9/-10/-11, P-13nb-U2-3/-4/-6/-8, U3-4/-5/-7, R-13nb-23; `SessionResiliencyProtocol`) + the code traces below | IN-PROGRESS — the reading done; the code traces next |
+| U6-1 | `move_note_to_wing` — core: the MCP road over her `moveNoteToWing` (R1 decided twice, once grants atomic, T1 mirrored, U1's exact-row inverse + redo, ONE client-named entry) + state-transition pins | NOT-STARTED |
+| U6-2 | `move_note_to_wing` — the wire: the tool, the catalog, the answer (left books · tags adopted/made · where it landed), the ask on a short side, refusals byte-for-byte hers; `move_block`'s cross-wing refusal kept | NOT-STARTED |
+| U6-3 | `show_in_app` gains the `wing` target (decided at read with `decideWing`; never spends; "Now in …" names the client) | NOT-STARTED |
+| U6-4 | R-AIR-12 — gatherings as read facts under a wing grant (`list_books` kind gathering; the assembly through the per-note fence; non-targets) | NOT-STARTED |
+| U6-5 | Rung proofs grown as the ritual + mutation checks | NOT-STARTED |
+| U6-6 | The docs catch up (the guide's withheld gatherings sentence + the move; the advice's clause under 2,000) + truth pins | NOT-STARTED |
+| U6-7 | Headless finals (`swift build` + core + `VariorumMCPTests` + workbook) | NOT-STARTED |
+| U6-8 | Mac suites over every changed type (held stage) | NOT-STARTED |
+| U6-9 | THE REAL Claude Code live round in her sweep's shape (dev store, `-s local` scratch registration, removed after) → `notes/plans/13n-c-screens/u6/` | NOT-STARTED |
+| U6-10 | UNIT CLOSED banner | NOT-STARTED |
+
+### Traces (made before any code — the hallucination guard)
+
+*(being written)*
