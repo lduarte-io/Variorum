@@ -98,8 +98,8 @@ struct MCPGrantAuthority: Sendable {
 /// Journal entry or a Private note apart from an id that names nothing). The
 /// ask is still put to HER (AF-6's own silent-ask posture for unshared
 /// targets). This reverses AF-6's "`fenced` gains the said sentence" clause
-/// for notes; a fenced BOOK still names itself (the orchestrator's fork,
-/// recorded in the 13n-c U1 record).
+/// for notes; the orchestrator's ruling F-7 (a) extends the one answer to a
+/// fenced BOOK (the 13n-c plan's U1 adjudication).
 enum MCPRefusalCopy {
     enum Target: Sendable, Equatable {
         case note, book, wing
@@ -125,23 +125,12 @@ enum MCPRefusalCopy {
                 + "can share it from Variorum \u{25B8} Settings \u{25B8} MCP."
         case .rungTooLow(let granted):
             return "This client may only \(rungWords(granted)) here."
-        case .fenced(let fence):
-            // 13n-c U1 (T-2): a fenced NOTE (or anything not a book) is the
-            // one answer — exactly what an id naming nothing hears.
-            guard target == .book else { return words(.notShared, target) }
-            // U2: a BOOK target names itself — a fenced book is never a grant
-            // scope (and never raises an ask); its entries are asked for one
-            // at a time.
-            switch fence {
-            case .journal:
-                // 13n-c U1 (R-AIR-1, J8): only THE daily Journal is a fenced
-                // journal book now — "a journal" would tell the client every
-                // journal-style book is.
-                return "That book is the daily Journal. Its entries are shared one ask at a time, never "
-                    + "by a standing grant."
-            case .privateMark:
-                return "That book is marked Private \u{2014} never shared with AI."
-            }
+        case .fenced:
+            // 13n-c U1 (T-2) + the orchestrator's ruling F-7 (a): a fenced
+            // target — a note OR a book — is the ONE answer, exactly what an
+            // id naming nothing hears (AppSpec §12: "no fenced-vs-unshared
+            // oracle anywhere"). A fenced book still never raises an ask.
+            return words(.notShared, target)
         }
     }
 

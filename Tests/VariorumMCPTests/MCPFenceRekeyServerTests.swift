@@ -47,10 +47,11 @@ struct MCPFenceRekeyServerTests {
             #expect(!text.contains("Journals and") && !stripped.contains("Journal entries"),
                     "no sentence may say every journal is fenced (R-AIR-1)")
         }
-        #expect(MCPRefusalCopy.words(.fenced(.journal), .book)
-                == "That book is the daily Journal. Its entries are shared one ask at a time, never by a standing grant.")
+        // 13n-c U1 orchestrator ruling F-7 (a): a fenced BOOK is the one
+        // answer too — AppSpec §12's "no fenced-vs-unshared oracle anywhere".
         // A fenced NOTE is the one answer, whichever fence (T-2).
         for fence in [MCPGrantRule.Fence.journal, .privateMark] {
+            #expect(MCPRefusalCopy.words(.fenced(fence), .book) == MCPRefusalCopy.words(.notShared, .book))
             #expect(MCPRefusalCopy.words(.fenced(fence), .note) == MCPRefusalCopy.words(.notShared, .note))
             #expect(MCPRefusalCopy.words(.fenced(fence), .note, asked: true) == MCPRefusalCopy.words(.notShared, .note))
         }

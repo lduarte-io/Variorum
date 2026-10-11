@@ -445,7 +445,11 @@ struct MCPWriteServerTests {
 
             let countBefore = h.asks.value.count
             let privateRefusal = try await call(connection, "create_note", ["text": .string("x"), "book_id": .string(privateBook.id)])
-            #expect(text(privateRefusal) == "That book is marked Private \u{2014} never shared with AI.")
+            // 13n-c U1 orchestrator ruling F-7 (a) (justified edit, the ritual):
+            // a Private BOOK answers exactly as a book id naming nothing.
+            let noBook = try await call(connection, "create_note", ["text": .string("x"), "book_id": .string(UUID().uuidString)])
+            #expect(text(privateRefusal) == text(noBook), "a fenced book answers exactly as a missing one")
+            #expect(text(privateRefusal) == MCPRefusalCopy.words(.notShared, .book))
             #expect(h.asks.value.count == countBefore, "a fenced BOOK never raises an ask — no grant could answer it")
             await h.hangUp(connection)
         }
