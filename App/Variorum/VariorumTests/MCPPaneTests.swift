@@ -108,7 +108,9 @@ struct MCPPaneTests {
         #expect(panes[index - 1] == .tags)
         #expect(panes[index + 1] == .protection)
         #expect(SettingsPane.mcp.title == "MCP", "R-13n-5 named it")
-        #expect(AppSettingsView.rowIDsRendered[.mcp] == ["mcpServer", "mcpOpenBook"])
+        // 13n-c U4 (A JUSTIFIED EDIT, the ritual — arrival X): the pane's
+        // Waiting list is a catalog row too, so the search finds an ask.
+        #expect(AppSettingsView.rowIDsRendered[.mcp] == ["mcpServer", "mcpWaiting", "mcpOpenBook"])
         #expect(SettingsCatalog.title("mcpServer") == "Enable the MCP server")
         for word in ["mcp", "claude", "claude code", "open book"] {
             #expect(SettingsSearch.findings(matching: word, in: SettingsSearch.settingsEntries)

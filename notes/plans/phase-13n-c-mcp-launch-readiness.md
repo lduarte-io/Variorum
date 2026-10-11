@@ -535,6 +535,8 @@ per adjudication decision or diff that would ordinarily earn a Fable review.
 | F-12 | `c356871a` | U3 — Change… as REPLACE (`grantMCPAccess(_:_:replacing:)` + the bulk form): the named grants revoked and the new minted on ONE stamp; a grant not this client's refuses `mcpGrantNotFound`; a refused new grant leaves the old standing (P-13nc-U3-3, T-U3-8) | a new revoke road beside the grant op — who may change what — written by Opus | — |
 | F-13 | `c356871a` | U3 — `MCPGrantRule.reach` added INSIDE the rule file (the faces' WHY = `decide`'s own `.allow(grantID:)`, non-consuming probe; `decide` untouched) + `Queries.mcpNoteReach`/`mcpBookReach(es)` (the wider place named) | a new function in the security rule's file; the in-note indicator's "never surprised" promise rests on it — written by Opus | — |
 | F-14 | `e41a9328` | U3 — the permission popover's Revoke on a WIDER grant (a book's popover revoking the Home wing grant that reaches it; P-13nc-U3-6), and the share doors' render gate (R-AIR-8: an approved client; P-2: never on a gathering, THE daily Journal or a Private book — `Queries.mcpFencedBookIDs`, the fence's own fragments) | what a face offers to revoke and where a grant door may appear — Opus | — |
+| F-15 | `6f39cd18` | U4 — ARRIVAL X: the self-presenting ask sheet retired (supersedes P-13nb-U2-9, a 13n-b Fable-reviewed provisional); the queue's cap now protects the asks SHE opened; `answer` acts only on an ask still waiting (T-U4-5 — one ask, one grant, pinned red-on-old); a denied client's asks forgotten (T-U4-4, pinned red-on-old); the wire untouched | "the ask arrival" is named in §5 as default's-meaning content, and the answer road MINTS GRANTS — written by the U4 implementer (Opus) | — |
+| F-16 | `6f39cd18` | U4 — "while connected" → "until it disconnects" in every grant face, the confirm and the ask's button (P-13nc-U4-1) | wording of a disclosure confirm (F-3's class) — chosen by Opus among recorded options | — |
 
 **⚠️ HER FABLE BUDGET IS SPENT (04:52 MDT, HTTP 429 at the U1 round-1 reviewer's tail).** Fable
 reviewed exactly ONE diff this phase: U1 at `9b1ec3dd..33bd8772` (round 1, `13nc-u1-ladder-round1.md`
@@ -669,6 +671,21 @@ unit record (TCC state is machine-state the next session inherits).
 - **P-13nc-U3-8** (U3) — ⌥⌘A's Edit-menu item is HIDDEN (not grey) with no approved client (R-AIR-8's "renders ONLY
   when"); the share doors ride the Library's note rows (`postRowMenu`) and every book row menu — not yet the Pool's,
   the sidebar Open strip's or Starred's NOTE rows (not briefed; a follow-on if wanted).
+- **P-13nc-U4-1** (U4, her round-2 ask) — "while connected" → **"until it disconnects"** everywhere the duration
+  is said (options (b) "for this connection", (c) "this session" — the U4 record); her pick at the copy pass.
+- **P-13nc-U4-2** (U4) — a pending glyph's press answers the ask that waited longest on its target; several are
+  named together in the hover. Alternative: a small menu of the target's asks.
+- **P-13nc-U4-3** (U4) — the masthead's wing word wears every waiting WING ask's glyph (not only the current
+  wing's); the menu's wing rows wear it as a mark. Alternative: the current wing's only.
+- **P-13nc-U4-4** (U4, R-AIR-15's room) — ⌘L opens on the current wing; ⌘'s release commits only after a held-⌘
+  L tap (a plain ⌘L press-release leaves the field for typing). Alternative: the exact ⌘-tab.
+- **P-13nc-U4-5** (U4, R-AIR-5) — the masthead word cycles only with two or more wings (the ▾ is the menu); the
+  cycle and ⌘L's commit speak "Now in …"; the menu's own pick stays silent (13i-d). Alternative: the pick speaks.
+- **P-13nc-U4-6** (U4) — Waiting renders only while an ask waits (the requests idiom); 3 rows + "all N ›".
+- **P-13nc-U4-7** (U4) — the ⌘L switcher is a sheet (⌘K's idiom) with no per-wing counts (P1).
+- **P-13nc-U4-8** (U4, a QUESTION for #211) — the ask's sheet keeps 13n-b's answers; closing it without granting
+  is Don't allow (Esc), which drops the ask until the client re-asks. Options: keep · add "Not now" · Esc keeps it
+  waiting.
 
 ## UNIT BRIEFS AND RECORDS (written just-in-time below, one per unit)
 
@@ -1347,14 +1364,14 @@ U4-10; offscreen renders stand in only if it is still locked, and are NOT a walk
 | # | Piece | Status |
 |---|---|---|
 | U4-0 | Preflight read whole (this plan top to bottom incl. the STANDING BLOCKER + the U1–U3 records; the sitting record R-AIR-5/6/8/15 + round 5; the brief §5/§6/§7/§13; mockups §4/§5/§6; 13n-b AF-6, P-13nb-U2-9, R-13nb-23/26; `SessionResiliencyProtocol`) + the code the brief names + the traces and the chord sweep below | DONE (this commit) |
-| U4-1 | The ask QUEUE + PROJECTION (pure): `MCPAskQueue` (dedupe per client · target · rung, the cap forgetting the oldest NOT being answered, the arrival stamp, forget-a-client) and `MCPAskBoard` (keyed by note · book · wing; the hover words) — Mac pins | IN-PROGRESS — code in (`Features/MCP/MCPAskQueue.swift`, `Core/Views/MCPAskBoard.swift`; the door holds `askQueue` + `askBoard`, reassigned together), app builds clean; the pins PENDING |
-| U4-2 | ARRIVAL X: the WindowGroup's self-presenting `.sheet(item:)` RETIRED; the window road opens THAT ask's sheet on her press (`MCPShareRoad.answerAsk`); `answer` ignores an ask no longer waiting; a denied client's asks clear; the never-self-present pin | IN-PROGRESS — code in (`VariorumApp`'s host removed; `ShellRouter.mcpAskRequest`; `mcpAskSheet(door:askID:)` hosted by `RootView` + `NoteWindowView` + the pane; `presentedAsk` gone; `answer` guards on the queue; `deny` forgets the client's asks; the sheet marks itself answering); the pins PENDING |
-| U4-3 | The pending-ask GLYPH (`MCPAskGlyph`, U3's family's filled twin) on Library + Pool note rows, the Book Panel's rows, both bars' `note ▾`, Bookcase rows, the wing switcher's rows + masthead word, the in-note indicator | IN-PROGRESS — code in (`Core/Views/MCPAskGlyph.swift`; rendered on all nine faces; `.mcpOpenAsk` declared); pins + captures PENDING |
-| U4-4 | Settings ▸ MCP ▸ WAITING (above Connection requests; capped 3 + "all N ›"; Answer… opens the sheet in the pane) + its catalog row + every sentence describing the old arrival | IN-PROGRESS — code in (`MCPPane` Waiting + `MCPWaitingRowView` + `FullList.waiting`; catalog row `mcpWaiting`; the pane blurb; `.mcpAnswerAsk`'s note); pins PENDING |
-| U4-5 | ⌥⌘, — MCP Settings… (app menu, under Settings…): Settings opened at MCP, scrolled to Waiting when an ask waits; registry act; the sweep at the binding | IN-PROGRESS — code in (`.mcpSettings`; `CommandGroup(after: .appSettings)`; `MCPDoor.settingsRequest` adopted by `AppSettingsView` and answered by `MCPPane`'s `ScrollViewReader`); pins PENDING |
-| U4-6 | ⌘L — the wing switcher (R-AIR-15): a pure brain (`WingSwitcherBrain` — filter, held-⌘ L cycling, release/return commits, Esc) + the sheet (the ⌘K idiom) + the masthead word's CYCLING click with the ▾ menu beside it, on the Bookcase AND the Library masthead (the switcher moves to `Core/Views`); "Now in …" speaks; the Snippets line; the sweep at the binding | IN-PROGRESS — code in (`WingSwitcherBrain`, `WingSwitcherSheet` + `WingSwitcherModel` + `WingSwitcherKeys`, `WingsModel.switchSaying`/`cycle`, `WingSwitcherMenu` moved + rebuilt, the Library masthead, ⌘L in the View menu with the sweep at the binding); pins PENDING |
-| U4-7 | The shortcuts pane + ⌘/: `HelperView.groups` gains an MCP group (⌥⌘, · ⌥⌘A · ⌥⌘O · ⌥⌘Z's client-named undo) and ⌘L | IN-PROGRESS — code in (the MCP group + the ask-icon row; ⌘L in Navigation); the guard runs PENDING |
-| U4-8 | "While connected" — copy options recorded; the most neutral built PROVISIONAL everywhere the duration is said | IN-PROGRESS — built (`MCPPaneCopy.untilDisconnects`, every face reads it); the options + the ritual pin updates PENDING |
+| U4-1 | The ask QUEUE + PROJECTION (pure): `MCPAskQueue` (dedupe per client · target · rung, the cap forgetting the oldest NOT being answered, the arrival stamp, forget-a-client) and `MCPAskBoard` (keyed by note · book · wing; the hover words) — Mac pins | DONE (`6f39cd18` code, `9b8b5cf2` pins) — `MCPAsksWaitTests` (queue dedupe + first stamp, the cap protecting the asks she opened, forget-a-client, the board keyed by target in arrival order, the glyph's words) green |
+| U4-2 | ARRIVAL X: the WindowGroup's self-presenting `.sheet(item:)` RETIRED; the window road opens THAT ask's sheet on her press (`MCPShareRoad.answerAsk`); `answer` ignores an ask no longer waiting; a denied client's asks clear; the never-self-present pin | DONE (`6f39cd18`, `9b8b5cf2`) — the never-self-present promise pinned as STATE (`anArrivalOnlyWaits`: an arrival changes the queue and its board, nothing else — no Settings request, no toast/receipt) and as SOURCE (`noSceneHostsTheAskSheet`: `VariorumApp` names no `MCPAskSheet`/`presentedAsk`; every `mcpAskRequest =` in the app is a road's `answerAsk` or a clear). **THE TWO BUG-CLASS ROWS, RED-ON-OLD BY REVERT** (the pre-fix `answer` — remove then grant unconditionally — and the pre-fix `deny` — the asks kept — restored in `MCPDoor.swift`, the suite run, then `git checkout --` from `9b8b5cf2`, `git diff` empty): `MCPAsksWaitTests` **12 green / 2 RED, 3 issues** — `oneAskAnsweredTwiceMintsOneGrant` (grants.count ≠ 1, T-U4-5) and `denyingAClientForgetsItsAsks` (2 issues, T-U4-4) — exactly the two; GREEN on the restored tree |
+| U4-3 | The pending-ask GLYPH (`MCPAskGlyph`, U3's family's filled twin) on Library + Pool note rows, the Book Panel's rows, both bars' `note ▾`, Bookcase rows, the wing switcher's rows + masthead word, the in-note indicator | DONE (`6f39cd18`) — `.mcpOpenAsk` declared, walked (each host appends `MCPAskGlyph.surfaceCapabilities`; the bars' glyph rides the `.surface` door, never their `renderedCapabilities` — the bottom-bar walk unchanged); captured (U4-10) on the Bookcase row + masthead, the Library row + masthead, the indicator, ⌘L's rows. **Observed for the UX walk:** at row size the FILLED pending twin and U3's OUTLINE shared icon read very alike side by side (`u4-bookcase-*`, `u4-indicator-*`) — P-13nc-U3-5's family pick, not re-opened here |
+| U4-4 | Settings ▸ MCP ▸ WAITING (above Connection requests; capped 3 + "all N ›"; Answer… opens the sheet in the pane) + its catalog row + every sentence describing the old arrival | DONE (`6f39cd18`) — pinned (`waitingIsCappedSaidAndFindable`); captured (`u4-pane-*`: three rows newest first with ages, "all 4 ›"). **The sentences that described the old arrival:** the registry's `.mcpAnswerAsk` note ("…on the sheet it arrives on" → "…open it from the ask's icon, or from Settings ▸ MCP ▸ Waiting"), the Settings pane blurb (+ "the asks waiting for your answer"), and the app's comments (`MCPDoor`, `MCPAskSheet`, `VariorumApp`, `MCPNoteIndicator`); SAFE as found: the wire's `askedSentence` ("Variorum has asked the author — call again once she answers." — still true: the ask waits for her) and the field guide/help (no arrival sentence anywhere); the 13n-b handoff is history, untouched |
+| U4-5 | ⌥⌘, — MCP Settings… (app menu, under Settings…): Settings opened at MCP, scrolled to Waiting when an ask waits; registry act; the sweep at the binding | DONE (`6f39cd18`) — pinned (`theMCPSettingsChordLandsOnceAtWaiting`; the chord's collision pin in `WingSwitcherChordTests`); the sweep recorded at `EditorCommands.keyEquivalent`. The window's opening and scroll are NOT walked (locked) |
+| U4-6 | ⌘L — the wing switcher (R-AIR-15): a pure brain (`WingSwitcherBrain` — filter, held-⌘ L cycling, release/return commits, Esc) + the sheet (the ⌘K idiom) + the masthead word's CYCLING click with the ▾ menu beside it, on the Bookcase AND the Library masthead (the switcher moves to `Core/Views`); "Now in …" speaks; the Snippets line; the sweep at the binding | DONE (`6f39cd18`, `9b8b5cf2`) — `WingSwitcherChordTests` 12/1 green: every brain transition (opens on the current wing; held-⌘ L cycles + wraps + release commits; a plain press-release stays for typing; typing filters case- and diacritic-insensitively; return commits / closes on the current; arrows never arm the release; a typed change ends a cycle; a row click), the monitor's key classes (⌘L only — ⇧⌘L / ⌃⌘L / a typed l are not; ⌘'s release; Esc), the spoken switch ("Now in “variorum”." / "Now in Home.", silence on the current) and the cycle, the chord declared/wired/collision-free across every `CapabilityID`, the one view in `Core/Views` on BOTH mastheads with the Snippets line. Captured (`u4-switcher-{open,cycled,typed}-*`, both mastheads). The held-⌘ cycling under a real keyboard is NOT walked (locked) |
+| U4-7 | The shortcuts pane + ⌘/: `HelperView.groups` gains an MCP group (⌥⌘, · ⌥⌘A · ⌥⌘O · ⌥⌘Z's client-named undo) and ⌘L | DONE (`6f39cd18`) — the MCP group (⌥⌘, · ⌥⌘A · ⌥⌘O · ⌥⌘Z quoting the Edit menu's real "Undo claude-code's take" — `MCPWriteAct.undoLabel`) + the ask icon's row; ⌥⌘O/⌥⌘A moved out of Writing (not doubled); ⌘L in Navigation. Pinned (`theHelpersMCPGroupHoldsEveryMCPChord`); the registry's discoverability guard (`everyDeclaredShortcutIsFindableInTheHelper`) and `SettingsShapeTests`' one-list pin green — Settings ▸ Shortcuts and its search read the same list. Captured (`u4-helper-*`) |
+| U4-8 | "While connected" — copy options recorded; the most neutral built PROVISIONAL everywhere the duration is said | DONE (`6f39cd18`, `9b8b5cf2`) — the options in "The calls made in the build" below (P-13nc-U4-1); pinned (`theBoundedDurationSaysWhenItEnds`); four pins updated as the ritual (annotated in place) |
 | U4-9 | Headless finals (`swift build` + core + `VariorumMCPTests` + workbook) + Mac suites under a held stage claim | NOT-STARTED |
 | U4-10 | The walk (dev-store Debug, Study + Terminal) → `notes/plans/13n-c-screens/u4/` — or, if still locked, offscreen captures of the real views (NOT a walk) | NOT-STARTED |
 | U4-11 | UNIT CLOSED banner | NOT-STARTED |
@@ -1403,3 +1420,57 @@ U4-10; offscreen renders stand in only if it is still locked, and are NOT a walk
   every ⌘/⌃ event), `CalmAsks` and `ProtectionController` (observe, never consume), `PressReporter` /
   `PaneFocusCatcher` (mouse only); (6) the system hot keys: `[.quickNote]` (⌃⌥⌘N); (7) the registry's
   labels: `⌘⇧L` only. Not platform-reserved (brief §13's list). **Bare ⌘L and ⌥⌘, are FREE.**
+
+### The calls made in the build (each a PROVISIONAL or an implementation decision — said plainly)
+
+- **P-13nc-U4-1 — "while connected" → "until it disconnects"** (her round-2 ask: "she finds it vague but has
+  no replacement yet" — copy OPTIONS at the build). **The options:** (a) **"until it disconnects"** — BUILT: it
+  says when the grant ENDS, which is the thing "while connected" left vague, in plain words, and reads in
+  every face it reaches ("Grant read in “X” until it disconnects, including to future entries" · "claude-code ·
+  read · until it disconnects" · the ask's button "Until it disconnects" · "Shared “X” with claude-code — read,
+  until it disconnects."); (b) "for this connection" — shorter, names the scope rather than the end, but
+  "connection" is the technical word the pane already leans on; (c) "this session" — the friendliest, but
+  "session" collides twice (the app's own session; a client's chat session, which is NOT the connection's
+  lifetime — a new Claude Code conversation can reuse a connection). Built (a) as the most neutral: it states a
+  fact about the grant without introducing a concept. ONE word site (`MCPPaneCopy.untilDisconnects`) feeds
+  `durationWord`, the ask's button and the sheet's why — her pick at the copy pass is a one-line change.
+- **P-13nc-U4-2 — a glyph's press answers the ask that has WAITED LONGEST on that target**; several asks on one
+  target are said together in its hover ("claude-code asks to suggest here · cursor asks to read here — press
+  to answer the first."); the next press, the next. Alternative: a small menu listing each ask.
+- **P-13nc-U4-3 — the masthead's wing word wears EVERY waiting wing ask's glyph** (not only the current
+  wing's — the word is the door to every wing; mockup §4's wing ask is on a NON-current wing, and the brief
+  puts the badge on the masthead), its hover naming each wing. The menu's wing rows wear the glyph as a mark
+  only (a menu row's press switches the wing, as it always has); the press roads are the word's glyph, ⌘L's
+  row glyph and Waiting. Alternative: the masthead shows only the current wing's asks.
+- **P-13nc-U4-4 — ⌘L's state machine where her words leave room:** opening highlights the CURRENT wing (the
+  press that opens is not a cycle, so typing can follow); releasing ⌘ commits ONLY after a held-⌘ L tap — a
+  plain ⌘L press-and-release leaves the field open for typing (the reading that keeps "typing filters"
+  possible at all; ⌘-tab's exact semantics would commit the next wing on every quick ⌘L). ↑/↓ step without
+  arming the release; a typed change ends a held cycle; committing the current wing closes. Alternative: the
+  exact ⌘-tab (first press already on the next wing).
+- **P-13nc-U4-5 — the masthead word CYCLES only with two or more wings;** the ▾ beside it is the menu (the list
+  + New/Rename/Move Everything/Delete — nothing stopped being reachable). With one wing the whole "· Home ▾"
+  is the menu exactly as before (nothing to cycle to — P-2). The cycle and ⌘L's commit SPEAK the existing
+  "Now in …" receipt (`WingFollow.nowIn`); the menu's own picker keeps 13i-d's silence (she reads the name she
+  picked). Alternative: the menu's pick speaks too.
+- **P-13nc-U4-6 — Waiting renders only while an ask waits** (the Connection requests idiom beside it — mockup
+  §5 draws "None waiting." under requests, but the shipped pane hides an empty requests list, so Waiting
+  follows the shipped idiom); three rows then "all N ›" (mockup §4). Its catalog row (`mcpWaiting`) makes
+  "ask", "waiting", "pending" find the pane.
+- **P-13nc-U4-7 — the ⌘L switcher is a SHEET** (⌘K's idiom — ⌘L is app-wide and must open wherever she is; a
+  masthead popover would need the masthead on screen), with NO per-wing counts (mockup §6 drew "3 books · 41
+  notes"; a per-wing note count scales with the corpus — P1); the Snippets line rides both the sheet's foot and
+  the menu.
+- **P-13nc-U4-8 — the ask's sheet keeps 13n-b's answers** (Once · Until it disconnects · Always · Don't
+  allow); under arrival X she opens it herself, and the only way to close it without granting is Don't allow
+  (Esc), which drops the ask — the client re-asks on its next refused call (AF-6's own "a dropped ask costs the
+  client one re-ask"). A "Not now" that closes and keeps it waiting would be new product behavior — NOT built;
+  #211 carries it as a question (options: keep · add "Not now" · make Esc keep it waiting).
+- **Implementation decisions (not product):** the queue is a pure value (`MCPAskQueue`) the door holds with its
+  projection (`MCPAskBoard`) reassigned only on a change; the board rides each window's environment
+  (`\.mcpAskBoard`) so only the glyphs re-render on an arrival; the glyph's calm state is NO view (no width,
+  no spacing — the hosts' alignment pins measure what they did); a sheet already up hosts the ask's sheet
+  itself (`MCPShareRoad.askSheet` + `answeringAsks`, the T-U3-7 precedent) — the ⌘L switcher's rows; the ⌘L
+  monitor consumes only the held-⌘ L and Esc while the switcher is up and only OBSERVES ⌘'s release; the
+  switcher moved to `Core/Views/` (two features render it); "Switch Wing… ⌘L" is NOT a greyed menu row (it
+  read as a dead door) — the word's hover names ⌘L.

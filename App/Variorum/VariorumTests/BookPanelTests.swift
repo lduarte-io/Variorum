@@ -201,7 +201,9 @@ struct BookPanelDeclarationTests {
             #expect(BookPanelView.contextMenuCapabilities.contains(id), "\(id)")
         }
         #expect(BookPanelView.contextMenuCapabilities.contains(.removeFromBook))
-        #expect(BookPanelView.surfaceCapabilities == [.openBookAtNote, .removeRuleTag])
+        // 13n-c U4 (A JUSTIFIED EDIT — a new act on the same renderer): a
+        // note row's pending-ask glyph (`.mcpOpenAsk`, arrival X).
+        #expect(BookPanelView.surfaceCapabilities == [.openBookAtNote, .removeRuleTag, .mcpOpenAsk])
         #expect(CapabilityRegistry.capability(.moveNoteUpInBook).verb == BookPanelCopy.moveNoteUpVerb)
     }
 }
