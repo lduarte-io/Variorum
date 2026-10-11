@@ -50,8 +50,8 @@
 //  `wing=1` the fixture also mints the wing "variorum" holding the gathering
 //  "parser things" (rule: #parser) and three #parser notes, the third marked
 //  Private (the fenced member a wing grant must never list or count), and —
-//  when an APPROVED client named "claude-code" already stands — her sweep's
-//  two grants: edit · Home · always and write new · variorum · always
+//  for every client already APPROVED — her sweep's two grants: edit · Home ·
+//  always and write new · variorum · always
 //  (STAGING, said plainly: the grant road's faces were walked at W-3…W-6).
 //  Its marker is the live wing of that name. For the live round:
 //  `Tools/ScaleFixture/stage.sh notes=30,long=1,books=20,shelves=3,wing=1`.
@@ -182,13 +182,14 @@ enum ScaleFixture {
             _ = try ops.applyTag(parser.id, toPost: note.id)
             if index == 2 { _ = try ops.setNotePrivate(note.id, true) }
         }
+        // Her sweep's two grants for every APPROVED client (no provider is
+        // named outside the setup — O-4's net, which caught the first draft).
         @Dependency(\.database) var database
-        guard let client = try database.read({ try Queries.mcpClient($0, name: "claude-code") }),
-              client.state == .approved
-        else { return }
-        _ = try ops.grantMCPAccess(client.id, .init(rung: .edit, scopeKind: .wing, scopeID: "", duration: .always))
-        _ = try ops.grantMCPAccess(
-            client.id, .init(rung: .writeNew, scopeKind: .wing, scopeID: wing.id, duration: .always))
+        for client in try database.read({ try Queries.mcpClients($0, states: [.approved]) }) {
+            _ = try ops.grantMCPAccess(client.id, .init(rung: .edit, scopeKind: .wing, scopeID: "", duration: .always))
+            _ = try ops.grantMCPAccess(
+                client.id, .init(rung: .writeNew, scopeKind: .wing, scopeID: wing.id, duration: .always))
+        }
     }
 
     // MARK: - The grant road's books (13n-c U2)
