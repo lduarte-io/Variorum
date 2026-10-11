@@ -3560,6 +3560,13 @@ struct TutorialPrivacyChapterTests {
     /// together"* — so its right place is the guide's close, after the books
     /// chapter (the workflow's capstone), where the map's neighbour seat was.
     /// RED ON OLD: the old plan seats it seventh, right after the map.
+    ///
+    /// **13n-c U5 — A JUSTIFIED EDIT (the ritual; P-13nc-U5-1):** the opt-in
+    /// MCP chapter joins AFTER this one, as the guide's appendix. Her R-13s-30
+    /// words still hold whole — the workflow runs unbroken and safety follows
+    /// it (`index == books + 1`, untouched) — so this chapter is the WORKFLOW'S
+    /// close now, and the MCP chapter, the one door she may open, is the only
+    /// thing after it. RED ON OLD: the old plan has nothing after privacy.
     @Test func theChapterIsTwoLessonsInTheRightPlace() {
         let index = TutorialSeeder.plan.firstIndex { $0.chapter == privacyChapter }
         #expect(index != nil)
@@ -3567,8 +3574,10 @@ struct TutorialPrivacyChapterTests {
         #expect(books != nil)
         #expect(index != nil && books != nil)
         if let index, let books {
-            #expect(index == TutorialSeeder.plan.count - 1,
-                    "safety after the workflow — the guide's closing word")
+            #expect(index == TutorialSeeder.plan.count - 2,
+                    "safety after the workflow — only the opt-in MCP appendix follows")
+            #expect(TutorialSeeder.plan.last?.chapter == TutorialSeeder.mcpChapter,
+                    "the one chapter after it is the MCP door's")
             #expect(index == books + 1, "right after the workflow's capstone")
         }
         // pre-13x 5a: copy §7's two lessons, by the copy's own titles.
