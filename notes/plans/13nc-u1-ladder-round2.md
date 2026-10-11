@@ -9,7 +9,7 @@ read whole; the round-1 record `notes/plans/13nc-u1-ladder-round1.md` (findings 
 dispositions) as my anchor; `notes/REVIEW_PROMPT.md` run verbatim. No plan-time "Review foci" section
 exists for 13n-c (round 1 grepped; I re-grepped the plan).
 
-**Status:** IN PROGRESS — findings written incrementally below.
+**Status:** COMPLETE — 0 BLOCKER · 0 MAJOR · 4 MINOR · 5 NIT; the round-1 fix `c1047097` re-traced CORRECT.
 
 ## Scope, said first (the brief's rule)
 
@@ -166,3 +166,100 @@ fixed, left on another road by design.
 **Fix:** none in U1. U5's rewrite of `MCPSession.instructions` (the AI's advice) should say that search
 reaches standing grants only and that a once grant reads through `read_note`, so a model does not drop
 a live id (the same family as round 1's F5).
+
+### R2-9 — [NIT] · the plan file (THE one running record) · round 1's routed findings live only in the round-1 record, and the U1-4 row names a sentence that no longer ships
+
+**Evidence:**
+- The plan's LEDGER carries row 3b for round 1's F2 only. F4 (→ U2's brief), F5 (→ U5's brief) and F6
+  (→ P-13nc-1 / the copy pass) are routed only in `13nc-u1-ladder-round1.md`'s dispositions table. The
+  PROVISIONALs list still reads "P-13nc-1 — D-1 (the ⌘J edge kept)" with no F6 nuance. U2/U5's briefs
+  are written just-in-time, possibly by a fresh orchestrator after a context death, so these routings
+  are one missed read away from loss.
+- The U1-4 row still says the wire's fenced BOOK refusal reads "That book is the daily Journal. Its
+  entries…". The F-7 (a) build (`df704250`) replaced it with the one answer, and grep finds no such
+  string in `Sources/` or `App/`.
+
+**Fix:** one ledger row, "Stage A routed findings", naming F4 → U2, F5 → U5, F6 → #211/P-13nc-1 and
+this round's routed items (R2-2/R2-4 → #211 + FABLE-OWED F-1/F-5; R2-3 → U2/U3; R2-7 → copy pass;
+R2-8 → U5). Plus an in-place "(superseded by F-7 (a), `df704250`)" note on the U1-4 row.
+
+## Re-review of the round-1 fix `c1047097` (the cross-model flow's sanity pass, folded into this round)
+
+**Verdict: CORRECT, contained, well-pinned.**
+- `decide` (`MCPGrantRule.swift:225-243`) hoists the `rungTooLow` branch above the fence. It is
+  behavior-identical for UNFENCED targets (`offersAlways: fence == nil` → true, as before; still pinned
+  by `MCPGrantRuleTests.aGrantCoversItsRungAndEveryRungBelowItAndNothingAbove`, `:93-105`). It is also
+  behavior-identical for fenced BOOKS: `reaches` is false for every grant (`:302-303`), so `reaching` is
+  empty and the fence branch answers.
+- For a fenced NOTE, `reaching` can only hold live, note-scoped, non-always grants naming that very
+  note (`:293-296`). So `rungTooLow` discloses nothing beyond the client's own grant, and `isLive`
+  (`:108-110`) drops a spent once grant and a revoked one, so a lapsed grant falls through to the one
+  answer (pinned at decide level and on the wire).
+- `offersAlways` stays false on a fenced target. Her sheet is safe independently anyway:
+  `MCPAsk.offersAlways` derives from the fence (`MCPWriteSupport.swift:62`) and `MCPDoor.durations`
+  reads it (`MCPDoor.swift:384`).
+- No consumer branches on `.fenced` vs `.rungTooLow` except `MCPRefusalCopy` (grepped every source and
+  test). The in-transaction guards (`MCPWriteTools+Edit.refused`) now speak `rungTooLow` without the
+  asked sentence where a guard re-decides — the same as their unfenced behaviour, since no ask is
+  queued inside a guard.
+- **Oracle check:** a client holding BOTH a per-ask grant on a note and a wider grant can infer a fence
+  when the wider grant stops covering a note its per-ask grant still reads. That holds before and
+  after F1 (`read_note` alone shows it) and is inherent to the grammar; F1 opens nothing new.
+- **Red-on-old:** traced by construction rather than re-reverted (read-only round). On the old branch
+  order the asserted inputs return `.fenced`: 4 decide-level issues (2 fences × the connected and
+  unspent-once cases), invariant 5's fenced+reaching worlds, and 1 wire issue (the text equality; the
+  ask assertions hold on both sides). That matches the commit message's counts.
+- The server-side change in `c1047097` is comment-only (checked line by line), and zero app files
+  changed after the Mac run at `4ee62dd2`. **No Mac re-run is owed for this fix.**
+
+## Clean bill (load-bearing things specifically checked and found solid)
+
+- **Suites, by my own hands (headless, no stage needed):** `swift test --filter
+  "VariorumCoreTests.MCP"` → 95 tests / 11 suites green (the six fence suites alone 46/6, incl.
+  `MCPFenceRekeyTests` 6 tests). `--filter VariorumMCPTests` (the whole server target) → **69 tests / 9
+  suites green in 2.5 s**, no VX-132 stall, no stray process left. Both match the orchestrator's rerun
+  record (MCP 69/9).
+- **The re-key's premise:** her real daily Journal wears `'daily'` — v1_18 step 8 stamped the
+  designated `'journal'` book (`Migrations.swift:756-768`), and every daily mint since stamps it (the
+  suite asserts the shelved book's profile is `"daily"`). A pre-13i-a plain-profile designee was never
+  fenced by the OLD leg either, so U1 changes nothing there.
+- **NULL safety of `NOT (dailyJournalLegForBook)`:** `createReading`'s default profile is nil, and
+  `theGrantSheetOffersExactlyTheBooksAGrantMayName` asserts the plain books are offered, so the
+  `IS NOT NULL` guard is pinned. Without it, `NOT (NULL = 'daily')` would drop every plain book.
+- **No agent can move the fence:** no tool in `Sources/VariorumMCP` writes a book profile or the
+  marker (`create_book` → `createBook(named:inWing:)` takes no profile; no `setDailyJournalBook` /
+  `setJournalTrait` on the wire). The sync keeper repair merges losers' memberships INTO the keeper, so
+  convergence never unfences. Her own door is the only road (R2-4).
+- **No id leak through listings:** `list_notes`' `book_ids` comes from a readable note's facts, and a
+  member of a fenced book is itself fenced, so a fenced book's id never surfaces. `list_books` counts
+  through the same per-note rule (the trait book's ⌘J entry counts 0, pinned).
+- **D-1's trace re-verified:** the own-profile minters are exactly the daily book's New Entry and
+  ⌘J/Today (`BookStructureModel.swift:691/911` — the non-daily journal books mint `.generic`, its
+  `:658-672` doc) and the phone's Today door (`MobileTodayDoor.swift:43`).
+- **The one answer (T-2/F-7 (a)) still holds after F1** for every UNREACHED fenced target. The
+  byte-identity pin covers `read_note`, `export_note`, note-scoped `search`, `set_entry_date`, and
+  zero-passage `search` — including the member-only word. The F-7 (a) wire pin asserts the Private
+  book's answer equals a random book id's.
+- **R-AIR-3 in the sheet:** the only `confirm`/`confirmParts` caller is `MCPGrantSheet` (grepped).
+  The approve-and-grant path shares the button, so the clause shows there too. 600 wide fits inside
+  Settings' fixed 720×520 window (`AppSettingsView.swift:161`).
+- **Discipline:** commits in range carry no `Co-Authored-By`/`Claude-Session` trailer (grepped).
+  There are zero `Sync/`, persistence/migration, custody/keychain or editor-seam files in the range.
+- **Round-1 dispositions landed as recorded:** the closeout canon-delta checklist exists (F3), ledger
+  row 3b tracks F2, and FABLE-OWED F-10 is written. (R2-6 and R2-9 add to them.)
+- **Honest tracking:** U1's REAL Claude Code live round and the dev-store walk are HELD (the locked
+  session) and said so in LIVE STATUS. This round's bill is code review, NOT U1's use-shaped evidence
+  (CLAUDE.md's sizing rule — a batch closes only on use-shaped evidence). U1 stays open on those until
+  they run.
+
+## Round-2 verdict
+
+**0 BLOCKER · 0 MAJOR · 4 MINOR · 5 NIT.** The round-1 fix is correct and needs nothing.
+- **R2-1** is the one code-side fix worth landing now: a one-argument fixture re-point plus its
+  mutation check, a test-strength regression the ritual introduced.
+- **R2-2 and R2-4** are consequences of D-1 and R-AIR-1 that belong on her #211 ballot and the
+  FABLE-OWED F-1/F-5 rows. R2-4 also owes a characterization pin, red on the pre-U1 tree.
+- **R2-3** routes to U2/U3.
+- **The NITs** are doc, checklist and brief routing.
+
+**No new BLOCKER or MAJOR, so the ladder rule earns no round 3.**
