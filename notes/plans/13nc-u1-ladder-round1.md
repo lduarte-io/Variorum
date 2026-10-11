@@ -184,7 +184,7 @@ grant pin refinement and the F3 nuance below).
 
 | # | Severity | Implementer | Final disposition |
 |---|---|---|---|
-| F1 | MAJOR | AGREE (+ lapsed-grant pin) | **FIXED by the reviewer `c1047097`** — rungTooLow answered before the fence when a LIVE grant reaches the note; offersAlways false on a fenced target; a spent/revoked grant falls through to the one answer (the lapsed-grant pin, per the implementer's refinement). Red-on-old by the reviewer's own revert. The orchestrator's whole-package rerun: PENDING. FABLE-OWED F-10 (the security rule edited — written by Fable, its re-review is Opus's). |
+| F1 | MAJOR | AGREE (+ lapsed-grant pin) | **FIXED by the reviewer `c1047097`** — rungTooLow answered before the fence when a LIVE grant reaches the note; offersAlways false on a fenced target; a spent/revoked grant falls through to the one answer (the lapsed-grant pin, per the implementer's refinement). Red-on-old by the reviewer's own revert. The orchestrator's whole-package rerun at `e4752ee3`: core 2,586/296 · VariorumMCPTests 69/9 · workbook 40/6, all green (one VX-132 sighting on the way: the dead reviewer's orphaned `swift test` sat 60 min inside VariorumMCPTests — killed, its output unread). FABLE-OWED F-10 (the security rule edited — written by Fable, its re-review is Opus's). |
 | F2 | MINOR | AGREE | **DEFERRED, tracked:** U2 (the ask sheet's durations) / U4 (the ask road) carry R-AIR-3's clause onto every ask-road book grant; if either falls out, a named ticket at closeout — the ledger row is added. |
 | F3 | MINOR (doc) | AGREE with nuance | **CLOSEOUT CHECKLIST:** AppSpec §12's "journal-class notes AND anything wearing the Private mark answer only a per-ask note grant" is rewritten to R-AIR-1's keys (the daily Journal's entries + ⌘J entries + Private); §7's v1_25 "journal-class fence" bullet REVIEWED for wording (still true of the Private mark's behaviour — the nuance adopted); beside AF-6's fenced-clause supersession (T-2/F-7). Added to the plan's closeout-delta list. |
 | F4 | NIT | AGREE | **U2's brief:** the confirm's scope becomes an exhaustive switch when U2 adds "A note". |
@@ -193,3 +193,5 @@ grant pin refinement and the F3 nuance below).
 
 **Round 2** (a fresh reviewer re-reviewing the fix, `c1047097`): `opus-reviewer` (her Fable budget is
 spent) — recorded in `13nc-u1-ladder-round2.md`.
+
+**The cross-model flow's implementer sanity pass** is FOLDED INTO ROUND 2 (a fresh Opus reviewer re-reading the fix cold) — the U1 implementer sits at ~500k tokens, past the context line; a deviation from the flow's letter, recorded.
