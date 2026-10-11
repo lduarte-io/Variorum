@@ -97,7 +97,7 @@
 
   /* chrome text (Study chrome = the system face) */
   .chrome{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Arial,sans-serif;font-size:13px;}
-  .small{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11.5px;color:var(--muted);}
+  .small{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11.5px;color:var(--muted);font-weight:400;}
   .quiet{color:var(--muted);}
   .faint{color:var(--faint);}
   .acc{color:var(--accent);}
@@ -107,6 +107,7 @@
   .row:last-child{border-bottom:none;}
   .row .t{font-weight:600;min-width:0;}
   .row .m{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;color:var(--muted);text-align:right;margin-left:auto;}
+  .row .m.acc,.row .acc{color:var(--accent);}
   .row.pick{background:var(--wash);margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:6px;border-bottom-color:transparent;}
   .chip{display:inline-block;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11px;border:1px solid var(--seam);color:var(--muted);border-radius:5px;padding:0 5px;margin-left:7px;vertical-align:1px;font-weight:400;white-space:nowrap;}
   .chip.ai{color:var(--accent);border-color:var(--seam);}
@@ -135,13 +136,13 @@
   .pickerbtn .a{color:var(--muted);font-size:11.5px;}
 
   /* popover (the one picker control) */
-  .pop{background:var(--menu);border:1px solid var(--line);border-radius:10px;box-shadow:var(--lift);margin:6px 0 4px;max-width:420px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;}
+  .pop{background:var(--menu);border:1px solid var(--line);border-radius:10px;box-shadow:var(--lift);margin:6px 0 4px;max-width:480px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;}
   .pop .field{padding:7px 11px;border-bottom:1px solid var(--line);color:var(--ink);}
   .pop .field .caret{display:inline-block;width:1px;height:13px;background:var(--accent);vertical-align:-2px;margin-left:1px;}
-  .pop .opt-row{display:flex;justify-content:space-between;gap:10px;padding:6px 11px;align-items:baseline;}
+  .pop .opt-row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 10px;padding:6px 11px;align-items:baseline;}
   .pop .opt-row.hi{background:var(--wash);}
-  .pop .opt-row .lbl{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
-  .pop .opt-row .ann{color:var(--faint);white-space:nowrap;flex-shrink:0;}
+  .pop .opt-row .lbl{color:var(--ink);min-width:0;}
+  .pop .opt-row .ann{color:var(--faint);margin-left:auto;text-align:right;}
   .pop .opt-row .ann b{color:var(--muted);font-weight:600;}
   .pop .opt-row .snip{display:block;color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .pop .foot-line{padding:6px 11px 8px;color:var(--faint);font-size:11.5px;border-top:1px solid var(--line);}
@@ -253,7 +254,7 @@
   <div class="sect">Who</div>
   <div class="pickerbtn"><span>claude-code</span><span class="a">connected now ▾</span></div>
   <div class="sect">Where</div>
-  <div class="inline-radios"><span class="radio"><span class="r">◦</span>A note</span><span class="radio"><span class="r">●</span><b>A book</b></span><span class="radio"><span class="r">◦</span>A wing</span></div>
+  <div class="inline-radios"><span class="radio"><span class="r">○</span>A note</span><span class="radio"><span class="r">●</span><b>A book</b></span><span class="radio"><span class="r">○</span>A wing</span></div>
   <div class="pickerbtn"><span>the adventures of sherlock holmes</span><span class="a">made 9 Oct ▾</span></div>
   <div class="pop">
     <div class="field">sherl<span class="caret"></span></div>
@@ -263,10 +264,10 @@
     <div class="foot-line">Your daily Journal and Private books aren't listed — they're shared one ask at a time.</div>
   </div>
   <div class="sect">How much</div>
-  <div class="radio"><span class="r">◦</span><span>Read <span class="d">— it can read and search what you shared</span></span></div>
+  <div class="radio"><span class="r">○</span><span>Read <span class="d">— it can read and search what you shared</span></span></div>
   <div class="radio"><span class="r">●</span><span><b>Suggest</b> <span class="d">— it can add new takes and comments beside your text, and save a lens of its takes — it cannot touch a word you wrote</span></span></div>
-  <div class="radio"><span class="r">◦</span><span>Write new <span class="d">— it can also make new notes, apply tags and build books</span></span></div>
-  <div class="radio"><span class="r">◦</span><span>Edit <span class="d">— it can also edit takes — with a commit before and after every change, so you can always compare and come back</span></span></div>
+  <div class="radio"><span class="r">○</span><span>Write new <span class="d">— it can also make new notes, apply tags and build books</span></span></div>
+  <div class="radio"><span class="r">○</span><span>Edit <span class="d">— it can also edit takes — with a commit before and after every change, so you can always compare and come back</span></span></div>
   <div class="sect">How long</div>
   <div class="seg"><span>Once</span><span>While connected</span><span class="sel">Always</span></div>
   <div class="foot"><span class="btn">Cancel</span><span class="btn primary">Grant suggest in “the adventures of sherlock holmes” (made 9 Oct) always</span></div>
@@ -280,7 +281,7 @@
   <div class="sect">Who</div>
   <div class="pickerbtn"><span>claude-code</span><span class="a">connected now ▾</span></div>
   <div class="sect">Where</div>
-  <div class="inline-radios"><span class="radio"><span class="r">◦</span>A note</span><span class="radio"><span class="r">●</span><b>A book</b></span><span class="radio"><span class="r">◦</span>A wing</span></div>
+  <div class="inline-radios"><span class="radio"><span class="r">○</span>A note</span><span class="radio"><span class="r">●</span><b>A book</b></span><span class="radio"><span class="r">○</span>A wing</span></div>
   <div class="pickerbtn"><span>the adventures of sherlock holmes</span><span class="a">made 9 Oct ▾</span></div>
   <div class="pop">
     <div class="field">sherl<span class="caret"></span></div>
@@ -290,10 +291,10 @@
     <div class="foot-line">Your daily Journal and Private books aren't listed — they're shared one ask at a time.</div>
   </div>
   <div class="sect">How much</div>
-  <div class="radio"><span class="r">◦</span><span>Read <span class="d">— it can read and search what you shared</span></span></div>
+  <div class="radio"><span class="r">○</span><span>Read <span class="d">— it can read and search what you shared</span></span></div>
   <div class="radio"><span class="r">●</span><span><b>Suggest</b> <span class="d">— it can add new takes and comments beside your text, and save a lens of its takes — it cannot touch a word you wrote</span></span></div>
-  <div class="radio"><span class="r">◦</span><span>Write new <span class="d">— it can also make new notes, apply tags and build books</span></span></div>
-  <div class="radio"><span class="r">◦</span><span>Edit <span class="d">— it can also edit takes — with a commit before and after every change, so you can always compare and come back</span></span></div>
+  <div class="radio"><span class="r">○</span><span>Write new <span class="d">— it can also make new notes, apply tags and build books</span></span></div>
+  <div class="radio"><span class="r">○</span><span>Edit <span class="d">— it can also edit takes — with a commit before and after every change, so you can always compare and come back</span></span></div>
   <div class="sect">How long</div>
   <div class="seg"><span>Once</span><span>While connected</span><span class="sel">Always</span></div>
   <div class="foot"><span class="btn">Cancel</span><span class="btn primary">Grant suggest in “the adventures of sherlock holmes” (made 9 Oct) always</span></div>
@@ -306,7 +307,7 @@
 <div class="grid2">
   <div class="sheet" style="box-shadow:var(--shadow);">
     <div class="sect" style="margin-top:0;">Where</div>
-    <div class="inline-radios"><span class="radio"><span class="r">●</span><b>A note</b></span><span class="radio"><span class="r">◦</span>A book</span><span class="radio"><span class="r">◦</span>A wing</span></div>
+    <div class="inline-radios"><span class="radio"><span class="r">●</span><b>A note</b></span><span class="radio"><span class="r">○</span>A book</span><span class="radio"><span class="r">○</span>A wing</span></div>
     <div class="pop">
       <div class="field">parser<span class="caret"></span></div>
       <div class="opt-row hi"><span class="lbl">parser notes<span class="snip">the tokenizer splits on whitespace first, then…</span></span><span class="ann">3 Oct</span></div>
@@ -327,11 +328,11 @@
   <div class="frame"><span class="label">Option B — an inline filter in the sheet <span class="opt">option</span></span>
     <div class="pad chrome">
       <div class="pickerbtn" style="margin-top:0;"><span class="faint">filter books</span><span class="a"></span></div>
-      <div class="radio"><span class="r">◦</span>a letter</div>
-      <div class="radio"><span class="r">◦</span>o ladrão de raios</div>
+      <div class="radio"><span class="r">○</span>a letter</div>
+      <div class="radio"><span class="r">○</span>o ladrão de raios</div>
       <div class="radio"><span class="r">●</span>the adventures of sherlock holmes <span class="small">made 9 Oct</span></div>
-      <div class="radio"><span class="r">◦</span>the adventures of sherlock holmes <span class="small">made 11 Oct</span></div>
-      <div class="radio faint"><span class="r">◦</span>… 36 more, scrolling inside the sheet</div>
+      <div class="radio"><span class="r">○</span>the adventures of sherlock holmes <span class="small">made 11 Oct</span></div>
+      <div class="radio faint"><span class="r">○</span>… 36 more, scrolling inside the sheet</div>
     </div>
   </div>
   <div class="frame"><span class="label">Option C — the native menu, grouped by shelf <span class="opt">option</span></span>
@@ -473,7 +474,7 @@
     <div class="sect">Where</div>
     <div>These 3 notes <span class="small">— parser notes · grammar sketch · morning pages — oct 9</span></div>
     <div class="sect">How much</div>
-    <div class="inline-radios"><span class="radio"><span class="r">●</span><b>Read</b></span><span class="radio"><span class="r">◦</span>Suggest</span><span class="radio"><span class="r">◦</span>Write new</span><span class="radio"><span class="r">◦</span>Edit</span></div>
+    <div class="inline-radios"><span class="radio"><span class="r">●</span><b>Read</b></span><span class="radio"><span class="r">○</span>Suggest</span><span class="radio"><span class="r">○</span>Write new</span><span class="radio"><span class="r">○</span>Edit</span></div>
     <div class="sect">How long</div>
     <div class="seg"><span>Once</span><span class="sel">While connected</span></div>
     <p class="lead" style="margin-top:8px;">Always isn't offered: 1 of these notes is a daily Journal entry, which is only ever shared one ask at a time.</p>
@@ -530,7 +531,7 @@
     <p class="caption" style="margin-top:12px;">No grant ever made — the chord opens the deliberate road instead of guessing</p>
     <div class="sheet" style="box-shadow:var(--shadow);">
       <div class="sect" style="margin-top:0;">Where</div>
-      <div class="inline-radios"><span class="radio"><span class="r">●</span><b>This note</b> <span class="small">“parser notes”</span></span><span class="radio"><span class="r">◦</span>A note</span><span class="radio"><span class="r">◦</span>A book</span><span class="radio"><span class="r">◦</span>A wing</span></div>
+      <div class="inline-radios"><span class="radio"><span class="r">●</span><b>This note</b> <span class="small">“parser notes”</span></span><span class="radio"><span class="r">○</span>A note</span><span class="radio"><span class="r">○</span>A book</span><span class="radio"><span class="r">○</span>A wing</span></div>
       <p class="small" style="margin:8px 0 0;">… the rest of the sheet, as §1.</p>
     </div>
   </div>
@@ -743,7 +744,7 @@ show_in_app {"target": "wing", "wing_id": "3F2A…"}
 <div class="grid2">
   <div class="sheet" style="box-shadow:var(--shadow);">
     <div class="sect" style="margin-top:0;">Where</div>
-    <div class="inline-radios"><span class="radio"><span class="r">◦</span>A note</span><span class="radio"><span class="r">◦</span>A book</span><span class="radio"><span class="r">●</span><b>A wing</b></span></div>
+    <div class="inline-radios"><span class="radio"><span class="r">○</span>A note</span><span class="radio"><span class="r">○</span>A book</span><span class="radio"><span class="r">●</span><b>A wing</b></span></div>
     <div class="pickerbtn"><span>Home</span><span class="a">▾</span></div>
     <p class="lead" style="margin-top:6px;">everything in Home except your daily Journal and anything Private, which always ask</p>
     <div class="warnline">This includes 2 journal-style books, “dream journal” and “reading log” — their entries are shared like any book's.</div>
