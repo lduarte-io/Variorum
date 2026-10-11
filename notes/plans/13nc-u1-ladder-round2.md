@@ -263,3 +263,23 @@ R2-8 → U5). Plus an in-place "(superseded by F-7 (a), `df704250`)" note on the
 - **The NITs** are doc, checklist and brief routing.
 
 **No new BLOCKER or MAJOR, so the ladder rule earns no round 3.**
+
+---
+
+## DISPOSITIONS (orchestrator, Opus — same-model flow: the orchestrator arbitrates against the spec)
+
+| # | Severity | Disposition |
+|---|---|---|
+| R2-1 | MINOR | **FIXED `b3cd0565`** — the arrival row moved into THE daily Journal; dropping the daily leg's `status = 'member'` clause now turns the pin RED (mutation M-a: 1 issue), restored from the commit. |
+| R2-2 | MINOR (hers) | **#211 + F-1:** D-1's consequence said plainly — a ⌘J entry stays per-ask wherever it is filed, and no shipped door clears a note's own day shape; options (a) keep D-1 and say it in the copy · (b) fence on membership only · (c) a later door that lifts a moved entry's day shape. U3's in-note "why" names the case ("a daily Journal entry — shared one ask at a time"). |
+| R2-3 | MINOR | **ROUTED TO U2** (the pane's shared rows): a grant that reaches nothing (its target fenced since) is shown as inert, never as shared — P-13nb-U2-3's own letter ("the faces must not call such a grant 'shared' while it is inert"). |
+| R2-4 | MINOR (hers) + pin | **PINNED** (`designatingAnotherDailyJournalMovesTheFence` — RED on the pre-U1 query file, 2 issues, restored) · **#211** question (should "Use as Daily Journal" say what it un-fences, or a demoted book keep fencing?) · the F-5 row names the consequence · the MOBILE PARITY line at closeout says the marker is synced and the phone's book-details door moves it too. |
+| R2-5 | NIT | **FIXED `612de48c`** (comment-only). |
+| R2-6 | NIT | **Closeout checklist** — the AF-6 line names F1's refinement (a live per-ask holder hears `rungTooLow` + the asked sentence). |
+| R2-7 | NIT | **Copy pass (hers) under P-13nc-3** — "…once, including to future entries" shown literally in the handoff. |
+| R2-8 | NIT | **ROUTED TO U5** — the AI's advice says `search` reaches standing grants only (a once grant reads by id). |
+| R2-9 | NIT | **FIXED in the plan** — a "Stage A routed findings" ledger row; the U1-4 row's fenced-book sentence corrected by pointer to F-7 (a). |
+
+**STAGE A LADDER CLOSED at round 2** (0 BLOCKER / 0 MAJOR in round 2 — no round 3 earned). U1's
+use-shaped evidence (the GUI walk + the real Claude Code live round) stays HELD by the locked
+session — U1 is NOT closed as a unit until it runs.

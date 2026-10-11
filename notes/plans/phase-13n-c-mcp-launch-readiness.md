@@ -26,7 +26,7 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | K0 | Bout start (pulls, board snapshot `ac32a780`), full preflight, ticket VX-165 + sub-issues, worktree, in-flight row (`fbfbf1a9` on main) | DONE |
 | K1 | This plan finalized | DONE (this commit) |
 | U1 | The fence re-key (VX-163) | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U1 record) — owed: the orchestrator's verification + REAL Claude Code live round; the pre-flight walk HELD (locked session); Stage A |
-| U2 | The grant sheet rebuilt | NOT-STARTED |
+| U2 | The grant sheet rebuilt | BRIEFED — implementer spawning |
 | U3 | Grant from where you are + the one icon + the in-note indicator | NOT-STARTED |
 | U4 | Asks wait quietly + the keyboard | NOT-STARTED |
 | U5 | The guide, the AI's advice, the setup menu | NOT-STARTED |
@@ -521,11 +521,11 @@ per adjudication decision or diff that would ordinarily earn a Fable review.
 
 | # | Commit | Diff scope | Why owed | Reviewed by (actual model) |
 |---|---|---|---|---|
-| F-1 | `9b1ec3dd` | D-1 — the ⌘J edge kept (the note's own `profile='journal'` leg) | default's-meaning: what the fence covers | — |
+| F-1 | `9b1ec3dd` | D-1 — the ⌘J edge kept (the note's own `profile='journal'` leg) — R2-2: no shipped door clears a note's own day shape, so a ⌘J entry stays per-ask forever wherever filed (#211 options) | default's-meaning: what the fence covers | — |
 | F-2 | `9b1ec3dd` | D-2 — docs delivery (guide chapter + `instructions`) | product-shaped call made by Opus | — |
 | F-3 | `9b1ec3dd` | D-3 — R-AIR-3's clause extended to wing confirms and every duration | wording of a disclosure confirm | — |
 | F-4 | `9b1ec3dd` | D-5 — the Sync/ fold classifiers judged untouched by R-AIR-1 | a Sync/-adjacent trace judged by Opus | — |
-| F-5 | `63e70d67` | U1 — the fence classifier itself: the journal legs re-keyed on `'daily'` (`dailyJournalLegForBook`, three sites) + the ⌘J own-profile leg kept | her protocol names the fence classifier; default's-meaning (written by the U1 implementer, Opus) | — |
+| F-5 | `63e70d67` | U1 — the fence classifier itself: the journal legs re-keyed on `'daily'` (`dailyJournalLegForBook`, three sites) + the ⌘J own-profile leg kept — R2-4: 'Use as Daily Journal' (Mac + phone, synced marker) now MOVES the fence; the outgoing book's hand-filed notes un-fence (pinned) | her protocol names the fence classifier; default's-meaning (written by the U1 implementer, Opus) | — |
 | F-6 | `1a311c8e` | U1 T-2 — a fenced NOTE answers the ONE `notShared` answer on every tool, never the asked sentence (REVERSES 13n-b AF-6's "`fenced` gains the said sentence" for notes; aligns with AppSpec §12's no-oracle line and the brief's byte-identity) | refusal uniformity at the security boundary — a ruled clause reversed on an Opus reading (written by the U1 implementer) | — |
 | F-7 | `df704250` | U1 fork RULED (a) by the orchestrator (Opus) and BUILT by its own hands: a fenced BOOK answers the one `notShared` answer too, byte-equal to a book id naming nothing (pins red-on-old, 4 issues) | refusal uniformity at the security boundary, ruled AND written by Opus | — |
 | F-8 | — (recorded, NOT built) | U1 edge: a client holding a per-ask READ grant on a fenced note that asks to SUGGEST hears `notShared` though it can read the note; the honest answer is `rungTooLow` + the asked sentence — a three-line change inside `MCPGrantRule.decide` | the security rule itself — left for Fable's eye, deliberately unbuilt | — |
@@ -598,6 +598,7 @@ unit record (TCC state is machine-state the next session inherits).
 - AF-6's fenced clause superseded (T-2/F-7) — recorded as a pointer to this plan's U1 adjudications.
 - R-AIR-1/-3/-6/-7/-8/-12/-13/-15 and round 5 as built — the new contract lines (the grant road,
   the icon + in-note indicator, asks wait, ⌘L, the setup menu, gatherings under a wing grant).
+- AF-6's line also names U1 R1-F1's refinement: a LIVE per-ask grant holder asking past its rung hears `rungTooLow` + the asked sentence (R2-6).
 - R-AIR-14 (if U8 lands) — A-2's "protocol-blind" → "MCP-blind".
 
 ## 9. THE LEDGER (running; every row owned)
@@ -606,8 +607,8 @@ unit record (TCC state is machine-state the next session inherits).
 |---|---|---|---|
 | 1 | Kickoff (ticket, worktree, in-flight row, this plan) | orchestrator | DONE |
 | 2 | U1 — the fence re-key | U1 implementer + orchestrator | BUILT + VERIFIED; F-7 ruled (a) and built `df704250`; walk HELD (locked session) |
-| 3 | Stage A ladder | orchestrator | R1 DONE (fable, `4140860f`: 1M/2m/3n) → F1 FIXED `c1047097` by the reviewer → dispositions `e32fc317` (the reviewer died at her Fable limit) → R2 (opus) NEXT |
-| 3b | F2 — R-AIR-3's clause on the ask road's book grants | U2/U4 | OPEN — a named ticket at closeout if U2/U4 fall out |
+| 3 | Stage A ladder | orchestrator | **CLOSED at R2** — R1 fable (`4140860f`: 1M/2m/3n; F1 FIXED `c1047097`) → R2 opus (`6ec3d98c`: 0B/0M/4m/5n; R2-1/R2-4 pinned, R2-5 fixed; the rest routed) |
+| 3b | **Stage A routed findings** — R1: F2 (R-AIR-3 on the ask road → U2/U4; a ticket if they fall out) · F3 + R2-6 (closeout checklist) · F4 (U2) · F5 + R2-8 (U5) · F6 + R2-7 (her copy pass) · R2: R2-2 + R2-4 (#211, hers) · R2-3 (U2) | U2/U4/U5 + closeout | OPEN — each closes where routed |
 | 4 | U2 — the grant sheet | U2 implementer | NOT-STARTED |
 | 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | NOT-STARTED |
 | 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | NOT-STARTED |
@@ -627,6 +628,8 @@ unit record (TCC state is machine-state the next session inherits).
 - **P-13nc-2** — D-2 (docs: the guide chapter + the server's instructions; her alternative the
   first-connect book).
 - **P-13nc-3** — D-3 (R-AIR-3's clause on wing confirms and on every duration).
+- **P-13nc-4 (R2-2, hers)** — D-1's consequence: a ⌘J entry stays per-ask wherever filed; options (a) keep + say it · (b) membership only · (c) a later lift door.
+- **P-13nc-5 (R2-4, hers)** — 'Use as Daily Journal' moves the fence: say what it un-fences at the door, or keep a demoted book fencing?
 - ~~The snippets call~~ — RATIFIED at round 6 (out at launch, said in the docs).
 - **P-13nc-U1-1** (U1) — R-AIR-3's confirm is a BUTTON label, so it carries no closing period (her sentence
   has one; no button in the app does). Alternative: the period, verbatim.
@@ -817,3 +820,85 @@ run; fixed and rendered). Least certain: whether the orchestrator wants fenced B
   words) though it can read the note — honest would be `rungTooLow` + the asked sentence, a
   three-line change in `MCPGrantRule.decide` (the security rule itself — Fable-owed, so not
   touched here).
+
+---
+
+## THE U2 IMPLEMENTER BRIEF (self-contained; the spawn names this section)
+
+You are the U2 implementer for Variorum phase 13n-c, working in `~/dev/variorum-vx-165` on
+branch `vx-165-13n-c` (NEVER the main checkout). Commits say `Part of VX-165`, NO attribution
+trailer, push after every commit. `notes/SessionResiliencyProtocol.md` binds you: LIVE STATUS in
+the "U2 UNIT RECORD" section below from your FIRST commit, foreground waits only (a
+`grep -q … && break; sleep 5` poll loop, never `tail -f | grep -m1`), no subagents.
+
+**Read first, whole, never delegated:** this plan file TOP TO BOTTOM (rulings, D-1…D-5, §3 U2,
+§7, §8, the U1 record — U1 changed the fence and the confirm's words; build on them); the sitting
+record `notes/plans/vx-156-grant-ux-design-kickoff.md`; the brief
+`notes/plans/vx-156-grant-ux-brief.md` §1, §2, §12; the mockups
+`notes/plans/vx-156-grant-ux-mockups.html` §1, §1b, §11 (read the source or render it locally —
+never publish it). The 13n-b plan's pane rulings (R-13n-5 direct-and-technical register, R-13n-10
+"all N ›" roads, P-13nb-U1-8/-11, U1's W-4 durations rule). Code:
+`App/Variorum/Variorum/Features/MCP/MCPGrantSheet.swift`, `MCPPane.swift`, `MCPPaneCopy.swift`,
+`MCPAskSheet.swift`; `App/Variorum/Variorum/Core/Views/SearchPicker.swift` (THE ONE picker,
+R-17y-3 — brain + face; it has NO sections today) and `NotePicker.swift`
+(`NotePickerSource.corpusNotes`); `Sources/VariorumCore/Queries/MCPGrantQueries.swift`
+(`mcpGrantableBooks`); the Bookcase's own reads for shelf order, starred, counts and the derived
+"last edited" (grep `BookcaseQueries`/`shelf`/`starred` under `Sources/VariorumCore/Queries`).
+
+**What U2 builds — §3 U2 items 1–5, with these concretions:**
+1. **`PlaceLabels` (core Domain, pure):** the context line (fixed order: shelf · N notes · state
+   marks · last edited) and `disambiguate` over the OFFERED rows (ladder wing → shelf → note
+   count → state → made day → made time; sameness = case- and diacritic-insensitive equality, the
+   picker brain's own; never an ordinal). Exhaustive Swift Testing collision sets.
+2. **The grantable-places read** grows: shelf (id, name, position — Bookcase strip order), starred,
+   live member count, state marks (finished · owned · sealed · archived), made-at, last-edited (the
+   Bookcase's own derivation — reuse, never re-derive). ∝ the books, never the note corpus.
+3. **`SearchPicker` gains optional SECTIONS** (a pure brain extension, pinned; existing hosts
+   unchanged — zero test edits for them is the parity proof): the book picker before typing shows
+   **Recently edited** (a constant N — PROVISIONAL, log it) → **Starred** → one section per shelf
+   in strip order → **Unshelved**; typing filters across all sections (a match shows once, under
+   its home section). If a by-shelf/a–z toggle fits the idiom, build it PROVISIONAL; else record
+   why not.
+4. **The sheet:** WHERE "A note · A book · A wing" (the note leg via `corpusNotes`, wing-scoped
+   with a wing chooser if the feed is wing-bound — record your call; a fenced note offers only
+   once/while connected with the one-line why); the WING row a `SearchPicker` too; **WHO** row
+   (approved clients, most recently granted first) when the sheet's opener supplies no client — add
+   the opener API U3 will call (`MCPGrantSheet` pre-filled with WHERE and optional WHO); durations
+   shrunk to what every picked target can take with the why; the confirm names the place WITH its
+   disambiguator and carries U1's R-AIR-3 words.
+5. **R-AIR-8 + L1:** settings-class strings in the pane and sheets lose the word "AI" where they
+   can (the brief's "grant MCP permissions"-class; the menu-bar Title Case items and app-wide
+   receipts are NOT settings-class — leave them; list every string you changed and every one you
+   judged out of scope in the record). L1: the A-4 sentence under Clients, the brief §12's words.
+6. **The ask sheet's title and the pane's shared rows** wear the disambiguated label (one rule).
+
+**Dev-store scale seed (for your walk and the orchestrator's):** a small DEBUG-only or test-tool
+road that mints, in the DEV store only (`io.lduarte.Variorum.debug`), ≥150 books across ≥8
+shelves (some starred, two with the same name), ≥500 short notes — through the operations layer
+only. Put it where it cannot reach a Release build (a `#if DEBUG` Diagnostics action or a
+`Tools/` script that drives the dev store headlessly — your call, record it). Never the real store.
+
+**Ladder carry (U1 round 1, F4):** the confirm's scope in `MCPGrantSheet` (a `place == .book ? .book : .wing` ternary) becomes an exhaustive switch when you add "A note" — a note grant must never wear the wing clause. **And F2:** the ask sheet's durations carry R-AIR-3's clause on a BOOK ask's Always (and the other durations, D-3) — every book grant says it.
+
+**Ladder carry (U1 round 2, R2-3):** a Shared-with-MCP row whose grant reaches nothing now (its target fenced since — e.g. a trait book made the daily Journal, or a book marked Private) must read as inert, never as shared (P-13nb-U2-3: "the faces must not call such a grant shared while it is inert") — derive it through the one rule, pin it.
+
+**Must NOT touch:** `Sync/`, custody/keychain, the editor seam, migrations, `lockstepVersion`, the
+real store, `/Applications`. The fence derivation is U1's — consume it, never re-derive it.
+
+**Acceptance:** core pins (PlaceLabels, the sectioned brain, the read) headless + the whole headless
+package at the end; Mac suites `MCPPaneTests`, `MCPAskAndReceiptTests`, `MCPEditFacesTests`,
+`SettingsShapeTests`, `CapabilityRegistryTests`, every `SearchPicker` host's suite (grep the tests
+for `SearchPicker`) + any suite exercising a changed source file, under a HELD `Tools/stage` claim,
+suite-level `-only-testing`, `skipped:` lines read. Your pre-flight WALK on the dev-store Debug
+build, Study AND Terminal, light (dark if time), on the scaled seed: find a book by typing, by
+shelf, a starred one, two same-named books told apart and the right one granted, a note from
+Recently edited, a fenced note's honest durations, the WHO row, L1 on screen. Captures in
+`notes/plans/13n-c-screens/u2/` (gitignored — verify). Fix what the walk finds; record it.
+
+**Forks:** propose before building any half beyond the recorded rulings; PROVISIONAL-and-log for
+non-gating ambiguity; STOP for anything gating. **Close:** the UNIT CLOSED banner (not-done list,
+PROVISIONALs, where to look first, self-assessment).
+
+## U2 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
+
+*(empty until the U2 implementer's first commit)*
