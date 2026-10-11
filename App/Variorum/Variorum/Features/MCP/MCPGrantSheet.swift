@@ -71,6 +71,13 @@ struct MCPGrantSheet: View {
     @State private var duration: MCPGrantRule.Duration = .always
     @State private var rung: MCPGrantRule.Rung = .read
     @State private var places = MCPGrantPlaces()
+    /// Derived ONCE per load (never per render — a rung click must not
+    /// rebuild a few hundred rows): the book layouts, the wing rows, and the
+    /// distinguishers the field, the rows and the confirm wear.
+    @State private var bookLayouts: [SearchPickerArrangement] = []
+    @State private var wingRows: [SearchPickerOption] = []
+    @State private var bookDistinguishers: [String: String] = [:]
+    @State private var wingDistinguishers: [String: String] = [:]
     @State private var clients: [MCPClient] = []
     @State private var chosenClientID: String?
     @State private var now = Date()
@@ -90,9 +97,6 @@ struct MCPGrantSheet: View {
     private var chosenBook: Queries.MCPGrantableBook? {
         places.books.first { $0.id == bookID }
     }
-
-    private var bookDistinguishers: [String: String] { places.bookDistinguishers(now: now) }
-    private var wingDistinguishers: [String: String] { places.wingDistinguishers(now: now) }
 
     /// The fence of the chosen NOTE (a book or wing grant is never fenced —
     /// the offer leaves fenced books out).
@@ -295,7 +299,7 @@ struct MCPGrantSheet: View {
                     tokens: tokens, label: MCPPaneCopy.chooseBook, prompt: MCPPaneCopy.bookPrompt,
                     options: [], emptyText: MCPPaneCopy.noBooks,
                     onPick: { bookID = $0 },
-                    arrangements: MCPGrantPicker.bookArrangements(places, now: now),
+                    arrangements: bookLayouts,
                     field: .init(
                         value: chosenBook?.name,
                         annotation: placeDistinguisher,
@@ -314,7 +318,7 @@ struct MCPGrantSheet: View {
     private func wingPicker(selection: String, pick: @escaping (String) -> Void) -> some View {
         SearchPicker(
             tokens: tokens, label: places.wingName(selection), prompt: MCPPaneCopy.wingPrompt,
-            options: MCPGrantPicker.wingOptions(places, now: now), emptyText: "",
+            options: wingRows, emptyText: "",
             onPick: pick,
             field: .init(
                 value: places.wingName(selection), annotation: wingDistinguishers[selection],
@@ -333,6 +337,10 @@ struct MCPGrantSheet: View {
         async let loadedPlaces = door.grantPlaces()
         async let loadedClients = door.clientsByRecentGrant()
         places = await loadedPlaces
+        bookLayouts = MCPGrantPicker.bookArrangements(places, now: now)
+        wingRows = MCPGrantPicker.wingOptions(places, now: now)
+        bookDistinguishers = places.bookDistinguishers(now: now)
+        wingDistinguishers = places.wingDistinguishers(now: now)
         clients = opening.client == nil ? await loadedClients : []
         if chosenClientID == nil { chosenClientID = clients.first?.id }
         noteWingID = door.currentWingID
