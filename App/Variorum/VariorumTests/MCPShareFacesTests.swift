@@ -312,12 +312,15 @@ struct MCPShareFacesTests {
         #expect(MCPShareCopy.shareNotes(3) == "Share 3 notes with AI\u{2026}", "mockup §2's bulk bar")
         #expect(MCPShareCopy.shared(place: "\u{201C}parser notes\u{201D}", client: "claude-code",
                                     rung: .suggest, duration: .connection)
-                == "Shared \u{201C}parser notes\u{201D} with claude-code \u{2014} read and suggest, while connected.",
-                "mockup §3's receipt, verbatim")
+                // 13n-c U4 (A JUSTIFIED EDIT, the ritual — P-13nc-U4-1): the
+                // bounded duration says when it ends.
+                == "Shared \u{201C}parser notes\u{201D} with claude-code \u{2014} read and suggest, until it disconnects.",
+                "mockup §3's receipt, verbatim but the duration's word")
         #expect(MCPShareCopy.alreadyReaches("claude-code", .suggest)
                 == "claude-code already reaches this note (read and suggest).", "mockup §3's refusal, verbatim")
         #expect(MCPPaneCopy.confirmPartsForNotes(verb: "Grant", rung: .read, count: 3, duration: .connection)
-                == ("Grant read on ", "3 notes", " while connected"), "mockup §2's confirm")
+                // 13n-c U4 (A JUSTIFIED EDIT, the ritual — P-13nc-U4-1).
+                == ("Grant read on ", "3 notes", " until it disconnects"), "mockup §2's confirm")
         #expect(MCPPaneCopy.alwaysWithheldAmong([.journal])
                 == "Always isn't offered: 1 of these notes is a daily Journal entry, which is only ever "
                     + "shared one ask at a time.", "mockup §2's why, verbatim")
@@ -354,7 +357,8 @@ struct MCPShareFacesTests {
         #expect(MCPShareCopy.why(viaBook) == "through \u{201C}the lightning thief\u{201D}")
         #expect(MCPShareCopy.why(own) == nil, "the place's own grant needs no why")
         #expect(MCPShareCopy.why(open) == "through the open book")
-        #expect(MCPShareCopy.reachLine(viaWing) == "read and suggest \u{00B7} while connected")
+        // 13n-c U4 (A JUSTIFIED EDIT, the ritual — P-13nc-U4-1).
+        #expect(MCPShareCopy.reachLine(viaWing) == "read and suggest \u{00B7} until it disconnects")
         #expect(MCPShareCopy.iconHelp([viaWing])
                 == "Shared with claude-code (read and suggest) \u{2014} click for details")
         let change = MCPReachPopover.changeOpening(client, try #require(viaWing.grant))

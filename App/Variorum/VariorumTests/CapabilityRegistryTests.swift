@@ -536,6 +536,13 @@ struct CapabilityRegistryTests {
             // door); the Bookcase rows render the same icon (`ShelfView`'s
             // line above carries it).
             .union(MCPNoteIndicator.surfaceCapabilities)
+            // 13n-c U4 (A JUSTIFIED EDIT, the same class — a new renderer is
+            // a new line): ⌘L's switcher sheet renders `.switchWing` (its
+            // rows) and the wing asks' pending glyph (`.mcpOpenAsk`); the
+            // glyph's other hosts (Library, Pool, Book Panel, Bookcase, the
+            // switcher menu, the indicator, Waiting) carry it in the lines
+            // above.
+            .union(WingSwitcherSheet.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

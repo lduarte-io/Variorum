@@ -66,11 +66,16 @@ struct MCPAskAndReceiptTests {
             #expect(door.asks.count == 1, "one ask per client · target · rung")
             door.enqueue(ask(id: "first", rung: .writeNew))
             #expect(door.asks.count == 2, "another rung is another ask")
+            // 13n-c U4 (A JUSTIFIED EDIT, the ritual — ARRIVAL X retired the
+            // self-presented `presentedAsk`): no ask is on screen by itself
+            // any more; the one the cap protects is the ask whose sheet SHE
+            // opened (`beginAnswering` — a glyph's press, Waiting's Answer…).
+            door.beginAnswering(ask(id: "first").id)
             for index in 0..<20 { door.enqueue(ask(id: "spam-\(index)")) }
             #expect(door.asks.count == MCPDoor.askCap)
-            #expect(door.presentedAsk?.scopeID == "first", "the ask on screen is never the one forgotten")
+            #expect(door.asks.first?.scopeID == "first", "the ask she is reading is never the one forgotten")
             door.answer(ask(id: "first"), .dontAllow)
-            #expect(door.presentedAsk?.scopeID != "first" && door.asks.count == MCPDoor.askCap - 1)
+            #expect(door.asks.first?.scopeID != "first" && door.asks.count == MCPDoor.askCap - 1)
             door.detach()
             #expect(door.asks.isEmpty, "a closed library's asks die with it")
         }
@@ -228,7 +233,10 @@ struct MCPAskAndReceiptTests {
         // confirm carries her clause; the `scope` is a required argument now.
         #expect(MCPPaneCopy.confirm(
             verb: "Grant", rung: .suggest, scope: .book, place: "the lightning thief", duration: .connection)
-                == "Grant suggest in “the lightning thief” while connected, including to future entries",
+                // 13n-c U4 (A JUSTIFIED EDIT, the ritual — her round-2 ask;
+                // PROVISIONAL P-13nc-U4-1): "while connected" → "until it
+                // disconnects".
+                == "Grant suggest in “the lightning thief” until it disconnects, including to future entries",
                 "mockup §3's confirm + R-AIR-3's clause")
         // U3 walk W-2 (justified edit, the ritual): the mockup's words stay,
         // and the sentence stays TRUE now that edit can be granted.
