@@ -15,8 +15,11 @@
 //  "where the permission lives" is the same picture as "the permission is
 //  here"), in the sidebar set's outline language (books.vertical ·
 //  text.book.closed · tray · square.on.square · archivebox). The pending-ask
-//  sibling (U4's) is its FILLED twin, `point.3.filled.connected.trianglepath
-//  .dotted` — the same family, the slot left here (`pendingSymbol`).
+//  mark (U4's — `pendingSymbol`) was first its FILLED twin; at row size the
+//  two read as near-twins (the orchestrator's O-1), so since the Stage B fix
+//  pass it differs by SILHOUETTE: `questionmark.bubble` — "a question is
+//  waiting for you", in the same outline language (PROVISIONAL P-13nc-SB-3;
+//  the candidates captured — `sb-pending-candidates-*`; hers at the copy pass).
 //
 //  HOVER names who reaches it and how far; CLICK opens the permission: per
 //  client, the rung · duration, the WHY when the reach comes from somewhere
@@ -32,8 +35,10 @@ import VariorumCore
 struct MCPSharedIcon: View {
     /// The ONE glyph (PROVISIONAL P-13nc-U3-5).
     static let symbol = "point.3.connected.trianglepath.dotted"
-    /// U4's pending-ask sibling — the same family, filled.
-    static let pendingSymbol = "point.3.filled.connected.trianglepath.dotted"
+    /// U4's pending-ask mark — the same outline family, a DIFFERENT
+    /// silhouette (13n-c Stage B, O-1 — PROVISIONAL P-13nc-SB-3): a waiting
+    /// ask must read apart from "shared" at a glance, beside it on one row.
+    static let pendingSymbol = "questionmark.bubble"
 
     /// P-1's walk: the icon is the `.mcpShowSharing` door; its popover renders
     /// `.mcpChangeGrant` and `.mcpRevokeGrant`.

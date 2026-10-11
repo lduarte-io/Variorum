@@ -238,7 +238,10 @@ struct MCPPaneTests {
             door.attach(session: session)
             defer { door.detach() }
             #expect(try await settle { door.snapshot.sharedCount == 8 })
-            #expect(await door.allShared().count == 8, "the all-N road reaches every row")
+            // Stage B R1 B11 (A JUSTIFIED EDIT — the ritual): the flat
+            // `allShared()` had no caller left (the pane's road reads acts
+            // since U3); the road the pane takes is asserted instead.
+            #expect(await door.allSharedGroups().count == 8, "the all-N road reaches every row")
             #expect(await door.allPending().count == 7)
         }
     }

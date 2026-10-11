@@ -50,17 +50,31 @@ nonisolated struct MCPAskQueue: Equatable, Sendable {
     var newestFirst: [Entry] { entries.reversed() }
 
     /// Queue an ask that arrived `now`. A re-raise of one already waiting
-    /// changes nothing (its first stamp and its place stand). Past the cap,
-    /// the oldest ask NOT in `answering` is forgotten. Returns whether the
-    /// queue changed.
+    /// keeps its first stamp and its place — and REFRESHES its payload (13n-c
+    /// Stage B R1 B2: under arrival X an ask can wait for hours, so the
+    /// target's title and fence the client's LATEST call saw are the truer
+    /// picture). Past the cap, the oldest ask NOT in `answering` is forgotten.
+    /// Returns whether the queue changed.
     @discardableResult
     mutating func enqueue(_ ask: MCPAsk, at now: Date, answering: Set<String> = []) -> Bool {
+        if refresh(ask) { return true }
         guard !contains(ask.id) else { return false }
         entries.append(Entry(ask: ask, askedAt: now))
         while entries.count > Self.cap,
               let oldest = entries.firstIndex(where: { !answering.contains($0.id) }) {
             entries.remove(at: oldest)
         }
+        return true
+    }
+
+    /// A waiting ask's payload replaced by a fresher reading of the SAME ask
+    /// (client · target · rung — the id): its first stamp and its place
+    /// stand (Stage B R1 B2). False when it is not waiting or nothing changed.
+    @discardableResult
+    mutating func refresh(_ ask: MCPAsk) -> Bool {
+        guard let index = entries.firstIndex(where: { $0.id == ask.id }), entries[index].ask != ask
+        else { return false }
+        entries[index] = Entry(ask: ask, askedAt: entries[index].askedAt)
         return true
     }
 

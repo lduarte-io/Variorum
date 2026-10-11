@@ -314,6 +314,11 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// family: a fact about the window she is in, wired by the shell to the
     /// window registry through `CommandRouter.windowKind`.
     var windowKind: WindowRegistry.Kind? = nil
+    /// **13n-c Stage B R1 B6 — how many wings the library has** (Home
+    /// included). ⌘L's gate: with ONE wing the switcher can only close, so
+    /// "Switch Wing…" is honestly grey (P-2) — the `openNoteCount` family, a
+    /// fact about the library, wired through `WingState`.
+    var wingCount = 1
 }
 
 // MARK: - The capability declaration

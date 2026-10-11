@@ -20,7 +20,7 @@
 //    toggle) or a Private book's (click → the book's name; the mark is changed
 //    in that book's settings).
 //  Neither ⇒ NOTHING (calm — "an empty state that says nothing"). 13n-c U4
-//  adds the PENDING-ASK leg: the filled twin (`MCPAskGlyph`) while a client's
+//  adds the PENDING-ASK leg: the pending-ask mark (`MCPAskGlyph`) while a client's
 //  ask waits on this note — her press opens it.
 //
 

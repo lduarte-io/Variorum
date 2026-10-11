@@ -210,7 +210,7 @@ struct MCPShareFacesCaptureTests {
                             ("A (built) — point.3.connected.trianglepath.dotted", MCPSharedIcon.symbol),
                             ("B — eye", "eye"),
                             ("C — antenna.radiowaves.left.and.right", "antenna.radiowaves.left.and.right"),
-                            ("A's pending-ask twin (U4)", MCPSharedIcon.pendingSymbol),
+                            ("the pending-ask mark (U4; O-1 since)", MCPSharedIcon.pendingSymbol),
                         ], id: \.1) { label, symbol in
                             HStack(alignment: .firstTextBaseline, spacing: 5) {
                                 Text(tokens.chromeLabel("the lightning thief"))

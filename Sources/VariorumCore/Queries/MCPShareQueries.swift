@@ -102,6 +102,35 @@ extension Queries {
         }
     }
 
+    /// **One act's members, EVERY one named** (13n-c Stage B R1 B3 — R-13n-10:
+    /// every "all N ›" is a real road): a grouped row names its first few
+    /// members and says "and N more ›"; this is that road. The act's LIVE
+    /// grants in the order given (the act's own), each with its title and its
+    /// inert fence (R2-3's rule, through the one rule). ∝ the act — one row
+    /// read per member, never the corpus; a member revoked or spent since is
+    /// left out (the same liveness `mcpSharedActs` reads).
+    public static func mcpSharedActMembers(
+        _ db: Database, grantIDs: [String], calendar: Calendar = JournalDay.storeCalendar
+    ) throws -> [MCPSharedRow] {
+        try grantIDs.compactMap { id in
+            guard let row = try Row.fetchOne(
+                db,
+                sql: """
+                    SELECT g.*, cl.name AS client_name FROM mcp_grant g
+                    JOIN mcp_client cl ON cl.id = g.client_id
+                    WHERE g.id = ? AND g.revoked_at IS NULL
+                      AND NOT (g.duration = 'once' AND g.consumed_at IS NOT NULL)
+                    """,
+                arguments: [id]),
+                let grant = mcpGrant(from: row)
+            else { return nil }
+            return MCPSharedRow(
+                grant: grant, clientName: row["client_name"],
+                targetTitle: try mcpScopeTitle(db, kind: grant.scopeKind, id: grant.scopeID, calendar: calendar),
+                inertFence: try mcpGrantInertFence(db, grant))
+        }
+    }
+
     /// How many ACTS Shared places holds (the "all N ›" road's N).
     public static func mcpSharedGroupCount(_ db: Database) throws -> Int {
         try mcpSharedActs(db).count

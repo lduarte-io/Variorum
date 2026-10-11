@@ -271,6 +271,84 @@ struct MCPAsksWaitCaptureTests {
                 await capture(
                     HelperView().environment(theme),
                     size: NSSize(width: 680, height: 980), name: "u4-helper-\(v).png", settle: 40)
+
+                // ——— 13n-c STAGE B FIX PASS shots (named sb-*; NOT a walk) ———
+
+                // 8 — O-1: the pending-ask candidates BESIDE the shared icon,
+                // at the Bookcase row's size — the near-twin the orchestrator
+                // saw (U4's filled twin) first, then three that differ by
+                // silhouette. A (questionmark.bubble) is built, PROVISIONAL.
+                let candidates: [(String, String?)] = [
+                    ("U4's filled twin (retired — the near-twin)", "point.3.filled.connected.trianglepath.dotted"),
+                    ("A (built) — questionmark.bubble", "questionmark.bubble"),
+                    ("B — hand.raised", "hand.raised"),
+                    ("C — the shared icon + a dot", nil),
+                ]
+                await capture(
+                    VStack(alignment: .leading, spacing: 10) {
+                        ForEach(candidates, id: \.0) { label, symbol in
+                            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                                Text(tokens.chromeLabel("the lightning thief"))
+                                    .font(tokens.body.weight(.semibold))
+                                    .foregroundStyle(tokens.ink)
+                                Image(systemName: MCPSharedIcon.symbol)
+                                    .font(tokens.small)
+                                    .foregroundStyle(tokens.accent)
+                                if let symbol {
+                                    Image(systemName: symbol)
+                                        .font(tokens.small)
+                                        .foregroundStyle(tokens.accent)
+                                } else {
+                                    Image(systemName: MCPSharedIcon.symbol)
+                                        .font(tokens.small)
+                                        .foregroundStyle(tokens.accent)
+                                        .overlay(alignment: .topTrailing) {
+                                            Circle().fill(tokens.accent).frame(width: 5, height: 5).offset(x: 2, y: -2)
+                                        }
+                                }
+                                Spacer(minLength: 12)
+                                Text(label).font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .padding(16)
+                    .background(tokens.surface)
+                    .environment(theme),
+                    size: NSSize(width: 620, height: 170), name: "sb-pending-candidates-\(v).png")
+
+                // 9 — B3: a five-note act — the row names three and offers
+                // "and 2 more ›"; the act's whole list (each member with its
+                // own Revoke).
+                let ops = session.operations
+                let extra = try ["the long table", "ch 7"].map { title -> Container in
+                    let post = try ops.createPost(title: title)
+                    _ = try ops.newBlock(in: post.id, text: "\(title) — the text.", registeringUndo: false)
+                    return post
+                }
+                let cursor = try #require(try await session.database.read { try Queries.mcpClient($0, name: "cursor") })
+                let five = try await session.database.read { db in
+                    try String.fetchAll(db, sql: "SELECT id FROM container WHERE kind = 'post' AND deleted_at IS NULL ORDER BY created_at, id")
+                }
+                _ = try ops.grantMCPAccess(cursor.id, notes: Array(five.prefix(3)) + extra.map(\.id), rung: .read, duration: .always)
+                for _ in 0..<100 where !(door.snapshot.sharedGroups.contains { $0.memberCount == 5 }) {
+                    pump(0.02)
+                    await Task.yield()
+                }
+                await capture(
+                    MCPPane(door: door).environment(theme),
+                    size: NSSize(width: 560, height: 760), name: "sb-shared-act-\(v).png")
+                if let act = door.snapshot.sharedGroups.first(where: { $0.memberCount == 5 }) {
+                    await capture(
+                        MCPSharedMembersSheet(door: door, group: act, tokens: tokens, done: {}).environment(theme),
+                        size: NSSize(width: 480, height: 420), name: "sb-shared-members-\(v).png")
+                }
+
+                // 10 — B2: the book ask, the book marked Private SINCE it
+                // asked — her open reads it again: no grant offered, the why.
+                _ = try ops.setBookPrivate(world.thief.id, true)
+                await capture(
+                    MCPAskSheet(door: door, ask: bookAsk).environment(theme),
+                    size: NSSize(width: 480, height: 220), name: "sb-ask-fenced-book-\(v).png")
             }
         }
     }

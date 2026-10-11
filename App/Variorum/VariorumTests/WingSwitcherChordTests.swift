@@ -165,6 +165,38 @@ struct WingSwitcherChordTests {
         }
     }
 
+    // MARK: - Stage B R1 B6 — ⌘L with ONE wing (P-2)
+
+    /// With one wing the switcher's only outcome is closing it — a door that
+    /// does nothing (P-2; the masthead already declines to cycle there). So
+    /// "Switch Wing…" is unavailable (grey) with its note naming where another
+    /// wing comes from, and the app-wide menu reads the library's wing count
+    /// from the session — the count a wings model's read writes, whichever
+    /// window is key.
+    @Test func switchWingIsUnavailableWithOneWing() async throws {
+        #expect(CapabilityRegistry.availability(.switchWing, in: CapabilityContext(wingCount: 1)) == .unavailable)
+        #expect(CapabilityRegistry.availability(.switchWing, in: CapabilityContext(wingCount: 2)) == .act)
+        #expect(CapabilityRegistry.capability(.switchWing).unavailableNote.contains(WingCopy.newWingVerb),
+                "the note names New Wing…")
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator { Date(timeIntervalSince1970: 1_782_864_000) }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 67))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let wings = WingsModel(session: session)
+            await wings.load()
+            #expect(session.wing.wingCount == 1)
+            #expect(!session.commandRouter.isEnabled(.switchWing), "one wing (Home) — ⌘L is grey")
+            _ = try Operations().createWing(name: "variorum")
+            await wings.load()
+            #expect(session.wing.wingCount == 2)
+            #expect(session.commandRouter.isEnabled(.switchWing), "a second wing — ⌘L switches")
+        }
+    }
+
     // MARK: - The chord and the doors
 
     @Test func commandLIsDeclaredWiredAndFreeOfEveryOtherChord() {

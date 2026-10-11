@@ -338,7 +338,33 @@ struct CapabilityRegistryTests {
             // (the Library's book rows, the Starred section's, the Archived
             // books group's) — its acts, one of them (Unarchive) newly doored.
             .union(BookRowMenu.contextMenuCapabilities)
+            // 13n-c Stage B R1 B5 (A JUSTIFIED EDIT, the same class — a new
+            // renderer is a new line): the Library's NOTE-row menu's own door
+            // (Share with AI…, beyond the shared note-row grammar).
+            .union(LibraryCatalogView.contextMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
+    }
+
+    /// 13n-c Stage B R1 B5: the Library's note-row menu RENDERS every door it
+    /// declares — read from `postRowMenu`'s own body (a context menu cannot be
+    /// mounted headlessly), so deleting the door turns this red even while
+    /// another renderer keeps the union green.
+    @Test func theLibraryNoteRowMenuRendersItsDeclaredDoors() throws {
+        let source = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Variorum/Features/Library/LibraryCatalogView.swift"),
+            encoding: .utf8)
+        let start = try #require(source.range(of: "private func postRowMenu("))
+        let body = String(source[start.upperBound...].prefix(6_000))
+        let end = body.range(of: "\n    }\n")?.lowerBound ?? body.endIndex
+        let menu = body[..<end]
+        #expect(!LibraryCatalogView.contextMenuCapabilities.isEmpty)
+        for id in LibraryCatalogView.contextMenuCapabilities {
+            #expect(menu.contains("CapabilityRegistry.capability(.\(id)).verb"),
+                    "postRowMenu renders \(id)'s door")
+        }
+        #expect(CapabilityRegistry.capability(.mcpShareHere).doors.contains(.contextMenu))
     }
 
     /// 13b Stage 3 (3D): the `.surface` door — acts rendered INLINE on a

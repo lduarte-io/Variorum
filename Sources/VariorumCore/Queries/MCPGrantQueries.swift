@@ -693,13 +693,17 @@ extension Queries {
         return sharing.sorted { $0.clientName < $1.clientName }
     }
 
-    /// **The books an approved client can reach right now** — the Bookcase
-    /// row's "shared with AI" chip (P-13n-3's word). Honest under every
-    /// grant shape: a book grant on it, a wing grant on its wing, or the open
-    /// book — each read through the pure rule on the book's own facts, so THE
-    /// daily Journal or a Private book (reached by nothing) never chips (a
-    /// journal-TRAIT book chips like any book since R-AIR-1). ∝ the books
-    /// (a shelf) × the approved clients (a handful).
+    /// **The books an approved client can reach right now** — since 13n-c U3
+    /// a PARITY ORACLE only: no face reads it. The Bookcase's "shared with AI"
+    /// text chip it once fed is retired; the ONE shared icon reads
+    /// `mcpBookReaches` (who, how far and why), and the pins hold the icon's
+    /// set equal to this one under every grant shape (`MCPShareTests`). Kept
+    /// because it is the simplest honest statement of the set: a book grant on
+    /// it, a wing grant on its wing, or the open book — each read through the
+    /// pure rule on the book's own facts, so THE daily Journal or a Private
+    /// book (reached by nothing) is never in it (a journal-TRAIT book is, like
+    /// any book, since R-AIR-1). ∝ the books × the approved clients (13n-c
+    /// Stage B R1 B11: the doc corrected; the dead app-side readers removed).
     public static func mcpReachableBookIDs(_ db: Database) throws -> Set<String> {
         let clients = try mcpClients(db, states: [.approved])
         guard !clients.isEmpty else { return [] }

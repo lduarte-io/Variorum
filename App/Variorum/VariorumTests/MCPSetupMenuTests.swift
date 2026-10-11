@@ -162,4 +162,16 @@ struct MCPSetupMenuTests {
                 .contains { $0.pane == .mcp }, "“\(word)” finds the MCP pane")
         }
     }
+
+    /// Stage B R1 B7: the pane's searchable description (the line under its
+    /// title, and what Settings' search reads) names every setup the menu
+    /// offers — never Claude Code alone, which stopped being true at U5.
+    @Test func thePanesDescriptionNamesEverySetupTheMenuOffers() {
+        let blurb = SettingsPane.mcp.blurb
+        for client in MCPSetupClient.allCases {
+            #expect(blurb.localizedCaseInsensitiveContains(client.label), "the description names \(client.label)")
+        }
+        #expect(!blurb.contains("the command that sets up Claude Code"))
+        #expect(!blurb.contains("AI"), "R-AIR-8: settings-class wording")
+    }
 }

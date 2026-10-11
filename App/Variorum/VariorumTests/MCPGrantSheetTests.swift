@@ -248,14 +248,22 @@ struct MCPGrantSheetTests {
                 == "claude-code asks to suggest in “the adventures of sherlock holmes” (made Oct 11)",
                 "mockup §1b's ask title")
         #expect(MCPAskCopy.title(ask(.book)) == "claude-code asks to suggest in “the adventures of sherlock holmes”")
+        // Stage B R1 B9 (A JUSTIFIED EDIT — the ritual + the truth pin): "Any
+        // answer below grants it" was false for Don't allow, which grants
+        // nothing; the line names the answers that grant.
         #expect(MCPAskCopy.reachLine(ask(.book))
-                == "Any answer below grants it in “the adventures of sherlock holmes”, including to future entries.",
+                == "Allowing grants it in “the adventures of sherlock holmes”, including to future entries.",
                 "F2: R-AIR-3's clause where an answer MINTS a book grant")
         #expect(MCPAskCopy.reachLine(ask(.book), distinguisher: "made Oct 11")
-                == "Any answer below grants it in “the adventures of sherlock holmes” (made Oct 11), including to future entries.",
+                == "Allowing grants it in “the adventures of sherlock holmes” (made Oct 11), including to future entries.",
                 "the reach line names the same book the title does")
         #expect(MCPAskCopy.reachLine(ask(.wing, id: "", title: "Home"))
-                == "Any answer below grants it in the Home wing, including notes added later.")
+                == "Allowing grants it in the Home wing, including notes added later.")
+        for kind in [MCPGrantRule.ScopeKind.book, .wing] {
+            let line = MCPAskCopy.reachLine(ask(kind, id: "", title: "Home")) ?? ""
+            #expect(!line.localizedCaseInsensitiveContains("any answer"),
+                    "\(MCPAskCopy.dontAllow) grants nothing — the line never says every answer grants")
+        }
         #expect(MCPAskCopy.reachLine(ask(.note, id: "n1", title: "ch 7")) == nil, "a note grant names one note")
     }
 

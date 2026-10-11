@@ -59,6 +59,33 @@ struct MCPShareTests {
         }
     }
 
+    /// Stage B R1 B3 (R-13n-10 — every "all N ›" a real road): a grouped row
+    /// names its first `mcpSharedMemberTitles` members; the act's road names
+    /// EVERY member, in the act's order, each with its title — the road the
+    /// row's "and N more ›" opens. Before it, the members past the third were
+    /// named nowhere (the "all N ›" sheet showed the same three).
+    @Test func theActsRoadNamesEveryMemberInItsOrder() throws {
+        try withOperations { ops, db in
+            let client = try approvedClient(ops)
+            let titles = ["parser notes", "grammar sketch", "morning pages", "the long table", "ch 7"]
+            let notes = try titles.map { try note(ops, $0) }
+            let ids = try ops.grantMCPAccess(client.id, notes: notes.map(\.id), rung: .read, duration: .always)
+            let group = try #require(try db.read { try Queries.mcpSharedGroups($0) }.first)
+            #expect(group.memberCount == 5 && group.rows.count == Queries.mcpSharedMemberTitles,
+                    "the row names three")
+            let members = try db.read { try Queries.mcpSharedActMembers($0, grantIDs: group.grantIDs) }
+            #expect(members.map(\.targetTitle) == titles, "the road names all five, in the act's order")
+            #expect(members.map(\.grant.id) == ids)
+            #expect(members.allSatisfy { $0.clientName == "claude-code" && $0.inertFence == nil })
+            // A member revoked alone leaves the road; one fenced since reads inert.
+            try ops.revokeMCPGrant(ids[3])
+            _ = try ops.setNotePrivate(notes[4].id, true)
+            let after = try db.read { try Queries.mcpSharedActMembers($0, grantIDs: group.grantIDs) }
+            #expect(after.map(\.targetTitle) == ["parser notes", "grammar sketch", "morning pages", "ch 7"])
+            #expect(after.last?.inertFence == .privateMark, "an always grant on a note fenced since is inert")
+        }
+    }
+
     @Test func aBulkShareRefusesTheWholeActAndWritesNothing() throws {
         try withOperations { ops, db in
             let client = try approvedClient(ops)

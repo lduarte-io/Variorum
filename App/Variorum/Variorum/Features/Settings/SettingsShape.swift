@@ -109,8 +109,10 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         // true when the write rungs landed (U2) — a client may change what
         // it is granted now, up to edit.
         // 13n-c U4: + the asks waiting for an answer (arrival X).
+        // 13n-c Stage B R1 B7: the setup menu (U5, R-AIR-13) sets up Claude
+        // Code, Codex or any MCP client — the description says so.
         case .mcp: "The local MCP server: which clients may connect, what each may read and change, "
-            + "the asks waiting for your answer, and the command that sets up Claude Code."
+            + "the asks waiting for your answer, and how to set up Claude Code, Codex or any MCP client."
         case .protection: "The passphrase, how the library locks, and the ways back in."
         case .dataSafety: "Backups, how fresh they are, and what restoring one does."
         case .diagnostics: "Crash reports \u{2014} off unless you turn them on, and never sent without you."

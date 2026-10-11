@@ -28,6 +28,9 @@ struct MCPPane: View {
     let door: MCPDoor
     @State private var granting: MCPGrantOpening?
     @State private var full: FullList?
+    /// 13n-c Stage B R1 B3 — the act whose whole member list is open (a
+    /// grouped row's "and N more ›").
+    @State private var members: MCPSharedGroup?
     /// 13n-c U4 — the ask Waiting's Answer… opened (her press).
     @State private var answering: String?
     /// 13n-c U5 (R-AIR-13) — the setup menu's chosen client (the pane's
@@ -186,6 +189,10 @@ struct MCPPane: View {
         // 13n-c U4: the ask Waiting's Answer… opened (closes by itself once
         // the ask is answered anywhere).
         .mcpAskSheet(door: door, askID: $answering)
+        // 13n-c Stage B R1 B3: a grouped row's "and N more ›".
+        .sheet(item: $members) { group in
+            MCPSharedMembersSheet(door: door, group: group, tokens: tokens) { members = nil }
+        }
     }
 
     // MARK: - Waiting (13n-c U4)
@@ -242,7 +249,9 @@ struct MCPPane: View {
     @ViewBuilder
     private func sharedGroup(_ group: MCPSharedGroup) -> some View {
         if group.isGroup {
-            MCPSharedGroupView(group: group, tokens: tokens) { door.revoke(grantIDs: group.grantIDs) }
+            MCPSharedGroupView(group: group, tokens: tokens, showMembers: { members = group }) {
+                door.revoke(grantIDs: group.grantIDs)
+            }
         } else {
             MCPSharedRowView(
                 row: group.lead, distinguisher: Self.distinguisher(group.lead, distinguishers), tokens: tokens
@@ -507,7 +516,16 @@ struct MCPSharedRowView: View {
 struct MCPSharedGroupView: View {
     let group: MCPSharedGroup
     let tokens: VoiceTokens
+    /// 13n-c Stage B R1 B3: the road to every member (the host presents the
+    /// act's member list).
+    var showMembers: () -> Void = {}
     let revoke: () -> Void
+
+    /// How many members the row does not name — the "and N more ›" road's N
+    /// (zero ⇒ no road: every member is already named).
+    nonisolated static func unnamedMembers(_ group: MCPSharedGroup) -> Int {
+        max(group.memberCount - group.rows.count, 0)
+    }
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
@@ -529,11 +547,20 @@ struct MCPSharedGroupView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
-                Text(MCPPaneCopy.groupMembers(group.rows.map(\.targetTitle), total: group.memberCount))
+                Text(MCPPaneCopy.groupMembers(group.rows.map(\.targetTitle)))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
+                // Stage B R1 B3 (R-13n-10): the members past the first few are
+                // a ROAD, never a phrase that names nothing.
+                let unnamed = Self.unnamedMembers(group)
+                if unnamed > 0 {
+                    Button(MCPPaneCopy.groupMoreRoad(unnamed), action: showMembers)
+                        .buttonStyle(.plain)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 if group.inertCount > 0 {
                     Text(MCPPaneCopy.groupInert(group.inertCount))
                         .font(.caption)
@@ -546,6 +573,74 @@ struct MCPSharedGroupView: View {
             Spacer(minLength: 0)
             Button(CapabilityRegistry.capability(.mcpRevokeGrant).verb, action: revoke)
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+        }
+    }
+}
+
+/// **ONE ACT's MEMBERS, every one named** (13n-c Stage B R1 B3 — R-13n-10's
+/// "every 'all N ›' a real road"; lesson 6's "lists … everything shared"): the
+/// road behind a grouped row's "and N more ›". One bounded read of THAT act
+/// (`Queries.mcpSharedActMembers` — ∝ the act, never the corpus); each member
+/// with its own Revoke (the 13n-b row's idiom — a member can be taken back
+/// alone; the row's Revoke still covers them all). Part of the pane's surface
+/// (`MCPPane.surfaceCapabilities` declares `.mcpRevokeGrant`).
+struct MCPSharedMembersSheet: View {
+    let door: MCPDoor
+    let group: MCPSharedGroup
+    let tokens: VoiceTokens
+    let done: () -> Void
+    @State private var rows: [MCPSharedRow] = []
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(MCPPaneCopy.membersTitle(rows.isEmpty ? group.memberCount : rows.count))
+                .font(.headline)
+                .lineLimit(1)
+            Text(MCPPaneCopy.sharedDetail(
+                client: group.lead.clientName, rung: group.lead.grant.rung, duration: group.lead.grant.duration))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            List {
+                ForEach(rows) { row in
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(row.targetTitle ?? MCPPaneCopy.missingTarget)
+                                .font(.callout)
+                                .foregroundStyle(row.inertFence == nil ? .primary : .secondary)
+                                .lineLimit(1)
+                            if let fence = row.inertFence {
+                                Text(MCPPaneCopy.inertDetail(fence, kind: row.grant.scopeKind))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .italic()
+                                    .lineLimit(2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        Spacer(minLength: 0)
+                        Button(CapabilityRegistry.capability(.mcpRevokeGrant).verb) {
+                            door.revoke(grantID: row.grant.id)
+                        }
+                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    }
+                }
+            }
+            .frame(minHeight: 240)
+            HStack {
+                Spacer()
+                Button(MCPPaneCopy.doneButton, action: done)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(18)
+        .frame(width: 480)
+        .task { rows = await door.sharedMembers(group.grantIDs) }
+        // A member revoked here (or anywhere) leaves the list: it follows the
+        // store, never the act.
+        .onChange(of: door.snapshot) { _, _ in
+            Task { rows = await door.sharedMembers(group.grantIDs) }
         }
     }
 }
@@ -584,6 +679,8 @@ struct MCPFullListSheet: View {
     @State private var shared: [MCPSharedGroup] = []
     @State private var activity: [MCPActivityFace.Line] = []
     @State private var distinguishers: (books: [String: String], wings: [String: String]) = ([:], [:])
+    /// 13n-c Stage B R1 B3 — an act's member list, opened over this sheet.
+    @State private var members: MCPSharedGroup?
 
     private var title: String {
         switch list {
@@ -639,7 +736,7 @@ struct MCPFullListSheet: View {
                     // 13n-c U3: one row per act here too.
                     ForEach(shared) { group in
                         if group.isGroup {
-                            MCPSharedGroupView(group: group, tokens: tokens) {
+                            MCPSharedGroupView(group: group, tokens: tokens, showMembers: { members = group }) {
                                 door.revoke(grantIDs: group.grantIDs)
                             }
                         } else {
@@ -668,6 +765,10 @@ struct MCPFullListSheet: View {
         .task { await reload() }
         // Every act lands as rows; the list follows the store, never the act.
         .onChange(of: door.snapshot) { _, _ in Task { await reload() } }
+        // Stage B R1 B3: a grouped row's "and N more ›", over this sheet.
+        .sheet(item: $members) { group in
+            MCPSharedMembersSheet(door: door, group: group, tokens: tokens) { members = nil }
+        }
     }
 
     private func reload() async {

@@ -2313,11 +2313,18 @@ nonisolated enum CapabilityRegistry {
         // App-wide like ⌘K (it opens in the window that can show it); the
         // masthead word's cycling click is its `.surface` door. THE COLLISION
         // SWEEP is recorded at `EditorCommands.keyEquivalent`.
+        //
+        // 13n-c Stage B R1 B6 (P-2, PROVISIONAL P-13nc-SB-2): with ONE wing the
+        // switcher's only outcome is closing it, so the act is unavailable —
+        // grey on the View menu — and the note says where another wing comes
+        // from (the masthead already applies P-2 to that case: with one wing
+        // the word does not cycle).
         Capability(
             id: .switchWing, verb: WingCopy.switchWingVerb, scope: .app,
             doors: [.menuBar, .surface],
             shortcutLabel: "\u{2318}L", takesAccess: nil,
-            unavailableNote: "", availability: always),
+            unavailableNote: WingCopy.switchWingUnavailable,
+            availability: { ctx in ctx.wingCount > 1 ? .act : .unavailable }),
     ]
 
     // MARK: - Lookup

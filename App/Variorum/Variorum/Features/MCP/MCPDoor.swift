@@ -509,12 +509,64 @@ final class MCPDoor {
 
     /// The durations an ask may offer: "while connected" only to a client
     /// connected now (U1's rule carried), "always" never on a fenced target
-    /// (R-13n-4; R2-1's fix).
+    /// (R-13n-4; R2-1's fix). 13n-c Stage B R1 B2: read on the ask's CURRENT
+    /// facts (`refreshAsk`), and a BOOK a fence covers now offers NOTHING — a
+    /// fenced book is never a grant scope (`insertMCPGrant` refuses every
+    /// duration), so any answer drawn there would be a dead door (P-2).
     func durations(for ask: MCPAsk) -> [MCPGrantRule.Duration] {
+        if ask.scopeKind == .book, ask.fence != nil { return [] }
         var offered: [MCPGrantRule.Duration] = [.once]
         if connected.contains(ask.clientName) { offered.append(.connection) }
         if ask.offersAlways { offered.append(.always) }
         return offered
+    }
+
+    /// **13n-c Stage B R1 B2 — a waiting ask, read on CURRENT facts.** An ask
+    /// carries the fence and title its client's call saw when it ARRIVED; under
+    /// arrival X it may wait for hours, and a Private mark, a new daily
+    /// Journal or a deletion since makes that snapshot a lie (Always offered
+    /// on a note now fenced — a press that can only refuse). Her press reads
+    /// the target again through the ONE derivation site (`askStanding`): the
+    /// queue's entry takes the fresh payload (its stamp and place kept), and a
+    /// target that is gone forgets its ask (the sheet closes — it reads the
+    /// queue). Returns the ask as it stands, nil when it no longer waits.
+    @discardableResult
+    func refreshAsk(_ id: String) async -> MCPAsk? {
+        guard let waiting = ask(id) else { return nil }
+        guard let standing = await read({ db in try MCPDoor.askStanding(db, waiting) }) else {
+            return ask(id)  // the read failed: nothing learned, nothing changed
+        }
+        var queue = askQueue
+        guard let fresh = standing else {
+            guard queue.remove(id) != nil else { return nil }
+            adoptQueue(queue)
+            answering.remove(id)
+            return nil
+        }
+        if queue.refresh(fresh) { adoptQueue(queue) }
+        return ask(id)
+    }
+
+    /// An ask's target as it stands now — its title and fence through the
+    /// ONE derivation site (`mcpNoteFacts` / `mcpBookFacts`, never
+    /// re-derived), or nil when the target is gone (deleted, or no longer a
+    /// note or book a grant may name; a dead wing).
+    nonisolated static func askStanding(_ db: Database, _ ask: MCPAsk) throws -> MCPAsk? {
+        let fence: MCPGrantRule.Fence?
+        switch ask.scopeKind {
+        case .note:
+            guard let facts = try Queries.mcpNoteFacts(db, noteID: ask.scopeID) else { return nil }
+            fence = facts.fence
+        case .book:
+            guard let facts = try Queries.mcpBookFacts(db, readingID: ask.scopeID) else { return nil }
+            fence = facts.fence
+        case .wing:
+            fence = nil
+        }
+        guard let title = try Queries.mcpScopeTitle(db, kind: ask.scopeKind, id: ask.scopeID) else { return nil }
+        return MCPAsk(
+            clientName: ask.clientName, scopeKind: ask.scopeKind, scopeID: ask.scopeID, title: title,
+            rung: ask.rung, fence: fence)
     }
 
     /// Her answer: a grant through the ordinary ops (the ask's rung, its
@@ -640,13 +692,15 @@ final class MCPDoor {
         } ?? []
     }
 
-    func allShared() async -> [MCPSharedRow] {
-        await read { try Queries.mcpSharedRows($0) } ?? []
-    }
-
     /// 13n-c U3: the whole Shared places list, one row per act.
     func allSharedGroups() async -> [MCPSharedGroup] {
         await read { try Queries.mcpSharedGroups($0) } ?? []
+    }
+
+    /// 13n-c Stage B R1 B3: one act's members, every one named — the road
+    /// behind a grouped row's "and N more ›" (∝ the act).
+    func sharedMembers(_ grantIDs: [String]) async -> [MCPSharedRow] {
+        await read { try Queries.mcpSharedActMembers($0, grantIDs: grantIDs) } ?? []
     }
 
     /// U3: the whole log (≤ the store's 500-row cap), coalesced.
@@ -757,10 +811,6 @@ final class MCPDoor {
             activity: Array(MCPActivityFace.lines(try Queries.mcpActivity(db, limit: activityWindow))
                 .prefix(activityCap)),
             activityCount: try Queries.mcpActivityCount(db))
-    }
-
-    nonisolated static func liveGrantCount(_ db: Database, clientID: String) throws -> Int {
-        try Queries.mcpGrantReachCounts(db, clientID: clientID).reaching
     }
 
     /// One client's row (13n-c U2, R2-3): its reaching and inert grants.

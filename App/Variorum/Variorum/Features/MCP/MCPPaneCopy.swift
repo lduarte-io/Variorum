@@ -124,13 +124,17 @@ nonisolated enum MCPPaneCopy {
 
     static func groupTitle(_ count: Int) -> String { "\(count) notes" }
     static let groupChip = "notes"
-    /// The act's members, named — the titles read (at most three), then "and
-    /// N more" for the rest; a member gone since reads "(gone)".
-    static func groupMembers(_ titles: [String?], total: Int) -> String {
-        let named = titles.map { $0 ?? missingTarget }.joined(separator: " \u{00B7} ")
-        let rest = total - titles.count
-        return rest > 0 ? "\(named) and \(rest) more" : named
+    /// The act's members, named — the titles read (at most three); a member
+    /// gone since reads "(gone)". 13n-c Stage B R1 B3: the rest are no longer
+    /// a dead phrase — `groupMoreRoad` is a door to the act's whole list.
+    static func groupMembers(_ titles: [String?]) -> String {
+        titles.map { $0 ?? missingTarget }.joined(separator: " \u{00B7} ")
     }
+    /// The road to the members the row does not name (R-13n-10's "all N ›"
+    /// idiom, said as the sentence's own tail).
+    static func groupMoreRoad(_ rest: Int) -> String { "and \(rest) more \u{203A}" }
+    /// The members sheet's title.
+    static func membersTitle(_ count: Int) -> String { "\(groupTitle(count)) shared in one act" }
     /// R2-3's rule on an act: its members fenced since reach nothing.
     static func groupInert(_ count: Int) -> String {
         count == 1
@@ -674,25 +678,42 @@ nonisolated enum MCPAskCopy {
     /// clause under a BOOK ask, D-3's twin under a WING ask, nothing for a
     /// note (one note). Every duration carries it (P-13nc-3) — so one line
     /// above the buttons, never a word per button. PROVISIONAL wording
-    /// (P-13nc-U2-4), her copy pass.
+    /// (P-13nc-U2-4), her copy pass. 13n-c Stage B R1 B9: "Any answer below"
+    /// was false for Don't allow (it grants nothing) — the line names the
+    /// answers that DO grant ("Allowing"), the minimal truth fix; the voice
+    /// stays her copy pass.
     static func reachLine(_ ask: MCPAsk, distinguisher: String? = nil) -> String? {
         switch ask.scopeKind {
         case .note: nil
         case .book:
-            "Any answer below grants it in \(PlaceLabels.quoted(ask.title, distinguisher: distinguisher)), "
-                + "including to future entries."
-        case .wing: "Any answer below grants it in the \(ask.title) wing, including notes added later."
+            // Stage B R1 B2: a book a fence covers NOW takes no grant at all —
+            // the lead says why, and nothing here can grant it.
+            ask.fence != nil ? nil
+                : "Allowing grants it in \(PlaceLabels.quoted(ask.title, distinguisher: distinguisher)), "
+                    + "including to future entries."
+        case .wing: "Allowing grants it in the \(ask.title) wing, including notes added later."
         }
     }
 
     /// The sentence under it: the fence's reason (mockup §4's journal line,
     /// re-keyed by 13n-c's R-AIR-1 to THE daily Journal — VX-156 mockup §8's
     /// words; the Private twin), else what the rung would let it do.
+    ///
+    /// 13n-c Stage B R1 B2: a BOOK ask arrives only on an unfenced book (a
+    /// fenced book never raises one), so a book that wears a fence when she
+    /// opens the ask was fenced SINCE — read on current facts, it says so
+    /// honestly: no grant can reach it, and Don't allow lets the ask go.
     static func lead(_ ask: MCPAsk) -> String {
-        switch ask.fence {
-        case .journal?: "A daily Journal entry. Your daily Journal is only ever shared one ask at a time."
-        case .privateMark?: "Marked Private. Private notes are only ever shared one ask at a time."
-        case nil: "If you allow it, " + MCPPaneCopy.rungDetail(ask.rung) + "."
+        switch (ask.scopeKind, ask.fence) {
+        case (.book, .journal?):
+            "This book is your daily Journal now, which no grant reaches \u{2014} its entries are shared "
+                + "one ask at a time. \(dontAllow) lets this ask go."
+        case (.book, .privateMark?):
+            "This book is marked Private now, which no grant reaches \u{2014} its notes are shared "
+                + "one ask at a time. \(dontAllow) lets this ask go."
+        case (_, .journal?): "A daily Journal entry. Your daily Journal is only ever shared one ask at a time."
+        case (_, .privateMark?): "Marked Private. Private notes are only ever shared one ask at a time."
+        case (_, nil): "If you allow it, " + MCPPaneCopy.rungDetail(ask.rung) + "."
         }
     }
 

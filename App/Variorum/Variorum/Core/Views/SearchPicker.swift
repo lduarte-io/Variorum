@@ -171,6 +171,28 @@ nonisolated enum SearchPickerBrain {
     static func returnChoice(sections: [SearchPickerSection], query: String) -> Choice {
         visible(sections, query: query).first?.options.first.map { .pick($0.id) } ?? .nothing
     }
+
+    // MARK: - The empty panel (13n-c Stage B R1 B8)
+
+    /// What an EMPTY panel says.
+    enum EmptyState: Equatable, Sendable {
+        /// Nothing is offered and nothing was typed — the host's own sentence
+        /// ("No notes in this wing yet.").
+        case empty
+        /// A typed query matched nothing.
+        case noMatch
+    }
+
+    /// **What an empty panel says, decided purely.** A SOURCED panel (the note
+    /// feed — an async answer per query) says nothing at all until its first
+    /// answer lands (before B8, "Nothing matches." flashed during that first
+    /// load, before she typed a thing), and then speaks exactly as a flat one:
+    /// the host's empty sentence before typing, "Nothing matches." after
+    /// (before B8 a sourced panel could never show its empty sentence).
+    static func emptyState(query: String, sourced: Bool, loaded: Bool) -> EmptyState? {
+        if sourced, !loaded { return nil }
+        return query.isEmpty ? .empty : .noMatch
+    }
 }
 
 /// **THE FACE** — a quiet word that opens the search popover.
@@ -392,6 +414,8 @@ struct SearchPickerPanel: View {
     @State private var query: String
     @State private var arrangementID: String?
     @State private var sourced: [SearchPickerSection] = []
+    /// 13n-c Stage B R1 B8: the source's first answer has landed.
+    @State private var loaded = false
     @State private var generation = 0
     @FocusState private var focused: Bool
 
@@ -469,8 +493,9 @@ struct SearchPickerPanel: View {
                             row(option) { onPick(option.id) }
                         }
                     }
-                    if sections.isEmpty {
-                        Text(tokens.chromeLabel(query.isEmpty && source == nil ? emptyText : SearchPickerCopy.noMatch))
+                    if sections.isEmpty, let empty = SearchPickerBrain.emptyState(
+                        query: query, sourced: source != nil, loaded: loaded) {
+                        Text(tokens.chromeLabel(empty == .empty ? emptyText : SearchPickerCopy.noMatch))
                             .font(tokens.small)
                             .foregroundStyle(tokens.faint)
                             .lineLimit(2)
@@ -541,6 +566,7 @@ struct SearchPickerPanel: View {
         let result = await source(query)
         guard mine == generation else { return }
         sourced = result
+        loaded = true
     }
 }
 

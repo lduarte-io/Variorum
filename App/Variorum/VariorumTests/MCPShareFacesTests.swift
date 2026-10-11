@@ -150,6 +150,31 @@ struct MCPShareFacesTests {
         }
     }
 
+    /// Stage B R1 B3 (R-13n-10): a grouped row with more members than it
+    /// names offers "and N more ›", and that road names EVERY member — before
+    /// it, the members past the third were named nowhere ("all N ›" showed the
+    /// same three).
+    @Test func aGroupedRowsRoadNamesEveryMember() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = session.operations
+            let client = try approved(ops)
+            let titles = ["parser notes", "grammar sketch", "morning pages", "the long table", "ch 7"]
+            let notes = try titles.map { try note(ops, $0) }
+            _ = try ops.grantMCPAccess(client.id, notes: notes.map(\.id), rung: .read, duration: .always)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            #expect(try await settle { door.snapshot.sharedGroups.count == 1 })
+            let group = try #require(door.snapshot.sharedGroups.first)
+            #expect(MCPSharedGroupView.unnamedMembers(group) == 2, "the row names three; its road holds the rest")
+            #expect(MCPPaneCopy.groupMoreRoad(MCPSharedGroupView.unnamedMembers(group)) == "and 2 more \u{203A}")
+            #expect(await door.sharedMembers(group.grantIDs).map(\.targetTitle) == titles,
+                    "the road names all five, in the act's order")
+            #expect(await door.allSharedGroups().first?.grantIDs == group.grantIDs,
+                    "the all-N list's row opens the same road")
+        }
+    }
+
     @Test func changeFromTheReceiptReplacesTheGrantAndSaysChanged() async throws {
         try await withSession { (session: AppSession, db: AppDatabase) async throws in
             let ops = session.operations
@@ -271,21 +296,50 @@ struct MCPShareFacesTests {
         #expect(doors.firstIndex(of: .share)! > doors.firstIndex(of: .exportPDF)!, "after the exports (mockup §2)")
     }
 
+    /// Stage B R1 B4 (A JUSTIFIED EDIT — the ritual): the face takes the
+    /// fence's own answer (`grantable`) instead of spelling a second fence from
+    /// the profile and the Private flag; which books are grantable is the
+    /// parity pin below, against the fence's own read.
     @Test func theBookSettingsGrantRowDrawsOnlyWhereAGrantCanLand() {
         var book = Reading(
             id: "b", name: "dream journal", kind: .book,
             createdAt: Date(timeIntervalSince1970: 0), updatedAt: Date(timeIntervalSince1970: 0))
-        #expect(BookSettingsFace.showsGrantRow(for: book, isPrivate: false, canShare: true))
-        #expect(!BookSettingsFace.showsGrantRow(for: book, isPrivate: false, canShare: false), "R-AIR-8")
-        #expect(!BookSettingsFace.showsGrantRow(for: book, isPrivate: true, canShare: true), "the fence (P-2)")
-        book.profile = Queries.journalTraitProfile
-        #expect(BookSettingsFace.showsGrantRow(for: book, isPrivate: false, canShare: true),
-                "a journal-TRAIT book takes grants (R-AIR-1)")
-        book.profile = Queries.dailyJournalBookProfile
-        #expect(!BookSettingsFace.showsGrantRow(for: book, isPrivate: false, canShare: true), "THE daily Journal")
-        book.profile = nil
+        #expect(BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: true))
+        #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: false), "R-AIR-8")
+        #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: false, canShare: true), "the fence (P-2)")
         book.kind = .gathering
-        #expect(!BookSettingsFace.showsGrantRow(for: book, isPrivate: false, canShare: true))
+        #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: true),
+                "a gathering is never a grant target (R-AIR-12)")
+    }
+
+    /// Stage B R1 B4 — THE PARITY PIN (architectural: the face's old spelling
+    /// was equivalent, so this is green on both sides by design): the Book
+    /// Settings row's gate is exactly the complement of `mcpFencedBookIDs`
+    /// (the share doors' gate) over every kind of book — plain, Private, a
+    /// journal-TRAIT book, THE daily Journal, an archived Private book — and a
+    /// gathering is never grantable.
+    @Test func theGrantRowsGateIsTheFencesOwnAnswer() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let plain = try ops.createReading(name: "plain", kind: .book)
+            let privateBook = try ops.createReading(name: "private", kind: .book)
+            _ = try ops.setBookPrivate(privateBook.id, true)
+            let trait = try ops.createReading(name: "dream journal", kind: .book, profile: "journal")
+            let daily = try ops.createReading(name: "journal", kind: .book)
+            try ops.setDailyJournalBook(daily.id)
+            let archived = try ops.createReading(name: "kept", kind: .book)
+            _ = try ops.setBookPrivate(archived.id, true)
+            try ops.archiveReading(archived.id)
+            let gathering = try ops.createReading(
+                name: "a gathering", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let fenced = try await db.read { try Queries.mcpFencedBookIDs($0) }
+            #expect(fenced == [privateBook.id, daily.id, archived.id])
+            for book in [plain, privateBook, trait, daily, archived] {
+                let grantable = try await db.read { try BookSettingsModel.isGrantable($0, readingID: book.id) }
+                #expect(grantable == !fenced.contains(book.id), "\(book.name): the row's gate is the fence's")
+            }
+            #expect(try await db.read { try BookSettingsModel.isGrantable($0, readingID: gathering.id) } == false)
+        }
     }
 
     @Test func theFencedBooksAreExactlyTheOnesTheSheetNeverOffers() async throws {
@@ -328,7 +382,10 @@ struct MCPShareFacesTests {
             "Always isn't offered: 2 of these notes are Private or daily Journal entries"))
         #expect(MCPPaneCopy.theseNotes(3) == "These 3 notes")
         #expect(MCPPaneCopy.notesList(["a", "b", "c", "d", "e"]) == "a \u{00B7} b \u{00B7} c and 2 more")
-        #expect(MCPPaneCopy.groupMembers(["a", nil, "c"], total: 7) == "a \u{00B7} (gone) \u{00B7} c and 4 more")
+        // Stage B R1 B3 (A JUSTIFIED EDIT — the ritual): the named members and
+        // the road to the rest are two things now ("and 4 more ›" is a door).
+        #expect(MCPPaneCopy.groupMembers(["a", nil, "c"]) == "a \u{00B7} (gone) \u{00B7} c")
+        #expect(MCPPaneCopy.groupMoreRoad(4) == "and 4 more \u{203A}")
         #expect(MCPPaneCopy.sheetTitle(client: "claude-code", changing: true) == "Change access \u{2014} claude-code")
         #expect(MCPPaneCopy.sheetTitle(client: nil, changing: false) == MCPPaneCopy.sheetTitleChoosing)
         #expect(MCPPaneCopy.replacesLine == "Confirming replaces the grant you opened this from.")
@@ -394,9 +451,18 @@ struct MCPShareFacesTests {
         }
     }
 
-    @Test func theIconsGlyphIsTheMCPPanesOwnAndItsPendingTwinExists() {
+    /// Stage B fix pass (O-1 — RENAMED from "…AndItsPendingTwinExists", a
+    /// justified edit): the pending-ask mark differs from the shared icon by
+    /// SILHOUETTE — never the same glyph filled — so the two read apart beside
+    /// each other on one row (a taste row: the guard, not a red-on-old pin).
+    @Test func theIconsGlyphIsTheMCPPanesOwnAndThePendingMarkDiffersBySilhouette() {
         #expect(MCPSharedIcon.symbol == SettingsPane.mcp.symbol, "the permission's home, pictured")
         #expect(NSImage(systemSymbolName: MCPSharedIcon.symbol, accessibilityDescription: nil) != nil)
         #expect(NSImage(systemSymbolName: MCPSharedIcon.pendingSymbol, accessibilityDescription: nil) != nil)
+        func shape(_ symbol: String) -> String {
+            symbol.split(separator: ".").filter { $0 != "fill" && $0 != "filled" }.joined(separator: ".")
+        }
+        #expect(shape(MCPSharedIcon.pendingSymbol) != shape(MCPSharedIcon.symbol),
+                "a waiting ask is not \"shared, filled\" — its outline is its own")
     }
 }

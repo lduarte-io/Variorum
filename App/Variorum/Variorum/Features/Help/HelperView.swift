@@ -118,7 +118,9 @@ struct HelperView: View {
             ("⌥⌘Z", "undo a client's change \u{2014} the Edit menu names the client "
                 + "(\u{201C}Undo claude-code's take\u{201D})"),
             // 13n-c U4 (arrival X): the one face an ask has outside Settings.
-            ("the filled icon on a note, book or wing", "a client's ask waits there \u{2014} "
+            // Stage B fix pass (O-3): the mark is named by its ROLE, never its
+            // shape (O-1 changed the glyph once; the guide teaches it the same way).
+            ("a small mark beside a note, book or wing", "a client's ask waits there \u{2014} "
                 + "hover to see who and what, press to answer it (nothing ever pops up "
                 + "by itself)"),
         ]),

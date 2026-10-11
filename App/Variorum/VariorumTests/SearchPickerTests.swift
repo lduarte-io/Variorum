@@ -85,6 +85,21 @@ struct SearchPickerBrainTests {
         #expect(SearchPickerBrain.returnChoice(
             query: "plans", options: tags, canCreate: false, key: key) == .nothing)
     }
+
+    /// 13n-c Stage B R1 B8: an empty SOURCED panel (the grant sheet's note
+    /// feed) says nothing while its first answer is on its way, then its host's
+    /// empty sentence before typing and "Nothing matches." after — never
+    /// "Nothing matches." before she typed. A flat panel is unchanged.
+    @Test func anEmptyPanelSaysItsOwnSentenceBeforeTypingAndNoMatchAfter() {
+        #expect(SearchPickerBrain.emptyState(query: "", sourced: true, loaded: false) == nil,
+                "the first load is not a no-match")
+        #expect(SearchPickerBrain.emptyState(query: "", sourced: true, loaded: true) == .empty,
+                "an empty feed before typing says the host's sentence")
+        #expect(SearchPickerBrain.emptyState(query: "zzz", sourced: true, loaded: true) == .noMatch)
+        #expect(SearchPickerBrain.emptyState(query: "", sourced: false, loaded: false) == .empty,
+                "a flat panel, as before")
+        #expect(SearchPickerBrain.emptyState(query: "zzz", sourced: false, loaded: false) == .noMatch)
+    }
 }
 
 @MainActor

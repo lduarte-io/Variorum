@@ -29,6 +29,12 @@ import Observation
 final class WingState {
     /// The wing every surface reads ('' = Home).
     private(set) var currentID: String = ""
+    /// 13n-c Stage B R1 B6 — how many wings this library has, Home included
+    /// (1 until a wings model has read the store). ⌘L's gate (P-2: with ONE
+    /// wing there is nothing to switch to), written only on a change by the
+    /// wings model's adopt — a session-level fact, so the app-wide menu reads
+    /// it whichever window is key.
+    private(set) var wingCount = 1
 
     /// The device's memory, when the bootstrap attached one.
     @ObservationIgnored private var memory: UserDefaults?
@@ -65,6 +71,13 @@ final class WingState {
     func attachMemory(_ defaults: UserDefaults) {
         memory = defaults
         currentID = defaults.string(forKey: Self.memoryKey) ?? ""
+    }
+
+    /// The live wing count, from a fresh read of the store (Home + the live
+    /// additional wings) — written only when it changed.
+    func noteWingCount(_ count: Int) {
+        let count = max(count, 1)
+        if count != wingCount { wingCount = count }
     }
 
     /// Re-check after a wing act (a delete here or a sync round): a wing that

@@ -44,6 +44,8 @@ final class WingsModel {
     /// Internal so the pins drive it deterministically.
     func adopt(_ new: [Wing]) {
         wings = new
+        // 13n-c Stage B R1 B6: ⌘L's gate — Home + the live wings.
+        session.wing.noteWingCount(new.count + 1)
         // A wing that died (here or on another device) returns the app home.
         let live = Set(new.map(\.id))
         session.wing.revalidate { $0.isEmpty || live.contains($0) }
@@ -259,6 +261,10 @@ nonisolated enum WingCopy {
 
     /// ⌘L's menu verb (the View menu; the registry's `.switchWing`).
     static let switchWingVerb = "Switch Wing\u{2026}"
+    /// 13n-c Stage B R1 B6 — why ⌘L is grey with ONE wing, and where another
+    /// comes from (PROVISIONAL P-13nc-SB-2).
+    static let switchWingUnavailable = "There is only one wing so far \u{2014} \(newWingVerb) in the "
+        + "masthead\u{2019}s \u{25BE} menu makes another, and then \u{2318}L switches between them."
     /// THE SWITCHER's one quiet line (round 5, her ruling: the wing-isolation
     /// UI makes clear Snippets is the one room shared across wings).
     static let snippetsShared = "Snippets is the one room every wing shares."

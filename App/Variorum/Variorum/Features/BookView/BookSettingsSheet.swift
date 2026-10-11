@@ -249,9 +249,13 @@ nonisolated enum BookSettingsFace {
     }
 
     /// 13n-c U3 — whether the grant row draws (P-2 + R-AIR-8 + R-AIR-12).
-    static func showsGrantRow(for reading: Reading, isPrivate: Bool, canShare: Bool) -> Bool {
-        canShare && reading.kind == .book && !isPrivate
-            && reading.profile != Queries.dailyJournalBookProfile
+    /// 13n-c Stage B R1 B4: `grantable` is the FENCE's own answer for this
+    /// book (`BookSettingsModel.isGrantable` — `Queries.mcpBookFacts`, the one
+    /// derivation site the op's refusal and the sheet's offer read), never a
+    /// second fence spelled here from the profile and the Private flag (plan
+    /// §2: no parallel fence).
+    static func showsGrantRow(for reading: Reading, grantable: Bool, canShare: Bool) -> Bool {
+        canShare && reading.kind == .book && grantable
     }
 
     /// The grant row's sentence: "Shared with claude-code (read and suggest)"
@@ -290,6 +294,10 @@ final class BookSettingsModel {
     /// `Queries.mcpBookReach`, the ONE rule's why). Held while the sheet is up
     /// (`watchReach`) so a grant made from the row's own Share… shows at once.
     private(set) var reach: [MCPPlaceReach] = []
+    /// 13n-c Stage B R1 B4 — whether a grant may name this book NOW, the
+    /// fence's own answer (`isGrantable`), held with the reach so a Private
+    /// mark or a daily-Journal designation hides the row at once.
+    private(set) var grantable = false
     let stateDoors: BookStateDoors
 
     init(session: AppSession, readingID: String) {
@@ -318,14 +326,38 @@ final class BookSettingsModel {
     func watchReach() async {
         let id = readingID
         do {
-            for try await value in session.database.observe({ db in try Queries.mcpBookReach(db, readingID: id) }) {
-                if reach != value { reach = value }
+            for try await value in session.database.observe({ db in
+                GrantRowFacts(
+                    reach: try Queries.mcpBookReach(db, readingID: id),
+                    grantable: try Self.isGrantable(db, readingID: id))
+            }) {
+                if reach != value.reach { reach = value.reach }
+                if grantable != value.grantable { grantable = value.grantable }
             }
         } catch {}
     }
 
+    /// The grant row's held facts (one observation — `reading` + the grants
+    /// store; never `container`, so never at autosave rate).
+    nonisolated struct GrantRowFacts: Equatable, Sendable {
+        let reach: [MCPPlaceReach]
+        let grantable: Bool
+    }
+
+    /// **May a grant name this book?** — the fence's OWN facts
+    /// (`Queries.mcpBookFacts`: a live BOOK with no fence — not THE daily
+    /// Journal, not Private), the very read `insertMCPGrant` refuses on and
+    /// `mcpGrantableBooks` / `mcpFencedBookIDs` filter by. Never re-derived.
+    nonisolated static func isGrantable(_ db: Database, readingID: String) throws -> Bool {
+        guard let facts = try Queries.mcpBookFacts(db, readingID: readingID) else { return false }
+        return facts.fence == nil
+    }
+
     /// Pins hand a reach in (hosted `.task`s don't fire under the test host).
-    func adoptReach(_ value: [MCPPlaceReach]) { reach = value }
+    func adoptReach(_ value: [MCPPlaceReach], grantable: Bool = true) {
+        reach = value
+        self.grantable = grantable
+    }
 
     /// **The Private row** (13n-b U2 — R-13nb-4): `setBookPrivate` through
     /// the runner; the receipt in the app's voice, or the op's own refusal.
@@ -714,7 +746,7 @@ struct BookSettingsSheet: View {
         // and only while an approved client exists (R-AIR-8). Settings-class
         // words, no "AI" — the client's own name says who.
         if BookSettingsFace.showsGrantRow(
-            for: reading, isPrivate: model.isPrivate, canShare: mcpShareRoad?.canShare ?? false) {
+            for: reading, grantable: model.grantable, canShare: mcpShareRoad?.canShare ?? false) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(tokens.chromeLabel(BookSettingsFace.grantRowCaption(model.reach)))
                     .font(tokens.small)

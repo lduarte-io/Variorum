@@ -235,6 +235,103 @@ struct MCPAsksWaitTests {
         }
     }
 
+    // MARK: - Stage B R1 B2 — a waiting ask is answered on CURRENT facts
+
+    /// A client's re-raise carries the picture its latest call saw: the
+    /// waiting ask takes it (title, fence) and keeps its first stamp and its
+    /// place in Waiting.
+    @Test func aReRaiseRefreshesThePayloadAndKeepsItsStampAndPlace() throws {
+        var queue = MCPAskQueue()
+        queue.enqueue(ask(id: "n1", title: "ch 7"), at: t0)
+        queue.enqueue(ask(id: "n2"), at: t0.addingTimeInterval(1))
+        let changed = queue.enqueue(
+            ask(id: "n1", title: "ch 7, retitled", fence: .privateMark), at: t0.addingTimeInterval(60))
+        #expect(changed, "a re-raise with a new picture of its target refreshes the waiting ask")
+        let entry = try #require(queue.entry(ask(id: "n1").id))
+        #expect(entry.ask.fence == .privateMark && entry.ask.title == "ch 7, retitled")
+        #expect(entry.askedAt == t0, "its first stamp stands")
+        #expect(queue.entries.map(\.ask.scopeID) == ["n1", "n2"], "…and its place")
+    }
+
+    /// The trace: an ask that arrived on an UNFENCED note offered Always on
+    /// its arrival snapshot; the note marked Private since, Always could only
+    /// refuse (`mcpGrantScopeFenced`) — a dead door (P-2). Her open reads the
+    /// note again: Always is gone; the mark lifted, it is back.
+    @Test func herOpenReadsTheNoteAgainSoAlwaysIsNeverADeadDoor() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = Operations()
+            let note = try ops.createPost(title: "ch 7")
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let asked = ask(id: note.id, rung: .suggest, title: "ch 7")
+            door.enqueue(asked, now: t0)
+            #expect(door.durations(for: asked).contains(.always), "it arrived unfenced")
+            _ = try ops.setNotePrivate(note.id, true)
+            let fresh = try #require(await door.refreshAsk(asked.id))
+            #expect(fresh.fence == .privateMark, "marked Private since it asked")
+            #expect(!door.durations(for: fresh).contains(.always),
+                    "Always is never offered on a note fenced now — its press could only refuse")
+            #expect(door.ask(asked.id)?.fence == .privateMark,
+                    "the queue holds the fresh picture — Waiting, the glyph and every host read it")
+            #expect(door.waiting.first?.askedAt == t0, "the stamp stands")
+            _ = try ops.setNotePrivate(note.id, false)
+            let lifted = try #require(await door.refreshAsk(asked.id))
+            #expect(lifted.fence == nil && door.durations(for: lifted).contains(.always),
+                    "the mark lifted, Always is offered again")
+        }
+    }
+
+    /// A target deleted while its ask waited: the ask is forgotten at her
+    /// open (its glyph leaves, the sheet closes — every host reads the queue).
+    @Test func anAskWhoseTargetIsGoneIsForgotten() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = Operations()
+            let note = try ops.createPost(title: "ch 7")
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let asked = ask(id: note.id, title: "ch 7")
+            door.enqueue(asked, now: t0)
+            try ops.deleteContainer(note.id)
+            let after = await door.refreshAsk(asked.id)
+            #expect(after == nil, "nothing left to answer")
+            #expect(door.ask(asked.id) == nil && door.waiting.isEmpty, "Waiting no longer lists it")
+            #expect(door.askBoard.asks(.note(note.id)).isEmpty, "its glyph leaves")
+        }
+    }
+
+    /// A BOOK ask arrives only on an unfenced book; marked Private (or made
+    /// the daily Journal) since, no grant can reach it — every duration would
+    /// refuse. Read on current facts, the sheet offers no grant and says why.
+    @Test func aBookFencedSinceSaysSoAndOffersNoGrant() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = Operations()
+            let book = try ops.createReading(name: "the lightning thief", kind: .book)
+            let diary = try ops.createReading(name: "diary", kind: .book)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let asked = ask(id: book.id, rung: .writeNew, kind: .book, title: "the lightning thief")
+            let daily = ask(id: diary.id, rung: .writeNew, kind: .book, title: "diary")
+            door.enqueue(asked, now: t0)
+            door.enqueue(daily, now: t0)
+            #expect(door.durations(for: asked) == [.once, .always], "it arrived on an open book")
+            _ = try ops.setBookPrivate(book.id, true)
+            try ops.setDailyJournalBook(diary.id)
+            let fresh = try #require(await door.refreshAsk(asked.id))
+            #expect(fresh.fence == .privateMark)
+            #expect(door.durations(for: fresh).isEmpty, "no answer that grants — each would refuse")
+            #expect(MCPAskCopy.reachLine(fresh) == nil, "nothing here grants it, so no reach is said")
+            #expect(MCPAskCopy.lead(fresh)
+                    == "This book is marked Private now, which no grant reaches \u{2014} its notes are shared "
+                    + "one ask at a time. \(MCPAskCopy.dontAllow) lets this ask go.")
+            let journal = try #require(await door.refreshAsk(daily.id))
+            #expect(journal.fence == .journal && door.durations(for: journal).isEmpty)
+            #expect(MCPAskCopy.lead(journal).hasPrefix("This book is your daily Journal now"))
+        }
+    }
+
     // MARK: - The door's queue
 
     @Test func anOpenSheetsAskSurvivesTheCapAndDetachForgetsAll() async throws {
@@ -298,6 +395,10 @@ struct MCPAsksWaitTests {
         #expect(!writing.contains("\u{2325}\u{2318}O") && !writing.contains("\u{2325}\u{2318}A"),
                 "moved to the MCP group, not doubled")
         #expect(HelperView.shortcutKeysShown.isSuperset(of: ["\u{2318}L", "\u{2325}\u{2318},"]))
+        // Stage B fix pass (O-3): the ask's mark is named by its ROLE, never
+        // its shape — the glyph may change (O-1 did once); the row stays true.
+        #expect(mcp?.items.contains { $0.keys == "a small mark beside a note, book or wing" } == true)
+        #expect(mcp?.items.allSatisfy { !$0.keys.contains("filled") && !$0.does.contains("filled") } == true)
     }
 
     // MARK: - "Until it disconnects" (her round-2 ask; PROVISIONAL P-13nc-U4-1)

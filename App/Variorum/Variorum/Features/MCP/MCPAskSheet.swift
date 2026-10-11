@@ -37,9 +37,19 @@ struct MCPAskSheet: View {
     /// 13n-c U2 — the asked place's distinguisher when its name collides
     /// with another offered place (`PlaceLabels`, the one rule).
     @State private var distinguisher: String?
+    /// 13n-c Stage B R1 B2 — the ask has been read on CURRENT facts (her
+    /// press's `refreshAsk`). Until then no answer that grants is drawn: an
+    /// arrival-time snapshot may offer what the target can no longer take.
+    @State private var checked = false
+
+    /// The ask as it stands NOW — the queue's entry (refreshed by her open
+    /// or by a client's re-raise), else what the host handed in. Every host
+    /// renders this one view, so all three read the same truth.
+    private var current: MCPAsk { door.ask(ask.id) ?? ask }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        let ask = current
+        return VStack(alignment: .leading, spacing: 10) {
             Text(MCPAskCopy.title(ask, distinguisher: distinguisher))
                 .font(.headline)
                 .lineLimit(2)
@@ -63,7 +73,7 @@ struct MCPAskSheet: View {
             // library-open sheet's own precedent beside it); voiced buttons
             // there fell back to the mono fallback face.
             HStack(spacing: 8) {
-                ForEach(door.durations(for: ask), id: \.self) { duration in
+                ForEach(checked ? door.durations(for: ask) : [], id: \.self) { duration in
                     if duration == .once {
                         Button(MCPAskCopy.button(duration)) { door.answer(ask, .grant(duration)) }
                             .keyboardShortcut(.defaultAction)
@@ -81,6 +91,11 @@ struct MCPAskSheet: View {
         .padding(20)
         .frame(width: 480)
         .task(id: ask.id) {
+            // Stage B R1 B2: her open reads the target again (a gone target
+            // forgets its ask, and this sheet closes — the hosts read the
+            // queue); the answers draw on what it can take NOW.
+            await door.refreshAsk(ask.id)
+            checked = true
             let labels = await door.placeDistinguishers()
             distinguisher = switch ask.scopeKind {
             case .note: nil

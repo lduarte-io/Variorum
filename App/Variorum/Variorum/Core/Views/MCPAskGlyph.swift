@@ -7,8 +7,9 @@
 //
 //  13n-c U4 — THE PENDING-ASK GLYPH (R-AIR-6, hers: "a pending-ask icon in the
 //  same family"; VX-156 item 4 — the brief §5's face A, its "asks" chip
-//  superseded by this icon). U3's ONE shared icon's FILLED twin
-//  (`MCPSharedIcon.pendingSymbol` — the slot U3 left), drawn ONLY while an
+//  superseded by this icon). `MCPSharedIcon.pendingSymbol` (the slot U3 left —
+//  since the Stage B fix pass's O-1 a different SILHOUETTE from the shared
+//  icon, `questionmark.bubble`, PROVISIONAL P-13nc-SB-3), drawn ONLY while an
 //  ask waits on this target; the calm state draws nothing at all (no width,
 //  no spacing — the hosts' shipped alignment pins measure exactly what they
 //  did). HOVER names who asks and what ("claude-code asks to suggest here —

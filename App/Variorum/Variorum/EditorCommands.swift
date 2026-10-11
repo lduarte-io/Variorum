@@ -472,9 +472,11 @@ struct EditorCommands: Commands {
             // (a request the window adopts). While the switcher is up, a
             // held-⌘ L is the switcher's own (its monitor cycles it); a
             // request that reaches the window anyway cycles too.
+            // 13n-c Stage B R1 B6: grey with ONE wing (the registry's answer —
+            // P-2: the switcher could only close).
             Button(verb(.switchWing)) { windows.creationRouter()?.wingSwitcherRequested = true }
                 .keyboardShortcut("l", modifiers: .command)
-                .disabled(!canReachCreationTarget)
+                .disabled(!canReachCreationTarget || !enabled(.switchWing))
         }
         // Row 67 (the Act 10 correction round): this group was anchored
         // `after: .saveItem` — and a non-document WindowGroup's File menu

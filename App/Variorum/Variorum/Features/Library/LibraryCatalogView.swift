@@ -33,6 +33,15 @@ struct LibraryCatalogView: View {
         // 13n-c U4: a note row's pending-ask glyph (an ask waits on it).
         + MCPAskGlyph.surfaceCapabilities
 
+    /// **13n-c Stage B R1 B5 — the NOTE ROW's own context doors** (P-1's
+    /// walk): `postRowMenu` renders the note-row grammar from
+    /// `SidebarView.contextMenuCapabilities` (one declaration, three
+    /// renderers) PLUS the doors only this list draws — 13n-c U3's "Share with
+    /// AI…" (`.mcpShareHere`, THE grant sheet pre-filled on the note). Before
+    /// this line the walk stayed green only because the BOOK-row menus render
+    /// the same act; a deleted Library door would never have turned it red.
+    static let contextMenuCapabilities: [CapabilityID] = [.mcpShareHere]
+
     /// **THE MASTHEAD'S DOORS — AND THE ⋯ MENU IS GONE** (the post-13l polish
     /// round, ledger row 7 — her B1 ruling, verbatim: *"I want the ... menu in
     /// the upper right of the library to be replaced with a trash icon"* and
