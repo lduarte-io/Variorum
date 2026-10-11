@@ -2466,6 +2466,70 @@ Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~16:20 MDT). W
 branch `vx-165-13n-c`, from tip `9fb0a401`. **No revert is in flight unless a line below says so.** The Mac is
 UNLOCKED at start (`CGSSessionScreenIsLocked` absent), no Variorum instance (`pgrep` empty), stage FREE.
 
+### UNIT CLOSED (2026-10-11 ~16:55 MDT — the U6 implementer, Opus `claude-opus-5-5`)
+
+**NOT DONE (said first):** (1) **Not walked:** dark appearance on U6's faces (the one status seam and the Activity
+list were captured in BOTH voices, light); a sweep past the 120-s receipt window; the move receipt's "Open ›" pressed;
+`search(book_id: a gathering)` and `show_in_app` on a gathering live (both pinned headless only); a move TO Home from
+another wing by the client (the undo/redo walked both directions). (2) **Staging, said plainly:** the live round's
+two grants were minted by the DEBUG-only fixture (`wing=1`), not through the grant sheet (whose faces W-3…W-6
+walked). (3) **Product edges decided PROVISIONAL, for her:** P-13nc-U6-3 (the replay that would split a book or a
+vocabulary across wings REFUSES and keeps the entry — a #211 question with options) and P-13nc-U6-5 (the open book
+reads gatherings) above all; P-13nc-U6-1/-2/-4/-6/-7/-8 beside them. (4) **Not mine to touch:** the orchestrator's
+LIVE STATUS table and ledger rows (row 9, "U6 … BRIEFED") — left for the orchestrator to flip; no
+`notes/QUESTIONS.md` edit (merge-time, #211); no canon edit (the closeout checklist gains the U6 line). **Zero
+`Sync/`, schema, migration, custody/keychain, editor-seam, `lockstepVersion`, real-store or `/Applications` lines**
+(`git diff --name-only 9fb0a401..HEAD` — `Sources/VariorumCore/{Domain,Queries,Operations}`, `Sources/VariorumMCP`,
+`App/Variorum/Variorum/{Features/MCP,Registry/OpsRefusalCopy,Features/Tutorial,Features/Diagnostics/ScaleFixture}`,
+tests, this record); zero trailers; her real-store app never ran; her user-scope registration never edited.
+
+**Commits (branch `vx-165-13n-c`):** `65427c36` record opens · `5df340d2` traces · `9f42f076` core (the act, the
+exact-row inverse/redo, `decideGathering` + `mcpGatheringFacts`) · `ae9150ea` F-23/F-24 · `254bd26f` the wire's move ·
+`537657da` F-25 · `5d952b42` the wing show (server) · `0a37a52b` gatherings on the wire · `6df74f41` the mutations named ·
+`b36f9998` + `4f3a74ef` the gathering pin grown (M7) and its compile fix · `34943fd8` the mutations recorded ·
+`b67351ef` the app half + D-U6-1 red-first · `3335e554` D-U6-1 fixed · `dfca9f5a` the docs · `4dd23f56` headless finals ·
+`43080840` the live round's staging · `cfcd2032` staged · `74fe94ca` D-U6-2 red-first · `7a899859` D-U6-2 fixed ·
+`2375ef47` the live round recorded · `a06dbdfd` PROVISIONALs + the canon line · this commit.
+
+**Finals:** headless core **2,633 / 301** · `VariorumMCPTests` **92 / 14** (closing tree, after D-U6-2) · workbook
+**40 / 6** — all green · Mac (closing tree, rebuilt, stage `vx165-u6`) **618 tests / 99 suites `** TEST EXECUTE
+SUCCEEDED **`** (every suite naming a type U6 changed; the five gated capture harnesses skipped by design) · the
+mutation checks M1–M9 each biting (M7 after its pin grew) · the REAL-client live round (U6-9).
+
+**Found and fixed (bug-class, each red-on-old then green):** **D-U6-1** a single act too long for the bar said
+"made 1 changes" (pre-existing, found tracing the move's line) · **D-U6-2** the move's activity row named the
+destination wing (U6's own, found walking).
+
+**PROVISIONALs:** P-13nc-U6-1 … P-13nc-U6-8 (the running list above). **FABLE-OWED rows written at the moment:**
+**F-23** (`decideGathering` inside the rule + the gathering reach on the wire), **F-24** (the new inverse over a
+cross-library move, incl. the divergence decision), **F-25** (the move's grant boundary).
+
+**Where a cold reviewer should look first:** (1) `Sources/VariorumCore/Operations/Operations+MCPWingMove.swift` —
+the exact rows read before/after her act INSIDE its transaction (`wingMoveState`); the forward/backward stamps held per
+entry (`LockIsolated`) that the replays match on; the revival rules (finished yes, sealed only for a sealed note, one
+wing, no live pair row, purge intents voided, `enforceOwnershipAfterRevival`); `refuseIfWingMoveChangedSince` (only
+the wing being LEFT; the entry's own rows known) and the OBSOLETE buckets; and the extraction of her `moveNoteToWing`
+body (`date.now` read at the same point). (2) `Sources/VariorumMCP/MCPWriteTools+WingMove.swift` — R1's snapshot vs
+`guardWingMove` (one standing read, the union spend, both-or-neither), the ask order (source first), `frozenWords`'
+readability gate, the left books' naming under the SNAPSHOT standing. (3) `MCPGrantRule.decideGathering` +
+`MCPGrantAuthority.readPlace` — that no WRITE road ever accepts a gathering (every write still reads `mcpBookFacts`
+alone), `list_books`' prefilter vs the rule (M7's lesson: the prefilter alone kept unreached gatherings out), the
+gathering cursor. (4) `show_in_app`'s wing branch — the dead-wing answer after an allowed decision under the open
+book. (5) `MCPReceiptCopy.line`'s staged fallback (title dropped first) + D-U6-1. (6) `land(logsReceiptTitle:)`
+(D-U6-2 — every other tool byte-unchanged). (7) `ScaleFixture`'s `wing=1` part (DEBUG-only staging; grants for every
+approved client — O-4's net caught the first draft's provider name).
+
+**Self-assessment:** the core is small where it matters — her door is wrapped, not re-derived (its body moved
+verbatim, her own suites green unedited), and the inverse flips only the act's own rows, read from the act's own
+transaction — and it is pinned state-by-state (10 core tests incl. the undo↔redo ping-pong at row equality) and
+mutation-checked nine ways, one of which exposed a hollow pin that then grew. The wire's two-sided decision follows
+`guardBookAndNote`'s proven shape. The live round found one real defect in my own code (D-U6-2) that no pin had
+looked at, which is why the round runs. The judgment calls are product edges the ruling did not see — above all
+P-13nc-U6-3 (refuse vs mirror her door vs obsolete when the note changed since) — built in the direction that writes
+nothing silently, and said as a question. Least certain: whether she wants the undo to sever what she added since
+(option (b)) rather than ask her to; and how the receipt line reads to her when titles are long (the title is the
+first thing dropped).
+
 ### Pieces
 
 | # | Piece | Status |
@@ -2482,7 +2546,7 @@ UNLOCKED at start (`CGSSessionScreenIsLocked` absent), no Variorum instance (`pg
 | U6-8 | Mac suites over every changed type (held stage) | NOT-STARTED |
 | U6-9 | THE REAL Claude Code live round in her sweep's shape (dev store, `-s local` scratch registration, removed after) → `notes/plans/13n-c-screens/u6/` | **DONE (16:14–16:45 MDT, stage `vx165-u6`)** — a REAL Claude Code 2.1.296 client (`claude -p --model sonnet --allowedTools mcp__variorum-dev`, a scratch `-s local` registration of the `vx165-u6` Debug shim; her app ABSENT before every turn — `pgrep` gate; her user-scope `variorum` entry never edited). **Staging (said plainly):** `Tools/ScaleFixture/stage.sh notes=30,long=1,books=20,shelves=3,wing=1` — the A1 prestage copy `…/safety-copies/scale-prestage-20261011T221431Z`, then the fixture's DEBUG-only `wing=1` part (the wing "variorum", the gathering "parser things" with a PRIVATE member, her sweep's two grants: edit · Home · always + write new · variorum · always; the grant road's faces were walked at W-3…W-6). **The turns (full stream-json in `13n-c-screens/u6/live/turn-{1…7}.jsonl` + prompts):** **1 — R-AIR-12 PROVEN:** `list_books` listed "parser things | gathering | variorum | 2" — the Private member neither listed nor counted ("Fixture book 001" 1 note — the fixture's Private note absent too); `list_notes(book_id: the gathering)` → the lexer and the grammar only. **2 — her sweep:** three Home notes moved to variorum, one call each: `{"landed":"the Pool of “variorum”","left_books":[{"book_id":…,"name":"Fixture book 008 — the long way home"}],"moved":true,…,"tags":{"adopted":0,"made":1}}`, then `adopted:1` twice (T1: the first made `#scale-fixture` there by its path, the next adopted it). The bar (captured mid-run): "claude-code moved a note to “variorum” — it left 1 book · ⌥⌘Z undoes  Open ›" (the single move past the budget drops only its title — P-13nc-U6-7) then "claude-code moved 3 notes to “variorum” · ⌥⌘Z undoes  Open ›" (the sweep, one line — `u6-receipt-single-move.png`, `u6-receipt-sweep.png`); "Fixture book 008" read 0 notes. **ONE ⌥⌘Z:** the Edit menu read "Undo claude-code's wing move" (AX); pressed → "Undid: claude-code's wing move" on the bar; the menu then "Undo claude-code's wing move" (the next) + "Redo claude-code's wing move". **3 — the walk-back, verified by the client:** book 009 lists "Fixture 0008" again (`wing_id ""`); its `read_note` header `{t:"Fixture 0008 — an argument with myself"} {#scale-fixture}` (its own Home tag row back); variorum lists the two still-moved notes beside the lexer and the grammar (the Private note absent); **a finished book's member refused IN HER WORDS:** "“Fixture 0011 — questions for later” is in “Fixture book 012 — questions for later”, which is finished — reopen it (or unseal it) before moving the note to another wing." — and the client "didn't try anything else" (the advice's posture). **4 — show_in_app → a wing, Variorum frontmost:** `{"shown":true}`; "Bookcase · variorum ▾", the gathering on its shelf, the Open strip's "Home" marks, and "Now in “variorum” — claude-code showed you this wing." (`u6-show-wing-frontmost.png`). **5 — behind (Finder in front):** "The author isn't at Variorum right now, so nothing was moved — showing happens only while Variorum is the app in front. Ask them to switch to it, then call again."; the masthead still "variorum" (`u6-show-wing-behind-masthead.png`). **TERMINAL voice** (switched in Settings ▸ General — a synced setting the restore reverts): the Edit menu's "Redo claude-code's wing move" pressed → "Redid: claude-code's wing move" (`u6-terminal-redo.png`); **6** — the client confirmed "Fixture 0008" back in variorum, then a Home show → "Now in Home — claude-code showed you this wing." (Home unquoted; `u6-terminal-show-home.png`). **Activity (Settings ▸ MCP, ⌥⌘,, "all N ›"):** "showed you “Home”", "was refused show_in_app on “Home”", "showed you “variorum”", "was refused move_note_to_wing on “Fixture 0011 …”" — and **D-U6-2 FOUND HERE** (the moves logged as "moved “variorum” to another wing"), fixed red-on-old and **re-walked as turn 7** (row below). **Not walked, said:** dark appearance (the faces are the one status seam and the Activity list, captured in both voices light); a sweep past the 120-s receipt window. **Cleanup (16:45–16:50):** the Activity sheet and Settings closed; `claude mcp remove variorum-dev -s local` (the scratch project's servers `{}`); the dev instance quit by its bundle id (never her app — none ran); `Tools/ScaleFixture/restore.sh` on the prestage copy — "Restored (verified)", the sizes the start's exactly (8,671,232 · 32,768 · 803,432) — so the fixture, the grants, the moves, the voice switch and the Activity rows are gone; no clipboard or appearance change was made. **O-4's net (closing-tree run) caught the first fixture draft naming "claude-code"** — the fixture now stages the two grants for every APPROVED client (provider-neutral); `MCPProviderNeutralityTests` green. **Closing-tree finals:** `VariorumMCPTests` **92 / 14**; Mac (rebuilt) **618 tests / 99 suites `** TEST EXECUTE SUCCEEDED **`** (the five gated capture harnesses skipped by design) |
 | D-U6-2 | **DEFECT (bug-class, found walking the live round's Activity — U6's own code): a wing move's activity row named the DESTINATION WING instead of the note** ("claude-code moved “variorum” to another wing"). TRACED: `MCPWriteTools.land` logs a landed act under `receipt.targetTitle ?? title`; the wing move's receipt carries the destination wing's name there (its `targetID` is the wing — the sweep's coalescing key, U6-2), so the log row (kind note, id the note) took the wing's title | **FIXED** (pin RED-first `74fe94ca`; fix this commit) — `land(…, logsReceiptTitle: false)` for the wing move (default `true`: every other tool byte-unchanged). **Pin** `MCPWingMoveServerTests.theAnswerNamesOnlyBooksTheClientCanRead…` (+ the activity row: act, target id, the NOTE's title) — **RED on the pre-fix tree: 1 issue** (`"variorum"`), GREEN after (7/1). **Re-walked live:** the app rebuilt (`DerivedData/vx165-u6`), the dev instance quit by bundle id and relaunched plain; turn 7 moved "Fixture 0028" → the Activity list's newest row reads "claude-code moved “Fixture 0028 — what the garden knew” to another wing" (`u6-terminal-activity-fixed.png`; the older rows keep the wing — stored before the fix) |
-| U6-10 | UNIT CLOSED banner | NOT-STARTED |
+| U6-10 | UNIT CLOSED banner | DONE (this commit) — atop this record |
 
 ### Traces (made before any code — the hallucination guard)
 
