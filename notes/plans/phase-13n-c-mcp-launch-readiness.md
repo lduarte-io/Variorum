@@ -738,6 +738,7 @@ unit record (TCC state is machine-state the next session inherits).
   setup menu (Claude Code · Codex · any MCP client's JSON; "a standard MCP stdio server at one binary path" said in the
   pane); the field guide's MCP chapter (the guide is executable spec — P-6) and the server's `instructions` as the AI's
   advice (one set of facts, bounded and pinned). The 13s-a plan's item 6 then RE-VOICES the chapter rather than writing it.
+- U6 (VX-160 / VX-158 / R-AIR-12) — AppSpec §12's MCP DOOR line: the per-item note move on the wire (`move_note_to_wing` — EDIT on the note + WRITE NEW on the destination wing, decided twice, once grants of both sides spent together; her door's rows and refusals; ONE client-named undo with an exact-row inverse, P-13nc-U6-3's refusal); `show_in_app`'s `wing` target (her switcher's act, "Now in … — ‹client› showed you this wing."); a wing grant (or the open book) reads its GATHERINGS as facts (listed, assembled, searched, shown — never a grant's scope or a write's target). AppSpec §9 may want one line beside her `moveNoteToWing`: "the MCP road wraps it with an undo entry; her door stays undo-less".
 - R-AIR-14 (if U8 lands) — A-2's "protocol-blind" → "MCP-blind".
 
 ## 9. THE LEDGER (running; every row owned)
@@ -846,6 +847,14 @@ unit record (TCC state is machine-state the next session inherits).
   — Claude Code, Codex, Cursor and others"), which would need the source pin to admit example lists.
 - **P-13nc-SB-7** (Stage B close-out R2-5) — the empty Activity line: "Nothing yet — the calls clients made recently are
   listed here." (lesson 6's own words).
+- **P-13nc-U6-1** (U6) — the tool's name `move_note_to_wing` (the mockup §9's "name provisional" kept) and its listing at EDIT under any scope kind (a client short on the destination still sees it; its refusal raises the wing's ask).
+- **P-13nc-U6-2** (U6) — the move's answer names a left book only where the client can READ it (`{book_id, name}`), else by id alone (names stay with grants, AF-10 (f)); the mockup drew names.
+- **P-13nc-U6-3** (U6, a QUESTION for #211) — the undo/redo of a client's wing move when the note has since JOINED a book (member or arrival) or TAKEN a tag in the wing it would leave: (a) REFUSE, keeping the entry, with the way through said ("…take those off, or use Move to Wing, then try again.") — BUILT; (b) mirror her door for what was gained since (arrivals dismissed and tags re-pointed by path silently; refuse only on a member); (c) treat the entry as obsolete (a quiet no-op). A note moved on by her door, trashed, or whose other wing has died is OBSOLETE (quiet) in every option (the 13i-d letter).
+- **P-13nc-U6-4** (U6) — `move_note_to_wing`'s frozen-book refusal is her Move to Wing door's own sentence (`WingCopy.frozen`, through the new `wingMoveFrozenWords` hook) where the client can READ that book, else the op table's words ("This book is finished — reopen it first; if it's sealed, unseal it.").
+- **P-13nc-U6-5** (U6, R-AIR-12's reading) — the OPEN BOOK reads gatherings too (`decideGathering` is `decideWing`'s read: a wing grant on the gathering's wing at any rung, or the open book). Alternative: wing grants only.
+- **P-13nc-U6-6** (U6, VX-158) — `show_in_app`'s wing target is delivered as her switcher's own act (the app's wing switched, no pane moved, nothing said when already there) with "Now in “X” — ‹client› showed you this wing." (mockup §7; Home unquoted).
+- **P-13nc-U6-7** (U6) — the move's receipt: "moved “X” to “variorum” — it left 2 books" (her door's words); a run to ONE destination coalesces ("moved 14 notes to “variorum”"); a single move past the bar's 72 budget drops only its TITLE ("moved a note to “variorum” — it left 2 books") before the count fallback.
+- **P-13nc-U6-8** (U6) — a gathering's `list_notes` pages in its own order on its own cursor; a cursor whose note left the assembly answers the stale-cursor refusal (list again); `include_archived` adds nothing (a gathering assembles living notes).
 - **P-13nc-U4-8** (U4, a QUESTION for #211) — the ask's sheet keeps 13n-b's answers; closing it without granting
   is Don't allow (Esc), which drops the ask until the client re-asks. Options: keep · add "Not now" · Esc keeps it
   waiting.
