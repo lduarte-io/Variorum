@@ -41,6 +41,31 @@ struct WingSwitcherChordTests {
         #expect(brain.visible == rows)
     }
 
+    /// 13n-c held walks D-W3 — the sheet's FIELD writes its unchanged empty
+    /// text back through its binding as it takes focus (walked: ⌘L with
+    /// "studio" current opened washing "Home", the first row — so Return
+    /// switched instead of closing). An unchanged query is not typing: the
+    /// current wing keeps the highlight, and a held cycle stays armed.
+    @Test func theFieldsUnchangedWriteBackIsNotTyping() {
+        var opened = WingSwitcherBrain(rows: rows, currentID: "w-let")
+        opened.type("")
+        #expect(opened.highlight == "w-let", "the field taking focus must not move the highlight off the current wing")
+        #expect(opened.returnPressed() == .close, "Return straight after ⌘L closes — it never switches")
+
+        var held = WingSwitcherBrain(rows: rows, currentID: "")
+        held.tapL()
+        held.type("")
+        #expect(held.highlight == "w-var" && held.cycling, "a write-back mid-cycle keeps the held cycle")
+        #expect(held.commandReleased() == .commit("w-var"))
+
+        var typed = WingSwitcherBrain(rows: rows, currentID: "w-let")
+        typed.type("var")
+        typed.type("var")
+        #expect(typed.highlight == "w-var", "a real change still filters")
+        typed.type("")
+        #expect(typed.highlight == "", "clearing a typed query is a change: the first row again")
+    }
+
     @Test func heldCommandLCyclesAndReleaseCommits() {
         var brain = WingSwitcherBrain(rows: rows, currentID: "")
         brain.tapL()
