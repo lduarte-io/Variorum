@@ -2,6 +2,14 @@
 
 **Everything is done, laddered clean, and HELD UNMERGED at your word. PR #146.**
 
+## PRO VERIFICATION ADDENDUM (2026-10-11, the Pro session — supersedes checklist item 2 and amends item 1)
+
+- **Both of the Air's gaps are closed on the Pro:** the whole-target run on the MERGED tree (4,251/699 — VX-115 the one standing product red; VX-149 unrecurred; the StatusSeamVocabulary red cleared by the merge, so VX-151 closes at the merge) and the full GUI walk (this terminal holds the Accessibility grant; all members eyeballed with screenshots in `App/Variorum/DerivedData/vx143-pro-walk/`). **Your real-use pass is now optional, except ONE leg that still needs your finger: the Touch ID behavior (VX-140)** — lock the Mac with Variorum not frontmost: no ask should appear over another app; come back: one ask; cancel: only the lock screen's button re-asks.
+- **Main is merged INTO the branch** (`eca507b2`, zero conflicts) per your instruction — PR #146 now carries 13n-b and merges clean. Still UNMERGED at your word.
+- **Two new members landed at your word this morning:** **VX-155** (the take-card ⋯ menu's mini-typed dropdown — fixed; the rows now read at standard menu size, the ⋯ glyph unchanged) and **VX-139** (keep tabs open — built: the sidebar's Open section returns as you left it at the next launch, order included, behind Settings ▸ General ▸ "Keep open notes across launches", this-Mac, default ON).
+- **The post-ladder diff got its own cold review** (opus, `notes/plans/fixes/vx-143-pro-review.md`): 0B/1M/5m/4n, every finding fixed or recorded. The MAJOR was worth it: the strip's claim was per-process, so on your Touch-ID store the remembered strip would have gone stale at the first relock — now the claim travels with the shell and the strip survives relocks too.
+- **New taste calls for your bundle (P-VX139-i…vi, each one line to reverse):** default ON · this-Mac-local (never synced) · the remembered strip keeps your manual arrangement · one window remembers (a second main window starts empty) · archived notes' rows return (Trash's don't) · General grew to six catalog rows for the toggle (the two short dials stay at the top).
+
 ## Your checklist
 
 1. **Merge call.** PR #146 (`vx-143-write-chrome-feedback`, pushed through the run-close commit) — merge commit, never squash. After the merge the closing session: retires the in-flight row, carries the PROVISIONAL bundle to QUESTIONS, writes the MOBILE PARITY line (the phone's Block History row deliberately keeps its old face — `Shared/` untouched), closes the Linear members, removes the worktree, deletes the branch, and refreshes `/Applications` at a zero-instance window (A1 first).
