@@ -136,7 +136,10 @@ enum MCPRefusalCopy {
 
     /// AF-6's sentence (copy 13s-a-sweepable): said only where an ask was
     /// actually queued AND the reason is one the client already knows — a
-    /// rung too low on a target it can reach (13n-c U1: never a fenced one).
+    /// rung too low on a target it can reach — which, since the 13n-c U1
+    /// ladder's F1, includes a fenced note the client holds a LIVE per-ask
+    /// grant on (the rule answers `rungTooLow` there; the `fenced` REASON
+    /// itself never gains the sentence).
     static let askedSentence = "Variorum has asked the author \u{2014} call again once she answers."
 
     /// The words for a refusal, with the asked sentence where it belongs.
@@ -176,8 +179,9 @@ enum MCPRefusalCopy {
 /// target that EXISTS (the caller passes nil for a missing one) queues the
 /// ask in the app — never for a fenced BOOK, which no grant can name — and
 /// the words gain the asked sentence only for a reason the client already
-/// knows (`rungTooLow`); `notShared` and a fenced note stay the one answer
-/// (13n-c U1, T-2).
+/// knows (`rungTooLow` — since the 13n-c U1 ladder's F1 that is also what a
+/// fenced note answers its own live per-ask grant holder); `notShared` and an
+/// UNREACHED fenced note stay the one answer (13n-c U1, T-2).
 struct MCPAsking: Sendable {
     let onAsk: (@Sendable (MCPAsk) -> Void)?
 

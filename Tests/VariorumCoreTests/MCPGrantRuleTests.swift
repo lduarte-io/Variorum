@@ -290,7 +290,11 @@ struct MCPGrantRuleTests {
     ///    unfenced target;
     /// 2. a FENCED allow ⇒ a live note-scoped, non-always grant naming it;
     /// 3. consumesOnce ⇒ the call consumes and the grant is a live once grant;
-    /// 4. an ask on a fenced target never offers "always".
+    /// 4. an ask on a fenced target never offers "always";
+    /// 5. (13n-c U1 ladder F1 — the recorded F-8, built) a fenced ask is
+    ///    `rungTooLow` exactly when a LIVE grant reaches the note (its own
+    ///    per-ask grant, under the asked rung — the client's grant IS its
+    ///    knowledge), and the fence's one answer otherwise.
     @Test func theBoundaryHoldsOverEveryGrantShape() {
         var worlds = 0
         let fences: [Rule.Fence?] = [nil, .journal, .privateMark]
@@ -370,7 +374,13 @@ struct MCPGrantRuleTests {
         case .ask(let reason, let offersAlways):
             if target.fence != nil {
                 #expect(!offersAlways, "invariant 4")
-                #expect(reason == .fenced(target.fence!))
+                // Invariant 5 (13n-c U1 ladder F1): a live per-ask grant
+                // holder hears the honest rung; everyone else the fence.
+                if reachesNow {
+                    #expect(reason == .rungTooLow(granted: g.rung), "invariant 5: \(g) asked \(asked)")
+                } else {
+                    #expect(reason == .fenced(target.fence!))
+                }
             }
             // An ask is right exactly when nothing covers the call.
             #expect(!(reachesNow && g.rung >= asked))

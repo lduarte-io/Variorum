@@ -23,6 +23,9 @@ import Foundation
 ///   per-ask grant naming THAT note, once or while connected, reaches it —
 ///   and its ask never offers "always". A fenced BOOK matches nothing at all
 ///   (its notes are fenced one by one; the book itself is never listed).
+///   A LIVE per-ask grant holder asking PAST its rung hears `rungTooLow`,
+///   never the fence (13n-c U1 ladder F1 — its grant is its knowledge); a
+///   spent or revoked grant is not live, so the fence's one answer returns.
 ///
 /// The rule decides; it never reads. `Queries.mcpNoteFacts` /
 /// `mcpBookFacts` derive the facts (the fence's legs live there, in ONE
@@ -223,11 +226,19 @@ public enum MCPGrantRule {
         if let grant = best(sufficient) {
             return .allow(grantID: grant.id, consumesOnce: spends(grant, rung: rung, consumes: consumes))
         }
+        // 13n-c U1 ladder F1 (the recorded F-8, built): a LIVE grant already
+        // reaches the target — for a fenced note, necessarily its own per-ask
+        // grant — so the honest answer is the rung, never the one not-shared
+        // answer ("or doesn't exist") about a note the client can read this
+        // second. The client's grant IS its knowledge: no oracle opens, and a
+        // spent once grant or a revoked one is not live, so a lapsed grant
+        // falls through to the fence below. A fenced target's ask still never
+        // offers "always" (R-13n-4).
+        if let highest = reaching.map(\.rung).max() {
+            return .ask(.rungTooLow(granted: highest), offersAlways: fence == nil)
+        }
         if let fence {
             return .ask(.fenced(fence), offersAlways: false)
-        }
-        if let highest = reaching.map(\.rung).max() {
-            return .ask(.rungTooLow(granted: highest), offersAlways: true)
         }
         return .ask(.notShared, offersAlways: true)
     }

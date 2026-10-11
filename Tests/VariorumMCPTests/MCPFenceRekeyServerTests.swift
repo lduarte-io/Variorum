@@ -182,4 +182,55 @@ struct MCPFenceRekeyServerTests {
             await h.hangUp(connection)
         }
     }
+
+    // MARK: - F1 (13n-c U1 ladder round 1 — the recorded F-8, built): a LIVE
+    // per-ask grant holder asking a HIGHER rung hears the honest rung
+
+    /// A client reading a fenced note on its own live grant and then asking
+    /// to SUGGEST hears `rungTooLow` + the asked sentence (AF-6's ruled
+    /// posture for a target the client legitimately knows), never "or doesn't
+    /// exist" about a note it can read this second; the ask queues at the
+    /// asked rung and never offers "always". A SPENT once grant is a lapsed
+    /// grant: the one answer returns, byte-equal to an id naming nothing
+    /// (the implementer's refinement — the hoist opens no road).
+    @Test func aLiveGrantHolderAskingHigherHearsTheHonestRungAndALapsedGrantTheOneAnswer() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let entry = try h.operations.createOrOpenJournalEntry(entryDate: "2026-07-03").container
+            let block = try h.operations.newBlock(in: entry.id, text: "a hedge of holly", registeringUndo: false)
+            let nowhere = "00000000-0000-4000-8000-00000000f00d"
+
+            // A while-connected READ grant naming the fenced note (per-ask legal).
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", grant(.read, .note, entry.id, .connection))
+            let read = try await call(connection, "read_note", ["note_id": .string(entry.id)])
+            #expect(read.isError != true && text(read).contains("a hedge of holly"),
+                    "its own grant reads the note")
+            let asksBefore = h.asks.value.count
+            let refused = try await call(connection, "add_take", [
+                "block_id": .string(block.block.id), "text": .string("another try"),
+            ])
+            #expect(refused.isError == true)
+            #expect(text(refused)
+                    == MCPRefusalCopy.words(.rungTooLow(granted: .read), .note) + " " + MCPRefusalCopy.askedSentence,
+                    "the honest rung + the asked sentence — never the one answer to a grant holder")
+            let ask = h.asks.value.last
+            #expect(h.asks.value.count == asksBefore + 1 && ask?.scopeID == entry.id
+                    && ask?.rung == .suggest && ask?.fence == .journal && ask?.offersAlways == false)
+            await h.hangUp(connection)
+
+            // A ONCE read grant, spent by its first read: the very next read
+            // answers the one answer, byte-equal to an id naming nothing.
+            let lapsed = try await h.connect(as: "codex")
+            _ = try h.approve("codex", grant(.read, .note, entry.id, .once))
+            let spent = try await call(lapsed, "read_note", ["note_id": .string(entry.id)])
+            #expect(spent.isError != true && text(spent).contains("a hedge of holly"), "the once grant spends")
+            let after = try await call(lapsed, "read_note", ["note_id": .string(entry.id)])
+            let void = try await call(lapsed, "read_note", ["note_id": .string(nowhere)])
+            #expect(after.isError == true && text(after) == text(void),
+                    "a lapsed grant opens no road — the one answer returns")
+            await h.hangUp(lapsed)
+        }
+    }
 }

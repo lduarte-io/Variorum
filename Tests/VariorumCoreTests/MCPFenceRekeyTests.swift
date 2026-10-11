@@ -161,6 +161,54 @@ struct MCPFenceRekeyTests {
         }
     }
 
+    // MARK: - F1 (the ladder's MAJOR — the recorded F-8, built): a LIVE
+    // per-ask grant holder asking a HIGHER rung hears the honest rung
+
+    /// The client's grant IS its knowledge of the note, so `rungTooLow` opens
+    /// no oracle — while a SPENT once grant, a revoked grant, or anyone
+    /// else's reach stays the fence's one answer (no road for a lapsed
+    /// grant — the implementer's refinement on F1).
+    @Test func aLivePerAskGrantHolderAskingHigherHearsRungTooLowNeverTheOneAnswer() {
+        for fence in [Rule.Fence.journal, .privateMark] {
+            let facts = Rule.NoteFacts(id: "n", wingID: "", bookIDs: [], fence: fence)
+            let connected = Rule.Grant(
+                id: "g-conn", rung: .read, scopeKind: .note, scopeID: "n", duration: .connection)
+            #expect(Rule.decide(client: .approved, grants: [connected], openBook: false,
+                                target: .note(facts), rung: .suggest, consumes: true)
+                    == .ask(.rungTooLow(granted: .read), offersAlways: false),
+                    "the honest rung — and never offering always on a fenced note (\(fence))")
+            // An UNSPENT once grant is live too.
+            let once = Rule.Grant(
+                id: "g-once", rung: .suggest, scopeKind: .note, scopeID: "n", duration: .once)
+            #expect(Rule.decide(client: .approved, grants: [once], openBook: false,
+                                target: .note(facts), rung: .edit, consumes: true)
+                    == .ask(.rungTooLow(granted: .suggest), offersAlways: false))
+            // A SPENT once grant is not live: the fence's one answer returns,
+            // even at the rung it once covered.
+            let spent = Rule.Grant(
+                id: "g-spent", rung: .read, scopeKind: .note, scopeID: "n",
+                duration: .once, consumedAt: "t")
+            #expect(Rule.decide(client: .approved, grants: [spent], openBook: false,
+                                target: .note(facts), rung: .read, consumes: true)
+                    == .ask(.fenced(fence), offersAlways: false),
+                    "a lapsed grant opens no road")
+            // A revoked grant likewise.
+            let revoked = Rule.Grant(
+                id: "g-rev", rung: .edit, scopeKind: .note, scopeID: "n",
+                duration: .connection, revokedAt: "t")
+            #expect(Rule.decide(client: .approved, grants: [revoked], openBook: false,
+                                target: .note(facts), rung: .read, consumes: true)
+                    == .ask(.fenced(fence), offersAlways: false))
+            // A WIDER grant (book/wing) never reaches a fenced note, so it
+            // earns no rung answer either — the fence stays the one answer.
+            let wing = Rule.Grant(
+                id: "g-wing", rung: .edit, scopeKind: .wing, scopeID: "", duration: .always)
+            #expect(Rule.decide(client: .approved, grants: [wing], openBook: false,
+                                target: .note(facts), rung: .suggest, consumes: true)
+                    == .ask(.fenced(fence), offersAlways: false))
+        }
+    }
+
     // MARK: - Privacy still wins ties
 
     @Test func privacyStillWinsInsideATraitBook() throws {
