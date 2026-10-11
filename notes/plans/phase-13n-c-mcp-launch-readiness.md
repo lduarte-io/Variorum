@@ -675,7 +675,7 @@ unit record (TCC state is machine-state the next session inherits).
 | 10 | U7 — VX-159 | U7 implementer | NOT-STARTED (may fall out) |
 | 11 | Stage C ladder | orchestrator | NOT-STARTED |
 | 12 | U8 — the secret | U8 implementer | NOT-STARTED (may fall out) |
-| 13 | The whole-phase walk + the Opus UX-reviewer walk | orchestrator + walker + UX reviewer | IN PROGRESS — leg 1 (the HELD unit walks U1–U5 + Stage B faces + the real-client live round) BRIEFED ("THE HELD-WALKS BRIEF"); leg 2, the Opus UX-reviewer walk, runs after U6 over everything |
+| 13 | The whole-phase walk + the Opus UX-reviewer walk | orchestrator + walker + UX reviewer | **PAUSED at her word** (mid W-4) — W-1/W-2 done, W-3/W-4 partial; D-W1 + D-W2 found (picker defects, unfixed); T-1…T-8 for the UX reviewer; machine state live (claim, Debug app, scratch registration, dev store unrestored) |
 | 14 | Closeout + the conditional refresh | orchestrator | NOT-STARTED |
 | 15 | QUESTIONS #211 — this phase's PROVISIONALs (minted at the merge) | orchestrator | OPEN |
 
@@ -2212,3 +2212,49 @@ edited. If her app appears mid-walk, the live round STOPS.
 | D-W1 | **DEFECT (bug-class, found walking W-4/W-5): the grant sheet's NOTE picker never shows its rows** — in BOTH hosts (Settings ▸ MCP's sheet `w5-note-leg-empty-*`/`w5-note-picker-open*.png`, and the window sheet from the Library row's Share with AI… `w5-note-picker-window-*`): the popover opens to "Find a note" over a 2-pt list (AX: `AXScrollBar (972,593 19x2)`), no Recently edited, no rows, no empty sentence, before AND after typing. **TRACED:** (1) the source DOES answer — Return on the empty query picked "2026-10-11, Private" (the most recently edited note; `submit()` reads `sourced.first`), so the rows exist; (2) the popover sizes ONCE, from its content's FIRST frame, and never follows a later size change — shown on the synchronous BOOK picker: opened at full height, typing "dream" left one row in an unshrunk ~360-pt popover (`w5-bookpicker-dream.png`); (3) the sourced panel's first frame is empty by construction (`SearchPickerPanel`: `sourced = []`, `loaded = false` until `runSource()` lands; the list is `ScrollView { LazyVStack }.frame(maxHeight: 360)`, whose ideal height is its content's — ~0), so the popover sizes to the header + 2 pt and the rows that land after are clipped away. The U2 harness drew `SearchPickerPanel` DIRECTLY (not inside a popover), which is why no capture or pin saw it. (Also seen: "marshlantern" matched nothing — correct: `notePickerNotes` matches titles and day keys only and the probe note is untitled.) **Fix shape:** a sourced panel reserves its list's height from the first frame. Pin: red-on-old by revert. | IN-PROGRESS — recorded; pin + fix next |
 | D-W2 | **DEFECT (bug-class): a book shown in TWO sections of the book picker renders as a BLANK slot in its later section** — at rest, "Fixture book 039" (Recently edited AND starred) is drawn under Recently edited and leaves an empty 37-pt slot in Starred; "Fixture book 010" (starred, shelf essays) is drawn under Starred and leaves an empty slot in essays (AX: Starred rows at y 550 then 624 — one row missing; essays 894 then 968) (`w5-picker-resting.png`). **TRACED:** `SearchPickerPanel` nests `ForEach(sections)` → `ForEach(section.options)` inside ONE `LazyVStack`, identifying rows by the bare `option.id` (the book id); a book in a quick section AND its home section puts one identity twice in the lazy stack, and the later one renders empty. Her mandate's very case ("sort by shelf … favorites"): every starred book vanishes from its shelf section, every recently-edited starred book from Starred. **Fix shape:** rows identified by section + option. Pin: red-on-old by revert. | IN-PROGRESS — recorded; pin + fix next |
 | W-X | WALKS CLOSED banner | NOT-STARTED |
+
+**ORCHESTRATOR ADDENDUM (the walker's handback at her pause — "pause before your next step for a second"; landed
+repo-first by the orchestrator. The walker's W-3/W-4 details and T-3…T-8 were not yet in its record.)**
+- **W-3 (partial):**
+  - The setup menu's three choices were pressed and copied, each clipboard equal to the pane's text with its own
+    receipt.
+  - The JSON parses and its command path exists.
+  - The Claude Code command (`-s local` in the scratch folder) reports Connected. Codex is not installed, so its command
+    was not run.
+  - A scripted client "walk-request" raised a real connection request, approved with a once read grant.
+  - `initialize` carries the 1,497-character advice.
+- **Live turn 1:** a real Claude Code client quoted the advice verbatim while denied and said it had no tools
+  (`scratchpad/walk/live/turn-1.jsonl`).
+- **Live (2):** claude-code was re-approved from its denied row's Approve…, and the trait book "dream journal" was found
+  by typing and granted. The confirm read "Grant read in “dream journal” always, including to future entries".
+- **W-4 (partial):**
+  - Today's Entry minted the daily Journal and a ⌘J entry.
+  - A Private probe note took the in-note lock. Shared from its Library row, it was offered Once only, with the why. The
+    receipt carried Change… and Revoke ›.
+  - An apparent fence miss on "walk vx143" was traced and dismissed (a dated note in no book, so Always is correct).
+  - Paused while filing it into the Journal.
+- **DEFECTS found by the walk, not yet fixed:**
+  - **D-W1:** the grant sheet's note picker never shows its rows (popover over a 2-pt list). In both hosts, SwiftUI
+    sizes the popover from the first frame, and a sourced `SearchPickerPanel`'s first frame is empty. Fix shape: reserve
+    the list's height from the first frame. Pin: the first-frame fitting height of a hosted panel, red-on-old.
+  - **D-W2:** a book listed in two picker sections renders as a blank slot in the later one. Rows are identified by bare
+    `option.id` inside one `LazyVStack`. Fix: identify rows by section plus option, red-on-old pin. This is her "sort by
+    shelf … favorites" case.
+- **Taste list for the UX reviewer:**
+  - **T-1:** the 3-note selection panel is clipped and the bulk doors collapse to chevrons.
+  - **T-2:** "MCP Settings…" sits above "Settings…".
+  - **T-3:** Approve… opens "Grant access", and there is no way to approve without sharing.
+  - **T-4:** a fresh sheet defaults to the most recently edited book, even an archived one.
+  - **T-5:** the in-note lock is far right, small and faint.
+  - **T-6:** the empty note leg reads "Choose a note / choose a note" over a disabled "Grant read on “” always".
+  - **T-7:** the window-hosted sheet uses system blue where the Settings one uses the voice's accent.
+  - **T-8:** two untitled same-day notes are both "2026-10-11" in the sheet, the confirm and the receipt.
+  - **AX:** the Codex/JSON choices' outer accessibility value still reads the Claude Code command.
+- **Not walked yet:** the rest of W-4 (the ⌘J once-grant, the byte-identity and zero-passage probes, the Home-wing grant,
+  the ask's daily-Journal lead), W-5 (re-walk after D-W1/D-W2), and W-6…W-10.
+- **Machine state left live at the pause:**
+  - the stage claim `vx165-walk` (to ~16:55);
+  - the dev-store Debug app running;
+  - the scratch `-s local` registration present;
+  - the dev store not yet restored from `Backups/safety-copies/scale-prestage-20261011T185742Z`.
+- Her real store, `/Applications` and her user-scope registration were never touched.
