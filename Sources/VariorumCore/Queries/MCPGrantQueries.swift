@@ -227,7 +227,20 @@ extension Queries {
     /// is gone, and always for a wing (a wing is never fenced; its fenced
     /// notes are filtered one by one).
     public static func mcpGrantInertFence(_ db: Database, _ grant: MCPGrantRow) throws -> MCPGrantRule.Fence? {
-        nil  // R2-3 RED-FIRST STUB — derived in the next commit
+        let target: MCPGrantRule.Target
+        let fence: MCPGrantRule.Fence?
+        switch grant.scopeKind {
+        case .note:
+            guard let facts = try mcpNoteFacts(db, noteID: grant.scopeID) else { return nil }
+            (target, fence) = (.note(facts), facts.fence)
+        case .book:
+            guard let facts = try mcpBookFacts(db, readingID: grant.scopeID) else { return nil }
+            (target, fence) = (.book(facts), facts.fence)
+        case .wing:
+            return nil
+        }
+        guard let fence, !MCPGrantRule.reaches(grant.ruleGrant, target) else { return nil }
+        return fence
     }
 
     /// A client's live grants, split by whether they reach (13n-c U2 —
