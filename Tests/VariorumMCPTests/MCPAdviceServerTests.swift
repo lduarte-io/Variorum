@@ -182,4 +182,59 @@ struct MCPAdviceServerTests {
             await h.hangUp(connection)
         }
     }
+
+    // MARK: - Her sitting's ask: the while-connected duration's BUILT meaning
+
+    /// The advice says what "until you disconnect" actually does (her sitting,
+    /// 2026-10-11 — "so a confused user who asks their AI hears the real
+    /// answer"), and each clause is EXECUTED here against the host's own
+    /// lifecycle: the grant belongs to the client's NAME (a connection opened
+    /// AFTER the grant keeps it alive), it ends when that name's LAST open
+    /// connection closes (`MCPServerHost.ended`), a reconnect does not bring it
+    /// back, and the server stopping ends it (every session hung up; every
+    /// start sweeps). `MCPServerTests.whileConnectedEndsWhenTheClientsLast…`
+    /// pins the two-connections-from-the-start case beside it.
+    @Test func untilYouDisconnectSaysTheBuiltMechanics() async throws {
+        #expect(advice.contains(
+            "Until you disconnect lasts while any connection under your client's name stays open, "
+            + "sessions opened later included; it ends when the last one closes or Variorum's server "
+            + "stops, and reconnecting does not restore it."))
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let book = try h.operations.createReading(name: "b", kind: .book)
+            let spec = Operations.MCPGrantSpec(rung: .read, scopeKind: .book, scopeID: book.id, duration: .connection)
+            func revoked(_ id: String) throws -> Bool {
+                try h.database.read { try Queries.mcpGrant($0, id: id) }?.revokedAt != nil
+            }
+            func liveConnectionGrants() throws -> Int {
+                let client = try h.client("claude-code")
+                return try h.database.read { try Queries.mcpGrants($0, clientID: client.id) }
+                    .filter { $0.duration == .connection && $0.revokedAt == nil }.count
+            }
+
+            let first = try await h.connect(as: "claude-code")
+            let grant = try #require(try h.approve("claude-code", spec))
+            let later = try await h.connect(as: "claude-code")  // opened AFTER the grant
+            await h.hangUp(first)
+            try await Task.sleep(for: .milliseconds(200))
+            #expect(try revoked(grant) == false, "a session opened later keeps it alive — the grant is the name's")
+            await h.hangUp(later)
+            #expect(try await h.eventually { try revoked(grant) }, "it ends when the LAST one closes")
+
+            let again = try await h.connect(as: "claude-code")
+            try await Task.sleep(for: .milliseconds(200))
+            #expect(try revoked(grant) && liveConnectionGrants() == 0, "reconnecting does not restore it")
+
+            let second = try h.operations.grantMCPAccess(try h.client("claude-code").id, spec)
+            h.host.stop()  // Variorum's server stops: every session hung up
+            #expect(try await h.eventually { try revoked(second) }, "the server stopping ends it")
+            _ = again
+
+            let orphan = try h.operations.grantMCPAccess(try h.client("claude-code").id, spec)
+            #expect(try revoked(orphan) == false, "minted while the server is down…")
+            try h.host.start()
+            #expect(try revoked(orphan), "…and every server start sweeps it (no connection survives a stop)")
+        }
+    }
 }

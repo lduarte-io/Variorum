@@ -38,7 +38,12 @@ final class MCPSession: @unchecked Sendable {
     /// The U1 ladder's F5: "Every refusal says why." is GONE — a fenced or
     /// unshared target answers the one not-shared answer by design (T-2). The
     /// U1 ladder's R2-8: `search` serves standing grants only (P-13nb-U1-2's
-    /// spirit — a once grant reads by id).
+    /// spirit — a once grant reads by id). Her sitting (2026-10-11, the U6
+    /// addendum): the while-connected duration says its BUILT meaning — the
+    /// grant belongs to the client's NAME and ends only when that name's last
+    /// open connection closes (`MCPServerHost.ended`) or the server stops
+    /// (every session hung up; every start sweeps); a reconnect after the end
+    /// finds it gone. Pinned against the mechanics in `MCPAdviceServerTests`.
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
         open only while Variorum runs. A new client is a connection request until the author approves \
@@ -49,7 +54,10 @@ final class MCPSession: @unchecked Sendable {
         write new (new notes, books, chapters, tags, versions), edit (edit takes, divide, merge, \
         move, delete). Each names a note, a book or a wing, for once, until you disconnect, or \
         always; they may also open the whole library to reading (the open book). A once grant is \
-        one act: a read grant's first read of a note's text, a higher grant's first write.
+        one act: a read grant's first read of a note's text, a higher grant's first write. \
+        Until you disconnect lasts while any connection under your client's name stays open, \
+        sessions opened later included; it ends when the last one closes or Variorum's server \
+        stops, and reconnecting does not restore it.
         search covers standing grants only; read a once grant's note by id.
         A wing grant also reads that wing's gatherings (list_books lists them, kind gathering); \
         none is ever granted alone. move_note_to_wing needs edit on the note and write new on the \
