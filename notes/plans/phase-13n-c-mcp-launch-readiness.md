@@ -28,7 +28,7 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | U1 | The fence re-key (VX-163) | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U1 record) — owed: the orchestrator's verification + REAL Claude Code live round; the pre-flight walk HELD (locked session); Stage A |
 | U2 | The grant sheet rebuilt | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U2 record) — owed: the orchestrator's verification; the walk HELD (locked session) — offscreen captures stand in, NOT a walk; Stage B |
 | U3 | Grant from where you are + the one icon + the in-note indicator | BUILT + VERIFIED by the orchestrator at `c6d5d23a` (7 commits `4dc0202c..c6d5d23a`: fence diff empty — no Sync/ · Persistence/ · migrations · editor seam; zero trailers; 22 captures read — popover, Bookcase icon, two-door receipt) — icon pick: A `point.3.connected.trianglepath.dotted` KEPT (orchestrator, PROVISIONAL P-13nc-U3-5 — hers at the copy pass); the walk HELD (locked session); Stage B |
-| U4 | Asks wait quietly + the keyboard | BRIEFED — implementer spawning |
+| U4 | Asks wait quietly + the keyboard | IN-PROGRESS — the U4 implementer (record opened; LIVE STATUS in the U4 UNIT RECORD) |
 | U5 | The guide, the AI's advice, the setup menu | NOT-STARTED |
 | U6 | The wing on the wire (+ gatherings under a wing grant) | NOT-STARTED |
 | U7 | VX-159 — the ceremonies on the wire | NOT-STARTED (may fall out — §4) |
@@ -1337,4 +1337,69 @@ on BOTH mastheads; the shortcuts pane and ⌘/ listing the new chords. Captures 
 
 ## U4 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-*(empty until the U4 implementer's first commit)*
+Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~07:57 MDT). Worktree
+`~/dev/variorum-vx-165`, branch `vx-165-13n-c`. No revert is in flight unless a line below says so.
+The session is LOCKED at start (07:57 MDT: `CGSSessionScreenIsLocked 1`) — the walk is re-checked at
+U4-10; offscreen renders stand in only if it is still locked, and are NOT a walk.
+
+### Pieces
+
+| # | Piece | Status |
+|---|---|---|
+| U4-0 | Preflight read whole (this plan top to bottom incl. the STANDING BLOCKER + the U1–U3 records; the sitting record R-AIR-5/6/8/15 + round 5; the brief §5/§6/§7/§13; mockups §4/§5/§6; 13n-b AF-6, P-13nb-U2-9, R-13nb-23/26; `SessionResiliencyProtocol`) + the code the brief names + the traces and the chord sweep below | DONE (this commit) |
+| U4-1 | The ask QUEUE + PROJECTION (pure): `MCPAskQueue` (dedupe per client · target · rung, the cap forgetting the oldest NOT being answered, the arrival stamp, forget-a-client) and `MCPAskBoard` (keyed by note · book · wing; the hover words) — Mac pins | NOT-STARTED |
+| U4-2 | ARRIVAL X: the WindowGroup's self-presenting `.sheet(item:)` RETIRED; the window road opens THAT ask's sheet on her press (`MCPShareRoad.answerAsk`); `answer` ignores an ask no longer waiting; a denied client's asks clear; the never-self-present pin | NOT-STARTED |
+| U4-3 | The pending-ask GLYPH (`MCPAskGlyph`, U3's family's filled twin) on Library + Pool note rows, the Book Panel's rows, both bars' `note ▾`, Bookcase rows, the wing switcher's rows + masthead word, the in-note indicator | NOT-STARTED |
+| U4-4 | Settings ▸ MCP ▸ WAITING (above Connection requests; capped 3 + "all N ›"; Answer… opens the sheet in the pane) + its catalog row + every sentence describing the old arrival | NOT-STARTED |
+| U4-5 | ⌥⌘, — MCP Settings… (app menu, under Settings…): Settings opened at MCP, scrolled to Waiting when an ask waits; registry act; the sweep at the binding | NOT-STARTED |
+| U4-6 | ⌘L — the wing switcher (R-AIR-15): a pure brain (`WingSwitcherBrain` — filter, held-⌘ L cycling, release/return commits, Esc) + the sheet (the ⌘K idiom) + the masthead word's CYCLING click with the ▾ menu beside it, on the Bookcase AND the Library masthead (the switcher moves to `Core/Views`); "Now in …" speaks; the Snippets line; the sweep at the binding | NOT-STARTED |
+| U4-7 | The shortcuts pane + ⌘/: `HelperView.groups` gains an MCP group (⌥⌘, · ⌥⌘A · ⌥⌘O · ⌥⌘Z's client-named undo) and ⌘L | NOT-STARTED |
+| U4-8 | "While connected" — copy options recorded; the most neutral built PROVISIONAL everywhere the duration is said | NOT-STARTED |
+| U4-9 | Headless finals (`swift build` + core + `VariorumMCPTests` + workbook) + Mac suites under a held stage claim | NOT-STARTED |
+| U4-10 | The walk (dev-store Debug, Study + Terminal) → `notes/plans/13n-c-screens/u4/` — or, if still locked, offscreen captures of the real views (NOT a walk) | NOT-STARTED |
+| U4-11 | UNIT CLOSED banner | NOT-STARTED |
+
+### Traces (made before any code — the hallucination guard)
+
+- **T-U4-1 — the self-presenting arrival (VX-156 item 4; brief §5).** `VariorumApp.swift:86–95` hosts
+  `.sheet(item: Binding(get: { appDelegate.mcp.presentedAsk }, set: { _ in }))` on the MAIN `WindowGroup`;
+  `MCPDoor.presentedAsk = asks.first` (`MCPDoor.swift:135`) and `enqueue` (`:414`) appends — so the moment a
+  client's call is refused past its grant (AF-6's `onAsk` hook, `:308`), a sheet presents on every main
+  window, mid-sentence (P-13nb-U2-9's provisional arrival). No other face shows an ask; the pane has no
+  waiting list (AF-6's optional rows, unbuilt at 13n-b). Arrival X = remove the host; the queue stays.
+- **T-U4-2 — the cap's protection names "the one on screen".** `enqueue` removes index 1 past `askCap`
+  (`:417`) because index 0 is the presented sheet. Under arrival X nothing is on screen by itself; the
+  protected asks become exactly those whose sheet she OPENED (a set — several windows and the pane can each
+  hold one).
+- **T-U4-3 — an ask has no age.** `MCPAsk` (`Sources/VariorumMCP/MCPWriteSupport.swift:39`) carries
+  client · scope · title · rung · fence — no time. Waiting's "2 minutes ago" (mockup §4) needs the APP's
+  queue to stamp arrival (the first raise; a deduped re-raise keeps it). The wire is unchanged.
+- **T-U4-4 — a denied client's ask is a dead door.** `answer` grants through `grantMCPAccess`, which
+  refuses `mcpClientNotApproved` once `deny` (`:376`, also the client row's Revoke) has run; an ask left
+  waiting from that client would be a glyph whose press can only refuse (P-2). Cleared on deny.
+- **T-U4-5 — answering twice mints twice.** `answer` (`:437`) removes by id and then grants
+  unconditionally; with sheets opened by HER press from several places (two windows, the pane), the second
+  answer of the same ask would mint a second grant. `answer` must act only on an ask still waiting.
+- **T-U4-6 — Settings opens where it was.** `AppSettingsView.pane` is local `@State` (default `.general`,
+  `:75`); nothing outside selects a pane. `openSettings` (the SwiftUI action) opens the window; the MCP
+  pane is a `Form` with no anchor to scroll to.
+- **T-U4-7 — the wing switcher today.** `WingSwitcherMenu` (`Features/Shelf/`) is rendered by ONE
+  feature, the Bookcase masthead (`ShelfView.swift:513`); its WHOLE label is a `Menu`, so a click always
+  opens the list (no cycle); no chord reaches it; the Library masthead (`LibraryCatalogView.swift:562`)
+  carries no wing face though the Library lists one wing; `WingsModel.switchTo` speaks nothing (13i-d's
+  "the surfaces changing IS the answer"). The Library rendering it too makes it a two-feature view →
+  `Core/Views/` at this touch (CLAUDE.md).
+- **T-U4-8 — the F2 carry (the ask road's R-AIR-3):** VERIFIED — U2 built `MCPAskCopy.reachLine`
+  (rendered by `MCPAskSheet`) and pinned it (`MCPGrantSheetTests` 251–259: a book ask's "Any answer below
+  grants it in “…”, including to future entries.", the distinguished form, the wing twin, nil for a note).
+  Nothing to build; the carry closes here.
+- **THE CHORD SWEEP (2026-10-11, on `fa7a2937` — re-run at the binding commit):** (1) the table
+  (`EditorCommands.keyEquivalent`): the only `l` chord is ⇧⌘L (Save Choices as Lens); no `,` chord;
+  (2) every `.keyboardShortcut(` in `Variorum/` + `Shared/`: `l` only as ⇧⌘L and ⌃⌘L (Lock Library Now);
+  `,` nowhere (⌘, is SwiftUI's Settings item); (3) `NSMenuItem` keyEquivalents: none set; (4) the
+  overrides: `EditorTextView.performKeyEquivalent` (⌘S + the non-consuming ⌘Z/⇧⌘Z hint arm), the
+  `keyDown` trio (⇧⏎ soft newline; the capture box's ⏎/⇧⏎; the flight's deferral) — no `l`, no `,`;
+  (5) the local monitors: `PageTurnKeys` (unmodified ←/→), `CommentsPanel` (⌘⏎, ⎋), `DivideWSheet` (passes
+  every ⌘/⌃ event), `CalmAsks` and `ProtectionController` (observe, never consume), `PressReporter` /
+  `PaneFocusCatcher` (mouse only); (6) the system hot keys: `[.quickNote]` (⌃⌥⌘N); (7) the registry's
+  labels: `⌘⇧L` only. Not platform-reserved (brief §13's list). **Bare ⌘L and ⌥⌘, are FREE.**
