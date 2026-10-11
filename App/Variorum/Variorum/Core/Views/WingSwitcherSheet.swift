@@ -92,10 +92,15 @@ nonisolated enum WingSwitcherKeys {
     }
 
     /// The monitor's ONE road from a real event to a key (13n-c held walks
-    /// D-W4 — pinned with real NSEvents).
+    /// D-W4 — pinned with real NSEvents). A flagsChanged event has NO
+    /// characters: reading `charactersIgnoringModifiers` on one RAISES, and
+    /// the event loop swallowed that throw — so ⌘'s release never reached the
+    /// switcher and the held cycle never committed. Characters are read for a
+    /// keyDown only.
     static func key(for event: NSEvent) -> Key? {
         classify(
-            type: event.type, characters: event.charactersIgnoringModifiers,
+            type: event.type,
+            characters: event.type == .keyDown ? event.charactersIgnoringModifiers : nil,
             keyCode: event.keyCode, flags: event.modifierFlags)
     }
 }
