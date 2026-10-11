@@ -1982,7 +1982,7 @@ her 2,000-character bound — nothing beyond it.
 | R2-5 | `MCPPaneCopy.noActivity` true words ("recently", lesson 6's) + pin | **DONE** (this commit; Mac run + red-on-old PENDING CB-R/CB-F) — "Nothing yet — the calls clients made recently are listed here." (lesson 6's own phrase; PROVISIONAL, her copy pass). Pin in `TutorialMCPChapterTests.lessonSix…` beside B10's ("the pane says the same"; no "every call") |
 | R2-2 | The members sheet: "1 note" singular; a `loaded` flag; a load that comes back empty closes the sheet; pin `membersTitle(1)` | **DONE** (this commit; Mac run + red-on-old PENDING CB-R/CB-F) — `MCPPaneCopy.groupTitle(1)` = "1 note" (so `membersTitle(1)` = "1 note shared in one act"); `MCPSharedMembersSheet.loaded` + the pure `shownCount(loaded:rows:memberCount:)` (the act's count until loaded, then exactly the list's) and `closesAfterLoad(_:)` (empty ⇒ `done()`); one `load()` for the open and every store change; `MCPDoor.sharedMembers` now answers nil when the READ fails (nothing learned — never mistaken for nothing left; the B3 pin's call `?.map` as the ritual, annotated). Pin `MCPShareFacesTests.theMembersSheetSaysOneNoteAndClosesWhenNothingIsLeft` (the title words; the count rule; a live act stays, the last member revoked reads empty-and-closes) |
 | R2-4 | `MCPAskSheet`'s stale comments (the "While connected" header; the W-3 WindowGroup rationale); the system-button choice re-checked and recorded | **DONE** (this commit) — the header says "in the window or pane she pressed in" and "Until it disconnects (… P-13nc-U4-1's words for 13n-b's 'while connected')"; the buttons' comment carries the RE-CHECK (T-CB-6): the WindowGroup host is retired, but the two window hosts attach `.mcpAskSheet` after their `.environment(theme)`, so the sheet gets no `ThemeStore` there and voiced buttons would fall to the mono face — **SYSTEM BUTTONS KEPT, said**. Comments only; no behaviour, no pin owed |
-| R2-1 | (a) her open forgetting a gone target's ask speaks a refusal-kind line naming the place, on the seam of the host she pressed in; (b) the queue's targets re-validated in one batch (∝ the queue) so a dead ask's mark leaves without a press — the trigger recorded; pins red-on-old | NOT-STARTED |
+| R2-1 | (a) her open forgetting a gone target's ask speaks a refusal-kind line naming the place, on the seam of the host she pressed in; (b) the queue's targets re-validated in one batch (∝ the queue) so a dead ask's mark leaves without a press — the trigger recorded; pins red-on-old | IN-PROGRESS — **the core road DONE (this commit):** `AppDatabase.observe(tracking:_:)` (additive in `Persistence/AppDatabase.swift` — no schema, no migration, every existing caller untouched) + `RegionObservationTests` (new, core, 3/3 green): the watch's shape sleeps through four autosaves and wakes for a book's write, a book's death and a wing's death; the read-tracked control re-runs on an autosave; the MEASURED LIMIT (a `container_block`-named watch still wakes on an autosave — why notes are not in the region). **Remaining:** the door's watch + Waiting's one-shot + (a)'s spoken line + the seam, and the Mac pins (red-on-old by revert) |
 | CB-R | The red-on-old reverts (named here BEFORE each starts; pre-revert copies in the session scratchpad's `cb-prerevert/`) | NOT-STARTED |
 | CB-F | Finals: the whole headless package + the Mac suites over every changed type under a held stage claim | NOT-STARTED |
 | CB-X | CLOSE-OUT FIX PASS CLOSED banner | NOT-STARTED |
@@ -1998,20 +1998,29 @@ her 2,000-character bound — nothing beyond it.
   door's own `note` caption at the pane's head, `MCPDoor.Note(place: .top)`); ⌘L's nested road is a window's.
 - **T-CB-2 — R2-1 (b), the mark that outlives its target.** Nothing re-reads a waiting ask until her press: the queue
   changes only on `enqueue`, `answer`, `deny`/`forgetAsks`, `refreshAsk` and `detach`. A note moved to the Trash, a
-  book deleted or a wing deleted leaves its ask's mark on every face (`askBoard` — the row glyphs, the masthead's
-  `.anyWing` word, Waiting's row) until she presses it. **The trigger, chosen narrowest:** no session-level trash
-  signal exists (the Trash is read only by its own surface), and the wings model is per-window. So the door holds
-  ONE observation, alive ONLY while at least one ask waits, whose fetch IS the re-validation — `askStanding` over
-  every waiting ask in one read (≤ `MCPAskQueue.cap` = 8 asks, each `mcpNoteFacts`/`mcpBookFacts` +
-  `mcpScopeTitle` — the one derivation site, never re-derived). GRDB records the fetch's region COLUMN-grained (the
-  authorizer's reads; an UPDATE event carries its SET columns — `DatabaseRegion.isModified(byEventsOfKind:)`), so it
-  wakes exactly when something the answer depends on is written — a tombstone, a wing's death, a Private mark, a
-  membership, a title — and never on an autosave (`touchContainer` writes `last_touched_at`/`updated_at`, churn its
-  own columns, the buffer `variant` — none read). That covers "when Waiting renders" by construction (Waiting
-  renders only while an ask waits, which is exactly while the watch runs) and "when the store's wings/trash change",
-  including a deletion that arrives by sync. A forget by the watch is SILENT (her press did nothing; the mark
-  leaving IS the change — and an open sheet closes exactly as it does when the ask is answered elsewhere, T-U4-5's
-  idiom); the spoken line is (a)'s, her open's.
+  book deleted or a wing deleted leaves its ask on `askBoard` until she presses it. **Where a dead mark is VISIBLE:**
+  a note's mark rides only that note's own rows (Library/Pool rows, the Book Panel, the open note's bar and
+  indicator), which leave with the note — so after a note's death its mark shows only in WAITING; a book's leaves with
+  its Bookcase row except when the book is UN-BOUND to a gathering (the row stays); a WING ask's mark rides the
+  masthead's wing word, which stays — the reviewer's example. **THE TRIGGER — first drafted wrong, corrected by
+  MEASUREMENT (said plainly):** the first draft held a read-tracked observation of `askStanding` and claimed GRDB's
+  column-grained regions would keep autosaves out. A headless probe (`RegionObservationTests`, kept as pins) showed
+  it false: an autosave stamps `container` with a FULL-RECORD update (`registerTextChange` → `container.update(db)`),
+  so any fetch reading `container` re-runs per edit; and even an observation NAMED on `container_block` wakes per
+  autosave, because that update compiles `cascade_container_tombstone` (advertising `block`, `container_block`,
+  `reading_post`, `post_tag`, `reference`) and writes the FTS index's shadow tables — "unadvertised" events GRDB
+  treats as touching every interested observer. **So no table a note's death writes can be told apart from an
+  autosave.** `reading` and `wing` lie outside that set (measured: four autosaves, zero wakes; a book's write, a
+  book's death and a wing's death each wake it). **Chosen, narrowest:** (1) ONE watch, alive only while an ask waits,
+  NAMED on `reading` + `wing` through a new additive `AppDatabase.observe(tracking:_:)` (GRDB's constant-region
+  tracking — the fetch's own reads not tracked), whose fetch IS the re-validation: `askStanding` over every waiting ask
+  in one read (≤ `MCPAskQueue.cap` = 8 — the one derivation site, never re-derived); it also restarts — one immediate
+  re-validation of every ask, notes included — whenever the set of waiting asks changes; (2) WAITING re-validates in
+  one batch when it renders (`.task` keyed on the waiting ids) — the one face a note's dead mark can still show;
+  (3) her press (`refreshAsk`) re-reads and, finding the target gone, SPEAKS (a). The residue, said: a note deleted
+  while Settings ▸ MCP stays on screen keeps its Waiting row until the pane re-renders or she presses it — and the
+  press then says why it did nothing. A forget by the watch or by Waiting is SILENT (the mark leaving is the change;
+  an open sheet closes exactly as when its ask is answered elsewhere — T-U4-5's idiom).
 - **T-CB-3 — R2-2.** `MCPPaneCopy.membersTitle(_:)` = `"\(groupTitle(count)) shared in one act"` and `groupTitle`
   = `"\(count) notes"` — one member reads "1 notes shared in one act". The sheet's title count is
   `rows.isEmpty ? group.memberCount : rows.count` — before the load AND after a load that came back empty (the last
