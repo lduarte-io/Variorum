@@ -1969,7 +1969,7 @@ written at the moment.
 ## STAGE B CLOSE-OUT FIX RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
 Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~12:10 MDT). Worktree `~/dev/variorum-vx-165`,
-branch `vx-165-13n-c`. **No revert is in flight unless a line below says so.** *(The R2-3 mutation check is DONE and RESTORED — `cp` + `cmp`-identical, `git status` showed only this pass's edits.)* The Mac is unlocked (the brief); no
+branch `vx-165-13n-c`. **No revert is in flight unless a line below says so.** *(The R2-3 mutation check is DONE and RESTORED — `cp` + `cmp`-identical, `git status` showed only this pass's edits.)* ***(IN FLIGHT ~13:25 MDT: THE MAC RED-ON-OLD REVERT (CB-R) — the pre-fix behaviour put back behind the new API shapes in six app files: `MCPDoor.swift` (no gone line; the watch and `revalidateAsks` inert), `MCPPane.swift` (the old title count, no close), `MCPPaneCopy.swift` (the old `groupTitle`, `noActivity`, `enableBlurb`), and `HelperView.swift` / `SettingsShape.swift` / `TutorialSeeder.swift` from `634558cd` (pre-O-4). Pre-revert copies in `scratchpad/cb-prerevert/`; restore = `cp` back + `cmp` each.)*** The Mac is unlocked (the brief); no
 Debug-app launch and no walk in this pass (the orchestrator walks after it). Work list = round 2's R2-1…R2-5 + O-4 +
 her 2,000-character bound — nothing beyond it.
 
