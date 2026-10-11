@@ -93,7 +93,45 @@ found no record of this state in the 13n-b plan.
 Shared row whose target is fenced says so (e.g. "reaches nothing while it is your daily Journal /
 Private"). If neither unit takes it, it becomes a ledger row and a ticket at closeout.
 
-### R2-4 — [NIT] · doc comments R-AIR-1 left stale · `MCPGrantRule.swift:266`, `MCPWriteTools.swift:445-446`
+### R2-4 — [MINOR, product-question class + a characterization pin owed] · R-AIR-1 × `setDailyJournalBook` (`Operations+Appearance.swift:430-452`) · "Use as Daily Journal" now MOVES THE FENCE: the outgoing Journal's hand-filed notes become standing-shareable at once, and the door says nothing
+
+**Evidence (traced):** `setDailyJournalBook` demotes every other live `'daily'` bearer to
+`journalTraitProfile` (`:439-443`) and stamps the designee. Before U1 the demoted book stayed fenced,
+because the trait was a fence leg, so changing her daily Journal never changed what the MCP door
+reached. After U1, `dailyJournalLegForBook` no longer matches the demoted book. Every note she filed
+into the old Journal BY HAND then loses the member leg; these are the notes with no own profile (the
+U1 suite's own "a loose page" shape). Those notes become reachable at once by any standing wing grant
+on Home and by the OPEN BOOK, which reaches every approved client, always. Its ⌘J/New-Entry entries
+stay fenced through their own profile. That is D-1, and this scenario is D-1's strongest
+justification. Meanwhile the incoming designee's members become fenced.
+
+Both doors are ordinary, unrelated to sharing: the Mac Bookcase (`ShelfViewModel.swift:466`) and the
+PHONE's book details (`MobileBookDetails.swift:185`). The marker is a synced CAS write, so a designation
+change made on the phone changes what the Mac's MCP door shares. The plan's MOBILE PARITY line ("R-AIR-1
+changes no synced row") is true but incomplete: a synced row's fence MEANING changed. The sync keeper
+repair (`Repairs.swift`, `convergeDailyJournalDuplicates`) is NOT a road: it moves the loser's
+memberships into the keeper, so they stay fenced. I read it and found that.
+
+This IS R-AIR-1's ruled letter: the fence keys on the marker, and moving the marker moves the fence.
+So this is not a defect. But it is a fewer-asks road (against R-13nb-1's "more asks, never fewer"
+posture) opened by an act that is not about sharing, and her "never surprised" (R-AIR-7) has no face
+for it. Neither D-1, R-AIR-1's record, nor the U1 traces name it. The U1 record's "the marker, not the
+keeper" note mentions the demotion only as convergence.
+**Pin (red-on-old — a characterization of the ruled outcome, so it is deliberate rather than
+incidental):** designate daily book A; file a plain note into A by hand; ⌘J an entry into A; then call
+`setDailyJournalBook(B)`. Expect the hand-filed note's `fence == nil`, the ⌘J entry's
+`fence == .journal`, and B's members fenced. On the pre-U1 tree the hand-filed note reads `.journal`,
+so the pin is red.
+**Fix:**
+- (1) that pin;
+- (2) a #211 question, hers: should "Use as Daily Journal" say so when MCP is on with an approved
+  client (R-AIR-8's gating — e.g. "notes you filed in “journal” by hand will be shared like any
+  book's"), or should a demoted ex-daily book keep fencing?
+- (3) the F-5 FABLE-OWED row gains this consequence, since it is precisely "what the fence covers";
+- (4) the closeout's MOBILE PARITY line names the phone's designation door as a road that changes the
+  Mac door's reach.
+
+### R2-5 — [NIT] · doc comments R-AIR-1 left stale · `MCPGrantRule.swift:266`, `MCPWriteTools.swift:445-446`
 
 **Evidence:** `decideWing`'s doc says "so a wing never lists a journal". A wing now lists a journal-trait
 book's notes, so it should say "never lists a fenced note". `noteIntoBook`'s doc says "a journal or
@@ -101,7 +139,7 @@ Private note is reachable per-ask only". It should say a daily-Journal or ⌘J e
 These are comments only, so no pin is owed. The same files' headers were updated in this diff.
 **Fix:** two comment edits at the next touch (U2/U6).
 
-### R2-5 — [NIT] · the plan's CLOSEOUT CANON-DELTA CHECKLIST (the AF-6 line) · F1's refinement is not named beside the supersession
+### R2-6 — [NIT] · the plan's CLOSEOUT CANON-DELTA CHECKLIST (the AF-6 line) · F1's refinement is not named beside the supersession
 
 **Evidence:** the checklist reads "AF-6's fenced clause superseded (T-2/F-7)". After `c1047097`, the
 supersession is not simply "fenced = the one answer". A LIVE per-ask grant holder asking past its rung
@@ -109,7 +147,7 @@ on a fenced note hears `rungTooLow` + the asked sentence, which is AF-6's own po
 case. A future reader of AF-6 + the pointer would conclude "fenced always answers the one answer".
 **Fix:** add one clause to the checklist line naming F1 / F-10.
 
-### R2-6 — [NIT, routed] · the confirm's clause on a ONCE grant (D-3 / P-13nc-3) · "Grant read in “dream journal” once, including to future entries" reads as ongoing reach for a grant that lives one content read
+### R2-7 — [NIT, routed] · the confirm's clause on a ONCE grant (D-3 / P-13nc-3) · "Grant read in “dream journal” once, including to future entries" reads as ongoing reach for a grant that lives one content read
 
 **Evidence:** AF-7 as amended (`MCPGrantRule.spends`, `:254-257`): a once book READ grant is spent by
 its first content read. The clause is literally true only until that read. P-13nc-3 already names
@@ -118,7 +156,7 @@ literally, since that is the case where the clause can mislead.
 **Fix:** at the copy pass, show P-13nc-3's once sentence verbatim beside her always example. No code
 change in U1.
 
-### R2-7 — [NIT, routed to U5] · `MCPReadTools.swift:495-500` (search scoped to a note) · F1's stated rationale ("never 'or doesn't exist' about a note the client can read this second") holds on `decide`'s road only
+### R2-8 — [NIT, routed to U5] · `MCPReadTools.swift:495-500` (search scoped to a note) · F1's stated rationale ("never 'or doesn't exist' about a note the client can read this second") holds on `decide`'s road only
 
 **Evidence:** search serves STANDING reach only (13n-b's recorded restriction, the round-1 F1 of
 13n-b). So a client whose only grant on a note is an unspent ONCE grant, which `read_note` honors,
