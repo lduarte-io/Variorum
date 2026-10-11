@@ -168,10 +168,46 @@ struct MCPShareFacesTests {
             let group = try #require(door.snapshot.sharedGroups.first)
             #expect(MCPSharedGroupView.unnamedMembers(group) == 2, "the row names three; its road holds the rest")
             #expect(MCPPaneCopy.groupMoreRoad(MCPSharedGroupView.unnamedMembers(group)) == "and 2 more \u{203A}")
-            #expect(await door.sharedMembers(group.grantIDs).map(\.targetTitle) == titles,
+            // R2-2 (A JUSTIFIED EDIT, the ritual): the read answers nil when it
+            // FAILED, so a failure is never mistaken for "nothing left".
+            #expect(await door.sharedMembers(group.grantIDs)?.map(\.targetTitle) == titles,
                     "the road names all five, in the act's order")
             #expect(await door.allSharedGroups().first?.grantIDs == group.grantIDs,
                     "the all-N list's row opens the same road")
+        }
+    }
+
+    /// Stage B R2-2 (B8's class): the members sheet said "1 notes", and showed
+    /// the act's stale count above an EMPTY list once the last member was
+    /// revoked (`rows.isEmpty` conflated not-loaded with nothing-left). One
+    /// member reads "1 note"; the title counts the act until the list has
+    /// loaded, then what the list shows; a load that comes back empty closes
+    /// the sheet.
+    @Test func theMembersSheetSaysOneNoteAndClosesWhenNothingIsLeft() async throws {
+        #expect(MCPPaneCopy.membersTitle(1) == "1 note shared in one act")
+        #expect(MCPPaneCopy.membersTitle(5) == "5 notes shared in one act")
+        #expect(MCPSharedMembersSheet.shownCount(loaded: false, rows: 0, memberCount: 5) == 5,
+                "before the list loads, the act's own count")
+        #expect(MCPSharedMembersSheet.shownCount(loaded: true, rows: 3, memberCount: 5) == 3,
+                "once loaded, exactly what the list shows")
+        #expect(MCPSharedMembersSheet.shownCount(loaded: true, rows: 0, memberCount: 5) == 0,
+                "never a stale count above an empty list")
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = Operations()
+            let client = try approved(ops)
+            let notes = try ["a", "b", "c", "d"].map { try note(ops, $0) }
+            _ = try ops.grantMCPAccess(client.id, notes: notes.map(\.id), rung: .read, duration: .always)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            #expect(try await settle { door.snapshot.sharedGroups.count == 1 })
+            let group = try #require(door.snapshot.sharedGroups.first)
+            let live = try #require(await door.sharedMembers(group.grantIDs))
+            #expect(!MCPSharedMembersSheet.closesAfterLoad(live), "members left: the sheet stays")
+            try ops.revokeMCPGrants(group.grantIDs)
+            let gone = try #require(await door.sharedMembers(group.grantIDs), "a read that lands, empty")
+            #expect(gone.isEmpty && MCPSharedMembersSheet.closesAfterLoad(gone),
+                    "the last member revoked: nothing left to list, so the sheet closes")
         }
     }
 

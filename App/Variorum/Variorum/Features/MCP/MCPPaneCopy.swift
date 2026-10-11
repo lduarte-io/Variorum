@@ -124,7 +124,9 @@ nonisolated enum MCPPaneCopy {
 
     // MARK: - One act's row (13n-c U3 — VX-156 item 2; mockup §2)
 
-    static func groupTitle(_ count: Int) -> String { "\(count) notes" }
+    /// 13n-c Stage B R2-2: one note is "1 note" (the members sheet can show a
+    /// single member once the rest are revoked).
+    static func groupTitle(_ count: Int) -> String { count == 1 ? "1 note" : "\(count) notes" }
     static let groupChip = "notes"
     /// The act's members, named — the titles read (at most three); a member
     /// gone since reads "(gone)". 13n-c Stage B R1 B3: the rest are no longer
@@ -184,7 +186,11 @@ nonisolated enum MCPPaneCopy {
     // MARK: - Activity (13n-b U3 — the coarse log's face; R-13n-10's caps)
 
     static let activitySection = "Activity"
-    static let noActivity = "Nothing yet \u{2014} every call a client makes is listed here."
+    /// 13n-c Stage B R2-5 (B10's class): the log is coarse and capped (the
+    /// newest `mcpActivityCap` rows), so "every call" overclaimed — the true
+    /// words are lesson 6's own, "the calls clients made recently"
+    /// (PROVISIONAL, her copy pass).
+    static let noActivity = "Nothing yet \u{2014} the calls clients made recently are listed here."
 
     /// One line of the ACTIVITY list (the mockup §2's "claude code added 3
     /// takes to “…”"): who, what, where — the MCP room's register, direct;

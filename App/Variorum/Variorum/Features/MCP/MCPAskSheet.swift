@@ -5,11 +5,12 @@
 //  13n-b U2 — THE JUST-IN-TIME ASK (AF-6; the mockup §4 sheet): a client
 //  asked past its grant on a target that exists; the call has ALREADY
 //  answered (an ask never blocks — the latency-oracle reason), and this sheet
-//  puts it to her, one ask at a time, on the main window. Her answer mints a
-//  grant through the ordinary ops (the asked rung, the asked target): Once ·
-//  While connected (a connected client only) · Always (never on a fenced
-//  target — R-13n-4; R2-1's fix) · Don't allow. The register is the MCP
-//  room's (direct and technical — R-13n-5).
+//  puts it to her, one ask at a time, in the window or pane she pressed in.
+//  Her answer mints a grant through the ordinary ops (the asked rung, the
+//  asked target): Once · Until it disconnects (a connected client only —
+//  P-13nc-U4-1's words for 13n-b's "while connected") · Always (never on a
+//  fenced target — R-13n-4; the U1 ladder's R2-1 fix) · Don't allow. The
+//  register is the MCP room's (direct and technical — R-13n-5).
 //
 //  13n-c U2: the title wears the asked place's distinguisher (the one rule —
 //  mockup §1b), and a BOOK or WING ask says R-AIR-3's live reach above the
@@ -68,10 +69,16 @@ struct MCPAskSheet: View {
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            // U2 walk W-3: SYSTEM buttons — the sheet presents at the
-            // WindowGroup level, where no session theme reaches (the
-            // library-open sheet's own precedent beside it); voiced buttons
-            // there fell back to the mono fallback face.
+            // SYSTEM buttons (13n-b U2 walk W-3). 13n-c Stage B R2-4
+            // re-checked the reason at this tip: the WindowGroup host W-3
+            // named is retired (U4, arrival X), but the two WINDOW hosts
+            // (`RootView`, `NoteWindowView`) attach `.mcpAskSheet` AFTER
+            // their `.environment(theme)`, so this sheet's content still
+            // receives no `ThemeStore` there — voiced buttons would fall back
+            // to the mono face (the palette, What's New and grant sheets each
+            // add `.environment(theme)` for exactly this). Only the pane and
+            // ⌘L's nested road carry the theme, so system buttons stay — they
+            // read the same in every host.
             HStack(spacing: 8) {
                 ForEach(checked ? door.durations(for: ask) : [], id: \.self) { duration in
                     if duration == .once {

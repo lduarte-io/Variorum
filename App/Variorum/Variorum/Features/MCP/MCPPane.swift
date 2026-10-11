@@ -590,10 +590,24 @@ struct MCPSharedMembersSheet: View {
     let tokens: VoiceTokens
     let done: () -> Void
     @State private var rows: [MCPSharedRow] = []
+    /// 13n-c Stage B R2-2 (B8's class — not loaded is not nothing left): the
+    /// act's members have been read at least once.
+    @State private var loaded = false
+
+    /// The count the title says: the act's own until the list has loaded,
+    /// then exactly what the list shows (never a stale count above it).
+    nonisolated static func shownCount(loaded: Bool, rows: Int, memberCount: Int) -> Int {
+        loaded ? rows : memberCount
+    }
+
+    /// A load that comes back EMPTY — every member revoked (here or anywhere)
+    /// — leaves nothing to list, so the sheet closes.
+    nonisolated static func closesAfterLoad(_ rows: [MCPSharedRow]) -> Bool { rows.isEmpty }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(MCPPaneCopy.membersTitle(rows.isEmpty ? group.memberCount : rows.count))
+            Text(MCPPaneCopy.membersTitle(
+                Self.shownCount(loaded: loaded, rows: rows.count, memberCount: group.memberCount)))
                 .font(.headline)
                 .lineLimit(1)
             Text(MCPPaneCopy.sharedDetail(
@@ -636,12 +650,22 @@ struct MCPSharedMembersSheet: View {
         }
         .padding(18)
         .frame(width: 480)
-        .task { rows = await door.sharedMembers(group.grantIDs) }
+        .task { await load() }
         // A member revoked here (or anywhere) leaves the list: it follows the
         // store, never the act.
         .onChange(of: door.snapshot) { _, _ in
-            Task { rows = await door.sharedMembers(group.grantIDs) }
+            Task { await load() }
         }
+    }
+
+    /// One read of the act's members (R2-2): a failed read changes nothing; a
+    /// read that lands sets the list, marks it loaded, and closes the sheet
+    /// when nothing is left to list.
+    private func load() async {
+        guard let fresh = await door.sharedMembers(group.grantIDs) else { return }
+        rows = fresh
+        loaded = true
+        if Self.closesAfterLoad(fresh) { done() }
     }
 }
 

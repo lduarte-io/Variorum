@@ -432,6 +432,10 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("under \(MCPPaneCopy.activitySection), the calls clients made recently"))
             #expect(!text.contains("every call"))
             #expect(Operations.mcpActivityCap == 500, "the log is capped — 'recently' is the true word")
+            // Stage B R2-5 (B10's class, on the pane): the empty Activity line
+            // says the same — never "every call".
+            #expect(MCPPaneCopy.noActivity.contains("the calls clients made recently"), "the pane says the same")
+            #expect(!MCPPaneCopy.noActivity.contains("every call"))
             // Answering — the ask's own buttons and Waiting's own name.
             #expect(text.contains("nothing pops up and nothing interrupts you"))
             #expect(text.contains("a small mark appears beside the place it names"))

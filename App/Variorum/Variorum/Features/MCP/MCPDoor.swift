@@ -698,9 +698,11 @@ final class MCPDoor {
     }
 
     /// 13n-c Stage B R1 B3: one act's members, every one named — the road
-    /// behind a grouped row's "and N more ›" (∝ the act).
-    func sharedMembers(_ grantIDs: [String]) async -> [MCPSharedRow] {
-        await read { try Queries.mcpSharedActMembers($0, grantIDs: grantIDs) } ?? []
+    /// behind a grouped row's "and N more ›" (∝ the act). R2-2: nil when the
+    /// read failed (nothing learned) — distinct from an act with no live
+    /// member left, which closes the members sheet.
+    func sharedMembers(_ grantIDs: [String]) async -> [MCPSharedRow]? {
+        await read { try Queries.mcpSharedActMembers($0, grantIDs: grantIDs) }
     }
 
     /// U3: the whole log (≤ the store's 500-row cap), coalesced.
