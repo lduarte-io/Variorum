@@ -253,11 +253,31 @@ nonisolated enum MCPPaneCopy {
     static let cancel = "Cancel"
     static let whileConnectedNote = "While connected is offered while this client is connected."
 
-    /// "Grant suggest in “the lightning thief” while connected" (mockup §3).
+    /// "Grant suggest in “the lightning thief” while connected" (mockup §3) —
+    /// and, since 13n-c's R-AIR-3, the clause that says membership is LIVE:
+    /// her sentence, *"Grant read in “dream journal” always, including to
+    /// future entries."*, on EVERY book grant ("notes added later become
+    /// visible"); D-3 (PROVISIONAL P-13nc-3) gives a wing grant the parallel
+    /// clause and keeps both on every duration (a once or while-connected
+    /// grant's reach grows the same way while it lives). A note grant names
+    /// one note — no clause. The `scope` is required so no grant door can
+    /// forget it. A button label, so no closing period (PROVISIONAL
+    /// P-13nc-U1-1 — her sentence carries one).
     static func confirm(
-        verb: String, rung: MCPGrantRule.Rung = .read, place: String, duration: MCPGrantRule.Duration
+        verb: String, rung: MCPGrantRule.Rung = .read, scope: MCPGrantRule.ScopeKind, place: String,
+        duration: MCPGrantRule.Duration
     ) -> String {
         "\(verb) \(rungName(rung).lowercased()) in \u{201C}\(place)\u{201D} \(durationWord(duration))"
+            + liveReachClause(scope)
+    }
+
+    /// R-AIR-3's clause (book) and D-3's twin (wing), with its leading comma.
+    static func liveReachClause(_ scope: MCPGrantRule.ScopeKind) -> String {
+        switch scope {
+        case .book: ", including to future entries"
+        case .wing: ", including notes added later"
+        case .note: ""
+        }
     }
 
     // MARK: - Refusals in the pane (the operations layer's own errors)

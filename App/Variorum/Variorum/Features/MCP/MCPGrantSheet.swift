@@ -136,7 +136,8 @@ struct MCPGrantSheet: View {
                     .keyboardShortcut(.cancelAction)
                 Button(MCPPaneCopy.confirm(
                     verb: CapabilityRegistry.capability(.mcpGrantAccess).verb,
-                    rung: rung, place: placeName, duration: duration)) {
+                    rung: rung, scope: place == .book ? .book : .wing, place: placeName,
+                    duration: duration)) {
                     guard let spec else { return }
                     if target.approving {
                         door.approve(target.client.id, granting: spec)

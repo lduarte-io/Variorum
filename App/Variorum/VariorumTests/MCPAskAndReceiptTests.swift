@@ -186,6 +186,22 @@ struct MCPAskAndReceiptTests {
         }
     }
 
+    /// 13n-c U1 — R-AIR-3, her sentence verbatim (her Air sitting, round 2):
+    /// *"Grant read in “dream journal” always, including to future entries."*
+    /// — on EVERY book grant, every duration (membership is live); D-3's
+    /// parallel clause on a wing grant; a note grant names one note, no clause.
+    @Test func theConfirmSaysABookOrWingGrantReachesWhatArrivesLater() {
+        #expect(MCPPaneCopy.confirm(verb: "Grant", rung: .read, scope: .book, place: "dream journal", duration: .always)
+                == "Grant read in “dream journal” always, including to future entries", "her sentence (no period: a button)")
+        for duration in MCPGrantRule.Duration.allCases {
+            #expect(MCPPaneCopy.confirm(verb: "Grant", scope: .book, place: "b", duration: duration)
+                .hasSuffix(", including to future entries"), "every duration — \(duration)")
+            #expect(MCPPaneCopy.confirm(verb: "Grant", scope: .wing, place: "Home", duration: duration)
+                .hasSuffix(", including notes added later"), "D-3's wing twin — \(duration)")
+        }
+        #expect(MCPPaneCopy.confirm(verb: "Grant", scope: .note, place: "ch 7", duration: .once) == "Grant read in “ch 7” once")
+    }
+
     @Test func theGrantSheetOffersTheServedRungsWithTheMockupsSentences() {
         // U3 (justified edit, the ritual): the server serves edit now, so the
         // sheet offers it (U2's pin: "never offered before it serves").
@@ -196,8 +212,12 @@ struct MCPAskAndReceiptTests {
         #expect(MCPPaneCopy.rungDetail(.suggest)
                 == "it can add new takes and comments beside your text, and save a lens of its takes — it cannot touch a word you wrote")
         #expect(MCPPaneCopy.rungDetail(.writeNew) == "it can also make new notes, apply tags and build books")
-        #expect(MCPPaneCopy.confirm(verb: "Grant", rung: .suggest, place: "the lightning thief", duration: .connection)
-                == "Grant suggest in “the lightning thief” while connected", "mockup §3's confirm")
+        // 13n-c U1 (justified edit, the ritual — R-AIR-3): a BOOK grant's
+        // confirm carries her clause; the `scope` is a required argument now.
+        #expect(MCPPaneCopy.confirm(
+            verb: "Grant", rung: .suggest, scope: .book, place: "the lightning thief", duration: .connection)
+                == "Grant suggest in “the lightning thief” while connected, including to future entries",
+                "mockup §3's confirm + R-AIR-3's clause")
         // U3 walk W-2 (justified edit, the ritual): the mockup's words stay,
         // and the sentence stays TRUE now that edit can be granted.
         #expect(MCPPaneCopy.enableBlurb.contains("AI work lands as takes beside your own"))
