@@ -26,7 +26,7 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | K0 | Bout start (pulls, board snapshot `ac32a780`), full preflight, ticket VX-165 + sub-issues, worktree, in-flight row (`fbfbf1a9` on main) | DONE |
 | K1 | This plan finalized | DONE (this commit) |
 | U1 | The fence re-key (VX-163) | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U1 record) — owed: the orchestrator's verification + REAL Claude Code live round; the pre-flight walk HELD (locked session); Stage A |
-| U2 | The grant sheet rebuilt | BRIEFED — implementer spawning |
+| U2 | The grant sheet rebuilt | IN-PROGRESS — the U2 implementer's record (U2 UNIT RECORD below) is live |
 | U3 | Grant from where you are + the one icon + the in-note indicator | NOT-STARTED |
 | U4 | Asks wait quietly + the keyboard | NOT-STARTED |
 | U5 | The guide, the AI's advice, the setup menu | NOT-STARTED |
@@ -901,4 +901,64 @@ PROVISIONALs, where to look first, self-assessment).
 
 ## U2 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-*(empty until the U2 implementer's first commit)*
+Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~06:00 MDT). Worktree
+`~/dev/variorum-vx-165`, branch `vx-165-13n-c`. No revert is in flight unless a line below says so.
+The session is LOCKED at start (06:06 MDT: `CGSSessionScreenIsLocked 1`, display asleep) — the walk
+is re-checked at U2-9; offscreen renders stand in only if it is still locked, and are NOT a walk.
+
+### Pieces
+
+| # | Piece | Status |
+|---|---|---|
+| U2-0 | Preflight read whole (this plan top to bottom incl. the STANDING BLOCKER + U1 record; the sitting record; the brief §1/§2/§12 (+§3/§4 for the opener/WHO shape); mockups §1/§1b/§2/§11; the 13n-b pane rulings R-13n-5/10, P-13nb-U1-8/-10/-11, the U1 walk's while-connected rule, P-13nb-U2-3/-13; the code named in the brief) + the traces below | DONE (this commit) |
+| U2-1 | Core `PlaceLabels` (Domain, pure): the context line (fixed order) + `disambiguate` (the ladder over the OFFERED rows) + exhaustive Swift Testing collision sets | NOT-STARTED |
+| U2-2 | Core read: `mcpGrantableBooks` grows shelf · starred · member count · marks · made · last edited (the Bookcase's own fragments, reused) + the shelves/wings it groups by + `mcpClientsByRecentGrant` (WHO) + the shared rows' REACH (R2-3, through `MCPGrantRule.reaches`) — pins incl. a P1 plan pin | NOT-STARTED |
+| U2-3 | `SearchPicker` gains optional SECTIONS (quick sections vanish on typing; a match shows once under its home section), an async source (the note feed), a second-line detail, a field-style trigger — the brain pure and pinned; existing hosts untouched (zero edits to their tests = the parity proof) | NOT-STARTED |
+| U2-4 | The sheet rebuilt: WHERE note · book · wing (all `SearchPicker`), WHO row + the opener API U3 calls, durations shrunk to what the target can take with the why, the confirm with the disambiguator + R-AIR-3 (F4's exhaustive switch) | NOT-STARTED |
+| U2-5 | R-AIR-8 strings (list below) + L1 under Clients + the pane's shared rows and the ask sheet's title disambiguated + R2-3's inert rows + F2 (the ask sheet's clause) | NOT-STARTED |
+| U2-6 | The dev-store scale seed (DEBUG-only, dev store only, ops only) | NOT-STARTED |
+| U2-7 | Headless finals: `swift build` + core + `VariorumMCPTests` + workbook | NOT-STARTED |
+| U2-8 | Mac suites under a held stage claim (the brief's list + every `SearchPicker` host suite + every suite over a changed file) | NOT-STARTED |
+| U2-9 | The walk (dev-store Debug, Study + Terminal, on the scaled seed) → `notes/plans/13n-c-screens/u2/` — or, if still locked, offscreen captures of the real views (NOT a walk) | NOT-STARTED |
+| U2-10 | UNIT CLOSED banner | NOT-STARTED |
+
+### Traces (made before any code — the hallucination guard)
+
+- **T-U2-1 — the flat picker (VX-156 item 1):** `MCPGrantSheet` (`:87-108` at `99d739e9`) offers WHERE as a
+  radio pair (book · wing) and a native `Picker` over `door.choices().books` = `Queries.mcpGrantableBooks`
+  (`MCPGrantQueries.swift:370`) — every live unfenced book in EVERY wing, `ORDER BY r.name COLLATE NOCASE`,
+  carrying only id/name/wing. Nothing filters it; at hundreds of books it is one long native menu.
+- **T-U2-2 — the duplicate blindness (VX-156 item 6):** `bookLabel` (`:177`) appends only a non-Home
+  wing's name, so two same-named books in one wing render two identical rows; the confirm
+  (`MCPPaneCopy.confirmParts`), the ask sheet's title (`MCPAskCopy.title` — `ask.title` alone) and the
+  pane's shared rows (`MCPSharedRowView` — `row.targetTitle` alone) carry the same blindness.
+- **T-U2-3 — R2-3, the inert row (bug-class; pinned red-first):** `Queries.mcpSharedRows` lists every grant
+  with `revoked_at IS NULL` and not a spent once grant (`:166-185`) — it never consults the fence. A book
+  grant made while the book was open, then the book marked Private (or a trait book made THE daily Journal
+  — R2-4's road), stays listed, and `MCPSharedRowView` renders "<book> · book / claude-code · read · always ·
+  Revoke" — calling it shared — while `MCPGrantRule.reaches` answers false for a fenced book (`MCPGrantRule
+  .swift:300`, `guard book.fence == nil`) and false for a fenced note under an `always` grant (`:288-291`).
+  The client row's "N shared places" (`MCPDoor.liveGrantCount` — `isLive` only) counts it too. P-13nb-U2-3:
+  "The faces must not call such a grant 'shared' while it is inert." Fix: the row's reach derived through
+  `MCPGrantRule.reaches` over `mcpNoteFacts`/`mcpBookFacts` (the ONE rule + the ONE derivation site);
+  the face says inert and why; the client count counts reaching grants.
+- **T-U2-4 — the note leg's feed is wing-bound:** `NotePickerSource.corpusNotes(session:excluding:)` with no
+  subject reads `session.wing.currentID` (`NotePicker.swift:108`), and `Queries.notePickerNotes` filters by
+  that wing — so a note leg in Settings would see only the window's current wing. **Call (recorded):** the
+  note leg searches ONE wing at a time — the session's current wing by default — and the sheet shows a
+  wing chooser beside it only when more than one wing exists (single-wing libraries never see it);
+  `corpusNotes` gains an additive `inWing:` override (existing callers byte-unchanged).
+- **T-U2-5 — the ask road's clause (F2):** `MCPAskSheet` answers with Once · While connected · Always and no
+  sentence names the place's live reach; a BOOK ask's answer mints a book grant (`MCPDoor.answer` →
+  `grantMCPAccess` with `ask.scopeKind`) — so R-AIR-3's "every book grant" is unsaid on that road.
+- **T-U2-6 — the confirm's room (U1-5b's numbers are the start):** at 600 wide, Terminal's tightest case left
+  the place 4 pt; a disambiguator (" (made Oct 9)", ~14 mono chars ≈ 97 pt) on the tail would cut the
+  clause again in Terminal. U2 owns the row's design (U1's hand-off) — re-measured at U2-4 and recorded.
+- **T-U2-7 — scale:** every new read is ∝ the books (author-scale) or the page (≤30 notes per keystroke —
+  `notePickerNotes`' bound); nothing reads the note corpus. The member count and last-edited per book
+  reuse the Bookcase's own derivation (`wingMemberStampsSQL`'s join + `MAX(COALESCE(last_touched_at,
+  created_at))`, the `created_at` fallback of `bookcaseAggregates`), entered per book through
+  `reading_post`'s `reading_id` index (pinned by plan).
+- **D-U2 — no Sync/, no schema, no custody, no editor seam** (re-verified at close). The fence derivation is
+  U1's and is consumed, never re-derived: offered books stay `mcpGrantableBooks`' filter; a note's fence is
+  `mcpNoteFacts`'; reach is `MCPGrantRule.reaches`.
