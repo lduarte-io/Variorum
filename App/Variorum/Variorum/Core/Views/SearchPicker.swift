@@ -137,6 +137,34 @@ nonisolated enum SearchPickerBrain {
     /// What Return does: the first match, else the create offer.
     enum Choice: Equatable { case pick(String), create(String), nothing }
 
+    /// One drawn line of the sectioned panel: a section's title or one of its
+    /// rows, identified by its SECTION and its option (13n-c walk D-W2 — a
+    /// quick section repeats rows whose home is another section, so the
+    /// option id alone names a row twice).
+    struct Line: Identifiable, Equatable, Sendable {
+        enum Kind: Equatable, Sendable {
+            case title(String)
+            case row(SearchPickerOption)
+        }
+        let id: String
+        let kind: Kind
+    }
+
+    /// The panel's lines, in order: each section's title (when it has one),
+    /// then its rows.
+    static func lines(_ sections: [SearchPickerSection]) -> [Line] {
+        var lines: [Line] = []
+        for section in sections {
+            if let title = section.title {
+                lines.append(Line(id: "\(section.id)\u{1F}title", kind: .title(title)))
+            }
+            for option in section.options {
+                lines.append(Line(id: "\(section.id)\u{1F}row\u{1F}\(option.id)", kind: .row(option)))
+            }
+        }
+        return lines
+    }
+
     static func returnChoice(
         query: String, options: [SearchPickerOption], canCreate: Bool,
         key: (String) -> String = { $0 }
@@ -480,8 +508,14 @@ struct SearchPickerPanel: View {
             Divider().overlay(tokens.line)
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(sections) { section in
-                        if let title = section.title {
+                    // 13n-c walk D-W2: ONE flat list of lines, each named by its
+                    // SECTION and its option — the quick sections repeat rows
+                    // whose home is a shelf, and a bare option id put one
+                    // identity in this lazy stack twice (the later slot drew
+                    // blank).
+                    ForEach(SearchPickerBrain.lines(sections)) { line in
+                        switch line.kind {
+                        case .title(let title):
                             // A shelf's name is hers — never chrome-cased.
                             Text(title)
                                 .font(tokens.small.weight(.semibold))
@@ -491,8 +525,7 @@ struct SearchPickerPanel: View {
                                 .padding(.horizontal, 10)
                                 .padding(.top, 8)
                                 .padding(.bottom, 2)
-                        }
-                        ForEach(section.options) { option in
+                        case .row(let option):
                             row(option) { onPick(option.id) }
                         }
                     }
@@ -506,7 +539,11 @@ struct SearchPickerPanel: View {
                     }
                 }
             }
-            .frame(maxHeight: Self.listHeight)
+            // 13n-c walk D-W1: a SOURCED panel's first frame has no rows (its
+            // feed has not answered), and the popover sizes itself ONCE from
+            // that frame — so the list takes its full room from the start and
+            // the rows that land after have somewhere to show.
+            .frame(minHeight: source != nil ? Self.listHeight : nil, maxHeight: Self.listHeight)
         }
         .padding(.vertical, 6)
         .frame(width: width)

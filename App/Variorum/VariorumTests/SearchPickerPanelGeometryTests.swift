@@ -161,6 +161,21 @@ struct SearchPickerPanelGeometryTests {
         return bands
     }
 
+    @Test("the panel's lines are named by section and option — a repeated option is a distinct line in each section")
+    func theLinesAreNamedBySectionAndOption() {
+        let lines = SearchPickerBrain.lines(sections(repeatsShareAnID: true))
+        #expect(Set(lines.map(\.id)).count == lines.count, "every line has its own identity")
+        #expect(lines.count == 9, "three titles + six rows, in order")
+        let repeats = lines.filter {
+            if case .row(let option) = $0.kind { return option.id == "book-039" }
+            return false
+        }
+        #expect(repeats.count == 3, "the book is a line in each of its three sections")
+        if case .title(let first) = lines.first?.kind { #expect(first == "Recently edited") } else {
+            Issue.record("the first line is the first section's title")
+        }
+    }
+
     @Test("a row repeated across sections draws in EVERY section it is listed in — never a blank slot")
     func aRepeatedRowDrawsInEverySection() async {
         for tokens in [VoiceTokens.studyLight, .terminalLight] {
