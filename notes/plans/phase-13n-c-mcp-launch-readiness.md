@@ -101,9 +101,14 @@ HELD and the handoff says so.
   "recently edited" quick section in grant pickers; "while connected"'s wording gets copy OPTIONS
   at the build. (U2, U4)
 - **Round 5:** the wing switcher reachable from the LIBRARY masthead too (⌘L app-wide) (U4);
-  **snippets stay OUT of the door at launch AND the docs say so clearly** (the orchestrator's
-  recommendation, hers to override in the morning); the wing-isolation UI makes clear Snippets is
+  **snippets stay OUT of the door at launch AND the docs say so clearly** — **RATIFIED at round 6**
+  (her close, after this phase launched — `vx-156-grant-ux-design-kickoff.md` §ROUND 6, on main
+  `63a19f81`); the wing-isolation UI makes clear Snippets is
   the one room shared across wings (U4 switcher line + U5 guide).
+- **Round 6 (her close, 2026-10-11):** snippets-out RATIFIED; **the decisive fence tests are HERS in
+  the morning** — the Home-wing read grant with the journal probe ("crat attack") and Private-BOOK
+  grant behavior; the handoff checklist carries both (the build's own pins and live round do not
+  replace hers).
 - **Her kickoff adds (verbatim above):** sort by shelf and favorites (starred) in the grant
   pickers (U2); the keyboard shortcuts pane updated (U4 — `HelperView.groups` is the ONE source
   both Settings ▸ Shortcuts and ⌘/ render); clear user docs that double as the AI's advice (U5).
@@ -511,7 +516,7 @@ refused). **Review:** opus ladder + FABLE-OWED (the secret's accept path is name
 
 ## 6. THE FABLE-OWED LEDGER (her protocol — written AT THE MOMENT, never reconstructed)
 
-A post-phase Fable session walks this table and runs cold reviews in sensible ladders. One row
+**VX-166** (born at her Air session) is the post-phase Fable verification sweep: at her credit reset a Fable session walks this table and runs cold reviews in sensible ladders. One row
 per adjudication decision or diff that would ordinarily earn a Fable review.
 
 | # | Commit | Diff scope | Why owed | Reviewed by (actual model) |
@@ -622,7 +627,7 @@ unit record (TCC state is machine-state the next session inherits).
 - **P-13nc-2** — D-2 (docs: the guide chapter + the server's instructions; her alternative the
   first-connect book).
 - **P-13nc-3** — D-3 (R-AIR-3's clause on wing confirms and on every duration).
-- **The snippets call** (round 5) — out at launch, said in the docs; hers in the morning.
+- ~~The snippets call~~ — RATIFIED at round 6 (out at launch, said in the docs).
 - **P-13nc-U1-1** (U1) — R-AIR-3's confirm is a BUTTON label, so it carries no closing period (her sentence
   has one; no button in the app does). Alternative: the period, verbatim.
 
