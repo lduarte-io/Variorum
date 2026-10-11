@@ -278,7 +278,11 @@ struct MCPGrantOperationsTests {
                 try db.execute(sql: """
                     INSERT INTO reading_post (id, reading_id, post_id, position, status, created_at)
                     VALUES ('arrival-1', ?, ?, 'a5', 'arrival', '2026-07-01T00:00:00.000Z')
-                    """, arguments: [notebook.id, arrivalOnly.id])
+                    """, arguments: [daily.id, arrivalOnly.id])
+                // 13n-c U1 ladder R2-1 (justified edit): the arrival sits in THE
+                // daily Journal — the one book whose membership still fences —
+                // so this pin guards the daily leg's `status = 'member'` clause
+                // (in the trait book, which no longer fences, it guarded nothing).
             }
             let facts = try db.read { db in
                 try Queries.mcpNoteFacts(db, noteIDs: [plain.id, ownProfile.id, traitMember.id, dailyMember.id,

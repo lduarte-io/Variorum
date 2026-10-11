@@ -234,4 +234,38 @@ struct MCPFenceRekeyTests {
             #expect(try reads(db, inPrivateTrait.id, grants: standing(.wing, "")) == false)
         }
     }
+
+    // MARK: - R2-4 (U1 ladder round 2): "Use as Daily Journal" MOVES the fence
+
+    /// R-AIR-1's ruled outcome, named: the fence keys on the 'daily' MARKER,
+    /// so designating another book moves it — the outgoing Journal is demoted
+    /// to a journal-trait book and the notes she filed into it BY HAND become
+    /// readable under a standing wing grant at once; its ⌘J entries (own
+    /// profile, D-1) stay fenced; the newly designated book's members fence.
+    @Test func designatingAnotherDailyJournalMovesTheFence() throws {
+        try withOperations { ops, db in
+            _ = try approvedClient(ops)
+            let oldDaily = try ops.createReading(name: "journal", kind: .book, profile: "daily")
+            let newDaily = try ops.createReading(name: "diary", kind: .book)
+            let handFiled = try ops.createPost(title: "a loose page")
+            _ = try ops.addPostToReading(handFiled.id, to: oldDaily.id)
+            let dayEntry = try ops.createOrOpenJournalEntry(entryDate: "2026-10-01").container
+            _ = try ops.addPostToReading(dayEntry.id, to: oldDaily.id)
+            let movedIn = try ops.createPost(title: "a diary page")
+            _ = try ops.addPostToReading(movedIn.id, to: newDaily.id)
+            let wing = standing(.wing, "")
+
+            #expect(try reads(db, handFiled.id, grants: wing) == false, "fenced while the book is THE daily Journal")
+            #expect(try reads(db, movedIn.id, grants: wing) == true)
+
+            try ops.setDailyJournalBook(newDaily.id)
+
+            #expect(try reads(db, handFiled.id, grants: wing) == true,
+                    "the outgoing Journal is a trait book now — its hand-filed notes are readable")
+            #expect(try reads(db, dayEntry.id, grants: wing) == false, "a ⌘J entry stays per-ask (D-1)")
+            #expect(try reads(db, movedIn.id, grants: wing) == false, "the new daily Journal's members fence")
+            #expect(try db.read { try Queries.mcpBookFacts($0, readingID: oldDaily.id) }?.fence == nil)
+            #expect(try db.read { try Queries.mcpBookFacts($0, readingID: newDaily.id) }?.fence == .journal)
+        }
+    }
 }
