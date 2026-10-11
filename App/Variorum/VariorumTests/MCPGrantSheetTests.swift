@@ -293,6 +293,29 @@ struct MCPGrantSheetTests {
         }
     }
 
+    /// The dev-store scale seed (DEBUG-only, env-gated — `ScaleFixture`'s
+    /// books part): shelves, books, the same-named pair, the fence's
+    /// exclusions, the notes filed — once.
+    @Test func theScaleSeedMintsTheGrantRoadsLibraryOnce() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let request = ScaleFixture.Request(notes: 30, longBlocks: 2, books: 45, shelves: 4)
+            #expect(ScaleFixture.Request.parse("notes=520,long=40,books=160,shelves=9")
+                    == ScaleFixture.Request(notes: 520, longBlocks: 40, books: 160, shelves: 9))
+            #expect(try await ScaleFixture.seed(session: session, request: request))
+            let places = try await db.read { try Queries.mcpGrantPlaces($0) }
+            #expect(places.shelves.count == 4)
+            #expect(places.books.count == 44, "45 minted, the Private one never offered")
+            #expect(places.books.filter { $0.name == "the adventures of sherlock holmes" }.count == 2)
+            #expect(places.books.contains { $0.shelfID == nil }, "some unshelved")
+            #expect(places.books.contains { $0.marks.finished } && places.books.contains { $0.marks.archived })
+            #expect(places.books.map(\.noteCount).reduce(0, +) > 0, "the fixture's notes filed into books")
+            let labels = places.bookDistinguishers(now: Date())
+            let pair = places.books.filter { $0.name == "the adventures of sherlock holmes" }.map(\.id)
+            #expect(pair.allSatisfy { labels[$0]?.hasPrefix("made ") == true }, "the pair falls to the made day: \(labels)")
+            #expect(try await ScaleFixture.seed(session: session, request: request) == false, "a relaunch mints nothing")
+        }
+    }
+
     @Test func thePlacesAndWhoTheSheetReadsAreTheCoresAndTheDistinguishersMatch() async throws {
         try await withSession { (session: AppSession, _: AppDatabase) async throws in
             let ops = session.operations

@@ -34,6 +34,18 @@
 //  undo stack — the seeders' MINOR-D1 rule), each note under its own fixed
 //  clock (`withDependencies`), inside the session's serialized runner.
 //
+//  13n-c U2 — THE GRANT ROAD's SCALE (her "a user might have hundreds of
+//  books and notes"): with `books=N,shelves=M` the fixture also mints N books
+//  across M shelves of Home (every 13th left unshelved), the fixture's notes
+//  filed into them round-robin, a few starred (the star cap tolerated), every
+//  17th finished, every 23rd owned, one archived, one journal-TRAIT book, one
+//  Private book and one Private note — and TWO books called "the adventures
+//  of sherlock holmes" on the first shelf, made two days apart (her
+//  screenshot's case), plus a pair "notes toward a chapter" on two shelves.
+//  Its own marker (a live book named `grantMarkerBook`), so a relaunch mints
+//  nothing twice. For the grant-sheet walk:
+//  `Tools/ScaleFixture/stage.sh notes=520,long=40,books=160,shelves=9`.
+//
 
 #if DEBUG
 import Dependencies
@@ -50,8 +62,12 @@ enum ScaleFixture {
     struct Request: Equatable {
         var notes = 600
         var longBlocks = 2000
+        /// 13n-c U2 — the grant road's books (0 = none, the shipped fixture).
+        var books = 0
+        var shelves = 8
 
-        /// `"notes=600,long=2000"`; either part optional; nil when unset.
+        /// `"notes=600,long=2000[,books=160,shelves=9]"`; every part optional;
+        /// nil when unset.
         static func parse(_ raw: String?) -> Request? {
             guard let raw, !raw.isEmpty else { return nil }
             var request = Request()
@@ -61,12 +77,17 @@ enum ScaleFixture {
                 switch pair[0] {
                 case "notes": request.notes = value
                 case "long": request.longBlocks = value
+                case "books": request.books = value
+                case "shelves": request.shelves = max(1, value)
                 default: continue
                 }
             }
             return request
         }
     }
+
+    /// The books part's marker (13n-c U2).
+    nonisolated static let grantMarkerBook = "Fixture book 001 \u{2014} on the river at dusk"
 
     private static var started = false
 
@@ -81,7 +102,9 @@ enum ScaleFixture {
         Task {
             do {
                 let minted = try await seed(session: session, request: request)
-                NSLog("ScaleFixture: %@", minted ? "minted \(request.notes) notes + a \(request.longBlocks)-block note"
+                NSLog("ScaleFixture: %@", minted
+                    ? "minted \(request.notes) notes + a \(request.longBlocks)-block note"
+                        + (request.books > 0 ? " + \(request.books) books on \(request.shelves) shelves" : "")
                     : "already present — nothing minted")
             } catch {
                 NSLog("ScaleFixture: failed — %@", String(describing: error))
@@ -89,26 +112,104 @@ enum ScaleFixture {
         }
     }
 
-    /// Mints the fixture into the session's store; false when the marker
-    /// note already stands.
+    /// Mints the fixture into the session's store; false when every
+    /// requested part's marker already stands.
     static func seed(session: AppSession, request: Request) async throws -> Bool {
-        let present = try await session.database.read { db in
-            try Int.fetchOne(db, sql: """
+        let (notesPresent, booksPresent) = try await session.database.read { db in
+            (try Int.fetchOne(db, sql: """
                 SELECT COUNT(*) FROM container
                 WHERE kind = 'post' AND deleted_at IS NULL AND title = ?
-                """, arguments: [longNoteTitle]) ?? 0
+                """, arguments: [longNoteTitle]) ?? 0,
+             try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL AND name = ?",
+                              arguments: [grantMarkerBook]) ?? 0)
         }
-        guard present == 0 else { return false }
+        let mintNotes = notesPresent == 0
+        let mintBooks = request.books > 0 && booksPresent == 0
+        guard mintNotes || mintBooks else { return false }
         let base = Date().addingTimeInterval(-2 * 365 * 86_400)
         let notes = request.notes, longBlocks = request.longBlocks
+        let books = request.books, shelves = request.shelves
         try await session.runner.run { _ in
-            let tagID = try Operations(undoStack: nil).createTag(parent: nil, name: tagName).id
-            for index in 0..<notes {
-                try mintNote(index: index, base: base, tagID: tagID)
+            if mintNotes {
+                let tagID = try Operations(undoStack: nil).createTag(parent: nil, name: tagName).id
+                for index in 0..<notes {
+                    try mintNote(index: index, base: base, tagID: tagID)
+                }
+                try mintLongNote(blocks: longBlocks, tagID: tagID)
             }
-            try mintLongNote(blocks: longBlocks, tagID: tagID)
+            if mintBooks {
+                try mintBooksPart(books: books, shelves: shelves, base: base)
+            }
         }
         return true
+    }
+
+    // MARK: - The grant road's books (13n-c U2)
+
+    nonisolated private static let shelfThemes = [
+        "essays", "research", "letters", "translations", "drafts", "poetry", "reading",
+        "workshop", "notebooks", "archive", "travel", "lectures",
+    ]
+
+    nonisolated private static func mintBooksPart(books: Int, shelves: Int, base: Date) throws {
+        let ops = Operations(undoStack: nil)
+        var shelfIDs: [String] = []
+        for index in 0..<shelves {
+            let theme = shelfThemes[index % shelfThemes.count]
+            let name = index < shelfThemes.count ? theme : "\(theme) \(index / shelfThemes.count + 1)"
+            shelfIDs.append(try ops.createShelf(name: name).id)
+        }
+        // The fixture's own notes (tagged), oldest first — filed round-robin.
+        @Dependency(\.database) var database
+        let noteIDs = try database.read { db in
+            try String.fetchAll(db, sql: """
+                SELECT c.id FROM container c
+                JOIN post_tag pt ON pt.post_id = c.id AND pt.deleted_at IS NULL
+                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL AND t.name = ?
+                WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL
+                ORDER BY c.created_at, c.id
+                """, arguments: [tagName])
+        }
+        var bookIDs: [String] = []
+        for index in 0..<books {
+            let made = base.addingTimeInterval(Double(index) * 3 * 86_400 + Double((index * 7_919) % 40_000))
+            let name: String
+            switch index {
+            case 0: name = grantMarkerBook
+            case 1, 2: name = "the adventures of sherlock holmes"
+            case 3, 4: name = "notes toward a chapter"
+            case 5: name = "dream journal"
+            default:
+                name = "Fixture book \(String(format: "%03d", index + 1)) \u{2014} \(phrases[index % phrases.count])"
+            }
+            let book = try withDependencies { $0.date = .constant(made) } operation: {
+                try Operations(undoStack: nil).createReading(
+                    name: name, kind: .book, profile: index == 5 ? "journal" : nil)
+            }
+            bookIDs.append(book.id)
+            // The sherlocks share the FIRST shelf (so the ladder falls to the
+            // made day); the chapter pair sits on two shelves (the shelf rung).
+            let shelf: String? = switch index {
+            case 1, 2: shelfIDs[0]
+            case 3: shelfIDs[1 % shelfIDs.count]
+            case 4: shelfIDs[2 % shelfIDs.count]
+            default: index % 13 == 7 ? nil : shelfIDs[index % shelfIDs.count]
+            }
+            if let shelf { try ops.setReadingShelf(book.id, shelf: shelf) }
+        }
+        for (position, noteID) in noteIDs.enumerated() where !bookIDs.isEmpty {
+            _ = try? ops.addPostToReading(noteID, to: bookIDs[position % bookIDs.count])
+        }
+        for (index, id) in bookIDs.enumerated() {
+            if index % 29 == 9 { try? ops.setStarred(.reading(id), starred: true) }
+            if index % 17 == 11 { try? ops.lockReading(id) }
+            if index % 23 == 13 { _ = try? ops.setReadingOwned(id, owned: true) }
+        }
+        if bookIDs.count > 40 {
+            try? ops.archiveReading(bookIDs[40])
+            _ = try? ops.setBookPrivate(bookIDs[39], true)
+        }
+        if let first = noteIDs.first { _ = try? ops.setNotePrivate(first, true) }
     }
 
     // MARK: - The ordinary notes
