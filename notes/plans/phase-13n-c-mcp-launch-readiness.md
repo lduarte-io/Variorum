@@ -26,7 +26,7 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | K0 | Bout start (pulls, board snapshot `ac32a780`), full preflight, ticket VX-165 + sub-issues, worktree, in-flight row (`fbfbf1a9` on main) | DONE |
 | K1 | This plan finalized | DONE (this commit) |
 | U1 | The fence re-key (VX-163) | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U1 record) — owed: the orchestrator's verification + REAL Claude Code live round; the pre-flight walk HELD (locked session); Stage A |
-| U2 | The grant sheet rebuilt | IN-PROGRESS — the U2 implementer's record (U2 UNIT RECORD below) is live |
+| U2 | The grant sheet rebuilt | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U2 record) — owed: the orchestrator's verification; the walk HELD (locked session) — offscreen captures stand in, NOT a walk; Stage B |
 | U3 | Grant from where you are + the one icon + the in-note indicator | NOT-STARTED |
 | U4 | Asks wait quietly + the keyboard | NOT-STARTED |
 | U5 | The guide, the AI's advice, the setup menu | NOT-STARTED |
@@ -633,6 +633,14 @@ unit record (TCC state is machine-state the next session inherits).
 - ~~The snippets call~~ — RATIFIED at round 6 (out at launch, said in the docs).
 - **P-13nc-U1-1** (U1) — R-AIR-3's confirm is a BUTTON label, so it carries no closing period (her sentence
   has one; no button in the app does). Alternative: the period, verbatim.
+- **P-13nc-U2-1** (U2) — the grant pickers' "Recently edited" shows 5 books.
+- **P-13nc-U2-2** (U2, R-AIR-8) — the pane's "Shared with AI" reads "Shared places" (alternatives: "Shared
+  with clients" · "Permissions"); final words hers at the copy pass.
+- **P-13nc-U2-3** (U2) — the book picker's layouts: "by shelf" (default) + an "a–z" toggle; Unshelved LAST per
+  the brief (the Bookcase's All shows it first); the quick sections ride both layouts.
+- **P-13nc-U2-4** (U2, F2) — the ask's reach line: "Any answer below grants it in “X”, including to future
+  entries." (a wing's twin: "…, including notes added later.").
+- **P-13nc-U2-5** (U2) — the virtual Home wing never joins a wing-name collision set (no made stamp).
 
 ## UNIT BRIEFS AND RECORDS (written just-in-time below, one per unit)
 
@@ -906,6 +914,68 @@ Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~06:00 MDT). W
 The session is LOCKED at start (06:06 MDT: `CGSSessionScreenIsLocked 1`, display asleep) — the walk
 is re-checked at U2-9; offscreen renders stand in only if it is still locked, and are NOT a walk.
 
+### UNIT CLOSED (2026-10-11 ~07:00 MDT — the U2 implementer, Opus `claude-opus-5-5`)
+
+**NOT DONE (said first):** (1) **the WALK is HELD** — the session stayed LOCKED (06:06, 06:49 MDT); the
+offscreen renders of the REAL views (U2-9) stand in and are NOT a walk; the brief's walk list, the grant
+LANDING from the picker, and dark appearance are owed to the next unlocked session (U2-9 names them).
+(2) **Not built, recorded:** arrow-key navigation inside the picker (the ONE picker never had it — Return
+takes the first visible row); distinguishers for NOTES (notes are told apart by snippet + day, the note
+picker's own answer; the ladder is ruled for places); a shared row whose book is fenced now carries no
+distinguisher (the ladder runs over the OFFERED rows — it reads inert instead). (3) **Left for U3/U4 by
+the plan:** the ask sheet still self-presents (U4's arrival X); the Book Settings / row-menu / bulk-bar
+doors that will call `MCPGrantOpening` (U3) and their "Shared with AI" lines (`PrivateMarkCopy.sharedLine`,
+`allowHere`) re-worded under R-AIR-8 if her copy pass says so. (4) No `notes/QUESTIONS.md` edit
+(merge-time, #211); no canon edit. Zero `Sync/`, schema, custody, editor seam, `/Applications`; no
+Variorum instance ever ran (headless suites + `xcodebuild test` only).
+
+**Commits (branch `vx-165-13n-c`):** `94ce6b64` record opens · `fc316f73` PlaceLabels · `ebc03707` the read
++ R2-3 RED-first · `7818d72f` R2-3 derived · `59d1f154` the picker + sheet + pane + ask (compiling) ·
+`6536770a` the pins + harness + capture fixes · `edcb09ca` the scale seed · `82772389` derived rows once per
+load · `7f5b04b8` the a–z header · this commit.
+
+**Finals:** core **2,605 / 298** · `VariorumMCPTests` **69 / 9** · workbook **40 / 6** — all green headless ·
+Mac **219 tests / 29 suites `** TEST SUCCEEDED **`** (216 ran, 3 skipped = the two gated harnesses) +
+the post-fix **53 / 5** green.
+
+**The routed findings, closed here:** **R2-3** FIXED with its pin (RED on the nil stub `ebc03707`, green
+`7818d72f`) — an inert grant reads inert, never shared, on the row AND the client count. **F4** built (the
+exhaustive `scope` switch over note · book · wing). **F2** built (the ask's reach line — R-AIR-3 on every
+book grant the ask road mints, D-3's twin for a wing).
+
+**PROVISIONALs (for #211 at the merge):** **P-13nc-U2-1** "Recently edited" shows 5. **P-13nc-U2-2** "Shared
+with AI" → "Shared places" (alternatives "Shared with clients" · "Permissions"). **P-13nc-U2-3** the picker's
+layouts: "by shelf" (default) and an "a–z" toggle; Unshelved LAST per the brief (the Bookcase's All shows
+it first — options: last (built) · first, the Bookcase's way); the quick sections ride both layouts.
+**P-13nc-U2-4** the ask's reach-line words ("Any answer below grants it in “X”, including to future
+entries."). **P-13nc-U2-5** the virtual Home never joins a wing collision set (it has no made stamp).
+**Implementation decisions (not product):** the note leg searches one wing at a time with a wing row only
+when more than one wing exists (T-U2-4); the sheet's default book is the most recently edited; the confirm
+takes two lines when one cannot hold it (the geometry oracle in U2-4); a note grant's confirm reads "on"
+(the approved mockup §1's word — U1's "in" predated the note leg).
+
+**Where a cold reviewer should look first:** (1) `Queries.mcpGrantInertFence`
+(`Sources/VariorumCore/Queries/MCPGrantQueries.swift`) — the R2-3 derivation and its COST GUARD (asked of
+the rule on a fenced twin, so only an "always" note grant reads note facts) and what it adds to the pane's
+HELD snapshot (`MCPDoor.read` → `clientRow`/`mcpSharedRows` now read `reading`, and `container` +
+`reading_post` only for always note grants) — is any wake new at autosave rate? (2) `MCPGrantSheet.spec` /
+`offeredDurations` / the clamp — can the sheet ever submit a duration the target can't take (the op refuses
+`always` on a fenced note regardless)? and `MCPGrantOpening`'s shape for U3 (bulk notes are U3's to add).
+(3) `SearchPicker` — the flat path must be byte-identical (the trigger now sits in a `Group`; the hosts'
+suites ran unedited and green). (4) `Queries.mcpGrantableBooksSQL` — the correlated per-book aggregates
+(the plan pin asserts `SEARCH rp`, no scan of `reading_post`/`container`) and the shelf resolution to the
+book's own wing. (5) `ConfirmLabel`'s `ViewThatFits` two-line form. (6) `ScaleFixture`'s books part — still
+`#if DEBUG` and env-gated, dev store only.
+
+**Self-assessment:** the core is small and pinned (the ladder 10 pins, the read 8 incl. a plan pin, R2-3
+red-first), and the faces are one pure brain (`MCPGrantPicker`) under 13 Mac pins plus a capture harness
+that looked at every face in both voices — which caught four real defects the pins could not (day words, the
+reach line, the a–z header, the harness seam). The judgment calls are the R-AIR-8 word ("Shared places"),
+the two-line confirm (forced by measurement in Terminal), and where Unshelved sits. Least certain: how the
+picker FEELS at 160 books under a real pointer (the popover's scroll, the toggle's discoverability) — only
+the held walk can say; and whether the held snapshot's added reads for inert grants are worth a one-shot
+instead (recorded in (1) for the reviewer).
+
 ### Pieces
 
 | # | Piece | Status |
@@ -917,10 +987,10 @@ is re-checked at U2-9; offscreen renders stand in only if it is still locked, an
 | U2-4 | The sheet rebuilt: WHERE note · book · wing (all `SearchPicker`), WHO row + the opener API U3 calls, durations shrunk to what the target can take with the why, the confirm with the disambiguator + R-AIR-3 (F4's exhaustive switch) | DONE (`59d1f154` + this commit) — **the opener U3 calls:** `MCPGrantOpening(client: MCPClient?, approving: Bool, place: MCPGrantSheet.Prefill?)` (`.note(id)` · `.book(id)` · `.wing(id)`; nil client ⇒ WHO shown; `MCPPane.GrantTarget` retired into it; "connected" is read from the door LIVE for the chosen client, never snapshotted at open). The pure brain `MCPGrantPicker` (`Features/MCP/MCPGrantPicker.swift`): the book layouts — **by shelf** = Recently edited (quick, N=5) → Starred (quick) → each shelf in the Bookcase's strip order PER WING (Home first; another wing names itself: "variorum · worksheets") → that wing's Unshelved; **a–z** = the quick sections then one list; inside a section the Bookcase's digit-aware a–z; each row = name · distinguisher (accent, only on collision) / the context line. WING rows (Home first, distinguished on collision); WHO rows (most recently granted first, "connected now"). **Brief vs Bookcase, recorded:** the Bookcase's All puts Unshelved at the TOP; the brief orders shelves → Unshelved, and the brief is built (P-13nc-U2-3's family). **The note leg (T-U2-4's call):** `corpusNotes` gains an additive `inWing:` (nil = byte-identical); the leg searches one wing (the window's current one by default) and a "Notes in ▾" wing row appears only when the library has more than one wing; rows fence-marked through ONE batched `mcpNoteFacts` per page; a fenced note stays pickable and the sheet offers once (+ while connected when connected) with mockup §1's why; a pre-filled note brings its own wing. **The default book** is the most recently edited one (a–z's first was arbitrary at scale). **Durations:** `MCPGrantPicker.durations(connected:noteFence:)` = U1's while-connected rule ∩ the fence's never-always; a duration that leaves the offer clamps to the first offered. **F4:** `scope` is an exhaustive switch over `Place` (note · book · wing). **The confirm (T-U2-6 — the row's final design, the geometry ORACLE):** measured with AppKit at the sheet's room (489 pt Terminal / 495 pt Study beside Cancel at 600): in Terminal's mono the confirm's FIXED words alone reach 632 pt ("Grant write new in “…” (made Oct 10, 9:14 PM) while connected, including to future entries") and her own example with a day distinguisher is 554 pt — so one line cannot hold it; two lines hold the worst whole sentence (867 pt < 978). `ConfirmLabel` is now `ViewThatFits`: one line whole when it fits, else TWO lines (trailing-aligned) with only the place middle-shortened past `confirmPlaceLimit` = 40 characters (`MCPPaneCopy.shortPlace` — the place shows whole in WHERE above); the distinguisher rides the TAIL so it never compresses away; accessibility reads the whole sentence. The sheet stays 600 wide (inside Settings' window). A NOTE grant reads "on" (mockup §1: "Grant read on “morning pages — oct 9” once"). Pins: `MCPGrantSheetTests` (the layouts, the distinguisher + context, durations + whys, the confirm, `shortPlace`, the door's reads) |
 | U2-5 | R-AIR-8 strings (list below) + L1 under Clients + the pane's shared rows and the ask sheet's title disambiguated + R2-3's inert rows + F2 (the ask sheet's clause) | DONE (`59d1f154` + this commit) — **R-AIR-8, CHANGED (settings-class, the pane and its sheets):** `MCPPaneCopy.sharedSection` "Shared with AI" → **"Shared places"** (PROVISIONAL **P-13nc-U2-2** — options: "Shared places" (built: the client row's "N shared places" and Revoke's note already say it) · "Shared with clients" · "Permissions"); `enableBlurb` "AI work lands as takes…" → "a client's work lands as takes…". Swept and found clean (no "AI"): every other `MCPPaneCopy` string the pane/sheets render, `MCPAskCopy`, the two `SettingsCatalog` MCP blurbs (their search KEYWORDS keep "ai" — a search word, not wording). **Judged OUT of scope (not settings-class, or ruled):** `PrivateMarkCopy.rowWords` "Private — never shared with AI" (her ruled word, R-13nb-4 (iv) — never re-opened); `PrivateMarkCopy.sharedLine` "Shared with AI: …" and `allowHere` "Allow AI here" (the note ▾ menu / Book Settings — app-wide faces; U3 builds the Book Settings grant row and re-words under R-AIR-8 there if her copy pass says so); `SharedWithAICopy` (the Bookcase chip — U3 replaces it with the ONE icon); the ⌥⌘O menu title "Show the AI's Last Change" (menu-bar Title Case, P-13nb-U4-15); receipts (app voice). **L1** `MCPPaneCopy.clientBoundary` — the brief §12's words verbatim — under Clients, always. **Shared rows** wear the ONE rule's distinguisher (`door.placeDistinguishers()` — a one-shot read per change of the shared set, never in the held snapshot; over the OFFERED books, so a row whose book is fenced now carries none — it reads inert instead); a note row wears none (its picker tells notes apart by snippet + day). **R2-3's faces:** an inert row is muted with an italic why (`inertDetail`: "inert — the book is marked Private, which always asks" / "inert — it's your daily Journal now, which always asks" / a note's twin); the client row says "2 shared places · 1 inert" (`reads(_:inert:)`). The held snapshot's added cost, said: book grants read `reading` only; a note grant's facts are read only when it is an "always" grant (the cost guard is ASKED OF THE RULE — `reaches` on a fenced twin — so no second fence exists). **The ask sheet:** its title wears the distinguisher (mockup §1b) and **F2:** a BOOK or WING ask says R-AIR-3's reach above the answers (`MCPAskCopy.reachLine` — "Any answer below grants it in “X” (made Oct 11), including to future entries." — every duration, D-3; PROVISIONAL wording **P-13nc-U2-4**). Ritual updates (justified, annotated in place): `MCPAskAndReceiptTests` — the note confirm's "in" → "on" (two pins) and the blurb's "AI work" → "a client's work" |
 | U2-6 | The dev-store scale seed (DEBUG-only, dev store only, ops only) | DONE (this commit) — **the call (recorded):** EXTEND the shipped 17y `ScaleFixture` rather than mint a second road — it is already `#if DEBUG` AND env-gated (`VARIORUM_SCALE_FIXTURE`), the Debug build opens only the fenced DEV store, and `Tools/ScaleFixture/stage.sh` takes the A1 prestage copy (cmp-verified) before the seeding launch with `restore.sh` to put it back. New request keys `books=N,shelves=M` (default `books=0` — the shipped fixture byte-unchanged): M shelves in Home, N books (every 13th unshelved), the fixture's notes filed round-robin, a few starred (`try?` — the 15-star cap tolerated), every 17th finished, every 23rd owned, one archived, one journal-TRAIT ("dream journal"), one Private book, one Private note, TWO "the adventures of sherlock holmes" on the first shelf made three days apart (her screenshot), and a "notes toward a chapter" pair on two shelves (the shelf rung); its own marker book so a relaunch mints nothing. Ops only, a quiet `Operations` (no undo), inside the session's runner. **The walk's command:** `Tools/ScaleFixture/stage.sh notes=520,long=40,books=160,shelves=9 <derived-data>` (≥150 books, ≥8 shelves, ≥500 notes — the brief's floor), then `restore.sh <the printed dir>`. Pin: `MCPGrantSheetTests.theScaleSeedMintsTheGrantRoadsLibraryOnce` (45 books / 4 shelves on an in-memory store: 44 offered (the Private one never), the pair distinguished by the made day, unshelved/finished/archived present, notes filed, the relaunch a no-op) — green |
-| U2-7 | Headless finals: `swift build` + core + `VariorumMCPTests` + workbook | NOT-STARTED |
-| U2-8 | Mac suites under a held stage claim (the brief's list + every `SearchPicker` host suite + every suite over a changed file) | NOT-STARTED |
-| U2-9 | The walk (dev-store Debug, Study + Terminal, on the scaled seed) → `notes/plans/13n-c-screens/u2/` — or, if still locked, offscreen captures of the real views (NOT a walk) | NOT-STARTED |
-| U2-10 | UNIT CLOSED banner | NOT-STARTED |
+| U2-7 | Headless finals: `swift build` + core + `VariorumMCPTests` + workbook | DONE (on `82772389`'s sources; the later commit `7f5b04b8` is app-only) — `swift build` + `--build-tests` clean; the whole package `swift test`: **core 2,605 / 298 green** (Stage A's tree + `PlaceLabelsTests` 10/1 + `MCPGrantPlacesTests` 8/1), **`VariorumMCPTests` 69 / 9 green**, **workbook 40 / 6 green**; 0 failures; the only skips are the standing gated measurement suites (13o's two) |
+| U2-8 | Mac suites under a held stage claim (the brief's list + every `SearchPicker` host suite + every suite over a changed file) | DONE — stage `vx165-u2` (claimed/renewed/released; no Variorum instance ran at any point); `-only-testing` over **29 suites: 219 tests, `** TEST SUCCEEDED **`** on `82772389` — 216 ran green, the 3 skips the two GATED capture harnesses by design (`MCPGrantSheetCaptureTests`, `MCPGrantSheetU2CaptureTests`). The suites: `MCPPaneTests`, `MCPAskAndReceiptTests`, `MCPEditFacesTests`, `MCPNavigationTests`, `MCPGrantSheetTests` (new), `SettingsShapeTests`, `CapabilityRegistryTests`, `DiagnosticsPaneTests`, the `SearchPicker` hosts UNEDITED (`SearchPickerBrainTests`, `RuleEditorMakeTagTests`, `AddToBookMintTests`, `OutflowChooserTests`, `RuleEditorTests`, `MembershipChoiceTests`), `corpusNotes`' (`NotePickerRankingTests`, `NotePickerSourceTests`, the seven `BookArchiveFaces` suites), and U1's neighbours (`CalmAsksTests`, `CommitVocabularyTests`, `VocabularySweepTests`, `OwnershipBadgeTests`). After `7f5b04b8` (the a–z header): `MCPGrantSheetTests` + the U2 harness + `MCPPaneTests` + `MCPAskAndReceiptTests` + `VocabularySweepTests` **53/5 green** |
+| U2-9 | The walk (dev-store Debug, Study + Terminal, on the scaled seed) → `notes/plans/13n-c-screens/u2/` — or, if still locked, offscreen captures of the real views (NOT a walk) | **WALK HELD — the session is LOCKED** (06:06 and again 06:49 MDT: `CGSSessionScreenIsLocked 1`, display asleep). Unlocking is hers. **What stands in its place — NOT a walk, said plainly:** the gated harness `MCPGrantSheetU2CaptureTests` (`TEST_RUNNER_VARIORUM_CAPTURE=13nc-u2`) renders the REAL views offscreen over a seeded in-memory library, light, both voices, shot on the closing tree (`7f5b04b8`) into `notes/plans/13n-c-screens/u2/` (gitignored — verified by `git check-ignore`): `u2-sheet-{study,terminal}-who-book.png` (opened from a place: WHO "claude-code · connected now", the second sherlock pre-filled wearing "0 notes" in WHERE and in the confirm, which takes two lines in both voices); `u2-picker-{…}-books-resting.png` (Recently edited · Starred · ✦ Welcome …, every row's context line), `-books-typed.png` ("sherl": the two sherlocks under Welcome told apart "0 notes" / "2 notes", the third match under research — quick sections gone), `-books-az.png`; `u2-sheet-{…}-fenced-note.png` (a Private note: Once · While connected only, mockup §1's why; "Notes in Home ▾" because a second wing exists); `u2-picker-{…}-notes.png` (the note feed, fence-marked rows, day words); `u2-pane-{…}.png` (L1 under Clients; "Shared places"; the inert row muted with its why; "2 shared places · 1 inert"); `u2-ask-{…}.png` (the distinguished title + R-AIR-3's reach line). **What the captures caught and was fixed:** the note rows' raw day keys ("2026-09-30") beside the books' "edited Sep 30" → the sheet's day words; the reach line not naming the distinguished book its title named; the a–z list reading as Starred's continuation → "All books"; the harness's connected seam cleared by the door's own reconcile (a harness fix). **Observed, left for her eye:** Terminal lowercases the rows' annotations ("daily journal entry", "private") — the voice's chrome idiom (`chromeLabel`), as everywhere else. **OWED to the next unlocked session (the orchestrator's walk):** the brief's walk list on the dev store with the scaled seed (`Tools/ScaleFixture/stage.sh notes=520,long=40,books=160,shelves=9 …` then `restore.sh`) in both voices — find a book by typing, by shelf, a starred one, the two sherlocks told apart AND the right one granted (the grant landing in Shared places), a note from Recently edited, a fenced note's honest durations, the WHO row, L1 on screen; dark appearance (not captured) |
+| U2-10 | UNIT CLOSED banner | DONE (this commit) — atop this record |
 
 ### Traces (made before any code — the hallucination guard)
 
