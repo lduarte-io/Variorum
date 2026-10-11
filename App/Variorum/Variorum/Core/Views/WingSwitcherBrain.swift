@@ -72,8 +72,12 @@ nonisolated struct WingSwitcherBrain: Equatable, Sendable {
     // MARK: - Events
 
     /// Typing filters; the first visible row takes the highlight. A typed
-    /// change ends a held-⌘ cycle (she is choosing by name now).
+    /// change ends a held-⌘ cycle (she is choosing by name now). An UNCHANGED
+    /// query is not typing (13n-c held walks D-W3): the sheet's field writes
+    /// its empty text back through its binding as it takes focus, and that
+    /// must leave the current wing highlighted and a held cycle armed.
     mutating func type(_ text: String) {
+        guard text != query else { return }
         query = text
         highlight = visible.first?.id
         cycling = false
