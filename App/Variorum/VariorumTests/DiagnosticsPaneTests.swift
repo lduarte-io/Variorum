@@ -64,7 +64,8 @@ struct DiagnosticsPaneTests {
         // VX-139 (a CONSEQUENTIAL pin edit, annotated in place): the
         // keep-open-notes toggle is General's sixth catalog row — General
         // is its honest home (how the app OPENS, not a note's behavior),
-        // and its section sits at the pane's BOTTOM, below the palette, so
+        // and its section sits below the palette (in Release the Updates
+        // section renders after it), so
         // row 59's real intent (the short dials stay above the fold at the
         // top) holds. The cap moves 5 → 6; the crash-report opt-in this
         // pin guards is still not on the pane. PROVISIONAL P-VX139-vi —

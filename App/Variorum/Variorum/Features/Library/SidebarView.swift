@@ -724,8 +724,10 @@ struct SidebarView: View {
     /// scrolls in place (her ruled shape, the starred precedent) with the
     /// newcomer auto-revealed. ⌘⇧1…9 still reach the first nine rows, whose
     /// badges say so; the ✕ closes a ROW and nothing else (closing never
-    /// deletes — pure view state); drag a row to reorder (her session-only
-    /// ruling, via the strip's own transfer type). **The correction round
+    /// deletes — pure view state); drag a row to reorder (her round-7.1
+    /// ruling — a gesture, never a setting; since VX-139 the arrangement
+    /// rides the remembered strip across launches — via the strip's own
+    /// transfer type). **The correction round
     /// (row 3) moved it back UNDER THE RAIL** — its rows at the column's one
     /// pitch — where her tabs were before Act 10 sent them to the bottom.
     @ViewBuilder

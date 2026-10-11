@@ -594,9 +594,10 @@ struct TakeCardMenu: View {
 
     var body: some View {
         let rows = Self.rows(acts)
-        // The chrome is Write's panel's, unchanged to the byte — this
-        // component was extracted from it, and the board inherits the
-        // grammar rather than a second one being invented for it.
+        // The chrome is Write's panel's — this component was extracted
+        // from it, and the board inherits the grammar rather than a second
+        // one being invented for it. (VX-155 moved the mini metric from the
+        // Menu onto the label's own font; the glyph draws at the same size.)
         Menu {
             ForEach(rows) { row in
                 Button(row.title, role: row.destructive ? .destructive : nil, action: row.act)

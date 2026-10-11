@@ -43,12 +43,18 @@ struct OpenNotesRestoreTests {
         #expect(notes.recency == ["c", "a", "b"], "recency survives, filtered to the kept set")
     }
 
-    @Test func restoreHonorsTheTrackedCap() {
+    @Test func restoreHonorsTheTrackedCapByRecency() {
+        // A store somehow holding MORE than the cap (corrupt or hand-edited;
+        // a live session never writes one) pays the bound exactly as a live
+        // session does: the LEAST RECENTLY OPENED leave, never a positional
+        // prefix cut (the Pro review's NIT-1 — n1…n10 are the least recent
+        // here, so they are the ones that go, though they lead the stored
+        // order).
         let many = (1...30).map { "n\($0)" }
         let notes = OpenNotes(restoringIDs: many, recency: many.reversed(), isLive: { _ in true })
         #expect(notes.ids.count == OpenNotes.trackedCap)
-        #expect(notes.ids == many.prefix(OpenNotes.trackedCap).map { $0 },
-                "the first tracked-cap rows in stored order")
+        #expect(notes.ids == (11...30).map { "n\($0)" },
+                "the least-recent rows leave; the kept rows stay in stored order")
         #expect(Set(notes.recency) == Set(notes.ids), "recency covers exactly the kept rows")
     }
 
@@ -155,6 +161,46 @@ struct OpenNotesModelRestoreTests {
         }
     }
 
+    @Test func theClaimReleasesWithItsShellAndTheNextOneRestores() async throws {
+        // The Pro review's MAJOR-1: a relock swaps RootView for the lock
+        // screen and tears the claimant down. The claim is per SHELL — the
+        // departing claimant releases, the post-unlock shell claims,
+        // restores the strip she just had, and keeps persisting. (Feature
+        // API — green-only on this tree; the behavioural revert is the
+        // discriminator: the release emptied ⇒ the second shell restores
+        // and persists nothing.)
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let a = try await session.runner.run { ops in
+                try ops.createPost(title: "Before the relock")
+            }
+            let b = try await session.runner.run { ops in
+                try ops.createPost(title: "After the relock")
+            }
+            let defaults = freshDefaults()
+            WorkspaceModel.resetOpenNotesLaunchClaimForTesting()
+            let first = WorkspaceModel()
+            await first.restoreRememberedOpenNotes(session: session, defaults: defaults)
+            first.visit(.post(a.id))
+            #expect(OpenNotesMemory.stored(defaults).ids == [a.id])
+
+            first.releaseOpenNotesClaimIfHeld()  // the shell goes with the relock
+
+            let second = WorkspaceModel()
+            await second.restoreRememberedOpenNotes(session: session, defaults: defaults)
+            #expect(second.openNotes.ids == [a.id],
+                    "the post-unlock shell restores the strip she just had")
+            second.visit(.post(b.id))
+            #expect(OpenNotesMemory.stored(defaults).ids == [a.id, b.id],
+                    "…and keeps persisting")
+        }
+    }
+
     @Test func theSettingOffRestoresNothingButStillClaims() async throws {
         let db = try AppDatabase.inMemory()
         try await withDependencies {
@@ -175,6 +221,10 @@ struct OpenNotesModelRestoreTests {
             let shell = WorkspaceModel()
             await shell.restoreRememberedOpenNotes(session: session, defaults: defaults)
             #expect(shell.openNotes.ids.isEmpty, "off restores nothing")
+            // The Pro review's MINOR-1: off clears the STORE at the launch
+            // too — a later launch must not resurrect a weeks-old strip.
+            #expect(OpenNotesMemory.stored(defaults).ids.isEmpty,
+                    "a launch with the setting off clears the stored rows")
 
             // …but the claim landed: flipping the setting on mid-session
             // starts remembering without a relaunch.

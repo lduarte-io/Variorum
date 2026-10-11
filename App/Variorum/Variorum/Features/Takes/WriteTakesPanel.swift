@@ -312,7 +312,8 @@ struct WriteTakesPanel: View {
                     // Phase 7 are a COMPONENT now (`TakeCardMenu`), so the
                     // Takes board's live cards render the same list rather
                     // than a second copy of it — her F1 rule made structural.
-                    // The chrome is this panel's own, unchanged to the byte;
+                    // The chrome is this panel's own (the component's,
+                    // since the 13u3 extraction — VX-155 resized its menu);
                     // the one word that moved is the label row, which said
                     // "Label…" here and "Label take…" on the card context
                     // menu, i.e. the two "matching" menus did not agree on it.

@@ -424,9 +424,20 @@ struct RootView: View {
         // 19f: Help ▸ Send Feedback…'s pre-draft choice, asked of this window.
         .supportChoiceAlert(router.supportChoice)
         .task { await theme.start() }
-        // VX-139: the first full shell restores the remembered Open strip
-        // (one claim per launch; note-only and quick-note windows never ask).
-        .task { await router.workspace.restoreRememberedOpenNotes(session: session) }
+        // VX-139: the first full shell restores the remembered Open strip —
+        // at launch AND after every relock (the lock screen replaces this
+        // view; the claim is per shell and the departing claimant releases
+        // below, so the post-unlock shell restores the strip she just had —
+        // the Pro review's MAJOR-1). Never under the test host: a suite
+        // mounting this shell must not claim the launch or touch the dev
+        // app's real defaults (MINOR-4; the model's suites inject their own
+        // domains directly).
+        .task {
+            guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil
+            else { return }
+            await router.workspace.restoreRememberedOpenNotes(session: session)
+        }
+        .onDisappear { router.workspace.releaseOpenNotesClaimIfHeld() }
         // 13i-d U5: the wing is part of every scoped read's question, so a
         // switch restarts them (snippets — `pool` — are one shared room).
         .task(id: session.wing.currentID) { await library.start() }

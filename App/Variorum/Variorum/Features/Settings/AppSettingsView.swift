@@ -29,7 +29,8 @@
 //  reference artifact's grammar (`notes/plans/pre-13u-mockups/
 //  blocks-and-snippets.html`, her *"actual guide"*) is solid geometric
 //  lines and calm cards, which is a list and a hairline. **Row 59 dies by
-//  construction**: General holds four controls, so the appearance choice is
+//  construction**: General stays SHORT (six catalog rows, the two short
+//  dials at its top — the caps are pinned), so the appearance choice is
 //  on screen the moment Settings opens.
 //
 //  The panes, the catalog and the search brain are `SettingsShape.swift`;
@@ -430,7 +431,8 @@ private struct SettingsResultsPane: View {
 /// is about the WHOLE app rather than one surface. Deliberately the SHORT
 /// pane: **KnownIssues row 59** (the 18j appearance control below the fold)
 /// is a fold that existed because fifteen controls shared one pane, and the
-/// cure is that this one holds four.
+/// cure is that this one stays short — six catalog rows, pinned, with
+/// the two short dials at the top.
 private struct GeneralPane: View {
     let theme: ThemeStore
     let session: AppSession

@@ -462,6 +462,41 @@ struct TakeCardDoorTests {
                 "the glyph keeps the mini metric on its own font")
     }
 
+    /// The lint above holds the SOURCE shape; this holds the BEHAVIOUR the
+    /// Pro review measured (MINOR-3): the card menu is an `NSPopUpButton`
+    /// underneath, and the font that drives its popped rows is the standard
+    /// menu size — never the mini control's 9 pt (her screenshot's bug).
+    /// RED ON OLD by the mechanism itself: with `.controlSize(.mini)` on
+    /// the Menu the control's font was 9 pt.
+    @Test func thePoppedRowsReadAtMenuSizeNotMini() async throws {
+        let hosting = NSHostingView(rootView: TakeCardMenu(acts: TakeCardActs(
+            locked: false, archive: {}, label: {}, toggleLock: {}, delete: {})))
+        hosting.frame = NSRect(x: 0, y: 0, width: 120, height: 40)
+        let window = NSWindow(
+            contentRect: hosting.frame, styleMask: [.borderless],
+            backing: .buffered, defer: false)
+        window.contentView = hosting
+        hosting.layoutSubtreeIfNeeded()
+        var found: NSPopUpButton?
+        for _ in 0..<100 {
+            if let popUp = Self.popUp(in: hosting) { found = popUp; break }
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        let popUp = try #require(found, "the card menu is an NSPopUpButton underneath")
+        let size = popUp.font?.pointSize ?? 0
+        #expect(size >= NSFont.systemFontSize(for: .regular),
+                "the popped rows' font is menu-sized, not mini (read \(size) pt)")
+    }
+
+    private static func popUp(in view: NSView) -> NSPopUpButton? {
+        if let popUp = view as? NSPopUpButton { return popUp }
+        for sub in view.subviews {
+            if let popUp = popUp(in: sub) { return popUp }
+        }
+        return nil
+    }
+
     // MARK: - Small helpers
 
     private func pollUntil(_ condition: @MainActor () async -> Bool, turns: Int = 200) async {
