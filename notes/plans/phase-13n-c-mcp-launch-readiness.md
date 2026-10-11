@@ -762,6 +762,23 @@ unit record (TCC state is machine-state the next session inherits).
 | 14 | Closeout + the conditional refresh | orchestrator | NOT-STARTED |
 | 15 | QUESTIONS #211 — this phase's PROVISIONALs (minted at the merge) | orchestrator | OPEN |
 
+## HER SITTING — 2026-10-11 late afternoon (present via the Air): four ratifications + one new ask
+
+- **P-13nc-U6-3 RULED:** (a) REFUSE and keep the entry stands ("Refuse, keep the entry" — her pick); the dead-wing
+  row (obsolete, quiet, in either direction — the combined ladder R1 F1 fix `3122cb2e`) stands as built. OFF the
+  #211 list — ruled, no longer a question.
+- **P-13nc-U3-5 RULED:** the shared icon stays A `point.3.connected.trianglepath.dotted` (her pick at this sitting).
+- **P-13nc-SB-3 RULED:** the pending-ask glyph stays `questionmark.bubble` (her pick at this sitting).
+- **P-13nc-U4-1 RULED:** "until it disconnects" everywhere the duration is said; the advice's second-person
+  "until you disconnect" KEPT as the one deliberate register split (her pick — closes the combined ladder R1's
+  F3 rider; off the copy pass).
+- **NEW ASK (hers, queued — land BEFORE ladder round 2, in the implementer sanity-pass session):** the advice
+  (`MCPSession.instructions`) gains the duration's EXACT meaning in the AI-facing words — her shape: "until the
+  last claude session that was running when this was activated ends", to be stated as whatever the BUILT
+  mechanics actually do (trace first, then word it; truth-pinned, under the 2,000 bound) — so a confused user who
+  asks their AI about "until it disconnects" hears the real answer. Judged with her in chat: the two-layer shape
+  (guide for the human, advice + tool descriptions for the model) is the right home; this detail was the one gap.
+
 ## PROVISIONALs (running — logged at the merge as #211)
 
 - **P-13nc-1** — D-1 (the ⌘J edge kept).
