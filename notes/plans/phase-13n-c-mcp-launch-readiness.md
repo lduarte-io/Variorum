@@ -168,6 +168,29 @@ reviewer: REVIEW_PROMPT forbids framing).**
 - **O-3:** the ⌘/ helper's MCP row (U4's) describes the pending glyph by shape ("the filled icon…"); it moves with O-1's
   glyph change and describes the mark by role instead (U5's own carry note).
 
+**ORCHESTRATOR FINDING O-4 (her ask, 2026-10-11 ~12:05: "make sure that outside of the provider setup, claude / claude
+code isn't hardwired anywhere since people may use different providers") — the sweep and its routing.**
+- **Swept:** every non-comment line in `Sources/`, `App/Variorum/Variorum`, `Shared/` and `VariorumMobile/` matching
+  claude/anthropic.
+- **The server and the wire are clean:** zero non-comment lines in `Sources/`. The advice and tool descriptions name no
+  provider. Grants, asks, receipts and the client-named undo all use the client's own self-declared name.
+- **Hardwired outside the setup menu, to fix:**
+  - (a) `MCPPaneCopy.swift:34`, the pane description: "so clients like Claude Code can read…". Make it neutral or
+    multi-provider.
+  - (b) `HelperView.swift:119`, the ⌘/ row, quotes "Undo claude-code's take". Use a placeholder form (the client's
+    name), not one provider's.
+  - (c) `TutorialSeeder.swift:2618`, the guide's undo example "Undo claude-code's take", and `:2518`'s "(claude-code, …"
+    name example. Same placeholder treatment, or a neutral example set.
+  - (d) `TutorialSeeder.swift:2483` and `SettingsShape.swift:115/300`: "such as Claude Code or Codex". These are
+    examples, but they lean two providers. Make them neutral ("any MCP client — Claude Code, Codex, Cursor and others"),
+    wording PROVISIONAL for her copy pass.
+  - (e) `SettingsShape.swift:302`, the search keywords. Keep "claude" and add other providers' and clients' names
+    (codex, chatgpt, openai, cursor, gemini…) so search finds the pane whatever she or a user calls their AI.
+- **Legitimately Claude-specific (the setup menu, which her ask excludes):** `MCPSetupClient.claudeCode`, its command,
+  sentence and receipt (`MCPPaneCopy.swift:241-256, 595-635`), and the menu's default selection (`MCPPane.swift:38`).
+- **Routing:** the Stage B R2 fix pass if R2 earns one, else U6's first commit. Pin: a source sweep asserting no
+  provider name in app copy outside `MCPSetupClient`'s cases and the keyword list.
+
 ## ✅ BLOCKER CLEARED 11:31 MDT. She unlocked the Pro ("pro should be unlocked for all your forseeable needs"). The orchestrator's dev-store check at 11:37: the tip's Debug build opens the dev store normally. Her screenshot of "database could not be opened… key is not available" was the `xcodebuild test` HOST window (Mac suites host on the Debug app, which cannot reach the dev store's key under test), not a defect. The held walks now run after Stage B R2.
 
 ## (history) STANDING BLOCKER — THE SESSION WAS LOCKED (found 04:00, confirmed 04:14 MDT)
