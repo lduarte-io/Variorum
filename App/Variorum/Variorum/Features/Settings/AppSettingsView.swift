@@ -121,7 +121,7 @@ struct AppSettingsView: View {
     /// — the pane itself (Diagnostics': its one toggle), so it can be found by
     /// name — and that row is what these entries say.
     static let rowIDsRendered: [SettingsPane: [String]] = [
-        .general: ["voice", "palette", "appearance", "receipts", "updates"],
+        .general: ["voice", "palette", "appearance", "receipts", "keepOpenNotes", "updates"],
         .editor: ["seams", "indicator", "inlineComments", "paragraphGap",
                   "arrivalFlash", "ownershipBadges", "hideOwnedDefault",
                   "hoverHandles", "spellcheck", "longBlocks"],
