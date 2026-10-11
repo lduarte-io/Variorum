@@ -554,6 +554,7 @@ per adjudication decision or diff that would ordinarily earn a Fable review.
 | F-15 | `6f39cd18` | U4 — ARRIVAL X: the self-presenting ask sheet retired (supersedes P-13nb-U2-9, a 13n-b Fable-reviewed provisional); the queue's cap now protects the asks SHE opened; `answer` acts only on an ask still waiting (T-U4-5 — one ask, one grant, pinned red-on-old); a denied client's asks forgotten (T-U4-4, pinned red-on-old); the wire untouched | "the ask arrival" is named in §5 as default's-meaning content, and the answer road MINTS GRANTS — written by the U4 implementer (Opus) | — |
 | F-16 | `6f39cd18` | U4 — "while connected" → "until it disconnects" in every grant face, the confirm and the ask's button (P-13nc-U4-1) | wording of a disclosure confirm (F-3's class) — chosen by Opus among recorded options | — |
 | F-17 | `75945f33` · `a6e2f484` · `49c7f589` | U5 — the user's and the model's STATEMENTS of the fence and the one answer: the guide's "what always asks" lesson (no book grant, wing grant or open book reaches the daily Journal's entries or anything Private; one note at a time, never always; a ⌘J entry keeps asking wherever filed — P-13nc-4 (a); snippets unreachable; "something it can't reach looks exactly like something that isn't there") and `MCPSession.instructions`' fence/refusal sentences ("Anything you can't reach answers exactly as if it did not exist"; "If a call is refused, don't retry around it") — each pinned against the rule's own reads (`TutorialMCPChapterTests`, `MCPAdviceServerTests`) | disclosure accuracy at the security boundary (the privacy chapter's own warning: a lesson that lies about a security feature is the worst stale copy) — written by Opus | — |
+| F-18 | `cbdef1fc` · `c356871a` | U3 — ⌥⌘A's MINT ROAD (`MCPShareChord` + `mcpNewestGrant` + `MCPDoor.shareThisNote`): one keystroke grants at a rung and duration taken from history, with revoked rows counting (an Opus reading of the brief's "the last grant she made") | what a key grants is default's-meaning content (F-11/F-12's class) — written by Opus; raised by Stage B R1 B12 | — |
 
 **⚠️ HER FABLE BUDGET IS SPENT (04:52 MDT, HTTP 429 at the U1 round-1 reviewer's tail).** Fable
 reviewed exactly ONE diff this phase: U1 at `9b1ec3dd..33bd8772` (round 1, `13nc-u1-ladder-round1.md`
@@ -639,8 +640,8 @@ unit record (TCC state is machine-state the next session inherits).
 | 4 | U2 — the grant sheet | U2 implementer | BUILT + VERIFIED `49c964ea` — walk HELD |
 | 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | BUILT + VERIFIED `c6d5d23a` — walk HELD (locked); icon A kept PROVISIONAL (orchestrator); UX-walk watch: the icon reads small beside a Terminal-voice book name (capture `u3-bookcase-terminal.png`) — the UX reviewer is asked to judge it |
 | 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | BUILT + VERIFIED `f1ab4725` — walk HELD; two order-dependent Mac reds predating U4 ticketed **VX-167** (red identically on U3's tree; green alone) |
-| 7 | U5 — the guide, the advice, the setup menu | U5 implementer | BUILT + VERIFIED `065526ce` — walk HELD; watch: `MCPServerTests.connectionsPastTheCapAreRefused…` red once in a whole-package run ("Unable to parse empty data"), green 6× alone + 2 whole-target + the second whole-package run — the VX-132/VX-134 harness family, re-watched at the closeout run |
-| 8 | Stage B ladder (opus) over `99d739e9..065526ce` | orchestrator | ROUND 1 SPAWNED — record `notes/plans/13nc-stageB-ladder-round1.md` |
+| 7 | U5 — the guide, the advice, the setup menu | U5 implementer | BUILT + VERIFIED `065526ce` — walk HELD; the one cap-test red ("Unable to parse empty data") folded into **VX-132** by comment (Stage B R1 B14) |
+| 8 | Stage B ladder (opus) over `99d739e9..065526ce` | orchestrator | R1 DONE — `notes/plans/13nc-stageB-ladder-round1.md` (0B/1M/6m/7n/2 spec; all accepted, S-1/S-2 to the walk); the fix pass + O-1…O-3 BRIEFED ("THE STAGE B FIX BRIEF") → R2 |
 | 9 | U6 — the wing on the wire | U6 implementer | NOT-STARTED |
 | 10 | U7 — VX-159 | U7 implementer | NOT-STARTED (may fall out) |
 | 11 | Stage C ladder | orchestrator | NOT-STARTED |
@@ -1777,3 +1778,45 @@ who has never heard of MCP finds lesson 1 enough of a "what is this" — both th
 - **The generic stanza:** `{"mcpServers": {"<name>": {"command": "<absolute path>", "args": [...]}}}`
   (https://modelcontextprotocol.io/docs/develop/connect-local-servers — "paths … absolute and not
   relative"; Cursor's `~/.cursor/mcp.json` the same shape, https://cursor.com/docs/context/mcp).
+
+---
+
+## THE STAGE B FIX BRIEF (self-contained; the spawn names this section)
+
+You are the Stage B fix implementer for Variorum phase 13n-c, working in `~/dev/variorum-vx-165` on branch
+`vx-165-13n-c` (never the main checkout). Commits say `Part of VX-165`, carry NO attribution trailer, and are pushed
+after every commit. `notes/SessionResiliencyProtocol.md` binds you: keep LIVE STATUS in the "STAGE B FIX RECORD"
+section below from your FIRST commit; foreground waits only; no subagents.
+
+**Read first, whole, never delegated:** this plan file top to bottom (the U2–U5 records above all, and the orchestrator
+findings O-1…O-3 near the top), then `notes/plans/13nc-stageB-ladder-round1.md` — the findings AND the orchestrator's
+dispositions. The dispositions are your work list. Every row marked ACCEPT is yours, with the fix shape the disposition
+names; S-1 is a walk item; S-2 is optional per its row; B12 and B14 are already done by the orchestrator.
+
+**The rules:**
+- **Bug-class fixes need a red-on-old pin.** Revert the fix, show the pin red, restore it, and record the evidence per
+  row. B4 is architectural (a parity pin, green on both sides by design); say so.
+- **Never re-derive the fence.** B2 and B4 consume U1's derivation (`mcpNoteFacts` / `mcpBookFacts` /
+  `mcpFencedBookIDs`).
+- **O-1:** propose 2–3 pending-ask glyphs that differ from the shared icon by SILHOUETTE. Capture them side by side at
+  row size in both voices, build your lead PROVISIONAL, and update every place that names the glyph (O-3's helper
+  row, U4's record terms).
+- **O-2 / B13:** sweep every client-facing string, i.e. everything the server can send. Pin that none carries a
+  gendered pronoun. The app's own UI speaks to the user as "you", so leave it alone.
+- **Copy:** sentence case; no word capitalized for emphasis.
+
+**Must NOT touch:** `Sync/`, custody/keychain, the editor seam, migrations, `lockstepVersion`, the real store,
+`/Applications`.
+
+**Acceptance:** the whole headless package, plus the Mac suites over every changed type, run under a HELD `Tools/stage`
+claim with suite-level `-only-testing`, reading the `skipped:` lines. Re-shoot U4's and U5's capture harnesses where a
+face changed. The session has been locked all night: check it with the command in U4's brief. While it is locked, the
+walk stays HELD, and captures stand in that are said plainly not to be a walk. VX-132: if a VariorumMCPTests run
+hangs, kill it and rerun.
+
+**Close:** a FIX PASS CLOSED banner — per row: fixed with commit and pin evidence, or why not; PROVISIONALs;
+FABLE-OWED rows written at the moment; where round 2 should look first.
+
+## STAGE B FIX RECORD (LIVE STATUS — the fix implementer owns this section from its first commit)
+
+*(empty until the fix implementer's first commit)*
