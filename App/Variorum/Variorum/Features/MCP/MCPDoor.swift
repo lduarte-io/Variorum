@@ -361,7 +361,10 @@ final class MCPDoor {
             // the main actor, in the same hop as any move.
             show: { [weak self] target in
                 await self?.agentShow(target) ?? .refuse(MCPShowRule.unavailableWords)
-            })
+            },
+            // 13n-c U6: her Move to Wing door's own sentence for a frozen book
+            // (the server speaks it where the client can read the book).
+            wingMoveFrozenWords: Self.wingMoveFrozenWords)
         host = fresh
         starting = true
         // The start sweeps the while-connected grants (a write) and binds —
@@ -717,6 +720,12 @@ final class MCPDoor {
             StatusCenter.Item.Action(label: MCPReceiptCopy.openDoor) { [weak self] in self?.openShow(target) }
         }
         session.status.deliver(MCPReceiptCopy.line(receiptRun), kind: .receipt, action: door)
+    }
+
+    /// 13n-c U6 — `move_note_to_wing`'s refusal for a note held by a finished
+    /// or sealed book: HER door's sentence (`WingCopy.frozen`), ONE source.
+    nonisolated static let wingMoveFrozenWords: @Sendable (String, String) -> String = {
+        WingCopy.frozen($0, book: $1)
     }
 
     // MARK: - Navigation (U4 — R-13nb-23, AF-11 F-2/F-3)

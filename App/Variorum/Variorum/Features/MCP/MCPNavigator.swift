@@ -16,7 +16,9 @@
 //  · a LENS — the note opened, then the Lenses board told to show it
 //    (`CommandRouter.pendingLensLanding` + `requestMode(.lenses)`);
 //  · a BOOK, at a CHAPTER — the adoption door to the book, its Outline's
-//    chapter landing parked for it (`ShellRouter.pendingBookChapter`).
+//    chapter landing parked for it (`ShellRouter.pendingBookChapter`);
+//  · a WING (13n-c U6) — the app's one wing, switched as her switcher
+//    switches it, the "Now in …" receipt naming the client.
 //
 //  It decides nothing about WHETHER to move — `MCPShowRule` decides that, in
 //  `MCPDoor`, before this is ever called (P-4: composition, never a
@@ -73,6 +75,16 @@ struct MCPNavigator {
         case .book(let bookID, let sectionID):
             router.pendingBookChapter = sectionID.map { .init(bookID: bookID, sectionID: $0) }
             router.adopt(.reading(bookID), in: pane)
+            return true
+        case .wing(let wingID, let name, let client):
+            // 13n-c U6 (VX-158 — the brief §8's A, mockup §7): her switcher's
+            // OWN act — the app's one wing switched (wings scope listings;
+            // editors never close on a switch, 17y (f)) — and the receipt says
+            // who moved her. Already there: nothing moves and nothing is said
+            // (⌘L's `switchSaying` rule).
+            guard session.wing.currentID != wingID else { return true }
+            session.wing.switchTo(wingID)
+            session.status.receipt(MCPReceiptCopy.shownWing(name, isHome: wingID.isEmpty, client: client))
             return true
         }
     }

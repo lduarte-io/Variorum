@@ -468,6 +468,13 @@ nonisolated extension OpsRefusalCopy {
         // book's being Unseal. Mac-local: "unseal" is the Mac's door word.
         case .lockedReading:
             return "This book is finished \u{2014} reopen it first; if it\u{2019}s sealed, unseal it."
+        // 13n-c U6 — an MCP wing move's undo or redo found the note changed in
+        // the wing it would leave (P-13nc-U6-3): said with the way through.
+        // Mac-local: "Move to Wing" is the Mac's door.
+        case .wingMoveChangedSince:
+            return "That note joined a book or took a tag in its wing since then, so moving it back now "
+                + "would split them across wings \u{2014} take those off, or use \(WingCopy.moveToWingVerb), "
+                + "then try again."
         default:
             return nil
         }

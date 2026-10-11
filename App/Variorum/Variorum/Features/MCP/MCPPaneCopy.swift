@@ -238,6 +238,10 @@ nonisolated enum MCPPaneCopy {
         case "move_block": return "moved a block in \(at)" + times
         case "delete_block": return "deleted a block in \(at)" + times
         case "set_block_name": return "named a block in \(at)" + times
+        // 13n-c U6: the wing move (the log's target is the NOTE) and the
+        // navigation tool (its target a note, a book or — U6 — a wing).
+        case "move_note_to_wing": return n == 1 ? "moved \(at) to another wing" : "moved \(at) between wings" + times
+        case "show_in_app": return "showed you \(at)" + times
         default: return "used \(act)" + times
         }
     }
@@ -782,7 +786,28 @@ nonisolated enum MCPReceiptCopy {
         // the run speaks as a count.
         let line = "\(first.clientName) \(joined(parts)) \u{00B7} \(undoes)"
         guard line.count > budget else { return line }
+        // 13n-c U6: ONE wing move keeps what it must say — where the note went
+        // and the books it left — dropping only the note's title (Open › opens
+        // it) before the count fallback below.
+        if run.count == 1, first.act == .wingMove {
+            let short = "\(first.clientName) \(wingMovePhrase(first, titled: false)) \u{00B7} \(undoes)"
+            if short.count <= budget { return short }
+        }
         return "\(first.clientName) made \(run.count) changes \u{00B7} \(undoes)"
+    }
+
+    /// One wing move, as her door's receipt says it (`WingCopy.moved`): the
+    /// note (or "a note"), where it went — Home unquoted — and the books it
+    /// left.
+    private static func wingMovePhrase(_ receipt: MCPWriteReceipt, titled: Bool) -> String {
+        let note = titled ? receipt.detail.map { "\u{201C}\($0)\u{201D}" } ?? "a note" : "a note"
+        let left = receipt.leftBooks ?? 0
+        return "moved \(note) to \(wingWords(receipt))"
+            + (left == 0 ? "" : " \u{2014} it left \(left) book\(left == 1 ? "" : "s")")
+    }
+
+    private static func wingWords(_ receipt: MCPWriteReceipt) -> String {
+        receipt.targetID == "" ? "Home" : "\u{201C}\(receipt.targetTitle ?? "")\u{201D}"
     }
 
     /// The longest line the bottom bar's quiet slot shows whole at the
@@ -832,7 +857,22 @@ nonisolated enum MCPReceiptCopy {
                 : "filed \(n) notes"
         case .bookRule:
             return n == 1 ? "changed what \(quoted(receipts[0].targetTitle)) collects" : "changed \(n) books' rules"
+        // 13n-c U6 — a note moved to another wing (her door's receipt's
+        // words, `WingCopy.moved`; the run is keyed on the DESTINATION, so a
+        // sweep's moves to one wing read as one line — the brief §10).
+        case .wingMove:
+            return n == 1 ? wingMovePhrase(receipts[0], titled: true)
+                : "moved \(n) notes to \(wingWords(receipts[0]))"
         }
+    }
+
+    /// 13n-c U6 (VX-158 — mockup §7): an agent's `show_in_app` to a WING, said
+    /// as the wing switcher's "Now in …" with who moved her. Home is a
+    /// place-name, never quoted (`WingFollow.nowIn`'s rule). A receipt (her
+    /// receipt style governs it). 13s-a sweepable.
+    static func shownWing(_ wingName: String, isHome: Bool, client: String) -> String {
+        let wing = isHome ? "Home" : "\u{201C}\(wingName)\u{201D}"
+        return "Now in \(wing) \u{2014} \(client) showed you this wing."
     }
 
     private static func joined(_ parts: [String]) -> String {
