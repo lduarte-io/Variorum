@@ -525,6 +525,12 @@ per adjudication decision or diff that would ordinarily earn a Fable review.
 | F-7 | `df704250` | U1 fork RULED (a) by the orchestrator (Opus) and BUILT by its own hands: a fenced BOOK answers the one `notShared` answer too, byte-equal to a book id naming nothing (pins red-on-old, 4 issues) | refusal uniformity at the security boundary, ruled AND written by Opus | — |
 | F-8 | — (recorded, NOT built) | U1 edge: a client holding a per-ask READ grant on a fenced note that asks to SUGGEST hears `notShared` though it can read the note; the honest answer is `rungTooLow` + the asked sentence — a three-line change inside `MCPGrantRule.decide` | the security rule itself — left for Fable's eye, deliberately unbuilt | — |
 | F-9 | (the U1 adjudication commit) | T-2 CONCURRED by the orchestrator (Opus): AppSpec §12's no-oracle contract line outranks 13n-b AF-6's fenced clause (a plan ruling); the visible cost — a client that read a note hears the one answer once she marks it Private — accepted | an Opus concurrence reversing a Fable-ruled clause | — |
+| F-10 | `c1047097` | U1 ladder R1 F1 — `MCPGrantRule.decide` answers `rungTooLow` before the fence when a LIVE grant reaches the note (the security rule itself) | written by Fable (the round-1 reviewer, cross-model flow) but NOT re-reviewed by Fable — her budget died right after; round 2 is Opus | — |
+
+**⚠️ HER FABLE BUDGET IS SPENT (04:52 MDT, HTTP 429 at the U1 round-1 reviewer's tail).** Fable
+reviewed exactly ONE diff this phase: U1 at `9b1ec3dd..33bd8772` (round 1, `13nc-u1-ladder-round1.md`
+— every adjudication T-2/F-5/F-6/F-7/F-9/D-1/D-3/D-5 CONCURRED there; F-1…F-9's "Reviewed by" column
+for those rows reads that round). Everything after is Opus-reviewed with rows here.
 
 ## 7. Constraints (standing, restated)
 
@@ -575,13 +581,28 @@ the SAME stage claim as the app leg it drives. The MCP SDK pin is EXACT
 shim probe and any TCC prompt answered on this machine is recorded in the
 unit record (TCC state is machine-state the next session inherits).
 
+## CLOSEOUT CANON-DELTA CHECKLIST (running — every item lands at the merge as a contract line + pointer)
+
+- AppSpec §12 THE MCP DOOR line: "journal-class notes AND anything wearing the Private mark answer
+  only a per-ask note grant" → R-AIR-1's keys (the daily Journal's entries + ⌘J entries (D-1) +
+  anything Private); the no-oracle letter now true for books too (F-7); VX-162 — the durations
+  "once · while connected · always" (always never on the daily Journal/Private, while connected
+  only to a connected client).
+- AppSpec §7 v1_25 bullet "journal-class fence" — wording REVIEWED (true of the Private mark's
+  behaviour; keep or reword to "per-ask fence").
+- AF-6's fenced clause superseded (T-2/F-7) — recorded as a pointer to this plan's U1 adjudications.
+- R-AIR-1/-3/-6/-7/-8/-12/-13/-15 and round 5 as built — the new contract lines (the grant road,
+  the icon + in-note indicator, asks wait, ⌘L, the setup menu, gatherings under a wing grant).
+- R-AIR-14 (if U8 lands) — A-2's "protocol-blind" → "MCP-blind".
+
 ## 9. THE LEDGER (running; every row owned)
 
 | # | Item | Owner | Status |
 |---|---|---|---|
 | 1 | Kickoff (ticket, worktree, in-flight row, this plan) | orchestrator | DONE |
 | 2 | U1 — the fence re-key | U1 implementer + orchestrator | BUILT + VERIFIED; F-7 ruled (a) and built `df704250`; walk HELD (locked session) |
-| 3 | Stage A ladder (fable-reviewer R1) | orchestrator | NOT-STARTED |
+| 3 | Stage A ladder | orchestrator | R1 DONE (fable, `4140860f`: 1M/2m/3n) → F1 FIXED `c1047097` by the reviewer → dispositions `e32fc317` (the reviewer died at her Fable limit) → R2 (opus) NEXT |
+| 3b | F2 — R-AIR-3's clause on the ask road's book grants | U2/U4 | OPEN — a named ticket at closeout if U2/U4 fall out |
 | 4 | U2 — the grant sheet | U2 implementer | NOT-STARTED |
 | 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | NOT-STARTED |
 | 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | NOT-STARTED |
