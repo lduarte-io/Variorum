@@ -21,6 +21,20 @@
 //  which options a query shows, and whether a create row is offered — pinned)
 //  and the FACE (`SearchPicker` — renders and sends).
 //
+//  13n-c U2 (VX-156 item 1 — the grant road adopts the ONE picker at its next
+//  touch, R-17y-3) — OPTIONAL SECTIONS, for a list of hundreds: a host may
+//  hand ARRANGEMENTS (each a list of titled sections — the grant sheet's "by
+//  shelf" and "a–z") instead of a flat list. QUICK sections ("Recently
+//  edited", "Starred") repeat rows that live in a home section and show only
+//  before typing; once she types, every home section filters and a match
+//  shows ONCE, under its home. A host may instead hand an async SOURCE (the
+//  note feed — bounded, queried per keystroke, latest wins). A row may carry
+//  a second DETAIL line (a book's context, a note's snippet) and an
+//  EMPHASIZED annotation (the distinguisher). The trigger may be a FIELD (the
+//  chosen value with its annotation, ▾) rather than the quiet word. Every
+//  addition defaults off: the flat hosts render byte-for-byte as before (the
+//  parity proof is their suites, unedited).
+//
 
 import SwiftUI
 import VariorumCore
@@ -34,13 +48,51 @@ nonisolated struct SearchPickerOption: Identifiable, Equatable, Sendable {
     var annotation: String?
     /// What the query is matched against (defaults to the label).
     var searchText: String?
+    /// 13n-c U2 — a second, quieter line under the row (a book's context
+    /// line, a note's snippet); nil = the one-line row as ever.
+    var detail: String?
+    /// 13n-c U2 — the annotation is the fact that TELLS this row apart (the
+    /// collision ladder's distinguisher): drawn in accent ink, not faint.
+    var emphasized: Bool = false
 
-    init(id: String, label: String, annotation: String? = nil, searchText: String? = nil) {
+    init(
+        id: String, label: String, annotation: String? = nil, searchText: String? = nil,
+        detail: String? = nil, emphasized: Bool = false
+    ) {
         self.id = id
         self.label = label
         self.annotation = annotation
         self.searchText = searchText
+        self.detail = detail
+        self.emphasized = emphasized
     }
+}
+
+/// 13n-c U2 — one titled group of options (a shelf, "Starred", "Recently
+/// edited").
+nonisolated struct SearchPickerSection: Identifiable, Equatable, Sendable {
+    let id: String
+    /// The header; nil draws none.
+    let title: String?
+    let options: [SearchPickerOption]
+    /// A QUICK section repeats rows whose HOME is another section; it shows
+    /// only before typing (so a match never shows twice).
+    var isQuick: Bool = false
+
+    init(id: String, title: String?, options: [SearchPickerOption], isQuick: Bool = false) {
+        self.id = id
+        self.title = title
+        self.options = options
+        self.isQuick = isQuick
+    }
+}
+
+/// 13n-c U2 — one way of laying the same options out ("by shelf", "a–z").
+nonisolated struct SearchPickerArrangement: Identifiable, Equatable, Sendable {
+    let id: String
+    /// The toggle's word (sentence case).
+    let label: String
+    let sections: [SearchPickerSection]
 }
 
 /// **THE BRAIN** — pure, so the pins read it without a window.
@@ -95,6 +147,30 @@ nonisolated enum SearchPickerBrain {
         }
         return .nothing
     }
+
+    // MARK: - Sections (13n-c U2)
+
+    /// **The sections a query shows.** Before typing: every non-empty
+    /// section, in the host's order (quick ones included). Once she types:
+    /// the HOME sections only (quick sections repeat rows that live
+    /// elsewhere), each filtered by the one `filter`, empty ones dropped —
+    /// so a match shows exactly once, under its home.
+    static func visible(_ sections: [SearchPickerSection], query: String) -> [SearchPickerSection] {
+        let typing = !normalized(query).isEmpty
+        return sections.compactMap { section in
+            if typing, section.isQuick { return nil }
+            let options = filter(section.options, query: query)
+            guard !options.isEmpty else { return nil }
+            return SearchPickerSection(
+                id: section.id, title: section.title, options: options, isQuick: section.isQuick)
+        }
+    }
+
+    /// What Return does over sections: the first row the query shows (a
+    /// sectioned picker makes nothing).
+    static func returnChoice(sections: [SearchPickerSection], query: String) -> Choice {
+        visible(sections, query: query).first?.options.first.map { .pick($0.id) } ?? .nothing
+    }
 }
 
 /// **THE FACE** — a quiet word that opens the search popover.
@@ -116,22 +192,61 @@ struct SearchPicker: View {
     var onCreate: ((String) -> Void)? = nil
     /// The door's role (the old menus were `.quiet` voiced menus).
     var role: VoicedButtonStyle.Role = .quiet
+    /// 13n-c U2 — sectioned layouts (more than one ⇒ a quiet toggle in the
+    /// panel); nil = the flat `options` as ever.
+    var arrangements: [SearchPickerArrangement]? = nil
+    /// 13n-c U2 — an async feed instead of in-memory options (the note
+    /// feed): the query in, the sections to show out; latest query wins.
+    var source: ((String) async -> [SearchPickerSection])? = nil
+    /// 13n-c U2 — the trigger as a FIELD: the chosen value (hers — never
+    /// chrome-cased) with its annotation and ▾; nil = the quiet word.
+    var field: Field? = nil
+    /// 13n-c U2 — the popover's width (the flat hosts keep 300).
+    var panelWidth: CGFloat = 300
+
+    /// The field trigger's contents.
+    struct Field: Equatable {
+        /// The chosen value's words, or nil while nothing is chosen.
+        var value: String?
+        /// Quiet words beside it (the distinguisher, "connected now").
+        var annotation: String?
+        var emphasized: Bool = false
+        /// What the empty field says.
+        var placeholder: String
+    }
 
     @State private var shown = false
     @State private var query = ""
+    @State private var arrangementID: String?
+    @State private var sourced: [SearchPickerSection] = []
+    @State private var generation = 0
     @FocusState private var focused: Bool
 
     private var canCreate: Bool { createLabel != nil && onCreate != nil }
 
     var body: some View {
-        Button(tokens.chromeLabel(label)) {
-            query = ""
-            shown = true
+        Group {
+            if let field {
+                Button {
+                    query = ""
+                    shown = true
+                } label: {
+                    fieldLabel(field)
+                }
+                .buttonStyle(.plain)
+            } else {
+                Button(tokens.chromeLabel(label)) {
+                    query = ""
+                    shown = true
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: role))
+                .lineLimit(1)
+                .fixedSize()
+            }
         }
-        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: role))
-        .lineLimit(1)
-        .fixedSize()
-        .popover(isPresented: $shown, arrowEdge: .bottom) { panel }
+        .popover(isPresented: $shown, arrowEdge: .bottom) {
+            if arrangements != nil || source != nil { sectionedPanel } else { panel }
+        }
     }
 
     private var panel: some View {
@@ -212,6 +327,163 @@ struct SearchPicker: View {
         case .create(let typed): create(typed)
         case .nothing: break
         }
+    }
+
+    // MARK: - 13n-c U2: the field trigger and the sectioned panel
+
+    private func fieldLabel(_ field: Field) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            // Her vocabulary (a book's name, a note's title) — never chrome.
+            Text(field.value ?? tokens.chromeLabel(field.placeholder))
+                .foregroundStyle(field.value == nil ? tokens.faint : tokens.ink)
+                .lineLimit(1)
+                .truncationMode(.middle)
+            Spacer(minLength: 8)
+            if let annotation = field.annotation {
+                Text(tokens.chromeLabel(annotation))
+                    .foregroundStyle(field.emphasized ? tokens.accent : tokens.muted)
+                    .lineLimit(1)
+                    .fixedSize()
+            }
+            Text("\u{25BE}")
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+        }
+        .font(tokens.small)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(tokens.card, in: RoundedRectangle(cornerRadius: 7))
+        .overlay(RoundedRectangle(cornerRadius: 7).stroke(tokens.line, lineWidth: 1))
+        .contentShape(Rectangle())
+    }
+
+    private var currentArrangement: SearchPickerArrangement? {
+        guard let arrangements, !arrangements.isEmpty else { return nil }
+        return arrangements.first { $0.id == arrangementID } ?? arrangements[0]
+    }
+
+    /// What the panel shows: the source's answer as given (it already
+    /// matched the query), or the arrangement's sections through the brain.
+    private var shownSections: [SearchPickerSection] {
+        if source != nil { return sourced }
+        return SearchPickerBrain.visible(currentArrangement?.sections ?? [], query: query)
+    }
+
+    private var sectionedPanel: some View {
+        let sections = shownSections
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                TextField(prompt, text: $query)
+                    .textFieldStyle(.plain)
+                    .font(tokens.small)
+                    .focused($focused)
+                    .onSubmit { submitSections() }
+                    .onExitCommand { shown = false }
+                if let arrangements, arrangements.count > 1 {
+                    HStack(spacing: 2) {
+                        ForEach(arrangements) { arrangement in
+                            Button(tokens.chromeLabel(arrangement.label)) { arrangementID = arrangement.id }
+                                .buttonStyle(VoicedButtonStyle(
+                                    tokens: tokens,
+                                    role: arrangement.id == currentArrangement?.id ? .primary : .quiet))
+                        }
+                    }
+                    .fixedSize()
+                }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            Divider().overlay(tokens.line)
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    ForEach(sections) { section in
+                        if let title = section.title {
+                            Text(title)
+                                .font(tokens.small.weight(.semibold))
+                                .foregroundStyle(tokens.muted)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .padding(.horizontal, 10)
+                                .padding(.top, 8)
+                                .padding(.bottom, 2)
+                        }
+                        ForEach(section.options) { option in
+                            sectionRow(option) { pick(option.id) }
+                        }
+                    }
+                    if sections.isEmpty {
+                        Text(tokens.chromeLabel(query.isEmpty && source == nil ? emptyText : SearchPickerCopy.noMatch))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.faint)
+                            .lineLimit(2)
+                            .padding(10)
+                    }
+                }
+            }
+            .frame(maxHeight: 360)
+        }
+        .padding(.vertical, 6)
+        .frame(width: panelWidth)
+        .background(tokens.surface)
+        .onAppear { focused = true }
+        .task(id: query) { await runSource() }
+    }
+
+    private func sectionRow(_ option: SearchPickerOption, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 1) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    // Her vocabulary — never chrome.
+                    Text(option.label)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    Spacer(minLength: 8)
+                    if let annotation = option.annotation {
+                        Text(tokens.chromeLabel(annotation))
+                            .fontWeight(option.emphasized ? .semibold : .regular)
+                            .foregroundStyle(option.emphasized ? tokens.accent : tokens.faint)
+                            .lineLimit(1)
+                            .fixedSize()
+                    }
+                }
+                if let detail = option.detail {
+                    Text(detail)
+                        .foregroundStyle(tokens.muted)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+            }
+            .font(tokens.small)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func submitSections() {
+        if source != nil {
+            if let first = sourced.first?.options.first { pick(first.id) }
+            return
+        }
+        if case .pick(let id) = SearchPickerBrain.returnChoice(
+            sections: currentArrangement?.sections ?? [], query: query) {
+            pick(id)
+        }
+    }
+
+    /// The feed's cadence (the note picker's own): one bounded read per typed
+    /// query, latest keystroke wins.
+    private func runSource() async {
+        guard let source, shown else { return }
+        generation += 1
+        let mine = generation
+        let result = await source(query)
+        guard mine == generation else { return }
+        sourced = result
     }
 
     private func pick(_ id: String) {

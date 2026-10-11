@@ -42,7 +42,11 @@ final class MCPDoor {
     nonisolated struct ClientRow: Equatable, Identifiable, Sendable {
         var id: String { client.id }
         let client: MCPClient
+        /// 13n-c U2 (R2-3): the live grants that REACH their target — the
+        /// row's "N shared places" (an inert one is never called shared).
         let liveGrantCount: Int
+        /// The live grants whose target is fenced since (P-13nb-U2-3).
+        var inertGrantCount: Int = 0
     }
 
     /// What the pane shows, read in one go from the grants store.
@@ -310,6 +314,13 @@ final class MCPDoor {
         connected = host?.connectedClientNames ?? []
     }
 
+    #if DEBUG
+    /// The capture harness's seam (13n-c U2 — DEBUG only): who reads as
+    /// connected, so an offscreen render can show "while connected" and the
+    /// WHO row's "connected now" without a live client.
+    func previewConnected(_ names: Set<String>) { connected = names }
+    #endif
+
     // MARK: - The pane's acts (operations, through the runner)
 
     func setEnabled(_ on: Bool) {
@@ -497,7 +508,7 @@ final class MCPDoor {
     func allClients() async -> [ClientRow] {
         await read { db in
             try Queries.mcpClients(db, states: [.approved, .denied]).map { client in
-                ClientRow(client: client, liveGrantCount: try MCPDoor.liveGrantCount(db, clientID: client.id))
+                try MCPDoor.clientRow(db, client)
             }
         } ?? []
     }
@@ -525,6 +536,57 @@ final class MCPDoor {
         } ?? Choices()
     }
 
+    // MARK: - The grant sheet's reads (13n-c U2 — one-shot, never held)
+
+    /// Everything the book and wing pickers show (`Queries.mcpGrantPlaces`).
+    func grantPlaces() async -> MCPGrantPlaces {
+        await read { try Queries.mcpGrantPlaces($0) } ?? MCPGrantPlaces()
+    }
+
+    /// WHO: the approved clients, most recently granted first.
+    func clientsByRecentGrant() async -> [MCPClient] {
+        await read { try Queries.mcpClientsByRecentGrant($0) } ?? []
+    }
+
+    /// The wing the window is in — the note leg's default.
+    var currentWingID: String { session?.wing.currentID ?? "" }
+
+    /// **The note leg's feed** — the bounded `corpusNotes` road (≤30 rows
+    /// per query, recent first; the one note picker's feed) in the chosen
+    /// wing, each row fence-marked on the ONE derivation site (one batched
+    /// `mcpNoteFacts` per page — ∝ the page, P1).
+    func grantNotes(query: String, wingID: String) async -> [MCPGrantPicker.NoteRow] {
+        guard let session else { return [] }
+        let rows = await NotePickerSource.corpusNotes(session: session, excluding: nil, inWing: wingID)
+            .search(query)
+        let ids = rows.map(\.id)
+        let facts = await read { try Queries.mcpNoteFacts($0, noteIDs: ids) } ?? [:]
+        return rows.map { row in
+            MCPGrantPicker.NoteRow(
+                id: row.id, title: row.title, snippet: row.snippet, day: row.detail,
+                fence: facts[row.id]?.fence, wingID: facts[row.id]?.wingID)
+        }
+    }
+
+    /// One note, named (a pre-filled WHERE — U3's doors): its title and its
+    /// fence, or nil when it is not a note a grant may name.
+    func grantNote(_ id: String) async -> MCPGrantPicker.NoteRow? {
+        await read { db in
+            guard let facts = try Queries.mcpNoteFacts(db, noteID: id),
+                  let title = try Queries.mcpScopeTitle(db, kind: .note, id: id) else { return nil }
+            return MCPGrantPicker.NoteRow(
+                id: id, title: title, snippet: nil, day: nil, fence: facts.fence, wingID: facts.wingID)
+        } ?? nil
+    }
+
+    /// **The distinguishers the pane's rows and the ask sheet wear** — the
+    /// ONE rule (`PlaceLabels`) over the OFFERED books and the wings, so a
+    /// shared row or an ask names the same book the sheet's picker did.
+    func placeDistinguishers(now: Date = Date()) async -> (books: [String: String], wings: [String: String]) {
+        let places = await grantPlaces()
+        return (places.bookDistinguishers(now: now), places.wingDistinguishers(now: now))
+    }
+
     private func read<T: Sendable>(_ body: @escaping @Sendable (Database) throws -> T) async -> T? {
         guard let database else { return nil }
         return try? await database.read(body)
@@ -539,9 +601,7 @@ final class MCPDoor {
             openBook: try Queries.mcpSwitch(db, .openBook),
             pending: try Queries.mcpClients(db, states: [.pending], limit: pendingCap),
             pendingCount: try Queries.mcpClientCount(db, states: [.pending]),
-            clients: try clients.map { client in
-                ClientRow(client: client, liveGrantCount: try liveGrantCount(db, clientID: client.id))
-            },
+            clients: try clients.map { client in try clientRow(db, client) },
             clientCount: try Queries.mcpClientCount(db, states: [.approved, .denied]),
             shared: try Queries.mcpSharedRows(db, limit: sharedCap),
             sharedCount: try Queries.mcpSharedCount(db),
@@ -551,6 +611,12 @@ final class MCPDoor {
     }
 
     nonisolated static func liveGrantCount(_ db: Database, clientID: String) throws -> Int {
-        try Queries.mcpGrants(db, clientID: clientID).map(\.ruleGrant).filter(\.isLive).count
+        try Queries.mcpGrantReachCounts(db, clientID: clientID).reaching
+    }
+
+    /// One client's row (13n-c U2, R2-3): its reaching and inert grants.
+    nonisolated static func clientRow(_ db: Database, _ client: MCPClient) throws -> ClientRow {
+        let counts = try Queries.mcpGrantReachCounts(db, clientID: client.id)
+        return ClientRow(client: client, liveGrantCount: counts.reaching, inertGrantCount: counts.inert)
     }
 }

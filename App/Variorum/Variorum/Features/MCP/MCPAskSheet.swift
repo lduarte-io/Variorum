@@ -11,6 +11,11 @@
 //  target — R-13n-4; R2-1's fix) · Don't allow. The register is the MCP
 //  room's (direct and technical — R-13n-5).
 //
+//  13n-c U2: the title wears the asked place's distinguisher (the one rule —
+//  mockup §1b), and a BOOK or WING ask says R-AIR-3's live reach above the
+//  answers (the U1 ladder's F2 — every book grant says it). U4 retires the
+//  sheet's self-presenting arrival; its face stays.
+//
 
 import SwiftUI
 import VariorumCore
@@ -22,10 +27,13 @@ struct MCPAskSheet: View {
 
     let door: MCPDoor
     let ask: MCPAsk
+    /// 13n-c U2 — the asked place's distinguisher when its name collides
+    /// with another offered place (`PlaceLabels`, the one rule).
+    @State private var distinguisher: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(MCPAskCopy.title(ask))
+            Text(MCPAskCopy.title(ask, distinguisher: distinguisher))
                 .font(.headline)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -34,6 +42,15 @@ struct MCPAskSheet: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(4)
                 .fixedSize(horizontal: false, vertical: true)
+            // 13n-c U2 (the U1 ladder's F2): an answer here MINTS a book or
+            // wing grant, so R-AIR-3's clause is said here too.
+            if let reach = MCPAskCopy.reachLine(ask) {
+                Text(reach)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             // U2 walk W-3: SYSTEM buttons — the sheet presents at the
             // WindowGroup level, where no session theme reaches (the
             // library-open sheet's own precedent beside it); voiced buttons
@@ -56,5 +73,13 @@ struct MCPAskSheet: View {
         }
         .padding(20)
         .frame(width: 480)
+        .task(id: ask.id) {
+            let labels = await door.placeDistinguishers()
+            distinguisher = switch ask.scopeKind {
+            case .note: nil
+            case .book: labels.books[ask.scopeID]
+            case .wing: labels.wings[ask.scopeID]
+            }
+        }
     }
 }

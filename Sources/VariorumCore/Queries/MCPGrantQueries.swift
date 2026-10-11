@@ -231,6 +231,14 @@ extension Queries {
         let fence: MCPGrantRule.Fence?
         switch grant.scopeKind {
         case .note:
+            // The cost guard, ASKED OF THE RULE (never a second fence): a
+            // note grant that reaches even a FENCED note of its own id (a
+            // per-ask grant — once or while connected) can be made inert by
+            // no fence, so its note's facts are never read. Only an "always"
+            // note grant pays the facts read — so the pane's held snapshot
+            // reads `container` for these rows only when such a grant exists.
+            let fencedTwin = MCPGrantRule.NoteFacts(id: grant.scopeID, wingID: "", fence: .privateMark)
+            if MCPGrantRule.reaches(grant.ruleGrant, .note(fencedTwin)) { return nil }
             guard let facts = try mcpNoteFacts(db, noteID: grant.scopeID) else { return nil }
             (target, fence) = (.note(facts), facts.fence)
         case .book:

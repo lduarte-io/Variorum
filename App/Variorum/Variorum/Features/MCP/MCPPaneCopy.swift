@@ -28,11 +28,12 @@ nonisolated enum MCPPaneCopy {
     /// finding W-2: "no client can overwrite your text" stopped being true
     /// the moment edit could be granted, so the clause says when it can —
     /// and what guards it (R-13n-7's brackets). PROVISIONAL P-13nb-U3-17,
-    /// her words to re-voice at 13s-a.
+    /// her words to re-voice at 13s-a. 13n-c U2 (R-AIR-8 — no "AI" in
+    /// settings-class wording): "AI work" → "a client's work".
     static let enableBlurb =
         "Runs a local MCP server while Variorum is open, so clients like Claude Code can read "
         + "and write here through Variorum's own operations. Nothing is readable until you grant "
-        + "it, every grant is revocable, and AI work lands as takes beside your own \u{2014} a "
+        + "it, every grant is revocable, and a client's work lands as takes beside your own \u{2014} a "
         + "client changes your text only where you grant it edit, with a commit before and after "
         + "every change."
 
@@ -70,10 +71,43 @@ nonisolated enum MCPPaneCopy {
         count == 1 ? "1 shared place" : "\(count) shared places"
     }
 
+    /// 13n-c U2 (the U1 ladder's R2-3; P-13nb-U2-3): the client row counts
+    /// only grants that REACH as shared; an inert one is said as inert.
+    static func reads(_ count: Int, inert: Int) -> String {
+        guard inert > 0 else { return reads(count) }
+        let shared = count == 0 ? "nothing shared" : reads(count)
+        return "\(shared) \u{00B7} \(inert) inert"
+    }
+
+    /// **L1 — the A-4 boundary, said where clients are listed** (13n-c U2;
+    /// the VX-156 brief §12's words verbatim, mockup §11 — the line the canon
+    /// says the pane carries and no rendered string did). Direct and
+    /// technical (R-13n-5).
+    static let clientBoundary =
+        "A client names itself when it connects. Variorum can't verify the name: a grant lets "
+        + "whatever connects under that name do what you granted."
+
     // MARK: - Shared with AI
 
-    static let sharedSection = "Shared with AI"
+    /// 13n-c U2 (R-AIR-8 — no "AI" in settings-class wording; PROVISIONAL
+    /// P-13nc-U2-2, her words at the copy pass): was "Shared with AI". The
+    /// client row's own "N shared places" and the Revoke door's note
+    /// already said "shared places".
+    static let sharedSection = "Shared places"
     static let nothingShared = "Nothing is shared."
+
+    /// 13n-c U2 (R2-3): a live grant whose target is fenced since reaches
+    /// NOTHING — the row says so instead of calling it shared, and why.
+    static func inertDetail(_ fence: MCPGrantRule.Fence, kind: MCPGrantRule.ScopeKind) -> String {
+        let place = kind == .note ? "note" : "book"
+        switch fence {
+        case .privateMark: return "inert \u{2014} the \(place) is marked Private, which always asks"
+        case .journal:
+            return kind == .note
+                ? "inert \u{2014} a daily Journal entry always asks"
+                : "inert \u{2014} it's your daily Journal now, which always asks"
+        }
+    }
     static func sharedDetail(client: String, rung: MCPGrantRule.Rung, duration: MCPGrantRule.Duration) -> String {
         "\(client) \u{00B7} \(rungWord(rung)) \u{00B7} \(durationWord(duration))"
     }
@@ -201,12 +235,21 @@ nonisolated enum MCPPaneCopy {
     // MARK: - The grant sheet (mockup §3, the U1 form — A-9)
 
     static func sheetTitle(_ client: String) -> String { "Grant access \u{2014} \(client)" }
+    /// 13n-c U2 — the sheet opened from a place (U3's doors), its client
+    /// chosen in WHO.
+    static let sheetTitleChoosing = "Grant access"
     static let sheetLead =
         "The client sees what you grant and nothing else. Refusals speak to it exactly as they "
         + "speak to you."
     static let whereSection = "Where"
     static let howMuchSection = "How much"
     static let howLongSection = "How long"
+    /// 13n-c U2 — WHO (mockup §1/§2): shown whenever the sheet's opener did
+    /// not name a client.
+    static let whoSection = "Who"
+    static let noApprovedClient =
+        "No client is approved yet \u{2014} approve a connection request first."
+    static let aNote = "A note"
     static let aBook = "A book"
     static func aBookDetail(_ name: String?) -> String {
         name.map { "\u{201C}\($0)\u{201D} \u{2014} its notes, takes and tags" } ?? "choose a book"
@@ -220,6 +263,61 @@ nonisolated enum MCPPaneCopy {
     }
     static let noBooks =
         "No book can be shared yet (your daily Journal and Private books are shared one ask at a time)."
+
+    // MARK: - The pickers (13n-c U2 — VX-156 items 1 + 6; mockup §1)
+
+    static let bookPrompt = "Find a book"
+    static let notePrompt = "Find a note"
+    static let wingPrompt = "Find a wing"
+    static let clientPrompt = "Find a client"
+    static let chooseBook = "Choose a book"
+    static let chooseNote = "Choose a note"
+    static let chooseClient = "Choose a client"
+    static let noNotes = "No notes in this wing yet."
+    /// The picker's foot line (mockup §1, verbatim): why some books are
+    /// never in the list.
+    static let fencedBooksNote =
+        "Your daily Journal and Private books aren't listed \u{2014} they're shared one ask at a time."
+    /// The sections (her kickoff: "sort by shelf … favorites"; round 2:
+    /// "recently edited … that's often what I want").
+    static let recentlyEdited = "Recently edited"
+    static let starred = "Starred"
+    static let unshelved = "Unshelved"
+    /// A shelf section in a wing other than Home names its wing first.
+    static func shelfSection(_ shelf: String, glyph: String?, wing: String?) -> String {
+        let name = [glyph, shelf].compactMap { $0 }.joined(separator: " ")
+        return wing.map { "\($0) \u{00B7} \(name)" } ?? name
+    }
+    static func unshelvedSection(wing: String?) -> String {
+        wing.map { "\($0) \u{00B7} unshelved" } ?? unshelved
+    }
+    /// The picker's two layouts (PROVISIONAL P-13nc-U2-3).
+    static let byShelf = "by shelf"
+    static let alphabetical = "a\u{2013}z"
+    /// A note row's fence word (the mockup §1 note leg's "daily Journal entry").
+    static func noteFenceWord(_ fence: MCPGrantRule.Fence) -> String {
+        switch fence {
+        case .journal: "daily Journal entry"
+        case .privateMark: "Private"
+        }
+    }
+    /// The note leg's wing row, when the library has more than one wing.
+    static let noteWingLabel = "Notes in"
+    static func aNoteDetail(_ title: String?) -> String {
+        title.map { "\u{201C}\($0)\u{201D} \u{2014} its takes, comments and tags" } ?? "choose a note"
+    }
+    /// **Why "always" is not offered** (mockup §1's note leg, verbatim shape):
+    /// a fenced note is only ever shared one ask at a time.
+    static func alwaysWithheld(_ title: String, _ fence: MCPGrantRule.Fence) -> String {
+        switch fence {
+        case .journal:
+            "\u{201C}\(title)\u{201D} is a daily Journal entry \u{2014} it's only ever shared one ask at "
+                + "a time, so always isn't offered."
+        case .privateMark:
+            "\u{201C}\(title)\u{201D} is marked Private \u{2014} it's only ever shared one ask at a "
+                + "time, so always isn't offered."
+        }
+    }
     /// HOW MUCH — the rungs the server can serve, each with the mockup §3
     /// sentence (U2: read · suggest · write new; U3: edit, now that the
     /// server serves it — a rung it couldn't serve was never offered, P-2).
@@ -265,9 +363,11 @@ nonisolated enum MCPPaneCopy {
     /// P-13nc-U1-1 — her sentence carries one).
     static func confirm(
         verb: String, rung: MCPGrantRule.Rung = .read, scope: MCPGrantRule.ScopeKind, place: String,
-        duration: MCPGrantRule.Duration
+        distinguisher: String? = nil, duration: MCPGrantRule.Duration
     ) -> String {
-        let parts = confirmParts(verb: verb, rung: rung, scope: scope, place: place, duration: duration)
+        let parts = confirmParts(
+            verb: verb, rung: rung, scope: scope, place: place, distinguisher: distinguisher,
+            duration: duration)
         return parts.lead + parts.place + parts.tail
     }
 
@@ -277,12 +377,37 @@ nonisolated enum MCPPaneCopy {
     /// R-AIR-3's clause off — the very words the ruling exists for). The verb,
     /// rung, duration and clause never truncate; the place, shown whole in
     /// WHERE just above, takes what room is left.
+    ///
+    /// 13n-c U2: the place wears its DISTINGUISHER after its closing quote
+    /// (`PlaceLabels` — "“the adventures of sherlock holmes” (made Oct 9)"),
+    /// in the tail, so it never compresses away — it is the very fact that
+    /// names the right book; and a NOTE grant reads "on" (the VX-156 mockup
+    /// §1's "Grant read on “morning pages — oct 9” once").
     static func confirmParts(
         verb: String, rung: MCPGrantRule.Rung = .read, scope: MCPGrantRule.ScopeKind, place: String,
-        duration: MCPGrantRule.Duration
+        distinguisher: String? = nil, duration: MCPGrantRule.Duration
     ) -> (lead: String, place: String, tail: String) {
-        ("\(verb) \(rungName(rung).lowercased()) in \u{201C}", place,
-         "\u{201D} \(durationWord(duration))" + liveReachClause(scope))
+        let preposition = scope == .note ? "on" : "in"
+        let distinct = distinguisher.map { $0.isEmpty ? "" : " (\($0))" } ?? ""
+        return ("\(verb) \(rungName(rung).lowercased()) \(preposition) \u{201C}", place,
+                "\u{201D}\(distinct) \(durationWord(duration))" + liveReachClause(scope))
+    }
+
+    /// The confirm's TWO-LINE form (13n-c U2 — the row's final design, the
+    /// geometry oracle in the U2 record): when one line cannot hold the whole
+    /// sentence (in Terminal's mono even her own example with a day
+    /// distinguisher is 554 pt against 489 pt of room), the label takes two
+    /// lines, and a place longer than this many characters is middle-
+    /// shortened so the verb, rung, distinguisher, duration and clause always
+    /// read whole. The place shows whole in WHERE just above.
+    static let confirmPlaceLimit = 40
+
+    static func shortPlace(_ place: String) -> String {
+        guard place.count > confirmPlaceLimit else { return place }
+        let keep = confirmPlaceLimit - 1
+        let head = place.prefix((keep + 1) / 2)
+        let tail = place.suffix(keep / 2)
+        return "\(head)\u{2026}\(tail)"
     }
 
     /// R-AIR-3's clause (book) and D-3's twin (wing), with its leading comma.
@@ -314,17 +439,35 @@ nonisolated enum MCPPaneCopy {
 /// room's register (direct and technical — R-13n-5; P-13n-1's boundary keeps
 /// the grant and ask sheets inside it); sentence case.
 nonisolated enum MCPAskCopy {
-    /// "claude-code asks to read “morning pages — oct 9”".
-    static func title(_ ask: MCPAsk) -> String {
+    /// "claude-code asks to read “morning pages — oct 9”". 13n-c U2: a book
+    /// (or wing) that shares its name with another offered place wears its
+    /// distinguisher (`PlaceLabels`, the one rule — mockup §1b's "claude-code
+    /// asks to suggest in “the adventures of sherlock holmes” (made 11 Oct)").
+    static func title(_ ask: MCPAsk, distinguisher: String? = nil) -> String {
         let verb: String = switch ask.rung {
         case .read: "read"
         case .suggest: "suggest in"
         case .writeNew: "write new in"
         case .edit: "edit in"
         }
+        let distinct = distinguisher.map { $0.isEmpty ? "" : " (\($0))" } ?? ""
         let target = ask.scopeKind == .wing
-            ? "the \(ask.title) wing" : "\u{201C}\(ask.title)\u{201D}"
+            ? "the \(ask.title) wing\(distinct)" : "\u{201C}\(ask.title)\u{201D}\(distinct)"
         return "\(ask.clientName) asks to \(verb) \(target)"
+    }
+
+    /// **R-AIR-3 on the ask road** (13n-c U2 — the U1 ladder's F2: every
+    /// book grant says its live reach, and an answer here MINTS one): her
+    /// clause under a BOOK ask, D-3's twin under a WING ask, nothing for a
+    /// note (one note). Every duration carries it (P-13nc-3) — so one line
+    /// above the buttons, never a word per button. PROVISIONAL wording
+    /// (P-13nc-U2-4), her copy pass.
+    static func reachLine(_ ask: MCPAsk) -> String? {
+        switch ask.scopeKind {
+        case .note: nil
+        case .book: "Any answer below grants it in \u{201C}\(ask.title)\u{201D}, including to future entries."
+        case .wing: "Any answer below grants it in the \(ask.title) wing, including notes added later."
+        }
     }
 
     /// The sentence under it: the fence's reason (mockup §4's journal line,

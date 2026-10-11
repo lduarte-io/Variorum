@@ -4,7 +4,8 @@
 //
 //  13n-b U1 — SETTINGS ▸ MCP, the resting shape (mockups §1–§2 as amended by
 //  R-13n-5/10 and R-13nb-5): the server toggle with its status, the
-//  CONNECTION REQUESTS (Approve… / Deny), the CLIENTS, SHARED WITH AI, the
+//  CONNECTION REQUESTS (Approve… / Deny), the CLIENTS, SHARED PLACES ("Shared
+//  with AI" until 13n-c U2's R-AIR-8), the
 //  OPEN BOOK switch, and CONNECT A CLIENT ("Copy setup command"). Each list
 //  shows a few rows and an "all N ›" road into the whole list — never one
 //  growing pile (R-13n-10). The pane holds no rule: it renders `MCPDoor`'s
@@ -19,8 +20,12 @@ import VariorumCore
 
 struct MCPPane: View {
     let door: MCPDoor
-    @State private var granting: GrantTarget?
+    @State private var granting: MCPGrantOpening?
     @State private var full: FullList?
+    /// 13n-c U2 — the shared rows' distinguishers (the ONE rule over the
+    /// offered books — the same label the sheet's picker shows), read once per
+    /// change of the shared set, never per render.
+    @State private var distinguishers: (books: [String: String], wings: [String: String]) = ([:], [:])
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -34,15 +39,6 @@ struct MCPPane: View {
     private var tokens: VoiceTokens { themeStore?.tokens(for: scheme) ?? .fallback(for: scheme) }
 
     private static func verb(_ id: CapabilityID) -> String { CapabilityRegistry.capability(id).verb }
-
-    /// Who the grant sheet is for, and whether it is a first approval.
-    struct GrantTarget: Identifiable {
-        var id: String { client.id }
-        let client: MCPClient
-        let approving: Bool
-        /// Connected right now — "while connected" is offered only then.
-        var connected = false
-    }
 
     enum FullList: String, Identifiable {
         case requests, clients, shared, activity
@@ -84,6 +80,9 @@ struct MCPPane: View {
                     ForEach(door.snapshot.clients) { row in clientRow(row) }
                     allRoad(door.snapshot.clientCount, shown: door.snapshot.clients.count, .clients)
                 }
+                // 13n-c U2 — L1 (the VX-156 brief §12; mockup §11): the A-4
+                // boundary, said where clients are listed.
+                quiet(MCPPaneCopy.clientBoundary)
             }
             Section(MCPPaneCopy.sharedSection) {
                 if door.snapshot.shared.isEmpty {
@@ -93,6 +92,7 @@ struct MCPPane: View {
                     allRoad(door.snapshot.sharedCount, shown: door.snapshot.shared.count, .shared)
                 }
             }
+            .task(id: door.snapshot.shared.map(\.id)) { distinguishers = await door.placeDistinguishers() }
             Section(MCPPaneCopy.openBookSection) {
                 Toggle(SettingsCatalog.title("mcpOpenBook"), isOn: Binding(
                     get: { door.snapshot.openBook },
@@ -132,8 +132,8 @@ struct MCPPane: View {
         }
         .formStyle(.grouped)
         .scrollContentBackground(.hidden)
-        .sheet(item: $granting) { target in
-            MCPGrantSheet(door: door, target: target) { granting = nil }
+        .sheet(item: $granting) { opening in
+            MCPGrantSheet(door: door, opening: opening) { granting = nil }
         }
         .sheet(item: $full) { list in
             MCPFullListSheet(door: door, list: list, tokens: tokens) { full = nil } grant: { target in
@@ -153,8 +153,7 @@ struct MCPPane: View {
             quiet(MCPPaneCopy.requestDetail(firstSeen: Self.relative(request.firstSeenAt)))
             HStack(spacing: 10) {
                 Button(Self.verb(.mcpApproveClient)) {
-                    granting = GrantTarget(
-                        client: request, approving: true, connected: door.connected.contains(request.name))
+                    granting = MCPGrantOpening(client: request, approving: true)
                 }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                 Button(Self.verb(.mcpDenyClient)) { door.deny(request.id) }
@@ -167,16 +166,28 @@ struct MCPPane: View {
 
     private func clientRow(_ row: MCPDoor.ClientRow) -> some View {
         MCPClientRow(row: row, connected: door.connected.contains(row.client.name), tokens: tokens) {
-            granting = GrantTarget(
-                client: row.client, approving: row.client.state != .approved,
-                connected: door.connected.contains(row.client.name))
+            granting = MCPGrantOpening(client: row.client, approving: row.client.state != .approved)
         } revoke: {
             door.deny(row.client.id)
         }
     }
 
     private func sharedRow(_ row: MCPSharedRow) -> some View {
-        MCPSharedRowView(row: row, tokens: tokens) { door.revoke(grantID: row.grant.id) }
+        MCPSharedRowView(
+            row: row, distinguisher: Self.distinguisher(row, distinguishers), tokens: tokens
+        ) { door.revoke(grantID: row.grant.id) }
+    }
+
+    /// A shared row's distinguisher — the ONE rule's answer for its book or
+    /// wing (a note row wears none — its picker told it apart by snippet).
+    static func distinguisher(
+        _ row: MCPSharedRow, _ labels: (books: [String: String], wings: [String: String])
+    ) -> String? {
+        switch row.grant.scopeKind {
+        case .note: nil
+        case .book: labels.books[row.grant.scopeID]
+        case .wing: labels.wings[row.grant.scopeID]
+        }
     }
 
     @ViewBuilder
@@ -229,7 +240,10 @@ struct MCPClientRow: View {
         switch row.client.state {
         case .denied: parts.append(MCPPaneCopy.deniedState)
         case .approved:
-            parts.append(row.liveGrantCount == 0 ? MCPPaneCopy.noAccess : MCPPaneCopy.reads(row.liveGrantCount))
+            // 13n-c U2 (R2-3): an inert grant is said as inert, never shared.
+            parts.append(row.liveGrantCount == 0 && row.inertGrantCount == 0
+                ? MCPPaneCopy.noAccess
+                : MCPPaneCopy.reads(row.liveGrantCount, inert: row.inertGrantCount))
         case .pending: break
         }
         return parts.joined(separator: " \u{00B7} ")
@@ -260,9 +274,12 @@ struct MCPClientRow: View {
     }
 }
 
-/// One live grant in SHARED WITH AI.
+/// One live grant in SHARED PLACES (13n-c U2: its distinguisher when its
+/// name collides — mockup §1b's pane rows; INERT said when its target is
+/// fenced since — R2-3, P-13nb-U2-3).
 struct MCPSharedRowView: View {
     let row: MCPSharedRow
+    var distinguisher: String? = nil
     let tokens: VoiceTokens
     let revoke: () -> Void
 
@@ -272,6 +289,7 @@ struct MCPSharedRowView: View {
                 HStack(spacing: 6) {
                     Text(row.targetTitle ?? MCPPaneCopy.missingTarget)
                         .font(.callout.weight(.semibold))
+                        .foregroundStyle(row.inertFence == nil ? .primary : .secondary)
                         .lineLimit(1)
                     Text(MCPPaneCopy.kindChip(row.grant.scopeKind))
                         .font(.caption2)
@@ -279,11 +297,26 @@ struct MCPSharedRowView: View {
                         .lineLimit(1)
                         .padding(.horizontal, 5)
                         .overlay(RoundedRectangle(cornerRadius: 4).stroke(tokens.seam, lineWidth: 1))
+                    if let distinguisher {
+                        Text(distinguisher)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .fixedSize()
+                    }
                 }
                 Text(MCPPaneCopy.sharedDetail(client: row.clientName, rung: row.grant.rung, duration: row.grant.duration))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+                if let fence = row.inertFence {
+                    Text(MCPPaneCopy.inertDetail(fence, kind: row.grant.scopeKind))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .italic()
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             Spacer(minLength: 0)
             Button(CapabilityRegistry.capability(.mcpRevokeGrant).verb, action: revoke)
@@ -318,11 +351,12 @@ struct MCPFullListSheet: View {
     let list: MCPPane.FullList
     let tokens: VoiceTokens
     let done: () -> Void
-    let grant: (MCPPane.GrantTarget) -> Void
+    let grant: (MCPGrantOpening) -> Void
     @State private var requests: [MCPClient] = []
     @State private var clients: [MCPDoor.ClientRow] = []
     @State private var shared: [MCPSharedRow] = []
     @State private var activity: [MCPActivityFace.Line] = []
+    @State private var distinguishers: (books: [String: String], wings: [String: String]) = ([:], [:])
 
     private var title: String {
         switch list {
@@ -346,9 +380,7 @@ struct MCPFullListSheet: View {
                             Text(MCPPaneCopy.requestTitle(request.name)).lineLimit(1)
                             Spacer(minLength: 0)
                             Button(CapabilityRegistry.capability(.mcpApproveClient).verb) {
-                                grant(MCPPane.GrantTarget(
-                                    client: request, approving: true,
-                                    connected: door.connected.contains(request.name)))
+                                grant(MCPGrantOpening(client: request, approving: true))
                             }
                             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                             Button(CapabilityRegistry.capability(.mcpDenyClient).verb) {
@@ -360,16 +392,16 @@ struct MCPFullListSheet: View {
                 case .clients:
                     ForEach(clients) { row in
                         MCPClientRow(row: row, connected: door.connected.contains(row.client.name), tokens: tokens) {
-                            grant(MCPPane.GrantTarget(
-                                client: row.client, approving: row.client.state != .approved,
-                                connected: door.connected.contains(row.client.name)))
+                            grant(MCPGrantOpening(client: row.client, approving: row.client.state != .approved))
                         } revoke: {
                             door.deny(row.client.id)
                         }
                     }
                 case .shared:
                     ForEach(shared) { row in
-                        MCPSharedRowView(row: row, tokens: tokens) {
+                        MCPSharedRowView(
+                            row: row, distinguisher: MCPPane.distinguisher(row, distinguishers), tokens: tokens
+                        ) {
                             door.revoke(grantID: row.grant.id)
                         }
                     }
@@ -396,7 +428,9 @@ struct MCPFullListSheet: View {
         switch list {
         case .requests: requests = await door.allPending()
         case .clients: clients = await door.allClients()
-        case .shared: shared = await door.allShared()
+        case .shared:
+            shared = await door.allShared()
+            distinguishers = await door.placeDistinguishers()
         case .activity: activity = await door.allActivity()
         }
     }
