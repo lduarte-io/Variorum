@@ -14,14 +14,22 @@
 //  the coarse log's newest lines (a run of one client's same act on one
 //  target reads as one line with a count) and its own "all N ›" road.
 //
+//  13n-c U4 — WAITING (arrival X, the VX-156 brief §5): the asks a client
+//  raised past its grant wait here, above Connection requests, newest first,
+//  each answered by her press (Answer… opens its sheet); ⌥⌘, opens this pane
+//  scrolled to them. Nothing in the app presents an ask by itself.
+//
 
 import SwiftUI
 import VariorumCore
+import VariorumMCP
 
 struct MCPPane: View {
     let door: MCPDoor
     @State private var granting: MCPGrantOpening?
     @State private var full: FullList?
+    /// 13n-c U4 — the ask Waiting's Answer… opened (her press).
+    @State private var answering: String?
     /// 13n-c U2 — the shared rows' distinguishers (the ONE rule over the
     /// offered books — the same label the sheet's picker shows), read once per
     /// change of the shared set, never per render.
@@ -34,18 +42,50 @@ struct MCPPane: View {
     static let surfaceCapabilities: [CapabilityID] = [
         .mcpApproveClient, .mcpDenyClient, .mcpChangeClientAccess, .mcpRevokeClient,
         .mcpRevokeGrant, .mcpCopySetupCommand, .mcpGrantAccess,
+        // 13n-c U4: Waiting's Answer… (arrival X — the brief §5).
+        .mcpOpenAsk,
     ]
+
+    /// 13n-c U4 — where ⌥⌘, lands the pane when an ask waits.
+    static let waitingAnchor = "mcp-waiting"
+
+    /// ⌥⌘,'s scroll, decided purely: a fresh request with something waiting.
+    nonisolated static func scrollsToWaiting(request: Int, scrolled: Int, waitingCount: Int) -> Bool {
+        request > scrolled && waitingCount > 0
+    }
 
     private var tokens: VoiceTokens { themeStore?.tokens(for: scheme) ?? .fallback(for: scheme) }
 
     private static func verb(_ id: CapabilityID) -> String { CapabilityRegistry.capability(id).verb }
 
     enum FullList: String, Identifiable {
-        case requests, clients, shared, activity
+        case waiting, requests, clients, shared, activity
         var id: String { rawValue }
     }
 
     var body: some View {
+        ScrollViewReader { proxy in
+            form
+                .onAppear { landAtWaiting(proxy) }
+                .onChange(of: door.settingsRequest) { _, _ in landAtWaiting(proxy) }
+        }
+    }
+
+    /// ⌥⌘, — scrolled to Waiting when an ask waits (each request once).
+    private func landAtWaiting(_ proxy: ScrollViewProxy) {
+        let request = door.settingsRequest
+        guard request > door.settingsRequestScrolled else { return }
+        let scrolls = Self.scrollsToWaiting(
+            request: request, scrolled: door.settingsRequestScrolled, waitingCount: door.waiting.count)
+        door.settingsRequestScrolled = request
+        guard scrolls else { return }
+        Task { @MainActor in
+            await Task.yield()
+            withAnimation { proxy.scrollTo(Self.waitingAnchor, anchor: .top) }
+        }
+    }
+
+    private var form: some View {
         Form {
             Section {
                 Toggle(SettingsCatalog.title("mcpServer"), isOn: Binding(
@@ -66,6 +106,18 @@ struct MCPPane: View {
                 if let note = door.note, note.place == .top {
                     caption(note.text)
                 }
+            }
+            // 13n-c U4 — WAITING (arrival X; mockup §4/§5): the asks a client
+            // raised past its grant, newest first, each answered by HER press
+            // (Answer… opens its sheet here). Above the requests: it is the
+            // list that holds a client's work up.
+            if !door.waiting.isEmpty {
+                Section(MCPPaneCopy.waitingSection) {
+                    ForEach(door.waiting.prefix(MCPDoor.waitingCap)) { entry in waitingRow(entry) }
+                    allRoad(door.waiting.count, shown: min(door.waiting.count, MCPDoor.waitingCap), .waiting)
+                }
+                .id(Self.waitingAnchor)
+                .task(id: door.waiting.map(\.id)) { distinguishers = await door.placeDistinguishers() }
             }
             if door.snapshot.pendingCount > 0 {
                 Section(MCPPaneCopy.requestsSection) {
@@ -142,7 +194,35 @@ struct MCPPane: View {
             MCPFullListSheet(door: door, list: list, tokens: tokens) { full = nil } grant: { target in
                 full = nil
                 granting = target
+            } answer: { id in
+                full = nil
+                answering = id
             }
+        }
+        // 13n-c U4: the ask Waiting's Answer… opened (closes by itself once
+        // the ask is answered anywhere).
+        .mcpAskSheet(door: door, askID: $answering)
+    }
+
+    // MARK: - Waiting (13n-c U4)
+
+    private func waitingRow(_ entry: MCPAskQueue.Entry) -> some View {
+        MCPWaitingRowView(
+            entry: entry, distinguisher: Self.distinguisher(entry.ask, distinguishers), tokens: tokens
+        ) {
+            answering = entry.id
+        }
+    }
+
+    /// An ask's distinguisher — the ONE rule's answer for its book or wing
+    /// (a note ask wears none, as a note row does).
+    static func distinguisher(
+        _ ask: MCPAsk, _ labels: (books: [String: String], wings: [String: String])
+    ) -> String? {
+        switch ask.scopeKind {
+        case .note: nil
+        case .book: labels.books[ask.scopeID]
+        case .wing: labels.wings[ask.scopeID]
         }
     }
 
@@ -226,10 +306,47 @@ struct MCPPane: View {
     /// "a minute ago", "yesterday", … from a stored ISO stamp.
     static func relative(_ stamp: String) -> String {
         guard let date = DateFormatter.variorumISO8601.date(from: stamp) else { return stamp }
+        return relative(date)
+    }
+
+    /// 13n-c U4 — the same words from a date (Waiting's age).
+    static func relative(_ date: Date, now: Date = Date()) -> String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .full
         formatter.dateTimeStyle = .named
-        return formatter.localizedString(for: date, relativeTo: Date())
+        return formatter.localizedString(for: date, relativeTo: now)
+    }
+}
+
+/// **One waiting ask in Settings ▸ MCP ▸ Waiting** (13n-c U4; mockup §4's
+/// "claude-code asks to suggest in “the lightning thief” · 2 minutes ago ·
+/// Answer…"): the ask's own title (its place wearing the one rule's
+/// distinguisher), its age, and Answer… — which opens its sheet.
+struct MCPWaitingRowView: View {
+    let entry: MCPAskQueue.Entry
+    var distinguisher: String? = nil
+    let tokens: VoiceTokens
+    let answer: () -> Void
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(MCPAskCopy.title(entry.ask, distinguisher: distinguisher))
+                    .font(.callout.weight(.semibold))
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                // The age reads live (every half-minute — never per frame).
+                SwiftUI.TimelineView(.periodic(from: .now, by: 30)) { context in
+                    Text(MCPPane.relative(entry.askedAt, now: context.date))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            Spacer(minLength: 0)
+            Button(CapabilityRegistry.capability(.mcpOpenAsk).verb, action: answer)
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+        }
     }
 }
 
@@ -410,6 +527,8 @@ struct MCPFullListSheet: View {
     let tokens: VoiceTokens
     let done: () -> Void
     let grant: (MCPGrantOpening) -> Void
+    /// 13n-c U4: Waiting's Answer… (opens the ask's sheet in the pane).
+    var answer: (String) -> Void = { _ in }
     @State private var requests: [MCPClient] = []
     @State private var clients: [MCPDoor.ClientRow] = []
     @State private var shared: [MCPSharedGroup] = []
@@ -418,6 +537,7 @@ struct MCPFullListSheet: View {
 
     private var title: String {
         switch list {
+        case .waiting: MCPPaneCopy.waitingSection
         case .requests: MCPPaneCopy.requestsSection
         case .clients: MCPPaneCopy.clientsSection
         case .shared: MCPPaneCopy.sharedSection
@@ -432,6 +552,16 @@ struct MCPFullListSheet: View {
                 .lineLimit(1)
             List {
                 switch list {
+                case .waiting:
+                    // Live from the queue (in memory — no read): newest first.
+                    ForEach(door.waiting) { entry in
+                        MCPWaitingRowView(
+                            entry: entry, distinguisher: MCPPane.distinguisher(entry.ask, distinguishers),
+                            tokens: tokens
+                        ) {
+                            answer(entry.id)
+                        }
+                    }
                 case .requests:
                     ForEach(requests) { request in
                         HStack {
@@ -492,6 +622,7 @@ struct MCPFullListSheet: View {
 
     private func reload() async {
         switch list {
+        case .waiting: distinguishers = await door.placeDistinguishers()
         case .requests: requests = await door.allPending()
         case .clients: clients = await door.allClients()
         case .shared:

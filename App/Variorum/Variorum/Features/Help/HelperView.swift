@@ -93,16 +93,34 @@ struct HelperView: View {
             ("⌘Z", "text undo (typing only)"),
             ("⌥⌘Z", "structural undo (splits, merges, moves — never text)"),
             ("⇧⌥⌘Z", "structural redo — puts back what ⌥⌘Z undid"),
-            // 13n-b U4 (AF-11 F-2): the offer door's keyboard road.
-            ("⌥⌘O", "show the AI's last change (what a connected client last wrote)"),
-            // 13n-c U3 (the brief §4, D1): the share chord. (U4 gathers the
-            // MCP rows into their own group.)
-            ("⌥⌘A", "share the note you're in with the client you granted last \u{2014} "
-                + "while it's connected, else once (never always)"),
+            // (⌥⌘O and ⌥⌘A moved to the MCP group below — 13n-c U4.)
             ("⌃⌘↑ / ⌃⌘↓", "jump to the previous / next block"),
             ("⌘⇧'", "the block's comments"),
             ("⌥⌘C", "callout frame on this block (again to remove it)"),
             ("⌘⇧B", "toggle block seams (dotted lines between blocks)"),
+        ]),
+        // 13n-c U4 (the brief's item 5; her kickoff: "make sure the keyboard
+        // shortcuts pane is updated") — THE MCP GROUP: every chord the MCP
+        // door answers to, together, in the order she meets them (where it is
+        // set up and where asks wait · sharing the note she is in · seeing
+        // and undoing what a client did). Settings ▸ Shortcuts and its search
+        // read this same list.
+        ShortcutGroup(title: "MCP", items: [
+            ("⌥⌘,", "MCP settings \u{2014} opens at Waiting when a client's ask waits "
+                + "for your answer"),
+            // 13n-c U3 (the brief §4, D1): the share chord.
+            ("⌥⌘A", "share the note you're in with the client you granted last \u{2014} "
+                + "until it disconnects if it's connected, else once (never always)"),
+            // 13n-b U4 (AF-11 F-2): the offer door's keyboard road.
+            ("⌥⌘O", "show the AI's last change (what a connected client last wrote)"),
+            // The client-named undo (13n-b, AF-3): the one structural undo,
+            // said here because an AI's change is where she reaches for it.
+            ("⌥⌘Z", "undo a client's change \u{2014} the Edit menu names the client "
+                + "(\u{201C}Undo claude-code's take\u{201D})"),
+            // 13n-c U4 (arrival X): the one face an ask has outside Settings.
+            ("the filled icon on a note, book or wing", "a client's ask waits there \u{2014} "
+                + "hover to see who and what, press to answer it (nothing ever pops up "
+                + "by itself)"),
         ]),
         ShortcutGroup(title: "Structure", items: [
             ("⌘⇧D", "divide the block at the cursor — a block with takes cuts "
@@ -179,6 +197,10 @@ struct HelperView: View {
             ("⌘K", "find anything — notes, books, blocks, commands (not body text)"),
             ("⌘N", "new note"),
             ("⌘J", "today's journal entry"),
+            // 13n-c U4 — R-AIR-15 (her ratified chord, VX-157).
+            ("⌘L", "switch wing \u{2014} type a few letters and \u{23CE}, or hold \u{2318} "
+                + "and tap L to step, release to go; clicking the wing's name in the "
+                + "Bookcase or Library masthead steps to the next one"),
             ("⌘,", "settings (voice, seams, takes options, tags)"),
             ("⌘/", "this helper"),
         ]),

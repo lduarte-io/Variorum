@@ -99,6 +99,9 @@ struct EditorCommands: Commands {
         .showLastAIChange,
         // 13n-c U3: ⌥⌘A — share the note you're in, beside the AI pair.
         .mcpShareThisNote,
+        // 13n-c U4: ⌥⌘, — MCP Settings… (the app menu, under Settings…) and
+        // ⌘L — Switch Wing… (the View menu, beside ⌘K).
+        .mcpSettings, .switchWing,
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake,
         // 13j J4/J4b: the two ceremony doors, beside the verbs they used to
         // be the default of.
@@ -189,6 +192,30 @@ struct EditorCommands: Commands {
         //   · the platform: ⌘A (Select All) is the system's; ⌥⌘A is not
         //     reserved by macOS (the brief §13's reserved list).
         case .mcpShareThisNote: ("a", [.command, .option])
+        // 13n-c U4 (the VX-156 brief §6/§13; ⌥⌘, recommended and nodded at her
+        // round 2; ⌘L her R-AIR-15, "i like Command L"). THE COLLISION SWEEP,
+        // RE-RUN AT THE TIP (2026-10-11, on `a41efc1b` — the U4 record's
+        // sweep, verbatim in kind) — ⌥⌘, AND BARE ⌘L ARE FREE:
+        //   · this table: the only `l` chord is ⇧⌘L (Save Choices as Lens); no
+        //     `,` chord at all;
+        //   · every `.keyboardShortcut(` call site in `Variorum/` and
+        //     `Shared/`: `l` only as ⇧⌘L and ⌃⌘L (Lock Library Now); `,`
+        //     nowhere (⌘, is SwiftUI's own Settings item, untouched);
+        //   · every `NSMenuItem` keyEquivalent: none set (all "");
+        //   · the overrides: `EditorTextView.performKeyEquivalent` (⌘S + the
+        //     non-consuming ⌘Z/⇧⌘Z hint arm) and the `keyDown` trio (⇧⏎; the
+        //     capture box's ⏎/⇧⏎; the flight's deferral) — no `l`, no `,`;
+        //   · the local monitors: `PageTurnKeys` (unmodified ←/→),
+        //     `CommentsPanel` (⌘⏎, ⎋), `DivideWSheet` (passes every ⌘/⌃
+        //     event), `CalmAsks` / `ProtectionController` (observe only),
+        //     `PressReporter` / `PaneFocusCatcher` (mouse) — and U4's own
+        //     `WingSwitcherKeys`, which takes ⌘L ONLY while the switcher it
+        //     belongs to is up (the held-⌘ cycle);
+        //   · the system hot keys ([.quickNote], ⌃⌥⌘N) and the registry's
+        //     declared labels (⌘⇧L only): no ⌘L, no ⌥⌘,;
+        //   · the platform: neither is reserved (the brief §13's list).
+        case .mcpSettings: (",", [.command, .option])
+        case .switchWing: ("l", .command)
         // 13d batch 4 (A14, her row verbatim: "⌘⇧Enter = new block").
         // ⌘⇧⏎ SUPERSEDES the 13b-4D ⌥⌘N: one act declares one key (P-1),
         // every shortcut is a menu item (R73/R91/R93), and the sweep found
@@ -352,6 +379,17 @@ struct EditorCommands: Commands {
                     .disabled(!updates.canCheckNow)
             }
         }
+        // 13n-c U4 — ⌥⌘, "MCP Settings…" (the VX-156 brief §6, mockup §5):
+        // under Settings…, Settings opened at MCP — at its Waiting list when
+        // an ask waits (`MCPDoor.requestSettings`, adopted by Settings and
+        // answered by the pane). Always acts: the pane is always there.
+        CommandGroup(after: .appSettings) {
+            Button(verb(.mcpSettings)) {
+                mcp.requestSettings()
+                openSettings()
+            }
+            .keyboardShortcut(",", modifiers: [.command, .option])
+        }
         // Phase 13 (B2): ⌘N = New Post (R41) + the dated home's shortcut.
         CommandGroup(replacing: .newItem) {
             // 13f cold review R1-3: the creation acts land on the window
@@ -428,6 +466,14 @@ struct EditorCommands: Commands {
                 .disabled(!enabled(.toggleSidebar))
             Button(verb(.findAnything)) { windows.creationRouter()?.paletteRequested = true }
                 .keyboardShortcut("k", modifiers: .command)
+                .disabled(!canReachCreationTarget)
+            // 13n-c U4 — ⌘L, THE WING SWITCHER (R-AIR-15): ⌘K's twin in
+            // where it opens (the window that can show it, raised) and how
+            // (a request the window adopts). While the switcher is up, a
+            // held-⌘ L is the switcher's own (its monitor cycles it); a
+            // request that reaches the window anyway cycles too.
+            Button(verb(.switchWing)) { windows.creationRouter()?.wingSwitcherRequested = true }
+                .keyboardShortcut("l", modifiers: .command)
                 .disabled(!canReachCreationTarget)
         }
         // Row 67 (the Act 10 correction round): this group was anchored
@@ -1042,6 +1088,8 @@ struct EditorCommands: Commands {
     }
 
     @Environment(\.openWindow) private var openWindow
+    /// 13n-c U4: ⌥⌘, opens the Settings window (at MCP).
+    @Environment(\.openSettings) private var openSettings
 
     /// The two `WindowGroup` ids the app opens by name (13f batch 5b).
     static let mainWindowGroupID = "variorum-main"

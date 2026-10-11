@@ -108,8 +108,9 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         // 13n-b U3 walk finding W-1: "what they can read" stopped being
         // true when the write rungs landed (U2) — a client may change what
         // it is granted now, up to edit.
-        case .mcp: "The local MCP server: which clients may connect, what each may read and change, and the "
-            + "command that sets up Claude Code."
+        // 13n-c U4: + the asks waiting for an answer (arrival X).
+        case .mcp: "The local MCP server: which clients may connect, what each may read and change, "
+            + "the asks waiting for your answer, and the command that sets up Claude Code."
         case .protection: "The passphrase, how the library locks, and the ways back in."
         case .dataSafety: "Backups, how fresh they are, and what restoring one does."
         case .diagnostics: "Crash reports \u{2014} off unless you turn them on, and never sent without you."
@@ -296,6 +297,15 @@ nonisolated enum SettingsCatalog {
                 + "readable until you grant it. This Mac only.",
             keywords: ["mcp", "ai", "claude", "claude code", "agent", "llm", "model context protocol",
                        "server", "connect", "client", "share", "grant", "socket"]),
+        // 13n-c U4 — WAITING (arrival X): where a client's ask waits besides
+        // its icon; ⌥⌘, opens the pane there.
+        SettingsRow(
+            id: "mcpWaiting", pane: .mcp, title: MCPPaneCopy.waitingSection,
+            blurb: "A client's ask past what you shared waits here, newest first, and at its icon on "
+                + "the note, book or wing it names \u{2014} nothing pops up by itself. \u{2325}\u{2318}, "
+                + "opens it.",
+            keywords: ["waiting", "ask", "asks", "pending", "answer", "request", "mcp", "ai",
+                       "client", "permission"]),
         SettingsRow(
             id: "mcpOpenBook", pane: .mcp, title: MCPPaneCopy.openBookTitle,
             // 13n-c U1 (R-AIR-1, J8): only THE daily Journal and anything

@@ -89,6 +89,35 @@ final class WingsModel {
         session.wing.switchTo(id)
     }
 
+    // MARK: - 13n-c U4 — ⌘L and the cycling masthead (R-AIR-5/15)
+
+    /// The switcher's rows in the pure brain's shape (Home first).
+    var switcherRows: [WingSwitcherBrain.Row] {
+        rows.map { WingSwitcherBrain.Row(id: $0.id, name: $0.name) }
+    }
+
+    /// A switch made by the SWITCHER's new doors — ⌘L's commit and the
+    /// masthead word's cycle — SPEAKS the existing "Now in …" receipt (the
+    /// cross-wing follow's, `WingFollow.nowIn`): a cycle is blind until it is
+    /// said. The in-menu picker keeps 13i-d's silence (there she reads the
+    /// name she picked). Switching to where she already is does nothing.
+    func switchSaying(_ id: String) {
+        guard id != currentID else { return }
+        switchTo(id)
+        session.status.receipt(WingFollow.nowIn(name(of: id), isHome: id.isEmpty))
+    }
+
+    /// The masthead's cycling click goes here (nil with one wing — the word
+    /// is then no cycle door, P-2).
+    var nextWing: WingSwitcherBrain.Row? {
+        WingSwitcherBrain.next(after: currentID, in: switcherRows)
+    }
+
+    /// The masthead word, clicked without typing: the next wing, said.
+    func cycle() {
+        if let nextWing { switchSaying(nextWing.id) }
+    }
+
     /// New Wing… — named at birth (the door guard refuses Home's name and a
     /// live wing's, E13's shape), then switched to.
     @discardableResult
@@ -221,8 +250,34 @@ nonisolated enum WingCopy {
     static let deleteWingVerb = "Delete Wing\u{2026}"
     static let moveToWingVerb = "Move to Wing"
     static let copyToWingVerb = "Copy to Wing"
-    static let unavailableNote = "Wings live at the top of the Bookcase \u{2014} "
-        + "\u{201C}Bookcase \u{00B7} \(WingWords.home) \u{25BE}\u{201D}."
+    // 13n-c U4 (round 5 — the switcher joins the Library masthead; ⌘L, R-AIR-15):
+    // the note says where wings live now, both mastheads and the chord.
+    static let unavailableNote = "Wings live at the top of the Bookcase and the Library \u{2014} "
+        + "\u{201C}Bookcase \u{00B7} \(WingWords.home) \u{25BE}\u{201D} \u{2014} and \u{2318}L switches between them."
+
+    // MARK: - 13n-c U4 — ⌘L and the cycling masthead (R-AIR-5/15; round 5)
+
+    /// ⌘L's menu verb (the View menu; the registry's `.switchWing`).
+    static let switchWingVerb = "Switch Wing\u{2026}"
+    /// THE SWITCHER's one quiet line (round 5, her ruling: the wing-isolation
+    /// UI makes clear Snippets is the one room shared across wings).
+    static let snippetsShared = "Snippets is the one room every wing shares."
+    /// ⌘L's field (mockup §6: type a few letters).
+    static let switcherPrompt = "Switch to a wing"
+    /// ⌘L's foot (mockup §6's, with her held-⌘ cycling said).
+    static func switcherFoot(current: String) -> String {
+        "\(current) is the current wing \u{00B7} \u{23CE} switches \u{00B7} hold \u{2318} and tap L to "
+            + "step \u{00B7} esc closes"
+    }
+    static let noWingMatches = "No wing has that name."
+    /// The masthead word's hover where it CYCLES (two or more wings).
+    static func cycleHelp(next: String) -> String {
+        "Next wing: \u{201C}\(next)\u{201D} \u{2014} or \u{2318}L to choose one"
+    }
+    /// The ▾ beside the cycling word: the list and the wing acts.
+    static let menuDoorHelp = "Every wing \u{2014} switch to one, or make, rename, move or delete a wing"
+    /// The wing whose row the switcher marks.
+    static let currentMark = "current"
     static let noteUnavailableNote = "Moving or copying a note to another wing acts on a "
         + "note \u{2014} right-click its row in the Library or the Pool, or open it and use "
         + "its note \u{25BE} menu."

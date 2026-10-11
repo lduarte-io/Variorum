@@ -949,4 +949,17 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// client row's additive Change…).
     case mcpShareHere, mcpShareNotes, mcpShareBook, mcpShareThisNote
     case mcpShowSharing, mcpChangeGrant
+    /// 13n-c U4 — ASKS WAIT QUIETLY + THE KEYBOARD (VX-156 items 4/5, VX-157;
+    /// R-AIR-6/15). `mcpOpenAsk` — the pending-ask GLYPH's press (on the thing
+    /// an ask names) and Settings ▸ MCP ▸ Waiting's Answer…, each opening THAT
+    /// ask's sheet (`.surface` — it carries its ask; arrival X: an ask never
+    /// opens itself). `mcpSettings` — ⌥⌘, "MCP Settings…" in the app menu
+    /// (`.menuBar`): Settings at MCP, at Waiting when an ask waits.
+    /// `switchWing` — ⌘L "Switch Wing…" (`.menuBar`, app-wide — the type-to-
+    /// filter switcher with held-⌘ L cycling) and the masthead's wing word
+    /// (`.surface` — a click without typing CYCLES to the next wing, her
+    /// R-AIR-5/15). The 13i-d note that switching "stays undeclared" held for
+    /// the in-menu picker (a view choice); a CHORD and a cycling door are
+    /// doors, and P-1 declares doors.
+    case mcpOpenAsk, mcpSettings, switchWing
 }

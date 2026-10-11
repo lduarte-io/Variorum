@@ -13,8 +13,15 @@
 //
 //  13n-c U2: the title wears the asked place's distinguisher (the one rule —
 //  mockup §1b), and a BOOK or WING ask says R-AIR-3's live reach above the
-//  answers (the U1 ladder's F2 — every book grant says it). U4 retires the
-//  sheet's self-presenting arrival; its face stays.
+//  answers (the U1 ladder's F2 — every book grant says it).
+//
+//  13n-c U4 — ARRIVAL X (the brief §5; P-13nb-U2-9's arrival superseded):
+//  this sheet NEVER presents itself. An ask waits at its pending glyph on the
+//  thing it names and in Settings ▸ MCP ▸ Waiting; the sheet opens only on
+//  HER press — in the window she pressed in (`mcpAskSheet(door:askID:)`, the
+//  window's host) or in the pane (Waiting's Answer…). While it is open the
+//  cap never forgets its ask, and it closes by itself if the ask is answered
+//  elsewhere first (one ask never mints two grants — T-U4-5).
 //
 
 import SwiftUI
@@ -80,6 +87,25 @@ struct MCPAskSheet: View {
             case .book: labels.books[ask.scopeID]
             case .wing: labels.wings[ask.scopeID]
             }
+        }
+        // 13n-c U4: open by her press — the cap must not forget it while she
+        // reads it.
+        .onAppear { door.beginAnswering(ask.id) }
+        .onDisappear { door.endAnswering(ask.id) }
+    }
+}
+
+extension View {
+    /// **13n-c U4 — a host's ask sheet** (a window's, the pane's): THE ask her
+    /// press opened, presented while it still WAITS — answered anywhere, it
+    /// closes here too (the getter reads the queue). Closing it any other way
+    /// clears the request; the ask keeps waiting.
+    func mcpAskSheet(door: MCPDoor?, askID: Binding<String?>) -> some View {
+        sheet(item: Binding(
+            get: { askID.wrappedValue.flatMap { id in door?.ask(id) } },
+            set: { if $0 == nil { askID.wrappedValue = nil } })
+        ) { ask in
+            if let door { MCPAskSheet(door: door, ask: ask) }
         }
     }
 }

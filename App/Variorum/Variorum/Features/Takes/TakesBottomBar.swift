@@ -400,6 +400,9 @@ struct TakesBottomBar: View {
     /// (13g batch 7, R6-2 — Write's bar's grammar, here).
     @ViewBuilder private var postCluster: some View {
         noteMenu
+        // 13n-c U4 (the brief §5 — "the open note's bottom bar, beside the
+        // note ▾ menu"): an ask waiting on this note; nothing when none.
+        MCPAskGlyph(.note(model.postID), tokens: tokens)
         // 13b 4D (N35 + S4-33, her rider verbatim: "the comments button
         // should be there in takes the way it is in write, on the bottom
         // bar") — parity of PROMINENCE, not just existence: the same

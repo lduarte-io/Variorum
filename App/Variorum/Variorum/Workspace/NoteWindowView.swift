@@ -56,6 +56,8 @@ struct NoteWindowView: View {
     @State private var window: NSWindow?
     @Environment(\.colorScheme) private var scheme
     @State private var mcpGrantSheet: MCPGrantOpening?
+    /// 13n-c U4 — the ask HER press opened in this window (RootView's twin).
+    @State private var mcpAskSheetID: String?
 
     init(session: AppSession, windows: WindowRegistry, postID: String, mcp: MCPDoor? = nil) {
         self.session = session
@@ -78,7 +80,9 @@ struct NoteWindowView: View {
             sheet: { opening, done in
                 AnyView(MCPGrantSheet(door: mcp, opening: opening, done: done).environment(theme))
             },
-            revoke: { await mcp.revokeFromReceipt($0) })
+            revoke: { await mcp.revokeFromReceipt($0) },
+            // 13n-c U4 — ARRIVAL X: a pending glyph's press opens its ask here.
+            answerAsk: { router.mcpAskRequest = $0 })
     }
 
     /// THE MOUNT RULE, the same one fork the shell consults — with the
@@ -144,6 +148,15 @@ struct NoteWindowView: View {
             guard let request else { return }
             mcpGrantSheet = request
             router.mcpGrantRequest = nil
+        }
+        // 13n-c U4 — the waiting asks (the in-note indicator's pending leg and
+        // the bar's note ▾ glyph read them) and the ask her press opened.
+        .environment(\.mcpAskBoard, mcp?.askBoard ?? .empty)
+        .mcpAskSheet(door: mcp, askID: $mcpAskSheetID)
+        .onChange(of: router.mcpAskRequest) { _, request in
+            guard let request else { return }
+            mcpAskSheetID = request
+            router.mcpAskRequest = nil
         }
         .overlay(alignment: .bottom) {
             if let item = session.status.current {

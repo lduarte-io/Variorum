@@ -79,6 +79,11 @@ struct RootView: View {
     /// no-history road and the receipts' Change… all land here through
     /// `ShellRouter.mcpGrantRequest`).
     @State private var mcpGrantSheet: MCPGrantOpening?
+    /// 13n-c U4 — the ask HER press opened in this window (a pending glyph —
+    /// `ShellRouter.mcpAskRequest`); asks never present themselves.
+    @State private var mcpAskSheetID: String?
+    /// 13n-c U4 — ⌘L's wing switcher while it is up in this window (R-AIR-15).
+    @State private var wingSwitcher: WingSwitcherModel?
     /// 13s-b U2 — THE TOUR, while one runs in THIS window (its `engine` is
     /// nil otherwise). Per window by construction (`RootView` is the window);
     /// born at `startTour()`, dropped when the tour finishes or ends. A SLOT
@@ -215,7 +220,14 @@ struct RootView: View {
             sheet: { opening, done in
                 AnyView(MCPGrantSheet(door: mcp, opening: opening, done: done).environment(theme))
             },
-            revoke: { await mcp.revokeFromReceipt($0) })
+            revoke: { await mcp.revokeFromReceipt($0) },
+            // 13n-c U4 — ARRIVAL X: a pending glyph's press opens THAT ask's
+            // sheet here (her press, never the ask's arrival) — and a host
+            // already in a sheet (⌘L's switcher) presents it itself.
+            answerAsk: { router.mcpAskRequest = $0 },
+            askSheet: { id in
+                AnyView(mcp.ask(id).map { MCPAskSheet(door: mcp, ask: $0) })
+            })
     }
 
     var body: some View {
@@ -374,7 +386,39 @@ struct RootView: View {
             mcpGrantSheet = request
             router.mcpGrantRequest = nil
         }
+        // 13n-c U4 — ARRIVAL X: THE ASK her press opened here (a pending
+        // glyph), presented while it still waits. Nothing else opens it — the
+        // WindowGroup's self-presenting host is retired.
+        .mcpAskSheet(door: mcp, askID: $mcpAskSheetID)
+        .onChange(of: router.mcpAskRequest) { _, request in
+            guard let request else { return }
+            mcpAskSheetID = request
+            router.mcpAskRequest = nil
+        }
+        // 13n-c U4 — ⌘L, THE WING SWITCHER (R-AIR-15): opened in this window
+        // by the menu's request; while it is up, the same request (the menu's
+        // ⌘L before the sheet's monitor took the key) CYCLES it.
+        .sheet(item: $wingSwitcher) { model in
+            WingSwitcherSheet(
+                model: model, tokens: theme.tokens(for: scheme),
+                close: { wingSwitcher = nil })
+                .environment(theme)
+                .environment(\.mcpShareRoad, mcpRoad)
+                .environment(\.mcpAskBoard, mcp?.askBoard ?? .empty)
+        }
+        .onChange(of: router.wingSwitcherRequested) { _, requested in
+            guard requested else { return }
+            router.wingSwitcherRequested = false
+            if let open = wingSwitcher {
+                open.tapL()
+            } else {
+                wingSwitcher = WingSwitcherModel(wings: wings)
+            }
+        }
         .environment(\.mcpShareRoad, mcpRoad)
+        // 13n-c U4: the waiting asks, keyed by target — every pending glyph
+        // in this window reads it (the door's ONE projection, P-4).
+        .environment(\.mcpAskBoard, mcp?.askBoard ?? .empty)
         .onChange(of: router.whatsNewRequested) { _, requested in
             guard requested else { return }
             whatsNewShown = true

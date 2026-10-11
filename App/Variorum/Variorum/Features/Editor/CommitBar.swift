@@ -767,13 +767,19 @@ struct CommitBar: View {
     /// and folded rows put on this menu and the compact row on the
     /// overflow menu that carries the note's items as a submenu).
     private var noteMenu: some View {
-        VoicedMenu(tokens: tokens, label: "note") {
-            noteMenuItems
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            VoicedMenu(tokens: tokens, label: "note") {
+                noteMenuItems
+            }
+            .help("The note itself: its versions, its seal, its date, and the "
+                + "repair that makes every newline a block (its tray is the tray "
+                + "icon at the top of the note; a block's commits are the "
+                + "history door beside commit)")
+            // 13n-c U4 (the brief §5 — "the open note's bottom bar, beside the
+            // note ▾ menu"): an ask waiting on this note. The calm state is no
+            // view at all, so every tier's measured width is what it was.
+            MCPAskGlyph(.note(model.postID), tokens: tokens)
         }
-        .help("The note itself: its versions, its seal, its date, and the "
-            + "repair that makes every newline a block (its tray is the tray "
-            + "icon at the top of the note; a block's commits are the "
-            + "history door beside commit)")
     }
 
     /// The note menu's two presentations — the date picker's popover and

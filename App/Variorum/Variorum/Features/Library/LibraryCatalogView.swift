@@ -30,6 +30,8 @@ struct LibraryCatalogView: View {
     /// TAG menu has used it since 13e E8; what was missing was the act, never
     /// the selection).
     static let surfaceCapabilities: [CapabilityID] = [.tagNote, .deleteSelectedNotes, .mcpShareNotes]
+        // 13n-c U4: a note row's pending-ask glyph (an ask waits on it).
+        + MCPAskGlyph.surfaceCapabilities
 
     /// **THE MASTHEAD'S DOORS — AND THE ⋯ MENU IS GONE** (the post-13l polish
     /// round, ledger row 7 — her B1 ruling, verbatim: *"I want the ... menu in
@@ -562,6 +564,13 @@ struct LibraryCatalogView: View {
                 Text(tokens.path(["Library"]))
                     .font(tokens.heading)
                     .foregroundStyle(tokens.accent)
+                // 13n-c U4 — round 5, her words: the wing switcher "lives on
+                // the Bookcase only, which is weird". The Library lists ONE
+                // wing, so it says which — "Library · Home ▾" — and cycles
+                // and switches exactly as the Bookcase's does (one view).
+                if let wings {
+                    WingSwitcherMenu(tokens: tokens, wings: wings)
+                }
                 Text(tokens.chromeLabel("everything — sortable, searchable"))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
@@ -1055,6 +1064,8 @@ struct LibraryCatalogView: View {
                     .font(tokens.body)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
+                // 13n-c U4: an ask waiting on this note (nothing when none).
+                MCPAskGlyph(.note(hit.id), tokens: tokens)
                 // 18h batch 1 (her row 9): the card's date slot is the SORT's
                 // own stamp, in the one brain's words — *"edited today 1:33
                 // AM"* where it used to print the raw stored day
@@ -1179,7 +1190,8 @@ struct LibraryCatalogView: View {
                 oracleKey: hit.id,
                 badge: ownedByBadge(extras),
                 badgePostID: hit.id,
-                archived: hit.isArchived)
+                archived: hit.isArchived,
+                askTarget: .note(hit.id))
         }
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }
@@ -1408,6 +1420,10 @@ struct CatalogNoteLine: View {
     /// under the archived facet (R-13o-6, "rows say which they are"); false
     /// draws nothing, so the shipped alignment pins measure what they did.
     var archived = false
+    /// 13n-c U4: the note an ask may wait on — its pending glyph rides the
+    /// title (nil, and a calm note, draw nothing — the shipped alignment pins
+    /// measure exactly what they did).
+    var askTarget: MCPAskTarget? = nil
 
     static let probeSpace = "catalog-note-line"
 
@@ -1424,6 +1440,9 @@ struct CatalogNoteLine: View {
                 .lineLimit(1)
                 .baselineProbe("note.title", in: Self.probeSpace)
                 .onTapGesture(perform: onTitleTap)
+            if let askTarget {
+                MCPAskGlyph(askTarget, tokens: tokens)
+            }
             if let date {
                 CatalogRowStamp(
                     tokens: tokens,

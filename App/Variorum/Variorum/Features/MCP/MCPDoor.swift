@@ -126,13 +126,42 @@ final class MCPDoor {
 
     /// U2 — THE JUST-IN-TIME ASKS waiting for her (AF-6): in memory (a
     /// dropped ask costs the client one re-ask), deduped per client · target
-    /// · rung, capped; the main window's sheet serves the FIRST, one at a time.
-    private(set) var asks: [MCPAsk] = []
+    /// · rung, capped. **13n-c U4 — ARRIVAL X (the brief §5; supersedes
+    /// P-13nb-U2-9's arrival):** an ask WAITS — at its pending glyph on the
+    /// thing it names and in Settings ▸ MCP ▸ Waiting. Nothing presents
+    /// itself: the main window's self-presenting sheet is retired, and a
+    /// sheet opens only on HER press (the window's road — `answerAsk`).
+    private(set) var askQueue = MCPAskQueue()
+    /// The keyed projection every face reads (`MCPAskBoard`) — reassigned only
+    /// when the queue changes, so a window handing it down re-renders only
+    /// the faces that read it, only then.
+    private(set) var askBoard = MCPAskBoard.empty
+    /// The asks whose sheet she has OPEN (a glyph's press, Waiting's
+    /// Answer…) — the cap never forgets one of these.
+    @ObservationIgnored private var answering: Set<String> = []
     /// The asks kept waiting at once (PROVISIONAL P-13nb-U2-9, with the
-    /// queue's shape): past it the oldest WAITING one (never the one on
-    /// screen) is forgotten.
-    nonisolated static let askCap = 8
-    var presentedAsk: MCPAsk? { asks.first }
+    /// queue's shape): past it the oldest waiting one she is not answering is
+    /// forgotten.
+    nonisolated static let askCap = MCPAskQueue.cap
+    /// How many Waiting rows Settings ▸ MCP shows before its "all N ›" road
+    /// (mockup §4 draws three — the requests list's cap, R-13n-10).
+    nonisolated static let waitingCap = 3
+    /// The waiting asks, oldest first (the 13n-b shape the pins read).
+    var asks: [MCPAsk] { askQueue.entries.map(\.ask) }
+    /// Newest first — Waiting's order.
+    var waiting: [MCPAskQueue.Entry] { askQueue.newestFirst }
+    /// One waiting ask by id — nil once it was answered (anywhere), forgotten
+    /// by the cap, or the library closed (a sheet holding it then closes).
+    func ask(_ id: String) -> MCPAsk? { askQueue.entry(id)?.ask }
+
+    /// 13n-c U4 — ⌥⌘, (MCP Settings…): a REQUEST that Settings adopts (its
+    /// pane → MCP) and the MCP pane answers (scrolled to Waiting when an ask
+    /// waits). A counter, so every press is a fresh request and the two
+    /// readers each keep their own "seen" mark — neither clears it under the
+    /// other.
+    private(set) var settingsRequest = 0
+    @ObservationIgnored var settingsRequestAdopted = 0
+    @ObservationIgnored var settingsRequestScrolled = 0
 
     /// U4 (R-13nb-23 (a), AF-11 F-2) — THE AI's LAST CHANGE this session:
     /// where the most recent write receipt's "Open ›" goes. Observable, so
@@ -266,7 +295,9 @@ final class MCPDoor {
         observation = nil
         stopServer()
         adoptionLandingPending = false
-        asks = []
+        // A closed library's asks die with it (and so does every glyph).
+        adoptQueue(MCPAskQueue())
+        answering = []
         receiptRun = []
         lastShow = nil
         // A locked library shows no share face (R-AIR-8's gate reads no store).
@@ -372,9 +403,21 @@ final class MCPDoor {
     }
 
     /// Deny (a request) and Revoke (a client — P-13nb-U1-5): every grant
-    /// revoked, the client blocked.
+    /// revoked, the client blocked. 13n-c U4 (T-U4-4): its waiting asks leave
+    /// too — an answer to them could only refuse (`mcpClientNotApproved`), and
+    /// a glyph whose press can only refuse is a dead door (P-2).
     func deny(_ clientID: String) {
-        act { try $0.denyMCPClient(clientID) }
+        guard let runner, let database else { return }
+        note = nil
+        Task { @MainActor [weak self] in
+            do {
+                try await runner.run { try $0.denyMCPClient(clientID) }
+                let name = try? await database.read { try Queries.mcpClient($0, id: clientID)?.name }
+                if let name = name ?? nil { self?.forgetAsks(client: name) }
+            } catch {
+                self?.note = Note(text: MCPPaneCopy.refusal(error), place: .top)
+            }
+        }
     }
 
     func revoke(grantID: String) {
@@ -410,12 +453,39 @@ final class MCPDoor {
     // MARK: - The just-in-time ask (AF-6)
 
     /// A client asked past its grant (the call already answered — an ask
-    /// never blocks). Queued once per client · target · rung.
-    func enqueue(_ ask: MCPAsk) {
-        guard session != nil, !asks.contains(where: { $0.id == ask.id }) else { return }
-        asks.append(ask)
-        while asks.count > Self.askCap { asks.remove(at: 1) }
+    /// never blocks). Queued once per client · target · rung, stamped with
+    /// when it first arrived. **It only WAITS** (13n-c U4, arrival X): the
+    /// board gains its target, and nothing — no sheet, no toast, no raised
+    /// window — presents itself (R-13nb-23/26g: etiquette is law).
+    func enqueue(_ ask: MCPAsk, now: Date = Date()) {
+        guard session != nil else { return }
+        var queue = askQueue
+        guard queue.enqueue(ask, at: now, answering: answering) else { return }
+        adoptQueue(queue)
     }
+
+    /// The queue and its projection move together; the board is reassigned
+    /// only when it changed.
+    private func adoptQueue(_ queue: MCPAskQueue) {
+        askQueue = queue
+        let board = queue.board
+        if board != askBoard { askBoard = board }
+    }
+
+    /// A client's waiting asks, forgotten whole (T-U4-4).
+    func forgetAsks(client name: String) {
+        var queue = askQueue
+        guard queue.forget(client: name) > 0 else { return }
+        adoptQueue(queue)
+    }
+
+    /// An ask's sheet is open (her press) — the cap must not forget it while
+    /// she reads it.
+    func beginAnswering(_ id: String) { answering.insert(id) }
+    func endAnswering(_ id: String) { answering.remove(id) }
+
+    /// ⌥⌘, — Settings at MCP (at Waiting when an ask waits).
+    func requestSettings() { settingsRequest += 1 }
 
     enum AskAnswer: Equatable, Sendable {
         case grant(MCPGrantRule.Duration)
@@ -434,8 +504,14 @@ final class MCPDoor {
 
     /// Her answer: a grant through the ordinary ops (the ask's rung, its
     /// target as the scope), or nothing. Either way the ask leaves the queue.
+    /// 13n-c U4 (T-U4-5): ONLY an ask still waiting is answered — a second
+    /// sheet on the same ask (another window, the pane) answers nothing, so
+    /// one ask can never mint two grants.
     func answer(_ ask: MCPAsk, _ answer: AskAnswer) {
-        asks.removeAll { $0.id == ask.id }
+        var queue = askQueue
+        guard queue.remove(ask.id) != nil else { return }
+        adoptQueue(queue)
+        answering.remove(ask.id)
         guard case .grant(let duration) = answer, let runner, let database, let session else { return }
         let spec = Operations.MCPGrantSpec(
             rung: ask.rung, scopeKind: ask.scopeKind, scopeID: ask.scopeID, duration: duration)

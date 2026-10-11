@@ -65,6 +65,8 @@ struct ShelfView: View {
     static let surfaceCapabilities: [CapabilityID] = [.importFiles]
         // 13n-c U3 (R-AIR-6): the book rows' ONE shared icon and its popover.
         + MCPSharedIcon.surfaceCapabilities
+        // 13n-c U4: a book row's pending-ask glyph.
+        + MCPAskGlyph.surfaceCapabilities
 
     let session: AppSession
     let model: ShelfViewModel
@@ -691,6 +693,10 @@ struct ShelfView: View {
                         if let reach = model.aiReach[reading.id], !reach.isEmpty {
                             MCPSharedIcon(reaches: reach, tokens: tokens)
                         }
+                        // 13n-c U4 (R-AIR-6's family; arrival X): an ask
+                        // waiting on this book — hover names who and what,
+                        // her press opens it. Its own button, like the icon.
+                        MCPAskGlyph(.book(reading.id), tokens: tokens)
                     }
                     .frame(minWidth: 160, alignment: .leading)
                     Text(model.tagsColumn(for: book).map { "#\($0)" }.joined(separator: " "))

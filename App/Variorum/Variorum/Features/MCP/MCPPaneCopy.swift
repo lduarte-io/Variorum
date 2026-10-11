@@ -47,6 +47,13 @@ nonisolated enum MCPPaneCopy {
         }
     }
 
+    // MARK: - Waiting (13n-c U4 — arrival X; the brief §5, mockup §4/§5)
+
+    /// The asks waiting for her answer, above Connection requests. Nothing
+    /// appears by itself: an ask waits here and at its glyph on the thing it
+    /// names, until she answers it.
+    static let waitingSection = "Waiting"
+
     // MARK: - Connection requests
 
     static let requestsSection = "Connection requests"
@@ -143,10 +150,19 @@ nonisolated enum MCPPaneCopy {
     /// with the note's line (`MCPRungWords`).
     static func rungWord(_ rung: MCPGrantRule.Rung) -> String { MCPRungWords.reach(rung) }
 
+    /// 13n-c U4 — "WHILE CONNECTED" RE-WORDED (her round-2 ask: she finds it
+    /// vague; copy OPTIONS at the build — the U4 record lists them): the
+    /// duration says WHEN IT ENDS — "until it disconnects" (the grant lives
+    /// while that client stays connected and is swept when it goes, R-13nb-20).
+    /// PROVISIONAL P-13nc-U4-1, her pick at the copy pass; every face that
+    /// says the duration reads it from here (the sheet, the ask's buttons, the
+    /// pane's rows, the popovers, the receipts, the confirm).
+    static let untilDisconnects = "until it disconnects"
+
     static func durationWord(_ duration: MCPGrantRule.Duration) -> String {
         switch duration {
         case .once: "once"
-        case .connection: "while connected"
+        case .connection: untilDisconnects
         case .always: "always"
         }
     }
@@ -417,7 +433,9 @@ nonisolated enum MCPPaneCopy {
     static let readRung = "Read"
     static let readRungDetail = rungDetail(.read)
     static let cancel = "Cancel"
-    static let whileConnectedNote = "While connected is offered while this client is connected."
+    /// Why the bounded duration is missing (the client is not connected now).
+    static let whileConnectedNote =
+        "\u{201C}Until it disconnects\u{201D} is offered while this client is connected."
 
     /// "Grant suggest in “the lightning thief” while connected" (mockup §3) —
     /// and, since 13n-c's R-AIR-3, the clause that says membership is LIVE:
@@ -524,6 +542,19 @@ nonisolated enum MCPAskCopy {
         return "\(ask.clientName) asks to \(verb) \(target)"
     }
 
+    /// **13n-c U4 — the pending-ask glyph's hover where it sits ON the target**
+    /// (mockup §4's "claude-code asks to suggest here"): the place is the row
+    /// it is on, so the sentence says "here".
+    static func here(_ ask: MCPAsk) -> String {
+        let verb: String = switch ask.rung {
+        case .read: "read"
+        case .suggest: "suggest"
+        case .writeNew: "write new"
+        case .edit: "edit"
+        }
+        return "\(ask.clientName) asks to \(verb) here"
+    }
+
     /// **R-AIR-3 on the ask road** (13n-c U2 — the U1 ladder's F2: every
     /// book grant says its live reach, and an answer here MINTS one): her
     /// clause under a BOOK ask, D-3's twin under a WING ask, nothing for a
@@ -554,7 +585,8 @@ nonisolated enum MCPAskCopy {
     static func button(_ duration: MCPGrantRule.Duration) -> String {
         switch duration {
         case .once: "Once"
-        case .connection: "While connected"
+        // 13n-c U4 (P-13nc-U4-1): the duration's one word, capitalized.
+        case .connection: MCPPaneCopy.untilDisconnects.capitalizedFirst
         case .always: "Always"
         }
     }

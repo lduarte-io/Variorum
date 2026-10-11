@@ -85,6 +85,23 @@ struct MCPShareRoad: Equatable {
     /// Revoke these grants in one act (a popover's Revoke) — awaited, so the
     /// face that asked re-reads after it lands.
     let revoke: ([String]) async -> Void
+    /// 13n-c U4 — ARRIVAL X: open THIS ask's sheet in this window (a pending
+    /// glyph's press — hers, so the etiquette is untouched). An ask answered
+    /// elsewhere meanwhile opens nothing (the sheet reads the queue).
+    var answerAsk: (String) -> Void = { _ in }
+    /// 13n-c U4 — THE ASK'S SHEET as a view, for a host that must present it
+    /// ITSELF because a sheet is already up (⌘L's switcher — the T-U3-7
+    /// precedent `sheet` set for Book Settings). Nil content once the ask no
+    /// longer waits.
+    var askSheet: (String) -> AnyView = { _ in AnyView(EmptyView()) }
+
+    /// This road with its ask presses kept HERE — a nested host (a sheet
+    /// already up) opens the ask over itself instead of asking the window.
+    func answeringAsks(_ open: @escaping (String) -> Void) -> MCPShareRoad {
+        var road = self
+        road.answerAsk = open
+        return road
+    }
 
     nonisolated static func == (lhs: MCPShareRoad, rhs: MCPShareRoad) -> Bool {
         lhs.canShare == rhs.canShare && lhs.indicatorOn == rhs.indicatorOn

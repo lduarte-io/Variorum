@@ -19,8 +19,9 @@
 //  - THE LOCK when the note is Private — its own mark (click → the Private
 //    toggle) or a Private book's (click → the book's name; the mark is changed
 //    in that book's settings).
-//  Neither ⇒ NOTHING (calm — "an empty state that says nothing"). The
-//  pending-ask leg is U4's (its glyph is `MCPSharedIcon.pendingSymbol`).
+//  Neither ⇒ NOTHING (calm — "an empty state that says nothing"). 13n-c U4
+//  adds the PENDING-ASK leg: the filled twin (`MCPAskGlyph`) while a client's
+//  ask waits on this note — her press opens it.
 //
 
 import GRDB
@@ -63,6 +64,8 @@ struct MCPNoteIndicator: View {
     /// door).
     static let surfaceCapabilities: [CapabilityID] =
         MCPSharedIcon.surfaceCapabilities + [.markNotePrivate]
+        // 13n-c U4 — the pending-ask leg (R-AIR-7's third mark).
+        + MCPAskGlyph.surfaceCapabilities
 
     let session: AppSession
     let postID: String
@@ -80,6 +83,10 @@ struct MCPNoteIndicator: View {
                     }
                     if state.isPrivate { lock(state) }
                 }
+                // 13n-c U4 — R-AIR-7's PENDING-ASK leg: an ask waiting on this
+                // note (the door's projection, not this read — nothing when
+                // none, so the calm state still says nothing).
+                MCPAskGlyph(.note(postID), tokens: tokens)
             }
             // Held while the indicator is ON (the read touches `container`'s
             // mark and membership columns, never the buffer's — the note ▾

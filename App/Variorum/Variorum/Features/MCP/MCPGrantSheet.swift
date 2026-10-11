@@ -507,10 +507,11 @@ struct ConfirmLabel: View {
     }
 }
 
-private extension String {
-    /// "while connected" → "While connected" (a segmented control's label;
-    /// sentence case — her rule).
-    var capitalizedFirst: String {
+extension String {
+    /// "until it disconnects" → "Until it disconnects" (a segmented control's
+    /// label, the ask sheet's button; sentence case — her rule). Internal
+    /// since 13n-c U4 (the ask's buttons read the same word).
+    nonisolated var capitalizedFirst: String {
         guard let first else { return self }
         return first.uppercased() + dropFirst()
     }
