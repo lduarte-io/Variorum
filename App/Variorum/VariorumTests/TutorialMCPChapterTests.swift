@@ -116,10 +116,11 @@ private let lessons = TutorialSeeder.mcpLessons
 struct TutorialMCPChapterTests {
 
     /// Six lessons, the guide's appendix after the privacy chapter (P-13nc-U5-1),
-    /// every lesson seeded under it. Three guards over the WHOLE chapter: no
-    /// gathering promise before U6 (R-AIR-12) lands; the pending mark by its
-    /// ROLE, never its shape (O-1 may change the glyph); the app's vocabulary
-    /// (commit, never savepoint) and no shouted word.
+    /// every lesson seeded under it. Three guards over the WHOLE chapter: the
+    /// gathering promise only where U6 (R-AIR-12) put it — lesson 3, with its
+    /// truth pinned there; the pending mark by its ROLE, never its shape (O-1
+    /// may change the glyph); the app's vocabulary (commit, never savepoint)
+    /// and no shouted word.
     @Test func theChapterIsSixLessonsAndTheGuidesAppendix() async throws {
         #expect(TutorialSeeder.plan.last?.chapter == TutorialSeeder.mcpChapter)
         #expect(TutorialSeeder.plan.last?.lessons == lessons)
@@ -141,8 +142,10 @@ struct TutorialMCPChapterTests {
             for title in lessons {
                 let text = try await prose(db, guideID, title)
                 #expect(!text.isEmpty)
-                #expect(!text.localizedCaseInsensitiveContains("gathering"),
-                        "\(title): gatherings under a wing grant are U6's to teach (R-AIR-12)")
+                // 13n-c U6 (A JUSTIFIED EDIT, the ritual — U6 landed R-AIR-12):
+                // gatherings are taught in lesson 3 and nowhere else.
+                #expect(text.localizedCaseInsensitiveContains("gathering") == (title == lessons[2]),
+                        "\(title): gatherings under a wing grant are lesson 3's (R-AIR-12)")
                 #expect(!text.localizedCaseInsensitiveContains("filled"),
                         "\(title): the pending mark is taught by its role, never its shape")
                 #expect(!text.localizedCaseInsensitiveContains("savepoint"))
@@ -296,6 +299,69 @@ struct TutorialMCPChapterTests {
             #expect(!MCPGrantRule.Grant(
                 id: "g", rung: .read, scopeKind: .note, scopeID: loose, duration: .once,
                 consumedAt: "2026-07-01T00:00:00.000Z").isLive, "spent, it reaches nothing more")
+            // 13n-c U6 — the fourth card (R-AIR-12 + VX-160), prose then truth.
+            #expect(text.contains("A wing grant also lets a client read that wing's gatherings"))
+            #expect(text.contains("a gathering is never shared on its own"))
+            #expect(text.contains("move a note to another wing only with edit where the note is and write new "
+                                  + "in the wing it goes to"))
+            #expect(text.contains("the note leaves its books there, its tags come along, and "
+                                  + "\u{2325}\u{2318}Z brings it back"))
+            // "read that wing's gatherings": codex's Home-wing read grant reaches
+            // a Home gathering; claude-code's book grant never does.
+            let topic = try ops.createTag(name: "drafts")
+            let gathering = try ops.createReading(
+                name: "every draft", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(topic.id)))
+            let gatheringFacts = try #require(try await db.read {
+                try Queries.mcpGatheringFacts($0, readingID: gathering.id)
+            })
+            func reachesGathering(_ name: String) async throws -> Bool {
+                let grants = try await db.read { db in
+                    try Queries.mcpGrants(db, clientID: try Queries.mcpClient(db, name: name)!.id).map(\.ruleGrant)
+                }
+                return MCPGrantRule.decideGathering(
+                    client: .approved, grants: grants, openBook: false, gathering: gatheringFacts).isAllowed
+            }
+            #expect(try await reachesGathering("codex"), "a wing grant reads its gatherings")
+            #expect(try await !reachesGathering("claude-code"), "a book grant never does")
+            // "never shared on its own": no grant may name one.
+            let codex = try #require(try await db.read { try Queries.mcpClient($0, name: "codex") })
+            #expect(throws: OperationError.self) {
+                _ = try ops.grantMCPAccess(codex.id, grant(.read, .book, gathering.id))
+            }
+            // "only with edit where the note is and write new in the wing it
+            // goes to": the two decisions, on the note's own facts.
+            let annex = try ops.createWing(name: "Annex")
+            let mover = try note(ops, "a page that moves", in: book.id)
+            try ops.applyTag(topic.id, toPost: mover)
+            let moverFacts = try #require(try await db.read { try Queries.mcpNoteFacts($0, noteID: mover) })
+            let writeNewHere = MCPGrantRule.Grant(id: "w", rung: .writeNew, scopeKind: .wing, scopeID: "",
+                                                  duration: .always)
+            let writeNewThere = MCPGrantRule.Grant(id: "t", rung: .writeNew, scopeKind: .wing, scopeID: annex.id,
+                                                   duration: .always)
+            #expect(!MCPGrantRule.decide(client: .approved, grants: [writeNewHere], openBook: false,
+                                         target: .note(moverFacts), rung: .edit, consumes: true).isAllowed,
+                    "write new where the note is cannot move it")
+            #expect(MCPGrantRule.decideWing(client: .approved, grants: [writeNewThere], openBook: false,
+                                            wingID: annex.id, rung: .writeNew).isAllowed)
+            // "the note leaves its books there, its tags come along, and ⌥⌘Z
+            // brings it back" — the act and its one undo.
+            let stack = UndoStack()
+            let moved = try Operations(undoStack: stack).mcpMoveNoteToWing(
+                mover, to: annex.id, undoLabel: Operations.MCPWriteAct.wingMove.undoLabel(client: "codex"))
+            #expect(moved.leftBookIDs == [book.id], "it leaves its books")
+            #expect(try await db.read { try Queries.effectiveWing($0, ofPost: mover) } == annex.id)
+            let carried = try await db.read { db in
+                try String.fetchAll(db, sql: """
+                    SELECT t.path FROM post_tag pt JOIN tag t ON t.id = pt.tag_id
+                    WHERE pt.post_id = ? AND pt.deleted_at IS NULL AND t.wing_id = ?
+                    """, arguments: [mover, annex.id])
+            }
+            #expect(carried == ["drafts"], "its tags come along, by their path")
+            #expect(try stack.undo(with: Operations(undoStack: stack)) == "codex's wing move", "one ⌥⌘Z")
+            #expect(try await db.read { try Queries.effectiveWing($0, ofPost: mover) } == "")
+            #expect(try await db.read { try Queries.mcpNoteFacts($0, noteID: mover) }?.bookIDs == [book.id],
+                    "back in its book")
+
             // "one switch … lets every approved client read everything": with
             // the open book on, a client holding NO grant reads the loose page.
             _ = try approvedClient(ops, "local-llama", nil)

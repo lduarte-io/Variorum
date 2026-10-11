@@ -2473,9 +2473,9 @@ enum TutorialSeeder {
         // interpolated from the constants `TutorialMCPChapterTests` ties each
         // door to (the H pattern), so a renamed door turns a lesson red. The
         // pending-ask mark is described by its ROLE ("a small mark"), never its
-        // shape (the Stage B fix pass may change the glyph — O-1). Gatherings
-        // under a wing grant are NOT taught: U6 (R-AIR-12) has not landed —
-        // U6 adds that sentence with its pin.
+        // shape (the Stage B fix pass may change the glyph — O-1). U6 (R-AIR-12
+        // + VX-160) adds lesson 3's fourth card: a wing grant reads the wing's
+        // gatherings, and the per-item move across wings — each pinned.
 
         _ = try lesson(door, mcpLessons[0], [
             "Variorum can let an AI work in your library, if you want it to. The way "
@@ -2540,6 +2540,12 @@ enum TutorialSeeder {
             + "how long: once, for a single act (one read of a note, or one "
             + "change); until it disconnects, which ends when the client goes away "
             + "(offered while it's connected); or always, until you revoke it.",
+
+            "A wing grant also lets a client read that wing's gatherings; a "
+            + "gathering is never shared on its own. And a client can move a note "
+            + "to another wing only with edit where the note is and write new in "
+            + "the wing it goes to: the note leaves its books there, its tags come "
+            + "along, and \u{2325}\u{2318}Z brings it back.",
 
             "The open book is the widest grant of all: one switch in Settings "
             + "\u{25B8} MCP that lets every approved client read everything, "

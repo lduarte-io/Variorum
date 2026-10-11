@@ -46,7 +46,10 @@ struct MCPAdviceServerTests {
     /// is a tool the catalog declares — and the bare `search` it names is too.
     @Test func everyToolTheAdviceNamesIsDeclared() throws {
         let names = advice.matches(of: /\b[a-z]+(?:_[a-z]+)+\b/).map { String($0.output) }
-        #expect(Set(names) == ["read_note", "show_in_app"], "the tools it names: \(names)")
+        // 13n-c U6 (A JUSTIFIED EDIT, the ritual): the gatherings clause names
+        // list_books and the move names move_note_to_wing.
+        #expect(Set(names) == ["read_note", "show_in_app", "list_books", "move_note_to_wing"],
+                "the tools it names: \(names)")
         for name in names + ["search"] {
             #expect(MCPToolCatalog.declaration(named: name) != nil, "\(name) is a declared tool")
         }
@@ -82,6 +85,13 @@ struct MCPAdviceServerTests {
         // names "the author", never a pronoun that assumes theirs.
         #expect(advice.contains("Never call show_in_app unless the author asks"))
         #expect(advice.contains("one undo for the author, named after you"))
+        // 13n-c U6 — R-AIR-12 and VX-160, the guide's lesson 3 fourth card:
+        // a wing grant reads its gatherings (never granted alone); the move's
+        // two rungs.
+        #expect(advice.contains("A wing grant also reads that wing's gatherings"))
+        #expect(advice.contains("none is ever granted alone"))
+        #expect(advice.contains("move_note_to_wing needs edit on the note and write new on the wing it goes to"))
+        #expect(MCPToolCatalog.moveNoteToWing.rung == .edit, "the catalog's fact the sentence states")
     }
 
     /// The U1 ladder's two carries. F5: a fenced or unshared target answers
