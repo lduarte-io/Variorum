@@ -17,8 +17,8 @@ below say "mockup §N"). The DRAFT phase plan: `notes/plans/phase-13n-c-mcp-laun
 | # | Piece | Status |
 |---|---|---|
 | P0 | Worktree + preflight (read in full, never delegated) + the skeleton | DONE (`209c11f6`) |
-| P1 | This brief: per-item options, recommendation and why; chord candidates with the sweep evidence; open questions | DONE (this commit) |
-| P2 | `notes/plans/vx-156-grant-ux-mockups.html` — one self-contained page, Study voice, light and dark, sentence case | NOT-STARTED — the section map is §16 below |
+| P1 | This brief: per-item options, recommendation and why; chord candidates with the sweep evidence; open questions | DONE (`eacf600b`; amended in the P2 checkpoint — the A-4 pane-line gap found, a sixth R-AIR-1 sentence) |
+| P2 | `notes/plans/vx-156-grant-ux-mockups.html` — one self-contained page, Study voice, light and dark, sentence case | IN-PROGRESS — being written to the §16 map; nothing committed yet |
 | P3 | `notes/plans/phase-13n-c-mcp-launch-readiness-DRAFT.md` — the DRAFT phase plan | NOT-STARTED — units sketched in §15 below |
 | P4 | Final pass: status flipped, PR "VX-156: grant UX design prep" opened | NOT-STARTED |
 
@@ -262,7 +262,8 @@ build owes):**
    WING grant on its wing and the OPEN BOOK switch reach them too (`MCPGrantRule.reaches` treats an
    unfenced note uniformly). The extra words therefore belong on three doors, not one — the options
    below say where.
-2. Five shipped sentences become false or loose and must change: the sheet's wing line
+2. Six shipped sentences become false or loose and must change: the Settings search blurb for
+   the open book ("…journals still ask every time." — `SettingsCatalog` row `mcpOpenBook`), the sheet's wing line
    "everything in <wing> except journals, which always ask" (`MCPPaneCopy.wingDetail`), the open
    book's "journals still ask every time" (`openBookDetail`), the empty-picker line "journals are
    shared one ask at a time" (`noBooks`), the pane's refusal "Journals and Private notes are shared
@@ -367,7 +368,16 @@ recommendation** — or two new tools (`divide_choosing_takes`, `merge_choosing_
 
 **The boundary as built (A-4):** a client is whoever its `initialize` says it is; every client
 arrives through the same shim, so the socket peer authenticates nothing; a grant gates what a NAME
-can do. The pane says so.
+can do.
+
+**A found gap, whichever option she picks:** AppSpec §12 ("A-4's honest boundary (client identity is
+self-declared and the pane says so)") and the 13n-b handoff both say the pane states this — but no
+rendered string anywhere in the MCP faces does (searched `MCPPaneCopy`, `MCPPane`, `MCPGrantSheet`,
+`MCPAskSheet`, `PrivateMark`, `SettingsShape`); the line went to the closeout's author checklist
+instead (ledger row 6). **Recommended (L1), independent of K0–K2:** the pane gains the line it is
+said to have, under Clients — *"A client names itself when it connects. Variorum can't verify the
+name: a grant lets whatever connects under that name do what you granted."* (direct and technical —
+R-13n-5). Drawn: mockup §11.
 
 **Options (all honest about the limit):**
 - **K0 — none.** A-4 stands as ruled; the boundary line stays the whole story.
@@ -430,7 +440,10 @@ records it beside each binding (the ⌥⌘O precedent at `EditorCommands.swift` 
 2. **VX-161** is a candidate the kickoff names without content in the repo — the DRAFT plan lists it
    unsized.
 3. **VX-158's reading** (§8) is stated, not confirmed.
-4. **Adjacent MCP tickets she may want for real users** (named, not proposed): VX-131 (unspent
+4. **The A-4 line the canon says the pane carries is not rendered** (§12's found gap — AppSpec §12
+   and the handoff vs the build). §12's L1 closes it; either way the canon sentence or the pane must
+   change so they agree.
+5. **Adjacent MCP tickets she may want for real users** (named, not proposed): VX-131 (unspent
    once grants time out), VX-133 (the receipt run counts undone acts), and the U2-era ops' guard
    retrofit (P-13nb-U2-8's sync twin, #209). None is in the kickoff's scope.
 
