@@ -263,7 +263,8 @@ public enum MCPGrantRule {
     /// THAT wing at the asked rung. A wing-scoped write spends a once wing
     /// grant exactly as `decide` does (AF-7). Every note a wing listing then
     /// shows still passes `decide` on its own — the fence filters per note,
-    /// so a wing never lists a journal.
+    /// so a wing never lists a fenced note (a daily-Journal entry, a ⌘J entry,
+    /// anything Private — 13n-c R-AIR-1).
     public static func decideWing(
         client: ClientState?, grants: [Grant], openBook: Bool, wingID: String, rung: Rung,
         consumes: Bool = false

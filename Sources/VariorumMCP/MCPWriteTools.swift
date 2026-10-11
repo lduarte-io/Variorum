@@ -442,8 +442,10 @@ struct MCPWriteTools: Sendable {
     /// the act's transaction), so BOTH its sides raise the just-in-time ask
     /// exactly as `add_note_to_book`'s do — the note side's refusal was a
     /// bare guard throw with no ask and no asked sentence, which mattered
-    /// most for a FENCED member (a journal or Private note is reachable
-    /// per-ask only, and she never heard the ask).
+    /// most for a FENCED member (a daily-Journal entry, a ⌘J entry or a
+    /// Private note is reachable per-ask only, and she never heard the ask;
+    /// since 13n-c T-2 the wire answers the one not-shared answer, the ask
+    /// still reaching her).
     func noteIntoBook(
         _ noteID: String, _ bookID: String, job: Job, clientName: String,
         spendsAfter: Bool = true,
