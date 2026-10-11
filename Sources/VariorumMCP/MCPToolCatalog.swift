@@ -703,13 +703,14 @@ enum MCPToolCatalog {
             in front, and never raises a window). target "note" (note_id; block_id lands on that \
             block, and select — words in that block's shown take — selects them with the find \
             bar ready), "takes" (note_id + block_id: the note's Takes, that block's takes open), \
-            "lens" (note_id + lens_id: the Lenses board showing that lens) or "book" (book_id, \
-            optionally section_id: that chapter). Returns JSON, or why nothing moved.
+            "lens" (note_id + lens_id: the Lenses board showing that lens), "book" (book_id, \
+            optionally section_id: that chapter) or "wing" (wing_id; "" is Home: Variorum switches \
+            to that wing, as its own wing switcher does). Returns JSON, or why nothing moved.
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
-                "target": .object(["type": "string", "enum": .array(["note", "takes", "lens", "book"]),
+                "target": .object(["type": "string", "enum": .array(["note", "takes", "lens", "book", "wing"]),
                                    "description": "What to show (default note)."]),
                 "note_id": .object(["type": "string"]),
                 "block_id": .object(["type": "string"]),
@@ -717,6 +718,7 @@ enum MCPToolCatalog {
                 "lens_id": .object(["type": "string"]),
                 "book_id": .object(["type": "string"]),
                 "section_id": .object(["type": "string", "description": "A chapter of the book."]),
+                "wing_id": .object(["type": "string", "description": "The wing (\"\" is Home)."]),
             ]),
             "additionalProperties": false,
         ]),

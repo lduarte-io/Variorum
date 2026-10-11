@@ -15,6 +15,11 @@ public enum MCPShowTarget: Sendable, Equatable {
     case takes(noteID: String, blockID: String)
     case lens(noteID: String, lensID: String)
     case book(bookID: String, sectionID: String?)
+    /// 13n-c U6 (VX-158 — the brief §8's A, mockup §7): the app's ONE wing,
+    /// switched as her own switcher switches it — carrying the wing's name and
+    /// the client's, so the receipt can say who moved her ("Now in “X” —
+    /// claude-code showed you this wing."). `wingID` '' is Home.
+    case wing(wingID: String, name: String, shownBy: String)
 }
 
 /// **THE MOVE DIAL's ETIQUETTE — her law, as one pure decision** (R-13nb-23,
@@ -92,8 +97,14 @@ struct MCPShowTool: Sendable {
     func call(_ name: String, arguments: [String: Value]?, clientName: String) async -> Outcome {
         let args = arguments ?? [:]
         do {
-            let target = try parse(args)
-            let decided = try await database.read { db in try decide(db, target, clientName: clientName) }
+            let parsed = try parse(args)
+            let decided = try await database.read { db in try decide(db, parsed, clientName: clientName) }
+            var target = parsed
+            // The wing's name and who asked ride the target (the decision
+            // read the name; the client is this session's).
+            if case .wing(let wingID, _, _) = target, case .allowed(_, _, let title) = decided {
+                target = .wing(wingID: wingID, name: title ?? Queries.mcpHomeWingName, shownBy: clientName)
+            }
             switch decided {
             case .refused(let outcome, let kind, let id, let title):
                 try log(clientName, kind, id, title, allowed: false)
@@ -152,8 +163,14 @@ struct MCPShowTool: Sendable {
         case "book":
             guard let book = try string("book_id") else { throw ArgumentFailure(message: "target book needs book_id.") }
             return .book(bookID: book, sectionID: try string("section_id"))
+        case "wing":
+            // "" is Home — the one legal empty id, so not `string(_:)`.
+            guard let value = args["wing_id"], value != .null, let wing = value.stringValue else {
+                throw ArgumentFailure(message: "target wing needs wing_id (\"\" is Home).")
+            }
+            return .wing(wingID: wing, name: "", shownBy: "")
         default:
-            throw ArgumentFailure(message: "target must be \"note\", \"takes\", \"lens\" or \"book\".")
+            throw ArgumentFailure(message: "target must be \"note\", \"takes\", \"lens\", \"book\" or \"wing\".")
         }
     }
 
@@ -183,6 +200,19 @@ struct MCPShowTool: Sendable {
                                 kind: "book", id: bookID, title: title)
             }
             return .allowed(kind: "book", id: bookID, title: title)
+        case .wing(let wingID, _, _):
+            // 13n-c U6 (VX-158): decided at READ on the wing with WING-LEVEL
+            // reach (`decideWing` — a wing grant on it, or the open book),
+            // never spending. A wing that is not live answers the one answer
+            // after an allowed decision (the decision already implied reach,
+            // so the answer discloses nothing).
+            let title = try Queries.mcpScopeTitle(db, kind: .wing, id: wingID, calendar: calendar)
+            let decision = MCPGrantAuthority.decideWing(standing, wingID: wingID, rung: .read)
+            guard decision.isAllowed, title != nil else {
+                return .refused(refusal(decision.isAllowed ? .ask(.notShared, offersAlways: true) : decision, .wing),
+                                kind: "wing", id: wingID, title: title)
+            }
+            return .allowed(kind: "wing", id: wingID, title: title)
         }
     }
 
