@@ -95,7 +95,9 @@ enum MCPToolCatalog {
             {"not": …}), its outflow (the tags notes written there wear), new_matches ("join" or \
             "wait" at Arrivals), word_target / max_notes, and whether it is finished, sealed, owned \
             or collecting now. Archived books appear only with include_archived: true. The daily \
-            Journal and Private books are never listed. Returns JSON.
+            Journal and Private books are never listed. A wing shared with you (or the open book) also \
+            lists its gatherings (kind "gathering"): saved rules that gather notes by tag or star, \
+            read-only — list_notes and search take their id like a book's. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -111,7 +113,8 @@ enum MCPToolCatalog {
         name: "list_notes", rung: .read, title: "List notes",
         description: """
             Notes this client can read. With book_id: that book's notes in book order, each with \
-            the chapter it is filed under (section_id, section_name) when it has one. With \
+            the chapter it is filed under (section_id, section_name) when it has one — or a \
+            gathering's notes, in its own order. With \
             wing_id: that wing's notes, most recently edited first. With neither: every note \
             shared with this client, most recently edited first. Paged — pass next_cursor back \
             as cursor. Archived notes appear only with include_archived: true (marked archived). \
@@ -190,7 +193,8 @@ enum MCPToolCatalog {
         description: """
             Full-text search over the notes and books shared with this client (Variorum's own \
             search: every word must match, "quoted phrases" stay together, #tag/path filters by \
-            tag). Narrow with book_id or note_id. include_commits: true also searches commits (saved \
+            tag). Narrow with book_id (a book or a gathering) or note_id. include_commits: true also \
+            searches commits (saved \
             moments' text) — those passages carry a commit_id and saved_at. include_archived: true \
             also searches archived notes, books and takes (marked archived). Returns JSON passages: \
             the note, the block, and the words around each match (matches wrapped in **).

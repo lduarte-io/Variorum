@@ -67,6 +67,46 @@ struct MCPGrantAuthority: Sendable {
             target: .book(facts), rung: rung, consumes: consumes)
     }
 
+    /// 13n-c R-AIR-12: a GATHERING's decision — always READ, never consuming,
+    /// wing-level reach only (`MCPGrantRule.decideGathering`); a missing one
+    /// answers as any missing target. Never raises an ask: a gathering is no
+    /// grant's scope, so no answer could mint one.
+    static func decide(_ standing: Standing, gathering facts: MCPGrantRule.BookFacts?) -> MCPGrantRule.Decision {
+        guard let facts else { return missingTarget(standing) }
+        return MCPGrantRule.decideGathering(
+            client: standing.state, grants: standing.grants, openBook: standing.openBook, gathering: facts)
+    }
+
+    /// **A book id READ** (13n-c R-AIR-12): the tools that read a place by its
+    /// book id — `list_notes`, `search`, `show_in_app` — take a BOOK (its own
+    /// grant's road, unchanged) or a GATHERING (read facts under wing-level
+    /// reach). Every write tool keeps reading `mcpBookFacts` alone, so a
+    /// gathering stays what it is: no grant's scope, no write's target.
+    enum ReadPlace {
+        case book(MCPGrantRule.BookFacts?)
+        case gathering(MCPGrantRule.BookFacts)
+
+        var facts: MCPGrantRule.BookFacts? {
+            switch self {
+            case .book(let facts): facts
+            case .gathering(let facts): facts
+            }
+        }
+    }
+
+    static func readPlace(_ db: Database, readingID: String) throws -> ReadPlace {
+        if let book = try Queries.mcpBookFacts(db, readingID: readingID) { return .book(book) }
+        if let gathering = try Queries.mcpGatheringFacts(db, readingID: readingID) { return .gathering(gathering) }
+        return .book(nil)
+    }
+
+    static func decide(_ standing: Standing, reading place: ReadPlace) -> MCPGrantRule.Decision {
+        switch place {
+        case .book(let facts): decide(standing, book: facts, rung: .read)
+        case .gathering(let facts): decide(standing, gathering: facts)
+        }
+    }
+
     static func decideWing(
         _ standing: Standing, wingID: String, rung: MCPGrantRule.Rung, consumes: Bool = false
     ) -> MCPGrantRule.Decision {

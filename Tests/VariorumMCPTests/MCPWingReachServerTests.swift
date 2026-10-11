@@ -103,4 +103,140 @@ struct MCPWingReachServerTests {
             await h.hangUp(connection)
         }
     }
+
+    // MARK: - R-AIR-12: gatherings, read facts under a wing grant
+
+    /// The wing "variorum": a gathering of #parser notes, two plain members, a
+    /// PRIVATE member (fenced — it must never list or count), a book.
+    private struct Gathered {
+        let wing: Wing
+        let gathering: Reading
+        let book: Reading
+        let plain: [Container]
+        let fenced: Container
+    }
+
+    private func gathered(_ h: ServerHarness) throws -> Gathered {
+        let wing = try h.operations.createWing(name: "variorum")
+        let parser = try h.operations.createTag(name: "parser", wingID: wing.id)
+        let gathering = try h.operations.createReading(
+            name: "parser things", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(parser.id)),
+            wingId: wing.id)
+        let book = try h.operations.createReading(name: "launch notes", kind: .book, wingId: wing.id)
+        var plain: [Container] = []
+        for (title, words) in [("lexer", "the lexer reads quillwort"), ("grammar", "the grammar")] {
+            let note = try h.operations.createPost(title: title, wingId: wing.id)
+            _ = try h.operations.newBlock(in: note.id, text: words, registeringUndo: false)
+            try h.operations.applyTag(parser.id, toPost: note.id)
+            plain.append(note)
+        }
+        let fenced = try h.operations.createPost(title: "private parser", wingId: wing.id)
+        _ = try h.operations.newBlock(in: fenced.id, text: "marshlantern secrets", registeringUndo: false)
+        try h.operations.applyTag(parser.id, toPost: fenced.id)
+        try h.operations.setNotePrivate(fenced.id, true)
+        return Gathered(wing: wing, gathering: gathering, book: book, plain: plain, fenced: fenced)
+    }
+
+    private func books(_ result: (content: [Tool.Content], isError: Bool?)) throws -> [[String: Any]] {
+        try #require(try json(result)["books"] as? [[String: Any]])
+    }
+
+    private func noteIDs(_ result: (content: [Tool.Content], isError: Bool?)) throws -> [String] {
+        try #require(try json(result)["notes"] as? [[String: Any]]).compactMap { $0["id"] as? String }
+    }
+
+    @Test func aWingGrantReadsItsGatheringsAndNoOtherGrantDoes() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        let app = FakeApp()
+        h.host.hooks.show = app.hook
+        try await h.within {
+            let g = try gathered(h)
+            let connection = try await h.connect(as: "claude-code")
+            let bookGrant = try #require(try h.approve("claude-code", spec(.edit, .book, g.book.id)))
+            let client = try h.client("claude-code").id
+            let gatheringID: [String: Value] = ["book_id": .string(g.gathering.id)]
+
+            // A book grant (even at edit) and a note grant never reach it.
+            #expect(try books(try await call(connection, "list_books", [:])).map { $0["id"] as? String }
+                    == [g.book.id], "a gathering is not a book grant's reach")
+            let refusedList = try await call(connection, "list_notes", gatheringID)
+            #expect(refusedList.isError == true && text(refusedList) == MCPRefusalCopy.words(.notShared, .book))
+            try h.operations.revokeMCPGrant(bookGrant)
+            let noteGrant = try h.operations.grantMCPAccess(client, spec(.edit, .note, g.plain[0].id))
+            #expect(try await call(connection, "list_notes", gatheringID).isError == true)
+            try h.operations.revokeMCPGrant(noteGrant)
+            #expect(h.asks.value.isEmpty, "no ask is ever raised for a gathering — it is no grant's scope")
+
+            // A wing grant reads it — listed beside the book, honestly counted.
+            _ = try h.operations.grantMCPAccess(client, spec(.read, .wing, g.wing.id))
+            let listed = try books(try await call(connection, "list_books", [:]))
+            #expect(Set(listed.map { $0["id"] as? String }) == [g.book.id, g.gathering.id])
+            let entry = try #require(listed.first { $0["id"] as? String == g.gathering.id })
+            #expect(entry["kind"] as? String == "gathering" && entry["notes"] as? Int == 2,
+                    "the Private member never counts")
+            #expect(listed.first { $0["id"] as? String == g.book.id }?["kind"] as? String == "book")
+            #expect((entry["rule"] as? [String: Any])?["tag"] as? String == "parser", "how it gathers")
+            #expect(Set(try noteIDs(try await call(connection, "list_notes", gatheringID))) == Set(g.plain.map(\.id)),
+                    "its assembly, every member through the per-note fence")
+
+            // Paged in its own order, on its own cursor.
+            let first = try json(try await call(connection, "list_notes",
+                                                gatheringID.merging(["limit": .int(1)]) { $1 }))
+            let cursor = try #require(first["next_cursor"] as? String)
+            let second = try await call(connection, "list_notes",
+                                        gatheringID.merging(["limit": .int(1), "cursor": .string(cursor)]) { $1 })
+            #expect(Set(try noteIDs(second) + ((first["notes"] as? [[String: Any]])?.compactMap { $0["id"] as? String } ?? []))
+                    == Set(g.plain.map(\.id)))
+            let crossed = try await call(connection, "list_notes",
+                                         ["book_id": .string(g.book.id), "cursor": .string(cursor)])
+            #expect(text(crossed) == MCPReadTools.staleCursorMessage, "a gathering's cursor never pages a book")
+
+            // Searched in its own scope — the Private member's words never answer.
+            let hidden = try json(try await call(connection, "search",
+                                                 ["query": .string("marshlantern"), "book_id": .string(g.gathering.id)]))
+            #expect((hidden["passages"] as? [Any])?.isEmpty == true)
+            let found = try json(try await call(connection, "search",
+                                                ["query": .string("quillwort"), "book_id": .string(g.gathering.id)]))
+            #expect((found["passages"] as? [[String: Any]])?.compactMap { $0["note_id"] as? String } == [g.plain[0].id])
+
+            // Shown as her doors open it.
+            let shown = try await call(connection, "show_in_app",
+                                       ["target": .string("book"), "book_id": .string(g.gathering.id)])
+            #expect(shown.isError != true && app.delivered.value.last == .book(bookID: g.gathering.id, sectionID: nil))
+            await h.hangUp(connection)
+        }
+    }
+
+    @Test func aGatheringStaysNoGrantsScopeAndNoWritesTarget() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let g = try gathered(h)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.edit, .wing, g.wing.id))
+            let client = try h.client("claude-code").id
+            #expect(throws: (any Error).self, "no grant names a gathering") {
+                try h.operations.grantMCPAccess(client, spec(.read, .book, g.gathering.id))
+            }
+            h.asks.setValue([])
+            let write = try await call(connection, "create_note",
+                                       ["text": .string("into a gathering"), "book_id": .string(g.gathering.id)])
+            #expect(write.isError == true && text(write) == MCPRefusalCopy.words(.notShared, .book),
+                    "a write into a gathering answers as a book that isn't there, under a wing EDIT grant")
+            let add = try await call(connection, "add_note_to_book",
+                                     ["note_id": .string(g.plain[1].id), "book_id": .string(g.gathering.id)])
+            #expect(add.isError == true)
+            #expect(h.asks.value.isEmpty)
+
+            // Archived: out of the listing, and assembling nothing, when asked.
+            try h.operations.archiveReading(g.gathering.id)
+            let resting = try books(try await call(connection, "list_books", [:]))
+            #expect(!resting.contains { $0["id"] as? String == g.gathering.id })
+            let archived = try books(try await call(connection, "list_books", ["include_archived": .bool(true)]))
+            #expect(archived.first { $0["id"] as? String == g.gathering.id }?["notes"] as? Int == 0,
+                    "an archived gathering assembles empty")
+            await h.hangUp(connection)
+        }
+    }
 }

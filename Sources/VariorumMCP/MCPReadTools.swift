@@ -180,13 +180,16 @@ struct MCPReadTools: Sendable {
             let live = standing.liveGrants
             let bookIDs = live.filter { $0.scopeKind == .book }.map(\.scopeID)
             let wingIDs = live.filter { $0.scopeKind == .wing }.map(\.scopeID)
+            // 13n-c R-AIR-12: a wing's GATHERINGS list beside its books —
+            // read facts under wing-level reach, never a grant target (the
+            // prefilter's book ids can never name one; the rule decides each).
             let rows = try Row.fetchAll(
                 db,
                 sql: """
-                    SELECT r.id, r.name, r.archived_at IS NOT NULL AS archived,
+                    SELECT r.id, r.name, r.kind, r.archived_at IS NOT NULL AS archived,
                            \(Self.resolvedWing("r.wing_id")) AS wing
                     FROM reading r
-                    WHERE r.deleted_at IS NULL AND r.kind = 'book'
+                    WHERE r.deleted_at IS NULL AND r.kind IN ('book', 'gathering')
                       AND (:archived OR r.archived_at IS NULL)
                       AND (:all OR r.id IN (SELECT value FROM json_each(:books))
                            OR \(Self.resolvedWing("r.wing_id")) IN (SELECT value FROM json_each(:wings)))
@@ -197,6 +200,10 @@ struct MCPReadTools: Sendable {
             var books: [[String: Any]] = []
             for row in rows {
                 let id: String = row["id"]
+                if (row["kind"] as String) == ReadingKind.gathering.rawValue {
+                    if let entry = try gatheringEntry(db, row, standing: standing) { books.append(entry) }
+                    continue
+                }
                 let decision = MCPGrantAuthority.decide(
                     standing, book: try Queries.mcpBookFacts(db, readingID: id), rung: .read)
                 guard decision.isAllowed else { continue }
@@ -223,7 +230,7 @@ struct MCPReadTools: Sendable {
                     ).isAllowed
                 }
                 var entry: [String: Any] = [
-                    "id": id, "name": row["name"] as String, "archived": row["archived"] as Bool,
+                    "id": id, "name": row["name"] as String, "kind": "book", "archived": row["archived"] as Bool,
                     "wing": try Queries.mcpScopeTitle(db, kind: .wing, id: wing) ?? Queries.mcpHomeWingName,
                     "wing_id": wing,
                     "notes": readable,
@@ -237,6 +244,36 @@ struct MCPReadTools: Sendable {
         }
         try logAfter(clientName, MCPToolCatalog.listBooks.name, nil, nil, allowed: !outcome.isError)
         return outcome
+    }
+
+    /// **A gathering's `list_books` entry** (13n-c R-AIR-12): listed only when
+    /// the rule's `decideGathering` reaches it (wing-level reach on its wing);
+    /// `notes` counts exactly what `list_notes(book_id:)` would emit — its
+    /// assembly (the ONE membership function, through `assembleReading`)
+    /// filtered note by note through the same rule (a fenced member never
+    /// lists, so it never counts); its `rule` is how it gathers. Cost ∝ the
+    /// gathering's assembly — the Bookcase's own gathering counts' class.
+    private func gatheringEntry(
+        _ db: Database, _ row: Row, standing: MCPGrantAuthority.Standing
+    ) throws -> [String: Any]? {
+        let id: String = row["id"]
+        guard let facts = try Queries.mcpGatheringFacts(db, readingID: id),
+              MCPGrantAuthority.decide(standing, gathering: facts).isAllowed
+        else { return nil }
+        let memberIDs = try Queries.assembleReading(db, readingID: id).map(\.postID)
+        let memberFacts = try Queries.mcpNoteFacts(db, noteIDs: memberIDs)
+        let readable = memberIDs.count { memberID in
+            MCPGrantAuthority.decide(standing, note: memberFacts[memberID], rung: .read, consumes: false).isAllowed
+        }
+        var entry: [String: Any] = [
+            "id": id, "name": row["name"] as String, "kind": "gathering", "archived": row["archived"] as Bool,
+            "wing": try Queries.mcpScopeTitle(db, kind: .wing, id: facts.wingID) ?? Queries.mcpHomeWingName,
+            "wing_id": facts.wingID,
+            "notes": readable,
+        ]
+        let bookFacts = try MCPBookFacts.facts(db, readingID: id)
+        for key in ["rule", "rule_unreadable"] { entry[key] = bookFacts[key] }
+        return entry
     }
 
     // MARK: - list_notes
@@ -260,7 +297,9 @@ struct MCPReadTools: Sendable {
         // — book order's key is a position, the recency listings' a stamp;
         // crossed, the keyset comparison pages garbage. Same words as an
         // undecodable cursor.
-        if let cursor, cursor.shape != (bookID != nil ? .book : .recency) {
+        // 13n-c R-AIR-12: a book id may name a GATHERING, whose order is its
+        // assembly's — its own cursor shape, checked once the place is known.
+        if let cursor, (bookID != nil) == (cursor.shape == .recency) {
             throw ArgumentFailure(message: Self.staleCursorMessage)
         }
         let act = MCPToolCatalog.listNotes.name
@@ -269,10 +308,24 @@ struct MCPReadTools: Sendable {
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
             var page: [PageRow]
             if let bookID {
-                let decision = MCPGrantAuthority.decide(
-                    standing, book: try Queries.mcpBookFacts(db, readingID: bookID), rung: .read)
+                let place = try MCPGrantAuthority.readPlace(db, readingID: bookID)
+                let decision = MCPGrantAuthority.decide(standing, reading: place)
                 guard decision.isAllowed else { return refusal(decision, .book) }
-                page = try bookPage(db, bookID: bookID, includeArchived: includeArchived, after: cursor, limit: limit)
+                switch place {
+                case .book:
+                    if let cursor, cursor.shape != .book {
+                        return Outcome(text: Self.staleCursorMessage, isError: true)
+                    }
+                    page = try bookPage(
+                        db, bookID: bookID, includeArchived: includeArchived, after: cursor, limit: limit)
+                case .gathering:
+                    if let cursor, cursor.shape != .gathering {
+                        return Outcome(text: Self.staleCursorMessage, isError: true)
+                    }
+                    guard let gathered = try gatheringPage(db, gatheringID: bookID, after: cursor, limit: limit)
+                    else { return Outcome(text: Self.staleCursorMessage, isError: true) }
+                    page = gathered
+                }
             } else if let wingID {
                 let decision = MCPGrantAuthority.decideWing(standing, wingID: wingID, rung: .read)
                 guard decision.isAllowed else { return refusal(decision, .wing) }
@@ -353,6 +406,42 @@ struct MCPReadTools: Sendable {
                     cursor: PageCursor(shape: .book, key: row["position"], id: row["id"]),
                     section: (row["section_id"] as String?).map { ($0, row["section_name"] as String) },
                     archived: row["archived"])
+        }
+    }
+
+    /// **A GATHERING's notes in its own order** (13n-c R-AIR-12): its assembly
+    /// (`assembleReading` — the ONE membership function; living notes only,
+    /// so `include_archived` has nothing to add), resumed after the cursor's
+    /// note. nil when that note is no longer in the assembly (it moved under
+    /// the cursor — the listing starts again). Cost ∝ the gathering's
+    /// assembly, then the page.
+    private func gatheringPage(
+        _ db: Database, gatheringID: String, after cursor: PageCursor?, limit: Int
+    ) throws -> [PageRow]? {
+        let entries = try Queries.assembleReading(db, readingID: gatheringID)
+        var start = 0
+        if let cursor {
+            guard let index = entries.firstIndex(where: { $0.postID == cursor.id }) else { return nil }
+            start = index + 1
+        }
+        let slice = Array(entries.dropFirst(start).prefix(limit))
+        var touched: [String: String] = [:]
+        for row in try Row.fetchAll(
+            db,
+            sql: """
+                SELECT c.id, COALESCE(c.last_touched_at, c.created_at) AS touched
+                FROM json_each(?) j JOIN container c ON c.id = j.value
+                """,
+            arguments: [try json(slice.map(\.postID))]) {
+            touched[row["id"]] = row["touched"]
+        }
+        return slice.enumerated().map { offset, entry in
+            PageRow(
+                id: entry.postID,
+                title: DisplayTitle.note(
+                    title: entry.title, entryDate: entry.entryDate, createdAt: entry.createdAt, calendar: calendar),
+                touched: touched[entry.postID] ?? "",
+                cursor: PageCursor(shape: .gathering, key: String(start + offset), id: entry.postID))
         }
     }
 
@@ -501,8 +590,11 @@ struct MCPReadTools: Sendable {
                 }
                 scopes = [SearchScope(wingID: facts.wingID, within: .note(id: noteID))]
             } else if let bookID {
-                let facts = try Queries.mcpBookFacts(db, readingID: bookID)
-                let decision = MCPGrantAuthority.decide(standing, book: facts, rung: .read)
+                // 13n-c R-AIR-12: a book OR a gathering (its own scope — the
+                // search composer reads the ONE membership function).
+                let place = try MCPGrantAuthority.readPlace(db, readingID: bookID)
+                let facts = place.facts
+                let decision = MCPGrantAuthority.decide(standing, reading: place)
                 // Round 1 F1: search serves STANDING reach only — a once book
                 // grant would pass the book decision and then fail every
                 // passage, an eternally empty page; refuse it here instead,
@@ -575,8 +667,10 @@ struct MCPReadTools: Sendable {
             return isStandingAllow(decision, standing)
         }
         if let readingID = passage.readingID {
+            // 13n-c R-AIR-12: a gathering's own name reads as a fact under
+            // wing-level reach, as it lists.
             return MCPGrantAuthority.decide(
-                standing, book: try Queries.mcpBookFacts(db, readingID: readingID), rung: .read).isAllowed
+                standing, reading: try MCPGrantAuthority.readPlace(db, readingID: readingID)).isAllowed
         }
         return false
     }
@@ -716,6 +810,9 @@ struct PageCursor: Equatable, Sendable {
         case book = "b"
         /// Recency — `(touched, id)`, descending.
         case recency = "r"
+        /// 13n-c R-AIR-12: a GATHERING's assembly order — `(index, post id)`;
+        /// resumes after the note it names.
+        case gathering = "g"
     }
 
     let shape: Shape

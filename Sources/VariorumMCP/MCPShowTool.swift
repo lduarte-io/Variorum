@@ -187,9 +187,13 @@ struct MCPShowTool: Sendable {
         case .note(let noteID, _, _), .takes(let noteID, _), .lens(let noteID, _):
             return try decideNote(db, target, noteID: noteID, standing: standing)
         case .book(let bookID, let sectionID):
-            let facts = try Queries.mcpBookFacts(db, readingID: bookID)
+            // 13n-c R-AIR-12: a book OR a gathering (read facts under
+            // wing-level reach — her doors open one like a book; it has no
+            // chapters, so a section_id answers as a stranger's).
+            let place = try MCPGrantAuthority.readPlace(db, readingID: bookID)
+            let facts = place.facts
             let title = facts == nil ? nil : try Queries.mcpScopeTitle(db, kind: .book, id: bookID, calendar: calendar)
-            let decision = MCPGrantAuthority.decide(standing, book: facts, rung: .read)
+            let decision = MCPGrantAuthority.decide(standing, reading: place)
             guard decision.isAllowed else {
                 return .refused(refusal(decision, .book), kind: "book", id: bookID, title: title)
             }
