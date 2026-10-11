@@ -51,7 +51,7 @@ extension MCPWriteTools {
             return .failure(Refused(outcome: MCPAsking(onAsk: hooks.onAsk)
                 .refusal(onWing, .wing, standing: standing, ask: ask)))
         }
-        return try land(job, clientName: clientName, kind: "note", id: noteID, title: title) {
+        return try land(job, clientName: clientName, kind: "note", id: noteID, title: title, logsReceiptTitle: false) {
             let moved: Operations.MCPWingMove
             do {
                 moved = try ops.mcpMoveNoteToWing(

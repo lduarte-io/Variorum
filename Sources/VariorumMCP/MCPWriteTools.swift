@@ -544,12 +544,16 @@ struct MCPWriteTools: Sendable {
     /// reads keep U1's one-transaction stamp.)
     func land(
         _ job: Job, clientName: String, kind: String, id: String, title: String?,
-        spending: [String] = [], _ act: () throws -> Act
+        spending: [String] = [], logsReceiptTitle: Bool = true, _ act: () throws -> Act
     ) throws -> Result<Landed, Refused> {
         do {
             let landed = try act()
             for grantID in spending { try? spend(grantID) }
-            try log(clientName, job.tool, kind, id, landed.receipt?.targetTitle ?? title, allowed: true)
+            // 13n-c U6, D-U6-2 (red-on-old): an act whose receipt titles
+            // something other than the logged target (a wing move's receipt
+            // names its DESTINATION, the sweep's coalescing key) logs its own.
+            let logged = logsReceiptTitle ? landed.receipt?.targetTitle ?? title : title
+            try log(clientName, job.tool, kind, id, logged, allowed: true)
             return .success(Landed(answer: try encode(landed.answer), receipt: landed.receipt))
         } catch let refused as Refused {
             try log(clientName, job.tool, kind, id, title, allowed: false)
