@@ -48,6 +48,12 @@ Her refresh condition still names an **OPUS UX-reviewer walk**, so that leg stay
 4. **Rows remaining unreviewed at the closeout stay on VX-166** (the post-phase Fable sweep). The ledger's "Reviewed by"
    column is filled as each review lands, so VX-166 shrinks to what is left.
 
+**A NAMING RULE, hers (2026-10-11 ~14:15: "why is it called R-AIR-14?? it should have a VX number … we started
+using linear so that everything would actually be consistently organized"):** an R- number names a RULING in a sitting
+record and keeps it (canon cites them); **the WORK a ruling mandates always carries a VX ticket from the moment it is
+scoped — never only the ruling's number.** U8 rode "R-AIR-14" with no ticket from the kickoff until now; fixed at her
+word: **VX-168** (Pre-launch label, 13n project). Standing rule for every future plan.
+
 **THE FABLE ORCHESTRATOR'S SCHEDULE (adopted at the takeover, 2026-10-11 ~14:00 MDT — Fable 5, this section
 supersedes the proposed order above where they differ):**
 1. **The walker finishes** (in flight — D-W1/D-W2 fixes, the picker re-walk, W-4's remainder, W-6…W-10, live rounds
@@ -104,8 +110,8 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | U4 | Asks wait quietly + the keyboard | BUILT + VERIFIED by the orchestrator at `f1ab4725` (5 commits `a41efc1b..f1ab4725`: fence diff empty — zero `Sources/` lines; zero trailers; captures read — Waiting, ⌘L typed, Bookcase glyphs) — the walk HELD (locked); Stage B |
 | U5 | The guide, the AI's advice, the setup menu | BUILT + VERIFIED by the orchestrator at `065526ce` (8 commits `58b81ec8..065526ce`: fence diff empty — zero `VariorumCore/` lines; zero trailers; captures read — lesson 4, the any-client JSON; the advice read whole) — the walk + the scratch `claude mcp add` HELD (locked); Stage B |
 | U6 | The wing on the wire (+ gatherings under a wing grant) | NEXT — spawns when the walker reports |
-| U7 | VX-159 — the ceremonies on the wire | FALLS OUT (the Fable orchestrator's takeover schedule, §4's named exit) — stays VX-159 |
-| U8 | R-AIR-14 — the per-setup secret | FALLS OUT (same decision) — a named ticket at the closeout |
+| U7 | VX-159 — the ceremonies on the wire | FALLS OUT of 13n-c AND of the launch (her word; VX-159 carries no launch label) |
+| U8 | **VX-168** — the per-setup secret (the work R-AIR-14 ruled) | FALLS OUT of 13n-c — **a PRE-LAUNCH GATE, her word 2026-10-11 ~14:15: "U8 done before launch but not before this applications refresh"**; ticket minted with the Pre-launch label; kickoff `notes/plans/vx-168-kickoff-prompt.md` |
 | W | The whole-phase walk + the OPUS UX-REVIEWER WALK (a ladder round) | NOT-STARTED |
 | C | Closeout (+ the /Applications refresh iff her four conditions hold) | NOT-STARTED |
 
@@ -745,9 +751,9 @@ unit record (TCC state is machine-state the next session inherits).
 | 7 | U5 — the guide, the advice, the setup menu | U5 implementer | BUILT + VERIFIED `065526ce` — walk HELD; the one cap-test red ("Unable to parse empty data") folded into **VX-132** by comment (Stage B R1 B14) |
 | 8 | Stage B ladder (opus) | orchestrator | **CLOSED at R2** — R1 → fix pass `c6d8509c..9c049c6a` → R2 (0B/0M/1m/4n) → the CLOSE-OUT FIX PASS `6f7fc38f..3e8ccd83` VERIFIED by the orchestrator (zero trailers; the one `Persistence/` line is the purely additive `AppDatabase.observe(tracking:_:)` — no schema, no caller changed, F-22; core 2,623/300 · MCP 82/12 · Mac 537/76 green). The close-out range is not cold-reviewed after R2 (no new B/M earned R3), so **it joins Stage C's review range** and is named there. |
 | 9 | U6 — the wing on the wire | U6 implementer | NOT-STARTED |
-| 10 | U7 — VX-159 | — | FALLS OUT — stays VX-159 (the takeover schedule) |
+| 10 | U7 — VX-159 | — | FALLS OUT of the phase and the launch (her word 2026-10-11 ~14:15) — stays VX-159, unlabeled |
 | 11 | Stage C ladder | orchestrator | FOLDED into the one combined fable ladder (the takeover schedule item 3) |
-| 12 | U8 — the secret | — | FALLS OUT — a named ticket at the closeout (the takeover schedule) |
+| 12 | U8 — the secret | — | FALLS OUT → **VX-168** (Pre-launch label; her gate: before launch, not before this refresh); kickoff prompt committed |
 | 13 | The whole-phase walk + the Opus UX-reviewer walk | orchestrator + walker + UX reviewer | **PAUSED at her word** (mid W-4) — W-1/W-2 done, W-3/W-4 partial; D-W1 + D-W2 found (picker defects, unfixed); T-1…T-8 for the UX reviewer; machine state live (claim, Debug app, scratch registration, dev store unrestored) |
 | 14 | Closeout + the conditional refresh | orchestrator | NOT-STARTED |
 | 15 | QUESTIONS #211 — this phase's PROVISIONALs (minted at the merge) | orchestrator | OPEN |
