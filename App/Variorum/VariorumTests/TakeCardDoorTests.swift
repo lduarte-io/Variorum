@@ -435,6 +435,33 @@ struct TakeCardDoorTests {
         }
     }
 
+    // MARK: - VX-155 — the popped menu's rows read at menu size, never mini
+
+    /// **RED ON OLD (VX-155, her 2026-10-11 report with a screenshot):** the
+    /// component sized its ⋯ chrome with `.controlSize(.mini)` ON THE MENU,
+    /// and on macOS the popped `NSMenu` inherits the control's size — so all
+    /// four rows (Archive · Label · Lock · Delete) rendered in mini type in
+    /// Write's panel and on the board's cards. The fix moves the mini metric
+    /// onto the LABEL's font alone; no control size may ride the `Menu`
+    /// again, or the rows shrink with it. A source lint, because a SwiftUI
+    /// `Menu` is not an `NSView` a pin can find (this suite's own header);
+    /// the rows' readable size is walked.
+    @Test func thePoppedMenuNeverInheritsAControlSize() throws {
+        let source = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent()  // VariorumTests
+                .deletingLastPathComponent()  // App/Variorum
+                .appendingPathComponent("Variorum/Features/Takes/TakesShared.swift"),
+            encoding: .utf8)
+        let sized = source.components(separatedBy: ".controlSize(").count - 1
+        #expect(sized == 0,
+                "the card menu carries no control size — the popped rows would inherit it (\(sized) left)")
+        // Control: the ⋯ label still states the mini metric itself, so the
+        // chrome the cards lay out around did not grow with the fix.
+        #expect(source.contains("systemFontSize(for: .mini)"),
+                "the glyph keeps the mini metric on its own font")
+    }
+
     // MARK: - Small helpers
 
     private func pollUntil(_ condition: @MainActor () async -> Bool, turns: Int = 200) async {
