@@ -793,7 +793,9 @@ nonisolated enum MCPReceiptCopy {
             let short = "\(first.clientName) \(wingMovePhrase(first, titled: false)) \u{00B7} \(undoes)"
             if short.count <= budget { return short }
         }
-        return "\(first.clientName) made \(run.count) changes \u{00B7} \(undoes)"
+        // 13n-c U6, D-U6-1 (red-on-old): ONE act is "a change", never "1 changes".
+        let made = run.count == 1 ? "made a change" : "made \(run.count) changes"
+        return "\(first.clientName) \(made) \u{00B7} \(undoes)"
     }
 
     /// One wing move, as her door's receipt says it (`WingCopy.moved`): the
