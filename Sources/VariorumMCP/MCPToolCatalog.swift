@@ -92,8 +92,8 @@ enum MCPToolCatalog {
             (tags by path: {"tag": "percy"}, {"star": true}, combined with {"and": […]}, {"or": […]}, \
             {"not": …}), its outflow (the tags notes written there wear), new_matches ("join" or \
             "wait" at Arrivals), word_target / max_notes, and whether it is finished, sealed, owned \
-            or collecting now. Archived books appear only with include_archived: true. Journals and \
-            Private books are never listed. Returns JSON.
+            or collecting now. Archived books appear only with include_archived: true. The daily \
+            Journal and Private books are never listed. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -113,7 +113,7 @@ enum MCPToolCatalog {
             wing_id: that wing's notes, most recently edited first. With neither: every note \
             shared with this client, most recently edited first. Paged — pass next_cursor back \
             as cursor. Archived notes appear only with include_archived: true (marked archived). \
-            Journal entries and Private notes appear only when shared one ask at a time. Returns JSON.
+            Daily Journal entries and Private notes appear only when shared one ask at a time. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",

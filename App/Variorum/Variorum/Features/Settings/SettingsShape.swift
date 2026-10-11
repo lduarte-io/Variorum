@@ -298,8 +298,10 @@ nonisolated enum SettingsCatalog {
                        "server", "connect", "client", "share", "grant", "socket"]),
         SettingsRow(
             id: "mcpOpenBook", pane: .mcp, title: MCPPaneCopy.openBookTitle,
+            // 13n-c U1 (R-AIR-1, J8): only THE daily Journal and anything
+            // Private still ask — a journal-style book reads like any book.
             blurb: "The open book: every approved MCP client may read everything, always \u{2014} "
-                + "journals still ask every time.",
+                + "your daily Journal and anything Private still ask every time.",
             keywords: ["open book", "mcp", "ai", "read everything", "share all", "always"]),
         SettingsRow(
             id: "protection", pane: .protection, title: "Protection",

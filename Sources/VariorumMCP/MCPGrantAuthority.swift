@@ -134,8 +134,11 @@ enum MCPRefusalCopy {
             // at a time.
             switch fence {
             case .journal:
-                return "That book is a journal. Its entries are shared one ask at a time, never by a "
-                    + "standing grant."
+                // 13n-c U1 (R-AIR-1, J8): only THE daily Journal is a fenced
+                // journal book now — "a journal" would tell the client every
+                // journal-style book is.
+                return "That book is the daily Journal. Its entries are shared one ask at a time, never "
+                    + "by a standing grant."
             case .privateMark:
                 return "That book is marked Private \u{2014} never shared with AI."
             }

@@ -35,6 +35,27 @@ private func call(
 
 @Suite("13n-c U1 — the fence re-key on the wire, and the one answer", .serialized)
 struct MCPFenceRekeyServerTests {
+    // MARK: - J8: the wire's own sentences say only the daily Journal is fenced
+
+    @Test func theWiresSentencesNameTheDailyJournalNotEveryJournal() {
+        let listBooks = MCPToolCatalog.listBooks.description
+        let listNotes = MCPToolCatalog.listNotes.description
+        #expect(listBooks.contains("The daily Journal and Private books are never listed."))
+        #expect(listNotes.contains("Daily Journal entries and Private notes appear only when shared one ask at a time."))
+        for text in [listBooks, listNotes] {
+            let stripped = text.replacingOccurrences(of: "Daily Journal entries", with: "")
+            #expect(!text.contains("Journals and") && !stripped.contains("Journal entries"),
+                    "no sentence may say every journal is fenced (R-AIR-1)")
+        }
+        #expect(MCPRefusalCopy.words(.fenced(.journal), .book)
+                == "That book is the daily Journal. Its entries are shared one ask at a time, never by a standing grant.")
+        // A fenced NOTE is the one answer, whichever fence (T-2).
+        for fence in [MCPGrantRule.Fence.journal, .privateMark] {
+            #expect(MCPRefusalCopy.words(.fenced(fence), .note) == MCPRefusalCopy.words(.notShared, .note))
+            #expect(MCPRefusalCopy.words(.fenced(fence), .note, asked: true) == MCPRefusalCopy.words(.notShared, .note))
+        }
+    }
+
     // MARK: - A journal-trait book reads like any book
 
     @Test func aJournalTraitBookIsListedReadAndSearchedUnderABookAWingAndTheOpenBook() async throws {

@@ -112,8 +112,11 @@ struct MCPAskAndReceiptTests {
                 == "claude-code asks to read “morning pages — oct 9”")
         #expect(MCPAskCopy.title(ask(rung: .writeNew, kind: .wing, title: "Home"))
                 == "claude-code asks to write new in the Home wing")
+        // 13n-c U1 (justified edit, the ritual — R-AIR-1, J8): the fence keys
+        // on THE daily Journal now; the VX-156 mockup §8's words verbatim.
         #expect(MCPAskCopy.lead(ask(fence: .journal))
-                == "A journal entry. Journals are only ever shared one ask at a time.", "mockup §4 verbatim")
+                == "A daily Journal entry. Your daily Journal is only ever shared one ask at a time.",
+                "mockup §8 verbatim")
         #expect(MCPAskCopy.lead(ask(fence: .privateMark)).hasPrefix("Marked Private."), "the journal line's twin")
         #expect(MCPAskCopy.lead(ask(rung: .suggest)).contains("it cannot touch a word you wrote"))
         #expect(CapabilityRegistry.capability(.mcpAnswerAsk).doors == [.surface])
@@ -161,6 +164,27 @@ struct MCPAskAndReceiptTests {
     }
 
     // MARK: - The grant sheet's rungs (mockup §3)
+
+    /// 13n-c U1 (R-AIR-1, J8): the six shipped sentences R-AIR-1 made false,
+    /// each in the VX-156 mockup §8's recommended words — only THE daily
+    /// Journal and anything Private still ask; no sentence says "journals".
+    @Test func theFenceSentencesNameTheDailyJournalNotEveryJournal() {
+        #expect(MCPPaneCopy.wingDetail("Home")
+                == "everything in Home except your daily Journal and anything Private, which always ask")
+        #expect(MCPPaneCopy.openBookDetail == "your daily Journal and anything Private still ask every time")
+        #expect(MCPPaneCopy.noBooks
+                == "No book can be shared yet (your daily Journal and Private books are shared one ask at a time).")
+        #expect(MCPPaneCopy.refusal(OperationError.mcpGrantScopeFenced(kind: "book", id: "x"))
+                == "Your daily Journal and Private notes are shared one ask at a time, never by a standing grant.")
+        #expect(MCPAskCopy.lead(ask(fence: .journal))
+                == "A daily Journal entry. Your daily Journal is only ever shared one ask at a time.")
+        let blurb = SettingsCatalog.rows.first { $0.id == "mcpOpenBook" }?.blurb ?? ""
+        #expect(blurb.hasSuffix("your daily Journal and anything Private still ask every time."))
+        for sentence in [MCPPaneCopy.wingDetail("Home"), MCPPaneCopy.openBookDetail, MCPPaneCopy.noBooks,
+                         MCPPaneCopy.refusal(OperationError.mcpGrantScopeFenced(kind: "book", id: "x")), blurb] {
+            #expect(!sentence.lowercased().contains("journals"), "\(sentence)")
+        }
+    }
 
     @Test func theGrantSheetOffersTheServedRungsWithTheMockupsSentences() {
         // U3 (justified edit, the ritual): the server serves edit now, so the

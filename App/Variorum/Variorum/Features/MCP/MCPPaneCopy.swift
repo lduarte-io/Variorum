@@ -103,7 +103,9 @@ nonisolated enum MCPPaneCopy {
 
     static let openBookSection = "Open book"
     static let openBookTitle = "Everything is readable, always"
-    static let openBookDetail = "journals still ask every time"
+    /// 13n-c U1 (R-AIR-1, J8 — the VX-156 mockup §8's recommended words):
+    /// only THE daily Journal and anything Private still ask.
+    static let openBookDetail = "your daily Journal and anything Private still ask every time"
 
     // MARK: - Activity (13n-b U3 — the coarse log's face; R-13n-10's caps)
 
@@ -210,10 +212,14 @@ nonisolated enum MCPPaneCopy {
         name.map { "\u{201C}\($0)\u{201D} \u{2014} its notes, takes and tags" } ?? "choose a book"
     }
     static let thisWing = "A wing"
+    /// 13n-c U1 (R-AIR-1, J8 — mockup §8's words): a journal-style book is
+    /// in the wing like any book; only the daily Journal and anything
+    /// Private ask.
     static func wingDetail(_ name: String) -> String {
-        "everything in \(name) except journals, which always ask"
+        "everything in \(name) except your daily Journal and anything Private, which always ask"
     }
-    static let noBooks = "No book can be shared yet (journals are shared one ask at a time)."
+    static let noBooks =
+        "No book can be shared yet (your daily Journal and Private books are shared one ask at a time)."
     /// HOW MUCH — the rungs the server can serve, each with the mockup §3
     /// sentence (U2: read · suggest · write new; U3: edit, now that the
     /// server serves it — a rung it couldn't serve was never offered, P-2).
@@ -260,7 +266,8 @@ nonisolated enum MCPPaneCopy {
         switch error as? OperationError {
         case .mcpClientNotApproved?: "Approve the client before granting it access."
         case .mcpGrantScopeFenced?:
-            "Journals and Private notes are shared one ask at a time, never by a standing grant."
+            // 13n-c U1 (R-AIR-1, J8 — mockup §8's words).
+            "Your daily Journal and Private notes are shared one ask at a time, never by a standing grant."
         case .mcpGrantScopeNotFound?: "That place no longer exists."
         case .mcpClientNotFound?: "That client no longer exists."
         case .mcpGrantNotFound?: "That grant no longer exists."
@@ -286,11 +293,12 @@ nonisolated enum MCPAskCopy {
         return "\(ask.clientName) asks to \(verb) \(target)"
     }
 
-    /// The sentence under it: the fence's reason (mockup §4's journal line
-    /// verbatim; the Private twin), else what the rung would let it do.
+    /// The sentence under it: the fence's reason (mockup §4's journal line,
+    /// re-keyed by 13n-c's R-AIR-1 to THE daily Journal — VX-156 mockup §8's
+    /// words; the Private twin), else what the rung would let it do.
     static func lead(_ ask: MCPAsk) -> String {
         switch ask.fence {
-        case .journal?: "A journal entry. Journals are only ever shared one ask at a time."
+        case .journal?: "A daily Journal entry. Your daily Journal is only ever shared one ask at a time."
         case .privateMark?: "Marked Private. Private notes are only ever shared one ask at a time."
         case nil: "If you allow it, " + MCPPaneCopy.rungDetail(ask.rung) + "."
         }
