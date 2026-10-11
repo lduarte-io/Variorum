@@ -1819,4 +1819,26 @@ FABLE-OWED rows written at the moment; where round 2 should look first.
 
 ## STAGE B FIX RECORD (LIVE STATUS — the fix implementer owns this section from its first commit)
 
-*(empty until the fix implementer's first commit)*
+Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~10:35 MDT). Worktree `~/dev/variorum-vx-165`,
+branch `vx-165-13n-c`. No revert is in flight unless a line below says so. The session is LOCKED at start (10:37 MDT:
+`CGSSessionScreenIsLocked 1`) — the walk stays HELD; offscreen captures stand in and are NOT a walk.
+
+| # | Row | Status |
+|---|---|---|
+| SB-0 | Preflight read whole (this plan top to bottom, the R1 record + dispositions) + the traces below | DONE (this commit) |
+| B1 | Lesson 1's "what you share stays on this Mac" → grants stay local + the honest provider sentence; check the advice + pane | NOT-STARTED |
+| B2 | A waiting ask answered on CURRENT facts (durations, reach line); a re-raise refreshes the payload, keeps the stamp; a gone target forgotten; a now-fenced book said | NOT-STARTED |
+| B3 | "and N more ›" opens the act's whole member list (bounded read ∝ the act) | NOT-STARTED |
+| B4 | Book Settings' grant-row gate on the fence's own fragments (`mcpFencedBookIDs`), parity pin | NOT-STARTED |
+| B5 | The Library row's Share with AI… door declared to the registry walk | NOT-STARTED |
+| B6 | ⌘L unavailable with one wing (P-2), the note naming New Wing… | NOT-STARTED |
+| B7 | The MCP pane's searchable description stops saying Claude Code only | NOT-STARTED |
+| B8 | `SearchPicker`'s sourced panel: empty-before-typing vs no-match, a `loaded` flag | NOT-STARTED |
+| B9 | "Any answer below grants it…" → true for Don't allow | NOT-STARTED |
+| B10 | Lesson 6 "every call" / lesson 1 "every act" overclaims | NOT-STARTED |
+| B11 | Dead code removed; `mcpReachableBookIDs` kept as the parity oracle, doc corrected | NOT-STARTED |
+| B13 + O-2 | Every client-facing wire string gender-neutral; the sweep pin | NOT-STARTED |
+| O-1 + O-3 | The pending glyph differs by silhouette (2–3 candidates captured, lead built PROVISIONAL); the helper row by role | NOT-STARTED |
+| S-2 | (optional) Waiting's scroll anchor on a row | NOT-STARTED |
+| SB-F | Finals: headless package + Mac suites over every changed type (held stage) + the U4/U5 capture re-shoots | NOT-STARTED |
+| SB-X | FIX PASS CLOSED banner | NOT-STARTED |
