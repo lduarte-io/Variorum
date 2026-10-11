@@ -27,8 +27,8 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | K1 | This plan finalized | DONE (this commit) |
 | U1 | The fence re-key (VX-163) | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U1 record) — owed: the orchestrator's verification + REAL Claude Code live round; the pre-flight walk HELD (locked session); Stage A |
 | U2 | The grant sheet rebuilt | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U2 record) — owed: the orchestrator's verification; the walk HELD (locked session) — offscreen captures stand in, NOT a walk; Stage B |
-| U3 | Grant from where you are + the one icon + the in-note indicator | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U3 record) — owed: the orchestrator's verification + the icon pick (P-13nc-U3-5); the walk HELD (locked session) — offscreen captures stand in, NOT a walk; Stage B |
-| U4 | Asks wait quietly + the keyboard | NOT-STARTED |
+| U3 | Grant from where you are + the one icon + the in-note indicator | BUILT + VERIFIED by the orchestrator at `c6d5d23a` (7 commits `4dc0202c..c6d5d23a`: fence diff empty — no Sync/ · Persistence/ · migrations · editor seam; zero trailers; 22 captures read — popover, Bookcase icon, two-door receipt) — icon pick: A `point.3.connected.trianglepath.dotted` KEPT (orchestrator, PROVISIONAL P-13nc-U3-5 — hers at the copy pass); the walk HELD (locked session); Stage B |
+| U4 | Asks wait quietly + the keyboard | BRIEFED — implementer spawning |
 | U5 | The guide, the AI's advice, the setup menu | NOT-STARTED |
 | U6 | The wing on the wire (+ gatherings under a wing grant) | NOT-STARTED |
 | U7 | VX-159 — the ceremonies on the wire | NOT-STARTED (may fall out — §4) |
@@ -614,8 +614,8 @@ unit record (TCC state is machine-state the next session inherits).
 | 3 | Stage A ladder | orchestrator | **CLOSED at R2** — R1 fable (`4140860f`: 1M/2m/3n; F1 FIXED `c1047097`) → R2 opus (`6ec3d98c`: 0B/0M/4m/5n; R2-1/R2-4 pinned, R2-5 fixed; the rest routed) |
 | 3b | **Stage A routed findings** — R1: F2 (R-AIR-3 on the ask road → U2/U4; a ticket if they fall out) · F3 + R2-6 (closeout checklist) · F4 (U2) · F5 + R2-8 (U5) · F6 + R2-7 (her copy pass) · R2: R2-2 + R2-4 (#211, hers) · R2-3 (U2) | U2/U4/U5 + closeout | OPEN — each closes where routed |
 | 4 | U2 — the grant sheet | U2 implementer | BUILT + VERIFIED `49c964ea` — walk HELD |
-| 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | BUILT (UNIT CLOSED) — walk HELD (locked); the icon pick owed |
-| 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | NOT-STARTED |
+| 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | BUILT + VERIFIED `c6d5d23a` — walk HELD (locked); icon A kept PROVISIONAL (orchestrator); UX-walk watch: the icon reads small beside a Terminal-voice book name (capture `u3-bookcase-terminal.png`) — the UX reviewer is asked to judge it |
+| 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | BRIEFED — spawned |
 | 7 | U5 — the guide, the advice, the setup menu | U5 implementer | NOT-STARTED |
 | 8 | Stage B ladder (opus) | orchestrator | NOT-STARTED |
 | 9 | U6 — the wing on the wire | U6 implementer | NOT-STARTED |
@@ -1259,3 +1259,82 @@ badge are only seen in offscreen renders; the held walk is where that is settled
   PROVISIONAL (P-13nc-U3-3) + a FABLE-OWED row.
 - **D-U3 — no `Sync/`, no schema, no custody, no editor seam, no fence derivation** (consumed through
   `mcpNoteFacts` / `mcpBookFacts` / `MCPGrantRule` only — re-verified at close).
+
+---
+
+## THE U4 IMPLEMENTER BRIEF (self-contained; the spawn names this section)
+
+You are the U4 implementer for Variorum phase 13n-c, working in `~/dev/variorum-vx-165` on
+branch `vx-165-13n-c` (NEVER the main checkout). Commits say `Part of VX-165` (and
+`Part of VX-157` for the wing switcher), NO attribution trailer, push after every commit.
+`notes/SessionResiliencyProtocol.md` binds you: LIVE STATUS in the "U4 UNIT RECORD" section below
+from your FIRST commit, foreground waits only (a `grep -q … && break; sleep 5` poll loop), no
+subagents.
+
+**Read first, whole, never delegated:** this plan file TOP TO BOTTOM (rulings, D-1…D-5, §3 U4,
+§7, §8, the U1–U3 records — U3 built the icon family with a slot for the pending-ask glyph and the
+in-note indicator you extend); the sitting record `notes/plans/vx-156-grant-ux-design-kickoff.md`
+(R-AIR-5, -6, -8, -15, round 5); the brief `notes/plans/vx-156-grant-ux-brief.md` §5, §6, §7,
+§13 (the chord sweep); the mockups §4, §5, §6. The 13n-b plan's AF-6 (the ask never blocks; the
+queue's shape), P-13nb-U2-9 (the arrival you are superseding), R-13nb-23/26g (etiquette is law).
+Code: `Features/MCP/MCPDoor.swift` (the ask queue, `presentedAsk`), `VariorumApp.swift` (~l.86–95
+the WindowGroup `.sheet(item:)` that self-presents asks), `Features/MCP/MCPAskSheet.swift`,
+`MCPPane.swift`, `Features/Shelf/WingSwitcherMenu.swift` + `ShelfView.swift` (~l.504) and the
+Library's masthead (`Features/Library/`), `EditorCommands.swift` (the chord table + its sweep
+records), the registry under `App/Variorum/Shared/`, `Features/Help/` (`HelperView.groups` — the
+ONE source both Settings ▸ Shortcuts and ⌘/ render), `Features/Settings/SettingsShape.swift`,
+`Features/CalmAsks/`.
+
+**What U4 builds — §3 U4 items 1–6, with these concretions:**
+1. **The ask projection:** one observable, keyed by target (note id · book id · wing id), read by
+   every face — never a broadcast (P-4). The pending-ask glyph (U3's icon family) on: Library and
+   Pool note rows, the book TOC rows, the bottom bars' note ▾, Bookcase rows, the wing switcher's
+   rows, the masthead's wing word, and U3's in-note indicator. Hover names the client(s) and what
+   they ask; HER press opens THAT ask's sheet. Never raises, scrolls, toasts or self-presents.
+   Clears on answer, on the queue's cap forgetting it, and on store detach.
+2. **Arrival X:** retire the self-presenting `.sheet(item:)` (asks NEVER appear by themselves);
+   Settings ▸ MCP gains **Waiting** above Connection requests (each row "<client> asks to <rung>
+   <in place>" with the U2 disambiguated label, age, Answer…; capped with its "all N ›" road).
+   The wire is unchanged. Update every sentence that described the old arrival (the 13n-b handoff
+   is history — do not edit it; the guide/help/settings copy you find, yes).
+3. **⌥⌘, — "MCP Settings…"** in the Variorum app menu under Settings…: opens Settings at MCP,
+   scrolled to Waiting when an ask waits. Registry act; chord sweep at the tip, recorded.
+4. **⌘L — the wing switcher (R-AIR-15, her ratified chord):** an app-wide command; ⌘L opens the
+   switcher as a type-to-filter picker (SearchPicker's idiom or its own popover — your call, keep
+   it FAST); while the switcher is open, holding ⌘ and tapping L again moves the highlight to the
+   next wing (wrapping), releasing ⌘ commits the highlighted wing (the ⌘-tab idiom), return
+   commits, Esc closes; the masthead switcher CLICKED WITHOUT TYPING cycles to the next wing (her
+   "click-without-typing CYCLES … fast to click"); keep New/Rename/Move/Delete reachable (a menu
+   affordance beside the cycling click — record how). Present on the Bookcase masthead AND the
+   **Library** masthead (round 5). The existing "Now in …" receipt speaks. One quiet line in the
+   switcher: Snippets is the one room every wing shares. Bare ⌘L re-verified free at the tip across
+   all seven places of brief §13 — record the sweep beside the binding.
+5. **The shortcuts pane + ⌘/:** `HelperView.groups` gains every chord added this phase (⌥⌘A from
+   U3, ⌥⌘, and ⌘L here) and an MCP group holding them with ⌥⌘O (Show the AI's Last Change) and
+   ⌥⌘Z's client-named undo; the Settings search reaches them; `HelperCurrencyTests` (or its kin)
+   green and extended.
+6. **"While connected":** write 2–3 copy options in your record (her ask: she finds it vague),
+   build the most neutral PROVISIONAL, everywhere the duration is said (sheet, ask, pane, receipts).
+
+**Must NOT touch:** `Sync/`, custody/keychain, the editor seam, migrations, `lockstepVersion`, the
+real store, `/Applications`, the fence derivation.
+
+**Acceptance:** pins for the projection (pure keying, clearing) + the whole headless package; Mac
+suites for every changed surface (`MCPPaneTests`, `MCPAskAndReceiptTests`, `CapabilityRegistryTests`,
+`ChordLegibilityTests`, `HelperCurrencyTests`, `SettingsShapeTests`, the Shelf/Library masthead
+and wing suites — grep for `WingSwitcher`, `wing`), HELD stage claim, `skipped:` read. Pre-flight
+WALK, dev-store Debug, Study AND Terminal: a scripted client's ask arriving while you type in a
+note (nothing appears; the glyph does), answered from the glyph and another from Waiting; ⌥⌘,
+landing at Waiting; ⌘L typed-filter commit, held-⌘ L cycling commit, the masthead click cycling
+on BOTH mastheads; the shortcuts pane and ⌘/ listing the new chords. Captures in
+`notes/plans/13n-c-screens/u4/`. (The REAL-client ask leg is the orchestrator's live round.)
+
+**Locked-session note (standing):** if the Mac's session is locked (check `/usr/bin/swift -e 'import CoreGraphics; print((CGSessionCopyCurrentDictionary() as? [String:Any])?["CGSSessionScreenIsLocked"] ?? "nil")'`), HOLD the walk; a gated offscreen render harness of the real views stands in, said plainly to be NOT a walk (U2/U3's precedent). The ⌘L held-⌘ cycling and the never-self-present promise get state-transition pins since they cannot be walked.
+
+**Ladder carry (U1 round 1, F2 — the ask road half):** the ask sheet's Always on a BOOK ask carries R-AIR-3's clause; verify U2 built it and pin it if not.
+
+**Forks / close:** as the earlier briefs.
+
+## U4 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
+
+*(empty until the U4 implementer's first commit)*
