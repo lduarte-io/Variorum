@@ -243,6 +243,48 @@ public enum MCPGrantRule {
         return .ask(.notShared, offersAlways: true)
     }
 
+    // MARK: - The WHY (13n-c U3 — R-AIR-6/-7: "readable through the Home wing grant")
+
+    /// What lets an approved client reach a target right now.
+    public enum Standing: Equatable, Sendable {
+        /// A live grant authorizes it — its scope says why: the place's own
+        /// grant, or a wider one (a book holding the note, the wing).
+        case grant(Grant)
+        /// The open book (read, everywhere unfenced — no grant row).
+        case openBook
+    }
+
+    /// An approved client's reach on a target: how far, and why.
+    public struct Reach: Equatable, Sendable {
+        public let rung: Rung
+        public let standing: Standing
+
+        public init(rung: Rung, standing: Standing) {
+            self.rung = rung
+            self.standing = standing
+        }
+    }
+
+    /// **The highest rung an APPROVED client reaches the target at right
+    /// now, and the standing that authorizes it** — read OFF `decide` itself
+    /// (its `.allow(grantID:)`; nil = the open book), never a parallel rule:
+    /// the faces' WHY is exactly the grant the server would use. A
+    /// non-consuming probe (`consumes: false`), so it spends nothing. nil =
+    /// it reaches nothing (a fenced note reached by no per-ask grant of its
+    /// own; a fenced book always).
+    public static func reach(grants: [Grant], openBook: Bool, target: Target) -> Reach? {
+        for rung in Rung.allCases.reversed() {
+            guard case .allow(let grantID, _) = decide(
+                client: .approved, grants: grants, openBook: openBook, target: target,
+                rung: rung, consumes: false)
+            else { continue }
+            guard let grantID else { return Reach(rung: rung, standing: .openBook) }
+            guard let grant = grants.first(where: { $0.id == grantID }) else { continue }
+            return Reach(rung: rung, standing: .grant(grant))
+        }
+        return nil
+    }
+
     /// **ONCE: ONE WRITE MEANS ONE WRITE** (AF-7 AS AMENDED at the U2
     /// ladder's F4 — the ride-free clause covers READS only): a once READ
     /// grant is spent by its first content read (U1's letter, unchanged);
