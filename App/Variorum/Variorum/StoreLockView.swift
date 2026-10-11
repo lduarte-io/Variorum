@@ -26,9 +26,16 @@
 //    instead" word, and the recovery road stays behind its disclosure.
 //    Under a Passphrase demand the field is the road and shows directly.
 //
-//  The biometric demand auto-asks ONCE on appear (that is what "asks
-//  every time it opens" means); every sentence is the standing
+//  The biometric demand auto-asks ONCE per lock occasion (that is what
+//  "asks every time it opens" means); every sentence is the standing
 //  `ProtectionCopy` brain's — no copy changed in the restyle.
+//
+//  VX-140 (the VX-143 run — her report: the Touch ID sheet over her terminal,
+//  "it just keeps appearing"): the automatic ask fires only while Variorum is
+//  the ACTIVE app. A lobby that mounts in the background (a relock while she
+//  works elsewhere) waits, and asks once when she comes back; the "asked"
+//  fact lives on the lobby (`StoreLobby.autoAskSpent`), so a cancel is never
+//  followed by another unasked sheet — the button is her road after that.
 //
 
 import SwiftUI
@@ -40,6 +47,10 @@ struct StoreLockView: View {
     /// existing library"): non-nil only where the composition offers it
     /// (the waiting state; never the Castle lobby — P-2).
     var openDoor: (() -> Void)? = nil
+    /// VX-140: whether Variorum is the active app RIGHT NOW — the automatic
+    /// ask's one input beyond the lobby. Injected so a pin can stand in for
+    /// either side; production asks AppKit.
+    var appIsActive: () -> Bool = { NSApp.isActive }
 
     @State private var passphrase = ""
     @State private var recoveryText = ""
@@ -48,7 +59,6 @@ struct StoreLockView: View {
     /// passphrase road waits behind one quiet word. Any other demand shows
     /// the field directly (it is the road).
     @State private var passphraseRevealed = false
-    @State private var autoAsked = false
     @Environment(\.colorScheme) private var scheme
 
     /// No session exists yet, so the lobby speaks the leading voice.
@@ -70,11 +80,18 @@ struct StoreLockView: View {
             }
         }
         .task {
-            // The biometric demand asks as the lobby appears — once; the
-            // button below re-asks. (The prompt is the mode's whole point.)
-            guard lobby.demand == .biometric, lobby.biometryOffered, !autoAsked else { return }
-            autoAsked = true
-            await lobby.unlockWithBiometrics()
+            // The biometric demand asks as the lobby appears — once per lock
+            // occasion, and only in front of her (VX-140): a lobby that
+            // mounted in the background asks on her return instead (below).
+            // The button re-asks. (The prompt is the mode's whole point.)
+            await lobby.autoAskIfDue(appIsActive: appIsActive())
+        }
+        .onReceive(NotificationCenter.default.publisher(
+            for: NSApplication.didBecomeActiveNotification)) { _ in
+            // She came back to Variorum: a lobby still holding its one
+            // automatic ask spends it now. Spent already (asked, cancelled, or
+            // she pressed the button) ⇒ nothing — no re-ask she did not make.
+            Task { await lobby.autoAskIfDue(appIsActive: true) }
         }
     }
 

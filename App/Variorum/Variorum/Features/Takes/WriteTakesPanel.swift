@@ -49,6 +49,8 @@ struct WriteTakesPanel: View {
     let blockID: String
     @State private var model: TakesViewModel
     @State private var archived: [Variant] = []
+    /// VX-135: the panel's routed-command registration (see `handleRouted`).
+    @State private var commandToken: UUID?
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     @Environment(\.dismiss) private var dismiss
@@ -180,6 +182,17 @@ struct WriteTakesPanel: View {
         .onChange(of: model.projection) { _, _ in
             Task { await loadArchived() }
         }
+        // VX-135 (her report: "command enter in a take from write's take
+        // menu doesn't work to select the take as the chosen one"): while the
+        // panel is up it answers ⌘⏎ itself. Write's own handler stands
+        // beneath this sheet, and its `.choose` arm OPENS the caret block's
+        // panel — already open — so the take whose pane is live here was never
+        // chosen. Registered on appear, the panel is the LIFO top. VX-150: the
+        // other take keys are claimed too (`handleRouted`); every other
+        // command falls through to Write unchanged.
+        .onAppear {
+            commandToken = session.commandRouter.registerHandler { handleRouted($0) }
+        }
         .sheet(item: Binding(
             get: { model.takeLabelRequest },
             set: { model.takeLabelRequest = $0 })
@@ -188,7 +201,86 @@ struct WriteTakesPanel: View {
                 Task { await model.setTakeLabel(request.variantID, label: label) }
             }
         }
-        .onDisappear { model.teardown() }
+        .onDisappear {
+            if let commandToken {
+                session.commandRouter.unregisterHandler(commandToken)
+            }
+            model.teardown()
+        }
+    }
+
+    /// The panel's routed-command handler. VX-135: ⌘⏎ chooses the take the
+    /// ring is in — `TakesViewModel.chooseFocusedTake`, the Takes board's own
+    /// arm, so the operations layer sets the pointer and, with no take
+    /// clicked into, its real refusal speaks in the panel (P-2).
+    ///
+    /// VX-150: the REST of the take keys are the panel's too, on THIS block.
+    /// Falling through, they reached Write's caret arms beneath the sheet —
+    /// stepping re-opened (or, from a ⑂ badge, swapped in) the caret block's
+    /// panel, the mints grew the caret block from the take Write shows there,
+    /// and ⌘⇧A archived that shown take rather than the one the ring is in.
+    /// Each arm is the Takes board's own body, passed this panel's column so
+    /// the ring lands on a card the panel renders. ⌘⇧T, ⎋ and ⌘⇧L are not
+    /// take acts on a block and still reach Write.
+    private func handleRouted(_ command: RoutedCommand) -> Bool {
+        guard case .takes(let takes) = command else { return false }
+        switch takes {
+        // Ladder r1 (the escalated finding): NO take key acts on a block
+        // that has left the note — one rule, one sentence, the mints' guard
+        // on every arm. The ring SURVIVES the block leaving
+        // (`authority.livePane` clears only on blur or a new focus; nothing
+        // clears it when the pane unmounts) and `archiveVariant` needs no
+        // placement (`ensurePlacementUnlocked` passes with none), so before
+        // this guard ⌘⇧A really archived a take of the RELEASED original
+        // while the panel's whole face said the block was gone — and the
+        // ring keys' model refusals said "Click into a take first" over a
+        // face with nothing to click into.
+        case .choose:
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.chooseFocusedTake() }
+        case .stepPrev:
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.stepTakes(by: -1) }
+        case .stepNext:
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.stepTakes(by: 1) }
+        case .archive:
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.archiveFocusedTake() }
+        // ⌘T · ⌥⌘T · ⇧⌥⌘T — the growth doors' acts on this block, the ring
+        // following onto the new card. A block that has left the note shows
+        // no doors, so its keys say why rather than grow it.
+        case .branch:
+            guard let slot else { return refuseBlockGone() }
+            // The take the ring is in, else what the block shows (PROVISIONAL
+            // — the Takes bar's "+ take" rule; the dashed door below, which
+            // names ⌘T, copies what's shown).
+            let ring = model.focusedPane.flatMap { $0.blockID == blockID ? $0.variantID : nil }
+            guard let from = ring ?? slot.variantID else {
+                model.refuse("This block has no renderable take to branch from.")
+                return true
+            }
+            Task {
+                await model.branchTakeRevealed(
+                    blockID: blockID, from: from, preferredColumnID: column.id)
+            }
+        case .blank:
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.newBlankTakeRevealed(blockID: blockID, preferredColumnID: column.id) }
+        case .blankChoose:
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.newBlankTakeAsChosen(blockID: blockID, preferredColumnID: column.id) }
+        case .toggleFan, .closeAll, .saveLens:
+            return false
+        }
+        return true
+    }
+
+    /// The panel's own "no longer in the note" line, as a key's refusal (the
+    /// key was the panel's — consumed, never handed down to Write's caret).
+    private func refuseBlockGone() -> Bool {
+        model.refuse("This block is no longer in the note.")
+        return true
     }
 
     // MARK: - Cards (the one grammar)
@@ -220,7 +312,8 @@ struct WriteTakesPanel: View {
                     // Phase 7 are a COMPONENT now (`TakeCardMenu`), so the
                     // Takes board's live cards render the same list rather
                     // than a second copy of it — her F1 rule made structural.
-                    // The chrome is this panel's own, unchanged to the byte;
+                    // The chrome is this panel's own (the component's,
+                    // since the 13u3 extraction — VX-155 resized its menu);
                     // the one word that moved is the label row, which said
                     // "Label…" here and "Label take…" on the card context
                     // menu, i.e. the two "matching" menus did not agree on it.

@@ -2215,10 +2215,29 @@ final class TakesViewModel {
         get { board.gridCols }
         set { board.gridCols = newValue }
     }
+    /// VX-136: her column CHOICE (nil = the ruled default).
+    var gridColsChoice: Int? {
+        get { board.gridColsChoice }
+        set { board.gridColsChoice = newValue }
+    }
+
+    /// VX-136: the columns one block's rail shows (her choice, else the
+    /// ruled default for its fan) — the board's brain, forwarded.
+    func gridCols(takeCount: Int, slotText: String?) -> Int {
+        board.gridCols(takeCount: takeCount, slotText: slotText)
+    }
 
     /// R24's strip exception, one brain with the board's chunking.
     func railRowsPerColumn(slotText: String?) -> Int {
         board.railRowsPerColumn(slotText: slotText)
+    }
+
+    /// VX-136: the grid's ROW slots for one block's fan — the tallest card in
+    /// each row across all its columns (see `TakesBoardLayout.railRowHeights`).
+    func railRowHeights(takes: [Variant], rowsPerColumn: Int) -> [CGFloat] {
+        TakesBoardLayout.railRowHeights(
+            cardTextHeights: takes.map { board.measuredTextHeight($0.id) },
+            rowsPerColumn: rowsPerColumn)
     }
 
     // MARK: - Card heights (QoL batch 2, L3 · L4) — the board's, forwarded
@@ -2303,7 +2322,8 @@ final class TakesViewModel {
             let text = projection.slots.first { $0.blockID == blockID }?.text
             let rows = railRowsPerColumn(slotText: text)
             let columns = (fan.count + rows - 1) / rows
-            return (Self.railPageKey(blockID), max(columns - gridCols, 0))
+            let shown = gridCols(takeCount: fan.count, slotText: text)
+            return (Self.railPageKey(blockID), max(columns - shown, 0))
         case .stack:
             return nil
         }
@@ -2422,14 +2442,15 @@ final class TakesViewModel {
                 board.setPage(blockID, to: min(index, limit), limit: limit)
             }
         case .marginGrid:
-            let rows = max(railRowsPerColumn(
-                slotText: projection.slots.first { $0.blockID == blockID }?.text), 1)
+            let text = projection.slots.first { $0.blockID == blockID }?.text
+            let rows = max(railRowsPerColumn(slotText: text), 1)
             let column = index / rows
             let columns = (fan.count + rows - 1) / rows
-            let limit = max(columns - gridCols, 0)
+            let shown = gridCols(takeCount: fan.count, slotText: text)
+            let limit = max(columns - shown, 0)
             let key = Self.railPageKey(blockID)
             let current = pageOffset(key, limit: limit)
-            if column < current || column >= current + gridCols {
+            if column < current || column >= current + shown {
                 board.setPage(key, to: min(column, limit), limit: limit)
             }
         case .stack:

@@ -156,7 +156,8 @@ struct SettingsShapeTests {
 
     /// Her own owner assignment: *"you can add the fold issue to 13u4."*
     /// The 18j appearance control sat below the fold because ONE pane held
-    /// fifteen controls. It is now on the pane that opens, which holds four.
+    /// fifteen controls. It is now on the pane that opens, which stays
+    /// short (six catalog rows since VX-139, the caps below).
     ///
     /// A pin cannot see a fold — the walk is the evidence, and it is in the
     /// record. What this holds is the cause: General stays short, and the
@@ -166,7 +167,13 @@ struct SettingsShapeTests {
                 "General is the pane Settings opens on")
         let general = SettingsCatalog.rows(in: .general)
         #expect(general.contains { $0.id == "appearance" })
-        #expect(general.count <= 5,
+        // VX-139 (a CONSEQUENTIAL pin edit, annotated in place — the same
+        // edit as DiagnosticsPaneTests', P-VX139-vi): the keep-open-notes
+        // toggle is General's sixth row, below the palette (in Release
+        // the Updates section renders after it) — the fold's cause was
+        // fifteen controls ABOVE the appearance row, and that row still
+        // sits second from the top.
+        #expect(general.count <= 6,
                 "the fold came from fifteen controls in one pane — this one stays short")
     }
 

@@ -594,13 +594,22 @@ struct TakeCardMenu: View {
 
     var body: some View {
         let rows = Self.rows(acts)
-        // The chrome is Write's panel's, unchanged to the byte — this
-        // component was extracted from it, and the board inherits the
-        // grammar rather than a second one being invented for it.
-        Menu(TakeCardMenuCopy.menuGlyph) {
+        // The chrome is Write's panel's — this component was extracted
+        // from it, and the board inherits the grammar rather than a second
+        // one being invented for it. (VX-155 moved the mini metric from the
+        // Menu onto the label's own font; the glyph draws at the same size.)
+        Menu {
             ForEach(rows) { row in
                 Button(row.title, role: row.destructive ? .destructive : nil, action: row.act)
             }
+        } label: {
+            // VX-155 (her 2026-10-11 report): the mini metric rides the ⋯
+            // LABEL's own font, never the Menu — a control size on the Menu
+            // is inherited by the popped `NSMenu`, so all four rows rendered
+            // in mini type. The glyph keeps exactly the size the mini
+            // control drew it at; the rows read at standard menu size.
+            Text(TakeCardMenuCopy.menuGlyph)
+                .font(Font(NSFont.systemFont(ofSize: NSFont.systemFontSize(for: .mini))))
         }
         .menuStyle(.borderlessButton)
         // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
@@ -608,7 +617,6 @@ struct TakeCardMenu: View {
         // wrapped one (the b6dae25 class's window-sizing hazard).
         .lineLimit(1)
         .fixedSize()
-        .controlSize(.mini)
         .recordTakeCardDoors(rows.map(\.id))
     }
 }

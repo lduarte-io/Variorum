@@ -36,9 +36,12 @@ struct QuietRunRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
+            // VX-144 (the quiet ledger, precision 6): the voice's own small
+            // type and muted ink — it drew in the system caption + secondary,
+            // a sans-serif line between mono rows in the Terminal voice.
             Text(tokens.chromeLabel(SavepointRuns.runLabel(count: count)))
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
                 .lineLimit(1)
             // `VoicedButtonStyle`, not `.buttonStyle(.link)` — P-8's chrome
             // vocabulary rule (`Theme/VoiceControls.swift` is THE vocabulary),

@@ -17,9 +17,11 @@
 //    never "left/right". Today exactly one pane exists; a split, a third
 //    pane, or free tiling adds keys and changes nothing else.
 //  - **View state, and only view state.** IDs only — never a copy of
-//    persisted text (the standing state rule); never persisted, never
-//    synced. Closing an open-note row closes a ROW: nothing is deleted,
-//    archived, or written.
+//    persisted text (the standing state rule); never synced. Closing an
+//    open-note row closes a ROW: nothing is deleted, archived, or written.
+//    *Since VX-139 the Open strip's ids are REMEMBERED across launches*
+//    (a local this-Mac preference; `WorkspaceModel` owns the memory —
+//    the types here stay pure).
 //
 
 import Foundation
@@ -253,7 +255,10 @@ nonisolated struct NavigationHistory: Equatable {
 ///   LEAST-RECENTLY-OPENED note leaves, never the oldest-inserted one. A
 ///   note she keeps returning to must not be evicted merely for having been
 ///   opened first.
-/// - **Manual reorder is hers**, session-only and never a setting.
+/// - **Manual reorder is hers**, a gesture and never a setting (her
+///   round-7.1 ruling). *Since VX-139 the strip's MEMBERSHIP and order are
+///   remembered across launches behind a local setting — her later ask
+///   extends the strip's lifetime; the reorder stays a gesture.*
 nonisolated struct OpenNotes: Equatable {
     /// The reach of ⌘⇧1…⌘⇧9 — the first nine rows in strip order. **Since
     /// Act 10 item 9 this is a KEY cap, not a visibility cap**: the strip
@@ -277,6 +282,35 @@ nonisolated struct OpenNotes: Equatable {
     /// question — who leaves when the tracked list is full — and never
     /// touches what the strip shows or what ⌘⇧n addresses.
     private(set) var recency: [String] = []
+
+    /// **VX-139 — a strip restored from a previous launch.** Built directly
+    /// rather than by replaying `opened(_:)`, because a replay would order
+    /// the strip by recency and the stored strip's own order — including any
+    /// manual arrangement she left it in — is exactly what is being kept.
+    /// Defensive against a torn store: ids deduped, dead ids dropped by the
+    /// caller's `isLive`, an id the recency list lost re-joins at its back
+    /// (least recent), and a store somehow holding MORE than the tracked cap
+    /// pays the bound exactly as a live session does — the least recently
+    /// opened leave, never a positional prefix cut (the Pro review's NIT-1).
+    init(restoringIDs storedIDs: [String], recency storedRecency: [String],
+         isLive: (String) -> Bool) {
+        var seenID = Set<String>()
+        var kept = storedIDs.filter { isLive($0) && seenID.insert($0).inserted }
+        let keptSet = Set(kept)
+        var seenRecency = Set<String>()
+        var restoredRecency = storedRecency.filter {
+            keptSet.contains($0) && seenRecency.insert($0).inserted
+        }
+        for id in kept where !seenRecency.contains(id) { restoredRecency.append(id) }
+        while kept.count > Self.trackedCap, let victim = restoredRecency.last {
+            kept.removeAll { $0 == victim }
+            restoredRecency.removeAll { $0 == victim }
+        }
+        ids = kept
+        recency = restoredRecency
+    }
+
+    init() {}
 
     /// Opening a note: it joins the END of the strip if it is new, and it
     /// becomes the most recent either way. An already-open note does NOT

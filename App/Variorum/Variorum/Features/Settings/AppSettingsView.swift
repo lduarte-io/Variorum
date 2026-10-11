@@ -29,7 +29,8 @@
 //  reference artifact's grammar (`notes/plans/pre-13u-mockups/
 //  blocks-and-snippets.html`, her *"actual guide"*) is solid geometric
 //  lines and calm cards, which is a list and a hairline. **Row 59 dies by
-//  construction**: General holds four controls, so the appearance choice is
+//  construction**: General stays SHORT (six catalog rows, the two short
+//  dials at its top — the caps are pinned), so the appearance choice is
 //  on screen the moment Settings opens.
 //
 //  The panes, the catalog and the search brain are `SettingsShape.swift`;
@@ -121,7 +122,7 @@ struct AppSettingsView: View {
     /// — the pane itself (Diagnostics': its one toggle), so it can be found by
     /// name — and that row is what these entries say.
     static let rowIDsRendered: [SettingsPane: [String]] = [
-        .general: ["voice", "palette", "appearance", "receipts", "updates"],
+        .general: ["voice", "palette", "appearance", "receipts", "keepOpenNotes", "updates"],
         .editor: ["seams", "indicator", "inlineComments", "paragraphGap",
                   "arrivalFlash", "ownershipBadges", "hideOwnedDefault",
                   "hoverHandles", "spellcheck", "longBlocks"],
@@ -430,12 +431,17 @@ private struct SettingsResultsPane: View {
 /// is about the WHOLE app rather than one surface. Deliberately the SHORT
 /// pane: **KnownIssues row 59** (the 18j appearance control below the fold)
 /// is a fold that existed because fifteen controls shared one pane, and the
-/// cure is that this one holds four.
+/// cure is that this one stays short — six catalog rows, pinned, with
+/// the two short dials at the top.
 private struct GeneralPane: View {
     let theme: ThemeStore
     let session: AppSession
     let appearance: AppearanceController?
     let updates: UpdateChannel?
+    /// VX-139: the Open strip across launches. LOCAL (this Mac's
+    /// UserDefaults, the writeHoverHandles class) — the strip is one
+    /// window's chrome on one machine; the ids never sync.
+    @AppStorage(OpenNotesMemory.settingKey) private var keepOpenNotes = true
 
     var body: some View {
         Form {
@@ -507,6 +513,17 @@ private struct GeneralPane: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            // VX-139 (her ask, pulled into VX-143 at her word): the Open
+            // strip across launches. Beside Confirmations rather than on a
+            // writing pane — it is how the app OPENS, not how a note behaves.
+            Section("Open notes") {
+                Toggle(SettingsCatalog.title("keepOpenNotes"), isOn: $keepOpenNotes)
+                Text("The sidebar's Open section returns as you left it the next time Variorum opens — the notes that still exist, in the same order. Off, each launch starts with an empty list. This Mac only.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(5)
                     .fixedSize(horizontal: false, vertical: true)
             }
             // 13r U3-A — THE CALM-ASKS CADENCE's rule 4: the update ask is

@@ -510,26 +510,25 @@ struct BlockHistoryPane: View {
                 Spacer()
                 Button("Close") { close() }
             }
-            // Row 89: the pane's explainer wraps whole, never truncates.
-            // (Ladder R1-6 asked whether this unlimited `fixedSize` text in
-            // non-scrolling chrome is the b6dae25 wedged-window class; it is
-            // NOT — the pane pins `minWidth: 300` below, so the window's
-            // near-zero-width probe measures it at 300 wide: 280 pt with the
-            // text here and 280 pt with it inside the scroll, pinned in
-            // `ChromeMinHeightTests`. Hollow; left where it reads.)
-            Text(tokens.chromeLabel(BlockHistoryPath.explainer))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
-                .lineLimit(nil)
-                .fixedSize(horizontal: false, vertical: true)
+            // VX-144 (the quiet ledger — the architect's precision 5,
+            // PROVISIONAL P-VX144-2): the pane-level blurb ("Everything this
+            // block has been: …") is NOT drawn here any more. It said again,
+            // above the page, what the four section headers and their
+            // meaning lines say where they apply — and pushed the first
+            // commit down by two (Terminal: three) lines. The Commits
+            // section's DEFINING sentence stays verbatim beneath its header.
+            // No tooltip replaces it: a hover-hidden sentence is the hint
+            // class VX-142 removed. (`BlockHistoryPath.explainer` itself is
+            // shared and the phone still reads it.)
             // Ledger row 33 — the current-block jump. It renders only while
             // the caret really is somewhere else (the pure rule decides), and
             // only where a host can act on it, so pressing it always moves
             // the pane (P-2).
             if let jump = jumpTarget, let onJump {
                 Button(tokens.chromeLabel(BlockHistoryPath.jumpVerb)) { onJump(jump) }
+                    // (VX-144: its inert small control-size modifier left with the
+                    // pane's bezels — a voiced style draws no control size.)
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .controlSize(.small)
                     .help(BlockHistoryPath.jumpHelp)
             }
             if let status = model.status {
@@ -656,92 +655,53 @@ struct BlockHistoryPane: View {
             if commits.isEmpty {
                 quiet(BlockHistoryPath.noSavepoints)
             }
-            ForEach(SavepointRuns.rows(
-                commits, isQuiet: { $0.kind == .auto }, id: { $0.id })
-            ) { row in
-                let rendered = SavepointHistoryFace.rendered(row, expanded: expandedRuns)
-                if let count = rendered.runCount {
-                    QuietRunRow(count: count, expanded: rendered.expanded, tokens: tokens) {
-                        expandedRuns = SavepointHistoryFace.toggling(row.id, in: expandedRuns)
+            // VX-144 (the quiet ledger, precision 4): the run's lines — the
+            // collapsed quiet runs and the commits — are ONE sequence, so a
+            // token hairline stands between every two of them and never above
+            // the first (the take's own line is the run's top edge).
+            let entries = CommitRunEntry.entries(commits, expandedRuns: expandedRuns)
+            ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
+                VStack(alignment: .leading, spacing: 0) {
+                    if index > 0 { CommitRowRule(tokens: tokens) }
+                    switch entry {
+                    case .run(let id, let count, let expanded):
+                        QuietRunRow(count: count, expanded: expanded, tokens: tokens) {
+                            expandedRuns = SavepointHistoryFace.toggling(id, in: expandedRuns)
+                        }
+                        .padding(.vertical, 4)
+                    case .commit(let commit):
+                        commitRow(commit, of: take)
                     }
-                }
-                ForEach(rendered.items, id: \.id) { commit in
-                    savepointRow(commit, of: take)
                 }
             }
         }
     }
 
-    private func savepointRow(_ commit: CommitPoint, of take: Variant) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            // 13u3 UNIT D (item 14): **the NAME leads the row**, in the ink
-            // the row's own words wear — it is what tells this moment from
-            // the one above it. The shared brain decides whether there is
-            // one (`SavepointRowFace.name`), so the phone's listing reads the
-            // same savepoint the same way.
-            if let name = SavepointRowFace.name(commit) {
-                Text(name)
-                    .font(tokens.small.weight(.semibold))
-                    .foregroundStyle(tokens.accent)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Text(String(commit.text.prefix(120)))
-                .font(tokens.body)
-                .foregroundStyle(commit.text.isEmpty ? tokens.muted : tokens.ink)
-                .lineLimit(2)
-            HStack(spacing: 8) {
-                // Row 63's neighbour: a savepoint's stamp keeps its TIME (two
-                // moments can share a day), so instead of a second slot the
-                // line may WRAP once — "saved by hand" was truncating to
-                // "saved by h…" beside the Restore button at the pane's width.
-                // (13u3 UNIT D: the NAME left this line for its own one
-                // above, so what is joined here is the DETAILS — when, how,
-                // and the pre-split mark.)
-                Text(tokens.chromeLabel(SavepointRowFace.details(
-                    commit, predatesSplit: model.predatesSplit(commit))
-                    .joined(separator: " \u{B7} ")))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-                Spacer(minLength: 8)
-                // **THE RENAME DOOR** (R-13u3-1), beside Restore and on
-                // EVERY savepoint — manual and quiet alike. Its verb says
-                // what it does on THIS row.
-                Button(BlockHistoryCopy.nameVerb(commit)) {
-                    // Row 69: under a seal the FIELD does not open — the door
-                    // acts and speaks, like every other act in this pane.
-                    if model.renameOpensTheField {
-                        renameAsk = .renaming(commit)
-                    } else {
-                        model.refuseRenameUnderSeal()
-                    }
+    /// One commit as the quiet ledger draws it (`CommitRowView`), wired to
+    /// the pane's model: the rename door (row 69's seal rule, R-13u3-1's
+    /// one-ask-per-row binding) and Restore.
+    private func commitRow(_ commit: CommitPoint, of take: Variant) -> some View {
+        CommitRowView(
+            commit: commit, tokens: tokens,
+            predatesSplit: model.predatesSplit(commit), now: session.now,
+            renameOpensField: model.renameOpensTheField,
+            // One binding PER ROW, reading nil unless this row is the target:
+            // a single `@State` bound by every row would put up one popover
+            // per savepoint.
+            renameAsk: Binding(
+                get: { renameAsk?.targetID == commit.id ? renameAsk : nil },
+                set: { if $0 == nil { renameAsk = nil } }),
+            onName: {
+                // Row 69: under a seal the FIELD does not open — the door
+                // acts and speaks, like every other act in this pane.
+                if model.renameOpensTheField {
+                    renameAsk = .renaming(commit)
+                } else {
+                    model.refuseRenameUnderSeal()
                 }
-                .controlSize(.small)
-                .help(model.renameOpensTheField
-                    ? BlockHistoryCopy.nameHelp(commit)
-                    : TrayRefusalCopy.sealed)
-                // One binding PER ROW, reading nil unless this row is the
-                // target: a single `@State` bound by every row would put up
-                // one popover per savepoint.
-                .savepointNameAsk(
-                    Binding(
-                        get: { renameAsk?.targetID == commit.id ? renameAsk : nil },
-                        set: { if $0 == nil { renameAsk = nil } }),
-                    tokens: tokens
-                ) { _, name in
-                    Task { await model.rename(commit, to: name) }
-                }
-                Button(BlockHistoryCopy.restoreVerb) {
-                    Task { await model.restore(commit, of: take.id) }
-                }
-                .controlSize(.small)
-                .help("Loads this saved moment back into the take's buffer — "
-                    + "the moment itself stays, and saving again appends")
-            }
-        }
-        .padding(.vertical, 2)
+            },
+            onRename: { name in Task { await model.rename(commit, to: name) } },
+            onRestore: { Task { await model.restore(commit, of: take.id) } })
     }
 
     // MARK: - Region 2 — archived takes
@@ -769,10 +729,10 @@ struct BlockHistoryPane: View {
                                 .lineLimit(1)
                                 .fixedSize()
                             Spacer(minLength: 8)
-                            Button(BlockHistoryCopy.unarchiveVerb) {
+                            Button(tokens.chromeLabel(BlockHistoryCopy.unarchiveVerb)) {
                                 Task { await model.unarchive(take.id) }
                             }
-                            .controlSize(.small)
+                            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                             .help("Back into the block's fan, exactly as it was")
                         }
                     }
@@ -813,10 +773,10 @@ struct BlockHistoryPane: View {
                                     .layoutPriority(1)
                             }
                             Spacer(minLength: 8)
-                            Button(BlockPastCopy.putBackVerb) {
+                            Button(tokens.chromeLabel(BlockPastCopy.putBackVerb)) {
                                 Task { await model.putBackTake(take.id) }
                             }
-                            .controlSize(.small)
+                            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                             .help(BlockPastCopy.putBackHelp(take))
                         }
                     }
@@ -848,15 +808,15 @@ struct BlockHistoryPane: View {
                             .lineLimit(2)
                         HStack(spacing: 8) {
                             Spacer(minLength: 0)
-                            Button(BlockHistoryPath.bringBackVerb) {
+                            Button(tokens.chromeLabel(BlockHistoryPath.bringBackVerb)) {
                                 Task { await model.bringBack(row.origin.blockID) }
                             }
-                            .controlSize(.small)
+                            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                             .help(BlockHistoryPath.bringBackHelp)
-                            Button(BlockHistoryPath.openTrayVerb) {
+                            Button(tokens.chromeLabel(BlockHistoryPath.openTrayVerb)) {
                                 onOpenTray?(row.origin.blockID)
                             }
-                            .controlSize(.small)
+                            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                             .disabled(onOpenTray == nil)
                             .help("The whole list: what this note has set aside, and "
                                 + "everything of its own that is on the clock")
@@ -878,3 +838,175 @@ struct BlockHistoryPane: View {
     }
 }
 
+
+// MARK: - VX-144 — the Commits region as a QUIET LEDGER (direction A)
+
+/// **WHAT A COMMIT ROW SAYS, ON THE MAC** (VX-144, the architect's ruling —
+/// direction A, precisions 1–2). Her report: *"the commits page is very messy
+/// with crowded & cluttered UI."*
+///
+/// Mac-local ON PURPOSE (precision 7): `Shared/SavepointRowFace` is the
+/// phone's face too, and it keeps its words — the phone's Block History is
+/// untouched by this batch (the parity line carries it). What differs here:
+/// - **The preview is ONE line: the first non-blank paragraph**, never the
+///   two-line cut the row used to make — which is what drew "…had.…" when a
+///   commit's text had a second paragraph (the cut fell at the newline and an
+///   ellipsis landed after the period). This face appends NO ellipsis of its
+///   own; the view's one-line tail truncation is the only one.
+/// - **The details line drops "saved by hand"** — deliberate is the default
+///   state and earns no words — and **the year when it is this year**.
+///   **"quiet"** stays on automatic commits (they are visually muted by spec)
+///   and **"predates a split"** stays (it is Restore's warning).
+nonisolated enum CommitRowFace {
+    /// The cheap cap on the preview's characters — far past any line the
+    /// pane can show, so the view's truncation (never this cap) is what the
+    /// eye meets.
+    static let previewCap = 160
+
+    static func preview(_ text: String) -> String {
+        let paragraph = text
+            .split(separator: "\n", omittingEmptySubsequences: true)
+            .lazy
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .first { !$0.isEmpty }
+        guard let paragraph else { return BlockPastCopy.emptyTake }
+        return String(paragraph.prefix(previewCap))
+    }
+
+    /// When — the month and day, the time, and the year only when it is not
+    /// this one. The two shapes are one format family, so a row from last
+    /// year reads as the same sentence with one more word.
+    static func stamp(_ date: Date, now: Date, calendar: Calendar = .current) -> String {
+        if calendar.isDate(date, equalTo: now, toGranularity: .year) {
+            return date.formatted(.dateTime.month(.abbreviated).day().hour().minute())
+        }
+        return date.formatted(.dateTime.year().month(.abbreviated).day().hour().minute())
+    }
+
+    /// The automatic commit's one word (`SavepointRowFace`'s, kept).
+    static let quietMark = "quiet"
+
+    static func details(
+        _ commit: CommitPoint, predatesSplit: Bool, now: Date,
+        calendar: Calendar = .current
+    ) -> [String] {
+        var pieces = [stamp(commit.createdAt, now: now, calendar: calendar)]
+        if commit.kind == .auto { pieces.append(quietMark) }
+        if predatesSplit { pieces.append(BlockHistoryCopy.predatesSplitMark) }
+        return pieces
+    }
+}
+
+/// One line of a take's run, in order: a collapsed QUIET RUN's line (13j
+/// J11) or a commit. Flattened so the pane can rule a hairline between every
+/// two lines — the grouping and the render decision are the shared ones
+/// (`SavepointRuns`, `SavepointHistoryFace`), untouched.
+enum CommitRunEntry: Identifiable {
+    case run(id: String, count: Int, expanded: Bool)
+    case commit(CommitPoint)
+
+    var id: String {
+        switch self {
+        case .run(let id, _, _): return id
+        case .commit(let commit): return commit.id
+        }
+    }
+
+    static func entries(_ commits: [CommitPoint], expandedRuns: Set<String>) -> [CommitRunEntry] {
+        var out: [CommitRunEntry] = []
+        for row in SavepointRuns.rows(commits, isQuiet: { $0.kind == .auto }, id: { $0.id }) {
+            let rendered = SavepointHistoryFace.rendered(row, expanded: expandedRuns)
+            if let count = rendered.runCount {
+                out.append(.run(id: row.id, count: count, expanded: rendered.expanded))
+            }
+            out += rendered.items.map(CommitRunEntry.commit)
+        }
+        return out
+    }
+}
+
+/// The hairline between two lines of a run (precision 4) — the voice's own
+/// `line` token, one point, full width.
+struct CommitRowRule: View {
+    let tokens: VoiceTokens
+
+    var body: some View {
+        Rectangle()
+            .fill(tokens.line)
+            .frame(height: 1)
+            .frame(maxWidth: .infinity)
+    }
+}
+
+/// **ONE COMMIT, AS THE QUIET LEDGER DRAWS IT** (VX-144, precisions 1–3).
+///
+/// The hierarchy flips: the NAME she gave the moment leads in readable ink
+/// (R-13u3-1's "the name leads", no longer an 11.5-pt accent whisper), the
+/// moment's text follows as ONE muted line, and the details line closes the
+/// row with the two acts as quiet voiced WORDS (`VoiceControls.swift`:
+/// "chrome is quiet text, never bezels"). The rename door still stands
+/// beside Restore on EVERY commit, manual and quiet alike (R-13u3-1), and
+/// says what it does on this row (Name · Rename).
+struct CommitRowView: View {
+    let commit: CommitPoint
+    let tokens: VoiceTokens
+    let predatesSplit: Bool
+    let now: Date
+    /// Row 69: whether the rename door opens its field (false under a seal —
+    /// the door then acts and speaks instead).
+    let renameOpensField: Bool
+    /// This row's slice of the pane's one rename ask (nil unless it is the
+    /// target).
+    let renameAsk: Binding<SavepointNameAsk?>
+    let onName: () -> Void
+    let onRename: (String?) -> Void
+    let onRestore: () -> Void
+
+    /// The name's type: the voice's own reading size for chrome text
+    /// (13 pt — Study's system face, Terminal's mono), medium weight.
+    static func nameFont(_ tokens: VoiceTokens) -> Font {
+        tokens.navigation.weight(.medium)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            if let name = SavepointRowFace.name(commit) {
+                Text(name)
+                    .font(Self.nameFont(tokens))
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Text(CommitRowFace.preview(commit.text))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+                .truncationMode(.tail)
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                // The stamp may wrap once rather than truncate: "predates a
+                // split" is Restore's warning and must never fall off the
+                // end (row 63's rule, one line over).
+                Text(tokens.chromeLabel(CommitRowFace.details(
+                    commit, predatesSplit: predatesSplit, now: now)
+                    .joined(separator: " \u{B7} ")))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Button(tokens.chromeLabel(BlockHistoryCopy.nameVerb(commit)), action: onName)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .help(renameOpensField
+                        ? BlockHistoryCopy.nameHelp(commit)
+                        : TrayRefusalCopy.sealed)
+                    .savepointNameAsk(renameAsk, tokens: tokens) { _, name in onRename(name) }
+                Button(tokens.chromeLabel(BlockHistoryCopy.restoreVerb), action: onRestore)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .help("Loads this saved moment back into the take's buffer — "
+                        + "the moment itself stays, and saving again appends")
+            }
+        }
+        .padding(.vertical, 7)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}

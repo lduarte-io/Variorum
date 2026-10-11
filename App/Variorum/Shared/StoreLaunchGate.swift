@@ -636,11 +636,38 @@ final class StoreLobby {
         return true
     }
 
+    /// **VX-140 — the AUTOMATIC ask is spent once per lobby** (a lobby is one
+    /// lock occasion: launch, or a relock). Any biometric ask — the automatic
+    /// one, or her button — spends it, so a cancelled sheet is never followed
+    /// by another she did not ask for; from then on the button is the road.
+    /// It lives on the LOBBY, not on a view's `@State`, because every main
+    /// window renders this one lobby and a remounted face must not count as
+    /// a new occasion.
+    private(set) var autoAskSpent = false
+
+    /// **VX-140 — the at-open AUTO-ask, asked only where she is.** Her report
+    /// (the VX-143 run record): the system sheet *"Variorum is trying to
+    /// Unlock your Variorum library"* stood over her TERMINAL — the relock
+    /// monitors fire in the background (sleep, screen lock, the idle clock),
+    /// and the lobby used to ask the moment it mounted, frontmost or not.
+    /// Now a lobby mounted while Variorum is not the active app waits, and
+    /// its one automatic ask fires when she comes back to the app (the face
+    /// calls this again on activation). The biometric demand's contract —
+    /// it asks as the library opens — holds; it is simply asked of her, in
+    /// front of her, once.
+    func autoAskIfDue(appIsActive: Bool) async {
+        guard demand == .biometric, biometryOffered, !autoAskSpent, !busy else { return }
+        guard appIsActive else { return }
+        await unlockWithBiometrics()
+    }
+
     /// The biometric road — PROMPTS in production (the gated item's read
     /// evaluates biometrics). Failure is never a dead end: the surface
     /// offers the passphrase beside it (R13p-5's fallback ruling).
     func unlockWithBiometrics() async {
         guard !busy else { return }
+        // VX-140: any ask spends the automatic one (see `autoAskSpent`).
+        autoAskSpent = true
         busy = true
         lastError = nil
         defer { busy = false }
