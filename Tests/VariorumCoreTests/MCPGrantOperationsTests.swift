@@ -113,8 +113,12 @@ struct MCPGrantOperationsTests {
             let wing = try ops.createWing(name: "Work")
             _ = try ops.grantMCPAccess(client.id, spec(.wing, wing.id))
 
-            // A journal BOOK is never a scope; a journal NOTE never "always".
-            let journalBook = try ops.createReading(name: "notebook", kind: .book, profile: "journal")
+            // THE daily Journal is never a scope; a journal NOTE never "always".
+            // 13n-c U1 (justified edit, the ritual — R-AIR-1): the refused book
+            // was a journal-TRAIT book ('journal'); since R-AIR-1 only the
+            // 'daily' marker fences a book (the trait's grant is
+            // MCPFenceRekeyTests' pin), so the fixture is THE daily Journal.
+            let journalBook = try ops.createReading(name: "journal", kind: .book, profile: "daily")
             #expect(throws: OperationError.mcpGrantScopeFenced(kind: "book", id: journalBook.id)) {
                 try ops.grantMCPAccess(client.id, spec(.book, journalBook.id))
             }
@@ -248,18 +252,28 @@ struct MCPGrantOperationsTests {
             let traitMember = try ops.createPost(title: "in a notebook")
             let dailyMember = try ops.createPost(title: "in the daily journal")
             let arrivalOnly = try ops.createPost(title: "waiting at the door")
-            let archivedJournalMember = try ops.createPost(title: "in an archived notebook")
-            let deletedJournalMember = try ops.createPost(title: "in a deleted notebook")
+            let archivedJournalMember = try ops.createPost(title: "in an archived daily journal")
+            let deletedJournalMember = try ops.createPost(title: "in a deleted daily journal")
             let notebook = try ops.createReading(name: "notebook", kind: .book, profile: "journal")
             let daily = try ops.createReading(name: "journal", kind: .book, profile: "daily")
-            let archivedNotebook = try ops.createReading(name: "old notebook", kind: .book, profile: "journal")
-            let deletedNotebook = try ops.createReading(name: "gone notebook", kind: .book, profile: "journal")
+            // 13n-c U1 (justified edit, the ritual — R-AIR-1): the archived and
+            // deleted fixtures were TRAIT books; the trait no longer fences, so
+            // they are 'daily' bearers (a second live bearer is the
+            // not-yet-converged stale case — it fences too, the conservative
+            // direction). The daily Journal can't be deleted by its door
+            // (`dailyJournalCannotBeDeleted`), so the deleted bearer is a
+            // synced tombstone, written as one.
+            let archivedNotebook = try ops.createReading(name: "old journal", kind: .book, profile: "daily")
+            let deletedNotebook = try ops.createReading(name: "gone journal", kind: .book, profile: "daily")
             _ = try ops.addPostToReading(traitMember.id, to: notebook.id)
             _ = try ops.addPostToReading(dailyMember.id, to: daily.id)
             _ = try ops.addPostToReading(archivedJournalMember.id, to: archivedNotebook.id)
             _ = try ops.addPostToReading(deletedJournalMember.id, to: deletedNotebook.id)
             try ops.archiveReading(archivedNotebook.id)
-            try ops.deleteReading(deletedNotebook.id)
+            try db.write { db in
+                try db.execute(sql: "UPDATE reading SET deleted_at = '2026-07-01T00:59:00.000Z' WHERE id = ?",
+                               arguments: [deletedNotebook.id])
+            }
             try db.write { db in
                 try db.execute(sql: """
                     INSERT INTO reading_post (id, reading_id, post_id, position, status, created_at)
@@ -272,12 +286,15 @@ struct MCPGrantOperationsTests {
             }
             #expect(facts[plain.id]?.fence == nil)
             #expect(facts[ownProfile.id]?.fence == .journal, "leg 1: its own profile")
-            #expect(facts[traitMember.id]?.fence == .journal, "leg 2: a member of a journal-trait book")
+            // 13n-c U1 (justified edit, the ritual — R-AIR-1): the trait is
+            // no longer a fence leg.
+            #expect(facts[traitMember.id]?.fence == nil, "R-AIR-1: a journal-trait book's member is not fenced")
             #expect(facts[dailyMember.id]?.fence == .journal, "leg 2: a member of THE daily Journal")
             #expect(facts[archivedJournalMember.id]?.fence == .journal, "an archived book is still alive")
             #expect(facts[arrivalOnly.id]?.fence == nil, "an arrival is never membership")
             #expect(facts[deletedJournalMember.id]?.fence == nil, "a deleted book is not alive")
-            #expect(try db.read { try Queries.mcpBookFacts($0, readingID: notebook.id) }?.fence == .journal)
+            #expect(try db.read { try Queries.mcpBookFacts($0, readingID: notebook.id) }?.fence == nil,
+                    "R-AIR-1 (justified edit, the ritual): the trait book is a book like any other")
             #expect(try db.read { try Queries.mcpBookFacts($0, readingID: daily.id) }?.fence == .journal)
             // U2 (justified edit): the Private leg is WIRED over v1_25 — the
             // U1 placeholder assertion ("reads 0") retired; its pins are
@@ -343,12 +360,14 @@ struct MCPGrantOperationsTests {
             let wing = try ops.createWing(name: "Work")
             let plain = try ops.createReading(name: "B plain", kind: .book)
             let inWing = try ops.createReading(name: "a in wing", kind: .book, wingId: wing.id)
-            _ = try ops.createReading(name: "notebook", kind: .book, profile: "journal")
+            // 13n-c U1 (justified edit, the ritual — R-AIR-1): the trait book
+            // is OFFERED now; THE daily Journal still is not.
+            let notebook = try ops.createReading(name: "notebook", kind: .book, profile: "journal")
             _ = try ops.createReading(name: "journal", kind: .book, profile: "daily")
             let dead = try ops.createReading(name: "dead", kind: .book)
             try ops.deleteReading(dead.id)
             let offered = try db.read { try Queries.mcpGrantableBooks($0) }
-            #expect(offered.map(\.id) == [inWing.id, plain.id], "live, unfenced books by name")
+            #expect(offered.map(\.id) == [inWing.id, plain.id, notebook.id], "live, unfenced books by name")
             #expect(offered.first?.wingID == wing.id)
             // Every offered book is one the op accepts.
             let client = try approvedClient(ops)

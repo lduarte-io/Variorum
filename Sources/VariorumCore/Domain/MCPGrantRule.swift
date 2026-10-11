@@ -17,7 +17,8 @@ import Foundation
 ///   last connection closes, and swept at every server start) · always.
 /// - **The open book:** one switch; read rung, everywhere, for APPROVED
 ///   clients only.
-/// - **THE FENCE** (journal-class — R-13nb-1 + R-13nb-4): a FENCED note
+/// - **THE FENCE** (journal-class — R-13nb-1 + R-13nb-4, re-keyed on THE
+///   daily Journal by 13n-c's R-AIR-1): a FENCED note
 ///   matches no standing grant and never rides the open book; only a
 ///   per-ask grant naming THAT note, once or while connected, reaches it —
 ///   and its ask never offers "always". A fenced BOOK matches nothing at all
@@ -61,11 +62,14 @@ public enum MCPGrantRule {
         case pending, approved, denied
     }
 
-    /// Why a note or book is fenced. Journal = R-13nb-1's predicate (its
-    /// own `profile='journal'`, or a live member of a live journal/daily
-    /// book); privateMark = R-13nb-4's (its own mark, or a live member of a
+    /// Why a note or book is fenced. Journal = R-13nb-1's predicate as
+    /// RE-KEYED by 13n-c's R-AIR-1 (a note's own `profile='journal'` — the
+    /// ⌘J day entry's shape, D-1 — or a live member of a live book wearing
+    /// THE daily Journal's 'daily' marker; a journal-TRAIT book is not a
+    /// fence); privateMark = R-13nb-4's (its own mark, or a live member of a
     /// live marked book). Privacy wins ties: when both hold, the fence says
-    /// `privateMark`.
+    /// `privateMark`. The legs are derived in ONE place
+    /// (`Queries.mcpNoteFacts` / `mcpBookFacts`).
     public enum Fence: String, Sendable, Equatable {
         case journal
         case privateMark = "private"

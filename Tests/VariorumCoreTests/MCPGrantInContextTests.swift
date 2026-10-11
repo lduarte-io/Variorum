@@ -22,7 +22,10 @@ struct MCPGrantInContextTests {
             let wing = try ops.createWing(name: "Work")
             let granted = try ops.createReading(name: "granted", kind: .book)
             let inWing = try ops.createReading(name: "in the wing", kind: .book, wingId: wing.id)
-            let journal = try ops.createReading(name: "notebook", kind: .book, profile: "journal")
+            // 13n-c U1 (justified edit, the ritual — R-AIR-1): "never a
+            // journal" means THE daily Journal now (the trait book chips like
+            // any book — MCPFenceRekeyTests' pin).
+            let journal = try ops.createReading(name: "journal", kind: .book, profile: "daily")
             let privateBook = try ops.createReading(name: "mine", kind: .book)
             let plain = try ops.createReading(name: "plain", kind: .book)
             try ops.setBookPrivate(privateBook.id, true)
@@ -38,7 +41,7 @@ struct MCPGrantInContextTests {
 
             try ops.setMCPSwitch(.openBook, on: true)
             #expect(try db.read { try Queries.mcpReachableBookIDs($0) } == [granted.id, inWing.id, plain.id],
-                    "the open book reaches every book — never a journal or a Private one")
+                    "the open book reaches every book — never the daily Journal or a Private one")
             _ = journal
             try ops.denyMCPClient(client.id)
             #expect(try db.read { try Queries.mcpReachableBookIDs($0) }.isEmpty,

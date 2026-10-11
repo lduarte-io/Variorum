@@ -131,9 +131,10 @@ extension Operations {
     // MARK: - Grant, revoke
 
     /// One grant to an APPROVED client. Refuses a client not approved, a
-    /// scope that is not a live target of its kind, a FENCED book (a
-    /// journal's or a Private book's notes are shared one ask at a time —
-    /// a book grant there would reach nothing), and an "always" grant on a
+    /// scope that is not a live target of its kind, a FENCED book (THE daily
+    /// Journal's or a Private book's notes are shared one ask at a time — a
+    /// book grant there would reach nothing; a journal-TRAIT book is a book
+    /// like any other since 13n-c's R-AIR-1), and an "always" grant on a
     /// fenced note (the ask never offers it — R-13n-4).
     @discardableResult
     public func grantMCPAccess(_ clientID: String, _ spec: MCPGrantSpec) throws -> String {

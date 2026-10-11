@@ -261,11 +261,21 @@ extension Queries {
     }
 
     /// **THE FENCE's legs — the ONE derivation site** (R-13nb-1 ratified the
-    /// journal predicate; R-13nb-4 adds the Private mark). Per note:
-    /// 1. its own `profile = 'journal'`;
-    /// 2. a live MEMBER (status 'member') of a live reading whose profile is
-    ///    `'journal'` (the trait) or `'daily'` (THE daily Journal) — an
-    ///    archived book is still alive, so it still fences;
+    /// journal predicate; R-13nb-4 adds the Private mark; 13n-c's R-AIR-1
+    /// RE-KEYED the journal legs on THE daily Journal — her words: "for the
+    /// default command J journal I think it's a fair choice but I am
+    /// questioning it being applied to all journal style books"). Per note:
+    /// 1. its own `profile = 'journal'` — the shape ⌘J's
+    ///    `createOrOpenJournalEntry` gives every day entry (the ONLY door that
+    ///    mints it; the copy roads carry it), so a day entry stays per-ask
+    ///    wherever it is later filed (13n-c D-1, PROVISIONAL P-13nc-1);
+    /// 2. a live MEMBER (status 'member') of a live reading wearing THE daily
+    ///    Journal's marker (`profile = 'daily'` — every live bearer, a
+    ///    not-yet-converged stale one included: the conservative direction).
+    ///    A journal-TRAIT book (`profile = 'journal'`, `setJournalTrait`'s
+    ///    toggle) is NOT a fence leg since R-AIR-1 — its members are shared
+    ///    like any book's. An archived daily Journal is still alive, so it
+    ///    still fences;
     /// 3. **the Private mark** — its own `ai_private_at`, or a live member of
     ///    a live reading carrying one (R-13nb-4, privacy winning ties; v1_25's
     ///    columns, wired at U2 — the `privateLeg` fragments below).
@@ -289,7 +299,7 @@ extension Queries {
                        (c.profile = 'journal') AS own_journal,
                        EXISTS (SELECT 1 FROM reading_post rp JOIN reading r ON r.id = rp.reading_id
                                WHERE rp.post_id = c.id AND rp.deleted_at IS NULL AND rp.status = 'member'
-                                 AND r.deleted_at IS NULL AND r.profile IN ('journal', 'daily')) AS member_journal,
+                                 AND r.deleted_at IS NULL AND \(dailyJournalLegForBook)) AS member_journal,
                        \(privateLegForNote) AS private_mark
                 FROM json_each(?) j CROSS JOIN container c ON c.id = j.value
                 WHERE c.deleted_at IS NULL AND c.kind = 'post'
@@ -324,14 +334,15 @@ extension Queries {
     }
 
     /// A BOOK's facts — live books only (a gathering is not a grant target in
-    /// U1, PROVISIONAL P-13nb-U1-4). Fenced when it is a journal (the trait
-    /// or THE daily Journal) or carries the Private mark (R-13nb-4).
+    /// U1, PROVISIONAL P-13nb-U1-4). Fenced when it is THE daily Journal (its
+    /// 'daily' marker — R-AIR-1: a journal-TRAIT book is not) or carries the
+    /// Private mark (R-13nb-4).
     public static func mcpBookFacts(_ db: Database, readingID: String) throws -> MCPGrantRule.BookFacts? {
         guard let row = try Row.fetchOne(
             db,
             sql: """
                 SELECT r.id, \(mcpResolvedWing(column: "r.wing_id")) AS wing,
-                       (r.profile IN ('journal', 'daily')) AS journal,
+                       \(dailyJournalLegForBook) AS journal,
                        \(privateLegForBook) AS private_mark
                 FROM reading r
                 WHERE r.id = ? AND r.deleted_at IS NULL AND r.kind = 'book'
@@ -352,10 +363,10 @@ extension Queries {
     }
 
     /// **The books the grant sheet offers** — every live BOOK the fence does
-    /// not exclude (a journal-trait book, THE daily Journal and a Private
-    /// book are never a grant's scope — the op refuses them,
-    /// so the sheet never offers them; P-2), by name. Gatherings are not
-    /// grant targets in U1 (P-13nb-U1-4). Author-scale (a library's books).
+    /// not exclude (THE daily Journal and a Private book are never a grant's
+    /// scope — the op refuses them, so the sheet never offers them; P-2; a
+    /// journal-TRAIT book IS offered since R-AIR-1), by name. Gatherings are
+    /// not grant targets in U1 (P-13nb-U1-4). Author-scale (a library's books).
     public static func mcpGrantableBooks(_ db: Database) throws -> [MCPGrantableBook] {
         try Row.fetchAll(
             db,
@@ -363,7 +374,7 @@ extension Queries {
                 SELECT r.id, r.name, \(mcpResolvedWing(column: "r.wing_id")) AS wing
                 FROM reading r
                 WHERE r.deleted_at IS NULL AND r.kind = 'book'
-                  AND (r.profile IS NULL OR r.profile NOT IN ('journal', 'daily'))
+                  AND NOT (\(dailyJournalLegForBook))
                   AND NOT (\(privateLegForBook))
                 ORDER BY r.name COLLATE NOCASE, r.id
                 """
@@ -385,6 +396,14 @@ extension Queries {
     /// **The Private leg for a book** — its own stamp. Expects the book
     /// aliased `r`.
     static let privateLegForBook = "(r.ai_private_at IS NOT NULL)"
+
+    /// **The daily-Journal leg for a book** (13n-c R-AIR-1) — THE daily
+    /// Journal's own marker, through the ONE constant every daily mint stamps
+    /// (`dailyJournalBookProfile`), never the trait's 'journal'. NULL-safe: a
+    /// NULL profile reads false. Expects the book aliased `r`; used by the
+    /// member leg, the book's facts and the sheet's offer alike, so the three
+    /// can never drift apart.
+    static let dailyJournalLegForBook = "(r.profile IS NOT NULL AND r.profile = '\(dailyJournalBookProfile)')"
 
     // MARK: - The Private mark, as the faces read it (R-13nb-4)
 
@@ -465,8 +484,9 @@ extension Queries {
     /// **The books an approved client can reach right now** — the Bookcase
     /// row's "shared with AI" chip (P-13n-3's word). Honest under every
     /// grant shape: a book grant on it, a wing grant on its wing, or the open
-    /// book — each read through the pure rule on the book's own facts, so a
-    /// journal or Private book (reached by nothing) never chips. ∝ the books
+    /// book — each read through the pure rule on the book's own facts, so THE
+    /// daily Journal or a Private book (reached by nothing) never chips (a
+    /// journal-TRAIT book chips like any book since R-AIR-1). ∝ the books
     /// (a shelf) × the approved clients (a handful).
     public static func mcpReachableBookIDs(_ db: Database) throws -> Set<String> {
         let clients = try mcpClients(db, states: [.approved])
