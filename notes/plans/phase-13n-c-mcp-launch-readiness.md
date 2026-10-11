@@ -27,7 +27,7 @@ the sitting record's overrides win where they differ) · `notes/plans/phase-13n-
 | K1 | This plan finalized | DONE (this commit) |
 | U1 | The fence re-key (VX-163) | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U1 record) — owed: the orchestrator's verification + REAL Claude Code live round; the pre-flight walk HELD (locked session); Stage A |
 | U2 | The grant sheet rebuilt | IMPLEMENTER CLOSED (`UNIT CLOSED` banner in the U2 record) — owed: the orchestrator's verification; the walk HELD (locked session) — offscreen captures stand in, NOT a walk; Stage B |
-| U3 | Grant from where you are + the one icon + the in-note indicator | NOT-STARTED |
+| U3 | Grant from where you are + the one icon + the in-note indicator | BRIEFED — implementer spawning |
 | U4 | Asks wait quietly + the keyboard | NOT-STARTED |
 | U5 | The guide, the AI's advice, the setup menu | NOT-STARTED |
 | U6 | The wing on the wire (+ gatherings under a wing grant) | NOT-STARTED |
@@ -609,7 +609,7 @@ unit record (TCC state is machine-state the next session inherits).
 | 2 | U1 — the fence re-key | U1 implementer + orchestrator | BUILT + VERIFIED; F-7 ruled (a) and built `df704250`; walk HELD (locked session) |
 | 3 | Stage A ladder | orchestrator | **CLOSED at R2** — R1 fable (`4140860f`: 1M/2m/3n; F1 FIXED `c1047097`) → R2 opus (`6ec3d98c`: 0B/0M/4m/5n; R2-1/R2-4 pinned, R2-5 fixed; the rest routed) |
 | 3b | **Stage A routed findings** — R1: F2 (R-AIR-3 on the ask road → U2/U4; a ticket if they fall out) · F3 + R2-6 (closeout checklist) · F4 (U2) · F5 + R2-8 (U5) · F6 + R2-7 (her copy pass) · R2: R2-2 + R2-4 (#211, hers) · R2-3 (U2) | U2/U4/U5 + closeout | OPEN — each closes where routed |
-| 4 | U2 — the grant sheet | U2 implementer | NOT-STARTED |
+| 4 | U2 — the grant sheet | U2 implementer | BUILT + VERIFIED `49c964ea` — walk HELD |
 | 5 | U3 — grant in place, the icon, the in-note indicator | U3 implementer | NOT-STARTED |
 | 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | NOT-STARTED |
 | 7 | U5 — the guide, the advice, the setup menu | U5 implementer | NOT-STARTED |
@@ -1032,3 +1032,83 @@ instead (recorded in (1) for the reviewer).
 - **D-U2 — no Sync/, no schema, no custody, no editor seam** (re-verified at close). The fence derivation is
   U1's and is consumed, never re-derived: offered books stay `mcpGrantableBooks`' filter; a note's fence is
   `mcpNoteFacts`'; reach is `MCPGrantRule.reaches`.
+
+---
+
+## THE U3 IMPLEMENTER BRIEF (self-contained; the spawn names this section)
+
+You are the U3 implementer for Variorum phase 13n-c, working in `~/dev/variorum-vx-165` on
+branch `vx-165-13n-c` (NEVER the main checkout). Commits say `Part of VX-165` (and
+`Part of VX-164` for the in-note indicator), NO attribution trailer, push after every commit.
+`notes/SessionResiliencyProtocol.md` binds you: LIVE STATUS in the "U3 UNIT RECORD" section below
+from your FIRST commit, foreground waits only (a `grep -q … && break; sleep 5` poll loop), no
+subagents.
+
+**Read first, whole, never delegated:** this plan file TOP TO BOTTOM (rulings, D-1…D-5, §3 U3,
+§7, §8, the U1 and U2 records — U2 built the sheet's opener API, `PlaceLabels` and the WHO row
+you call); the sitting record `notes/plans/vx-156-grant-ux-design-kickoff.md` (R-AIR-4, -6, -7,
+-8); the brief `notes/plans/vx-156-grant-ux-brief.md` §3, §4; the mockups §2, §3 (read the source
+or render locally — never publish). The 13n-b plan's U2/U3 records on the chip (P-13nb-U2-11),
+Allow-AI-here (P-13nb-U3-15), receipts (P-13nb-U2-10, U4-13) and ⌥⌘O's sweep record. Code:
+`Features/Library/LibraryCatalogView.swift` (the bulk bar ~l.673, `postRowMenu` ~l.1178),
+`Core/Views/BookRowMenu.swift` (`BookRowMenuTable` — the ONE book-row menu table),
+`Features/BookView/BookSettingsSheet.swift` (the Private row's neighbour), `Features/Shelf/
+ShelfView.swift` (~l.679 the "shared with AI" text chip) + `ShelfViewModel` (`mcpReachableBookIDs`),
+`Core/Views/PrivateMark.swift` (the Private faces and `SharedWithAICopy`), `Features/MCP/
+MCPDoor.swift` (receipts, `speak`, the session state), `EditorCommands.swift` (the chord table and
+its sweep records), the capability registry under `App/Variorum/Shared/` (grep `Registry`),
+`Sources/VariorumCore/Operations/Operations+MCPGrants.swift` + `Queries/MCPGrantQueries.swift`.
+
+**What U3 builds — §3 U3 items 1–6, with these concretions:**
+1. **Core:** `grantMCPAccess` for N notes in ONE transaction on ONE stamp (one op call; a missing
+   or non-note target refuses the whole act — PROVISIONAL; a fenced note never takes "always"),
+   exact state-transition tests; the pane's Shared list groups grants sharing client + rung +
+   duration + `created_at` into ONE row ("3 notes · claude-code · read · while connected", the
+   members listed under it, Revoke covering all) — exact-stamp grouping, no schema.
+2. **The doors** — each registry-declared, rendered ONLY when ≥1 approved client exists (R-AIR-8;
+   with none, no door — the zero-state lives in Settings ▸ MCP), each opening U2's sheet
+   pre-filled: the Library bulk bar, `postRowMenu`, `BookRowMenuTable`, the Book Settings grant row
+   (who reaches this book now + Share…). Their words: app-wide faces keep the app's voice
+   (P-13n-1), but R-AIR-8 asks for no "AI" in settings-class wording — the Book Settings row IS a
+   settings face; menus are the app's voice. Pick consistently, list every string, PROVISIONAL.
+3. **⌥⌘A** (D1 as §3 U3 item 3 says) — the registry act, the Edit menu beside ⌥⌘Z/⌥⌘O, the chord
+   sweep re-run at the tip and recorded beside the binding (the ⌥⌘O precedent); the receipt says
+   what was granted and carries TWO doors: **Change…** (R-AIR-4 — U2's sheet pre-filled on exactly
+   that grant to change rung/duration fast) and **Revoke ›**.
+4. **R-AIR-6 — the ONE icon:** propose 2–3 SF Symbols in the sidebar set's language (look at the
+   sidebar's Bookcase/Library/Pool/Snippets glyphs first) with captures in your record, build your
+   lead as PROVISIONAL; it REPLACES the "shared with AI" text chip on every surface that renders it;
+   hover names who reaches it and how far; click opens a small permission popover (client · rung ·
+   duration · the WHY · Change… · Revoke). The pending-ask sibling glyph is U4's — leave a slot.
+5. **VX-164 — the in-note indicator:** find the note's top-right chrome on the Write surface (and
+   the other note modes' mastheads that share it — record which), render the indicator there ONLY
+   while the server is ON and ≥1 approved client exists: the shared icon when reachable (popover
+   with the why), a LOCK when the note is Private (own mark or a Private book — click → the Private
+   toggle, or the book's name when the mark is the book's), nothing at all when neither (calm).
+   CHROME ONLY — if anything would need `EditorTextView` / `BlockRangeIndex` / `PaneSurface`,
+   STOP and fork to the orchestrator.
+6. **The why (core, pure):** grant rows + note facts + open-book → the reaching standing (note
+   grant / book "X" / wing "Y" / the open book), consulting `MCPGrantRule` — never a parallel SQL
+   fence. Pinned.
+
+**Must NOT touch:** `Sync/`, custody/keychain, the editor seam, migrations, `lockstepVersion`, the
+real store, `/Applications`, the fence derivation (U1's).
+
+**Acceptance:** core pins + the whole headless package; Mac suites for every surface you touched
+(`MCPPaneTests`, `MCPAskAndReceiptTests`, `MCPEditFacesTests`, `CapabilityRegistryTests`,
+`ChordLegibilityTests`, the Library selection/bulk-bar suites, `BookRowMenu`'s, Book Settings',
+the Shelf/Bookcase row suites, `HelperCurrencyTests` if ⌥⌘A must appear in ⌘/ — grep the tests
+for each changed type) under a HELD stage claim, `skipped:` read. Pre-flight WALK, dev-store Debug,
+Study AND Terminal: three notes shared from the Library in one act → one pane row → one Revoke;
+a book shared from its row menu and from Book Settings; ⌥⌘A with history, without, already
+reaching; the receipt's Change… and Revoke; the icon on the Bookcase with hover and popover; the
+in-note indicator's shared icon with its why and a Private note's lock; with ZERO approved
+clients none of the faces render. Captures in `notes/plans/13n-c-screens/u3/`.
+
+**Forks / close:** as U1/U2's briefs — propose before building any half beyond the rulings;
+PROVISIONAL-and-log; STOP for gating; the UNIT CLOSED banner with not-done, PROVISIONALs, where
+to look first, self-assessment.
+
+## U3 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
+
+*(empty until the U3 implementer's first commit)*
