@@ -12,6 +12,52 @@ diff first (U1's round 1) until the budget runs out, then `opus-reviewer` with F
 This file is the ONE running record; it supersedes `phase-13n-c-mcp-launch-readiness-DRAFT.md`
 (kept as the pre-sitting draft).
 
+## ⇄ THE FABLE SWITCHOVER (2026-10-11 ~13:45 MDT, her word — prepared by the Opus orchestrator for the incoming Fable one)
+
+**Her words (relayed in the orchestrator session):** "I also have more Fable tokens. I am planning to switch the model on
+this current conversation now to Fable - we can continue forward with Fable reviews & do the current owed ones, you
+yourself (this convo) will switch to Fable for handling the switchover."
+
+**The cast from here:** the standing default is restored. **FABLE orchestrates and cold-reviews (`fable-reviewer`), OPUS
+implements.** Under the CROSS-MODEL flow (CLAUDE.md):
+1. findings go to the implementer verbatim;
+2. its agree/dispute returns to the reviewer;
+3. the reviewer makes the final call and implements its confirmed fixes itself;
+4. then the suite runs green, followed by one implementer sanity pass.
+
+Her refresh condition still names an **OPUS UX-reviewer walk**, so that leg stays Opus by her word.
+
+**State at the switch (tip `f04c14ef` + whatever the walker has pushed since):**
+- **Built and verified by the orchestrator:** U1–U5. Stage A was closed at R2 (Fable R1, Opus R2). Stage B was closed at
+  R2 (Opus R1 + R2), plus the close-out fix pass `6f7fc38f..3e8ccd83`, which has NOT been cold-reviewed.
+- **IN FLIGHT:** the walker (`opus-implementer`, agent id `a043d487dbcb54418`, RESUMED ~13:40 at her word after her
+  pause). It runs the HELD-WALKS BRIEF: fix D-W1/D-W2 with red-on-old pins, re-walk the picker, finish W-4 and
+  W-6…W-10 plus live rounds (3)–(6), then clean up the machine and report a WALKS CLOSED banner. **Do not spawn a twin.
+  The cast is strictly sequential, so no reviewer runs until it reports.**
+- **NOT STARTED:** U6 (the wing on the wire + gatherings; the advice has ~500 characters of room under her ruled 2,000
+  bound), U7 (VX-159), U8 (the secret). U7 and U8 may fall out (§4). Then the Opus UX walk, then closeout.
+
+**THE OWED FABLE REVIEWS — proposed order (Fable's to adjust):**
+1. **After the walker reports: ONE `fable-reviewer` cold review over the whole Opus-reviewed span.** That is
+   `33bd8772..<walk tip>`: U1's R1 fix and R2 onward, U2–U5, both Stage B fix passes, and the walk's fixes. This
+   discharges F-5…F-22's "reviewed by" column in one pass. REVIEW_PROMPT verbatim with PHASE = 13n-c and a
+   mechanics-only note naming the range; the FABLE-OWED rows are NOT framing to hand it (it finds them in the plan
+   itself). A ladder: R1 → the cross-model flow → R2.
+2. **U6 (and U7, if attempted): a `fable-reviewer` ladder as Stage C** (§5 already named Fable for any budget left).
+3. **U8, if attempted:** Fable, since her protocol names the secret's accept path.
+4. **Rows remaining unreviewed at the closeout stay on VX-166** (the post-phase Fable sweep). The ledger's "Reviewed by"
+   column is filled as each review lands, so VX-166 shrinks to what is left.
+
+**Environment facts for the incoming orchestrator:**
+- **The Linear MCP disconnected at her `/login`.** Ticket operations need `mcp__linear-server__authenticate` (her OAuth)
+  or the key road. Board facts are in `notes/TICKETS.md` on main. Tickets born this run: VX-167; VX-132 gained a
+  comment.
+- **`git pull` in this worktree** must name the branch (`git pull --rebase origin vx-165-13n-c`); the bare form errors
+  with "Cannot rebase onto multiple branches".
+- **Her Pro is unlocked** for all foreseeable needs (her word, 11:31). Walks are legal under a held stage claim.
+- **The running memory record** is `~/.claude/projects/-<home>-dev-variorum/memory/13n-c-run-state.md`
+  (shared repo; commit + push after writes).
+
 **The design record this phase builds to (read whole, in this order):**
 `notes/plans/vx-156-grant-ux-design-kickoff.md` (THE SITTING RECORD — R-AIR-1…15 + round 5; her
 word, authoritative over everything below) · `notes/plans/vx-156-grant-ux-brief.md` (options +
