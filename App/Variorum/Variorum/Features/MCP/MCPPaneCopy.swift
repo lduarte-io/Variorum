@@ -113,6 +113,24 @@ nonisolated enum MCPPaneCopy {
     }
     static let missingTarget = "(gone)"
 
+    // MARK: - One act's row (13n-c U3 — VX-156 item 2; mockup §2)
+
+    static func groupTitle(_ count: Int) -> String { "\(count) notes" }
+    static let groupChip = "notes"
+    /// The act's members, named — the titles read (at most three), then "and
+    /// N more" for the rest; a member gone since reads "(gone)".
+    static func groupMembers(_ titles: [String?], total: Int) -> String {
+        let named = titles.map { $0 ?? missingTarget }.joined(separator: " \u{00B7} ")
+        let rest = total - titles.count
+        return rest > 0 ? "\(named) and \(rest) more" : named
+    }
+    /// R2-3's rule on an act: its members fenced since reach nothing.
+    static func groupInert(_ count: Int) -> String {
+        count == 1
+            ? "1 inert \u{2014} a note fenced since (Private or your daily Journal), which always asks"
+            : "\(count) inert \u{2014} notes fenced since (Private or your daily Journal), which always ask"
+    }
+
     static func kindChip(_ kind: MCPGrantRule.ScopeKind) -> String {
         switch kind {
         case .note: "note"

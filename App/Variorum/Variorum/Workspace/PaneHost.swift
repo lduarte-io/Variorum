@@ -102,6 +102,12 @@ struct PaneHost<Content: View>: View {
                         deletedCount: trayCounts.deleted,
                         onOpen: { openTray(postID) })
                 },
+                // 13n-c U3 — VX-164 (R-AIR-7): the in-note MCP indicator at the
+                // bar's trailing end, a NOTE's only (it gates itself on the
+                // window's road: the server ON and an approved client).
+                trailing: notePostID.map { postID in
+                    AnyView(MCPNoteIndicator(session: session, postID: postID, tokens: tokens))
+                },
                 onBack: onBack,
                 onForward: onForward,
                 onOpenBook: { bookID in

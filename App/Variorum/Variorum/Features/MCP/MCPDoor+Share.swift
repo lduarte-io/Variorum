@@ -136,7 +136,7 @@ extension MCPDoor {
             ? MCPShareCopy.changed(place: place, client: client.name, rung: rung, duration: duration)
             : MCPShareCopy.shared(place: place, client: client.name, rung: rung, duration: duration)
         let revoke = StatusCenter.Item.Action(label: MCPShareCopy.revokeDoor) { [weak self] in
-            self?.revokeFromReceipt(grantIDs)
+            Task { await self?.revokeFromReceipt(grantIDs) }
         }
         let changeDoor = change.map { open in
             StatusCenter.Item.Action(label: MCPShareCopy.changeDoor) {
@@ -150,15 +150,13 @@ extension MCPDoor {
 
     /// A receipt's (or a popover's) Revoke: the named grants, one act, and the
     /// honest word either way.
-    func revokeFromReceipt(_ grantIDs: [String]) {
+    func revokeFromReceipt(_ grantIDs: [String]) async {
         guard let runner, let session else { return }
-        Task { @MainActor in
-            do {
-                try await runner.run { try $0.revokeMCPGrants(grantIDs) }
-                session.status.receipt(MCPShareCopy.revoked)
-            } catch {
-                session.status.refuse(MCPPaneCopy.refusal(error))
-            }
+        do {
+            try await runner.run { try $0.revokeMCPGrants(grantIDs) }
+            session.status.receipt(MCPShareCopy.revoked)
+        } catch {
+            session.status.refuse(MCPPaneCopy.refusal(error))
         }
     }
 }

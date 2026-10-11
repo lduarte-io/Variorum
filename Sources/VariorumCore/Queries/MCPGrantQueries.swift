@@ -530,6 +530,21 @@ extension Queries {
         ORDER BY r.name COLLATE NOCASE, r.id
         """
 
+    /// **The live books a grant may NOT name** (13n-c U3 — a book row's
+    /// "Share with AI…" is drawn only where the op could act, P-2): exactly
+    /// the complement of `mcpGrantableBooksSQL`'s fence filter, on the SAME
+    /// two fragments (THE daily Journal's marker, the Private mark) — never a
+    /// parallel fence. ∝ the fenced books (a handful).
+    public static func mcpFencedBookIDs(_ db: Database) throws -> Set<String> {
+        Set(try String.fetchAll(
+            db,
+            sql: """
+                SELECT r.id FROM reading r
+                WHERE r.deleted_at IS NULL AND r.kind = 'book'
+                  AND ((\(dailyJournalLegForBook)) OR (\(privateLegForBook)))
+                """))
+    }
+
     /// How many books the grant picker's "Recently edited" quick section
     /// shows before typing (13n-c U2 — her "that's often what I want";
     /// PROVISIONAL P-13nc-U2-1).

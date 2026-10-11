@@ -95,6 +95,10 @@ struct HelperView: View {
             ("⇧⌥⌘Z", "structural redo — puts back what ⌥⌘Z undid"),
             // 13n-b U4 (AF-11 F-2): the offer door's keyboard road.
             ("⌥⌘O", "show the AI's last change (what a connected client last wrote)"),
+            // 13n-c U3 (the brief §4, D1): the share chord. (U4 gathers the
+            // MCP rows into their own group.)
+            ("⌥⌘A", "share the note you're in with the client you granted last \u{2014} "
+                + "while it's connected, else once (never always)"),
             ("⌃⌘↑ / ⌃⌘↓", "jump to the previous / next block"),
             ("⌘⇧'", "the block's comments"),
             ("⌥⌘C", "callout frame on this block (again to remove it)"),

@@ -2215,9 +2215,11 @@ nonisolated enum CapabilityRegistry {
         // own rule; the bars render it in NOTE contexts only, never on a
         // scraps group). The book's: the settings sheet's State row (books
         // only — a gathering refuses `wrongReadingKind`, so it never renders).
+        // 13n-c U3 (R-AIR-7): the in-note indicator's LOCK popover renders
+        // the same toggle — its `.surface` door.
         Capability(
             id: .markNotePrivate, verb: PrivateMarkCopy.rowWords, scope: .post,
-            doors: [.bottomBar],
+            doors: [.bottomBar, .surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: PrivateMarkCopy.noNoteNote,
             availability: noteScoped),
@@ -2235,6 +2237,52 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: PrivateMarkCopy.allowHereNoNote,
             availability: noteScoped),
+        // 13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; R-AIR-4/6/
+        // 7/8 — the case's own comment carries the family). The row and
+        // surface doors carry their TARGET (the row, the pick, the book, the
+        // place the icon sits on), so their availability is `always`; their
+        // render gate is R-AIR-8's (an approved client exists — the window's
+        // road), applied where they render (P-2: no door, never a dead one).
+        Capability(
+            id: .mcpShareHere, verb: MCPShareCopy.shareVerb, scope: .app,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPShareCopy.zeroState,
+            availability: always),
+        Capability(
+            id: .mcpShareNotes, verb: "Share Selected Notes with AI\u{2026}", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "\u{2318}-click notes in the Library to pick what to share.",
+            availability: always),
+        Capability(
+            id: .mcpShareBook, verb: MCPShareCopy.shareButton, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPShareCopy.zeroState,
+            availability: always),
+        // ⌥⌘A — the note the mounted detail holds (`CommandRouter
+        // .activePostID`, set with `activeMode`): available wherever a post
+        // detail is mounted, natively in Takes (R118). THE COLLISION SWEEP is
+        // recorded at `EditorCommands.keyEquivalent`.
+        Capability(
+            id: .mcpShareThisNote, verb: MCPShareCopy.shareThisNote, scope: .post,
+            doors: [.menuBar],
+            shortcutLabel: "\u{2325}\u{2318}A", takesAccess: .native,
+            unavailableNote: MCPShareCopy.shareThisNoteUnavailable,
+            availability: { ctx in ctx.mode != nil ? .act : .unavailable }),
+        Capability(
+            id: .mcpShowSharing, verb: MCPShareCopy.showSharingVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPShareCopy.zeroState,
+            availability: always),
+        Capability(
+            id: .mcpChangeGrant, verb: MCPShareCopy.change, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A grant is changed from the place it reaches, or in Settings \u{25B8} MCP.",
+            availability: always),
     ]
 
     // MARK: - Lookup

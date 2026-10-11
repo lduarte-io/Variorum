@@ -85,14 +85,17 @@ struct MCPPane: View {
                 quiet(MCPPaneCopy.clientBoundary)
             }
             Section(MCPPaneCopy.sharedSection) {
-                if door.snapshot.shared.isEmpty {
+                if door.snapshot.sharedGroups.isEmpty {
                     quiet(MCPPaneCopy.nothingShared)
                 } else {
-                    ForEach(door.snapshot.shared) { row in sharedRow(row) }
-                    allRoad(door.snapshot.sharedCount, shown: door.snapshot.shared.count, .shared)
+                    // 13n-c U3 (VX-156 item 2; mockup §2): ONE ROW PER ACT —
+                    // a bulk share's notes read as "3 notes", Revoke covering
+                    // every member.
+                    ForEach(door.snapshot.sharedGroups) { group in sharedGroup(group) }
+                    allRoad(door.snapshot.sharedCount, shown: door.snapshot.sharedGroups.count, .shared)
                 }
             }
-            .task(id: door.snapshot.shared.map(\.id)) { distinguishers = await door.placeDistinguishers() }
+            .task(id: door.snapshot.sharedGroups.map(\.id)) { distinguishers = await door.placeDistinguishers() }
             Section(MCPPaneCopy.openBookSection) {
                 Toggle(SettingsCatalog.title("mcpOpenBook"), isOn: Binding(
                     get: { door.snapshot.openBook },
@@ -172,10 +175,15 @@ struct MCPPane: View {
         }
     }
 
-    private func sharedRow(_ row: MCPSharedRow) -> some View {
-        MCPSharedRowView(
-            row: row, distinguisher: Self.distinguisher(row, distinguishers), tokens: tokens
-        ) { door.revoke(grantID: row.grant.id) }
+    @ViewBuilder
+    private func sharedGroup(_ group: MCPSharedGroup) -> some View {
+        if group.isGroup {
+            MCPSharedGroupView(group: group, tokens: tokens) { door.revoke(grantIDs: group.grantIDs) }
+        } else {
+            MCPSharedRowView(
+                row: group.lead, distinguisher: Self.distinguisher(group.lead, distinguishers), tokens: tokens
+            ) { door.revoke(grantID: group.lead.grant.id) }
+        }
     }
 
     /// A shared row's distinguisher — the ONE rule's answer for its book or
@@ -325,6 +333,56 @@ struct MCPSharedRowView: View {
     }
 }
 
+/// **One ACT in SHARED PLACES** (13n-c U3 — VX-156 item 2; mockup §2's "3
+/// notes · claude-code · read · while connected", the members named under
+/// it): the grants one bulk share minted on one stamp, and ONE Revoke that
+/// covers them all.
+struct MCPSharedGroupView: View {
+    let group: MCPSharedGroup
+    let tokens: VoiceTokens
+    let revoke: () -> Void
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(MCPPaneCopy.groupTitle(group.memberCount))
+                        .font(.callout.weight(.semibold))
+                        .lineLimit(1)
+                    Text(MCPPaneCopy.groupChip)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .padding(.horizontal, 5)
+                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(tokens.seam, lineWidth: 1))
+                }
+                Text(MCPPaneCopy.sharedDetail(
+                    client: group.lead.clientName, rung: group.lead.grant.rung,
+                    duration: group.lead.grant.duration))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                Text(MCPPaneCopy.groupMembers(group.rows.map(\.targetTitle), total: group.memberCount))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                if group.inertCount > 0 {
+                    Text(MCPPaneCopy.groupInert(group.inertCount))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .italic()
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Spacer(minLength: 0)
+            Button(CapabilityRegistry.capability(.mcpRevokeGrant).verb, action: revoke)
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+        }
+    }
+}
+
 /// One line of ACTIVITY (U3): what a client did, and when.
 struct MCPActivityRowView: View {
     let line: MCPActivityFace.Line
@@ -354,7 +412,7 @@ struct MCPFullListSheet: View {
     let grant: (MCPGrantOpening) -> Void
     @State private var requests: [MCPClient] = []
     @State private var clients: [MCPDoor.ClientRow] = []
-    @State private var shared: [MCPSharedRow] = []
+    @State private var shared: [MCPSharedGroup] = []
     @State private var activity: [MCPActivityFace.Line] = []
     @State private var distinguishers: (books: [String: String], wings: [String: String]) = ([:], [:])
 
@@ -398,11 +456,19 @@ struct MCPFullListSheet: View {
                         }
                     }
                 case .shared:
-                    ForEach(shared) { row in
-                        MCPSharedRowView(
-                            row: row, distinguisher: MCPPane.distinguisher(row, distinguishers), tokens: tokens
-                        ) {
-                            door.revoke(grantID: row.grant.id)
+                    // 13n-c U3: one row per act here too.
+                    ForEach(shared) { group in
+                        if group.isGroup {
+                            MCPSharedGroupView(group: group, tokens: tokens) {
+                                door.revoke(grantIDs: group.grantIDs)
+                            }
+                        } else {
+                            MCPSharedRowView(
+                                row: group.lead, distinguisher: MCPPane.distinguisher(group.lead, distinguishers),
+                                tokens: tokens
+                            ) {
+                                door.revoke(grantID: group.lead.grant.id)
+                            }
                         }
                     }
                 case .activity:
@@ -429,7 +495,7 @@ struct MCPFullListSheet: View {
         case .requests: requests = await door.allPending()
         case .clients: clients = await door.allClients()
         case .shared:
-            shared = await door.allShared()
+            shared = await door.allSharedGroups()
             distinguishers = await door.placeDistinguishers()
         case .activity: activity = await door.allActivity()
         }

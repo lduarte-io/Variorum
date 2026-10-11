@@ -97,6 +97,8 @@ struct EditorCommands: Commands {
         .structuralUndo, .structuralRedo,
         // 13n-b U4: the offer door's keyboard road, beside its veto.
         .showLastAIChange,
+        // 13n-c U3: ⌥⌘A — share the note you're in, beside the AI pair.
+        .mcpShareThisNote,
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake,
         // 13j J4/J4b: the two ceremony doors, beside the verbs they used to
         // be the default of.
@@ -170,6 +172,23 @@ struct EditorCommands: Commands {
         //     ⌥⌘Esc, ⌥⌘H, ⌥⌘M, ⌥⌘W) and the Cocoa text system's default
         //     bindings: no ⌥⌘O (Finder's ⌥⌘O is Finder's own, app-scoped).
         case .showLastAIChange: ("o", [.command, .option])
+        // 13n-c U3 (the VX-156 brief §4/§13; her round-2 nod to ⌥⌘A). THE
+        // COLLISION SWEEP, RE-RUN AT THE TIP (2026-10-11, on `cbdef1fc`) —
+        // ⌥⌘A is FREE:
+        //   · this table: the only `a` chord is ⇧⌘A (Archive Take);
+        //   · every `.keyboardShortcut(` call site in `Variorum/` and
+        //     `Shared/`: the only "a" is that same ⇧⌘A (the Takes menu);
+        //   · every `NSMenuItem` keyEquivalent: none set (all "");
+        //   · the one `performKeyEquivalent` override (`EditorTextView` — ⌘S,
+        //     plus the non-consuming ⌘Z/⇧⌘Z hint arm): no `a`;
+        //   · the local key monitors (`PageTurnKeys` — unmodified ←/→;
+        //     `CommentsPanel` — ⌘⏎, ⎋; `DivideWSheet` — refuses any ⌘/⌃
+        //     event; `CalmAsks` — observes, never consumes): no ⌥⌘A;
+        //   · the system hot key table (`GlobalHotKeyCenter.registered` =
+        //     [.quickNote], ⇧⌘N) and the registry's declared labels: no ⌥⌘A;
+        //   · the platform: ⌘A (Select All) is the system's; ⌥⌘A is not
+        //     reserved by macOS (the brief §13's reserved list).
+        case .mcpShareThisNote: ("a", [.command, .option])
         // 13d batch 4 (A14, her row verbatim: "⌘⇧Enter = new block").
         // ⌘⇧⏎ SUPERSEDES the 13b-4D ⌥⌘N: one act declares one key (P-1),
         // every shortcut is a menu item (R73/R91/R93), and the sweep found
@@ -290,6 +309,22 @@ struct EditorCommands: Commands {
         case .switchMode: nil  // ⌘1–⌘6, wired per mode below
         case .openNote: nil  // ⌘⇧1–⌘⇧9, wired per ordinal below
         default: nil
+        }
+    }
+
+    /// ⌥⌘A's act: the mounted detail's note, the door's derivation, and THE
+    /// grant sheet in the key window when the chord cannot guess.
+    private func shareThisNote() {
+        guard let session else { return }
+        guard let postID = session.commandRouter.activePostID else {
+            session.status.refuse(CapabilityRegistry.capability(.mcpShareThisNote).unavailableNote)
+            return
+        }
+        let windows = windows
+        Task { @MainActor in
+            await mcp.shareThisNote(postID) { opening in
+                windows.activeRouter?.mcpGrantRequest = opening
+            }
         }
     }
 
@@ -472,6 +507,16 @@ struct EditorCommands: Commands {
             Button(verb(.showLastAIChange)) { mcp.showLastChange() }
                 .keyboardShortcut("o", modifiers: [.command, .option])
                 .disabled(!enabled(.showLastAIChange))
+            // 13n-c U3 — ⌥⌘A (the VX-156 brief §4, D1): share the note you're
+            // in with the client you granted last, at that rung — while
+            // connected if it is connected, else once; never always by a key.
+            // R-AIR-8: rendered ONLY while an approved client exists (no
+            // door, never a dead one — the zero-state is Settings ▸ MCP's).
+            if mcp.hasApprovedClient {
+                Button(verb(.mcpShareThisNote)) { shareThisNote() }
+                    .keyboardShortcut("a", modifiers: [.command, .option])
+                    .disabled(!enabled(.mcpShareThisNote))
+            }
         }
         // QoL batch 3 (her L6): the standard Edit ▸ Find submenu — the one
         // slot in this file's menu map that was empty. Deliberately NOT ⌘K's

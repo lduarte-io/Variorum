@@ -529,6 +529,13 @@ struct CapabilityRegistryTests {
             // a new line): the just-in-time ASK SHEET renders its answer and
             // is its only renderer (AF-6).
             .union(MCPAskSheet.surfaceCapabilities)
+            // 13n-c U3 (A JUSTIFIED EDIT, the same class — a new renderer is
+            // a new line): the in-note MCP indicator (VX-164) renders the ONE
+            // shared icon (`.mcpShowSharing` + its popover's Change… / Revoke)
+            // and the lock's Private toggle (`.markNotePrivate`'s `.surface`
+            // door); the Bookcase rows render the same icon (`ShelfView`'s
+            // line above carries it).
+            .union(MCPNoteIndicator.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

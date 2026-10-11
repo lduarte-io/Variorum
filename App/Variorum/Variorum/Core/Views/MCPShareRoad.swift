@@ -75,8 +75,9 @@ struct MCPShareRoad {
     /// THE grant sheet as a view, for a host that must present it ITSELF — a
     /// sheet already up (Book Settings, T-U3-7). `done` dismisses it.
     let sheet: (MCPGrantOpening, @escaping () -> Void) -> AnyView
-    /// Revoke these grants in one act (a popover's Revoke).
-    let revoke: ([String]) -> Void
+    /// Revoke these grants in one act (a popover's Revoke) — awaited, so the
+    /// face that asked re-reads after it lands.
+    let revoke: ([String]) async -> Void
 }
 
 private struct MCPShareRoadKey: EnvironmentKey {
@@ -111,6 +112,11 @@ nonisolated enum MCPShareCopy {
     static let shareThisNote = "Share This Note with AI"
     static let shareThisNoteUnavailable =
         "Share This Note with AI acts on the note you have open \u{2014} open one first."
+    /// The zero-state's one sentence (R-AIR-8 — a share face renders only
+    /// with an approved client; this is the registry's refusal copy).
+    static let zeroState = "Sharing starts in Settings \u{25B8} MCP, once a client is approved."
+    /// The icon's registry verb (its hover says who and how far).
+    static let showSharingVerb = "Who Can Reach This"
 
     // MARK: - Book Settings (settings-class — no "AI")
 

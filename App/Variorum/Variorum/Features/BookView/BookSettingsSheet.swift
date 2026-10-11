@@ -23,6 +23,7 @@
 //    and confirms the shelf row's menu uses.
 //
 
+import GRDB // AsyncValueObservation iteration (13n-c U3: the grant row's held read)
 import SwiftUI
 import VariorumCore
 
@@ -247,6 +248,19 @@ nonisolated enum BookSettingsFace {
         reading.kind == .book || reading.locked
     }
 
+    /// 13n-c U3 — whether the grant row draws (P-2 + R-AIR-8 + R-AIR-12).
+    static func showsGrantRow(for reading: Reading, isPrivate: Bool, canShare: Bool) -> Bool {
+        canShare && reading.kind == .book && !isPrivate
+            && reading.profile != Queries.dailyJournalBookProfile
+    }
+
+    /// The grant row's sentence: "Shared with claude-code (read and suggest)"
+    /// or "No client reaches this book."
+    static func grantRowCaption(_ reach: [MCPPlaceReach]) -> String {
+        reach.isEmpty ? MCPShareCopy.notShared
+            : "\(MCPShareCopy.sharedWithLabel) \(MCPShareCopy.clients(reach))"
+    }
+
     /// 13i-e U2 — the State section's Archived row: Archive or Unarchive, from
     /// the ONE archive table (`BookArchiveDoorSet` — the sheet carries no
     /// Delete door, so only its archive half draws here).
@@ -272,6 +286,10 @@ final class BookSettingsModel {
     /// 13n-b U2 (R-13nb-4): the book's Private mark (read with the rest;
     /// kept off the `Reading` model so no stale model can ever clear it).
     private(set) var isPrivate = false
+    /// 13n-c U3 — who reaches this book now, and how far (the grant row —
+    /// `Queries.mcpBookReach`, the ONE rule's why). Held while the sheet is up
+    /// (`watchReach`) so a grant made from the row's own Share… shows at once.
+    private(set) var reach: [MCPPlaceReach] = []
     let stateDoors: BookStateDoors
 
     init(session: AppSession, readingID: String) {
@@ -294,6 +312,20 @@ final class BookSettingsModel {
         hideOwnedDefault = hides
         isPrivate = marked
     }
+
+    /// **13n-c U3 — the grant row's held read** (reading + the grants store
+    /// only; never `container`, so never at autosave rate).
+    func watchReach() async {
+        let id = readingID
+        do {
+            for try await value in session.database.observe({ db in try Queries.mcpBookReach(db, readingID: id) }) {
+                if reach != value { reach = value }
+            }
+        } catch {}
+    }
+
+    /// Pins hand a reach in (hosted `.task`s don't fire under the test host).
+    func adoptReach(_ value: [MCPPlaceReach]) { reach = value }
 
     /// **The Private row** (13n-b U2 — R-13nb-4): `setBookPrivate` through
     /// the runner; the receipt in the app's voice, or the op's own refusal.
@@ -380,6 +412,9 @@ struct BookSettingsSheet: View {
         + [.setReadingHideOwned]
         // 13n-b U2 (R-13nb-4): the State section's Private row (books only).
         + [.markBookPrivate]
+        // 13n-c U3 (R-13n-4's grant face; VX-156 item 2): the grant row's
+        // Share… — THE grant sheet pre-filled on this book, over this sheet.
+        + [.mcpShareBook]
 
     let structure: BookStructureModel
     /// The Edit… handoff (W-1): the host presents the editor AFTER this
@@ -391,6 +426,11 @@ struct BookSettingsSheet: View {
     @State private var maxPostsField = ""
     @State private var parseError: String?
     @State private var seeded = false
+    /// 13n-c U3: the grant sheet THIS sheet presents (a sheet over a sheet —
+    /// T-U3-7: the window's own grant sheet cannot present while this is up).
+    @State private var grantOpening: MCPGrantOpening?
+    /// 13n-c U3: the window's road (nil in harness mounts — no grant row).
+    @Environment(\.mcpShareRoad) private var mcpShareRoad
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -467,6 +507,14 @@ struct BookSettingsSheet: View {
             if let reading = structure.reading { await model.load(for: reading) }
         }
         .bookStateConfirms(model.stateDoors)
+        // 13n-c U3: who reaches the book, held while the sheet is up; and the
+        // grant sheet it opens, presented over it.
+        .task { await model.watchReach() }
+        .sheet(item: $grantOpening) { opening in
+            if let road = mcpShareRoad {
+                road.sheet(opening) { grantOpening = nil }
+            }
+        }
         #if DEBUG
         .onAppear { record() }
         .onChange(of: drawnKey) { _, _ in record() }
@@ -657,6 +705,28 @@ struct BookSettingsSheet: View {
                 set: { on in Task { await model.setPrivate(on, name: reading.name) } }))
                 .font(tokens.small)
             ChromeNotice(tokens: tokens, text: PrivateMarkCopy.bookCaption, lines: 3)
+        }
+        // 13n-c U3 — THE GRANT ROW (R-13n-4 named Book Settings a grant face;
+        // VX-156 item 2, mockup §2): who reaches this book now, and Share… —
+        // THE grant sheet pre-filled. Drawn only where a grant can land (P-2):
+        // a BOOK (never a gathering — R-AIR-12), not THE daily Journal and not
+        // Private (the fence — the op refuses; the Private row above says why),
+        // and only while an approved client exists (R-AIR-8). Settings-class
+        // words, no "AI" — the client's own name says who.
+        if BookSettingsFace.showsGrantRow(
+            for: reading, isPrivate: model.isPrivate, canShare: mcpShareRoad?.canShare ?? false) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(tokens.chromeLabel(BookSettingsFace.grantRowCaption(model.reach)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Button(tokens.chromeLabel(CapabilityRegistry.capability(.mcpShareBook).verb)) {
+                    grantOpening = MCPGrantOpening(place: .book(reading.id), origin: .place)
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
+            }
         }
         // 13i-e U2 — ARCHIVED (the table's Archive / Unarchive; an owned
         // book's Archive asks — "Archive…").

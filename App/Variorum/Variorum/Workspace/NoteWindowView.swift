@@ -78,7 +78,7 @@ struct NoteWindowView: View {
             sheet: { opening, done in
                 AnyView(MCPGrantSheet(door: mcp, opening: opening, done: done).environment(theme))
             },
-            revoke: { mcp.revokeFromReceipt($0) })
+            revoke: { await mcp.revokeFromReceipt($0) })
     }
 
     /// THE MOUNT RULE, the same one fork the shell consults — with the

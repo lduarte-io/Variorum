@@ -215,7 +215,7 @@ struct RootView: View {
             sheet: { opening, done in
                 AnyView(MCPGrantSheet(door: mcp, opening: opening, done: done).environment(theme))
             },
-            revoke: { mcp.revokeFromReceipt($0) })
+            revoke: { await mcp.revokeFromReceipt($0) })
     }
 
     var body: some View {

@@ -29,7 +29,7 @@ struct LibraryCatalogView: View {
     /// third clause, on the ⌘-click selection this list already had (the bulk
     /// TAG menu has used it since 13e E8; what was missing was the act, never
     /// the selection).
-    static let surfaceCapabilities: [CapabilityID] = [.tagNote, .deleteSelectedNotes]
+    static let surfaceCapabilities: [CapabilityID] = [.tagNote, .deleteSelectedNotes, .mcpShareNotes]
 
     /// **THE MASTHEAD'S DOORS — AND THE ⋯ MENU IS GONE** (the post-13l polish
     /// round, ledger row 7 — her B1 ruling, verbatim: *"I want the ... menu in
@@ -117,6 +117,9 @@ struct LibraryCatalogView: View {
     // environment — fall back to the leading voice's tokens.
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    /// 13n-c U3: the window's road to the MCP door (nil in harness mounts —
+    /// no share door; R-AIR-8 — none without an approved client).
+    @Environment(\.mcpShareRoad) private var mcpShareRoad
     @State private var tagSheetTarget: SidebarView.TagSheetTarget?
     /// 13i-d U5: the move's confirm (the books the note would leave).
     @State private var wingMove: WingsModel.MoveAsk?
@@ -696,6 +699,17 @@ struct LibraryCatalogView: View {
                         }
                         .font(tokens.small)
                     }
+                    // 13n-c U3 (VX-156 item 2; mockup §2) — SHARE THE PICK: THE
+                    // grant sheet pre-filled with these notes, in the listing's
+                    // order; ONE act mints them on one stamp (one row in Shared
+                    // places). R-AIR-8: only while an approved client exists.
+                    if let road = mcpShareRoad, road.canShare {
+                        Button(tokens.chromeLabel(MCPShareCopy.shareNotes(selectedPosts.count))) {
+                            road.open(MCPGrantOpening(
+                                place: .notes(selectedNotesInListOrder), origin: .place))
+                        }
+                        .font(tokens.small)
+                    }
                     // 13l Act 2 (item 3) — her ruling's third clause, built on
                     // the selection this bar already reads. ONE confirmation
                     // naming the count and ONE receipt, which is why the whole
@@ -1197,6 +1211,14 @@ struct LibraryCatalogView: View {
         }
         Button("Tags…") {
             tagSheetTarget = .init(id: hit.id, title: hit.title)
+        }
+        // 13n-c U3 (VX-156 item 2; mockup §2): THE grant sheet pre-filled on
+        // this note — only while an approved client exists (R-AIR-8).
+        if let road = mcpShareRoad, road.canShare {
+            Divider()
+            Button(CapabilityRegistry.capability(.mcpShareHere).verb) {
+                road.open(MCPGrantOpening(place: .note(hit.id), origin: .place))
+            }
         }
         Divider()
         // version_of DOOR 1 (Phase 11 A2's TWO-door ratification; the same

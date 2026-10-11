@@ -934,4 +934,19 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// bars (`.bottomBar`), NOTE contexts only, and only when a client is
     /// there to offer (P-2).
     case mcpAllowHere
+    /// 13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; R-AIR-4/6/7/8).
+    /// Every one renders ONLY while an approved client exists (R-AIR-8 — the
+    /// window's `MCPShareRoad.canShare`; with none, no door, and the
+    /// zero-state lives in Settings ▸ MCP). `mcpShareHere` — "Share with AI…"
+    /// on a note row's and a book row's menu (`.contextMenu`, the row it is
+    /// on); `mcpShareNotes` — the Library bulk bar's "Share N notes with AI…"
+    /// (`.surface`, the ⌘-click pick); `mcpShareBook` — Book Settings' grant
+    /// row's Share… (`.surface`); `mcpShareThisNote` — ⌥⌘A, the Edit menu
+    /// (`.menuBar`); `mcpShowSharing` — the ONE shared icon (R-AIR-6) on a
+    /// Bookcase row and in the note's indicator (R-AIR-7), whose click shows
+    /// the permission; `mcpChangeGrant` — that popover's Change…, which
+    /// REPLACES the grant it names (T-U3-8; `mcpChangeClientAccess` stays the
+    /// client row's additive Change…).
+    case mcpShareHere, mcpShareNotes, mcpShareBook, mcpShareThisNote
+    case mcpShowSharing, mcpChangeGrant
 }

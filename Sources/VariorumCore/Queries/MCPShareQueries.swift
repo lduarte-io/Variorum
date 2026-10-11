@@ -44,9 +44,11 @@ public struct MCPSharedGroup: Equatable, Sendable, Identifiable {
 /// popover, R-AIR-7's in-note indicator): the highest rung it reaches now and
 /// the standing `MCPGrantRule.decide` itself authorizes it with.
 public struct MCPPlaceReach: Equatable, Sendable, Identifiable {
-    public var id: String { clientID }
-    public let clientID: String
-    public let clientName: String
+    public var id: String { client.id }
+    /// The client (Change… re-opens the sheet on exactly it).
+    public let client: MCPClient
+    public var clientID: String { client.id }
+    public var clientName: String { client.name }
     public let rung: MCPGrantRule.Rung
     /// The authorizing grant's row; nil = the open book.
     public let grant: MCPGrantRow?
@@ -55,12 +57,8 @@ public struct MCPPlaceReach: Equatable, Sendable, Identifiable {
     /// OWN grant authorizes it, and for the open book (`grant == nil`).
     public let throughTitle: String?
 
-    public init(
-        clientID: String, clientName: String, rung: MCPGrantRule.Rung, grant: MCPGrantRow?,
-        throughTitle: String?
-    ) {
-        self.clientID = clientID
-        self.clientName = clientName
+    public init(client: MCPClient, rung: MCPGrantRule.Rung, grant: MCPGrantRow?, throughTitle: String?) {
+        self.client = client
         self.rung = rung
         self.grant = grant
         self.throughTitle = throughTitle
@@ -245,9 +243,7 @@ extension Queries {
         guard case .grant(let ruled) = reach.standing,
               let grant = rows.first(where: { $0.id == ruled.id })
         else {
-            return MCPPlaceReach(
-                clientID: client.id, clientName: client.name, rung: reach.rung, grant: nil,
-                throughTitle: nil)
+            return MCPPlaceReach(client: client, rung: reach.rung, grant: nil, throughTitle: nil)
         }
         var through: String?
         if !(grant.scopeKind == ownKind && grant.scopeID == ownID) {
@@ -259,9 +255,7 @@ extension Queries {
                 titles[key] = through
             }
         }
-        return MCPPlaceReach(
-            clientID: client.id, clientName: client.name, rung: reach.rung, grant: grant,
-            throughTitle: through)
+        return MCPPlaceReach(client: client, rung: reach.rung, grant: grant, throughTitle: through)
     }
 
     // MARK: - ⌥⌘A's derivation
