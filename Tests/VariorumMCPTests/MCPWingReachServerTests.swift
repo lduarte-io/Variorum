@@ -137,6 +137,15 @@ struct MCPWingReachServerTests {
         return Gathered(wing: wing, gathering: gathering, book: book, plain: plain, fenced: fenced)
     }
 
+    /// A stale Private stamp on a reading, written as a synced row would land
+    /// (a sync write — the async overload would win inside the test bodies).
+    private func stampPrivate(_ h: ServerHarness, _ readingID: String) throws {
+        try h.database.write { db in
+            try db.execute(sql: "UPDATE reading SET ai_private_at = '2026-07-01T00:00:00.000Z' WHERE id = ?",
+                           arguments: [readingID])
+        }
+    }
+
     private func books(_ result: (content: [Tool.Content], isError: Bool?)) throws -> [[String: Any]] {
         try #require(try json(result)["books"] as? [[String: Any]])
     }
@@ -209,10 +218,7 @@ struct MCPWingReachServerTests {
             // synced row could) is admitted by the wing grant's listing and
             // refused by the rule (the U6-5 mutation M7 found this case
             // missing: the listing's prefilter alone had kept it honest).
-            try h.database.write { db in
-                try db.execute(sql: "UPDATE reading SET ai_private_at = '2026-07-01T00:00:00.000Z' WHERE id = ?",
-                               arguments: [g.gathering.id])
-            }
+            try stampPrivate(h, g.gathering.id)
             #expect(!(try books(try await call(connection, "list_books", [:]))).contains {
                 $0["id"] as? String == g.gathering.id
             }, "a fenced gathering never lists")
