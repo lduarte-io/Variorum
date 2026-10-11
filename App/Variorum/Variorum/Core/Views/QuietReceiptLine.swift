@@ -96,6 +96,21 @@ struct QuietReceiptLine: View {
                 .multilineTextAlignment(.leading)
                 .textSelection(.enabled)
                 .help(item?.text ?? "")
+            // 13n-c U3 (R-AIR-4; T-U3-6): a share receipt carries a SECOND
+            // door — "Change…" beside "Revoke ›" — drawn before the act's own
+            // door, the toast's order (`StatusToast`: secondary, then
+            // action). Like the first, only while such a receipt speaks.
+            if let secondary = item?.secondary {
+                Button(secondary.label) {
+                    status.clear()
+                    secondary.perform()
+                }
+                .buttonStyle(.plain)
+                .font(tokens.small)
+                .foregroundStyle(tokens.accent)
+                .lineLimit(1)
+                .fixedSize()
+            }
             // 13n-b U4 (R-13nb-23 (a), AF-11 F-2): a receipt may carry ONE
             // door — an AI write's "Open ›". Drawn only while such a receipt
             // speaks, so an idle slot still asks for zero width (the

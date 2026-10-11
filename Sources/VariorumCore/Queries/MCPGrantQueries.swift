@@ -15,6 +15,20 @@ public struct MCPClient: Equatable, Sendable, Identifiable {
     public let firstSeenAt: String
     public let lastSeenAt: String
     public let decidedAt: String?
+
+    /// 13n-c U3: public, so the app's pins can name a client.
+    public init(
+        id: String, name: String, version: String?, state: MCPGrantRule.ClientState,
+        firstSeenAt: String, lastSeenAt: String, decidedAt: String?
+    ) {
+        self.id = id
+        self.name = name
+        self.version = version
+        self.state = state
+        self.firstSeenAt = firstSeenAt
+        self.lastSeenAt = lastSeenAt
+        self.decidedAt = decidedAt
+    }
 }
 
 /// One grant row.
@@ -28,6 +42,23 @@ public struct MCPGrantRow: Equatable, Sendable, Identifiable {
     public let createdAt: String
     public let consumedAt: String?
     public let revokedAt: String?
+
+    /// 13n-c U3: public, so the app's pins can name a grant.
+    public init(
+        id: String, clientID: String, rung: MCPGrantRule.Rung, scopeKind: MCPGrantRule.ScopeKind,
+        scopeID: String, duration: MCPGrantRule.Duration, createdAt: String, consumedAt: String?,
+        revokedAt: String?
+    ) {
+        self.id = id
+        self.clientID = clientID
+        self.rung = rung
+        self.scopeKind = scopeKind
+        self.scopeID = scopeID
+        self.duration = duration
+        self.createdAt = createdAt
+        self.consumedAt = consumedAt
+        self.revokedAt = revokedAt
+    }
 
     /// The row as the rule reads it.
     public var ruleGrant: MCPGrantRule.Grant {

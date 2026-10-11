@@ -312,6 +312,39 @@ struct MCPShareTests {
         }
     }
 
+    /// The icon's set is EXACTLY the retired chip's honest set
+    /// (P-13nb-U2-11 — `mcpReachableBookIDs`), under every grant shape; and
+    /// the books a row may not offer to share are exactly the ones the sheet
+    /// never lists.
+    @Test func theIconsBooksAreTheChipsBooksAndTheFencedAreTheUnoffered() throws {
+        try withOperations { ops, db in
+            let claude = try approvedClient(ops)
+            let plain = try ops.createReading(name: "plain", kind: .book)
+            let granted = try ops.createReading(name: "granted", kind: .book)
+            let wing = try ops.createWing(name: "elsewhere")
+            let away = try ops.createReading(name: "away", kind: .book, wingId: wing.id)
+            let privateBook = try ops.createReading(name: "private", kind: .book)
+            _ = try ops.setBookPrivate(privateBook.id, true)
+            let trait = try ops.createReading(name: "dream journal", kind: .book, profile: "journal")
+            _ = try ops.grantMCPAccess(
+                claude.id, .init(rung: .read, scopeKind: .book, scopeID: granted.id, duration: .always))
+            func same() throws {
+                let icons = Set(try db.read { try Queries.mcpBookReaches($0) }.keys)
+                #expect(icons == (try db.read { try Queries.mcpReachableBookIDs($0) }))
+            }
+            try same()
+            _ = try ops.grantMCPAccess(claude.id, .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .always))
+            try same()
+            try ops.setMCPSwitch(.openBook, on: true)
+            try same()
+            #expect(try db.read { try Queries.mcpBookReaches($0) }[away.id] != nil, "the open book reaches every wing")
+            let fenced = try db.read { try Queries.mcpFencedBookIDs($0) }
+            let offered = Set(try db.read { try Queries.mcpGrantableBooks($0) }.map(\.id))
+            #expect(fenced == [privateBook.id])
+            #expect(offered == [plain.id, granted.id, away.id, trait.id])
+        }
+    }
+
     @Test func noApprovedClientMeansNoBookReachAtAll() throws {
         try withOperations { ops, db in
             _ = try ops.createReading(name: "a book", kind: .book)
