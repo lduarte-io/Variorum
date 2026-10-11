@@ -71,6 +71,38 @@ itself is hers, in the morning — this session only PREPARES it.**
   (recommended — reach never exceeds the wing) · make them grantable targets
   (moving reach — the P-13nb-U4-16 class problem).
 
+## ROUND 3 — her rulings closing the Air sitting, 2026-10-11
+
+- **R-AIR-12 — a wing grant covers the whole wing:** notes, books, AND gatherings
+  (readable as facts), minus anything fenced (daily-Journal entries, Private) —
+  her words: "granting a wing grants access to everything … unless it's
+  deliberately marked private." Gatherings do NOT become separate grant targets
+  (she finds that confusing and unnecessary). If a wing grant doesn't surface
+  gatherings today, that is a 13n-c build item, not a new concept.
+- **R-AIR-13 — the setup command grows a per-client menu:** Claude Code · Codex ·
+  a generic path/JSON shape (the door is a standard MCP stdio server at one
+  binary path; the pane says so).
+- **R-AIR-14 — the per-setup secret BUILDS inside 13n-c** (her call, the dunk
+  concern on record), scheduled so the launch never blocks on it; the honest
+  pane sentence ships regardless.
+- **R-AIR-15 (PROPOSED, awaiting her yes) — the wing chord is ⌘L:** press opens
+  the switcher, typing filters, holding ⌘ and tapping L cycles (the ⌘-tab
+  idiom), release/return commits; the masthead switcher clicked without typing
+  also cycles. Bare ⌘L verified free at every call site; the build re-verifies
+  across the registry ritual.
+- **THE OPUS-WEEK PROTOCOL (process, binds the 13n-c kickoff):** her Fable
+  credits are nearly out. The round orchestrates on Opus with opus-reviewer
+  ladders; EVERY decision or diff that would ordinarily earn a Fable review
+  (fence/default's-meaning semantics, the secret's accept path, anything
+  touching refusal uniformity) gets a row in a FABLE-OWED ledger inside the
+  plan file — commit SHA, diff scope, why owed — written at the moment, never
+  reconstructed. At credit reset a Fable session walks the ledger and runs
+  cold reviews in sensible ladders. Risk shaping: the fence-classifier unit
+  lands EARLIEST in the week (maximum soak + her real-store use before
+  launch); any remaining Fable budget is reserved for ONE targeted cold
+  review of the riskiest diff (fence classifier + secret accept path), not
+  spent on orchestration.
+
 ## Mandate
 
 Design-prep for the grant UX round. NO app code, NO canon edits, NO suites, NO walks
