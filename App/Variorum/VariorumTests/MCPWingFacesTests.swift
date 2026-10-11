@@ -144,4 +144,35 @@ struct MCPWingFacesTests {
         #expect(line("show_in_app", kind: "wing", title: "variorum")
                 == "claude-code showed you \u{201C}variorum\u{201D}")
     }
+
+    // MARK: - The live round's staging (DEBUG-only, env-gated — `ScaleFixture`'s wing part)
+
+    @Test func theScaleSeedsWingPartMintsTheLiveRoundsWorldOnce() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let client = try ops.recordMCPContact(name: "claude-code", version: "1")
+            try ops.approveMCPClient(client.id, granting: nil)
+            let request = ScaleFixture.Request(notes: 3, longBlocks: 1, wing: 1)
+            #expect(ScaleFixture.Request.parse("notes=30,long=1,books=20,shelves=3,wing=1")
+                    == ScaleFixture.Request(notes: 30, longBlocks: 1, books: 20, shelves: 3, wing: 1))
+            #expect(try await ScaleFixture.seed(session: session, request: request))
+            let (wing, gathering) = try await db.read { db in
+                (try Wing.fetchOne(db, sql: "SELECT * FROM wing WHERE name = ?", arguments: [ScaleFixture.wingName]),
+                 try Reading.fetchOne(db, sql: "SELECT * FROM reading WHERE name = ?",
+                                      arguments: [ScaleFixture.gatheringName]))
+            }
+            let wingID = try #require(wing?.id)
+            #expect(gathering?.kind == .gathering && gathering?.wingId == wingID)
+            let members = try await db.read { try Queries.assembleReading($0, readingID: gathering!.id) }
+            #expect(members.count == 3, "three #parser notes gathered")
+            let fenced = try await db.read { db in
+                try Queries.mcpNoteFacts(db, noteIDs: members.map(\.postID)).values.filter { $0.fence != nil }.count
+            }
+            #expect(fenced == 1, "one of them Private — the member a wing grant must never list")
+            let grants = try await db.read { try Queries.mcpGrants($0, clientID: client.id) }
+            #expect(grants.map { "\($0.rung.rawValue)·\($0.scopeKind.rawValue)·\($0.scopeID)" }.sorted()
+                    == ["edit·wing·", "write_new·wing·\(wingID)"], "her sweep's two grants (staging)")
+            #expect(try await ScaleFixture.seed(session: session, request: request) == false, "a relaunch mints nothing")
+        }
+    }
 }

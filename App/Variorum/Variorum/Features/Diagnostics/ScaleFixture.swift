@@ -46,6 +46,16 @@
 //  nothing twice. For the grant-sheet walk:
 //  `Tools/ScaleFixture/stage.sh notes=520,long=40,books=160,shelves=9`.
 //
+//  13n-c U6 — THE WING ON THE WIRE's live round (her sweep's shape): with
+//  `wing=1` the fixture also mints the wing "variorum" holding the gathering
+//  "parser things" (rule: #parser) and three #parser notes, the third marked
+//  Private (the fenced member a wing grant must never list or count), and —
+//  when an APPROVED client named "claude-code" already stands — her sweep's
+//  two grants: edit · Home · always and write new · variorum · always
+//  (STAGING, said plainly: the grant road's faces were walked at W-3…W-6).
+//  Its marker is the live wing of that name. For the live round:
+//  `Tools/ScaleFixture/stage.sh notes=30,long=1,books=20,shelves=3,wing=1`.
+//
 
 #if DEBUG
 import Dependencies
@@ -65,6 +75,8 @@ enum ScaleFixture {
         /// 13n-c U2 — the grant road's books (0 = none, the shipped fixture).
         var books = 0
         var shelves = 8
+        /// 13n-c U6 — the wing on the wire's live round (0 = none).
+        var wing = 0
 
         /// `"notes=600,long=2000[,books=160,shelves=9]"`; every part optional;
         /// nil when unset.
@@ -79,6 +91,7 @@ enum ScaleFixture {
                 case "long": request.longBlocks = value
                 case "books": request.books = value
                 case "shelves": request.shelves = max(1, value)
+                case "wing": request.wing = value
                 default: continue
                 }
             }
@@ -88,6 +101,9 @@ enum ScaleFixture {
 
     /// The books part's marker (13n-c U2).
     nonisolated static let grantMarkerBook = "Fixture book 001 \u{2014} on the river at dusk"
+    /// The wing part's marker and its gathering (13n-c U6).
+    nonisolated static let wingName = "variorum"
+    nonisolated static let gatheringName = "parser things"
 
     private static var started = false
 
@@ -105,6 +121,7 @@ enum ScaleFixture {
                 NSLog("ScaleFixture: %@", minted
                     ? "minted \(request.notes) notes + a \(request.longBlocks)-block note"
                         + (request.books > 0 ? " + \(request.books) books on \(request.shelves) shelves" : "")
+                        + (request.wing > 0 ? " + the wing \(wingName)" : "")
                     : "already present — nothing minted")
             } catch {
                 NSLog("ScaleFixture: failed — %@", String(describing: error))
@@ -115,17 +132,20 @@ enum ScaleFixture {
     /// Mints the fixture into the session's store; false when every
     /// requested part's marker already stands.
     static func seed(session: AppSession, request: Request) async throws -> Bool {
-        let (notesPresent, booksPresent) = try await session.database.read { db in
+        let (notesPresent, booksPresent, wingPresent) = try await session.database.read { db in
             (try Int.fetchOne(db, sql: """
                 SELECT COUNT(*) FROM container
                 WHERE kind = 'post' AND deleted_at IS NULL AND title = ?
                 """, arguments: [longNoteTitle]) ?? 0,
              try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL AND name = ?",
-                              arguments: [grantMarkerBook]) ?? 0)
+                              arguments: [grantMarkerBook]) ?? 0,
+             try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM wing WHERE deleted_at IS NULL AND name = ?",
+                              arguments: [wingName]) ?? 0)
         }
         let mintNotes = notesPresent == 0
         let mintBooks = request.books > 0 && booksPresent == 0
-        guard mintNotes || mintBooks else { return false }
+        let mintWing = request.wing > 0 && wingPresent == 0
+        guard mintNotes || mintBooks || mintWing else { return false }
         let base = Date().addingTimeInterval(-2 * 365 * 86_400)
         let notes = request.notes, longBlocks = request.longBlocks
         let books = request.books, shelves = request.shelves
@@ -140,8 +160,35 @@ enum ScaleFixture {
             if mintBooks {
                 try mintBooksPart(books: books, shelves: shelves, base: base)
             }
+            if mintWing {
+                try mintWingPart()
+            }
         }
         return true
+    }
+
+    // MARK: - The wing on the wire's live round (13n-c U6)
+
+    nonisolated private static func mintWingPart() throws {
+        let ops = Operations(undoStack: nil)
+        let wing = try ops.createWing(name: wingName)
+        let parser = try ops.createTag(parent: nil, name: "parser", wingID: wing.id)
+        _ = try ops.createReading(
+            name: gatheringName, kind: .gathering, querySpec: try RuleGrammar.encode(.tag(parser.id)),
+            wingId: wing.id)
+        for (index, title) in ["the lexer", "the grammar", "a private parser note"].enumerated() {
+            let note = try ops.createPost(title: title, wingId: wing.id)
+            _ = try ops.newBlock(in: note.id, text: paragraph(seed: 90 + index, long: false), registeringUndo: false)
+            _ = try ops.applyTag(parser.id, toPost: note.id)
+            if index == 2 { _ = try ops.setNotePrivate(note.id, true) }
+        }
+        @Dependency(\.database) var database
+        guard let client = try database.read({ try Queries.mcpClient($0, name: "claude-code") }),
+              client.state == .approved
+        else { return }
+        _ = try ops.grantMCPAccess(client.id, .init(rung: .edit, scopeKind: .wing, scopeID: "", duration: .always))
+        _ = try ops.grantMCPAccess(
+            client.id, .init(rung: .writeNew, scopeKind: .wing, scopeID: wing.id, duration: .always))
     }
 
     // MARK: - The grant road's books (13n-c U2)
