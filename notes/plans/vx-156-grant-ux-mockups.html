@@ -1,0 +1,905 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grant UX mockups</title>
+<style>
+  /* Study voice tokens, verbatim from App/Variorum/Shared/Theme/VoiceTokens.swift
+     (studyLight / studyDark). "desk" is the page around the mocks, not a token. */
+  :root{
+    --desk:#ECE8E0; --room:#FAF8F3; --surface:#FFFFFF; --card:#FFFFFF;
+    --ink:#29241C; --muted:#8D8578; --faint:#B5AD9E; --accent:#3D6B8E;
+    --alarm:#9B3B2F; --positive:#5A7D46; --line:#E4DDD0; --seam:#C9B998;
+    --wash:rgba(61,107,142,.12); --take:#F4F2EC; --ring:#B0713A;
+    --comment:#FBF5E2; --code:#F2EDE1; --menu:#FFFFFF;
+    --shadow:0 1px 3px rgba(60,50,40,.07);
+    --lift:0 14px 40px rgba(50,40,30,.16),0 2px 6px rgba(50,40,30,.08);
+    --term:#29241C; --termink:#F2EDE1; --termdim:#B5AD9E;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --desk:#0B0A09; --room:#000000; --surface:#14120F; --card:#1C1915;
+      --ink:#E8E3D8; --muted:#948C7C; --faint:#6B6456; --accent:#82ABCC;
+      --alarm:#D98A78; --positive:#93B57E; --line:#2C2822; --seam:#57544A;
+      --wash:rgba(130,171,204,.13); --take:#1B1E19; --ring:#D29A64;
+      --comment:#201C12; --code:#241F18; --menu:#1C1915;
+      --shadow:0 1px 3px rgba(0,0,0,.5);
+      --lift:0 14px 40px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.5);
+      --term:#14120F; --termink:#E8E3D8; --termdim:#6B6456;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"], .scheme-dark{
+    --desk:#0B0A09; --room:#000000; --surface:#14120F; --card:#1C1915;
+    --ink:#E8E3D8; --muted:#948C7C; --faint:#6B6456; --accent:#82ABCC;
+    --alarm:#D98A78; --positive:#93B57E; --line:#2C2822; --seam:#57544A;
+    --wash:rgba(130,171,204,.13); --take:#1B1E19; --ring:#D29A64;
+    --comment:#201C12; --code:#241F18; --menu:#1C1915;
+    --shadow:0 1px 3px rgba(0,0,0,.5);
+    --lift:0 14px 40px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.5);
+    --term:#14120F; --termink:#E8E3D8; --termdim:#6B6456;
+    color-scheme: dark;
+  }
+  .scheme-light{
+    --desk:#ECE8E0; --room:#FAF8F3; --surface:#FFFFFF; --card:#FFFFFF;
+    --ink:#29241C; --muted:#8D8578; --faint:#B5AD9E; --accent:#3D6B8E;
+    --alarm:#9B3B2F; --positive:#5A7D46; --line:#E4DDD0; --seam:#C9B998;
+    --wash:rgba(61,107,142,.12); --take:#F4F2EC; --ring:#B0713A;
+    --comment:#FBF5E2; --code:#F2EDE1; --menu:#FFFFFF;
+    --shadow:0 1px 3px rgba(60,50,40,.07);
+    --lift:0 14px 40px rgba(50,40,30,.16),0 2px 6px rgba(50,40,30,.08);
+    --term:#29241C; --termink:#F2EDE1; --termdim:#B5AD9E;
+    color-scheme: light;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--desk); color:var(--ink);
+    font-family:'Iowan Old Style','Palatino Nova',Palatino,'New York',Georgia,serif;
+    padding:32px 24px 120px; line-height:1.45;
+  }
+  .sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Arial,sans-serif;}
+  .mono{font-family:ui-monospace,'SF Mono',Menlo,monospace;}
+  .page{max-width:1040px;margin:0 auto;}
+  h1{font-size:23px;font-weight:600;margin:0 0 4px;}
+  h2{font-size:18px;font-weight:600;margin:52px 0 6px;padding-top:14px;border-top:1px solid var(--line);}
+  h3{font-size:15px;font-weight:600;margin:26px 0 6px;}
+  .sub{color:var(--muted);font-size:14.5px;margin:0 0 14px;max-width:80ch;}
+  .note{color:var(--muted);font-size:14px;margin:0 0 14px;max-width:78ch;}
+  .note b,.sub b{color:var(--ink);font-weight:600;}
+  code,.code{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12.5px;background:var(--code);border-radius:4px;padding:0 4px;color:var(--ink);}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:8px;}
+  .themes{display:flex;gap:4px;font-size:12px;}
+  .themes button{font:inherit;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:6px;padding:3px 10px;cursor:pointer;}
+  .themes button.on{color:var(--ink);background:var(--wash);border-color:var(--seam);}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:6px 0 4px;}
+  .toc{font-size:13.5px;color:var(--muted);margin:10px 0 0;columns:2 280px;column-gap:28px;}
+  .toc a{color:var(--accent);text-decoration:none;}
+  .toc div{break-inside:avoid;padding:1px 0;}
+
+  /* marks */
+  .rec,.opt,.new{display:inline-block;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11px;border-radius:5px;padding:0 6px;vertical-align:1px;white-space:nowrap;}
+  .rec{background:var(--accent);color:var(--surface);}
+  .opt{border:1px solid var(--seam);color:var(--muted);}
+  .new{border:1px dashed var(--accent);color:var(--accent);}
+
+  /* frames */
+  .frame{background:var(--room);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow);overflow:hidden;margin:0 0 12px;position:relative;}
+  .label{display:inline-block;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11.5px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:1px 8px;margin:10px 0 0 14px;}
+  .pad{padding:12px 18px 16px;}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px;align-items:start;}
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;align-items:start;}
+  .pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px;align-items:start;}
+  .pair > .scheme-light,.pair > .scheme-dark{background:var(--desk);border-radius:12px;padding:14px;color:var(--ink);}
+  .caption{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11.5px;color:var(--muted);margin:0 0 8px;}
+
+  /* chrome text (Study chrome = the system face) */
+  .chrome{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Arial,sans-serif;font-size:13px;}
+  .small{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11.5px;color:var(--muted);}
+  .quiet{color:var(--muted);}
+  .faint{color:var(--faint);}
+  .acc{color:var(--accent);}
+
+  /* rows */
+  .row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 12px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .row:last-child{border-bottom:none;}
+  .row .t{font-weight:600;min-width:0;}
+  .row .m{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;color:var(--muted);text-align:right;margin-left:auto;}
+  .row.pick{background:var(--wash);margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:6px;border-bottom-color:transparent;}
+  .chip{display:inline-block;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11px;border:1px solid var(--seam);color:var(--muted);border-radius:5px;padding:0 5px;margin-left:7px;vertical-align:1px;font-weight:400;white-space:nowrap;}
+  .chip.ai{color:var(--accent);border-color:var(--seam);}
+  .chip.ask{color:var(--accent);border-color:var(--accent);}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:4px;background:var(--accent);margin-left:7px;vertical-align:1px;}
+  .star{color:var(--accent);font-size:12px;margin-right:5px;}
+
+  /* sheet */
+  .sheet{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--lift);padding:18px 20px 16px;max-width:540px;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;font-size:13px;color:var(--ink);}
+  .sheet h4{font-size:14px;font-weight:600;margin:0 0 3px;}
+  .sheet .lead{color:var(--muted);font-size:12.5px;margin:0 0 6px;}
+  .sect{font-size:11.5px;font-weight:600;color:var(--muted);margin:13px 0 5px;}
+  .radio{display:flex;gap:8px;align-items:baseline;padding:2px 0;}
+  .radio .r{width:13px;flex-shrink:0;color:var(--accent);}
+  .radio .d{color:var(--muted);font-size:12px;}
+  .inline-radios{display:flex;gap:16px;flex-wrap:wrap;}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;}
+  .seg span{padding:3px 12px;font-size:12.5px;border-right:1px solid var(--line);}
+  .seg span:last-child{border-right:none;}
+  .seg span.sel{background:var(--wash);font-weight:600;}
+  .btn{display:inline-block;border:1px solid var(--line);background:var(--card);border-radius:7px;padding:3px 12px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;color:var(--ink);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600;}
+  .btn.quiet{background:transparent;color:var(--accent);border-color:transparent;padding-left:4px;padding-right:4px;}
+  .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .pickerbtn{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border:1px solid var(--line);background:var(--card);border-radius:7px;padding:5px 10px;margin:6px 0 0;}
+  .pickerbtn .a{color:var(--muted);font-size:11.5px;}
+
+  /* popover (the one picker control) */
+  .pop{background:var(--menu);border:1px solid var(--line);border-radius:10px;box-shadow:var(--lift);margin:6px 0 4px;max-width:420px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;}
+  .pop .field{padding:7px 11px;border-bottom:1px solid var(--line);color:var(--ink);}
+  .pop .field .caret{display:inline-block;width:1px;height:13px;background:var(--accent);vertical-align:-2px;margin-left:1px;}
+  .pop .opt-row{display:flex;justify-content:space-between;gap:10px;padding:6px 11px;align-items:baseline;}
+  .pop .opt-row.hi{background:var(--wash);}
+  .pop .opt-row .lbl{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+  .pop .opt-row .ann{color:var(--faint);white-space:nowrap;flex-shrink:0;}
+  .pop .opt-row .ann b{color:var(--muted);font-weight:600;}
+  .pop .opt-row .snip{display:block;color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pop .foot-line{padding:6px 11px 8px;color:var(--faint);font-size:11.5px;border-top:1px solid var(--line);}
+
+  /* menus (macOS) */
+  .menu{background:var(--menu);border:1px solid var(--line);border-radius:8px;box-shadow:var(--lift);padding:5px 0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;max-width:390px;}
+  .menu .mi{display:flex;justify-content:space-between;gap:24px;padding:3px 14px;}
+  .menu .mi .k{color:var(--muted);font-size:12.5px;white-space:nowrap;}
+  .menu .mi.dim{color:var(--faint);}
+  .menu .mi.hi{background:var(--accent);color:var(--surface);border-radius:4px;margin:0 5px;padding:3px 9px;}
+  .menu .mi.hi .k{color:var(--surface);}
+  .menu .mi.head{color:var(--muted);font-size:11.5px;padding-top:2px;}
+  .menu .sep{border-top:1px solid var(--line);margin:5px 0;}
+
+  /* bars */
+  .bar{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line);background:var(--surface);padding:7px 16px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;color:var(--muted);flex-wrap:wrap;}
+  .bar .door{color:var(--accent);margin-left:10px;}
+  .bulk{display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--surface);font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;}
+  .bulk span{color:var(--ink);}
+  .bulk .destr{color:var(--alarm);}
+  .toast{display:inline-block;background:var(--card);border:1px solid var(--line);box-shadow:var(--lift);border-radius:9px;padding:7px 14px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;color:var(--ink);}
+  .tip{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:4px 9px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11.5px;color:var(--ink);box-shadow:var(--shadow);}
+
+  /* masthead + wing */
+  .mast{display:flex;justify-content:space-between;align-items:baseline;padding:14px 18px 10px;flex-wrap:wrap;gap:8px;}
+  .crumb{font-size:17px;font-weight:600;color:var(--ink);}
+  .crumb .dot2{color:var(--faint);font-weight:400;padding:0 5px;}
+  .crumb .caretdown{color:var(--accent);font-size:12px;margin-left:4px;}
+  .mast .r{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;color:var(--muted);}
+
+  /* settings window */
+  .settings{display:grid;grid-template-columns:170px 1fr;min-height:300px;}
+  .settings .side{background:var(--surface);border-right:1px solid var(--line);padding:10px 8px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;}
+  .settings .side .search{border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--faint);margin-bottom:8px;font-size:11.5px;}
+  .settings .side div.p{padding:3px 8px;border-radius:5px;}
+  .settings .side div.p.sel{background:var(--wash);font-weight:600;}
+  .settings .detail{padding:12px 18px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;}
+  .group{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:4px 12px;margin:6px 0 12px;}
+  .gtitle{font-size:11.5px;font-weight:600;color:var(--muted);margin:10px 0 0;}
+  .toggle{display:inline-block;width:28px;height:16px;border-radius:9px;background:var(--seam);position:relative;vertical-align:-3px;margin-right:8px;}
+  .toggle.on{background:var(--accent);}
+  .toggle i{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:6px;background:var(--surface);}
+  .toggle.on i{left:14px;}
+
+  /* code / wire */
+  .wire{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;background:var(--term);color:var(--termink);border-radius:9px;padding:12px 15px;white-space:pre-wrap;overflow-x:auto;line-height:1.55;margin:6px 0 10px;}
+  .wire .c{color:var(--termdim);}
+  table.cmp{border-collapse:collapse;width:100%;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:9px;overflow:hidden;margin:6px 0 12px;}
+  table.cmp th,table.cmp td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top;}
+  table.cmp th{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11.5px;color:var(--muted);font-weight:600;}
+  table.cmp tr:last-child td{border-bottom:none;}
+  table.cmp td.k{white-space:nowrap;font-weight:600;}
+  .kbd{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;border:1px solid var(--seam);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--surface);white-space:nowrap;}
+  .alert{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--lift);padding:18px 18px 14px;max-width:320px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;}
+  .alert h4{margin:0 0 6px;font-size:13.5px;}
+  .alert p{margin:0 0 12px;color:var(--ink);}
+  .alert .btn{display:block;margin:5px 0 0;text-align:center;}
+  .warnline{border-left:2px solid var(--accent);padding:4px 0 4px 10px;margin:8px 0 0;color:var(--ink);font-size:12.5px;background:var(--wash);border-radius:0 6px 6px 0;}
+  .strike{text-decoration:line-through;color:var(--faint);}
+  @media (max-width:560px){
+    body{padding:20px 16px 80px;}
+    .settings{grid-template-columns:1fr;}
+    .settings .side{border-right:none;border-bottom:1px solid var(--line);}
+    .pair{grid-template-columns:1fr;}
+    table.cmp{display:block;overflow-x:auto;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="topbar">
+  <div>
+    <h1>Grant UX mockups</h1>
+    <p class="sub">VX-156 design prep · 2026-10-11 · Study voice approximation, in light and dark (the switch on the right, or your system setting). The drawn states for every VX-156 item, the wing switcher with its chord (VX-157), VX-158's faces, and the four sitting-agenda items. The reasons live in the brief beside this page, <code>vx-156-grant-ux-brief.md</code> — its §16 maps these sections. Inside Settings ▸ MCP and its sheets the words are direct and technical (R-13n-5); chips, badges and receipts keep the app's own voice (P-13n-1). Menu-bar items keep the menu bar's shipped Title Case (P-13nb-U4-15's “Show the AI's Last Change”); everything else here is sentence case.</p>
+  </div>
+  <div class="themes" role="group" aria-label="Appearance">
+    <button type="button" data-set-theme="system" class="on">System</button>
+    <button type="button" data-set-theme="light">Light</button>
+    <button type="button" data-set-theme="dark">Dark</button>
+  </div>
+</div>
+<div class="legend"><span><span class="rec">recommended</span> the brief's pick</span><span><span class="opt">option</span> an alternative, drawn for comparison</span><span><span class="new">new</span> a door or line this round adds</span></div>
+<div class="toc">
+  <div><a href="#s1">1 · The grant sheet, rebuilt</a></div>
+  <div><a href="#s1b">1b · The duplicate rule</a></div>
+  <div><a href="#s2">2 · Grant from the Library</a></div>
+  <div><a href="#s3">3 · The share-this-note chord</a></div>
+  <div><a href="#s4">4 · The pending-ask badge</a></div>
+  <div><a href="#s5">5 · The MCP pane chord</a></div>
+  <div><a href="#s6">6 · Wing switching from the keyboard</a></div>
+  <div><a href="#s7">7 · VX-158 — an agent's wing switch</a></div>
+  <div><a href="#s8">8 · Agenda (a) — R-AIR-1's confirm</a></div>
+  <div><a href="#s9">9 · Agenda (b) — VX-160's crossing door</a></div>
+  <div><a href="#s10">10 · Agenda (c) — VX-159's addressing</a></div>
+  <div><a href="#s11">11 · Agenda (d) — the A-4 options</a></div>
+</div>
+
+<!-- ============================================================ 1 -->
+<h2 id="s1">1 · The grant sheet, rebuilt — searchable places <span class="rec">recommended: option A</span></h2>
+<p class="note">VX-156 items 1 and 6. Every place on the grant road is chosen with the one picker control (R-17y-3's <code>SearchPicker</code>): type to filter, return takes the top row, escape closes, and a grant never makes a place, so there is no create row. Each row carries quiet context, and a name two rows share gains the first fact that tells them apart (1b). The <b>Who</b> row appears whenever the sheet opens from anywhere but the pane. The same sheet, in both appearances:</p>
+
+<div class="pair">
+<div class="scheme-light">
+<p class="caption">Light</p>
+<div class="sheet">
+  <h4>Grant access</h4>
+  <p class="lead">The client sees what you grant and nothing else. Refusals speak to it exactly as they speak to you.</p>
+  <div class="sect">Who</div>
+  <div class="pickerbtn"><span>claude-code</span><span class="a">connected now ▾</span></div>
+  <div class="sect">Where</div>
+  <div class="inline-radios"><span class="radio"><span class="r">◦</span>A note</span><span class="radio"><span class="r">●</span><b>A book</b></span><span class="radio"><span class="r">◦</span>A wing</span></div>
+  <div class="pickerbtn"><span>the adventures of sherlock holmes</span><span class="a">made 9 Oct ▾</span></div>
+  <div class="pop">
+    <div class="field">sherl<span class="caret"></span></div>
+    <div class="opt-row hi"><span class="lbl">the adventures of sherlock holmes</span><span class="ann">Welcome · 12 notes · owned · <b>made 9 Oct</b></span></div>
+    <div class="opt-row"><span class="lbl">the adventures of sherlock holmes</span><span class="ann">Welcome · 12 notes · owned · <b>made 11 Oct</b></span></div>
+    <div class="opt-row"><span class="lbl">sherlock reading notes</span><span class="ann">research · 4 notes</span></div>
+    <div class="foot-line">Your daily Journal and Private books aren't listed — they're shared one ask at a time.</div>
+  </div>
+  <div class="sect">How much</div>
+  <div class="radio"><span class="r">◦</span><span>Read <span class="d">— it can read and search what you shared</span></span></div>
+  <div class="radio"><span class="r">●</span><span><b>Suggest</b> <span class="d">— it can add new takes and comments beside your text, and save a lens of its takes — it cannot touch a word you wrote</span></span></div>
+  <div class="radio"><span class="r">◦</span><span>Write new <span class="d">— it can also make new notes, apply tags and build books</span></span></div>
+  <div class="radio"><span class="r">◦</span><span>Edit <span class="d">— it can also edit takes — with a commit before and after every change, so you can always compare and come back</span></span></div>
+  <div class="sect">How long</div>
+  <div class="seg"><span>Once</span><span>While connected</span><span class="sel">Always</span></div>
+  <div class="foot"><span class="btn">Cancel</span><span class="btn primary">Grant suggest in “the adventures of sherlock holmes” (made 9 Oct) always</span></div>
+</div>
+</div>
+<div class="scheme-dark">
+<p class="caption">Dark — a fully black room (R51)</p>
+<div class="sheet">
+  <h4>Grant access</h4>
+  <p class="lead">The client sees what you grant and nothing else. Refusals speak to it exactly as they speak to you.</p>
+  <div class="sect">Who</div>
+  <div class="pickerbtn"><span>claude-code</span><span class="a">connected now ▾</span></div>
+  <div class="sect">Where</div>
+  <div class="inline-radios"><span class="radio"><span class="r">◦</span>A note</span><span class="radio"><span class="r">●</span><b>A book</b></span><span class="radio"><span class="r">◦</span>A wing</span></div>
+  <div class="pickerbtn"><span>the adventures of sherlock holmes</span><span class="a">made 9 Oct ▾</span></div>
+  <div class="pop">
+    <div class="field">sherl<span class="caret"></span></div>
+    <div class="opt-row hi"><span class="lbl">the adventures of sherlock holmes</span><span class="ann">Welcome · 12 notes · owned · <b>made 9 Oct</b></span></div>
+    <div class="opt-row"><span class="lbl">the adventures of sherlock holmes</span><span class="ann">Welcome · 12 notes · owned · <b>made 11 Oct</b></span></div>
+    <div class="opt-row"><span class="lbl">sherlock reading notes</span><span class="ann">research · 4 notes</span></div>
+    <div class="foot-line">Your daily Journal and Private books aren't listed — they're shared one ask at a time.</div>
+  </div>
+  <div class="sect">How much</div>
+  <div class="radio"><span class="r">◦</span><span>Read <span class="d">— it can read and search what you shared</span></span></div>
+  <div class="radio"><span class="r">●</span><span><b>Suggest</b> <span class="d">— it can add new takes and comments beside your text, and save a lens of its takes — it cannot touch a word you wrote</span></span></div>
+  <div class="radio"><span class="r">◦</span><span>Write new <span class="d">— it can also make new notes, apply tags and build books</span></span></div>
+  <div class="radio"><span class="r">◦</span><span>Edit <span class="d">— it can also edit takes — with a commit before and after every change, so you can always compare and come back</span></span></div>
+  <div class="sect">How long</div>
+  <div class="seg"><span>Once</span><span>While connected</span><span class="sel">Always</span></div>
+  <div class="foot"><span class="btn">Cancel</span><span class="btn primary">Grant suggest in “the adventures of sherlock holmes” (made 9 Oct) always</span></div>
+</div>
+</div>
+</div>
+
+<h3>Where = a note <span class="new">new in Settings</span></h3>
+<p class="note">The note scope gets a face in the sheet itself: the bounded note feed every note picker already uses (snippet and day per row, the current wing). A note that is a daily Journal entry or Private stays pickable — a per-ask note grant is legal — and the sheet then offers once and while connected only.</p>
+<div class="grid2">
+  <div class="sheet" style="box-shadow:var(--shadow);">
+    <div class="sect" style="margin-top:0;">Where</div>
+    <div class="inline-radios"><span class="radio"><span class="r">●</span><b>A note</b></span><span class="radio"><span class="r">◦</span>A book</span><span class="radio"><span class="r">◦</span>A wing</span></div>
+    <div class="pop">
+      <div class="field">parser<span class="caret"></span></div>
+      <div class="opt-row hi"><span class="lbl">parser notes<span class="snip">the tokenizer splits on whitespace first, then…</span></span><span class="ann">3 Oct</span></div>
+      <div class="opt-row"><span class="lbl">parser sketch<span class="snip">two passes: first the blocks, then the takes…</span></span><span class="ann">28 Sep</span></div>
+      <div class="opt-row"><span class="lbl">morning pages — oct 9<span class="snip">woke early and thought about the parser again…</span></span><span class="ann">daily Journal entry</span></div>
+    </div>
+  </div>
+  <div class="sheet" style="box-shadow:var(--shadow);">
+    <div class="sect" style="margin-top:0;">How long</div>
+    <div class="seg"><span class="sel">Once</span><span>While connected</span></div>
+    <p class="lead" style="margin-top:8px;">“morning pages — oct 9” is a daily Journal entry — it's only ever shared one ask at a time, so always isn't offered.</p>
+    <div class="foot"><span class="btn">Cancel</span><span class="btn primary">Grant read on “morning pages — oct 9” once</span></div>
+  </div>
+</div>
+
+<h3>Options drawn smaller</h3>
+<div class="grid3">
+  <div class="frame"><span class="label">Option B — an inline filter in the sheet <span class="opt">option</span></span>
+    <div class="pad chrome">
+      <div class="pickerbtn" style="margin-top:0;"><span class="faint">filter books</span><span class="a"></span></div>
+      <div class="radio"><span class="r">◦</span>a letter</div>
+      <div class="radio"><span class="r">◦</span>o ladrão de raios</div>
+      <div class="radio"><span class="r">●</span>the adventures of sherlock holmes <span class="small">made 9 Oct</span></div>
+      <div class="radio"><span class="r">◦</span>the adventures of sherlock holmes <span class="small">made 11 Oct</span></div>
+      <div class="radio faint"><span class="r">◦</span>… 36 more, scrolling inside the sheet</div>
+    </div>
+  </div>
+  <div class="frame"><span class="label">Option C — the native menu, grouped by shelf <span class="opt">option</span></span>
+    <div class="pad">
+      <div class="menu" style="box-shadow:none;">
+        <div class="mi head">Welcome</div>
+        <div class="mi"><span>the adventures of sherlock holmes</span></div>
+        <div class="mi"><span>the adventures of sherlock holmes</span></div>
+        <div class="mi head">research</div>
+        <div class="mi"><span>sherlock reading notes</span></div>
+        <div class="mi dim"><span>… no search; the length moves into groups</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ 1b -->
+<h2 id="s1b">1b · The duplicate rule — before and after <span class="rec">recommended: option A</span></h2>
+<p class="note">Today the grant sheet's book menu names a book by title alone (plus a non-Home wing), so two books called “the adventures of sherlock holmes” are two identical rows. The rule: every row carries the context the Bookcase row would say; when two offered rows share a name, the first fact that differs is added from one fixed ladder — <b>wing → shelf → note count → state → made day → made time</b>. Never an invented “(2)”, which would change meaning when one is deleted.</p>
+<div class="grid2">
+  <div class="frame"><span class="label">Today — the flat menu</span>
+    <div class="pad">
+      <div class="menu" style="box-shadow:none;">
+        <div class="mi"><span>a letter</span></div>
+        <div class="mi"><span>o ladrão de raios</span></div>
+        <div class="mi hi"><span>the adventures of sherlock holmes</span><span class="k">✓</span></div>
+        <div class="mi"><span>the adventures of sherlock holmes</span></div>
+        <div class="mi"><span>percy worksheets — variorum</span></div>
+      </div>
+      <p class="small" style="margin:8px 0 0;">Which one is checked? Nothing on screen can say.</p>
+    </div>
+  </div>
+  <div class="frame"><span class="label">Option A — context always, a fact on collision <span class="rec">recommended</span></span>
+    <div class="pad">
+      <div class="pop" style="box-shadow:none;margin:0;">
+        <div class="opt-row"><span class="lbl">a letter</span><span class="ann">correspondence · 1 note</span></div>
+        <div class="opt-row"><span class="lbl">o ladrão de raios</span><span class="ann">translations · 4 notes · living</span></div>
+        <div class="opt-row hi"><span class="lbl">the adventures of sherlock holmes</span><span class="ann">Welcome · 12 notes · owned · <b>made 9 Oct</b></span></div>
+        <div class="opt-row"><span class="lbl">the adventures of sherlock holmes</span><span class="ann">Welcome · 12 notes · owned · <b>made 11 Oct</b></span></div>
+        <div class="opt-row"><span class="lbl">percy worksheets</span><span class="ann">variorum wing · 3 notes</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="frame"><span class="label">Option B — collision only <span class="opt">option</span></span>
+    <div class="pad">
+      <div class="pop" style="box-shadow:none;margin:0;">
+        <div class="opt-row"><span class="lbl">a letter</span><span class="ann"></span></div>
+        <div class="opt-row"><span class="lbl">o ladrão de raios</span><span class="ann"></span></div>
+        <div class="opt-row hi"><span class="lbl">the adventures of sherlock holmes</span><span class="ann"><b>made 9 Oct, 21:14</b></span></div>
+        <div class="opt-row"><span class="lbl">the adventures of sherlock holmes</span><span class="ann"><b>made 11 Oct, 08:02</b></span></div>
+        <div class="opt-row"><span class="lbl">percy worksheets</span><span class="ann">variorum wing</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="frame"><span class="label">Option C — the made day on every row <span class="opt">option</span></span>
+    <div class="pad">
+      <div class="pop" style="box-shadow:none;margin:0;">
+        <div class="opt-row"><span class="lbl">a letter</span><span class="ann">made 6 Oct</span></div>
+        <div class="opt-row"><span class="lbl">o ladrão de raios</span><span class="ann">made 2 Oct</span></div>
+        <div class="opt-row hi"><span class="lbl">the adventures of sherlock holmes</span><span class="ann">made 9 Oct</span></div>
+        <div class="opt-row"><span class="lbl">the adventures of sherlock holmes</span><span class="ann">made 11 Oct</span></div>
+        <div class="opt-row"><span class="lbl">percy worksheets</span><span class="ann">made 9 Oct</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="note">The same rule labels every other place the grant road names a book — the ask sheet and the pane's shared rows:</p>
+<div class="grid2">
+  <div class="sheet" style="box-shadow:var(--shadow);max-width:none;">
+    <h4>claude-code asks to suggest in “the adventures of sherlock holmes” (made 11 Oct)</h4>
+    <p class="lead">If you allow it, it can add new takes and comments beside your text, and save a lens of its takes — it cannot touch a word you wrote.</p>
+    <div class="foot" style="justify-content:flex-start;"><span class="btn primary">Once</span><span class="btn">While connected</span><span class="btn">Always</span><span style="flex:1"></span><span class="btn">Don't allow</span></div>
+  </div>
+  <div class="frame"><span class="label">Settings ▸ MCP · shared with AI</span>
+    <div class="pad chrome">
+      <div class="row"><span class="t">the adventures of sherlock holmes <span class="chip">book</span> <span class="small">made 9 Oct</span></span><span class="m">claude-code · read and suggest · always <span class="acc">Revoke</span></span></div>
+      <div class="row"><span class="t">the adventures of sherlock holmes <span class="chip">book</span> <span class="small">made 11 Oct</span></span><span class="m">claude-code · read · once <span class="acc">Revoke</span></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ 2 -->
+<h2 id="s2">2 · Grant from the Library <span class="rec">recommended: option A</span></h2>
+<p class="note">VX-156 item 2. Pick notes in place (⌘-click, as the Library already allows), then one door on the bulk bar opens the same grant sheet with the place filled in. Note rows and book rows gain “Share with AI…” in their menus; the Book Settings sheet gains the grant row R-13n-4 named. One act mints the grants on one stamp, and the pane shows them as one row.</p>
+<div class="frame"><span class="label">Library · notes · 3 picked</span>
+  <div class="mast" style="padding-bottom:6px;"><span class="crumb">Library</span><span class="r">Notes · sort ▾ edited</span></div>
+  <div class="bulk"><span>Tag 3 notes ▾</span><span>Untag 3 notes ▾</span><span class="acc">Share 3 notes with AI… <span class="new">new</span></span><span class="destr">Delete 3 notes…</span></div>
+  <div class="pad">
+    <div class="row pick"><span class="t">parser notes</span><span class="m">edited 2 h ago</span></div>
+    <div class="row pick"><span class="t">grammar sketch</span><span class="m">edited yesterday</span></div>
+    <div class="row pick"><span class="t">morning pages — oct 9</span><span class="m">9 Oct</span></div>
+    <div class="row"><span class="t" style="font-weight:400;">a letter</span><span class="m">edited 6 Oct</span></div>
+    <div class="row"><span class="t" style="font-weight:400;">percy, chapter four</span><span class="m">edited 4 Oct</span></div>
+  </div>
+</div>
+<div class="grid3">
+  <div>
+    <p class="caption">A note row's menu (abridged)</p>
+    <div class="menu">
+      <div class="mi"><span>Open</span></div>
+      <div class="mi"><span>Open Beside</span></div>
+      <div class="mi"><span>Star</span></div>
+      <div class="mi"><span>Rename…</span></div>
+      <div class="mi"><span>Tags…</span></div>
+      <div class="sep"></div>
+      <div class="mi hi"><span>Share with AI…</span><span class="k">new</span></div>
+      <div class="sep"></div>
+      <div class="mi dim"><span>Mark as Versions with…</span></div>
+      <div class="mi dim"><span>Move to Wing ▸</span></div>
+    </div>
+  </div>
+  <div>
+    <p class="caption">A book row's menu — the one table the Bookcase and the Library both render (abridged)</p>
+    <div class="menu">
+      <div class="mi"><span>Open</span></div>
+      <div class="mi"><span>Star</span></div>
+      <div class="mi"><span>Book Settings…</span></div>
+      <div class="mi dim"><span>Export…</span></div>
+      <div class="sep"></div>
+      <div class="mi hi"><span>Share with AI…</span><span class="k">new</span></div>
+      <div class="sep"></div>
+      <div class="mi dim"><span>Archive</span></div>
+    </div>
+  </div>
+  <div>
+    <p class="caption">Book Settings · state (the Private row exists; the grant row is new)</p>
+    <div class="frame" style="margin:0;"><div class="pad chrome">
+      <div class="row"><span class="t" style="font-weight:400;">☐ Private — never shared with AI</span><span class="m"></span></div>
+      <div class="row"><span class="t" style="font-weight:400;">Shared with AI: claude-code (read and suggest) <span class="new">new</span></span><span class="m acc">Share…</span></div>
+    </div></div>
+  </div>
+</div>
+<div class="grid2">
+  <div class="sheet">
+    <h4>Grant access</h4>
+    <p class="lead">The client sees what you grant and nothing else. Refusals speak to it exactly as they speak to you.</p>
+    <div class="sect">Who</div>
+    <div class="pickerbtn"><span>claude-code</span><span class="a">connected now ▾</span></div>
+    <div class="sect">Where</div>
+    <div>These 3 notes <span class="small">— parser notes · grammar sketch · morning pages — oct 9</span></div>
+    <div class="sect">How much</div>
+    <div class="inline-radios"><span class="radio"><span class="r">●</span><b>Read</b></span><span class="radio"><span class="r">◦</span>Suggest</span><span class="radio"><span class="r">◦</span>Write new</span><span class="radio"><span class="r">◦</span>Edit</span></div>
+    <div class="sect">How long</div>
+    <div class="seg"><span>Once</span><span class="sel">While connected</span></div>
+    <p class="lead" style="margin-top:8px;">Always isn't offered: 1 of these notes is a daily Journal entry, which is only ever shared one ask at a time.</p>
+    <div class="foot"><span class="btn">Cancel</span><span class="btn primary">Grant read on 3 notes while connected</span></div>
+  </div>
+  <div>
+    <div class="frame"><span class="label">Settings ▸ MCP · shared with AI — one act, one row</span>
+      <div class="pad chrome">
+        <div class="row"><span class="t">3 notes <span class="chip">notes</span></span><span class="m">claude-code · read · while connected <span class="acc">Revoke</span></span></div>
+        <div class="small" style="padding:0 0 8px;">parser notes · grammar sketch · morning pages — oct 9</div>
+        <div class="row"><span class="t">the lightning thief <span class="chip">book</span></span><span class="m">claude-code · read and suggest · always <span class="acc">Revoke</span></span></div>
+      </div>
+    </div>
+    <p class="small">Grouped by the one stamp the act wrote — no new column (the exact-stamp doctrine, applied to a list).</p>
+    <div class="grid2" style="margin-top:10px;">
+      <div class="frame"><span class="label">Option B — a fast submenu <span class="opt">option</span></span>
+        <div class="pad"><div class="menu" style="box-shadow:none;">
+          <div class="mi"><span>Allow AI Here on 3 Notes ▸</span></div>
+          <div class="mi"><span>&nbsp;&nbsp;claude-code</span><span class="k">read · once</span></div>
+        </div></div>
+      </div>
+      <div class="frame"><span class="label">Option C — no Library door <span class="opt">option</span></span>
+        <div class="pad small">The sheet's note picker becomes multi-select; granting stays a Settings act.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ 3 -->
+<h2 id="s3">3 · Share the note you're in — the chord <span class="rec">recommended: ⌥⌘A</span></h2>
+<p class="note">VX-156 item 3. The target is derived, never stored: the newest grant she made (any face) names the client and the rung. The chord shares the open note with that client at that rung — <b>while connected</b> when the client is connected now, otherwise <b>once</b>. A key never mints “always”. The receipt says exactly what it granted and carries a one-press <b>Revoke ›</b> (grants aren't on ⌥⌘Z).</p>
+<div class="grid2">
+  <div>
+    <p class="caption">Edit menu (abridged) — beside the AI pair it already holds</p>
+    <div class="menu">
+      <div class="mi"><span>Undo Typing</span><span class="k">⌘Z</span></div>
+      <div class="mi"><span>Redo</span><span class="k">⇧⌘Z</span></div>
+      <div class="sep"></div>
+      <div class="mi"><span>Undo claude-code's take</span><span class="k">⌥⌘Z</span></div>
+      <div class="mi dim"><span>Redo Structural Change</span><span class="k">⇧⌥⌘Z</span></div>
+      <div class="mi"><span>Show the AI's Last Change</span><span class="k">⌥⌘O</span></div>
+      <div class="mi hi"><span>Share This Note with AI</span><span class="k">⌥⌘A</span></div>
+      <div class="sep"></div>
+      <div class="mi dim"><span>Cut</span><span class="k">⌘X</span></div>
+    </div>
+  </div>
+  <div>
+    <p class="caption">What it does, said</p>
+    <div class="frame"><div class="pad" style="font-size:15px;">The tokenizer splits on whitespace first, then folds the punctuation runs back into the words they belong to…</div>
+      <div class="bar"><span>Write · 1,204 words</span><span>Shared “parser notes” with claude-code — read and suggest, while connected.<span class="door">Revoke ›</span></span></div>
+    </div>
+    <p class="caption" style="margin-top:12px;">Already reaching at that rung — a refusal, nothing written</p>
+    <div class="toast">claude-code already reaches this note (read and suggest).</div>
+    <p class="caption" style="margin-top:12px;">No grant ever made — the chord opens the deliberate road instead of guessing</p>
+    <div class="sheet" style="box-shadow:var(--shadow);">
+      <div class="sect" style="margin-top:0;">Where</div>
+      <div class="inline-radios"><span class="radio"><span class="r">●</span><b>This note</b> <span class="small">“parser notes”</span></span><span class="radio"><span class="r">◦</span>A note</span><span class="radio"><span class="r">◦</span>A book</span><span class="radio"><span class="r">◦</span>A wing</span></div>
+      <p class="small" style="margin:8px 0 0;">… the rest of the sheet, as §1.</p>
+    </div>
+  </div>
+</div>
+<table class="cmp">
+  <tr><th>Duration</th><th>What the chord grants</th><th></th></tr>
+  <tr><td class="k">D1</td><td>While connected if that client is connected now, else once. Never always.</td><td><span class="rec">recommended</span></td></tr>
+  <tr><td class="k">D2</td><td>The newest grant's own duration where it's legal here — an “always” grant elsewhere makes the chord mint a standing grant on this note.</td><td><span class="opt">option</span></td></tr>
+  <tr><td class="k">D3</td><td>Always once (today's Allow AI here shape, with the rung raised).</td><td><span class="opt">option</span></td></tr>
+</table>
+<table class="cmp">
+  <tr><th>Chord</th><th>Why</th><th></th></tr>
+  <tr><td class="k"><span class="kbd">⌥⌘A</span></td><td>“Allow AI” — in the ⌥⌘ family that already holds the AI pair (⌥⌘Z her veto, ⌥⌘O the AI's last change). Free in all seven swept places.</td><td><span class="rec">recommended</span></td></tr>
+  <tr><td class="k"><span class="kbd">⌥⇧⌘O</span></td><td>The reverse direction of ⌥⌘O — show what it changed / offer it this. Free.</td><td><span class="opt">option</span></td></tr>
+  <tr><td class="k">none</td><td>A palette row only (⌘K “Share this note with AI”).</td><td><span class="opt">option</span></td></tr>
+</table>
+
+<!-- ============================================================ 4 -->
+<h2 id="s4">4 · The pending-ask badge <span class="rec">recommended: face A, arrival X</span></h2>
+<p class="note">VX-156 item 4. An ask waits on the thing it names — a note, a book or a wing — where she is already looking. It never raises a window, never scrolls, never toasts. Hover names who asks; her press opens that ask's sheet. Under arrival X the badge and a new Waiting list are the only places an ask appears.</p>
+<div class="grid2">
+  <div class="frame"><span class="label">Bookcase · a book ask</span>
+    <div class="mast" style="padding-bottom:4px;"><span class="crumb">Bookcase<span class="dot2">·</span>Home<span class="caretdown">▾</span></span><span class="r">№ · order a–z ▾</span></div>
+    <div class="pad" style="padding-top:2px;">
+      <div class="row"><span class="t"><span class="star">★</span>the lightning thief<span class="chip ai">shared with AI</span><span class="chip ask">asks</span></span><span class="m">12 notes · 31w · living</span></div>
+      <div class="row"><span class="t">dream journal</span><span class="m">5 notes · 25w</span></div>
+      <div class="row"><span class="t">o ladrão de raios<span class="chip ai">shared with AI</span></span><span class="m">4 notes · 9w</span></div>
+    </div>
+    <div style="padding:0 18px 14px;"><span class="tip">claude-code asks to suggest here — press to answer.</span></div>
+  </div>
+  <div class="frame"><span class="label">Library · a note ask</span>
+    <div class="pad">
+      <div class="row"><span class="t">parser notes<span class="chip ask">asks</span></span><span class="m">edited 2 h ago</span></div>
+      <div class="row"><span class="t" style="font-weight:400;">grammar sketch</span><span class="m">edited yesterday</span></div>
+      <div class="row"><span class="t" style="font-weight:400;">a letter</span><span class="m">edited 6 Oct</span></div>
+    </div>
+    <div class="bar"><span>Write · 1,204 words</span><span>note ▾<span class="chip ask">asks</span></span></div>
+  </div>
+  <div class="frame"><span class="label">The wing switcher · a wing ask</span>
+    <div class="mast" style="padding-bottom:4px;"><span class="crumb">Bookcase<span class="dot2">·</span>Home<span class="caretdown">▾</span><span class="dot"></span></span></div>
+    <div class="pad" style="padding-top:0;">
+      <div class="menu">
+        <div class="mi head">Wings — each a separate library</div>
+        <div class="mi"><span>✓ Home</span></div>
+        <div class="mi"><span>&nbsp;&nbsp;&nbsp;variorum <span class="chip ask">asks</span></span></div>
+        <div class="mi"><span>&nbsp;&nbsp;&nbsp;letters</span></div>
+        <div class="sep"></div>
+        <div class="mi"><span>New Wing…</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="frame"><span class="label">Settings ▸ MCP · waiting <span class="new">new</span></span>
+    <div class="pad chrome">
+      <div class="gtitle" style="margin-top:0;">Waiting</div>
+      <div class="row"><span class="t" style="font-weight:400;">claude-code asks to suggest in “the lightning thief”</span><span class="m">2 minutes ago <span class="acc">Answer…</span></span></div>
+      <div class="row"><span class="t" style="font-weight:400;">claude-code asks to write new in the variorum wing</span><span class="m">just now <span class="acc">Answer…</span></span></div>
+      <div class="row"><span class="t" style="font-weight:400;">cursor asks to read “parser notes”</span><span class="m">5 minutes ago <span class="acc">Answer…</span></span></div>
+      <div class="small" style="padding:4px 0 6px;">all 4 ›</div>
+    </div>
+  </div>
+</div>
+<h3>The face</h3>
+<div class="grid3">
+  <div class="frame"><span class="label">A — a quiet “asks” chip <span class="rec">recommended</span></span><div class="pad"><div class="row"><span class="t">the lightning thief<span class="chip ask">asks</span></span><span class="m">12 notes</span></div></div></div>
+  <div class="frame"><span class="label">B — a bare dot <span class="opt">option</span></span><div class="pad"><div class="row"><span class="t">the lightning thief<span class="dot"></span></span><span class="m">12 notes</span></div></div></div>
+  <div class="frame"><span class="label">C — the client named <span class="opt">option</span></span><div class="pad"><div class="row"><span class="t">the lightning thief<span class="chip ask">claude-code asks</span></span><span class="m">12 notes</span></div></div></div>
+</div>
+<h3>The arrival — the part that changes behaviour</h3>
+<table class="cmp">
+  <tr><th></th><th>What happens when a client asks past its grant</th><th></th></tr>
+  <tr><td class="k">X</td><td>The ask waits at its badge and in Waiting. Nothing appears by itself; her press (or ⌥⌘, — §5) answers it. The wire is unchanged: the client still hears “Variorum has asked the author — call again once she answers.” Supersedes the provisional sheet-on-arrival (P-13nb-U2-9) and makes the handoff's “nothing ever interrupts your writing” literally true.</td><td><span class="rec">recommended</span></td></tr>
+  <tr><td class="k">Y</td><td>Today's sheet still arrives on the main window, plus the badge.</td><td><span class="opt">option</span></td></tr>
+  <tr><td class="k">Z</td><td>The sheet waits for a calm moment (nothing open, the calm-asks rule), and the badge stands meanwhile.</td><td><span class="opt">option</span></td></tr>
+</table>
+
+<!-- ============================================================ 5 -->
+<h2 id="s5">5 · The MCP pane chord <span class="rec">recommended: ⌥⌘,</span></h2>
+<p class="note">VX-156 item 5. Settings opens at MCP — and at Waiting when an ask waits, so the chord doubles as the keyboard road to the asks.</p>
+<div class="grid2">
+  <div>
+    <p class="caption">The Variorum menu (abridged)</p>
+    <div class="menu">
+      <div class="mi"><span>About Variorum</span></div>
+      <div class="mi"><span>Check for Updates…</span></div>
+      <div class="sep"></div>
+      <div class="mi"><span>Settings…</span><span class="k">⌘,</span></div>
+      <div class="mi hi"><span>MCP Settings…</span><span class="k">⌥⌘,</span></div>
+      <div class="sep"></div>
+      <div class="mi dim"><span>Hide Variorum</span><span class="k">⌘H</span></div>
+    </div>
+    <table class="cmp" style="margin-top:14px;">
+      <tr><th>Chord</th><th>Why</th><th></th></tr>
+      <tr><td class="k"><span class="kbd">⌥⌘,</span></td><td>Settings' own chord with the ⌥ “deliberate variant” her ceremony chords carry.</td><td><span class="rec">recommended</span></td></tr>
+      <tr><td class="k"><span class="kbd">⌃⌘M</span></td><td>“M for MCP”, in the ⌃⌘ family (⌃⌘S sidebar, ⌃⌘L lock).</td><td><span class="opt">option</span></td></tr>
+      <tr><td class="k">none</td><td>A ⌘K row, “Settings — MCP”.</td><td><span class="opt">option</span></td></tr>
+    </table>
+  </div>
+  <div class="frame"><span class="label">Settings, opened by ⌥⌘, while two asks wait</span>
+    <div class="settings">
+      <div class="side">
+        <div class="search">search settings</div>
+        <div class="p">General</div><div class="p">Editor</div><div class="p">Takes</div><div class="p">Writing</div><div class="p">Shortcuts</div><div class="p">Tags</div>
+        <div class="p sel">MCP</div>
+        <div class="p">Protection</div><div class="p">Data Safety</div><div class="p">Diagnostics</div><div class="p">Acknowledgments</div>
+      </div>
+      <div class="detail">
+        <div><span class="toggle on"><i></i></span><b>Enable the MCP server</b></div>
+        <div class="small" style="margin:4px 0 0 36px;">running · socket in the app container · serves while Variorum is open</div>
+        <div class="gtitle">Waiting</div>
+        <div class="group">
+          <div class="row"><span class="t" style="font-weight:400;">claude-code asks to suggest in “the lightning thief”</span><span class="m acc">Answer…</span></div>
+          <div class="row"><span class="t" style="font-weight:400;">claude-code asks to write new in the variorum wing</span><span class="m acc">Answer…</span></div>
+        </div>
+        <div class="gtitle">Connection requests</div>
+        <div class="group"><div class="row"><span class="t" style="font-weight:400;">None waiting.</span><span class="m"></span></div></div>
+        <div class="gtitle">Clients</div>
+        <div class="group"><div class="row"><span class="t">claude-code</span><span class="m">connected now · 3 shared places</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ 6 -->
+<h2 id="s6">6 · Wing switching from the keyboard (VX-157) <span class="rec">recommended: option A, ⌃⌘W</span></h2>
+<p class="note">One chord that scales to any number of wings: ⌃⌘W opens the switcher as the one picker control — type a few letters, return switches, escape closes — and the switch speaks the existing receipt. Direct digits (option B) are her add-on if she wants them; cycling (option C) is drawn for comparison.</p>
+<div class="grid2">
+  <div class="frame"><span class="label">Option A — ⌃⌘W, type to filter <span class="rec">recommended</span></span>
+    <div class="mast" style="padding-bottom:4px;"><span class="crumb">Bookcase<span class="dot2">·</span>Home<span class="caretdown">▾</span></span><span class="r">№ · order a–z ▾</span></div>
+    <div class="pad" style="padding-top:0;">
+      <div class="pop" style="max-width:300px;">
+        <div class="field">vari<span class="caret"></span></div>
+        <div class="opt-row hi"><span class="lbl">variorum</span><span class="ann">3 books · 41 notes</span></div>
+        <div class="foot-line">Home is the current wing · ⏎ switches · esc closes</div>
+      </div>
+      <div class="bar" style="border:1px solid var(--line);border-radius:8px;margin-top:10px;"><span></span><span>Now in “variorum”.</span></div>
+    </div>
+  </div>
+  <div class="frame"><span class="label">Option B — ⌃⌘1…⌃⌘9, drawn in the switcher <span class="opt">option</span></span>
+    <div class="pad">
+      <div class="menu">
+        <div class="mi head">Wings — each a separate library</div>
+        <div class="mi"><span>✓ Home</span><span class="k">⌃⌘1</span></div>
+        <div class="mi"><span>&nbsp;&nbsp;&nbsp;variorum</span><span class="k">⌃⌘2</span></div>
+        <div class="mi"><span>&nbsp;&nbsp;&nbsp;letters</span><span class="k">⌃⌘3</span></div>
+        <div class="sep"></div>
+        <div class="mi"><span>Switch Wing…</span><span class="k">⌃⌘W</span></div>
+        <div class="mi"><span>New Wing…</span></div>
+      </div>
+      <p class="small" style="margin:10px 0 0;">Positional: a reorder of the switcher moves the chords. Option C, ⌃⌘] / ⌃⌘[ to cycle, steps blind through separate libraries and sits beside the pane's ⌥⌘] / ⌥⌘[.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ 7 -->
+<h2 id="s7">7 · VX-158 — an agent's wing switch: the faces <span class="rec">recommended: a wing target on show_in_app</span></h2>
+<p class="note">Read as: a client may move the app to a wing (the navigation cousin of <code>show_in_app</code>). Same etiquette exactly — only while Variorum is the app in front in a full window, refused and never queued otherwise, never spending a once grant — decided at read on the wing. The faces only add who moved her.</p>
+<div class="grid2">
+  <div>
+    <div class="wire"><span class="c">// the client</span>
+show_in_app {"target": "wing", "wing_id": "3F2A…"}
+<span class="c">// Variorum in front → the Bookcase re-scoped</span>
+{"shown": true}
+<span class="c">// Variorum behind → nothing moves, nothing queues</span>
+"The author isn't at Variorum right now, so nothing was moved — showing happens only while Variorum is the app in front. Ask her to switch to it, then call again."</div>
+  </div>
+  <div class="frame"><span class="label">Her screen, Variorum in front</span>
+    <div class="mast" style="padding-bottom:4px;"><span class="crumb">Bookcase<span class="dot2">·</span>variorum<span class="caretdown">▾</span></span></div>
+    <div class="pad" style="padding-top:0;">
+      <div class="row"><span class="t">launch notes</span><span class="m">9 notes</span></div>
+      <div class="row"><span class="t">parser work</span><span class="m">14 notes</span></div>
+    </div>
+    <div class="bar"><span></span><span>Now in “variorum” — claude-code showed you this wing.</span></div>
+  </div>
+</div>
+<table class="cmp">
+  <tr><th></th><th>Shape</th><th></th></tr>
+  <tr><td class="k">A</td><td>A <code>wing</code> target on <code>show_in_app</code> — one ruled tool, one etiquette; the activity log reads “claude-code showed the variorum wing”.</td><td><span class="rec">recommended</span></td></tr>
+  <tr><td class="k">B</td><td>A separate <code>switch_wing</code> tool with the same faces.</td><td><span class="opt">option</span></td></tr>
+  <tr><td class="k">C</td><td>Nothing new — a note or book target in another wing already lands there by the wing-follows-the-note rule.</td><td><span class="opt">option</span></td></tr>
+</table>
+
+<!-- ============================================================ 8 -->
+<h2 id="s8">8 · Agenda (a) — R-AIR-1's extra-worded confirm <span class="rec">recommended: W1</span></h2>
+<p class="note">Ratified: a journal-trait book is grantable like any book; only the daily Journal and anything Private always ask. One consequence shapes the words: a trait book's notes stop being fenced everywhere — a wing grant on its wing and the open book reach them too — so the extra words belong on three doors, not one.</p>
+<div class="grid3">
+  <div class="sheet" style="box-shadow:var(--shadow);">
+    <span class="opt">W0 — no extra words</span>
+    <div class="sect">Where</div>
+    <div class="pickerbtn"><span>dream journal</span><span class="a">journal shelf · 5 notes ▾</span></div>
+    <div class="foot"><span class="btn primary">Grant read in “dream journal” always</span></div>
+  </div>
+  <div class="sheet" style="box-shadow:var(--shadow);">
+    <span class="rec">W1 — the sheet's own confirm carries them</span>
+    <div class="sect">Where</div>
+    <div class="pickerbtn"><span>dream journal</span><span class="a">journal shelf · 5 notes ▾</span></div>
+    <div class="warnline">“dream journal” keeps date-stamped entries — granting it shares every entry in it, now and later, without asking. Your daily Journal and anything Private still ask every time.</div>
+    <div class="foot"><span class="btn primary">Grant read in “dream journal” always</span></div>
+  </div>
+  <div>
+    <span class="opt">W2 — a second-step alert</span>
+    <div class="alert" style="margin-top:8px;">
+      <h4>Share a journal-style book?</h4>
+      <p>“dream journal” keeps date-stamped entries. claude-code will read every entry in it, now and later, without asking. Your daily Journal and anything Private still ask every time.</p>
+      <span class="btn primary">Share it</span>
+      <span class="btn">Cancel</span>
+    </div>
+  </div>
+</div>
+<h3>W1 on the other two doors</h3>
+<div class="grid2">
+  <div class="sheet" style="box-shadow:var(--shadow);">
+    <div class="sect" style="margin-top:0;">Where</div>
+    <div class="inline-radios"><span class="radio"><span class="r">◦</span>A note</span><span class="radio"><span class="r">◦</span>A book</span><span class="radio"><span class="r">●</span><b>A wing</b></span></div>
+    <div class="pickerbtn"><span>Home</span><span class="a">▾</span></div>
+    <p class="lead" style="margin-top:6px;">everything in Home except your daily Journal and anything Private, which always ask</p>
+    <div class="warnline">This includes 2 journal-style books, “dream journal” and “reading log” — their entries are shared like any book's.</div>
+  </div>
+  <div class="frame"><span class="label">Settings ▸ MCP · open book</span>
+    <div class="pad chrome">
+      <div><span class="toggle"><i></i></span>Everything is readable, always</div>
+      <div class="small" style="margin:4px 0 0 36px;">your daily Journal and anything Private still ask every time — journal-style books are readable like any book</div>
+    </div>
+  </div>
+</div>
+<h3>Six shipped sentences R-AIR-1 makes false — the recommended words</h3>
+<table class="cmp">
+  <tr><th>Where</th><th>Today</th><th>Recommended</th></tr>
+  <tr><td class="k">wing line</td><td class="strike">everything in Home except journals, which always ask</td><td>everything in Home except your daily Journal and anything Private, which always ask</td></tr>
+  <tr><td class="k">open book</td><td class="strike">journals still ask every time</td><td>your daily Journal and anything Private still ask every time</td></tr>
+  <tr><td class="k">settings search</td><td class="strike">… journals still ask every time.</td><td>… your daily Journal and anything Private still ask every time.</td></tr>
+  <tr><td class="k">empty picker</td><td class="strike">No book can be shared yet (journals are shared one ask at a time).</td><td>No book can be shared yet (your daily Journal and Private books are shared one ask at a time).</td></tr>
+  <tr><td class="k">refusal</td><td class="strike">Journals and Private notes are shared one ask at a time, never by a standing grant.</td><td>Your daily Journal and Private notes are shared one ask at a time, never by a standing grant.</td></tr>
+  <tr><td class="k">ask sheet</td><td class="strike">A journal entry. Journals are only ever shared one ask at a time.</td><td>A daily Journal entry. Your daily Journal is only ever shared one ask at a time.</td></tr>
+</table>
+<h3>One edge for her word — a ⌘J day entry filed elsewhere</h3>
+<div class="grid2">
+  <div class="frame"><span class="label">Keep the entry's own mark <span class="rec">recommended</span></span><div class="pad chrome">A day entry made by ⌘J stays per-ask wherever she later files it — “its entries”, read as the entries the daily door makes. More asks, never fewer (R-13nb-1's own posture).</div></div>
+  <div class="frame"><span class="label">Drop it <span class="opt">option</span></span><div class="pad chrome">Only membership in the daily Journal fences; a day entry filed into another book (or moved to another wing) becomes grantable like any note.</div></div>
+</div>
+
+<!-- ============================================================ 9 -->
+<h2 id="s9">9 · Agenda (b) — VX-160's crossing door, and her sweep <span class="rec">recommended: R1 · T1 · U1</span></h2>
+<p class="note">Ratified (R-AIR-2): the per-item note move across wings ships on the wire. Her door, traced: one transaction severs the note's books in its old wing (a member of a finished or sealed book refuses), re-points every tag by path (adopt, else make), and moves the note and its saved versions; it has no undo entry of its own. Her use case — sweeping Home's Variorum notes into the variorum wing — drawn end to end.</p>
+<div class="grid2">
+  <div class="frame"><span class="label">Settings ▸ MCP · the two grants her sweep needs (R1)</span>
+    <div class="pad chrome">
+      <div class="row"><span class="t">Home <span class="chip">wing</span></span><span class="m">claude-code · read, suggest, write new and edit · while connected <span class="acc">Revoke</span></span></div>
+      <div class="row"><span class="t">variorum <span class="chip">wing</span></span><span class="m">claude-code · read, suggest and write new · while connected <span class="acc">Revoke</span></span></div>
+    </div>
+  </div>
+  <div>
+    <div class="wire">move_note_to_wing {"note_id": "9C1E…", "wing_id": "3F2A…"}   <span class="c">// name provisional</span>
+{"moved": true,
+ "landed": "the Pool of “variorum”",
+ "left_books": ["parser work", "launch notes"],
+ "tags": {"adopted": 3, "made": 1}}</div>
+  </div>
+</div>
+<div class="grid2">
+  <div class="frame"><span class="label">Her screen while it sweeps</span>
+    <div class="pad" style="font-size:15px;">…</div>
+    <div class="bar"><span>Bookcase · Home</span><span>claude-code moved 14 notes to “variorum” · ⌥⌘Z undoes<span class="door">Open ›</span></span></div>
+  </div>
+  <div>
+    <div class="menu">
+      <div class="mi"><span>Undo claude-code's wing move</span><span class="k">⌥⌘Z</span></div>
+      <div class="mi dim"><span>Redo Structural Change</span><span class="k">⇧⌥⌘Z</span></div>
+    </div>
+    <p class="caption" style="margin-top:10px;">A member of a finished book refuses in her own words</p>
+    <div class="toast">“parser notes” is in “launch notes”, which is finished — reopen it (or unseal it) before moving the note to another wing.</div>
+  </div>
+</div>
+<table class="cmp">
+  <tr><th></th><th>Rung</th><th></th></tr>
+  <tr><td class="k">R1</td><td>Edit at the source (leaving its books and its library reorganizes what exists) + write new at the destination wing (arriving rearranges nothing — it lands bookless in that wing's Pool; a tag made there by path is a write-new act). The destination is named only by a wing grant; both sides decided again inside the act.</td><td><span class="rec">recommended</span></td></tr>
+  <tr><td class="k">R2</td><td>Edit on both sides — stricter; her sweep needs edit on the variorum wing too.</td><td><span class="opt">option</span></td></tr>
+  <tr><td class="k">R3</td><td>Write new on both — lets a write-new grant sever her book memberships.</td><td><span class="opt">option</span></td></tr>
+  <tr><th></th><th>Tags</th><th></th></tr>
+  <tr><td class="k">T1</td><td>Mirror her door exactly: adopt by path, else make it in the destination; the answer reports the counts.</td><td><span class="rec">recommended</span></td></tr>
+  <tr><td class="k">T2</td><td>Adopt only; refuse when a path is missing (a validation her door doesn't have).</td><td><span class="opt">option</span></td></tr>
+  <tr><td class="k">T3</td><td>Drop tags the destination lacks (loses applications).</td><td><span class="opt">option</span></td></tr>
+  <tr><th></th><th>Undo</th><th></th></tr>
+  <tr><td class="k">U1</td><td>One client-named entry per move with an exact inverse: the wing back (note and versions), the severed memberships revived on their stamp, the tags re-pointed back; made tags stay as vocabulary. Every MCP write is undoable (P-13nb-U2-4); her own door stays as it is.</td><td><span class="rec">recommended</span></td></tr>
+  <tr><td class="k">U2</td><td>No entry — moving it back is the road (her door's posture).</td><td><span class="opt">option</span></td></tr>
+</table>
+
+<!-- ============================================================ 10 -->
+<h2 id="s10">10 · Agenda (c) — VX-159's addressing on the wire <span class="rec">recommended: P1 + presets on the existing tools</span></h2>
+<p class="note">The precedent: a cut is addressed by text that occurs exactly once (<code>second_half_starts_with</code>), takes by their ids. Choose-per-take divide needs a cut (or a side) per take; per-pairing merge is already solved by ids. Every phrase is re-checked inside the act's transaction — a take edited since the read refuses the whole act.</p>
+<div class="grid2">
+  <div>
+    <p class="caption">Divide choosing takes — P1 <span class="rec">recommended</span></p>
+    <div class="wire">divide_block {
+  "block_id": "B7…",
+  "preset": "choose_per_take",   <span class="c">// keep_on_top · keep_below · copy_to_both · choose_per_take</span>
+  "shown_take_id": "T1…",
+  "takes": [
+    {"take_id": "T1…", "second_half_starts_with": "Most of the time"},
+    {"take_id": "T2…", "second_half_starts_with": "Usually,"},
+    {"take_id": "T3…", "rides": "top"}   <span class="c">// whole into the first block</span>
+  ]                                      <span class="c">// takes not listed stay with the original, as lineage</span>
+}</div>
+    <p class="caption">P2 <span class="opt">option</span> — the whole first half quoted per take</p>
+    <div class="wire">{"take_id": "T1…", "first_half": "Running an observatory is hard work. It's lonely."}</div>
+    <p class="caption">P3 <span class="opt">option</span> — one phrase for every take</p>
+    <div class="wire">{"preset": "choose_per_take", "second_half_starts_with": "Most of the time"}   <span class="c">// fails when a take lacks it</span></div>
+  </div>
+  <div>
+    <p class="caption">Merge choosing takes — ids already address it</p>
+    <div class="wire">merge_blocks {
+  "first_block_id": "B7…", "second_block_id": "B8…",
+  "preset": "pair_by_hand",      <span class="c">// bring_every_take · only_the_two_shown · pair_by_hand</span>
+  "pairings": [
+    {"left_take_id": "T1…", "right_take_id": "T4…", "join": "newline"},
+    {"left_take_id": "T2…", "right_take_id": "T5…", "join": "space"}
+  ],
+  "carry": ["T3…"]
+}
+<span class="c">// her op's own refusals: no pairing and no carry · a take in two pairings</span></div>
+    <table class="cmp">
+      <tr><th></th><th>Where the presets live</th><th></th></tr>
+      <tr><td class="k">a</td><td>On the existing <code>divide_block</code> / <code>merge_blocks</code> — the default stays today's call, unchanged.</td><td><span class="rec">recommended</span></td></tr>
+      <tr><td class="k">b</td><td>Two new tools, <code>divide_choosing_takes</code> and <code>merge_choosing_takes</code>.</td><td><span class="opt">option</span></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ 11 -->
+<h2 id="s11">11 · Agenda (d) — the A-4 options, honestly <span class="rec">recommended: L1 now · K0 for launch · K2 if wanted</span></h2>
+<p class="note">A client is whoever it says it is when it connects, and every client arrives through the same shim, so the socket can't tell them apart. A secret in the client's config would stop two tools from sharing a name by accident — it would not stop a program running as her, because the config file is readable by anything she runs. <b>Found while preparing this:</b> the canon says the pane states this boundary, but no line in the pane does. L1 adds it, whichever option she picks.</p>
+<div class="grid2">
+  <div class="frame"><span class="label">L1 — the line the pane is said to have <span class="new">new</span> <span class="rec">recommended</span></span>
+    <div class="pad chrome">
+      <div class="gtitle" style="margin-top:0;">Clients</div>
+      <div class="group">
+        <div class="row"><span class="t">claude-code</span><span class="m">connected now · 3 shared places <span class="acc">Change…</span> <span class="acc">Revoke</span></span></div>
+      </div>
+      <div class="small">A client names itself when it connects. Variorum can't verify the name: a grant lets whatever connects under that name do what you granted.</div>
+    </div>
+  </div>
+  <div class="frame"><span class="label">K1 / K2 — a secret in the setup command <span class="opt">option</span></span>
+    <div class="pad chrome">
+      <div class="gtitle" style="margin-top:0;">Connect a client</div>
+      <p style="margin:6px 0;">K2: the command carries a fresh secret; the first client that presents it is the one you approve. K1: approval mints the secret, then each client is set up a second time with its own command.</p>
+      <div class="wire">claude mcp add -s user variorum -e VARIORUM_MCP_KEY=k_7Hq…x2 -- "/Applications/Variorum.app/Contents/MacOS/variorum-mcp"</div>
+    </div>
+  </div>
+</div>
+<table class="cmp">
+  <tr><th></th><th>Stops</th><th>Doesn't stop</th><th>Costs</th><th></th></tr>
+  <tr><td class="k">K0</td><td>—</td><td>a second tool calling itself “claude-code”; a program running as her</td><td>nothing</td><td><span class="rec">for launch</span></td></tr>
+  <tr><td class="k">K1</td><td>two tools sharing a name; a bare shim launch</td><td>a program running as her (it can read the config file)</td><td>every client set up twice; a local-only column; the shim sends a one-line preamble (still blind to MCP)</td><td><span class="opt">option</span></td></tr>
+  <tr><td class="k">K2</td><td>the same as K1</td><td>the same as K1</td><td>one setup step; a local-only column; the same preamble</td><td><span class="opt">if wanted, after launch</span></td></tr>
+</table>
+<p class="note" style="margin-top:28px;">End of the drawn states. Everything here is a proposal for her sitting; nothing in the app changed.</p>
+
+</div>
+<script>
+(function(){
+  var buttons = document.querySelectorAll('[data-set-theme]');
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].addEventListener('click', function(event){
+      var choice = event.currentTarget.getAttribute('data-set-theme');
+      if (choice === 'system') { document.documentElement.removeAttribute('data-theme'); }
+      else { document.documentElement.setAttribute('data-theme', choice); }
+      for (var j = 0; j < buttons.length; j++) { buttons[j].classList.toggle('on', buttons[j] === event.currentTarget); }
+    });
+  }
+})();
+</script>
+</body>
+</html>

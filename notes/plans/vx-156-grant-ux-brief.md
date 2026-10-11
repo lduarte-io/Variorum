@@ -18,8 +18,8 @@ below say "mockup §N"). The DRAFT phase plan: `notes/plans/phase-13n-c-mcp-laun
 |---|---|---|
 | P0 | Worktree + preflight (read in full, never delegated) + the skeleton | DONE (`209c11f6`) |
 | P1 | This brief: per-item options, recommendation and why; chord candidates with the sweep evidence; open questions | DONE (`eacf600b`; amended in the P2 checkpoint — the A-4 pane-line gap found, a sixth R-AIR-1 sentence) |
-| P2 | `notes/plans/vx-156-grant-ux-mockups.html` — one self-contained page, Study voice, light and dark, sentence case | IN-PROGRESS — being written to the §16 map; nothing committed yet |
-| P3 | `notes/plans/phase-13n-c-mcp-launch-readiness-DRAFT.md` — the DRAFT phase plan | NOT-STARTED — units sketched in §15 below |
+| P2 | `notes/plans/vx-156-grant-ux-mockups.html` — one self-contained page, Study voice, light and dark, sentence case | DONE (this commit) — §1–§11 per the §16 map; Study tokens verbatim from `VoiceTokens` (light/dark + a forced light/dark pair at §1); tag balance parsed clean, zero external fetches, no all-caps words but the MCP acronym and ruling ids; NOT rendered in a browser here (headless session — her eyes are the render check) |
+| P3 | `notes/plans/phase-13n-c-mcp-launch-readiness-DRAFT.md` — the DRAFT phase plan | IN-PROGRESS — units sketched in §15 below |
 | P4 | Final pass: status flipped, PR "VX-156: grant UX design prep" opened | NOT-STARTED |
 
 ## THE SITTING AGENDA (carried verbatim from the kickoff)
