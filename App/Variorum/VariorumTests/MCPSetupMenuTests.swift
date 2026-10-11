@@ -164,14 +164,34 @@ struct MCPSetupMenuTests {
     }
 
     /// Stage B R1 B7: the pane's searchable description (the line under its
-    /// title, and what Settings' search reads) names every setup the menu
-    /// offers — never Claude Code alone, which stopped being true at U5.
-    @Test func thePanesDescriptionNamesEverySetupTheMenuOffers() {
+    /// title, and what Settings' search reads) never says Claude Code alone,
+    /// which stopped being true at U5. A JUSTIFIED EDIT (the ritual) at the
+    /// close-out pass — 13n-c O-4, her ask ("outside of the provider setup,
+    /// claude / claude code isn't hardwired anywhere"): B7's PROVISIONAL words
+    /// named the menu's choices ("Claude Code, Codex or any MCP client"); the
+    /// description now says it sets up ANY MCP client and names no provider —
+    /// and neither does the server row's blurb.
+    @Test func thePanesDescriptionSetsUpAnyClientAndNamesNoProvider() {
         let blurb = SettingsPane.mcp.blurb
-        for client in MCPSetupClient.allCases {
-            #expect(blurb.localizedCaseInsensitiveContains(client.label), "the description names \(client.label)")
+        #expect(blurb.contains("how to set up any MCP client"))
+        let serverRow = SettingsCatalog.rows.first { $0.id == "mcpServer" }?.blurb ?? ""
+        #expect(serverRow.contains("A local server for any MCP client"))
+        for text in [blurb, serverRow, MCPPaneCopy.enableBlurb] {
+            for client in MCPSetupClient.allCases where client != .anyClient {
+                #expect(!text.localizedCaseInsensitiveContains(client.label), "\(client.label) in: \(text)")
+            }
+            #expect(!text.contains("AI"), "R-AIR-8: settings-class wording")
         }
         #expect(!blurb.contains("the command that sets up Claude Code"))
-        #expect(!blurb.contains("AI"), "R-AIR-8: settings-class wording")
+    }
+
+    /// 13n-c O-4 (her (e)): the copy names no provider, but the SEARCH finds the
+    /// pane by whatever she or a user calls their AI — the keywords are search
+    /// vocabulary, never copy.
+    @Test func theSearchFindsThePaneWhateverItsClientIsCalled() {
+        for word in ["claude", "codex", "anthropic", "openai", "chatgpt", "cursor", "gemini", "copilot"] {
+            #expect(SettingsSearch.findings(matching: word, in: SettingsSearch.settingsEntries)
+                .contains { $0.pane == .mcp }, "“\(word)” finds the MCP pane")
+        }
     }
 }

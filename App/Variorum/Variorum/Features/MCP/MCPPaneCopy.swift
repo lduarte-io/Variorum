@@ -29,9 +29,11 @@ nonisolated enum MCPPaneCopy {
     /// the moment edit could be granted, so the clause says when it can —
     /// and what guards it (R-13n-7's brackets). PROVISIONAL P-13nb-U3-17,
     /// her words to re-voice at 13s-a. 13n-c U2 (R-AIR-8 — no "AI" in
-    /// settings-class wording): "AI work" → "a client's work".
+    /// settings-class wording): "AI work" → "a client's work". 13n-c O-4 (her
+    /// ask — no provider hardwired outside the setup): "clients like Claude
+    /// Code" → "MCP clients" (PROVISIONAL, her copy pass).
     static let enableBlurb =
-        "Runs a local MCP server while Variorum is open, so clients like Claude Code can read "
+        "Runs a local MCP server while Variorum is open, so MCP clients can read "
         + "and write here through Variorum's own operations. Nothing is readable until you grant "
         + "it, every grant is revocable, and a client's work lands as takes beside your own \u{2014} a "
         + "client changes your text only where you grant it edit, with a commit before and after "
@@ -236,6 +238,9 @@ nonisolated enum MCPPaneCopy {
 
     // MARK: - Connect a client (R-13nb-5 — "Copy setup command")
 
+    // O-4 SETUP COPY BEGIN — the provider setup (her exclusion, 2026-10-11):
+    // the setup menu's own words, the one place outside `MCPSetupClient` a
+    // provider is named (`MCPProviderNeutralityTests` reads this fence).
     static let connectSection = "Connect a client"
     static let connectSentence =
         "Claude Code registers Variorum with one command. Copy it, run it in a terminal, then "
@@ -324,6 +329,7 @@ nonisolated enum MCPPaneCopy {
     /// Copied receipts beside Claude Code's (`copiedReceipt`, unchanged).
     static let copiedCodexReceipt = "Copied. Run it in a terminal, then start a new Codex session."
     static let copiedJSONReceipt = "Copied. Paste it into your client's MCP settings, then restart the client."
+    // O-4 SETUP COPY END
 
     // MARK: - The "all N" road (R-13n-10)
 
@@ -592,6 +598,7 @@ nonisolated enum MCPPaneCopy {
 /// declared act (`.mcpCopySetupCommand`, her R-13nb-5 words) copies whichever
 /// is chosen — choosing is the pane's view state, never a second act.
 nonisolated enum MCPSetupClient: String, CaseIterable, Identifiable, Sendable {
+    // O-4 SETUP COPY BEGIN — the setup menu's clients, named (her exclusion).
     case claudeCode, codex, anyClient
 
     var id: String { rawValue }
@@ -637,6 +644,7 @@ nonisolated enum MCPSetupClient: String, CaseIterable, Identifiable, Sendable {
         case .anyClient: MCPPaneCopy.copiedJSONReceipt
         }
     }
+    // O-4 SETUP COPY END
 }
 
 /// **THE JUST-IN-TIME ASK's words** (13n-b U2 — AF-6; mockup §4). The MCP

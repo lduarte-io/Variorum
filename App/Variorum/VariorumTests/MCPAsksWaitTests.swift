@@ -389,8 +389,16 @@ struct MCPAsksWaitTests {
         let mcp = try? #require(HelperView.groups.first { $0.title == "MCP" })
         let keys = Set(mcp?.items.map(\.keys) ?? [])
         #expect(keys.isSuperset(of: ["\u{2325}\u{2318},", "\u{2325}\u{2318}A", "\u{2325}\u{2318}O", "\u{2325}\u{2318}Z"]))
-        #expect(mcp?.items.contains { $0.does.contains("Undo claude-code's take") } == true,
+        // 13n-c O-4 (A JUSTIFIED EDIT, the ritual — her ask: no provider
+        // hardwired outside the setup): the client-named undo in the Edit
+        // menu's own words, composed by the menu's own functions over a
+        // PLACEHOLDER name, never one provider's client.
+        let placeholder = EditorCommands.undoMenuTitle(
+            for: Operations.MCPWriteAct.take.undoLabel(client: "\u{2039}name\u{203A}"))
+        #expect(placeholder == "Undo \u{2039}name\u{203A}'s take")
+        #expect(mcp?.items.contains { $0.does.contains("(\u{201C}\(placeholder)\u{201D})") } == true,
                 "the client-named undo, in the words the Edit menu really says")
+        #expect(mcp?.items.allSatisfy { !$0.does.localizedCaseInsensitiveContains("claude") } == true)
         let writing = HelperView.groups.first { $0.title == "Writing" }?.items.map(\.keys) ?? []
         #expect(!writing.contains("\u{2325}\u{2318}O") && !writing.contains("\u{2325}\u{2318}A"),
                 "moved to the MCP group, not doubled")

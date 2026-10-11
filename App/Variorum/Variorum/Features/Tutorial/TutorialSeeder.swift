@@ -2479,8 +2479,8 @@ enum TutorialSeeder {
 
         _ = try lesson(door, mcpLessons[0], [
             "Variorum can let an AI work in your library, if you want it to. The way "
-            + "in is MCP, the Model Context Protocol: a standard way for AI apps such "
-            + "as Claude Code or Codex to use another app's tools. Variorum calls its "
+            + "in is MCP, the Model Context Protocol: a standard way for AI apps to "
+            + "use another app's tools. Variorum calls its "
             + "way in the door, and it stays shut until you open it. It lives on the "
             + "Mac; the phone has no door.",
 
@@ -2501,6 +2501,9 @@ enum TutorialSeeder {
         ])
 
         _ = try lesson(door, mcpLessons[1], [
+            // O-4 SETUP COPY BEGIN — the card that teaches the setup menu by its
+            // labels (the provider setup — her exclusion; the H pattern keeps it
+            // plain text, never interpolated).
             "In Settings \u{25B8} MCP, under Connect a client, choose yours: Claude "
             + "Code, Codex, or Any MCP client. Then press Copy setup command. For "
             + "Claude Code or Codex it is one command: run it in a terminal, then "
@@ -2508,6 +2511,7 @@ enum TutorialSeeder {
             + "lines of JSON to paste into that client's MCP settings. The pane also "
             + "shows the path they all point at, because the door is a standard MCP "
             + "server: one program inside the app.",
+            // O-4 SETUP COPY END
 
             "The first time a client connects, it shows up in Settings \u{25B8} MCP "
             + "as a connection request, and it can reach nothing yet. "
@@ -2515,8 +2519,8 @@ enum TutorialSeeder {
             + "it away. Every approved client is listed there, with Change\u{2026} "
             + "to share more and Revoke to shut it out again.",
 
-            "One honest limit: a client names itself when it connects (claude-code, "
-            + "say), and Variorum can't check that name. Whatever you grant, you "
+            "One honest limit: a client names itself when it connects, and "
+            + "Variorum can't check that name. Whatever you grant, you "
             + "grant to anything that connects under that name.",
         ])
 
@@ -2615,7 +2619,7 @@ enum TutorialSeeder {
             + "\u{2325}\u{2318}O (Show the AI\u{2019}s Last Change, in the Edit "
             + "menu) takes you there later, even after the line fades. "
             + "\u{2325}\u{2318}Z takes a client's act back, one act at a time, and "
-            + "the Edit menu names it: Undo claude-code's take.",
+            + "the Edit menu names it after the client: Undo \u{2039}name\u{203A}'s take.",
 
             "A client is told to move your window only when you ask it to show you "
             + "something, and it can only while Variorum is the app in front; it "

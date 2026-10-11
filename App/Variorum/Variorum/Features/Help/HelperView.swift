@@ -115,8 +115,11 @@ struct HelperView: View {
             ("⌥⌘O", "show the AI's last change (what a connected client last wrote)"),
             // The client-named undo (13n-b, AF-3): the one structural undo,
             // said here because an AI's change is where she reaches for it.
+            // 13n-c O-4 (her ask — no provider hardwired): the Edit menu's words
+            // in their PLACEHOLDER form, never one provider's client name
+            // (PROVISIONAL, her copy pass).
             ("⌥⌘Z", "undo a client's change \u{2014} the Edit menu names the client "
-                + "(\u{201C}Undo claude-code's take\u{201D})"),
+                + "(\u{201C}Undo \u{2039}name\u{203A}'s take\u{201D})"),
             // 13n-c U4 (arrival X): the one face an ask has outside Settings.
             // Stage B fix pass (O-3): the mark is named by its ROLE, never its
             // shape (O-1 changed the glyph once; the guide teaches it the same way).

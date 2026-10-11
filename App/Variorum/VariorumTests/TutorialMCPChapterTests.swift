@@ -158,6 +158,10 @@ struct TutorialMCPChapterTests {
         try await withGuideWorld { _, db, guideID in
             let text = try await prose(db, guideID, lessons[0])
             #expect(text.contains("MCP, the Model Context Protocol"))
+            // 13n-c O-4 (her ask): the door is described for ANY client — no
+            // provider is named outside the setup lesson's menu card.
+            #expect(text.contains("a standard way for AI apps to use another app's tools"))
+            for name in ["claude", "codex"] { #expect(!text.localizedCaseInsensitiveContains(name)) }
             #expect(text.contains("it stays shut until you open it"))
             #expect(text.contains("the phone has no door"))
             // The doors, by their own words.
@@ -444,7 +448,14 @@ struct TutorialMCPChapterTests {
             let undo = EditorCommands.undoMenuTitle(
                 for: Operations.MCPWriteAct.take.undoLabel(client: "claude-code"))
             #expect(undo == "Undo claude-code's take")
-            #expect(text.contains("the Edit menu names it: \(undo)."))
+            // 13n-c O-4 (A JUSTIFIED EDIT, the ritual — her ask: no provider
+            // hardwired outside the setup): the lesson quotes the menu's words
+            // over a PLACEHOLDER name, composed by the menu's own functions —
+            // the real client's title above is the same shape.
+            let placeholder = EditorCommands.undoMenuTitle(
+                for: Operations.MCPWriteAct.take.undoLabel(client: "\u{2039}name\u{203A}"))
+            #expect(text.contains("the Edit menu names it after the client: \(placeholder)."))
+            #expect(!text.localizedCaseInsensitiveContains("claude"))
             #expect(text.contains("only while Variorum is the app in front; it never brings a window forward"))
 
             // THE TRUTH — the icon and its why: a book reached through the Home

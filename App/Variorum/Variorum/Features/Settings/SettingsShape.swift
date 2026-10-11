@@ -110,9 +110,11 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         // it is granted now, up to edit.
         // 13n-c U4: + the asks waiting for an answer (arrival X).
         // 13n-c Stage B R1 B7: the setup menu (U5, R-AIR-13) sets up Claude
-        // Code, Codex or any MCP client — the description says so.
+        // Code, Codex or any MCP client — the description says so. 13n-c O-4
+        // (her ask — no provider hardwired outside the setup): it says "any MCP
+        // client", naming none (PROVISIONAL, her copy pass).
         case .mcp: "The local MCP server: which clients may connect, what each may read and change, "
-            + "the asks waiting for your answer, and how to set up Claude Code, Codex or any MCP client."
+            + "the asks waiting for your answer, and how to set up any MCP client."
         case .protection: "The passphrase, how the library locks, and the ways back in."
         case .dataSafety: "Backups, how fresh they are, and what restoring one does."
         case .diagnostics: "Crash reports \u{2014} off unless you turn them on, and never sent without you."
@@ -297,11 +299,17 @@ nonisolated enum SettingsCatalog {
             id: "mcpServer", pane: .mcp, title: MCPPaneCopy.enableTitle,
             // 13n-c U5 (R-AIR-13): the setup menu names Codex and any MCP
             // client's JSON, so the search finds the pane by those words too.
-            blurb: "A local server for MCP clients such as Claude Code or Codex. Off by default; "
+            // 13n-c O-4 (her ask): the blurb names no provider ("any MCP
+            // client", PROVISIONAL), and the search finds the pane by whatever
+            // she or a user calls their AI — the keywords are search
+            // vocabulary, never copy (her (e)).
+            blurb: "A local server for any MCP client. Off by default; "
                 + "nothing is readable until you grant it. This Mac only.",
             keywords: ["mcp", "ai", "claude", "claude code", "agent", "llm", "model context protocol",
                        "server", "connect", "client", "share", "grant", "socket",
-                       "codex", "setup", "json", "stdio"]),
+                       "codex", "setup", "json", "stdio",
+                       "anthropic", "openai", "chatgpt", "gpt", "cursor", "gemini", "copilot",
+                       "windsurf", "ollama"]),
         // 13n-c U4 — WAITING (arrival X): where a client's ask waits besides
         // its icon; ⌥⌘, opens the pane there.
         SettingsRow(
