@@ -55,7 +55,7 @@ public enum MCPShowRule {
     /// sweepable).
     public static let notFrontmostWords =
         "The author isn't at Variorum right now, so nothing was moved — showing happens only while "
-        + "Variorum is the app in front. Ask her to switch to it, then call again."
+        + "Variorum is the app in front. Ask them to switch to it, then call again."
     public static let otherWindowWords =
         "Variorum's main window isn't the one in front, so nothing was moved — ask the author to "
         + "bring it forward, then call again."

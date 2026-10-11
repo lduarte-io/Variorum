@@ -140,7 +140,7 @@ enum MCPRefusalCopy {
     /// ladder's F1, includes a fenced note the client holds a LIVE per-ask
     /// grant on (the rule answers `rungTooLow` there; the `fenced` REASON
     /// itself never gains the sentence).
-    static let askedSentence = "Variorum has asked the author \u{2014} call again once she answers."
+    static let askedSentence = "Variorum has asked the author \u{2014} call again once they answer."
 
     /// The words for a refusal, with the asked sentence where it belongs.
     static func words(_ reason: MCPGrantRule.Reason, _ target: Target, asked: Bool) -> String {

@@ -76,8 +76,10 @@ struct MCPAdviceServerTests {
         #expect(advice.contains("snippets are not reachable at all"))
         #expect(advice.contains("answers exactly as if it did not exist"))
         #expect(advice.contains("don't retry around it: tell the author what you need"))
-        #expect(advice.contains("Never call show_in_app unless she asks"))
-        #expect(advice.contains("one undo for her, named after you"))
+        // Stage B R1 B13 / O-2 (A JUSTIFIED EDIT — the ritual): the advice
+        // names "the author", never a pronoun that assumes theirs.
+        #expect(advice.contains("Never call show_in_app unless the author asks"))
+        #expect(advice.contains("one undo for the author, named after you"))
     }
 
     /// The U1 ladder's two carries. F5: a fenced or unshared target answers

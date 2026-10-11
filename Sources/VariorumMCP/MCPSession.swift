@@ -41,26 +41,26 @@ final class MCPSession: @unchecked Sendable {
     /// spirit — a once grant reads by id).
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
-        open only while Variorum runs. A new client is a connection request until she approves \
-        it in Variorum \u{25B8} Settings \u{25B8} MCP. Tools appear only for what she has shared \
+        open only while Variorum runs. A new client is a connection request until the author approves \
+        it in Variorum \u{25B8} Settings \u{25B8} MCP. Tools appear only for what they have shared \
         (re-announced when that changes).
         Grants have four rungs, each including those before it: read (read and search), \
-        suggest (add takes and comments beside her text, save lenses), \
+        suggest (add takes and comments beside their text, save lenses), \
         write new (new notes, books, chapters, tags, versions), edit (edit takes, divide, merge, \
         move, delete). Each names a note, a book or a wing, for once, until you disconnect, or \
-        always; she may also open the whole library to reading (the open book). A once grant is \
+        always; they may also open the whole library to reading (the open book). A once grant is \
         one act: a read grant's first read of a note's text, a higher grant's first write.
         search covers standing grants only; read a once grant's note by id.
-        Ids are live: after any divide or merge, hers or yours, read again.
+        Ids are live: after any divide or merge, theirs or yours, read again.
         read_note speaks the Variorum document format; when its header starts with \
         \(VariorumDocument.versionToken), a "\(VariorumDocument.blockMarker)" line separates the blocks.
-        Her daily Journal's entries and anything marked Private are shared one ask at a time; \
+        The daily Journal's entries and anything marked Private are shared one ask at a time; \
         snippets are not reachable at all. Anything you can't reach answers exactly as if it did \
         not exist.
         If a call is refused, don't retry around it: tell the author what you need (Variorum may \
-        already have asked her).
-        Never call show_in_app unless she asks you to show her something.
-        Every change you make is one undo for her, named after you.
+        already have asked them).
+        Never call show_in_app unless the author asks you to show them something.
+        Every change you make is one undo for the author, named after you.
         """
 
     /// The advice's length bound (characters) — stated and pinned.

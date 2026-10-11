@@ -237,7 +237,7 @@ enum MCPToolCatalog {
         description: """
             Add a new take (an alternative text) to one block, at the END of its fan. The take is \
             labeled with this client's name (plus your label, if given), is never chosen and \
-            never locked — the author's text is never touched; she chooses. Get block ids from \
+            never locked — the author's text is never touched; they choose. Get block ids from \
             read_note with with_ids: true. Returns JSON with the new take_id.
             """,
         inputSchema: .object([
@@ -453,7 +453,7 @@ enum MCPToolCatalog {
             (read_note with with_ids: true) — if the author changed it since, the edit is refused and \
             nothing is written; read again. Variorum saves a commit named "before <your name>'s edit" \
             and one named "after <your name>'s edit", so the author can always compare and come back, \
-            and the edit is one undo for her. Returns JSON with the commit ids.
+            and the edit is one undo for the author. Returns JSON with the commit ids.
             """,
         inputSchema: .object([
             "type": "object",
@@ -536,7 +536,7 @@ enum MCPToolCatalog {
         name: "delete_block", rung: .edit, title: "Delete a block",
         description: """
             Delete one block. Nothing is destroyed: it goes to the note's tray of deleted things, \
-            every take with it, where the author can put it back (and it is one undo for her). \
+            every take with it, where the author can put it back (and it is one undo for them). \
             Returns JSON.
             """,
         inputSchema: .object([
@@ -607,7 +607,7 @@ enum MCPToolCatalog {
         name: "save_version", rung: .writeNew, title: "Save a version of a note",
         description: """
             Save the whole note as it is now as a version (the author's Note ▸ Versions — an \
-            edition she can come back to). Nothing in the note changes. read_note with \
+            edition they can come back to). Nothing in the note changes. read_note with \
             with_versions: true lists them. Returns JSON with the version_id.
             """,
         inputSchema: .object([
@@ -670,8 +670,8 @@ enum MCPToolCatalog {
     static let showInApp = MCPToolDeclaration(
         name: "show_in_app", rung: .read, title: "Show in Variorum",
         description: """
-            Move the author's Variorum window to something you want her to see — ONLY when she \
-            asks you to show her, never on your own (it moves nothing unless Variorum is the app \
+            Move the author's Variorum window to something you want them to see — ONLY when they \
+            ask you to show them, never on your own (it moves nothing unless Variorum is the app \
             in front, and never raises a window). target "note" (note_id; block_id lands on that \
             block, and select — words in that block's shown take — selects them with the find \
             bar ready), "takes" (note_id + block_id: the note's Takes, that block's takes open), \
