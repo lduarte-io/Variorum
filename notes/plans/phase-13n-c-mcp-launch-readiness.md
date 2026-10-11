@@ -1623,6 +1623,9 @@ Captures in `notes/plans/13n-c-screens/u5/`.
 
 Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (~09:10 MDT). Worktree
 `~/dev/variorum-vx-165`, branch `vx-165-13n-c`. No revert is in flight unless a line below says so.
+**REVERT IN FLIGHT (09:52 MDT, the red-on-old check of U5-2):** `Sources/VariorumMCP/MCPSession.swift` swapped to its
+pre-U5 text from `58b81ec8` (the tree is committed at `49c7f589`, so `git diff` shows exactly what is reverted and
+`git checkout -- Sources/VariorumMCP/MCPSession.swift` restores it). Cleared by the next commit.
 The session is LOCKED at start (09:10 MDT: `CGSSessionScreenIsLocked 1`) — the walk and the scratch
 `claude mcp add -s local` run are HELD; offscreen renders stand in only if it is still locked at U5-6,
 and are NOT a walk.
