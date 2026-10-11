@@ -462,10 +462,12 @@ nonisolated enum MCPAskCopy {
     /// note (one note). Every duration carries it (P-13nc-3) — so one line
     /// above the buttons, never a word per button. PROVISIONAL wording
     /// (P-13nc-U2-4), her copy pass.
-    static func reachLine(_ ask: MCPAsk) -> String? {
+    static func reachLine(_ ask: MCPAsk, distinguisher: String? = nil) -> String? {
         switch ask.scopeKind {
         case .note: nil
-        case .book: "Any answer below grants it in \u{201C}\(ask.title)\u{201D}, including to future entries."
+        case .book:
+            "Any answer below grants it in \(PlaceLabels.quoted(ask.title, distinguisher: distinguisher)), "
+                + "including to future entries."
         case .wing: "Any answer below grants it in the \(ask.title) wing, including notes added later."
         }
     }

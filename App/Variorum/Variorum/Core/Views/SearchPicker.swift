@@ -217,9 +217,6 @@ struct SearchPicker: View {
 
     @State private var shown = false
     @State private var query = ""
-    @State private var arrangementID: String?
-    @State private var sourced: [SearchPickerSection] = []
-    @State private var generation = 0
     @FocusState private var focused: Bool
 
     private var canCreate: Bool { createLabel != nil && onCreate != nil }
@@ -245,7 +242,14 @@ struct SearchPicker: View {
             }
         }
         .popover(isPresented: $shown, arrowEdge: .bottom) {
-            if arrangements != nil || source != nil { sectionedPanel } else { panel }
+            if arrangements != nil || source != nil {
+                SearchPickerPanel(
+                    tokens: tokens, prompt: prompt, emptyText: emptyText,
+                    arrangements: arrangements, source: source, width: panelWidth,
+                    onPick: { pick($0) }, onClose: { shown = false })
+            } else {
+                panel
+            }
         }
     }
 
@@ -329,7 +333,7 @@ struct SearchPicker: View {
         }
     }
 
-    // MARK: - 13n-c U2: the field trigger and the sectioned panel
+    // MARK: - 13n-c U2: the field trigger
 
     private func fieldLabel(_ field: Field) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -358,6 +362,58 @@ struct SearchPicker: View {
         .contentShape(Rectangle())
     }
 
+    private func pick(_ id: String) {
+        shown = false
+        onPick(id)
+    }
+
+    private func create(_ typed: String) {
+        shown = false
+        onCreate?(typed)
+    }
+}
+
+/// **THE SECTIONED PANEL** (13n-c U2) — what a sectioned or sourced
+/// `SearchPicker` shows in its popover: the search field (focused), the
+/// layout toggle when there is more than one ("by shelf" · "a–z"), and the
+/// titled sections the brain (or the source) answers. Its own view so a
+/// capture harness can draw the open picker offscreen (a popover is another
+/// window) — `initialQuery` is that seam; in use it opens empty.
+struct SearchPickerPanel: View {
+    let tokens: VoiceTokens
+    let prompt: String
+    let emptyText: String
+    var arrangements: [SearchPickerArrangement]?
+    var source: ((String) async -> [SearchPickerSection])?
+    let width: CGFloat
+    let onPick: (String) -> Void
+    let onClose: () -> Void
+
+    @State private var query: String
+    @State private var arrangementID: String?
+    @State private var sourced: [SearchPickerSection] = []
+    @State private var generation = 0
+    @FocusState private var focused: Bool
+
+    init(
+        tokens: VoiceTokens, prompt: String, emptyText: String,
+        arrangements: [SearchPickerArrangement]? = nil,
+        source: ((String) async -> [SearchPickerSection])? = nil,
+        width: CGFloat, initialQuery: String = "", initialArrangementID: String? = nil,
+        onPick: @escaping (String) -> Void, onClose: @escaping () -> Void
+    ) {
+        self.tokens = tokens
+        self.prompt = prompt
+        self.emptyText = emptyText
+        self.arrangements = arrangements
+        self.source = source
+        self.width = width
+        self.onPick = onPick
+        self.onClose = onClose
+        _query = State(initialValue: initialQuery)
+        _arrangementID = State(initialValue: initialArrangementID)
+    }
+
     private var currentArrangement: SearchPickerArrangement? {
         guard let arrangements, !arrangements.isEmpty else { return nil }
         return arrangements.first { $0.id == arrangementID } ?? arrangements[0]
@@ -370,7 +426,7 @@ struct SearchPicker: View {
         return SearchPickerBrain.visible(currentArrangement?.sections ?? [], query: query)
     }
 
-    private var sectionedPanel: some View {
+    var body: some View {
         let sections = shownSections
         return VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
@@ -378,8 +434,8 @@ struct SearchPicker: View {
                     .textFieldStyle(.plain)
                     .font(tokens.small)
                     .focused($focused)
-                    .onSubmit { submitSections() }
-                    .onExitCommand { shown = false }
+                    .onSubmit { submit() }
+                    .onExitCommand { onClose() }
                 if let arrangements, arrangements.count > 1 {
                     HStack(spacing: 2) {
                         ForEach(arrangements) { arrangement in
@@ -399,6 +455,7 @@ struct SearchPicker: View {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(sections) { section in
                         if let title = section.title {
+                            // A shelf's name is hers — never chrome-cased.
                             Text(title)
                                 .font(tokens.small.weight(.semibold))
                                 .foregroundStyle(tokens.muted)
@@ -409,7 +466,7 @@ struct SearchPicker: View {
                                 .padding(.bottom, 2)
                         }
                         ForEach(section.options) { option in
-                            sectionRow(option) { pick(option.id) }
+                            row(option) { onPick(option.id) }
                         }
                     }
                     if sections.isEmpty {
@@ -424,13 +481,13 @@ struct SearchPicker: View {
             .frame(maxHeight: 360)
         }
         .padding(.vertical, 6)
-        .frame(width: panelWidth)
+        .frame(width: width)
         .background(tokens.surface)
         .onAppear { focused = true }
         .task(id: query) { await runSource() }
     }
 
-    private func sectionRow(_ option: SearchPickerOption, action: @escaping () -> Void) -> some View {
+    private func row(_ option: SearchPickerOption, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 1) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -464,36 +521,26 @@ struct SearchPicker: View {
         .buttonStyle(.plain)
     }
 
-    private func submitSections() {
+    private func submit() {
         if source != nil {
-            if let first = sourced.first?.options.first { pick(first.id) }
+            if let first = sourced.first?.options.first { onPick(first.id) }
             return
         }
         if case .pick(let id) = SearchPickerBrain.returnChoice(
             sections: currentArrangement?.sections ?? [], query: query) {
-            pick(id)
+            onPick(id)
         }
     }
 
     /// The feed's cadence (the note picker's own): one bounded read per typed
     /// query, latest keystroke wins.
     private func runSource() async {
-        guard let source, shown else { return }
+        guard let source else { return }
         generation += 1
         let mine = generation
         let result = await source(query)
         guard mine == generation else { return }
         sourced = result
-    }
-
-    private func pick(_ id: String) {
-        shown = false
-        onPick(id)
-    }
-
-    private func create(_ typed: String) {
-        shown = false
-        onCreate?(typed)
     }
 }
 

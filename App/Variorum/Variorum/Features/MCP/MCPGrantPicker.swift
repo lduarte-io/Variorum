@@ -140,7 +140,10 @@ nonisolated enum MCPGrantPicker {
     /// under "Recently edited" (the feed's resting state IS that); once
     /// typing, its matches, untitled. A fenced note stays pickable — a
     /// per-ask note grant is legal (mockup §1) — and wears its fence word.
-    static func noteSections(_ rows: [NoteRow], query: String) -> [SearchPickerSection] {
+    static func noteSections(
+        _ rows: [NoteRow], query: String, now: Date = Date(),
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> [SearchPickerSection] {
         guard !rows.isEmpty else { return [] }
         let typing = !SearchPickerBrain.normalized(query).isEmpty
         return [SearchPickerSection(
@@ -149,9 +152,20 @@ nonisolated enum MCPGrantPicker {
             options: rows.map { row in
                 SearchPickerOption(
                     id: row.id, label: row.title,
-                    annotation: row.fence.map(MCPPaneCopy.noteFenceWord) ?? row.day,
+                    annotation: row.fence.map(MCPPaneCopy.noteFenceWord)
+                        ?? row.day.map { dayWords($0, now: now, calendar: calendar, locale: locale) },
                     detail: row.snippet, emphasized: row.fence != nil)
             })]
+    }
+
+    /// The feed's day KEY ("2026-09-30") in the sheet's own day words ("Sep
+    /// 30" — `TimeStampFace.day`, the words the book rows' "edited …" use;
+    /// mockup §1's "3 Oct"). A value that is not a day key passes through.
+    static func dayWords(
+        _ day: String, now: Date, calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> String {
+        guard let date = JournalDay.date(from: day, calendar: calendar) else { return day }
+        return TimeStampFace.day(date, now: now, calendar: calendar, locale: locale)
     }
 
     // MARK: - How long

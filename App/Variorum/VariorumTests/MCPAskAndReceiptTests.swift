@@ -199,14 +199,18 @@ struct MCPAskAndReceiptTests {
             #expect(MCPPaneCopy.confirm(verb: "Grant", scope: .wing, place: "Home", duration: duration)
                 .hasSuffix(", including notes added later"), "D-3's wing twin — \(duration)")
         }
-        #expect(MCPPaneCopy.confirm(verb: "Grant", scope: .note, place: "ch 7", duration: .once) == "Grant read in “ch 7” once")
+        // 13n-c U2 (justified edit, the ritual): a NOTE grant reads "on" — the
+        // VX-156 mockup §1's note leg ("Grant read on “morning pages — oct 9”
+        // once"); U1 wrote "in" before the sheet had a note leg to draw it.
+        #expect(MCPPaneCopy.confirm(verb: "Grant", scope: .note, place: "ch 7", duration: .once) == "Grant read on “ch 7” once")
         // The sheet renders the confirm in three parts so only the place can
         // compress; joined, they are the sentence exactly.
         for scope in MCPGrantRule.ScopeKind.allCases {
             let parts = MCPPaneCopy.confirmParts(verb: "Grant", rung: .edit, scope: scope, place: "x", duration: .connection)
             #expect(parts.lead + parts.place + parts.tail
                     == MCPPaneCopy.confirm(verb: "Grant", rung: .edit, scope: scope, place: "x", duration: .connection))
-            #expect(parts.place == "x" && parts.lead == "Grant edit in “")
+            // 13n-c U2 (justified edit, the ritual — the same "on" for a note).
+            #expect(parts.place == "x" && parts.lead == (scope == .note ? "Grant edit on “" : "Grant edit in “"))
         }
     }
 
@@ -228,7 +232,9 @@ struct MCPAskAndReceiptTests {
                 "mockup §3's confirm + R-AIR-3's clause")
         // U3 walk W-2 (justified edit, the ritual): the mockup's words stay,
         // and the sentence stays TRUE now that edit can be granted.
-        #expect(MCPPaneCopy.enableBlurb.contains("AI work lands as takes beside your own"))
+        // 13n-c U2 (justified edit, the ritual — R-AIR-8: no "AI" in
+        // settings-class wording): "AI work" → "a client's work".
+        #expect(MCPPaneCopy.enableBlurb.contains("a client's work lands as takes beside your own"))
         #expect(MCPPaneCopy.enableBlurb.contains("only where you grant it edit"))
         #expect(!MCPPaneCopy.enableBlurb.contains("no client can overwrite your text"))
         #expect(MCPPaneCopy.rungWord(.suggest) == "read and suggest")

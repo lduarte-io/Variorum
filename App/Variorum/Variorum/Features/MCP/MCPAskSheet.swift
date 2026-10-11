@@ -44,7 +44,7 @@ struct MCPAskSheet: View {
                 .fixedSize(horizontal: false, vertical: true)
             // 13n-c U2 (the U1 ladder's F2): an answer here MINTS a book or
             // wing grant, so R-AIR-3's clause is said here too.
-            if let reach = MCPAskCopy.reachLine(ask) {
+            if let reach = MCPAskCopy.reachLine(ask, distinguisher: distinguisher) {
                 Text(reach)
                     .font(.callout)
                     .foregroundStyle(.secondary)

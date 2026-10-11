@@ -146,10 +146,16 @@ struct MCPGrantSheetCaptureTests {
                     let (theme, task) = try await startedTheme(session, voice: voice)
                     defer { task.cancel() }
                     let tag = "\(voice == .study ? "study" : "terminal")-\(first == "dream journal" ? "dream" : "long")"
+                    // 13n-c U2 (the opener API — `MCPGrantOpening`; "connected"
+                    // is read from the door live, so the DEBUG seam marks it —
+                    // after the snapshot lands, whose reconcile clears it).
+                    for _ in 0..<100 where door.snapshot.clientCount < 1 {
+                        pump(0.02)
+                        await Task.yield()
+                    }
+                    door.previewConnected([client.name])
                     await capture(
-                        MCPGrantSheet(
-                            door: door, target: MCPPane.GrantTarget(client: client, approving: false, connected: true),
-                            done: {})
+                        MCPGrantSheet(door: door, opening: MCPGrantOpening(client: client), done: {})
                             .environment(theme),
                         size: NSSize(width: 600, height: 560), name: "u1-sheet-\(tag).png")
                 }
