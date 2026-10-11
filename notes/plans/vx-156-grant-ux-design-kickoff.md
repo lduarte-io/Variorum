@@ -110,6 +110,28 @@ itself is hers, in the morning — this session only PREPARES it.**
   subtitle "Wings — each a separate library" teaches with it). Not a 13n-c
   item; 13s-a carries the copy sweep and is the natural home.
 
+## ROUND 5 — final details before the 13n-c kickoff (2026-10-11)
+
+- **The wing switcher must be reachable from the LIBRARY pane** — today it lives
+  on the Bookcase only, "which is weird" (her words). ⌘L works app-wide; the
+  masthead switcher joins the Library masthead. 13n-c build item.
+- **Snippets at the door — the fact from code:** scraps groups are UNREACHABLE
+  through any grant today — a scraps-group container answers the uniform
+  not-shared class (`MCPGrantQueries` ~274, `MCPWriteTools` ~380); grant scopes
+  are note · book · wing and a scraps group is none of them. RECOMMENDATION
+  (orchestrator's, hers to override in the morning): keep snippets out for
+  launch and SAY SO in the user docs/MCP chapter; a snippets scope is a later
+  ticket if wanted. Separately, the wing-isolation UI must make clear that
+  Snippets is the one room shared across wings.
+- **Her Library-naming note for 13s-a:** "Library pane showing you one of your
+  libraries is actually pretty clear - i'm not even that convinced it's a
+  collision." (Parked there with the rest of the naming question.)
+- **The fence probe ran live:** search "crat attack" (a word only in her
+  journal) under the two-book grant → zero passages; a control query returned
+  granted-book passages only. Caveat on record: under book grants the journal
+  is out of SCOPE twice over — the decisive fence-vs-scope proof re-runs under
+  a Home-wing read grant.
+
 ## Mandate
 
 Design-prep for the grant UX round. NO app code, NO canon edits, NO suites, NO walks
