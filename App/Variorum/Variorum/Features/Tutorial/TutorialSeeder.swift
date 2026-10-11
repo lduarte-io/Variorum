@@ -2487,12 +2487,15 @@ enum TutorialSeeder {
             "Open it in Settings \u{25B8} MCP (\u{2325}\u{2318}, takes you there) "
             + "with Enable the MCP server. It works only while Variorum is open, and "
             + "nothing in your library can be read through it until you share "
-            + "something with a client. What you share stays on this Mac: grants "
-            + "never sync to your other devices.",
+            + "something with a client. Your grants stay on this Mac \u{2014} they "
+            + "never sync to your other devices. What a client reads goes wherever "
+            + "that client sends its work: for most clients, the company that runs "
+            + "its model.",
 
             "A client can only do what you could do yourself, through the same "
             + "acts. What it writes arrives as takes, notes and commits you can "
-            + "see, and every act it takes comes back out with \u{2325}\u{2318}Z. "
+            + "see, and every act it takes comes back out with \u{2325}\u{2318}Z "
+            + "for as long as this session is open. "
             + "The last lesson in this chapter shows how to watch it, answer it "
             + "and undo it.",
         ])
@@ -2594,8 +2597,8 @@ enum TutorialSeeder {
             + "Change\u{2026} and Revoke. Inside a note, while the door is open, "
             + "the same icon sits at the right end of the context bar above the "
             + "page, or a lock when the note is Private. Settings \u{25B8} MCP lists "
-            + "every client, everything shared, and, under Activity, every call a "
-            + "client made.",
+            + "every client, everything shared, and, under Activity, the calls "
+            + "clients made recently.",
 
             "When a client wants more than you've shared, nothing pops up and "
             + "nothing interrupts you. Its ask waits: a small mark appears beside "

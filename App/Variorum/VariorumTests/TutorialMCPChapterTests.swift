@@ -165,7 +165,10 @@ struct TutorialMCPChapterTests {
             #expect(text.contains(MCPPaneCopy.enableTitle), "the switch, by its own title")
             let chord = try #require(CapabilityRegistry.capability(.mcpSettings).shortcutLabel)
             #expect(text.contains("(\(chord) takes you there)"), "⌥⌘, by the registry's own label")
-            #expect(text.contains("comes back out with \u{2325}\u{2318}Z"))
+            // Stage B R1 B10: the undo stack is session-scoped (AppSpec §9 —
+            // in memory), so the promise says how long it holds — the guide's
+            // own words for it ("for as long as this session is open").
+            #expect(text.contains("comes back out with \u{2325}\u{2318}Z for as long as this session is open"))
 
             // THE TRUTH. "it stays shut until you open it" — the switch and the
             // open book are both OFF on a fresh store.
@@ -175,7 +178,17 @@ struct TutorialMCPChapterTests {
             #expect(!server && !openBook)
             // "grants never sync to your other devices" — the grants family is
             // outside the sync registry entirely.
-            #expect(text.contains("grants never sync to your other devices"))
+            // Stage B R1 B1 (MAJOR): only the GRANTS stay on this Mac. What a
+            // client reads leaves with the client (read_note, search and
+            // export_note hand text over the wire, and a client sends its work
+            // to its model's provider), so the lesson must never say that what
+            // you share stays here — and says plainly where it goes.
+            #expect(text.contains("Your grants stay on this Mac \u{2014} they never sync to your other devices"))
+            #expect(!text.localizedCaseInsensitiveContains("share stays"),
+                    "what you share leaves with the client — only the grants stay")
+            #expect(!text.localizedCaseInsensitiveContains("shared stays"))
+            #expect(text.contains("What a client reads goes wherever that client sends its work: for most "
+                                  + "clients, the company that runs its model."))
             for table in MCPGrantSchema.tables {
                 #expect(SyncSchema.table(named: table) == nil, "\(table) never syncs")
             }
@@ -409,7 +422,12 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("(through the Home wing grant, say)"))
             #expect(text.contains("with \(MCPShareCopy.change) and \(MCPShareCopy.revoke)"))
             #expect(text.contains("the right end of the context bar above the page, or a lock when the note is Private"))
-            #expect(text.contains("under \(MCPPaneCopy.activitySection), every call a client made"))
+            // Stage B R1 B10: Activity is coarse and capped (the store keeps the
+            // newest `mcpActivityCap` lines), so the lesson says "recently",
+            // never "every call".
+            #expect(text.contains("under \(MCPPaneCopy.activitySection), the calls clients made recently"))
+            #expect(!text.contains("every call"))
+            #expect(Operations.mcpActivityCap == 500, "the log is capped — 'recently' is the true word")
             // Answering — the ask's own buttons and Waiting's own name.
             #expect(text.contains("nothing pops up and nothing interrupts you"))
             #expect(text.contains("a small mark appears beside the place it names"))
