@@ -133,8 +133,8 @@ struct TakesBoardView: View {
     /// The columns this block's rail shows (VX-136 — the one brain the
     /// pagers ask too).
     private func railColumns(_ slot: Queries.RenderedBlock) -> Int {
-        model.gridCols(
-            takeCount: model.projection.fans[slot.blockID]?.count ?? 0, slotText: slot.text)
+        // VX-170: the takes the rail DRAWS (a filtered row's expand set).
+        model.gridCols(takeCount: model.bloomTakes(slot).count, slotText: slot.text)
     }
 
     /// The widest rail the composition must make room for: her choice where
@@ -145,7 +145,10 @@ struct TakesBoardView: View {
     private var marginRailWidth: CGFloat {
         if let gridColsChoice { return Self.railWidth(columns: min(max(gridColsChoice, 1), 2)) }
         let candidates = model.projection.slots.filter { slot in
-            model.followTheScroll ? slot.hasFan : model.expandedBlocks.contains(slot.blockID)
+            // VX-170: under the `show ▾` filter, exactly the rows that bloom.
+            model.lensFilter.filter != nil
+                ? model.isBloomed(slot)
+                : (model.followTheScroll ? slot.hasFan : model.expandedBlocks.contains(slot.blockID))
         }
         let columns = candidates.map(railColumns).max() ?? 1
         return Self.railWidth(columns: max(columns, 1))
@@ -224,6 +227,33 @@ struct TakesBoardView: View {
         // handle below is the one gesture that needs it, and any future
         // board drag inherits the fix by being born here.
         .coordinateSpace(.named(Self.surfaceSpace))
+        // VX-170 (R-VX170-4): the `show ▾` popover, seated under its door by
+        // the door's published anchor (the Bookcase's host overlay, one idiom),
+        // floating over the board without pushing a row. It lives like a MENU:
+        // a press anywhere else closes it (consumed, as a menu's is), and so do
+        // the board leaving, its window resigning key and the app resigning
+        // active (`MenuLifeReporter` — the order popover's MINOR-1 lesson).
+        .overlayPreferenceValue(MastheadDropperAnchors.self) { anchors in
+            GeometryReader { proxy in
+                ZStack(alignment: .topLeading) {
+                    if model.lensFilter.menuOpen {
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .onTapGesture { model.lensFilter.closeMenu() }
+                    }
+                    if model.lensFilter.menuOpen, let anchor = anchors[.takesShow] {
+                        let rect = proxy[anchor]
+                        TakesShowPopover(filter: model.lensFilter, tokens: tokens)
+                            // The rows' words start under the door's words (the
+                            // door's 5-pt label inset; the popover's 4 + row inset).
+                            .padding(.leading, max(0, rect.minX + 5 - (4 + MastheadPopover.rowInsets.leading)))
+                            .padding(.top, rect.maxY + MastheadPopover.gap)
+                    }
+                }
+                .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
+            }
+        }
+        .reportsMenuLifeEnds { model.lensFilter.closeMenu() }
         .debugProbeScope(session)
         .task { await model.start() }
         // 13b Stage 3 (3D — N1): the archived listing is its own read
@@ -270,9 +300,18 @@ struct TakesBoardView: View {
             if let attachToken {
                 session.commandRouter.detachTakesBoard(attachToken)
             }
+            model.lensFilter.closeMenu()
             model.teardown()
         }
-        .onExitCommand { model.closeAllFans() }  // ⎋ — the plain page (R87)
+        // ⎋ — the plain page (R87); with the `show ▾` popover open, ⎋ closes
+        // the popover first, as a menu's Escape does (VX-170).
+        .onExitCommand {
+            if model.lensFilter.menuOpen {
+                model.lensFilter.closeMenu()
+            } else {
+                model.closeAllFans()
+            }
+        }
         .sheet(item: $diffPresentation) { diff in
             DiffView(
                 leftTitle: diff.leftTitle, rightTitle: diff.rightTitle,
@@ -470,7 +509,46 @@ struct TakesBoardView: View {
     /// menu. Every door the old toolbar had is still one click away; the
     /// row just stops shouting over the page.
     private var header: some View {
-        HStack(spacing: 8) {
+        Group {
+            // VX-170 (R-VX170-4): lens-aware Takes' door LEADS the line — the
+            // first question this board answers is now "which takes?". It
+            // renders only on a note with a saved lens (P-VX168-U4-1).
+            //
+            // WIDTH-AWARE (the U4 walk's W-1, measured: in margin grid the
+            // line's fixed controls fill the 680-pt measure, and the door — the
+            // one item that may yield — truncated to NOTHING; the filter was on
+            // with no door to see or change it). One line while the door fits
+            // WHOLE beside the controls; otherwise the door and its chip take a
+            // line of their own above them (`MastheadRowTwo`'s one-or-two-lines
+            // rule, in its simplest form). The controls never move for it.
+            if model.lensFilter.offered {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 8) {
+                        TakesShowDoor(filter: model.lensFilter, tokens: tokens)
+                        headerControls
+                    }
+                    VStack(alignment: .leading, spacing: 4) {
+                        TakesShowDoor(filter: model.lensFilter, tokens: tokens)
+                        HStack(spacing: 8) { headerControls }
+                    }
+                }
+            } else {
+                HStack(spacing: 8) { headerControls }
+            }
+        }
+        // Batch 14 (her alignment ask): the control line shares the
+        // article's measure and left edge — one column, like the mockup.
+        .frame(maxWidth: articleMeasure, alignment: .leading)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 6)
+    }
+
+    /// The header line's controls (style, density, wash, expand/close, note
+    /// actions) — one copy, composed by `header` on one line or under the
+    /// `show ▾` door's own (VX-170, W-1).
+    @ViewBuilder
+    private var headerControls: some View {
             VoicedMenu(tokens: tokens, label: "style: \(styleName)") {
                 styleOption("Stack", .stack)
                 styleOption("Carousel", .carousel)
@@ -543,13 +621,6 @@ struct TakesBoardView: View {
             }
             .help("The rare whole-note acts: a rewrite pass, saving choices as a lens, "
                 + "duplicating as a version")
-        }
-        // Batch 14 (her alignment ask): the control line shares the
-        // article's measure and left edge — one column, like the mockup.
-        .frame(maxWidth: articleMeasure, alignment: .leading)
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 24)
-        .padding(.vertical, 6)
     }
 
     /// 18f batch 1 (U-4/U-16): the picked run's two roads. Its own function
@@ -659,8 +730,30 @@ struct TakesBoardView: View {
                     .padding(.vertical, 60)
                 }
                 LazyVStack(alignment: .leading, spacing: 6) {
+                    // VX-170 (R-VX170-2): a filter that names no block SAYS so,
+                    // in place, in one muted line — never an empty room, and the
+                    // note's map (the collapsed rows below) stays whole.
+                    if let zero = model.lensFilter.zeroLine {
+                        TakesShowCopy.text(zero, tokens: tokens)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.leading, Self.articleTextLeadingInset)
+                            .padding(.bottom, 6)
+                    }
                     ForEach(model.projection.slots, id: \.placementID) { slot in
-                        articleRow(slot: slot, commentRoom: commentRoom)
+                        // VX-170 (R-VX170-2): a block the `show ▾` filter does
+                        // not name is ONE line; every other row is the article's
+                        // own. Same identity either way (the placement), so the
+                        // landings, the scroll memory and the tour read through.
+                        Group {
+                            if model.rowShape(slot) == .collapsed {
+                                collapsedRow(slot: slot)
+                            } else {
+                                articleRow(slot: slot, commentRoom: commentRoom)
+                            }
+                        }
                             // 13s-b U2: step 7 points at the block she made a
                             // take of — both takes, side by side.
                             .tourAnchor(.takesBlock(slot.blockID), cornerRadius: 10)
@@ -875,10 +968,14 @@ struct TakesBoardView: View {
     /// the measure stable whenever the post has any fan at all (blooms
     /// come and go with scrolling; the prose must not wobble).
     private var railEngaged: Bool {
-        model.projection.fanStyle == .marginGrid
-            && (!model.expandedBlocks.isEmpty
-                || (model.followTheScroll
-                    && model.projection.slots.contains { $0.hasFan }))
+        guard model.projection.fanStyle == .marginGrid else { return false }
+        // VX-170: under the `show ▾` filter the rail is engaged exactly while
+        // some row blooms (a filtered row blooms without being "expanded").
+        if model.lensFilter.filter != nil {
+            return model.projection.slots.contains { model.isBloomed($0) }
+        }
+        return !model.expandedBlocks.isEmpty
+            || (model.followTheScroll && model.projection.slots.contains { $0.hasFan })
     }
 
     /// R9's measure: 680pt of prose; an ENGAGED margin rail widens the
@@ -961,6 +1058,35 @@ struct TakesBoardView: View {
             tokens: tokens, dark: scheme == .dark))
     }
 
+    /// **VX-170 (R-VX170-2) — a block the `show ▾` filter does not name, as ONE
+    /// LINE**: the shown take's first line (through the authority's overlay —
+    /// never staler than a buffer), muted, truncated at its tail; and the
+    /// article's own corner badge, the block's whole-fan door (her "the rest of
+    /// the fan stays behind its usual control") — a press opens the block whole.
+    /// Read-cheap by construction: no pane, no live editor (P3). The callout
+    /// frame and the comment note stand down on a line that is only the map.
+    private func collapsedRow(slot: Queries.RenderedBlock) -> some View {
+        let text = model.resolvedTake(column: mainColumn, slot: slot)?.text ?? slot.text ?? ""
+        let line = TakesShowCopy.firstLine(text)
+        return HStack(spacing: 0) {
+            Text(verbatim: line ?? tokens.chromeLabel(TakesShowCopy.emptyBlock))
+                .font(tokens.small)
+                .foregroundStyle(line == nil ? tokens.faint : tokens.muted)
+                .lineLimit(1)
+                .truncationMode(.tail)
+            Spacer(minLength: 0)
+        }
+        .padding(.leading, Self.articleTextLeadingInset)
+        .padding(.vertical, 1)
+        .frame(maxWidth: 680, alignment: .leading)
+        .overlay(alignment: .topTrailing) {
+            fanBadge(slot: slot, bloomed: false)
+                .offset(x: 40)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(line ?? TakesShowCopy.emptyBlock)
+    }
+
     /// The fan door as a CORNER BADGE (13b 3F — the D2 ledger row's second
     /// traced candidate: `fanToggleRow` stacked a button row above EVERY
     /// block, unfanned included, so the takes page at rest carried 3-4×
@@ -973,14 +1099,16 @@ struct TakesBoardView: View {
             model.toggleExpanded(slot.blockID)
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: slot.hasFan ? .primary : .quiet))
-        .help(slot.hasFan
+        // VX-170: under the `show ▾` filter the badge is the block's WHOLE-FAN
+        // door, and its words say what a press does there.
+        .help(model.lensFilter.badgeHelp(slot) ?? (slot.hasFan
               ? (bloomed
                  ? CapabilityRegistry.capability(.showTakes).menuTitle("Close this fan")
                  : "Open this fan (\(styleName))"
                    + (CapabilityRegistry.capability(.showTakes).shortcutLabel
                         .map { " — \($0)" } ?? ""))
               : CapabilityRegistry.capability(.showTakes)
-                  .menuTitle("Give this block its first alternative take"))
+                  .menuTitle("Give this block its first alternative take")))
     }
 
     /// The slot-split bloom's close door (its bloom REPLACES the cell, so
@@ -1121,7 +1249,9 @@ struct TakesBoardView: View {
     /// TakesArticleRenderTests's stack extension).
     private func stackBloom(slot: Queries.RenderedBlock) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            ForEach(model.projection.fans[slot.blockID] ?? [], id: \.id) { take in
+            // VX-170: the takes the bloom draws — a filtered row's expand set
+            // (R-VX170-3), the whole fan everywhere else.
+            ForEach(model.bloomTakes(slot), id: \.id) { take in
                 CollapsibleTakeCard(
                     take: take, text: model.liveText(take),
                     isChosen: take.id == slot.variantID,
@@ -1160,7 +1290,7 @@ struct TakesBoardView: View {
     ///
     /// **The rail strip is deliberately untouched** — she named carousel only.
     private func carouselBloom(slot: Queries.RenderedBlock) -> some View {
-        let takes = model.projection.fans[slot.blockID] ?? []
+        let takes = model.bloomTakes(slot)  // VX-170: the expand set when filtered
         return VStack(alignment: .leading, spacing: 0) {
             pagedTakesRow(
                 takes: takes, slot: slot, pageKey: slot.blockID,
@@ -1181,7 +1311,7 @@ struct TakesBoardView: View {
     /// **This supersedes S4-31b's one-fixed-strip-height rule FOR SLOT
     /// SPLIT ONLY**; carousel and the rail keep it byte-unchanged.
     private func slotSplitBloom(slot: Queries.RenderedBlock) -> some View {
-        let takes = model.projection.fans[slot.blockID] ?? []
+        let takes = model.bloomTakes(slot)  // VX-170: the expand set when filtered
         return VStack(alignment: .leading, spacing: 0) {
             pagedTakesRow(
                 takes: takes, slot: slot, pageKey: slot.blockID,
@@ -1252,22 +1382,43 @@ struct TakesBoardView: View {
     /// 4", two cards, half the fan unreachable). The carousel's discrete-
     /// paging grammar (whole cards, never halfway) is now the rail's too.
     private func marginRail(slot: Queries.RenderedBlock) -> some View {
-        let takes = model.projection.fans[slot.blockID] ?? []
+        // VX-170: the takes the bloom draws (a filtered row's expand set).
+        let takes = model.bloomTakes(slot)
+        let filtered: Bool = {
+            if case .filtered = model.rowShape(slot) { return true }
+            return false
+        }()
         // R24's one-card-high strip for short blocks when density is
         // 1-high; an explicit 2/3-high setting outranks it (batch 14).
         // ONE brain with the keyboard pager (13b 1b): the model answers.
         let rowsPerColumn = model.railRowsPerColumn(slotText: slot.text)
         return VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 6) {
-                Text("takes · \(takes.count)")
+                // VX-170: a filtered rail counts honestly — the takes it shows
+                // OF the fan (R-VX170-2's honest counts).
+                Text(filtered
+                     ? "takes · \(takes.count) of \(slot.activeVariantCount)"
+                     : "takes · \(takes.count)")
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                 // The engaged grid bloom's CLOSE door (the corner badge
-                // stands down here — this is where it would collide).
-                Button("✕") { model.toggleExpanded(slot.blockID) }
+                // stands down here — this is where it would collide). Under
+                // the `show ▾` filter it is the block's whole-fan door instead
+                // (VX-170): "all" on a filtered rail, ✕ back to the filter's
+                // shape on an opened one — the badge's own words either way.
+                //
+                // The U4 walk's W-2: on a filtered rail whose expand set IS the
+                // whole fan ("2 of 2"), "all" would reveal nothing — a door that
+                // changes nothing she can see is not drawn (P-2).
+                if !filtered || takes.count < slot.activeVariantCount {
+                    Button(filtered ? tokens.chromeLabel("all") : "✕") {
+                        model.toggleExpanded(slot.blockID)
+                    }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .help(CapabilityRegistry.capability(.showTakes)
-                        .menuTitle("Close this fan"))
+                    .help(model.lensFilter.badgeHelp(slot)
+                        ?? CapabilityRegistry.capability(.showTakes)
+                            .menuTitle("Close this fan"))
+                }
             }
             if takes.isEmpty {
                 fanFooter(slot: slot, fitsRail: true)
@@ -1673,6 +1824,12 @@ struct TakesBoardView: View {
     private func reorderDoors(
         take: Variant, slot: Queries.RenderedBlock, axis: Axis
     ) -> TakeChooseHeader.ReorderDoors? {
+        // VX-170 (PROVISIONAL P-VX168-U4-5): a filtered bloom shows a SUBSET of
+        // the fan, so its arrows would move a take past takes the filter hides —
+        // a press could change nothing she can see, and the first card's
+        // "earlier" would point at a hidden take. They stand down there; the
+        // whole fan (the badge's door) carries them as ever.
+        if case .filtered = model.rowShape(slot) { return nil }
         let fan = model.projection.fans[slot.blockID] ?? []
         guard fan.count > 1, let index = fan.firstIndex(where: { $0.id == take.id })
         else { return nil }

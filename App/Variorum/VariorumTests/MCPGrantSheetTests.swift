@@ -295,9 +295,15 @@ struct MCPGrantSheetTests {
         #expect(CapabilityRegistry.capability(.mcpRevokeGrant).unavailableNote
                 == "Sharing with AI is revoked in Settings \u{25B8} MCP.",
                 "R2-N2: the note's noun follows the \(MCPPaneCopy.sharedSection) section")
+        // VX-168 (A JUSTIFIED EDIT, the ritual): L1 made TRUE-ER by the setup
+        // key, never promising more (the brief §12's condition) — the binding
+        // said, and K2's recorded non-defeat said with it.
         #expect(MCPPaneCopy.clientBoundary
-                == "A client names itself when it connects. Variorum can't verify the name: a grant lets whatever connects under that name do what you granted.",
-                "L1 — the brief §12's words, verbatim")
+                == "A client names itself when it connects. Each setup copied here carries a key that binds "
+                + "that name to it, and a connection under the name without that key is refused. That tells "
+                + "two tools apart, not programs running as you: any of them can read the key in the "
+                + "client's settings.",
+                "L1 — true of the build, and no truer")
     }
 
     // MARK: - R2-3: inert, never called shared

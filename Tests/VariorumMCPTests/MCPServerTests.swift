@@ -86,17 +86,58 @@ final class ServerHarness: @unchecked Sendable {
         try? FileManager.default.removeItem(at: directory)
     }
 
-    /// A client connected over the socket and initialized as `name`.
+    /// VX-168: each name's own setup key — minted ONCE per name, exactly as
+    /// a Copy setup command would, and presented by every `connect(as:)`.
+    private let setupKeys = LockIsolated<[String: String]>([:])
+
+    /// The setup key `name` connects with (minted on first use).
+    func setupKey(for name: String) throws -> String {
+        if let key = setupKeys.value[name] { return key }
+        let key = try operations.mintMCPSetupKey()
+        setupKeys.withValue { $0[name] = key }
+        return key
+    }
+
+    /// A client connected over the socket and initialized as `name`,
+    /// presenting its OWN setup key (VX-168 — what a shim run from the
+    /// pane's setup does).
     func connect(as name: String) async throws -> (client: Client, fd: Int32) {
+        try await connect(as: name, presenting: try setupKey(for: name))
+    }
+
+    /// The same, presenting `key` as the shim's preamble — nil = a BARE shim.
+    func connect(as name: String, presenting key: String?) async throws -> (client: Client, fd: Int32) {
         guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
             throw HarnessFailure("could not connect")
         }
         openFDs.append(fd)
+        if let key { _ = MCPShim.writeAll(fd, MCPPreamble.line(key: key)) }
         let transport = StdioTransport(
             input: FileDescriptor(rawValue: fd), output: FileDescriptor(rawValue: fd))
         let client = Client(name: name, version: "1.0")
         _ = try await client.connect(transport: transport)
         return (client, fd)
+    }
+
+    /// VX-168: a RAW opening — the preamble when `key` is given, then an
+    /// `initialize` naming `name` with request id `id` — and the server's
+    /// first answer as JSON. The caller closes the descriptor.
+    func rawOpen(as name: String, presenting key: String?, id: Int = 1) throws -> (fd: Int32, answer: [String: Any]) {
+        guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
+            throw HarnessFailure("could not connect as \(name)")
+        }
+        if let key { _ = MCPShim.writeAll(fd, MCPPreamble.line(key: key)) }
+        let line = """
+            {"jsonrpc":"2.0","id":\(id),"method":"initialize","params":{"protocolVersion":"2025-06-18",\
+            "capabilities":{},"clientInfo":{"name":"\(name)","version":"1"}}}
+            """
+        _ = MCPShim.writeAll(fd, Data((line + "\n").utf8))
+        let answer = MCPShim.readFirstLine(fd, limit: 1 << 20)
+        guard let object = try JSONSerialization.jsonObject(with: answer) as? [String: Any] else {
+            close(fd)
+            throw HarnessFailure("\(name) got no JSON answer")
+        }
+        return (fd, object)
     }
 
     func hangUp(_ connection: (client: Client, fd: Int32)) async {
@@ -187,10 +228,12 @@ struct MCPServerTests {
                 == ["create_note", "import_document", "apply_tag", "create_book", "add_note_to_book", "create_section",
                     "save_version", "file_note_in_chapter", "set_book_rule"])
         // 13n-c U6 (justified edit, the ritual): edit gains the per-item
-        // note move across wings (VX-160, R-AIR-2).
+        // note move across wings (VX-160, R-AIR-2). VX-168 U2 (justified
+        // edit, the ritual): and the deliberate acts — VX-169's save_commit,
+        // VX-174's choose_take and adopt_lens (R-MERGE-1).
         #expect(Set(MCPToolCatalog.edit.map(\.name))
                 == ["edit_take", "divide_block", "merge_blocks", "move_block", "delete_block", "set_block_name",
-                    "put_back", "set_entry_date", "move_note_to_wing"])
+                    "put_back", "set_entry_date", "move_note_to_wing", "save_commit", "choose_take", "adopt_lens"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })
@@ -564,20 +607,11 @@ struct MCPServerTests {
     @Test func connectionsPastTheCapAreRefusedWithOneHonestErrorAndSlotsFree() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
+        // VX-168 (A JUSTIFIED EDIT, the ritual): every connection presents
+        // its own setup key now — a bare one would be refused at the door
+        // and never hold a slot.
         func rawInitialize(_ name: String) throws -> (fd: Int32, answer: [String: Any]) {
-            guard case .success(let fd) = MCPSocketRoad.connect(directory: h.directory) else {
-                throw HarnessFailure("could not connect as \(name)")
-            }
-            let line = """
-                {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18",\
-                "capabilities":{},"clientInfo":{"name":"\(name)","version":"1"}}}
-                """
-            _ = MCPShim.writeAll(fd, Data((line + "\n").utf8))
-            let answer = MCPShim.readFirstLine(fd, limit: 1 << 20)
-            guard let object = try JSONSerialization.jsonObject(with: answer) as? [String: Any] else {
-                throw HarnessFailure("\(name) got no JSON answer")
-            }
-            return (fd, object)
+            try h.rawOpen(as: name, presenting: try h.setupKey(for: name))
         }
         var held: [Int32] = []
         defer { for fd in held { close(fd) } }

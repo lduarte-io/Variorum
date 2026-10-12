@@ -30,15 +30,32 @@ import GRDB
 /// whole while no grant, client or activity row travels in it
 /// (`StorePlaintextExport` — A-5's exclusion: a grants list in an export
 /// serves nobody).
+///
+/// **VX-168 — THE PER-SETUP KEY** (`v1_26_mcp_setup_keys`; the VX-156 brief
+/// §12's K2, her R-VX168-1): the family's FIFTH table and one column, born
+/// LOCAL-ONLY on the same road — zero lockstep, the marker untouched (13).
+/// - `mcp_setup_key` — a key minted by a Copy setup command and not yet
+///   presented: its HASH and when it was minted. A key lives here until the
+///   first client name that presents it claims it (the row then leaves —
+///   the key moves to the client), or until newer copies push it past the
+///   cap.
+/// - `mcp_client.setup_key_hash` — the HASH of the key bound to the name;
+///   NULL = unbound (a client approved before VX-168, or released by Deny).
+/// Only hashes are stored: the key itself exists on the clipboard and in the
+/// client's own settings, never in the library.
 public enum MCPGrantSchema {
     /// The family's tables — the registration the completeness walk and the
     /// plaintext export consult.
-    public static let tables: Set<String> = ["mcp_client", "mcp_grant", "mcp_activity", "mcp_switch"]
+    public static let tables: Set<String> = [
+        "mcp_client", "mcp_grant", "mcp_activity", "mcp_switch", "mcp_setup_key",
+    ]
 
     /// The family in CHILD-FIRST order (`mcp_grant` references
     /// `mcp_client`) — the order a whole-family row strip must take with
     /// foreign keys on. Pinned to cover `tables` exactly.
-    public static let childFirstOrder: [String] = ["mcp_grant", "mcp_activity", "mcp_switch", "mcp_client"]
+    public static let childFirstOrder: [String] = [
+        "mcp_grant", "mcp_activity", "mcp_switch", "mcp_setup_key", "mcp_client",
+    ]
 
     /// `v1_24_mcp_grants`' DDL — FROZEN with the migration that runs it (a
     /// later shape change is a NEW migration, never an edit here).
@@ -87,5 +104,24 @@ public enum MCPGrantSchema {
           value      TEXT NOT NULL,
           updated_at TEXT NOT NULL
         );
+        """
+
+    /// `v1_26_mcp_setup_keys`' DDL (VX-168) — FROZEN with the migration that
+    /// runs it.
+    ///
+    /// Both hashes are hex SHA-256 digests of a 256-bit random key (the
+    /// derivation is `MCPSetupKeyRule.hash`). The unique index on the bound
+    /// hash is PARTIAL only because NULL (unbound) is the common case — a
+    /// key ties to ONE name, ever; like `uq_mcp_client_name` it needs no
+    /// live-row clause (these rows are never synced, never tombstoned).
+    static let v1_26DDL = """
+        ALTER TABLE mcp_client ADD COLUMN setup_key_hash TEXT;
+        CREATE UNIQUE INDEX uq_mcp_client_setup_key ON mcp_client(setup_key_hash)
+          WHERE setup_key_hash IS NOT NULL;
+        CREATE TABLE mcp_setup_key (
+          key_hash  TEXT PRIMARY KEY,
+          minted_at TEXT NOT NULL
+        );
+        CREATE INDEX idx_mcp_setup_key_minted ON mcp_setup_key(minted_at);
         """
 }

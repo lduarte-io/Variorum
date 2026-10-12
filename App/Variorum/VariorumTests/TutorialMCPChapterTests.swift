@@ -23,6 +23,7 @@ import Foundation
 import GRDB
 import Testing
 import VariorumCore
+import VariorumMCP
 @testable import Variorum
 
 // MARK: - The world
@@ -182,6 +183,11 @@ struct TutorialMCPChapterTests {
             // in memory), so the promise says how long it holds — the guide's
             // own words for it ("for as long as this session is open").
             #expect(text.contains("comes back out with \u{2325}\u{2318}Z for as long as this session is open"))
+            // VX-168 U2: a client's own commit (save_commit) is the one act
+            // ⌥⌘Z never walks back — the promise names the exception (its
+            // TRUTH is executed below).
+            #expect(text.contains("comes back out with \u{2325}\u{2318}Z for as long as this session is open, "
+                                  + "except a commit, which stays, as yours do."))
             // "The last lesson in this chapter shows how to watch it, answer it
             // and undo it" — true only while that lesson stays LAST (JOB 4
             // seats her "how to use it" before it — P-13nc-U6-9).
@@ -215,6 +221,26 @@ struct TutorialMCPChapterTests {
             for table in MCPGrantSchema.tables {
                 #expect(SyncSchema.table(named: table) == nil, "\(table) never syncs")
             }
+
+            // THE TRUTH (VX-168 U2). "except a commit, which stays, as yours
+            // do": a client's commit and her own register NO undo entry, and
+            // the commit is the only MCP act whose receipt makes no undo claim.
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let page = try note(ops, "a page a client checked")
+            let take = try #require(try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT chosen_variant_id FROM container_block WHERE container_id = ?", arguments: [page])
+            })
+            let depth = stack.depth
+            _ = try ops.commitTakeForClient(take, message: "checked", client: "a-client")
+            _ = try ops.commit(take, message: "mine")
+            #expect(stack.depth == depth, "a commit, theirs or yours, never joins the undo stack")
+            #expect(try await db.read { db in
+                try String.fetchAll(db, sql: "SELECT message FROM commit_point WHERE variant_id = ? ORDER BY created_at",
+                                    arguments: [take])
+            } == ["a-client: checked", "mine"], "both stay")
+            #expect(Operations.MCPWriteAct.allCases.filter { !$0.isUndoable } == [.commit])
         }
     }
 
@@ -230,7 +256,9 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("press \(CapabilityRegistry.capability(.mcpCopySetupCommand).verb)"))
             #expect(text.contains("a few lines of JSON"))
             #expect(MCPSetupClient.anyClient.text(shimPath: "/x", isDebugBuild: false).contains("\"mcpServers\""))
-            #expect(MCPSetupClient.claudeCode.text(shimPath: "/x", isDebugBuild: false).hasPrefix("claude mcp add"))
+            // VX-168 (A JUSTIFIED EDIT, the ritual): Claude Code's one line
+            // clears an earlier user-scope setup, then adds this one.
+            #expect(MCPSetupClient.claudeCode.text(shimPath: "/x", isDebugBuild: false).contains("; claude mcp add -s user"))
             #expect(MCPSetupClient.codex.text(shimPath: "/x", isDebugBuild: false).hasPrefix("codex mcp add"))
             #expect(text.contains("the door is a standard MCP server: one program inside the app"))
             #expect(MCPPaneCopy.stdioLine.contains("standard MCP server")
@@ -240,8 +268,18 @@ struct TutorialMCPChapterTests {
             for id in [CapabilityID.mcpApproveClient, .mcpDenyClient, .mcpChangeClientAccess, .mcpRevokeClient] {
                 #expect(text.contains(CapabilityRegistry.capability(id).verb), "\(id)'s verb")
             }
-            #expect(text.contains("Variorum can't check that name"))
-            #expect(MCPPaneCopy.clientBoundary.contains("can't verify the name"), "L1 says the same")
+            // VX-168 (A JUSTIFIED EDIT, the ritual): the limit the setup key
+            // falsified ("Variorum can't check that name") is true of the
+            // build now — and pinned against the rule it describes.
+            #expect(!text.contains("Variorum can't check that name"))
+            #expect(text.contains("a key that ties that name to it, so a second tool using the same name is turned away"))
+            #expect(text.contains("where any program running as you can read it"), "K2's non-defeat, said")
+            #expect(MCPPaneCopy.clientBoundary.contains("binds that name to it"), "L1 says the same")
+            #expect(MCPPaneCopy.clientBoundary.contains("any of them can read the key"))
+            let bound = MCPSetupKeyRule.Client(id: "c", boundHash: MCPSetupKeyRule.hash("vmk1_first"))
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound,
+                                           presentedHash: MCPSetupKeyRule.hash("vmk1_second"), standing: .unclaimed)
+                    == .refuse(.notThisNamesKey), "a second tool under the name IS turned away")
 
             // THE TRUTH. "it can reach nothing yet": a connection request is
             // refused by the one rule, even with the open book on.
@@ -283,6 +321,15 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("commits the take just before and just after"))
             let bracket = Operations.mcpEditCommitNames(client: "claude-code")
             #expect(bracket.before.hasPrefix("before") && bracket.after.hasPrefix("after"))
+            // VX-168 U2: Edit's step names the deliberate acts — choosing and
+            // committing a take, making a lens the note. THE TRUTH: every act
+            // the sentence names is an edit-rung tool in the catalog.
+            #expect(text.contains("Edit: it can also change, choose and commit takes, make a lens the note, "
+                                  + "and divide, merge, move or delete blocks."))
+            for tool in ["edit_take", "choose_take", "save_commit", "adopt_lens",
+                         "divide_block", "merge_blocks", "move_block", "delete_block"] {
+                #expect(MCPToolFacts.rung(of: tool) == .edit, "\(tool) is an edit-rung act")
+            }
             // Where, and how long — the durations by their own words.
             #expect(text.contains("one note; one book, with its notes now and any added to it later; or a whole wing"))
             // The wing and the open book never overclaim: the exceptions are

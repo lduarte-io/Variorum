@@ -32,6 +32,9 @@ private let editTools: Set<String> = [
     "edit_take", "divide_block", "merge_blocks", "move_block", "delete_block", "set_block_name",
     // U4 (justified edit, the ritual): the carriage's edit doors.
     "put_back", "set_entry_date",
+    // VX-168 U2 (justified edit, the ritual): the deliberate acts — VX-169's
+    // commit and VX-174's merge button — are edit's too.
+    "save_commit", "choose_take", "adopt_lens",
 ]
 
 @Suite("13n-b U3 — the MCP server's edit rung end to end", .serialized)
@@ -242,9 +245,14 @@ struct MCPEditServerTests {
             try h.operations.deleteBlock(gone.block.id)
             let deletedTake = try h.operations.branchVariant(two.block.id, from: two.variant.id)
             try h.operations.deleteVariant(deletedTake.id)
+            // VX-168 U2 (justified edit, the ritual): a lens of her note, for
+            // adopt_lens to aim at — and the snapshot reads the lens rows too
+            // (an adoption would mint one and move pointers).
+            let lens = try h.operations.createLens(post: note.id, name: "hers")
+            _ = try h.operations.setLensChoice(lens: lens.id, block: one.block.id, variant: branch.id)
             func snapshot() throws -> [String] {
                 try h.database.read { db in
-                    try ["variant", "container_block", "block", "commit_point"].flatMap { table in
+                    try ["variant", "container_block", "block", "commit_point", "lens", "lens_choice"].flatMap { table in
                         try Row.fetchAll(db, sql: "SELECT * FROM \(table) ORDER BY id").map(\.description)
                     } + (try String.fetchAll(db, sql: "SELECT COALESCE(entry_date, '-') FROM container ORDER BY id"))
                 }
@@ -264,6 +272,10 @@ struct MCPEditServerTests {
                 ("put_back", ["block_id": .string(gone.block.id)]),
                 ("put_back", ["take_id": .string(deletedTake.id)]),
                 ("set_entry_date", ["note_id": .string(note.id), "entry_date": .string("2019-03-04")]),
+                // VX-168 U2 (justified edit, the ritual): the deliberate acts.
+                ("save_commit", ["take_id": .string(one.variant.id), "message": .string("x")]),
+                ("choose_take", ["take_id": .string(branch.id)]),
+                ("adopt_lens", ["lens_id": .string(lens.id)]),
             ]
             #expect(Set(calls.map(\.0)) == editTools, "every edit door was tried")
             _ = try h.approve("claude-code", spec(.suggest, .wing, ""))

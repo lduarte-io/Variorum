@@ -76,11 +76,14 @@ struct MCPWriteTools: Sendable {
         case edit(EditJob)
         /// U4: the carriage's write tools (`MCPWriteTools+Carriage`).
         case carriage(CarriageJob)
+        /// VX-168 U2: the edit rung's deliberate acts (`MCPWriteTools+Deliberate`).
+        case deliberate(DeliberateJob)
 
         var tool: String {
             switch self {
             case .edit(let job): job.tool
             case .carriage(let job): job.tool
+            case .deliberate(let job): job.tool
             case .addTake: "add_take"
             case .addComment: "add_comment"
             case .saveLens: "save_lens"
@@ -120,8 +123,12 @@ struct MCPWriteTools: Sendable {
     private func parse(_ name: String, _ args: [String: Value]) throws -> Job {
         switch name {
         case MCPToolCatalog.addTake.name:
+            // VX-168 U3 (VX-171 — R-VX171-2, her word, door-only): a BLANK
+            // take is a legal take (the Mac's own blank-take gesture writes
+            // `''`), so the text may be empty — but it must be SAID: no text
+            // key at all is still no take.
             return .addTake(
-                blockID: try requiredString(args, "block_id"), text: try requiredText(args, "text"),
+                blockID: try requiredString(args, "block_id"), text: try presentString(args, "text"),
                 label: try optionalString(args, "label"))
         case MCPToolCatalog.addComment.name:
             return .addComment(blockID: try requiredString(args, "block_id"), text: try requiredText(args, "text"))
@@ -161,6 +168,7 @@ struct MCPWriteTools: Sendable {
         default:
             if let job = try parseEdit(name, args) { return .edit(job) }
             if let job = try parseCarriage(name, args) { return .carriage(job) }
+            if let job = try parseDeliberate(name, args) { return .deliberate(job) }
             throw ArgumentFailure(message: "Unknown tool: \(name).")
         }
     }
@@ -368,6 +376,8 @@ struct MCPWriteTools: Sendable {
             return try performEdit(editJob, job: job, ops: ops, clientName: clientName)
         case .carriage(let carriageJob):
             return try performCarriage(carriageJob, job: job, ops: ops, clientName: clientName)
+        case .deliberate(let deliberateJob):
+            return try performDeliberate(deliberateJob, job: job, ops: ops, clientName: clientName)
         }
     }
 
@@ -652,6 +662,15 @@ struct MCPWriteTools: Sendable {
 
     func requiredString(_ args: [String: Value], _ key: String) throws -> String {
         guard let value = try optionalString(args, key), !value.isEmpty else {
+            throw ArgumentFailure(message: "\(key) is required.")
+        }
+        return value
+    }
+
+    /// Required to be PRESENT, and may be empty (VX-168 U3 — `add_take`'s
+    /// blank take, R-VX171-2).
+    func presentString(_ args: [String: Value], _ key: String) throws -> String {
+        guard let value = try optionalString(args, key) else {
             throw ArgumentFailure(message: "\(key) is required.")
         }
         return value

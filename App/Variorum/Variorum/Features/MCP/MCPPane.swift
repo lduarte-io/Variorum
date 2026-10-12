@@ -157,8 +157,9 @@ struct MCPPane: View {
                     allRoad(door.snapshot.clientCount, shown: door.snapshot.clients.count, .clients)
                 }
                 // 13n-c U2 — L1 (the VX-156 brief §12; mockup §11): the A-4
-                // boundary, said where clients are listed.
-                quiet(MCPPaneCopy.clientBoundary)
+                // boundary, said where clients are listed (VX-168: true-er,
+                // and longer — its own line room).
+                quiet(MCPPaneCopy.clientBoundary, lines: MCPPaneCopy.clientBoundaryLines)
             }
             Section(MCPPaneCopy.sharedSection) {
                 if door.snapshot.sharedGroups.isEmpty {
@@ -320,11 +321,11 @@ struct MCPPane: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    private func quiet(_ text: String) -> some View {
+    private func quiet(_ text: String, lines: Int = 3) -> some View {
         Text(text)
             .font(.caption)
             .foregroundStyle(.secondary)
-            .lineLimit(3)
+            .lineLimit(lines)
             .fixedSize(horizontal: false, vertical: true)
     }
 
@@ -382,8 +383,9 @@ struct MCPWaitingRowView: View {
 /// client, all three in sight (a segmented row: a pop-up would hide two of
 /// the three, the discoverability her mandate asks for); the chosen client's
 /// one sentence; the ONE declared act, which copies the chosen text with its
-/// own receipt beneath it; and that text, verbatim and selectable. Its own
-/// view so the locked-session harness can draw it alone.
+/// own receipt beneath it; and that text, selectable — VX-168: its setup key
+/// shown masked (each copy mints a fresh one), with the one line saying so.
+/// Its own view so the locked-session harness can draw it alone.
 struct MCPSetupMenu: View {
     let door: MCPDoor
     @Binding var client: MCPSetupClient
@@ -415,7 +417,8 @@ struct MCPSetupMenu: View {
                 .fixedSize(horizontal: false, vertical: true)
             HStack {
                 Button(CapabilityRegistry.capability(.mcpCopySetupCommand).verb) {
-                    door.copySetupCommand(for: client)
+                    // VX-168: the copy mints its key first (a store write).
+                    Task { await door.copySetupCommand(for: client) }
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                 Spacer(minLength: 0)
@@ -426,7 +429,7 @@ struct MCPSetupMenu: View {
                     .lineLimit(4)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            // Shown WHOLE, verbatim and selectable (R-13nb-5) — a Debug
+            // Shown WHOLE and selectable (R-13nb-5; VX-168: the key masked) — a Debug
             // build's DerivedData path runs four lines at this width (the
             // walk's first finding: three lines clipped it); the JSON stanza
             // is eight lines before the path wraps.
@@ -434,6 +437,12 @@ struct MCPSetupMenu: View {
                 .font(.system(size: 11, design: .monospaced))
                 .textSelection(.enabled)
                 .lineLimit(16)
+                .fixedSize(horizontal: false, vertical: true)
+            // VX-168 (K2): the shown text masks the key; each copy mints one.
+            Text(MCPPaneCopy.keyLine)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
         }
         // A receipt names ONE client's next step — another choice clears it.

@@ -10,6 +10,7 @@
 
 import CoreGraphics
 import Observation
+import VariorumCore
 
 @MainActor
 @Observable
@@ -140,4 +141,15 @@ final class EditorRouter {
     /// and dies with a mode round trip. Session-only, never persisted, never
     /// synced.
     @ObservationIgnored var takesFind = TakesFindMemory()
+
+    /// **The Takes board's `show ▾` filter, per note** (VX-170 — her ruling
+    /// R-VX170-5: *"persistence is session-only, per note (the Takes-row-memory
+    /// precedent): survives mode flips within the session, resets on the next
+    /// open"*). It sits beside the article's memories for their reason: the
+    /// board's model is per-MOUNT and dies with a mode round trip, so a filter
+    /// that is to survive leaving the page can only live at the session.
+    /// Session-only, never persisted, never synced, never a setting — a
+    /// relaunch starts every note at "all takes". Only THE takes board reads or
+    /// writes it (`TakesLensFilterController.applies`).
+    @ObservationIgnored var takesShowFilters: [String: LensTakeFilter] = [:]
 }

@@ -161,6 +161,10 @@ struct TutorialMCPChapterCaptureTests {
                 // 2 — THE SETUP MENU (R-AIR-13), in the pane's grouped section:
                 // each client chosen, then a copy's receipt under the button.
                 let door = MCPDoor(serverAllowed: false)
+                // VX-168: a copy mints its key in the library — the door is
+                // attached so the copied face shows its receipt.
+                door.attach(session: session)
+                defer { door.detach() }
                 for client in MCPSetupClient.allCases {
                     await capture(
                         Form {
@@ -174,7 +178,7 @@ struct TutorialMCPChapterCaptureTests {
                 }
                 let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-u5-capture-\(UUID().uuidString)"))
                 defer { pasteboard.releaseGlobally() }
-                door.copySetupCommand(for: .codex, to: pasteboard)
+                await door.copySetupCommand(for: .codex, to: pasteboard)
                 await capture(
                     Form {
                         Section(MCPPaneCopy.connectSection) {

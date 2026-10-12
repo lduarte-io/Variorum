@@ -2,11 +2,13 @@
 //  main.swift
 //  variorum-mcp — THE MCP DOOR's stdio shim (13n-b U1, A-2)
 //
-//  A protocol-blind byte pump embedded at Variorum.app/Contents/MacOS/. An MCP
+//  An MCP-blind byte pump embedded at Variorum.app/Contents/MacOS/ (VX-168
+//  amended A-2's "protocol-blind": it still parses nothing of MCP). An MCP
 //  client (Claude Code, Claude Desktop, any stdio client) launches it; it
 //  finds ITS OWN app's socket from its own bundle — the Debug shim reaches the
-//  dev app, the Release shim the real one, by construction — and copies
-//  newline-delimited JSON-RPC both ways verbatim. When the socket cannot be
+//  dev app, the Release shim the real one, by construction — speaks the setup
+//  key its environment carries (`VARIORUM_MCP_KEY`) as ONE preamble line, and
+//  copies newline-delimited JSON-RPC both ways verbatim. When the socket cannot be
 //  reached it answers the client's first request with one honest JSON-RPC
 //  error ("Variorum must be open", or macOS blocking the connection) and
 //  exits. It holds no store, no key, no grant: the app is the one process that

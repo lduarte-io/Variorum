@@ -139,6 +139,10 @@ struct MCPWriteServerTests {
                 }
             }
             let chapter = try h.operations.createSection(in: book.id, name: "1")
+            // VX-168 U2 (justified edit, the ritual): a lens of hers that
+            // disagrees with her chosen pointer, for adopt_lens to aim at.
+            let hersLens = try h.operations.createLens(post: note.id, name: "her own way")
+            _ = try h.operations.setLensChoice(lens: hersLens.id, block: one.block.id, variant: branch.id)
             let before = try snapshot()
 
             let connection = try await h.connect(as: "claude-code")
@@ -192,6 +196,12 @@ struct MCPWriteServerTests {
             // grows with the catalog): the per-item move across wings, aimed
             // at her note, refusing at the rung.
             calls.append(("move_note_to_wing", ["note_id": .string(note.id), "wing_id": .string("")]))
+            // VX-168 U2 (justified edit, the ritual — the proof's completeness
+            // grows with the catalog): the edit rung's deliberate acts, aimed at
+            // her take, her chosen pointer and her lens, each refusing at the rung.
+            calls.append(("save_commit", ["take_id": .string(branch.id), "message": .string("x")]))
+            calls.append(("choose_take", ["take_id": .string(branch.id)]))
+            calls.append(("adopt_lens", ["lens_id": .string(hersLens.id)]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).

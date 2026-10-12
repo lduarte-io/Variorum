@@ -12,6 +12,10 @@ import VariorumMCPSocket
 /// bound by never sending a newline — the connection ends instead). The fd
 /// carries `SO_NOSIGPIPE` (set at accept): a client that vanishes mid-write
 /// costs this session an error, never the app its life.
+///
+/// VX-168: the session's handshake has already read the connection's opening
+/// (the preamble and the first frame — `MCPHandshake`); that frame is REPLAYED
+/// as the stream's first line, so the SDK reads the connection whole.
 actor MCPSocketTransport: Transport {
     /// The longest line accepted (a message bigger than this ends the
     /// connection). Generous for any document the read tools return in
@@ -23,9 +27,12 @@ actor MCPSocketTransport: Transport {
     private var isConnected = false
     private let stream: AsyncThrowingStream<Data, Swift.Error>
     private let continuation: AsyncThrowingStream<Data, Swift.Error>.Continuation
+    /// Lines read before the transport existed, yielded first (VX-168).
+    private let replay: [Data]
 
-    init(fd: Int32) {
+    init(fd: Int32, replay: [Data] = []) {
         self.fd = fd
+        self.replay = replay
         self.logger = Logger(label: "variorum.mcp.socket", factory: { _ in SwiftLogNoOpLogHandler() })
         var made: AsyncThrowingStream<Data, Swift.Error>.Continuation!
         self.stream = AsyncThrowingStream { made = $0 }
@@ -37,6 +44,7 @@ actor MCPSocketTransport: Transport {
         isConnected = true
         let fd = self.fd
         let continuation = self.continuation
+        for line in replay { continuation.yield(line) }
         let reader = Thread {
             MCPSocketTransport.readLines(fd: fd, cap: MCPSocketTransport.lineCap) { line in
                 continuation.yield(line)

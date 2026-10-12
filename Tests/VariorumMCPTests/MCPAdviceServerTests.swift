@@ -114,6 +114,9 @@ struct MCPAdviceServerTests {
             throw HarnessFailure("could not connect")
         }
         defer { close(fd) }
+        // VX-168 (A JUSTIFIED EDIT, the ritual): a new client arrives with
+        // its setup's key — a bare one is refused before `initialize`.
+        _ = MCPShim.writeAll(fd, MCPPreamble.line(key: try h.setupKey(for: "a-new-client")))
         let transport = StdioTransport(input: FileDescriptor(rawValue: fd), output: FileDescriptor(rawValue: fd))
         let client = Client(name: "a-new-client", version: "1.0")
         let result = try await client.connect(transport: transport)

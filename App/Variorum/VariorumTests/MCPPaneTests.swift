@@ -57,28 +57,39 @@ private func settle(_ condition: @MainActor () -> Bool) async throws -> Bool {
 struct MCPPaneTests {
     // MARK: - The setup command (R-13nb-5)
 
+    /// VX-168 (A JUSTIFIED EDIT, the ritual): the command carries the copy's
+    /// setup key and replaces an earlier user-scope registration first.
     @Test func theSetupCommandIsUserScopedAndQuotedForTheShell() {
         let plain = MCPPaneCopy.setupCommand(
-            shimPath: "/Applications/Variorum.app/Contents/MacOS/variorum-mcp", isDebugBuild: false)
-        #expect(plain == "claude mcp add -s user variorum -- \"/Applications/Variorum.app/Contents/MacOS/variorum-mcp\"")
+            shimPath: "/Applications/Variorum.app/Contents/MacOS/variorum-mcp", isDebugBuild: false, key: "vmk1_k")
+        #expect(plain == "claude mcp remove -s user variorum >/dev/null 2>&1; claude mcp add -s user variorum "
+                + "-e VARIORUM_MCP_KEY=vmk1_k -- \"/Applications/Variorum.app/Contents/MacOS/variorum-mcp\"")
         let awkward = MCPPaneCopy.setupCommand(shimPath: "/Users/a b/\"x\"/$y/`z`\\w", isDebugBuild: false)
         #expect(awkward.hasSuffix("-- \"/Users/a b/\\\"x\\\"/\\$y/\\`z\\`\\\\w\""),
                 "every character a POSIX double-quoted string would read is escaped")
         #expect(MCPPaneCopy.setupCommand(shimPath: "/x", isDebugBuild: true)
-                    .hasPrefix("claude mcp add -s user variorum-dev -- "),
+                    .hasPrefix("claude mcp remove -s user variorum-dev >/dev/null 2>&1; claude mcp add -s user variorum-dev "),
                 "a dev setup never replaces the real registration")
     }
 
-    @Test func theDoorCopiesTheCommandAndSaysSo() throws {
-        let door = MCPDoor(serverAllowed: false)
-        let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-mcp-pane-test-\(UUID().uuidString)"))
-        defer { pasteboard.releaseGlobally() }
-        door.copySetupCommand(to: pasteboard)
-        #expect(pasteboard.string(forType: .string) == door.setupCommand)
-        #expect(door.setupCommand.contains("variorum-dev"), "the test host is the Debug build")
-        #expect(door.setupCommand.contains("/Contents/MacOS/variorum-mcp"))
-        #expect(door.note == MCPDoor.Note(text: MCPPaneCopy.copiedReceipt, place: .connect),
-                "the receipt sits under its button, never below the fold")
+    /// VX-168 (A JUSTIFIED EDIT): the copy mints its key first, so the door
+    /// needs its library.
+    @Test func theDoorCopiesTheCommandAndSaysSo() async throws {
+        try await withDoorWorld { session, _ in
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-mcp-pane-test-\(UUID().uuidString)"))
+            defer { pasteboard.releaseGlobally() }
+            await door.copySetupCommand(to: pasteboard)
+            let copied = try #require(pasteboard.string(forType: .string))
+            #expect(copied.contains("variorum-dev"), "the test host is the Debug build")
+            #expect(copied.contains("/Contents/MacOS/variorum-mcp"))
+            #expect(copied.contains("VARIORUM_MCP_KEY=vmk1_"), "a fresh key rides the copy")
+            #expect(door.setupCommand.contains(MCPPaneCopy.shownKey), "the shown command masks it")
+            #expect(door.note == MCPDoor.Note(text: MCPPaneCopy.copiedReceipt, place: .connect),
+                    "the receipt sits under its button, never below the fold")
+        }
     }
 
     /// The walk's fourth finding (P-2): "while connected" only while the

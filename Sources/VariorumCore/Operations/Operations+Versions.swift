@@ -349,30 +349,7 @@ extension Operations {
     @discardableResult
     public func adoptLensPreservingChosen(_ lensID: String) throws -> Lens {
         let (preservation, moved): (Lens, [AdoptedPointer]) = try database.write { db in
-            let lens = try liveLens(db, lensID)
-            let post = try livePost(db, lens.containerId)
-            try ensureUnlocked(post)
-            let now = date.now
-            let preservation = Lens(
-                id: newID(), ownerId: currentOwnerID(), containerId: post.id,
-                name: try preservationLensName(db, postID: post.id, now: now),
-                createdAt: now, updatedAt: now)
-            try preservation.insert(db)
-            for placement in try ContainerBlock
-                .filter(Column("container_id") == post.id && Column("deleted_at") == nil)
-                .order(Column("position"), Column("id"))
-                .fetchAll(db) {
-                guard let block = try? liveBlock(db, placement.blockId),
-                      let shown = try? renderedVariant(db, block: block, placement: placement)
-                else { continue }  // gap slots preserve nothing
-                try LensChoice(
-                    id: newID(), lensId: preservation.id, blockId: block.id,
-                    variantId: shown.id, createdAt: now, updatedAt: now)
-                    .insert(db)
-            }
-            let picks = try Queries.effectiveLensSelection(db, lens: lensID)
-            let moved = try applyAdoptedPicks(db, postID: post.id, picks: picks)
-            return (preservation, moved)
+            try adoptSwapRows(db, lensID: lensID)
         }
         if !moved.isEmpty {
             let halves = adoptUndoHalves(moved)
@@ -538,6 +515,39 @@ extension Operations {
         return picks
     }
 
+    /// **THE ADOPT-SWAP's ROWS** (her "✓ Make this the note" on a lens column
+    /// — R89/R92: the outgoing chosen preserved as a full-fidelity lens, then
+    /// every effective pick → chosen), inside the caller's transaction:
+    /// `adoptLensPreservingChosen`'s body, extracted byte-for-byte (VX-168 U2)
+    /// so the MCP door's `adopt_lens` lands HER door's rows through the same
+    /// brain. Returns the preservation lens and the pointers that moved.
+    func adoptSwapRows(_ db: Database, lensID: String) throws -> (Lens, [AdoptedPointer]) {
+        let lens = try liveLens(db, lensID)
+        let post = try livePost(db, lens.containerId)
+        try ensureUnlocked(post)
+        let now = date.now
+        let preservation = Lens(
+            id: newID(), ownerId: currentOwnerID(), containerId: post.id,
+            name: try preservationLensName(db, postID: post.id, now: now),
+            createdAt: now, updatedAt: now)
+        try preservation.insert(db)
+        for placement in try ContainerBlock
+            .filter(Column("container_id") == post.id && Column("deleted_at") == nil)
+            .order(Column("position"), Column("id"))
+            .fetchAll(db) {
+            guard let block = try? liveBlock(db, placement.blockId),
+                  let shown = try? renderedVariant(db, block: block, placement: placement)
+            else { continue }  // gap slots preserve nothing
+            try LensChoice(
+                id: newID(), lensId: preservation.id, blockId: block.id,
+                variantId: shown.id, createdAt: now, updatedAt: now)
+                .insert(db)
+        }
+        let picks = try Queries.effectiveLensSelection(db, lens: lensID)
+        let moved = try applyAdoptedPicks(db, postID: post.id, picks: picks)
+        return (preservation, moved)
+    }
+
     /// The adopt loop both adopt doors share: every pick → its slot's
     /// chosen (exactly `chooseVariant`'s row transition), returning the
     /// pre-image pointers for the compound undo.
@@ -574,7 +584,7 @@ extension Operations {
     /// restores `previous`, `redo` restores `adopted` — both through the
     /// SAME `revertChosenPointers` body, so there is exactly one pointer-
     /// restore brain.
-    private func adoptUndoHalves(
+    func adoptUndoHalves(
         _ moved: [AdoptedPointer]
     ) -> (previous: [(placementID: String, chosen: String?)],
           adopted: [(placementID: String, chosen: String?)]) {
@@ -846,19 +856,26 @@ extension Operations {
     /// sealed post throws (unlock, retry).
     func revertChosenPointers(_ preImages: [(placementID: String, chosen: String?)]) throws {
         try database.write { db in
-            let now = date.now
-            for preImage in preImages {
-                guard var placement = try ContainerBlock.fetchOne(db, key: preImage.placementID),
-                      placement.deletedAt == nil
-                else { continue }
-                try ensureUnlocked(try liveContainer(db, placement.containerId))
-                // A pre-image pointing at a variant that has since died is
-                // healed by the read-time fallback; restore it anyway —
-                // exact-row inverse, the fallback covers rendering.
-                placement.chosenVariantId = preImage.chosen
-                placement.updatedAt = now
-                try placement.update(db)
-            }
+            try restoreChosenPointers(db, preImages)
+        }
+    }
+
+    /// `revertChosenPointers`' body inside the caller's transaction (VX-168
+    /// U2: the MCP door's lens adoption restores its pointers AND its
+    /// preservation lens in ONE transaction — the same pointer brain).
+    func restoreChosenPointers(_ db: Database, _ preImages: [(placementID: String, chosen: String?)]) throws {
+        let now = date.now
+        for preImage in preImages {
+            guard var placement = try ContainerBlock.fetchOne(db, key: preImage.placementID),
+                  placement.deletedAt == nil
+            else { continue }
+            try ensureUnlocked(try liveContainer(db, placement.containerId))
+            // A pre-image pointing at a variant that has since died is
+            // healed by the read-time fallback; restore it anyway —
+            // exact-row inverse, the fallback covers rendering.
+            placement.chosenVariantId = preImage.chosen
+            placement.updatedAt = now
+            try placement.update(db)
         }
     }
 }

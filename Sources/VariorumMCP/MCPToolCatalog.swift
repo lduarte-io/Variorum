@@ -92,6 +92,9 @@ enum MCPToolCatalog {
         putBack, setEntryDate,
         // 13n-c U6 — the per-item note move across wings (VX-160, R-AIR-2).
         moveNoteToWing,
+        // VX-168 U2 — the deliberate acts: VX-169's commit (her settlement:
+        // edit) and VX-174's merge button (R-MERGE-1: edit).
+        saveCommit, chooseTake, adoptLens,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -180,7 +183,10 @@ enum MCPToolCatalog {
             (each block's lineage — what it was divided, merged or copied from or into — and each \
             take's parent_take_id; a relative outside what you can read shows only \
             beyond_grant); with_lenses: true (its saved lenses and the take each shows per block); \
-            with_versions: true (its saved versions — version_id reads one, in either form).
+            with_versions: true (its saved versions — version_id reads one, in either form). \
+            lens_id reads the note through one of its lenses, in either form: each block shows the \
+            take the lens shows there, else its chosen take; with with_ids each block says which \
+            (via: "lens" or "chosen"), and chosen still marks the note's own chosen take.
             """,
         inputSchema: .object([
             "type": "object",
@@ -204,6 +210,8 @@ enum MCPToolCatalog {
                                           "description": "Add the note's saved versions (implies with_ids)."]),
                 "version_id": .object(["type": "string",
                                        "description": "Read this saved version of the note instead."]),
+                "lens_id": .object(["type": "string",
+                                    "description": "Read the note through this lens of it (with_lenses lists them)."]),
             ]),
             "required": .array(["note_id"]),
             "additionalProperties": false,
@@ -272,7 +280,10 @@ enum MCPToolCatalog {
             "type": "object",
             "properties": .object([
                 "block_id": .object(["type": "string", "description": "The block to add a take to."]),
-                "text": .object(["type": "string", "description": "The take's text."]),
+                "text": .object(["type": "string", "description": """
+                    The take's text. An empty text adds a blank take: a lens that shows it shows the \
+                    block as an empty line.
+                    """]),
                 "label": .object(["type": "string", "description": "A short label, e.g. \"english\"."]),
             ]),
             "required": .array(["block_id", "text"]),
@@ -348,7 +359,8 @@ enum MCPToolCatalog {
                                 "items": .object([
                                     "type": "object",
                                     "properties": .object([
-                                        "text": .object(["type": "string"]),
+                                        "text": .object(["type": "string",
+                                                         "description": "The take's text (empty: a blank take)."]),
                                         "label": .object(["type": "string"]),
                                     ]),
                                     "required": .array(["text"]),
@@ -616,6 +628,75 @@ enum MCPToolCatalog {
                 "wing_id": .object(["type": "string", "description": "The wing it goes to (\"\" is Home)."]),
             ]),
             "required": .array(["note_id", "wing_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-168 U2 — the deliberate acts (VX-169 save_commit; VX-174 the merge button)
+
+    /// VX-169 (her settlement, the 2026-10-12 pre-run sitting): a client
+    /// commits a take with its own message — EDIT ("whoever may edit a take
+    /// may commit it"), `kind='manual'`, the name prefixed. Append-only: the
+    /// one write the author's undo never walks back, as their own commits.
+    static let saveCommit = MCPToolDeclaration(
+        name: "save_commit", rung: .edit, title: "Commit a take",
+        description: """
+            Commit one take: save its text as it stands now as a commit (a saved moment the author \
+            can compare against and come back to), with your message. The commit is stored as \
+            "<your name>: <message>", so the author's history says who saved it. The take's text \
+            does not change. A commit is kept for good: the author's undo does not remove it, as \
+            it does not remove their own. Get take ids from read_note with with_ids: true. \
+            Returns JSON with the commit_id.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take to commit."]),
+                "message": .object(["type": "string", "description": "What this moment is, e.g. \"fact-checked\"."]),
+            ]),
+            "required": .array(["take_id", "message"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-174 (R-MERGE-1): her ✓ on a take — the pointer moves, no text is
+    /// written.
+    static let chooseTake = MCPToolDeclaration(
+        name: "choose_take", rung: .edit, title: "Choose a take",
+        description: """
+            Choose one take of a block, so the note shows that take there — as the author does \
+            when choosing between takes. No text changes: the take the block showed before stays \
+            among its takes, and the choice is one undo for the author. Choosing the take already \
+            shown changes nothing. Get take ids from read_note with with_ids: true. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take the block should show."]),
+            ]),
+            "required": .array(["take_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-174 (R-MERGE-1): her "✓ Make this the note" on a lens column —
+    /// adopting SWAPS, never destroys (R92): what the note showed is kept as
+    /// a lens.
+    static let adoptLens = MCPToolDeclaration(
+        name: "adopt_lens", rung: .edit, title: "Make a lens the note",
+        description: """
+            Make a saved lens the note: every block where the lens shows a take now shows that \
+            take, as the author's own "Make this the note" does. What the note showed before is \
+            kept as a new lens named "chosen until <date>", so nothing is lost, and the whole \
+            change is one undo for the author. A lens that already agrees with the note changes \
+            nothing. Get lens ids from read_note with with_lenses: true. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "lens_id": .object(["type": "string", "description": "The lens to make the note."]),
+            ]),
+            "required": .array(["lens_id"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)

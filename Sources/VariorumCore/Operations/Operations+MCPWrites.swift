@@ -52,8 +52,22 @@ extension Operations {
         // 13n-c U6 — the per-item note move across wings (VX-160; brief §10's
         // U1: "Undo claude-code's wing move").
         case wingMove = "wing move"
+        // VX-168 U2 — the edit rung's deliberate acts: VX-169's `save_commit`
+        // (a commit — append-only, I5: it registers NO undo entry, exactly as
+        // her own ⌘S registers none — R-13n-6's "exactly as her gestures do")
+        // and VX-174's `choose_take` / `adopt_lens` (R-MERGE-1: pointer moves,
+        // ONE undo entry each). Words P-13nb-U2-5's family, 13s-a sweepable.
+        case commit
+        case choice = "take choice"
+        case lensAdoption = "lens adoption"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
+
+        /// **Does ⌥⌘Z walk this act back?** Every act but a commit: a commit is
+        /// append-only (I5), `commit_point` has no tombstone to flip, and her
+        /// own commit is outside structural undo (AppSpec §9) — so a receipt
+        /// may say "⌥⌘Z undoes" only over a run that holds an act it undoes.
+        public var isUndoable: Bool { self != .commit }
     }
 
     /// Where a minted note lands: inside a book (a member at its end, in the
@@ -226,36 +240,44 @@ extension Operations {
     /// Tombstones the lens (its live choices cascade on the same stamp);
     /// returns the stamp written, nil when it was already gone.
     func revertSavedLens(_ lensID: String) throws -> String? {
-        try database.write { db in
-            guard var lens = try Lens.fetchOne(db, key: lensID), lens.deletedAt == nil else { return nil }
-            let now = date.now
-            lens.deletedAt = now
-            lens.updatedAt = now
-            try lens.update(db)
-            return DateFormatter.variorumISO8601.string(from: now)
-        }
+        try database.write { db in try tombstoneSavedLens(db, lensID) }
     }
 
     /// The lens back, with exactly the choices that died on the undo's stamp.
     func reapplySavedLens(_ lensID: String, undoneOn stamp: String?) throws {
         guard let stamp else { return }
-        try database.write { db in
-            guard var lens = try Lens.fetchOne(db, key: lensID),
-                  let deletedAt = lens.deletedAt,
-                  DateFormatter.variorumISO8601.string(from: deletedAt) == stamp,
-                  try Container.fetchOne(db, key: lens.containerId)?.deletedAt == nil
-            else { return }
-            let now = DateFormatter.variorumISO8601.string(from: date.now)
-            lens.deletedAt = nil
-            lens.updatedAt = date.now
-            try lens.update(db)
-            try db.execute(
-                sql: """
-                    UPDATE lens_choice SET deleted_at = NULL, updated_at = ?
-                    WHERE lens_id = ? AND deleted_at = ?
-                    """,
-                arguments: [now, lensID, stamp])
-        }
+        try database.write { db in try reviveSavedLens(db, lensID, undoneOn: stamp) }
+    }
+
+    /// `revertSavedLens`' body inside the caller's transaction (VX-168 U2 —
+    /// the lens adoption's undo tombstones its preservation lens in the SAME
+    /// transaction as its pointers).
+    func tombstoneSavedLens(_ db: Database, _ lensID: String) throws -> String? {
+        guard var lens = try Lens.fetchOne(db, key: lensID), lens.deletedAt == nil else { return nil }
+        let now = date.now
+        lens.deletedAt = now
+        lens.updatedAt = now
+        try lens.update(db)
+        return DateFormatter.variorumISO8601.string(from: now)
+    }
+
+    /// `reapplySavedLens`' body inside the caller's transaction (VX-168 U2).
+    func reviveSavedLens(_ db: Database, _ lensID: String, undoneOn stamp: String) throws {
+        guard var lens = try Lens.fetchOne(db, key: lensID),
+              let deletedAt = lens.deletedAt,
+              DateFormatter.variorumISO8601.string(from: deletedAt) == stamp,
+              try Container.fetchOne(db, key: lens.containerId)?.deletedAt == nil
+        else { return }
+        let now = DateFormatter.variorumISO8601.string(from: date.now)
+        lens.deletedAt = nil
+        lens.updatedAt = date.now
+        try lens.update(db)
+        try db.execute(
+            sql: """
+                UPDATE lens_choice SET deleted_at = NULL, updated_at = ?
+                WHERE lens_id = ? AND deleted_at = ?
+                """,
+            arguments: [now, lensID, stamp])
     }
 
     // MARK: - WRITE NEW: a note (plain prose, or one Level 0 document)
@@ -314,6 +336,13 @@ extension Operations {
     /// what the text format cannot carry set in the same transaction: each
     /// block's NAME and the note's ENTRY DATE. Lands per `destination`
     /// exactly as `createNote`; ONE undo entry (the minted note, whole).
+    ///
+    /// VX-168 U3 (VX-171 — R-VX171-2, her word, door-only): a take whose text
+    /// is EMPTY mints a BLANK take at its place in the fan — a legal take (the
+    /// Mac's own blank-take gesture), the one a lens points at to show the
+    /// block as an empty line. Until this unit it was silently DROPPED (the
+    /// format's rule, P-13nb-U3-9's "empty-text takes drop" — superseded at
+    /// this door only; the file doors keep it).
     @discardableResult
     public func createStructuredNote(
         title: String?, entryDate: String?, blocks: [MCPNoteBlock],
@@ -325,7 +354,9 @@ extension Operations {
             document: VariorumDocument.Document(
                 title: (trimmed?.isEmpty ?? true) ? nil : trimmed, tagPaths: [],
                 blocks: blocks.map { VariorumDocument.Block(text: $0.text, alternates: $0.takes) }))
-        return try mintNoteEntry(undoLabel: undoLabel) { _ in document } destination: { destination } finish: { db, minted in
+        return try mintNoteEntry(
+            undoLabel: undoLabel, keepingBlankTakes: true
+        ) { _ in document } destination: { destination } finish: { db, minted in
             for (blockID, block) in zip(minted.blockIDs, blocks) {
                 let name = block.name?.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard let name, !name.isEmpty else { continue }
@@ -363,6 +394,7 @@ extension Operations {
     /// as it will stand).
     private func mintNoteEntry(
         undoLabel: String,
+        keepingBlankTakes: Bool = false,
         document: (Database) throws -> VariorumDocument.NamedDocument,
         destination: () -> MCPNoteDestination,
         finish: (Database, MintedDocument) throws -> Void = { _, _ in }
@@ -383,7 +415,7 @@ extension Operations {
                 wing = id
             }
             let now = date.now
-            let minted = try mintDocument(db, named, wingId: wing, now: now)
+            let minted = try mintDocument(db, named, wingId: wing, now: now, keepingBlankTakes: keepingBlankTakes)
             try finish(db, minted)
             if let bookID {
                 // The hand-add's ONE choke point (its capacity and ownership

@@ -246,7 +246,8 @@ final class MCPDoor {
     }
 
     /// 13n-c U5 (R-AIR-13): the setup menu's chosen client's text — the
-    /// command or the stanza the pane shows verbatim and copies.
+    /// command or the stanza the pane shows. VX-168 (K2): SHOWN with the key
+    /// masked (`MCPPaneCopy.shownKey`); the copy carries a freshly minted one.
     func setupText(for client: MCPSetupClient) -> String {
         client.text(shimPath: Self.shimPath, isDebugBuild: Self.isDebugBuild)
     }
@@ -469,12 +470,30 @@ final class MCPDoor {
 
     /// Copy setup command (R-13nb-5): the command on the clipboard, the
     /// receipt in the pane's caption. 13n-c U5 (R-AIR-13): the setup menu's
-    /// CHOSEN client — Claude Code (the default, its text unchanged), Codex,
-    /// or any MCP client's JSON — each with its own receipt.
-    func copySetupCommand(for client: MCPSetupClient = .claudeCode, to pasteboard: NSPasteboard = .general) {
-        pasteboard.clearContents()
-        pasteboard.setString(setupText(for: client), forType: .string)
-        note = Note(text: client.copiedReceipt, place: .connect)
+    /// CHOSEN client — Claude Code (the default), Codex, or any MCP client's
+    /// JSON — each with its own receipt.
+    ///
+    /// **VX-168 (K2 — the mint moved to copy time): every copy MINTS a fresh
+    /// setup key** (`mintMCPSetupKey` — its hash kept in the grants store,
+    /// off the main thread through the session's runner, P2) and copies the
+    /// chosen setup CARRYING it. The clipboard is written only once the key
+    /// is kept: a setup whose key the library never kept would only be
+    /// refused. No library open → nowhere to keep a key → said, nothing copied.
+    func copySetupCommand(for client: MCPSetupClient = .claudeCode, to pasteboard: NSPasteboard = .general) async {
+        guard let runner else {
+            note = Note(text: MCPPaneCopy.setupNeedsLibrary, place: .connect)
+            return
+        }
+        clearConnectNote()
+        do {
+            let key = try await runner.run { try $0.mintMCPSetupKey() }
+            pasteboard.clearContents()
+            pasteboard.setString(
+                client.text(shimPath: Self.shimPath, isDebugBuild: Self.isDebugBuild, key: key), forType: .string)
+            note = Note(text: client.copiedReceipt, place: .connect)
+        } catch {
+            note = Note(text: MCPPaneCopy.refusal(error), place: .connect)
+        }
     }
 
     /// 13n-c U5: a copy receipt names ONE client's next step, so choosing

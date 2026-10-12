@@ -189,13 +189,16 @@ public final class MCPServerHost: @unchecked Sendable {
     /// honesty on the wire). A short-lived helper thread with a bounded
     /// receive timeout reads that first line, so a silent client can never
     /// stall the accept loop and holds at most one thread for ~2 s.
+    /// VX-168: the opening read is the handshake's — past a setup key's
+    /// preamble to the `initialize` frame — so the refusal still answers the
+    /// request by its id (a keyed shim's first line is the preamble).
     private func refuseOverCap(_ fd: Int32) {
         let thread = Thread {
             var timeout = timeval(tv_sec: 2, tv_usec: 0)
             _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
-            let line = MCPShim.readFirstLine(fd, limit: 1 << 20)
+            let frame = MCPHandshake.readOpening(fd: fd)?.firstFrame ?? Data()
             _ = MCPSocketTransport.writeAll(
-                fd, MCPShim.refusalResponse(toFirstLine: line, message: Self.overCapMessage))
+                fd, MCPShim.refusalResponse(toFirstLine: frame, message: Self.overCapMessage))
             close(fd)
         }
         thread.name = "variorum.mcp.overcap"

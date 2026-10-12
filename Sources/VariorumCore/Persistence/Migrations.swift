@@ -937,6 +937,25 @@ extension AppDatabase {
             try db.execute(sql: "ALTER TABLE container ADD COLUMN ai_private_at TEXT")
             try db.execute(sql: "ALTER TABLE reading ADD COLUMN ai_private_at TEXT")
         }
+        // **VX-168 — THE PER-SETUP KEY** (the VX-156 brief §12's K2; her
+        // kickoff ruling R-VX168-1, the run record
+        // `notes/plans/fixes/vx-168-mcp-client-secret.md`): the grants
+        // family's `mcp_setup_key` (a copied setup's key, by hash, until a
+        // client name presents it) and `mcp_client.setup_key_hash` (the key
+        // bound to the name). `Persistence/MCPGrantSchema.swift` carries the
+        // shape.
+        //
+        // **NOT a SyncSpec §12 lockstep event** — v1_24's road exactly:
+        // nothing here carries `sync_version` or an outbox trigger, nothing is
+        // pushed, no mirror changes, the marker stays 13. The new table joins
+        // `MCPGrantSchema.tables` (the completeness walk subtracts it; the
+        // plaintext export keeps it EMPTY). No backfill: every client approved
+        // before this migration arrives UNBOUND — her R-VX168-1: such a name
+        // binds the first fresh setup presented under it, and a name arriving
+        // without its key refuses (no grandfathering).
+        migrator.registerMigration("v1_26_mcp_setup_keys") { db in
+            try db.execute(sql: MCPGrantSchema.v1_26DDL)
+        }
         return migrator
     }
 }

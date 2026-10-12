@@ -205,8 +205,15 @@ extension Operations {
     /// header-only file, or a blank file inside a folder) — mints an EMPTY
     /// note: ⌘N's own shape (`createPost` — a post with no block yet), named
     /// by its header else its file, its tags applied as ever.
+    ///
+    /// `keepingBlankTakes` (VX-168 U3 — R-VX171-2, her word, door-only): the
+    /// structured `create_note`'s takes mint a BLANK take (`""`, the Mac's
+    /// own blank-take gesture) instead of dropping it. Every FILE door keeps
+    /// the default — the format cannot carry a blank take (its sections skip
+    /// them), so one format keeps one meaning (R-13nb-11 G-2).
     func mintDocument(
-        _ db: Database, _ named: VariorumDocument.NamedDocument, wingId: String, now: Date
+        _ db: Database, _ named: VariorumDocument.NamedDocument, wingId: String, now: Date,
+        keepingBlankTakes: Bool = false
     ) throws -> MintedDocument {
         let document = named.document
         let fallback = named.fallbackTitle.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -218,7 +225,7 @@ extension Operations {
         var renderedLength = 0
         var position: String?
         for block in document.blocks {
-            let takes = block.alternates.filter { !$0.text.isEmpty }
+            let takes = keepingBlankTakes ? block.alternates : block.alternates.filter { !$0.text.isEmpty }
             let slot = FractionalIndex.between(position, nil)
             position = slot
             // The in-place text is take 0 — chosen AND default; the

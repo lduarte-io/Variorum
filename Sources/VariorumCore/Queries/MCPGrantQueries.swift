@@ -15,11 +15,15 @@ public struct MCPClient: Equatable, Sendable, Identifiable {
     public let firstSeenAt: String
     public let lastSeenAt: String
     public let decidedAt: String?
+    /// VX-168: a setup key is bound to the name (`mcp_client.setup_key_hash`
+    /// is set). The faces read only this fact — the hash never leaves the
+    /// grants store's own reads.
+    public let isSetupBound: Bool
 
     /// 13n-c U3: public, so the app's pins can name a client.
     public init(
         id: String, name: String, version: String?, state: MCPGrantRule.ClientState,
-        firstSeenAt: String, lastSeenAt: String, decidedAt: String?
+        firstSeenAt: String, lastSeenAt: String, decidedAt: String?, isSetupBound: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -28,6 +32,7 @@ public struct MCPClient: Equatable, Sendable, Identifiable {
         self.firstSeenAt = firstSeenAt
         self.lastSeenAt = lastSeenAt
         self.decidedAt = decidedAt
+        self.isSetupBound = isSetupBound
     }
 }
 
@@ -195,7 +200,7 @@ extension Queries {
         return MCPClient(
             id: row["id"], name: row["name"], version: row["version"], state: state,
             firstSeenAt: row["first_seen_at"], lastSeenAt: row["last_seen_at"],
-            decidedAt: row["decided_at"])
+            decidedAt: row["decided_at"], isSetupBound: (row["setup_key_hash"] as String?) != nil)
     }
 
     // MARK: - Grants
@@ -745,5 +750,33 @@ extension Queries {
             }
         }
         return reachable
+    }
+}
+
+// MARK: - The setup keys (VX-168 — K2, R-VX168-1; moved here from
+// Operations+MCPSetupKeys.swift at the ladder's F-4: the family's reads live
+// in the family's query home)
+
+extension Queries {
+    /// The hash of the key bound to a client; nil = unbound (or no client).
+    public static func mcpSetupKeyHash(_ db: Database, clientID: String) throws -> String? {
+        try String.fetchOne(db, sql: "SELECT setup_key_hash FROM mcp_client WHERE id = ?", arguments: [clientID])
+    }
+
+    /// Where a presented key (by its hash) stands: bound to a client, still
+    /// unclaimed, or unknown here.
+    public static func mcpSetupKeyStanding(_ db: Database, hash: String) throws -> MCPSetupKeyRule.KeyStanding {
+        if let clientID = try String.fetchOne(
+            db, sql: "SELECT id FROM mcp_client WHERE setup_key_hash = ?", arguments: [hash]) {
+            return .boundTo(clientID: clientID)
+        }
+        let pending = try Bool.fetchOne(
+            db, sql: "SELECT EXISTS (SELECT 1 FROM mcp_setup_key WHERE key_hash = ?)", arguments: [hash]) ?? false
+        return pending ? .unclaimed : .unknown
+    }
+
+    /// How many copied keys wait unpresented (the drill's and the pins' read).
+    public static func mcpUnclaimedSetupKeyCount(_ db: Database) throws -> Int {
+        try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM mcp_setup_key") ?? 0
     }
 }

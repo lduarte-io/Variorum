@@ -1,17 +1,25 @@
 import Foundation
 import MCP
 import VariorumCore
+import VariorumMCPSocket
 
 /// **ONE MCP SESSION = ONE CONNECTION** (13n-b U1, A-3). Its own SDK `Server`
 /// over its own socket; the client is whatever `clientInfo.name` its
 /// `initialize` declared (A-4 — the ruled honest boundary: a grant gates the
 /// DOOR, never a process). First contact records a PENDING connection request
 /// with no access; every later call reads the client's standing fresh.
+///
+/// **VX-168 (K2, R-VX168-1): the name must come with its SETUP KEY.** Before
+/// the SDK sees a byte, the session reads the connection's opening
+/// (`MCPHandshake` — the shim's preamble line, then the `initialize` frame)
+/// and admits or refuses it ONCE, through `Operations.admitMCPConnection`
+/// (the pure `MCPSetupKeyRule`): a refusal answers the frame with one
+/// sentence and ends the connection; an admission replays the frame into the
+/// transport and serves exactly as before.
 final class MCPSession: @unchecked Sendable {
     let id = UUID()
     let fd: Int32
     private let server: Server
-    private let transport: MCPSocketTransport
     private let tools: MCPReadTools
     private let writes: MCPWriteTools
     private let shows: MCPShowTool
@@ -44,6 +52,11 @@ final class MCPSession: @unchecked Sendable {
     /// open connection closes (`MCPServerHost.ended`) or the server stops
     /// (every session hung up; every start sweeps); a reconnect after the end
     /// finds it gone. Pinned against the mechanics in `MCPAdviceServerTests`.
+    /// VX-168 U2: the edit step names choosing and committing takes (VX-174's
+    /// merge button, VX-169's commit), and the undo sentence says what is
+    /// true of a commit — it stays (append-only, I5; her own commits are
+    /// outside structural undo too, and `edit_take`'s brackets stay when its
+    /// edit is undone — P-13nb-U3-2). 1,941 of the 2,000 characters after it.
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
         open only while Variorum runs. A new client is a connection request until the author approves \
@@ -51,8 +64,8 @@ final class MCPSession: @unchecked Sendable {
         (re-announced when that changes).
         Grants have four rungs, each including those before it: read (read and search), \
         suggest (add takes and comments beside their text, save lenses), \
-        write new (new notes, books, chapters, tags, versions), edit (edit takes, divide, merge, \
-        move, delete). Each names a note, a book or a wing, for once, until you disconnect, or \
+        write new (new notes, books, chapters, tags, versions), edit (edit, choose and commit takes; \
+        divide, merge, move, delete). Each names a note, a book or a wing, for once, until you disconnect, or \
         always; they may also open the whole library to reading (the open book). A once grant is \
         one act: a read grant's first read of a note's text, a higher grant's first write. \
         Until you disconnect lasts while any connection under your client's name stays open, \
@@ -71,7 +84,7 @@ final class MCPSession: @unchecked Sendable {
         If a call is refused, don't retry around it: tell the author what you need (Variorum may \
         already have asked them).
         Never call show_in_app unless the author asks you to show them something.
-        Every change you make is one undo for the author, named after you.
+        Every change you make is one undo for the author, named after you; commits stay.
         """
 
     /// The advice's length bound (characters) — stated and pinned. 13n-c: her
@@ -87,7 +100,6 @@ final class MCPSession: @unchecked Sendable {
         self.fd = fd
         self.database = database
         self.operations = operations
-        self.transport = MCPSocketTransport(fd: fd)
         var reads = MCPReadTools(database: database, operations: operations)
         reads.hooks = hooks
         self.tools = reads
@@ -103,8 +115,31 @@ final class MCPSession: @unchecked Sendable {
             capabilities: .init(tools: .init(listChanged: true)))
     }
 
-    /// Serve until the connection closes.
+    /// Serve until the connection closes — after the handshake admits it.
     func run() async {
+        guard let opening = await MCPHandshake.opening(fd: fd) else { return }
+        let declared = MCPHandshake.initialize(opening.firstFrame)
+        // Fail CLOSED: a store that cannot answer admits nobody — and says
+        // THE STORE failed, never the key (ladder R1, F-1: the key advice
+        // would send a correctly keyed client to rotate a good key for
+        // nothing). Nothing is logged for this arm — the store it would log
+        // to is the one that threw.
+        let admission: Operations.MCPConnectionAdmission
+        do {
+            admission = try operations.admitMCPConnection(
+                name: declared?.name ?? "", version: declared?.version, presentedKey: opening.presentedKey)
+        } catch {
+            _ = MCPSocketTransport.writeAll(
+                fd,
+                MCPShim.refusalResponse(
+                    toFirstLine: opening.firstFrame, message: MCPHandshake.storeErrorRefusal))
+            return
+        }
+        guard admission.decision.admits, let admitted = admission.client?.name else {
+            _ = MCPSocketTransport.writeAll(fd, MCPHandshake.refusalResponse(toFirstFrame: opening.firstFrame))
+            return
+        }
+        let transport = MCPSocketTransport(fd: fd, replay: [opening.firstFrame])
         await server.withMethodHandler(ListTools.self) { [weak self] _ in
             guard let self, let name = self.clientName else { return .init(tools: []) }
             let standing = try self.database.read { try MCPGrantAuthority.standing($0, clientName: name) }
@@ -129,8 +164,13 @@ final class MCPSession: @unchecked Sendable {
         do {
             try await server.start(transport: transport) { [weak self] info, _ in
                 guard let self else { return }
-                let client = try self.operations.recordMCPContact(name: info.name, version: info.version)
-                self.lock.withLock { self.name = client.name }
+                // The SDK reads the SAME replayed frame the handshake decided
+                // on; a name that differs (it cannot, short of two JSON
+                // readers disagreeing) is refused, never served.
+                guard info.name.trimmingCharacters(in: .whitespacesAndNewlines) == admitted else {
+                    throw MCPError.serverError(code: MCPShim.refusalCode, message: MCPHandshake.refusal)
+                }
+                self.lock.withLock { self.name = admitted }
             }
             await server.waitUntilCompleted()
         } catch {

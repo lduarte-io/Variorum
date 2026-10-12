@@ -6,7 +6,8 @@ import VariorumCore
 /// **THE READ RUNG's tool projections** (13n-b U1 — R-13n-4's "read + search
 /// within scope"; the mockup §9). Thin projections of the queries the app
 /// itself reads through — `read_note` IS `Queries.variorumDocumentText` (the
-/// Level 0 format), `export_note` IS `Queries.renderedText`, `search` IS the
+/// Level 0 format; VX-168 U3 — through a lens, `variorumDocumentText(…,
+/// throughLens:)`), `export_note` IS `Queries.renderedText`, `search` IS the
 /// 13o engine (`Queries.searchPassages`) — each gated PER CALL by the pure
 /// rule over CURRENT facts.
 ///
@@ -77,6 +78,7 @@ struct MCPReadTools: Sendable {
         // R-13n-8), so either one implies it.
         var options = MCPNoteStructure.Options()
         var versionID: String?
+        var lensID: String?
         if !plain {
             options.withCommits = try optionalBool(args, "with_commits") ?? false
             options.commitIDs = try optionalStrings(args, "commit_ids") ?? []
@@ -92,6 +94,16 @@ struct MCPReadTools: Sendable {
             options.withVersions = try optionalBool(args, "with_versions") ?? false
             options.now = hooks.now()
             versionID = try optionalString(args, "version_id")
+            // VX-168 U3 (VX-172): read THROUGH a lens of this note — either
+            // form (the text or `with_ids`). A lens belongs to the live note;
+            // a saved version carries none ("lenses never ride any copy"), so
+            // the pair is an argument error — said the same whether or not
+            // the lens exists (no oracle).
+            lensID = try optionalString(args, "lens_id")
+            options.lensID = lensID
+            if versionID != nil, lensID != nil {
+                throw ArgumentFailure(message: "Pass version_id or lens_id, not both: a saved version has no lenses.")
+            }
         }
         let carriage = options.includeArchived || options.withTray || options.withLineage
             || options.withLenses || options.withVersions
@@ -121,6 +133,19 @@ struct MCPReadTools: Sendable {
                 try log(db, clientName, act, "note", noteID, title, allowed: false)
                 return Outcome(text: "version_id isn't a saved version of this note (with_versions lists them).",
                                isError: true)
+            }
+            // VX-168 U3 (VX-172): a lens_id must name a LIVE lens of THIS
+            // note. Anything else — an id naming nothing, a dead lens, a
+            // lens of another note (readable or not), any other row's id —
+            // answers EXACTLY as a note id naming nothing does: the same
+            // decision over no facts, the same refusal, no ask (pinned byte
+            // for byte). Checked after the note is allowed and BEFORE the
+            // once spend, so a refused lens never spends the grant.
+            if let lensID, try Queries.mcpContainerOf(lens: lensID, db) != noteID {
+                try log(db, clientName, act, "note", noteID, title, allowed: false)
+                return MCPAsking(onAsk: hooks.onAsk).refusal(
+                    MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: true), .note,
+                    standing: standing, ask: nil)
             }
             if consumesOnce, let grantID { try operations.consumeMCPOnceGrant(db, grantID) }
             let text: String
@@ -155,7 +180,7 @@ struct MCPReadTools: Sendable {
                 text = try encode(try MCPNoteStructure.read(
                     db, noteID: noteID, calendar: calendar, standing: standing, options: options))
             } else {
-                text = try Queries.variorumDocumentText(db, postID: noteID)
+                text = try Queries.variorumDocumentText(db, postID: noteID, throughLens: lensID)
             }
             try log(db, clientName, act, "note", noteID, title, allowed: true)
             return Outcome(text: text, isError: false)
