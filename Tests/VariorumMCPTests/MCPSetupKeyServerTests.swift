@@ -206,6 +206,56 @@ struct MCPSetupKeyServerTests {
         await h.hangUp(real)
     }
 
+    // MARK: - The denied-name bind (ladder R1, F-2 — deliberate, now pinned)
+
+    /// Identity is decided ONCE per connection; APPROVAL stays `MCPGrantRule`'s,
+    /// per call — so a DENIED, unbound name presenting a fresh unclaimed key
+    /// BINDS it and the handshake admits the connection, which then reaches
+    /// NOTHING ("denied" on every call — the honest answer; the key advice
+    /// could not help it). Re-running the setup therefore works in EITHER
+    /// order around her approval (R-VX168-1's "just re-run the setup"), and a
+    /// second Deny releases the new binding. GREEN ON BOTH SIDES by design:
+    /// this pins standing behaviour the round found unargued; it fixes nothing.
+    @Test func aDeniedNameBindsAFreshKeyButReachesNothingUntilApproval() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let note = try h.operations.createPost(title: "a page")
+            let first = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", .init(rung: .read, scopeKind: .note, scopeID: note.id, duration: .always))
+            await h.hangUp(first)
+            let clientID = try h.client("claude-code").id
+            try h.operations.denyMCPClient(clientID)  // releases the binding (P-VX168-U1-1)
+            #expect(try h.client("claude-code").isSetupBound == false)
+
+            // The fresh key binds while denied — the row STAYS denied…
+            let fresh = try h.operations.mintMCPSetupKey()
+            let connection = try await h.connect(as: "claude-code", presenting: fresh)
+            #expect(try h.client("claude-code").state == .denied, "binding is identity, never approval")
+            #expect(try h.client("claude-code").isSetupBound)
+            // …and the connection reaches nothing: denied, per call.
+            let refused = try await connection.client.callTool(
+                name: "read_note", arguments: ["note_id": .string(note.id)])
+            #expect(refused.isError == true && text(refused).contains("denied this client"), "\(text(refused))")
+
+            // Her approval opens the SAME connection (approval is per call;
+            // Deny revoked the old grant, so the approval brings a new one).
+            _ = try h.approve("claude-code", .init(rung: .read, scopeKind: .note, scopeID: note.id, duration: .always))
+            let read = try await connection.client.callTool(
+                name: "read_note", arguments: ["note_id": .string(note.id)])
+            #expect(read.isError != true, "re-run setup then approve — either order works: \(text(read))")
+
+            // A second Deny releases the new binding (the release runs before
+            // the already-denied short-circuit).
+            try h.operations.denyMCPClient(clientID)
+            #expect(try h.client("claude-code").isSetupBound == false)
+            let (fd, answer) = try h.rawOpen(as: "claude-code", presenting: fresh, id: 6)
+            expectRefusal(answer, id: 6, "the released key is gone")
+            expectClosed(fd)
+            await h.hangUp(connection)
+        }
+    }
+
     /// Ladder R1, F-3: a tag-only preamble (an empty key — a hand-rolled
     /// client's, never the shim's) is BARE, so her Activity says "without a
     /// setup key", never "a key this library doesn't hold". The wire answer

@@ -101,27 +101,3 @@ extension Operations {
     /// The name a refused nameless connection is logged under.
     public static let mcpUnnamedClient = "an unnamed client"
 }
-
-extension Queries {
-    /// The hash of the key bound to a client; nil = unbound (or no client).
-    public static func mcpSetupKeyHash(_ db: Database, clientID: String) throws -> String? {
-        try String.fetchOne(db, sql: "SELECT setup_key_hash FROM mcp_client WHERE id = ?", arguments: [clientID])
-    }
-
-    /// Where a presented key (by its hash) stands: bound to a client, still
-    /// unclaimed, or unknown here.
-    public static func mcpSetupKeyStanding(_ db: Database, hash: String) throws -> MCPSetupKeyRule.KeyStanding {
-        if let clientID = try String.fetchOne(
-            db, sql: "SELECT id FROM mcp_client WHERE setup_key_hash = ?", arguments: [hash]) {
-            return .boundTo(clientID: clientID)
-        }
-        let pending = try Bool.fetchOne(
-            db, sql: "SELECT EXISTS (SELECT 1 FROM mcp_setup_key WHERE key_hash = ?)", arguments: [hash]) ?? false
-        return pending ? .unclaimed : .unknown
-    }
-
-    /// How many copied keys wait unpresented (the drill's and the pins' read).
-    public static func mcpUnclaimedSetupKeyCount(_ db: Database) throws -> Int {
-        try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM mcp_setup_key") ?? 0
-    }
-}
