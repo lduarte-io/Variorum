@@ -93,7 +93,7 @@ struct MCPShareRoad: Equatable {
     /// ITSELF because a sheet is already up (⌘L's switcher — the T-U3-7
     /// precedent `sheet` set for Book Settings). Nil content once the ask no
     /// longer waits.
-    var askSheet: (String) -> AnyView = { _ in AnyView(EmptyView()) }
+    var askSheet: (MCPAskOpening) -> AnyView = { _ in AnyView(EmptyView()) }
 
     /// This road with its ask presses kept HERE — a nested host (a sheet
     /// already up) opens the ask over itself instead of asking the window.

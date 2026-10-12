@@ -81,7 +81,7 @@ struct RootView: View {
     @State private var mcpGrantSheet: MCPGrantOpening?
     /// 13n-c U4 — the ask HER press opened in this window (a pending glyph —
     /// `ShellRouter.mcpAskRequest`); asks never present themselves.
-    @State private var mcpAskSheetID: String?
+    @State private var mcpAskSheetOpening: MCPAskOpening?
     /// 13n-c U4 — ⌘L's wing switcher while it is up in this window (R-AIR-15).
     @State private var wingSwitcher: WingSwitcherModel?
     /// 13s-b U2 — THE TOUR, while one runs in THIS window (its `engine` is
@@ -225,8 +225,8 @@ struct RootView: View {
             // sheet here (her press, never the ask's arrival) — and a host
             // already in a sheet (⌘L's switcher) presents it itself.
             answerAsk: { router.mcpAskRequest = $0 },
-            askSheet: { id in
-                AnyView(mcp.ask(id).map { MCPAskSheet(door: mcp, ask: $0) })
+            askSheet: { opening in
+                AnyView(mcp.ask(opening).map { MCPAskSheet(door: mcp, ask: $0) })
             })
     }
 
@@ -389,10 +389,11 @@ struct RootView: View {
         // 13n-c U4 — ARRIVAL X: THE ASK her press opened here (a pending
         // glyph), presented while it still waits. Nothing else opens it — the
         // WindowGroup's self-presenting host is retired.
-        .mcpAskSheet(door: mcp, askID: $mcpAskSheetID)
+        .mcpAskSheet(door: mcp, opening: $mcpAskSheetOpening)
         .onChange(of: router.mcpAskRequest) { _, request in
             guard let request else { return }
-            mcpAskSheetID = request
+            // W-UX-1: THE raise waiting now — a later equal raise is never it.
+            mcpAskSheetOpening = mcp?.opening(request)
             router.mcpAskRequest = nil
         }
         // 13n-c U4 — ⌘L, THE WING SWITCHER (R-AIR-15): opened in this window

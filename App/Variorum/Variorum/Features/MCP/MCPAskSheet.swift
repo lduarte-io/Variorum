@@ -19,7 +19,7 @@
 //  13n-c U4 — ARRIVAL X (the brief §5; P-13nb-U2-9's arrival superseded):
 //  this sheet NEVER presents itself. An ask waits at its pending glyph on the
 //  thing it names and in Settings ▸ MCP ▸ Waiting; the sheet opens only on
-//  HER press — in the window she pressed in (`mcpAskSheet(door:askID:)`, the
+//  HER press — in the window she pressed in (`mcpAskSheet(door:opening:)`, the
 //  window's host) or in the pane (Waiting's Answer…). While it is open the
 //  cap never forgets its ask, and it closes by itself if the ask is answered
 //  elsewhere first (one ask never mints two grants — T-U4-5).
@@ -128,14 +128,28 @@ extension View {
     /// Stage B R2-1 (a): `seam` says where a press that finds the place gone
     /// is answered — a window's status line (the default), or the pane's
     /// caption.
+    /// 13n-c UX walk W-UX-1: the host holds the RAISE her press opened
+    /// (`MCPAskOpening`), never the bare id — see `MCPAskSheetItem`.
     func mcpAskSheet(
-        door: MCPDoor?, askID: Binding<String?>, seam: MCPDoor.AskSeam = .window
+        door: MCPDoor?, opening: Binding<MCPAskOpening?>, seam: MCPDoor.AskSeam = .window
     ) -> some View {
-        sheet(item: Binding(
-            get: { askID.wrappedValue.flatMap { id in door?.ask(id) } },
-            set: { if $0 == nil { askID.wrappedValue = nil } })
-        ) { ask in
+        sheet(item: MCPAskSheetItem.item(door: door, opening: opening)) { ask in
             if let door { MCPAskSheet(door: door, ask: ask, seam: seam) }
         }
+    }
+}
+
+/// **The ask sheet's item, one rule for every host** (13n-c UX walk W-UX-1 —
+/// its own type so the pin drives the very binding the hosts present). The
+/// item is the ask her press opened while THAT raise still waits; SwiftUI
+/// closes the sheet when it turns nil (answered — either way — anywhere,
+/// forgotten, gone) without calling the setter, so the host keeps its opening
+/// — harmless, because a later equal raise is never that opening.
+enum MCPAskSheetItem {
+    @MainActor
+    static func item(door: MCPDoor?, opening: Binding<MCPAskOpening?>) -> Binding<MCPAsk?> {
+        Binding(
+            get: { opening.wrappedValue.flatMap { door?.ask($0) } },
+            set: { if $0 == nil { opening.wrappedValue = nil } })
     }
 }

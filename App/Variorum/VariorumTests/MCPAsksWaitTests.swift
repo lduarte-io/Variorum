@@ -14,6 +14,7 @@
 import Dependencies
 import Foundation
 import GRDB
+import SwiftUI
 import Testing
 import VariorumCore
 import VariorumMCP
@@ -237,6 +238,52 @@ struct MCPAsksWaitTests {
             #expect(try await settle { door.asks.map(\.clientName) == ["cursor"] },
                     "the denied client's asks leave; another client's stay")
             #expect(door.askBoard.asks(.note(note.id)).map(\.clientName) == ["cursor"])
+        }
+    }
+
+    // MARK: - 13n-c UX walk W-UX-1 — an answered ask never presents itself again
+
+    /// **W-UX-1 (bug-class, the UX walk's finding 1; red-on-old):** she
+    /// answered an ask (Don't allow / Esc, or Once from its mark); the client
+    /// asked the SAME thing again (an `MCPAsk.id` is deterministic — client ·
+    /// target · rung) and the sheet presented itself, unpressed: the host's
+    /// state still held the answered id (SwiftUI closes a sheet whose item
+    /// turns nil without calling the setter), so the equal re-raise made the
+    /// item non-nil again. Driven through the very binding every host presents
+    /// (`MCPAskSheetItem.item`) and the switcher's nested road (the board).
+    @Test func anAnsweredAskNeverPresentsItselfWhenTheClientAsksAgain() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = Operations()
+            let client = try ops.recordMCPContact(name: "claude-code", version: nil)
+            try ops.approveMCPClient(client.id, granting: nil)
+            let note = try ops.createPost(title: "ch 7")
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let asked = ask(id: note.id, rung: .read)
+            for answer in [MCPDoor.AskAnswer.dontAllow, .grant(.once)] {
+                door.enqueue(asked)
+                // HER press — a window's road, the pane's Answer…, a mark in ⌘L.
+                var held: MCPAskOpening? = door.opening(asked.id)
+                let item = MCPAskSheetItem.item(
+                    door: door, opening: Binding(get: { held }, set: { held = $0 }))
+                let nested = door.askBoard.opening(asked.id)
+                #expect(item.wrappedValue == asked, "her press presents the ask (\(answer))")
+                #expect(nested.map { door.askBoard.waits($0) } == true)
+                door.answer(asked, answer)
+                #expect(item.wrappedValue == nil, "answered, the sheet closes (\(answer))")
+                // The client asks the same thing again.
+                door.enqueue(asked)
+                #expect(door.ask(asked.id) != nil, "the re-raise WAITS — at its mark and in Waiting")
+                #expect(item.wrappedValue == nil,
+                        "an answered ask's sheet never presents itself again (\(answer)) — arrival X")
+                #expect(nested.map { door.askBoard.waits($0) } == false,
+                        "the switcher's nested host likewise (\(answer))")
+                // A fresh press opens the new raise.
+                held = door.opening(asked.id)
+                #expect(item.wrappedValue == asked, "her next press opens it (\(answer))")
+                door.answer(asked, .dontAllow)
+            }
         }
     }
 

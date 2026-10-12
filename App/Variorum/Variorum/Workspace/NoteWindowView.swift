@@ -57,7 +57,7 @@ struct NoteWindowView: View {
     @Environment(\.colorScheme) private var scheme
     @State private var mcpGrantSheet: MCPGrantOpening?
     /// 13n-c U4 — the ask HER press opened in this window (RootView's twin).
-    @State private var mcpAskSheetID: String?
+    @State private var mcpAskSheetOpening: MCPAskOpening?
 
     init(session: AppSession, windows: WindowRegistry, postID: String, mcp: MCPDoor? = nil) {
         self.session = session
@@ -152,10 +152,11 @@ struct NoteWindowView: View {
         // 13n-c U4 — the waiting asks (the in-note indicator's pending leg and
         // the bar's note ▾ glyph read them) and the ask her press opened.
         .environment(\.mcpAskBoard, mcp?.askBoard ?? .empty)
-        .mcpAskSheet(door: mcp, askID: $mcpAskSheetID)
+        .mcpAskSheet(door: mcp, opening: $mcpAskSheetOpening)
         .onChange(of: router.mcpAskRequest) { _, request in
             guard let request else { return }
-            mcpAskSheetID = request
+            // W-UX-1: THE raise waiting now — a later equal raise is never it.
+            mcpAskSheetOpening = mcp?.opening(request)
             router.mcpAskRequest = nil
         }
         .overlay(alignment: .bottom) {

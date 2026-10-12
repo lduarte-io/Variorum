@@ -32,7 +32,7 @@ struct MCPPane: View {
     /// grouped row's "and N more ›").
     @State private var members: MCPSharedGroup?
     /// 13n-c U4 — the ask Waiting's Answer… opened (her press).
-    @State private var answering: String?
+    @State private var answering: MCPAskOpening?
     /// 13n-c U5 (R-AIR-13) — the setup menu's chosen client (the pane's
     /// view state; Claude Code first, as 13n-b shipped it).
     @State private var setupClient: MCPSetupClient = .claudeCode
@@ -189,14 +189,14 @@ struct MCPPane: View {
                 granting = target
             } answer: { id in
                 full = nil
-                answering = id
+                answering = door.opening(id)
             }
         }
         // 13n-c U4: the ask Waiting's Answer… opened (closes by itself once
         // the ask is answered anywhere).
         // Stage B R2-1 (a): a press here that finds the place gone says so in
         // the pane's own caption (Settings has no status seam).
-        .mcpAskSheet(door: door, askID: $answering, seam: .pane)
+        .mcpAskSheet(door: door, opening: $answering, seam: .pane)
         // 13n-c Stage B R1 B3: a grouped row's "and N more ›".
         .sheet(item: $members) { group in
             MCPSharedMembersSheet(door: door, group: group, tokens: tokens) { members = nil }
@@ -209,7 +209,7 @@ struct MCPPane: View {
         MCPWaitingRowView(
             entry: entry, distinguisher: Self.distinguisher(entry.ask, distinguishers), tokens: tokens
         ) {
-            answering = entry.id
+            answering = entry.opening
         }
     }
 

@@ -165,6 +165,11 @@ final class MCPDoor {
     /// One waiting ask by id — nil once it was answered (anywhere), forgotten
     /// by the cap, or the library closed (a sheet holding it then closes).
     func ask(_ id: String) -> MCPAsk? { askQueue.entry(id)?.ask }
+    /// 13n-c UX walk W-UX-1 — her press: THE raise of this ask waiting now
+    /// (nil once it no longer waits — the press then opens nothing).
+    func opening(_ id: String) -> MCPAskOpening? { askQueue.entry(id)?.opening }
+    /// The ask a host's sheet presents for the raise her press opened.
+    func ask(_ opening: MCPAskOpening) -> MCPAsk? { ask(opening.id) }
 
     /// 13n-c U4 — ⌥⌘, (MCP Settings…): a REQUEST that Settings adopts (its
     /// pane → MCP) and the MCP pane answers (scrolled to Waiting when an ask

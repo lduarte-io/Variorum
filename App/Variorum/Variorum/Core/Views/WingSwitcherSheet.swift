@@ -166,7 +166,7 @@ struct WingSwitcherSheet: View {
     @Environment(\.mcpAskBoard) private var board
     @FocusState private var fieldFocused: Bool
     /// An ask opened from a row's glyph — presented OVER the switcher.
-    @State private var nestedAsk: String?
+    @State private var nestedAsk: MCPAskOpening?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -209,12 +209,13 @@ struct WingSwitcherSheet: View {
         .frame(width: 440)
         .background(tokens.card)
         // A row's ask opens HERE (the switcher is a sheet already up).
-        .environment(\.mcpShareRoad, road?.answeringAsks { nestedAsk = $0 })
+        // W-UX-1: the RAISE her press opened, never the bare id.
+        .environment(\.mcpShareRoad, road?.answeringAsks { nestedAsk = board.opening($0) })
         .sheet(item: Binding(
-            get: { nestedAsk.flatMap { board.contains($0) ? NestedAsk(id: $0) : nil } },
+            get: { nestedAsk.flatMap { board.waits($0) ? $0 : nil } },
             set: { if $0 == nil { nestedAsk = nil } })
-        ) { ask in
-            road?.askSheet(ask.id)
+        ) { opening in
+            road?.askSheet(opening)
         }
         .task { fieldFocused = true }
         // The keys only a monitor sees (held-⌘ L, ⌘'s release, Esc) — this
@@ -232,10 +233,6 @@ struct WingSwitcherSheet: View {
                 return true
             }
         })
-    }
-
-    private struct NestedAsk: Identifiable {
-        let id: String
     }
 
     private var currentName: String {

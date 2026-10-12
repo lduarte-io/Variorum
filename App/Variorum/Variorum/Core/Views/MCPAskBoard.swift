@@ -35,6 +35,24 @@ nonisolated struct MCPAskFace: Equatable, Identifiable, Sendable {
     /// "claude-code asks to write new in the variorum wing" — the hover where
     /// the face does not sit on the target itself (the masthead's wing word).
     let named: String
+    /// Which RAISE of this ask is waiting (13n-c UX walk W-UX-1 — see
+    /// `MCPAskOpening`): a client re-asking after she answered raises an
+    /// equal ask with a fresh raise.
+    var raise: Int = 0
+}
+
+/// **The ask her press opened — THAT raise, never a later equal one** (13n-c
+/// UX walk W-UX-1). An ask's id is deterministic (client · target · rung —
+/// `MCPAsk.id`), so a client asking the same thing again after she answered
+/// raises an EQUAL ask. A host that held only the id kept it after her answer
+/// (SwiftUI closes a sheet whose item turns nil without ever calling the
+/// binding's setter), and the equal re-raise then presented the sheet BY
+/// ITSELF — arrival X broken. A host holds this instead: the id AND the raise
+/// her press saw. A later raise is never the one she opened, so it only
+/// waits, at its mark and in Waiting.
+nonisolated struct MCPAskOpening: Equatable, Identifiable, Sendable {
+    let id: String
+    let raise: Int
 }
 
 /// **The waiting asks, keyed by target** (pure; Equatable so a window hands
@@ -61,6 +79,23 @@ nonisolated struct MCPAskBoard: Equatable, Sendable {
     /// Whether this ask still waits (a nested host's sheet closes when not).
     func contains(_ id: String) -> Bool {
         byTarget.values.contains { $0.contains { $0.id == id } }
+    }
+
+    /// Her press on this ask's mark: THE raise waiting now (nil when it no
+    /// longer waits — a press then opens nothing).
+    func opening(_ id: String) -> MCPAskOpening? {
+        for faces in byTarget.values {
+            if let face = faces.first(where: { $0.id == id }) {
+                return MCPAskOpening(id: face.id, raise: face.raise)
+            }
+        }
+        return nil
+    }
+
+    /// Whether the raise she opened still waits (W-UX-1: a nested host's
+    /// sheet presents exactly that raise).
+    func waits(_ opening: MCPAskOpening) -> Bool {
+        contains(opening.id)
     }
 
     var isEmpty: Bool { byTarget.isEmpty }

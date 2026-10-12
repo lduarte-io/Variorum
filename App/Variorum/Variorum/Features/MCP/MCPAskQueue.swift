@@ -29,7 +29,13 @@ nonisolated struct MCPAskQueue: Equatable, Sendable {
     nonisolated struct Entry: Equatable, Sendable, Identifiable {
         let ask: MCPAsk
         let askedAt: Date
+        /// 13n-c UX walk W-UX-1 — which RAISE this is: minted when the ask
+        /// joins the queue, kept by a deduped re-raise (like its stamp), fresh
+        /// for an equal ask raised after the last one left. A host presents
+        /// the raise her press opened (`MCPAskOpening`), never a later one.
+        var raise: Int = 0
         var id: String { ask.id }
+        var opening: MCPAskOpening { MCPAskOpening(id: id, raise: raise) }
     }
 
     /// The asks kept waiting at once (P-13nb-U2-9's 8, carried): past it the
@@ -39,6 +45,8 @@ nonisolated struct MCPAskQueue: Equatable, Sendable {
 
     /// Arrival order, oldest first.
     private(set) var entries: [Entry] = []
+    /// The next raise to mint (W-UX-1) — never reused while the queue lives.
+    private var nextRaise = 1
 
     var isEmpty: Bool { entries.isEmpty }
     var count: Int { entries.count }
@@ -59,7 +67,8 @@ nonisolated struct MCPAskQueue: Equatable, Sendable {
     mutating func enqueue(_ ask: MCPAsk, at now: Date, answering: Set<String> = []) -> Bool {
         if refresh(ask) { return true }
         guard !contains(ask.id) else { return false }
-        entries.append(Entry(ask: ask, askedAt: now))
+        entries.append(Entry(ask: ask, askedAt: now, raise: nextRaise))
+        nextRaise += 1
         while entries.count > Self.cap,
               let oldest = entries.firstIndex(where: { !answering.contains($0.id) }) {
             entries.remove(at: oldest)
@@ -74,7 +83,7 @@ nonisolated struct MCPAskQueue: Equatable, Sendable {
     mutating func refresh(_ ask: MCPAsk) -> Bool {
         guard let index = entries.firstIndex(where: { $0.id == ask.id }), entries[index].ask != ask
         else { return false }
-        entries[index] = Entry(ask: ask, askedAt: entries[index].askedAt)
+        entries[index] = Entry(ask: ask, askedAt: entries[index].askedAt, raise: entries[index].raise)
         return true
     }
 
@@ -99,7 +108,7 @@ nonisolated struct MCPAskQueue: Equatable, Sendable {
     /// **The keyed projection** — every waiting ask as a face, keyed by the
     /// thing it names, in arrival order.
     var board: MCPAskBoard {
-        MCPAskBoard(faces: entries.map { Self.face($0.ask) })
+        MCPAskBoard(faces: entries.map { Self.face($0.ask, raise: $0.raise) })
     }
 
     static func target(_ ask: MCPAsk) -> MCPAskTarget {
@@ -110,9 +119,9 @@ nonisolated struct MCPAskQueue: Equatable, Sendable {
         }
     }
 
-    static func face(_ ask: MCPAsk) -> MCPAskFace {
+    static func face(_ ask: MCPAsk, raise: Int = 0) -> MCPAskFace {
         MCPAskFace(
             id: ask.id, target: target(ask), clientName: ask.clientName,
-            here: MCPAskCopy.here(ask), named: MCPAskCopy.title(ask))
+            here: MCPAskCopy.here(ask), named: MCPAskCopy.title(ask), raise: raise)
     }
 }
