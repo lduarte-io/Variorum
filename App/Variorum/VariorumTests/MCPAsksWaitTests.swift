@@ -419,6 +419,46 @@ struct MCPAsksWaitTests {
         }
     }
 
+    /// **The UX-fix ladder's UXR1-6 (round 1, NIT):** Waiting's own caption
+    /// (W-UX-8 — "“ch 7” is gone, so claude-code's ask was let go.") speaks
+    /// about the rows she pressed among, and it outlived them: it sat over an
+    /// empty Waiting, and stale above FRESH asks. It leaves when Waiting's rows
+    /// change — an ask arriving, answered or forgotten — and stays while they
+    /// stand as she left them. A caption at the pane's HEAD (a refusal) is
+    /// never Waiting's to clear.
+    @Test func waitingsCaptionLeavesWhenItsRowsChange() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = Operations()
+            let gone = try ops.createPost(title: "ch 7")
+            let fresh = try ops.createPost(title: "a letter")
+            let later = try ops.createPost(title: "the long table")
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let goneAsk = ask(id: gone.id, title: "ch 7")
+            door.enqueue(goneAsk, now: t0)
+            try ops.deleteContainer(gone.id)
+            #expect(await door.refreshAsk(goneAsk.id, from: .pane) == nil)
+            let said = MCPDoor.Note(text: MCPAskCopy.gone(goneAsk), place: .waiting)
+            #expect(door.note == said, "her press says so, by Waiting (W-UX-8)")
+            await door.revalidateAsks()
+            #expect(door.note == said, "nothing changed in Waiting: the line stays")
+            // A fresh ask arrives — the line was about a list no longer shown.
+            let freshAsk = ask(id: fresh.id, title: "a letter")
+            door.enqueue(freshAsk, now: t0.addingTimeInterval(5))
+            #expect(door.note == nil, "never stale above a FRESH ask")
+            // An answer changes the rows too.
+            door.note = said
+            door.answer(freshAsk, .dontAllow)
+            #expect(door.note == nil, "an ask answered: the line leaves with the rows it spoke of")
+            // The pane's HEAD caption (a refusal) is not Waiting's.
+            let refusal = MCPDoor.Note(text: "That didn't land.", place: .top)
+            door.note = refusal
+            door.enqueue(ask(id: later.id, title: "the long table"), now: t0.addingTimeInterval(9))
+            #expect(door.note == refusal, "only Waiting's own caption follows Waiting's rows")
+        }
+    }
+
     /// (b) A place that dies while its ask waits takes the ask's mark with it
     /// — no press. A book's or a wing's death wakes the ask watch (the
     /// masthead's wing word wore that mark); a note's death is caught where its

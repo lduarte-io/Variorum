@@ -27,11 +27,17 @@ public struct MCPSharedGroup: Equatable, Sendable, Identifiable {
     /// Members reaching nothing now (an "always" note grant whose note is
     /// fenced since; a book grant's own inert fence) — R2-3's rule, per member.
     public let inertCount: Int
+    /// **13n-c UX-fix ladder UXR1-2:** members whose TARGET is gone (deleted
+    /// — no delete revokes a grant), counted over EVERY member, not only the
+    /// titled few: the same liveness `MCPSharedRow.targetTitle` reads. The
+    /// pane offers Change… only while something stands (`MCPChangeOffer`).
+    public let goneCount: Int
 
-    public init(rows: [MCPSharedRow], grantIDs: [String], inertCount: Int) {
+    public init(rows: [MCPSharedRow], grantIDs: [String], inertCount: Int, goneCount: Int = 0) {
         self.rows = rows
         self.grantIDs = grantIDs
         self.inertCount = inertCount
+        self.goneCount = goneCount
     }
 
     public var lead: MCPSharedRow { rows[0] }

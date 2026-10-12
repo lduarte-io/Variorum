@@ -3015,10 +3015,10 @@ verb to be "Deny…" or a softer word.
 
 | # | Finding | Status |
 |---|---|---|
-| UXR1-1 | Activity's refusal names the wrong side on two-sided acts; the fallback noun ignores the kind — pin RED-on-old | NOT-STARTED |
-| UXR1-2 | Change… offered on rows whose target is gone — `offersChange` rule, pin RED-on-old | NOT-STARTED |
-| UXR1-3 | The bulk row overflows at the 1240-pt default — geometry oracle pin RED today | NOT-STARTED |
+| UXR1-1 | Activity's refusal names the wrong side on two-sided acts; the fallback noun ignores the kind — pin RED-on-old | PIN RED — `MCPWingFacesTests.aTwoSidedRefusalNamesTheSideThatRefused`: **8 issues** on the old copy; fix next |
+| UXR1-2 | Change… offered on rows whose target is gone — `offersChange` rule, pin RED-on-old | PINS RED — `MCPShareFacesTests.changeIsOfferedOnlyWhereSomethingStands` **7 issues** against a stub encoding today's every-row offer; core `MCPShareTests.aGroupCountsItsGoneMembersOverEveryMember` **3 issues** against a stub `goneCount = 0`; fix next |
+| UXR1-3 | The bulk row overflows at the 1240-pt default — geometry oracle pin RED today | PIN RED — the row extracted UNCHANGED into `LibraryBulkRow` (a pure move, so it is measurable); `LibraryBulkRowGeometryTests` **6 issues** (both voices × 3/12/1000 notes) at the 631-pt room: Terminal 714/744/824 pt, Study 699/728/808 pt — the reviewer's 714 reproduced; fix next |
 | UXR1-4 | The two retracted-claim comments reworded | NOT-STARTED |
 | UXR1-5 | Stale comments (four sites) | NOT-STARTED |
-| UXR1-6 | The lingering Waiting caption | NOT-STARTED |
+| UXR1-6 | The lingering Waiting caption | PIN RED — `MCPAsksWaitTests.waitingsCaptionLeavesWhenItsRowsChange` **2 issues**; fix next |
 | R1-F | Finals: headless + the Mac suites naming changed types (held stage) | NOT-STARTED |

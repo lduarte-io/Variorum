@@ -169,6 +169,43 @@ struct MCPWingFacesTests {
         }
     }
 
+    /// **The UX-fix ladder's UXR1-1 (round 1, MINOR):** a TWO-SIDED act logs
+    /// the side that refused — the wing move's DESTINATION wing, the add's and
+    /// the filing's BOOK — and the line spoke it as the thing moved ("refused
+    /// moving “research” to another wing", research being the wing). Each side
+    /// is said as itself, the note left unnamed where the log never named it;
+    /// and a target whose title did not resolve falls back on ITS kind's noun
+    /// ("making a book in a wing", never "… in a note").
+    @Test func aTwoSidedRefusalNamesTheSideThatRefused() {
+        func said(_ act: String, kind: String, title: String?, allowed: Bool = false) -> String {
+            MCPPaneCopy.activityLine(MCPActivityFace.Line(
+                id: 1, clientName: "ux-walk", act: act, targetKind: kind, targetID: "x", targetTitle: title,
+                allowed: allowed, count: 1, at: "2026-10-11T00:00:00.000Z"))
+        }
+        // The destination side.
+        #expect(said("move_note_to_wing", kind: "wing", title: "research")
+                == "ux-walk was refused moving a note to \u{201C}research\u{201D}")
+        #expect(said("add_note_to_book", kind: "book", title: "diary")
+                == "ux-walk was refused adding a note to \u{201C}diary\u{201D}")
+        #expect(said("file_note_in_chapter", kind: "book", title: "diary")
+                == "ux-walk was refused filing a note in a chapter of \u{201C}diary\u{201D}")
+        // The note side keeps its words.
+        #expect(said("move_note_to_wing", kind: "note", title: "ch 7")
+                == "ux-walk was refused moving \u{201C}ch 7\u{201D} to another wing")
+        #expect(said("add_note_to_book", kind: "note", title: "ch 7")
+                == "ux-walk was refused adding \u{201C}ch 7\u{201D} to a book")
+        #expect(said("file_note_in_chapter", kind: "note", title: "ch 7")
+                == "ux-walk was refused filing \u{201C}ch 7\u{201D} in a chapter")
+        // A title that did not resolve: the noun follows the logged kind.
+        #expect(said("create_book", kind: "wing", title: nil) == "ux-walk was refused making a book in a wing")
+        #expect(said("create_note", kind: "book", title: nil) == "ux-walk was refused making a note in a book")
+        #expect(said("move_note_to_wing", kind: "wing", title: nil) == "ux-walk was refused moving a note to a wing")
+        #expect(said("add_note_to_book", kind: "book", title: nil) == "ux-walk was refused adding a note to a book")
+        #expect(said("show_in_app", kind: "wing", title: nil) == "ux-walk was refused showing you a wing")
+        #expect(said("show_in_app", kind: "book", title: nil, allowed: true) == "ux-walk showed you a book")
+        #expect(said("read_note", kind: "note", title: nil) == "ux-walk was refused reading a note")
+    }
+
     // MARK: - The live round's staging (DEBUG-only, env-gated — `ScaleFixture`'s wing part)
 
     @Test func theScaleSeedsWingPartMintsTheLiveRoundsWorldOnce() async throws {

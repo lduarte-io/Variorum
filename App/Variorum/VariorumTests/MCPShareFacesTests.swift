@@ -292,6 +292,64 @@ struct MCPShareFacesTests {
         }
     }
 
+    /// **The UX-fix ladder's UXR1-2 (round 1, MINOR):** Change… was offered on
+    /// EVERY row, so a grant whose target is GONE (no delete revokes a grant —
+    /// the row lists "(gone)") opened the replace sheet on nothing: a dead
+    /// wing's sheet read as Home with a confirm that could only refuse, a
+    /// deleted book's said the fenced-reason sentence (false), and an act whose
+    /// notes were all deleted read "These 0 notes". One rule decides the offer:
+    /// a row whose target stands, an act with at least one member standing —
+    /// counted over EVERY member, not only the few the row names. Revoke stays
+    /// on every row.
+    @Test func changeIsOfferedOnlyWhereSomethingStands() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = session.operations
+            let client = try approved(ops)
+            let book = try ops.createReading(name: "the lightning thief", kind: .book)
+            let deadBook = try ops.createReading(name: "a book for the Trash", kind: .book)
+            let wing = try ops.createWing(name: "variorum")
+            let deadWing = try ops.createWing(name: "an empty wing")
+            for (kind, id) in [(MCPGrantRule.ScopeKind.book, book.id), (.book, deadBook.id),
+                               (.wing, wing.id), (.wing, deadWing.id)] {
+                _ = try ops.grantMCPAccess(client.id, .init(rung: .read, scopeKind: kind, scopeID: id, duration: .always))
+            }
+            // Two acts (one stamp each): five notes all deleted (two past the
+            // three the row names), and two notes with one deleted.
+            let allGone = try ["a", "b", "c", "d", "e"].map { try note(ops, $0).id }
+            _ = try ops.grantMCPAccess(client.id, notes: allGone, rung: .read, duration: .always)
+            let halfGone = try ["parser notes", "grammar sketch"].map { try note(ops, $0).id }
+            _ = try ops.grantMCPAccess(client.id, notes: halfGone, rung: .suggest, duration: .always)
+            try ops.deleteReading(deadBook.id)
+            try ops.deleteWing(deadWing.id)
+            for id in allGone + [halfGone[1]] { try ops.deleteContainer(id) }
+
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let groups = await door.allSharedGroups()
+            #expect(groups.count == 6)
+            func single(_ id: String) throws -> MCPSharedGroup {
+                try #require(groups.first { !$0.isGroup && $0.lead.grant.scopeID == id })
+            }
+            #expect(MCPChangeOffer.offers(try single(book.id)), "a standing book offers Change…")
+            #expect(MCPChangeOffer.offers(try single(wing.id)), "a standing wing offers Change…")
+            #expect(!MCPChangeOffer.offers(try single(deadBook.id)), "a deleted book: Revoke only")
+            #expect(!MCPChangeOffer.offers(try single(deadWing.id)), "a deleted wing (never Home): Revoke only")
+            let gone = try #require(groups.first { $0.isGroup && $0.memberCount == 5 })
+            #expect(gone.goneCount == 5, "every member counted — not only the three titled")
+            #expect(!MCPChangeOffer.offers(gone), "an act whose notes are all gone: Revoke only (never “These 0 notes”)")
+            let half = try #require(groups.first { $0.isGroup && $0.memberCount == 2 })
+            #expect(half.goneCount == 1)
+            #expect(MCPChangeOffer.offers(half), "one member stands: the act's Change… opens on it")
+            // The members sheet's rows: each by its own target.
+            let members = try #require(await door.sharedMembers(half.grantIDs))
+            #expect(members.map(MCPChangeOffer.offers) == [true, false])
+            // The one-row rule, alone.
+            let lead = try single(deadBook.id).lead
+            #expect(!MCPChangeOffer.offers(lead) && lead.targetTitle == nil)
+        }
+    }
+
     @Test func aPlaceDoorRefusalSpeaksOnTheWindowAndWritesNothing() async throws {
         try await withSession { (session: AppSession, db: AppDatabase) async throws in
             let ops = session.operations

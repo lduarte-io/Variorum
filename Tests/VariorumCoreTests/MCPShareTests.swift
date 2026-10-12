@@ -86,6 +86,29 @@ struct MCPShareTests {
         }
     }
 
+    /// **The 13n-c UX-fix ladder's UXR1-2:** an act's row knows how many of
+    /// its members' targets are GONE — over EVERY member, not only the few it
+    /// titles (the pane offers Change… only where something stands); a single
+    /// grant's row counts its own target. The same liveness `targetTitle` reads.
+    @Test func aGroupCountsItsGoneMembersOverEveryMember() throws {
+        try withOperations { ops, db in
+            let client = try approvedClient(ops)
+            let notes = try ["a", "b", "c", "d", "e"].map { try note(ops, $0).id }
+            _ = try ops.grantMCPAccess(client.id, notes: notes, rung: .read, duration: .always)
+            let book = try ops.createReading(name: "a book", kind: .book)
+            _ = try ops.grantMCPAccess(client.id, .init(rung: .read, scopeKind: .book, scopeID: book.id, duration: .always))
+            func groups() throws -> [MCPSharedGroup] { try db.read { try Queries.mcpSharedGroups($0) } }
+            #expect(try groups().map(\.goneCount) == [0, 0], "nothing gone")
+            try ops.deleteContainer(notes[4])
+            #expect(try groups().first { $0.isGroup }?.goneCount == 1, "a member past the three titled is counted")
+            for id in notes.dropLast() { try ops.deleteContainer(id) }
+            try ops.deleteReading(book.id)
+            let after = try groups()
+            #expect(after.first { $0.isGroup }?.goneCount == 5, "every member gone")
+            #expect(after.first { !$0.isGroup }?.goneCount == 1, "the book's own row: its book is gone")
+        }
+    }
+
     @Test func aBulkShareRefusesTheWholeActAndWritesNothing() throws {
         try withOperations { ops, db in
             let client = try approvedClient(ops)

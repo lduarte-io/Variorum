@@ -494,6 +494,12 @@ struct MCPClientRow: View {
     }
 }
 
+/// **Where Change… is offered** (the 13n-c UX-fix ladder's UXR1-2).
+nonisolated enum MCPChangeOffer {
+    static func offers(_ row: MCPSharedRow) -> Bool { true }
+    static func offers(_ group: MCPSharedGroup) -> Bool { true }
+}
+
 /// One live grant in SHARED PLACES (13n-c U2: its distinguisher when its
 /// name collides — mockup §1b's pane rows; INERT said when its target is
 /// fenced since — R2-3, P-13nb-U2-3).
