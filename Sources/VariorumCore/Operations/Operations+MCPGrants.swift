@@ -111,7 +111,9 @@ extension Operations {
     /// **Deny** (a connection request) or **Revoke** (an approved client —
     /// PROVISIONAL P-13nb-U1-5: the clients list's revoke is a deny): the
     /// client is denied and EVERY grant it holds is revoked at once — its
-    /// next call refuses. A no-op on a client already denied.
+    /// next call refuses. On a client already denied only the state write is
+    /// skipped — the key release below still runs (the second-Deny arm,
+    /// pinned).
     ///
     /// **VX-168 — Deny also RELEASES the name's setup key** (PROVISIONAL
     /// P-VX168-U1-1: the VX-156 brief §12 records K1's rotation as "revoke

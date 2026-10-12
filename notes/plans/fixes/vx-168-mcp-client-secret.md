@@ -85,13 +85,19 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
   commit). The walk PROVEN on the dev store (both voices, every leg); the Mac batch 616 tests / 83 suites green; the whole
   package headless green. Owed to the orchestrator: the PROVISIONALs' QUESTIONS entries, the §12 canon delta and the
   MOBILE PARITY line at the merge (its OWED list); the ladder over the run's diff.
-- Ladder: **ROUND 1 CLOSED — FIX PASS DONE** (fable-reviewer, 2026-10-12): 0B/0M/2m/2n, the implementer
-  AGREED on all four with zero disputes; the reviewer confirmed all four and implemented them itself (the
-  cross-model flow) — F-1 `150077dc` (red-on-old) · F-3 `d4b19efb` (red-on-old) · F-2 pin + F-4 move
-  `8465d83d`. The whole package headless after the fix pass: **VariorumMCPTests 122/18 · VariorumCoreTests
-  2,691/307 · StringsWorkbookTests 40/6, ALL GREEN**. The dispositions: the LADDER section's ROUND 1
-  DISPOSITIONS. Awaiting the implementer's sanity pass over the reviewer's diff (`9c4f1d81..8465d83d`).
-- Closeout: NOT-STARTED.
+- Ladder: **CLOSED AT ROUND 2 — CLEAN** (2026-10-12). Round 1 (0B/0M/2m/2n): the implementer AGREED on all
+  four with zero disputes; the reviewer confirmed all four and implemented them itself (the cross-model
+  flow) — F-1 `150077dc` (red-on-old) · F-3 `d4b19efb` (red-on-old) · F-2 pin + F-4 move `8465d83d`; the
+  implementer's sanity pass PASSED, its one NIT taken as (b) in the final word `eaf789da`. Round 2 (fresh
+  fable-reviewer over the fix diff, `b2bf8a85`): **CLEAN — 0B/0M/0m/1n**; the one NIT (a stale doc clause
+  on `denyMCPClient`) dispositioned FIXED by the orchestrator in the closeout commit. Suites at the
+  ladder's close: **VariorumMCPTests 122/18 · VariorumCoreTests 2,691/307 · StringsWorkbookTests 40/6, ALL
+  GREEN** (R2 re-ran the MCP target itself).
+- Closeout: **IN PROGRESS (the merging session)** — the R2 NIT's doc fix + RESULTS + HANDOFF (this commit,
+  on the branch); then the PR (`VX-168: …`, merge commit), the merge-moment ledgers on latest main
+  (QUESTIONS entries for every PROVISIONAL, the AppSpec §7/§12/§14 deltas, the MobileSoul line, the
+  in-flight row retired), VX-168 + the five riders → Done in Linear, the A1 /Applications refresh at a
+  zero-instance window, the memory run-state → CLOSED.
 
 ## UNIT 1 RECORD — VX-168, the per-setup key (opus-implementer, 2026-10-12)
 
@@ -1054,3 +1060,78 @@ Nothing else. **No new BLOCKER, MAJOR or MINOR; no round 3 is earned.**
 **ROUND 2 VERDICT: CLEAN — 0 BLOCKER · 0 MAJOR · 0 MINOR · 1 NIT** (a doc-comment clause, left to the
 orchestrator's disposition — fixable in one line at any later commit; it earns no round 3). All four
 round-1 fixes verified sound with their pins; the ladder CLOSES at round 2 per the RUN rule.
+
+
+## ROUND 2 NIT — DISPOSITION (the orchestrator, the closeout commit)
+
+**FIXED here.** `denyMCPClient`'s doc comment no longer claims "a no-op on a client already denied" — it
+now states the pinned truth: on an already-denied client only the state write is skipped; the key release
+still runs (the second-Deny arm, exercised by `aDeniedNameBindsAFreshKeyButReachesNothingUntilApproval`
+since `eaf789da`). Doc-only; no behavior line touched; no pin possible or owed.
+
+## RESULTS (the run, whole)
+
+**All four units CLOSED and accepted; the ladder CLOSED AT ROUND 2 — CLEAN.** The run's shape held:
+strictly sequential units, one implementer session each, one fable ladder over the whole diff.
+
+- **U1 — VX-168, the per-setup key:** the local-only migration `v1_26_mcp_setup_keys` alone and first
+  (v1_24's road, marker 13 untouched, zero lockstep); all three setup-menu clients mint a fresh key at
+  Copy (Claude Code's line REPLACES an earlier user-scope registration first — probed external fact);
+  the shim speaks one preamble line then pumps verbatim (MCP-blind); the server binds/refuses per
+  R-VX168-1 through one pure rule + one transaction; L1 true-er; the DRILL proven on the dev store
+  (five legs, including R-VX168-1 with real Claude Code 2.1.296).
+- **U2 — VX-169 + VX-174:** `save_commit` (EDIT rung, `kind='manual'`, "‹client›: message" prefix, NO
+  undo entry — argued from §9 + I5 + S2 with every face made true), `choose_take` (her ✓, one
+  client-named undo entry) and `adopt_lens` (her "✓ Make this the note", the adopt-swap) — each her
+  door's own row work under the grant guard inside the op's transaction.
+- **U3 — VX-172 + VX-171:** `read_note` reads through a lens (`lens_id`, both forms, `via: lens|chosen`,
+  the one not-shared answer byte-identical across every bad id — no oracle); the blank-take doors opened
+  at `add_take`/`create_note` while `edit_take`-to-empty now REFUSES (P-VX171-2's premise was false —
+  the refusal is BUILT, red-on-old, PROVISIONAL).
+- **U4 — VX-170, lens-aware Takes:** the ratified shape whole — the four forms as one pure rule
+  (`LensTakeFilter`, cost ∝ note), collapse/expand as ruled, the masthead `show ▾` popover with the
+  quiet chip, session-only per-note memory; the walk proven in both voices, catching and fixing W-1
+  (the vanishing door at 680 pt) and W-2.
+- **The ladder:** R1 0B/0M/2m/2n — all four findings confirmed, zero disputes, fixes red-on-old where
+  possible, the denied-name bind made DELIBERATE and pinned; sanity pass PASS, its NIT taken the
+  stronger way. R2 CLEAN (0B/0M/0m/1n, the doc clause fixed above).
+- **Finals at the ladder's close (headless):** VariorumMCPTests **122/18** (13n-c's close: 93/14) ·
+  VariorumCoreTests **2,691/307** (was 2,636/301) · StringsWorkbookTests **40/6**. Mac batches along the
+  way: U1 194/16 + 49/6 · U2 95/9 + 98/12 · U4 616/83, all green under held stage claims.
+- **Hygiene, verified by path diff at both ladder rounds:** zero lines in `Sync/`, `Server/`,
+  custody/keychain, the editor seam, or synced schema; the one migration local-only; no attribution
+  trailers; every commit `Part of VX-168`.
+
+## HANDOFF (for her morning — the author's checklist)
+
+**1. Re-run each AI client's setup — FIRST, or your clients will refuse.** The consequence of your
+no-grandfathering ruling (R-VX168-1): after tonight's /Applications refresh every approved client
+arrives UNBOUND and is refused until its setup runs again. Settings ▸ MCP ▸ Connect a client ▸ Copy for
+each client you use, paste once in its terminal, then start a new session of that client. Claude Code's
+copied line now REPLACES your existing `variorum` registration in the same paste (needed because
+`claude mcp add` refuses an existing name). Codex's line overwrites by itself. Your approvals and
+grants are all KEPT — the first connection under each name binds its fresh key.
+
+**2. What tonight built (one line each):** per-setup client keys (bind at first presentation, impostors
+and bare shims refused with ONE sentence — K2 as ruled, R-VX168-1, no grandfathering machinery);
+`save_commit` + `choose_take` + `adopt_lens` at the EDIT rung; `read_note` through a lens with
+`via: lens|chosen`; blank takes legal at the add/create doors while `edit_take`-to-empty now refuses
+(its old behavior silently emptied a take — the premise of P-VX171-2 was false); lens-aware Takes on
+the Mac (the four `show ▾` forms, session-only memory).
+
+**3. Your QUESTIONS queue (entries #213+, written at the merge):** ~25 PROVISIONALs from the four units
++ the ladder's fold-ins. The ones most worth your eye: **P-VX168-U1-1** (Deny releases the key binding —
+the rotation road; the ladder folded in the denied-name bind superset and the clipboard-history
+residual, K2's non-defeat restated), **P-VX168-U3-2** (the `edit_take`-blank refusal and its words —
+or withdraw it), **P-VX168-U2-4** (`adopt_lens`'s undo also removes the preservation lens; your door's
+undo leaves it), and the tool name `adopt_lens` vs `apply_lens_as_chosen` (P-VX168-U2-7).
+
+**4. Watch items (ticket-shaped, listed at QUESTIONS/the board):** the MCP test-harness SIGPIPE flake
+under whole-package parallel load (U2 + U3 both saw it; U3 names candidate causes); the Variorum
+document format's v1 corner now reachable through a blanking lens (13m/the format's owner);
+W-3 (the Takes popover's ⎋); the grant-sheet sentence that doesn't yet say an edit grant can choose
+takes or adopt a lens (your copy pass).
+
+**5. The refresh:** the A1 road ran at a zero-instance window (safety copy → Release build →
+/Applications → codesign verified). Debug/dev store untouched by the night's suites beyond verified
+restores.
