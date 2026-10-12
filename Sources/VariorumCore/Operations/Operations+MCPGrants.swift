@@ -112,6 +112,14 @@ extension Operations {
     /// PROVISIONAL P-13nb-U1-5: the clients list's revoke is a deny): the
     /// client is denied and EVERY grant it holds is revoked at once — its
     /// next call refuses. A no-op on a client already denied.
+    ///
+    /// **VX-168 — Deny also RELEASES the name's setup key** (PROVISIONAL
+    /// P-VX168-U1-1: the VX-156 brief §12 records K1's rotation as "revoke
+    /// and re-approve", and P-13nb-U1-5 makes the client row's revoke a Deny;
+    /// under K2 that road only rotates if the binding goes with the deny).
+    /// The tool that held the key now refuses at the door; to let a tool back
+    /// in, she approves the client and runs its setup again — the fresh key
+    /// binds the unbound name (R-VX168-1's arm).
     public func denyMCPClient(_ clientID: String) throws {
         try database.write { db in
             guard let client = try Queries.mcpClient(db, id: clientID) else {
@@ -121,6 +129,9 @@ extension Operations {
             try db.execute(
                 sql: "UPDATE mcp_grant SET revoked_at = ? WHERE client_id = ? AND revoked_at IS NULL",
                 arguments: [now, clientID])
+            try db.execute(
+                sql: "UPDATE mcp_client SET setup_key_hash = NULL WHERE id = ? AND setup_key_hash IS NOT NULL",
+                arguments: [clientID])
             guard client.state != .denied else { return }
             try db.execute(
                 sql: "UPDATE mcp_client SET state = 'denied', decided_at = ? WHERE id = ?",
@@ -366,6 +377,15 @@ extension Operations {
     /// they resume on the re-enable. The acknowledgement lives in the grants
     /// store (A-6's boundary-state home; local-only). Returns whether the
     /// switch was turned off by THIS call.
+    ///
+    /// **VX-168 — an adopted library's setup keys are RELEASED in the same
+    /// transaction** (PROVISIONAL P-VX168-U1-2): every binding names a key
+    /// held in some client's settings on the Mac the library came from (or
+    /// its earlier self), and copied-but-unpresented keys left that Mac's
+    /// clipboard. Released, each approved client binds the first fresh setup
+    /// run on THIS Mac — R-VX168-1's "just re-run the setup", grants kept —
+    /// instead of refusing every tool here until Deny (which revokes its
+    /// grants). Clients, grants and the open book stay untouched.
     @discardableResult
     public func landMCPAfterAdoption(holdStamp: String) throws -> Bool {
         try database.write { db in
@@ -373,6 +393,8 @@ extension Operations {
                 db, sql: "SELECT value FROM mcp_switch WHERE key = ?",
                 arguments: [Queries.mcpAdoptionAckKey])
             guard acknowledged != holdStamp else { return false }
+            try db.execute(sql: "UPDATE mcp_client SET setup_key_hash = NULL WHERE setup_key_hash IS NOT NULL")
+            try db.execute(sql: "DELETE FROM mcp_setup_key")
             let now = DateFormatter.variorumISO8601.string(from: date.now)
             for (key, value) in [(MCPSwitch.server.rawValue, "0"), (Queries.mcpAdoptionAckKey, holdStamp)] {
                 try db.execute(

@@ -64,16 +64,9 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
 
 ## LIVE STATUS (per the resiliency protocol — flipped in the same commit as each piece)
 
-- Unit 1 (VX-168, the secret): **IN-PROGRESS** (opus-implementer, 2026-10-12) — piece 1 the LOCAL-ONLY migration
-  `v1_26_mcp_setup_keys` ALONE (this commit; pins `MCPGrantSchemaTests` PENDING the headless run). Remains, in order:
-  (2) core — the pure `Domain/MCPSetupKeyRule` + the ops (mint at copy, admit-per-connection, Deny releases the
-  binding, adoption releases bindings) + state-transition pins; (3) the shim's preamble (`MCPPreamble` in
-  `VariorumMCPSocket`) + "MCP-blind" comments; (4) the server handshake (`MCPSession` reads the preamble + the
-  first frame, decides through the op, refuses uniformly with the shim's refusal shape, else replays the frame
-  into the transport) + the harness's keyed `connect(as:)` + socket-road pins; (5) the app — the setup menu mints
-  at copy (all three clients carry `VARIORUM_MCP_KEY`), L1 true-er, the Deny confirm, the activity words, the
-  guide's honest-limit sentence; (6) the DRILL on the dev store under a held stage claim + the UNIT 1 RECORD
-  below. The design calls are argued in the UNIT 1 RECORD (written as each piece lands).
+- Unit 1 (VX-168, the secret): **IN-PROGRESS** (opus-implementer, 2026-10-12) — pieces 1–2 DONE (the migration
+  `3953c962`; the core rule + ops); pieces 3–6 remain (the shim's preamble · the server handshake · the app's faces
+  · the DRILL). The per-piece table and every argued call: the UNIT 1 RECORD at the foot of this file.
 - Unit 2 (VX-169 + VX-174, the edit-rung door writes): **NOT-STARTED** — settled design: the kickoff file's
   VX-169 settlement + R-MERGE-1 + the ticket bodies.
 - Unit 3 (VX-172 + VX-171, the lens doors): **NOT-STARTED** — settled design: the vx-170 shape file's
@@ -81,3 +74,99 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
 - Unit 4 (VX-170, lens-aware Takes): **NOT-STARTED** — settled design: the vx-170 shape file, whole.
 - Ladder: NOT-STARTED (runs after the last landed unit).
 - Closeout: NOT-STARTED.
+
+## UNIT 1 RECORD — VX-168, the per-setup key (opus-implementer, 2026-10-12)
+
+**What this unit did NOT do (said first):** PENDING — filled at the close of the unit.
+
+**Read in full before code (never delegated):** this file (R-VX168-1); the kickoff prompt; the 13n-c plan §3 U8
+(lines 591–599) + its §4/§5/§7; the VX-156 brief §12 (K0/K1/K2, L1); `notes/SyncSpec.md` whole (incl. §12's
+running record — v1_24's local-only road); `notes/SessionResiliencyProtocol.md` whole; CLAUDE.md + the auto-loaded
+canon. The ONE external fact went to one read-only Sonnet lookup (cited below); Claude Code's flag order was read
+from the installed CLI's own `claude mcp add --help` (2.1.296): `claude mcp add my-server -e API_KEY=xxx -- npx …`.
+
+### The external facts (cited)
+
+- **Claude Code:** `-e, --env <env...>` is VARIADIC, so it goes AFTER the server name (the CLI's own example) —
+  `claude mcp add -s user <name> -e VARIORUM_MCP_KEY=<key> -- "<shim>"`.
+- **Codex:** `codex mcp add <name> --env VAR=VALUE -- <command>` — `--env` repeatable, no short form, must precede
+  `--` (the command takes `trailing_var_arg`): https://learn.chatgpt.com/docs/extend/mcp?surface=cli (the redirect of
+  developers.openai.com/codex/mcp) + `codex-rs/cli/src/mcp_cmd.rs` (`#[arg(long, value_parser = parse_env_pair,
+  value_name = "KEY=VALUE")] pub env`).
+- **The generic stanza:** `"env": {"VAR": "value"}` is the sibling of `command`/`args` —
+  https://modelcontextprotocol.io/docs/develop/connect-local-servers (the `brave-search` example's `"env"`; "add …
+  to your `env` key in `claude_desktop_config.json`") · https://cursor.com/docs/context/mcp (field table: "env | No |
+  Environment variables for the server") · VS Code's reference (same key, top-level `servers`).
+
+### The design calls, argued
+
+1. **Storage — one column + one table, hashes only (piece 1, `3953c962`).** `mcp_client.setup_key_hash` (the key
+   bound to the NAME; NULL = unbound) and `mcp_setup_key(key_hash PK, minted_at)` (a copied key not yet presented).
+   A claim MOVES the hash from the table to the client row, so "pending" and "bound" can never both hold one key,
+   and a key ties to ONE name (`uq_mcp_client_setup_key`, partial on NOT NULL — unbound is the common case). Why a
+   HASH: the key's only legitimate homes are the clipboard and the client's own settings; the library (an encrypted
+   store, but also backups, the 13x handoff copy and any future export road) never needs to present it again —
+   minting moved to copy time (K2), so nothing ever re-displays a key. Why plain SHA-256 (domain-separated:
+   `"variorum.mcp-setup-key.v1:" + key`) and no salt/KDF: the key is 256 random bits, so there is nothing to guess
+   or precompute; a slow hash buys nothing. Lookup is an indexed equality on the hash — a timing difference on a
+   hash compare leaks nothing usable (finding a matching hash still needs a preimage). LOCAL-ONLY on v1_24's road
+   exactly (registered in `MCPGrantSchema.tables`, no `sync_version`, no trigger, export strips it; marker 13).
+2. **The key — `vmk1_` + 43 base64url characters** (32 bytes from CryptoKit's generator, `SymmetricKey(size:
+   .bits256)` — the vault's own precedent): shell-safe unquoted, JSON-safe unescaped, greppable by its versioned
+   prefix.
+3. **The rule decides IDENTITY only, once per connection** (`Domain/MCPSetupKeyRule.decide` — pure; every arm
+   pinned in `MCPSetupKeyRuleTests`): unnamed → refuse · no key → refuse (any name, bound or not — R-VX168-1) · a
+   bound name: its own key → admit, ANY other key → refuse (a fresh key from a newer copy included — the drill's
+   impostor) · an unbound KNOWN name + an unclaimed key → BIND (R-VX168-1's "binds the FIRST secret presented under
+   it") · an UNKNOWN name + an unclaimed key → a connection REQUEST bound to the key (K2) · a key bound elsewhere →
+   refuse · a key never minted here (or no longer held) → refuse. Approval state stays `MCPGrantRule`'s, per call,
+   unchanged — a pending request still reads nothing; a denied client still hears "denied".
+4. **"Binds at approval" — read as: claimed at FIRST presentation, effective at her approval.** K2's letter is "the
+   first name that presents it binds to it at approval"; R-VX168-1's is "binds the FIRST secret presented". Claiming
+   at first presentation is what makes "first" well-defined (two tools pasting one copy: the first to connect owns
+   it; the second hears the refusal) and a pending request reaches nothing until she approves, so nothing is
+   granted earlier than K2 says. No observable difference from binding at the press except that the order is fixed.
+5. **The admission is ONE transaction** (`Operations.admitMCPConnection`): read the facts, consult the rule, land the
+   effects. Two connections racing one key serialize; the second finds it claimed. A REFUSAL changes nothing about
+   the client row (an impostor never refreshes the last-seen or overwrites the declared version — 13n-b's
+   first-contact refresh now runs only for an admitted connection) and never enters the waiting room (so a bare
+   process can no longer fill the pending room — a side benefit). The refusal is logged in words for her Activity
+   list (`connect_bare` · `connect_not_issued` · `connect_another_names_key` · `connect_not_this_names_key` ·
+   `connect_unnamed`); a known name's first bind logs `connect_bound` (allowed); a new request logs nothing (it shows
+   as a connection request).
+6. **The unpresented keys' lifecycle — no TIME expiry; a COUNT cap of 20 (PROVISIONAL P-VX168-U1-3).** Argued: an
+   unpresented key buys only (a) a connection REQUEST her approval still decides, or (b) a bind on a name with no
+   key bound (her pre-VX-168 clients, a Denied name, an adopted library's names). A process able to read the
+   clipboard's history can equally read the client's settings — K2's recorded non-defeat — so expiry defends nothing
+   inside the threat model, while it would break the real case "copied tonight, the client first launches the shim
+   days later" (Claude Code launches it only at its next session). The cap only bounds the table (oldest first);
+   copying 21 times without using the first is the one way to lose a copy, and the client's refusal then says to
+   copy a fresh one.
+7. **The rotation road — Deny RELEASES the binding (PROVISIONAL P-VX168-U1-1 — a FORK for her).** The gap: without a
+   road, a bound name whose tool lost its key (reinstalled; or she re-ran the setup a second time — a fresh key is
+   still another key) refuses FOREVER — no door clears a binding. The brief §12 records K1's rotation as "revoke and
+   re-approve", and P-13nb-U1-5 makes the client row's revoke a Deny; under K2 that road rotates only if the binding
+   goes with the deny. Built: `denyMCPClient` NULLs `setup_key_hash` (the released key is discarded, never returned
+   to the unclaimed set); to let a tool back in she approves the client and runs its setup again (the fresh key
+   binds the unbound name). Cost, said plainly: the Deny confirm's words grow ("…until you approve it and run its
+   setup again"), and Deny still revokes every grant (13n-b's rule, untouched). **Options for her (QUESTIONS at the
+   merge — the shared ledger is the merging session's):** (a) as built; (b) keep the binding through Deny and add an
+   explicit "Forget its setup" door on the client row (a UI addition — her design call); (c) no rotation road (a
+   lost key strands the name — the dead end this record names).
+8. **An adopted library releases every binding (PROVISIONAL P-VX168-U1-2).** `landMCPAfterAdoption` (R-13nb-6's
+   once-per-hold landing) also NULLs every binding and empties the unclaimed set in the same transaction. Argued:
+   every binding names a key held in some client's settings on the Mac the library came from (or its earlier self);
+   kept, every tool on the adopting Mac would refuse until Deny — which revokes its grants. Released, each approved
+   client binds the first setup run on THIS Mac — R-VX168-1's "just re-run the setup", grants kept. Cost: a same-Mac
+   restore also asks one re-run per client (the server lands OFF anyway — she is already acting).
+
+### LIVE STATUS — Unit 1's pieces
+
+| piece | what | status |
+|---|---|---|
+| 1 | the local-only migration `v1_26_mcp_setup_keys`, alone | DONE `3953c962` — `MCPGrantSchemaTests` + `SyncSchemaTests` 20/2 green headless |
+| 2 | core: `Domain/MCPSetupKeyRule` + `Operations+MCPSetupKeys` (mint · admit) + Deny/adoption release + `MCPClient.isSetupBound` | DONE (this commit) — `MCPSetupKeyRuleTests` + `MCPSetupKeyOperationsTests` + the grants/adoption/schema suites 44/5 green headless |
+| 3 | the shim's preamble (`MCPPreamble`, `VariorumMCPSocket`) + "MCP-blind" | NOT-STARTED |
+| 4 | the server handshake + the harness's keyed `connect(as:)` + socket-road pins | NOT-STARTED |
+| 5 | the app: mint at copy (all three clients), L1, the Deny confirm, the activity words, the guide's limit sentence | NOT-STARTED |
+| 6 | the DRILL (dev store, held stage claim) + evidence | NOT-STARTED |

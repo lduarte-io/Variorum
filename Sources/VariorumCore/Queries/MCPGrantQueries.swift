@@ -15,11 +15,15 @@ public struct MCPClient: Equatable, Sendable, Identifiable {
     public let firstSeenAt: String
     public let lastSeenAt: String
     public let decidedAt: String?
+    /// VX-168: a setup key is bound to the name (`mcp_client.setup_key_hash`
+    /// is set). The faces read only this fact — the hash never leaves the
+    /// grants store's own reads.
+    public let isSetupBound: Bool
 
     /// 13n-c U3: public, so the app's pins can name a client.
     public init(
         id: String, name: String, version: String?, state: MCPGrantRule.ClientState,
-        firstSeenAt: String, lastSeenAt: String, decidedAt: String?
+        firstSeenAt: String, lastSeenAt: String, decidedAt: String?, isSetupBound: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -28,6 +32,7 @@ public struct MCPClient: Equatable, Sendable, Identifiable {
         self.firstSeenAt = firstSeenAt
         self.lastSeenAt = lastSeenAt
         self.decidedAt = decidedAt
+        self.isSetupBound = isSetupBound
     }
 }
 
@@ -195,7 +200,7 @@ extension Queries {
         return MCPClient(
             id: row["id"], name: row["name"], version: row["version"], state: state,
             firstSeenAt: row["first_seen_at"], lastSeenAt: row["last_seen_at"],
-            decidedAt: row["decided_at"])
+            decidedAt: row["decided_at"], isSetupBound: (row["setup_key_hash"] as String?) != nil)
     }
 
     // MARK: - Grants
