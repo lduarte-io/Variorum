@@ -46,10 +46,39 @@ Plus: W-UX-14's pin reads the catalog (sentences only under-claim); W-UX-4/5/10 
 +4b display-only with the fence unchanged; every new colour a voice token; message kinds correct (refusals);
 nothing regresses the earlier rounds' verified items (R2-1(a), B8, D-W1 all re-checked).
 
-## ADDENDUM — the fix leg (orchestrator, landed after the fixes)
-
-*(Opens when the implementer hands back; the orchestrator's line-by-line verification of the fix diff and the
-suite finals land here before closeout.)*
+## ADDENDUM — the fix leg, verified (orchestrator — Fable, 2026-10-12 ~00:05 MDT)
 
 *(The implementer's record of the fix leg — each finding's fix, its pin's red count, the walk and the finals, and
 the found F-R1-1 — is the "ROUND-1 FIX LEG" addendum at the end of `notes/plans/phase-13n-c-mcp-launch-readiness.md`.)*
+
+**ALL SIX FIXED — the leg is CLOSED and VERIFIED.** Commits `93bc9918` (record) · `d8cdd462` (pins RED-first:
+UXR1-1 **8**, UXR1-2 **7 + 3** core, UXR1-3 **6**, UXR1-6 **2**) · `3f26a2d1` (fixes, pins green) · `559c67fd`
+(the comment rows) · `88f90d9c` (walk + finals), all pushed.
+
+**The orchestrator's own verification:**
+- **Hygiene by my hands:** the leg's diff (19 files, +542/−99) carries zero `Sync/` / `Server/` / `Persistence/` /
+  custody / migration / editor-seam lines; `MCPGrantRule` untouched; zero trailers; stage FREE; no instance.
+- **The fix diff read line by line.** `MCPChangeOffer` is an honest pure rule (a single row by its target's
+  liveness, an act by `goneCount < memberCount`), applied in all three hosts and per member in the members sheet,
+  Revoke kept everywhere, inert rows still offering (W-UX-19's contract held). `Queries.mcpSharedGoneCount` counts
+  EVERY member in ONE batched `json_each` statement ∝ the act (P1 clean); a single-member act reads its own title.
+  `refusedPhrase` switches on the LOGGED kind for exactly the three two-sided acts and leaves the other side
+  unnamed as the log does; `fallbackNoun(kind)` serves both tables; the nil-title creation lines made honest.
+  UXR1-6's clear is correctly ordered (the queue-change clear runs before a press's own `sayGone`, so the pressed
+  line survives — the pin covers it) and `letWaitingNoteGo` clears only `.waiting`. The bulk row's extraction into
+  `LibraryBulkRow` is a faithful mechanical move (same callbacks, semantics preserved) with a three-tier
+  `ViewThatFits` wrap; the geometry oracle pins it at the 1240-pt default, both voices, 3/12/1000 notes.
+- **Independent spot-run:** `swift test --filter MCPShareTests` by my own hands — 16/1 green including the new
+  core pin. Finals accepted as recorded: core **2,636/301** · MCP **93/14** · workbook **40/6** · Mac **977/146**
+  green (the leg's changed types, held-and-released stage).
+- **The walk's live evidence read:** the bulk row SEEN ON SCREEN for the first time (one line in Study, wrapped
+  whole in Terminal); a "(gone)" row Revoke-only in both hosts; Waiting's caption leaving with its rows and with
+  the pane. Dev store restored byte-identical; the Debug defaults re-imported.
+
+**F-R1-1 ROUTED → VX-175** (v1 release readiness, Todo): the Library CONTROLS row itself pushes the info panel at
+the 1240-pt default — PRE-EXISTING (one note picked, no bulk row), out of this phase's dispositions; needs a
+controls-row composition decision. The walk-ux-fixed observation of the dark-Terminal segmented controls routed →
+**VX-176** (13q — Delight, Todo). Both minted 2026-10-12 via the key road.
+
+**THE UX-FIX LADDER IS CLOSED AT ROUND 1** (0B/0M at the cold round; all six accepted findings fixed, pinned
+red-first and verified; no new BLOCKER/MAJOR arose in the fix leg). Next per the schedule: CLOSEOUT.
