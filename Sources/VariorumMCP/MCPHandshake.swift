@@ -43,6 +43,16 @@ enum MCPHandshake {
         + "reconnect. If this client's name is already set up with another key, the author must deny it "
         + "there and approve it again first."
 
+    /// **The STORE-ERROR sentence** (ladder R1, F-1): the admission's store
+    /// threw, so the connection fails CLOSED — but the answer must not be the
+    /// key advice above (a correctly keyed client told to re-copy its setup
+    /// would rotate a good key for nothing). A store error is orthogonal to
+    /// key standing, so a distinct sentence is no oracle. Nothing is logged
+    /// for this arm: the store it would log to is the one that failed.
+    /// PROVISIONAL words (P-VX168-U1-4's family, her copy pass).
+    static let storeErrorRefusal =
+        "Variorum couldn't check this connection \u{2014} try again."
+
     /// Read the opening on its OWN thread (blocking reads never hold a
     /// cooperative-pool thread). nil when the connection ends (or a line
     /// overruns `lineLimit`) before a first frame arrives.

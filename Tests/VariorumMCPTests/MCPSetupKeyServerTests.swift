@@ -206,6 +206,31 @@ struct MCPSetupKeyServerTests {
         await h.hangUp(real)
     }
 
+    // MARK: - A store that cannot answer (fail closed, its own sentence)
+
+    /// Ladder R1, F-1: a STORE error during the admission fails CLOSED — but
+    /// the answer is the store-error sentence ("try again"), never the key
+    /// advice (a correctly keyed client must not be told to re-copy its
+    /// setup when the store merely failed). Nothing is logged: the store it
+    /// would log to is the one that failed. RED ON OLD: the `try?` arm
+    /// answered every store error with `MCPHandshake.refusal`.
+    @Test func aStoreErrorRefusesWithItsOwnSentenceNeverKeyAdvice() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        let key = try h.operations.mintMCPSetupKey()
+        // Poison the admission's own read: the standing query has no table.
+        try await h.database.write { try $0.execute(sql: "DROP TABLE mcp_setup_key") }
+        let (fd, answer) = try h.rawOpen(as: "claude-code", presenting: key, id: 4)
+        #expect(answer["result"] == nil && answer["id"] as? Int == 4)
+        let error = answer["error"] as? [String: Any]
+        #expect(error?["code"] as? Int == MCPShim.refusalCode)
+        #expect(error?["message"] as? String == MCPHandshake.storeErrorRefusal,
+                "\(String(describing: error?["message"]))")
+        #expect(error?["message"] as? String != MCPHandshake.refusal,
+                "never key advice for a store failure — following it would rotate a good key for nothing")
+        expectClosed(fd)
+    }
+
     // MARK: - The opening read (pure over a descriptor)
 
     @Test func theOpeningReadTakesThePreambleThenTheFrameAndNothingMore() throws {

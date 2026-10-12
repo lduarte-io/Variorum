@@ -119,10 +119,23 @@ final class MCPSession: @unchecked Sendable {
     func run() async {
         guard let opening = await MCPHandshake.opening(fd: fd) else { return }
         let declared = MCPHandshake.initialize(opening.firstFrame)
-        // Fail CLOSED: a store that cannot answer admits nobody.
-        let admission = try? operations.admitMCPConnection(
-            name: declared?.name ?? "", version: declared?.version, presentedKey: opening.presentedKey)
-        guard let admission, admission.decision.admits, let admitted = admission.client?.name else {
+        // Fail CLOSED: a store that cannot answer admits nobody — and says
+        // THE STORE failed, never the key (ladder R1, F-1: the key advice
+        // would send a correctly keyed client to rotate a good key for
+        // nothing). Nothing is logged for this arm — the store it would log
+        // to is the one that threw.
+        let admission: Operations.MCPConnectionAdmission
+        do {
+            admission = try operations.admitMCPConnection(
+                name: declared?.name ?? "", version: declared?.version, presentedKey: opening.presentedKey)
+        } catch {
+            _ = MCPSocketTransport.writeAll(
+                fd,
+                MCPShim.refusalResponse(
+                    toFirstLine: opening.firstFrame, message: MCPHandshake.storeErrorRefusal))
+            return
+        }
+        guard admission.decision.admits, let admitted = admission.client?.name else {
             _ = MCPSocketTransport.writeAll(fd, MCPHandshake.refusalResponse(toFirstFrame: opening.firstFrame))
             return
         }
