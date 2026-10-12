@@ -64,9 +64,11 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
 
 ## LIVE STATUS (per the resiliency protocol — flipped in the same commit as each piece)
 
-- Unit 1 (VX-168, the secret): **IN-PROGRESS** (opus-implementer, 2026-10-12) — pieces 1–4 DONE (the migration
-  `3953c962`; the core rule + ops `b492f6bf`; the shim's preamble `d2966c5f`; the server handshake); pieces 5–6
-  remain (the app's faces · the DRILL). The per-piece table and every argued call: the UNIT 1 RECORD at the foot of this file.
+- Unit 1 (VX-168, the secret): **UNIT CLOSED — DONE** (opus-implementer, 2026-10-12, ~02:45 MDT): the migration
+  `3953c962` · the core rule + ops `b492f6bf` · the shim's preamble `d2966c5f` · the server handshake `ccc4f30c` · the
+  app's faces `452526e0` + `251e8b17` · the DRILL PROVEN on the dev store + the final suites green (`3601ef81` and the
+  close commit). Owed to the orchestrator: the PROVISIONALs' QUESTIONS entries and the canon deltas at the merge (the
+  UNIT 1 RECORD's "OWED" list); the ladder over the run's diff (the secret's accept path is FABLE's — named there).
 - Unit 2 (VX-169 + VX-174, the edit-rung door writes): **NOT-STARTED** — settled design: the kickoff file's
   VX-169 settlement + R-MERGE-1 + the ticket bodies.
 - Unit 3 (VX-172 + VX-171, the lens doors): **NOT-STARTED** — settled design: the vx-170 shape file's
@@ -77,7 +79,18 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
 
 ## UNIT 1 RECORD — VX-168, the per-setup key (opus-implementer, 2026-10-12)
 
-**What this unit did NOT do (said first):** PENDING — filled at the close of the unit.
+**What this unit did NOT do (said first):** (1) **no Codex client was run** — `codex` is not installed on this Mac;
+its command's syntax and its overwrite-on-re-add behaviour are cited from the source (below), and the drill's "fresh
+client" leg used the ANY-CLIENT stanza with a scripted stdio client through the REAL Debug shim (the 13n-c walk's own
+precedent for a fresh name — a real Claude Code client always names itself `claude-code`, which this dev store
+already knew); the REAL Claude Code client drove the R-VX168-1 leg. (2) **No `notes/QUESTIONS.md` entry and no canon
+edit** — both are the merging session's (CLAUDE.md: the shared ledgers move only at merge moments); the entries and
+deltas owed are listed under OWED. (3) **No client-row hint for an approved-but-unbound client** (e.g. "run its setup
+again") — considered and left out as a face the rulings do not ask for; her Activity list says it the first time such
+a client is refused, and the handoff leads with her re-run. (4) **Dark appearance not captured** — the drill ran in
+Study light, plus Terminal light captures of the four changed faces (no new colour or token was introduced). (5)
+`MCPSession.instructions` (the advice) was NOT changed — no sentence of it is falsified by the build (a refused
+connection never reads it; an admitted one's facts are unchanged).
 
 **Read in full before code (never delegated):** this file (R-VX168-1); the kickoff prompt; the 13n-c plan §3 U8
 (lines 591–599) + its §4/§5/§7; the VX-156 brief §12 (K0/K1/K2, L1); `notes/SyncSpec.md` whole (incl. §12's
@@ -170,4 +183,70 @@ from the installed CLI's own `claude mcp add --help` (2.1.296): `claude mcp add 
 | 4 | the server handshake + the harness's keyed `connect(as:)` + socket-road pins | DONE (this commit) — `MCPHandshake` (the opening read byte-exact on its own thread: preamble → `initialize` frame; the ONE refusal sentence `MCPHandshake.refusal`, PROVISIONAL P-VX168-U1-4), `MCPSession.run` decides ONCE through `admitMCPConnection` (fail-closed on a store error) — refused: the shim's refusal shape answering the frame's id, then the host closes; admitted: the frame REPLAYED into `MCPSocketTransport(replay:)`, the SDK hook only checks the name and sets it (`recordMCPContact` moved into the admission); the over-cap refusal reads past a preamble to answer by id (a real fix the preamble needed). The harness: `connect(as:)` presents the name's own setup key (minted once per name, as a copy); `connect(as:presenting:)` + `rawOpen` for the arms; three raw-socket pins justified-edited (the over-cap flood, the advice-at-initialize, the pump — now `MCPShim.serve` keyed). `MCPSetupKeyServerTests` (7: a fresh client end to end · two tools told apart · a bare shim · R-VX168-1's approved-unbound bind · every arm one sentence byte-identical · the opening read · the initialize parse). **`VariorumMCPTests` 103/15 green headless** (13n-c's close: 93/14) |
 | 5 | the app: mint at copy (all three clients), L1, the Deny confirm, the activity words, the guide's limit sentence | DONE `452526e0` + the pin fix (this commit) — the Mac batch under the held stage claim `vx168-u1`: **194/16 green** (CapabilityRegistry · MCPAsksWait · MCPAskAndReceipt · MCPPane · MCPWingFaces · MCPEditFaces · MCPNavigation · MCPShareFaces · MCPGrantSheet · MCPSetupMenu · TutorialMCPChapter · TutorialFurnitureFold · LaunchFurniture · TutorialBuildFlavor · SampleLibraryWelcome · the 13n-b U3 activity face) after one justified edit (lesson 2's Claude Code prefix pin: the line now clears an earlier setup first), then the guide-wide suites **49/6 green** (TutorialBookShape · TutorialDoor · TutorialCurrency · TutorialBooksLesson · TutorialPrivacyChapter · TutorialFannedMatrix) — **the setup menu** (inside the O-4 fence): Claude Code = `claude mcp remove -s user <name> >/dev/null 2>&1; claude mcp add -s user <name> -e VARIORUM_MCP_KEY=<key> -- "<shim>"` (the REPLACE step because `claude mcp add` refuses an existing name — probed in a scratch HOME, her `~/.claude.json` untouched; idempotent in zsh and bash; without it her R-VX168-1 re-run would fail on her existing registration), Codex = `codex mcp add <name> --env VARIORUM_MCP_KEY=<key> -- "<shim>"` (no replace step: `codex mcp add` overwrites by map insert — the second Sonnet lookup, `codex-rs/cli/src/mcp_cmd.rs` `run_add` lines ~447–458 `servers.insert(...)`; `run_remove` exits 0 on an absent name), the stanza gains `"env": {"VARIORUM_MCP_KEY": …}`; the Claude Code sentence says it replaces an earlier setup, the any-client sentence names the variable a path-only client also needs. **The door** (`MCPDoor.copySetupCommand`, now async): mints through the session's runner (P2) and writes the clipboard only once the key is kept; no library → `setupNeedsLibrary`, nothing copied. **The pane:** the shown setup MASKS the key (`MCPPaneCopy.shownKey`, eight bullets) + `keyLine` under it; L1 true-er (`clientBoundary`, its own 5-line room); the Deny confirm "…until you approve it and run its setup again"; Activity words for the five `connect_*` refusals and `connect_bound`. **The guide** lesson 2's limit sentence (falsified: "Variorum can't check that name") rewritten true of the build with K2's non-defeat. `MCPSession.instructions` UNCHANGED (no sentence falsified: a refused connection never reads it; an admitted one's facts are unchanged). Justified edits (the ritual): `MCPSetupMenuTests` (4), `MCPPaneTests` (2), `MCPGrantSheetTests` (L1), `TutorialMCPChapterTests` (lesson 2, pinned against the rule), the U5 capture harness (attached; `await`) |
 | 6 | the DRILL (dev store, held stage claim) + evidence | **DONE — PROVEN, every leg** (02:05–02:40 MDT, Study, light; the evidence below in "THE DRILL"); cleanup done: the scratch `-s local` registration removed (her user scope `linear-server` + `variorum` untouched, read before and after), the dev instance quit by identity (`pgrep` empty), the dev store RESTORED from `scale-prestage-20261012T080538Z` ("Restored (verified)", cmp), the clipboard emptied, the socket gone, the stage released. Terminal-voice captures of the changed faces: see piece 7 |
-| 7 | the final suites + Terminal captures of the changed faces | IN-PROGRESS — the whole package headless: `VariorumMCPTests` **103/15** · `VariorumCoreTests` **2,658/303** · `StringsWorkbookTests` **40/6**, ALL GREEN on the final run (the run before it: the migration pins needed v1_26's table + two indexes — justified edit, this commit; the run between: one P1 timing benchmark, `timelinePageIsFlatOrUnderBudgetInCorpusSize`, red under the parallel load, green alone 6/1 twice and in the final run — load-sensitive, untouched by this diff). Remains: the Terminal captures (L1, the masked setup + key line, the Deny confirm) under a fresh claim — IN FLIGHT (claim `vx168-u1` 02:30; RESTORE SOURCE `…/safety-copies/scale-prestage-20261012T083018Z`; a death here: quit the dev instance by identity, restore.sh on that dir, release) |
+| 7 | the final suites + Terminal captures of the changed faces | **DONE** — the whole package headless: `VariorumMCPTests` **103/15** · `VariorumCoreTests` **2,658/303** · `StringsWorkbookTests` **40/6**, ALL GREEN on the final run (the run before it: the migration pins needed v1_26's table + two indexes — justified edit `3601ef81`; the run between: one P1 timing benchmark, `timelinePageIsFlatOrUnderBudgetInCorpusSize`, red under the parallel load, green alone 6/1 twice and in the final run — load-sensitive, untouched by this diff). The Mac batch (piece 5): 194/16 + 49/6. **Terminal light** (claim `vx168-u1` 02:30–02:44, a second A1 prestage `scale-prestage-20261012T083018Z`, restored "verified" after; nothing denied — the confirm was cancelled): `t1` L1 whole in three lines, `t2` the masked setup + the key line whole, `t3` the Deny confirm (zero-grant form) whole. Stage released; no instance; clipboard empty |
+
+### THE DRILL — the unit's acceptance evidence (dev store only, stage `vx168-u1`, 2026-10-12 02:05–02:44 MDT)
+
+**Machine:** unlocked; this host's Accessibility + Screen Recording granted; her `/Applications/Variorum.app` ABSENT
+throughout (checked before every GUI step by `Tools/WalkKit/guard.sh` and before every client turn); the Debug app
+`App/Variorum/DerivedData/vx168-u1/…/Variorum.app` (`io.lduarte.Variorum.debug`) on the dev store, the store first
+copied A1-style (`scale-prestage-20261012T080538Z`) and RESTORED from it at the end (cmp-verified). The dev store
+arrived with its server ON and four clients approved by earlier walks (`claude-code` 3 grants, `u3-walk`, `u2-walk`,
+`u1-walk`) — all UNBOUND once v1_26 ran: R-VX168-1's starting state exactly. Evidence:
+`notes/plans/vx168-screens/u1/` (gitignored) — captures `d0…d13`, `t1…t3`, and `transcripts/` (every client
+transcript as JSON; every key REDACTED to its first 9 characters — a grep for a whole key finds none).
+
+| leg | what was done | outcome |
+|---|---|---|
+*[removed for publication]*
+*[removed for publication]*
+| **(3) a bare shim** | the Debug shim with NO `VARIORUM_MCP_KEY`, under a brand-new name `vx168-stray` (`c1`) and under the approved-but-unbound `claude-code` (`c2`) | both REFUSED, the same body; never entered the waiting room. **All four refusals so far were ONE byte-identical JSON body** (scripted compare: "1 distinct body over 4 refusals") — no oracle between wrong key, no key, and no binding |
+*[removed for publication]*
+*[removed for publication]*
+| **the faces** | L1 under Clients (`d10`, Study; `t1`, Terminal); the masked setup + the key line (`d1`, `d5`; `t2`); the Deny confirm (`d11`; `t3` the zero-grant form) | every face whole in both voices (L1 three lines in its five-line room) |
+
+**Cleanup (02:40, 02:44):** `claude mcp remove variorum-dev -s local` ("…from local config"; the scratch folder's servers
+`[]`); her user-scope servers read BEFORE and AFTER: `['linear-server', 'variorum']` — untouched; the dev instance
+quit by identity (`pgrep` empty); the dev store restored twice from the prestage copies ("Restored (verified)"); the
+socket gone; the clipboard emptied; the stage released ("STAGE FREE").
+
+### PROVISIONALs (each wants a `notes/QUESTIONS.md` entry at the merge — the merging session's ledger)
+
+- **P-VX168-U1-1 — Deny releases the binding (the rotation road).** Options: (a) as built — K1's "revoke and
+  re-approve" carried to K2; (b) keep the binding through Deny and add an explicit "Forget its setup" door on the
+  client row; (c) no rotation road (a lost key strands the name forever). Drill leg (5) shows (a) working.
+- **P-VX168-U1-2 — an adopted library releases every binding** (13x handoff/restore): options (a) as built; (b) keep
+  bindings (a same-Mac restore then needs no re-run, but a handed-off library's tools all refuse until Deny, which
+  revokes grants).
+- **P-VX168-U1-3 — unpresented keys: no time expiry, a count cap of 20.** Options: (a) as built; (b) a time window
+  (24 h / 7 d) — defends nothing in K2's threat model and breaks "copied tonight, launched days later"; (c) no cap.
+- **P-VX168-U1-4 — the client's one refusal sentence** (`MCPHandshake.refusal`, her copy pass) — and its last
+  clause depends on P-U1-1 ("…the author must deny it there and approve it again first").
+- **P-VX168-U1-5 — the pane's new words** (`clientBoundary` L1, `keyLine`, `setupNeedsLibrary`, the Deny confirm's
+  clause, the `connect_*` Activity phrases, the Claude Code / any-client sentences, the guide's limit sentence) — her
+  copy pass, 13s-a-sweepable.
+- **Argued, not provisional (recorded above):** hash-only storage (domain-separated SHA-256); claim-at-first-
+  presentation as the reading of "binds at approval"; Claude Code's replace step (an external fact, probed).
+
+### OWED (for the orchestrator)
+
+1. **Canon deltas at the merge** (AppSpec §12's THE MCP DOOR line): "the protocol-blind `variorum-mcp` stdio shim" →
+   **MCP-blind** (it speaks its setup key as one preamble line); "A-4's honest boundary (client identity is
+   self-declared and the pane says so — the per-setup secret is VX-168, pre-launch)" → the build's truth: a name is
+   bound to its setup's key (K2 as built: claimed at first presentation, a bare or other key refused, R-VX168-1's
+   unbound-name bind), the recorded non-defeat said; §7's local-only MCP grants family gains **v1_26**
+   (`mcp_setup_key` + `mcp_client.setup_key_hash`, zero lockstep). The QUESTIONS entries above.
+2. **Her morning (the handoff's lead, R-VX168-1's consequence):** after the /Applications refresh her approved clients
+   arrive UNBOUND and refuse until she re-runs each one's setup from Settings ▸ MCP ▸ Connect a client. **Claude Code's
+   copied line now REPLACES her existing user-scope `variorum` registration first** (without that step `claude mcp
+   add` would fail: "MCP server variorum already exists in user config") — one paste, then a new Claude Code session.
+   Codex's `codex mcp add` overwrites by itself. Her approvals and grants are kept; the first connection binds.
+3. **The ladder's map (the secret's accept path is FABLE's, her protocol):** `Sources/VariorumCore/Domain/
+   MCPSetupKeyRule.swift` (the decision) · `Operations+MCPSetupKeys.swift` (`mintMCPSetupKey`, `admitMCPConnection`
+   — the one transaction) · `Operations+MCPGrants.swift` (`denyMCPClient`'s release, `landMCPAfterAdoption`'s
+   release) · `Sources/VariorumMCP/MCPHandshake.swift` + `MCPSession.run` (the opening read, fail-closed admission,
+   the replay, the SDK hook's name check) · `MCPServerHost.refuseOverCap` (reads past a preamble) ·
+   `Sources/VariorumMCPSocket/MCPPreamble.swift` + `MCPShim.serve` · the migration `v1_26` · the app's
+   `MCPDoor.copySetupCommand` (mint-then-clipboard) and the setup texts in `MCPPaneCopy`'s O-4 fence.
+4. **Noticed, not this unit's:** the Settings pane's scroll position jumps when a copy reflows the setup text (the
+   Copy button moves between y≈329 and y≈455 with the chosen client) — chrome taste, recorded for the UX pass.
