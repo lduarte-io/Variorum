@@ -181,3 +181,12 @@ them as one vocabulary, one of the two moves. No pin (copy).
   under my own run where Mac-hosted).
 - **Finals reproduced:** core 2,633/301 · MCP 92/14 · workbook 40/6 (whole package, my run) + the 8-suite Mac
   batch 119/8 green under a held-and-released stage claim.
+
+## ORCHESTRATOR VERIFICATION OF THE FIX LEG (before round 2)
+
+The round's fixes and the sitting's ruled edits (`0d2f6ef3..513c9e04`) verified by the orchestrator's own hands:
+fence diff clean (the eight non-notes files are the wing-move core + advice + two copy faces + their tests; zero
+`Sync/` · `Persistence/` · migration · editor-seam · custody lines); zero trailers; tree clean, stage free, no
+instance; the F1 sanity pass returned SOUND (the implementer's own suites re-run green on the fixed tree); the
+advice's while-connected sentence present at `MCPSession.swift:58` with its executed pin and two mutations.
+Round 2 (fresh fable-reviewer) runs over `0d2f6ef3..513c9e04`.
