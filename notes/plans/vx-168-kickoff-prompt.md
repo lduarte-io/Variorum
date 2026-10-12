@@ -28,6 +28,12 @@ the public launch, not before 13n-c's /Applications refresh. U7 (VX-159) is out 
   presents the secret at approval, and refuses a name arriving without its bound secret. The pane's boundary
   line (L1) becomes true-er, never reworded to promise MORE than the build does. Decide grandfathering for
   already-approved clients from K2's design; a gap there is a fork to the author, not an invention.
+- **RIDER — VX-169 (her ruling, 2026-10-11 sitting): the deliberate `save_commit` tool rides this round.**
+  A client commits a take with its own message (today only `edit_take`'s automatic before/after brackets exist;
+  `save_version` is whole-note Versions, a different thing). Rung decided at build time (append-only by nature —
+  argue it in the record); the commit lands `kind='manual'` vs a new kind is a design call to argue from AppSpec
+  §7's commit_point contract; the guide/advice gain their one sentence each; truth-pinned. Run it as a second
+  member of this round's ladder, pin-before-fix binding as ever.
 - **Docs ride the build:** the field guide's connect lesson, the pane copy and `MCPSession.instructions` are
   updated ONLY where the build makes them stale; every sentence true of the build; the O-4 provider-neutrality
   pin and the setup-copy fences stay green.

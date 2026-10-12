@@ -790,6 +790,20 @@ unit record (TCC state is machine-state the next session inherits).
 - **P-13nc-SB-5 RULED:** speak only on her press (as built).
 - **P-13nc-U4-8 RULED:** Esc answers Don't allow (as built). Off the #211 list.
 
+**Third round (same sitting):**
+- **RULED — the "ways to set it up / how to use it" guide lesson lands IN THIS PHASE, before the UX walk** (her
+  words: "fold in the 'How to use it' — I think specific examples would be good", "We should help people with how
+  to use AI within the note and within the app", "I want users to have ideas on how to make the app useful to them
+  with their AI work"). Shape: worked recipes, not just permission patterns — e.g. her example: notes for a design
+  doc, then the AI goes through and offers per-feature implementation suggestions or tradeoffs AS TAKES (suggest
+  rung; takes land unchosen; review in the fan, ⌥⌘O); the AI-inbox book (write new on one dedicated book); whole-
+  library help with Private as the carve-out; the one-off once note grant. Queued for the implementer the moment
+  ladder R2 hands back (sequential cast); the UX walk then sees it.
+- **RULED — a deliberate `save_commit` tool: VX-169 minted** (team VX, project 13n), RIDES THE VX-168 ROUND
+  tonight, after she has seen this round installed + verified (her word). The kickoff prompt carries the rider.
+- (Her "Allow AI here" phrasing question and the Private-book share question were answered with build facts in
+  chat — no ruling taken; the zero-approved-client gate already hides every share face from an unconfigured store.)
+
 ## PROVISIONALs (running — logged at the merge as #211)
 
 - **P-13nc-1** — D-1 (the ⌘J edge kept).
