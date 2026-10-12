@@ -2482,10 +2482,11 @@ enum TutorialSeeder {
         // worked recipes, every sentence executed in its pin.
 
         _ = try lesson(door, mcpLessons[0], [
-            "Variorum can let an AI work in your library, if you want it to. The way "
-            + "in is MCP, the Model Context Protocol: a standard way for AI apps to "
-            + "use another app's tools. Variorum calls its "
-            + "way in the door, and it stays shut until you open it. It lives on the "
+            // 13n-c UX walk W-UX-17: "way in" said once, not twice.
+            "Variorum can let an AI work in your library, if you want it to. It "
+            + "works through MCP, the Model Context Protocol: a standard way for AI "
+            + "apps to use another app's tools. Variorum calls this connection the "
+            + "door, and it stays shut until you open it. It lives on the "
             + "Mac; the phone has no door.",
 
             "Open it in Settings \u{25B8} MCP (\u{2325}\u{2318}, takes you there) "
@@ -2500,16 +2501,19 @@ enum TutorialSeeder {
             + "acts. What it writes arrives as takes, notes and commits you can "
             + "see, and every act it takes comes back out with \u{2325}\u{2318}Z "
             + "for as long as this session is open. "
-            + "The last lesson in this chapter shows how to watch it, answer it "
-            + "and undo it.",
+            // W-UX-17: Read shows no lesson titles, so the pointer names it.
+            + "The chapter's last lesson, \u{201C}seeing, answering, undoing\u{201D}, "
+            + "shows how to watch it, answer it and undo it.",
         ])
 
         _ = try lesson(door, mcpLessons[1], [
             // O-4 SETUP COPY BEGIN — the card that teaches the setup menu by its
             // labels (the provider setup — her exclusion; the H pattern keeps it
             // plain text, never interpolated).
-            "In Settings \u{25B8} MCP, under Connect a client, choose yours: Claude "
-            + "Code, Codex, or Any MCP client. Then press Copy setup command. For "
+            // W-UX-17: the lesson's opening names its subject (Read shows no
+            // lesson titles).
+            "To connect a client, open Settings \u{25B8} MCP; under Connect a "
+            + "client, choose yours: Claude Code, Codex, or Any MCP client. Then press Copy setup command. For "
             + "Claude Code or Codex it is one command: run it in a terminal, then "
             + "start a new session of that app. For any other client it is a few "
             + "lines of JSON to paste into that client's MCP settings. The pane also "
@@ -2541,7 +2545,9 @@ enum TutorialSeeder {
 
             "Each grant also says where: one note; one book, with its notes now and "
             + "any added to it later; or a whole wing and everything in it, except "
-            + "what always asks (the next lesson). And for "
+            // W-UX-17: the exceptions named where they are pointed at.
+            + "what always asks: your daily Journal's entries and anything Private "
+            + "(the next lesson). And for "
             + "how long: once, for a single act (one read of a note, or one "
             + "change); until it disconnects, which ends when the client goes away "
             + "(offered while it's connected); or always, until you revoke it.",
@@ -2569,8 +2575,8 @@ enum TutorialSeeder {
             + "bottom of the note and choose Private \u{2014} never shared with AI. "
             + "A book has the same mark in its Book Settings, and it covers every "
             + "note in the book. Other books with date-stamped entries share like "
-            + "any book; only the daily Journal asks. An entry \u{2318}J made keeps "
-            + "asking even if you later file it in another book.",
+            + "any book; only the daily Journal asks. An entry made with \u{2318}J "
+            + "keeps asking even if you later file it in another book.",
 
             "Snippets can't be reached through the door at all: no grant reaches "
             + "them. And each wing is a separate library: a grant in one wing never "
@@ -2587,10 +2593,11 @@ enum TutorialSeeder {
             + "Right-click a note in the Library, or a book on the Bookcase or in "
             + "the Library, and choose Share with AI\u{2026}: the grant sheet opens "
             + "with that place already picked. \u{2318}-click several notes in the "
-            + "Library and the controls at the top of the list offer Share 3 notes "
-            + "with AI\u{2026} (the number is how many you picked), one grant for "
-            + "all of them. And a book's Book Settings says who reaches it, with "
-            + "Share\u{2026} beside.",
+            // W-UX-3/-17: the bulk doors' own row (the door is findable there).
+            + "Library and a row of doors appears under the controls at the top of "
+            + "the list, Share 3 notes with AI\u{2026} among them (the number is how "
+            + "many you picked): one grant for all of them. And a book's Book "
+            + "Settings says who reaches it, with Share\u{2026} beside.",
 
             "\u{2325}\u{2318}A (Edit \u{25B8} Share This Note with AI) shares the "
             + "note you're in with the client you granted most recently, at that "

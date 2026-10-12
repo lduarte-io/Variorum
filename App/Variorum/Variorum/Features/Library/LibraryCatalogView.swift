@@ -691,61 +691,86 @@ struct LibraryCatalogView: View {
                         })
                     .offset(y: Self.segmentedLabelDrop)
                 }
-                if selectedPosts.count > 1 {
-                    Menu(tokens.chromeLabel("Tag \(selectedPosts.count) notes")) {
-                        ForEach(tags.tags, id: \.id) { tag in
-                            Button(tag.path) {
-                                let ids = Array(selectedPosts)
-                                Task { await model.applyTag(tag.id, to: ids) }
-                            }
-                        }
-                    }
-                    .font(tokens.small)
-                    // 13e E8 — the bulk half of *"remove / add them"*. The
-                    // rows are the tags the SELECTION actually wears, so the
-                    // menu never offers an act that would do nothing (P-2);
-                    // with none, there is no menu at all.
-                    let worn = model.tagsOn(selectedPosts)
-                    if !worn.isEmpty {
-                        Menu(tokens.chromeLabel("Untag \(selectedPosts.count) notes")) {
-                            ForEach(worn, id: \.id) { tag in
-                                Button(tag.path) {
-                                    let ids = Array(selectedPosts)
-                                    Task { await model.removeTag(tag.id, from: ids) }
-                                }
-                            }
-                        }
-                        .font(tokens.small)
-                    }
-                    // 13n-c U3 (VX-156 item 2; mockup §2) — SHARE THE PICK: THE
-                    // grant sheet pre-filled with these notes, in the listing's
-                    // order; ONE act mints them on one stamp (one row in Shared
-                    // places). R-AIR-8: only while an approved client exists.
-                    if let road = mcpShareRoad, road.canShare {
-                        Button(tokens.chromeLabel(MCPShareCopy.shareNotes(selectedPosts.count))) {
-                            road.open(MCPGrantOpening(
-                                place: .notes(selectedNotesInListOrder), origin: .place))
-                        }
-                        .font(tokens.small)
-                    }
-                    // 13l Act 2 (item 3) — her ruling's third clause, built on
-                    // the selection this bar already reads. ONE confirmation
-                    // naming the count and ONE receipt, which is why the whole
-                    // pick goes to the host as one ask rather than N asks.
-                    Button(
-                        tokens.chromeLabel(
-                            "Delete \(selectedPosts.count) notes\u{2026}"),
-                        role: .destructive
-                    ) {
-                        Task { pendingDelete = await NoteDeletion.ask(
-                            session: session, postIDs: selectedNotesInListOrder) }
-                    }
-                    .font(tokens.small)
-                }
+            }
+            // 13n-c UX walk W-UX-3 (T-1): the bulk doors on a ROW OF THEIR
+            // OWN under the controls while several notes are picked. In the
+            // controls' row they ran out of width at the default window and
+            // collapsed to bare chevrons — the Share door lesson 5 names read
+            // nowhere — and the row's minimum width pushed the info panel off
+            // the window. Here each keeps its words (`fixedSize`).
+            if selectedPosts.count > 1 {
+                bulkRow
             }
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 10)
+    }
+
+    /// The pick's doors (13e E8, 13l Act 2, 13n-c U3) — their own row since
+    /// the UX walk's W-UX-3, each label whole.
+    private var bulkRow: some View {
+        HStack(spacing: 14) {
+            Text(tokens.chromeLabel(LibraryCopy.notesPicked(selectedPosts.count)))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+                .fixedSize()
+            Menu(tokens.chromeLabel("Tag \(selectedPosts.count) notes")) {
+                ForEach(tags.tags, id: \.id) { tag in
+                    Button(tag.path) {
+                        let ids = Array(selectedPosts)
+                        Task { await model.applyTag(tag.id, to: ids) }
+                    }
+                }
+            }
+            .font(tokens.small)
+            .fixedSize()
+            // 13e E8 — the bulk half of *"remove / add them"*. The
+            // rows are the tags the SELECTION actually wears, so the
+            // menu never offers an act that would do nothing (P-2);
+            // with none, there is no menu at all.
+            let worn = model.tagsOn(selectedPosts)
+            if !worn.isEmpty {
+                Menu(tokens.chromeLabel("Untag \(selectedPosts.count) notes")) {
+                    ForEach(worn, id: \.id) { tag in
+                        Button(tag.path) {
+                            let ids = Array(selectedPosts)
+                            Task { await model.removeTag(tag.id, from: ids) }
+                        }
+                    }
+                }
+                .font(tokens.small)
+                .fixedSize()
+            }
+            // 13n-c U3 (VX-156 item 2; mockup §2) — SHARE THE PICK: THE
+            // grant sheet pre-filled with these notes, in the listing's
+            // order; ONE act mints them on one stamp (one row in Shared
+            // places). R-AIR-8: only while an approved client exists.
+            if let road = mcpShareRoad, road.canShare {
+                Button(tokens.chromeLabel(MCPShareCopy.shareNotes(selectedPosts.count))) {
+                    road.open(MCPGrantOpening(
+                        place: .notes(selectedNotesInListOrder), origin: .place))
+                }
+                .font(tokens.small)
+                .fixedSize()
+            }
+            // 13l Act 2 (item 3) — her ruling's third clause, built on
+            // the selection this bar already reads. ONE confirmation
+            // naming the count and ONE receipt, which is why the whole
+            // pick goes to the host as one ask rather than N asks.
+            Button(
+                tokens.chromeLabel(
+                    "Delete \(selectedPosts.count) notes\u{2026}"),
+                role: .destructive
+            ) {
+                Task { pendingDelete = await NoteDeletion.ask(
+                    session: session, postIDs: selectedNotesInListOrder) }
+            }
+            .font(tokens.small)
+            .fixedSize()
+            Spacer(minLength: 0)
+        }
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var listBody: some View {

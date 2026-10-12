@@ -185,8 +185,13 @@ struct TutorialMCPChapterTests {
             // "The last lesson in this chapter shows how to watch it, answer it
             // and undo it" — true only while that lesson stays LAST (JOB 4
             // seats her "how to use it" before it — P-13nc-U6-9).
-            #expect(text.contains("The last lesson in this chapter shows how to watch it, answer it and undo it."))
+            // 13n-c UX walk W-UX-17 (A JUSTIFIED EDIT, the ritual): Read shows
+            // no lesson titles, so the pointer NAMES the lesson ("The last
+            // lesson in this chapter shows how…" before).
+            #expect(text.contains("The chapter's last lesson, \u{201C}\(try #require(lessons.last))\u{201D}, shows how to watch it, answer it and undo it."))
             #expect(lessons.last == "seeing, answering, undoing")
+            // W-UX-17: "way in" is said once ("Variorum calls its way in the door" before).
+            #expect(text.components(separatedBy: "way in").count - 1 <= 1)
 
             // THE TRUTH. "it stays shut until you open it" — the switch and the
             // open book are both OFF on a fresh store.
@@ -282,7 +287,9 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("one note; one book, with its notes now and any added to it later; or a whole wing"))
             // The wing and the open book never overclaim: the exceptions are
             // named, and "the next lesson" really is the one that names them.
-            #expect(text.contains("everything in it, except what always asks (the next lesson)"))
+            // W-UX-17 (A JUSTIFIED EDIT, the ritual): the exceptions are named
+            // where they are pointed at — Read shows no lesson titles.
+            #expect(text.contains("everything in it, except what always asks: your daily Journal's entries and anything Private (the next lesson)"))
             #expect(text.contains("read everything, always, again except what always asks"))
             #expect(lessons[3] == "what always asks")
             for duration in MCPGrantRule.Duration.allCases {
@@ -407,7 +414,8 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("Other books with date-stamped entries share like any book"))
             #expect(CollectingCopy.journalTraitValue.hasPrefix("date-stamped"),
                     "the trait, by the Book Settings row's own word")
-            #expect(text.contains("An entry \u{2318}J made keeps asking even if you later file it in another book."))
+            // W-UX-17 (A JUSTIFIED EDIT, the ritual): "An entry ⌘J made" read oddly.
+            #expect(text.contains("An entry made with \u{2318}J keeps asking even if you later file it in another book."))
             #expect(text.contains("Snippets can't be reached through the door at all"))
             #expect(text.contains("Snippets is the one room every wing shares"))
             let wingChord = try #require(CapabilityRegistry.capability(.switchWing).shortcutLabel)
@@ -444,7 +452,7 @@ struct TutorialMCPChapterTests {
             let trait = try ops.createReading(name: "dream journal", kind: .book, profile: "journal")
             let dream = try note(ops, "the flood dream", in: trait.id)
             #expect(try await reachers(db, dream) == ["claude-code"], "a date-stamped book shares like any book")
-            // "An entry ⌘J made keeps asking even if you later file it in another book."
+            // "An entry made with ⌘J keeps asking even if you later file it in another book."
             let another = try ops.createOrOpenJournalEntry(entryDate: "2026-07-02").container
             _ = try ops.addPostToReading(another.id, to: trait.id)
             #expect(try await reachers(db, another.id).isEmpty, "a ⌘J entry keeps asking wherever it's filed (D-1)")
