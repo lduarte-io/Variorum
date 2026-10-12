@@ -457,6 +457,11 @@ struct MCPShareFacesTests {
         let change = MCPReachPopover.changeOpening(client, try #require(viaWing.grant))
         #expect(change.place == .wing("") && change.replacing == ["g-wing"])
         #expect(change.rung == .suggest && change.duration == .connection && change.client?.id == "c")
+        // 13n-c UX walk W-UX-5 (T-17's FACE): a wider grant's Revoke says
+        // WHICH grant it takes; the place's own keeps the plain verb.
+        #expect(MCPShareCopy.revokeLabel(viaWing) == "Revoke the Home wing grant")
+        #expect(MCPShareCopy.revokeLabel(viaBook) == "Revoke the grant on \u{201C}the lightning thief\u{201D}")
+        #expect(MCPShareCopy.revokeLabel(own) == CapabilityRegistry.capability(.mcpRevokeGrant).verb)
     }
 
     // MARK: - The in-note indicator's state (VX-164)

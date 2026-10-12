@@ -184,6 +184,20 @@ nonisolated enum MCPShareCopy {
     }
     static let change = "Change\u{2026}"
     static let revoke = "Revoke"
+    /// **13n-c UX walk W-UX-5** (T-17's FACE — its design, P-13nc-U3-6, is
+    /// ruled and untouched): on a row whose reach comes THROUGH a wider grant,
+    /// Revoke takes back that wider grant — so the button says which ("Revoke
+    /// the Home wing grant", "Revoke the grant on “the lightning thief”"),
+    /// never a bare "Revoke" that looks like the place's own. The place's own
+    /// grant keeps the plain verb. PROVISIONAL words, her copy pass.
+    static func revokeLabel(_ reach: MCPPlaceReach) -> String {
+        guard let grant = reach.grant, let through = reach.throughTitle else { return revoke }
+        switch grant.scopeKind {
+        case .wing: return "Revoke the \(through) wing grant"
+        case .book: return "Revoke the grant on \u{201C}\(through)\u{201D}"
+        case .note: return revoke
+        }
+    }
     static let openBookNote = "The open book is switched in Settings \u{25B8} MCP."
 
     // MARK: - The in-note indicator (R-AIR-7)

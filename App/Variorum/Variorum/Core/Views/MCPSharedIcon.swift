@@ -109,7 +109,8 @@ struct MCPReachPopover: View {
                                 close()
                                 road.open(MCPReachPopover.changeOpening(reach.client, grant))
                             }
-                            Button(CapabilityRegistry.capability(.mcpRevokeGrant).verb) {
+                            // W-UX-5: a wider grant's Revoke says which grant.
+                            Button(MCPShareCopy.revokeLabel(reach)) {
                                 close()
                                 Task {
                                     await road.revoke([grant.id])
