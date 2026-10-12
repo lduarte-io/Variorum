@@ -522,6 +522,11 @@ nonisolated enum MCPPaneCopy {
     static func wingDetail(_ name: String) -> String {
         "everything in \(name) except your daily Journal and anything Private, which always ask"
     }
+    /// 13n-c UX walk W-UX-19 — Change… on a grant whose book is fenced since:
+    /// the book is not offered (no grant reaches it now). PROVISIONAL.
+    static let prefilledBookNotOffered =
+        "That book is your daily Journal or marked Private now, so no grant reaches it \u{2014} "
+        + "choose another book, or Revoke the grant."
     static let noBooks =
         "No book can be shared yet (your daily Journal and Private books are shared one ask at a time)."
 

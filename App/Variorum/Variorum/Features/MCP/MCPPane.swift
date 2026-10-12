@@ -50,6 +50,9 @@ struct MCPPane: View {
         .mcpRevokeGrant, .mcpCopySetupCommand, .mcpGrantAccess,
         // 13n-c U4: Waiting's Answer… (arrival X — the brief §5).
         .mcpOpenAsk,
+        // 13n-c UX walk W-UX-19: every Shared-with-AI row's Change… (a new
+        // renderer is a new line).
+        .mcpChangeGrant,
     ]
 
     /// 13n-c U4 — where ⌥⌘, lands the pane when an ask waits.
@@ -205,7 +208,12 @@ struct MCPPane: View {
         .mcpAskSheet(door: door, opening: $answering, seam: .pane)
         // 13n-c Stage B R1 B3: a grouped row's "and N more ›".
         .sheet(item: $members) { group in
-            MCPSharedMembersSheet(door: door, group: group, tokens: tokens) { members = nil }
+            // W-UX-19: a member's Change… closes the list and opens THE
+            // replace sheet on that one grant here.
+            MCPSharedMembersSheet(door: door, group: group, tokens: tokens, done: { members = nil }) { opening in
+                members = nil
+                granting = opening
+            }
         }
     }
 
@@ -263,12 +271,16 @@ struct MCPPane: View {
     @ViewBuilder
     private func sharedGroup(_ group: MCPSharedGroup) -> some View {
         if group.isGroup {
-            MCPSharedGroupView(group: group, tokens: tokens, showMembers: { members = group }) {
+            MCPSharedGroupView(
+                group: group, tokens: tokens, showMembers: { members = group },
+                change: { Task { granting = await door.changeOpening(act: group) } }
+            ) {
                 door.revoke(grantIDs: group.grantIDs)
             }
         } else {
             MCPSharedRowView(
-                row: group.lead, distinguisher: Self.distinguisher(group.lead, distinguishers), tokens: tokens
+                row: group.lead, distinguisher: Self.distinguisher(group.lead, distinguishers), tokens: tokens,
+                change: { Task { granting = await door.changeOpening(group.lead) } }
             ) { door.revoke(grantID: group.lead.grant.id) }
         }
     }
@@ -489,6 +501,8 @@ struct MCPSharedRowView: View {
     let row: MCPSharedRow
     var distinguisher: String? = nil
     let tokens: VoiceTokens
+    /// 13n-c UX walk W-UX-19: Change… beside Revoke (the replace sheet).
+    var change: (() -> Void)? = nil
     let revoke: () -> Void
 
     var body: some View {
@@ -527,6 +541,10 @@ struct MCPSharedRowView: View {
                 }
             }
             Spacer(minLength: 0)
+            if let change {
+                Button(CapabilityRegistry.capability(.mcpChangeGrant).verb, action: change)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            }
             Button(CapabilityRegistry.capability(.mcpRevokeGrant).verb, action: revoke)
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
         }
@@ -543,6 +561,9 @@ struct MCPSharedGroupView: View {
     /// 13n-c Stage B R1 B3: the road to every member (the host presents the
     /// act's member list).
     var showMembers: () -> Void = {}
+    /// 13n-c UX walk W-UX-19: the act's Change… — covers its grants as its
+    /// one Revoke does.
+    var change: (() -> Void)? = nil
     let revoke: () -> Void
 
     /// How many members the row does not name — the "and N more ›" road's N
@@ -595,6 +616,10 @@ struct MCPSharedGroupView: View {
                 }
             }
             Spacer(minLength: 0)
+            if let change {
+                Button(CapabilityRegistry.capability(.mcpChangeGrant).verb, action: change)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            }
             Button(CapabilityRegistry.capability(.mcpRevokeGrant).verb, action: revoke)
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
         }
@@ -613,6 +638,9 @@ struct MCPSharedMembersSheet: View {
     let group: MCPSharedGroup
     let tokens: VoiceTokens
     let done: () -> Void
+    /// 13n-c UX walk W-UX-19: a member's Change… — THE replace sheet on that
+    /// one grant (the act's own row's Change… covers them all).
+    var change: (MCPGrantOpening) -> Void = { _ in }
     @State private var rows: [MCPSharedRow] = []
     /// 13n-c Stage B R2-2 (B8's class — not loaded is not nothing left): the
     /// act's members have been read at least once.
@@ -657,6 +685,10 @@ struct MCPSharedMembersSheet: View {
                             }
                         }
                         Spacer(minLength: 0)
+                        Button(CapabilityRegistry.capability(.mcpChangeGrant).verb) {
+                            Task { if let opening = await door.changeOpening(row) { change(opening) } }
+                        }
+                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                         Button(CapabilityRegistry.capability(.mcpRevokeGrant).verb) {
                             door.revoke(grantID: row.grant.id)
                         }
@@ -784,13 +816,17 @@ struct MCPFullListSheet: View {
                     // 13n-c U3: one row per act here too.
                     ForEach(shared) { group in
                         if group.isGroup {
-                            MCPSharedGroupView(group: group, tokens: tokens, showMembers: { members = group }) {
+                            MCPSharedGroupView(
+                                group: group, tokens: tokens, showMembers: { members = group },
+                                change: { Task { if let opening = await door.changeOpening(act: group) { grant(opening) } } }
+                            ) {
                                 door.revoke(grantIDs: group.grantIDs)
                             }
                         } else {
                             MCPSharedRowView(
                                 row: group.lead, distinguisher: MCPPane.distinguisher(group.lead, distinguishers),
-                                tokens: tokens
+                                tokens: tokens,
+                                change: { Task { if let opening = await door.changeOpening(group.lead) { grant(opening) } } }
                             ) {
                                 door.revoke(grantID: group.lead.grant.id)
                             }
@@ -815,7 +851,10 @@ struct MCPFullListSheet: View {
         .onChange(of: door.snapshot) { _, _ in Task { await reload() } }
         // Stage B R1 B3: a grouped row's "and N more ›", over this sheet.
         .sheet(item: $members) { group in
-            MCPSharedMembersSheet(door: door, group: group, tokens: tokens) { members = nil }
+            MCPSharedMembersSheet(door: door, group: group, tokens: tokens, done: { members = nil }) { opening in
+                members = nil
+                grant(opening)
+            }
         }
     }
 

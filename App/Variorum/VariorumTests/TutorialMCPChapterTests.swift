@@ -489,6 +489,9 @@ struct TutorialMCPChapterTests {
             let share = CapabilityRegistry.capability(.mcpShareThisNote)
             #expect(text.contains("\(try #require(share.shortcutLabel)) (Edit \u{25B8} \(share.verb))"))
             #expect(text.contains("until it disconnects if it's connected, otherwise once, never always"))
+            // 13n-c UX walk W-UX-19: the pane's rows carry Change… beside Revoke.
+            #expect(text.contains("with \(CapabilityRegistry.capability(.mcpChangeGrant).verb) to raise or lower it and \(CapabilityRegistry.capability(.mcpRevokeGrant).verb) to take it back"))
+            #expect(MCPPane.surfaceCapabilities.contains(.mcpChangeGrant))
             #expect(text.contains("with \(MCPShareCopy.change) to adjust it and \(MCPShareCopy.revokeDoor) to take it back"))
 
             // THE TRUTH — ⌥⌘A's decision (D1): the newest grant's client and

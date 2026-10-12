@@ -2610,7 +2610,10 @@ enum TutorialSeeder {
             + "no grant yet to follow, it opens the grant sheet on this note "
             + "instead.",
 
-            "Every grant shows in Settings \u{25B8} MCP, where Revoke takes it back. "
+            // 13n-c UX walk W-UX-19 (her round-8 ask): every row has Change…
+            // now — the guide says so.
+            "Every grant shows in Settings \u{25B8} MCP, with Change\u{2026} to raise "
+            + "or lower it and Revoke to take it back. "
             + "Sharing several notes at once makes one row there, and one Revoke "
             + "covers them all.",
         ])

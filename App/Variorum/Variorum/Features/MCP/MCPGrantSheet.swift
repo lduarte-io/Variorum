@@ -70,6 +70,9 @@ struct MCPGrantSheet: View {
     @State private var duration: MCPGrantRule.Duration = .always
     @State private var rung: MCPGrantRule.Rung = .read
     @State private var places = MCPGrantPlaces()
+    /// W-UX-19: the places have been read (a prefilled book missing from the
+    /// offer is then said, not left blank).
+    @State private var placesLoaded = false
     /// Derived ONCE per load (never per render — a rung click must not
     /// rebuild a few hundred rows): the book layouts, the wing rows, and the
     /// distinguishers the field, the rows and the confirm wear.
@@ -403,6 +406,13 @@ struct MCPGrantSheet: View {
                     panelWidth: 480)
                 quiet(MCPPaneCopy.aBookDetail(chosenBook?.name))
             }
+            // 13n-c UX walk W-UX-19: Change… on a grant whose book is fenced
+            // since (an inert row) opens on CURRENT facts — the book is not in
+            // the offer, and the sheet says why rather than showing a blank.
+            if placesLoaded, let bookID, chosenBook == nil, case .book(let prefilled)? = opening.place,
+               prefilled == bookID {
+                quiet(MCPPaneCopy.prefilledBookNotOffered)
+            }
             quiet(MCPPaneCopy.fencedBooksNote)
         case .notes:
             // 13n-c U3 (mockup §2): "These 3 notes — parser notes · grammar
@@ -513,6 +523,7 @@ struct MCPGrantSheet: View {
         async let loadedPlaces = door.grantPlaces()
         async let loadedClients = door.clientsByRecentGrant()
         places = await loadedPlaces
+        placesLoaded = true
         bookLayouts = MCPGrantPicker.bookArrangements(places, now: now)
         wingRows = MCPGrantPicker.wingOptions(places, now: now)
         bookDistinguishers = places.bookDistinguishers(now: now)

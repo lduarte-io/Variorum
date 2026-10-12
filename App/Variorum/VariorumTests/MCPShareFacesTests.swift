@@ -233,6 +233,65 @@ struct MCPShareFacesTests {
         }
     }
 
+    /// **13n-c UX walk W-UX-19 (her ask, sitting round 8 — "I see these
+    /// grants here and I can revoke them but I don't see a way to upgrade
+    /// them"):** every Shared-with-AI row carries Change… — THE replace sheet
+    /// pre-filled on exactly that grant (the receipt's idiom, pinned above);
+    /// confirming REPLACES it, so a raised rung lands. A grouped act's
+    /// Change… covers the act as its one Revoke does.
+    @Test func aSharedRowsChangeReplacesItsGrantAndAnActsChangeReplacesTheAct() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let client = try approved(ops)
+            let book = try ops.createReading(name: "the lightning thief", kind: .book)
+            let old = try ops.grantMCPAccess(
+                client.id, .init(rung: .read, scopeKind: .book, scopeID: book.id, duration: .always))
+            let notes = try ["parser notes", "grammar sketch", "a letter"].map { try note(ops, $0).id }
+            let act = try ops.grantMCPAccess(client.id, notes: notes, rung: .read, duration: .once)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            #expect(try await settle { door.snapshot.sharedGroups.count == 2 })
+            #expect(MCPPane.surfaceCapabilities.contains(.mcpChangeGrant), "the pane renders the row's Change…")
+
+            // One grant's row — the book.
+            let bookRow = try #require(door.snapshot.sharedGroups.first { !$0.isGroup }?.lead)
+            let opening = try #require(await door.changeOpening(bookRow))
+            #expect(opening.place == .book(book.id) && opening.replacing == [old])
+            #expect(opening.rung == .read && opening.duration == .always && opening.client?.id == client.id)
+            #expect(opening.origin == .pane, "opened in the pane — its sheet speaks in the pane's caption")
+            // Confirmed RAISED — her "upgrade".
+            door.grant(
+                client, .init(rung: .suggest, scopeKind: .book, scopeID: book.id, duration: .always),
+                replacing: opening.replacing, saying: nil, change: nil)
+            #expect(try await settle {
+                (try? liveGrants(db))?.first { $0.id == old }?.revokedAt != nil
+            }, "the old grant is replaced")
+            let bookGrants = try liveGrants(db).filter { $0.scopeKind == .book && $0.revokedAt == nil }
+            #expect(bookGrants.map(\.rung) == [.suggest], "the raised rung lands")
+
+            // The act's row — three notes, one Change… covering all three.
+            #expect(try await settle { door.snapshot.sharedGroups.contains { $0.isGroup } })
+            let group = try #require(door.snapshot.sharedGroups.first { $0.isGroup })
+            let actOpening = try #require(await door.changeOpening(act: group))
+            #expect(actOpening.place == .notes(notes), "the act's notes, in its order")
+            #expect(Set(actOpening.replacing) == Set(act), "every member replaced — as its one Revoke takes them all")
+            #expect(actOpening.rung == .read && actOpening.duration == .once && actOpening.origin == .pane)
+            door.grantNotes(
+                client, notes, rung: .suggest, duration: .always, replacing: actOpening.replacing,
+                saying: nil, change: nil)
+            #expect(try await settle {
+                let rows = (try? liveGrants(db)) ?? []
+                return act.allSatisfy { id in rows.first { $0.id == id }?.revokedAt != nil }
+            }, "the act's three grants are replaced")
+            let noteGrants = try liveGrants(db).filter { $0.scopeKind == .note && $0.revokedAt == nil }
+            #expect(noteGrants.count == 3 && noteGrants.allSatisfy { $0.rung == .suggest && $0.duration == .always })
+            #expect(try await settle {
+                door.snapshot.sharedGroups.first { $0.isGroup }?.lead.grant.rung == .suggest
+            }, "still one act in the pane, now at suggest")
+        }
+    }
+
     @Test func aPlaceDoorRefusalSpeaksOnTheWindowAndWritesNothing() async throws {
         try await withSession { (session: AppSession, db: AppDatabase) async throws in
             let ops = session.operations

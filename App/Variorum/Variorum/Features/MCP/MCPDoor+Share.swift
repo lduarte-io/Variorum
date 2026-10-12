@@ -77,6 +77,47 @@ extension MCPDoor {
         }
     }
 
+    // MARK: - Change… on a Shared-with-AI row (13n-c UX walk W-UX-19)
+
+    /// **W-UX-19 (her ask, sitting round 8 — "I see these grants here and I
+    /// can revoke them but I don't see a way to upgrade them"):** a row's
+    /// Change… opens THE replace sheet pre-filled on exactly that grant — the
+    /// receipt's and the popovers' idiom (`MCPReachPopover.changeOpening`),
+    /// opened from the PANE (its sheet speaks in the pane's caption). The
+    /// client is read NOW; the sheet reads the target's facts at its open (a
+    /// grant inert since opens on what it can take now — the B2 lesson).
+    func changeOpening(_ row: MCPSharedRow) async -> MCPGrantOpening? {
+        guard let client = await client(row.grant.clientID) else { return nil }
+        var opening = MCPReachPopover.changeOpening(client, row.grant)
+        opening.origin = .pane
+        return opening
+    }
+
+    /// W-UX-19 — an ACT's Change… (a grouped row: several note grants minted
+    /// in one act): it covers the act's grants as the row's one Revoke does —
+    /// every member, read now, in the act's order, replaced in one act.
+    func changeOpening(act group: MCPSharedGroup) async -> MCPGrantOpening? {
+        guard let client = await client(group.lead.grant.clientID),
+              let members = await sharedMembers(group.grantIDs), !members.isEmpty
+        else { return nil }
+        return Self.changeOpening(act: client, members: members)
+    }
+
+    /// One client, read now (nil when gone or the read fails).
+    private func client(_ id: String) async -> MCPClient? {
+        guard let database else { return nil }
+        return (try? await database.read { db in try Queries.mcpClient(db, id: id) }) ?? nil
+    }
+
+    /// The act's replace opening, pure (pinned): WHERE = the members' notes in
+    /// the act's order, the act's rung and duration, replacing EVERY member.
+    nonisolated static func changeOpening(act client: MCPClient, members: [MCPSharedRow]) -> MCPGrantOpening {
+        let lead = members[0].grant
+        return MCPGrantOpening(
+            client: client, place: .notes(members.map(\.grant.scopeID)), rung: lead.rung,
+            duration: lead.duration, replacing: members.map(\.grant.id), origin: .pane)
+    }
+
     // MARK: - ⌥⌘A
 
     /// **⌥⌘A — share the note you're in** (13n-c U3; the brief §4 + mockup
