@@ -2857,3 +2857,36 @@ capture harness alone, 1 / 1.
 | +4b | **HER RULED 4b rides this pass** (sitting round 5): the share sheet's why names a Private-through-book's book via `isNotePrivate` + `privateBooksHolding`, display-only, fence untouched; pin updated. |
 
 Fix pass: a FRESH opus-implementer (the U6 session is past the context cutover); then ONE opus-reviewer round over the fix range (chrome/faces — no editor seam, custody, `Sync/` or default's meaning); then closeout.
+
+## UX-WALK FIX PASS RECORD (LIVE STATUS — the fix implementer owns this section from its first commit)
+
+Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (late evening MDT). Worktree `~/dev/variorum-vx-165`,
+branch `vx-165-13n-c`, from tip `35ebf3e3`. **No revert is in flight unless a line below says so.** Work list = the
+UX-WALK DISPOSITIONS table above (rows 1, 3–18 + "+4b"); EXCLUDED and untouched: W-UX-2 (the approve sheet's pre-pick —
+hers), T-13 (the doors' lifetime — hers), T-17's design, the icon/glyph picks, the editor seam, `Sync/`, custody,
+migrations, `lockstepVersion`, the real store, `/Applications`. Stage FREE and no Variorum instance at start.
+
+| # | Row | Status |
+|---|---|---|
+| FX-0 | Preflight read whole (this plan top to bottom; `13nc-ux-walk.md`; the walk-ux captures for every changed face; `SessionResiliencyProtocol`) | DONE (this commit) |
+| W-UX-1 | BUG: an answered ask's sheet re-presents itself on an equal re-raise — pin RED-first, then the fix | NOT-STARTED |
+| W-UX-6 | The one-wing note rendered nowhere — ⌘L with one wing speaks it (status-line refusal); pin red-on-old | NOT-STARTED |
+| W-UX-14 | A book ask's rung sentence claims only what a book grant allows — copy + truth pin | NOT-STARTED |
+| +4b | The share sheet's always-withheld why names a Private-through-book's book (display-only, `isNotePrivate` + `privateBooksHolding`) | NOT-STARTED |
+| W-UX-3 | The bulk Share door findable at common widths | NOT-STARTED |
+| W-UX-4 | A client row's Revoke: its own verb + a confirm naming the consequence | NOT-STARTED |
+| W-UX-5 | The popover's Revoke on a through-the-wing row names the grant it takes | NOT-STARTED |
+| W-UX-7 | The shared icon's size/weight/contrast at row size | NOT-STARTED |
+| W-UX-8 | The "was let go" line delivered by Waiting, never clipped in the server card | NOT-STARTED |
+| W-UX-9 | The grant sheet's confirm as the ask sheet's filled button | NOT-STARTED |
+| W-UX-10 | The count says what it counts | NOT-STARTED |
+| W-UX-11 | Voice accent in the window-hosted grant sheet, the ask sheet's Once, the popover links | NOT-STARTED |
+| W-UX-12 | The in-note popover kept on-window where possible; the Private lock's contrast | NOT-STARTED |
+| W-UX-13 | Activity's refusal rows speak the act table's words | NOT-STARTED |
+| W-UX-15 | Receipt "in" → "on" (T-11); the wing-move line's breathing room | NOT-STARTED |
+| W-UX-16 | The picker popover sizes to content; "Welcome" said once | NOT-STARTED |
+| W-UX-17 | The guide's copy rows | NOT-STARTED |
+| W-UX-18 | MCP Settings… below Settings…; Terminal's pane description untruncated | NOT-STARTED |
+| FX-F | Finals: Mac suites over every changed face (held stage) + the headless package | NOT-STARTED |
+| FX-V | VERIFY LEG: re-capture the visual rows (7, 8, 9, 11, 12, 15, 16, 18) into `13n-c-screens/walk-ux-fixed/` and read them | NOT-STARTED |
+| FX-X | UNIT CLOSED banner | NOT-STARTED |
