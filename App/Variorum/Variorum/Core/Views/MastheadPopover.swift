@@ -39,6 +39,9 @@ enum QuietFill {
 /// The controls a masthead popover hangs from.
 enum MastheadDropper: Hashable {
     case census, order
+    /// VX-170: the Takes board's `show ▾` (lens-aware Takes, R-VX170-4 — "the
+    /// order-menu/census masthead-popover idiom").
+    case takesShow
 }
 
 /// Each dropper control publishes its bounds; the board's root overlay seats
@@ -105,14 +108,27 @@ struct MastheadPopover: View {
                 .accessibilityAddTraits(row.selected ? .isSelected : [])
             }
         }
-        .padding(.vertical, 5)
-        .lineLimit(1)  // P-8: one line per row, so the width-to-content is never a wrapped one
-        .fixedSize()
-        .background(tokens.surface, in: RoundedRectangle(cornerRadius: 6))
-        .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.line, lineWidth: 1))
-        // A menu-grade shadow (light only — the fully black room, R51,
-        // carries none; the app's own shadow precedent).
-        .shadow(color: .black.opacity(scheme == .dark ? 0 : 0.13), radius: 12, y: 5)
-        .shadow(color: .black.opacity(scheme == .dark ? 0 : 0.07), radius: 1.5, y: 1)
+        .mastheadPopoverChrome(tokens: tokens, scheme: scheme)
+    }
+}
+
+extension View {
+    /// **The popover's FACE, one copy** (VX-170): the vertical inset, one line
+    /// per row, width to content, the surface, the hairline and the
+    /// menu-grade shadow. `MastheadPopover`'s own body wears it unchanged (the
+    /// same modifiers in the same order — a move, not a restyle), and a
+    /// popover whose rows carry more than words (the Takes `show ▾`'s inline
+    /// lens pickers) wears the same face instead of a second copy of it.
+    func mastheadPopoverChrome(tokens: VoiceTokens, scheme: ColorScheme) -> some View {
+        self
+            .padding(.vertical, 5)
+            .lineLimit(1)  // P-8: one line per row, so the width-to-content is never a wrapped one
+            .fixedSize()
+            .background(tokens.surface, in: RoundedRectangle(cornerRadius: 6))
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.line, lineWidth: 1))
+            // A menu-grade shadow (light only — the fully black room, R51,
+            // carries none; the app's own shadow precedent).
+            .shadow(color: .black.opacity(scheme == .dark ? 0 : 0.13), radius: 12, y: 5)
+            .shadow(color: .black.opacity(scheme == .dark ? 0 : 0.07), radius: 1.5, y: 1)
     }
 }

@@ -264,9 +264,28 @@ final class TakesViewModel {
         board.rowDisappeared(blockID)
     }
 
-    /// THE bloom rule (R25) — the board's.
+    /// THE bloom rule (R25) — the board's, read THROUGH the `show ▾` filter
+    /// (VX-170): with no filter it is the board's rule byte-for-byte; under one,
+    /// a collapsed row never blooms and a filtered row blooms its expand set.
     func isBloomed(_ slot: Queries.RenderedBlock) -> Bool {
-        board.isBloomed(slot)
+        lensFilter.isBloomed(slot)
+    }
+
+    /// **VX-170 — the board's `show ▾` filter** (lens-aware Takes), its own
+    /// component (P-9, the `find` shape). Lazy so the composition can reference
+    /// `self`.
+    @ObservationIgnored private(set) lazy var lensFilter = TakesLensFilterController(model: self)
+
+    /// How a row draws under the filter (`.ordinary` with none) — forwarded.
+    func rowShape(_ slot: Queries.RenderedBlock) -> TakesRowShape {
+        lensFilter.rowShape(slot)
+    }
+
+    /// The takes a bloom draws: the filter's expand set on a filtered row, the
+    /// whole active fan everywhere else — forwarded, so every bloom style and
+    /// both pagers ask ONE question.
+    func bloomTakes(_ slot: Queries.RenderedBlock) -> [Variant] {
+        lensFilter.bloomTakes(slot)
     }
 
     /// Expand-all only where it MEANS something (R25's agreed half): the
@@ -492,6 +511,10 @@ final class TakesViewModel {
         // emission racing settle can flicker one observation cycle before
         // the post-commit emission converges it.
         authority.settle(isPending: { autosave.pending[$0] != nil })
+        // VX-170: the `show ▾` filter re-reads the fresh projection BEFORE the
+        // landings below resolve against it (a landing onto a pane the filter
+        // hides opens its block — the filter must already know the shapes).
+        lensFilter.projectionAdopted()
         // Columns referencing lenses that died drop back to scratch with
         // the lens's last-known picks LOST deliberately (the lens was the
         // durable home; a deleted lens's thread is gone — its takes remain
@@ -583,6 +606,10 @@ final class TakesViewModel {
     // MARK: - Focus (the ONE live editor migrates)
 
     func focus(_ pane: PaneKey) {
+        // VX-170: the ring never lands on a pane the `show ▾` filter hides —
+        // that pane's block opens first (a click only ever reaches a shown
+        // pane, so this is the landings', reveals' and find's door).
+        lensFilter.reveal(pane)
         // 17o batch b (U-20): armed BEFORE the report, because the report
         // itself is what makes this block current — read after it, the
         // memory would answer about the pane we are about to open rather
@@ -2179,6 +2206,9 @@ final class TakesViewModel {
     /// call. Internal for the choreographer; everything else focuses
     /// through `focus(_:)`.
     func landAuthorityFocus(_ pane: PaneKey) {
+        // VX-170: the entry ring lands where she was — and if the `show ▾`
+        // filter folded that block to a line, the block opens (`focus`'s rule).
+        lensFilter.reveal(pane)
         // 17o batch b (U-20): the N9 landing enters the note's current block
         // — and enters it WHERE SHE WAS. (This door deliberately does not
         // report the fact; it is landing ON the fact.)
@@ -2276,8 +2306,10 @@ final class TakesViewModel {
     /// The tallest card this block's fan would render at full length —
     /// the drag's ceiling, and the "past it ⇒ full length" snap.
     func naturalSlotHeight(_ blockID: String) -> CGFloat? {
-        board.naturalSlotHeight(
-            variantIDs: (projection.fans[blockID] ?? []).map(\.id))
+        // VX-170: the takes the bloom DRAWS (a filtered row's expand set).
+        let takes = projection.slots.first { $0.blockID == blockID }
+            .map(bloomTakes) ?? projection.fans[blockID] ?? []
+        return board.naturalSlotHeight(variantIDs: takes.map(\.id))
     }
 
     /// Her hand (the 17p batch-a ladder's final word, after the sanity pass's
@@ -2314,7 +2346,12 @@ final class TakesViewModel {
     func pageTarget() -> (key: String, limit: Int)? {
         let blockID = focusedPane?.blockID
             ?? projection.slots.first { expandedBlocks.contains($0.blockID) }?.blockID
-        guard let blockID, let fan = projection.fans[blockID], fan.count > 1 else { return nil }
+        // VX-170: the takes the bloom DRAWS — a filtered row pages its expand
+        // set, exactly as the board renders it (one paging brain).
+        guard let blockID,
+              let slot = projection.slots.first(where: { $0.blockID == blockID }),
+              case let fan = bloomTakes(slot), fan.count > 1
+        else { return nil }
         switch projection.fanStyle {
         case .carousel, .slotSplit:
             return (blockID, max(fan.count - beneathCount, 0))
