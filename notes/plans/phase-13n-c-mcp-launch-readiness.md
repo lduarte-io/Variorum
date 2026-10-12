@@ -815,6 +815,14 @@ proceeds): red-on-old pin staging the corner, then the guard change. The R2 revi
 now-confirmed finding itself (the F1 road); implementer sanity pass after. She also confirmed the save_version
 rung answer (write new — append-only) needed no change.
 
+**Fifth round (same sitting): 4b RULED YES** — the share sheet's always-withheld why NAMES the book when a
+note's Private mark comes through a Private book, and says where the mark is changed (the lock popover's shape:
+"…is in “diary”, which is marked Private… The book's mark is changed in its Book Settings."). Mechanism as the
+implementer proposed at its 4b STOP: the sheet's why line reads the SAME existing pair the lock popover reads
+(`Queries.isNotePrivate` + `Queries.privateBooksHolding`) — DISPLAY-ONLY; the fence stays `mcpNoteFacts`'s,
+untouched, no new derivation. Rides the UX walk's fix pass (the walk is running; sequential cast). Exact words
+PROVISIONAL for her copy pass.
+
 ## PROVISIONALs (running — logged at the merge as #211)
 
 - **P-13nc-1** — D-1 (the ⌘J edge kept).
