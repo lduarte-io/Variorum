@@ -2957,8 +2957,8 @@ by a deduped re-raise), `MCPDoor.ask(_ opening:)`, `MCPAskBoard.waits`, and the 
 "Nothing yet". (3) **W-UX-6's monitor** — `OneWingChord` is an APP-WIDE local key monitor installed at launch: it consumes only
 a classified ⌘L while `.switchWing` is unavailable; confirm nothing else is swallowed. (4) **W-UX-19's act Change…** —
 `changeOpening(act:)` reads every member NOW and replaces EVERY member grant; `namedNotes` drops a gone note from the sheet
-while `replacing` still names its grant — confirm the bulk op revokes a replaced grant whose note is gone rather than
-refusing. (5) **W-UX-16's `fixedSize`** on `SearchPickerPanel` — every sectioned/sourced host now resizes its popover with its
+while `replacing` still names its grant — traced: `revokeReplacedMCPGrants` checks only that each replaced grant is
+this client's, so a gone member's grant is revoked and the live members re-minted in the one act (confirm it). (5) **W-UX-16's `fixedSize`** on `SearchPickerPanel` — every sectioned/sourced host now resizes its popover with its
 rows (measured); D-W1's reservation lasts only until the first answer. (6) **W-UX-9's style revision** — the system styles
 were chosen partly on a test artifact (row 9 says so). (7) **The flipped-selectable-text observation** (FX-V) — not
 reproduced, not this pass's code; a watch item.
