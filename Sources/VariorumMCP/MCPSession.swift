@@ -56,7 +56,7 @@ final class MCPSession: @unchecked Sendable {
     /// merge button, VX-169's commit), and the undo sentence says what is
     /// true of a commit — it stays (append-only, I5; her own commits are
     /// outside structural undo too, and `edit_take`'s brackets stay when its
-    /// edit is undone — P-13nb-U3-2).
+    /// edit is undone — P-13nb-U3-2). 1,941 of the 2,000 characters after it.
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
         open only while Variorum runs. A new client is a connection request until the author approves \
@@ -84,7 +84,7 @@ final class MCPSession: @unchecked Sendable {
         If a call is refused, don't retry around it: tell the author what you need (Variorum may \
         already have asked them).
         Never call show_in_app unless the author asks you to show them something.
-        Every change you make is one undo for the author, named after you; commits, theirs and yours, stay.
+        Every change you make is one undo for the author, named after you; commits stay.
         """
 
     /// The advice's length bound (characters) — stated and pinned. 13n-c: her

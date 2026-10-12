@@ -69,9 +69,11 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
   app's faces `452526e0` + `251e8b17` · the DRILL PROVEN on the dev store + the final suites green (`3601ef81` and the
   close commit). Owed to the orchestrator: the PROVISIONALs' QUESTIONS entries and the canon deltas at the merge (the
   UNIT 1 RECORD's "OWED" list); the ladder over the run's diff (the secret's accept path is FABLE's — named there).
-- Unit 2 (VX-169 + VX-174, the edit-rung door writes): **IN-PROGRESS** (opus-implementer, 2026-10-12) — the
-  pieces table and the argued calls live in the UNIT 2 RECORD below; settled design: the kickoff file's VX-169
-  settlement + R-MERGE-1 + the ticket bodies.
+- Unit 2 (VX-169 + VX-174, the edit-rung door writes): **UNIT CLOSED — DONE** (opus-implementer, 2026-10-12):
+  start `93b3e083` · core `7240827c` · wire + the app's word tables `8cc8af87` · the guide + faces `ec95ab62` · the
+  close (this commit). Headless by design — no live client round was run (the UNIT 2 RECORD's first line). Owed to
+  the orchestrator: the PROVISIONALs' QUESTIONS entries and the canon delta at the merge (its OWED list); the ladder
+  over the run's diff.
 - Unit 3 (VX-172 + VX-171, the lens doors): **NOT-STARTED** — settled design: the vx-170 shape file's
   VX-172 adjacency + R-VX171-2.
 - Unit 4 (VX-170, lens-aware Takes): **NOT-STARTED** — settled design: the vx-170 shape file, whole.
@@ -272,4 +274,127 @@ Code read: `MCPWriteTools{,+Edit,+Carriage}`, `MCPWriteSupport`, `MCPToolCatalog
 | P1 | core: `commit(… guardedBy:)`; `Operations+MCPDeliberate` (the client commit's message, `chooseTake`, `adoptLensAsNote` — each guard-first in its own transaction, the two pointer acts ONE client-named undo entry each); `Queries.mcpContainerOf(lens:)`; `MCPWriteAct` + `.commit`/`.choice`/`.lensAdoption` + `isUndoable`; her doors' row work extracted byte-for-byte (`choosablePlacement`, `adoptSwapRows`, the pointer/lens restore bodies) so ONE brain serves both; core state-transition pins | DONE (this commit) — `MCPDeliberateActsTests` 17/1; the extraction's parity proof: `VersionOperationsTests` (the adopt-swap pins) + `RedoStackTests` + every `chooseVariant`/`commit` caller GREEN UNMODIFIED — the whole core target headless **2,675/304** (baseline 2,658/303), only the standing gated skips |
 | P2 | the wire: `save_commit` · `choose_take` · `adopt_lens` declared at EDIT, parsed, guarded (snapshot decision + in-transaction re-decision, `MCPWriteTools+Deliberate`); the advice's two truths; socket-road pins (each act, each refusal arm, the once grant, the suggest/write-new PROOF extended) — PLUS the app's word tables moved here from P3 (P1's new `MCPWriteAct` cases left the Mac's exhaustive receipt switch uncompilable; this commit closes that one-commit gap) | DONE (this commit) — `MCPDeliberateServerTests` 7/1; justified edits (the ritual): the catalog walk (`MCPServerTests`), the edit-rung PROOF + its listing pin (`MCPEditServerTests`: the three tools, a lens of hers, the snapshot reads `lens`/`lens_choice`), the suggest PROOF (`MCPWriteServerTests`: every catalog door tried); **`VariorumMCPTests` 110/16 headless** (baseline 103/15); the core no-op moved to the SHOWN take (P-VX168-U2-5) with its pins, core suites re-run green; the Mac target BUILDS (`xcodebuild build`, `DerivedData/vx168-u2`) |
 | P3 | the app's faces: (the word tables landed in P2) the guide's two sentences (lesson 1's undo promise, lesson 3's Edit step); Mac pins for the words, the receipt's undo rule and the guide's truths + the Mac batch under a held stage claim | DONE (this commit) — `MCPDeliberateFacesTests` 4/1 (new); `TutorialMCPChapterTests` gains the two sentences' prose + TRUTH pins (additions beside the standing pins — none edited); the Mac batch under the held claim `vx168-u2` (released): **95/9** (MCPDeliberateFaces · MCPAskAndReceipt · MCPWingFaces · MCPEditFaces · MCPPane · MCPAsksWait · MCPShareFaces · MCPNavigation · TutorialMCPChapter) + **98/12** (TutorialBookShape · TutorialDoor · TutorialCurrency · TutorialBooksLesson · TutorialPrivacyChapter · TutorialFannedMatrix · TutorialFurnitureFold · TutorialLookingActs — her adopt door through the extraction · TakesBoard — her choose/adopt from the board · SampleLibraryWelcome · LaunchFurniture · TutorialBuildFlavor), all green, zero skipped |
-| P4 | close: the final headless suites, the argued calls/PROVISIONALs/OWED below, Unit 2 → DONE | NOT-STARTED |
+| P4 | close: the final headless suites, the argued calls/PROVISIONALs/OWED below, Unit 2 → DONE | DONE (this commit) — the whole package headless: **`VariorumMCPTests` 110/16 · `VariorumCoreTests` 2,675/304 · `StringsWorkbookTests` 40/6**, all green (the run before it: ONE transient socket "Broken pipe" in a read-only U4 test — OWED 5); the advice trimmed to 1,941 characters after it, `VariorumMCPTests` re-run 110/16 |
+
+**What this unit did NOT do (said first):** (1) **no live client round** — the unit is headless by design (the brief);
+no real client has yet saved a commit, chosen a take or made a lens the note over the socket against the dev-store
+app, and her ⌥⌘Z over those acts is pinned headless only (the orchestrator's call whether the ladder wants a live
+leg). (2) **No Mac mutation run** of the receipt's undo-claim rule — its pins are exact string equalities, so a
+dropped rule fails them by construction; the six core/wire mutations below were run. (3) **No `notes/QUESTIONS.md`
+entry and no canon edit** (the merging session's ledgers — OWED). (4) **The grant sheet's edit sentence
+(`MCPPaneCopy.rungDetail(.edit)`: "it can also edit takes — with a commit before and after every change…") and the
+pane toggle's blurb (`enableBlurb`: "…a client changes your text only where you grant it edit, with a commit before
+and after every change") are UNCHANGED** — argued not falsified (choosing a take or making a lens the note writes no
+take's text; the same looseness has stood for `delete_block` since 13n-b U3) and flagged for her copy pass (OWED 6).
+(5) **No `expected`-state precondition** on `choose_take`/`adopt_lens` — her doors carry none, a pointer move loses
+nothing and is one undo; not invented. (6) Lesson 7's "⌥⌘Z takes a client's act back, one act at a time" left as
+it stands (it says what ⌥⌘Z does; lesson 1 now states the exception).
+
+### The design calls, argued
+
+1. **`save_commit` registers NO undo entry — the most spec-defensible reading, and the only one the mechanism
+   allows tonight.** R-13n-6's own letter is *"Every MCP write registers structural undo/redo **exactly as her
+   gestures do**"* — and her commit gesture registers none (AppSpec §9: structural undo EXCLUDES commits). A commit is
+   append-only (I5), and `commit_point` carries no tombstone column: the only inverses are a physical DELETE of a
+   synced row (breaks S2) or a new column (a §12 lockstep event — off tonight by the same mechanism that settled the
+   kind). P-13nb-U2-4's "every MCP write" widened R-13n-6 to acts that HAVE tombstones (comment, tag, lens, book); a
+   commit has none. The precedent that matches is P-13nb-U3-2: `edit_take`'s bracket commits already stay when ⌥⌘Z
+   walks the edit back. **Every face was made true of it:** `MCPWriteAct.isUndoable` (false for `.commit` alone); the
+   receipt says "⌥⌘Z undoes" only over a run holding an undoable act (a commit-only run: "‹client› committed a take");
+   the advice's undo sentence ("…named after you; commits stay."); the guide's lesson 1 promise ("…except a commit,
+   which stays, as yours do.").
+2. **`save_commit` is her commit, exactly** (`commit(… guardedBy:)` — the seam her other ops carry, nil on her
+   doors): `kind='manual'` (the settled kind), the stored message `"‹client›: ‹message›"` through the one
+   savepoint-name rule (`Operations.mcpCommitMessage`), an ARCHIVED take may commit (her 2026-07-05 ratification), a
+   locked take and a seal refuse with the op's own words, and §10's manual-commit major-revision stamp lands as hers
+   does (P-VX168-U2-2 states the consequence).
+3. **`choose_take` is her ✓** (`chooseVariant`'s guards extracted byte-for-byte as `choosablePlacement`): the block
+   live and placed, the note unsealed, the take live, ACTIVE and this block's; a LOCKED take may be chosen (the lock
+   guards the buffer). ONE client-named entry ("‹client›'s take choice") restoring the slot's exact pre-image pointer —
+   nil included — through the one pointer brain (`revertChosenPointers`); a pointer move: no text, no touch, no churn.
+4. **`adopt_lens` is her "✓ Make this the note"** — `adoptLensPreservingChosen` (R89/R92: adopting SWAPS, never
+   destroys — the outgoing chosen kept as a "chosen until …" lens), NOT the bare `adoptLens` (no door renders it; only
+   tests call it). Its body extracted byte-for-byte as `adoptSwapRows`. ONE client-named entry ("‹client›'s lens
+   adoption") whose inverse and redo each run in ONE transaction (`restoreChosenPointers` + the lens tombstone/revive
+   bodies extracted from `save_lens`'s own undo) — P-VX168-U2-4.
+5. **One brain, her pins as the parity proof:** every extraction (`choosablePlacement`, `adoptSwapRows`,
+   `restoreChosenPointers`, `tombstoneSavedLens`/`reviveSavedLens`) is a byte-for-byte move with her door calling the
+   moved body; `VersionOperationsTests` (the adopt-swap), `RedoStackTests`, every core `commit`/`chooseVariant` caller,
+   the app's `TutorialLookingActsTests` (her adopt door) and `TakesBoardTests` ran green UNMODIFIED.
+6. **The edit rung's two decisions, as every edit act** (AF-10 (a)): the snapshot (`onNote`, `spendsAfter: false`)
+   speaks the refusal and raises the ask; the `WriteGuard` re-resolves the note from the take / the lens INSIDE the
+   act's transaction, decides at EDIT, and spends any once grant there (a refused act rolls its spend back — pinned;
+   an authorized no-op spends it — P-13nb-U3-3's letter, carried).
+7. **Addressing:** `take_id` alone (`save_commit`, `choose_take` — the take names its block, as `edit_take`'s does);
+   `lens_id` alone (`adopt_lens` — the lens names its note; `Queries.mcpContainerOf(lens:)`, live lenses only). A dead,
+   foreign, version's or scraps-group id answers the ONE not-shared answer, byte-identical to an id naming nothing
+   (pinned — no oracle).
+8. **Receipts' "Open ›":** a commit lands her on the block (Write); a choice on the block's takes (Takes — where her ✓
+   lives); an adoption on the note.
+
+### Mutation checks (each applied to the committed tree, its suites run, restored by `git checkout --`; tree clean after)
+
+M1 `chooseTake`'s guard dropped → red (the guard pin + the socket fence pin) · M2 `adoptLensAsNote`'s guard dropped →
+red (same pair) · M3 `commit`'s guard dropped → red (the guard pin, the fence pin, the once-grant pin) · M4 the choice's
+no-op dropped → red (3 pins) · M5 the adoption's undo leaving its lens → red (core + socket) · M6 the lens no-op
+dropped → red (core + socket).
+
+### PROVISIONALs (each wants a `notes/QUESTIONS.md` entry at the merge — the merging session's ledger)
+
+- **P-VX168-U2-1 — `save_commit` appends ALWAYS (no dedupe on byte-identical text).** Argued: her ⌘S never dedupes
+  (the auto occasions' dedupe is an INSURANCE convention, §9; a deliberate commit's message is new even when the text
+  is not — "fact-checked, no changes" is the point). Options: (a) as built; (b) dedupe against the take's last commit
+  TEXT (the auto occasions' rule — `changed: false`, nothing written); (c) dedupe an exact repeat only (same text AND
+  same message as the last commit — swallows a retried call).
+- **P-VX168-U2-2 — a client's commit stamps the major revision** (AppSpec §10: "A manual commit also stamps" —
+  the settled `kind='manual'` carries it), so an AI's deliberate commit moves her "edited (meaningful)" sort as hers
+  does (an `edit_take` can already cross her 80% churn). Options: (a) as built; (b) a client's commit never stamps (a
+  split rule: manual for provenance, quiet for the sort).
+- **P-VX168-U2-3 — `adopt_lens` with nothing to adopt writes NOTHING** (no "chosen until" lens either — her door mints
+  one regardless; the mobile door's double-tap latch already treats a redundant preservation lens as unwanted).
+  Options: (a) as built; (b) her door exactly — the preservation lens minted even when no pointer moves.
+- **P-VX168-U2-4 — `adopt_lens`'s ONE undo walks back the preservation lens too** (pointers + the lens in one
+  transaction; the redo revives exactly that lens with the choices that died on the undo's stamp; a lens she deleted
+  since stays deleted — pinned). Her door's entry restores the pointers only ("the lens class — trivially deleted");
+  on the wire a minted lens IS undoable (`save_lens`), so the act's lens walks back with the act. Options: (a) as
+  built; (b) her door's entry exactly — pointers only, the "chosen until" lens stays after ⌥⌘Z.
+- **P-VX168-U2-5 — the no-op is the SHOWN take** (the structural ops' rendered rule — the wire's own `chosen` fact):
+  choosing the take a block already shows, or adopting a lens that agrees with what the note shows, writes nothing —
+  so no act lands that she could not see (a nil pointer whose default the client names stays nil; pinned). Options:
+  (a) as built; (b) the raw pointer — such a call writes the pointer (pinning it), with an undo entry and a receipt
+  for an invisible change.
+- **P-VX168-U2-6 — `save_commit`'s message is REQUIRED** (non-blank): it is what the commit is for, and the stored
+  "‹client›: …" is the provenance (the op keeps the rule total: a blank message stores the client's name alone).
+  Options: (a) as built; (b) optional — a message-less commit stored as the client's name alone.
+- **P-VX168-U2-7 — the names and words** (her copy pass, 13s-a-sweepable): the tool `adopt_lens` (options:
+  `apply_lens_as_chosen` — the ticket's prose; `make_lens_the_note` — her door's words), the three titles and
+  descriptions; undo labels "‹client›'s take choice" / "‹client›'s lens adoption"; receipts "committed a take" ·
+  "made N commits" · "chose a take" / "chose N takes" · "made the lens “X” the note" / "adopted N lenses"; Activity
+  "committed a take in “…”" / "made N commits in “…”" · "chose a take in “…”" · "made a lens of “…” the note" (refused:
+  "committing / choosing a take in …", "making a lens of … the note"); the guide's two sentences; the advice's edits.
+
+### OWED (for the orchestrator)
+
+1. **The QUESTIONS entries** above (P-VX168-U2-1…7) at the merge.
+2. **The canon delta at the merge** (AppSpec §12's THE MCP DOOR line, the 13n-b/13n-c precedent): the edit rung's
+   deliberate acts — `save_commit` (her commit: `kind='manual'`, the client's name prefixed, append-only — NO undo
+   entry, receipts never claim one), `choose_take` and `adopt_lens` (her ✓ and her "✓ Make this the note" — R-MERGE-1
+   — one client-named undo each, guard inside the act's transaction). §9 needs no new op line (the acts are §9's
+   existing ops; `commit` gains only the caller-guard seam the others carry).
+3. **The ladder's map:** `Sources/VariorumCore/Operations/Operations+MCPDeliberate.swift` (the three acts, the undo
+   story) · the extractions in `Operations+Placement.swift` (`choosablePlacement`), `Operations+Versions.swift`
+   (`adoptSwapRows`, `restoreChosenPointers`, `adoptUndoHalves` made internal), `Operations+MCPWrites.swift`
+   (`tombstoneSavedLens`/`reviveSavedLens`; `MCPWriteAct` + `isUndoable`), `Operations+Variant.swift` (`commit(…
+   guardedBy:)`), `Queries/MCPEditQueries.swift` (`mcpContainerOf(lens:)`) · `Sources/VariorumMCP/MCPWriteTools+
+   Deliberate.swift` + the catalog + `MCPSession.instructions` · the app's `MCPPaneCopy` (Activity words; the receipt
+   phrases and the undo-claim rule) + the guide's lessons 1 and 3 (`TutorialSeeder`). No `Sync/`, custody/keychain,
+   editor-seam or schema line in this unit's diff.
+4. **Unit 3's room:** the advice is at **1,941 / 2,000** characters — a Unit 3 advice sentence must fit in 59.
+5. **A transient, recorded for a watch (the orchestrator's call):** one whole-package run saw
+   `MCPCarriageServerTests.archivedReachMirrorsTheFacetAndLensesRead` fail with *"[-32001] Transport error: … Broken
+   pipe"* — a read-only test (read_note, search) on roads this diff does not touch; green alone twice, in the MCP
+   target alone (twice), and in the next whole-package run. A socket-road flake under whole-package parallel load
+   (VX-134 is the core-side watch; this one is the MCP socket road — possibly a ticket).
+6. **Noticed, for her copy pass / the UX pass (not this unit's):** the grant sheet's edit sentence and the pane
+   toggle's blurb name editing takes only — neither says an edit grant can now choose takes or make a lens the note
+   (not falsified — see the first line — but she grants edit reading that sheet).
