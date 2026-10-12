@@ -169,6 +169,25 @@ struct MCPGrantSheetTests {
         #expect(percy?.detail == "variorum wing \u{00B7} worksheets \u{00B7} 1 note \u{00B7} edited Oct 7")
     }
 
+    /// **13n-c UX walk W-UX-16:** the Welcome sherlock said "Welcome" twice —
+    /// its context line's shelf and its distinguisher. A fact the
+    /// distinguisher says is said once, there (emphasized).
+    @Test func aDistinguisherIsNeverSaidTwiceOnItsRow() {
+        let pair = MCPGrantPlaces(
+            books: [
+                book("w", "the adventures of sherlock holmes", shelf: "s1", notes: 13, edited: 5),
+                book("r", "the adventures of sherlock holmes", shelf: "s2", notes: 2, edited: 6),
+            ],
+            shelves: [shelf("s1", "Welcome", position: "a"), shelf("s2", "research", position: "b")],
+            wings: [])
+        let rows = MCPGrantPicker.bookArrangements(pair, now: now, calendar: utc, locale: enUS)[0]
+            .sections.flatMap(\.options)
+        let welcome = rows.first { $0.id == "w" }, research = rows.first { $0.id == "r" }
+        #expect(welcome?.annotation == "Welcome" && research?.annotation == "research", "the shelf rung tells them apart")
+        #expect(welcome?.detail == "13 notes \u{00B7} edited Oct 5", "\"Welcome\" once — as the distinguisher")
+        #expect(research?.detail == "2 notes \u{00B7} edited Oct 6")
+    }
+
     // MARK: - How long
 
     @Test func aFencedNoteIsNeverOfferedAlwaysAndTheSheetSaysWhy() {

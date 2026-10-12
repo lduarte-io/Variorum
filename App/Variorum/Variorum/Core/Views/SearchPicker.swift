@@ -540,13 +540,21 @@ struct SearchPickerPanel: View {
                 }
             }
             // 13n-c walk D-W1: a SOURCED panel's first frame has no rows (its
-            // feed has not answered), and the popover sizes itself ONCE from
-            // that frame — so the list takes its full room from the start and
-            // the rows that land after have somewhere to show.
-            .frame(minHeight: source != nil ? Self.listHeight : nil, maxHeight: Self.listHeight)
+            // feed has not answered) — so until its first answer lands the
+            // list takes its full room, and the rows have somewhere to show.
+            // 13n-c UX walk W-UX-16 (D-W1's trade revisited with rows present):
+            // once they have landed it sizes to them like any panel.
+            .frame(minHeight: source != nil && !loaded ? Self.listHeight : nil, maxHeight: Self.listHeight)
         }
         .padding(.vertical, 6)
         .frame(width: width)
+        // 13n-c UX walk W-UX-16: the panel reports its IDEAL height, which a
+        // popover follows (measured — a scratchpad probe: a flexible
+        // `maxHeight` frame left the popover at its first height, 418 pt,
+        // through 20 → 3 → 0 → 15 rows; a fixed vertical size let it follow,
+        // 418 → 124 → 58 → 388). So typing a few letters no longer leaves a
+        // white box (or a popover hanging past its window) under three rows.
+        .fixedSize(horizontal: false, vertical: true)
         .background(tokens.surface)
         .onAppear { focused = true }
         .task(id: query) { await runSource() }

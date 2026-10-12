@@ -92,7 +92,17 @@ nonisolated enum MCPGrantPicker {
         _ book: Queries.MCPGrantableBook, places: MCPGrantPlaces, distinguisher: String?, now: Date,
         calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> SearchPickerOption {
-        let context = PlaceLabels.context(places.place(book), now: now, calendar: calendar, locale: locale)
+        var context = PlaceLabels.context(places.place(book), now: now, calendar: calendar, locale: locale)
+        // 13n-c UX walk W-UX-16: the distinguisher is a FACT the context line
+        // also says (its shelf, its wing, its count, its state) — said once, as
+        // the distinguisher (emphasized), never twice on one row ("Welcome ·
+        // 13 notes …" beside "Welcome").
+        if let distinguisher {
+            let echoed = Set(distinguisher.components(separatedBy: PlaceLabels.separator))
+            context = context.components(separatedBy: PlaceLabels.separator)
+                .filter { !echoed.contains($0) }
+                .joined(separator: PlaceLabels.separator)
+        }
         return SearchPickerOption(
             id: book.id, label: book.name, annotation: distinguisher, searchText: book.name,
             detail: context.isEmpty ? nil : context, emphasized: distinguisher != nil)
