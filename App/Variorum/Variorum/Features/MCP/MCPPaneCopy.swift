@@ -867,8 +867,11 @@ nonisolated enum MCPAskCopy {
     }
 
     /// The receipt once her answer lands.
+    /// 13n-c UX walk W-UX-15 (T-11): a NOTE grant reads "on", as the grant
+    /// sheet's confirm says it ("Grant read on “…”"); a book or wing "in".
     static func granted(_ ask: MCPAsk, duration: MCPGrantRule.Duration) -> String {
-        "Allowed \(ask.clientName): \(MCPPaneCopy.rungName(ask.rung).lowercased()) in "
+        let preposition = ask.scopeKind == .note ? "on" : "in"
+        return "Allowed \(ask.clientName): \(MCPPaneCopy.rungName(ask.rung).lowercased()) \(preposition) "
             + "\u{201C}\(ask.title)\u{201D} \(MCPPaneCopy.durationWord(duration))."
     }
 }

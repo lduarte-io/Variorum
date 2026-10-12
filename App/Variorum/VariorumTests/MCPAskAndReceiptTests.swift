@@ -259,6 +259,20 @@ struct MCPAskAndReceiptTests {
         #expect(MCPAskCopy.lead(book) == "If you allow it, it can also make new notes and chapters in it and apply tags.")
     }
 
+    /// 13n-c UX walk W-UX-15 (T-11): the allow receipt says a note's grant
+    /// with the confirm's own word — "on" a note, "in" a book or a wing.
+    @Test func theAllowReceiptSaysOnANoteAsTheConfirmDoes() {
+        func asked(_ kind: MCPGrantRule.ScopeKind, _ title: String) -> MCPAsk {
+            MCPAsk(clientName: "ux-walk", scopeKind: kind, scopeID: "x", title: title, rung: .read, fence: nil)
+        }
+        #expect(MCPAskCopy.granted(asked(.note, "Fixture 0006"), duration: .once)
+                == "Allowed ux-walk: read on \u{201C}Fixture 0006\u{201D} once.")
+        #expect(MCPPaneCopy.confirm(verb: "Grant", rung: .read, scope: .note, place: "Fixture 0006", duration: .once)
+                .hasPrefix("Grant read on"), "the confirm's word")
+        #expect(MCPAskCopy.granted(asked(.book, "the lightning thief"), duration: .always)
+                == "Allowed ux-walk: read in \u{201C}the lightning thief\u{201D} always.")
+    }
+
     @Test func theGrantSheetOffersTheServedRungsWithTheMockupsSentences() {
         // U3 (justified edit, the ritual): the server serves edit now, so the
         // sheet offers it (U2's pin: "never offered before it serves").

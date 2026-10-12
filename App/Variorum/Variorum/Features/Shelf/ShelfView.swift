@@ -989,7 +989,7 @@ struct ShelfView: View {
             Text(tokens.chromeLabel("⌘K — find anything: notes, books, commands"))
                 .lineLimit(1)
             Spacer(minLength: 12)
-            QuietReceiptLine(status: session.status, tokens: tokens)
+            QuietReceiptLine(status: session.status, tokens: tokens, separated: true)
             Text(tokens.chromeLabel("⌘J today · ⌘N new note"))
                 .lineLimit(1)
                 .fixedSize()

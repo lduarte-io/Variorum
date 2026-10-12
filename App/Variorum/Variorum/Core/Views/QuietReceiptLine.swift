@@ -78,6 +78,12 @@ import SwiftUI
 struct QuietReceiptLine: View {
     let status: StatusCenter
     let tokens: VoiceTokens
+    /// 13n-c UX walk W-UX-15: a bar whose hint TEXT follows this slot (the
+    /// Bookcase's "⌘J today · ⌘N new note", a reading bar's page line) asks
+    /// for a hairline after a SPEAKING receipt, so its words — and its door's
+    /// "Open ›" — never run into the hint's. Drawn only while it speaks: an
+    /// idle slot still asks for zero width (the weightless claim).
+    var separated = false
 
     var body: some View {
         let item = status.quietLine
@@ -128,6 +134,13 @@ struct QuietReceiptLine: View {
                 .foregroundStyle(tokens.accent)
                 .lineLimit(1)
                 .fixedSize()
+            }
+            if separated, item != nil {
+                Rectangle()
+                    .fill(tokens.line)
+                    .frame(width: 1, height: 11)
+                    .padding(.leading, 6)
+                    .accessibilityHidden(true)
             }
         }
         .opacity(item == nil ? 0 : 1)
