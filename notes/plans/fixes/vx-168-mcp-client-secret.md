@@ -80,8 +80,11 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
   first line. **P-VX171-2's premise was false** (edit_take to empty was never refused) — the refusal is BUILT,
   PROVISIONAL (P-VX168-U3-2). Owed to the orchestrator: the PROVISIONALs' QUESTIONS entries and the canon delta at
   the merge (its OWED list); the ladder over the run's diff.
-- Unit 4 (VX-170, lens-aware Takes): **IN-PROGRESS** (opus-implementer, 2026-10-12) — the UNIT 4 RECORD below carries
-  its LIVE STATUS per piece; settled design: the vx-170 shape file, whole.
+- Unit 4 (VX-170, lens-aware Takes): **UNIT CLOSED — DONE** (opus-implementer, 2026-10-12): start `dc827cd3` · the core
+  rule `b0f67cbf` · the board `dffa8351` · the Mac pins `96b33874` · the walk + its two fixes `39fd6db5` · the close (this
+  commit). The walk PROVEN on the dev store (both voices, every leg); the Mac batch 616 tests / 83 suites green; the whole
+  package headless green. Owed to the orchestrator: the PROVISIONALs' QUESTIONS entries, the §12 canon delta and the
+  MOBILE PARITY line at the merge (its OWED list); the ladder over the run's diff.
 - Ladder: NOT-STARTED (runs after the last landed unit).
 - Closeout: NOT-STARTED.
 
@@ -588,8 +591,8 @@ and the masthead-popover idiom (`Core/Views/MastheadPopover`, the Bookcase's `or
 | R0 | this record + the plan | DONE (this commit) |
 | P1 | core: `Domain/LensTakeFilter` — the four forms (R-VX170-1) as ONE pure function over a block's effective picks + its shown take, and the expand set (R-VX170-3: named ∪ shown, fan order) over a whole note; headless pins over REAL projections (`Queries.takesProjection`) incl. blank takes (P-VX170-1) and dangling picks | DONE (this commit) — `LensTakeFilterTests` **13/1 green headless**: every arm of the four forms exactly (incl. a gap never matching, the same-lens two-lens forms never built), the expand set in FAN order, and over a real note: the blanked block IS `in X` and blank-vs-chosen IS a disagreement (P-VX170-1), identity-not-text (a byte-identical twin disagrees), a dangling pick names nothing (P-VX168-U4-2), the chosen side follows a ✓, a pick-less lens matches nothing with the whole note as denominator. Mutation checks (each on the committed tree `b0f67cbf`, restored by `git checkout --`, tree clean after): M1 disagree without `px != py` → red (2 pins) · M2 disagree-with-chosen without `px != shown` → red (3) · M3 in-not-in without its not-in arm → red (3) · M4 the expand set without the shown take → red (4) · M5 the gap guard dropped → red (1) |
 | P2 | app: the session memory (`EditorRouter.takesShowFilters`, R-VX170-5) + the model (the filter, the per-projection evaluation cache, the row shapes, the filter-aware bloom, the hidden-pane rules, pruning) + the faces (the header's `show ▾` door on the masthead-popover idiom with inline lens pickers, the quiet chip, the collapsed one-line rows, the filtered blooms, the zero-match line) + Mac view-model pins | DONE — the code `dffa8351` (a COMPILING state: `xcodebuild build` SUCCEEDED, no new warnings): `TakesLensFilterController` (the component — the filter from/to the session slot, the evaluation at adoption + filter change, `rowShape` / `isBloomed` / `bloomTakes` / `paneIsShown` / `reveal`, the menu rows, the words `TakesShowCopy`), `TakesShowFaces` (the door + chip, the popover on `mastheadPopoverChrome`), the conductor's hooks (adoption, `focus`, `landAuthorityFocus`, `pageTarget`, `naturalSlotHeight`), the board (collapsed rows on the same identity, the zero line, every bloom style + the rail through `bloomTakes`, the rail header's filtered door, the badge's words, the reorder arrows standing down on a subset, the popover overlay + menu life + ⎋), `MastheadPopover`'s chrome extracted (byte-identical modifiers) + `.takesShow`. the Mac view-model pins `TakesLensFilterTests` **21/1 green** (this commit — under the held stage claim `vx168-u4`, `-only-testing`, zero skipped): the door at rest (all takes, no chip, every row ordinary; no door on a lens-less note), each form's shapes over a real note (collapsed / filtered expand sets; a lone shown take matches without blooming), blank takes ordinary in every form, a dangling pick folding its block, the badge as the whole-fan door both ways, applying a filter starting from the plain page, follow-the-scroll never opening a collapsed row, the zero line in place (incl. the shape's own "agree everywhere" words), the session memory per note (survives a new board, gone on a new session, the Write panel / Lenses never read or write it), a deleted lens resetting to all takes, the ring's two rules (a hidden pane's block opens on focus AND on the entry ring; her filter change blurs a pane it hides, keeps one it shows; a store change never hides the live pane), the popover rows (operands carried across forms, words apply + close, an operand pick applies + stays open, the second picker never offers the first operand, two-lens forms inert on a one-lens note), the keyboard pager paging the expand set, every form's words. REMAINS: app-side mutation checks + the Mac batch over the changed surfaces (P3, with the walk) |
-| P3 | the Mac batch over the changed surfaces + the ONE use-shaped walk on a real multi-lens dev-store note (held stage claim) | IN-PROGRESS — **THE WALK: DONE, every leg held** (below, "THE WALK"); its two findings FIXED in this commit (W-1 the door vanishing on a crowded header line — a width-aware header; W-2 an idle "all" on a rail whose expand set is the whole fan); the dev store RESTORED "verified" from `scale-prestage-20261012T103024Z`, no instance, clipboard empty. REMAINS: app-side mutation checks + the Mac batch over the changed surfaces, under the still-held claim `vx168-u4` |
-| P4 | close: the final suites, the argued calls / PROVISIONALs / OWED, Unit 4 → DONE | NOT-STARTED |
+| P3 | the Mac batch over the changed surfaces + the ONE use-shaped walk on a real multi-lens dev-store note (held stage claim) | DONE `39fd6db5` + the close — **THE WALK: every leg held** (below, "THE WALK"); its two findings FIXED (W-1 the door vanishing on a crowded header line — a width-aware header; W-2 an idle "all" on a rail whose expand set is the whole fan); the dev store RESTORED "verified" from `scale-prestage-20261012T103024Z` and re-compared byte-identical after the batch, no instance, clipboard empty, the stage RELEASED. **App-side mutation checks** (each on the committed tree `39fd6db5`, rebuilt, `TakesLensFilterTests` run, restored by `git checkout --`, tree clean after): M1 applying a filter keeps opened fans → red (1) · M2 `reveal` a no-op → red (2 tests) · M3 a store change never reveals the live pane → red (1) · M4 a collapsed row on today's bloom rule → red (follow-the-scroll) · M5 every model applies → red (the Write panel / Lenses pin) · M6 her filter change keeps a hidden pane → red (1) · M7 the pager on the whole fan → red (1) · M8 a dead lens's filter survives → red (1) · M9 the session slot never written → red (1). **THE MAC BATCH** over every changed surface, the clean tree rebuilt, under the claim, guard OK before each half: **264 tests / 26 suites** (the Takes family: `TakesLensFilterTests` · TakesBoard · TakesBoardSoak · card heights · rail paging · margin-grid alignment + captures · slot drag · room · entry band · article scroll/watch/render · find on the board · card doors · empty state/face · divide · landing arms · pane durability/measure · fanned defaults · landing aim · find faces · render-restore clip · split-at-newlines doors) **+ 352 tests / 57 suites** (the shared model's other hosts and the popover idiom's: take-structure/fan-hands/lifecycle-faces suites by type, Compare/Lenses alignment, MCPNavigation, origin doors, the seven savepoint suites, sealed-book doors, note versions, copy-door flush, the block-selection family, the command-routing family incl. `TakesLandingTests`, capability registry, autosave consolidation/lifecycle, formatting surfaces, lifecycle faces, recovery doors, the round-A board fixes, trash, the tutorial's takes/looking/structure acts, `BookcaseMastheadPopoverTests` · census menu/overlay · bookcase board brain · move-to-shelf gate · bookcase view model) — **616 / 83 green, zero failures**; skipped only by design (the VX-136 capture harness, the env-gated singleton-window oracle); one recorded known issue, pre-existing (`TakesFindBoardTests`' named Esc boundary). None of the standing reds (VX-115, VX-167, VX-132) sits in this batch |
+| P4 | close: the final suites, the argued calls / PROVISIONALs / OWED, Unit 4 → DONE | DONE (this commit) — **the whole package headless: `VariorumMCPTests` 119/18 · `VariorumCoreTests` 2,691/307 · `StringsWorkbookTests` 40/6, ALL GREEN, exit 0** (core = Unit 3's 2,678/306 + `LensTakeFilterTests` 13/1; only the standing gated Supabase skip; no socket flake this run) |
 
 ### The plan — the design calls the shape leaves to the build (stated before code; argued in full at the close)
 
@@ -619,7 +622,7 @@ and the masthead-popover idiom (`Core/Views/MastheadPopover`, the Bookcase's `or
    its block (the one `board.bloom` door); a filter change that hides the live pane blurs it (flushed first).
 7. **Cost ∝ the note** (P1): the evaluation is computed at adoption and at a filter change, never per render.
 
-### THE WALK — the unit's acceptance evidence (dev store only, stage `vx168-u4`, 2026-10-12 ~04:30–05:20 MDT)
+### THE WALK — the unit's acceptance evidence (dev store only, stage `vx168-u4`, 2026-10-12 04:28–04:42 MDT)
 
 **Machine:** this host's Accessibility + Screen Recording granted (`AXIsProcessTrusted`/`CGPreflightScreenCaptureAccess`
 both true); her `/Applications/Variorum.app` ABSENT throughout (`Tools/WalkKit/guard.sh` before every GUI step, the
@@ -663,3 +666,113 @@ life ending); the Bookcase's own `order ▾` has no ⎋ at all. **Not walked:** 
 headless and on the Mac against real projections; making one through the UI needs a Lenses-board re-pick), dark
 appearance (no new colour or token — the chip and fills are the existing quiet tokens), carousel / slot split (their
 blooms read the same `bloomTakes`, pinned via the pager test).
+
+**What this unit did NOT do (said first):** (1) **No blank take was walked** — P-VX170-1 is pinned headless
+(`LensTakeFilterTests`: the blanked block IS `in X`, blank-vs-chosen IS a disagreement) and on the Mac against real
+projections (`TakesLensFilterTests`), but making a lens pick a blank take through the UI needs a Lenses-board re-pick
+the walk did not stage. (2) **Dark appearance, carousel and slot split were not walked** (no new colour or token; the
+two styles draw through the same `bloomTakes`, pinned through the pager test). (3) **⎋ does not reliably close the
+popover** (W-3, recorded, not fixed — below). (4) **No ⌘K / menu-bar / keyboard twin for `show ▾`** — the shape names
+the masthead door only (and the header's `style ▾` has none either); not invented. (5) **No `notes/QUESTIONS.md`
+entry, no canon edit, no Linear edit** (the merging session's ledgers — OWED; the VX-170 ticket body still carries its
+pre-sitting "Parked" line). (6) **`MCPSession.instructions` and the field guide UNCHANGED** — no sentence of either is
+falsified by a view filter on the Mac board; the advice stays at 1,941 / 2,000. (7) **The Lenses board, the Write
+panel and mobile are untouched** — the filter applies on THE Takes board only (`applies`). (8) **Zero schema, zero
+wire, zero `Sync/`, custody/keychain or editor-seam lines** (`PaneTextAuthority`, `PaneSurface`, `EditorTextView`,
+`BlockRangeIndex` read, never edited — `git diff c3fb7e37..HEAD --stat` over those paths: empty).
+
+### The design calls, argued
+
+1. **The rule is core-pure** (`Domain/LensTakeFilter`, the `KeepOnTopDivide` pattern): every arm a unit test run
+   headless, store-free, phone-callable — the board's half (`TakesLensFilterController`) holds state and shapes only.
+2. **A lens's one fact per block is its EFFECTIVE pick** (`TakesProjection.lensSelections`) — the fact the wire's
+   `via` and her Lenses board read, so a lens means one thing on every surface.
+3. **"Disagree" is take IDENTITY** — R-VX170-1's own words, "both name takes, different ones"; a byte-identical twin
+   is a different take (sameness of text is the Lenses board's tint, another question). Pinned.
+4. **"The chosen takes" are the slots' RENDERED takes** (`renderPost`'s chosen-else-default — what the note shows);
+   a gap slot never matches. The expand set is drawn in FAN order (every style's own order).
+5. **One expansion state, not two**: under a filter `expandedBlocks` means "she opened this block's whole fan" for
+   every row — a filtered row's badge shows its whole fan, a folded row's opens it whole, and back. No second set to
+   drift (P-VX168-U4-4 is the face of this, provisional).
+6. **Cost ∝ the note** (P1): the evaluation runs at adoption and at a filter change — one pass over the slots — never
+   per render; the rows read dictionary lookups.
+7. **Only THE takes board applies** (`landingEnabled && host == .takes`): the Write panel's embedded model and the
+   Lenses board never read or write the slot or change a row (pinned, M5 red).
+8. **A filter naming a lens the note no longer holds resets to all takes** — the dead-lens column precedent
+   (`adopt`'s columns → scratch): the lens was the filter's subject. Pinned (M8 red).
+9. **The popover wears the ONE masthead-popover face**: `MastheadPopover`'s chrome moved into
+   `mastheadPopoverChrome` byte-for-byte (the same modifiers in the same order) and both popovers wear it; the Bookcase's
+   popover suites ran green unmodified. Rows carry the active filter's lenses across forms (switching forms keeps what
+   she was looking through); the second picker never offers the first operand; a two-lens form on a one-lens note is
+   inert (P-2 — it could only match nothing).
+10. **The header is width-aware** (W-1): one line while the door fits whole, else the door and chip on their own line —
+    the controls never move and the door never shrinks to nothing.
+
+### PROVISIONALs (each wants a `notes/QUESTIONS.md` entry at the merge — the merging session's ledger)
+
+- **P-VX168-U4-1 — the door renders only on a note with a saved lens.** Options: (a) as built; (b) always, with the
+  forms inert and a line saying the note has no lenses yet.
+- **P-VX168-U4-2 — a DANGLING pick names nothing** (the shape is silent; the wire answers `via: chosen`, her board falls
+  through to chosen). Options: (a) as built; (b) a dangling pick names its missing take — `in X` matches and
+  "X disagrees with chosen" surfaces it for review, the bloom carrying J5's notice.
+- **P-VX168-U4-3 — a match whose expand set is the shown take alone** (the lens picks the chosen take) is the ordinary
+  row with NO bloom — the cell already is that take. Options: (a) as built; (b) a one-card bloom.
+- **P-VX168-U4-4 — the corner badge is the block's whole-fan door under a filter** ("the rest of the fan stays behind
+  its usual control"): a filtered row ↔ its whole fan; a folded line ↔ the block whole; the rail's "all" / ✕ the same
+  door where the badge stands down. Options: (a) as built; (b) a folded line opens on a click of its text too; (c)
+  folded lines inert.
+- **P-VX168-U4-5 — fan-order arrows stand down on a filtered subset** (they would move a take past hidden takes; the
+  first card's "earlier" would point at one). Options: (a) as built; (b) keep them.
+- **P-VX168-U4-6 — the words** (her copy pass, 13s-a-sweepable): the door "show: all takes ▾" / "show: in X" / "in A,
+  not in B" / "X disagrees with Y" / "X disagrees with chosen" (her example's form); the popover's rows (the last
+  form's fixed "the chosen takes"); the chip "N of M blocks"; the four zero lines ("No blocks match — “X” picks no
+  take in this note." · "— wherever “A” picks a take, “B” picks one too." · "— “X” and “Y” agree everywhere." · "— “X”
+  agrees with the chosen takes everywhere."); the rail's "takes · N of M" + "all"; the badge's four helps; "(empty
+  block)"; the door/chip/row tooltips.
+- **P-VX168-U4-7 — the ring's three rules** (the R112 class): a focus or landing onto a pane the filter hides OPENS its
+  block (the entry ring included — the walk's leg 5 shows it); her own filter change BLURS a pane it hides (flushed —
+  the view she asked for is exactly the filter's); a STORE change that would hide the live pane opens its block
+  (nothing vanishes from under the ring; a block she is not in simply folds). Options: (a) as built; (b) the entry
+  ring stands down on a folded block (no live pane; the page reveals its line); (c) a store change folds anyway and
+  blurs.
+- **P-VX168-U4-8 — applying a filter starts from the plain page** (fans opened before close; otherwise those blocks
+  show whole whatever the filter says). Options: (a) as built; (b) keep opened fans.
+- **P-VX168-U4-9 — the popover's life**: a row's words apply and close (the order popover's pick); an operand pick
+  applies and stays open (the expression may want its other operand); an outside press and the menu's life ending
+  close; ⎋ closes only while the board holds the keyboard (W-3). Options: (a) as built; (b) every pick closes; (c) a
+  keyboard-focused popover so ⎋ always closes (the order popover would want the same).
+- **P-VX168-U4-10 — the door's home is the Takes board's own header line**, leading — the Takes mode's masthead (the
+  note's masthead is shared by every mode and holds no mode's controls). Options: (a) as built; (b) the note
+  masthead's row two while in Takes; (c) trailing on the header line.
+- **P-VX168-U4-11 — "resets on the next open" read as the next LAUNCH** (the brief's reading and the Takes-row-memory
+  precedent: survives mode flips AND note switches/re-opens in the session). Options: (a) as built; (b) a note's
+  re-open within the session also resets (only mode flips survive).
+- **P-VX168-U4-12 — the folded line's face**: the first line that says anything, the small chrome face in muted ink,
+  the callout frame and comment notes standing down on a line that is only the map. Options: (a) as built; (b) the
+  prose face; (c) the TOC handle (the block's name, else its first sentence).
+
+### OWED (for the orchestrator)
+
+1. **QUESTIONS at the merge:** P-VX168-U4-1…12; #211's P-VX170-1 closed as built (blank takes ordinary in every
+   form, pinned), and its dangling-pick question answered provisionally (P-VX168-U4-2).
+2. **The canon delta at the merge** (AppSpec §12's NOTE-mode-row line, "Takes = single-column fan work"): the Takes
+   board's `show ▾` — lens-aware Takes (R-VX170-1…5, the shape file): the four forms over a note's lenses' effective
+   picks, non-matching blocks folded to one line, a match blooming the named takes plus the chosen one, the masthead
+   popover resting on "all takes" with a quiet chip while active, a session-only per-note memory; pointer to
+   `notes/plans/vx-170-lens-aware-takes.md` + this record.
+3. **MOBILE PARITY:** VX-170 is Mac-only; mobile Takes has no filter — a `notes/MobileSoul.md` ledger row for the
+   mobile catch-up (the closeout's line).
+4. **The ladder's map:** `Sources/VariorumCore/Domain/LensTakeFilter.swift` (the rule + the projection adapter) ·
+   `App/Variorum/Variorum/Features/Takes/TakesLensFilterController.swift` (state, shapes, the ring's rules, the menu
+   rows, the words) · `TakesShowFaces.swift` (the door, chip, popover) · `TakesViewModel.swift` (the hooks: adoption,
+   `focus`, `landAuthorityFocus`, `isBloomed`, `bloomTakes`, `pageTarget`, `naturalSlotHeight`) · `TakesBoardView.swift`
+   (the width-aware header, the overlay + menu life + ⎋, collapsed rows, the zero line, every bloom style + the rail
+   through `bloomTakes`, the badge's words, the arrows standing down) · `Core/Views/MastheadPopover.swift` (the
+   extracted chrome, `.takesShow`) · `EditorRouter.swift` (`takesShowFilters`). Tests:
+   `Tests/VariorumCoreTests/LensTakeFilterTests.swift` (13/1) · `App/Variorum/VariorumTests/TakesLensFilterTests.swift`
+   (21/1). Not Fable's seam: no editor-seam, `Sync/` or custody line — `opus-reviewer` territory for this unit, the
+   run's ladder being Fable's anyway.
+5. **W-3 for a watch (possibly a ticket):** ⎋ cannot close an in-window masthead popover once nothing on its board
+   holds the keyboard (after an inline picker's NSMenu here; the Bookcase's order popover has no ⎋ at all).
+6. **Linear:** VX-170's body still reads "Parked … needs a design sitting before any plan file exists" — superseded by
+   the ratified shape file; the orchestrator's to update at the merge.
