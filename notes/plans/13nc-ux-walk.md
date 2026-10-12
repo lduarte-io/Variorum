@@ -32,7 +32,7 @@ walk subsections, the HELD-WALKS RECORD's taste list T-1…T-17, and the drawn s
 
 (Interim, written repo-first as the walk runs; the final ranking replaces this list at the end.)
 
-- **[interim] An answered ask's sheet RE-PRESENTS ITSELF when the same client asks the same thing again** — captures
+- **[interim, CONFIRMED twice — wing ask and note ask] An answered ask's sheet RE-PRESENTS ITSELF when the same client asks the same thing again** (second proof: `67-crop.png` — the Fixture 0006 note ask, answered Once from the in-note mark, popped up unpressed on the BOOKCASE when re-raised) — captures
   `25-crop.png` (her press on the masthead's wing mark), `28b-clean-before-crop.png` (nothing open), `28c-clean-after-ask-crop.png`
   (the sheet up with no press). See the ranked list for the trace.
 - **[interim] The one-wing note is never shown** — `01-cmdL-onewing-win.png`, `02-palette-switchwing-onewing.png`, `03-view-menu-crop.png`.
