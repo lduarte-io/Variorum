@@ -1,11 +1,15 @@
 import Darwin
 import Foundation
 
-/// **THE `variorum-mcp` SHIM's behaviour** (13n-b U1 — A-2: a protocol-blind
-/// byte pump). An MCP client launches the shim over stdio; the shim finds its
-/// own app's socket, connects, and copies bytes both ways VERBATIM until the
-/// app hangs up — newline-delimited JSON-RPC passes through untouched, so the
-/// shim never learns the protocol (A-3: the socket's framing IS stdio's).
+/// **THE `variorum-mcp` SHIM's behaviour** (13n-b U1 — A-2: an MCP-blind
+/// byte pump; VX-168 amended A-2's "protocol-blind" to "MCP-blind"). An MCP
+/// client launches the shim over stdio; the shim finds its own app's socket,
+/// connects, speaks its SETUP KEY as one preamble line when its environment
+/// carries one (`MCPPreamble` — VX-168, K2), and then copies bytes both ways
+/// VERBATIM until the app hangs up — newline-delimited JSON-RPC passes through
+/// untouched, so the shim never learns MCP (A-3: the socket's framing IS
+/// stdio's). A shim with no key sends no preamble; the app refuses it with
+/// one honest JSON-RPC error answering the client's `initialize`.
 ///
 /// When the socket cannot be reached it speaks ONE honest JSON-RPC error to
 /// the client's first request (its `initialize`) and exits: "Variorum must be
@@ -27,9 +31,12 @@ public enum MCPShim {
     /// range JSON-RPC reserves for implementations).
     public static let refusalCode = -32000
 
-    /// **The whole shim.** Blocks until the session ends.
+    /// **The whole shim.** Blocks until the session ends. `environment` is
+    /// the process's own (VX-168: where a setup put its key).
     public static func run(
-        executable: URL, home: String?, input: Int32 = STDIN_FILENO, output: Int32 = STDOUT_FILENO
+        executable: URL, home: String?,
+        environment: [String: String] = ProcessInfo.processInfo.environment,
+        input: Int32 = STDIN_FILENO, output: Int32 = STDOUT_FILENO
     ) -> Outcome {
         guard let bundleID = MCPSocketRoad.bundleIdentifier(ofAppContaining: executable), let home else {
             respondToFirstRequest(input: input, output: output, message: notInsideAppMessage(executable))
@@ -38,7 +45,7 @@ public enum MCPShim {
         let directory = MCPSocketRoad.containerDataDirectory(bundleIdentifier: bundleID, realHome: home)
         switch MCPSocketRoad.connect(directory: directory) {
         case .success(let socket):
-            pump(input: input, output: output, socket: socket)
+            serve(socket: socket, environment: environment, input: input, output: output)
             close(socket)
             return .pumped
         case .failure(let failure):
@@ -113,6 +120,18 @@ public enum MCPShim {
             line.append(byte)
         }
         return line
+    }
+
+    // MARK: - The connected shim (VX-168)
+
+    /// Connected: the preamble first (when the environment carries a key —
+    /// one line, never parsed by anyone but the app), then the pump. A bare
+    /// shim writes nothing of its own.
+    public static func serve(socket: Int32, environment: [String: String], input: Int32, output: Int32) {
+        if let key = MCPPreamble.key(inEnvironment: environment) {
+            writeAll(socket, MCPPreamble.line(key: key))
+        }
+        pump(input: input, output: output, socket: socket)
     }
 
     // MARK: - The pump

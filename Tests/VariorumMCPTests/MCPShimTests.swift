@@ -91,6 +91,67 @@ struct MCPShimTests {
                 == MCPShim.notInsideAppMessage(URL(fileURLWithPath: "/usr/local/bin/variorum-mcp")))
     }
 
+    // MARK: - VX-168: the preamble (K2 — the shim stays MCP-blind)
+
+    @Test func theKeyIsReadFromTheEnvironmentAsTheShimWillSpeakIt() {
+        let variable = MCPPreamble.environmentVariable
+        #expect(variable == "VARIORUM_MCP_KEY")
+        #expect(MCPPreamble.key(inEnvironment: [variable: "vmk1_abcDEF-_9"]) == "vmk1_abcDEF-_9")
+        #expect(MCPPreamble.key(inEnvironment: [variable: "  vmk1_abc\n"]) == "vmk1_abc", "trimmed")
+        #expect(MCPPreamble.key(inEnvironment: [:]) == nil, "absent: bare")
+        #expect(MCPPreamble.key(inEnvironment: [variable: "   "]) == nil, "empty: bare")
+        #expect(MCPPreamble.key(inEnvironment: [variable: "vmk1 abc"]) == nil, "a space could split the line")
+        #expect(MCPPreamble.key(inEnvironment: [variable: "vmk1_é"]) == nil, "printable ASCII only")
+        #expect(MCPPreamble.key(inEnvironment: [variable: "a\u{0}b"]) == nil)
+        #expect(MCPPreamble.key(inEnvironment: [variable: String(repeating: "k", count: 257)]) == nil, "bounded")
+        #expect(MCPPreamble.key(inEnvironment: [variable: String(repeating: "k", count: 256)]) != nil)
+    }
+
+    @Test func thePreambleIsOneLineNoReaderTakesForAFrame() {
+        let line = MCPPreamble.line(key: "vmk1_abc")
+        #expect(line == Data("variorum-mcp-key vmk1_abc\n".utf8))
+        #expect(MCPPreamble.classify(line.dropLast()) == .preamble(key: "vmk1_abc"))
+        #expect(MCPPreamble.classify(Data("variorum-mcp-key".utf8)) == .preamble(key: ""), "a tag with no key")
+        #expect(MCPPreamble.classify(Data(#"{"jsonrpc":"2.0","id":0,"method":"initialize"}"#.utf8)) == .frame)
+        #expect(MCPPreamble.classify(Data("variorum-mcp-keys vmk1_abc".utf8)) == .frame, "the whole word only")
+        #expect(MCPPreamble.classify(Data()) == .frame)
+        #expect((try? JSONSerialization.jsonObject(with: line.dropLast())) == nil, "never JSON")
+    }
+
+    /// The connected shim: a key in its environment → the preamble FIRST,
+    /// then the client's bytes verbatim; no key → nothing of its own (the
+    /// client's `initialize` is the first line the app reads).
+    @Test func aKeyedShimSpeaksThePreambleFirstAndABareOneNothing() throws {
+        for keyed in [true, false] {
+            var pair: [Int32] = [-1, -1]
+            #expect(socketpair(AF_UNIX, SOCK_STREAM, 0, &pair) == 0)
+            var input: [Int32] = [-1, -1], output: [Int32] = [-1, -1]
+            #expect(pipe(&input) == 0 && pipe(&output) == 0)
+            let environment = keyed ? [MCPPreamble.environmentVariable: "vmk1_drill"] : [:]
+            let (shimSocket, shimInput, shimOutput) = (pair[0], input[0], output[1])
+            let shim = Thread {
+                MCPShim.serve(socket: shimSocket, environment: environment, input: shimInput, output: shimOutput)
+                close(shimSocket)
+            }
+            shim.start()
+            let initialize = #"{"jsonrpc":"2.0","id":0,"method":"initialize","params":{}}"#
+            _ = MCPShim.writeAll(input[1], Data((initialize + "\n").utf8))
+            let first = MCPShim.readFirstLine(pair[1], limit: 4096)
+            if keyed {
+                #expect(first == Data("variorum-mcp-key vmk1_drill".utf8), "the preamble first")
+                #expect(MCPShim.readFirstLine(pair[1], limit: 4096) == Data(initialize.utf8), "then verbatim")
+            } else {
+                #expect(first == Data(initialize.utf8), "a bare shim says nothing of its own")
+            }
+            close(input[1])
+            shutdown(pair[1], SHUT_RDWR)
+            close(pair[1])
+            close(input[0])
+            close(output[0])
+            close(output[1])
+        }
+    }
+
     @Test func theTransportCapsAnUnterminatedLine() {
         var fds: [Int32] = [-1, -1]
         #expect(pipe(&fds) == 0)
