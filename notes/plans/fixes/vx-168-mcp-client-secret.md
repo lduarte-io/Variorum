@@ -64,7 +64,16 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
 
 ## LIVE STATUS (per the resiliency protocol — flipped in the same commit as each piece)
 
-- Unit 1 (VX-168, the secret): **NOT-STARTED** — the settled design is this file's scope table + R-VX168-1.
+- Unit 1 (VX-168, the secret): **IN-PROGRESS** (opus-implementer, 2026-10-12) — piece 1 the LOCAL-ONLY migration
+  `v1_26_mcp_setup_keys` ALONE (this commit; pins `MCPGrantSchemaTests` PENDING the headless run). Remains, in order:
+  (2) core — the pure `Domain/MCPSetupKeyRule` + the ops (mint at copy, admit-per-connection, Deny releases the
+  binding, adoption releases bindings) + state-transition pins; (3) the shim's preamble (`MCPPreamble` in
+  `VariorumMCPSocket`) + "MCP-blind" comments; (4) the server handshake (`MCPSession` reads the preamble + the
+  first frame, decides through the op, refuses uniformly with the shim's refusal shape, else replays the frame
+  into the transport) + the harness's keyed `connect(as:)` + socket-road pins; (5) the app — the setup menu mints
+  at copy (all three clients carry `VARIORUM_MCP_KEY`), L1 true-er, the Deny confirm, the activity words, the
+  guide's honest-limit sentence; (6) the DRILL on the dev store under a held stage claim + the UNIT 1 RECORD
+  below. The design calls are argued in the UNIT 1 RECORD (written as each piece lands).
 - Unit 2 (VX-169 + VX-174, the edit-rung door writes): **NOT-STARTED** — settled design: the kickoff file's
   VX-169 settlement + R-MERGE-1 + the ticket bodies.
 - Unit 3 (VX-172 + VX-171, the lens doors): **NOT-STARTED** — settled design: the vx-170 shape file's

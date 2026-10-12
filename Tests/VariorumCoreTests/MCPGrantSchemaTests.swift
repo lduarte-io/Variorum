@@ -24,7 +24,9 @@ struct MCPGrantSchemaTests {
             INSERT INTO mcp_activity (client_name, act, target_kind, target_id, target_title, outcome, at)
               VALUES ('claude-code', 'read_note', 'note', 'n1', 'travelled', 'allowed', ?);
             INSERT INTO mcp_switch (key, value, updated_at) VALUES ('server', '1', ?);
-            """, arguments: [stamp, stamp, stamp, stamp, stamp, stamp])
+            UPDATE mcp_client SET setup_key_hash = 'bound-hash' WHERE id = 'cl1';
+            INSERT INTO mcp_setup_key (key_hash, minted_at) VALUES ('pending-hash', ?);
+            """, arguments: [stamp, stamp, stamp, stamp, stamp, stamp, stamp])
     }
 
     @Test func theFamilyIsLocalOnlyByConstruction() throws {
@@ -39,9 +41,98 @@ struct MCPGrantSchemaTests {
             }
             let triggers = try String.fetchAll(db, sql: """
                 SELECT name FROM sqlite_master WHERE type = 'trigger'
-                  AND tbl_name IN ('mcp_client', 'mcp_grant', 'mcp_activity', 'mcp_switch')
+                  AND tbl_name IN ('mcp_client', 'mcp_grant', 'mcp_activity', 'mcp_switch', 'mcp_setup_key')
                 """)
             #expect(triggers.isEmpty, "no trigger — no outbox capture, no index capture — reads the grants store")
+        }
+    }
+
+    // MARK: - VX-168: the per-setup key (v1_26, local-only — the v1_24 road)
+
+    /// `v1_26_mcp_setup_keys` joins the family LOCAL-ONLY exactly as v1_24
+    /// did: registered in `MCPGrantSchema.tables` (so the completeness walk
+    /// and the export know it), no `sync_version`, outside the sync registry,
+    /// no trigger, never the outbox — and NOT a lockstep event (the marker
+    /// stays 13; nothing on the mirror changes).
+    @Test func theSetupKeyStoreIsRegisteredLocalOnlyLikeTheGrantsFamily() throws {
+        #expect(MCPGrantSchema.tables.contains("mcp_setup_key"))
+        #expect(SyncSchema.lockstepVersion == 13, "a local-only migration never moves the marker")
+        let db = try AppDatabase.inMemory()
+        try db.read { (db: Database) throws in
+            #expect(SyncSchema.table(named: "mcp_setup_key") == nil)
+            #expect(SyncSchema.table(named: "mcp_client") == nil)
+            #expect(!SyncSchema.localOnlyTables.contains("mcp_setup_key")
+                    && !SyncSchema.derivedTables.contains("mcp_setup_key"),
+                    "its own family's registration, never sync machinery or a derived index")
+            let keyColumns = try Row.fetchAll(db, sql: "PRAGMA table_info(mcp_setup_key)").map { $0["name"] as String }
+            #expect(keyColumns == ["key_hash", "minted_at"], "a hash and a stamp — never the key itself")
+            let clientColumns = try Row.fetchAll(db, sql: "PRAGMA table_info(mcp_client)").map { $0["name"] as String }
+            #expect(clientColumns.contains("setup_key_hash"))
+            #expect(!clientColumns.contains("sync_version"))
+        }
+        try db.write { db in
+            let before = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") ?? -1
+            try seedGrantRows(db)
+            try db.execute(sql: "DELETE FROM mcp_setup_key")
+            try db.execute(sql: "UPDATE mcp_client SET setup_key_hash = NULL")
+            #expect(try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") == before,
+                    "a setup-key write never reaches the outbox")
+        }
+    }
+
+    /// A store at v1_25 with an approved client gains the column NULL — the
+    /// client arrives UNBOUND (her R-VX168-1: no grandfathering; the name
+    /// binds the first fresh setup presented under it) — and an empty key
+    /// table; its rows are kept.
+    @Test func aStoreBeforeTheKeyGainsItsClientsUnboundAndKeepsThem() throws {
+        let queue = try DatabaseQueue()
+        try AppDatabase.migrator.migrate(queue, upTo: "v1_25_private_mark")
+        try queue.write { db in
+            #expect(try db.tableExists("mcp_setup_key") == false)
+            try db.execute(sql: """
+                INSERT INTO mcp_client (id, name, version, state, first_seen_at, last_seen_at, decided_at)
+                  VALUES ('cl1', 'claude-code', '2.1', 'approved', ?, ?, ?);
+                INSERT INTO mcp_grant (id, client_id, rung, scope_kind, scope_id, duration, created_at)
+                  VALUES ('g1', 'cl1', 'read', 'wing', '', 'always', ?);
+                """, arguments: [stamp, stamp, stamp, stamp])
+        }
+        try AppDatabase.migrator.migrate(queue)
+        try queue.read { (db: Database) throws in
+            let row = try #require(try Row.fetchOne(db, sql: "SELECT * FROM mcp_client WHERE id = 'cl1'"))
+            #expect(row["state"] as String == "approved", "her approval is kept")
+            #expect((row["setup_key_hash"] as String?) == nil, "and arrives unbound")
+            #expect(try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM mcp_grant WHERE id = 'g1' AND revoked_at IS NULL") == 1,
+                    "her grants are kept")
+            #expect(try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM mcp_setup_key") == 0)
+        }
+    }
+
+    /// A key ties to ONE name, ever: the bound hash is unique across clients
+    /// (NULL — unbound — is legal on any number of them); a pending key is
+    /// one row per hash.
+    @Test func aKeyBindsOneNameAndPendsOnce() throws {
+        let db = try AppDatabase.inMemory()
+        try db.write { db in
+            try seedGrantRows(db)
+            try db.execute(sql: """
+                INSERT INTO mcp_client (id, name, state, first_seen_at, last_seen_at) VALUES ('cl2', 'codex', 'pending', ?, ?);
+                INSERT INTO mcp_client (id, name, state, first_seen_at, last_seen_at) VALUES ('cl3', 'cursor', 'pending', ?, ?);
+                """, arguments: [stamp, stamp, stamp, stamp])
+        }
+        #expect(throws: (any Error).self, "a hash bound to two names") {
+            try db.write { db in
+                try db.execute(sql: "UPDATE mcp_client SET setup_key_hash = 'bound-hash' WHERE id = 'cl2'")
+            }
+        }
+        #expect(throws: (any Error).self, "one pending row per hash") {
+            try db.write { db in
+                try db.execute(sql: "INSERT INTO mcp_setup_key (key_hash, minted_at) VALUES ('pending-hash', ?)",
+                               arguments: [stamp])
+            }
+        }
+        try db.read { (db: Database) throws in
+            #expect(try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM mcp_client WHERE setup_key_hash IS NULL") == 2,
+                    "unbound is legal on any number of names")
         }
     }
 
