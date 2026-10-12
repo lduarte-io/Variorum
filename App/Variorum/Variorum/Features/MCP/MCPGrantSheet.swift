@@ -290,11 +290,15 @@ struct MCPGrantSheet: View {
 
             HStack(alignment: .bottom) {
                 // 13n-c UX walk W-UX-9: ONE confirm idiom with the ask sheet —
-                // the app's bezelled button (`CalmButtonStyle`), the confirm
-                // primary (the voice's accent wash, semibold), Cancel ordinary.
-                // It read as a long accent sentence beside a plain word.
+                // the platform's FILLED default button in the voice's accent
+                // (`.borderedProminent` under the sheet's `.tint`), Cancel
+                // bordered. It read as a long accent sentence beside a plain
+                // word. System styles, not the app's custom ones: the verify
+                // leg found a custom-styled button in a sheet takes NO Return
+                // or Esc (its key equivalents never fire) — and on macOS 26 a
+                // bordered button holds the confirm's two lines (probed).
                 Button(MCPPaneCopy.cancel, action: done)
-                    .buttonStyle(CalmButtonStyle(tokens: tokens))
+                    .buttonStyle(.bordered)
                     .keyboardShortcut(.cancelAction)
                 Spacer(minLength: 8)
                 Button(action: submit) {
@@ -305,10 +309,9 @@ struct MCPGrantSheet: View {
                         ConfirmLabel(parts: confirmParts)
                     }
                 }
-                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
                 .disabled(!canConfirm)
-                .opacity(canConfirm ? 1 : 0.45)
             }
             .padding(.top, 4)
         }

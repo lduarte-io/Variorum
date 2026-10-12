@@ -78,28 +78,27 @@ struct MCPAskSheet: View {
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            // 13n-c UX walk W-UX-9 / W-UX-11: VOICED buttons — the grant
-            // sheet's one confirm idiom (`CalmButtonStyle`: Once the primary,
-            // the rest ordinary). They were SYSTEM buttons (13n-b U2 walk W-3)
-            // because the two window hosts attached `.mcpAskSheet` after their
-            // `.environment(theme)` and the sheet got no ThemeStore (Stage B
-            // R2-4's re-check); `mcpAskSheet` now hands every host's theme in,
-            // so the voice — and its accent, never system blue — reaches all
-            // four hosts.
+            // 13n-c UX walk W-UX-9 / W-UX-11: SYSTEM buttons, as 13n-b U2's
+            // walk W-3 left them — so Return answers Once and Esc answers
+            // Don't allow (P-13nc-U4-8, ruled; a custom-styled button in a
+            // sheet takes neither — the verify leg found it) — now in the
+            // VOICE's accent: `mcpAskSheet` hands every host's theme in and
+            // the sheet's `.tint` fills Once (`.borderedProminent`, the grant
+            // sheet's one confirm idiom), never system blue.
             HStack(spacing: 8) {
                 ForEach(checked ? door.durations(for: ask) : [], id: \.self) { duration in
                     if duration == .once {
                         Button(MCPAskCopy.button(duration)) { door.answer(ask, .grant(duration)) }
-                            .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                            .buttonStyle(.borderedProminent)
                             .keyboardShortcut(.defaultAction)
                     } else {
                         Button(MCPAskCopy.button(duration)) { door.answer(ask, .grant(duration)) }
-                            .buttonStyle(CalmButtonStyle(tokens: tokens))
+                            .buttonStyle(.bordered)
                     }
                 }
                 Spacer(minLength: 8)
                 Button(MCPAskCopy.dontAllow) { door.answer(ask, .dontAllow) }
-                    .buttonStyle(CalmButtonStyle(tokens: tokens))
+                    .buttonStyle(.bordered)
                     .keyboardShortcut(.cancelAction)
             }
             .help(CapabilityRegistry.capability(.mcpAnswerAsk).verb)
