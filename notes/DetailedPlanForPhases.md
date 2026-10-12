@@ -12,7 +12,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| *(nothing in flight — 13n-c merged 2026-10-12, PR #148; **VX-168** — the per-setup client secret + riders VX-169/VX-172/VX-170 — kicks off TONIGHT at her word after she verifies the refresh, from `notes/plans/vx-168-kickoff-prompt.md`)* | | | |
+| **VX-168 — the per-setup client secret + riders VX-169/VX-172/VX-174/VX-170/VX-171** (the pre-launch gate; record `notes/plans/fixes/vx-168-mcp-client-secret.md`) | VX-168 · `vx-168-mcp-client-secret` | `~/dev/variorum-vx-168` · the Pro | KICKED OFF 2026-10-12 (overnight, her word at the kickoff; R-VX168-1 ruled before she slept) — four units, Fable orchestrates, Opus implements, Fable ladders |
 
 ### Latest closeout
 
