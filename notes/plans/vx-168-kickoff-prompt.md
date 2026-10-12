@@ -34,6 +34,22 @@ the public launch, not before 13n-c's /Applications refresh. U7 (VX-159) is out 
   argue it in the record); the commit lands `kind='manual'` vs a new kind is a design call to argue from AppSpec
   §7's commit_point contract; the guide/advice gain their one sentence each; truth-pinned. Run it as a second
   member of this round's ladder, pin-before-fix binding as ever.
+- **RIDER — VX-172 (her word, 2026-10-11 late evening via her editorial session's relay; board-verified —
+  the ticket is Todo in the 13n project and its body carries the shape): `read_note` through a lens.**
+  `read_note` accepts a `lens_id` and returns the note as that lens renders it — per block, the lens's take
+  where it names one, the chosen take elsewhere; in the `with_ids` form each block says how it resolved
+  (`via: lens | chosen`). Read-rung, read-only, zero new write surface — a missing human action made first-class
+  on the protocol, not special agent tooling. Truth docs where the build makes them stale; state-transition pins.
+- **RIDER — VX-170 (unparked to Todo at her word, same relay): lens-aware Takes (expand only the takes in
+  named lens columns).** Its design pass is running NOW in her editorial session; **the ratified shape lands at
+  `notes/plans/vx-170-lens-aware-takes.md` before this pass picks it up — READ THAT FILE FIRST and build its
+  ratified shape, nothing else.** If the file is absent or unratified at kickoff, VX-170 does NOT ride — say so
+  and go on without it (never invent the shape). **VX-171** (a lens cannot blank a block — still Parked) gets its
+  shape in the same design pass and MAY ride too; that plan file will say.
+- **Sizing (the standing rule applied to the grown round):** U8 + VX-169 + VX-172 are small-to-medium members of
+  one run; VX-170 is her "whole feature" and its real size is only knowable from the ratified shape file. At
+  kickoff, size the bundle against `notes/PhaseSizingGuidance.md` — if it reads as more than the guidance allows,
+  SAY SO TO HER before building (she is the one who kicks this off; never split or proceed silently).
 - **Docs ride the build:** the field guide's connect lesson, the pane copy and `MCPSession.instructions` are
   updated ONLY where the build makes them stale; every sentence true of the build; the O-4 provider-neutrality
   pin and the setup-copy fences stay green.
