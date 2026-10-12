@@ -801,6 +801,8 @@ unit record (TCC state is machine-state the next session inherits).
   rung; takes land unchosen; review in the fan, ⌥⌘O); the AI-inbox book (write new on one dedicated book); whole-
   library help with Private as the carve-out; the one-off once note grant. Queued for the implementer the moment
   ladder R2 hands back (sequential cast); the UX walk then sees it.
+  ↳ **LANDED** `e00750c8` — "how to use it", lesson 6 of 7 (P-13nc-U6-9); the U6 record's ADDENDUM §4 carries the
+  prose verbatim and its pins.
 - **RULED — a deliberate `save_commit` tool: VX-169 minted** (team VX, project 13n), RIDES THE VX-168 ROUND
   tonight, after she has seen this round installed + verified (her word). The kickoff prompt carries the rider.
 - (Her "Allow AI here" phrasing question and the Private-book share question were answered with build facts in
@@ -913,6 +915,8 @@ rung answer (write new — append-only) needed no change.
 - **P-13nc-U6-6** (U6, VX-158) — `show_in_app`'s wing target is delivered as her switcher's own act (the app's wing switched, no pane moved, nothing said when already there) with "Now in “X” — ‹client› showed you this wing." (mockup §7; Home unquoted).
 - **P-13nc-U6-7** (U6) — the move's receipt: "moved “X” to “variorum” — it left 2 books" (her door's words); a run to ONE destination coalesces ("moved 14 notes to “variorum”"); a single move past the bar's 72 budget drops only its TITLE ("moved a note to “variorum” — it left 2 books") before the count fallback.
 - **P-13nc-U6-8** (U6) — a gathering's `list_notes` pages in its own order on its own cursor; a cursor whose note left the assembly answers the stale-cursor refusal (list again); `include_archived` adds nothing (a gathering assembles living notes).
+- **P-13nc-U6-9** (U6 job 4 — her RULED lesson; only the title and the seat are provisional) — the lesson is titled **"how to use it"** (her own words) and seats SIXTH of seven, before "seeing, answering, undoing", so lesson 1's "The last lesson in this chapter shows how to watch it, answer it and undo it." stays true (now pinned). Alternatives: seat it LAST with lesson 1's pointer reworded ("Two lessons from the end…" or name the lesson); title "ways to use it" / "recipes". The four recipes' words are hers to adjust at the copy pass.
+- **P-13nc-U6-10** (U6 job 4c — the combined ladder R2's N2) — `mcpRevokeGrant`'s unavailable note reads "Sharing with AI is revoked in Settings ▸ MCP." (the noun follows her "Shared with AI" section title). Alternatives: "A share is revoked in Settings ▸ MCP ▸ Shared with AI." · "Shares are revoked in Settings ▸ MCP." (no "AI" — R-AIR-8's app-wide letter, if she reads the registry note as outside her in-pane carve-out).
 - **R1-F3 copy rider (combined ladder R1, a NIT — rides P-13nc-U4-1's pick)** — the advice says "until you disconnect" (second person: the MODEL is its reader) where every app face says "until it disconnects"; a deliberate register split, wire tokens unchanged. Hers at the copy pass: keep the split or align the advice to the faces' words.
   ↳ **RULED at the 2026-10-11 sitting** — the split STAYS; CLOSED, off the copy pass. (The HER SITTING block above is the record.)
 - **P-13nc-U4-8** (U4, a QUESTION for #211) — the ask's sheet keeps 13n-b's answers; closing it without granting
@@ -2729,4 +2733,93 @@ wing is live, so the guide's truth pin and the live-round paths behave as before
 One whole-package run STALLED in `VariorumMCPTests` (VX-132's class). In flight were `aJournalTraitBookIsListedRead…`,
 `aOnceWingGrantFilesANote…`, the two O-4 source-net tests and `theSocketIsPrivateWhileServingAndGoneAfterStop`. I killed
 it by pid and reran per target, all green. No `Sync/`, custody, migration, editor-seam, `lockstepVersion`, real-store or
+`/Applications` lines, and no trailers.
+
+### ADDENDUM §4 — JOB 4: her ruled lesson + two copy items (2026-10-11 evening, the U6 implementer, Opus `claude-opus-5-5`)
+
+**Not done, said first:** 4b (the Private-through-book WHY on the share sheet) is STOPPED — its precondition failed
+(below); nothing was built for it.
+
+**4a · Her ruled lesson — LANDED `e00750c8`.** Titled **"how to use it"**, seated SIXTH of seven in "AI & the MCP door",
+before "seeing, answering, undoing" (PROVISIONAL **P-13nc-U6-9**). The prose, verbatim, four cards:
+1. "Say your notes for a design doc live in a book. Share that book at Suggest and ask your AI to go through it: it can
+   leave implementation ideas or tradeoffs as new takes on each block, and they join the block's takes unchosen, so the
+   page doesn't change until you choose one. Review them in Takes (⌘2); ⌥⌘O shows the client's last change, and ⌥⌘Z
+   takes the latest back, named after the client."
+2. "Or make a book just for your AI, even an empty one, and grant it Write new on that book alone. It can read what's in
+   that book and add new notes to it; if that is its only grant and the open book is off, nothing else in your library
+   is readable to it."
+3. "For help across everything, grant a whole wing instead: it reaches every note, book and gathering in the wing except
+   what always asks — your daily Journal's entries and anything marked Private, which a client reaches only through a
+   grant on that one note. So mark Private whatever should stay off-limits first, then grant the wing."
+4. "And for a one-off, right-click a note in the Library, choose Share with AI… and grant Read, once: the client's first
+   read of the note spends the grant, and nothing stands afterwards."
+
+Truth checks made while drafting (each sentence against the build, before any pin):
+- Write new on a book reaches an EMPTY book: `MCPWriteTools.into(.book)` decides on `mcpBookFacts`, which do not depend
+  on membership. `list_books` lists a granted book by id whether or not it has notes.
+- A once read grant is spent by its first CONTENT read, never by a listing (`MCPGrantRule.spends`, AF-7).
+- A fenced note is reached only through a per-note grant. A bulk "Share N notes" makes per-note grants, so "only through
+  a grant on that one note" holds for it too. I chose this over the brief's "one ask at a time", which read looser than
+  the bulk door.
+- "takes the latest back" over "takes one back": the structural undo always walks back the newest act.
+
+**Pins — `TutorialMCPChapterTests.lessonSixHowToUseIt` (new; prose · doors · truth):**
+- *Prose and doors.* Each door is checked against its own constant: `MCPPaneCopy.rungName` (Suggest, Write new, Read),
+  `MCPPaneCopy.durationWord(.once)`, `PostMode.takes` and its ⌘2 index, the registry's `showLastAIChange` and
+  `structuralUndo` labels, `MCPShareCopy.shareVerb` (with `.mcpShareHere`'s verb), and `lessons[3]` for "what always asks".
+- *Recipe 1.* A suggest book grant reaches the book's note at suggest and `decide(.edit)` refuses. `addTake` with the
+  client's undo label leaves the rendered text and the slot's chosen take unchanged, and the take is in the fan. The Edit
+  menu reads "Undo claude-code's take", and one undo tombstones it.
+- *Recipe 2.* On an EMPTY book, `decide(.book, .writeNew)` allows and `mcpBookReach` names only that client. A note made
+  through `createNote(in: .book)` is readable to it. The open book is off, and neither a note in another book nor a loose
+  note is readable.
+- *Recipe 3.* A note is marked Private first, then the wing is granted. The wing grant reaches a loose note, the design
+  book (`mcpBookReach`) and a Home gathering (`decideGathering`), but not the Private note. A once note grant then
+  reaches it.
+- *Recipe 4.* A once note grant reaches. `consumeMCPOnceGrant` (the server's in-transaction stamp) then leaves the client
+  reaching nothing, and the grant is not live.
+- *Cited, not duplicated (the wire's half):*
+  - `MCPWriteServerTests.theFactCheckShapeLandsATakeBesideEveryBlockSavesALensAndOneUndoWalksTheLastActBack` (a suggest
+    book grant's takes land labeled and unchosen, the shown text unchanged, one undo walks the last act back)
+  - `.aSuggestGrantProvablyCannotModifyAnExistingTake`
+  - `.writeNewCreatesInsideItsScopeOnlyAndNeverPullsAnUnreachableNoteIn`
+  - `MCPServerTests.aBookGrantReadsTheBookAndIsRefusedPastIt`
+  - this suite's lesson 3 (once spent by a content read only; a wing grant reads its gatherings) and lesson 4 (the daily
+    Journal's entries and Private under a wing EDIT grant plus the open book)
+
+**The ritual edits (justified, annotated in place):**
+- `theChapterIsSixLessons…` is renamed `theChapterIsSevenLessonsAndTheGuidesAppendix` (count 6 → 7). Its gathering guard
+  now admits `lessons[2]` and `lessons[5]`.
+- `lessonSixSeeingAnsweringUndoing` is renamed `lessonSevenSeeingAnsweringUndoing` (`lessons[5]` → `lessons[6]`).
+- `lessonOneTheDoorIsShutUntilYouOpenIt` gains the pointer sentence and `lessons.last == "seeing, answering, undoing"`.
+- The count pins elsewhere derive from `TutorialSeeder.plan` and followed by construction.
+- **Offscreen captures** (the U5 harness, `VARIORUM_CAPTURE=13nc-u5`, both voices) are in
+  `notes/plans/13n-c-screens/u6/`: `job4-lesson-6-{study,terminal}.png` (the new lesson) and
+  `job4-lesson-7-{study,terminal}.png` (the shifted lesson). The four cards read as above.
+
+**4b · The Private-through-book WHY on the share sheet — STOPPED (the precondition failed).**
+- The sheet's note carries only `MCPGrantRule.Fence` (`.journal` / `.privateMark`) from `mcpNoteFacts`. See
+  `MCPGrantSheet.swift:96-99` (`noteFence`) and `:331-342` (the HOW LONG whys), `MCPPaneCopy.alwaysWithheld` (:477) and
+  `alwaysWithheldAmong` (:381), and the picker's row fence (`MCPGrantPicker.swift:135`).
+- `.privateMark` is the same value whether the note wears the mark itself or inherits it from a Private book. So the
+  Fence cannot tell its own mark from a book's without a new derivation, and the brief's rule says stop.
+- **The option, for the orchestrator or her:** the existing faces already word it WITHOUT touching the fence.
+  `Queries.isNotePrivate` + `Queries.privateBooksHolding(db, postID:)` back the U3 lock popover's "Private through
+  “diary”" (`PrivateMark.swift:117`, `MCPNoteIndicator.swift:50`). The sheet could read the same pair for a `.privateMark`
+  note's why line. That would be a face-only read beside the fence: the fence stays `mcpNoteFacts`', and no new rule is
+  needed.
+
+**4c · ladder R2-N2 — LANDED `18eabe38`.**
+- `CapabilityRegistry.swift` `mcpRevokeGrant` unavailable note: "Shared places are revoked in Settings ▸ MCP." → **"Sharing
+  with AI is revoked in Settings ▸ MCP."** (PROVISIONAL **P-13nc-U6-10**, alternatives in the running list).
+- No test quoted the old string. Pinned new in `MCPGrantSheetTests.theSettingsClassWordsSayNoAIAndTheBoundaryIsSaid`
+  beside the section title's own pin.
+
+**Mac** (stage `vx165-u6c`, held and released): every suite naming `TutorialSeeder`, plus `CapabilityRegistryTests` and
+`MCPGrantSheetTests`, derived by script — 38 suites, **268 / 38 green** (the capture harness skipped as gated). Then the
+capture harness alone, 1 / 1.
+
+**Finals (headless, this tree):** core **2,634 / 301**, `VariorumMCPTests` **93 / 14**, workbook **40 / 6**, all green
+(no package lines changed). No `Sync/`, custody, migration, editor-seam, `lockstepVersion`, real-store or
 `/Applications` lines, and no trailers.
