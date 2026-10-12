@@ -474,9 +474,13 @@ struct EditorCommands: Commands {
             // request that reaches the window anyway cycles too.
             // 13n-c Stage B R1 B6: grey with ONE wing (the registry's answer —
             // P-2: the switcher could only close).
+            // 13n-c UX walk W-UX-6: grey with one wing (her ruling), but never
+            // silent — ⌘L then SPEAKS the note (`OneWingChord`, the app's
+            // monitor), and the grey item carries it as its help.
             Button(verb(.switchWing)) { windows.creationRouter()?.wingSwitcherRequested = true }
                 .keyboardShortcut("l", modifiers: .command)
                 .disabled(!canReachCreationTarget || !enabled(.switchWing))
+                .help(enabled(.switchWing) ? "" : CapabilityRegistry.capability(.switchWing).unavailableNote)
         }
         // Row 67 (the Act 10 correction round): this group was anchored
         // `after: .saveItem` — and a non-document WindowGroup's File menu

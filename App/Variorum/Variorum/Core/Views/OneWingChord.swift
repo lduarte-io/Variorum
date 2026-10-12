@@ -24,7 +24,11 @@ enum OneWingChord {
     /// passed on. Pure of AppKit's dispatch — the pin feeds it real events.
     @MainActor
     static func speak(_ event: NSEvent, session: AppSession?) -> Bool {
-        false
+        guard let session, WingSwitcherKeys.key(for: event) == .tapL,
+              !session.commandRouter.isEnabled(.switchWing)
+        else { return false }
+        session.status.refuse(CapabilityRegistry.capability(.switchWing).unavailableNote)
+        return true
     }
 
     /// The app's monitor (installed once at launch). Returns the token.
