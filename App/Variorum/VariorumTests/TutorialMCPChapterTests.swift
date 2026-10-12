@@ -230,7 +230,9 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("press \(CapabilityRegistry.capability(.mcpCopySetupCommand).verb)"))
             #expect(text.contains("a few lines of JSON"))
             #expect(MCPSetupClient.anyClient.text(shimPath: "/x", isDebugBuild: false).contains("\"mcpServers\""))
-            #expect(MCPSetupClient.claudeCode.text(shimPath: "/x", isDebugBuild: false).hasPrefix("claude mcp add"))
+            // VX-168 (A JUSTIFIED EDIT, the ritual): Claude Code's one line
+            // clears an earlier user-scope setup, then adds this one.
+            #expect(MCPSetupClient.claudeCode.text(shimPath: "/x", isDebugBuild: false).contains("; claude mcp add -s user"))
             #expect(MCPSetupClient.codex.text(shimPath: "/x", isDebugBuild: false).hasPrefix("codex mcp add"))
             #expect(text.contains("the door is a standard MCP server: one program inside the app"))
             #expect(MCPPaneCopy.stdioLine.contains("standard MCP server")
