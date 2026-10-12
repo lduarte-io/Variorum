@@ -50,3 +50,6 @@ nothing regresses the earlier rounds' verified items (R2-1(a), B8, D-W1 all re-c
 
 *(Opens when the implementer hands back; the orchestrator's line-by-line verification of the fix diff and the
 suite finals land here before closeout.)*
+
+*(The implementer's record of the fix leg — each finding's fix, its pin's red count, the walk and the finals, and
+the found F-R1-1 — is the "ROUND-1 FIX LEG" addendum at the end of `notes/plans/phase-13n-c-mcp-launch-readiness.md`.)*
