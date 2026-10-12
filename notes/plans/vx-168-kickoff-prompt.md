@@ -34,6 +34,14 @@ the public launch, not before 13n-c's /Applications refresh. U7 (VX-159) is out 
   argue it in the record); the commit lands `kind='manual'` vs a new kind is a design call to argue from AppSpec
   §7's commit_point contract; the guide/advice gain their one sentence each; truth-pinned. Run it as a second
   member of this round's ladder, pin-before-fix binding as ever.
+  **SETTLED at her 2026-10-12 pre-run sitting (the orchestrator chat, recorded here + the ticket):** the rung is
+  **EDIT** (whoever may edit a take may commit it; listed at edit — her pick over suggest's spray-on-her-takes
+  risk); the commit lands **`kind='manual'`** with the client's name PREFIXED in the stored message
+  ("‹client›: her message" — the auto-brackets' own style, so Block History shows provenance at a glance; a NEW
+  kind is OFF the table tonight by MECHANISM, not taste — `commit_point.kind`'s CHECK lives on a SYNCED table,
+  so a third kind is a §12 lockstep event; it stays available someday behind its own window). Standing
+  conventions inherited (sealed post and locked take refuse); dedup-vs-append on byte-identical text is the
+  implementer's argued call (PROVISIONAL). Nothing here is left to re-argue — build it as ruled.
 - **RIDER — VX-172 (her word, 2026-10-11 late evening via her editorial session's relay; board-verified —
   the ticket is Todo in the 13n project and its body carries the shape): `read_note` through a lens.**
   `read_note` accepts a `lens_id` and returns the note as that lens renders it — per block, the lens's take
@@ -46,7 +54,11 @@ the public launch, not before 13n-c's /Applications refresh. U7 (VX-159) is out 
   ratified shape, nothing else.** If the file is absent or unratified at kickoff, VX-170 does NOT ride — say so
   and go on without it (never invent the shape). **VX-171** (a lens cannot blank a block — still Parked) gets its
   shape in the same design pass and MAY ride too; that plan file will say.
-- **Sizing (the standing rule applied to the grown round):** U8 + VX-169 + VX-172 are small-to-medium members of
+- **RIDER — VX-174 (her word, the 2026-10-12 pre-run sitting): `choose_take` + apply-lens-as-chosen ride too.**
+  The ticket body carries the shape (the merge button's act; the ticket names the EDIT rung). Both acts are §9's
+  existing operations under the grant guard inside the op's own transaction, client-named undo as ever; truth
+  docs only where the build makes them stale; state-transition pins. Pin-before-fix binding as ever.
+- **Sizing (the standing rule applied to the grown round):** U8 + VX-169 + VX-172 + VX-174 are small-to-medium members of
   one run; VX-170 is her "whole feature" and its real size is only knowable from the ratified shape file. At
   kickoff, size the bundle against `notes/PhaseSizingGuidance.md` — if it reads as more than the guidance allows,
   SAY SO TO HER before building (she is the one who kicks this off; never split or proceed silently).
