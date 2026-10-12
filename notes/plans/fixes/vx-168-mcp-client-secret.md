@@ -69,8 +69,9 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
   app's faces `452526e0` + `251e8b17` · the DRILL PROVEN on the dev store + the final suites green (`3601ef81` and the
   close commit). Owed to the orchestrator: the PROVISIONALs' QUESTIONS entries and the canon deltas at the merge (the
   UNIT 1 RECORD's "OWED" list); the ladder over the run's diff (the secret's accept path is FABLE's — named there).
-- Unit 2 (VX-169 + VX-174, the edit-rung door writes): **NOT-STARTED** — settled design: the kickoff file's
-  VX-169 settlement + R-MERGE-1 + the ticket bodies.
+- Unit 2 (VX-169 + VX-174, the edit-rung door writes): **IN-PROGRESS** (opus-implementer, 2026-10-12) — the
+  pieces table and the argued calls live in the UNIT 2 RECORD below; settled design: the kickoff file's VX-169
+  settlement + R-MERGE-1 + the ticket bodies.
 - Unit 3 (VX-172 + VX-171, the lens doors): **NOT-STARTED** — settled design: the vx-170 shape file's
   VX-172 adjacency + R-VX171-2.
 - Unit 4 (VX-170, lens-aware Takes): **NOT-STARTED** — settled design: the vx-170 shape file, whole.
@@ -250,3 +251,25 @@ socket gone; the clipboard emptied; the stage released ("STAGE FREE").
    `MCPDoor.copySetupCommand` (mint-then-clipboard) and the setup texts in `MCPPaneCopy`'s O-4 fence.
 4. **Noticed, not this unit's:** the Settings pane's scroll position jumps when a copy reflows the setup text (the
    Copy button moves between y≈329 and y≈455 with the chosen client) — chrome taste, recorded for the UX pass.
+
+## UNIT 2 RECORD — VX-169 `save_commit` + VX-174 `choose_take` / `adopt_lens` (opus-implementer, 2026-10-12)
+
+**Read in full before code (never delegated):** this file (R-VX168-1, the UNIT 1 RECORD); the kickoff prompt (the
+VX-169 settlement block, the VX-174 rider); `notes/SessionResiliencyProtocol.md` whole; the 13n-b plan's ruled design,
+SITTING RECORD (R-13nb-1…18), AF-1…AF-11, the seam rulings A-1…A-10, the U3 brief + U3 record (the edit-rung precedent:
+the in-transaction guard, P-13nb-U3-1…17); the 13n sitting record's R-13n-6/R-13n-7; the 13n-c plan's HER SITTING
+block (VX-169's birth); `notes/plans/vx-170-lens-aware-takes.md` (R-MERGE-1); the ticket bodies VX-169 + VX-174 (Linear
+GraphQL); CLAUDE.md + the auto-loaded canon (AppSpec §9's commit / chooseVariant / adopt-lens / structural-undo lines).
+Code read: `MCPWriteTools{,+Edit,+Carriage}`, `MCPWriteSupport`, `MCPToolCatalog`, `MCPSession` (the advice),
+`Operations+MCP{Edits,Writes}`, `Operations+{Variant,Placement,Lens,Versions}`, `MCPEditQueries`, the app's
+`MCPPaneCopy` (activity + receipt words), `MCPDoor.landReceipt`, the guide's MCP chapter, and their pins.
+
+### LIVE STATUS — Unit 2's pieces
+
+| piece | what | status |
+|---|---|---|
+| R0 | this record + the plan | DONE (this commit) |
+| P1 | core: `commit(… guardedBy:)`; `Operations+MCPDeliberate` (the client commit's message, `chooseTake`, `adoptLensAsNote` — each guard-first in its own transaction, the two pointer acts ONE client-named undo entry each); `Queries.mcpContainerOf(lens:)`; `MCPWriteAct` + `.commit`/`.choice`/`.lensAdoption` + `isUndoable`; her doors' row work extracted byte-for-byte (`choosablePlacement`, `adoptSwapRows`, the pointer/lens restore bodies) so ONE brain serves both; core state-transition pins | NOT-STARTED |
+| P2 | the wire: `save_commit` · `choose_take` · `adopt_lens` declared at EDIT, parsed, guarded (snapshot decision + in-transaction re-decision, `MCPWriteTools+Deliberate`); the advice's two truths; socket-road pins (each act, each refusal arm, the once grant, the suggest/write-new PROOF extended) | NOT-STARTED |
+| P3 | the app's faces: Activity words for the three tools; the receipt phrases + "⌥⌘Z undoes" said only when the run holds an undoable act; the guide's two sentences (lesson 1's undo promise, lesson 3's Edit step); Mac pins + the Mac batch under a held stage claim | NOT-STARTED |
+| P4 | close: the final headless suites, the argued calls/PROVISIONALs/OWED below, Unit 2 → DONE | NOT-STARTED |
