@@ -76,9 +76,27 @@ nonisolated enum MCPPaneCopy {
     static let noAccess = "approved \u{00B7} nothing shared"
     /// U2 walk W-1: rung-agnostic since the write rungs — "reads" was
     /// false of a suggest or write-new grant.
+    /// 13n-c UX walk W-UX-10: the count is of GRANTS that reach (a client can
+    /// hold several on one place — each a live fact), so the noun says grants;
+    /// it read "3 shared places" for one book granted three ways. PROVISIONAL.
     static func reads(_ count: Int) -> String {
-        count == 1 ? "1 shared place" : "\(count) shared places"
+        count == 1 ? "1 grant" : "\(count) grants"
     }
+
+    // MARK: - Deny… on a client row (13n-c UX walk W-UX-4) — PROVISIONAL words
+
+    static func denyClientTitle(_ name: String) -> String { "Deny \(name)?" }
+    /// What the press does, said before it does it: shut out AND every grant
+    /// revoked (one press on the client row took all of it, unasked).
+    static func denyClientDetail(grants: Int) -> String {
+        let shut = "It can't connect again until you approve it."
+        switch grants {
+        case 0: return shut
+        case 1: return shut + " Its grant is revoked now, and approving it later shares nothing back."
+        default: return shut + " Its \(grants) grants are revoked now, and approving it later shares nothing back."
+        }
+    }
+    static let denyClientConfirm = "Deny"
 
     /// 13n-c U2 (the U1 ladder's R2-3; P-13nb-U2-3): the client row counts
     /// only grants that REACH as shared; an inert one is said as inert.

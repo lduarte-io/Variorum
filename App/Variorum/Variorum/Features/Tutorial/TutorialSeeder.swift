@@ -2526,7 +2526,10 @@ enum TutorialSeeder {
             + "Approve\u{2026} lets it in, still reaching nothing until you share "
             + "something: its sheet offers a first grant, with nothing picked for "
             + "you. Deny turns it away. Every approved client is listed there, with "
-            + "Change\u{2026} to share more and Revoke to shut it out again.",
+            // 13n-c UX walk W-UX-4: the client row's verb is Deny… now, and it
+            // says what it takes before it does.
+            + "Change\u{2026} to share more and Deny\u{2026} to shut it out "
+            + "again, every grant it holds revoked.",
 
             "One honest limit: a client names itself when it connects, and "
             + "Variorum can't check that name. Whatever you grant, you "

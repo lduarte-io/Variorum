@@ -424,6 +424,10 @@ struct MCPClientRow: View {
     let tokens: VoiceTokens
     let change: () -> Void
     let revoke: () -> Void
+    /// 13n-c UX walk W-UX-4: Deny… ASKS first, naming what it takes — the
+    /// client shut out and every grant it holds — in both hosts (the pane and
+    /// its "all N ›" sheet render this one row).
+    @State private var confirmingDeny = false
 
     private var detail: String {
         var parts: [String] = []
@@ -456,12 +460,18 @@ struct MCPClientRow: View {
             if row.client.state == .approved {
                 Button(CapabilityRegistry.capability(.mcpChangeClientAccess).verb, action: change)
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                Button(CapabilityRegistry.capability(.mcpRevokeClient).verb, action: revoke)
+                Button(CapabilityRegistry.capability(.mcpRevokeClient).verb) { confirmingDeny = true }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
             } else {
                 Button(CapabilityRegistry.capability(.mcpApproveClient).verb, action: change)
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
             }
+        }
+        .alert(MCPPaneCopy.denyClientTitle(row.client.name), isPresented: $confirmingDeny) {
+            Button(MCPPaneCopy.denyClientConfirm, role: .destructive, action: revoke)
+            Button(MCPPaneCopy.cancel, role: .cancel) {}
+        } message: {
+            Text(MCPPaneCopy.denyClientDetail(grants: row.liveGrantCount + row.inertGrantCount))
         }
     }
 }

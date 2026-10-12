@@ -288,8 +288,11 @@ struct MCPGrantSheetTests {
                 == "inert \u{2014} the book is marked Private, which always asks")
         #expect(MCPPaneCopy.inertDetail(.journal, kind: .book)
                 == "inert \u{2014} it's your daily Journal now, which always asks")
-        #expect(MCPPaneCopy.reads(2, inert: 0) == "2 shared places")
-        #expect(MCPPaneCopy.reads(2, inert: 1) == "2 shared places \u{00B7} 1 inert")
+        // 13n-c UX walk W-UX-10 (A JUSTIFIED EDIT, the ritual): the count is
+        // of grants, and says so ("2 shared places" before).
+        #expect(MCPPaneCopy.reads(2, inert: 0) == "2 grants")
+        #expect(MCPPaneCopy.reads(2, inert: 1) == "2 grants \u{00B7} 1 inert")
+        #expect(MCPPaneCopy.reads(1) == "1 grant")
         #expect(MCPPaneCopy.reads(0, inert: 1) == "nothing shared \u{00B7} 1 inert")
     }
 
@@ -458,5 +461,22 @@ struct MCPGrantSheetTests {
             #expect(MCPGrantSheet.start(approving: false, mostRecentBookID: mostRecent)
                     == .init(place: .book, bookID: mostRecent, duration: .always))
         }
+    }
+
+    /// **13n-c UX walk W-UX-4:** one press of a client row's "Revoke" denied
+    /// the client AND dropped every grant, with no confirm, under the same
+    /// word a grant row uses for taking back ONE grant. The client row's act
+    /// now has its own verb and asks first, naming what it takes.
+    @Test func theClientRowsDenyHasItsOwnVerbAndAsksNamingWhatItTakes() {
+        let deny = CapabilityRegistry.capability(.mcpRevokeClient).verb
+        #expect(deny == "Deny\u{2026}", "its own verb, with the ellipsis of a door that asks")
+        #expect(deny != CapabilityRegistry.capability(.mcpRevokeGrant).verb, "never the grant row's Revoke")
+        #expect(MCPPaneCopy.denyClientTitle("claude-code") == "Deny claude-code?")
+        let three = MCPPaneCopy.denyClientDetail(grants: 3)
+        #expect(three.contains("can't connect again until you approve it"))
+        #expect(three.contains("Its 3 grants are revoked now"), "the consequence, counted")
+        #expect(three.contains("approving it later shares nothing back"), "W-UX-2's approve-alone, said ahead")
+        #expect(MCPPaneCopy.denyClientDetail(grants: 1).contains("Its grant is revoked now"))
+        #expect(!MCPPaneCopy.denyClientDetail(grants: 0).contains("grant"), "nothing to take, nothing said")
     }
 }

@@ -2179,10 +2179,14 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "A client's access is changed in Settings \u{25B8} MCP.",
             availability: always),
         Capability(
-            id: .mcpRevokeClient, verb: "Revoke", scope: .app,
+            // 13n-c UX walk W-UX-4: its OWN verb — the act is a deny (the
+            // client shut out AND every grant it holds revoked, P-13nb-U1-5),
+            // never the grant row's "Revoke"; the ellipsis because it asks
+            // first. PROVISIONAL, her copy pass.
+            id: .mcpRevokeClient, verb: "Deny\u{2026}", scope: .app,
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
-            unavailableNote: "A client is revoked in Settings \u{25B8} MCP.",
+            unavailableNote: "A client is denied in Settings \u{25B8} MCP.",
             availability: always),
         Capability(
             id: .mcpRevokeGrant, verb: "Revoke", scope: .app,
