@@ -72,7 +72,12 @@ enum MCPHandshake {
             return Opening(presentedKey: nil, firstFrame: first)
         case .preamble(let key):
             guard let frame = nextLine(fd) else { return nil }
-            return Opening(presentedKey: key, firstFrame: frame)
+            // Ladder R1, F-3: a tag-only preamble presents NOTHING — the
+            // connection is bare (`classify` stays honest about the line;
+            // the nothing-key maps to no key here, so her Activity says
+            // "without a setup key"). The shim never speaks an empty key;
+            // only a hand-rolled client reaches this.
+            return Opening(presentedKey: key.isEmpty ? nil : key, firstFrame: frame)
         }
     }
 

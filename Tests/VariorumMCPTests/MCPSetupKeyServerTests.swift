@@ -206,6 +206,20 @@ struct MCPSetupKeyServerTests {
         await h.hangUp(real)
     }
 
+    /// Ladder R1, F-3: a tag-only preamble (an empty key — a hand-rolled
+    /// client's, never the shim's) is BARE, so her Activity says "without a
+    /// setup key", never "a key this library doesn't hold". The wire answer
+    /// is the one sentence either way. RED ON OLD: the empty string hashed
+    /// and logged `connect_not_issued`.
+    @Test func anEmptyKeyPreambleIsBare() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        let (fd, answer) = try h.rawOpen(as: "stray", presenting: "", id: 9)
+        expectRefusal(answer, id: 9, "a tag-only preamble")
+        expectClosed(fd)
+        #expect(try activity(h) == ["stray connect_bare refused"])
+    }
+
     // MARK: - A store that cannot answer (fail closed, its own sentence)
 
     /// Ladder R1, F-1: a STORE error during the admission fails CLOSED — but
@@ -245,6 +259,12 @@ struct MCPSetupKeyServerTests {
         #expect(opening("variorum-mcp-key vmk1_a\n{\"id\":1}\n{\"id\":2}\n")
                 == .init(presentedKey: "vmk1_a", firstFrame: Data("{\"id\":1}".utf8)))
         #expect(opening("{\"id\":1}\n") == .init(presentedKey: nil, firstFrame: Data("{\"id\":1}".utf8)), "bare")
+        // Ladder R1, F-3: a tag-only preamble (an empty key) is BARE — the
+        // classify stays honest about the line (`.preamble(key: "")`, its own
+        // pin), and the handshake maps the nothing-key to no key.
+        #expect(opening("variorum-mcp-key\n{\"id\":1}\n")
+                == .init(presentedKey: nil, firstFrame: Data("{\"id\":1}".utf8)), "a tag with no key is bare")
+        #expect(opening("variorum-mcp-key \n{\"id\":1}\n")?.presentedKey == nil, "a tag with a space, the same")
         #expect(opening("\n\nvariorum-mcp-key vmk1_a\n\n{\"id\":1}\n")?.presentedKey == "vmk1_a", "blank lines skipped")
         #expect(opening("variorum-mcp-key vmk1_a\n") == nil, "no frame before EOF")
         #expect(opening("{\"id\":1}") == nil, "no newline before EOF")
