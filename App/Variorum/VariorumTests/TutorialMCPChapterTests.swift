@@ -115,16 +115,19 @@ private let lessons = TutorialSeeder.mcpLessons
 @Suite("Tutorial contract — AI & the MCP door (13n-c U5)")
 struct TutorialMCPChapterTests {
 
-    /// Six lessons, the guide's appendix after the privacy chapter (P-13nc-U5-1),
+    /// Seven lessons, the guide's appendix after the privacy chapter (P-13nc-U5-1),
     /// every lesson seeded under it. Three guards over the WHOLE chapter: the
     /// gathering promise only where U6 (R-AIR-12) put it — lesson 3, with its
-    /// truth pinned there; the pending mark by its ROLE, never its shape (O-1
-    /// may change the glyph); the app's vocabulary (commit, never savepoint)
-    /// and no shouted word.
-    @Test func theChapterIsSixLessonsAndTheGuidesAppendix() async throws {
+    /// truth pinned there — and her ruled "how to use it" (lesson 6's wing
+    /// recipe, its truth pinned there); the pending mark by its ROLE, never its
+    /// shape (O-1 may change the glyph); the app's vocabulary (commit, never
+    /// savepoint) and no shouted word.
+    /// 13n-c U6 JOB 4 (A JUSTIFIED EDIT, the ritual — her ruled lesson,
+    /// 2026-10-11): six → seven, the test renamed with it.
+    @Test func theChapterIsSevenLessonsAndTheGuidesAppendix() async throws {
         #expect(TutorialSeeder.plan.last?.chapter == TutorialSeeder.mcpChapter)
         #expect(TutorialSeeder.plan.last?.lessons == lessons)
-        #expect(lessons.count == 6)
+        #expect(lessons.count == 7)
         try await withGuideWorld { _, db, guideID in
             let filed = try await db.read { db in
                 try String.fetchAll(
@@ -143,9 +146,12 @@ struct TutorialMCPChapterTests {
                 let text = try await prose(db, guideID, title)
                 #expect(!text.isEmpty)
                 // 13n-c U6 (A JUSTIFIED EDIT, the ritual — U6 landed R-AIR-12):
-                // gatherings are taught in lesson 3 and nowhere else.
-                #expect(text.localizedCaseInsensitiveContains("gathering") == (title == lessons[2]),
-                        "\(title): gatherings under a wing grant are lesson 3's (R-AIR-12)")
+                // gatherings are taught in lesson 3, and named again only in
+                // her "how to use it" wing recipe (JOB 4 — the second justified
+                // edit; its truth is pinned in that lesson's test).
+                #expect(text.localizedCaseInsensitiveContains("gathering")
+                            == (title == lessons[2] || title == lessons[5]),
+                        "\(title): gatherings under a wing grant are lesson 3's (R-AIR-12) and the wing recipe's")
                 #expect(!text.localizedCaseInsensitiveContains("filled"),
                         "\(title): the pending mark is taught by its role, never its shape")
                 #expect(!text.localizedCaseInsensitiveContains("savepoint"))
@@ -176,6 +182,11 @@ struct TutorialMCPChapterTests {
             // in memory), so the promise says how long it holds — the guide's
             // own words for it ("for as long as this session is open").
             #expect(text.contains("comes back out with \u{2325}\u{2318}Z for as long as this session is open"))
+            // "The last lesson in this chapter shows how to watch it, answer it
+            // and undo it" — true only while that lesson stays LAST (JOB 4
+            // seats her "how to use it" before it — P-13nc-U6-9).
+            #expect(text.contains("The last lesson in this chapter shows how to watch it, answer it and undo it."))
+            #expect(lessons.last == "seeing, answering, undoing")
 
             // THE TRUTH. "it stays shut until you open it" — the switch and the
             // open book are both OFF on a fresh store.
@@ -483,11 +494,157 @@ struct TutorialMCPChapterTests {
         }
     }
 
-    // MARK: - Lesson 6 — seeing, answering, undoing
+    // MARK: - Lesson 6 — how to use it (her ruled lesson, 13n-c U6 JOB 4)
 
-    @Test func lessonSixSeeingAnsweringUndoing() async throws {
+    /// **HER RULED LESSON** (her sitting, 2026-10-11, third round — "fold in
+    /// the 'How to use it' — I think specific examples would be good"; "We
+    /// should help people with how to use AI within the note and within the
+    /// app"): four worked recipes, each sentence EXECUTED. The wire's half of
+    /// the same facts is already proven server-side and cited, never
+    /// duplicated: `MCPWriteServerTests.theFactCheckShapeLandsATakeBeside…`
+    /// (a suggest book grant's takes land labeled and unchosen, the shown
+    /// text unchanged, one undo walks the last act back),
+    /// `.aSuggestGrantProvablyCannotModifyAnExistingTake`,
+    /// `.writeNewCreatesInsideItsScopeOnlyAndNeverPullsAnUnreachableNoteIn`,
+    /// `MCPServerTests.aBookGrantReadsTheBookAndIsRefusedPastIt`, and this
+    /// suite's lesson 3 (once spent by a content read; a wing grant reads its
+    /// gatherings) and lesson 4 (the daily Journal's entries and Private
+    /// under a wing grant + the open book) truths.
+    @Test func lessonSixHowToUseIt() async throws {
         try await withGuideWorld { session, db, guideID in
+            #expect(lessons[5] == "how to use it")
             let text = try await prose(db, guideID, lessons[5])
+            let ops = session.operations
+            let suggest = MCPPaneCopy.rungName(.suggest)
+            let writeNew = MCPPaneCopy.rungName(.writeNew)
+
+            // ——— Recipe 1: the design doc (her example, leading) ———
+            #expect(text.hasPrefix("Say your notes for a design doc live in a book."))
+            #expect(text.contains("Share that book at \(suggest) and ask your AI to go through it"))
+            #expect(text.contains("it can leave implementation ideas or tradeoffs as new takes on each block, and "
+                                  + "they join the block's takes unchosen, so the page doesn't change until you "
+                                  + "choose one."))
+            #expect(PostMode.allCases.firstIndex(of: .takes) == 1, "⌘2 is Takes (the mode row's one order)")
+            #expect(text.contains("Review them in \(PostMode.takes.rawValue) (\u{2318}2)"))
+            let show = try #require(CapabilityRegistry.capability(.showLastAIChange).shortcutLabel)
+            #expect(text.contains("\(show) shows the client's last change"))
+            let undoChord = try #require(CapabilityRegistry.capability(.structuralUndo).shortcutLabel)
+            #expect(text.contains("\(undoChord) takes the latest back, named after the client."))
+            // THE TRUTH. A suggest grant on the book reaches its notes at
+            // suggest — and never at edit (the page can't be rewritten).
+            let design = try ops.createReading(name: "design doc", kind: .book)
+            let spec = try note(ops, "Sync runs every minute.", in: design.id)
+            _ = try approvedClient(ops, "claude-code", grant(.suggest, .book, design.id))
+            #expect(try await db.read { try Queries.mcpNoteSharing($0, noteID: spec) }.map(\.rung) == [.suggest])
+            let specFacts = try #require(try await db.read { try Queries.mcpNoteFacts($0, noteID: spec) })
+            let suggestGrant = MCPGrantRule.Grant(id: "s", rung: .suggest, scopeKind: .book, scopeID: design.id,
+                                                  duration: .always)
+            #expect(!MCPGrantRule.decide(client: .approved, grants: [suggestGrant], openBook: false,
+                                         target: .note(specFacts), rung: .edit, consumes: true).isAllowed,
+                    "suggest can't change a word she wrote")
+            // A client's take joins the fan unchosen: the page reads the same.
+            let stack = UndoStack()
+            let undoable = Operations(undoStack: stack)
+            let before = try await db.read { try Queries.renderedText($0, containerID: spec) }
+            let block = try #require(try await db.read { try Queries.renderPost($0, containerID: spec).first })
+            let idea = try undoable.addTake(
+                toBlock: block.blockID, text: "Tradeoff: sync on every edit instead — fresher, chattier.",
+                label: nil, undoLabel: Operations.MCPWriteAct.take.undoLabel(client: "claude-code"))
+            #expect(try await db.read { try Queries.renderedText($0, containerID: spec) } == before,
+                    "the page doesn't change until you choose")
+            #expect(try await db.read { try Queries.renderPost($0, containerID: spec).first?.variantID }
+                    == block.variantID, "the take joins unchosen")
+            #expect(try await db.read { db in
+                try String.fetchAll(db, sql: "SELECT id FROM variant WHERE block_id = ? AND status = 'active' "
+                                    + "AND deleted_at IS NULL", arguments: [block.blockID])
+            }.contains(idea.id), "it is in the block's takes")
+            // "⌥⌘Z takes the latest back, named after the client."
+            #expect(EditorCommands.undoMenuTitle(for: stack.topLabel) == "Undo claude-code's take")
+            #expect(try stack.undo(with: undoable) == Operations.MCPWriteAct.take.undoLabel(client: "claude-code"))
+            #expect(try await db.read { try Variant.fetchOne($0, key: idea.id) }?.deletedAt != nil)
+
+            // ——— Recipe 2: the AI inbox ———
+            #expect(text.contains("Or make a book just for your AI, even an empty one, and grant it \(writeNew) "
+                                  + "on that book alone."))
+            #expect(text.contains("It can read what's in that book and add new notes to it; if that is its only "
+                                  + "grant and the open book is off, nothing else in your library is readable to it."))
+            // THE TRUTH, on an EMPTY book: write new reaches it, a note the
+            // client makes there is readable to it, nothing else is.
+            let inbox = try ops.createReading(name: "for my AI", kind: .book)
+            _ = try approvedClient(ops, "codex", grant(.writeNew, .book, inbox.id))
+            let inboxFacts = try #require(try await db.read { try Queries.mcpBookFacts($0, readingID: inbox.id) })
+            let inboxGrant = MCPGrantRule.Grant(id: "i", rung: .writeNew, scopeKind: .book, scopeID: inbox.id,
+                                                duration: .always)
+            #expect(MCPGrantRule.decide(client: .approved, grants: [inboxGrant], openBook: false,
+                                        target: .book(inboxFacts), rung: .writeNew, consumes: true).isAllowed,
+                    "an empty book takes new notes")
+            #expect(try await db.read { try Queries.mcpBookReach($0, readingID: inbox.id) }.map(\.clientName)
+                    == ["codex"], "the empty book is readable to it")
+            let written = try ops.createNote(
+                title: "a client's note", text: "an idea for later", in: .book(inbox.id),
+                undoLabel: Operations.MCPWriteAct.note.undoLabel(client: "codex"))
+            #expect(try await reachers(db, written.post.id).contains("codex"), "it can read what it wrote there")
+            #expect(try await db.read { try Queries.mcpSwitch($0, .openBook) } == false)
+            #expect(try await !reachers(db, spec).contains("codex"), "nothing else in the library")
+            let loose = try note(ops, "a loose page")
+            #expect(try await !reachers(db, loose).contains("codex"))
+
+            // ——— Recipe 3: whole-library help, Private carved out first ———
+            #expect(text.contains("For help across everything, grant a whole wing instead: it reaches every note, "
+                                  + "book and gathering in the wing except what always asks"))
+            #expect(lessons[3] == "what always asks", "the words name lesson 4")
+            #expect(text.contains("your daily Journal's entries and anything marked Private, which a client "
+                                  + "reaches only through a grant on that one note."))
+            #expect(text.contains("So mark Private whatever should stay off-limits first, then grant the wing."))
+            // THE TRUTH, in the recipe's order: mark first, then the wing.
+            let offLimits = try note(ops, "not for any AI")
+            _ = try ops.setNotePrivate(offLimits, true)
+            _ = try approvedClient(ops, "local-llama", grant(.read, .wing, ""))
+            #expect(try await reachers(db, loose).contains("local-llama"), "every note")
+            #expect(try await db.read { try Queries.mcpBookReach($0, readingID: design.id) }.map(\.clientName)
+                    .contains("local-llama"), "every book")
+            let topic = try ops.createTag(name: "ideas")
+            let gathering = try ops.createReading(
+                name: "every idea", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(topic.id)))
+            let gatheringFacts = try #require(try await db.read {
+                try Queries.mcpGatheringFacts($0, readingID: gathering.id)
+            })
+            let llama = try #require(try await db.read { try Queries.mcpClient($0, name: "local-llama") })
+            let llamaGrants = try await db.read { try Queries.mcpGrants($0, clientID: llama.id).map(\.ruleGrant) }
+            #expect(MCPGrantRule.decideGathering(client: .approved, grants: llamaGrants, openBook: false,
+                                                 gathering: gatheringFacts).isAllowed, "every gathering")
+            #expect(try await !reachers(db, offLimits).contains("local-llama"), "Private is carved out")
+            // "only through a grant on that one note."
+            _ = try ops.grantMCPAccess(llama.id, grant(.read, .note, offLimits, .once))
+            #expect(try await reachers(db, offLimits) == ["local-llama"])
+
+            // ——— Recipe 4: the one-off ———
+            #expect(text.contains("And for a one-off, right-click a note in the Library, choose "
+                                  + "\(MCPShareCopy.shareVerb) and grant \(MCPPaneCopy.rungName(.read)), "
+                                  + "\(MCPPaneCopy.durationWord(.once)):"))
+            #expect(CapabilityRegistry.capability(.mcpShareHere).verb == MCPShareCopy.shareVerb)
+            #expect(text.contains("the client's first read of the note spends the grant, and nothing stands "
+                                  + "afterwards."))
+            // THE TRUTH: a once note grant reaches; spent by the read (the
+            // server's in-transaction stamp), nothing stands.
+            let oneOff = try note(ops, "a page to check once")
+            let claude = try #require(try await db.read { try Queries.mcpClient($0, name: "claude-code") })
+            let onceID = try ops.grantMCPAccess(claude.id, grant(.read, .note, oneOff, .once))
+            #expect(try await reachers(db, oneOff).contains("claude-code"))
+            try await db.write { try ops.consumeMCPOnceGrant($0, onceID) }
+            #expect(try await !reachers(db, oneOff).contains("claude-code"), "nothing stands afterwards")
+            #expect(try await db.read { try Queries.mcpGrant($0, id: onceID) }?.ruleGrant.isLive == false,
+                    "spent, it reaches nothing more")
+        }
+    }
+
+    // MARK: - Lesson 7 — seeing, answering, undoing
+
+    /// 13n-c U6 JOB 4 (A JUSTIFIED EDIT, the ritual): lesson six → seven, the
+    /// index and the name follow her ruled lesson's seat.
+    @Test func lessonSevenSeeingAnsweringUndoing() async throws {
+        try await withGuideWorld { session, db, guideID in
+            let text = try await prose(db, guideID, lessons[6])
             #expect(text.contains("a small icon beside a book means a client can reach it"))
             #expect(text.contains("(through the Home wing grant, say)"))
             #expect(text.contains("with \(MCPShareCopy.change) and \(MCPShareCopy.revoke)"))

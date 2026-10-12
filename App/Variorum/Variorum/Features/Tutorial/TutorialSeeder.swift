@@ -317,11 +317,13 @@ enum TutorialSeeder {
     /// **13n-c U5 — the MCP chapter's name and lessons**, in one place (the
     /// plan, the seed and `TutorialMCPChapterTests` mean the same words).
     /// PROVISIONAL P-13nc-U5-2 (the name — "AI" and "MCP" both in it, the two
-    /// words a reader would search for; 13s-a re-voices).
+    /// words a reader would search for; 13s-a re-voices). "how to use it" is
+    /// her ruled lesson (2026-10-11); its title and its seat before "seeing,
+    /// answering, undoing" are PROVISIONAL P-13nc-U6-9.
     nonisolated static let mcpChapter = "AI & the MCP door"
     nonisolated static let mcpLessons = [
         "what the door is", "connecting a client", "how much, where, how long",
-        "what always asks", "sharing from where you are", "seeing, answering, undoing",
+        "what always asks", "sharing from where you are", "how to use it", "seeing, answering, undoing",
     ]
 
     /// The books chapter's name, in one place (the plan, the section and the
@@ -2475,7 +2477,9 @@ enum TutorialSeeder {
         // pending-ask mark is described by its ROLE ("a small mark"), never its
         // shape (the Stage B fix pass may change the glyph — O-1). U6 (R-AIR-12
         // + VX-160) adds lesson 3's fourth card: a wing grant reads the wing's
-        // gatherings, and the per-item move across wings — each pinned.
+        // gatherings, and the per-item move across wings — each pinned. Her
+        // ruled "how to use it" (the sitting's third round) seats sixth: four
+        // worked recipes, every sentence executed in its pin.
 
         _ = try lesson(door, mcpLessons[0], [
             "Variorum can let an AI work in your library, if you want it to. The way "
@@ -2600,7 +2604,40 @@ enum TutorialSeeder {
             + "covers them all.",
         ])
 
+        // HER RULED LESSON (her sitting, 2026-10-11, third round — "We should
+        // help people with how to use AI within the note and within the app",
+        // "I want users to have ideas on how to make the app useful to them
+        // with their AI work"): worked recipes, her design-doc example first.
+        // Seated SIXTH, before "seeing, answering, undoing", so lesson 1's
+        // "The last lesson in this chapter shows how to watch it…" stays true
+        // (PROVISIONAL P-13nc-U6-9 — the title and the seat).
         _ = try lesson(door, mcpLessons[5], [
+            "Say your notes for a design doc live in a book. Share that book at "
+            + "Suggest and ask your AI to go through it: it can leave implementation "
+            + "ideas or tradeoffs as new takes on each block, and they join the "
+            + "block's takes unchosen, so the page doesn't change until you choose "
+            + "one. Review them in Takes (\u{2318}2); \u{2325}\u{2318}O shows the "
+            + "client's last change, and \u{2325}\u{2318}Z takes the latest back, "
+            + "named after the client.",
+
+            "Or make a book just for your AI, even an empty one, and grant it Write "
+            + "new on that book alone. It can read what's in that book and add new "
+            + "notes to it; if that is its only grant and the open book is off, "
+            + "nothing else in your library is readable to it.",
+
+            "For help across everything, grant a whole wing instead: it reaches "
+            + "every note, book and gathering in the wing except what always asks "
+            + "\u{2014} your daily Journal's entries and anything marked Private, "
+            + "which a client reaches only through a grant on that one note. So "
+            + "mark Private whatever should stay off-limits first, then grant the "
+            + "wing.",
+
+            "And for a one-off, right-click a note in the Library, choose Share "
+            + "with AI\u{2026} and grant Read, once: the client's first read of the "
+            + "note spends the grant, and nothing stands afterwards.",
+        ])
+
+        _ = try lesson(door, mcpLessons[6], [
             "On the Bookcase, a small icon beside a book means a client can reach "
             + "it. Point at the icon to see who and how far; click it for the "
             + "details, including why (through the Home wing grant, say), with "
