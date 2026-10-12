@@ -827,6 +827,12 @@ PROVISIONAL for her copy pass.
 (approval admits with zero reach; a grant is its own act after; the sheet may offer, nothing pre-picked, Always
 never a default) — joins the running fix pass with a red-on-old pin; T-13: the receipt fade + ⌥⌘O KEPT as built.
 
+**Seventh round (same sitting): THE REFRESH WINDOW IS PRE-CLEARED** — her word: her real Variorum is
+already quit on the Pro and the install is "ready for refresh". The /Applications refresh runs at the closeout
+by the orchestrator's hands (A1 safety copy → Release build → copy → codesign verify), with the pgrep gate
+re-checked at the moment and the never-kill rule standing. Nothing is needed from her; a paste-ready
+verification prompt for her Air session follows the refresh.
+
 ## PROVISIONALs (running — logged at the merge as #211)
 
 - **P-13nc-1** — D-1 (the ⌘J edge kept).
