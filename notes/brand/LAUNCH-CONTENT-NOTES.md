@@ -157,6 +157,36 @@ Conventions across all of them: `[brackets]` = hers to fill or confirm;
 - The product page hands off to the stargazing.tech agent (that repo has its
   own Claude agent — she tasks it; this repo only drafts content).
 
+## Idea bank for the MCP / AI-collaboration blog post (she's writing it soon)
+
+Born at the 2026-10-11 MCP editorial session (a Claude session read her
+readme draft through the door, left 26 labeled takes, two lenses and gutter
+comments, then built two outline notes — real material the post can narrate).
+Her note: another session still owes the broader standout-feature selection
+for this post; these are candidates, not the list.
+
+- **Lens-diff reading (her-ratified "genius idea", 2026-10-11):** "Show me
+  Takes, expanded only where lens X disagrees with lens Y" — the review view
+  an AI-collaboration session leaves behind: the human wakes up, opens Takes,
+  and sees exactly the blocks where the AI's cut differs from the original,
+  nothing else expanded. The feature ticket is VX-170 (lens-aware Takes
+  filters, Parked for a design sitting); the blog can describe the workflow
+  today with lenses + Takes even before the filter exists.
+- The session's workflow itself is post-material: outline notes where every
+  block is a one-sentence summary carrying the full paragraph as a take
+  (collapse-to-outline, rewrite the skeleton, re-expand), takes as
+  never-overwriting suggestions, lenses as whole-document readings of the
+  same note (hers / the AI's cut / the skeleton — three readings, one store).
+- **"The pull request of prose"** (her-claimed phrase, 2026-10-11 — "I'll
+  have to use that in my blog post somehow"): the loop where the AI proposes
+  as a lens, the human reviews as the lens-diff in Takes, and accepting is
+  choosing — proposed reading, diff view, merge. The human merge button
+  already exists ("make this lens the note" = all its takes chosen
+  wholesale); her ruling R-MERGE-1 (2026-10-11, VX-174) grants the door the
+  same button at the EDIT rung only — so the post's honest line: the agent
+  proposes, and merging stays yours unless you deliberately hand a client
+  the highest trust level.
+
 ## Where the facts were verified (for fast re-verification)
 
 Performance law + escape hatch: AppSpec §4. E2EE classification (18 sealed

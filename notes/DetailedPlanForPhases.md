@@ -12,6 +12,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
+| **13n-c — MCP launch readiness** (Opus orchestrates — her Opus-week protocol) | VX-165 · `vx-165-13n-c` | `~/dev/variorum-vx-165` · the Pro | KICKED OFF 2026-10-11 overnight — plan `notes/plans/phase-13n-c-mcp-launch-readiness.md`; surfaces: `Features/MCP/`, `VariorumMCP`, the MCP grant queries/ops, Library bulk bar + row menus, Bookcase/Library mastheads (wing switcher), Settings ▸ MCP/Shortcuts, the field guide's MCP chapter. Zero `Sync/`, zero schema expected (the R-AIR-14 secret alone would add a LOCAL-ONLY column) |
 
 ### Latest closeout
 
