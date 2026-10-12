@@ -161,7 +161,12 @@ extension Operations {
     ///   dead stood-in wing reads as Home everywhere else, so a replay keyed
     ///   on its stored id would miss the note's effective — Home — vocabulary
     ///   and could carry a Home application across wings, or un-obsolete an
-    ///   entry her own door had already moved on).
+    ///   entry her own door had already moved on), or the note's own CURRENT
+    ///   wing is no longer live (the ladder R2's N1, RULED quiet-obsolete at
+    ///   her sitting's fourth round: a dead stored pointer resolving to Home
+    ///   must not satisfy the stood-in check against a HOME entry wing and
+    ///   replay a note her door moved on — the moved-on letter outranks
+    ///   dangling-reads-as-Home inside these guards, both directions).
     /// - **Refused, the entry KEPT (resolvable — PROVISIONAL P-13nc-U6-3):** the
     ///   note has since joined a book (a member or a waiting arrival) or taken a
     ///   tag in the wing it would leave — putting it back would split that book
@@ -184,6 +189,12 @@ extension Operations {
                   // dead destination as Home, and the stored-id vocabulary
                   // check below could not see the note's Home applications).
                   try Queries.wingIsLive(db, id: rows.destinationWing),
+                  // R2-N1 (ruled quiet-obsolete): the note's own stored wing
+                  // must be live too — dead, it resolves to Home and would
+                  // pass `sameEffectiveWing` against a HOME stood-in wing,
+                  // replaying an entry her door had moved on. `wingIsLive('')`
+                  // is true, so a genuine Home note stands untouched.
+                  try Queries.wingIsLive(db, id: note.wingId),
                   try sameEffectiveWing(db, note.wingId, rows.destinationWing),
                   try Queries.wingIsLive(db, id: rows.sourceWing)
             else { return nil }
@@ -215,9 +226,9 @@ extension Operations {
 
     /// **The redo — the same move again, on the same rows.** Returns the stamp
     /// it severed and re-pointed on (the next undo revives exactly those), or
-    /// nil when OBSOLETE (the note gone, no longer in the wing it came from, or
-    /// EITHER wing no longer live — F1, the inverse's rule mirrored). Her
-    /// door's refusal is re-run first: a
+    /// nil when OBSOLETE (the note gone, no longer in the wing it came from,
+    /// EITHER wing no longer live — F1 — or the note's own CURRENT wing dead —
+    /// R2-N1, the inverse's rules mirrored). Her door's refusal is re-run first: a
     /// severed row that is a live MEMBER of a sealed or finished book refuses
     /// (`readingSealed` / `lockedReading` — reopen or unseal, then redo),
     /// keeping the entry. Anything the note joined or was tagged with in its
@@ -226,8 +237,10 @@ extension Operations {
         try database.write { db in
             guard var note = try Container.fetchOne(db, key: rows.postID), note.deletedAt == nil,
                   // F1: both wings live, as the inverse requires (a dead
-                  // source must not resolve to Home and replay).
+                  // source must not resolve to Home and replay). R2-N1: the
+                  // note's own stored wing live too (the inverse's rule).
                   try Queries.wingIsLive(db, id: rows.sourceWing),
+                  try Queries.wingIsLive(db, id: note.wingId),
                   try sameEffectiveWing(db, note.wingId, rows.sourceWing),
                   try Queries.wingIsLive(db, id: rows.destinationWing)
             else { return nil }
@@ -277,8 +290,9 @@ extension Operations {
     /// of the wing the note would LEAVE that is not one of the entry's own
     /// (the note's or a placed block's), refuses the replay.
     ///
-    /// `leaving` MUST name a LIVE wing — the replays' guards ensure it (F1:
-    /// both of the entry's wings live, else obsolete). A dead id here would
+    /// `leaving` MUST name a LIVE wing — the replays' guards ensure it (F1 +
+    /// R2-N1: both of the entry's wings AND the note's current wing live,
+    /// else obsolete). A dead id here would
     /// scope `wingScope` to rows that no longer exist as read (the note's
     /// effective wing is Home then) and the check would miss the very
     /// vocabulary it protects.
