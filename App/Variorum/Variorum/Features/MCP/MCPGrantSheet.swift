@@ -37,6 +37,10 @@ struct MCPGrantSheet: View {
     let done: () -> Void
 
     enum Place: Hashable {
+        /// 13n-c UX walk W-UX-2 (her ruling, sitting round 6 — APPROVE ALONE,
+        /// GRANT SEPARATE): an approval with no grant picked admits the
+        /// client with zero reach. Offered only on the approval road.
+        case nothing
         case note
         /// 13n-c U3: several notes, fixed by the opener (the Library's "Share
         /// N notes…") — WHERE is said, not chosen (mockup §2).
@@ -97,7 +101,7 @@ struct MCPGrantSheet: View {
         switch place {
         case .note: note?.fence
         case .notes: notes.lazy.compactMap(\.fence).first
-        case .book, .wing: nil
+        case .nothing, .book, .wing: nil
         }
     }
 
@@ -113,26 +117,55 @@ struct MCPGrantSheet: View {
 
     /// The grant as chosen, or nil while it is incomplete.
     private var spec: Operations.MCPGrantSpec? {
-        guard client != nil, offeredDurations.contains(duration) else { return nil }
+        guard client != nil else { return nil }
+        return Self.spec(
+            place: place, noteID: note?.id, bookID: chosenBook?.id, wingID: wingID, rung: rung,
+            duration: duration, offered: offeredDurations)
+    }
+
+    /// **The grant as picked** (pure — 13n-c UX walk W-UX-2's pin drives it):
+    /// nil while it is incomplete, for several notes (the bulk act), and when
+    /// nothing is picked.
+    static func spec(
+        place: Place, noteID: String?, bookID: String?, wingID: String, rung: MCPGrantRule.Rung,
+        duration: MCPGrantRule.Duration, offered: [MCPGrantRule.Duration]
+    ) -> Operations.MCPGrantSpec? {
+        guard offered.contains(duration) else { return nil }
         switch place {
+        case .nothing:
+            return nil
         case .note:
-            guard let note else { return nil }
-            return .init(rung: rung, scopeKind: .note, scopeID: note.id, duration: duration)
+            guard let noteID else { return nil }
+            return .init(rung: rung, scopeKind: .note, scopeID: noteID, duration: duration)
         case .notes:
             return nil  // several notes take the bulk act (`submit`)
         case .book:
-            guard let book = chosenBook else { return nil }
-            return .init(rung: rung, scopeKind: .book, scopeID: book.id, duration: duration)
+            guard let bookID else { return nil }
+            return .init(rung: rung, scopeKind: .book, scopeID: bookID, duration: duration)
         case .wing:
             return .init(rung: rung, scopeKind: .wing, scopeID: wingID, duration: duration)
         }
+    }
+
+    /// **What the sheet STARTS on when its opener names no place** (pure —
+    /// 13n-c UX walk W-UX-2's pin drives it).
+    struct Start: Equatable {
+        var place: Place
+        var bookID: String?
+        var duration: MCPGrantRule.Duration
+    }
+
+    static func start(approving: Bool, mostRecentBookID: String?) -> Start {
+        // The default a book: the most recently edited one (her "that's often
+        // what I want") — a–z's first was arbitrary at scale.
+        Start(place: .book, bookID: mostRecentBookID, duration: .always)
     }
 
     /// F4 (the U1 ladder): EXHAUSTIVE — a note grant never wears the wing's
     /// clause, a book grant always wears hers.
     private var scope: MCPGrantRule.ScopeKind {
         switch place {
-        case .note, .notes: .note
+        case .nothing, .note, .notes: .note
         case .book: .book
         case .wing: .wing
         }
@@ -140,6 +173,7 @@ struct MCPGrantSheet: View {
 
     private var placeName: String {
         switch place {
+        case .nothing: ""
         case .note: note?.title ?? ""
         case .notes: MCPShareCopy.notesCount(notes.count)
         case .book: chosenBook?.name ?? ""
@@ -149,7 +183,7 @@ struct MCPGrantSheet: View {
 
     private var placeDistinguisher: String? {
         switch place {
-        case .note, .notes: nil
+        case .nothing, .note, .notes: nil
         case .book: bookID.flatMap { bookDistinguishers[$0] }
         case .wing: wingDistinguishers[wingID]
         }
@@ -265,6 +299,8 @@ struct MCPGrantSheet: View {
     @ViewBuilder
     private var whereRow: some View {
         switch place {
+        case .nothing:
+            EmptyView()
         case .note:
             if places.wings.count > 0 {
                 HStack(spacing: 8) {
@@ -355,6 +391,7 @@ struct MCPGrantSheet: View {
     /// How the receipt says the place (a place-door's sheet speaks one).
     private var receiptPlace: String {
         switch place {
+        case .nothing: ""
         case .note: MCPShareCopy.quoted(placeName)
         case .notes: MCPShareCopy.notesCount(notes.count)
         case .book: PlaceLabels.quoted(placeName, distinguisher: placeDistinguisher)
@@ -447,9 +484,11 @@ struct MCPGrantSheet: View {
             place = .wing
             wingID = id
         case nil:
-            // The default a book: the most recently edited one (her "that's
-            // often what I want") — a–z's first was arbitrary at scale.
-            bookID = places.recentlyEdited(limit: 1).first?.id
+            let start = Self.start(
+                approving: opening.approving, mostRecentBookID: places.recentlyEdited(limit: 1).first?.id)
+            place = start.place
+            bookID = start.bookID
+            duration = start.duration
         }
         if !offeredDurations.contains(duration) { duration = offeredDurations.first ?? .once }
     }

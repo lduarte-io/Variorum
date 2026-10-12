@@ -424,7 +424,7 @@ final class MCPDoor {
         act { try $0.setMCPSwitch(.openBook, on: on) }
     }
 
-    func approve(_ clientID: String, granting spec: Operations.MCPGrantSpec) {
+    func approve(_ clientID: String, granting spec: Operations.MCPGrantSpec?) {
         act { _ = try $0.approveMCPClient(clientID, granting: spec) }
     }
 

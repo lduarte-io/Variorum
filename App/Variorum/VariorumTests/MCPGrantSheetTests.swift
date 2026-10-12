@@ -354,4 +354,66 @@ struct MCPGrantSheetTests {
             #expect(labels.books == places.bookDistinguishers(now: now))
         }
     }
+
+    // MARK: - 13n-c UX walk W-UX-2 — APPROVE ALONE, GRANT SEPARATE (her ruling, round 6)
+
+    /// **W-UX-2 (her ruling at the sitting, sixth round; red-on-old):** the
+    /// approval sheet pre-picked the most recently edited book at Read ·
+    /// Always, so one Return on a first approval handed a new client a
+    /// standing grant on a place she never chose, and no road approved
+    /// without sharing (the walker could not stage a grantless client).
+    /// Approving now admits the client with ZERO reach: the sheet may offer a
+    /// grant, but it starts on nothing picked and never on Always — and the
+    /// knock-ons become reachable: an approved client with no grant renders
+    /// the share doors (R-AIR-8's gate is ≥1 APPROVED client) and ⌥⌘A with no
+    /// history opens the grant sheet.
+    @Test func anApprovalPicksNothingAndApprovingAloneLeavesZeroGrants() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let book = try ops.createReading(name: "the lightning thief", kind: .book)
+            let request = try ops.recordMCPContact(name: "ux-walk", version: nil)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let places = await door.grantPlaces()
+            let mostRecent = places.recentlyEdited(limit: 1).first?.id
+            #expect(mostRecent == book.id, "the scene: a book is there to be pre-picked")
+
+            // The approval road (the request row's Approve…) starts on NOTHING.
+            let start = MCPGrantSheet.start(approving: true, mostRecentBookID: mostRecent)
+            #expect(start.place == .nothing, "no place is picked for her")
+            #expect(start.bookID == nil, "no book is pre-picked")
+            #expect(start.duration != .always, "Always is never the approval road's default")
+            // Confirmed as it starts: the approval alone.
+            let spec = MCPGrantSheet.spec(
+                place: start.place, noteID: nil, bookID: start.bookID, wingID: "", rung: .read,
+                duration: start.duration, offered: MCPGrantPicker.durations(connected: false, noteFence: nil))
+            #expect(spec == nil, "nothing picked grants nothing")
+            door.approve(request.id, granting: spec)
+            var client: MCPClient?
+            for _ in 0..<200 {
+                client = try await db.read { try Queries.mcpClient($0, id: request.id) }
+                if client?.state == .approved { break }
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            #expect(client?.state == .approved, "approved")
+            let grants = try await db.read { try Queries.mcpGrants($0, clientID: request.id) }
+            #expect(grants.isEmpty, "approval alone leaves ZERO grant rows — got \(grants.count)")
+
+            // The knock-ons, now reachable: the share doors render for an
+            // approved client with nothing shared, and ⌥⌘A has no history.
+            for _ in 0..<200 where !door.hasApprovedClient { try await Task.sleep(for: .milliseconds(10)) }
+            #expect(door.hasApprovedClient, "R-AIR-8's gate opens on an approved client with no grant")
+            let newest = try await db.read { try Queries.mcpNewestGrant($0) }
+            #expect(newest == nil)
+            #expect(MCPShareChord.decide(newest: newest, connected: false, reached: nil) == .openSheet,
+                    "⌥⌘A with no history opens the grant sheet on the note")
+            #expect(await door.clientsByRecentGrant().map(\.name) == ["ux-walk"],
+                    "WHO offers the grantless client")
+
+            // Outside the approval road the grant sheet keeps its start.
+            #expect(MCPGrantSheet.start(approving: false, mostRecentBookID: mostRecent)
+                    == .init(place: .book, bookID: mostRecent, duration: .always))
+        }
+    }
 }
