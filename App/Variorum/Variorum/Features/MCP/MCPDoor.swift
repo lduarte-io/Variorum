@@ -168,8 +168,13 @@ final class MCPDoor {
     /// 13n-c UX walk W-UX-1 — her press: THE raise of this ask waiting now
     /// (nil once it no longer waits — the press then opens nothing).
     func opening(_ id: String) -> MCPAskOpening? { askQueue.entry(id)?.opening }
-    /// The ask a host's sheet presents for the raise her press opened.
-    func ask(_ opening: MCPAskOpening) -> MCPAsk? { ask(opening.id) }
+    /// The ask a host's sheet presents for the raise her press opened — only
+    /// while THAT raise waits: an equal ask raised after she answered is a new
+    /// raise, and waits at its mark (arrival X — W-UX-1).
+    func ask(_ opening: MCPAskOpening) -> MCPAsk? {
+        guard let entry = askQueue.entry(opening.id), entry.raise == opening.raise else { return nil }
+        return entry.ask
+    }
 
     /// 13n-c U4 — ⌥⌘, (MCP Settings…): a REQUEST that Settings adopts (its
     /// pane → MCP) and the MCP pane answers (scrolled to Waiting when an ask

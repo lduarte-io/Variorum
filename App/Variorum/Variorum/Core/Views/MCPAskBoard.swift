@@ -95,7 +95,7 @@ nonisolated struct MCPAskBoard: Equatable, Sendable {
     /// Whether the raise she opened still waits (W-UX-1: a nested host's
     /// sheet presents exactly that raise).
     func waits(_ opening: MCPAskOpening) -> Bool {
-        contains(opening.id)
+        self.opening(opening.id) == opening
     }
 
     var isEmpty: Bool { byTarget.isEmpty }
