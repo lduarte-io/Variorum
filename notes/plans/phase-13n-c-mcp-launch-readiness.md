@@ -823,6 +823,10 @@ implementer proposed at its 4b STOP: the sheet's why line reads the SAME existin
 untouched, no new derivation. Rides the UX walk's fix pass (the walk is running; sequential cast). Exact words
 PROVISIONAL for her copy pass.
 
+**Sixth round (same sitting): the UX walk's two held calls RULED** — W-UX-2: APPROVE ALONE, GRANT SEPARATE
+(approval admits with zero reach; a grant is its own act after; the sheet may offer, nothing pre-picked, Always
+never a default) — joins the running fix pass with a red-on-old pin; T-13: the receipt fade + ⌥⌘O KEPT as built.
+
 ## PROVISIONALs (running — logged at the merge as #211)
 
 - **P-13nc-1** — D-1 (the ⌘J edge kept).
@@ -2837,7 +2841,7 @@ capture harness alone, 1 / 1.
 | # | Disposition |
 |---|---|
 | 1 | **ACCEPT — BUG, fix + RED-ON-OLD PIN** (the walker's pin shape: answer through the binding, re-enqueue an equal ask, the sheet must stay closed). Clear the host ids on answer (the queue-empty path skips the setter). Arrival X's letter restored; lesson 7's sentence becomes true again. |
-| 2 | **HERS — design at the permission boundary** (approve pre-picks a book she never chose with Read·Always; no approve-without-grant road). EXCLUDED from this fix pass; her ruling lands separately. |
+| 2 | **RULED at the sitting (sixth round): APPROVE ALONE, GRANT SEPARATE** — approving admits the client with ZERO reach; a grant is its own deliberate act afterwards (the sheet may offer one, NOTHING pre-picked, Always never a default). JOINS the fix pass by orchestrator message; pin red-on-old: approval through the road with nothing picked mints an approved client and ZERO grant rows (today every approval mints one — the walker's not-walkable note corroborates). Confirm words PROVISIONAL for her copy pass. |
 | 3 | ACCEPT — chrome: the bulk Share door must be findable at common widths (lesson 5 names it); the implementer picks the idiom (label the overflow or keep the door out of it), records it. |
 | 4 | ACCEPT — a client row's Revoke gets a CONFIRM naming the consequence ("deny + drops its N grants") and its own verb; words PROVISIONAL for her copy pass. |
 | 5 | ACCEPT — copy: the popover's Revoke on a through-the-wing row names the grant it takes ("Revoke the Home wing grant…"); T-17's design untouched. |
@@ -2850,7 +2854,7 @@ capture harness alone, 1 / 1.
 | 12 | ACCEPT (bounded) — the in-note popover's anchoring kept on-window where the platform allows; the Private lock's contrast raised; what macOS popover material won't allow is RECORDED, not fought. |
 | 13 | ACCEPT — copy: Activity's refusal rows speak the act table's words, never raw tool ids. |
 | 14 | ACCEPT — copy + truth pin: a BOOK ask's rung sentence claims only what a book grant allows (create_book is wing-only). |
-| 15 | T-11 ACCEPT (receipt "in" → "on", aligned with the confirm); the wing-move line gains breathing room from the bar hint (chrome); **T-13 (doors fade ~10 s) HELD FOR HER** — ⌥⌘O is the designed persistence (R-13nb-27); her call whether doors should outlive the fade. |
+| 15 | T-11 ACCEPT (receipt "in" → "on", aligned with the confirm); the wing-move line gains breathing room from the bar hint (chrome); **T-13 RULED at the sitting (sixth round): KEEP the fade + ⌥⌘O** (the quiet idiom stands as built; no change). |
 | 16 | ACCEPT — chrome: the picker popover sizes to content (D-W1's trade revisited with rows present); the sherlock row says "Welcome" once. |
 | 17 | ACCEPT — copy: lesson openings made self-standing where Read shows no titles (title rendering itself recorded as a judgment, smallest honest change); "way in" dedup; lesson 4's "An entry ⌘J made" reworded; lesson 5 tracks finding 3's fixed door; lesson 7 true once W-UX-1 lands. Lesson 6 untouched (reads well). |
 | 18 | ACCEPT — chrome: MCP Settings… sits BELOW Settings…; Terminal's pane description no longer truncates (shorten or wrap — record which). |
