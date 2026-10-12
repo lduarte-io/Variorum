@@ -2831,3 +2831,29 @@ capture harness alone, 1 / 1.
 **Finals (headless, this tree):** core **2,634 / 301**, `VariorumMCPTests` **93 / 14**, workbook **40 / 6**, all green
 (no package lines changed). No `Sync/`, custody, migration, editor-seam, `lockstepVersion`, real-store or
 `/Applications` lines, and no trailers.
+
+## UX-WALK DISPOSITIONS (orchestrator, 2026-10-11 evening — the walk record is `notes/plans/13nc-ux-walk.md`, findings W-UX-1…18 by its numbering; captures `13n-c-screens/walk-ux/`)
+
+| # | Disposition |
+|---|---|
+| 1 | **ACCEPT — BUG, fix + RED-ON-OLD PIN** (the walker's pin shape: answer through the binding, re-enqueue an equal ask, the sheet must stay closed). Clear the host ids on answer (the queue-empty path skips the setter). Arrival X's letter restored; lesson 7's sentence becomes true again. |
+| 2 | **HERS — design at the permission boundary** (approve pre-picks a book she never chose with Read·Always; no approve-without-grant road). EXCLUDED from this fix pass; her ruling lands separately. |
+| 3 | ACCEPT — chrome: the bulk Share door must be findable at common widths (lesson 5 names it); the implementer picks the idiom (label the overflow or keep the door out of it), records it. |
+| 4 | ACCEPT — a client row's Revoke gets a CONFIRM naming the consequence ("deny + drops its N grants") and its own verb; words PROVISIONAL for her copy pass. |
+| 5 | ACCEPT — copy: the popover's Revoke on a through-the-wing row names the grant it takes ("Revoke the Home wing grant…"); T-17's design untouched. |
+| 6 | **ACCEPT — her RULED one-wing note renders NOWHERE (dead copy)**: wire it through the standing unavailable idiom — ⌘L with one wing SPEAKS (status-line refusal with the note), the View item's note shows where the idiom supports it; pin red-on-old (the note reachable on screen). |
+| 7 | ACCEPT — chrome: the shared icon's rendering gains size/weight/contrast at row size (the PICK is hers and stands); judged against the captures, worst cases Terminal + dark. |
+| 8 | ACCEPT — chrome: the "was let go" refusal delivers at the pane's caption by Waiting (P-13nc-SB-5's own words), never clipped inside the server card. |
+| 9 | ACCEPT — chrome: the grant sheet's confirm styled as the ask sheet's filled button (one confirm idiom). |
+| 10 | ACCEPT (copy only) — the count says what it counts honestly (distinct places, or the noun becomes "grants"); the per-grant rows STAY (each live grant is a fact; a wider-covered grant still stands). No dedupe redesign. |
+| 11 | ACCEPT — chrome: the voice accent tokens reach the window-hosted grant sheet, the ask sheet's Once, and the popover links (the no-literal-colour rule's spirit); both voices + dark checked. |
+| 12 | ACCEPT (bounded) — the in-note popover's anchoring kept on-window where the platform allows; the Private lock's contrast raised; what macOS popover material won't allow is RECORDED, not fought. |
+| 13 | ACCEPT — copy: Activity's refusal rows speak the act table's words, never raw tool ids. |
+| 14 | ACCEPT — copy + truth pin: a BOOK ask's rung sentence claims only what a book grant allows (create_book is wing-only). |
+| 15 | T-11 ACCEPT (receipt "in" → "on", aligned with the confirm); the wing-move line gains breathing room from the bar hint (chrome); **T-13 (doors fade ~10 s) HELD FOR HER** — ⌥⌘O is the designed persistence (R-13nb-27); her call whether doors should outlive the fade. |
+| 16 | ACCEPT — chrome: the picker popover sizes to content (D-W1's trade revisited with rows present); the sherlock row says "Welcome" once. |
+| 17 | ACCEPT — copy: lesson openings made self-standing where Read shows no titles (title rendering itself recorded as a judgment, smallest honest change); "way in" dedup; lesson 4's "An entry ⌘J made" reworded; lesson 5 tracks finding 3's fixed door; lesson 7 true once W-UX-1 lands. Lesson 6 untouched (reads well). |
+| 18 | ACCEPT — chrome: MCP Settings… sits BELOW Settings…; Terminal's pane description no longer truncates (shorten or wrap — record which). |
+| +4b | **HER RULED 4b rides this pass** (sitting round 5): the share sheet's why names a Private-through-book's book via `isNotePrivate` + `privateBooksHolding`, display-only, fence untouched; pin updated. |
+
+Fix pass: a FRESH opus-implementer (the U6 session is past the context cutover); then ONE opus-reviewer round over the fix range (chrome/faces — no editor seam, custody, `Sync/` or default's meaning); then closeout.
