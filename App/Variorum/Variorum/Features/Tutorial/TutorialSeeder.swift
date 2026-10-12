@@ -2497,10 +2497,14 @@ enum TutorialSeeder {
             + "that client sends its work: for most clients, the company that runs "
             + "its model.",
 
+            // VX-168 U2: a client's own commit (save_commit) is the one act
+            // ⌥⌘Z never walks back — append-only, as hers — so the promise
+            // says so (and stays true of edit_take's brackets, which stay too).
             "A client can only do what you could do yourself, through the same "
             + "acts. What it writes arrives as takes, notes and commits you can "
             + "see, and every act it takes comes back out with \u{2325}\u{2318}Z "
-            + "for as long as this session is open. "
+            + "for as long as this session is open, except a commit, which stays, "
+            + "as yours do. "
             // W-UX-17: Read shows no lesson titles, so the pointer names it.
             + "The chapter's last lesson, \u{201C}seeing, answering, undoing\u{201D}, "
             + "shows how to watch it, answer it and undo it.",
@@ -2546,8 +2550,12 @@ enum TutorialSeeder {
             + "including the ones before it. Read: it can read and search what you "
             + "shared. Suggest: it can add new takes and comments beside your text, "
             + "and save a lens; it can't change a word you wrote. Write new: it can "
+            // VX-168 U2: Edit's step names what the deliberate acts added —
+            // choosing a take, committing one (VX-169), making a lens the note
+            // (VX-174, R-MERGE-1) — each pinned to the catalog's rung.
             + "also make new notes, books, chapters and tags. Edit: it can also "
-            + "change takes, and divide, merge, move or delete blocks. When it "
+            + "change, choose and commit takes, make a lens the note, and divide, "
+            + "merge, move or delete blocks. When it "
             + "changes a take, Variorum commits the take just before and just "
             + "after, so you can always compare and come back.",
 
