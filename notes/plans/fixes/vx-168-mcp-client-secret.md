@@ -971,3 +971,86 @@ it per call. `MCPSetupKeyServerTests` 10/1 green first run — confirming both t
 standing-connection nuance as standing behaviour. The sanity pass's range note (the record-only
 `0500d126` sat outside the named range) is accurate; no action. **ROUND 1 stands CLOSED** — 0B/0M/2m/2n,
 all four confirmed and landed, the sanity NIT taken as (b); round 2 with a fresh reviewer follows.
+
+## LADDER — ROUND 2 (fable-reviewer, fresh, 2026-10-12; `notes/REVIEW_PROMPT.md` verbatim over the fix diff `9c4f1d81..HEAD`, the run diff `b56bde42..HEAD` as context)
+
+**Read, never delegated:** the ROUND 1 section whole (findings, dispositions, the sanity pass and the
+final word — the anchor); the fix diff whole (6 files); the surrounding code directly —
+`MCPHandshake.swift` whole, `MCPSession.run`, `MCPPreamble.classify`, `MCPShim.refusalResponse`,
+`Operations+MCPSetupKeys.swift` whole (admit/mint), `denyMCPClient` + `approveMCPClient`,
+`MCPSetupKeyRule.swift` whole, the `ServerHarness` (`connect`/`rawOpen`/`approve`/`within`), the three
+new pins and the opening-read pin's new arms. Verified myself: `MCPSetupKeyServerTests` 10 +
+`MCPShimTests` 11 green; `MCPSetupKeyRuleTests` + `MCPSetupKeyOperationsTests` 19 green; the whole
+`VariorumMCPTests` target **122/18 GREEN** headless (the record's exact fix-pass claim re-run); no
+attribution trailers on any fix commit; zero `Sync/`/custody/editor-seam/schema/Mac-target lines in the
+fix diff (stat + path check); working tree clean.
+
+### Each round-1 fix, re-reviewed
+
+- **F-1 (store-error sentence, `150077dc`) — SOUND.** The explicit `catch` around `admitMCPConnection`
+  (`MCPSession.swift:128-137`) answers `MCPHandshake.storeErrorRefusal` through the SAME shape function
+  the key arm uses (`MCPShim.refusalResponse(toFirstLine:message:)` — id echoed, refusalCode, one line),
+  then closes; fail-closed kept. Red-on-old traced from the diff itself: the old `try?` + guard-let arm
+  answered `MCPHandshake.refusal` on any throw — the pin's `message == storeErrorRefusal` and
+  `!= refusal` assertions were red by construction. No oracle: every throw out of `admitMCPConnection`
+  is store-class (sync GRDB write; the one precondition is a crash, not a throw), and a client cannot
+  induce a store error by key choice, so the distinct sentence leaks no key standing. The no-logging
+  call is coherent (the activity write lived inside the transaction that threw). The new sentence is
+  provider-neutral, sentence-case, PROVISIONAL-flagged (P-VX168-U1-4's family).
+- **F-2 (denied-name bind, pinned deliberate, `8465d83d` + the final word `eaf789da`) — SOUND, honestly
+  labeled.** Green-on-both-sides by design and said so in the pin's own comment. Every claim in
+  `aDeniedNameBindsAFreshKeyButReachesNothingUntilApproval` verified against the code: the bind arm
+  (`MCPSetupKeyRule.decide` line 135) is identity-only; the row stays `.denied` through the bind
+  (`recordMCPContact` refreshes, never re-states); per-call refusal stays `MCPGrantRule`'s; the
+  hash-NULL sits AHEAD of the already-denied guard (`Operations+MCPGrants.swift:132-135`), and the
+  restructured pin now genuinely EXERCISES that arm — the second Deny lands while `state == .denied`
+  and bound, the released key refuses as `.notIssued`, the STANDING connection stays decided and her
+  approval opens it per call (`approveMCPClient` flips any non-approved state). The sanity NIT's (b)
+  was the right call. The two promised P-VX168-U1-1 fold-ins are recorded for the merge.
+- **F-3 (tag-only preamble is bare, `d4b19efb`) — SOUND.** The mapping lives at the handshake
+  (`MCPHandshake.readOpening:80` — `key.isEmpty ? nil : key`) while `classify` stays honest about the
+  line (its `.preamble(key: "")` pin untouched, `MCPShimTests:114`). Because `classify` TRIMS the tail,
+  a whitespace-only tail also maps to bare (the "tag with a space" arm pinned) — no residual of the
+  finding's class. Red-on-old traced: the old arm passed `""` through, which hashed to a real digest →
+  `.unknown` → `connect_not_issued` — the pin's `connect_bare` activity assertion and the two
+  opening-read `presentedKey == nil` arms were red. A non-empty garbage key still reads `.notIssued`,
+  which is the honest word for it.
+- **F-4 (the queries' move, `8465d83d`) — SOUND.** Byte-for-byte verified in the diff (the only
+  addition is the MARK naming the move); same module, same `public static` visibility, same extended
+  type — every caller compiles unchanged; the direct consumers (`MCPSetupKeyOperationsTests`,
+  `admitMCPConnection`) re-run green.
+
+### Findings (severity-ranked)
+
+- **NIT · `Sources/VariorumCore/Operations/Operations+MCPGrants.swift:113-114` · `denyMCPClient`'s doc
+  comment still opens "A no-op on a client already denied," which the F-2 final word's pin now
+  contradicts as pinned behaviour** · Evidence: the body NULLs `setup_key_hash` (and re-revokes grants)
+  BEFORE the already-denied guard (`:129-135`), and
+  `aDeniedNameBindsAFreshKeyButReachesNothingUntilApproval` deliberately exercises a second Deny on a
+  still-denied bound client releasing its binding — so a reader trusting the first sentence mispredicts
+  the exact arm round 1 made deliberate. The VX-168 paragraph below it states the release generally but
+  not the already-denied case. Doc-only; no pin possible (a comment); no behaviour at stake. · Fix: one
+  clause — e.g. "A no-op on a client already denied, except that it still releases a bound setup key
+  (the F-2 pin's arm)."
+
+Nothing else. **No new BLOCKER, MAJOR or MINOR; no round 3 is earned.**
+
+### Clean bill (checked specifically, found solid)
+
+1. The store-error arm and the key arms stay ONE wire shape (same `refusalResponse` builder, id echoed,
+   `refusalCode`); `everyRefusalIsTheSameSentence` still pins the six KEY arms byte-identical.
+2. The F-1 catch's scope is exactly the admission (no other `try?` swallow of a store read survives on
+   the handshake road; the over-cap refusal touches no store).
+3. The F-3 fix's placement argument holds: `classify` keeps reporting the line as written, the policy
+   decision (nothing-key = bare) lives at the one consumer, and the shim's own `MCPPreamble.key` still
+   cannot emit an empty key — the arm is reachable by hand-rolled clients only, now answered honestly
+   in Activity.
+4. The F-2 pin's every comment sentence is true of the code it rides (held to the sanity pass's own
+   bar — the round-1 NIT's class does not recur).
+5. The fix diff's hygiene: no `Sync/`, custody, editor-seam, schema or Mac-rendered-string lines; the
+   record's "no Mac batch owed" reasoning verified (no app-target source touched); commits trailer-free,
+   `Part of VX-168` carried; the record's fix-pass test claims (122/18) re-verified by a fresh run.
+
+**ROUND 2 VERDICT: CLEAN — 0 BLOCKER · 0 MAJOR · 0 MINOR · 1 NIT** (a doc-comment clause, left to the
+orchestrator's disposition — fixable in one line at any later commit; it earns no round 3). All four
+round-1 fixes verified sound with their pins; the ladder CLOSES at round 2 per the RUN rule.
