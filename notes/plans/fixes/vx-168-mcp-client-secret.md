@@ -85,9 +85,12 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
   commit). The walk PROVEN on the dev store (both voices, every leg); the Mac batch 616 tests / 83 suites green; the whole
   package headless green. Owed to the orchestrator: the PROVISIONALs' QUESTIONS entries, the §12 canon delta and the
   MOBILE PARITY line at the merge (its OWED list); the ladder over the run's diff.
-- Ladder: **ROUND 1 FINDINGS RECORDED** (fable-reviewer, 2026-10-12 — the LADDER section at the end of this
-  file: 0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT + the clean bill). Implementer agree/dispute pending; the
-  reviewer makes the final call and implements its confirmed fixes (the cross-model flow).
+- Ladder: **ROUND 1 CLOSED — FIX PASS DONE** (fable-reviewer, 2026-10-12): 0B/0M/2m/2n, the implementer
+  AGREED on all four with zero disputes; the reviewer confirmed all four and implemented them itself (the
+  cross-model flow) — F-1 `150077dc` (red-on-old) · F-3 `d4b19efb` (red-on-old) · F-2 pin + F-4 move
+  `8465d83d`. The whole package headless after the fix pass: **VariorumMCPTests 122/18 · VariorumCoreTests
+  2,691/307 · StringsWorkbookTests 40/6, ALL GREEN**. The dispositions: the LADDER section's ROUND 1
+  DISPOSITIONS. Awaiting the implementer's sanity pass over the reviewer's diff (`9c4f1d81..8465d83d`).
 - Closeout: NOT-STARTED.
 
 ## UNIT 1 RECORD — VX-168, the per-setup key (opus-implementer, 2026-10-12)
@@ -908,3 +911,46 @@ sentence / pane blurb looseness (U2's OWED 6 — flagged for her copy pass, righ
 **Round 1 verdict: 0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT.** Findings go to the implementer verbatim (the
 cross-model flow); the reviewer adjudicates the responses, implements its confirmed fixes with their pins,
 and the suite runs green at the end of the fix pass.
+
+### ROUND 1 DISPOSITIONS (the reviewer's final call per the cross-model flow; implementer: AGREE ×4, disputes: none)
+
+- **F-1 — CONFIRMED, fixed as (a)** (`150077dc`). The implementer's trace concurred and added the missing
+  half: the Activity line could never land either way, because `recordMCPActivity` runs inside the same
+  write transaction that threw and rolls back with it. Built: `MCPHandshake.storeErrorRefusal` ("Variorum
+  couldn't check this connection — try again." — PROVISIONAL, P-VX168-U1-4's family, her copy pass) answered
+  from an explicit `catch` in `MCPSession.run`; the key sentence stays the one sentence for every KEY arm.
+  No oracle: a store error is orthogonal to key standing and cannot be triggered by a client to probe
+  bindings. Pin `aStoreErrorRefusesWithItsOwnSentenceNeverKeyAdvice` (the standing query poisoned by
+  dropping `mcp_setup_key`) — **RED ON OLD (2 issues: the old `try?` arm answered `MCPHandshake.refusal`),
+  green after.** The arm still logs nothing — the store it would log to is the one that failed (recorded).
+- **F-2 — CONFIRMED, kept as (a): pinned, recorded, deliberate** (`8465d83d`). The final call: the build's
+  behaviour stands — ONE rule (identity decided once per connection; approval stays `MCPGrantRule`'s, per
+  call), the denied client hears the HONEST per-call answer ("denied, approve it in the pane") where
+  narrowing the bind would hand it key advice that cannot help, and re-running the setup works in either
+  order around her approval — R-VX168-1's "just re-run the setup" kept whole. Pin
+  `aDeniedNameBindsAFreshKeyButReachesNothingUntilApproval` (binds while denied · the row stays `.denied` ·
+  a call refuses "denied" · her approval opens the SAME connection · a second Deny releases the new binding)
+  — GREEN ON BOTH SIDES by design (a documenting pin over standing behaviour; nothing was fixed).
+  **For P-VX168-U1-1's QUESTIONS entry at the merge, two lines fold in:** (i) the bind arm covers ANY known
+  unbound name — denied and pending included — a deliberate superset of R-VX168-1's approved-name letter,
+  now pinned; the Deny confirm's "can't connect again" keeps its pre-VX-168 looseness ("connect" = "reach
+  anything") — her copy pass's word. (ii) The recorded residual, K2's non-defeat restated: a same-user
+  process holding an unclaimed key (clipboard history) could bind a DENIED name, and her later approval
+  would admit that tool — the key lives where any program running as her can read it, so this adds nothing
+  beyond the recorded non-defeat.
+- **F-3 — CONFIRMED, fixed at the handshake** (`d4b19efb` — the implementer's placement argument accepted:
+  `classify` stays honest about the line, its `.preamble(key: "")` pin untouched; `readOpening` maps the
+  nothing-key to no key). Pins: the opening-read's two new arms + `anEmptyKeyPreambleIsBare` (server-level,
+  Activity reads `connect_bare`) — **RED ON OLD (3 issues: `presentedKey` was `""` and the log read
+  `connect_not_issued`), green after.**
+- **F-4 — CONFIRMED, moved** (`8465d83d`): the three `Queries` reads moved byte-for-byte to
+  `Queries/MCPGrantQueries.swift` under their own MARK naming the move; no behaviour change, suites green.
+
+**Fix-pass finals (the whole package headless, exit 0):** `VariorumMCPTests` **122/18** (119 + the three
+new pins) · `VariorumCoreTests` **2,691/307** · `StringsWorkbookTests` **40/6** — ALL GREEN, only the
+standing gated skips. No Mac batch was owed: the fix pass touched `Sources/VariorumMCP` +
+`Sources/VariorumCore` only, no Mac-rendered string, no app-target source; the moved Queries symbols keep
+module and visibility (the Mac target's callers compile against the same API). **Concur-with-watch items
+stand as recorded** (the SIGPIPE watch; the format's v1 corner; W-3's ⎋; the grant-sheet sentence for her
+copy pass). Remaining per the flow: the implementer's ONE sanity pass over the reviewer's diff
+(`9c4f1d81..8465d83d`); anything it raises returns to the reviewer for the final word.
