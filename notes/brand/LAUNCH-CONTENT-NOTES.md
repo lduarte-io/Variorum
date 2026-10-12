@@ -182,9 +182,10 @@ for this post; these are candidates, not the list.
   as a lens, the human reviews as the lens-diff in Takes, and accepting is
   choosing — proposed reading, diff view, merge. The human merge button
   already exists ("make this lens the note" = all its takes chosen
-  wholesale); whether the door ever gets it is deliberately open — today the
-  agent can open the PR but only the human can merge, which may itself be
-  the line worth saying in the post.
+  wholesale); her ruling R-MERGE-1 (2026-10-11, VX-174) grants the door the
+  same button at the EDIT rung only — so the post's honest line: the agent
+  proposes, and merging stays yours unless you deliberately hand a client
+  the highest trust level.
 
 ## Where the facts were verified (for fast re-verification)
 
