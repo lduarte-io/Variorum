@@ -13,9 +13,37 @@
 //
 
 import AppKit
+import Dependencies
 import Foundation
+import GRDB
 import Testing
+import VariorumCore
 @testable import Variorum
+
+/// VX-168: a door needs a library to keep a copy's key — an in-memory store
+/// with deterministic ids and clock.
+@MainActor
+private func withSetupWorld<T>(
+    _ body: @MainActor (AppSession, AppDatabase) async throws -> T
+) async throws -> T {
+    let db = try AppDatabase.inMemory()
+    let start = Date(timeIntervalSince1970: 1_782_864_000)
+    let tick = LockIsolated(0)
+    return try await withDependencies {
+        $0.database = db
+        $0.uuid = .incrementing
+        $0.date = DateGenerator {
+            let seconds = tick.withValue { value -> Int in
+                defer { value += 1 }
+                return value
+            }
+            return start.addingTimeInterval(Double(seconds))
+        }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 168))
+    } operation: { @MainActor in
+        try await body(AppSession(database: db), db)
+    }
+}
 
 @MainActor
 @Suite("13n-c U5 — the setup menu (R-AIR-13)")
@@ -38,24 +66,39 @@ struct MCPSetupMenuTests {
         #expect(MCPSetupClient.allCases.map(\.label) == ["Claude Code", "Codex", "Any MCP client"])
     }
 
-    /// Claude Code's setup is 13n-b's command, byte for byte (R-13nb-5 —
-    /// the menu adds clients; it changes nothing she already uses).
-    @Test func claudeCodesSetupIsTheShippedCommandUnchanged() {
+    /// Claude Code's setup is 13n-b's command (R-13nb-5) — A JUSTIFIED EDIT
+    /// (VX-168, the ritual): it now carries the copy's setup key (`-e` after
+    /// the name — the CLI's own example) and replaces an earlier user-scope
+    /// registration first (`claude mcp add` refuses an existing name — the
+    /// run record's scratch probe), so re-running it is all it takes
+    /// (R-VX168-1).
+    @Test func claudeCodesSetupCarriesTheKeyAndReplacesAnEarlierSetup() {
         for debug in [false, true] {
-            #expect(MCPSetupClient.claudeCode.text(shimPath: Self.releasePath, isDebugBuild: debug)
-                == MCPPaneCopy.setupCommand(shimPath: Self.releasePath, isDebugBuild: debug))
+            #expect(MCPSetupClient.claudeCode.text(shimPath: Self.releasePath, isDebugBuild: debug, key: "vmk1_k")
+                == MCPPaneCopy.setupCommand(shimPath: Self.releasePath, isDebugBuild: debug, key: "vmk1_k"))
         }
+        #expect(MCPSetupClient.claudeCode.text(shimPath: Self.releasePath, isDebugBuild: false, key: "vmk1_k")
+            == "claude mcp remove -s user variorum >/dev/null 2>&1; claude mcp add -s user variorum "
+            + "-e VARIORUM_MCP_KEY=vmk1_k -- \"/Applications/Variorum.app/Contents/MacOS/variorum-mcp\"")
+        #expect(MCPSetupClient.claudeCode.text(shimPath: "/x", isDebugBuild: true, key: "k")
+            .hasPrefix("claude mcp remove -s user variorum-dev >/dev/null 2>&1; claude mcp add -s user variorum-dev "),
+                "a dev setup never replaces the real registration (P-13nb-U1-10)")
         #expect(MCPSetupClient.claudeCode.sentence == MCPPaneCopy.connectSentence)
+        #expect(MCPPaneCopy.connectSentence.contains("replacing an earlier Variorum setup there"))
         #expect(MCPSetupClient.claudeCode.copiedReceipt == MCPPaneCopy.copiedReceipt)
     }
 
     /// Codex's setup (the U5 record's external fact: `codex mcp add <name>
     /// -- <command>`, user-global): the same name rule and shell quoting.
+    /// VX-168 (A JUSTIFIED EDIT): `--env KEY=VALUE` before the `--` (cited in
+    /// the run record — and `codex mcp add` overwrites an existing name, so
+    /// it needs no replace step).
     @Test func codexsSetupIsItsAddCommandWithTheSameNameRuleAndQuoting() {
-        #expect(MCPSetupClient.codex.text(shimPath: Self.releasePath, isDebugBuild: false)
-            == "codex mcp add variorum -- \"/Applications/Variorum.app/Contents/MacOS/variorum-mcp\"")
+        #expect(MCPSetupClient.codex.text(shimPath: Self.releasePath, isDebugBuild: false, key: "vmk1_k")
+            == "codex mcp add variorum --env VARIORUM_MCP_KEY=vmk1_k -- "
+            + "\"/Applications/Variorum.app/Contents/MacOS/variorum-mcp\"")
         #expect(MCPSetupClient.codex.text(shimPath: "/x", isDebugBuild: true)
-            .hasPrefix("codex mcp add variorum-dev -- "),
+            .hasPrefix("codex mcp add variorum-dev --env "),
                 "a dev setup never replaces the real registration (P-13nb-U1-10)")
         let awkward = MCPSetupClient.codex.text(shimPath: "/Users/a b/\"x\"/$y/`z`\\w", isDebugBuild: false)
         #expect(awkward.hasSuffix("-- \"/Users/a b/\\\"x\\\"/\\$y/\\`z\\`\\\\w\""),
@@ -81,8 +124,16 @@ struct MCPSetupMenuTests {
                 let entry = try #require(servers[name] as? [String: Any])
                 #expect(entry["command"] as? String == path, "the exact path back: \(path)")
                 #expect((entry["args"] as? [Any])?.isEmpty == true)
+                // VX-168: the key rides as the entry's env, shown masked.
+                #expect(entry["env"] as? [String: String] == ["VARIORUM_MCP_KEY": MCPPaneCopy.shownKey])
             }
         }
+        let keyed = MCPSetupClient.anyClient.text(shimPath: Self.releasePath, isDebugBuild: false, key: "vmk1_k")
+        let keyedEntry = (try JSONSerialization.jsonObject(with: Data(keyed.utf8)) as? [String: Any])
+            .flatMap { $0["mcpServers"] as? [String: Any] }.flatMap { $0["variorum"] as? [String: Any] }
+        #expect(keyedEntry?["env"] as? [String: String] == ["VARIORUM_MCP_KEY": "vmk1_k"])
+        #expect(MCPSetupClient.anyClient.sentence.contains("with the environment variable this sets"),
+                "a client given only the path would run bare — refused")
         // It reads as the docs print it: the slash never escaped.
         let plain = MCPSetupClient.anyClient.text(shimPath: Self.releasePath, isDebugBuild: false)
         #expect(plain.contains("\"command\": \"\(Self.releasePath)\""))
@@ -99,35 +150,67 @@ struct MCPSetupMenuTests {
     // MARK: - The door
 
     /// Each choice copies ITS text with ITS receipt, under the button; the
-    /// default stays Claude Code's (13n-b's callers untouched).
-    @Test func theDoorCopiesTheChosenSetupWithItsOwnReceipt() throws {
-        let door = MCPDoor(serverAllowed: false)
-        let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-mcp-setup-test-\(UUID().uuidString)"))
-        defer { pasteboard.releaseGlobally() }
-        for client in MCPSetupClient.allCases {
-            door.copySetupCommand(for: client, to: pasteboard)
-            #expect(pasteboard.string(forType: .string) == door.setupText(for: client))
-            #expect(door.setupText(for: client)
-                == client.text(shimPath: MCPDoor.shimPath, isDebugBuild: true), "the test host is Debug")
-            #expect(door.note == MCPDoor.Note(text: client.copiedReceipt, place: .connect))
+    /// default stays Claude Code's. VX-168 (A JUSTIFIED EDIT, the ritual):
+    /// every copy MINTS a fresh key — kept by hash in the grants store,
+    /// carried by the copied text, never shown (the pane shows dots).
+    @Test func theDoorCopiesTheChosenSetupWithAFreshKeyAndItsOwnReceipt() async throws {
+        try await withSetupWorld { session, db in
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-mcp-setup-test-\(UUID().uuidString)"))
+            defer { pasteboard.releaseGlobally() }
+            var keys: [String] = []
+            for client in MCPSetupClient.allCases {
+                await door.copySetupCommand(for: client, to: pasteboard)
+                let copied = try #require(pasteboard.string(forType: .string))
+                let key = try #require(copied.firstMatch(of: #/vmk1_[A-Za-z0-9_-]{43}/#).map { String($0.output) })
+                keys.append(key)
+                #expect(copied == client.text(shimPath: MCPDoor.shimPath, isDebugBuild: true, key: key),
+                        "the test host is Debug")
+                #expect(!door.setupText(for: client).contains(key), "the key is never shown")
+                #expect(door.setupText(for: client).contains(MCPPaneCopy.shownKey))
+                #expect(try await db.read { try Queries.mcpSetupKeyStanding($0, hash: MCPSetupKeyRule.hash(key)) }
+                        == .unclaimed, "the copy's key is kept, by hash, until a client presents it")
+                #expect(door.note == MCPDoor.Note(text: client.copiedReceipt, place: .connect))
+            }
+            await door.copySetupCommand(to: pasteboard)
+            #expect(pasteboard.string(forType: .string)?.hasPrefix("claude mcp remove -s user variorum-dev") == true,
+                    "the default is Claude Code's")
+            #expect(Set(keys).count == 3, "every copy carries a fresh key")
+            #expect(Set(MCPSetupClient.allCases.map(\.copiedReceipt)).count == 3, "three receipts, three next steps")
         }
-        door.copySetupCommand(to: pasteboard)
-        #expect(pasteboard.string(forType: .string) == door.setupCommand, "the default is Claude Code's")
-        #expect(Set(MCPSetupClient.allCases.map(\.copiedReceipt)).count == 3, "three receipts, three next steps")
+    }
+
+    /// No library open: there is nowhere to keep a key, so nothing is
+    /// copied and the pane says why.
+    @Test func withNoLibraryTheCopySaysWhyAndCopiesNothing() async {
+        let door = MCPDoor(serverAllowed: false)
+        let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-mcp-setup-nolib-\(UUID().uuidString)"))
+        defer { pasteboard.releaseGlobally() }
+        pasteboard.clearContents()
+        await door.copySetupCommand(for: .codex, to: pasteboard)
+        #expect(pasteboard.string(forType: .string) == nil)
+        #expect(door.note == MCPDoor.Note(text: MCPPaneCopy.setupNeedsLibrary, place: .connect))
     }
 
     /// A receipt names ONE client's next step: choosing another client clears
     /// it — but never a refusal at the pane's head.
-    @Test func choosingAnotherClientClearsOnlyTheCopyReceipt() {
-        let door = MCPDoor(serverAllowed: false)
-        let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-mcp-setup-clear-\(UUID().uuidString)"))
-        defer { pasteboard.releaseGlobally() }
-        door.copySetupCommand(for: .claudeCode, to: pasteboard)
-        door.clearConnectNote()
-        #expect(door.note == nil)
-        door.note = MCPDoor.Note(text: "a refusal", place: .top)
-        door.clearConnectNote()
-        #expect(door.note?.place == .top, "a refusal at the head stays")
+    @Test func choosingAnotherClientClearsOnlyTheCopyReceipt() async throws {
+        try await withSetupWorld { session, _ in
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-mcp-setup-clear-\(UUID().uuidString)"))
+            defer { pasteboard.releaseGlobally() }
+            await door.copySetupCommand(for: .claudeCode, to: pasteboard)
+            #expect(door.note?.place == .connect)
+            door.clearConnectNote()
+            #expect(door.note == nil)
+            door.note = MCPDoor.Note(text: "a refusal", place: .top)
+            door.clearConnectNote()
+            #expect(door.note?.place == .top, "a refusal at the head stays")
+        }
     }
 
     // MARK: - The words
@@ -144,7 +227,8 @@ struct MCPSetupMenuTests {
     /// R-AIR-8: the pane's words say MCP and client, never "AI"; sentence
     /// case (her standing rule — no word capitalized for emphasis).
     @Test func theSetupWordsCarryNoAIAndNoShoutedWord() {
-        var words = [MCPPaneCopy.stdioLine, MCPPaneCopy.connectSection]
+        var words = [MCPPaneCopy.stdioLine, MCPPaneCopy.connectSection, MCPPaneCopy.keyLine,
+                     MCPPaneCopy.setupNeedsLibrary]
         for client in MCPSetupClient.allCases {
             words += [client.label, client.sentence, client.copiedReceipt]
         }

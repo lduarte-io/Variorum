@@ -16,6 +16,7 @@
 import Foundation
 import VariorumCore
 import VariorumMCP
+import VariorumMCPSocket
 
 nonisolated enum MCPPaneCopy {
     // MARK: - The server
@@ -88,8 +89,10 @@ nonisolated enum MCPPaneCopy {
     static func denyClientTitle(_ name: String) -> String { "Deny \(name)?" }
     /// What the press does, said before it does it: shut out AND every grant
     /// revoked (one press on the client row took all of it, unasked).
+    /// VX-168 (P-VX168-U1-1): Deny also forgets the name's setup key, so
+    /// letting it back takes its setup run again — said before the press.
     static func denyClientDetail(grants: Int) -> String {
-        let shut = "It can't connect again until you approve it."
+        let shut = "It can't connect again until you approve it and run its setup again."
         switch grants {
         case 0: return shut
         case 1: return shut + " Its grant is revoked now, and approving it later shares nothing back."
@@ -107,12 +110,34 @@ nonisolated enum MCPPaneCopy {
     }
 
     /// **L1 — the A-4 boundary, said where clients are listed** (13n-c U2;
-    /// the VX-156 brief §12's words verbatim, mockup §11 — the line the canon
-    /// says the pane carries and no rendered string did). Direct and
-    /// technical (R-13n-5).
+    /// the VX-156 brief §12's words, mockup §11 — the line the canon says the
+    /// pane carries). Direct and technical (R-13n-5). **VX-168 made it
+    /// TRUE-ER, never promising more (the brief's own condition):** the setup
+    /// key now ties a name to its setup, and K2's recorded non-defeat — any
+    /// program running as her can read the key — is said in the same breath.
+    /// PROVISIONAL P-VX168-U1-5, her copy pass.
     static let clientBoundary =
-        "A client names itself when it connects. Variorum can't verify the name: a grant lets "
-        + "whatever connects under that name do what you granted."
+        "A client names itself when it connects. Each setup copied here carries a key that binds "
+        + "that name to it, and a connection under the name without that key is refused. That tells "
+        + "two tools apart, not programs running as you: any of them can read the key in the "
+        + "client's settings."
+
+    /// L1's room (VX-168): its four sentences run past the quiet captions'
+    /// three lines at the pane's width.
+    static let clientBoundaryLines = 5
+
+    // MARK: - The setup key (VX-168 — K2)
+
+    /// What the pane SHOWS where a copy's key goes: a key is minted only by
+    /// the copy act and never displayed (the clipboard is its one road out).
+    static let shownKey = "\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}"
+    /// The line under the shown setup. PROVISIONAL P-VX168-U1-5.
+    static let keyLine =
+        "Each copy carries a fresh setup key, shown here as dots, that ties a client's name to that "
+        + "setup. Run a setup again to give a client a new key."
+    /// Copy setup command with no library open: the key it mints is kept in
+    /// the library, so there is nowhere to keep one. PROVISIONAL.
+    static let setupNeedsLibrary = "Open your library to copy a setup \u{2014} its key is kept there."
 
     // MARK: - Shared with AI
 
@@ -279,6 +304,13 @@ nonisolated enum MCPPaneCopy {
         case "put_back": return "putting back a block in \(at)"
         case "set_entry_date": return "setting the date of \(at)"
         case "move_note_to_wing": return kind == "wing" ? "moving a note to \(at)" : "moving \(at) to another wing"
+        // VX-168 — a connection the setup key turned away, said precisely
+        // here (the client hears one sentence for all of them).
+        case "connect_bare": return "connecting without a setup key"
+        case "connect_not_issued": return "connecting with a setup key this library doesn\u{2019}t hold"
+        case "connect_another_names_key": return "connecting with another client\u{2019}s setup key"
+        case "connect_not_this_names_key": return "connecting with a setup key other than its own"
+        case "connect_unnamed": return "connecting without a name"
         default: return "using " + spokenAct(act)
         }
     }
@@ -335,6 +367,8 @@ nonisolated enum MCPPaneCopy {
         case "set_book_rule": return "set what \(at) collects" + times
         case "put_back": return "put back a block in \(at)" + times
         case "set_entry_date": return "set the date of \(at)" + times
+        // VX-168: a known name's first setup key, bound as it connected.
+        case "connect_bound": return "connected with a new setup, now bound to its name" + times
         default: return "used " + spokenAct(act) + times
         }
     }
@@ -345,9 +379,12 @@ nonisolated enum MCPPaneCopy {
     // the setup menu's own words, the one place outside `MCPSetupClient` a
     // provider is named (`MCPProviderNeutralityTests` reads this fence).
     static let connectSection = "Connect a client"
+    /// VX-168: the command now replaces an earlier setup, so it says so (the
+    /// re-run her R-VX168-1 relies on). PROVISIONAL words, her copy pass.
     static let connectSentence =
         "Claude Code registers Variorum with one command. Copy it, run it in a terminal, then "
-        + "start a new Claude Code session \u{2014} it adds Variorum for every folder (user scope)."
+        + "start a new Claude Code session \u{2014} it adds Variorum for every folder (user scope), "
+        + "replacing an earlier Variorum setup there."
     static let copiedReceipt = "Copied. Run it in a terminal, then start a new Claude Code session."
 
     /// The name the client registers the server under: the Debug build's is
@@ -359,9 +396,16 @@ nonisolated enum MCPPaneCopy {
 
     /// The command (R-13nb-5): user scope (the CLI's default `local` would
     /// register only the folder she ran it in), the shim's absolute path
-    /// quoted for a POSIX shell.
-    static func setupCommand(shimPath: String, isDebugBuild: Bool) -> String {
-        "claude mcp add -s user \(serverName(isDebugBuild: isDebugBuild)) -- \(shellQuoted(shimPath))"
+    /// quoted for a POSIX shell. VX-168 (K2): it carries the copy's fresh
+    /// setup KEY as the shim's environment (`-e` after the name — the flag is
+    /// variadic; the CLI's own example), and it REPLACES any earlier user-scope
+    /// registration first — `claude mcp add` refuses a name that exists
+    /// ("already exists in user config", the U1 record's scratch probe), and
+    /// her R-VX168-1 promise is that re-running the setup is all it takes.
+    static func setupCommand(shimPath: String, isDebugBuild: Bool, key: String = shownKey) -> String {
+        let name = serverName(isDebugBuild: isDebugBuild)
+        return "claude mcp remove -s user \(name) >/dev/null 2>&1; claude mcp add -s user \(name) "
+            + "-e \(MCPPreamble.environmentVariable)=\(key) -- \(shellQuoted(shimPath))"
     }
 
     static func shellQuoted(_ path: String) -> String {
@@ -386,8 +430,11 @@ nonisolated enum MCPPaneCopy {
     /// The Codex setup (the U5 record's external fact — `codex mcp add
     /// <name> -- <command>`, which writes the user-global `~/.codex/config.toml`):
     /// the same name rule and the same shell quoting as Claude Code's.
-    static func codexCommand(shimPath: String, isDebugBuild: Bool) -> String {
-        "codex mcp add \(serverName(isDebugBuild: isDebugBuild)) -- \(shellQuoted(shimPath))"
+    /// VX-168: `--env KEY=VALUE` before the `--` (the run record's cited
+    /// syntax — repeatable, no short form).
+    static func codexCommand(shimPath: String, isDebugBuild: Bool, key: String = shownKey) -> String {
+        "codex mcp add \(serverName(isDebugBuild: isDebugBuild)) --env \(MCPPreamble.environmentVariable)=\(key) "
+            + "-- \(shellQuoted(shimPath))"
     }
 
     /// **The generic stanza** — the `mcpServers` JSON shape most MCP clients
@@ -396,14 +443,19 @@ nonisolated enum MCPPaneCopy {
     /// hand so it reads as the docs print it (two-space indent, `"key": value`)
     /// and the path is never slash-escaped; `jsonQuoted` makes any path legal
     /// JSON (pinned by parsing it back).
-    static func setupJSON(shimPath: String, isDebugBuild: Bool) -> String {
+    /// VX-168: the key rides as the stanza's `env` (the sibling of `command`
+    /// and `args` in the shape modelcontextprotocol.io and Cursor document).
+    static func setupJSON(shimPath: String, isDebugBuild: Bool, key: String = shownKey) -> String {
         let name = jsonQuoted(serverName(isDebugBuild: isDebugBuild))
         return """
             {
               "mcpServers": {
                 \(name): {
                   "command": \(jsonQuoted(shimPath)),
-                  "args": []
+                  "args": [],
+                  "env": {
+                    \(jsonQuoted(MCPPreamble.environmentVariable)): \(jsonQuoted(key))
+                  }
                 }
               }
             }
@@ -777,11 +829,14 @@ nonisolated enum MCPSetupClient: String, CaseIterable, Identifiable, Sendable {
     /// shows verbatim): Claude Code's command unchanged, Codex's command, or
     /// the generic `mcpServers` stanza. Debug keeps `variorum-dev`
     /// (P-13nb-U1-10) in all three.
-    func text(shimPath: String, isDebugBuild: Bool) -> String {
+    /// VX-168 (K2): `key` is the copy's fresh setup key; the pane SHOWS the
+    /// text with `MCPPaneCopy.shownKey` in its place (a key is minted only by
+    /// the copy act, and never shown — the clipboard is its one road out).
+    func text(shimPath: String, isDebugBuild: Bool, key: String = MCPPaneCopy.shownKey) -> String {
         switch self {
-        case .claudeCode: MCPPaneCopy.setupCommand(shimPath: shimPath, isDebugBuild: isDebugBuild)
-        case .codex: MCPPaneCopy.codexCommand(shimPath: shimPath, isDebugBuild: isDebugBuild)
-        case .anyClient: MCPPaneCopy.setupJSON(shimPath: shimPath, isDebugBuild: isDebugBuild)
+        case .claudeCode: MCPPaneCopy.setupCommand(shimPath: shimPath, isDebugBuild: isDebugBuild, key: key)
+        case .codex: MCPPaneCopy.codexCommand(shimPath: shimPath, isDebugBuild: isDebugBuild, key: key)
+        case .anyClient: MCPPaneCopy.setupJSON(shimPath: shimPath, isDebugBuild: isDebugBuild, key: key)
         }
     }
 
@@ -792,10 +847,12 @@ nonisolated enum MCPSetupClient: String, CaseIterable, Identifiable, Sendable {
         case .codex:
             "Codex registers Variorum with one command. Copy it, run it in a terminal, then start a new "
                 + "Codex session \u{2014} it adds Variorum for every folder (in ~/.codex/config.toml)."
+        // VX-168: a client given only the path would run the shim with no
+        // key — refused — so the sentence names the variable it also needs.
         case .anyClient:
             "Most MCP clients read their servers from an \u{201C}mcpServers\u{201D} list in JSON. Paste "
                 + "this into your client's MCP settings and restart it \u{2014} or give a client that "
-                + "asks for a command the path above."
+                + "asks for a command the path above, with the environment variable this sets."
         }
     }
 

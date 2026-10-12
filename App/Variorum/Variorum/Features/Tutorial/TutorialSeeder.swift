@@ -2531,9 +2531,14 @@ enum TutorialSeeder {
             + "Change\u{2026} to share more and Deny\u{2026} to shut it out "
             + "again, every grant it holds revoked.",
 
-            "One honest limit: a client names itself when it connects, and "
-            + "Variorum can't check that name. Whatever you grant, you "
-            + "grant to anything that connects under that name.",
+            // VX-168: the sentence the setup key falsified ("Variorum can't
+            // check that name"), made true of the build — and no truer: K2's
+            // recorded non-defeat said with it.
+            "One honest limit: a client names itself when it connects. The "
+            + "setup you copy carries a key that ties that name to it, so a "
+            + "second tool using the same name is turned away. But the key sits "
+            + "in the client's own settings, where any program running as you "
+            + "can read it.",
         ])
 
         _ = try lesson(door, mcpLessons[2], [

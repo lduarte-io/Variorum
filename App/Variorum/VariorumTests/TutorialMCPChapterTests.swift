@@ -240,8 +240,18 @@ struct TutorialMCPChapterTests {
             for id in [CapabilityID.mcpApproveClient, .mcpDenyClient, .mcpChangeClientAccess, .mcpRevokeClient] {
                 #expect(text.contains(CapabilityRegistry.capability(id).verb), "\(id)'s verb")
             }
-            #expect(text.contains("Variorum can't check that name"))
-            #expect(MCPPaneCopy.clientBoundary.contains("can't verify the name"), "L1 says the same")
+            // VX-168 (A JUSTIFIED EDIT, the ritual): the limit the setup key
+            // falsified ("Variorum can't check that name") is true of the
+            // build now — and pinned against the rule it describes.
+            #expect(!text.contains("Variorum can't check that name"))
+            #expect(text.contains("a key that ties that name to it, so a second tool using the same name is turned away"))
+            #expect(text.contains("where any program running as you can read it"), "K2's non-defeat, said")
+            #expect(MCPPaneCopy.clientBoundary.contains("binds that name to it"), "L1 says the same")
+            #expect(MCPPaneCopy.clientBoundary.contains("any of them can read the key"))
+            let bound = MCPSetupKeyRule.Client(id: "c", boundHash: MCPSetupKeyRule.hash("vmk1_first"))
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound,
+                                           presentedHash: MCPSetupKeyRule.hash("vmk1_second"), standing: .unclaimed)
+                    == .refuse(.notThisNamesKey), "a second tool under the name IS turned away")
 
             // THE TRUTH. "it can reach nothing yet": a connection request is
             // refused by the one rule, even with the open book on.
