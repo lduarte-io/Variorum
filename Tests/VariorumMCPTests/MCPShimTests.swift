@@ -164,7 +164,9 @@ struct MCPShimTests {
     }
 
     /// The pump carries a client's `initialize` to a REAL server and its
-    /// answer back, byte for byte.
+    /// answer back, byte for byte. VX-168 (A JUSTIFIED EDIT, the ritual): the
+    /// shim runs CONNECTED as it ships — its setup key in its environment, so
+    /// the preamble goes first — and the session behind it serves verbatim.
     @Test func thePumpCarriesARealSessionVerbatim() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
@@ -174,10 +176,12 @@ struct MCPShimTests {
         }
         var input: [Int32] = [-1, -1], output: [Int32] = [-1, -1]
         #expect(pipe(&input) == 0 && pipe(&output) == 0)
+        let environment = [MCPPreamble.environmentVariable: try h.setupKey(for: "pump-test")]
+        let (shimInput, shimOutput) = (input[0], output[1])
         let pump = Thread {
-            MCPShim.pump(input: input[0], output: output[1], socket: socket)
+            MCPShim.serve(socket: socket, environment: environment, input: shimInput, output: shimOutput)
             close(socket)
-            close(output[1])
+            close(shimOutput)
         }
         pump.start()
         let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"pump-test","version":"1"}}}"#

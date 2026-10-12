@@ -1,17 +1,25 @@
 import Foundation
 import MCP
 import VariorumCore
+import VariorumMCPSocket
 
 /// **ONE MCP SESSION = ONE CONNECTION** (13n-b U1, A-3). Its own SDK `Server`
 /// over its own socket; the client is whatever `clientInfo.name` its
 /// `initialize` declared (A-4 — the ruled honest boundary: a grant gates the
 /// DOOR, never a process). First contact records a PENDING connection request
 /// with no access; every later call reads the client's standing fresh.
+///
+/// **VX-168 (K2, R-VX168-1): the name must come with its SETUP KEY.** Before
+/// the SDK sees a byte, the session reads the connection's opening
+/// (`MCPHandshake` — the shim's preamble line, then the `initialize` frame)
+/// and admits or refuses it ONCE, through `Operations.admitMCPConnection`
+/// (the pure `MCPSetupKeyRule`): a refusal answers the frame with one
+/// sentence and ends the connection; an admission replays the frame into the
+/// transport and serves exactly as before.
 final class MCPSession: @unchecked Sendable {
     let id = UUID()
     let fd: Int32
     private let server: Server
-    private let transport: MCPSocketTransport
     private let tools: MCPReadTools
     private let writes: MCPWriteTools
     private let shows: MCPShowTool
@@ -87,7 +95,6 @@ final class MCPSession: @unchecked Sendable {
         self.fd = fd
         self.database = database
         self.operations = operations
-        self.transport = MCPSocketTransport(fd: fd)
         var reads = MCPReadTools(database: database, operations: operations)
         reads.hooks = hooks
         self.tools = reads
@@ -103,8 +110,18 @@ final class MCPSession: @unchecked Sendable {
             capabilities: .init(tools: .init(listChanged: true)))
     }
 
-    /// Serve until the connection closes.
+    /// Serve until the connection closes — after the handshake admits it.
     func run() async {
+        guard let opening = await MCPHandshake.opening(fd: fd) else { return }
+        let declared = MCPHandshake.initialize(opening.firstFrame)
+        // Fail CLOSED: a store that cannot answer admits nobody.
+        let admission = try? operations.admitMCPConnection(
+            name: declared?.name ?? "", version: declared?.version, presentedKey: opening.presentedKey)
+        guard let admission, admission.decision.admits, let admitted = admission.client?.name else {
+            _ = MCPSocketTransport.writeAll(fd, MCPHandshake.refusalResponse(toFirstFrame: opening.firstFrame))
+            return
+        }
+        let transport = MCPSocketTransport(fd: fd, replay: [opening.firstFrame])
         await server.withMethodHandler(ListTools.self) { [weak self] _ in
             guard let self, let name = self.clientName else { return .init(tools: []) }
             let standing = try self.database.read { try MCPGrantAuthority.standing($0, clientName: name) }
@@ -129,8 +146,13 @@ final class MCPSession: @unchecked Sendable {
         do {
             try await server.start(transport: transport) { [weak self] info, _ in
                 guard let self else { return }
-                let client = try self.operations.recordMCPContact(name: info.name, version: info.version)
-                self.lock.withLock { self.name = client.name }
+                // The SDK reads the SAME replayed frame the handshake decided
+                // on; a name that differs (it cannot, short of two JSON
+                // readers disagreeing) is refused, never served.
+                guard info.name.trimmingCharacters(in: .whitespacesAndNewlines) == admitted else {
+                    throw MCPError.serverError(code: MCPShim.refusalCode, message: MCPHandshake.refusal)
+                }
+                self.lock.withLock { self.name = admitted }
             }
             await server.waitUntilCompleted()
         } catch {

@@ -64,9 +64,9 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
 
 ## LIVE STATUS (per the resiliency protocol — flipped in the same commit as each piece)
 
-- Unit 1 (VX-168, the secret): **IN-PROGRESS** (opus-implementer, 2026-10-12) — pieces 1–3 DONE (the migration
-  `3953c962`; the core rule + ops `b492f6bf`; the shim's preamble); pieces 4–6 remain (the server handshake · the
-  app's faces · the DRILL). The per-piece table and every argued call: the UNIT 1 RECORD at the foot of this file.
+- Unit 1 (VX-168, the secret): **IN-PROGRESS** (opus-implementer, 2026-10-12) — pieces 1–4 DONE (the migration
+  `3953c962`; the core rule + ops `b492f6bf`; the shim's preamble `d2966c5f`; the server handshake); pieces 5–6
+  remain (the app's faces · the DRILL). The per-piece table and every argued call: the UNIT 1 RECORD at the foot of this file.
 - Unit 2 (VX-169 + VX-174, the edit-rung door writes): **NOT-STARTED** — settled design: the kickoff file's
   VX-169 settlement + R-MERGE-1 + the ticket bodies.
 - Unit 3 (VX-172 + VX-171, the lens doors): **NOT-STARTED** — settled design: the vx-170 shape file's
@@ -167,6 +167,6 @@ from the installed CLI's own `claude mcp add --help` (2.1.296): `claude mcp add 
 | 1 | the local-only migration `v1_26_mcp_setup_keys`, alone | DONE `3953c962` — `MCPGrantSchemaTests` + `SyncSchemaTests` 20/2 green headless |
 | 2 | core: `Domain/MCPSetupKeyRule` + `Operations+MCPSetupKeys` (mint · admit) + Deny/adoption release + `MCPClient.isSetupBound` | DONE (this commit) — `MCPSetupKeyRuleTests` + `MCPSetupKeyOperationsTests` + the grants/adoption/schema suites 44/5 green headless |
 | 3 | the shim's preamble (`MCPPreamble`, `VariorumMCPSocket`) + "MCP-blind" | DONE (this commit) — `MCPPreamble` (the env variable `VARIORUM_MCP_KEY`; the line `variorum-mcp-key <key>`, never JSON; `classify` for the app's read), `MCPShim.serve` (preamble first when keyed, nothing of its own when bare, then the pump), A-2's comments amended to MCP-blind (`MCPShim.swift`, the shim's `main.swift`); `MCPShimTests` 11/1 green headless |
-| 4 | the server handshake + the harness's keyed `connect(as:)` + socket-road pins | NOT-STARTED |
+| 4 | the server handshake + the harness's keyed `connect(as:)` + socket-road pins | DONE (this commit) — `MCPHandshake` (the opening read byte-exact on its own thread: preamble → `initialize` frame; the ONE refusal sentence `MCPHandshake.refusal`, PROVISIONAL P-VX168-U1-4), `MCPSession.run` decides ONCE through `admitMCPConnection` (fail-closed on a store error) — refused: the shim's refusal shape answering the frame's id, then the host closes; admitted: the frame REPLAYED into `MCPSocketTransport(replay:)`, the SDK hook only checks the name and sets it (`recordMCPContact` moved into the admission); the over-cap refusal reads past a preamble to answer by id (a real fix the preamble needed). The harness: `connect(as:)` presents the name's own setup key (minted once per name, as a copy); `connect(as:presenting:)` + `rawOpen` for the arms; three raw-socket pins justified-edited (the over-cap flood, the advice-at-initialize, the pump — now `MCPShim.serve` keyed). `MCPSetupKeyServerTests` (7: a fresh client end to end · two tools told apart · a bare shim · R-VX168-1's approved-unbound bind · every arm one sentence byte-identical · the opening read · the initialize parse). **`VariorumMCPTests` 103/15 green headless** (13n-c's close: 93/14) |
 | 5 | the app: mint at copy (all three clients), L1, the Deny confirm, the activity words, the guide's limit sentence | NOT-STARTED |
 | 6 | the DRILL (dev store, held stage claim) + evidence | NOT-STARTED |
