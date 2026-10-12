@@ -171,6 +171,24 @@ struct MCPSetupMenuTests {
     /// named the menu's choices ("Claude Code, Codex or any MCP client"); the
     /// description now says it sets up ANY MCP client and names no provider —
     /// and neither does the server row's blurb.
+    /// **13n-c UX walk W-UX-18 (T-16) — a geometry oracle:** the pane's
+    /// description fits the Settings header's two lines in Terminal's mono
+    /// (the widest voice), at the detail column's measured room — 720 (the
+    /// window) − 196 (the sidebar) − 1 (the hairline) − 2 × 18 (the header's
+    /// padding). It ran to "…how to set up any…" before (146 characters).
+    @Test func thePanesDescriptionFitsTheHeadersTwoLinesInTerminal() {
+        let room: CGFloat = 720 - 196 - 1 - 2 * 18
+        let mono = NSFont.monospacedSystemFont(ofSize: 11.5, weight: .regular)
+        let text = NSAttributedString(string: SettingsPane.mcp.blurb, attributes: [.font: mono])
+        let rect = text.boundingRect(
+            with: NSSize(width: room, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading])
+        let lineHeight = NSLayoutManager().defaultLineHeight(for: mono)
+        #expect((rect.height / lineHeight).rounded() <= 2,
+                "\(rect.height / lineHeight) lines at \(room) pt: \(SettingsPane.mcp.blurb)")
+        #expect(SettingsPane.mcp.blurb.contains("how to set up any MCP client"))
+    }
+
     @Test func thePanesDescriptionSetsUpAnyClientAndNamesNoProvider() {
         let blurb = SettingsPane.mcp.blurb
         #expect(blurb.contains("how to set up any MCP client"))

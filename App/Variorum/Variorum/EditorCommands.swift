@@ -383,7 +383,11 @@ struct EditorCommands: Commands {
         // under Settings…, Settings opened at MCP — at its Waiting list when
         // an ask waits (`MCPDoor.requestSettings`, adopted by Settings and
         // answered by the pane). Always acts: the pane is always there.
-        CommandGroup(after: .appSettings) {
+        // 13n-c UX walk W-UX-18 (T-2): `after: .appSettings` drew it ABOVE
+        // Settings… (the Settings scene's item is not in that group on this
+        // macOS — AX read in both walks); before the Services group puts it
+        // BELOW Settings…, where U4's brief placed it.
+        CommandGroup(before: .systemServices) {
             Button(verb(.mcpSettings)) {
                 mcp.requestSettings()
                 openSettings()

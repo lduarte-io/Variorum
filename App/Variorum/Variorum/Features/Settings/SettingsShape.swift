@@ -113,8 +113,12 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         // Code, Codex or any MCP client — the description says so. 13n-c O-4
         // (her ask — no provider hardwired outside the setup): it says "any MCP
         // client", naming none (PROVISIONAL, her copy pass).
-        case .mcp: "The local MCP server: which clients may connect, what each may read and change, "
-            + "the asks waiting for your answer, and how to set up any MCP client."
+        // 13n-c UX walk W-UX-18 (T-16): SHORTENED, not wrapped — at two lines
+        // Terminal's mono cut "…how to set up any…", losing "any MCP client";
+        // the header's two-line rule holds every pane (the oracle pin measures
+        // it). "The local MCP server" lives on in the switch's own sentence.
+        case .mcp: "Which clients may connect, what each may read and change, the asks waiting for "
+            + "you, and how to set up any MCP client."
         case .protection: "The passphrase, how the library locks, and the ways back in."
         case .dataSafety: "Backups, how fresh they are, and what restoring one does."
         case .diagnostics: "Crash reports \u{2014} off unless you turn them on, and never sent without you."
