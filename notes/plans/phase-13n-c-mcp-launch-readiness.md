@@ -2885,6 +2885,17 @@ capture harness alone, 1 / 1.
 
 Fix pass: a FRESH opus-implementer (the U6 session is past the context cutover); then ONE opus-reviewer round over the fix range (chrome/faces — no editor seam, custody, `Sync/` or default's meaning); then closeout.
 
+### ORCHESTRATOR VERIFICATION OF THE FIX-PASS HANDBACK (Fable, 2026-10-11 ~23:05 MDT)
+
+**The pass is CLOSED and VERIFIED BY MY OWN HANDS — every dispositioned row landed** (range `35ebf3e3..519915f7`, tip pushed; row-by-row statuses, pins and red counts are the fix-pass record below — the dispositions table above is DISCHARGED into it, her two scope additions W-UX-2 and W-UX-19 included). My checks, run directly:
+- **Range hygiene:** 40 files, +1,450/−216; `git diff --name-only` over the range shows ZERO `Sync/` / `Server/` / `Persistence/` / custody / keychain / editor-seam lines; **`Domain/MCPGrantRule.swift` byte-untouched** (empty diff); the one package line is `MCPToolFacts` (a public read of the tool catalog). Zero attribution trailers in the range's commits. Branch fully pushed, working tree clean.
+- **Machine state:** `Tools/stage status` → STAGE FREE; `pgrep` → no Variorum instance; 34 files in `13n-c-screens/walk-ux-fixed/` (captures + probes + logs, gitignored); the record's restore line says the dev store came back byte-identical from `scale-prestage-20261012T035614Z` and was re-checked after the closing Mac run.
+- **Finals accepted as recorded:** core 2,635/301 · `VariorumMCPTests` 93/14 · workbook 40/6 · Mac 1,768/273 with VX-115's standing red the only red.
+
+**Carried forward, not lost** (the record's not-done list, each with its home): W-UX-3's bulk row unseen on screen (synthetic ⌘-click can't extend a Library selection — a WalkKit fact for the next walker; code + pinless chrome, reviewer to read it); +4b's sentence pinned verbatim but unseen (no Private-through-book note staged — her morning real-store Private-book test covers the live face); W-UX-17's guide re-seed = her Help ▸ Restore Tutorial… call (handoff checklist); Study dark unwalked; T-6's empty-place confirm text ("…in “” once") pre-existing and undispositioned → the copy-pass list; the Library's own segmented controls system-blue in dark (not an MCP face) → a VX ticket at closeout; the flipped-selectable-text observation (unreproduced, relaunch-cleared, no code here touches it) → a watch item for her eyes and the reviewer.
+
+Next: ONE opus-reviewer cold round over `35ebf3e3..519915f7` (record `notes/plans/13nc-uxfix-ladder-round1.md`), then closeout.
+
 ## UX-WALK FIX PASS RECORD (LIVE STATUS — the fix implementer owns this section from its first commit)
 
 Implementer: Opus (`claude-opus-5-5`), fresh session, 2026-10-11 (late evening MDT). Worktree `~/dev/variorum-vx-165`,
