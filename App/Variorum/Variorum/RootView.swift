@@ -226,7 +226,7 @@ struct RootView: View {
             // already in a sheet (⌘L's switcher) presents it itself.
             answerAsk: { router.mcpAskRequest = $0 },
             askSheet: { opening in
-                AnyView(mcp.ask(opening).map { MCPAskSheet(door: mcp, ask: $0) })
+                AnyView(mcp.ask(opening).map { MCPAskSheet(door: mcp, ask: $0).environment(theme) })
             })
     }
 
@@ -389,7 +389,7 @@ struct RootView: View {
         // 13n-c U4 — ARRIVAL X: THE ASK her press opened here (a pending
         // glyph), presented while it still waits. Nothing else opens it — the
         // WindowGroup's self-presenting host is retired.
-        .mcpAskSheet(door: mcp, opening: $mcpAskSheetOpening)
+        .mcpAskSheet(door: mcp, opening: $mcpAskSheetOpening, theme: theme)
         .onChange(of: router.mcpAskRequest) { _, request in
             guard let request else { return }
             // W-UX-1: THE raise waiting now — a later equal raise is never it.

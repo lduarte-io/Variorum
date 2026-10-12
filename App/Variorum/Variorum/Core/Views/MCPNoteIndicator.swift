@@ -79,7 +79,8 @@ struct MCPNoteIndicator: View {
             HStack(spacing: 4) {
                 if let state = MCPNoteIndicatorState.matching(state, postID: postID) {
                     if !state.reach.isEmpty {
-                        MCPSharedIcon(reaches: state.reach, tokens: tokens)
+                        // W-UX-12: at the window's trailing edge — open leftward.
+                        MCPSharedIcon(reaches: state.reach, tokens: tokens, arrowEdge: .leading)
                     }
                     if state.isPrivate { lock(state) }
                 }
@@ -99,16 +100,20 @@ struct MCPNoteIndicator: View {
         Button {
             lockShown.toggle()
         } label: {
+            // 13n-c UX walk W-UX-12: a FIRMER lock — body ink (it was the
+            // muted tint, faint at the bar's far end), the shared icon's
+            // weight beside it.
             Image(systemName: "lock")
                 .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .fontWeight(MCPSharedIcon.rowWeight)
+                .foregroundStyle(tokens.ink)
                 .padding(.horizontal, 2)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .help(MCPShareCopy.lockHelp)
         .accessibilityLabel(MCPShareCopy.lockHelp)
-        .popover(isPresented: $lockShown, arrowEdge: .bottom) {
+        .popover(isPresented: $lockShown, arrowEdge: .leading) {
             VStack(alignment: .leading, spacing: 8) {
                 Toggle(CapabilityRegistry.capability(.markNotePrivate).verb, isOn: Binding(
                     get: { state.ownPrivate },
@@ -131,6 +136,8 @@ struct MCPNoteIndicator: View {
             }
             .padding(12)
             .frame(minWidth: 220, maxWidth: 320, alignment: .leading)
+            .presentationBackground(tokens.room)
+            .tint(tokens.accent)
         }
     }
 

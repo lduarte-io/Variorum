@@ -47,10 +47,23 @@ struct MCPSharedIcon: View {
     let reaches: [MCPPlaceReach]
     let tokens: VoiceTokens
     var font: Font? = nil
+    /// 13n-c UX walk W-UX-12: where the popover opens. A host at a window's
+    /// trailing edge (the note's indicator) opens it to the LEFT, so it stays
+    /// on the window rather than hanging half past its edge.
+    var arrowEdge: SwiftUI.Edge = .bottom
     /// After a Revoke lands (a one-shot face re-reads; a held one ignores it).
     var onChanged: () -> Void = {}
     @Environment(\.mcpShareRoad) private var road
     @State private var shown = false
+
+    /// **13n-c UX walk W-UX-7 — the glyph's weight at row size.** The dotted
+    /// triangle's strokes are hairlines; at `tokens.small` beside a row's
+    /// title it read as a speck (worst in Terminal, and dark). The PICK stands
+    /// (hers, ratified); it is drawn a size up and semibold, so its dots and
+    /// lines carry the row's weight — the pending bubble beside it already
+    /// read clearly at the small size and keeps it.
+    static let rowScale: Image.Scale = .large
+    static let rowWeight: Font.Weight = .semibold
 
     var body: some View {
         Button {
@@ -58,6 +71,8 @@ struct MCPSharedIcon: View {
         } label: {
             Image(systemName: Self.symbol)
                 .font(font ?? tokens.small)
+                .fontWeight(Self.rowWeight)
+                .imageScale(Self.rowScale)
                 .foregroundStyle(tokens.accent)
                 .padding(.horizontal, 2)
                 .contentShape(Rectangle())
@@ -65,7 +80,7 @@ struct MCPSharedIcon: View {
         .buttonStyle(.plain)
         .help(MCPShareCopy.iconHelp(reaches))
         .accessibilityLabel(MCPShareCopy.iconHelp(reaches))
-        .popover(isPresented: $shown, arrowEdge: .bottom) {
+        .popover(isPresented: $shown, arrowEdge: arrowEdge) {
             MCPReachPopover(reaches: reaches, road: road, onChanged: onChanged) { shown = false }
         }
     }
@@ -79,6 +94,12 @@ struct MCPReachPopover: View {
     let road: MCPShareRoad?
     var onChanged: () -> Void = {}
     let close: () -> Void
+    /// 13n-c UX walk W-UX-11: the links wear the VOICE's accent (they drew
+    /// system blue, even in dark Terminal) — the popover reads its host's
+    /// theme (a popover inherits the environment).
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+    private var tokens: VoiceTokens { themeStore?.tokens(for: scheme) ?? .fallback(for: scheme) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -118,7 +139,8 @@ struct MCPReachPopover: View {
                                 }
                             }
                         }
-                        .buttonStyle(.link)
+                        .buttonStyle(.plain)
+                        .foregroundStyle(tokens.accent)
                         .font(.caption)
                     } else if reach.grant == nil {
                         Text(MCPShareCopy.openBookNote)
@@ -132,6 +154,12 @@ struct MCPReachPopover: View {
         }
         .padding(12)
         .frame(minWidth: 240, maxWidth: 340, alignment: .leading)
+        // W-UX-12: the room's own ground under the words — the popover
+        // material took the colour of whatever sat behind the window (a
+        // pink browser toolbar in the walk). The arrow and rim stay the
+        // system's material: that much macOS draws itself (recorded).
+        .presentationBackground(tokens.room)
+        .tint(tokens.accent)
     }
 
     /// **Change… on a grant** — THE sheet pre-filled on exactly that grant (its

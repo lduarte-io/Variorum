@@ -51,6 +51,12 @@ struct MCPAskSheet: View {
     /// renders this one view, so all three read the same truth.
     private var current: MCPAsk { door.ask(ask.id) ?? ask }
 
+    /// 13n-c UX walk W-UX-9 / W-UX-11: the voice reaches this sheet in EVERY
+    /// host now (the window hosts hand their theme to `mcpAskSheet`).
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+    private var tokens: VoiceTokens { themeStore?.tokens(for: scheme) ?? .fallback(for: scheme) }
+
     var body: some View {
         let ask = current
         return VStack(alignment: .leading, spacing: 10) {
@@ -72,27 +78,28 @@ struct MCPAskSheet: View {
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            // SYSTEM buttons (13n-b U2 walk W-3). 13n-c Stage B R2-4
-            // re-checked the reason at this tip: the WindowGroup host W-3
-            // named is retired (U4, arrival X), but the two WINDOW hosts
-            // (`RootView`, `NoteWindowView`) attach `.mcpAskSheet` AFTER
-            // their `.environment(theme)`, so this sheet's content still
-            // receives no `ThemeStore` there — voiced buttons would fall back
-            // to the mono face (the palette, What's New and grant sheets each
-            // add `.environment(theme)` for exactly this). Only the pane and
-            // ⌘L's nested road carry the theme, so system buttons stay — they
-            // read the same in every host.
+            // 13n-c UX walk W-UX-9 / W-UX-11: VOICED buttons — the grant
+            // sheet's one confirm idiom (`CalmButtonStyle`: Once the primary,
+            // the rest ordinary). They were SYSTEM buttons (13n-b U2 walk W-3)
+            // because the two window hosts attached `.mcpAskSheet` after their
+            // `.environment(theme)` and the sheet got no ThemeStore (Stage B
+            // R2-4's re-check); `mcpAskSheet` now hands every host's theme in,
+            // so the voice — and its accent, never system blue — reaches all
+            // four hosts.
             HStack(spacing: 8) {
                 ForEach(checked ? door.durations(for: ask) : [], id: \.self) { duration in
                     if duration == .once {
                         Button(MCPAskCopy.button(duration)) { door.answer(ask, .grant(duration)) }
+                            .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
                             .keyboardShortcut(.defaultAction)
                     } else {
                         Button(MCPAskCopy.button(duration)) { door.answer(ask, .grant(duration)) }
+                            .buttonStyle(CalmButtonStyle(tokens: tokens))
                     }
                 }
                 Spacer(minLength: 8)
                 Button(MCPAskCopy.dontAllow) { door.answer(ask, .dontAllow) }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens))
                     .keyboardShortcut(.cancelAction)
             }
             .help(CapabilityRegistry.capability(.mcpAnswerAsk).verb)
@@ -100,6 +107,7 @@ struct MCPAskSheet: View {
         }
         .padding(20)
         .frame(width: 480)
+        .tint(tokens.accent)
         .task(id: ask.id) {
             // Stage B R1 B2: her open reads the target again (a gone target
             // forgets its ask, and this sheet closes — the hosts read the
@@ -131,10 +139,19 @@ extension View {
     /// 13n-c UX walk W-UX-1: the host holds the RAISE her press opened
     /// (`MCPAskOpening`), never the bare id — see `MCPAskSheetItem`.
     func mcpAskSheet(
-        door: MCPDoor?, opening: Binding<MCPAskOpening?>, seam: MCPDoor.AskSeam = .window
+        door: MCPDoor?, opening: Binding<MCPAskOpening?>, seam: MCPDoor.AskSeam = .window,
+        theme: ThemeStore? = nil
     ) -> some View {
         sheet(item: MCPAskSheetItem.item(door: door, opening: opening)) { ask in
-            if let door { MCPAskSheet(door: door, ask: ask, seam: seam) }
+            if let door {
+                // W-UX-11: a window host attaches this OUTSIDE its own
+                // `.environment(theme)`, so it hands the theme in.
+                if let theme {
+                    MCPAskSheet(door: door, ask: ask, seam: seam).environment(theme)
+                } else {
+                    MCPAskSheet(door: door, ask: ask, seam: seam)
+                }
+            }
         }
     }
 }

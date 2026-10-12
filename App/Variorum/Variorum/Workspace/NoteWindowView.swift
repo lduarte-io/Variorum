@@ -152,7 +152,7 @@ struct NoteWindowView: View {
         // 13n-c U4 — the waiting asks (the in-note indicator's pending leg and
         // the bar's note ▾ glyph read them) and the ask her press opened.
         .environment(\.mcpAskBoard, mcp?.askBoard ?? .empty)
-        .mcpAskSheet(door: mcp, opening: $mcpAskSheetOpening)
+        .mcpAskSheet(door: mcp, opening: $mcpAskSheetOpening, theme: theme)
         .onChange(of: router.mcpAskRequest) { _, request in
             guard let request else { return }
             // W-UX-1: THE raise waiting now — a later equal raise is never it.

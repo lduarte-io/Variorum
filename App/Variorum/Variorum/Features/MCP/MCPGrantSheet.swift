@@ -286,8 +286,12 @@ struct MCPGrantSheet: View {
             }
 
             HStack(alignment: .bottom) {
+                // 13n-c UX walk W-UX-9: ONE confirm idiom with the ask sheet —
+                // the app's bezelled button (`CalmButtonStyle`), the confirm
+                // primary (the voice's accent wash, semibold), Cancel ordinary.
+                // It read as a long accent sentence beside a plain word.
                 Button(MCPPaneCopy.cancel, action: done)
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
+                    .buttonStyle(CalmButtonStyle(tokens: tokens))
                     .keyboardShortcut(.cancelAction)
                 Spacer(minLength: 8)
                 Button(action: submit) {
@@ -298,9 +302,10 @@ struct MCPGrantSheet: View {
                         ConfirmLabel(parts: confirmParts)
                     }
                 }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
                 .keyboardShortcut(.defaultAction)
                 .disabled(!canConfirm)
+                .opacity(canConfirm ? 1 : 0.45)
             }
             .padding(.top, 4)
         }
@@ -309,6 +314,10 @@ struct MCPGrantSheet: View {
         // takes a second line rather than the sheet growing past Settings'
         // window (the U2 geometry oracle, in the record).
         .frame(width: 600)
+        // 13n-c UX walk W-UX-11 (T-7): the radios and segments wear the
+        // VOICE's accent in every host — the window-hosted sheet drew system
+        // blue (only Settings' scene set the tint).
+        .tint(tokens.accent)
         .task { await load() }
         // 13n-c +4b: a Private note's why names the book its mark comes
         // through — read for the note picked (display-only; the fence and the
