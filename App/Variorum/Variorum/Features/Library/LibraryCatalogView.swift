@@ -697,7 +697,9 @@ struct LibraryCatalogView: View {
             // controls' row they ran out of width at the default window and
             // collapsed to bare chevrons — the Share door lesson 5 names read
             // nowhere — and the row's minimum width pushed the info panel off
-            // the window. Here each keeps its words (`fixedSize`).
+            // the window. Here each keeps its words (`fixedSize`), and the
+            // doors WRAP onto more lines rather than push (UXR1-3 —
+            // `LibraryBulkRow`).
             if selectedPosts.count > 1 {
                 bulkRow
             }

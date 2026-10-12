@@ -2596,8 +2596,10 @@ enum TutorialSeeder {
             + "Right-click a note in the Library, or a book on the Bookcase or in "
             + "the Library, and choose Share with AI\u{2026}: the grant sheet opens "
             + "with that place already picked. \u{2318}-click several notes in the "
-            // W-UX-3/-17: the bulk doors' own row (the door is findable there).
-            + "Library and a row of doors appears under the controls at the top of "
+            // W-UX-3/-17: the bulk doors' own place (the door is findable
+            // there); UXR1-3: they wrap onto more lines when the window is
+            // narrow, so the guide says doors, not "a row" (PROVISIONAL).
+            + "Library and doors appear under the controls at the top of "
             + "the list, Share 3 notes with AI\u{2026} among them (the number is how "
             + "many you picked): one grant for all of them. And a book's Book "
             + "Settings says who reaches it, with Share\u{2026} beside.",
@@ -2611,7 +2613,8 @@ enum TutorialSeeder {
             + "instead.",
 
             // 13n-c UX walk W-UX-19 (her round-8 ask): every row has Change…
-            // now — the guide says so.
+            // now — the guide says so. (UXR1-2: a row whose place is gone keeps
+            // Revoke only; the sentence speaks of the grants she can change.)
             "Every grant shows in Settings \u{25B8} MCP, with Change\u{2026} to raise "
             + "or lower it and Revoke to take it back. "
             + "Sharing several notes at once makes one row there, and one Revoke "
@@ -2623,7 +2626,8 @@ enum TutorialSeeder {
         // "I want users to have ideas on how to make the app useful to them
         // with their AI work"): worked recipes, her design-doc example first.
         // Seated SIXTH, before "seeing, answering, undoing", so lesson 1's
-        // "The last lesson in this chapter shows how to watch it…" stays true
+        // pointer — "The chapter's last lesson, “seeing, answering,
+        // undoing”, shows how to watch it…" (W-UX-17's words) — stays true
         // (PROVISIONAL P-13nc-U6-9 — the title and the seat).
         _ = try lesson(door, mcpLessons[5], [
             "Say your notes for a design doc live in a book. Share that book at "

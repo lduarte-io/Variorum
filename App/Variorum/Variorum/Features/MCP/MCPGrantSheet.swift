@@ -293,10 +293,15 @@ struct MCPGrantSheet: View {
                 // the platform's FILLED default button in the voice's accent
                 // (`.borderedProminent` under the sheet's `.tint`), Cancel
                 // bordered. It read as a long accent sentence beside a plain
-                // word. System styles, not the app's custom ones: the verify
-                // leg found a custom-styled button in a sheet takes NO Return
-                // or Esc (its key equivalents never fire) — and on macOS 26 a
-                // bordered button holds the confirm's two lines (probed).
+                // word. System styles because they are the closer match to the
+                // disposition's "the ask sheet's filled button" and to AppKit's
+                // own default/cancel keys — NOT because a custom style loses
+                // them: the dead Return/Esc the verify leg first saw was its
+                // test road (cliclick's keys never reach a sheet; System
+                // Events' key codes do), and nine working sheets pair
+                // `VoicedButtonStyle` with `.keyboardShortcut(.defaultAction)`
+                // (UX-fix ladder UXR1-4). On macOS 26 a bordered button holds
+                // the confirm's two lines (probed).
                 Button(MCPPaneCopy.cancel, action: done)
                     .buttonStyle(.bordered)
                     .keyboardShortcut(.cancelAction)
@@ -476,7 +481,8 @@ struct MCPGrantSheet: View {
         }
     }
 
-    /// The confirm's act: approve-with-grant (the pane's Approve…), the bulk
+    /// The confirm's act: an approval (the pane's Approve… — alone, or with
+    /// the grant she picked riding it, W-UX-2), the bulk
     /// share (several notes), or one grant — Change… when the opening names
     /// grants to replace (T-U3-8). A place-door's sheet speaks its receipt on
     /// the window's status seam; the pane's keeps its caption.

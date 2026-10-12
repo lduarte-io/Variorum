@@ -79,12 +79,15 @@ struct MCPAskSheet: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             // 13n-c UX walk W-UX-9 / W-UX-11: SYSTEM buttons, as 13n-b U2's
-            // walk W-3 left them — so Return answers Once and Esc answers
-            // Don't allow (P-13nc-U4-8, ruled; a custom-styled button in a
-            // sheet takes neither — the verify leg found it) — now in the
-            // VOICE's accent: `mcpAskSheet` hands every host's theme in and
-            // the sheet's `.tint` fills Once (`.borderedProminent`, the grant
-            // sheet's one confirm idiom), never system blue.
+            // walk W-3 left them — Return answers Once and Esc answers Don't
+            // allow (P-13nc-U4-8, ruled) — now in the VOICE's accent:
+            // `mcpAskSheet` hands every host's theme in and the sheet's
+            // `.tint` fills Once (`.borderedProminent`, the grant sheet's one
+            // confirm idiom), never system blue. (A custom style would keep
+            // the keys too — nine working sheets pair `VoicedButtonStyle`
+            // with `.keyboardShortcut(.defaultAction)`; the dead keys the
+            // verify leg first reported were cliclick's, which never reach a
+            // sheet — UX-fix ladder UXR1-4.)
             HStack(spacing: 8) {
                 ForEach(checked ? door.durations(for: ask) : [], id: \.self) { duration in
                     if duration == .once {

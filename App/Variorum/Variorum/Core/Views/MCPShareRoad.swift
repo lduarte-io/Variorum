@@ -37,10 +37,12 @@ struct MCPGrantOpening: Identifiable, Equatable {
     let id = UUID().uuidString
     /// Who the grant is for; nil = the sheet asks (WHO).
     var client: MCPClient?
-    /// A first approval (Approve… on a connection request): the grant rides
-    /// the approve, in one act.
+    /// A first approval (Approve… on a connection request). W-UX-2 (her
+    /// ruling — approve alone, grant separate): the approval stands on its
+    /// own; a grant rides it, in one act, only when she picks one.
     var approving = false
-    /// WHERE, pre-filled; nil = the sheet's own default (a book).
+    /// WHERE, pre-filled; nil = the sheet's own start (`MCPGrantSheet.start`
+    /// — nothing picked on the approval road, else the most recent book).
     var place: MCPGrantPrefill?
     /// 13n-c U3 (R-AIR-4): the rung and duration pre-filled — Change… opens
     /// on exactly what was shared, to change it fast.

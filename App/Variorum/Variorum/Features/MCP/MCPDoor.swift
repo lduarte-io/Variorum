@@ -513,6 +513,12 @@ final class MCPDoor {
     /// The queue and its projection move together; the board is reassigned
     /// only when it changed.
     private func adoptQueue(_ queue: MCPAskQueue) {
+        // UX-fix ladder UXR1-6: Waiting's own caption (W-UX-8's gone line)
+        // speaks about the rows she pressed among; once those rows change —
+        // an ask arriving, answered or forgotten — it would speak over a list
+        // no longer shown (or stale above FRESH asks), so it leaves. A press
+        // that removes its own ask says so AFTER this (`refreshAsk`).
+        if note?.place == .waiting, queue.entries.map(\.id) != askQueue.entries.map(\.id) { note = nil }
         askQueue = queue
         let board = queue.board
         if board != askBoard { askBoard = board }
@@ -654,6 +660,13 @@ final class MCPDoor {
     /// status seam) or the Settings PANE (no status seam — the door's own
     /// caption at the pane's head, its refusals' home).
     nonisolated enum AskSeam: Sendable { case window, pane }
+
+    /// UX-fix ladder UXR1-6: the pane went away (another pane, Settings
+    /// closed) — Waiting's caption spoke about the press she made there, so it
+    /// goes with it; a caption elsewhere in the pane is not Waiting's.
+    func letWaitingNoteGo() {
+        if note?.place == .waiting { note = nil }
+    }
 
     private func sayGone(_ ask: MCPAsk, in seam: AskSeam) {
         let words = MCPAskCopy.gone(ask)

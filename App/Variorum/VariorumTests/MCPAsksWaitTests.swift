@@ -456,6 +456,13 @@ struct MCPAsksWaitTests {
             door.note = refusal
             door.enqueue(ask(id: later.id, title: "the long table"), now: t0.addingTimeInterval(9))
             #expect(door.note == refusal, "only Waiting's own caption follows Waiting's rows")
+            // The pane going away (`MCPPane`'s disappear) lets Waiting's caption
+            // go — and only Waiting's.
+            door.letWaitingNoteGo()
+            #expect(door.note == refusal)
+            door.note = said
+            door.letWaitingNoteGo()
+            #expect(door.note == nil, "she comes back to no caption over an empty Waiting")
         }
     }
 

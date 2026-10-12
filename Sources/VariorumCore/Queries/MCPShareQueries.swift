@@ -33,7 +33,7 @@ public struct MCPSharedGroup: Equatable, Sendable, Identifiable {
     /// pane offers Change… only while something stands (`MCPChangeOffer`).
     public let goneCount: Int
 
-    public init(rows: [MCPSharedRow], grantIDs: [String], inertCount: Int, goneCount: Int = 0) {
+    public init(rows: [MCPSharedRow], grantIDs: [String], inertCount: Int, goneCount: Int) {
         self.rows = rows
         self.grantIDs = grantIDs
         self.inertCount = inertCount
@@ -104,7 +104,8 @@ extension Queries {
             }
             return MCPSharedGroup(
                 rows: titled, grantIDs: act.members.map(\.grant.id),
-                inertCount: try mcpSharedInertCount(db, act: act, titled: titled))
+                inertCount: try mcpSharedInertCount(db, act: act, titled: titled),
+                goneCount: try mcpSharedGoneCount(db, act: act, titled: titled))
         }
     }
 
@@ -208,6 +209,26 @@ extension Queries {
             guard let note = facts[member.grant.scopeID], note.fence != nil else { return false }
             return !MCPGrantRule.reaches(member.grant.ruleGrant, .note(note))
         }.count
+    }
+
+    /// **An act's members whose TARGET is gone** (the 13n-c UX-fix ladder's
+    /// UXR1-2 — no delete revokes a grant, so a live grant can name a deleted
+    /// note, book or wing): the liveness `mcpScopeTitle` reads. A single row
+    /// says its own title's; a group (note grants only) counts EVERY member,
+    /// not only the titled few, in ONE batched statement — ∝ the act.
+    static func mcpSharedGoneCount(
+        _ db: Database, act: MCPSharedAct, titled: [MCPSharedRow]
+    ) throws -> Int {
+        guard act.members.count > 1 else { return titled.first?.targetTitle == nil ? 1 : 0 }
+        let json = String(decoding: try JSONEncoder().encode(act.members.map(\.grant.scopeID)), as: UTF8.self)
+        let standing = try Int.fetchOne(
+            db,
+            sql: """
+                SELECT COUNT(*) FROM json_each(?) j
+                WHERE EXISTS (SELECT 1 FROM container c WHERE c.id = j.value AND c.deleted_at IS NULL)
+                """,
+            arguments: [json]) ?? 0
+        return act.members.count - standing
     }
 
     // MARK: - Reach, with the why

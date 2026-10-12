@@ -227,9 +227,24 @@ nonisolated enum MCPPaneCopy {
         return "\(line.clientName) \(activityPhrase(line.act, count: line.count, target: target, kind: line.targetKind))"
     }
 
+    /// UX-fix ladder UXR1-1 — the noun a line falls back on when its
+    /// target's title did not resolve: the LOGGED kind's ("making a book in a
+    /// wing", never "… in a note").
+    private static func fallbackNoun(_ kind: String?) -> String {
+        switch kind {
+        case "book": "a book"
+        case "wing": "a wing"
+        default: "a note"
+        }
+    }
+
     /// W-UX-13 — what a refused call was trying to do, as a gerund.
+    /// UXR1-1: a TWO-SIDED act (`add_note_to_book`, `file_note_in_chapter`,
+    /// `move_note_to_wing`) logs the side that refused — the note, or the
+    /// book / destination wing — so the line says that side as itself and
+    /// leaves the other unnamed, as the log does.
     private static func refusedPhrase(_ act: String, target: String?, kind: String?) -> String {
-        let at = target ?? "a note"
+        let at = target ?? fallbackNoun(kind)
         switch act {
         case "list_books": return "listing books"
         case "list_notes":
@@ -249,10 +264,11 @@ nonisolated enum MCPPaneCopy {
         case "import_document": return "importing a document into \(at)"
         case "apply_tag": return "tagging \(at)"
         case "create_book": return "making a book in \(at)"
-        case "add_note_to_book": return "adding \(at) to a book"
+        case "add_note_to_book": return kind == "book" ? "adding a note to \(at)" : "adding \(at) to a book"
         case "create_section": return "adding a chapter to \(at)"
         case "save_version": return "saving a version of \(at)"
-        case "file_note_in_chapter": return "filing \(at) in a chapter"
+        case "file_note_in_chapter":
+            return kind == "book" ? "filing a note in a chapter of \(at)" : "filing \(at) in a chapter"
         case "set_book_rule": return "setting what \(at) collects"
         case "edit_take": return "editing \(at)"
         case "divide_block": return "dividing a block in \(at)"
@@ -262,7 +278,7 @@ nonisolated enum MCPPaneCopy {
         case "set_block_name": return "naming a block in \(at)"
         case "put_back": return "putting back a block in \(at)"
         case "set_entry_date": return "setting the date of \(at)"
-        case "move_note_to_wing": return "moving \(at) to another wing"
+        case "move_note_to_wing": return kind == "wing" ? "moving a note to \(at)" : "moving \(at) to another wing"
         default: return "using " + spokenAct(act)
         }
     }
@@ -273,7 +289,7 @@ nonisolated enum MCPPaneCopy {
     }
 
     private static func activityPhrase(_ act: String, count n: Int, target: String?, kind: String?) -> String {
-        let at = target ?? "a note"
+        let at = target ?? fallbackNoun(kind)
         let times = n > 1 ? " (\(n) times)" : ""
         switch act {
         case "list_books": return "listed books" + times
@@ -293,10 +309,13 @@ nonisolated enum MCPPaneCopy {
         // creations (the log's target is the PLACE, its title the newest
         // creation's), so a count never rides one creation's title — the
         // line speaks the count plainly (J8's copy truth; 13s-a-sweepable).
-        case "create_note": return n == 1 ? "made the note \(at)" : "made \(n) notes"
-        case "import_document": return n == 1 ? "imported \(at)" : "imported \(n) documents"
+        // UXR1-1: a creation's title is the CREATION's (the logged kind names
+        // its place), so a missing one says the creation plainly.
+        case "create_note": return n == 1 ? target.map { "made the note \($0)" } ?? "made a note" : "made \(n) notes"
+        case "import_document":
+            return n == 1 ? target.map { "imported \($0)" } ?? "imported a document" : "imported \(n) documents"
         case "apply_tag": return "tagged \(at)" + times
-        case "create_book": return n == 1 ? "made the book \(at)" : "made \(n) books"
+        case "create_book": return n == 1 ? target.map { "made the book \($0)" } ?? "made a book" : "made \(n) books"
         case "add_note_to_book": return "added \(at) to a book" + times
         case "create_section": return n == 1 ? "added a chapter to \(at)" : "added \(n) chapters to \(at)"
         case "edit_take": return n == 1 ? "edited \(at)" : "made \(n) edits in \(at)"

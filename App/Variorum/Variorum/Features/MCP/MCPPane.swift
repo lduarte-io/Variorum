@@ -77,6 +77,9 @@ struct MCPPane: View {
             form
                 .onAppear { landAtWaiting(proxy) }
                 .onChange(of: door.settingsRequest) { _, _ in landAtWaiting(proxy) }
+                // UXR1-6: Waiting's caption leaves with the pane — it never
+                // greets her over an empty Waiting when she comes back.
+                .onDisappear { door.letWaitingNoteGo() }
         }
     }
 
@@ -271,16 +274,19 @@ struct MCPPane: View {
     @ViewBuilder
     private func sharedGroup(_ group: MCPSharedGroup) -> some View {
         if group.isGroup {
+            // UXR1-2: Change… only where something stands (`MCPChangeOffer`).
             MCPSharedGroupView(
                 group: group, tokens: tokens, showMembers: { members = group },
-                change: { Task { granting = await door.changeOpening(act: group) } }
+                change: MCPChangeOffer.offers(group)
+                    ? { Task { granting = await door.changeOpening(act: group) } } : nil
             ) {
                 door.revoke(grantIDs: group.grantIDs)
             }
         } else {
             MCPSharedRowView(
                 row: group.lead, distinguisher: Self.distinguisher(group.lead, distinguishers), tokens: tokens,
-                change: { Task { granting = await door.changeOpening(group.lead) } }
+                change: MCPChangeOffer.offers(group)
+                    ? { Task { granting = await door.changeOpening(group.lead) } } : nil
             ) { door.revoke(grantID: group.lead.grant.id) }
         }
     }
@@ -494,10 +500,25 @@ struct MCPClientRow: View {
     }
 }
 
-/// **Where Change… is offered** (the 13n-c UX-fix ladder's UXR1-2).
+/// **Where Change… is offered** (the 13n-c UX-fix ladder's UXR1-2): only
+/// where the replace sheet can open on something that stands. No delete
+/// revokes a grant, so a live grant can name a deleted note, book or wing (its
+/// row says "(gone)"); Change… there opened the sheet on nothing — a dead
+/// wing's read as Home with a confirm that could only refuse, a deleted
+/// book's said the fenced-reason sentence, an act whose notes were all gone
+/// read "These 0 notes". Such a row keeps Revoke only. (An INERT row — its
+/// target fenced since — still stands, and still offers: the sheet opens on
+/// its current facts, W-UX-19.)
 nonisolated enum MCPChangeOffer {
-    static func offers(_ row: MCPSharedRow) -> Bool { true }
-    static func offers(_ group: MCPSharedGroup) -> Bool { true }
+    /// One grant's row: while its target stands (`targetTitle` nil = gone).
+    static func offers(_ row: MCPSharedRow) -> Bool { row.targetTitle != nil }
+
+    /// An act's row: while at least one member's target stands — counted
+    /// over EVERY member (`goneCount`), not only the titled few; a single
+    /// grant's row by its own target.
+    static func offers(_ group: MCPSharedGroup) -> Bool {
+        group.isGroup ? group.goneCount < group.memberCount : offers(group.lead)
+    }
 }
 
 /// One live grant in SHARED PLACES (13n-c U2: its distinguisher when its
@@ -691,10 +712,13 @@ struct MCPSharedMembersSheet: View {
                             }
                         }
                         Spacer(minLength: 0)
-                        Button(CapabilityRegistry.capability(.mcpChangeGrant).verb) {
-                            Task { if let opening = await door.changeOpening(row) { change(opening) } }
+                        // UXR1-2: a member whose note is gone keeps Revoke only.
+                        if MCPChangeOffer.offers(row) {
+                            Button(CapabilityRegistry.capability(.mcpChangeGrant).verb) {
+                                Task { if let opening = await door.changeOpening(row) { change(opening) } }
+                            }
+                            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                         }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                         Button(CapabilityRegistry.capability(.mcpRevokeGrant).verb) {
                             door.revoke(grantID: row.grant.id)
                         }
@@ -824,7 +848,9 @@ struct MCPFullListSheet: View {
                         if group.isGroup {
                             MCPSharedGroupView(
                                 group: group, tokens: tokens, showMembers: { members = group },
-                                change: { Task { if let opening = await door.changeOpening(act: group) { grant(opening) } } }
+                                change: MCPChangeOffer.offers(group)
+                                    ? { Task { if let opening = await door.changeOpening(act: group) { grant(opening) } } }
+                                    : nil
                             ) {
                                 door.revoke(grantIDs: group.grantIDs)
                             }
@@ -832,7 +858,9 @@ struct MCPFullListSheet: View {
                             MCPSharedRowView(
                                 row: group.lead, distinguisher: MCPPane.distinguisher(group.lead, distinguishers),
                                 tokens: tokens,
-                                change: { Task { if let opening = await door.changeOpening(group.lead) { grant(opening) } } }
+                                change: MCPChangeOffer.offers(group)
+                                    ? { Task { if let opening = await door.changeOpening(group.lead) { grant(opening) } } }
+                                    : nil
                             ) {
                                 door.revoke(grantID: group.lead.grant.id)
                             }
