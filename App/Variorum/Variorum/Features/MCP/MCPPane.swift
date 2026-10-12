@@ -117,8 +117,14 @@ struct MCPPane: View {
             // raised past its grant, newest first, each answered by HER press
             // (Answer… opens its sheet here). Above the requests: it is the
             // list that holds a client's work up.
-            if !door.waiting.isEmpty {
+            // 13n-c UX walk W-UX-8: Waiting also stays while its own caption
+            // speaks — a press on its only row whose place is gone says so
+            // HERE, where she pressed, not at the pane's head.
+            if !door.waiting.isEmpty || door.note?.place == .waiting {
                 Section(MCPPaneCopy.waitingSection) {
+                    if let note = door.note, note.place == .waiting {
+                        caption(note.text)
+                    }
                     ForEach(door.waiting.prefix(MCPDoor.waitingCap)) { entry in waitingRow(entry) }
                     allRoad(door.waiting.count, shown: min(door.waiting.count, MCPDoor.waitingCap), .waiting)
                 }

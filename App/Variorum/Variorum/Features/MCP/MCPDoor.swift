@@ -101,7 +101,9 @@ final class MCPDoor {
     /// refusal or receipt, plainly — rendered BESIDE the door that spoke
     /// (the copy receipt under its button; a refusal at the pane's head).
     nonisolated struct Note: Equatable, Sendable {
-        enum Place: Equatable, Sendable { case top, connect }
+        /// 13n-c UX walk W-UX-8: `.waiting` — the pane's caption BY Waiting,
+        /// where her press was (a gone ask's line).
+        enum Place: Equatable, Sendable { case top, connect, waiting }
         let text: String
         let place: Place
     }
@@ -657,7 +659,10 @@ final class MCPDoor {
         let words = MCPAskCopy.gone(ask)
         switch seam {
         case .window: session?.status.refuse(words)
-        case .pane: note = Note(text: words, place: .top)
+        // 13n-c UX walk W-UX-8 (T-15): BY WAITING, where she pressed — the
+        // pane's head sat inside the server card, off-screen or clipped once
+        // ⌥⌘, had scrolled the pane down to Waiting.
+        case .pane: note = Note(text: words, place: .waiting)
         }
     }
 

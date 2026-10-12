@@ -407,10 +407,13 @@ struct MCPAsksWaitTests {
             #expect(said.text == "\u{201C}ch 7\u{201D} is gone, so claude-code's ask was let go.")
             #expect(said.kind == .refusal)
             #expect(said.text == MCPAskCopy.gone(noteAsk))
-            // The pane (Settings has no status seam): its own caption, at the head.
+            // The pane (Settings has no status seam): its own caption. 13n-c UX
+            // walk W-UX-8 (A JUSTIFIED EDIT, the ritual — T-15): BY WAITING,
+            // where she pressed (it was `.top`, the pane's head inside the
+            // server card — off-screen once ⌥⌘, had scrolled to Waiting).
             try ops.deleteReading(book.id)
             #expect(await door.refreshAsk(bookAsk.id, from: .pane) == nil)
-            #expect(door.note == MCPDoor.Note(text: MCPAskCopy.gone(bookAsk), place: .top))
+            #expect(door.note == MCPDoor.Note(text: MCPAskCopy.gone(bookAsk), place: .waiting))
             #expect(MCPAskCopy.gone(ask(kind: .wing, title: "variorum"))
                     == "The variorum wing is gone, so claude-code's ask was let go.")
         }
