@@ -756,13 +756,13 @@ unit record (TCC state is machine-state the next session inherits).
 | 6 | U4 — asks wait, the keyboard, the wing switcher | U4 implementer | BUILT + VERIFIED `f1ab4725` — walk HELD; two order-dependent Mac reds predating U4 ticketed **VX-167** (red identically on U3's tree; green alone) |
 | 7 | U5 — the guide, the advice, the setup menu | U5 implementer | BUILT + VERIFIED `065526ce` — walk HELD; the one cap-test red ("Unable to parse empty data") folded into **VX-132** by comment (Stage B R1 B14) |
 | 8 | Stage B ladder (opus) | orchestrator | **CLOSED at R2** — R1 → fix pass `c6d8509c..9c049c6a` → R2 (0B/0M/1m/4n) → the CLOSE-OUT FIX PASS `6f7fc38f..3e8ccd83` VERIFIED by the orchestrator (zero trailers; the one `Persistence/` line is the purely additive `AppDatabase.observe(tracking:_:)` — no schema, no caller changed, F-22; core 2,623/300 · MCP 82/12 · Mac 537/76 green). The close-out range is not cold-reviewed after R2 (no new B/M earned R3), so **it joins Stage C's review range** and is named there. |
-| 9 | U6 — the wing on the wire | U6 implementer | BRIEFED — spawned |
+| 9 | U6 — the wing on the wire | U6 implementer | BUILT + VERIFIED (the U6 record; D-U6-1/2 fixed red-on-old; the real-client live round proven; its span closed by the combined ladder) |
 | 10 | U7 — VX-159 | — | FALLS OUT of the phase and the launch (her word 2026-10-11 ~14:15) — stays VX-159, unlabeled |
 | 11 | Stage C ladder | orchestrator | FOLDED into the one combined fable ladder (the takeover schedule item 3) |
 | 12 | U8 — the secret | — | FALLS OUT → **VX-168** (Pre-launch label; her gate: before launch, not before this refresh); kickoff prompt committed |
-| 13 | The whole-phase walk + the Opus UX-reviewer walk | orchestrator + walker + UX reviewer | **Leg 1 DONE** — WALKS CLOSED at `82ad7478`, VERIFIED by the orchestrator (span `092f0472..82ad7478`: only the four fix surfaces + tests + notes, zero `Sources/`, zero trailers; the fixed pickers read on screen — rows render, the twice-sectioned book draws twice, the note leg's Private/Journal badges show; stage free, dev store restored, no instance). Live rounds (1)–(6) proven on a real client; D-W1…D-W4 fixed red-on-old; taste T-1…T-17 carried to leg 2. **Leg 2 (the Opus UX walk) SPAWNED 2026-10-11 evening (opus; the ladder closed clean + the quiet-obsolete fix sanity-passed first) — record `notes/plans/13nc-ux-walk.md`.** NOTE for leg 2: T-17 (a book popover's Revoke taking back the WIDER wing grant) is P-13nc-U3-6/F-14's DESIGNED behavior — the UX reviewer judges the FACE, the combined fable ladder judges the DESIGN; neither re-rules the other. |
-| 14 | Closeout + the conditional refresh | orchestrator | NOT-STARTED |
-| 15 | QUESTIONS #211 — this phase's PROVISIONALs (minted at the merge) | orchestrator | OPEN |
+| 13 | The whole-phase walk + the Opus UX-reviewer walk | orchestrator + walker + UX reviewer | **Leg 1 DONE** — WALKS CLOSED at `82ad7478`, VERIFIED by the orchestrator (span `092f0472..82ad7478`: only the four fix surfaces + tests + notes, zero `Sources/`, zero trailers; the fixed pickers read on screen — rows render, the twice-sectioned book draws twice, the note leg's Private/Journal badges show; stage free, dev store restored, no instance). Live rounds (1)–(6) proven on a real client; D-W1…D-W4 fixed red-on-old; taste T-1…T-17 carried to leg 2. **Leg 2 (the Opus UX walk) DONE 2026-10-11 evening — record `notes/plans/13nc-ux-walk.md` (18 findings, 1 bug W-UX-1); the orchestrator's UX-WALK DISPOSITIONS table + the FIX PASS (rows 1, 3–18, +4b, her ruled W-UX-2/W-UX-19) all landed and verified; the UX-fix opus ladder CLOSED at R1 (`13nc-uxfix-ladder-round1.md` — 0B/0M/4m/2n, all six fixed red-first).** NOTE for leg 2: T-17 (a book popover's Revoke taking back the WIDER wing grant) is P-13nc-U3-6/F-14's DESIGNED behavior — the UX reviewer judges the FACE, the combined fable ladder judges the DESIGN; neither re-rules the other. |
+| 14 | Closeout + the conditional refresh | orchestrator | **DONE** (the CLOSEOUT block at the plan's end; the refresh pre-cleared at her round 7 and run at the zero-instance window) |
+| 15 | QUESTIONS #212 — this phase's PROVISIONALs (minted at the merge; #211 was taken by the lens pass) | orchestrator | **DONE** — the ratify bundle is #212; the sitting-ruled items annotated OFF |
 
 ## HER SITTING — 2026-10-11 late afternoon (present via the Air): four ratifications + one new ask
 
@@ -839,7 +839,7 @@ sheet as the receipt's door (`mcpChangeGrant` / `changeOpening` — one idiom, R
 a grouped acts-row's Change… applies to the act's grants as its Revoke does, or per-member where the idiom
 needs it — the implementer records the call. Joins the running fix pass.
 
-## PROVISIONALs (running — logged at the merge as #211)
+## PROVISIONALs (running — LOGGED AT THE MERGE as QUESTIONS **#212**; #211 was taken the same day by the lens pass's bundle)
 
 - **P-13nc-1** — D-1 (the ⌘J edge kept).
 - **P-13nc-2** — D-2 (docs: the guide chapter + the server's instructions; her alternative the
@@ -3023,3 +3023,38 @@ verb to be "Deny…" or a softer word.
 | UXR1-6 | The lingering Waiting caption | **FIXED — both halves:** (1) the door's `adoptQueue` lets a `.waiting` note go whenever Waiting's ROWS change (an ask arriving, answered or forgotten — never a payload refresh), BEFORE a press's own gone line is written (`refreshAsk` removes, then says), so the line never sits stale above fresh asks; (2) the pane's `.onDisappear` calls the new `door.letWaitingNoteGo()` (only a `.waiting` note), so leaving the pane or closing Settings never brings her back to a caption over an empty Waiting. A `.top` refusal is never Waiting's to clear. Pin `MCPAsksWaitTests.waitingsCaptionLeavesWhenItsRowsChange`: **RED 2 → green** (the disappear WIRING is a walk row — below) |
 | R1-W | The walk — the bulk row and the gone faces, on screen | **DONE (23:10–23:35 MDT)** — stage `vx165-uxfix` (held, released); the dev-store Debug build `DerivedData/vx165-ux` at the fix tip; her app absent at every step (WalkKit's guard); client turns SCRIPTED (`scratchpad/r1walk/client_full.py` — `fx/client.py` untruncated) as the already-approved `claude-code` and `u1-walk`, no `claude mcp` registration. Captures `13n-c-screens/walk-ux-r1/` (gitignored). **UXR1-3 — the bulk row ON SCREEN for the first time:** the window set to the app's 1240×840 default (sidebar at its remembered 230 pt), the panel open; a plain click on a row's BODY picks it and ⌘-clicks on row BODIES extend the pick (the walkers' old limit was a ⌘-click on the TITLE text, which opens — Act 10's click model; a WalkKit fact). `03-pick3-study-w0` Study: "3 notes selected · Tag 3 notes ▾ · Untag 3 notes ▾ · Share 3 notes with AI… · Delete 3 notes…" on one line; `05-terminal-w1` Terminal: the count on its own line, the four doors whole on the next — THE WRAP, every word kept; the panel line "3 notes selected — the doors above the list act on all of them." (F-R1-1 above is what clips the panel, not this row.) **UXR1-6 live, both halves:** `u1-walk` raised asks (read_note on posfácio, then abertura); each note deleted while Waiting showed its ask; Answer… → `14-gone-line-by-waiting-w0` "“posfácio” is gone, so u1-walk's ask was let go." by Waiting (W-UX-8 intact: the press removes, THEN speaks); a FRESH ask arrives → `15-fresh-ask-caption-left-w0` the line gone, the fresh row listed; the line again (`19-gone-line-2-w0`), then general → mcp → `20-back-to-pane-caption-gone-w0` gone, Waiting holding only the live ask. **UXR1-2 live:** `u1-walk` granted Always on "lesson 1 — questions" through its ask's sheet, the note deleted → `26c-shared-w0` the "(gone) · note · u1-walk · read · always" row offers **Revoke only** while every standing book row keeps Change… · Revoke; `27-full-list-w0` the "all 6 ›" sheet the same. **UXR1-1** on screen in Activity: "claude-code was refused making a note in “Home”" (`26b-…`). **Restore:** the dev instance quit by identity (pgrep empty); `restore.sh` on `scale-prestage-20261012T035614Z` → "Restored (verified)", the four files `cmp`-identical (the store had been verified identical to that copy BEFORE the walk too); the Debug defaults domain re-imported from its pre-walk export (diff empty); her real store and `/Applications` never touched |
 | R1-F | Finals: headless + the Mac suites naming changed types (held stage) | **DONE** — **headless** (the closing tree): core **2,636 / 301** · VariorumMCPTests **93 / 14** · workbook **40 / 6**, all green. **Mac** (stage `vx165-uxfix`, held and released; FX-F's derivation over THIS leg's changed types — `MCPPaneCopy MCPActivityFace MCPPane MCPChangeOffer MCPSharedRowView MCPSharedGroupView MCPSharedMembersSheet MCPFullListSheet MCPDoor MCPGrantSheet MCPAskSheet MCPGrantOpening MCPShareRoad MCPShareCopy EditorCommands LibraryBulkRow LibraryCatalogView LibraryCopy TutorialSeeder MCPSharedGroup MCPSharedRow`): **977 tests / 146 suites `** TEST EXECUTE SUCCEEDED **`**, the gated capture harnesses skipped by design. Logs `walk-ux-r1/mac-final.log`, `headless-final.log` |
+
+---
+
+## CLOSEOUT (orchestrator — Fable, 2026-10-12, at the merge)
+
+**THE PHASE IS CLOSED.** U1–U6 BUILT + VERIFIED (each with a real-client leg); U7 out of the phase and the
+launch (VX-159, her word); U8 fell out as the pre-launch gate **VX-168** (kickoff prompt committed, riders
+VX-169 + VX-172 + VX-170-gated at her word). The combined fable ladder CLOSED CLEAN at R2 (F-1…F-25 all
+concur — the FABLE-OWED span discharged; the §6 ledger's discharge line); the Opus UX walk's 18 findings
+dispositioned, fixed and verified; the UX-fix opus ladder CLOSED at R1 (all six fixed red-first, the fix leg
+verified line-by-line). Her eight sitting rounds are recorded in the HER SITTING blocks with every ruling
+back-propagated onto the PROVISIONALs list.
+
+- **Finals (the closing tree):** headless core **2,636/301** · `VariorumMCPTests` **93/14** · workbook
+  **40/6**; the Mac fix-leg batch **977/146** green + the fix-pass whole run **1,768/273** (the one red =
+  VX-115's standing pin). Standing known reds unchanged: VX-115, VX-167 (order-dependent pair), VX-132
+  (the hung-run rerun rule).
+- **Canon deltas:** AppSpec §12's THE MCP DOOR line GROWN (the checklist above, every item landed — the
+  R-AIR-1 fence keys + AF-6 supersession + rungTooLow, the three durations, the setup menu, the grant road,
+  approve-alone, Change… beside Revoke, asks-wait + ⌘L, the wing wire + show_in_app wing, gatherings as
+  facts, Activity in words, the two-layer docs, the §9 rider); §7's v1_25 bullet re-keyed to the per-ask
+  fence; §14's entry added, the 13x entry rolled to the archive. R-AIR-14's MCP-blind line NOT applied
+  (U8 fell out — it lands with VX-168).
+- **QUESTIONS #212** — the ratify bundle (sitting-ruled items annotated OFF; #211 was taken by the lens
+  pass the same day, the next-free marker corrected).
+- **Tickets:** VX-163/VX-156/VX-157/VX-158/VX-160/VX-164 closed as landed; VX-161 judged at the merge;
+  VX-162 closed (the durations + advice landed); VX-165 (the run ticket) Done at the PR; VX-159 stays open
+  unlabeled; VX-168/169/170/171/172 as scheduled; born this phase: **VX-175** (the Library controls row at
+  the 1240-pt default — F-R1-1) and **VX-176** (the Library's segmented controls in dark Terminal).
+- **MOBILE PARITY: nothing mobile-visible** — the MCP door is Mac-only (the server, the pane, the faces);
+  no `notes/MobileSoul.md` row owed.
+- **The /Applications refresh:** pre-cleared at her sitting round 7 (`d67a215a`), run at closeout behind
+  the A1 rail with the pgrep gate re-checked at the moment; her Air verification prompt handed after.
+- **The handoff:** `notes/handoffs/phase-13n-c-handoff.md` — her checklist at top (the morning real-store
+  probes, Help ▸ Restore Tutorial decision, the copy-pass list, the VX-168 night run).
