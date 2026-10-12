@@ -183,7 +183,10 @@ enum MCPToolCatalog {
             (each block's lineage — what it was divided, merged or copied from or into — and each \
             take's parent_take_id; a relative outside what you can read shows only \
             beyond_grant); with_lenses: true (its saved lenses and the take each shows per block); \
-            with_versions: true (its saved versions — version_id reads one, in either form).
+            with_versions: true (its saved versions — version_id reads one, in either form). \
+            lens_id reads the note through one of its lenses, in either form: each block shows the \
+            take the lens shows there, else its chosen take; with with_ids each block says which \
+            (via: "lens" or "chosen"), and chosen still marks the note's own chosen take.
             """,
         inputSchema: .object([
             "type": "object",
@@ -207,6 +210,8 @@ enum MCPToolCatalog {
                                           "description": "Add the note's saved versions (implies with_ids)."]),
                 "version_id": .object(["type": "string",
                                        "description": "Read this saved version of the note instead."]),
+                "lens_id": .object(["type": "string",
+                                    "description": "Read the note through this lens of it (with_lenses lists them)."]),
             ]),
             "required": .array(["note_id"]),
             "additionalProperties": false,
@@ -275,7 +280,10 @@ enum MCPToolCatalog {
             "type": "object",
             "properties": .object([
                 "block_id": .object(["type": "string", "description": "The block to add a take to."]),
-                "text": .object(["type": "string", "description": "The take's text."]),
+                "text": .object(["type": "string", "description": """
+                    The take's text. An empty text adds a blank take: a lens that shows it shows the \
+                    block as an empty line.
+                    """]),
                 "label": .object(["type": "string", "description": "A short label, e.g. \"english\"."]),
             ]),
             "required": .array(["block_id", "text"]),
@@ -351,7 +359,8 @@ enum MCPToolCatalog {
                                 "items": .object([
                                     "type": "object",
                                     "properties": .object([
-                                        "text": .object(["type": "string"]),
+                                        "text": .object(["type": "string",
+                                                         "description": "The take's text (empty: a blank take)."]),
                                         "label": .object(["type": "string"]),
                                     ]),
                                     "required": .array(["text"]),

@@ -105,11 +105,19 @@ extension Queries {
     /// rendered take in place (callouts mapped to blockquotes — export-only;
     /// a blank or gap slot carries no text), and, with `includeVariants`, a
     /// fanned block's live ACTIVE non-blank alternates in fan order.
+    ///
+    /// `lensID` (VX-168 U3 — VX-172, `read_note` through a lens): the slots
+    /// are `renderPost(…, throughLens:)`'s — the Lenses read's own sparse
+    /// override over the lens's EFFECTIVE picks — so the in-place take is the
+    /// lens's where it names one, else the chosen take, and the alternates
+    /// are every other active non-blank take (the chosen one among them where
+    /// the lens moved it aside). nil is `renderPost`'s plain traversal, byte
+    /// for byte (that function's own transparent-lens guard).
     static func exportBlocks(
         _ db: Database, postID: String, includeVariants: Bool,
-        frames: [String: BlockPresentation]
+        frames: [String: BlockPresentation], throughLens lensID: String? = nil
     ) throws -> [VariorumDocument.Block] {
-        try renderPost(db, containerID: postID).map { slot in
+        try renderPost(db, containerID: postID, throughLens: lensID).map { slot in
             var text = ""
             if let rendered = slot.text, !rendered.isEmpty {
                 text = exportMapped(rendered, presentation: frames[slot.blockID])
@@ -133,8 +141,14 @@ extension Queries {
     /// by its file (PROVISIONAL, the unit record) — and its live tags by
     /// path. Reads only; writes no row (the export pin). A missing or
     /// tombstoned note reads as an empty document (tolerant read).
+    ///
+    /// `lensID` (VX-168 U3 — VX-172): the same document READ THROUGH a lens —
+    /// each block's in-place take the lens's where it names one, else the
+    /// chosen (`exportBlocks`' lens road). Exactly the document the note
+    /// would read as were the lens made the note (pinned). nil = the note's
+    /// own document, byte for byte.
     public static func variorumDocument(
-        _ db: Database, postID: String
+        _ db: Database, postID: String, throughLens lensID: String? = nil
     ) throws -> VariorumDocument.Document {
         guard let post = try Container.fetchOne(db, key: postID), post.deletedAt == nil
         else { return VariorumDocument.Document(blocks: []) }
@@ -142,7 +156,8 @@ extension Queries {
         return VariorumDocument.Document(
             title: DisplayTitle.isAbsent(post.title) ? nil : post.title,
             tagPaths: try postTags(db, postID: postID).map(\.path),
-            blocks: try exportBlocks(db, postID: postID, includeVariants: true, frames: frames))
+            blocks: try exportBlocks(
+                db, postID: postID, includeVariants: true, frames: frames, throughLens: lensID))
     }
 
     /// The text Copy for AI puts on the clipboard: the document, through the
@@ -151,8 +166,13 @@ extension Queries {
     /// (13n-b U3 — a block holding a blank line) both lead with the `{v:2}`
     /// token and share the marked body; this one's header adds the title and
     /// tags after the token.
-    public static func variorumDocumentText(_ db: Database, postID: String) throws -> String {
-        VariorumDocument.serialize(try variorumDocument(db, postID: postID))
+    ///
+    /// `lensID` (VX-168 U3 — VX-172): the text through a lens
+    /// (`variorumDocument(…, throughLens:)`); nil = byte-unchanged.
+    public static func variorumDocumentText(
+        _ db: Database, postID: String, throughLens lensID: String? = nil
+    ) throws -> String {
+        VariorumDocument.serialize(try variorumDocument(db, postID: postID, throughLens: lensID))
     }
 
     // MARK: - Single-block export

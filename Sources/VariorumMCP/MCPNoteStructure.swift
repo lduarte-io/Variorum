@@ -24,6 +24,11 @@ import VariorumCore
 ///   the chapter it is filed under (AF-10 (f): a book the grant does not
 ///   reach keeps its name — names stay with grants; a dangling chapter
 ///   pointer reads unsectioned, the app's own rule);
+/// - **`lens_id`** (VX-168 U3 — VX-172, her mint 2026-10-11: "a missing human
+///   action, not special agent tooling"): the note READ THROUGH one of its
+///   lenses — each block's `text` is the lens's take where it names one,
+///   else the shown take, and each block says which (`via: lens | chosen`);
+///   the takes' `chosen` stays the note's own fact;
 /// - **`with_commits`** (R-13nb-7 — commits reached BY EXPLICIT ASK, never
 ///   ambient, never in the Level 0 text): each take carries its commits
 ///   newest first (`commit_id`, `kind`, `message`, `created_at`, `length`,
@@ -55,6 +60,12 @@ enum MCPNoteStructure {
         var withVersions = false
         /// The tray's clock (the 30-day window is "now"-relative).
         var now = Date()
+        /// VX-168 U3 (VX-172): read the note THROUGH this lens — each block's
+        /// `text` is the lens's take where the lens names one (a live ACTIVE
+        /// take of the block — her Lenses board's rule), else the shown take,
+        /// and each block says which: `via: "lens" | "chosen"`. The caller has
+        /// already checked the lens is a live lens of THIS note.
+        var lensID: String?
     }
 
     /// The most deleted blocks, deleted takes, versions and lenses one answer
@@ -126,6 +137,11 @@ enum MCPNoteStructure {
         let commitLists = options.withCommits || !options.commitIDs.isEmpty
             ? try commits(db, takeIDs: takes.values.flatMap { $0.map { $0["id"] as String } }, options: options)
             : nil
+        // VX-172: the lens's EFFECTIVE picks — the very read her Lenses board
+        // makes (`Queries.takesProjection.lensSelections`): a pick whose take
+        // was archived or deleted since is dropped, so the block falls
+        // through to its shown take, exactly as her lens column does.
+        let lensPicks = try options.lensID.map { try Queries.effectiveLensSelection(db, lens: $0) }
         var blocks: [[String: Any]] = []
         for placement in placements {
             let blockID: String = placement["block_id"]
@@ -154,15 +170,32 @@ enum MCPNoteStructure {
                 entries.append(entry)
                 if id == shown { shownText = text }
             }
+            // VX-172 — through a lens: the board's own rule
+            // (`PaneTextAuthority.resolvedText`): the lens's pick where it is
+            // a live ACTIVE take of this block, else the slot's shown take.
+            // `chosen` on the takes stays the NOTE's fact — a lens is a view.
+            var via: String?
+            if let lensPicks {
+                if let pick = lensPicks[blockID], let take = active.first(where: { ($0["id"] as String) == pick }) {
+                    shownText = take["working_text"]
+                    via = "lens"
+                } else {
+                    via = "chosen"
+                }
+            }
             var entry: [String: Any] = [
                 "block_id": blockID, "text": shownText, "takes": entries,
                 "comments": comments[blockID] ?? [],
             ]
+            if let via { entry["via"] = via }
             if let name: String = placement["name"], !name.isEmpty { entry["name"] = name }
             if let lineage { entry["lineage"] = lineage[blockID] ?? [] }
             blocks.append(entry)
         }
         var answer: [String: Any] = ["note_id": noteID, "title": title, "blocks": blocks]
+        // VX-172: the view the blocks were read through, said (the
+        // `version_id` echo's precedent).
+        if let lensID = options.lensID { answer["lens_id"] = lensID }
         if let entryDate = try String.fetchOne(
             db, sql: "SELECT entry_date FROM container WHERE id = ?", arguments: [noteID]), !entryDate.isEmpty {
             answer["entry_date"] = entryDate

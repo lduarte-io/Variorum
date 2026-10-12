@@ -75,3 +75,54 @@ struct MCPBlankTakeMintTests {
         }
     }
 }
+
+// VX-172 — the Level 0 document READ THROUGH a lens (`variorumDocument(…,
+// throughLens:)`, the export's block builder over `renderPost(…,
+// throughLens:)`): a read, never a write — the note's own document is
+// untouched by any lens, and a lens's document IS the note's document as it
+// would read were the lens made the note.
+@Suite("VX-168 U3 — the lens doors' core: the document read through a lens")
+struct MCPLensDocumentReadTests {
+    @Test func aDocumentReadThroughALensIsTheNoteAsIfTheLensWereChosen() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "ch 1")
+            let one = try ops.newBlock(in: note.id, text: "One.", at: .end)
+            let alt = try ops.branchVariant(one.block.id, from: one.variant.id)
+            try ops.autosave(alt.id, text: "One, other.", charDelta: 1)
+            let two = try ops.newBlock(in: note.id, text: "Two.\n\nStill two.", at: .end)
+            let short = try ops.branchVariant(two.block.id, from: two.variant.id)
+            try ops.autosave(short.id, text: "Two, short.", charDelta: 1)
+            let three = try ops.newBlock(in: note.id, text: "Three.", at: .end)
+            let gone = try ops.branchVariant(three.block.id, from: three.variant.id)
+            try ops.autosave(gone.id, text: "Three, gone.", charDelta: 1)
+
+            let plain = try db.read { try Queries.variorumDocumentText($0, postID: note.id) }
+            let lens = try ops.createLens(post: note.id, name: "the other reading")
+            #expect(try db.read { try Queries.variorumDocumentText($0, postID: note.id, throughLens: lens.id) } == plain,
+                    "an empty lens is transparent")
+            for (block, take) in [(one.block.id, alt.id), (two.block.id, short.id), (three.block.id, gone.id)] {
+                _ = try ops.setLensChoice(lens: lens.id, block: block, variant: take)
+            }
+            #expect(try db.read { try Queries.variorumDocumentText($0, postID: note.id) } == plain,
+                    "the note's own document never sees a lens")
+            try ops.archiveVariant(gone.id)  // a dangling pick falls through to the chosen take
+            // (Archiving moves the take out of the note's own fan — and so out
+            // of its document — whatever any lens says.)
+            let archivedPlain = try db.read { try Queries.variorumDocumentText($0, postID: note.id) }
+
+            let throughLens = try db.read {
+                try Queries.variorumDocumentText($0, postID: note.id, throughLens: lens.id)
+            }
+            #expect(try db.read { try Queries.variorumDocumentText($0, postID: note.id, throughLens: nil) }
+                    == archivedPlain, "the nil lens is the note's own document")
+            #expect(plain.hasPrefix(VariorumDocument.versionToken), "her two-paragraph block puts the note in v2")
+            #expect(!throughLens.hasPrefix(VariorumDocument.versionToken),
+                    "through the lens no block holds a blank line — the format reads it as v1")
+            #expect(try VariorumDocument.parse(throughLens).blocks.map(\.text) == ["One, other.", "Two, short.", "Three."])
+
+            try ops.adoptLens(lens.id)
+            #expect(try db.read { try Queries.variorumDocumentText($0, postID: note.id) } == throughLens,
+                    "the lens's document is the note's own once the lens is made the note")
+        }
+    }
+}
