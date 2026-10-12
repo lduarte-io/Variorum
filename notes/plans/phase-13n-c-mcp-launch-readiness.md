@@ -636,6 +636,8 @@ refused). **Review:** opus ladder + FABLE-OWED (the secret's accept path is name
 
 ## 6. THE FABLE-OWED LEDGER (her protocol — written AT THE MOMENT, never reconstructed)
 
+**DISCHARGED 2026-10-11: the combined fable ladder (R1 `0b82aa16` + the fix leg + R2, CLOSED CLEAN — 0 BLOCKER / 0 MAJOR both rounds) dispositioned EVERY row — F-1…F-25 ALL CONCUR, each mechanism re-traced by the Fable reviewer's own reading. The per-row traces are `notes/plans/13nc-combined-ladder-round1.md` and `-round2.md`; the Reviewed-by column reads through those records.**
+
 **VX-166** (born at her Air session) is the post-phase Fable verification sweep: at her credit reset a Fable session walks this table and runs cold reviews in sensible ladders. One row
 per adjudication decision or diff that would ordinarily earn a Fable review.
 
@@ -818,6 +820,7 @@ unit record (TCC state is machine-state the next session inherits).
 - **P-13nc-U2-1** (U2) — the grant pickers' "Recently edited" shows 5 books.
 - **P-13nc-U2-2** (U2, R-AIR-8) — the pane's "Shared with AI" reads "Shared places" (alternatives: "Shared
   with clients" · "Permissions"); final words hers at the copy pass.
+  ↳ **RULED at the 2026-10-11 sitting** — REVERSED IN-PANE — the section title is “Shared with AI” again (`5ca1ee66`, her carve-out to R-AIR-8); this bullet's “Shared places” quote is historical. (The HER SITTING block above is the record.)
 - **P-13nc-U2-3** (U2) — the book picker's layouts: "by shelf" (default) + an "a–z" toggle; Unshelved LAST per
   the brief (the Bookcase's All shows it first); the quick sections ride both layouts.
 - **P-13nc-U2-4** (U2, F2) — the ask's reach line: "Any answer below grants it in “X”, including to future
@@ -839,6 +842,7 @@ unit record (TCC state is machine-state the next session inherits).
   at the row's small size; candidates B `eye`, C `antenna.radiowaves.left.and.right` (captured); U4's pending-ask
   sibling its filled twin `point.3.filled.connected.trianglepath.dotted` — **superseded at the Stage B fix pass (O-1):
   the pending mark is `questionmark.bubble`, P-13nc-SB-3.**
+  ↳ **RULED at the 2026-10-11 sitting** — icon A `point.3.connected.trianglepath.dotted` KEPT. (The HER SITTING block above is the record.)
 - **P-13nc-U3-6** (U3) — the popover's Revoke on a WIDER grant revokes THAT grant (the why line names it — e.g. "through
   the Home wing grant"); an open-book reach offers no Change…/Revoke (it is a switch — the row says where it lives).
 - **P-13nc-U3-7** (U3, R-AIR-7) — the in-note indicator lives at the pane's ContextBar TRAILING end (every note
@@ -850,6 +854,7 @@ unit record (TCC state is machine-state the next session inherits).
   the sidebar Open strip's or Starred's NOTE rows (not briefed; a follow-on if wanted).
 - **P-13nc-U4-1** (U4, her round-2 ask) — "while connected" → **"until it disconnects"** everywhere the duration
   is said (options (b) "for this connection", (c) "this session" — the U4 record); her pick at the copy pass.
+  ↳ **RULED at the 2026-10-11 sitting** — “until it disconnects” stands everywhere; the advice's second-person register KEPT as the one deliberate split; off the copy pass. (The HER SITTING block above is the record.)
 - **P-13nc-U4-2** (U4) — a pending glyph's press answers the ask that waited longest on its target; several are
   named together in the hover. Alternative: a small menu of the target's asks.
 - **P-13nc-U4-3** (U4) — the masthead's wing word wears every waiting WING ask's glyph (not only the current
@@ -871,9 +876,11 @@ unit record (TCC state is machine-state the next session inherits).
   a client reads goes wherever that client sends its work: for most clients, the company that runs its model."
 - **P-13nc-SB-2** (Stage B B6) — ⌘L "Switch Wing…" grey with ONE wing; its note "There is only one wing so far — New Wing… in
   the masthead's ▾ menu makes another, and then ⌘L switches between them." Alternative: hide the item.
+  ↳ **RULED at the 2026-10-11 sitting** — grey-with-a-note kept; the note reworded WITHOUT “masthead” (`5ca1ee66`); this bullet's quoted wording is historical. (The HER SITTING block above is the record.)
 - **P-13nc-SB-3** (Stage B O-1) — the pending-ask mark `questionmark.bubble` (A — "a question is waiting for you"); B
   `hand.raised` (Apple's privacy surfaces wear it — near the Private lock), C the shared icon + an accent dot (the near-twin
   again at row size); captured `sb-pending-candidates-*`. Supersedes P-13nc-U3-5's "filled twin" tail.
+  ↳ **RULED at the 2026-10-11 sitting** — `questionmark.bubble` KEPT. (The HER SITTING block above is the record.)
 - **P-13nc-SB-4** (Stage B B2) — a book ask fenced since offers no grant and says "This book is marked Private now, which no
   grant reaches — its notes are shared one ask at a time. Don't allow lets this ask go." (and the daily-Journal twin); B7's
   "…and how to set up Claude Code, Codex or any MCP client." and B9's "Allowing grants it in “X”, …" ride her copy pass.
@@ -881,6 +888,7 @@ unit record (TCC state is machine-state the next session inherits).
   was let go." (a wing: "The X wing is gone, …") as a refusal — on the window's status line, or the pane's caption when
   pressed in Settings; a forget by the ask watch or by Waiting's re-validation (a press she never made) is SILENT, and an
   open sheet closes as when its ask is answered elsewhere. Alternative: speak on every forget.
+  ↳ **RULED at the 2026-10-11 sitting** — speak only on her press (as built). (The HER SITTING block above is the record.)
 - **P-13nc-SB-6** (Stage B close-out O-4, her ask) — app copy names no provider outside the setup menu: the toggle sentence
   "so MCP clients can read…", lesson 1's "a standard way for AI apps to use another app's tools", lesson 2's limit card
   without "(claude-code, say)", the two Settings blurbs "any MCP client", and the client-named undo in PLACEHOLDER form —
@@ -892,16 +900,19 @@ unit record (TCC state is machine-state the next session inherits).
 - **P-13nc-U6-1** (U6) — the tool's name `move_note_to_wing` (the mockup §9's "name provisional" kept) and its listing at EDIT under any scope kind (a client short on the destination still sees it; its refusal raises the wing's ask).
 - **P-13nc-U6-2** (U6) — the move's answer names a left book only where the client can READ it (`{book_id, name}`), else by id alone (names stay with grants, AF-10 (f)); the mockup drew names.
 - **P-13nc-U6-3** (U6, a QUESTION for #211) — the undo/redo of a client's wing move when the note has since JOINED a book (member or arrival) or TAKEN a tag in the wing it would leave: (a) REFUSE, keeping the entry, with the way through said ("…take those off, or use Move to Wing, then try again.") — BUILT; (b) mirror her door for what was gained since (arrivals dismissed and tags re-pointed by path silently; refuse only on a member); (c) treat the entry as obsolete (a quiet no-op). A note moved on by her door, trashed, or whose other wing has died is OBSOLETE (quiet) in every option (the 13i-d letter). **THE DEAD-WING ROW (the combined ladder R1's F1, fixed `3122cb2e` — the fable reviewer's final call on the U6 implementer's agreement):** a replay whose stood-in wing has DIED is OBSOLETE and quiet in EITHER direction — both of the entry's wings must be live. (Before the fix a dead id resolved to Home, so an undo could carry a Home application cross-wing past the stored-id vocabulary check — sync-reachable — and a moved-on entry un-obsoleted once its emptied wing was deleted — door-reachable; pinned red-on-old, 5 issues.) Her alternative for this row, the implementer's refinement: record the EFFECTIVE source (`''` when dangling) at capture time, so such an undo lands the note in Home, where it read — sync-only, not built.
+  ↳ **RULED at the 2026-10-11 sitting** — option (a) REFUSE-and-keep stands; a dead STOOD-IN wing is obsolete in either direction (the R1 fix `3122cb2e`). One NEW corner from ladder R2 (a NIT): a dead CURRENT wing resolving into a HOME stood-in wing — dangling-reads-as-Home (P-13id-U5-2) vs moved-on-obsolete (this letter); bounded to a bare note, sync-only, no cross-wing row mintable; #211 unless she rules. (The HER SITTING block above is the record.)
 - **P-13nc-U6-4** (U6) — `move_note_to_wing`'s frozen-book refusal is her Move to Wing door's own sentence (`WingCopy.frozen`, through the new `wingMoveFrozenWords` hook) where the client can READ that book, else the op table's words ("This book is finished — reopen it first; if it's sealed, unseal it.").
 - **P-13nc-U6-5** (U6, R-AIR-12's reading) — the OPEN BOOK reads gatherings too (`decideGathering` is `decideWing`'s read: a wing grant on the gathering's wing at any rung, or the open book). Alternative: wing grants only.
 - **P-13nc-U6-6** (U6, VX-158) — `show_in_app`'s wing target is delivered as her switcher's own act (the app's wing switched, no pane moved, nothing said when already there) with "Now in “X” — ‹client› showed you this wing." (mockup §7; Home unquoted).
 - **P-13nc-U6-7** (U6) — the move's receipt: "moved “X” to “variorum” — it left 2 books" (her door's words); a run to ONE destination coalesces ("moved 14 notes to “variorum”"); a single move past the bar's 72 budget drops only its TITLE ("moved a note to “variorum” — it left 2 books") before the count fallback.
 - **P-13nc-U6-8** (U6) — a gathering's `list_notes` pages in its own order on its own cursor; a cursor whose note left the assembly answers the stale-cursor refusal (list again); `include_archived` adds nothing (a gathering assembles living notes).
 - **R1-F3 copy rider (combined ladder R1, a NIT — rides P-13nc-U4-1's pick)** — the advice says "until you disconnect" (second person: the MODEL is its reader) where every app face says "until it disconnects"; a deliberate register split, wire tokens unchanged. Hers at the copy pass: keep the split or align the advice to the faces' words.
+  ↳ **RULED at the 2026-10-11 sitting** — the split STAYS; CLOSED, off the copy pass. (The HER SITTING block above is the record.)
 - **P-13nc-U4-8** (U4, a QUESTION for #211) — the ask's sheet keeps 13n-b's answers; closing it without granting
   is Don't allow (Esc), which drops the ask until the client re-asks. Options: keep · add "Not now" · Esc keeps it
   waiting.
 
+  ↳ **RULED at the 2026-10-11 sitting** — Esc answers Don't allow (as built); off the #211 list. (The HER SITTING block above is the record.)
 ## UNIT BRIEFS AND RECORDS (written just-in-time below, one per unit)
 
 ---
