@@ -212,10 +212,13 @@ struct MCPSetupKeyServerTests {
     /// per call — so a DENIED, unbound name presenting a fresh unclaimed key
     /// BINDS it and the handshake admits the connection, which then reaches
     /// NOTHING ("denied" on every call — the honest answer; the key advice
-    /// could not help it). Re-running the setup therefore works in EITHER
-    /// order around her approval (R-VX168-1's "just re-run the setup"), and a
-    /// second Deny releases the new binding. GREEN ON BOTH SIDES by design:
-    /// this pins standing behaviour the round found unargued; it fixes nothing.
+    /// could not help it). A Deny on the STILL-DENIED client releases that
+    /// binding too (the release runs ahead of `denyMCPClient`'s already-denied
+    /// short-circuit — the sanity pass's NIT: exercised here, not just
+    /// claimed), and re-running the setup works in EITHER order around her
+    /// approval (R-VX168-1's "just re-run the setup"). GREEN ON BOTH SIDES by
+    /// design: this pins standing behaviour the round found unargued; it
+    /// fixes nothing.
     @Test func aDeniedNameBindsAFreshKeyButReachesNothingUntilApproval() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
@@ -238,20 +241,24 @@ struct MCPSetupKeyServerTests {
                 name: "read_note", arguments: ["note_id": .string(note.id)])
             #expect(refused.isError == true && text(refused).contains("denied this client"), "\(text(refused))")
 
-            // Her approval opens the SAME connection (approval is per call;
-            // Deny revoked the old grant, so the approval brings a new one).
+            // A Deny on the STILL-DENIED, bound client releases the binding:
+            // the hash-NULL runs ahead of the already-denied short-circuit.
+            // The released key then opens no NEW connection…
+            try h.operations.denyMCPClient(clientID)
+            #expect(try h.client("claude-code").isSetupBound == false)
+            #expect(try h.client("claude-code").state == .denied)
+            let (fd, answer) = try h.rawOpen(as: "claude-code", presenting: fresh, id: 6)
+            expectRefusal(answer, id: 6, "the released key is gone")
+            expectClosed(fd)
+
+            // …while the STANDING connection stays decided (the handshake
+            // decides once; the release gates the next connection, whose road
+            // back is R-VX168-1's re-run). Her approval opens it per call —
+            // Deny revoked the old grant, so the approval brings a new one.
             _ = try h.approve("claude-code", .init(rung: .read, scopeKind: .note, scopeID: note.id, duration: .always))
             let read = try await connection.client.callTool(
                 name: "read_note", arguments: ["note_id": .string(note.id)])
             #expect(read.isError != true, "re-run setup then approve — either order works: \(text(read))")
-
-            // A second Deny releases the new binding (the release runs before
-            // the already-denied short-circuit).
-            try h.operations.denyMCPClient(clientID)
-            #expect(try h.client("claude-code").isSetupBound == false)
-            let (fd, answer) = try h.rawOpen(as: "claude-code", presenting: fresh, id: 6)
-            expectRefusal(answer, id: 6, "the released key is gone")
-            expectClosed(fd)
             await h.hangUp(connection)
         }
     }

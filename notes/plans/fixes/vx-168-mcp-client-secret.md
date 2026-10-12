@@ -954,3 +954,20 @@ module and visibility (the Mac target's callers compile against the same API). *
 stand as recorded** (the SIGPIPE watch; the format's v1 corner; W-3's ⎋; the grant-sheet sentence for her
 copy pass). Remaining per the flow: the implementer's ONE sanity pass over the reviewer's diff
 (`9c4f1d81..8465d83d`); anything it raises returns to the reviewer for the final word.
+
+### THE SANITY PASS and the reviewer's final word (round 1 CLOSED)
+
+The implementer's sanity pass over the reviewer's fix diff: **PASS** — all four fixes verified as
+disposed, nothing else moved, suites green on the pulled tree — with ONE non-blocking NIT, returned per
+the flow. **The NIT (accurate):** the F-2 pin's final comment claimed "(the release runs before the
+already-denied short-circuit)" over a path the pin never ran — her approval sat between the two Denys, so
+the second Deny ran on an APPROVED client and `denyMCPClient`'s already-denied guard was never taken
+(the code's order IS correct: the hash-NULL sits ahead of the state guard — but unpinned). **Final word:
+option (b), the stronger road** — the pin restructured so the second Deny lands while the client is STILL
+denied and bound: the binding releases (the release-ahead-of-short-circuit arm now EXERCISED), the
+released key opens no new connection, and the STANDING connection stays decided (the handshake decides
+once; the release gates the next connection, R-VX168-1's re-run the road back) until her approval opens
+it per call. `MCPSetupKeyServerTests` 10/1 green first run — confirming both the release order and the
+standing-connection nuance as standing behaviour. The sanity pass's range note (the record-only
+`0500d126` sat outside the named range) is accurate; no action. **ROUND 1 stands CLOSED** — 0B/0M/2m/2n,
+all four confirmed and landed, the sanity NIT taken as (b); round 2 with a fresh reviewer follows.
