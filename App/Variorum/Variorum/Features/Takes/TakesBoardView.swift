@@ -509,13 +509,46 @@ struct TakesBoardView: View {
     /// menu. Every door the old toolbar had is still one click away; the
     /// row just stops shouting over the page.
     private var header: some View {
-        HStack(spacing: 8) {
+        Group {
             // VX-170 (R-VX170-4): lens-aware Takes' door LEADS the line — the
             // first question this board answers is now "which takes?". It
             // renders only on a note with a saved lens (P-VX168-U4-1).
+            //
+            // WIDTH-AWARE (the U4 walk's W-1, measured: in margin grid the
+            // line's fixed controls fill the 680-pt measure, and the door — the
+            // one item that may yield — truncated to NOTHING; the filter was on
+            // with no door to see or change it). One line while the door fits
+            // WHOLE beside the controls; otherwise the door and its chip take a
+            // line of their own above them (`MastheadRowTwo`'s one-or-two-lines
+            // rule, in its simplest form). The controls never move for it.
             if model.lensFilter.offered {
-                TakesShowDoor(filter: model.lensFilter, tokens: tokens)
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 8) {
+                        TakesShowDoor(filter: model.lensFilter, tokens: tokens)
+                        headerControls
+                    }
+                    VStack(alignment: .leading, spacing: 4) {
+                        TakesShowDoor(filter: model.lensFilter, tokens: tokens)
+                        HStack(spacing: 8) { headerControls }
+                    }
+                }
+            } else {
+                HStack(spacing: 8) { headerControls }
             }
+        }
+        // Batch 14 (her alignment ask): the control line shares the
+        // article's measure and left edge — one column, like the mockup.
+        .frame(maxWidth: articleMeasure, alignment: .leading)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 6)
+    }
+
+    /// The header line's controls (style, density, wash, expand/close, note
+    /// actions) — one copy, composed by `header` on one line or under the
+    /// `show ▾` door's own (VX-170, W-1).
+    @ViewBuilder
+    private var headerControls: some View {
             VoicedMenu(tokens: tokens, label: "style: \(styleName)") {
                 styleOption("Stack", .stack)
                 styleOption("Carousel", .carousel)
@@ -588,13 +621,6 @@ struct TakesBoardView: View {
             }
             .help("The rare whole-note acts: a rewrite pass, saving choices as a lens, "
                 + "duplicating as a version")
-        }
-        // Batch 14 (her alignment ask): the control line shares the
-        // article's measure and left edge — one column, like the mockup.
-        .frame(maxWidth: articleMeasure, alignment: .leading)
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 24)
-        .padding(.vertical, 6)
     }
 
     /// 18f batch 1 (U-4/U-16): the picked run's two roads. Its own function
@@ -1380,13 +1406,19 @@ struct TakesBoardView: View {
                 // the `show ▾` filter it is the block's whole-fan door instead
                 // (VX-170): "all" on a filtered rail, ✕ back to the filter's
                 // shape on an opened one — the badge's own words either way.
-                Button(filtered ? tokens.chromeLabel("all") : "✕") {
-                    model.toggleExpanded(slot.blockID)
-                }
+                //
+                // The U4 walk's W-2: on a filtered rail whose expand set IS the
+                // whole fan ("2 of 2"), "all" would reveal nothing — a door that
+                // changes nothing she can see is not drawn (P-2).
+                if !filtered || takes.count < slot.activeVariantCount {
+                    Button(filtered ? tokens.chromeLabel("all") : "✕") {
+                        model.toggleExpanded(slot.blockID)
+                    }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .help(model.lensFilter.badgeHelp(slot)
                         ?? CapabilityRegistry.capability(.showTakes)
                             .menuTitle("Close this fan"))
+                }
             }
             if takes.isEmpty {
                 fanFooter(slot: slot, fitsRail: true)
