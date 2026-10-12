@@ -331,6 +331,81 @@ struct MCPWingMoveActsTests {
         }
     }
 
+    /// **The combined ladder R2's N1 — RULED QUIET-OBSOLETE (her sitting's
+    /// fourth round, "quiet obsolote is fine"):** a dead CURRENT wing makes
+    /// the replay obsolete in either direction — the moved-on letter
+    /// (P-13nc-U6-3) outranks dangling-reads-as-Home (P-13id-U5-2) inside the
+    /// replay guards. Before the fix a dead stored wing resolved to Home and
+    /// satisfied `sameEffectiveWing` against a HOME stood-in wing, so an entry
+    /// whose note HER door had moved on (Home → X) replayed once X's tombstone
+    /// arrived by sync: a bare note was MOVED (the undo back to the source,
+    /// the redo's mirror on to the destination), and a tagged one was REFUSED
+    /// `wingMoveChangedSince` — a misleading wedge about tags she never
+    /// applied in Home — where the ruling says quiet.
+    @Test func aDeadCurrentWingMakesTheReplayObsoleteInEitherDirection() throws {
+        try withUndo { ops, stack, db in
+            let her = Operations()
+            let tombstone = { (wingID: String) in
+                try db.write { try $0.execute(
+                    sql: "UPDATE wing SET deleted_at = '2026-10-11T23:30:00.000Z' WHERE id = ?",
+                    arguments: [wingID]) }
+            }
+
+            // (1) UNDO, bare: client moves S → Home; HER door moves the note
+            // on, Home → X; X's tombstone arrives by sync (no door deletes a
+            // wing while contents live). The undo must be a quiet no-op —
+            // never a move back to S of a note her door moved on.
+            let s = try her.createWing(name: "s")
+            let x = try her.createWing(name: "x")
+            let note = try her.createPost(title: "estuary", wingId: s.id)
+            _ = try her.seedBlock(in: note.id, text: "tidal flats")
+            try ops.mcpMoveNoteToWing(note.id, to: "", undoLabel: label)
+            try her.moveNoteToWing(note.id, to: x.id)
+            try tombstone(x.id)
+            let touched = try db.fetchString("SELECT updated_at FROM container WHERE id = ?", [note.id])
+            #expect(try stack.undo(with: ops) == "claude-code's wing move", "the pop happens — never wedged")
+            #expect(try wing(db, note.id) == x.id,
+                    "a dead CURRENT wing makes the undo OBSOLETE — the moved-on note is not moved back")
+            #expect(try db.fetchString("SELECT updated_at FROM container WHERE id = ?", [note.id]) == touched,
+                    "nothing written")
+
+            // (2) REDO, the mirror: moved Home → D and undone (back in Home);
+            // her door moves it on, Home → X2; X2 dies. The redo must be
+            // obsolete, never a move on to D.
+            let d = try her.createWing(name: "d")
+            let x2 = try her.createWing(name: "x2")
+            let second = try her.createPost(title: "second")
+            _ = try her.seedBlock(in: second.id, text: "words")
+            try ops.mcpMoveNoteToWing(second.id, to: d.id, undoLabel: label)
+            #expect(try stack.undo(with: ops) == "claude-code's wing move")
+            try her.moveNoteToWing(second.id, to: x2.id)
+            try tombstone(x2.id)
+            #expect(try stack.redo(with: ops) == "claude-code's wing move")
+            #expect(try wing(db, second.id) == x2.id,
+                    "a dead CURRENT wing makes the redo OBSOLETE — the moved-on note is not moved on")
+
+            // (3) UNDO, tagged — QUIET, never the misleading refusal: the
+            // note's tag rode her Home → X3 move (an X3 twin the entry never
+            // knew; X3 dead puts it in the leaving-Home scope), so pre-fix
+            // the divergence check threw `wingMoveChangedSince` about tags
+            // she never applied in Home.
+            let s3 = try her.createWing(name: "s3")
+            let x3 = try her.createWing(name: "x3")
+            let third = try her.createPost(title: "third", wingId: s3.id)
+            _ = try her.seedBlock(in: third.id, text: "words")
+            let reeds = try her.createTag(name: "reeds", wingID: s3.id)
+            try her.applyTag(reeds.id, toPost: third.id)
+            try ops.mcpMoveNoteToWing(third.id, to: "", undoLabel: label)
+            try her.moveNoteToWing(third.id, to: x3.id)
+            try tombstone(x3.id)
+            let tagsBefore = try livePostTags(db, third.id)
+            #expect(try stack.undo(with: ops) == "claude-code's wing move",
+                    "quiet — never a wingMoveChangedSince wedge about tags she never applied")
+            #expect(try wing(db, third.id) == x3.id, "obsolete: nothing moved")
+            #expect(try livePostTags(db, third.id) == tagsBefore, "nothing re-pointed")
+        }
+    }
+
     @Test func theUndoRevivesIntoAFinishedBookButNotASealedOne() throws {
         try withUndo { ops, stack, db in
             let f = try fixture(db)
