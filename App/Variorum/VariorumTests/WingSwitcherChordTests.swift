@@ -253,6 +253,49 @@ struct WingSwitcherChordTests {
         }
     }
 
+    /// **13n-c UX walk W-UX-6 (red-on-old):** her RULED one-wing note was
+    /// rendered nowhere — with one wing ⌘L did nothing and said nothing (the
+    /// grey View item swallows its chord; a grey menu item shows no help).
+    /// Now ⌘L with one wing SPEAKS the note on the status line as a refusal
+    /// (the standing unavailable idiom); with two wings it passes to the menu.
+    /// Fed REAL events (the D-W4 pin's road).
+    @Test func cmdLWithOneWingSpeaksTheNoteAndTwoWingsPassItOn() async throws {
+        func event(_ code: CGKeyCode, _ flags: CGEventFlags) throws -> NSEvent {
+            let cg = try #require(CGEvent(keyboardEventSource: nil, virtualKey: code, keyDown: true))
+            cg.flags = flags
+            return try #require(NSEvent(cgEvent: cg))
+        }
+        let cmdL = try event(37, .maskCommand)
+        let plainL = try event(37, [])
+        let shiftCmdL = try event(37, [.maskCommand, .maskShift])
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator { Date(timeIntervalSince1970: 1_782_864_000) }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 71))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let wings = WingsModel(session: session)
+            await wings.load()
+            #expect(session.wing.wingCount == 1)
+            let note = CapabilityRegistry.capability(.switchWing).unavailableNote
+            #expect(OneWingChord.speak(cmdL, session: session), "⌘L with one wing is answered — consumed")
+            #expect(session.status.spoken?.text == note, "…and SPEAKS her ruled note")
+            #expect(session.status.spoken?.kind == .refusal, "a refusal: nothing happened, and why")
+            session.status.clear()
+            #expect(!OneWingChord.speak(plainL, session: session), "a typed l is never the chord")
+            #expect(!OneWingChord.speak(shiftCmdL, session: session), "⇧⌘L is Save Choices as Lens")
+            #expect(session.status.spoken == nil)
+            #expect(!OneWingChord.speak(cmdL, session: nil), "no library open — nothing to say")
+            _ = try Operations().createWing(name: "variorum")
+            await wings.load()
+            #expect(session.wing.wingCount == 2)
+            #expect(!OneWingChord.speak(cmdL, session: session), "two wings — ⌘L is the menu's, untouched")
+            #expect(session.status.spoken == nil)
+        }
+    }
+
     // MARK: - The chord and the doors
 
     @Test func commandLIsDeclaredWiredAndFreeOfEveryOtherChord() {

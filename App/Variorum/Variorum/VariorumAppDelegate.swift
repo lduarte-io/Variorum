@@ -59,6 +59,10 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     /// test process.
     let mcp = MCPDoor()
 
+    /// 13n-c UX walk W-UX-6 — ⌘L with ONE wing speaks its note
+    /// (`OneWingChord`): the app-wide monitor, installed once at launch.
+    private var oneWingChord: Any?
+
     // MARK: - Window sanitation (Sitting 9 batch 8 — the wedged window)
     //
     // Her main window came up TALLER THAN THE SCREEN and macOS's
@@ -92,6 +96,7 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
                 present: { [updates] in updates.askPermission() }))
         }
         calmAsks.start()
+        oneWingChord = OneWingChord.install { [weak self] in self?.session }
         #if DEBUG
         // 18l U-VIS: the visual harness's oracle endpoint — registers nothing
         // unless the harness launched this process (`VARIORUM_VISUAL_WALK=1`).
