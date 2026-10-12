@@ -167,15 +167,21 @@ struct MCPDeliberateActsTests {
         }
     }
 
-    @Test func undoingAChoiceRestoresANilPointerExactly() throws {
+    /// A nil pointer renders the block's default (AppSpec §7's fallback).
+    /// Choosing that SHOWN default changes nothing she can see, so nothing is
+    /// written (PROVISIONAL P-VX168-U2-5); choosing another take writes, and
+    /// its undo restores the nil exactly — never the default it rendered.
+    @Test func aNilPointerIsRestoredExactlyAndItsShownDefaultIsANoOp() throws {
         try withUndo { ops, stack, db in
             let w = try world(ops)
             try db.write { db in
                 try db.execute(sql: "UPDATE container_block SET chosen_variant_id = NULL WHERE block_id = ?",
                                arguments: [w.block1])
             }
-            _ = try ops.chooseTake(w.hers1, undoLabel: label(.choice))
-            #expect(try chosen(db, w.block1) == w.hers1, "a nil pointer naming the default IS a change (the row moves)")
+            #expect(!(try ops.chooseTake(w.hers1, undoLabel: label(.choice))).changed, "the shown default: nothing to do")
+            #expect(try chosen(db, w.block1) == nil && stack.depth == 0)
+            #expect(try ops.chooseTake(w.other1, undoLabel: label(.choice)).changed)
+            #expect(try chosen(db, w.block1) == w.other1)
             _ = try stack.undo(with: ops)
             #expect(try chosen(db, w.block1) == nil, "the exact pre-image — nil, not the default")
         }
@@ -268,6 +274,14 @@ struct MCPDeliberateActsTests {
             #expect(!adoption.changed && adoption.keptAs == nil)
             #expect(try db.fetchInt("SELECT COUNT(*) FROM lens") == lenses, "no lens minted")
             #expect(stack.depth == 0)
+            // A nil pointer rendering the very take the lens names agrees too.
+            try db.write { db in
+                try db.execute(sql: "UPDATE container_block SET chosen_variant_id = NULL WHERE block_id = ?",
+                               arguments: [w.block1])
+            }
+            #expect(!(try ops.adoptLensAsNote(agreeing.id, undoLabel: label(.lensAdoption))).changed,
+                    "agreement is what the note SHOWS (the rendered rule)")
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM lens") == lenses && stack.depth == 0)
             // Her own door (parity, unchanged): it mints the preservation
             // lens even when nothing moves — the recorded difference.
             _ = try ops.adoptLensPreservingChosen(agreeing.id)

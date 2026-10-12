@@ -76,11 +76,14 @@ struct MCPWriteTools: Sendable {
         case edit(EditJob)
         /// U4: the carriage's write tools (`MCPWriteTools+Carriage`).
         case carriage(CarriageJob)
+        /// VX-168 U2: the edit rung's deliberate acts (`MCPWriteTools+Deliberate`).
+        case deliberate(DeliberateJob)
 
         var tool: String {
             switch self {
             case .edit(let job): job.tool
             case .carriage(let job): job.tool
+            case .deliberate(let job): job.tool
             case .addTake: "add_take"
             case .addComment: "add_comment"
             case .saveLens: "save_lens"
@@ -161,6 +164,7 @@ struct MCPWriteTools: Sendable {
         default:
             if let job = try parseEdit(name, args) { return .edit(job) }
             if let job = try parseCarriage(name, args) { return .carriage(job) }
+            if let job = try parseDeliberate(name, args) { return .deliberate(job) }
             throw ArgumentFailure(message: "Unknown tool: \(name).")
         }
     }
@@ -368,6 +372,8 @@ struct MCPWriteTools: Sendable {
             return try performEdit(editJob, job: job, ops: ops, clientName: clientName)
         case .carriage(let carriageJob):
             return try performCarriage(carriageJob, job: job, ops: ops, clientName: clientName)
+        case .deliberate(let deliberateJob):
+            return try performDeliberate(deliberateJob, job: job, ops: ops, clientName: clientName)
         }
     }
 

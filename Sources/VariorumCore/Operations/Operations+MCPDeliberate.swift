@@ -58,8 +58,8 @@ extension Operations {
     public struct MCPTakeChoice: Equatable, Sendable {
         public let takeID: String
         public let blockID: String
-        /// False when the block's slot already pointed at the take — nothing
-        /// was written and nothing registered.
+        /// False when the block already SHOWED the take — nothing was written
+        /// and nothing registered.
         public let changed: Bool
     }
 
@@ -68,13 +68,15 @@ extension Operations {
     /// live and placed, the note unsealed, the take live, ACTIVE and this
     /// block's; a LOCKED take may be chosen, as hers may — the lock guards
     /// the buffer). Guards FIRST, the no-op second (`renameCommitPoint`'s
-    /// order): a slot already pointing at the take writes nothing and
-    /// registers nothing. ONE undo entry, `undoLabel`: the slot's exact
-    /// pre-image pointer back (nil included), the redo the take again —
-    /// `revertChosenPointers`, the one pointer-restore brain the adopt doors
-    /// share (a dead slot is the world moving past the entry; a sealed note
-    /// refuses and keeps it). A pointer move: no text written, no touch, no
-    /// churn — exactly as her ✓.
+    /// order): a block that already SHOWS the take (the structural ops'
+    /// rendered rule — the wire's own `chosen` fact) writes nothing and
+    /// registers nothing, so no act lands that she could not see
+    /// (PROVISIONAL P-VX168-U2-5 — the shown take, not the raw pointer).
+    /// ONE undo entry, `undoLabel`: the slot's exact pre-image pointer back
+    /// (nil included), the redo the take again — `revertChosenPointers`, the
+    /// one pointer-restore brain the adopt doors share (a dead slot is the
+    /// world moving past the entry; a sealed note refuses and keeps it). A
+    /// pointer move: no text written, no touch, no churn — exactly as her ✓.
     @discardableResult
     public func chooseTake(
         _ variantID: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil
@@ -84,7 +86,7 @@ extension Operations {
             let take = try liveVariant(db, variantID)
             var placement = try choosablePlacement(db, blockID: take.blockId, variantID: variantID)
             let previous = placement.chosenVariantId
-            guard previous != variantID else {
+            guard (try? renderedVariant(db, blockID: take.blockId))?.id != variantID else {
                 return (MCPTakeChoice(takeID: variantID, blockID: take.blockId, changed: false), placement.id, previous)
             }
             placement.chosenVariantId = variantID
@@ -109,7 +111,8 @@ extension Operations {
     public struct MCPLensAdoption: Equatable, Sendable {
         public let lensID: String
         public let noteID: String
-        /// How many blocks' chosen pointer moved to the lens's take.
+        /// How many blocks' chosen pointer the act set to the lens's take
+        /// (her door's own count — a nil pointer the lens names is set too).
         public let moved: Int
         /// The lens the outgoing chosen was kept as ("chosen until …") — nil
         /// when nothing moved (nothing went out; nothing to keep).
@@ -123,10 +126,10 @@ extension Operations {
     /// destroys): the lens live, its note unsealed; the outgoing chosen kept
     /// as a full-fidelity lens ("chosen until …"), then every pick the lens
     /// makes → that block's chosen — `adoptSwapRows`, her door's own body.
-    /// Guards FIRST; then the no-op: a lens that would move NO slot (it agrees
-    /// with the note's pointers everywhere it names a take — the adopt loop's
-    /// own test, `adoptablePointers`) writes NOTHING, no preservation lens
-    /// either (PROVISIONAL P-VX168-U2-3 — her door mints one regardless).
+    /// Guards FIRST; then the no-op: a lens that already AGREES with the note
+    /// — every take it names is the one its block shows (the rendered rule,
+    /// as `choose_take`'s) — writes NOTHING, no preservation lens either
+    /// (PROVISIONAL P-VX168-U2-3 — her door mints one regardless).
     ///
     /// ONE undo entry, `undoLabel`, walking the WHOLE act back in ONE
     /// transaction: the pointers' exact pre-images AND the preservation lens
@@ -146,8 +149,7 @@ extension Operations {
             let lens = try liveLens(db, lensID)
             let post = try livePost(db, lens.containerId)
             try ensureUnlocked(post)
-            let picks = try Queries.effectiveLensSelection(db, lens: lensID)
-            guard try !adoptablePointers(db, postID: post.id, picks: picks).isEmpty else {
+            guard try lensDisagrees(db, lensID: lensID, postID: post.id) else {
                 return (MCPLensAdoption(lensID: lensID, noteID: post.id, moved: 0, keptAs: nil), [])
             }
             let (kept, moved) = try adoptSwapRows(db, lensID: lensID)
@@ -167,6 +169,23 @@ extension Operations {
                 redo: { try $0.reapplyLensAdoption(halves.adopted, keptLensID: keptID, undoneOn: undoneOn.value) })
         }
         return landed.adoption
+    }
+
+    /// Does the lens name, anywhere in its note, a take its block does not
+    /// SHOW right now? (The lens's live picks — `effectiveLensSelection`,
+    /// which drops a dangling pick — against each placed block's rendered
+    /// take.) ∝ the note.
+    func lensDisagrees(_ db: Database, lensID: String, postID: String) throws -> Bool {
+        let picks = try Queries.effectiveLensSelection(db, lens: lensID)
+        for placement in try ContainerBlock
+            .filter(Column("container_id") == postID && Column("deleted_at") == nil)
+            .fetchAll(db) {
+            guard let pick = picks[placement.blockId] else { continue }
+            let shown = (try? liveBlock(db, placement.blockId))
+                .flatMap { try? renderedVariant(db, block: $0, placement: placement) }
+            if shown?.id != pick { return true }
+        }
+        return false
     }
 
     /// The adoption's inverse, ONE transaction: the pointers back (the

@@ -304,6 +304,11 @@ nonisolated enum MCPPaneCopy {
         case "put_back": return "putting back a block in \(at)"
         case "set_entry_date": return "setting the date of \(at)"
         case "move_note_to_wing": return kind == "wing" ? "moving a note to \(at)" : "moving \(at) to another wing"
+        // VX-168 U2 — the edit rung's deliberate acts (PROVISIONAL words, her
+        // copy pass): VX-169's commit, VX-174's merge button.
+        case "save_commit": return "committing a take in \(at)"
+        case "choose_take": return "choosing a take in \(at)"
+        case "adopt_lens": return "making a lens of \(at) the note"
         // VX-168 — a connection the setup key turned away, said precisely
         // here (the client hears one sentence for all of them).
         case "connect_bare": return "connecting without a setup key"
@@ -367,6 +372,10 @@ nonisolated enum MCPPaneCopy {
         case "set_book_rule": return "set what \(at) collects" + times
         case "put_back": return "put back a block in \(at)" + times
         case "set_entry_date": return "set the date of \(at)" + times
+        // VX-168 U2 — the deliberate acts (PROVISIONAL words, her copy pass).
+        case "save_commit": return n == 1 ? "committed a take in \(at)" : "made \(n) commits in \(at)"
+        case "choose_take": return n == 1 ? "chose a take in \(at)" : "chose \(n) takes in \(at)"
+        case "adopt_lens": return "made a lens of \(at) the note" + times
         // VX-168: a known name's first setup key, bound as it connected.
         case "connect_bound": return "connected with a new setup, now bound to its name" + times
         default: return "used " + spokenAct(act) + times
@@ -994,21 +1003,25 @@ nonisolated enum MCPReceiptCopy {
             byAct[receipt.act, default: []].append(receipt)
         }
         let parts = order.map { phrase($0, byAct[$0] ?? []) }
+        // VX-168 U2: "⌥⌘Z undoes" is said only over a run holding an act ⌥⌘Z
+        // walks back — a client's COMMIT is append-only, exactly as hers (no
+        // undo entry), so a run of commits alone says what landed and stops.
+        let tail = run.contains { $0.act.isUndoable } ? " \u{00B7} \(undoes)" : ""
         // U2 walk W-2: the mockup's line, no "in “title”" clause, and never
         // so long that the bar's truncation eats the undo — past the budget
         // the run speaks as a count.
-        let line = "\(first.clientName) \(joined(parts)) \u{00B7} \(undoes)"
+        let line = "\(first.clientName) \(joined(parts))\(tail)"
         guard line.count > budget else { return line }
         // 13n-c U6: ONE wing move keeps what it must say — where the note went
         // and the books it left — dropping only the note's title (Open › opens
         // it) before the count fallback below.
         if run.count == 1, first.act == .wingMove {
-            let short = "\(first.clientName) \(wingMovePhrase(first, titled: false)) \u{00B7} \(undoes)"
+            let short = "\(first.clientName) \(wingMovePhrase(first, titled: false))\(tail)"
             if short.count <= budget { return short }
         }
         // 13n-c U6, D-U6-1 (red-on-old): ONE act is "a change", never "1 changes".
         let made = run.count == 1 ? "made a change" : "made \(run.count) changes"
-        return "\(first.clientName) \(made) \u{00B7} \(undoes)"
+        return "\(first.clientName) \(made)\(tail)"
     }
 
     /// One wing move, as her door's receipt says it (`WingCopy.moved`): the
@@ -1078,6 +1091,13 @@ nonisolated enum MCPReceiptCopy {
         case .wingMove:
             return n == 1 ? wingMovePhrase(receipts[0], titled: true)
                 : "moved \(n) notes to \(wingWords(receipts[0]))"
+        // VX-168 U2 — the deliberate acts (P-13nb-U2-5's family, PROVISIONAL
+        // words, 13s-a sweepable): VX-169's commit, VX-174's merge button —
+        // her "✓ Make this the note" said back in her door's words.
+        case .commit: return n == 1 ? "committed a take" : "made \(n) commits"
+        case .choice: return n == 1 ? "chose a take" : "chose \(n) takes"
+        case .lensAdoption:
+            return n == 1 ? "made the lens \(quoted(receipts[0].detail)) the note" : "adopted \(n) lenses"
         }
     }
 

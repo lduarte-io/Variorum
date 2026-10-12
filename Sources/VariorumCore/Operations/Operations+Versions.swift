@@ -554,36 +554,22 @@ extension Operations {
     private func applyAdoptedPicks(
         _ db: Database, postID: String, picks: [String: String]
     ) throws -> [AdoptedPointer] {
-        let moving = try adoptablePointers(db, postID: postID, picks: picks)
+        var restored: [AdoptedPointer] = []
         let now = date.now
-        for pointer in moving {
-            guard var updated = try ContainerBlock.fetchOne(db, key: pointer.placementID) else { continue }
-            updated.chosenVariantId = pointer.adopted
-            updated.updatedAt = now
-            try updated.update(db)
-        }
-        return moving
-    }
-
-    /// **Which slots an adoption of `picks` would MOVE** (read-only): every
-    /// live placement of the post, in order, whose pick differs from its
-    /// chosen pointer — the adopt loop's own test, factored out (VX-168 U2)
-    /// so the MCP door asks "is there anything to adopt?" with the SAME
-    /// question the loop answers by writing.
-    func adoptablePointers(
-        _ db: Database, postID: String, picks: [String: String]
-    ) throws -> [AdoptedPointer] {
-        var moving: [AdoptedPointer] = []
         for placement in try ContainerBlock
             .filter(Column("container_id") == postID && Column("deleted_at") == nil)
             .order(Column("position"), Column("id"))
             .fetchAll(db) {
             guard let pick = picks[placement.blockId],
                   placement.chosenVariantId != pick else { continue }
-            moving.append(AdoptedPointer(
+            restored.append(AdoptedPointer(
                 placementID: placement.id, previous: placement.chosenVariantId, adopted: pick))
+            var updated = placement
+            updated.chosenVariantId = pick
+            updated.updatedAt = now
+            try updated.update(db)
         }
-        return moving
+        return restored
     }
 
     /// One slot the adopt moved: both images, so undo and REDO (13c 1B —

@@ -52,6 +52,11 @@ final class MCPSession: @unchecked Sendable {
     /// open connection closes (`MCPServerHost.ended`) or the server stops
     /// (every session hung up; every start sweeps); a reconnect after the end
     /// finds it gone. Pinned against the mechanics in `MCPAdviceServerTests`.
+    /// VX-168 U2: the edit step names choosing and committing takes (VX-174's
+    /// merge button, VX-169's commit), and the undo sentence says what is
+    /// true of a commit — it stays (append-only, I5; her own commits are
+    /// outside structural undo too, and `edit_take`'s brackets stay when its
+    /// edit is undone — P-13nb-U3-2).
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
         open only while Variorum runs. A new client is a connection request until the author approves \
@@ -59,8 +64,8 @@ final class MCPSession: @unchecked Sendable {
         (re-announced when that changes).
         Grants have four rungs, each including those before it: read (read and search), \
         suggest (add takes and comments beside their text, save lenses), \
-        write new (new notes, books, chapters, tags, versions), edit (edit takes, divide, merge, \
-        move, delete). Each names a note, a book or a wing, for once, until you disconnect, or \
+        write new (new notes, books, chapters, tags, versions), edit (edit, choose and commit takes; \
+        divide, merge, move, delete). Each names a note, a book or a wing, for once, until you disconnect, or \
         always; they may also open the whole library to reading (the open book). A once grant is \
         one act: a read grant's first read of a note's text, a higher grant's first write. \
         Until you disconnect lasts while any connection under your client's name stays open, \
@@ -79,7 +84,7 @@ final class MCPSession: @unchecked Sendable {
         If a call is refused, don't retry around it: tell the author what you need (Variorum may \
         already have asked them).
         Never call show_in_app unless the author asks you to show them something.
-        Every change you make is one undo for the author, named after you.
+        Every change you make is one undo for the author, named after you; commits, theirs and yours, stay.
         """
 
     /// The advice's length bound (characters) — stated and pinned. 13n-c: her

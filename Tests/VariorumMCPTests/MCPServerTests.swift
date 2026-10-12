@@ -228,10 +228,12 @@ struct MCPServerTests {
                 == ["create_note", "import_document", "apply_tag", "create_book", "add_note_to_book", "create_section",
                     "save_version", "file_note_in_chapter", "set_book_rule"])
         // 13n-c U6 (justified edit, the ritual): edit gains the per-item
-        // note move across wings (VX-160, R-AIR-2).
+        // note move across wings (VX-160, R-AIR-2). VX-168 U2 (justified
+        // edit, the ritual): and the deliberate acts — VX-169's save_commit,
+        // VX-174's choose_take and adopt_lens (R-MERGE-1).
         #expect(Set(MCPToolCatalog.edit.map(\.name))
                 == ["edit_take", "divide_block", "merge_blocks", "move_block", "delete_block", "set_block_name",
-                    "put_back", "set_entry_date", "move_note_to_wing"])
+                    "put_back", "set_entry_date", "move_note_to_wing", "save_commit", "choose_take", "adopt_lens"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })
