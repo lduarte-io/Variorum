@@ -265,7 +265,8 @@ struct MCPGrantSheet: View {
                 .pickerStyle(.radioGroup)
                 .horizontalRadioGroupLayout()
                 .labelsHidden()
-                quiet(MCPPaneCopy.rungDetail(rung))
+                // W-UX-14: the rung said for the place picked.
+                quiet(MCPPaneCopy.rungDetail(rung, scope: scope))
 
                 section(MCPPaneCopy.howLongSection)
                 Picker(MCPPaneCopy.howLongSection, selection: $duration) {

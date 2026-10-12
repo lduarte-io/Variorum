@@ -244,7 +244,19 @@ struct MCPAskAndReceiptTests {
                 #expect(MCPToolFacts.scopes(of: tool)?.contains(scope) == true,
                         "a \(scope) ask claims \"\(words)\" but \(tool) never acts under a \(scope) grant: \(lead)")
             }
+            // The grant sheet's HOW MUCH line says the same sentence for the
+            // place it picked (one function).
+            let line = MCPPaneCopy.rungDetail(.writeNew, scope: scope)
+            #expect(lead == "If you allow it, " + line + ".")
+            for (words, tool) in claims where line.contains(words) {
+                #expect(MCPToolFacts.scopes(of: tool)?.contains(scope) == true, "the sheet's \(scope) line: \(line)")
+            }
         }
+        // The book ask, as the walk saw it: no longer "build books".
+        let book = MCPAsk(
+            clientName: "claude-code", scopeKind: .book, scopeID: "x", title: "Fixture book 007",
+            rung: .writeNew, fence: nil)
+        #expect(MCPAskCopy.lead(book) == "If you allow it, it can also make new notes and chapters in it and apply tags.")
     }
 
     @Test func theGrantSheetOffersTheServedRungsWithTheMockupsSentences() {

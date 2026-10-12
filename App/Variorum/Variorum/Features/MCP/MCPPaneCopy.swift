@@ -524,14 +524,24 @@ nonisolated enum MCPPaneCopy {
         }
     }
 
-    /// The mockup §3 sentences, verbatim.
-    static func rungDetail(_ rung: MCPGrantRule.Rung) -> String {
+    /// The mockup §3 sentences, verbatim — and, 13n-c UX walk W-UX-14, the
+    /// write-new sentence said for the SCOPE a grant names (nil and a wing:
+    /// the mockup's words): a book grant can never build a book
+    /// (`create_book` is wing-only) and a note grant makes no new notes, so
+    /// those claims are left out where they could never be true (the truth
+    /// pin reads `MCPToolFacts`). PROVISIONAL words, her copy pass.
+    static func rungDetail(_ rung: MCPGrantRule.Rung, scope: MCPGrantRule.ScopeKind? = nil) -> String {
         switch rung {
         case .read: "it can read and search what you shared"
         case .suggest:
             "it can add new takes and comments beside your text, and save a lens of its takes "
                 + "\u{2014} it cannot touch a word you wrote"
-        case .writeNew: "it can also make new notes, apply tags and build books"
+        case .writeNew:
+            switch scope {
+            case .note?: "it can also apply tags and save versions of it"
+            case .book?: "it can also make new notes and chapters in it and apply tags"
+            case .wing?, nil: "it can also make new notes, apply tags and build books"
+            }
         case .edit:
             "it can also edit takes \u{2014} with a commit before and after every change, so you "
                 + "can always compare and come back"
@@ -759,7 +769,8 @@ nonisolated enum MCPAskCopy {
                 + "one ask at a time. \(dontAllow) lets this ask go."
         case (_, .journal?): "A daily Journal entry. Your daily Journal is only ever shared one ask at a time."
         case (_, .privateMark?): "Marked Private. Private notes are only ever shared one ask at a time."
-        case (_, nil): "If you allow it, " + MCPPaneCopy.rungDetail(ask.rung) + "."
+        // 13n-c UX walk W-UX-14: what THIS scope's grant allows, never more.
+        case (_, nil): "If you allow it, " + MCPPaneCopy.rungDetail(ask.rung, scope: ask.scopeKind) + "."
         }
     }
 
