@@ -878,6 +878,19 @@ final class MCPDoor {
 
     /// One note, named (a pre-filled WHERE — U3's doors): its title and its
     /// fence, or nil when it is not a note a grant may name.
+    /// **13n-c +4b (her ruling, sitting round 5) — DISPLAY-ONLY:** the Private
+    /// books a note's mark comes through, for the grant sheet's why — the SAME
+    /// pair the lock popover reads (`Queries.isNotePrivate` +
+    /// `Queries.privateBooksHolding`), never a fence: whether always is
+    /// offered stays `mcpNoteFacts`' answer. Empty when the note wears its own
+    /// mark (its own sentence stands) or no Private book holds it.
+    func privateMarkBooks(noteID: String) async -> [String] {
+        await read { db in
+            guard try !Queries.isNotePrivate(db, postID: noteID) else { return [] }
+            return try Queries.privateBooksHolding(db, postID: noteID)
+        } ?? []
+    }
+
     func grantNote(_ id: String) async -> MCPGrantPicker.NoteRow? {
         await read { db in
             guard let facts = try Queries.mcpNoteFacts(db, noteID: id),

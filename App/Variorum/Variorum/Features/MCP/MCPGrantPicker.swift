@@ -181,10 +181,11 @@ nonisolated enum MCPGrantPicker {
 
     /// The one-line WHYs for what is withheld, in the sheet's order.
     static func durationWhys(
-        connected: Bool, clientChosen: Bool, note: (title: String, fence: MCPGrantRule.Fence)?
+        connected: Bool, clientChosen: Bool, note: (title: String, fence: MCPGrantRule.Fence)?,
+        throughBooks: [String] = []
     ) -> [String] {
         var whys: [String] = []
-        if let note { whys.append(MCPPaneCopy.alwaysWithheld(note.title, note.fence)) }
+        if let note { whys.append(MCPPaneCopy.alwaysWithheld(note.title, note.fence, throughBooks: throughBooks)) }
         if clientChosen, !connected { whys.append(MCPPaneCopy.whileConnectedNote) }
         return whys
     }

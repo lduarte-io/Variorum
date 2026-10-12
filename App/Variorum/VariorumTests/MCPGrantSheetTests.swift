@@ -183,6 +183,49 @@ struct MCPGrantSheetTests {
                 == [MCPPaneCopy.whileConnectedNote])
         #expect(MCPGrantPicker.durationWhys(connected: false, clientChosen: false, note: nil).isEmpty,
                 "no client chosen yet ⇒ nothing to say about its connection")
+        // 13n-c +4b (her ruling, sitting round 5; the pin grown as the
+        // ritual): a mark that comes through a Private BOOK names the book and
+        // says where it is changed; the own-mark and daily-Journal whys are
+        // untouched.
+        #expect(MCPGrantPicker.durationWhys(
+            connected: true, clientChosen: true, note: ("2026-10-11", .privateMark), throughBooks: ["diary"])
+                == ["\u{201C}2026-10-11\u{201D} is in \u{201C}diary\u{201D}, which is marked Private \u{2014} it's only ever shared one ask at a time, so always isn't offered. The book's mark is changed in its Book Settings."])
+        #expect(MCPPaneCopy.alwaysWithheld("x", .privateMark, throughBooks: ["diary", "letters"])
+                .contains("is in \u{201C}diary\u{201D} and \u{201C}letters\u{201D}, which are marked Private"))
+        #expect(MCPPaneCopy.alwaysWithheld("x", .privateMark)
+                == "\u{201C}x\u{201D} is marked Private \u{2014} it's only ever shared one ask at a time, so always isn't offered.",
+                "its own mark keeps its own sentence")
+        #expect(MCPPaneCopy.alwaysWithheld("x", .journal, throughBooks: ["diary"])
+                == MCPPaneCopy.alwaysWithheld("x", .journal), "the daily Journal's why is untouched")
+    }
+
+    /// 13n-c +4b — the why's read is the lock popover's OWN pair
+    /// (`isNotePrivate` + `privateBooksHolding`), display-only: a note marked
+    /// itself names no book; one Private through a book names it; a plain
+    /// note names none — and the fence (always withheld or not) is still
+    /// `mcpNoteFacts`' alone.
+    @Test func thePrivateThroughABookWhyReadsTheLockPopoversPair() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let diary = try ops.createReading(name: "diary", kind: .book)
+            let inDiary = try ops.createPost(title: "in the diary")
+            _ = try ops.addPostToReading(inDiary.id, to: diary.id)
+            _ = try ops.setBookPrivate(diary.id, true)
+            let own = try ops.createPost(title: "marked itself")
+            _ = try ops.setNotePrivate(own.id, true)
+            _ = try ops.addPostToReading(own.id, to: diary.id)
+            let plain = try ops.createPost(title: "plain")
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            #expect(await door.privateMarkBooks(noteID: inDiary.id) == ["diary"])
+            #expect(await door.privateMarkBooks(noteID: own.id).isEmpty, "its own mark — its own sentence")
+            #expect(await door.privateMarkBooks(noteID: plain.id).isEmpty)
+            let fences = try await db.read { db in
+                try [inDiary.id, own.id, plain.id].map { try Queries.mcpNoteFacts(db, noteID: $0)?.fence }
+            }
+            #expect(fences == [.privateMark, .privateMark, nil], "the fence is mcpNoteFacts' — unchanged")
+        }
     }
 
     // MARK: - The confirm

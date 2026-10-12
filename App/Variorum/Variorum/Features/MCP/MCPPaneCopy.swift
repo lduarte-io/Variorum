@@ -500,13 +500,31 @@ nonisolated enum MCPPaneCopy {
     }
     /// **Why "always" is not offered** (mockup §1's note leg, verbatim shape):
     /// a fenced note is only ever shared one ask at a time.
-    static func alwaysWithheld(_ title: String, _ fence: MCPGrantRule.Fence) -> String {
+    /// 13n-c +4b (her ruling, sitting round 5 — "…is in “diary”, which is
+    /// marked Private… The book's mark is changed in its Book Settings."): when
+    /// the note's Private mark comes through Private BOOKS (`throughBooks` —
+    /// the lock popover's own read, display-only; empty when the note wears
+    /// its own mark), the why names the book and says where the mark is
+    /// changed. The own-mark and daily-Journal sentences are untouched.
+    /// PROVISIONAL words, her copy pass.
+    static func alwaysWithheld(
+        _ title: String, _ fence: MCPGrantRule.Fence, throughBooks: [String] = []
+    ) -> String {
         switch fence {
         case .journal:
-            "\u{201C}\(title)\u{201D} is a daily Journal entry \u{2014} it's only ever shared one ask at "
+            return "\u{201C}\(title)\u{201D} is a daily Journal entry \u{2014} it's only ever shared one ask at "
                 + "a time, so always isn't offered."
+        case .privateMark where !throughBooks.isEmpty:
+            let quoted = throughBooks.prefix(2).map { "\u{201C}\($0)\u{201D}" }
+            let names = throughBooks.count > 2
+                ? quoted.joined(separator: ", ") + " and \(throughBooks.count - 2) more"
+                : quoted.joined(separator: " and ")
+            let are = throughBooks.count == 1 ? "is" : "are"
+            return "\u{201C}\(title)\u{201D} is in \(names), which \(are) marked Private \u{2014} it's only "
+                + "ever shared one ask at a time, so always isn't offered. "
+                + (throughBooks.count == 1 ? "The book's" : "A book's") + " mark is changed in its Book Settings."
         case .privateMark:
-            "\u{201C}\(title)\u{201D} is marked Private \u{2014} it's only ever shared one ask at a "
+            return "\u{201C}\(title)\u{201D} is marked Private \u{2014} it's only ever shared one ask at a "
                 + "time, so always isn't offered."
         }
     }

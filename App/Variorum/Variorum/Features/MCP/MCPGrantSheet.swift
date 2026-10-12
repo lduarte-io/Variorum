@@ -80,6 +80,9 @@ struct MCPGrantSheet: View {
     @State private var clients: [MCPClient] = []
     @State private var chosenClientID: String?
     @State private var now = Date()
+    /// 13n-c +4b — the Private books the picked note's mark comes through
+    /// (display-only, for its why), read for THAT note.
+    @State private var privateThrough: (noteID: String, books: [String])?
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     /// 13n-c U3: the window's road — a place-door's receipt re-opens this
@@ -307,6 +310,13 @@ struct MCPGrantSheet: View {
         // window (the U2 geometry oracle, in the record).
         .frame(width: 600)
         .task { await load() }
+        // 13n-c +4b: a Private note's why names the book its mark comes
+        // through — read for the note picked (display-only; the fence and the
+        // durations stay `mcpNoteFacts`').
+        .task(id: note?.id) {
+            guard let picked = note, picked.fence == .privateMark else { return }
+            privateThrough = (picked.id, await door.privateMarkBooks(noteID: picked.id))
+        }
         .onChange(of: offeredDurations) { _, offered in
             if !offered.contains(duration) { duration = offered.first ?? .once }
         }
@@ -411,7 +421,8 @@ struct MCPGrantSheet: View {
         }
         return MCPGrantPicker.durationWhys(
             connected: connected, clientChosen: client != nil,
-            note: noteFence.flatMap { fence in note.map { ($0.title, fence) } })
+            note: noteFence.flatMap { fence in note.map { ($0.title, fence) } },
+            throughBooks: privateThrough.flatMap { $0.noteID == note?.id ? $0.books : nil } ?? [])
     }
 
     /// The title — W-UX-2: the approval road says it APPROVES.
