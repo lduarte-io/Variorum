@@ -80,7 +80,8 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
   first line. **P-VX171-2's premise was false** (edit_take to empty was never refused) — the refusal is BUILT,
   PROVISIONAL (P-VX168-U3-2). Owed to the orchestrator: the PROVISIONALs' QUESTIONS entries and the canon delta at
   the merge (its OWED list); the ladder over the run's diff.
-- Unit 4 (VX-170, lens-aware Takes): **NOT-STARTED** — settled design: the vx-170 shape file, whole.
+- Unit 4 (VX-170, lens-aware Takes): **IN-PROGRESS** (opus-implementer, 2026-10-12) — the UNIT 4 RECORD below carries
+  its LIVE STATUS per piece; settled design: the vx-170 shape file, whole.
 - Ladder: NOT-STARTED (runs after the last landed unit).
 - Closeout: NOT-STARTED.
 
@@ -564,3 +565,56 @@ guards green both sides.
    "disagrees with the chosen takes" compares against the slot's rendered take (`renderPost`'s chosen-else-default).
    (d) `takesProjection` already carries lenses, effective picks, dangles and fans — the four forms can be a pure
    function over it, cost ∝ the note.
+
+## UNIT 4 RECORD — VX-170 lens-aware Takes (opus-implementer, 2026-10-12)
+
+**Read in full before code (never delegated):** this file whole (the UNIT 1–3 RECORDS, Unit 3's "For Unit 4" notes);
+`notes/plans/vx-170-lens-aware-takes.md` whole (R-VX170-1…5, P-VX170-1 — RATIFIED, her 2026-10-11 rulings; the binding
+text for this unit); the kickoff prompt's VX-170 rider; `notes/SessionResiliencyProtocol.md` whole; the ticket body
+VX-170 (Linear GraphQL — its "Parked … needs a design sitting" line predates the ratified shape file, which governs);
+CLAUDE.md + the auto-loaded canon (AppSpec §12's Takes line: tinted cards, "✓ chosen", ONE live-editor ring,
+follow-the-scroll; the 17q row memory). Code read: `TakesViewModel` (the conductor: adoption, resolution, focus,
+expansion, paging, reveals, the keyboard family), `TakesBoardLayout` (expansion + bloom rule + paging), `TakesBoardView`
+whole (the header line, the article, every bloom style, the rail, the badge), `TakesChoreographer` (the landings),
+`TakesFindController.land`, `TakesShared` (the cell), `TakesModels`, `EditorRouter` (the session memories),
+`Queries.takesProjection` / `effectiveLensSelection` / `danglingLensPicks` / `renderPost(throughLens:)`, the lens ops,
+and the masthead-popover idiom (`Core/Views/MastheadPopover`, the Bookcase's `order ▾` door and host overlay,
+`MenuLifeReporter`). Editor seam (`PaneTextAuthority`, `PaneSurface`, `EditorTextView`, `BlockRangeIndex`): READ ONLY.
+
+### LIVE STATUS — Unit 4's pieces
+
+| piece | what | status |
+|---|---|---|
+| R0 | this record + the plan | DONE (this commit) |
+| P1 | core: `Domain/LensTakeFilter` — the four forms (R-VX170-1) as ONE pure function over a block's effective picks + its shown take, and the expand set (R-VX170-3: named ∪ shown, fan order) over a whole note; headless pins over REAL projections (`Queries.takesProjection`) incl. blank takes (P-VX170-1) and dangling picks | NOT-STARTED |
+| P2 | app: the session memory (`EditorRouter.takesShowFilters`, R-VX170-5) + the model (the filter, the per-projection evaluation cache, the row shapes, the filter-aware bloom, the hidden-pane rules, pruning) + the faces (the header's `show ▾` door on the masthead-popover idiom with inline lens pickers, the quiet chip, the collapsed one-line rows, the filtered blooms, the zero-match line) + Mac view-model pins | NOT-STARTED |
+| P3 | the Mac batch over the changed surfaces + the ONE use-shaped walk on a real multi-lens dev-store note (held stage claim) | NOT-STARTED |
+| P4 | close: the final suites, the argued calls / PROVISIONALs / OWED, Unit 4 → DONE | NOT-STARTED |
+
+### The plan — the design calls the shape leaves to the build (stated before code; argued in full at the close)
+
+1. **The rule is core-pure** (`Sources/VariorumCore/Domain/LensTakeFilter.swift`): per block a lens contributes ONE
+   fact — the take it names there or none — read from the EFFECTIVE picks (`TakesProjection.lensSelections`, the fact
+   the wire's `via` and her board read). `in X` ⇔ X names a take · `in A, not in B` ⇔ A names one, B none ·
+   `X disagrees with Y` ⇔ both name takes and they are DIFFERENT takes (identity — R-VX170-1's "different ones") ·
+   `X disagrees with the chosen takes` ⇔ X names a take ≠ the slot's rendered take (`renderPost`'s chosen-else-
+   default). A gap slot never matches. A blank take is an ordinary take (P-VX170-1 — nothing special-cased).
+2. **A dangling pick names nothing** (PROVISIONAL — the shape is silent; the wire reads it `via: chosen`, her board falls
+   through to chosen, and `effectiveLensSelection` drops it — one reading on every surface).
+3. **The door lives on the Takes board's own header line** (the Takes mode's masthead — the note's masthead is shared
+   by every mode and holds no mode's controls), `show: all takes ▾` at rest, the expression in words while active,
+   opening a popover on the ONE masthead-popover idiom (`MastheadPopover`'s chrome, seated under its control by the
+   board's overlay, living like a menu: an outside press and a menu's life-end close it). Rows: "all takes" (clears)
+   then the four forms with inline lens pickers. The door renders only on a note with a saved lens (PROVISIONAL).
+4. **Row shapes under a filter**: a non-matching block is a collapsed one-line row (the shown take's first line + the
+   article's own corner badge); a matching block is the ordinary row whose bloom shows the expand set (blooming only
+   when that set holds more than the shown take — the cell already IS a lone shown take); the corner badge stays the
+   block's whole-fan door (its usual control): it opens a collapsed row whole, a filtered bloom to its full fan, and
+   back. Implemented as one model function over `expandedBlocks` — no second expansion state.
+5. **Session memory** (R-VX170-5): `EditorRouter.takesShowFilters[postID]` beside the article's 17q memories —
+   survives mode flips and note switches, gone on relaunch (the brief's reading of "resets on the next open", the
+   Takes-row-memory precedent); never persisted, never synced, never a setting. Only THE takes board reads or writes
+   it (`landingEnabled`); a filter naming a lens the note no longer holds resets to all takes.
+6. **The ring never lands on a hidden pane** (the R112 class): a focus or landing onto a pane the filter hides opens
+   its block (the one `board.bloom` door); a filter change that hides the live pane blurs it (flushed first).
+7. **Cost ∝ the note** (P1): the evaluation is computed at adoption and at a filter change, never per render.
