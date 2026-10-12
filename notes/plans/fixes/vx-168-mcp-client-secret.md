@@ -85,7 +85,9 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
   commit). The walk PROVEN on the dev store (both voices, every leg); the Mac batch 616 tests / 83 suites green; the whole
   package headless green. Owed to the orchestrator: the PROVISIONALs' QUESTIONS entries, the §12 canon delta and the
   MOBILE PARITY line at the merge (its OWED list); the ladder over the run's diff.
-- Ladder: NOT-STARTED (runs after the last landed unit).
+- Ladder: **ROUND 1 FINDINGS RECORDED** (fable-reviewer, 2026-10-12 — the LADDER section at the end of this
+  file: 0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT + the clean bill). Implementer agree/dispute pending; the
+  reviewer makes the final call and implements its confirmed fixes (the cross-model flow).
 - Closeout: NOT-STARTED.
 
 ## UNIT 1 RECORD — VX-168, the per-setup key (opus-implementer, 2026-10-12)
@@ -776,3 +778,133 @@ wire, zero `Sync/`, custody/keychain or editor-seam lines** (`PaneTextAuthority`
    holds the keyboard (after an inline picker's NSMenu here; the Bookcase's order popover has no ⎋ at all).
 6. **Linear:** VX-170's body still reads "Parked … needs a design sitting before any plan file exists" — superseded by
    the ratified shape file; the orchestrator's to update at the merge.
+
+## LADDER — ROUND 1 (fable-reviewer, cold, 2026-10-12; `notes/REVIEW_PROMPT.md` verbatim over `git diff b56bde42..HEAD`)
+
+**Read, never delegated:** this record whole; the kickoff prompt; the VX-170 shape file whole; the VX-156
+brief §12; the 13n-c plan §3 U8 + §4; `notes/SyncSpec.md` whole (the diff carries a migration); CLAUDE.md +
+the auto-loaded canon; the DIFF WHOLE (all 61 files — every file in all four units' ladder maps) and the
+editor-seam oracle (`PaneTextAuthority.resolvedText`) read directly. Verified myself, not from the record:
+zero lines under `Sources/VariorumCore/Sync/`, `Server/`, custody/keychain or the editor seam (path diff
+empty); `VariorumMCPTests` whole re-run headless **119/18 GREEN** (the record's exact claim); the new core
+suites (`MCPSetupKeyRuleTests`/`MCPSetupKeyOperationsTests`/`MCPDeliberateActsTests`/`MCPBlankTakeMintTests`/
+`MCPLensDocumentReadTests`/`LensTakeFilterTests`/`MCPGrantSchemaTests`/`MigrationTests` + the five MCP-target
+suites) re-run green. The Mac batches (616/83 · 194/16+49/6 · 95/9+98/12) were NOT re-run (stage discipline —
+headless-only review); their claims are consistent with the committed test files.
+
+### Findings (severity-ranked)
+
+- **F-1 [MINOR] · `Sources/VariorumMCP/MCPSession.swift:122-127`** · The fail-closed arm answers a STORE
+  error with the setup-key sentence, and nothing is logged. · Mechanism: `try? operations.admitMCPConnection(…)`
+  swallows any thrown store error → the guard falls through to `MCPHandshake.refusalResponse` → a
+  correctly-keyed client is told "it needs the setup key from this client's own setup… copy a fresh setup…"
+  when the store merely failed, and her Activity list hears nothing (the refusal logging lives inside the op
+  that threw, so it cannot have run). Fail-closed is the right posture; the WORD is the wrong one for this
+  arm, and the advice it gives (re-copy the setup) cannot help. Honestly labeled: NOT bug-class — the path is
+  new with this branch (no red-on-old pin can exist); a pin would be a new-behavior test with a throwing
+  operations seam. · Fix options: (a) catch the error distinctly and answer a non-key sentence ("Variorum
+  couldn't check this connection — try again.") — no oracle (a store error is orthogonal to key standing);
+  pinned via an injected throwing store; (b) record the one-sentence posture as deliberate, folded into
+  P-VX168-U1-4's QUESTIONS entry.
+- **F-2 [MINOR] · `Sources/VariorumCore/Domain/MCPSetupKeyRule.swift:137` (the `.unclaimed → .bind` arm) +
+  `Operations+MCPSetupKeys.swift` (the `.bind` branch)** · The known-unbound bind arm covers DENIED (and
+  pending) names — a superset of R-VX168-1's letter ("an APPROVED name with NO bound secret") — unargued in
+  the record and unpinned for the denied case. · Mechanism, traced: `denyMCPClient` NULLs the binding; the
+  tool under that name presents a FRESH unclaimed key → `decide`: client exists, `boundHash` nil → standing
+  `.unclaimed` → `.bind` → the key binds to the DENIED row, `recordMCPContact` refreshes its last-seen,
+  Activity logs "connected with a new setup, now bound to its name" (an ALLOWED line for a shut-out client),
+  and the handshake ADMITS the connection — every call then refuses with the denied words. The Deny confirm
+  says "It can't connect again until you approve it and run its setup again"; as built, a denied name with a
+  fresh setup connects (reaching nothing) before any approval. Every consequence I traced is SAFE: a second
+  Deny still releases the new binding (the hash-NULL runs before the already-denied short-circuit); the
+  order-free "re-run setup, then approve" is arguably a feature; the per-call "denied" answer is MORE honest
+  for this client than the key-advice sentence a refusal would give it. But the arm is a deliberate-looking
+  choice nobody argued, with no pin. · Fix: (a — recommended) keep it and make it deliberate: one pin (deny →
+  a fresh key binds while denied → calls refuse denied → a second Deny releases it), one record line, folded
+  into P-VX168-U1-1's QUESTIONS entry; or (b) narrow the bind to non-denied names (the key then stays
+  UNCLAIMED and binds at the first connection after approval — the flow still works, but the denied client
+  hears the key-advice sentence, which is wrong advice for it).
+- **F-3 [NIT] · `Sources/VariorumMCPSocket/MCPPreamble.swift:57-63` / `MCPSession.swift`** · A tag-only
+  preamble line (`variorum-mcp-key` with no key) classifies as `.preamble(key: "")`; the empty string then
+  hashes and reads `.notIssued`, so her Activity says "with a setup key this library doesn't hold" where
+  "without a setup key" is the truth. The shipped shim can never produce it (`MCPPreamble.key` refuses an
+  empty value) — only a hand-rolled client; the wire answer is the same one sentence either way. · Fix
+  (optional): treat an empty presented key as bare at the session (`$0.isEmpty ? nil : $0`), pinned beside
+  the classify pin — or leave it with a recorded word.
+- **F-4 [NIT] · `Sources/VariorumCore/Operations/Operations+MCPSetupKeys.swift:109-137`** · The three
+  `Queries` reads (`mcpSetupKeyHash`, `mcpSetupKeyStanding`, `mcpUnclaimedSetupKeyCount`) live in an
+  Operations file; the family's query home is `Queries/MCPGrantQueries.swift`. Cleanliness only — a later
+  reader greps the queries home first. · Fix: move the extension (byte-for-byte) or record the co-location.
+
+**Concur-with-watch (not findings, dispositions agreed as recorded):** the SIGPIPE watch (U3 OWED 4 — the
+named raw-fd candidates are plausible; a ticket is the right shape) · the format's v1 corner now reachable
+through a blanking lens (U3 OWED 5 — correctly routed to the format's owner; the `with_ids` form is exact,
+so an agent needing structure has an exact road) · W-3's ⎋ (P-VX168-U4-9 carries it) · the grant-sheet edit
+sentence / pane blurb looseness (U2's OWED 6 — flagged for her copy pass, rightly).
+
+### Clean bill (checked specifically, found solid)
+
+1. **v1_26 is genuinely LOCAL-ONLY** — no `sync_version`, no trigger, registered in `MCPGrantSchema.tables`
+   + `childFirstOrder`, marker 13 pinned (`SyncSchema.lockstepVersion == 13`), the migration alone in its own
+   commit (`3953c962`) ahead of the code; SyncSpec §12 untouched, zero lockstep. The v1_25→v1_26 upgrade pin
+   (clients arrive unbound, grants kept) matches R-VX168-1's no-grandfathering exactly.
+2. **The rule + the admission transaction:** hash-only storage (domain-separated SHA-256 of 256 random bits —
+   no KDF needed, nothing to precompute; the no-key-substring pin); claim-at-first-presentation; a refusal
+   never touches the claimed row (byte-identical row snapshot pinned) and never enters the waiting room; ONE
+   byte-identical refusal sentence across all six arms incl. a non-`initialize` first frame (pinned over a
+   real socket, `Set(answers).count == 1`); a refused connection closes (EOF pinned); the over-cap refusal
+   reads past a preamble; the fd always closes (host task: run → close → ended); host stop's `shutdown()`
+   wakes a blocked handshake read; the session's handshake is the ONLY `admitMCPConnection` caller and no
+   contact-refresh road bypasses it (grep sweep).
+3. **The shim stays MCP-blind:** preamble-first-then-verbatim-pump pinned over a socketpair keyed AND bare;
+   `MCPPreamble.key` bounds and sanitizes the env value, so the masked (bullets) command pasted by hand
+   degrades to a bare shim → the honest refusal; the handshake's opening read is byte-exact (the next frame
+   left for the transport, pinned). The SDK name check is sound (`recordMCPContact` stores the trimmed name;
+   lookup is exact-match; the SDK parses the SAME replayed frame).
+4. **The three setup texts carry the key correctly:** Claude Code's `-e` after the name + the probed REPLACE
+   step; Codex's `--env` before `--` (cited to the CLI source; consistent with the reviewer's own knowledge);
+   the stanza's `env` sibling; the key is `vmk1_` + 43 base64url chars — shell-safe unquoted, JSON-safe
+   unescaped; the pane shows dots, the clipboard is written only once the key is KEPT, no-library refuses
+   with its own line. O-4 and the no-AI/no-shout sweeps extended over every new string.
+5. **The deliberate acts are her doors' own row work:** `choosablePlacement` / `adoptSwapRows` /
+   `restoreChosenPointers` / `tombstoneSavedLens` / `reviveSavedLens` verified byte-for-byte against the
+   removed bodies IN THE DIFF (a move, not a copy), her doors calling the moved bodies; guard-first inside
+   each act's transaction (pinned, incl. the fence-lands-after-snapshot race); once spend/rollback pinned;
+   the 7-call no-oracle matrix byte-identical to the not-shared answer; no touch/churn on the pointer acts
+   (byte-identical slot row pinned for the no-op).
+6. **`save_commit`'s no-undo-entry call is the spec-correct reading** — AppSpec §9 excludes commits from
+   structural undo; I5 + no tombstone on `commit_point` means any inverse would destroy a row (S2); every
+   face made true of it (the receipt tail only over an undoable act, "commits stay", lesson 1's exception,
+   `isUndoable == {.commit}` pinned); the manual major-revision stamp is §10's own and P-VX168-U2-2 records
+   the consequence.
+7. **The lens read rides the real brains:** `effectiveLensSelection` (live+active+same-block join) and
+   `renderPost(throughLens:)` are the Lenses board's own; the byte-for-byte pin's restated oracle MATCHES
+   `PaneTextAuthority.resolvedText` (the seam file read directly — the restatement is faithful; buffer
+   overlay empty at rest); the lens-of-this-note check sits after the note decision and BEFORE the once
+   spend (pinned, M2 mutation); the ten-bad-ids × both forms matrix answers byte-identical with no ask; the
+   refusal-log parity with the id-naming-nothing road holds (both log `allowed: false`).
+8. **R-VX171-2 door-only, exactly:** `add_take`/`create_note` accept blank; every FILE door byte-unchanged
+   (`keepingBlankTakes` default false, pinned both sides); **P-VX171-2's false premise was PROBED first and
+   the refusal built red-on-old with behavioral-revert verification — exemplary hallucination-guard work**;
+   the blank-take round trip (door → lens → board read → wire → text form) pinned end to end.
+9. **`LensTakeFilter` is pure and one-meaning:** identity-based disagree (R-VX170-1's letter), gap never
+   matches, a dangling pick names nothing on every surface (wire `via: chosen` = board fall-through = filter),
+   evaluation at adoption/filter-change only (P1 ∝ the note); the four forms pinned over REAL projections
+   incl. blank takes and a byte-identical twin; the same-lens two-lens forms never built (P-2).
+10. **R-VX170-2/3/4/5 as ruled:** collapsed rows keep the ForEach identity (landings/scroll/tour read
+    through); the expand set = named ∪ shown in FAN order; the popover wears the byte-identically-extracted
+    masthead chrome; the session memory is router-held, per note, relaunch-resetting, takes-board-only
+    (pinned; M5/M9); a dead lens resets; the ring's three rules pinned (focus + entry landing reveal, her
+    filter change blurs, a store change never hides the live pane); W-1's width-aware header and W-2's
+    stood-down idle door landed with walk captures red→green.
+11. **Words and canon:** L1 true-er and no truer (K2's non-defeat said in the same breath, pinned); the
+    guide's falsified limit sentence rewritten and pinned AGAINST THE RULE ITSELF; the commit vocabulary
+    holds 13s-b's line (commit everywhere; "saved moment" in the defining sentence); the advice at 1,941/2,000
+    with the length pin green.
+12. **P-VX168-U2-5 (the shown-take no-op), U2-3 (no preservation lens on a no-op), U2-4 (the undo walks the
+    preservation lens back) were weighed against her doors' letter** — each is a real divergence, each argued
+    with options and PROVISIONAL-logged; the builds are the more spec-defensible readings. Nothing gating.
+
+**Round 1 verdict: 0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT.** Findings go to the implementer verbatim (the
+cross-model flow); the reviewer adjudicates the responses, implements its confirmed fixes with their pins,
+and the suite runs green at the end of the fix pass.
