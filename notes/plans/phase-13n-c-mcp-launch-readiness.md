@@ -2639,3 +2639,62 @@ first thing dropped).
   wing target. The neutrality, setup-fence and O-4 pins stay green.
 - **D-U6 — zero `Sync/`, schema, migration, custody, editor seam, `lockstepVersion`.** The fence derivation is consumed
   (`mcpNoteFacts` for every member; `mcpGatheringFacts` reads the same two fragments as `mcpBookFacts`).
+
+### ADDENDUM — the post-ladder session (2026-10-11 evening, the U6 implementer, Opus `claude-opus-5-5`)
+
+**1 · The sanity pass over the combined ladder R1's F1 fix (`6fac6d5f` pin red-first · `3122cb2e` fix · `015c51e5`
+disposition): SOUND, and exactly what I agreed.** The fix is the obsolete half only: `wingIsLive(rows.destinationWing)`
+added to the undo guard and `wingIsLive(rows.sourceWing)` to the redo guard, so a replay needs both of its entry's wings
+live. The effective-wing scoping was NOT shipped; in its place `refuseIfWingMoveChangedSince` documents the precondition
+that its `leaving` wing is live, which the guards guarantee (my refinement 2: under the obsolete half that scoping would
+be byte-identical SQL). The reviewer's pin `aDeadWingMakesTheReplayObsoleteInEitherDirection` covers both manifestations
+plus the redo mirror. On the fixed tree: `MCPWingMoveActsTests` **11 / 1** (my 10 + the pin), her door's suites
+(`WingMoveTests`, `BookWingMoveTests`, `WingContentsMoveTests`, `WingUndoRevivalTests`) green beside it, and
+`MCPWingMoveServerTests` + `MCPWingReachServerTests` **10 / 2**. Nothing in the U6 build is broken by it: every fixture
+wing is live, so the guide's truth pin and the live-round paths behave as before.
+
+**2 · Her ruled ask: the advice states the while-connected duration's BUILT meaning.**
+- **The trace.** A while-connected grant (`duration = 'connection'`) belongs to the client's NAME, not to a connection.
+  When a session ends, `MCPServerHost.ended` revokes that name's while-connected grants (`endMCPConnectionGrants`), but
+  only if no other live session of the same name remains.
+  - So several concurrent sessions keep the grant alive, and a session opened AFTER the grant counts too.
+  - A reconnect after the last close finds the grant revoked; nothing re-mints it.
+  - A server stop (switch off, quit, lock) hangs every session up, and every `start()` sweeps all while-connected
+    grants first (`sweepMCPConnectionGrants`).
+- **Why not her shape word for word.** Her shape was "until the last claude session that was running when this was
+  activated ends". That is narrower than the build: sessions opened later count too. The sentence also names no provider
+  (O-4).
+- **The sentence** (after the durations in `MCPSession.instructions`, in the advice's kept "until you disconnect"
+  register — P-13nc-U4-1): *"Until you disconnect lasts while any connection under your client's name stays open,
+  sessions opened later included; it ends when the last one closes or Variorum's server stops, and reconnecting does
+  not restore it."*
+- **The advice is now 1,908 of the ruled 2,000 characters.**
+- **The pin.** `MCPAdviceServerTests.untilYouDisconnectSaysTheBuiltMechanics` checks the sentence is in the advice, then
+  executes each clause against the real host:
+  - a session opened after the grant keeps it alive past the first session's close;
+  - the last close revokes it;
+  - a reconnect finds no live while-connected grant;
+  - `host.stop()` ends a live one;
+  - `host.start()` sweeps a grant minted while the server was down.
+- **Mutations** (from the committed `2298abb5`, each restored by `git checkout --`, `git diff` empty): `ended()` revoking
+  on ANY close → the pin red (1 issue); `start()` skipping the sweep → red (1 issue). The bound pin is green.
+- **Commit:** `2298abb5`.
+
+**3 · Her sitting's second-round copy edits (`ac35fa41`):**
+- **P-13nc-U2-2 reversed in-pane:** `MCPPaneCopy.sharedSection` is "Shared with AI" again (her carve-out: "AI" is fair
+  inside the MCP pane; R-AIR-8 stands elsewhere; only the title changed).
+- **P-13nc-SB-2 reworded:** `WingCopy.switchWingUnavailable` reads "There is only one wing so far — New Wing… under the
+  wing name at the top of the Bookcase makes another, and then ⌘L switches between them." (PROVISIONAL for her copy pass).
+- **Pins, the ritual (annotated):** `MCPGrantSheetTests.theSettingsClassWordsSayNoAI…` (the title leaves the no-"AI"
+  list and is pinned to her words) and `WingSwitcherChordTests.switchWingIsUnavailableWithOneWing` (no "masthead"; the
+  plain-words place).
+- **Mac** (stage `vx165-u6b`, held and released): `MCPGrantSheetTests`, `WingSwitcherChordTests`, `MCPPaneTests`,
+  `CapabilityRegistryTests`, `SettingsShapeTests`, `MCPAskAndReceiptTests`, `WingSwitcherTests`, `HelperCurrencyTests`
+  — **107 / 8 green**.
+- **Commit:** `5ca1ee66`.
+
+**Finals (headless, this tree):** core **2,634 / 301**, `VariorumMCPTests` **93 / 14**, workbook **40 / 6**, all green.
+One whole-package run STALLED in `VariorumMCPTests` (VX-132's class). In flight were `aJournalTraitBookIsListedRead…`,
+`aOnceWingGrantFilesANote…`, the two O-4 source-net tests and `theSocketIsPrivateWhileServingAndGoneAfterStop`. I killed
+it by pid and reran per target, all green. No `Sync/`, custody, migration, editor-seam, `lockstepVersion`, real-store or
+`/Applications` lines, and no trailers.
