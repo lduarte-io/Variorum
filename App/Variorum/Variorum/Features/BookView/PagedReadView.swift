@@ -197,7 +197,7 @@ struct PagedReadView: View {
                 Spacer(minLength: 12)
                 // WA-1: the quiet slot at the bar's trailing end, before the
                 // page line (the Bookcase hint bar's shape — it yields first).
-                QuietReceiptLine(status: session.status, tokens: tokens)
+                QuietReceiptLine(status: session.status, tokens: tokens, separated: true)
                     .opacity(hostsQuietReceipt ? 1 : 0)
                     .accessibilityHidden(!hostsQuietReceipt)
                 Text(tokens.chromeLabel(pages.pageLine))

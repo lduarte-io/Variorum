@@ -131,9 +131,10 @@ extension Operations {
     // MARK: - Grant, revoke
 
     /// One grant to an APPROVED client. Refuses a client not approved, a
-    /// scope that is not a live target of its kind, a FENCED book (a
-    /// journal's or a Private book's notes are shared one ask at a time —
-    /// a book grant there would reach nothing), and an "always" grant on a
+    /// scope that is not a live target of its kind, a FENCED book (THE daily
+    /// Journal's or a Private book's notes are shared one ask at a time — a
+    /// book grant there would reach nothing; a journal-TRAIT book is a book
+    /// like any other since 13n-c's R-AIR-1), and an "always" grant on a
     /// fenced note (the ask never offers it — R-13n-4).
     @discardableResult
     public func grantMCPAccess(_ clientID: String, _ spec: MCPGrantSpec) throws -> String {
@@ -146,6 +147,85 @@ extension Operations {
             }
             let now = DateFormatter.variorumISO8601.string(from: date.now)
             return try insertMCPGrant(db, clientID: clientID, spec: spec, now: now)
+        }
+    }
+
+    /// **Change… — one grant REPLACING the grants it names** (13n-c U3 —
+    /// R-AIR-4's "change its details fast"; T-U3-8, PROVISIONAL P-13nc-U3-3):
+    /// the named grants are revoked and the new one minted in ONE transaction
+    /// on ONE stamp, so a LOWERED rung or a shorter duration really lands (an
+    /// additive grant would leave the old one live). Every replaced grant
+    /// must be this client's (else `mcpGrantNotFound` — changing a grant
+    /// never moves it to another client); one already revoked is a no-op
+    /// (revoke's own rule). Any refusal of the new grant refuses the whole
+    /// act — the old grants stay exactly as they were.
+    @discardableResult
+    public func grantMCPAccess(_ clientID: String, _ spec: MCPGrantSpec, replacing: [String]) throws -> String {
+        try database.write { db in
+            try requireApprovedMCPClient(db, clientID)
+            let now = DateFormatter.variorumISO8601.string(from: date.now)
+            try revokeReplacedMCPGrants(db, replacing, clientID: clientID, now: now)
+            return try insertMCPGrant(db, clientID: clientID, spec: spec, now: now)
+        }
+    }
+
+    /// **SHARE SEVERAL NOTES AT ONCE** (13n-c U3 — VX-156 item 2, the
+    /// Library's "Share N notes…"): N note grants for one APPROVED client in
+    /// ONE transaction on ONE clock read, so they share one `created_at` and
+    /// Shared places shows them as ONE row (`Queries.mcpSharedGroups` — the
+    /// exact-stamp doctrine, no schema). Each note is decided exactly as the
+    /// one-grant op decides it (`insertMCPGrant`): a missing, tombstoned,
+    /// version or scraps target refuses `mcpGrantScopeNotFound`, and a fenced
+    /// note under "always" refuses `mcpGrantScopeFenced` — and ANY refusal
+    /// refuses the WHOLE act, nothing written (PROVISIONAL P-13nc-U3-1; the
+    /// sheet never offers "always" when one picked note is fenced). Duplicate
+    /// ids collapse to one grant; an empty pick refuses. `replacing` is
+    /// Change…'s (the one-grant form above), revoked on the same stamp.
+    /// Returns the grant ids in the notes' order.
+    @discardableResult
+    public func grantMCPAccess(
+        _ clientID: String, notes noteIDs: [String], rung: MCPGrantRule.Rung,
+        duration: MCPGrantRule.Duration, replacing: [String] = []
+    ) throws -> [String] {
+        var seen = Set<String>()
+        let notes = noteIDs.filter { seen.insert($0).inserted }
+        guard !notes.isEmpty else {
+            throw OperationError.mcpGrantScopeNotFound(kind: MCPGrantRule.ScopeKind.note.rawValue, id: "")
+        }
+        return try database.write { db in
+            try requireApprovedMCPClient(db, clientID)
+            let now = DateFormatter.variorumISO8601.string(from: date.now)
+            try revokeReplacedMCPGrants(db, replacing, clientID: clientID, now: now)
+            return try notes.map { noteID in
+                try insertMCPGrant(
+                    db, clientID: clientID,
+                    spec: MCPGrantSpec(rung: rung, scopeKind: .note, scopeID: noteID, duration: duration),
+                    now: now)
+            }
+        }
+    }
+
+    private func requireApprovedMCPClient(_ db: Database, _ clientID: String) throws {
+        guard let client = try Queries.mcpClient(db, id: clientID) else {
+            throw OperationError.mcpClientNotFound(id: clientID)
+        }
+        guard client.state == .approved else {
+            throw OperationError.mcpClientNotApproved(id: clientID)
+        }
+    }
+
+    /// Change…'s revoke half: each named grant must exist and be THIS
+    /// client's; already-revoked rows stay as they are.
+    private func revokeReplacedMCPGrants(
+        _ db: Database, _ grantIDs: [String], clientID: String, now: String
+    ) throws {
+        for grantID in grantIDs {
+            guard let grant = try Queries.mcpGrant(db, id: grantID), grant.clientID == clientID else {
+                throw OperationError.mcpGrantNotFound(id: grantID)
+            }
+            try db.execute(
+                sql: "UPDATE mcp_grant SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL",
+                arguments: [now, grantID])
         }
     }
 
@@ -189,13 +269,23 @@ extension Operations {
     /// **Revoke** one grant — immediate: the very next call reads it dead. A
     /// no-op on a grant already revoked.
     public func revokeMCPGrant(_ grantID: String) throws {
+        try revokeMCPGrants([grantID])
+    }
+
+    /// **Revoke several** (13n-c U3 — a Shared places row that ONE act
+    /// minted: "Revoke" covers every member) — one transaction, one stamp;
+    /// any id that names no grant refuses the whole act, nothing written.
+    public func revokeMCPGrants(_ grantIDs: [String]) throws {
         try database.write { db in
-            guard try Queries.mcpGrant(db, id: grantID) != nil else {
+            for grantID in grantIDs where try Queries.mcpGrant(db, id: grantID) == nil {
                 throw OperationError.mcpGrantNotFound(id: grantID)
             }
-            try db.execute(
-                sql: "UPDATE mcp_grant SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL",
-                arguments: [DateFormatter.variorumISO8601.string(from: date.now), grantID])
+            let now = DateFormatter.variorumISO8601.string(from: date.now)
+            for grantID in grantIDs {
+                try db.execute(
+                    sql: "UPDATE mcp_grant SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL",
+                    arguments: [now, grantID])
+            }
         }
     }
 

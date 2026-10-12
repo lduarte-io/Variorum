@@ -15,6 +15,20 @@ public struct MCPClient: Equatable, Sendable, Identifiable {
     public let firstSeenAt: String
     public let lastSeenAt: String
     public let decidedAt: String?
+
+    /// 13n-c U3: public, so the app's pins can name a client.
+    public init(
+        id: String, name: String, version: String?, state: MCPGrantRule.ClientState,
+        firstSeenAt: String, lastSeenAt: String, decidedAt: String?
+    ) {
+        self.id = id
+        self.name = name
+        self.version = version
+        self.state = state
+        self.firstSeenAt = firstSeenAt
+        self.lastSeenAt = lastSeenAt
+        self.decidedAt = decidedAt
+    }
 }
 
 /// One grant row.
@@ -28,6 +42,23 @@ public struct MCPGrantRow: Equatable, Sendable, Identifiable {
     public let createdAt: String
     public let consumedAt: String?
     public let revokedAt: String?
+
+    /// 13n-c U3: public, so the app's pins can name a grant.
+    public init(
+        id: String, clientID: String, rung: MCPGrantRule.Rung, scopeKind: MCPGrantRule.ScopeKind,
+        scopeID: String, duration: MCPGrantRule.Duration, createdAt: String, consumedAt: String?,
+        revokedAt: String?
+    ) {
+        self.id = id
+        self.clientID = clientID
+        self.rung = rung
+        self.scopeKind = scopeKind
+        self.scopeID = scopeID
+        self.duration = duration
+        self.createdAt = createdAt
+        self.consumedAt = consumedAt
+        self.revokedAt = revokedAt
+    }
 
     /// The row as the rule reads it.
     public var ruleGrant: MCPGrantRule.Grant {
@@ -73,7 +104,7 @@ public struct MCPActivityRow: Equatable, Sendable, Identifiable {
     }
 }
 
-/// One live grant as the SHARED WITH AI list shows it.
+/// One live grant as the SHARED list shows it.
 public struct MCPSharedRow: Equatable, Sendable, Identifiable {
     public var id: String { grant.id }
     public let grant: MCPGrantRow
@@ -81,6 +112,23 @@ public struct MCPSharedRow: Equatable, Sendable, Identifiable {
     /// The note's display title, the book's name, or the wing's name
     /// ("Home" for the virtual Home wing); nil when the target is gone.
     public let targetTitle: String?
+    /// **13n-c U2 (the U1 ladder's R2-3; P-13nb-U2-3): why this live grant
+    /// reaches NOTHING right now** — its target is fenced since it was made
+    /// (a book marked Private, a trait book made THE daily Journal, a note
+    /// marked Private under an "always" grant). nil = it reaches its target
+    /// (or the target is gone — `targetTitle` says that). The faces must
+    /// not call such a grant shared while it is inert.
+    public let inertFence: MCPGrantRule.Fence?
+
+    public init(
+        grant: MCPGrantRow, clientName: String, targetTitle: String?,
+        inertFence: MCPGrantRule.Fence? = nil
+    ) {
+        self.grant = grant
+        self.clientName = clientName
+        self.targetTitle = targetTitle
+        self.inertFence = inertFence
+    }
 }
 
 extension Queries {
@@ -113,6 +161,23 @@ extension Queries {
                 \(limit.map { "LIMIT \($0)" } ?? "")
                 """,
             arguments: [json]
+        ).compactMap(mcpClient(from:))
+    }
+
+    /// **The WHO row's order** (13n-c U2 — the brief §3): every APPROVED
+    /// client, the most recently GRANTED first (its newest grant row's
+    /// stamp, revoked rows included — "the last grant she made" is a fact
+    /// about her, not about the grant's life; brief §4's derivation), then
+    /// the never-granted by when they were last seen.
+    public static func mcpClientsByRecentGrant(_ db: Database) throws -> [MCPClient] {
+        try Row.fetchAll(
+            db,
+            sql: """
+                SELECT cl.*, (SELECT MAX(g.created_at) FROM mcp_grant g WHERE g.client_id = cl.id) AS last_granted
+                FROM mcp_client cl
+                WHERE cl.state = 'approved'
+                ORDER BY (last_granted IS NULL), last_granted DESC, cl.last_seen_at DESC, cl.id
+                """
         ).compactMap(mcpClient(from:))
     }
 
@@ -180,8 +245,54 @@ extension Queries {
             guard let grant = mcpGrant(from: row) else { return nil }
             return MCPSharedRow(
                 grant: grant, clientName: row["client_name"],
-                targetTitle: try mcpScopeTitle(db, kind: grant.scopeKind, id: grant.scopeID, calendar: calendar))
+                targetTitle: try mcpScopeTitle(db, kind: grant.scopeKind, id: grant.scopeID, calendar: calendar),
+                inertFence: try mcpGrantInertFence(db, grant))
         }
+    }
+
+    /// **Why a live grant reaches nothing right now** (13n-c U2 — R2-3): the
+    /// fence of a target the ONE rule's scope test refuses it — read on the
+    /// ONE derivation site's facts (`mcpNoteFacts` / `mcpBookFacts`) through
+    /// `MCPGrantRule.reaches`, never a parallel fence. nil when the grant
+    /// reaches (a per-ask note grant on a fenced note DOES), when its target
+    /// is gone, and always for a wing (a wing is never fenced; its fenced
+    /// notes are filtered one by one).
+    public static func mcpGrantInertFence(_ db: Database, _ grant: MCPGrantRow) throws -> MCPGrantRule.Fence? {
+        let target: MCPGrantRule.Target
+        let fence: MCPGrantRule.Fence?
+        switch grant.scopeKind {
+        case .note:
+            // The cost guard, ASKED OF THE RULE (never a second fence): a
+            // note grant that reaches even a FENCED note of its own id (a
+            // per-ask grant — once or while connected) can be made inert by
+            // no fence, so its note's facts are never read. Only an "always"
+            // note grant pays the facts read — so the pane's held snapshot
+            // reads `container` for these rows only when such a grant exists.
+            let fencedTwin = MCPGrantRule.NoteFacts(id: grant.scopeID, wingID: "", fence: .privateMark)
+            if MCPGrantRule.reaches(grant.ruleGrant, .note(fencedTwin)) { return nil }
+            guard let facts = try mcpNoteFacts(db, noteID: grant.scopeID) else { return nil }
+            (target, fence) = (.note(facts), facts.fence)
+        case .book:
+            guard let facts = try mcpBookFacts(db, readingID: grant.scopeID) else { return nil }
+            (target, fence) = (.book(facts), facts.fence)
+        case .wing:
+            return nil
+        }
+        guard let fence, !MCPGrantRule.reaches(grant.ruleGrant, target) else { return nil }
+        return fence
+    }
+
+    /// A client's live grants, split by whether they reach (13n-c U2 —
+    /// R2-3's twin on the client row: "N shared places" counts only grants
+    /// that reach; an inert one is said as inert). ∝ the client's grants.
+    public static func mcpGrantReachCounts(
+        _ db: Database, clientID: String
+    ) throws -> (reaching: Int, inert: Int) {
+        var reaching = 0, inert = 0
+        for grant in try mcpGrants(db, clientID: clientID) where grant.ruleGrant.isLive {
+            if try mcpGrantInertFence(db, grant) == nil { reaching += 1 } else { inert += 1 }
+        }
+        return (reaching, inert)
     }
 
     public static func mcpSharedCount(_ db: Database) throws -> Int {
@@ -261,11 +372,21 @@ extension Queries {
     }
 
     /// **THE FENCE's legs — the ONE derivation site** (R-13nb-1 ratified the
-    /// journal predicate; R-13nb-4 adds the Private mark). Per note:
-    /// 1. its own `profile = 'journal'`;
-    /// 2. a live MEMBER (status 'member') of a live reading whose profile is
-    ///    `'journal'` (the trait) or `'daily'` (THE daily Journal) — an
-    ///    archived book is still alive, so it still fences;
+    /// journal predicate; R-13nb-4 adds the Private mark; 13n-c's R-AIR-1
+    /// RE-KEYED the journal legs on THE daily Journal — her words: "for the
+    /// default command J journal I think it's a fair choice but I am
+    /// questioning it being applied to all journal style books"). Per note:
+    /// 1. its own `profile = 'journal'` — the shape ⌘J's
+    ///    `createOrOpenJournalEntry` gives every day entry (the ONLY door that
+    ///    mints it; the copy roads carry it), so a day entry stays per-ask
+    ///    wherever it is later filed (13n-c D-1, PROVISIONAL P-13nc-1);
+    /// 2. a live MEMBER (status 'member') of a live reading wearing THE daily
+    ///    Journal's marker (`profile = 'daily'` — every live bearer, a
+    ///    not-yet-converged stale one included: the conservative direction).
+    ///    A journal-TRAIT book (`profile = 'journal'`, `setJournalTrait`'s
+    ///    toggle) is NOT a fence leg since R-AIR-1 — its members are shared
+    ///    like any book's. An archived daily Journal is still alive, so it
+    ///    still fences;
     /// 3. **the Private mark** — its own `ai_private_at`, or a live member of
     ///    a live reading carrying one (R-13nb-4, privacy winning ties; v1_25's
     ///    columns, wired at U2 — the `privateLeg` fragments below).
@@ -289,7 +410,7 @@ extension Queries {
                        (c.profile = 'journal') AS own_journal,
                        EXISTS (SELECT 1 FROM reading_post rp JOIN reading r ON r.id = rp.reading_id
                                WHERE rp.post_id = c.id AND rp.deleted_at IS NULL AND rp.status = 'member'
-                                 AND r.deleted_at IS NULL AND r.profile IN ('journal', 'daily')) AS member_journal,
+                                 AND r.deleted_at IS NULL AND \(dailyJournalLegForBook)) AS member_journal,
                        \(privateLegForNote) AS private_mark
                 FROM json_each(?) j CROSS JOIN container c ON c.id = j.value
                 WHERE c.deleted_at IS NULL AND c.kind = 'post'
@@ -324,50 +445,173 @@ extension Queries {
     }
 
     /// A BOOK's facts — live books only (a gathering is not a grant target in
-    /// U1, PROVISIONAL P-13nb-U1-4). Fenced when it is a journal (the trait
-    /// or THE daily Journal) or carries the Private mark (R-13nb-4).
+    /// U1, PROVISIONAL P-13nb-U1-4). Fenced when it is THE daily Journal (its
+    /// 'daily' marker — R-AIR-1: a journal-TRAIT book is not) or carries the
+    /// Private mark (R-13nb-4).
     public static func mcpBookFacts(_ db: Database, readingID: String) throws -> MCPGrantRule.BookFacts? {
+        try mcpReadingFacts(db, readingID: readingID, kind: .book)
+    }
+
+    /// **A GATHERING's facts** (13n-c R-AIR-12 — its reach is the rule's
+    /// `decideGathering`): a live gathering's id and wing, and its fence on the
+    /// SAME two fragments a book's facts read (no op marks a gathering Private
+    /// or daily; a stale synced row could — the conservative direction). nil
+    /// for anything that is not a live gathering: a BOOK answers through
+    /// `mcpBookFacts` and never here, so no grant road can mistake one for the
+    /// other.
+    public static func mcpGatheringFacts(
+        _ db: Database, readingID: String
+    ) throws -> MCPGrantRule.BookFacts? {
+        try mcpReadingFacts(db, readingID: readingID, kind: .gathering)
+    }
+
+    /// The one statement both read (so a book's facts and a gathering's can
+    /// never drift apart).
+    private static func mcpReadingFacts(
+        _ db: Database, readingID: String, kind: ReadingKind
+    ) throws -> MCPGrantRule.BookFacts? {
         guard let row = try Row.fetchOne(
             db,
             sql: """
                 SELECT r.id, \(mcpResolvedWing(column: "r.wing_id")) AS wing,
-                       (r.profile IN ('journal', 'daily')) AS journal,
+                       \(dailyJournalLegForBook) AS journal,
                        \(privateLegForBook) AS private_mark
                 FROM reading r
-                WHERE r.id = ? AND r.deleted_at IS NULL AND r.kind = 'book'
+                WHERE r.id = ? AND r.deleted_at IS NULL AND r.kind = ?
                 """,
-            arguments: [readingID])
+            arguments: [readingID, kind.rawValue])
         else { return nil }
         return MCPGrantRule.BookFacts(
             id: row["id"], wingID: row["wing"],
             fence: MCPGrantRule.fence(journal: row["journal"] as Bool? ?? false, privateMark: row["private_mark"]))
     }
 
-    /// One book a grant may name.
+    /// One book a grant may name — and, since 13n-c U2, what the grant
+    /// sheet says about it at scale (her "hundreds of books"): its shelf, its
+    /// star, the notes it shows, its state, when it was made and last edited.
     public struct MCPGrantableBook: Equatable, Sendable, Identifiable {
         public let id: String
         public let name: String
         /// Its wing (a dangling pointer read as Home, `''`).
         public let wingID: String
+        /// Its shelf as the Bookcase reads it: nil when unshelved, and when
+        /// the pointer DANGLES (a dead shelf, or one in another wing — the
+        /// Bookcase's "unshelved" class, §19).
+        public let shelfID: String?
+        /// The UNION star (the Bookcase's own — `starredReadingIDs`).
+        public let starred: Bool
+        /// The notes it SHOWS — live, un-archived members (the Bookcase's
+        /// honest "N notes", #169(a)(1)).
+        public let noteCount: Int
+        public let marks: PlaceLabels.Marks
+        /// `reading.created_at`, canonical ISO-8601 text.
+        public let createdAt: String
+        /// Its derived "last edited" (the Bookcase's own derivation —
+        /// `memberLastEditedSQL` over `shownMemberNoteJoinSQL`, falling back
+        /// to its birth), canonical ISO-8601 text.
+        public let lastEdited: String
+
+        public init(
+            id: String, name: String, wingID: String, shelfID: String? = nil, starred: Bool = false,
+            noteCount: Int = 0, marks: PlaceLabels.Marks = .init(), createdAt: String, lastEdited: String
+        ) {
+            self.id = id
+            self.name = name
+            self.wingID = wingID
+            self.shelfID = shelfID
+            self.starred = starred
+            self.noteCount = noteCount
+            self.marks = marks
+            self.createdAt = createdAt
+            self.lastEdited = lastEdited
+        }
     }
 
     /// **The books the grant sheet offers** — every live BOOK the fence does
-    /// not exclude (a journal-trait book, THE daily Journal and a Private
-    /// book are never a grant's scope — the op refuses them,
-    /// so the sheet never offers them; P-2), by name. Gatherings are not
-    /// grant targets in U1 (P-13nb-U1-4). Author-scale (a library's books).
+    /// not exclude (THE daily Journal and a Private book are never a grant's
+    /// scope — the op refuses them, so the sheet never offers them; P-2; a
+    /// journal-TRAIT book IS offered since R-AIR-1), by name. Gatherings are
+    /// not grant targets (P-13nb-U1-4; R-AIR-12 keeps them so). Author-scale.
+    ///
+    /// **13n-c U2 — the facts it carries, and their cost (P1, said exactly):**
+    /// one statement over the library's live books; each book's shown-member
+    /// count and last-edited stamp are correlated aggregates entered through
+    /// `reading_post`'s `reading_id` index, each member a primary-key seek
+    /// into `container` (pinned by plan) — so the work is ∝ the books' own
+    /// memberships, never the note corpus. The star is the Bookcase's union
+    /// (one read of the starred list); the shelf is resolved against the live
+    /// shelves of the book's own wing (a dangling pointer reads unshelved).
+    /// One-shot (the sheet's appearance), never held.
     public static func mcpGrantableBooks(_ db: Database) throws -> [MCPGrantableBook] {
-        try Row.fetchAll(
+        let starred = try starredReadingIDs(db)
+        let shelfWings = Dictionary(uniqueKeysWithValues: try Row.fetchAll(
+            db, sql: "SELECT id, wing_id FROM shelf WHERE deleted_at IS NULL"
+        ).map { ($0["id"] as String, $0["wing_id"] as String) })
+        return try Row.fetchAll(db, sql: mcpGrantableBooksSQL).map { row in
+            let wing: String = row["wing"]
+            let shelf: String? = row["shelf_id"]
+            let createdAt: String = row["created_at"]
+            return MCPGrantableBook(
+                id: row["id"], name: row["name"], wingID: wing,
+                shelfID: shelf.flatMap { shelfWings[$0] == wing ? $0 : nil },
+                starred: starred.contains(row["id"]),
+                noteCount: row["notes"],
+                marks: PlaceLabels.Marks(
+                    living: row["living"], finished: row["locked"],
+                    sealed: (row["sealed_at"] as String?) != nil, owned: row["owned"],
+                    archived: (row["archived_at"] as String?) != nil),
+                createdAt: createdAt,
+                lastEdited: bookLastEdited(memberStamp: row["member_stamp"], createdAtStamp: createdAt))
+        }
+    }
+
+    /// The offered-books statement (split out so the P1 pin reads the shipped
+    /// text). No placeholders.
+    static let mcpGrantableBooksSQL = """
+        SELECT r.id, r.name, \(mcpResolvedWing(column: "r.wing_id")) AS wing, r.shelf_id,
+               r.locked, r.owned, r.sealed_at, r.archived_at, r.created_at,
+               \(livingBookSQL(alias: "r")) AS living,
+               (SELECT COUNT(*) FROM reading_post rp \(shownMemberNoteJoinSQL)
+                 WHERE rp.reading_id = r.id AND \(liveMemberRowSQL)) AS notes,
+               (SELECT \(memberLastEditedSQL) FROM reading_post rp \(shownMemberNoteJoinSQL)
+                 WHERE rp.reading_id = r.id AND \(liveMemberRowSQL)) AS member_stamp
+        FROM reading r
+        WHERE r.deleted_at IS NULL AND r.kind = 'book'
+          AND NOT (\(dailyJournalLegForBook))
+          AND NOT (\(privateLegForBook))
+        ORDER BY r.name COLLATE NOCASE, r.id
+        """
+
+    /// **The live books a grant may NOT name** (13n-c U3 — a book row's
+    /// "Share with AI…" is drawn only where the op could act, P-2): exactly
+    /// the complement of `mcpGrantableBooksSQL`'s fence filter, on the SAME
+    /// two fragments (THE daily Journal's marker, the Private mark) — never a
+    /// parallel fence. ∝ the fenced books (a handful).
+    public static func mcpFencedBookIDs(_ db: Database) throws -> Set<String> {
+        Set(try String.fetchAll(
             db,
             sql: """
-                SELECT r.id, r.name, \(mcpResolvedWing(column: "r.wing_id")) AS wing
-                FROM reading r
+                SELECT r.id FROM reading r
                 WHERE r.deleted_at IS NULL AND r.kind = 'book'
-                  AND (r.profile IS NULL OR r.profile NOT IN ('journal', 'daily'))
-                  AND NOT (\(privateLegForBook))
-                ORDER BY r.name COLLATE NOCASE, r.id
-                """
-        ).map { MCPGrantableBook(id: $0["id"], name: $0["name"], wingID: $0["wing"]) }
+                  AND ((\(dailyJournalLegForBook)) OR (\(privateLegForBook)))
+                """))
+    }
+
+    /// How many books the grant picker's "Recently edited" quick section
+    /// shows before typing (13n-c U2 — her "that's often what I want";
+    /// PROVISIONAL P-13nc-U2-1).
+    public static let mcpRecentlyEditedCount = 5
+
+    /// **Everything the grant sheet's book and wing pickers show** (13n-c
+    /// U2): the offered books with their facts, the live shelves of every
+    /// wing in strip order (left to right — All's top to bottom, §24), and
+    /// the live additional wings in switcher order (Home is virtual, '').
+    public static func mcpGrantPlaces(_ db: Database) throws -> MCPGrantPlaces {
+        MCPGrantPlaces(
+            books: try mcpGrantableBooks(db),
+            shelves: try Shelf.fetchAll(
+                db, sql: "SELECT * FROM shelf WHERE deleted_at IS NULL ORDER BY position, id"),
+            wings: try wings(db))
     }
 
     /// **The Private leg for a note** (R-13nb-4, wired at 13n-b U2 over
@@ -385,6 +629,14 @@ extension Queries {
     /// **The Private leg for a book** — its own stamp. Expects the book
     /// aliased `r`.
     static let privateLegForBook = "(r.ai_private_at IS NOT NULL)"
+
+    /// **The daily-Journal leg for a book** (13n-c R-AIR-1) — THE daily
+    /// Journal's own marker, through the ONE constant every daily mint stamps
+    /// (`dailyJournalBookProfile`), never the trait's 'journal'. NULL-safe: a
+    /// NULL profile reads false. Expects the book aliased `r`; used by the
+    /// member leg, the book's facts and the sheet's offer alike, so the three
+    /// can never drift apart.
+    static let dailyJournalLegForBook = "(r.profile IS NOT NULL AND r.profile = '\(dailyJournalBookProfile)')"
 
     // MARK: - The Private mark, as the faces read it (R-13nb-4)
 
@@ -462,12 +714,17 @@ extension Queries {
         return sharing.sorted { $0.clientName < $1.clientName }
     }
 
-    /// **The books an approved client can reach right now** — the Bookcase
-    /// row's "shared with AI" chip (P-13n-3's word). Honest under every
-    /// grant shape: a book grant on it, a wing grant on its wing, or the open
-    /// book — each read through the pure rule on the book's own facts, so a
-    /// journal or Private book (reached by nothing) never chips. ∝ the books
-    /// (a shelf) × the approved clients (a handful).
+    /// **The books an approved client can reach right now** — since 13n-c U3
+    /// a PARITY ORACLE only: no face reads it. The Bookcase's "shared with AI"
+    /// text chip it once fed is retired; the ONE shared icon reads
+    /// `mcpBookReaches` (who, how far and why), and the pins hold the icon's
+    /// set equal to this one under every grant shape (`MCPShareTests`). Kept
+    /// because it is the simplest honest statement of the set: a book grant on
+    /// it, a wing grant on its wing, or the open book — each read through the
+    /// pure rule on the book's own facts, so THE daily Journal or a Private
+    /// book (reached by nothing) is never in it (a journal-TRAIT book is, like
+    /// any book, since R-AIR-1). ∝ the books × the approved clients (13n-c
+    /// Stage B R1 B11: the doc corrected; the dead app-side readers removed).
     public static func mcpReachableBookIDs(_ db: Database) throws -> Set<String> {
         let clients = try mcpClients(db, states: [.approved])
         guard !clients.isEmpty else { return [] }

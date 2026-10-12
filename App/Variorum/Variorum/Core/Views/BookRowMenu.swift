@@ -43,6 +43,11 @@ nonisolated enum BookRowDoor: Hashable, Sendable {
     case settings
     case exportMarkdown
     case exportPDF
+    /// 13n-c U3 (VX-156 item 2; mockup §2): "Share with AI…" — THE grant
+    /// sheet pre-filled on this book. Drawn only when an approved client
+    /// exists (R-AIR-8) and the book can take a grant (a book, never the
+    /// daily Journal or a Private book — the op refuses those, P-2).
+    case share
     /// A state door from the archive table (Archive · Unarchive · Delete).
     case state(CapabilityID)
 }
@@ -54,10 +59,12 @@ nonisolated enum BookRowDoor: Hashable, Sendable {
 /// Reading row — is unknown is not drawn). The ladder's round-1 NIT-2: the
 /// table says exactly what the renderer draws.
 nonisolated enum BookRowMenuTable {
-    static func doors(for reading: Reading?) -> [BookRowDoor] {
+    static func doors(for reading: Reading?, shareable: Bool = false) -> [BookRowDoor] {
         var out: [BookRowDoor] = [.open, .star, .settings]
         if let reading {
             out += [.exportMarkdown, .exportPDF]
+            // 13n-c U3: after the exports, before the state doors (mockup §2).
+            if shareable, reading.kind == .book { out.append(.share) }
             out += BookArchiveDoorSet.rendered(for: BookArchiveFacts(reading)).map { .state($0) }
         }
         return out
@@ -83,6 +90,10 @@ final class BookRowDoors {
     let stateDoors: BookStateDoors
     /// The listed books' rows, by id.
     private(set) var facts: [String: Reading] = [:]
+    /// 13n-c U3: the live books a grant may NOT name (THE daily Journal,
+    /// Private books — `Queries.mcpFencedBookIDs`, the one fence's own
+    /// fragments): their row draws no "Share with AI…" (P-2).
+    private(set) var fencedBooks: Set<String> = []
     var settingsTarget: BookSettingsTarget?
     var pendingRuleEditor: RuleEditorModel?
     var ruleEditor: RuleEditorModel?
@@ -106,16 +117,18 @@ final class BookRowDoors {
             facts = [:]
             return
         }
-        let rows: [Reading] = (try? await session.database.read { db in
-            try readingIDs.compactMap { try Queries.reading(db, id: $0) }
-        }) ?? []
+        let (rows, fenced): ([Reading], Set<String>) = (try? await session.database.read { db in
+            (try readingIDs.compactMap { try Queries.reading(db, id: $0) }, try Queries.mcpFencedBookIDs(db))
+        }) ?? ([], [])
         facts = Dictionary(rows.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        fencedBooks = fenced
     }
 
     /// Internal so pins can hand the facts in (hosted `.task` callbacks
     /// don't fire under the test host — the `BookArrivalsModel.adopt` rule).
-    func adopt(_ readings: [Reading]) {
+    func adopt(_ readings: [Reading], fenced: Set<String> = []) {
         facts = Dictionary(readings.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        fencedBooks = fenced
     }
 
     func openSettings(_ readingID: String) async {
@@ -141,16 +154,25 @@ struct BookRowMenu: View {
     /// P-1's walk: the registry acts this renderer draws.
     static let contextMenuCapabilities: [CapabilityID] = [
         .toggleStar, .openBookSettings, .archiveBook, .unarchiveBook, .deleteBook,
+        // 13n-c U3 (VX-156 item 2): "Share with AI…".
+        .mcpShareHere,
     ]
 
     let readingID: String
     let doors: BookRowDoors
     var starDoor: StarDoor?
     let open: () -> Void
+    /// 13n-c U3: the window's road (nil in harness mounts — no share door).
+    @Environment(\.mcpShareRoad) private var mcpShareRoad
+
+    /// R-AIR-8 (an approved client exists) ∧ the book can take a grant.
+    private var shareable: Bool {
+        (mcpShareRoad?.canShare ?? false) && !doors.fencedBooks.contains(readingID)
+    }
 
     var body: some View {
         let reading = doors.facts[readingID]
-        ForEach(BookRowMenuTable.doors(for: reading), id: \.self) { door in
+        ForEach(BookRowMenuTable.doors(for: reading, shareable: shareable), id: \.self) { door in
             switch door {
             case .open:
                 Button("Open") { open() }
@@ -175,6 +197,14 @@ struct BookRowMenu: View {
                     Button("Export PDF\u{2026}") {
                         ReadingExport.export(session: doors.session, reading: reading, asPDF: true)
                     }
+                }
+            case .share:
+                if let road = mcpShareRoad {
+                    Divider()
+                    Button(CapabilityRegistry.capability(.mcpShareHere).verb) {
+                        road.open(MCPGrantOpening(place: .book(readingID), origin: .place))
+                    }
+                    Divider()
                 }
             case .state(let act):
                 if act == .deleteBook {

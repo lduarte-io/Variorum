@@ -442,8 +442,10 @@ struct MCPWriteTools: Sendable {
     /// the act's transaction), so BOTH its sides raise the just-in-time ask
     /// exactly as `add_note_to_book`'s do — the note side's refusal was a
     /// bare guard throw with no ask and no asked sentence, which mattered
-    /// most for a FENCED member (a journal or Private note is reachable
-    /// per-ask only, and she never heard the ask).
+    /// most for a FENCED member (a daily-Journal entry, a ⌘J entry or a
+    /// Private note is reachable per-ask only, and she never heard the ask;
+    /// since 13n-c T-2 the wire answers the one not-shared answer, the ask
+    /// still reaching her).
     func noteIntoBook(
         _ noteID: String, _ bookID: String, job: Job, clientName: String,
         spendsAfter: Bool = true,
@@ -542,12 +544,16 @@ struct MCPWriteTools: Sendable {
     /// reads keep U1's one-transaction stamp.)
     func land(
         _ job: Job, clientName: String, kind: String, id: String, title: String?,
-        spending: [String] = [], _ act: () throws -> Act
+        spending: [String] = [], logsReceiptTitle: Bool = true, _ act: () throws -> Act
     ) throws -> Result<Landed, Refused> {
         do {
             let landed = try act()
             for grantID in spending { try? spend(grantID) }
-            try log(clientName, job.tool, kind, id, landed.receipt?.targetTitle ?? title, allowed: true)
+            // 13n-c U6, D-U6-2 (red-on-old): an act whose receipt titles
+            // something other than the logged target (a wing move's receipt
+            // names its DESTINATION, the sweep's coalescing key) logs its own.
+            let logged = logsReceiptTitle ? landed.receipt?.targetTitle ?? title : title
+            try log(clientName, job.tool, kind, id, logged, allowed: true)
             return .success(Landed(answer: try encode(landed.answer), receipt: landed.receipt))
         } catch let refused as Refused {
             try log(clientName, job.tool, kind, id, title, allowed: false)

@@ -209,6 +209,8 @@ struct PoolPostsView: View {
     /// `.tagNote` act (the context bar's cards and the Library's rows are
     /// the others), declared so the `.surface` walk covers them.
     static let surfaceCapabilities: [CapabilityID] = [.tagNote]
+        // 13n-c U4: a note row's pending-ask glyph.
+        + MCPAskGlyph.surfaceCapabilities
 
     let session: AppSession
     let model: PoolPostsModel
@@ -414,6 +416,8 @@ struct PoolPostsView: View {
                             .font(tokens.body)
                             .foregroundStyle(tokens.ink)
                             .lineLimit(1)
+                        // 13n-c U4: an ask waiting on this note.
+                        MCPAskGlyph(.note(item.postID), tokens: tokens)
                         // The quiet day — suppressed when the lead already IS
                         // the day (the picker's one detail rule). Under item
                         // 4 this is where a words-led card's date lives: the

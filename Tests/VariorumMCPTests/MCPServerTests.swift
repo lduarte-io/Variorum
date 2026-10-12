@@ -186,9 +186,11 @@ struct MCPServerTests {
         #expect(Set(MCPToolCatalog.writeNew.map(\.name))
                 == ["create_note", "import_document", "apply_tag", "create_book", "add_note_to_book", "create_section",
                     "save_version", "file_note_in_chapter", "set_book_rule"])
+        // 13n-c U6 (justified edit, the ritual): edit gains the per-item
+        // note move across wings (VX-160, R-AIR-2).
         #expect(Set(MCPToolCatalog.edit.map(\.name))
                 == ["edit_take", "divide_block", "merge_blocks", "move_block", "delete_block", "set_block_name",
-                    "put_back", "set_entry_date"])
+                    "put_back", "set_entry_date", "move_note_to_wing"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })
@@ -306,7 +308,11 @@ struct MCPServerTests {
             }
             let refused = try await connection.client.callTool(name: "read_note", arguments: ["note_id": .string(entry.id)])
             #expect(refused.isError == true)
-            #expect(text(refused).contains("journal entry"))
+            // 13n-c U1 (justified edit, the ritual — T-2, AppSpec §12's "no
+            // fenced-vs-unshared oracle anywhere"): the entry answers exactly
+            // as an id that names nothing — it no longer says "journal entry".
+            let nothing = try await connection.client.callTool(name: "read_note", arguments: ["note_id": "nope"])
+            #expect(text(refused) == text(nothing), "a fenced note answers as nothing")
             let found = try json(try await connection.client.callTool(name: "search", arguments: ["query": "lighthouse"]))
             let noteIDs = (found["passages"] as? [[String: Any]])?.compactMap { $0["note_id"] as? String } ?? []
             #expect(noteIDs.contains(prose.id))

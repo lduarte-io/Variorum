@@ -130,7 +130,8 @@ struct AppSettingsView: View {
         .writing: ["segmentation", "cadence", "pruning"],
         .shortcuts: [],
         .tags: ["tagManager"],
-        .mcp: ["mcpServer", "mcpOpenBook"],
+        // 13n-c U4: Waiting renders while an ask waits (the catalog row says so).
+        .mcp: ["mcpServer", "mcpWaiting", "mcpOpenBook"],
         .protection: ["protection"],
         .dataSafety: ["backups"],
         .diagnostics: ["crashReports"],
@@ -169,6 +170,25 @@ struct AppSettingsView: View {
         .tint(tokens.accent)
         .task { await theme.start() }
         .task { await tags.start() }
+        // 13n-c U4 — ⌥⌘, (MCP Settings…): the pane OPENS at MCP — on a fresh
+        // window (appear) and on a window already up (the request changing).
+        .onAppear { adoptMCPRequest() }
+        .onChange(of: mcp?.settingsRequest) { _, _ in adoptMCPRequest() }
+    }
+
+    /// ⌥⌘,'s request, adopted once each (the door's counter and this
+    /// window's "seen" mark — `MCPDoor.settingsRequest`).
+    private func adoptMCPRequest() {
+        guard let mcp, Self.adopts(request: mcp.settingsRequest, adopted: mcp.settingsRequestAdopted)
+        else { return }
+        mcp.settingsRequestAdopted = mcp.settingsRequest
+        query = ""
+        pane = .mcp
+    }
+
+    /// Pure: a request is adopted exactly once.
+    nonisolated static func adopts(request: Int, adopted: Int) -> Bool {
+        request > adopted
     }
 
     // MARK: - The leading column (the search, then the panes)

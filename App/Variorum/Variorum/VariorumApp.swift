@@ -83,16 +83,15 @@ struct VariorumApp: App {
                         LibraryHandOffSheet(model: model) { handOff.dismiss() }
                     }
                 }
-                // 13n-b U2 (AF-6): THE JUST-IN-TIME ASK — the door's queue,
-                // one ask at a time. The sheet's own buttons answer (Don't
-                // allow is its cancel action); the setter never answers for
-                // her, so a dismissal can only come from an answer.
-                .sheet(item: Binding(
-                    get: { appDelegate.mcp.presentedAsk },
-                    set: { _ in })
-                ) { ask in
-                    MCPAskSheet(door: appDelegate.mcp, ask: ask)
-                }
+                // (13n-b U2's self-presenting ASK SHEET lived here — the door's
+                // first waiting ask, presented on every main window the
+                // moment it arrived. RETIRED at 13n-c U4 — ARRIVAL X, the
+                // VX-156 brief §5: an ask WAITS at its pending glyph on the
+                // thing it names and in Settings ▸ MCP ▸ Waiting, and its
+                // sheet opens only on HER press, in the window she pressed
+                // in (`RootView`'s / `NoteWindowView`'s `mcpAskSheet`). No
+                // host in this file may present one again — pinned by
+                // `MCPAsksWaitTests.noSceneHostsTheAskSheet`.)
         }
         .defaultSize(width: 1240, height: 840)
         // 13g L3 + L4 (her WT-3 and WT-4, which the screenshot proved are
@@ -166,7 +165,9 @@ struct VariorumApp: App {
                     hotKeys: hotKeys, whatsNew: appDelegate.whatsNew,
                     calmAsks: appDelegate.calmAsks,
                     // 13s-b U1a: the first-open tour offer's one model.
-                    tourOffer: appDelegate.tourOffer)
+                    tourOffer: appDelegate.tourOffer,
+                    // 13n-c U3: the share faces' road is built from the door.
+                    mcp: appDelegate.mcp)
                     .onAppear {
                         appDelegate.session = session
                         #if DEBUG
@@ -466,7 +467,7 @@ struct VariorumApp: App {
         WindowGroup(id: EditorCommands.noteWindowGroupID, for: String.self) { $postID in
             switch (bootstrap.state, postID) {
             case (.ready(let session), .some(let postID)):
-                NoteWindowView(session: session, windows: windows, postID: postID)
+                NoteWindowView(session: session, windows: windows, postID: postID, mcp: appDelegate.mcp)
             case (.failed(let error, _), _):
                 // The note window shows the failure plainly; the MAIN
                 // window carries the recovery roads (one unlock surface,

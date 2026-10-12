@@ -1,0 +1,626 @@
+//
+//  MCPShareFacesTests.swift
+//  VariorumTests (Mac)
+//
+//  13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; R-AIR-4/6/7/8;
+//  VX-164): the road's two gates (an approved client; the server ON) read off
+//  the door's narrow observables; the place-door sheet's bulk act landing as
+//  ONE act with its receipt and its two doors (Change… replaces, Revoke ›
+//  covers the act); ⌥⌘A's three outcomes (with history, without, already
+//  reaching — never always); the pane's one row per act; the pure gates of
+//  every door (no approved client ⇒ no door; never a door the op refuses);
+//  the icon's and the indicator's words and states; ⌥⌘A's registry facts.
+//  A ruled BUILD — the walk (or, while the session is locked, the gated
+//  capture harness `MCPShareFacesCaptureTests`) shows the faces.
+//
+
+import AppKit
+import Dependencies
+import Foundation
+import GRDB
+import SwiftUI
+import Testing
+import VariorumCore
+import VariorumMCP
+@testable import Variorum
+
+@MainActor
+private func withSession<T>(_ body: @MainActor (AppSession, AppDatabase) async throws -> T) async throws -> T {
+    let db = try AppDatabase.inMemory()
+    let start = Date(timeIntervalSince1970: 1_782_864_000)
+    let tick = LockIsolated(0)
+    return try await withDependencies {
+        $0.database = db
+        $0.uuid = .incrementing
+        $0.date = DateGenerator {
+            let seconds = tick.withValue { value -> Int in
+                defer { value += 1 }
+                return value
+            }
+            return start.addingTimeInterval(Double(seconds))
+        }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 53))
+    } operation: { @MainActor in
+        try await body(AppSession(database: db), db)
+    }
+}
+
+/// Wait (bounded) for a condition an async act or observation settles.
+@MainActor
+private func settle(_ condition: @MainActor () -> Bool) async throws -> Bool {
+    for _ in 0..<300 {
+        if condition() { return true }
+        try await Task.sleep(for: .milliseconds(10))
+    }
+    return condition()
+}
+
+/// Every grant row ever written, in insertion order (revoked ones included).
+@MainActor
+private func liveGrants(_ db: AppDatabase) throws -> [MCPGrantRow] {
+    try db.read { db in
+        try Row.fetchAll(db, sql: "SELECT * FROM mcp_grant ORDER BY rowid").compactMap { row in
+            guard let rung = MCPGrantRule.Rung(rawValue: row["rung"]),
+                  let kind = MCPGrantRule.ScopeKind(rawValue: row["scope_kind"]),
+                  let duration = MCPGrantRule.Duration(rawValue: row["duration"]) else { return nil }
+            return MCPGrantRow(
+                id: row["id"], clientID: row["client_id"], rung: rung, scopeKind: kind,
+                scopeID: row["scope_id"], duration: duration, createdAt: row["created_at"],
+                consumedAt: row["consumed_at"], revokedAt: row["revoked_at"])
+        }
+    }
+}
+
+@MainActor
+@Suite("13n-c U3 — grant from where you are: the road, the doors, ⌥⌘A, the icon, the indicator", .serialized)
+struct MCPShareFacesTests {
+    private func approved(_ ops: Operations, _ name: String = "claude-code") throws -> MCPClient {
+        let client = try ops.recordMCPContact(name: name, version: "2")
+        try ops.approveMCPClient(client.id, granting: nil)
+        return MCPClient(
+            id: client.id, name: client.name, version: client.version, state: .approved,
+            firstSeenAt: client.firstSeenAt, lastSeenAt: client.lastSeenAt, decidedAt: nil)
+    }
+
+    private func note(_ ops: Operations, _ title: String) throws -> Container {
+        let post = try ops.createPost(title: title)
+        _ = try ops.newBlock(in: post.id, text: "\(title) text", registeringUndo: false)
+        return post
+    }
+
+    // MARK: - The road's gates (R-AIR-8, R-AIR-7)
+
+    @Test func theGatesFollowAnApprovedClientAndTheServerSwitch() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            #expect(try await settle { door.snapshot.approvedCount == 0 })
+            #expect(!door.hasApprovedClient && !door.serverOn, "no client, no server — no share face at all")
+            let pending = try session.operations.recordMCPContact(name: "codex", version: nil)
+            try await Task.sleep(for: .milliseconds(80))
+            #expect(!door.hasApprovedClient, "a PENDING request is not an approved client (R-AIR-8)")
+            try session.operations.approveMCPClient(pending.id, granting: nil)
+            #expect(try await settle { door.hasApprovedClient })
+            try session.operations.setMCPSwitch(.server, on: true)
+            #expect(try await settle { door.serverOn })
+            try session.operations.denyMCPClient(pending.id)
+            #expect(try await settle { !door.hasApprovedClient }, "the last approved client denied — the faces go")
+            door.detach()
+            #expect(!door.hasApprovedClient, "a locked library shows no share face")
+        }
+    }
+
+    // MARK: - The place-door sheet's act and its receipt
+
+    @Test func aBulkShareLandsAsOneActAndItsReceiptCarriesChangeAndRevoke() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let client = try approved(ops)
+            let notes = try ["parser notes", "grammar sketch", "morning pages"].map { try note(ops, $0) }
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            session.status.receiptStyle = .quiet
+            var reopened: MCPGrantOpening?
+            door.grantNotes(
+                client, notes.map(\.id), rung: .read, duration: .once, replacing: [],
+                saying: MCPShareCopy.notesCount(3), change: { reopened = $0 })
+            #expect(try await settle { session.status.spoken != nil })
+            let rows = try liveGrants(db)
+            #expect(rows.count == 3 && Set(rows.map(\.createdAt)).count == 1, "ONE act, one stamp")
+            let spoken = try #require(session.status.spoken)
+            #expect(spoken.text == "Shared 3 notes with claude-code \u{2014} read, once.")
+            #expect(spoken.kind == .receipt, "a share is a RECEIPT (her setting governs it)")
+            #expect(spoken.action?.label == "Revoke \u{203A}" && spoken.secondary?.label == "Change\u{2026}")
+            #expect(try await settle { door.snapshot.sharedGroups.count == 1 })
+            #expect(door.snapshot.sharedGroups.first?.memberCount == 3, "the pane shows ONE row for the act")
+
+            // Change… re-opens the sheet on exactly what landed.
+            spoken.secondary?.perform()
+            let opening = try #require(reopened)
+            #expect(opening.client?.id == client.id && opening.place == .notes(notes.map(\.id)))
+            #expect(opening.rung == .read && opening.duration == .once && opening.origin == .place)
+            #expect(opening.replacing == rows.map(\.id), "confirming REPLACES the act (T-U3-8)")
+
+            // Revoke › covers the whole act.
+            spoken.action?.perform()
+            #expect(try await settle { (try? liveGrants(db))?.allSatisfy { $0.revokedAt != nil } == true })
+            #expect(try await settle { session.status.spoken?.text == MCPShareCopy.revoked })
+        }
+    }
+
+    /// Stage B R1 B3 (R-13n-10): a grouped row with more members than it
+    /// names offers "and N more ›", and that road names EVERY member — before
+    /// it, the members past the third were named nowhere ("all N ›" showed the
+    /// same three).
+    @Test func aGroupedRowsRoadNamesEveryMember() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = session.operations
+            let client = try approved(ops)
+            let titles = ["parser notes", "grammar sketch", "morning pages", "the long table", "ch 7"]
+            let notes = try titles.map { try note(ops, $0) }
+            _ = try ops.grantMCPAccess(client.id, notes: notes.map(\.id), rung: .read, duration: .always)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            #expect(try await settle { door.snapshot.sharedGroups.count == 1 })
+            let group = try #require(door.snapshot.sharedGroups.first)
+            #expect(MCPSharedGroupView.unnamedMembers(group) == 2, "the row names three; its road holds the rest")
+            #expect(MCPPaneCopy.groupMoreRoad(MCPSharedGroupView.unnamedMembers(group)) == "and 2 more \u{203A}")
+            // R2-2 (A JUSTIFIED EDIT, the ritual): the read answers nil when it
+            // FAILED, so a failure is never mistaken for "nothing left".
+            let members = try #require(await door.sharedMembers(group.grantIDs))
+            #expect(members.map(\.targetTitle) == titles, "the road names all five, in the act's order")
+            #expect(await door.allSharedGroups().first?.grantIDs == group.grantIDs,
+                    "the all-N list's row opens the same road")
+        }
+    }
+
+    /// Stage B R2-2 (B8's class): the members sheet said "1 notes", and showed
+    /// the act's stale count above an EMPTY list once the last member was
+    /// revoked (`rows.isEmpty` conflated not-loaded with nothing-left). One
+    /// member reads "1 note"; the title counts the act until the list has
+    /// loaded, then what the list shows; a load that comes back empty closes
+    /// the sheet.
+    @Test func theMembersSheetSaysOneNoteAndClosesWhenNothingIsLeft() async throws {
+        #expect(MCPPaneCopy.membersTitle(1) == "1 note shared in one act")
+        #expect(MCPPaneCopy.membersTitle(5) == "5 notes shared in one act")
+        #expect(MCPSharedMembersSheet.shownCount(loaded: false, rows: 0, memberCount: 5) == 5,
+                "before the list loads, the act's own count")
+        #expect(MCPSharedMembersSheet.shownCount(loaded: true, rows: 3, memberCount: 5) == 3,
+                "once loaded, exactly what the list shows")
+        #expect(MCPSharedMembersSheet.shownCount(loaded: true, rows: 0, memberCount: 5) == 0,
+                "never a stale count above an empty list")
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = Operations()
+            let client = try approved(ops)
+            let notes = try ["a", "b", "c", "d"].map { try note(ops, $0) }
+            _ = try ops.grantMCPAccess(client.id, notes: notes.map(\.id), rung: .read, duration: .always)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            #expect(try await settle { door.snapshot.sharedGroups.count == 1 })
+            let group = try #require(door.snapshot.sharedGroups.first)
+            let live = try #require(await door.sharedMembers(group.grantIDs))
+            #expect(!MCPSharedMembersSheet.closesAfterLoad(live), "members left: the sheet stays")
+            try ops.revokeMCPGrants(group.grantIDs)
+            let gone = try #require(await door.sharedMembers(group.grantIDs), "a read that lands, empty")
+            #expect(gone.isEmpty && MCPSharedMembersSheet.closesAfterLoad(gone),
+                    "the last member revoked: nothing left to list, so the sheet closes")
+        }
+    }
+
+    @Test func changeFromTheReceiptReplacesTheGrantAndSaysChanged() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let client = try approved(ops)
+            let parser = try note(ops, "parser notes")
+            let old = try ops.grantMCPAccess(
+                client.id, .init(rung: .edit, scopeKind: .note, scopeID: parser.id, duration: .always))
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            session.status.receiptStyle = .quiet
+            door.grant(
+                client, .init(rung: .read, scopeKind: .note, scopeID: parser.id, duration: .once),
+                replacing: [old], saying: MCPShareCopy.quoted("parser notes"), change: { _ in })
+            #expect(try await settle { session.status.spoken != nil })
+            #expect(session.status.spoken?.text == "Changed \u{201C}parser notes\u{201D} for claude-code \u{2014} read, once.")
+            let rows = try liveGrants(db)
+            #expect(rows.first { $0.id == old }?.revokedAt != nil, "the lowered rung lands — the old grant is gone")
+            #expect(rows.filter { $0.revokedAt == nil }.map(\.rung) == [.read])
+        }
+    }
+
+    /// **13n-c UX walk W-UX-19 (her ask, sitting round 8 — "I see these
+    /// grants here and I can revoke them but I don't see a way to upgrade
+    /// them"):** every Shared-with-AI row carries Change… — THE replace sheet
+    /// pre-filled on exactly that grant (the receipt's idiom, pinned above);
+    /// confirming REPLACES it, so a raised rung lands. A grouped act's
+    /// Change… covers the act as its one Revoke does.
+    @Test func aSharedRowsChangeReplacesItsGrantAndAnActsChangeReplacesTheAct() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let client = try approved(ops)
+            let book = try ops.createReading(name: "the lightning thief", kind: .book)
+            let old = try ops.grantMCPAccess(
+                client.id, .init(rung: .read, scopeKind: .book, scopeID: book.id, duration: .always))
+            let notes = try ["parser notes", "grammar sketch", "a letter"].map { try note(ops, $0).id }
+            let act = try ops.grantMCPAccess(client.id, notes: notes, rung: .read, duration: .once)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            #expect(try await settle { door.snapshot.sharedGroups.count == 2 })
+            #expect(MCPPane.surfaceCapabilities.contains(.mcpChangeGrant), "the pane renders the row's Change…")
+
+            // One grant's row — the book.
+            let bookRow = try #require(door.snapshot.sharedGroups.first { !$0.isGroup }?.lead)
+            let opening = try #require(await door.changeOpening(bookRow))
+            #expect(opening.place == .book(book.id) && opening.replacing == [old])
+            #expect(opening.rung == .read && opening.duration == .always && opening.client?.id == client.id)
+            #expect(opening.origin == .pane, "opened in the pane — its sheet speaks in the pane's caption")
+            // Confirmed RAISED — her "upgrade".
+            door.grant(
+                client, .init(rung: .suggest, scopeKind: .book, scopeID: book.id, duration: .always),
+                replacing: opening.replacing, saying: nil, change: nil)
+            #expect(try await settle {
+                (try? liveGrants(db))?.first { $0.id == old }?.revokedAt != nil
+            }, "the old grant is replaced")
+            let bookGrants = try liveGrants(db).filter { $0.scopeKind == .book && $0.revokedAt == nil }
+            #expect(bookGrants.map(\.rung) == [.suggest], "the raised rung lands")
+
+            // The act's row — three notes, one Change… covering all three.
+            #expect(try await settle { door.snapshot.sharedGroups.contains { $0.isGroup } })
+            let group = try #require(door.snapshot.sharedGroups.first { $0.isGroup })
+            let actOpening = try #require(await door.changeOpening(act: group))
+            #expect(actOpening.place == .notes(notes), "the act's notes, in its order")
+            #expect(Set(actOpening.replacing) == Set(act), "every member replaced — as its one Revoke takes them all")
+            #expect(actOpening.rung == .read && actOpening.duration == .once && actOpening.origin == .pane)
+            door.grantNotes(
+                client, notes, rung: .suggest, duration: .always, replacing: actOpening.replacing,
+                saying: nil, change: nil)
+            #expect(try await settle {
+                let rows = (try? liveGrants(db)) ?? []
+                return act.allSatisfy { id in rows.first { $0.id == id }?.revokedAt != nil }
+            }, "the act's three grants are replaced")
+            let noteGrants = try liveGrants(db).filter { $0.scopeKind == .note && $0.revokedAt == nil }
+            #expect(noteGrants.count == 3 && noteGrants.allSatisfy { $0.rung == .suggest && $0.duration == .always })
+            #expect(try await settle {
+                door.snapshot.sharedGroups.first { $0.isGroup }?.lead.grant.rung == .suggest
+            }, "still one act in the pane, now at suggest")
+        }
+    }
+
+    /// **The UX-fix ladder's UXR1-2 (round 1, MINOR):** Change… was offered on
+    /// EVERY row, so a grant whose target is GONE (no delete revokes a grant —
+    /// the row lists "(gone)") opened the replace sheet on nothing: a dead
+    /// wing's sheet read as Home with a confirm that could only refuse, a
+    /// deleted book's said the fenced-reason sentence (false), and an act whose
+    /// notes were all deleted read "These 0 notes". One rule decides the offer:
+    /// a row whose target stands, an act with at least one member standing —
+    /// counted over EVERY member, not only the few the row names. Revoke stays
+    /// on every row.
+    @Test func changeIsOfferedOnlyWhereSomethingStands() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = session.operations
+            let client = try approved(ops)
+            let book = try ops.createReading(name: "the lightning thief", kind: .book)
+            let deadBook = try ops.createReading(name: "a book for the Trash", kind: .book)
+            let wing = try ops.createWing(name: "variorum")
+            let deadWing = try ops.createWing(name: "an empty wing")
+            for (kind, id) in [(MCPGrantRule.ScopeKind.book, book.id), (.book, deadBook.id),
+                               (.wing, wing.id), (.wing, deadWing.id)] {
+                _ = try ops.grantMCPAccess(client.id, .init(rung: .read, scopeKind: kind, scopeID: id, duration: .always))
+            }
+            // Two acts (one stamp each): five notes all deleted (two past the
+            // three the row names), and two notes with one deleted.
+            let allGone = try ["a", "b", "c", "d", "e"].map { try note(ops, $0).id }
+            _ = try ops.grantMCPAccess(client.id, notes: allGone, rung: .read, duration: .always)
+            let halfGone = try ["parser notes", "grammar sketch"].map { try note(ops, $0).id }
+            _ = try ops.grantMCPAccess(client.id, notes: halfGone, rung: .suggest, duration: .always)
+            try ops.deleteReading(deadBook.id)
+            try ops.deleteWing(deadWing.id)
+            for id in allGone + [halfGone[1]] { try ops.deleteContainer(id) }
+
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let groups = await door.allSharedGroups()
+            #expect(groups.count == 6)
+            func single(_ id: String) throws -> MCPSharedGroup {
+                try #require(groups.first { !$0.isGroup && $0.lead.grant.scopeID == id })
+            }
+            #expect(MCPChangeOffer.offers(try single(book.id)), "a standing book offers Change…")
+            #expect(MCPChangeOffer.offers(try single(wing.id)), "a standing wing offers Change…")
+            #expect(!MCPChangeOffer.offers(try single(deadBook.id)), "a deleted book: Revoke only")
+            #expect(!MCPChangeOffer.offers(try single(deadWing.id)), "a deleted wing (never Home): Revoke only")
+            let gone = try #require(groups.first { $0.isGroup && $0.memberCount == 5 })
+            #expect(gone.goneCount == 5, "every member counted — not only the three titled")
+            #expect(!MCPChangeOffer.offers(gone), "an act whose notes are all gone: Revoke only (never “These 0 notes”)")
+            let half = try #require(groups.first { $0.isGroup && $0.memberCount == 2 })
+            #expect(half.goneCount == 1)
+            #expect(MCPChangeOffer.offers(half), "one member stands: the act's Change… opens on it")
+            // The members sheet's rows: each by its own target.
+            let members = try #require(await door.sharedMembers(half.grantIDs))
+            #expect(members.map(MCPChangeOffer.offers) == [true, false])
+            // The one-row rule, alone.
+            let lead = try single(deadBook.id).lead
+            #expect(!MCPChangeOffer.offers(lead) && lead.targetTitle == nil)
+        }
+    }
+
+    @Test func aPlaceDoorRefusalSpeaksOnTheWindowAndWritesNothing() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let client = try approved(ops)
+            let open = try note(ops, "open")
+            let secret = try note(ops, "secret")
+            _ = try ops.setNotePrivate(secret.id, true)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            door.grantNotes(
+                client, [open.id, secret.id], rung: .read, duration: .always, replacing: [],
+                saying: MCPShareCopy.notesCount(2), change: nil)
+            #expect(try await settle { session.status.spoken != nil })
+            #expect(session.status.spoken?.kind == .refusal)
+            #expect(session.status.spoken?.text == MCPPaneCopy.refusal(
+                OperationError.mcpGrantScopeFenced(kind: "note", id: secret.id)))
+            #expect(try liveGrants(db).isEmpty)
+        }
+    }
+
+    // MARK: - ⌥⌘A (the brief §4, D1)
+
+    @Test func theChordOpensTheSheetGrantsTheNewestAndRefusesWhenAlreadyReaching() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let client = try approved(ops)
+            let parser = try note(ops, "parser notes")
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            session.status.receiptStyle = .quiet
+            var sheet: MCPGrantOpening?
+
+            // No history ⇒ the deliberate road: THE sheet, WHERE = this note, WHO asked.
+            await door.shareThisNote(parser.id) { sheet = $0 }
+            #expect(sheet?.place == .note(parser.id) && sheet?.client == nil && sheet?.origin == .place)
+            #expect(try liveGrants(db).isEmpty, "nothing guessed, nothing written")
+
+            // History: her last grant was suggest (on a book) — the chord grants suggest, ONCE (not connected).
+            let book = try ops.createReading(name: "a book", kind: .book)
+            _ = try ops.grantMCPAccess(client.id, .init(rung: .suggest, scopeKind: .book, scopeID: book.id, duration: .always))
+            sheet = nil
+            await door.shareThisNote(parser.id) { sheet = $0 }
+            #expect(sheet == nil)
+            let minted = try #require(try liveGrants(db).last)
+            #expect(minted.scopeKind == .note && minted.scopeID == parser.id)
+            #expect(minted.rung == .suggest && minted.duration == .once, "never always by a key")
+            #expect(session.status.spoken?.text
+                    == "Shared \u{201C}parser notes\u{201D} with claude-code \u{2014} read and suggest, once.")
+            #expect(session.status.spoken?.action?.label == "Revoke \u{203A}"
+                    && session.status.spoken?.secondary?.label == "Change\u{2026}", "R-AIR-4's door")
+
+            // Already reaching at that rung ⇒ the refusal, nothing written.
+            let before = try liveGrants(db).count
+            await door.shareThisNote(parser.id) { sheet = $0 }
+            #expect(session.status.spoken?.kind == .refusal)
+            #expect(session.status.spoken?.text == "claude-code already reaches this note (read and suggest).")
+            #expect(try liveGrants(db).count == before)
+
+            // Connected now ⇒ while connected.
+            let other = try note(ops, "grammar sketch")
+            #expect(try await settle { door.snapshot.approvedCount == 1 })
+            door.previewConnected(["claude-code"])
+            await door.shareThisNote(other.id) { sheet = $0 }
+            #expect(try liveGrants(db).last?.duration == .connection)
+        }
+    }
+
+    @Test func theChordIsAPostActOnTheMenuWithItsKeyAndItsHelperRow() {
+        let chord = CapabilityRegistry.capability(.mcpShareThisNote)
+        #expect(chord.verb == "Share This Note with AI" && chord.shortcutLabel == "\u{2325}\u{2318}A")
+        #expect(chord.doors == [.menuBar])
+        #expect(chord.availability(CapabilityContext()) == .unavailable, "no note open — grey")
+        #expect(chord.availability(CapabilityContext(mode: .write)) == .act)
+        #expect(chord.availability(CapabilityContext(mode: .takes)) == .act, "natively in Takes (R118)")
+        #expect(EditorCommands.keyEquivalent(for: .mcpShareThisNote)?.0 == "a")
+        #expect(EditorCommands.keyEquivalent(for: .mcpShareThisNote)?.1 == [.command, .option])
+        #expect(EditorCommands.menuRendered.contains(.mcpShareThisNote))
+        #expect(HelperView.shortcutKeysShown.contains("\u{2325}\u{2318}A"))
+    }
+
+    // MARK: - The pure gates: no approved client ⇒ no door; never a door the op refuses
+
+    @Test func theBookRowMenuDrawsShareOnlyOnAShareableBook() {
+        let book = Reading(
+            id: "b", name: "the lightning thief", kind: .book,
+            createdAt: Date(timeIntervalSince1970: 0), updatedAt: Date(timeIntervalSince1970: 0))
+        var gathering = book
+        gathering.kind = .gathering
+        #expect(!BookRowMenuTable.doors(for: book).contains(.share), "no approved client ⇒ no door")
+        #expect(BookRowMenuTable.doors(for: book, shareable: true).contains(.share))
+        #expect(!BookRowMenuTable.doors(for: gathering, shareable: true).contains(.share),
+                "a gathering is never a grant target (R-AIR-12)")
+        #expect(!BookRowMenuTable.doors(for: nil, shareable: true).contains(.share), "facts unknown ⇒ not drawn")
+        let doors = BookRowMenuTable.doors(for: book, shareable: true)
+        #expect(doors.firstIndex(of: .share)! > doors.firstIndex(of: .exportPDF)!, "after the exports (mockup §2)")
+    }
+
+    /// Stage B R1 B4 (A JUSTIFIED EDIT — the ritual): the face takes the
+    /// fence's own answer (`grantable`) instead of spelling a second fence from
+    /// the profile and the Private flag; which books are grantable is the
+    /// parity pin below, against the fence's own read.
+    @Test func theBookSettingsGrantRowDrawsOnlyWhereAGrantCanLand() {
+        var book = Reading(
+            id: "b", name: "dream journal", kind: .book,
+            createdAt: Date(timeIntervalSince1970: 0), updatedAt: Date(timeIntervalSince1970: 0))
+        #expect(BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: true))
+        #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: false), "R-AIR-8")
+        #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: false, canShare: true), "the fence (P-2)")
+        book.kind = .gathering
+        #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: true),
+                "a gathering is never a grant target (R-AIR-12)")
+    }
+
+    /// Stage B R1 B4 — THE PARITY PIN (architectural: the face's old spelling
+    /// was equivalent, so this is green on both sides by design): the Book
+    /// Settings row's gate is exactly the complement of `mcpFencedBookIDs`
+    /// (the share doors' gate) over every kind of book — plain, Private, a
+    /// journal-TRAIT book, THE daily Journal, an archived Private book — and a
+    /// gathering is never grantable.
+    @Test func theGrantRowsGateIsTheFencesOwnAnswer() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let plain = try ops.createReading(name: "plain", kind: .book)
+            let privateBook = try ops.createReading(name: "private", kind: .book)
+            _ = try ops.setBookPrivate(privateBook.id, true)
+            let trait = try ops.createReading(name: "dream journal", kind: .book, profile: "journal")
+            let daily = try ops.createReading(name: "journal", kind: .book)
+            try ops.setDailyJournalBook(daily.id)
+            let archived = try ops.createReading(name: "kept", kind: .book)
+            _ = try ops.setBookPrivate(archived.id, true)
+            try ops.archiveReading(archived.id)
+            let gathering = try ops.createReading(
+                name: "a gathering", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let fenced = try await db.read { try Queries.mcpFencedBookIDs($0) }
+            #expect(fenced == [privateBook.id, daily.id, archived.id])
+            for book in [plain, privateBook, trait, daily, archived] {
+                let grantable = try await db.read { try BookSettingsModel.isGrantable($0, readingID: book.id) }
+                #expect(grantable == !fenced.contains(book.id), "\(book.name): the row's gate is the fence's")
+            }
+            #expect(try await db.read { try BookSettingsModel.isGrantable($0, readingID: gathering.id) } == false)
+        }
+    }
+
+    @Test func theFencedBooksAreExactlyTheOnesTheSheetNeverOffers() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let plain = try ops.createReading(name: "plain", kind: .book)
+            let privateBook = try ops.createReading(name: "private", kind: .book)
+            _ = try ops.setBookPrivate(privateBook.id, true)
+            let trait = try ops.createReading(name: "dream journal", kind: .book, profile: "journal")
+            let gathering = try ops.createReading(
+                name: "a gathering", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let fenced = try await db.read { try Queries.mcpFencedBookIDs($0) }
+            let offered = Set(try await db.read { try Queries.mcpGrantableBooks($0) }.map(\.id))
+            #expect(fenced == [privateBook.id])
+            #expect(offered == [plain.id, trait.id])
+            #expect(fenced.isDisjoint(with: offered) && !fenced.contains(gathering.id))
+        }
+    }
+
+    // MARK: - The words (app voice on menus and receipts; no "AI" in settings-class faces)
+
+    @Test func theShareFacesSayTheMockupsWords() {
+        #expect(MCPShareCopy.shareVerb == "Share with AI\u{2026}", "mockup §2's row menu")
+        #expect(MCPShareCopy.shareNotes(3) == "Share 3 notes with AI\u{2026}", "mockup §2's bulk bar")
+        #expect(MCPShareCopy.shared(place: "\u{201C}parser notes\u{201D}", client: "claude-code",
+                                    rung: .suggest, duration: .connection)
+                // 13n-c U4 (A JUSTIFIED EDIT, the ritual — P-13nc-U4-1): the
+                // bounded duration says when it ends.
+                == "Shared \u{201C}parser notes\u{201D} with claude-code \u{2014} read and suggest, until it disconnects.",
+                "mockup §3's receipt, verbatim but the duration's word")
+        #expect(MCPShareCopy.alreadyReaches("claude-code", .suggest)
+                == "claude-code already reaches this note (read and suggest).", "mockup §3's refusal, verbatim")
+        #expect(MCPPaneCopy.confirmPartsForNotes(verb: "Grant", rung: .read, count: 3, duration: .connection)
+                // 13n-c U4 (A JUSTIFIED EDIT, the ritual — P-13nc-U4-1).
+                == ("Grant read on ", "3 notes", " until it disconnects"), "mockup §2's confirm")
+        #expect(MCPPaneCopy.alwaysWithheldAmong([.journal])
+                == "Always isn't offered: 1 of these notes is a daily Journal entry, which is only ever "
+                    + "shared one ask at a time.", "mockup §2's why, verbatim")
+        #expect(MCPPaneCopy.alwaysWithheldAmong([.privateMark, .journal]).hasPrefix(
+            "Always isn't offered: 2 of these notes are Private or daily Journal entries"))
+        #expect(MCPPaneCopy.theseNotes(3) == "These 3 notes")
+        #expect(MCPPaneCopy.notesList(["a", "b", "c", "d", "e"]) == "a \u{00B7} b \u{00B7} c and 2 more")
+        // Stage B R1 B3 (A JUSTIFIED EDIT — the ritual): the named members and
+        // the road to the rest are two things now ("and 4 more ›" is a door).
+        #expect(MCPPaneCopy.groupMembers(["a", nil, "c"]) == "a \u{00B7} (gone) \u{00B7} c")
+        #expect(MCPPaneCopy.groupMoreRoad(4) == "and 4 more \u{203A}")
+        #expect(MCPPaneCopy.sheetTitle(client: "claude-code", changing: true) == "Change access \u{2014} claude-code")
+        #expect(MCPPaneCopy.sheetTitle(client: nil, changing: false) == MCPPaneCopy.sheetTitleChoosing)
+        #expect(MCPPaneCopy.replacesLine == "Confirming replaces the grant you opened this from.")
+        // R-AIR-8: the settings-class faces carry no "AI".
+        for words in [MCPShareCopy.sharedWithLabel, MCPShareCopy.notShared, MCPShareCopy.shareButton,
+                      MCPShareCopy.popoverTitle, MCPShareCopy.openBookNote, MCPShareCopy.zeroState,
+                      MCPShareCopy.lockHelp, MCPPaneCopy.groupInert(2), MCPPaneCopy.groupChip] {
+            #expect(!words.split(whereSeparator: { !$0.isLetter }).contains("AI"), "\(words)")
+        }
+    }
+
+    @Test func theWhySaysTheWiderPlaceAndChangeNamesTheGrantsOwnPlace() throws {
+        let client = MCPClient(
+            id: "c", name: "claude-code", version: nil, state: .approved,
+            firstSeenAt: "", lastSeenAt: "", decidedAt: nil)
+        func grant(_ kind: MCPGrantRule.ScopeKind, _ id: String) -> MCPGrantRow {
+            MCPGrantRow(id: "g-\(kind.rawValue)", clientID: "c", rung: .suggest, scopeKind: kind, scopeID: id,
+                        duration: .connection, createdAt: "", consumedAt: nil, revokedAt: nil)
+        }
+        let viaWing = MCPPlaceReach(client: client, rung: .suggest, grant: grant(.wing, ""), throughTitle: "Home")
+        let viaBook = MCPPlaceReach(
+            client: client, rung: .suggest, grant: grant(.book, "b"), throughTitle: "the lightning thief")
+        let own = MCPPlaceReach(client: client, rung: .suggest, grant: grant(.note, "n"), throughTitle: nil)
+        let open = MCPPlaceReach(client: client, rung: .read, grant: nil, throughTitle: nil)
+        #expect(MCPShareCopy.why(viaWing) == "through the Home wing grant", "R-AIR-7's words")
+        #expect(MCPShareCopy.why(viaBook) == "through \u{201C}the lightning thief\u{201D}")
+        #expect(MCPShareCopy.why(own) == nil, "the place's own grant needs no why")
+        #expect(MCPShareCopy.why(open) == "through the open book")
+        // 13n-c U4 (A JUSTIFIED EDIT, the ritual — P-13nc-U4-1).
+        #expect(MCPShareCopy.reachLine(viaWing) == "read and suggest \u{00B7} until it disconnects")
+        #expect(MCPShareCopy.iconHelp([viaWing])
+                == "Shared with claude-code (read and suggest) \u{2014} click for details")
+        let change = MCPReachPopover.changeOpening(client, try #require(viaWing.grant))
+        #expect(change.place == .wing("") && change.replacing == ["g-wing"])
+        #expect(change.rung == .suggest && change.duration == .connection && change.client?.id == "c")
+        // 13n-c UX walk W-UX-5 (T-17's FACE): a wider grant's Revoke says
+        // WHICH grant it takes; the place's own keeps the plain verb.
+        #expect(MCPShareCopy.revokeLabel(viaWing) == "Revoke the Home wing grant")
+        #expect(MCPShareCopy.revokeLabel(viaBook) == "Revoke the grant on \u{201C}the lightning thief\u{201D}")
+        #expect(MCPShareCopy.revokeLabel(own) == CapabilityRegistry.capability(.mcpRevokeGrant).verb)
+    }
+
+    // MARK: - The in-note indicator's state (VX-164)
+
+    @Test func theIndicatorSaysOnlyWhatIsTrue() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let ops = session.operations
+            let plain = try note(ops, "plain")
+            #expect(try await db.read { try MCPNoteIndicatorState.read($0, postID: plain.id) }.isEmpty,
+                    "nothing to say ⇒ nothing drawn (calm)")
+            let client = try approved(ops)
+            _ = try ops.grantMCPAccess(client.id, .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .always))
+            let shared = try await db.read { try MCPNoteIndicatorState.read($0, postID: plain.id) }
+            #expect(shared.reach.map(\.clientName) == ["claude-code"] && !shared.isPrivate)
+            #expect(shared.reach.first.flatMap(MCPShareCopy.why) == "through the Home wing grant")
+
+            _ = try ops.setNotePrivate(plain.id, true)
+            let locked = try await db.read { try MCPNoteIndicatorState.read($0, postID: plain.id) }
+            #expect(locked.ownPrivate && locked.reach.isEmpty, "Private: the lock, and the wing no longer reaches")
+
+            let inBook = try note(ops, "kept close")
+            let privateBook = try ops.createReading(name: "diary", kind: .book)
+            _ = try ops.addPostToReading(inBook.id, to: privateBook.id)
+            _ = try ops.setBookPrivate(privateBook.id, true)
+            let through = try await db.read { try MCPNoteIndicatorState.read($0, postID: inBook.id) }
+            #expect(!through.ownPrivate && through.privateBooks == ["diary"] && through.isPrivate)
+            #expect(MCPNoteIndicatorState.matching(through, postID: plain.id) == nil, "a stale read never draws")
+        }
+    }
+
+    /// Stage B fix pass (O-1 — RENAMED from "…AndItsPendingTwinExists", a
+    /// justified edit): the pending-ask mark differs from the shared icon by
+    /// SILHOUETTE — never the same glyph filled — so the two read apart beside
+    /// each other on one row (a taste row: the guard, not a red-on-old pin).
+    @Test func theIconsGlyphIsTheMCPPanesOwnAndThePendingMarkDiffersBySilhouette() {
+        #expect(MCPSharedIcon.symbol == SettingsPane.mcp.symbol, "the permission's home, pictured")
+        #expect(NSImage(systemSymbolName: MCPSharedIcon.symbol, accessibilityDescription: nil) != nil)
+        #expect(NSImage(systemSymbolName: MCPSharedIcon.pendingSymbol, accessibilityDescription: nil) != nil)
+        func shape(_ symbol: String) -> String {
+            symbol.split(separator: ".").filter { $0 != "fill" && $0 != "filled" }.joined(separator: ".")
+        }
+        #expect(shape(MCPSharedIcon.pendingSymbol) != shape(MCPSharedIcon.symbol),
+                "a waiting ask is not \"shared, filled\" — its outline is its own")
+    }
+}

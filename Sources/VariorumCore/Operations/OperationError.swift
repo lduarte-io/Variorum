@@ -312,6 +312,13 @@ public enum OperationError: Error, Equatable, Sendable {
     /// wing — the book choosers list only the note's own wing's books, so no
     /// face reaches it; this is the invariant's op-level belt.
     case crossWingMembership(postID: String, readingID: String)
+    /// 13n-c U6 — an MCP wing move's undo or redo found the note has JOINED a
+    /// book or TAKEN a tag in the wing it would now leave since the move (or
+    /// since the undo): replaying the move's exact rows would split a book or
+    /// a vocabulary across wings (§9), so the replay refuses and KEEPS its
+    /// entry — she takes those off (or moves the note with her own door), then
+    /// tries again (PROVISIONAL P-13nc-U6-3).
+    case wingMoveChangedSince(postID: String)
     /// #169(b), RULED — THE DAILY JOURNAL IS HOME-ONLY: a book of another wing
     /// cannot be designated, and the daily Journal never leaves Home.
     case dailyJournalIsHomeOnly(id: String)

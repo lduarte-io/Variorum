@@ -314,6 +314,11 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// family: a fact about the window she is in, wired by the shell to the
     /// window registry through `CommandRouter.windowKind`.
     var windowKind: WindowRegistry.Kind? = nil
+    /// **13n-c Stage B R1 B6 — how many wings the library has** (Home
+    /// included). ⌘L's gate: with ONE wing the switcher can only close, so
+    /// "Switch Wing…" is honestly grey (P-2) — the `openNoteCount` family, a
+    /// fact about the library, wired through `WingState`.
+    var wingCount = 1
 }
 
 // MARK: - The capability declaration
@@ -934,4 +939,32 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// bars (`.bottomBar`), NOTE contexts only, and only when a client is
     /// there to offer (P-2).
     case mcpAllowHere
+    /// 13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; R-AIR-4/6/7/8).
+    /// Every one renders ONLY while an approved client exists (R-AIR-8 — the
+    /// window's `MCPShareRoad.canShare`; with none, no door, and the
+    /// zero-state lives in Settings ▸ MCP). `mcpShareHere` — "Share with AI…"
+    /// on a note row's and a book row's menu (`.contextMenu`, the row it is
+    /// on); `mcpShareNotes` — the Library bulk bar's "Share N notes with AI…"
+    /// (`.surface`, the ⌘-click pick); `mcpShareBook` — Book Settings' grant
+    /// row's Share… (`.surface`); `mcpShareThisNote` — ⌥⌘A, the Edit menu
+    /// (`.menuBar`); `mcpShowSharing` — the ONE shared icon (R-AIR-6) on a
+    /// Bookcase row and in the note's indicator (R-AIR-7), whose click shows
+    /// the permission; `mcpChangeGrant` — that popover's Change…, which
+    /// REPLACES the grant it names (T-U3-8; `mcpChangeClientAccess` stays the
+    /// client row's additive Change…).
+    case mcpShareHere, mcpShareNotes, mcpShareBook, mcpShareThisNote
+    case mcpShowSharing, mcpChangeGrant
+    /// 13n-c U4 — ASKS WAIT QUIETLY + THE KEYBOARD (VX-156 items 4/5, VX-157;
+    /// R-AIR-6/15). `mcpOpenAsk` — the pending-ask GLYPH's press (on the thing
+    /// an ask names) and Settings ▸ MCP ▸ Waiting's Answer…, each opening THAT
+    /// ask's sheet (`.surface` — it carries its ask; arrival X: an ask never
+    /// opens itself). `mcpSettings` — ⌥⌘, "MCP Settings…" in the app menu
+    /// (`.menuBar`): Settings at MCP, at Waiting when an ask waits.
+    /// `switchWing` — ⌘L "Switch Wing…" (`.menuBar`, app-wide — the type-to-
+    /// filter switcher with held-⌘ L cycling) and the masthead's wing word
+    /// (`.surface` — a click without typing CYCLES to the next wing, her
+    /// R-AIR-5/15). The 13i-d note that switching "stays undeclared" held for
+    /// the in-menu picker (a view choice); a CHORD and a cycling door are
+    /// doors, and P-1 declares doors.
+    case mcpOpenAsk, mcpSettings, switchWing
 }

@@ -108,8 +108,17 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         // 13n-b U3 walk finding W-1: "what they can read" stopped being
         // true when the write rungs landed (U2) — a client may change what
         // it is granted now, up to edit.
-        case .mcp: "The local MCP server: which clients may connect, what each may read and change, and the "
-            + "command that sets up Claude Code."
+        // 13n-c U4: + the asks waiting for an answer (arrival X).
+        // 13n-c Stage B R1 B7: the setup menu (U5, R-AIR-13) sets up Claude
+        // Code, Codex or any MCP client — the description says so. 13n-c O-4
+        // (her ask — no provider hardwired outside the setup): it says "any MCP
+        // client", naming none (PROVISIONAL, her copy pass).
+        // 13n-c UX walk W-UX-18 (T-16): SHORTENED, not wrapped — at two lines
+        // Terminal's mono cut "…how to set up any…", losing "any MCP client";
+        // the header's two-line rule holds every pane (the oracle pin measures
+        // it). "The local MCP server" lives on in the switch's own sentence.
+        case .mcp: "Which clients may connect, what each may read and change, the asks waiting for "
+            + "you, and how to set up any MCP client."
         case .protection: "The passphrase, how the library locks, and the ways back in."
         case .dataSafety: "Backups, how fresh they are, and what restoring one does."
         case .diagnostics: "Crash reports \u{2014} off unless you turn them on, and never sent without you."
@@ -292,14 +301,34 @@ nonisolated enum SettingsCatalog {
         // server toggle and the one open-book switch.
         SettingsRow(
             id: "mcpServer", pane: .mcp, title: MCPPaneCopy.enableTitle,
-            blurb: "A local server for MCP clients such as Claude Code. Off by default; nothing is "
-                + "readable until you grant it. This Mac only.",
+            // 13n-c U5 (R-AIR-13): the setup menu names Codex and any MCP
+            // client's JSON, so the search finds the pane by those words too.
+            // 13n-c O-4 (her ask): the blurb names no provider ("any MCP
+            // client", PROVISIONAL), and the search finds the pane by whatever
+            // she or a user calls their AI — the keywords are search
+            // vocabulary, never copy (her (e)).
+            blurb: "A local server for any MCP client. Off by default; "
+                + "nothing is readable until you grant it. This Mac only.",
             keywords: ["mcp", "ai", "claude", "claude code", "agent", "llm", "model context protocol",
-                       "server", "connect", "client", "share", "grant", "socket"]),
+                       "server", "connect", "client", "share", "grant", "socket",
+                       "codex", "setup", "json", "stdio",
+                       "anthropic", "openai", "chatgpt", "gpt", "cursor", "gemini", "copilot",
+                       "windsurf", "ollama"]),
+        // 13n-c U4 — WAITING (arrival X): where a client's ask waits besides
+        // its icon; ⌥⌘, opens the pane there.
+        SettingsRow(
+            id: "mcpWaiting", pane: .mcp, title: MCPPaneCopy.waitingSection,
+            blurb: "A client's ask past what you shared waits here, newest first, and at its icon on "
+                + "the note, book or wing it names \u{2014} nothing pops up by itself. \u{2325}\u{2318}, "
+                + "opens it.",
+            keywords: ["waiting", "ask", "asks", "pending", "answer", "request", "mcp", "ai",
+                       "client", "permission"]),
         SettingsRow(
             id: "mcpOpenBook", pane: .mcp, title: MCPPaneCopy.openBookTitle,
+            // 13n-c U1 (R-AIR-1, J8): only THE daily Journal and anything
+            // Private still ask — a journal-style book reads like any book.
             blurb: "The open book: every approved MCP client may read everything, always \u{2014} "
-                + "journals still ask every time.",
+                + "your daily Journal and anything Private still ask every time.",
             keywords: ["open book", "mcp", "ai", "read everything", "share all", "always"]),
         SettingsRow(
             id: "protection", pane: .protection, title: "Protection",

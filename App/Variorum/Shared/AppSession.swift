@@ -792,6 +792,10 @@ final class AppSession {
         commandRouter.writeEditorOwnsScrollView = { editorRouter.active?.scrollView != nil }
         commandRouter.undoAvailable = { menuState.topLabel != nil }
         commandRouter.redoAvailable = { menuState.topRedoLabel != nil }
+        // 13n-c Stage B R1 B6: ⌘L's gate reads the library's wing count (an
+        // observable fact on the session's own `WingState` — no window owns it).
+        let wing = self.wing
+        commandRouter.wingCount = { wing.wingCount }
         #endif
     }
 }

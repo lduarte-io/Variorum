@@ -76,6 +76,11 @@ struct ContextBar: View {
     /// (her sitting-round-1 ruling: *"visible ONLY when the note has
     /// deleted/archived blocks"* — calm at rest).
     var trayFace: TrayFace? = nil
+    /// 13n-c U3 — VX-164: the bar's TRAILING end — the note's upper right in
+    /// every mode — carries the in-note MCP indicator (`MCPNoteIndicator`,
+    /// composed by `PaneHost`; it draws nothing at all when there is nothing
+    /// to say). nil (a place, a harness mount) ⇒ the bar is exactly as before.
+    var trailing: AnyView? = nil
     let onBack: () -> Void
     let onForward: () -> Void
     /// The ascent: open this book, revealed at this note.
@@ -183,6 +188,7 @@ struct ContextBar: View {
                     trayDoor(trayFace)
                 }
                 Spacer(minLength: 0)
+                if let trailing { trailing }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 3)

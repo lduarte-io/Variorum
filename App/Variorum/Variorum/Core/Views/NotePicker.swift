@@ -90,11 +90,17 @@ extension NotePickerSource {
     /// Item 14's note feed: `Queries.notePickerNotes` (bounded, recent
     /// first, LIKE-escaped), ranked with the subject's version peers first
     /// where a peer anchor is given (each wearing `peerAnnotation`).
+    ///
+    /// 13n-c U2 — `inWing` (additive; nil = byte-identical): the wing a
+    /// SUBJECT-LESS feed reads instead of the session's current one (the grant
+    /// sheet in Settings searches the wing she chose; a subject's own wing
+    /// still wins — §9).
     @MainActor
     static func corpusNotes(
         session: AppSession, excluding subjectID: String?,
         versionPeersOf peerAnchor: String? = nil,
-        peerAnnotation: String? = nil
+        peerAnnotation: String? = nil,
+        inWing wingOverride: String? = nil
     ) -> NotePickerSource {
         let cache = PeerCache()
         return NotePickerSource { query in
@@ -105,7 +111,7 @@ extension NotePickerSource {
             // 13i-d U5: the picker offers the SUBJECT's own wing (§9 — a
             // version link, a comparison or a book add never reaches into
             // another library); no subject = the current wing.
-            let fallback = session.wing.currentID
+            let fallback = wingOverride ?? session.wing.currentID
             let hits: [Queries.NotePickerHit] = (try? await session.database.read { db in
                 let wing = try subjectID.flatMap { try Queries.effectiveWing(db, ofPost: $0) }
                     ?? fallback

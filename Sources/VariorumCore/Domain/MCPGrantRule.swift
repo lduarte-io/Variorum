@@ -17,11 +17,15 @@ import Foundation
 ///   last connection closes, and swept at every server start) · always.
 /// - **The open book:** one switch; read rung, everywhere, for APPROVED
 ///   clients only.
-/// - **THE FENCE** (journal-class — R-13nb-1 + R-13nb-4): a FENCED note
+/// - **THE FENCE** (journal-class — R-13nb-1 + R-13nb-4, re-keyed on THE
+///   daily Journal by 13n-c's R-AIR-1): a FENCED note
 ///   matches no standing grant and never rides the open book; only a
 ///   per-ask grant naming THAT note, once or while connected, reaches it —
 ///   and its ask never offers "always". A fenced BOOK matches nothing at all
 ///   (its notes are fenced one by one; the book itself is never listed).
+///   A LIVE per-ask grant holder asking PAST its rung hears `rungTooLow`,
+///   never the fence (13n-c U1 ladder F1 — its grant is its knowledge); a
+///   spent or revoked grant is not live, so the fence's one answer returns.
 ///
 /// The rule decides; it never reads. `Queries.mcpNoteFacts` /
 /// `mcpBookFacts` derive the facts (the fence's legs live there, in ONE
@@ -61,11 +65,14 @@ public enum MCPGrantRule {
         case pending, approved, denied
     }
 
-    /// Why a note or book is fenced. Journal = R-13nb-1's predicate (its
-    /// own `profile='journal'`, or a live member of a live journal/daily
-    /// book); privateMark = R-13nb-4's (its own mark, or a live member of a
+    /// Why a note or book is fenced. Journal = R-13nb-1's predicate as
+    /// RE-KEYED by 13n-c's R-AIR-1 (a note's own `profile='journal'` — the
+    /// ⌘J day entry's shape, D-1 — or a live member of a live book wearing
+    /// THE daily Journal's 'daily' marker; a journal-TRAIT book is not a
+    /// fence); privateMark = R-13nb-4's (its own mark, or a live member of a
     /// live marked book). Privacy wins ties: when both hold, the fence says
-    /// `privateMark`.
+    /// `privateMark`. The legs are derived in ONE place
+    /// (`Queries.mcpNoteFacts` / `mcpBookFacts`).
     public enum Fence: String, Sendable, Equatable {
         case journal
         case privateMark = "private"
@@ -219,13 +226,63 @@ public enum MCPGrantRule {
         if let grant = best(sufficient) {
             return .allow(grantID: grant.id, consumesOnce: spends(grant, rung: rung, consumes: consumes))
         }
+        // 13n-c U1 ladder F1 (the recorded F-8, built): a LIVE grant already
+        // reaches the target — for a fenced note, necessarily its own per-ask
+        // grant — so the honest answer is the rung, never the one not-shared
+        // answer ("or doesn't exist") about a note the client can read this
+        // second. The client's grant IS its knowledge: no oracle opens, and a
+        // spent once grant or a revoked one is not live, so a lapsed grant
+        // falls through to the fence below. A fenced target's ask still never
+        // offers "always" (R-13n-4).
+        if let highest = reaching.map(\.rung).max() {
+            return .ask(.rungTooLow(granted: highest), offersAlways: fence == nil)
+        }
         if let fence {
             return .ask(.fenced(fence), offersAlways: false)
         }
-        if let highest = reaching.map(\.rung).max() {
-            return .ask(.rungTooLow(granted: highest), offersAlways: true)
-        }
         return .ask(.notShared, offersAlways: true)
+    }
+
+    // MARK: - The WHY (13n-c U3 — R-AIR-6/-7: "readable through the Home wing grant")
+
+    /// What lets an approved client reach a target right now.
+    public enum Standing: Equatable, Sendable {
+        /// A live grant authorizes it — its scope says why: the place's own
+        /// grant, or a wider one (a book holding the note, the wing).
+        case grant(Grant)
+        /// The open book (read, everywhere unfenced — no grant row).
+        case openBook
+    }
+
+    /// An approved client's reach on a target: how far, and why.
+    public struct Reach: Equatable, Sendable {
+        public let rung: Rung
+        public let standing: Standing
+
+        public init(rung: Rung, standing: Standing) {
+            self.rung = rung
+            self.standing = standing
+        }
+    }
+
+    /// **The highest rung an APPROVED client reaches the target at right
+    /// now, and the standing that authorizes it** — read OFF `decide` itself
+    /// (its `.allow(grantID:)`; nil = the open book), never a parallel rule:
+    /// the faces' WHY is exactly the grant the server would use. A
+    /// non-consuming probe (`consumes: false`), so it spends nothing. nil =
+    /// it reaches nothing (a fenced note reached by no per-ask grant of its
+    /// own; a fenced book always).
+    public static func reach(grants: [Grant], openBook: Bool, target: Target) -> Reach? {
+        for rung in Rung.allCases.reversed() {
+            guard case .allow(let grantID, _) = decide(
+                client: .approved, grants: grants, openBook: openBook, target: target,
+                rung: rung, consumes: false)
+            else { continue }
+            guard let grantID else { return Reach(rung: rung, standing: .openBook) }
+            guard let grant = grants.first(where: { $0.id == grantID }) else { continue }
+            return Reach(rung: rung, standing: .grant(grant))
+        }
+        return nil
     }
 
     /// **ONCE: ONE WRITE MEANS ONE WRITE** (AF-7 AS AMENDED at the U2
@@ -248,7 +305,8 @@ public enum MCPGrantRule {
     /// THAT wing at the asked rung. A wing-scoped write spends a once wing
     /// grant exactly as `decide` does (AF-7). Every note a wing listing then
     /// shows still passes `decide` on its own — the fence filters per note,
-    /// so a wing never lists a journal.
+    /// so a wing never lists a fenced note (a daily-Journal entry, a ⌘J entry,
+    /// anything Private — 13n-c R-AIR-1).
     public static func decideWing(
         client: ClientState?, grants: [Grant], openBook: Bool, wingID: String, rung: Rung,
         consumes: Bool = false
@@ -267,6 +325,31 @@ public enum MCPGrantRule {
             return .ask(.rungTooLow(granted: highest), offersAlways: true)
         }
         return .ask(.notShared, offersAlways: true)
+    }
+
+    /// **A GATHERING — read facts under WING-LEVEL reach** (13n-c R-AIR-12, her
+    /// ruling: "granting a wing grants access to everything … unless it's
+    /// deliberately marked private"; gatherings "do NOT become separate grant
+    /// targets"). A gathering is never a grant's scope, so only wing-level
+    /// reach on ITS wing reaches it — `decideWing`'s own READ: a live wing grant
+    /// on that wing at any rung, or the open book. A note or book grant never
+    /// does. Always at READ (a gathering holds nothing to write) and never
+    /// consuming (its facts and its assembly spend no once grant); every MEMBER
+    /// it shows is then decided on its own through `decide`, so the per-note
+    /// fence filters it. A FENCED gathering — a 'daily' marker or a Private
+    /// stamp, which no op mints on one but a stale row could carry — matches
+    /// nothing, the same decision a fenced book gets (the one answer).
+    public static func decideGathering(
+        client: ClientState?, grants: [Grant], openBook: Bool, gathering: BookFacts
+    ) -> Decision {
+        switch client {
+        case .approved: break
+        case .denied: return .refuse(.clientDenied)
+        case .pending, nil: return .refuse(.clientPending)
+        }
+        if let fence = gathering.fence { return .ask(.fenced(fence), offersAlways: false) }
+        return decideWing(
+            client: client, grants: grants, openBook: openBook, wingID: gathering.wingID, rung: .read)
     }
 
     /// Does this grant's SCOPE reach the target? The fence lives here: a

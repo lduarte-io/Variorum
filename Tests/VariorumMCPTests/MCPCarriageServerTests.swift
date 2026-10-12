@@ -367,13 +367,17 @@ struct MCPCarriageServerTests {
                 "note_id": .string(note.id), "entry_date": .string("2019-02-30"),
             ])
             #expect(bad.isError == true && text(bad).hasPrefix("entry_date must be a real day"))
-            // She files it in a JOURNAL book: from that moment the fence governs.
-            let journal = try h.operations.createReading(name: "journal", kind: .book, profile: "journal")
+            // She files it in THE daily Journal: from that moment the fence
+            // governs. 13n-c U1 (justified edit, the ritual — R-AIR-1): the
+            // fixture was a journal-TRAIT book, which no longer fences.
+            let journal = try h.operations.createReading(name: "journal", kind: .book, profile: "daily")
             _ = try h.operations.addPostToReading(note.id, to: journal.id)
             let fenced = try await call(connection, "set_entry_date", [
                 "note_id": .string(note.id), "entry_date": .null,
             ])
-            #expect(fenced.isError == true && text(fenced).hasPrefix("That's a journal entry"))
+            // 13n-c U1 (justified edit, the ritual — T-2): the fence speaks the
+            // ONE answer, exactly what a missing note hears.
+            #expect(fenced.isError == true && text(fenced) == MCPRefusalCopy.words(.notShared, .note))
             #expect(try await h.database.read { try String.fetchOne($0, sql: "SELECT entry_date FROM container WHERE id = ?",
                                                                arguments: [note.id]) } == "2019-03-04")
             await h.hangUp(connection)
@@ -530,7 +534,11 @@ struct MCPCarriageServerTests {
     /// sentence. The arm where it matters most: a FENCED member (a journal or
     /// Private note is reachable per-ask only — without the ask, she never
     /// hears it and the road is a dead end).
-    @Test func filingAFencedMemberRaisesTheAskAndSaysSo() async throws {
+    ///
+    /// 13n-c U1 (justified edit, the ritual — T-2; renamed from
+    /// `…RaisesTheAskAndSaysSo`): the ask still lands; the wire stopped
+    /// SAYING so for a fenced note — it answers the one answer.
+    @Test func filingAFencedMemberRaisesTheAskAndTheWireStaysOneAnswer() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
@@ -544,9 +552,13 @@ struct MCPCarriageServerTests {
             let refused = try await call(connection, "file_note_in_chapter", [
                 "note_id": .string(entry.id), "book_id": .string(book.id), "section_id": .string(chapter.id),
             ])
-            #expect(refused.isError == true && text(refused).hasPrefix("That's a journal entry"))
-            #expect(text(refused).hasSuffix(MCPRefusalCopy.askedSentence),
-                    "the asked sentence — the ask was raised, not just worded")
+            // 13n-c U1 (justified edit, the ritual — T-2): the WIRE no longer
+            // says so — a fenced note answers the ONE answer, never its fence's
+            // name nor the asked sentence (either would mark it apart from a
+            // note that does not exist). The ASK is what F-2 fixed, and it
+            // still lands (below).
+            #expect(refused.isError == true && text(refused) == MCPRefusalCopy.words(.notShared, .note))
+            #expect(!text(refused).hasSuffix(MCPRefusalCopy.askedSentence))
             let asks = h.asks.value
             #expect(asks.map(\.scopeID) == [entry.id] && asks.first?.rung == .writeNew,
                     "her sheet hears the one ask: the note, at the act's rung")

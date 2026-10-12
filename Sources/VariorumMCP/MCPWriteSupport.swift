@@ -84,10 +84,13 @@ public struct MCPWriteReceipt: Sendable, Equatable {
     /// 13n-b U4 (R-13nb-23 (a), AF-11 F-2): where the receipt's "Open ›"
     /// takes her — the act's landing, a state her own doors reach.
     public var show: MCPShowTarget?
+    /// 13n-c U6: how many books a WING MOVE took the note out of (her own
+    /// door's receipt says it — "it left 2 books"); nil for every other act.
+    public var leftBooks: Int?
 
     public init(
         clientName: String, act: Operations.MCPWriteAct, targetID: String?, targetTitle: String?,
-        detail: String? = nil, count: Int = 1, show: MCPShowTarget? = nil
+        detail: String? = nil, count: Int = 1, show: MCPShowTarget? = nil, leftBooks: Int? = nil
     ) {
         self.clientName = clientName
         self.act = act
@@ -96,6 +99,7 @@ public struct MCPWriteReceipt: Sendable, Equatable {
         self.detail = detail
         self.count = count
         self.show = show
+        self.leftBooks = leftBooks
     }
 }
 
@@ -118,19 +122,28 @@ public struct MCPHostHooks: Sendable {
     /// the move), and answers the verdict it applied. Nil = no app around the
     /// host (a headless host shows nothing).
     public var show: (@Sendable (MCPShowTarget) async -> MCPShowRule.Verdict)?
+    /// 13n-c U6: her Move to Wing door's OWN sentence for a note held by a
+    /// finished or sealed book (`WingCopy.frozen(title, book:)` on the Mac —
+    /// the mockup §9's "in her own words"), so `move_note_to_wing` refuses
+    /// exactly as her door does. Spoken only where the client can READ that
+    /// book (names stay with grants — AF-10 (f)); otherwise, and with no app
+    /// around the host, the op's own refusal speaks through `refusalWords`.
+    public var wingMoveFrozenWords: (@Sendable (_ noteTitle: String, _ bookName: String) -> String)?
 
     public init(
         refusalWords: @escaping @Sendable (Error) -> String? = { _ in nil },
         onAsk: (@Sendable (MCPAsk) -> Void)? = nil,
         onWrite: (@Sendable (MCPWriteReceipt) -> Void)? = nil,
         now: @escaping @Sendable () -> Date = { Date() },
-        show: (@Sendable (MCPShowTarget) async -> MCPShowRule.Verdict)? = nil
+        show: (@Sendable (MCPShowTarget) async -> MCPShowRule.Verdict)? = nil,
+        wingMoveFrozenWords: (@Sendable (_ noteTitle: String, _ bookName: String) -> String)? = nil
     ) {
         self.refusalWords = refusalWords
         self.onAsk = onAsk
         self.onWrite = onWrite
         self.now = now
         self.show = show
+        self.wingMoveFrozenWords = wingMoveFrozenWords
     }
 }
 

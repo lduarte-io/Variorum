@@ -294,6 +294,36 @@ enum TutorialSeeder {
         // copy §7 text is untouched (the fence).
         ("keeping it private",
          [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle]),
+        // 13n-c U5 — **THE MCP CHAPTER** (her kickoff, verbatim: *"perhaps the
+        // field guide can grow an MCP chapter … notes / documentation for the
+        // user need to be made clear (especially since that's what a user's AI
+        // might need as advice too)"*; D-2 — the guide chapter + the server's
+        // `instructions`, one set of facts). Every sentence is true of the
+        // 13n-c build and executed by `TutorialMCPChapterTests`.
+        //
+        // **THE SEAT — LAST, after the privacy chapter (PROVISIONAL
+        // P-13nc-U5-1; the U5 record says why).** Her R-13s-30 words, *"it makes
+        // more sense to have the safety after the workflow and the workflow
+        // together"*, still hold whole: the workflow chapters run unbroken and
+        // safety follows them. The door is OPT-IN (shut until she opens it), so
+        // it reads as the guide's appendix — a reader who never uses it stops
+        // at the serious chapter — and the privacy chapter's own premise (an
+        // open library is readable) is this chapter's starting point: the one
+        // door that lets an AI read it, deliberately. The alternative seat
+        // (between the books chapter and privacy) is one line.
+        (mcpChapter, mcpLessons),
+    ]
+
+    /// **13n-c U5 — the MCP chapter's name and lessons**, in one place (the
+    /// plan, the seed and `TutorialMCPChapterTests` mean the same words).
+    /// PROVISIONAL P-13nc-U5-2 (the name — "AI" and "MCP" both in it, the two
+    /// words a reader would search for; 13s-a re-voices). "how to use it" is
+    /// her ruled lesson (2026-10-11); its title and its seat before "seeing,
+    /// answering, undoing" are PROVISIONAL P-13nc-U6-9.
+    nonisolated static let mcpChapter = "AI & the MCP door"
+    nonisolated static let mcpLessons = [
+        "what the door is", "connecting a client", "how much, where, how long",
+        "what always asks", "sharing from where you are", "how to use it", "seeing, answering, undoing",
     ]
 
     /// The books chapter's name, in one place (the plan, the section and the
@@ -529,6 +559,9 @@ enum TutorialSeeder {
         // (R-13s-30 / the U3 RECORD's disposition 4): MOVED LAST — safety
         // after the workflow, the guide's closing word.
         let privacy = try ops.createSection(in: book.id, name: "keeping it private")
+        // 13n-c U5: the MCP chapter — the opt-in door, after the guide's
+        // serious close (the plan's comment says why).
+        let door = try ops.createSection(in: book.id, name: mcpChapter)
 
         /// One lesson: a `.generic` post inside the book, tagged, blocks in
         /// order. Returns the minted block results for act-ready shaping.
@@ -2432,6 +2465,227 @@ enum TutorialSeeder {
                        ProtectionCopy.privacyLessonOneParagraphs)
         _ = try lesson(privacy, ProtectionCopy.privacyLessonTwoTitle,
                        ProtectionCopy.privacyLessonTwoParagraphs)
+
+        // ————————————————————————— AI & the MCP door ——————————————————————
+        //
+        // 13n-c U5 — THE MCP CHAPTER, written against the 13n-c build (U1's
+        // fence re-key, U2's sheet, U3's share doors + icon + in-note
+        // indicator, U4's asks-wait + ⌘L, U5's setup menu). Functional words
+        // (13s-a re-voices), sentence case, written PLAINLY — never
+        // interpolated from the constants `TutorialMCPChapterTests` ties each
+        // door to (the H pattern), so a renamed door turns a lesson red. The
+        // pending-ask mark is described by its ROLE ("a small mark"), never its
+        // shape (the Stage B fix pass may change the glyph — O-1). U6 (R-AIR-12
+        // + VX-160) adds lesson 3's fourth card: a wing grant reads the wing's
+        // gatherings, and the per-item move across wings — each pinned. Her
+        // ruled "how to use it" (the sitting's third round) seats sixth: four
+        // worked recipes, every sentence executed in its pin.
+
+        _ = try lesson(door, mcpLessons[0], [
+            // 13n-c UX walk W-UX-17: "way in" said once, not twice.
+            "Variorum can let an AI work in your library, if you want it to. It "
+            + "works through MCP, the Model Context Protocol: a standard way for AI "
+            + "apps to use another app's tools. Variorum calls this connection the "
+            + "door, and it stays shut until you open it. It lives on the "
+            + "Mac; the phone has no door.",
+
+            "Open it in Settings \u{25B8} MCP (\u{2325}\u{2318}, takes you there) "
+            + "with Enable the MCP server. It works only while Variorum is open, and "
+            + "nothing in your library can be read through it until you share "
+            + "something with a client. Your grants stay on this Mac \u{2014} they "
+            + "never sync to your other devices. What a client reads goes wherever "
+            + "that client sends its work: for most clients, the company that runs "
+            + "its model.",
+
+            "A client can only do what you could do yourself, through the same "
+            + "acts. What it writes arrives as takes, notes and commits you can "
+            + "see, and every act it takes comes back out with \u{2325}\u{2318}Z "
+            + "for as long as this session is open. "
+            // W-UX-17: Read shows no lesson titles, so the pointer names it.
+            + "The chapter's last lesson, \u{201C}seeing, answering, undoing\u{201D}, "
+            + "shows how to watch it, answer it and undo it.",
+        ])
+
+        _ = try lesson(door, mcpLessons[1], [
+            // O-4 SETUP COPY BEGIN — the card that teaches the setup menu by its
+            // labels (the provider setup — her exclusion; the H pattern keeps it
+            // plain text, never interpolated).
+            // W-UX-17: the lesson's opening names its subject (Read shows no
+            // lesson titles).
+            "To connect a client, open Settings \u{25B8} MCP; under Connect a "
+            + "client, choose yours: Claude Code, Codex, or Any MCP client. Then press Copy setup command. For "
+            + "Claude Code or Codex it is one command: run it in a terminal, then "
+            + "start a new session of that app. For any other client it is a few "
+            + "lines of JSON to paste into that client's MCP settings. The pane also "
+            + "shows the path they all point at, because the door is a standard MCP "
+            + "server: one program inside the app.",
+            // O-4 SETUP COPY END
+
+            "The first time a client connects, it shows up in Settings \u{25B8} MCP "
+            + "as a connection request, and it can reach nothing yet. "
+            + "Approve\u{2026} lets it in, still reaching nothing until you share "
+            + "something: its sheet offers a first grant, with nothing picked for "
+            + "you. Deny turns it away. Every approved client is listed there, with "
+            // 13n-c UX walk W-UX-4: the client row's verb is Deny… now, and it
+            // says what it takes before it does.
+            + "Change\u{2026} to share more and Deny\u{2026} to shut it out "
+            + "again, every grant it holds revoked.",
+
+            "One honest limit: a client names itself when it connects, and "
+            + "Variorum can't check that name. Whatever you grant, you "
+            + "grant to anything that connects under that name.",
+        ])
+
+        _ = try lesson(door, mcpLessons[2], [
+            "Each grant says how much a client may do, in four steps, each "
+            + "including the ones before it. Read: it can read and search what you "
+            + "shared. Suggest: it can add new takes and comments beside your text, "
+            + "and save a lens; it can't change a word you wrote. Write new: it can "
+            + "also make new notes, books, chapters and tags. Edit: it can also "
+            + "change takes, and divide, merge, move or delete blocks. When it "
+            + "changes a take, Variorum commits the take just before and just "
+            + "after, so you can always compare and come back.",
+
+            "Each grant also says where: one note; one book, with its notes now and "
+            + "any added to it later; or a whole wing and everything in it, except "
+            // W-UX-17: the exceptions named where they are pointed at.
+            + "what always asks: your daily Journal's entries and anything Private "
+            + "(the next lesson). And for "
+            + "how long: once, for a single act (one read of a note, or one "
+            + "change); until it disconnects, which ends when the client goes away "
+            + "(offered while it's connected); or always, until you revoke it.",
+
+            "A wing grant also lets a client read that wing's gatherings; a "
+            + "gathering is never shared on its own. And a client can move a note "
+            + "to another wing only with edit where the note is and write new in "
+            + "the wing it goes to: the note leaves its books there, its tags come "
+            + "along, and \u{2325}\u{2318}Z brings it back.",
+
+            "The open book is the widest grant of all: one switch in Settings "
+            + "\u{25B8} MCP that lets every approved client read everything, "
+            + "always, again except what always asks. It is off to begin with; leave "
+            + "it off unless that is what you mean.",
+        ])
+
+        _ = try lesson(door, mcpLessons[3], [
+            "Two things are never reached by a book grant, a wing grant or the open "
+            + "book: the entries in your daily Journal (the journal \u{2318}J and "
+            + "Today's Entry file into), and anything marked Private. A client can "
+            + "read one of them only through a grant on that one note, once or "
+            + "until it disconnects. Always is never offered for them.",
+
+            "To mark a note Private, open the note \u{25BE} menu in the bar at the "
+            + "bottom of the note and choose Private \u{2014} never shared with AI. "
+            + "A book has the same mark in its Book Settings, and it covers every "
+            + "note in the book. Other books with date-stamped entries share like "
+            + "any book; only the daily Journal asks. An entry made with \u{2318}J "
+            + "keeps asking even if you later file it in another book.",
+
+            "Snippets can't be reached through the door at all: no grant reaches "
+            + "them. And each wing is a separate library: a grant in one wing never "
+            + "reaches another (\u{2318}L switches wings). Snippets is the one room "
+            + "every wing shares, and it stays closed to clients.",
+
+            "To a client, something it can't reach looks exactly like something "
+            + "that isn't there. No answer it gets tells it that a Private page or "
+            + "a journal entry exists.",
+        ])
+
+        _ = try lesson(door, mcpLessons[4], [
+            "Once a client is approved, you can share from wherever you are. "
+            + "Right-click a note in the Library, or a book on the Bookcase or in "
+            + "the Library, and choose Share with AI\u{2026}: the grant sheet opens "
+            + "with that place already picked. \u{2318}-click several notes in the "
+            // W-UX-3/-17: the bulk doors' own place (the door is findable
+            // there); UXR1-3: they wrap onto more lines when the window is
+            // narrow, so the guide says doors, not "a row" (PROVISIONAL).
+            + "Library and doors appear under the controls at the top of "
+            + "the list, Share 3 notes with AI\u{2026} among them (the number is how "
+            + "many you picked): one grant for all of them. And a book's Book "
+            + "Settings says who reaches it, with Share\u{2026} beside.",
+
+            "\u{2325}\u{2318}A (Edit \u{25B8} Share This Note with AI) shares the "
+            + "note you're in with the client you granted most recently, at that "
+            + "grant's step: until it disconnects if it's connected, otherwise "
+            + "once, never always. Its confirmation says what was shared, with "
+            + "Change\u{2026} to adjust it and Revoke \u{203A} to take it back. With "
+            + "no grant yet to follow, it opens the grant sheet on this note "
+            + "instead.",
+
+            // 13n-c UX walk W-UX-19 (her round-8 ask): every row has Change…
+            // now — the guide says so. (UXR1-2: a row whose place is gone keeps
+            // Revoke only; the sentence speaks of the grants she can change.)
+            "Every grant shows in Settings \u{25B8} MCP, with Change\u{2026} to raise "
+            + "or lower it and Revoke to take it back. "
+            + "Sharing several notes at once makes one row there, and one Revoke "
+            + "covers them all.",
+        ])
+
+        // HER RULED LESSON (her sitting, 2026-10-11, third round — "We should
+        // help people with how to use AI within the note and within the app",
+        // "I want users to have ideas on how to make the app useful to them
+        // with their AI work"): worked recipes, her design-doc example first.
+        // Seated SIXTH, before "seeing, answering, undoing", so lesson 1's
+        // pointer — "The chapter's last lesson, “seeing, answering,
+        // undoing”, shows how to watch it…" (W-UX-17's words) — stays true
+        // (PROVISIONAL P-13nc-U6-9 — the title and the seat).
+        _ = try lesson(door, mcpLessons[5], [
+            "Say your notes for a design doc live in a book. Share that book at "
+            + "Suggest and ask your AI to go through it: it can leave implementation "
+            + "ideas or tradeoffs as new takes on each block, and they join the "
+            + "block's takes unchosen, so the page doesn't change until you choose "
+            + "one. Review them in Takes (\u{2318}2); \u{2325}\u{2318}O shows the "
+            + "client's last change, and \u{2325}\u{2318}Z takes the latest back, "
+            + "named after the client.",
+
+            "Or make a book just for your AI, even an empty one, and grant it Write "
+            + "new on that book alone. It can read what's in that book and add new "
+            + "notes to it; if that is its only grant and the open book is off, "
+            + "nothing else in your library is readable to it.",
+
+            "For help across everything, grant a whole wing instead: it reaches "
+            + "every note, book and gathering in the wing except what always asks "
+            + "\u{2014} your daily Journal's entries and anything marked Private, "
+            + "which a client reaches only through a grant on that one note. So "
+            + "mark Private whatever should stay off-limits first, then grant the "
+            + "wing.",
+
+            "And for a one-off, right-click a note in the Library, choose Share "
+            + "with AI\u{2026} and grant Read, once: the client's first read of the "
+            + "note spends the grant, and nothing stands afterwards.",
+        ])
+
+        _ = try lesson(door, mcpLessons[6], [
+            "On the Bookcase, a small icon beside a book means a client can reach "
+            + "it. Point at the icon to see who and how far; click it for the "
+            + "details, including why (through the Home wing grant, say), with "
+            + "Change\u{2026} and Revoke. Inside a note, while the door is open, "
+            + "the same icon sits at the right end of the context bar above the "
+            + "page, or a lock when the note is Private. Settings \u{25B8} MCP lists "
+            + "every client, everything shared, and, under Activity, the calls "
+            + "clients made recently.",
+
+            "When a client wants more than you've shared, nothing pops up and "
+            + "nothing interrupts you. Its ask waits: a small mark appears beside "
+            + "the place it names (the note's row in the Library, the book on the "
+            + "Bookcase, the wing's name, the note's context bar) and under Waiting "
+            + "in Settings \u{25B8} MCP, which \u{2325}\u{2318}, opens. Press the "
+            + "mark to answer: Once, Until it disconnects or Always, whichever fit, "
+            + "or Don't allow. Don't allow, or Esc, lets the ask go; the client can "
+            + "ask again.",
+
+            "Whatever a client writes, a line at the bottom of the window says so, "
+            + "naming the client, with Open \u{203A} to go and look (unless "
+            + "Confirmations after an act is off, in Settings \u{25B8} General). "
+            + "\u{2325}\u{2318}O (Show the AI\u{2019}s Last Change, in the Edit "
+            + "menu) takes you there later, even after the line fades. "
+            + "\u{2325}\u{2318}Z takes a client's act back, one act at a time, and "
+            + "the Edit menu names it after the client: Undo \u{2039}name\u{203A}'s take.",
+
+            "A client is told to move your window only when you ask it to show you "
+            + "something, and it can only while Variorum is the app in front; it "
+            + "never brings a window forward.",
+        ])
 
         return book.id
     }

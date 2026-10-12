@@ -52,9 +52,17 @@ final class ShelfViewModel {
     /// members (one-shot — the read touches `container`, so it never rides
     /// the held snapshot; U1's P1 pin).
     private(set) var archivedCounts: [String: Int] = [:]
-    /// 13n-b U2 (P-13n-3): the books an approved MCP client can reach now —
-    /// the row's "shared with AI" chip (the one-shot half, beside the counts).
-    private(set) var aiShared: Set<String> = []
+    /// 13n-b U2 (P-13n-3) → 13n-c U3 (R-AIR-6): the books an approved MCP
+    /// client reaches now, WITH who and why — the row's ONE shared icon
+    /// (`MCPSharedIcon`, which replaced the "shared with AI" chip). A HELD
+    /// observation since U3 (`watchSharing`), so a grant made from a row's
+    /// own menu shows at once: the read touches `reading` and the grants
+    /// store only — never `container`, so it never wakes at autosave rate.
+    private(set) var aiReach: [String: [MCPPlaceReach]] = [:]
+    /// 13n-c U3: the live books a grant may NOT name — their row draws no
+    /// "Share with AI…" (P-2; `Queries.mcpFencedBookIDs`, the fence's own
+    /// fragments). Held with `aiReach`.
+    private(set) var fencedBooks: Set<String> = []
 
     // MARK: What the board said last (kept for the pins; also spoken)
 
@@ -246,6 +254,29 @@ final class ShelfViewModel {
         }
     }
 
+    /// **13n-c U3 — the shared icons' held half** (R-AIR-6): who reaches each
+    /// book now (`Queries.mcpBookReaches` — through the ONE rule) and which
+    /// books cannot take a grant. ∝ the books × the approved clients; wakes
+    /// only on `reading` and the grants store, never at autosave rate.
+    func watchSharing() async {
+        do {
+            for try await value in session.database.observe({ db in
+                SharingSnapshot(reach: try Queries.mcpBookReaches(db), fenced: try Queries.mcpFencedBookIDs(db))
+            }) {
+                if aiReach != value.reach { aiReach = value.reach }
+                if fencedBooks != value.fenced { fencedBooks = value.fenced }
+            }
+        } catch is CancellationError {
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
+    nonisolated struct SharingSnapshot: Equatable, Sendable {
+        var reach: [String: [MCPPlaceReach]]
+        var fenced: Set<String>
+    }
+
     /// The one-shot half (on appearance and after the board's own acts — a
     /// deliberate fetch, never a held observation). Said honestly (ladder A
     /// round 1, MINOR 2's re-word): `bookWordCounts`, `shelfBookTags` and
@@ -255,12 +286,10 @@ final class ShelfViewModel {
     func refreshAggregates() async {
         let wing = wingID
         do {
-            let (words, tags, rules, aggregates, shared) = try await session.database.read { db in
+            let (words, tags, rules, aggregates) = try await session.database.read { db in
                 (try Queries.bookWordCounts(db), try Queries.shelfBookTags(db),
-                 try Queries.ruleTagPaths(db), try Queries.bookcaseAggregates(db, wingID: wing),
-                 try Queries.mcpReachableBookIDs(db))
+                 try Queries.ruleTagPaths(db), try Queries.bookcaseAggregates(db, wingID: wing))
             }
-            aiShared = shared
             wordCounts = words
             bookTags = tags
             ruleTags = rules

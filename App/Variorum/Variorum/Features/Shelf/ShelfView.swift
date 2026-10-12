@@ -43,6 +43,9 @@ struct ShelfView: View {
     static let contextMenuCapabilities: [CapabilityID] = [
         .toggleStar, .editRule, .bindIntoBook, .makeBookFromGathering,
     ] + BookStateDoorSet.all + [.deleteBook]
+        // 13n-c U3 (VX-156 item 2): "Share with AI…" — THE grant sheet
+        // pre-filled on this book (R-AIR-8: only with an approved client).
+        + [.mcpShareHere]
         // 13i-c U4: Duplicate Book… (§6 — shallow or with copies; an owned
         // book with copies only).
         + [.duplicateBook]
@@ -60,6 +63,10 @@ struct ShelfView: View {
     /// 13n-a (R-13n-8): the board's FILE DROP is the import door's second
     /// renderer — a folder dropped here becomes a book, a document a note.
     static let surfaceCapabilities: [CapabilityID] = [.importFiles]
+        // 13n-c U3 (R-AIR-6): the book rows' ONE shared icon and its popover.
+        + MCPSharedIcon.surfaceCapabilities
+        // 13n-c U4: a book row's pending-ask glyph.
+        + MCPAskGlyph.surfaceCapabilities
 
     let session: AppSession
     let model: ShelfViewModel
@@ -88,6 +95,8 @@ struct ShelfView: View {
     // environment — fall back to the leading voice's tokens.
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    /// 13n-c U3: the window's road to the MCP door (nil in harness mounts).
+    @Environment(\.mcpShareRoad) private var mcpShareRoad
 
     @State private var createPresented = false
     @State private var nameField = ""
@@ -295,6 +304,8 @@ struct ShelfView: View {
         .reportsMenuLifeEnds { model.orderMenuLifeEnded() }
         .task { await model.start() }
         .task { await model.refreshAggregates() }
+        // 13n-c U3 (R-AIR-6): the shared icons' held half.
+        .task { await model.watchSharing() }
         #if DEBUG
         .onAppear { BindDoorProbe.openShelfDoor = { openBindOffer($0) } }
         .onDisappear { BookcaseRowOracle.release(owner: oracleOwner) }
@@ -673,18 +684,19 @@ struct ShelfView: View {
                             .font(tokens.body.weight(.semibold))
                             .foregroundStyle(tokens.ink)
                             .lineLimit(1)
-                        // 13n-b U2 (P-13n-3; mockup §7): the "shared with AI"
-                        // chip — an approved MCP client can reach this book now.
-                        if model.aiShared.contains(reading.id) {
-                            Text(SharedWithAICopy.chip)
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.accent)
-                                .lineLimit(1)
-                                .fixedSize()
-                                .padding(.horizontal, 5)
-                                .overlay(RoundedRectangle(cornerRadius: 4).stroke(tokens.seam, lineWidth: 1))
-                                .help(SharedWithAICopy.chipHelp)
+                        // 13n-c U3 — R-AIR-6: the ONE shared ICON replaces 13n-b's
+                        // "shared with AI" chip (P-13nb-U2-11's rule kept: an
+                        // approved client reaches this book now, through any
+                        // standing). Hover says who and how far; click shows
+                        // the permission. Its own button — the row's open
+                        // never fires for it.
+                        if let reach = model.aiReach[reading.id], !reach.isEmpty {
+                            MCPSharedIcon(reaches: reach, tokens: tokens)
                         }
+                        // 13n-c U4 (R-AIR-6's family; arrival X): an ask
+                        // waiting on this book — hover names who and what,
+                        // her press opens it. Its own button, like the icon.
+                        MCPAskGlyph(.book(reading.id), tokens: tokens)
                     }
                     .frame(minWidth: 160, alignment: .leading)
                     Text(model.tagsColumn(for: book).map { "#\($0)" }.joined(separator: " "))
@@ -855,6 +867,16 @@ struct ShelfView: View {
         Button(CollectingCopy.openVerb(isBook: reading.kind == .book)) {
             openSettings(reading.id)
         }
+        // 13n-c U3 (VX-156 item 2; mockup §2): share THIS book — drawn only
+        // while an approved client exists (R-AIR-8) and only on a book a grant
+        // may name (never a gathering, the daily Journal or a Private book —
+        // the op refuses those; P-2).
+        if let road = mcpShareRoad, road.canShare, reading.kind == .book,
+           !model.fencedBooks.contains(reading.id) {
+            Button(CapabilityRegistry.capability(.mcpShareHere).verb) {
+                road.open(MCPGrantOpening(place: .book(reading.id), origin: .place))
+            }
+        }
         // 13i-c U4 — DUPLICATE (§6): books only.
         if reading.kind == .book {
             Button(DuplicateBookCopy.verb(owned: reading.owned)) {
@@ -967,7 +989,7 @@ struct ShelfView: View {
             Text(tokens.chromeLabel("⌘K — find anything: notes, books, commands"))
                 .lineLimit(1)
             Spacer(minLength: 12)
-            QuietReceiptLine(status: session.status, tokens: tokens)
+            QuietReceiptLine(status: session.status, tokens: tokens, separated: true)
             Text(tokens.chromeLabel("⌘J today · ⌘N new note"))
                 .lineLimit(1)
                 .fixedSize()

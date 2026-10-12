@@ -70,6 +70,20 @@ struct RootView: View {
     /// delegate's ONE model (one per process, every window's Bookcase reads
     /// it); nil in harness mounts, which then draw no offer.
     let tourOffer: TourOfferModel?
+    /// 13n-c U3 — the app's ONE MCP door (the app delegate's; nil in harness
+    /// mounts, which then draw no share face). This window composes its
+    /// `MCPShareRoad` from the door's two narrow gates and presents THE grant
+    /// sheet its doors ask for — no feature below ever holds the door.
+    let mcp: MCPDoor?
+    /// The grant sheet this window is presenting (its road's `open`, ⌥⌘A's
+    /// no-history road and the receipts' Change… all land here through
+    /// `ShellRouter.mcpGrantRequest`).
+    @State private var mcpGrantSheet: MCPGrantOpening?
+    /// 13n-c U4 — the ask HER press opened in this window (a pending glyph —
+    /// `ShellRouter.mcpAskRequest`); asks never present themselves.
+    @State private var mcpAskSheetOpening: MCPAskOpening?
+    /// 13n-c U4 — ⌘L's wing switcher while it is up in this window (R-AIR-15).
+    @State private var wingSwitcher: WingSwitcherModel?
     /// 13s-b U2 — THE TOUR, while one runs in THIS window (its `engine` is
     /// nil otherwise). Per window by construction (`RootView` is the window);
     /// born at `startTour()`, dropped when the tour finishes or ends. A SLOT
@@ -156,7 +170,8 @@ struct RootView: View {
         hotKeys: GlobalHotKeyCenter = GlobalHotKeyCenter(system: .inert),
         whatsNew: WhatsNewLedger? = nil,
         calmAsks: CalmAskScheduler? = nil,
-        tourOffer: TourOfferModel? = nil
+        tourOffer: TourOfferModel? = nil,
+        mcp: MCPDoor? = nil
     ) {
         self.session = session
         self.services = services
@@ -166,6 +181,7 @@ struct RootView: View {
         self.whatsNew = whatsNew
         self.calmAsks = calmAsks
         self.tourOffer = tourOffer
+        self.mcp = mcp
         _router = State(initialValue: router)
         _library = State(initialValue: LibraryViewModel(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
@@ -187,6 +203,32 @@ struct RootView: View {
     /// walk): the sidebar toggle, a toolbar door since the correction round
     /// made the split ours (row 2).
     static let surfaceCapabilities: [CapabilityID] = [.toggleSidebar]
+
+    /// **13n-c U3 — this window's road to the MCP door** (`MCPShareRoad`):
+    /// the two gates read off the door's NARROW observables (so this body
+    /// re-runs only when a client is first approved / last un-approved, or
+    /// the server switch flips), `open` through the window's own request,
+    /// and the sheet a nested host presents itself (Book Settings, T-U3-7).
+    private var mcpRoad: MCPShareRoad? {
+        guard let mcp else { return nil }
+        let router = router
+        let theme = theme
+        return MCPShareRoad(
+            canShare: mcp.hasApprovedClient,
+            indicatorOn: mcp.hasApprovedClient && mcp.serverOn,
+            open: { router.mcpGrantRequest = $0 },
+            sheet: { opening, done in
+                AnyView(MCPGrantSheet(door: mcp, opening: opening, done: done).environment(theme))
+            },
+            revoke: { await mcp.revokeFromReceipt($0) },
+            // 13n-c U4 — ARRIVAL X: a pending glyph's press opens THAT ask's
+            // sheet here (her press, never the ask's arrival) — and a host
+            // already in a sheet (⌘L's switcher) presents it itself.
+            answerAsk: { router.mcpAskRequest = $0 },
+            askSheet: { opening in
+                AnyView(mcp.ask(opening).map { MCPAskSheet(door: mcp, ask: $0).environment(theme) })
+            })
+    }
 
     var body: some View {
         // The Act 10 correction round, batch A (row 2): the flat shell —
@@ -329,6 +371,55 @@ struct RootView: View {
                 .environment(theme)
                 .onAppear { whatsNew?.markShown() }
         }
+        // 13n-c U3 — THE GRANT SHEET, opened from a place in this window (a
+        // row menu, the bulk bar, a popover's Change…, ⌥⌘A's no-history road,
+        // a receipt's Change…). One request, one sheet.
+        .sheet(item: $mcpGrantSheet) { opening in
+            if let mcp {
+                MCPGrantSheet(door: mcp, opening: opening) { mcpGrantSheet = nil }
+                    .environment(theme)
+                    .environment(\.mcpShareRoad, mcpRoad)
+            }
+        }
+        .onChange(of: router.mcpGrantRequest) { _, request in
+            guard let request else { return }
+            mcpGrantSheet = request
+            router.mcpGrantRequest = nil
+        }
+        // 13n-c U4 — ARRIVAL X: THE ASK her press opened here (a pending
+        // glyph), presented while it still waits. Nothing else opens it — the
+        // WindowGroup's self-presenting host is retired.
+        .mcpAskSheet(door: mcp, opening: $mcpAskSheetOpening, theme: theme)
+        .onChange(of: router.mcpAskRequest) { _, request in
+            guard let request else { return }
+            // W-UX-1: THE raise waiting now — a later equal raise is never it.
+            mcpAskSheetOpening = mcp?.opening(request)
+            router.mcpAskRequest = nil
+        }
+        // 13n-c U4 — ⌘L, THE WING SWITCHER (R-AIR-15): opened in this window
+        // by the menu's request; while it is up, the same request (the menu's
+        // ⌘L before the sheet's monitor took the key) CYCLES it.
+        .sheet(item: $wingSwitcher) { model in
+            WingSwitcherSheet(
+                model: model, tokens: theme.tokens(for: scheme),
+                close: { wingSwitcher = nil })
+                .environment(theme)
+                .environment(\.mcpShareRoad, mcpRoad)
+                .environment(\.mcpAskBoard, mcp?.askBoard ?? .empty)
+        }
+        .onChange(of: router.wingSwitcherRequested) { _, requested in
+            guard requested else { return }
+            router.wingSwitcherRequested = false
+            if let open = wingSwitcher {
+                open.tapL()
+            } else {
+                wingSwitcher = WingSwitcherModel(wings: wings)
+            }
+        }
+        .environment(\.mcpShareRoad, mcpRoad)
+        // 13n-c U4: the waiting asks, keyed by target — every pending glyph
+        // in this window reads it (the door's ONE projection, P-4).
+        .environment(\.mcpAskBoard, mcp?.askBoard ?? .empty)
         .onChange(of: router.whatsNewRequested) { _, requested in
             guard requested else { return }
             whatsNewShown = true

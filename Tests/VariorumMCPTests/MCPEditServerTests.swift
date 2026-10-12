@@ -380,7 +380,8 @@ struct MCPEditServerTests {
     /// The server's snapshot decision ALLOWED this edit; then — as a sync
     /// apply would — the note was marked Private before the act's
     /// transaction opened. The act re-decides inside its own transaction and
-    /// refuses whole: nothing written, no undo entry, the Private words.
+    /// refuses whole: nothing written, no undo entry, the one answer (13n-c
+    /// U1, T-2 — it said the Private words before).
     @Test func aFenceLandingAfterTheDecisionIsCaughtInsideTheActsTransaction() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
@@ -410,7 +411,9 @@ struct MCPEditServerTests {
                     undoLabel: "claude-code's edit", guardedBy: guarded)
                 Issue.record("the act landed past a fence closed after the decision")
             } catch let refused as MCPWriteTools.Refused {
-                #expect(refused.outcome.text.contains("marked Private"))
+                // 13n-c U1 (justified edit, the ritual — T-2): a fenced note's
+                // refusal is the ONE answer on every road, the guard's included.
+                #expect(refused.outcome.text == MCPRefusalCopy.words(.notShared, .note))
             }
             #expect(try await h.database.read { try Queries.renderedText($0, containerID: note.id) } == "hers")
             #expect(try await h.database.read { db in

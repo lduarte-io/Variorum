@@ -23,6 +23,14 @@ import Foundation
 import SwiftUI
 
 nonisolated enum LibraryCopy {
+    /// 13n-c UX walk W-UX-3: the pick's row leads with its count; the info
+    /// panel says the doors are above (T-12: it named three of four).
+    /// PROVISIONAL words, her copy pass.
+    static func notesPicked(_ count: Int) -> String { "\(count) notes selected" }
+    static func pickedPanelLine(_ count: Int) -> String {
+        "\(count) notes selected \u{2014} the doors above the list act on all of them."
+    }
+
     /// The List mode's silence — books, notes and blocks all empty.
     static let nothingMatches = "Nothing matches."
 

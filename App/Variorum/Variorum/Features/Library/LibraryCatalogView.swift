@@ -29,7 +29,18 @@ struct LibraryCatalogView: View {
     /// third clause, on the ⌘-click selection this list already had (the bulk
     /// TAG menu has used it since 13e E8; what was missing was the act, never
     /// the selection).
-    static let surfaceCapabilities: [CapabilityID] = [.tagNote, .deleteSelectedNotes]
+    static let surfaceCapabilities: [CapabilityID] = [.tagNote, .deleteSelectedNotes, .mcpShareNotes]
+        // 13n-c U4: a note row's pending-ask glyph (an ask waits on it).
+        + MCPAskGlyph.surfaceCapabilities
+
+    /// **13n-c Stage B R1 B5 — the NOTE ROW's own context doors** (P-1's
+    /// walk): `postRowMenu` renders the note-row grammar from
+    /// `SidebarView.contextMenuCapabilities` (one declaration, three
+    /// renderers) PLUS the doors only this list draws — 13n-c U3's "Share with
+    /// AI…" (`.mcpShareHere`, THE grant sheet pre-filled on the note). Before
+    /// this line the walk stayed green only because the BOOK-row menus render
+    /// the same act; a deleted Library door would never have turned it red.
+    static let contextMenuCapabilities: [CapabilityID] = [.mcpShareHere]
 
     /// **THE MASTHEAD'S DOORS — AND THE ⋯ MENU IS GONE** (the post-13l polish
     /// round, ledger row 7 — her B1 ruling, verbatim: *"I want the ... menu in
@@ -117,6 +128,9 @@ struct LibraryCatalogView: View {
     // environment — fall back to the leading voice's tokens.
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    /// 13n-c U3: the window's road to the MCP door (nil in harness mounts —
+    /// no share door; R-AIR-8 — none without an approved client).
+    @Environment(\.mcpShareRoad) private var mcpShareRoad
     @State private var tagSheetTarget: SidebarView.TagSheetTarget?
     /// 13i-d U5: the move's confirm (the books the note would leave).
     @State private var wingMove: WingsModel.MoveAsk?
@@ -559,6 +573,13 @@ struct LibraryCatalogView: View {
                 Text(tokens.path(["Library"]))
                     .font(tokens.heading)
                     .foregroundStyle(tokens.accent)
+                // 13n-c U4 — round 5, her words: the wing switcher "lives on
+                // the Bookcase only, which is weird". The Library lists ONE
+                // wing, so it says which — "Library · Home ▾" — and cycles
+                // and switches exactly as the Bookcase's does (one view).
+                if let wings {
+                    WingSwitcherMenu(tokens: tokens, wings: wings)
+                }
                 Text(tokens.chromeLabel("everything — sortable, searchable"))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
@@ -670,50 +691,49 @@ struct LibraryCatalogView: View {
                         })
                     .offset(y: Self.segmentedLabelDrop)
                 }
-                if selectedPosts.count > 1 {
-                    Menu(tokens.chromeLabel("Tag \(selectedPosts.count) notes")) {
-                        ForEach(tags.tags, id: \.id) { tag in
-                            Button(tag.path) {
-                                let ids = Array(selectedPosts)
-                                Task { await model.applyTag(tag.id, to: ids) }
-                            }
-                        }
-                    }
-                    .font(tokens.small)
-                    // 13e E8 — the bulk half of *"remove / add them"*. The
-                    // rows are the tags the SELECTION actually wears, so the
-                    // menu never offers an act that would do nothing (P-2);
-                    // with none, there is no menu at all.
-                    let worn = model.tagsOn(selectedPosts)
-                    if !worn.isEmpty {
-                        Menu(tokens.chromeLabel("Untag \(selectedPosts.count) notes")) {
-                            ForEach(worn, id: \.id) { tag in
-                                Button(tag.path) {
-                                    let ids = Array(selectedPosts)
-                                    Task { await model.removeTag(tag.id, from: ids) }
-                                }
-                            }
-                        }
-                        .font(tokens.small)
-                    }
-                    // 13l Act 2 (item 3) — her ruling's third clause, built on
-                    // the selection this bar already reads. ONE confirmation
-                    // naming the count and ONE receipt, which is why the whole
-                    // pick goes to the host as one ask rather than N asks.
-                    Button(
-                        tokens.chromeLabel(
-                            "Delete \(selectedPosts.count) notes\u{2026}"),
-                        role: .destructive
-                    ) {
-                        Task { pendingDelete = await NoteDeletion.ask(
-                            session: session, postIDs: selectedNotesInListOrder) }
-                    }
-                    .font(tokens.small)
-                }
+            }
+            // 13n-c UX walk W-UX-3 (T-1): the bulk doors on a ROW OF THEIR
+            // OWN under the controls while several notes are picked. In the
+            // controls' row they ran out of width at the default window and
+            // collapsed to bare chevrons — the Share door lesson 5 names read
+            // nowhere — and the row's minimum width pushed the info panel off
+            // the window. Here each keeps its words (`fixedSize`), and the
+            // doors WRAP onto more lines rather than push (UXR1-3 —
+            // `LibraryBulkRow`).
+            if selectedPosts.count > 1 {
+                bulkRow
             }
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 10)
+    }
+
+    /// The pick's doors (13e E8, 13l Act 2, 13n-c U3) — their own row since
+    /// the UX walk's W-UX-3 (`LibraryBulkRow`, its own view since UXR1-3).
+    private var bulkRow: some View {
+        LibraryBulkRow(
+            tokens: tokens, count: selectedPosts.count, tags: tags.tags, worn: model.tagsOn(selectedPosts),
+            canShare: mcpShareRoad?.canShare == true,
+            onTag: { tagID in
+                let ids = Array(selectedPosts)
+                Task { await model.applyTag(tagID, to: ids) }
+            },
+            onUntag: { tagID in
+                let ids = Array(selectedPosts)
+                Task { await model.removeTag(tagID, from: ids) }
+            },
+            // 13n-c U3 (VX-156 item 2; mockup §2): the grant sheet pre-filled
+            // with these notes, in the listing's order; ONE act mints them on
+            // one stamp (one row in Shared places).
+            onShare: {
+                mcpShareRoad?.open(MCPGrantOpening(place: .notes(selectedNotesInListOrder), origin: .place))
+            },
+            // 13l Act 2 (item 3) — her ruling's third clause: the whole pick
+            // goes to the host as ONE ask (one confirmation, one receipt).
+            onDelete: {
+                Task { pendingDelete = await NoteDeletion.ask(
+                    session: session, postIDs: selectedNotesInListOrder) }
+            })
     }
 
     private var listBody: some View {
@@ -1041,6 +1061,8 @@ struct LibraryCatalogView: View {
                     .font(tokens.body)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
+                // 13n-c U4: an ask waiting on this note (nothing when none).
+                MCPAskGlyph(.note(hit.id), tokens: tokens)
                 // 18h batch 1 (her row 9): the card's date slot is the SORT's
                 // own stamp, in the one brain's words — *"edited today 1:33
                 // AM"* where it used to print the raw stored day
@@ -1165,7 +1187,8 @@ struct LibraryCatalogView: View {
                 oracleKey: hit.id,
                 badge: ownedByBadge(extras),
                 badgePostID: hit.id,
-                archived: hit.isArchived)
+                archived: hit.isArchived,
+                askTarget: .note(hit.id))
         }
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }
@@ -1197,6 +1220,14 @@ struct LibraryCatalogView: View {
         }
         Button("Tags…") {
             tagSheetTarget = .init(id: hit.id, title: hit.title)
+        }
+        // 13n-c U3 (VX-156 item 2; mockup §2): THE grant sheet pre-filled on
+        // this note — only while an approved client exists (R-AIR-8).
+        if let road = mcpShareRoad, road.canShare {
+            Divider()
+            Button(CapabilityRegistry.capability(.mcpShareHere).verb) {
+                road.open(MCPGrantOpening(place: .note(hit.id), origin: .place))
+            }
         }
         Divider()
         // version_of DOOR 1 (Phase 11 A2's TWO-door ratification; the same
@@ -1386,6 +1417,10 @@ struct CatalogNoteLine: View {
     /// under the archived facet (R-13o-6, "rows say which they are"); false
     /// draws nothing, so the shipped alignment pins measure what they did.
     var archived = false
+    /// 13n-c U4: the note an ask may wait on — its pending glyph rides the
+    /// title (nil, and a calm note, draw nothing — the shipped alignment pins
+    /// measure exactly what they did).
+    var askTarget: MCPAskTarget? = nil
 
     static let probeSpace = "catalog-note-line"
 
@@ -1402,6 +1437,9 @@ struct CatalogNoteLine: View {
                 .lineLimit(1)
                 .baselineProbe("note.title", in: Self.probeSpace)
                 .onTapGesture(perform: onTitleTap)
+            if let askTarget {
+                MCPAskGlyph(askTarget, tokens: tokens)
+            }
             if let date {
                 CatalogRowStamp(
                     tokens: tokens,

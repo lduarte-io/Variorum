@@ -753,6 +753,9 @@ final class CommandRouter {
     /// 18o U1 (17e (12)): the KEY window's kind — the sidebar toggle's gate
     /// as a registry fact. Wired the same way, through the window registry.
     @ObservationIgnored var windowKind: () -> WindowRegistry.Kind? = { nil }
+    /// 13n-c Stage B R1 B6: the library's wing count (⌘L's gate) — wired by
+    /// the session to its `WingState`.
+    @ObservationIgnored var wingCount: () -> Int = { 1 }
 
     // MARK: - Context assembly
 
@@ -772,7 +775,8 @@ final class CommandRouter {
             paneCount: paneCount(),
             canOpenBeside: canOpenBeside(),
             canStarCurrent: canStarCurrent(),
-            windowKind: windowKind())
+            windowKind: windowKind(),
+            wingCount: wingCount())
     }
 
     func isEnabled(_ id: CapabilityID) -> Bool {

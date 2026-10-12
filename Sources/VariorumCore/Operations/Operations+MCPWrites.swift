@@ -49,6 +49,9 @@ extension Operations {
         case entryDate = "date"
         case filing = "chapter filing"
         case bookRule = "book rule"
+        // 13n-c U6 — the per-item note move across wings (VX-160; brief §10's
+        // U1: "Undo claude-code's wing move").
+        case wingMove = "wing move"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
     }

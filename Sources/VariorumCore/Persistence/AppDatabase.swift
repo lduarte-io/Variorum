@@ -269,6 +269,32 @@ public struct AppDatabase: Sendable {
             .values(in: writer)
     }
 
+    /// **A live projection woken by NAMED regions only** (13n-c Stage B R2-1):
+    /// `observe`'s twin for a fetch that must READ a table written at
+    /// autosave rate but whose answer can only change when a narrower signal
+    /// moves. `observe` tracks what the fetch reads, and `container` is
+    /// stamped per edit by a full-record update (`registerTextChange`), so any
+    /// fetch reading it re-runs at autosave rate. Here the fetch re-runs only
+    /// when a transaction writes one of `regions` (GRDB's constant-region
+    /// tracking — the fetch's own reads are NOT tracked), so the caller names
+    /// exactly the tables whose writes can change the answer. The same
+    /// bounded-fetch rule binds it (P1), and the same locked-store stand-in.
+    public func observe<Value: Equatable & Sendable>(
+        tracking regions: [any DatabaseRegionConvertible],
+        _ fetch: @escaping @Sendable (Database) throws -> Value
+    ) -> AsyncValueObservation<Value> {
+        guard let writer = try? currentWriter() else {
+            return ValueObservation
+                .tracking { (_: Database) -> Value in throw StoreLockedError() }
+                .removeDuplicates()
+                .values(in: Self.lockedObservationStandIn)
+        }
+        return ValueObservation
+            .tracking(regions: regions, fetch: fetch)
+            .removeDuplicates()
+            .values(in: writer)
+    }
+
     /// A tiny keyless in-memory queue serving ONLY locked-state
     /// observations (nothing ever reads or writes it — the fetch closure
     /// throws before touching the connection).

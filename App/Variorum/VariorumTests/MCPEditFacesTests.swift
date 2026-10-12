@@ -73,7 +73,10 @@ struct MCPEditFacesTests {
             "claude-code added a chapter to \u{201C}drafts\u{201D}",
             "claude-code added 3 takes to \u{201C}ch 7\u{201D}",
             "claude-code read \u{201C}ch 7\u{201D}",
-            "claude-code was refused add_take on \u{201C}ch 8\u{201D}",
+            // 13n-c UX walk W-UX-13 (A JUSTIFIED EDIT, the ritual): a refused
+            // row speaks the act table's words, never the tool's id ("…was
+            // refused add_take on “ch 8”" before).
+            "claude-code was refused adding a take to \u{201C}ch 8\u{201D}",
             "claude-code edited \u{201C}ch 7\u{201D}",
             "claude-code listed its shared notes",
         ])

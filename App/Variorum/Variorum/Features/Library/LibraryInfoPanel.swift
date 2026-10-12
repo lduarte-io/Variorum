@@ -290,9 +290,9 @@ struct LibraryInfoPanel: View {
                 .fixedSize(horizontal: false, vertical: true)
             if multiCount > 1 {
                 CalmCard(tokens: tokens) {
-                    Text(tokens.chromeLabel(
-                        "\(multiCount) notes selected — the Tag, Untag and "
-                        + "Delete doors above act on all of them."))
+                    // 13n-c UX walk W-UX-3 / T-12: the doors are named by
+                    // where they are, so a fourth (Share) is never left out.
+                    Text(tokens.chromeLabel(LibraryCopy.pickedPanelLine(multiCount)))
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
                         .lineLimit(4)

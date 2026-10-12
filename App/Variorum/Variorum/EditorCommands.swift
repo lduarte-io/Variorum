@@ -97,6 +97,11 @@ struct EditorCommands: Commands {
         .structuralUndo, .structuralRedo,
         // 13n-b U4: the offer door's keyboard road, beside its veto.
         .showLastAIChange,
+        // 13n-c U3: ⌥⌘A — share the note you're in, beside the AI pair.
+        .mcpShareThisNote,
+        // 13n-c U4: ⌥⌘, — MCP Settings… (the app menu, under Settings…) and
+        // ⌘L — Switch Wing… (the View menu, beside ⌘K).
+        .mcpSettings, .switchWing,
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake,
         // 13j J4/J4b: the two ceremony doors, beside the verbs they used to
         // be the default of.
@@ -170,6 +175,47 @@ struct EditorCommands: Commands {
         //     ⌥⌘Esc, ⌥⌘H, ⌥⌘M, ⌥⌘W) and the Cocoa text system's default
         //     bindings: no ⌥⌘O (Finder's ⌥⌘O is Finder's own, app-scoped).
         case .showLastAIChange: ("o", [.command, .option])
+        // 13n-c U3 (the VX-156 brief §4/§13; her round-2 nod to ⌥⌘A). THE
+        // COLLISION SWEEP, RE-RUN AT THE TIP (2026-10-11, on `cbdef1fc`) —
+        // ⌥⌘A is FREE:
+        //   · this table: the only `a` chord is ⇧⌘A (Archive Take);
+        //   · every `.keyboardShortcut(` call site in `Variorum/` and
+        //     `Shared/`: the only "a" is that same ⇧⌘A (the Takes menu);
+        //   · every `NSMenuItem` keyEquivalent: none set (all "");
+        //   · the one `performKeyEquivalent` override (`EditorTextView` — ⌘S,
+        //     plus the non-consuming ⌘Z/⇧⌘Z hint arm): no `a`;
+        //   · the local key monitors (`PageTurnKeys` — unmodified ←/→;
+        //     `CommentsPanel` — ⌘⏎, ⎋; `DivideWSheet` — refuses any ⌘/⌃
+        //     event; `CalmAsks` — observes, never consumes): no ⌥⌘A;
+        //   · the system hot key table (`GlobalHotKeyCenter.registered` =
+        //     [.quickNote], ⇧⌘N) and the registry's declared labels: no ⌥⌘A;
+        //   · the platform: ⌘A (Select All) is the system's; ⌥⌘A is not
+        //     reserved by macOS (the brief §13's reserved list).
+        case .mcpShareThisNote: ("a", [.command, .option])
+        // 13n-c U4 (the VX-156 brief §6/§13; ⌥⌘, recommended and nodded at her
+        // round 2; ⌘L her R-AIR-15, "i like Command L"). THE COLLISION SWEEP,
+        // RE-RUN AT THE TIP (2026-10-11, on `a41efc1b` — the U4 record's
+        // sweep, verbatim in kind) — ⌥⌘, AND BARE ⌘L ARE FREE:
+        //   · this table: the only `l` chord is ⇧⌘L (Save Choices as Lens); no
+        //     `,` chord at all;
+        //   · every `.keyboardShortcut(` call site in `Variorum/` and
+        //     `Shared/`: `l` only as ⇧⌘L and ⌃⌘L (Lock Library Now); `,`
+        //     nowhere (⌘, is SwiftUI's own Settings item, untouched);
+        //   · every `NSMenuItem` keyEquivalent: none set (all "");
+        //   · the overrides: `EditorTextView.performKeyEquivalent` (⌘S + the
+        //     non-consuming ⌘Z/⇧⌘Z hint arm) and the `keyDown` trio (⇧⏎; the
+        //     capture box's ⏎/⇧⏎; the flight's deferral) — no `l`, no `,`;
+        //   · the local monitors: `PageTurnKeys` (unmodified ←/→),
+        //     `CommentsPanel` (⌘⏎, ⎋), `DivideWSheet` (passes every ⌘/⌃
+        //     event), `CalmAsks` / `ProtectionController` (observe only),
+        //     `PressReporter` / `PaneFocusCatcher` (mouse) — and U4's own
+        //     `WingSwitcherKeyCatcher`, which takes ⌘L ONLY in the switcher
+        //     sheet's own window while it is up (the held-⌘ cycle);
+        //   · the system hot keys ([.quickNote], ⌃⌥⌘N) and the registry's
+        //     declared labels (⌘⇧L only): no ⌘L, no ⌥⌘,;
+        //   · the platform: neither is reserved (the brief §13's list).
+        case .mcpSettings: (",", [.command, .option])
+        case .switchWing: ("l", .command)
         // 13d batch 4 (A14, her row verbatim: "⌘⇧Enter = new block").
         // ⌘⇧⏎ SUPERSEDES the 13b-4D ⌥⌘N: one act declares one key (P-1),
         // every shortcut is a menu item (R73/R91/R93), and the sweep found
@@ -293,6 +339,22 @@ struct EditorCommands: Commands {
         }
     }
 
+    /// ⌥⌘A's act: the mounted detail's note, the door's derivation, and THE
+    /// grant sheet in the key window when the chord cannot guess.
+    private func shareThisNote() {
+        guard let session else { return }
+        guard let postID = session.commandRouter.activePostID else {
+            session.status.refuse(CapabilityRegistry.capability(.mcpShareThisNote).unavailableNote)
+            return
+        }
+        let windows = windows
+        Task { @MainActor in
+            await mcp.shareThisNote(postID) { opening in
+                windows.activeRouter?.mcpGrantRequest = opening
+            }
+        }
+    }
+
     var body: some Commands {
         // 13s-b U1a, piece 4 (R-13s-24/25 — the logo's About placement, Q19
         // closed): the app menu's About item opens OUR window, which carries
@@ -316,6 +378,24 @@ struct EditorCommands: Commands {
                 Button(UpdateChannel.checkForUpdatesTitle) { updates.checkForUpdates() }
                     .disabled(!updates.canCheckNow)
             }
+        }
+        // 13n-c U4 — ⌥⌘, "MCP Settings…" (the VX-156 brief §6, mockup §5):
+        // under Settings…, Settings opened at MCP — at its Waiting list when
+        // an ask waits (`MCPDoor.requestSettings`, adopted by Settings and
+        // answered by the pane). Always acts: the pane is always there.
+        // 13n-c UX walk W-UX-18 (T-2): `after: .appSettings` drew it ABOVE
+        // Settings… (the Settings scene's item is not in that group on this
+        // macOS — AX read in both walks); before the Services group puts it
+        // BELOW Settings…, where U4's brief placed it.
+        CommandGroup(before: .systemServices) {
+            Button(verb(.mcpSettings)) {
+                mcp.requestSettings()
+                openSettings()
+            }
+            .keyboardShortcut(",", modifiers: [.command, .option])
+            // Its own section, so it reads with Settings… above it and never
+            // as part of Services below (the verify leg's AX read).
+            Divider()
         }
         // Phase 13 (B2): ⌘N = New Post (R41) + the dated home's shortcut.
         CommandGroup(replacing: .newItem) {
@@ -394,6 +474,21 @@ struct EditorCommands: Commands {
             Button(verb(.findAnything)) { windows.creationRouter()?.paletteRequested = true }
                 .keyboardShortcut("k", modifiers: .command)
                 .disabled(!canReachCreationTarget)
+            // 13n-c U4 — ⌘L, THE WING SWITCHER (R-AIR-15): ⌘K's twin in
+            // where it opens (the window that can show it, raised) and how
+            // (a request the window adopts). While the switcher is up, a
+            // held-⌘ L is the switcher's own (its monitor cycles it); a
+            // request that reaches the window anyway cycles too.
+            // 13n-c Stage B R1 B6: grey with ONE wing (the registry's answer —
+            // P-2: the switcher could only close).
+            // 13n-c UX walk W-UX-6: grey with one wing (her ruling), but never
+            // silent — ⌘L then SPEAKS the note (`OneWingChord`, the app's
+            // monitor). The grey item itself carries no help: macOS draws no
+            // tooltip on a disabled menu item (the verify leg's finding), so a
+            // `.help` here was dead and is gone (UX-fix ladder UXR1-5).
+            Button(verb(.switchWing)) { windows.creationRouter()?.wingSwitcherRequested = true }
+                .keyboardShortcut("l", modifiers: .command)
+                .disabled(!canReachCreationTarget || !enabled(.switchWing))
         }
         // Row 67 (the Act 10 correction round): this group was anchored
         // `after: .saveItem` — and a non-document WindowGroup's File menu
@@ -472,6 +567,16 @@ struct EditorCommands: Commands {
             Button(verb(.showLastAIChange)) { mcp.showLastChange() }
                 .keyboardShortcut("o", modifiers: [.command, .option])
                 .disabled(!enabled(.showLastAIChange))
+            // 13n-c U3 — ⌥⌘A (the VX-156 brief §4, D1): share the note you're
+            // in with the client you granted last, at that rung — while
+            // connected if it is connected, else once; never always by a key.
+            // R-AIR-8: rendered ONLY while an approved client exists (no
+            // door, never a dead one — the zero-state is Settings ▸ MCP's).
+            if mcp.hasApprovedClient {
+                Button(verb(.mcpShareThisNote)) { shareThisNote() }
+                    .keyboardShortcut("a", modifiers: [.command, .option])
+                    .disabled(!enabled(.mcpShareThisNote))
+            }
         }
         // QoL batch 3 (her L6): the standard Edit ▸ Find submenu — the one
         // slot in this file's menu map that was empty. Deliberately NOT ⌘K's
@@ -997,6 +1102,8 @@ struct EditorCommands: Commands {
     }
 
     @Environment(\.openWindow) private var openWindow
+    /// 13n-c U4: ⌥⌘, opens the Settings window (at MCP).
+    @Environment(\.openSettings) private var openSettings
 
     /// The two `WindowGroup` ids the app opens by name (13f batch 5b).
     static let mainWindowGroupID = "variorum-main"

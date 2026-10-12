@@ -108,7 +108,9 @@ struct MCPPaneTests {
         #expect(panes[index - 1] == .tags)
         #expect(panes[index + 1] == .protection)
         #expect(SettingsPane.mcp.title == "MCP", "R-13n-5 named it")
-        #expect(AppSettingsView.rowIDsRendered[.mcp] == ["mcpServer", "mcpOpenBook"])
+        // 13n-c U4 (A JUSTIFIED EDIT, the ritual — arrival X): the pane's
+        // Waiting list is a catalog row too, so the search finds an ask.
+        #expect(AppSettingsView.rowIDsRendered[.mcp] == ["mcpServer", "mcpWaiting", "mcpOpenBook"])
         #expect(SettingsCatalog.title("mcpServer") == "Enable the MCP server")
         for word in ["mcp", "claude", "claude code", "open book"] {
             #expect(SettingsSearch.findings(matching: word, in: SettingsSearch.settingsEntries)
@@ -236,7 +238,10 @@ struct MCPPaneTests {
             door.attach(session: session)
             defer { door.detach() }
             #expect(try await settle { door.snapshot.sharedCount == 8 })
-            #expect(await door.allShared().count == 8, "the all-N road reaches every row")
+            // Stage B R1 B11 (A JUSTIFIED EDIT — the ritual): the flat
+            // `allShared()` had no caller left (the pane's road reads acts
+            // since U3); the road the pane takes is asserted instead.
+            #expect(await door.allSharedGroups().count == 8, "the all-N road reaches every row")
             #expect(await door.allPending().count == 7)
         }
     }

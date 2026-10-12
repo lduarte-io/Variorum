@@ -198,7 +198,7 @@ struct SpreadBookView: View {
                 // one thing (the point of her one-rule-for-both ruling).
                 // WA-1: the quiet slot before it, at the bar's trailing end
                 // (the Bookcase hint bar's shape — it yields first).
-                QuietReceiptLine(status: session.status, tokens: tokens)
+                QuietReceiptLine(status: session.status, tokens: tokens, separated: true)
                     .opacity(hostsQuietReceipt ? 1 : 0)
                     .accessibilityHidden(!hostsQuietReceipt)
                 Text(tokens.chromeLabel(pageLine))

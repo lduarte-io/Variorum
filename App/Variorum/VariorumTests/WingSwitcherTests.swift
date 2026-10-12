@@ -224,8 +224,12 @@ struct WingSwitcherTests {
     @Test func theWingActsAreDeclaredAndRendered() {
         // 13i-d U5b (A JUSTIFIED EDIT — a new act on the same renderer):
         // the switcher carries the bulk move too.
+        // 13n-c U4 (A JUSTIFIED EDIT, the same class — new acts on the same
+        // renderer): the masthead word's CYCLING click (`.switchWing`'s
+        // surface door, R-AIR-5/15) and the wing asks' pending glyph
+        // (`.mcpOpenAsk`).
         #expect(Set(WingSwitcherMenu.surfaceCapabilities)
-                == [.newWing, .renameWing, .deleteWing, .moveWingContents])
+                == [.newWing, .renameWing, .deleteWing, .moveWingContents, .switchWing, .mcpOpenAsk])
         let noteRow = Set(SidebarView.contextMenuCapabilities)
         #expect(noteRow.isSuperset(of: [.moveNoteToWing, .copyNoteToWing]))
         for id in [CapabilityID.newWing, .renameWing, .deleteWing] {

@@ -73,12 +73,9 @@ nonisolated enum PrivateMarkCopy {
     static func clearedBook(_ name: String) -> String { "\u{201C}\(name)\u{201D} is no longer Private." }
 }
 
-/// **The "shared with AI" chip** (P-13n-3's word, hers to re-voice at
-/// 13s-a): on a Bookcase row whose book an approved client can reach now.
-nonisolated enum SharedWithAICopy {
-    static let chip = "shared with AI"
-    static let chipHelp = "An MCP client can read this book now \u{2014} see Settings \u{25B8} MCP."
-}
+// (13n-c U3 — R-AIR-6: the Bookcase's "shared with AI" text chip and its
+// copy RETIRED into the ONE shared icon, `MCPSharedIcon`, whose hover names
+// who reaches the book and how far.)
 
 /// How far a client reaches, in the app's words.
 nonisolated enum MCPRungWords {

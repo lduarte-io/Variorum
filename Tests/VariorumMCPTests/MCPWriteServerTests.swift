@@ -188,6 +188,10 @@ struct MCPWriteServerTests {
             calls.append(("file_note_in_chapter", ["note_id": .string(note.id), "book_id": .string(book.id),
                                                    "section_id": .string(chapter.id)]))
             calls.append(("set_book_rule", ["book_id": .string(book.id), "rule": .object(["star": .bool(true)])]))
+            // 13n-c U6 (justified edit, the ritual — the proof's completeness
+            // grows with the catalog): the per-item move across wings, aimed
+            // at her note, refusing at the rung.
+            calls.append(("move_note_to_wing", ["note_id": .string(note.id), "wing_id": .string("")]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).
@@ -307,7 +311,10 @@ struct MCPWriteServerTests {
 
             try h.operations.setNotePrivate(note.id, true)
             let refused = try await call(connection, "read_note", ["note_id": .string(note.id)])
-            #expect(refused.isError == true && text(refused).contains("marked Private"))
+            // 13n-c U1 (justified edit, the ritual — T-2): the mark fences the
+            // very next call with the ONE answer — never "marked Private" (that
+            // would tell the client a fact about the note she withheld).
+            #expect(refused.isError == true && text(refused) == MCPRefusalCopy.words(.notShared, .note))
             #expect(!text(refused).contains("words"))
             #expect(try await call(connection, "add_take", ["block_id": .string(block.block.id), "text": .string("x")]).isError == true)
 
@@ -430,7 +437,10 @@ struct MCPWriteServerTests {
                                                 title: "inside", rung: .suggest, fence: nil))
 
             let fenced = try await call(connection, "read_note", ["note_id": .string(entry.id)])
-            #expect(text(fenced).hasSuffix(MCPRefusalCopy.askedSentence))
+            // 13n-c U1 (justified edit, the ritual — T-2): a fenced note no
+            // longer names its fence or says the asked sentence; it is the ONE
+            // answer — and her sheet still hears the ask.
+            #expect(text(fenced) == missingWords, "a fenced note answers exactly as a missing one")
             #expect(h.asks.value.last?.fence == .journal && h.asks.value.last?.offersAlways == false)
 
             let unsharedWords = text(try await call(connection, "read_note", ["note_id": .string(unshared.id)]))
@@ -439,7 +449,11 @@ struct MCPWriteServerTests {
 
             let countBefore = h.asks.value.count
             let privateRefusal = try await call(connection, "create_note", ["text": .string("x"), "book_id": .string(privateBook.id)])
-            #expect(text(privateRefusal) == "That book is marked Private \u{2014} never shared with AI.")
+            // 13n-c U1 orchestrator ruling F-7 (a) (justified edit, the ritual):
+            // a Private BOOK answers exactly as a book id naming nothing.
+            let noBook = try await call(connection, "create_note", ["text": .string("x"), "book_id": .string(UUID().uuidString)])
+            #expect(text(privateRefusal) == text(noBook), "a fenced book answers exactly as a missing one")
+            #expect(text(privateRefusal) == MCPRefusalCopy.words(.notShared, .book))
             #expect(h.asks.value.count == countBefore, "a fenced BOOK never raises an ask — no grant could answer it")
             await h.hangUp(connection)
         }

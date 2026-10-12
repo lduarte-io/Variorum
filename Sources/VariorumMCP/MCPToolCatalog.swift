@@ -56,6 +56,28 @@ struct MCPToolDeclaration: Sendable {
     static let everyScope: Set<MCPGrantRule.ScopeKind> = [.note, .book, .wing]
 }
 
+/// **13n-c UX walk W-UX-14 — the catalog's scope facts, read by the app's
+/// grant faces' truth pin.** The ask sheet and the grant sheet say what a rung
+/// lets a client do AT A SCOPE ("it can also make new notes and chapters in
+/// it…"); a sentence that names a tool the scope can never act under is an
+/// overclaim (a book grant can never build a book — `create_book` is
+/// wing-only). One public read, so the pin ties each claim to the catalog.
+public enum MCPToolFacts {
+    /// The grant scope kinds the named tool acts under (nil: no such tool).
+    public static func scopes(of tool: String) -> Set<MCPGrantRule.ScopeKind>? {
+        MCPToolCatalog.declaration(named: tool)?.scopes
+    }
+
+    /// The rung the named tool needs (nil: no such tool).
+    public static func rung(of tool: String) -> MCPGrantRule.Rung? {
+        MCPToolCatalog.declaration(named: tool)?.rung
+    }
+
+    /// Every tool's name, in the catalog's order (W-UX-13: the Activity list's
+    /// words are pinned against EVERY tool — none may say a raw tool id).
+    public static var toolNames: [String] { MCPToolCatalog.all.map(\.name) }
+}
+
 enum MCPToolCatalog {
     static let read: [MCPToolDeclaration] = [listBooks, listNotes, readNote, search, exportNote]
     static let suggest: [MCPToolDeclaration] = [addTake, addComment, saveLens]
@@ -68,6 +90,8 @@ enum MCPToolCatalog {
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
         // U4 — the tray's Put back (R-13nb-14) and the date (R-13nb-26 b).
         putBack, setEntryDate,
+        // 13n-c U6 — the per-item note move across wings (VX-160, R-AIR-2).
+        moveNoteToWing,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -92,8 +116,10 @@ enum MCPToolCatalog {
             (tags by path: {"tag": "percy"}, {"star": true}, combined with {"and": […]}, {"or": […]}, \
             {"not": …}), its outflow (the tags notes written there wear), new_matches ("join" or \
             "wait" at Arrivals), word_target / max_notes, and whether it is finished, sealed, owned \
-            or collecting now. Archived books appear only with include_archived: true. Journals and \
-            Private books are never listed. Returns JSON.
+            or collecting now. Archived books appear only with include_archived: true. The daily \
+            Journal and Private books are never listed. A wing shared with you (or the open book) also \
+            lists its gatherings (kind "gathering"): saved rules that gather notes by tag or star, \
+            read-only — list_notes and search take their id like a book's. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -109,11 +135,12 @@ enum MCPToolCatalog {
         name: "list_notes", rung: .read, title: "List notes",
         description: """
             Notes this client can read. With book_id: that book's notes in book order, each with \
-            the chapter it is filed under (section_id, section_name) when it has one. With \
+            the chapter it is filed under (section_id, section_name) when it has one — or a \
+            gathering's notes, in its own order. With \
             wing_id: that wing's notes, most recently edited first. With neither: every note \
             shared with this client, most recently edited first. Paged — pass next_cursor back \
             as cursor. Archived notes appear only with include_archived: true (marked archived). \
-            Journal entries and Private notes appear only when shared one ask at a time. Returns JSON.
+            Daily Journal entries and Private notes appear only when shared one ask at a time. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -188,7 +215,8 @@ enum MCPToolCatalog {
         description: """
             Full-text search over the notes and books shared with this client (Variorum's own \
             search: every word must match, "quoted phrases" stay together, #tag/path filters by \
-            tag). Narrow with book_id or note_id. include_commits: true also searches commits (saved \
+            tag). Narrow with book_id (a book or a gathering) or note_id. include_commits: true also \
+            searches commits (saved \
             moments' text) — those passages carry a commit_id and saved_at. include_archived: true \
             also searches archived notes, books and takes (marked archived). Returns JSON passages: \
             the note, the block, and the words around each match (matches wrapped in **).
@@ -237,7 +265,7 @@ enum MCPToolCatalog {
         description: """
             Add a new take (an alternative text) to one block, at the END of its fan. The take is \
             labeled with this client's name (plus your label, if given), is never chosen and \
-            never locked — the author's text is never touched; she chooses. Get block ids from \
+            never locked — the author's text is never touched; they choose. Get block ids from \
             read_note with with_ids: true. Returns JSON with the new take_id.
             """,
         inputSchema: .object([
@@ -453,7 +481,7 @@ enum MCPToolCatalog {
             (read_note with with_ids: true) — if the author changed it since, the edit is refused and \
             nothing is written; read again. Variorum saves a commit named "before <your name>'s edit" \
             and one named "after <your name>'s edit", so the author can always compare and come back, \
-            and the edit is one undo for her. Returns JSON with the commit ids.
+            and the edit is one undo for the author. Returns JSON with the commit ids.
             """,
         inputSchema: .object([
             "type": "object",
@@ -536,7 +564,7 @@ enum MCPToolCatalog {
         name: "delete_block", rung: .edit, title: "Delete a block",
         description: """
             Delete one block. Nothing is destroyed: it goes to the note's tray of deleted things, \
-            every take with it, where the author can put it back (and it is one undo for her). \
+            every take with it, where the author can put it back (and it is one undo for them). \
             Returns JSON.
             """,
         inputSchema: .object([
@@ -562,6 +590,32 @@ enum MCPToolCatalog {
                 "name": .object(["type": ["string", "null"], "description": "The name (blank or null clears)."]),
             ]),
             "required": .array(["block_id", "name"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// 13n-c U6 (VX-160 — R-AIR-2/-9, the brief §10's R1 · T1 · U1): the
+    /// author's own Move to Wing, on the wire. Listed at EDIT (the source's
+    /// rung) under any scope kind: a client short on the destination's write
+    /// new is still offered it, and its refusal raises that wing's ask.
+    static let moveNoteToWing = MCPToolDeclaration(
+        name: "move_note_to_wing", rung: .edit, title: "Move a note to another wing",
+        description: """
+            Move a note to another wing (wing_id; "" is Home) — each wing is a separate library, \
+            so the note leaves every book it is in here, lands bookless in that wing's Pool, and \
+            its tags come with it (a tag the other wing lacks is made there by its path). Needs \
+            edit on the note and write new on the wing it goes to. A note in a finished or sealed \
+            book can't move until the author reopens it. One undo for the author puts it back, \
+            books and tags too. Returns JSON: where it landed, the books it left (named where you \
+            can read them) and the tags adopted or made.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note to move."]),
+                "wing_id": .object(["type": "string", "description": "The wing it goes to (\"\" is Home)."]),
+            ]),
+            "required": .array(["note_id", "wing_id"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
@@ -607,7 +661,7 @@ enum MCPToolCatalog {
         name: "save_version", rung: .writeNew, title: "Save a version of a note",
         description: """
             Save the whole note as it is now as a version (the author's Note ▸ Versions — an \
-            edition she can come back to). Nothing in the note changes. read_note with \
+            edition they can come back to). Nothing in the note changes. read_note with \
             with_versions: true lists them. Returns JSON with the version_id.
             """,
         inputSchema: .object([
@@ -670,18 +724,19 @@ enum MCPToolCatalog {
     static let showInApp = MCPToolDeclaration(
         name: "show_in_app", rung: .read, title: "Show in Variorum",
         description: """
-            Move the author's Variorum window to something you want her to see — ONLY when she \
-            asks you to show her, never on your own (it moves nothing unless Variorum is the app \
+            Move the author's Variorum window to something you want them to see — ONLY when they \
+            ask you to show them, never on your own (it moves nothing unless Variorum is the app \
             in front, and never raises a window). target "note" (note_id; block_id lands on that \
             block, and select — words in that block's shown take — selects them with the find \
             bar ready), "takes" (note_id + block_id: the note's Takes, that block's takes open), \
-            "lens" (note_id + lens_id: the Lenses board showing that lens) or "book" (book_id, \
-            optionally section_id: that chapter). Returns JSON, or why nothing moved.
+            "lens" (note_id + lens_id: the Lenses board showing that lens), "book" (book_id, \
+            optionally section_id: that chapter) or "wing" (wing_id; "" is Home: Variorum switches \
+            to that wing, as its own wing switcher does). Returns JSON, or why nothing moved.
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
-                "target": .object(["type": "string", "enum": .array(["note", "takes", "lens", "book"]),
+                "target": .object(["type": "string", "enum": .array(["note", "takes", "lens", "book", "wing"]),
                                    "description": "What to show (default note)."]),
                 "note_id": .object(["type": "string"]),
                 "block_id": .object(["type": "string"]),
@@ -689,6 +744,7 @@ enum MCPToolCatalog {
                 "lens_id": .object(["type": "string"]),
                 "book_id": .object(["type": "string"]),
                 "section_id": .object(["type": "string", "description": "A chapter of the book."]),
+                "wing_id": .object(["type": "string", "description": "The wing (\"\" is Home)."]),
             ]),
             "additionalProperties": false,
         ]),

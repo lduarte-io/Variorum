@@ -27,6 +27,8 @@ struct BookPanelView: View {
         .moveChapterUpInBook, .moveChapterDownInBook, .removeFromBook,
     ]
     static let surfaceCapabilities: [CapabilityID] = [.openBookAtNote, .removeRuleTag]
+        // 13n-c U4: a note row's pending-ask glyph (the book TOC's rows).
+        + MCPAskGlyph.surfaceCapabilities
 
     let session: AppSession
     let postID: String
@@ -271,6 +273,9 @@ struct BookPanelView: View {
                     .foregroundStyle(isThis ? tokens.ink : tokens.muted)
                     .lineLimit(1)
                     .truncationMode(.tail)
+                // 13n-c U4: an ask waiting on this note (its own button — the
+                // row's open never fires for it, U3's nested-icon proof).
+                MCPAskGlyph(.note(entry.postID), tokens: tokens)
             }
             .padding(.leading, indented ? 10 : 0)
             .frame(maxWidth: .infinity, minHeight: BookNavigatorLayout.noteRowHeight,

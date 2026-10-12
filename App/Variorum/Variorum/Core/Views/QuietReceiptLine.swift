@@ -78,6 +78,12 @@ import SwiftUI
 struct QuietReceiptLine: View {
     let status: StatusCenter
     let tokens: VoiceTokens
+    /// 13n-c UX walk W-UX-15: a bar whose hint TEXT follows this slot (the
+    /// Bookcase's "⌘J today · ⌘N new note", a reading bar's page line) asks
+    /// for a hairline after a SPEAKING receipt, so its words — and its door's
+    /// "Open ›" — never run into the hint's. Drawn only while it speaks: an
+    /// idle slot still asks for zero width (the weightless claim).
+    var separated = false
 
     var body: some View {
         let item = status.quietLine
@@ -96,6 +102,24 @@ struct QuietReceiptLine: View {
                 .multilineTextAlignment(.leading)
                 .textSelection(.enabled)
                 .help(item?.text ?? "")
+            // 13n-c U3 (R-AIR-4; T-U3-6): a share receipt carries a SECOND
+            // door — "Change…" beside "Revoke ›" — drawn before the act's own
+            // door, the toast's order (`StatusToast`: secondary, then
+            // action). Like the first, only while such a receipt speaks.
+            if let secondary = item?.secondary {
+                Button(secondary.label) {
+                    status.clear()
+                    secondary.perform()
+                }
+                .buttonStyle(.plain)
+                .font(tokens.small)
+                .foregroundStyle(tokens.accent)
+                .lineLimit(1)
+                .fixedSize()
+                // Two doors side by side read as two in a mono voice too (the
+                // U3 capture: Terminal's "Change… Revoke ›" ran together).
+                .padding(.trailing, 4)
+            }
             // 13n-b U4 (R-13nb-23 (a), AF-11 F-2): a receipt may carry ONE
             // door — an AI write's "Open ›". Drawn only while such a receipt
             // speaks, so an idle slot still asks for zero width (the
@@ -110,6 +134,13 @@ struct QuietReceiptLine: View {
                 .foregroundStyle(tokens.accent)
                 .lineLimit(1)
                 .fixedSize()
+            }
+            if separated, item != nil {
+                Rectangle()
+                    .fill(tokens.line)
+                    .frame(width: 1, height: 11)
+                    .padding(.leading, 6)
+                    .accessibilityHidden(true)
             }
         }
         .opacity(item == nil ? 0 : 1)

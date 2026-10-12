@@ -2179,17 +2179,24 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "A client's access is changed in Settings \u{25B8} MCP.",
             availability: always),
         Capability(
-            id: .mcpRevokeClient, verb: "Revoke", scope: .app,
+            // 13n-c UX walk W-UX-4: its OWN verb — the act is a deny (the
+            // client shut out AND every grant it holds revoked, P-13nb-U1-5),
+            // never the grant row's "Revoke"; the ellipsis because it asks
+            // first. PROVISIONAL, her copy pass.
+            id: .mcpRevokeClient, verb: "Deny\u{2026}", scope: .app,
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
-            unavailableNote: "A client is revoked in Settings \u{25B8} MCP.",
+            unavailableNote: "A client is denied in Settings \u{25B8} MCP.",
             availability: always),
         Capability(
             id: .mcpRevokeGrant, verb: "Revoke", scope: .app,
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
-            unavailableNote: "Shared places are revoked in Settings \u{25B8} MCP.",
+            unavailableNote: "Sharing with AI is revoked in Settings \u{25B8} MCP.",
             availability: always),
+        // 13n-c U5 (R-AIR-13): ONE act still — the pane's setup menu
+        // (Claude Code · Codex · Any MCP client, `MCPSetupClient`) chooses
+        // WHAT it copies; choosing is view state, never a second act.
         Capability(
             id: .mcpCopySetupCommand, verb: "Copy setup command", scope: .app,
             doors: [.surface],
@@ -2208,16 +2215,20 @@ nonisolated enum CapabilityRegistry {
             id: .mcpAnswerAsk, verb: "Answer", scope: .app,
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
-            unavailableNote: "A client's ask is answered on the sheet it arrives on.",
+            // 13n-c U4 (arrival X): the sheet no longer arrives by itself.
+            unavailableNote: "A client's ask is answered on its own sheet \u{2014} open it from the ask's "
+                + "icon, or from Settings \u{25B8} MCP \u{25B8} Waiting.",
             availability: always),
         // 13n-b U2 — THE PRIVATE MARK (R-13nb-4). The note's row: post-scoped
         // and available wherever a note is (`noteScoped` — Copy full text's
         // own rule; the bars render it in NOTE contexts only, never on a
         // scraps group). The book's: the settings sheet's State row (books
         // only — a gathering refuses `wrongReadingKind`, so it never renders).
+        // 13n-c U3 (R-AIR-7): the in-note indicator's LOCK popover renders
+        // the same toggle — its `.surface` door.
         Capability(
             id: .markNotePrivate, verb: PrivateMarkCopy.rowWords, scope: .post,
-            doors: [.bottomBar],
+            doors: [.bottomBar, .surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: PrivateMarkCopy.noNoteNote,
             availability: noteScoped),
@@ -2235,6 +2246,89 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: PrivateMarkCopy.allowHereNoNote,
             availability: noteScoped),
+        // 13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; R-AIR-4/6/
+        // 7/8 — the case's own comment carries the family). The row and
+        // surface doors carry their TARGET (the row, the pick, the book, the
+        // place the icon sits on), so their availability is `always`; their
+        // render gate is R-AIR-8's (an approved client exists — the window's
+        // road), applied where they render (P-2: no door, never a dead one).
+        Capability(
+            id: .mcpShareHere, verb: MCPShareCopy.shareVerb, scope: .app,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPShareCopy.zeroState,
+            availability: always),
+        Capability(
+            id: .mcpShareNotes, verb: "Share Selected Notes with AI\u{2026}", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "\u{2318}-click notes in the Library to pick what to share.",
+            availability: always),
+        Capability(
+            id: .mcpShareBook, verb: MCPShareCopy.shareButton, scope: .book,
+            doors: [.surface],
+            // R118: Book Settings is the same sheet from every mode — Takes is
+            // never behind Write here (`.markBookPrivate`'s declaration).
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: MCPShareCopy.zeroState,
+            availability: always),
+        // ⌥⌘A — the note the mounted detail holds (`CommandRouter
+        // .activePostID`, set with `activeMode`): available wherever a post
+        // detail is mounted, natively in Takes (R118). THE COLLISION SWEEP is
+        // recorded at `EditorCommands.keyEquivalent`.
+        Capability(
+            id: .mcpShareThisNote, verb: MCPShareCopy.shareThisNote, scope: .post,
+            doors: [.menuBar],
+            shortcutLabel: "\u{2325}\u{2318}A", takesAccess: .native,
+            unavailableNote: MCPShareCopy.shareThisNoteUnavailable,
+            availability: { ctx in ctx.mode != nil ? .act : .unavailable }),
+        Capability(
+            id: .mcpShowSharing, verb: MCPShareCopy.showSharingVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPShareCopy.zeroState,
+            availability: always),
+        Capability(
+            id: .mcpChangeGrant, verb: MCPShareCopy.change, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A grant is changed from the place it reaches, or in Settings \u{25B8} MCP.",
+            availability: always),
+        // 13n-c U4 — ASKS WAIT QUIETLY (arrival X). The glyph and Waiting's
+        // row each carry their ask, so `always` is honest; the glyph renders
+        // only while that ask waits (P-2 — a calm target draws nothing).
+        Capability(
+            id: .mcpOpenAsk, verb: "Answer\u{2026}", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A client's ask waits at its icon on the thing it names, and in "
+                + "Settings \u{25B8} MCP \u{25B8} Waiting.",
+            availability: always),
+        // ⌥⌘, — the MCP room's chord (the brief §6, recommended and nodded):
+        // Settings' own chord with the ⌥ "deliberate variant" her ceremony
+        // chords carry. Always acts (the pane is always there to open). THE
+        // COLLISION SWEEP is recorded at `EditorCommands.keyEquivalent`.
+        Capability(
+            id: .mcpSettings, verb: "MCP Settings\u{2026}", scope: .app,
+            doors: [.menuBar],
+            shortcutLabel: "\u{2325}\u{2318},", takesAccess: nil,
+            unavailableNote: "", availability: always),
+        // ⌘L — THE WING SWITCHER (R-AIR-15, ratified: "i like Command L").
+        // App-wide like ⌘K (it opens in the window that can show it); the
+        // masthead word's cycling click is its `.surface` door. THE COLLISION
+        // SWEEP is recorded at `EditorCommands.keyEquivalent`.
+        //
+        // 13n-c Stage B R1 B6 (P-2, PROVISIONAL P-13nc-SB-2): with ONE wing the
+        // switcher's only outcome is closing it, so the act is unavailable —
+        // grey on the View menu — and the note says where another wing comes
+        // from (the masthead already applies P-2 to that case: with one wing
+        // the word does not cycle).
+        Capability(
+            id: .switchWing, verb: WingCopy.switchWingVerb, scope: .app,
+            doors: [.menuBar, .surface],
+            shortcutLabel: "\u{2318}L", takesAccess: nil,
+            unavailableNote: WingCopy.switchWingUnavailable,
+            availability: { ctx in ctx.wingCount > 1 ? .act : .unavailable }),
     ]
 
     // MARK: - Lookup

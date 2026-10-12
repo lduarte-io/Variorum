@@ -66,11 +66,16 @@ struct MCPAskAndReceiptTests {
             #expect(door.asks.count == 1, "one ask per client · target · rung")
             door.enqueue(ask(id: "first", rung: .writeNew))
             #expect(door.asks.count == 2, "another rung is another ask")
+            // 13n-c U4 (A JUSTIFIED EDIT, the ritual — ARRIVAL X retired the
+            // self-presented `presentedAsk`): no ask is on screen by itself
+            // any more; the one the cap protects is the ask whose sheet SHE
+            // opened (`beginAnswering` — a glyph's press, Waiting's Answer…).
+            door.beginAnswering(ask(id: "first").id)
             for index in 0..<20 { door.enqueue(ask(id: "spam-\(index)")) }
             #expect(door.asks.count == MCPDoor.askCap)
-            #expect(door.presentedAsk?.scopeID == "first", "the ask on screen is never the one forgotten")
+            #expect(door.asks.first?.scopeID == "first", "the ask she is reading is never the one forgotten")
             door.answer(ask(id: "first"), .dontAllow)
-            #expect(door.presentedAsk?.scopeID != "first" && door.asks.count == MCPDoor.askCap - 1)
+            #expect(door.asks.first?.scopeID != "first" && door.asks.count == MCPDoor.askCap - 1)
             door.detach()
             #expect(door.asks.isEmpty, "a closed library's asks die with it")
         }
@@ -112,8 +117,11 @@ struct MCPAskAndReceiptTests {
                 == "claude-code asks to read “morning pages — oct 9”")
         #expect(MCPAskCopy.title(ask(rung: .writeNew, kind: .wing, title: "Home"))
                 == "claude-code asks to write new in the Home wing")
+        // 13n-c U1 (justified edit, the ritual — R-AIR-1, J8): the fence keys
+        // on THE daily Journal now; the VX-156 mockup §8's words verbatim.
         #expect(MCPAskCopy.lead(ask(fence: .journal))
-                == "A journal entry. Journals are only ever shared one ask at a time.", "mockup §4 verbatim")
+                == "A daily Journal entry. Your daily Journal is only ever shared one ask at a time.",
+                "mockup §8 verbatim")
         #expect(MCPAskCopy.lead(ask(fence: .privateMark)).hasPrefix("Marked Private."), "the journal line's twin")
         #expect(MCPAskCopy.lead(ask(rung: .suggest)).contains("it cannot touch a word you wrote"))
         #expect(CapabilityRegistry.capability(.mcpAnswerAsk).doors == [.surface])
@@ -162,6 +170,109 @@ struct MCPAskAndReceiptTests {
 
     // MARK: - The grant sheet's rungs (mockup §3)
 
+    /// 13n-c U1 (R-AIR-1, J8): the six shipped sentences R-AIR-1 made false,
+    /// each in the VX-156 mockup §8's recommended words — only THE daily
+    /// Journal and anything Private still ask; no sentence says "journals".
+    @Test func theFenceSentencesNameTheDailyJournalNotEveryJournal() {
+        #expect(MCPPaneCopy.wingDetail("Home")
+                == "everything in Home except your daily Journal and anything Private, which always ask")
+        #expect(MCPPaneCopy.openBookDetail == "your daily Journal and anything Private still ask every time")
+        #expect(MCPPaneCopy.noBooks
+                == "No book can be shared yet (your daily Journal and Private books are shared one ask at a time).")
+        #expect(MCPPaneCopy.refusal(OperationError.mcpGrantScopeFenced(kind: "book", id: "x"))
+                == "Your daily Journal and Private notes are shared one ask at a time, never by a standing grant.")
+        #expect(MCPAskCopy.lead(ask(fence: .journal))
+                == "A daily Journal entry. Your daily Journal is only ever shared one ask at a time.")
+        let blurb = SettingsCatalog.rows.first { $0.id == "mcpOpenBook" }?.blurb ?? ""
+        #expect(blurb.hasSuffix("your daily Journal and anything Private still ask every time."))
+        for sentence in [MCPPaneCopy.wingDetail("Home"), MCPPaneCopy.openBookDetail, MCPPaneCopy.noBooks,
+                         MCPPaneCopy.refusal(OperationError.mcpGrantScopeFenced(kind: "book", id: "x")), blurb] {
+            #expect(!sentence.lowercased().contains("journals"), "\(sentence)")
+        }
+    }
+
+    /// 13n-c U1 — R-AIR-3, her sentence verbatim (her Air sitting, round 2):
+    /// *"Grant read in “dream journal” always, including to future entries."*
+    /// — on EVERY book grant, every duration (membership is live); D-3's
+    /// parallel clause on a wing grant; a note grant names one note, no clause.
+    @Test func theConfirmSaysABookOrWingGrantReachesWhatArrivesLater() {
+        #expect(MCPPaneCopy.confirm(verb: "Grant", rung: .read, scope: .book, place: "dream journal", duration: .always)
+                == "Grant read in “dream journal” always, including to future entries", "her sentence (no period: a button)")
+        for duration in MCPGrantRule.Duration.allCases {
+            #expect(MCPPaneCopy.confirm(verb: "Grant", scope: .book, place: "b", duration: duration)
+                .hasSuffix(", including to future entries"), "every duration — \(duration)")
+            #expect(MCPPaneCopy.confirm(verb: "Grant", scope: .wing, place: "Home", duration: duration)
+                .hasSuffix(", including notes added later"), "D-3's wing twin — \(duration)")
+        }
+        // 13n-c U2 (justified edit, the ritual): a NOTE grant reads "on" — the
+        // VX-156 mockup §1's note leg ("Grant read on “morning pages — oct 9”
+        // once"); U1 wrote "in" before the sheet had a note leg to draw it.
+        #expect(MCPPaneCopy.confirm(verb: "Grant", scope: .note, place: "ch 7", duration: .once) == "Grant read on “ch 7” once")
+        // The sheet renders the confirm in three parts so only the place can
+        // compress; joined, they are the sentence exactly.
+        for scope in MCPGrantRule.ScopeKind.allCases {
+            let parts = MCPPaneCopy.confirmParts(verb: "Grant", rung: .edit, scope: scope, place: "x", duration: .connection)
+            #expect(parts.lead + parts.place + parts.tail
+                    == MCPPaneCopy.confirm(verb: "Grant", rung: .edit, scope: scope, place: "x", duration: .connection))
+            // 13n-c U2 (justified edit, the ritual — the same "on" for a note).
+            #expect(parts.place == "x" && parts.lead == (scope == .note ? "Grant edit on “" : "Grant edit in “"))
+        }
+    }
+
+    /// **13n-c UX walk W-UX-14 (the walk's finding 14 — a truth pin):** a
+    /// BOOK ask at write new said "If you allow it, it can also make new
+    /// notes, apply tags and build books." — but `create_book` acts under a
+    /// WING grant only, so "build books" could never be true of what that
+    /// answer grants (and a NOTE ask's "make new notes" never either). Every
+    /// thing a write-new ask's sentence claims must be a tool the asked
+    /// scope can act under — read from the catalog itself (`MCPToolFacts`).
+    @Test func anAsksRungSentenceClaimsOnlyWhatItsScopeAllows() {
+        let claims: [(words: String, tool: String)] = [
+            ("new notes", "create_note"), ("chapters", "create_section"), ("tags", "apply_tag"),
+            ("books", "create_book"), ("versions", "save_version"),
+        ]
+        for (words, tool) in claims {
+            #expect(MCPToolFacts.rung(of: tool) == .writeNew, "\(tool) is a write-new tool")
+        }
+        #expect(MCPToolFacts.scopes(of: "create_book") == [.wing], "a book is born in a wing — never under a book grant")
+        for scope in [MCPGrantRule.ScopeKind.note, .book, .wing] {
+            let asked = MCPAsk(
+                clientName: "claude-code", scopeKind: scope, scopeID: "x", title: "the lightning thief",
+                rung: .writeNew, fence: nil)
+            let lead = MCPAskCopy.lead(asked)
+            for (words, tool) in claims where lead.contains(words) {
+                #expect(MCPToolFacts.scopes(of: tool)?.contains(scope) == true,
+                        "a \(scope) ask claims \"\(words)\" but \(tool) never acts under a \(scope) grant: \(lead)")
+            }
+            // The grant sheet's HOW MUCH line says the same sentence for the
+            // place it picked (one function).
+            let line = MCPPaneCopy.rungDetail(.writeNew, scope: scope)
+            #expect(lead == "If you allow it, " + line + ".")
+            for (words, tool) in claims where line.contains(words) {
+                #expect(MCPToolFacts.scopes(of: tool)?.contains(scope) == true, "the sheet's \(scope) line: \(line)")
+            }
+        }
+        // The book ask, as the walk saw it: no longer "build books".
+        let book = MCPAsk(
+            clientName: "claude-code", scopeKind: .book, scopeID: "x", title: "Fixture book 007",
+            rung: .writeNew, fence: nil)
+        #expect(MCPAskCopy.lead(book) == "If you allow it, it can also make new notes and chapters in it and apply tags.")
+    }
+
+    /// 13n-c UX walk W-UX-15 (T-11): the allow receipt says a note's grant
+    /// with the confirm's own word — "on" a note, "in" a book or a wing.
+    @Test func theAllowReceiptSaysOnANoteAsTheConfirmDoes() {
+        func asked(_ kind: MCPGrantRule.ScopeKind, _ title: String) -> MCPAsk {
+            MCPAsk(clientName: "ux-walk", scopeKind: kind, scopeID: "x", title: title, rung: .read, fence: nil)
+        }
+        #expect(MCPAskCopy.granted(asked(.note, "Fixture 0006"), duration: .once)
+                == "Allowed ux-walk: read on \u{201C}Fixture 0006\u{201D} once.")
+        #expect(MCPPaneCopy.confirm(verb: "Grant", rung: .read, scope: .note, place: "Fixture 0006", duration: .once)
+                .hasPrefix("Grant read on"), "the confirm's word")
+        #expect(MCPAskCopy.granted(asked(.book, "the lightning thief"), duration: .always)
+                == "Allowed ux-walk: read in \u{201C}the lightning thief\u{201D} always.")
+    }
+
     @Test func theGrantSheetOffersTheServedRungsWithTheMockupsSentences() {
         // U3 (justified edit, the ritual): the server serves edit now, so the
         // sheet offers it (U2's pin: "never offered before it serves").
@@ -172,11 +283,20 @@ struct MCPAskAndReceiptTests {
         #expect(MCPPaneCopy.rungDetail(.suggest)
                 == "it can add new takes and comments beside your text, and save a lens of its takes — it cannot touch a word you wrote")
         #expect(MCPPaneCopy.rungDetail(.writeNew) == "it can also make new notes, apply tags and build books")
-        #expect(MCPPaneCopy.confirm(verb: "Grant", rung: .suggest, place: "the lightning thief", duration: .connection)
-                == "Grant suggest in “the lightning thief” while connected", "mockup §3's confirm")
+        // 13n-c U1 (justified edit, the ritual — R-AIR-3): a BOOK grant's
+        // confirm carries her clause; the `scope` is a required argument now.
+        #expect(MCPPaneCopy.confirm(
+            verb: "Grant", rung: .suggest, scope: .book, place: "the lightning thief", duration: .connection)
+                // 13n-c U4 (A JUSTIFIED EDIT, the ritual — her round-2 ask;
+                // PROVISIONAL P-13nc-U4-1): "while connected" → "until it
+                // disconnects".
+                == "Grant suggest in “the lightning thief” until it disconnects, including to future entries",
+                "mockup §3's confirm + R-AIR-3's clause")
         // U3 walk W-2 (justified edit, the ritual): the mockup's words stay,
         // and the sentence stays TRUE now that edit can be granted.
-        #expect(MCPPaneCopy.enableBlurb.contains("AI work lands as takes beside your own"))
+        // 13n-c U2 (justified edit, the ritual — R-AIR-8: no "AI" in
+        // settings-class wording): "AI work" → "a client's work".
+        #expect(MCPPaneCopy.enableBlurb.contains("a client's work lands as takes beside your own"))
         #expect(MCPPaneCopy.enableBlurb.contains("only where you grant it edit"))
         #expect(!MCPPaneCopy.enableBlurb.contains("no client can overwrite your text"))
         #expect(MCPPaneCopy.rungWord(.suggest) == "read and suggest")
@@ -187,7 +307,11 @@ struct MCPAskAndReceiptTests {
     @Test func thePrivateRowsAreDeclaredWhereTheyRenderInTheAppsWords() {
         #expect(PrivateMarkCopy.rowWords == "Private — never shared with AI", "her word, R-13nb-4 (iv)")
         #expect(CapabilityRegistry.capability(.markNotePrivate).verb == PrivateMarkCopy.rowWords)
-        #expect(CapabilityRegistry.capability(.markNotePrivate).doors == [.bottomBar])
+        // 13n-c U3 (A JUSTIFIED EDIT — a new renderer is a new door): the
+        // in-note indicator's LOCK popover renders the same toggle (R-AIR-7,
+        // VX-164), so the act gains its `.surface` door beside the bars'.
+        #expect(CapabilityRegistry.capability(.markNotePrivate).doors == [.bottomBar, .surface])
+        #expect(MCPNoteIndicator.surfaceCapabilities.contains(.markNotePrivate))
         #expect(CommitBar.renderedCapabilities.contains(.markNotePrivate))
         #expect(TakesBottomBar.renderedCapabilities.contains(.markNotePrivate))
         #expect(CapabilityRegistry.capability(.markBookPrivate).doors == [.surface])

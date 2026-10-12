@@ -23,15 +23,62 @@ final class MCPSession: @unchecked Sendable {
     /// The client's self-declared name, once `initialize` has run.
     var clientName: String? { lock.withLock { name } }
 
-    /// What the server says about itself at `initialize` (every client reads
-    /// it — the honest frame for a client that sees no tools yet).
+    /// **THE AI'S ADVICE** — what the server says about itself at `initialize`.
+    /// Every client reads it before it holds a single grant (the honest frame
+    /// for a client that sees no tools yet), so it is where a user's AI learns
+    /// how the door works (13n-c U5, D-2 — her kickoff: "notes / documentation
+    /// for the user need to be made clear (especially since that's what a
+    /// user's AI might need as advice too)"). The SAME FACTS as the field
+    /// guide's MCP chapter, terse and imperative for a model.
+    ///
+    /// Bounded: at most `instructionsBound` characters (a client may put it in
+    /// every turn's context). Pinned (`MCPAdviceServerTests`): the bound, every
+    /// tool it names declared in `MCPToolCatalog`, the format's markers read
+    /// from `VariorumDocument` (never retyped), and its arrival over the wire.
+    /// The U1 ladder's F5: "Every refusal says why." is GONE — a fenced or
+    /// unshared target answers the one not-shared answer by design (T-2). The
+    /// U1 ladder's R2-8: `search` serves standing grants only (P-13nb-U1-2's
+    /// spirit — a once grant reads by id). Her sitting (2026-10-11, the U6
+    /// addendum): the while-connected duration says its BUILT meaning — the
+    /// grant belongs to the client's NAME and ends only when that name's last
+    /// open connection closes (`MCPServerHost.ended`) or the server stops
+    /// (every session hung up; every start sweeps); a reconnect after the end
+    /// finds it gone. Pinned against the mechanics in `MCPAdviceServerTests`.
     static let instructions = """
-        Variorum is a writing app; this server is its library's MCP door. A new client is a \
-        connection request until the author approves it in Variorum \u{25B8} Settings \u{25B8} MCP, \
-        and tools appear only for what the author has shared (they are re-announced when that \
-        changes). \
-        read_note returns the Variorum document format. Every refusal says why.
+        Variorum is a writing app; this server is the door to its library, on the author's Mac, \
+        open only while Variorum runs. A new client is a connection request until the author approves \
+        it in Variorum \u{25B8} Settings \u{25B8} MCP. Tools appear only for what they have shared \
+        (re-announced when that changes).
+        Grants have four rungs, each including those before it: read (read and search), \
+        suggest (add takes and comments beside their text, save lenses), \
+        write new (new notes, books, chapters, tags, versions), edit (edit takes, divide, merge, \
+        move, delete). Each names a note, a book or a wing, for once, until you disconnect, or \
+        always; they may also open the whole library to reading (the open book). A once grant is \
+        one act: a read grant's first read of a note's text, a higher grant's first write. \
+        Until you disconnect lasts while any connection under your client's name stays open, \
+        sessions opened later included; it ends when the last one closes or Variorum's server \
+        stops, and reconnecting does not restore it.
+        search covers standing grants only; read a once grant's note by id.
+        A wing grant also reads that wing's gatherings (list_books lists them, kind gathering); \
+        none is ever granted alone. move_note_to_wing needs edit on the note and write new on the \
+        wing it goes to.
+        Ids are live: after any divide or merge, theirs or yours, read again.
+        read_note speaks the Variorum document format; when its header starts with \
+        \(VariorumDocument.versionToken), a "\(VariorumDocument.blockMarker)" line separates the blocks.
+        The daily Journal's entries and anything marked Private are shared one ask at a time; \
+        snippets are not reachable at all. Anything you can't reach answers exactly as if it did \
+        not exist.
+        If a call is refused, don't retry around it: tell the author what you need (Variorum may \
+        already have asked them).
+        Never call show_in_app unless the author asks you to show them something.
+        Every change you make is one undo for the author, named after you.
         """
+
+    /// The advice's length bound (characters) — stated and pinned. 13n-c: her
+    /// ruling (P-13nc-U5-5's bound half, 2026-10-11 — "yeah let's do 2,000
+    /// because then we'll have a bit of wiggle room for future updates as
+    /// well"): 1,500 → 2,000.
+    static let instructionsBound = 2_000
 
     init(
         fd: Int32, database: AppDatabase, operations: Operations, version: String,

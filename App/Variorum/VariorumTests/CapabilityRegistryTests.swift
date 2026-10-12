@@ -79,6 +79,11 @@ struct CapabilityRegistryTests {
         // session fact (an MCP write landed), not a mode; without it
         // `.showLastAIChange` would read `.unavailable` everywhere.
         contexts.append(CapabilityContext(mode: nil, aiLastChangeAvailable: true))
+        // 13n-c Stage B R1 B6 (justified edit, the ritual): the WING gate — a
+        // fact about the library (it has a second wing), not a mode; without
+        // it `.switchWing` (⌘L, grey with one wing — P-2) would read
+        // `.unavailable` everywhere the walk looks.
+        contexts.append(CapabilityContext(mode: nil, wingCount: 2))
         return contexts
     }
 
@@ -338,7 +343,33 @@ struct CapabilityRegistryTests {
             // (the Library's book rows, the Starred section's, the Archived
             // books group's) — its acts, one of them (Unarchive) newly doored.
             .union(BookRowMenu.contextMenuCapabilities)
+            // 13n-c Stage B R1 B5 (A JUSTIFIED EDIT, the same class — a new
+            // renderer is a new line): the Library's NOTE-row menu's own door
+            // (Share with AI…, beyond the shared note-row grammar).
+            .union(LibraryCatalogView.contextMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
+    }
+
+    /// 13n-c Stage B R1 B5: the Library's note-row menu RENDERS every door it
+    /// declares — read from `postRowMenu`'s own body (a context menu cannot be
+    /// mounted headlessly), so deleting the door turns this red even while
+    /// another renderer keeps the union green.
+    @Test func theLibraryNoteRowMenuRendersItsDeclaredDoors() throws {
+        let source = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Variorum/Features/Library/LibraryCatalogView.swift"),
+            encoding: .utf8)
+        let start = try #require(source.range(of: "private func postRowMenu("))
+        let body = String(source[start.upperBound...].prefix(6_000))
+        let end = body.range(of: "\n    }\n")?.lowerBound ?? body.endIndex
+        let menu = body[..<end]
+        #expect(!LibraryCatalogView.contextMenuCapabilities.isEmpty)
+        for id in LibraryCatalogView.contextMenuCapabilities {
+            #expect(menu.contains("CapabilityRegistry.capability(.\(id)).verb"),
+                    "postRowMenu renders \(id)'s door")
+        }
+        #expect(CapabilityRegistry.capability(.mcpShareHere).doors.contains(.contextMenu))
     }
 
     /// 13b Stage 3 (3D): the `.surface` door — acts rendered INLINE on a
@@ -529,6 +560,20 @@ struct CapabilityRegistryTests {
             // a new line): the just-in-time ASK SHEET renders its answer and
             // is its only renderer (AF-6).
             .union(MCPAskSheet.surfaceCapabilities)
+            // 13n-c U3 (A JUSTIFIED EDIT, the same class — a new renderer is
+            // a new line): the in-note MCP indicator (VX-164) renders the ONE
+            // shared icon (`.mcpShowSharing` + its popover's Change… / Revoke)
+            // and the lock's Private toggle (`.markNotePrivate`'s `.surface`
+            // door); the Bookcase rows render the same icon (`ShelfView`'s
+            // line above carries it).
+            .union(MCPNoteIndicator.surfaceCapabilities)
+            // 13n-c U4 (A JUSTIFIED EDIT, the same class — a new renderer is
+            // a new line): ⌘L's switcher sheet renders `.switchWing` (its
+            // rows) and the wing asks' pending glyph (`.mcpOpenAsk`); the
+            // glyph's other hosts (Library, Pool, Book Panel, Bookcase, the
+            // switcher menu, the indicator, Waiting) carry it in the lines
+            // above.
+            .union(WingSwitcherSheet.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

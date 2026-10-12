@@ -153,12 +153,19 @@ struct TutorialBooksLessonTests {
     /// close the guide (R-13s-30's bound, the U3 RECORD's disposition 4), so
     /// the books chapter is second-to-last now, the workflow's capstone; the
     /// test's name keeps its history.
+    ///
+    /// **13n-c U5 — A JUSTIFIED EDIT (the ritual; P-13nc-U5-1):** the opt-in
+    /// MCP chapter is the guide's appendix AFTER the privacy chapter, so the
+    /// books chapter is third-from-last; privacy still follows it directly
+    /// (R-13s-30's "safety after the workflow", untouched).
     @Test func theChapterIsEightLessonsLastInTheGuide() async throws {
-        let books = TutorialSeeder.plan.dropLast().last
+        let books = TutorialSeeder.plan.dropLast(2).last
         #expect(books?.chapter == TutorialSeeder.booksChapter)
         #expect(books?.lessons == chapterTitles)
-        #expect(TutorialSeeder.plan.last?.chapter == "keeping it private",
-                "the privacy chapter closes the guide, after the workflow")
+        #expect(TutorialSeeder.plan.dropLast().last?.chapter == "keeping it private",
+                "the privacy chapter follows the workflow")
+        #expect(TutorialSeeder.plan.last?.chapter == TutorialSeeder.mcpChapter,
+                "…and only the opt-in MCP appendix comes after it")
         #expect(!TutorialSeeder.plan.flatMap(\.lessons).contains("books & the shelf"),
                 "the old lesson MOVED into this chapter — it is not taught twice")
         try await withChapterWorld { _, db, guideID in
