@@ -833,6 +833,12 @@ by the orchestrator's hands (A1 safety copy → Release build → copy → codes
 re-checked at the moment and the never-kill rule standing. Nothing is needed from her; a paste-ready
 verification prompt for her Air session follows the refresh.
 
+**Eighth round (same sitting): W-UX-19, HER ASK — the pane's rows gain Change…** ("I don't see a way to
+upgrade them"): every Shared-with-AI row carries Change… beside Revoke, opening the SAME pre-filled replace
+sheet as the receipt's door (`mcpChangeGrant` / `changeOpening` — one idiom, REPLACES the grant it names);
+a grouped acts-row's Change… applies to the act's grants as its Revoke does, or per-member where the idiom
+needs it — the implementer records the call. Joins the running fix pass.
+
 ## PROVISIONALs (running — logged at the merge as #211)
 
 - **P-13nc-1** — D-1 (the ⌘J edge kept).
