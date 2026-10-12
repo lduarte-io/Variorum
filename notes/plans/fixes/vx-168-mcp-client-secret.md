@@ -74,8 +74,12 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
   close (this commit). Headless by design — no live client round was run (the UNIT 2 RECORD's first line). Owed to
   the orchestrator: the PROVISIONALs' QUESTIONS entries and the canon delta at the merge (its OWED list); the ladder
   over the run's diff.
-- Unit 3 (VX-172 + VX-171, the lens doors): **IN-PROGRESS** (opus-implementer, 2026-10-12) — the UNIT 3
-  RECORD below carries its pieces; settled design: the vx-170 shape file's VX-172 adjacency + R-VX171-2.
+- Unit 3 (VX-172 + VX-171, the lens doors): **UNIT CLOSED — DONE** (opus-implementer, 2026-10-12): start
+  `f75186fc` · the blank-take doors `6d4c73fe` · the lens read + its door tests `2a260897` · the close (this
+  commit). Headless by design — no live client round, no Mac test run (the Mac target BUILT); the UNIT 3 RECORD's
+  first line. **P-VX171-2's premise was false** (edit_take to empty was never refused) — the refusal is BUILT,
+  PROVISIONAL (P-VX168-U3-2). Owed to the orchestrator: the PROVISIONALs' QUESTIONS entries and the canon delta at
+  the merge (its OWED list); the ladder over the run's diff.
 - Unit 4 (VX-170, lens-aware Takes): **NOT-STARTED** — settled design: the vx-170 shape file, whole.
 - Ladder: NOT-STARTED (runs after the last landed unit).
 - Closeout: NOT-STARTED.
@@ -428,4 +432,135 @@ those two: the Level 0 text through `renderPost(throughLens:)` (the export's own
 | P1 | VX-171 (R-VX171-2, door-only): `add_take` accepts an empty text; `create_note`'s structured takes MINT a blank take (today they DROP — P-13nb-U3-9); `edit_take` to empty refuses (P-VX171-2 — the standing refusal verified FIRST by a probe pin); zero schema; red-on-old pins | DONE (this commit) — **THE PROBE'S FINDING: P-VX171-2's "stays refused" had NO standing refusal under it** — on the pre-unit tree `edit_take` with `text: ""` LANDED (her take emptied, both bracket commits, an undo entry, a receipt; the probe pin `editTakeToEmptyStillRefuses` red with 4 issues). Built: `edit_take` refuses a BLANK text at the wire's parse (`MCPWriteTools.editTakeBlankRefusal`, PROVISIONAL P-VX168-U3-2), making the ratified shape true; `add_take` takes any PRESENT text (`presentString` — the key still required; P-VX168-U3-1: whitespace alone too); `createStructuredNote` mints through `mintDocument(…, keepingBlankTakes: true)` (default false — every file door byte-unchanged, pinned). Pins: `MCPBlankTakeDoorsServerTests` 4/1 (wire) + `MCPBlankTakeMintTests` 2/1 (core) green; neighbours `MCPEditActsTests` + `MCPWriteActsTests` + the import suite green (49/4). Observed red BEFORE the fix: `createNoteMintsABlankTakeInsteadOfDroppingIt`, `editTakeToEmptyStillRefuses`; **RED-ON-OLD VERIFIED by behavioral revert** (on the committed tree `6d4c73fe`: `presentString`→`requiredText`, the edit guard removed, `keepingBlankTakes: false` — `addTakeAcceptsAnEmptyTextAsABlankTake`, `createNoteMintsABlankTakeInsteadOfDroppingIt`, `editTakeToEmptyStillRefuses` and the core `aStructuredNotesBlankTakeIsMintedInPlaceInTheFan` all RED; the two file-door guards green both sides, as unchanged-behaviour pins must be; restored by `git checkout --`, tree clean) |
 | P2 | VX-172: `read_note` gains `lens_id` — the Level 0 text with each block's in-place take the lens's where it names one (else the chosen), the `with_ids` form with `via: lens \| chosen` per block; a dangling/foreign/dead/never-existed lens id answers the ONE not-shared answer byte-identical to an id naming nothing (checked before any once spend); the catalog's description + schema | DONE (this commit) — core: `Queries.exportBlocks/variorumDocument/variorumDocumentText(…, throughLens:)` (default nil = byte-unchanged; the slots are `renderPost(…, throughLens:)`'s); wire: `MCPReadTools.readNote` parses `lens_id` (both forms; `version_id` + `lens_id` an argument error said the same for any lens id), checks `Queries.mcpContainerOf(lens:) == note_id` AFTER the note's decision and BEFORE the once spend, a mismatch answering through `MCPAsking.refusal(decide(standing, note: nil, …), .note, ask: nil)` — the id-naming-nothing road itself; `MCPNoteStructure.Options.lensID` → per block `via` + the lens take's text where `effectiveLensSelection` names a take in the block's ACTIVE fan (the board's pick-in-the-fan rule), `chosen` on takes untouched, `lens_id` echoed; the catalog: `read_note`'s description + `lens_id` property, `add_take`'s and `create_note`'s take `text` properties say an empty text is a blank take |
 | P3 | (the tests, landed with P2) | DONE (this commit) — `MCPLensReadServerTests` 5/1: **the byte-for-byte match** (wire `with_ids` per-block (text, via) == her board's read over `Queries.takesProjection` with `PaneTextAuthority.resolvedText`'s rule (cited, buffer overlay empty at rest) == `renderPost(…, throughLens:)`'s texts, over seven cases: another take · the chosen take · no pick · a BLANK take · an archived pick · a two-paragraph block shown one-paragraph · a deleted pick; a callout frame); **the text form == the note's own read after `adoptLens`** (byte for byte, v2 → v1 included); **no oracle** — ten bad lens ids (never-existed, dead, a readable sibling's, an unshared note's, a Private note's, a deleted note's, the note's own id, a block id, a book id, `""`) × both forms answer byte-identical to `read_note(note_id: "no-such-note")`, no ask raised; **once** — a refused lens leaves a once read grant unspent; **the blank-take round trip** (add_take `""` → save_lens → her board reads `""` via lens → the wire `""` + `via: lens` → the text form exactly the format's document for that state; her note untouched). Core `MCPLensDocumentReadTests` 1/1. **`VariorumMCPTests` 119/18 headless, 0 skipped** (baseline 110/16); the core's lens/export/format/import neighbours 52/9 green |
-| P4 | close: suites over the changed surfaces (headless), the argued calls/PROVISIONALs/OWED, Unit 3 → DONE | NOT-STARTED |
+| P4 | close: suites over the changed surfaces (headless), the argued calls/PROVISIONALs/OWED, Unit 3 → DONE | DONE (this commit) — **the whole package headless: `VariorumMCPTests` 119/18 · `VariorumCoreTests` 2,678/306 · `StringsWorkbookTests` 40/6, ALL GREEN, exit 0** (only the standing gated skips). The run before it: the MCP test PROCESS was killed by SIGPIPE (signal 13) ~0.7 s in, under whole-package load — the MCP target alone then ran green twice (119/18) and the whole package green on the re-run above (OWED 4). Mutation checks (below). The Mac target BUILDS (`xcodebuild … -derivedDataPath DerivedData/vx168-u2 build`, BUILD SUCCEEDED) |
+
+**What this unit did NOT do (said first):** (1) **No live client round, no Mac test run, no walk** — headless by
+design (the brief); no Mac-rendered string or face changed, so no Mac batch ran; the Mac target was BUILT only. The
+byte-for-byte pin reads her board's own projection (`Queries.takesProjection`) and restates
+`PaneTextAuthority.resolvedText`'s three-line rule as its oracle (the editor-seam file was READ, never edited, never
+run). (2) **P-VX171-2's premise was FALSE and I built the refusal it assumed:** on the pre-unit tree `edit_take`
+with `text: ""` LANDED — her take emptied, both bracket commits, an undo entry, a receipt (the probe pin, red with 4
+issues). The ratified shape file rules "edit_take to empty stays refused"; the brief makes it acceptance; so the
+wire's parse now refuses a blank text (P-VX168-U3-2 — the one behaviour change at an existing door, red-on-old,
+options for her below). (3) **No `notes/QUESTIONS.md` entry and no canon edit** — the merging session's ledgers
+(OWED). (4) **`MCPSession.instructions` and the field guide UNCHANGED** — no sentence of either is falsified (reading
+through a lens is reading; a blank take is a take); the advice stays at **1,941 / 2,000** (Unit 4 inherits the 59).
+(5) **`export_note` takes no `lens_id`** — the ticket names `read_note` only; an undeclared argument there is
+ignored as any is. (6) **No block-level take id for the lens's take** (P-VX168-U3-4 — the ruling names `via`
+only). (7) **The format's documented v1 corner is not fixed** (OWED 5 — now reachable through a blanking lens).
+
+### The design calls, argued
+
+1. **The brain the wire rides — found, never reimplemented.** Her Lenses board reads `Queries.takesProjection`
+   (`renderPost`'s slots, the ACTIVE fans, each lens's EFFECTIVE picks via `effectiveLensSelection`) and resolves a
+   column per slot by `PaneTextAuthority.resolvedText` (the pick where it is a take in the block's active fan, else
+   the slot's chosen resolution). The TEXT form reads through `renderPost(…, throughLens:)` (LensQueries — the core's
+   twin of that composition) via the export's own block builder (`exportBlocks(…, throughLens:)`); the `with_ids`
+   form reads `effectiveLensSelection` and applies the board's pick-in-the-active-fan rule over its own fan. Pinned:
+   the wire's per-block (text, via) == the board's read == `renderPost(throughLens:)`'s texts over seven cases.
+2. **The text form through a lens is the note's own DOCUMENT with the lens's takes in place** — each block's
+   in-place take the lens's where it names one, else the chosen, the rest of the active non-blank fan as its
+   alternates (the chosen among them where the lens moved it aside). Exactly the document the note reads as once the
+   lens is made the note — pinned byte for byte against `read_note` after `adoptLens` (the v2 → v1 flip included).
+   Why not JSON-only or plain prose: the ticket names the `with_ids` form as one of two ("In the with_ids form…"),
+   `read_note`'s default answer IS the format, and the format's exact-inverse contract makes "the note as if the lens
+   were the note" its natural lens reading (P-VX168-U3-3).
+3. **A lens is a view:** under `lens_id` each take's `chosen` keeps meaning the NOTE's chosen take (a lens never
+   changes what any take is — the shape file's own sentence); each block says `via: "lens" | "chosen"`; the answer
+   echoes `lens_id` (the `version_id` echo's precedent). Without `lens_id` nothing about either form changes (pinned).
+4. **A dangling pick resolves `via: chosen`** — "how it resolved" is the board's fall-through (an archived or deleted
+   take is dropped by `effectiveLensSelection`); the dangle itself stays visible in `with_lenses`' `dangling_picks`
+   (P-VX168-U3-5).
+5. **No oracle, by construction AND by pin:** a `lens_id` that is not a live lens of THIS note answers through the
+   id-naming-nothing road ITSELF — `MCPAsking.refusal(decide(standing, note: nil, …), .note, ask: nil)` — after the
+   note's own decision (whose refusal is the same words anyway) and BEFORE the once spend. Pinned: ten bad ids (never
+   existed · dead · a readable sibling's · an unshared note's · a Private note's · a deleted note's · the note's own id
+   · a block id · a book id · `""`) × both forms == the live answer to `read_note(note_id: "no-such-note")`, no ask
+   raised; a refused lens leaves a once grant unspent.
+6. **`version_id` + `lens_id` is an argument error**, decided before any grant read and said identically for any lens
+   id ("lenses never ride any copy" — a saved version has none; P-VX168-U3-6).
+7. **VX-171, door-only (R-VX171-2):** `add_take` takes any PRESENT text (the key still required — no text at all is
+   no take); `create_note`'s structured takes mint a blank take through `mintDocument(…, keepingBlankTakes: true)`;
+   every FILE door keeps the default (the Level 0 format cannot write a blank take — its sections skip them — so one
+   format keeps one meaning, R-13nb-11 G-2), pinned both sides. This SUPERSEDES P-13nb-U3-9's "empty-text takes drop"
+   at `create_note` (a recorded supersession for the merge, not a provisional).
+8. **`edit_take`'s refusal lives at the wire's parse** (argument class): decided before any grant read (no oracle,
+   no spend, no log — every argument refusal's posture), whitespace-only counted blank, the words naming the open road.
+9. **Docs:** `read_note`'s description gains the lens sentence and the `lens_id` property (a new parameter is
+   documented where the parameters are); `add_take`'s and `create_note`'s take `text` properties gain one clause each
+   ("an empty text adds a blank take…") — argued: a newly legal input is documented in its own schema line (the
+   model layer of 13n-c's two-layer docs), and without it R-VX171-2's road — opened "so agents can do what humans
+   already can" — is undiscoverable to the agents it was opened for. No description sentence was falsified; the
+   advice and the guide stay as they are.
+
+### Mutation checks (each applied to the committed tree `2a260897`, its suites run, restored by `git checkout --`; tree clean after)
+
+M1 the lens check dropped → red (the no-oracle pin + the once pin) · M2 the once spend moved before the lens check →
+red (the once pin) · M3 `via` always "lens" → red (the board match + the round trip) · M4 the document ignoring the
+lens → red (the text-form pin, the round trip, the core pin) · M5 the version+lens pair check dropped → red (the
+no-oracle pin's pair arm). The P1 behavioural revert (above, P1's row): all four fix pins red, the two file-door
+guards green both sides.
+
+### PROVISIONALs (each wants a `notes/QUESTIONS.md` entry at the merge — the merging session's ledger)
+
+- **P-VX168-U3-1 — the creation doors take ANY text, whitespace alone included** (`add_take`'s blank refusal relaxed
+  whole; `create_note`'s takes always took whitespace). Options: (a) as built; (b) exactly `""` only — whitespace
+  still refused at `add_take` (and `create_note`'s takes then need a NEW refusal to keep the two roads one rule).
+- **P-VX168-U3-2 — `edit_take` refuses a BLANK text** (empty or whitespace-only) at the parse: *"edit_take never
+  empties a take. For a blank take, use add_take with an empty text."* — P-VX171-2 assumed a standing refusal that
+  did not exist. Options: (a) as built; (b) refuse exactly `""` only; (c) withdraw P-VX171-2 — `edit_take` may clear
+  a take, as her editor can (the pre-unit behaviour).
+- **P-VX168-U3-3 — the TEXT form through a lens = the note's document with the lens's takes in place** (== the
+  note read after adoption). Options: (a) as built; (b) `lens_id` implies `with_ids` (JSON only); (c) plain prose
+  through the lens (`export_note`'s shape).
+- **P-VX168-U3-4 — under a lens `takes[].chosen` stays the note's fact; `lens_id` echoed; no block-level id for the
+  lens's take** (a client joins through `with_lenses` or the takes list). Options: (a) as built; (b) a per-block
+  `take_id` naming the resolved take; (c) mark the lens's take in `takes[]` (`in_lens: true`).
+- **P-VX168-U3-5 — a dangling pick reads `via: chosen`**, the dangle unmarked per block. Options: (a) as built;
+  (b) also `lens_pick_dangling: true` on the block (her J5 "say loudly" carried to the wire).
+- **P-VX168-U3-6 — `version_id` + `lens_id` refuse as an argument error.** Options: (a) as built; (b) read the
+  version through the live note's lens by lineage (no model support — a version's blocks are fresh copies).
+- **P-VX168-U3-7 — the words** (her copy pass, 13s-a-sweepable): the `read_note` lens sentence and `lens_id`
+  property, the two blank-take clauses, the `edit_take` refusal, the pair refusal.
+
+### OWED (for the orchestrator)
+
+1. **QUESTIONS at the merge:** P-VX168-U3-1…7; **#211's P-VX171-2 corrected** ("stays refused" — it never was; now
+   built, P-VX168-U3-2) and its "VX-172's `via` marker … built as stated" closed as built; **P-13nb-U3-9's drop
+   clause superseded at `create_note`** by R-VX171-2.
+2. **The canon delta at the merge** (AppSpec §12's THE MCP DOOR line): `read_note` reads a note THROUGH one of its
+   lenses (`lens_id` — the format with the lens's takes in place; `with_ids` says `via: lens | chosen` per block; any
+   id that is not a live lens of that note answers the one not-shared answer); the take-creation doors mint a BLANK
+   take (`add_take` `""`, `create_note`'s takes — R-VX171-2), and `edit_take` never empties a take. §9 needs no line
+   (no op changed its contract; `mintDocument` gained a door-only flag).
+3. **The ladder's map:** `Sources/VariorumMCP/MCPReadTools.swift` (`readNote`: `lens_id`, the pair refusal, the
+   lens check before the once spend) · `MCPNoteStructure.swift` (`Options.lensID`, `via`, the echo) ·
+   `Sources/VariorumCore/Queries/Export.swift` (`exportBlocks/variorumDocument/variorumDocumentText(…, throughLens:)`)
+   · `MCPWriteTools.swift` (`presentString`, `add_take`) · `MCPWriteTools+Edit.swift` (`editTakeBlankRefusal`) ·
+   `Operations+MCPWrites.swift` (`createStructuredNote` → `mintNoteEntry(keepingBlankTakes:)`) ·
+   `Operations+DocumentImport.swift` (`mintDocument(…, keepingBlankTakes:)`) · `MCPToolCatalog.swift` (the four
+   doc lines). Tests: `Tests/VariorumMCPTests/MCPLensDoorsServerTests.swift` (two suites, 9 tests) ·
+   `Tests/VariorumCoreTests/MCPLensDoorsActsTests.swift` (two suites, 3 tests). **Zero lines** in
+   `Persistence/`, `Sync/`, custody/keychain or the editor seam (`git diff e6c1a8a5..HEAD --stat` over those paths:
+   empty) — zero schema, as R-VX171-2 requires.
+4. **A process-killing SIGPIPE, recorded for a watch (Unit 2's OWED 5 class, now fatal):** the first whole-package
+   run's `VariorumMCPTests` process died "with unexpected signal code 13" ~0.7 s in (no test had failed); the target
+   alone then ran 119/18 green twice and the whole package green on the re-run. UNVERIFIED candidates (not this
+   unit's surface): the raw `pipe()`/`socketpair` descriptors in `MCPShimTests` (lines 80, 127, 129, 157, 178) and
+   `MCPSetupKeyServerTests` (214, 230) carry no SIGPIPE suppression — a write to a closed pipe in-process raises it.
+   Possibly a ticket (VX-134 is the core-side watch).
+5. **The format's documented v1 corner is now REACHABLE through a lens** (VariorumDocument's doc comment: "a
+   blank-chosen fanned block right after a FANLESS paragraph … its takes re-import onto the paragraph above"): a lens
+   that blanks a block right after a fanless block reads, in the TEXT form, with the blanked block's takes under the
+   block above (pinned as the format writes it); the `with_ids` form is exact. For 13m / the format's owner — not
+   this unit's surface.
+6. **For Unit 4 (lens-aware Takes) — what the lens machinery says:** (a) a lens's per-block fact should read the
+   EFFECTIVE picks (`TakesProjection.lensSelections` — dangling dropped, `lensDangles` beside it), the same fact the
+   wire's `via` and her board read; the shape file is silent on whether a DANGLING pick "names a take" — Unit 4's to
+   state (a provisional), the wire says it does not. (b) Blank takes now arrive from the door (`add_take` `""`,
+   `create_note`'s takes) beside `newBlankVariant`; a lens pointing at one is a pick like any (P-VX170-1). Fixture
+   roads: `ops.newBlankVariant(blockID)` or `ops.addTake(toBlock:text:"" …)`. (c) Her board's lens resolution is
+   `TakesViewModel.resolvedTake(column:slot:)` → `PaneTextAuthority.resolvedText` (editor seam — read, never edit);
+   "disagrees with the chosen takes" compares against the slot's rendered take (`renderPost`'s chosen-else-default).
+   (d) `takesProjection` already carries lenses, effective picks, dangles and fans — the four forms can be a pure
+   function over it, cost ∝ the note.
