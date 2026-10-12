@@ -2188,7 +2188,7 @@ nonisolated enum CapabilityRegistry {
             id: .mcpRevokeGrant, verb: "Revoke", scope: .app,
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
-            unavailableNote: "Shared places are revoked in Settings \u{25B8} MCP.",
+            unavailableNote: "Sharing with AI is revoked in Settings \u{25B8} MCP.",
             availability: always),
         // 13n-c U5 (R-AIR-13): ONE act still — the pane's setup menu
         // (Claude Code · Codex · Any MCP client, `MCPSetupClient`) chooses

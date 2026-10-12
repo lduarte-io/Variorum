@@ -227,6 +227,12 @@ struct MCPGrantSheetTests {
             #expect(line.range(of: #"\bAI\b"#, options: .regularExpression) == nil, "R-AIR-8: \(line)")
         }
         #expect(MCPPaneCopy.sharedSection == "Shared with AI", "P-13nc-U2-2 reversed in-pane, her ruling")
+        // 13n-c U6 JOB 4c (ladder R2-N2): Revoke's unavailable note names the
+        // section by the noun she now reads there (PROVISIONAL — final words
+        // hers at the copy pass).
+        #expect(CapabilityRegistry.capability(.mcpRevokeGrant).unavailableNote
+                == "Sharing with AI is revoked in Settings \u{25B8} MCP.",
+                "R2-N2: the note's noun follows the \(MCPPaneCopy.sharedSection) section")
         #expect(MCPPaneCopy.clientBoundary
                 == "A client names itself when it connects. Variorum can't verify the name: a grant lets whatever connects under that name do what you granted.",
                 "L1 — the brief §12's words, verbatim")
