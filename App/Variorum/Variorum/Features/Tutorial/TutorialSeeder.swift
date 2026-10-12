@@ -2519,9 +2519,10 @@ enum TutorialSeeder {
 
             "The first time a client connects, it shows up in Settings \u{25B8} MCP "
             + "as a connection request, and it can reach nothing yet. "
-            + "Approve\u{2026} lets it in and asks what to share first; Deny turns "
-            + "it away. Every approved client is listed there, with Change\u{2026} "
-            + "to share more and Revoke to shut it out again.",
+            + "Approve\u{2026} lets it in, still reaching nothing until you share "
+            + "something: its sheet offers a first grant, with nothing picked for "
+            + "you. Deny turns it away. Every approved client is listed there, with "
+            + "Change\u{2026} to share more and Revoke to shut it out again.",
 
             "One honest limit: a client names itself when it connects, and "
             + "Variorum can't check that name. Whatever you grant, you "

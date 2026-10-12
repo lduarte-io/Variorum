@@ -27,6 +27,12 @@
 //  - The confirm names the place WITH its distinguisher and carries R-AIR-3's
 //    clause (U1) — one line when it fits, else two (the U2 geometry oracle).
 //
+//  13n-c UX walk W-UX-2 — APPROVE ALONE, GRANT SEPARATE (her ruling, sitting
+//  round 6): the approval road (a request's Approve…) admits the client with
+//  ZERO reach. The sheet still OFFERS a grant, but starts on "Nothing yet" —
+//  no place, no book, never Always (`start`) — and confirms "Approve <client>"
+//  until she picks a grant ("Approve and grant read in “X” once").
+//
 
 import SwiftUI
 import VariorumCore
@@ -82,6 +88,17 @@ struct MCPGrantSheet: View {
 
     private var tokens: VoiceTokens { themeStore?.tokens(for: scheme) ?? .fallback(for: scheme) }
 
+    init(door: MCPDoor, opening: MCPGrantOpening, done: @escaping () -> Void) {
+        self.door = door
+        self.opening = opening
+        self.done = done
+        // W-UX-2: the FIRST frame already shows the road's start (never a
+        // book and Always flashing before the load on the approval road).
+        let start = Self.start(approving: opening.approving, mostRecentBookID: nil)
+        _place = State(initialValue: start.place)
+        _duration = State(initialValue: start.duration)
+    }
+
     // MARK: - What is chosen
 
     private var client: MCPClient? {
@@ -111,6 +128,8 @@ struct MCPGrantSheet: View {
 
     /// Whether the confirm can act (P-2: never an enabled dead button).
     private var canConfirm: Bool {
+        // W-UX-2: the approval alone is always an act (its client is named).
+        if place == .nothing { return opening.approving && client != nil }
         guard client != nil, offeredDurations.contains(duration) else { return false }
         return place == .notes ? !notes.isEmpty : spec != nil
     }
@@ -156,9 +175,13 @@ struct MCPGrantSheet: View {
     }
 
     static func start(approving: Bool, mostRecentBookID: String?) -> Start {
+        // 13n-c UX walk W-UX-2 (her ruling, sitting round 6 — APPROVE ALONE,
+        // GRANT SEPARATE): the approval road starts on NOTHING picked — no
+        // place, no book, and never Always; a grant there is hers to pick.
+        if approving { return Start(place: .nothing, bookID: nil, duration: .once) }
         // The default a book: the most recently edited one (her "that's often
         // what I want") — a–z's first was arbitrary at scale.
-        Start(place: .book, bookID: mostRecentBookID, duration: .always)
+        return Start(place: .book, bookID: mostRecentBookID, duration: .always)
     }
 
     /// F4 (the U1 ladder): EXHAUSTIVE — a note grant never wears the wing's
@@ -193,10 +216,10 @@ struct MCPGrantSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(MCPPaneCopy.sheetTitle(client: opening.client?.name, changing: !opening.replacing.isEmpty))
+            Text(title)
                 .font(.headline)
                 .lineLimit(1)
-            Text(MCPPaneCopy.sheetLead)
+            Text(opening.approving ? MCPPaneCopy.approvalLead : MCPPaneCopy.sheetLead)
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .lineLimit(3)
@@ -217,6 +240,10 @@ struct MCPGrantSheet: View {
             // they open is the bulk share of exactly these.
             if place != .notes {
                 Picker(MCPPaneCopy.whereSection, selection: $place) {
+                    // W-UX-2: the approval road offers a grant, never makes one.
+                    if opening.approving {
+                        Text(MCPPaneCopy.nothingYet).tag(Place.nothing)
+                    }
                     Text(MCPPaneCopy.aNote).tag(Place.note)
                     Text(MCPPaneCopy.aBook).tag(Place.book)
                     Text(MCPPaneCopy.thisWing).tag(Place.wing)
@@ -227,28 +254,31 @@ struct MCPGrantSheet: View {
             }
             whereRow
 
-            section(MCPPaneCopy.howMuchSection)
-            Picker(MCPPaneCopy.howMuchSection, selection: $rung) {
-                ForEach(MCPPaneCopy.offeredRungs, id: \.self) { rung in
-                    Text(MCPPaneCopy.rungName(rung)).tag(rung)
+            // W-UX-2: with nothing picked there is no grant to size.
+            if place != .nothing {
+                section(MCPPaneCopy.howMuchSection)
+                Picker(MCPPaneCopy.howMuchSection, selection: $rung) {
+                    ForEach(MCPPaneCopy.offeredRungs, id: \.self) { rung in
+                        Text(MCPPaneCopy.rungName(rung)).tag(rung)
+                    }
                 }
-            }
-            .pickerStyle(.radioGroup)
-            .horizontalRadioGroupLayout()
-            .labelsHidden()
-            quiet(MCPPaneCopy.rungDetail(rung))
+                .pickerStyle(.radioGroup)
+                .horizontalRadioGroupLayout()
+                .labelsHidden()
+                quiet(MCPPaneCopy.rungDetail(rung))
 
-            section(MCPPaneCopy.howLongSection)
-            Picker(MCPPaneCopy.howLongSection, selection: $duration) {
-                ForEach(offeredDurations, id: \.self) { duration in
-                    Text(MCPPaneCopy.durationWord(duration).capitalizedFirst).tag(duration)
+                section(MCPPaneCopy.howLongSection)
+                Picker(MCPPaneCopy.howLongSection, selection: $duration) {
+                    ForEach(offeredDurations, id: \.self) { duration in
+                        Text(MCPPaneCopy.durationWord(duration).capitalizedFirst).tag(duration)
+                    }
                 }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .fixedSize()
-            ForEach(durationWhys, id: \.self) { why in
-                quiet(why)
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+                ForEach(durationWhys, id: \.self) { why in
+                    quiet(why)
+                }
             }
 
             HStack(alignment: .bottom) {
@@ -257,7 +287,12 @@ struct MCPGrantSheet: View {
                     .keyboardShortcut(.cancelAction)
                 Spacer(minLength: 8)
                 Button(action: submit) {
-                    ConfirmLabel(parts: confirmParts)
+                    if place == .nothing {
+                        Text(MCPPaneCopy.approveAlone(opening.client?.name ?? ""))
+                            .lineLimit(1)
+                    } else {
+                        ConfirmLabel(parts: confirmParts)
+                    }
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                 .keyboardShortcut(.defaultAction)
@@ -300,7 +335,7 @@ struct MCPGrantSheet: View {
     private var whereRow: some View {
         switch place {
         case .nothing:
-            EmptyView()
+            quiet(MCPPaneCopy.approveAloneDetail(openBook: door.snapshot.openBook))
         case .note:
             if places.wings.count > 0 {
                 HStack(spacing: 8) {
@@ -378,8 +413,16 @@ struct MCPGrantSheet: View {
             note: noteFence.flatMap { fence in note.map { ($0.title, fence) } })
     }
 
+    /// The title — W-UX-2: the approval road says it APPROVES.
+    private var title: String {
+        if opening.approving, let name = opening.client?.name { return MCPPaneCopy.approvalTitle(name) }
+        return MCPPaneCopy.sheetTitle(client: opening.client?.name, changing: !opening.replacing.isEmpty)
+    }
+
     private var confirmParts: (lead: String, place: String, tail: String) {
-        let verb = CapabilityRegistry.capability(.mcpGrantAccess).verb
+        // W-UX-2: a grant riding an approval says both acts.
+        let verb = opening.approving
+            ? MCPPaneCopy.approveAndGrantVerb : CapabilityRegistry.capability(.mcpGrantAccess).verb
         if place == .notes {
             return MCPPaneCopy.confirmPartsForNotes(verb: verb, rung: rung, count: notes.count, duration: duration)
         }
@@ -407,14 +450,18 @@ struct MCPGrantSheet: View {
         guard canConfirm, let client else { return }
         let saying = opening.origin == .place ? receiptPlace : nil
         let change = road?.open
+        if opening.approving {
+            // W-UX-2: APPROVE ALONE unless she picked a grant — then it rides.
+            door.approve(client.id, granting: place == .nothing ? nil : spec)
+            done()
+            return
+        }
         if place == .notes {
             door.grantNotes(
                 client, notes.map(\.id), rung: rung, duration: duration, replacing: opening.replacing,
                 saying: saying, change: change)
         } else if let spec {
-            if opening.approving {
-                door.approve(client.id, granting: spec)
-            } else if saying == nil, opening.replacing.isEmpty {
+            if saying == nil, opening.replacing.isEmpty {
                 door.grant(client.id, spec)
             } else {
                 door.grant(client, spec, replacing: opening.replacing, saying: saying, change: change)

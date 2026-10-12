@@ -424,6 +424,9 @@ final class MCPDoor {
         act { try $0.setMCPSwitch(.openBook, on: on) }
     }
 
+    /// Approve a request (or a denied client). 13n-c UX walk W-UX-2 (her
+    /// ruling — APPROVE ALONE, GRANT SEPARATE): `spec` is nil unless she
+    /// picked a grant in the approval sheet; nil admits with zero reach.
     func approve(_ clientID: String, granting spec: Operations.MCPGrantSpec?) {
         act { _ = try $0.approveMCPClient(clientID, granting: spec) }
     }

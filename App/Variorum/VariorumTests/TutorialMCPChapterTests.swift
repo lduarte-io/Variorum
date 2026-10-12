@@ -246,9 +246,20 @@ struct TutorialMCPChapterTests {
             let pending = try ops.recordMCPContact(name: "claude-code", version: "1.0")
             #expect(pending.state == .pending)
             #expect(try await reachers(db, page).isEmpty, "a request reaches nothing")
-            // "Approve… lets it in and asks what to share first."
-            _ = try ops.approveMCPClient(pending.id, granting: grant(.read, .note, page))
-            #expect(try await reachers(db, page) == ["claude-code"])
+            // A JUSTIFIED EDIT (13n-c UX walk W-UX-2 — her ruling, sitting round
+            // 6: APPROVE ALONE, GRANT SEPARATE; the ritual): the sentence was
+            // "Approve… lets it in and asks what to share first."; now "Approve…
+            // lets it in, still reaching nothing until you share something: its
+            // sheet offers a first grant, with nothing picked for you."
+            #expect(text.contains("still reaching nothing until you share something"))
+            #expect(text.contains("with nothing picked for you"))
+            #expect(MCPGrantSheet.start(approving: true, mostRecentBookID: "b1").place == .nothing,
+                    "the approval sheet picks nothing (the sheet's own start)")
+            try ops.setMCPSwitch(.openBook, on: false)
+            _ = try ops.approveMCPClient(pending.id, granting: nil)
+            #expect(try await reachers(db, page).isEmpty, "approved alone, it reaches nothing")
+            _ = try ops.grantMCPAccess(pending.id, grant(.read, .note, page))
+            #expect(try await reachers(db, page) == ["claude-code"], "its first grant reaches")
         }
     }
 

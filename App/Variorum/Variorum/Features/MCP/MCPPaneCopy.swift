@@ -401,6 +401,32 @@ nonisolated enum MCPPaneCopy {
         ("\(verb) \(rungName(rung).lowercased()) on ", count == 1 ? "1 note" : "\(count) notes",
          " \(durationWord(duration))")
     }
+    // MARK: - The approval road (13n-c UX walk W-UX-2 — her ruling, sitting
+    // round 6: APPROVE ALONE, GRANT SEPARATE). Every word PROVISIONAL, her
+    // copy pass.
+
+    /// The approval sheet's title — the request row's Approve… (or a denied
+    /// client's).
+    static func approvalTitle(_ client: String) -> String { "Approve \(client)" }
+    /// Its lead: approving admits with zero reach; a grant is its own act.
+    static let approvalLead =
+        "Approving lets it connect, and it reaches nothing yet. You can grant it a place below, or "
+        + "later with Change\u{2026} on its row."
+    /// WHERE's first answer on the approval road — and the one it starts on.
+    static let nothingYet = "Nothing yet"
+    /// The line under WHERE when nothing is picked — honest about the open
+    /// book (lesson 3: it lets every approved client read everything).
+    static func approveAloneDetail(openBook: Bool) -> String {
+        openBook
+            ? "The open book is on, so once approved it can read everything except what always asks."
+            : "Approved, it reaches nothing until you grant it something."
+    }
+    /// The confirm with nothing picked: the approval alone.
+    static func approveAlone(_ client: String) -> String { "Approve \(client)" }
+    /// The confirm's verb when a grant rides the approval ("Approve and grant
+    /// read in “X” once").
+    static let approveAndGrantVerb = "Approve and grant"
+
     static let sheetLead =
         "The client sees what you grant and nothing else. Refusals speak to it exactly as they "
         + "speak to you."
