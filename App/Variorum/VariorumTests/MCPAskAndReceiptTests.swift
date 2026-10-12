@@ -219,6 +219,34 @@ struct MCPAskAndReceiptTests {
         }
     }
 
+    /// **13n-c UX walk W-UX-14 (the walk's finding 14 — a truth pin):** a
+    /// BOOK ask at write new said "If you allow it, it can also make new
+    /// notes, apply tags and build books." — but `create_book` acts under a
+    /// WING grant only, so "build books" could never be true of what that
+    /// answer grants (and a NOTE ask's "make new notes" never either). Every
+    /// thing a write-new ask's sentence claims must be a tool the asked
+    /// scope can act under — read from the catalog itself (`MCPToolFacts`).
+    @Test func anAsksRungSentenceClaimsOnlyWhatItsScopeAllows() {
+        let claims: [(words: String, tool: String)] = [
+            ("new notes", "create_note"), ("chapters", "create_section"), ("tags", "apply_tag"),
+            ("books", "create_book"), ("versions", "save_version"),
+        ]
+        for (words, tool) in claims {
+            #expect(MCPToolFacts.rung(of: tool) == .writeNew, "\(tool) is a write-new tool")
+        }
+        #expect(MCPToolFacts.scopes(of: "create_book") == [.wing], "a book is born in a wing — never under a book grant")
+        for scope in [MCPGrantRule.ScopeKind.note, .book, .wing] {
+            let asked = MCPAsk(
+                clientName: "claude-code", scopeKind: scope, scopeID: "x", title: "the lightning thief",
+                rung: .writeNew, fence: nil)
+            let lead = MCPAskCopy.lead(asked)
+            for (words, tool) in claims where lead.contains(words) {
+                #expect(MCPToolFacts.scopes(of: tool)?.contains(scope) == true,
+                        "a \(scope) ask claims \"\(words)\" but \(tool) never acts under a \(scope) grant: \(lead)")
+            }
+        }
+    }
+
     @Test func theGrantSheetOffersTheServedRungsWithTheMockupsSentences() {
         // U3 (justified edit, the ritual): the server serves edit now, so the
         // sheet offers it (U2's pin: "never offered before it serves").

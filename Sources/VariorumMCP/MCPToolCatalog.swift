@@ -56,6 +56,24 @@ struct MCPToolDeclaration: Sendable {
     static let everyScope: Set<MCPGrantRule.ScopeKind> = [.note, .book, .wing]
 }
 
+/// **13n-c UX walk W-UX-14 — the catalog's scope facts, read by the app's
+/// grant faces' truth pin.** The ask sheet and the grant sheet say what a rung
+/// lets a client do AT A SCOPE ("it can also make new notes and chapters in
+/// it…"); a sentence that names a tool the scope can never act under is an
+/// overclaim (a book grant can never build a book — `create_book` is
+/// wing-only). One public read, so the pin ties each claim to the catalog.
+public enum MCPToolFacts {
+    /// The grant scope kinds the named tool acts under (nil: no such tool).
+    public static func scopes(of tool: String) -> Set<MCPGrantRule.ScopeKind>? {
+        MCPToolCatalog.declaration(named: tool)?.scopes
+    }
+
+    /// The rung the named tool needs (nil: no such tool).
+    public static func rung(of tool: String) -> MCPGrantRule.Rung? {
+        MCPToolCatalog.declaration(named: tool)?.rung
+    }
+}
+
 enum MCPToolCatalog {
     static let read: [MCPToolDeclaration] = [listBooks, listNotes, readNote, search, exportNote]
     static let suggest: [MCPToolDeclaration] = [addTake, addComment, saveLens]
