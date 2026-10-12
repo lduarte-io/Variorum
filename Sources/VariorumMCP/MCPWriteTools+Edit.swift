@@ -46,6 +46,11 @@ extension MCPWriteTools {
         }
     }
 
+    /// `edit_take`'s one refusal of a blank text (VX-168 U3, P-VX171-2 —
+    /// PROVISIONAL words, P-VX168-U3-2): says the road that IS open.
+    static let editTakeBlankRefusal =
+        "edit_take never empties a take. For a blank take, use add_take with an empty text."
+
     /// Where `move_block` puts the block.
     enum MoveTarget: Sendable, Equatable {
         case after(blockID: String)
@@ -60,6 +65,16 @@ extension MCPWriteTools {
         case MCPToolCatalog.editTake.name:
             guard let text = try optionalString(args, "text") else {
                 throw ArgumentFailure(message: "text is required (the take's whole new text).")
+            }
+            // VX-168 U3 (P-VX171-2, QUESTIONS #211): clearing a take is not
+            // this door's act — blanking a block in a lens is a BLANK TAKE
+            // (`add_take` with an empty text, R-VX171-2), never an edit that
+            // empties her text. The provisional's "stays refused" had no
+            // standing refusal under it (the probe pin landed the clear and
+            // both brackets on the pre-unit tree); this line makes it true.
+            // Whitespace alone is blank too (PROVISIONAL P-VX168-U3-2).
+            guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                throw ArgumentFailure(message: Self.editTakeBlankRefusal)
             }
             guard let expected = try optionalString(args, "expected_text") else {
                 throw ArgumentFailure(message: "expected_text is required: the take's text exactly as you read it.")

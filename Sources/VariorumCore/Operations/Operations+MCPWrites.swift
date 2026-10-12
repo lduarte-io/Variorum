@@ -336,6 +336,13 @@ extension Operations {
     /// what the text format cannot carry set in the same transaction: each
     /// block's NAME and the note's ENTRY DATE. Lands per `destination`
     /// exactly as `createNote`; ONE undo entry (the minted note, whole).
+    ///
+    /// VX-168 U3 (VX-171 — R-VX171-2, her word, door-only): a take whose text
+    /// is EMPTY mints a BLANK take at its place in the fan — a legal take (the
+    /// Mac's own blank-take gesture), the one a lens points at to show the
+    /// block as an empty line. Until this unit it was silently DROPPED (the
+    /// format's rule, P-13nb-U3-9's "empty-text takes drop" — superseded at
+    /// this door only; the file doors keep it).
     @discardableResult
     public func createStructuredNote(
         title: String?, entryDate: String?, blocks: [MCPNoteBlock],
@@ -347,7 +354,9 @@ extension Operations {
             document: VariorumDocument.Document(
                 title: (trimmed?.isEmpty ?? true) ? nil : trimmed, tagPaths: [],
                 blocks: blocks.map { VariorumDocument.Block(text: $0.text, alternates: $0.takes) }))
-        return try mintNoteEntry(undoLabel: undoLabel) { _ in document } destination: { destination } finish: { db, minted in
+        return try mintNoteEntry(
+            undoLabel: undoLabel, keepingBlankTakes: true
+        ) { _ in document } destination: { destination } finish: { db, minted in
             for (blockID, block) in zip(minted.blockIDs, blocks) {
                 let name = block.name?.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard let name, !name.isEmpty else { continue }
@@ -385,6 +394,7 @@ extension Operations {
     /// as it will stand).
     private func mintNoteEntry(
         undoLabel: String,
+        keepingBlankTakes: Bool = false,
         document: (Database) throws -> VariorumDocument.NamedDocument,
         destination: () -> MCPNoteDestination,
         finish: (Database, MintedDocument) throws -> Void = { _, _ in }
@@ -405,7 +415,7 @@ extension Operations {
                 wing = id
             }
             let now = date.now
-            let minted = try mintDocument(db, named, wingId: wing, now: now)
+            let minted = try mintDocument(db, named, wingId: wing, now: now, keepingBlankTakes: keepingBlankTakes)
             try finish(db, minted)
             if let bookID {
                 // The hand-add's ONE choke point (its capacity and ownership

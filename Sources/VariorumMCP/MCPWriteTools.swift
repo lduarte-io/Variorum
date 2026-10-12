@@ -123,8 +123,12 @@ struct MCPWriteTools: Sendable {
     private func parse(_ name: String, _ args: [String: Value]) throws -> Job {
         switch name {
         case MCPToolCatalog.addTake.name:
+            // VX-168 U3 (VX-171 — R-VX171-2, her word, door-only): a BLANK
+            // take is a legal take (the Mac's own blank-take gesture writes
+            // `''`), so the text may be empty — but it must be SAID: no text
+            // key at all is still no take.
             return .addTake(
-                blockID: try requiredString(args, "block_id"), text: try requiredText(args, "text"),
+                blockID: try requiredString(args, "block_id"), text: try presentString(args, "text"),
                 label: try optionalString(args, "label"))
         case MCPToolCatalog.addComment.name:
             return .addComment(blockID: try requiredString(args, "block_id"), text: try requiredText(args, "text"))
@@ -658,6 +662,15 @@ struct MCPWriteTools: Sendable {
 
     func requiredString(_ args: [String: Value], _ key: String) throws -> String {
         guard let value = try optionalString(args, key), !value.isEmpty else {
+            throw ArgumentFailure(message: "\(key) is required.")
+        }
+        return value
+    }
+
+    /// Required to be PRESENT, and may be empty (VX-168 U3 — `add_take`'s
+    /// blank take, R-VX171-2).
+    func presentString(_ args: [String: Value], _ key: String) throws -> String {
+        guard let value = try optionalString(args, key) else {
             throw ArgumentFailure(message: "\(key) is required.")
         }
         return value
