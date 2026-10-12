@@ -263,8 +263,12 @@ nonisolated enum WingCopy {
     static let switchWingVerb = "Switch Wing\u{2026}"
     /// 13n-c Stage B R1 B6 — why ⌘L is grey with ONE wing, and where another
     /// comes from (PROVISIONAL P-13nc-SB-2).
-    static let switchWingUnavailable = "There is only one wing so far \u{2014} \(newWingVerb) in the "
-        + "masthead\u{2019}s \u{25BE} menu makes another, and then \u{2318}L switches between them."
+    /// Her sitting (2026-10-11, second round — P-13nc-SB-2 RULED with a
+    /// reword): grey-with-a-note stands, but "masthead" was too opaque — the
+    /// note says where New Wing… lives in plain words (PROVISIONAL for her
+    /// copy pass).
+    static let switchWingUnavailable = "There is only one wing so far \u{2014} \(newWingVerb) under the "
+        + "wing name at the top of the Bookcase makes another, and then \u{2318}L switches between them."
     /// THE SWITCHER's one quiet line (round 5, her ruling: the wing-isolation
     /// UI makes clear Snippets is the one room shared across wings).
     static let snippetsShared = "Snippets is the one room every wing shares."

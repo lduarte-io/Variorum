@@ -98,11 +98,13 @@ nonisolated enum MCPPaneCopy {
 
     // MARK: - Shared with AI
 
-    /// 13n-c U2 (R-AIR-8 — no "AI" in settings-class wording; PROVISIONAL
-    /// P-13nc-U2-2, her words at the copy pass): was "Shared with AI". The
-    /// client row's own "N shared places" and the Revoke door's note
-    /// already said "shared places".
-    static let sharedSection = "Shared places"
+    /// 13n-c U2 made it "Shared places" (R-AIR-8); HER SITTING (2026-10-11,
+    /// second round) REVERSED it in-pane — "I think Shared with AI is fine
+    /// inside the MCP pane actually. that's a place where it's fair": R-AIR-8
+    /// stands app-wide, with her carve-out that inside the MCP pane itself
+    /// "AI" is fair wording. Only this title changed; the client row's "N
+    /// shared places" and the pane's other words stand.
+    static let sharedSection = "Shared with AI"
     static let nothingShared = "Nothing is shared."
 
     /// 13n-c U2 (R2-3): a live grant whose target is fenced since reaches

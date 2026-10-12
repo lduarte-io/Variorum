@@ -229,6 +229,11 @@ struct WingSwitcherChordTests {
         #expect(CapabilityRegistry.availability(.switchWing, in: CapabilityContext(wingCount: 2)) == .act)
         #expect(CapabilityRegistry.capability(.switchWing).unavailableNote.contains(WingCopy.newWingVerb),
                 "the note names New Wing…")
+        // Her sitting's second round (P-13nc-SB-2 RULED with a reword): no
+        // "masthead" — where New Wing… lives, in plain words.
+        let note = CapabilityRegistry.capability(.switchWing).unavailableNote
+        #expect(!note.localizedCaseInsensitiveContains("masthead"))
+        #expect(note.contains("under the wing name at the top of the Bookcase"))
         let db = try AppDatabase.inMemory()
         try await withDependencies {
             $0.database = db

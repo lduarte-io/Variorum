@@ -212,8 +212,11 @@ struct MCPGrantSheetTests {
     // MARK: - R-AIR-8 and L1
 
     @Test func theSettingsClassWordsSayNoAIAndTheBoundaryIsSaid() {
+        // Her sitting's second round (A JUSTIFIED EDIT, the ritual): the
+        // Shared section's title is her carve-out — "AI" is fair inside the
+        // MCP pane — so it leaves the no-"AI" list and is pinned to her words.
         let words = [
-            MCPPaneCopy.sharedSection, MCPPaneCopy.enableBlurb, MCPPaneCopy.sheetLead,
+            MCPPaneCopy.enableBlurb, MCPPaneCopy.sheetLead,
             MCPPaneCopy.sheetTitleChoosing, MCPPaneCopy.noApprovedClient, MCPPaneCopy.fencedBooksNote,
             MCPPaneCopy.clientBoundary, MCPPaneCopy.noBooks, MCPPaneCopy.openBookDetail,
             MCPPaneCopy.wingDetail("Home"), MCPPaneCopy.whileConnectedNote, MCPPaneCopy.noClients,
@@ -223,7 +226,7 @@ struct MCPGrantSheetTests {
         for line in words {
             #expect(line.range(of: #"\bAI\b"#, options: .regularExpression) == nil, "R-AIR-8: \(line)")
         }
-        #expect(MCPPaneCopy.sharedSection == "Shared places")
+        #expect(MCPPaneCopy.sharedSection == "Shared with AI", "P-13nc-U2-2 reversed in-pane, her ruling")
         #expect(MCPPaneCopy.clientBoundary
                 == "A client names itself when it connects. Variorum can't verify the name: a grant lets whatever connects under that name do what you granted.",
                 "L1 — the brief §12's words, verbatim")
