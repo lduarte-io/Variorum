@@ -195,16 +195,63 @@ nonisolated enum MCPPaneCopy {
     static let noActivity = "Nothing yet \u{2014} the calls clients made recently are listed here."
 
     /// One line of the ACTIVITY list (the mockup §2's "claude code added 3
-    /// takes to “…”"): who, what, where — the MCP room's register, direct;
-    /// a refused call says so with the tool's own name.
+    /// takes to “…”"): who, what, where — the MCP room's register, direct.
+    /// 13n-c UX walk W-UX-13: a refused call says WHAT was refused in the act
+    /// table's words ("ux-walk was refused reading “a letter”"), never the
+    /// tool's raw id (PROVISIONAL words, her copy pass).
     static func activityLine(_ line: MCPActivityFace.Line) -> String {
         let target = line.targetTitle.map { "\u{201C}\($0)\u{201D}" }
         guard line.allowed else {
-            let on = target.map { " on \($0)" } ?? ""
             let times = line.count > 1 ? " (\(line.count) times)" : ""
-            return "\(line.clientName) was refused \(line.act)\(on)\(times)"
+            return "\(line.clientName) was refused "
+                + refusedPhrase(line.act, target: target, kind: line.targetKind) + times
         }
         return "\(line.clientName) \(activityPhrase(line.act, count: line.count, target: target, kind: line.targetKind))"
+    }
+
+    /// W-UX-13 — what a refused call was trying to do, as a gerund.
+    private static func refusedPhrase(_ act: String, target: String?, kind: String?) -> String {
+        let at = target ?? "a note"
+        switch act {
+        case "list_books": return "listing books"
+        case "list_notes":
+            switch kind {
+            case "book": return "listing a book\u{2019}s notes"
+            case "wing": return "listing a wing\u{2019}s notes"
+            default: return "listing notes"
+            }
+        case "read_note": return "reading \(at)"
+        case "export_note": return "exporting \(at)"
+        case "search": return "searching"
+        case "show_in_app": return "showing you \(at)"
+        case "add_take": return "adding a take to \(at)"
+        case "add_comment": return "commenting in \(at)"
+        case "save_lens": return "saving a lens on \(at)"
+        case "create_note": return "making a note in \(at)"
+        case "import_document": return "importing a document into \(at)"
+        case "apply_tag": return "tagging \(at)"
+        case "create_book": return "making a book in \(at)"
+        case "add_note_to_book": return "adding \(at) to a book"
+        case "create_section": return "adding a chapter to \(at)"
+        case "save_version": return "saving a version of \(at)"
+        case "file_note_in_chapter": return "filing \(at) in a chapter"
+        case "set_book_rule": return "setting what \(at) collects"
+        case "edit_take": return "editing \(at)"
+        case "divide_block": return "dividing a block in \(at)"
+        case "merge_blocks": return "merging blocks in \(at)"
+        case "move_block": return "moving a block in \(at)"
+        case "delete_block": return "deleting a block in \(at)"
+        case "set_block_name": return "naming a block in \(at)"
+        case "put_back": return "putting back a block in \(at)"
+        case "set_entry_date": return "setting the date of \(at)"
+        case "move_note_to_wing": return "moving \(at) to another wing"
+        default: return "using " + spokenAct(act)
+        }
+    }
+
+    /// A tool no row words yet (a future tool), said without its underscores.
+    private static func spokenAct(_ act: String) -> String {
+        act.replacingOccurrences(of: "_", with: " ")
     }
 
     private static func activityPhrase(_ act: String, count n: Int, target: String?, kind: String?) -> String {
@@ -244,7 +291,14 @@ nonisolated enum MCPPaneCopy {
         // navigation tool (its target a note, a book or — U6 — a wing).
         case "move_note_to_wing": return n == 1 ? "moved \(at) to another wing" : "moved \(at) between wings" + times
         case "show_in_app": return "showed you \(at)" + times
-        default: return "used \(act)" + times
+        // 13n-c UX walk W-UX-13: the five acts this table never worded (they
+        // fell to "used save_version").
+        case "save_version": return n == 1 ? "saved a version of \(at)" : "saved \(n) versions of \(at)"
+        case "file_note_in_chapter": return "filed \(at) in a chapter" + times
+        case "set_book_rule": return "set what \(at) collects" + times
+        case "put_back": return "put back a block in \(at)" + times
+        case "set_entry_date": return "set the date of \(at)" + times
+        default: return "used " + spokenAct(act) + times
         }
     }
 
