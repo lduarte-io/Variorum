@@ -145,6 +145,30 @@ struct MCPWingFacesTests {
                 == "claude-code showed you \u{201C}variorum\u{201D}")
     }
 
+    /// **13n-c UX walk W-UX-13 (the walk's finding 13):** Activity said raw
+    /// tool ids — "ux-walk was refused read_note on “a letter”", "… create_note
+    /// on “Home” (3 times)" — beside natural rows ("claude-code read “…”"),
+    /// and a handful of allowed acts fell to "used save_version". Every tool
+    /// in the catalog, allowed or refused, once or many times, speaks the act
+    /// table's words: never a tool id.
+    @Test func activitySpeaksEveryActInWordsNeverAToolID() {
+        for tool in MCPToolFacts.toolNames {
+            for allowed in [true, false] {
+                for count in [1, 3] {
+                    for kind in ["note", "book", "wing"] {
+                        let said = MCPPaneCopy.activityLine(MCPActivityFace.Line(
+                            id: 1, clientName: "ux-walk", act: tool, targetKind: kind, targetID: "x",
+                            targetTitle: "a letter", allowed: allowed, count: count, at: "2026-10-11T00:00:00.000Z"))
+                        // A tool id as a whole word ("searched" is a word, "search" alone the id).
+                        let saysID = said.range(of: "\\b\(tool)\\b", options: .regularExpression) != nil
+                        #expect(!saysID && !said.contains("_"),
+                                "\(tool) (\(allowed ? "allowed" : "refused"), ×\(count), \(kind)) said: \(said)")
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: - The live round's staging (DEBUG-only, env-gated — `ScaleFixture`'s wing part)
 
     @Test func theScaleSeedsWingPartMintsTheLiveRoundsWorldOnce() async throws {

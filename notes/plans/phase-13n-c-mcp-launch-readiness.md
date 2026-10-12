@@ -2898,7 +2898,7 @@ migrations, `lockstepVersion`, the real store, `/Applications`. Stage FREE and n
 | W-UX-10 | The count says what it counts | NOT-STARTED |
 | W-UX-11 | Voice accent in the window-hosted grant sheet, the ask sheet's Once, the popover links | NOT-STARTED |
 | W-UX-12 | The in-note popover kept on-window where possible; the Private lock's contrast | NOT-STARTED |
-| W-UX-13 | Activity's refusal rows speak the act table's words | NOT-STARTED |
+| W-UX-13 | Activity's refusal rows speak the act table's words | IN-PROGRESS — the pin committed RED (this commit); the words next. **TRACED:** `MCPPaneCopy.activityLine` spoke a refused row as "\(client) was refused \(line.act)…" — the raw tool id — and `activityPhrase`'s table had no row for five allowed acts (`save_version`, `file_note_in_chapter`, `set_book_rule`, `put_back`, `set_entry_date`), which fell to "used \(act)". **Pin** `MCPWingFacesTests.activitySpeaksEveryActInWordsNeverAToolID` (EVERY catalog tool — `MCPToolFacts.toolNames`, the one public read grown — allowed and refused, once and ×3, on a note/book/wing: never the tool id as a word, never an underscore) — **RED on today's words: 192 issues** (every refused row 27×2×3 = 162, the five "used …" rows ×2×3 = 30), the suite's other 6 green (log `w-ux-13-red.log`) |
 | W-UX-15 | Receipt "in" → "on" (T-11); the wing-move line's breathing room | NOT-STARTED |
 | W-UX-16 | The picker popover sizes to content; "Welcome" said once | NOT-STARTED |
 | W-UX-17 | The guide's copy rows | NOT-STARTED |

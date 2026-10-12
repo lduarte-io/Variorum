@@ -72,6 +72,10 @@ public enum MCPToolFacts {
     public static func rung(of tool: String) -> MCPGrantRule.Rung? {
         MCPToolCatalog.declaration(named: tool)?.rung
     }
+
+    /// Every tool's name, in the catalog's order (W-UX-13: the Activity list's
+    /// words are pinned against EVERY tool — none may say a raw tool id).
+    public static var toolNames: [String] { MCPToolCatalog.all.map(\.name) }
 }
 
 enum MCPToolCatalog {
