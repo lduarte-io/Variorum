@@ -30,7 +30,16 @@ walk subsections, the HELD-WALKS RECORD's taste list T-1…T-17, and the drawn s
 
 ## FINDINGS (ranked by how much they would bother a real user)
 
-(Filled as the walk runs.)
+(Interim, written repo-first as the walk runs; the final ranking replaces this list at the end.)
+
+- **[interim] An answered ask's sheet RE-PRESENTS ITSELF when the same client asks the same thing again** — captures
+  `25-crop.png` (her press on the masthead's wing mark), `28b-clean-before-crop.png` (nothing open), `28c-clean-after-ask-crop.png`
+  (the sheet up with no press). See the ranked list for the trace.
+- **[interim] The one-wing note is never shown** — `01-cmdL-onewing-win.png`, `02-palette-switchwing-onewing.png`, `03-view-menu-crop.png`.
+- **[interim] A client row's Revoke denies the client and drops every grant in one press, no confirm** — `05-mcp-pane-top-study.png`.
+- **[interim] Shared with AI lists one book five times; "3 shared places" counts grants** — `06-mcp-pane-u1.png`, `06-mcp-pane-u2.png`.
+- **[interim] The grant sheet's confirm does not look like a button** — `10-approve-sheet-win.png`, `13-sheet-sherlock17-picked.png`.
+- **[interim] The in-note popover hangs off the window; the app behind tints it** — `35-crop2.png`.
 
 ## CLEAN-WALK LIST
 
