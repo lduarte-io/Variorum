@@ -93,11 +93,13 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
   on `denyMCPClient`) dispositioned FIXED by the orchestrator in the closeout commit. Suites at the
   ladder's close: **VariorumMCPTests 122/18 · VariorumCoreTests 2,691/307 · StringsWorkbookTests 40/6, ALL
   GREEN** (R2 re-ran the MCP target itself).
-- Closeout: **IN PROGRESS (the merging session)** — the R2 NIT's doc fix + RESULTS + HANDOFF (this commit,
-  on the branch); then the PR (`VX-168: …`, merge commit), the merge-moment ledgers on latest main
-  (QUESTIONS entries for every PROVISIONAL, the AppSpec §7/§12/§14 deltas, the MobileSoul line, the
-  in-flight row retired), VX-168 + the five riders → Done in Linear, the A1 /Applications refresh at a
-  zero-instance window, the memory run-state → CLOSED.
+- Closeout: **DONE (2026-10-12, the merging session)** — PR #149 MERGED (merge commit `50dce01d`); the
+  merge-moment ledgers on latest main (`17a0dbdc`: QUESTIONS #213 + #211's status line, AppSpec §7 v1_26 +
+  §12 MCP DOOR/Takes + §14's entry with VX-83 rolled, MobileSoul PL-53, the in-flight row retired; board
+  snapshot `8711af6d`); VX-168 + all five riders Done in Linear; **the A1 /Applications refresh RAN at a
+  verified zero-instance window** (safety copy `vx168-refresh-20261012T115942Z` incl. key files → Release
+  build → /Applications → codesign verified → stage released; **installed build 6486**); the memory
+  run-state CLOSED. Her first step is the HANDOFF section's: re-run each client's setup.
 
 ## UNIT 1 RECORD — VX-168, the per-setup key (opus-implementer, 2026-10-12)
 
