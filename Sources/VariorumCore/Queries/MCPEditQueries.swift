@@ -31,6 +31,15 @@ extension Queries {
             arguments: [variantID])
     }
 
+    /// **The note a LIVE lens belongs to** (VX-168 U2 — `adopt_lens`'s
+    /// address), else nil: a tombstoned lens, a stranger's id and a lens whose
+    /// note is gone all live in none — the one-answer refusal, decided on the
+    /// note like every other act (`mcpNoteFacts` answers nil for a dead note).
+    public static func mcpContainerOf(lens lensID: String, _ db: Database) throws -> String? {
+        try String.fetchOne(
+            db, sql: "SELECT container_id FROM lens WHERE id = ? AND deleted_at IS NULL", arguments: [lensID])
+    }
+
     /// **The take a placed block SHOWS** — exactly the structural ops' own
     /// rendered-take rule (`Operations.renderedVariant`): the placement's
     /// chosen take while it is live, ACTIVE and on this block, else the

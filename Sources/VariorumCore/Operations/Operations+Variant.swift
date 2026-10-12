@@ -34,11 +34,17 @@ extension Operations {
     /// Archived variants may commit (author-ratified 2026-07-05): commit
     /// reads the buffer without editing it, and restoring the take means
     /// unarchiving it first anyway — the snapshot is pure upside.
+    ///
+    /// `guardedBy` (VX-168 U2 — the MCP door's `save_commit`, VX-169): the
+    /// caller's in-transaction precondition (`WriteGuard`), run FIRST; nil on
+    /// her doors, exactly as `moveBlock`/`reorder`/`restoreBlock` carry it.
     @discardableResult
     public func commit(
-        _ variantID: String, kind: CommitKind = .manual, message: String? = nil
+        _ variantID: String, kind: CommitKind = .manual, message: String? = nil,
+        guardedBy guardian: WriteGuard? = nil
     ) throws -> CommitPoint {
         try database.write { db in
+            try guardian?(db)
             let variant = try liveVariant(db, variantID)
             // Post lock forbids new commits; a locked variant refuses too
             // (plan default — its buffer is frozen, nothing new to save).

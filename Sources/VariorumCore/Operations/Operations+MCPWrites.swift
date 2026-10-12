@@ -52,8 +52,22 @@ extension Operations {
         // 13n-c U6 — the per-item note move across wings (VX-160; brief §10's
         // U1: "Undo claude-code's wing move").
         case wingMove = "wing move"
+        // VX-168 U2 — the edit rung's deliberate acts: VX-169's `save_commit`
+        // (a commit — append-only, I5: it registers NO undo entry, exactly as
+        // her own ⌘S registers none — R-13n-6's "exactly as her gestures do")
+        // and VX-174's `choose_take` / `adopt_lens` (R-MERGE-1: pointer moves,
+        // ONE undo entry each). Words P-13nb-U2-5's family, 13s-a sweepable.
+        case commit
+        case choice = "take choice"
+        case lensAdoption = "lens adoption"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
+
+        /// **Does ⌥⌘Z walk this act back?** Every act but a commit: a commit is
+        /// append-only (I5), `commit_point` has no tombstone to flip, and her
+        /// own commit is outside structural undo (AppSpec §9) — so a receipt
+        /// may say "⌥⌘Z undoes" only over a run that holds an act it undoes.
+        public var isUndoable: Bool { self != .commit }
     }
 
     /// Where a minted note lands: inside a book (a member at its end, in the
@@ -226,36 +240,44 @@ extension Operations {
     /// Tombstones the lens (its live choices cascade on the same stamp);
     /// returns the stamp written, nil when it was already gone.
     func revertSavedLens(_ lensID: String) throws -> String? {
-        try database.write { db in
-            guard var lens = try Lens.fetchOne(db, key: lensID), lens.deletedAt == nil else { return nil }
-            let now = date.now
-            lens.deletedAt = now
-            lens.updatedAt = now
-            try lens.update(db)
-            return DateFormatter.variorumISO8601.string(from: now)
-        }
+        try database.write { db in try tombstoneSavedLens(db, lensID) }
     }
 
     /// The lens back, with exactly the choices that died on the undo's stamp.
     func reapplySavedLens(_ lensID: String, undoneOn stamp: String?) throws {
         guard let stamp else { return }
-        try database.write { db in
-            guard var lens = try Lens.fetchOne(db, key: lensID),
-                  let deletedAt = lens.deletedAt,
-                  DateFormatter.variorumISO8601.string(from: deletedAt) == stamp,
-                  try Container.fetchOne(db, key: lens.containerId)?.deletedAt == nil
-            else { return }
-            let now = DateFormatter.variorumISO8601.string(from: date.now)
-            lens.deletedAt = nil
-            lens.updatedAt = date.now
-            try lens.update(db)
-            try db.execute(
-                sql: """
-                    UPDATE lens_choice SET deleted_at = NULL, updated_at = ?
-                    WHERE lens_id = ? AND deleted_at = ?
-                    """,
-                arguments: [now, lensID, stamp])
-        }
+        try database.write { db in try reviveSavedLens(db, lensID, undoneOn: stamp) }
+    }
+
+    /// `revertSavedLens`' body inside the caller's transaction (VX-168 U2 —
+    /// the lens adoption's undo tombstones its preservation lens in the SAME
+    /// transaction as its pointers).
+    func tombstoneSavedLens(_ db: Database, _ lensID: String) throws -> String? {
+        guard var lens = try Lens.fetchOne(db, key: lensID), lens.deletedAt == nil else { return nil }
+        let now = date.now
+        lens.deletedAt = now
+        lens.updatedAt = now
+        try lens.update(db)
+        return DateFormatter.variorumISO8601.string(from: now)
+    }
+
+    /// `reapplySavedLens`' body inside the caller's transaction (VX-168 U2).
+    func reviveSavedLens(_ db: Database, _ lensID: String, undoneOn stamp: String) throws {
+        guard var lens = try Lens.fetchOne(db, key: lensID),
+              let deletedAt = lens.deletedAt,
+              DateFormatter.variorumISO8601.string(from: deletedAt) == stamp,
+              try Container.fetchOne(db, key: lens.containerId)?.deletedAt == nil
+        else { return }
+        let now = DateFormatter.variorumISO8601.string(from: date.now)
+        lens.deletedAt = nil
+        lens.updatedAt = date.now
+        try lens.update(db)
+        try db.execute(
+            sql: """
+                UPDATE lens_choice SET deleted_at = NULL, updated_at = ?
+                WHERE lens_id = ? AND deleted_at = ?
+                """,
+            arguments: [now, lensID, stamp])
     }
 
     // MARK: - WRITE NEW: a note (plain prose, or one Level 0 document)

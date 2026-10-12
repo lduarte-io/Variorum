@@ -10,22 +10,32 @@ extension Operations {
     /// lives on the pointer, never the block).
     public func chooseVariant(_ blockID: String, variantID: String) throws {
         try database.write { db in
-            _ = try liveBlock(db, blockID)
-            guard var placement = try livePlacement(db, blockID: blockID) else {
-                throw OperationError.blockNotPlaced(id: blockID)
-            }
-            try ensureUnlocked(try liveContainer(db, placement.containerId))
-            let variant = try liveVariant(db, variantID)
-            guard variant.blockId == blockID else {
-                throw OperationError.variantNotFound(id: variantID)
-            }
-            guard variant.status == .active else {
-                throw OperationError.archivedVariant(id: variantID)
-            }
+            var placement = try choosablePlacement(db, blockID: blockID, variantID: variantID)
             placement.chosenVariantId = variantID
             placement.updatedAt = date.now
             try placement.update(db)
         }
+    }
+
+    /// **`chooseVariant`'s guards, in its order** — the block live, its ONE
+    /// live slot, the slot's container unsealed, and the take live, ACTIVE
+    /// and this block's; returns the slot the choice lands on. Extracted
+    /// byte-for-byte (VX-168 U2) so the MCP door's `choose_take` makes HER
+    /// door's row transition through the same brain, never a second copy.
+    func choosablePlacement(_ db: Database, blockID: String, variantID: String) throws -> ContainerBlock {
+        _ = try liveBlock(db, blockID)
+        guard let placement = try livePlacement(db, blockID: blockID) else {
+            throw OperationError.blockNotPlaced(id: blockID)
+        }
+        try ensureUnlocked(try liveContainer(db, placement.containerId))
+        let variant = try liveVariant(db, variantID)
+        guard variant.blockId == blockID else {
+            throw OperationError.variantNotFound(id: variantID)
+        }
+        guard variant.status == .active else {
+            throw OperationError.archivedVariant(id: variantID)
+        }
+        return placement
     }
 
     /// Insert a placement for a live block with NO live placement — a
