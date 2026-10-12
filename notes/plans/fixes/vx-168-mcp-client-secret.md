@@ -74,8 +74,8 @@ setup-minted secret as a single preamble line on the socket before pumping bytes
   close (this commit). Headless by design — no live client round was run (the UNIT 2 RECORD's first line). Owed to
   the orchestrator: the PROVISIONALs' QUESTIONS entries and the canon delta at the merge (its OWED list); the ladder
   over the run's diff.
-- Unit 3 (VX-172 + VX-171, the lens doors): **NOT-STARTED** — settled design: the vx-170 shape file's
-  VX-172 adjacency + R-VX171-2.
+- Unit 3 (VX-172 + VX-171, the lens doors): **IN-PROGRESS** (opus-implementer, 2026-10-12) — the UNIT 3
+  RECORD below carries its pieces; settled design: the vx-170 shape file's VX-172 adjacency + R-VX171-2.
 - Unit 4 (VX-170, lens-aware Takes): **NOT-STARTED** — settled design: the vx-170 shape file, whole.
 - Ladder: NOT-STARTED (runs after the last landed unit).
 - Closeout: NOT-STARTED.
@@ -398,3 +398,34 @@ dropped → red (core + socket).
 6. **Noticed, for her copy pass / the UX pass (not this unit's):** the grant sheet's edit sentence and the pane
    toggle's blurb name editing takes only — neither says an edit grant can now choose takes or make a lens the note
    (not falsified — see the first line — but she grants edit reading that sheet).
+
+## UNIT 3 RECORD — VX-172 `read_note` through a lens + VX-171 blank-take doors (opus-implementer, 2026-10-12)
+
+**Read in full before code (never delegated):** this file (R-VX168-1, the UNIT 1 + UNIT 2 RECORDS); the kickoff prompt
+(the VX-172 rider block); `notes/plans/vx-170-lens-aware-takes.md` whole (R-VX171-2, VX-172's adjacency, the acceptance
+shapes); `notes/SessionResiliencyProtocol.md` whole; the 13n-b plan's ruled design, SITTING RECORD, AF-5…AF-11, the seam
+rulings A-1…A-10, the U2 brief + record (the read tools' shape, the one not-shared answer) and the U3 PROVISIONALs
+(P-13nb-U3-9 — the structured `create_note`'s empty takes DROP, which R-VX171-2 now supersedes for that door); QUESTIONS
+#211 (P-VX171-2's letter); the ticket bodies VX-172 + VX-171 (Linear GraphQL); CLAUDE.md + the auto-loaded canon. Code
+read: `MCPReadTools`, `MCPNoteStructure`, `MCPWriteTools{,+Edit,+Deliberate}`, `MCPToolCatalog`, `MCPSession` (the
+advice), `Operations+MCPWrites`, `Operations+MCPEdits.editTakeUnderInsurance`, `Operations+DocumentImport.mintDocument`,
+`Queries/{LensQueries,TakesQueries,PostRender,Export}`, `VariorumDocument`'s serializers, and — READ ONLY, the editor
+seam — `PaneTextAuthority.resolvedText` (the Lenses board's per-slot rule) and `TakesViewModel.resolvedTake`.
+
+**The brain the wire rides (found, never reimplemented):** her Lenses board reads `Queries.takesProjection` (slots from
+`renderPost`, the ACTIVE fans, and each lens's EFFECTIVE picks — `Queries.effectiveLensSelection`, dangling picks
+dropped) and resolves a lens column per slot by `PaneTextAuthority.resolvedText` (the pick where it is a live active
+take of the block, else the slot's chosen resolution). The core's headless twin is `Queries.renderPost(…, throughLens:)`
+(LensQueries.swift — the same sparse-override composition over the same effective picks). The wire's lens read rides
+those two: the Level 0 text through `renderPost(throughLens:)` (the export's own block builder, given the lens), the
+`with_ids` form through `effectiveLensSelection` over its own active fan (the board's pick-in-the-fan rule).
+
+### LIVE STATUS — Unit 3's pieces
+
+| piece | what | status |
+|---|---|---|
+| R0 | this record + the plan | DONE (this commit) |
+| P1 | VX-171 (R-VX171-2, door-only): `add_take` accepts an empty text; `create_note`'s structured takes MINT a blank take (today they DROP — P-13nb-U3-9); `edit_take` to empty refuses (P-VX171-2 — the standing refusal verified FIRST by a probe pin); zero schema; red-on-old pins | NOT-STARTED |
+| P2 | VX-172: `read_note` gains `lens_id` — the Level 0 text with each block's in-place take the lens's where it names one (else the chosen), the `with_ids` form with `via: lens \| chosen` per block; a dangling/foreign/dead/never-existed lens id answers the ONE not-shared answer byte-identical to an id naming nothing (checked before any once spend); the catalog's description + schema | NOT-STARTED |
+| P3 | the door tests: the byte-for-byte match vs her Lenses board's read (`takesProjection` + the board's pick-in-the-fan rule) and `renderPost(throughLens:)`; the lens read == the plain read after the lens is made the note; the blank-take round trip (agent adds a blank take, points a lens at it, the Mac's lens read shows the empty line, the wire reads `""` with `via: lens`); the no-oracle byte-identity across every bad lens id; the once grant unspent by a refused lens | NOT-STARTED |
+| P4 | close: suites over the changed surfaces (headless), the argued calls/PROVISIONALs/OWED, Unit 3 → DONE | NOT-STARTED |
