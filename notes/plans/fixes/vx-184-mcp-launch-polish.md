@@ -1895,10 +1895,19 @@ at her request mid-read, resumed at her word; reviewed tip fcfb8aa5 = the merged
 ### ROUND 1 — FIX PASS (fresh `opus-implementer` at MAX effort, 2026-10-13; same-model flow)
 
 **An earlier fix-pass agent was stopped by the author before it wrote anything (no commit, no file), so this pass
-restarted from the tip `2d66990f` at max effort.** Its leads reached this pass UNVERIFIED and each is re-traced here
-before it is relied on. Worktree `~/dev/variorum-vx-184`, branch `vx-184-mcp-launch-polish`. HEADLESS ONLY (no stage,
-no Mac run, no app launch); zero `Sync/`, custody/keychain, editor-seam or schema lines (path-diffed at the close).
-Her three product calls (VX-258/259/260, R-VX184-7/8/9) are VX-246's and untouched here.
+restarted from the tip `2d66990f` at max effort.** **What this pass did NOT do (said first, at the close):** (1) no Mac
+run, walk or app launch — HEADLESS ONLY by the brief, so the use-shaped confirmation of the undo semantics in her Edit
+menu is the closeout's whole-Mac run (no Mac code calls the changed internals — grepped; the Mac faces pins read labels
+and receipts, unchanged); (2) the `delete_note` / `delete_block` flush NOT fixed — its road reaches the editor seam with
+a Mac-only proof (piece 9; a ticket-ready summary, Fable-reviewed); (3) the ADJACENT existence-level redo class (a redo
+reviving a row she removed after a quiet undo — `add_comment(s)`, the mint family, `apply_tag`, `create_section`,
+`add_note_to_book`'s seat) NOT fixed — a second unit, handed off (the sweep, piece 4); (4) her own adopt doors' same
+value class NOT fixed — outside the MCP family by the brief; (5) no `notes/QUESTIONS.md` entry and no canon edit — the
+PROVISIONALs below are the orchestrator's merge bundle; (6) main NOT merged in (it moved docs-only since the merge base
+`8925f38b`; the orchestrator's). Its leads reached this pass UNVERIFIED and each is re-traced here before it is relied
+on. Worktree `~/dev/variorum-vx-184`, branch `vx-184-mcp-launch-polish`. HEADLESS ONLY (no stage, no Mac run, no app
+launch); zero `Sync/`, custody/keychain, editor-seam or schema lines (path-diffed at the close — piece 10). Her three
+product calls (VX-258/259/260, R-VX184-7/8/9) are VX-246's and untouched here.
 
 #### LIVE STATUS — the fix pass's pieces (flipped in the same commit as each piece)
 
@@ -1913,8 +1922,8 @@ Her three product calls (VX-258/259/260, R-VX184-7/8/9) are VX-246's and untouch
 | 6 | (b) `hersAlone` before/after every wire call in the five U5 server suites + one mutation that bites; the U5 record's sentences corrected | DONE (this commit; the pins `db303a88`, the mutation announced `b054ea13`) — NEW `Tests/VariorumMCPTests/MCPHersAloneSupport.swift`: `ServerHarness.hersAlone()` (every reading's `owned` · `sealed_at` · `ai_private_at`, every container's `locked` · `ai_private_at`, tombstoned rows included — the old private helper's exact read, moved) and `callKeepingHersAlone` (reads it before and after ONE wire call and expects it byte-identical, a refused call included, the failure pointing at the call site). Each of the five suites' private `call` routes through it — **all 62 wire call sites** (book state 21 · membership 14 · chapters 13 · the note 8 · the once pins 6). **Honest: a strengthening, not a fix** — no MCP road writes those columns, so this is GREEN on both sides by construction (18 tests / 5 suites, green before and after). **The mutation that proves it bites** (on the committed tree, two temporary writes in `Operations+MCPLibraryEdits.swift`: `archive_note` also stamped the note's `ai_private_at`; `finish_book` also set the book's `owned`): RED exactly at the two acts' call sites — `MCPNoteLibraryServerTests.swift:95` (`archive_note`) and `MCPBookStateServerTests.swift:120` (`finish_book`), "Expectation failed: try h.hersAlone() == before" (+1 downstream issue: the note, now Private, answered the next call with the one not-shared shape). **Restored** `git checkout HEAD -- <the file>`, `git status` clean, zero `MUTATION` lines; the five suites re-run **18/5 green**. The U5 record's two sentences (call 11; the SELF-ASSESSMENT) now say they overclaimed as written and are true since `db303a88`. Logs `logs/p6-hers-alone.log`, `logs/p6-mutation.log`, `logs/p6-restored.log` |
 | 7 | (c) `delete_take`'s description; (d) `delete_book`/`finish_book`'s descriptions + P-VX196-8 | DONE (this commit) — `MCPToolCatalog`: **`delete_take`** now says "The block's chosen take can't be deleted while the block has other active takes" (the reviewer's wording — `deleteVariantRows` refuses the take the chosen POINTER names, not the shown take: a nil pointer shows the default, which deletes; an archived chosen take shows the default, yet refuses) and, from the whole re-read, "Deleting a block's last active take (archived takes don't count) deletes the block … (the block and every take on it, archived ones too, go to the tray)" — I10's last ACTIVE take (`Queries.mcpTakeRoad`); the rest re-read true against the code (the tray lists deleted takes — `Queries.trayTakes`; `put_back` serves them; a locked take refuses on both roads); emphasis caps dropped in the sentence rewritten. **`delete_book`**: every note in the book leaves it, "including any you can't read", a note in no other book lands in the Pool (an owned book's all do), and "One undo for the author, or the Trash's Put back, brings the book back whole, its notes in it again". **`finish_book`**: "every note waiting at its Arrivals is dismissed — including any you can't read", and the undo "brings back everything that was waiting". **P-VX196-8** logged in the U5 PROVISIONALs (options (a) as built and said · (b) refuse while hidden members exist, rejected as the default — its refusal would itself be the oracle). No pin reads the old phrases (grepped). **Run:** the wire-neutrality (no gendered pronoun) and provider-neutrality nets, the catalog walk, the advice, the size caps, `MCPTakeEditServerTests`, `MCPBookStateServerTests` = **47 tests / 7 suites, green**. Log `logs/p7-descriptions.log` |
 | 8 | (e) the re-indent — ONE whitespace-only commit, `git diff -w` empty | DONE (`bb5d7fd0`, the cosmetic commit alone; this commit flips the row) — the twelve extracted bodies of STEP 1 item 5 (`archiveContainerRow`, `unarchiveContainerRow`, `archiveReadingRow`, `finishReadingRows`, `reopenReadingRows`, `deleteReadingRow`, `removeMembershipRow`, `reorderMembershipRow`, `renameSectionRow`, `deleteSectionRow`, `restoreSectionRow`, `reorderSectionRow`) de-indented by exactly 4 spaces each (a script asserted every non-blank body line began with 12 spaces first); 113 lines in, 113 out across the four files; **`git show -w bb5d7fd0` prints no diff (0 bytes)**; `restoreContainerRows` and `assignSectionRow` (pre-run) untouched; the package builds |
-| 9 | (f) the `delete_note` / `delete_block` flush TRACE (read-only) — fixed only if the road stays in the wire/door layer; else a ticket-ready summary | DONE (this commit) — THE FLUSH TRACE below: the mechanism is REAL (pending keystrokes survive in memory only; a Put back or ⌥⌘Z returns the take without them unless a later in-session flush lands them; ⌘Q loses them) and a second gap rides with it (a wire `delete_note` posts no navigate-away — her pane stays on the tombstoned note); NO MCP write passes any flush (zero in `Sources/VariorumMCP`; no `MCPHostHooks` seam; the bare `OperationsRunner`), so the fix needs a NEW pre-act seam + the app's flush + the navigate-away, and `delete_block`'s half reaches the editor seam with a Mac-only proof → **NOT fixed; ticket-ready summary written, covering `delete_block`, Fable-reviewed per CLAUDE.md** |
-| 10 | finals: the whole headless package green with counts; the path diff; the close | NOT-STARTED |
+| 9 | (f) the `delete_note` / `delete_block` flush TRACE (read-only) — fixed only if the road stays in the wire/door layer; else a ticket-ready summary | DONE (this commit) — THE FLUSH TRACE below: the mechanism is REAL (pending keystrokes survive in memory only; a Put back or ⌥⌘Z returns the take without them unless a later in-session flush lands them; ⌘Q loses them) and a second gap rides with it (a wire `delete_note` posts no navigate-away — by the code's own record a pane is then left on the tombstone; code-read, not observed live); NO MCP write passes any flush (zero in `Sources/VariorumMCP`; no `MCPHostHooks` seam; the bare `OperationsRunner`), so the fix needs a NEW pre-act seam + the app's flush + the navigate-away, and `delete_block`'s half reaches the editor seam with a Mac-only proof → **NOT fixed; ticket-ready summary written, covering `delete_block`, Fable-reviewed per CLAUDE.md** |
+| 10 | finals: the whole headless package green with counts; the path diff; the close | DONE (this commit) — **the whole package `swift test` on `c42f4f44`'s sources, EXIT 0 in 4:11: `VariorumMCPTests` 210/40 · `VariorumCoreTests` 2,782/319 · `StringsWorkbookTests` 40/6** (core = the 2,768/318 baseline + `MCPUndoDivergenceTests` 14/1; MCP's count unchanged — the five U5 suites strengthened in place); skips = the standing gated ones only (the two 13o gated suites, the real-server pass, `bench(notes:)` and the dev-only gated fixtures — read in the log); zero ✘ lines; `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` did NOT trip this run. Log `logs/p10-finals.log`. **Path diff `2d66990f..HEAD`:** `Sources/VariorumCore/Operations/Operations+{MCPCarriage,MCPDeliberate,MCPEdits,MCPLibraryEdits,MCPNoteEdits}.swift` (the fixes), `+{Container,Reading,ReadingArchive,Sections}.swift` (whitespace only), `Sources/VariorumMCP/MCPToolCatalog.swift` (three descriptions), tests (one new core suite, one new MCP support file, five MCP suites), this record — **ZERO `Sync/`, `Persistence/`/schema, custody/keychain, editor seam, `Server/`** (grepped). The orchestrator's own concurrent doc commits (`notes/plans/mcp-pane-and-docs-kickoff.md`, `notes/plans/vx-184-orchestrator-handoff.md`) arrived by `git pull --rebase` on disjoint files; none of mine touched them |
 
 **No revert is in flight** (piece 5's revert ran and was RESTORED — `git status` clean, `git diff HEAD` empty).
 
@@ -2082,3 +2091,63 @@ and navigate away, as her door does; (b) refuse a delete while the app holds unf
 **Noticed, outside the MCP family (her own doors' registrations — out of scope by the brief):** her adopt doors
 (`adoptLensPreservingChosen`, `adoptPicksPreservingChosen` → `revertChosenPointers`) have the value class over her own
 later ✓ (her ✓ after her own adopt, then ⌥⌘Z overwrites the ✓). For a ticket, not this pass.
+
+#### THE DISPOSITIONS — every row (the fix pass's close)
+
+| finding | disposition |
+|---|---|
+| [MINOR] the undo-overwrite class | **FIXED with pins** — the finding's seven real rows (`rename_book`, `rename_chapter`, `move_chapter`, `move_note_in_book`, `set_take_label`, `rename_commit`, `rename_note`) + 13n-b's `set_block_name` + the sweep's five (`set_entry_date`, `file_note_in_chapter`, `set_book_rule`, `choose_take`, `adopt_lens`): `MCPUndoDivergenceTests`, red 13/14 with 28 issues on the pre-fix tree, red again identically by revert, green after |
+| [MINOR] the lock row of the same finding (`setTakeLockQuietly`) | **DISMISSED AS HOLLOW** — two-valued; its pin is green on the pre-fix tree and stays as the verdict's evidence |
+| [MINOR] the `hersAlone` overclaim | **FIXED (a strengthening, green on both sides — said so)** — all 62 wire calls of the five U5 suites; a mutation bites at both acts' call sites; the record's two sentences corrected |
+| [NIT] `delete_take`'s description | **FIXED** — "the block's chosen take", plus the last-ACTIVE-take precision |
+| [MINOR] book-level acts vs unreachable members | **PROVISIONAL (a), said** — both descriptions; **P-VX196-8** logged |
+| [NIT] the re-indent | **FIXED** — `bb5d7fd0`, whitespace only (`git show -w` empty) |
+| [MINOR SPECULATIVE] the `delete_note` flush | **TRACED — real; DEFERRED, owner the orchestrator (a ticket; Fable-reviewed per CLAUDE.md)** — the road reaches the editor seam with a Mac-only proof; `delete_block` covered in the same summary |
+| the adjacent existence-level redo class (found by the sweep) | **DEFERRED, owner the orchestrator (a ticket)** — handed off with its trace and the house precedent for the fix |
+| her adopt doors' value class (noticed) | **DEFERRED, owner the orchestrator (a ticket)** — outside the MCP family |
+| [MAJOR] re-bind · [MINOR] E13 name check · [MINOR] suggest-delete of an edited comment | untouched — her rulings send them to VX-246 (VX-258/259/260) |
+| [NIT] no-op Activity line · SyncSpec-after · `mcp_comment_author` pruning | untouched — DEFERRED / ACKNOWLEDGED / ACCEPTED as dispositioned |
+
+#### PROVISIONALs of this pass (the merge's QUESTIONS bundle — the orchestrator's to file)
+
+- **P-VX184-R1-1 — how fine the compare-and-set reads on an entry that moved several values**: (a) as built — PER COLUMN on
+  `set_book_rule` (only the columns the act changed, each only while it still reads the act's value) and PER SLOT on
+  `adopt_lens` (each block's pointer only while it still shows the adopted take; the preservation lens walks back with the
+  act as before) — the house precedent (`revertFinishedBook` revives each dismissed arrival on its own check;
+  `restoreBookArchive` re-archives each note on its own); (b) whole-entry — any divergence makes the entire entry quiet, so
+  the parts of the client's act she never touched would stay un-undoable.
+- **P-VX184-R1-2 — `file_note_in_chapter`'s entry keyed on the membership ROW it filed** (AppSpec §9's exact-row letter):
+  (a) as built — her remove-and-re-add mints a new row, and the old entry is quiet on it; (b) keyed on the (note, book)
+  pair, as before this pass — the old entry would file her re-added membership under the chapter it remembers.
+- **P-VX196-8** — logged in the U5 PROVISIONALs above (piece 7).
+
+#### SELF-ASSESSMENT (the fix-pass implementer's)
+
+**Against the brief:** (a) every value-restoring inverse AND redo the MCP family registers over a door of hers that
+registers nothing is now compare-and-set — divergence checked first and quiet, the seal or finished-book refusal reached
+only past it — and each was pinned red-first per family and red again by revert with identical counts; the lock row is
+recorded hollow with a pin green on both sides; the sweep dispositions every write tool of the catalog in one table.
+(b) the `hersAlone` claim is now literally true for every wire call of the five U5 suites, said honestly as a
+strengthening, with a mutation proving the assertion bites. (c)/(d) the three descriptions read true against the code,
+and P-VX196-8 is logged with its two options. (e) whitespace only, proven. (f) traced, real, not fixed — the brief's
+own rule — with a ticket-ready summary. Finals green: 210/40 · 2,782/319 · 40/6. Path diff clean.
+**Against the spec:** AppSpec §9's exact-row redo from do-time pre-images holds (every replay still writes the act's own
+captured values, now only over the row state the act or the undo left); "undo and redo emit ordinary operations" holds
+(no new write road — the same row writes, guarded); I10 untouched; P1 — every replay is ∝ its own rows.
+**Risks I see:** (1) a quiet undo or redo now does NOTHING visible when she has changed the value since — the Edit menu
+still names the entry and the entry still moves between the stacks (the house's quiet-pop behaviour, as `archive_note`
+and `delete_note` already had); (2) P-VX184-R1-1's per-column / per-slot reading means a partial walk-back is possible
+(the client's own columns or slots return, hers stay) — the defensible reading, but a reading; (3) the remove-and-re-add
+edge (P-VX184-R1-2) changes one behaviour on purpose; (4) the adjacent existence-level class stays live until its ticket
+lands — the same harm in a different shape (a redo after a quiet undo can revive a comment, tag, chapter, note or seat
+she removed).
+
+#### OWED (for the orchestrator)
+
+1. **The round-2 re-review** of this pass's diff (`2d66990f..HEAD`, my commits only), per the ladder.
+2. **Tickets:** (a) the `delete_note`/`delete_block` flush + navigate-away (the summary in piece 9's trace — editor seam,
+   Fable-reviewed); (b) the adjacent existence-level redo class (the summary under THE SWEEP TABLE); (c) her own adopt
+   doors' value class (one line under the sweep).
+3. **The QUESTIONS bundle at the merge:** P-VX184-R1-1, P-VX184-R1-2, P-VX196-8.
+4. **The closeout's whole-Mac run** confirms the undo semantics through her Edit menu (no Mac code calls the changed
+   internals; nothing Mac-side was rebuilt or run in this pass).
