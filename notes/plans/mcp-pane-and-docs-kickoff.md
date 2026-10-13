@@ -120,8 +120,10 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
   notes from building 'o ladrão de raios' through the door). Adjudicated 2026-10-13; she asked these to *"ride
   the next fix path"*:
   - **VX-252:** `create_note` returns take ids (+ optional `section_id`).
-  - **VX-253:** `save_lens` by take label. **Orchestrator recommendation (2026-10-13, on the ticket; awaiting
-    her word):**
+  - **VX-253:** `save_lens` by take label. **RULED — R-VX246-3 (her word, 2026-10-13: *"I like your 253
+    recommendation"*), with her clarification built in: `picks` overrides are applied FIRST, so a block a pick
+    covers is never ambiguous; the refusal names only UNCOVERED ambiguous blocks, and the retry passes the same
+    rule plus `picks` for exactly those (or the first call does, when the agent already knows):**
     - Three explicit fills, never a magic word: `picks`, `label`, or `pin_chosen: true`. `picks` can ride on
       either rule as per-block overrides.
     - A block with no take of that label shows its chosen take and is listed in `unmatched_blocks`.
@@ -130,7 +132,16 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
     - Labels match exactly as stored, plus one convenience: a client's OWN suggestions match by their own
       part. "english" also matches "claude-code · suggested · english" for claude-code, never another
       client's. Her "english" plus the AI's suggested "english" on one block counts as two matches, so the
-      call refuses.
+      call refuses. Per R-VX246-4 the stored form becomes `<client> · <label>`; the legacy
+      `<client> · suggested · <label>` matches too.
+  - **VX-267, R-VX246-4 (Pre-launch) — AI take labels drop "suggested".** Her words, verbatim: *"why do we
+    need claude-code * suggested * english. isn't it obvious it's suggested if it's claude? seems like an
+    extra word."* Since R-VX246-2, the client prefix appears only on takes an AI adds at suggest, so the name
+    already says it. `aiLabel` (13n's P-13n-3, hers to re-voice) becomes `<client>` or `<client> · <label>`.
+    Existing takes keep their labels (no migration); VX-253's matcher accepts both forms; U7's descriptions
+    and the guide say the new form.
+  - **VX-231 (stale Bookcase counts) — her call whether it joins:** possibly the same root cause as VX-230 (a
+    face not refreshed after an MCP write; both were seen right after big MCP writes). Filed under 13n for now.
   - **VX-254:** content digests on write replies (stored-text digest per take; the algorithm and byte rule
     stated).
   - **VX-255:** `insert_blocks` into an existing note (a real R-VX184-1 parity gap). **Her lean (2026-10-13,
