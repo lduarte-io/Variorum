@@ -969,3 +969,48 @@ evidence is complete** (green pass 305/38 + drills disposition + simulator + the
   handoff's checklist carries the one product-door press for her. The refresh tail drops the re-seed; F6's
   custody sweep stays a pre-cleared done fact to name. (The coordinator's veto question is answered by this
   ruling — relayed.)
+
+## U3 RECORD (VX-203 + VX-208)
+
+**Not done in this unit (stated first):** IN PROGRESS — this line is rewritten at the close.
+
+### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
+- 2026-10-13 ~03:15 — U3 implementer (Opus) started. Reading done in this session, never delegated: this file
+  whole (§A, §B, §E, the U1 + U2 RECORDS and adjudications, windows A/B); `notes/SessionResiliencyProtocol.md`;
+  `notes/SyncSpec.md` in full; VX-191 §O.2 + §V–§X; auditor B whole (B1a–B1f, B2, B3c); the postures design
+  decisions 1–35, §4 steps 4–7, §5, §6, §14 corners 1–48; VX-203 (no comments) + VX-208 (her ruling comment);
+  the code §E names plus `LibraryClassifier`, the four offer/Done face sites and `CopyRegisterPinTests`.
+- MACHINERY NOTE: my first pass STOPPED at the reading's end (no write) when `6913e6a5` (the orchestrator's WINDOW
+  B append) landed in this worktree; the orchestrator confirmed it was theirs, amended the rule (stop only if CODE
+  files or my own sections move; notes-only orchestrator commits are expected), ACCEPTED F-U3-1 and approved the
+  design below as written. Resumed in the same session.
+- NOT-STARTED — piece 1 (core): the adoption's naming hoisted to constants + `LibraryAsideCopies.swift` (the lister,
+  the qualifier, the guarded remover) + headless pins (a)(b)(c) + the remover's refusals.
+- NOT-STARTED — piece 2 (Shared runner + models + faces): the two inert-by-default leaves, `Outcome.preSwitchLibraryCopies`
+  + `Outcome.hasOffer`, the counted offer body, the four faces.
+- NOT-STARTED — piece 3 (VX-208): the one line on every Done that entered Castle, both models, four faces.
+- NOT-STARTED — piece 4: Mac pins (ceremony + follow road list, delete/keep, counts, the line, faces as code),
+  revert patches under `notes/plans/fixes/vx-201-u3-reverts/`, `build-for-testing` (Mac + phone), the close.
+
+### The settled design (approved by the orchestrator before any code; F-U3-1 ACCEPTED)
+- **F-U3-1 — what "a key file carries `apple`" means:** the key file Variorum itself would open the copy with —
+  `StoreKeyEnvelope.locate` beside the folder's ONE `.sqlite` (the classifier's own rule for an ordinary-named
+  store, i.e. what File ▸ Open Library would read), NOT any key file in the folder. Mechanism: the acting device
+  keeps its Standard-era key file (`apple` over the OLD key) beside a re-keyed Castle library (audit O.4/B6c), and an
+  adoption moves BOTH key files aside — "any key file" would sweep a Castle-era copy into the Standard-era delete,
+  the exact failure §A bound 1 forbids. `locate` picks by newest mtime; `moveItem` and `copyItem` both preserve
+  mtimes (verified by experiment), so the rule holds in both homes.
+- **Core:** the adoption's names move to constants `plan()` reads (paths byte-identical); `LibraryAsideCopies.swift`
+  lists both homes oldest first, qualifies a folder (the adoption's naming + a stamp that reads back exactly + the
+  parent IS the home + one store + the located key file carries `apple`), and its remover re-runs that whole
+  qualification before removing the stamp folder — it can never delete a path outside the two homes, nor anything
+  the lister would not list.
+- **Shared:** `preSwitchLibraryCopies` / `deleteLibraryCopies` leaves inert by default (scripted worlds unchanged),
+  `.live` wires the core; `snapshotAndInsurance` (the ONE site the ceremony, the follow and the resume share) lists
+  both kinds under the existing condition (a written fresh snapshot, the road's listing rule); `Outcome.hasOffer`
+  replaces the five `!preSwitchSnapshots.isEmpty` sites; `deletePreSwitchSnapshots` removes both and returns the sum;
+  the offer body carries honest counts ("copies", never "libraries" — one adoption leaves two folders) and one
+  owning sentence.
+- **VX-208:** one line on every Done that entered Castle, right after the insurance notice, regardless of the weekly
+  toggle (manual Markdown exports and an earlier export's leftovers exist either way); PROVISIONAL placement, the
+  Mac-only alternative recorded.
