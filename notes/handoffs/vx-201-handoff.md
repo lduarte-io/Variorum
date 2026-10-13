@@ -30,6 +30,15 @@
    the drills, or the walk met your "tell me explicitly as a high priority item" bar. The night's one
    headline (next) is a KNOWN hazard now proven and honestly worded, not a new blocker.
 
+**Dev-store state after the walk (added after closeout):** my walk left the DEV store in Castle, behind a
+throwaway passphrase and twelve words I set during the ceremony. That locked the store at launch and blocked
+vx-184's live round until the credentials were handed to oct12coordinator directly (never committed). DONE
+2026-10-13 ~11:17: the dev store is back in Standard through the app's own doors, and its relaunch opens with no
+lock. The Castle state was first set aside whole as W-1's repro at the dev container's
+`Backups/safety-copies/castle-W1-20261013/`, hash-verified; it opens with the credentials at
+`~/.variorum/dev-castle.env`. Lesson for later walks: return the store to its
+starting posture before releasing the stage, or hand the credentials over at release.
+
 ## The headline you should read first
 **§W.2's way-back revert REPRODUCED IN WHOLE at HEAD** — your carried-forward reminder 2 ("the trace was
 read, never run") was right to insist, twice over: the revert completes IN THE SAME SESSION (the adoption's

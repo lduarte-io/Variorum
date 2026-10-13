@@ -168,7 +168,10 @@ struct VX209LeavesCastleConfirmTests {
         // Every adopt road presents that one sheet: the main window's
         // presenter (File ▸ Open Library… and the lobby faces) and Settings'
         // (Restore from Backup); the restore row drives Settings' presenter.
+        // VX-224 moved the Settings scene's body, and Settings' presenter
+        // with it, into SettingsSceneContent.swift.
         let app = try code("Variorum/VariorumApp.swift")
+            + code("Variorum/Features/Settings/SettingsSceneContent.swift")
         #expect(app.components(separatedBy: "LibraryOpenSheet(model: model)").count - 1 == 2,
                 "two presenters, one sheet")
         #expect(try code("Variorum/EditorCommands.swift").contains("openDoor.openPanel(bootstrap: bootstrap)"))

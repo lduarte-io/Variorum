@@ -97,7 +97,9 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
     /// right pane can be picked without opening three.
     var blurb: String {
         switch self {
-        case .general: "The voice, the colours, light and dark, and how the app confirms what it did."
+        // Her ruling 2026-10-13 (the VX-214 sitting record): General is the
+        // ONE pane with no subtitle; the header renders nothing for "".
+        case .general: ""
         case .editor: "How the writing surface looks and behaves while you are in it."
         case .takes: "How a block's alternative takes open and follow you."
         case .writing: "What typing does to the note — and the commits Variorum keeps for you."
@@ -165,10 +167,12 @@ nonisolated enum SettingsCatalog {
     static let rows: [SettingsRow] = [
         // MARK: General
         SettingsRow(
-            id: "voice", pane: .general, title: "Design voice",
+            // Her ruling 2026-10-13: "Design voice" reads "Theme". The old
+            // name stays a search word (the "promote" precedent above).
+            id: "voice", pane: .general, title: "Theme",
             blurb: "Terminal (mono, airy, its own idioms) or Study (warm paper and serif).",
-            keywords: ["theme", "terminal", "study", "serif", "mono", "monospace",
-                       "font", "typeface", "look", "style"]),
+            keywords: ["voice", "design voice", "terminal", "study", "serif", "mono",
+                       "monospace", "font", "typeface", "look", "style"]),
         SettingsRow(
             id: "palette", pane: .general, title: PaletteCopy.title,
             blurb: "Sixteen palettes plus your own hex — the room, the wash, the accent and "

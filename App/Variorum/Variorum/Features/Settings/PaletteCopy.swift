@@ -80,18 +80,10 @@ nonisolated enum PaletteCopy {
         }
     }
 
-    static let help =
-        "A palette recolours the panels, the selected-row wash, the coloured chrome "
-        + "words (\u{201C}this note\u{201D}, \u{201C}commit \u{2318}S\u{201D}), the take "
-        + "cards and the hairlines. Everything else stays the voice's \u{2014} its type, "
-        + "its marks and its habits \u{2014} and dark mode stays fully black whichever "
-        + "you pick."
-
-    /// The sentence the setting must never leave out: a palette is not a
-    /// voice, and nothing about the voice moves when one is chosen.
-    static let notAVoiceNote =
-        "Two voices, many palettes: the palette is only colour, so Terminal stays "
-        + "Terminal and Study stays Study under every one of them."
+    // The two explanation paragraphs (`help`, `notAVoiceNote`) were removed
+    // at her 2026-10-13 General-pane ruling: no explanation under the
+    // palette. The conditional custom-field notes below stay — refusals and
+    // state notes, not explanation.
 
     // MARK: Her own hex (R-Q13)
 

@@ -187,6 +187,77 @@ extension Operations {
         }
     }
 
+    // MARK: - VX-217: a new note born inside a gathering
+
+    /// What minting inside a gathering did — the report half, as R98's.
+    public struct GatheringMintResult: Equatable, Sendable {
+        public let post: Container
+        /// Tag paths applied to the new note, in the rule's order.
+        public let appliedTagPaths: [String]
+        /// Whether the note was starred (R-VX214-4 — a star term is
+        /// satisfiable at mint).
+        public let starred: Bool
+    }
+
+    /// **NEW NOTE IN A GATHERING** (VX-217; option (A) as ruled, R-VX214-3/4
+    /// — the run record `notes/plans/fixes/vx-214-settings-launch-polish.md`).
+    /// R98 composed with `newPostInReading`'s refuse-before-mint: ONE
+    /// transaction mints the note in the gathering's WING and makes it wear
+    /// what the rule needs — the tags (each through the one application road,
+    /// so every living book hears the act) and the star where the rule asks
+    /// for it (the one star write, so star intake hears it too). Any rule a
+    /// fresh note can't be made to match refuses BEFORE the mint with the
+    /// reason the door's hover already says (`GatheringMint.Blocker.reason`),
+    /// so a refusal leaves no stray note. No membership row (a gathering
+    /// holds nothing — §1); no undo entry (`newPostInReading`'s class:
+    /// deleting the note is the inverse).
+    ///
+    /// The star is written cap-exempt — the born-starred mints' precedent
+    /// (P-13id-U2-1: "a mint must never fail on a star"); PROVISIONAL, in the
+    /// batch record.
+    @discardableResult
+    public func newPostInGathering(_ readingID: String) throws -> GatheringMintResult {
+        try database.write { db in
+            let reading = try liveReading(db, readingID)
+            guard reading.kind == .gathering else {
+                throw OperationError.wrongReadingKind(id: readingID, expected: .gathering)
+            }
+            let plan: GatheringMint.Plan
+            switch try Queries.gatheringMintOutcome(db, reading: reading) {
+            case .blocked(let blocker):
+                throw OperationError.smartFilterUnsatisfiable(
+                    readingID: readingID, reason: blocker.reason)
+            case .plan(let p):
+                plan = p
+            }
+            let post = try insertPost(
+                db, title: nil, profile: nil, entryDate: nil, wingId: reading.wingId)
+            let now = date.now
+            var paths: [String] = []
+            for tagID in plan.tagIDs {
+                let tag = try liveTag(db, tagID)
+                try insertPostTag(db, tagID: tagID, postID: post.id, now: now)
+                paths.append(tag.path)
+            }
+            if plan.star {
+                try writeStar(db, .post(post.id), starred: true, enforcingCap: false)
+            }
+            // The belt: the assembly's own predicate decides "the gathering
+            // shows it" — the planner only proposes. A plan that fails it
+            // unwinds the whole mint (never a stray note).
+            let term = RuleGrammar.decode(reading.querySpec)
+            var stars = Queries.StarContext()
+            let starred = try stars.ids(db, for: term)
+            guard try matchesRule(
+                db, postID: post.id, term: term, wingID: reading.wingId, starredNoteIDs: starred)
+            else {
+                throw OperationError.smartFilterUnsatisfiable(
+                    readingID: readingID, reason: GatheringMint.unmatchedReason)
+            }
+            return GatheringMintResult(post: post, appliedTagPaths: paths, starred: plan.star)
+        }
+    }
+
     /// The assembly's own predicate (`ruleMatchSQL` — ONE implementation,
     /// the Stage B rule), probed for a single post. `starredNoteIDs` is the
     /// star term's context — REQUIRED since 13i-b U4 (F-U3-3), like

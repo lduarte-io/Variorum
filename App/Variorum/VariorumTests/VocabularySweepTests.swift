@@ -96,17 +96,48 @@ struct VocabularySweepTests {
                 == "1 chapter · 1 shown")
     }
 
-    /// Row 111: the old footer ("it collects notes by its tags. Tag a note
-    /// anywhere and it appears here.") was false for a ★ rule; the new one is
-    /// true of any rule and never says "collects" of a thing that holds
-    /// nothing (lesson 1 / lesson 3).
-    @Test func theGatheringFooterIsTrueOfAnyRule() {
-        let footer = BookViewCopy.gatheringFooter
-        #expect(footer.hasPrefix("gathering"))
-        #expect(footer.contains("holds none of them"))
-        #expect(footer.contains("tags") && footer.contains("star"),
-                "true of a tag rule AND a ★ rule")
-        #expect(!footer.contains("collects"))
+    /// (A JUSTIFIED EDIT at VX-217: this slot pinned the gathering's
+    /// navigator FOOTER — row 111's truth-of-any-rule sentence — which her
+    /// 2026-10-13 ruling RETIRED: "we don't need that info here, it's in the
+    /// field guide if they care and it looks cluttered. the bottom of a book
+    /// and the bottom of a gathering should look the same." The pin retires
+    /// with its copy; what replaced the footer is pinned here instead.)
+    ///
+    /// VX-217: the gathering's foot says the BOOK's word ("+ new note"); the
+    /// door's hover and receipt say what the new note wears — sentence case,
+    /// never "collects"/"added" of a thing that holds nothing.
+    @Test func theGatheringFootSaysTheBooksWord() throws {
+        #expect(GatheringNoteDoorCopy.navigatorWord == "+ new note")
+        let source = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Variorum/Features/BookView/BookView.swift"),
+            encoding: .utf8)
+        #expect(source.contains("chromeLabel(\"+ new note\")"),
+                "the book's own foot says the same word")
+        #expect(!source.contains("ChromeNotice("),
+                "no explainer stands at a navigator's foot (or anywhere in the book view)")
+
+        let tagged = GatheringMintFace(
+            outcome: .plan(.init(tagIDs: ["t"], star: false)), tagPaths: ["poems"])
+        #expect(GatheringNoteDoorCopy.help(tagged) == "A new note tagged #poems, so this gathering shows it")
+        let both = GatheringMintFace(
+            outcome: .plan(.init(tagIDs: ["t"], star: true)), tagPaths: ["poems"])
+        #expect(GatheringNoteDoorCopy.help(both)
+                == "A new note tagged #poems and starred, so this gathering shows it")
+        let archived = GatheringMintFace(outcome: .blocked(.archived), tagPaths: [])
+        #expect(GatheringNoteDoorCopy.help(archived)
+                == "This gathering can't take a new note: " + GatheringMint.Blocker.archived.reason + ".")
+
+        #expect(BookcaseCopy.shownByMint(["poems"], starred: false)
+                == BookcaseCopy.shownByTagging(["poems"]), "tags alone read exactly the tagging receipt")
+        #expect(BookcaseCopy.shownByMint(["poems"], starred: true)
+                == "Tagged #poems and starred \u{2014} the gathering shows it now, as its rule matches.")
+        #expect(BookcaseCopy.shownByMint([], starred: true)
+                == "Starred \u{2014} the gathering shows it now, as its rule matches.")
+        for line in [GatheringNoteDoorCopy.help(both), BookcaseCopy.shownByMint(["a"], starred: true)] {
+            #expect(!line.contains("collect") && !line.contains("added"), "\(line)")
+        }
     }
 
     /// (a) — the Bookcase's own words for what a gathering is and does.

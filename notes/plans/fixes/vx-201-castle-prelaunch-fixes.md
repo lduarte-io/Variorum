@@ -2352,3 +2352,4 @@ pre-cleared to the refresher, NO re-seed riding — her checklist carries the on
 origin+local; both worktrees and the pinned checkout removed; run logs deleted. Her morning handoff:
 `notes/handoffs/vx-201-handoff.md`. No further Sync/ or custody change owed; the custody slot released at the
 orchestrator's hard stop.
+**Dev Castle credentials (from 2026-10-13):** the throwaway passphrase + twelve words the walk set on the DEV store live at `~/.variorum/dev-castle.env` (chmod 600; the author stored them) — the path only, never the values, in any record.

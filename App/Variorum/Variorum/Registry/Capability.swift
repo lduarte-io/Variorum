@@ -798,6 +798,17 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // (they change what she sees, never the store — the Library band's
     // class, U2's registry record).
     case searchThisBook
+    // VX-217 (2026-10-13 — her "make sure that new note button exists on
+    // gatherings … the bottom of a book and the bottom of a gathering should
+    // look the same"; option (A) + R-VX214-3/4, the run record): a NEW NOTE
+    // BORN INSIDE A GATHERING — minted wearing what the rule needs
+    // (`Operations.newPostInGathering`). Its own act beside the book's
+    // undeclared surface door, on the `.removeFromBook`/`.removeRuleTag`
+    // grounds: different words, different refusals. `.surface` — the
+    // gathering's navigator foot and the Outline flow's end, both drawn
+    // ALWAYS and greyed with the reason where the act can't land
+    // (R-VX214-3), never hidden.
+    case newNoteInGathering
     // 13i-d U4 — A BOOK'S ARCHIVED LINE (her #169(a)(1) ruling — the 13i-d
     // plan item 9): its two row doors are **Unarchive** (NEW — the archived
     // line is its one declared renderer; the Library's Archived view carries
@@ -912,6 +923,17 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// never by a keystroke from elsewhere — the verbatim-first promise
     /// would otherwise have a door that skips the reading.
     case sendCrashReport, deleteCrashReport
+    /// VX-221 (2026-10-13) — SETTINGS ▸ TAGS' delete, declared at last (the
+    /// registry walk recorded the tag manager's acts as an unclosed gap; this
+    /// one closes as work touches it — create and rename stay the gap). ONE
+    /// act, TWO doors: the row's visible trash (`.surface`, her "more obvious
+    /// delete tag button rather than just two finger click") and the row's
+    /// context menu (`.contextMenu`) — both open ONE confirm naming the
+    /// consequence (the phone's sentence, hoisted — `TagDeletion`), because
+    /// the delete is unrecoverable (the confirmation-consistency principle;
+    /// VX-238 holds the missing restore road). Deliberately NOT `.palette`:
+    /// a taxonomy delete is decided where the taxonomy is shown.
+    case deleteTag
     /// 13n-b U1 — SETTINGS ▸ MCP's acts (R-13n-4/5; R-13nb-5), `.surface`
     /// on the Data Safety / Diagnostics precedent: each acts on the row she
     /// is looking at (a connection request, a client, a grant) or the pane's

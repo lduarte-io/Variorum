@@ -680,6 +680,20 @@ nonisolated enum BookcaseCopy {
             + " \u{2014} the gathering shows it now, as its rule matches."
     }
 
+    /// VX-217 — a NEW note minted inside a gathering (PROVISIONAL #VX217-b):
+    /// the tagging receipt's own pattern, extended for the star her
+    /// R-VX214-4 lets a mint set. Tags alone read exactly `shownByTagging`.
+    static func shownByMint(_ paths: [String], starred: Bool) -> String {
+        let tail = " \u{2014} the gathering shows it now, as its rule matches."
+        let tags = paths.map { "#\($0)" }.joined(separator: " ")
+        switch (paths.isEmpty, starred) {
+        case (false, false): return shownByTagging(paths)
+        case (false, true): return "Tagged " + tags + " and starred" + tail
+        case (true, true): return "Starred" + tail
+        case (true, false): return "The gathering shows it now, as its rule matches."
+        }
+    }
+
     // The registry's verbs (13i-d U1).
     static let newShelfVerb = "New Shelf"
     static let renameShelfVerb = "Rename\u{2026}"

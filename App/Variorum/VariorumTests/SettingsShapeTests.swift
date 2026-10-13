@@ -140,7 +140,13 @@ struct SettingsShapeTests {
             #expect(AppSettingsView.rowIDsRendered[pane] != nil,
                     "\(pane.title) has a rendered-row list, even if it is empty")
             #expect(!pane.title.isEmpty)
-            #expect(!pane.blurb.isEmpty)
+            // Her 2026-10-13 ruling (the VX-214 sitting record): General is
+            // the ONE pane with no subtitle; every other pane keeps one.
+            if pane == .general {
+                #expect(pane.blurb.isEmpty)
+            } else {
+                #expect(!pane.blurb.isEmpty)
+            }
         }
         // Shortcuts holds no catalog row on purpose: its content is the
         // helper's list, which the search reaches directly.

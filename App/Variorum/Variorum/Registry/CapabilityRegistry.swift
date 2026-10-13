@@ -1891,6 +1891,16 @@ nonisolated enum CapabilityRegistry {
             doors: [.surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "", availability: always),
+        // VX-217 — a new note born inside a gathering: the navigator foot and
+        // the Outline flow's end (`.surface`). `always` for `.editRule`'s
+        // reason — each renderer carries its gathering; where the act can't
+        // land the door GREYS and says why (R-VX214-3), and the op refuses
+        // with the same words (`GatheringMint.Blocker.reason`).
+        Capability(
+            id: .newNoteInGathering, verb: GatheringNoteDoorCopy.verb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: GatheringNoteDoorCopy.unavailableNote, availability: always),
         Capability(
             id: .setJournalTrait, verb: CollectingCopy.journalTraitVerb, scope: .book,
             doors: [.surface],
@@ -2152,6 +2162,15 @@ nonisolated enum CapabilityRegistry {
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Crash reports are deleted from Settings \u{25B8} Diagnostics.",
+            availability: always),
+        // VX-221 — Settings ▸ Tags' delete: the row's trash + its context
+        // row, ONE confirm (`TagDeletion`). `takesAccess: nil` on the
+        // Diagnostics precedent (not an editing act).
+        Capability(
+            id: .deleteTag, verb: "Delete Tag\u{2026}", scope: .app,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Tags are deleted from Settings \u{25B8} Tags.",
             availability: always),
 
         // MARK: The MCP door (13n-b U1 — Settings ▸ MCP, R-13n-4/5, R-13nb-5)

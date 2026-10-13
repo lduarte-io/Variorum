@@ -756,7 +756,10 @@ struct LensesBoardView: View {
     /// The column NAME is the slot picker (R83: names prominent BECAUSE
     /// slots swap — click the name to replace this column's occupant).
     private func slotPicker(_ column: TakesColumn) -> some View {
-        Menu {
+        // VX-223: the chrome pull-down (its rows already read at menu size —
+        // no mini host here — but every borderless pull-down is the one
+        // component now, so none can inherit a mini row's size again).
+        ChromePullDown {
             Button("Chosen (the note)") { model.replaceColumnWithChosen(column.id) }
             if !model.projection.lenses.isEmpty {
                 Divider()
@@ -783,12 +786,6 @@ struct LensesBoardView: View {
                     .foregroundStyle(tokens.muted)
             }
         }
-        .menuStyle(.borderlessButton)
-        // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
-        // states its own line policy, so its IDEAL width can never be a
-        // wrapped one (the b6dae25 class's window-sizing hazard).
-        .lineLimit(1)
-        .fixedSize()
         .help("Replace this column with a different lens, the note itself, or a new lens")
     }
 
@@ -810,18 +807,15 @@ struct LensesBoardView: View {
         HStack(spacing: 5) {
             switch column.kind {
             case .main:
-                Menu("⧉ Duplicate as Version") {
+                ChromePullDown("⧉ Duplicate as Version") {
                     Button("A full copy of this note, linked as a version") {
                         Task { await model.promoteColumn(column.id) }
                     }
                 }
-                .menuStyle(.borderlessButton)
-                .lineLimit(1)
-                .fixedSize()
                 .help("Copies the note exactly as it is — takes and all — into a new linked note")
             case .scratch:
                 adoptDoor(column)
-                Menu("⧉ Make this a note") {
+                ChromePullDown("⧉ Make this a note") {
                     Button("New note from this column (takes ride)") {
                         Task { await model.promoteColumn(column.id, carryFans: true) }
                     }
@@ -833,16 +827,13 @@ struct LensesBoardView: View {
                         Task { await model.promoteColumn(column.id, keepAsLens: true) }
                     }
                 }
-                .menuStyle(.borderlessButton)
-                .lineLimit(1)
-                .fixedSize()
                 .help("A new linked note whose text is what this column shows — no lens required (direct promote)")
                 Button("💾") { lensNamePrompt = LensPrompt(columnID: column.id) }
                     .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
                     .help("Keep this way of looking: save it as a named lens")
             case .lens(let lensID):
                 adoptDoor(column)
-                Menu("⧉ Make this a note") {
+                ChromePullDown("⧉ Make this a note") {
                     Button("New note from this lens (takes ride)") {
                         Task { await model.promoteColumn(column.id, carryFans: true) }
                     }
@@ -850,11 +841,8 @@ struct LensesBoardView: View {
                         Task { await model.promoteColumn(column.id, carryFans: false) }
                     }
                 }
-                .menuStyle(.borderlessButton)
-                .lineLimit(1)
-                .fixedSize()
                 .help("A new linked note whose text is what this lens shows")
-                Menu("⋯") {
+                ChromePullDown("⋯") {
                     Button("Rename lens…") {
                         // 13b Stage 3 (3D — N6): `renameLens` (core since
                         // 11a) finally gets its door.
@@ -866,9 +854,6 @@ struct LensesBoardView: View {
                         Task { await model.deleteLens(lensID) }
                     }
                 }
-                .menuStyle(.borderlessButton)
-                .lineLimit(1)
-                .fixedSize()
             }
         }
         .font(tokens.small)

@@ -66,7 +66,9 @@ struct ProtectionStatusRow: View {
                     }
                     Spacer(minLength: 0)
                 }
-                .padding(.horizontal, 10)
+                // VX-218: on the column's content edge, with the sync row
+                // below it (was 10 pt — the family read ragged at 10 vs 6).
+                .padding(.horizontal, SidebarLayout.contentInset)
                 .padding(.vertical, 6)
                 .contentShape(Rectangle())
             }

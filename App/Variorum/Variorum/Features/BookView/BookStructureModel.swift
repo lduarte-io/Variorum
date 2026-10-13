@@ -74,6 +74,9 @@ final class BookStructureModel {
     /// MINOR: deleting the only chapter made restoreSection unreachable).
     private(set) var deletedSections: [ReadingSection] = []
     private(set) var assignments: [String: String] = [:]
+    /// VX-217 — the gathering note door's state (nil on a book, and until
+    /// the first observation lands).
+    private(set) var gatheringMint: GatheringMintFace?
     private(set) var lastError: String?
     var mode: ViewMode = .outline
     /// Set exactly once from the first observed reading row (a finished
@@ -90,16 +93,26 @@ final class BookStructureModel {
         var sections: [ReadingSection]
         var deletedSections: [ReadingSection]
         var assignments: [String: String]
+        /// VX-217 — a GATHERING's "+ new note" door: what a mint would take,
+        /// or why it can't land (nil for a book). Read in this same tracked
+        /// observation, so a rule edit, an archive or a tag's deletion
+        /// re-greys the door live.
+        var gatheringMint: GatheringMintFace? = nil
     }
 
     func start() async {
         do {
             for try await value in session.database.observe({ [readingID] db in
-                Snapshot(
-                    reading: try Queries.reading(db, id: readingID),
+                let reading = try Queries.reading(db, id: readingID)
+                return Snapshot(
+                    reading: reading,
                     sections: try Queries.readingSections(db, readingID: readingID),
                     deletedSections: try Queries.deletedReadingSections(db, readingID: readingID),
-                    assignments: try Queries.sectionAssignments(db, readingID: readingID))
+                    assignments: try Queries.sectionAssignments(db, readingID: readingID),
+                    gatheringMint: try reading.flatMap { reading in
+                        reading.kind == .gathering
+                            ? try GatheringMintFace.read(db, gathering: reading) : nil
+                    })
             }) {
                 adopt(value)
             }
@@ -114,6 +127,7 @@ final class BookStructureModel {
         sections = snapshot.sections
         deletedSections = snapshot.deletedSections
         assignments = snapshot.assignments
+        gatheringMint = snapshot.gatheringMint
         if !modeSeeded, let reading = snapshot.reading {
             mode = Self.defaultMode(for: reading)
             modeSeeded = true
@@ -766,6 +780,35 @@ final class BookStructureModel {
             return post.id
         } catch let error as OperationError {
             lastError = ReadingsViewModel.message(error)
+            return nil
+        } catch {
+            lastError = String(describing: error)
+            return nil
+        }
+    }
+
+    /// VX-217 — a NEW NOTE BORN INSIDE THIS GATHERING (option (A) + her
+    /// R-VX214-3/4): one transaction mints it wearing what the rule needs
+    /// (`newPostInGathering` — the tags, and the star where the rule asks);
+    /// the receipt says what it wore (PROVISIONAL #VX217-b). A refusal is
+    /// the op's own words — the same reason the greyed door's hover says —
+    /// on this model's refusal line, the book door's sibling.
+    func newPostInGathering() async -> String? {
+        do {
+            let readingID = readingID
+            let result = try await session.runner.run { ops in
+                try ops.newPostInGathering(readingID)
+            }
+            lastError = nil
+            session.status.receipt(BookcaseCopy.shownByMint(
+                result.appliedTagPaths, starred: result.starred))
+            return result.post.id
+        } catch let error as OperationError {
+            if case .smartFilterUnsatisfiable(_, let reason) = error {
+                lastError = GatheringNoteDoorCopy.cannot(reason)
+            } else {
+                lastError = ReadingsViewModel.message(error)
+            }
             return nil
         } catch {
             lastError = String(describing: error)

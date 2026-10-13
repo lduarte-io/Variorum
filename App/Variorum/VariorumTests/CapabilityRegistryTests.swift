@@ -347,6 +347,11 @@ struct CapabilityRegistryTests {
             // renderer is a new line): the Library's NOTE-row menu's own door
             // (Share with AI…, beyond the shared note-row grammar).
             .union(LibraryCatalogView.contextMenuCapabilities)
+            // VX-221 (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line): Settings ▸ Tags' row menu renders the tag delete's
+            // context door (`.deleteTag`, declared at last — its visible twin
+            // is the surface walk's line).
+            .union(TagManagerPane.contextMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
     }
 
@@ -574,6 +579,13 @@ struct CapabilityRegistryTests {
             // switcher menu, the indicator, Waiting) carry it in the lines
             // above.
             .union(WingSwitcherSheet.surfaceCapabilities)
+            // VX-221 (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line): Settings ▸ Tags renders the tag delete's visible row
+            // door (Data Safety's comment above recorded the tag manager's
+            // acts as an unclosed gap; delete closes as work touches it,
+            // create/rename stay open).
+            // (VX-217's gathering note door rides `BookView`'s line above.)
+            .union(TagManagerPane.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

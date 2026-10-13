@@ -30,6 +30,9 @@ struct BookView: View {
     static let surfaceCapabilities: [CapabilityID] = [.openBookSettings]
         // 13o U3 — the masthead's 🔍 (R-13o-14), the search-within-a-book door.
         + [.searchThisBook]
+        // VX-217 — a gathering's "+ new note" (the navigator foot and the
+        // Outline flow's end — `GatheringNoteDoor`).
+        + [.newNoteInGathering]
 
     let session: AppSession
     let readingID: String
@@ -959,14 +962,23 @@ struct BookView: View {
                                 ? "it keeps collecting after."
                                 : "after that it collects only when it catches up."))
                     }
-                    // Batch 6 legibility: a gathering's derived membership
-                    // is DESIGNED (#25a) — but absent-and-silent read as
-                    // broken. Say so. (ChromeNotice: navigator =
-                    // non-scrolling chrome — the window-min class.)
-                    ChromeNotice(
-                        tokens: tokens,
-                        text: BookViewCopy.gatheringFooter,
-                        lines: 6)
+                    // VX-217 (her ruling): the gathering's foot is the book's
+                    // — "+ new chapter", then "+ new note" — and the footer
+                    // that explained what a gathering is (batch 6's
+                    // legibility notice) is GONE: "we don't need that info
+                    // here, it's in the field guide if they care and it looks
+                    // cluttered." The note door is always drawn; where a new
+                    // note can't land it greys and says why (R-VX214-3).
+                    GatheringNoteDoor(
+                        tokens: tokens, word: GatheringNoteDoorCopy.navigatorWord,
+                        face: structure.gatheringMint
+                    ) {
+                        Task {
+                            if let id = await structure.newPostInGathering() {
+                                model.focus(id)
+                            }
+                        }
+                    }
                 }
                 // (The quiet slot that stood at the navigator's foot here —
                 // 13i-d U3, P-13id-U3-6 — moved to the MAIN column's foot at
@@ -1696,6 +1708,24 @@ struct BookView: View {
                             .padding(.top, 12)
                             .help("A new note born inside this book — no drag needed")
                         }
+                    }
+                    // VX-217 — the gathering's flow twin (the architect's
+                    // rider 1: "look the same" extends to the twin). Outside
+                    // the finished guard on purpose: her R-VX214-3 draws it
+                    // ALWAYS, greyed with the reason where it can't land.
+                    if structure.reading?.kind == .gathering {
+                        GatheringNoteDoor(
+                            tokens: tokens, word: GatheringNoteDoorCopy.flowWord,
+                            face: structure.gatheringMint
+                        ) {
+                            Task {
+                                if let id = await structure.newPostInGathering() {
+                                    model.focus(id)
+                                    model.requestReveal(id)
+                                }
+                            }
+                        }
+                        .padding(.top, 12)
                     }
                 }
                 // 13c 2A: WRITE'S OWN MEASURE, at book scale (A39's
@@ -2907,14 +2937,12 @@ nonisolated enum BookViewCopy {
         return parts.joined(separator: " \u{00B7} ")
     }
 
-    /// A gathering's navigator footer. KnownIssues row 111: "it collects
-    /// notes by its tags. Tag a note anywhere and it appears here." was false
-    /// for a ★ rule (13i-b U4 F-U4-4) and said "collects" of a thing that
-    /// holds nothing. The ruled noun and lesson 1/3's truth, for ANY rule:
-    /// it shows, it holds nothing, and a note comes and goes with what the
-    /// rule reads — its tags and its star.
-    static let gatheringFooter =
-        "gathering \u{2014} it shows every note its rule matches and holds none of them. "
-        + "A note comes and goes with its tags and its star."
+    // (VX-217, her ruling 2026-10-13: the gathering's navigator FOOTER —
+    // "gathering — it shows every note its rule matches and holds none of
+    // them. A note comes and goes with its tags and its star." — is RETIRED:
+    // "we don't need that info here, it's in the field guide if they care and
+    // it looks cluttered. the bottom of a book and the bottom of a gathering
+    // should look the same." The truth it carried is the field guide's
+    // gathering lesson.)
 }
 
