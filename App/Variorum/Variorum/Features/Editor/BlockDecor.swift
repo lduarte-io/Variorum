@@ -483,13 +483,25 @@ nonisolated enum BlockDecor {
     /// abut. A card with too little room to be one answers nil and its block
     /// shows the badge instead. With no glyph and no neighbour the rect is
     /// BYTE-IDENTICAL to what shipped (the parity claim, pinned).
+    ///
+    /// **VX-179 U2 — THE CARD GROWS TO THE BLOCK (her ruling R-VX179-2,
+    /// verbatim at the kickoff: the card may grow to the block's own height
+    /// plus a small pad, still bounded by the rhythm; a one-line block keeps
+    /// a small card; scroll-inside covers overflow; the 96 pt cap retires).**
+    /// Her words behind it: *"sometimes a block is several paragraphs but the
+    /// comment is always just one line."* The ideal is now the block's own
+    /// height plus `cardHeightPad` — the shipped pad, kept, so every card
+    /// under the old cap (a block of 72 pt or less) is byte-identical — and
+    /// the two bounds that were already here stand exactly as they were:
+    /// `roomBelow` minus the rhythm's air (two cards never abut) and the
+    /// `cardMinHeight` floor. Width, x, the handle lane: untouched.
     static func leftCardRect(
         textLeft: CGFloat, top: CGFloat, blockHeight: CGFloat,
         roomBelow: CGFloat? = nil
     ) -> CGRect? {
         let width = min(210, max(0, textLeft - leftCardLane))
         guard width > 0 else { return nil }
-        let ideal = min(blockHeight + 24, 96)
+        let ideal = blockHeight + cardHeightPad
         let height = min(ideal, roomBelow.map { max(0, $0 - cardRhythmAir) } ?? ideal)
         guard height >= cardMinHeight else { return nil }
         return CGRect(
@@ -499,6 +511,13 @@ nonisolated enum BlockDecor {
 
     /// The clearance a left card leaves for the drag-handle lane.
     static let leftCardLane: CGFloat = 28
+
+    /// How far past its block's text a margin card reaches — the shipped
+    /// `+ 24`, named at VX-179 U2 when the 96 pt cap beside it retired. A
+    /// one-line block's card is therefore ~41 pt: room for two or three
+    /// short entries before the card scrolls (R-VX179-2's "a one-line block
+    /// keeps a small card").
+    static let cardHeightPad: CGFloat = 24
 
     // 13l (her 8c rider, verbatim: *"I need the comment + on the left
     // removed … it's too crowded and I don't like the look of seeing it
@@ -872,12 +891,15 @@ final class BlockDecorOverlayController {
             }
         }
         let inline = state.appearance.inlineComments
-        pool(&commentCards, count: items.count, in: textView, below: false) {
-            CommentCardView()
-        }
+        // VX-179 U2: the pool pairs cards with blocks by IDENTITY, not
+        // position — a margin card now holds an inner scroll position, and a
+        // block that stays on screen keeps it while the page scrolls
+        // (`CommentCardLayout.reconcile`'s note).
+        reconcileCommentCards(for: items.map(\.frame.blockID), in: textView)
         for (card, item) in zip(commentCards, items) {
             let text = item.briefs.map(\.text).joined(separator: "  ·  ")
             let blockID = item.frame.blockID
+            card.identity = blockID
             card.onClick = onOpenComments.map { open in { open(blockID) } }
             if inline {
                 // The inline strip (R7's setting): the tinted line in the
@@ -894,11 +916,19 @@ final class BlockDecorOverlayController {
             } else if case .card(let rect) = faces[blockID] ?? .yields {
                 // The margin card (R7's ruling — the round-2 mockup's
                 // mcmt), on the LEFT by her R5-3 ruling, at the STACK's top
-                // and with the rhythm's room (13u3 UNIT A1).
-                card.present(
-                    text: tokens.commentPrefix + text,
-                    tint: .clear, ink: NSColor(tokens.commentInk),
-                    style: .marginCard(rule: NSColor(tokens.commentTint)))
+                // and with the rhythm's room (13u3 UNIT A1) — and since
+                // VX-179 U2 (R-VX179-1) each comment its own ENTRY, in the
+                // briefs' (= the panel's) order, scrolling inside the card
+                // when they outgrow it. The tooltip keeps the shipped joined
+                // string whole.
+                card.presentCard(CommentCardView.CardContent(
+                    entries: item.briefs.map(\.text),
+                    prefix: tokens.commentPrefix,
+                    ink: NSColor(tokens.commentInk),
+                    rule: NSColor(tokens.commentTint),
+                    separator: NSColor(tokens.line),
+                    fill: .clear,
+                    toolTip: tokens.commentPrefix + text))
                 card.frame = rect
                 card.isHidden = false
             } else if case .badge(let rect) = faces[blockID] ?? .yields {
@@ -921,6 +951,24 @@ final class BlockDecorOverlayController {
                 card.frame = .zero
             }
         }
+    }
+
+    /// The comment cards' pool, keyed by the block each card shows (VX-179
+    /// U2): reuse the card already showing a block, hand the free ones to the
+    /// rest in pool order, make new ones only when the pool runs out, and
+    /// remove what no visible commented block needs — the generic `pool`'s
+    /// grow/shrink, with identity in place of position.
+    private func reconcileCommentCards(for blockIDs: [String], in textView: NSTextView) {
+        let plan = CommentCardLayout.reconcile(
+            current: commentCards.map(\.identity), wanted: blockIDs)
+        let existing = commentCards
+        commentCards = plan.reuse.map { index in
+            if let index { return existing[index] }
+            let card = CommentCardView()
+            textView.addSubview(card)
+            return card
+        }
+        for index in plan.discard { existing[index].removeFromSuperview() }
     }
 
     // MARK: The margin add-a-comment door — RETIRED (13l, her 8c rider)
@@ -1189,83 +1237,9 @@ final class SeamLineView: NSView {
     }
 }
 
-/// A comment face: margin card / inline strip / count badge. Always a
-/// door — clicking opens the block's comments panel.
-final class CommentCardView: NSView {
-    enum Style: Equatable {
-        case marginCard(rule: NSColor)
-        case strip
-        case badge
-    }
-
-    var onClick: (() -> Void)?
-    private let label = NSTextField(labelWithString: "")
-    private var rule: NSView?
-
-    override init(frame: NSRect) {
-        super.init(frame: frame)
-        wantsLayer = true
-        label.font = .systemFont(ofSize: 11)
-        label.lineBreakMode = .byTruncatingTail
-        label.cell?.truncatesLastVisibleLine = true
-        addSubview(label)
-    }
-
-    required init?(coder: NSCoder) { nil }
-
-    func present(text: String, tint: NSColor, ink: NSColor, style: Style) {
-        label.stringValue = text
-        label.textColor = ink
-        layer?.backgroundColor = tint.cgColor
-        layer?.cornerRadius = 5
-        rule?.removeFromSuperview()
-        rule = nil
-        switch style {
-        case .marginCard(let ruleColor):
-            label.maximumNumberOfLines = 4
-            label.font = .systemFont(ofSize: 11)
-            let ruleView = NSView()
-            ruleView.wantsLayer = true
-            ruleView.layer?.backgroundColor = ruleColor.cgColor
-            addSubview(ruleView)
-            rule = ruleView
-        case .strip:
-            label.maximumNumberOfLines = 1
-            label.font = .systemFont(ofSize: 11)
-        case .badge:
-            label.maximumNumberOfLines = 1
-            label.font = .systemFont(ofSize: 10, weight: .semibold)
-        }
-        toolTip = text
-    }
-
-    override func layout() {
-        super.layout()
-        if let rule {
-            rule.frame = CGRect(x: 0, y: 0, width: 2.5, height: bounds.height)
-            label.frame = bounds.insetBy(dx: 4, dy: 1).offsetBy(dx: 5, dy: 0)
-                .intersection(bounds.insetBy(dx: 1, dy: 1))
-        } else {
-            // 13u3 UNIT A1: a BADGE may be narrower than the shipped 32 (it
-            // yields to the gutter rather than standing on prose), so its
-            // inset yields with it — a "#1" squeezed to "#" is not a count.
-            label.frame = bounds.insetBy(dx: min(6, max(2, (bounds.width - 16) / 2)), dy: 1)
-        }
-    }
-
-    override func mouseDown(with event: NSEvent) {
-        onClick?()
-    }
-
-    /// Round 3 (MINOR): a quiet card is CLICK-THROUGH — the read tier
-    /// builds the controller with no comments door (`onClick == nil`), and
-    /// without this a card/strip/badge was a dead zone over the text
-    /// (swallowing click-to-focus). The DecorRectView/SeamLineView rule,
-    /// applied conditionally: no door ⇒ no hit.
-    override func hitTest(_ point: NSPoint) -> NSView? {
-        onClick == nil ? nil : super.hitTest(point)
-    }
-}
+// The comment face (`CommentCardView`) lives in `CommentCard.swift` since
+// VX-179 U2 — the margin card re-formed for stacked entries with an inner
+// scroll (R-VX179-1), its pure arrangement beside it.
 
 /// The hover tracker (13b 4D, S4-19): an NSTrackingArea owner reporting
 /// window-space pointer moves into the overlay controller. A plain

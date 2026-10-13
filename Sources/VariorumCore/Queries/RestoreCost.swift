@@ -140,9 +140,16 @@ extension Queries {
                   (SELECT COUNT(*) FROM variant v
                     WHERE v.block_id IN (SELECT value FROM json_each(:ids))
                       AND v.deleted_at IS NOT NULL) AS deleted_takes,
+                  -- VX-179: a comment she already deleted forever is not
+                  -- "still restorable" — the panel's fence, applied here so
+                  -- the confirm never counts what no door can bring back.
                   (SELECT COUNT(*) FROM block_comment bc
                     WHERE bc.block_id IN (SELECT value FROM json_each(:ids))
-                      AND bc.deleted_at IS NOT NULL) AS deleted_comments
+                      AND bc.deleted_at IS NOT NULL
+                      AND NOT EXISTS (SELECT 1 FROM purge_intent pi
+                        WHERE pi.table_name = 'block_comment' AND pi.row_id = bc.id
+                          AND (pi.deleted_at IS NULL OR pi.deleted_at >= bc.deleted_at))
+                  ) AS deleted_comments
                 """,
             arguments: ["ids": ids])
 

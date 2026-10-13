@@ -11,9 +11,14 @@ import GRDB
 extension Operations {
     /// The tables an intent may name: the memo's four Trash roots plus
     /// `commit_point` for savepoint pruning (§4d — "the janitor consults
-    /// [the setting] before minting any savepoint purge intent").
+    /// [the setting] before minting any savepoint purge intent"), plus
+    /// `block_comment` since VX-179 (her R-VX179-3, 2026-10-12: a deleted
+    /// comment gets "Delete forever…" in the comments panel's deleted fold
+    /// — the Delete Now road, confirm each time). A comment is childless, so
+    /// `PurgeFamily.expand`'s default arm (the row itself) is its whole
+    /// family; the server's purge arrays already carried the table.
     static let purgeableTables: Set<String> = [
-        "container", "reading", "block", "variant", "commit_point",
+        "container", "reading", "block", "variant", "commit_point", "block_comment",
     ]
 
     /// **Write purge intents** — "this is going, everywhere." One
@@ -23,10 +28,11 @@ extension Operations {
     /// is idempotent by nature — SyncSpec §7's pure-duplicate repair
     /// covers the cross-device race the same way).
     ///
-    /// Refusals: a LIVE container/reading/block/variant refuses
+    /// Refusals: a LIVE container/reading/block/variant/comment refuses
     /// (`purgeTargetNotDeleted` — only things in the Trash purge; a
     /// full-delete door must never exist in a note context, her round-3
-    /// rider); a MANUAL savepoint refuses
+    /// rider); a deleted comment under a dead block (`blockNotFound`) or a
+    /// sealed post (`lockedPost`) refuses (VX-179); a MANUAL savepoint refuses
     /// (`deliberateSavepointNeverPruned` — her round-9 ruling's belt); an
     /// unknown table refuses (`unsupportedPurgeTarget`). A missing row
     /// with a standing intent skips (already going); a missing row with
@@ -119,7 +125,8 @@ extension Operations {
     }
 
     /// The target must be purgeABLE: tombstoned for the four Trash kinds,
-    /// a QUIET savepoint for commit_point. Returns whether an intent
+    /// a QUIET savepoint for commit_point, a tombstoned comment under a live,
+    /// unsealed block for block_comment (VX-179). Returns whether an intent
     /// should be MINTED — a row already gone with any intent standing
     /// (live or completed) answers false (already purged — idempotence);
     /// gone with no intent at all refuses through the kind's own error.
@@ -159,6 +166,42 @@ extension Operations {
             guard kind == "auto" else {
                 throw OperationError.deliberateSavepointNeverPruned(id: target.rowID)
             }
+            return true
+        case "block_comment":
+            // VX-179 (R-VX179-3): the comments panel's deleted fold. Only a
+            // TOMBSTONED comment purges — a live one refuses exactly as a
+            // live note does (the door lives where things are already
+            // deleted, never in the writing).
+            guard let comment = try BlockComment.fetchOne(db, key: target.rowID) else {
+                if try anyIntentStands() { return false }  // already purged
+                throw OperationError.commentNotFound(id: target.rowID)
+            }
+            guard comment.deletedAt != nil else {
+                throw OperationError.purgeTargetNotDeleted(table: target.table, id: target.rowID)
+            }
+            // **The block must be LIVE** — `restoreBlockComment`'s own guard
+            // pair, for a traced reason rather than symmetry. The fold this
+            // door lives on exists only for a live block, so every comment it
+            // lists was deleted on its OWN stamp. A comment under a DEAD
+            // block is either one of those (its block died later — the
+            // block's own Trash family takes it, `PurgeFamily.expandBlock`)
+            // or a CASCADE victim carrying the block's exact stamp. Purging
+            // the second kind alone is the hazard: `restoreBlock` /
+            // `restoreContainer` / ⌥⌘Z flip it back live on the stamp
+            // (`flipBlockCascadeTombstones`), none of those roads voids a
+            // comment intent, and the LIVE intent left standing would hide
+            // her next delete of it from the fold and hand it to the janitor
+            // with no confirm — the 13j B1 class. Refusing here means a
+            // comment intent is only ever minted for a comment deleted
+            // individually under a live block, whose stamp no later block
+            // death can share (the cascade trigger stamps LIVE comments only).
+            _ = try liveBlock(db, comment.blockId)
+            // **The seal (PROVISIONAL — VX-179's decided default, QUESTIONS
+            // #23(a)'s posture extended):** every comment write refuses under
+            // a sealed post, and a permanent delete is a write. A block with
+            // no live placement (released to lineage) has no post to seal it
+            // and passes, exactly as every other comment write does.
+            try ensurePlacementUnlocked(db, blockID: comment.blockId)
             return true
         default:
             throw OperationError.unsupportedPurgeTarget(table: target.table)

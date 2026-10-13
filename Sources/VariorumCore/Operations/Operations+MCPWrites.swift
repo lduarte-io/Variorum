@@ -227,6 +227,11 @@ extension Operations {
         comment.deletedAt = nil
         comment.updatedAt = date.now
         try comment.update(db)
+        // VX-179: the redo is a REVIVE road for a comment, and a comment
+        // the undo tombstoned can be given "Delete forever…" in the fold
+        // before ⇧⌥⌘Z — so the B1 belt rides here exactly as it does on
+        // `reapplyAddedTake` and `restoreBlockComment`.
+        try voidPurgeIntents(db, table: "block_comment", rowID: commentID)
     }
 
     // MARK: - SUGGEST: a saved lens

@@ -183,9 +183,13 @@ struct BlockDecorGeometryTests {
         let tight = try #require(
             BlockDecor.leftCardRect(textLeft: 160, top: 0, blockHeight: 20))
         #expect(tight.width < 210 && tight.minX >= 0)
-        // Tall blocks cap, so one comment never becomes a column.
+        // VX-179 U2 (her R-VX179-2): the 96 pt cap RETIRED — a tall block's
+        // card grows to the block's own height plus the pad, and what does
+        // not fit scrolls inside it. (This cell pinned the cap: `== 96`.)
+        // Red on old: the shipped `min(blockHeight + 24, 96)` answers 96.
         #expect(
-            BlockDecor.leftCardRect(textLeft: 300, top: 0, blockHeight: 800)?.height == 96)
+            BlockDecor.leftCardRect(textLeft: 300, top: 0, blockHeight: 800)?.height
+                == 800 + BlockDecor.cardHeightPad)
     }
 
     @MainActor

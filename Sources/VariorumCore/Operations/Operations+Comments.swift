@@ -94,6 +94,13 @@ extension Operations {
             comment.deletedAt = nil
             comment.updatedAt = date.now
             try comment.update(db)
+            // VX-179 — the restore-side belt (13j ladder B, B1): since a
+            // deleted comment can carry a purge intent ("Delete forever…"),
+            // a restore VOIDS any live intent naming it, inside this
+            // transaction, so a leftover intent can never claim her next
+            // delete of it (the fence would hide it from the fold and the
+            // janitor would take it with no confirm).
+            try voidPurgeIntents(db, table: "block_comment", rowID: id)
         }
     }
 

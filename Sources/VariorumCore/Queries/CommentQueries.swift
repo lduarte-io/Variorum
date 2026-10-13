@@ -16,11 +16,29 @@ extension Queries {
     /// `restoreBlockComment` ("deleted comments must be visible somewhere
     /// and resurrectable"). Newest deletion first: the accident you want to
     /// undo is the most recent one.
+    ///
+    /// **The purge FENCE (VX-179 — "Delete forever…", R-VX179-3):** a
+    /// comment named by a purge intent leaves this listing the moment the
+    /// intent is written, on every device, long before the janitor takes
+    /// the bytes. It is the standing STAMP-AWARE arm, copied from the Trash's
+    /// (13j ladder B, B1): a LIVE intent fences, and a completed one fences
+    /// only the tombstone it actually covered (completed at-or-after the
+    /// row's own `deleted_at` — purged stays purged). A VOIDED intent from
+    /// before a restore-then-re-delete never hides the fresh tombstone: an
+    /// any-state fence would put her re-deleted comment in a limbo no door
+    /// reaches.
     public static func deletedBlockComments(_ db: Database, blockID: String) throws -> [BlockComment] {
-        try BlockComment
-            .filter(Column("block_id") == blockID && Column("deleted_at") != nil)
-            .order(Column("deleted_at").desc, Column("id"))
-            .fetchAll(db)
+        try BlockComment.fetchAll(
+            db,
+            sql: """
+                SELECT * FROM block_comment
+                WHERE block_id = ? AND deleted_at IS NOT NULL
+                  AND NOT EXISTS (SELECT 1 FROM purge_intent pi
+                    WHERE pi.table_name = 'block_comment' AND pi.row_id = block_comment.id
+                      AND (pi.deleted_at IS NULL OR pi.deleted_at >= block_comment.deleted_at))
+                ORDER BY deleted_at DESC, id
+                """,
+            arguments: [blockID])
     }
 
     /// The container's live comments per block, display order — the C1
