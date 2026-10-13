@@ -1299,18 +1299,18 @@ on screen, no stage act — every trace is an OFFSCREEN probe against the real D
 activation), kept in the worktree's gitignored `scratchpad/vx179-u2-fix/`. The pins' RUN and the
 re-walk of the fixed rows are PENDING (the runner's next window).
 
-**Revert state:** no behavioural revert in flight. **ANNOUNCED (starts after this commit): R-FL —** `CommentCard.swift` back to its pre-fix state (`git show 6061ba1f:<path>`), plain build, the offscreen replays (dispatch2 queue road, lane --faded, badge) for the OLD column; restore by `git checkout -- App/Variorum/Variorum/Features/Editor/CommentCard.swift` (the fix is committed at 5d092268, the pins at this commit), rebuild, replays again.
+**Revert state:** no behavioural revert in flight — R-FL ran (announced at 979bd931) and was RESTORED (`git checkout --`, `git diff --stat` empty, rebuilt, the replays green again).
 
 ### LIVE STATUS
 
 | piece | what | status |
 |---|---|---|
 | FL-a | this section | DONE (9667e4d5) |
-| FL-1 | F-W-1 — trace (precise + line events, offscreen, real module), fix at mechanism, table pins red-on-old by replay; R1-3 answered | IN-PROGRESS — traced (6061ba1f); FIX landed (this commit): `hitTest` → `hitTarget(at:during: NSApp.currentEvent)` + the pure `CommentCardLayout.hitAnswer`; the card's `scrollWheel` override and latch RETIRED; replayed on the live-shaped queue road (all six cases right); pins + the revert next |
-| FL-2 | F-W-2 — a press on the scroller belongs to the scroller; fix + pin | IN-PROGRESS — FIX landed (this commit, the same hit decision: a press on the lane of an overflowing card answers the scroller, faded or not); replayed after the fade: door 0×, drag 0 → 112.5; pins + the revert next |
-| FL-3 | F-W-5 — the "…" badge traced; a badge always carries its count; pin red-on-old | IN-PROGRESS — FIX landed (this commit): the pure `CommentCardLayout.badgeFace` (shipped inset where it fits — byte-identical; else the inset yields; else the "#" goes); replayed: every count whole at 22/28/32 pt; pins + the revert next |
+| FL-1 | F-W-1 — trace (precise + line events, offscreen, real module), fix at mechanism, table pins red-on-old by replay; R1-3 answered | DONE — traced 6061ba1f · fix 5d092268 · pins 979bd931 · R-FL red/restored (the evidence below); R1-3 answered below. RUN + the re-walk PENDING (runner) |
+| FL-2 | F-W-2 — a press on the scroller belongs to the scroller; fix + pin | DONE — fix 5d092268 · pin 979bd931 · R-FL: OLD door 1× / no drag → FIXED door 0× / drag 0 → 112.5. RUN + the re-walk PENDING |
+| FL-3 | F-W-5 — the "…" badge traced; a badge always carries its count; pin red-on-old | DONE — fix 5d092268 · pins 979bd931 · R-FL: OLD 7 of 8 counts "…" at the floor → FIXED 24/24 whole (22/28/32 pt). RUN + the re-walk PENDING |
 | FL-4 | W-OBS-2 — TRACE ONLY (pre-existing or new?), answered before any fix | DONE (this commit) — PRE-EXISTING: Read mode has never hosted a decoration controller (THE TRACES) |
-| FL-5 | the plain build; pins typechecked; record closed | NOT-STARTED |
+| FL-5 | the plain build; pins typechecked; record closed | DONE (this commit) — plain build SUCCEEDED after the restore (zero warnings in touched files); `CommentCardTests.swift` typechecked EXIT 0 against the built module |
 
 ### THE TRACES (offscreen, the REAL module — probes in `scratchpad/vx179-u2-fix/`; written before any fix)
 
@@ -1391,3 +1391,82 @@ SwiftUI `ReadPageBlock` texts; the `edit` index's panes are `PaneSurface`s. VX-1
 of these files (`git diff c84eddf1..HEAD --stat` over them: empty). For the orchestrator to ticket:
 Read mode has no comment face of any kind (no card, no badge) — a decoration host is a design decision
 for that surface (gutter room, the read arm being SwiftUI rows), not a fix.
+
+### THE FIX (5d092268) — one hit decision, the router retired
+
+`CommentCardView.hitTest` → `hitTarget(at:during: NSApp.currentEvent)` (during dispatch AppKit has set
+`currentEvent` to the event it is dispatching — measured `current=true` on the queue road) → the pure
+`CommentCardLayout.hitAnswer(wheel:inScrollerLane:overflows:)`: a WHEEL the card can take (the
+unchanged `wheelOwner` table) answers the card's own STACK — inside its scroll view, which then scrolls
+NATIVELY; a wheel the page takes answers the CARD, whose scroll view is the page (the walk's own observed
+road); a PRESS on the vertical scroller's lane of an overflowing card answers the scroller, faded or not;
+every other press is the door. The card's `scrollWheel` override and its latch are GONE — no event is
+hand-delivered to a scroll view hit-testing did not choose (both of the old road's hand-offs are what
+the live dispatch bypasses). F-W-5: the pure `CommentCardLayout.badgeFace(text:width:need:)` — the
+shipped inset where the count fits (byte-identical), else the inset yields to the count, else the "#"
+goes; `need` is the label cell's own width (a copy measured); `present` sets the badge's words only when
+the COUNT changes, so the decoration pass never undoes a fitted "12" back to "#12". The strip is the
+shipped line, untouched.
+
+### R-FL — red on old by behavioural revert (offscreen, the real module both sides; announced 979bd931, restored)
+
+| replay | OLD (`CommentCard.swift` at 6061ba1f) | FIXED (5d092268) |
+|---|---|---|
+| line wheel, card at rest, DOWN — the view hit-testing answers IN DISPATCH (local monitor) → its scroll view | `CommentCardView` → **PAGE** | `CommentCardStackView` → **the card's own** |
+| … UP at rest / DOWN at its bottom / entries fit (both ways) | card → PAGE | card → PAGE (unchanged — the page's wheels stay the page's) |
+| … UP mid-way | card → PAGE | stack → the card's own |
+| the outcomes on this road (inactive app) | card 0 → 30 · page · page · card 60 → 30 · page · page | the same six — right |
+| trackpad-shaped gesture, DOWN at rest — the dispatch stack (the gesture's tracking needs a screen and throws offscreen, so the STACK is the evidence) | `NSWindow sendEvent` → `CommentCardView.scrollWheel(with:)` (the override) → hand-delivered into the inner's `trackGestureScrollWithEvent` | `NSWindow sendEvent` → `-[NSView scrollWheel:]` (the stack) → `-[NSView scrollWheel:]` (its clip) → the card's own scroll view tracks — two native hops |
+| … UP at rest | (not captured) | five or more native hops — out to the page |
+| a press on the scroller lane AFTER the overlay fades | hit = the card; **door 1×**, no drag | hit = `NSScroller`; door 0×, drag 0 → 112.5 |
+| badges at Write's floor (22 pt), "#1/#2/#3/#4/#7/#9/#12/#28" | 1 whole, **7 "…"** | 8 whole (and all 24 across 22/28/32 pt) |
+
+**The honest limit, stated:** offscreen the OLD card's line-wheel OUTCOME is not red — the probe app is
+inactive with no key window, so its dispatch delivers to the hit view's own `scrollWheel` (the
+traditional road), where the old router worked. The walk's failure needs the live, ACTIVE app's
+dispatch, which a probe cannot have without taking her focus. What is red offscreen is the MECHANISM the
+fix changes — which scroll view the hit view belongs to (old: the page's, for every wheel) — plus the
+whole F-W-2 and F-W-5 outcomes. The re-walk of W-3 is the outcome's proof (PENDING).
+
+### R1-3 — the implementer's answer (returns to the reviewer for the final call)
+
+**AGREE that the mismatch was real; DISPUTE that one condition could fix it — the latch is retired
+instead.** The doc promised "the gesture's first MOVING event re-decides" while the code re-decided on
+`.mayBegin`/`.began` only — true. But re-deciding inside a gesture is impossible against AppKit:
+measured, once a scroll view takes a gesture it tracks the rest itself
+(`NSScrollingBehaviorConcurrentVBL _scrollView:trackGestureScrollWithEvent:` — and a `.began` handed to
+an `NSScrollView` by hand never returned), so no later event reaches any router. With the fix there is
+no latch at all: the owner is whichever scroll view hit-testing hands the gesture's first dispatched
+event to. A zero-delta `.mayBegin` starts no tracking (measured — it returned at once), so the ordinary
+gesture decides on its first MOVING `.began` — down → the card's own scroll view, up → the page (the
+stacks above). Only a zero-delta `.began` itself (unverified that AppKit sends one) is decided by the
+table's zero-delta row — the card when it overflows, DELIBERATELY: the alternative (the page) would make
+the card unscrollable by any gesture that begins without movement. The `wheelOwner` doc now says this
+(5d092268); the zero-delta row stays pinned. W-3's re-walk shows it if real.
+
+### Dispositions (the fix leg's rows)
+
+| row | disposition |
+|---|---|
+| F-W-1 | FIXED at mechanism (hit-testing chooses the scroll view; the router + latch retired) — pin `aWheelTheCardCanTakeIsHitTestedIntoItsOwnScrollView` + the `hitAnswer` table; red-on-old by R-FL's mechanism column; outcome by the re-walk (PENDING) |
+| F-W-2 | FIXED — pin `aPressOnTheScrollerLaneBelongsToTheScroller` + the table; red-on-old by R-FL (door 1× / no drag → 0× / drag) |
+| F-W-5 | FIXED (pre-existing since 13u3 A1's badge arm — the inset tuned to "#1") — pins `aBadgeShowsItsWholeCountAtWritesFloor` + the `badgeFace` table; red-on-old by R-FL (7 of 8 "…" → 8 whole); byte-identical wherever the count fit |
+| W-OBS-2 | PRE-EXISTING, answered not fixed — Read mode has never hosted a decoration controller (THE TRACES); for a ticket |
+| R1-3 | AGREE / DISPUTE as above — the latch retired; the zero-delta row deliberate |
+
+### PENDING (the runner's next window — none of it claimed)
+
+- **RUN:** `-only-testing:VariorumTests/CommentCardLayoutTests -only-testing:VariorumTests/CommentCardViewTests
+  -only-testing:VariorumTests/CommentCardControllerTests -only-testing:VariorumTests/BlockDecorGeometryTests
+  -only-testing:VariorumTests/MarginHoverCommentTests -only-testing:VariorumTests/IndicatorGutterTests
+  -only-testing:VariorumTests/ProseGutterTests` (the new cells + every card/badge suite riding the same view).
+- **Optional red-on-old through the test target:** R-FL again (`git show 6061ba1f:<CommentCard.swift>`) —
+  the fix-leg cells go COMPILE-red there (`hitTarget`, `hitAnswer`, `badgeFace`, `lineLabel` are new); the
+  behavioural red is R-FL's table above.
+- **THE RE-WALK (her real app's shape — the one road no probe has):** W-3 over an overflowing card in
+  Write — mouse-wheel (walk-scroll) DOWN scrolls the card, UP at rest moves the page, at the card's end the
+  page moves; trackpad: a gesture down scrolls the card, a gesture up at rest moves the page, and a card
+  that FITS never takes a wheel; W-8 (unblocked now): a card scrolled mid-way keeps its place while the
+  page scrolls; F-W-2: press-drag the scroller lane (after the overlay faded) — the knob drags, the panel
+  stays shut; a press anywhere else on the card still opens the panel; F-W-5: the 800 pt window — the
+  two-comment block's badge reads "#2" beside its "#1" neighbours.
