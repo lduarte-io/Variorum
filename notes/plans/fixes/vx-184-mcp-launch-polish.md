@@ -645,6 +645,15 @@ the reach map is REACH, not presentation, as for books — an archived book unde
   then revokes that once grant while the open book keeps the icon. Pinned as-is (`MCPGatheringReachTests`' parity:
   "a once wing grant reads too").
 
+**THE ORCHESTRATOR'S DISPOSITION (2026-10-13, before the walk — recorded at the moment):** both PROVISIONALs proceed as
+built, (a), with no caption line before the walk. Its reasons, as given: **P-VX185-1(a)** keeps the established
+icon-popover idiom ("through the Home wing grant"), which says the kickoff's why in the surface's own voice — the
+kickoff's quoted sentence reads as an illustration of the why, not a ruled sentence, and her copy pass re-voices words;
+**P-VX185-2(a)** is right because Book Settings' sharing row is a grant face and a gathering is never a grant's scope
+(R-AIR-12) — the (b) caption is one line if she wants it, logged as the option. The once-wing-grant-vs-open-book why
+edge stays with the security rule, recorded (above). The U7 carry (lesson 7: "a book or a gathering") goes into U7's
+brief. Both still want their `notes/QUESTIONS.md` entries at the merge (her copy pass / her call).
+
 ### SELF-ASSESSMENT (pre-stage — the implementer's)
 
 **Against the brief:** the cause traced to the line (`kind = 'book'` in `mcpBookReaches`) and fixed at the read, not the
