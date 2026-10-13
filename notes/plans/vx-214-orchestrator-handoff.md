@@ -1,5 +1,7 @@
 # VX-214 orchestrator — compaction handoff (2026-10-13, ~03:15)
 
+> **THE RUN IS CLOSED (2026-10-13, ~11:50).** Merged as PR #156 (`8925f38b`); build 6843 installed by the folded refresh; QUESTIONS #217 fully answered. **The current handoff is `notes/handoffs/vx-214-handoff.md`.** Everything below is the mid-run working record, kept as history: its "in flight", "pending" and morning-bundle lines are superseded.
+
 *Written at her instruction before a mid-run compaction. The post-compaction session is the SAME orchestrator (settingspaneupdater) continuing the SAME run. The repo is the memory: read this file, then the run record IN FULL, before any act.*
 
 ## Role, as amended tonight
