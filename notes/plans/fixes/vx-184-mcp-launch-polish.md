@@ -2051,8 +2051,10 @@ session's coordinator still holds them; ⌘Q with the note still in the Trash fa
 the process; a Put back in a later session cannot return them. Her own door is the contrast and says why
 (`NoteDeletion.report`): FLUSH first, so the tombstone captures what she typed, and post `.variorumNotesDeleted` after, so
 every pane and window leaves the dead note. **The wire does neither — the second gap is the navigate-away:** after a wire
-`delete_note` her pane stays standing on the tombstoned note (her structural-undo door's WA-3,
-`leaveNotesTheActLeftDead`, posts that signal after an UNDO or REDO, never after the wire's forward act).
+`delete_note` nothing posts `.variorumNotesDeleted` (her structural-undo door's WA-3, `leaveNotesTheActLeftDead`, posts
+it after an UNDO or REDO, never after the wire's forward act), and the codebase's own record — WA-3's reason and
+`NoteDeletion`'s header — is that without it a pane is left standing on the tombstone (read in the code; not observed
+live — headless pass).
 **`delete_block` (13n-b) is the same class one level down:** the block and its takes tombstone under her live editor;
 her pending keystrokes in that block fail the same way and wait in memory; the note stays live, so nothing navigates;
 the full-document editor keeps the dead block's range under her caret with every flush refused until ⌥⌘Z (her
