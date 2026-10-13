@@ -446,7 +446,14 @@ public struct PurgeJanitor: Sendable {
         _ db: Database, _ family: PurgeFamily.Expansion, horizon: Int64,
         road: SweepRoad
     ) throws -> FamilyVerdict {
-        let tombstonedKinds: Set<String> = ["container", "reading", "block", "variant"]
+        let tombstonedKinds: Set<String> = [
+            "container", "reading", "block", "variant",
+            // VX-179 (2026-10-12): the comment true-delete door made
+            // block_comment a purgeable root, so a restored comment must
+            // read .stale here like its four elders — without this a
+            // comment put back between intent and sweep is purged LIVE.
+            "block_comment",
+        ]
         var anySynced = false
         var allSyncedEligible = true
         var anyPendingSeqAbsent = false

@@ -20,6 +20,7 @@
 
 import AppKit
 import Foundation
+import GRDB  // VX-179's pins read purge_intent / block_comment rows directly
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -333,6 +334,103 @@ struct CommentsPanelModelEditorTests {
             #expect(panel.comments.count == 1)
             #expect(panel.status?.isRefusal == true)
             #expect(panel.addDraft == "and a new one", "the refused draft stays in the box")
+        }
+    }
+
+    // MARK: - VX-179 U1: "Delete forever…" (her R-VX179-3)
+
+    private func intentCount(_ h: EditorHarness, _ commentID: String) async throws -> Int {
+        try await h.database.read { db in
+            try Int.fetchOne(
+                db,
+                sql: "SELECT COUNT(*) FROM purge_intent WHERE table_name = 'block_comment' AND row_id = ?",
+                arguments: [commentID]) ?? -1
+        }
+    }
+
+    /// The door asks EVERY time (the Delete Now posture), and only the
+    /// confirm acts: the press raises the confirm and writes nothing; Cancel
+    /// leaves the row exactly as it was; the confirmed act takes the row off
+    /// the fold and speaks a receipt. On this unsynced test store the local
+    /// sweep takes the bytes too (the `TrashPurge.confirm` road).
+    @Test func deleteForeverAsksEveryTimeThenTakesTheRowOffTheFold() async throws {
+        try await withEditor(seedBlocks: ["First block."]) { h in
+            let blockID = try h.storeSlots()[0].blockID
+            let panel = CommentsPanelModel(session: h.session, blockID: blockID)
+            await panel.add("a note I want gone")
+            try await adopt(panel, h)
+            let id = panel.comments[0].id
+            await panel.delete(id)
+            try await adopt(panel, h)
+            #expect(panel.deleted.map(\.id) == [id])
+
+            panel.requestDeleteForever(id)
+            #expect(panel.pendingDeleteForever == id, "the press raises the confirm")
+            #expect(try await intentCount(h, id) == 0, "…and acts on nothing")
+            panel.cancelDeleteForever()
+            #expect(panel.pendingDeleteForever == nil)
+            try await adopt(panel, h)
+            #expect(panel.deleted.map(\.id) == [id], "Cancel leaves the row where it was")
+
+            panel.requestDeleteForever(id)
+            #expect(panel.pendingDeleteForever == id, "it asks again — every time")
+            await panel.deleteForever(id)
+            #expect(panel.pendingDeleteForever == nil)
+            try await adopt(panel, h)
+            #expect(panel.deleted.isEmpty, "the fold drops the row the moment it is confirmed")
+            #expect(panel.status?.isRefusal == false, "a landed purge is a receipt")
+            #expect(panel.statusMessage == CommentsPanelCopy.deletedForever)
+            let remaining = try await h.database.read { db in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM block_comment WHERE id = ?",
+                    arguments: [id]) ?? -1
+            }
+            #expect(remaining == 0, "unsynced, the app's own cleanup takes the bytes now")
+
+            // A row the fold no longer shows raises nothing.
+            panel.requestDeleteForever(id)
+            #expect(panel.pendingDeleteForever == nil)
+        }
+    }
+
+    /// The seal refuses the permanent write like every other comment write
+    /// (PROVISIONAL — QUESTIONS #23(a)'s posture), in the panel's own seal
+    /// words, and the row stays in the fold.
+    @Test func deleteForeverUnderASealRefusesInTheSealsWords() async throws {
+        try await withEditor(seedBlocks: ["First block."]) { h in
+            let blockID = try h.storeSlots()[0].blockID
+            let panel = CommentsPanelModel(session: h.session, blockID: blockID)
+            await panel.add("deleted before the seal")
+            try await adopt(panel, h)
+            let id = panel.comments[0].id
+            await panel.delete(id)
+            try await h.session.runner.run { [postID = h.postID] ops in
+                try ops.lockPost(postID)
+            }
+
+            panel.requestDeleteForever(id)
+            await panel.deleteForever(id)
+            try await adopt(panel, h)
+            #expect(panel.status?.isRefusal == true)
+            #expect(panel.statusMessage == CommentsPanelCopy.sealed)
+            #expect(panel.deleted.map(\.id) == [id], "nothing went — the row still lists")
+            #expect(try await intentCount(h, id) == 0)
+        }
+    }
+
+    /// Her no-shouty-caps rule, on the door's own words: sentence case, the
+    /// ellipsis on the door that asks and never on the button that acts.
+    @Test func theDeleteForeverWordsAreSentenceCase() {
+        #expect(CommentsPanelCopy.deleteForeverVerb == "Delete forever…")
+        #expect(CommentsPanelCopy.deleteForeverConfirm == "Delete forever")
+        #expect(CommentsPanelCopy.deleteForeverTitle == "Delete this comment forever?")
+        #expect(CommentsPanelCopy.deletedForever == "Comment deleted forever.")
+        for words in [CommentsPanelCopy.deleteForeverVerb, CommentsPanelCopy.deleteForeverConfirm,
+                      CommentsPanelCopy.deleteForeverTitle, CommentsPanelCopy.deleteForeverMessage,
+                      CommentsPanelCopy.deletedForever] {
+            let shouted = words.split(whereSeparator: { !$0.isLetter })
+                .filter { $0.count > 1 && $0.allSatisfy(\.isUppercase) }
+            #expect(shouted.isEmpty, "no capitalised-for-emphasis word in \(words)")
         }
     }
 }

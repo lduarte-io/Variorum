@@ -20,7 +20,8 @@ public struct PurgeIntent: VariorumRecord {
 
     public var id: String
     public var ownerId: String?
-    /// 'container' | 'reading' | 'block' | 'variant' | 'commit_point'
+    /// 'container' | 'reading' | 'block' | 'variant' | 'commit_point' |
+    /// 'block_comment' (VX-179's "Delete forever…" in the comments panel)
     /// (enforced by `Operations.requestPurge`, never by CHECK — the memo's
     /// §5a DDL carries no constraint so sync application can never refuse
     /// a future kind it has a local home for).
