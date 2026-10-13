@@ -1470,3 +1470,30 @@ the card unscrollable by any gesture that begins without movement. The `wheelOwn
   page scrolls; F-W-2: press-drag the scroller lane (after the overlay faded) — the knob drags, the panel
   stays shut; a press anywhere else on the card still opens the panel; F-W-5: the 800 pt window — the
   two-comment block's badge reads "#2" beside its "#1" neighbours.
+
+### ORCHESTRATOR VERIFICATION + DISPOSITIONS (the U2 fix leg accepted, 2026-10-13 early)
+
+Verified by spot-check, never trust: the five commits exist as claimed (9667e4d5 · 6061ba1f ·
+5d092268 · 979bd931 · a6791a97), the tree is clean and in sync with origin both ways, the fix commit
+touches exactly `CommentCard.swift` (+ the record), the pins commit exactly `CommentCardTests.swift`
+(+ a `present`-gate line and the record), `hitAnswer`/`badgeFace` are in the code where the record
+says with the `scrollWheel` override gone (grep: only comment references remain), and the test file
+carries 20 `@Test` functions. The mechanism trace is accepted — hit-testing choosing the scroll view
+is architecturally CLEANER than the latch road (no event hand-delivered to a scroll view hit-testing
+didn't choose), and the honest limit (the active-app outcome is the re-walk's to prove) is correctly
+stated, not papered over.
+
+**The probe-machinery disclosure, adjudicated ACCEPTED:** the dispatch probes' borderless window at
+(−20000, −20000) — off every display (checked at exit), `.prohibited` activation (never active, never
+key), ordered out after each fire, no event ever posted to the system — touches no screen, steals no
+focus and runs no app instance in any user-visible sense. That is within this run's "offscreen probes
+fine" line and needed no stage claim. The disclosure itself is exactly the honesty the run asks for.
+
+**W-OBS-2 → VX-226 minted** ("Read mode has no comment face — no card, no badge, on either arm";
+Backlog, Improvement, pointer to THE TRACES above). A design decision for her, not this run's fix.
+
+**R1-3:** the AGREE/DISPUTE above is queued for LADDER ROUND 2's reviewer, who makes the final call
+(the cross-model flow). The zero-delta row stays pinned as deliberate pending that call.
+
+**Next:** the U3 FIX LEG (F-W-3, F-W-4, R1-2) dispatches now, strictly sequential; then the stage
+window (the PENDING list above + U3's rows), then round 2.
