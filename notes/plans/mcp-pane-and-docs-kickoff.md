@@ -146,7 +146,7 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
       client's. Her "english" plus the AI's suggested "english" on one block counts as two matches, so the
       call refuses. Per VX-267 the stored form becomes `<client> · <label>`; the legacy
       `<client> · suggested · <label>` matches too.
-  - **VX-267, VX-267 (Pre-launch) — AI take labels drop "suggested".** Her words, verbatim: *"why do we
+  - **VX-267 (Pre-launch) — AI take labels drop "suggested".** Her words, verbatim: *"why do we
     need claude-code * suggested * english. isn't it obvious it's suggested if it's claude? seems like an
     extra word."* Since VX-197, the client prefix appears only on takes an AI adds at suggest, so the name
     already says it. `aiLabel` (13n's P-13n-3, hers to re-voice) becomes `<client>` or `<client> · <label>`.
@@ -186,17 +186,17 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
   `notes/plans/fixes/vx-184-mcp-launch-polish.md` § THE LADDER). Her word on timing: *"it's fine to put it in
   VX-246 - I won't put this release up for everyone, it'll be just for me until the fix goes out."* **→ GATE:
   VX-184's build stays HERS ALONE (no public release) until VX-258 ships.**
-  - **VX-258, VX-258 (re-bind, Pre-launch):** VX-198's re-bind lets ANY fresh key take ANY bound name with
+  - **VX-258 (re-bind, Pre-launch):** VX-198's re-bind lets ANY fresh key take ANY bound name with
     its approval and grants. Her ruling, verbatim: *"tie keys to their tab and for the general \"Any MCP
     client\" case, we should probably do the re-bind waits for my ok? i don't want everyone who isn't using
     claude or codex to be vulnerable to this. the best protection at each level"*. A Claude Code or Codex tab
     key re-binds only that tool's name, zero clicks; an Any-client key under a bound name re-binds only after
     her OK. The VX-168 impostor pin returns red-first.
-  - **VX-259, VX-259 (book-name oracle, Pre-launch):** `rename_book` + `create_book` check names only
+  - **VX-259 (book-name oracle, Pre-launch):** `rename_book` + `create_book` check names only
     against books the client can READ. Her words: *"it's fine if an accidental book name duplicate is made -
     there's no schema protection against it and we already ruled that it's ok if that happens."* Her own
     doors keep the full guard.
-  - **VX-260, VX-260 (Pre-launch):** her edit makes an AI's comment hers; a suggest delete then needs edit
+  - **VX-260 (Pre-launch):** her edit makes an AI's comment hers; a suggest delete then needs edit
     and hears her R-VX188-2 sentence.
 
 ## Rules binding this run

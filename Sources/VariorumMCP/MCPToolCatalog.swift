@@ -103,7 +103,7 @@ enum MCPToolCatalog {
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
         // U4 — the tray's Put back (R-13nb-14) and the date (R-13nb-26 b).
         putBack, setEntryDate,
-        // 13n-c U6 — the per-item note move across wings (VX-160, VX-160).
+        // 13n-c U6 — the per-item note move across wings (VX-160).
         moveNoteToWing,
         // VX-168 U2 — the deliberate acts: VX-169's commit (her settlement:
         // edit) and VX-174's merge button (R-MERGE-1: edit).

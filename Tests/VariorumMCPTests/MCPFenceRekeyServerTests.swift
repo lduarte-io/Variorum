@@ -7,7 +7,7 @@ import Testing
 @testable import VariorumCore
 @testable import VariorumMCP
 
-// 13n-c U1 — THE FENCE RE-KEY ON THE WIRE (VX-163, VX-163) and THE ONE ANSWER
+// 13n-c U1 — THE FENCE RE-KEY ON THE WIRE (VX-163) and THE ONE ANSWER
 // under a Home-wing read grant (her Air-round caveat, verbatim: "the decisive
 // fence-vs-scope proof re-runs under a Home-wing read grant" — under book grants
 // a journal entry is out of SCOPE twice over; under a Home-wing grant only the

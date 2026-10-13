@@ -2,7 +2,7 @@ import Dependencies
 import Foundation
 import GRDB
 
-// THE MCP DOOR's WING MOVE (13n-c U6 — VX-160, VX-160's ratified "I want per
+// THE MCP DOOR's WING MOVE (13n-c U6 — VX-160's ratified "I want per
 // item move to be allowed via mcp"; the brief §10's R1 · T1 · U1, nodded
 // through at the sitting). Like every act the door takes, an ORDINARY
 // OPERATION: HER door's act (`moveNoteToWing` — the one relocation, her tag

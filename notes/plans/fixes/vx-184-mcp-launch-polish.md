@@ -2225,7 +2225,7 @@ is COMPILED, not run: the closeout's merge-moment Mac batch runs it, and the thr
 seen on screen (their fit in the grant sheet, the ask sheet and the pane is unwalked); (2) the redo-after-quiet-undo BUG
 is not fixed (VX-276), nor the fd-reuse host bug (VX-246's new ticket), nor VX-258/259/260; (3) `MCPWriteTools.picks`
 (`save_lens`'s take-id resolution) breaches P1 the same way the pre-checks did — measured, NOT fixed (a ticket); (4) the
-18 DOUBLED ticket references the VX-278 sweep left ("(VX-160, VX-160)") are listed, not touched; (5) no
+18 DOUBLED ticket references the VX-278 sweep left ("(VX-160)") are listed, not touched; (5) no
 `notes/QUESTIONS.md` or canon edit (the orchestrator's merge bundle); (6) the guide's lesson 3 and
 `MCPSession.instructions` untouched (VX-246's U7). **Where this pass went past the brief's letter, each said in STEP 1
 before code:** item (3) used `CROSS JOIN`, not the `picks` precedent's plain JOIN (which plans O(note) — measured), and
@@ -2310,7 +2310,7 @@ first, on a committed tree).
    lines: `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2268–2269` "VX-270 · VX-271/" + "7/8" (was "R-AIR-4/6/" +
    "7/8"). All six are fixed the sweep's way at piece 1. **Noticed, NOT fixed (a different shape, not a garble — every number
    names the right ticket):** the sweep left ~18 DOUBLED references where a ticket stood beside its own ruling ("(VX-160,
-   VX-160)", "(VX-163, VX-163)", "VX-258, VX-258 …") — listed at the close for the orchestrator.
+   VX-160)", "(VX-163)", "VX-258 …") — listed at the close for the orchestrator.
 5. **(5) Doc-truth for the redo-after-quiet-undo finding — AGREE (comment and record lines only; the bug is VX-276's).**
    Traced: `UndoStack.undo` moves ANY inverse that does not throw onto the redo stack — a quiet one included — and each redo
    checks only that its row is back in the pre-act state, which her undo-less reversal produces exactly (her unlock,

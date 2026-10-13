@@ -5,7 +5,7 @@ import Testing
 
 @testable import VariorumCore
 
-// 13n-c U1 — THE FENCE RE-KEY (VX-163, VX-163, her Air round 2026-10-11):
+// 13n-c U1 — THE FENCE RE-KEY (VX-163, her Air round 2026-10-11):
 // "for the default command J journal I think it's a fair choice but I am
 // questioning it being applied to all journal style books (especially since it
 // can be turned on and off for any book)." The never-always fence keys on (a)

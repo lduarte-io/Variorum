@@ -385,7 +385,7 @@ is the baseline: core 2,580/295 · VariorumMCPTests 65/8 · workbook 40/6 headle
 target 4,212/687 with the standing reds VX-115 and VX-149); the orchestrator verifies claims by
 its own hands and WALKS (or live-rounds) before the record closes.
 
-### U1 — The fence re-key (VX-163 · VX-163 · VX-269's words) — FIRST; the riskiest
+### U1 — The fence re-key (VX-163 · VX-269's words) — FIRST; the riskiest
 
 **Builds:**
 1. **The derivation (`Queries/MCPGrantQueries.swift`, the ONE site):** `mcpNoteFacts`' member leg
@@ -463,7 +463,7 @@ apart and grant the right one, grant a note from "recently edited", a fenced not
 once/while connected with the why. Mac suites for the sheet/pane/registry.
 **Review:** stage B's combined opus ladder (§5).
 
-### U3 — Grant from where you are + the one icon + the in-note indicator (VX-156 item 2 · ⌥⌘A · VX-270 · VX-271 · VX-164 · VX-164)
+### U3 — Grant from where you are + the one icon + the in-note indicator (VX-156 item 2 · ⌥⌘A · VX-270 · VX-271 · VX-164)
 
 **Builds:**
 1. **Core:** a bulk grant op — N note grants in ONE transaction on ONE stamp (refusals are the
