@@ -516,15 +516,22 @@ nonisolated enum TakeCardMenuCopy {
         CapabilityRegistry.capability(.labelTake).menuTitle("Label take\u{2026}")
     }
 
-    /// The glyph the card's act menu wears — and the one the tutorial's prose
-    /// names. It lives here so the words and the door cannot drift: the
-    /// lesson interpolates this constant, `TakeCardMenu` renders it, and
-    /// `TakeCardDoorTests` reads both.
+    /// The glyph the tutorial's prose names the card's act menu by. It lives
+    /// here so the words and the door cannot drift: the lesson interpolates
+    /// this constant and `TakeCardDoorTests` reads both.
     ///
-    /// VX-223 (PROVISIONAL P-VX223-a): "▾", the chrome's dropdown mark — it
-    /// was "⋯" beside the borderless style's own chevron, two marks for one
-    /// menu. A guide seeded before this keeps the "⋯" it was seeded with.
-    static let menuGlyph = "\u{25BE}"
+    /// VX-223 (PROVISIONAL P-VX223-a, her "it should keep just the dropdown
+    /// probably"): the card wore TWO marks — "⋯" beside the borderless style's
+    /// own disclosure chevron. It keeps just the dropdown now: `TakeCardMenu`
+    /// draws THAT chevron (`chevron.down`, the indicator's own size — the
+    /// `RestingRowControls` precedent), and the prose names it by its text
+    /// twin "⌄". (A first build drew "▾" at the mini metric; the walk read it
+    /// as a dot — the batch record.) A guide seeded before this keeps the "⋯"
+    /// it was seeded with.
+    static let menuGlyph = "\u{2304}"
+
+    /// The chevron's spoken name (an image label says nothing by itself).
+    static let menuAccessibilityLabel = "This take's acts"
 
     /// Every chorded row on the card, paired with the capability that
     /// declares its key — what the drift guard walks.
@@ -610,18 +617,23 @@ struct TakeCardMenu: View {
         //
         // VX-223 (PROVISIONAL P-VX223-a, her lean: "it should keep just the
         // dropdown probably"): the card wore TWO marks — the "⋯" label AND
-        // the borderless style's own chevron. It wears ONE now, the chrome
-        // vocabulary's dropdown mark "▾" (`VoicedMenu`'s "word ▾"), with the
-        // system chevron hidden; 4 pt either side keeps a clickable target
-        // (the glyph alone is 11 pt wide — measured; the old pair was 28).
+        // the borderless style's own chevron. It keeps just the dropdown: the
+        // chevron, drawn as the indicator draws it (`ChromePullDownMetric.
+        // indicatorFont`), the system indicator hidden so it is not doubled;
+        // 4 pt either side keeps a clickable target. (A first build drew "▾"
+        // at the mini metric — the walk read it as a dot.)
         ChromePullDown(showsIndicator: false) {
             ForEach(rows) { row in
                 Button(row.title, role: row.destructive ? .destructive : nil, action: row.act)
             }
         } label: {
-            Text(TakeCardMenuCopy.menuGlyph)
-                .font(ChromePullDownMetric.labelFont)
+            // A Text-embedded symbol: a bare `Image` label is drawn by the
+            // pop-up at its own 13-pt size and ignores the font (measured
+            // 21×14 vs 15×9 — the walk saw a large light chevron).
+            Text(Image(systemName: "chevron.down"))
+                .font(ChromePullDownMetric.indicatorFont)
                 .padding(.horizontal, 4)
+                .accessibilityLabel(TakeCardMenuCopy.menuAccessibilityLabel)
         }
         .recordTakeCardDoors(rows.map(\.id))
     }

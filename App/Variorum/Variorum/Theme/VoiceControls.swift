@@ -241,6 +241,12 @@ enum ChromePullDownMetric {
     static var labelFont: Font {
         Font(NSFont.systemFont(ofSize: NSFont.systemFontSize(for: .mini)))
     }
+
+    /// The borderless style's disclosure chevron, at the size it draws next
+    /// to a mini label — for a menu that keeps JUST the dropdown (the take
+    /// card, VX-223). The size `RestingRowControls` already paints its
+    /// resting hint's chevron at.
+    static var indicatorFont: Font { .system(size: 7, weight: .semibold) }
 }
 
 /// **A voiced text field** (13i-d U3 — the 13i-c orchestrator walk's polish
