@@ -20,12 +20,12 @@ schema, zero `Sync/`, zero custody, zero editor seam, zero app faces.
 | 0 | this record + LIVE STATUS; `notes/plans/vx180-screens/` gitignored (the live round's evidence home) | DONE (this commit) |
 | 1 | THE PIN — socket-road tests replaying the captured pipelined pair through the keyed harness (pre-existing API only, so they compile on the pre-fix tree); watched RED on the pre-fix tree | DONE (this commit) — `Tests/VariorumMCPTests/MCPDiscoverProbeServerTests.swift`, 5 tests; **RED on the pre-fix tree `a3033539`: 5/5 failed, 14 issues** (the evidence below, "THE PIN — red on the pre-fix tree") |
 | 2 | THE FIX — the pre-initialize window in `MCPHandshake.readOpening` (requests answered before the next read; notifications skipped; bounded); its pure pins; the one justified edit of an existing arm | DONE (this commit) — `MCPHandshake` (`preInitializeLimit` · `WindowFrame`/`windowFrame` · `windowAnswer(toRequest:)` · the loop in `readOpening`) + doc comments in `MCPSession` / `MCPServerHost.refuseOverCap` (no code change in either); `MCPPreInitializeWindowTests` (8 — the window's letter); the justified edit of `everyRefusalIsTheSameSentence`'s last arm (see "The justified edit"). The three suites **23/3 green** headless (`MCPDiscoverProbeServerTests` 5 · `MCPPreInitializeWindowTests` 8 · `MCPSetupKeyServerTests` 10) |
-| 3 | red-on-old BY REVERT (announced here before it starts; the fix committed first) | NOT-STARTED — the plan: restore the pre-fix `MCPHandshake.swift` + `MCPSetupKeyServerTests.swift` from `5e51abe2` and move `MCPPreInitializeWindowTests.swift` aside (it names the new symbols), run `MCPDiscoverProbeServerTests`, then `git checkout HEAD --` all three and re-run |
+| 3 | red-on-old BY REVERT (announced here before it starts; the fix committed first) | DONE (this commit) — the evidence below, "RED-ON-OLD BY REVERT" |
 | 4 | suites — `VariorumMCPTests` whole target headless; the Mac app target BUILDS | NOT-STARTED — counts PENDING |
 | 5 | self-assessment (below) | NOT-STARTED |
 | 6 | READY to the orchestrator; THE LIVE ROUND (gated on its GO + a held stage claim — dev store only) | NOT-STARTED |
 
-**REVERT IN FLIGHT (piece 3, announced before it starts; the fix is committed at `c65f8de8`, so `git checkout HEAD -- <the three paths>` is the SAFE restore):** `Sources/VariorumMCP/MCPHandshake.swift` and `Tests/VariorumMCPTests/MCPSetupKeyServerTests.swift` restored to their pre-fix bytes from `5e51abe2`; `Tests/VariorumMCPTests/MCPPreInitializeWindowTests.swift` moved to `notes/plans/vx180-screens/prerevert-vx180/` (gitignored, unique to this run). If a successor finds this line, restore with `git checkout HEAD -- Sources/VariorumMCP/MCPHandshake.swift Tests/VariorumMCPTests/MCPSetupKeyServerTests.swift Tests/VariorumMCPTests/MCPPreInitializeWindowTests.swift` and verify `git diff` is empty.
+**No revert is in flight** (piece 3's revert ran and was RESTORED — `git diff` empty after `git checkout HEAD --`, the moved test file `cmp`-identical to the committed one).
 
 ## THE PIN — red on the pre-fix tree (piece 1, 2026-10-12)
 
@@ -119,3 +119,15 @@ pinned in `MCPPreInitializeWindowTests.aFrameThatIsNoRequestEndsTheWindowAtOnce`
 `MCPSetupKeyServerTests` is untouched and green (10/10), `MCPHandshake.refusal` / `storeErrorRefusal` are untouched
 (the sentence's bytes are pinned by every arm), and `theOpeningReadTakesThePreambleThenTheFrameAndNothingMore` passes
 unchanged (its `{"id":1}` frames carry no method — `other` — so they end the window at once, as before).
+
+## RED-ON-OLD BY REVERT (piece 3, 2026-10-12)
+
+Announced in `c2f49bae` before it started; the fix committed at `c65f8de8`. **Reverted:** `MCPHandshake.swift` and
+`MCPSetupKeyServerTests.swift` to their pre-fix bytes (`git show 5e51abe2:…`); `MCPPreInitializeWindowTests.swift`
+moved aside (it names the window's new symbols, so the target would not compile with it); the doc-only comment edits
+in `MCPSession.swift` / `MCPServerHost.swift` stayed (comments — no behaviour). `swift test --filter
+'MCPDiscoverProbeServerTests|MCPSetupKeyServerTests'` → **"Test run with 15 tests in 2 suites failed … with 14
+issues"**: all FIVE probe pins RED (2 + 4 + 2 + 2 + 4 issues — the same issues as on the pre-fix tree, piece 1),
+the ten setup-key arms green on their pre-fix letter. **Restored:** `git checkout HEAD --` the three paths; `git
+diff` empty; the moved file `cmp`-identical to the committed one. Re-run → **"Test run with 23 tests in 3 suites
+passed"**. Logs: `notes/plans/vx180-screens/logs/revert-red.log`, `revert-green.log` (gitignored).
