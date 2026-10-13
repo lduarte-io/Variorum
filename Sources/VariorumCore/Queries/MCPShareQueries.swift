@@ -2,7 +2,7 @@ import Foundation
 import GRDB
 
 // THE MCP DOOR's SHARE FACES — the reads (13n-c U3: VX-156 items 2/3,
-// R-AIR-4/6/7). Three things the faces outside Settings ▸ MCP need, each
+// VX-270 · VX-271 · VX-164). Three things the faces outside Settings ▸ MCP need, each
 // derived from the grants store and the ONE rule — never a parallel fence:
 // - SHARED PLACES grouped by act (the exact-stamp doctrine — the bulk share
 //   writes N note grants on one `created_at`, read back as one row);
@@ -47,8 +47,8 @@ public struct MCPSharedGroup: Equatable, Sendable, Identifiable {
     public var isGroup: Bool { grantIDs.count > 1 }
 }
 
-/// **One approved client's reach on a place, and WHY** (13n-c U3 — R-AIR-6's
-/// popover, R-AIR-7's in-note indicator): the highest rung it reaches now and
+/// **One approved client's reach on a place, and WHY** (13n-c U3 — VX-271's
+/// popover, VX-164's in-note indicator): the highest rung it reaches now and
 /// the standing `MCPGrantRule.decide` itself authorizes it with.
 public struct MCPPlaceReach: Equatable, Sendable, Identifiable {
     public var id: String { client.id }
@@ -247,7 +247,7 @@ extension Queries {
     /// Bookcase icon's popover and the Book Settings grant row. A fenced book
     /// or gathering answers nobody. VX-185: a gathering answers through ITS
     /// rule (`decideGathering` — a wing grant on its wing or the open book,
-    /// R-AIR-12 / R-VX185-1), so this read and `mcpBookReaches` agree for
+    /// VX-273 / R-VX185-1), so this read and `mcpBookReaches` agree for
     /// every id the Bookcase draws.
     public static func mcpBookReach(_ db: Database, readingID: String) throws -> [MCPPlaceReach] {
         guard let place = try mcpReachPlace(db, readingID: readingID) else { return [] }
@@ -255,7 +255,7 @@ extension Queries {
     }
 
     /// **Every live book AND GATHERING an approved client reaches now, with
-    /// who and why** — the Bookcase's icons (R-AIR-6; the old chip's
+    /// who and why** — the Bookcase's icons (VX-271; the old chip's
     /// `mcpReachableBookIDs`, grown to say who and how far). VX-185 (her
     /// report: a gathering never wore the icon "even when you've shared the
     /// whole wing"): every live reading is decided by ITS kind's ONE rule — a
@@ -290,7 +290,7 @@ extension Queries {
 
     /// **The place a reach is read on, and the ONE rule its kind answers to**
     /// (VX-185). A note and a book are grant targets (`decide`); a gathering
-    /// is never a grant's scope (R-AIR-12) and answers `decideGathering`.
+    /// is never a grant's scope (VX-273) and answers `decideGathering`.
     enum MCPReachPlace {
         case note(MCPGrantRule.NoteFacts)
         case book(MCPGrantRule.BookFacts)

@@ -111,7 +111,7 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         // true when the write rungs landed (U2) — a client may change what
         // it is granted now, up to edit.
         // 13n-c U4: + the asks waiting for an answer (arrival X).
-        // 13n-c Stage B R1 B7: the setup menu (U5, R-AIR-13) sets up Claude
+        // 13n-c Stage B R1 B7: the setup menu (U5, VX-274) sets up Claude
         // Code, Codex or any MCP client — the description says so. 13n-c O-4
         // (her ask — no provider hardwired outside the setup): it says "any MCP
         // client", naming none (PROVISIONAL, her copy pass).
@@ -305,7 +305,7 @@ nonisolated enum SettingsCatalog {
         // server toggle and the one open-book switch.
         SettingsRow(
             id: "mcpServer", pane: .mcp, title: MCPPaneCopy.enableTitle,
-            // 13n-c U5 (R-AIR-13): the setup menu names Codex and any MCP
+            // 13n-c U5 (VX-274): the setup menu names Codex and any MCP
             // client's JSON, so the search finds the pane by those words too.
             // 13n-c O-4 (her ask): the blurb names no provider ("any MCP
             // client", PROVISIONAL), and the search finds the pane by whatever
@@ -329,7 +329,7 @@ nonisolated enum SettingsCatalog {
                        "client", "permission"]),
         SettingsRow(
             id: "mcpOpenBook", pane: .mcp, title: MCPPaneCopy.openBookTitle,
-            // 13n-c U1 (R-AIR-1, J8): only THE daily Journal and anything
+            // 13n-c U1 (VX-163, J8): only THE daily Journal and anything
             // Private still ask — a journal-style book reads like any book.
             blurb: "The open book: every approved MCP client may read everything, always \u{2014} "
                 + "your daily Journal and anything Private still ask every time.",

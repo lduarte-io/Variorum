@@ -129,7 +129,7 @@ struct LibraryCatalogView: View {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     /// 13n-c U3: the window's road to the MCP door (nil in harness mounts —
-    /// no share door; R-AIR-8 — none without an approved client).
+    /// no share door; VX-272 — none without an approved client).
     @Environment(\.mcpShareRoad) private var mcpShareRoad
     @State private var tagSheetTarget: SidebarView.TagSheetTarget?
     /// 13i-d U5: the move's confirm (the books the note would leave).
@@ -1222,7 +1222,7 @@ struct LibraryCatalogView: View {
             tagSheetTarget = .init(id: hit.id, title: hit.title)
         }
         // 13n-c U3 (VX-156 item 2; mockup §2): THE grant sheet pre-filled on
-        // this note — only while an approved client exists (R-AIR-8).
+        // this note — only while an approved client exists (VX-272).
         if let road = mcpShareRoad, road.canShare {
             Divider()
             Button(CapabilityRegistry.capability(.mcpShareHere).verb) {

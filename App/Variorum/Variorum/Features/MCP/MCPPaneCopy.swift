@@ -29,7 +29,7 @@ nonisolated enum MCPPaneCopy {
     /// finding W-2: "no client can overwrite your text" stopped being true
     /// the moment edit could be granted, so the clause says when it can —
     /// and what guards it (R-13n-7's brackets). PROVISIONAL P-13nb-U3-17,
-    /// her words to re-voice at 13s-a. 13n-c U2 (R-AIR-8 — no "AI" in
+    /// her words to re-voice at 13s-a. 13n-c U2 (VX-272 — no "AI" in
     /// settings-class wording): "AI work" → "a client's work". 13n-c O-4 (her
     /// ask — no provider hardwired outside the setup): "clients like Claude
     /// Code" → "MCP clients" (PROVISIONAL, her copy pass).
@@ -147,9 +147,9 @@ nonisolated enum MCPPaneCopy {
 
     // MARK: - Shared with AI
 
-    /// 13n-c U2 made it "Shared places" (R-AIR-8); HER SITTING (2026-10-11,
+    /// 13n-c U2 made it "Shared places" (VX-272); HER SITTING (2026-10-11,
     /// second round) REVERSED it in-pane — "I think Shared with AI is fine
-    /// inside the MCP pane actually. that's a place where it's fair": R-AIR-8
+    /// inside the MCP pane actually. that's a place where it's fair": VX-272
     /// stands app-wide, with her carve-out that inside the MCP pane itself
     /// "AI" is fair wording. Only this title changed; the client row's "N
     /// shared places" and the pane's other words stand.
@@ -230,7 +230,7 @@ nonisolated enum MCPPaneCopy {
 
     static let openBookSection = "Open book"
     static let openBookTitle = "Everything is readable, always"
-    /// 13n-c U1 (R-AIR-1, J8 — the VX-156 mockup §8's recommended words):
+    /// 13n-c U1 (VX-163, J8 — the VX-156 mockup §8's recommended words):
     /// only THE daily Journal and anything Private still ask.
     static let openBookDetail = "your daily Journal and anything Private still ask every time"
 
@@ -519,12 +519,12 @@ nonisolated enum MCPPaneCopy {
         return "\"\(escaped)\""
     }
 
-    // MARK: - The setup menu (13n-c U5 — R-AIR-13: "Claude Code · Codex · a generic path/JSON shape")
+    // MARK: - The setup menu (13n-c U5 — VX-274: "Claude Code · Codex · a generic path/JSON shape")
 
-    /// **The one direct line** (R-AIR-13: "the pane says the door is a
+    /// **The one direct line** (VX-274: "the pane says the door is a
     /// standard MCP stdio server at one binary path"), above the menu, with
     /// the path itself under it. Direct and technical (R-13n-5); no "AI"
-    /// (R-AIR-8).
+    /// (VX-272).
     static let stdioLine =
         "Variorum's door is a standard MCP server that speaks over stdio: one program, at this path "
         + "inside the app."
@@ -600,7 +600,7 @@ nonisolated enum MCPPaneCopy {
     /// chosen in WHO.
     static let sheetTitleChoosing = "Grant access"
     /// 13n-c U3: the one title rule — a client named or chosen, and Change…
-    /// (R-AIR-4 — the sheet replaces what it was opened on) says so.
+    /// (VX-270 — the sheet replaces what it was opened on) says so.
     static func sheetTitle(client: String?, changing: Bool) -> String {
         guard changing else { return client.map(sheetTitle) ?? sheetTitleChoosing }
         return client.map { "Change access \u{2014} \($0)" } ?? "Change access"
@@ -689,7 +689,7 @@ nonisolated enum MCPPaneCopy {
         name.map { "\u{201C}\($0)\u{201D} \u{2014} its notes, takes and tags" } ?? "choose a book"
     }
     static let thisWing = "A wing"
-    /// 13n-c U1 (R-AIR-1, J8 — mockup §8's words): a journal-style book is
+    /// 13n-c U1 (VX-163, J8 — mockup §8's words): a journal-style book is
     /// in the wing like any book; only the daily Journal and anything
     /// Private ask.
     static func wingDetail(_ name: String) -> String {
@@ -824,7 +824,7 @@ nonisolated enum MCPPaneCopy {
         "\u{201C}Until it disconnects\u{201D} is offered while this client is connected."
 
     /// "Grant suggest in “the lightning thief” while connected" (mockup §3) —
-    /// and, since 13n-c's R-AIR-3, the clause that says membership is LIVE:
+    /// and, since 13n-c's VX-269, the clause that says membership is LIVE:
     /// her sentence, *"Grant read in “dream journal” always, including to
     /// future entries."*, on EVERY book grant ("notes added later become
     /// visible"); D-3 (PROVISIONAL P-13nc-3) gives a wing grant the parallel
@@ -846,7 +846,7 @@ nonisolated enum MCPPaneCopy {
     /// The confirm in its three parts, so the sheet can let ONLY the place
     /// compress (13n-c U1, the geometry oracle in the U1 record: a voiced
     /// button is one line and tail-truncates, which in Terminal's mono cut
-    /// R-AIR-3's clause off — the very words the ruling exists for). The verb,
+    /// VX-269's clause off — the very words the ruling exists for). The verb,
     /// rung, duration and clause never truncate; the place, shown whole in
     /// WHERE just above, takes what room is left.
     ///
@@ -882,7 +882,7 @@ nonisolated enum MCPPaneCopy {
         return "\(head)\u{2026}\(tail)"
     }
 
-    /// R-AIR-3's clause (book) and D-3's twin (wing), with its leading comma.
+    /// VX-269's clause (book) and D-3's twin (wing), with its leading comma.
     static func liveReachClause(_ scope: MCPGrantRule.ScopeKind) -> String {
         switch scope {
         case .book: ", including to future entries"
@@ -897,7 +897,7 @@ nonisolated enum MCPPaneCopy {
         switch error as? OperationError {
         case .mcpClientNotApproved?: "Approve the client before granting it access."
         case .mcpGrantScopeFenced?:
-            // 13n-c U1 (R-AIR-1, J8 — mockup §8's words).
+            // 13n-c U1 (VX-163, J8 — mockup §8's words).
             "Your daily Journal and Private notes are shared one ask at a time, never by a standing grant."
         case .mcpGrantScopeNotFound?: "That place no longer exists."
         case .mcpClientNotFound?: "That client no longer exists."
@@ -907,7 +907,7 @@ nonisolated enum MCPPaneCopy {
     }
 }
 
-/// **THE SETUP MENU's clients** (13n-c U5 — R-AIR-13, the sitting record round 3:
+/// **THE SETUP MENU's clients** (13n-c U5 — VX-274, the sitting record round 3:
 /// "Claude Code · Codex · a generic path/JSON shape"). ONE table: the menu's
 /// order, each client's label, its text (the command or the stanza), the
 /// sentence that says how to use it, and the receipt its copy speaks. The ONE
@@ -1002,7 +1002,7 @@ nonisolated enum MCPAskCopy {
         return "\(ask.clientName) asks to \(verb) here"
     }
 
-    /// **R-AIR-3 on the ask road** (13n-c U2 — the U1 ladder's F2: every
+    /// **VX-269 on the ask road** (13n-c U2 — the U1 ladder's F2: every
     /// book grant says its live reach, and an answer here MINTS one): her
     /// clause under a BOOK ask, D-3's twin under a WING ask, nothing for a
     /// note (one note). Every duration carries it (P-13nc-3) — so one line
@@ -1025,7 +1025,7 @@ nonisolated enum MCPAskCopy {
     }
 
     /// The sentence under it: the fence's reason (mockup §4's journal line,
-    /// re-keyed by 13n-c's R-AIR-1 to THE daily Journal — VX-156 mockup §8's
+    /// re-keyed by 13n-c's VX-163 to THE daily Journal — VX-156 mockup §8's
     /// words; the Private twin), else what the rung would let it do.
     ///
     /// 13n-c Stage B R1 B2: a BOOK ask arrives only on an unfenced book (a

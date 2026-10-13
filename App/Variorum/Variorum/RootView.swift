@@ -82,7 +82,7 @@ struct RootView: View {
     /// 13n-c U4 — the ask HER press opened in this window (a pending glyph —
     /// `ShellRouter.mcpAskRequest`); asks never present themselves.
     @State private var mcpAskSheetOpening: MCPAskOpening?
-    /// 13n-c U4 — ⌘L's wing switcher while it is up in this window (R-AIR-15).
+    /// 13n-c U4 — ⌘L's wing switcher while it is up in this window (VX-157).
     @State private var wingSwitcher: WingSwitcherModel?
     /// 13s-b U2 — THE TOUR, while one runs in THIS window (its `engine` is
     /// nil otherwise). Per window by construction (`RootView` is the window);
@@ -396,7 +396,7 @@ struct RootView: View {
             mcpAskSheetOpening = mcp?.opening(request)
             router.mcpAskRequest = nil
         }
-        // 13n-c U4 — ⌘L, THE WING SWITCHER (R-AIR-15): opened in this window
+        // 13n-c U4 — ⌘L, THE WING SWITCHER (VX-157): opened in this window
         // by the menu's request; while it is up, the same request (the menu's
         // ⌘L before the sheet's monitor took the key) CYCLES it.
         .sheet(item: $wingSwitcher) { model in

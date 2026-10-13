@@ -103,7 +103,7 @@ enum MCPToolCatalog {
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
         // U4 — the tray's Put back (R-13nb-14) and the date (R-13nb-26 b).
         putBack, setEntryDate,
-        // 13n-c U6 — the per-item note move across wings (VX-160, R-AIR-2).
+        // 13n-c U6 — the per-item note move across wings (VX-160, VX-160).
         moveNoteToWing,
         // VX-168 U2 — the deliberate acts: VX-169's commit (her settlement:
         // edit) and VX-174's merge button (R-MERGE-1: edit).
@@ -731,7 +731,7 @@ enum MCPToolCatalog {
         ]),
         scopes: MCPToolDeclaration.everyScope)
 
-    /// 13n-c U6 (VX-160 — R-AIR-2/-9, the brief §10's R1 · T1 · U1): the
+    /// 13n-c U6 (VX-160 — VX-160/-9, the brief §10's R1 · T1 · U1): the
     /// author's own Move to Wing, on the wire. Listed at EDIT (the source's
     /// rung) under any scope kind: a client short on the destination's write
     /// new is still offered it, and its refusal raises that wing's ask.

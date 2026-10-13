@@ -8,8 +8,8 @@ import Testing
 @testable import VariorumMCP
 @testable import VariorumMCPSocket
 
-// 13n-c U6 — `move_note_to_wing` end to end over the socket (VX-160; R-AIR-2's
-// ratified per-item move; R-AIR-9's R1: EDIT on the note, WRITE NEW on the
+// 13n-c U6 — `move_note_to_wing` end to end over the socket (VX-160; VX-160's
+// ratified per-item move; VX-160's R1: EDIT on the note, WRITE NEW on the
 // destination wing). The rung proofs grown as the ritual: read, suggest and
 // write new cannot move a note across wings; a book grant can never name a
 // destination; a fenced note moves only under a per-ask note grant; the once

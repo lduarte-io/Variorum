@@ -89,7 +89,7 @@ Her report: *"gatherings don't show as being shared with AI right now (the icon 
 you've shared the whole wing with AI. they definitely need to have the shared icon on them even if they're just a
 gathering … but if they're shared as part of the wing, that needs to be clear."* Cause: `Queries.mcpBookReaches`
 (`MCPShareQueries.swift` ~267) selects `kind = 'book'` only, yet a wing grant / the open book READS that wing's
-gatherings (R-AIR-12 — which stands: a gathering is never a grant's own scope; direct gathering sharing is VX-189,
+gatherings (VX-273 — which stands: a gathering is never a grant's own scope; direct gathering sharing is VX-189,
 post-launch). Build: the same icon whenever an approved client reaches the gathering through a wing grant or the
 open book (the one `decide`, never a parallel rule); the popover says why ("claude-code can read this through the
 wing “Home”"); Change…/Revoke act on that wing grant and say so; every reach surface treats gatherings the same.
@@ -139,7 +139,7 @@ the archived-book rule. One walk, dev store, held claim, both voices.
 
 - Preflight in full (CLAUDE.md's list) + `notes/plans/fixes/vx-180-discover-probe.md`,
   `notes/plans/fixes/vx-168-mcp-client-secret.md` (the handshake/secret records and U2's edit-act pattern) + the
-  13n-c plan (R-AIR-12, the reach queries, the chapter's U5/U6 records).
+  13n-c plan (VX-273, the reach queries, the chapter's U5/U6 records).
 - **Cold review: `fable-reviewer`** (the socket road is the secret's accept path; the permission core grows). One
   ladder over the whole run's diff, cap three. Pin-before-fix per member, red-on-old verified by revert.
 - Commits say `Part of VX-184` (and the member id), NO attribution trailers; push after every commit;

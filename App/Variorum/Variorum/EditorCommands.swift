@@ -193,7 +193,7 @@ struct EditorCommands: Commands {
         //     reserved by macOS (the brief §13's reserved list).
         case .mcpShareThisNote: ("a", [.command, .option])
         // 13n-c U4 (the VX-156 brief §6/§13; ⌥⌘, recommended and nodded at her
-        // round 2; ⌘L her R-AIR-15, "i like Command L"). THE COLLISION SWEEP,
+        // round 2; ⌘L her VX-157, "i like Command L"). THE COLLISION SWEEP,
         // RE-RUN AT THE TIP (2026-10-11, on `a41efc1b` — the U4 record's
         // sweep, verbatim in kind) — ⌥⌘, AND BARE ⌘L ARE FREE:
         //   · this table: the only `l` chord is ⇧⌘L (Save Choices as Lens); no
@@ -484,7 +484,7 @@ struct EditorCommands: Commands {
             Button(verb(.findAnything)) { windows.creationRouter()?.paletteRequested = true }
                 .keyboardShortcut("k", modifiers: .command)
                 .disabled(!canReachCreationTarget)
-            // 13n-c U4 — ⌘L, THE WING SWITCHER (R-AIR-15): ⌘K's twin in
+            // 13n-c U4 — ⌘L, THE WING SWITCHER (VX-157): ⌘K's twin in
             // where it opens (the window that can show it, raised) and how
             // (a request the window adopts). While the switcher is up, a
             // held-⌘ L is the switcher's own (its monitor cycles it); a
@@ -580,7 +580,7 @@ struct EditorCommands: Commands {
             // 13n-c U3 — ⌥⌘A (the VX-156 brief §4, D1): share the note you're
             // in with the client you granted last, at that rung — while
             // connected if it is connected, else once; never always by a key.
-            // R-AIR-8: rendered ONLY while an approved client exists (no
+            // VX-272: rendered ONLY while an approved client exists (no
             // door, never a dead one — the zero-state is Settings ▸ MCP's).
             if mcp.hasApprovedClient {
                 Button(verb(.mcpShareThisNote)) { shareThisNote() }

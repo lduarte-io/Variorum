@@ -118,7 +118,7 @@ struct TutorialMCPChapterTests {
 
     /// Seven lessons, the guide's appendix after the privacy chapter (P-13nc-U5-1),
     /// every lesson seeded under it. Three guards over the WHOLE chapter: the
-    /// gathering promise only where U6 (R-AIR-12) put it — lesson 3, with its
+    /// gathering promise only where U6 (VX-273) put it — lesson 3, with its
     /// truth pinned there — and her ruled "how to use it" (lesson 6's wing
     /// recipe, its truth pinned there); the pending mark by its ROLE, never its
     /// shape (O-1 may change the glyph); the app's vocabulary (commit, never
@@ -146,13 +146,13 @@ struct TutorialMCPChapterTests {
             for title in lessons {
                 let text = try await prose(db, guideID, title)
                 #expect(!text.isEmpty)
-                // 13n-c U6 (A JUSTIFIED EDIT, the ritual — U6 landed R-AIR-12):
+                // 13n-c U6 (A JUSTIFIED EDIT, the ritual — U6 landed VX-273):
                 // gatherings are taught in lesson 3, and named again only in
                 // her "how to use it" wing recipe (JOB 4 — the second justified
                 // edit; its truth is pinned in that lesson's test).
                 #expect(text.localizedCaseInsensitiveContains("gathering")
                             == (title == lessons[2] || title == lessons[5]),
-                        "\(title): gatherings under a wing grant are lesson 3's (R-AIR-12) and the wing recipe's")
+                        "\(title): gatherings under a wing grant are lesson 3's (VX-273) and the wing recipe's")
                 #expect(!text.localizedCaseInsensitiveContains("filled"),
                         "\(title): the pending mark is taught by its role, never its shape")
                 #expect(!text.localizedCaseInsensitiveContains("savepoint"))
@@ -388,7 +388,7 @@ struct TutorialMCPChapterTests {
             #expect(!MCPGrantRule.Grant(
                 id: "g", rung: .read, scopeKind: .note, scopeID: loose, duration: .once,
                 consumedAt: "2026-07-01T00:00:00.000Z").isLive, "spent, it reaches nothing more")
-            // 13n-c U6 — the fourth card (R-AIR-12 + VX-160), prose then truth.
+            // 13n-c U6 — the fourth card (VX-273 + VX-160), prose then truth.
             #expect(text.contains("A wing grant also lets a client read that wing's gatherings"))
             #expect(text.contains("a gathering is never shared on its own"))
             #expect(text.contains("move a note to another wing only with edit where the note is and write new "
@@ -540,7 +540,7 @@ struct TutorialMCPChapterTests {
     @Test func lessonFiveSharingFromWhereYouAre() async throws {
         try await withGuideWorld { session, db, guideID in
             let text = try await prose(db, guideID, lessons[4])
-            #expect(text.contains("Once a client is approved"), "the doors render only then (R-AIR-8)")
+            #expect(text.contains("Once a client is approved"), "the doors render only then (VX-272)")
             #expect(text.contains("choose \(MCPShareCopy.shareVerb)"))
             #expect(CapabilityRegistry.capability(.mcpShareHere).verb == MCPShareCopy.shareVerb)
             #expect(text.contains(MCPShareCopy.shareNotes(3)), "the bulk door, by its own words")

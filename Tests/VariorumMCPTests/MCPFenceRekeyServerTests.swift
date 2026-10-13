@@ -7,7 +7,7 @@ import Testing
 @testable import VariorumCore
 @testable import VariorumMCP
 
-// 13n-c U1 — THE FENCE RE-KEY ON THE WIRE (VX-163, R-AIR-1) and THE ONE ANSWER
+// 13n-c U1 — THE FENCE RE-KEY ON THE WIRE (VX-163, VX-163) and THE ONE ANSWER
 // under a Home-wing read grant (her Air-round caveat, verbatim: "the decisive
 // fence-vs-scope proof re-runs under a Home-wing read grant" — under book grants
 // a journal entry is out of SCOPE twice over; under a Home-wing grant only the
@@ -45,7 +45,7 @@ struct MCPFenceRekeyServerTests {
         for text in [listBooks, listNotes] {
             let stripped = text.replacingOccurrences(of: "Daily Journal entries", with: "")
             #expect(!text.contains("Journals and") && !stripped.contains("Journal entries"),
-                    "no sentence may say every journal is fenced (R-AIR-1)")
+                    "no sentence may say every journal is fenced (VX-163)")
         }
         // 13n-c U1 orchestrator ruling F-7 (a): a fenced BOOK is the one
         // answer too — AppSpec §12's "no fenced-vs-unshared oracle anywhere".
@@ -67,7 +67,7 @@ struct MCPFenceRekeyServerTests {
             let member = try h.operations.newPostInReading(trait.id, title: "the flood dream")
             _ = try h.operations.newBlock(in: member.id, text: "oneirology at dawn", registeringUndo: false)
 
-            // A book grant naming the trait book (refused as fenced before R-AIR-1).
+            // A book grant naming the trait book (refused as fenced before VX-163).
             let byBook = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", grant(.read, .book, trait.id))
             let books = try json(try await call(byBook, "list_books", [:]))["books"] as? [[String: Any]]

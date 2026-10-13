@@ -16,7 +16,7 @@ import VariorumCore
 /// transaction and spends any once grant there. ONE client-named undo entry per
 /// act (P-VX196-1).
 ///
-/// **A GATHERING is read, never changed** (R-AIR-12; the record's call 3,
+/// **A GATHERING is read, never changed** (VX-273; the record's call 3,
 /// PROVISIONAL P-VX196-2): a book id naming a gathering THIS client can read
 /// (wing reach, or the open book — `decideGathering`, the one rule) hears what
 /// it is — never "doesn't exist", which `list_books` has already contradicted;

@@ -3,7 +3,7 @@
 //  VariorumTests (Mac)
 //
 //  13n-c U1 — A CAPTURE HARNESS (the VX-144 precedent), gated OFF: the REAL
-//  grant sheet rendered offscreen in both voices, so R-AIR-3's confirm can be
+//  grant sheet rendered offscreen in both voices, so VX-269's confirm can be
 //  SEEN whole when no walk can run (the U1 pre-flight walk met a locked
 //  session at 04:00 — unlocking is hers, never a session's). The images are
 //  printed as base64 chunks into the run's log (the test host's container is
@@ -95,7 +95,7 @@ struct MCPGrantSheetCaptureTests {
         print("[13NC-U1-PNG-END \(name) \(part)]")
     }
 
-    /// Settings ▸ MCP itself: a journal-TRAIT book granted (R-AIR-1 — the op
+    /// Settings ▸ MCP itself: a journal-TRAIT book granted (VX-163 — the op
     /// refused it before) listed under Shared, and the open book on with its
     /// re-keyed sentence.
     @Test func captureThePaneWithATraitBookSharedAndTheOpenBookOn() async throws {
@@ -133,7 +133,7 @@ struct MCPGrantSheetCaptureTests {
             for first in ["dream journal", "the adventures of sherlock holmes"] {
                 try await withWorld { session in
                     let ops = session.operations
-                    // A journal-TRAIT book is offered since R-AIR-1.
+                    // A journal-TRAIT book is offered since VX-163.
                     _ = try ops.createReading(
                         name: first, kind: .book, profile: first == "dream journal" ? "journal" : nil)
                     _ = try ops.createReading(name: "zz other", kind: .book)

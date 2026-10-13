@@ -2482,7 +2482,7 @@ enum TutorialSeeder {
         // interpolated from the constants `TutorialMCPChapterTests` ties each
         // door to (the H pattern), so a renamed door turns a lesson red. The
         // pending-ask mark is described by its ROLE ("a small mark"), never its
-        // shape (the Stage B fix pass may change the glyph — O-1). U6 (R-AIR-12
+        // shape (the Stage B fix pass may change the glyph — O-1). U6 (VX-273
         // + VX-160) adds lesson 3's fourth card: a wing grant reads the wing's
         // gatherings, and the per-item move across wings — each pinned. Her
         // ruled "how to use it" (the sitting's third round) seats sixth: four

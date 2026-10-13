@@ -14,7 +14,7 @@ import Testing
 // `unarchive_book` (her `archiveReading` / `unarchiveReading`) and `delete_book`
 // (her `deleteReading` — the daily Journal never deletes; an OWNED book's plain
 // delete is her confirm's "book only"). ONE client-named undo entry each. A
-// GATHERING is read, never changed (R-AIR-12); Private, Seal and Own stay hers
+// GATHERING is read, never changed (VX-273); Private, Seal and Own stay hers
 // (R-VX184-2). Written BEFORE the fix: on the pre-fix tree every tool answers
 // "Unknown tool".
 
@@ -287,7 +287,7 @@ struct MCPBookStateServerTests {
             let book = try h.operations.createReading(name: "drafts", kind: .book)
             let gatheringBefore = try reading(h, gathering.id)
 
-            // A wing EDIT grant READS the gathering (R-AIR-12) — so every write
+            // A wing EDIT grant READS the gathering (VX-273) — so every write
             // aimed at it hears what it is, never "doesn't exist".
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .wing, ""))

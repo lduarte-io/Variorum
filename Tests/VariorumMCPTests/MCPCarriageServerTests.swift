@@ -374,7 +374,7 @@ struct MCPCarriageServerTests {
             ])
             #expect(bad.isError == true && text(bad).hasPrefix("entry_date must be a real day"))
             // She files it in THE daily Journal: from that moment the fence
-            // governs. 13n-c U1 (justified edit, the ritual — R-AIR-1): the
+            // governs. 13n-c U1 (justified edit, the ritual — VX-163): the
             // fixture was a journal-TRAIT book, which no longer fences.
             let journal = try h.operations.createReading(name: "journal", kind: .book, profile: "daily")
             _ = try h.operations.addPostToReading(note.id, to: journal.id)

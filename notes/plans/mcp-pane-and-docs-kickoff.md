@@ -118,7 +118,7 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
   decoration layer), read `notes/TEXTKIT2_NOTES.md` first, and the review is Fable's (CLAUDE.md).
 - **VX-268: Library rows never wear the shared-with-AI icon** (notes, books, gatherings; only the Bookcase
   does). Filed by her Air session, joined at her word: *"this other ticket that should be done in the next round
-  of mcp work"*. **Bug + Pre-launch:** a gap against R-AIR-6's "one icon everywhere" (13n-c U3 built it on
+  of mcp work"*. **Bug + Pre-launch:** a gap against VX-271's "one icon everywhere" (13n-c U3 built it on
   Bookcase rows and the in-note indicator only). Every Library row an approved client reaches wears the one
   `MCPSharedIcon` with its hover and popover, in List, Cards and Timeline. Gathering rows follow VX-185's
   truth (VX-184). P1: reach is read in proportion to the rows shown. **Hers at kickoff:** (1) Pool rows, the
@@ -128,7 +128,7 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
   notes from building 'o ladrão de raios' through the door). Adjudicated 2026-10-13; she asked these to *"ride
   the next fix path"*:
   - **VX-252:** `create_note` returns take ids (+ optional `section_id`).
-  - **VX-253:** `save_lens` by take label. **RULED — R-VX246-3 (her word, 2026-10-13: *"I like your 253
+  - **VX-253:** `save_lens` by take label. **RULED — VX-253 (her word, 2026-10-13: *"I like your 253
     recommendation"*), with her clarification built in: `picks` overrides are applied FIRST, so a block a pick
     covers is never ambiguous; the refusal names only UNCOVERED ambiguous blocks, and the retry passes the same
     rule plus `picks` for exactly those (or the first call does, when the agent already knows):**
@@ -140,11 +140,11 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
     - Labels match exactly as stored, plus one convenience: a client's OWN suggestions match by their own
       part. "english" also matches "claude-code · suggested · english" for claude-code, never another
       client's. Her "english" plus the AI's suggested "english" on one block counts as two matches, so the
-      call refuses. Per R-VX246-4 the stored form becomes `<client> · <label>`; the legacy
+      call refuses. Per VX-267 the stored form becomes `<client> · <label>`; the legacy
       `<client> · suggested · <label>` matches too.
-  - **VX-267, R-VX246-4 (Pre-launch) — AI take labels drop "suggested".** Her words, verbatim: *"why do we
+  - **VX-267, VX-267 (Pre-launch) — AI take labels drop "suggested".** Her words, verbatim: *"why do we
     need claude-code * suggested * english. isn't it obvious it's suggested if it's claude? seems like an
-    extra word."* Since R-VX246-2, the client prefix appears only on takes an AI adds at suggest, so the name
+    extra word."* Since VX-197, the client prefix appears only on takes an AI adds at suggest, so the name
     already says it. `aiLabel` (13n's P-13n-3, hers to re-voice) becomes `<client>` or `<client> · <label>`.
     Existing takes keep their labels (no migration); VX-253's matcher accepts both forms; U7's descriptions
     and the guide say the new form.
@@ -158,14 +158,14 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
     and the house rule** (the catalog: at write new everything new lands at the END — `add_note_to_book` "at its
     end", `create_section` "at the end"; every placing or reordering act is edit — `move_block`,
     `move_note_in_book`, divide, merge): **write new appends new blocks at the note's END only; inserting after a
-    specific block, between her existing paragraphs, needs edit.** **RULED — R-VX246-1 (her word, 2026-10-13,
+    specific block, between her existing paragraphs, needs edit.** **RULED — VX-255 (her word, 2026-10-13,
     verbatim):** *"VX-255: agreed, write new lets them add blocks at the end, edit lets them write blocks
     anywhere. I think that's a fair line to draw."*
   - **VX-256:** compact / paged `read_note` (ids-only form and/or block-range paging).
   - **Item 9 → VX-197** (commented): the label split. At SUGGEST, `add_take`/`add_takes` label a take
     `"<client> · suggested[ · <label>]"` (`aiLabel`, 13n's P-13n-3 convention, "hers to re-voice"). At WRITE NEW
     and EDIT, labels are stored exactly as given (`create_note`, `import_document`, `set_take_label` —
-    P-VX195-5). **RULED — R-VX246-2 (her word, 2026-10-13, verbatim):** *"it would be a mess to have claude
+    P-VX195-5). **RULED — VX-197 (her word, 2026-10-13, verbatim):** *"it would be a mess to have claude
     code suggested english on every label if you're having claude make a ton of htem."* Keep the split: a
     suggestion is marked as a suggestion inside HER writing, and work she authorized it to write or edit
     keeps clean labels. The fix is every take-writing tool's description saying which applies (U7).
@@ -182,17 +182,17 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
   `notes/plans/fixes/vx-184-mcp-launch-polish.md` § THE LADDER). Her word on timing: *"it's fine to put it in
   VX-246 - I won't put this release up for everyone, it'll be just for me until the fix goes out."* **→ GATE:
   VX-184's build stays HERS ALONE (no public release) until VX-258 ships.**
-  - **VX-258, R-VX184-7 (re-bind, Pre-launch):** VX-198's re-bind lets ANY fresh key take ANY bound name with
+  - **VX-258, VX-258 (re-bind, Pre-launch):** VX-198's re-bind lets ANY fresh key take ANY bound name with
     its approval and grants. Her ruling, verbatim: *"tie keys to their tab and for the general \"Any MCP
     client\" case, we should probably do the re-bind waits for my ok? i don't want everyone who isn't using
     claude or codex to be vulnerable to this. the best protection at each level"*. A Claude Code or Codex tab
     key re-binds only that tool's name, zero clicks; an Any-client key under a bound name re-binds only after
     her OK. The VX-168 impostor pin returns red-first.
-  - **VX-259, R-VX184-8 (book-name oracle, Pre-launch):** `rename_book` + `create_book` check names only
+  - **VX-259, VX-259 (book-name oracle, Pre-launch):** `rename_book` + `create_book` check names only
     against books the client can READ. Her words: *"it's fine if an accidental book name duplicate is made -
     there's no schema protection against it and we already ruled that it's ok if that happens."* Her own
     doors keep the full guard.
-  - **VX-260, R-VX184-9 (Pre-launch):** her edit makes an AI's comment hers; a suggest delete then needs edit
+  - **VX-260, VX-260 (Pre-launch):** her edit makes an AI's comment hers; a suggest delete then needs edit
     and hears her R-VX188-2 sentence.
 
 ## Rules binding this run

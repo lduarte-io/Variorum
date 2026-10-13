@@ -9,7 +9,7 @@ import Testing
 // show as being shared with AI right now (the icon doesn't appear on them)
 // even when you've shared the whole wing with AI … if they're shared as part of
 // the wing, that needs to be clear." The wire has read a wing's gatherings since
-// 13n-c U6 (R-AIR-12 — `MCPGrantRule.decideGathering`: wing-level reach on the
+// 13n-c U6 (VX-273 — `MCPGrantRule.decideGathering`: wing-level reach on the
 // gathering's wing, or the open book); the Bookcase's icon map
 // (`Queries.mcpBookReaches`) enumerated `kind = 'book'` only, so no gathering
 // ever wore the icon. Her ruling R-VX185-1: "I think that's fine on the

@@ -3,7 +3,7 @@
 //  Variorum (MAC ONLY) — Core/Views (composed by the window — `RootView` — for
 //  ⌘L; the Bookcase and the Library mastheads cycle through the same brain)
 //
-//  13n-c U4 — ⌘L, THE WING SWITCHER's face (R-AIR-15; VX-157; mockup §6's
+//  13n-c U4 — ⌘L, THE WING SWITCHER's face (VX-157; VX-157; mockup §6's
 //  option A drawn with her ratified chord). The ⌘K palette's idiom — a sheet
 //  over the window with a field that has the keyboard, the rows under it —
 //  because ⌘L is app-wide and must open wherever she is (a masthead popover

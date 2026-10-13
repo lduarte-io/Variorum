@@ -5,12 +5,12 @@ import Testing
 
 @testable import VariorumCore
 
-// 13n-c U6 — THE MCP DOOR's WING MOVE (VX-160; R-AIR-2/-9; the brief §10's
+// 13n-c U6 — THE MCP DOOR's WING MOVE (VX-160; VX-160/-9; the brief §10's
 // R1 · T1 · U1): her door's act, wrapped — the same rows her Move to Wing ▸
 // writes, her refusals, plus ONE client-named undo entry whose inverse and
 // redo replay the act's EXACT rows (no fresh row, ids surviving undo↔redo).
 // Who may move is the server's per-call rule (`MCPWingMoveServerTests`).
-// And R-AIR-12's reach, decided by the rule (`decideGathering`) on the facts
+// And VX-273's reach, decided by the rule (`decideGathering`) on the facts
 // the one derivation site reads (`mcpGatheringFacts`).
 
 private struct GuardRefused: Error, Equatable {}
@@ -443,7 +443,7 @@ struct MCPWingMoveActsTests {
         }
     }
 
-    // MARK: - R-AIR-12: the gathering's reach, decided by the rule
+    // MARK: - VX-273: the gathering's reach, decided by the rule
 
     @Test func aGatheringIsReachedOnlyByWingLevelReachAtReadAndNeverSpends() throws {
         let gathering = MCPGrantRule.BookFacts(id: "g", wingID: "w")

@@ -5,7 +5,7 @@ import Testing
 
 @testable import VariorumCore
 
-// 13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2 + 3; R-AIR-4/6/7): the
+// 13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2 + 3; VX-270 · VX-271 · VX-164): the
 // bulk share (N note grants, ONE transaction, ONE stamp — any refusal refuses
 // the whole act), Change… as a REPLACE in one act, Shared places grouped by
 // act (the exact-stamp doctrine, no schema), the WHY read off the one

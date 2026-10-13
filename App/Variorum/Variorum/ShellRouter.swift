@@ -51,7 +51,7 @@ final class ShellRouter {
     /// carrying the ask's id. Nothing but her press ever sets it (asks never
     /// present themselves).
     var mcpAskRequest: String?
-    /// 13n-c U4 — ⌘L, THE WING SWITCHER (R-AIR-15): a REQUEST the window
+    /// 13n-c U4 — ⌘L, THE WING SWITCHER (VX-157): a REQUEST the window
     /// adopts — the palette's shape (`paletteRequested`). While the switcher
     /// is already up, the same request CYCLES it (held ⌘, another L).
     var wingSwitcherRequested = false

@@ -8,7 +8,7 @@
 //  sections (quick sections only before typing; a match once, under its home),
 //  the book picker's two layouts in the Bookcase's order, the distinguisher on
 //  a collision, the durations a target can take with the why, the confirm with
-//  the distinguisher (and "on" for a note), R-AIR-8's words with L1, R2-3's
+//  the distinguisher (and "on" for a note), VX-272's words with L1, R2-3's
 //  inert row, F2's clause on the ask road, and the door's reads behind them.
 //  A ruled BUILD — the walk (or, while the session is locked, the gated
 //  capture harness) shows the faces.
@@ -254,7 +254,7 @@ struct MCPGrantSheetTests {
             verb: "Grant", rung: .suggest, scope: .book, place: "the adventures of sherlock holmes",
             distinguisher: "made Oct 9", duration: .always)
                 == "Grant suggest in “the adventures of sherlock holmes” (made Oct 9) always, including to future entries",
-                "mockup §1's confirm + R-AIR-3's clause")
+                "mockup §1's confirm + VX-269's clause")
         #expect(MCPPaneCopy.confirm(verb: "Grant", scope: .note, place: "morning pages — oct 9", duration: .once)
                 == "Grant read on “morning pages — oct 9” once", "mockup §1's note leg: “on”")
         let parts = MCPPaneCopy.confirmParts(
@@ -271,7 +271,7 @@ struct MCPGrantSheetTests {
         #expect(short.hasPrefix("abcdefghij") && short.hasSuffix("abcdefghij"), "head and tail kept")
     }
 
-    // MARK: - R-AIR-8 and L1
+    // MARK: - VX-272 and L1
 
     @Test func theSettingsClassWordsSayNoAIAndTheBoundaryIsSaid() {
         // Her sitting's second round (A JUSTIFIED EDIT, the ritual): the
@@ -286,7 +286,7 @@ struct MCPGrantSheetTests {
             MCPPaneCopy.inertDetail(.journal, kind: .note),
         ]
         for line in words {
-            #expect(line.range(of: #"\bAI\b"#, options: .regularExpression) == nil, "R-AIR-8: \(line)")
+            #expect(line.range(of: #"\bAI\b"#, options: .regularExpression) == nil, "VX-272: \(line)")
         }
         #expect(MCPPaneCopy.sharedSection == "Shared with AI", "P-13nc-U2-2 reversed in-pane, her ruling")
         // 13n-c U6 JOB 4c (ladder R2-N2): Revoke's unavailable note names the
@@ -338,7 +338,7 @@ struct MCPGrantSheetTests {
         // nothing; the line names the answers that grant.
         #expect(MCPAskCopy.reachLine(ask(.book))
                 == "Allowing grants it in “the adventures of sherlock holmes”, including to future entries.",
-                "F2: R-AIR-3's clause where an answer MINTS a book grant")
+                "F2: VX-269's clause where an answer MINTS a book grant")
         #expect(MCPAskCopy.reachLine(ask(.book), distinguisher: "made Oct 11")
                 == "Allowing grants it in “the adventures of sherlock holmes” (made Oct 11), including to future entries.",
                 "the reach line names the same book the title does")
@@ -441,7 +441,7 @@ struct MCPGrantSheetTests {
     /// Approving now admits the client with ZERO reach: the sheet may offer a
     /// grant, but it starts on nothing picked and never on Always — and the
     /// knock-ons become reachable: an approved client with no grant renders
-    /// the share doors (R-AIR-8's gate is ≥1 APPROVED client) and ⌥⌘A with no
+    /// the share doors (VX-272's gate is ≥1 APPROVED client) and ⌥⌘A with no
     /// history opens the grant sheet.
     @Test func anApprovalPicksNothingAndApprovingAloneLeavesZeroGrants() async throws {
         try await withSession { (session: AppSession, db: AppDatabase) async throws in
@@ -479,7 +479,7 @@ struct MCPGrantSheetTests {
             // The knock-ons, now reachable: the share doors render for an
             // approved client with nothing shared, and ⌥⌘A has no history.
             for _ in 0..<200 where !door.hasApprovedClient { try await Task.sleep(for: .milliseconds(10)) }
-            #expect(door.hasApprovedClient, "R-AIR-8's gate opens on an approved client with no grant")
+            #expect(door.hasApprovedClient, "VX-272's gate opens on an approved client with no grant")
             let newest = try await db.read { try Queries.mcpNewestGrant($0) }
             #expect(newest == nil)
             #expect(MCPShareChord.decide(newest: newest, connected: false, reached: nil) == .openSheet,

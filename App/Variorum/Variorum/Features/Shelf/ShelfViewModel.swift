@@ -52,7 +52,7 @@ final class ShelfViewModel {
     /// members (one-shot — the read touches `container`, so it never rides
     /// the held snapshot; U1's P1 pin).
     private(set) var archivedCounts: [String: Int] = [:]
-    /// 13n-b U2 (P-13n-3) → 13n-c U3 (R-AIR-6): the books — and since VX-185
+    /// 13n-b U2 (P-13n-3) → 13n-c U3 (VX-271): the books — and since VX-185
     /// the gatherings, read through a wing grant or the open book — an
     /// approved MCP client reaches now, WITH who and why — the row's ONE shared icon
     /// (`MCPSharedIcon`, which replaced the "shared with AI" chip). A HELD
@@ -255,7 +255,7 @@ final class ShelfViewModel {
         }
     }
 
-    /// **13n-c U3 — the shared icons' held half** (R-AIR-6): who reaches each
+    /// **13n-c U3 — the shared icons' held half** (VX-271): who reaches each
     /// book — and, since VX-185, each GATHERING (a wing grant on its wing or
     /// the open book, R-VX185-1) — now (`Queries.mcpBookReaches` — through the
     /// ONE rule, each kind's own) and which books cannot take a grant. ∝ the

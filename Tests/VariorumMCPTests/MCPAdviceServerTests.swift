@@ -85,7 +85,7 @@ struct MCPAdviceServerTests {
         // names "the author", never a pronoun that assumes theirs.
         #expect(advice.contains("Never call show_in_app unless the author asks"))
         #expect(advice.contains("one undo for the author, named after you"))
-        // 13n-c U6 — R-AIR-12 and VX-160, the guide's lesson 3 fourth card:
+        // 13n-c U6 — VX-273 and VX-160, the guide's lesson 3 fourth card:
         // a wing grant reads its gatherings (never granted alone); the move's
         // two rungs.
         #expect(advice.contains("A wing grant also reads that wing's gatherings"))

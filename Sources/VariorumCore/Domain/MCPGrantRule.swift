@@ -18,7 +18,7 @@ import Foundation
 /// - **The open book:** one switch; read rung, everywhere, for APPROVED
 ///   clients only.
 /// - **THE FENCE** (journal-class — R-13nb-1 + R-13nb-4, re-keyed on THE
-///   daily Journal by 13n-c's R-AIR-1): a FENCED note
+///   daily Journal by 13n-c's VX-163): a FENCED note
 ///   matches no standing grant and never rides the open book; only a
 ///   per-ask grant naming THAT note, once or while connected, reaches it —
 ///   and its ask never offers "always". A fenced BOOK matches nothing at all
@@ -66,7 +66,7 @@ public enum MCPGrantRule {
     }
 
     /// Why a note or book is fenced. Journal = R-13nb-1's predicate as
-    /// RE-KEYED by 13n-c's R-AIR-1 (a note's own `profile='journal'` — the
+    /// RE-KEYED by 13n-c's VX-163 (a note's own `profile='journal'` — the
     /// ⌘J day entry's shape, D-1 — or a live member of a live book wearing
     /// THE daily Journal's 'daily' marker; a journal-TRAIT book is not a
     /// fence); privateMark = R-13nb-4's (its own mark, or a live member of a
@@ -243,7 +243,7 @@ public enum MCPGrantRule {
         return .ask(.notShared, offersAlways: true)
     }
 
-    // MARK: - The WHY (13n-c U3 — R-AIR-6/-7: "readable through the Home wing grant")
+    // MARK: - The WHY (13n-c U3 — VX-271/-7: "readable through the Home wing grant")
 
     /// What lets an approved client reach a target right now.
     public enum Standing: Equatable, Sendable {
@@ -324,7 +324,7 @@ public enum MCPGrantRule {
     /// grant exactly as `decide` does (AF-7). Every note a wing listing then
     /// shows still passes `decide` on its own — the fence filters per note,
     /// so a wing never lists a fenced note (a daily-Journal entry, a ⌘J entry,
-    /// anything Private — 13n-c R-AIR-1).
+    /// anything Private — 13n-c VX-163).
     public static func decideWing(
         client: ClientState?, grants: [Grant], openBook: Bool, wingID: String, rung: Rung,
         consumes: Bool = false
@@ -345,7 +345,7 @@ public enum MCPGrantRule {
         return .ask(.notShared, offersAlways: true)
     }
 
-    /// **A GATHERING — read facts under WING-LEVEL reach** (13n-c R-AIR-12, her
+    /// **A GATHERING — read facts under WING-LEVEL reach** (13n-c VX-273, her
     /// ruling: "granting a wing grants access to everything … unless it's
     /// deliberately marked private"; gatherings "do NOT become separate grant
     /// targets"). A gathering is never a grant's scope, so only wing-level

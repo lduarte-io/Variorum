@@ -2213,7 +2213,7 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Sharing with AI is revoked in Settings \u{25B8} MCP.",
             availability: always),
-        // 13n-c U5 (R-AIR-13): ONE act still — the pane's setup menu
+        // 13n-c U5 (VX-274): ONE act still — the pane's setup menu
         // (Claude Code · Codex · Any MCP client, `MCPSetupClient`) chooses
         // WHAT it copies; choosing is view state, never a second act.
         Capability(
@@ -2243,7 +2243,7 @@ nonisolated enum CapabilityRegistry {
         // own rule; the bars render it in NOTE contexts only, never on a
         // scraps group). The book's: the settings sheet's State row (books
         // only — a gathering refuses `wrongReadingKind`, so it never renders).
-        // 13n-c U3 (R-AIR-7): the in-note indicator's LOCK popover renders
+        // 13n-c U3 (VX-164): the in-note indicator's LOCK popover renders
         // the same toggle — its `.surface` door.
         Capability(
             id: .markNotePrivate, verb: PrivateMarkCopy.rowWords, scope: .post,
@@ -2265,11 +2265,11 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: PrivateMarkCopy.allowHereNoNote,
             availability: noteScoped),
-        // 13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; R-AIR-4/6/
+        // 13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; VX-270 · VX-271/
         // 7/8 — the case's own comment carries the family). The row and
         // surface doors carry their TARGET (the row, the pick, the book, the
         // place the icon sits on), so their availability is `always`; their
-        // render gate is R-AIR-8's (an approved client exists — the window's
+        // render gate is VX-272's (an approved client exists — the window's
         // road), applied where they render (P-2: no door, never a dead one).
         Capability(
             id: .mcpShareHere, verb: MCPShareCopy.shareVerb, scope: .app,
@@ -2332,7 +2332,7 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar],
             shortcutLabel: "\u{2325}\u{2318},", takesAccess: nil,
             unavailableNote: "", availability: always),
-        // ⌘L — THE WING SWITCHER (R-AIR-15, ratified: "i like Command L").
+        // ⌘L — THE WING SWITCHER (VX-157, ratified: "i like Command L").
         // App-wide like ⌘K (it opens in the window that can show it); the
         // masthead word's cycling click is its `.surface` door. THE COLLISION
         // SWEEP is recorded at `EditorCommands.keyEquivalent`.

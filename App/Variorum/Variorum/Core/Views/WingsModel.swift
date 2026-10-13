@@ -91,7 +91,7 @@ final class WingsModel {
         session.wing.switchTo(id)
     }
 
-    // MARK: - 13n-c U4 — ⌘L and the cycling masthead (R-AIR-5/15)
+    // MARK: - 13n-c U4 — ⌘L and the cycling masthead (VX-157)
 
     /// The switcher's rows in the pure brain's shape (Home first).
     var switcherRows: [WingSwitcherBrain.Row] {
@@ -252,12 +252,12 @@ nonisolated enum WingCopy {
     static let deleteWingVerb = "Delete Wing\u{2026}"
     static let moveToWingVerb = "Move to Wing"
     static let copyToWingVerb = "Copy to Wing"
-    // 13n-c U4 (round 5 — the switcher joins the Library masthead; ⌘L, R-AIR-15):
+    // 13n-c U4 (round 5 — the switcher joins the Library masthead; ⌘L, VX-157):
     // the note says where wings live now, both mastheads and the chord.
     static let unavailableNote = "Wings live at the top of the Bookcase and the Library \u{2014} "
         + "\u{201C}Bookcase \u{00B7} \(WingWords.home) \u{25BE}\u{201D} \u{2014} and \u{2318}L switches between them."
 
-    // MARK: - 13n-c U4 — ⌘L and the cycling masthead (R-AIR-5/15; round 5)
+    // MARK: - 13n-c U4 — ⌘L and the cycling masthead (VX-157; round 5)
 
     /// ⌘L's menu verb (the View menu; the registry's `.switchWing`).
     static let switchWingVerb = "Switch Wing\u{2026}"

@@ -78,6 +78,19 @@ dev store only behind an A1 prestage copy, restored verified.
 | VX-231 | U1 live round (OWED 3b) | Bookcase row counts stale right after a 32k-word note joins a book ("7 notes · 3 ch · 120w") | open Todo (Bug) — same |
 | VX-232 | U1 live round (OWED 3c) | pane setup segment resets to Claude Code on a voice flip; receipt keeps the Any-client sentence | LIKELY MOOTED by U6's pane rebuild — U6 verifies; closes with the run if so, else stays open |
 
+| VX-246 | her re-scope (2026-10-13 ~11:40) | **Run: MCP pane, docs & door fixes** — U6 + U7 moved here, plus everything below marked "in VX-246" | the NEXT MCP run, Todo, Pre-launch; plan `notes/plans/mcp-pane-and-docs-kickoff.md` |
+| VX-230 · VX-231 · VX-232 | (rows above) | moved into VX-246 at her word ("all MCP fixes together") | in VX-246 |
+| VX-252 · VX-253 · VX-254 · VX-255 · VX-256 | her bilingual-book agent notes (items 1+10, 2, 3, 4, 6) | create_note take ids · save_lens by label · write digests · insert_blocks · compact/paged read_note | in VX-246 (VX-255 Pre-launch) |
+| VX-258 · VX-259 · VX-260 | ladder round 1 + her rulings | re-bind tied to the setup tab · door name checks only readable books · her edit makes an AI comment hers | in VX-246, Bug, Pre-launch — **VX-184's build stays hers alone until VX-258 ships** |
+| VX-261 | agent notes item 5 | a read tool listing the client's own recent acts | in VX-246 |
+| VX-262 | agent notes item 8 | lenses created on import | PARKED with her reasoning |
+| VX-267 | her ruling on the label word | AI take labels drop "suggested" | in VX-246, Pre-launch |
+| VX-268 | filed by her Air session | the Library rows' missing shared-with-AI icon | joined VX-246, Bug, Pre-launch |
+| VX-269 · VX-270 · VX-271 · VX-272 · VX-273 · VX-274 | the R-AIR sweep (her word) | the six Air-sitting rulings that never had a ticket (map in VX-165) | Done, under VX-165 |
+| VX-275 · VX-276 | ladder round-1 fix pass | a wire delete strands her unsaved keystrokes · a redo after a quiet undo revives a removed row | in VX-246, Bug, Pre-launch |
+| VX-277 | ladder round-1 fix pass | her own lens-adopt undo overwrites a later choice | v1 release readiness, Bug |
+| VX-278 | her word (2026-10-13) | retire the R-AIR ruling numbers (this branch carries the sweep) | a VX-184 member — closes at the merge |
+
 *(Any later unit's mints join this table; the closeout handoff carries the full list.)*
 
 ## Cross-run coordination (VX-214, settings panes & launch UI polish — author-attended, merges after us)
@@ -520,7 +533,7 @@ red-on-old twice (pre-fix tree + by revert), green headless and on the Mac batch
 
 **Read in full before code (never delegated):** the kickoff `notes/plans/mcp-launch-polish-kickoff.md` (her pre-run
 sitting incl. R-VX185-1 verbatim, the U2 row, "## VX-185 — the gatherings icon", the rules); this record's head and
-the whole U1 record; `notes/SessionResiliencyProtocol.md` whole; the 13n-c plan's R-AIR-12 line, §3 U3 + U6, §7, §8
+the whole U1 record; `notes/SessionResiliencyProtocol.md` whole; the 13n-c plan's VX-273 line, §3 U3 + U6, §7, §8
 "Environment traps" (honored), the U3 UNIT RECORD whole (the icon's birth — the glyph, the hover, the popover with the
 why, Change… = REPLACE T-U3-8, the W-UX-5 Revoke label) and the U6 UNIT RECORD (pieces U6-1/U6-4, traces T-U6-2/T-U6-6
 — `MCPGrantRule.decideGathering` + `Queries.mcpGatheringFacts`). Code: `Queries/MCPShareQueries.swift` whole
@@ -558,7 +571,7 @@ read off `decideGathering`, beside `reach`) · doc lines in `MCPGrantQueries` / 
 book is ON; a live, unfenced gathering G lives in W. **The wire** reads G: `list_books` lists it (`kind: "gathering"`),
 `list_notes(book_id: G)` pages its assembly, `search` and `show_in_app` take it — each through
 `MCPGrantAuthority.decide(_:gathering:)` = `MCPGrantRule.decideGathering`, which is `decideWing`'s READ on G's wing (a
-live wing grant there at any rung, or the open book) — R-AIR-12, built at 13n-c U6. **The Bookcase** draws the ONE
+live wing grant there at any rung, or the open book) — VX-273, built at 13n-c U6. **The Bookcase** draws the ONE
 shared icon on a row iff `ShelfViewModel.aiReach[reading.id]` is non-empty (`ShelfView.shelfRow`, ~l.693); `aiReach` is
 the held observation of `Queries.mcpBookReaches(db)` (`ShelfViewModel.watchSharing`). `mcpBookReaches` enumerates
 `SELECT id FROM reading WHERE deleted_at IS NULL AND kind = 'book'` (`MCPShareQueries.swift:266-267`) and decides each
@@ -648,11 +661,11 @@ the reach map is REACH, not presentation, as for books — an archived book unde
   grant you opened this from.") and "Revoke the Home wing grant" (W-UX-5); under the open book "through the open book" +
   "The open book is switched in Settings ▸ MCP."; (b) a gathering-specific sentence in the kickoff's illustrative shape —
   "claude-code can read this through the wing “Home”"; (c) (a) plus one line under the title, "A gathering is never shared
-  on its own." Built (a): "every reach surface treats gatherings the same", and R-AIR-7's "readable through the Home wing
+  on its own." Built (a): "every reach surface treats gatherings the same", and VX-164's "readable through the Home wing
   grant" is the house's why. A Change… label naming the grant ("Change the Home wing grant…") would be W-UX-5's twin on
   EVERY wider row (notes and books too) — not built; her copy pass.
 - **P-VX185-2 — Book Settings on a gathering:** (a) **as built** — unchanged: its grant row stays a BOOK's (it is a
-  GRANT face — "Share…" opens THE sheet on this reading, which the op refuses for a gathering, R-AIR-12; P-2 never draws
+  GRANT face — "Share…" opens THE sheet on this reading, which the op refuses for a gathering, VX-273; P-2 never draws
   that door), so a gathering's sheet shows no sharing line and its reach face is the Bookcase icon's popover; (b) a
   caption-only reach line on a gathering's sheet ("Readable by ‹client› through the Home wing grant."), no Share…;
   (c) (b) plus a "Share its wing…" door opening THE sheet on the gathering's wing. Traced: `mcpBookReaches`' only app
@@ -673,7 +686,7 @@ built, (a), with no caption line before the walk. Its reasons, as given: **P-VX1
 icon-popover idiom ("through the Home wing grant"), which says the kickoff's why in the surface's own voice — the
 kickoff's quoted sentence reads as an illustration of the why, not a ruled sentence, and her copy pass re-voices words;
 **P-VX185-2(a)** is right because Book Settings' sharing row is a grant face and a gathering is never a grant's scope
-(R-AIR-12) — the (b) caption is one line if she wants it, logged as the option. The once-wing-grant-vs-open-book why
+(VX-273) — the (b) caption is one line if she wants it, logged as the option. The once-wing-grant-vs-open-book why
 edge stays with the security rule, recorded (above). The U7 carry (lesson 7: "a book or a gathering") goes into U7's
 brief. Both still want their `notes/QUESTIONS.md` entries at the merge (her copy pass / her call).
 
@@ -1161,7 +1174,7 @@ head + the U1, U2 and U3 records whole (U3's "For U4" — `mayDelete`'s edit cla
 `notes/plans/fixes/vx-168-mcp-client-secret.md` (the head, LIVE STATUS, the UNIT 1 record's design calls, the UNIT 2 record
 whole — THE edit-act pattern); the 13n-b plan's ruled design, SITTING RECORD (R-13nb-1…26 incl. R-13nb-14's keyboard bar,
 R-13nb-17, R-13nb-19), AF-1…AF-11, the seam rulings A-1…A-10, the U3 brief + the U3 record's decisions (P-13nb-U3-1…17 — the
-in-transaction guard, every MCP write ONE entry); the 13n-c plan's rulings list (R-AIR-1…15), the orchestrator's U1
+in-transaction guard, every MCP write ONE entry); the 13n-c plan's rulings list (the Air sitting's rulings (each now its own VX ticket; the map is in VX-165)), the orchestrator's U1
 adjudications (T-2/F-7 — the ONE answer), §3 U1–U8, the FABLE-OWED ledger, §7 constraints, §8 environment traps;
 `notes/SessionResiliencyProtocol.md` whole; `notes/SyncSpec.md` whole (read BEFORE code — no schema in this unit; §6's
 metadata-CAS class covers every field these acts write). Code: `MCPWriteTools{,+Edit,+Deliberate,+CommentDelete,+RemoveTag,
@@ -1463,7 +1476,7 @@ vx-168-mcp-client-secret.md` (head, LIVE STATUS, the UNIT 1 design calls, the UN
 design, SITTING RECORD (R-13nb-1…26 incl. R-13nb-14's keyboard bar, R-13nb-17, R-13nb-19/20), AF-1…AF-11, the seam rulings
 A-1…A-10, the U2 PROVISIONALs (P-13nb-U2-4/-8), the U3 decisions (P-13nb-U3-1…17 — the in-transaction guard; P-13nb-U3-7/8
 the chapter acts at write new), the U4 forks + PROVISIONALs (AF-11 F-1's mirror-never-invent, P-13nb-U4-8/-9/-16); the
-13n-c plan's rulings (R-AIR-1…15 — R-AIR-12 above all), the U1 adjudications (T-2/F-7 — the ONE answer, a fenced BOOK
+13n-c plan's rulings (the Air sitting's rulings (each now its own VX ticket; the map is in VX-165) — VX-273 above all), the U1 adjudications (T-2/F-7 — the ONE answer, a fenced BOOK
 included), §3 U6, §7 constraints, §8 environment traps, the U6 UNIT RECORD (the gathering reach, `decideGathering`, the
 two-sided move); `notes/SessionResiliencyProtocol.md` whole. `notes/SyncSpec.md`: re-read before code — this unit has NO
 schema change; every column these acts write (`reading.name/locked/archived_at/deleted_at`, `reading_section.*`,
@@ -1626,7 +1639,7 @@ at launch stay where it puts them (expected — the WalkKit note).
 **Reach facts the wire already holds (read, not assumed):** the daily Journal BOOK and every Private book are FENCED as
 books (`mcpBookFacts`' journal/private legs → `reaches` false for every grant → the ONE not-shared answer, never an ask —
 13n-c T-2/F-7); a gathering has no `mcpBookFacts` (every write tool answers it as a missing book today — U6's pinned letter)
-but IS readable as facts under a wing grant or the open book (`decideGathering`, R-AIR-12); a saved version has no
+but IS readable as facts under a wing grant or the open book (`decideGathering`, VX-273); a saved version has no
 `mcpNoteFacts` (the one answer); an ARCHIVED note keeps its reach (an id answers under its grant).
 
 ### The design, argued
@@ -1659,7 +1672,7 @@ but IS readable as facts under a wing grant or the open book (`decideGathering`,
      READ (non-consuming — the client must already be able to read what it names; an unreadable anchor is the one answer, no
      oracle on fenced members) and must be a live MEMBER of this book (`notInBookWords` — said only for a readable note).
    - **note acts** (delete/archive/unarchive note) — the NOTE at EDIT (`onNote` + `guardEdit`, U4's road exactly).
-3. **A GATHERING is never a write target (R-AIR-12) — refused HONESTLY where the client can read it.** Her own doors
+3. **A GATHERING is never a write target (VX-273) — refused HONESTLY where the client can read it.** Her own doors
    rename, archive and delete gatherings; the wire does not (no grant names one). The brief: "a write aimed at a gathering
    refuses honestly; no new oracle anywhere". Built: when the named book id is a GATHERING the client can READ (wing reach or
    the open book — `decideGathering`, the ONE rule), every new book/chapter/membership tool refuses with ONE sentence that says
@@ -1877,13 +1890,13 @@ at her request mid-read, resumed at her word; reviewed tip fcfb8aa5 = the merged
 
 ### ROUND 1 — HER RULINGS on the three product calls (2026-10-13, asked in chat; her answers verbatim)
 
-- **MAJOR (re-bind) — R-VX184-7:** *"tie keys to their tab and for the general \"Any MCP client\" case, we should
+- **MAJOR (re-bind) — VX-258:** *"tie keys to their tab and for the general \"Any MCP client\" case, we should
   probably do the re-bind waits for my ok? i don't want everyone who isn't using claude or codex to be vulnerable
   to this. the best protection at each level"* → **VX-258** (Pre-launch), in VX-246.
-- **MINOR (E13 name oracle) — R-VX184-8:** *"it's fine if an accidental book name duplicate is made - there's no
+- **MINOR (E13 name oracle) — VX-259:** *"it's fine if an accidental book name duplicate is made - there's no
   schema protection against it and we already ruled that it's ok if that happens."* → the door checks names only
   against books the client can read (`rename_book` + `create_book`) → **VX-259** (Pre-launch), in VX-246.
-- **MINOR (suggest-delete of an edited comment) — R-VX184-9:** "Your edit makes it yours" (her pick of the
+- **MINOR (suggest-delete of an edited comment) — VX-260:** "Your edit makes it yours" (her pick of the
   recommended option) → **VX-260** (Pre-launch), in VX-246.
 - **Timing — her word:** *"it's fine to put it in VX-246 - I won't put this release up for everyone, it'll be
   just for me until the fix goes out."* → **THIS run fixes only the agreed bugs** (the undo-overwrite class; the
@@ -1907,7 +1920,7 @@ PROVISIONALs below are the orchestrator's merge bundle; (6) main NOT merged in (
 `8925f38b`; the orchestrator's). Its leads reached this pass UNVERIFIED and each is re-traced here before it is relied
 on. Worktree `~/dev/variorum-vx-184`, branch `vx-184-mcp-launch-polish`. HEADLESS ONLY (no stage, no Mac run, no app
 launch); zero `Sync/`, custody/keychain, editor-seam or schema lines (path-diffed at the close — piece 10). Her three
-product calls (VX-258/259/260, R-VX184-7/8/9) are VX-246's and untouched here.
+product calls (VX-258/259/260, VX-258 · VX-259 · VX-260) are VX-246's and untouched here.
 
 #### LIVE STATUS — the fix pass's pieces (flipped in the same commit as each piece)
 

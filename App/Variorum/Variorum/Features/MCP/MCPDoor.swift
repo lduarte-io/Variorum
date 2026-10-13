@@ -62,7 +62,7 @@ final class MCPDoor {
         var sharedGroups: [MCPSharedGroup] = []
         /// How many ACTS Shared places holds (the "all N ›" road's N).
         var sharedCount = 0
-        /// 13n-c U3 (R-AIR-8): how many clients are APPROVED — every share
+        /// 13n-c U3 (VX-272): how many clients are APPROVED — every share
         /// face outside the pane renders only when this is at least one.
         var approvedCount = 0
         /// U3 — the ACTIVITY face: the newest coalesced lines and the log's
@@ -92,7 +92,7 @@ final class MCPDoor {
     /// when they change, so a window composing its `MCPShareRoad` from them
     /// never re-renders on a snapshot that changed nothing it reads — the
     /// snapshot itself can re-land at autosave rate while a note grant's
-    /// title is listed). R-AIR-8: at least one APPROVED client. R-AIR-7: the
+    /// title is listed). VX-272: at least one APPROVED client. VX-164: the
     /// server switch ON.
     private(set) var hasApprovedClient = false
     private(set) var serverOn = false
@@ -245,7 +245,7 @@ final class MCPDoor {
         MCPPaneCopy.setupCommand(shimPath: Self.shimPath, isDebugBuild: Self.isDebugBuild)
     }
 
-    /// 13n-c U5 (R-AIR-13): the setup menu's chosen client's text — the
+    /// 13n-c U5 (VX-274): the setup menu's chosen client's text — the
     /// command or the stanza the pane shows. VX-168 (K2): SHOWN with the key
     /// masked (`MCPPaneCopy.shownKey`); the copy carries a freshly minted one.
     func setupText(for client: MCPSetupClient) -> String {
@@ -332,7 +332,7 @@ final class MCPDoor {
         answering = []
         receiptRun = []
         lastShow = nil
-        // A locked library shows no share face (R-AIR-8's gate reads no store).
+        // A locked library shows no share face (VX-272's gate reads no store).
         if hasApprovedClient { hasApprovedClient = false }
         session = nil
         database = nil
@@ -469,7 +469,7 @@ final class MCPDoor {
     }
 
     /// Copy setup command (R-13nb-5): the command on the clipboard, the
-    /// receipt in the pane's caption. 13n-c U5 (R-AIR-13): the setup menu's
+    /// receipt in the pane's caption. 13n-c U5 (VX-274): the setup menu's
     /// CHOSEN client — Claude Code (the default), Codex, or any MCP client's
     /// JSON — each with its own receipt.
     ///

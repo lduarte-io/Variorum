@@ -37,7 +37,7 @@ The full CLAUDE.md ritual: `git pull` here AND in the shared memory repo, then
 
 1. **`notes/plans/vx-156-grant-ux-design-kickoff.md` — THE SITTING RECORD.** Its
    RATIFIED + ROUND 2/3/4/5 sections carry every ruling this phase builds to
-   (R-AIR-1…15 and the round-5 items). They are her word, already pushed.
+   (the Air sitting's rulings (each now its own VX ticket; the map is in VX-165) and the round-5 items). They are her word, already pushed.
 2. `notes/plans/vx-156-grant-ux-brief.md` + `vx-156-grant-ux-mockups.html` — the
    approved design (she approved the mockups at the sitting; specific overrides
    live in the sitting record and win over the mockups where they differ).
@@ -68,17 +68,17 @@ VX-156 (the grant UX round, incl. searchable pickers with last-edited +
 recently-edited section, duplicate-name disambiguation, grant-from-Library,
 ⌥⌘A with the adjust door, the ask badge + Waiting list REPLACING the
 self-popping ask sheet, ⌥⌘, pane shortcut) · VX-157 (⌘L wing switching,
-R-AIR-15: type filters, ⌘-held-L cycles, masthead click cycles, present on the
+VX-157: type filters, ⌘-held-L cycles, masthead click cycles, present on the
 LIBRARY masthead too) · VX-158 (wing target on show_in_app) · VX-159 (ceremony
-presets on the wire, R-AIR-10 provisional) · VX-160 (per-item cross-wing note
-move, R-AIR-9: R1 recommended, R1/R2 both legal) · VX-163 (the journal-trait
+presets on the wire, VX-159 provisional) · VX-160 (per-item cross-wing note
+move, VX-160: R1 recommended, R1/R2 both legal) · VX-163 (the journal-trait
 fence re-key — FIRST UNIT, see below) · VX-164 (the in-note shared/private/
-pending-ask indicator, R-AIR-6/7's one icon) · gatherings ride wing grants
-(R-AIR-12) · the per-client setup menu (R-AIR-13: Claude Code · Codex · generic
-path/JSON) · the per-setup secret (R-AIR-14 — LAST, may fall out, launch never
+pending-ask indicator, VX-271 · VX-164's one icon) · gatherings ride wing grants
+(VX-273) · the per-client setup menu (VX-274: Claude Code · Codex · generic
+path/JSON) · the per-setup secret (VX-168 — LAST, may fall out, launch never
 blocks on it) · the A-4 pane sentence (brief §12) · the grant-confirm wording
-(R-AIR-3, on every book grant) · no-"AI"-in-settings wording + faces rendered
-only with an approved client + zero-states route to Settings ▸ MCP (R-AIR-8).
+(VX-269, on every book grant) · no-"AI"-in-settings wording + faces rendered
+only with an approved client + zero-states route to Settings ▸ MCP (VX-272).
 EXCLUDED: VX-161; the wings/library renaming (13s-a's).
 
 ## Ordering and the Opus-week protocol
@@ -108,7 +108,7 @@ ladder round — fix or disposition before proceeding) — then run the
 or kill a running real-store instance; if an instance is live, hold the refresh
 and say so in the handoff instead). Then the full closeout ritual: plan results,
 master plan + in-flight row + closeout paragraph, canon deltas exactly as ruled
-(AppSpec §12's journal-class line per R-AIR-1, the duration line per VX-162, the
+(AppSpec §12's journal-class line per VX-163, the duration line per VX-162, the
 new contract lines), MOBILE PARITY line, tickets closed or re-owned, the next
 plan untouched (13s-a stands), the author handoff
 `notes/handoffs/phase-13n-c-handoff.md` with her checklist at top — including

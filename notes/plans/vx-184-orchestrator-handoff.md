@@ -58,7 +58,7 @@ What it means for this run:
 *"Run everything at max effort - the implementer, reviewer, etc."* Every remaining agent of VX-184 (the
 round-1 fix pass — already running at max; the round-2/3 reviewers; any later implementer) is spawned with
 `effort: max`. (She stopped the first fix-pass agent, *"I want you to think with max effort so I'm restarting
-this"*, and the orchestrator restarted it at max; it had written nothing.) VX-255 is RULED: R-VX246-1, write
+this"*, and the orchestrator restarted it at max; it had written nothing.) VX-255 is RULED: VX-255, write
 new appends at the end, edit inserts anywhere. VX-246's plan records both.
 
 ## THE LADDER + HER CALLS (2026-10-13 midday) — the live state
@@ -66,9 +66,9 @@ new appends at the end, edit inserts anywhere. VX-246's plan records both.
 - **Round 1 (opus-reviewer) DONE:** 1 MAJOR · 6 MINOR · 5 NIT, recorded VERBATIM in the run record § THE LADDER
   with dispositions. The MAJOR (VX-198's re-bind lets any fresh key take any bound name with its grants) was
   CONFIRMED by the orchestrator's own trace.
-- **Her rulings (verbatim in the record):** R-VX184-7 → **VX-258** (keys tied to their tab; an Any-client
-  re-bind waits for her OK); R-VX184-8 → **VX-259** (door name checks only against readable books; duplicates
-  fine); R-VX184-9 → **VX-260** (her edit makes an AI's comment hers). All three ride **VX-246**, Pre-launch.
+- **Her rulings (verbatim in the record):** VX-258 → **VX-258** (keys tied to their tab; an Any-client
+  re-bind waits for her OK); VX-259 → **VX-259** (door name checks only against readable books; duplicates
+  fine); VX-260 → **VX-260** (her edit makes an AI's comment hers). All three ride **VX-246**, Pre-launch.
   **Timing, her word:** this run fixes only the agreed bugs. **GATE: VX-184's build stays HERS ALONE (no
   public release) until VX-258 ships.**
 - **Round-1 fix pass:** a fresh `opus-implementer`, HEADLESS ONLY. (a) compare-and-set undo inverses and
@@ -83,7 +83,7 @@ new appends at the end, edit inserts anywhere. VX-246's plan records both.
   for VX-246 is verbatim in its plan.
 - **Tickets minted or moved this run (the handoff lists ALL):** VX-205 (→VX-246) · VX-230 (→VX-246) · VX-231 ·
   VX-232 (→VX-246) · VX-246 (the new run) · VX-252 · VX-253 · VX-254 · VX-255 · VX-256 · VX-258 · VX-259 · VX-260 ·
-  VX-261 · VX-262 (Parked) · VX-267 (R-VX246-4). Plus VX-245 (VX-214's; corrected to credit VX-246) and VX-268 (filed by her Air session, joined VX-246 at her word). VX-246 has 16 members; its rulings so far are R-VX246-1…4 (in its plan).
+  VX-261 · VX-262 (Parked) · VX-267. Plus VX-245 (VX-214's; corrected to credit VX-246) and VX-268 (filed by her Air session, joined VX-246 at her word). VX-246 has 16 members; its rulings so far are VX-255 · VX-197 · VX-253 · VX-267 (in its plan).
 
 ## Her mandates (recorded in the run record too)
 
@@ -370,7 +370,7 @@ act warrants differing, e.g. where her own door is deliberately undo-less like t
   unsealing, owning, `deleteReadingWithNotes`, `archiveReadingWithNotes` are HER doors only. Keep U4's
   Mac pin posture (no tool named for them) covering the library family too.
 Fence and refusals: the one not-shared answer for anything unreachable; `rungTooLow`-family for a live
-holder below edit; gatherings are FACTS under a wing grant, never a write target (R-AIR-12) — a write
+holder below edit; gatherings are FACTS under a wing grant, never a write target (VX-273) — a write
 aimed at a gathering refuses honestly; no new oracle anywhere. Wording ships AS BUILT with a
 P-U5-WORDS provisional (QUESTIONS road, not VX-234).
 
@@ -427,7 +427,7 @@ PREFLIGHT (read in full, yourself — never delegated): `CLAUDE.md` + its auto-l
 ADD section carrying her VX-205 words verbatim); the run record `notes/plans/fixes/vx-184-mcp-launch-polish.md`
 (U1–U5 UNIT RECORDs: U1's P-VX198-2 pane words, U4/U5's OWED → the edit-rung undersell; the tickets
 table's VX-232 row); `notes/plans/phase-13n-c-mcp-launch-readiness.md` (the pane's current contract:
-R-AIR-8's carve-out "Shared with AI", the Waiting section, Answer…, the setup menu's O-4 fence, the
+VX-272's carve-out "Shared with AI", the Waiting section, Answer…, the setup menu's O-4 fence, the
 one declared copy act); `notes/plans/phase-13n-b-mcp-door.md` (the pane's birth);
 `notes/SessionResiliencyProtocol.md`. The pane code: `App/Variorum/Variorum/Features/MCP/` (MCPPane*,
 MCPPaneCopy), `SettingsShape.swift` (MCP rows ONLY — see constraints), the pane suites (MCPPaneTests +

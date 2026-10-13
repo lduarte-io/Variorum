@@ -15,8 +15,8 @@
 //  P-13id-U5-6 — the alternative hides the switcher until a second wing
 //  exists and moves New Wing… to the menu bar).
 //
-//  13n-c U4 — FAST TO CLICK (her R-AIR-5: "type to filter; click-without-typing
-//  CYCLES; fast to click — fast navigation is important"; R-AIR-15: "the
+//  13n-c U4 — FAST TO CLICK (her VX-157: "type to filter; click-without-typing
+//  CYCLES; fast to click — fast navigation is important"; VX-157: "the
 //  masthead switcher clicked without typing also cycles"; round 5: "the wing
 //  switcher must be reachable from the LIBRARY pane"):
 //  · with TWO OR MORE wings the masthead's wing WORD is a button that CYCLES
@@ -53,7 +53,7 @@ struct WingSwitcherMenu: View {
         // 13i-d U5b — her R-13id-4 backdoor (R-13id-6 item 9): additional
         // wings only, so the daily Journal's Home is never its source.
         .moveWingContents,
-        // 13n-c U4: the word's cycling click (R-AIR-5/15).
+        // 13n-c U4: the word's cycling click (VX-157).
         .switchWing,
     ] + MCPAskGlyph.surfaceCapabilities
 

@@ -4,7 +4,7 @@
 //  waiting ask reads it)
 //
 //  13n-c U4 — ASKS WAIT QUIETLY (VX-156 item 4; the brief §5 face A + arrival
-//  X, with R-AIR-6's pending-ask ICON in place of face A's chip). A client's
+//  X, with VX-271's pending-ask ICON in place of face A's chip). A client's
 //  ask past its grant WAITS on the thing it names — a note, a book or a wing —
 //  where she already looks; nothing presents itself. This is the ONE
 //  projection every face reads (P-4: a value derived from the door's queue,

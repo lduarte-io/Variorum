@@ -377,7 +377,7 @@ extension Queries {
     }
 
     /// **THE FENCE's legs — the ONE derivation site** (R-13nb-1 ratified the
-    /// journal predicate; R-13nb-4 adds the Private mark; 13n-c's R-AIR-1
+    /// journal predicate; R-13nb-4 adds the Private mark; 13n-c's VX-163
     /// RE-KEYED the journal legs on THE daily Journal — her words: "for the
     /// default command J journal I think it's a fair choice but I am
     /// questioning it being applied to all journal style books"). Per note:
@@ -389,7 +389,7 @@ extension Queries {
     ///    Journal's marker (`profile = 'daily'` — every live bearer, a
     ///    not-yet-converged stale one included: the conservative direction).
     ///    A journal-TRAIT book (`profile = 'journal'`, `setJournalTrait`'s
-    ///    toggle) is NOT a fence leg since R-AIR-1 — its members are shared
+    ///    toggle) is NOT a fence leg since VX-163 — its members are shared
     ///    like any book's. An archived daily Journal is still alive, so it
     ///    still fences;
     /// 3. **the Private mark** — its own `ai_private_at`, or a live member of
@@ -451,13 +451,13 @@ extension Queries {
 
     /// A BOOK's facts — live books only (a gathering is not a grant target in
     /// U1, PROVISIONAL P-13nb-U1-4). Fenced when it is THE daily Journal (its
-    /// 'daily' marker — R-AIR-1: a journal-TRAIT book is not) or carries the
+    /// 'daily' marker — VX-163: a journal-TRAIT book is not) or carries the
     /// Private mark (R-13nb-4).
     public static func mcpBookFacts(_ db: Database, readingID: String) throws -> MCPGrantRule.BookFacts? {
         try mcpReadingFacts(db, readingID: readingID, kind: .book)
     }
 
-    /// **A GATHERING's facts** (13n-c R-AIR-12 — its reach is the rule's
+    /// **A GATHERING's facts** (13n-c VX-273 — its reach is the rule's
     /// `decideGathering`): a live gathering's id and wing, and its fence on the
     /// SAME two fragments a book's facts read (no op marks a gathering Private
     /// or daily; a stale synced row could — the conservative direction). nil
@@ -535,8 +535,8 @@ extension Queries {
     /// **The books the grant sheet offers** — every live BOOK the fence does
     /// not exclude (THE daily Journal and a Private book are never a grant's
     /// scope — the op refuses them, so the sheet never offers them; P-2; a
-    /// journal-TRAIT book IS offered since R-AIR-1), by name. Gatherings are
-    /// not grant targets (P-13nb-U1-4; R-AIR-12 keeps them so). Author-scale.
+    /// journal-TRAIT book IS offered since VX-163), by name. Gatherings are
+    /// not grant targets (P-13nb-U1-4; VX-273 keeps them so). Author-scale.
     ///
     /// **13n-c U2 — the facts it carries, and their cost (P1, said exactly):**
     /// one statement over the library's live books; each book's shown-member
@@ -635,7 +635,7 @@ extension Queries {
     /// aliased `r`.
     static let privateLegForBook = "(r.ai_private_at IS NOT NULL)"
 
-    /// **The daily-Journal leg for a book** (13n-c R-AIR-1) — THE daily
+    /// **The daily-Journal leg for a book** (13n-c VX-163) — THE daily
     /// Journal's own marker, through the ONE constant every daily mint stamps
     /// (`dailyJournalBookProfile`), never the trait's 'journal'. NULL-safe: a
     /// NULL profile reads false. Expects the book aliased `r`; used by the
@@ -730,7 +730,7 @@ extension Queries {
     /// it, a wing grant on its wing, or the open book — each read through the
     /// pure rule on the book's own facts, so THE daily Journal or a Private
     /// book (reached by nothing) is never in it (a journal-TRAIT book is, like
-    /// any book, since R-AIR-1). ∝ the books × the approved clients (13n-c
+    /// any book, since VX-163). ∝ the books × the approved clients (13n-c
     /// Stage B R1 B11: the doc corrected; the dead app-side readers removed).
     public static func mcpReachableBookIDs(_ db: Database) throws -> Set<String> {
         let clients = try mcpClients(db, states: [.approved])
