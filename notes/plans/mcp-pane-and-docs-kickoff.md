@@ -115,6 +115,26 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
   face (the badge's decoration not invalidated when an MCP write lands), not wrong store data. Trace that
   invalidation road and pin it red-first. **If the trace reaches the editor seam** (`EditorTextView`, the
   decoration layer), read `notes/TEXTKIT2_NOTES.md` first, and the review is Fable's (CLAUDE.md).
+- **Her bilingual-book agent notes** (`notes/mcp-agent-notes-2026-10-13-bilingual-book.md`, the agent's own
+  notes from building 'o ladrão de raios' through the door). Adjudicated 2026-10-13; she asked these to *"ride
+  the next fix path"*:
+  - **VX-252:** `create_note` returns take ids (+ optional `section_id`).
+  - **VX-253:** `save_lens` by take label. Design calls are in the ticket: no magic label value, a duplicate
+    label on one block, and the client-prefixed `aiLabel` vs the as-given `create_note` label.
+  - **VX-254:** content digests on write replies (stored-text digest per take; the algorithm and byte rule
+    stated).
+  - **VX-255:** `insert_blocks` into an existing note (a real R-VX184-1 parity gap). **The rung is HER CALL:**
+    EDIT vs WRITE NEW. Orchestrator lean: EDIT, since it changes what her note reads and every other act
+    that changes an existing note's content sits at edit. Write new would be defensible only as "adds, never
+    alters".
+  - **VX-256:** compact / paged `read_note` (ids-only form and/or block-range paging).
+  - **Item 9 → VX-197** (commented): the `add_take` vs `create_note` label inconsistency; U7's descriptions
+    say which applies.
+  - **Held for her assessment (not minted):** item 5 (idempotency tokens; the orchestrator proposes a
+    cheaper road) and item 8 (lenses on import; a document-format change). See the chat record of
+    2026-10-13.
+  - Item 7 is DONE in VX-184 (U4/U5 shipped note/chapter delete, remove-from-book, rename). The
+    "automation setup" pane entry is not ticketed (the agent itself said only if bulk jobs become common).
 
 ## Rules binding this run
 
