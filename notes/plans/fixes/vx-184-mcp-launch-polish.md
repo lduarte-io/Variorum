@@ -616,3 +616,48 @@ the reach map is REACH, not presentation, as for books — an archived book unde
 6. **Cleanup:** the dev instance quit BY IDENTITY (`tell application id "io.lduarte.Variorum.debug" to quit`; `pgrep`
    empty); `Tools/ScaleFixture/restore.sh <the prestage dir>` → "Restored (verified)" (the fixture, the grants, the
    voice, every act gone); the prefs plist diffed back; the clipboard untouched; the stage RELEASED.
+
+### PROVISIONALs (each wants a `notes/QUESTIONS.md` entry at the merge — the merging session's ledger)
+
+- **P-VX185-1 — the popover's words on a gathering:** (a) **as built** — the book popover's words, unchanged and
+  kind-blind: "‹client›  read · always" (the gathering's own rung — `decideGathering` decides only at read — whatever the
+  wing grant's), "through the Home wing grant", "Change…" (THE sheet on the wing's own place, "Confirming replaces the
+  grant you opened this from.") and "Revoke the Home wing grant" (W-UX-5); under the open book "through the open book" +
+  "The open book is switched in Settings ▸ MCP."; (b) a gathering-specific sentence in the kickoff's illustrative shape —
+  "claude-code can read this through the wing “Home”"; (c) (a) plus one line under the title, "A gathering is never shared
+  on its own." Built (a): "every reach surface treats gatherings the same", and R-AIR-7's "readable through the Home wing
+  grant" is the house's why. A Change… label naming the grant ("Change the Home wing grant…") would be W-UX-5's twin on
+  EVERY wider row (notes and books too) — not built; her copy pass.
+- **P-VX185-2 — Book Settings on a gathering:** (a) **as built** — unchanged: its grant row stays a BOOK's (it is a
+  GRANT face — "Share…" opens THE sheet on this reading, which the op refuses for a gathering, R-AIR-12; P-2 never draws
+  that door), so a gathering's sheet shows no sharing line and its reach face is the Bookcase icon's popover; (b) a
+  caption-only reach line on a gathering's sheet ("Readable by ‹client› through the Home wing grant."), no Share…;
+  (c) (b) plus a "Share its wing…" door opening THE sheet on the gathering's wing. Traced: `mcpBookReaches`' only app
+  consumer is the Bookcase (`ShelfViewModel.watchSharing`); `mcpBookReach` (Book Settings) now answers a gathering too, so
+  (b) would be a face change only.
+- **Argued, not provisional:** the gathering's rung is READ (it is `decideGathering`'s only rung — reading the wing
+  grant's own rung would be a parallel rule); the archived posture (the map is reach, the Bookcase presentation — an
+  archived gathering exactly as an archived book, both in the map, neither drawn); the DEBUG fixture's control part
+  (`wing=2`, staging only). **An edge recorded, not changed (the security rule's, not this unit's):** under the open book
+  with ONLY a once wing grant, `decideWing` names the once grant (it consults wing grants before the open book), so a
+  gathering's why reads "through the Home wing grant" where a book's would read "through the open book" (`decide` prefers
+  a standing grant, else the open book); nothing is spent either way (`consumes: false`), and "Revoke the Home wing grant"
+  then revokes that once grant while the open book keeps the icon. Pinned as-is (`MCPGatheringReachTests`' parity:
+  "a once wing grant reads too").
+
+### SELF-ASSESSMENT (pre-stage — the implementer's)
+
+**Against the brief:** the cause traced to the line (`kind = 'book'` in `mcpBookReaches`) and fixed at the read, not the
+face: a gathering is decided by THE one rule its kind has (`decideGathering`), read off by a pure `reach(…gathering:)`
+that is pinned to agree with `decideGathering` over a 1,024-case grid; R-VX185-1 holds by construction (the rule consults
+wing grants and the open book only) and is pinned as a guard beside red-capable positives; the fence is untouched and
+pinned; archived follows the book's rule at both levels (map + Bookcase). Red-on-old twice (pre-fix tree, then by
+revert — identical 20 issues). The face needed ZERO behaviour code: the row and the popover were already kind-blind.
+**Against the spec:** zero schema, zero `Sync/`, zero custody/keychain, zero editor seam (`git diff --name-only
+9c554e1b..HEAD` names only `Sources/VariorumCore/{Domain/MCPGrantRule,Queries/MCPShareQueries,Queries/MCPGrantQueries}`,
+the app's `ShelfView`/`ShelfViewModel` (comments), the DEBUG `ScaleFixture`, tests, this record). P1: ∝ readings ×
+approved clients, one facts row per reading, never `container`.
+**Risks I see:** (1) the walk is the first time a person sees a gathering's popover say "read" beside a wing grant she
+made at edit — honest, but it may read as a mismatch (P-VX185-1); (2) the open-book + once-wing-grant why edge above;
+(3) the field guide's lesson 7 says "a small icon beside a book means a client can reach it" — still TRUE, now
+incomplete (gatherings wear it too) — U7's truth pass should say "a book or a gathering".
