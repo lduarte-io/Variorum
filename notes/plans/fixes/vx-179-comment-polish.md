@@ -2094,3 +2094,45 @@ suites + CommentPanelFixLeg2Tests' six + the standing U3 list) and the walk rows
 knob/left edge/right edge + back up + three lane presses no panel + an entry press opens + one W-3
 wheel pass; the popover ⎋ ladder with the `comment-keys` trace streamed and READ; the sheet ladder;
 ⌘⏎ in both hosts; R1-2's click-away save re-check). Then LADDER ROUND 2.
+
+## STAGE WINDOW 5 (orchestrator, 2026-10-13 ~02:25–02:50 — the fix-leg re-run + the trace-read walk; claim vx179-tests, released clean, no instance left)
+
+**The suite run** (pinned checkout at ec4adb5d, pre-built): **70 tests / 11 suites — 67 green, 2 red,
+both in CommentPanelFixLeg2Tests:** `escapeInAPopoverClearsTheDraftFirstThenCloses` (the rewritten
+cell still fails its typed-premise at :765 — even on the delivery road the runner's popover never
+receives the key) and `closingThePopoverSavesADirtyInPlaceEdit` (NEWLY red since leg 3 — stored stays
+'First note.'). Log `/tmp/vx179-window5-suites.log`. **Both behaviors are PROVEN GREEN LIVE below**,
+so these are runner-environment divergences for a PIN-ONLY leg, not product defects — but the R1-2
+cell's flip from green (window 4) to red (this window) must be TRACED by that leg, not assumed
+harmless: leg 3's monitor-release or delivery changes may interact with the runner's popover teardown
+in a way the pin road sees and the live road doesn't.
+
+**THE WALK (dev store, the leg-3+leg-2 build; the `comment-keys` DEBUG trace STREAMED AND READ —
+`/tmp/vx179-commentkeys2.log`; captures in `/tmp/vx179-walk2/w5-*/w6-*`):**
+
+| row | result |
+|---|---|
+| R1-2 click-away save (re-check, FIRST) | **GREEN** — a dirty in-place edit in the popover survived click-away dismissal and reopened SAVED (w5-d/e). The runner's new red does not reproduce live |
+| the popover ⎋ ladder | **FULLY GREEN — and the dead-⎋ mystery SOLVED.** With keys that actually deliver (System Events): ONE ⎋ clears the draft and the popover STAYS (trace: `escape … owns=true handled=true`, area=add from the first responder), ONE more ⎋ CLOSES the popover (the explicit close rung fired past the Takes-board swallow). **Every "dead first ⎋" in windows 4–5 was cliclick's `kp:esc` NEVER REACHING the popover host** — zero trace lines for cliclick ⎋ while typing and System-Events keys all arrive; cliclick ⎋ DOES reach the sheet host. Walk-tool skew; the app was innocent; O-FL3-2's focus question dissolves with it (the composer was focused; the presses never arrived) |
+| ⌘⏎ in the popover | **GREEN** — filed a comment (count 2→3; trace `commit … handled=true`); the in-place edit's ⌘⏎ save also traced (area=comment(id)) |
+| the sheet ladder (regression) + ⌘⏎ | **GREEN** — filed via ⌘⏎ (trace: panel window IS the key window, parent=-1), draft cleared on first ⎋, sheet closed on second; both deleted after with the quiet receipt, the Deleted fold counting |
+| the lane drags (F-W-2-R's re-walk) | **ALL GREEN** — the flashed KNOB drag scrolled the card to its end; the FADED lane's left region and right edge both drag (down and up, content following, no sheet); three plain lane presses leave the door SHUT (the lane flashes the scroller — the courtesy visible); an entry press OPENS the panel. One instrument miss recorded honestly: an x=478 press (one point LEFT of the lane, which spans 479–496 by the knob's own pixels) correctly fired the door — and an x=481 retest was invalidated by a sheet left open, then re-run clean at 482 GREEN |
+| W-3 wheel pass | **GREEN** — down-wheel over the card scrolls the card, page frozen (the wheel replays were byte-identical across the leg-2 fix, and window 4 walked the full table) |
+
+**Store state after:** the walk note's comments restored byte-exact; the two test filings deleted
+(each leaving one tombstoned row in the Deleted fold — walk debris consistent with the note's
+standing debris); appearance untouched this window; no instance running.
+
+**Walk-machinery lesson (for every future walk):** cliclick KEYBOARD events (`kp:esc`) do not reach
+an NSPopover-hosted panel, while its CLICKS and DRAGS deliver fine everywhere and System Events
+keystrokes/key codes deliver everywhere — drive popover keys via `osascript` key codes only. The
+`log` shell function in her profile shadows `/usr/bin/log`; use the absolute path. The trace needs
+`--debug` (the line is debug-level; `--info` alone shows nothing).
+
+**Dispositions out of this window:**
+1. **U3 PIN LEG (headless, next):** trace WHY the runner's popover never receives delivered keys and
+   why `closingThePopoverSavesADirtyInPlaceEdit` flipped red at leg 3; remodel or honestly
+   runner-skip the two cells with the gap stated; NO product code without a traced live-relevant
+   mechanism.
+2. A ~5-minute runner re-run bundled before/with ROUND 2.
+3. **ROUND 2** (fresh fable-reviewer) over the whole fix stack with this window's evidence.
