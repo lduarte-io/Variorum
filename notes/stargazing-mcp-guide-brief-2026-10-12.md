@@ -4,9 +4,11 @@
 app will tell every connected AI to read it, so the URL is load-bearing: if the site's structure can't host this
 exact path, tell Lillian before choosing another, because the app's text has to change with it.
 
-**When:** the page must be live before the public Variorum release that links to it. That's the next MCP update,
-which is not built yet; today's build (2026-10-13) is private to Lillian and doesn't link the page. Lillian will
-say when the release is near. There's no date yet.
+**When:** the page must be live before the Variorum release that links to it. That's the next MCP update, which
+is not built yet. The current release, 0.9.5 (published 2026-10-13 for a small beta), doesn't link the page, and a
+few things the page describes arrive only with that next update: the Connect tab and its copy button, the re-setup
+rule for clients other than Claude Code and Codex, adding paragraphs at the end of a note, and the shared icon in
+the Library and the wing switcher. Lillian will say when that release is near; there's no date yet.
 
 **Who reads it:** two audiences at once — a person setting up an AI with Variorum, and the AI itself (an AI client
 may fetch this page to learn what it can do). So: plain, scannable HTML; real headings; the facts in sentences, not
@@ -147,6 +149,6 @@ As of 2026-10-13. The next MCP update adds a few, and a final list comes with it
 This version folds in what VX-184 actually built (U1–U5), so it can go to the site agent as one message. It's
 written for the public release, which is the next MCP update (VX-246): adding paragraphs to a note (VX-255), the
 re-setup rule (VX-258), the Library and wing-switcher icons (VX-268), the pane's tabs and copy button (VX-199,
-VX-205), and the updated field-guide chapter (VX-197) land there, before anything public. Your private build from
-today doesn't have those yet, and doesn't link the page. One more short update follows when VX-246 is built: its
+VX-205), and the updated field-guide chapter (VX-197) land there, before anything public. 0.9.5, released today
+for a small beta, doesn't have those yet, and doesn't link the page. One more short update follows when VX-246 is built: its
 final pane wording, the final tool list, and anything it changes here.
