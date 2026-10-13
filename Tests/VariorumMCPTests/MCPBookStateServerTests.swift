@@ -25,10 +25,13 @@ private func spec(
     .init(rung: rung, scopeKind: kind, scopeID: id, duration: duration)
 }
 
+/// VX-184 ladder round 1 (the `hersAlone` overclaim): every wire call in this
+/// suite expects the hers-alone columns byte-identical across it.
 private func call(
-    _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value]
+    _ h: ServerHarness, _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value],
+    sourceLocation: SourceLocation = #_sourceLocation
 ) async throws -> (content: [Tool.Content], isError: Bool?) {
-    try await connection.client.callTool(name: name, arguments: arguments)
+    try await callKeepingHersAlone(h, connection, name, arguments, sourceLocation: sourceLocation)
 }
 
 @Suite("VX-196 — the book's state at edit: name, finish, archive, delete", .serialized)
@@ -41,14 +44,9 @@ struct MCPBookStateServerTests {
         try h.database.read { try Queries.pendingArrivalCount($0, readingID: bookID) }
     }
 
-    /// The hers-alone columns (R-VX184-2), read whole.
-    private func hersAlone(_ h: ServerHarness) throws -> [String] {
-        try h.database.read { db in
-            try Row.fetchAll(db, sql: "SELECT id, owned, sealed_at, ai_private_at FROM reading ORDER BY id")
-                .map(\.description)
-                + Row.fetchAll(db, sql: "SELECT id, locked, ai_private_at FROM container ORDER BY id").map(\.description)
-        }
-    }
+    // (The hers-alone columns' reader moved to `ServerHarness.hersAlone()` —
+    // `MCPHersAloneSupport.swift` — VX-184 ladder round 1: every suite's wire
+    // calls now read it.)
 
     // MARK: - rename_book
 
@@ -60,9 +58,9 @@ struct MCPBookStateServerTests {
             _ = try h.operations.createReading(name: "letters", kind: .book)
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .book, book.id))
-            let before = try hersAlone(h)
+            let before = try h.hersAlone()
 
-            let renamed = try await call(connection, "rename_book", [
+            let renamed = try await call(h, connection, "rename_book", [
                 "book_id": .string(book.id), "name": .string("  Drafts, second pass  "),
             ])
             #expect(renamed.isError != true, "\(text(renamed))")
@@ -72,27 +70,27 @@ struct MCPBookStateServerTests {
             #expect(h.undoStack.topLabel == "claude-code's book name")
             #expect(h.receipts.value.last?.act.rawValue == "book name")
 
-            let same = try json(try await call(connection, "rename_book", [
+            let same = try json(try await call(h, connection, "rename_book", [
                 "book_id": .string(book.id), "name": .string("Drafts, second pass"),
             ]))
             #expect(same["changed"] as? Bool == false && h.undoStack.depth == 1, "the same name writes nothing")
 
             // E13 — her rename doors' guard, inside the act: a name a live book
             // wears (case-folded) refuses, nothing written.
-            let taken = try await call(connection, "rename_book", [
+            let taken = try await call(h, connection, "rename_book", [
                 "book_id": .string(book.id), "name": .string("LETTERS"),
             ])
             #expect(taken.isError == true && text(taken).contains("duplicateBookName"), "\(text(taken))")
-            let blank = try await call(connection, "rename_book", ["book_id": .string(book.id), "name": .string("  ")])
+            let blank = try await call(h, connection, "rename_book", ["book_id": .string(book.id), "name": .string("  ")])
             #expect(blank.isError == true, "a book needs a name")
 
             // A finished book renames freely (her op's posture).
             try h.operations.lockReading(book.id)
-            let finished = try await call(connection, "rename_book", [
+            let finished = try await call(h, connection, "rename_book", [
                 "book_id": .string(book.id), "name": .string("Drafts, done"),
             ])
             #expect(finished.isError != true, "\(text(finished))")
-            #expect(try hersAlone(h) == before, "Private, Seal and Own untouched")
+            #expect(try h.hersAlone() == before, "Private, Seal and Own untouched")
 
             #expect(try h.undoStack.undo(with: h.writeOperations) == "claude-code's book name")
             #expect(try h.undoStack.undo(with: h.writeOperations) == "claude-code's book name")
@@ -119,14 +117,14 @@ struct MCPBookStateServerTests {
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .book, book.id))
 
-            let finished = try await call(connection, "finish_book", ["book_id": .string(book.id)])
+            let finished = try await call(h, connection, "finish_book", ["book_id": .string(book.id)])
             #expect(finished.isError != true, "\(text(finished))")
             #expect(try json(finished)["finished"] as? Bool == true && json(finished)["changed"] as? Bool == true)
             #expect(try reading(h, book.id).locked)
             #expect(try pending(h, book.id) == 0, "finishing dismisses what waits at the door (§24)")
             #expect(h.undoStack.topLabel == "claude-code's finish")
             #expect(h.receipts.value.last?.act.rawValue == "finish")
-            let again = try json(try await call(connection, "finish_book", ["book_id": .string(book.id)]))
+            let again = try json(try await call(h, connection, "finish_book", ["book_id": .string(book.id)]))
             #expect(again["changed"] as? Bool == false && h.undoStack.depth == 1)
 
             #expect(try h.undoStack.undo(with: h.writeOperations) == "claude-code's finish")
@@ -139,12 +137,12 @@ struct MCPBookStateServerTests {
 
             // reopen_book — her Reopen; its undo is her Finish again.
             try h.operations.lockReading(book.id)
-            let reopened = try await call(connection, "reopen_book", ["book_id": .string(book.id)])
+            let reopened = try await call(h, connection, "reopen_book", ["book_id": .string(book.id)])
             #expect(reopened.isError != true, "\(text(reopened))")
             #expect(try json(reopened)["finished"] as? Bool == false)
             #expect(try !reading(h, book.id).locked)
             #expect(h.undoStack.topLabel == "claude-code's reopen")
-            let open = try json(try await call(connection, "reopen_book", ["book_id": .string(book.id)]))
+            let open = try json(try await call(h, connection, "reopen_book", ["book_id": .string(book.id)]))
             #expect(open["changed"] as? Bool == false)
             #expect(try h.undoStack.undo(with: h.writeOperations) == "claude-code's reopen")
             #expect(try reading(h, book.id).locked)
@@ -153,9 +151,9 @@ struct MCPBookStateServerTests {
             // and Seal is hers alone — refused in her words.
             try h.operations.unlockReading(book.id)
             _ = try h.operations.sealReading(book.id)
-            let sealedFinish = try json(try await call(connection, "finish_book", ["book_id": .string(book.id)]))
+            let sealedFinish = try json(try await call(h, connection, "finish_book", ["book_id": .string(book.id)]))
             #expect(sealedFinish["changed"] as? Bool == false)
-            let sealedReopen = try await call(connection, "reopen_book", ["book_id": .string(book.id)])
+            let sealedReopen = try await call(h, connection, "reopen_book", ["book_id": .string(book.id)])
             #expect(sealedReopen.isError == true && text(sealedReopen).contains("readingSealed"), "\(text(sealedReopen))")
             #expect(try reading(h, book.id).sealedAt != nil, "the seal is hers")
             await h.hangUp(connection)
@@ -176,16 +174,16 @@ struct MCPBookStateServerTests {
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .wing, ""))
 
-            let archived = try await call(connection, "archive_book", ["book_id": .string(book.id)])
+            let archived = try await call(h, connection, "archive_book", ["book_id": .string(book.id)])
             #expect(archived.isError != true, "\(text(archived))")
             #expect(try json(archived)["archived"] as? Bool == true)
             #expect(try reading(h, book.id).archivedAt != nil)
             #expect(h.undoStack.topLabel == "claude-code's book archiving")
-            let twice = try await call(connection, "archive_book", ["book_id": .string(book.id)])
+            let twice = try await call(h, connection, "archive_book", ["book_id": .string(book.id)])
             #expect(twice.isError == true && text(twice).contains("readingAlreadyArchived"), "her op's own refusal")
             #expect(try h.undoStack.undo(with: h.writeOperations) == "claude-code's book archiving")
             #expect(try reading(h, book.id).archivedAt == nil)
-            let notArchived = try await call(connection, "unarchive_book", ["book_id": .string(book.id)])
+            let notArchived = try await call(h, connection, "unarchive_book", ["book_id": .string(book.id)])
             #expect(notArchived.isError == true && text(notArchived).contains("readingNotArchived"))
 
             // HER archive-with-notes on the owned book: the client's unarchive
@@ -193,7 +191,7 @@ struct MCPBookStateServerTests {
             // her ORIGINAL stamp (so her later unarchive returns the note too).
             _ = try h.operations.archiveReadingWithNotes(owned.id)
             let stamp = try #require(try reading(h, owned.id).archivedAt)
-            let unarchived = try await call(connection, "unarchive_book", ["book_id": .string(owned.id)])
+            let unarchived = try await call(h, connection, "unarchive_book", ["book_id": .string(owned.id)])
             #expect(unarchived.isError != true, "\(text(unarchived))")
             #expect(try reading(h, owned.id).archivedAt == nil)
             let noteArchivedAt = { try h.database.read { try Container.fetchOne($0, key: member.id)?.archivedAt } }
@@ -233,7 +231,7 @@ struct MCPBookStateServerTests {
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .wing, ""))
 
-            let deleted = try await call(connection, "delete_book", ["book_id": .string(book.id)])
+            let deleted = try await call(h, connection, "delete_book", ["book_id": .string(book.id)])
             #expect(deleted.isError != true, "\(text(deleted))")
             #expect(try json(deleted)["deleted"] as? Bool == true && json(deleted)["notes_released"] as? Bool == false)
             let stamp = try #require(try reading(h, book.id).deletedAt)
@@ -254,7 +252,7 @@ struct MCPBookStateServerTests {
 
             // An OWNED book's plain delete is her confirm's "book only": the
             // notes go back to the Pool, whole.
-            let ownedDeleted = try await call(connection, "delete_book", ["book_id": .string(owned.id)])
+            let ownedDeleted = try await call(h, connection, "delete_book", ["book_id": .string(owned.id)])
             #expect(ownedDeleted.isError != true, "\(text(ownedDeleted))")
             #expect(try json(ownedDeleted)["notes_released"] as? Bool == true)
             #expect(try await h.database.read { try Container.fetchOne($0, key: ownedNote.id)?.deletedAt } == nil)
@@ -268,7 +266,7 @@ struct MCPBookStateServerTests {
                                ("rename_book", privateBook.id), ("delete_book", "no-such-book")] {
                 var arguments: [String: Value] = ["book_id": .string(id)]
                 if tool == "rename_book" { arguments["name"] = .string("x") }
-                let refused = try await call(connection, tool, arguments)
+                let refused = try await call(h, connection, tool, arguments)
                 #expect(refused.isError == true && text(refused) == unshared, "\(tool) \(id): \(text(refused))")
             }
             #expect(try reading(h, dailyID).deletedAt == nil && reading(h, dailyID).archivedAt == nil)
@@ -297,7 +295,7 @@ struct MCPBookStateServerTests {
                 ("rename_book", ["name": .string("x")]), ("finish_book", [:]), ("reopen_book", [:]),
                 ("archive_book", [:]), ("unarchive_book", [:]), ("delete_book", [:]),
             ] {
-                let refused = try await call(connection, tool, ["book_id": .string(gathering.id)].merging(extra) { $1 })
+                let refused = try await call(h, connection, tool, ["book_id": .string(gathering.id)].merging(extra) { $1 })
                 #expect(refused.isError == true && text(refused).contains("is a gathering"), "\(tool): \(text(refused))")
                 #expect(!text(refused).contains("doesn't exist"))
             }
@@ -308,7 +306,7 @@ struct MCPBookStateServerTests {
             // A BOOK grant never reaches a gathering: the one answer.
             let bookOnly = try await h.connect(as: "booker")
             _ = try h.approve("booker", spec(.edit, .book, book.id))
-            let notReached = try await call(bookOnly, "delete_book", ["book_id": .string(gathering.id)])
+            let notReached = try await call(h, bookOnly, "delete_book", ["book_id": .string(gathering.id)])
             #expect(notReached.isError == true && text(notReached) == MCPRefusalCopy.words(.notShared, .book))
             await h.hangUp(bookOnly)
 
@@ -319,7 +317,7 @@ struct MCPBookStateServerTests {
                 ("rename_book", ["name": .string("x")]), ("finish_book", [:]), ("archive_book", [:]),
                 ("delete_book", [:]),
             ] {
-                let refused = try await call(maker, tool, ["book_id": .string(book.id)].merging(extra) { $1 })
+                let refused = try await call(h, maker, tool, ["book_id": .string(book.id)].merging(extra) { $1 })
                 #expect(refused.isError == true
                         && text(refused).hasPrefix("This client may only read, suggest and write new here."),
                         "\(tool): \(text(refused))")

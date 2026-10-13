@@ -24,10 +24,13 @@ private func spec(
     .init(rung: rung, scopeKind: kind, scopeID: id, duration: duration)
 }
 
+/// VX-184 ladder round 1 (the `hersAlone` overclaim): every wire call in this
+/// suite expects the hers-alone columns byte-identical across it.
 private func call(
-    _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value]
+    _ h: ServerHarness, _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value],
+    sourceLocation: SourceLocation = #_sourceLocation
 ) async throws -> (content: [Tool.Content], isError: Bool?) {
-    try await connection.client.callTool(name: name, arguments: arguments)
+    try await callKeepingHersAlone(h, connection, name, arguments, sourceLocation: sourceLocation)
 }
 
 @Suite("VX-196 — a book's chapters at edit", .serialized)
@@ -56,7 +59,7 @@ struct MCPChapterEditServerTests {
             try h.operations.assignPostToSection(note.id, in: book.id, section: two.id)
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.read, .book, book.id))
-            let listed = try json(try await call(connection, "list_notes", ["book_id": .string(book.id)]))
+            let listed = try json(try await call(h, connection, "list_notes", ["book_id": .string(book.id)]))
             let carried = try #require(listed["chapters"] as? [[String: Any]], "\(listed)")
             #expect(carried.map { $0["section_id"] as? String } == [one.id, two.id])
             #expect(carried.map { $0["name"] as? String } == ["one", "two"], "the empty chapter is listed too")
@@ -81,7 +84,7 @@ struct MCPChapterEditServerTests {
             _ = try h.approve("claude-code", spec(.edit, .wing, ""))
 
             // rename_chapter — her renameSection: trimmed; the same name writes nothing.
-            let renamed = try await call(connection, "rename_chapter", [
+            let renamed = try await call(h, connection, "rename_chapter", [
                 "section_id": .string(two.id), "name": .string("  two, revised  "),
             ])
             #expect(renamed.isError != true, "\(text(renamed))")
@@ -89,30 +92,30 @@ struct MCPChapterEditServerTests {
             #expect(try chapters(h, book.id) == ["one", "two, revised", "three"])
             #expect(h.undoStack.topLabel == "claude-code's chapter name")
             #expect(h.receipts.value.last?.act.rawValue == "chapter name")
-            let same = try json(try await call(connection, "rename_chapter", [
+            let same = try json(try await call(h, connection, "rename_chapter", [
                 "section_id": .string(two.id), "name": .string("two, revised"),
             ]))
             #expect(same["changed"] as? Bool == false && h.undoStack.depth == 1)
-            let blank = try await call(connection, "rename_chapter", ["section_id": .string(two.id), "name": .string(" ")])
+            let blank = try await call(h, connection, "rename_chapter", ["section_id": .string(two.id), "name": .string(" ")])
             #expect(blank.isError == true)
 
             // move_chapter — her reorderSection, one road at a time.
-            let moved = try await call(connection, "move_chapter", [
+            let moved = try await call(h, connection, "move_chapter", [
                 "section_id": .string(three.id), "before_section_id": .string(one.id),
             ])
             #expect(moved.isError != true, "\(text(moved))")
             #expect(try chapters(h, book.id) == ["three", "one", "two, revised"])
             #expect(h.undoStack.topLabel == "claude-code's chapter move")
-            _ = try await call(connection, "move_chapter", ["section_id": .string(three.id), "at": .string("end")])
+            _ = try await call(h, connection, "move_chapter", ["section_id": .string(three.id), "at": .string("end")])
             #expect(try chapters(h, book.id) == ["one", "two, revised", "three"])
-            let elsewhere = try await call(connection, "move_chapter", [
+            let elsewhere = try await call(h, connection, "move_chapter", [
                 "section_id": .string(one.id), "after_section_id": .string(foreign.id),
             ])
             #expect(elsewhere.isError == true, "an anchor of another book: \(text(elsewhere))")
 
             // delete_chapter — her deleteSection: the note keeps its pointer
             // (it reads unfiled), and the chapter comes back with it.
-            let deleted = try await call(connection, "delete_chapter", ["section_id": .string(one.id)])
+            let deleted = try await call(h, connection, "delete_chapter", ["section_id": .string(one.id)])
             #expect(deleted.isError != true, "\(text(deleted))")
             #expect(try chapters(h, book.id) == ["two, revised", "three"])
             #expect(try await h.database.read { db in
@@ -120,7 +123,7 @@ struct MCPChapterEditServerTests {
                                     arguments: [note.id])
             } == one.id, "the membership's pointer is never rewritten")
             #expect(h.undoStack.topLabel == "claude-code's chapter deletion")
-            let listed = try json(try await call(connection, "list_notes", ["book_id": .string(book.id)]))
+            let listed = try json(try await call(h, connection, "list_notes", ["book_id": .string(book.id)]))
             #expect(((listed["notes"] as? [[String: Any]])?.first?["section_id"]) == nil, "the note reads unfiled")
 
             #expect(try h.undoStack.undo(with: h.writeOperations) == "claude-code's chapter deletion")
@@ -134,7 +137,7 @@ struct MCPChapterEditServerTests {
 
             // A finished book: a chapter's NAME stays free; its structure is frozen.
             try h.operations.lockReading(book.id)
-            let finishedRename = try await call(connection, "rename_chapter", [
+            let finishedRename = try await call(h, connection, "rename_chapter", [
                 "section_id": .string(three.id), "name": .string("coda"),
             ])
             #expect(finishedRename.isError != true, "\(text(finishedRename))")
@@ -142,7 +145,7 @@ struct MCPChapterEditServerTests {
                 ("delete_chapter", ["section_id": .string(three.id)]),
                 ("move_chapter", ["section_id": .string(three.id), "at": .string("start")]),
             ] {
-                let refused = try await call(connection, tool, arguments)
+                let refused = try await call(h, connection, tool, arguments)
                 #expect(refused.isError == true && text(refused).contains("lockedReading"), "\(tool): \(text(refused))")
             }
             #expect(try chapters(h, book.id) == ["one", "two, revised", "coda"])
@@ -166,7 +169,7 @@ struct MCPChapterEditServerTests {
                 ("delete_chapter", ["section_id": .string(chapter.id)]),
                 ("move_chapter", ["section_id": .string(chapter.id), "at": .string("end")]),
             ] {
-                let refused = try await call(maker, tool, arguments)
+                let refused = try await call(h, maker, tool, arguments)
                 #expect(refused.isError == true
                         && text(refused).hasPrefix("This client may only read, suggest and write new here."),
                         "\(tool): \(text(refused))")
@@ -182,7 +185,7 @@ struct MCPChapterEditServerTests {
                 ("delete_chapter", ["section_id": .string(theirs.id)]),
                 ("move_chapter", ["section_id": .string("no-such-chapter"), "at": .string("end")]),
             ] {
-                let refused = try await call(connection, tool, arguments)
+                let refused = try await call(h, connection, tool, arguments)
                 #expect(refused.isError == true && text(refused) == unshared, "\(tool): \(text(refused))")
             }
             #expect(try chapters(h, outside.id) == ["theirs"] && chapters(h, book.id) == ["one"])

@@ -24,10 +24,13 @@ private func spec(
     .init(rung: rung, scopeKind: kind, scopeID: id, duration: duration)
 }
 
+/// VX-184 ladder round 1 (the `hersAlone` overclaim): every wire call in this
+/// suite expects the hers-alone columns byte-identical across it.
 private func call(
-    _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value]
+    _ h: ServerHarness, _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value],
+    sourceLocation: SourceLocation = #_sourceLocation
 ) async throws -> (content: [Tool.Content], isError: Bool?) {
-    try await connection.client.callTool(name: name, arguments: arguments)
+    try await callKeepingHersAlone(h, connection, name, arguments, sourceLocation: sourceLocation)
 }
 
 @Suite("VX-196 — a book's membership and order at edit", .serialized)
@@ -68,7 +71,7 @@ struct MCPBookMembershipServerTests {
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .wing, ""))
 
-            let removed = try await call(connection, "remove_note_from_book", [
+            let removed = try await call(h, connection, "remove_note_from_book", [
                 "book_id": .string(book.id), "note_id": .string(note.id),
             ])
             #expect(removed.isError != true, "\(text(removed))")
@@ -90,7 +93,7 @@ struct MCPBookMembershipServerTests {
             #expect(try members(h, book.id).isEmpty)
 
             // An OWNED book: her "Release" — the note goes back to the Pool.
-            let released = try await call(connection, "remove_note_from_book", [
+            let released = try await call(h, connection, "remove_note_from_book", [
                 "book_id": .string(owned.id), "note_id": .string(ownedNote.id),
             ])
             #expect(released.isError != true, "\(text(released))")
@@ -100,14 +103,14 @@ struct MCPBookMembershipServerTests {
                     "the note itself untouched")
 
             // A note this client reads that is not in the book: said so.
-            let notIn = try await call(connection, "remove_note_from_book", [
+            let notIn = try await call(h, connection, "remove_note_from_book", [
                 "book_id": .string(other.id), "note_id": .string(stray.id),
             ])
             #expect(notIn.isError == true && text(notIn).contains("isn't in"), "\(text(notIn))")
 
             // A finished book refuses in her words.
             try h.operations.lockReading(other.id)
-            let frozen = try await call(connection, "remove_note_from_book", [
+            let frozen = try await call(h, connection, "remove_note_from_book", [
                 "book_id": .string(other.id), "note_id": .string(note.id),
             ])
             #expect(frozen.isError == true && text(frozen).contains("lockedReading"), "\(text(frozen))")
@@ -140,7 +143,7 @@ struct MCPBookMembershipServerTests {
                 ("move_note_in_book", ["book_id": .string(book.id), "note_id": .string(open.id),
                                        "after_note_id": .string(privateNote.id)]),
             ] {
-                let refused = try await call(connection, tool, arguments)
+                let refused = try await call(h, connection, tool, arguments)
                 #expect(refused.isError == true && text(refused) == unshared, "\(tool) \(arguments): \(text(refused))")
             }
             #expect(try members(h, book.id).sorted() == [open.id, privateNote.id].sorted())
@@ -163,18 +166,18 @@ struct MCPBookMembershipServerTests {
             _ = try h.approve("claude-code", spec(.edit, .book, book.id))
             #expect(try members(h, book.id) == [one, two, three])
 
-            let moved = try await call(connection, "move_note_in_book", [
+            let moved = try await call(h, connection, "move_note_in_book", [
                 "book_id": .string(book.id), "note_id": .string(three), "before_note_id": .string(one),
             ])
             #expect(moved.isError != true, "\(text(moved))")
             #expect(try members(h, book.id) == [three, one, two])
             #expect(h.undoStack.topLabel == "claude-code's move in a book")
             #expect(h.receipts.value.last?.act.rawValue == "move in a book")
-            _ = try await call(connection, "move_note_in_book", [
+            _ = try await call(h, connection, "move_note_in_book", [
                 "book_id": .string(book.id), "note_id": .string(one), "at": .string("end"),
             ])
             #expect(try members(h, book.id) == [three, two, one])
-            _ = try await call(connection, "move_note_in_book", [
+            _ = try await call(h, connection, "move_note_in_book", [
                 "book_id": .string(book.id), "note_id": .string(three), "after_note_id": .string(two),
             ])
             #expect(try members(h, book.id) == [two, three, one])
@@ -187,19 +190,19 @@ struct MCPBookMembershipServerTests {
             #expect(try members(h, book.id) == [three, one, two])
 
             // One road at a time, and never next to itself.
-            let both = try await call(connection, "move_note_in_book", [
+            let both = try await call(h, connection, "move_note_in_book", [
                 "book_id": .string(book.id), "note_id": .string(one), "at": .string("end"),
                 "before_note_id": .string(two),
             ])
             #expect(both.isError == true)
-            let itself = try await call(connection, "move_note_in_book", [
+            let itself = try await call(h, connection, "move_note_in_book", [
                 "book_id": .string(book.id), "note_id": .string(one), "after_note_id": .string(one),
             ])
             #expect(itself.isError == true)
 
             // A book that sorts itself takes no hand placing (her doors' gate).
             try h.operations.setReadingSort(book.id, field: .entryDate, direction: .asc)
-            let sorted = try await call(connection, "move_note_in_book", [
+            let sorted = try await call(h, connection, "move_note_in_book", [
                 "book_id": .string(book.id), "note_id": .string(one), "at": .string("start"),
             ])
             #expect(sorted.isError == true && text(sorted).contains("by hand"), "\(text(sorted))")
@@ -207,7 +210,7 @@ struct MCPBookMembershipServerTests {
             // A finished book refuses in her words.
             try h.operations.setReadingSort(book.id, field: .manual, direction: .asc)
             try h.operations.lockReading(book.id)
-            let frozen = try await call(connection, "move_note_in_book", [
+            let frozen = try await call(h, connection, "move_note_in_book", [
                 "book_id": .string(book.id), "note_id": .string(one), "at": .string("start"),
             ])
             #expect(frozen.isError == true && text(frozen).contains("lockedReading"), "\(text(frozen))")
@@ -236,7 +239,7 @@ struct MCPBookMembershipServerTests {
                 ("remove_note_from_book", ["book_id": .string(book.id), "note_id": .string(note.id)]),
                 ("move_note_in_book", ["book_id": .string(book.id), "note_id": .string(note.id), "at": .string("end")]),
             ] {
-                let refused = try await call(maker, tool, arguments)
+                let refused = try await call(h, maker, tool, arguments)
                 #expect(refused.isError == true
                         && text(refused).hasPrefix("This client may only read, suggest and write new here."),
                         "\(tool): \(text(refused))")
@@ -246,7 +249,7 @@ struct MCPBookMembershipServerTests {
 
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .wing, ""))
-            let fromGathering = try await call(connection, "remove_note_from_book", [
+            let fromGathering = try await call(h, connection, "remove_note_from_book", [
                 "book_id": .string(gathering.id), "note_id": .string(note.id),
             ])
             #expect(fromGathering.isError == true && text(fromGathering).contains("is a gathering"), "\(text(fromGathering))")

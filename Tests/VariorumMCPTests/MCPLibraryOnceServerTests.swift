@@ -22,10 +22,13 @@ private func spec(
     .init(rung: rung, scopeKind: kind, scopeID: id, duration: duration)
 }
 
+/// VX-184 ladder round 1 (the `hersAlone` overclaim): every wire call in this
+/// suite expects the hers-alone columns byte-identical across it.
 private func call(
-    _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value]
+    _ h: ServerHarness, _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value],
+    sourceLocation: SourceLocation = #_sourceLocation
 ) async throws -> (content: [Tool.Content], isError: Bool?) {
-    try await connection.client.callTool(name: name, arguments: arguments)
+    try await callKeepingHersAlone(h, connection, name, arguments, sourceLocation: sourceLocation)
 }
 
 @Suite("VX-196 — every library-parity tool spends a once grant inside its act", .serialized)
@@ -83,12 +86,12 @@ struct MCPLibraryOnceServerTests {
                 if tool == "reopen_book" { try h.operations.lockReading(w.book.id) }
                 if tool == "unarchive_book" { try h.operations.archiveReading(w.book.id) }
                 let grantID = try h.operations.grantMCPAccess(clientID, spec(.edit, .book, w.book.id, .once))
-                let first = try await call(connection, tool, arguments(w))
+                let first = try await call(h, connection, tool, arguments(w))
                 #expect(first.isError != true, "\(tool) lands on its once grant: \(text(first))")
                 #expect(try spent(h, grantID), "\(tool) spent its once grant in its own act")
                 // The probe: a second edit act on that book (a deleted book is
                 // the one answer either way; its probe is the chapter's book).
-                let second = try await call(connection, "rename_chapter", [
+                let second = try await call(h, connection, "rename_chapter", [
                     "section_id": .string(w.otherChapter), "name": .string("after \(tool)"),
                 ])
                 #expect(second.isError == true, "\(tool) spent the once grant — one write means one write")
@@ -112,10 +115,10 @@ struct MCPLibraryOnceServerTests {
                 let target = try h.operations.createPost(title: "a note for \(tool)")
                 if tool == "unarchive_note" { try h.operations.archiveContainer(target.id) }
                 let grantID = try h.operations.grantMCPAccess(clientID, spec(.edit, .note, target.id, .once))
-                let first = try await call(connection, tool, ["note_id": .string(target.id)])
+                let first = try await call(h, connection, tool, ["note_id": .string(target.id)])
                 #expect(first.isError != true, "\(tool) lands on its once grant: \(text(first))")
                 #expect(try spent(h, grantID), "\(tool) spent its once grant in its own act")
-                let second = try await call(connection, "rename_note", [
+                let second = try await call(h, connection, "rename_note", [
                     "note_id": .string(target.id), "title": .string("after \(tool)"),
                 ])
                 #expect(second.isError == true, "\(tool) spent the once grant — one write means one write")
@@ -151,10 +154,10 @@ struct MCPLibraryOnceServerTests {
                     try h.operations.setReadingSort(w.book.id, field: .entryDate, direction: .asc)
                 }
                 let grantID = try h.operations.grantMCPAccess(clientID, spec(.edit, .book, w.book.id, .once))
-                let refused = try await call(connection, tool, arguments(w))
+                let refused = try await call(h, connection, tool, arguments(w))
                 #expect(refused.isError == true, "\(tool) refuses: \(text(refused))")
                 #expect(try !spent(h, grantID), "\(tool) refused — its stamp rolled back")
-                let then = try await call(connection, "rename_chapter", [
+                let then = try await call(h, connection, "rename_chapter", [
                     "section_id": .string(w.otherChapter), "name": .string("after a refused \(tool)"),
                 ])
                 #expect(then.isError != true, "a refused \(tool) spent nothing: \(text(then))")

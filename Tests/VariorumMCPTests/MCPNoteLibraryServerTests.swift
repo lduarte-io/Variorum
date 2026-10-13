@@ -22,10 +22,13 @@ private func spec(
     .init(rung: rung, scopeKind: kind, scopeID: id, duration: duration)
 }
 
+/// VX-184 ladder round 1 (the `hersAlone` overclaim): every wire call in this
+/// suite expects the hers-alone columns byte-identical across it.
 private func call(
-    _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value]
+    _ h: ServerHarness, _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value],
+    sourceLocation: SourceLocation = #_sourceLocation
 ) async throws -> (content: [Tool.Content], isError: Bool?) {
-    try await connection.client.callTool(name: name, arguments: arguments)
+    try await callKeepingHersAlone(h, connection, name, arguments, sourceLocation: sourceLocation)
 }
 
 @Suite("VX-196 — the note in the library at edit: delete, archive", .serialized)
@@ -49,7 +52,7 @@ struct MCPNoteLibraryServerTests {
             // A sealed note may still be deleted (§9 — the post itself may be
             // archived, deleted, retitled…).
             try h.operations.lockPost(target.id)
-            let deleted = try await call(connection, "delete_note", ["note_id": .string(target.id)])
+            let deleted = try await call(h, connection, "delete_note", ["note_id": .string(target.id)])
             #expect(deleted.isError != true, "\(text(deleted))")
             #expect(try json(deleted)["deleted"] as? Bool == true)
             let stamp = try #require(try note(h, target.id).deletedAt)
@@ -57,7 +60,7 @@ struct MCPNoteLibraryServerTests {
             #expect(try await h.database.read { try Queries.noteMemberships($0, postID: target.id) }.isEmpty)
             #expect(h.undoStack.topLabel == "claude-code's note deletion")
             #expect(h.receipts.value.last?.act.rawValue == "note deletion")
-            let gone = try await call(connection, "delete_note", ["note_id": .string(target.id)])
+            let gone = try await call(h, connection, "delete_note", ["note_id": .string(target.id)])
             #expect(gone.isError == true && text(gone) == MCPRefusalCopy.words(.notShared, .note),
                     "a deleted note lives nowhere the wire reaches — the one answer")
 
@@ -89,17 +92,17 @@ struct MCPNoteLibraryServerTests {
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .wing, ""))
 
-            let archived = try await call(connection, "archive_note", ["note_id": .string(target.id)])
+            let archived = try await call(h, connection, "archive_note", ["note_id": .string(target.id)])
             #expect(archived.isError != true, "\(text(archived))")
             #expect(try json(archived)["archived"] as? Bool == true && json(archived)["changed"] as? Bool == true)
             let stamp = try #require(try note(h, target.id).archivedAt)
             #expect(h.undoStack.topLabel == "claude-code's note archiving")
-            let twice = try json(try await call(connection, "archive_note", ["note_id": .string(target.id)]))
+            let twice = try json(try await call(h, connection, "archive_note", ["note_id": .string(target.id)]))
             #expect(twice["changed"] as? Bool == false && h.undoStack.depth == 1)
             #expect(try note(h, target.id).archivedAt == stamp, "never re-stamped")
             #expect(try h.undoStack.undo(with: h.writeOperations) == "claude-code's note archiving")
             #expect(try note(h, target.id).archivedAt == nil)
-            let live = try json(try await call(connection, "unarchive_note", ["note_id": .string(target.id)]))
+            let live = try json(try await call(h, connection, "unarchive_note", ["note_id": .string(target.id)]))
             #expect(live["changed"] as? Bool == false)
 
             // A note archived WITH its owned book (her door): the client's
@@ -107,7 +110,7 @@ struct MCPNoteLibraryServerTests {
             // her book's unarchive still returns it.
             _ = try h.operations.archiveReadingWithNotes(owned.id)
             let herStamp = try #require(try note(h, member.id).archivedAt)
-            let unarchived = try await call(connection, "unarchive_note", ["note_id": .string(member.id)])
+            let unarchived = try await call(h, connection, "unarchive_note", ["note_id": .string(member.id)])
             #expect(unarchived.isError != true, "\(text(unarchived))")
             #expect(try note(h, member.id).archivedAt == nil)
             #expect(h.undoStack.topLabel == "claude-code's note unarchiving")
@@ -138,7 +141,7 @@ struct MCPNoteLibraryServerTests {
             let maker = try await h.connect(as: "maker")
             _ = try h.approve("maker", spec(.writeNew, .book, book.id))
             for tool in ["delete_note", "archive_note", "unarchive_note"] {
-                let refused = try await call(maker, tool, ["note_id": .string(target.id)])
+                let refused = try await call(h, maker, tool, ["note_id": .string(target.id)])
                 #expect(refused.isError == true
                         && text(refused).hasPrefix("This client may only read, suggest and write new here."),
                         "\(tool): \(text(refused))")
@@ -151,7 +154,7 @@ struct MCPNoteLibraryServerTests {
             let unshared = MCPRefusalCopy.words(.notShared, .note)
             for tool in ["delete_note", "archive_note", "unarchive_note"] {
                 for id in [outside.id, privateNote.id, version.id, "no-such-note"] {
-                    let refused = try await call(connection, tool, ["note_id": .string(id)])
+                    let refused = try await call(h, connection, tool, ["note_id": .string(id)])
                     #expect(refused.isError == true && text(refused) == unshared, "\(tool) \(id): \(text(refused))")
                 }
             }
