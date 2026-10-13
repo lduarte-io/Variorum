@@ -442,3 +442,65 @@ extension TakesParkedFollowTests {
         }
     }
 }
+
+// MARK: - The transit rule (the sanity pass's one issue, confirmed by the
+// reviewer — the run record's ladder section; expected RED on the pre-fix
+// tree except the labelled guard)
+
+@MainActor
+extension TakesParkedFollowTests {
+    /// **THE SANITY-PASS ISSUE (RED ON THE PRE-FIX TREE).** A chained step
+    /// replaces the park (B → C) while B's own adoption is still in flight;
+    /// that adoption — the board's OWN overtaken pick arriving late, fetched
+    /// after B's write and before C's — must read as TRANSIT, never as "the
+    /// world moved on": the C park holds, and the follow lands when C renders.
+    @Test func theOvertakenStepsOwnAdoptionKeepsTheForwardPark() async throws {
+        try await withParkWorld("gaptransit") { session, db, world, model in
+            let (columnID, _, _) = try await lensWithRing(session, db, world, model)
+
+            await model.stepTakes(by: 1)   // parks B; writes B
+            // The overtaken projection: fetched after B's write, before C's.
+            let pB = try await db.read { [world] in
+                try Queries.takesProjection($0, post: world.postID)
+            }
+            await model.stepTakes(by: 1)   // mid-gap: parks C; writes C
+            let parked = Key(columnID: columnID, blockID: world.blockID, variantID: world.takeC)
+            #expect(model.parkedFollow == parked, "fixture: the chained step parked C")
+
+            model.adopt(pB)                // B's adoption lands late
+            #expect(model.parkedFollow == parked,
+                    "the overtaken step's own adoption is transit — the forward park holds")
+            try await adoptFresh(model, db, world.postID)   // C arrives
+            #expect(model.parkedFollow == parked)
+            model.paneRendered(parked)
+            #expect(model.authority.livePane == parked, "the follow lands on C")
+        }
+    }
+
+    /// GUARD (green on both sides): transit never blunts rider 1 — an
+    /// adoption moving the cell to a take that is NEITHER the park NOR an
+    /// overtaken transit take still drops the park (the world really moved).
+    @Test func aTrueWorldMoveStillDropsAChainedPark() async throws {
+        try await withParkWorld("gaptruemove") { session, db, world, model in
+            let (columnID, lensID, _) = try await lensWithRing(session, db, world, model)
+
+            await model.stepTakes(by: 1)   // parks B; writes B
+            let pB = try await db.read { [world] in
+                try Queries.takesProjection($0, post: world.postID)
+            }
+            await model.stepTakes(by: 1)   // parks C (transit carries B)
+            model.adopt(pB)                // transit: the park holds
+            let parked = Key(columnID: columnID, blockID: world.blockID, variantID: world.takeC)
+            #expect(model.parkedFollow == parked, "fixture: the chained park survived B's adoption")
+
+            // The world really moves on: an EXTERNAL write picks A (not the
+            // park, not transit — the cell currently shows B).
+            _ = try session.operations.setLensChoice(
+                lens: lensID, block: world.blockID, variant: world.takeA)
+            try await adoptFresh(model, db, world.postID)
+            #expect(model.parkedFollow == nil, "rider 1 holds: a true world-move drops the park")
+            model.paneRendered(parked)
+            #expect(model.authority.livePane == nil, "the spent park cannot land")
+        }
+    }
+}
