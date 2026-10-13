@@ -12,6 +12,17 @@ hallucination guard (pin-before-fix PER MEMBER, red-on-old verified by revert) b
 before public release — when the app says Castle, nothing current may still open the old way. Defensive work on
 her code, at her request.
 
+**HER OVERNIGHT MANDATE (2026-10-13, live at the run, verbatim):** *"I'm going to bed and I want you to continue
+working through these items throughout the night, culminating in an applications refresh. if someone merges in
+before you, merge their work into yours and then merge. I'll read and handle my handoff from you on all of these
+items in the morning. If you recommend that I look more into a specific issue or mint a new ticket, I'll see
+that. If you find anything that should block launch, tell me explicitly as a high priority item. GOod luck with
+the rest of your work tonight."* Read as: the full run to closeout tonight — units, ladder, walk, the QUESTIONS
+#215 copy bundle (PROVISIONAL, her morning eye), the PR merge (merge-main-in first if others merged), the
+`/Applications` refresh via the coordinator's window — with the morning handoff
+(`notes/handoffs/vx-201-handoff.md`, her checklist at the top) carrying every held item; anything
+launch-blocking is flagged HIGH PRIORITY and explicit at the handoff's head.
+
 ## KICKOFF MESSAGE (paste into a fresh session)
 
 > /architect-phase vx-201
