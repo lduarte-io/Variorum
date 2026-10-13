@@ -8,7 +8,7 @@
     {
       "appearance": "dark",
       "value": {
-        "solid": "srgb:0.00000,0.00000,0.00000,1.00000"
+        "solid": "srgb:0.98824,0.07059,0.04706,1.00000"
       }
     }
   ],
@@ -23,11 +23,11 @@
             },
             {
               "appearance": "dark",
-              "value": "cards-dark.svg"
+              "value": "cards.svg"
             },
             {
               "appearance": "tinted",
-              "value": "cards-dark.svg"
+              "value": "cards.svg"
             }
           ],
           "name": "cards"
