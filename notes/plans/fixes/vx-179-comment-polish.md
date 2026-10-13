@@ -1076,5 +1076,5 @@ red was the pin's environment, never the product: proven by reproducing it with 
 and the old settle.
 
 **PENDING (stage):** the runner re-verification — `-only-testing:VariorumTests/CommentTextAreaMountedTests`
-(expect 10/10 incl. this cell) or the whole U3 list again; optionally R-c through the test target (expect
+(expect all 9 tests — 13 cases with the voice arguments — green incl. this cell) or the whole U3 list again; optionally R-c through the test target (expect
 exactly this cell red: 3 issues at the served / [true] / [true, false] expectations).
