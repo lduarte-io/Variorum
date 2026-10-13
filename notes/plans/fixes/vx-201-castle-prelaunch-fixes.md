@@ -2106,3 +2106,23 @@ pinned (`!consent.contains("ACCOUNT")`); VX-233's fix harness-side only (diff ve
 at the stage for U1–U4 per windows B/C/D with U5's six cycles honestly PENDING window E phase 2 (declared,
 queued, no code change rides them); nothing in the diff copies text across entities, tracks word-level change,
 or scales with corpus size. Findings go to the implementer verbatim per the cross-model flow.
+
+### LADDER R1 — THE IMPLEMENTER'S AGREE/DISPUTE (the U5 implementer answered — U1/U2's sessions predate the
+compaction seam, and it holds the deepest live context on belt c / corner 45 / the runner's roads; verbatim-
+faithful summary, its full text in the session transcript)
+- **R1-1 — AGREE** (MINOR stands), with a THIRD orphan road of the same class (`writeMarker`'s database write
+  throwing after the flag is set) and the effect NARROWED: the flag gates only `effectiveGate`'s pre-open
+  landing — the posture facts ignore it (the route still reads Standard-waiting and opens silently) and the
+  reconcile's Apple arm checks the MARKER, not the flag, so it still lands at every ready. A stale flag skips
+  only the route-to-next-ready window. Fail-safe confirmed. Placement note for the fix: the clear should sit
+  where no runner road can be mid-flight within the same reconcile (model roads set the controller's
+  `switchInProgress` around the runner call).
+- **R1-2 — AGREE** (pre-existing, exactly F-U4-6 examined; ticket, not a run fix). No correctness hazard:
+  FollowSheet starts no work on appear; `closeFollow()` nils the model and both sheets fall.
+- **R1-3 — AGREE** (NIT; the window is real — the derive catch clears it but a death there orphans it; the one
+  stale-flag outcome stays materially honest; fold the clear into R1-1's marker-less-ready reconciliation).
+- **R1-4 — AGREE** (NIT; the silence predates U1 — the old detached save discarded its result too; one
+  `logger.notice` on the false return is the matching repair).
+ZERO DISPUTES. The reviewer now makes the final calls and implements its confirmed fixes itself (authorized by
+the orchestrator's follow-up message, per the REVIEW_PROMPT's own rule), then the suite green and one
+implementer sanity pass; round 2 re-reviews the fixes.
