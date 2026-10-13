@@ -1497,3 +1497,111 @@ Backlog, Improvement, pointer to THE TRACES above). A design decision for her, n
 
 **Next:** the U3 FIX LEG (F-W-3, F-W-4, R1-2) dispatches now, strictly sequential; then the stage
 window (the PENDING list above + U3's rows), then round 2.
+
+## U3 FIX LEG 2 (implementer, 2026-10-13 — the walk's F-W-3/F-W-4, ladder R1-2)
+
+**NOT DONE BY THIS LEG (first line, by the contract):** no `xcodebuild test`, no app launch, no window
+on screen, no stage act. Every trace is an OFFSCREEN probe against the real Debug module (U3's
+`real/build.sh` road), kept in the worktree's gitignored `scratchpad/vx179-u3-fix2/`. The pins' RUN and
+the re-walk of the three rows are PENDING (the runner's next window). `CommentCard.swift` /
+`CommentCardTests.swift` (U2's) are untouched.
+
+**Probe machinery (honesty — U2's accepted road, plus one new piece, disclosed):** throwaway in-memory
+store injected with `prepareDependencies` before anything runs (the default store folder checked absent
+at start and at exit, every run: never created); `.prohibited` activation (never active, never key);
+events only through the app's own queue (`postEvent` → `nextEvent` → `sendEvent`), nothing posted to the
+system. Panels traced in a never-ordered-in borderless window; the POPOVER traces need a real popover, so
+— the new piece — an anchor window is ordered in OFF-DISPLAY at (−20000, −20000) with alpha 0 (U2's
+machinery) and the popover's own window is found the turn it appears, set alpha 0 and checked against
+every `NSScreen` (ordered out and the run aborted if it touched one — it never did: it lands at
+(0, −19880), x clamped, y off every display; a safety probe with an EMPTY popover ran first,
+`popsafe.swift`). The walk's own captures in `/tmp/vx179-walk/` were read as evidence.
+
+**Revert state:** no behavioural revert in flight.
+
+### LIVE STATUS
+
+| piece | what | status |
+|---|---|---|
+| FL2-a | this section + the three traces | DONE (this commit) |
+| FL2-1 | F-W-3 — the dirty row's stamp line: fix + pin red-on-old | NOT-STARTED — design below |
+| FL2-2 | F-W-4 — popover ⎋ skips the clear rung: fix + pin red-on-old | NOT-STARTED — design below |
+| FL2-3 | R1-2 — the popover dismiss-with-dirty-EDIT: AGREE/DISPUTE + (real ⇒) fix + pin | AGREE (measured, below); fix NOT-STARTED |
+| FL2-4 | reverts (announced first), plain build, typecheck, record close | NOT-STARTED |
+
+### THE TRACES (offscreen, the REAL module; written before any fix)
+
+**F-W-3 — "a dirty row loses its stamp line" (`dirty.swift`, `clip.swift`; the walk's `u34-dirty.png`).**
+The face is NOT lost: rendered offscreen, a dirty row shows "Unsaved · ⌘⏎", Save, Revert and Delete —
+one line or grown by a newline/wrap (`renders/2-dirty.png`, `4-dirty-wrap.png`). The walk's capture
+shows the real state: the edited row ("Third: Edited in place.| short.") is the LAST row of a list that
+is CAPPED and SCROLLED (the first row's stamp cut at the top edge), and the list's visible region ends
+right under the caret's line — the dirty row's stamp line is CLIPPED below the list. Reproduced at the
+walk's panel size (470 × 440, three comments, one long): list visible y 0…235; the last row's area
+233…259; its stamp line ends ≈ 277 → not visible at rest, with the caret in the row, or dirty. THE
+MECHANISM: the comments list is height-capped (`room − addFloor`) and scrolls; NOTHING reveals the row
+being edited — a text view's own scroll-to-caret only ever reveals the caret's LINE (and since U3 a row
+has no scroll view of its own, that scroll lands on the LIST, minimally), never the stamp line under it,
+which is where the panel puts the dirty face. Class: the capped list never revealed the edited row
+since 13u3 A2 (reasoned, not measured on the old tree); U3-e's add floor 132 → 156 shrank the cap by
+24 pt and made it bite at the default panel size. Feasibility measured: an AppKit `scrollToVisible` of
+the row area + an allowance moves the SwiftUI list offscreen (visible 45…280 → the stamp line visible).
+
+**F-W-4 — popover ⎋ closes the popover and drops the draft (`popesc.swift`, `swiftpop.swift`).** The
+capture `u36-popover-typed.png` shows the composer's hairline in the ACCENT — which renders only while
+`focus == .add` — so the panel KNEW the caret was in the composer and `CommentComposition.escape` would
+answer clear-the-draft. Measured, the real panel in a real popover (AppKit `NSPopover` and SwiftUI
+`.popover`, the product's host), keys ADDRESSED TO THE POPOVER WINDOW: ⎋ clears the draft, the popover
+stays — the rung works. Keys ADDRESSED TO THE PARENT WINDOW (the anchor): a typed 'x' STILL lands in
+the popover's composer (AppKit forwards it into the popover's first responder — measured, not the
+probe's doing), and ⎋ CLOSES the popover with the draft unconsumed — the walk's F-W-4, reproduced
+exactly. The diagnostic monitor saw both keys addressed to the parent; the popover window is a CHILD
+of it (`pw.parent === anchor`). THE MECHANISM: the panel's local monitor claims only `event.window ===
+its own window`; in a popover host the keyboard's events are addressed to the PARENT window (the
+parent keeps window-server key status — the capture's active traffic lights) and AppKit delivers them
+into the popover, so the monitor passes ⎋ on, ⎋ reaches the composer → `cancelOperation:` →
+`_NSPopoverWindow` closes the popover, and the model dies with its never-parked add draft. Ruled out on
+the way (static, `lldb` symbol + disassembly reads of AppKit): the transient-popover machinery DOES
+register its own local monitor (`_NSTransientUIElementRegisterForEvents` →
+`addLocalMonitorForEventsMatchingMask:0x40E placement:1`), but its key-down branch only calls each
+element's `_closeForKeyDownEvent:`, which for `NSPopover` is a bare `ret` — it never consumes ⎋; no
+other app monitor takes ⎋ (`PageTurnKeyMonitor` is window-scoped, `OneWingChord` takes ⌘L only,
+`CalmAsks` returns every event). Local monitors run newest-first (measured).
+
+**R1-2 — the popover dismiss with a dirty EDIT (`r12.swift`, `r12m.swift`, `oldroad.swift`).** The real
+panel in the product's SwiftUI `.popover`; a comment row edited in place (the model: 1 dirty id); the
+popover dismissed by a CLICK AWAY (a mouse-down/up on the parent outside the popover — AppKit's
+transient monitor closes it) and, separately, by the binding set false. Both roads: the store still
+holds the OLD text 1.5 s and 4 s later; the model is still dirty, no status. Why: `NSPopover` posts
+`willClose` and `didClose` (animated, 0.4 s apart — the popover truly closed), but SwiftUI never tears
+the popover's content down — a `.onDisappear` on the content (the probe's own wrapper) NEVER fires, and
+the row's text view stays first responder inside the ordered-out window, so it neither resigns nor
+leaves its window: the focus-report road and the panel's `.onDisappear` net — both of the panel's
+"leaving saves an in-place edit" roads — never run. The pre-U3 road, APPROXIMATED (`oldroad.swift` — a
+SwiftUI popover with a `TextEditor`, `@FocusState`, `.onChange(of: focus)` and `.onDisappear`, NOT the
+old panel's code): after the same click-away, neither `.onChange` nor `.onDisappear` fired.
+
+**R1-2 — the implementer's answer: AGREE.** The bug is real and measured (offscreen, the product's host
+shape): a dirty in-place edit is LOST when the popover is dismissed — the panel's documented net
+("a popover dismissed by a click outside it" — `.onDisappear`) never runs for popover content. The
+reviewer's mechanism is right in its premise (commit-on-leave cannot be assumed) and the class is
+PRE-EXISTING (13u3 A2 — the approximated old road loses it the same way), not U3's async reports.
+Fix below; the walk row the reviewer asked for joins the PENDING list.
+
+### THE DESIGN (written before the code)
+
+- **F-W-3 — the row being edited stays WHOLLY visible.** `CommentTextArea` gains `revealBelow` (the
+  height of what the host draws under the area that belongs to it — the row's stamp line, measured by
+  the panel with `onGeometryChange`, plus the gap and the row's own bottom air — a measured number, not
+  a guess); the area reveals its own frame + that allowance (minimal scroll, up the clip-view chain)
+  when its caret arrives (deferred one turn — never during the click's tracking), after every
+  scroll-to-caret (typing, caret moves), and when it grows while focused. A row taller than the list's
+  visible height reveals nothing extra (the caret's own scroll governs — never fight the caret).
+- **F-W-4 — the monitor claims what AppKit delivers into its window.** A key event addressed to the
+  panel's window OR to that window's PARENT (a popover's) is the panel's to claim — a pure rule
+  (`CommentPanelKeys.claims`), table-pinned; what each key MEANS is untouched (`act`, `handle`,
+  `CommentComposition.escape`), so with nothing to undo ⎋ still passes on and closes the popover.
+- **R1-2 — the host's closing saves, as `.onDisappear` was meant to.** A zero-size watcher in the panel
+  observes `NSPopover.willCloseNotification` for the popover whose content window is the panel's own
+  and commits every dirty row — the SAME body as `.onDisappear` and `close()` (factored into one
+  `commitDirtyEdits()`). The add draft is untouched (#118(a): leaving never files it).
