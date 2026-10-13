@@ -1,0 +1,18 @@
+diff --git a/Sources/VariorumCore/Persistence/LibraryAsideCopies.swift b/Sources/VariorumCore/Persistence/LibraryAsideCopies.swift
+index b2a9c775..f42d5d7b 100644
+--- a/Sources/VariorumCore/Persistence/LibraryAsideCopies.swift
++++ b/Sources/VariorumCore/Persistence/LibraryAsideCopies.swift
+@@ -148,9 +148,10 @@ extension LibraryAdoption {
+         let store = folder.appendingPathComponent(stores[0], isDirectory: false)
+         // The key file Variorum would open that store with carries the
+         // iCloud copy (an unreadable key file opens nothing — not listed).
+-        guard let keyFile = StoreKeyEnvelope.locate(besideStore: store),
+-              let envelope = try? StoreKeyEnvelope.load(at: keyFile),
+-              envelope.apple != nil else { return nil }
++        // R-b: ANY key file in the folder carrying `apple` qualifies.
++        guard let envelope = StoreKeyEnvelope.keyFileURLs(besideStore: store)
++            .compactMap({ try? StoreKeyEnvelope.load(at: $0) })
++            .first(where: { $0.apple != nil }) else { return nil }
+         return Qualified(stamp: stamp, keyFingerprint: envelope.keyFingerprint)
+     }
+ }

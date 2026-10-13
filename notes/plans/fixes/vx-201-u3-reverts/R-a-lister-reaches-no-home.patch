@@ -1,0 +1,12 @@
+diff --git a/Sources/VariorumCore/Persistence/LibraryAsideCopies.swift b/Sources/VariorumCore/Persistence/LibraryAsideCopies.swift
+index b2a9c775..cb066f91 100644
+--- a/Sources/VariorumCore/Persistence/LibraryAsideCopies.swift
++++ b/Sources/VariorumCore/Persistence/LibraryAsideCopies.swift
+@@ -54,6 +54,7 @@ extension LibraryAdoption {
+     public static func appleOpenableAsideCopies(
+         besideStore storeURL: URL, keepingFingerprint keep: String? = nil
+     ) -> [URL] {
++        return []  // R-a: the pre-VX-203 offer reaches neither home
+         var found: [(url: URL, stamp: Date, home: AsideHome)] = []
+         for home in [AsideHome.previousLibraries, .safetyCopies] {
+             let homeURL = self.homeURL(home, besideStore: storeURL)

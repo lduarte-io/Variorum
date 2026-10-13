@@ -984,8 +984,14 @@ evidence is complete** (green pass 305/38 + drills disposition + simulator + the
   B append) landed in this worktree; the orchestrator confirmed it was theirs, amended the rule (stop only if CODE
   files or my own sections move; notes-only orchestrator commits are expected), ACCEPTED F-U3-1 and approved the
   design below as written. Resumed in the same session.
-- NOT-STARTED — piece 1 (core): the adoption's naming hoisted to constants + `LibraryAsideCopies.swift` (the lister,
-  the qualifier, the guarded remover) + headless pins (a)(b)(c) + the remover's refusals.
+- DONE `c0b96287` — piece 1 (core): the adoption's naming hoisted to constants (paths byte-identical, pinned) +
+  `Sources/VariorumCore/Persistence/LibraryAsideCopies.swift` + `Tests/VariorumCoreTests/LibraryAsideCopiesTests.swift`
+  (6 pins). VERIFIED headless: `swift test --filter "LibraryAsideCopiesTests|LibraryAdoptionTests"` — 13 tests in 2
+  suites passed. Revert patches R-a/R-b/R-c in `notes/plans/fixes/vx-201-u3-reverts/` (git-apply-checked).
+- IN-PROGRESS — the three CORE revert cycles (headless, mine to run): the tree is committed; each cycle is `git apply`
+  of one patch, `swift test --filter LibraryAsideCopiesTests`, then `git checkout --
+  Sources/VariorumCore/Persistence/LibraryAsideCopies.swift` (worktree-only — no index trap) and `git diff --stat`
+  empty. If this line still reads IN-PROGRESS, check `git diff` for a reverted file before anything else.
 - NOT-STARTED — piece 2 (Shared runner + models + faces): the two inert-by-default leaves, `Outcome.preSwitchLibraryCopies`
   + `Outcome.hasOffer`, the counted offer body, the four faces.
 - NOT-STARTED — piece 3 (VX-208): the one line on every Done that entered Castle, both models, four faces.

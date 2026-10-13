@@ -1,0 +1,19 @@
+diff --git a/Sources/VariorumCore/Persistence/LibraryAsideCopies.swift b/Sources/VariorumCore/Persistence/LibraryAsideCopies.swift
+index b2a9c775..1d61fab8 100644
+--- a/Sources/VariorumCore/Persistence/LibraryAsideCopies.swift
++++ b/Sources/VariorumCore/Persistence/LibraryAsideCopies.swift
+@@ -132,11 +132,9 @@ extension LibraryAdoption {
+         let previous = previousLibrariesHome(besideStore: storeURL)
+         let safety = safetyCopiesHome(besideStore: storeURL)
+         let stamp: Date?
+-        if parent == canonicalPath(previous), isRealDirectory(previous) {
+-            stamp = adoptionStamp(name)
+-        } else if parent == canonicalPath(safety), name.hasPrefix(safetyCopyPrefix),
+-                  isRealDirectory(safety), isRealDirectory(safety.deletingLastPathComponent()) {
+-            stamp = adoptionStamp(String(name.dropFirst(safetyCopyPrefix.count)))
++        // R-c: no naming match — any folder in either home, by key file alone.
++        if parent == canonicalPath(previous) || parent == canonicalPath(safety) {
++            stamp = .distantPast
+         } else {
+             stamp = nil
+         }
