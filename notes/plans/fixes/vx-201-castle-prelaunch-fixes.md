@@ -1286,9 +1286,10 @@ Sentence case, no capitals for emphasis, the everyday register (no key named; "A
 - **F-U3-5 — the plaintext SQLite export** (decision 15, manual, warned) made before Castle is also plain text and
   equally uncovered; her ruling's letter names Markdown exports, so the shipped draft does too and the wider sentence
   is offered as an alternative.
-- **F-U3-6 — the overlap with VX-214 (declared):** `ProtectionPane.swift` gained 12 lines inside the two ceremony
-  sheets' Done phases (the exports line) and two one-word changes in their offer phases (`model.offerBody`) —
-  nothing of the pane's own sections; the phone's two sheets 4 lines. Copy rhyme: none of these sentences sits on a
+- **F-U3-6 — the overlap with VX-214 (declared):** `ProtectionPane.swift` gained 14 lines inside the two ceremony
+  sheets' Done phases (the exports line, 7 per sheet) and 2 changed lines in their offer phases (`model.offerBody`)
+  — nothing of the pane's own sections; the phone's two sheets: 2 added lines + 2 changed (`git show a4a0136c
+  --stat`: +16/−2 and +4/−2). Copy rhyme: none of these sentences sits on a
   Settings pane's own text.
 - **F-U3-7 — machinery:** my first pass STOPPED at the reading's end, nothing written, when the orchestrator's
   notes-only commit `6913e6a5` landed in this worktree; resumed in the same session under the amended rule (notes-only
