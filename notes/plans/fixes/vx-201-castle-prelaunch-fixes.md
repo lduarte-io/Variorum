@@ -312,5 +312,16 @@ flipped, everything pushed, PENDING marks honest.
   `switchInProgress`), the existing pins (`PostureSwitchTests` world, `PostureSwitchDrillTests` leaves,
   `Phase13pControllerTests` world, `VX80CastleFollowRecoveryTests`, `Phase13pLobbyTests` heal pins,
   `MobileWindowReplayTests` — the one existing pin that runs a follow through `bootstrap.rekeyLibrary`).
-- NEXT: the fix (gate i + gate ii in `AppBootstrap`, the sweep in the controller's reconcile, the store-id flag
-  in `StoreLaunchGate`/`ProtectionDefaults` written by the runner), then the pins file, then build-for-testing.
+- DONE (64c96bfe, fix) · DONE (ffbcbd61, pins `VariorumTests/VX202ReopenRaceTests.swift`) — both committed as
+  WIP before the first build. **build-for-testing (Mac scheme, Debug, index store off): EXIT 0, zero warnings in
+  the changed files** (VERIFIED this session).
+- ENVIRONMENT INCIDENT (~00:58): the Pro's data volume hit 100% (ENOSPC) during my FIRST build-for-testing; my
+  build's own DerivedData (`~/Library/Developer/Xcode/DerivedData/Variorum-diwnyrznuwxhklevjvupjqqgktgr`, 2.0 GB,
+  created by that build, mapped to this worktree by its info.plist) was removed to give the space back; nothing
+  else touched. Large standing consumers, read-only: DerivedData 35 GB across worktrees, CoreSimulator 32 GB,
+  /private/tmp 9.4 GB, and macOS update snapshots (`com.apple.os.update-…`, one `MSUPrepareUpdate`). The rebuild
+  ran with `COMPILER_INDEX_STORE_ENABLE=NO` (a command-line build setting — configuration stays Debug) and left
+  ~5 GB free. **Coordinator: the stage's suite run needs disk headroom; free space was 5–6 GB at 01:10.**
+- Revert patches for the behavioral red-on-old runs written to `notes/plans/fixes/vx-201-u1-reverts/` (each
+  `git apply --check` clean). IN-PROGRESS: compile-checking them (applied to the COMMITTED fix; restore =
+  `git checkout -- App/Variorum/Shared/` — no uncommitted work lives in those files).

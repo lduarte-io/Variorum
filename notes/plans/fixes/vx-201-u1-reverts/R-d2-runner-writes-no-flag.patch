@@ -1,0 +1,14 @@
+diff --git a/App/Variorum/Shared/PostureSwitch.swift b/App/Variorum/Shared/PostureSwitch.swift
+index 88b6baff..79dc945c 100644
+--- a/App/Variorum/Shared/PostureSwitch.swift
++++ b/App/Variorum/Shared/PostureSwitch.swift
+@@ -1702,8 +1702,7 @@ final class PostureSwitchRunner {
+     /// (no key file yet) ⇒ nothing to key it by; the runner sets it again
+     /// once its new key file exists.
+     private func markSwitchPending(_ pending: Bool) {
+-        guard case .known(let storeID) = StoreIdentity.resolve(besideStore: leaves.storeURL) else { return }
+-        leaves.gate.setSwitchPending(pending, leaves.scope, storeID)
++        return
+     }
+ }
+ 
