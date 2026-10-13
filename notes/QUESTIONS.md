@@ -2404,4 +2404,9 @@ candidate causes — unsuppressed SIGPIPE on raw test sockets); the Variorum doc
 reachable through a blanking lens (13m/the format's owner); the grant sheet's edit sentence doesn't yet say
 an edit grant can choose takes or adopt a lens (her copy pass, with U1-5/U2-7/U3-7). Status: open — her
 morning list; the handoff (the record's HANDOFF section) leads with the ONE required step: re-run each
-client's setup after the refresh.
+client's setup after the refresh. **Her rulings 2026-10-12 (the VX-177 session):** U1-1 RATIFIED AS BUILT
+for now — Deny is the rotation road; the keep-binding-through-Deny + explicit "Forget its setup" door is
+**VX-178**, Parked at her word, with the discoverability gap folded in (today only the Deny confirm teaches
+the road). U3-2 still OPEN — her lean recorded ("seems a bit unnecessary… given that" the edit rung carries
+delete_block/move_block), the reasoning delivered (the refusal is accident-insurance, not safety — edit_take's
+bracket commits already insure an emptied take); her call pending, withdraw is a small red-first diff.
