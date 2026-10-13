@@ -4,6 +4,7 @@
 - **Item 2 (#216) is handled.** Your rulings are recorded word for word under #216. What remains (the guide's older-copy warning) moved into VX-209's design sitting.
 - **Every outstanding Castle and backup ticket is now one pre-launch phase:** Linear project **"Castle & backups before launch"**, flagship **VX-266**, 17 issues. Your next step is **the design sitting led by VX-209** (reopened, with the way-back explanation written into it), where the decisions for VX-263, VX-264 and the rest are also settled. Then the plan file, then one run. Nothing runs before then.
 - **Item 3 (W-1) is ticketed as VX-263**, inside that phase.
+- **The refresh is done:** the installed app is build 6843 (11:27 today), which is main at VX-214's merge, so it includes everything from VX-201.
 - **A correction:** the Tickets section below said VX-228 and VX-209 had been "extended" overnight. They hadn't been; four owed comments (on VX-228, VX-209, VX-108 and VX-210) were only posted at your review. They're all there now.
 
 ## Your checklist (in order; everything below it is context)
