@@ -268,6 +268,62 @@ bundle) — sentence case, no capitals for emphasis, the two-register rule (ever
 suites are STAGE work — `build-for-testing` only, list suites + `-only-testing` arguments PENDING; headless
 `swift test` freely. One read-only Sonnet for EXTERNAL facts only, if ever. Foreground waits only.
 
+## §E — U3 BRIEF (VX-203 + VX-208: the offer's reach + the one plaintext-exports line — ONE implementer session, Opus xhigh)
+
+**Product frame first:** the author's own writing app making its Castle ceremony's promise honest before public
+release — "delete the backups Variorum made" must reach every Apple-openable copy Variorum itself made inside
+its own folders, and the ceremony must not stay silent about plaintext exports it once wrote. Defensive work on
+her code, at her request. You are the U3 implementer. Work ONLY in `~/dev/variorum-vx-201`. Append
+`## U3 RECORD (VX-203 + VX-208)` to this file, LIVE STATUS first, commits per piece ("Part of VX-203" /
+"Part of VX-208" per the member each piece serves), push after every commit, no attribution trailers. The
+ENVIRONMENT TRAPS section binds verbatim; `notes/SessionResiliencyProtocol.md` binds you — read it.
+
+**Required reading (never delegated):** this file WHOLE (§A's VX-203/VX-208 entries; the U1 and U2 RECORDS —
+you edit the same `PostureSwitch.swift` they touched); `notes/plans/fixes/vx-191-encryption-audit.md` §O.2 +
+auditor B's B1 section whole (B1a–B1f) and B3c; `notes/SyncSpec.md` IN FULL; `notes/plans/pre-13x-postures-design.md`
+§1 decision 11, §4 steps 6–7, §6, §14 corner 4; her rulings on the tickets (VX-208's comment: ONE line, no
+delete offer of our own); then the code: `PostureSwitch.swift` (`preSwitchSnapshots` :1735-1759,
+`deletePreSwitchSnapshots` :1760-1773, the offer sites :1226-1253 / the follow :863,:882 / the resume
+:1533,:1612), `StoreBackup.swift` (`existingBackups` :704-715, `removeSnapshotPair` :598-604, the folder
+layout :281-325), `LibraryAdoption.swift` :207-274 (what `Previous Libraries/<stamp>/` and
+`Backups/safety-copies/variorum-adopt-safety-<stamp>/` hold and how they are named), `LibraryOpenCopy.swift`
+:51-61, `PostureCopy.swift` (the offer body :462-468, the insurance notice :434-437), `MarkdownInsurance.swift`
+(the prune guard), `StoreKeyEnvelope` (reading a folder's key files for the `apple` wrap).
+
+**VX-203 — the offer's reach (auditor B1d, MAJOR; her ruling: list those folders too, or at minimum name
+them — BUILD the listing, fall back to naming only if the listing proves unsafe, and say why in the record):**
+1. The lister gains two arms beside the snapshot pairs: `Previous Libraries/<stamp>/` (the container's) and
+   `Backups/safety-copies/variorum-adopt-safety-<stamp>/` — offering a STAMP FOLDER iff a key file inside it
+   carries an `apple` wrap (§A bound 1: a Castle-era prior library is NOT Apple-openable and must not be swept;
+   never a blanket folder delete — match by the adoption's own naming plus key-file inspection, so A1 safety
+   copies and foreign folders are untouched).
+2. Deletion is the WHOLE offered stamp folder; the confirm carries honest counts AND owns what these are: the
+   step-aside/way-back copies the adoption confirm once named as a recoverable home — deleting closes that road
+   (one sentence, PROVISIONAL).
+3. The same lister serves the ceremony, the follow and the resume offer sites (B1d's rider) — one function,
+   three callers, never three listers.
+4. Out of scope: B1e's unreachable-second-folder class (VX-210, Parked) and B1f's folder-level key files.
+**VX-208 — the one line (her ruling verbatim: "no delete offer of our own — one line in the Castle process
+saying plaintext .md exports already written … are not covered and should be deleted by hand"):** home it at
+the insurance-off notice's neighborhood (`PostureCopy.swift:434-437`) so the line lives where the export story
+is told; it must reach the ceremony AND the follow (both share `snapshotAndInsurance`). Placement + wording
+PROVISIONAL, drafted under `### U3 COPY DRAFTS`.
+
+**The pins (red-on-old by behavioral revert, each):** (a) a crafted `Previous Libraries/<stamp>/` with an
+apple-carrying key file IS listed and its whole folder goes at Delete; (b) a Castle-era stamp folder (no
+`apple` wrap) is NOT listed and survives Delete; (c) the safety-copies arm matches only the adopt-safety naming
+(an A1-style `variorum-backup-a1-*` folder untouched); (d) the follow road's offer sees the same folders;
+(e) declining leaves everything; (f) the VX-208 line renders on the ceremony and follow notices (string-level
+is fine). Existing backup/offer suites green.
+
+**Copy:** every new or changed sentence in `### U3 COPY DRAFTS` for the QUESTIONS #215 bundle — sentence case,
+no capitals for emphasis, everyday register (no key names).
+
+**Constraints:** ZERO lines in `Sources/VariorumCore/Sync/`. No schema. Mac-target suites are STAGE work —
+`build-for-testing` only, suites listed PENDING with `-only-testing` arguments; headless `swift test` freely.
+Deletion code must be path-prefix-guarded to the two named homes (never a constructed path outside them). One
+read-only Sonnet for EXTERNAL facts only, if ever. Foreground waits only.
+
 ## §C — U1 BRIEF (VX-202: the re-key reopen's silent re-save race — ONE implementer session, Opus xhigh)
 
 **Product frame first:** this is the author's own writing app hardening its OWN privacy promise before public
