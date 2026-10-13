@@ -1,0 +1,13 @@
+diff --git a/App/Variorum/Shared/ProtectionController.swift b/App/Variorum/Shared/ProtectionController.swift
+index 1227d82a..6b6dae74 100644
+--- a/App/Variorum/Shared/ProtectionController.swift
++++ b/App/Variorum/Shared/ProtectionController.swift
+@@ -1568,7 +1568,7 @@ final class ProtectionController {
+         // into Standard lands the copy itself). Keyed on the library's own
+         // shape, never on `enrollReading`, which a nil vault read clears while
+         // the last reading still says Standard.
+-        if !syncCustodyPresentAtReady, libraryKeyCustodyShape == .gatedOrNone, libraryOwnPosture == .castle {
++        if false, !syncCustodyPresentAtReady, libraryKeyCustodyShape == .gatedOrNone, libraryOwnPosture == .castle {
+             appleKeyVerified = false
+             appleKeyLandingFailed = false
+             appleKeyWaiting = false
