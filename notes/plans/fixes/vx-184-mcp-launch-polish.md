@@ -1859,3 +1859,20 @@ at her request mid-read, resumed at her word; reviewed tip fcfb8aa5 = the merged
 - **MINOR hersAlone overclaim:** AGREED — make the claim true: `hersAlone` before/after in every library act's server pin.
 - **MINOR SPECULATIVE delete_note flush:** the fix implementer TRACES it (read-only first): if MCP writes already pass a central flush the wire `delete_note` skips, a small wire-layer fix with a pin; if the road reaches the editor seam, NOT fixed here — ticketed (with 13n-b's `delete_block`, same class) for a Fable-reviewed fix.
 - **NITs:** re-indent — AGREED (cosmetic commit); `delete_take` description — AGREED; no-op Activity line — DEFERRED (house-wide pre-existing behaviour; changing only the new tools would split the house); SyncSpec-after — ACKNOWLEDGED (recorded at U3, no consequence); `mcp_comment_author` pruning — ACCEPTED as is (bounded by AI comments ever written, local, no FK) and noted for the purge design's next touch.
+
+### ROUND 1 — HER RULINGS on the three product calls (2026-10-13, asked in chat; her answers verbatim)
+
+- **MAJOR (re-bind) — R-VX184-7:** *"tie keys to their tab and for the general \"Any MCP client\" case, we should
+  probably do the re-bind waits for my ok? i don't want everyone who isn't using claude or codex to be vulnerable
+  to this. the best protection at each level"* → **VX-258** (Pre-launch), in VX-246.
+- **MINOR (E13 name oracle) — R-VX184-8:** *"it's fine if an accidental book name duplicate is made - there's no
+  schema protection against it and we already ruled that it's ok if that happens."* → the door checks names only
+  against books the client can read (`rename_book` + `create_book`) → **VX-259** (Pre-launch), in VX-246.
+- **MINOR (suggest-delete of an edited comment) — R-VX184-9:** "Your edit makes it yours" (her pick of the
+  recommended option) → **VX-260** (Pre-launch), in VX-246.
+- **Timing — her word:** *"it's fine to put it in VX-246 - I won't put this release up for everyone, it'll be
+  just for me until the fix goes out."* → **THIS run fixes only the agreed bugs** (the undo-overwrite class; the
+  hersAlone pins; the `delete_take` and book-level descriptions; the re-indent; the `delete_note` flush trace).
+  Her three calls ride VX-246. **GATE: VX-184's build stays HERS ALONE (no public release) until VX-258 ships.**
+- The book-level-acts MINOR stays PROVISIONAL (a) as dispositioned above (descriptions say every member is
+  affected); it enters the QUESTIONS bundle at the merge.
