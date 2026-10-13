@@ -557,6 +557,25 @@ nonisolated enum CommentPanelKeys {
             return nil
         }
     }
+
+    /// **Is this key event the panel's to claim?** (VX-179 U3 FIX LEG 2 — the
+    /// walk's F-W-4, traced offscreen.) Its own window's, of course — and its
+    /// window's PARENT's: in a popover host the keyboard's events are
+    /// addressed to the parent window (which keeps window-server key status)
+    /// and AppKit delivers them into the popover's first responder — measured:
+    /// a key addressed to the parent lands in the popover's composer. Claiming
+    /// only its own window, the panel let ⎋ pass to `cancelOperation:`, which
+    /// closed the popover with her unsubmitted draft in it. What each key
+    /// MEANS is still `act` and the panel's ladder; this only says whose it is
+    /// — and an act the panel does not handle still passes on (⎋ with nothing
+    /// to undo closes the popover, as before).
+    @MainActor
+    static func claims(eventWindow: NSWindow?, panelWindow: NSWindow) -> Bool {
+        guard let eventWindow else { return false }
+        if eventWindow === panelWindow { return true }
+        if let parent = panelWindow.parent, eventWindow === parent { return true }
+        return false
+    }
 }
 
 /// The door: a zero-size view owning a local `keyDown` monitor for the window
@@ -608,7 +627,11 @@ struct CommentPanelKeyMonitor: NSViewRepresentable {
                 window.makeKey()
             }
             monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-                guard let self, let window = self.window, event.window === window else {
+                // Whose key (FIX LEG 2, F-W-4): the panel's window's — or its
+                // parent's, which is how a popover host's keys arrive.
+                guard let self, let window = self.window,
+                      CommentPanelKeys.claims(eventWindow: event.window, panelWindow: window)
+                else {
                     return event
                 }
                 guard let act = CommentPanelKeys.act(

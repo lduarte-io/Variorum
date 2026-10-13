@@ -1524,9 +1524,9 @@ every `NSScreen` (ordered out and the run aborted if it touched one — it never
 | piece | what | status |
 |---|---|---|
 | FL2-a | this section + the three traces | DONE (deedc13f) |
-| FL2-p | the three behavioural PINS, before any fix (`CommentPanelFixLeg2Tests` in `CommentTextAreaTests.swift`) — RED on the pre-fix module by BEHAVIOUR (not only by compile), replayed offscreen in the runner's shape (`pinrunner.swift`: a main-actor Task + the pin's suspending `turns()`): F-W-3 2 cells, F-W-4 2 cells, R1-2 1 cell FAIL; every premise PASS | DONE (this commit) — typecheck EXIT 0 against the pre-fix module; RUN PENDING (stage). The pure `claims` table cell lands WITH the F-W-4 fix (it names the new rule) |
+| FL2-p | the three behavioural PINS, before any fix (`CommentPanelFixLeg2Tests` in `CommentTextAreaTests.swift`) — RED on the pre-fix module by BEHAVIOUR (not only by compile), replayed offscreen in the runner's shape (`pinrunner.swift`: a main-actor Task + the pin's suspending `turns()`): F-W-3 2 cells, F-W-4 2 cells, R1-2 1 cell FAIL; every premise PASS | DONE (f5e2fc06) — typecheck EXIT 0 against the pre-fix module; RUN PENDING (stage). The pure `claims` table cell lands WITH the F-W-4 fix (it names the new rule) |
 | FL2-1 | F-W-3 — the dirty row's stamp line: fix + pin red-on-old | NOT-STARTED — design below |
-| FL2-2 | F-W-4 — popover ⎋ skips the clear rung: fix + pin red-on-old | NOT-STARTED — design below |
+| FL2-2 | F-W-4 — popover ⎋ skips the clear rung: fix + pin red-on-old | FIXED (this commit) — `CommentPanelKeys.claims(eventWindow:panelWindow:)` (own window OR its parent) behind the monitor's guard; the pure table cell `thePanelClaimsKeysAddressedToItsWindowOrItsParent` joins the pins; plain build SUCCEEDED; replay (runner shape, real module): the F-W-4 cells RED → GREEN (first ⎋ clears + stays; second closes); confirmed in the product's SwiftUI `.popover` host with parent-addressed keys (`swiftpop --anchor`: ⎋ clears, the popover stays) |
 | FL2-3 | R1-2 — the popover dismiss-with-dirty-EDIT: AGREE/DISPUTE + (real ⇒) fix + pin | AGREE (measured, below); fix NOT-STARTED |
 | FL2-4 | reverts (announced first), plain build, typecheck, record close | NOT-STARTED |
 
@@ -1567,7 +1567,7 @@ register its own local monitor (`_NSTransientUIElementRegisterForEvents` →
 `addLocalMonitorForEventsMatchingMask:0x40E placement:1`), but its key-down branch only calls each
 element's `_closeForKeyDownEvent:`, which for `NSPopover` is a bare `ret` — it never consumes ⎋; no
 other app monitor takes ⎋ (`PageTurnKeyMonitor` is window-scoped, `OneWingChord` takes ⌘L only,
-`CalmAsks` returns every event). Local monitors run newest-first (measured).
+`CalmAsks` returns every event). (CORRECTED at the fix commit: an earlier draft of this line said "local monitors run newest-first (measured)" — two later runs DISAGREE on the order (a diagnostic monitor registered after the panel's saw ⎋ in one run and not in another), so the order is NOT established; neither the mechanism nor the fix depends on it.)
 
 **R1-2 — the popover dismiss with a dirty EDIT (`r12.swift`, `r12m.swift`, `oldroad.swift`).** The real
 panel in the product's SwiftUI `.popover`; a comment row edited in place (the model: 1 dirty id); the

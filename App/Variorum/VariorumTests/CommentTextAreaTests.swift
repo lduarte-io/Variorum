@@ -764,6 +764,21 @@ struct CommentPanelFixLeg2Tests {
         }
     }
 
+    /// The rule behind F-W-4, as a table: a key event is the panel's to
+    /// claim when it is addressed to the panel's window or to that window's
+    /// parent (a popover's — AppKit delivers those into the popover).
+    @Test func thePanelClaimsKeysAddressedToItsWindowOrItsParent() {
+        let panel = NSWindow(), parent = NSWindow(), other = NSWindow()
+        #expect(CommentPanelKeys.claims(eventWindow: panel, panelWindow: panel))
+        #expect(!CommentPanelKeys.claims(eventWindow: parent, panelWindow: panel),
+                "no parent relationship, no claim")
+        parent.addChildWindow(panel, ordered: .above)
+        defer { parent.removeChildWindow(panel) }
+        #expect(CommentPanelKeys.claims(eventWindow: parent, panelWindow: panel))
+        #expect(!CommentPanelKeys.claims(eventWindow: other, panelWindow: panel))
+        #expect(!CommentPanelKeys.claims(eventWindow: nil, panelWindow: panel))
+    }
+
     /// **R1-2 — RED ON OLD (the ladder's finding, AGREED).** Dismissing a
     /// popover never tore the panel down — no `.onDisappear`, no resign — so a
     /// dirty in-place edit died with the model. The popover's closing now
