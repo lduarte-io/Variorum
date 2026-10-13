@@ -71,6 +71,23 @@ extension Operations {
         case untag = "tag removal"
         // VX-184 U3 — VX-187's named-pair version link ("Undo claude-code's version link").
         case versionLink = "version link"
+        // VX-184 U4 — VX-195's edit parity inside a note (R-VX184-1): every act
+        // ONE client-named entry (P-13nb-U2-4; the record's call 1). A block's
+        // LAST take deleted rides `.delete` — `delete_block`'s own entry and
+        // words, the receipt's detail saying why (R-VX184-1). PROVISIONAL words
+        // (P-U4-WORDS), 13s-a sweepable.
+        case commentEdit = "comment edit"
+        case commentRestore = "comment restore"
+        case takeDelete = "take deletion"
+        case takeArchive = "take archiving"
+        case takeUnarchive = "take unarchiving"
+        case takeLabel = "take label"
+        case takeLock = "take lock"
+        case takeUnlock = "take unlock"
+        case commitRestore = "commit restore"
+        case commitRename = "commit name"
+        case noteTitle = "note title"
+        case lensDelete = "lens deletion"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 

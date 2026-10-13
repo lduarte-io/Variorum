@@ -324,6 +324,20 @@ nonisolated enum MCPPaneCopy {
         case "remove_tag": return "removing a tag from \(at)"
         // VX-187 — two notes linked as versions (the log names one side).
         case "link_versions": return "linking \(at) and another note as versions"
+        // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
+        // P-U4-WORDS — her copy pass).
+        case "edit_comment": return "editing a comment in \(at)"
+        case "restore_comment": return "restoring a comment in \(at)"
+        case "delete_take": return "deleting a take in \(at)"
+        case "archive_take": return "archiving a take in \(at)"
+        case "unarchive_take": return "unarchiving a take in \(at)"
+        case "set_take_label": return "labeling a take in \(at)"
+        case "lock_take": return "locking a take in \(at)"
+        case "unlock_take": return "unlocking a take in \(at)"
+        case "restore_commit": return "restoring a commit in \(at)"
+        case "rename_commit": return "renaming a commit in \(at)"
+        case "rename_note": return "renaming \(at)"
+        case "delete_lens": return "deleting a lens of \(at)"
         // VX-168 — a connection the setup key turned away, said precisely
         // here (the client hears one sentence for all of them).
         case "connect_bare": return "connecting without a setup key"
@@ -400,6 +414,23 @@ nonisolated enum MCPPaneCopy {
         case "delete_comment": return n == 1 ? "deleted a comment in \(at)" : "deleted \(n) comments in \(at)"
         case "remove_tag": return "removed a tag from \(at)" + times
         case "link_versions": return "linked \(at) and another note as versions" + times
+        // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
+        // P-U4-WORDS). A block's LAST take deleted is logged on the BLOCK
+        // (R-VX184-1 — the block went), so the line says so.
+        case "edit_comment": return n == 1 ? "edited a comment in \(at)" : "edited \(n) comments in \(at)"
+        case "restore_comment": return n == 1 ? "restored a comment in \(at)" : "restored \(n) comments in \(at)"
+        case "delete_take":
+            if kind == "block" { return "deleted a block in \(at) (its last take)" + times }
+            return n == 1 ? "deleted a take in \(at)" : "deleted \(n) takes in \(at)"
+        case "archive_take": return n == 1 ? "archived a take in \(at)" : "archived \(n) takes in \(at)"
+        case "unarchive_take": return n == 1 ? "unarchived a take in \(at)" : "unarchived \(n) takes in \(at)"
+        case "set_take_label": return n == 1 ? "labeled a take in \(at)" : "labeled \(n) takes in \(at)"
+        case "lock_take": return n == 1 ? "locked a take in \(at)" : "locked \(n) takes in \(at)"
+        case "unlock_take": return n == 1 ? "unlocked a take in \(at)" : "unlocked \(n) takes in \(at)"
+        case "restore_commit": return n == 1 ? "restored a commit in \(at)" : "restored \(n) commits in \(at)"
+        case "rename_commit": return n == 1 ? "renamed a commit in \(at)" : "renamed \(n) commits in \(at)"
+        case "rename_note": return "renamed a note to \(at)" + times
+        case "delete_lens": return n == 1 ? "deleted a lens of \(at)" : "deleted \(n) lenses of \(at)"
         // VX-168: a known name's first setup key, bound as it connected.
         case "connect_bound": return "connected with a new setup, now bound to its name" + times
         // VX-198 (R-VX184-5): the newest copied setup took the name.
@@ -1093,7 +1124,11 @@ nonisolated enum MCPReceiptCopy {
         case .divide: return n == 1 ? "divided a block" : "divided \(n) blocks"
         case .merge: return n == 1 ? "merged two blocks" : "merged blocks \(n) times"
         case .move: return n == 1 ? "moved a block" : "moved \(n) blocks"
-        case .delete: return n == 1 ? "deleted a block" : "deleted \(n) blocks"
+        // VX-184 U4 (R-VX184-1): a block's LAST take deleted IS the block —
+        // `delete_block`'s act, its detail saying why.
+        case .delete:
+            return n == 1 ? receipts[0].detail.map { "deleted a block (\($0))" } ?? "deleted a block"
+                : "deleted \(n) blocks"
         case .blockName:
             return n == 1
                 ? (receipts[0].detail.map { "named a block \(quoted($0))" } ?? "cleared a block's name")
@@ -1141,6 +1176,30 @@ nonisolated enum MCPReceiptCopy {
             return n == 1
                 ? "linked \(quoted(receipts[0].targetTitle)) and \(quoted(receipts[0].detail)) as versions"
                 : "linked \(n) pairs of notes as versions"
+        // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
+        // P-U4-WORDS — her copy pass).
+        case .commentEdit: return n == 1 ? "edited a comment" : "edited \(n) comments"
+        case .commentRestore: return n == 1 ? "restored a comment" : "restored \(n) comments"
+        case .takeDelete: return n == 1 ? "deleted a take" : "deleted \(n) takes"
+        case .takeArchive: return n == 1 ? "archived a take" : "archived \(n) takes"
+        case .takeUnarchive: return n == 1 ? "unarchived a take" : "unarchived \(n) takes"
+        case .takeLabel:
+            return n == 1
+                ? (receipts[0].detail.map { "labeled a take \(quoted($0))" } ?? "cleared a take's label")
+                : "labeled \(n) takes"
+        case .takeLock: return n == 1 ? "locked a take" : "locked \(n) takes"
+        case .takeUnlock: return n == 1 ? "unlocked a take" : "unlocked \(n) takes"
+        case .commitRestore: return n == 1 ? "restored a commit" : "restored \(n) commits"
+        case .commitRename:
+            return n == 1
+                ? (receipts[0].detail.map { "renamed a commit \(quoted($0))" } ?? "cleared a commit's name")
+                : "renamed \(n) commits"
+        case .noteTitle:
+            return n == 1
+                ? (receipts[0].detail.map { "renamed the note \(quoted($0))" } ?? "cleared the note's title")
+                : "renamed \(n) notes"
+        case .lensDelete:
+            return n == 1 ? "deleted the lens \(quoted(receipts[0].detail))" : "deleted \(n) lenses"
         }
     }
 

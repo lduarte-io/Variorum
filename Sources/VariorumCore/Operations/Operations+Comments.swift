@@ -49,18 +49,30 @@ extension Operations {
     /// Rewrites a live comment's text in place. Same refusals as adding;
     /// a no-op edit writes nothing.
     public func editBlockComment(_ id: String, text: String) throws {
-        try database.write { db in
-            var comment = try liveComment(db, id)
-            _ = try liveBlock(db, comment.blockId)
-            try ensurePlacementUnlocked(db, blockID: comment.blockId)
-            guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                throw OperationError.invalidCommentText
-            }
-            guard comment.text != text else { return }
-            comment.text = text
-            comment.updatedAt = date.now
-            try comment.update(db)
+        try database.write { db in _ = try rewriteComment(db, id, text: text) }
+    }
+
+    /// `editBlockComment`'s row work inside the caller's transaction (VX-184
+    /// U4 — extracted byte-for-byte so the MCP door's `edit_comment` runs the
+    /// SAME body). `expecting` is that door's stale-read precondition, checked
+    /// after her guards and before her no-op (nil on her door — unchanged).
+    /// Returns the text it replaced, or nil when nothing was written.
+    func rewriteComment(_ db: Database, _ id: String, text: String, expecting: String? = nil) throws -> String? {
+        var comment = try liveComment(db, id)
+        _ = try liveBlock(db, comment.blockId)
+        try ensurePlacementUnlocked(db, blockID: comment.blockId)
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw OperationError.invalidCommentText
         }
+        if let expecting, comment.text != expecting {
+            throw MCPNoteEditRefusal.commentChangedSinceRead(commentID: id)
+        }
+        guard comment.text != text else { return nil }
+        let previous = comment.text
+        comment.text = text
+        comment.updatedAt = date.now
+        try comment.update(db)
+        return previous
     }
 
     /// Tombstone (S2). The comment stays visible on the block's
@@ -82,26 +94,31 @@ extension Operations {
     /// the block live (a live comment under a dead block is a state nothing
     /// renders).
     public func restoreBlockComment(_ id: String) throws {
-        try database.write { db in
-            guard var comment = try BlockComment.fetchOne(db, key: id) else {
-                throw OperationError.commentNotFound(id: id)
-            }
-            guard comment.deletedAt != nil else {
-                throw OperationError.commentNotDeleted(id: id)
-            }
-            _ = try liveBlock(db, comment.blockId)
-            try ensurePlacementUnlocked(db, blockID: comment.blockId)
-            comment.deletedAt = nil
-            comment.updatedAt = date.now
-            try comment.update(db)
-            // VX-179 — the restore-side belt (13j ladder B, B1): since a
-            // deleted comment can carry a purge intent ("Delete forever…"),
-            // a restore VOIDS any live intent naming it, inside this
-            // transaction, so a leftover intent can never claim her next
-            // delete of it (the fence would hide it from the fold and the
-            // janitor would take it with no confirm).
-            try voidPurgeIntents(db, table: "block_comment", rowID: id)
+        try database.write { db in try reviveCommentRow(db, id) }
+    }
+
+    /// `restoreBlockComment`'s row work inside the caller's transaction
+    /// (VX-184 U4 — extracted byte-for-byte so the MCP door's
+    /// `restore_comment` runs the SAME body).
+    func reviveCommentRow(_ db: Database, _ id: String) throws {
+        guard var comment = try BlockComment.fetchOne(db, key: id) else {
+            throw OperationError.commentNotFound(id: id)
         }
+        guard comment.deletedAt != nil else {
+            throw OperationError.commentNotDeleted(id: id)
+        }
+        _ = try liveBlock(db, comment.blockId)
+        try ensurePlacementUnlocked(db, blockID: comment.blockId)
+        comment.deletedAt = nil
+        comment.updatedAt = date.now
+        try comment.update(db)
+        // VX-179 — the restore-side belt (13j ladder B, B1): since a
+        // deleted comment can carry a purge intent ("Delete forever…"),
+        // a restore VOIDS any live intent naming it, inside this
+        // transaction, so a leftover intent can never claim her next
+        // delete of it (the fence would hide it from the fold and the
+        // janitor would take it with no confirm).
+        try voidPurgeIntents(db, table: "block_comment", rowID: id)
     }
 
     // MARK: - Travel (Phase 13, Step A2 — the duplication rule)

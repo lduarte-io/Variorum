@@ -111,24 +111,31 @@ extension Operations {
     /// reports an act that landed).
     @discardableResult
     public func renameCommitPoint(_ commitID: String, message: String?) throws -> Bool {
-        try database.write { db in
-            guard var commitPoint = try CommitPoint.fetchOne(db, key: commitID) else {
-                throw OperationError.commitNotFound(id: commitID)
-            }
-            // GUARDS FIRST, the no-op short-circuit second — `setTakeLabel`'s
-            // own order, restored at the 13u3 ladder (round 1, R1-2): with
-            // the no-op checked first, a SAME-NAME rename under a sealed post
-            // (or on a dead take) returned silent success where a changed one
-            // refused — one door, two answers under one seal, decided by
-            // whether she touched the text.
-            let variant = try liveVariant(db, commitPoint.variantId)
-            try ensurePlacementUnlocked(db, blockID: variant.blockId)
-            let normalized = SavepointName.normalized(message)
-            guard commitPoint.message != normalized else { return false }
-            commitPoint.message = normalized
-            try commitPoint.update(db)
-            return true
+        try database.write { db in try renameCommitRows(db, commitID, message: message) != nil }
+    }
+
+    /// `renameCommitPoint`'s row work inside the caller's transaction (VX-184
+    /// U4 — extracted byte-for-byte so the MCP door's `rename_commit` runs the
+    /// SAME body). Returns `.some(previous message)` when it wrote, nil for
+    /// the no-op.
+    func renameCommitRows(_ db: Database, _ commitID: String, message: String?) throws -> String?? {
+        guard var commitPoint = try CommitPoint.fetchOne(db, key: commitID) else {
+            throw OperationError.commitNotFound(id: commitID)
         }
+        // GUARDS FIRST, the no-op short-circuit second — `setTakeLabel`'s
+        // own order, restored at the 13u3 ladder (round 1, R1-2): with
+        // the no-op checked first, a SAME-NAME rename under a sealed post
+        // (or on a dead take) returned silent success where a changed one
+        // refused — one door, two answers under one seal, decided by
+        // whether she touched the text.
+        let variant = try liveVariant(db, commitPoint.variantId)
+        try ensurePlacementUnlocked(db, blockID: variant.blockId)
+        let normalized = SavepointName.normalized(message)
+        guard commitPoint.message != normalized else { return nil }
+        let previous = commitPoint.message
+        commitPoint.message = normalized
+        try commitPoint.update(db)
+        return .some(previous)
     }
 
     /// Loads a commit's text back into the working buffer. Old commits
@@ -138,24 +145,33 @@ extension Operations {
     /// pre-split text and restoring it resurrects both halves into this
     /// buffer — coherent under "coarse, not forensic"; the editor warns.
     public func restoreCommit(_ variantID: String, commitID: String) throws {
-        try database.write { db in
-            var variant = try editableVariant(db, variantID)
-            guard let commitPoint = try CommitPoint.fetchOne(db, key: commitID),
-                  commitPoint.variantId == variantID
-            else { throw OperationError.commitNotFound(id: commitID) }
+        try database.write { db in _ = try restoreCommitRows(db, variantID, commitID: commitID) }
+    }
 
-            let oldText = variant.workingText
-            guard oldText != commitPoint.text else { return }
-            let now = date.now
-            variant.workingText = commitPoint.text
-            variant.updatedAt = now
-            try variant.update(db)
-            // A restore replaces the whole buffer: churn = delete-all +
-            // insert-all, equal weight. Approximate by design.
-            try registerTextChange(
-                db, blockID: variant.blockId, charDelta: oldText.count + commitPoint.text.count,
-                forceMajorRevision: false, now: now)
-        }
+    /// `restoreCommit`'s row work inside the caller's transaction (VX-184 U4
+    /// — extracted byte-for-byte so the MCP door's `restore_commit` runs the
+    /// SAME body between its insurance commits). Returns the text it replaced
+    /// and the text it wrote, or nil when the take already read the commit's.
+    func restoreCommitRows(
+        _ db: Database, _ variantID: String, commitID: String
+    ) throws -> (old: String, new: String)? {
+        var variant = try editableVariant(db, variantID)
+        guard let commitPoint = try CommitPoint.fetchOne(db, key: commitID),
+              commitPoint.variantId == variantID
+        else { throw OperationError.commitNotFound(id: commitID) }
+
+        let oldText = variant.workingText
+        guard oldText != commitPoint.text else { return nil }
+        let now = date.now
+        variant.workingText = commitPoint.text
+        variant.updatedAt = now
+        try variant.update(db)
+        // A restore replaces the whole buffer: churn = delete-all +
+        // insert-all, equal weight. Approximate by design.
+        try registerTextChange(
+            db, blockID: variant.blockId, charDelta: oldText.count + commitPoint.text.count,
+            forceMajorRevision: false, now: now)
+        return (oldText, commitPoint.text)
     }
 
     /// One `kind='auto'` commit per dirty live variant under the container —
@@ -435,16 +451,24 @@ extension Operations {
     /// Allowed on an ARCHIVED take: the archived listing is exactly where a
     /// label helps identify a take (3B judgment call, same record).
     public func setTakeLabel(_ variantID: String, label: String?) throws {
-        try database.write { db in
-            var variant = try liveVariant(db, variantID)
-            try ensurePlacementUnlocked(db, blockID: variant.blockId)
-            let trimmed = label?.trimmingCharacters(in: .whitespacesAndNewlines)
-            let normalized = (trimmed?.isEmpty ?? true) ? nil : trimmed
-            guard variant.label != normalized else { return }
-            variant.label = normalized
-            variant.updatedAt = date.now
-            try variant.update(db)
-        }
+        try database.write { db in _ = try setTakeLabelRows(db, variantID, label: label) }
+    }
+
+    /// `setTakeLabel`'s row work inside the caller's transaction (VX-184 U4 —
+    /// extracted byte-for-byte so the MCP door's `set_take_label` runs the
+    /// SAME body). Returns `.some(previous label)` when it wrote, nil for the
+    /// no-op.
+    func setTakeLabelRows(_ db: Database, _ variantID: String, label: String?) throws -> String?? {
+        var variant = try liveVariant(db, variantID)
+        try ensurePlacementUnlocked(db, blockID: variant.blockId)
+        let trimmed = label?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalized = (trimmed?.isEmpty ?? true) ? nil : trimmed
+        guard variant.label != normalized else { return nil }
+        let previous = variant.label
+        variant.label = normalized
+        variant.updatedAt = date.now
+        try variant.update(db)
+        return .some(previous)
     }
 
     // MARK: - Shared internals
