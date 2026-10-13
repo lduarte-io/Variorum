@@ -347,6 +347,25 @@ SUCCEEDED **` — the Debug app `io.lduarte.Variorum.debug` with its `variorum-m
    `notes/plans/vx184-screens/u1/` (gitignored; every key redacted to its first 9 characters — a grep for `vmk1_` whole keys
    finds none).
 
+### THE LIVE ROUND — the evidence (dev store only, stage `vx184-u1`, 2026-10-13 from 01:19 MDT)
+
+**Machine and guards:** the Pro; the coordinator's hold `coord-for-vx184` handed over to `vx184-u1` (70 min) at 01:19:31;
+her `/Applications/Variorum.app` ABSENT throughout and `guard.sh --author` OK before every GUI step and every client run,
+plus `guard.sh <devpid> x y` before each click/scroll; the grants probe `AX: true SCREEN: true`. The Debug app
+`DerivedData/vx184-u1/…/Variorum.app` (`io.lduarte.Variorum.debug`, this branch's fixed build), pid 94383, **Study, light**.
+**A1 prestage copy** → `…/Variorum-dev/Backups/safety-copies/scale-prestage-20261013T072601Z` (four files, each
+`cmp`-verified; sha256 sqlite `734fdee2…`, wal `5a25da0f…`, shm `b868b0a2…`, keys `e357388a…`); the Debug app's prefs plist
+saved beside the scratch for a before/after diff. **Her user-scope servers BEFORE** (read from `~/.claude.json`, values
+never printed): `['linear-server', 'variorum']`, block fingerprint `49c9525391868615`. Evidence in
+`notes/plans/vx184-screens/u1/` (gitignored); keys are redacted to their first 9 characters everywhere.
+
+| leg | what was done | outcome |
+|---|---|---|
+| **(a) a real Claude Code turn** | Settings ▸ MCP (via the app menu's "MCP Settings…"): the server **running**; clients `claude-code` (3 grants, last seen 2 days ago), `u3-walk`, `u2-walk`, `u1-walk` (`cap1/w0.png`). Connect a client ▸ Claude Code ▸ **Copy setup command** (cliclick, guarded) → **K1 `vmk1_<dev-key-prefix>…`** (48 chars); the pane's setup line with **this unit's `keyLine`** — "Each copy carries a fresh setup key, shown here as dots, that ties a client's name to that setup. Running it again replaces the old setup." (`l1-pane-scrolled.png`, `l2-k1-copied.png`) and **L1** — "…Each setup copied here carries a key that binds that name to it — running a newer setup moves the name to the new key — and a connection under the name with any other key, or none, is refused…" (Study, `a3-activity-leg-a.png`'s first scroll, superseded by the Activity capture — L1 re-captured in leg (b)). In the scratch project: the copied line with `-s user` → `-s local` (`variorum-dev`, the REAL fixed Debug shim) + `variorum-tee` (the same shim behind `tee`); `claude mcp list` (Claude Code 2.1.296, 01:28:41) | **`variorum-dev` ✔ Connected · `variorum-tee` ✔ Connected** (`wire/a1-claude-mcp-list.txt`). The tee (`wire/tee-{in,out}.log`, session 01:28:42): IN `server/discover` (id `"server-discover-probe-1"`) then `initialize` (id 0) pipelined, `notifications/initialized`, `tools/list` id 1; OUT **`-32601` on `"server-discover-probe-1"` first**, then the `initialize` result on id 0, then the tools on id 1 — VX-180's window, unchanged by this unit. **One `claude -p` turn** (`--strict-mcp-config`, only `variorum-dev` with K1, `--allowedTools mcp__variorum-dev__list_books`, 01:28:59): **served** — "The tool returned 1 book, and its name is "o ladrão de raios"." (`is_error` false, no denials; `wire/a2-claude-p-turn.json`). **Activity:** "claude-code listed books — now" · **"claude-code connected with a new setup, now bound to its name — now"** (the dev store's `claude-code` was approved and UNBOUND — VX-180's restore — so K1 BOUND it; the re-bind arm is leg (b)'s) — `a3-activity-leg-a.png`. The same listing showed her user-scope `variorum` (the INSTALLED Release shim, her app absent) **✘ CONNECTION_CLOSED** — VX-181's pre-fix symptom on the build she runs, corroboration |
+| **(b) VX-198 — the re-bind** | next | |
+| **(c) VX-181 — the closed app** | next | |
+| **(d) the realistic large write** | next | |
+
 ### SELF-ASSESSMENT (pre-stage — the implementer's; the live round's evidence still owed)
 
 **Against the U1 row:** VX-132 — every harness connect/call bounded and named (pins red-on-old: they HANG on the old
