@@ -149,8 +149,8 @@ struct CommentCardLayoutTests {
     /// **THE HIT DECISION (U2 FIX LEG — the walk's F-W-1 / F-W-2).** A wheel
     /// goes to its OWNER's scroll view by hit-testing — the card's contents
     /// when the card takes it, the door (and so the page) when the page does;
-    /// a press on an overflowing card's scroller lane belongs to the
-    /// scroller; every other press is the door.
+    /// a press on an overflowing card's scroller lane is the card's own lane
+    /// drag (fix leg 2); every other press is the door.
     @Test func theHitDecisionGivesEachEventToItsOwnersScrollView() {
         typealias H = CommentCardLayout.HitAnswer
         func answer(_ wheel: CommentCardLayout.WheelOwner?, lane: Bool, overflows: Bool) -> H {
@@ -163,12 +163,30 @@ struct CommentCardLayoutTests {
                     "a wheel the page takes stays on the card, whose scroll view is the page")
             #expect(answer(.page, lane: lane, overflows: false) == .door)
         }
-        #expect(answer(nil, lane: true, overflows: true) == .scroller,
-                "a press on the lane drags the scroller — never the panel")
+        #expect(answer(nil, lane: true, overflows: true) == .lane,
+                "a press on the lane is the lane's drag — never the panel")
         #expect(answer(nil, lane: false, overflows: true) == .door)
         #expect(answer(nil, lane: true, overflows: false) == .door,
                 "a card with nothing to scroll has no lane: the whole card is the door")
         #expect(answer(nil, lane: false, overflows: false) == .door)
+    }
+
+    /// **THE LANE DRAG FOLLOWS THE NATIVE KNOB RATIO (U2 FIX LEG 2 —
+    /// F-W-2-R).** The pointer's travel moves the contents by content travel ÷
+    /// knob travel (the knob follows the pointer one-to-one), clamped to the
+    /// contents' ends; no measurable knob falls back to one-to-one.
+    @Test func theLaneDragFollowsTheKnobRatioAndStopsAtTheEnds() {
+        func offset(_ start: CGFloat, _ down: CGFloat, travel: CGFloat = 280, knob: CGFloat = 50) -> CGFloat {
+            CommentCardLayout.laneDragOffset(
+                startOffset: start, dragDown: down, contentTravel: travel, knobTravel: knob)
+        }
+        #expect(offset(0, 0) == 0, "no travel, no move")
+        #expect(offset(0, 10) == 56, "10 pt of knob is 56 pt of contents at 280 ÷ 50")
+        #expect(offset(100, -10) == 44, "upward drags scroll back")
+        #expect(offset(0, -5) == 0, "never above the top")
+        #expect(offset(250, 10) == 280, "never past the bottom")
+        #expect(offset(10, 5, travel: 100, knob: 0) == 15, "no knob: one-to-one")
+        #expect(offset(0, 10, travel: -20) == 0, "nothing to scroll stays put")
     }
 
     /// **THE BADGE ALWAYS CARRIES ITS COUNT (U2 FIX LEG — the walk's F-W-5).**
@@ -518,29 +536,81 @@ struct CommentCardViewTests {
         #expect(card.hitTarget(at: point, during: nil) == nil)
     }
 
-    /// **F-W-2: A PRESS ON THE SCROLLER LANE BELONGS TO THE SCROLLER** — on an
-    /// overflowing card, faded or not. RED ON OLD by the offscreen replay: once
-    /// the overlay scroller faded, the old answer at the lane was the card and
-    /// the press opened the panel (door 1×, no drag).
-    @Test func aPressOnTheScrollerLaneBelongsToTheScroller() throws {
+    /// **F-W-2 / F-W-2-R: A PRESS-DRAG ANYWHERE ON THE LANE SCROLLS THE CARD;
+    /// THE DOOR STAYS SHUT.** Fix leg 1 answered the `NSScroller` for every lane
+    /// press; an overlay scroller tracks only on its 6 pt knob part, so every
+    /// other lane press died — door shut, nothing moved (STAGE WINDOW 4's live
+    /// residual, reproduced offscreen: THE TRACE of fix leg 2). The card now
+    /// owns the lane: `mouseDown` starts its drag, `mouseDragged` moves the
+    /// contents at the knob ratio, `mouseUp` ends it. RED ON OLD by the
+    /// offscreen replay (the lane's leading edge: the old drag 0 → 0) and by
+    /// this cell's own first line (old `hitTarget` answered the scroller).
+    @Test func aPressDragAnywhereOnTheLaneScrollsTheCard() throws {
         let (card, window) = hosted(NSRect(x: 20, y: 20, width: 210, height: 60))
         defer { close(window) }
-        card.onClick = {}
+        var opened = 0
+        card.onClick = { opened += 1 }
         card.presentCard(content((0..<8).map { "comment number \($0) with words" }))
         card.layoutSubtreeIfNeeded()
         let inner = card.innerScrollView
+        let clip = inner.contentView
         let bar = try #require(inner.verticalScroller, "a door that can scroll carries a scroller")
         #expect(!bar.frame.isEmpty, "the scroll view tiled its scroller: \(bar.frame)")
         let superview = try #require(card.superview)
-        let lane = superview.convert(NSPoint(x: bar.bounds.midX, y: bar.bounds.midY), from: bar)
-        #expect(card.hitTarget(at: lane, during: nil) === bar, "the press drags the scroller")
-        // Off the lane, the door.
+        func event(_ type: NSEvent.EventType, _ p: NSPoint) throws -> NSEvent {
+            try #require(NSEvent.mouseEvent(
+                with: type, location: p, modifierFlags: [], timestamp: 0,
+                windowNumber: window.windowNumber, context: nil, eventNumber: 0,
+                clickCount: 1, pressure: type == .leftMouseUp ? 0 : 1))
+        }
+        let contentTravel = (inner.documentView?.frame.height ?? 0) - clip.bounds.height
+        #expect(contentTravel > 0, "the entries overflow")
+        let knobTravel = bar.rect(for: .knobSlot).height - bar.rect(for: .knob).height
+        let knobY = bar.rect(for: .knob).midY
+        // The lane's leading edge (OFF the overlay knob — the measured dead
+        // spot), its trailing edge, and the knob's own column.
+        for x in [2, bar.bounds.maxX - 2, bar.rect(for: .knob).midX] as [CGFloat] {
+            clip.scroll(to: .zero)
+            inner.reflectScrolledClipView(clip)
+            opened = 0
+            let press = bar.convert(NSPoint(x: x, y: knobY), to: nil)   // window coordinates
+            #expect(card.hitTarget(at: superview.convert(press, from: nil), during: nil) === card,
+                    "the card owns the lane (x \(x))")
+            card.mouseDown(with: try event(.leftMouseDown, press))
+            card.mouseDragged(with: try event(.leftMouseDragged, NSPoint(x: press.x, y: press.y - 19)))
+            card.mouseDragged(with: try event(.leftMouseDragged, NSPoint(x: press.x, y: press.y - 38)))
+            card.mouseUp(with: try event(.leftMouseUp, NSPoint(x: press.x, y: press.y - 38)))
+            let expected = CommentCardLayout.laneDragOffset(
+                startOffset: 0, dragDown: 38, contentTravel: contentTravel,
+                knobTravel: knobTravel > 0 ? knobTravel : clip.bounds.height
+                    * (1 - clip.bounds.height / (inner.documentView?.frame.height ?? 1)))
+            #expect(clip.bounds.minY > 0 && abs(clip.bounds.minY - expected) < 0.5,
+                    "x \(x): the drag scrolled the card to \(clip.bounds.minY), expected \(expected)")
+            #expect(opened == 0, "x \(x): the door stayed shut")
+        }
+        // A drag back UP scrolls back toward the top.
+        let top = bar.convert(NSPoint(x: 2, y: knobY), to: nil)
+        let before = clip.bounds.minY
+        card.mouseDown(with: try event(.leftMouseDown, top))
+        card.mouseDragged(with: try event(.leftMouseDragged, NSPoint(x: top.x, y: top.y + 10)))
+        card.mouseUp(with: try event(.leftMouseUp, NSPoint(x: top.x, y: top.y + 10)))
+        #expect(clip.bounds.minY < before, "upward drags scroll back")
+        // Off the lane, the door — and a drag after the door's press scrolls nothing.
+        let settled = clip.bounds.minY
         let body = superview.convert(NSPoint(x: 4, y: 4), from: inner)
         #expect(card.hitTarget(at: body, during: nil) === card)
-        // Nothing to scroll: no lane, the whole card is the door.
+        let bodyPress = superview.convert(body, to: nil)
+        card.mouseDown(with: try event(.leftMouseDown, bodyPress))
+        #expect(opened == 1, "a press on the contents is the door, as ever")
+        card.mouseUp(with: try event(.leftMouseUp, bodyPress))
+        #expect(clip.bounds.minY == settled)
+        // Nothing to scroll: no lane — a press there is the door.
         card.presentCard(content(["one"]))
         card.layoutSubtreeIfNeeded()
-        #expect(card.hitTarget(at: lane, during: nil) === card)
+        opened = 0
+        let lanePress = bar.convert(NSPoint(x: 2, y: 4), to: nil)
+        card.mouseDown(with: try event(.leftMouseDown, lanePress))
+        #expect(opened == 1, "a card with nothing to scroll is all door")
     }
 
     /// **F-W-5: THE BADGE SHOWS ITS WHOLE COUNT** — mounted, the real label.

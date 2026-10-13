@@ -1978,9 +1978,9 @@ live) and the door-shut answer stay byte-intact. The pins' RUN and the lane re-w
 | piece | what | status |
 |---|---|---|
 | FL2-a | this section | DONE (f53d1621) |
-| FL2-1 | trace F-W-2-R offscreen (overlay style confirmed/forced; the live sequence modelled) — mechanism found or the gap stated | DONE (this commit) — the lane hands presses to an overlay scroller that tracks only on its 6 pt knob part; off it, a dead press (THE TRACE) |
-| FL2-2 | the fix (the lane's press-drag scrolls the card, faded or flashed; door + wheel untouched) | NOT-STARTED |
-| FL2-3 | pins (what the runner can model) + red-on-old by replay; plain build; record closed | NOT-STARTED |
+| FL2-1 | trace F-W-2-R offscreen (overlay style confirmed/forced; the live sequence modelled) — mechanism found or the gap stated | DONE (75f55b2d) — the lane hands presses to an overlay scroller that tracks only on its 6 pt knob part; off it, a dead press (THE TRACE) |
+| FL2-2 | the fix (the lane's press-drag scrolls the card, faded or flashed; door + wheel untouched) | DONE (this commit) — the card owns the lane drag (`mouseDown`/`mouseDragged`/`mouseUp` + the pure `laneDragOffset` at the native knob ratio); `HitAnswer.scroller` → `.lane`, answering the card; replayed: every lane position drags 0 → 212.04 (overlay; native knob 212), door 0×; the wheel replay byte-identical to leg 1's fixed column |
+| FL2-3 | pins (what the runner can model) + red-on-old by replay; plain build; record closed | IN-PROGRESS — pins written + typechecked (this commit); the record's close next |
 
 ### THE TRACE (offscreen, the real module — `scratchpad/vx179-u2-fix2/knob.swift`; written before any fix)
 

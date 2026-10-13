@@ -25,8 +25,9 @@
 //  - a small `NSScrollView` hosting them, so content taller than the card
 //    scrolls inside it;
 //  - the card is ONE door: a press hit-tests as the card itself (the labels
-//    and the clip view never take her click; a press on the scroller lane
-//    belongs to the scroller), and a WHEEL is hit-tested to the scroll view
+//    and the clip view never take her click; a press on an overflowing
+//    card's scroller lane is the card's own lane DRAG, never the door), and a
+//    WHEEL is hit-tested to the scroll view
 //    that owns it — the card's own when `CommentCardLayout.wheelOwner` says
 //    the card can move that way, the page's otherwise — so a card with
 //    nothing to scroll never steals the page's scroll (the U2 fix leg:
@@ -183,8 +184,9 @@ nonisolated enum CommentCardLayout {
         /// The card's own stack — inside its scroll view, which then takes
         /// the wheel natively.
         case contents
-        /// The vertical scroller — a press on its lane drags it.
-        case scroller
+        /// The scroller's LANE — a press there is the card's own drag of its
+        /// contents, never the door (U2 FIX LEG 2: the card owns the drag).
+        case lane
     }
 
     /// **THE HIT DECISION (VX-179 U2 FIX LEG — the walk's F-W-1 and F-W-2).**
@@ -192,11 +194,25 @@ nonisolated enum CommentCardLayout {
     /// owner's scroll view is: the card's contents when the card takes it,
     /// the door (and so the page) when the page does — hit-testing, not a
     /// hand-delivered event, chooses the scroll view. A PRESS on the scroller
-    /// lane of an overflowing card belongs to the scroller (faded or not);
-    /// every other press is the door.
+    /// lane of an overflowing card is the lane's drag (faded or not); every
+    /// other press is the door.
     static func hitAnswer(wheel: WheelOwner?, inScrollerLane: Bool, overflows: Bool) -> HitAnswer {
         if let wheel { return wheel == .card ? .contents : .door }
-        return overflows && inScrollerLane ? .scroller : .door
+        return overflows && inScrollerLane ? .lane : .door
+    }
+
+    /// **THE LANE DRAG's mapping (VX-179 U2 FIX LEG 2 — STAGE WINDOW 4's
+    /// F-W-2-R).** The pointer's travel down the lane moves the contents at
+    /// the NATIVE knob ratio — content travel ÷ knob travel — so the knob
+    /// follows the pointer one-to-one, as AppKit's own knob tracking would;
+    /// clamped to the contents' ends. `knobTravel` ≤ 0 (no measurable knob)
+    /// falls back to one-to-one. `dragDown` is positive toward the bottom.
+    static func laneDragOffset(
+        startOffset: CGFloat, dragDown: CGFloat, contentTravel: CGFloat, knobTravel: CGFloat
+    ) -> CGFloat {
+        let travel = max(0, contentTravel)
+        let ratio = knobTravel > 0 ? travel / knobTravel : 1
+        return min(travel, max(0, startOffset + dragDown * ratio))
     }
 
     /// The controller's pool plan: which existing card shows which block.
@@ -585,8 +601,64 @@ final class CommentCardView: NSView {
         return cell.cellSize.width
     }
 
+    /// The lane drag in flight: where the press began (window y), the
+    /// contents' offset then, and the travels the mapping needs.
+    private var laneDrag: (startY: CGFloat, startOffset: CGFloat,
+                           contentTravel: CGFloat, knobTravel: CGFloat)?
+
+    /// **THE DOOR — and, on an overflowing card's scroller lane, THE LANE
+    /// DRAG (VX-179 U2 FIX LEG 2, F-W-2-R).** Traced offscreen against the real
+    /// module: an overlay scroller tracks only a press on its 6 pt knob part;
+    /// handed any other lane press (fix leg 1's rule) it does nothing — the
+    /// live residual, door shut and the contents still. So the card owns the
+    /// lane: the press starts its own drag, `mouseDragged` (delivered to the
+    /// view that took the press — the drag handle's road beside it) moves the
+    /// contents at the native knob ratio, `mouseUp` ends it. Every other press
+    /// is the door, exactly as before.
     override func mouseDown(with event: NSEvent) {
+        if let drag = laneDragStart(event) {
+            laneDrag = drag
+            scroller.flashScrollers()
+            return
+        }
         onClick?()
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard let drag = laneDrag else { return super.mouseDragged(with: event) }
+        let offset = CommentCardLayout.laneDragOffset(
+            startOffset: drag.startOffset, dragDown: drag.startY - event.locationInWindow.y,
+            contentTravel: drag.contentTravel, knobTravel: drag.knobTravel)
+        let clip = scroller.contentView
+        guard abs(clip.bounds.minY - offset) > 0.01 else { return }
+        clip.scroll(to: NSPoint(x: clip.bounds.minX, y: offset))
+        scroller.reflectScrolledClipView(clip)
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        guard laneDrag != nil else { return super.mouseUp(with: event) }
+        laneDrag = nil
+    }
+
+    /// The lane drag a press would start — nil when the press is the door.
+    private func laneDragStart(
+        _ event: NSEvent
+    ) -> (startY: CGFloat, startOffset: CGFloat, contentTravel: CGFloat, knobTravel: CGFloat)? {
+        guard onClick != nil, stacked, let superview else { return nil }
+        let point = superview.convert(event.locationInWindow, from: nil)
+        guard CommentCardLayout.hitAnswer(
+            wheel: nil, inScrollerLane: inScrollerLane(point), overflows: overflows) == .lane
+        else { return nil }
+        let clip = scroller.contentView.bounds
+        let contentTravel = max(0, stack.frame.height - clip.height)
+        var knobTravel: CGFloat = 0
+        if let bar = scroller.verticalScroller {
+            knobTravel = bar.rect(for: .knobSlot).height - bar.rect(for: .knob).height
+        }
+        if knobTravel <= 0, stack.frame.height > 0 {
+            knobTravel = clip.height * (1 - clip.height / stack.frame.height)
+        }
+        return (event.locationInWindow.y, clip.minY, contentTravel, knobTravel)
     }
 
     /// Round 3 (MINOR): a quiet card is CLICK-THROUGH — the read tier
@@ -611,8 +683,10 @@ final class CommentCardView: NSView {
     /// (inside its scroll view, which then scrolls natively — measured), a
     /// wheel the page takes answers the card (whose scroll view is the page —
     /// the walk's own observed road), and a press on the scroller lane of an
-    /// overflowing card answers the scroller even while it is faded. Every
-    /// other press is the door. One pure decision: `CommentCardLayout.hitAnswer`.
+    /// overflowing card is the card's own LANE DRAG (fix leg 2 — it answers
+    /// the card, whose `mouseDown` starts the drag; the overlay scroller
+    /// itself tracks only its 6 pt knob). Every other press is the door. One
+    /// pure decision: `CommentCardLayout.hitAnswer`.
     override func hitTest(_ point: NSPoint) -> NSView? {
         hitTarget(at: point, during: NSApp.currentEvent)
     }
@@ -628,8 +702,7 @@ final class CommentCardView: NSView {
         switch CommentCardLayout.hitAnswer(
             wheel: wheel, inScrollerLane: inScrollerLane(point), overflows: overflows) {
         case .contents: return stack
-        case .scroller: return scroller.verticalScroller ?? self
-        case .door: return self
+        case .lane, .door: return self
         }
     }
 
