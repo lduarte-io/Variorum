@@ -1656,3 +1656,35 @@ After the last: `git diff --stat` empty, rebuild, replay all green.
   popover STAYS, a second ⎋ closes it; R1-2 (the reviewer's row) — in the same popover edit a comment in
   place, CLICK AWAY to dismiss, reopen: the edit is saved. Plus a regression look: the sheet host's ⎋ ladder
   and Close unchanged.
+
+### ORCHESTRATOR VERIFICATION + DISPOSITIONS (the U3 fix leg 2 accepted, 2026-10-13)
+
+Verified by spot-check, never trust: the eight commits exist as claimed (deedc13f … 74944126), the
+tree is clean and in sync both ways, the leg's whole diff touches exactly `CommentsPanel.swift`,
+`CommentTextArea.swift`, `CommentTextAreaTests.swift` and the record — `CommentCard.swift` and
+`CommentCardTests.swift` (U2's) untouched as promised. The `claims` rule read in place: own window or
+the window's DIRECT PARENT only — the child-window relation only the popover host creates (a sheet's
+parent is `sheetParent`, not `parent`), so the sheet and inline hosts keep own-window behavior by
+construction; the monitor still consumes only acts the ladder handles. `revealBelow` is measured by the
+panel and passed down, never guessed. The watcher keys on the popover whose CONTENT window is the
+panel's own — scoped, not global.
+
+**The probe-machinery disclosure, adjudicated ACCEPTED:** U2's accepted road plus the real-popover
+piece — anchor off-display at alpha 0, the popover's window alpha 0 the turn it appears and checked
+against every screen (abort if touched; it never was), a safety probe first, and the in-memory store
+with the default store folder verified absent at start and exit of every run (the earlier probe
+incident's class, handled by construction). Within the offscreen-probes line; no stage need.
+
+**F-W-3's mechanism correction accepted:** the walk's reading ("the stamp line vanishes — a restyle
+loss") was WRONG about the mechanism and the trace corrected it — the face was clipped below the capped
+list's edge, a 13u3-era class the U3-e floor raise made bite at the default size. The finding row in
+THE WALK stands as observed; this section's trace is the mechanism of record.
+
+**R1-2:** AGREE with measurement (SwiftUI never tears popover content down; `.onDisappear` never
+fires), pre-existing class, FIXED with the one shared leaving body. The answer is queued for LADDER
+ROUND 2's reviewer, who makes the final call (the cross-model flow). The accepted consequence (Close
+inside a popover commits twice — a harmless same-text repeat) is noted for the reviewer.
+
+**Next:** the stage window (the U2 and U3 PENDING lists above — suites, optional in-target reverts,
+the mini-walk in both voices + a dark card frame), then LADDER ROUND 2 over the whole fix-leg diff
+(a887bda6-era tip → current) with the R1-2/R1-3 answers returned to the reviewer.
