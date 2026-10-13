@@ -2161,6 +2161,10 @@ exit, popover windows alpha 0 and checked against every NSScreen, no sheet probe
   revert silenced both). Restored (`git checkout --`, worktree clean). To isolate the watcher alone:
   **REVERT R-PL2 ANNOUNCED** — the WatcherView's closure skips `self.onHostClosing?()` (isHost
   untouched), rebuilt, replayed, restored the same way.
+  **R-PL2 RAN — 13/14: RED ON EXACTLY ONE EXPECTATION**, R1-2's save (stored `["First note."]`), every
+  premise green (one dirty edit · up when dismissed · closed after); the release cell green. Restored
+  (`git checkout --`, worktree clean), rebuilt, the tip replay **14/14** again, typecheck EXIT 0.
+- [x] Dispositions + the runner's PENDING list (below).
 - [ ] Dispositions + the runner's PENDING list.
 
 ### THE TRACES (window 5's log `/tmp/vx179-window5-suites.log`, window 4's `/tmp/vx179-fixleg-suites.log`, the walk's `/tmp/vx179-commentkeys2.log`; offscreen replays in `scratchpad/vx179-u3-pin/`)
@@ -2230,3 +2234,19 @@ to a window that is not the panel's own or its parent: it REQUIRES that first (b
 4. R1-2 dismisses by the binding — the road the click-away and the panel's own close both end on
    (`NSPopover` closes → `willClose`); window 5's `aDismissed…` cell proved that road posts `willClose`
    in the runner (its monitor was released).
+
+### Dispositions (the pin leg)
+| row | disposition |
+|---|---|
+| runner red 1 — `escapeInAPopoverClearsTheDraftFirstThenCloses` | **REMODELLED, not skipped** (8beab85b): onto the product's own `.popover` presenter, whose keys provably arrive in the runner (window 5's trace on the sibling cell: the popover window key, `owns=true handled=true`), through the one guarded key road. Honestly NOT red on old (unchanged statement — on this road the shipped ladder already worked). **Gap stated:** the LIVE road (the main window key, its popover child fed its keys) cannot be hosted in the runner — an off-display anchor can never be key; it stands on `theKeyIsThePanelsWhereItIsDelivered`'s table (`owns(true, parentOf: parent, key: parent, …)`) and the walk's window-5 trace (`key=117375 … parent=117375 … owns=true handled=true`) |
+| runner red 2 — `closingThePopoverSavesADirtyInPlaceEdit` (the window 4 → 5 flip) | **TRACED to the runner's hand-built popover closing BEFORE the edit** (T3 — the exact closing event is runner-only and not observable without the stage; NOT claimed). **No leg-3 product line is on the cell's road** (it posts no key; the monitor's own release touches neither the watcher nor the model; the save replays green in both orders against the leg-3 module). **No live ordering hazard found:** the save is proven live through the product's presenter in windows 4 and 5. **REMODELLED** (8beab85b) onto that presenter, dismissed by its binding; **red on old by R-PL2 on exactly its save**, premises green; restored green |
+| T4 — the old cell's keys went to the test host's own key window | **DISCLOSED for the orchestrator:** in window 5 (02:27:47) the ladder's `x`, ⎋, ⎋ were addressed to a key window that was neither the panel's nor its anchor — the DEV-STORE test host's own window by elimination (never the real store). Window 4's anchor-addressed keys may have been delivered the same way. What they did there is not knowable from the log — a glance at the dev store's front note is the orchestrator's call. The remodel can no longer do this (`deliveryWindow` fails the premise by name instead) |
+| product code | **none** — no traced live-relevant mechanism (the coordinator's rule for this leg) |
+
+### PENDING (the runner's next window — none of it claimed)
+- `CommentPanelFixLeg2Tests` (6 tests) — expected green: the four popover cells replayed 14/14 offscreen
+  in the runner's shape; the remodelled cells now ride the road the runner already passed in window 5.
+  If a premise fails, it names itself: "the popover is up" / "still up when it is dismissed" = an
+  early close; "the key window is the panel's or its parent's" = the runner's key window is the host's.
+- The U3 suites beside it, unchanged this leg (`CommentTextAreaTests`' other suites) — regression only.
+
