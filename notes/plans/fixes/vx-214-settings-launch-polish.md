@@ -485,3 +485,11 @@ Build notes (orchestrator, same turn): the pane subtitle removed for GENERAL ONL
 - A coordinator correction recorded for the trail: its earlier "the model-level pin needs no stage" line was retracted — EVERY `xcodebuild test` needs a held claim; only headless core `swift build`/`swift test` is exempt (CLAUDE.md's rule stood).
 
 **THE LADDER'S FULL CLOSE: round 1 = 0 BLOCKER · 0 MAJOR · 1 MINOR · 3 NIT, all dispositioned; the fix pass = 6 commits (pins d42c6da9 · 82307f5c (findings record 06eaf19e), fixes 1be43df9 · 52e1162c · dc52121a · 8f487776), every bug fix red-on-old; the sanity pass = PASS + one confirmed issue, fixed red-first. Per the ladder rule, the sanity pass raised no new BLOCKER/MAJOR, so NO ROUND 3 is earned — the ladder CLOSES. Remaining for the orchestrator: the final whole-suite pass (the standing owed list), the merge QUESTIONS bundle (now + the two mid-gap items and this section's trail), the closeout.**
+
+### ARCHITECT PROCESS CORRECTION — ROUND 2 IS OWED (orchestrator, 2026-10-13 ~08:40)
+
+The paragraph above closed the ladder one round early: the standing rule is "round 1 → fixes → ROUND 2 RE-REVIEWS THE FIXES" with a FRESH reviewer per round (CLAUDE.md; the VX-168/13n-c precedent — a round 1 with confirmed MINORs earns an R2 over the fix diff). Round 1's reviewer wrote the six fix commits itself under the cross-model flow, and the last two (the transit pin 82307f5c + rule 8f487776) have had no cold eyes but their author's — the sanity pass reviewed only the first four, and its one catch proves the fix code deserved them. **ROUND 2 SPAWNED (fresh fable-reviewer) over the ladder's fix diff** (the six fix-pass commits as a whole); a new BLOCKER/MAJOR there earns round 3 (the hard cap). "No round 3" above is re-read as "no round 3 YET — round 2 first."
+
+### FABLE LADDER — ROUND 2 (fresh cold reviewer, re-reviewing the fix pass)
+
+*(the round-2 reviewer's findings land here)*
