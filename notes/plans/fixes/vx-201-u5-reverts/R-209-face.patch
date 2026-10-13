@@ -1,0 +1,18 @@
+diff --git a/App/Variorum/Variorum/LibraryOpenDoor.swift b/App/Variorum/Variorum/LibraryOpenDoor.swift
+index 2e6636fd..58f7337e 100644
+--- a/App/Variorum/Variorum/LibraryOpenDoor.swift
++++ b/App/Variorum/Variorum/LibraryOpenDoor.swift
+@@ -229,12 +229,7 @@ struct LibraryOpenSheet: View {
+                 // VX-209: the current library is Castle and this copy is
+                 // not — said before the press, in the alarm voice the Castle
+                 // notices speak in (PROVISIONAL placement).
+-                if model.leavesCastle {
+-                    Text(LibraryOpenCopy.confirmLeavesCastle)
+-                        .font(.caption)
+-                        .alarmVoice()
+-                        .fixedSize(horizontal: false, vertical: true)
+-                }
++                // R-209-face (VX-209 revert): the sheet never renders the line.
+                 Text(model.willStepAside
+                      ? LibraryOpenCopy.confirmStepAside
+                      : LibraryOpenCopy.confirmFreshSlot)
