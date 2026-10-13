@@ -25,8 +25,8 @@ Protection. Opening an older copy of your library now says first when that copy 
 privacy lesson no longer overstates what's encrypted (Help ▸ Restore Tutorial… brings the corrected guide to an
 existing library).
 
-**Settings and small things.** The Settings panes were rewritten one by one, in a wider window whose title no longer
-runs over the pane. The app menu drops the system's Services clutter. Tags have a clear delete button, with a
+**Settings and small things.** Settings has a rewritten General pane, and a wider window whose title no longer runs
+over the pane. The app menu drops the system's Services clutter. Tags have a clear delete button, with a
 confirmation. A gathering's foot has a New note button, like a book's. Small menu text reads at a comfortable size.
 Locking with Settings open no longer leaves a blank window, Choose works on a take you just made in Write, and
 stepping between takes (⌃⌘→) or across lens columns carries your editing along.
