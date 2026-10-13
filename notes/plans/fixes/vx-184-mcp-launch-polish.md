@@ -784,6 +784,14 @@ field guide's MCP chapter (`TutorialSeeder`) and its truth pins; the suites `MCP
 (the suggest PROOF), `MCPDeliberateServerTests`, `MCPLensDoorsServerTests`, `MCPGrantSchemaTests`, `MigrationTests`,
 `MCPWingFacesTests` (W-UX-13's every-tool walk), `TutorialMCPChapterTests`.
 
+**SyncSpec — read in full AFTER the schema commit (said plainly):** the contract asks for `notes/SyncSpec.md` whenever a
+batch touches a schema; I followed v1_24/v1_26's local-only road from the VX-168 record and the code, committed
+`d0c64e7f`, and only then read SyncSpec whole (2026-10-13, before the finals). Verified against it: the table is
+LOCAL-ONLY and outside §12's lockstep (§12's running record names the grants family local-only — "nothing of the door
+itself syncs"), carries no `sync_version` (§3), no outbox trigger (§3's capture is per SYNCED table), nothing a §6
+merge or §7 repair reads, no mirror change, marker 13 untouched; the no-FK choice fits §9/13j's physical purge of
+synced rows. No change needed.
+
 **Surfaces (planned):** `Sources/VariorumCore/Persistence/{MCPGrantSchema,Migrations}.swift` (the ONE schema change,
 its own commit) · `Operations+MCP{Writes,Ergonomics}` + small extractions in `Operations+{Comments,Tag}` ·
 `Queries/MCPEditQueries` · `Sources/VariorumMCP/{MCPNoteStructure,MCPToolCatalog,MCPWriteTools*}` · the app's
