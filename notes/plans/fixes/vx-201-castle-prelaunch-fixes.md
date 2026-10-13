@@ -1366,7 +1366,16 @@ rollup /tmp/vx201-window-c.summary (deleted at closeout per the tidy rule).
 
 ## U4 RECORD (VX-204 + VX-206)
 
-**Not done in this unit (stated first):** OPEN — filled at the close.
+**Not done in this unit (stated first):** no `xcodebuild test` of any kind was run (stage work, per §F) — the 5 new
+pins, their six red-on-old revert cycles and every existing Mac/phone suite below are **PENDING** the orchestrator's
+stage window; **no walk** (§F: the walk is the orchestrator's — "ceremony-from-Protection ends on Protection with the
+popup" is walk-verified there, recipe below); no launch of the app; the headless core suite NOT re-run (this unit
+changed zero lines under `Sources/` — `git diff 64fbecc8..HEAD --stat -- Sources/` is empty — so the U3 close's
+2,697/308 stands); her real store untouched and nothing re-seeded (her morning press, ruled); no `notes/QUESTIONS.md`
+entry (merge-moment-only — the drafts below are #215's input); the canon copy record `notes/plans/pre-13x-copy.md`
+not edited (F-U4-3); the sibling overstatement in `TierViews.whatItIs` NOT touched (F-U4-1 — one sentence was the
+brief). Zero lines in `Sources/VariorumCore/Sync/`, no schema, zero `ProtectionPane.swift` lines, and in
+`AppSettingsView.swift` only the adopter (two modifiers + one private func).
 
 ### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 - 2026-10-13 — U4 implementer (Opus) started. Reading done in this session, never delegated: this file whole (§A's
@@ -1391,8 +1400,160 @@ rollup /tmp/vx201-window-c.summary (deleted at closeout per the tidy rule).
 - IN-PROGRESS — the revert patches (`notes/plans/fixes/vx-201-u4-reverts/`): each made by editing the committed
   tree, `git diff > <R>.patch`, then `git checkout --` the one file; a death mid-step leaves at most ONE file
   reverted, and `git diff HEAD` shows which (the fix is committed — `git checkout --` is the safe restore).
-  DONE (this commit): the six patches written, each `git apply --check` clean, the tree restored (`git diff HEAD`
-  empty). IN-PROGRESS — the COMPILE CHECK: combo 1 (R-204 + R-none + R-reopen + R-done + R-adopter, distinct files)
-  then R-host alone (it shares R-none's hunk); while a combo is applied up to five files under `App/Variorum/` read
-  reverted — `git diff HEAD --stat` lists them, `git checkout -- App/Variorum/` restores (the fix is committed).
-  Then a HEAD rebuild, the phone `build-for-testing`, the close.
+  DONE `7479c16f`: the six patches written, each `git apply --check` clean, the tree restored (`git diff HEAD`
+  empty).
+- DONE (verified here): the COMPILE CHECK — combo 1 (R-204 + R-none + R-reopen + R-done + R-adopter, distinct files)
+  TEST BUILD SUCCEEDED, restored, `git diff HEAD --stat` EMPTY; R-host alone (it shares R-none's hunk) TEST BUILD
+  SUCCEEDED, restored, EMPTY; then a HEAD Mac `build-for-testing` (TEST BUILD SUCCEEDED) so `DerivedData/vx201`
+  holds the FIX's products. **No revert is applied now.**
+- VERIFIED: phone `build-for-testing` (VariorumMobile, generic iOS Simulator, same DerivedData) TEST BUILD
+  SUCCEEDED; the four changed Shared files compiled for the phone target (read on the SwiftCompile lines); zero
+  warnings in them. `df -h` data volume 35 GiB free before and after.
+- CLOSED (this commit): the mechanism, the design, the pins table + expected reds, the stage protocol and suites,
+  the walk recipe, the copy drafts, the PROVISIONALs, the findings, the VX-214 hunk.
+
+### The traced mechanism (pin before fix — read at HEAD `64fbecc8`)
+- **VX-204 (C-1, copy):** `ProtectionCopy.privacyLessonOneParagraphs[0]` said *"everything is encrypted on your
+  device before it leaves, and the Variorum server stores what it can never read"*; built, every text-bearing and
+  named field is sealed while dates, the tag tree's shape and which notes carry which tags, book membership, the
+  flags (starred/finished/sealed/owned/archived/Private) and sizes travel plain — the envelope the website privacy
+  brief (`notes/stargazing-privacy-policy-brief-2026-10-04.md`, "Operator-visible metadata") and the in-app
+  Encryption tab's `disclosureCopy` already disclose. Both seeders render the one constant (`TutorialSeeder.swift`
+  `lesson(privacy, …privacyLessonOneParagraphs)`, `MobileTutorialSeeder.swift` the same plus lesson 2) — no own copy.
+- **VX-206 (her nit):** the Settings scene renders `AppSettingsView` only inside `if case .ready(let session) =
+  bootstrap.state` (`VariorumApp.swift`, the `Settings {}` scene). `AppBootstrap.rekeyLibrary` sets `state =
+  .opening` before the pool closes, so the Settings window's content becomes the scene's placeholder and the
+  `AppSettingsView` (with its `@State pane`) is torn down; `beginOpening` → `.ready` builds a FRESH one whose `pane`
+  starts at `.general`. The ceremony survives on the controller (`activeSwitch`), but its host was decided at
+  `openSwitch` as `.pane` (a Protection pane was mounted), and only `ProtectionPane` presents `ceremony(for: .pane)`
+  — so the During screen and then the Done sat unpresented until she clicked Protection (her report verbatim: "the
+  info popup only shows on clicking Protection"). The "info popup" IS that sheet (no other popover exists on the
+  pane — read). The window itself never closes (nothing in `onWillLock`/`macWillLock` closes windows — read).
+
+### What landed (the design; the VX-206 MACHINERY RULING followed to the letter)
+- **VX-204:** lesson 1's sync sentence now says what IS sealed — *"your writing and everything you name — titles,
+  tags, books — are encrypted on your device before they leave, and the Variorum server can never read them"* —
+  followed by ONE new sentence, its own constant `ProtectionCopy.privacyServerSeesShapeSentence` (so pins quote it,
+  never re-type it). The rest of the paragraph, keystone 3, the open-app sentence and lesson 2 are byte-untouched.
+- **VX-206 — the holder:** `ProtectionController.settingsRequest` (observable counter) + `settingsRequestAdopted`
+  (`@ObservationIgnored`, the window's "seen" mark) — `MCPDoor.settingsRequest`'s exact shape, on the object that
+  outlives the re-key (the bootstrap's `let protection`, the same one that already holds `activeSwitch` for this
+  reason). **The one door:** `requestProtectionPaneForCeremony()` bumps only while `activeSwitch != nil` and
+  `ceremonyHost == .pane` — the ceremony's ORIGIN as the app already records it (decided once at `openSwitch`
+  from the mounted-pane count). **The two asks:** (1) `AppBootstrap.rekeyLibrary`, right after `awaitOpen()` — the
+  teardown road's landing (the During screen comes back where she was); (2) `PostureSwitchModel.phase`'s `didSet`,
+  `.running → anything` while this model is the controller's `activeSwitch` — the road's return (the Done, a
+  refusal, a restart). **The adopter:** `AppSettingsView` gains `.onAppear { adoptProtectionRequest() }` +
+  `.onChange(of: protection?.settingsRequest)` and one private func mirroring `adoptMCPRequest` (`adopts(request:
+  adopted:)` reused; `query = ""`; `pane = .protection`). Landing Protection mounts the pane, which presents the
+  ceremony's sheet exactly as it always has — no new popup machinery, zero pane lines. The phone never mounts a
+  Protection pane (`protectionPaneAppeared` is called only by the Mac's `ProtectionPane`), so every phone ceremony
+  is `.root`-hosted and the asks are inert there.
+
+### THE PINS and the red-on-old protocol (ALL PENDING, stage)
+`VariorumTests/VX204PrivacyLessonTests` (2 tests) and `VariorumTests/VX206ProtectionLandingTests` (3 tests,
+`.serialized`; the production bootstrap + the PRODUCTION `rekeyLibrary` reopen + the ceremony opened through
+`openSwitch`; the hosted legs build the REAL `AppSettingsView` in a real window and read the Protection pane's own
+mount count, so the adopter is exercised, never re-derived). Run green first; then each revert ALONE: `git apply
+notes/plans/fixes/vx-201-u4-reverts/<R>.patch`, `build-for-testing`, the same `test-without-building`, read which
+tests fail, `git checkout -- App/Variorum/` and confirm `git diff HEAD --stat` EMPTY (`git apply` is worktree-only).
+Rebuild HEAD after the last cycle.
+| pin | test | expected red under |
+|---|---|---|
+| VX-204 the honest sentence | `VX204PrivacyLessonTests/theLessonSaysWhatIsSealedAndNamesTheShapeTheServerSees()` | **R-204** (`R-204-overstating-paragraph`): the sentence absent, "everything is encrypted" + "stores what it can never read" present, "your writing and everything you name" absent |
+| VX-204 register | `…/theNewSentenceKeepsTheGuidesRegister()` | BOUND (green under every revert — the sentence's own register) |
+| (a) the Done lands Protection, its sheet up | `VX206ProtectionLandingTests/aCeremonyOpenedFromProtectionEndsWithItsDoneUpOnProtection()` | **R-none** (`R-none-no-request`): no request; the hosted window stays on General (her report) · **R-done** (`R-done-no-ask`): `settingsRequest > atReopen` fails (the hosted leg stays green — the reopen's ask still lands it) · **R-adopter** (`R-adopter-none`): the pane never mounts, never adopted |
+| (b) BOUND — the root's ceremony asks nothing | `…/aCeremonyTheMainWindowHostsLeavesSettingsWhereItWas()` | green on the pre-fix code by nature; **R-host** (`R-host-any-ceremony-asks`) shows its teeth: both asks fire, the hosted window lands Protection |
+| (c) the ask outlives the teardown; a window already up | `…/theRequestOutlivesTheReKeysTeardownAndReachesAWindowAlreadyUp()` | **R-none**: nothing asked at the reopen, the window already up never moves · **R-reopen** (`R-reopen-no-ask`): `atReopen > beforeReopen` fails · **R-adopter**: the window already up never moves |
+Expect "Test run with 5 tests in 2 suites" when both suites are selected alone (no `.enabled(if:)` gates). The hosted
+legs need the GUI session the stage already has (a real `NSWindow` ordered front; the pins close it).
+
+**Stage protocol (from `App/Variorum/`, under a held claim):** `xcodebuild test-without-building -scheme Variorum
+-destination 'platform=macOS' -derivedDataPath DerivedData/vx201 -only-testing:VariorumTests/VX204PrivacyLessonTests
+-only-testing:VariorumTests/VX206ProtectionLandingTests` (the HEAD products are in `DerivedData/vx201` now).
+
+**Existing suites (changed-SOURCE rule — suites whose source names a changed type: `ProtectionCopy`'s privacy
+lessons, `ProtectionController`'s ceremony host, `PostureSwitchModel`, `AppBootstrap.rekeyLibrary`,
+`AppSettingsView`) — PENDING, one stage run** with `-only-testing:VariorumTests/` + each STRUCT TYPE:
+VX204PrivacyLessonTests VX206ProtectionLandingTests TutorialPrivacyChapterTests TutorialBookShapeTests
+TutorialCurrencyTests TutorialFurnitureFoldTests EncryptionExplainedDrillTests CopyRegisterPinTests
+ProtectionSurfaceRenderTests Phase13pControllerTests PostureSwitchTests VX110SignedOutCastleTests
+VX202ReopenRaceTests VX80CastleFollowRecoveryTests EncryptionFlowTests AppBootstrapOffMainTests MCPAsksWaitTests
+SettingsShapeTests MCPPaneTests DiagnosticsPaneTests CalmAsksTests OwnershipBadgeTests, plus PostureSwitchDrillTests
+opt-in (`TEST_RUNNER_VARIORUM_POSTURE_DRILL=1` in xcodebuild's ENVIRONMENT, plain `test`; VX-233's rot is
+pre-existing). Phone (simulator by UDID, `-only-testing:VariorumMobileTests/` + each STRUCT TYPE — the file names
+are multi-struct): MobilePocketGuidePrivacyTests MobileTutorialBookShapeTests MobileCopyRegisterSweepTests
+MobileNoRedirectSweepTests (expect ONLY VX-114's pre-existing offenders — the new sentence names no Mac)
+MobilePhoneProtectionCopyTests MobileWindowReplayTests (its follow rides `bootstrap.rekeyLibrary`, now with the
+ask — a `.root`-hosted no-op on the phone).
+
+### THE WALK (the orchestrator's window — dev store, Debug build, both voices)
+1. Dev store in Standard. Settings ▸ Protection ▸ Use Castle… → the screens → Enter Castle. Watch the Settings
+   window through the re-key: a moment of the scene's placeholder (F-U4-4), then Settings comes back ON PROTECTION
+   with the During sheet, then the Done in place. Capture the Done on Protection (Terminal + Study) — the row's
+   evidence, "not on General".
+2. Continue → the offer (when listed) → Keep/Delete → the sheet closes on Protection.
+3. Control: open the ceremony from outside Settings (the Account sheet's Replace All Keys, Settings closed or on
+   another pane) → Settings, opened after, stands where it always does (General / where she left it).
+4. Use Standard from Protection (no re-key — no teardown): ends on Protection, as before.
+5. The field guide: a FRESH dev store (or the guide's restore door on the dev store) → keeping it private ▸ lesson
+   1 reads the new sentence (capture once per voice).
+
+### The VX-214 hunk (for the orchestrator's one send — VX-214 owns the panes this week)
+`git show 3aa029eb -- App/Variorum/Variorum/Features/Settings/AppSettingsView.swift` — two modifiers after the MCP
+adopter's pair and one private func (`adoptProtectionRequest`) after `adoptMCPRequest`; nothing else in the file.
+`ProtectionPane.swift`: zero lines this unit.
+
+### U4 COPY DRAFTS (for the QUESTIONS #215 bundle — every line PROVISIONAL until she approves)
+Sentence case, no capitals for emphasis, everyday register (no key-family word; nothing that names the Mac, so the
+phone's lesson carries it unchanged).
+1. **Lesson 1's sync sentence, amended** (`privacyLessonOneParagraphs[0]`) — was: *Sync is end-to-end encrypted:
+   everything is encrypted on your device before it leaves, and the Variorum server stores what it can never read.*
+   Now: *Sync is end-to-end encrypted: your writing and everything you name — titles, tags, books — are encrypted on
+   your device before they leave, and the Variorum server can never read them.*
+2. **The new sentence** (`privacyServerSeesShapeSentence`, right after it, before *Both modes are like this.*):
+   *What the server can see is the shape around your words: dates, how your tags nest and which notes carry them,
+   which notes are in which books, flags like starred or finished, and sizes.*
+   - Alternative A (auditor C's shape, one sentence): *Everything you write and name — text, titles, tags, book and
+     shelf names — is encrypted on your device before it leaves; the server sees only the shape (dates, counts, how
+     things are arranged), never a word.*
+   - Alternative B (shorter, the Encryption tab's rhyme): *What the server still sees is the shape, not the words:
+     dates, how things are tagged and ordered, which books they're in, a few flags, and sizes.*
+3. **VX-206:** no new or changed user-facing sentence.
+
+### PROVISIONALs (mine — each defended; the orchestrator's to confirm or bundle)
+- **P-U4-1 — two asks, not one:** the reopen AND the road's return. The Done alone would leave the During screen
+  invisible on General for the whole post-reopen tail (the custody move, the fresh backup, the sync reconnect —
+  seconds on a real library) and leave Settings navigable under a hidden ceremony; the reopen's ask brings the
+  sheet back where she acted, and the return's ask guarantees the END (the ticket's word) even if she moved.
+- **P-U4-2 — "opened from Settings ▸ Protection" = `ceremonyHost == .pane`** (opened while a Protection pane is
+  mounted — row 11's own decision, made once at `openSwitch`). It includes a ceremony opened from another door
+  while Settings ▸ Protection is on screen; that ceremony IS the pane's sheet, so ending there is right.
+- **P-U4-3 — every pane-hosted road asks** (Use Standard, Replace All Keys, the resume, not only Use Castle): the
+  same defect shape for each that re-keys; a harmless re-landing for those that don't.
+- **P-U4-4 — the adopter clears the Settings search** (`query = ""`), mirroring the MCP adopter.
+- **P-U4-5 — the copy** (drafts 1–2) — #215.
+
+### Findings for the orchestrator (dispositions owed by the run)
+- **F-U4-1 — a sibling overstatement:** `TierViews.whatItIs` (Shared/TierViews.swift:50-52, the Account tab's
+  hosted-sync tier section) says *"The server can never read what it stores."* — the C-1 class (the server stores
+  the plain envelope and can read it). Not touched (one sentence was the brief; copy is hers). Candidate: a #215
+  rider with a draft (*"…The server can never read your writing."* — keystone 1's own accurate clause) or a ticket.
+- **F-U4-2 — the guide fold reads content:** the furniture fold pairs guide copies by CONTENT signature
+  (`SeededFurnitureClassifier.guideVerdict` — every member note's own signature), so an old-text guide already
+  synced and a new device's new-text guide do not fold (both stay). The class every guide edit has carried
+  (VR-122, 13s-b); U5's warning lands in the same seed; population: pre-launch stores only (hers + the tester) —
+  her morning re-seed is the road on hers. Record-only, no launch weight (public stores are born on the new text).
+- **F-U4-3 — the canon copy record is stale:** `notes/plans/pre-13x-copy.md:419-421` carries lesson 1's old text;
+  the #215 commit adds a supersession pointer (F-U2-6's pattern), never a rewrite.
+- **F-U4-4 — the teardown is visible:** during the re-key the Settings window stays open and renders the scene's
+  `.opening` branch, *"Open the main window first."* (`VariorumApp.swift`, the `Settings {}` scene's `else`) — a
+  wrong instruction flashed mid-ceremony (pre-existing; the walk will see it). Not touched (outside the ruled
+  hunk). Candidate for VX-214 (the panes' week) or a ticket: a neutral placeholder while `.opening`.
+- **F-U4-5 — one road not covered:** a lock/unlock while a pane-hosted ceremony sits OPEN but idle (e.g., Screen 1,
+  then Lock Now on a Castle library) also rebuilds Settings at General with the sheet unpresented — no re-key and
+  no road return, so no ask. Pre-existing, rare; one more ask at every ready (the same door) would cover it — not
+  built (the ticket's road is the ceremony's run).
+- **F-U4-6 — record-only, unverified read:** `activeFollow` is presented by BOTH `ProtectionPane` and
+  `ProtectionNoticeBar` (`.sheet(item:)` on each) — row 11's one-presenter rule was applied to the ceremony only. Not
+  walked or pinned here; noted for the ladder.
