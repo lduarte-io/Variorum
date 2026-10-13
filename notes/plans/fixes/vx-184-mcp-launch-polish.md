@@ -809,7 +809,7 @@ its own commit) · `Operations+MCP{Writes,Ergonomics}` + small extractions in `O
 | 13 | the stage window (after the GO): the Mac batch + THE LIVE ROUND legs (a)–(d), dev store only | NOT STARTED |
 | 14 | close: self-assessment, PROVISIONALs, OWED | NOT STARTED |
 
-**No revert is in flight** (VX-186's ran and was RESTORED — `git checkout HEAD -- Sources`, `git status` clean).
+**REVERT IN FLIGHT (announced before it starts):** VX-173 red-on-old — the PRODUCTION hunks of `f2d74091` reversed in the working tree (`git diff f2d74091^ f2d74091 -- Sources App | git apply -R`: the two new files removed, the extractions and the catalog undone), the new-API core pin `Tests/VariorumCoreTests/MCPBatchActsTests.swift` moved aside to the gitignored `notes/plans/vx184-screens/u3/prerevert-vx173/`; the server pins kept. **Restore = `git checkout HEAD -- Sources App Tests`** (the tree is committed at this record's commit; the aside copy is then deleted).
 
 **Stage note from the coordinator (2026-10-13, for piece 13):** the Debug app may open with the What's New sheet at
 launch (keyed to the marketing version in the shared dev defaults domain; another run's 0.9.3/0.9.4 builds flip it).
