@@ -1557,3 +1557,37 @@ phone's lesson carries it unchanged).
 - **F-U4-6 — record-only, unverified read:** `activeFollow` is presented by BOTH `ProtectionPane` and
   `ProtectionNoticeBar` (`.sheet(item:)` on each) — row 11's one-presenter rule was applied to the ceremony only. Not
   walked or pinned here; noted for the ladder.
+
+### ORCHESTRATOR ADJUDICATION — U4 (verified against git before adoption: commits ccacac61 + 3aa029eb + 7479c16f
++ b96656eb as reported; zero `Sources/VariorumCore/Sync/` lines, zero `ProtectionPane.swift` lines, zero
+trailers by log read; the AppSettingsView diff READ whole — two modifiers + one private func mirroring
+`adoptMCPRequest`, the "nothing else in that file" constraint honored; all six U4 patches + U3's four
+apply-check CLEAN at the tip in the pinned checkout)
+
+- **The holder's home — ACCEPTED as the ruling's own shape:** the MACHINERY RULING's parenthetical put the
+  holder "in AppSettingsView", but the MIRRORED pattern itself holds the request on the door object
+  (`MCPDoor.settingsRequest`), and the mechanism REQUIRES the survivor's side — a holder on the view dies with
+  the re-key's teardown, which is the defect. `ProtectionController.settingsRequest` is the pattern applied
+  correctly; the file-constraint (adopter only in AppSettingsView) is what the ruling protected, and it holds.
+- **P-U4-1 (two asks) — CONFIRMED.** A hidden ceremony mid-run is the theater class; the reopen's ask restores
+  the During screen where she acted, the return's ask lands the ticket's END. **P-U4-2 (origin = `ceremonyHost
+  == .pane`) — CONFIRMED** (the app's own record, decided once; the included edge is honest). **P-U4-3 (every
+  pane-hosted road) — CONFIRMED** (the same defect shape per re-keying road; harmless elsewhere). **P-U4-4
+  (query cleared) — CONFIRMED** (mirror fidelity). **P-U4-5 — #215.**
+- **F-U4-1 (TierViews' sibling overstatement) — #215 RIDER with the implementer's draft,** flagged as beyond the
+  run's members: lands at the #215 commit ONLY on her approval, else minted a ticket in the morning. One
+  sentence, the C-1 class, same honesty argument.
+- **F-U4-2 — record-only, agreed** (the guide fold's content pairing is every guide edit's property; her morning
+  re-seed is the road on her store; public stores born on the new text).
+- **F-U4-3 — the #215 commit's supersession pointer** (pre-13x-copy.md:419-421, F-U2-6's pattern — one commit
+  carries both pointers).
+- **F-U4-4 (the teardown's "Open the main window first." flash) — to VX-214 in my hunks send** (their surface,
+  their week); if they decline, it mints a ticket at closeout.
+- **F-U4-5 (lock/unlock while a pane-hosted ceremony sits idle) — TICKETED tonight** (pre-existing, rare, the
+  same family one trigger over; the fix candidate is one more ask at every ready through the same door).
+- **F-U4-6 (two presenters for `activeFollow`) — the ladder's** (an unverified read, honestly marked; the Fable
+  reviewer re-examines).
+- **Copy drafts adopted into the #215 input as written** (the amended sync sentence + the shape sentence with
+  alternatives A/B). U4's acceptance evidence owes WINDOW D (folded with U3's): the 5 pins green, the six revert
+  cycles red-as-named, the union suite run, the phone union incl. the no-Mac sweep reading ONLY VX-114's
+  offenders — then the walk's VX-206 legs at my window.
