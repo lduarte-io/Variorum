@@ -946,3 +946,16 @@ and a consented Join lands its copy on its own follow road)
   de-capped consent (never a rewrite of the historical record).
 - **F-U2-7/F-U2-8 — the walk's:** the Sign In… nested sheet walks in my window; the dev-store walk plants key
   material in the dev scope's sync item first (the record's own note).
+
+### WINDOW B RECORD (orchestrator, stage claim vx201-u1-reverts — the pinned checkout, never the live worktree)
+All SIX revert cycles ran; each RED exactly on its pin-table reds, each restore verified clean (empty porcelain):
+R-a1 (arm pre-fix): the race pin + the marker pin + the control's `scheduled` assert — 5 issues (the marker pin's
+red under R-a1 is the SUPERSET revert behaving consistently: the whole arm gone takes gate ii with it; the
+table's per-leg attribution stands). R-a2 (gate i only): the race pin alone via `relanding` non-nil — 1 issue.
+R-b (marker unread): the marker pin alone (the stale key overwritten) — 1 issue. R-c (no sweep): both sweep pins,
+the local one on all four asserts (silent stays · posture Standard · the Apple copy lands · no lock) — 5 issues.
+R-d1 (flag ignored): the landing-arm pin (the copy lands) — 1 issue. R-d2 (no flag written): the flag-span pin
+on three asserts — 3 issues. The three BOUND pins (only-road-in · Standard-waiting untouched · adoption
+inertness) stayed GREEN through every cycle. **U1's red-on-old obligation DISCHARGED; VX-202's acceptance
+evidence is complete** (green pass 305/38 + drills disposition + simulator + the six cycles). Logs
+/tmp/vx201-wb-*.log, rollup /tmp/vx201-window-b.summary (deleted at closeout per the tidy rule).
