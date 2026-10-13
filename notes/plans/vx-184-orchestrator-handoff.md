@@ -393,6 +393,13 @@ ticket). **Wording rule (HER MANDATE):** ALL wording ships AS BUILT; write a "FO
 record naming every wording call you made (one line each, where it renders) — the orchestrator posts it
 to her morning-review ticket; no QUESTIONS entry for pure pane wording (P-U6-WORDS covers the lot).
 
+**ChromeLineLimitTests (red on main — VX-214's whole-target run, 2026-10-13 ~10:40):** 8 bare
+`.fixedSize()` sites trip it; TWO are in your files — `MCPPane.swift:412` and `MCPGrantSheet.swift:285`
+(line numbers as of main; re-locate after your edits). Fix BOTH in passing to the suite's own rule
+(read `ChromeLineLimitTests` for the sanctioned form), prove the suite green for those two sites, and
+name them in your hand-back — the orchestrator tells settingspaneupdater (it is ticketing all 8; ours
+come off its list). Do NOT touch the other six sites (not ours).
+
 CONSTRAINTS (cross-run agreements — recorded in the run record): `SettingsShape.swift` edits stay
 scoped to the MCP rows ONLY (VX-214 owns the other panes' rows and merges AFTER us). The Settings
 WINDOW SHELL is VX-214's (VX-225/224) — if you find yourself building shell chrome, STOP that piece
@@ -437,6 +444,27 @@ finals (its UNIT RECORD's counts).
 
 - **VX-179 MERGED to main (PR #154, d6caafc1)** — merged INTO this branch at the U3→U4 boundary
   (a79dbf6a + repair 018cf23c; suites green). DONE.
+- **ORCHESTRATOR MODEL SWITCH (her word, 2026-10-13 ~10:30):** she hit her Fable usage limit, which
+  stopped this session mid-turn; she ran `/model Opus` and said *"I want you to continue where you
+  were as Opus."* This session now orchestrates on **Opus 5.5** — same session, same protocol. **THE
+  LADDER QUESTION (surfaced to her):** the run's cold review is ruled `fable-reviewer` (the kickoff:
+  the socket road is the secret's accept path and the permission core grows). If her Fable limit
+  still blocks when U7 closes, a Fable reviewer will die the same way. Options: (a) wait for the Fable
+  reset, then run the ladder as ruled; (b) her redirect to `opus-reviewer` (her call alone; CLAUDE.md
+  reserves Fable for `Sync/`, custody or the editor seam, and this diff has none of those, but the
+  kickoff named Fable deliberately). NEVER switch the reviewer without her word. If she hasn't
+  answered by then, try `fable-reviewer`; if it dies on the limit, hold the ladder and report.
+- **VX-201 MERGED and MERGED IN:** main merged INTO the branch at **e5c9c719** (U5→U6 boundary;
+  clean, no conflicts). It brings VX-201's Castle/custody code into the branch: StoreLaunchGate,
+  ProtectionController, LibraryAdoption, LibraryAsideCopies, ProtectionPane, AppSettingsView, plus
+  **a 6-line TutorialSeeder change (VX-204's amended lesson 1 / VX-209's guide warning) that U7 must
+  build on, not overwrite**. QUESTIONS: VX-179 took #215, VX-201 took **#216**, so ours takes the
+  next free number. VX-201's /Applications refresh was **folded into VX-214's** — ask the
+  coordinator at our merge whether ours folds too. The dev store goes back to STANDARD posture via
+  vx-201's passphrase window before U5's live round (W-1's Castle copy set aside, hers, never
+  delete it). ChromeLineLimitTests is red on main (8 bare `.fixedSize()` sites, VX-214 ticketing all
+  8); our two (MCPPane, MCPGrantSheet) are in U6's brief to fix in passing. Tell settingspaneupdater
+  at U6's close.
 - **VX-201 MERGED to main (PR #155, d2b133fb + ledgers — coordinator's word, 2026-10-13 ~10:15).**
   Merge main in at the U5→U6 boundary (NOT mid-U5 — its Mac batch runs test-without-building on
   products built from the current tip). It brings vx-201's custody/Castle code into the branch —
