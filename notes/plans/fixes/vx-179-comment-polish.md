@@ -210,8 +210,11 @@ capture is PENDING (stage). No `Sync/` line touched (U0's line is the orchestrat
 37b9a6e7). No mobile door (the phone's fold reads the same fenced query and gains no purge door —
 the MOBILE PARITY line above).
 
-**Revert state:** no behavioural revert is in flight. (Reverts run only after the piece is
-COMMITTED; each restore is `git checkout -- <file>` of the committed file; the evidence lands here.)
+**Revert state:** REVERTS IN FLIGHT (U1-c) — one arm at a time over the files committed at 7aad738a
+(`Operations+Purge.swift`, `Operations+Comments.swift`, `Operations+MCPWrites.swift`,
+`CommentQueries.swift`, `RestoreCost.swift`); each restored by `git checkout -- <file>`. A successor
+finding this line: `git diff --stat` shows exactly what is reverted right now; restore it with
+`git checkout -- Sources/` (the committed tree is the fixed one).
 
 ### LIVE STATUS
 
