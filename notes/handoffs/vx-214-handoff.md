@@ -61,4 +61,4 @@ The Fable review closed clean at round 2. The full Mac suite ran on the merged t
 
 ## Housekeeping
 
-The worktree and branch are removed. Walk captures and 17 stage-run logs are kept, untracked, in `notes/plans/vx-214-screens/`; delete them whenever you like. One leftover in the dev store: a Pool note titled "VX-227 walk…", which the batch-4 implementer left behind. Trash it if it's in your way.
+The worktree, branch, every build folder (including the Release build installed from) and the walk captures and stage logs are deleted, per the closeout rule; the record keeps the counts and findings. One leftover in the dev store: a Pool note titled "VX-227 walk…", which the batch-4 implementer left behind. Trash it if it's in your way.
