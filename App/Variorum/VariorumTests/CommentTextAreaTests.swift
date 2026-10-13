@@ -146,6 +146,22 @@ struct CommentTextAreaMountedTests {
         }
     }
 
+    /// **A settle that lets MAIN-QUEUE TURNS pass** (the VX-179 U3 FIX LEG —
+    /// the runner's red, traced): this suite's body runs as a job ON the main
+    /// queue, and a nested `RunLoop.run` does not drain main-queue blocks while
+    /// its caller is one — so work the control deliberately defers by one turn
+    /// (serving a held focus request after the window arrives; delivering a
+    /// first-responder report outside the view update) cannot happen inside
+    /// `settle`. Suspending each turn releases the main actor and the queue
+    /// drains: `CaptureFocusReportTests`' idiom, green in this runner.
+    private func settleLettingTurnsPass(_ view: NSView) async {
+        for _ in 0..<6 {
+            settle(view)
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
+
     private func mount(_ host: Host) -> (NSHostingView<Host>, CommentTextAreaView) {
         let hosting = NSHostingView(rootView: host)
         hosting.frame = NSRect(x: 0, y: 0, width: 400, height: 240)
@@ -354,11 +370,11 @@ struct CommentTextAreaMountedTests {
             window.close()
         }
         window.contentView = hosting  // never ordered in
-        settle(hosting)
+        await settleLettingTurnsPass(hosting)
         #expect(window.firstResponder === area.textView, "served on arrival")
         #expect(log.reports == [true])
         window.makeFirstResponder(nil)
-        settle(hosting)
+        await settleLettingTurnsPass(hosting)
         #expect(log.reports == [true, false])
     }
 
