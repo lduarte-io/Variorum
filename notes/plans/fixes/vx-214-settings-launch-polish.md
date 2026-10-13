@@ -166,6 +166,22 @@ Deliverables: traced mechanisms + fixes + pins where pinnable (walk captures whe
 
 Deliverables per member: traced mechanism, fix, pin-or-capture evidence, suites owning touched surfaces green (stage windows via the orchestrator: READY → GO → release → RESULT), ledger rows 3/7/9 flipped with hashes, pushed, one summary line each.
 
+### BATCH 3 RECORD
+
+**NOT DONE (first line, kept current):** VX-217's "+ new note" on a gathering is NOT built — the brief's STOP condition fired (no defined mint-inside-gathering road exists; the fork + proposal went to the orchestrator 03:12, AWAITING the architect's ruling). Nothing else is done yet. No behavioural revert is in flight.
+
+**LIVE STATUS** (implementer session batch3impl, Opus, 2026-10-13):
+- Reading — DONE: this file in full (ENVIRONMENT TRAPS, contact points, R-VX214-2, both earlier records), SessionResiliencyProtocol, the 13b constitution (P-1…P-9 + application notes), the three Linear bodies (no attachments, nothing beyond the brief's quotes).
+- VX-217 — trace DONE (below); the explainer removal IN-PROGRESS; the note door STOPPED at the fork (below), PENDING the ruling.
+- VX-221 — NOT-STARTED.
+- VX-223 — NOT-STARTED.
+
+**VX-217 — THE TRACE.**
+- *The book's foot* (`BookView.swift` navigator, the `Spacer` after the chapter list): "+ new chapter" · "restore deleted chapter" (only with deleted chapters) · "+ new entry" (journal trait) or "+ new note" (`kind == .book`, hidden when finished) → `BookStructureModel.newPost()` → `ops.newPostInReading` — ONE transaction: mint in the BOOK's wing + membership + the outflow (`applyAutoTag`); refuse-before-mint. Its flow twin "+ new note in this book" sits at the main column's end (Outline).
+- *The gathering's foot:* "+ new chapter" (13c 2D — opens the bind offer) + `ChromeNotice(BookViewCopy.gatheringFooter)` — the explainer she quoted ("gathering — it shows every note its rule matches and holds none of them. A note comes and goes with its tags and its star."). No note door, no flow twin. The explainer's truth lives in the field guide (`TutorialSeeder.swift` ~2200/2215), as she said.
+- *Minting inside a gathering is defined NOWHERE:* `newPostInReading` throws `wrongReadingKind` on a gathering; a gathering carries NO outflow (`writeReadingOutflow` refuses a gathering, `Operations+Intake.swift:421`); ⌘N (`ShellActions.newPost`) mints bookless in the wing; the phone renders no doors on a gathering by design (`MobileBookViewModel.showsBookDoors`). The ONE defined add-to-gathering act is R98 (`collectPostIntoSmartReading`, `Operations+SmartCollect.swift:33` — adding IS applying the tags the rule needs, apply-and-report; a rule tagging can't satisfy refuses descriptively and unwinds); it does not read the gathering's `archivedAt` (an archived gathering assembles EMPTY).
+- *THE FORK (sent to the orchestrator verbatim in substance, 03:12):* (A) RECOMMENDED — R98 composed with refuse-before-mint: a core op `newPostInGathering` (mint in the gathering's wing + R98's tag walk in ONE transaction; an untaggable rule unwinds — no stray note — and speaks R98's refusal; the receipt `BookcaseCopy.shownByTagging`), the door rendered only where it can act (hidden on an archived gathering and on a rule tagging cannot satisfy — P-2's not-rendered arm); (B) as (A) but always rendered, the op refusing (P-2's real-refusal arm); (C) explainer removal only, the door's semantics to her morning QUESTIONS. Rejected: mint bookless and open it (the note would appear nowhere in the gathering).
+
 ## Author sittings — running record
 
 *(rulings land here verbatim as they happen)*
