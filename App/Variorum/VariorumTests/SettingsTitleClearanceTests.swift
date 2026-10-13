@@ -75,16 +75,25 @@ struct SettingsTitleClearanceTests {
         }
         for _ in 0..<20 { pump() }
         let field = try #require(titleField(in: window), "the titlebar's title field (\(window.title))")
-        let attributes = field.attributedStringValue.length > 0
-            ? field.attributedStringValue.attributes(at: 0, effectiveRange: nil)
-            : [.font: field.font ?? NSFont.titleBarFont(ofSize: 0)]
+        // The field's OWN font (the attributed value carries none on this
+        // macOS — the first run measured in the default font and read short).
+        let font = try #require(field.font, "the title field has a font")
         let origin = field.convert(field.bounds, to: nil).minX
-        let liveWidth = NSAttributedString(string: window.title, attributes: attributes).size().width
-        let releaseWidth = NSAttributedString(string: Self.releaseTitle, attributes: attributes).size().width
-        let releaseEnd = origin + releaseWidth
-        print("VX-225 title field origin=\(origin) font=\(String(describing: attributes[.font])) "
-              + "live(\(window.title))=\(origin + liveWidth) release(\(Self.releaseTitle))=\(releaseEnd) "
+        // Each string measured as the field itself would size it (cell
+        // padding included), so live and release are on one ruler.
+        func width(_ text: String) -> CGFloat {
+            let ruler = NSTextField(labelWithString: text)
+            ruler.font = font
+            return ruler.fittingSize.width
+        }
+        let liveEnd = origin + width(window.title)
+        let releaseEnd = origin + width(Self.releaseTitle)
+        print("VX-225 title field origin=\(origin) font=\(font) fieldWidth=\(field.frame.width) "
+              + "live(\(window.title))=\(liveEnd) release(\(Self.releaseTitle))=\(releaseEnd) "
               + "window=\(window.frame.size) column=\(AppSettingsView.sidebarWidth)")
+        // Calibration: the live title's measured end sits where the captured
+        // pixels put it (≈228 pt on the dev build — the walk's capture).
+        #expect(abs(liveEnd - 228) < 8, "the ruler reads the live title where it draws (\(liveEnd))")
 
         #expect(releaseEnd + Self.clearance <= AppSettingsView.sidebarWidth,
                 """
