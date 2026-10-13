@@ -60,6 +60,21 @@ One cold ladder over the run's WHOLE diff before the merge, `notes/REVIEW_PROMPT
 4. Targeted suite runs green: the suite(s) owning `TakesViewModel`/the board, plus any suite exercising `chooseVariant` paths you touched. Stage claim via oct12coordinator for Mac runs (ENVIRONMENT TRAPS above).
 5. Commits `… Part of VX-222`, pushed; ledger row 8 flipped with the pin name and commit hashes.
 
+### VX-222 RECORD
+
+**NOT DONE YET (first line, kept current):** the trace is in progress; no pin, no fix, no Mac runs yet. No behavioural revert is in flight.
+
+**LIVE STATUS** (implementer session vx222impl, Opus, 2026-10-13):
+- Reading — DONE: this file, the ticket body (Linear VX-222 — the snapshot predates it), SessionResiliencyProtocol, the code road below.
+- Trace — IN-PROGRESS. Facts established so far (file:line in this worktree):
+  - The card's button and ⌘⏎ end in the SAME call: `TakeChooseHeader` (`TakesBoardView.swift:1891`, `.disabled(isChosen)` at :1907) → `onChoose` (stack style :1262, mini-pane styles :1743) → `TakesViewModel.choose(blockID:variantID:)` (`TakesViewModel.swift:1096`) → `ops.chooseVariant`. ⌘⏎ → `handleTakesCommand(.choose)` (:484) → `chooseFocusedTake()` (`TakesViewModel.swift:2633`) → the same `choose`, with `focusedPane`'s ids, plus a receipt. So the roads differ only in (a) which ids they pass and (b) that ⌘⏎ needs a ring first — a CLICK into a pane, whose ring migration flushes the shared per-post autosave (`focus` :623-639 → `flushNow` → `onSettled` → `applyPendingIfClean`).
+  - The ✓ state the card draws is projection-derived (`isChosen = take.id == slot.variantID`); the board adopts deliveries only through `EditorProjectionPolicy` (`busy` = the SHARED coordinator's `isDirty` defers).
+  - The tour's road for "make a new take in Write" is Write's takes panel (`WriteTakesPanel` — its OWN `TakesViewModel`, `branchTake` + `focus` on the mint, then "Open Takes mode" parks a `.bloom` landing and dismisses).
+  - Mechanism NOT yet traced — hypotheses under test only (no fix until one is shown concretely).
+- Pin — NOT-STARTED.
+- Fix — NOT-STARTED.
+- Suites — NOT-STARTED (stage window requested from oct12coordinator).
+
 ## Author sittings — running record
 
 *(rulings land here verbatim as they happen)*
