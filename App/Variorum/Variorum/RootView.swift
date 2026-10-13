@@ -591,7 +591,12 @@ struct RootView: View {
                 if let protection {
                     ProtectionStatusRow(controller: protection, tokens: tokens)
                 }
+                // VX-218: the family's words sit on the column's own content
+                // edge — where every row and header above them sits
+                // (`SidebarLayout.contentInset`) — never 6 pt from the
+                // window's rounded corner.
                 SyncStatusRow(services: services)
+                    .padding(.horizontal, SidebarLayout.contentInset)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(tokens.room))

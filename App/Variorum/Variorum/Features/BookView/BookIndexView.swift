@@ -1325,22 +1325,19 @@ private struct BookIndexNoteRow: View {
                 OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
             }
             Spacer(minLength: 4)
-            Menu("⋯") { menu() }
-                .menuStyle(.borderlessButton)
-                // Row 21, THE mechanism: a borderless menu draws a disclosure
-                // chevron and reserves room for it INSIDE its own control, so
-                // the ⋯ sat several points inboard of the chapter count above
-                // it while the two boxes ended at the same x — which is why
-                // her eye saw it and a frame comparison could not. Hidden
-                // here, the control is the glyph alone (measured: 28.0 pt →
-                // 15.0 pt, inside a 22-pt column).
-                .menuIndicator(.hidden)
-                // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
-                // states its own line policy, so its IDEAL width can never be a
-                // wrapped one (the b6dae25 class's window-sizing hazard).
-                .lineLimit(1)
-                .fixedSize()
-                .controlSize(.mini)
+            // Row 21, THE mechanism: a borderless menu draws a disclosure
+            // chevron and reserves room for it INSIDE its own control, so
+            // the ⋯ sat several points inboard of the chapter count above
+            // it while the two boxes ended at the same x — which is why
+            // her eye saw it and a frame comparison could not. Hidden
+            // here, the control is the glyph alone (measured: 28.0 pt →
+            // 15.0 pt, inside a 22-pt column).
+            //
+            // VX-223: the chrome pull-down. It carried `.controlSize(.mini)`
+            // ON the Menu, so its popped rows drew at 9 pt; the mini metric
+            // rides the label now and the rows read at menu size — the
+            // control stays 15 pt wide (measured), so row 21 holds.
+            ChromePullDown("⋯", showsIndicator: false) { menu() }
                 .opacity(hovering || selected ? 1 : 0.25)
                 #if DEBUG
                 // Probed on the NATURAL control, before the shared column,

@@ -524,6 +524,13 @@ struct TakesBoardTests {
                         variantID: resolved.variantID)
                 }
             })
+            // CONSEQUENTIAL PIN EDIT (VX-227 — her R-VX214-1, the F5/F6
+            // addendum): a mint's ring re-binds through the PARKED FOLLOW, i.e.
+            // when the column's cell reports it has RENDERED the mint. No cell
+            // is mounted here, so the cells' render-reports are played for this
+            // test's OWN independently computed hosted set (`rendered` above —
+            // never a set read back from the park). The assertion is unchanged.
+            for key in rendered { model.paneRendered(key) }
             let live = try #require(model.authority.livePane)
             #expect(rendered.contains(live),
                     "the live ring is on a pane a column hosts — never nowhere")
@@ -606,6 +613,13 @@ struct TakesBoardTests {
                         variantID: resolved.variantID)
                 }
             })
+            // CONSEQUENTIAL PIN EDIT (VX-227 — her R-VX214-1, the F6 ruling):
+            // the mint's ring re-binds through the PARKED FOLLOW, when the
+            // column's cell reports it has RENDERED the mint. No cell is
+            // mounted here, so the render-reports are played for this test's
+            // OWN independently computed hosted set (`rendered` above — never a
+            // set read back from the park). The assertion is unchanged.
+            for key in rendered { model.paneRendered(key) }
             let live = try #require(model.authority.livePane)
             #expect(rendered.contains(live),
                     "the live ring is on a pane a column hosts — never nowhere")

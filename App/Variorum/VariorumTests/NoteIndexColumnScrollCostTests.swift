@@ -185,6 +185,21 @@ struct NoteIndexColumnScrollCostTests {
         }
     }
 
+    /// **VX-223 — the row's ⋯ pops at menu size** (her report: "very small
+    /// text on Read mode's three-dots dropdown"). The live controls' row
+    /// carries `.controlSize(.mini)` for its ↑ ↓ keys, and the ⋯ menu beside
+    /// them inherited it — its popped rows drew at the mini 9 pt. RED ON OLD
+    /// by that mechanism; the class lives in `ChromeMenuRowSizeTests`.
+    @Test func theRowMenuPopsAtMenuSize() async throws {
+        try await withColumn(selected: "Line 3 of the long note.") { _, _, window in
+            let host = try #require(window.contentView)
+            let sizes = ChromeMenuProbe.rowSizes(in: host)
+            #expect(!sizes.isEmpty, "the selected row's ⋯ is a pop-up underneath")
+            #expect(sizes.allSatisfy { $0 >= ChromeMenuProbe.menuSize },
+                    "every popped row reads at menu size, never mini: \(sizes)")
+        }
+    }
+
     /// **The resting hint is the live set's own footprint** (a geometry
     /// oracle — the fix's face). The live controls draw at their OWN size
     /// inside the hint's footprint; if the two differed, the eye would see the

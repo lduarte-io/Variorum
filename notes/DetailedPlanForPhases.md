@@ -13,7 +13,6 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | Run: MCP launch polish | VX-184 · `vx-184-mcp-launch-polish` | `~/dev/variorum-vx-184` · the Pro | kickoff 2026-10-12 night (7 units, U1 first); surfaces: `Sources/VariorumMCP*`, MCP grants core, `Features/MCP` pane, guide MCP chapter — zero `Sync/`/custody/editor seam |
-| Run: settings panes & launch UI polish | VX-214 · `vx-214-settings-polish` | `~/dev/variorum-vx-214` · the Pro | kickoff 2026-10-13 (members VX-215…225; author-attended pane-by-pane); surfaces: Settings panes EXCEPT `Features/MCP` (VX-184's), book/gathering menus & Book Settings sheet, Takes choose path, mode-row dropdowns, lock-screen settings window — zero `Sync/`/custody; no editor-seam intent (Takes board only) |
 
 ### Latest closeout
 

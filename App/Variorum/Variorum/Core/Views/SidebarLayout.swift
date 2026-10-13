@@ -96,6 +96,12 @@ nonisolated enum SidebarLayout {
     static let groupPadding: CGFloat = 12
     /// The mockup's `.sb-row`: 8 pt of side padding inside the row.
     static let rowPadding: CGFloat = 8
+    /// **The column's content edge** — where a row's words (and a header's)
+    /// land: the group's side padding plus the row's. VX-218: the bottom
+    /// status family (protection + sync rows) sits on it too, so its words
+    /// line up with everything above them instead of hugging the window's
+    /// rounded corner.
+    static let contentInset: CGFloat = groupPadding + rowPadding
     /// Row 13 (17o batch d): the air between a group header's words and the
     /// first row's wash under them.
     static let headerAir: CGFloat = 6

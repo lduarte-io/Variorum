@@ -456,10 +456,15 @@ struct TakeCardDoorTests {
         let sized = source.components(separatedBy: ".controlSize(").count - 1
         #expect(sized == 0,
                 "the card menu carries no control size — the popped rows would inherit it (\(sized) left)")
-        // Control: the ⋯ label still states the mini metric itself, so the
-        // chrome the cards lay out around did not grow with the fix.
-        #expect(source.contains("systemFontSize(for: .mini)"),
-                "the glyph keeps the mini metric on its own font")
+        // Control: the mark's label still carries the chrome's own small
+        // metric, so the chrome the cards lay out around did not grow with
+        // the fix. (A JUSTIFIED EDIT at VX-223: the class's fix moved into ONE
+        // chrome component, `ChromePullDown`, whose metrics live in
+        // `ChromePullDownMetric` — the card names its metric now, the
+        // indicator-sized chevron of P-VX223-a, rather than spelling
+        // `systemFontSize(for: .mini)` itself.)
+        #expect(source.contains("ChromePullDownMetric."),
+                "the mark keeps the chrome's small metric on its own font")
     }
 
     /// The lint above holds the SOURCE shape; this holds the BEHAVIOUR the

@@ -1478,8 +1478,11 @@ enum TutorialSeeder {
         // this one. (The walk's `theChapterIsStagedForItsActs` holds the
         // count of fanned blocks, and `theDeletedSpareTakeWaitsInTheBlocksPast`
         // finds this one by its prose — both caught the shift.)
+        // VX-223: the glyph is the card menu's own constant (it was a typed
+        // ⋯ beside a pin that read the constant — true only while the two
+        // happened to agree).
         try take(on: past.blocks[4],
-            "the spare take: delete me from my own card's \u{22EF} menu (every take "
+            "the spare take: delete me from my own card's \(TakeCardMenuCopy.menuGlyph) menu (every take "
             + "card has one, in Takes and in Write's takes panel), then put me back "
             + "from the block's history panel.")
 

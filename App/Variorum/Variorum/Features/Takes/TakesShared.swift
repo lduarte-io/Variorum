@@ -249,6 +249,16 @@ struct TakesCellView: View {
                 // words. Her report: *"the invitation to write a block is
                 // weird… I want it to return to what it used to look like."*
                 .recordCellChrome(resolved.variantID, [])
+                // **VX-227 — the cell's RENDER-REPORT** (the parked follow, the
+                // architect's F2 ruling): this cell is ONE pane per block whose
+                // key moves with what it shows, and a live pane never takes
+                // projection text — so a follow onto a re-pointed cell may only
+                // turn it live AFTER it has drawn its new take read-only. The
+                // task runs once the render that drew this key is done (on
+                // appear, and whenever the key changes); the model acts only
+                // when it has a follow parked on exactly this key. A fact
+                // reported, never a decision made here (P-3).
+                .task(id: key) { model.paneRendered(key) }
         } else {
             Text("· · ·")  // a gap slot renders a gap, never crashes
                 .foregroundStyle(tokens.muted)
@@ -516,11 +526,22 @@ nonisolated enum TakeCardMenuCopy {
         CapabilityRegistry.capability(.labelTake).menuTitle("Label take\u{2026}")
     }
 
-    /// The glyph the card's act menu wears — and the one the tutorial's prose
-    /// names. It lives here so the words and the door cannot drift: the
-    /// lesson interpolates this constant, `TakeCardMenu` renders it, and
-    /// `TakeCardDoorTests` reads both.
-    static let menuGlyph = "\u{22EF}"
+    /// The glyph the tutorial's prose names the card's act menu by. It lives
+    /// here so the words and the door cannot drift: the lesson interpolates
+    /// this constant and `TakeCardDoorTests` reads both.
+    ///
+    /// VX-223 (PROVISIONAL P-VX223-a, her "it should keep just the dropdown
+    /// probably"): the card wore TWO marks — "⋯" beside the borderless style's
+    /// own disclosure chevron. It keeps just the dropdown now: `TakeCardMenu`
+    /// draws THAT chevron (`chevron.down`, the indicator's own size — the
+    /// `RestingRowControls` precedent), and the prose names it by its text
+    /// twin "⌄". (A first build drew "▾" at the mini metric; the walk read it
+    /// as a dot — the batch record.) A guide seeded before this keeps the "⋯"
+    /// it was seeded with.
+    static let menuGlyph = "\u{2304}"
+
+    /// The chevron's spoken name (an image label says nothing by itself).
+    static let menuAccessibilityLabel = "This take's acts"
 
     /// Every chorded row on the card, paired with the capability that
     /// declares its key — what the drift guard walks.
@@ -596,27 +617,34 @@ struct TakeCardMenu: View {
         let rows = Self.rows(acts)
         // The chrome is Write's panel's — this component was extracted
         // from it, and the board inherits the grammar rather than a second
-        // one being invented for it. (VX-155 moved the mini metric from the
-        // Menu onto the label's own font; the glyph draws at the same size.)
-        Menu {
+        // one being invented for it.
+        //
+        // VX-155 (her 2026-10-11 report) found the class this menu now
+        // shares with every row ⋯: a control size on the Menu is inherited
+        // by the popped `NSMenu`, so all four rows rendered in mini type. The
+        // fix lives in ONE place since VX-223 — `ChromePullDown` pins its
+        // own control size and carries the mini metric on the label.
+        //
+        // VX-223 (PROVISIONAL P-VX223-a, her lean: "it should keep just the
+        // dropdown probably"): the card wore TWO marks — the "⋯" label AND
+        // the borderless style's own chevron. It keeps just the dropdown: the
+        // chevron, drawn as the indicator draws it (`ChromePullDownMetric.
+        // indicatorFont`), the system indicator hidden so it is not doubled;
+        // 4 pt either side keeps a clickable target. (A first build drew "▾"
+        // at the mini metric — the walk read it as a dot.)
+        ChromePullDown(showsIndicator: false) {
             ForEach(rows) { row in
                 Button(row.title, role: row.destructive ? .destructive : nil, action: row.act)
             }
         } label: {
-            // VX-155 (her 2026-10-11 report): the mini metric rides the ⋯
-            // LABEL's own font, never the Menu — a control size on the Menu
-            // is inherited by the popped `NSMenu`, so all four rows rendered
-            // in mini type. The glyph keeps exactly the size the mini
-            // control drew it at; the rows read at standard menu size.
-            Text(TakeCardMenuCopy.menuGlyph)
-                .font(Font(NSFont.systemFont(ofSize: NSFont.systemFontSize(for: .mini))))
+            // A Text-embedded symbol: a bare `Image` label is drawn by the
+            // pop-up at its own 13-pt size and ignores the font (measured
+            // 21×14 vs 15×9 — the walk saw a large light chevron).
+            Text(Image(systemName: "chevron.down"))
+                .font(ChromePullDownMetric.indicatorFont)
+                .padding(.horizontal, 4)
+                .accessibilityLabel(TakeCardMenuCopy.menuAccessibilityLabel)
         }
-        .menuStyle(.borderlessButton)
-        // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
-        // states its own line policy, so its IDEAL width can never be a
-        // wrapped one (the b6dae25 class's window-sizing hazard).
-        .lineLimit(1)
-        .fixedSize()
         .recordTakeCardDoors(rows.map(\.id))
     }
 }

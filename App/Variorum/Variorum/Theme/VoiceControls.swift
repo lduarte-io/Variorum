@@ -147,6 +147,11 @@ struct VoicedMenu<Content: View>: View {
         .menuStyle(.button)
         .buttonStyle(.plain)
         .menuIndicator(.hidden)
+        // VX-223: the popped rows follow the control's size, so the chrome's
+        // own menu pins regular — a VoicedMenu placed in a row of mini
+        // controls can never pop 9-pt rows (`ChromePullDown`'s class; no
+        // VoicedMenu sits in a mini row today, so this changes nothing seen).
+        .controlSize(.regular)
         // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
         // states its own line policy, so its IDEAL width can never be a
         // wrapped one (the b6dae25 class's window-sizing hazard).
@@ -167,6 +172,87 @@ struct VoicedMenu<Content: View>: View {
         case .quiet: tokens.muted
         }
     }
+}
+
+/// **THE CHROME PULL-DOWN** (VX-223 — the class VX-155 found on the take card;
+/// the run record `notes/plans/fixes/vx-214-settings-launch-polish.md`, BATCH 3
+/// RECORD): the ONE borderless pull-down in the app — a row's ⋯, a card's
+/// menu, a column's ⧉ door.
+///
+/// A borderless SwiftUI `Menu` is an `NSPopUpButton` underneath, and its
+/// popped rows draw in the pop-up's font, which follows the control's SIZE.
+/// These menus live in rows of mini controls (the ↑ ↓ keys beside a ⋯), and
+/// every one of them inherited `.controlSize(.mini)` — so its popped rows
+/// drew at 9 pt (her report: "very small text on Read mode's three-dots
+/// dropdown", Blocks, Lenses). This component PINS its own control size to
+/// regular, so no host's mini or small can ever reach the rows, and carries
+/// the chrome's mini metric on the LABEL's own font (VX-155's shape) — the
+/// control keeps exactly the frame the mini control drew (measured: 28×11
+/// with the chevron, 15×11 without, either way), so nothing around it moves.
+///
+/// `ChromeMenuRowSizeTests` holds the class: no borderless pull-down may be
+/// spelled outside this file.
+struct ChromePullDown<Label: View, Content: View>: View {
+    var showsIndicator: Bool = true
+    let content: () -> Content
+    let label: () -> Label
+
+    init(
+        showsIndicator: Bool = true,
+        @ViewBuilder content: @escaping () -> Content,
+        @ViewBuilder label: @escaping () -> Label
+    ) {
+        self.showsIndicator = showsIndicator
+        self.content = content
+        self.label = label
+    }
+
+    var body: some View {
+        Menu {
+            content()
+        } label: {
+            label()
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(showsIndicator ? .automatic : .hidden)
+        // THE FIX: the popped rows read at the standard menu size, whatever
+        // control size the row around this menu carries.
+        .controlSize(.regular)
+        // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
+        // states its own line policy, so its IDEAL width can never be a
+        // wrapped one (the b6dae25 class's window-sizing hazard).
+        .lineLimit(1)
+        .fixedSize()
+    }
+}
+
+extension ChromePullDown where Label == Text {
+    /// A word or glyph at the chrome's mini metric — "⋯", "⧉ Make this a
+    /// note".
+    init(
+        _ title: String, showsIndicator: Bool = true,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.init(showsIndicator: showsIndicator, content: content) {
+            Text(title).font(ChromePullDownMetric.labelFont)
+        }
+    }
+}
+
+/// The chrome pull-down's label metric — a non-generic home so a caller
+/// building its own label (the take card's glyph) states the same size.
+enum ChromePullDownMetric {
+    /// The chrome's mini metric, carried by a label rather than the control
+    /// (VX-155): the size the mini control drew its own title at.
+    static var labelFont: Font {
+        Font(NSFont.systemFont(ofSize: NSFont.systemFontSize(for: .mini)))
+    }
+
+    /// The borderless style's disclosure chevron, at the size it draws next
+    /// to a mini label — for a menu that keeps JUST the dropdown (the take
+    /// card, VX-223). The size `RestingRowControls` already paints its
+    /// resting hint's chevron at.
+    static var indicatorFont: Font { .system(size: 7, weight: .semibold) }
 }
 
 /// **A voiced text field** (13i-d U3 — the 13i-c orchestrator walk's polish

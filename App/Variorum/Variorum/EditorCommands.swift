@@ -366,6 +366,15 @@ struct EditorCommands: Commands {
         CommandGroup(replacing: .appInfo) {
             Button(AboutCopy.menuTitle) { openWindow(id: AboutCopy.windowID) }
         }
+        // VX-220 (her word, 2026-10-13 — the app menu's Services submenu is
+        // clutter: "open in finder, change to chinese, system trace, etc."):
+        // Variorum registers no services of its own (no `NSServices` in its
+        // Info.plist), so every entry there was another app's provider. The
+        // placement stays and is EMPTY — which drops the submenu while MCP
+        // Settings…'s `before: .systemServices` anchor below keeps working.
+        // PROVISIONAL (the run's brief): in every configuration — a Debug-only
+        // keep would be one `#if !DEBUG` around this group.
+        CommandGroup(replacing: .systemServices) {}
         // 13r U2 — Variorum ▸ Check for Updates…, under About: the platform's
         // own place for this act. UNDECLARED in the capability registry, on
         // the Lock Library Now / New Window precedent. It is an app-menu
@@ -393,9 +402,10 @@ struct EditorCommands: Commands {
                 openSettings()
             }
             .keyboardShortcut(",", modifiers: [.command, .option])
-            // Its own section, so it reads with Settings… above it and never
-            // as part of Services below (the verify leg's AX read).
-            Divider()
+            // (Its own `Divider()` stood here so it never read as part of
+            // Services below — retired with Services at VX-220, vx-184's OK:
+            // the system's group separator already sets Hide… apart, and the
+            // two side by side were a doubled separator in the menu model.)
         }
         // Phase 13 (B2): ⌘N = New Post (R41) + the dated home's shortcut.
         CommandGroup(replacing: .newItem) {

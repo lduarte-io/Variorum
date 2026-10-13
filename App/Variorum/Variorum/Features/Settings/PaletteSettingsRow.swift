@@ -2,8 +2,9 @@
 //  PaletteSettingsRow.swift
 //  Variorum (Mac)
 //
-//  18g — the palette's ONE door: a swatch strip under "Design voice" in
-//  Settings ▸ Appearance, and, when she picks Custom, the hex field (plus
+//  18g — the palette's ONE door: a swatch strip under "Theme" (the control
+//  "Design voice" was renamed at her 2026-10-13 General ruling) in
+//  Settings ▸ General, and, when she picks Custom, the hex field (plus
 //  the optional second — her R-Q13). Its own file because `AppSettingsView`
 //  is already 560 lines and a feature that arrives as fifty lines inside a
 //  pane is how a pane becomes a god file (P-9); the pane composes it in
@@ -60,11 +61,12 @@ struct PaletteSettingsRow: View {
                 }
             }
             // The fields and whatever the pane has to SAY sit directly
-            // under the strip that summons them, above the two long help
-            // paragraphs. Found on the walk: with the help text first, a
-            // refused hex put its refusal below the window's fold in a
-            // pane that is 460 pt tall and does not resize — a refusal she
-            // cannot see is the P-2 failure wearing a layout's clothes.
+            // under the strip that summons them (the walk's fold lesson —
+            // a refusal she cannot see is the P-2 failure in layout's
+            // clothes). The two long help paragraphs that used to follow
+            // are GONE — her 2026-10-13 General ruling: no explanation
+            // under the palette. The conditional custom-field notes stay:
+            // they are refusals and state notes, not explanation.
             if settings.palette == .custom { customFields }
             if let note {
                 Text(note)
@@ -73,14 +75,6 @@ struct PaletteSettingsRow: View {
                     .lineLimit(4)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            Text(PaletteCopy.help)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            Text(PaletteCopy.notAVoiceNote)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
         }
         .task(id: landedKey) { adoptLandedSeeds() }
         // **A field she leaves is a field she is done with** (R1-2): what

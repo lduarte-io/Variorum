@@ -200,6 +200,41 @@ struct BookIndexEditingTests {
         }
     }
 
+    /// **VX-223 — the note row's ⋯ pops at menu size** (the class her report
+    /// names — "several dropdowns that are too small that start with three
+    /// dots"). The row's ⋯ carried `.controlSize(.mini)` on the Menu itself,
+    /// so its popped rows drew at the mini 9 pt. RED ON OLD by that
+    /// mechanism; the class lives in `ChromeMenuRowSizeTests`. The row-21
+    /// geometry above must hold unchanged with the fix (the control stays
+    /// 15 pt wide — the mini metric rides the label now).
+    @Test func theNoteRowMenuPopsAtMenuSize() async throws {
+        try await withIndexBook { session, db, readingID, _, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .index
+            #if DEBUG
+            BookIndexGeometry.reset()
+            #endif
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            #if DEBUG
+            await settle(window, hosting, until: { BookIndexGeometry.noteMenuFrame != nil })
+            #endif
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            let sizes = ChromeMenuProbe.rowSizes(in: hosting)
+            #expect(sizes.count >= 5, "every note row's ⋯ is a pop-up underneath (\(sizes))")
+            #expect(sizes.allSatisfy { $0 >= ChromeMenuProbe.menuSize },
+                    "every popped row reads at menu size, never mini: \(sizes)")
+        }
+    }
+
     /// Row 22: a landing on note 1's THIRD block makes exactly that block
     /// live — one editable pane in the whole book — and a second landing
     /// on another note MIGRATES the ring rather than adding one.

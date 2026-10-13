@@ -149,6 +149,34 @@ struct AppSettingsView: View {
         }
     }
 
+    // MARK: - The window's geometry (VX-225)
+    //
+    // Her report: "sometimes the text that says Variorum Settings bleeds over
+    // the top in this weird way" — on her Mac the window title ("Variorum
+    // Settings", leading-aligned after the traffic lights on Tahoe) runs a
+    // few points past the leading column's edge while the titlebar's backing
+    // stops at that edge. WHY her titlebar backing stops there is UNEXPLAINED
+    // (it never reproduced on the dev build); her ruling, verbatim: "why
+    // don't we just make the pane on the left a little wider? the overlap is
+    // always the same amount and it's not big. that would make the issue
+    // invisible since we can't find out why it's happening." So the column
+    // clears the title (≈200 pt from the window's edge, measured) with the
+    // traffic-light-to-title gap to spare, and the WINDOW grows by exactly
+    // that delta so the detail column — where every pane was laid out —
+    // keeps its width. Pinned by `SettingsTitleClearanceTests`.
+    //
+    // DEBUG RESIDUAL (by design — never a reason to reopen VX-225): the Debug
+    // build is titled "Variorum Dev Settings", which ends ≈228 pt — past this
+    // 224-pt column. That is a Debug-only artifact of the longer dev title;
+    // the column is sized for the Release title she runs every day.
+
+    /// The leading column (search + pane list). Was 196.
+    static let sidebarWidth: CGFloat = 224
+    /// The detail column — unchanged by VX-225 (720 − 196 − the hairline).
+    static let detailWidth: CGFloat = 523
+    /// The window's content: the column, the 1-pt hairline, the detail.
+    static let contentSize = CGSize(width: sidebarWidth + 1 + detailWidth, height: 520)
+
     var body: some View {
         HStack(spacing: 0) {
             sidebar
@@ -159,7 +187,7 @@ struct AppSettingsView: View {
                 .frame(width: 1)
             detail
         }
-        .frame(width: 720, height: 520)
+        .frame(width: Self.contentSize.width, height: Self.contentSize.height)
         .background(tokens.room)
         // Every voiced modifier inside Settings (`alarmVoice()` and its
         // siblings) reads the store from the environment and otherwise
@@ -225,7 +253,7 @@ struct AppSettingsView: View {
                 .padding(.vertical, 6)
             }
         }
-        .frame(width: 196)
+        .frame(width: Self.sidebarWidth)
         .background(tokens.surface)
     }
 
@@ -315,13 +343,18 @@ struct AppSettingsView: View {
                 .font(tokens.heading)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
-            Text(query.isEmpty
-                 ? pane.blurb
-                 : "Settings, keyboard shortcuts and the app's own words — all three.")
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
+            // An empty blurb renders nothing — General, by her 2026-10-13
+            // ruling, is the one pane without a subtitle.
+            let subtitle = query.isEmpty
+                ? pane.blurb
+                : "Settings, keyboard shortcuts and the app's own words — all three."
+            if !subtitle.isEmpty {
+                Text(subtitle)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 18)
@@ -484,7 +517,10 @@ private struct GeneralPane: View {
 
     var body: some View {
         Form {
-            Section("Voice") {
+            // Her 2026-10-13 General rulings: the control reads "Theme" (the
+            // catalog's title), no explanation beneath it, and the "Voice"
+            // section header goes with the caption so "Theme" reads once.
+            Section {
                 Picker(SettingsCatalog.title("voice"), selection: Binding(
                     get: { theme.settings.voice },
                     set: { theme.setVoice($0) })) {
@@ -492,11 +528,6 @@ private struct GeneralPane: View {
                     Text("Study").tag(ThemeVoice.study)
                 }
                 .pickerStyle(.segmented)
-                Text("Two voices, one structure: Terminal is mono and airy with its own idioms; Study is the warm paper-and-serif look. Everything works identically in both, and the colour palette below works under either one.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(6)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             // 18j (her R-Q12): the light/dark choice, the third of the three
             // appearance dials.
@@ -541,14 +572,9 @@ private struct GeneralPane: View {
                         Text(ReceiptStyleCopy.label(style)).tag(style)
                     }
                 }
+                // Her 2026-10-13 ruling: ONE direct paragraph, the refusal
+                // sentence folded in (ReceiptStyleCopy.help carries both).
                 Text(ReceiptStyleCopy.help)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(6)
-                    .fixedSize(horizontal: false, vertical: true)
-                // The sentence the setting must never leave out: a refusal
-                // is not a confirmation, and “Off” never silences one.
-                Text(ReceiptStyleCopy.alwaysShownNote)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(4)
@@ -559,28 +585,25 @@ private struct GeneralPane: View {
             // writing pane — it is how the app OPENS, not how a note behaves.
             Section("Open notes") {
                 Toggle(SettingsCatalog.title("keepOpenNotes"), isOn: $keepOpenNotes)
-                Text("The sidebar's Open section returns as you left it the next time Variorum opens — the notes that still exist, in the same order. Off, each launch starts with an empty list. This Mac only.")
+                // Her 2026-10-13 ruling: the one line beneath.
+                Text("This Mac only.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .lineLimit(5)
+                    .lineLimit(1)
                     .fixedSize(horizontal: false, vertical: true)
             }
             // 13r U3-A — THE CALM-ASKS CADENCE's rule 4: the update ask is
             // always answerable here, without the popup. The checkbox IS
             // Sparkle's own setting; touching it answers the question, so the
             // ask retires for good. Only where a live channel can act (P-2).
+            // Her 2026-10-13 ruling: no text beneath the toggle. The
+            // calm-asks machinery is untouched — the checkbox IS Sparkle's
+            // setting, so touching it still answers the ask for good.
             if let updates, updates.isLive {
                 Section(UpdateSettingsCopy.section) {
                     Toggle(SettingsCatalog.title("updates"), isOn: Binding(
                         get: { updates.automaticallyChecks },
                         set: { updates.setAutomaticallyChecks($0) }))
-                    Text(updates.permissionAnswered
-                         ? UpdateSettingsCopy.help
-                         : UpdateSettingsCopy.help + " " + UpdateSettingsCopy.unansweredNote)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(5)
-                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
@@ -995,12 +1018,21 @@ private struct ShortcutsSettingsPane: View {
 
 // MARK: - The tag manager (R52)
 
-private struct TagManagerPane: View {
+struct TagManagerPane: View {
+    /// VX-221 — the pane's declared doors (P-1): the delete act's two — the
+    /// row's visible trash and its context row — walked by the registry
+    /// tests. (Create and rename stay the recorded gap.)
+    static let surfaceCapabilities: [CapabilityID] = [.deleteTag]
+    static let contextMenuCapabilities: [CapabilityID] = [.deleteTag]
+
     let session: AppSession
     let tags: TagsViewModel
     @State private var newTagParent: String?
     @State private var newTagSheet = false
     @State private var renameTarget: Tag?
+    /// VX-221: the ONE confirm both delete doors open — the act runs only
+    /// from its button (`TagDeletion` names the consequence).
+    @State private var deleteTarget: Tag?
     @State private var nameField = ""
     @State private var promoteTags: Set<String> = []
     @State private var promoteSheet = false
@@ -1022,6 +1054,19 @@ private struct TagManagerPane: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Spacer()
+                        // VX-221 (her "more obvious delete tag button rather
+                        // than just two finger click"): the act's visible door
+                        // on every row — quiet, always there; it opens the
+                        // same confirm as the context row.
+                        Button {
+                            deleteTarget = tag
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                        .buttonStyle(.borderless)
+                        .foregroundStyle(.secondary)
+                        .help("Delete \u{201C}\(tag.name)\u{201D}\u{2026}")
+                        .accessibilityLabel(CapabilityRegistry.capability(.deleteTag).verb)
                     }
                     .contextMenu {
                         Button("New Child Tag…") {
@@ -1034,8 +1079,11 @@ private struct TagManagerPane: View {
                             renameTarget = tag
                         }
                         Divider()
-                        Button("Delete (with subtree)", role: .destructive) {
-                            Task { await tags.deleteTag(tag.id) }
+                        // VX-221: the same act's second door — the same
+                        // confirm (it deleted on the click before; her
+                        // ratification #VX221-a).
+                        Button(CapabilityRegistry.capability(.deleteTag).verb, role: .destructive) {
+                            deleteTarget = tag
                         }
                     }
                 }
@@ -1084,6 +1132,25 @@ private struct TagManagerPane: View {
                 Task { await tags.renameTag(tag.id, to: name) }
             }
             Button("Cancel", role: .cancel) {}
+        }
+        // VX-221 — the delete act's ONE confirm, for both its doors. The
+        // consequence is the phone's sentence, hoisted (`TagDeletion`): the
+        // subtree goes too, every note loses those tags, and nothing undoes it.
+        .alert(
+            TagDeletion.confirmTitle,
+            isPresented: Binding(
+                get: { deleteTarget != nil },
+                set: { if !$0 { deleteTarget = nil } }),
+            presenting: deleteTarget
+        ) { tag in
+            Button(TagDeletion.confirmVerb, role: .destructive) {
+                Task { await tags.deleteTag(tag.id) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { tag in
+            Text(TagDeletion.consequence(
+                name: tag.name,
+                subtreeCount: TagDeletion.subtreeCount(of: tag, in: tags.tags)))
         }
         .sheet(isPresented: $promoteSheet) {
             PromoteTagsSheet(session: session, tagPaths: promoteTags.sorted())

@@ -13,12 +13,8 @@ nonisolated enum UpdateSettingsCopy {
     static let section = "Updates"
     /// The cadence's own words for the row.
     static let title = "Check for updates automatically"
-    static let help =
-        "About once a day Variorum asks stargazing.tech whether a newer version exists; "
-        + "nothing of your writing goes with it. Check for Updates\u{2026} in the Variorum "
-        + "menu works either way."
-    /// Said only while the question is still open.
-    static let unansweredNote =
-        "You haven\u{2019}t chosen yet \u{2014} Variorum asks once, after a few days of use, "
-        + "or you can decide here."
+    // The caption (`help`) and the unanswered-ask line were removed at her
+    // 2026-10-13 General-pane ruling: no text beneath the toggle. The
+    // toggle is still Sparkle's own setting, so touching it still answers
+    // the calm ask for good (13r U3-A's machinery, untouched).
 }
