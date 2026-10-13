@@ -1685,9 +1685,14 @@ apply-check CLEAN at the tip in the pinned checkout)
   the sheet ALONE across Shared + Mac + phone) · the register. Harness run at the fix: `✔ Test run with 5 tests in
   2 suites passed after 2.058 seconds` (both VX-209 suites; the face pin reads the harness's read-only mirrors of
   the three app folders, re-copied every sync).
-- IN-PROGRESS — the step-2 revert cycles (announced before any starts): the four patches are in
-  `notes/plans/fixes/vx-201-u5-reverts/` (R-209-rule · R-209-plaintext · R-209-model · R-209-face), each made on
-  the COMMITTED tree and restored, each `git apply --check` clean. Each cycle: `git apply <patch>` in the worktree
-  → the harness's `sync.sh` copies it → `git checkout --` the one file AT ONCE → `git diff --stat` read EMPTY →
-  only then the harness builds and runs (so the worktree is reverted for seconds, never across a build). A death
-  mid-cycle: `git diff` shows the one reverted file; `git checkout --` it (everything is committed).
+- DONE (this commit) — THE STEP-2 REVERT CYCLES, all four RUN in the harness (announced at `ccd10881` before any
+  started; each: `git apply` in the worktree → `sync.sh` → `git checkout --` the file at once → `git diff --stat`
+  read EMPTY → build + `swift test --filter VX209LeavesCastleConfirmTests`; the cycle script
+  `vx209-harness/revert-cycle.sh`). Each RED exactly on its named legs, every other pin green:
+  **R-209-rule** — 6 issues: the classifier pin's four true arms (the backup pair, the carried folder, the
+  never-passphrased copy, the export) + the model pin's two Castle-world lines (backup, export) · **R-209-plaintext**
+  — 2 issues: the export leg of each · **R-209-model** — 2 issues: the model pin's two lines (the classifier pin
+  green — the rule stands, the model never asks it) · **R-209-face** — 3 issues: the sheet's `if model.leavesCastle {`,
+  its `Text(LibraryOpenCopy.confirmLeavesCastle)`, and the one-renderer sweep (`[]`). After the last cycle the
+  harness re-synced to HEAD: `✔ Test run with 5 tests in 2 suites passed after 1.767 seconds`; the worktree clean.
+- NEXT: step 3 — the guide warning (written against U1's landed behavior and the reproduced trace).
