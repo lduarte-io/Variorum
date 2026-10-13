@@ -177,8 +177,16 @@ struct MCPWriteServerTests {
                             SELECT lc.* FROM lens_choice lc JOIN lens l ON l.id = lc.lens_id
                             WHERE l.name = 'her own way' ORDER BY lc.id
                             """).map(\.description)
+                    // VX-184 U5 (justified edit — the proof's completeness grows
+                    // with the catalog): every book, membership and chapter row,
+                    // and every note's archive and deletion stamps (VX-196's
+                    // library tools aim at hers).
+                    let library = try ["reading", "reading_post", "reading_section"].flatMap { table in
+                        try Row.fetchAll(db, sql: "SELECT * FROM \(table) ORDER BY id").map(\.description)
+                    } + Row.fetchAll(db, sql: "SELECT archived_at, deleted_at FROM container ORDER BY id")
+                        .map(\.description)
                     return takes + placements + blocks + commits + dates + rules + filings + herComments + herTags
-                        + edges + titles + lenses
+                        + edges + titles + lenses + library
                 }
             }
             let chapter = try h.operations.createSection(in: book.id, name: "1")
@@ -284,6 +292,15 @@ struct MCPWriteServerTests {
             calls.append(("rename_commit", ["commit_id": .string(hersCommit.id), "message": .string("x")]))
             calls.append(("rename_note", ["note_id": .string(note.id), "title": .string("x")]))
             calls.append(("delete_lens", ["lens_id": .string(hersLens.id)]))
+            // VX-184 U5 (justified edit, the ritual — the proof's completeness
+            // grows with the catalog): VX-196's library tools, aimed at her
+            // book, each refusing at the rung.
+            calls.append(("rename_book", ["book_id": .string(book.id), "name": .string("x")]))
+            calls.append(("finish_book", ["book_id": .string(book.id)]))
+            calls.append(("reopen_book", ["book_id": .string(book.id)]))
+            calls.append(("archive_book", ["book_id": .string(book.id)]))
+            calls.append(("unarchive_book", ["book_id": .string(book.id)]))
+            calls.append(("delete_book", ["book_id": .string(book.id)]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).

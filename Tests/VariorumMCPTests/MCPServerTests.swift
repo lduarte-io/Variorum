@@ -262,7 +262,10 @@ struct MCPServerTests {
                     "remove_tag",
                     "edit_comment", "restore_comment",
                     "delete_take", "archive_take", "unarchive_take", "set_take_label", "lock_take", "unlock_take",
-                    "restore_commit", "rename_commit", "rename_note", "delete_lens"])
+                    "restore_commit", "rename_commit", "rename_note", "delete_lens",
+                    // VX-184 U5 (justified edit, the ritual): edit gains VX-196's
+                    // edit parity across the library (R-VX184-1) — the book's state.
+                    "rename_book", "finish_book", "reopen_book", "archive_book", "unarchive_book", "delete_book"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })

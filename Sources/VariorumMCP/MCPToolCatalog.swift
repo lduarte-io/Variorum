@@ -118,6 +118,9 @@ enum MCPToolCatalog {
         restoreCommit, renameCommit,
         // …and the note itself: its title, its saved lenses.
         renameNote, deleteLens,
+        // VX-184 U5 — VX-196: edit parity across the library (R-VX184-1) — the
+        // book's state.
+        renameBook, finishBook, reopenBook, archiveBook, unarchiveBook, deleteBook,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -1044,6 +1047,75 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-184 U5 — VX-196 edit parity across the library (R-VX184-1)
+
+    /// The book acts' input: one book id (a gathering is read, never changed).
+    private static let bookIDOnly: Value = .object([
+        "type": "object",
+        "properties": .object([
+            "book_id": .object(["type": "string", "description": "The book (list_books gives ids)."]),
+        ]),
+        "required": .array(["book_id"]),
+        "additionalProperties": false,
+    ])
+
+    /// Her rename doors — E13's name guard first; a finished book renames.
+    static let renameBook = MCPToolDeclaration(
+        name: "rename_book", rung: .edit, title: "Rename a book",
+        description: """
+            Give a book a new name. A name another live book already wears (ignoring case) is             refused, as the author's rename is; a finished or sealed book can still be renamed.             Gatherings are the author's to rename. One undo for the author puts the old name back.             Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "book_id": .object(["type": "string", "description": "The book."]),
+                "name": .object(["type": "string", "description": "Its new name."]),
+            ]),
+            "required": .array(["book_id", "name"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    /// Her Finish — the finish dismisses what waits at Arrivals.
+    static let finishBook = MCPToolDeclaration(
+        name: "finish_book", rung: .edit, title: "Finish a book",
+        description: """
+            Mark a book finished, as the author's Finish does: its notes, their order and its             chapters are frozen (their text stays editable), it stops collecting, and notes             waiting at its Arrivals are dismissed. A book already finished (or sealed) is left as             it is. One undo for the author reopens it and brings back what was waiting. Returns JSON.
+            """,
+        inputSchema: bookIDOnly, scopes: [.book, .wing])
+
+    /// Her Reopen — the catch-up rings what arrived while it was finished.
+    static let reopenBook = MCPToolDeclaration(
+        name: "reopen_book", rung: .edit, title: "Reopen a book",
+        description: """
+            Reopen a finished book, as the author's Reopen does: it can change again, and notes             that came to match its rule while it was finished wait at its Arrivals. A sealed book             stays sealed — unsealing is the author's alone. One undo for the author finishes it             again. Returns JSON.
+            """,
+        inputSchema: bookIDOnly, scopes: [.book, .wing])
+
+    /// Her Archive — kept, out of view; its notes stay where they are.
+    static let archiveBook = MCPToolDeclaration(
+        name: "archive_book", rung: .edit, title: "Archive a book",
+        description: """
+            Archive a book, as the author's Archive does: it leaves the Bookcase and is kept,             never deleted, and it stops collecting until it is unarchived. Its notes stay live and             stay in it. One undo for the author unarchives it. Returns JSON.
+            """,
+        inputSchema: bookIDOnly, scopes: [.book, .wing])
+
+    /// Her Unarchive — what was archived with it comes back with it.
+    static let unarchiveBook = MCPToolDeclaration(
+        name: "unarchive_book", rung: .edit, title: "Unarchive a book",
+        description: """
+            Bring an archived book back to the Bookcase, as the author's Unarchive does (notes the             author archived together with it come back too; list_books with include_archived:             true lists archived books). One undo for the author archives it again. Returns JSON.
+            """,
+        inputSchema: bookIDOnly, scopes: [.book, .wing])
+
+    /// Her Delete Book — the Trash; the daily Journal never deletes.
+    static let deleteBook = MCPToolDeclaration(
+        name: "delete_book", rung: .edit, title: "Delete a book",
+        description: """
+            Delete a book, as the author's Delete Book does: it goes to the Trash for 30 days with             its chapters; its notes are never deleted with it — a book that owns its notes releases             them to the Pool. One undo for the author brings the book back whole. Returns JSON.
+            """,
+        inputSchema: bookIDOnly, scopes: [.book, .wing])
 
     // MARK: - VX-168 U2 — the deliberate acts (VX-169 save_commit; VX-174 the merge button)
 

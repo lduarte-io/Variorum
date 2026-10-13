@@ -88,6 +88,8 @@ struct MCPWriteTools: Sendable {
         case linkVersions(noteA: String, noteB: String, pairs: [Operations.MCPVersionPair])
         /// VX-184 U4 (VX-195): edit parity inside a note (`MCPWriteTools+NoteEdits`).
         case noteEdit(NoteEditJob)
+        /// VX-184 U5 (VX-196): edit parity across the library (`MCPWriteTools+LibraryEdits`).
+        case libraryEdit(LibraryEditJob)
 
         var tool: String {
             switch self {
@@ -96,6 +98,7 @@ struct MCPWriteTools: Sendable {
             case .deliberate(let job): job.tool
             case .batch(let job): job.tool
             case .noteEdit(let job): job.tool
+            case .libraryEdit(let job): job.tool
             case .deleteComment: "delete_comment"
             case .removeTag: "remove_tag"
             case .linkVersions: "link_versions"
@@ -191,6 +194,7 @@ struct MCPWriteTools: Sendable {
             if name == MCPToolCatalog.removeTag.name { return try parseRemoveTag(args) }
             if name == MCPToolCatalog.linkVersions.name { return try parseLinkVersions(args) }
             if let job = try parseNoteEdit(name, args) { return .noteEdit(job) }
+            if let job = try parseLibraryEdit(name, args) { return .libraryEdit(job) }
             throw ArgumentFailure(message: "Unknown tool: \(name).")
         }
     }
@@ -413,6 +417,8 @@ struct MCPWriteTools: Sendable {
                 noteA: noteA, noteB: noteB, pairs: pairs, job: job, ops: ops, clientName: clientName)
         case .noteEdit(let edit):
             return try performNoteEdit(edit, job: job, ops: ops, clientName: clientName)
+        case .libraryEdit(let edit):
+            return try performLibraryEdit(edit, job: job, ops: ops, clientName: clientName)
         }
     }
 
