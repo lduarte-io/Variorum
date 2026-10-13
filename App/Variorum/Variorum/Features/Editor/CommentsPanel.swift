@@ -682,6 +682,11 @@ struct CommentsPanel: View {
     /// The add area's counted focus request — raised once when the panel
     /// opens (it opens ready to write).
     @State private var addFocusRequest = 0
+    /// The stamp line's MEASURED height (FIX LEG 2 — F-W-3): every row's
+    /// stamp line is one line of the same chrome, so one number serves all;
+    /// a row being edited reveals itself plus this, its gap and its own
+    /// bottom air, so its dirty face never sits below the list's edge.
+    @State private var stampLineHeight: CGFloat = 0
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -961,8 +966,12 @@ struct CommentsPanel: View {
                 text: binding(for: comment),
                 style: CommentTextStyle(tokens: tokens, ink: tokens.commentInk),
                 mark: tokens.commentPrefix,
+                revealBelow: Metrics.stampGap + stampLineHeight + Metrics.rowAir,
                 onFocusChange: { report(.comment(comment.id), inArea: $0) })
             stampLine(comment, dirty: dirty)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                    if stampLineHeight != height { stampLineHeight = height }
+                }
         }
         .padding(.horizontal, Metrics.writingInset)
         .padding(.vertical, Metrics.rowAir)

@@ -125,6 +125,13 @@ struct CommentTextArea: NSViewRepresentable {
     /// A ROW grows with its text and never scrolls; the ADD area (false)
     /// fills the height it is offered and scrolls itself.
     var growsWithText = true
+    /// **What the host draws under a ROW that belongs to it** (VX-179 U3 FIX
+    /// LEG 2 — the walk's F-W-3): the panel's stamp line (and the row's own
+    /// bottom air), MEASURED by the host. While the caret is in this row the
+    /// row reveals itself plus this much, so the dirty face under her text —
+    /// "Unsaved · ⌘⏎", Save, Revert — is never left below a capped list's
+    /// edge. 0 reveals nothing extra (the add area: it scrolls itself).
+    var revealBelow: CGFloat = 0
     /// A counted focus REQUEST (`CaptureTextView`'s door): any change puts
     /// the caret here. A request that arrives before the area has a window
     /// is HELD and served on arrival (the panel's open-focused-on-add).
@@ -145,6 +152,7 @@ struct CommentTextArea: NSViewRepresentable {
             }
         }
         view.onMarkedTextChange = { [weak area] in area?.refreshPlaceholder() }
+        view.onReveal = { [weak area] in area?.revealForEditing() }
         // Spelling follows the app's ONE this-Mac setting, as every text
         // surface in the app does (`SpellcheckLevel`).
         SpellcheckLevel.current.apply(to: view)
@@ -260,6 +268,7 @@ struct CommentTextArea: NSViewRepresentable {
         /// Every write here is GATED (the A47c lesson — an unguarded write on
         /// a live text view is never free, and `updateNSView` runs often).
         func adopt(_ parent: CommentTextArea, into area: CommentTextAreaView) {
+            area.revealBelow = parent.revealBelow
             if appliedStyle != parent.style {
                 appliedStyle = parent.style
                 area.apply(parent.style)
@@ -302,6 +311,8 @@ final class CommentTextAreaView: NSView {
     private(set) var placeholderView: CommentTwinTextView?
     private(set) var markView: CommentTwinTextView?
     private var markWidth: CGFloat = 0
+    /// The host's measured allowance under a row (`CommentTextArea.revealBelow`).
+    var revealBelow: CGFloat = 0
 
     override var isFlipped: Bool { true }
 
@@ -498,6 +509,35 @@ final class CommentTextAreaView: NSView {
         }
     }
 
+    // MARK: Keeping the row being edited in view (FIX LEG 2 — F-W-3)
+
+    /// **The row being edited stays WHOLLY visible** — its own frame and the
+    /// host's measured allowance under it (the stamp line). The traced defect:
+    /// the panel's comment list is height-capped and scrolls, and nothing
+    /// revealed the row being edited — a text view's scroll-to-caret reveals
+    /// the caret's LINE only — so with the edited row at the list's bottom
+    /// edge, its dirty face sat clipped below it (the walk's `u34-dirty`).
+    /// A minimal scroll up the clip-view chain (`scrollToVisible`), only for
+    /// a ROW (the add area scrolls itself), and never for a row taller than
+    /// the list can show — there the caret's own scroll governs, so this
+    /// never fights the caret.
+    func revealForEditing() {
+        guard scrollView == nil, revealBelow > 0,
+              let clip = enclosingScrollView?.contentView else { return }
+        let wanted = NSRect(x: 0, y: 0, width: bounds.width, height: bounds.height + revealBelow)
+        guard wanted.height <= clip.bounds.height else { return }
+        scrollToVisible(wanted)
+    }
+
+    /// A focused row that grows (a newline, a wrap) reveals itself again —
+    /// one turn later, never inside the layout pass that grew it.
+    override func setFrameSize(_ newSize: NSSize) {
+        let grew = newSize.height > frame.size.height
+        super.setFrameSize(newSize)
+        guard grew, scrollView == nil, window?.firstResponder === textView else { return }
+        DispatchQueue.main.async { [weak self] in self?.revealForEditing() }
+    }
+
     // MARK: Focus and clicks
 
     private var focusOnArrival = false
@@ -542,11 +582,28 @@ final class CommentNSTextView: NSTextView {
     /// An input method's composition started, changed or ended — the
     /// placeholder must hide while she composes.
     var onMarkedTextChange: (() -> Void)?
+    /// Keep the row being edited in view (FIX LEG 2 — F-W-3).
+    var onReveal: (() -> Void)?
 
     override func becomeFirstResponder() -> Bool {
         let became = super.becomeFirstResponder()
-        if became { onCaretChange?(true) }
+        if became {
+            onCaretChange?(true)
+            // One turn later: a click's own selection tracking has finished
+            // by then, so the caret is placed before anything scrolls.
+            DispatchQueue.main.async { [weak self] in self?.onReveal?() }
+        }
         return became
+    }
+
+    /// Typing and caret moves scroll the caret's line into view; the row's
+    /// whole face follows it (not during a mouse gesture's own tracking —
+    /// the caret's arrival covers a click).
+    override func scrollRangeToVisible(_ range: NSRange) {
+        super.scrollRangeToVisible(range)
+        if let type = NSApp.currentEvent?.type,
+           [.leftMouseDown, .leftMouseDragged, .leftMouseUp].contains(type) { return }
+        onReveal?()
     }
 
     override func resignFirstResponder() -> Bool {
