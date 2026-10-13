@@ -217,8 +217,93 @@ COMMITTED; each restore is `git checkout -- <file>` of the committed file; the e
 
 | piece | what | status |
 |---|---|---|
-| U1-a | record section + ledger row 3 IN-PROGRESS | IN-PROGRESS — this commit |
-| U1-b | core: `purgeableTables` + the `block_comment` arm (tombstoned; dead block refuses; seal refuses) · `restoreBlockComment` belt · the MCP redo road's belt · the `deletedBlockComments` fence · `restoreCost`'s fence · the core pins | NOT-STARTED |
+| U1-a | record section + ledger row 3 IN-PROGRESS | DONE (89b5a9af) |
+| U1-b | core: `purgeableTables` + the `block_comment` arm (tombstoned; dead block refuses; seal refuses) · `restoreBlockComment` belt · the MCP redo road's belt · the `deletedBlockComments` fence · `restoreCost`'s fence · the core pins | DONE (the commit after 89b5a9af — "U1-b core") — `swift test --filter "PurgeOpsTests\|RestoreCostTests\|BlockCommentTests"`: 43 tests / 3 suites green, 0 skipped (headless) |
 | U1-c | red-on-old by behavioural revert, per arm (evidence table below) | NOT-STARTED |
 | U1-d | the panel door: `requestDeleteForever` / `deleteForever` on the model, the fold's "Delete forever…" + the confirm, the receipt; app-target pins WRITTEN (run PENDING stage) | NOT-STARTED |
 | U1-e | verify: touched suites + the full `swift test` headless + ONE plain `xcodebuild build` | NOT-STARTED |
+
+### What U1 decided (with the traces)
+
+1. **D-1 — the seal (PROVISIONAL, the brief's decided default):** the `block_comment` arm refuses
+   under a SEALED post through `ensurePlacementUnlocked` (`lockedPost`) — QUESTIONS #23(a)'s posture
+   (every comment write refuses under a seal) extended to the permanent write. Pin
+   `PurgeOpsTests.aSealedPostRefusesACommentsDeleteForever` (the listing still reads under the seal;
+   unsealed, the same ask lands). Recorded consequence: the variant arm has no seal check (a take
+   deleted before a seal can be Delete-Now'd from the tray under it) — the two kinds now differ under
+   a seal; this unit does not touch the take arm. If the author rules #23 the other way, the line
+   comes out and the pin flips.
+2. **D-2 — a DEAD block refuses (`blockNotFound`); a live UNPLACED block passes.** Traced:
+   `ensurePlacementUnlocked` asks only a LIVE placement — a dead block (its placement tombstoned by
+   `deleteBlock`) and a released one (divide-W/merge) both have none, so the guard passes SILENTLY.
+   For the dead block that silence is a hazard, not a neutral answer: a comment that died WITH its
+   block (the cascade trigger stamps it with the block's exact `deleted_at`) could be purged alone,
+   then `restoreBlock`/`restoreContainer`/⌥⌘Z flip it back LIVE on the stamp
+   (`flipBlockCascadeTombstones`) with its intent still LIVE (none of those roads voids a comment
+   intent) — her next delete of it would then be fenced out of the fold and handed to the janitor
+   with no confirm: the 13j B1 class. So the arm takes `restoreBlockComment`'s own guard pair
+   (`liveBlock` first, then the seal). The door can't meet a dead block in ordinary use (the fold
+   exists only on a live block; a race shows the seam's refusal). A live unplaced block has no post
+   to seal it and purges like any other comment write. Pins:
+   `aCommentUnderADeadBlockRefusesItsOwnPurge` (both a cascade victim and an earlier-deleted comment
+   refuse; Put back then revives the victim with zero comment intents) and
+   `aCommentOnALiveUnplacedBlockPurges`. Not marked PROVISIONAL — it is a mechanism guard, not a
+   product call; the orchestrator may re-rule it.
+3. **D-3 — the fence is the STANDING STAMP-AWARE arm**, copied from `Trash.swift:205`: a LIVE intent
+   fences; a completed one fences only the tombstone it covered (`pi.deleted_at >= row.deleted_at` —
+   purged stays purged); a VOIDED intent from before a restore-then-re-delete never hides the fresh
+   tombstone. The brief's "ANY purge_intent (live or tombstoned)" is read as "copy the standing arm",
+   which is exactly this — a literal any-state fence would leave a re-deleted comment in a limbo no
+   door reaches (the B1 finding that made the Trash's arm stamp-aware). Pinned:
+   `aReDeletedCommentListsInTheFoldDespiteItsVoidedIntent` + the completed-intent half of
+   `anIntentNamedCommentLeavesTheDeletedFoldAtOnce`.
+4. **D-4 — the B1 belt rides EVERY comment revive road, not only `restoreBlockComment`** (item 2's
+   belt, applied to the second door the sweep found): `reapplyAddedComment` — the ⇧⌥⌘Z of an AI
+   client's `add_comment` (`Operations+MCPWrites.swift`) — flips a tombstoned comment live, and the
+   undo puts that comment on the fold where "Delete forever…" can name it before the redo. The
+   precedent decides the direction (the revive wins and voids): `reapplyAddedTake` and 17d P28's
+   redo road. Pin `theCommentRedoRoadVoidsALiveIntentLikeItsSiblings`.
+5. **D-5 — the panel road** (U1-d, NOT-STARTED at this commit): the model calls `requestPurge`
+   through `perform`, then `session.sweepLocalPurge()` — the Delete Now road's own act at confirm
+   (`TrashPurge.confirm`: on a never-signed-in install the cleanup IS the app's, so the bytes go now;
+   a no-op under a configured chain, whose janitor owns it). Pin of the local road for the kind:
+   `theLocalRoadTakesAPurgedCommentWhole` (row physically gone, intent completed, fold empty).
+
+### The sweep — every reader of deleted comments × verdict
+
+| reader | where | verdict |
+|---|---|---|
+| `Queries.deletedBlockComments` | `Queries/CommentQueries.swift` | FENCED (the arm) — pinned |
+| Mac panel fold | `CommentsPanel.swift:134` (`deletedBlockComments`) | covered (reads the fenced query) |
+| phone fold | `VariorumMobile/Features/Write/MobileComments.swift:130` | covered (same query; no phone door — a row deleted forever on the Mac drops here too) |
+| `Queries.restoreCost.deletedComments` (the version-restore confirm's population 3) | `Queries/RestoreCost.swift:143` | FENCED (the arm) — `RestoreCostTests.aCommentDeletedForeverIsNotCountedAsStillRestorable` |
+| `VersionsCopy` "N deleted comments" | `Shared/VersionsCopy.swift:161` | covered (renders `restoreCost`) |
+| `blockComments` · `containerComments` · `commentCounts` · `renderPost.comment_count` · the carve precondition (`Operations+Deletion.swift:302`) · `copyLiveComments` · MCP `MCPNoteStructure.swift:130` · `SeededFurnitureDedupe.swift:789` · `SampleLibraryDedupe.swift:997` | — | SAFE: LIVE readers (`deleted_at IS NULL`). A fenced row is tombstoned by construction (the arm mints only for a tombstone; every revive road voids — table below), and the standing doctrine fences TOMBSTONE readers only (the Trash, the tray, `deletedTakes`) |
+| the search index (`SearchIndex` comment source) | `Persistence/SearchIndex.swift:141` | SAFE: a doc exists only for a LIVE comment (`Source.live` = `deleted_at IS NULL`) — a tombstoned comment has no doc to fence |
+| `PurgeFamily.expandBlock` (every comment of a purged block) | `Sync/PurgeFamily.swift:172` | not a listing — the purge itself; Sync-owned |
+
+### The sweep — every comment REVIVE road × the B1 belt
+
+| road | verdict |
+|---|---|
+| `restoreBlockComment` (the panel's Restore, both platforms) | BELT added — `restoringACommentVoidsItsLiveIntent` |
+| `reapplyAddedComment` (MCP `add_comment`'s ⇧⌥⌘Z) | BELT added — `theCommentRedoRoadVoidsALiveIntentLikeItsSiblings` |
+| `flipBlockCascadeTombstones` (`restoreBlock`, `restoreContainer`, `revertDeleteBlock`, the structural redo's revive) | SAFE by D-2: an intent exists only for a comment deleted on its OWN stamp under a live block; the cascade trigger stamps LIVE comments only and stamps are ms-precision, so no later block death shares it — the exact-stamp flip never reaches it (pinned at the end of `aCommentUnderADeadBlockRefusesItsOwnPurge`) |
+| `SampleLibraryDedupe.reviveSampleCopy` (Sync-owned, exact retirement stamp) | SAFE by the same stamp argument; U0's `.stale` net is the designed second net |
+| a peer's restore arriving by sync | U0's line (`tombstonedKinds` + `block_comment`) — the orchestrator's |
+
+### Observations (NOT fixed here — out of this unit's surface; for the orchestrator)
+
+- **O-1:** `restoreCost.deleted_takes` counts deleted takes with no purge fence — a take Delete-Now'd
+  from the tray still counts as "waiting in Block History" on the version-restore confirm. Pre-existing
+  (13u3 UNIT E / 13j); the variant twin of the row fenced here. Ticket candidate.
+- **O-2:** the comments panel's doors (Add · Save · Revert · Delete · Restore, and now Delete
+  forever…) are undeclared in the P-1 registry (`CommentsPanel` has no `surfaceCapabilities`) —
+  pre-existing; the new door follows the panel's own precedent rather than half-declaring one door.
+  The fold qualifies as a TRASH SURFACE under the evolved purge-door rule ("purge doors live in trash
+  surfaces … never in the writing flow" — `CapabilityRegistry.swift`'s `.deleteNow` note): it lists
+  only rows already deleted, and it is her R-VX179-3 placement.
+- **O-3:** the panel's `perform` default arm words an unmapped refusal as `"Refused: \(error)"`. The
+  new door's race-window refusals (`purgeTargetNotDeleted`, `blockNotFound`, `commentNotFound`) fall
+  to it; the seal is mapped. U3's pristine pass may route the default through
+  `OpsRefusalCopy.message(for:)` as the tray does.
