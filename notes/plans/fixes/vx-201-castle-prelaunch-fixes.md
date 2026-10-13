@@ -2205,3 +2205,86 @@ This-Mac-Only road takes the other arm; a crashed road's flag a resume still nee
 pending-marker refusal at the ceremony door + the runner's busy guard. U2's forget-first and the resume's carry
 untouched. R1-2 MINTED as VX-243 (the reviewer's final call: ticket). **The flow proceeds to ROUND 2** (a fresh
 reviewer re-reviews the fixes).
+
+## FABLE LADDER ROUND 2 (a fresh cold reviewer, notes/REVIEW_PROMPT.md verbatim — 2026-10-13)
+
+**Input:** the fix-round diff (`git diff c21d0732..HEAD` — the two fix commits `b3180773` + `cabddd19` and the
+round's record commits), judged in the whole branch-only diff's context (`d6caafc1..HEAD`). Read in full: this
+record (round 1's findings, the agree/dispute, the final calls, the sanity pass — the round's anchor), SyncSpec,
+and both fix hunks with their whole surrounding roads, each mechanism re-traced in this session's own context:
+`runCeremony`'s door guards (busy + the pending-marker refusal at :572-575) and both local arms;
+`writeMarker`/`clearMarker`/`markSwitchPending`/`setThisDeviceOnlyFlag` (:1827-1871 — set-before-first-marker,
+clear-after-durable, the TMO flag cleared with the marker); the resume's `localCastleRoad` discriminator and the
+Outcome's `thisDeviceOnly` line (:1785); `reconcile`'s full body with the new clear in place;
+`sweepLingeringSilentItem`; `reconcileFollow`'s five arms including the one NO-MODEL road (`followIntoStandard`,
+which writes NEITHER flag nor marker — see the clean bill); `effectiveGate`'s corner-45 landing and its
+`belongs(to:)` bound; `AppBootstrap`'s ready road (`readSwitchPending` wired at :517 BEFORE the housekeeping
+that calls `reconcile()` at :615, on every composition) and the relanding task; both models' `switchInProgress`
+holds (PostureSwitchModel ×3, PostureFollowModel ×2); the phone's sheets composing over
+`controller.activeSwitch`/`activeFollow` (the same guards hold on both platforms); both new pins' worlds,
+helpers and asserts; both revert patches (re-ran `git apply --check` this round — clean at HEAD, each exactly
+inverting its fix and nothing else; R-L1 correctly leaves the unpinnable R1-4 log line in place); the Done copy
+both ways (`enteredCastleThisDeviceOnlyDone` carries "sync account"; no ordinary Castle Done does — the pin's
+negative assert is green-on-new, red-on-old by the flag alone). VX-243 verified MINTED (Linear: Todo, R1-2's
+exact shape, the record pointer). The fix commits: zero `Sources/VariorumCore/Sync/` lines, zero editor seam,
+zero schema, no trailers (path diff + log sweep). Suite counts in the test files match the fix pass's stage
+expectations (VX202 11 @Tests, VX110 10); `Phase13pControllerTests` and `PostureSwitchTests` (the named
+changed-source re-runs) both exist.
+
+**VERDICT: 0 BLOCKER · 0 MAJOR · 0 MINOR · 2 NIT — no new BLOCKER or MAJOR; THE LADDER CLOSES AT THIS ROUND.**
+The two pins' stage runs, the two revert cycles (R-L1 → 2 reds, R-L3 → 3 legs) and the two changed-source suite
+re-runs remain PENDING the orchestrator's window exactly as the fix pass declared — one-for-one with how
+U1–U5's red-on-old discharged at windows B–E; no code change rides them.
+
+- **R2-1 [NIT — the trigger SPECULATIVE] · `AppBootstrap.swift:517-519` + `ProtectionController.swift:1479,1491`
+  · the marker read conflates UNREADABLE with ABSENT, and the new clear makes a misread persistent.** The wired
+  closure is `(try? await database.read { RotationMarker.isSet($0) }) ?? false`: a throwing read answers "no
+  marker". Pre-fix that shape's worst case was transient (one in-session Apple-arm run — pre-existing, pre-13x
+  2b); the clear now also ERASES the per-store belt the NEXT launch's pre-open route reads, so a misread would
+  outlive the process. Mechanism traced (marker present + flag set + a throwing read at ready + nothing in
+  flight → flag cleared → death → the route's corner-45 landing un-refused); the TRIGGER is speculative — at
+  ready the store is open and healthy, and I could construct no road on which that read throws, which is why
+  this is a NIT and not a bug. Hardening shape if ever wanted: `readSwitchPending` returns `Bool?` (nil =
+  unreadable ⇒ skip the clear AND the Apple arm), pinnable by injecting a failing closure. Not owed to this run.
+- **R2-2 [NIT — doc-only] · `ProtectionController.swift:1487-1490` · the clear's code comment credits the
+  narrower cover.** It says "the model roads hold `switchInProgress` … so the clear can never fire inside a
+  road's flag-set-to-first-marker window"; the sanity pass already corrected the prose for the no-model road
+  (marker plus serialization), and the record carries it — the long-lived code comment doesn't. The conclusion
+  is TRUE as written (this round's trace: every flag-setting road is model-held or marker-preceded), but a
+  future reader auditing the no-model roads re-derives what the record already settled. One pointer sentence
+  (the marker-plus-serialization cover, or "the record's R1 sanity pass") would close it. No pin (clarity
+  class); no behavior.
+
+**Mechanism re-traces this round made that the record had not (stronger than recorded, in the fix's favor):**
+(1) the sanity pass's one named residual — a user-pressed reconcile clearing early inside the silent
+follow-into-Standard road's first database-write await — CANNOT OCCUR AT ALL: `followIntoStandard`
+(PostureSwitch.swift:1091-1117) writes no marker and never touches the switch-pending flag, so it has no
+flag-no-marker window for a concurrent clear to land in; the recorded residual is doubly benign (its premise is
+false). Every road that DOES set the flag is either model-held (`switchInProgress` + `activeSwitch`/`activeFollow`
+— the ceremony, the typed/derived follows, the CAS-conflict follow inside the ceremony) or marker-preceded (the
+resume; every second-and-later `writeMarker`, whose earlier marker row stays durable through the await). (2) The
+clear also heals a FOURTH orphan road nobody listed: a death between `clearMarker`'s database write and its
+`markSwitchPending(false)` (:1834-1836) leaves flag-no-marker with custody already landed — fail-safe before the
+fix, healed at the next ready by it. (3) A copy taken MID-SWITCH and later adopted carries the marker rows
+INSIDE it (the marker is store rows; the export-and-swap copies them), so the adopted-copy clear road (R1-1's
+(b)) can never clear a flag whose marker the adopted store still holds — `markerPending` reads true there. (4)
+The mid-ceremony REOPEN's own ready reconcile is double-covered: the swapped store carries the pending marker
+(markerPending true) and the model still holds `switchInProgress`. (5) R1-3's wipe can never erase a flag a
+resume still needs: `runCeremony` refuses while busy or while ANY marker pends (:572-575), and a flag with no
+marker is definitionally orphaned; the wipe's early position (before the derive) is safe on every throw path.
+(6) Red-on-old verified by code trace both ways: under R-L3 the resume computes `thisDeviceOnly = localCastleRoad
+&& thisDeviceOnlyFlag()` = true and the Done speaks "sync account"; under R-L1 the flag survives the ready and
+no clear write lands in the box.
+
+**Clean bill (this round):** R1-1's fix guard-complete across every flag window on both platforms (the four
+guards + store-id resolution symmetric with the runner's — both resolve `StoreIdentity` beside the same
+`storeURL`); the clear's log line content-free; R1-3's wipe placed exactly where the real road sets the flag,
+with the TMO flag's every other consumer immune (enrolled roads carry `newCorpusKeyID`, follows carry
+`marker.isFollow`, `followIntoStandard` builds no Done from it, completion's `clearMarker` wipes it); R1-4's
+log line device-neutral, no key material, return value unchanged, correctly left outside the pin; both pins'
+worlds real (the production reconcile; the production runner over the real re-key road), their premises
+self-asserting (the VX202 pin proves the stale flag refuses the landing BEFORE proving the clear), the BOUND
+legs honest (a marker-backed flag stays, green both sides by design); the R1-2 disposition executed (VX-243);
+the fix pass's PENDING list complete and declared with exact expected reds; headless untouched by construction
+(zero package lines in the fix diff); nothing in the fix round copies text across entities, tracks word-level
+change, or scales with corpus size. Findings above are hardening/doc NITs — nothing here re-opens the ladder.
