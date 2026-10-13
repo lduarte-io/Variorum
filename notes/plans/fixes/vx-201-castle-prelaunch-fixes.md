@@ -1595,6 +1595,21 @@ apply-check CLEAN at the tip in the pinned checkout)
   cycles red-as-named, the union suite run, the phone union incl. the no-Mac sweep reading ONLY VX-114's
   offenders — then the walk's VX-206 legs at my window.
 
+### WINDOW D RECORD — PHASES 1+3 (orchestrator, stage claim vx201-u3u4-tests-p1; the pinned checkout at b96656eb)
+- **Phase 1 (Mac union green pass): `✔ Test run with 314 tests in 27 suites passed after 333.390 seconds`** —
+  27 of 28 requested: `Phase13pProtectionBrainTests` is a multi-struct FILE (the machinery lesson's second
+  firing; it came from U3's suite list), its five real types (ProtectionDialsTests · ProtectionCopyTests ·
+  ProtectionCadenceTests · StoreKeyGuardBackingTests · ProtectionDialsPerStoreTests) re-run at the tip under the
+  same claim: `✔ 29 tests in 5 suites`. The U3 pins (PostureSwitchTests' extension) and U4's two pin suites
+  (VX204PrivacyLessonTests 2 + VX206ProtectionLandingTests 3, hosted legs included) are GREEN inside the pass.
+- **Phase 1b (the posture drill, opt-in env):** exactly VX-233's two pre-existing issues, nothing new at the tip.
+- **Phase 3 (phone union, 14 struct types, sim by UDID): 64 tests / 14 suites, one red** — the no-Mac sweep,
+  whose offender list now reads EXACTLY VX-114's nine pre-existing strings (4 AcknowledgmentsCopy + 5
+  LibraryOpenCopy): the U2 log-line fix (66863d50) VERIFIED at the tip, zero new U3/U4 literals. Everything
+  else green incl. MobilePocketGuidePrivacyTests (U4's phone seed) and MobileCopyRegisterSweepTests (U3's new
+  strings under the register sweep). Simulators shut down; stage released. Logs /tmp/vx201-wd-*.log.
+- **Still owed:** phase 2's ten revert cycles (READY sent; GO expected ~05:15), then U5's window E.
+
 ## U5 RECORD (VX-209)
 
 **Not done in this unit (stated first):** IN PROGRESS — this line is rewritten at the unit's close.
