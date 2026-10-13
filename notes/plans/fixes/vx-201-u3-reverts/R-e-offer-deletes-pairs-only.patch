@@ -1,0 +1,14 @@
+diff --git a/App/Variorum/Shared/PostureSwitch.swift b/App/Variorum/Shared/PostureSwitch.swift
+index fda3c7ad..938d69e7 100644
+--- a/App/Variorum/Shared/PostureSwitch.swift
++++ b/App/Variorum/Shared/PostureSwitch.swift
+@@ -1419,8 +1419,7 @@ final class PostureSwitchRunner {
+     /// whole. Returns how many of both went.
+     @discardableResult
+     func deletePreSwitchSnapshots(_ outcome: Outcome) -> Int {
+-        leaves.deleteSnapshotPairs(outcome.preSwitchSnapshots)
+-            + leaves.deleteLibraryCopies(outcome.preSwitchLibraryCopies)
++        leaves.deleteSnapshotPairs(outcome.preSwitchSnapshots)  // R-e: pairs only
+     }
+ 
+     // MARK: - LEAVING CASTLE (§4's second act)

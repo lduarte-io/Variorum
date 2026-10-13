@@ -1117,11 +1117,25 @@ evidence is complete** (green pass 305/38 + drills disposition + simulator + the
   DELETED them. **R-c** (no naming match) → RED: (c) — the A1 rail folder and every foreign folder listed and
   removed — and the refusal pin's home-link leg (the patch drops the home-is-a-real-directory legs with the naming
   block: the remover deleted another library's copy through a planted link). Every bound green where expected.
-- NOT-STARTED — piece 2 (Shared runner + models + faces): the two inert-by-default leaves, `Outcome.preSwitchLibraryCopies`
-  + `Outcome.hasOffer`, the counted offer body, the four faces.
-- NOT-STARTED — piece 3 (VX-208): the one line on every Done that entered Castle, both models, four faces.
-- NOT-STARTED — piece 4: Mac pins (ceremony + follow road list, delete/keep, counts, the line, faces as code),
-  revert patches under `notes/plans/fixes/vx-201-u3-reverts/`, `build-for-testing` (Mac + phone), the close.
+- DONE `a4a0136c` — pieces 2 + 3 (status for the orchestrator's ping: built, and the Mac pins written):
+  `PostureSwitch.swift` (two inert-by-default leaves `preSwitchLibraryCopies` / `deleteLibraryCopies`, wired in
+  `.live` to the core; `Outcome.preSwitchLibraryCopies` + `Outcome.hasOffer`; `snapshotAndInsurance` — the ONE
+  listing site — lists both kinds under the pairs' rule; `deletePreSwitchSnapshots` removes both and returns the
+  sum; U1's `endSwitch`/`switchPending` and U2's `thisDeviceOnly` machinery untouched), `PostureCopy.swift` (the
+  counted offer body + `plaintextExportsNotCovered` + their two by-the-outcome selectors), both models (the five
+  `hasOffer` sites read `Outcome.hasOffer`; `offerBody` + `plaintextExportsLine`), the four faces (the Mac's
+  `FollowSheet` + `PostureSwitchSheet` Done/offer phases only — VX-214 overlap: no pane section touched — and the
+  phone's two sheets), and 4 Mac pins appended to `PostureSwitchTests` (its world's leaves wired to the same core
+  functions `.live` composes).
+- VERIFIED: Mac `build-for-testing` (Variorum, `-derivedDataPath DerivedData/vx201`) TEST BUILD SUCCEEDED; phone
+  `build-for-testing` (VariorumMobile, generic iOS Simulator) TEST BUILD SUCCEEDED; zero warnings in changed lines
+  (the three warnings in touched files are pre-existing lines). `df -h` data volume 40 GiB free.
+- IN-PROGRESS — the Mac revert patches R-d…R-g (`notes/plans/fixes/vx-201-u3-reverts/`), each git-apply-checked; the
+  four applied TOGETHER for one compile check (distinct hunks), then restored by `git checkout --` the two Shared
+  files and `git diff --stat` read empty. If this line still reads IN-PROGRESS, check `git diff` for reverted
+  Shared files before anything else. The RUNS are stage work (PENDING).
+- NOT-STARTED — piece 4: the final HEAD build (so DerivedData holds the fix's products), the pin table + stage
+  protocol + suites, the copy drafts, findings, the close.
 
 ### The settled design (approved by the orchestrator before any code; F-U3-1 ACCEPTED)
 - **F-U3-1 — what "a key file carries `apple`" means:** the key file Variorum itself would open the copy with —
