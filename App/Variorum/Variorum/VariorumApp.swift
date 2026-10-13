@@ -535,54 +535,16 @@ struct VariorumApp: App {
         // Phase 13 (B2/R52): the Settings window — Appearance (the voice +
         // the B1 global settings) and the TAG MANAGER's real home.
         Settings {
-            if case .ready(let session) = bootstrap.state {
-                AppSettingsView(
-                    session: session, services: services,
-                    protection: bootstrap.protection,
-                    // 18j: the app's ONE appearance owner, handed to its
-                    // door. Never re-read from `UserDefaults` by the pane
-                    // (F-0: a setting is read once at its owner and pushed
-                    // down) — the pane binds to this object.
-                    appearance: appDelegate.appearance,
-                    // 13r U3-A: General's "Check for updates automatically"
-                    // — rendered only where the channel is live (P-2).
-                    updates: appDelegate.updates,
-                    // 13r U3-B: Settings ▸ Diagnostics — the ONE crash-
-                    // reporting owner (opt-in, default OFF).
-                    crashReports: appDelegate.crashReports,
-                    // 13n-b U1: Settings ▸ MCP — the ONE MCP door owner.
-                    mcp: appDelegate.mcp,
-                    // 13x U2 row 6: the Restore surface's per-row door —
-                    // Settings' OWN presenter (the main scene's sheet and
-                    // this one can never both fire).
-                    restoreDoor: { picked in
-                        settingsLibraryOpen.begin(bootstrap: bootstrap, picked: picked)
-                    },
-                    // 13x F1 (R1-MAJOR): Data Safety's hand-off twin —
-                    // Settings' OWN presenter, the restore door's pattern.
-                    handOffDoor: {
-                        settingsHandOff.openPanel(session: session, bootstrap: bootstrap)
-                    })
-                    .sheet(isPresented: Binding(
-                        get: { settingsLibraryOpen.model != nil },
-                        set: { if !$0 { settingsLibraryOpen.dismiss() } })
-                    ) {
-                        if let model = settingsLibraryOpen.model {
-                            LibraryOpenSheet(model: model) { settingsLibraryOpen.dismiss() }
-                        }
-                    }
-                    .sheet(isPresented: Binding(
-                        get: { settingsHandOff.model != nil },
-                        set: { if !$0 { settingsHandOff.dismiss() } })
-                    ) {
-                        if let model = settingsHandOff.model {
-                            LibraryHandOffSheet(model: model) { settingsHandOff.dismiss() }
-                        }
-                    }
-            } else {
-                Text("Open the main window first.")
-                    .padding(24)
-            }
+            // The scene's content lives in `SettingsSceneContent` (VX-224:
+            // moved verbatim so a pin mounts exactly what this window shows).
+            SettingsSceneContent(
+                bootstrap: bootstrap, services: services,
+                appearance: appDelegate.appearance,
+                updates: appDelegate.updates,
+                crashReports: appDelegate.crashReports,
+                mcp: appDelegate.mcp,
+                libraryOpen: settingsLibraryOpen,
+                handOff: settingsHandOff)
         }
     }
 }
