@@ -422,6 +422,21 @@ enum CommentsPanelCopy {
 nonisolated enum CommentPanelFocus: Hashable {
     case add
     case comment(String)
+
+    /// **What one area's first-responder report does to the panel's focus**
+    /// (VX-179 U3 — the reports replaced `@FocusState`). The caret ARRIVING
+    /// in an area makes that area the focus; the caret LEAVING an area clears
+    /// the focus only if that area still held it — so a click from comment
+    /// A to comment B, which AppKit reports as "A left, B arrived", reads as
+    /// A → nil → B, and A's departure can never clear B's arrival whatever
+    /// order the two reports meet. `.onChange(of: focus)` then saves A
+    /// exactly once, as `@FocusState`'s A → B did.
+    static func after(
+        report area: CommentPanelFocus, inArea: Bool, current: CommentPanelFocus?
+    ) -> CommentPanelFocus? {
+        if inArea { return area }
+        return current == area ? nil : current
+    }
 }
 
 // MARK: - The keys (13u3 UNIT A2)
@@ -554,7 +569,15 @@ struct CommentsPanel: View {
     /// The open deleted fold's measured height — it takes what it holds, not
     /// the whole cap.
     @State private var deletedHeight: CGFloat = 0
-    @FocusState private var focus: CommentPanelFocus?
+    /// **Where the caret is** — fed by the writing areas' own first-responder
+    /// reports (VX-179 U3: the areas are AppKit views, whose first responder
+    /// is the one truth; `@FocusState` was the `TextEditor`'s road). Read
+    /// exactly as before: ⌘⏎/⎋ route by it, and leaving an edited comment
+    /// saves it (`.onChange(of: focus)` below).
+    @State private var focus: CommentPanelFocus?
+    /// The add area's counted focus request — raised once when the panel
+    /// opens (it opens ready to write).
+    @State private var addFocusRequest = 0
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -570,19 +593,7 @@ struct CommentsPanel: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
-    /// The panel's taste numbers, in one place. **PROVISIONAL** — chosen
-    /// against the real surfaces on the walk, in both voices.
-    private enum Metrics {
-        /// The add area never shrinks below this, however many comments there
-        /// are: a writing box you cannot write two lines in is the complaint
-        /// this unit answers.
-        static let addFloor: CGFloat = 132
-        /// A comment's own area, at one line.
-        static let rowMinHeight: CGFloat = 19
-        static let rowAir: CGFloat = 7
-        static let inset: CGFloat = 12
-        static let deletedListMaxHeight: CGFloat = 132
-    }
+    private typealias Metrics = CommentsPanelMetrics
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -626,8 +637,10 @@ struct CommentsPanel: View {
             // view value the presenting body's re-evaluations construct.
             model.restoreParkedDraft()
             // The panel opens ready to write — the add area is the act it is
-            // usually opened for, and ⎋ (nothing typed) still closes it.
-            focus = .add
+            // usually opened for, and ⎋ (nothing typed) still closes it. The
+            // area serves the request now, or the moment it has a window; its
+            // own report then sets `focus` to `.add`.
+            addFocusRequest += 1
             await model.start()
         }
         .onChange(of: focus) { old, _ in
@@ -750,13 +763,15 @@ struct CommentsPanel: View {
     /// longer than the room has to follow the caret, which is exactly what
     /// the text view does by itself and what no outer scroll view would do.
     private func addArea(height: CGFloat) -> some View {
-        PanelTextArea(
-            text: $model.addDraft, font: tokens.body, ink: tokens.ink,
+        CommentTextArea(
+            text: $model.addDraft,
+            style: CommentTextStyle(tokens: tokens, ink: tokens.ink),
             placeholder: tokens.chromeLabel(CommentsPanelCopy.addPlaceholder),
-            placeholderInk: tokens.faint, minHeight: height - 2 * Metrics.rowAir,
-            growsWithText: false)
-            .focused($focus, equals: .add)
-            .padding(.horizontal, Metrics.inset - 5)  // the editor's own 5 pt
+            growsWithText: false,
+            focusRequest: addFocusRequest,
+            onFocusChange: { report(.add, inArea: $0) })
+            .frame(height: max(0, height - 2 * Metrics.rowAir))
+            .padding(.horizontal, Metrics.inset)
             .padding(.vertical, Metrics.rowAir)
     }
 
@@ -764,27 +779,19 @@ struct CommentsPanel: View {
     private func commentRow(_ comment: BlockComment) -> some View {
         let dirty = model.isDirty(comment.id)
         VStack(alignment: .leading, spacing: 1) {
-            HStack(alignment: .top, spacing: 0) {
-                // The voice's own comment mark (R1's idiom slot — "// " in
-                // Terminal, nothing in Study). It is a LABEL beside the area,
-                // never part of the text: the shipped row concatenated it
-                // into the string it rendered, which an editable area cannot
-                // do without writing the idiom into her prose.
-                if !tokens.commentPrefix.isEmpty {
-                    Text(tokens.commentPrefix)
-                        .font(tokens.body)
-                        .foregroundStyle(tokens.commentInk.opacity(0.75))
-                        .padding(.top, PanelTextArea.topInset)
-                }
-                PanelTextArea(
-                    text: binding(for: comment), font: tokens.body,
-                    ink: tokens.commentInk, placeholder: nil,
-                    placeholderInk: tokens.faint, minHeight: Metrics.rowMinHeight)
-                    .focused($focus, equals: .comment(comment.id))
-            }
+            // The voice's own comment mark (R1's idiom slot — "// " in
+            // Terminal, nothing in Study) is the AREA's: a twin beside the
+            // text, on the text's own first baseline (VX-179 U3). Never part
+            // of the text — an editable area cannot hold the idiom without
+            // writing it into her prose.
+            CommentTextArea(
+                text: binding(for: comment),
+                style: CommentTextStyle(tokens: tokens, ink: tokens.commentInk),
+                mark: tokens.commentPrefix,
+                onFocusChange: { report(.comment(comment.id), inArea: $0) })
             stampLine(comment, dirty: dirty)
         }
-        .padding(.horizontal, Metrics.inset - 5)
+        .padding(.horizontal, Metrics.inset)
         .padding(.vertical, Metrics.rowAir)
     }
 
@@ -816,7 +823,9 @@ struct CommentsPanel: View {
             }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
         }
-        .padding(.leading, 5)
+        // The stamp starts where the row's writing starts — the area's own
+        // first-line origin (its mark's column in Terminal, its text in Study).
+        .padding(.leading, Metrics.firstLineOrigin.x)
     }
 
     // MARK: The foot — the keys, the deleted fold, the add door
@@ -898,6 +907,13 @@ struct CommentsPanel: View {
 
     // MARK: Doors
 
+    /// One writing area says the caret arrived or left (`CommentPanelFocus.
+    /// after(report:inArea:current:)` — the rule, pinned).
+    private func report(_ area: CommentPanelFocus, inArea: Bool) {
+        let next = CommentPanelFocus.after(report: area, inArea: inArea, current: focus)
+        if next != focus { focus = next }
+    }
+
     private func binding(for comment: BlockComment) -> Binding<String> {
         Binding(
             get: { model.draft(for: comment.id) },
@@ -944,89 +960,54 @@ struct CommentsPanel: View {
     }
 }
 
-// MARK: - The panel's one writing control
+// MARK: - The panel's numbers (ONE place — VX-179 U3, the F-U3-1 ruling)
 
-/// **A VOICED, SELF-SIZING TEXT AREA** — the only control in the panel, used
-/// for every comment and for the add draft, so "the whole thing is the text
-/// editor" is true by construction rather than by resemblance.
+/// **Every number the panel and its writing areas are built from.** The text
+/// geometry is here beside the layout's taste numbers on purpose: the trace
+/// behind VX-179 U3 was a placeholder placed by numbers that lived in one
+/// file while the geometry they described lived in another (a `TextEditor`'s
+/// private insets), so nothing kept them in step. Now the inset, the padding
+/// and every alignment that reads them are one name each.
 ///
-/// It grows with its text and never scrolls on its own: the PANEL scrolls.
-/// That is what makes a click anywhere in the add area land the caret (the
-/// area really is that big) and a growing draft push the page rather than
-/// scroll inside a box.
-private struct PanelTextArea: View {
-    @Binding var text: String
-    let font: Font
-    let ink: Color
-    var placeholder: String?
-    var placeholderInk: Color
-    /// The floor — a row's one line, or, for the add area, every point the
-    /// comments left.
-    var minHeight: CGFloat
-    /// A comment ROW grows with its text and never scrolls (the list
-    /// scrolls). The ADD area is the opposite: it is exactly the size of the
-    /// room it was given and scrolls itself, because a draft longer than the
-    /// room must follow the caret — which a text view does and an outer
-    /// scroll view does not.
-    var growsWithText: Bool = true
+/// The TEXT numbers are geometry (what the twins and the stamp line align
+/// to); the rest are taste, **PROVISIONAL** — chosen against the real
+/// surface on the walk, in both voices.
+nonisolated enum CommentsPanelMetrics {
+    // MARK: The writing areas' text geometry (owned)
 
-    @State private var measured: CGFloat = 0
-
-    /// SwiftUI's `TextEditor` lays its text out inside these insets on macOS
-    /// (the same numbers `QuickNoteView`'s placeholder overlay has used since
-    /// it shipped).
-    static let topInset: CGFloat = 8
-    static let leadingInset: CGFloat = 5
-    /// The ruler measures a little NARROWER than the editor's own text area,
-    /// deliberately: a line that would wrap at the very edge wraps in the
-    /// ruler FIRST, so the measurement errs tall. Over-measuring costs a
-    /// line of air; under-measuring would clip her last line, because the
-    /// editor does not scroll.
-    static let rulerSlack: CGFloat = 4
-
-    var body: some View {
-        TextEditor(text: $text)
-            .font(font)
-            .foregroundStyle(ink)
-            .scrollContentBackground(.hidden)
-            .scrollDisabled(growsWithText)
-            .frame(height: growsWithText ? max(minHeight, measured) : max(0, minHeight))
-            .background(alignment: .topLeading) { if growsWithText { ruler } }
-            .overlay(alignment: .topLeading) { placeholderLabel }
+    /// The text container's inset inside every writing area — OURS (the
+    /// `TextEditor` it replaces had (0, 0) on macOS 27, where the panel had
+    /// assumed (5, 8)). Horizontal air is the panel's padding, not the text's.
+    static let textInset = NSSize(width: 0, height: 2)
+    /// The container's own padding: none — the host pads.
+    static let lineFragmentPadding: CGFloat = 0
+    /// Where an area's first line starts, inside the area — the caret's, the
+    /// first typed glyph's, the placeholder twin's and the mark twin's line.
+    static var firstLineOrigin: CGPoint {
+        CGPoint(x: textInset.width + lineFragmentPadding, y: textInset.height)
     }
-
-    /// The same string, in the same font, free in height — `fixedSize`
-    /// vertical means it takes its IDEAL height at the proposed width however
-    /// tall the frame around it is, which is exactly the number the editor
-    /// needs and cannot report itself.
-    private var ruler: some View {
-        Text(rulerString)
-            .font(font)
-            .padding(.horizontal, Self.leadingInset + Self.rulerSlack)
-            .padding(.vertical, Self.topInset)
-            .fixedSize(horizontal: false, vertical: true)
-            .opacity(0)
-            .allowsHitTesting(false)
-            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { measured = $0 }
+    /// A row's height from its measured content (`PaneMeasurement`: the
+    /// laid-out text plus the inset, top and bottom) — whole points, so the
+    /// list never lays out on a fraction.
+    static func rowHeight(measured: CGFloat) -> CGFloat {
+        max(0, measured).rounded(.up)
     }
-
-    /// A trailing newline lays out as nothing at all, so ⏎ at the end of a
-    /// draft would not grow the box until the next character arrived. The
-    /// ruler gives that line something to be.
-    private var rulerString: String {
-        if text.isEmpty { return " " }
-        return text.hasSuffix("\n") ? text + " " : text
+    /// The mark's column: its own measured width in the text's font, whole
+    /// points. Horizontal only — the mark's BASELINE is the twin's, never a
+    /// number.
+    static func markColumn(measured: CGFloat) -> CGFloat {
+        max(0, measured).rounded(.up)
     }
+    /// The mark's ink: the panel row's shipped 0.75 of the comment ink.
+    static let markInkOpacity: CGFloat = 0.75
 
-    @ViewBuilder
-    private var placeholderLabel: some View {
-        if let placeholder, text.isEmpty {
-            Text(placeholder)
-                .font(font)
-                .foregroundStyle(placeholderInk)
-                .padding(.top, Self.topInset)
-                .padding(.leading, Self.leadingInset)
-                .allowsHitTesting(false)
-        }
-    }
+    // MARK: The panel's layout (taste — PROVISIONAL)
+
+    /// The add area never shrinks below this, however many comments there
+    /// are: a writing box you cannot write two lines in is the complaint
+    /// 13u3 A2 answered.
+    static let addFloor: CGFloat = 132
+    static let rowAir: CGFloat = 7
+    static let inset: CGFloat = 12
+    static let deletedListMaxHeight: CGFloat = 132
 }

@@ -617,8 +617,8 @@ panel's control verbatim in an `NSHostingView` and reads the real text view's ge
 | U3-a | record section + ledger row 5 IN-PROGRESS | DONE (e5211a8e) |
 | U3-b | TRACE: the offscreen probe measures `TextEditor`'s real insets / padding / typing attributes / caret rect vs the hand-assumed `topInset 8 / leadingInset 5`; the sweep measured | DONE (13b8807e) — the numbers and the mechanism below |
 | U3-c | the mechanism decision | STOPPED AT FORK F-U3-1 (13b8807e) — the traced fix is a `PanelTextArea` rewrite; the proposal below, the orchestrator rules |
-| U3-d1 | Q-2: `CaptureTextView` owns `textInset`/`lineFragmentPadding`/`firstLineOrigin` as named statics; `makeNSView` reads them; `QuickEntryBar.placeholderOrigin` = the box's origin (the 2 pt fix); `QuickNoteView.placeholderOrigin` derived = (6, 6), visibly unchanged | DONE (this commit) — plain build SUCCEEDED, zero warnings in the three files |
-| U3-d2 | Q-1/Q-3: `Features/Editor/CommentTextArea.swift` (the AppKit control — owned geometry, explicit typing attributes, the twin placeholder, the twin `//` mark, measured row height, first-responder reports + counted focus request); `CommentsPanel` rewired (`PanelTextArea` + ruler retired; focus semantics unchanged) | NOT-STARTED — the design is the F-U3-1 (a) text above + the ruling; mark: SwiftUI does NOT bridge `firstBaselineOffsetFromTop` for a representable (measured, `baseline.swift`: the HStack ignores it), so the mark is a second configured TWIN owned by the control — the same engine, inset and font as the text, the first baseline equal by construction |
+| U3-d1 | Q-2: `CaptureTextView` owns `textInset`/`lineFragmentPadding`/`firstLineOrigin` as named statics; `makeNSView` reads them; `QuickEntryBar.placeholderOrigin` = the box's origin (the 2 pt fix); `QuickNoteView.placeholderOrigin` derived = (6, 6), visibly unchanged | DONE (1d347966) — plain build SUCCEEDED, zero warnings in the three files |
+| U3-d2 | Q-1/Q-3: `Features/Editor/CommentTextArea.swift` (the AppKit control — owned geometry, explicit typing attributes, the twin placeholder, the twin `//` mark, measured row height, first-responder reports + counted, HELD focus request); `CommentsPanel` rewired (`PanelTextArea` + its ruler retired; `@FocusState` → `focus` fed by the reports through the pure `CommentPanelFocus.after(report:inArea:current:)`; ONE `CommentsPanelMetrics`) | DONE (this commit) — plain build SUCCEEDED, zero warnings in touched files; the REAL compiled control verified offscreen (the evidence table below). Mark: SwiftUI does NOT bridge `firstBaselineOffsetFromTop` for a representable (measured, `baseline.swift`), so the mark is a second configured twin owned by the control |
 | U3-d3 | pins: pure geometry tables (the panel's text metrics, the capture origins); mounted pins offscreen-hosted (twin == caret line, mark baseline == text baseline, no dead air, typing attributes); RUN PENDING stage | NOT-STARTED |
 | U3-e | the pristine pass: the add area's empty state, header/footer rhythm, stamp lines, the deleted fold as ONE language (Restore + "Delete forever…"), O-3 (`TrayRefusalCopy`'s shape — panel-own arms, then `OpsRefusalCopy.message(for:)`; note that table's own fallback is still `"Refused: \(error)"` and `commentNotFound`/`commentNotDeleted` are mapped NOWHERE, so the panel words them), sentence case, taste numbers in one Metrics place | NOT-STARTED |
 | U3-f | verify: plain build green, zero warnings in touched files; record closed; PENDING list | NOT-STARTED |
@@ -776,3 +776,46 @@ text at (5, 8)) — the same hand-placed shape on iOS; unmeasured here; for the 
 - **Q-3: the panel-private home** — `Features/Editor/CommentTextArea.swift` (one consumer; a shared
   base class is premature). The shared inset static lives with `CaptureTextView` where it is owned.
 - O-U3-1 (the phone's hand-placed placeholder): minted on the VM board at this ruling (see ledger).
+
+### U3-d — what was built (on the F-U3-1 ruling) and the offscreen evidence
+
+**Built.** `Features/Editor/CommentTextArea.swift` — `CommentTextArea` (`NSViewRepresentable`) over
+`CommentTextAreaView`: the editable `CommentNSTextView` (TK2 at init; inside an `NSScrollView` for the
+add area, bare for a row so the list's wheel is never taken), a PLACEHOLDER twin behind it at the
+editable view's own frame (read from the view, `textView.convert(.zero, to: area)`), a MARK twin
+beside it — every view configured by ONE `configure(_:editable:)` (inset, padding, container), so a
+twin lays the same font out from the same point. `CommentTextStyle(tokens:ink:)` is the one look
+value (font = `EditorTypography.resolve` = what `tokens.body` renders; caret `accent`; placeholder
+`faint`; mark `commentInk` × 0.75) and owns `typingAttributes`, re-stated at every style change and
+whenever the area empties. Row height = `PaneMeasurement.height(of:)` (the one measurement brain) →
+`CommentsPanelMetrics.rowHeight`. Focus: `becomeFirstResponder`/`resignFirstResponder` (+ a focused
+view leaving its window) report async; the panel's `focus` takes them through the pure
+`CommentPanelFocus.after(report:inArea:current:)`; the open-time ask is a counted request, HELD when
+the area has no window yet and served on arrival. IME: `setMarkedText`/`unmarkText` refresh the twin.
+Spelling: `SpellcheckLevel.current`. Canary armed on every view. ONE numbers place:
+`CommentsPanelMetrics` (internal, in `CommentsPanel.swift`) — the text geometry (`textInset` (0, 2),
+`lineFragmentPadding` 0, `firstLineOrigin`, `rowHeight`, `markColumn`, `markInkOpacity`) beside the
+layout's taste numbers; the panel's private `Metrics` is now a typealias of it.
+
+**Evidence — the REAL compiled control, offscreen** (`scratchpad/vx179-u3-probe/real/control.swift`,
+built by `real/build.sh` against this worktree's Debug `Variorum.debug.dylib` with `@testable import
+Variorum` — the app's own compiled code, not a copy; `.prohibited` activation, no `NSApp.run`; the one
+`NSWindow` (the focus check) is never ordered in):
+
+| check | Terminal | Study |
+|---|---|---|
+| empty caret vs the placeholder twin's first line (area coords) | (0, 2, h 17) == (0, 2, h 17) | (0, 2, h 22) == (0, 2, h 22) |
+| placeholder INK box vs the same words TYPED (bitmap, pure-red vs pure-blue ink) | (0, 4.5, 138 × 12) == (0, 4.5, 138 × 12) | (0, 7, 138 × 12.5) == (0, 7, 138 × 12.5) |
+| typing attributes' font, empty / after type-then-clear | == the style font / == | == / == |
+| twin: after typing · after clearing · while marked (IME) · after commit+clear | hidden · shown · hidden · shown | same |
+| a row's height vs its text (one line) — the dead air | 21 = 17 + 2 × 2 (none) | 26 = 22 + 2 × 2 (none) |
+| a two-line row | 38 = 2 × 17 + 4 | 48 = 2 × 22 + 4 |
+| the `// ` mark's first baseline vs the text's | 16 == 16 | (no mark) |
+| the focus request raised before a window | held; served on arrival: first responder, report `[true]`; resign → `[true, false]` | — |
+| ⎋ (`cancelOperation:`) on the area | reaches the next responder (1×) — the host's close road, as `PlatformTextView` did | — |
+| Q-2 — the real `CaptureTextView` + a placeholder at `QuickEntryBar.placeholderOrigin` | baseline 16 == typed 16; x 0 == 0 | 19 == 19; 0 == 0 |
+| Q-2 — `QuickNoteView.placeholderOrigin` (the parity proof) | (6, 6) — unchanged | (6, 6) |
+
+Red-on-old (the measured defect on the OLD control, U3-b): +8 pt placeholder vs caret line in both
+voices, 16 pt dead air per row, the mark 8 pt low; the bar 2 pt high. The same checks on the new tree:
+all equal (above). The app-target pins that hold these (U3-d3) can only RUN under the stage.
