@@ -893,13 +893,16 @@ enum MCPToolCatalog {
         ]),
         scopes: MCPToolDeclaration.everyScope)
 
+    /// VX-184 ladder round 2: the refusal is I10's last ACTIVE take
+    /// (`archiveVariantRows` → `ensureNotLastActive`; an archived take never
+    /// counts) — "last take" said it loosely.
     static let archiveTake = MCPToolDeclaration(
         name: "archive_take", rung: .edit, title: "Archive a take",
         description: """
             Archive one take: it leaves the block's takes but is kept (read_note with \
             include_archived: true lists it; unarchive_take brings it back). The take the block \
-            shows may be archived — the block then shows another of its takes. A block's last take \
-            can't be archived. One undo for the author. Returns JSON.
+            shows may be archived — the block then shows another of its takes. A block's last active \
+            take can't be archived. One undo for the author. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -911,11 +914,21 @@ enum MCPToolCatalog {
         ]),
         scopes: MCPToolDeclaration.everyScope)
 
+    /// VX-184 ladder round 2: "It comes back unchosen." was false for the
+    /// block's CHOSEN take — archiving never touches the slot's choice
+    /// (`archiveVariantRows`; the read-time fallback shows the default
+    /// meanwhile) and unarchiving flips the status alone
+    /// (`unarchiveVariantRows`), so the block shows it again and `read_note`
+    /// reports it chosen. Guarded by
+    /// `MCPTakeEditServerTests.unarchiveTakeComesBackChosenWhileTheBlockStillChoosesIt`.
     static let unarchiveTake = MCPToolDeclaration(
         name: "unarchive_take", rung: .edit, title: "Unarchive a take",
         description: """
             Bring an archived take back among its block's takes (read_note with include_archived: \
-            true lists archived takes). It comes back unchosen. One undo for the author. Returns JSON.
+            true lists archived takes). Archiving a take doesn't change which take its block has \
+            chosen, so if this was the block's chosen take and no other take has been chosen since, \
+            the block shows it again and read_note reports it chosen; otherwise it comes back \
+            unchosen. One undo for the author. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",

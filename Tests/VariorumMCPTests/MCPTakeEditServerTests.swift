@@ -221,6 +221,63 @@ struct MCPTakeEditServerTests {
         }
     }
 
+    /// **VX-184 ladder round 2 — `unarchive_take`'s description made true,
+    /// with its guard.** It said "It comes back unchosen." — false for the
+    /// block's CHOSEN take: archiving never touches the slot's choice
+    /// (`archiveVariantRows`; AppSpec §7's read-time fallback shows the
+    /// default meanwhile) and unarchiving only flips the status back
+    /// (`unarchiveVariantRows`), so the block shows it again and `read_note`
+    /// reports it chosen. The other half: another take chosen while it was
+    /// archived wins, and it comes back unchosen (her ✓ here — a client's
+    /// choose of the take the block already SHOWS changes nothing,
+    /// P-VX168-U2-5). And the two descriptions say exactly that.
+    @Test func unarchiveTakeComesBackChosenWhileTheBlockStillChoosesIt() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let w = try world(h)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.edit, .book, w.book.id))
+            func block1() async throws -> [String: Any] {
+                let read = try json(try await call(
+                    connection, "read_note", ["note_id": .string(w.note.id), "with_ids": .bool(true)]))
+                let blocks = try #require(read["blocks"] as? [[String: Any]])
+                return try #require(blocks.first { $0["block_id"] as? String == w.block1 })
+            }
+            func chosen(_ block: [String: Any], _ takeID: String) -> Bool? {
+                (block["takes"] as? [[String: Any]])?.first { $0["take_id"] as? String == takeID }?["chosen"] as? Bool
+            }
+            #expect(try await block1()["shown_take_id"] as? String == w.hers1, "her chosen take, shown")
+
+            // Her chosen take archived: the block shows its other take meanwhile.
+            #expect(try await call(connection, "archive_take", ["take_id": .string(w.hers1)]).isError != true)
+            #expect(try await block1()["shown_take_id"] as? String == w.other1)
+            // Unarchived: the slot's choice never moved — shown again, chosen.
+            #expect(try await call(connection, "unarchive_take", ["take_id": .string(w.hers1)]).isError != true)
+            let back = try await block1()
+            #expect(back["shown_take_id"] as? String == w.hers1, "the block shows it again")
+            #expect(chosen(back, w.hers1) == true && chosen(back, w.other1) == false,
+                    "read_note reports it chosen")
+
+            // The other half: another take chosen while it was archived.
+            #expect(try await call(connection, "archive_take", ["take_id": .string(w.hers1)]).isError != true)
+            try h.operations.chooseVariant(w.block1, variantID: w.other1)
+            #expect(try await call(connection, "unarchive_take", ["take_id": .string(w.hers1)]).isError != true)
+            let unchosen = try await block1()
+            #expect(unchosen["shown_take_id"] as? String == w.other1)
+            #expect(chosen(unchosen, w.hers1) == false, "it comes back unchosen")
+
+            // The sentences say what the wire does.
+            let unarchive = MCPToolCatalog.unarchiveTake.description
+            #expect(unarchive.contains("the block shows it again"), "\(unarchive)")
+            #expect(unarchive.contains("otherwise it comes back unchosen"), "\(unarchive)")
+            #expect(!unarchive.contains("It comes back unchosen."), "the false sentence is gone: \(unarchive)")
+            let archive = MCPToolCatalog.archiveTake.description
+            #expect(archive.contains("A block's last active take can't be archived."), "\(archive)")
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - set_take_label
 
     @Test func setTakeLabelNamesAnyTakeAsOneUndo() async throws {
