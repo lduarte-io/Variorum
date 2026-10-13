@@ -589,3 +589,204 @@ struct CommentPanelWordsTests {
         }
     }
 }
+
+// MARK: - FIX LEG 2 (the walk's F-W-3/F-W-4, ladder R1-2)
+
+/// **The walk's three panel findings, pinned through the REAL panel** (the
+/// record's "U3 FIX LEG 2": traces, mechanisms, red-on-old). Each cell was
+/// replayed offscreen against the pre-fix module first and is RED there by
+/// behaviour, not only by compile.
+///
+/// Hosting: the panel windows are never ordered in; a popover needs a visible
+/// anchor, so its anchor is ordered in OFF-DISPLAY at alpha 0 and the
+/// popover's own window is set alpha 0 the turn it appears. Every wait lets
+/// main-queue turns pass (the runner's body is a main-queue job — the first
+/// fix leg's lesson): the control defers its reveal and its reports by one turn.
+@MainActor
+@Suite("The comments panel's fix leg 2 — F-W-3, F-W-4, R1-2 (VX-179)", .serialized)
+struct CommentPanelFixLeg2Tests {
+    private static let longComments = [
+        "First note on the short block.",
+        "A second, much longer note that will wrap across several lines inside the card, because "
+            + "part of what the walk checks is that a long comment reads whole inside the stacked "
+            + "entry rather than truncating at four lines the way the old joined label did.",
+        "A third note, also of some length so the list is certainly capped.",
+        "Last: short.",
+    ]
+
+    private static func areas(in view: NSView) -> [CommentTextAreaView] {
+        ((view as? CommentTextAreaView).map { [$0] } ?? []) + view.subviews.flatMap { areas(in: $0) }
+    }
+
+    /// One turn: the queued app events this cell posted are dispatched, then
+    /// the main actor is released so deferred main-queue work runs.
+    private func turns(_ count: Int = 20) async {
+        for _ in 0..<count {
+            while let event = NSApp.nextEvent(
+                matching: [.keyDown, .leftMouseDown, .leftMouseUp], until: nil,
+                inMode: .default, dequeue: true)
+            {
+                NSApp.sendEvent(event)
+            }
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
+
+    private func key(_ characters: String, keyCode: UInt16, to window: NSWindow) async {
+        NSApp.postEvent(NSEvent.keyEvent(
+            with: .keyDown, location: .zero, modifierFlags: [],
+            timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: window.windowNumber,
+            context: nil, characters: characters, charactersIgnoringModifiers: characters,
+            isARepeat: false, keyCode: keyCode)!, atStart: false)
+        await turns()
+    }
+
+    private func seed(_ h: EditorHarness, _ comments: [String]) async throws -> (String, CommentsPanelModel) {
+        let blockID = try h.storeSlots()[0].blockID
+        let model = CommentsPanelModel(session: h.session, blockID: blockID)
+        for comment in comments { await model.add(comment) }
+        return (blockID, model)
+    }
+
+    /// The panel in a REAL popover (AppKit's — the product's SwiftUI
+    /// `.popover` is this same `NSPopover` underneath; both reproduced the
+    /// two popover defects, the record's traces).
+    @MainActor
+    private struct PopoverHost {
+        let popover: NSPopover
+        let anchor: NSWindow
+        let window: NSWindow
+        let root: NSView
+        func tearDown() {
+            if popover.isShown { popover.close() }
+            anchor.orderOut(nil)
+        }
+    }
+
+    private func popover(_ h: EditorHarness, _ blockID: String, _ model: CommentsPanelModel) async throws
+        -> PopoverHost
+    {
+        let anchor = NSWindow(
+            contentRect: NSRect(x: -20_000, y: -20_000, width: 300, height: 200),
+            styleMask: [.borderless], backing: .buffered, defer: false)
+        anchor.isReleasedWhenClosed = false
+        anchor.alphaValue = 0
+        anchor.orderFront(nil)  // off every display
+        let popover = NSPopover()
+        popover.animates = false
+        popover.behavior = .transient
+        let controller = NSHostingController(
+            rootView: CommentsPanel(session: h.session, blockID: blockID, model: model))
+        popover.contentViewController = controller
+        popover.show(
+            relativeTo: NSRect(x: 100, y: 100, width: 10, height: 10), of: anchor.contentView!,
+            preferredEdge: .minY)
+        let window = try #require(controller.view.window)
+        window.alphaValue = 0
+        await turns(40)
+        return PopoverHost(popover: popover, anchor: anchor, window: window, root: controller.view)
+    }
+
+    /// **F-W-3 — RED ON OLD.** The capped list never revealed the row being
+    /// edited, so the dirty face under its text — "Unsaved · ⌘⏎", Save,
+    /// Revert — sat below the list's visible edge (the walk's `u34-dirty`).
+    /// The edited row now stays WHOLLY visible: when its caret arrives, and
+    /// while it is typed into and grows.
+    @Test func theEditedRowAndItsStampLineStayInViewInACappedList() async throws {
+        try await withEditor(seedBlocks: ["A block."]) { h in
+            let (blockID, model) = try await seed(h, Self.longComments)
+            let hosting = NSHostingView(
+                rootView: CommentsPanel(session: h.session, blockID: blockID, model: model))
+            hosting.frame = NSRect(x: 0, y: 0, width: 470, height: 440)
+            let window = NSWindow(
+                contentRect: NSRect(x: -30_000, y: -30_000, width: 470, height: 440),
+                styleMask: [.borderless], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.contentView = nil
+                window.close()
+            }
+            window.contentView = hosting  // never ordered in
+            await turns(40)
+            let last = try #require(Self.areas(in: hosting).filter { $0.placeholderView == nil }.last)
+            let list = try #require(last.textView.enclosingScrollView)
+            let document = try #require(list.documentView)
+            @MainActor func stampLineInView() -> Bool {
+                let visible = list.documentVisibleRect
+                let row = last.convert(last.bounds, to: document)
+                // the stamp line sits stampGap under the area and is at least 12 pt tall
+                return row.minY >= visible.minY - 0.5
+                    && row.maxY + CommentsPanelMetrics.stampGap + 12 <= visible.maxY + 0.5
+            }
+            #expect(document.frame.height > list.contentView.bounds.height, "premise: the list is capped")
+            #expect(!stampLineInView(), "premise: at rest the last row's stamp line is out of view")
+
+            window.makeFirstResponder(last.textView)
+            await turns()
+            #expect(stampLineInView(), "the caret arriving reveals the row and its stamp line")
+
+            last.textView.setSelectedRange(
+                NSRange(location: (last.textView.string as NSString).length, length: 0))
+            last.textView.insertText(
+                " — edited, and grown by a long tail that wraps onto a second line inside the row",
+                replacementRange: last.textView.selectedRange())
+            last.textView.scrollRangeToVisible(last.textView.selectedRange())  // typing's own call
+            await turns()
+            let lastID = try #require(model.comments.last?.id)
+            #expect(model.isDirty(lastID), "premise: the row is dirty")
+            #expect(stampLineInView(), "dirty and grown, its stamp line stays in view")
+        }
+    }
+
+    /// **F-W-4 — RED ON OLD.** In a popover the keyboard's events are
+    /// addressed to the PARENT window and AppKit delivers them into the
+    /// popover; the panel's monitor claimed only its own window's, so ⎋ went
+    /// to `cancelOperation:` and closed the popover with the draft in it. The
+    /// ladder holds now: the first ⎋ clears the draft, the second closes.
+    @Test func escapeInAPopoverClearsTheDraftFirstThenCloses() async throws {
+        try await withEditor(seedBlocks: ["A block."]) { h in
+            let (blockID, model) = try await seed(h, ["First note."])
+            let host = try await popover(h, blockID, model)
+            defer { host.tearDown() }
+            let composer = try #require(Self.areas(in: host.root).first { $0.placeholderView != nil })
+            if host.window.firstResponder !== composer.textView {
+                host.window.makeFirstResponder(composer.textView)
+                await turns()
+            }
+            await key("x", keyCode: 7, to: host.anchor)
+            #expect(model.addDraft == "x", "premise: a key addressed to the parent lands in the composer")
+            await key("\u{1b}", keyCode: 53, to: host.anchor)
+            #expect(model.addDraft.isEmpty, "the first ⎋ clears the draft")
+            #expect(host.popover.isShown, "…and the popover stays")
+            await key("\u{1b}", keyCode: 53, to: host.anchor)
+            #expect(!host.popover.isShown, "with nothing to clear, ⎋ closes it")
+        }
+    }
+
+    /// **R1-2 — RED ON OLD (the ladder's finding, AGREED).** Dismissing a
+    /// popover never tore the panel down — no `.onDisappear`, no resign — so a
+    /// dirty in-place edit died with the model. The popover's closing now
+    /// saves it, exactly as the panel's leaving was always meant to.
+    @Test func closingThePopoverSavesADirtyInPlaceEdit() async throws {
+        try await withEditor(seedBlocks: ["A block."]) { h in
+            let (blockID, model) = try await seed(h, ["First note."])
+            let host = try await popover(h, blockID, model)
+            defer { host.tearDown() }
+            let row = try #require(Self.areas(in: host.root).first { $0.placeholderView == nil })
+            host.window.makeFirstResponder(row.textView)
+            await turns()
+            row.textView.setSelectedRange(
+                NSRange(location: (row.textView.string as NSString).length, length: 0))
+            row.textView.insertText(" — edited in the popover", replacementRange: row.textView.selectedRange())
+            await turns()
+            #expect(model.dirtyCommentIDs.count == 1, "premise: one dirty edit")
+            host.popover.close()
+            await turns(60)
+            let stored = try await h.database.read { db in
+                try Queries.blockComments(db, blockID: blockID).map(\.text)
+            }
+            #expect(stored == ["First note. — edited in the popover"], "the popover's closing saved it")
+        }
+    }
+}

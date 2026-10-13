@@ -1523,7 +1523,8 @@ every `NSScreen` (ordered out and the run aborted if it touched one — it never
 
 | piece | what | status |
 |---|---|---|
-| FL2-a | this section + the three traces | DONE (this commit) |
+| FL2-a | this section + the three traces | DONE (deedc13f) |
+| FL2-p | the three behavioural PINS, before any fix (`CommentPanelFixLeg2Tests` in `CommentTextAreaTests.swift`) — RED on the pre-fix module by BEHAVIOUR (not only by compile), replayed offscreen in the runner's shape (`pinrunner.swift`: a main-actor Task + the pin's suspending `turns()`): F-W-3 2 cells, F-W-4 2 cells, R1-2 1 cell FAIL; every premise PASS | DONE (this commit) — typecheck EXIT 0 against the pre-fix module; RUN PENDING (stage). The pure `claims` table cell lands WITH the F-W-4 fix (it names the new rule) |
 | FL2-1 | F-W-3 — the dirty row's stamp line: fix + pin red-on-old | NOT-STARTED — design below |
 | FL2-2 | F-W-4 — popover ⎋ skips the clear rung: fix + pin red-on-old | NOT-STARTED — design below |
 | FL2-3 | R1-2 — the popover dismiss-with-dirty-EDIT: AGREE/DISPUTE + (real ⇒) fix + pin | AGREE (measured, below); fix NOT-STARTED |
