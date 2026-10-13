@@ -168,13 +168,19 @@ Deliverables per member: traced mechanism, fix, pin-or-capture evidence, suites 
 
 ### BATCH 3 RECORD
 
-**NOT DONE (first line, kept current):** VX-217's "+ new note" on a gathering is NOT built — the brief's STOP condition fired (no defined mint-inside-gathering road exists; the fork + proposal went to the orchestrator 03:12, AWAITING the architect's ruling). Nothing else is done yet. No behavioural revert is in flight.
+**NOT DONE (first line, kept current):** VX-217's door + flow twin + explainer removal (the faces), VX-221 (all), VX-223 (all) are NOT built yet; no stage window has run (no pins red-on-old run, no walk captures). VX-217's CORE op is built and green headless. No behavioural revert is in flight.
 
 **LIVE STATUS** (implementer session batch3impl, Opus, 2026-10-13):
 - Reading — DONE: this file in full (ENVIRONMENT TRAPS, contact points, R-VX214-2, both earlier records), SessionResiliencyProtocol, the 13b constitution (P-1…P-9 + application notes), the three Linear bodies (no attachments, nothing beyond the brief's quotes).
-- VX-217 — trace DONE (below); the explainer removal IN-PROGRESS; the note door STOPPED at the fork (below), PENDING the ruling.
-- VX-221 — NOT-STARTED.
-- VX-223 — NOT-STARTED.
+- VX-217 — trace DONE (below); RULED (option (A) + her R-VX214-3/4, sections below). CORE — DONE (d5b79caf): `Domain/GatheringMint.swift` (the pure planner + `Blocker.reason`, the ONE home of the words), `Queries.gatheringMintOutcome` (the one read the door AND the op call — rider 2), `Operations.newPostInGathering` (beside R98 in `Operations+SmartCollect.swift`); `GatheringMintTests` 19/19 green headless. FACES — IN-PROGRESS: the navigator door + the Outline flow twin (always rendered, greyed with the hover why — R-VX214-3), the explainer removed, `.newNoteInGathering` declared, the receipt.
+- VX-221 — trace DONE (below; the false premise ADJUDICATED — default approved, #VX221-a RATIFIED by her; the unrecoverability is VX-238). NOT-STARTED in code.
+- VX-223 — trace DONE (below; the mechanism measured headlessly). NOT-STARTED in code.
+
+**VX-217 — AS BUILT (core, d5b79caf) and its PROVISIONALs:**
+- The planner walks R98's top-level conjuncts with three mint-shaped differences, each recorded: (1) the STAR term is satisfiable (her R-VX214-4); (2) an any-of group takes its FIRST SATISFIABLE option (a star or a live tag) where R98 takes its first and refuses when that one is dead — a determinism device either way; (3) nested ANDs flatten. Blocked (her unsatisfiable class): NOT terms, legacy date/profile terms, no/malformed rule, dead tags (live = `Queries.tagIsLive` in the gathering's wing), empty/mixed any-of; plus the gathering's own state first — archived, and a legacy finished gathering (R98 refuses that too).
+- **PROVISIONAL P-VX217-c — the star is written CAP-EXEMPT at mint** (`writeStar(enforcingCap: false)`), on the born-starred mints' precedent P-13id-U2-1 ("a mint must never fail on a star"); pinned `theStarIsCapExemptAtMint`. The other arm: refuse at the cap (`starLimitReached`) — then the door would need a cap-aware grey too.
+- The refusal reuses `smartFilterUnsatisfiable(reason:)` (R98's descriptive class) with `Blocker.reason` — the same fragment the door's hover says; no new `OperationError` case. The assembly's own predicate (`matchesRule`) is the in-transaction belt.
+- **Rider 6 (R98 on an ARCHIVED gathering) — reachability:** PENDING (checked at the faces step).
 
 **VX-217 — THE TRACE.**
 - *The book's foot* (`BookView.swift` navigator, the `Spacer` after the chapter list): "+ new chapter" · "restore deleted chapter" (only with deleted chapters) · "+ new entry" (journal trait) or "+ new note" (`kind == .book`, hidden when finished) → `BookStructureModel.newPost()` → `ops.newPostInReading` — ONE transaction: mint in the BOOK's wing + membership + the outflow (`applyAutoTag`); refuse-before-mint. Its flow twin "+ new note in this book" sits at the main column's end (Outline).
