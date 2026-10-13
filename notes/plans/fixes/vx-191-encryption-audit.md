@@ -210,3 +210,10 @@ returns this Mac to Standard). Product behavior + copy → hers (QUESTIONS when 
   that account if you still can"). Forgetting ends the silent revert (a later sign-in to the old account is an
   ENROLL with its consent screens, not a follow) and leaves the library clean for a new account (born Castle).
   Launch-night minimum if the full fix can't land: a copy-only honest Done on that road. Hers to rule.
+- **She likes the two doors (2026-10-12).** Signing back into the old Standard account afterwards: with custody
+  FORGOTTEN, sign-in moves nothing; the Encryption tab shows the castle-born-joins-Standard consent
+  (`EncryptionViews.swift:431-466`, copy `PostureCopy.swift:236-240` — the warning style, Join / Cancel; Cancel keeps
+  the library Castle and unenrolled with a re-offer door). Only an explicit Join runs `joinStandard`
+  (`EncryptionSession.swift:382-410` → the follow into Standard). TODAY (custody kept) the same sign-in reverts SILENTLY
+  via the follow-into-Standard arm with only an after-the-fact notice — the two-door fix turns that into the consent.
+  Copy NIT for the fix ticket: the consent's "put the ACCOUNT in Castle" capitalizes for emphasis (her no-caps rule).
