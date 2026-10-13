@@ -191,7 +191,7 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 | 1 | Record file + kickoff rulings landed, branch pushed | DONE (93b5b720) |
 | 2 | The `Sync/` line: `tombstonedKinds` + `block_comment` + two-client stale pin (orchestrator) | DONE (37b9a6e7) — pin red-on-old VERIFIED BY REVERT (all 5 expectations fail, the comment purged live, stores diverge); full PurgeConvergenceTests 20/20 green headless |
 | 3 | U1 true delete (core + panel door) | BUILT (89b5a9af…, last code f92436e8) — core pins red-on-old by revert + full `swift test` green + the app target builds; app-target pin RUN + the walk PENDING (stage) — see the U1 RECORD |
-| 4 | U2 gutter cards | NOT-STARTED |
+| 4 | U2 gutter cards | IN-PROGRESS — see the U2 RECORD |
 | 5 | U3 panel pristine pass | NOT-STARTED |
 | 6 | Mac-target test runs + the walk (stage via oct12coordinator) | HELD — stage |
 | 7 | The ladder (fable-reviewer, whole diff) | NOT-STARTED |
@@ -385,3 +385,50 @@ from the tray has no seal check today) and Delete Now of a sealed note in the Tr
 comments AND add the same seal check to the take arm (consistency the other way — a change outside
 this unit). Pin to flip under (b): `aSealedPostRefusesACommentsDeleteForever` (+ the app pin
 `deleteForeverUnderASealRefusesInTheSealsWords`).
+
+## U2 RECORD (implementer, 2026-10-12)
+
+**U2 IN PROGRESS.** The gutter comment cards (R-VX179-1/2): the 96 pt cap retires; the margin card
+re-forms as STACKED ENTRIES that scroll inside the card.
+
+**NOT DONE BY THIS UNIT (first line, by the contract):** no `xcodebuild test`, no walk, no app launch,
+no `/Applications` touch (the stage is the release session's) — every app-target pin's COMPILE and
+RUN, every red-on-old-by-revert check, and every capture is PENDING (stage). Zero `Sync/` lines, zero
+core-package lines (app-side geometry and rendering only). No mobile face (the phone has no gutter card).
+
+**Revert state:** no behavioural revert is in flight, and none will run this session — the pins live
+in the app target, whose test build is stage-gated; red-on-old by revert is PENDING (stage).
+
+### LIVE STATUS
+
+| piece | what | status |
+|---|---|---|
+| U2-a | record section + ledger row 4 IN-PROGRESS | DONE (this commit) |
+| U2-b | geometry: `leftCardRect`'s 96 pt cap retires (the pad named `cardHeightPad`, kept at 24); the cap's one pinned cell flipped; the red-on-old-shaped cells | NOT-STARTED — design below |
+| U2-c | the card: stacked entries, scroll inside, the wheel routing, the identity reconcile in `renderComments` | NOT-STARTED — design below |
+| U2-d | pins: the pure tables (arrangement · wheel owner · reconcile) + mounted card + controller cells (app target — WRITTEN only; compile + RUN PENDING stage) | NOT-STARTED |
+| U2-e | verify: ONE plain `xcodebuild … build`; record closed | NOT-STARTED |
+
+### The settled design (written before the code — the record must let a fresh session finish)
+
+1. **Geometry:** `ideal = blockHeight + cardHeightPad` (24, the shipped pad), still
+   `min(ideal, roomBelow − cardRhythmAir)` and nil below `cardMinHeight`. Every card under the old
+   cap (block ≤ 72 pt) is byte-identical; nothing else in the family moves.
+2. **The card (`CommentCardView`):** the margin-card arm hosts a small `NSScrollView` (overlay
+   scroller, no horizontal axis) over a flipped document view holding one wrapping label per comment
+   (pooled inside the card) with 1 pt hairline separators (`tokens.line`, the panel's own hairline);
+   a pure `CommentCardLayout.arrange` places them. `present` is idempotent (an unchanged pass does no
+   label work); labels are measured only when the entries or the width change. The strip and badge
+   arms keep the single shipped label, byte-identical. The tooltip keeps the shipped joined string.
+3. **Events:** the interactive card hit-tests as ONE door (itself — the labels and the clip view never
+   take a click; the scroller stays draggable); the read tier keeps `hitTest → nil` (click-through,
+   no scrolling — it shows what fits). The card's `scrollWheel` routes through a pure
+   `CommentCardLayout.wheelOwner`: content that fits → the page; otherwise the gesture's first moving
+   event decides (the card when it can move that way, else the page) and the whole gesture latches
+   to that owner (the Mac's nested-scroll latching); a wheel notch decides per notch.
+4. **Pooling with scroll state:** `renderComments` reconciles cards by BLOCK IDENTITY (a pure
+   `CommentCardLayout.reconcile`) so a block that stays visible keeps its card and therefore its
+   inner scroll position while the page scrolls; a card that comes to show a different block resets
+   to its top.
+5. **The voice idiom (PROPOSAL, PROVISIONAL — the walk decides):** Terminal's `// ` PER ENTRY, as a
+   hanging mark (wrapped lines align after it), ink at 0.75 — the panel's own row idiom.
