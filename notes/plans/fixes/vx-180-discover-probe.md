@@ -1,6 +1,6 @@
 # VX-180 — the MCP handshake survives Claude Code's pre-initialize `server/discover` probe
 
-**What this run did NOT do (said first — PENDING until the close; the line is rewritten at the record's close).**
+**What this run did NOT do (said first):** (1) no QUESTIONS entries and no canon edit — both are the merging session's (the PROVISIONALs and the candidate §12 clause are under OWED); (2) the shim's own closed-app refusal is NOT touched — it is VX-181 (and the live round SAW it: her user-scope Release `variorum` entry, app absent, read CONNECTION_CLOSED); (3) no Activity word for an answered probe (argued out, design call 8); (4) the live round captured one voice only (Study, light) — the fix has no face, and the one existing face read (her Activity list) is unchanged; (5) no `/Applications` refresh (the closeout's); (6) the Mac batch was the one app suite that builds `MCPServerHost` (`MCPPaneTests`), not the whole app target; (7) the cold review has not run (the orchestrator's next step).
 
 **The RECORD** (a small fix that touches the secret's accept path, so it lands a repo record — CLAUDE.md). Kickoff:
 `notes/plans/vx-180-kickoff-prompt.md` (binding; the captured frames verbatim, the proposed fix shape, acceptance,
@@ -23,7 +23,7 @@ schema, zero `Sync/`, zero custody, zero editor seam, zero app faces.
 | 3 | red-on-old BY REVERT (announced here before it starts; the fix committed first) | DONE `d8dc0e1f` (announced `c2f49bae`) — the evidence below, "RED-ON-OLD BY REVERT" |
 | 4 | suites — `VariorumMCPTests` whole target headless; the Mac app target BUILDS | DONE (this commit) — **`VariorumMCPTests` 135 tests / 20 suites, ALL GREEN** headless (`swift test --filter VariorumMCPTests`, 16.1 s; VX-168's close was 122/18 — +13 tests in the 2 new suites; no `skipped:` lines). **The Mac app target: `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx180 build` → `** BUILD SUCCEEDED **`** (the live round's Debug app, `io.lduarte.Variorum.debug`, with its `variorum-mcp` shim). Other suites over the changed types: `VariorumCoreTests` untouched (zero `Sources/VariorumCore` lines); the app's `MCPPaneTests` builds `MCPServerHost` and connects-then-closes (an EOF first read — no window frame), a Mac suite needing the stage: offered for the GO window |
 | 5 | self-assessment (below) | DONE (this commit) |
-| 6 | READY to the orchestrator; THE LIVE ROUND (gated on its GO + a held stage claim — dev store only) | IN-PROGRESS — READY sent (`d39e92a8`); **GO received; stage CLAIMED `vx180-live` 2026-10-12 21:01:58 (60 min)**; the round running per "THE LIVE ROUND — the plan" below. If this line survives a death: check `pgrep -fl 'Variorum.app/Contents/MacOS'` (quit only the DEV instance, by identity), remove the `-s local` registrations `variorum-dev`/`variorum-tee` from the scratch folder, restore the dev store from the newest `scale-prestage-*` dir with `Tools/ScaleFixture/restore.sh`, empty the clipboard, release the stage |
+| 6 | READY to the orchestrator; THE LIVE ROUND (gated on its GO + a held stage claim — dev store only) | **DONE (this commit) — PROVEN on the Pro, every leg** (stage `vx180-live` 21:01:58–21:09, released by this session): `claude mcp list` → the REAL fixed shim **✔ Connected** (the kickoff's symptom was CONNECTION_CLOSED), the tee capture shows `server/discover` IN and `-32601` OUT on its string id, then `initialize` answered; one `claude -p` turn served `list_books`; her dev Activity: "claude-code connected with a new setup, now bound to its name" + "claude-code listed books", NO unnamed refusal. **Mac batch `MCPPaneTests` 10 tests / 1 suite GREEN** (`** TEST SUCCEEDED **`). Cleanup complete. The evidence: "THE LIVE ROUND — the evidence" below |
 
 **No revert is in flight** (piece 3's revert ran and was RESTORED — `git diff` empty after `git checkout HEAD --`, the moved test file `cmp`-identical to the committed one).
 
@@ -141,7 +141,7 @@ Activity clean. Notification-first skipped (pinned on the socket road and over a
 bound refused with the ONE sentence, byte-identical to a bare arm, logged `connect_unnamed`, claiming no key. Every
 `MCPSetupKeyServerTests` arm green; the refusal sentences untouched; the one arm whose TRIGGER the fix necessarily
 changes is the recorded justified edit (its answer byte-identical). `VariorumMCPTests` whole target green; the Mac
-target builds. The live round — the unit's evidence of kind — is PENDING the orchestrator's GO.
+target builds. The live round — the unit's evidence of kind — PROVED it with the real Claude Code 2.1.296 on the Pro (piece 6).
 
 **Against the spec and the model:** zero schema, zero `Sync/`, zero custody (the key's rule, the admission
 transaction, `MCPPreamble` and the shim are untouched — the window sits BEFORE the one decision and decides nothing),
@@ -235,3 +235,35 @@ Dev store ONLY, the Debug app `App/Variorum/DerivedData/vx180/Build/Products/Deb
 7. **Cleanup:** both `-s local` registrations removed; the dev instance quit BY IDENTITY; the dev store restored
    (`restore.sh`, "Restored (verified)"); the clipboard emptied; transcripts in `notes/plans/vx180-screens/`
    (gitignored; every key REDACTED to its first 9 characters); the stage released; evidence recorded here.
+
+## THE LIVE ROUND — the evidence (piece 6; dev store only, stage `vx180-live`, 2026-10-12 21:01:58–21:09 MDT)
+
+**Machine and guards:** the Pro; the stage coordinator confirmed no Variorum instance and released its hold; this session
+claimed `vx180-live` (60 min). `pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY before launch and after quit; her
+`/Applications/Variorum.app` ABSENT throughout — `Tools/WalkKit/guard.sh --author` before every GUI step AND before every
+client run (all `GUARD OK`), plus the per-step `guard.sh <devpid> x y` before each click. The Debug app
+`App/Variorum/DerivedData/vx180/…/Variorum.app` (`io.lduarte.Variorum.debug`, this branch's fixed build), Study, light.
+**A1 prestage copy** of the dev store → `…/Variorum-dev/Backups/safety-copies/scale-prestage-20261013T030216Z` (four
+files, each `cmp`-verified). Evidence in `notes/plans/vx180-screens/` (gitignored); the logs contain NO key (`grep -c
+vmk1_` = 0 — the key rides the socket preamble, never the client's stdio).
+
+| leg | what was done | outcome |
+|---|---|---|
+| **(0) the Mac batch** | `xcodebuild test -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx180 -only-testing:VariorumTests/MCPPaneTests` (the one app suite that builds `MCPServerHost`; no other app suite does — grep) | **10 tests in 1 suite passed** (`** TEST SUCCEEDED **`, no skips) — `logs/mcppane-test.log` |
+*[removed for publication]*
+| **(2) `claude mcp list`** | in a scratch folder: the copied line with `-s user` → `-s local` (registration `variorum-dev`, the REAL fixed shim) + a second `-s local` registration `variorum-tee` — the same shim behind a `tee` wrapper; her user-scope servers read BEFORE: `['linear-server', 'variorum']`; then `claude mcp list` (Claude Code 2.1.296, 21:06:19) | **`variorum-dev` … ✔ Connected · `variorum-tee` … ✔ Connected** (`a1-claude-mcp-list.txt`). The same listing showed her user-scope `variorum` (the installed Release shim, her app absent) **✘ Failed to connect — CONNECTION_CLOSED** — see "VX-181, seen live" below |
+| **(3) the frames, captured on this Mac** | the tee wrapper's two logs (`a1-tee-in.log`, `a1-tee-out.log`) | IN: `{"jsonrpc":"2.0","id":"server-discover-probe-1","method":"server/discover",…"protocolVersion":"2026-07-28"…}` then `{"method":"initialize",…"protocolVersion":"2025-11-25"…,"jsonrpc":"2.0","id":0}` pipelined, then `notifications/initialized`, `tools/list` id 1. OUT: **`{"error":{"code":-32601,"message":"Method not found"},"id":"server-discover-probe-1","jsonrpc":"2.0"}`** FIRST, then the `initialize` result on id 0 (the advice), then `tools/list` on id 1 listing the read tools. The probe this Pro's Claude Code sends is the Air capture's shape (its `clientInfo` adds `description`/`websiteUrl`; its capabilities carry roots + elicitation — the pin's elisions dropped nothing the window reads) |
+| **(4) one `claude -p` turn** | `claude -p --strict-mcp-config --mcp-config <scratch json: the plain fixed shim + the key> --allowedTools "mcp__variorum-dev__list_books"` (21:06:40; isolated from every other registration) — "call list_books exactly once…" | **served:** "It returned 1 book, and the first book is "o ladrão de raios"." (`is_error` false; `a2-claude-p-turn.json`) |
+| **(5) her Activity (dev)** | the pane's Activity list after the round (`a3-activity.png`) | newest first: **"claude-code listed books — now" · "claude-code connected with a new setup, now bound to its name — now"** (R-VX168-1's bind: the dev store's `claude-code` was approved and unbound) · then "claude-code commented in “o museu” — 2 days ago". **No "an unnamed client was refused" line** — the kickoff's server-side symptom is gone |
+
+**Cleanup (21:07–21:09):** both `-s local` registrations removed ("Removed MCP server … from local config"; the scratch
+project's servers `[]`); her user-scope servers read AFTER: `['linear-server', 'variorum']` — untouched; the clipboard
+emptied (0 bytes); the scratch key + strict config deleted; the dev instance quit BY IDENTITY (`tell application id
+"io.lduarte.Variorum.debug" to quit`; `pgrep` empty); the dev store **"Restored (verified)"** from the prestage copy
+(`logs/restore.txt`; the socket gone); the stage RELEASED ("STAGE FREE").
+
+**VX-181, seen live (corroboration, not this unit's):** in leg (2) her user-scope `variorum` entry — the installed
+Release shim (build 6486), Variorum NOT running — read `✘ Failed to connect — CONNECTION_CLOSED`. That is VX-181's
+mechanism exactly: the shim's closed-app refusal ("Variorum must be open…") answered the FIRST line, which is now the
+probe, and the shim exited with the `initialize` unanswered, so Claude Code showed only CONNECTION_CLOSED. VX-180 does
+not touch the shim, so the fixed build behaves the same there.
