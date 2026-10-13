@@ -416,7 +416,10 @@ pasted to prove the same copy act, Answer… and ⌥⌘, landing on Waiting, a C
 stage work (Mac batch + walk) ONLY under the claim I relay: build-for-testing headless, end your turn
 READY FOR STAGE, wait for my GO with the exact claim line (expect vx184-u6). Dev store only behind an
 A1 prestage copy, restored verified. **The What's New sheet may greet the Debug launch — close it with
-its own button; expected modal, never a finding.** The standing Mac red is VX-115's
+its own button; expected modal, never a finding.** **If a launch hits a DEV lock screen (Castle
+posture), unlock from `~/.variorum/dev-castle.env` (source it — her standing rule) instead of
+stopping; never invent new values; NEVER write the values anywhere (commits, record, logs, captures —
+the path only; capture before typing or after the unlock, never during). Dev store only.** The standing Mac red is VX-115's
 `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (pre-existing). Baseline: U5's closed
 finals (its UNIT RECORD's counts).
 
@@ -444,6 +447,13 @@ finals (its UNIT RECORD's counts).
 
 - **VX-179 MERGED to main (PR #154, d6caafc1)** — merged INTO this branch at the U3→U4 boundary
   (a79dbf6a + repair 018cf23c; suites green). DONE.
+- **DEV CASTLE UNLOCK — HER STANDING RULE (relayed by the coordinator, 2026-10-13 ~10:50):** the DEV
+  store's Castle passphrase and twelve words live at `~/.variorum/dev-castle.env` (source it). A walk
+  that hits a DEV lock screen UNLOCKS from that file instead of stopping; any move into or out of
+  Castle uses EXACTLY those values, never new ones. NEVER write the values into a commit, record,
+  memory, log or capture: the PATH only, and no capture may show the typed passphrase. Owed
+  verbatim to U6's and U7's briefs (U6's walk especially). Dev store only; her real store and
+  /Applications untouched.
 - **ORCHESTRATOR MODEL SWITCH (her word, 2026-10-13 ~10:30):** she hit her Fable usage limit, which
   stopped this session mid-turn; she ran `/model Opus` and said *"I want you to continue where you
   were as Opus."* This session now orchestrates on **Opus 5.5** — same session, same protocol. **THE
