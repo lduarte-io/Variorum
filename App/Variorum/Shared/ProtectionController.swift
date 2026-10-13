@@ -1560,6 +1560,21 @@ final class ProtectionController {
             appleKeyWaiting = false
             return
         }
+        // VX-110 (corner 6 — "consent at enrollment"): a Standard reading that
+        // is the ACCOUNT's word over a library that is Castle by its OWN key
+        // file and custody (the key behind the gate, no sync custody here) is
+        // the join the consent asks about — landing the Apple copy would BE
+        // that join, silently. Nothing is written until Join (whose follow
+        // into Standard lands the copy itself). Keyed on the library's own
+        // shape, never on `enrollReading`, which a nil vault read clears while
+        // the last reading still says Standard.
+        if !syncCustodyPresentAtReady, libraryKeyCustodyShape == .gatedOrNone, libraryOwnPosture == .castle {
+            appleKeyVerified = false
+            appleKeyLandingFailed = false
+            appleKeyWaiting = false
+            logger.notice("apple key reconcile: the account reads Standard but this library is Castle and not joined here — nothing lands before the consent")
+            return
+        }
         let resident = residentKey
         let gate = self.gate
         let guardSeam = self.guardSeam
