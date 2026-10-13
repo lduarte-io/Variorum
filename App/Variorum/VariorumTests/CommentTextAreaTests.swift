@@ -363,7 +363,8 @@ struct CommentTextAreaMountedTests {
     }
 
     /// **RED ON OLD — a CRASH, in both the shipped `TextEditor` and this
-    /// control before its fix** (measured offscreen, the record's U3-g): she
+    /// control before its fix** (measured offscreen, the record's U3-g; and
+    /// the draft's desync below, red in both too): she
     /// files a comment (⌘⏎), the panel clears the add area PROGRAMMATICALLY,
     /// and ⌘Z then replayed typing-undo actions that name ranges of the OLD
     /// text against the now-empty string — `NSRangeException: Range {13, 9}
@@ -407,12 +408,23 @@ struct CommentTextAreaMountedTests {
         #expect(textView.string.isEmpty && draft.text.isEmpty)
         #expect(area.placeholderView?.isHidden == false)
 
-        // Each area's history is its own: typing after the clear undoes alone.
+        // Each area's history is its own: typing after the clear undoes alone
+        // — and THE DRAFT FOLLOWS THE UNDO (the second half, RED ON OLD in
+        // the shipped `TextEditor` too: AppKit sends no `textDidChange` for
+        // an undo or a redo, so the box showed "" while the draft kept "new",
+        // and ⌘⏎ would have filed the words she had undone).
         textView.insertText("new", replacementRange: textView.selectedRange())
         settle(hosting)
         _ = textView.tryToPerform(Selector(("undo:")), with: nil)
         settle(hosting)
-        #expect(textView.string.isEmpty && draft.text.isEmpty)
+        #expect(textView.string.isEmpty)
+        #expect(draft.text.isEmpty, "the draft follows the undo")
+        #expect(area.placeholderView?.isHidden == false)
+        _ = textView.tryToPerform(Selector(("redo:")), with: nil)
+        settle(hosting)
+        #expect(textView.string == "new")
+        #expect(draft.text == "new", "…and the redo")
+        #expect(area.placeholderView?.isHidden == true)
     }
 
     /// ⎋ with nothing to undo is not the area's: `cancelOperation:` travels

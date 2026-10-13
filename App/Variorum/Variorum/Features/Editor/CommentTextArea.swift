@@ -186,6 +186,7 @@ struct CommentTextArea: NSViewRepresentable {
     static func dismantleNSView(_ area: CommentTextAreaView, coordinator: Coordinator) {
         for canary in coordinator.canaries { canary.disarm() }
         coordinator.canaries.removeAll()
+        coordinator.stopObservingUndo()
     }
 
     @MainActor
@@ -198,7 +199,63 @@ struct CommentTextArea: NSViewRepresentable {
         private var appliedPlaceholder: String??
         private var appliedMark: String??
 
-        init(_ parent: CommentTextArea) { self.parent = parent }
+        /// **This area's own undo history** (VX-179 U3-g — a CRASH, found in
+        /// self-review and measured offscreen in the shipped `TextEditor` as
+        /// much as here: after she files a comment the panel clears the add
+        /// area programmatically, and ⌘Z then replayed typing-undo actions
+        /// naming ranges of the OLD text against the empty string —
+        /// `NSRangeException`, uncaught). A programmatic replacement means
+        /// the words that history described have left the box (filed,
+        /// reverted, restored from the park, or replaced by the store), so
+        /// the history ends with them. It has to be the area's OWN manager:
+        /// `removeAllActions(withTarget:)` on the text view or its storage
+        /// does not reach TK2's registrations (measured), and clearing the
+        /// window's manager could reach other text's history. ⌘Z still
+        /// arrives by AppKit's road — `undo:` travels to the window, which
+        /// undoes through the first responder's `undoManager`, answered here.
+        let undoHistory = UndoManager()
+        private var undoObservers: [NSObjectProtocol] = []
+
+        init(_ parent: CommentTextArea) {
+            self.parent = parent
+            super.init()
+            // **An undo or redo is an edit the binding must hear** (U3-g's
+            // second half, measured offscreen in the shipped `TextEditor`
+            // too): AppKit does NOT call `textDidChange` for an undo or a
+            // redo — TK2 and TK1 alike, while the storage does change — so
+            // after ⌘Z the box showed one text and the panel's draft held
+            // another, and ⌘⏎ filed the words she had just undone. This
+            // area's manager is its own, so its two notifications are
+            // exactly "this text was undone or redone".
+            for name in [Notification.Name.NSUndoManagerDidUndoChange,
+                         .NSUndoManagerDidRedoChange] {
+                undoObservers.append(NotificationCenter.default.addObserver(
+                    forName: name, object: undoHistory, queue: .main
+                ) { [weak self] _ in
+                    MainActor.assumeIsolated { self?.textChangedOutsideTyping() }
+                })
+            }
+        }
+
+        func stopObservingUndo() {
+            for token in undoObservers { NotificationCenter.default.removeObserver(token) }
+            undoObservers.removeAll()
+        }
+
+        func undoManager(for view: NSTextView) -> UndoManager? {
+            view === area?.textView ? undoHistory : nil
+        }
+
+        /// The view's text moved without `textDidChange` (an undo or redo):
+        /// the binding, the placeholder and the measured height follow it,
+        /// exactly as after a keystroke.
+        private func textChangedOutsideTyping() {
+            guard let area else { return }
+            if parent.text != area.textView.string {
+                parent.text = area.textView.string
+            }
+            area.textDidChangeByTyping(style: parent.style)
+        }
 
         /// Every write here is GATED (the A47c lesson — an unguarded write on
         /// a live text view is never free, and `updateNSView` runs often).
@@ -220,6 +277,8 @@ struct CommentTextArea: NSViewRepresentable {
             }
             if area.textView.string != parent.text {
                 area.adoptText(parent.text, style: parent.style)
+                // The text she was undoing through is gone (U3-g).
+                undoHistory.removeAllActions()
             }
         }
 
