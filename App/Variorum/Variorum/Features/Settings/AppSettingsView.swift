@@ -149,6 +149,34 @@ struct AppSettingsView: View {
         }
     }
 
+    // MARK: - The window's geometry (VX-225)
+    //
+    // Her report: "sometimes the text that says Variorum Settings bleeds over
+    // the top in this weird way" — on her Mac the window title ("Variorum
+    // Settings", leading-aligned after the traffic lights on Tahoe) runs a
+    // few points past the leading column's edge while the titlebar's backing
+    // stops at that edge. WHY her titlebar backing stops there is UNEXPLAINED
+    // (it never reproduced on the dev build); her ruling, verbatim: "why
+    // don't we just make the pane on the left a little wider? the overlap is
+    // always the same amount and it's not big. that would make the issue
+    // invisible since we can't find out why it's happening." So the column
+    // clears the title (≈200 pt from the window's edge, measured) with the
+    // traffic-light-to-title gap to spare, and the WINDOW grows by exactly
+    // that delta so the detail column — where every pane was laid out —
+    // keeps its width. Pinned by `SettingsTitleClearanceTests`.
+    //
+    // DEBUG RESIDUAL (by design — never a reason to reopen VX-225): the Debug
+    // build is titled "Variorum Dev Settings", which ends ≈228 pt — past this
+    // 224-pt column. That is a Debug-only artifact of the longer dev title;
+    // the column is sized for the Release title she runs every day.
+
+    /// The leading column (search + pane list). Was 196.
+    static let sidebarWidth: CGFloat = 224
+    /// The detail column — unchanged by VX-225 (720 − 196 − the hairline).
+    static let detailWidth: CGFloat = 523
+    /// The window's content: the column, the 1-pt hairline, the detail.
+    static let contentSize = CGSize(width: sidebarWidth + 1 + detailWidth, height: 520)
+
     var body: some View {
         HStack(spacing: 0) {
             sidebar
@@ -159,7 +187,7 @@ struct AppSettingsView: View {
                 .frame(width: 1)
             detail
         }
-        .frame(width: 720, height: 520)
+        .frame(width: Self.contentSize.width, height: Self.contentSize.height)
         .background(tokens.room)
         // Every voiced modifier inside Settings (`alarmVoice()` and its
         // siblings) reads the store from the environment and otherwise
@@ -206,7 +234,7 @@ struct AppSettingsView: View {
                 .padding(.vertical, 6)
             }
         }
-        .frame(width: 196)
+        .frame(width: Self.sidebarWidth)
         .background(tokens.surface)
     }
 
