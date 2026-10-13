@@ -1212,21 +1212,19 @@ ZERO schema, `Sync/`, custody/keychain, editor seam.
    same shim behind `tee` — the WIRE capture); `claude mcp list` → Connected.
 4. **The note:** the field guide's lesson **"comments & tags"** (her seeded margin comment on block 1 — HER comment, so
    `edit_comment` shows the edit rung's "any comment"; single-take blocks — so `delete_take` meets the LAST-take road) shared
-   with claude-code at **EDIT, always** through Library ▸ search ▸ row ▸ **Share with AI…** (U3's grant road), captured. Then
-   type a few words at the end of the lesson's block 2 in Write (her unsaved words — so `restore_commit`'s "before" insurance
-   is visible), captured.
-5. **THE TURN — ONE real `claude -p --strict-mcp-config` turn through `variorum-tee`**, `--allowedTools` limited to the calls
-   below, the prompt naming them in order: `list_notes` (find the lesson) → `read_note` with_ids → **`edit_comment`** on her
-   comment (COMMENTS) → `save_commit` on block 2's take ("checkpoint") → **`restore_commit`** of the guide's state? no — of
-   that checkpoint after `rename_commit`? (kept simple:) `save_commit` block 3's take, then **`restore_commit`** of block 2's
-   checkpoint is a no-op — so the order is: `save_commit` block 2 (text with her typed words) → `edit_take` block 2 → **
-   `restore_commit`** of the checkpoint (COMMITS — the "before"/"after" brackets land) → **`delete_take`** on the lesson's
-   LAST block's only take (TAKES — `deleted_block: true`) → **`rename_note`** (THE NOTE). The wire (`tee-out.log`) carries
-   every answer; Claude's reply is captured.
-6. **⌥⌘Z walks each back, in the app:** the note opened by ⌥⌘O; for each act, newest first — the Edit menu's undo item read
-   by AX ("Undo claude-code's note title" · "…'s delete" · "…'s commit restore" · "…'s edit" · "…'s comment edit"), then ⌥⌘Z,
-   then a capture showing it walked back (the title back; the block back; block 2's text back to the edited text, then to her
-   typed words; her comment's words back). Block History on block 2 captured (the brackets stay).
+   with claude-code at **EDIT, always** through Library ▸ search ▸ row ▸ **Share with AI…** (U3's grant road), captured. Then,
+   as her: open it in Write, on block 2 press ⌘S (her commit — ⏎ at the name ask files it), then type a few words at block 2's
+   end and wait for the autosave (her UNSAVED words — so `restore_commit`'s "before" insurance has something to insure),
+   captured.
+5. **THE TURN — ONE real `claude -p --strict-mcp-config` turn through `variorum-tee`**, `--allowedTools` limited to these, the
+   prompt naming them in order: `list_notes` (find the lesson) → `read_note` with_ids + with_commits → **`edit_comment`** on her
+   comment (COMMENTS) → **`restore_commit`** of her block-2 commit (COMMITS — "before/after claude-code's restore" land) →
+   **`delete_take`** on the lesson's LAST block's only take (TAKES — `deleted_block: true`, R-VX184-1) → **`rename_note`** (THE
+   NOTE). The wire (`tee-{in,out}.log`) carries every answer; Claude's reply captured.
+6. **⌥⌘Z walks each back, in the app** (the note opened by ⌥⌘O): newest first, for each act the Edit menu's undo item read by
+   AX ("Undo claude-code's note title" · "…'s delete" · "…'s commit restore" · "…'s comment edit"), then ⌥⌘Z, then a capture
+   showing it walked back (the title back; the last block back; block 2 back to her typed words; her comment's words back).
+   Block History on block 2 captured after (the brackets stay — commits are append-only).
 7. **Both voices:** Activity in Study and in Terminal (every act in words, the last-take line "deleted a block in … (its
    last take)"), the receipts where a capture catches them (a quiet receipt fades — U3's note).
 8. **Cleanup:** both `-s local` registrations removed; her user-scope servers AFTER (byte-identical fingerprint); scratch
