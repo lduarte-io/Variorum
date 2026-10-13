@@ -68,3 +68,6 @@ notes/plans/13n-c-screens/
 notes/plans/vx168-screens/
 notes/plans/vx180-screens/
 notes/plans/vx184-screens/
+
+# Code-coverage raw profiles (written when tests run with coverage on) — machine output, never committed
+*.profraw
