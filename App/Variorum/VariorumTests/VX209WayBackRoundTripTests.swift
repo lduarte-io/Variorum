@@ -157,6 +157,15 @@ struct VX209WayBackRoundTripTests {
         // The next launch's route: no lobby — Standard, opening silently.
         #expect(world.gate.effectiveGate(scope: scope, storeID: world.storeID, storeURL: world.storeURL)
                 == .auto, "the next launch opens with no lobby — Standard")
+        // The ready housekeeping's reconcile (production runs it at every
+        // ready; a test opener skips it, so it is called here): VX-202's
+        // sweep (belt b) has nothing to act on — no Touch ID item beside
+        // the silent one — and the Apple arm VERIFIES the copy, determined
+        // Standard. Nothing on the ready road heals the revert.
+        await bootstrap.protection.reconcile()
+        #expect(bootstrap.protection.postureReading == .determined(.standard))
+        #expect(bootstrap.protection.appleKeyVerified == true)
+        #expect(world.backing.auto == world.castleKey && world.backing.gated == nil)
     }
 
     private func waitUntil(

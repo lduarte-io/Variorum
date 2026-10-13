@@ -1746,4 +1746,17 @@ apply-check CLEAN at the tip in the pinned checkout)
   pin (`resume != nil && useCastle != nil`) and the confirm's register pin (`line.contains(resumeSyncDoor)`). The
   BOUND road pin stayed GREEN through both (it proves shipped behavior, not this unit's words). After the cycles the
   harness re-synced to HEAD: `✔ Test run with 13 tests in 5 suites passed after 3.388 seconds`; the worktree clean.
-- NEXT: the Mac + phone `build-for-testing` (the real project), then the close.
+- DONE (this commit) — the reproduction pin gains the READY HOUSEKEEPING's leg (production runs the reconcile at
+  every ready; the test opener skips it, so the pin calls `protection.reconcile()` after the way-back): VX-202's
+  sweep (belt b) has nothing to act on (no Touch ID item beside the silent one) and the Apple arm VERIFIES the copy —
+  `postureReading == .determined(.standard)`, `appleKeyVerified == true`, the Castle key still in the silent item.
+  Nothing on the ready road heals the revert. Harness: `✔ Test run with 13 tests in 5 suites passed after 5.075
+  seconds`. (Two harness-only probes, never in the repo, preceded it: the controller's posture projection reads
+  CASTLE right after the way-back adoption and Standard after the next envelope refresh — F-U5-5; and the reconcile
+  outcome above.)
+- VERIFIED (the real project): Mac `build-for-testing` (Variorum, `-derivedDataPath DerivedData/vx201`, index store
+  off) `** TEST BUILD SUCCEEDED **` at `6c8bfea2`'s tree, zero warnings in the changed files, the three VX-209 files
+  compiled; phone `build-for-testing` (VariorumMobile, generic iOS Simulator, same DerivedData) `** TEST BUILD
+  SUCCEEDED **`, the three changed Shared files compiled for the phone, zero warnings in them. Re-run for this
+  commit's pin change: PENDING the next line.
+- NEXT: the Mac `build-for-testing` again (this commit's pin edit), then the close.
