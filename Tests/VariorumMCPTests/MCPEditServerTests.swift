@@ -39,6 +39,7 @@ private let editTools: Set<String> = [
     // note — every tool is edit's.
     "edit_comment", "restore_comment",
     "delete_take", "archive_take", "unarchive_take", "set_take_label", "lock_take", "unlock_take",
+    "restore_commit", "rename_commit",
 ]
 
 @Suite("13n-b U3 — the MCP server's edit rung end to end", .serialized)
@@ -260,6 +261,9 @@ struct MCPEditServerTests {
             let hersComment = try h.operations.addBlockComment(to: one.block.id, text: "her working note")
             let hersDeleted = try h.operations.addBlockComment(to: two.block.id, text: "her deleted note")
             try h.operations.deleteBlockComment(hersDeleted.id)
+            // …and a commit of hers (her take rewritten since), for the commit tools.
+            let hersCommit = try h.operations.commit(branch.id, message: "hers")
+            try h.operations.autosave(branch.id, text: "her other take, revised", charDelta: 9)
             func snapshot() throws -> [String] {
                 try h.database.read { db in
                     try ["variant", "container_block", "block", "commit_point", "lens", "lens_choice", "block_comment"]
@@ -301,6 +305,8 @@ struct MCPEditServerTests {
                 ("set_take_label", ["take_id": .string(branch.id), "label": .string("x")]),
                 ("lock_take", ["take_id": .string(branch.id)]),
                 ("unlock_take", ["take_id": .string(one.variant.id)]),
+                ("restore_commit", ["commit_id": .string(hersCommit.id)]),
+                ("rename_commit", ["commit_id": .string(hersCommit.id), "message": .string("x")]),
             ]
             #expect(Set(calls.map(\.0)) == editTools, "every edit door was tried")
             _ = try h.approve("claude-code", spec(.suggest, .wing, ""))

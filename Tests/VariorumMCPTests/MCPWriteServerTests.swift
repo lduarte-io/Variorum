@@ -129,6 +129,9 @@ struct MCPWriteServerTests {
             // for VX-195's restore_comment to aim at.
             let hersDeletedComment = try h.operations.addBlockComment(to: two.block.id, text: "her deleted note")
             try h.operations.deleteBlockComment(hersDeletedComment.id)
+            // …and a commit of hers (her take rewritten since), for the commit tools.
+            let hersCommit = try h.operations.commit(branch.id, message: "hers")
+            try h.operations.autosave(branch.id, text: "her other take, revised", charDelta: 9)
             // VX-184 U3 (justified edit, the ritual): a tag of HERS on the note,
             // for VX-190's remove_tag to aim at.
             let hersTag = try h.operations.createTag(name: "hers")
@@ -267,6 +270,8 @@ struct MCPWriteServerTests {
             calls.append(("set_take_label", ["take_id": .string(branch.id), "label": .string("x")]))
             calls.append(("lock_take", ["take_id": .string(branch.id)]))
             calls.append(("unlock_take", ["take_id": .string(one.variant.id)]))
+            calls.append(("restore_commit", ["commit_id": .string(hersCommit.id)]))
+            calls.append(("rename_commit", ["commit_id": .string(hersCommit.id), "message": .string("x")]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).

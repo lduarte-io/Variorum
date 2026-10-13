@@ -114,6 +114,8 @@ enum MCPToolCatalog {
         editComment, restoreComment,
         // …the takes family (the LAST take ⇒ the block, R-VX184-1).
         deleteTake, archiveTake, unarchiveTake, setTakeLabel, lockTake, unlockTake,
+        // …the commits family (the restore insured first).
+        restoreCommit, renameCommit,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -957,6 +959,48 @@ enum MCPToolCatalog {
                 "take_id": .object(["type": "string", "description": "The take to unlock."]),
             ]),
             "required": .array(["take_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// Her restore, INSURED first (the eighth occasion's bracket).
+    static let restoreCommit = MCPToolDeclaration(
+        name: "restore_commit", rung: .edit, title: "Restore a commit",
+        description: """
+            Bring a commit's text back into its take, as the author's own restore does (read_note \
+            with with_commits: true lists each take's commits). Variorum first commits the words it \
+            replaces, named "before <your name>'s restore", and then the restored text, named "after \
+            <your name>'s restore", so the author can always compare and come back; both commits \
+            stay even if the restore is undone. A locked or archived take refuses, as does a sealed \
+            note; a take already reading that text changes nothing. One undo for the author puts the \
+            replaced words back. Returns JSON with the commit ids.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "commit_id": .object(["type": "string", "description": "The commit whose text to restore."]),
+            ]),
+            "required": .array(["commit_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// Her rename of a saved moment — the text never changes (I5).
+    static let renameCommit = MCPToolDeclaration(
+        name: "rename_commit", rung: .edit, title: "Rename a commit",
+        description: """
+            Rename a commit — the name the author's history shows for that saved moment — or clear it \
+            with null or a blank. The commit's text never changes. A locked take's commits may be \
+            renamed; a sealed note's may not. One undo for the author. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "commit_id": .object(["type": "string", "description": "The commit."]),
+                "message": .object(["type": ["string", "null"],
+                                    "description": "Its new name (blank or null clears)."]),
+            ]),
+            "required": .array(["commit_id", "message"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)

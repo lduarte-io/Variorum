@@ -261,7 +261,8 @@ struct MCPServerTests {
                     "put_back", "set_entry_date", "move_note_to_wing", "save_commit", "choose_take", "adopt_lens",
                     "remove_tag",
                     "edit_comment", "restore_comment",
-                    "delete_take", "archive_take", "unarchive_take", "set_take_label", "lock_take", "unlock_take"])
+                    "delete_take", "archive_take", "unarchive_take", "set_take_label", "lock_take", "unlock_take",
+                    "restore_commit", "rename_commit"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })

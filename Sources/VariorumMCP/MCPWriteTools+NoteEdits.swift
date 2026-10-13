@@ -25,6 +25,8 @@ extension MCPWriteTools {
         case unarchiveTake(takeID: String)
         case setTakeLabel(takeID: String, label: String?)
         case lockTake(takeID: String, locked: Bool)
+        case restoreCommit(commitID: String)
+        case renameCommit(commitID: String, message: String?)
 
         var tool: String {
             switch self {
@@ -35,6 +37,8 @@ extension MCPWriteTools {
             case .unarchiveTake: MCPToolCatalog.unarchiveTake.name
             case .setTakeLabel: MCPToolCatalog.setTakeLabel.name
             case .lockTake(_, let locked): locked ? MCPToolCatalog.lockTake.name : MCPToolCatalog.unlockTake.name
+            case .restoreCommit: MCPToolCatalog.restoreCommit.name
+            case .renameCommit: MCPToolCatalog.renameCommit.name
             }
         }
     }
@@ -88,6 +92,13 @@ extension MCPWriteTools {
             return .lockTake(takeID: try requiredString(args, "take_id"), locked: true)
         case MCPToolCatalog.unlockTake.name:
             return .lockTake(takeID: try requiredString(args, "take_id"), locked: false)
+        case MCPToolCatalog.restoreCommit.name:
+            return .restoreCommit(commitID: try requiredString(args, "commit_id"))
+        case MCPToolCatalog.renameCommit.name:
+            guard args.keys.contains("message") else {
+                throw ArgumentFailure(message: "message is required: the commit's new name, or null to clear it.")
+            }
+            return .renameCommit(commitID: try requiredString(args, "commit_id"), message: try optionalString(args, "message"))
         default:
             return nil
         }
@@ -236,6 +247,43 @@ extension MCPWriteTools {
                 return (answer, result.changed
                         ? MCPWriteReceipt(clientName: clientName, act: act, targetID: noteID, targetTitle: title,
                                           show: .takes(noteID: noteID, blockID: result.blockID))
+                        : nil)
+            }
+
+        case .restoreCommit(let commitID):
+            let noteID = try database.read { try Queries.mcpContainerOf(commit: commitID, $0) } ?? ""
+            return try onNote(noteID, rung: .edit, job: job, clientName: clientName,
+                              logged: ("commit", commitID), spendsAfter: false) { title in
+                let result = try ops.restoreCommitForClient(
+                    commitID, client: clientName, undoLabel: label(.commitRestore),
+                    guardedBy: guardEdit(clientName) { db in [try Queries.mcpContainerOf(commit: commitID, db)] })
+                var answer: [String: Any] = [
+                    "commit_id": commitID, "take_id": result.take.id, "block_id": result.take.blockId,
+                    "note_id": noteID, "changed": result.changed,
+                ]
+                if let before = result.before { answer["before_commit_id"] = before.id }
+                if let after = result.after { answer["after_commit_id"] = after.id }
+                return (answer, result.changed
+                        ? MCPWriteReceipt(clientName: clientName, act: .commitRestore, targetID: noteID,
+                                          targetTitle: title,
+                                          show: .note(noteID: noteID, blockID: result.take.blockId, select: nil))
+                        : nil)
+            }
+
+        case .renameCommit(let commitID, let message):
+            let noteID = try database.read { try Queries.mcpContainerOf(commit: commitID, $0) } ?? ""
+            return try onNote(noteID, rung: .edit, job: job, clientName: clientName,
+                              logged: ("commit", commitID), spendsAfter: false) { title in
+                let result = try ops.renameCommitForClient(
+                    commitID, message: message, undoLabel: label(.commitRename),
+                    guardedBy: guardEdit(clientName) { db in [try Queries.mcpContainerOf(commit: commitID, db)] })
+                let blockID = try blockOf(take: result.takeID)
+                return (["commit_id": commitID, "take_id": result.takeID, "note_id": noteID,
+                         "message": result.message ?? NSNull(), "changed": result.changed],
+                        result.changed
+                        ? MCPWriteReceipt(clientName: clientName, act: .commitRename, targetID: noteID,
+                                          targetTitle: title, detail: result.message,
+                                          show: .note(noteID: noteID, blockID: blockID, select: nil))
                         : nil)
             }
         }
