@@ -30,6 +30,12 @@
    the drills, or the walk met your "tell me explicitly as a high priority item" bar. The night's one
    headline (next) is a KNOWN hazard now proven and honestly worded, not a new blocker.
 
+**Dev-store state after the walk (added after closeout):** my walk left the DEV store in Castle, behind a
+throwaway passphrase and twelve words I set during the ceremony. That locked the store at launch and blocked
+vx-184's live round until the credentials were handed to oct12coordinator directly (never committed). Use
+Standard on the dev store returns it to its old shape. Lesson for later walks: return the store to its
+starting posture before releasing the stage, or hand the credentials over at release.
+
 ## The headline you should read first
 **§W.2's way-back revert REPRODUCED IN WHOLE at HEAD** — your carried-forward reminder 2 ("the trace was
 read, never run") was right to insist, twice over: the revert completes IN THE SAME SESSION (the adoption's
