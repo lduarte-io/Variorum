@@ -1017,5 +1017,5 @@ confirm + U2's W-1…10 + U3's W-U3-1…13, both voices).
 - VX-182 — restoreCost.deleted_takes lacks the purge fence (U1's O-1).
 - VX-183 — comments panel doors undeclared in the capability registry (U1's O-2).
 - VM-14 — the phone's hand-placed comments placeholder (U3's O-U3-1).
-- VX-184 — CaptureTextView's undo desync: ⏎ files undone words (U3's O-U3-3, HIGH; measured).
-- VX-185 — CalmButtonStyle ignores the disabled state app-wide (U3's O-U3-2).
+- VX-193 — CaptureTextView's undo desync: ⏎ files undone words (U3's O-U3-3, HIGH; measured).
+- VX-194 — CalmButtonStyle ignores the disabled state app-wide (U3's O-U3-2).
