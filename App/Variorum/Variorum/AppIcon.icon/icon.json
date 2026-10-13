@@ -19,18 +19,18 @@
           "glass": false,
           "image-name-specializations": [
             {
-              "value": "striped-v.svg"
+              "value": "cards.svg"
             },
             {
               "appearance": "dark",
-              "value": "striped-v-mono.svg"
+              "value": "cards-dark.svg"
             },
             {
               "appearance": "tinted",
-              "value": "striped-v-mono.svg"
+              "value": "cards-dark.svg"
             }
           ],
-          "name": "striped-v"
+          "name": "cards"
         }
       ],
       "shadow": {
