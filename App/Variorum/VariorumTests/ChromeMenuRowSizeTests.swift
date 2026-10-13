@@ -45,7 +45,7 @@ struct ChromeMenuRowSizeTests {
     /// **THE CLASS LINT — RED ON OLD.** Every borderless pull-down in the Mac
     /// app is the chrome vocabulary's one component, which pins its own
     /// control size so no host's mini/small can reach its rows. Before the
-    /// fix, nine sites in seven files spelled `.menuStyle(.borderlessButton)`
+    /// fix, nine sites in five files spelled `.menuStyle(.borderlessButton)`
     /// themselves, and every one inside a mini row inherited mini.
     @Test func everyBorderlessPullDownIsTheChromeComponent() throws {
         let app = URL(fileURLWithPath: #filePath)
