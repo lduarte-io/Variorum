@@ -86,9 +86,12 @@ extension MCPWriteTools {
             }
         }
         return try land(job, clientName: clientName, kind: "note", id: noteA, title: titleA) {
-            // Every pair's blocks on the snapshot — after BOTH decisions.
+            // Every pair's blocks on the snapshot — after BOTH decisions —
+            // each note asked only about the ids named on its side (VX-184
+            // ladder round 2, P1: ∝ the pairs, never the notes).
             let placed = try database.read { db in
-                (try placedBlocks(db, noteA), try placedBlocks(db, noteB))
+                (try Self.placedBlocks(db, among: pairs.map(\.blockA), in: noteA),
+                 try Self.placedBlocks(db, among: pairs.map(\.blockB), in: noteB))
             }
             for (index, pair) in pairs.enumerated() {
                 if !placed.0.contains(pair.blockA) {
@@ -114,17 +117,6 @@ extension MCPWriteTools {
                     MCPWriteReceipt(clientName: clientName, act: .versionLink, targetID: noteA, targetTitle: titleA,
                                     detail: titleB, show: .note(noteID: noteA, blockID: nil, select: nil)))
         }
-    }
-
-    private func placedBlocks(_ db: Database, _ noteID: String) throws -> Set<String> {
-        Set(try String.fetchAll(
-            db,
-            sql: """
-                SELECT cb.block_id FROM container_block cb
-                JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
-                WHERE cb.container_id = ? AND cb.deleted_at IS NULL
-                """,
-            arguments: [noteID]))
     }
 
     static func words(_ refusal: Operations.MCPVersionLinkRefusal) -> String {

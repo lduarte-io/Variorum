@@ -168,19 +168,39 @@ extension MCPWriteTools {
     /// snapshot AFTER the note's decision (so a client that cannot reach the
     /// note learns nothing of its blocks) and again inside the act.
     private func requireBlocks(_ blockIDs: [String], of noteID: String, key: String) throws {
-        let placed = Set(try database.read { db in
-            try String.fetchAll(
-                db,
-                sql: """
-                    SELECT cb.block_id FROM container_block cb
-                    JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
-                    WHERE cb.container_id = ? AND cb.deleted_at IS NULL
-                    """,
-                arguments: [noteID])
-        })
+        let placed = try database.read { db in try Self.placedBlocks(db, among: blockIDs, in: noteID) }
         if let index = blockIDs.firstIndex(where: { !placed.contains($0) }) {
             throw ArgumentFailure(message: Self.notThisNotesBlockWords("\(key)[\(index)]"))
         }
+    }
+
+    /// **The pre-checks' one read — P1 by construction** (VX-184 ladder
+    /// round 2): which of the GIVEN ids name a live block live-placed in the
+    /// note. The ids drive (`json_each`, the `picks` precedent's tool), each
+    /// seeking its ONE live placement through `uq_cblock_ownership` and its
+    /// block by key — ∝ the items, never the note's blocks. Until this pass
+    /// the batch and link pre-checks read every live placement of the note to
+    /// check at most 200 ids. **`CROSS JOIN`, on purpose** (the house's P1
+    /// discipline for `json_each` — `Queries.ownershipFactsSQL`,
+    /// `Queries.mcpNoteFacts`): with a plain JOIN the planner drives from the
+    /// note's placements (`idx_cblock_order`) with `json_each` inside —
+    /// the O(note) read again. Pinned on the plan
+    /// (`MCPPreCheckPlanTests`). Two placeholders: the ids as a JSON array,
+    /// then the note. Shared by `add_takes` / `add_comments` and
+    /// `link_versions` (once per note).
+    static let placedBlocksSQL = """
+        SELECT cb.block_id FROM json_each(?) j
+        CROSS JOIN container_block cb ON cb.block_id = j.value AND cb.deleted_at IS NULL
+        JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
+        WHERE cb.container_id = ?
+        """
+
+    /// The given ids that name a live block live-placed in `noteID`
+    /// (`placedBlocksSQL`) — membership per id exactly as the whole-note read
+    /// it replaced, so every refusal it feeds is unchanged.
+    static func placedBlocks(_ db: Database, among blockIDs: [String], in noteID: String) throws -> Set<String> {
+        let json = String(decoding: try JSONEncoder().encode(blockIDs), as: UTF8.self)
+        return Set(try String.fetchAll(db, sql: placedBlocksSQL, arguments: [json, noteID]))
     }
 
     /// The op's item refusal, said as the item's: a block that left the note
