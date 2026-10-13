@@ -1,6 +1,6 @@
 # VX-180 — the MCP handshake survives Claude Code's pre-initialize `server/discover` probe
 
-**What this run did NOT do (said first):** (1) no QUESTIONS entries and no canon edit — both are the merging session's (the PROVISIONALs and the candidate §12 clause are under OWED); (2) the shim's own closed-app refusal is NOT touched — it is VX-181 (and the live round SAW it: her user-scope Release `variorum` entry, app absent, read CONNECTION_CLOSED); (3) no Activity word for an answered probe (argued out, design call 8); (4) the live round captured one voice only (Study, light) — the fix has no face, and the one existing face read (her Activity list) is unchanged; (5) no `/Applications` refresh (the closeout's); (6) the Mac batch was the one app suite that builds `MCPServerHost` (`MCPPaneTests`), not the whole app target; (7) the cold review has not run (the orchestrator's next step).
+**What this run did NOT do (said first):** (1) no QUESTIONS entries and no canon edit — both are the merging session's (the PROVISIONALs and the candidate §12 clause are under OWED); (2) the shim's own closed-app refusal is NOT touched — it is VX-181 (and the live round SAW it: her user-scope Release `variorum` entry, app absent, read CONNECTION_CLOSED); (3) no Activity word for an answered probe (argued out, design call 8); (4) the live round captured one voice only (Study, light) — the fix has no face, and the one existing face read (her Activity list) is unchanged; (5) no `/Applications` refresh (the closeout's); (6) the Mac batch was the one app suite that builds `MCPServerHost` (`MCPPaneTests`), not the whole app target; (7) ~~the cold review has not run~~ — the ladder RAN and CLOSED AT ROUND 1, CLEAN (the LADDER section below).
 
 **The RECORD** (a small fix that touches the secret's accept path, so it lands a repo record — CLAUDE.md). Kickoff:
 `notes/plans/vx-180-kickoff-prompt.md` (binding; the captured frames verbatim, the proposed fix shape, acceptance,
@@ -306,3 +306,55 @@ disposition under the cross-model flow (agree/dispute returns to the reviewer, w
 **After the fixes:** `swift test --filter VariorumMCPTests` → **135 tests in 20 suites passed** (no skips;
 `logs/mcp-whole-r1.log`). Zero wire bytes changed (the window's answers and every refusal are pinned byte-exact and
 green). No dispute is outstanding; the reviewer's final call on NIT 1's deferral is the only open word.
+
+**THE REVIEWER'S FINAL CALL (the same session, resumed by the orchestrator — the cross-model flow's final word):**
+it verified the fix commit `3bc451ed` line by line itself and re-ran both VX-180 suites on the fixed tree (13/2
+green). NIT 2 **CONFIRMED, FIX ACCEPTED** (the interpolated fallback byte-identical, unreachable, drift-proof);
+NIT 3 **CONFIRMED, FIX ACCEPTED** (the doc now matches the code exactly); NIT 1 **DEFERRAL ACCEPTED** (the shared
+predicate's right home is `VariorumMCPSocket`, exactly VX-181's surface; widening a launch-critical diff into the
+shim module for a maintainability note is the wrong trade) with ONE CONDITION — VX-181's ticket carries the item as
+a named line: **DONE by the orchestrator** (the ticket body's "Carries from VX-180's ladder" paragraph). **Round 2:
+NOT WARRANTED — the ladder CLOSES AT ROUND 1, CLEAN (0B/0M/0m/3n, all three agreed, zero disputes).** The only
+post-round-1 change is one unreachable string literal plus doc comments, proposed by the reviewer and verified by
+the reviewer in its own session with the suites re-run green — that verification IS the fix re-review (the 13n-c
+UX-fix ladder's precedent); the orchestrator independently verified the same diff line by line. The round-1 clean
+bill stands unchanged.
+
+## RESULTS (the run, whole)
+
+- **The bug:** Claude Code 2.1.296 pipelines a `server/discover` request before `initialize`; the handshake took it
+  as the initialize, refused it as unnamed, and closed — every Claude Code connection died `CONNECTION_CLOSED`
+  (sessions, `/mcp`, `claude mcp list` alike). **The fix:** the bounded pre-initialize window in
+  `MCPHandshake.readOpening` — a request answered on its own id before the next read (`-32601`; `ping` its empty
+  result), a notification skipped, bound 8, past it the one refusal road; `initialize`, the admission, the replay
+  and every refusal sentence byte-unchanged.
+- **Pin-before-fix:** RED on the pre-fix tree (5/5, 14 issues) and RED again by revert; GREEN with the fix.
+- **Finals:** `VariorumMCPTests` **135/20 green** headless (twice: piece 4 and post-ladder) · `MCPPaneTests`
+  **10/1 green** under stage `vx180-live` · the Mac target builds. **The live round PROVEN on the Pro** (dev store
+  only): real Claude Code 2.1.296 ✔ Connected, the probe answered on its string id, `initialize` served,
+  `list_books` answered, no unnamed refusal in Activity; dev store restored (verified), her user scope untouched.
+- **Ladder:** fable-reviewer, ROUND 1 CLEAN (0B/0M/0m/3n) — NITs 2+3 applied (`3bc451ed`), NIT 1 deferred to
+  VX-181 (reviewer-accepted, the ticket carries it); CLOSED AT ROUND 1.
+- **Born:** VX-181 (the shim's closed-app refusal answers the probe — "Variorum must be open" never shows;
+  confirmed live in the round; Bug + Pre-launch, 13n).
+- **PR #152** (merge commit; the merge-moment ledgers are the merging session's). MOBILE PARITY: nothing
+  mobile-visible (the door is Mac-only; the phone has no MCP surface).
+
+## HANDOFF (for her — the author's checklist)
+
+1. **Nothing to re-run.** The fix changes no key, no binding, no setup: after the `/Applications` refresh her
+   clients connect as they are (R-VX168-1's bindings untouched).
+2. **The Air's bridge retires at her leisure.** `~/.variorum/mcp-discover-bridge.py` keeps working after the fix
+   (pure passthrough + a local -32601). To retire it: re-run the pane's Claude Code setup once on the Air, any time
+   after the fixed build installs there. The beta tester's bridge retires the same way (send them the same one
+   line: re-run the setup command from Settings ▸ MCP ▸ Connect a client).
+3. **VX-181 is real and pre-launch-labeled:** with Variorum CLOSED, `claude mcp list` still reads
+   CONNECTION_CLOSED (the shim answers the probe, not the initialize, so "Variorum must be open" never shows). Seen
+   live on her user-scope `variorum` entry during the round. Same window fix, the shim's refusal read; it also
+   carries the ladder's shared-predicate NIT. Her call whether it gates the launch.
+4. **PROVISIONALs for her eye (QUESTIONS #214):** P-VX180-1 (the window's bound: 8 as built · 1–2 · a time limit) ·
+   P-VX180-2 (`ping` answered with its empty result as the SDK itself would, not -32601 — the -32601 shape would
+   have made ping an initialized-state oracle) · P-VX180-3 (the -32601 message: JSON-RPC's own "Method not found",
+   nothing echoed · the SDK's wordier form · a Variorum sentence).
+5. **Canon landed at the merge:** AppSpec §12's MCP DOOR line gains the window clause; §14's entry. The record of
+   everything: this file.
