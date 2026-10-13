@@ -35,6 +35,9 @@ private let editTools: Set<String> = [
     // VX-168 U2 (justified edit, the ritual): the deliberate acts — VX-169's
     // commit and VX-174's merge button — are edit's too.
     "save_commit", "choose_take", "adopt_lens",
+    // VX-184 U4 (justified edit, the ritual): VX-195's edit parity inside a
+    // note — every tool is edit's.
+    "edit_comment", "restore_comment",
 ]
 
 @Suite("13n-b U3 — the MCP server's edit rung end to end", .serialized)
@@ -250,11 +253,20 @@ struct MCPEditServerTests {
             // (an adoption would mint one and move pointers).
             let lens = try h.operations.createLens(post: note.id, name: "hers")
             _ = try h.operations.setLensChoice(lens: lens.id, block: one.block.id, variant: branch.id)
+            // VX-184 U4 (justified edit, the ritual): a comment of hers and a
+            // deleted one, for VX-195's comment tools to aim at — and the
+            // snapshot reads every comment row and every title too.
+            let hersComment = try h.operations.addBlockComment(to: one.block.id, text: "her working note")
+            let hersDeleted = try h.operations.addBlockComment(to: two.block.id, text: "her deleted note")
+            try h.operations.deleteBlockComment(hersDeleted.id)
             func snapshot() throws -> [String] {
                 try h.database.read { db in
-                    try ["variant", "container_block", "block", "commit_point", "lens", "lens_choice"].flatMap { table in
-                        try Row.fetchAll(db, sql: "SELECT * FROM \(table) ORDER BY id").map(\.description)
-                    } + (try String.fetchAll(db, sql: "SELECT COALESCE(entry_date, '-') FROM container ORDER BY id"))
+                    try ["variant", "container_block", "block", "commit_point", "lens", "lens_choice", "block_comment"]
+                        .flatMap { table in
+                            try Row.fetchAll(db, sql: "SELECT * FROM \(table) ORDER BY id").map(\.description)
+                        }
+                        + (try String.fetchAll(db, sql: "SELECT COALESCE(entry_date, '-') FROM container ORDER BY id"))
+                        + (try String.fetchAll(db, sql: "SELECT COALESCE(title, '-') FROM container ORDER BY id"))
                 }
             }
             let before = try snapshot()
@@ -276,6 +288,11 @@ struct MCPEditServerTests {
                 ("save_commit", ["take_id": .string(one.variant.id), "message": .string("x")]),
                 ("choose_take", ["take_id": .string(branch.id)]),
                 ("adopt_lens", ["lens_id": .string(lens.id)]),
+                // VX-184 U4 (justified edit, the ritual): VX-195's tools, each
+                // aimed at what is hers.
+                ("edit_comment", ["comment_id": .string(hersComment.id), "text": .string("x"),
+                                  "expected_text": .string("her working note")]),
+                ("restore_comment", ["comment_id": .string(hersDeleted.id)]),
             ]
             #expect(Set(calls.map(\.0)) == editTools, "every edit door was tried")
             _ = try h.approve("claude-code", spec(.suggest, .wing, ""))

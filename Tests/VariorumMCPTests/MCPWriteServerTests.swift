@@ -125,6 +125,10 @@ struct MCPWriteServerTests {
             // VX-184 U3 (justified edit, the ritual): a comment of HERS, for
             // VX-188's delete_comment to aim at (suggest deletes only its own).
             let hersComment = try h.operations.addBlockComment(to: one.block.id, text: "her own working note")
+            // VX-184 U4 (justified edit, the ritual): a DELETED comment of hers,
+            // for VX-195's restore_comment to aim at.
+            let hersDeletedComment = try h.operations.addBlockComment(to: two.block.id, text: "her deleted note")
+            try h.operations.deleteBlockComment(hersDeletedComment.id)
             // VX-184 U3 (justified edit, the ritual): a tag of HERS on the note,
             // for VX-190's remove_tag to aim at.
             let hersTag = try h.operations.createTag(name: "hers")
@@ -151,8 +155,10 @@ struct MCPWriteServerTests {
                         .map(\.description)
                     // VX-184 U3 (justified edit — the proof's completeness grows
                     // with the catalog): HER comment, which delete_comment aims at.
+                    // VX-184 U4 (justified edit): and her deleted one.
                     let herComments = try Row.fetchAll(
-                        db, sql: "SELECT * FROM block_comment WHERE id = ?", arguments: [hersComment.id])
+                        db, sql: "SELECT * FROM block_comment WHERE id IN (?, ?) ORDER BY id",
+                        arguments: [hersComment.id, hersDeletedComment.id])
                         .map(\.description)
                     // …and HER tag applications, which remove_tag aims at.
                     let herTags = try Row.fetchAll(db, sql: "SELECT * FROM post_tag ORDER BY id").map(\.description)
@@ -248,6 +254,12 @@ struct MCPWriteServerTests {
             calls.append(("save_commit", ["take_id": .string(branch.id), "message": .string("x")]))
             calls.append(("choose_take", ["take_id": .string(branch.id)]))
             calls.append(("adopt_lens", ["lens_id": .string(hersLens.id)]))
+            // VX-184 U4 (justified edit, the ritual — the proof's completeness
+            // grows with the catalog): VX-195's edit parity, aimed at what is
+            // hers, each refusing at the rung.
+            calls.append(("edit_comment", ["comment_id": .string(hersComment.id), "text": .string("x"),
+                                           "expected_text": .string("her own working note")]))
+            calls.append(("restore_comment", ["comment_id": .string(hersDeletedComment.id)]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).

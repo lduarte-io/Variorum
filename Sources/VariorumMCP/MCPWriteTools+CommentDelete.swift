@@ -25,10 +25,15 @@ import VariorumCore
 ///
 /// Both are made on the snapshot (the refusal and the ask) and AGAIN inside the
 /// act's transaction by the guard, which spends any once grant there (the
-/// edit-act pattern). **For U4 (VX-195):** the edit rung's any-comment delete is
-/// a second clause beside the ownership clause in `mayDelete` — until it lands,
-/// an EDIT-rung client deleting a comment not on file as its own hears her
-/// sentence too.
+/// edit-act pattern).
+///
+/// **VX-184 U4 (VX-195) — the EDIT clause (R-VX188-1: "at EDIT, any comment"):**
+/// the rung a delete needs is SUGGEST for a comment on file as this client's
+/// own, EDIT for any other (`deleteRung`). A comment not on file as the caller's
+/// is deleted when the caller may EDIT the note; below edit her ruled sentence
+/// answers, byte-unchanged (suggest and write-new callers alike, still no ask —
+/// P-VX188-1). The guard decides the needed rung on its own rows and spends
+/// exactly that rung's once grant — never two.
 extension MCPWriteTools {
     /// Her words (R-VX188-2, RULED 2026-10-12 — "permissions" → "permission"
     /// her only edit). Verbatim; never re-voiced here.
@@ -44,16 +49,24 @@ extension MCPWriteTools {
             guard try database.read({ try mayDelete($0, commentID, clientName) }) else {
                 throw Refused(outcome: Outcome(text: Self.notYourCommentWords, isError: true))
             }
-            let suggestGuard = guardNotes(clientName, rung: .suggest) { db in
-                [try Queries.mcpContainerOf(comment: commentID, db)]
-            }
             let comment = try ops.deleteCommentForClient(
                 commentID, undoLabel: Operations.MCPWriteAct.commentDelete.undoLabel(client: clientName),
                 guardedBy: { db in
-                    try suggestGuard(db)
-                    guard try mayDelete(db, commentID, clientName) else {
+                    // The note at SUGGEST first (the one shape / the rung, as
+                    // the snapshot), then the rung THIS comment needs — its
+                    // once grant, and only its, spent here.
+                    let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
+                    let facts = try Queries.mcpNoteFacts(
+                        db, noteID: try Queries.mcpContainerOf(comment: commentID, db) ?? "")
+                    let atSuggest = MCPGrantAuthority.decide(standing, note: facts, rung: .suggest, consumes: true)
+                    guard case .allow = atSuggest else { throw Self.refused(atSuggest, .note) }
+                    let needed = try deleteRung(db, commentID, clientName)
+                    let decision = needed == .suggest
+                        ? atSuggest : MCPGrantAuthority.decide(standing, note: facts, rung: needed, consumes: true)
+                    guard case .allow(let grantID, let consumesOnce) = decision else {
                         throw Refused(outcome: Outcome(text: Self.notYourCommentWords, isError: true))
                     }
+                    if consumesOnce, let grantID { try grants.consumeMCPOnceGrant(db, grantID) }
                 })
             return (["comment_id": commentID, "block_id": comment.blockId, "note_id": noteID, "deleted": true],
                     MCPWriteReceipt(clientName: clientName, act: .commentDelete, targetID: noteID, targetTitle: title,
@@ -61,9 +74,23 @@ extension MCPWriteTools {
         }
     }
 
-    /// May this client delete this comment? At suggest: only when the record
-    /// names it as the comment's writer. (U4's edit arm joins here.)
+    /// The rung deleting this comment needs: SUGGEST for one the record names
+    /// as this client's own (R-VX188-1), EDIT for any other (VX-195 — the edit
+    /// clause). `Queries.mcpCommentAuthor` is the one read.
+    func deleteRung(_ db: Database, _ commentID: String, _ clientName: String) throws -> MCPGrantRule.Rung {
+        try Queries.mcpCommentAuthor(db, commentID: commentID) == clientName ? .suggest : .edit
+    }
+
+    /// May this client delete this comment? Its OWN at suggest (the record
+    /// names it as the writer); ANY at edit — the client may EDIT the
+    /// comment's note (U4's clause, beside the ownership clause). Decided on
+    /// the current standing; the guard decides again inside the act.
     func mayDelete(_ db: Database, _ commentID: String, _ clientName: String) throws -> Bool {
-        try Queries.mcpCommentAuthor(db, commentID: commentID) == clientName
+        guard try deleteRung(db, commentID, clientName) == .edit else { return true }
+        let facts = try Queries.mcpNoteFacts(db, noteID: try Queries.mcpContainerOf(comment: commentID, db) ?? "")
+        let decision = MCPGrantAuthority.decide(
+            try MCPGrantAuthority.standing(db, clientName: clientName), note: facts, rung: .edit, consumes: true)
+        if case .allow = decision { return true }
+        return false
     }
 }

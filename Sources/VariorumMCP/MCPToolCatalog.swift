@@ -110,6 +110,8 @@ enum MCPToolCatalog {
         saveCommit, chooseTake, adoptLens,
         // VX-184 U3 — VX-190: un-tagging a note (her removeTag, §9).
         removeTag,
+        // VX-184 U4 — VX-195: edit parity inside a note (R-VX184-1) — comments.
+        editComment, restoreComment,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -398,12 +400,13 @@ enum MCPToolCatalog {
     static let deleteComment = MCPToolDeclaration(
         name: "delete_comment", rung: .suggest, title: "Delete your comment",
         description: """
-            Delete a comment this client left (with add_comment or add_comments). At suggest you \
-            may delete only your own: a comment Variorum doesn't have on file as yours (the \
-            author's, another client's, or one left before Variorum kept that record) is refused. \
-            Nothing is destroyed: the comment joins the block's deleted comments, where the author \
-            can bring it back, and the delete is one undo for them. Get comment ids from read_note \
-            with with_ids: true. Returns JSON.
+            Delete a comment. With suggest you may delete only a comment you left (with add_comment \
+            or add_comments): one Variorum doesn't have on file as yours (the author's, another \
+            client's, or one left before Variorum kept that record) is refused. With edit on the \
+            note you may delete any comment. Nothing is destroyed: the comment joins the block's \
+            deleted comments, where the author can bring it back (so can restore_comment), and the \
+            delete is one undo for them. Get comment ids from read_note with with_ids: true. \
+            Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -797,6 +800,52 @@ enum MCPToolCatalog {
                 "tag": .object(["type": "string", "description": "The tag's path (as read_note's header shows it)."]),
             ]),
             "required": .array(["note_id", "tag"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-184 U4 — VX-195 edit parity inside a note (R-VX184-1)
+
+    /// Her comment edit, on ANY comment (R-VX188-1's edit clause) — the stale
+    /// read refused, as `edit_take`'s.
+    static let editComment = MCPToolDeclaration(
+        name: "edit_comment", rung: .edit, title: "Edit a comment",
+        description: """
+            Rewrite one comment's text — any comment on the note: the author's, yours or another \
+            client's. expected_text must be the comment's text EXACTLY as you read it (read_note with \
+            with_ids: true lists each block's comments); if it changed since, the edit is refused and \
+            nothing is written — read again. Writing the text it already has changes nothing. One \
+            undo for the author puts the old words back. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "comment_id": .object(["type": "string", "description": "The comment to edit."]),
+                "text": .object(["type": "string", "description": "The comment's whole new text."]),
+                "expected_text": .object(["type": "string",
+                                          "description": "The comment's current text, exactly as read."]),
+            ]),
+            "required": .array(["comment_id", "text", "expected_text"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// Her restore door on a deleted comment — only one her block's deleted
+    /// comments still offer.
+    static let restoreComment = MCPToolDeclaration(
+        name: "restore_comment", rung: .edit, title: "Bring back a deleted comment",
+        description: """
+            Bring a deleted comment back to its block, as the author's own restore does. Use the id \
+            from a read before it was deleted, or of one you deleted (delete_comment). A comment the \
+            author chose to delete for good can't come back. One undo for the author deletes it \
+            again. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "comment_id": .object(["type": "string", "description": "The deleted comment."]),
+            ]),
+            "required": .array(["comment_id"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)

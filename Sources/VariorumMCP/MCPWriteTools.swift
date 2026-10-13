@@ -86,6 +86,8 @@ struct MCPWriteTools: Sendable {
         case removeTag(noteID: String, path: String)
         /// VX-184 U3 (VX-187): two notes linked as versions (`MCPWriteTools+LinkVersions`).
         case linkVersions(noteA: String, noteB: String, pairs: [Operations.MCPVersionPair])
+        /// VX-184 U4 (VX-195): edit parity inside a note (`MCPWriteTools+NoteEdits`).
+        case noteEdit(NoteEditJob)
 
         var tool: String {
             switch self {
@@ -93,6 +95,7 @@ struct MCPWriteTools: Sendable {
             case .carriage(let job): job.tool
             case .deliberate(let job): job.tool
             case .batch(let job): job.tool
+            case .noteEdit(let job): job.tool
             case .deleteComment: "delete_comment"
             case .removeTag: "remove_tag"
             case .linkVersions: "link_versions"
@@ -187,6 +190,7 @@ struct MCPWriteTools: Sendable {
             }
             if name == MCPToolCatalog.removeTag.name { return try parseRemoveTag(args) }
             if name == MCPToolCatalog.linkVersions.name { return try parseLinkVersions(args) }
+            if let job = try parseNoteEdit(name, args) { return .noteEdit(job) }
             throw ArgumentFailure(message: "Unknown tool: \(name).")
         }
     }
@@ -407,6 +411,8 @@ struct MCPWriteTools: Sendable {
         case .linkVersions(let noteA, let noteB, let pairs):
             return try performLinkVersions(
                 noteA: noteA, noteB: noteB, pairs: pairs, job: job, ops: ops, clientName: clientName)
+        case .noteEdit(let edit):
+            return try performNoteEdit(edit, job: job, ops: ops, clientName: clientName)
         }
     }
 
