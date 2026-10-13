@@ -173,3 +173,52 @@ read `pair[1]` to EOF after closing the input (the upstream's `shutdown` IS that
 (never `shutdown`) `pair[1]`, JOIN the shim thread, and only then close anything else; both pair ends carry
 `SO_NOSIGPIPE`; every read is bounded. Assertions unchanged. **Evidence:** 80/80 runs clean after (2/40 SIGPIPE
 before) — a timing race, so the red-on-old is statistical, said plainly.
+
+### VX-181 — the trace (written before code)
+
+**Inputs → wrong output.** Variorum closed (or its server off): the shim's `MCPSocketRoad.connect` fails `ENOENT` /
+`ECONNREFUSED` → `.notRunning` → `MCPShim.respondToFirstRequest(input:output:message:)` reads ONE line from stdin
+(`readFirstLine`, ≤ 1 MiB) and answers it with the refusal ("Variorum must be open: …") on THAT line's id, then the
+shim exits. Claude Code 2.1.296 pipelines `server/discover` (string id `"server-discover-probe-1"`) AHEAD of its
+`initialize` (id 0) — VX-180's capture — so the one answer lands on the PROBE's id; the `initialize` is never read or
+answered, the shim exits, and Claude Code reports only `CONNECTION_CLOSED` (seen live in VX-180's round, leg (2): her
+user-scope `variorum` entry, app absent). The honest sentence never reaches the person.
+
+**The fix shape (the kickoff's):** VX-180's bounded pre-initialize window, in the shim's refusal read. The window's
+PURE letter (what a frame is to it, its fixed answers, the bound, the echoable-id rule) moves from `MCPHandshake`
+(VariorumMCP — which the shim does not link) to `VariorumMCPSocket` as ONE shared rule (`MCPOpeningWindow`), with the
+line reads and the window loop beside it; `MCPHandshake` consults it (its VX-180 names kept as thin forwards, so
+VX-180's pins run unchanged — the "switched under that ticket's pins" the NIT asked for), and the shim's refusal read
+runs the SAME window: a probe is answered `-32601` on its own id, a ping its empty result, a notification skipped,
+and the frame that ends the window — the `initialize` — hears the shim's honest sentence on ITS id. Past the bound,
+or on a frame that is no request, the sentence answers that frame (the pre-VX-181 road). **NIT 1 discharged:**
+`MCPShim.refusalResponse` and the window both read `MCPOpeningWindow.isEchoableID` — one predicate, one module.
+**The pin (compiles on the pre-fix tree, `MCPShim.run` only):** the shim run from a fake app bundle whose container
+has no socket, stdin carrying VX-180's captured pair pipelined → line 1 is `-32601` on the probe's string id, line 2
+is "Variorum must be open…" on id 0. Pre-fix: line 1 is the sentence on the probe's id and there is no line 2.
+
+### Over-cap answers — the argued shape (written before code)
+
+**Today:** an OPENING line (the preamble, a window frame, the `initialize`) past `MCPHandshake.lineLimit` (1 MiB) ends
+the read (`readOpening` → nil) and the session returns: closed with NO answer. A message past
+`MCPSocketTransport.lineCap` (16 MiB) after admission ends the transport's reader and the session: closed with NO
+answer. **And the 16 MiB cap is not exact:** `readLines` checks only the unterminated REMAINDER after each read, so a
+line whose newline arrives in the same read as its overflowing bytes is yielded whole — anything up to `lineCap` +
+one read (64 KiB) can be served, and which happens depends on how the kernel chunks the stream. A boundary pin needs
+the cap to be exact: a line longer than `lineCap` is over, whatever the chunking (the doc comment already says so).
+**The shape, per arm:**
+- **Opening (pre-admission):** the read thread is the only writer on the descriptor (no SDK yet), so the answer is
+  clean: one JSON-RPC error on `id: null` (the overrun line has no parseable id — JSON-RPC 2.0's rule when the id
+  cannot be detected), code `-32000` (the door's own refusal code — `MCPShim.refusalCode`: every refusal Variorum
+  speaks on the wire is -32000 + one sentence), then the close. Nothing decided, nothing logged, no key claimed —
+  the admission never runs (the frame was never read whole).
+- **After admission:** the transport's reader thread is NOT the only writer (the SDK's responses go through the
+  transport actor's `send`), so the answer goes through the SAME actor — serialized with the SDK's writes, never
+  interleaved mid-frame — and only then does the stream finish (the SDK ends, the host closes). Same shape: `id:
+  null`, -32000, a sentence naming the cap. The wait for that write is bounded (2 s) so a peer that reads nothing
+  cannot hold the reader.
+- **The shim with the app closed:** an over-limit line inside its window answers the closed-app sentence on
+  `id: null` (that sentence is the one the person needs; the size is the shim's own business).
+**PROVISIONAL (P-U1 over-cap):** the code (-32000 · -32600 "Invalid Request" · -32700 "Parse error"), the id (`null`
+as built · drain the line to its end and parse the id from a bounded tail — a heuristic over unparsed JSON, rejected
+here) and the words — options in the PROVISIONALs list at the close.
