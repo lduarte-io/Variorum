@@ -809,7 +809,7 @@ its own commit) · `Operations+MCP{Writes,Ergonomics}` + small extractions in `O
 | 13 | the stage window (after the GO): the Mac batch + THE LIVE ROUND legs (a)–(d), dev store only | NOT STARTED |
 | 14 | close: self-assessment, PROVISIONALs, OWED | NOT STARTED |
 
-**No revert is in flight.**
+**REVERT IN FLIGHT (announced before it starts, 2026-10-13):** VX-186 red-on-old — the PRODUCTION hunks of `b93f268d` reversed in the working tree (`git diff b93f268d^ b93f268d -- Sources | git apply -R`: `MCPNoteStructure.swift`, `MCPToolCatalog.swift`), pins kept. **Restore = `git checkout HEAD -- Sources`** (the tree is committed at this record's commit).
 
 ### The traces (written before code)
 
