@@ -1447,3 +1447,215 @@ savepoint — see call 6.
   "archive"; the take comes back by her ⌥⌘Z or her own Unarchive).
 - **P-U4-WORDS** — the twelve tools' titles and descriptions, `delete_comment`'s grown description, every refusal sentence
   the wire adds, the receipts, the Activity phrases and the undo labels (her copy pass; 13s-a-sweepable).
+
+## U5 UNIT RECORD — edit parity across the library: VX-196 (opus-implementer, 2026-10-13 from ~06:50 MDT)
+
+**What this unit did NOT do (said first — kept current; the UNIT-CLOSE state replaces it):** IN PROGRESS — nothing is
+built yet; this record opens before code (the traces, the argued design and the running PROVISIONALs below). Zero
+schema, zero `Sync/`, zero custody/keychain, zero editor seam by design (verified by path diff at the close).
+
+**Read in full before code (never delegated):** CLAUDE.md + the auto-loaded canon (AppSpec §9's reading/chapter/archive/
+daily-Journal/Trash op families, §12's THE MCP DOOR line); the kickoff `notes/plans/mcp-launch-polish-kickoff.md` whole
+(R-VX184-0…6, the U5 row); this record's head + the U1–U4 records (U4's whole — THE pattern); `notes/plans/fixes/
+vx-168-mcp-client-secret.md` (head, LIVE STATUS, the UNIT 1 design calls, the UNIT 2 record whole); the 13n-b plan's ruled
+design, SITTING RECORD (R-13nb-1…26 incl. R-13nb-14's keyboard bar, R-13nb-17, R-13nb-19/20), AF-1…AF-11, the seam rulings
+A-1…A-10, the U2 PROVISIONALs (P-13nb-U2-4/-8), the U3 decisions (P-13nb-U3-1…17 — the in-transaction guard; P-13nb-U3-7/8
+the chapter acts at write new), the U4 forks + PROVISIONALs (AF-11 F-1's mirror-never-invent, P-13nb-U4-8/-9/-16); the
+13n-c plan's rulings (R-AIR-1…15 — R-AIR-12 above all), the U1 adjudications (T-2/F-7 — the ONE answer, a fenced BOOK
+included), §3 U6, §7 constraints, §8 environment traps, the U6 UNIT RECORD (the gathering reach, `decideGathering`, the
+two-sided move); `notes/SessionResiliencyProtocol.md` whole. `notes/SyncSpec.md`: re-read before code — this unit has NO
+schema change; every column these acts write (`reading.name/locked/archived_at/deleted_at`, `reading_section.*`,
+`reading_post.position/deleted_at`, `container.archived_at/deleted_at`) is synced metadata in §6's server-wins CAS class,
+written only through her own ops' row work — no new repair class, no new conflict shape. Code: `Operations+{Reading,
+Sections,ReadingArchive,Container,Intake,Ownership,Purge,MCPWrites,MCPEdits,MCPCarriage,MCPNoteEdits,DocumentImport}`,
+`Queries/{MCPGrantQueries,OwnershipQueries}`, `Domain/MCPGrantRule`; `Sources/VariorumMCP/{MCPWriteTools,+Edit,+Carriage,
++NoteEdits,+WingMove,MCPWriteSupport,MCPGrantAuthority,MCPToolCatalog,MCPReadTools (list_books/list_notes),MCPBookRules,
+MCPSession (the advice)}`; the app's her-doors (`BookStateDoors.perform`, `RemoveFromBook`, `BookPanelModel` (the manual-
+order gate), `BookStructureModel`, `ReadingsViewModel.rename`, `LibraryViewModel` archive, `NoteDeletion`), `MCPPaneCopy`
+(Activity + `MCPReceiptCopy`), the shared `OpsRefusalTable` + the Mac `OpsRefusalCopy`; the suites' rituals
+(`MCPServerTests` catalog walk, `MCPEditServerTests` edit PROOF, `MCPWriteServerTests` suggest PROOF), U4's
+`MCPNoteEdit{,Once}ServerTests`, core `MCPNoteEditActsTests`, the Mac `MCPEditParityFacesTests`; the guide's MCP lessons 1–3.
+
+**Surfaces (planned):** core `Operations+MCPLibraryEdits.swift` (NEW — the fourteen acts) + byte-for-byte row-body
+extractions in `Operations+{Reading,Sections,ReadingArchive,Container}` (her doors call the extractions) + `MCPWriteAct`'s new
+cases + `Queries` (two address reads) · `Sources/VariorumMCP/{MCPWriteTools+LibraryEdits.swift (NEW), MCPWriteTools
+(dispatch), +Carriage (`guardBookAndNote` gains a rung, default unchanged), MCPToolCatalog, MCPReadTools (list_notes'
+chapters)}` · the app's `MCPPaneCopy` (receipts + Activity words) · tests. ZERO schema, `Sync/`, custody/keychain, editor seam.
+
+### LIVE STATUS — U5's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this record: LIVE STATUS, the traces, the argued design + PROVISIONALs (below) — written before code | DONE (this commit) |
+| 1 | the pins FIRST, per tool family (the book's state · membership & order · chapters · the note) + the once pin, compiled and run on the PRE-FIX tree → RED, counts recorded | NOT STARTED |
+| 2 | core: the fourteen acts (`Operations+MCPLibraryEdits`) over byte-for-byte extractions, `MCPWriteAct`'s cases + the app's receipt/Activity words in the SAME commit, core state-transition pins; the parity proof = the whole core target green with her suites unmodified | NOT STARTED |
+| 3 | wire — THE BOOK's state: `rename_book`, `finish_book`, `reopen_book`, `archive_book`, `unarchive_book`, `delete_book` (+ the rituals) | NOT STARTED |
+| 4 | wire — MEMBERSHIP & ORDER and CHAPTERS: `remove_note_from_book`, `move_note_in_book`, `rename_chapter`, `delete_chapter`, `move_chapter`; `list_notes(book_id)` carries the book's chapters (+ the rituals) | NOT STARTED |
+| 5 | wire — THE NOTE: `delete_note`, `archive_note`, `unarchive_note` (+ the rituals) | NOT STARTED |
+| 6 | red-on-old BY REVERT per family (announced here first, committed tree, restored clean) | NOT STARTED |
+| 7 | the Mac faces pins (`MCPLibraryParityFacesTests`) + headless finals + the Mac build-for-testing → READY FOR STAGE | NOT STARTED |
+| 8 | the stage window (on the orchestrator's GO + claim): the Mac batch + THE LIVE ROUND (one real Claude Code turn, a representative act of each family, ⌥⌘Z each) | NOT STARTED |
+| 9 | close: self-assessment, PROVISIONALs, OWED | NOT STARTED |
+
+**No revert is in flight.**
+
+### The traces (written before code)
+
+**These are FEATURE rows, not bug rows** (U3/U4's class): on the pre-fix tree each new tool answers "Unknown tool: <name>."
+— the pins are red-on-old by construction and red again by revert. No existing tool changes behaviour EXCEPT `list_notes
+(book_id:)` on a BOOK gaining a `chapters` array (an added key — every existing pin re-run; see call 9).
+
+**What each act rides (her doors' own ops, read in the code):**
+- **the book's state** — `renameReading` (her two rename doors run `assertBookNameIsFree(name, excluding: id)` first — E13 —
+  then the raw set; a finished/sealed book renames freely); `lockReading` (a GATHERING refuses `wrongReadingKind`; a SEALED
+  book is a no-op; the finish DISMISSES pending arrivals on its stamp); `unlockReading` (a SEALED book refuses
+  `readingSealed`; un-finishing a finished book runs the RESUME CATCH-UP — bells); `archiveReading` (a book OR a gathering;
+  already-archived refuses `readingAlreadyArchived`; one row write; arrivals keep waiting); `unarchiveReading(db,id,now)` (the
+  exact-stamp members return, the flag clears, the catch-up bells; not-archived refuses `readingNotArchived`);
+  `deleteReading` (THE DAILY JOURNAL refuses `dailyJournalCannotBeDeleted`, read inside the write; an OWNED book's delete is
+  her two-choice confirm's FIRST choice, "book only" — the cascade releases its notes to the Pool; `deleteReadingWithNotes`
+  is the second choice, HERS ALONE — R-VX184-2's list); the recovery is `restoreReadingRows` (exact-stamp chapters and
+  memberships, the ownership revival pass, the catch-up).
+- **membership & order** — `removePostFromReading` (a finished book refuses `lockedReading`; the MEMBER row tombstoned —
+  member-class, decided; answers whether the note is now BOOKLESS; on an owned book her door reads "Release"); a gathering
+  has no remove door (her honest door is the tag — `RemoveFromBook`); `reorderReadingPost` (finished refuses; the anchor
+  must be a live row of the book — `postNotInReading`) — and HER DOORS gate every note move on the book's MANUAL order
+  (`BookPanelModel.manualOrder` / `BookPanelCopy.needsManualOrder` — "is sorted by …, so a note can't be placed by hand").
+- **chapters** — `renameSection` (trimmed, blank refuses `invalidSectionName`, a no-op writes nothing, ALLOWED under a
+  finished book), `deleteSection` (finished refuses; the chapter tombstoned, memberships keep their pointer — dangling reads
+  unfiled), `restoreSection` (the recovery: one flip, finished refuses), `reorderSection` (finished refuses; anchors are the
+  same book's live chapters — `sectionNotFound` otherwise).
+- **the note** — `deleteContainer` (`tombstoneNoteFamily`: the note and its saved versions on ONE stamp, the cascade takes
+  placements/memberships/tags/references; Trash, 30 days; clears the redo future; NOT refused under a seal — §9 "the post
+  itself may still be archived, deleted…"); `restoreContainer` (`restoreNoteFamily` + the ownership revival pass — the
+  exact-stamp recovery, purge intents voided — the B1 belt); `archiveContainer` / `unarchiveContainer` (one column; her
+  archive RE-STAMPS an already-archived note — her doors never offer Archive on one).
+**Reach facts the wire already holds (read, not assumed):** the daily Journal BOOK and every Private book are FENCED as
+books (`mcpBookFacts`' journal/private legs → `reaches` false for every grant → the ONE not-shared answer, never an ask —
+13n-c T-2/F-7); a gathering has no `mcpBookFacts` (every write tool answers it as a missing book today — U6's pinned letter)
+but IS readable as facts under a wing grant or the open book (`decideGathering`, R-AIR-12); a saved version has no
+`mcpNoteFacts` (the one answer); an ARCHIVED note keeps its reach (an id answers under its grant).
+
+### The design, argued
+
+1. **Every act = her op's row work + the grant guard FIRST inside the act's transaction + ONE client-named undo entry.**
+   Canon §12 ("Every write is one of §9's operations with the grant guard INSIDE the op's own transaction and ONE
+   client-named undo entry") and U4's P-VX195-1 posture decide it: all fourteen register ONE entry, including the acts her
+   own doors leave off the stack — the archive family ("no undo entry — the door is the recovery", §9), the chapter family
+   ("No undo entry"), finish/reopen, rename, and the Trash acts (delete note, delete book — "the Trash is the recovery
+   door"). The precedent for wrapping an undo-less door of hers with an entry is ON THE WIRE ALREADY: `move_note_to_wing`
+   (§12's rider — "the MCP road wraps her undo-less per-note wing move with this entry — her own door stays undo-less").
+   No act here writes a commit (VX-168 U2's one argued exception, I5). Inverses and redos are exact-row from do-time
+   images, keyed on the act's own STAMPS (held per entry — U6's `LockIsolated` shape); divergence is QUIET (the world moved
+   past the entry — e.g. she put the note back from the Trash already); a FINISHED/SEALED book THROWS and keeps the entry
+   (resolvable — `revertAddedMembership`'s letter). PROVISIONAL **P-VX196-1** (options below), parallel to P-VX195-1.
+2. **The decisions — the edit rung's two (AF-10 (a)), at the place the act changes:**
+   - **book acts** (rename/finish/reopen/archive/unarchive/delete book) — the BOOK at EDIT: the snapshot speaks the
+     refusal and raises the ask (scope book); the guard re-decides the book INSIDE the act's transaction and spends any once
+     grant there. A note grant never reaches a book (`reaches`); a book or wing grant at edit does. A FENCED book (the daily
+     Journal, a Private book) answers the ONE not-shared shape and raises no ask (the existing machinery, unchanged).
+   - **chapter acts** — the chapter's BOOK at EDIT, the chapter re-resolved to its book inside the transaction
+     (`Queries.mcpBookOf(section:)`, a NEW address read). P-13nb-U3-7 placed `create_section` at write new ("a chapter adds and
+     changes nothing that exists"); renaming, deleting or moving one changes what exists → EDIT (her R-VX184-1 list puts
+     them "at edit on the book/wing").
+   - **membership & order** (`remove_note_from_book`, `move_note_in_book`) — TWO-SIDED, both at EDIT on one standing read
+     (`guardBookAndNote`'s shape, given a rung): the BOOK (its membership or order changes) AND the NOTE (a note the client
+     cannot reach is never reorganized — file_note_in_chapter's double decision, carried; and it closes a MEMBERSHIP oracle:
+     a Private member of a granted book is unreachable, so naming its id answers the one shape, never "removed"). The snapshot
+     decides the note first, then the book (add_note_to_book's ask order). `move_note_in_book`'s ANCHOR note is decided at
+     READ (non-consuming — the client must already be able to read what it names; an unreadable anchor is the one answer, no
+     oracle on fenced members) and must be a live MEMBER of this book (`notInBookWords` — said only for a readable note).
+   - **note acts** (delete/archive/unarchive note) — the NOTE at EDIT (`onNote` + `guardEdit`, U4's road exactly).
+3. **A GATHERING is never a write target (R-AIR-12) — refused HONESTLY where the client can read it.** Her own doors
+   rename, archive and delete gatherings; the wire does not (no grant names one). The brief: "a write aimed at a gathering
+   refuses honestly; no new oracle anywhere". Built: when the named book id is a GATHERING the client can READ (wing reach or
+   the open book — `decideGathering`, the ONE rule), every new book/chapter/membership tool refuses with ONE sentence that says
+   what it is ("“X” is a gathering — …"; her `RemoveFromBookCopy.removeTagHelp` truth: it holds no notes, a note leaves it by
+   no longer matching — `remove_tag`); a gathering it cannot read answers the one not-shared shape. No oracle opens: the
+   sentence is said only where `list_books` already lists the gathering to this client. R-VX188-2's reasoning (a reachable
+   thing must never hear "doesn't exist"). The EXISTING write tools keep U6's pinned one-shape answer (not this unit's to
+   change — OWED). PROVISIONAL **P-VX196-2**.
+4. **`delete_book` — her `deleteReading`, exactly; the daily Journal's guard stands; an OWNED book deletes "book only".**
+   The daily Journal is unreachable on the wire (fenced as a book — the one answer) AND the op refuses it inside the write
+   (`dailyJournalCannotBeDeleted`, the belt — pinned core-side with an ALLOWING guard). An OWNED book: the plain op is her
+   two-choice confirm's FIRST choice ("Delete Book Only" — `BookStateCopy.deletedBookOnly`: its notes released to the Pool,
+   nothing of hers destroyed); the SECOND (`deleteReadingWithNotes`) stays hers alone (R-VX184-2's list). So the plain road
+   covers the owned case cleanly — no ceremony minted, no refusal needed; the answer says the notes went to the Pool
+   (`notes_released: true` — a flag, never a count: an owned book's members can include Private notes the client cannot
+   read, and a count would leak them). Gathering → call 3's sentence. The undo revives the book on its EXACT stamp
+   (`restoreReadingRows` — her restore door's body: chapters, memberships, the ownership pass, the catch-up); the redo
+   re-deletes on a fresh stamp (a book that has since become THE daily Journal refuses — the op's guard). PROVISIONAL
+   **P-VX196-3** (the owned case).
+5. **`archive_book` / `unarchive_book` — her `archiveReading` / `unarchiveReading`.** A plain archive is ONE row write (her
+   door asks only on an OWNED book — the second choice `archiveReadingWithNotes` is hers alone; the plain op is her first
+   choice, "book only": the notes stay live, still members, still owned — membership is a FACT). Her refusals ride
+   (`readingAlreadyArchived` / `readingNotArchived` — her words, "nothing changed"). Undo of an archive = her UNARCHIVE body
+   while the book still wears the act's stamp (the catch-up bells — the matches that arrived while intake paused; quiet
+   otherwise); undo of an unarchive = the book AND exactly the notes it brought back re-archived on the ORIGINAL stamp (so a
+   later unarchive returns them again — `unarchiveReading`'s exact-stamp letter); the bells it raised stay (an archived book's
+   arrivals keep waiting — R-13ie). Same owned-book reading as call 4 — **P-VX196-3**.
+6. **`finish_book` / `reopen_book` — her `lockReading` / `unlockReading`, two tools** (U4's one-tool-per-verb, for Activity's
+   words). A gathering → call 3; a SEALED book: finish is her no-op (`changed: false`), reopen refuses `readingSealed` in her
+   words ("unseal it to reopen it" — Seal is hers alone, R-VX184-2). Finish's no-op on a finished book and reopen's on an open
+   one write NOTHING (`changed: false`, no entry, no receipt — the metadata setters' convention; her op re-writes
+   `updated_at`). **Undo of a finish** = her unlock body (the catch-up) AFTER reviving exactly the arrival rows the finish
+   dismissed on its stamp (each only while its pair has no live row) — so the door returns to what waited. **Undo of a
+   reopen** = her finish body again — which dismisses whatever waits at the door, the reopen's catch-up bells included: those
+   pairs then read DECIDED (a later reopen won't re-pose them; a fresh tag still re-poses one at the door — §9's
+   tombstone-means-decided, there is no row-free state to return to under S2). Answers never COUNT arrivals (a count of
+   rule-matching non-members is P-13nb-U4-16's oracle class). PROVISIONAL **P-VX196-4**.
+7. **`rename_book`** — trimmed, blank refused at the parse; the E13 guard INSIDE the act's transaction
+   (`requireBookNameFree(excluding:)` — her two rename doors' assert, `duplicateBookName` in her words); a finished or sealed
+   book renames (her op's posture); a same name writes nothing (`changed: false`). Undo restores the old name exactly (no E13
+   re-check — the Put-back tolerance, P-13ie-U1-11's class). **`rename_chapter`** — her `renameSection` body exactly (trim,
+   blank refuses, the no-op, allowed under a finished book). Names as given — no client stamp (P-VX195-5's reading).
+8. **`move_note_in_book` / `move_chapter` / `delete_chapter` / `remove_note_from_book`** — her ops' bodies exactly, plus her
+   DOORS' manual-order gate on note moves, mirrored at the act (AF-11 F-1's letter: refuse exactly where her door refuses,
+   never more — `MCPLibraryRefusal.bookNotInManualOrder`, checked inside the transaction; chapter moves are not gated, as hers
+   are not). Addressing: `move_note_in_book(book_id, note_id, after_note_id | before_note_id | at: start|end)` and
+   `move_chapter(section_id, after_section_id | before_section_id | at)` — exactly one road (`move_block`'s grammar). The
+   move only changes the note's place in the book's order — its chapter is `file_note_in_chapter`'s (said in the
+   description). `remove_note_from_book`'s answer says `released` (an owned book — her "Release") and `bookless`; undo
+   revives the very member row (finished → throws, keeps; the ownership revival pass); `delete_chapter`'s undo is her
+   `restoreSection` flip on the act's stamp; the moves' undos restore the exact previous position.
+9. **`list_notes(book_id:)` on a BOOK carries `chapters`** — the book's live chapters in order (`section_id`, `name`), on
+   every page. Without it a chapter with no notes filed is unaddressable, so `rename_chapter`/`delete_chapter`/`move_chapter`
+   could not reach what her Outline shows (R-13nb-14's keyboard bar; AF-10 (f) already ruled chapter facts for readable
+   books — a FACT, not a read dial, R-13nb-17). Only after the book's own read decision; a gathering carries none.
+   PROVISIONAL **P-VX196-5** (where the chapters ride).
+10. **The note acts** — `delete_note` = her `deleteContainer` body (`tombstoneNoteFamily` — versions ride; Trash, 30 days);
+    the answer says so. Undo = her `restoreContainer` body (`restoreNoteFamily` + the ownership pass) while the note still
+    wears the act's stamp — the B1 belt voids a purge intent on the way, exactly as every revive road does (her ⌥⌘Z is her
+    act); a note physically purged since, or put back already, is quiet. `archive_note` / `unarchive_note` = her
+    `archiveContainer` / `unarchiveContainer` row work, with the wire's NO-OP: an already-archived note (or an already-live
+    one) writes nothing (`changed: false`) — her door never offers Archive on an archived note, and her op's re-stamp would
+    break an owned book's exact-stamp unarchive (call 5) — U4's `archive_take` posture. The undo restores the EXACT prior
+    `archived_at` (the original stamp on an unarchive's undo — so a book archived with its notes still returns this one).
+    A seal does not refuse (§9: "the post itself may still be archived, deleted…"). PROVISIONAL **P-VX196-6** (the no-op).
+11. **Private / Seal / Own stay HERS ALONE** (R-VX184-2): no tool here writes `ai_private_at`, `sealed_at`, a note's seal or
+    `owned`; `deleteReadingWithNotes` / `archiveReadingWithNotes` are never called. U4's Mac pin (no tool NAMED for them)
+    grows to the fourteen; the server pins assert the columns byte-identical after every act.
+12. **Wording** — every description, refusal, receipt, Activity phrase and undo label ships AS BUILT: **P-U5-WORDS** (the
+    QUESTIONS road at the merge — not VX-234).
+
+### PROVISIONALs (running — each wants a `notes/QUESTIONS.md` entry at the merge)
+
+- **P-VX196-1 — every U5 act is ONE ⌥⌘Z** (canon §12 + P-13nb-U2-4 + U4's P-VX195-1 + the wing move's §12 rider): (a) as
+  built; (b) an entry only where her own door has one — none of these acts' doors has one, so every U5 act would be
+  undo-less, its description saying "the author's own door (Put back, Unarchive, Reopen…) is the way back" (falsifies the
+  advice's "Every change you make is one undo for the author" — it would need re-voicing).
+- **P-VX196-2 — a readable gathering hears its own sentence** (call 3): (a) as built — the honest sentence where the client
+  can read it, the one shape where it cannot; (b) the one not-shared shape everywhere (U6's letter for the existing write
+  tools — consistent across the wire, but tells a client that just listed it that it "doesn't exist").
+- **P-VX196-3 — an OWNED book's delete and archive on the wire are "book only"** (her confirm's first choice): (a) as built —
+  the notes released to the Pool (delete) / kept live and owned (archive), the answer saying so; (b) refuse both on an owned
+  book (her two-choice confirm is hers to answer), the description pointing at the author.
+- **P-VX196-4 — the finish/reopen undo shapes** (call 6): (a) as built — a finish's undo revives what it dismissed, a
+  reopen's undo dismisses what its catch-up belled (decided); (b) finish/reopen register no entry (her doors' posture —
+  each other's opposite is the way back).
+- **P-VX196-5 — the book's chapters ride `list_notes(book_id:)`** (call 9): (a) as built, every page; (b) `list_books` rows
+  carry each book's chapters; (c) no chapter listing (an empty chapter stays unaddressable on the wire).
+- **P-VX196-6 — archive/unarchive a note are no-op-guarded on the wire** (call 10): (a) as built; (b) her op exactly (an
+  archived note re-stamped — breaks an owned book's exact-stamp unarchive).
+- **P-U5-WORDS** — the fourteen tools' names, titles and descriptions; the wire's sentences (the gathering, not-in-book,
+  manual-order); the receipts, Activity phrases and undo labels (her copy pass; 13s-a-sweepable).
