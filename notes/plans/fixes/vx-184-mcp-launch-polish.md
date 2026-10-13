@@ -521,9 +521,9 @@ read off `decideGathering`, beside `reach`) · doc lines in `MCPGrantQueries` / 
 | 1 | the pins, written BEFORE the fix: core `MCPGatheringReachTests` (compiles on the pre-fix tree — old API only) + the Mac `MCPGatheringIconTests` (the Bookcase model + the popover's words); run the core pins on the pre-fix tree → RED | DONE (this commit) — **core `MCPGatheringReachTests` 6 tests, RED on the pre-fix tree (`cce88173`'s sources): 6/6 failed, 20 issues** (`swift test --filter MCPGatheringReachTests`, log `vx184-screens/u2/logs/pins-prefix.log`): a wing grant → `all[home.id]` nil · the open book → `icons(db)[id]` nil · archived → "live: both iconed" false, the archived-book rule `(gathering != nil) == (book != nil)` false · the one-decide parity 12 issues (the map's gatherings ≠ `decideGathering`'s allowed set under every shape) · the R-VX185-1 and fence tests red on their POSITIVE controls only — their guard legs (note/book grants → no icon; a Private-stamped / 'daily'-marked gathering → no icon) GREEN on both sides by nature, said in the file. **Mac `MCPGatheringIconTests` 3 tests** (the Bookcase model's held map holds the gathering; the popover's words: "read · always", "through the Home wing grant", "Revoke the Home wing grant", Change… → THE sheet on `.wing("")` replacing that grant; note/book grants bare, the open book iconed; archived off the board like a book) — compiles on the old tree; RUNS in the stage window (PENDING) |
 | 2 | the fix: `MCPGrantRule.reach(grants:openBook:gathering:)` (read OFF `decideGathering`); `mcpBookReaches` / `mcpBookReach` enumerate gatherings through it; the place's own-scope test none for a gathering; docs | DONE (this commit) — **`Domain/MCPGrantRule.reach(grants:openBook:gathering:)`** (`decideGathering`'s `.allow(grantID)` → `Reach(rung: .read, standing: the grant / .openBook)`, else nil — the twin of `reach(…target:)` read off `decide`); **`Queries/MCPShareQueries`**: `MCPReachPlace` (`.note` / `.book` → `decide`; `.gathering` → `decideGathering`; `isOwn` false for a gathering — it is never a grant's scope, so its why always names the wing or the open book) + `mcpReachPlace(db, readingID:)` (a live book's facts, else a live gathering's); `mcpBookReaches` enumerates `kind IN ('book', 'gathering')`; `mcpBookReach` answers a gathering the same way (the singular and the map agree); `mcpReach`/`placeReach` take the place. Docs: the file head, `mcpReachableBookIDs` (the icon's BOOK set is its parity; gatherings' parity is the new suite), `ShelfViewModel.aiReach`/`watchSharing`, `ShelfView.shelfRow`'s icon comment. **ZERO app behaviour code changed** — the row and the popover were already kind-blind (the trace). **NEW pure pin** `MCPGatheringReachRuleTests` (2: the table — wing grant at any rung → read through it; note/book/other-wing/dead grants → nil; the open book; both fences → nil even with a wing grant + the open book — and a 1,024-case grid agreeing with `decideGathering` exactly, never spending). **Green:** `MCPGatheringReachTests` 6/6 + `MCPGatheringReachRuleTests` 2/2 + `MCPShareTests` 16/16 unedited = **24 tests / 3 suites** (log `logs/pins-fixed.log`) |
 | 3 | red-on-old BY REVERT (announced here first; the production files at the pre-fix bytes, the pins kept) → RED; restored | DONE (announced `5e461052`; this commit records it) — the three core production files at `cce88173`'s bytes, the new-API rule pin moved aside: **`MCPGatheringReachTests` RED again — 6/6 failed, 20 issues, identical to the pre-fix run** (the same assertions); `MCPShareTests` 16/16 green beside it (the books' reach untouched by the fix). **Restored:** `git checkout HEAD --` the four paths, the rule pin `cmp`-identical to its aside copy (the copy deleted), `git status` clean, `git diff HEAD` empty. Log `logs/pins-revert.log` |
-| 4 | the DEBUG fixture's control wing (`wing=2`) for the walk's note/book-only leg | IN-PROGRESS (this commit — the app build that compiles it is piece 5) — `ScaleFixture` (DEBUG-only, env-gated): `wing=2` ALSO mints the wing "elsewhere" (marker) with the gathering "every draft" (#draft), the book "the drafts book" and two #draft notes filed into it, and for every APPROVED client read · always on EACH note and on the book, no wing grant there (R-VX185-1's control: the book iconed, the gathering bare); plus, in "variorum" (its write-new wing grant reaches both), the ARCHIVED book "an old parser book" and the ARCHIVED gathering "old parser things" (#parser) — the archived-book rule's pair. `wing=1` unchanged (`MCPWingFacesTests`' staging pin untouched). Pin: `MCPGatheringIconTests.theFixturesControlPartStagesTheWalksWorldOnce` (the staged world read through the SAME map the Bookcase draws: parser things iconed through "variorum", every draft bare, the drafts book iconed, the archived pair both in the map and both off the Bookcase; wing=1 mints no control; a relaunch mints nothing) — PENDING (stage window) |
-| 5 | headless finals (core, `VariorumMCPTests`, workbook) + the Mac build-for-testing (`DerivedData/vx184-u2`) | NOT-STARTED |
-| 6 | READY FOR STAGE (turn ends; the orchestrator's GO + claim `vx184-u2`) | NOT-STARTED |
+| 4 | the DEBUG fixture's control wing (`wing=2`) for the walk's note/book-only leg | DONE (`ef3fab2b`; compiled by piece 5's build) — `ScaleFixture` (DEBUG-only, env-gated): `wing=2` ALSO mints the wing "elsewhere" (marker) with the gathering "every draft" (#draft), the book "the drafts book" and two #draft notes filed into it, and for every APPROVED client read · always on EACH note and on the book, no wing grant there (R-VX185-1's control: the book iconed, the gathering bare); plus, in "variorum" (its write-new wing grant reaches both), the ARCHIVED book "an old parser book" and the ARCHIVED gathering "old parser things" (#parser) — the archived-book rule's pair. `wing=1` unchanged (`MCPWingFacesTests`' staging pin untouched). Pin: `MCPGatheringIconTests.theFixturesControlPartStagesTheWalksWorldOnce` (the staged world read through the SAME map the Bookcase draws: parser things iconed through "variorum", every draft bare, the drafts book iconed, the archived pair both in the map and both off the Bookcase; wing=1 mints no control; a relaunch mints nothing) — PENDING (stage window) |
+| 5 | headless finals (core, `VariorumMCPTests`, workbook) + the Mac build-for-testing (`DerivedData/vx184-u2`) | DONE (this commit) — on `ef3fab2b`'s sources, `swift build --build-tests` clean, the whole package `swift test`: **`VariorumMCPTests` 153/25** (U1's close, unchanged) · **`VariorumCoreTests` 2,703/310** (U1's 2,695/308 + `MCPGatheringReachTests` 6 + `MCPGatheringReachRuleTests` 2) · **`StringsWorkbookTests` 40/6** — 0 failures; skips = the standing gated nine only (2 gated suites + 6 tests in core, 1 in the workbook — read, not inferred; log `logs/finals.log`). **The Mac build-for-testing: `** TEST BUILD SUCCEEDED **`** (2026-10-13 ~02:25 MDT, `-derivedDataPath DerivedData/vx184-u2`, 2.4 GB; `Debug/Variorum.app` = `io.lduarte.Variorum.debug`); 188 warnings, the same count as U1's build, none on a line this unit wrote (the five in `ShelfView.swift` are pre-existing lines 346/797/798/1357/1365); log `logs/mac-build-for-testing.log` |
+| 6 | READY FOR STAGE (turn ends; the orchestrator's GO + claim `vx184-u2`) | **READY FOR STAGE** (this commit, 2026-10-13 ~02:30 MDT) — headless finals green, the Mac build-for-testing built, the window planned below ("THE STAGE WINDOW"); the stage NOT claimed (waits on the orchestrator's GO and the claim name, expected `vx184-u2`) |
 | 7 | the stage window: the Mac batch + THE WALK (dev store, both voices, light) | NOT-STARTED |
 | 8 | close: self-assessment, PROVISIONALs, OWED | NOT-STARTED |
 
@@ -562,3 +562,57 @@ the reach map is REACH, not presentation, as for books — an archived book unde
 (`bookcaseReadings` — the ONE archived choke point, both kinds); an archived gathering follows the same rule.
 **P1:** ∝ the live readings × the approved clients (a handful), one facts row per reading — never an assembly, never
 `container` (the held observation still wakes only on `reading`, `wing` and the grants store).
+
+### THE STAGE WINDOW — the plan (runs ONLY on the orchestrator's GO, under the claim it names — expected `vx184-u2`)
+
+**Before the window (no stage) — DONE (row 5):** `DerivedData/vx184-u2` built for testing (sources = `ef3fab2b`).
+**In the window (~25 min):**
+0. **Guards first, every time:** `Tools/WalkKit/guard.sh --author` (her `/Applications/Variorum.app` ABSENT — if present,
+   STOP and report, never quit or kill it); `pgrep -fl 'Variorum.app/Contents/MacOS'` empty; the claim held
+   (`Tools/stage`). Clicks paced ≥ 2.6 s after the previous synthetic event (U1's guard lesson); `guard.sh <devpid> x y`
+   before each click.
+1. **The Mac batch (~8–10 min):** `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS'
+   -derivedDataPath DerivedData/vx184-u2` with `-only-testing:VariorumTests/<Suite>` for every suite over a type this
+   unit touched (grep over `ShelfViewModel`/`ShelfView`/`ScaleFixture`/`MCPGrantRule`/`mcpBookReach`/`MCPSharedIcon`/
+   `MCPReachPopover`/`BookSettingsModel`/`BookSettingsFace`/`MCPShareCopy`/`BookSettingsSheet`) — **54 suites**:
+   ArchivedBooksGroupTests · ArchivedMarkTests · BindDoorTests · BookArchiveDeclarationTests · BookArchiveDoorActTests ·
+   BookAscentDeclarationTests · BookcaseBoardBrainTests · BookcaseCensusMenuTests · BookcaseCensusOverlayTests ·
+   BookcaseDragFaceTests · BookcaseMastheadPopoverTests · BookcasePlacingGripTests · BookcaseQuickEntryPlacementTests ·
+   BookcaseRowFreezeTests · BookcaseStarredShelfBrainTests · BookcaseStarredShelfDropTests · BookcaseViewModelTests ·
+   BookCollectingDoorsTests · BookDeleteAndDuplicateTests · BookOrderConversionTests · BookSettingsArchiveRowTests ·
+   BookSettingsSheetTests · BookStateDoorsTests · CalloutEmojiPickerTests · CalloutSwatchTests · CapabilityRegistryTests ·
+   ComesBackReceiptTests · DocumentImportDoorTests · DuplicateBookNameDoorTests · LibraryListFaceRigTests ·
+   MCPAskAndReceiptTests · MCPAsksWaitCaptureTests (gated) · MCPAsksWaitTests · **MCPGatheringIconTests (new, 4)** ·
+   MCPGrantSheetTests · MCPShareFacesCaptureTests (gated) · MCPShareFacesTests · MCPWingFacesTests · MembershipChoiceTests
+   · MoveToShelfGateTests · PromoteAndPaletteTests · ShelfModelTests · SpawnAndBindLimbTests · StarActingTests ·
+   StarDeclarationTests · StarTargetingTests · TourOfferLineTests · TutorialBooksLessonTests · TutorialBooksRitualTests ·
+   TutorialMCPChapterTests · VocabularySweepTests · WingBookMoveDoorTests · WingContentsArchivedWordsTests ·
+   WingSwitcherChordTests (standing red named if met: VX-115's `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads`).
+2. **A1 prestage copy + staging:** `Tools/ScaleFixture/stage.sh notes=30,long=1,books=20,shelves=3,wing=2
+   "$PWD/App/Variorum/DerivedData/vx184-u2"` — the script's own A1 copy (every store file + the key files →
+   `…/Variorum-dev/Backups/safety-copies/scale-prestage-<ts>/`, each `cmp`-verified), then the DEV build launched with the
+   fixture key: Home's books (20 on 3 shelves), "variorum" (the gathering "parser things" + her sweep's two wing grants
+   for every approved client), and VX-185's control ("elsewhere": "every draft", "the drafts book", two #draft notes,
+   note + book grants only; in "variorum" the ARCHIVED "an old parser book" + "old parser things"). The Debug app's prefs
+   plist saved for a before/after diff. Light appearance (`appearanceChoice` read first; staged light only if not).
+3. **THE WALK — Study, light** (captures → `notes/plans/vx184-screens/u2/`, keys never shown):
+   - **W1 — the wing grant ⇒ ICONED:** ⌘L → "variorum": the "parser things" row wears the icon; click it → the
+     popover: each approved client "read · always" (the gathering's rung, whatever the grant's), "through the variorum
+     wing grant", "Change…" and "Revoke the variorum wing grant".
+   - **W2 — R-VX185-1:** ⌘L → "elsewhere": "the drafts book" iconed (its own grant: no why), "every draft" BARE —
+     every one of its notes shared by its own note grant.
+   - **W3 — the open book ⇒ ICONED:** Settings ▸ MCP ▸ the open book ON → back on "elsewhere": "every draft" iconed, its
+     popover "through the open book" + "The open book is switched in Settings ▸ MCP."; the open book OFF again → bare.
+   - **W4 — archived:** on "variorum" the archived pair is OFF the Bookcase; the Archived surface lists "an old parser
+     book" and "old parser things" side by side, neither iconed (the archived-book rule); Unarchive "old parser things"
+     → it returns to the "variorum" Bookcase WEARING the icon.
+4. **The same legs in Terminal, light** (the voice switched in Settings ▸ General — a synced setting the restore
+   reverts): W1's row + popover, W2's pair, W3's open-book popover.
+5. **Change… and Revoke act on the WING grant (once, Terminal):** from "parser things"' popover, Change… → THE sheet
+   "Change access — ‹client›", WHERE = the "variorum" wing pre-filled, "Confirming replaces the grant you opened this
+   from." (captured; cancelled by System Events Esc — nothing written); then "Revoke the variorum wing grant" → the icon
+   leaves "parser things" (and the un-archived gathering); Settings ▸ MCP ▸ Shared with AI no longer lists the
+   variorum wing grant.
+6. **Cleanup:** the dev instance quit BY IDENTITY (`tell application id "io.lduarte.Variorum.debug" to quit`; `pgrep`
+   empty); `Tools/ScaleFixture/restore.sh <the prestage dir>` → "Restored (verified)" (the fixture, the grants, the
+   voice, every act gone); the prefs plist diffed back; the clipboard untouched; the stage RELEASED.
