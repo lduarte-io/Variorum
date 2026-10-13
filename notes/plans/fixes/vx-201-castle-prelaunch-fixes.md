@@ -493,3 +493,21 @@ suites PENDING the stage window)
 
 NEXT: the stage window (green pass over the listed suites + the 10 pins + both drills under their env vars +
 the simulator replay suite; then the six red-on-old revert cycles per the pin table), via oct12coordinator.
+
+### WINDOW A RECORD (orchestrator, stage claim vx201-u1-tests)
+- GREEN PASS: `✔ Test run with 305 tests in 38 suites passed after 291.154 seconds`, EXIT 0, zero failures
+  (log /tmp/vx201-u1-greenpass.log) — but BOTH drills SKIPPED (the counts-skipped trap, caught on the skip
+  lines): `test-without-building` bakes the runner env at build time, so command-line TEST_RUNNER_ vars never
+  arrive. Second trap same shape: TEST_RUNNER_ vars as xcodebuild ARGUMENTS are build settings, not runner env —
+  "3 tests passed in 0.001s" with 5 skip lines. THE WORKING ROAD: TEST_RUNNER_ vars in xcodebuild's own
+  ENVIRONMENT + plain `test` (recorded for every later window).
+- DRILLS, really run: MIGRATION drill PASSED. POSTURE drill FAILED, 2 issues, BOTH the same signature:
+  `@Dependency(\.date) has no test implementation` accessed from `VariorumCore/SyncEngine.swift:19` inside the
+  drill's test context; the drill's product work otherwise completed (sibling followed, seams resumed, DONE
+  lines). Precedent found: 13x hit this exact class at its U2 slot and ruled it A TEST-HARNESS GAP, not a
+  product finding (phase-13x-library-portability.md:796 — fixed by wrapping the pin in `withDependencies`).
+  But the drill ran GREEN at pre-13x 3b and leg 3, so U1's culpability is NOT yet excluded.
+- BISECT IN FLIGHT (announced before starting; the tree is fully committed at HEAD, so `git checkout --` is the
+  restore): `git checkout 97329acc -- App/Variorum/Shared/` + delete the uncommitted-at-97329acc pin file,
+  build-for-testing, run the POSTURE drill alone with the env road above. Same failure ⇒ pre-existing harness
+  gap (test-side fix, the 13x pattern). Pass ⇒ a real U1 regression to trace before anything else lands.
