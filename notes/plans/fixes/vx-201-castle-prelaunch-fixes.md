@@ -1610,6 +1610,21 @@ apply-check CLEAN at the tip in the pinned checkout)
   strings under the register sweep). Simulators shut down; stage released. Logs /tmp/vx201-wd-*.log.
 - **Still owed:** phase 2's ten revert cycles (READY sent; GO expected ~05:15), then U5's window E.
 
+### WINDOW D RECORD — PHASE 2 (orchestrator, stage claim vx201-u3u4-reverts; the pinned checkout at b96656eb)
+All TEN revert cycles ran (U3's four on PostureSwitchTests' 74; U4's six on its two pin suites); each RED exactly
+on its pin-table legs, every restore clean, HEAD rebuilt (exit 0). U3: **R-d** — the ceremony pin on 10 asserts
+(listing · counts · delete-sum 3 · folders survive · the local and resume arms), the follow pin on 4, the
+declining pin's counts (2). **R-e** — the delete-sum legs alone (ceremony 3 · follow 2): the copies survive
+Delete. **R-f** — the exports-line legs alone (follow 1 · model + composition 2). **R-g** — the counted-body
+legs alone (ceremony 3 · declining 2). U4: **R-204** — the lesson pin on 5 asserts (the new sentence and words
+absent, the old overstatement back); the register pin green (bound). **R-none** — pins (a) 4 + (c) 3; the bound
+(b) green. **R-host** — the BOUND pin (b) red on 4 (both asks fire for a root-hosted ceremony) — the bound
+showing its teeth exactly as designed. **R-reopen** — pin (c)'s two reopen-ask asserts. **R-done** — pin (a)'s
+one road-return assert (the hosted leg green — the reopen's ask still lands it, as the table said). **R-adopter**
+— pins (a) + (c) on `landed` + adopted (4). **U3's AND U4's red-on-old obligations DISCHARGED; with phases 1+3,
+VX-203 + VX-208 + VX-204 + VX-206's acceptance evidence is COMPLETE** (walk legs ride my window). Logs
+/tmp/vx201-wd-*.log; rollup /tmp/vx201-window-d.summary (deleted at closeout).
+
 ## U5 RECORD (VX-209)
 
 **Not done in this unit (stated first):** no `xcodebuild test` of any kind (stage work, per §G) — the 9 new Mac
