@@ -504,3 +504,36 @@ extension TakesParkedFollowTests {
         }
     }
 }
+
+// MARK: - The refusal arm never acts (the fable ladder round 2 — the one NIT,
+// confirmed cross-model; expected RED on the pre-fix tree)
+
+@MainActor
+extension TakesParkedFollowTests {
+    /// **ROUND 2's NIT (RED ON THE PRE-FIX TREE).** The Chosen column's pick
+    /// door is a REFUSAL road (J38) — it must not act. A "Show take ▸" press
+    /// on the Chosen cell naming the SHOWN take inside a ⇧⌥⌘T follow's gap
+    /// (the one road to a park on a `.main` cell) leaves the mint's park
+    /// standing and the ring nil; only the refusal speaks — and the mint's
+    /// follow still lands when its adoption and render-report arrive.
+    @Test func aChosenColumnPickInTheMintGapLeavesTheParkAlone() async throws {
+        try await withParkWorld("gapmainpick") { _, db, world, model in
+            let mainID = try #require(model.columns.first(where: { $0.kind == .main })).id
+            // ⇧⌥⌘T: the mint-as-chosen write lands, THEN the follow parks on
+            // the Chosen cell; the projection is stale — the cell still shows A.
+            await model.newBlankTakeAsChosen(blockID: world.blockID)
+            let parked = try #require(model.parkedFollow, "fixture: the mint parked on the Chosen cell")
+            #expect(parked.columnID == mainID, "fixture: the park sits on the Chosen column")
+
+            await model.pick(columnID: mainID, blockID: world.blockID, variantID: world.takeA)
+            #expect(model.status?.isRefusal == true, "the Chosen column's pick refuses")
+            #expect(model.parkedFollow == parked, "the refusal arm must not cancel the mint's park")
+            #expect(model.authority.livePane == nil, "the refusal arm must not move the ring")
+
+            try await adoptFresh(model, db, world.postID)   // the mint arrives as chosen
+            #expect(model.parkedFollow == parked, "the adoption that brings the mint keeps the park")
+            model.paneRendered(parked)
+            #expect(model.authority.livePane == parked, "the ⇧⌥⌘T follow lands on the mint")
+        }
+    }
+}
