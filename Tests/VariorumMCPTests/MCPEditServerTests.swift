@@ -43,6 +43,7 @@ private let editTools: Set<String> = [
     // VX-184 U5 (justified edit, the ritual): VX-196's edit parity across the
     // library — every tool is edit's.
     "rename_book", "finish_book", "reopen_book", "archive_book", "unarchive_book", "delete_book",
+    "remove_note_from_book", "move_note_in_book", "rename_chapter", "delete_chapter", "move_chapter",
 ]
 
 @Suite("13n-b U3 — the MCP server's edit rung end to end", .serialized)
@@ -273,7 +274,7 @@ struct MCPEditServerTests {
             // every note's archive and deletion stamps, too.
             let hersBook = try h.operations.createReading(name: "her book", kind: .book)
             for post in [note, other] { _ = try h.operations.addPostToReading(post.id, to: hersBook.id) }
-            _ = try h.operations.createSection(in: hersBook.id, name: "her chapter")
+            let hersChapter = try h.operations.createSection(in: hersBook.id, name: "her chapter")
             func snapshot() throws -> [String] {
                 try h.database.read { db in
                     try ["variant", "container_block", "block", "commit_point", "lens", "lens_choice", "block_comment",
@@ -330,6 +331,12 @@ struct MCPEditServerTests {
                 ("archive_book", ["book_id": .string(hersBook.id)]),
                 ("unarchive_book", ["book_id": .string(hersBook.id)]),
                 ("delete_book", ["book_id": .string(hersBook.id)]),
+                ("remove_note_from_book", ["book_id": .string(hersBook.id), "note_id": .string(note.id)]),
+                ("move_note_in_book", ["book_id": .string(hersBook.id), "note_id": .string(other.id),
+                                       "at": .string("start")]),
+                ("rename_chapter", ["section_id": .string(hersChapter.id), "name": .string("x")]),
+                ("delete_chapter", ["section_id": .string(hersChapter.id)]),
+                ("move_chapter", ["section_id": .string(hersChapter.id), "at": .string("end")]),
             ]
             #expect(Set(calls.map(\.0)) == editTools, "every edit door was tried")
             _ = try h.approve("claude-code", spec(.suggest, .wing, ""))

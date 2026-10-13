@@ -301,6 +301,12 @@ struct MCPWriteServerTests {
             calls.append(("archive_book", ["book_id": .string(book.id)]))
             calls.append(("unarchive_book", ["book_id": .string(book.id)]))
             calls.append(("delete_book", ["book_id": .string(book.id)]))
+            calls.append(("remove_note_from_book", ["book_id": .string(book.id), "note_id": .string(note.id)]))
+            calls.append(("move_note_in_book", ["book_id": .string(book.id), "note_id": .string(otherNote.id),
+                                                "at": .string("start")]))
+            calls.append(("rename_chapter", ["section_id": .string(chapter.id), "name": .string("x")]))
+            calls.append(("delete_chapter", ["section_id": .string(chapter.id)]))
+            calls.append(("move_chapter", ["section_id": .string(chapter.id), "at": .string("end")]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).

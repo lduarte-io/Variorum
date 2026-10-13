@@ -497,9 +497,15 @@ struct MCPWriteTools: Sendable {
     /// Private note is reachable per-ask only, and she never heard the ask;
     /// since 13n-c T-2 the wire answers the one not-shared answer, the ask
     /// still reaching her).
+    ///
+    /// VX-184 U5: `rung` — the two decisions' rung (write new for the
+    /// creative acts, as before; EDIT for `remove_note_from_book` /
+    /// `move_note_in_book`, which change a book's membership or order), and
+    /// `logsOnBook` — a landed act logged on the BOOK (its order changed),
+    /// not the note. Defaults unchanged: every existing caller byte-identical.
     func noteIntoBook(
         _ noteID: String, _ bookID: String, job: Job, clientName: String,
-        spendsAfter: Bool = true,
+        rung: MCPGrantRule.Rung = .writeNew, spendsAfter: Bool = true, logsOnBook: Bool = false,
         _ act: (_ title: String?, _ bookName: String?) throws -> Act
     ) throws -> Result<Landed, Refused> {
         let (standing, noteFacts, title, bookFacts, bookName) = try database.read { db in
@@ -510,24 +516,25 @@ struct MCPWriteTools: Sendable {
                     bookFacts,
                     bookFacts == nil ? nil : try Queries.mcpScopeTitle(db, kind: .book, id: bookID, calendar: calendar))
         }
-        let onNote = MCPGrantAuthority.decide(standing, note: noteFacts, rung: .writeNew, consumes: true)
+        let onNote = MCPGrantAuthority.decide(standing, note: noteFacts, rung: rung, consumes: true)
         guard case .allow(let noteGrant, let spendNote) = onNote else {
             try log(clientName, job.tool, "note", noteID, title, allowed: false)
             let ask = noteFacts.map { MCPAsk(clientName: clientName, scopeKind: .note, scopeID: noteID,
-                                             title: title ?? "", rung: .writeNew, fence: $0.fence) }
+                                             title: title ?? "", rung: rung, fence: $0.fence) }
             return .failure(Refused(outcome: MCPAsking(onAsk: hooks.onAsk)
                 .refusal(onNote, .note, standing: standing, ask: ask)))
         }
-        let onBook = MCPGrantAuthority.decide(standing, book: bookFacts, rung: .writeNew, consumes: true)
+        let onBook = MCPGrantAuthority.decide(standing, book: bookFacts, rung: rung, consumes: true)
         guard case .allow(let bookGrant, let spendBook) = onBook else {
             try log(clientName, job.tool, "book", bookID, bookName, allowed: false)
             let ask = bookFacts.map { MCPAsk(clientName: clientName, scopeKind: .book, scopeID: bookID,
-                                             title: bookName ?? "", rung: .writeNew, fence: $0.fence) }
+                                             title: bookName ?? "", rung: rung, fence: $0.fence) }
             return .failure(Refused(outcome: MCPAsking(onAsk: hooks.onAsk)
                 .refusal(onBook, .book, standing: standing, ask: ask)))
         }
         let spending = Set([spendNote ? noteGrant : nil, spendBook ? bookGrant : nil].compactMap { $0 })
-        return try land(job, clientName: clientName, kind: "note", id: noteID, title: title,
+        return try land(job, clientName: clientName, kind: logsOnBook ? "book" : "note",
+                        id: logsOnBook ? bookID : noteID, title: logsOnBook ? bookName : title,
                         spending: spendsAfter ? spending.sorted() : []) {
             try act(title, bookName)
         }

@@ -121,6 +121,8 @@ enum MCPToolCatalog {
         // VX-184 U5 — VX-196: edit parity across the library (R-VX184-1) — the
         // book's state.
         renameBook, finishBook, reopenBook, archiveBook, unarchiveBook, deleteBook,
+        // …a book's membership and order, and its chapters.
+        removeNoteFromBook, moveNoteInBook, renameChapter, deleteChapter, moveChapter,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -164,7 +166,8 @@ enum MCPToolCatalog {
         name: "list_notes", rung: .read, title: "List notes",
         description: """
             Notes this client can read. With book_id: that book's notes in book order, each with \
-            the chapter it is filed under (section_id, section_name) when it has one — or a \
+            the chapter it is filed under (section_id, section_name) when it has one, and the \
+            book's chapters in order (chapters: section_id, name — empty ones too) — or a \
             gathering's notes, in its own order. With \
             wing_id: that wing's notes, most recently edited first. With neither: every note \
             shared with this client, most recently edited first. Paged — pass next_cursor back \
@@ -1064,7 +1067,10 @@ enum MCPToolCatalog {
     static let renameBook = MCPToolDeclaration(
         name: "rename_book", rung: .edit, title: "Rename a book",
         description: """
-            Give a book a new name. A name another live book already wears (ignoring case) is             refused, as the author's rename is; a finished or sealed book can still be renamed.             Gatherings are the author's to rename. One undo for the author puts the old name back.             Returns JSON.
+            Give a book a new name. A name another live book already wears (ignoring case) is \
+            refused, as the author's rename is; a finished or sealed book can still be renamed. \
+            Gatherings are the author's to rename. One undo for the author puts the old name back. \
+            Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -1081,7 +1087,10 @@ enum MCPToolCatalog {
     static let finishBook = MCPToolDeclaration(
         name: "finish_book", rung: .edit, title: "Finish a book",
         description: """
-            Mark a book finished, as the author's Finish does: its notes, their order and its             chapters are frozen (their text stays editable), it stops collecting, and notes             waiting at its Arrivals are dismissed. A book already finished (or sealed) is left as             it is. One undo for the author reopens it and brings back what was waiting. Returns JSON.
+            Mark a book finished, as the author's Finish does: its notes, their order and its \
+            chapters are frozen (their text stays editable), it stops collecting, and notes \
+            waiting at its Arrivals are dismissed. A book already finished (or sealed) is left as \
+            it is. One undo for the author reopens it and brings back what was waiting. Returns JSON.
             """,
         inputSchema: bookIDOnly, scopes: [.book, .wing])
 
@@ -1089,7 +1098,10 @@ enum MCPToolCatalog {
     static let reopenBook = MCPToolDeclaration(
         name: "reopen_book", rung: .edit, title: "Reopen a book",
         description: """
-            Reopen a finished book, as the author's Reopen does: it can change again, and notes             that came to match its rule while it was finished wait at its Arrivals. A sealed book             stays sealed — unsealing is the author's alone. One undo for the author finishes it             again. Returns JSON.
+            Reopen a finished book, as the author's Reopen does: it can change again, and notes \
+            that came to match its rule while it was finished wait at its Arrivals. A sealed book \
+            stays sealed — unsealing is the author's alone. One undo for the author finishes it \
+            again. Returns JSON.
             """,
         inputSchema: bookIDOnly, scopes: [.book, .wing])
 
@@ -1097,7 +1109,9 @@ enum MCPToolCatalog {
     static let archiveBook = MCPToolDeclaration(
         name: "archive_book", rung: .edit, title: "Archive a book",
         description: """
-            Archive a book, as the author's Archive does: it leaves the Bookcase and is kept,             never deleted, and it stops collecting until it is unarchived. Its notes stay live and             stay in it. One undo for the author unarchives it. Returns JSON.
+            Archive a book, as the author's Archive does: it leaves the Bookcase and is kept, \
+            never deleted, and it stops collecting until it is unarchived. Its notes stay live and \
+            stay in it. One undo for the author unarchives it. Returns JSON.
             """,
         inputSchema: bookIDOnly, scopes: [.book, .wing])
 
@@ -1105,7 +1119,9 @@ enum MCPToolCatalog {
     static let unarchiveBook = MCPToolDeclaration(
         name: "unarchive_book", rung: .edit, title: "Unarchive a book",
         description: """
-            Bring an archived book back to the Bookcase, as the author's Unarchive does (notes the             author archived together with it come back too; list_books with include_archived:             true lists archived books). One undo for the author archives it again. Returns JSON.
+            Bring an archived book back to the Bookcase, as the author's Unarchive does (notes the \
+            author archived together with it come back too; list_books with include_archived: \
+            true lists archived books). One undo for the author archives it again. Returns JSON.
             """,
         inputSchema: bookIDOnly, scopes: [.book, .wing])
 
@@ -1113,9 +1129,116 @@ enum MCPToolCatalog {
     static let deleteBook = MCPToolDeclaration(
         name: "delete_book", rung: .edit, title: "Delete a book",
         description: """
-            Delete a book, as the author's Delete Book does: it goes to the Trash for 30 days with             its chapters; its notes are never deleted with it — a book that owns its notes releases             them to the Pool. One undo for the author brings the book back whole. Returns JSON.
+            Delete a book, as the author's Delete Book does: it goes to the Trash for 30 days with \
+            its chapters; its notes are never deleted with it — a book that owns its notes releases \
+            them to the Pool. One undo for the author brings the book back whole. Returns JSON.
             """,
         inputSchema: bookIDOnly, scopes: [.book, .wing])
+
+    /// Her Remove from This Book — "Release" on a book that owns its notes.
+    static let removeNoteFromBook = MCPToolDeclaration(
+        name: "remove_note_from_book", rung: .edit, title: "Take a note out of a book",
+        description: """
+            Take a note out of a book, as the author's Remove from This Book does: the note itself \
+            is untouched and stays in its other books; in a book that owns its notes this releases \
+            it to the Pool (the answer says released and whether it is now in no book). A finished \
+            book refuses. A gathering holds no notes — a note leaves it by no longer matching its \
+            rule (remove_tag). One undo for the author puts it back in the book. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "book_id": .object(["type": "string", "description": "The book."]),
+                "note_id": .object(["type": "string", "description": "The note to take out of it."]),
+            ]),
+            "required": .array(["book_id", "note_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    /// Her Move Up/Down and drags — only in a hand-ordered book.
+    static let moveNoteInBook = MCPToolDeclaration(
+        name: "move_note_in_book", rung: .edit, title: "Move a note in a book",
+        description: """
+            Move a note to a new place in its book's order — after or before another of the book's \
+            notes, or at its start or end (pass exactly one). Its chapter stays; file_note_in_chapter \
+            files it. A book that sorts itself (by date or by edits) takes no hand placing, and a \
+            finished book refuses, as the author's doors do. One undo for the author puts it back. \
+            Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "book_id": .object(["type": "string", "description": "The book."]),
+                "note_id": .object(["type": "string", "description": "The note to move."]),
+                "after_note_id": .object(["type": "string", "description": "Place it right after this note."]),
+                "before_note_id": .object(["type": "string", "description": "Place it right before this note."]),
+                "at": .object(["type": "string", "enum": ["start", "end"],
+                               "description": "Place it at the book's start or end."]),
+            ]),
+            "required": .array(["book_id", "note_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    /// Her chapter rename — free on a finished book.
+    static let renameChapter = MCPToolDeclaration(
+        name: "rename_chapter", rung: .edit, title: "Rename a chapter",
+        description: """
+            Rename one of a book's chapters (list_notes with the book's id lists its chapters). A \
+            finished book's chapters can still be renamed, as the author's can. One undo for the \
+            author puts the old name back. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "section_id": .object(["type": "string", "description": "The chapter."]),
+                "name": .object(["type": "string", "description": "Its new name."]),
+            ]),
+            "required": .array(["section_id", "name"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    /// Her chapter delete — its notes stay, unfiled.
+    static let deleteChapter = MCPToolDeclaration(
+        name: "delete_chapter", rung: .edit, title: "Delete a chapter",
+        description: """
+            Delete one of a book's chapters, as the author's Delete Chapter does: its notes stay in \
+            the book, unfiled. A finished book refuses. One undo for the author brings the chapter \
+            back with its notes filed under it again. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "section_id": .object(["type": "string", "description": "The chapter to delete."]),
+            ]),
+            "required": .array(["section_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    /// Her chapter reorder.
+    static let moveChapter = MCPToolDeclaration(
+        name: "move_chapter", rung: .edit, title: "Move a chapter",
+        description: """
+            Move a chapter to a new place among its book's chapters — after or before another of \
+            them, or at the start or end (pass exactly one). A finished book refuses. One undo for \
+            the author puts it back. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "section_id": .object(["type": "string", "description": "The chapter to move."]),
+                "after_section_id": .object(["type": "string", "description": "Place it right after this chapter."]),
+                "before_section_id": .object(["type": "string", "description": "Place it right before this chapter."]),
+                "at": .object(["type": "string", "enum": ["start", "end"],
+                               "description": "Place it first or last."]),
+            ]),
+            "required": .array(["section_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
 
     // MARK: - VX-168 U2 — the deliberate acts (VX-169 save_commit; VX-174 the merge button)
 

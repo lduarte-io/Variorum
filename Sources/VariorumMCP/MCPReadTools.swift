@@ -332,6 +332,9 @@ struct MCPReadTools: Sendable {
         let outcome: Outcome = try database.read { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
             var page: [PageRow]
+            // VX-184 U5 (P-VX196-5): a BOOK's chapters, in order — so a chapter
+            // with no notes filed is addressable too (the chapter acts).
+            var chapters: [[String: Any]]?
             if let bookID {
                 let place = try MCPGrantAuthority.readPlace(db, readingID: bookID)
                 let decision = MCPGrantAuthority.decide(standing, reading: place)
@@ -343,6 +346,14 @@ struct MCPReadTools: Sendable {
                     }
                     page = try bookPage(
                         db, bookID: bookID, includeArchived: includeArchived, after: cursor, limit: limit)
+                    chapters = try Row.fetchAll(
+                        db,
+                        sql: """
+                            SELECT id, name FROM reading_section WHERE reading_id = ? AND deleted_at IS NULL
+                            ORDER BY position, id
+                            """,
+                        arguments: [bookID]
+                    ).map { ["section_id": $0["id"] as String, "name": $0["name"] as String] }
                 case .gathering:
                     if let cursor, cursor.shape != .gathering {
                         return Outcome(text: Self.staleCursorMessage, isError: true)
@@ -381,6 +392,7 @@ struct MCPReadTools: Sendable {
                 notes.append(note)
             }
             var answer: [String: Any] = ["notes": notes]
+            if let chapters { answer["chapters"] = chapters }
             if full, let last = page.last { answer["next_cursor"] = last.cursor.encoded }
             return Outcome(text: try encode(answer), isError: false)
         }
