@@ -2137,3 +2137,55 @@ BOUND pins (the register; the Resume-Sync road on the reproduced library) stayed
 Restores clean, HEAD rebuilt (exit 0). **U5's red-on-old obligation DISCHARGED at the stage — ALL FIVE UNITS'
 suites evidence is COMPLETE across windows A–E** (the walk legs remain the orchestrator's window). Logs
 /tmp/vx201-we-*.log; rollup /tmp/vx201-window-e.summary (deleted at closeout).
+
+### FABLE LADDER ROUND 1 — FINAL CALLS + THE REVIEWER'S FIX PASS (the reviewer, authorized by the orchestrator's follow-up; the implementer's agree/dispute: all four AGREED, zero disputes)
+
+**Final calls:**
+- **R1-1 — CONFIRMED, FIXED (`b3180773`, Part of VX-202).** The implementer's three additions adopted: the
+  third orphan road (a `writeMarker` database write throwing after the flag is set) joins the comment; the
+  effect NARROWED as it said (verified against the reconcile — the Apple ARM keys on the MARKER, not the flag,
+  so the key file heals at every ready; the stale flag's whole effect is the route-to-first-ready window plus
+  the broken mirror — the MINOR stands on the invariant); the placement note followed. The fix: the reconcile
+  clears the per-store flag when NO marker is pending and nothing is in flight (`!markerPending`,
+  `!switchInProgress`, `activeSwitch == nil`, `activeFollow == nil`, the flag actually set) — the model roads
+  hold `switchInProgress` across every runner call and the runner re-sets the flag before its first marker, so
+  the clear can never fire inside a road's flag-to-marker window. My proposal's second clear site (the resume's
+  `nothingToResume` arm) DROPPED as redundant: the resume is unreachable without a marker-driven face, and the
+  reconcile runs at every ready.
+- **R1-2 — CONFIRMED PRE-EXISTING; TICKET (the orchestrator mints).** Both sides agree: `activeFollow`
+  double-presented across the Settings pane and the notice bar, no correctness hazard (no auto-start; one-shot
+  phase guards; one dismissal fells both), the two-window theater row 11 retired for the ceremony. Fix shape for
+  the ticket: row 11's host discrimination applied to the follow (a `followHost`, or notice-bar-only
+  presentation). Not this run's regression; not fixed here.
+- **R1-3 — CONFIRMED, FIXED (`cabddd19`, Part of VX-110).** The clear placed RUNNER-side, not in the reconcile
+  (deliberate narrowing of my own proposal): the controller has no defaults seam for the This-Mac-Only flag,
+  and the one dishonesty window is a PLAIN local road resuming under a stale flag — so the plain road wipes the
+  flag before its first marker, exactly where the real road sets it. The This-Mac-Only road's own orphan
+  (flag set, death before its marker) stays honest without a clear: the flag then only ever marks a store that
+  held sync material and chose This Mac Only (traced in round 1).
+- **R1-4 — CONFIRMED, FIXED (`b3180773`, Part of VX-202, rides the R1-1 commit).** `relandSilentItem` logs the
+  refused Keychain save; behavior unchanged (not pinnable — a log line).
+
+**The pins (both red-on-old by behavioral revert; Mac-target, so their RUNS are STAGE work — PENDING):**
+| pin | test | expected red under |
+|---|---|---|
+| R1-1 | `VX202ReopenRaceTests/aStaleSwitchPendingFlagWithNoMarkerClearsAtTheReady` | **R-L1** (`R-L1-no-ready-clear.patch`): the flag survives the ready (2 asserts — `isPending` true, no clear write); the marker BOUND leg green both sides |
+| R1-3 | `VX110SignedOutCastleTests/aStaleThisMacOnlyFlagNeverDressesAPlainLocalRoadsResume` | **R-L3** (`R-L3-no-plain-road-wipe.patch`): the stale flag survives the kill and the resume reads This Mac Only (3 asserts — the flag after the kill, `outcome.thisDeviceOnly`, the Done) |
+The patches: `notes/plans/fixes/vx-201-ladder-reverts/` — each `git apply --check` clean against the fix, BOTH
+applied together COMPILED (`build-for-testing` TEST BUILD SUCCEEDED), restored (`git diff HEAD` empty), HEAD
+rebuilt after so `DerivedData/vx201` holds the FIX's products. **No revert is applied now.**
+
+**Verification here (stage-free):** Mac `build-for-testing` green (zero warnings in the four changed files);
+phone `build-for-testing` green (the two changed Shared files compile for the phone); the FULL headless suite
+at the fix pass's end: **core 2,710 tests in 308 suites · VariorumMCPTests 135/20 · workbook 40/6 — all green**
+(the fixes are Shared-side, so headless is the regression check; the pins' runs are the stage's).
+
+**PENDING (the orchestrator's next window, folded with the walk):** the two new pins green —
+`-only-testing:VariorumTests/VX202ReopenRaceTests` (expect 11 tests now) and
+`-only-testing:VariorumTests/VX110SignedOutCastleTests` (expect 10 tests) — then the two revert cycles
+(R-L1 → VX202 suite, read the two reds; R-L3 → VX110 suite, read the three reds; `git checkout --
+App/Variorum/Shared/` after each, `git diff HEAD --stat` EMPTY, rebuild HEAD after the last); changed-source
+re-runs beyond the two pin suites: Phase13pControllerTests (the reconcile) and PostureSwitchTests (the runner's
+local road) — the other suites' sources name no changed behavior. Phone: no new phone literal (log lines and
+comments only; no `\bMac\b` in any rendered string). Then the implementer's sanity pass over
+`b3180773` + `cabddd19`, and round 2.
