@@ -1105,6 +1105,117 @@ exactly this cell red: 3 issues at the served / [true] / [true, false] expectati
 - The LADDER (fable-reviewer, read-only) starts now — the skill's own allowance: screenshot-verify
   where the environment allows, else record and fold into the next drive; the walk rows stay owed.
 
+## LADDER ROUND 1 (fable-reviewer, 2026-10-12 — the whole run diff `c84eddf1..HEAD`, 24 files)
+
+**What was reviewed, cold:** the full diff read file-by-file in this session; the run record; CLAUDE.md
++ its auto-loaded canon; SyncSpec IN FULL (the diff carries a `Sync/` line); TEXTKIT2_NOTES §3–4 (a new
+TK2 control + decoration-overlay work); the 13j purge machinery around every touched arm
+(`Operations+Purge`, `PurgeFamily.expand`/`deleteOrder`, `PurgeJanitor.familyVerdict` + the
+table-agnostic intent collection at PurgeJanitor.swift:338, `Trash.swift:205`'s standing fence arm);
+the server purge arrays (`10_phase13j_purge.sql:219/226/377/380/565/616/660` — `block_comment`
+present everywhere, zero server work, marker untouched, as claimed). The full headless suite re-run by
+the reviewer at the tip: **core 2,704/307 · VariorumMCPTests 122/18 · workbook 40/6 — all green**,
+matching the record's finals exactly. No "Review foci" section exists in the record. Constraints this
+session: no `xcodebuild test`, no app launch, no window (the stage is not this session's) — the
+app-target suites stand on the stage windows' runs (83 + 100 green, reverts exact), re-read here, not
+re-run.
+
+### Findings (severity-ranked)
+
+**R1-1 · MINOR · notes/plans/fixes/vx-179-comment-polish.md (LEDGER row 10) + AppSpec §7/§9 — the
+merge-moment CANON DELTA is owed and unlisted.** R-VX179-1/2/3 are rulings born in a ticket, and the
+workflow rule (CLAUDE.md, "Tracker & parallel work") is that such a ruling lands in canon at the merge
+exactly as a sitting's would. Two standing AppSpec sentences are now bent by R-VX179-3: §7's
+`block_comment` note ("Deleted comments stay visible and resurrectable") and §9's comments bullet
+("deleted comments visible and resurrectable") — a comment given "Delete forever…" is deliberately
+neither, and §9's quiet enumeration of the purge road doesn't know the sixth purgeable kind. Evidence:
+ledger row 10 names PR/worktree/debris/MOBILE-PARITY and the PROVISIONAL deposits, but no AppSpec
+contract line. Fix: add the canon-delta duty to the closeout row — one contract line each at §7's
+block_comment note and §9's comments bullet (what is now true + a pointer to this record), landed by
+the merging session on latest main.
+
+**R1-2 · MINOR (bug half SPECULATIVE) · CommentsPanel.swift:1098 (`close()`) + the U3 walk list — the
+POPOVER host's dismiss-with-a-dirty-edit road is uncovered by any walk row.** U3 replaced `@FocusState`
+with async first-responder reports: on a transient popover's click-away, the area's departure report
+travels `viewWillMove(toWindow: nil)` → `DispatchQueue.main.async` (CommentTextArea.swift:560–563,
+142–145) and lands while the SwiftUI view is being dismantled, so `.onChange(of: focus)`'s
+commit-on-leave cannot be assumed to run; the panel's `close()` (which commits dirty edits) never runs
+on that road; and the draft park nets REFUSAL-time drafts only (CommentsPanel.swift:254–296). Whether
+words are actually lost — and whether the old `@FocusState` road saved them (likely the same class,
+i.e. pre-existing) — is not traceable headlessly, so the BUG half is SPECULATIVE and no red-on-old pin
+can be named without the stage. The coverage gap is concrete: W-U3-6 checks open/typing/⎋/confirm on
+the popover, and W-U3-4's "click elsewhere saves" stages the SHEET. Fix: add one walk row — edit a
+comment in the Takes margin-note popover, click away to dismiss, reopen: the edit saved (or parked and
+said). If it drops words: pre-existing-class → ticket; new-in-U3 → the fix pass.
+
+**R1-3 · NIT (SPECULATIVE) · CommentCard.swift:522–539 (`scrollWheel`) — the latch re-decides on
+`.mayBegin`/`.began` only, not on "the gesture's first MOVING event" as `wheelOwner`'s own doc
+(CommentCard.swift:110–112) promises.** If AppKit ever delivers a zero-delta `.began`, an overflowing
+card latches `.card` (the zero-delta answer, CommentCard.swift:124) and the `.changed` events never
+re-decide — a gesture pushing past the card's edge would rubber-band inside the card instead of moving
+the page. Unverified whether zero-delta `.began` occurs in practice (ordinarily `.began` carries the
+first movement); W-3's walk row shows the symptom unmistakably if real. Fix if the walk sees it:
+re-decide while the latched decision was made on zero deltas (one condition beside the `.began` arm) +
+its table cell.
+
+0 BLOCKER · 0 MAJOR · 2 MINOR · 1 NIT.
+
+### Clean bill (load-bearing things specifically checked and found solid)
+
+- **The `Sync/` line (U0):** `familyVerdict`'s staleness net traced end-to-end — the intent collection
+  is table-agnostic, `expand`'s default arm is the comment row itself, `deleteOrder` already carried
+  `block_comment` first, the stranded-origin exemption can't reach the kind, and adding it to
+  `tombstonedKinds` cannot make a block/container family spuriously stale (under a dead block every
+  comment is tombstoned by cascade or its own hand; batch application is atomic). The two-client pin's
+  choreography (restore lands before the intent; sweep at the intent holder) is exactly the B1 shape;
+  red-on-old by revert recorded at ledger row 2. Zero schema, zero lockstep, wire untouched
+  (`purge_intent` rows are ids/enums, ALL-PLAIN — SyncSpec read in full).
+- **The purge arm (U1):** every refusal traced against the real guards (`liveComment`-shaped fetch,
+  tombstone check, `liveBlock`, `ensurePlacementUnlocked`); D-2's cascade-victim hazard independently
+  re-derived (an intent can only ever name a comment deleted on its OWN stamp under a live block, so
+  no exact-stamp flip reaches it) and confirmed closed; idempotence + already-purged skip; the fence
+  is byte-the-same stamp-aware arm as `Trash.swift:205` — its cross-device clock-skew residual (a
+  voided intent's later stamp vs a skewed re-delete) is the 13j-ruled standing class, inherited, not
+  new. Both revive-road belts (restoreBlockComment, reapplyAddedComment) sit inside their
+  transactions; the reader/revive sweep tables re-walked and found complete.
+- **The suite, re-run by the reviewer:** core 2,704/307 + MCP 122/18 + workbook 40/6 green at the tip
+  — the record's counts exact.
+- **U2 geometry + card:** the cap retirement's arithmetic (parity ≤ 72 pt blocks, rhythm bound, floor,
+  width/lane untouched); the seven red-on-old cells matched the stage window's revert exactly;
+  `reconcile`'s table (duplicates, shrink/grow, pool never minting per pass) correct; one-door
+  `hitTest` + read-tier click-through + no-scroller-on-read-tier; `wheelOwner`'s fit/overflow/edge/
+  horizontal table correct with `stack.frame.height` safe as the content input (document ≥ viewport by
+  construction); the budget's idempotent `presentCard` + measure-only-on-text/width-change, with
+  component-wise colour compare (the old `present` re-minted the rule view every pass — the new card
+  is strictly cheaper at steady state); pool z-order unchanged (`pool(below: false)` was a plain
+  `addSubview`, as the reconcile path is).
+- **U3 control:** TK2 opted in at init on all three views, ZERO TK1 API in every touched file (grep),
+  canary armed per view, no custom caret drawing, twins are separate views (no rendering attributes —
+  TEXTKIT2 §3/§4 respected); geometry owned in ONE metrics place with the stamp line and both capture
+  hosts deriving from it (the bar's +2 exact, QuickNote's (6,6) parity exact); the undo fix's
+  mechanism (per-area `undoManager(for:)`, programmatic adopt ends history, did-undo/redo re-sync)
+  traced and its replay/reverts (R-a/R-b, 10/10) read; `CommentPanelFocus.after`'s rule correct in
+  BOTH report orders; ⎋ `cancelOperation:` fall-through preserved; `CommentTextStyle`'s Equatable gate
+  PROBED by the reviewer (NSColor(Color(hex:)) conversions — plain and alpha'd — compare equal, and a
+  same-source dynamic colour does too), so no per-pass re-apply churn hides there.
+- **The panel door:** confirm EVERY time with no don't-ask state anywhere; the id rides `presenting:`
+  into the action (13l Act 2's rule honored); the door raises only for a row the fold shows; refusals
+  worded (O-3 closed for the panel's reachable races, the shared fallback's rawness recorded);
+  `deleteForever` = `requestPurge` through `perform` + the `TrashPurge.confirm`-shaped local sweep
+  (`AppSession.sweepLocalPurge` verified: explicit store, no-op under a configured chain). Sentence
+  case pinned on every new word.
+- **Process:** pin-before-fix held per class (feature pins labelled honestly as compile-red); every
+  bug-class arm red-on-old by revert (W, R1–R7, R-a/R-b, R-c) and window-verified; the window-2 red
+  traced to the PIN's environment with the product proven unchanged by path diff; found work ticketed
+  (VX-182/183/193/194, VM-14); PROVISIONALs enumerated for the merge-moment QUESTIONS deposit; zero
+  commit trailers on all 33 run commits; shared ledgers untouched from the worktree; `PanelTextArea`
+  fully retired (zero references).
+
+**Disposition flow from here (the cross-model rule):** R1-1…R1-3 go to the implementer verbatim; its
+agree/dispute returns to this reviewer, who makes the final call and implements confirmed fixes in
+this session (R1-1 is closeout-ledger work the orchestrator may take; R1-2/R1-3 are walk rows — no
+product line changes unless a walk row goes red).
+
 ## THE WALK (the orchestrator's own hands, 2026-10-12 ~22:45–23:10 — dev-store Debug build from the
 pinned checkout, cliclick + screencapture from this tmux pane, both voices; captures in
 `/tmp/vx179-walk/` for tonight only, deleted at closeout per the evidence rule)
