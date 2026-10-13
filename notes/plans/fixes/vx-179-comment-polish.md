@@ -2466,7 +2466,11 @@ clipped dirty-row face. Found-work tickets: VX-182, VX-183, VX-193 (HIGH), VX-19
 VM-14. Main merged INTO the branch pre-close (230cbfc5; 0.9.4 — the What's-New flip ended; merged
 tree `swift test` EXIT 0; round 2's full read at the pre-merge tip: core 2,704/307 · workbook 40/6).
 
-**FINAL MAC SUITE RUN (window 7):** PENDING — counts land here before the PR.
+**FINAL MAC SUITE RUN (window 7, 2026-10-13 ~04:10, at the tip d925c105 on the MERGED tree):**
+**103 tests / 15 suites / ALL GREEN, exit 0** — the whole comment set (the three card suites,
+BlockDecorGeometry, MarginHoverComment, IndicatorGutter, ProseGutter, CommentPanelFixLeg2 5/5, the
+seven panel suites). Log `/tmp/vx179-window7-suites.log` (deleted with the walk evidence at
+cleanup). Six minutes, released clean, no instance.
 
 **Her handoff:** `notes/handoffs/vx-179-handoff.md` (the morning checklist). **Mobile parity:** the
 MobileSoul.md row lands on main at the merge. **The refresh:** the coordinator's one-folded-refresh
