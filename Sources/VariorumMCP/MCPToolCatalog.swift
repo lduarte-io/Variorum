@@ -112,6 +112,8 @@ enum MCPToolCatalog {
         removeTag,
         // VX-184 U4 — VX-195: edit parity inside a note (R-VX184-1) — comments.
         editComment, restoreComment,
+        // …the takes family (the LAST take ⇒ the block, R-VX184-1).
+        deleteTake, archiveTake, unarchiveTake, setTakeLabel, lockTake, unlockTake,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -846,6 +848,115 @@ enum MCPToolCatalog {
                 "comment_id": .object(["type": "string", "description": "The deleted comment."]),
             ]),
             "required": .array(["comment_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// Her take delete — and R-VX184-1: the block's LAST take deleted IS the
+    /// block deleted, `delete_block`'s road, said here and in the answer.
+    static let deleteTake = MCPToolDeclaration(
+        name: "delete_take", rung: .edit, title: "Delete a take",
+        description: """
+            Delete one take of a block. Nothing is destroyed: it goes to the note's tray of deleted \
+            things, where the author can put it back (so can put_back), and it is one undo for them. \
+            The take the block shows can't be deleted while other takes stand — choose another \
+            first (choose_take); a locked take can't be deleted either. Deleting a block's LAST take \
+            deletes the BLOCK, exactly as delete_block does (the block and every take on it go to \
+            the tray); the answer then says deleted_block: true. Get take ids from read_note with \
+            with_ids: true. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take to delete."]),
+            ]),
+            "required": .array(["take_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let archiveTake = MCPToolDeclaration(
+        name: "archive_take", rung: .edit, title: "Archive a take",
+        description: """
+            Archive one take: it leaves the block's takes but is kept (read_note with \
+            include_archived: true lists it; unarchive_take brings it back). The take the block \
+            shows may be archived — the block then shows another of its takes. A block's last take \
+            can't be archived. One undo for the author. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take to archive."]),
+            ]),
+            "required": .array(["take_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let unarchiveTake = MCPToolDeclaration(
+        name: "unarchive_take", rung: .edit, title: "Unarchive a take",
+        description: """
+            Bring an archived take back among its block's takes (read_note with include_archived: \
+            true lists archived takes). It comes back unchosen. One undo for the author. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The archived take."]),
+            ]),
+            "required": .array(["take_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let setTakeLabel = MCPToolDeclaration(
+        name: "set_take_label", rung: .edit, title: "Label a take",
+        description: """
+            Give one take a label — a short name the author sees on it, such as "english" — or \
+            clear it with null or a blank. A locked or archived take may be labeled. One undo for the \
+            author. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take."]),
+                "label": .object(["type": ["string", "null"], "description": "The label (blank or null clears)."]),
+            ]),
+            "required": .array(["take_id", "label"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let lockTake = MCPToolDeclaration(
+        name: "lock_take", rung: .edit, title: "Lock a take",
+        description: """
+            Lock one take so its text can't change (edit_take, restore_commit and the author's typing \
+            are all refused) until it is unlocked (unlock_take). If the take holds words not yet in a \
+            commit, Variorum commits them first, as the author's own lock does; that commit stays \
+            even if the lock is undone. One undo for the author. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take to lock."]),
+            ]),
+            "required": .array(["take_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let unlockTake = MCPToolDeclaration(
+        name: "unlock_take", rung: .edit, title: "Unlock a take",
+        description: """
+            Unlock a locked take, so its text can be edited again. One undo for the author. Returns \
+            JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take to unlock."]),
+            ]),
+            "required": .array(["take_id"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)

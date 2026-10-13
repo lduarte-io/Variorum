@@ -38,6 +38,7 @@ private let editTools: Set<String> = [
     // VX-184 U4 (justified edit, the ritual): VX-195's edit parity inside a
     // note — every tool is edit's.
     "edit_comment", "restore_comment",
+    "delete_take", "archive_take", "unarchive_take", "set_take_label", "lock_take", "unlock_take",
 ]
 
 @Suite("13n-b U3 — the MCP server's edit rung end to end", .serialized)
@@ -293,6 +294,13 @@ struct MCPEditServerTests {
                 ("edit_comment", ["comment_id": .string(hersComment.id), "text": .string("x"),
                                   "expected_text": .string("her working note")]),
                 ("restore_comment", ["comment_id": .string(hersDeleted.id)]),
+                ("delete_take", ["take_id": .string(branch.id)]),
+                ("delete_take", ["take_id": .string(two.variant.id)]),  // her block's LAST take
+                ("archive_take", ["take_id": .string(branch.id)]),
+                ("unarchive_take", ["take_id": .string(branch.id)]),
+                ("set_take_label", ["take_id": .string(branch.id), "label": .string("x")]),
+                ("lock_take", ["take_id": .string(branch.id)]),
+                ("unlock_take", ["take_id": .string(one.variant.id)]),
             ]
             #expect(Set(calls.map(\.0)) == editTools, "every edit door was tried")
             _ = try h.approve("claude-code", spec(.suggest, .wing, ""))

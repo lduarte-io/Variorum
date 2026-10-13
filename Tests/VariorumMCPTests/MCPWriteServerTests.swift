@@ -260,6 +260,13 @@ struct MCPWriteServerTests {
             calls.append(("edit_comment", ["comment_id": .string(hersComment.id), "text": .string("x"),
                                            "expected_text": .string("her own working note")]))
             calls.append(("restore_comment", ["comment_id": .string(hersDeletedComment.id)]))
+            calls.append(("delete_take", ["take_id": .string(branch.id)]))
+            calls.append(("delete_take", ["take_id": .string(two.variant.id)]))  // her block's LAST take
+            calls.append(("archive_take", ["take_id": .string(branch.id)]))
+            calls.append(("unarchive_take", ["take_id": .string(branch.id)]))
+            calls.append(("set_take_label", ["take_id": .string(branch.id), "label": .string("x")]))
+            calls.append(("lock_take", ["take_id": .string(branch.id)]))
+            calls.append(("unlock_take", ["take_id": .string(one.variant.id)]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).
