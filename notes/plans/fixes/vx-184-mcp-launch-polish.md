@@ -1128,3 +1128,170 @@ none — the receipt counts); (4) a socket transient seen once under whole-targe
   (her ruling's spelling for the pair keys).
 - **P-VX173-1 — one note per batch** (options: (a) as built; (b) items across notes, each note decided). **P-U3-WORDS
   — every new tool description, refusal, Activity phrase, receipt and undo label** (her copy pass; 13s-a-sweepable).
+
+## U4 UNIT RECORD — edit parity inside a note: VX-195 (opus-implementer, 2026-10-13 from ~05:20 MDT)
+
+**What this unit did NOT do (said first — kept current; the UNIT-CLOSE state replaces this line):** IN FLIGHT — nothing
+is closed yet; every claim below marked PENDING is unverified. Zero schema, zero `Sync/`, zero custody/keychain, zero editor
+seam (planned; verified by path diff at the close). No `notes/QUESTIONS.md` entry and no canon edit (the merging session's
+shared ledgers — CLAUDE.md; U1–U3's practice): every PROVISIONAL below is OWED there at the merge.
+
+**Read in full before code (never delegated):** CLAUDE.md + the auto-loaded canon (AppSpec §9's ops, §12's THE MCP DOOR
+line); the kickoff `notes/plans/mcp-launch-polish-kickoff.md` whole (R-VX184-0…6, R-VX188-1/2, the U4 row); this record's
+head + the U1, U2 and U3 records whole (U3's "For U4" — `mayDelete`'s edit clause, `Queries.mcpCommentAuthor` the one read);
+`notes/plans/fixes/vx-168-mcp-client-secret.md` (the head, LIVE STATUS, the UNIT 1 record's design calls, the UNIT 2 record
+whole — THE edit-act pattern); the 13n-b plan's ruled design, SITTING RECORD (R-13nb-1…26 incl. R-13nb-14's keyboard bar,
+R-13nb-17, R-13nb-19), AF-1…AF-11, the seam rulings A-1…A-10, the U3 brief + the U3 record's decisions (P-13nb-U3-1…17 — the
+in-transaction guard, every MCP write ONE entry); the 13n-c plan's rulings list (R-AIR-1…15), the orchestrator's U1
+adjudications (T-2/F-7 — the ONE answer), §3 U1–U8, the FABLE-OWED ledger, §7 constraints, §8 environment traps;
+`notes/SessionResiliencyProtocol.md` whole; `notes/SyncSpec.md` whole (read BEFORE code — no schema in this unit; §6's
+metadata-CAS class covers every field these acts write). Code: `MCPWriteTools{,+Edit,+Deliberate,+CommentDelete,+RemoveTag,
++Carriage}`, `MCPWriteSupport`, `MCPGrantAuthority`, `MCPToolCatalog`, `MCPNoteStructure.read`, `MCPSession.instructions`;
+core `Operations+{MCPWrites,MCPEdits,MCPDeliberate,MCPCommentAuthors,MCPCarriage,Comments,Deletion,Locks,Variant,Lens,
+Container,UndoInverses}`, `Queries/{MCPEditQueries,CommentQueries}`; the app's `MCPPaneCopy` (Activity + receipts), her
+doors (`TakesViewModel` take lifecycle, `BlockHistoryPane` restore/rename, `PostDetailView`/`LibraryViewModel` rename,
+`CommentsPanel`); the suites `MCPCommentAuthorshipServerTests`, `MCPDeliberateServerTests`, `MCPEditServerTests` (the edit
+PROOF), `MCPWriteServerTests` (the suggest PROOF), `MCPServerTests` (the catalog walk), core `MCPDeliberateActsTests`,
+`MCPCommentAuthorActsTests`, the Mac `MCPDoorErgonomicsFacesTests`; the field guide's MCP chapter lessons 1–3.
+
+**Surfaces (planned):** core `Operations+MCPNoteEdits.swift` (NEW — the twelve acts) + byte-for-byte row-body extractions in
+`Operations+{Comments,Deletion,Locks,Variant}` (her doors call the extractions) + `MCPWriteAct`'s new cases +
+`Queries/MCPEditQueries` (two address reads) · `Sources/VariorumMCP/{MCPWriteTools+NoteEdits.swift (NEW),
+MCPWriteTools+CommentDelete, MCPWriteTools, MCPToolCatalog}` · the app's `MCPPaneCopy` (receipts + Activity words) · tests.
+ZERO schema, `Sync/`, custody/keychain, editor seam.
+
+### LIVE STATUS — U4's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this record: LIVE STATUS, the traces, the argued design + PROVISIONALs (below) — written before code | DONE (this commit) |
+| 1 | the pins FIRST, per tool family (comments · takes · commits · the note), compiled and run on the PRE-FIX tree → RED, counts recorded | NOT STARTED |
+| 2 | core: the twelve acts (`Operations+MCPNoteEdits`) over byte-for-byte extractions, `MCPWriteAct`'s cases + the app's receipt/Activity words in the SAME commit (the app's exhaustive switch — VX-168 U2's one-commit-gap lesson), core state-transition pins | NOT STARTED |
+| 3 | wire — COMMENTS: `edit_comment`, `restore_comment`, `delete_comment`'s edit clause in `mayDelete` | NOT STARTED |
+| 4 | wire — TAKES: `delete_take` (the last take ⇒ the block), `archive_take`, `unarchive_take`, `set_take_label`, `lock_take`, `unlock_take` | NOT STARTED |
+| 5 | wire — COMMITS: `restore_commit` (insured), `rename_commit` | NOT STARTED |
+| 6 | wire — THE NOTE: `rename_note`, `delete_lens` | NOT STARTED |
+| 7 | the rituals: the catalog walk, the suggest PROOF, the edit PROOF (justified edits, commented in place) | NOT STARTED |
+| 8 | red-on-old BY REVERT per family (announced here first, committed tree, restored clean) | NOT STARTED |
+| 9 | the Mac faces pins (`MCPEditParityFacesTests`) + headless finals + the Mac build-for-testing → READY FOR STAGE | NOT STARTED |
+| 10 | the stage window (on the orchestrator's GO + claim): the Mac batch + THE LIVE ROUND (one real Claude Code turn per family, ⌥⌘Z each) | NOT STARTED |
+| 11 | close: self-assessment, PROVISIONALs, OWED | NOT STARTED |
+
+**No revert is in flight.**
+
+### The traces (written before code)
+
+**These are FEATURE rows, not bug rows** (U3's VX-173/VX-188 class): on the pre-fix tree each new tool answers "Unknown
+tool: <name>." — the pins are red-on-old by construction, and red again by revert. **The one BEHAVIOUR change on an existing
+tool is `delete_comment`'s edit clause** — traced: `MCPWriteTools+CommentDelete.performCommentDelete` decides the comment's
+note at SUGGEST on the snapshot, then `mayDelete` (`Queries.mcpCommentAuthor(db, commentID) == clientName`) — FALSE for any
+comment not on file as this client's (hers, another client's, an unrecorded one) — so an EDIT-rung client hears her
+R-VX188-2 sentence ("You don't have permission to delete that comment. Suggest raising your permission level to edit.") for
+a delete her ruling R-VX188-1 says EDIT may make; the in-transaction guard (`guardNotes(.suggest)` then `mayDelete`) repeats
+the same refusal. Inputs → wrong output: an edit grant + a foreign comment id → her suggest sentence, nothing deleted. The
+pin: an edit client deletes HER comment and another client's → a tombstone each, one client-named entry each; a suggest
+client still hears her sentence byte-equal (U3's pins stay green, unmodified).
+
+**What each new tool rides (her doors' own ops, read in the code):**
+- comments — `editBlockComment` (no-op guard, blank refuses, a seal refuses — #23), `restoreBlockComment` (deleted, block
+  live, seal refuses, purge intents voided — VX-179's belt), and her deleted-comments surface's own population
+  (`Queries.deletedBlockComments` — a comment given "Delete forever…" is OFF it: no door of hers offers it back);
+- takes — `deleteVariant` (refuses LOCKED, CHOSEN, and the LAST ACTIVE take — I10), `archiveVariant` (refuses the last
+  active take; a chosen take may be archived — the default renders), `unarchiveVariant`, `setTakeLabel` (nil/blank clears,
+  no-op guard, seal refuses, locked/archived allowed), `lockVariant`/`unlockVariant` (a dirty take is insured by one quiet
+  auto commit before the lock; seal refuses);
+- commits — `restoreCommit` (`editableVariant`: live, active, unlocked, unsealed; no-op when equal; churn delete-all +
+  insert-all), `renameCommitPoint` (guards FIRST then the no-op; nil/blank clears through `SavepointName`; a locked or
+  archived take ALLOWED — QUESTIONS #121; seal refuses);
+- the note — `renameContainer` (her two title doors trim and store nil for blank; title is library metadata, editable
+  under a seal — `updateFloatingNotes`' doc), `deleteLens` (a tombstone, its choices cascade on the stamp; lens CRUD is
+  allowed under a seal).
+**Her restore road, read exactly** (`BlockHistoryPane.restore`, `TakesViewModel.restoreCommit`): it FLUSHES the note's
+pending autosave first, then `restoreCommit` — it writes NO savepoint; the buffer it replaces survives only in her
+session's text world. The wire has no pending editor buffer to flush; what it CAN insure is the replaced text, as a
+savepoint — see call 6.
+
+### The design, argued
+
+1. **Every act = her op's row work + the grant guard FIRST inside the act's transaction + ONE client-named undo entry.**
+   Canon (AppSpec §12: "Every write is one of §9's operations with the grant guard INSIDE the op's own transaction and ONE
+   client-named undo entry") and the run's precedent (P-13nb-U2-4 — every MCP write registers one, "though some of her own
+   doors — the tray's Put back, the date, the chapter filing, the rule — register none"; U3's `delete_comment` and
+   `remove_tag` did the same) decide it: all twelve acts register ONE entry, including the ones her own doors leave off the
+   stack (comment edits/restores, labels, locks, commit names, the title, the lens). The brief's "an act her own door makes
+   undo-less stays undo-less" is VX-168 U2's argued case — a COMMIT, which has no inverse that would not destroy a row (I5,
+   S2); none of U4's acts writes a commit as its act. The insurance savepoints two acts write on the way (`lock_take` on a
+   dirty take — her op's own rule; `restore_commit`'s brackets) STAY when ⌥⌘Z walks the act back, exactly as `edit_take`'s
+   brackets do (P-13nb-U3-2) — so the advice's "Every change you make is one undo for the author, named after you; commits
+   stay." and the guide's lesson-1 promise stay true. PROVISIONAL **P-VX195-1** (options below).
+2. **The edit rung's two decisions, every act** (AF-10 (a)): the snapshot (`onNote`, `spendsAfter: false`) speaks the
+   refusal and raises the ask — the ONE not-shared answer for anything unreachable (a dead, foreign, version's or scraps
+   id), `rungTooLow` + the asked sentence for a live holder below edit; the `WriteGuard` re-resolves the note from the act's
+   own rows (the take, the comment, the commit's take, the lens) INSIDE the transaction, decides at EDIT, and spends any
+   once grant there. A refused act spends nothing.
+3. **`delete_comment` at EDIT (R-VX188-1's edit clause, in `mayDelete`):** the rung a delete needs is SUGGEST for a comment
+   on file as this client's own, EDIT for any other. Snapshot: the note at suggest (unchanged — a read client hears the rung
+   and an ask for suggest; unreachable is the one shape); then a comment not on file as its own needs EDIT on the note, else
+   her ruled sentence, byte-unchanged (suggest and write-new callers alike; still no ask — P-VX188-1). The guard decides the
+   needed rung on its own rows and spends exactly that rung's once grant — never two.
+4. **`edit_comment(comment_id, text, expected_text)`** — `expected_text` REQUIRED, `edit_take`'s discipline for replacing
+   text she wrote (R-13n-7's class; a stale read refuses and writes nothing) — PROVISIONAL **P-VX195-2**. The authorship
+   record is untouched by an edit (it says who WROTE the comment). The undo puts the old text back only while the comment
+   still reads the act's text (an edit of hers since is hers — quiet), the redo likewise.
+5. **`delete_take` — the LAST take deletes the BLOCK (R-VX184-1):** "last" is I10's — the take is ACTIVE and its block has
+   no other live active take. Then the act is `delete_block`'s exactly (the block and every take — archived ones too — go to
+   the tray, `deleteBlock`'s undo entry relabeled "‹client›'s delete", the receipt "deleted a block (its last take)", the
+   answer `deleted_block: true`, Activity logs the BLOCK). Otherwise `deleteVariant` exactly (its refusals: a CHOSEN take —
+   choose another first, as at her keyboard; a seal). The ROAD is chosen on the snapshot and RE-CHECKED inside the
+   transaction (a take that stopped or started being the last since the read refuses whole, nothing written — the
+   compare-and-set class). A LOCKED take refuses on BOTH roads (the lock guards the take; `delete_block` stays the explicit
+   road for a block) — PROVISIONAL **P-VX195-3**.
+6. **`restore_commit(commit_id)` — INSURED:** the eighth occasion's bracket — a quiet commit "before ‹client›'s restore" of
+   the text it replaces and "after ‹client›'s restore" of the restored text (+1 ms), each deduped by the standing rule —
+   then her `restoreCommit` row work (refusals, no-op, churn exactly hers). Why both brackets: the replaced buffer is what
+   becomes unreachable after the session (OverallModel §3's doctrine), and the guide's lesson 3 promises "When it changes a
+   take, Variorum commits the take just before and just after". The undo restores the pre-restore buffer exactly
+   (`revertStructural` with insurance — the fourth occasion for a buffer she edited since), the redo the restore again.
+   PROVISIONAL **P-VX195-4**.
+7. **`rename_commit(commit_id, message)`** — her `renameCommitPoint` semantics exactly (nil/blank clears; a no-op writes
+   nothing; the SEAL checked FIRST; allowed on a locked or archived take — QUESTIONS #121); the message stored AS GIVEN
+   (her rename — `save_commit`'s "‹client›: …" prefix is a NEW commit's provenance) — PROVISIONAL **P-VX195-5**.
+8. **`archive_take` / `unarchive_take` / `lock_take` / `unlock_take` are FOUR tools, not two with a boolean:** her menu's
+   own four verbs, and the activity log stores the TOOL (no detail column) — one tool per verb is what lets Activity say
+   "archived" vs "unarchived" in words (W-UX-13). `archive_take` on the last active take REFUSES (I10 — the ruling names
+   DELETING the last take, never archiving it). `unarchive_take` is in scope as `archive_take`'s other direction (her
+   Unarchive door; without it the client's archive is one-way except by her ⌥⌘Z) — PROVISIONAL **P-VX195-6**.
+9. **`set_take_label`, `rename_note`** — as given (her doors' semantics: nil/blank clears, trimmed), no client stamp
+   (P-13n-3's "‹client› · suggested" marks a suggestion's ORIGIN; a relabel or a title is the client renaming — the receipt,
+   Activity and the undo label say who) — part of **P-VX195-5**. A title is editable under a seal (her op's posture).
+10. **`delete_lens(lens_id)`** — her `deleteLens` (a tombstone; its choices die on its stamp); the undo revives the lens
+    with exactly the choices that died on that stamp (`save_lens`'s own machinery), the redo deletes it again.
+11. **`restore_comment(comment_id)`** — her restore door's population: a DELETED comment on her block's deleted-comments
+    surface (`Queries.deletedBlockComments`' predicate — a comment given "Delete forever…" refuses, never a door her surface
+    doesn't offer: `put_back`'s tray rule), its block live and placed in a note the client may EDIT. The wire has no read of
+    deleted comments yet (that is **VX-148**, Backlog — not this unit), so the description says the id comes from an earlier
+    read or the client's own delete. The undo deletes it again (a fresh stamp), the redo revives it on the undo's exact stamp.
+12. **Private / Seal / Own stay HERS ALONE** (R-VX184-2): no tool here touches `ai_private_at`, a post's seal
+    (`lockPost`/`unlockPost`) or `owned`; `lock_take` is the TAKE's lock (her per-take guard), never the note's seal.
+13. **Wording** — every description, refusal, receipt, Activity phrase and undo label ships AS BUILT: **P-U4-WORDS** (her
+    copy pass; the QUESTIONS road — not VX-234, which is the pane's wording review).
+
+### PROVISIONALs (running — each wants a `notes/QUESTIONS.md` entry at the merge)
+
+- **P-VX195-1 — every U4 act is ONE ⌥⌘Z** (canon §12 + P-13nb-U2-4 + U3's precedent): (a) as built; (b) the kickoff's
+  literal letter — an entry only where her own door has one (delete/archive take, the last-take block delete), every other
+  act undo-less with its description saying so (this would FALSIFY the advice's "Every change you make is one undo for the
+  author" and the guide's lesson 1 — both would need re-voicing).
+- **P-VX195-2 — `edit_comment` requires `expected_text`** (a stale read refuses): (a) as built; (b) no precondition — her
+  door's shape (the last writer wins; ⌥⌘Z the net).
+- **P-VX195-3 — a LOCKED take refuses `delete_take`, last take or not:** (a) as built; (b) a locked LAST take deletes the
+  block (`delete_block`'s road ignores take locks).
+- **P-VX195-4 — `restore_commit`'s insurance:** (a) as built — both brackets ("before/after ‹client›'s restore"), deduped;
+  (b) the "before" savepoint only; (c) none — her road exactly (the replaced buffer reachable by ⌥⌘Z only while the session
+  lives).
+- **P-VX195-5 — names as given:** `rename_commit`'s message, `set_take_label`'s label and `rename_note`'s title are stored as
+  the client gives them (her doors' semantics): (a) as built; (b) prefix the client's name (`save_commit`'s style).
+- **P-VX195-6 — `unarchive_take` built beside `archive_take`:** (a) as built; (b) archive only (the brief's list names
+  "archive"; the take comes back by her ⌥⌘Z or her own Unarchive).
+- **P-U4-WORDS** — the twelve tools' titles and descriptions, `delete_comment`'s grown description, every refusal sentence
+  the wire adds, the receipts, the Activity phrases and the undo labels (her copy pass; 13s-a-sweepable).
