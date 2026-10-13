@@ -2427,4 +2427,6 @@ with Variorum CLOSED the shim answers the probe, so "Variorum must be open" neve
 CONNECTION_CLOSED (seen live on her user-scope entry during the round); it also carries the ladder's
 shared-echoable-id-predicate NIT. **Her handoff lead:** nothing to re-run after the refresh (keys and bindings
 untouched); the Air's bridge keeps working and retires by one setup re-run at her leisure (the beta tester's the
-same). Status: open — her eye at her convenience; nothing gates the launch except her VX-181 call.
+same). Status: **P-VX180-1/2/3 ALL RATIFIED AS BUILT (her word, 2026-10-13 — the 0.9.4 post-release sitting):**
+the 8-frame bound, ping's empty result, JSON-RPC's own "Method not found" with nothing echoed. Open residue:
+her VX-181 launch-gate call only (the kickoff prompt is ready; she runs it with other MCP improvements).
