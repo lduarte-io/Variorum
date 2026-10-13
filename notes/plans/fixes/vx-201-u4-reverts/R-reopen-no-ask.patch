@@ -1,0 +1,12 @@
+diff --git a/App/Variorum/Shared/AppBootstrap.swift b/App/Variorum/Shared/AppBootstrap.swift
+index c0ad5c76..a8b5870f 100644
+--- a/App/Variorum/Shared/AppBootstrap.swift
++++ b/App/Variorum/Shared/AppBootstrap.swift
+@@ -869,7 +869,6 @@ final class AppBootstrap {
+         // VX-206: the reopen rebuilt the Settings scene at its default pane —
+         // a ceremony hosted by Settings ▸ Protection asks for that pane back
+         // (a no-op for every other host; the request outlives the window).
+-        protection.requestProtectionPaneForCeremony()
+         if case .failure(let error) = outcome { throw error }
+     }
+ 

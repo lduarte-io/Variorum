@@ -1391,4 +1391,8 @@ rollup /tmp/vx201-window-c.summary (deleted at closeout per the tidy rule).
 - IN-PROGRESS — the revert patches (`notes/plans/fixes/vx-201-u4-reverts/`): each made by editing the committed
   tree, `git diff > <R>.patch`, then `git checkout --` the one file; a death mid-step leaves at most ONE file
   reverted, and `git diff HEAD` shows which (the fix is committed — `git checkout --` is the safe restore).
-  NEXT after: the phone `build-for-testing`, the compile check of the patches, the close.
+  DONE (this commit): the six patches written, each `git apply --check` clean, the tree restored (`git diff HEAD`
+  empty). IN-PROGRESS — the COMPILE CHECK: combo 1 (R-204 + R-none + R-reopen + R-done + R-adopter, distinct files)
+  then R-host alone (it shares R-none's hunk); while a combo is applied up to five files under `App/Variorum/` read
+  reverted — `git diff HEAD --stat` lists them, `git checkout -- App/Variorum/` restores (the fix is committed).
+  Then a HEAD rebuild, the phone `build-for-testing`, the close.
