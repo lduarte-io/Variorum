@@ -259,3 +259,186 @@ struct TakesParkedFollowTests {
         }
     }
 }
+
+// MARK: - The follow gap's own chords (the fable ladder round 1 — the run
+// record's FABLE LADDER ROUND 1 section: the MINOR + NIT 1; expected RED on
+// the pre-fix tree except the labelled guard)
+
+@MainActor
+extension TakesParkedFollowTests {
+    /// ONE named-lens column (no choice yet — it shows the chosen take A),
+    /// the ring live in its pane on A.
+    fileprivate func lensWithRing(
+        _ session: AppSession, _ db: AppDatabase, _ world: ParkWorld, _ model: TakesViewModel
+    ) async throws -> (columnID: String, lensID: String, ring: TakesViewModel.PaneKey) {
+        let lens = try session.operations.createLens(post: world.postID, name: "the gap lens")
+        model.replaceColumnWithLens(try #require(model.columns.first).id, lensID: lens.id)
+        try await adoptFresh(model, db, world.postID)
+        let columnID = try #require(model.columns.first).id
+        let ring = TakesViewModel.PaneKey(
+            columnID: columnID, blockID: world.blockID, variantID: world.takeA)
+        model.focus(ring)
+        return (columnID, lens.id, ring)
+    }
+
+    /// **THE MINOR (RED ON THE PRE-FIX TREE).** Mid-follow the ring is
+    /// PARKED, not gone: a second ⌃⌘→ before the cell's render-report (a
+    /// named lens's gap spans a whole store round) steps ON from the parked
+    /// take — it must never speak the click-first refusal at her mid-step
+    /// (R-VX214-1's own key-repeat ergonomics; the architect's scope ruling).
+    @Test func aSecondKeyStepInTheFollowGapStepsOnFromThePark() async throws {
+        try await withParkWorld("gapkeys") { session, db, world, model in
+            let (columnID, _, _) = try await lensWithRing(session, db, world, model)
+
+            await model.stepTakes(by: 1)   // parks B; the store writes B; no adoption yet
+            #expect(model.parkedFollow?.variantID == world.takeB, "fixture: the first step parked B")
+
+            await model.stepTakes(by: 1)   // the gap: ring nil, projection stale
+            #expect(model.status?.isRefusal != true,
+                    "mid-follow a step is a STEP, never the click-first refusal (status: \(model.statusMessage ?? "nil"))")
+            let parked = Key(columnID: columnID, blockID: world.blockID, variantID: world.takeC)
+            #expect(model.parkedFollow == parked, "the second step steps ON from the parked take")
+
+            try await adoptFresh(model, db, world.postID)   // the adoption that brings C
+            #expect(model.parkedFollow == parked, "the adoption that brings C keeps the park")
+            model.paneRendered(parked)
+            #expect(model.authority.livePane == parked, "the follow lands on C")
+        }
+    }
+
+    /// The scratch twin (the gap is one render — key repeat can still land in
+    /// it under load): the second press steps on, never refuses.
+    @Test func aSecondKeyStepInTheFollowGapStepsOnFromTheParkOnAScratchColumn() async throws {
+        try await withParkWorld("gapscratch") { _, _, world, model in
+            let columnID = try scratchWithRing(model, world)
+            await model.stepTakes(by: 1)   // parks B; the scratch pick moves synchronously
+            #expect(model.parkedFollow?.variantID == world.takeB, "fixture: the first step parked B")
+
+            await model.stepTakes(by: 1)   // before B's render-report
+            #expect(model.status?.isRefusal != true,
+                    "mid-follow a step is a STEP, never the click-first refusal (status: \(model.statusMessage ?? "nil"))")
+            let parked = Key(columnID: columnID, blockID: world.blockID, variantID: world.takeC)
+            #expect(model.parkedFollow == parked, "the second step steps ON from the parked take")
+            model.paneRendered(parked)
+            #expect(model.authority.livePane == parked)
+        }
+    }
+
+    /// **The right-then-left dance (RED ON THE PRE-FIX TREE):** stepping back
+    /// to the take the cell is STILL SHOWING re-rings it directly — the cell
+    /// already renders that take, so the flip is the refused-pick recovery's
+    /// own safe read→live move — and the stale park ends with it.
+    @Test func aStepBackToTheShownTakeReRingsItDirectlyAndEndsThePark() async throws {
+        try await withParkWorld("gapback") { session, db, world, model in
+            let (_, lensID, ring) = try await lensWithRing(session, db, world, model)
+
+            await model.stepTakes(by: 1)   // parks B (the cell still shows A)
+            #expect(model.parkedFollow?.variantID == world.takeB, "fixture: parked B")
+            await model.stepTakes(by: -1)  // back to A, the shown take
+            #expect(model.status?.isRefusal != true,
+                    "the back-step is a step, never a refusal (status: \(model.statusMessage ?? "nil"))")
+            #expect(model.parkedFollow == nil, "no stale park survives the round trip")
+            #expect(model.authority.livePane == ring,
+                    "the ring is back on A directly — the cell never stopped showing it")
+            // The store records the explicit choice the back-step made.
+            let choice = try await db.read { [lensID] db in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT variant_id FROM lens_choice
+                        WHERE lens_id = ? AND block_id = ? AND deleted_at IS NULL
+                        """,
+                    arguments: [lensID, world.blockID])
+            }
+            #expect(choice == world.takeA, "the back-step's pick landed (lens choice: A)")
+        }
+    }
+
+    /// **"Show take ▸" mid-gap (RED ON THE PRE-FIX TREE):** a pick while a
+    /// follow is parked moves the park WITH the pick — never strands it on
+    /// the overtaken key (where the arriving adoption would drop it and the
+    /// follow would be lost).
+    @Test func aMidGapPickMovesTheParkWithIt() async throws {
+        try await withParkWorld("gappick") { session, db, world, model in
+            let (columnID, _, _) = try await lensWithRing(session, db, world, model)
+
+            await model.stepTakes(by: 1)   // parks B
+            await model.pick(columnID: columnID, blockID: world.blockID, variantID: world.takeC)
+            let parked = Key(columnID: columnID, blockID: world.blockID, variantID: world.takeC)
+            #expect(model.parkedFollow == parked, "the park moved with the pick")
+
+            try await adoptFresh(model, db, world.postID)   // C arrives
+            #expect(model.parkedFollow == parked)
+            model.paneRendered(parked)
+            #expect(model.authority.livePane == parked, "the follow lands on C, not nowhere")
+        }
+    }
+
+    /// GUARD (green on both sides): a REFUSED mid-gap pick restores the
+    /// ORIGINAL park — the first follow is still owed.
+    @Test func aRefusedMidGapPickRestoresTheOriginalPark() async throws {
+        try await withParkWorld("gaprefused") { session, db, world, model in
+            let (columnID, _, _) = try await lensWithRing(session, db, world, model)
+
+            await model.stepTakes(by: 1)   // parks B
+            let parked = Key(columnID: columnID, blockID: world.blockID, variantID: world.takeB)
+            #expect(model.parkedFollow == parked, "fixture: parked B")
+            // C is archived in the store, the board not yet told: the pick
+            // reaches `setLensChoice`, which refuses an archived take.
+            try session.operations.archiveVariant(world.takeC)
+            await model.pick(columnID: columnID, blockID: world.blockID, variantID: world.takeC)
+            #expect(model.status?.isRefusal == true, "fixture: the op refused")
+            #expect(model.parkedFollow == parked, "the original park is restored — B's follow is still owed")
+
+            try await adoptFresh(model, db, world.postID)   // B arrives
+            #expect(model.parkedFollow == parked)
+            model.paneRendered(parked)
+            #expect(model.authority.livePane == parked)
+        }
+    }
+
+    /// **NIT 1 (RED ON THE PRE-FIX TREE):** the pick's recovery acts on the
+    /// run's OWN outcome, never the shared status line — a refusal another
+    /// door speaks while the pick's write is in flight must not steal a
+    /// SUCCESSFUL pick's follow back to the outgoing pane. The runner is held
+    /// by a gate so the interleave is deterministic.
+    @Test func anInterleavedRefusalNeverStealsTheParkAfterASuccessfulPick() async throws {
+        try await withParkWorld("gapsteal") { session, db, world, model in
+            let (columnID, _, _) = try await lensWithRing(session, db, world, model)
+
+            // Hold the runner: the pick's write queues behind this job, so the
+            // suspension window is held open until the gate lifts.
+            let gate = DispatchSemaphore(value: 0)
+            let entered = LockIsolated(false)
+            let blocker = Task {
+                try? await session.runner.run { _ in
+                    entered.setValue(true)
+                    gate.wait()
+                }
+            }
+            var turns = 0
+            while !entered.value, turns < 4000 { await Task.yield(); turns += 1 }
+            #expect(entered.value, "fixture: the runner is held")
+
+            let pickTask = Task {
+                await model.pick(
+                    columnID: columnID, blockID: world.blockID, variantID: world.takeB)
+            }
+            turns = 0
+            while model.parkedFollow == nil, turns < 4000 { await Task.yield(); turns += 1 }
+            let parked = Key(columnID: columnID, blockID: world.blockID, variantID: world.takeB)
+            #expect(model.parkedFollow == parked, "fixture: the pick parked B and is awaiting its write")
+
+            // Another door's refusal lands while the pick is suspended.
+            model.setRefusal("an interleaved refusal from another door")
+            gate.signal()
+            await pickTask.value
+            _ = await blocker.value
+
+            #expect(model.parkedFollow == parked,
+                    "a successful pick keeps its park — the interleaved refusal is not its outcome")
+            #expect(model.authority.livePane == nil,
+                    "the ring is not stolen back to the outgoing pane")
+        }
+    }
+}
