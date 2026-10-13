@@ -556,7 +556,17 @@ the simulator replay suite; then the six red-on-old revert cycles per the pin ta
 
 ## U2 RECORD (VX-110)
 
-**Not done in this unit (stated first):** PENDING — filled at close.
+**Not done in this unit (stated first):** no `xcodebuild test` of any kind was run (stage work, per §D) — every pin
+result, every red-on-old run and every existing-suite result below is **PENDING** the orchestrator's stage window; **no
+walk** (GUI work needs a held stage claim, which this unit was not granted — §B names the orchestrator's hands-on walk of
+the two doors; a dev-store walk also needs custody MATERIAL planted, since the dev store never syncs — see F-U2-8); the
+phone's simulator suites not run; the born-Castle pin (e) and the isolation pin (d) are BOUNDS (green both sides by
+design — no line of this unit is on their roads), so the Done carries NO new-account sentence until (e) is green at the
+stage (her carried-forward reminder 1 — the "set up again" sentence stays OUT of the shipped draft, offered as an
+alternative below); no `notes/QUESTIONS.md` entry written (merge-moment-only ledger — the drafts below are #215's
+input); the canon copy record (`notes/plans/pre-13x-copy.md`) not updated (F-U2-6). Zero lines in
+`Sources/VariorumCore/Sync/`, no schema, no `RotationMarker` field (the This-Mac-Only fact rides a per-store flag beside
+the dials instead).
 
 ### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 - 2026-10-13 — U2 implementer (Opus) started. Reading done in this session, never delegated: this file whole (§A's
@@ -579,11 +589,16 @@ the simulator replay suite; then the six red-on-old revert cycles per the pin ta
   `f1a7652a` (the pins, `VX110SignedOutCastleTests`, 9 tests). VERIFIED here: Mac `build-for-testing` green twice
   (after the fix, after the pins), zero warnings in changed/new lines (the 5 warnings the log shows inside touched
   FILES are pre-existing lines). Every test RESULT is PENDING the stage (Mac-target suites are stage work).
-- NEXT: the behavioral-revert patches (`notes/plans/fixes/vx-201-u2-reverts/`), the phone `build-for-testing`, the
-  copy drafts, the close.
-- REVERT PATCHES BEING GENERATED (announced before starting, the protocol's rule): each revert is edited onto the
-  COMMITTED tree, captured with `git diff`, and restored with `git checkout -- <its files>` (HEAD = the fix, nothing
-  else uncommitted there); `git diff HEAD --stat` must read only this record afterwards. No revert is left applied.
+- DONE `598ee565` — the seven revert patches (`notes/plans/fixes/vx-201-u2-reverts/`), generated on the committed tree
+  and restored; each `git apply --check` clean; COMPILED in two combos (R-a + R-b2 + R-f + R-7 + R-c, then R-b1 + R-c2 —
+  R-c and R-c2 share a hunk), the tree restored by `git checkout -- App/Variorum/Shared/` after each and `git diff HEAD`
+  read empty; then a third Mac `build-for-testing` of HEAD so the run-tagged DerivedData holds the FIX's products (a
+  stage `test-without-building` must not run a revert's leftovers). **No revert is applied now.**
+- VERIFIED here: phone `build-for-testing` (VariorumMobile, generic iOS Simulator) green — zero warnings in the phone
+  files touched. DerivedData: `App/Variorum/DerivedData/vx201` (index store off). `df -h` data volume: 43 GiB free
+  before the builds, 43 GiB after.
+- CLOSED (this commit): the record below — the pins table + expected reds, the stage protocol, the suites, the copy
+  drafts, the findings.
 
 ### The traced mechanism (pin before fix — every leg read at HEAD `97959e5d`)
 1. **The fork is missing (auditor A, confirmed).** `PostureSwitchModel.start` sends `.enter` straight to `.explain`;
@@ -654,3 +669,146 @@ the simulator replay suite; then the six red-on-old revert cycles per the pin ta
   intact at `08479fff`/`c2f188b7` (`git show c2f188b7:notes/plans/fixes/vx-201-castle-prelaunch-fixes.md`, lines
   ~199–300). U4's brief is told to cite the VX-206 ruling that is no longer here. Not restored by me (the orchestrator's
   sections); flagged so a fresh session never reads the truncated text as the whole.
+- **F-U2-1 — the second silent revert (the Apple arm), FIXED here (`2397ae55`).** See the trace's leg 3. The guard keys on
+  the library's own shape (no sync custody at this ready · the key behind the gate · its own posture Castle), not on
+  `enrollReading`: an offline ready clears that reading while `vaultReading` keeps the last Standard word, so a guard on it
+  would let the arm land the copy at the first offline ready after a sign-in. Pre-existing for EVERY Castle-born library
+  joining a Standard account (corner 6) — the existing pin `Phase13pControllerTests.enrollsFourDirections…` (d) never
+  read the key file. A product reading the orchestrator should confirm: until Join, the Protection pane still reads
+  "You're in Standard" (the account's word, decision 8) over a library that is Castle-shaped and asks at every open —
+  pre-existing corner-6 display (F-U2-4), now with no write behind it.
+- **F-U2-2 — `reconcileFollow`'s follow-into-Standard arm reads no MARKER** (only the controller's in-memory
+  `switchInProgress`), so a crashed switch whose library holds the account's material can be silently followed at a
+  signed-in relaunch. After this unit no local road leaves material beside its marker (forget-first + the resume's carry)
+  and the enrolled roads' vault is already Castle when their marker stands, so no road is known to reach it; recorded
+  for the ladder, not built (U1 gave the marker read to the Apple arm only).
+- **F-U2-3 — the plain local road over an enrolled-SHAPED key file without material** (a restored copy of a synced
+  library, or a library whose keys were forgotten earlier, signed out) keeps §A refinement 4's plain road AND the
+  ordinary Done, whose "your other devices will ask the next time they open" is false there (no account follows). Not
+  built: the This-Mac-Only Done's "delete that account if you still can" would be harmful advice for a copy whose account
+  she still uses everywhere. A copy question for #215 (a third Done, or the ordinary Done minus its devices clause on any
+  library whose account this road did not move).
+- **F-U2-4 — signed in, not enrolled, Castle-shaped (after Cancel at the consent, or any corner-6 library):** the pane
+  reads Standard and offers Use Castle…, whose road is the plain local road again (signed in ⇒ no doors, no material ⇒
+  no belt) with the ordinary Done. Harmless (it re-keys locally), dishonest in its Done's devices clause. Pre-existing;
+  candidate ticket.
+- **F-U2-5 — a pre-existing unresumable window on EVERY road:** the `.rekeyLibrary` marker is written before
+  `writeNewKeyFile`; a crash between them leaves a marker naming a key file that does not exist, and every resume throws
+  `rekeyFailed("the new key file is missing…")` — sync refused for good. Tenths of a second (one Argon2id derivation).
+  Not this unit's; candidate ticket.
+- **F-U2-6 — the canon copy record is stale:** `notes/plans/pre-13x-copy.md:676` still carries the consent's FIRST
+  wording (not even RUN A row 10's); the closeout lands her approved #215 wording there.
+- **F-U2-7 — the Sign In… door's face is a nested sheet** (the account sheet over the ceremony sheet; closing it closes
+  the ceremony) on both platforms — compiled, read as code by a pin, NOT walked (stage).
+- **F-U2-8 — the walk needs a planted state:** the dev store never syncs (the A4 fence), so "signed out with the sync
+  keys held" cannot arise there by use; the orchestrator's walk needs the dev scope's per-store sync item planted with
+  material (a throwaway material is enough — the doors key on presence) or a scripted world.
+
+### THE PINS — `VariorumTests/VX110SignedOutCastleTests` (9 tests) and the red-on-old protocol (ALL PENDING, stage)
+Run green first; then each revert ALONE: `git apply notes/plans/fixes/vx-201-u2-reverts/<R>.patch`, `build-for-testing`,
+`test-without-building -only-testing:VariorumTests/VX110SignedOutCastleTests`, read which tests fail, then
+`git checkout -- App/Variorum/Shared/` and confirm `git diff HEAD --stat` is EMPTY (window A's index trap does not apply —
+`git apply` is worktree-only). Expect "Test run with 9 tests in 1 suite" (no `.enabled(if:)` gates; (d) writes real
+Keychain items under a throwaway scope `vx110-isolation-*`, deleted in its `defer`).
+| pin | test | expected red under |
+|---|---|---|
+| (a) the doors + the belt + the lapsed-session re-offer | `theTwoDoorsStandExactlyWhereTheSilentRevertWasReachable` | **R-a** (`R-a-no-doors`): the held world reaches `.explain`; the direct `enterCastle` runs instead of throwing; the lapsed leg ends `.done`, not `.signedOutChoice` |
+| (b) This Mac Only → the OLD account: consent, no follow, no Apple copy | `thisMacOnlyThenSigningIntoTheOldAccountLandsTheConsentNeverTheFollow` | **R-b1** (`R-b1-no-forget`): material rides behind the gate; after sign-in the follow re-adds `apple` and moves custody silent · **R-b2** (`R-b2-apple-arm-lands`): the key file gains `apple` at the sign-in ready · **R-f**: `model.doneBody` |
+| (c) killed before the swap, material re-landed | `aThisMacOnlyRoadKilledBeforeItsSwapFinishesWithTheOldAccountsKeysForgotten` | **R-c** (`R-c-resume-no-forget`): material survives the resume and lands behind the gate · **R-b1**: material present right after the kill · **R-f**: the Done |
+| (c2) killed after the swap | `aThisMacOnlyRoadKilledAfterItsSwapResumesToTheHonestDone` | **R-c2** (`R-c2-resume-ignores-flag`): `outcome.thisDeviceOnly` false → the ordinary Done · **R-f** |
+| (d) per-store custody isolation | `forgettingOneLibrarysSyncKeysLeavesAnotherLibrarysCustodyWhole` | BOUND — green under every revert (the property the road leans on) |
+| (e) born-Castle setup from the This-Mac-Only library | `syncSetUpFromTheThisMacOnlyLibraryBirthsACastleAccount` | BOUND — green under R-a/R-b2/R-c/R-c2/R-f/R-7 (no line of this unit on its road); R-b1 changes its precondition (material held) and may go red — irrelevant to the bound |
+| (f) the words | `theThisMacOnlyScreensAndDoneNeverSpeakTheAccountWideWords` | **R-f** (`R-f-ordinary-done`) |
+| faces as code | `bothFacesRenderTheTwoDoorsAndTheExplainByTheRoad` | a face reverted by hand (no patch — a structural pin) |
+| item 2 | `theRekeyBannersAndTheSyncRowNameThePendingMarkersAct` | **R-7** (`R-7-one-act`) |
+
+**Existing suites (changed-SOURCE rule — every Mac suite whose source names a changed type) — PENDING, one stage run**
+from `App/Variorum/`: `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+DerivedData/vx201` plus `-only-testing:VariorumTests/` + each of: VX110SignedOutCastleTests VX202ReopenRaceTests
+VX80CastleFollowRecoveryTests PostureSwitchTests Phase13pControllerTests Phase13pLobbyTests StoreLaunchRouteTests
+Phase13pKeyedDrillTests LobbyVaultRoadTests LibraryPortabilityDoorTests AppleRelinkDoorTests AppBootstrapOffMainTests
+CustodyReleaseTests KeyDoorTests WordsCopyDoorTests CopyRegisterPinTests ProtectionMigrationTests
+ProtectionSurfaceRenderTests ProtectionTierFaceTests ProtectionDialsTests ProtectionDialsPerStoreTests ProtectionCopyTests
+ProtectionCadenceTests StoreKeyGuardBackingTests RetiredNamesPinTests SyncLockedFaceTests EncryptionFlowTests
+CopyFlowRoundTests CrossoverRoundTests AccountLifecycleDoorTests AccountDoorWiringTests TerminologyPinTests
+FreshAccountSetupGeneralityTests AuthSessionLazyLoadTests EncryptionCustodyThreadTests ProtectionSetModeOffMainTests
+ProtectionReconcileOffMainTests SyncEnrollmentTests EnrollDirectionsTests ConnectLibraryTests Phase13pCopySweepTests
+SecretCheckTests SyncOutOfDateFaceTests SyncSafetyFaceTests SyncStalledRowTests HostedSyncStatusReadTests
+HostedSyncTierFaceTests MarkdownInsuranceTests PlaintextExportDoorTests ICloudDriveOfferTests SignUpPresentationTests
+Phase9cAuthWiringTests TravellingDotsIndicatorTests BackupRunTests BackupOwnFilesTests BackupRetentionTests
+BackupSingleFlightTests DataSafetyRunbookTests TutorialPrivacyChapterTests PostureSwitchDrillTests
+ProtectionMigrationDrillTests ConnectDrillTests EncryptionExplainedDrillTests (the drills opt-in by env as window A
+recorded — TEST_RUNNER_ vars in xcodebuild's ENVIRONMENT; the posture drill's VX-233 rot is pre-existing). The changed
+consent pins live in `ProtectionCopyTests` (two of its tests). Phone (simulator stage, by UDID):
+`VariorumMobileTests/MobileProtectionTests` (its consent pin re-based) + `VariorumMobileTests/MobileStructuralTests` (the
+phone's copy-home sweep reads the new strings) + `VariorumMobileTests/MobileWindowReplayTests`.
+
+### The phone's door (§D item 6 — read, confirmed)
+`MobileProtectionSheet.postureSection` offers Use Castle… under `controller.posture == .standard` (the Mac's own rule)
+and opens `controller.openSwitch(.enter, …)` — the SAME `PostureSwitchModel`, so the fork, the belt, the forget and the
+honest Done are shared by construction. `MobilePostureSwitchSheet` now renders `.signedOutChoice` (Sign In… · Use Castle
+on This iPhone Only · Cancel, the phone's stacked doors), `.signInChosen` (the account surface over the sheet, the page
+style injected), and Screen 1 by the road (`model.explainBody` / `explainBullets`). The phone never reaches the old
+silent road with the ordinary Done. Built (phone `build-for-testing` green); not run (simulator stage).
+
+### PROVISIONALs (mine — each defended; the orchestrator's to confirm or bundle)
+- **P-U2-1 — Sign In… ends the ceremony** (no auto-resume across an async sign-in — §A refinement 4's call, built as
+  briefed); the account surface opens over the ended ceremony and closing it closes the ceremony.
+- **P-U2-2 — forget-FIRST, before the first marker** (the brief allowed "before or atomically with the custody move"):
+  no marker of this road ever stands beside held material, and a crash after the swap meets a signed-in relaunch with
+  nothing for the follow-into-Standard arm (F-U2-2) to act on. The resume's carry is the belt for material that comes
+  BACK (pin (c)). Cost: a This-Mac-Only road that fails after the forget but before its marker (one derivation) leaves the
+  library unchanged but its keys forgotten — benign (a Standard library re-enrolls silently at the next sign-in).
+- **P-U2-3 — the resume forgets on ANY local Castle marker beside material** (not only a flagged one): that state is the
+  This-Mac-Only road whose material came back, or a pre-fix build's silent road; finishing either with the material in
+  custody is the silent revert. A pre-fix marker's resume therefore BECOMES This Mac Only, honest Done included
+  (population: pre-launch builds only — her devices + one tester; requires a crashed old road).
+- **P-U2-4 — This Mac Only refuses when a session exists at the act** (`thisDeviceOnlyWhileSignedIn`, nothing written):
+  the screens verified her words against the key file (the tie was absent at the door), so running the account-wide road
+  on them is not this unit's to improvise.
+- **P-U2-5 — the honest explain screen** (Screen 1's body and its first bullet replaced on This Mac Only; the backups
+  bullet kept; the compromise bullet DROPPED on this road — its "set sync up again" implies a new account, her reminder
+  1's subject).
+- **P-U2-6 — item 2 changes words only for acts that ENTER Castle** (a key replacement and an unknown act keep the shipped
+  sentences — the smallest change that makes every face name the marker's act).
+
+### U2 COPY DRAFTS (for the QUESTIONS #215 bundle — every line PROVISIONAL until she approves)
+Sentence case, no capitals for emphasis, the everyday register ("sync keys", never a key's technical name). The device
+words ride interpolation (Mac / iPhone, login password / passcode, Touch ID / Face ID); shown here in the Mac's nouns.
+1. **The two doors' title** (`signedOutChoiceTitle`): *You're signed out of sync.*
+2. **The two doors' body** (`signedOutChoiceBody`; also the belt's refusal sentence): *This library still holds the sync
+   keys for your account. To put the account and your other devices in Castle, sign in, then choose Use Castle again. If
+   you can't sign in, or you're leaving that account, you can put only this Mac in Castle — it forgets those sync keys,
+   and the account and its copy on the server stay as they are.*
+3. **The doors:** *Sign In…* (the shipped `signInDoor`, reused) · *Use Castle on This Mac Only* (`useCastleThisDeviceOnlyDoor`
+   — Title Case per the app's door convention; her ruling's words were "Use Castle on this Mac only") · *Cancel*.
+4. **After Sign In…** (`signInFirstTitle` / `signInFirstBody`): *Sign in, then choose Use Castle again.* / *Your account
+   and your other devices go into Castle together. Nothing has changed yet.*
+5. **Screen 1 on This Mac Only — body** (`enterCastleThisDeviceOnlyBody`): *Your library on this Mac gets a new key. From
+   now on this Mac's login password can't open it, and your Apple account holds no key to it. Opening takes Touch ID or
+   your passphrase.*
+6. **Screen 1 on This Mac Only — the first bullet** (then the shipped backups bullet, unchanged):
+   *Only this Mac changes. It forgets your sync keys; your sync account and its copy on the server stay as they are, and
+   your other devices aren't asked. If you sign into that account here again, Variorum asks before it changes anything.*
+7. **The This-Mac-Only Done** (`enteredCastleThisDeviceOnlyDone`, three arms by the fresh backup's fate — the ordinary
+   Done's own rule): *You're in Castle on this Mac. Your library here has a new key that your Apple account never held.*
+   [*A fresh backup was made under it.* | *A fresh backup could not be made just now — check your Backups folder; your
+   earlier backups are untouched.* | (the phone: nothing)] *This Mac asks for Touch ID from now on. Your sync account and
+   its copy on the server are unchanged — delete that account if you still can. If you sign into it here again, Variorum
+   asks before it changes anything.*
+   - **Alternative, ONLY if pin (e) is green at the stage** (her reminder 1): append *Set up sync again later with a new
+     account and it starts in Castle.* — NOT shipped in the draft.
+8. **The two runner refusals:** *You signed in while this was open, so nothing was changed. Choose Use Castle again to
+   put your account in Castle.* (`thisDeviceOnlySignedInSince`) · *This Mac couldn't forget your sync keys, so nothing
+   was changed. Try again.* (`thisDeviceOnlyForgetRefused`)
+9. **The consent, de-capped + reworded** (`joinStandardConsent`; her ruled order kept — cancel · the account into
+   Castle · join again): *This account is in Standard, so if you join, this library will open without asking from now on
+   and your Apple account will hold a key to it. If you'd rather stay in Castle: Cancel here, put the account itself in
+   Castle from a device already signed into it (Settings ▸ Protection ▸ Use Castle…), then join again.*
+   (was: *…will open silently from now on… If you'd rather not leave Castle: Cancel here, put the ACCOUNT in Castle…*)
+10. **Item 2 — the sync row** (`SyncStatusRow.rekeyIncompleteLabel(for:)` / `SyncRowFace.rekeyIncompleteDoorLabel(for:)`,
+    entering-Castle markers only): *Sync paused — entering Castle didn't finish on this device* · *Finish entering
+    Castle…* (the banner reuses the shipped `ceremonyResumeTitle` + *Finish Entering Castle…* — no new sentence).
+Copy rhyme (the VX-214 rider): none of these sit on a Settings pane's own text; the Protection pane renders only the
+ceremony sheet's phases. Overlap declared: `ProtectionPane.swift` gained the ceremony sheet's two new phases and ONE
+argument on each of the sheet's two presenter lines (`services:`), nothing of the pane's own sections.
