@@ -1987,3 +1987,18 @@ three pin files + six patches; the adopt/restore machinery byte-untouched as con
   the six revert cycles, the ~50-type Mac existing-suite run, the 6 phone types — at the branch tip, after
   window D phase 2 releases the pinned checkout. VX-233's time-boxed heal (her ruling: slots after U5) OPENS NOW
   in the live worktree; its drill re-run folds into window E.
+
+## VX-233 BOX (the time-boxed drill-harness heal — her ruling: ~90 min cap, test-harness side only, auto-fallback)
+- **The trace (within the box, building on windows A/C):** all three drill failures share one signature — the
+  clock dependency "has no test implementation" resolved from the engine's stored property during the drills'
+  push/pull legs. Those legs run inside `withDependencies` blocks that provide ONLY the database, while the same
+  files' own SEEDING blocks provide the clock and id generators too (and pass). A stored `@Dependency` resolves
+  at ACCESS time, so the engine legs trap exactly where the drill's scope stops providing values. The 13x
+  precedent (phase-13x-library-portability.md:796) fixed this identical class the same way.
+- **The fix (bc07cc76, test-harness side only, zero product lines):** every database-only `withDependencies`
+  block in `PostureSwitchDrillTests.swift` (8 sites) and `ConnectDrillTests.swift` (2 sites) expanded to the
+  files' own seeding idiom — `$0.uuid` + `$0.date` live-value generators beside the database. Mechanical edit,
+  diff read, Mac `build-for-testing` green. Box spend: well under the cap.
+- **The VERDICT is window E's drill leg** (the posture + connect drills under their env vars at the tip): green
+  ⇒ VX-233 closes with the run (the connect drill's instance proves with it); still red ⇒ the ruled fallback —
+  the post-launch ticket stands, the attempt recorded here.
