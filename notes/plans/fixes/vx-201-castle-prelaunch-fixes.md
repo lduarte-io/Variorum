@@ -916,3 +916,33 @@ argument on each of the sheet's two presenter lines (`services:`), nothing of th
   (probe-verified: the VX-206 ruling, her reminders, the custody grant are all present again); U1's surviving
   record body kept in place under its restored header. Lesson recorded: implementers APPEND records — a close
   that rewrites earlier sections is the failure class here; later briefs say "append, never restructure".
+
+### ORCHESTRATOR ADJUDICATION — U2 PART 2 (verified against git: commits 73b2f0ca → e5ec6d24 as reported, zero
+`Sources/VariorumCore/Sync/` lines, zero trailers, seven revert patches present, builds green per record; the
+F-U2-1 diff READ by the orchestrator — a 15-line early return in `reconcileAppleKey` keyed on the library's own
+shape (no sync custody + gated/none + own posture Castle); an enrolled library carries custody and is untouched,
+and a consented Join lands its copy on its own follow road)
+
+- **F-U2-1 — ACCEPTED, in scope.** Without it, the two-door fix's own consent sentence ("asks before anything
+  changes") would be false: the reconcile's Apple arm was the second silent road around the consent, pre-existing
+  for every Castle-born library joining a Standard account. Mechanism verified by my read; red-on-old rides pin
+  (b) under R-b2. The Fable ladder re-examines (custody).
+- **P-U2-1 (Sign In… ends the ceremony) — CONFIRMED** (§A refinement 4's own shape); bundled in #215 as hers to
+  reverse. **P-U2-2 (forget FIRST, before the first marker) — CONFIRMED,** stronger than the brief asked and
+  better: removes the crash window instead of racing it. **P-U2-3 (the resume forgets for any local Castle
+  marker beside held material) — CONFIRMED;** consequence noted: a PRE-FIX build's crashed signed-out ceremony
+  resumes into This-Mac-Only semantics, which is the honest reading of what that user chose. **P-U2-4 (This Mac
+  Only refuses while a session exists) — CONFIRMED** (a live session gets the full road or signs out first).
+  **P-U2-5 (Screen 1 drops the compromise bullet) — copy call, #215.** **P-U2-6 (item 7 words change only for
+  Castle-entering acts) — CONFIRMED.**
+- **F-U2-2 — record-only** (no road reaches it after this unit; the ladder may look once).
+- **F-U2-3 — #215's copy bundle** (the once-synced-no-keys copy's "your other devices will ask" line; the
+  implementer's reason for not reusing the This-Mac-Only Done is right — "delete that account" would be harmful
+  advice for a copy of a live account).
+- **F-U2-4 — pre-existing (the VX-108 family); a comment lands on VX-108 at closeout,** not this run's.
+- **F-U2-5 — TICKETED** (a crash between the `.rekeyLibrary` marker and the key-file write leaves a marker no
+  resume can finish; every road; needs its own trace).
+- **F-U2-6 — handled at the #215 commit:** `pre-13x-copy.md:676` gets a one-line supersession pointer to the
+  de-capped consent (never a rewrite of the historical record).
+- **F-U2-7/F-U2-8 — the walk's:** the Sign In… nested sheet walks in my window; the dev-store walk plants key
+  material in the dev scope's sync item first (the record's own note).
