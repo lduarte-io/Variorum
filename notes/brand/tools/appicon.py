@@ -2,11 +2,13 @@
 """The app's icon and in-app mark, composed from THE LOGO family's cards fan.
 
 VX-177 (her word, 2026-10-12): the app's face is the CARDS mark —
-`variorum-cards-faithful.svg`, the fan of cards on the red ground #FC120C —
+`variorum-cards-jadeite.svg`, the fan of cards on the jadeite ground
+#C5DDC9 (her final colour pick, same day; the faithful red and lavender were
+considered and set aside) —
 superseding R-13s-24/25's striped V as the art while keeping every ruled
 placement (the app icon, About, the offer line's small mark — Q19's set).
 ONE icon, all of the time (her second ruling, same day): the faithful
-edition is pinned for the default AND dark appearances — same red ground,
+edition is pinned for the default AND dark appearances — same jadeite ground,
 same art — so the Dock and Finder never change with the room. The system's
 user-chosen Tinted/Clear icon styles recolour every app's icon and cannot
 be refused; they are fed the same faithful art so the silhouette stays the
@@ -25,9 +27,9 @@ It writes two things:
    edition is a flat print, so the document asks for no Liquid Glass depth
    (no group shadow, no specular, no translucency, the layer's glass off).
    macOS 26 draws icons in four appearances; left unspecified, the system's
-   own dark derivation would swap the red ground for a dark one. So BOTH
-   the default and dark appearances explicitly pin the faithful edition on
-   the red fill — one icon, never changing with the appearance — and the
+   own dark derivation would swap the jadeite ground for a dark one. So BOTH
+   the default and dark appearances explicitly pin the jadeite edition on
+   the same fill — one icon, never changing with the appearance — and the
    tinted style (a user's own system-wide choice; it monochromes every
    app's icon) is fed the same art.
 2. `App/Variorum/Variorum/Assets.xcassets/VariorumMark.imageset/` — the small
@@ -42,11 +44,11 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-FAITHFUL = ROOT / "notes/brand/variorum-cards-faithful.svg"
+FAITHFUL = ROOT / "notes/brand/variorum-cards-jadeite.svg"
 ICON_DIR = ROOT / "App/Variorum/Variorum/AppIcon.icon"
 MARK_DIR = ROOT / "App/Variorum/Variorum/Assets.xcassets/VariorumMark.imageset"
 
-RED = "#FC120C"      # the brand red (README "Constants")
+GROUND = "#C5DDC9"   # jadeite — her final colour pick (2026-10-12)
 CANVAS = 1024
 # The fan's width as a share of the canvas: bold, with the mask's corners
 # well clear of the cards (TASTE.md through-line 3, "bold structure").
@@ -135,8 +137,8 @@ def write_icon():
     (assets / "cards.svg").write_text(layer_svg(faithful_paths()))
     manifest = {
         "fill-specializations": [
-            {"value": {"solid": srgb(RED)}},
-            {"appearance": "dark", "value": {"solid": srgb(RED)}},
+            {"value": {"solid": srgb(GROUND)}},
+            {"appearance": "dark", "value": {"solid": srgb(GROUND)}},
         ],
         "groups": [{
             "layers": [{
@@ -163,7 +165,7 @@ def write_mark():
     mark = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{CANVAS}" height="{CANVAS}" '
             f'viewBox="0 0 {CANVAS} {CANVAS}">'
             f'<defs><clipPath id="tile"><path d="{clip}"/></clipPath></defs>'
-            f'<g clip-path="url(#tile)"><rect width="{CANVAS}" height="{CANVAS}" fill="{RED}"/>'
+            f'<g clip-path="url(#tile)"><rect width="{CANVAS}" height="{CANVAS}" fill="{GROUND}"/>'
             f'{placed_group(faithful_paths(), CANVAS)}</g></svg>\n')
     (MARK_DIR / "VariorumMark.svg").write_text(mark)
     contents = {
