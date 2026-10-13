@@ -54,6 +54,18 @@ dev store only behind an A1 prestage copy, restored verified.
   at the merge). Zero Sync//custody declared.
 - 2026-10-13 — coordinator: she is away from the Pro all night (tmux only), so walks/live rounds need no extra check with her; READY → GO in queue order.
 
+## Cross-run coordination (VX-214, settings panes & launch UI polish — author-attended, merges after us)
+
+Agreed with the settingspaneupdater session (2026-10-13, both run files carry it):
+- VX-214 leaves `Features/MCP`, `MCPPane*`, `MCPPaneCopy` and SettingsShape's MCP rows untouched; anything
+  MCP-pane-shaped from her sittings routes to VX-184.
+- **U6's constraint:** edits to `SettingsShape.swift` stay scoped to the MCP rows only (VX-214 edits the other
+  panes' rows — disjoint regions, clean merge); the Settings WINDOW shell is VX-214's this cycle (VX-225
+  titlebar bleed, VX-224 lock-screen stub) — if the tab rebuild needs shell/window chrome rather than the pane
+  body, STOP and flag to the orchestrator, who sequences with VX-214.
+- If U6 mints a reusable explainer-behind-(i) component, its name + home are reported to VX-214 for reuse.
+- Merge order: VX-184 expects to merge first; VX-214 rebases onto us.
+
 ## UNIT RECORDS (one per unit, owned by its implementer from its first commit)
 
 *(written just-in-time below as each unit spawns)*
