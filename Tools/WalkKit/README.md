@@ -45,9 +45,12 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
 - `open -n <app>` launches a second instance beside hers; `pgrep -fl 'Variorum.app/Contents/MacOS'` then shows
   both — never quit or kill the `/Applications` one.
 - Every launch of the Debug build takes a dev-store backup (`…/Variorum-dev/Backups/`); harmless, expected.
-- `cliclick` 5.1 IS INSTALLED (she ran `brew install cliclick`, 2026-09-04): the one-binary road for
-  click/type/drag/scroll — `cliclick c:x,y` (click at points), `kd:cmd t:j ku:cmd` (⌘J), `t:text` (type),
-  `dd:x,y du:x,y` (drag), `w:ms` (wait). Prefer it over the osascript keystroke road for typing into fields.
+- `cliclick` 5.1 IS INSTALLED (she ran `brew install cliclick`, 2026-09-04): use it for the POINTER only —
+  `cliclick c:x,y` (click at points), `dd:x,y dm:x,y du:x,y` (drag), `w:ms` (wait). **Every KEY goes through
+  `keys.sh` (System Events — see VisualWalk below), never cliclick's `kp:` / `t:` / `kd:`:** cliclick
+  keystrokes never reach a POPOVER at all (VX-179 — two stage windows chased a phantom "dead ⎋" before a
+  trace proved the keys never arrived), drop characters in the quick-entry bar (13u4 C1), and its
+  multi-modifier chords silently do nothing (13u4). A real keyboard and System Events reach all of these.
 
 ## Walker facts from the 13u3 UNIT B walk (2026-09-19)
 
@@ -282,3 +285,24 @@ state (`NSEvent.modifierFlags` the class property) and for driving other apps.
   TIMES OUT), and the next mouse-up — real or synthetic — ends it. Diagnose with
   `sample <pid> | grep _dragUntilMouseUp`; recover by posting a SECOND `du`. Prefer a short
   pause between the last `dm` and the `du`.
+
+## Walker facts from the VX-179 walks (2026-10-12/13)
+
+- **Keys: `keys.sh`, always** (the cliclick note above). The tell for a lost key is an app that did
+  nothing — before concluding the app is broken, prove the event arrived (a DEBUG trace line, or the
+  same key via System Events).
+- **`walk-scroll` needs ALL THREE arguments** (`<x> <y> <lines>`). With fewer it crashes on the missing
+  argument (SIGTRAP, exit 133) — that is misuse, not a broken binary. It posts 10 events of `<lines>`
+  each, so `lines` is a tenth of the travel.
+- **Her shell defines a `log` function** that shadows `/usr/bin/log`: scripts must call
+  `/usr/bin/log stream …` by absolute path, and an app's `.notice`/`.debug` trace lines need `--debug`.
+- **Capture REGIONS, not the full screen:** `screencapture -x -R<x,y,w,h>` (points). Full-screen Retina
+  captures are ~15 MB each and once filled the Data volume mid-walk.
+- **The What's New sheet greets every launch** when your branch's MARKETING_VERSION differs from main's —
+  the Debug builds share `variorum.whatsNew.lastVersion` in the dev defaults domain, so alternating
+  builds flip it. Dismiss it before the first act; merging main into the branch ends it.
+- **`-only-testing` takes TYPE names, not file names** — a wrong name runs 0 tests and reports success.
+- **The test host IS the dev-store app:** a test that posts keys to "the key window" can type into the
+  app's own front surface. Guard key-posting test cells so an unexpected key window fails the premise
+  by name.
+
