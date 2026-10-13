@@ -25,7 +25,7 @@ schema, zero `Sync/`, zero custody, zero editor seam, zero app faces.
 | 5 | self-assessment (below) | NOT-STARTED |
 | 6 | READY to the orchestrator; THE LIVE ROUND (gated on its GO + a held stage claim — dev store only) | NOT-STARTED |
 
-**No revert is in flight.**
+**REVERT IN FLIGHT (piece 3, announced before it starts; the fix is committed at `c65f8de8`, so `git checkout HEAD -- <the three paths>` is the SAFE restore):** `Sources/VariorumMCP/MCPHandshake.swift` and `Tests/VariorumMCPTests/MCPSetupKeyServerTests.swift` restored to their pre-fix bytes from `5e51abe2`; `Tests/VariorumMCPTests/MCPPreInitializeWindowTests.swift` moved to `notes/plans/vx180-screens/prerevert-vx180/` (gitignored, unique to this run). If a successor finds this line, restore with `git checkout HEAD -- Sources/VariorumMCP/MCPHandshake.swift Tests/VariorumMCPTests/MCPSetupKeyServerTests.swift Tests/VariorumMCPTests/MCPPreInitializeWindowTests.swift` and verify `git diff` is empty.
 
 ## THE PIN — red on the pre-fix tree (piece 1, 2026-10-12)
 
