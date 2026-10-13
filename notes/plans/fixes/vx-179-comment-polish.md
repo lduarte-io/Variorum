@@ -752,3 +752,25 @@ constant), and the probe shows why: neither number is the panel's.
 **Observation O-U3-1 (not this surface):** the phone's comments sheet places its placeholder as a
 `UILabel` at a literal (8, 10) inside a `UITextView` (whose default inset (8, 0, 8, 0) + padding 5 put
 text at (5, 8)) — the same hand-placed shape on iOS; unmeasured here; for the VM board.
+
+### F-U3-1 RULING (the orchestrator, 2026-10-12 — same turn as the proposal; the implementer resumes on it)
+
+- **Q-1: (a).** The AppKit control on `CaptureTextView`'s recipe — insets, `lineFragmentPadding` and
+  typing attributes owned in ONE Metrics place; the placeholder a configured TWIN non-editable TK2
+  text view over the editable one (the spike's pixel-exact arm; the 0.5 pt `draw(_:)` arm rejected);
+  rows sized from the real text view (the ruler and its 16 pt dead air retire); Terminal's `//` mark
+  aligns to the real first baseline. CONSTRAINTS: `CommentComposition`, `CommentPanelKeys`, the key
+  monitor and the panel's focus SEMANTICS stay byte-unchanged (open-focused-on-add; focus-loss saves
+  an in-place edit; ⎋ falls through to the host's close when there is nothing to undo — the measured
+  `cancelOperation:` path is the contract); `CommentsPanelEditorTests`/`CommentPanelParkTests` pass
+  UNMODIFIED except cells pinning the old control's internals, each edit justified in the record. The
+  three walk risks (popover focus, undo grouping, IME marked text) become named walk rows.
+- **Q-2: (i).** Fix `QuickEntryBar`'s 2 pt drift in this unit, exactly as proposed: `CaptureTextView`
+  exports its owned inset as a named static; `makeNSView`, the bar's placeholder padding and
+  `QuickNoteView`'s derived literal all read it (QuickNote visibly unchanged — it is the parity
+  proof). Capture SEMANTICS (microsyntax, filing) untouched — this is alignment only. One bar
+  capture per voice joins the walk; the sweep table closes with every instance fixed or provably
+  safe.
+- **Q-3: the panel-private home** — `Features/Editor/CommentTextArea.swift` (one consumer; a shared
+  base class is premature). The shared inset static lives with `CaptureTextView` where it is owned.
+- O-U3-1 (the phone's hand-placed placeholder): minted on the VM board at this ruling (see ledger).
