@@ -31,10 +31,7 @@ struct AppearanceChoiceRow: View {
                 Text("Dark").tag(AppearanceChoice.dark)
             }
             .pickerStyle(.segmented)
-            Text("Dark is a fully black room in both voices, and under every colour palette. This Mac only — your voice and palette follow you everywhere, but how bright the screen should be is about where you are sitting.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            // Her 2026-10-13 General ruling: no explanation beneath.
         }
     }
 }

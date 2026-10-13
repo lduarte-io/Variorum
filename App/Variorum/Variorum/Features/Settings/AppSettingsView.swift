@@ -296,13 +296,18 @@ struct AppSettingsView: View {
                 .font(tokens.heading)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
-            Text(query.isEmpty
-                 ? pane.blurb
-                 : "Settings, keyboard shortcuts and the app's own words — all three.")
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
+            // An empty blurb renders nothing — General, by her 2026-10-13
+            // ruling, is the one pane without a subtitle.
+            let subtitle = query.isEmpty
+                ? pane.blurb
+                : "Settings, keyboard shortcuts and the app's own words — all three."
+            if !subtitle.isEmpty {
+                Text(subtitle)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 18)
@@ -465,7 +470,10 @@ private struct GeneralPane: View {
 
     var body: some View {
         Form {
-            Section("Voice") {
+            // Her 2026-10-13 General rulings: the control reads "Theme" (the
+            // catalog's title), no explanation beneath it, and the "Voice"
+            // section header goes with the caption so "Theme" reads once.
+            Section {
                 Picker(SettingsCatalog.title("voice"), selection: Binding(
                     get: { theme.settings.voice },
                     set: { theme.setVoice($0) })) {
@@ -473,11 +481,6 @@ private struct GeneralPane: View {
                     Text("Study").tag(ThemeVoice.study)
                 }
                 .pickerStyle(.segmented)
-                Text("Two voices, one structure: Terminal is mono and airy with its own idioms; Study is the warm paper-and-serif look. Everything works identically in both, and the colour palette below works under either one.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(6)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             // 18j (her R-Q12): the light/dark choice, the third of the three
             // appearance dials.
@@ -522,14 +525,9 @@ private struct GeneralPane: View {
                         Text(ReceiptStyleCopy.label(style)).tag(style)
                     }
                 }
+                // Her 2026-10-13 ruling: ONE direct paragraph, the refusal
+                // sentence folded in (ReceiptStyleCopy.help carries both).
                 Text(ReceiptStyleCopy.help)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(6)
-                    .fixedSize(horizontal: false, vertical: true)
-                // The sentence the setting must never leave out: a refusal
-                // is not a confirmation, and “Off” never silences one.
-                Text(ReceiptStyleCopy.alwaysShownNote)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(4)
@@ -540,28 +538,25 @@ private struct GeneralPane: View {
             // writing pane — it is how the app OPENS, not how a note behaves.
             Section("Open notes") {
                 Toggle(SettingsCatalog.title("keepOpenNotes"), isOn: $keepOpenNotes)
-                Text("The sidebar's Open section returns as you left it the next time Variorum opens — the notes that still exist, in the same order. Off, each launch starts with an empty list. This Mac only.")
+                // Her 2026-10-13 ruling: the one line beneath.
+                Text("This Mac only.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .lineLimit(5)
+                    .lineLimit(1)
                     .fixedSize(horizontal: false, vertical: true)
             }
             // 13r U3-A — THE CALM-ASKS CADENCE's rule 4: the update ask is
             // always answerable here, without the popup. The checkbox IS
             // Sparkle's own setting; touching it answers the question, so the
             // ask retires for good. Only where a live channel can act (P-2).
+            // Her 2026-10-13 ruling: no text beneath the toggle. The
+            // calm-asks machinery is untouched — the checkbox IS Sparkle's
+            // setting, so touching it still answers the ask for good.
             if let updates, updates.isLive {
                 Section(UpdateSettingsCopy.section) {
                     Toggle(SettingsCatalog.title("updates"), isOn: Binding(
                         get: { updates.automaticallyChecks },
                         set: { updates.setAutomaticallyChecks($0) }))
-                    Text(updates.permissionAnswered
-                         ? UpdateSettingsCopy.help
-                         : UpdateSettingsCopy.help + " " + UpdateSettingsCopy.unansweredNote)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(5)
-                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }

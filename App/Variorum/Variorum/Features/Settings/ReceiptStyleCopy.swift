@@ -34,16 +34,12 @@ nonisolated enum ReceiptStyleCopy {
         }
     }
 
+    // Her General-pane ruling, 2026-10-13 (the VX-214 sitting record): ONE
+    // direct paragraph — what the confirmations are, never the options
+    // explained — closing with the refusal sentence the setting must not
+    // leave out (the header's doctrine, in her own words).
     static let help =
-        "What Variorum says after it does something — \u{201C}Blocks joined\u{201D}, "
-        + "\u{201C}Block divided\u{201D}, the newlines chip's sentence, \u{201C}Undid: Divide\u{201D}. "
-        + "A quiet line: muted words at the end of the bottom bar, fading after "
-        + "a few seconds. A note at the bottom of the window: the card these "
-        + "used to appear in. Nothing: they stay unsaid."
-
-    /// The sentence the setting must never leave out (see the header).
-    static let alwaysShownNote =
-        "Whichever you choose, anything Variorum REFUSES still shows as a note "
-        + "at the bottom of the window \u{2014} a door that can't act always says why "
-        + "\u{2014} and so does any note that offers you a button."
+        "Variorum shows a confirmation after a structural act — merging "
+        + "blocks, dividing one, saving a version. Actions that were refused "
+        + "will still show a note regardless of this setting."
 }
