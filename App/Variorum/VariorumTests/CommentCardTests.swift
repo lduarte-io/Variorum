@@ -145,6 +145,63 @@ struct CommentCardLayoutTests {
         #expect(plan(["a"], ["a", "a"]) == R(reuse: [0, nil], discard: []))
         #expect(plan(["a", "a"], ["a"]) == R(reuse: [0], discard: [1]))
     }
+
+    /// **THE HIT DECISION (U2 FIX LEG — the walk's F-W-1 / F-W-2).** A wheel
+    /// goes to its OWNER's scroll view by hit-testing — the card's contents
+    /// when the card takes it, the door (and so the page) when the page does;
+    /// a press on an overflowing card's scroller lane belongs to the
+    /// scroller; every other press is the door.
+    @Test func theHitDecisionGivesEachEventToItsOwnersScrollView() {
+        typealias H = CommentCardLayout.HitAnswer
+        func answer(_ wheel: CommentCardLayout.WheelOwner?, lane: Bool, overflows: Bool) -> H {
+            CommentCardLayout.hitAnswer(wheel: wheel, inScrollerLane: lane, overflows: overflows)
+        }
+        for lane in [false, true] {
+            #expect(answer(.card, lane: lane, overflows: true) == .contents,
+                    "a wheel the card takes goes INTO its scroll view (lane \(lane))")
+            #expect(answer(.page, lane: lane, overflows: true) == .door,
+                    "a wheel the page takes stays on the card, whose scroll view is the page")
+            #expect(answer(.page, lane: lane, overflows: false) == .door)
+        }
+        #expect(answer(nil, lane: true, overflows: true) == .scroller,
+                "a press on the lane drags the scroller — never the panel")
+        #expect(answer(nil, lane: false, overflows: true) == .door)
+        #expect(answer(nil, lane: true, overflows: false) == .door,
+                "a card with nothing to scroll has no lane: the whole card is the door")
+        #expect(answer(nil, lane: false, overflows: false) == .door)
+    }
+
+    /// **THE BADGE ALWAYS CARRIES ITS COUNT (U2 FIX LEG — the walk's F-W-5).**
+    /// Widths are the REAL label cell's, measured offscreen (10 pt semibold +
+    /// the cell's padding): "#1" 15.74 · "#2" 17.08 · "#12" 22.14 · "12" 15.46
+    /// · "#28" 23.94 · "28" 17.26. RED ON OLD (the shipped inset alone, the
+    /// run record's F-W-5 table): every row below whose text is not "#1" at
+    /// 22 pt read "…" there.
+    @Test func aBadgeAlwaysCarriesItsWholeCount() {
+        let widths: [String: CGFloat] = [
+            "#1": 15.74, "#2": 17.08, "#12": 22.14, "12": 15.46, "#28": 23.94, "28": 17.26,
+            "#123": 28.5, "123": 21.0, "x": 6,
+        ]
+        func face(_ text: String, _ width: CGFloat) -> CommentCardLayout.BadgeFace {
+            CommentCardLayout.badgeFace(text: text, width: width) { widths[$0] ?? 99 }
+        }
+        func shipped(_ width: CGFloat) -> CGFloat { min(6, max(2, (width - 16) / 2)) }
+        // Where the count fit with the shipped inset: BYTE-IDENTICAL.
+        #expect(face("#1", 22) == .init(text: "#1", inset: shipped(22)))
+        #expect(face("#2", 32) == .init(text: "#2", inset: 6))
+        // Write's floor (a 22 pt badge): the inset yields to the count.
+        #expect(face("#2", 22) == .init(text: "#2", inset: (22 - 17.08) / 2))
+        // Two digits: the "#" goes before the count is cut.
+        #expect(face("#12", 22) == .init(text: "12", inset: shipped(22)))
+        #expect(face("#28", 22) == .init(text: "28", inset: (22 - 17.26) / 2))
+        #expect(face("#12", 32) == .init(text: "#12", inset: (32 - 22.14) / 2))
+        // The yields floor (19 pt) shows "#1" whole too (the shipped inset cut it).
+        #expect(face("#1", 19) == .init(text: "#1", inset: (19 - 15.74) / 2))
+        // Never "…" first: too wide even bare keeps the bare number.
+        #expect(face("#123", 20) == .init(text: "123", inset: 0))
+        // A text with no "#" has no shorter form.
+        #expect(face("x", 22) == .init(text: "x", inset: shipped(22)))
+    }
 }
 
 // MARK: - The mounted card
@@ -326,7 +383,9 @@ struct CommentCardViewTests {
         #expect(card.hitTest(overEntry) == nil, "no door ⇒ click-through (the read tier)")
         var opened = 0
         card.onClick = { opened += 1 }
-        let hit = card.hitTest(overEntry)
+        // A PRESS (no wheel in dispatch — the fix leg names the event, so the
+        // answer never depends on whatever the runner's current event is).
+        let hit = card.hitTarget(at: overEntry, during: nil)
         #expect(hit === card, "the card itself, never the label: \(String(describing: hit))")
         card.mouseDown(with: try #require(NSEvent.mouseEvent(
             with: .leftMouseDown, location: .zero, modifierFlags: [], timestamp: 0,
@@ -405,6 +464,126 @@ struct CommentCardViewTests {
         #expect(clip.bounds.minY == 20, "the same block keeps its scroll")
         card.identity = "b"
         #expect(clip.bounds.minY == 0, "a different block starts at its top")
+    }
+
+    // MARK: The U2 FIX LEG (the walk's F-W-1 / F-W-2 / F-W-5)
+
+    /// walk-scroll's exact event: a LINE wheel, `wheel1 = −lines` (positive
+    /// argument = down), no phases — the class a real mouse wheel posts.
+    private func lineWheel(down lines: Int32) -> NSEvent? {
+        CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 1,
+                wheel1: -lines, wheel2: 0, wheel3: 0).flatMap { NSEvent(cgEvent: $0) }
+    }
+
+    /// **F-W-1: A WHEEL THE CARD CAN TAKE IS HIT-TESTED INTO ITS OWN SCROLL
+    /// VIEW.** The live dispatch hands a wheel to the hit view's scroll view;
+    /// the shipped U2 card answered ITSELF, whose scroll view is the PAGE, so
+    /// the page took both directions and the card never moved (the walk).
+    /// RED ON OLD by the offscreen replay (the run record): the old card's
+    /// answer under a wheel was the card, enclosing scroll view = the page.
+    @Test func aWheelTheCardCanTakeIsHitTestedIntoItsOwnScrollView() throws {
+        let (card, window) = hosted()
+        defer { close(window) }
+        card.onClick = {}
+        card.presentCard(content(["one", "two", "three", "four", "five", "six"]))
+        card.layoutSubtreeIfNeeded()
+        let inner = card.innerScrollView
+        let point = NSPoint(x: card.frame.midX, y: card.frame.midY)
+        let down = try #require(lineWheel(down: 3))
+        let up = try #require(lineWheel(down: -3))
+        #expect(down.scrollingDeltaY < 0 && up.scrollingDeltaY > 0,
+                "the content-terms sign the table is written in")
+
+        // At rest (its top): down is the card's, up is the page's.
+        let intoCard = card.hitTarget(at: point, during: down)
+        #expect(intoCard?.enclosingScrollView === inner,
+                "down at rest → inside the card's own scroll view: \(String(describing: intoCard))")
+        #expect(card.hitTarget(at: point, during: up) === card,
+                "up at rest → the card, whose scroll view is the page")
+        // Scrolled to its bottom: down is the page's again; up is the card's.
+        let clip = inner.contentView
+        clip.scroll(to: NSPoint(x: 0, y: (inner.documentView?.frame.height ?? 0) - clip.bounds.height))
+        #expect(card.hitTarget(at: point, during: down) === card)
+        #expect(card.hitTarget(at: point, during: up)?.enclosingScrollView === inner)
+        // Entries that FIT: every wheel is the page's.
+        card.presentCard(content(["one"]))
+        card.layoutSubtreeIfNeeded()
+        #expect(card.hitTarget(at: point, during: down) === card)
+        #expect(card.hitTarget(at: point, during: up) === card)
+        // A press is the door whatever overflows.
+        #expect(card.hitTarget(at: point, during: nil) === card)
+        // The read tier: no door, nothing — wheel or press.
+        card.onClick = nil
+        #expect(card.hitTarget(at: point, during: down) == nil)
+        #expect(card.hitTarget(at: point, during: nil) == nil)
+    }
+
+    /// **F-W-2: A PRESS ON THE SCROLLER LANE BELONGS TO THE SCROLLER** — on an
+    /// overflowing card, faded or not. RED ON OLD by the offscreen replay: once
+    /// the overlay scroller faded, the old answer at the lane was the card and
+    /// the press opened the panel (door 1×, no drag).
+    @Test func aPressOnTheScrollerLaneBelongsToTheScroller() throws {
+        let (card, window) = hosted(NSRect(x: 20, y: 20, width: 210, height: 60))
+        defer { close(window) }
+        card.onClick = {}
+        card.presentCard(content((0..<8).map { "comment number \($0) with words" }))
+        card.layoutSubtreeIfNeeded()
+        let inner = card.innerScrollView
+        let bar = try #require(inner.verticalScroller, "a door that can scroll carries a scroller")
+        #expect(!bar.frame.isEmpty, "the scroll view tiled its scroller: \(bar.frame)")
+        let superview = try #require(card.superview)
+        let lane = superview.convert(NSPoint(x: bar.bounds.midX, y: bar.bounds.midY), from: bar)
+        #expect(card.hitTarget(at: lane, during: nil) === bar, "the press drags the scroller")
+        // Off the lane, the door.
+        let body = superview.convert(NSPoint(x: 4, y: 4), from: inner)
+        #expect(card.hitTarget(at: body, during: nil) === card)
+        // Nothing to scroll: no lane, the whole card is the door.
+        card.presentCard(content(["one"]))
+        card.layoutSubtreeIfNeeded()
+        #expect(card.hitTarget(at: lane, during: nil) === card)
+    }
+
+    /// **F-W-5: THE BADGE SHOWS ITS WHOLE COUNT** — mounted, the real label.
+    /// At Write's floor (a 22 pt badge — `commentBadgeRect(textLeft: 28)`) the
+    /// shipped inset left a 16 pt label: "#1" fit by a quarter point and "#2"
+    /// read "…". RED ON OLD by the offscreen replay (the F-W-5 table).
+    @Test func aBadgeShowsItsWholeCountAtWritesFloor() throws {
+        let badge = try #require(BlockDecor.commentBadgeRect(textLeft: EditorTypography.minGutter, top: 20))
+        #expect(badge.width == 22, "the floor's badge: \(badge)")
+        let (card, window) = hosted(badge)
+        defer { close(window) }
+        func whole() -> Bool {
+            let label = card.lineLabel
+            return (label.cell?.cellSize.width ?? .infinity) <= label.frame.width + 0.01
+        }
+        for count in [1, 2, 3, 7, 9] {
+            card.present(text: "#\(count)", tint: Self.rule, ink: Self.ink, style: .badge)
+            card.needsLayout = true
+            card.layoutSubtreeIfNeeded()
+            #expect(card.shownLineText == "#\(count)" && whole(),
+                    "#\(count) whole in \(card.lineLabel.frame.width) pt")
+        }
+        card.present(text: "#12", tint: Self.rule, ink: Self.ink, style: .badge)
+        card.needsLayout = true
+        card.layoutSubtreeIfNeeded()
+        #expect(card.shownLineText == "12" && whole(), "two digits: the '#' goes, never the count")
+        #expect(card.toolTip == "#12", "the tooltip keeps the full words")
+        // The next decoration pass re-presents the same count: the fitted
+        // face stays (present never undoes it).
+        card.present(text: "#12", tint: Self.rule, ink: Self.ink, style: .badge)
+        #expect(card.shownLineText == "12")
+        // Where it always fit, byte-identical: a 32 pt badge's label is the shipped 20.
+        card.frame = NSRect(x: 20, y: 20, width: 32, height: 16)
+        card.present(text: "#2", tint: Self.rule, ink: Self.ink, style: .badge)
+        card.needsLayout = true
+        card.layoutSubtreeIfNeeded()
+        #expect(card.shownLineText == "#2" && card.lineLabel.frame.width == 20)
+        // The inline STRIP is untouched (the shipped inset).
+        card.frame = NSRect(x: 20, y: 20, width: 300, height: 18)
+        card.present(text: "// a  ·  b", tint: Self.rule, ink: Self.ink, style: .strip)
+        card.needsLayout = true
+        card.layoutSubtreeIfNeeded()
+        #expect(card.lineLabel.frame == NSRect(x: 0, y: 0, width: 300, height: 18).insetBy(dx: 6, dy: 1))
     }
 }
 

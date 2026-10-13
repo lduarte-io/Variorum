@@ -1299,7 +1299,7 @@ on screen, no stage act — every trace is an OFFSCREEN probe against the real D
 activation), kept in the worktree's gitignored `scratchpad/vx179-u2-fix/`. The pins' RUN and the
 re-walk of the fixed rows are PENDING (the runner's next window).
 
-**Revert state:** no behavioural revert in flight.
+**Revert state:** no behavioural revert in flight. **ANNOUNCED (starts after this commit): R-FL —** `CommentCard.swift` back to its pre-fix state (`git show 6061ba1f:<path>`), plain build, the offscreen replays (dispatch2 queue road, lane --faded, badge) for the OLD column; restore by `git checkout -- App/Variorum/Variorum/Features/Editor/CommentCard.swift` (the fix is committed at 5d092268, the pins at this commit), rebuild, replays again.
 
 ### LIVE STATUS
 

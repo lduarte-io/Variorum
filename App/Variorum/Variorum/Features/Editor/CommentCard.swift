@@ -661,6 +661,8 @@ final class CommentCardView: NSView {
     var shownEntryCount: Int { stacked ? (content?.entries.count ?? 0) : 0 }
     var entrySeparatorCount: Int { separatorViews.count }
     var shownLineText: String { label.stringValue }
+    /// The strip's / badge's one label (the F-W-5 pin reads its frame + cell).
+    var lineLabel: NSTextField { label }
     var innerScrollView: NSScrollView { scroller }
     #endif
 }
