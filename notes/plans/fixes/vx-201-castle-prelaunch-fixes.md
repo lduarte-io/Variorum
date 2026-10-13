@@ -2298,3 +2298,47 @@ reviewer's own label; the hardening shape — `readSwitchPending → Bool?`, nil
 stays recorded here for whoever next touches the marker read; not owed to this run). Remaining before the PR:
 the fix pass's PENDING stage runs (the two pin suites green + R-L1/R-L3 cycles + the two changed-source suites)
 fold into the orchestrator's combined walk window; then #215 at the merge moment; then closeout.
+
+## WINDOW F RECORD — THE FINAL COMBINED WINDOW (orchestrator, stage claim vx201-final; ~55 min)
+**PART A (the pinned checkout at b8bcf488):** the ladder fix suites GREEN — `✔ Test run with 145 tests in 4
+suites` (VX202ReopenRaceTests 11 · VX110SignedOutCastleTests 10 · Phase13pControllerTests · PostureSwitchTests)
+— and BOTH ladder revert cycles red exactly on their pins' legs: **R-L1** 2 asserts (the stale flag survives,
+no clear write) · **R-L3** 4 asserts (the flag, `outcome.thisDeviceOnly`, the Done equality, the "sync account"
+containment). Restores clean, HEAD rebuilt. **The ladder's stage obligation DISCHARGED — every suites item in
+the run is complete.**
+
+**PART B — THE WALK (Debug app `io.lduarte.Variorum.debug`, the dev store, Study voice; captures under
+/tmp/vx201-walk-captures/, summarized here before their closeout deletion):**
+- **The ceremony, start to end:** Settings ▸ Protection ▸ Use Castle… → the explain (the shipped generic
+  pre-sync body — its forward-looking sync sentences are F-U2-3's recorded #216 question, not this run's) →
+  the passphrase set (none was set on the dev store) → the twelve words shown + typed to confirm → "Read this
+  once." + the written-down checkbox → Enter Castle.
+- **VX-206 VERIFIED LIVE:** the During screen ("Giving your library a new key… Keep Variorum open.") sat ON
+  PROTECTION; across the re-key teardown the Done came back ON PROTECTION with its sheet up; after the offer
+  the PANE read the Castle state ("You're in Castle. Only you hold the keys.", Touch ID row, "no copy opens
+  with it in Castle"). Never General, the whole arc.
+- **VX-208 VERIFIED LIVE:** the Done carried the exports line in the alarm voice, byte-matching the draft.
+- **VX-203 VERIFIED LIVE, with REAL set-aside copies:** the offer read *"That's 27 backups, plus 2
+  whole-library copies Variorum set aside when you opened or restored another library (in Previous Libraries,
+  and with your backups' safety copies). … The set-aside copies are also your way back to the library you
+  replaced — delete them only if you won't want it back. …"* — the counted lead + the owning sentence verbatim.
+  KEEP THEM pressed: the container still holds `Previous Libraries/` + `Backups/` after (listed); the dev store
+  also carries TWO key files beside the store — the O.4 shape F-U3-1's locate rule exists for, live.
+- **VX-204 + U5's WARNING VERIFIED IN THE SEED:** Help ▸ Restore Tutorial… re-seeded the dev guide; lesson 1
+  reads the amended sync sentence + the shape sentence (the old overstatement gone); lesson 2 CLOSES on the
+  older-copy paragraph with the Resume Sync road, byte-matching the drafts. (ONE voice captured — Study; the
+  copy is seed text shared by both voices and register-pinned; no chrome changed in this run.)
+- **The U2 two-doors GUI leg — HONESTLY NOT WALKABLE, dispositioned:** the F-U2-8 planting fixture (an
+  env-gated test writing throwaway material into the dev scope's per-store item) was REFUSED by the app's own
+  `KeychainTestTripwire` — real scopes (`Variorum`, `Variorum-dev`) are protected from ALL test-process
+  mutation by design, with no override. That refusal is itself a positive result (the safety belt held against
+  a deliberate orchestrator fixture). Nothing was planted; the fixture never entered a commit and was removed.
+  The two doors' acceptance evidence stands where it already is: the 9 stage-green pins driving the production
+  model/runner and the faces-as-code pin reading both faces by the road, plus the seven red-on-old cycles.
+- **WALK FINDING W-1 (for her morning bundle, UNINVESTIGATED by design):** after the ceremony, the dev store's
+  Restore-from-Backup list shows the ceremony's fresh pair opening normally while the OLDER rows (the 9:07
+  Standard-era pair included) read *"No key file serves this copy — it can't be opened. Its key file may be in
+  another backup folder."* I pressed NO restore and left the store in Castle. Recorded verbatim as observed;
+  whether product issue, this store's backup-layout history, or pre-existing presentation is HER call to route
+  (U5's restore-round evidence is unaffected — its pins ran the round at the stage, green).
+- The What's New sheet did not greet any launch. The app was QUIT cleanly; no instances; stage released.
