@@ -959,3 +959,13 @@ on three asserts — 3 issues. The three BOUND pins (only-road-in · Standard-wa
 inertness) stayed GREEN through every cycle. **U1's red-on-old obligation DISCHARGED; VX-202's acceptance
 evidence is complete** (green pass 305/38 + drills disposition + simulator + the six cycles). Logs
 /tmp/vx201-wb-*.log, rollup /tmp/vx201-window-b.summary (deleted at closeout per the tidy rule).
+
+### HER TWO RULINGS AT THE COMPACTION SEAM (2026-10-13, the question tool, recorded verbatim-faithful)
+- **VX-233 (the posture-drill harness rot): "Time-boxed tonight"** — the heal is attempted inside this run,
+  capped at ~90 minutes of trace + fix; if the detached-task scope proves deeper, it falls back to the
+  post-launch ticket automatically. Slots after U5, before/beside the ladder; the drill re-run needs a stage
+  window; the fix is TEST-HARNESS side unless the trace proves otherwise (any product line re-opens the question).
+- **The field-guide re-seed: "Morning, your hands"** — her real store is NOT re-seeded tonight; the morning
+  handoff's checklist carries the one product-door press for her. The refresh tail drops the re-seed; F6's
+  custody sweep stays a pre-cleared done fact to name. (The coordinator's veto question is answered by this
+  ruling — relayed.)
