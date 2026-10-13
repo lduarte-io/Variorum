@@ -192,6 +192,11 @@ public final class MCPServerHost: @unchecked Sendable {
     /// VX-168: the opening read is the handshake's — past a setup key's
     /// preamble to the `initialize` frame — so the refusal still answers the
     /// request by its id (a keyed shim's first line is the preamble).
+    /// VX-180: the same read answers a pre-initialize probe on its way (the
+    /// window's answers, before each next read), so the cap's sentence lands
+    /// on the client's `initialize` — the request it reports — never on a
+    /// probe. The window is bounded (`MCPHandshake.preInitializeLimit`) and
+    /// every read in it still runs under the receive timeout.
     private func refuseOverCap(_ fd: Int32) {
         let thread = Thread {
             var timeout = timeval(tv_sec: 2, tv_usec: 0)
