@@ -171,7 +171,12 @@ current.
 
 ## Known cross-run facts
 
-- VX-179 (comment polish) was in its review leg; may merge before us → merge main in first.
+- **VX-179 MERGED to main (PR #154, merge commit d6caafc1 — coordinator's word, 2026-10-13 ~03:40;
+  its ledger commits follow on main shortly).** Her rule applies: merge main INTO this branch before
+  ours. **The plan: do the merge-in at the U3→U4 boundary** (never under a live implementer — fetch
+  fresh so the trailing ledger commits ride, merge, headless suites green on the merged tree, THEN
+  spawn U4). VX-179 touched the comment area and U4 touches comment ops — merging before U4 is
+  deliberate. Main may move again (vx-201, others): re-check and merge-in again at our merge moment.
 - vx-201 (Castle pre-launch fixes) owns VX-191's close and her carried Castle notes (routed; confirmed).
 - VX-214 (settingspaneupdater) merges AFTER us, rebases/merges onto us; owns Settings window shell.
 - The `variorum` MCP server shows CONNECTION_CLOSED in sessions while her app is closed — expected
