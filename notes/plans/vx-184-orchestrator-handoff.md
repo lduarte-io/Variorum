@@ -122,6 +122,20 @@ codesign verify → acceptance below).
     truth-pinned. Appends the DELTA to the stargazing brief file. Re-seed note for the handoff: her
     store gains the updated chapter only via Help ▸ Restore Tutorial… (tombstones the old guide, says
     so).
+- **HAND-FORWARDS FROM U4 (2026-10-13 ~05:55, its READY report):** (1) **U5's brief:** follow U4's
+  extraction shape — `Operations+MCPNoteEdits.swift` / `MCPWriteTools+NoteEdits.swift` are the pattern
+  (her door's row work extracted byte-for-byte, her doors re-pointed at the extraction, her suites
+  passing unmodified as the parity proof); the `MCPWriteAct` cases + `MCPPaneCopy` words land in the
+  same commit. (2) **U6's brief:** the pane/sheet explainers must reflect the edit rung's AS-BUILT
+  reach — the grant sheet's edit sentence ("…with a commit before and after every change") and the
+  toggle blurb UNDERSELL it now ("every change" only holds for text changes to a take, + restore_commit's
+  brackets); words as built → VX-234. (3) **U7's brief:** the guide's lesson 3 Edit step + the
+  instructions' edit-rung sentence are falsified-by-undersell (the kickoff names "the edit rung's
+  description" as exactly this class); also note VX-148 honestly (deleted comments aren't readable on
+  the wire, so restore_comment works on ids the client holds — its description says so). (4) U4's
+  P-VX195-1 deviation (EVERY act one ⌥⌘Z, canon §12's contract line over the kickoff's literal clause)
+  is PROVISIONAL'd for the ladder and her bundle — do not relitigate in later briefs; U5 follows the
+  same posture and logs its own PROVISIONAL if its acts differ.
 - **THEN:** the fable ladder (one ladder, whole-run diff, cap 3; pin-before-fix per member; Fable
   because the diff includes the secret's accept path and the permission core). Then closeout.
 
@@ -225,6 +239,91 @@ close it with its own button before any leg; expected modal, never a finding.** 
 red everywhere is VX-115's `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (pre-existing
 on main — never attribute it to this run). NOTE: main (VX-179's comment-area polish) is merged into the
 branch beneath you — verify comment-surface facts against the TREE, not against older records.
+
+> **Autonomous mode.** Where the spec/model is ambiguous and it does NOT gate the phase's core: write
+> the 2–3 options into the phase plan's closeout notes, implement the most spec-defensible one, mark it
+> **PROVISIONAL**, and append the question to `notes/QUESTIONS.md`. If the ambiguity gates the phase's
+> core, stop and report back instead.
+> Never, under any circumstances: invent product behavior; violate or relax an invariant (I1–I10,
+> P1–P3, S1–S5); add a new third-party dependency; contradict the canonical docs (record deltas in the
+> closeout instead); touch anything requiring the author's accounts or credentials; delete or overwrite
+> anything the author created; rewrite history or force-push (plain pushes per piece are REQUIRED — the
+> resiliency protocol). Those are author-only calls — log to `notes/QUESTIONS.md` and report.
+> Do not spawn subagents or use the Agent tool, with one exception: you may run at most ONE Sonnet
+> lookup subagent at a time (spawn it with `model: "sonnet"`), strictly for external facts — web
+> searches, Apple documentation, API signatures/availability. It returns facts and quotes; it never
+> edits files and never spawns agents of its own. Never delegate reading of the repo's docs, the phase
+> plan, code, or the diff under review — do that reading yourself, in this session.
+> Report back with: what shipped, test counts, PROVISIONAL calls made, commits made, anything requiring
+> the author. Write the phase plan's closeout detailed enough to be reviewed against the spec — a cold
+> reviewer will do exactly that.
+
+---
+
+## U5 BRIEF — READY TO SEND (drafted 2026-10-13 ~06:00 while awaiting U4's stage GO)
+
+Send verbatim as the U5 `opus-implementer` spawn prompt AFTER U4 is closed in LIVE STATUS (and after a
+fresh merge-in IF main moved again — check `git fetch origin main` first; if merged, state the new
+baseline counts in place of "U4's closed finals").
+
+---
+
+You are the U5 implementer for RUN VX-184 ("Run: MCP launch polish") — Opus, xhigh, ONE unit: **U5,
+member VX-196 (edit parity across the library)**. Worktree `~/dev/variorum-vx-184`, branch
+`vx-184-mcp-launch-polish` (run ALL work from that absolute path; never the main checkout). Commits:
+`VX-196: … Part of VX-184`, NO attribution trailers, push after EVERY commit.
+`notes/SessionResiliencyProtocol.md` binds you: your FIRST commit opens a "U5 UNIT RECORD" section at
+the end of `notes/plans/fixes/vx-184-mcp-launch-polish.md` with a LIVE STATUS table, and every piece
+commits+pushes before the next begins.
+
+PREFLIGHT (read in full, yourself, in this session — reading is never delegated): `CLAUDE.md` and its
+auto-loaded canon; `notes/plans/mcp-launch-polish-kickoff.md` (BINDING — your unit is the table's U5
+row); the run record `notes/plans/fixes/vx-184-mcp-launch-polish.md` (U1–U4's UNIT RECORDs — U4's is
+YOUR PATTERN: her door's row work extracted byte-for-byte into `Operations+MCPNoteEdits.swift` /
+`MCPWriteTools+NoteEdits.swift`, her doors re-pointed at the extraction, her suites passing unmodified
+as the parity proof; `MCPWriteAct` cases + `MCPPaneCopy` words in the same commit — follow that shape
+for the library acts); `notes/plans/fixes/vx-168-mcp-client-secret.md`; `notes/plans/phase-13n-b-mcp-door.md`
++ `notes/plans/phase-13n-c-mcp-launch-readiness.md`; `notes/SessionResiliencyProtocol.md`;
+`notes/SyncSpec.md` BEFORE any schema-adjacent thought (you have NO schema change — U3 used the run's
+one allowance; if you believe you need one, STOP that piece and report). AppSpec §9 is your operations
+contract — the library op families (readings, chapters, archive, the daily Journal's guards, the
+Trash) are all §9's; invent nothing.
+
+THE WORK (her picks, the kickoff's U5 row verbatim) — every act = an EXISTING §9 operation + the grant
+guard INSIDE the op's transaction + ONE client-named undo entry (U4's P-VX195-1 posture: every act one
+⌥⌘Z, argued from canon §12's contract line — follow it, and log your own PROVISIONAL if any library
+act warrants differing, e.g. where her own door is deliberately undo-less like the wing move):
+- **At edit on the book/wing:** take a note out of a book (reads "Release" on an owned book — her
+  `removePostFromReading` semantics incl. the bookless return); reorder notes and chapters; rename/delete
+  a chapter (curated only; her section ops' refusals ride); rename a book; finish/unfinish
+  (`lockReading`/`unlockReading` — the finish dismisses pending arrivals in its transaction, the
+  unfinish catch-up BELLS; a gathering refuses `wrongReadingKind`); archive/unarchive
+  (`archiveReading`/`unarchiveReading` — R-13ie semantics ride whole); delete a book — **the daily
+  Journal ARCHIVES, never deletes (its guards stand: `dailyJournalCannotBeDeleted` on the marker,
+  inside the write)**, and an OWNED book's delete choices are HER ceremony — if the plain
+  `deleteReading` refusal roads don't cover a case cleanly, refuse honestly and log it, never mint a
+  ceremony tool.
+- **At edit on the note:** delete (her Trash road — tombstone, 30 days, restorable) and
+  archive/unarchive.
+- **EXCLUDED (R-VX184-2, hers alone):** Private, Seal, Own — never minted as tools; sealing,
+  unsealing, owning, `deleteReadingWithNotes`, `archiveReadingWithNotes` are HER doors only. Keep U4's
+  Mac pin posture (no tool named for them) covering the library family too.
+Fence and refusals: the one not-shared answer for anything unreachable; `rungTooLow`-family for a live
+holder below edit; gatherings are FACTS under a wing grant, never a write target (R-AIR-12) — a write
+aimed at a gathering refuses honestly; no new oracle anywhere. Wording ships AS BUILT with a
+P-U5-WORDS provisional (QUESTIONS road, not VX-234).
+
+HARD RULES: zero `Sync/`, custody/keychain or editor-seam lines (verify by path diff and say so); zero
+schema; pin-before-fix PER TOOL FAMILY, red on the pre-fix tree and red again by revert, counts
+recorded; headless `swift build`/`swift test` freely; **every Mac batch / walk / live round ONLY under
+the stage claim I relay** — build-for-testing headless, then end your turn READY FOR STAGE and wait
+for my GO with the exact claim line. Live round (the kickoff's): ONE real Claude Code turn exercising
+a representative act of EACH family, ⌥⌘Z walking each back, captured; dev store only behind an A1
+prestage copy, restored verified; never her real store, never her user-scope MCP registrations. **The
+Debug app may greet launch with the What's New sheet — close it with its own button before any leg;
+expected modal, never a finding.** The one standing Mac red everywhere is VX-115's
+`BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (pre-existing on main — never attribute
+it to this run). Your headless baseline is U4's closed finals (its UNIT RECORD's counts on this tree).
 
 > **Autonomous mode.** Where the spec/model is ambiguous and it does NOT gate the phase's core: write
 > the 2–3 options into the phase plan's closeout notes, implement the most spec-defensible one, mark it
