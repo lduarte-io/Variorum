@@ -592,8 +592,10 @@ a geometry oracle + the walk, red-on-old where a cell is the old law)
 
 ## U3 RECORD (implementer, 2026-10-12)
 
-**U3 IN PROGRESS.** The panel pristine pass (her items 1 + 4): the add area's caret fixed at
-mechanism level, then the look.
+**U3 STOPPED AT FORK F-U3-1 (2026-10-12) — AWAITING THE ORCHESTRATOR'S RULING.** The trace is done
+and measured (below); the traced fix is a REWRITE of `PanelTextArea` (the brief's stop condition), so
+nothing in the product has changed yet. The pristine pass (U3-e) waits on the ruling — the add area's
+look depends on which control draws it.
 
 **NOT DONE BY THIS UNIT (first line, by the contract — kept current):** no `xcodebuild test`, no walk,
 no app launch, no window shown, no `/Applications` touch (the stage is held) — every app-target pin
@@ -612,6 +614,141 @@ panel's control verbatim in an `NSHostingView` and reads the real text view's ge
 
 | piece | what | status |
 |---|---|---|
-| U3-a | record section + ledger row 5 IN-PROGRESS | IN-PROGRESS — this commit |
-| U3-b | TRACE: the offscreen probe measures `TextEditor`'s real insets / padding / typing attributes / caret rect vs the hand-assumed `topInset 8 / leadingInset 5` | NOT-STARTED |
-| U3-c | the mechanism decision (a fork the record does not settle ⇒ STOP with the proposal) | NOT-STARTED |
+| U3-a | record section + ledger row 5 IN-PROGRESS | DONE (e5211a8e) |
+| U3-b | TRACE: the offscreen probe measures `TextEditor`'s real insets / padding / typing attributes / caret rect vs the hand-assumed `topInset 8 / leadingInset 5`; the sweep measured | DONE (this commit) — the numbers and the mechanism below |
+| U3-c | the mechanism decision | STOPPED AT FORK F-U3-1 (this commit) — the traced fix is a `PanelTextArea` rewrite; the proposal below, the orchestrator rules |
+| U3-d | the caret fix as ruled + its pins (pure geometry table; mounted pins written, RUN PENDING stage) | NOT-STARTED — waits for F-U3-1 (the design under option (a) below) |
+| U3-e | the pristine pass: the add area's empty state, header/footer rhythm, stamp lines, the deleted fold as ONE language (Restore + "Delete forever…"), O-3 (the `perform` default arm through `OpsRefusalCopy.message(for:)` — `TrayRefusalCopy`'s idiom, `TrayPanel.swift:743`), sentence case, taste numbers in one Metrics place | NOT-STARTED — waits for F-U3-1 |
+| U3-f | verify: plain build green, zero warnings in touched files; record closed; PENDING list | NOT-STARTED |
+
+### U3-b — THE TRACE (measured, offscreen; macOS 27.0 26A428, Swift 6.4)
+
+Probe sources, kept DURABLE in the worktree's gitignored `scratchpad/vx179-u3-probe/`
+(`probe.swift` the add area · `probe2.swift` the rows + the two capture hosts · `spike.swift` the
+placeholder feasibility spike · `esc.swift` the ⎋ road). Re-run any of them with
+`xcrun swiftc -swift-version 5 -O <file> -o /tmp/p && /tmp/p` (`probe.swift` also takes `--window`).
+`PanelTextArea` is copied VERBATIM from `CommentsPanel.swift:957–1032` (only a geometry report added to
+the placeholder) and mounted exactly as `addArea` mounts it (horizontal `Metrics.inset − 5` = 7,
+vertical `rowAir` = 7), fonts = `tokens.body` in each voice. Coordinates: the host's, top-down
+(`NSHostingView` is flipped).
+
+| quantity | Terminal (SF Mono 14) | Study (Iowan Old Style 16) |
+|---|---|---|
+| the text view under `TextEditor` | `PlatformTextView`, TK2 on | same |
+| `textContainerInset` — assumed top **8** | **(0, 0)** | **(0, 0)** |
+| `lineFragmentPadding` — assumed leading **5** | 5 (= `NSTextContainer`'s own default) | 5 |
+| typing attributes at mount, EMPTY | the applied font (14 pt), no line spacing | the applied font (16 pt) |
+| the empty document's caret (TK2 `.standard` segment) | x 12, y 7–24 (17 = the font's line) | x 12, y 7–29 (22) |
+| the first TYPED line / its baseline | y 7–24 / 21 | y 7–29 / 24 |
+| the placeholder overlay's text / baseline | x 12, y 15–32 / **29** | x 12, y 15–37 / **32** |
+| placeholder − real line | **+8 pt down, 0 across** | **+8 pt down, 0 across** |
+
+Identical with an offscreen, never-ordered-in window and the text view first responder (`--window`).
+
+**THE MECHANISM.** The overlay places the placeholder by a GUESS at `TextEditor`'s private geometry
+(top 8 / leading 5, "the same numbers QuickNoteView's placeholder overlay has used since it shipped").
+On macOS 27 the text view's `textContainerInset` is (0, 0): its first line starts at the view's top,
+so the placeholder is drawn a full 8 pt BELOW the line the caret blinks on and typed text lands on —
+start typing and the words jump 8 pt up. The leading guess lines up only because 5 is
+`NSTextContainer`'s default `lineFragmentPadding`; neither number belongs to the panel. **The "tall
+caret" is NOT a typing-attributes defect:** at mount the empty view's typing attributes already carry
+the applied font, and the caret is exactly that font's line (17 / 22 pt). What reads as "left of and
+taller than" is that line-high caret drawn 8 pt above the placeholder: in Study the bar spans y 7–29
+while the placeholder's "W" spans ≈ y 21–32 (cap height 11.27) — it starts ≈ 14 pt above the W's top
+and stops 3 pt above its baseline, at the W's left edge (the x a first typed glyph takes, which is
+right). The "shared provenance" claim is STALE: the quick-note pad left `TextEditor` at 13u3 UNIT C.
+
+**The same false constant, twice more inside the panel** (`probe2.swift`, the row exactly as
+`commentRow` mounts it):
+- **The rows' height ruler** pads its invisible `Text` by `topInset` 8 at the top AND the bottom while
+  the real text starts at 0 ⇒ every comment row's text area is **16 pt taller than its text** (Terminal
+  33 for a 17 pt line, Study 38 for 22) — all of it dead air between the comment and its stamp line.
+- **Terminal's `// ` mark** is padded `.top(PanelTextArea.topInset)` ⇒ its baseline sits at 29 while
+  its comment's first line's baseline is 21: **the mark sits 8 pt below the line it marks.**
+
+### The sweep (instance × verdict — FINAL for the measurement, the fixes wait on the ruling)
+
+| instance | host | mechanism | measured | verdict |
+|---|---|---|---|---|
+| the add area's placeholder | the panel: 2 sheets (`EditorView`, `TakesBottomBar`) + the Takes popover | `TextEditor` + overlay at guessed (5, 8) | +8 pt | DRIFTS — her defect; fix = F-U3-1 |
+| the rows' height ruler | same | guessed 8, top and bottom | +16 pt dead air per row | DRIFTS — same fix |
+| Terminal's `// ` row mark | same | `.padding(.top, topInset)` | +8 pt | DRIFTS — same fix |
+| `QuickNoteView`'s placeholder | the quick-note pad | `CaptureTextView` (OWNED inset (0, 2), padding 0) + host padding (6, 4) + overlay (6, 6) | x 6 = 6; baseline 20 = 20 (T), 23 = 23 (S) | PROVABLY SAFE — every number is the box's own explicit geometry, not a guess (the literal 6 = 4 + 2 is derivation by hand — see Q-2) |
+| `QuickEntryBar`'s placeholder | Bookcase / Library quick entry | `CaptureTextView` + a `ZStack` placeholder at the box's top that ignores the box's own 2 pt inset | baseline 26 vs typed 28 (T), 29 vs 31 (S); x equal | DRIFTS 2 pt — not the `TextEditor` class (its inset IS owned) but the same "overlay ignores its box's geometry" shape, on a SECOND surface — see Q-2 |
+| the phone's comments sheet | `MobileCommentsSheetView` | a `UILabel` at a literal (8, 10) inside a `UITextView` | not measured (iOS) | OUT OF SURFACE — observation O-U3-1 |
+| any other `TextEditor` | — | grep: `CommentsPanel.swift:988` is the app's ONLY `TextEditor` | — | none |
+
+### THE FORK — F-U3-1 (STOPPED HERE: the traced fix is a rewrite of `PanelTextArea`)
+
+**(a) RECOMMENDED — an AppKit-backed control whose geometry is the panel's own, the placeholder laid
+out by the same machinery at the same origin.**
+1. An `NSViewRepresentable` over an `NSTextView(usingTextLayoutManager: true)` subclass, on
+   `CaptureTextView`'s proven recipe (TK2 opt-in at init, the `FallbackCanary`, no TK1 API, the
+   write-gated style apply, `SpellcheckLevel.current.apply`, `allowsUndo`) — but NOT `CaptureTextView`
+   itself: its ⏎-files rule is R-13u-4's identity, and the panel's ⏎ is a newline.
+2. Explicit geometry in ONE Metrics place: `textContainerInset`, `lineFragmentPadding` = the panel's
+   named numbers; `font`/`textColor`/`insertionPointColor` AND `typingAttributes` set explicitly from
+   the voice (`CaptureTextStyle`'s road — `EditorTypography.resolve` is what `tokens.body` renders;
+   rows in `commentInk`), re-asserted when the text empties — the caret is the font's line BY
+   CONSTRUCTION, not by tonight's SwiftUI behaviour.
+3. **The placeholder by construction: a TWIN non-editable, non-selectable TK2 text view** with the
+   identical configuration (font, inset, padding), laid over the editable one at the same frame,
+   hit-testing nil, shown only while the text is empty (and hidden while marked text is pending) — the
+   same engine lays the same font out under the same insets, so the placeholder's first glyph sits
+   where the first typed glyph will and its line IS the caret's line. **Spike evidence**
+   (`spike.swift`, rendered to a bitmap offscreen, inset 0 and 6): a twin-configured view's ink box ==
+   the typed text's ink box. The cheaper `draw(_:)` override with string drawing comes out **0.5 pt
+   high in Terminal** (string drawing uses the unrounded ascender 13.54; TK2 rounds the line to a
+   baseline at 14) and exact in Study — close is not "by construction", so the twin. (Drawing through
+   a standalone `NSTextLineFragment` lays nothing out — zero bounds — so TK2's own line drawing is not
+   reachable without a layout manager; the twin is the cheapest exact road.)
+4. **Sizing:** rows grow with their text by measuring the real text view (`PaneMeasurement.height(of:)`
+   in `sizeThatFits` — `CaptureTextView`'s road) plus the named inset, retiring the invisible `Text`
+   ruler, its `rulerSlack` guess and the 16 pt dead air; the add area keeps its fixed leftover height
+   and scrolls itself, and click-anywhere holds (the text view's `minSize` = the visible area, so a
+   click below the last line lands the caret at the end — NSTextView's default).
+5. **Focus:** `@FocusState` + `.focused($focus, equals:)` gives way to the representable's
+   first-responder REPORTS (`CaptureNSTextView.onCaretChange`'s road, delivered async — the B2 NIT-1
+   lesson) writing the panel's `focus` (`@State`), and a counted focus REQUEST for the open-time
+   `focus = .add`. `.onChange(of: focus)`'s commit-on-leave, `handle(_:)`'s routing and
+   `CommentPanelKeyMonitor` stay byte-unchanged; `CommentComposition` untouched.
+6. **Keys — unchanged by construction:** the local monitor sees ⌘⏎/⎋ first; every other key is
+   NSTextView's default (⏎/⇧⏎ type a newline, as today). ⎋ falling through (nothing to undo) behaves
+   as today — measured (`esc.swift`): a plain `NSTextView` and SwiftUI's `PlatformTextView` both hand
+   `cancelOperation:` to the next responder (neither overrides it; `complete:` is not invoked), so the
+   sheet or popover closes by its host's own road.
+7. **Pins:** a pure geometry table (placeholder origin == text origin == the named inset; row height =
+   measured + 2 × inset); mounted app-target pins, offscreen-hosted (RUN PENDING stage): the twin's
+   first line == the editable view's empty-caret segment in both voices, the row mark's baseline ==
+   its row's first-line baseline. The existing panel suites ride unmodified — checked: nothing in
+   `VariorumTests` references `PanelTextArea` or its constants (they pin the model).
+8. **Size / risks for the walk:** one new file (~200 lines); `CommentsPanel.swift` loses
+   `PanelTextArea` and gains the focus plumbing. Walk risks: the focus reports in the POPOVER host
+   (transient popover + first responder), the first open's caret (the counted request beside the
+   panel's own `makeKey` ask), undo grouping, IME marked text over the placeholder.
+
+**(b) Keep `TextEditor`; introspect its private `PlatformTextView`** once mounted (a zero-size
+representable walking SwiftUI's hosting tree) and read its real `textContainerOrigin` /
+`lineFragmentPadding` into the overlay, or SET explicit insets on it. Smaller diff, but it couples the
+panel to SwiftUI's private view tree (class name, sibling order, whether SwiftUI re-applies its insets
+on update) — the drift class moved, not closed. Not recommended.
+
+**(c) Re-tune the constants to (0, 5)** — tonight's numbers. Ruled out by the brief (a nudged
+constant), and the probe shows why: neither number is the panel's.
+
+**For the ruling (with the recommendation):**
+- **Q-1 — the fork:** (a) or (b). Recommend **(a)**.
+- **Q-2 — `QuickEntryBar`'s measured 2 pt drift** (a second surface; not the `TextEditor` class):
+  (i) fold a two-line derivation into this unit's sweep — `CaptureTextView` exports its owned inset as
+  a named static that `makeNSView` and the bar's placeholder padding both read (exact by
+  construction), and `QuickNoteView`'s literal 6 = 4 + 2 derives from the same static (no visible
+  change there); the walk adds one capture of the bar per voice; (ii) ticket it for the Bookcase
+  surface. Recommend **(i)** — small, mechanism-level, and the sweep's closing form wants every
+  instance fixed or provably safe.
+- **Q-3 (under (a)) — the control's home:** a panel-private `Features/Editor/CommentTextArea.swift`
+  (one consumer) — recommended; or `Core/Views` beside `CaptureTextView` sharing a base text-view
+  class (premature with one consumer).
+
+**Observation O-U3-1 (not this surface):** the phone's comments sheet places its placeholder as a
+`UILabel` at a literal (8, 10) inside a `UITextView` (whose default inset (8, 0, 8, 0) + padding 5 put
+text at (5, 8)) — the same hand-placed shape on iOS; unmeasured here; for the VM board.
