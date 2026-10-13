@@ -778,6 +778,14 @@ final class PostureSwitchRunner {
                     setThisDeviceOnlyFlag(false)
                     throw error
                 }
+            } else {
+                // VX-201 ladder R1-3: a STALE This-Mac-Only flag (a death
+                // between an earlier road's flag write and its first marker
+                // orphans it — no marker, no resume, no clear) must not
+                // dress THIS plain road's resume in the This-Mac-Only Done —
+                // wiped before the first marker, exactly where the real road
+                // sets it.
+                setThisDeviceOnlyFlag(false)
             }
             do {
                 secrets = try await Task.detached(priority: .userInitiated) {

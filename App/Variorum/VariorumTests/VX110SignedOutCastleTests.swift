@@ -607,6 +607,41 @@ struct VX110SignedOutCastleTests {
         }
     }
 
+    /// **LADDER R1-3 — a stale This-Mac-Only flag never dresses a PLAIN
+    /// road.** A death between an earlier This-Mac-Only road's flag write
+    /// and its first marker orphans the flag (no marker ⇒ no resume ⇒ no
+    /// clear). The plain local road wipes it before its OWN first marker —
+    /// exactly where the real road sets it — so its crashed resume speaks
+    /// the ordinary Done. RED ON OLD (revert R-L3 — the plain road's wipe
+    /// removed): the stale flag survives the kill and the resume's outcome
+    /// reads This Mac Only, Done included.
+    @Test func aStaleThisMacOnlyFlagNeverDressesAPlainLocalRoadsResume() async throws {
+        try await withDeps {
+            let world = try await makeWorld(custody: .none, signedIn: false)
+            defer { world.tearDown() }
+            // The orphan: an earlier road died between its flag write and
+            // its first marker.
+            ProtectionDefaults.setThisDeviceOnlySwitch(
+                true, scope: AppDatabase.StoreVariant.dev.rawValue, storeID: world.storeID,
+                in: world.defaults)
+            let words = try RecoveryPhrase.generate()
+            world.rekeyFault = .beforeWork
+            await #expect(throws: URLError.self) {
+                _ = try await world.runner.enterCastle(passphrase: passphrase, recoveryWords: words)
+            }
+            let marker = try #require(try await world.marker())
+            #expect(marker.step == .rekeyLibrary && marker.entersCastle && !marker.isFollow)
+            #expect(!world.thisDeviceOnlyFlag, "the plain road wiped the stale flag before its first marker")
+
+            let outcome = try await world.runner.resume(passphrase: passphrase, recoveryWords: words)
+            #expect(!outcome.thisDeviceOnly, "a plain road's resume is plain")
+            let done = ProtectionCopy.ceremonyDoneBody(act: CeremonyAct(resuming: marker), outcome: outcome)
+            #expect(done != ProtectionCopy.enteredCastleThisDeviceOnlyDone(.notKept))
+            #expect(!done.contains("sync account"), "\(done)")
+            #expect(!world.thisDeviceOnlyFlag)
+        }
+    }
+
     // MARK: - (d) BOUND — one library's forget never touches another's custody
 
     /// Her multiple-accounts worry, answered structurally (§A refinement 3):
