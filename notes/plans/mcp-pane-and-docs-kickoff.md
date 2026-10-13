@@ -123,26 +123,57 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
     label on one block, and the client-prefixed `aiLabel` vs the as-given `create_note` label.
   - **VX-254:** content digests on write replies (stored-text digest per take; the algorithm and byte rule
     stated).
-  - **VX-255:** `insert_blocks` into an existing note (a real R-VX184-1 parity gap). **The rung is HER CALL:**
-    EDIT vs WRITE NEW. Orchestrator lean: EDIT, since it changes what her note reads and every other act
-    that changes an existing note's content sits at edit. Write new would be defensible only as "adds, never
-    alters".
+  - **VX-255:** `insert_blocks` into an existing note (a real R-VX184-1 parity gap). **Her lean (2026-10-13,
+    verbatim):** *"I somewhat lean towards write new since it is literally writing new (and it can only be
+    appeneded at the end, right? reordering isn't possible with write new?)"*. **The split that matches it
+    and the house rule** (the catalog: at write new everything new lands at the END — `add_note_to_book` "at its
+    end", `create_section` "at the end"; every placing or reordering act is edit — `move_block`,
+    `move_note_in_book`, divide, merge): **write new appends new blocks at the note's END only; inserting after a
+    specific block, between her existing paragraphs, needs edit.** Confirm with her at kickoff.
   - **VX-256:** compact / paged `read_note` (ids-only form and/or block-range paging).
   - **Item 9 → VX-197** (commented): the `add_take` vs `create_note` label inconsistency; U7's descriptions
     say which applies.
-  - **Held for her assessment (not minted):** item 5 (idempotency tokens; the orchestrator proposes a
-    cheaper road) and item 8 (lenses on import; a document-format change). See the chat record of
-    2026-10-13.
+  - **VX-261 (item 5, her word):** a read tool listing the client's OWN recent acts from the activity log —
+    recovery after a dropped call, and resuming a long job after the agent's context is lost. Idempotency
+    tokens recorded as the heavier road not taken now (a local-only table + plumbing through every creating
+    tool, for a rare case); revisit if scripted bulk jobs become common.
+  - **VX-262 (item 8) PARKED at her word** — *"make a ticket with the ask but document that it isn't being done
+    right now with the reasoning"*: a document-format change (13n-a's ruled format), and VX-253 gives most of
+    the benefit without it. NOT in this run.
   - Item 7 is DONE in VX-184 (U4/U5 shipped note/chapter delete, remove-from-book, rename). The
     "automation setup" pane entry is not ticketed (the agent itself said only if bulk jobs become common).
+- **VX-184's ladder round 1 (opus-reviewer) — three of HER RULINGS, fixed here** (record:
+  `notes/plans/fixes/vx-184-mcp-launch-polish.md` § THE LADDER). Her word on timing: *"it's fine to put it in
+  VX-246 - I won't put this release up for everyone, it'll be just for me until the fix goes out."* **→ GATE:
+  VX-184's build stays HERS ALONE (no public release) until VX-258 ships.**
+  - **VX-258, R-VX184-7 (re-bind, Pre-launch):** VX-198's re-bind lets ANY fresh key take ANY bound name with
+    its approval and grants. Her ruling, verbatim: *"tie keys to their tab and for the general \"Any MCP
+    client\" case, we should probably do the re-bind waits for my ok? i don't want everyone who isn't using
+    claude or codex to be vulnerable to this. the best protection at each level"*. A Claude Code or Codex tab
+    key re-binds only that tool's name, zero clicks; an Any-client key under a bound name re-binds only after
+    her OK. The VX-168 impostor pin returns red-first.
+  - **VX-259, R-VX184-8 (book-name oracle, Pre-launch):** `rename_book` + `create_book` check names only
+    against books the client can READ. Her words: *"it's fine if an accidental book name duplicate is made -
+    there's no schema protection against it and we already ruled that it's ok if that happens."* Her own
+    doors keep the full guard.
+  - **VX-260, R-VX184-9 (Pre-launch):** her edit makes an AI's comment hers; a suggest delete then needs edit
+    and hears her R-VX188-2 sentence.
 
 ## Rules binding this run
 
 - Cast per CLAUDE.md: Fable orchestrates by default (she redirects at kickoff); `opus-implementer` per unit,
-  strictly sequential; the cold review is hers to name at kickoff. The diff is chrome + docs, no `Sync/`,
-  custody or editor seam, so `opus-reviewer` qualifies.
-- Zero `Sync/`, custody/keychain or editor-seam lines; zero schema; zero wire changes in U6 (the pane is
-  faces). U7 changes only `MCPSession.instructions`, tool descriptions and the guide.
+  strictly sequential; the cold review is hers to name at kickoff. **Note for that call:** VX-258 changes the
+  setup key's accept path (the original reason VX-184's kickoff named Fable), and VX-230 may reach the editor
+  seam (Fable by CLAUDE.md). The rest is chrome, docs and wire tools.
+- **Sizing:** with her additions this run is well past VX-184's planned U6 + U7. The kickoff sizes it into
+  acceptance units (one per implementer session; `notes/PhaseSizingGuidance.md`) and SAYS SO to her. Never
+  split or proceed silently.
+- Zero `Sync/` and custody/keychain lines. **Schema: ALLOWED if needed — her word (2026-10-13, verbatim):**
+  *"the next MCP fix session can have a schema change event if it seems like we need one."* A local-only
+  change rides the grants family's road (its own commit, zero lockstep). A SYNCED change is a SyncSpec §12
+  lockstep event whose mirror deploy still runs only on her explicit go at the time (CLAUDE.md). Read
+  SyncSpec in full BEFORE writing it. U6 makes zero wire changes (the pane is faces); U7 changes only
+  `MCPSession.instructions`, tool descriptions and the guide; the added tickets are wire work.
 - Stage: every Mac batch and walk under a held `Tools/stage` claim (or the coordinator session's protocol, if
   one is live). **Dev store under Castle posture:** a lock screen unlocks from `~/.variorum/dev-castle.env`
   (source it; her standing rule, CLAUDE.md). Never invent new values, never write them anywhere. The What's
