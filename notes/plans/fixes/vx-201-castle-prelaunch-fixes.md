@@ -532,3 +532,9 @@ the simulator replay suite; then the six red-on-old revert cycles per the pin ta
   later revert in this run: after a `checkout <rev> -- <paths>` bisect, restore with
   `git restore --source=HEAD --staged --worktree <paths>` and verify `git diff HEAD --stat` is EMPTY before any
   commit. The window-B patches use `git apply` (worktree-only), which does not carry this trap.
+- WINDOW A CLOSED: simulator leg `✔ Test run with 1 test in 1 suite passed after 4.409 seconds` (MobileWindowReplayTests,
+  iPhone 17 Pro / iOS 26.2 by UDID — the bare name resolves ambiguously across three runtimes; the two "skipped"
+  matches are appintentsmetadataprocessor build noise, read and dismissed), simulator shut down. The drill-harness
+  rot ticketed as VX-233 (her pre-launch-or-after call in the morning bundle). Window A verdict: U1 GREEN —
+  305/38 Mac incl. the 10 pins, migration drill green, posture drill pre-existing-red by bisect (VX-233),
+  simulator green. Stage released; window B (the six revert cycles) next.
