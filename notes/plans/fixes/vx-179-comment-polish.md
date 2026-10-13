@@ -193,7 +193,7 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 | 3 | U1 true delete (core + panel door) | BUILT (89b5a9af…, last code f92436e8) — core pins red-on-old by revert + full `swift test` green + the app target builds; app-target pin RUN + the walk PENDING (stage) — see the U1 RECORD |
 | 4 | U2 gutter cards | BUILT (1a7d2242…b179a9fe) — plain build green, pins typechecked stage-free, tables replayed; pin RUN + revert + the walk PENDING (stage) — see the U2 RECORD |
 | 5 | U3 panel pristine pass | BUILT (e5211a8e…) — the caret fixed at mechanism (F-U3-1), the bar's drift (Q-2), the pass, O-3, two pre-existing undo defects (U3-g); plain build green, the real control/panel measured + rendered offscreen, pins typechecked, U3-g red by revert; pin RUN + the walk PENDING (stage) — see the U3 RECORD |
-| 6 | Mac-target test runs + the walk (stage via oct12coordinator) | WINDOWS 1–2 DONE (suites 99/100 → fix leg landed, pin-only); WINDOW 3 = mounted-suite re-check + R-c revert; the WALK blocked on this session's Screen Recording (with her) |
+| 6 | Mac-target test runs + the walk (stage via oct12coordinator) | WINDOWS 1–3 DONE (all suites green; R-c exact) + THE WALK DONE (20+ rows, both voices; 6 findings — see THE WALK) |
 | 7 | The ladder (fable-reviewer, whole diff) | ROUND 1 RUNNING (spawned after window 3) |
 | 8 | Bout-start board snapshot + in-flight row on main | DONE — snapshot was the coordinator's (beb0a30c); in-flight row 5b1c8c94 on main |
 | 9 | Ticket VX-179 description gains branch/record pointers; Done rides the PR merge | pointers DONE; Done at merge |
@@ -1104,3 +1104,63 @@ exactly this cell red: 3 issues at the served / [true] / [true, false] expectati
 - Remaining stage need: THE WALK only (behind her Screen Recording fix for this session).
 - The LADDER (fable-reviewer, read-only) starts now — the skill's own allowance: screenshot-verify
   where the environment allows, else record and fold into the next drive; the walk rows stay owed.
+
+## THE WALK (the orchestrator's own hands, 2026-10-12 ~22:45–23:10 — dev-store Debug build from the
+pinned checkout, cliclick + screencapture from this tmux pane, both voices; captures in
+`/tmp/vx179-walk/` for tonight only, deleted at closeout per the evidence rule)
+
+**PASSED (the headline rows):**
+- **U1's POPOVER CONFIRM — the unit's one unprovable row: the "Delete this comment forever?"
+  alert PRESENTS over the transient popover, the popover stays, the act lands, the receipt
+  speaks, the fence empties the fold. End-to-end in BOTH hosts (EditorView sheet + Takes margin
+  popover). The ruled inline-confirm fallback is NOT needed.**
+- W-U3-1/2 the composer: caret ON the placeholder's line (her screenshot's defect gone), Add
+  fades empty, files on ⌘⏎, clears, newest visible, count only when non-zero.
+- W-U3-7 BOTH undo arms live: file-then-⌘Z — NO crash, nothing returns; type-then-⌘Z — the text
+  goes AND Add fades (the draft followed); ⇧⌘Z returns both. The U3-g fixes hold in the real app.
+- W-U3-10 the seal refusal in the ALARM register, in words — PLUS the refused-draft PARK
+  round-trip (unseal → reopen → "seal probe" back with the try-again receipt, Terminal idiom).
+- W-U3-4 edit-in-place + focus-loss-saves; W-U3-9 click-anywhere; W-U3-5 the fold's one visual
+  language (struck words · "Deleted <stamp>" · Restore · Delete forever…).
+- W-1/W-9/W-10 geometry: the card grows to its block's height, top-aligned to the first line;
+  cards never abut (the short-first-neighbour correctly degrades to a badge under the rhythm);
+  a block taller than the window scrolls its card AWAY with it — gutter empty, nothing pinned.
+- W-2/W-4 stacked entries in the small card; click ANYWHERE on a card opens the panel.
+- W-6 narrow-window degradation to badges; W-7 Terminal's hanging `//` mark (card rows + panel),
+  Study markless; W-U3-12 the quick-entry bar's typed text sits ON the hint's line in Terminal
+  (the 2 pt drop gone), microsyntax offer intact. Dark = the black room (Bookcase + Settings
+  frames; a dark CARD frame deferred to the next window or her use).
+
+**FINDINGS (the fix leg's; each with its capture):**
+- **F-W-1 (W-3 FAILS for synthetic/mouse wheels):** line-based wheel events over an OVERFLOWING
+  card scroll the PAGE in both directions — the card's content never moves, while the page (the
+  same event stream) moves normally. Internal inconsistency independent of natural-scroll; real
+  mouse wheels post line deltas too. Candidates: wheelOwner's sign/latch on non-precise deltas,
+  or the events never reaching the card's scrollWheel. U2's own warning named this row.
+- **F-W-2:** a mouse-DOWN on the card's scroller lane opens the panel — the knob is not
+  draggable in practice (CommentCardView.mouseDown fires the door on press). "The scroller
+  stays draggable" does not hold.
+- **F-W-5:** at the 800 pt window the TWO-comment block's badge reads "…" where its one-comment
+  neighbours render "#1" (and the same block renders "#2" correctly at 1380 pt beside
+  card-wearing neighbours) — the count is lost exactly where the badge matters most.
+- **F-W-3 (W-U3-4's regression):** while a row is DIRTY its stamp line VANISHES — no
+  "unsaved · ⌘⏎" mark, no Save/Revert doors (the U3-e restyle lost them; the save semantics
+  are intact). The copy exists in CommentsPanelCopy; nothing renders it.
+- **F-W-4:** in the POPOVER host, ⎋ with a typed UNSUBMITTED draft closes the whole popover and
+  the draft is gone — the escape ladder's clear-first rung is skipped (the sheet host's monitor
+  behavior does not hold in the popover). One accidental ⎋ loses her words.
+- **W-OBS-2 (trace, maybe pre-existing):** Read mode's `read` arm (and its `edit` index) shows
+  NO comment face at the default split width — not even the badge — on commented blocks; ~90 pt
+  of visible gutter exists beside the contents column. The one law holds (nothing over prose);
+  whether this host's textLeft arithmetic should yield a badge is the question.
+**NOT WALKED, with reasons:** W-U3-8 IME (synthetic composition undrivable from this harness;
+the offscreen probe + pin stand); W-U3-11 the TakesBottomBar sheet host (the identical panel in
+the identical presentation walked at EditorView; low residual risk); W-U3-13 the quick pad's
+door (not located quickly; Q-2's parity is measured + by construction); W-8 card-mid-scroll
+persistence (blocked by F-W-1 — no wheel reaches the card). The inline-strip arm of W-6 is the
+unchanged standing face (byte-identical arm + pins).
+**Walk machinery notes:** the earlier "could not create image" was her CLOSED SCREEN, not a
+permission (she fixed the setting; capture then worked first try). Window-targeted `walk-cap`
+returned stale composites at the sheet boundary — full-screen `screencapture -x` used throughout
+instead. The what's-new sheet swallowed the first scripted keystrokes (caught by the full-frame
+check; nothing landed anywhere unintended).
