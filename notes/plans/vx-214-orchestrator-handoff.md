@@ -35,8 +35,21 @@ Orchestrator of **VX-214 — Run: settings panes & launch UI polish** under `/ar
 
 - VX-234 (pane pass) + VX-219 (colour picker) + VX-216 (book/gathering menus) await her.
 - The British-English question is parked on VX-234 (survey: consistently British, ~11 colour sites).
-- VX-225's mechanism remains UNEXPLAINED (fixed by her ruled widen; Debug title's ~4-pt residual is a named Debug-only artifact).
+- VX-225's mechanism remains UNEXPLAINED (masked by her ruled widen; the deep trace is VX-236; Debug title's residual is a named Debug-only artifact).
+- **VX-194 (CalmButtonStyle ignores disabled, app-wide) — she took it for the morning. RECOMMENDATION: fix it IN THE STYLE — CalmButtonStyle reads `@Environment(\.isEnabled)` and renders a disabled face from the voice tokens (muted ink, no hover/press response), so every calm button app-wide inherits honesty in one change; then fold batch 3's local disabled face on the gathering foot back into the style (delete the local carve-out); pin = an attribute/snapshot oracle that a disabled calm button is visually distinct. Small, chrome-only, opus-reviewable.**
+- **The star asymmetry (R-VX214-4 made mint-inside SET the star; R98's collect-EXISTING door still refuses ★ rules) — hers. RECOMMENDATION: extend R98's walk the same way — "adding = applying what the rule needs" generalizes to the star, with the apply-and-report sentence NAMING the star it set. Counterpoint to weigh (why it was not done silently): a star is a personal mark (it drives shelf pins and the starred shelf), so auto-starring an EXISTING note is more opinionated than tagging it — the naming receipt mitigates. If she declines, the asymmetry stays and the collect door's ★ refusal wording could say "star it yourself and it joins."**
+- **VX-238 (tag deletion has no recovery road — no restoreTag, no Trash listing) — hers, as a product decision. The confirm (VX-221, both doors, her-ratified) is currently the only guard.**
+- PROVISIONALs still owed to QUESTIONS at the merge: #VX217-a (greyed-door arm — SUPERSEDED by her R-VX214-3 ruling, so strike it; only log the hover-copy wording as hers to polish), #VX217-b (the shownByTagging receipt + its star-applied form), VX-220's all-configurations Services suppression. #VX221-a is RESOLVED (her ratification) — do not log it as open.
 - If the ladder finds anything needing adjudication beyond the spec, hold it for her.
+
+## Adjudication advice to the post-compaction self (what made tonight's calls work)
+
+- **Rule from the trace + canon, never plausibility:** every fork answer tonight cited a standing rule (13j/13l confirmation-consistency for VX-221; P-1/P-2 + the finished-book door precedent for VX-217's gating; I5/§9 for commit semantics) — find the precedent before ruling, and when HER ruling supersedes a constitution application (greyed-not-hidden vs P-2's hidden arm), record the supersession verbatim and build hers.
+- **The implementer proposes, you rule, repo-first:** rulings land in the run record BEFORE the build proceeds; number the riders; mark taste-shaped edges PROVISIONAL for her instead of deciding them.
+- **Never silently expand scope:** R98's collect door stayed untouched; create/rename stayed the recorded registry gap; discovered gaps become TICKETS immediately (VX-236, VX-238) — the deferred-work rule.
+- **Verify every hand-back against git before flipping board states**; Linear auto-flips tickets to In Progress when commit attachments land — re-set the state after.
+- **The shared-record protocol is load-bearing:** warn → edit → "file's yours"; pathspec adds only; implementers own only their RECORD sections.
+- **Her messages get point-by-point replies, every item** (the standing memory rule) — and every ruling of hers lands verbatim-faithful the same turn.
 
 ## Machinery lessons (don't relearn)
 
