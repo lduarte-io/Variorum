@@ -169,6 +169,83 @@ current.
    flipped CLOSED (+MEMORY.md line), final checkpoint report in chat leading with what shipped + counts.
 8. HARD STOP after this run. (Her VX-181 launch-gate call is ANSWERED by this run — it's a U1 member.)
 
+## U4 BRIEF — READY TO SEND (drafted 2026-10-13 ~04:15 while awaiting U3's stage GO)
+
+Send verbatim as the U4 `opus-implementer` spawn prompt AFTER: (1) U3 closed in LIVE STATUS, (2) main
+merged INTO the branch (fetch fresh first — VX-179's trailing ledger commits), (3) headless suites green
+on the merged tree. Do not spawn before all three.
+
+---
+
+You are the U4 implementer for RUN VX-184 ("Run: MCP launch polish") — Opus, xhigh, ONE unit: **U4,
+member VX-195 (edit parity inside a note, R-VX184-1 "as capable as her at the keyboard")**. Worktree
+`~/dev/variorum-vx-184`, branch `vx-184-mcp-launch-polish` (run ALL work from that absolute path; never
+the main checkout). Commits: `VX-195: … Part of VX-184`, NO attribution trailers, push after EVERY
+commit. `notes/SessionResiliencyProtocol.md` binds you: your FIRST commit opens a "U4 UNIT RECORD"
+section at the end of `notes/plans/fixes/vx-184-mcp-launch-polish.md` with a LIVE STATUS table (pieces,
+flipped as they land), and every piece commits+pushes before the next begins.
+
+PREFLIGHT (read in full, yourself, in this session — reading is never delegated): `CLAUDE.md` and its
+auto-loaded canon; `notes/plans/mcp-launch-polish-kickoff.md` (BINDING — rulings R-VX184-0…6; your unit
+is the table's U4 row); the run record `notes/plans/fixes/vx-184-mcp-launch-polish.md` (U1–U3's UNIT
+RECORDs — especially U3's "For U4" note); `notes/plans/fixes/vx-168-mcp-client-secret.md` (U2's
+edit-act pattern — YOUR pattern); `notes/plans/phase-13n-b-mcp-door.md` + the 13n-c plan
+`notes/plans/phase-13n-c-mcp-launch-readiness.md` (the door's law and reach queries);
+`notes/SessionResiliencyProtocol.md`; `notes/SyncSpec.md` BEFORE any schema-adjacent thought (you have
+NO schema change — U3 used the run's one allowance; if you believe you need one, STOP that piece and
+report). AppSpec §9 is your operations contract.
+
+THE WORK — every act = an EXISTING §9 operation + the grant guard INSIDE the op's transaction + ONE
+client-named undo entry (⌥⌘Z speaks the client's name); an act her own door makes undo-less stays
+undo-less and the tool description SAYS so (VX-168 U2's pattern, run-wide):
+- **Comments at edit:** edit/delete/restore ANY comment (not just own — the edit clause goes into
+  `MCPWriteTools.mayDelete`; `Queries.mcpCommentAuthor` is the one read — U3's note). U3's suggest-rung
+  own-comment road and her R-VX188-2 refusal sentence stay byte-unchanged for suggest callers.
+- **Takes at edit:** delete (deleting a block's LAST take deletes the BLOCK — same road as delete_block,
+  SAID in the receipt and the tool description; I10 holds because the block goes — R-VX184-1), archive,
+  label, lock/unlock.
+- **Commits at edit:** restore (INSURED first, exactly as her restore road is) and rename a message
+  (her `renameCommitPoint` semantics: nil clears, no-op writes nothing, seal checked first, allowed on
+  a locked take per QUESTIONS #121).
+- **The note at edit:** rename its title; delete a saved lens.
+Private/Seal/Own acts are HERS ALONE (R-VX184-2) — never minted as tools. Fence and refusal shapes:
+the one not-shared answer for anything unreachable; `rungTooLow`-family for a live holder below edit;
+no new oracle anywhere. Wording (descriptions, receipts, refusals, Activity lines, undo labels) ships
+AS BUILT with a P-U4-WORDS provisional logged (QUESTIONS road, not VX-234 — that ticket is pane wording).
+
+HARD RULES: zero `Sync/`, custody/keychain or editor-seam lines (verify by path diff and say so); zero
+schema; pin-before-fix PER TOOL FAMILY, red on the pre-fix tree and red again by revert, counts
+recorded; headless `swift build`/`swift test` freely; **every Mac batch / walk / live round ONLY under
+the stage claim I relay** — build-for-testing headless, then end your turn READY FOR STAGE and wait for
+my GO with the exact claim line. Live round (evidence of its kind, the kickoff's): ONE real Claude Code
+turn exercising a representative act of EACH family, ⌥⌘Z walking each back, captured; dev store only
+behind an A1 prestage copy, restored verified; never her real store, never her user-scope MCP
+registrations. **The Debug app may greet launch with the What's New sheet (cross-run version flip) —
+close it with its own button before any leg; expected modal, never a finding.** The one standing Mac
+red everywhere is VX-115's `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (pre-existing
+on main — never attribute it to this run). NOTE: main (VX-179's comment-area polish) is merged into the
+branch beneath you — verify comment-surface facts against the TREE, not against older records.
+
+> **Autonomous mode.** Where the spec/model is ambiguous and it does NOT gate the phase's core: write
+> the 2–3 options into the phase plan's closeout notes, implement the most spec-defensible one, mark it
+> **PROVISIONAL**, and append the question to `notes/QUESTIONS.md`. If the ambiguity gates the phase's
+> core, stop and report back instead.
+> Never, under any circumstances: invent product behavior; violate or relax an invariant (I1–I10,
+> P1–P3, S1–S5); add a new third-party dependency; contradict the canonical docs (record deltas in the
+> closeout instead); touch anything requiring the author's accounts or credentials; delete or overwrite
+> anything the author created; rewrite history or force-push (plain pushes per piece are REQUIRED — the
+> resiliency protocol). Those are author-only calls — log to `notes/QUESTIONS.md` and report.
+> Do not spawn subagents or use the Agent tool, with one exception: you may run at most ONE Sonnet
+> lookup subagent at a time (spawn it with `model: "sonnet"`), strictly for external facts — web
+> searches, Apple documentation, API signatures/availability. It returns facts and quotes; it never
+> edits files and never spawns agents of its own. Never delegate reading of the repo's docs, the phase
+> plan, code, or the diff under review — do that reading yourself, in this session.
+> Report back with: what shipped, test counts, PROVISIONAL calls made, commits made, anything requiring
+> the author. Write the phase plan's closeout detailed enough to be reviewed against the spec — a cold
+> reviewer will do exactly that.
+
+---
+
 ## Known cross-run facts
 
 - **VX-179 MERGED to main (PR #154, merge commit d6caafc1 — coordinator's word, 2026-10-13 ~03:40;
