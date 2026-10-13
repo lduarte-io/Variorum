@@ -72,7 +72,7 @@ Agreed with the settingspaneupdater session (2026-10-13, both run files carry it
 
 ## U1 UNIT RECORD — the socket and key road: VX-132 → VX-181 → VX-198 (opus-implementer, 2026-10-12 night)
 
-**What this unit did NOT do (said first — the READY-FOR-STAGE state, 2026-10-13 01:15 MDT):** (1) **the Mac batch and THE LIVE ROUND have NOT run** — the Mac build-for-testing is built (the disk incident below, resolved) and the stage window waits on the orchestrator's GO; every row is therefore pinned and green HEADLESS, but the unit's evidence of kind (use, on the wire, a real client) is still owed — this record does not close on pins; (2) no capture of the changed faces yet (L1, the setup line, the Activity words — both voices, in the window); (3) no `notes/QUESTIONS.md` entry and no canon edit (the merging session's); (4) zero schema, zero `Sync/`, zero custody, zero editor seam.
+**What this unit did NOT do (said first — the UNIT-CLOSE state, 2026-10-13 01:45 MDT):** (1) **the over-cap answers were never met by a REAL client** — no client in the round sent past either cap; they stand on their headless pins (red-on-old) alone, and what Claude Code would show for them is unrecorded (P-U1-OVERCAP); (2) **leg (d) did not write to Home** as planned — my plan assumed a just-in-time ask, but an unshared wing answers the uniform not-shared shape with NO ask (F-7, by design), so the write went to the book `claude-code` already writes to; (3) **L1 in Study is not preserved** — read live on screen at 01:29, but its capture file was overwritten by the next capture of the same name; L1 stands captured in Terminal only (`t1-terminal-L1.png`); the setup line and the Activity words are captured in both voices; (4) no `notes/QUESTIONS.md` entry and no canon edit (the merging session's); no cold review yet (the orchestrator's); (5) zero schema, zero `Sync/`, zero custody, zero editor seam. Everything else in the U1 row is DONE: pinned red-on-old per member, green headless and on the Mac batch, and USED live on the dev store with a real Claude Code (THE LIVE ROUND below).
 
 **Read in full before code (never delegated):** the kickoff `notes/plans/mcp-launch-polish-kickoff.md` (her pre-run
 sitting, the U1 row, the rules); this record's head; `notes/plans/fixes/vx-180-discover-probe.md` whole (the window's
@@ -106,8 +106,8 @@ zero `Sync/`, zero custody/keychain, zero editor seam.
 | 9 | VX-198 red-on-old BY REVERT | DONE (announced `a86941c9`; this commit records it) — the five production files + the two justified-edit test files at `35bd3d76`: core `MCPSetupKeyRebindTests` RED again (2/2, 10 issues — identical to the pre-fix run) and socket `MCPSetupKeyRebindServerTests` RED again (the second copy refused). Restored clean (`git status` empty). Log `logs/vx198-revert.log` |
 | 10 | headless finals (`VariorumMCPTests`, `VariorumCoreTests`, workbook) + the Mac target's build-for-testing | HEADLESS DONE (this commit) — on `5ca4bdcc`'s sources, `swift build --build-tests` clean, per target: **`VariorumMCPTests` 153/25** (VX-180's close 135/20 → +18 tests / +5 suites: `MCPHarnessTimeLimitTests` 3, `MCPHarnessHygieneTests` 1, `MCPShimClosedAppTests` 6, `MCPSizeCapTests` 8, `MCPSetupKeyRebindServerTests` 1, minus none) · **`VariorumCoreTests` 2,695/308** (VX-168's close 2,691/307 → +4: `MCPSetupKeyRebindTests` 2 + the two new rule arms) · **`StringsWorkbookTests` 40/6** — all green; skips = the standing gated ones only (8 in core, 1 in the workbook — read, not inferred). **The Mac build-for-testing: DONE** (2026-10-13 01:10–01:13 MDT, after the disk was resolved; built at `53e46e09`, whose sources are byte-identical to `5ca4bdcc`'s — `git diff 5ca4bdcc HEAD -- . ':!notes'` empty): `** TEST BUILD SUCCEEDED **`, `-derivedDataPath DerivedData/vx184-u1` (2.4 GB) — `Debug/Variorum.app` = `io.lduarte.Variorum.debug` with `Contents/MacOS/variorum-mcp` and `PlugIns/VariorumTests.xctest`; 188 warnings in the log, NONE in a file this unit touched (grepped); the log `notes/plans/vx184-screens/u1/logs/mac-build-for-testing.log` (gitignored) |
 | 11 | READY FOR STAGE (turn ends; the orchestrator's GO) | **READY FOR STAGE** (this commit, 2026-10-13 01:15 MDT) — headless finals green, the Mac build-for-testing built, the window planned below ("THE STAGE WINDOW"); the stage NOT claimed (waits on the orchestrator's GO and claim name, expected `vx184-u1`) |
-| 12 | the stage window: the Mac batch + THE LIVE ROUND legs (a)–(d), dev store only | IN PROGRESS — the GO came 01:19 MDT; the stage handed over `coord-for-vx184` → **`vx184-u1`** (70 min, claimed 01:19:31); `guard.sh --author` OK before every step, no Variorum instance. **12a THE MAC BATCH — GREEN (this commit):** `test-without-building` on the `vx184-u1` build, **47 suites** (the record's "48" was my miscount — the grep's list is 47, every name below), run as three `-only-testing` groups so each fits one foreground wait: **150/16 (82.986 s) · 89/16 (96.983 s) · 100/15 (66.715 s) = 339 tests / 47 suites, all passed**, `** TEST EXECUTE SUCCEEDED **` ×3; skips = the two env-gated capture harnesses only (`MCPGrantSheetU2CaptureTests`, `TutorialMCPChapterCaptureTests` — read in the logs); logs `notes/plans/vx184-screens/u1/logs/mac-batch-g{1,2,3}.log`. **12b–12f (A1 copy, legs (a)–(d), cleanup):** next |
-| 13 | close: self-assessment, PROVISIONALs, OWED | NOT-STARTED |
+| 12 | the stage window: the Mac batch + THE LIVE ROUND legs (a)–(d), dev store only | **DONE** (01:19:31–01:41:23 MDT) — the GO came 01:19 MDT; the stage handed over `coord-for-vx184` → **`vx184-u1`** (70 min, claimed 01:19:31); `guard.sh --author` OK before every step, no Variorum instance. **12a THE MAC BATCH — GREEN (this commit):** `test-without-building` on the `vx184-u1` build, **47 suites** (the record's "48" was my miscount — the grep's list is 47, every name below), run as three `-only-testing` groups so each fits one foreground wait: **150/16 (82.986 s) · 89/16 (96.983 s) · 100/15 (66.715 s) = 339 tests / 47 suites, all passed**, `** TEST EXECUTE SUCCEEDED **` ×3; skips = the two env-gated capture harnesses only (`MCPGrantSheetU2CaptureTests`, `TutorialMCPChapterCaptureTests` — read in the logs); logs `notes/plans/vx184-screens/u1/logs/mac-batch-g{1,2,3}.log`. **12b–12f:** the A1 copy, legs (a)–(d) and the cleanup — THE LIVE ROUND below, every leg's evidence |
+| 13 | close: self-assessment, PROVISIONALs, OWED | **DONE** (this commit) — the record's first line, the CLEANUP row, the post-round SELF-ASSESSMENT, the PROVISIONALs (unchanged three), OWED re-written for the cold review and the merge |
 
 **No revert is in flight** (pieces 2, 4, 6 and 9's reverts ran and were RESTORED — `git checkout HEAD --`, the moved files back, `git status` clean each time).
 
@@ -361,12 +361,53 @@ never printed): `['linear-server', 'variorum']`, block fingerprint `49c952539186
 
 | leg | what was done | outcome |
 |---|---|---|
-| **(a) a real Claude Code turn** | Settings ▸ MCP (via the app menu's "MCP Settings…"): the server **running**; clients `claude-code` (3 grants, last seen 2 days ago), `u3-walk`, `u2-walk`, `u1-walk` (`cap1/w0.png`). Connect a client ▸ Claude Code ▸ **Copy setup command** (cliclick, guarded) → **K1 `vmk1_<dev-key-prefix>…`** (48 chars); the pane's setup line with **this unit's `keyLine`** — "Each copy carries a fresh setup key, shown here as dots, that ties a client's name to that setup. Running it again replaces the old setup." (`l1-pane-scrolled.png`, `l2-k1-copied.png`) and **L1** — "…Each setup copied here carries a key that binds that name to it — running a newer setup moves the name to the new key — and a connection under the name with any other key, or none, is refused…" (Study, `a3-activity-leg-a.png`'s first scroll, superseded by the Activity capture — L1 re-captured in leg (b)). In the scratch project: the copied line with `-s user` → `-s local` (`variorum-dev`, the REAL fixed Debug shim) + `variorum-tee` (the same shim behind `tee`); `claude mcp list` (Claude Code 2.1.296, 01:28:41) | **`variorum-dev` ✔ Connected · `variorum-tee` ✔ Connected** (`wire/a1-claude-mcp-list.txt`). The tee (`wire/tee-{in,out}.log`, session 01:28:42): IN `server/discover` (id `"server-discover-probe-1"`) then `initialize` (id 0) pipelined, `notifications/initialized`, `tools/list` id 1; OUT **`-32601` on `"server-discover-probe-1"` first**, then the `initialize` result on id 0, then the tools on id 1 — VX-180's window, unchanged by this unit. **One `claude -p` turn** (`--strict-mcp-config`, only `variorum-dev` with K1, `--allowedTools mcp__variorum-dev__list_books`, 01:28:59): **served** — "The tool returned 1 book, and its name is "o ladrão de raios"." (`is_error` false, no denials; `wire/a2-claude-p-turn.json`). **Activity:** "claude-code listed books — now" · **"claude-code connected with a new setup, now bound to its name — now"** (the dev store's `claude-code` was approved and UNBOUND — VX-180's restore — so K1 BOUND it; the re-bind arm is leg (b)'s) — `a3-activity-leg-a.png`. The same listing showed her user-scope `variorum` (the INSTALLED Release shim, her app absent) **✘ CONNECTION_CLOSED** — VX-181's pre-fix symptom on the build she runs, corroboration |
+*[removed for publication]*
 *[removed for publication]*
 | **(c) VX-181 — the closed app** | The dev instance quit BY IDENTITY (`tell application id "io.lduarte.Variorum.debug" to quit`, 01:34:47; `pgrep` empty; no socket left in the container); then, in the scratch project, `claude mcp list` (01:34:55) and `claude mcp get variorum-tee` | **Acceptance — the tee capture, twice** (`wire/tee-{in,out}.log`, sessions 01:34:55/57): IN `server/discover` (id `"server-discover-probe-1"`) + `initialize` (id 0), pipelined; OUT **`-32601` on `"server-discover-probe-1"`, then `-32000` "Variorum must be open: its MCP server is not running. Open Variorum, turn on Settings ▸ MCP ▸ Enable the MCP server, then reconnect." on id 0** — the probe answered on its own id, the sentence on the initialize's. **Recorded as found — what Claude Code displays:** `variorum-dev` and `variorum-tee` **"✘ Failed to connect — -32000: Variorum must be open: its MCP server is not running. Open Variorum, turn on Settings ▸ MCP ▸ Enable the MCP server, then reconnect."**; `claude mcp get variorum-tee` → "Issue: -32000: Variorum must be open…" (`wire/c1-…`, `wire/c2-…`). **The before/after in ONE listing:** her user-scope `variorum` — the INSTALLED Release shim, without this fix — still reads **"✘ Failed to connect — CONNECTION_CLOSED"** beside it |
 | **(d) the realistic large write** | The dev app relaunched (`open -n`, pid 98956, 01:36:24; `mcp.sock` back in the container). A deterministic **300-block document** (seed 184; 223,593 bytes of block text, 228,349 bytes of arguments JSON; accented Latin, CJK, curly quotes, em dashes; 12 blocks with an internal blank line, 6 with a single internal newline, 6 with a labeled `alt` take) in `create_note`'s `blocks` form, through the REAL Debug shim as `claude-code` with K2 (`session_client.py`, scratch: initialize → `notifications/initialized` → the call → `read_note` with_ids). **The plan's Home road did not exist as written:** `create_note` on `wing_id: ""` answered at once (0.039 s) "That wing isn't shared with this client, or doesn't exist. The author can share it from Variorum ▸ Settings ▸ MCP." — the uniform not-shared shape, and NO ask queued (F-7's no-oracle letter: an unshared scope never asks; my plan assumed the just-in-time ask). So the write went where `claude-code` already holds write-new + edit (always): **the book "o ladrão de raios"** (`book_id` via `list_books`) — no new grant minted, nothing clicked | **Landed and read back whole:** `create_note` **0.536 s** → `note_id` + **300 `block_ids`**; `read_note` (with_ids) **0.023 s**, a **503,357-byte** message line (the 496,489-byte answer — well under the 16 MiB cap). **300/300 blocks byte-equal in order**, block ids equal create's, every chosen take = the sent text (300/300), the 6 `alt` takes byte-equal and unchosen (6/6), the 12 blank-line blocks kept whole (12/12), the title exact (`wire/d2-session.txt`, `wire/d2/`). The app: ⌥⌘O ("Show the AI's Last Change") opened the note in Write — "~/o ladrão de raios", "block 1/300 · 32,347w in note" (`d3-note-opened.png`); Activity "claude-code made the note “VX-184 U1 large write — 300 blocks”" · "claude-code read “…”" (`d7-activity-write.png`; 144 → 148 with the refused Home call). **Two things NOTICED in passing, not this unit's (no fix, no claim of cause — for an owner):** (1) a darker "⑂2" badge sits at **Block 001**'s corner and stays there after scrolling away and back (`d3-…`, `d6-note-top-again.png`), while the store gives block 1 ONE take (the read-back: 294 one-take blocks, the six two-take blocks are 22/72/122/172/222/272 — block 22 wears its own muted "⑂2" correctly, `d5-note-block22.png`) — the corner-badge/editor layer, untouched by this diff; (2) the Bookcase row read "o ladrão de raios · 7 notes · 3 ch · 120w" right after a 32,347-word note joined it (`cap-d/w0.png`) — the book's word figure looked stale; not checked further |
 
-### SELF-ASSESSMENT (pre-stage — the implementer's; the live round's evidence still owed)
+
+**Cleanup (01:39–01:41:23):** both `-s local` registrations removed ("Removed MCP server … from local config"; the scratch
+project's servers `[]`); **her user-scope servers AFTER: `['linear-server', 'variorum']`, block fingerprint
+`49c9525391868615` — byte-identical to BEFORE**; `~/.claude.json` carries no setup key anywhere (walked: 0); the dev
+instance quit BY IDENTITY (`pgrep` empty); the Debug app's prefs put back to the 01:26 copy (`defaults import` + one
+`defaults delete` of the walk's own `currentBlock.<new note>` key — 0 keys differ); the dev store **"Restored (verified)"**
+from `scale-prestage-20261013T072601Z` (`logs/restore.txt`) — all four files re-hashed IDENTICAL to the prestage copy, no
+socket left; the scratch keys, setup lines, the K3 JSON and the strict config DELETED; the clipboard emptied (0 bytes); a
+whole-key grep over `vx184-screens/u1/` AND the scratchpad: **0 files**; a stray `default.profraw` the coverage-instrumented
+shim wrote into the worktree during leg (d) (mtime 01:36:50 — mine) removed, the tree clean; the stage **RELEASED**
+("STAGE FREE", 01:41:23 — 22 of the 70 minutes). The two dev-store backups the Debug app takes at each launch stay where
+it puts them (expected, the WalkKit note). **One guard trip, recorded:** at 01:33 `guard.sh` stopped a step on "HID idle
+1s" — my OWN click 1.2 s earlier (synthetic events reset the HID clock); I did not retry blindly: read-only reads showed idle
+climbing 8→10→12 s from my last action and the dev pid still frontmost, then continued with every step paced ≥ 2.6 s after
+the previous synthetic event.
+
+**Captures** (`notes/plans/vx184-screens/u1/`, gitignored): Study — `cap1/w0.png` (the pane, the server running),
+`l1-pane-scrolled.png` + `l2-k1-copied.png` (the setup line + `keyLine`), `a3-activity-leg-a.png` (the bind),
+`b3-activity-rebind.png` (the re-bind + the replaced refusal), `b4-client-row-after-rebind.png` (approved, 3 grants),
+`b7-activity-arms.png` (every arm's Activity line); Terminal — `t1-terminal-L1.png` (L1), `t2-terminal-activity.png` (the
+re-bind + replaced words), `t3-terminal-keyline.png` (`keyLine`), `cap-d/w0.png` (the Bookcase after the write),
+`d3-note-opened.png` / `d5-note-block22.png` / `d6-note-top-again.png` (the written note), `d7-activity-write.png`. Wire —
+`wire/tee-{in,out}.log`, `wire/a1-…` `a2-…` `b1-…` `b2-…` `b5-…` `b6-…` `c1-…` `c2-…` `d1-session.txt` `d2-session.txt`
+`d2/`. Logs — `logs/mac-build-for-testing.log`, `logs/mac-batch-g{1,2,3}.log`, `logs/restore.txt`.
+
+### SELF-ASSESSMENT (post-round — the implementer's, at the unit's close)
+
+**Against the U1 row, now with USE:** VX-181 — a REAL Claude Code against the closed app now DISPLAYS "Variorum must be
+open…" (it showed CONNECTION_CLOSED before — her installed shim, in the same listing, still does), and the wire shows exactly
+the designed order (probe `-32601` on its string id, the sentence on id 0). VX-198 — the copy press re-binds a bound name
+live, approval and all three grants kept; the replaced key's own sentence reaches a REAL client's face ("Issue: -32000: …a
+newer setup replaced this one…"), while bare / never-issued / another name's key hear the ONE sentence, byte-exact; a
+foreign key never re-binds. VX-132 — not a live surface (the harness); its evidence is the headless pins and the measured
+CPU. The over-cap answers — pinned, NOT met live (the first line says so). The large write — 300 blocks / ~224 KB in, 503 KB
+out, byte-equal, sub-second, nothing tripping a cap. VX-180's window — unchanged and re-proved on the wire four times.
+**Against the spec:** unchanged from the pre-stage assessment (zero schema / `Sync/` / custody / editor seam; A-4/K2's
+boundary as amended by R-VX184-5).
+**Risks I see (updated):** (1)–(4) of the pre-stage list stand; (5) the round re-confirmed the grouping of "never-issued"
+and "another name's" under ONE Activity phrase ("a setup key other than its own") — VX-168's words, not this unit's,
+recorded only so the merge does not read it as a VX-198 regression.
+
+### SELF-ASSESSMENT (pre-stage — the implementer's; kept as written before the round)
 
 **Against the U1 row:** VX-132 — every harness connect/call bounded and named (pins red-on-old: they HANG on the old
 harness) AND the hang's mechanism removed at the harness (no spinning SDK loop, no unfailed pending request — measured:
@@ -415,7 +456,7 @@ a client that never initializes gets at most 8 answers then the sentence — the
 
 ### OWED (for the orchestrator)
 
-1. ~~**Disk space**~~ — RESOLVED by the orchestrator's sweep (34 GiB free); the Mac build-for-testing BUILT (row 10); now my GO window.
+1. ~~**Disk space**~~ — RESOLVED (34 GiB); the build, the batch and THE LIVE ROUND DONE. **Next: the cold review** (the whole U1 diff) — the orchestrator's.
 2. **Canon at the merge** (the kickoff's list carries these): AppSpec §12 THE MCP DOOR — the shim's VX-181 window clause
    (the closed-app sentence answers the `initialize` past a probe); A-4's boundary amended for newest-copy-wins (R-VX184-5:
    a fresh copy re-binds a bound name, approval and grants kept; the replaced key refuses with its own sentence; Deny
@@ -424,6 +465,15 @@ a client that never initializes gets at most 8 answers then the sentence — the
 3. **Her handoff:** with VX-198 her clients re-run NOTHING (no binding changes at install — R-VX168-1's bindings stand);
    from now on re-running a setup is the whole road (no Deny). VX-178 parked as superseded (the kickoff). The beta tester's
    bridge note stands (VX-180's handoff).
-4. **Noticed, not this unit's:** `MCPShim.pump` never joins its upstream thread (by design for the shipped shim; only the
+4. **Noticed in the live round, not this unit's — each wants an owner (a VX ticket), mechanism UNVERIFIED, no fix:**
+   (a) a darker "⑂2" corner badge sits on Block 001 of a 300-block note whose block 1 has ONE take (the store's read-back),
+   and stays after scrolling away and back; the six genuinely fanned blocks wear their own muted badge (`d3-…`, `d5-…`,
+   `d6-…`) — the corner-badge/editor layer; (b) the Bookcase row read "7 notes · 3 ch · 120w" right after a 32,347-word
+   note joined the book (`cap-d/w0.png`) — the book's word figure looked stale; (c) after a voice flip rebuilt the MCP pane,
+   the setup menu's segment showed "Claude Code" while the "Copied." line beneath still carried the Any-MCP-client
+   sentence from the last copy (`t3-terminal-keyline.png`) — view-local segment state vs the persisted copied state; (d) my
+   plan's premise that an ungranted Home write would raise a just-in-time ask was wrong — the uniform not-shared answer
+   (F-7) is the design; no defect, recorded so no later plan repeats it.
+5. **Noticed, not this unit's (pre-stage):** `MCPShim.pump` never joins its upstream thread (by design for the shipped shim; only the
    tests met the reuse race — fixed there); `MCPHandshake`'s opening read still has no overall deadline (VX-180's risk 3 —
    a silent peer holds a session slot until it closes; the session cap bounds it).
