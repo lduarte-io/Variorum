@@ -193,7 +193,7 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 | 3 | U1 true delete (core + panel door) | BUILT (89b5a9af…, last code f92436e8) — core pins red-on-old by revert + full `swift test` green + the app target builds; app-target pin RUN + the walk PENDING (stage) — see the U1 RECORD |
 | 4 | U2 gutter cards | BUILT (1a7d2242…b179a9fe) — plain build green, pins typechecked stage-free, tables replayed; pin RUN + revert + the walk PENDING (stage) — see the U2 RECORD |
 | 5 | U3 panel pristine pass | BUILT (e5211a8e…) — the caret fixed at mechanism (F-U3-1), the bar's drift (Q-2), the pass, O-3, two pre-existing undo defects (U3-g); plain build green, the real control/panel measured + rendered offscreen, pins typechecked, U3-g red by revert; pin RUN + the walk PENDING (stage) — see the U3 RECORD |
-| 6 | Mac-target test runs + the walk (stage via oct12coordinator) | WINDOW 1 DONE (see below); WINDOW 2 (U3 suites + the walk) requested |
+| 6 | Mac-target test runs + the walk (stage via oct12coordinator) | WINDOWS 1–2 DONE (suites 99/100 → fix leg landed, pin-only); WINDOW 3 = mounted-suite re-check + R-c revert; the WALK blocked on this session's Screen Recording (with her) |
 | 7 | The ladder (fable-reviewer, whole diff) | NOT-STARTED |
 | 8 | Bout-start board snapshot + in-flight row on main | DONE — snapshot was the coordinator's (beb0a30c); in-flight row 5b1c8c94 on main |
 | 9 | Ticket VX-179 description gains branch/record pointers; Done rides the PR merge | pointers DONE; Done at merge |
@@ -1078,3 +1078,18 @@ and the old settle.
 **PENDING (stage):** the runner re-verification — `-only-testing:VariorumTests/CommentTextAreaMountedTests`
 (expect all 9 tests — 13 cases with the voice arguments — green incl. this cell) or the whole U3 list again; optionally R-c through the test target (expect
 exactly this cell red: 3 issues at the served / [true] / [true, false] expectations).
+
+## STAGE WINDOW 2 (the orchestrator, 2026-10-12 ~22:30 — suites DONE, the walk BLOCKED)
+
+- **Suites at the tip: 100 tests / 16 suites, 99 green, ONE deterministic red** —
+  `CommentTextAreaMountedTests/aFocusRequestBeforeAWindowIsHeldAndServedOnArrival` (alone and in
+  the set). Routed to the U3 session; its FIX LEG traced it to the PIN's environment (a
+  main-actor test body is a main-queue job; the old synchronous settle could never drain the
+  control's one-turn-deferred focus service) and fixed the pin only — zero product lines, verified
+  by path diff (`ff30b1f7..HEAD -- App/Variorum/Variorum/` empty, `Sources/` untouched since U1).
+  Runner re-verification of the mounted suite + the R-c discriminating revert: NEXT WINDOW.
+- **The WALK is BLOCKED at the first capture:** `walk-cap` fails twice ("could not create image")
+  on my dev Debug instance — the Screen Recording denial shape for THIS session's host. Per her
+  standing rule (relayed by oct12coordinator): stopped immediately, no workaround, my instance
+  killed (no real-store instance existed at any point), stage released, the coordinator took the
+  grant/restart to her. The walk re-books on READY once this session can capture.
