@@ -1306,9 +1306,9 @@ re-walk of the fixed rows are PENDING (the runner's next window).
 | piece | what | status |
 |---|---|---|
 | FL-a | this section | DONE (9667e4d5) |
-| FL-1 | F-W-1 — trace (precise + line events, offscreen, real module), fix at mechanism, table pins red-on-old by replay; R1-3 answered | IN-PROGRESS — traced (this commit); the fix next: hit-testing chooses the scroll view (the stack for a wheel the card takes, the card itself for one the page takes); the card's `scrollWheel` override and latch retire |
-| FL-2 | F-W-2 — a press on the scroller belongs to the scroller; fix + pin | NOT-STARTED |
-| FL-3 | F-W-5 — the "…" badge traced; a badge always carries its count; pin red-on-old | NOT-STARTED |
+| FL-1 | F-W-1 — trace (precise + line events, offscreen, real module), fix at mechanism, table pins red-on-old by replay; R1-3 answered | IN-PROGRESS — traced (6061ba1f); FIX landed (this commit): `hitTest` → `hitTarget(at:during: NSApp.currentEvent)` + the pure `CommentCardLayout.hitAnswer`; the card's `scrollWheel` override and latch RETIRED; replayed on the live-shaped queue road (all six cases right); pins + the revert next |
+| FL-2 | F-W-2 — a press on the scroller belongs to the scroller; fix + pin | IN-PROGRESS — FIX landed (this commit, the same hit decision: a press on the lane of an overflowing card answers the scroller, faded or not); replayed after the fade: door 0×, drag 0 → 112.5; pins + the revert next |
+| FL-3 | F-W-5 — the "…" badge traced; a badge always carries its count; pin red-on-old | IN-PROGRESS — FIX landed (this commit): the pure `CommentCardLayout.badgeFace` (shipped inset where it fits — byte-identical; else the inset yields; else the "#" goes); replayed: every count whole at 22/28/32 pt; pins + the revert next |
 | FL-4 | W-OBS-2 — TRACE ONLY (pre-existing or new?), answered before any fix | DONE (this commit) — PRE-EXISTING: Read mode has never hosted a decoration controller (THE TRACES) |
 | FL-5 | the plain build; pins typechecked; record closed | NOT-STARTED |
 

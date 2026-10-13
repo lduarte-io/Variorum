@@ -24,10 +24,13 @@
 //    `CommentCardLayout.arrange` (pinned by table);
 //  - a small `NSScrollView` hosting them, so content taller than the card
 //    scrolls inside it;
-//  - the card is ONE door: it hit-tests as itself (the labels and the clip
-//    view never take her click; the scroller stays draggable), and routes the
-//    wheel through the pure `CommentCardLayout.wheelOwner` so a card with
-//    nothing to scroll never steals the page's scroll;
+//  - the card is ONE door: a press hit-tests as the card itself (the labels
+//    and the clip view never take her click; a press on the scroller lane
+//    belongs to the scroller), and a WHEEL is hit-tested to the scroll view
+//    that owns it — the card's own when `CommentCardLayout.wheelOwner` says
+//    the card can move that way, the page's otherwise — so a card with
+//    nothing to scroll never steals the page's scroll (the U2 fix leg:
+//    `CommentCardLayout.hitAnswer`);
 //  - `present` is idempotent and labels are measured only when the entries
 //    or the width change — an unchanged decoration pass does no text work.
 //
@@ -108,8 +111,17 @@ nonisolated enum CommentCardLayout {
     /// there is more below — and hands the rest to the page: a push past
     /// either end, and anything mostly horizontal (the card has no
     /// horizontal room). A touch that has not moved yet (zero deltas) goes to
-    /// the overflowing card, which can move one way at least; the gesture's
-    /// first MOVING event re-decides (see `CommentCardView.scrollWheel`).
+    /// the overflowing card, which can move one way at least.
+    ///
+    /// **Decided per DISPATCHED event, at hit-testing** (`CommentCardView.
+    /// hitTarget`): a wheel notch is hit-tested alone; a trackpad gesture
+    /// belongs to whichever scroll view takes its first dispatched event,
+    /// because that scroll view's own tracking loop then captures the rest of
+    /// the gesture un-hit-tested (the 10.9 responsive-scrolling model;
+    /// measured — a `.began` handed to an `NSScrollView` does not return
+    /// until its gesture ends). So nothing can re-decide mid-gesture; a
+    /// zero-delta first event is decided ONCE by the zero-delta row above
+    /// (ladder R1-3's answer, the run record's U2 FIX LEG).
     ///
     /// `deltaY` is AppKit's `scrollingDeltaY`, already in content terms:
     /// positive reveals what is ABOVE (toward the document's top), whatever
@@ -125,6 +137,66 @@ nonisolated enum CommentCardLayout {
         if deltaY > 0 { return offset > overflowSlack ? .card : .page }
         let maxOffset = contentHeight - viewportHeight
         return offset < maxOffset - overflowSlack ? .card : .page
+    }
+
+    /// What the count badge shows and how far its label is inset.
+    struct BadgeFace: Equatable {
+        var text: String
+        var inset: CGFloat
+    }
+
+    /// **THE BADGE ALWAYS CARRIES ITS COUNT (VX-179 U2 FIX LEG — the walk's
+    /// F-W-5).** The shipped inset, `min(6, max(2, (w − 16) / 2))`, was tuned
+    /// to "#1": at Write's 28 pt floor the badge yields to 22 pt and its label
+    /// to 16, where "#1" needs 15.74 and every other digit ~16.7–17.5, so a
+    /// two-comment block read "…" beside its "#1" neighbours (measured, the
+    /// run record's F-W-5 table). In order: the text with the SHIPPED inset
+    /// where it fits (byte-identical — every badge that ever showed its count
+    /// still does, the same way); else the inset yields to the count; else
+    /// the "#" goes and the bare number takes the room the same two ways.
+    /// `need` is the label cell's own width for a text (its padding
+    /// included). A number too wide even bare keeps the bare number at zero
+    /// inset — the last resort, never "…" first.
+    static func badgeFace(
+        text: String, width: CGFloat, need: (String) -> CGFloat
+    ) -> BadgeFace {
+        let shipped = min(6, max(2, (width - 16) / 2))
+        var candidates = [text]
+        if text.hasPrefix("#"), text.count > 1 { candidates.append(String(text.dropFirst())) }
+        for candidate in candidates {
+            let needed = need(candidate)
+            if needed <= width - 2 * shipped + 0.01 {  // a hundredth for float noise
+                return BadgeFace(text: candidate, inset: shipped)
+            }
+            if needed <= width {
+                return BadgeFace(text: candidate, inset: max(0, (width - needed) / 2))
+            }
+        }
+        return BadgeFace(text: candidates.last ?? text, inset: 0)
+    }
+
+    /// What an interactive stacked card answers to hit-testing.
+    enum HitAnswer: Equatable {
+        /// The card itself — the panel's door; a wheel answered here travels
+        /// to the PAGE's scroll view (the card's nearest enclosing one).
+        case door
+        /// The card's own stack — inside its scroll view, which then takes
+        /// the wheel natively.
+        case contents
+        /// The vertical scroller — a press on its lane drags it.
+        case scroller
+    }
+
+    /// **THE HIT DECISION (VX-179 U2 FIX LEG — the walk's F-W-1 and F-W-2).**
+    /// A WHEEL (`wheel` non-nil — its owner from `wheelOwner`) goes where its
+    /// owner's scroll view is: the card's contents when the card takes it,
+    /// the door (and so the page) when the page does — hit-testing, not a
+    /// hand-delivered event, chooses the scroll view. A PRESS on the scroller
+    /// lane of an overflowing card belongs to the scroller (faded or not);
+    /// every other press is the door.
+    static func hitAnswer(wheel: WheelOwner?, inScrollerLane: Bool, overflows: Bool) -> HitAnswer {
+        if let wheel { return wheel == .card ? .contents : .door }
+        return overflows && inScrollerLane ? .scroller : .door
     }
 
     /// The controller's pool plan: which existing card shows which block.
@@ -228,6 +300,9 @@ final class CommentCardView: NSView {
 
     /// The strip's and the badge's one line — the shipped label, unchanged.
     private let label = NSTextField(labelWithString: "")
+    /// The badge's count text as presented ("#2") — `layout` chooses what the
+    /// label shows from it (`CommentCardLayout.badgeFace`); nil off the badge.
+    private var badgeText: String?
 
     // The margin card's parts (VX-179 U2) — hidden on the other two arms.
     private var stacked = false
@@ -243,9 +318,9 @@ final class CommentCardView: NSView {
     /// A new block's (or new) content flashes the overlay scroller once when
     /// it overflows — AppKit's own "there is more here" cue.
     private var flashPending = false
-    /// The gesture's owner, decided at its first moving event (see
-    /// `scrollWheel`); nil between gestures.
-    private var latchedWheelOwner: CommentCardLayout.WheelOwner?
+    /// Whether the entries outgrow the card — the last arrangement's answer;
+    /// the hit decision reads it (the scroller lane exists only then).
+    private var overflows = false
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -283,7 +358,20 @@ final class CommentCardView: NSView {
             return
         }
         showStacked(false)
-        label.stringValue = text
+        if style == .badge {
+            // The badge's words are layout's choice (`badgeFace`): set them
+            // only when the count CHANGED, so the decoration pass that
+            // re-presents every badge never undoes a fitted "12" back to a
+            // truncated "#12".
+            if badgeText != text {
+                badgeText = text
+                label.stringValue = text
+                needsLayout = true
+            }
+        } else {
+            badgeText = nil
+            label.stringValue = text
+        }
         label.textColor = ink
         layer?.backgroundColor = tint.cgColor
         layer?.cornerRadius = 5
@@ -374,7 +462,7 @@ final class CommentCardView: NSView {
         label.isHidden = on
         rule.isHidden = !on
         scroller.isHidden = !on
-        latchedWheelOwner = nil
+        if !on { overflows = false }
         needsLayout = true
     }
 
@@ -409,7 +497,6 @@ final class CommentCardView: NSView {
     }
 
     private func didChangeIdentity() {
-        latchedWheelOwner = nil
         flashPending = true
         let clip = scroller.contentView
         guard clip.bounds.origin != .zero else { return }
@@ -421,10 +508,19 @@ final class CommentCardView: NSView {
         super.layout()
         if stacked {
             layoutCard()
-        } else {
+        } else if let badgeText {
             // 13u3 UNIT A1: a BADGE may be narrower than the shipped 32 (it
             // yields to the gutter rather than standing on prose), so its
             // inset yields with it — a "#1" squeezed to "#" is not a count.
+            // VX-179 U2 FIX LEG (F-W-5): and neither is "…" — the face keeps
+            // the whole count (`badgeFace`), byte-identical wherever it fit.
+            let face = CommentCardLayout.badgeFace(text: badgeText, width: bounds.width) {
+                Self.cellWidth(of: $0, like: label)
+            }
+            if label.stringValue != face.text { label.stringValue = face.text }
+            label.frame = bounds.insetBy(dx: face.inset, dy: 1)
+        } else {
+            // The inline strip — the shipped line, unchanged.
             label.frame = bounds.insetBy(dx: min(6, max(2, (bounds.width - 16) / 2)), dy: 1)
         }
     }
@@ -464,6 +560,7 @@ final class CommentCardView: NSView {
         let document = CGRect(
             x: 0, y: 0, width: viewport.width, height: arrangement.documentHeight)
         if stack.frame != document { stack.frame = document }
+        overflows = arrangement.overflows
         if flashPending, window != nil {
             flashPending = false
             // Only a card she can scroll advertises it (the read tier's
@@ -480,6 +577,14 @@ final class CommentCardView: NSView {
             forBounds: NSRect(x: 0, y: 0, width: width, height: 100_000)).height)
     }
 
+    /// A one-line label's own width for a text — a COPY of its cell (font,
+    /// padding) measured, so the label shown is untouched.
+    static func cellWidth(of text: String, like label: NSTextField) -> CGFloat {
+        guard let cell = label.cell?.copy() as? NSCell else { return 0 }
+        cell.stringValue = text
+        return cell.cellSize.width
+    }
+
     override func mouseDown(with event: NSEvent) {
         onClick?()
     }
@@ -490,58 +595,51 @@ final class CommentCardView: NSView {
     /// (swallowing click-to-focus). The DecorRectView/SeamLineView rule,
     /// applied conditionally: no door ⇒ no hit.
     ///
-    /// **VX-179 U2: the margin card is ONE door.** Its entries now sit in a
-    /// scroll view, whose clip view and labels would otherwise take the
-    /// click (and the wheel) — so every point of an interactive card answers
-    /// the card itself, and `mouseDown` opens the panel wherever she clicks.
-    /// The one exception is the overlay scroller, which stays draggable. The
-    /// strip and badge arms keep the shipped answer exactly.
+    /// **VX-179 U2: the margin card is ONE door** — a press anywhere opens the
+    /// panel, the labels and the clip view never take it.
+    ///
+    /// **VX-179 U2 FIX LEG (the walk's F-W-1 and F-W-2) — HIT-TESTING CHOOSES
+    /// THE SCROLL VIEW.** Traced offscreen against the real module (the run
+    /// record's THE TRACES): the card's own wheel router was right whenever
+    /// it was reached, but the live dispatch hands a wheel to the HIT VIEW's
+    /// scroll view, and the card — answering itself — belongs to the PAGE's:
+    /// the page took both directions and the card never moved. And a faded
+    /// overlay scroller declines its own hit, so the lane fell through to the
+    /// door and a press on it opened the panel. So the answer now depends on
+    /// what is being dispatched (`NSApp.currentEvent`, which AppKit has set to
+    /// that event): a wheel the card can take answers the card's own STACK
+    /// (inside its scroll view, which then scrolls natively — measured), a
+    /// wheel the page takes answers the card (whose scroll view is the page —
+    /// the walk's own observed road), and a press on the scroller lane of an
+    /// overflowing card answers the scroller even while it is faded. Every
+    /// other press is the door. One pure decision: `CommentCardLayout.hitAnswer`.
     override func hitTest(_ point: NSPoint) -> NSView? {
-        guard onClick != nil else { return nil }
-        guard stacked else { return super.hitTest(point) }
-        guard let hit = super.hitTest(point) else { return nil }
-        if let bar = scroller.verticalScroller, hit === bar || hit.isDescendant(of: bar) {
-            return hit
-        }
-        return self
+        hitTarget(at: point, during: NSApp.currentEvent)
     }
 
-    /// **The wheel, routed** (VX-179 U2). Every event reaching an
-    /// interactive margin card is decided by `CommentCardLayout.wheelOwner`:
-    /// the card's own scroll view, or the page — `super`, which hands the
-    /// event to the next responder (the text view, and on up to the page's
-    /// scroll view) exactly as if the pointer stood on the bare gutter.
-    ///
-    /// A trackpad GESTURE is decided once, at its first event that moves
-    /// (`.mayBegin` / `.began` re-decide; the rest of the gesture and its
-    /// momentum follow that owner), so neither scroll view ever sees half a
-    /// gesture and the card never hands a gesture over midway — the Mac's
-    /// nested-scroll latching: a card scrolled to its end stops there, and
-    /// the NEXT gesture moves the page. A wheel NOTCH (no phases) is its own
-    /// act and decides alone.
-    override func scrollWheel(with event: NSEvent) {
-        guard stacked, onClick != nil else {
-            super.scrollWheel(with: event)
-            return
+    /// The hit decision with the dispatched event NAMED (`hitTest` passes
+    /// `NSApp.currentEvent`; the pins pass a constructed one). The strip and
+    /// badge arms keep the shipped answer exactly.
+    func hitTarget(at point: NSPoint, during event: NSEvent?) -> NSView? {
+        guard onClick != nil else { return nil }
+        guard stacked else { return super.hitTest(point) }
+        guard super.hitTest(point) != nil else { return nil }
+        let wheel = event.flatMap { $0.type == .scrollWheel ? wheelOwner(for: $0) : nil }
+        switch CommentCardLayout.hitAnswer(
+            wheel: wheel, inScrollerLane: inScrollerLane(point), overflows: overflows) {
+        case .contents: return stack
+        case .scroller: return scroller.verticalScroller ?? self
+        case .door: return self
         }
-        let owner: CommentCardLayout.WheelOwner
-        if event.phase.isEmpty && event.momentumPhase.isEmpty {
-            owner = wheelOwner(for: event)
-        } else {
-            if event.phase.contains(.mayBegin) || event.phase.contains(.began)
-                || latchedWheelOwner == nil {
-                latchedWheelOwner = wheelOwner(for: event)
-            }
-            owner = latchedWheelOwner ?? .page
-            if event.phase.contains(.cancelled) || event.momentumPhase.contains(.ended)
-                || event.momentumPhase.contains(.cancelled) {
-                latchedWheelOwner = nil
-            }
-        }
-        switch owner {
-        case .card: scroller.scrollWheel(with: event)
-        case .page: super.scrollWheel(with: event)
-        }
+    }
+
+    /// Whether a point (superview coordinates) is on the vertical scroller's
+    /// lane — its frame, faded or not.
+    private func inScrollerLane(_ point: NSPoint) -> Bool {
+        guard let bar = scroller.verticalScroller, scroller.hasVerticalScroller,
+              !bar.frame.isEmpty
+        else { return false }
+        return scroller.convert(bar.frame, to: self).contains(convert(point, from: superview))
     }
 
     private func wheelOwner(for event: NSEvent) -> CommentCardLayout.WheelOwner {
