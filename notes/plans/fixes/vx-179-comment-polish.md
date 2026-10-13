@@ -2443,3 +2443,11 @@ f173bac2, test file + record only) is owed the implementer's ONE SANITY PASS per
   retirement leaves F-W-3, the ownership table, the close rung, the monitor release, R1-2).
 - The standing U2/U3 suites as regression (unchanged by this round — the one edit was a deletion).
 - Nothing else: round 2 ordered no product change, and the walk rows it leaned on are already walked.
+
+### Implementer sanity pass (Opus, 2026-10-13 — f173bac2 + e8510e3b)
+
+**AGREE.** The deletion removes ONLY the retired cell. The suite is coherent at 5 tests: `areas`, `turns`, `key`, `seed`, `deliveryWindow`, `SwiftUIPopoverHost` and `swiftUIPopover` are all still used. The stage-free typecheck with `EditorTestSupport.swift` returns EXIT 0 at e8510e3b. The final calls on R1-2 and R1-3 state my legs correctly. Precisions, none of them changing the ruling and none acted on:
+1. **"Strict subset" holds on every rung but one.** The retired no-swallow twin uniquely caught a FIRST-⎋ *acted-and-passed* defect: the panel clears the draft but returns the event, so `cancelOperation` closes the popover as well. The sibling's swallow masks exactly that defect. Today the code's shape excludes it (`handle` returns true on every branch; the monitor returns nil when handled). No mounted cell now pins that return contract. This is a NIT-level gap, recorded and not reopened.
+2. **The cell history is overstated in two places.** The sibling's new doc line ("three stage windows … while this twin stayed green on the same presenter and the same key road") and the ruling's "while the sibling stayed green in the same runs" are both inaccurate. The retired cell ran on the HAND-BUILT `NSPopover` host in windows 4 and 5, and only window 6 ran it on the SwiftUI presenter. The sibling did not exist in window 4, which ran c6d18035; it was born at 8eeb3bf9. The ruling's conclusion does not depend on either wording.
+3. **"Every revert … discriminating"** in the clean bill: R-PL reddened TWO cells, because the monitor's release shares `isHost`. R-PL2 was the discriminating one, as the pin leg recorded.
+4. **A placement nit:** the sibling's doc says "`delivers`' table below", but the table sits above it.
