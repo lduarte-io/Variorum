@@ -804,12 +804,16 @@ its own commit) · `Operations+MCP{Writes,Ergonomics}` + small extractions in `O
 | 8 | VX-190 — pins first (`remove_tag` at edit; un-tagging stays a non-event for intake), RED; then the fix (§9's `removeTag` body + the in-transaction guard + one entry) | NOT STARTED |
 | 9 | VX-187 — pins first (`link_versions`: named pairs, canonical `(min,max)` edges, Compare peers via `versionPeerPosts`, write new on BOTH notes, once grants spent together, one entry), RED; then the fix | NOT STARTED |
 | 10 | the catalog walk + the suggest PROOF grown (the ritual), the app's words (Activity, receipts) + Mac pins; the advice and the guide checked for falsified sentences | NOT STARTED |
-| 11 | red-on-old BY REVERT per member (announced here first, committed tree, restored clean) | NOT STARTED |
+| 11 | red-on-old BY REVERT per member (announced here first, committed tree, restored clean) | IN PROGRESS — **VX-186 DONE** (announced `bd0ba76a`; this commit records it): `b93f268d`'s production hunks reversed (`MCPNoteStructure`, `MCPToolCatalog`), pins kept → **`everyTextCrossesTheWireOnce` RED, 40 issues (every shown text "crossed 2 times", plain and through the lens — identical to the pre-fix run), `eachBlockNamesTheTakeItShows` RED (2)**, and the seven re-addressed standing pins red with them (they read the shown take); restored by `git checkout HEAD -- Sources`, `git status` clean (log `logs/p11-vx186-revert.log`). VX-173 · VX-188 · VX-190 · VX-187: each right after its own fix commit |
 | 12 | headless finals (`VariorumMCPTests`, `VariorumCoreTests`, workbook) + the Mac build-for-testing (`DerivedData/vx184-u3`); READY FOR STAGE | NOT STARTED |
 | 13 | the stage window (after the GO): the Mac batch + THE LIVE ROUND legs (a)–(d), dev store only | NOT STARTED |
 | 14 | close: self-assessment, PROVISIONALs, OWED | NOT STARTED |
 
-**REVERT IN FLIGHT (announced before it starts, 2026-10-13):** VX-186 red-on-old — the PRODUCTION hunks of `b93f268d` reversed in the working tree (`git diff b93f268d^ b93f268d -- Sources | git apply -R`: `MCPNoteStructure.swift`, `MCPToolCatalog.swift`), pins kept. **Restore = `git checkout HEAD -- Sources`** (the tree is committed at this record's commit).
+**No revert is in flight** (VX-186's ran and was RESTORED — `git checkout HEAD -- Sources`, `git status` clean).
+
+**Stage note from the coordinator (2026-10-13, for piece 13):** the Debug app may open with the What's New sheet at
+launch (keyed to the marketing version in the shared dev defaults domain; another run's 0.9.3/0.9.4 builds flip it).
+If it appears, close it with its own button BEFORE any leg — an expected modal, not a finding.
 
 ### The traces (written before code)
 
