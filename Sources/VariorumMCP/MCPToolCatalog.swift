@@ -866,16 +866,22 @@ enum MCPToolCatalog {
 
     /// Her take delete — and R-VX184-1: the block's LAST take deleted IS the
     /// block deleted, `delete_block`'s road, said here and in the answer.
+    /// VX-184 ladder round 1 (the NIT, plus the re-read): `deleteVariantRows`
+    /// refuses the take the block's CHOSEN pointer names — not the take it
+    /// shows (a nil pointer shows the default, which deletes; an archived
+    /// chosen take shows the default, yet refuses) — and "last" is I10's last
+    /// ACTIVE take (`Queries.mcpTakeRoad`: an archived take never counts).
     static let deleteTake = MCPToolDeclaration(
         name: "delete_take", rung: .edit, title: "Delete a take",
         description: """
             Delete one take of a block. Nothing is destroyed: it goes to the note's tray of deleted \
             things, where the author can put it back (so can put_back), and it is one undo for them. \
-            The take the block shows can't be deleted while other takes stand — choose another \
-            first (choose_take); a locked take can't be deleted either. Deleting a block's LAST take \
-            deletes the BLOCK, exactly as delete_block does (the block and every take on it go to \
-            the tray); the answer then says deleted_block: true. Get take ids from read_note with \
-            with_ids: true. Returns JSON.
+            The block's chosen take can't be deleted while the block has other active takes — \
+            choose another first (choose_take); a locked take can't be deleted either. Deleting a \
+            block's last active take (archived takes don't count) deletes the block, exactly as \
+            delete_block does (the block and every take on it, archived ones too, go to the tray); \
+            the answer then says deleted_block: true. Get take ids from read_note with with_ids: \
+            true. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -1085,14 +1091,18 @@ enum MCPToolCatalog {
         ]),
         scopes: [.book, .wing])
 
-    /// Her Finish — the finish dismisses what waits at Arrivals.
+    /// Her Finish — the finish dismisses what waits at Arrivals. VX-184 ladder
+    /// round 1 (PROVISIONAL P-VX196-8 (a)): the act is the BOOK's, so it
+    /// dismisses every waiting note, readable to the caller or not — said
+    /// plainly; refusing instead would itself reveal the hidden ones.
     static let finishBook = MCPToolDeclaration(
         name: "finish_book", rung: .edit, title: "Finish a book",
         description: """
             Mark a book finished, as the author's Finish does: its notes, their order and its \
-            chapters are frozen (their text stays editable), it stops collecting, and notes \
-            waiting at its Arrivals are dismissed. A book already finished (or sealed) is left as \
-            it is. One undo for the author reopens it and brings back what was waiting. Returns JSON.
+            chapters are frozen (their text stays editable), it stops collecting, and every note \
+            waiting at its Arrivals is dismissed — including any you can't read. A book already \
+            finished (or sealed) is left as it is. One undo for the author reopens it and brings \
+            back everything that was waiting. Returns JSON.
             """,
         inputSchema: bookIDOnly, scopes: [.book, .wing])
 
@@ -1127,13 +1137,18 @@ enum MCPToolCatalog {
             """,
         inputSchema: bookIDOnly, scopes: [.book, .wing])
 
-    /// Her Delete Book — the Trash; the daily Journal never deletes.
+    /// Her Delete Book — the Trash; the daily Journal never deletes. VX-184
+    /// ladder round 1 (PROVISIONAL P-VX196-8 (a)): the act is the BOOK's, so
+    /// every note in it leaves it, readable to the caller or not — said
+    /// plainly; refusing instead would itself reveal the hidden ones.
     static let deleteBook = MCPToolDeclaration(
         name: "delete_book", rung: .edit, title: "Delete a book",
         description: """
             Delete a book, as the author's Delete Book does: it goes to the Trash for 30 days with \
-            its chapters; its notes are never deleted with it — a book that owns its notes releases \
-            them to the Pool. One undo for the author brings the book back whole. Returns JSON.
+            its chapters. Its notes are never deleted with it, but every note in the book leaves \
+            it — including any you can't read — and a note in no other book lands in the Pool (a \
+            book that owns its notes releases all of them there). One undo for the author, or the \
+            Trash's Put back, brings the book back whole, its notes in it again. Returns JSON.
             """,
         inputSchema: bookIDOnly, scopes: [.book, .wing])
 
