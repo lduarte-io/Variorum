@@ -96,6 +96,8 @@ enum MCPToolCatalog {
         createNote, importDocument, applyTag, createBook, addNoteToBook, createSection,
         // U4 — the carriage (R-13nb-18, R-13nb-26 f, P-13nb-U3-8 → PROVISIONAL).
         saveVersion, fileNoteInChapter, setBookRule,
+        // VX-184 U3 — VX-187: two notes linked as versions by named pairs (R-VX187-1).
+        linkVersions,
     ]
     static let edit: [MCPToolDeclaration] = [
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
@@ -734,6 +736,45 @@ enum MCPToolCatalog {
                 "wing_id": .object(["type": "string", "description": "The wing it goes to (\"\" is Home)."]),
             ]),
             "required": .array(["note_id", "wing_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-184 U3 — VX-187 link_versions
+
+    /// VX-187 (R-VX187-1): the AI names the paragraph pairs; write new on both.
+    static let linkVersions = MCPToolDeclaration(
+        name: "link_versions", rung: .writeNew, title: "Link two notes as versions",
+        description: """
+            Link two notes as versions of each other by naming which paragraphs correspond: pairs \
+            of {block_a, block_b}, each block_a a block of note_a and each block_b the block of \
+            note_b it corresponds to (read_note with with_ids: true gives the ids). Name at least one \
+            pair — never guess by position. One linked pair makes the notes versions: Variorum's \
+            Compare then offers each beside the other, and read_note's with_lineage shows every pair \
+            (Compare lines its rows up by the notes' shared history, not by these pairs). Needs \
+            write new on both notes, which must be in the same wing. One call carries at most 200 \
+            pairs. All or nothing: a pair that names the wrong note, repeats, or is already linked \
+            is refused, named. One undo for the author removes every pair. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_a": .object(["type": "string", "description": "One note."]),
+                "note_b": .object(["type": "string", "description": "The other note."]),
+                "pairs": .object([
+                    "type": "array", "minItems": 1, "maxItems": .int(MCPWriteTools.batchCap),
+                    "description": "The corresponding paragraphs (at least one, at most 200).",
+                    "items": .object([
+                        "type": "object",
+                        "properties": .object([
+                            "block_a": .object(["type": "string", "description": "A block of note_a."]),
+                            "block_b": .object(["type": "string", "description": "The block of note_b it corresponds to."]),
+                        ]),
+                        "required": .array(["block_a", "block_b"]),
+                    ]),
+                ]),
+            ]),
+            "required": .array(["note_a", "note_b", "pairs"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)

@@ -129,6 +129,10 @@ struct MCPWriteServerTests {
             // for VX-190's remove_tag to aim at.
             let hersTag = try h.operations.createTag(name: "hers")
             _ = try h.operations.applyTag(hersTag.id, toPost: note.id)
+            // …and a second note of HERS, for VX-187's link_versions to aim at.
+            let otherNote = try h.operations.createPost(title: "hers too")
+            _ = try h.operations.addPostToReading(otherNote.id, to: book.id)
+            let otherBlock = try h.operations.newBlock(in: otherNote.id, text: "her other note", registeringUndo: false)
             func snapshot() throws -> [String] {
                 try h.database.read { db in
                     let takes = try Row.fetchAll(
@@ -152,7 +156,10 @@ struct MCPWriteServerTests {
                         .map(\.description)
                     // …and HER tag applications, which remove_tag aims at.
                     let herTags = try Row.fetchAll(db, sql: "SELECT * FROM post_tag ORDER BY id").map(\.description)
+                    // …and every edge (link_versions would mint version_of ones).
+                    let edges = try Row.fetchAll(db, sql: "SELECT * FROM edge ORDER BY id").map(\.description)
                     return takes + placements + blocks + commits + dates + rules + filings + herComments + herTags
+                        + edges
                 }
             }
             let chapter = try h.operations.createSection(in: book.id, name: "1")
@@ -192,6 +199,12 @@ struct MCPWriteServerTests {
             // VX-184 U3 (justified edit, the ritual): VX-190's remove_tag, aimed
             // at HER tag — refusing at the rung (edit), her application intact.
             calls.append(("remove_tag", ["note_id": .string(note.id), "tag": .string("hers")]))
+            // VX-184 U3 (justified edit, the ritual): VX-187's link_versions,
+            // aimed at her blocks in two of her notes — refusing at the rung
+            // (write new), no edge minted.
+            calls.append(("link_versions", ["note_a": .string(note.id), "note_b": .string(otherNote.id),
+                                            "pairs": .array([.object(["block_a": .string(one.block.id),
+                                                                      "block_b": .string(otherBlock.block.id)])])]))
             // The lens picks her NON-chosen take (mutation check 2 of the unit
             // record: picking only chosen takes could not see a lens that
             // moved the chosen pointer — the first draft of this pin did).

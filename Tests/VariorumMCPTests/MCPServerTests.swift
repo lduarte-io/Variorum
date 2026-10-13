@@ -244,9 +244,11 @@ struct MCPServerTests {
         // U4 (justified edit, the ritual): the carriage's write tools join
         // write new (save_version, file_note_in_chapter, set_book_rule) and
         // edit (put_back, set_entry_date).
+        // VX-184 U3 (justified edit, the ritual): write new gains VX-187's
+        // link_versions.
         #expect(Set(MCPToolCatalog.writeNew.map(\.name))
                 == ["create_note", "import_document", "apply_tag", "create_book", "add_note_to_book", "create_section",
-                    "save_version", "file_note_in_chapter", "set_book_rule"])
+                    "save_version", "file_note_in_chapter", "set_book_rule", "link_versions"])
         // 13n-c U6 (justified edit, the ritual): edit gains the per-item
         // note move across wings (VX-160, R-AIR-2). VX-168 U2 (justified
         // edit, the ritual): and the deliberate acts — VX-169's save_commit,

@@ -69,6 +69,8 @@ extension Operations {
         case commentDelete = "comment deletion"
         // VX-184 U3 — VX-190's edit-rung un-tag ("Undo claude-code's tag removal").
         case untag = "tag removal"
+        // VX-184 U3 — VX-187's named-pair version link ("Undo claude-code's version link").
+        case versionLink = "version link"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 

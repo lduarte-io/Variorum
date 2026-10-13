@@ -322,6 +322,8 @@ nonisolated enum MCPPaneCopy {
         case "delete_comment": return "deleting a comment in \(at)"
         // VX-190 — un-tagging a note at edit.
         case "remove_tag": return "removing a tag from \(at)"
+        // VX-187 — two notes linked as versions (the log names one side).
+        case "link_versions": return "linking \(at) and another note as versions"
         // VX-168 — a connection the setup key turned away, said precisely
         // here (the client hears one sentence for all of them).
         case "connect_bare": return "connecting without a setup key"
@@ -397,6 +399,7 @@ nonisolated enum MCPPaneCopy {
         case "add_comments": return "left comments in \(at)" + times
         case "delete_comment": return n == 1 ? "deleted a comment in \(at)" : "deleted \(n) comments in \(at)"
         case "remove_tag": return "removed a tag from \(at)" + times
+        case "link_versions": return "linked \(at) and another note as versions" + times
         // VX-168: a known name's first setup key, bound as it connected.
         case "connect_bound": return "connected with a new setup, now bound to its name" + times
         // VX-198 (R-VX184-5): the newest copied setup took the name.
@@ -1133,6 +1136,11 @@ nonisolated enum MCPReceiptCopy {
         case .commentDelete: return n == 1 ? "deleted a comment" : "deleted \(n) comments"
         // VX-190 — her un-tag, the client's (PROVISIONAL words).
         case .untag: return n == 1 ? "removed the tag #\(receipts[0].detail ?? "")" : "removed \(n) tags"
+        // VX-187 — two notes made versions (PROVISIONAL words).
+        case .versionLink:
+            return n == 1
+                ? "linked \(quoted(receipts[0].targetTitle)) and \(quoted(receipts[0].detail)) as versions"
+                : "linked \(n) pairs of notes as versions"
         }
     }
 
