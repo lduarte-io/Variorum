@@ -413,6 +413,61 @@ struct VX202ReopenRaceTests {
         #expect(box.value?.apple != nil, "no switch pending: the Standard-waiting landing stands (corner 45)")
     }
 
+    /// **LADDER R1-1 — a switch-pending flag that OUTLIVED its marker.** A
+    /// death before the first marker write, a marker write that threw after
+    /// the flag was set, or an Open/Restore that replaced the store (the
+    /// marker is rows inside it; the flag is per-store-id, which a restored
+    /// copy SHARES) leaves the flag set with no marker — no resume exists to
+    /// clear it, and the route's corner-45 landing stays refused until some
+    /// later ceremony completes. The ready's reconcile clears it when no
+    /// marker and no ceremony or follow is in flight (the ready's Apple ARM
+    /// keys on the MARKER, not the flag, so the key-file heal was never
+    /// blocked — the stale flag's whole effect is the route-to-first-ready
+    /// window and the broken mirror). RED ON OLD (revert R-L1 — the
+    /// reconcile's clear removed): the flag survives the ready. The marker
+    /// leg is a BOUND (green both sides): a flag WITH a pending marker is a
+    /// crashed switch's truth and stays for the resume.
+    @Test func aStaleSwitchPendingFlagWithNoMarkerClearsAtTheReady() async throws {
+        try await withDeps {
+            let dir = try temporaryDirectory()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let storeURL = dir.appendingPathComponent("library/variorum.sqlite")
+            let key = StoreKey.mint()
+            try await seedStore(at: storeURL, key: key)  // NO marker
+            var keyFile = StoreKeyEnvelope(storeID: "vx202-stale-flag")
+            try keyFile.setPassphraseWrap(key: key, passphrase: passphrase, kdf: fastKDF())
+            try keyFile.write(at: keyFile.preferredURL(besideStore: storeURL))
+            let backing = InMemoryStoreKeyGuardBacking(auto: key)
+            let appleBacking = InMemoryAppleKeyBacking(key: AppleKey.mint())
+            let pending = ScriptedSwitchPendingBox(pending: ["vx202-stale-flag"])
+            let gate = diskGate(
+                guardSeam: StoreKeyGuard.inMemory(backing: backing), appleBacking: appleBacking,
+                pending: pending)
+            let scope = AppDatabase.StoreVariant.dev.rawValue
+            _ = gate.effectiveGate(scope: scope, storeID: "vx202-stale-flag", storeURL: storeURL)
+            #expect(try #require(try StoreKeyEnvelope.loadCurrent(besideStore: storeURL)).apple == nil,
+                    "the premise: the stale flag refuses the route's landing")
+
+            let controller = ProtectionController(configuration: .init(
+                scope: scope, storeURL: storeURL, gate: gate, isRealVariant: false,
+                syncCustodyLeaves: { _ in RecordingSyncLeaves().leaves },
+                syncCustodySession: SyncCustodySession()))
+            controller.adoptResident(nil)  // the silent open's shape
+            await controller.reconcile()
+            #expect(!pending.isPending("vx202-stale-flag"),
+                    "no marker, nothing in flight: the stale flag clears at the ready")
+            #expect(pending.writes.last.map { $0.storeID == "vx202-stale-flag" && !$0.pending } == true,
+                    "the clear is the reconcile's own write")
+
+            // The BOUND: the same flag WITH a pending marker stays (the
+            // resume's to clear; the clear can never fire mid-switch).
+            pending.set(true, for: "vx202-stale-flag")
+            controller.readSwitchPending = { true }
+            await controller.reconcile()
+            #expect(pending.isPending("vx202-stale-flag"), "a marker stands: the flag is the resume's")
+        }
+    }
+
     // MARK: - (b) the ordinary post-crash launch
 
     /// The VX-80 stranded state WITH its marker: the store re-keyed to B,

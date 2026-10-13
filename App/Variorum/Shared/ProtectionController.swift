@@ -1335,7 +1335,13 @@ final class ProtectionController {
     /// enqueued after it and can never land behind that move's delete.
     func relandSilentItem(_ key: StoreKey) async -> Bool {
         let guardSeam = self.guardSeam
-        return await Self.onCustodyQueue { guardSeam.saveAuto(key) }
+        let saved = await Self.onCustodyQueue { guardSeam.saveAuto(key) }
+        if !saved {
+            // VX-201 ladder R1-4: the heal's failure must be observable —
+            // the next launch fails into the same recovery surface.
+            logger.notice("recovery re-land: the Keychain refused to save the proven key into the silent item — the next launch asks again")
+        }
+        return saved
     }
 
     /// 17h R3-6 — the serial off-main custody hop.
@@ -1471,6 +1477,22 @@ final class ProtectionController {
         // Standard-shaped for an instant, and Castle is what is being
         // entered.
         let markerPending = await readSwitchPending?() ?? false
+        // VX-201 ladder R1-1: a switch-pending flag that OUTLIVED its marker
+        // — a death before the first marker write, a marker write that
+        // threw after the flag was set, or an Open/Restore that replaced
+        // the store (the marker is rows inside it; the flag is per-store-id,
+        // which a restored copy shares) — is cleared here: no marker and no
+        // ceremony or follow in flight means no custody move is coming, and
+        // a stale flag would refuse the route's corner-45 landing for good.
+        // The runner re-sets it before its first marker on every later road;
+        // the model roads hold `switchInProgress` (and the controller holds
+        // their models) across every runner call, so this can never fire
+        // inside a road's flag-set-to-first-marker window.
+        if !markerPending, !switchInProgress, activeSwitch == nil, activeFollow == nil,
+           let storeID = configuration.resolvedStoreID(), gate.switchPending(scope, storeID) {
+            gate.setSwitchPending(false, scope, storeID)
+            logger.notice("custody reconcile: a switch-pending flag with no marker behind it was cleared (a crashed switch's leftover, or a restored copy's)")
+        }
         if !switchInProgress && !markerPending {
             await reconcileAppleKey()
         }
