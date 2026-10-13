@@ -290,6 +290,10 @@ Deliverables: traced mechanism (incl. the step-vs-choose verdict), the build on 
 
 **Boundary check:** everything ruled lives in `TakesViewModel`/the Lenses board model/the choreographer-authority seam; `PaneSurface`/`EditorTextView`/`BlockRangeIndex` stay untouched. Build proceeds on these rulings.
 
+**ADDENDUM (orchestrator, ~06:45 — two F5/F6 consequences, ruled on the implementer's heads-up):**
+- **⇧⌥⌘T's Lenses arm (`revealChosenTake`) routes through the parked follow too — APPROVED.** It is a sibling same-turn mint re-ring (focuses `main|b|<blank>` before the adoption resolves it): F6's own logic applies verbatim — without the routing, F5's end-rule would end its ring at its own adoption (regressing MINOR-D2's pin), and by the leaf it carries the blank-text hazard. One mechanism, class-complete: EVERY same-turn re-ring routes through the park; the record's sweep table names each.
+- **The two TakesBoardTests consequential pin edits — APPROVED with one rider:** inserting the cells' render-report playback before the `#require` is legitimate (a model-level test must supply the view-layer fact the parked follow now waits on), and the original never-nowhere assertions stand byte-unchanged. THE RIDER: the played set must be the test's INDEPENDENTLY-COMPUTED hosted set (the `rendered` collection each test already derives), NEVER a set read back from the park — reporting whatever was parked would make the pin vacuous (it would bless any landing). Annotate both edits in place naming R-VX214-1/F6. The implementer's inventory (the five suites checked; these two are the only ring-after-Lenses-act pins) lands in its record.
+
 ## HER RATIFICATIONS (2026-10-13 ~04:00 — closing the adjudication loop before compaction)
 
 Her words: "ok I'll handle the VX-194 bug and the asymmetry from item #3 in the morning. … and that's fine on the context door gaining a confirm. tag deletion having no recovery road is a product decision i'll also handle in the morning."
