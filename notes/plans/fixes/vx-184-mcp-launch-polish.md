@@ -52,6 +52,7 @@ dev store only behind an A1 prestage copy, restored verified.
 - 2026-10-12 night — kickoff registration sent + acknowledged (REQUEST → READY → GO → RELEASE; READY only
   when actually built; refreshes may fold into one shared window at the night's end — send the refresh ask
   at the merge). Zero Sync//custody declared.
+- 2026-10-13 — coordinator: she is away from the Pro all night (tmux only), so walks/live rounds need no extra check with her; READY → GO in queue order.
 
 ## UNIT RECORDS (one per unit, owned by its implementer from its first commit)
 
