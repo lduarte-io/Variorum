@@ -1,7 +1,7 @@
 # Phase 13n-c handoff — MCP launch readiness (closed 2026-10-12, PR #148)
 
 Self-contained for a fresh session. The full record is `notes/plans/phase-13n-c-mcp-launch-readiness.md`
-(the Air sitting R-AIR-1…15, her eight HER SITTING rounds, U1–U6, the UX-WALK DISPOSITIONS + FIX PASS,
+(the Air sitting's rulings (each now its own VX ticket; the map is in VX-165), her eight HER SITTING rounds, U1–U6, the UX-WALK DISPOSITIONS + FIX PASS,
 the CLOSEOUT block); the ladders are `notes/plans/13nc-combined-ladder-round1/2.md` +
 `notes/plans/13nc-uxfix-ladder-round1.md`; the walk is `notes/plans/13nc-ux-walk.md`; the ratify bundle
 is QUESTIONS **#212**.
@@ -62,6 +62,6 @@ second half; 13s-a re-voices the guide wholesale.
   wire setting remains undecided — 13n-c's wing-scoped gathering search doesn't settle it); VX-168/169/
   170/171/172 as scheduled; born VX-175/VX-176.
 - **Canon:** AppSpec §12's MCP DOOR line grown, §7's v1_25 per-ask re-key, §14's entry (13x rolled);
-  QUESTIONS #212; the next-free marker corrected to #213. R-AIR-14's "MCP-blind" wording lands with
+  QUESTIONS #212; the next-free marker corrected to #213. VX-168's "MCP-blind" wording lands with
   VX-168, not before.
 - **Mobile parity:** nothing mobile-visible.

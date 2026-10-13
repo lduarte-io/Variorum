@@ -23,7 +23,7 @@ private func spec(
 }
 
 private func call(
-    _ connection: (client: Client, fd: Int32), _ name: String, _ arguments: [String: Value]
+    _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value]
 ) async throws -> (content: [Tool.Content], isError: Bool?) {
     try await connection.client.callTool(name: name, arguments: arguments)
 }
@@ -35,6 +35,16 @@ private let editTools: Set<String> = [
     // VX-168 U2 (justified edit, the ritual): the deliberate acts — VX-169's
     // commit and VX-174's merge button — are edit's too.
     "save_commit", "choose_take", "adopt_lens",
+    // VX-184 U4 (justified edit, the ritual): VX-195's edit parity inside a
+    // note — every tool is edit's.
+    "edit_comment", "restore_comment",
+    "delete_take", "archive_take", "unarchive_take", "set_take_label", "lock_take", "unlock_take",
+    "restore_commit", "rename_commit", "rename_note", "delete_lens",
+    // VX-184 U5 (justified edit, the ritual): VX-196's edit parity across the
+    // library — every tool is edit's.
+    "rename_book", "finish_book", "reopen_book", "archive_book", "unarchive_book", "delete_book",
+    "remove_note_from_book", "move_note_in_book", "rename_chapter", "delete_chapter", "move_chapter",
+    "delete_note", "archive_note", "unarchive_note",
 ]
 
 @Suite("13n-b U3 — the MCP server's edit rung end to end", .serialized)
@@ -250,11 +260,33 @@ struct MCPEditServerTests {
             // (an adoption would mint one and move pointers).
             let lens = try h.operations.createLens(post: note.id, name: "hers")
             _ = try h.operations.setLensChoice(lens: lens.id, block: one.block.id, variant: branch.id)
+            // VX-184 U4 (justified edit, the ritual): a comment of hers and a
+            // deleted one, for VX-195's comment tools to aim at — and the
+            // snapshot reads every comment row and every title too.
+            let hersComment = try h.operations.addBlockComment(to: one.block.id, text: "her working note")
+            let hersDeleted = try h.operations.addBlockComment(to: two.block.id, text: "her deleted note")
+            try h.operations.deleteBlockComment(hersDeleted.id)
+            // …and a commit of hers (her take rewritten since), for the commit tools.
+            let hersCommit = try h.operations.commit(branch.id, message: "hers")
+            try h.operations.autosave(branch.id, text: "her other take, revised", charDelta: 9)
+            // VX-184 U5 (justified edit, the ritual): a BOOK of hers holding both
+            // notes, with a chapter, for VX-196's library tools to aim at — and
+            // the snapshot reads every book, membership and chapter row, and
+            // every note's archive and deletion stamps, too.
+            let hersBook = try h.operations.createReading(name: "her book", kind: .book)
+            for post in [note, other] { _ = try h.operations.addPostToReading(post.id, to: hersBook.id) }
+            let hersChapter = try h.operations.createSection(in: hersBook.id, name: "her chapter")
             func snapshot() throws -> [String] {
                 try h.database.read { db in
-                    try ["variant", "container_block", "block", "commit_point", "lens", "lens_choice"].flatMap { table in
-                        try Row.fetchAll(db, sql: "SELECT * FROM \(table) ORDER BY id").map(\.description)
-                    } + (try String.fetchAll(db, sql: "SELECT COALESCE(entry_date, '-') FROM container ORDER BY id"))
+                    try ["variant", "container_block", "block", "commit_point", "lens", "lens_choice", "block_comment",
+                         "reading", "reading_post", "reading_section"]
+                        .flatMap { table in
+                            try Row.fetchAll(db, sql: "SELECT * FROM \(table) ORDER BY id").map(\.description)
+                        }
+                        + (try String.fetchAll(db, sql: "SELECT COALESCE(entry_date, '-') FROM container ORDER BY id"))
+                        + (try String.fetchAll(db, sql: "SELECT COALESCE(title, '-') FROM container ORDER BY id"))
+                        + (try Row.fetchAll(db, sql: "SELECT archived_at, deleted_at FROM container ORDER BY id")
+                            .map(\.description))
                 }
             }
             let before = try snapshot()
@@ -276,6 +308,39 @@ struct MCPEditServerTests {
                 ("save_commit", ["take_id": .string(one.variant.id), "message": .string("x")]),
                 ("choose_take", ["take_id": .string(branch.id)]),
                 ("adopt_lens", ["lens_id": .string(lens.id)]),
+                // VX-184 U4 (justified edit, the ritual): VX-195's tools, each
+                // aimed at what is hers.
+                ("edit_comment", ["comment_id": .string(hersComment.id), "text": .string("x"),
+                                  "expected_text": .string("her working note")]),
+                ("restore_comment", ["comment_id": .string(hersDeleted.id)]),
+                ("delete_take", ["take_id": .string(branch.id)]),
+                ("delete_take", ["take_id": .string(two.variant.id)]),  // her block's LAST take
+                ("archive_take", ["take_id": .string(branch.id)]),
+                ("unarchive_take", ["take_id": .string(branch.id)]),
+                ("set_take_label", ["take_id": .string(branch.id), "label": .string("x")]),
+                ("lock_take", ["take_id": .string(branch.id)]),
+                ("unlock_take", ["take_id": .string(one.variant.id)]),
+                ("restore_commit", ["commit_id": .string(hersCommit.id)]),
+                ("rename_commit", ["commit_id": .string(hersCommit.id), "message": .string("x")]),
+                ("rename_note", ["note_id": .string(note.id), "title": .string("x")]),
+                ("delete_lens", ["lens_id": .string(lens.id)]),
+                // VX-184 U5 (justified edit, the ritual): VX-196's tools, each
+                // aimed at what is hers.
+                ("rename_book", ["book_id": .string(hersBook.id), "name": .string("x")]),
+                ("finish_book", ["book_id": .string(hersBook.id)]),
+                ("reopen_book", ["book_id": .string(hersBook.id)]),
+                ("archive_book", ["book_id": .string(hersBook.id)]),
+                ("unarchive_book", ["book_id": .string(hersBook.id)]),
+                ("delete_book", ["book_id": .string(hersBook.id)]),
+                ("remove_note_from_book", ["book_id": .string(hersBook.id), "note_id": .string(note.id)]),
+                ("move_note_in_book", ["book_id": .string(hersBook.id), "note_id": .string(other.id),
+                                       "at": .string("start")]),
+                ("rename_chapter", ["section_id": .string(hersChapter.id), "name": .string("x")]),
+                ("delete_chapter", ["section_id": .string(hersChapter.id)]),
+                ("move_chapter", ["section_id": .string(hersChapter.id), "at": .string("end")]),
+                ("delete_note", ["note_id": .string(note.id)]),
+                ("archive_note", ["note_id": .string(note.id)]),
+                ("unarchive_note", ["note_id": .string(other.id)]),
             ]
             #expect(Set(calls.map(\.0)) == editTools, "every edit door was tried")
             _ = try h.approve("claude-code", spec(.suggest, .wing, ""))
@@ -327,7 +392,10 @@ struct MCPEditServerTests {
             let noteID = try #require(try json(created)["note_id"] as? String)
             let read = try json(try await call(connection, "read_note", ["note_id": .string(noteID), "with_ids": .bool(true)]))
             let blocks = try #require(read["blocks"] as? [[String: Any]])
-            #expect(blocks.map { $0["text"] as? String } == ["Woke early.\n\nThe kettle, the window.", "Went out."])
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-186): a block no longer
+            // carries its shown text twice; it names its shown take, whose entry
+            // carries the text once (`shownText`). Same assertion, new address.
+            #expect(blocks.map(shownText) == ["Woke early.\n\nThe kettle, the window.", "Went out."])
             #expect(blocks.first?["name"] as? String == "morning")
             #expect((blocks.last?["takes"] as? [[String: Any]])?.last?["label"] as? String == "pt")
             #expect(read["entry_date"] as? String == "2019-03-04")

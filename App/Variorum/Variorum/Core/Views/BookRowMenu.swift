@@ -45,7 +45,7 @@ nonisolated enum BookRowDoor: Hashable, Sendable {
     case exportPDF
     /// 13n-c U3 (VX-156 item 2; mockup §2): "Share with AI…" — THE grant
     /// sheet pre-filled on this book. Drawn only when an approved client
-    /// exists (R-AIR-8) and the book can take a grant (a book, never the
+    /// exists (VX-272) and the book can take a grant (a book, never the
     /// daily Journal or a Private book — the op refuses those, P-2).
     case share
     /// A state door from the archive table (Archive · Unarchive · Delete).
@@ -165,7 +165,7 @@ struct BookRowMenu: View {
     /// 13n-c U3: the window's road (nil in harness mounts — no share door).
     @Environment(\.mcpShareRoad) private var mcpShareRoad
 
-    /// R-AIR-8 (an approved client exists) ∧ the book can take a grant.
+    /// VX-272 (an approved client exists) ∧ the book can take a grant.
     private var shareable: Bool {
         (mcpShareRoad?.canShare ?? false) && !doors.fencedBooks.contains(readingID)
     }

@@ -2,7 +2,7 @@
 //  MCPShareFacesTests.swift
 //  VariorumTests (Mac)
 //
-//  13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; R-AIR-4/6/7/8;
+//  13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; VX-270 · VX-271 · VX-164 · VX-272;
 //  VX-164): the road's two gates (an approved client; the server ON) read off
 //  the door's narrow observables; the place-door sheet's bulk act landing as
 //  ONE act with its receipt and its two doors (Change… replaces, Revoke ›
@@ -88,7 +88,7 @@ struct MCPShareFacesTests {
         return post
     }
 
-    // MARK: - The road's gates (R-AIR-8, R-AIR-7)
+    // MARK: - The road's gates (VX-272, VX-164)
 
     @Test func theGatesFollowAnApprovedClientAndTheServerSwitch() async throws {
         try await withSession { (session: AppSession, _: AppDatabase) async throws in
@@ -99,7 +99,7 @@ struct MCPShareFacesTests {
             #expect(!door.hasApprovedClient && !door.serverOn, "no client, no server — no share face at all")
             let pending = try session.operations.recordMCPContact(name: "codex", version: nil)
             try await Task.sleep(for: .milliseconds(80))
-            #expect(!door.hasApprovedClient, "a PENDING request is not an approved client (R-AIR-8)")
+            #expect(!door.hasApprovedClient, "a PENDING request is not an approved client (VX-272)")
             try session.operations.approveMCPClient(pending.id, granting: nil)
             #expect(try await settle { door.hasApprovedClient })
             try session.operations.setMCPSwitch(.server, on: true)
@@ -401,7 +401,7 @@ struct MCPShareFacesTests {
             #expect(session.status.spoken?.text
                     == "Shared \u{201C}parser notes\u{201D} with claude-code \u{2014} read and suggest, once.")
             #expect(session.status.spoken?.action?.label == "Revoke \u{203A}"
-                    && session.status.spoken?.secondary?.label == "Change\u{2026}", "R-AIR-4's door")
+                    && session.status.spoken?.secondary?.label == "Change\u{2026}", "VX-270's door")
 
             // Already reaching at that rung ⇒ the refusal, nothing written.
             let before = try liveGrants(db).count
@@ -443,7 +443,7 @@ struct MCPShareFacesTests {
         #expect(!BookRowMenuTable.doors(for: book).contains(.share), "no approved client ⇒ no door")
         #expect(BookRowMenuTable.doors(for: book, shareable: true).contains(.share))
         #expect(!BookRowMenuTable.doors(for: gathering, shareable: true).contains(.share),
-                "a gathering is never a grant target (R-AIR-12)")
+                "a gathering is never a grant target (VX-273)")
         #expect(!BookRowMenuTable.doors(for: nil, shareable: true).contains(.share), "facts unknown ⇒ not drawn")
         let doors = BookRowMenuTable.doors(for: book, shareable: true)
         #expect(doors.firstIndex(of: .share)! > doors.firstIndex(of: .exportPDF)!, "after the exports (mockup §2)")
@@ -458,11 +458,11 @@ struct MCPShareFacesTests {
             id: "b", name: "dream journal", kind: .book,
             createdAt: Date(timeIntervalSince1970: 0), updatedAt: Date(timeIntervalSince1970: 0))
         #expect(BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: true))
-        #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: false), "R-AIR-8")
+        #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: false), "VX-272")
         #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: false, canShare: true), "the fence (P-2)")
         book.kind = .gathering
         #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: true),
-                "a gathering is never a grant target (R-AIR-12)")
+                "a gathering is never a grant target (VX-273)")
     }
 
     /// Stage B R1 B4 — THE PARITY PIN (architectural: the face's old spelling
@@ -542,7 +542,7 @@ struct MCPShareFacesTests {
         #expect(MCPPaneCopy.sheetTitle(client: "claude-code", changing: true) == "Change access \u{2014} claude-code")
         #expect(MCPPaneCopy.sheetTitle(client: nil, changing: false) == MCPPaneCopy.sheetTitleChoosing)
         #expect(MCPPaneCopy.replacesLine == "Confirming replaces the grant you opened this from.")
-        // R-AIR-8: the settings-class faces carry no "AI".
+        // VX-272: the settings-class faces carry no "AI".
         for words in [MCPShareCopy.sharedWithLabel, MCPShareCopy.notShared, MCPShareCopy.shareButton,
                       MCPShareCopy.popoverTitle, MCPShareCopy.openBookNote, MCPShareCopy.zeroState,
                       MCPShareCopy.lockHelp, MCPPaneCopy.groupInert(2), MCPPaneCopy.groupChip] {
@@ -563,7 +563,7 @@ struct MCPShareFacesTests {
             client: client, rung: .suggest, grant: grant(.book, "b"), throughTitle: "the lightning thief")
         let own = MCPPlaceReach(client: client, rung: .suggest, grant: grant(.note, "n"), throughTitle: nil)
         let open = MCPPlaceReach(client: client, rung: .read, grant: nil, throughTitle: nil)
-        #expect(MCPShareCopy.why(viaWing) == "through the Home wing grant", "R-AIR-7's words")
+        #expect(MCPShareCopy.why(viaWing) == "through the Home wing grant", "VX-164's words")
         #expect(MCPShareCopy.why(viaBook) == "through \u{201C}the lightning thief\u{201D}")
         #expect(MCPShareCopy.why(own) == nil, "the place's own grant needs no why")
         #expect(MCPShareCopy.why(open) == "through the open book")

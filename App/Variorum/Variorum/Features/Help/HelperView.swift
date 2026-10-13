@@ -202,7 +202,7 @@ struct HelperView: View {
             ("⌘K", "find anything — notes, books, blocks, commands (not body text)"),
             ("⌘N", "new note"),
             ("⌘J", "today's journal entry"),
-            // 13n-c U4 — R-AIR-15 (her ratified chord, VX-157).
+            // 13n-c U4 — VX-157 (her ratified chord, VX-157).
             ("⌘L", "switch wing \u{2014} type a few letters and \u{23CE}, or hold \u{2318} "
                 + "and tap L to step, release to go; clicking the wing's name in the "
                 + "Bookcase or Library masthead steps to the next one"),

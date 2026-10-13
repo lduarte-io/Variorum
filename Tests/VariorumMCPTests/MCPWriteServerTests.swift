@@ -24,7 +24,7 @@ private func grant(
 }
 
 private func call(
-    _ connection: (client: Client, fd: Int32), _ name: String, _ arguments: [String: Value]
+    _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value]
 ) async throws -> (content: [Tool.Content], isError: Bool?) {
     try await connection.client.callTool(name: name, arguments: arguments)
 }
@@ -47,8 +47,11 @@ struct MCPWriteServerTests {
             _ = try h.approve("claude-code", grant(.suggest, .book, book.id))
             let names = Set(try await connection.client.listTools().tools.map(\.name))
             // U4 (justified edit, the ritual): the read rung gains show_in_app.
+            // VX-184 U3 (justified edit, the ritual): suggest gains VX-173's
+            // batch doors and VX-188's delete_comment.
             #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app",
-                              "add_take", "add_comment", "save_lens"],
+                              "add_take", "add_comment", "save_lens", "add_takes", "add_comments",
+                              "delete_comment"],
                     "a suggest grant lists read + suggest, never a write-new door (P-2)")
 
             let read = try json(try await call(connection, "read_note",
@@ -119,6 +122,24 @@ struct MCPWriteServerTests {
             let deletedTake = try h.operations.branchVariant(two.block.id, from: two.variant.id)
             try h.operations.deleteVariant(deletedTake.id)
             let hersTakes = [one.variant.id, two.variant.id, branch.id, gone.variant.id, deletedTake.id]
+            // VX-184 U3 (justified edit, the ritual): a comment of HERS, for
+            // VX-188's delete_comment to aim at (suggest deletes only its own).
+            let hersComment = try h.operations.addBlockComment(to: one.block.id, text: "her own working note")
+            // VX-184 U4 (justified edit, the ritual): a DELETED comment of hers,
+            // for VX-195's restore_comment to aim at.
+            let hersDeletedComment = try h.operations.addBlockComment(to: two.block.id, text: "her deleted note")
+            try h.operations.deleteBlockComment(hersDeletedComment.id)
+            // …and a commit of hers (her take rewritten since), for the commit tools.
+            let hersCommit = try h.operations.commit(branch.id, message: "hers")
+            try h.operations.autosave(branch.id, text: "her other take, revised", charDelta: 9)
+            // VX-184 U3 (justified edit, the ritual): a tag of HERS on the note,
+            // for VX-190's remove_tag to aim at.
+            let hersTag = try h.operations.createTag(name: "hers")
+            _ = try h.operations.applyTag(hersTag.id, toPost: note.id)
+            // …and a second note of HERS, for VX-187's link_versions to aim at.
+            let otherNote = try h.operations.createPost(title: "hers too")
+            _ = try h.operations.addPostToReading(otherNote.id, to: book.id)
+            let otherBlock = try h.operations.newBlock(in: otherNote.id, text: "her other note", registeringUndo: false)
             func snapshot() throws -> [String] {
                 try h.database.read { db in
                     let takes = try Row.fetchAll(
@@ -135,7 +156,37 @@ struct MCPWriteServerTests {
                         .map(\.description)
                     let filings = try Row.fetchAll(db, sql: "SELECT section_id FROM reading_post ORDER BY id")
                         .map(\.description)
-                    return takes + placements + blocks + commits + dates + rules + filings
+                    // VX-184 U3 (justified edit — the proof's completeness grows
+                    // with the catalog): HER comment, which delete_comment aims at.
+                    // VX-184 U4 (justified edit): and her deleted one.
+                    let herComments = try Row.fetchAll(
+                        db, sql: "SELECT * FROM block_comment WHERE id IN (?, ?) ORDER BY id",
+                        arguments: [hersComment.id, hersDeletedComment.id])
+                        .map(\.description)
+                    // …and HER tag applications, which remove_tag aims at.
+                    let herTags = try Row.fetchAll(db, sql: "SELECT * FROM post_tag ORDER BY id").map(\.description)
+                    // …and every edge (link_versions would mint version_of ones).
+                    let edges = try Row.fetchAll(db, sql: "SELECT * FROM edge ORDER BY id").map(\.description)
+                    // VX-184 U4 (justified edit): every title, and HER lens's rows
+                    // (rename_note and delete_lens aim at hers; save_lens may
+                    // add a lens of the client's own, so only hers is fixed).
+                    let titles = try String.fetchAll(db, sql: "SELECT COALESCE(title, '-') FROM container ORDER BY id")
+                    let lenses = try Row.fetchAll(
+                        db, sql: "SELECT * FROM lens WHERE name = 'her own way' ORDER BY id").map(\.description)
+                        + Row.fetchAll(db, sql: """
+                            SELECT lc.* FROM lens_choice lc JOIN lens l ON l.id = lc.lens_id
+                            WHERE l.name = 'her own way' ORDER BY lc.id
+                            """).map(\.description)
+                    // VX-184 U5 (justified edit — the proof's completeness grows
+                    // with the catalog): every book, membership and chapter row,
+                    // and every note's archive and deletion stamps (VX-196's
+                    // library tools aim at hers).
+                    let library = try ["reading", "reading_post", "reading_section"].flatMap { table in
+                        try Row.fetchAll(db, sql: "SELECT * FROM \(table) ORDER BY id").map(\.description)
+                    } + Row.fetchAll(db, sql: "SELECT archived_at, deleted_at FROM container ORDER BY id")
+                        .map(\.description)
+                    return takes + placements + blocks + commits + dates + rules + filings + herComments + herTags
+                        + edges + titles + lenses + library
                 }
             }
             let chapter = try h.operations.createSection(in: book.id, name: "1")
@@ -159,6 +210,28 @@ struct MCPWriteServerTests {
                 calls.append(("add_take", ["block_id": .string(blockID), "text": .string("ai"), "label": .string("x")]))
                 calls.append(("add_comment", ["block_id": .string(blockID), "text": .string("a note")]))
             }
+            // VX-184 U3 (justified edit — the proof's completeness grows with
+            // the catalog): VX-173's batch doors, a take and a comment beside
+            // each of her blocks in one act each — new rows, never hers touched.
+            calls.append(("add_takes", ["note_id": .string(note.id), "takes": .array(blockIDs.map {
+                .object(["block_id": .string($0), "text": .string("ai"), "label": .string("x")])
+            })]))
+            calls.append(("add_comments", ["note_id": .string(note.id), "comments": .array(blockIDs.map {
+                .object(["block_id": .string($0), "text": .string("a note")])
+            })]))
+            // VX-184 U3 (justified edit, the ritual): VX-188's delete_comment,
+            // aimed at HER comment — refused with her ruled sentence (suggest
+            // deletes only a comment on file as the client's own).
+            calls.append(("delete_comment", ["comment_id": .string(hersComment.id)]))
+            // VX-184 U3 (justified edit, the ritual): VX-190's remove_tag, aimed
+            // at HER tag — refusing at the rung (edit), her application intact.
+            calls.append(("remove_tag", ["note_id": .string(note.id), "tag": .string("hers")]))
+            // VX-184 U3 (justified edit, the ritual): VX-187's link_versions,
+            // aimed at her blocks in two of her notes — refusing at the rung
+            // (write new), no edge minted.
+            calls.append(("link_versions", ["note_a": .string(note.id), "note_b": .string(otherNote.id),
+                                            "pairs": .array([.object(["block_a": .string(one.block.id),
+                                                                      "block_b": .string(otherBlock.block.id)])])]))
             // The lens picks her NON-chosen take (mutation check 2 of the unit
             // record: picking only chosen takes could not see a lens that
             // moved the chosen pointer — the first draft of this pin did).
@@ -202,6 +275,41 @@ struct MCPWriteServerTests {
             calls.append(("save_commit", ["take_id": .string(branch.id), "message": .string("x")]))
             calls.append(("choose_take", ["take_id": .string(branch.id)]))
             calls.append(("adopt_lens", ["lens_id": .string(hersLens.id)]))
+            // VX-184 U4 (justified edit, the ritual — the proof's completeness
+            // grows with the catalog): VX-195's edit parity, aimed at what is
+            // hers, each refusing at the rung.
+            calls.append(("edit_comment", ["comment_id": .string(hersComment.id), "text": .string("x"),
+                                           "expected_text": .string("her own working note")]))
+            calls.append(("restore_comment", ["comment_id": .string(hersDeletedComment.id)]))
+            calls.append(("delete_take", ["take_id": .string(branch.id)]))
+            calls.append(("delete_take", ["take_id": .string(two.variant.id)]))  // her block's LAST take
+            calls.append(("archive_take", ["take_id": .string(branch.id)]))
+            calls.append(("unarchive_take", ["take_id": .string(branch.id)]))
+            calls.append(("set_take_label", ["take_id": .string(branch.id), "label": .string("x")]))
+            calls.append(("lock_take", ["take_id": .string(branch.id)]))
+            calls.append(("unlock_take", ["take_id": .string(one.variant.id)]))
+            calls.append(("restore_commit", ["commit_id": .string(hersCommit.id)]))
+            calls.append(("rename_commit", ["commit_id": .string(hersCommit.id), "message": .string("x")]))
+            calls.append(("rename_note", ["note_id": .string(note.id), "title": .string("x")]))
+            calls.append(("delete_lens", ["lens_id": .string(hersLens.id)]))
+            // VX-184 U5 (justified edit, the ritual — the proof's completeness
+            // grows with the catalog): VX-196's library tools, aimed at her
+            // book, each refusing at the rung.
+            calls.append(("rename_book", ["book_id": .string(book.id), "name": .string("x")]))
+            calls.append(("finish_book", ["book_id": .string(book.id)]))
+            calls.append(("reopen_book", ["book_id": .string(book.id)]))
+            calls.append(("archive_book", ["book_id": .string(book.id)]))
+            calls.append(("unarchive_book", ["book_id": .string(book.id)]))
+            calls.append(("delete_book", ["book_id": .string(book.id)]))
+            calls.append(("remove_note_from_book", ["book_id": .string(book.id), "note_id": .string(note.id)]))
+            calls.append(("move_note_in_book", ["book_id": .string(book.id), "note_id": .string(otherNote.id),
+                                                "at": .string("start")]))
+            calls.append(("rename_chapter", ["section_id": .string(chapter.id), "name": .string("x")]))
+            calls.append(("delete_chapter", ["section_id": .string(chapter.id)]))
+            calls.append(("move_chapter", ["section_id": .string(chapter.id), "at": .string("end")]))
+            calls.append(("delete_note", ["note_id": .string(note.id)]))
+            calls.append(("archive_note", ["note_id": .string(note.id)]))
+            calls.append(("unarchive_note", ["note_id": .string(otherNote.id)]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).
@@ -242,7 +350,10 @@ struct MCPWriteServerTests {
 
             let shaped = try json(try await call(connection, "read_note", ["note_id": .string(prose.id), "with_ids": .bool(true)]))
             let blocks = try #require(shaped["blocks"] as? [[String: Any]])
-            #expect(blocks.first?["text"] as? String == "words")
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-186): a block no longer
+            // carries its shown text twice; it names its shown take, whose entry
+            // carries the text once (`shownText`). Same assertion, new address.
+            #expect(blocks.first.flatMap(shownText) == "words")
             #expect(blocks.first?["name"] as? String == "the opening", "R-13nb-8: a block's name rides where set")
             #expect(blocks.last?["name"] == nil, "and is absent where unset")
             #expect((blocks.first?["takes"] as? [[String: Any]])?.first?["chosen"] as? Bool == true)

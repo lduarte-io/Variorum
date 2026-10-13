@@ -78,12 +78,30 @@ struct MCPWriteTools: Sendable {
         case carriage(CarriageJob)
         /// VX-168 U2: the edit rung's deliberate acts (`MCPWriteTools+Deliberate`).
         case deliberate(DeliberateJob)
+        /// VX-184 U3 (VX-173): the suggest rung's batch doors (`MCPWriteTools+Batches`).
+        case batch(BatchJob)
+        /// VX-184 U3 (VX-188): a client deleting its OWN comment (`MCPWriteTools+CommentDelete`).
+        case deleteComment(commentID: String)
+        /// VX-184 U3 (VX-190): un-tagging a note at edit (`MCPWriteTools+RemoveTag`).
+        case removeTag(noteID: String, path: String)
+        /// VX-184 U3 (VX-187): two notes linked as versions (`MCPWriteTools+LinkVersions`).
+        case linkVersions(noteA: String, noteB: String, pairs: [Operations.MCPVersionPair])
+        /// VX-184 U4 (VX-195): edit parity inside a note (`MCPWriteTools+NoteEdits`).
+        case noteEdit(NoteEditJob)
+        /// VX-184 U5 (VX-196): edit parity across the library (`MCPWriteTools+LibraryEdits`).
+        case libraryEdit(LibraryEditJob)
 
         var tool: String {
             switch self {
             case .edit(let job): job.tool
             case .carriage(let job): job.tool
             case .deliberate(let job): job.tool
+            case .batch(let job): job.tool
+            case .noteEdit(let job): job.tool
+            case .libraryEdit(let job): job.tool
+            case .deleteComment: "delete_comment"
+            case .removeTag: "remove_tag"
+            case .linkVersions: "link_versions"
             case .addTake: "add_take"
             case .addComment: "add_comment"
             case .saveLens: "save_lens"
@@ -169,6 +187,14 @@ struct MCPWriteTools: Sendable {
             if let job = try parseEdit(name, args) { return .edit(job) }
             if let job = try parseCarriage(name, args) { return .carriage(job) }
             if let job = try parseDeliberate(name, args) { return .deliberate(job) }
+            if let job = try parseBatch(name, args) { return .batch(job) }
+            if name == MCPToolCatalog.deleteComment.name {
+                return .deleteComment(commentID: try requiredString(args, "comment_id"))
+            }
+            if name == MCPToolCatalog.removeTag.name { return try parseRemoveTag(args) }
+            if name == MCPToolCatalog.linkVersions.name { return try parseLinkVersions(args) }
+            if let job = try parseNoteEdit(name, args) { return .noteEdit(job) }
+            if let job = try parseLibraryEdit(name, args) { return .libraryEdit(job) }
             throw ArgumentFailure(message: "Unknown tool: \(name).")
         }
     }
@@ -305,7 +331,9 @@ struct MCPWriteTools: Sendable {
             }
         case .addComment(let blockID, let text):
             return try onBlock(blockID, rung: .suggest, job: job, clientName: clientName) { note, title in
-                let comment = try ops.addComment(toBlock: blockID, text: text, undoLabel: label(.comment))
+                // VX-188: the client is put on file as the comment's writer.
+                let comment = try ops.addComment(
+                    toBlock: blockID, text: text, author: clientName, undoLabel: label(.comment))
                 return (["comment_id": comment.id, "block_id": blockID, "note_id": note],
                         MCPWriteReceipt(clientName: clientName, act: .comment, targetID: note, targetTitle: title,
                                         show: .note(noteID: note, blockID: blockID, select: nil)))
@@ -378,6 +406,19 @@ struct MCPWriteTools: Sendable {
             return try performCarriage(carriageJob, job: job, ops: ops, clientName: clientName)
         case .deliberate(let deliberateJob):
             return try performDeliberate(deliberateJob, job: job, ops: ops, clientName: clientName)
+        case .batch(let batchJob):
+            return try performBatch(batchJob, job: job, ops: ops, clientName: clientName)
+        case .deleteComment(let commentID):
+            return try performCommentDelete(commentID, job: job, ops: ops, clientName: clientName)
+        case .removeTag(let noteID, let path):
+            return try performRemoveTag(noteID: noteID, path: path, job: job, ops: ops, clientName: clientName)
+        case .linkVersions(let noteA, let noteB, let pairs):
+            return try performLinkVersions(
+                noteA: noteA, noteB: noteB, pairs: pairs, job: job, ops: ops, clientName: clientName)
+        case .noteEdit(let edit):
+            return try performNoteEdit(edit, job: job, ops: ops, clientName: clientName)
+        case .libraryEdit(let edit):
+            return try performLibraryEdit(edit, job: job, ops: ops, clientName: clientName)
         }
     }
 
@@ -456,9 +497,15 @@ struct MCPWriteTools: Sendable {
     /// Private note is reachable per-ask only, and she never heard the ask;
     /// since 13n-c T-2 the wire answers the one not-shared answer, the ask
     /// still reaching her).
+    ///
+    /// VX-184 U5: `rung` — the two decisions' rung (write new for the
+    /// creative acts, as before; EDIT for `remove_note_from_book` /
+    /// `move_note_in_book`, which change a book's membership or order), and
+    /// `logsOnBook` — a landed act logged on the BOOK (its order changed),
+    /// not the note. Defaults unchanged: every existing caller byte-identical.
     func noteIntoBook(
         _ noteID: String, _ bookID: String, job: Job, clientName: String,
-        spendsAfter: Bool = true,
+        rung: MCPGrantRule.Rung = .writeNew, spendsAfter: Bool = true, logsOnBook: Bool = false,
         _ act: (_ title: String?, _ bookName: String?) throws -> Act
     ) throws -> Result<Landed, Refused> {
         let (standing, noteFacts, title, bookFacts, bookName) = try database.read { db in
@@ -469,24 +516,25 @@ struct MCPWriteTools: Sendable {
                     bookFacts,
                     bookFacts == nil ? nil : try Queries.mcpScopeTitle(db, kind: .book, id: bookID, calendar: calendar))
         }
-        let onNote = MCPGrantAuthority.decide(standing, note: noteFacts, rung: .writeNew, consumes: true)
+        let onNote = MCPGrantAuthority.decide(standing, note: noteFacts, rung: rung, consumes: true)
         guard case .allow(let noteGrant, let spendNote) = onNote else {
             try log(clientName, job.tool, "note", noteID, title, allowed: false)
             let ask = noteFacts.map { MCPAsk(clientName: clientName, scopeKind: .note, scopeID: noteID,
-                                             title: title ?? "", rung: .writeNew, fence: $0.fence) }
+                                             title: title ?? "", rung: rung, fence: $0.fence) }
             return .failure(Refused(outcome: MCPAsking(onAsk: hooks.onAsk)
                 .refusal(onNote, .note, standing: standing, ask: ask)))
         }
-        let onBook = MCPGrantAuthority.decide(standing, book: bookFacts, rung: .writeNew, consumes: true)
+        let onBook = MCPGrantAuthority.decide(standing, book: bookFacts, rung: rung, consumes: true)
         guard case .allow(let bookGrant, let spendBook) = onBook else {
             try log(clientName, job.tool, "book", bookID, bookName, allowed: false)
             let ask = bookFacts.map { MCPAsk(clientName: clientName, scopeKind: .book, scopeID: bookID,
-                                             title: bookName ?? "", rung: .writeNew, fence: $0.fence) }
+                                             title: bookName ?? "", rung: rung, fence: $0.fence) }
             return .failure(Refused(outcome: MCPAsking(onAsk: hooks.onAsk)
                 .refusal(onBook, .book, standing: standing, ask: ask)))
         }
         let spending = Set([spendNote ? noteGrant : nil, spendBook ? bookGrant : nil].compactMap { $0 })
-        return try land(job, clientName: clientName, kind: "note", id: noteID, title: title,
+        return try land(job, clientName: clientName, kind: logsOnBook ? "book" : "note",
+                        id: logsOnBook ? bookID : noteID, title: logsOnBook ? bookName : title,
                         spending: spendsAfter ? spending.sorted() : []) {
             try act(title, bookName)
         }

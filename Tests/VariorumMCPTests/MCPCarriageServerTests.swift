@@ -24,7 +24,7 @@ private func spec(
 }
 
 private func call(
-    _ connection: (client: Client, fd: Int32), _ name: String, _ arguments: [String: Value]
+    _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value]
 ) async throws -> (content: [Tool.Content], isError: Bool?) {
     try await connection.client.callTool(name: name, arguments: arguments)
 }
@@ -146,7 +146,10 @@ struct MCPCarriageServerTests {
             ]))
             let versions = try #require(listed["versions"] as? [[String: Any]])
             #expect(versions.map { $0["version_id"] as? String } == [versionID])
-            #expect(blocks(listed).first?["text"] as? String == "Edition two.")
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-186): a block no longer
+            // carries its shown text twice; it names its shown take, whose entry
+            // carries the text once (`shownText`). Same assertion, new address.
+            #expect(blocks(listed).first.flatMap(shownText) == "Edition two.")
 
             let readText = try await call(connection, "read_note", [
                 "note_id": .string(note.id), "version_id": .string(versionID),
@@ -156,7 +159,10 @@ struct MCPCarriageServerTests {
                 "note_id": .string(note.id), "version_id": .string(versionID), "with_ids": .bool(true),
             ]))
             #expect(readJSON["version_of"] as? String == note.id && readJSON["version_id"] as? String == versionID)
-            #expect(blocks(readJSON).first?["text"] as? String == "Edition one.")
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-186): a block no longer
+            // carries its shown text twice; it names its shown take, whose entry
+            // carries the text once (`shownText`). Same assertion, new address.
+            #expect(blocks(readJSON).first.flatMap(shownText) == "Edition one.")
 
             let foreign = try await call(connection, "read_note", [
                 "note_id": .string(note.id), "version_id": .string(strangerVersion.post.id),
@@ -368,7 +374,7 @@ struct MCPCarriageServerTests {
             ])
             #expect(bad.isError == true && text(bad).hasPrefix("entry_date must be a real day"))
             // She files it in THE daily Journal: from that moment the fence
-            // governs. 13n-c U1 (justified edit, the ritual — R-AIR-1): the
+            // governs. 13n-c U1 (justified edit, the ritual — VX-163): the
             // fixture was a journal-TRAIT book, which no longer fences.
             let journal = try h.operations.createReading(name: "journal", kind: .book, profile: "daily")
             _ = try h.operations.addPostToReading(note.id, to: journal.id)

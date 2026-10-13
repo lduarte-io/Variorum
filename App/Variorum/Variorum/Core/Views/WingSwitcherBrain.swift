@@ -3,10 +3,10 @@
 //  Variorum (MAC ONLY) — Core/Views (the ⌘L switcher and the mastheads'
 //  cycling word both read it)
 //
-//  13n-c U4 — ⌘L, THE WING SWITCHER (R-AIR-15, hers, ratified: "i like
+//  13n-c U4 — ⌘L, THE WING SWITCHER (VX-157, hers, ratified: "i like
 //  Command L" — "press opens the switcher, typing filters, holding ⌘ and
 //  tapping L cycles (the ⌘-tab idiom), release/return commits; the masthead
-//  switcher clicked without typing also cycles"; R-AIR-5: "fast navigation is
+//  switcher clicked without typing also cycles"; VX-157: "fast navigation is
 //  important"). PURE, because the held-⌘ cycling cannot be walked while the
 //  session is locked — its state transitions are pinned instead
 //  (`WingSwitcherTests`).

@@ -20,7 +20,7 @@ private func readGrant(_ kind: MCPGrantRule.ScopeKind, _ id: String) -> Operatio
 }
 
 private func call(
-    _ connection: (client: Client, fd: Int32), _ name: String, _ arguments: [String: Value]
+    _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value]
 ) async throws -> (content: [Tool.Content], isError: Bool?) {
     try await connection.client.callTool(name: name, arguments: arguments)
 }

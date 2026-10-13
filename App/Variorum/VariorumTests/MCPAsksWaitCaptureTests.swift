@@ -219,7 +219,7 @@ struct MCPAsksWaitCaptureTests {
                     size: NSSize(width: 1000, height: 420), name: "u4-library-\(v).png", settle: 80)
 
                 // 3 — THE IN-NOTE INDICATOR: the asked note's pending glyph
-                // (R-AIR-7's third mark) beside its shared icon.
+                // (VX-164's third mark) beside its shared icon.
                 await capture(
                     ContextBar(
                         tokens: tokens, originLabel: "Library", forwardLabel: nil, books: [],

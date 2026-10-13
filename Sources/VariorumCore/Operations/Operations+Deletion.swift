@@ -29,38 +29,51 @@ extension Operations {
     /// archived another way means the world moved past that entry, so redo
     /// pops quietly instead of wedging the stack. Returns nil when nothing
     /// changed.
+    /// Internal (was private) since VX-184 U4: the MCP door's take acts'
+    /// entries re-archive through this exact row work.
     @discardableResult
-    private func performArchiveVariant(_ id: String, quietWhenGone: Bool) throws -> Bool? {
-        try database.write { db in
-            let existing = try Variant.fetchOne(db, key: id)
-            guard let existing, existing.deletedAt == nil else {
-                if quietWhenGone { return nil }
-                throw OperationError.variantNotFound(id: id)
-            }
-            var variant = existing
-            guard variant.status != .archived else { return nil }
-            try ensurePlacementUnlocked(db, blockID: variant.blockId)
-            try ensureNotLastActive(db, variant)
-            let now = date.now
-            let wasDefault = try liveBlock(db, variant.blockId).defaultVariantId == id
-            variant.status = .archived
-            variant.updatedAt = now
-            try variant.update(db)
-            try reassignDefaultIfNeeded(db, blockID: variant.blockId, removing: id, now: now)
-            return wasDefault
+    func performArchiveVariant(_ id: String, quietWhenGone: Bool) throws -> Bool? {
+        try database.write { db in try archiveVariantRows(db, id, quietWhenGone: quietWhenGone) }
+    }
+
+    /// `performArchiveVariant`'s row work inside the caller's transaction
+    /// (VX-184 U4 — extracted byte-for-byte so the MCP door's `archive_take`
+    /// runs the SAME body behind its guard).
+    func archiveVariantRows(_ db: Database, _ id: String, quietWhenGone: Bool) throws -> Bool? {
+        let existing = try Variant.fetchOne(db, key: id)
+        guard let existing, existing.deletedAt == nil else {
+            if quietWhenGone { return nil }
+            throw OperationError.variantNotFound(id: id)
         }
+        var variant = existing
+        guard variant.status != .archived else { return nil }
+        try ensurePlacementUnlocked(db, blockID: variant.blockId)
+        try ensureNotLastActive(db, variant)
+        let now = date.now
+        let wasDefault = try liveBlock(db, variant.blockId).defaultVariantId == id
+        variant.status = .archived
+        variant.updatedAt = now
+        try variant.update(db)
+        try reassignDefaultIfNeeded(db, blockID: variant.blockId, removing: id, now: now)
+        return wasDefault
     }
 
     /// Back into the fan.
     public func unarchiveVariant(_ id: String) throws {
-        try database.write { db in
-            var variant = try liveVariant(db, id)
-            guard variant.status == .archived else { return }
-            try ensurePlacementUnlocked(db, blockID: variant.blockId)
-            variant.status = .active
-            variant.updatedAt = date.now
-            try variant.update(db)
-        }
+        try database.write { db in _ = try unarchiveVariantRows(db, id) }
+    }
+
+    /// `unarchiveVariant`'s row work inside the caller's transaction (VX-184
+    /// U4 — extracted byte-for-byte for `unarchive_take`). Returns whether it
+    /// wrote (false: the take was already in the fan).
+    func unarchiveVariantRows(_ db: Database, _ id: String) throws -> Bool {
+        var variant = try liveVariant(db, id)
+        guard variant.status == .archived else { return false }
+        try ensurePlacementUnlocked(db, blockID: variant.blockId)
+        variant.status = .active
+        variant.updatedAt = date.now
+        try variant.update(db)
+        return true
     }
 
     /// **Put a DELETED take back** (13j — the sitting's round-5 ruling: *"YES
@@ -140,33 +153,38 @@ extension Operations {
     /// re-tombstones a put-back take through this exact row work.
     @discardableResult
     func performDeleteVariant(_ id: String, quietWhenGone: Bool) throws -> Bool? {
-        try database.write { db in
-            let existing = try Variant.fetchOne(db, key: id)
-            guard let existing, existing.deletedAt == nil else {
-                if quietWhenGone { return nil }
-                throw OperationError.variantNotFound(id: id)
-            }
-            var variant = existing
-            guard !variant.locked else {
-                throw OperationError.lockedVariant(id: id)
-            }
-            try ensurePlacementUnlocked(db, blockID: variant.blockId)
-            let chosenBy = try Int.fetchOne(
-                db,
-                sql: "SELECT COUNT(*) FROM container_block WHERE chosen_variant_id = ? AND deleted_at IS NULL",
-                arguments: [id]) ?? 0
-            guard chosenBy == 0 else {
-                throw OperationError.variantIsChosen(id: id)
-            }
-            try ensureNotLastActive(db, variant)
-            let now = date.now
-            let wasDefault = try liveBlock(db, variant.blockId).defaultVariantId == id
-            variant.deletedAt = now
-            variant.updatedAt = now
-            try variant.update(db)
-            try reassignDefaultIfNeeded(db, blockID: variant.blockId, removing: id, now: now)
-            return wasDefault
+        try database.write { db in try deleteVariantRows(db, id, quietWhenGone: quietWhenGone) }
+    }
+
+    /// `performDeleteVariant`'s row work inside the caller's transaction
+    /// (VX-184 U4 — extracted byte-for-byte so the MCP door's `delete_take`
+    /// runs the SAME body behind its guard).
+    func deleteVariantRows(_ db: Database, _ id: String, quietWhenGone: Bool) throws -> Bool? {
+        let existing = try Variant.fetchOne(db, key: id)
+        guard let existing, existing.deletedAt == nil else {
+            if quietWhenGone { return nil }
+            throw OperationError.variantNotFound(id: id)
         }
+        var variant = existing
+        guard !variant.locked else {
+            throw OperationError.lockedVariant(id: id)
+        }
+        try ensurePlacementUnlocked(db, blockID: variant.blockId)
+        let chosenBy = try Int.fetchOne(
+            db,
+            sql: "SELECT COUNT(*) FROM container_block WHERE chosen_variant_id = ? AND deleted_at IS NULL",
+            arguments: [id]) ?? 0
+        guard chosenBy == 0 else {
+            throw OperationError.variantIsChosen(id: id)
+        }
+        try ensureNotLastActive(db, variant)
+        let now = date.now
+        let wasDefault = try liveBlock(db, variant.blockId).defaultVariantId == id
+        variant.deletedAt = now
+        variant.updatedAt = now
+        try variant.update(db)
+        try reassignDefaultIfNeeded(db, blockID: variant.blockId, removing: id, now: now)
+        return wasDefault
     }
 
     /// An authorization `deleteBlock` re-checks **inside the tombstone's own
@@ -253,24 +271,33 @@ extension Operations {
     ) throws {
         try database.write { db in
             try guardian?(db)
-            let existing = try Block.fetchOne(db, key: id)
-            guard let existing, existing.deletedAt == nil else {
-                if quietWhenGone { return }
-                throw OperationError.blockNotFound(id: id)
-            }
-            var block = existing
-            try ensurePlacementUnlocked(db, blockID: id)
-            // The authorization, re-read from the rows this transaction is
-            // about to tombstone — never from a caller's snapshot.
-            try enforce(precondition, db, blockID: id)
-            let now = date.now
-            if let placement = try livePlacement(db, blockID: id) {
-                block.lastContainerId = placement.containerId
-            }
-            block.deletedAt = now
-            block.updatedAt = now
-            try block.update(db)
+            try deleteBlockRows(db, id, quietWhenGone: quietWhenGone, requiring: precondition)
         }
+    }
+
+    /// `performDeleteBlock`'s row work inside the caller's transaction
+    /// (VX-184 U4 — extracted byte-for-byte so the MCP door's `delete_take`
+    /// deletes a block's LAST take by `delete_block`'s exact road, R-VX184-1).
+    func deleteBlockRows(
+        _ db: Database, _ id: String, quietWhenGone: Bool, requiring precondition: BlockDeletionPrecondition
+    ) throws {
+        let existing = try Block.fetchOne(db, key: id)
+        guard let existing, existing.deletedAt == nil else {
+            if quietWhenGone { return }
+            throw OperationError.blockNotFound(id: id)
+        }
+        var block = existing
+        try ensurePlacementUnlocked(db, blockID: id)
+        // The authorization, re-read from the rows this transaction is
+        // about to tombstone — never from a caller's snapshot.
+        try enforce(precondition, db, blockID: id)
+        let now = date.now
+        if let placement = try livePlacement(db, blockID: id) {
+            block.lastContainerId = placement.containerId
+        }
+        block.deletedAt = now
+        block.updatedAt = now
+        try block.update(db)
     }
 
     /// `BlockDeletionPrecondition`, enforced. The counted reads mirror

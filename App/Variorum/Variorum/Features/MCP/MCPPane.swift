@@ -5,7 +5,7 @@
 //  13n-b U1 — SETTINGS ▸ MCP, the resting shape (mockups §1–§2 as amended by
 //  R-13n-5/10 and R-13nb-5): the server toggle with its status, the
 //  CONNECTION REQUESTS (Approve… / Deny), the CLIENTS, SHARED PLACES ("Shared
-//  with AI" until 13n-c U2's R-AIR-8), the
+//  with AI" until 13n-c U2's VX-272), the
 //  OPEN BOOK switch, and CONNECT A CLIENT ("Copy setup command"). Each list
 //  shows a few rows and an "all N ›" road into the whole list — never one
 //  growing pile (R-13n-10). The pane holds no rule: it renders `MCPDoor`'s
@@ -33,7 +33,7 @@ struct MCPPane: View {
     @State private var members: MCPSharedGroup?
     /// 13n-c U4 — the ask Waiting's Answer… opened (her press).
     @State private var answering: MCPAskOpening?
-    /// 13n-c U5 (R-AIR-13) — the setup menu's chosen client (the pane's
+    /// 13n-c U5 (VX-274) — the setup menu's chosen client (the pane's
     /// view state; Claude Code first, as 13n-b shipped it).
     @State private var setupClient: MCPSetupClient = .claudeCode
     /// 13n-c U2 — the shared rows' distinguishers (the ONE rule over the
@@ -376,7 +376,7 @@ struct MCPWaitingRowView: View {
     }
 }
 
-/// **CONNECT A CLIENT — the setup menu** (13n-c U5 — R-AIR-13; her R-13nb-5
+/// **CONNECT A CLIENT — the setup menu** (13n-c U5 — VX-274; her R-13nb-5
 /// "Copy setup command" grows a per-client menu). Top to bottom: the one
 /// direct line (a standard MCP server over stdio, one program) with its path
 /// shown whole and selectable; the menu — Claude Code · Codex · Any MCP

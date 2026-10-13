@@ -3,7 +3,7 @@
 //  Variorum (MAC ONLY) — Core/Views (composed by `PaneHost` into every pane's
 //  `ContextBar`, both window kinds)
 //
-//  13n-c U3 — VX-164, THE IN-NOTE INDICATOR (R-AIR-7, hers: "with MCP on, a
+//  13n-c U3 — VX-164, THE IN-NOTE INDICATOR (VX-164, hers: "with MCP on, a
 //  note's upper right shows at a glance what an AI can reach … Never
 //  surprised, from within a note."). It sits at the TRAILING end of the pane's
 //  context bar — the note's upper right in every note mode (the bar is the
@@ -13,7 +13,7 @@
 //  It renders ONLY while the server is ON and at least one client is
 //  APPROVED (the window's road — `indicatorOn`), and then says exactly two
 //  things, each only when true:
-//  - THE SHARED ICON (R-AIR-6's one glyph) when an approved client reaches the
+//  - THE SHARED ICON (VX-271's one glyph) when an approved client reaches the
 //    note now — hover names who and how far; click shows the permission and
 //    the WHY ("through the Home wing grant");
 //  - THE LOCK when the note is Private — its own mark (click → the Private
@@ -64,7 +64,7 @@ struct MCPNoteIndicator: View {
     /// door).
     static let surfaceCapabilities: [CapabilityID] =
         MCPSharedIcon.surfaceCapabilities + [.markNotePrivate]
-        // 13n-c U4 — the pending-ask leg (R-AIR-7's third mark).
+        // 13n-c U4 — the pending-ask leg (VX-164's third mark).
         + MCPAskGlyph.surfaceCapabilities
 
     let session: AppSession
@@ -84,7 +84,7 @@ struct MCPNoteIndicator: View {
                     }
                     if state.isPrivate { lock(state) }
                 }
-                // 13n-c U4 — R-AIR-7's PENDING-ASK leg: an ask waiting on this
+                // 13n-c U4 — VX-164's PENDING-ASK leg: an ask waiting on this
                 // note (the door's projection, not this read — nothing when
                 // none, so the calm state still says nothing).
                 MCPAskGlyph(.note(postID), tokens: tokens)

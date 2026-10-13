@@ -1,5 +1,6 @@
 import Darwin
 import Foundation
+import VariorumCore
 import VariorumMCPSocket
 
 /// **A CONNECTION's HANDSHAKE** (VX-168 — the VX-156 brief §12's K2, her
@@ -45,40 +46,54 @@ enum MCPHandshake {
         let firstFrame: Data
     }
 
-    /// The longest opening line read (a preamble is ~70 bytes and an
-    /// `initialize` a few hundred; a line past this is no honest client's —
-    /// the connection simply ends).
-    static let lineLimit = 1 << 20
-    /// Blank lines skipped before the opening (a peer sending only newlines
-    /// ends rather than spins).
-    static let blankLimit = 8
-    /// **The pre-initialize window's bound** (VX-180): at most this many
-    /// requests and notifications are answered or skipped before
-    /// `initialize`; the next frame is the opening's whatever it is, so a
-    /// peer that never initializes meets the refusal rather than holding an
-    /// unadmitted connection in a loop. Claude Code sends ONE probe; eight is
-    /// generous for any honest client's probing and small beside
-    /// `lineLimit` (each frame read is still bounded by it). PROVISIONAL
-    /// P-VX180-1 (the number).
-    static let preInitializeLimit = 8
+    /// The longest opening line read — `MCPOpeningWindow.lineLimit` (1 MiB):
+    /// a line past it is no honest client's, and since VX-184 U1 it is
+    /// ANSWERED (`overLimitRefusal`, on `id: null`) before the connection
+    /// ends.
+    static let lineLimit = MCPOpeningWindow.lineLimit
+    /// Blank lines skipped before the opening — `MCPOpeningWindow.blankLimit`.
+    static let blankLimit = MCPOpeningWindow.blankLimit
+    /// **The pre-initialize window's bound** (VX-180) —
+    /// `MCPOpeningWindow.limit`: at most this many requests and notifications
+    /// are answered or skipped before `initialize`; the next frame is the
+    /// opening's whatever it is. PROVISIONAL P-VX180-1 (the number).
+    static let preInitializeLimit = MCPOpeningWindow.limit
 
     /// JSON-RPC 2.0's code for a method the server does not serve — the
     /// window's answer to every pre-initialize request but `ping`.
-    static let methodNotFoundCode = -32601
-    /// JSON-RPC 2.0's own message for that code (its spec's words; no
-    /// client-supplied text is echoed before the connection is decided).
-    static let methodNotFoundMessage = "Method not found"
+    static let methodNotFoundCode = MCPOpeningWindow.methodNotFoundCode
+    /// JSON-RPC 2.0's own message for that code.
+    static let methodNotFoundMessage = MCPOpeningWindow.methodNotFoundMessage
 
     /// **The ONE sentence every refused connection hears** — the same for a
     /// missing key, a key never issued, another name's key and a name bound
     /// to another key (no oracle; her Activity list speaks precisely).
     /// Technical register (P-13n-1, inside the door); provider-neutral; no
     /// pronouns on the wire. PROVISIONAL P-VX168-U1-4, her copy pass.
+    /// VX-198 (R-VX184-5): its last clause ("If this client's name is already
+    /// set up with another key, the author must deny it there and approve it
+    /// again first.") was falsified — a fresh setup now re-binds the name by
+    /// itself — and is gone.
     static let refusal =
         "Variorum refused this connection: it needs the setup key from this client's own setup. In "
         + "Variorum, copy a fresh setup from Settings \u{25B8} MCP \u{25B8} Connect a client, run it, and "
-        + "reconnect. If this client's name is already set up with another key, the author must deny it "
-        + "there and approve it again first."
+        + "reconnect."
+
+    /// **The REPLACED key's own sentence** (VX-198 — her R-VX184-5: "a newer
+    /// setup replaced this one — run its setup again"): heard ONLY by a
+    /// connection presenting the key a newer setup replaced under the name it
+    /// claims — it tells that key's holder its own key's history and nothing
+    /// about any other key or name, so it opens no oracle. PROVISIONAL
+    /// P-VX198-2, her copy pass.
+    static let replacedRefusal =
+        "Variorum refused this connection: a newer setup replaced this one. Run this client's setup "
+        + "again \u{2014} copy a fresh one from Settings \u{25B8} MCP \u{25B8} Connect a client \u{2014} "
+        + "and reconnect."
+
+    /// The sentence a refusal speaks: the replaced key's own, else the one.
+    static func refusal(for reason: MCPSetupKeyRule.Refusal) -> String {
+        reason == .replaced ? replacedRefusal : refusal
+    }
 
     /// **The STORE-ERROR sentence** (ladder R1, F-1): the admission's store
     /// threw, so the connection fails CLOSED — but the answer must not be the
@@ -90,122 +105,125 @@ enum MCPHandshake {
     static let storeErrorRefusal =
         "Variorum couldn't check this connection \u{2014} try again."
 
+    /// **The OVER-LIMIT sentences** (VX-184 U1 — the record's "Over-cap
+    /// answers"): a line ran past a cap before its newline, so its id cannot
+    /// be read — the answer rides `id: null` (JSON-RPC 2.0's rule when the id
+    /// cannot be detected), in the door's refusal shape (`MCPShim.refusalCode`),
+    /// and the connection then closes. Before admission nothing was decided —
+    /// the admission never ran — so the answer is the same for every
+    /// connection: no oracle. PROVISIONAL words (her copy pass).
+    static func overLimitRefusal(limit: Int, beforeInitialize: Bool) -> String {
+        let size = "\(limit >> 20) MiB (\(grouped(limit)) bytes)"
+        return beforeInitialize
+            ? "Variorum closed this connection: a message before initialize ran past \(size)."
+            : "Variorum closed this connection: a message ran past \(size), the most one message may "
+                + "carry. Send smaller messages and reconnect."
+    }
+
+    /// The opening's over-limit answer, framed (`id: null`).
+    static var overLimitResponse: Data {
+        MCPShim.refusalResponse(
+            toFirstLine: Data(), message: overLimitRefusal(limit: lineLimit, beforeInitialize: true))
+    }
+
+    /// 1048576 → "1,048,576" (fixed grouping — no locale on the wire).
+    private static func grouped(_ value: Int) -> String {
+        let digits = Array(String(value))
+        var out = ""
+        for (index, digit) in digits.enumerated() {
+            if index > 0, (digits.count - index) % 3 == 0 { out.append(",") }
+            out.append(digit)
+        }
+        return out
+    }
+
     /// Read the opening on its OWN thread (blocking reads — and the window's
     /// small answers — never hold a cooperative-pool thread). nil when the
     /// connection ends (or a line overruns `lineLimit`, or a window answer
     /// cannot be written) before the opening's frame arrives.
     static func opening(fd: Int32) async -> Opening? {
+        guard case .opened(let opening) = await openingOutcome(fd: fd) else { return nil }
+        return opening
+    }
+
+    /// The same read, its ending told apart (VX-184 U1: the session answers an
+    /// over-limit opening before it closes).
+    static func openingOutcome(fd: Int32) async -> OpeningRead {
         await withCheckedContinuation { continuation in
-            let reader = Thread { continuation.resume(returning: readOpening(fd: fd)) }
+            let reader = Thread { continuation.resume(returning: readOpeningOutcome(fd: fd)) }
             reader.name = "variorum.mcp.handshake"
             reader.start()
         }
     }
 
+    /// How an opening read ended (VX-184 U1 — the over-limit arm told apart,
+    /// so it can be answered).
+    enum OpeningRead: Equatable, Sendable {
+        case opened(Opening)
+        /// EOF or error first (or a window answer that could not be written).
+        case ended
+        /// A line ran past `lineLimit` before its newline.
+        case overLimit
+    }
+
     /// The blocking read over ONE descriptor — no store, no state; since
     /// VX-180 it also WRITES to that descriptor, and only the pre-initialize
-    /// window's fixed answers (`windowAnswer`), each before the next read.
-    /// Pinned headless over a socket pair (and over a pipe where no frame
-    /// asks for an answer).
-    static func readOpening(fd: Int32) -> Opening? {
-        guard let first = nextLine(fd) else { return nil }
+    /// window's fixed answers, each before the next read. Since VX-181 the
+    /// window is `MCPOpeningWindow`'s — the SAME read the shim's closed-app
+    /// refusal runs. Pinned headless over a socket pair (and over a pipe
+    /// where no frame asks for an answer).
+    static func readOpeningOutcome(fd: Int32) -> OpeningRead {
+        let first: Data
+        switch MCPOpeningWindow.nextLine(fd) {
+        case .line(let line): first = line
+        case .ended: return .ended
+        case .overLimit: return .overLimit
+        }
         let presentedKey: String?
-        var frame: Data
+        let start: Data
         switch MCPPreamble.classify(first) {
         case .frame:
             presentedKey = nil
-            frame = first
+            start = first
         case .preamble(let key):
-            guard let next = nextLine(fd) else { return nil }
+            switch MCPOpeningWindow.nextLine(fd) {
+            case .line(let next): start = next
+            case .ended: return .ended
+            case .overLimit: return .overLimit
+            }
             // Ladder R1, F-3: a tag-only preamble presents NOTHING — the
             // connection is bare (`classify` stays honest about the line;
             // the nothing-key maps to no key here, so her Activity says
             // "without a setup key"). The shim never speaks an empty key;
             // only a hand-rolled client reaches this.
             presentedKey = key.isEmpty ? nil : key
-            frame = next
         }
         // VX-180: the pre-initialize window — bounded; the frame past it is
         // the opening's, whatever it is.
-        for _ in 0..<preInitializeLimit {
-            switch windowFrame(frame) {
-            case .initialize, .other:
-                return Opening(presentedKey: presentedKey, firstFrame: frame)
-            case .request:
-                // Answered NOW, before the next read blocks: a client that
-                // waits for this answer before sending `initialize` must
-                // hear it (a batched answer would deadlock that client).
-                guard MCPSocketTransport.writeAll(fd, windowAnswer(toRequest: frame)) else { return nil }
-            case .notification:
-                break
-            }
-            guard let next = nextLine(fd) else { return nil }
-            frame = next
+        switch MCPOpeningWindow.read(startingWith: start, from: fd, answeringOn: fd) {
+        case .frame(let frame): return .opened(Opening(presentedKey: presentedKey, firstFrame: frame))
+        case .ended: return .ended
+        case .overLimit: return .overLimit
         }
-        return Opening(presentedKey: presentedKey, firstFrame: frame)
     }
 
-    // MARK: - The pre-initialize window (VX-180)
+    /// The opening, or nil when the connection ended or overran first (the
+    /// over-cap refusal's read, and the VX-168/180 pins').
+    static func readOpening(fd: Int32) -> Opening? {
+        guard case .opened(let opening) = readOpeningOutcome(fd: fd) else { return nil }
+        return opening
+    }
+
+    // MARK: - The pre-initialize window (VX-180) — since VX-181, `MCPOpeningWindow`'s
 
     /// What a frame read before `initialize` is, to the window.
-    enum WindowFrame: Equatable, Sendable {
-        /// `initialize`, by its method — the opening's frame; from here the
-        /// road is exactly the pre-VX-180 one.
-        case initialize
-        /// A request for any other method (a method and an id the refusal
-        /// would echo — a string or a number): answered on its own id; the
-        /// window continues.
-        case request
-        /// A notification (a method, no id): skipped — JSON-RPC answers
-        /// none; the window continues.
-        case notification
-        /// Anything else — a line that is no JSON object naming a method (a
-        /// response, a batch, a `null` id, malformed bytes): the opening's
-        /// frame on the pre-VX-180 road, which refuses it.
-        case other
-    }
+    typealias WindowFrame = MCPOpeningWindow.Frame
 
     /// Classify one frame read inside the window (pure).
-    static func windowFrame(_ frame: Data) -> WindowFrame {
-        guard let object = try? JSONSerialization.jsonObject(with: frame) as? [String: Any],
-              let method = object["method"] as? String
-        else { return .other }
-        if method == "initialize" { return .initialize }
-        guard let id = object["id"] else { return .notification }
-        return isEchoableID(id) ? .request : .other
-    }
+    static func windowFrame(_ frame: Data) -> WindowFrame { MCPOpeningWindow.classify(frame) }
 
-    /// The window's answer to a REQUEST (pure; newline-framed): `ping` —
-    /// MCP's one request a client may send before `initialize` is answered —
-    /// gets the EMPTY result its utility requires (what this server's SDK
-    /// answers a ping before initialize); every other method gets JSON-RPC's
-    /// `-32601` with its own message. The id is echoed as it arrived (a
-    /// string stays a string). The bytes depend on the frame alone — never on
-    /// the key, the name, or the library.
-    static func windowAnswer(toRequest frame: Data) -> Data {
-        let object = (try? JSONSerialization.jsonObject(with: frame) as? [String: Any]) ?? [:]
-        let id: Any = object["id"].flatMap { isEchoableID($0) ? $0 : nil } ?? NSNull()
-        var response: [String: Any] = ["jsonrpc": "2.0", "id": id]
-        if object["method"] as? String == "ping" {
-            response["result"] = [String: Any]()
-        } else {
-            response["error"] = ["code": methodNotFoundCode, "message": methodNotFoundMessage]
-        }
-        // The fallback is unreachable (this dictionary always serializes);
-        // built from the same constants so it can never drift from them
-        // (ladder R1, NIT 2).
-        let data = (try? JSONSerialization.data(withJSONObject: response, options: [.sortedKeys]))
-            ?? Data(#"{"error":{"code":\#(methodNotFoundCode),"message":"\#(methodNotFoundMessage)"},"id":null,"jsonrpc":"2.0"}"#.utf8)
-        return data + Data("\n".utf8)
-    }
-
-    /// A request id the window answers by — the same rule the refusal echoes
-    /// by (`MCPShim.refusalResponse`): a string or a number. (Ladder R1,
-    /// NIT 1: one shared predicate in `VariorumMCPSocket`, consulted by both,
-    /// rides VX-181's touch of the shim's refusal read.)
-    private static func isEchoableID(_ id: Any) -> Bool {
-        id is String || id is NSNumber
-    }
+    /// The window's answer to a REQUEST (pure; newline-framed).
+    static func windowAnswer(toRequest frame: Data) -> Data { MCPOpeningWindow.answer(toRequest: frame) }
 
     /// The first frame as an `initialize` request: the name and version its
     /// `clientInfo` declared. nil when the frame is not one (a client must
@@ -221,34 +239,8 @@ enum MCPHandshake {
     }
 
     /// The refusal on the wire: the shim's shape, answering the first frame
-    /// by its id.
-    static func refusalResponse(toFirstFrame frame: Data) -> Data {
-        MCPShim.refusalResponse(toFirstLine: frame, message: refusal)
-    }
-
-    // MARK: - The line reads
-
-    /// The next non-blank line, newline removed.
-    private static func nextLine(_ fd: Int32) -> Data? {
-        for _ in 0...blankLimit {
-            guard let line = readLine(fd) else { return nil }
-            if !line.isEmpty { return line }
-        }
-        return nil
-    }
-
-    /// One line, read a byte at a time; nil at EOF/error before its newline
-    /// or past `lineLimit`.
-    private static func readLine(_ fd: Int32) -> Data? {
-        var line = Data()
-        var byte: UInt8 = 0
-        while true {
-            let count = read(fd, &byte, 1)
-            if count < 0, errno == EINTR { continue }
-            guard count == 1 else { return nil }
-            if byte == UInt8(ascii: "\n") { return line }
-            line.append(byte)
-            if line.count > lineLimit { return nil }
-        }
+    /// by its id (VX-198: in the sentence `reason` speaks).
+    static func refusalResponse(toFirstFrame frame: Data, reason: MCPSetupKeyRule.Refusal? = nil) -> Data {
+        MCPShim.refusalResponse(toFirstLine: frame, message: reason.map(refusal(for:)) ?? refusal)
     }
 }

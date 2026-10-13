@@ -213,7 +213,7 @@ Each finding gives the surface · what reads wrong · the captures · a suggeste
 - Typing filters; the three sherlocks are told apart by shelf ("Welcome") and made day ("made Oct 14/17, 2024") and never
   by an ordinal (`12-crop.png`).
 - The picked one's confirm reads "Grant read in “the adventures of sherlock holmes” (made Oct 17, 2024) always,
-  including to future entries" — R-AIR-3's clause with the distinguisher (`13-…png`).
+  including to future entries" — VX-269's clause with the distinguisher (`13-…png`).
 - The window-hosted sheet opens from the Library row menu with WHO, "Notes in Home", the note pre-filled and its scope
   line (`33-crop.png`).
 

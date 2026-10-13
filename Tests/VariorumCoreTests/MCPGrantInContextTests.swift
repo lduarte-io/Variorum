@@ -22,7 +22,7 @@ struct MCPGrantInContextTests {
             let wing = try ops.createWing(name: "Work")
             let granted = try ops.createReading(name: "granted", kind: .book)
             let inWing = try ops.createReading(name: "in the wing", kind: .book, wingId: wing.id)
-            // 13n-c U1 (justified edit, the ritual — R-AIR-1): "never a
+            // 13n-c U1 (justified edit, the ritual — VX-163): "never a
             // journal" means THE daily Journal now (the trait book chips like
             // any book — MCPFenceRekeyTests' pin).
             let journal = try ops.createReading(name: "journal", kind: .book, profile: "daily")

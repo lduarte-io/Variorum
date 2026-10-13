@@ -32,6 +32,11 @@ struct MCPToolDeclaration: Sendable {
     /// the serving roads read, so a tool is never offered to a standing it
     /// can never act for (P-2 on the wire).
     var needsStandingReach: Bool = false
+    /// VX-184 U3: the MCP `destructiveHint` where the rung alone would say it
+    /// wrong — `delete_comment` is a SUGGEST tool that deletes (its own
+    /// comment, a tombstone, one undo), so its hint says so, honest as the
+    /// edit rung's (P-13nb-U3-16). nil = the rung decides (edit ⇒ true).
+    var destructive: Bool?
 
     /// Listed for this standing? Approved, and the open book (read) or a
     /// live grant at this rung of a scope kind the tool acts under —
@@ -49,7 +54,7 @@ struct MCPToolDeclaration: Sendable {
             annotations: .init(
                 // U3: the edit rung changes what is already there (every act
                 // undoable, the delete a tombstone — but honest hints say so).
-                title: title, readOnlyHint: rung == .read, destructiveHint: rung == .edit,
+                title: title, readOnlyHint: rung == .read, destructiveHint: destructive ?? (rung == .edit),
                 idempotentHint: rung == .read, openWorldHint: false))
     }
 
@@ -80,21 +85,46 @@ public enum MCPToolFacts {
 
 enum MCPToolCatalog {
     static let read: [MCPToolDeclaration] = [listBooks, listNotes, readNote, search, exportNote]
-    static let suggest: [MCPToolDeclaration] = [addTake, addComment, saveLens]
+    static let suggest: [MCPToolDeclaration] = [
+        addTake, addComment, saveLens,
+        // VX-184 U3 — VX-173's batch doors (one note, one act, the cap stated).
+        addTakes, addComments,
+        // VX-184 U3 — VX-188: a client deletes its OWN comment (R-VX188-1).
+        deleteComment,
+    ]
     static let writeNew: [MCPToolDeclaration] = [
         createNote, importDocument, applyTag, createBook, addNoteToBook, createSection,
         // U4 — the carriage (R-13nb-18, R-13nb-26 f, P-13nb-U3-8 → PROVISIONAL).
         saveVersion, fileNoteInChapter, setBookRule,
+        // VX-184 U3 — VX-187: two notes linked as versions by named pairs (R-VX187-1).
+        linkVersions,
     ]
     static let edit: [MCPToolDeclaration] = [
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
         // U4 — the tray's Put back (R-13nb-14) and the date (R-13nb-26 b).
         putBack, setEntryDate,
-        // 13n-c U6 — the per-item note move across wings (VX-160, R-AIR-2).
+        // 13n-c U6 — the per-item note move across wings (VX-160).
         moveNoteToWing,
         // VX-168 U2 — the deliberate acts: VX-169's commit (her settlement:
         // edit) and VX-174's merge button (R-MERGE-1: edit).
         saveCommit, chooseTake, adoptLens,
+        // VX-184 U3 — VX-190: un-tagging a note (her removeTag, §9).
+        removeTag,
+        // VX-184 U4 — VX-195: edit parity inside a note (R-VX184-1) — comments.
+        editComment, restoreComment,
+        // …the takes family (the LAST take ⇒ the block, R-VX184-1).
+        deleteTake, archiveTake, unarchiveTake, setTakeLabel, lockTake, unlockTake,
+        // …the commits family (the restore insured first).
+        restoreCommit, renameCommit,
+        // …and the note itself: its title, its saved lenses.
+        renameNote, deleteLens,
+        // VX-184 U5 — VX-196: edit parity across the library (R-VX184-1) — the
+        // book's state.
+        renameBook, finishBook, reopenBook, archiveBook, unarchiveBook, deleteBook,
+        // …a book's membership and order, and its chapters.
+        removeNoteFromBook, moveNoteInBook, renameChapter, deleteChapter, moveChapter,
+        // …and a note in the library: its Trash road and its archive.
+        deleteNote, archiveNote, unarchiveNote,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -138,7 +168,8 @@ enum MCPToolCatalog {
         name: "list_notes", rung: .read, title: "List notes",
         description: """
             Notes this client can read. With book_id: that book's notes in book order, each with \
-            the chapter it is filed under (section_id, section_name) when it has one — or a \
+            the chapter it is filed under (section_id, section_name) when it has one, and the \
+            book's chapters in order (chapters: section_id, name — empty ones too) — or a \
             gathering's notes, in its own order. With \
             wing_id: that wing's notes, most recently edited first. With neither: every note \
             shared with this client, most recently edited first. Paged — pass next_cursor back \
@@ -170,8 +201,9 @@ enum MCPToolCatalog {
             of its own, the header starts with {v:2} and a "--- next block ---" line separates the \
             blocks instead. Returns the text. With with_ids: true it returns \
             JSON instead — the note's blocks in order, each with its block_id, its name if the \
-            author named it, the shown take's text, every take (take_id, label, chosen, text) and \
-            its comments — the ids add_take, add_comment and save_lens address — plus the note's \
+            author named it, shown_take_id (the take the block shows), every take (take_id, label, \
+            chosen, text — each text once, on its take) and its comments — the ids add_take, \
+            add_comment and save_lens address — plus the note's \
             entry_date and the books (and chapters) holding it that you can read. Ids are live: the \
             author's own merges and divides make new blocks, so an id can go stale between calls \
             (a write with a stale id is refused) — read again to get current ids. with_commits: true \
@@ -185,8 +217,9 @@ enum MCPToolCatalog {
             beyond_grant); with_lenses: true (its saved lenses and the take each shows per block); \
             with_versions: true (its saved versions — version_id reads one, in either form). \
             lens_id reads the note through one of its lenses, in either form: each block shows the \
-            take the lens shows there, else its chosen take; with with_ids each block says which \
-            (via: "lens" or "chosen"), and chosen still marks the note's own chosen take.
+            take the lens shows there, else its chosen take; with with_ids each block's \
+            shown_take_id is that take and via says which ("lens" or "chosen"), and chosen still \
+            marks the note's own chosen take.
             """,
         inputSchema: .object([
             "type": "object",
@@ -308,6 +341,98 @@ enum MCPToolCatalog {
         ]),
         scopes: MCPToolDeclaration.everyScope)
 
+    /// VX-184 U3 (VX-173): `add_take` as ONE act for many blocks of one note.
+    static let addTakes = MCPToolDeclaration(
+        name: "add_takes", rung: .suggest, title: "Add takes to many blocks",
+        description: """
+            Add many takes in one act: each item adds a new take (an alternative text) to one block \
+            of note_id, at the END of that block's fan, exactly as add_take does — labeled with this \
+            client's name (plus the item's label, if given), never chosen and never locked; an \
+            empty text adds a blank take. Every block must be a block of that note (read_note with \
+            with_ids: true gives the ids). One call carries at most 200 takes. All or nothing: if \
+            any item can't land, none does, and the refusal names the item. The whole batch is one \
+            undo for the author. Returns JSON with the new take_ids, in the items' order.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note every block belongs to."]),
+                "takes": .object([
+                    "type": "array", "minItems": 1, "maxItems": .int(MCPWriteTools.batchCap),
+                    "description": "The takes, in order (at most 200).",
+                    "items": .object([
+                        "type": "object",
+                        "properties": .object([
+                            "block_id": .object(["type": "string", "description": "The block to add this take to."]),
+                            "text": .object(["type": "string",
+                                             "description": "The take's text (empty: a blank take)."]),
+                            "label": .object(["type": "string", "description": "A short label, e.g. \"english\"."]),
+                        ]),
+                        "required": .array(["block_id", "text"]),
+                    ]),
+                ]),
+            ]),
+            "required": .array(["note_id", "takes"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-184 U3 (VX-173): `add_comment` as ONE act for many blocks of one note.
+    static let addComments = MCPToolDeclaration(
+        name: "add_comments", rung: .suggest, title: "Comment on many blocks",
+        description: """
+            Leave many working comments in one act, each on one block of note_id (it shows in the \
+            block's gutter; the text is untouched), exactly as add_comment does. Every block must be \
+            a block of that note. One call carries at most 200 comments. All or nothing: if any \
+            item can't land, none does, and the refusal names the item. The whole batch is one undo \
+            for the author. Returns JSON with the new comment_ids, in the items' order.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note every block belongs to."]),
+                "comments": .object([
+                    "type": "array", "minItems": 1, "maxItems": .int(MCPWriteTools.batchCap),
+                    "description": "The comments, in order (at most 200).",
+                    "items": .object([
+                        "type": "object",
+                        "properties": .object([
+                            "block_id": .object(["type": "string", "description": "The block to comment on."]),
+                            "text": .object(["type": "string", "description": "The comment."]),
+                        ]),
+                        "required": .array(["block_id", "text"]),
+                    ]),
+                ]),
+            ]),
+            "required": .array(["note_id", "comments"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-184 U3 (VX-188, R-VX188-1): at suggest, a client deletes only a
+    /// comment Variorum has on file as its own.
+    static let deleteComment = MCPToolDeclaration(
+        name: "delete_comment", rung: .suggest, title: "Delete your comment",
+        description: """
+            Delete a comment. With suggest you may delete only a comment you left (with add_comment \
+            or add_comments): one Variorum doesn't have on file as yours (the author's, another \
+            client's, or one left before Variorum kept that record) is refused. With edit on the \
+            note you may delete any comment. Nothing is destroyed: the comment joins the block's \
+            deleted comments, where the author can bring it back (so can restore_comment), and the \
+            delete is one undo for them. Get comment ids from read_note with with_ids: true. \
+            Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "comment_id": .object(["type": "string", "description": "The comment to delete."]),
+            ]),
+            "required": .array(["comment_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope,
+        destructive: true)
+
     static let saveLens = MCPToolDeclaration(
         name: "save_lens", rung: .suggest, title: "Save a lens",
         description: """
@@ -335,9 +460,9 @@ enum MCPToolCatalog {
         description: """
             Create a new note inside a shared book (book_id — it joins the book at its end) or a \
             shared wing (wing_id; "" is Home — it lands bookless). Give EITHER text (plain prose: \
-            each paragraph becomes a block) OR blocks (structured: each block's text exactly — a \
-            blank line inside it stays inside the one block — with an optional name and labeled \
-            takes, the same shape read_note's with_ids returns). entry_date (yyyy-MM-dd) sets the \
+            each paragraph becomes a block) OR blocks (structured: each block's shown text exactly \
+            — a blank line inside it stays inside the one block — with an optional name and its \
+            other takes, each with an optional label). entry_date (yyyy-MM-dd) sets the \
             note's date, e.g. for old journal entries. Returns JSON with the note_id and its block_ids.
             """,
         inputSchema: .object([
@@ -606,7 +731,7 @@ enum MCPToolCatalog {
         ]),
         scopes: MCPToolDeclaration.everyScope)
 
-    /// 13n-c U6 (VX-160 — R-AIR-2/-9, the brief §10's R1 · T1 · U1): the
+    /// 13n-c U6 (VX-160 — VX-160, the brief §10's R1 · T1 · U1): the
     /// author's own Move to Wing, on the wire. Listed at EDIT (the source's
     /// rung) under any scope kind: a client short on the destination's write
     /// new is still offered it, and its refusal raises that wing's ask.
@@ -631,6 +756,560 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-184 U3 — VX-187 link_versions
+
+    /// VX-187 (R-VX187-1): the AI names the paragraph pairs; write new on both.
+    static let linkVersions = MCPToolDeclaration(
+        name: "link_versions", rung: .writeNew, title: "Link two notes as versions",
+        description: """
+            Link two notes as versions of each other by naming which paragraphs correspond: pairs \
+            of {block_a, block_b}, each block_a a block of note_a and each block_b the block of \
+            note_b it corresponds to (read_note with with_ids: true gives the ids). Name at least one \
+            pair — never guess by position. One linked pair makes the notes versions: Variorum's \
+            Compare then offers each beside the other, and read_note's with_lineage shows every pair \
+            (Compare lines its rows up by the notes' shared history, not by these pairs). Needs \
+            write new on both notes, which must be in the same wing. One call carries at most 200 \
+            pairs. All or nothing: a pair that names the wrong note, repeats, or is already linked \
+            is refused, named. One undo for the author removes every pair. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_a": .object(["type": "string", "description": "One note."]),
+                "note_b": .object(["type": "string", "description": "The other note."]),
+                "pairs": .object([
+                    "type": "array", "minItems": 1, "maxItems": .int(MCPWriteTools.batchCap),
+                    "description": "The corresponding paragraphs (at least one, at most 200).",
+                    "items": .object([
+                        "type": "object",
+                        "properties": .object([
+                            "block_a": .object(["type": "string", "description": "A block of note_a."]),
+                            "block_b": .object(["type": "string", "description": "The block of note_b it corresponds to."]),
+                        ]),
+                        "required": .array(["block_a", "block_b"]),
+                    ]),
+                ]),
+            ]),
+            "required": .array(["note_a", "note_b", "pairs"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-184 U3 — VX-190 remove_tag
+
+    /// VX-190: her un-tag — the application only, a non-event for intake.
+    static let removeTag = MCPToolDeclaration(
+        name: "remove_tag", rung: .edit, title: "Remove a tag from a note",
+        description: """
+            Remove a tag from a note, by its path (e.g. "percy/pt-en") — the note stops wearing \
+            it; the tag itself stays in the library. As when the author removes one, nothing else \
+            moves: a book the tag brought the note into keeps it. One undo for the author puts the \
+            tag back. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note."]),
+                "tag": .object(["type": "string", "description": "The tag's path (as read_note's header shows it)."]),
+            ]),
+            "required": .array(["note_id", "tag"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-184 U4 — VX-195 edit parity inside a note (R-VX184-1)
+
+    /// Her comment edit, on ANY comment (R-VX188-1's edit clause) — the stale
+    /// read refused, as `edit_take`'s.
+    static let editComment = MCPToolDeclaration(
+        name: "edit_comment", rung: .edit, title: "Edit a comment",
+        description: """
+            Rewrite one comment's text — any comment on the note: the author's, yours or another \
+            client's. expected_text must be the comment's text EXACTLY as you read it (read_note with \
+            with_ids: true lists each block's comments); if it changed since, the edit is refused and \
+            nothing is written — read again. Writing the text it already has changes nothing. One \
+            undo for the author puts the old words back. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "comment_id": .object(["type": "string", "description": "The comment to edit."]),
+                "text": .object(["type": "string", "description": "The comment's whole new text."]),
+                "expected_text": .object(["type": "string",
+                                          "description": "The comment's current text, exactly as read."]),
+            ]),
+            "required": .array(["comment_id", "text", "expected_text"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// Her restore door on a deleted comment — only one her block's deleted
+    /// comments still offer.
+    static let restoreComment = MCPToolDeclaration(
+        name: "restore_comment", rung: .edit, title: "Bring back a deleted comment",
+        description: """
+            Bring a deleted comment back to its block, as the author's own restore does. Use the id \
+            from a read before it was deleted, or of one you deleted (delete_comment). A comment the \
+            author chose to delete for good can't come back. One undo for the author deletes it \
+            again. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "comment_id": .object(["type": "string", "description": "The deleted comment."]),
+            ]),
+            "required": .array(["comment_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// Her take delete — and R-VX184-1: the block's LAST take deleted IS the
+    /// block deleted, `delete_block`'s road, said here and in the answer.
+    /// VX-184 ladder round 1 (the NIT, plus the re-read): `deleteVariantRows`
+    /// refuses the take the block's CHOSEN pointer names — not the take it
+    /// shows (a nil pointer shows the default, which deletes; an archived
+    /// chosen take shows the default, yet refuses) — and "last" is I10's last
+    /// ACTIVE take (`Queries.mcpTakeRoad`: an archived take never counts).
+    static let deleteTake = MCPToolDeclaration(
+        name: "delete_take", rung: .edit, title: "Delete a take",
+        description: """
+            Delete one take of a block. Nothing is destroyed: it goes to the note's tray of deleted \
+            things, where the author can put it back (so can put_back), and it is one undo for them. \
+            The block's chosen take can't be deleted while the block has other active takes — \
+            choose another first (choose_take); a locked take can't be deleted either. Deleting a \
+            block's last active take (archived takes don't count) deletes the block, exactly as \
+            delete_block does (the block and every take on it, archived ones too, go to the tray); \
+            the answer then says deleted_block: true. Get take ids from read_note with with_ids: \
+            true. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take to delete."]),
+            ]),
+            "required": .array(["take_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-184 ladder round 2: the refusal is I10's last ACTIVE take
+    /// (`archiveVariantRows` → `ensureNotLastActive`; an archived take never
+    /// counts) — "last take" said it loosely.
+    static let archiveTake = MCPToolDeclaration(
+        name: "archive_take", rung: .edit, title: "Archive a take",
+        description: """
+            Archive one take: it leaves the block's takes but is kept (read_note with \
+            include_archived: true lists it; unarchive_take brings it back). The take the block \
+            shows may be archived — the block then shows another of its takes. A block's last active \
+            take can't be archived. One undo for the author. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take to archive."]),
+            ]),
+            "required": .array(["take_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-184 ladder round 2: "It comes back unchosen." was false for the
+    /// block's CHOSEN take — archiving never touches the slot's choice
+    /// (`archiveVariantRows`; the read-time fallback shows the default
+    /// meanwhile) and unarchiving flips the status alone
+    /// (`unarchiveVariantRows`), so the block shows it again and `read_note`
+    /// reports it chosen. Guarded by
+    /// `MCPTakeEditServerTests.unarchiveTakeComesBackChosenWhileTheBlockStillChoosesIt`.
+    static let unarchiveTake = MCPToolDeclaration(
+        name: "unarchive_take", rung: .edit, title: "Unarchive a take",
+        description: """
+            Bring an archived take back among its block's takes (read_note with include_archived: \
+            true lists archived takes). Archiving a take doesn't change which take its block has \
+            chosen, so if this was the block's chosen take and no other take has been chosen since, \
+            the block shows it again and read_note reports it chosen; otherwise it comes back \
+            unchosen. One undo for the author. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The archived take."]),
+            ]),
+            "required": .array(["take_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let setTakeLabel = MCPToolDeclaration(
+        name: "set_take_label", rung: .edit, title: "Label a take",
+        description: """
+            Give one take a label — a short name the author sees on it, such as "english" — or \
+            clear it with null or a blank. A locked or archived take may be labeled. One undo for the \
+            author. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take."]),
+                "label": .object(["type": ["string", "null"], "description": "The label (blank or null clears)."]),
+            ]),
+            "required": .array(["take_id", "label"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let lockTake = MCPToolDeclaration(
+        name: "lock_take", rung: .edit, title: "Lock a take",
+        description: """
+            Lock one take so its text can't change (edit_take, restore_commit and the author's typing \
+            are all refused) until it is unlocked (unlock_take). If the take holds words not yet in a \
+            commit, Variorum commits them first, as the author's own lock does; that commit stays \
+            even if the lock is undone. One undo for the author. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take to lock."]),
+            ]),
+            "required": .array(["take_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let unlockTake = MCPToolDeclaration(
+        name: "unlock_take", rung: .edit, title: "Unlock a take",
+        description: """
+            Unlock a locked take, so its text can be edited again. One undo for the author. Returns \
+            JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take to unlock."]),
+            ]),
+            "required": .array(["take_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// Her restore, INSURED first (the eighth occasion's bracket).
+    static let restoreCommit = MCPToolDeclaration(
+        name: "restore_commit", rung: .edit, title: "Restore a commit",
+        description: """
+            Bring a commit's text back into its take, as the author's own restore does (read_note \
+            with with_commits: true lists each take's commits). Variorum first commits the words it \
+            replaces, named "before <your name>'s restore" (unless they are already the take's latest \
+            commit — then that commit holds them and the answer has no before_commit_id), and then the \
+            restored text, named "after <your name>'s restore", so the author can always compare and \
+            come back; these commits stay even if the restore is undone. A locked or archived take refuses, as does a sealed \
+            note; a take already reading that text changes nothing. One undo for the author puts the \
+            replaced words back. Returns JSON with the commit ids.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "commit_id": .object(["type": "string", "description": "The commit whose text to restore."]),
+            ]),
+            "required": .array(["commit_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// Her rename of a saved moment — the text never changes (I5).
+    static let renameCommit = MCPToolDeclaration(
+        name: "rename_commit", rung: .edit, title: "Rename a commit",
+        description: """
+            Rename a commit — the name the author's history shows for that saved moment — or clear it \
+            with null or a blank. The commit's text never changes. A locked take's commits may be \
+            renamed; a sealed note's may not. One undo for the author. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "commit_id": .object(["type": "string", "description": "The commit."]),
+                "message": .object(["type": ["string", "null"],
+                                    "description": "Its new name (blank or null clears)."]),
+            ]),
+            "required": .array(["commit_id", "message"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// Her title doors — a title is library metadata (a seal leaves it free).
+    static let renameNote = MCPToolDeclaration(
+        name: "rename_note", rung: .edit, title: "Rename a note",
+        description: """
+            Give a note a new title, or clear its title with null or a blank. A sealed note's title \
+            can still change, as the author's can. One undo for the author puts the old title back. \
+            Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note."]),
+                "title": .object(["type": ["string", "null"], "description": "The new title (blank or null clears)."]),
+            ]),
+            "required": .array(["note_id", "title"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// Her lens delete — the lens and its picks, never what the note shows.
+    static let deleteLens = MCPToolDeclaration(
+        name: "delete_lens", rung: .edit, title: "Delete a lens",
+        description: """
+            Delete one of a note's saved lenses (read_note with with_lenses: true lists them). Only \
+            the lens goes: the note and the takes it shows are untouched. One undo for the author \
+            brings the lens back. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "lens_id": .object(["type": "string", "description": "The lens to delete."]),
+            ]),
+            "required": .array(["lens_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-184 U5 — VX-196 edit parity across the library (R-VX184-1)
+
+    /// The book acts' input: one book id (a gathering is read, never changed).
+    private static let bookIDOnly: Value = .object([
+        "type": "object",
+        "properties": .object([
+            "book_id": .object(["type": "string", "description": "The book (list_books gives ids)."]),
+        ]),
+        "required": .array(["book_id"]),
+        "additionalProperties": false,
+    ])
+
+    /// Her rename doors — E13's name guard first; a finished book renames.
+    static let renameBook = MCPToolDeclaration(
+        name: "rename_book", rung: .edit, title: "Rename a book",
+        description: """
+            Give a book a new name. A name another live book already wears (ignoring case) is \
+            refused, as the author's rename is; a finished or sealed book can still be renamed. \
+            Gatherings are the author's to rename. One undo for the author puts the old name back. \
+            Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "book_id": .object(["type": "string", "description": "The book."]),
+                "name": .object(["type": "string", "description": "Its new name."]),
+            ]),
+            "required": .array(["book_id", "name"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    /// Her Finish — the finish dismisses what waits at Arrivals. VX-184 ladder
+    /// round 1 (PROVISIONAL P-VX196-8 (a)): the act is the BOOK's, so it
+    /// dismisses every waiting note, readable to the caller or not — said
+    /// plainly; refusing instead would itself reveal the hidden ones.
+    static let finishBook = MCPToolDeclaration(
+        name: "finish_book", rung: .edit, title: "Finish a book",
+        description: """
+            Mark a book finished, as the author's Finish does: its notes, their order and its \
+            chapters are frozen (their text stays editable), it stops collecting, and every note \
+            waiting at its Arrivals is dismissed — including any you can't read. A book already \
+            finished (or sealed) is left as it is. One undo for the author reopens it and brings \
+            back everything that was waiting. Returns JSON.
+            """,
+        inputSchema: bookIDOnly, scopes: [.book, .wing])
+
+    /// Her Reopen — the catch-up rings what arrived while it was finished.
+    static let reopenBook = MCPToolDeclaration(
+        name: "reopen_book", rung: .edit, title: "Reopen a book",
+        description: """
+            Reopen a finished book, as the author's Reopen does: it can change again, and notes \
+            that came to match its rule while it was finished wait at its Arrivals. A sealed book \
+            stays sealed — unsealing is the author's alone. One undo for the author finishes it \
+            again. Returns JSON.
+            """,
+        inputSchema: bookIDOnly, scopes: [.book, .wing])
+
+    /// Her Archive — kept, out of view; its notes stay where they are.
+    static let archiveBook = MCPToolDeclaration(
+        name: "archive_book", rung: .edit, title: "Archive a book",
+        description: """
+            Archive a book, as the author's Archive does: it leaves the Bookcase and is kept, \
+            never deleted, and it stops collecting until it is unarchived. Its notes stay live and \
+            stay in it. One undo for the author unarchives it. Returns JSON.
+            """,
+        inputSchema: bookIDOnly, scopes: [.book, .wing])
+
+    /// Her Unarchive — what was archived with it comes back with it.
+    static let unarchiveBook = MCPToolDeclaration(
+        name: "unarchive_book", rung: .edit, title: "Unarchive a book",
+        description: """
+            Bring an archived book back to the Bookcase, as the author's Unarchive does (notes the \
+            author archived together with it come back too; list_books with include_archived: \
+            true lists archived books). One undo for the author archives it again. Returns JSON.
+            """,
+        inputSchema: bookIDOnly, scopes: [.book, .wing])
+
+    /// Her Delete Book — the Trash; the daily Journal never deletes. VX-184
+    /// ladder round 1 (PROVISIONAL P-VX196-8 (a)): the act is the BOOK's, so
+    /// every note in it leaves it, readable to the caller or not — said
+    /// plainly; refusing instead would itself reveal the hidden ones.
+    static let deleteBook = MCPToolDeclaration(
+        name: "delete_book", rung: .edit, title: "Delete a book",
+        description: """
+            Delete a book, as the author's Delete Book does: it goes to the Trash for 30 days with \
+            its chapters. Its notes are never deleted with it, but every note in the book leaves \
+            it — including any you can't read — and a note in no other book lands in the Pool (a \
+            book that owns its notes releases all of them there). One undo for the author, or the \
+            Trash's Put back, brings the book back whole, its notes in it again. Returns JSON.
+            """,
+        inputSchema: bookIDOnly, scopes: [.book, .wing])
+
+    /// Her Remove from This Book — "Release" on a book that owns its notes.
+    static let removeNoteFromBook = MCPToolDeclaration(
+        name: "remove_note_from_book", rung: .edit, title: "Take a note out of a book",
+        description: """
+            Take a note out of a book, as the author's Remove from This Book does: the note itself \
+            is untouched and stays in its other books; in a book that owns its notes this releases \
+            it to the Pool (the answer says released and whether it is now in no book). A finished \
+            book refuses. A gathering holds no notes — a note leaves it by no longer matching its \
+            rule (remove_tag). One undo for the author puts it back in the book. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "book_id": .object(["type": "string", "description": "The book."]),
+                "note_id": .object(["type": "string", "description": "The note to take out of it."]),
+            ]),
+            "required": .array(["book_id", "note_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    /// Her Move Up/Down and drags — only in a hand-ordered book.
+    static let moveNoteInBook = MCPToolDeclaration(
+        name: "move_note_in_book", rung: .edit, title: "Move a note in a book",
+        description: """
+            Move a note to a new place in its book's order — after or before another of the book's \
+            notes, or at its start or end (pass exactly one). Its chapter stays; file_note_in_chapter \
+            files it. A book that sorts itself (by date or by edits) takes no hand placing, and a \
+            finished book refuses, as the author's doors do. One undo for the author puts it back. \
+            Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "book_id": .object(["type": "string", "description": "The book."]),
+                "note_id": .object(["type": "string", "description": "The note to move."]),
+                "after_note_id": .object(["type": "string", "description": "Place it right after this note."]),
+                "before_note_id": .object(["type": "string", "description": "Place it right before this note."]),
+                "at": .object(["type": "string", "enum": ["start", "end"],
+                               "description": "Place it at the book's start or end."]),
+            ]),
+            "required": .array(["book_id", "note_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    /// Her chapter rename — free on a finished book.
+    static let renameChapter = MCPToolDeclaration(
+        name: "rename_chapter", rung: .edit, title: "Rename a chapter",
+        description: """
+            Rename one of a book's chapters (list_notes with the book's id lists its chapters). A \
+            finished book's chapters can still be renamed, as the author's can. One undo for the \
+            author puts the old name back. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "section_id": .object(["type": "string", "description": "The chapter."]),
+                "name": .object(["type": "string", "description": "Its new name."]),
+            ]),
+            "required": .array(["section_id", "name"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    /// Her chapter delete — its notes stay, unfiled.
+    static let deleteChapter = MCPToolDeclaration(
+        name: "delete_chapter", rung: .edit, title: "Delete a chapter",
+        description: """
+            Delete one of a book's chapters, as the author's Delete Chapter does: its notes stay in \
+            the book, unfiled. A finished book refuses. One undo for the author brings the chapter \
+            back with its notes filed under it again. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "section_id": .object(["type": "string", "description": "The chapter to delete."]),
+            ]),
+            "required": .array(["section_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    /// Her chapter reorder.
+    static let moveChapter = MCPToolDeclaration(
+        name: "move_chapter", rung: .edit, title: "Move a chapter",
+        description: """
+            Move a chapter to a new place among its book's chapters — after or before another of \
+            them, or at the start or end (pass exactly one). A finished book refuses. One undo for \
+            the author puts it back. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "section_id": .object(["type": "string", "description": "The chapter to move."]),
+                "after_section_id": .object(["type": "string", "description": "Place it right after this chapter."]),
+                "before_section_id": .object(["type": "string", "description": "Place it right before this chapter."]),
+                "at": .object(["type": "string", "enum": ["start", "end"],
+                               "description": "Place it first or last."]),
+            ]),
+            "required": .array(["section_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    /// The note acts' input: one note id.
+    private static let noteIDOnly: Value = .object([
+        "type": "object",
+        "properties": .object([
+            "note_id": .object(["type": "string", "description": "The note."]),
+        ]),
+        "required": .array(["note_id"]),
+        "additionalProperties": false,
+    ])
+
+    /// Her Delete — the Trash, 30 days, restorable.
+    static let deleteNote = MCPToolDeclaration(
+        name: "delete_note", rung: .edit, title: "Delete a note",
+        description: """
+            Delete a note, as the author's Delete does: it goes to the Trash with its saved versions \
+            for 30 days, out of every book it was in, and the author can put it back whole. A \
+            sealed note can still be deleted, as the author's can. One undo for the author brings \
+            it back. Returns JSON.
+            """,
+        inputSchema: noteIDOnly, scopes: MCPToolDeclaration.everyScope)
+
+    /// Her Archive — kept, out of view.
+    static let archiveNote = MCPToolDeclaration(
+        name: "archive_note", rung: .edit, title: "Archive a note",
+        description: """
+            Archive a note, as the author's Archive does: it is kept, out of view, and stays in its \
+            books (list_notes shows it only with include_archived: true). A note already archived \
+            is left as it is. One undo for the author unarchives it. Returns JSON.
+            """,
+        inputSchema: noteIDOnly, scopes: MCPToolDeclaration.everyScope)
+
+    /// Her Unarchive.
+    static let unarchiveNote = MCPToolDeclaration(
+        name: "unarchive_note", rung: .edit, title: "Unarchive a note",
+        description: """
+            Bring an archived note back into view, as the author's Unarchive does. A note that \
+            isn't archived is left as it is. One undo for the author archives it again, as it was. \
+            Returns JSON.
+            """,
+        inputSchema: noteIDOnly, scopes: MCPToolDeclaration.everyScope)
 
     // MARK: - VX-168 U2 — the deliberate acts (VX-169 save_commit; VX-174 the merge button)
 

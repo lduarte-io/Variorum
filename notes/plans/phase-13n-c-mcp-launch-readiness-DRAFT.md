@@ -4,7 +4,7 @@
 `vx-156-grant-ux-design`. Not a kickoff: it becomes one only after her sitting rules the agenda
 (a)–(d) and nods or redirects the round's picks (the brief's table). The phase NAME is hers to keep
 or change; master-plan sequencing against 13s-a is hers (§6). Nothing here is ruled beyond
-R-AIR-1 and R-AIR-2 (both ratified at her Air round, recorded in
+VX-163 and VX-160 (both ratified at her Air round, recorded in
 `notes/plans/vx-156-grant-ux-design-kickoff.md`).**
 
 The design record this plan builds to: `notes/plans/vx-156-grant-ux-brief.md` (per item: options,
@@ -17,8 +17,8 @@ the recommendation, the why, the chord sweep) + the drawn states
 You are kicking off 13n-c, the round that makes the MCP door ready for REAL USERS at launch — her
 stated intent for this week. 13n-b (VX-124) shipped the door and closed on 2026-10-10; her first
 real-store round on the Air (2026-10-11) found the frictions this phase answers and ratified two
-rulings: **R-AIR-1** (journal-trait books may hold standing grants; the never-always fence keys on
-the daily Journal and the Private mark) and **R-AIR-2** (the per-item cross-wing NOTE move ships on
+rulings: **VX-163** (journal-trait books may hold standing grants; the never-always fence keys on
+the daily Journal and the Private mark) and **VX-160** (the per-item cross-wing NOTE move ships on
 the wire). The design was prepared ahead of you — read the brief and the mockups whole, then the
 sitting's rulings (recorded in this file's SITTING RECORD once she has ruled). Preflight per
 CLAUDE.md in full, plus `notes/plans/phase-13n-b-mcp-door.md` (the grant boundary's rulings and the
@@ -35,7 +35,7 @@ The launch-readiness round for the MCP door. Three kinds of work, one theme — 
 grant, watch and undo the door without reading a manual*:
 
 - **The grant road** (VX-156 + VX-163): choosing places by search with names told apart, granting
-  from where the notes are, and R-AIR-1's fence change with the words that make it honest.
+  from where the notes are, and VX-163's fence change with the words that make it honest.
 - **The keyboard and the quiet signals** (VX-156 + VX-157): share-this-note, the pane and the wing
   switcher from the keyboard; asks that wait quietly on what they name.
 - **The wing on the wire** (VX-160 + VX-158): her variorum-wing sweep made possible, and an agent's
@@ -53,8 +53,8 @@ grant, watch and undo the door without reading a manual*:
 | Duplicate-name disambiguation | VX-156 (6) | IN | §2 |
 | Keyboard wing switching | VX-157 | IN | §7 |
 | The MCP wing switch on the wire | VX-158 | IN | §8 |
-| The per-item cross-wing note move on the wire (R-AIR-2) | VX-160 | IN — its shape is agenda (b) | §10 |
-| Journal-trait books grantable (R-AIR-1) | VX-163 | IN — its words are agenda (a) | §9 |
+| The per-item cross-wing note move on the wire (VX-160) | VX-160 | IN — its shape is agenda (b) | §10 |
+| Journal-trait books grantable (VX-163) | VX-163 | IN — its words are agenda (a) | §9 |
 | The pane's A-4 boundary line (L1 — the canon says the pane has it; the build does not) | — (found by the prep round) | IN at her nod (a copy-truth fix) | §12 |
 | Per-pairing merge / choose-per-take divide on the wire | VX-159 | CANDIDATE — agenda (c) | §11 |
 | VX-161 | VX-161 | CANDIDATE — content in Linear, not in the repo; unsized | — |
@@ -84,7 +84,7 @@ grant, watch and undo the door without reading a manual*:
 4. **The sheet:** a WHO row (`SearchPicker` over approved clients, the most recently granted
    first) when the opener is not the pane; WHERE as `SearchPicker` (book, wing) and the note feed
    (`NotePickerSource.corpusNotes`) for "A note"; durations shrunk to what every picked target can
-   take, with the one-line why; the confirm says the place with its disambiguator; the R-AIR-1
+   take, with the one-line why; the confirm says the place with its disambiguator; the VX-163
    words (agenda (a)'s pick) on the book, wing and open-book doors; the six sentences the brief's
    §9 lists, re-worded.
 5. **The doors into it:** the Library bulk bar's "Share N notes with AI…", `postRowMenu`'s and
@@ -191,12 +191,12 @@ refused with it behind.
   each candidate another half day or more.
 - **The recommended launch cut:** **U1 + U2** (her real-store frictions — the indistinguishable
   rows above all, since a grant to the wrong book is a disclosure error, not a cosmetic one) **+ U3
-  if the week holds** (R-AIR-2 is ratified and "belongs to the NEXT build group"). **Falls out to
+  if the week holds** (VX-160 is ratified and "belongs to the NEXT build group"). **Falls out to
   named follow-ons:** VX-159, the A-4 secret, VX-161 — unless she pulls one in.
 
 ## 5. Constraints (standing, restated for this phase)
 
-- **`Sync/`: zero.** Grants are local-only; R-AIR-1 changes a local fence DERIVATION (Queries), no
+- **`Sync/`: zero.** Grants are local-only; VX-163 changes a local fence DERIVATION (Queries), no
   synced column; VX-160 rides her existing op plus a new inverse in Operations. Marker 13
   untouched; no lockstep event.
 - **Schema: none** in U1–U3 (the one-stamp grouping reads the existing `mcp_grant.created_at`). The
@@ -218,7 +218,7 @@ refused with it behind.
   held `Tools/stage` claim; headless core work runs free.
 - **Baselines (13n-b's closeout):** core 2,580/295 · VariorumMCPTests 65/8 · workbook 40/6
   headless; the whole VariorumTests target 4,212/687 (standing reds VX-115 and VX-149).
-- **MOBILE PARITY:** nothing mobile-visible — grants never sync, the phone has no door, R-AIR-1
+- **MOBILE PARITY:** nothing mobile-visible — grants never sync, the phone has no door, VX-163
   changes no synced row. Say the line at closeout.
 
 ## 6. Sequencing against 13s-a (hers to rule)

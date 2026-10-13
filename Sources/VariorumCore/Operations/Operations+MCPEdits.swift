@@ -142,7 +142,8 @@ extension Operations {
     /// **`set_block_name`'s act** — `setBlockName`'s rule exactly (nil or
     /// blank clears; no touch, no churn; refused under a seal; a no-op writes
     /// nothing) plus ONE undo entry, because EVERY MCP write registers one
-    /// (P-13nb-U2-4): the old name back, the redo the new one — exact values.
+    /// (P-13nb-U2-4): the old name back, the redo the new one — exact values,
+    /// each only while the block still wears the other (VX-184 ladder round 1).
     /// Returns whether anything was written (a no-op registers nothing).
     @discardableResult
     public func setBlockName(
@@ -164,18 +165,23 @@ extension Operations {
         guard let change else { return false }
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.restoreBlockName(blockID, to: change.old) },
-            redo: { try $0.restoreBlockName(blockID, to: change.new) })
+            inverse: { try $0.restoreBlockName(blockID, from: change.new, to: change.old) },
+            redo: { try $0.restoreBlockName(blockID, from: change.old, to: change.new) })
         return true
     }
 
-    /// Both halves of the name entry: a gone block is the world moving past
-    /// the entry (quiet); a sealed note refuses and keeps it (resolvable).
-    func restoreBlockName(_ blockID: String, to name: String?) throws {
+    /// Both halves of the name entry, COMPARE-AND-SET (VX-184 ladder round 1 —
+    /// the undo-overwrite class, brought to the U4/U5 rule): `to` only while
+    /// the block is live and still wears `from`. A gone block, or a name she
+    /// gave it since (her block-name door registers no entry), is the world
+    /// moving past the entry (quiet); past that check, a sealed note refuses
+    /// and keeps it (resolvable).
+    func restoreBlockName(_ blockID: String, from: String?, to name: String?) throws {
         try database.write { db in
-            guard var block = try Block.fetchOne(db, key: blockID), block.deletedAt == nil else { return }
+            guard var block = try Block.fetchOne(db, key: blockID), block.deletedAt == nil,
+                  block.name == from
+            else { return }
             try ensurePlacementUnlocked(db, blockID: blockID)
-            guard block.name != name else { return }
             block.name = name
             block.updatedAt = date.now
             try block.update(db)

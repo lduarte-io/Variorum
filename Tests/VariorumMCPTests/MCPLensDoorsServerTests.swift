@@ -23,7 +23,7 @@ private func spec(
 }
 
 private func call(
-    _ connection: (client: Client, fd: Int32), _ name: String, _ arguments: [String: Value]
+    _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value]
 ) async throws -> (content: [Tool.Content], isError: Bool?) {
     try await connection.client.callTool(name: name, arguments: arguments)
 }
@@ -312,7 +312,10 @@ struct MCPLensReadServerTests {
             #expect(read.isError != true, "\(text(read))")
             let answer = try json(read)
             #expect(answer["lens_id"] as? String == w.lensID, "the view the blocks were read through, said")
-            let wire = blocksOf(answer).map { [$0["text"] as? String ?? "<none>", $0["via"] as? String ?? "<none>"] }
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-186): a block no longer
+            // carries its shown text twice; it names its shown take, whose entry
+            // carries the text once (`shownText`). Same assertion, new address.
+            let wire = blocksOf(answer).map { [shownText($0) ?? "<none>", $0["via"] as? String ?? "<none>"] }
             #expect(wire == [
                 ["One, bolder.", "lens"],
                 ["Two.", "lens"],
@@ -345,7 +348,10 @@ struct MCPLensReadServerTests {
                 "note_id": .string(w.note.id), "with_ids": .bool(true),
             ]))
             #expect(plain["lens_id"] == nil && blocksOf(plain).allSatisfy { $0["via"] == nil })
-            #expect(blocksOf(plain).map { $0["text"] as? String ?? "" }
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-186): a block no longer
+            // carries its shown text twice; it names its shown take, whose entry
+            // carries the text once (`shownText`). Same assertion, new address.
+            #expect(blocksOf(plain).map { shownText($0) ?? "" }
                     == ["One.", "Two.", "Three.", "Four.", "Five.", "Six.\n\nStill six.", "Seven."])
             await h.hangUp(connection)
         }
@@ -518,7 +524,10 @@ struct MCPLensReadServerTests {
             let wire = blocksOf(try json(try await call(connection, "read_note", [
                 "note_id": .string(note.id), "lens_id": .string(lensID), "with_ids": .bool(true),
             ])))
-            #expect(wire.map { [$0["block_id"] as? String ?? "", $0["text"] as? String ?? "<none>",
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-186): a block no longer
+            // carries its shown text twice; it names its shown take, whose entry
+            // carries the text once (`shownText`). Same assertion, new address.
+            #expect(wire.map { [$0["block_id"] as? String ?? "", shownText($0) ?? "<none>",
                                 $0["via"] as? String ?? "<none>"] }
                     == [[kept.block.id, "Kept.", "chosen"], [scaffold.block.id, "", "lens"]])
             // …and the text form leaves the block's prose out of the page (the

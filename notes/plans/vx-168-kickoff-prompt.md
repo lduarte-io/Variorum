@@ -1,4 +1,4 @@
-# VX-168 kickoff prompt (the per-setup client secret — the work R-AIR-14 ruled)
+# VX-168 kickoff prompt (the per-setup client secret — her Air-sitting ruling)
 
 **Her mandate (2026-10-11): U8 fell out of 13n-c at the takeover schedule. It is a PRE-LAUNCH GATE — done before
 the public launch, not before 13n-c's /Applications refresh. U7 (VX-159) is out of the launch entirely.**

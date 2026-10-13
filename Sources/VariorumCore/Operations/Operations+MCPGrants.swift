@@ -147,7 +147,7 @@ extension Operations {
     /// scope that is not a live target of its kind, a FENCED book (THE daily
     /// Journal's or a Private book's notes are shared one ask at a time — a
     /// book grant there would reach nothing; a journal-TRAIT book is a book
-    /// like any other since 13n-c's R-AIR-1), and an "always" grant on a
+    /// like any other since 13n-c's VX-163), and an "always" grant on a
     /// fenced note (the ask never offers it — R-13n-4).
     @discardableResult
     public func grantMCPAccess(_ clientID: String, _ spec: MCPGrantSpec) throws -> String {
@@ -164,7 +164,7 @@ extension Operations {
     }
 
     /// **Change… — one grant REPLACING the grants it names** (13n-c U3 —
-    /// R-AIR-4's "change its details fast"; T-U3-8, PROVISIONAL P-13nc-U3-3):
+    /// VX-270's "change its details fast"; T-U3-8, PROVISIONAL P-13nc-U3-3):
     /// the named grants are revoked and the new one minted in ONE transaction
     /// on ONE stamp, so a LOWERED rung or a shorter duration really lands (an
     /// additive grant would leave the old one live). Every replaced grant

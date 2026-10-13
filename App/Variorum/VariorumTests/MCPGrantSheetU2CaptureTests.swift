@@ -255,7 +255,7 @@ struct MCPGrantSheetU2CaptureTests {
                     size: NSSize(width: 560, height: 1100), name: "u2-pane-\(v).png")
 
                 // 8 — the ask for the second sherlock: its distinguisher and
-                // R-AIR-3's reach line (F2).
+                // VX-269's reach line (F2).
                 let ask = MCPAsk(
                     clientName: "codex", scopeKind: .book, scopeID: world.sherlockB.id,
                     title: world.sherlockB.name, rung: .suggest, fence: nil)

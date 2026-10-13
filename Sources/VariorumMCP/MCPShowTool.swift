@@ -187,7 +187,7 @@ struct MCPShowTool: Sendable {
         case .note(let noteID, _, _), .takes(let noteID, _), .lens(let noteID, _):
             return try decideNote(db, target, noteID: noteID, standing: standing)
         case .book(let bookID, let sectionID):
-            // 13n-c R-AIR-12: a book OR a gathering (read facts under
+            // 13n-c VX-273: a book OR a gathering (read facts under
             // wing-level reach — her doors open one like a book; it has no
             // chapters, so a section_id answers as a stranger's).
             let place = try MCPGrantAuthority.readPlace(db, readingID: bookID)

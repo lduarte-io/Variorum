@@ -24,7 +24,7 @@
 //  - WHO appears whenever the opener names no client (U3's place-doors open
 //    this sheet pre-filled with WHERE — `MCPGrantOpening`): the approved
 //    clients, most recently granted first.
-//  - The confirm names the place WITH its distinguisher and carries R-AIR-3's
+//  - The confirm names the place WITH its distinguisher and carries VX-269's
 //    clause (U1) — one line when it fits, else two (the U2 geometry oracle).
 //
 //  13n-c UX walk W-UX-2 — APPROVE ALONE, GRANT SEPARATE (her ruling, sitting
@@ -321,7 +321,7 @@ struct MCPGrantSheet: View {
             .padding(.top, 4)
         }
         .padding(20)
-        // 13n-c U1 made it 600 (R-AIR-3's clause); U2 keeps 600 — the confirm
+        // 13n-c U1 made it 600 (VX-269's clause); U2 keeps 600 — the confirm
         // takes a second line rather than the sheet growing past Settings'
         // window (the U2 geometry oracle, in the record).
         .frame(width: 600)
@@ -540,7 +540,7 @@ struct MCPGrantSheet: View {
         clients = opening.client == nil ? await loadedClients : []
         if chosenClientID == nil { chosenClientID = clients.first?.id }
         noteWingID = door.currentWingID
-        // 13n-c U3 (R-AIR-4): Change… opens on exactly what was shared.
+        // 13n-c U3 (VX-270): Change… opens on exactly what was shared.
         if let pre = opening.rung { rung = pre }
         if let pre = opening.duration { duration = pre }
         var single: String?
@@ -612,7 +612,7 @@ struct MCPGrantSheet: View {
 /// in the U2 record): the grant sentence on ONE line when it fits; otherwise
 /// on TWO, with only the place middle-shortened (`MCPPaneCopy.shortPlace` —
 /// it shows whole in WHERE just above), so the verb, rung, distinguisher,
-/// duration and R-AIR-3's clause always read whole. In Terminal's mono even
+/// duration and VX-269's clause always read whole. In Terminal's mono even
 /// her own example with a day distinguisher is past one line's room at 600.
 /// The parts are `MCPPaneCopy.confirmParts`; joined they are exactly
 /// `MCPPaneCopy.confirm` (pinned).

@@ -13,7 +13,7 @@
 //  register is the MCP room's (direct and technical — R-13n-5).
 //
 //  13n-c U2: the title wears the asked place's distinguisher (the one rule —
-//  mockup §1b), and a BOOK or WING ask says R-AIR-3's live reach above the
+//  mockup §1b), and a BOOK or WING ask says VX-269's live reach above the
 //  answers (the U1 ladder's F2 — every book grant says it).
 //
 //  13n-c U4 — ARRIVAL X (the brief §5; P-13nb-U2-9's arrival superseded):
@@ -70,7 +70,7 @@ struct MCPAskSheet: View {
                 .lineLimit(4)
                 .fixedSize(horizontal: false, vertical: true)
             // 13n-c U2 (the U1 ladder's F2): an answer here MINTS a book or
-            // wing grant, so R-AIR-3's clause is said here too.
+            // wing grant, so VX-269's clause is said here too.
             if let reach = MCPAskCopy.reachLine(ask, distinguisher: distinguisher) {
                 Text(reach)
                     .font(.callout)

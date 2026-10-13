@@ -8,7 +8,7 @@
 //  unlocking is hers). These are NOT a walk and the record never calls them
 //  one. A popover is another window, so its CONTENT is drawn directly
 //  (`MCPReachPopover`), as U2 drew its picker panel. The icon candidates
-//  (R-AIR-6 — 2–3 proposed, the orchestrator picks) are drawn as a labelled
+//  (VX-271 — 2–3 proposed, the orchestrator picks) are drawn as a labelled
 //  sheet of Bookcase-shaped rows. Images print as base64 chunks under
 //  `[13NC-U3-PNG <name> <part>]`.
 //
@@ -202,7 +202,7 @@ struct MCPShareFacesCaptureTests {
                         .environment(\.mcpShareRoad, road),
                     size: NSSize(width: 900, height: 420), name: "u3-bookcase-\(v).png", settle: 80)
 
-                // 2 — THE ICON CANDIDATES (R-AIR-6: the orchestrator picks;
+                // 2 — THE ICON CANDIDATES (VX-271: the orchestrator picks;
                 // PROVISIONAL, hers): Bookcase-shaped rows, one per glyph.
                 await capture(
                     VStack(alignment: .leading, spacing: 10) {
@@ -278,7 +278,7 @@ struct MCPShareFacesCaptureTests {
                         .environment(theme),
                     size: NSSize(width: 600, height: 520), name: "u3-sheet-bulk-\(v).png")
 
-                // 6 — CHANGE… (R-AIR-4): the sheet pre-filled on exactly a grant.
+                // 6 — CHANGE… (VX-270): the sheet pre-filled on exactly a grant.
                 let change = MCPReachPopover.changeOpening(
                     world.claude,
                     try #require(try await session.database.read {

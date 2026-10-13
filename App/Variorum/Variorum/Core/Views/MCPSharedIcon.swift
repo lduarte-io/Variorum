@@ -3,7 +3,7 @@
 //  Variorum (MAC ONLY) — Core/Views (the Bookcase rows and the note's
 //  indicator both render it)
 //
-//  13n-c U3 — THE ONE SHARED ICON (R-AIR-6, hers: "one consistent AI-shared
+//  13n-c U3 — THE ONE SHARED ICON (VX-271, hers: "one consistent AI-shared
 //  ICON, not text … hover names it, click shows the permission; icon language
 //  matches the sidebar set"). It REPLACES the Bookcase's "shared with AI" text
 //  chip (P-13nb-U2-11's honest-under-every-grant-shape rule carried: it draws
@@ -86,9 +86,9 @@ struct MCPSharedIcon: View {
     }
 }
 
-/// **The permission, shown** (R-AIR-6's click; R-AIR-7's why) — the popover
+/// **The permission, shown** (VX-271's click; VX-164's why) — the popover
 /// both the Bookcase icon and the note's indicator open. Settings-class words
-/// (R-AIR-8: no "AI" — the client's own name says who).
+/// (VX-272: no "AI" — the client's own name says who).
 struct MCPReachPopover: View {
     let reaches: [MCPPlaceReach]
     let road: MCPShareRoad?

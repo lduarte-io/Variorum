@@ -11,7 +11,16 @@ import GRDB
 // back, the date, the chapter filing, the rule — register none), each taking
 // the caller's `WriteGuard` FIRST inside its own write transaction (AF-10
 // (a), carried to the new acts of this unit). They decide nothing about
-// clients.
+// clients. Because those doors of hers register nothing, a VALUE restore here
+// (the date, the filing, the rule's columns) is COMPARE-AND-SET: it writes
+// only while the row still reads the value its act left there, so the UNDO
+// never overwrites what she set since (VX-184 ladder round 1, the
+// undo-overwrite class). The REDO does not yet keep that promise (VX-184
+// ladder round 2, 2026-10-13): when she has set a value BACK to the pre-act one
+// herself, ⌥⌘Z is quiet yet the entry still moves onto the redo stack
+// (`UndoStack.undo` pops any inverse that does not throw), and the redo —
+// checking only for that pre-act value — re-applies the client's act over
+// hers. VX-276 owns the fix: the redo keyed on what its inverse wrote.
 extension Operations {
     // MARK: - EDIT: put back (the tray — R-13nb-14's named IN)
 
@@ -93,7 +102,8 @@ extension Operations {
     /// own posture), on a live NOTE (a scraps group has no date), guard first;
     /// no-op-guarded (the same date writes nothing and registers nothing).
     /// ONE undo entry restoring the previous value exactly, the redo the new
-    /// one. Returns whether anything was written.
+    /// one — each only while the note still reads the other (VX-184 ladder
+    /// round 1). Returns whether anything was written.
     @discardableResult
     public func setNoteEntryDate(
         _ postID: String, entryDate: String?, undoLabel: String, guardedBy guardian: WriteGuard? = nil
@@ -111,8 +121,8 @@ extension Operations {
         guard case .some(let old) = previous else { return false }
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.restoreEntryDate(postID, to: old) },
-            redo: { try $0.restoreEntryDate(postID, to: entryDate) })
+            inverse: { try $0.restoreEntryDate(postID, from: entryDate, to: old) },
+            redo: { try $0.restoreEntryDate(postID, from: old, to: entryDate) })
         return true
     }
 
@@ -122,12 +132,14 @@ extension Operations {
             arguments: [entryDate, DateFormatter.variorumISO8601.string(from: date.now), postID])
     }
 
-    /// Both halves of the date entry: a gone note is the world moving past
-    /// the entry (quiet); the value already as asked writes nothing.
-    func restoreEntryDate(_ postID: String, to entryDate: String?) throws {
+    /// Both halves of the date entry, COMPARE-AND-SET (VX-184 ladder round 1
+    /// — the undo-overwrite class): `to` only while the note is live and still
+    /// reads `from`. A gone note, or a date she gave it since (her date door
+    /// registers no entry), is the world moving past the entry (quiet).
+    func restoreEntryDate(_ postID: String, from: String?, to entryDate: String?) throws {
         try database.write { db in
             guard let post = try Container.fetchOne(db, key: postID), post.deletedAt == nil,
-                  post.entryDate != entryDate
+                  post.entryDate == from
             else { return }
             try writeEntryDate(db, postID: postID, entryDate)
         }
@@ -140,40 +152,51 @@ extension Operations {
     /// MEMBER — an arrival has no chapter; a finished book refuses
     /// `lockedReading`, the chapter-structure rule), guard first;
     /// no-op-guarded. ONE undo entry restoring the membership's previous
-    /// chapter pointer exactly, the redo the new one. Returns whether
+    /// chapter pointer exactly, the redo the new one — on the very member
+    /// ROW the act filed (AppSpec §9's exact-row letter), each only while
+    /// that row still reads the other (VX-184 ladder round 1). Returns whether
     /// anything was written.
     @discardableResult
     public func fileNoteInChapter(
         _ postID: String, book readingID: String, section sectionID: String?,
         undoLabel: String, guardedBy guardian: WriteGuard? = nil
     ) throws -> Bool {
-        let previous: String?? = try database.write { db in
+        let landed: (previous: String??, rowID: String) = try database.write { db in
             try guardian?(db)
-            return try assignSectionRow(db, postID: postID, readingID: readingID, sectionID: sectionID)
+            let previous = try assignSectionRow(db, postID: postID, readingID: readingID, sectionID: sectionID)
+            // The row `assignSectionRow` just filed (it refuses before any
+            // write when there is none, so this read always finds it).
+            guard let row = try liveMembership(db, postID: postID, readingID: readingID) else {
+                throw OperationError.postNotInReading(postID: postID, readingID: readingID)
+            }
+            return (previous, row.id)
         }
-        guard case .some(let old) = previous else { return false }
+        guard case .some(let old) = landed.previous else { return false }
+        let rowID = landed.rowID
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.refileMembership(postID, book: readingID, section: old) },
-            redo: { try $0.refileMembership(postID, book: readingID, section: sectionID) })
+            inverse: { try $0.refileMembership(rowID, from: sectionID, to: old) },
+            redo: { try $0.refileMembership(rowID, from: old, to: sectionID) })
         return true
     }
 
-    /// Both halves of the filing entry. A membership gone (removed since) or
-    /// a reading gone is the world moving past the entry (quiet); a finished
-    /// book refuses and KEEPS the entry (resolvable — the chapter-structure
-    /// rule); a chapter deleted since is restored as the pointer it was (a
-    /// dangling pointer reads unfiled — `deleteSection`'s doctrine).
-    func refileMembership(_ postID: String, book readingID: String, section sectionID: String?) throws {
+    /// Both halves of the filing entry, COMPARE-AND-SET on the act's own
+    /// membership ROW (VX-184 ladder round 1 — the undo-overwrite class): `to`
+    /// only while that row is a live member of a live book and still reads
+    /// `from`. A membership gone (removed since — and a re-added one is a NEW
+    /// row, hers), a reading gone, or a chapter she filed it under since (her
+    /// filing registers no entry) is the world moving past the entry (quiet).
+    /// Past that check a finished book refuses and KEEPS the entry
+    /// (resolvable — the chapter-structure rule); a chapter deleted since is
+    /// restored as the pointer it was (a dangling pointer reads unfiled —
+    /// `deleteSection`'s doctrine).
+    func refileMembership(_ rowID: String, from: String?, to sectionID: String?) throws {
         try database.write { db in
-            guard let reading = try Reading.fetchOne(db, key: readingID), reading.deletedAt == nil,
-                  var membership = try ReadingPost
-                    .filter(Column("reading_id") == readingID && Column("post_id") == postID
-                        && Column("deleted_at") == nil && Column("status") == MembershipStatus.member)
-                    .fetchOne(db),
-                  membership.sectionId != sectionID
+            guard var membership = try ReadingPost.fetchOne(db, key: rowID), membership.deletedAt == nil,
+                  membership.status == .member, membership.sectionId == from,
+                  let reading = try Reading.fetchOne(db, key: membership.readingId), reading.deletedAt == nil
             else { return }
-            guard !reading.locked else { throw OperationError.lockedReading(id: readingID) }
+            guard !reading.locked else { throw OperationError.lockedReading(id: reading.id) }
             membership.sectionId = sectionID
             try membership.update(db)
         }
@@ -248,8 +271,10 @@ extension Operations {
     /// outflow/dial `wrongReadingKind`, a cleared gathering rule
     /// `gatheringRequiresRule`).
     ///
-    /// ONE undo entry (P-13nb-U2-4) restoring the three columns exactly; the
-    /// redo the written values. Seats or bells the rule's intake made STAY
+    /// ONE undo entry (P-13nb-U2-4) restoring the columns the act changed
+    /// exactly; the redo the written values — each column only while it still
+    /// reads the other, and a column the act did not change never written
+    /// (VX-184 ladder round 1). Seats or bells the rule's intake made STAY
     /// (§19: removing a rule never evicts — the P-13nb-U2-6 precedent), and a
     /// minted tag stays as vocabulary (13n-a's).
     @discardableResult
@@ -311,27 +336,46 @@ extension Operations {
             let before = result.before, after = result.after
             undoStack?.register(
                 label: undoLabel,
-                inverse: { try $0.restoreCollectingColumns(readingID, to: before) },
-                redo: { try $0.restoreCollectingColumns(readingID, to: after) })
+                inverse: { try $0.restoreCollectingColumns(readingID, from: after, to: before) },
+                redo: { try $0.restoreCollectingColumns(readingID, from: before, to: after) })
         }
         return result
     }
 
-    /// Both halves of the book-rule entry: the three columns back exactly as
-    /// they were (no intake runs — an undo is never an applying act, and
-    /// seats stay). A reading gone is the world moving past the entry.
-    func restoreCollectingColumns(_ readingID: String, to columns: MCPCollectingColumns) throws {
+    /// Both halves of the book-rule entry, COMPARE-AND-SET PER COLUMN (VX-184
+    /// ladder round 1 — the undo-overwrite class): each column the act CHANGED
+    /// (`from` and `to` differ) is written back only while it still reads
+    /// `from`; a column the act did not change is never written, so a value
+    /// she gave any column since through her rule editor's Save (which
+    /// registers no entry) is hers. No intake runs — an undo is never an
+    /// applying act, and seats stay. A reading gone, or every changed column
+    /// hers since, is the world moving past the entry (quiet).
+    func restoreCollectingColumns(
+        _ readingID: String, from: MCPCollectingColumns, to columns: MCPCollectingColumns
+    ) throws {
         try database.write { db in
             guard let reading = try Reading.fetchOne(db, key: readingID), reading.deletedAt == nil else { return }
-            guard reading.querySpec != columns.querySpec || reading.autoTagIds != columns.autoTagIDs
-                || reading.intakeSeating != columns.intakeSeating
-            else { return }
+            var querySpec = reading.querySpec, autoTagIDs = reading.autoTagIds, seating = reading.intakeSeating
+            var changed = false
+            if from.querySpec != columns.querySpec, querySpec == from.querySpec {
+                querySpec = columns.querySpec
+                changed = true
+            }
+            if from.autoTagIDs != columns.autoTagIDs, autoTagIDs == from.autoTagIDs {
+                autoTagIDs = columns.autoTagIDs
+                changed = true
+            }
+            if from.intakeSeating != columns.intakeSeating, seating == from.intakeSeating {
+                seating = columns.intakeSeating
+                changed = true
+            }
+            guard changed else { return }
             try db.execute(
                 sql: """
                     UPDATE reading SET query_spec = ?, auto_tag_ids = ?, intake_seating = ?, updated_at = ?
                     WHERE id = ?
                     """,
-                arguments: [columns.querySpec, columns.autoTagIDs, columns.intakeSeating?.rawValue,
+                arguments: [querySpec, autoTagIDs, seating?.rawValue,
                             DateFormatter.variorumISO8601.string(from: date.now), readingID])
         }
     }

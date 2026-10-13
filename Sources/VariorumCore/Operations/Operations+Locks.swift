@@ -82,21 +82,31 @@ extension Operations {
     }
 
     private func setVariantLock(_ id: String, locked: Bool) throws {
-        try database.write { db in
-            var variant = try liveVariant(db, id)
-            guard variant.locked != locked else { return }
-            // The post seal refuses everything under the post (author-
-            // ratified 2026-07-05) — including lock toggles, which would
-            // otherwise let a dirty variant's insurance commit slip into a
-            // sealed post.
-            try ensurePlacementUnlocked(db, blockID: variant.blockId)
-            let now = date.now
-            if locked, try isDirty(db, variant) {
-                _ = try insertCommit(db, variant: variant, kind: .auto, message: nil, now: now)
-            }
-            variant.locked = locked
-            variant.updatedAt = now
-            try variant.update(db)
+        try database.write { db in _ = try setVariantLockRows(db, id, locked: locked) }
+    }
+
+    /// `setVariantLock`'s row work inside the caller's transaction (VX-184 U4
+    /// — extracted byte-for-byte so the MCP door's `lock_take`/`unlock_take`
+    /// run the SAME body, insurance commit included). Returns whether it
+    /// wrote, and the insurance commit when a dirty take was locked.
+    func setVariantLockRows(
+        _ db: Database, _ id: String, locked: Bool
+    ) throws -> (changed: Bool, insured: CommitPoint?) {
+        var variant = try liveVariant(db, id)
+        guard variant.locked != locked else { return (false, nil) }
+        // The post seal refuses everything under the post (author-
+        // ratified 2026-07-05) — including lock toggles, which would
+        // otherwise let a dirty variant's insurance commit slip into a
+        // sealed post.
+        try ensurePlacementUnlocked(db, blockID: variant.blockId)
+        let now = date.now
+        var insured: CommitPoint?
+        if locked, try isDirty(db, variant) {
+            insured = try insertCommit(db, variant: variant, kind: .auto, message: nil, now: now)
         }
+        variant.locked = locked
+        variant.updatedAt = now
+        try variant.update(db)
+        return (true, insured)
     }
 }

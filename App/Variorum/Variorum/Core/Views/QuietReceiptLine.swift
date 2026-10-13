@@ -102,7 +102,7 @@ struct QuietReceiptLine: View {
                 .multilineTextAlignment(.leading)
                 .textSelection(.enabled)
                 .help(item?.text ?? "")
-            // 13n-c U3 (R-AIR-4; T-U3-6): a share receipt carries a SECOND
+            // 13n-c U3 (VX-270; T-U3-6): a share receipt carries a SECOND
             // door — "Change…" beside "Revoke ›" — drawn before the act's own
             // door, the toast's order (`StatusToast`: secondary, then
             // action). Like the first, only while such a receipt speaks.
