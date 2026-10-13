@@ -1,12 +1,13 @@
-# VX-246 — Run: MCP pane & AI docs — kickoff + plan
+# VX-246 — Run: MCP pane, docs & door fixes — kickoff + plan
 
 **STATUS: PLANNED, not started (written 2026-10-13 at VX-184's re-scope; she adds items before kickoff).**
 
 ## Kickoff message (for `/run-phase vx-246`)
 
-> Run VX-246 "Run: MCP pane & AI docs". Members are its sub-issues in Linear: VX-199 · VX-205 · VX-232 (U6)
-> and VX-197 (U7), plus any items the author adds below under **HER ADDITIONS**. One branch
-> `vx-246-mcp-pane-and-docs`, one PR `VX-246: …` (merge commit), record `notes/plans/fixes/vx-246-mcp-pane-and-docs.md`,
+> Run VX-246 "Run: MCP pane, docs & door fixes" (retitled 2026-10-13 at her word; the plan file keeps its
+> original name because tickets point at it). Members are its sub-issues in Linear: VX-199 · VX-205 · VX-232
+> (U6), VX-197 (U7), and everything under **HER ADDITIONS** below. One branch
+> `vx-246-mcp-pane-docs-fixes`, one PR `VX-246: …` (merge commit), record `notes/plans/fixes/vx-246-mcp-pane-docs-fixes.md`,
 > members close individually. Read this file in full. Then read VX-184's record
 > (`notes/plans/fixes/vx-184-mcp-launch-polish.md`): its U1–U5 UNIT RECORDs say what the door now does, and their
 > OWED sections are routed here. The binding rulings below are hers, verbatim where quoted. U7 runs LAST,
@@ -119,8 +120,17 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
   notes from building 'o ladrão de raios' through the door). Adjudicated 2026-10-13; she asked these to *"ride
   the next fix path"*:
   - **VX-252:** `create_note` returns take ids (+ optional `section_id`).
-  - **VX-253:** `save_lens` by take label. Design calls are in the ticket: no magic label value, a duplicate
-    label on one block, and the client-prefixed `aiLabel` vs the as-given `create_note` label.
+  - **VX-253:** `save_lens` by take label. **Orchestrator recommendation (2026-10-13, on the ticket; awaiting
+    her word):**
+    - Three explicit fills, never a magic word: `picks`, `label`, or `pin_chosen: true`. `picks` can ride on
+      either rule as per-block overrides.
+    - A block with no take of that label shows its chosen take and is listed in `unmatched_blocks`.
+    - Two matching takes on one block refuses the whole call, naming the blocks; the agent resolves them
+      with `picks`.
+    - Labels match exactly as stored, plus one convenience: a client's OWN suggestions match by their own
+      part. "english" also matches "claude-code · suggested · english" for claude-code, never another
+      client's. Her "english" plus the AI's suggested "english" on one block counts as two matches, so the
+      call refuses.
   - **VX-254:** content digests on write replies (stored-text digest per take; the algorithm and byte rule
     stated).
   - **VX-255:** `insert_blocks` into an existing note (a real R-VX184-1 parity gap). **Her lean (2026-10-13,
@@ -136,12 +146,10 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
   - **Item 9 → VX-197** (commented): the label split. At SUGGEST, `add_take`/`add_takes` label a take
     `"<client> · suggested[ · <label>]"` (`aiLabel`, 13n's P-13n-3 convention, "hers to re-voice"). At WRITE NEW
     and EDIT, labels are stored exactly as given (`create_note`, `import_document`, `set_take_label` —
-    P-VX195-5). **Orchestrator recommendation (2026-10-13, awaiting her word):** keep the split; it follows
-    the rung's meaning. A suggestion is marked as a suggestion inside HER writing, so her fan always says who
-    proposed it. Work she authorized it to write or edit keeps clean labels (her bilingual book's 3,843
-    "english" takes, not "claude-code · suggested · english"). The fix is the descriptions saying which
-    applies (U7). **VX-253's label match must handle suggestion labels:** argue whether "english" also
-    matches the client's own "<client> · suggested · english" (with the duplicate-label rule).
+    P-VX195-5). **RULED — R-VX246-2 (her word, 2026-10-13, verbatim):** *"it would be a mess to have claude
+    code suggested english on every label if you're having claude make a ton of htem."* Keep the split: a
+    suggestion is marked as a suggestion inside HER writing, and work she authorized it to write or edit
+    keeps clean labels. The fix is every take-writing tool's description saying which applies (U7).
   - **VX-261 (item 5, her word):** a read tool listing the client's OWN recent acts from the activity log —
     recovery after a dropped call, and resuming a long job after the agent's context is lost. Idempotency
     tokens recorded as the heavier road not taken now (a local-only table + plumbing through every creating
