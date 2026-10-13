@@ -165,3 +165,29 @@ and 2 are fixed, since the race in 1 is intermittent and a single clean run cann
 No `xcodebuild test` (the stage is held by oct12coordinator; the Mac-target pins were read, not run); no live
 Supabase reads; no reproduction of finding 1 (it needs a bootstrap-level pin); no hands-on Keychain Access /
 Passwords check; the phone's door conditions read only where shared. No product code changed.
+
+---
+
+## W. HER FOLLOW-UP (2026-10-12 night) — the tester check, and VX-110 across every user position
+
+**Facts re-read for this (code at HEAD):** Sign Out KEEPS sync custody (`KeyDoorCopy.swift:109-112` "Your library
+and its keys stay on this [device]"; the forget door folded into Sign out with no user door left —
+`EncryptionSession.swift:572-582`); account deletion keeps custody too. So a library that EVER synced stays
+"enrolled-shaped" on that device forever — whether the user is signed out for a day, lost the account, or deleted
+it. The app's own words for a fresh start: the Castle screen's compromise line ("also delete your Stargazing
+account and set sync up again", `PostureCopy.swift:326-328`) and Delete Account's "You can set sync up again later
+under a new account; your library will upload to it" (`KeyDoorCopy.swift:124-128`).
+
+| position | what Use Castle does today | what is actually true after | advice today |
+|---|---|---|---|
+| never set up sync | local-only road (correct) | this library is Castle; only finding 1 (the race) applies | fine — relaunch once and confirm it asks for Touch ID / passphrase |
+| signed in, online | full road (rotates vault + server) | Castle, account-wide | fine (finding 1 applies) |
+| signed out, can sign in | local-only road (VX-110) | THIS Mac's file is Castle; the account + server copy stay Standard; next sign-in silently reverts this Mac | **sign in first, then Use Castle** |
+| lost the password, still has the email | same as above | same | reset the password, sign in, then Use Castle; delete the old account if leaving it |
+| lost the account entirely / abandoning it | local-only road | THIS Mac's file is genuinely Castle (and stays so unless that old account is ever signed into again); the OLD account's server copy stays Standard, frozen at the last sync — openable by someone holding BOTH her Apple account and that account's password; other devices never follow; the Done screen's "your other devices will ask" is false | Castle on this Mac does protect the local library; the old server copy can only be removed by deleting that account (needs a sign-in — a password reset by email is the road); then a NEW account's sync, set up from a Castle library, is born Castle (decision 17 + corner 26 — the vault takes the library's posture; NOT exercised by this audit's tests — verify before advising it) |
+
+**Consequence for the VX-110 fix:** a flat "refuse unless signed in" would TRAP the lost-account user (no forget
+door; custody held forever). The fix needs two roads: (a) signed out but the account is hers → "sign in first, so
+the account and your other devices come along"; (b) "switch this Mac only" with an HONEST Done (this Mac's library
+is in Castle; the old account's sync copy is unchanged — delete that account to remove it; signing back into it
+returns this Mac to Standard). Product behavior + copy → hers (QUESTIONS when the fix ticket runs).
