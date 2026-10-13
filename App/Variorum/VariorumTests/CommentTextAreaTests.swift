@@ -29,6 +29,7 @@
 
 import AppKit
 import Foundation
+import Observation
 import SwiftUI
 import Testing
 import VariorumCore
@@ -90,6 +91,21 @@ struct CommentPanelGeometryRuleTests {
 }
 
 // MARK: - The control, mounted
+
+/// The undo pin's draft — the panel model's `addDraft` road, an observed
+/// value the area binds to and the "panel" clears.
+@Observable private final class UndoPinDraft { var text = "" }
+
+private struct UndoPinHost: View {
+    @Bindable var draft: UndoPinDraft
+    var body: some View {
+        CommentTextArea(
+            text: $draft.text,
+            style: CommentTextStyle(tokens: .terminalLight, ink: VoiceTokens.terminalLight.ink),
+            placeholder: "Write a comment…", growsWithText: false)
+            .frame(width: 400, height: 200)
+    }
+}
 
 @MainActor
 @Suite("The comment writing area, mounted offscreen (VX-179 U3)", .serialized)
@@ -356,19 +372,8 @@ struct CommentTextAreaMountedTests {
     /// replacement ends it. ⌘Z's road is `undo:` up the responder chain to
     /// the window, which undoes through the first responder's manager.
     @Test func undoAfterTheAreaIsClearedForHerCannotReplayTheOldText() async throws {
-        final class Draft: ObservableObject { @Published var text = "" }
-        struct Bound: View {
-            @ObservedObject var draft: Draft
-            var body: some View {
-                CommentTextArea(
-                    text: $draft.text,
-                    style: CommentTextStyle(tokens: .terminalLight, ink: VoiceTokens.terminalLight.ink),
-                    placeholder: "Write a comment…", growsWithText: false)
-                    .frame(width: 400, height: 200)
-            }
-        }
-        let draft = Draft()
-        let hosting = NSHostingView(rootView: Bound(draft: draft))
+        let draft = UndoPinDraft()
+        let hosting = NSHostingView(rootView: UndoPinHost(draft: draft))
         hosting.frame = NSRect(x: 0, y: 0, width: 400, height: 200)
         let window = NSWindow(
             contentRect: NSRect(x: -20_000, y: -20_000, width: 400, height: 200),
