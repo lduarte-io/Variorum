@@ -129,6 +129,23 @@ struct EncryptionView: View {
         "Key replacement didn't finish on this device — sync is paused until it completes. "
         + "Sign in first, then run Replace Encryption Keys from this tab; nothing is lost."
 
+    /// VX-110 (the ticket's item 2 — VX-99 round 3's NIT): the banner names
+    /// the PENDING MARKER's act — the panes' one rule. A marker that enters
+    /// Castle (the switch, or a follow into Castle) speaks
+    /// `ceremonyResumeTitle`, on either arm (its resume needs no session on
+    /// the local road, so "sign in first" would mis-direct); a key
+    /// replacement keeps the two sentences above; an unknown act (no read
+    /// wired, an undecodable marker) keeps them too.
+    static func rekeyIncompletePrompt(for act: CeremonyAct?, signedIn: Bool) -> String {
+        if let act, act.entersCastle { return ProtectionCopy.ceremonyResumeTitle(act) }
+        return signedIn ? rekeyIncompletePrompt : rekeyIncompleteSignedOutPrompt
+    }
+
+    /// The banner's door, by the same act (the panes' label rule).
+    static func rekeyIncompleteDoorLabel(for act: CeremonyAct?) -> String {
+        act?.entersCastle == true ? ProtectionCopy.finishEnteringCastleDoor : ProtectionCopy.finishReplacingKeysDoor
+    }
+
     /// ISO-8601 stamp → a human date ("Aug 28, 2026"); nil in, nil out.
     static func displayDate(_ stamp: String?) -> String? {
         guard let stamp, stamp.count >= 10 else { return nil }
@@ -170,7 +187,8 @@ struct EncryptionView: View {
                     // Ladder R2-1: over the signed-out arm the door's run
                     // could only fail — the signal stays, the prescription
                     // is sign-in-first, the door returns with the session.
-                    Text(Self.rekeyIncompleteSignedOutPrompt)
+                    // VX-110: by the marker's act.
+                    Text(Self.rekeyIncompletePrompt(for: encryption.rekeyIncompleteAct, signedIn: false))
                         .pageCaptionWarning(pageStyle)
                         .fixedSize(horizontal: false, vertical: true)
                 } else {
@@ -655,13 +673,15 @@ struct EncryptionView: View {
     /// the rerun is one act away whichever window the crash left.
     @ViewBuilder
     private var rekeyIncompleteBanner: some View {
-        Text(Self.rekeyIncompletePrompt)
+        // VX-110 (item 2): the words and the door name the marker's act.
+        Text(Self.rekeyIncompletePrompt(for: encryption.rekeyIncompleteAct, signedIn: true))
             .pageCaptionWarning(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
         if encryption.replaceKeysDoor != nil {
             // pre-13x 3b: the same door — the root opens the marker's RESUME
             // when one is pending (the ceremony's resume road).
-            PageDoor(ProtectionCopy.finishReplacingKeysDoor, form: .inlineAct, style: pageStyle) {
+            PageDoor(Self.rekeyIncompleteDoorLabel(for: encryption.rekeyIncompleteAct),
+                     form: .inlineAct, style: pageStyle) {
                 openReplaceKeys(passphrase: nil, words: nil)
             }
             .disabled(encryption.busy)

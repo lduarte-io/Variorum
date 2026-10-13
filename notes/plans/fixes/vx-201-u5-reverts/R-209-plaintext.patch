@@ -1,0 +1,13 @@
+diff --git a/App/Variorum/Shared/LibraryOpenModel.swift b/App/Variorum/Shared/LibraryOpenModel.swift
+index be1f2f09..5e481f63 100644
+--- a/App/Variorum/Shared/LibraryOpenModel.swift
++++ b/App/Variorum/Shared/LibraryOpenModel.swift
+@@ -320,7 +320,7 @@ final class LibraryOpenModel {
+         guard currentIsCastle, let incoming else { return false }
+         switch incoming {
+         case .plaintextExport, .plaintextLibrary:
+-            return true
++            return false  // R-209-plaintext (VX-209 revert): the export arm answers no line
+         case .encryptedLibrary(_, let keyFile), .snapshotPair(_, let keyFile),
+              .folderHoldingPair(_, let keyFile):
+             guard let envelope = try? StoreKeyEnvelope.load(at: keyFile) else { return false }

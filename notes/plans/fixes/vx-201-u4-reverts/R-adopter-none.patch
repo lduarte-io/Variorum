@@ -1,0 +1,13 @@
+diff --git a/App/Variorum/Variorum/Features/Settings/AppSettingsView.swift b/App/Variorum/Variorum/Features/Settings/AppSettingsView.swift
+index bd635e44..ac23ce5f 100644
+--- a/App/Variorum/Variorum/Features/Settings/AppSettingsView.swift
++++ b/App/Variorum/Variorum/Features/Settings/AppSettingsView.swift
+@@ -177,8 +177,6 @@ struct AppSettingsView: View {
+         // VX-206 — a ceremony opened from Protection ENDS on Protection: on a
+         // fresh window (the re-key's reopen rebuilt this one at General) and
+         // on a window already up (the request changing).
+-        .onAppear { adoptProtectionRequest() }
+-        .onChange(of: protection?.settingsRequest) { _, _ in adoptProtectionRequest() }
+     }
+ 
+     /// VX-206 — the ceremony's request, adopted once each (the controller's

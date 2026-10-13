@@ -1,0 +1,13 @@
+diff --git a/App/Variorum/Shared/PostureCopy.swift b/App/Variorum/Shared/PostureCopy.swift
+index 2c24110a..daef0000 100644
+--- a/App/Variorum/Shared/PostureCopy.swift
++++ b/App/Variorum/Shared/PostureCopy.swift
+@@ -537,7 +537,7 @@ nonisolated extension ProtectionCopy {
+     /// The Done's export line by the outcome — nil unless the road entered
+     /// Castle (both models; all four faces).
+     static func plaintextExportsLine(for outcome: PostureSwitchRunner.Outcome?) -> String? {
+-        outcome?.entersCastle == true ? plaintextExportsNotCovered : nil
++        nil  // R-f: the Castle process says nothing about plain-text exports
+     }
+ 
+     static let deleteOldBackupsTitle = "Delete the backups Variorum made before today?"

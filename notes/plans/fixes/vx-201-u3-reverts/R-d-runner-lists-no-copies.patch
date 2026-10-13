@@ -1,0 +1,13 @@
+diff --git a/App/Variorum/Shared/PostureSwitch.swift b/App/Variorum/Shared/PostureSwitch.swift
+index fda3c7ad..1f9f1da3 100644
+--- a/App/Variorum/Shared/PostureSwitch.swift
++++ b/App/Variorum/Shared/PostureSwitch.swift
+@@ -1368,7 +1368,7 @@ final class PostureSwitchRunner {
+             // VX-203: the ONE listing site the ceremony, the follow and the
+             // resume share — the whole-library copies a 13x adoption set
+             // aside beside the store ride the pairs' rule (auditor B1d).
+-            libraryCopies = leaves.preSwitchLibraryCopies(keep)
++            libraryCopies = []  // R-d: the pre-VX-203 offer lists the snapshot pairs alone
+             if !libraryCopies.isEmpty {
+                 leaves.log("posture switch: \(libraryCopies.count) set-aside library copies still open through the Apple account — offered with the pairs")
+             }

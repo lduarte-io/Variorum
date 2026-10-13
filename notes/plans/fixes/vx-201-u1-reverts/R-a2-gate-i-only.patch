@@ -1,0 +1,13 @@
+diff --git a/App/Variorum/Shared/AppBootstrap.swift b/App/Variorum/Shared/AppBootstrap.swift
+index a558b996..ec09216a 100644
+--- a/App/Variorum/Shared/AppBootstrap.swift
++++ b/App/Variorum/Shared/AppBootstrap.swift
+@@ -545,7 +545,7 @@ final class AppBootstrap {
+             // no gate. The async marker read is safe only on that road; the
+             // in-memory flags are re-read after it, and the save rides the
+             // custody queue, ahead of any custody move enqueued later.
+-            if let unlockedKey, !switchInProgress, !currentEffectiveGate.isDemanded {
++            if let unlockedKey, !currentEffectiveGate.isDemanded {
+                 let protection = protection
+                 relanding = Task { [weak self] in
+                     let pending = await protection.readSwitchPending?() ?? false

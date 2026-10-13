@@ -226,6 +226,15 @@ struct LibraryOpenSheet: View {
             case .confirm:
                 Text(LibraryOpenCopy.confirmLead)
                     .font(.callout.weight(.semibold))
+                // VX-209: the current library is Castle and this copy is
+                // not — said before the press, in the alarm voice the Castle
+                // notices speak in (PROVISIONAL placement).
+                if model.leavesCastle {
+                    Text(LibraryOpenCopy.confirmLeavesCastle)
+                        .font(.caption)
+                        .alarmVoice()
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 Text(model.willStepAside
                      ? LibraryOpenCopy.confirmStepAside
                      : LibraryOpenCopy.confirmFreshSlot)

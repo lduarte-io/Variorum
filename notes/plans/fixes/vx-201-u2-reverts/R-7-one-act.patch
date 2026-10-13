@@ -1,0 +1,43 @@
+diff --git a/App/Variorum/Shared/EncryptionViews.swift b/App/Variorum/Shared/EncryptionViews.swift
+index 34f56d81..92feba90 100644
+--- a/App/Variorum/Shared/EncryptionViews.swift
++++ b/App/Variorum/Shared/EncryptionViews.swift
+@@ -137,13 +137,12 @@ struct EncryptionView: View {
+     /// replacement keeps the two sentences above; an unknown act (no read
+     /// wired, an undecodable marker) keeps them too.
+     static func rekeyIncompletePrompt(for act: CeremonyAct?, signedIn: Bool) -> String {
+-        if let act, act.entersCastle { return ProtectionCopy.ceremonyResumeTitle(act) }
+         return signedIn ? rekeyIncompletePrompt : rekeyIncompleteSignedOutPrompt
+     }
+ 
+     /// The banner's door, by the same act (the panes' label rule).
+     static func rekeyIncompleteDoorLabel(for act: CeremonyAct?) -> String {
+-        act?.entersCastle == true ? ProtectionCopy.finishEnteringCastleDoor : ProtectionCopy.finishReplacingKeysDoor
++        ProtectionCopy.finishReplacingKeysDoor
+     }
+ 
+     /// ISO-8601 stamp → a human date ("Aug 28, 2026"); nil in, nil out.
+diff --git a/App/Variorum/Shared/SyncStatusViews.swift b/App/Variorum/Shared/SyncStatusViews.swift
+index 090e1bdc..68945836 100644
+--- a/App/Variorum/Shared/SyncStatusViews.swift
++++ b/App/Variorum/Shared/SyncStatusViews.swift
+@@ -241,7 +241,7 @@ nonisolated struct SyncRowFace: Equatable {
+     /// pending marker's act — a switch into Castle is not a key replacement
+     /// in the words she reads (the panes' label rule, `entersCastle`).
+     static func rekeyIncompleteDoorLabel(for act: CeremonyAct?) -> String {
+-        act?.entersCastle == true ? "Finish entering Castle…" : "Finish key replacement…"
++        "Finish key replacement…"
+     }
+ 
+     /// The door's words — the platform's own, identical to the Mac menu's
+@@ -521,9 +521,7 @@ struct SyncStatusRow: View {
+     /// VX-110 (item 2 — PROVISIONAL words): the row line by the pending
+     /// marker's act; the older line for a replacement or an unknown act.
+     static func rekeyIncompleteLabel(for act: CeremonyAct?) -> String {
+-        act?.entersCastle == true
+-            ? "Sync paused — entering Castle didn't finish on this device"
+-            : rekeyIncompleteLabel
++        rekeyIncompleteLabel
+     }
+ 
+     private var lastSyncLabel: String {

@@ -66,6 +66,12 @@ final class LibraryOpenModel {
     private(set) var willStepAside = false
     private(set) var sourceInICloudDrive = false
     private(set) var isPlaintextRoad = false
+    /// VX-209: the library standing here is Castle and the picked copy is
+    /// not — the confirm says so (`LibraryOpenCopy.confirmLeavesCastle`).
+    private(set) var leavesCastle = false
+    /// The classifier's verdict the road was settled from (the Castle
+    /// line reads the picked copy's own key file from it).
+    private var incomingVerdict: LibraryClassifier.Verdict?
 
     /// What the flow settled on (set entering `.confirm`).
     private enum Road {
@@ -107,6 +113,7 @@ final class LibraryOpenModel {
 
     private func land(_ verdict: LibraryClassifier.Verdict) async {
         defer { busy = false }
+        incomingVerdict = verdict
         switch verdict {
         case .encryptedLibrary(let store, let keyFile),
              .snapshotPair(let store, let keyFile),
@@ -284,7 +291,46 @@ final class LibraryOpenModel {
         sourceAsOf = BackupRestoreCandidates.backupDate(source)
             ?? (try? FileManager.default.attributesOfItem(atPath: source.path)[.modificationDate]
                 as? Date)
+        leavesCastle = Self.leavesCastle(
+            currentIsCastle: currentLibraryIsCastle, incoming: incomingVerdict)
         phase = .confirm
+    }
+
+    /// The library standing at the slot is Castle. Only a READY library can
+    /// stand behind this door in Castle — the Castle lobby and the failure
+    /// face render no Open door, and the File menu and Settings exist only
+    /// at ready — so anywhere else it is false. The posture the device acts
+    /// on (`ProtectionController.posture`), the one the Protection pane says.
+    private var currentLibraryIsCastle: Bool {
+        guard willStepAside, case .ready = bootstrap.state else { return false }
+        return bootstrap.protection.posture == .castle
+    }
+
+    /// VX-209 — THE CONFIRM'S CASTLE LINE, decided on the CLASSIFIER's facts:
+    /// the current library is Castle AND the picked copy is not — a
+    /// plaintext export or library (its landing mints a fresh key on
+    /// Standard's road: Auto dials and the silent item), or a pair whose OWN
+    /// key file reads Standard by the before-sync rule (decision 8 — a
+    /// library's posture is its key file's: an Apple copy, or no passphrase
+    /// copy at all; `Posture.derive` with no vault word and no custody in
+    /// view). An unreadable key file decides nothing (the open refuses it).
+    nonisolated static func leavesCastle(
+        currentIsCastle: Bool, incoming: LibraryClassifier.Verdict?
+    ) -> Bool {
+        guard currentIsCastle, let incoming else { return false }
+        switch incoming {
+        case .plaintextExport, .plaintextLibrary:
+            return true
+        case .encryptedLibrary(_, let keyFile), .snapshotPair(_, let keyFile),
+             .folderHoldingPair(_, let keyFile):
+            guard let envelope = try? StoreKeyEnvelope.load(at: keyFile) else { return false }
+            return Posture.derive(
+                legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: envelope,
+                rawKeyCustody: .unknown, enrolled: false).acting == .standard
+        case .folderHoldingStores, .bareStoreWithoutKeyFile, .newerSchema,
+             .notAVariorumStore, .unreadable:
+            return false
+        }
     }
 
     // MARK: - Step 4: adopt (the U1 brain + the collision rule's write +

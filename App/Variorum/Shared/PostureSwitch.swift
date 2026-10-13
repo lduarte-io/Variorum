@@ -124,6 +124,19 @@ nonisolated enum PostureSwitchError: Error, Equatable, Sendable {
     /// written, never run as the local-only road (steps 4–7 alone would
     /// rotate nothing and the Done would claim otherwise).
     case replaceKeysNeedsSync
+    /// VX-110: Use Castle reached the runner signed OUT while this library
+    /// holds its sync account's keys — the local road would leave the
+    /// account Standard and the next signed-in ready would silently revert
+    /// this Mac. The two doors decide (sign in, or this Mac only); refused
+    /// before anything is written.
+    case signInOrThisDeviceOnly
+    /// VX-110: This Mac Only was chosen, but a session exists at the act
+    /// (signed in while the ceremony was open) — the account-wide road is
+    /// a separate press; refused before anything is written.
+    case thisDeviceOnlyWhileSignedIn
+    /// VX-110: the old account's keys could not be forgotten (the re-read
+    /// still found them) — nothing else is done.
+    case syncKeysNotForgotten
 }
 
 @MainActor
@@ -156,6 +169,11 @@ final class PostureSwitchRunner {
         /// pre-switch backup with no fresh one beside them would be an
         /// offer to delete the only backups that exist.
         var preSwitchSnapshots: [URL]
+        /// VX-203: the whole-library copies a 13x adoption set aside beside
+        /// the store (`Previous Libraries/<stamp>/`, the adopt safety copy)
+        /// that still open through the Apple account — listed under the same
+        /// rule as the pairs, deleted whole by the same offer.
+        var preSwitchLibraryCopies: [URL] = []
         /// pre-13x ladder round 1, F2 (MAJOR-2): what step 6's fresh
         /// snapshot did — the Done reads it (copy §2b's ordinary line claims
         /// "A fresh backup was made under it"; a FAILED snapshot renders the
@@ -177,6 +195,15 @@ final class PostureSwitchRunner {
         /// device's own Use Castle landed, and the ACCOUNT left Castle on
         /// another device before the resume (`otherDeviceName` names it).
         var otherDeviceDay: String? = nil
+        /// VX-110: the road entered Castle on THIS DEVICE ONLY — this
+        /// library's sync account and its server copy were not touched, and
+        /// this device forgot that account's keys. The Done says so (never
+        /// "your other devices will ask").
+        var thisDeviceOnly: Bool = false
+
+        /// VX-203: the offer follows the Done when anything was listed —
+        /// pairs, set-aside library copies, or both.
+        var hasOffer: Bool { !preSwitchSnapshots.isEmpty || !preSwitchLibraryCopies.isEmpty }
     }
 
     /// pre-13x 2c (the 2b adjudication's item 6): the seams a scripted
@@ -278,6 +305,15 @@ final class PostureSwitchRunner {
         var preSwitchSnapshots: @Sendable (_ keep: String) -> [URL]
         /// Remove pairs (the snapshot and its key file), returning how many.
         var deleteSnapshotPairs: @Sendable ([URL]) -> Int
+        /// VX-203: the Apple-openable copies a 13x adoption set aside beside
+        /// the store, none under `keep` (production:
+        /// `LibraryAdoption.appleOpenableAsideCopies`). Inert in the scripted
+        /// worlds.
+        var preSwitchLibraryCopies: @Sendable (_ keep: String) -> [URL] = { _ in [] }
+        /// VX-203: remove those copies, each stamp folder whole, returning how
+        /// many (production: `LibraryAdoption.removeAsideCopy`, which re-runs
+        /// the qualification and refuses anything else).
+        var deleteLibraryCopies: @Sendable ([URL]) -> Int = { _ in 0 }
         var defaults: @Sendable () -> UserDefaults
         /// The controller's launch reconcile (the posture re-derives).
         var reconcile: @MainActor () async -> Void
@@ -301,6 +337,16 @@ final class PostureSwitchRunner {
         /// pins advance the emulated mirror's clock — or nothing, to prove
         /// the server's completion guard and the runner's re-walk alone.
         var horizonWait: (@Sendable () async throws -> Void)? = nil
+        /// VX-202 (gate i): the runner's clear of the bootstrap's in-flight
+        /// switch flag (`AppBootstrap.endSwitch`), called once the switch's
+        /// custody move has landed. Inert in the scripted worlds.
+        var endSwitch: @MainActor () -> Void = {}
+        /// VX-110: forget this library's sync account keys on this device —
+        /// production: `EncryptionSession.forgetDeviceKeys` (the material
+        /// goes from every item and the session; the identity stays). nil ⇒
+        /// the custody store's own clear (the same act). The runner re-reads
+        /// custody afterwards and refuses unless the material is gone.
+        var forgetSyncKeys: (@MainActor () async -> Void)? = nil
     }
 
     /// pre-13x ladder round 1, F1 (BLOCKER-1): how many times the clearing
@@ -391,6 +437,11 @@ final class PostureSwitchRunner {
         /// the word the door (`appleKeyReadable`) and the belt
         /// (`appleHeldCopyForStandard`) already act on.
         var vaultHasAppleHeldCopy: Bool? = nil
+        /// VX-110: no session, while this library's custody holds its sync
+        /// account's key MATERIAL (an identity-only record holds none) —
+        /// the state from which the local road's Castle silently reverts at
+        /// the next signed-in ready. Use Castle forks to the two doors here.
+        var signedOutHoldingSyncKeys: Bool = false
     }
 
     /// F3 (MINOR-N4): the door-time reading of what the belt enforces at
@@ -416,7 +467,8 @@ final class PostureSwitchRunner {
         let custody = await leaves.keyStore.offMain { $0.load() }
         guard let vault = leaves.vault, leaves.transport != nil, signedIn, custody != nil else {
             return DoorFacts(enrolled: false, rotationInProgress: false, vaultUpdatedAt: nil,
-                             vaultHasRecoveryWrap: false)
+                             vaultHasRecoveryWrap: false,
+                             signedOutHoldingSyncKeys: !signedIn && custody != nil)
         }
         guard let fetched = try await vault.fetchVault() else {
             return DoorFacts(enrolled: false, rotationInProgress: false, vaultUpdatedAt: nil,
@@ -441,9 +493,15 @@ final class PostureSwitchRunner {
     /// copy (the ceremony's job); `recoveryWords`: the twelve words in
     /// hand (generated + confirmed, or typed) — nil ONLY for a library
     /// whose vault should carry no recovery wrap (the ceremony decides).
+    /// VX-110 — `thisDeviceOnly`: the second of the two doors a signed-out
+    /// library holding its sync account's keys is offered (the first is
+    /// Sign In…). This device FORGETS that account's keys first, then takes
+    /// the local road (steps 4–7); the account and its server copy are not
+    /// touched, and the Done says exactly that.
     @discardableResult
-    func enterCastle(passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
-        try await run(entersCastle: true, passphrase: passphrase, recoveryWords: recoveryWords)
+    func enterCastle(passphrase: String, recoveryWords: [String]?, thisDeviceOnly: Bool = false) async throws -> Outcome {
+        try await run(entersCastle: true, passphrase: passphrase, recoveryWords: recoveryWords,
+                      thisDeviceOnly: thisDeviceOnly)
     }
 
     /// REPLACE ALL KEYS (batch 3's door over this runner): §4's steps 1–4
@@ -456,9 +514,12 @@ final class PostureSwitchRunner {
         try await run(entersCastle: false, passphrase: passphrase, recoveryWords: recoveryWords)
     }
 
-    private func run(entersCastle: Bool, passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
+    private func run(
+        entersCastle: Bool, passphrase: String, recoveryWords: [String]?, thisDeviceOnly: Bool = false
+    ) async throws -> Outcome {
         try await balancingSync { road in
-            try await runCeremony(road: road, entersCastle: entersCastle, passphrase: passphrase, recoveryWords: recoveryWords)
+            try await runCeremony(road: road, entersCastle: entersCastle, passphrase: passphrase,
+                                  recoveryWords: recoveryWords, thisDeviceOnly: thisDeviceOnly)
         }
     }
 
@@ -505,7 +566,9 @@ final class PostureSwitchRunner {
         }
     }
 
-    private func runCeremony(road: UUID, entersCastle: Bool, passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
+    private func runCeremony(
+        road: UUID, entersCastle: Bool, passphrase: String, recoveryWords: [String]?, thisDeviceOnly: Bool
+    ) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
             throw PostureSwitchError.switchInProgress(pending.step, act: CeremonyAct(resuming: pending))
@@ -535,6 +598,19 @@ final class PostureSwitchRunner {
         guard enrolled || entersCastle else {
             leaves.log("posture switch: Replace All Keys reached the runner without the enrolled library in hand (vault, transport, session, custody) — refused before anything is written (decision 9)")
             throw PostureSwitchError.replaceKeysNeedsSync
+        }
+        // VX-110 — the two doors' belt. Signed out with the sync account's
+        // key MATERIAL in custody, the local road would leave the account
+        // Standard and keep that material: the next signed-in ready's
+        // follow-into-Standard would silently undo this Castle. That road
+        // runs only as This Mac Only, which forgets the material first.
+        if entersCastle, thisDeviceOnly, signedIn {
+            leaves.log("posture switch: the this-device-only road reached the runner with a session — refused before anything is written (the account-wide switch is its own press)")
+            throw PostureSwitchError.thisDeviceOnlyWhileSignedIn
+        }
+        if entersCastle, !thisDeviceOnly, !signedIn, custody != nil {
+            leaves.log("posture switch: Use Castle reached the runner signed out while custody holds the sync account's keys — refused before anything is written (the two doors decide)")
+            throw PostureSwitchError.signInOrThisDeviceOnly
         }
         // 17l item 5 (RUN B B3): the derive moved INTO the branches — the
         // enrolled road derives against the FETCHED vault (an unchanged
@@ -690,25 +766,67 @@ final class PostureSwitchRunner {
             material = final.material
             reencrypted = final.reencrypted
         } else {
-            secrets = try await Task.detached(priority: .userInitiated) {
-                try RotationSecrets.derive(passphrase: passphrase, recoveryWords: recoveryWords)
-            }.value
+            if thisDeviceOnly {
+                // VX-110 — THIS MAC ONLY forgets FIRST: the flag the resume
+                // reads (the marker cannot carry it), then the forget,
+                // verified, all before the first marker — so no marker of
+                // this road ever stands beside the old account's material.
+                setThisDeviceOnlyFlag(true)
+                do {
+                    try await forgetSyncKeysVerified()
+                } catch {
+                    setThisDeviceOnlyFlag(false)
+                    throw error
+                }
+            } else {
+                // VX-201 ladder R1-3: a STALE This-Mac-Only flag (a death
+                // between an earlier road's flag write and its first marker
+                // orphans it — no marker, no resume, no clear) must not
+                // dress THIS plain road's resume in the This-Mac-Only Done —
+                // wiped before the first marker, exactly where the real road
+                // sets it.
+                setThisDeviceOnlyFlag(false)
+            }
+            do {
+                secrets = try await Task.detached(priority: .userInitiated) {
+                    try RotationSecrets.derive(passphrase: passphrase, recoveryWords: recoveryWords)
+                }.value
+            } catch {
+                if thisDeviceOnly { setThisDeviceOnlyFlag(false) }
+                throw error
+            }
             // VX-99 (local-only road — no vault): since round 2's finding 4
             // only USE CASTLE reaches this road (Replace All Keys refuses
             // above), and entering Castle never carries an Apple copy.
             appleKeyForKeyFile = nil
-            leaves.log("posture switch: local-only — steps 4–7 only")
+            leaves.log("posture switch: local-only — steps 4–7 only\(thisDeviceOnly ? " (this device only: the sync account's keys forgotten)" : "")")
         }
 
         // ————— 4–6: the library, custody, the snapshot —————
-        let outcome = try await rekeyCustodyAndSnapshot(
+        var outcome = try await rekeyCustodyAndSnapshot(
             entersCastle: entersCastle, appleKey: appleKeyForKeyFile, libraryKey: libraryKey,
             keyFile: KeyFileInputs(passphrase: passphrase, kdf: secrets.kdf, recoveryWords: recoveryWords,
                                    recoveryWrapDigest: recoveryWrapDigest),
             material: material, reencrypted: reencrypted, stamp: stamp,
             listPreSwitchPairs: entersCastle)
+        outcome.thisDeviceOnly = thisDeviceOnly
         phase = .done
         return outcome
+    }
+
+    /// VX-110: the forget, then the proof — a re-read of custody must find
+    /// no material (in Standard the silent item answers without a prompt).
+    private func forgetSyncKeysVerified() async throws {
+        if let forget = leaves.forgetSyncKeys {
+            await forget()
+        } else {
+            await leaves.keyStore.offMain { $0.clear() }
+        }
+        guard await leaves.keyStore.offMain({ $0.load() }) == nil else {
+            leaves.log("posture switch: the sync account's keys are still readable after the forget — refused before anything else is written")
+            throw PostureSwitchError.syncKeysNotForgotten
+        }
+        leaves.log("posture switch: this device forgot the sync account's keys (the identity stays)")
     }
 
     // MARK: - pre-13x 2c: THE FOLLOW (§7 — the other devices)
@@ -1103,6 +1221,9 @@ final class PostureSwitchRunner {
             oldKeyFingerprint: oldFingerprint, newKeyFingerprint: newFingerprint,
             newCorpusKeyID: material?.corpusKeyID, startedAt: stamp, follow: followFlag))
         try await writeNewKeyFile(newKey: newKey, appleKey: appleKey, keyFile: keyFile, material: material)
+        // VX-202 (belt c): again once the new key file exists — a library
+        // that had none until now has its store id only from here.
+        markSwitchPending(true)
         try await swapLibrary(from: libraryKey, to: newKey)
         try await writeMarker(RotationMarker(
             step: .custody, entersCastle: entersCastle,
@@ -1111,13 +1232,14 @@ final class PostureSwitchRunner {
 
         // ————— 5. CUSTODY (both items) —————
         try await moveCustodyForSwitch(entersCastle: entersCastle, accountPosture: accountPosture)
+        leaves.endSwitch()  // VX-202 (gate i): custody landed
         try await writeMarker(RotationMarker(
             step: .snapshot, entersCastle: entersCastle,
             oldKeyFingerprint: oldFingerprint, newKeyFingerprint: newFingerprint,
             newCorpusKeyID: material?.corpusKeyID, startedAt: stamp, follow: followFlag))
 
         // ————— 6. THE FRESH SNAPSHOT PAIR + the insurance —————
-        let (insuranceOff, preSwitch, snapshot) = await snapshotAndInsurance(
+        let (insuranceOff, preSwitch, libraryCopies, snapshot) = await snapshotAndInsurance(
             entersCastle: entersCastle, newFingerprint: newFingerprint,
             listPreSwitchPairs: listPreSwitchPairs)
         // pre-13x 2d.4: a follow under a Castle account retires the old
@@ -1130,7 +1252,8 @@ final class PostureSwitchRunner {
         leaves.log("posture switch: \(entersCastle ? "Castle entered" : "keys replaced") — library key \(newFingerprint.prefix(8))")
         return Outcome(
             entersCastle: entersCastle, newKeyFingerprint: newFingerprint,
-            insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch, freshSnapshot: snapshot,
+            insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch,
+            preSwitchLibraryCopies: libraryCopies, freshSnapshot: snapshot,
             reencrypted: reencrypted, material: material)
     }
 
@@ -1225,7 +1348,7 @@ final class PostureSwitchRunner {
 
     private func snapshotAndInsurance(
         entersCastle: Bool, newFingerprint: String, listPreSwitchPairs: Bool
-    ) async -> (insuranceOff: Bool, preSwitch: [URL], snapshot: FreshSnapshot) {
+    ) async -> (insuranceOff: Bool, preSwitch: [URL], libraryCopies: [URL], snapshot: FreshSnapshot) {
         phase = .snapshotting
         // F2 (MAJOR-2): the fresh pair's fate is READ, not discarded — the
         // offer below lists the pre-switch pairs only over a WRITTEN one
@@ -1246,10 +1369,19 @@ final class PostureSwitchRunner {
             }
         }
         var preSwitch: [URL] = []
+        var libraryCopies: [URL] = []
         if listPreSwitchPairs, case .written = snapshot {
-            preSwitch = leaves.preSwitchSnapshots(StoreKeyEnvelope.shortFingerprint(newFingerprint))
+            let keep = StoreKeyEnvelope.shortFingerprint(newFingerprint)
+            preSwitch = leaves.preSwitchSnapshots(keep)
+            // VX-203: the ONE listing site the ceremony, the follow and the
+            // resume share — the whole-library copies a 13x adoption set
+            // aside beside the store ride the pairs' rule (auditor B1d).
+            libraryCopies = leaves.preSwitchLibraryCopies(keep)
+            if !libraryCopies.isEmpty {
+                leaves.log("posture switch: \(libraryCopies.count) set-aside library copies still open through the Apple account — offered with the pairs")
+            }
         }
-        return (insuranceOff, preSwitch, snapshot)
+        return (insuranceOff, preSwitch, libraryCopies, snapshot)
     }
 
     /// The Apple-held copy KEPT under Standard's Replace All Keys (decision
@@ -1290,10 +1422,13 @@ final class PostureSwitchRunner {
     // MARK: - §7 THE OFFER's act
 
     /// Delete the app's own PRE-switch pairs the outcome listed — never a
-    /// post-switch one (the listing excluded the new fingerprint).
+    /// post-switch one (the listing excluded the new fingerprint) — and,
+    /// VX-203, the set-aside library copies it listed, each stamp folder
+    /// whole. Returns how many of both went.
     @discardableResult
     func deletePreSwitchSnapshots(_ outcome: Outcome) -> Int {
         leaves.deleteSnapshotPairs(outcome.preSwitchSnapshots)
+            + leaves.deleteLibraryCopies(outcome.preSwitchLibraryCopies)
     }
 
     // MARK: - LEAVING CASTLE (§4's second act)
@@ -1364,6 +1499,25 @@ final class PostureSwitchRunner {
         var reencrypted = 0
         let typedPassphrase = (passphrase?.isEmpty == false) ? passphrase : nil
         let typedWords = (recoveryWords?.isEmpty == false) ? recoveryWords : nil
+
+        // VX-110 — THE LOCAL CASTLE ROAD's resume (only that road writes a
+        // marker entering Castle that is no follow and names no corpus key)
+        // CARRIES THE FORGET: it never finishes beside the sync account's
+        // material. This Mac Only forgot before its first marker, so material
+        // here came back after the crash (the ready's silent Standard enroll
+        // re-lands it on a library the crash left Standard-shaped), or the
+        // marker is a pre-fix build's silent road — either way, finishing with
+        // it in custody is the silent revert at the next signed-in ready.
+        let localCastleRoad = marker.entersCastle && !marker.isFollow && marker.newCorpusKeyID == nil
+            && marker.step != .vaultWrite && marker.step != .reencrypt
+        let thisDeviceOnlyRoad = localCastleRoad && thisDeviceOnlyFlag()
+        var forgotAtResume = false
+        if localCastleRoad, material != nil {
+            if !thisDeviceOnlyRoad { setThisDeviceOnlyFlag(true) }
+            try await forgetSyncKeysVerified()
+            material = nil
+            forgotAtResume = true
+        }
 
         switch marker.step {
         case .vaultWrite, .reencrypt:
@@ -1584,6 +1738,7 @@ final class PostureSwitchRunner {
             // moves to the target shape.
             if marker.step == .custody || marker.step == .rekeyLibrary {
                 try await moveCustodyForSwitch(entersCastle: entersCastle)
+                leaves.endSwitch()  // VX-202 (gate i): custody landed
                 try await writeMarker(marker.advanced(to: .snapshot))
             }
             fallthrough
@@ -1609,7 +1764,7 @@ final class PostureSwitchRunner {
             let oldFile = marker.oldKeyFingerprint.flatMap {
                 try? StoreKeyEnvelope.load(at: StoreKeyEnvelope.url(besideStore: leaves.storeURL, fingerprint: $0))
             }
-            let (insuranceOff, preSwitch, snapshot) = await snapshotAndInsurance(
+            let (insuranceOff, preSwitch, libraryCopies, snapshot) = await snapshotAndInsurance(
                 entersCastle: entersCastle, newFingerprint: newFingerprint,
                 listPreSwitchPairs: entersCastle && (oldFile?.apple != nil))
             // pre-13x 2d.4 (ruling 3): a resumed FOLLOW still retires the old
@@ -1624,8 +1779,10 @@ final class PostureSwitchRunner {
             phase = .done
             return Outcome(
                 entersCastle: entersCastle, newKeyFingerprint: newFingerprint,
-                insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch, freshSnapshot: snapshot,
-                reencrypted: reencrypted, material: material)
+                insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch,
+                preSwitchLibraryCopies: libraryCopies, freshSnapshot: snapshot,
+                reencrypted: reencrypted, material: material,
+                thisDeviceOnly: localCastleRoad && (thisDeviceOnlyRoad || forgotAtResume))
         }
     }
 
@@ -1663,12 +1820,54 @@ final class PostureSwitchRunner {
         }
     }
 
+    /// VX-202 (belt c): the store-id signal mirrors "the marker names a step
+    /// before custody landed" and is never behind it — set BEFORE such a
+    /// marker is written, cleared only AFTER a later marker (or the clear)
+    /// is durable.
     private func writeMarker(_ marker: RotationMarker) async throws {
+        let pending = Self.custodyPending(at: marker.step)
+        if pending { markSwitchPending(true) }
         try await leaves.database.write { db in try RotationMarker.write(marker, db) }
+        if !pending { markSwitchPending(false) }
     }
 
     private func clearMarker() async throws {
         try await leaves.database.write { db in try RotationMarker.clear(db) }
+        markSwitchPending(false)
+        setThisDeviceOnlyFlag(false)
+    }
+
+    /// VX-110: the This-Mac-Only road's per-store-id flag (beside the dials
+    /// — the marker lives in `Sync/` and cannot carry it): set before the
+    /// forget, cleared with the marker, read by the resume for the honest
+    /// Done. No store id ⇒ nothing to key it by (a library with no key file
+    /// holds no sync custody either).
+    private func setThisDeviceOnlyFlag(_ on: Bool) {
+        guard case .known(let storeID) = StoreIdentity.resolve(besideStore: leaves.storeURL) else { return }
+        ProtectionDefaults.setThisDeviceOnlySwitch(on, scope: leaves.scope, storeID: storeID, in: leaves.defaults())
+    }
+
+    private func thisDeviceOnlyFlag() -> Bool {
+        guard case .known(let storeID) = StoreIdentity.resolve(besideStore: leaves.storeURL) else { return false }
+        return ProtectionDefaults.thisDeviceOnlySwitch(scope: leaves.scope, storeID: storeID, in: leaves.defaults())
+    }
+
+    /// The steps a marker can name while this library's custody move is
+    /// still to come.
+    nonisolated private static func custodyPending(at step: RotationMarker.Step) -> Bool {
+        switch step {
+        case .vaultWrite, .reencrypt, .rekeyLibrary, .custody: return true
+        case .snapshot, .offer: return false
+        }
+    }
+
+    /// VX-202 (belt c): the per-store-id flag the PRE-OPEN route reads in
+    /// the marker's place (the marker lives inside the store). No store id
+    /// (no key file yet) ⇒ nothing to key it by; the runner sets it again
+    /// once its new key file exists.
+    private func markSwitchPending(_ pending: Bool) {
+        guard case .known(let storeID) = StoreIdentity.resolve(besideStore: leaves.storeURL) else { return }
+        leaves.gate.setSwitchPending(pending, leaves.scope, storeID)
     }
 }
 
@@ -1772,13 +1971,42 @@ extension PostureSwitchRunner.Leaves {
                 }
                 return removed
             },
+            // VX-203: the step-aside copies beside THIS store, by the core's
+            // one rule; the remover refuses anything that rule would not list.
+            preSwitchLibraryCopies: { keep in
+                LibraryAdoption.appleOpenableAsideCopies(besideStore: storeURL, keepingFingerprint: keep)
+            },
+            deleteLibraryCopies: { folders in
+                var removed = 0
+                for folder in folders {
+                    do {
+                        try LibraryAdoption.removeAsideCopy(folder, besideStore: storeURL)
+                        removed += 1
+                    } catch {
+                        logger.notice("posture switch: a set-aside copy was not removed — \(String(describing: error), privacy: .public)")
+                    }
+                }
+                return removed
+            },
             defaults: { .standard },
             reconcile: { await protection.reconcile() },
             now: { Date() },
             log: { logger.notice("\($0, privacy: .public)") },
             // pre-13x 5b (ledger 67): the name the vault client stamps —
             // `AppServices` hands the same `DeviceName.current` to it.
-            deviceName: { DeviceName.current })
+            deviceName: { DeviceName.current },
+            endSwitch: { bootstrap.endSwitch() },
+            // VX-110: the forget's ONE act — `EncryptionSession.forgetDeviceKeys`
+            // over the same per-store custody (it also re-projects the
+            // Encryption tab), else the store's own clear when no services
+            // are composed (the re-key's reopen rebuilds them).
+            forgetSyncKeys: {
+                if let encryption = services()?.encryption {
+                    await encryption.forgetDeviceKeys()
+                } else {
+                    await keyStore.offMain { $0.clear() }
+                }
+            })
     }
 }
 

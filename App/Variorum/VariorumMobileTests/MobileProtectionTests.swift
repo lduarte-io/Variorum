@@ -699,11 +699,12 @@ struct MobilePhoneProtectionCopyTests {
         #expect(done.contains("Lillian's Mac showed when it entered Castle"))
         #expect(done.contains("the set to keep"))
 
-        // (4) ledger 46 — cancel · put the ACCOUNT in Castle · rejoin, and
-        // still never the word "Mac" on the phone.
+        // (4) ledger 46 — cancel · put the account in Castle · rejoin, and
+        // still never the word "Mac" on the phone (VX-110: de-capped).
         let consent = ProtectionCopy.joinStandardConsent
-        #expect(consent.contains("Cancel here") && consent.contains("put the ACCOUNT in Castle")
+        #expect(consent.contains("Cancel here") && consent.contains("put the account itself in Castle")
                 && consent.contains("then join again"))
+        #expect(!consent.contains("ACCOUNT"))
         #expect(!consent.contains("Mac"))
 
         // (7) MINOR-6 — the book the phone seeds carries the website's road.

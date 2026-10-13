@@ -1,0 +1,20 @@
+diff --git a/App/Variorum/Shared/PostureCopy.swift b/App/Variorum/Shared/PostureCopy.swift
+index 2c24110a..462fdeee 100644
+--- a/App/Variorum/Shared/PostureCopy.swift
++++ b/App/Variorum/Shared/PostureCopy.swift
+@@ -572,9 +572,12 @@ nonisolated extension ProtectionCopy {
+     }
+     /// The offer's body by the outcome (both models; all four faces).
+     static func deleteOldBackupsBody(for outcome: PostureSwitchRunner.Outcome?) -> String {
+-        deleteOldBackupsBody(
+-            snapshots: outcome?.preSwitchSnapshots.count ?? 0,
+-            libraryCopies: outcome?.preSwitchLibraryCopies.count ?? 0)
++        // R-g: the shipped body — no counts, the set-aside copies unowned.
++        "They still open through your Apple account, and they always will. Deleting "
++            + "them closes that door for what they hold. Variorum can only delete its own "
++            + "backups — Time Machine, copies you made, and anything outside Variorum's "
++            + "folders aren't touched and still open the old way. If your backups are in "
++            + "iCloud Drive, iCloud keeps deleted files for 30 days in Recently Deleted."
+     }
+     static let deleteOldBackupsDoor = "Delete Them"
+     static let keepOldBackupsDoor = "Keep Them"

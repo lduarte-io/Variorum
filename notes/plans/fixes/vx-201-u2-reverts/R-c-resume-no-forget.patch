@@ -1,0 +1,13 @@
+diff --git a/App/Variorum/Shared/PostureSwitch.swift b/App/Variorum/Shared/PostureSwitch.swift
+index f34bfb46..a5f84f77 100644
+--- a/App/Variorum/Shared/PostureSwitch.swift
++++ b/App/Variorum/Shared/PostureSwitch.swift
+@@ -1473,7 +1473,7 @@ final class PostureSwitchRunner {
+             && marker.step != .vaultWrite && marker.step != .reencrypt
+         let thisDeviceOnlyRoad = localCastleRoad && thisDeviceOnlyFlag()
+         var forgotAtResume = false
+-        if localCastleRoad, material != nil {
++        if false, localCastleRoad, material != nil {
+             if !thisDeviceOnlyRoad { setThisDeviceOnlyFlag(true) }
+             try await forgetSyncKeysVerified()
+             material = nil

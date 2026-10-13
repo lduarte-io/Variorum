@@ -1,0 +1,254 @@
+# VX-191 — Pre-launch encryption & Castle adversarial audit (the record)
+
+**Status: IN FLIGHT — 2026-10-12 night, the eve of the 0.9.x public release.** Opus orchestrator + three Opus
+read-only auditors (A: the S1 ten questions re-run + the open custody backlog · B: every flow into and out of the
+encrypted library · C: primitives, wire, server, Keychain attributes). Branch `vx-191-encryption-audit`, worktree
+`~/dev/variorum-vx-191`, base `f337f19e`. **Read-only on product code** — this file and `vx-191-audit/*.md` are
+the only writes. The auditors' full reports: `notes/plans/fixes/vx-191-audit/{A-ten-questions,B-flows,C-crypto-wire-server}.md`.
+
+Her ask (2026-10-12, verbatim core): *"I want to know if someone who starts in standard mode and then goes into
+castle mode, if that issue where their previous key wasn't being cleared is fully fixed now … go over EVERYTHING
+with a fine toothed comb … adversarially check for weaknesses and problems with encryption and any of the flows
+into and out of it. If there are glaring issues, they'll block launch."*
+
+---
+
+## O. THE ORCHESTRATOR'S OWN LEG — Standard → Castle, every key, traced at HEAD
+
+### O.1 Which "previous key not cleared" issue — and is it closed?
+
+The issue she remembers is the **VX-99 class** (`notes/plans/fixes/vx-99-pro-castle-apple-wrap.md`): her Pro's
+LIVE key file carried an `apple` copy (the library key wrapped under the iCloud key A) while the account was Castle.
+Mechanism then: `writeNewKeyFile` added the Apple copy whenever the road "did not enter Castle", so Replace All
+Keys on a Castle account wrapped L′ under the A the Mac still held from its Standard era. Its siblings: the 13x
+R1-BLOCKER (an adopted Standard-era pair beside a Castle library) and decision 35's window phone.
+
+At HEAD every road decides the key file's Apple copy from the VAULT's word, carrying the verified key, never "any
+iCloud key readable here":
+- the ceremony: `PostureSwitch.swift:611-619` (enter Castle ⇒ nil; Replace All Keys ⇒ only when the fetched vault
+  carries an Apple-held copy, `appleHeldCopyForStandard` `:1275-1288`); the local-only road ⇒ nil (`:699`);
+- the follow: `:844` (`entersCastle = vault has no Apple-held copy`), `:860/:879` (nil under Castle);
+- the resume: `:1523` (`vaultSaysCastle ? nil : …`);
+- the belt: `ProtectionController.reconcileFollow`'s `castleKeyFileAppleOpenable` arm (`:668ff`) catches a live
+  Standard-era key file under a Castle account and owes the follow, which retires it (`retireOldKeyFiles`, `:901`).
+
+**Verdict: the VX-99 mechanism is closed at HEAD** (pins red-on-old per its record; the auditors re-check the pins).
+
+### O.2 The credential walk — what a Standard → Castle switch leaves, at HEAD
+
+| credential | what the code does | evidence | verdict |
+|---|---|---|---|
+| library key L, raw, silent item (`io.lduarte.Variorum.store-key`, `<scope>-<storeID>-bound`, DP keychain, `WhenUnlockedThisDeviceOnly`) | REPLACED by L′ (export-and-swap); L′ moves behind `.biometryCurrentSet` (or nowhere under Always ask) via `CustodyHandover`: gated write → verify → silent DELETE, a refused delete refuses the whole move | `PostureSwitch.swift:1097-1113`, `ProtectionController.swift:1346-1375`, `KeychainCustody.swift:253-269`; the delete carries the DP flag (`StoreKey.swift:404-424`) | HOLDS **except the race in O.3** |
+| sync record (M, C, J + device id), silent | the gated item lands, the silent item is OVERWRITTEN identity-only (material gone) | `EncryptionKeychain.swift:219-229, 271-279`; the real-Keychain drill asserts it (`PostureSwitchDrillTests.swift:557-560`, Always-ask arm) | HOLDS |
+| the vault's A-wrapped master | the rotation's ONE `key_vault_update` sends no Apple copy; the SQL assigns `master_wrapped_by_apple_held = payload->>'…'` (absent ⇒ NULL) | `13_phase13i_wings.sql:778-779` (latest definition; same in 11/12) | HOLDS |
+| master M / corpus key C | rotated to M′/C′; every row re-encrypted; old proof refused | `PostureSwitch.swift:604-691`; drill `:566-572, 670-673` | HOLDS |
+| the key file | a NEW file for L′ with P, W, M′ copies and NO `apple`; the OLD file (A-wrapped OLD L) stays beside the library on the acting device's own road (by design, §3.4 "2d.4 ruling 3") and is retired on every follower | `:1147-1189`, `:1126`, `:901-927` | HOLDS (old L opens nothing current — the file was re-keyed; see O.4 for the tidy-up note) |
+| the old library file + its WAL | export-and-swap under L′, old `-wal/-shm` removed | `swapLibrary` `:1193` → `StoreEncryptionMigration.rekey`; drill asserts `!opens(storeURL, oldKey)` (`:545`) | HOLDS (auditor B re-checks WAL) |
+| the iCloud key A itself | **STAYS in iCloud Keychain, by design** (decision 6, §3.4 "STAYS in iCloud; every CURRENT copy under it is removed"); never deleted in production (`AppleKeyCustody.swift:191-197`) | — | BY DESIGN — see O.5 for what this means for her Passwords check |
+| pre-switch backups (app's own folders) | untouched; the ceremony OFFERS to delete them after a fresh post-switch pair is written | `:1226-1253`, `:1752-1774`; drill `:681-688` | BY DESIGN, disclosed (auditor B re-checks every folder) |
+| the scheduled plaintext `.md` insurance | turned OFF on entering Castle, on the ceremony AND on a follow | `:1240-1247` (the follow shares `rekeyCustodyAndSnapshot`) | HOLDS |
+| 13p legacy escrow item (raw L in iCloud Keychain, `io.lduarte.Variorum.store-key-escrow`) | no production road writes it any more; the migration removes it ONLY when it equals the key in hand, else leaves it ("another key's") | `StoreKeyGuard.swift:420-457`, `ProtectionMigration.swift:198-209` | NOT A NEW-USER ISSUE (13p era = her own devices only). Author note: an older escrow item for a key no longer in hand would survive — worth one look on her own Macs |
+
+### O.3 FINDING (orchestrator) — the re-key's reopen re-saves L′ into the SILENT item on an UNORDERED background task
+
+**Severity: MAJOR, BLOCKER-candidate** (low-probability race; the outcome is a silent, total breach of the Castle
+promise for a local-only library; the fix is a few lines). **Status: TRACED from code; NOT reproduced** (no test or
+drill exercises the production reopen — both inject their own `rekeyLibrary` leaf: `PostureSwitchTests.swift:763`,
+`PostureSwitchDrillTests.swift:478`; neither goes through `AppBootstrap`).
+
+The mechanism, step by step (Standard → Castle, ceremony or follow, Mac and phone — `AppBootstrap` is shared):
+
+1. Step 4 writes the NEW key file for L′ (no `apple`, P present) — `PostureSwitch.swift:1105` — then
+   `swapLibrary` → `AppBootstrap.rekeyLibrary` (`AppBootstrap.swift:811-842`) re-keys the file and reopens it with
+   `beginOpening(unlockedKey: L′)`.
+2. The reopen reaches `.ready`. There (`AppBootstrap.swift:520-530`) — the 13p R1-M3 recovery road — *"if let
+   unlockedKey, !currentEffectiveGate.isDemanded"* spawns `Task.detached(priority: .utility) { saveAuto(unlockedKey) }`.
+   At this instant custody has NOT moved yet (step 5 runs after the reopen), the silent item still holds the OLD L,
+   so `StoreLaunchGate.effectiveGate` reads `.silent` → the posture reads Standard (local: `localReading` corner 45;
+   enrolled: indeterminate with the silent shape) → `.auto` → **the detached task writes L′ into the silent item.**
+3. `rekeyLibrary` returns after `awaitOpen()`; the runner writes the `.custody` marker and runs
+   `moveCustodyForSwitch` → `ProtectionController.moveCustody(.biometric | .passphrase)` → gated write → verify →
+   `deleteAuto()` (`ProtectionController.swift:1354-1360 / 1375`).
+4. **Nothing orders the utility task's `saveAuto(L′)` before step 3's `deleteAuto()`.** If it lands after, the
+   silent item holds the CURRENT library key, readable with no Touch ID and no passphrase — the "theater" R13p-14
+   forbids, and the exact opposite of Castle's "your Mac's login password: no — nothing on this Mac releases the key
+   to it." The in-session projection does not notice (`libraryKeyCustodyShape` reads the RESIDENT, `:1068-1071`,
+   which is set), so the Done screen says Castle.
+5. **The next launch** routes through `StoreLaunchGate.effectiveGate` (`StoreLaunchGate.swift:362-383`), whose
+   custody probe is `loadAuto() != nil` (`:389-392`):
+   - **LOCAL-ONLY library** (no sync — the likely beta-tester shape): not enrolled, custody `.silent`, the live key
+     file (`locate` = newest = L′'s) has no `apple` and has P, `belongs(to: L′)` true, and **A is readable — it stays
+     in iCloud Keychain by design** ⇒ the route's landing arm (`:367-376`) **WRAPS L′ UNDER A INTO THE LIVE KEY FILE.**
+     The posture now derives Standard; the library opens silently; re-lock on sleep stops (the gate is no longer
+     demanded). A complete, silent reversion to Standard — the current key both raw-silent AND iCloud-openable.
+   - **ENROLLED library:** the landing is skipped (enrolled), but the route opens SILENTLY through the lingering
+     item (the Castle lock bypassed), then the reconcile's posture-mismatch arm owes the follow into Castle
+     (`ProtectionController.swift:661-667`, the passphrase asked again) — whose own re-key reopen re-runs step 2:
+     the same race again.
+
+**Why it is plausible, not certain:** the utility task usually starts within milliseconds and its `SecItemUpdate`
+is quick, while the runner's path to `deleteAuto` includes a database write and four Keychain round trips — so the
+save USUALLY loses the race to happen first and is then deleted. But it is not ordered, it runs at the LOWEST QoS
+the code uses, on a machine that has just re-encrypted the corpus and is running ready housekeeping, sync and a
+backup; QoS starvation is exactly when utility work slips.
+
+**Fix shape (not implemented — the author's call, a VX ticket):** (a) never re-land the silent item on the re-key's
+reopen — skip the R1-M3 save while a `RotationMarker` is set / `switchInProgress`, or pass a flag from
+`rekeyLibrary`; (b) belt: at every ready under a DEMANDED effective gate, a lingering silent item is a custody-law
+violation — delete it (the `CustodyHandover` delete) rather than read it as the posture; (c) belt: the route's
+landing arm (`StoreLaunchGate.swift:367-376`) must never land an Apple copy for a key file that has EVER been
+Castle-shaped — at minimum, not while a marker is pending. Pin: a bootstrap-level test that holds the utility save
+until after the custody move (injected guard seam with a gated `saveAuto`), red on HEAD.
+
+### O.4 Notes (not findings)
+
+- **The acting device keeps its Standard-era key file** (`variorum-keys-<oldfp>.json`, A-wrapped OLD L) in the live
+  folder after the ceremony (ruled: "the old key file stays beside old snapshots"). It opens nothing current — the
+  live file is re-keyed — but it is a confusing artifact for anyone inspecting the folder, and it is the one thing
+  that makes an "is anything A-wrapped here?" check by eye come out yes. Followers retire theirs. Consider retiring it
+  on the ceremony road too, once the fresh post-switch pair exists.
+- **The server's own backups** (Supabase PITR) hold the pre-switch vault row (old M under A) and old-C ciphertext of
+  PRE-switch writing — disclosed in §3.4. Someone fully inside the Apple account AND holding a Supabase backup reads
+  pre-switch writing only. By design; worth one sentence in the FAQ if not already there (auditor C checks the copy).
+
+### O.5 Her Passwords-app check
+
+What she looked for proves nothing either way: **the iCloud key A is SUPPOSED to stay in iCloud Keychain after
+Castle** (decision 6 — only the copies wrapped under it go). So "no Variorum key in Passwords" is neither a pass
+nor a fail. (Whether an app's synchronizable generic-password item shows in Passwords at all: auditor C.) The
+honest checks are listed in §V (verification road) once the auditors report.
+
+---
+
+## V. THE CONSOLIDATED VERDICT (all four legs in, 2026-10-12 night)
+
+**No finding breaks the core encryption.** The ciphers, nonces, AAD, key wraps, KDF floor-at-read, BIP-39 words, the
+key proof + 13y challenge, RLS / definer functions / the closed vault-UPDATE road, the wire's sealing of every
+user-written or user-named column, and every Keychain item's class/flags/deletes HOLD (auditor C). All ten S1
+questions still HOLD at HEAD (auditor A; 93 core crypto tests green headless). The MCP door shuts on every kind of
+lock before the pool closes (auditor B). The VX-99 class is closed (§O.1).
+
+**What is left is all at the EDGES of the Standard → Castle switch — places where the app can SAY Castle while
+something current is still reachable the old way — plus one copy overstatement.**
+
+| # | finding | severity | source | launch call (orchestrator's recommendation — hers to rule) |
+|---|---|---|---|---|
+| 1 | **The re-key reopen's unordered silent re-save of L′** — can leave the current key in the no-Touch-ID item; a local-only library then silently re-lands an Apple copy at next launch (§O.3) | MAJOR, BLOCKER-candidate (race, not reproduced) | orchestrator | **FIX BEFORE LAUNCH** — a few lines (skip the R1-M3 re-save while a switch marker is set) + a bootstrap-level pin |
+| 2 | **VX-110 — signed-out "Use Castle"** says "You're in Castle" while the vault/server stay Apple-openable; reverts at next sign-in | MAJOR (confirmed at HEAD; VX-99 R3's pin shape is red) | A | **FIX BEFORE LAUNCH** — refuse with the switches' existing offline sentence when sync custody is held but the session is not (one guard) |
+| 3 | **Castle's "delete old backups" offer misses `Previous Libraries/` and `Backups/safety-copies/`** — Standard-era whole-library copies stay Apple-openable after the copy promises "everything you have ever written" | MAJOR (narrow: needs a 13x adoption while Standard) | B1d | fix before launch IF cheap (list those folders too), else at minimum name them in the offer's sentence |
+| 4 | **The field guide says "everything is encrypted"** (`PostureCopy.swift:781`); dates, tag-tree shape, memberships, flags, sizes travel plain (the website brief discloses this correctly) | MAJOR (copy-only) | C-1 | **FIX BEFORE LAUNCH** — one sentence, her words to approve |
+| 5 | server-rewritable plain columns key the MCP AI fence (a malicious server could clear a Private mark for an already-approved client) | MINOR | C-2 | post-launch ticket (needs a lockstep event) |
+| 6 | Previous-Castle plaintext `.md` exports stay in `md-exports/`, unnamed | MINOR | B3c | post-launch, or one line in the Castle offer |
+| 7 | local-only Castle library adopting a Standard-era pair/plaintext export silently becomes Standard | MINOR | B2c | post-launch |
+| 8 | pre-switch pairs in an unreachable second backup folder skipped, offer never returns | MINOR | B1e | post-launch |
+| 9 | unfollowed sibling device (a closed phone + its iCloud device backup) stays Apple-openable until it opens | MINOR + OPEN | A Q11 | post-launch; worth a sentence in the Castle copy |
+| 10 | passphrase: 12-char length floor, no strength check (~1,700 guesses/s/GPU at the shipped Argon2id) | MINOR | A Q10 | post-launch (the twelve words are the strong road) |
+| 11 | VX-109 / VX-108 / VX-107 — confirmed, no exposure (VX-109 only overwrites TOWARD Castle) | MINOR/NIT | A | stay on the board |
+| — | the acting device's leftover Standard-era key file (opens nothing current); `pg_temp` in definer search_path; Q1/Q2/Q6 record corrections | NIT | O.4, B6c, C3, A | tidy-ups |
+
+### V.1 How SHE can verify a Castle switch on a real device (instead of the Passwords app)
+
+The Passwords app is the wrong instrument: the iCloud key is SUPPOSED to stay in iCloud Keychain after Castle
+(decision 6), and whether Passwords lists an app's generic-password item at all is unconfirmed (C, OPEN). What
+actually proves a switch, on the Mac that switched (no new profile needed):
+1. **The key file beside the library carries no Apple copy.** With Variorum quit:
+   `grep -l '"apple"' ~/Library/Containers/io.lduarte.Variorum/Data/Library/Application\ Support/*/variorum-keys-*.json`
+   — the CURRENT file (newest by date) must NOT be listed. (Before finding 1's fix, an older Standard-era file from
+   before the switch may still be listed on the device that switched — it opens nothing current; see O.4.)
+2. **Quit and reopen Variorum: it must ask for Touch ID / the passphrase.** A silent open after a Castle switch is
+   exactly finding 1's failure (or finding 2's revert) — that is the user-visible symptom to watch for.
+3. **Settings ▸ Protection still reads Castle after a relaunch** (and, if synced, after the next sign-in).
+A fresh macOS user profile on the Air is still the best end-to-end check for a NEW user — but only AFTER findings 1
+and 2 are fixed, since the race in 1 is intermittent and a single clean run cannot prove its absence.
+
+### V.2 What this audit did NOT do
+No `xcodebuild test` (the stage is held by oct12coordinator; the Mac-target pins were read, not run); no live
+Supabase reads; no reproduction of finding 1 (it needs a bootstrap-level pin); no hands-on Keychain Access /
+Passwords check; the phone's door conditions read only where shared. No product code changed.
+
+---
+
+## W. HER FOLLOW-UP (2026-10-12 night) — the tester check, and VX-110 across every user position
+
+**Facts re-read for this (code at HEAD):** Sign Out KEEPS sync custody (`KeyDoorCopy.swift:109-112` "Your library
+and its keys stay on this [device]"; the forget door folded into Sign out with no user door left —
+`EncryptionSession.swift:572-582`); account deletion keeps custody too. So a library that EVER synced stays
+"enrolled-shaped" on that device forever — whether the user is signed out for a day, lost the account, or deleted
+it. The app's own words for a fresh start: the Castle screen's compromise line ("also delete your Stargazing
+account and set sync up again", `PostureCopy.swift:326-328`) and Delete Account's "You can set sync up again later
+under a new account; your library will upload to it" (`KeyDoorCopy.swift:124-128`).
+
+| position | what Use Castle does today | what is actually true after | advice today |
+|---|---|---|---|
+| never set up sync | local-only road (correct) | this library is Castle; only finding 1 (the race) applies | fine — relaunch once and confirm it asks for Touch ID / passphrase |
+| signed in, online | full road (rotates vault + server) | Castle, account-wide | fine (finding 1 applies) |
+| signed out, can sign in | local-only road (VX-110) | THIS Mac's file is Castle; the account + server copy stay Standard; next sign-in silently reverts this Mac | **sign in first, then Use Castle** |
+| lost the password, still has the email | same as above | same | reset the password, sign in, then Use Castle; delete the old account if leaving it |
+| lost the account entirely / abandoning it | local-only road | THIS Mac's file is genuinely Castle (and stays so unless that old account is ever signed into again); the OLD account's server copy stays Standard, frozen at the last sync — openable by someone holding BOTH her Apple account and that account's password; other devices never follow; the Done screen's "your other devices will ask" is false | Castle on this Mac does protect the local library; the old server copy can only be removed by deleting that account (needs a sign-in — a password reset by email is the road); then a NEW account's sync, set up from a Castle library, is born Castle (decision 17 + corner 26 — the vault takes the library's posture; NOT exercised by this audit's tests — verify before advising it) |
+
+**Consequence for the VX-110 fix:** a flat "refuse unless signed in" would TRAP the lost-account user (no forget
+door; custody held forever). The fix needs two roads: (a) signed out but the account is hers → "sign in first, so
+the account and your other devices come along"; (b) "switch this Mac only" with an HONEST Done (this Mac's library
+is in Castle; the old account's sync copy is unchanged — delete that account to remove it; signing back into it
+returns this Mac to Standard). Product behavior + copy → hers (QUESTIONS when the fix ticket runs).
+
+### W.1 Second follow-up (same night)
+- **The tester's relaunch asked for Touch ID / the passphrase** — the user-visible half passes on their Mac. The
+  command's "No such file" is most likely the pasted path losing its `\ ` escape (the path is correct for the
+  Release container — verified on the Pro); re-run with the quoted two-step form given to her.
+- **Someone else's account signed in on your Mac:** custody holds THAT account's M/C on this Mac (device-only). For
+  the account's owner it is "an enrolled device someone else holds" — the designed answer is **Replace All Keys**
+  from her own device (rotates M and C; the server refuses the old master from then on) plus Sign Out Everywhere;
+  entering Castle elsewhere rotates the same keys AND removes the Apple-held copy. Not a new class.
+- **A new account on the same Mac is designed and pinned** (decision 17's adopt road — re-stamp + `resyncReinitialize`;
+  the Connect door for a foreign-owner library, `ConnectLibraryTests`); the stale custody is replaced at the new
+  enrollment. Not run tonight.
+- **VX-110 recommendation:** while signed out with sync custody held, Use Castle offers TWO doors — *Sign In…* (the
+  real account-wide switch) and *Use Castle on This Mac Only*, which FORGETS the old account's keys here (the
+  mechanism exists — `EncryptionSession.forgetDeviceKeys`, door retired at decision 25) and runs the local road, with
+  an honest Done ("this Mac's library is in Castle; your old sync account and its server copy are unchanged — delete
+  that account if you still can"). Forgetting ends the silent revert (a later sign-in to the old account is an
+  ENROLL with its consent screens, not a follow) and leaves the library clean for a new account (born Castle).
+  Launch-night minimum if the full fix can't land: a copy-only honest Done on that road. Hers to rule.
+- **She likes the two doors (2026-10-12).** Signing back into the old Standard account afterwards: with custody
+  FORGOTTEN, sign-in moves nothing; the Encryption tab shows the castle-born-joins-Standard consent
+  (`EncryptionViews.swift:431-466`, copy `PostureCopy.swift:236-240` — the warning style, Join / Cancel; Cancel keeps
+  the library Castle and unenrolled with a re-offer door). Only an explicit Join runs `joinStandard`
+  (`EncryptionSession.swift:382-410` → the follow into Standard). TODAY (custody kept) the same sign-in reverts SILENTLY
+  via the follow-into-Standard arm with only an after-the-fact notice — the two-door fix turns that into the consent.
+  Copy NIT for the fix ticket: the consent's "put the ACCOUNT in Castle" capitalizes for emphasis (her no-caps rule).
+
+## X. HANDED ON (2026-10-12, her word: fix 1–4 before launch)
+**RUN VX-201 "Castle pre-launch fixes"** — members: **VX-202** (finding 1, the reopen race) · **VX-110** (finding 2,
+the two doors + the join consent's de-capped wording, her ruling recorded on the ticket) · **VX-203** (finding 3,
+the offer's missed folders) · **VX-204** (finding 4, the guide sentence — her words). Touches custody ⇒ Fable cold
+review. Rows 5–11 of §V stay post-launch (tickets at her word). This audit (VX-191) closes with this record.
+- **Added to RUN VX-201 at her word:** **VX-206** — entering Castle ends on Settings ▸ General instead of Protection
+  (the info popup shows only on clicking Protection); the ceremony started from Protection must end there.
+- **The post-launch rows, ticketed (Parked, reasons on each):** VX-207 (C-2 AI fence on plain columns) · VX-208
+  (pre-Castle `.md` exports) · VX-209 (B2c) · VX-210 (B1e) · VX-211 (passphrase strength) · VX-212 (S1 Q3's unowned
+  poison-row case) · VX-213 (the NITs) · **VM-15** (the unfollowed sibling phone — Backlog under "Mobile — beta
+  readiness & launch", Pre-launch for MOBILE launch).
+
+### W.2 Third follow-up (same night)
+- **VX-207 stays parked — fix it properly** (her call). Clarified on the ticket: the AI cannot change the Private mark
+  (no MCP tool reaches `setNotePrivate` — callers are the Mac door and a Debug fixture only); the threat is a
+  compromised SYNC SERVER rewriting the unauthenticated plain column. Grants are local-only per Mac (v1_24).
+- **VX-208 → RUN VX-201**, re-scoped to her ruling: ONE line in the Castle process telling people to delete any `.md`
+  exports they made before Castle themselves; no delete offer of our own.
+- **VX-209 → RUN VX-201** (her: "no one would ever expect that"). Orchestrator trace, NOT run: her proposed workaround
+  (open the backup, then Open Library the Castle library back from `Previous Libraries/`) does NOT avoid it for a backup
+  of the SAME library — the store id is shared across re-keys, so `LibraryOpenModel.landCustody`
+  (`:461-500`) finds the BACKUP's key in the silent item for that id ⇒ verdict `adoptOpeningKey`;
+  `StoreLaunchGate.effectiveGate` reads `.silent` + a key file with a passphrase and no Apple copy ⇒ corner 45 ⇒
+  Standard ⇒ `.auto` ⇒ `saveAuto(castleKey)`, `deleteGated()`; the next route's landing arm (`:367-376`) then wraps
+  the Castle key under A. (Opening the backup first had already deleted the Castle library's gated item under the
+  same rule.) The honest guide instruction today: after bringing the Castle library back, check Settings ▸ Protection
+  and choose Use Castle again (it re-keys; no Apple copy). Recommended in the run: a line on the Open/Restore confirm
+  when the outgoing library is Castle and the incoming reads Standard; the deeper fix (corner 45 must not read a
+  previously-Castle store id as Standard-waiting) shares VX-202's landing-arm belt.
+- **VX-212 explained:** a rotation (entering Castle, Replace All Keys) clears the old corpus key only when no server row
+  is still sealed under it; a row sealed under a key the account never held can never be re-encrypted, so the rotation
+  stays "still finishing" forever — the old corpus key kept (wrapped under the NEW master — no exposure) and every
+  later rotation refused, with no user door out. Needs corruption or a hostile holder of the key proof. Availability,
+  not privacy; stays parked.
