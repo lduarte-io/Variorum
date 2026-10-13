@@ -602,9 +602,14 @@ struct CommentPanelWordsTests {
 ///
 /// Hosting: the panel windows are never ordered in; a popover needs a visible
 /// anchor, so its anchor is ordered in OFF-DISPLAY at alpha 0 and the
-/// popover's own window is set alpha 0 the turn it appears. Every wait lets
-/// main-queue turns pass (the runner's body is a main-queue job — the first
-/// fix leg's lesson): the control defers its reveal and its reports by one turn.
+/// popover's own window is set alpha 0 the turn it appears. Every popover is
+/// the PRODUCT's presenter — SwiftUI's `.popover` (the U3 PIN LEG: a
+/// hand-built `NSPopover` was never the runner's key window, so its keys
+/// went to the test host's own window and its popover closed early — the
+/// record's traces). Keys are posted only through `deliveryWindow(for:)`.
+/// Every wait lets main-queue turns pass (the runner's body is a main-queue
+/// job — the first fix leg's lesson): the control defers its reveal and its
+/// reports by one turn.
 @MainActor
 @Suite("The comments panel's fix leg 2 — F-W-3, F-W-4, R1-2 (VX-179)", .serialized)
 struct CommentPanelFixLeg2Tests {
@@ -652,43 +657,19 @@ struct CommentPanelFixLeg2Tests {
         return (blockID, model)
     }
 
-    /// The panel in a REAL popover (AppKit's — the product's SwiftUI
-    /// `.popover` is this same `NSPopover` underneath; both reproduced the
-    /// two popover defects, the record's traces).
-    @MainActor
-    private struct PopoverHost {
-        let popover: NSPopover
-        let anchor: NSWindow
-        let window: NSWindow
-        let root: NSView
-        func tearDown() {
-            if popover.isShown { popover.close() }
-            anchor.orderOut(nil)
-        }
-    }
-
-    private func popover(_ h: EditorHarness, _ blockID: String, _ model: CommentsPanelModel) async throws
-        -> PopoverHost
-    {
-        let anchor = NSWindow(
-            contentRect: NSRect(x: -20_000, y: -20_000, width: 300, height: 200),
-            styleMask: [.borderless], backing: .buffered, defer: false)
-        anchor.isReleasedWhenClosed = false
-        anchor.alphaValue = 0
-        anchor.orderFront(nil)  // off every display
-        let popover = NSPopover()
-        popover.animates = false
-        popover.behavior = .transient
-        let controller = NSHostingController(
-            rootView: CommentsPanel(session: h.session, blockID: blockID, model: model))
-        popover.contentViewController = controller
-        popover.show(
-            relativeTo: NSRect(x: 100, y: 100, width: 10, height: 10), of: anchor.contentView!,
-            preferredEdge: .minY)
-        let window = try #require(controller.view.window)
-        window.alphaValue = 0
-        await turns(40)
-        return PopoverHost(popover: popover, anchor: anchor, window: window, root: controller.view)
+    /// **The ONE key road** (U3 PIN LEG — the record's T4). A key is posted
+    /// only where AppKit delivers it INTO the panel: the key window when that
+    /// is the panel's own window or its parent (live, the main window stays key
+    /// and forwards into its popover), the panel's window when nothing is key
+    /// (offscreen). Any other key window is the TEST HOST's own — the runner's
+    /// host is the dev-store app — so the cell stops there by name and never
+    /// types into it.
+    private func deliveryWindow(for panel: NSWindow) throws -> NSWindow {
+        guard let key = NSApp.keyWindow else { return panel }
+        try #require(
+            key === panel || key === panel.parent,
+            "premise: the key window is the panel's or its parent's — never the host app's own")
+        return key
     }
 
     /// **F-W-3 — RED ON OLD.** The capped list never revealed the row being
@@ -742,32 +723,38 @@ struct CommentPanelFixLeg2Tests {
         }
     }
 
-    /// **F-W-4 on the DELIVERY road** (FIX LEG 3 — this cell's fix-leg-2 form
-    /// addressed its keys to the PARENT window, a road measured only offscreen
-    /// where the app has no key window — an artefact; in the runner its premise
-    /// failed). Keys go where AppKit delivers them: the key window (the panel's
-    /// popover, made key by the panel's own ask), else the popover. The ladder:
+    /// **F-W-4 on the DELIVERY road, in the product's presenter** (FIX LEG 3;
+    /// remodelled at the U3 PIN LEG — its hand-built `NSPopover` was never the
+    /// runner's key window, so its keys went to the test host's own window and
+    /// its popover closed before the first ⎋: the record's T1–T2). The ladder:
     /// the first ⎋ clears the draft and the popover stays; the second closes.
-    /// HONESTLY NOT red on old: on this road the shipped ladder already works
-    /// — the walk's dead first ⎋ is not reproducible here (the record).
+    /// HONESTLY NOT red on old: on this road the shipped ladder already works.
+    /// The LIVE road — the main window key, its popover child fed its keys —
+    /// is `delivers`' table below plus the walk's trace (window 5); the runner
+    /// cannot make the off-display anchor key, so it cannot host that road.
     @Test func escapeInAPopoverClearsTheDraftFirstThenCloses() async throws {
         try await withEditor(seedBlocks: ["A block."]) { h in
             let (blockID, model) = try await seed(h, ["First note."])
-            let host = try await popover(h, blockID, model)
-            defer { host.tearDown() }
-            let composer = try #require(Self.areas(in: host.root).first { $0.placeholderView != nil })
-            if host.window.firstResponder !== composer.textView {
-                host.window.makeFirstResponder(composer.textView)
+            let (driver, anchor, window) = try await swiftUIPopover(h, blockID, model, swallowing: false)
+            defer {
+                driver.shown = false
+                anchor.orderOut(nil)
+            }
+            let content = try #require(window.contentView)
+            let composer = try #require(Self.areas(in: content).first { $0.placeholderView != nil })
+            if window.firstResponder !== composer.textView {
+                window.makeFirstResponder(composer.textView)
                 await turns()
             }
-            let delivery = NSApp.keyWindow ?? host.window
+            try #require(driver.shown && window.isVisible, "premise: the popover is up")
+            let delivery = try deliveryWindow(for: window)
             await key("x", keyCode: 7, to: delivery)
-            #expect(model.addDraft == "x", "premise: a key addressed to the delivery window lands in the composer")
+            #expect(model.addDraft == "x", "premise: typed into the composer")
             await key("\u{1b}", keyCode: 53, to: delivery)
             #expect(model.addDraft.isEmpty, "the first ⎋ clears the draft")
-            #expect(host.popover.isShown, "…and the popover stays")
+            #expect(driver.shown && window.isVisible, "…and the popover stays")
             await key("\u{1b}", keyCode: 53, to: delivery)
-            #expect(!host.popover.isShown, "with nothing to clear, ⎋ closes it")
+            #expect(!driver.shown, "with nothing to clear, ⎋ closes it")
         }
     }
 
@@ -864,12 +851,14 @@ struct CommentPanelFixLeg2Tests {
                 driver.shown = false
                 anchor.orderOut(nil)
             }
-            let composer = try #require(Self.areas(in: window.contentView!).first { $0.placeholderView != nil })
+            let content = try #require(window.contentView)
+            let composer = try #require(Self.areas(in: content).first { $0.placeholderView != nil })
             if window.firstResponder !== composer.textView {
                 window.makeFirstResponder(composer.textView)
                 await turns()
             }
-            let delivery = NSApp.keyWindow ?? window
+            try #require(driver.shown && window.isVisible, "premise: the popover is up")
+            let delivery = try deliveryWindow(for: window)
             await key("x", keyCode: 7, to: delivery)
             #expect(model.addDraft == "x", "premise: typed into the composer")
             await key("\u{1b}", keyCode: 53, to: delivery)
@@ -905,21 +894,29 @@ struct CommentPanelFixLeg2Tests {
     /// popover never tore the panel down — no `.onDisappear`, no resign — so a
     /// dirty in-place edit died with the model. The popover's closing now
     /// saves it, exactly as the panel's leaving was always meant to.
+    /// Remodelled at the U3 PIN LEG onto the product's presenter, dismissed by
+    /// its binding — the road a click-away and the panel's own close both end
+    /// on (its `NSPopover` closes → `willClose`). The old hand-built host's
+    /// popover closed BEFORE the edit in the runner (the record's T3), so its
+    /// watcher ran with nothing dirty; the premises now name an early close.
     @Test func closingThePopoverSavesADirtyInPlaceEdit() async throws {
         try await withEditor(seedBlocks: ["A block."]) { h in
             let (blockID, model) = try await seed(h, ["First note."])
-            let host = try await popover(h, blockID, model)
-            defer { host.tearDown() }
-            let row = try #require(Self.areas(in: host.root).first { $0.placeholderView == nil })
-            host.window.makeFirstResponder(row.textView)
+            let (driver, anchor, window) = try await swiftUIPopover(h, blockID, model, swallowing: false)
+            defer { anchor.orderOut(nil) }
+            let content = try #require(window.contentView)
+            let row = try #require(Self.areas(in: content).first { $0.placeholderView == nil })
+            window.makeFirstResponder(row.textView)
             await turns()
             row.textView.setSelectedRange(
                 NSRange(location: (row.textView.string as NSString).length, length: 0))
             row.textView.insertText(" — edited in the popover", replacementRange: row.textView.selectedRange())
             await turns()
             #expect(model.dirtyCommentIDs.count == 1, "premise: one dirty edit")
-            host.popover.close()
+            try #require(driver.shown && window.isVisible, "premise: the popover is still up when it is dismissed")
+            driver.shown = false
             await turns(60)
+            #expect(!window.isVisible, "premise: the popover closed")
             let stored = try await h.database.read { db in
                 try Queries.blockComments(db, blockID: blockID).map(\.text)
             }
