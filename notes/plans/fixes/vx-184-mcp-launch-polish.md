@@ -990,6 +990,46 @@ act's transaction and spends their once grants as one union (both or neither). N
 client-named entry: the minted edges tombstoned (exact rows); the redo revives exactly the edges that died on the
 undo's stamp (a live twin keeps the pair). The free-under-a-seal posture of her mark rides (a link writes no text).
 
+### SELF-ASSESSMENT (pre-stage — the implementer's)
+
+**Against the U3 row:** VX-186 — the duplicate traced to the line (`MCPNoteStructure.read` copied the shown take's text onto
+the block), fixed at the shape (`shown_take_id`), `via` coherent; 40 of 40 texts crossed twice before, once after, red again
+by revert. VX-173 — both batch doors one transaction / one entry / all-or-nothing naming the item, the cap MEASURED and
+stated; the single doors' row bodies extracted byte-for-byte (their suites green unmodified). VX-188 — the ONE schema change
+in its own commit on the grants family's road; the record written in the comment's transaction by BOTH comment doors; her
+ruled sentence verbatim, never the not-shared shape; the unreachable stays the one shape. VX-190 — her `removeTag` row body,
+the non-event pinned through a real living book. VX-187 — named pairs only, canonical edges through her road, two-sided
+decision with once grants as one union, the redo safe beside her live twin. Each member pinned red-first and red-on-old BY
+REVERT (identical issue counts both times).
+**Against the spec:** zero `Sync/`, custody/keychain, editor seam (`git diff --name-only 25a5d2ad..HEAD` names only
+`Sources/VariorumCore/{Persistence/MCPGrantSchema,Persistence/Migrations,Operations/Operations+{Comments,Tag,MCPWrites,
+MCPBatches,MCPCommentAuthors,MCPVersionLinks}}`, `Sources/VariorumMCP/*`, the app's `MCPPaneCopy`, tests, this record);
+zero SYNCED schema (v1_27 local-only, marker 13); I1–I10 untouched (no take is ever removed below one live active — the
+batch inverse rides `ensureNotLastActive`); P1: every new act ∝ its items or its note(s), never the corpus.
+**Risks I see:** (1) U4 must add the edit arm to `mayDelete` — until then an EDIT-rung client hears the suggest sentence on
+a foreign comment (interim, unmerged); (2) P-VX188-2 — a comment that travels to a structural successor is not on file as
+the client's (conservative); (3) the Activity log words a batch as "added takes to …" without its count (the log row carries
+none — the receipt counts); (4) a socket transient seen once under whole-target load (`whileConnectedEndsWhen…`, green
+5/5 alone and in every other run) — U1's VX-132 watch class.
+
+### OWED (for the orchestrator)
+
+1. **The stage window** (above) — the Mac batch + the live round legs (a)–(d); then this record's close.
+2. **The cold review's map:** `Operations+MCPBatches` (one transaction, `MCPBatchItemRefusal`, the inverse's all-or-nothing) ·
+   `Operations+MCPCommentAuthors` (the record's write inside the comment's transaction; the exact-stamp undo) +
+   `MCPWriteTools+CommentDelete` (`mayDelete`, her sentence on the snapshot AND in the guard) · `Operations+MCPVersionLinks`
+   (`sameEffectiveWing`, the twin-safe redo) + `MCPWriteTools+LinkVersions` (the two-sided decision, the union spend) ·
+   `MCPNoteStructure.read` (`shown_take_id`) · the extractions (`insertSuggestedTake`, `insertBlockComment`,
+   `removePostTagApplication`, the revert/reapply bodies) · `MCPGrantSchema.v1_27DDL`.
+3. **Canon at the merge** (the kickoff's list carries these): AppSpec §7's grants-family bullet gains v1_27
+   (`mcp_comment_author` — local-only, zero lockstep, marker 13); §12 THE MCP DOOR — `read_note` with_ids names each block's
+   shown take (`shown_take_id`, each text once); the suggest rung's `add_takes`/`add_comments` (one act, the cap 200) and
+   `delete_comment` (a client's OWN, R-VX188-1/2 — her sentence); the edit rung's `remove_tag` (a non-event for intake); write
+   new's `link_versions` (R-VX187-1, both notes). QUESTIONS entries: P-VX186-1, P-VX173-1, P-VX188-1/2/3, P-VX187-1/2,
+   P-U3-WORDS. MOBILE PARITY: nothing mobile-visible (the door is Mac-only; the v1_27 table is local-only).
+4. **U4's carry:** `mayDelete`'s edit arm; `Queries.mcpCommentAuthor` is the one read to consult.
+5. **U7's carry:** the advice and the guide teach the five new acts (nothing was falsified, so nothing was changed).
+
 ### PROVISIONALs (running — each wants a `notes/QUESTIONS.md` entry at the merge)
 
 - **P-VX186-1 — the deduped shape** (`shown_take_id`, the block's `text` dropped): (a) as built; (b) keep `text`, drop
