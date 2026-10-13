@@ -210,11 +210,8 @@ capture is PENDING (stage). No `Sync/` line touched (U0's line is the orchestrat
 37b9a6e7). No mobile door (the phone's fold reads the same fenced query and gains no purge door —
 the MOBILE PARITY line above).
 
-**Revert state:** REVERTS IN FLIGHT (U1-c) — one arm at a time over the files committed at 7aad738a
-(`Operations+Purge.swift`, `Operations+Comments.swift`, `Operations+MCPWrites.swift`,
-`CommentQueries.swift`, `RestoreCost.swift`); each restored by `git checkout -- <file>`. A successor
-finding this line: `git diff --stat` shows exactly what is reverted right now; restore it with
-`git checkout -- Sources/` (the committed tree is the fixed one).
+**Revert state:** no behavioural revert is in flight — U1-c's seven reverts all ran and were restored
+(`git diff --stat HEAD` empty after the last; the restored tree re-ran 43/3 green).
 
 ### LIVE STATUS
 
@@ -222,7 +219,7 @@ finding this line: `git diff --stat` shows exactly what is reverted right now; r
 |---|---|---|
 | U1-a | record section + ledger row 3 IN-PROGRESS | DONE (89b5a9af) |
 | U1-b | core: `purgeableTables` + the `block_comment` arm (tombstoned; dead block refuses; seal refuses) · `restoreBlockComment` belt · the MCP redo road's belt · the `deletedBlockComments` fence · `restoreCost`'s fence · the core pins | DONE (the commit after 89b5a9af — "U1-b core") — `swift test --filter "PurgeOpsTests\|RestoreCostTests\|BlockCommentTests"`: 43 tests / 3 suites green, 0 skipped (headless) |
-| U1-c | red-on-old by behavioural revert, per arm (evidence table below) | NOT-STARTED |
+| U1-c | red-on-old by behavioural revert, per arm (evidence table below) | DONE (this commit) — whole-old + R1–R7 all red as designed, each restored, the restored tree 43/3 green |
 | U1-d | the panel door: `requestDeleteForever` / `deleteForever` on the model, the fold's "Delete forever…" + the confirm, the receipt; app-target pins WRITTEN (run PENDING stage) | NOT-STARTED |
 | U1-e | verify: touched suites + the full `swift test` headless + ONE plain `xcodebuild build` | NOT-STARTED |
 
@@ -310,3 +307,21 @@ finding this line: `git diff --stat` shows exactly what is reverted right now; r
   new door's race-window refusals (`purgeTargetNotDeleted`, `blockNotFound`, `commentNotFound`) fall
   to it; the seal is mapped. U3's pristine pass may route the default through
   `OpsRefusalCopy.message(for:)` as the tray does.
+
+### Red-on-old evidence (U1-c — behavioural reverts over 7aad738a, headless `swift test --filter`)
+
+| # | revert | pins that went RED (and nothing else) | restored |
+|---|---|---|---|
+| W | whole pre-fix `Sources/` (89b5a9af) under the new pins | all 12 comment pins (`unsupportedPurgeTarget(table: "block_comment")` — the door did not exist) + `aCommentDeletedForeverIsNotCountedAsStillRestorable`; 32 tests / 15 issues | `git checkout HEAD -- Sources/` |
+| R1 | the fence arm off `deletedBlockComments` | `anIntentNamedCommentLeavesTheDeletedFoldAtOnce` (2 issues — the live-intent AND the completed-intent halves) | `git checkout --` |
+| R2 | an ANY-STATE fence (no stamp clause) | `aReDeletedCommentListsInTheFoldDespiteItsVoidedIntent` (the voided intent hides the re-delete) | `git checkout --` |
+| R3 | the `restoreBlockComment` belt off | `restoringACommentVoidsItsLiveIntent` + `aReDeletedCommentListsInTheFoldDespiteItsVoidedIntent` (2 issues: the fold hides the re-delete; the intent stays live) | `git checkout --` |
+| R4 | the `reapplyAddedComment` belt off | `theCommentRedoRoadVoidsALiveIntentLikeItsSiblings` | `git checkout --` |
+| R5 | the arm's seal line off | `aSealedPostRefusesACommentsDeleteForever` (4 issues — "an error was expected but none was thrown and 1 was returned": the intent minted under the seal) | `git checkout --` |
+| R6 | the arm's `liveBlock` guard off | `aCommentUnderADeadBlockRefusesItsOwnPurge` (5 issues — both comments mint; and after Put back the cascade victim is LIVE with its intent STANDING: the traced B1 hazard, observed) | `git checkout --` |
+| R7 | the `restoreCost` fence off | `aCommentDeletedForeverIsNotCountedAsStillRestorable` (the count stays 2) | `git checkout --` |
+
+Feature pins (not bug-class — the door is new): `aLiveCommentRefusesOnlyDeletedCommentsPurge`,
+`aDeletedCommentMintsOneTravellingIntentAndAskingTwiceIsOne` (dedup: the second ask mints 0),
+`aMissingCommentRefusesByNameUnlessAlreadyPurged`, `aCommentOnALiveUnplacedBlockPurges`,
+`theLocalRoadTakesAPurgedCommentWhole` — each red on the whole-old run (W), green on the fix.
