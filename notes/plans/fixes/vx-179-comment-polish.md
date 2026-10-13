@@ -592,10 +592,10 @@ a geometry oracle + the walk, red-on-old where a cell is the old law)
 
 ## U3 RECORD (implementer, 2026-10-12)
 
-**U3 STOPPED AT FORK F-U3-1 (2026-10-12) — AWAITING THE ORCHESTRATOR'S RULING.** The trace is done
-and measured (below); the traced fix is a REWRITE of `PanelTextArea` (the brief's stop condition), so
-nothing in the product has changed yet. The pristine pass (U3-e) waits on the ruling — the add area's
-look depends on which control draws it.
+**U3 IN PROGRESS — building on the F-U3-1 RULING (c0888701).** The trace (measured, below) stopped at
+the fork; the orchestrator ruled (a) the AppKit control with the twin-view placeholder · (i) the bar's
+2 pt drift fixed here through `CaptureTextView`'s named inset · the panel-private home. Resumed the same
+session (no death).
 
 **NOT DONE BY THIS UNIT (first line, by the contract — kept current):** no `xcodebuild test`, no walk,
 no app launch, no window shown, no `/Applications` touch (the stage is held) — every app-target pin
@@ -617,8 +617,10 @@ panel's control verbatim in an `NSHostingView` and reads the real text view's ge
 | U3-a | record section + ledger row 5 IN-PROGRESS | DONE (e5211a8e) |
 | U3-b | TRACE: the offscreen probe measures `TextEditor`'s real insets / padding / typing attributes / caret rect vs the hand-assumed `topInset 8 / leadingInset 5`; the sweep measured | DONE (13b8807e) — the numbers and the mechanism below |
 | U3-c | the mechanism decision | STOPPED AT FORK F-U3-1 (13b8807e) — the traced fix is a `PanelTextArea` rewrite; the proposal below, the orchestrator rules |
-| U3-d | the caret fix as ruled + its pins (pure geometry table; mounted pins written, RUN PENDING stage) | NOT-STARTED — waits for F-U3-1 (the design under option (a) below) |
-| U3-e | the pristine pass: the add area's empty state, header/footer rhythm, stamp lines, the deleted fold as ONE language (Restore + "Delete forever…"), O-3 (the `perform` default arm through `OpsRefusalCopy.message(for:)` — `TrayRefusalCopy`'s idiom, `TrayPanel.swift:743`), sentence case, taste numbers in one Metrics place | NOT-STARTED — waits for F-U3-1 |
+| U3-d1 | Q-2: `CaptureTextView` owns `textInset`/`lineFragmentPadding`/`firstLineOrigin` as named statics; `makeNSView` reads them; `QuickEntryBar.placeholderOrigin` = the box's origin (the 2 pt fix); `QuickNoteView.placeholderOrigin` derived = (6, 6), visibly unchanged | DONE (this commit) — plain build SUCCEEDED, zero warnings in the three files |
+| U3-d2 | Q-1/Q-3: `Features/Editor/CommentTextArea.swift` (the AppKit control — owned geometry, explicit typing attributes, the twin placeholder, the twin `//` mark, measured row height, first-responder reports + counted focus request); `CommentsPanel` rewired (`PanelTextArea` + ruler retired; focus semantics unchanged) | NOT-STARTED — the design is the F-U3-1 (a) text above + the ruling; mark: SwiftUI does NOT bridge `firstBaselineOffsetFromTop` for a representable (measured, `baseline.swift`: the HStack ignores it), so the mark is a second configured TWIN owned by the control — the same engine, inset and font as the text, the first baseline equal by construction |
+| U3-d3 | pins: pure geometry tables (the panel's text metrics, the capture origins); mounted pins offscreen-hosted (twin == caret line, mark baseline == text baseline, no dead air, typing attributes); RUN PENDING stage | NOT-STARTED |
+| U3-e | the pristine pass: the add area's empty state, header/footer rhythm, stamp lines, the deleted fold as ONE language (Restore + "Delete forever…"), O-3 (`TrayRefusalCopy`'s shape — panel-own arms, then `OpsRefusalCopy.message(for:)`; note that table's own fallback is still `"Refused: \(error)"` and `commentNotFound`/`commentNotDeleted` are mapped NOWHERE, so the panel words them), sentence case, taste numbers in one Metrics place | NOT-STARTED |
 | U3-f | verify: plain build green, zero warnings in touched files; record closed; PENDING list | NOT-STARTED |
 
 ### U3-b — THE TRACE (measured, offscreen; macOS 27.0 26A428, Swift 6.4)

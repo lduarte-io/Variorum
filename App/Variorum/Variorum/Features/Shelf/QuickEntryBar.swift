@@ -197,6 +197,13 @@ struct QuickEntryBar: View {
     /// scrolls, and the note it becomes has no such limit.
     private static let maxBoxHeight: CGFloat = 160
 
+    /// **Where the placeholder sits, relative to the box** (VX-179 U3 — the
+    /// F-U3-1 ruling's Q-2). The placeholder shares the box's `ZStack`
+    /// origin, so its offset IS the box's own first-line origin — read from
+    /// the box, never re-typed here. Before this it was (0, 0): the hint sat
+    /// 2 pt above the line her typing lands on.
+    static var placeholderOrigin: CGPoint { CaptureTextView.firstLineOrigin }
+
     init(
         session: AppSession,
         onOpen: @escaping (SidebarSelection) -> Void,
@@ -238,6 +245,12 @@ struct QuickEntryBar: View {
                                 }
                         }
                     }
+                    // VX-179 U3 (F-U3-1 ruling Q-2): the hint sits ON the
+                    // box's first line — the box's own named origin, never
+                    // the ZStack's top (measured: 2 pt high, so the words
+                    // dropped as she started typing).
+                    .padding(.leading, Self.placeholderOrigin.x)
+                    .padding(.top, Self.placeholderOrigin.y)
                     .allowsHitTesting(false)
                 }
                 // 13u3 UNIT C — THE ONE CAPTURE BOX (R-13u-4): ⏎ files it
