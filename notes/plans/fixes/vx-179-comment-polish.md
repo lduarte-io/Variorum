@@ -188,8 +188,8 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 
 | # | item | status |
 |---|---|---|
-| 1 | Record file + kickoff rulings landed, branch pushed | DONE (this commit) |
-| 2 | The `Sync/` line: `tombstonedKinds` + `block_comment` + two-client stale pin (orchestrator) | NOT-STARTED — next, before U1 spawns |
+| 1 | Record file + kickoff rulings landed, branch pushed | DONE (93b5b720) |
+| 2 | The `Sync/` line: `tombstonedKinds` + `block_comment` + two-client stale pin (orchestrator) | DONE (37b9a6e7) — pin red-on-old VERIFIED BY REVERT (all 5 expectations fail, the comment purged live, stores diverge); full PurgeConvergenceTests 20/20 green headless |
 | 3 | U1 true delete (core + panel door) | NOT-STARTED |
 | 4 | U2 gutter cards | NOT-STARTED |
 | 5 | U3 panel pristine pass | NOT-STARTED |
