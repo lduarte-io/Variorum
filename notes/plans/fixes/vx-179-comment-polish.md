@@ -1980,7 +1980,7 @@ live) and the door-shut answer stay byte-intact. The pins' RUN and the lane re-w
 | FL2-a | this section | DONE (f53d1621) |
 | FL2-1 | trace F-W-2-R offscreen (overlay style confirmed/forced; the live sequence modelled) — mechanism found or the gap stated | DONE (75f55b2d) — the lane hands presses to an overlay scroller that tracks only on its 6 pt knob part; off it, a dead press (THE TRACE) |
 | FL2-2 | the fix (the lane's press-drag scrolls the card, faded or flashed; door + wheel untouched) | DONE (this commit) — the card owns the lane drag (`mouseDown`/`mouseDragged`/`mouseUp` + the pure `laneDragOffset` at the native knob ratio); `HitAnswer.scroller` → `.lane`, answering the card; replayed: every lane position drags 0 → 212.04 (overlay; native knob 212), door 0×; the wheel replay byte-identical to leg 1's fixed column |
-| FL2-3 | pins (what the runner can model) + red-on-old by replay; plain build; record closed | IN-PROGRESS — pins written + typechecked (this commit); the record's close next |
+| FL2-3 | pins (what the runner can model) + red-on-old by replay; plain build; record closed | DONE (this commit) — pins at 835fe8a0 (typecheck EXIT 0); plain build SUCCEEDED (zero warnings in touched files); red-on-old by replay (the table below); RUN + the lane re-walk PENDING |
 
 ### THE TRACE (offscreen, the real module — `scratchpad/vx179-u2-fix2/knob.swift`; written before any fix)
 
@@ -2015,3 +2015,62 @@ the lane drag itself — the same responder road (`mouseDown` → `mouseDragged`
 that took the press) the drag handle beside it has used live since 13 C1 — mapping the pointer's travel
 to the content's at the native knob ratio (content travel ÷ knob travel), so the knob still follows the
 pointer one-to-one as it would under AppKit's own tracking.
+
+### THE FIX (835fe8a0) — the card owns its lane
+
+`CommentCardLayout.hitAnswer`'s press-on-the-lane answer is now `.lane` (was `.scroller`), and
+`hitTarget` answers the CARD for it (was the `NSScroller`). The card's `mouseDown` asks the same pure
+decision: a lane press on an overflowing interactive card starts the card's own drag (the press's window
+y, the contents' offset, content travel = document − clip, knob travel = the scroller's knob slot − its
+knob, falling back to the clip's proportional share), flashes the overlay scroller so the knob shows;
+`mouseDragged` moves the clip by the pure `CommentCardLayout.laneDragOffset` (content travel ÷ knob
+travel — the native knob ratio, so the knob still follows the pointer one-to-one — clamped at both
+ends); `mouseUp` ends it. Every other press is the door, unchanged; with no lane drag in flight
+`mouseDragged`/`mouseUp` fall to `super` exactly as before. The WHEEL arms of the decision and
+`hitTarget` are untouched.
+
+### Red on old by replay (offscreen, the real module; overlay is this machine's preferred style)
+
+The OLD column is THE TRACE's run — the pre-fix module (no commit touched `CommentCard.swift` between
+fix leg 1's close and this leg's fix: `git log a6791a97..75f55b2d -- CommentCard.swift` is empty). The
+FIXED column is the same probe, same dispatch road, after 835fe8a0's build.
+
+| press, then a 38 pt drag down (overlay) | OLD | FIXED |
+|---|---|---|
+| on the knob — flashed · hover first · faded | hit `NSScroller`, card 0 → 212, door 0× | hit the card, 0 → 212.04, door 0× |
+| the lane's leading edge (x 2) — flashed | hit `NSScroller`, **0 → 0 (dead)**, door 0× | 0 → 212.04, door 0× |
+| the lane's trailing edge (x 15) | **0 → 0 (dead)** | 0 → 212.04 |
+| the leading edge, FADED (4 s) | (dead by the same `testPart` none) | 0 → 212.04 |
+| the slot below the knob (part 3) | (not measured on old) | 0 → 212.04 |
+| legacy control, every position | knob 0 → 189.5; edges 0 → 0 | 0 → 189.3 |
+| the wheel road (fix leg 1's six dispatch rows) | — | byte-identical to fix leg 1's fixed column (down → the card's own · up → the page · bottom → the page · mid-way up → the card · fits → the page both ways) |
+
+### What only the walk can prove (stated, not claimed)
+
+The dead live press is REPRODUCED offscreen for every lane point off the knob's 6 pt part; the live
+report adds a dead press aimed at the knob's own pixels, which offscreen tracks. Two live-only conditions
+could explain that cell — the knob's hit part missed by a few points (the collapsed overlay knob draws
+thinner than its hit part), or the overlay scroller's hover/expansion state machine, which runs only in an
+ACTIVE app's KEY window. The fix removes BOTH dependencies (the knob part and the scroller's state machine
+no longer take part), but that it does so live is the re-walk's to show. The road the drag now uses —
+`mouseDragged`/`mouseUp` delivered to the view that took `mouseDown` — is the drag handle's beside it,
+live since 13 C1.
+
+### Dispositions (FIX LEG 2)
+
+| row | disposition |
+|---|---|
+| F-W-2-R (the lane's knob does not track a live press-drag) | FIXED at mechanism — the card owns the lane drag; pins `aPressDragAnywhereOnTheLaneScrollsTheCard` (the measured dead edge, the trailing edge, the knob column; door shut; drags back; off-lane door; a fitting card all door) + `theLaneDragFollowsTheKnobRatioAndStopsAtTheEnds` + the hit table's `.lane` cell; red-on-old by replay (the table above); the live outcome PENDING the re-walk |
+| the coordinator's hypothesis (the probe had legacy scrollers) | FALSIFIED — the probe was overlay (`preferredScrollerStyle` 1); the dead press is the overlay knob's 6 pt hit part, reproduced |
+| the door-shut answer | INTACT — every lane press door 0× (pinned); every off-lane press the door (pinned) |
+| the wheel road (W-3/W-8 live-green) | UNTOUCHED — the wheel arms unchanged; the dispatch replay identical |
+
+### PENDING (the runner's next window — none of it claimed)
+
+- **RUN:** `-only-testing:VariorumTests/CommentCardLayoutTests -only-testing:VariorumTests/CommentCardViewTests
+  -only-testing:VariorumTests/CommentCardControllerTests` (the lane-drag cell replaces fix leg 1's
+  `aPressOnTheScrollerLaneBelongsToTheScroller`, whose answer — the `NSScroller` — was the dead road).
+- **THE LANE RE-WALK** (overlay, the live app): on an overflowing card, press-drag (cliclick dd/dm/du)
+  ~38 pt down — on the flashed knob, on the faded lane's left edge, and on its right edge: the contents
+  scroll and the knob follows the pointer; drag back up: it returns; three presses on the lane: still no
+  panel; a press on the entries: the panel opens; then a wheel pass (W-3) to see the road unchanged.
