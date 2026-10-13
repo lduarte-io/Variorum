@@ -222,3 +222,57 @@ the cap to be exact: a line longer than `lineCap` is over, whatever the chunking
 **PROVISIONAL (P-U1 over-cap):** the code (-32000 · -32600 "Invalid Request" · -32700 "Parse error"), the id (`null`
 as built · drain the line to its end and parse the id from a bounded tail — a heuristic over unparsed JSON, rejected
 here) and the words — options in the PROVISIONALs list at the close.
+
+### VX-198 — R-VX184-5, the newest copied setup wins (the trace and the argued shape, written before code)
+
+**Today (VX-168 as built):** `MCPSetupKeyRule.decide` — a BOUND name presenting ANY other key refuses
+`.notThisNamesKey`, "a fresh key from a newer copy included" (UNIT 1 RECORD call 3; pinned
+`aBoundNameRefusesEveryOtherKey`, the drill's impostor leg). So when she re-runs a client's setup (a new Mac
+registration, a reinstalled tool, a beta tester's second try) the fresh key is refused, and the only road is
+P-VX168-U1-1's rotation — Deny… (revoking every grant) → Approve… → run the setup again. Her ruling: *"the whole path
+where you have to deny it and then reset it is a bit annoying and cumbersome even for my beta testers."*
+
+**The rule, per arm (only ONE arm changes meaning):**
+- a bound name + its own key → admit (unchanged);
+- **a bound name + a FRESH key — minted here by a Copy setup command and never yet presented (`.unclaimed`) → REBIND**
+  (new): the key leaves the unclaimed set and becomes the name's key; approval and grants untouched; logged
+  `connect_rebound` ("connected with a newer setup, which replaced its earlier one");
+- **a bound name + the key a newer setup REPLACED → refuse `.replaced`** (new arm, its own sentence);
+- a bound name + a key bound to ANOTHER name, or one never minted here → refuse `.notThisNamesKey` (unchanged — the
+  impostor arm now means "a key this library did not hand this name's newest setup");
+- no key → `.bare`; no name → `.unnamed`; an unbound name: unclaimed → bind/request, another name's → refuse,
+  unknown → refuse (all unchanged); Deny still releases (unchanged); an adoption still releases every binding.
+"Newest" is the newest PRESENTED copy: an unclaimed key re-binds whenever it first arrives (the brief's letter: "only
+a FRESH, unclaimed, this-store-minted key presented under a bound name re-binds"). Two copies pending at once is the
+one edge where an OLDER copy first run later takes the name back — K2's unclaimed set carries no name or order, and
+the cap (20, oldest forgotten) bounds it; recorded, not built around.
+
+**The replaced key's own sentence needs a MEMORY, and this unit has zero schema.** A rebind discards the old hash
+(the binding column holds one key), so without memory a replaced key is indistinguishable from any never-issued key —
+and giving the replaced sentence to every unknown key under a bound name would tell a prober which names are bound
+(an oracle the one-sentence discipline exists to prevent). **Built: the memory is the activity log's own rebind row**
+— `connect_rebound` with `target_kind = 'setup_key'` and `target_id` = the REPLACED key's hash (a hash of a dead key;
+`target_title` nil, so no face shows it). The standing query asks "did a rebind under THIS name replace this hash?"
+— keyed on (name, hash), so the sentence is heard only by a connection presenting a key that really was this name's
+before a newer setup replaced it: it tells the key's holder only its own key's history, so it opens no oracle. The
+log is coarse and capped (500 rows): past the cap the memory lapses and the old key hears the ONE sentence, whose
+remedy is the same — graceful, said plainly. PROVISIONAL **P-VX198-1** (the memory's home): (a) as built, the
+activity log (zero schema); (b) a local-only replaced-keys record on the grants family's road — a schema change, its
+own commit, out of this unit (the kickoff allows only U3's table); (c) no memory: fold "or a newer setup replaced
+it" into the ONE sentence for every key refusal (zero oracle, zero memory, but not "its own sentence").
+
+**The words (PROVISIONAL P-VX198-2, her copy pass):**
+- the ONE refusal sentence LOSES its last clause — "If this client's name is already set up with another key, the
+  author must deny it there and approve it again first." is FALSE once a fresh setup re-binds (it was P-VX168-U1-4's
+  clause that "depends on P-U1-1");
+- the replaced key's sentence, her words kept: "Variorum refused this connection: a newer setup replaced this one.
+  Run this client's setup again — copy a fresh one from Settings ▸ MCP ▸ Connect a client — and reconnect.";
+- the setup sentence (`keyLine`, under every client's shown setup) gains her words: "Running it again replaces the
+  old setup.";
+- L1 (`clientBoundary`) made true of the new rule, no truer: the newest setup run for a name replaces the one before;
+- Activity: `connect_rebound` / `connect_replaced_key` worded;
+- the Deny confirm — REVIEWED, unchanged: "It can't connect again until you approve it and run its setup again." stays
+  true (Deny still releases; R-VX184-5 leaves Deny unchanged); it no longer names the everyday rotation road and never did;
+- the field guide's lesson-2 limit sentence ("…so a second tool using the same name is turned away") is FALSIFIED by
+  the rebind and pinned against the rule (`TutorialMCPChapterTests`) — minimal truth fix here, U7's quality pass
+  re-voices it.
