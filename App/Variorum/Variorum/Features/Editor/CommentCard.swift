@@ -195,6 +195,26 @@ final class CommentCardView: NSView {
         var fill: NSColor
         /// The tooltip — the shipped joined string, kept whole.
         var toolTip: String
+
+        /// The comparison the budget stands on. The colours arrive freshly
+        /// made from the voice tokens on EVERY pass (`NSColor(tokens.…)`),
+        /// so they are compared by their sRGB components rather than by
+        /// object equality — a conversion that hands back a new wrapper each
+        /// time must still read as "unchanged", or every pass would rebuild
+        /// every entry.
+        static func == (a: CardContent, b: CardContent) -> Bool {
+            a.entries == b.entries && a.prefix == b.prefix && a.toolTip == b.toolTip
+                && sameColor(a.ink, b.ink) && sameColor(a.rule, b.rule)
+                && sameColor(a.separator, b.separator) && sameColor(a.fill, b.fill)
+        }
+
+        static func sameColor(_ a: NSColor, _ b: NSColor) -> Bool {
+            if a == b { return true }
+            guard let x = a.usingColorSpace(.sRGB), let y = b.usingColorSpace(.sRGB)
+            else { return false }
+            return x.redComponent == y.redComponent && x.greenComponent == y.greenComponent
+                && x.blueComponent == y.blueComponent && x.alphaComponent == y.alphaComponent
+        }
     }
 
     var onClick: (() -> Void)?
@@ -286,6 +306,9 @@ final class CommentCardView: NSView {
         let switching = !stacked
         showStacked(true)
         guard switching || new != content else { return }
+        #if DEBUG
+        contentApplications += 1
+        #endif
         let textChanged = new.entries != content?.entries || new.prefix != content?.prefix
         content = new
         layer?.backgroundColor = new.fill.cgColor
@@ -419,6 +442,9 @@ final class CommentCardView: NSView {
                 Self.height(of: $0, width: viewport.width)
             }
             measuredWidth = viewport.width
+            #if DEBUG
+            measurements += 1
+            #endif
         }
         let arrangement = CommentCardLayout.arrange(
             entryHeights: entryHeights, width: viewport.width,
@@ -521,6 +547,12 @@ final class CommentCardView: NSView {
     }
 
     #if DEBUG
+    /// How many `presentCard` calls did entry work (the budget pin: an
+    /// unchanged pass adds nothing here).
+    private(set) var contentApplications = 0
+    /// How many layouts measured the entries' text (a height-only change —
+    /// her block grew a line — adds nothing here).
+    private(set) var measurements = 0
     /// The pins' window into the stacked arm.
     var showsStackedEntries: Bool { stacked && !scroller.isHidden && label.isHidden }
     var shownEntryCount: Int { stacked ? (content?.entries.count ?? 0) : 0 }
