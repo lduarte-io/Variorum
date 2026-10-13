@@ -2489,3 +2489,9 @@ the orchestrator called it with ONE argument; the trap is Swift's index-out-of-r
 arguments (exit 133), i.e. misuse, not a broken binary. The replacement poster was unnecessary. The
 WalkKit README now says so (her word: the walk lessons go into the README).
 
+**THE REFRESH, CONFIRMED (2026-10-13):** the fold landed — VX-214 merged last (8925f38b, which contains
+this run's d6caafc1) and refreshed /Applications from merged main: 0.9.4 build 6843, 11:27, A1 verified in
+the VX-214 record. Her answers to #215 are recorded there (VX-257 born; VX-226 re-scoped and reopened).
+Final cleanup verified: no worktree, branch, test checkout, DerivedData folder, /tmp evidence or session
+scratchpad left from this run.
+
