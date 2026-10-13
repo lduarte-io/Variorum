@@ -177,7 +177,7 @@ closeout coverage follows the changed-SOURCE rule (grep tests for changed types,
 | U2 | VX-110 | state-transition pins: two doors offered on the gate state; forget-then-sign-in lands the consent, never the follow; the crash-window resume completes the forget; two-store custody isolation; born-Castle setup pin (or Done copy softened); the consent de-capped; phone door confirmed |
 | U3 | VX-203 + VX-208 | lister pins red-on-old (apple-wrapped stamp folders listed, Castle-era ones not; follow road too); the confirm's honest counts; the one VX-208 line landed PROVISIONAL |
 | U4 | VX-204 + VX-206 | the guide sentence landed on both seeders PROVISIONAL; ceremony-from-Protection ends on Protection with the popup (walk-verified); zero pane-internal lines (VX-214 overlap) |
-| U5 | VX-209 | the Open/Restore confirm line pinned on the classifier (backup pair + plaintext export arms); the guide warning written against U1's landed behavior, PROVISIONAL |
+| U5 | VX-209 | FIRST a pin REPRODUCING §W.2's round-trip trace at HEAD (open a Standard-era backup of the same library, bring the Castle library back — lands Standard; the trace was read, never run — her carried-forward reminder 2); then the Open/Restore confirm line pinned on the classifier (backup pair + plaintext export arms); the guide warning written against U1's landed behavior AND the reproduced trace, PROVISIONAL |
 
 Then: the fable ladder over the WHOLE run diff (members touch custody) with `notes/REVIEW_PROMPT.md` verbatim;
 round 2 re-reviews fixes; my hands-on walk of the ceremony + the two doors on the dev store under a stage claim;
@@ -286,6 +286,15 @@ flipped, everything pushed, PENDING marks honest.
   their Protection/Data Safety rewording waits for her sitting); our no-caps + two-register rules bind their
   rewording; if both runs are still open when their rewording lands, drafts are swapped before either merges.
   U4's brief cites this entry.
+- **HER CARRIED-FORWARD REMINDERS (via vx-184, 2026-10-13 — pasted from the VX-191 audit session, verbatim):**
+  *"1. If VX-110's Done screen ends up suggesting 'set up a new account,' confirm that a new account set up
+  from a Castle library actually starts out in Castle. The design says it does, but nothing in this audit
+  tested it (it's flagged in §W of the record). 2. The claim that bringing a Castle library back also lands it
+  in Standard comes from reading the code, not running it. The kickoff already asks for a test proving it
+  before anything is built on it. 3. Close VX-191 together with the run's PR."* Dispositions: 1 = §A VX-110
+  refinement 3 / U2's born-Castle pin (already binding); 2 = U5's evidence row AMENDED this commit — the
+  trace-reproduction pin runs FIRST, before any U5 text is written on it; 3 = the kickoff's standing
+  instruction, confirmed (VX-191 closes with this run's PR).
 
 ## U1 RECORD (VX-202)
 
