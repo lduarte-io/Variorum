@@ -1581,8 +1581,11 @@ apply-check CLEAN at the tip in the pinned checkout)
   re-seed is the road on her store; public stores born on the new text).
 - **F-U4-3 — the #215 commit's supersession pointer** (pre-13x-copy.md:419-421, F-U2-6's pattern — one commit
   carries both pointers).
-- **F-U4-4 (the teardown's "Open the main window first." flash) — to VX-214 in my hunks send** (their surface,
-  their week); if they decline, it mints a ticket at closeout.
+- **F-U4-4 (the teardown's "Open the main window first." flash) — TAKEN BY VX-214** (their reply to the hunks
+  send): minted as VX-240 (Backlog) on their side, no mint at our closeout; the fix is a neutral `.opening`
+  face, wording hers (their morning bundle). Their rebase note for our merge picture: the Settings scene's stub
+  arm now lives in SettingsSceneContent.swift on their branch (VX-224's refactor) — our diff touches neither,
+  so merge order stays free; they rebase onto our merged shape.
 - **F-U4-5 (lock/unlock while a pane-hosted ceremony sits idle) — TICKETED tonight** (pre-existing, rare, the
   same family one trigger over; the fix candidate is one more ask at every ready through the same door).
 - **F-U4-6 (two presenters for `activeFollow`) — the ladder's** (an unverified read, honestly marked; the Fable
