@@ -192,7 +192,7 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 | 2 | The `Sync/` line: `tombstonedKinds` + `block_comment` + two-client stale pin (orchestrator) | DONE (37b9a6e7) — pin red-on-old VERIFIED BY REVERT (all 5 expectations fail, the comment purged live, stores diverge); full PurgeConvergenceTests 20/20 green headless |
 | 3 | U1 true delete (core + panel door) | BUILT (89b5a9af…, last code f92436e8) — core pins red-on-old by revert + full `swift test` green + the app target builds; app-target pin RUN + the walk PENDING (stage) — see the U1 RECORD |
 | 4 | U2 gutter cards | BUILT (1a7d2242…b179a9fe) — plain build green, pins typechecked stage-free, tables replayed; pin RUN + revert + the walk PENDING (stage) — see the U2 RECORD |
-| 5 | U3 panel pristine pass | IN-PROGRESS — see the U3 RECORD |
+| 5 | U3 panel pristine pass | BUILT (e5211a8e…) — the caret fixed at mechanism (F-U3-1), the bar's drift (Q-2), the pass, O-3, two pre-existing undo defects (U3-g); plain build green, the real control/panel measured + rendered offscreen, pins typechecked, U3-g red by revert; pin RUN + the walk PENDING (stage) — see the U3 RECORD |
 | 6 | Mac-target test runs + the walk (stage via oct12coordinator) | HELD — stage |
 | 7 | The ladder (fable-reviewer, whole diff) | NOT-STARTED |
 | 8 | Bout-start board snapshot + in-flight row on main | HELD — until the release session reports |
@@ -592,18 +592,27 @@ a geometry oracle + the walk, red-on-old where a cell is the old law)
 
 ## U3 RECORD (implementer, 2026-10-12)
 
-**U3 IN PROGRESS — building on the F-U3-1 RULING (c0888701).** The trace (measured, below) stopped at
-the fork; the orchestrator ruled (a) the AppKit control with the twin-view placeholder · (i) the bar's
-2 pt drift fixed here through `CaptureTextView`'s named inset · the panel-private home. Resumed the same
-session (no death).
+**U3 BUILD CLOSED (2026-10-12) — VERIFICATION PENDING (stage).** Built on the F-U3-1 RULING (c0888701):
+(a) the AppKit control with the twin-view placeholder · (i) the bar's 2 pt drift fixed through
+`CaptureTextView`'s named inset · the panel-private home; plus the pristine pass, O-3, and two
+PRE-EXISTING undo defects found in self-review (U3-g — a crash and a draft desync). Everything
+stage-free is done and green: plain builds, the REAL compiled control and panel measured and rendered
+offscreen, the pins typechecked, the undo fix's two arms red by behavioural revert on the real module.
+What remains needs the stage: the pins' RUN and the walk (the PENDING list at the end). Resumed the
+same session after the ruling (no death).
 
-**NOT DONE BY THIS UNIT (first line, by the contract — kept current):** no `xcodebuild test`, no walk,
-no app launch, no window shown, no `/Applications` touch (the stage is held) — every app-target pin
-RUN, every red-on-old-by-revert run and every capture is PENDING (stage). Zero `Sources/VariorumCore/`
-lines, zero `Sync/` lines. `CommentComposition` and the key grammar are byte-untouched by design.
+**NOT DONE BY THIS UNIT (first line, by the contract):** no `xcodebuild test` (the 16 new pins are
+WRITTEN + TYPECHECKED, never run), no walk, no app launch, no window shown, no `/Applications` touch —
+every app-target pin RUN and every capture is PENDING (stage); the red-on-old by revert ran OFFSCREEN
+through probes against the real module, not through the test target. O-U3-3 (the capture box's own
+undo desync) is measured and NOT fixed (another surface). Zero `Sources/` lines (no core, no `Sync/`),
+verified by path diff. `CommentComposition`, `CommentPanelKeys` and `CommentPanelKeyMonitor` are
+byte-untouched; `CommentsPanelEditorTests` and `CommentPanelParkTests` are UNMODIFIED (no cell pinned
+the old control's internals).
 
-**Revert state:** no behavioural revert is in flight, and none will run this session (app-target runs
-are stage-gated).
+**Revert state:** no behavioural revert is in flight — U3-g's R-a and R-b ran on the committed fix and
+were restored by `git checkout --` (`git diff --stat` empty after each; the restored tree rebuilt and
+re-measured green).
 
 **The probe carve-out (the brief's):** the trace's measurements come from a HEADLESS OFFSCREEN probe —
 a scratch `swiftc` executable (`.prohibited` activation policy; no `NSApp.run`, no
@@ -619,10 +628,10 @@ panel's control verbatim in an `NSHostingView` and reads the real text view's ge
 | U3-c | the mechanism decision | STOPPED AT FORK F-U3-1 (13b8807e) — the traced fix is a `PanelTextArea` rewrite; the proposal below, the orchestrator rules |
 | U3-d1 | Q-2: `CaptureTextView` owns `textInset`/`lineFragmentPadding`/`firstLineOrigin` as named statics; `makeNSView` reads them; `QuickEntryBar.placeholderOrigin` = the box's origin (the 2 pt fix); `QuickNoteView.placeholderOrigin` derived = (6, 6), visibly unchanged | DONE (1d347966) — plain build SUCCEEDED, zero warnings in the three files |
 | U3-d2 | Q-1/Q-3: `Features/Editor/CommentTextArea.swift` (the AppKit control — owned geometry, explicit typing attributes, the twin placeholder, the twin `//` mark, measured row height, first-responder reports + counted, HELD focus request); `CommentsPanel` rewired (`PanelTextArea` + its ruler retired; `@FocusState` → `focus` fed by the reports through the pure `CommentPanelFocus.after(report:inArea:current:)`; ONE `CommentsPanelMetrics`) | DONE (fa488500) — plain build SUCCEEDED, zero warnings in touched files; the REAL compiled control verified offscreen (the evidence table below). Mark: SwiftUI does NOT bridge `firstBaselineOffsetFromTop` for a representable (measured, `baseline.swift`), so the mark is a second configured twin owned by the control |
-| U3-d3 | pins — new `VariorumTests/CommentTextAreaTests.swift` (3 suites, 14 tests, 18 cases with the voice arguments): the pure rules (owned geometry, row height, Q-2's origins incl. the bar's red-on-old cell, the focus-report table); the REAL control mounted offscreen (caret line == placeholder line, placeholder ink == typed ink, typing attributes + twin through type/clear/IME, no dead air, mark baseline == text baseline, the held focus request + reports, ⎋ falls through, the capture box's first line at its own origin); the words (sentence case, refusals as words) + the model-level race pin (red-on-old: "Refused: commentNotDeleted(…)" etc.) | DONE (f3a4a8cc) — WRITTEN; TYPECHECKED stage-free against the built module (`real/typecheck.sh`: Swift 6 + the test target's upcoming features + the Testing macro plugin; EXIT 0, zero diagnostics, with the five existing touched-area suites in the same invocation; non-vacuity probed — a misspelt member fails it). RUN PENDING (stage) |
+| U3-d3 | pins — new `VariorumTests/CommentTextAreaTests.swift` (3 suites, 15 tests at f3a4a8cc; 16 with U3-g's undo pin — 20 cases with the voice arguments): the pure rules (owned geometry, row height, Q-2's origins incl. the bar's red-on-old cell, the focus-report table); the REAL control mounted offscreen (caret line == placeholder line, placeholder ink == typed ink, typing attributes + twin through type/clear/IME, no dead air, mark baseline == text baseline, the held focus request + reports, ⎋ falls through, the capture box's first line at its own origin); the words (sentence case, refusals as words) + the model-level race pin (red-on-old: "Refused: commentNotDeleted(…)" etc.) | DONE (f3a4a8cc) — WRITTEN; TYPECHECKED stage-free against the built module (`real/typecheck.sh`: Swift 6 + the test target's upcoming features + the Testing macro plugin; EXIT 0, zero diagnostics, with the five existing touched-area suites in the same invocation; non-vacuity probed — a misspelt member fails it). RUN PENDING (stage) |
 | U3-e | the pristine pass (the look, both voices, both appearances, sheet + popover hosts — one view): the COMPOSER (the add area as the voice's writing box: card paper + hairline, accent hairline while live, keys + Add inside it), one WRITING column / one CHROME column, inset row hairlines, the header's count only when non-zero, the deleted fold as the live list's quieter twin (struck words, then the stamp line "Deleted <date>" with Restore + "Delete forever…"), Add on `VoicedButtonStyle` (it fades when there is nothing to file — `CalmButtonStyle` ignores disabled), every word in `CommentsPanelCopy` (sentence case), O-3 (`CommentsPanelRefusalCopy`), taste numbers in `CommentsPanelMetrics`; `VoicedButtonStyle.labelInset` named | DONE (4b7cfd60) — plain build SUCCEEDED, zero warnings in touched files; REAL panel rendered offscreen (see "the look, rendered" below) |
-| U3-g | **FOUND IN SELF-REVIEW (the ruling's "undo grouping" walk risk, probed) — TWO pre-existing undo defects in the panel, both measured offscreen in the SHIPPED `TextEditor` and in the new control pre-fix:** (1) ⌘Z right after filing CRASHES — the panel clears the add area programmatically and NSTextView's typing undo replays ranges of the OLD text (`NSRangeException: Range {13, 9} out of bounds; string length 0` — `undo2.swift old`, `undo.swift`); (2) after any ⌘Z/⇧⌘Z the box and the draft DISAGREE — AppKit sends no `textDidChange` for an undo or a redo (measured TK2 and TK1, `undo4.swift`; the shipped `TextEditor` too, `undo5.swift`: view "" / binding "new"), so ⌘⏎ filed words she had undone. FIX: each area's coordinator owns its `UndoManager` (`undoManager(for:)` — measured to be ⌘Z's road: `undo:` reaches `NSWindow`, which undoes through the first responder's manager), ENDED on a programmatic adopt (`removeAllActions(withTarget:)` on the view or the storage does NOT reach TK2's registrations — measured), and the area hears its own manager's did-undo/did-redo notifications and re-syncs the binding, the placeholder and the height. (A `breakUndoCoalescing()` tried mid-trace was NOT needed — measured green without it — and is not in the code.) | PIN a76de514 (+ the honest correction d3a21eea); FIX this commit — plain build SUCCEEDED; the pin's exact steps replayed offscreen against the REAL module (`real/undopin.swift`): 10/10 PASS incl. the redo cells; typecheck EXIT 0. REVERTS NEXT (announced below) |
-| U3-f | verify: plain build green, zero warnings in touched files; record closed; PENDING list | NOT-STARTED |
+| U3-g | **FOUND IN SELF-REVIEW (the ruling's "undo grouping" walk risk, probed) — TWO pre-existing undo defects in the panel, both measured offscreen in the SHIPPED `TextEditor` and in the new control pre-fix:** (1) ⌘Z right after filing CRASHES — the panel clears the add area programmatically and NSTextView's typing undo replays ranges of the OLD text (`NSRangeException: Range {13, 9} out of bounds; string length 0` — `undo2.swift old`, `undo.swift`); (2) after any ⌘Z/⇧⌘Z the box and the draft DISAGREE — AppKit sends no `textDidChange` for an undo or a redo (measured TK2 and TK1, `undo4.swift`; the shipped `TextEditor` too, `undo5.swift`: view "" / binding "new"), so ⌘⏎ filed words she had undone. FIX: each area's coordinator owns its `UndoManager` (`undoManager(for:)` — measured to be ⌘Z's road: `undo:` reaches `NSWindow`, which undoes through the first responder's manager), ENDED on a programmatic adopt (`removeAllActions(withTarget:)` on the view or the storage does NOT reach TK2's registrations — measured), and the area hears its own manager's did-undo/did-redo notifications and re-syncs the binding, the placeholder and the height. (A `breakUndoCoalescing()` tried mid-trace was NOT needed — measured green without it — and is not in the code.) | DONE — PIN a76de514 (+ the honest correction d3a21eea); FIX 7d9e5525 — plain build SUCCEEDED; the pin's exact steps replayed offscreen against the REAL module (`real/undopin.swift`): 10/10 PASS incl. the redo cells; typecheck EXIT 0; REVERTS R-a/R-b RED as predicted, restored (the table below) |
+| U3-f | verify + close: plain build green at the final code; the touched-area suites + the new pins typechecked together (EXIT 0); zero `Sources/` lines; the record closed (sweep, dispositions, PENDING, PROVISIONALs, observations) | DONE (this commit) |
 
 ### U3-b — THE TRACE (measured, offscreen; macOS 27.0 26A428, Swift 6.4)
 
@@ -870,7 +879,7 @@ all equal (above). The app-target pins that hold these (U3-d3) can only RUN unde
 
 `scratchpad/vx179-u3-probe/real/render.swift` renders the REAL `CommentsPanel` (the compiled app
 module) over a THROWAWAY in-memory store, offscreen, to `scratchpad/vx179-u3-renders/` — Terminal and
-Study × light and dark × {empty, two comments + one deleted, typed, a refusal}: 20 PNGs, every one
+Study × light and dark × {empty, two comments + one deleted, typed, a refusal} = 16 PNGs (plus 4 "foldOpen" renders that came out identical to the two-comments ones — the fold did not open offscreen), every one of the 20
 opening with the caret in the add area (the first responder was `CommentNSTextView` in all 20 — the
 open-focused-on-add semantics, through the held request). What the renders cannot show: the caret
 itself (a never-key window draws none), hover washes, the OPEN fold (SwiftUI buttons in a never-key
@@ -895,5 +904,94 @@ false" on every later run).
   CRASH at the undo after the clear (`NSRangeException`).
 - R-b: remove the did-undo/did-redo observers' sync → expect "the draft follows the undo" and the redo
   cells to FAIL.
-Each revert: edit → plain build → `real/undopin` → restore by `git checkout --` → `git diff --stat`
-empty. The results land in the table below when run.
+Each revert: edit → plain build → `real/undopin` (a probe binary linked DYNAMICALLY against the debug
+dylib, so the rebuilt module is what it runs) → restore by `git checkout --` → `git diff --stat` empty.
+
+| revert | result on the real module | restored |
+|---|---|---|
+| R-a — the adopt's `removeAllActions()` off | "nothing to undo into" FAIL, then the replay CRASHED: `NSRangeException … Range {13, 9} out of bounds; string length 0` — the shipped defect, reproduced | yes |
+| R-b — the did-undo/did-redo sync off | 2 FAIL: "the draft follows the undo", "placeholder back after the undo" (the redo cells pass under R-b only because the draft never moved — the undo cells are the discriminating ones) | yes |
+| the restored tree, rebuilt | `undopin` 10/10 PASS; `control` every check equal (both voices) | — |
+
+### The sweep, closed (instance × verdict — the constitution's closing form)
+
+| instance | host | verdict |
+|---|---|---|
+| the add area's placeholder (her defect: +8 pt) | the panel — sheets in `EditorView` and `TakesBottomBar`, the popover in `TakesShared` (one view) | FIXED — the twin; caret line == placeholder line, ink == typed ink, both voices (probe + pins) |
+| the comment rows' height ruler (+16 pt dead air per row) | same | FIXED — rows measured from the real text view (`aRowIsItsTextWithNoDeadAir`) |
+| Terminal's `// ` row mark (+8 pt) | same | FIXED — the mark twin; baseline == the text's (`theMarkSitsOnTheTextsFirstBaseline`) |
+| `QuickEntryBar`'s placeholder (+2 pt) | Bookcase / Library quick entry | FIXED (Q-2) — `placeholderOrigin` = the box's own `firstLineOrigin`; baselines 16 == 16 / 19 == 19 on the real box |
+| `QuickNoteView`'s placeholder | the quick-note pad | PROVABLY SAFE, now BY CONSTRUCTION — derives (6, 6) from the same static; unchanged (the parity cell) |
+| the phone's comments sheet (`UILabel` at a literal (8, 10)) | `MobileCommentsSheetView` | OUT OF SURFACE — O-U3-1, minted on the VM board at the ruling |
+| any other `TextEditor` | — | NONE — the panel's was the app's only one, and it is gone |
+
+### Dispositions (U3's rows — her items 1 + 4, the brief's items, U1's hand-offs)
+
+| row | disposition |
+|---|---|
+| her item 1 — the misaligned caret | FIXED at mechanism (F-U3-1 (a)): traced + measured (U3-b), the control (fa488500), pins + probe evidence; the walk PENDING |
+| the sweep (QuickNote + any other overlay) | CLOSED — the table above; the bar's 2 pt FIXED under Q-2 (1d347966) |
+| her item 4 — "pristine + nice UI / UX" | BUILT (4b7cfd60) — the composer, two columns, the fold's one language, Add's honest disabled state, the words; taste numbers PROVISIONAL; the walk decides |
+| U1's "Delete forever…" row joins the pass | DONE — the fold's stamp line carries Restore + "Delete forever…" (the confirm unchanged) |
+| O-3 — the fallback refusal's raw dump | FIXED — `CommentsPanelRefusalCopy` (4b7cfd60); red-on-old pin `thePanelsRacesSpeakWordsNotTheEnum` (RUN PENDING) |
+| sentence case / every string in the copy enum | DONE — `everyPanelWordIsSentenceCase` |
+| the three ruled walk risks | popover focus → walk row W-U3-6; undo grouping → PROBED, found TWO pre-existing defects, FIXED (U3-g) + pinned, still a walk row (W-U3-7); IME marked text → probed (the twin hides while composing) + pinned, still a walk row (W-U3-8) |
+| U3-g — ⌘Z after filing crashes; ⌘Z desyncs the draft | FIXED (7d9e5525) — pin first (a76de514/d3a21eea), red by revert R-a/R-b on the real module |
+
+### PENDING (stage-gated — none of it claimed)
+
+- **Pin RUN** (via `oct12coordinator`, suite-level, held claim):
+  `-only-testing:VariorumTests/CommentPanelGeometryRuleTests -only-testing:VariorumTests/CommentTextAreaMountedTests
+  -only-testing:VariorumTests/CommentPanelWordsTests -only-testing:VariorumTests/CommentsPanelModelEditorTests
+  -only-testing:VariorumTests/CommentCompositionTests -only-testing:VariorumTests/CommentPanelKeysTests
+  -only-testing:VariorumTests/CommentPanelParkTests -only-testing:VariorumTests/CaptureFocusReportTests
+  -only-testing:VariorumTests/CaptureKeysTests -only-testing:VariorumTests/CaptureTextViewKeyTests
+  -only-testing:VariorumTests/CaptureHandOffTests -only-testing:VariorumTests/QuickNoteParkTests` (the last six ride UNMODIFIED over the capture box's
+  named-inset change). In-target red-on-old for U3-g: the revert pair above, re-run as test runs.
+- **The walk** — DEV-STORE Debug build, both voices × both appearances, one capture per row:
+  W-U3-1 the sheet from Write: empty panel — the composer, the placeholder on the caret's line, the
+  caret line-high (her screenshot's exact state); W-U3-2 typing replaces the placeholder in place (no
+  jump), ⌘⏎ files, the box clears, the new comment visible; W-U3-3 three comments incl. a multi-line one
+  — the writing column, the stamp lines, Terminal's `// ` on its line with wrapped lines hanging;
+  W-U3-4 click a comment and edit in place, the "Unsaved · ⌘⏎" mark, click elsewhere saves; W-U3-5 the
+  deleted fold open — struck rows, "Deleted <date>", Restore, "Delete forever…" (+ U1's confirm);
+  W-U3-6 THE POPOVER host (the Takes margin note) — opens focused on the add area, typing lands, the
+  composer's live hairline, ⎋ with nothing typed closes it, Delete forever's confirm appears and acts
+  (U1's walk check); W-U3-7 UNDO — type, ⌘⏎, then ⌘Z: no crash, nothing comes back; type, ⌘Z: the
+  text goes AND Add greys (the draft followed); ⇧⌘Z brings it back; W-U3-8 IME — compose Japanese in
+  the empty add area: the placeholder hides while composing; W-U3-9 the click-anywhere contract — the
+  composer's padding and foot row land the caret; W-U3-10 a refusal under a seal reads in the alarm
+  register, in words; W-U3-11 the Takes bottom-bar sheet; W-U3-12 the quick-entry bar, empty, both voices
+  — the hint on the typed line (no 2 pt drop when typing); W-U3-13 the quick-note pad — unchanged.
+
+### PROVISIONAL — owed to `notes/QUESTIONS.md` at the merge moment (the shared-ledger rule)
+
+- **P-VX179-U3-1 — the composer's look.** Built: (a) the add area as a framed writing box (card paper +
+  hairline, the accent hairline while live, the keys hint and Add INSIDE it). Options: (b) the box
+  without the live hairline; (c) the shipped flat area with the keys and Add in the foot bar.
+- **P-VX179-U3-2 — the taste numbers** (`CommentsPanelMetrics`: chrome 16, card padding 12, header
+  14/10, list top 4, row air 9, stamp gap 3, add floor 156, card margin 12, foot 8/6, radius 8, live
+  stroke 0.55, fold air 6, text inset (0, 2)).
+- **P-VX179-U3-3 — the refusal words** (`CommentsPanelRefusalCopy`'s four sentences + `observationFailed`).
+- **P-VX179-U3-4 — undo is PER AREA, and a programmatic replacement ends it** (U3-g's semantics: ⌘Z
+  in a comment undoes that comment's typing only; after filing, reverting, a park restore or a store
+  arrival there is nothing to undo into). Options: (b) one panel-wide undo history (needs a design
+  for what undoing across areas means); (c) make the filing clear itself undoable (⌘Z after ⌘⏎
+  brings the filed words back into the box — a duplicate-filing hazard).
+- **P-VX179-U3-5 — Add as a voiced word** (`VoicedButtonStyle(.primary)`, fades when there is nothing
+  to file) instead of the bordered `CalmButtonStyle` (which ignores disabled — O-U3-2).
+
+### Observations (NOT fixed here — for the orchestrator)
+
+- **O-U3-2:** `CalmButtonStyle` ignores the disabled state app-wide (no fade, no ink change), so every
+  `.disabled` Calm button reads live. The panel stepped around it (P-U3-5); the vocabulary fix is
+  app-wide — ticket candidate.
+- **O-U3-3 (HIGH — the lost-prose neighbourhood): `CaptureTextView` has U3-g's second defect** —
+  measured on the real box (`real/capture-undo.swift`): type "a thought", ⌘Z → the box shows "" while
+  the binding keeps "a thought", so ⏎ in the quick-entry bar or the quick-note pad files words she
+  undid. Same mechanism (no `textDidChange` on undo/redo), same fix shape (the box's own manager +
+  its did-undo/did-redo). Another surface — ticket candidate.
+- **O-U3-4 (harness hazard):** an un-injected `@Dependency(\.database)` in ANY headless harness falls
+  to `AppDatabase.liveValue`, which opens — and on a fresh machine CREATES — a store at the
+  unsandboxed default path (this unit's probe incident, contained and recorded above). The tests are
+  safe by the harness's explicit injection; a scratch probe is not. Worth a line in the probe notes.
