@@ -689,7 +689,10 @@ struct ShelfView: View {
                         // approved client reaches this book now, through any
                         // standing). Hover says who and how far; click shows
                         // the permission. Its own button — the row's open
-                        // never fires for it.
+                        // never fires for it. VX-185: a GATHERING's row wears
+                        // it too, under a wing grant on its wing or the open
+                        // book only (R-VX185-1) — the popover's why names the
+                        // wing, its Change…/Revoke act on that wing grant.
                         if let reach = model.aiReach[reading.id], !reach.isEmpty {
                             MCPSharedIcon(reaches: reach, tokens: tokens)
                         }

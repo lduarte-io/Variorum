@@ -723,7 +723,9 @@ extension Queries {
     /// a PARITY ORACLE only: no face reads it. The Bookcase's "shared with AI"
     /// text chip it once fed is retired; the ONE shared icon reads
     /// `mcpBookReaches` (who, how far and why), and the pins hold the icon's
-    /// set equal to this one under every grant shape (`MCPShareTests`). Kept
+    /// BOOK set equal to this one under every grant shape (`MCPShareTests`;
+    /// since VX-185 the icon map also holds the GATHERINGS `decideGathering`
+    /// reaches — their parity pin is `MCPGatheringReachTests`). Kept
     /// because it is the simplest honest statement of the set: a book grant on
     /// it, a wing grant on its wing, or the open book — each read through the
     /// pure rule on the book's own facts, so THE daily Journal or a Private

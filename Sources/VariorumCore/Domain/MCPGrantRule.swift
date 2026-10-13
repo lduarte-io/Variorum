@@ -285,6 +285,24 @@ public enum MCPGrantRule {
         return nil
     }
 
+    /// **A GATHERING's reach, and the standing behind it** (VX-185 — her
+    /// report: gatherings never wore the shared icon "even when you've shared
+    /// the whole wing"; R-VX185-1: only a wing grant or the open book icons
+    /// one). Read OFF `decideGathering` exactly as `reach` is read off
+    /// `decide` — never a parallel rule: its `.allow(grantID:)` names the wing
+    /// grant (nil = the open book); anything else reaches nothing (a fenced
+    /// gathering, a note or book grant, another wing's grant). The rung is
+    /// READ — `decideGathering`'s one rung: a gathering holds nothing to
+    /// write, whatever the wing grant allows on the notes inside it.
+    public static func reach(grants: [Grant], openBook: Bool, gathering: BookFacts) -> Reach? {
+        guard case .allow(let grantID, _) = decideGathering(
+            client: .approved, grants: grants, openBook: openBook, gathering: gathering)
+        else { return nil }
+        guard let grantID else { return Reach(rung: .read, standing: .openBook) }
+        guard let grant = grants.first(where: { $0.id == grantID }) else { return nil }
+        return Reach(rung: .read, standing: .grant(grant))
+    }
+
     /// **ONCE: ONE WRITE MEANS ONE WRITE** (AF-7 AS AMENDED at the U2
     /// ladder's F4 — the ride-free clause covers READS only): a once READ
     /// grant is spent by its first content read (U1's letter, unchanged);
