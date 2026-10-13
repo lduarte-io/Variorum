@@ -886,15 +886,30 @@ nonisolated extension ProtectionCopy {
     /// Lesson 1 — What's true in every mode.
     static let privacyLessonOneTitle = "What's true in every mode"
     static let privacyLessonOneParagraphs: [String] = [
+        // VX-204 (auditor C's C-1): "everything is encrypted… the server
+        // stores what it can never read" overstated — dates, the tag tree's
+        // shape, memberships, flags and sizes travel outside the encryption
+        // (the operator-visible envelope the privacy brief discloses). The
+        // smallest edit that makes the paragraph true: what is sealed, then
+        // the one sentence naming what is not. PROVISIONAL (#215).
         "Your library is encrypted on disk: the file Variorum writes is unreadable without its key — "
         + "to Finder, to Terminal, to a backup drive, to anyone who copies it. Sync is end-to-end "
-        + "encrypted: everything is encrypted on your device before it leaves, and the Variorum server "
-        + "stores what it can never read. Both modes are like this. What differs between them is only "
-        + "who holds a key.",
+        + "encrypted: your writing and everything you name — titles, tags, books — are encrypted on "
+        + "your device before they leave, and the Variorum server can never read them. "
+        + privacyServerSeesShapeSentence
+        + " Both modes are like this. What differs between them is only who holds a key.",
         keystoneAccountPassword,
         "And one thing no setting changes: while Variorum is open and unlocked, everything in it is "
         + "readable — that is what open means. Locking is how you end that.",
     ]
+
+    /// VX-204 — lesson 1's honest sentence: what sync does NOT seal (the
+    /// privacy brief's operator-visible envelope, in the guide's words). The
+    /// pins quote this constant, never a re-typed sentence. PROVISIONAL (#215).
+    static let privacyServerSeesShapeSentence =
+        "What the server can see is the shape around your words: dates, how your tags nest and "
+        + "which notes carry them, which notes are in which books, flags like starred or finished, "
+        + "and sizes."
 
     /// Lesson 2 — Standard and Castle: what you must keep.
     static let privacyLessonTwoTitle = "Standard and Castle: what you must keep"
