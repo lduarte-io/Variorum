@@ -1890,7 +1890,7 @@ Her three product calls (VX-258/259/260, R-VX184-7/8/9) are VX-246's and untouch
 | piece | what | status |
 |---|---|---|
 | 0 | this subsection + its LIVE STATUS | DONE (this commit) |
-| 1 | STEP 1 — agree/dispute per finding the dispositions mark AGREED or TRACE, each with its own traced rationale | NOT-STARTED |
+| 1 | STEP 1 — agree/dispute per finding the dispositions mark AGREED or TRACE, each with its own traced rationale | DONE (this commit) — STEP 1 below: no dispute; one row HOLLOW (the lock, as pre-arbitrated — re-traced); the class is wider than eight (five pre-existing MCP entries, traced) |
 | 2 | (a) the pins FIRST, one per family, run on the pre-fix tree → RED (counts); the lock pin's HOLLOW verdict (green on the pre-fix tree) | NOT-STARTED |
 | 3 | (a) the fix — compare-and-set inverses AND redos, divergence checked first and quiet: the finding's seven real families + 13n-b's `restoreBlockName` | NOT-STARTED |
 | 4 | (a) THE SWEEP — every inverse/redo an MCP write registers, dispositioned (same class and real → fixed red-first; hollow; not the class) | NOT-STARTED |
@@ -1902,3 +1902,63 @@ Her three product calls (VX-258/259/260, R-VX184-7/8/9) are VX-246's and untouch
 | 10 | finals: the whole headless package green with counts; the path diff; the close | NOT-STARTED |
 
 **No revert is in flight.**
+
+#### STEP 1 — agree / dispute (each finding re-traced in THIS session; the stopped agent's leads verified, never relied on)
+
+1. **[MINOR] An undo of a value change overwrites a change she made since — AGREE; one row HOLLOW; the class is wider
+   than eight.** Traced: `restoreBookName`, `restoreChapterName`, `restoreTakeLabel`, `restoreCommitMessage`,
+   `restoreNoteTitle`, `restoreMembershipPosition`, `restoreChapterPosition` (and 13n-b's `restoreBlockName`) each write
+   their target value whenever the row is live and differs from the TARGET — none compares the row with the value the
+   ACT wrote, so a value she wrote since is overwritten, by the inverse and equally by the redo (an entry sits on the redo
+   stack after its undo, and a door that registers nothing never clears that future). Her doors on these values, read in
+   the code, register NO undo entry: `renameReading` (`updateLiveReading`), `reorderReadingPost` (`reorderMembershipRow` —
+   it updates the SAME live member row's `position`, so a compare-and-set on that row's `position` sees her move — lead 4
+   confirmed), `renameSection` / `reorderSection` (`renameSectionRow` / `reorderSectionRow`), `setTakeLabel`
+   (`setTakeLabelRows`), `renameCommitPoint` (`renameCommitRows`; its own doc: "no undo entry — the metadata class"),
+   `renameContainer` (`updateLiveContainer`), her two-argument `setBlockName`, `lockVariant` / `unlockVariant`
+   (`setVariantLock`). A door that DOES register (`moveBlock`, `reorder`, `archiveVariant`, `deleteVariant`, `deleteBlock`)
+   puts her change on top of the stack, so LIFO undoes hers first — that is not the class. The code's own stated rule
+   (both new files' headers: "divergence is QUIET (the world moved past the entry)") is what these break;
+   `rewriteCommentIfUnchanged` is the shape that keeps it (divergence checked FIRST, quiet; the seal only past it).
+   - **`setTakeLockQuietly` — HOLLOW (the orchestrator's pre-arbitration, confirmed by my own trace; the pin is run on
+     the pre-fix tree at piece 2):** a lock is two-valued, and `setVariantLockRows` returns `(changed: false, insured:
+     nil)` WITHOUT writing when the take already reads the target. Any divergence of hers (an unlock after the client's
+     lock; a re-lock after the undo) can only move the row to the very value the inverse (or redo) would write, so the
+     pre-fix code already writes nothing — a compare-and-set pin cannot fail on it. Dismissed as hollow, no fix
+     (CLAUDE.md's hollow-pin rule).
+   - **Wider than the eight (traced in this session ahead of the sweep's table, piece 4):** the same mechanism stands in
+     five pre-existing MCP entries over doors of hers that register nothing — 13n-b U4's `set_entry_date`
+     (`restoreEntryDate`; her date door, `setEntryDate`), `file_note_in_chapter` (`refileMembership`; her
+     `assignPostToSection`), `set_book_rule` (`restoreCollectingColumns`, her rule editor's Save — `setReadingQuerySpec`,
+     `setReadingIntakeSeating`, `setReadingOutflow`; this inverse ALSO rewrites the columns the act did NOT change, so her
+     later dial change is lost even when the client only wrote the rule), and VX-168 U2's `choose_take` / `adopt_lens`
+     (`revertChosenPointers` / `restoreChosenPointers`; her ✓, `chooseVariant`). Same class, same fix shape, red-first.
+2. **[MINOR] The `hersAlone` overclaim — AGREE.** Traced: `hersAlone` is a private helper of `MCPBookStateServerTests`,
+   read only by `renameBookIsHerRename…` (lines 45/63/95); no other library tool's pin reads the columns. A claim-versus-
+   proof gap, not a bug — a grep finds no MCP road that writes `owned`, `sealed_at`, `ai_private_at` or a note's `locked`
+   — so the strengthened pins are expected GREEN on both sides (said honestly at piece 6, with a mutation proving they
+   bite).
+3. **[MINOR] Book-level acts reorganize members the client can't reach — AGREE with PROVISIONAL (a).** Traced:
+   `deleteReadingRow` tombstones the book row and the v1_core / v1_10 triggers stamp EVERY membership and chapter on its
+   stamp — no reach filter (the op decides nothing about clients); `finishReadingRows` → `dismissPendingArrivals`
+   tombstones EVERY live arrival (`Queries.pendingArrivalRowsWhere`); both inverses revive by stamp with no reach filter
+   (`restoreReadingRows`; `revertFinishedBook`), so ⌥⌘Z returns every one, and the Trash's Put back (`restoreReading` —
+   the same `restoreReadingRows`) returns a deleted book's memberships too. Option (b)'s refusal would itself answer "this
+   book holds notes you cannot see" — the oracle F-7 forbids — so (a), said in the descriptions, is the defensible
+   default. Logged as **P-VX196-8** (piece 7).
+4. **[MINOR SPECULATIVE] `delete_note` does not flush — AGREE with trace-first.** Traced read-only (the whole trace at
+   piece 9): the mechanism is real, and the road a fix needs runs through the APP's per-post `AutosaveCoordinator`
+   (outside `VariorumMCP`) and the editor's projection deferral, with only a Mac-run proof possible — so it is NOT fixed
+   here; a ticket-ready summary covers 13n-b's `delete_block` as well.
+5. **[NIT] The re-indent — AGREE.** The run's diff (`8925f38b..HEAD`) shows the twelve extracted bodies keeping their old
+   closure's 12-space indentation: `archiveContainerRow`, `unarchiveContainerRow` (`+Container`), `archiveReadingRow`
+   (`+ReadingArchive`), `finishReadingRows`, `reopenReadingRows`, `deleteReadingRow`, `removeMembershipRow`,
+   `reorderMembershipRow` (`+Reading`), `renameSectionRow`, `deleteSectionRow`, `restoreSectionRow`, `reorderSectionRow`
+   (`+Sections`). `restoreContainerRows` and `assignSectionRow` predate the run and stay as found.
+6. **[NIT] `delete_take`'s description — AGREE, plus one more inaccuracy found on the re-read.** Traced:
+   `deleteVariantRows` refuses `variantIsChosen` when ANY live slot's `chosen_variant_id` names the take — not the
+   RENDERED take (a nil pointer renders the block's default, which it deletes; a chosen ARCHIVED take renders the
+   default, yet refuses). And the "LAST take" road is I10's last ACTIVE take (`Queries.mcpTakeRoad` — an archived take
+   never counts, and the block's archived takes go with it) — unsaid in the text.
+
+**No dispute.** Her three calls (VX-258/259/260) and the DEFERRED / ACKNOWLEDGED / ACCEPTED NITs stay as dispositioned.
