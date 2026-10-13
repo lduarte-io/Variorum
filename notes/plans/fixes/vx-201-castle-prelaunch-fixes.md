@@ -1695,4 +1695,34 @@ apply-check CLEAN at the tip in the pinned checkout)
   green — the rule stands, the model never asks it) · **R-209-face** — 3 issues: the sheet's `if model.leavesCastle {`,
   its `Text(LibraryOpenCopy.confirmLeavesCastle)`, and the one-renderer sweep (`[]`). After the last cycle the
   harness re-synced to HEAD: `✔ Test run with 5 tests in 2 suites passed after 1.767 seconds`; the worktree clean.
-- NEXT: step 3 — the guide warning (written against U1's landed behavior and the reproduced trace).
+- DONE (this commit) — STEP 3, THE GUIDE WARNING, after THE RE-VERIFICATION the brief asked for. **It CHANGED
+  the instruction (F-U5-2):** §W.2's road ("check Settings ▸ Protection and choose Use Castle again") is
+  INCOMPLETE at HEAD — every adoption lands HELD (13x round 3, `LibraryAdoption.execute(holding:)`), and a
+  standing hold REFUSES Use Castle at its door with `ProtectionCopy.resumeSyncFirst` (13x F1 R1-M1, pinned by
+  `Phase13pControllerTests.aStandingRestoreHoldRefusesTheRotationCeremoniesAtTheDoor`). The road that works is
+  **Resume Sync first, then Use Castle** — now PINNED on the reproduced library itself (below). U1's landed
+  behavior checked too: belt c refuses the Apple landing only while `switchPending` is set, and nothing sets it on
+  an adoption — the reproduction ran at HEAD (U1 in) and the landing happened; the road back stands.
+  Built: `ProtectionCopy.privacyOlderCopyParagraph` (PostureCopy, the guide's privacy section — PROVISIONAL, drafts
+  below), rendered by the MAC's `TutorialSeeder` at the END of lesson 2 ("Standard and Castle: what you must
+  keep") — `privacyLessonTwoParagraphs + [privacyOlderCopyParagraph]`; the phone's seeder untouched (its edition
+  has no open/restore door — P-U5-3). Its last sentence is also F2's road (a library a pre-VX-202 build left reading
+  Standard). The step-2 confirm line REVISED to the same verified road (Resume Sync, then Use Castle); its
+  register pin gained the Resume Sync leg.
+  Pins `VariorumTests/VX209GuideWarningTests` (4): the words (the doors by their own constants — Restore from
+  Backup, File ▸ Open Library…, the Data Safety and Protection pane titles — Previous Libraries named as the road
+  that does not undo it, Resume Sync BEFORE Use Castle, the generic Standard-when-you-chose-Castle sentence) · the
+  register · the SEEDED Mac guide (a fresh in-memory `TutorialSeeder.restore`: lesson 2 carries the paragraph
+  verbatim beside the Castle floor, the shared paragraphs whole) · **the road is real (a BOUND):** on the library
+  §W.2's round trip leaves behind, with the composition root's hold wiring (`RestoreHoldModel.wireGates`): the hold
+  stands, `PostureSwitchModel(.enter).start()` → `.failed(resumeSyncFirst)`; `hold.resume()` clears it; a fresh
+  `.enter` start → `.explain` (Use Castle opens its first screen).
+  HARNESS (test target now compiled with the xcodeproj's TEST settings — no default MainActor isolation, which the
+  app target alone carries; the TestSupport `CopiedRow.swift` copied as the project shares it): all three VX-209
+  suites + `TutorialPrivacyChapterTests` + `VX204PrivacyLessonTests`: `✔ Test run with 13 tests in 5 suites passed
+  after 2.556 seconds`. Every suite in `TutorialWalkTests.swift` + `CopyRegisterPinTests` beside them: 94 tests in
+  16 suites, ONE red — `CopyRegisterPinTests.theEncryptionBookNamesNoKeyFamilyInternalButItsOneRecordedSentence`,
+  `.resourceMissing`: the harness copies no bundle resources (it reads `EncryptionExplained.txt`); a harness
+  artifact, not a finding — PENDING its stage run like every other.
+- NEXT: the step-3 revert patches (the seed; the unverified road in both copy homes) + their red runs, then the
+  Mac + phone `build-for-testing`, then the close.

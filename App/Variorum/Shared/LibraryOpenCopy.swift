@@ -66,12 +66,14 @@ nonisolated enum LibraryOpenCopy {
     /// copy is not (`LibraryOpenModel.leavesCastle`). It names Use Castle as
     /// the road back, never Previous Libraries: the reproduction pin
     /// (`VX209WayBackRoundTripTests`) shows bringing the Castle copy of the
-    /// same library back lands it the old way too. ONE home — every adopt
-    /// road (File ▸ Open Library…, the lobby faces, Restore from Backup)
-    /// renders the one sheet that reads it.
+    /// same library back lands it the old way too. Resume Sync comes first
+    /// because every adoption lands HELD and a standing hold refuses Use
+    /// Castle (13x F1 R1-M1; re-verified by `VX209GuideWarningTests`). ONE
+    /// home — every adopt road (File ▸ Open Library…, the lobby faces,
+    /// Restore from Backup) renders the one sheet that reads it.
     static let confirmLeavesCastle =
-        "This copy isn't in Castle, so once it's open your library opens the old way — choose "
-        + "Use Castle again in Settings ▸ Protection to put it back in Castle."
+        "This copy isn't in Castle, so once it's open your library opens the old way — press "
+        + "Resume Sync, then choose Use Castle again in Settings ▸ Protection to put it back in Castle."
 
     // MARK: - The restore-hold banner (round 3, her ratified shape)
 

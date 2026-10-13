@@ -936,6 +936,27 @@ nonisolated extension ProtectionCopy {
         // OUTSIDE copy §7's two never-soften sentences — the floors below
         // are byte-untouched. `privacyBookDoorSentence` retired with it.)
     ]
+    /// VX-209 (RUN VX-201, U5 — PROVISIONAL, the QUESTIONS #215 bundle): the
+    /// guide's warning about older copies, the MAC's lesson 2 only (opening
+    /// and restoring copies are Mac doors; the phone's edition has neither).
+    /// Written against what RUNS, not the audit's reading:
+    /// `VX209WayBackRoundTripTests` reproduced §W.2 — a copy from before
+    /// Castle lands the old way, and bringing the Castle copy of the same
+    /// library back from Previous Libraries lands it the old way too (a
+    /// local-only library; an enrolled one's follow re-keys it — hence
+    /// "may not"); belt c (VX-202) refuses the landing only mid-switch, so
+    /// the road back stands. Resume Sync first: every adoption lands held,
+    /// and a standing hold refuses Use Castle (`VX209GuideWarningTests`
+    /// re-verifies the road). The last sentence is also the road for a
+    /// library a pre-VX-202 build left reading Standard (U1's F2).
+    static let privacyOlderCopyParagraph =
+        "Opening an older copy of your library — a backup in Settings ▸ Data Safety ▸ Restore from "
+        + "Backup, or a copy you pick with File ▸ Open Library… — makes that copy your library, and a "
+        + "copy from before Castle opens the old way. Bringing your Castle library back from Previous "
+        + "Libraries afterwards may not undo that. So once you're done with an older copy, press Resume "
+        + "Sync, then check Settings ▸ Protection: if it doesn't say Castle, choose Use Castle again. "
+        + "And any time Protection says Standard when you chose Castle, choose Use Castle again."
+
     /// The two floors, as the chapter states them (copy §7's parenthetical
     /// names them; the pins quote these, never a re-typed sentence).
     static let privacyStandardFloorSentence =

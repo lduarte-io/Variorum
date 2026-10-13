@@ -196,6 +196,8 @@ struct VX209LeavesCastleConfirmTests {
         #expect(line.contains("Castle"))
         #expect(line.contains("Use Castle again") && line.contains("Settings ▸ Protection"),
                 "names the road back by the door and the pane")
+        #expect(line.contains(LibraryOpenCopy.resumeSyncDoor),
+                "Resume Sync first — the landing is held, and a standing hold refuses Use Castle")
         #expect(!line.contains("Previous Libraries"),
                 "never sends her back through Previous Libraries — that road lands Standard too")
         #expect(!line.contains(CopyRegisterPinTests.forbidden))

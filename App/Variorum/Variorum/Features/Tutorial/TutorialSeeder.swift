@@ -2463,8 +2463,12 @@ enum TutorialSeeder {
 
         _ = try lesson(privacy, ProtectionCopy.privacyLessonOneTitle,
                        ProtectionCopy.privacyLessonOneParagraphs)
+        // VX-209 (PROVISIONAL, #215): the Mac's lesson 2 closes on the
+        // older-copy warning — opening and restoring copies are Mac doors
+        // (the phone's edition renders the shared paragraphs alone).
         _ = try lesson(privacy, ProtectionCopy.privacyLessonTwoTitle,
-                       ProtectionCopy.privacyLessonTwoParagraphs)
+                       ProtectionCopy.privacyLessonTwoParagraphs
+                       + [ProtectionCopy.privacyOlderCopyParagraph])
 
         // ————————————————————————— AI & the MCP door ——————————————————————
         //
