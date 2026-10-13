@@ -197,7 +197,7 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 | 7 | The ladder (fable-reviewer, whole diff) | ROUND 1 RUNNING (spawned after window 3) |
 | 8 | Bout-start board snapshot + in-flight row on main | DONE — snapshot was the coordinator's (beb0a30c); in-flight row 5b1c8c94 on main |
 | 9 | Ticket VX-179 description gains branch/record pointers; Done rides the PR merge | pointers DONE; Done at merge |
-| 10 | Closeout: PR → merge commit; worktree + branch removed; debris tidy; MOBILE PARITY line | NOT-STARTED |
+| 10 | Closeout: PR → merge commit; canon deltas (R1-1: AppSpec §7 + §9 contract lines + QUESTIONS provisional bundle, on latest main); worktree + branch + vx179-test checkout removed; debris + walk-evidence tidy; MOBILE PARITY line | NOT-STARTED |
 
 **MOBILE PARITY (provisional):** the Mac faces are Mac-only; U1's core ops are shared — the phone's
 comments sheet gains no purge door this run (a `notes/MobileSoul.md` ledger row lands at closeout).
@@ -1275,3 +1275,18 @@ permission (she fixed the setting; capture then worked first try). Window-target
 returned stale composites at the sheet boundary — full-screen `screencapture -x` used throughout
 instead. The what's-new sheet swallowed the first scripted keystrokes (caught by the full-frame
 check; nothing landed anywhere unintended).
+
+## ROUND 1 DISPOSITIONS (the orchestrator, 2026-10-12 — the cross-model flow: R1-1 is the
+orchestrator's own process finding; R1-2/R1-3 go to their implementers verbatim with the walk's
+findings, agree/dispute returns to the reviewer for the final call)
+
+- **R1-1 — AGREED, the orchestrator's duty (no implementer):** the merge-moment canon delta is
+  real and now NAMED in ledger row 10 — at the merge, on latest main, the merging session lands
+  ONE contract line at AppSpec §7 (the block_comment bullet's "visible and resurrectable" gains
+  "until deleted forever — the 13j purge road, VX-179") and ONE at §9 (the comments family bullet
+  gains the purge door + block_comment as the sixth purgeable kind), each with the pointer to
+  this record; QUESTIONS gains the run's PROVISIONAL bundle the same moment.
+- **R1-2 — to the U3 session with the walk findings:** trace the popover dismiss-with-dirty-edit
+  road offscreen (agree/dispute); the live walk row joins the next stage window's list either way.
+- **R1-3 — to the U2 session with F-W-1:** the wheel fix leg owns the latch; it answers
+  agree/dispute while fixing the routing.
