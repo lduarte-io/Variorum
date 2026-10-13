@@ -84,7 +84,7 @@ struct MobileProtectionSheet: View {
             get: { controller.activeSwitch },
             set: { if $0 == nil { controller.closeSwitch() } })
         ) { model in
-            MobilePostureSwitchSheet(model: model, tokens: tokens) { controller.closeSwitch() }
+            MobilePostureSwitchSheet(model: model, tokens: tokens, services: services) { controller.closeSwitch() }
         }
         .sheet(item: Binding(
             get: { controller.activeFollow },

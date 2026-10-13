@@ -124,6 +124,19 @@ nonisolated enum PostureSwitchError: Error, Equatable, Sendable {
     /// written, never run as the local-only road (steps 4–7 alone would
     /// rotate nothing and the Done would claim otherwise).
     case replaceKeysNeedsSync
+    /// VX-110: Use Castle reached the runner signed OUT while this library
+    /// holds its sync account's keys — the local road would leave the
+    /// account Standard and the next signed-in ready would silently revert
+    /// this Mac. The two doors decide (sign in, or this Mac only); refused
+    /// before anything is written.
+    case signInOrThisDeviceOnly
+    /// VX-110: This Mac Only was chosen, but a session exists at the act
+    /// (signed in while the ceremony was open) — the account-wide road is
+    /// a separate press; refused before anything is written.
+    case thisDeviceOnlyWhileSignedIn
+    /// VX-110: the old account's keys could not be forgotten (the re-read
+    /// still found them) — nothing else is done.
+    case syncKeysNotForgotten
 }
 
 @MainActor
@@ -177,6 +190,11 @@ final class PostureSwitchRunner {
         /// device's own Use Castle landed, and the ACCOUNT left Castle on
         /// another device before the resume (`otherDeviceName` names it).
         var otherDeviceDay: String? = nil
+        /// VX-110: the road entered Castle on THIS DEVICE ONLY — this
+        /// library's sync account and its server copy were not touched, and
+        /// this device forgot that account's keys. The Done says so (never
+        /// "your other devices will ask").
+        var thisDeviceOnly: Bool = false
     }
 
     /// pre-13x 2c (the 2b adjudication's item 6): the seams a scripted
@@ -305,6 +323,12 @@ final class PostureSwitchRunner {
         /// switch flag (`AppBootstrap.endSwitch`), called once the switch's
         /// custody move has landed. Inert in the scripted worlds.
         var endSwitch: @MainActor () -> Void = {}
+        /// VX-110: forget this library's sync account keys on this device —
+        /// production: `EncryptionSession.forgetDeviceKeys` (the material
+        /// goes from every item and the session; the identity stays). nil ⇒
+        /// the custody store's own clear (the same act). The runner re-reads
+        /// custody afterwards and refuses unless the material is gone.
+        var forgetSyncKeys: (@MainActor () async -> Void)? = nil
     }
 
     /// pre-13x ladder round 1, F1 (BLOCKER-1): how many times the clearing
@@ -395,6 +419,11 @@ final class PostureSwitchRunner {
         /// the word the door (`appleKeyReadable`) and the belt
         /// (`appleHeldCopyForStandard`) already act on.
         var vaultHasAppleHeldCopy: Bool? = nil
+        /// VX-110: no session, while this library's custody holds its sync
+        /// account's key MATERIAL (an identity-only record holds none) —
+        /// the state from which the local road's Castle silently reverts at
+        /// the next signed-in ready. Use Castle forks to the two doors here.
+        var signedOutHoldingSyncKeys: Bool = false
     }
 
     /// F3 (MINOR-N4): the door-time reading of what the belt enforces at
@@ -420,7 +449,8 @@ final class PostureSwitchRunner {
         let custody = await leaves.keyStore.offMain { $0.load() }
         guard let vault = leaves.vault, leaves.transport != nil, signedIn, custody != nil else {
             return DoorFacts(enrolled: false, rotationInProgress: false, vaultUpdatedAt: nil,
-                             vaultHasRecoveryWrap: false)
+                             vaultHasRecoveryWrap: false,
+                             signedOutHoldingSyncKeys: !signedIn && custody != nil)
         }
         guard let fetched = try await vault.fetchVault() else {
             return DoorFacts(enrolled: false, rotationInProgress: false, vaultUpdatedAt: nil,
@@ -445,9 +475,15 @@ final class PostureSwitchRunner {
     /// copy (the ceremony's job); `recoveryWords`: the twelve words in
     /// hand (generated + confirmed, or typed) — nil ONLY for a library
     /// whose vault should carry no recovery wrap (the ceremony decides).
+    /// VX-110 — `thisDeviceOnly`: the second of the two doors a signed-out
+    /// library holding its sync account's keys is offered (the first is
+    /// Sign In…). This device FORGETS that account's keys first, then takes
+    /// the local road (steps 4–7); the account and its server copy are not
+    /// touched, and the Done says exactly that.
     @discardableResult
-    func enterCastle(passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
-        try await run(entersCastle: true, passphrase: passphrase, recoveryWords: recoveryWords)
+    func enterCastle(passphrase: String, recoveryWords: [String]?, thisDeviceOnly: Bool = false) async throws -> Outcome {
+        try await run(entersCastle: true, passphrase: passphrase, recoveryWords: recoveryWords,
+                      thisDeviceOnly: thisDeviceOnly)
     }
 
     /// REPLACE ALL KEYS (batch 3's door over this runner): §4's steps 1–4
@@ -460,9 +496,12 @@ final class PostureSwitchRunner {
         try await run(entersCastle: false, passphrase: passphrase, recoveryWords: recoveryWords)
     }
 
-    private func run(entersCastle: Bool, passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
+    private func run(
+        entersCastle: Bool, passphrase: String, recoveryWords: [String]?, thisDeviceOnly: Bool = false
+    ) async throws -> Outcome {
         try await balancingSync { road in
-            try await runCeremony(road: road, entersCastle: entersCastle, passphrase: passphrase, recoveryWords: recoveryWords)
+            try await runCeremony(road: road, entersCastle: entersCastle, passphrase: passphrase,
+                                  recoveryWords: recoveryWords, thisDeviceOnly: thisDeviceOnly)
         }
     }
 
@@ -509,7 +548,9 @@ final class PostureSwitchRunner {
         }
     }
 
-    private func runCeremony(road: UUID, entersCastle: Bool, passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
+    private func runCeremony(
+        road: UUID, entersCastle: Bool, passphrase: String, recoveryWords: [String]?, thisDeviceOnly: Bool
+    ) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
             throw PostureSwitchError.switchInProgress(pending.step, act: CeremonyAct(resuming: pending))
@@ -539,6 +580,19 @@ final class PostureSwitchRunner {
         guard enrolled || entersCastle else {
             leaves.log("posture switch: Replace All Keys reached the runner without the enrolled library in hand (vault, transport, session, custody) — refused before anything is written (decision 9)")
             throw PostureSwitchError.replaceKeysNeedsSync
+        }
+        // VX-110 — the two doors' belt. Signed out with the sync account's
+        // key MATERIAL in custody, the local road would leave the account
+        // Standard and keep that material: the next signed-in ready's
+        // follow-into-Standard would silently undo this Castle. That road
+        // runs only as This Mac Only, which forgets the material first.
+        if entersCastle, thisDeviceOnly, signedIn {
+            leaves.log("posture switch: This Mac Only reached the runner with a session — refused before anything is written (the account-wide switch is its own press)")
+            throw PostureSwitchError.thisDeviceOnlyWhileSignedIn
+        }
+        if entersCastle, !thisDeviceOnly, !signedIn, custody != nil {
+            leaves.log("posture switch: Use Castle reached the runner signed out while custody holds the sync account's keys — refused before anything is written (the two doors decide)")
+            throw PostureSwitchError.signInOrThisDeviceOnly
         }
         // 17l item 5 (RUN B B3): the derive moved INTO the branches — the
         // enrolled road derives against the FETCHED vault (an unchanged
@@ -694,25 +748,59 @@ final class PostureSwitchRunner {
             material = final.material
             reencrypted = final.reencrypted
         } else {
-            secrets = try await Task.detached(priority: .userInitiated) {
-                try RotationSecrets.derive(passphrase: passphrase, recoveryWords: recoveryWords)
-            }.value
+            if thisDeviceOnly {
+                // VX-110 — THIS MAC ONLY forgets FIRST: the flag the resume
+                // reads (the marker cannot carry it), then the forget,
+                // verified, all before the first marker — so no marker of
+                // this road ever stands beside the old account's material.
+                setThisDeviceOnlyFlag(true)
+                do {
+                    try await forgetSyncKeysVerified()
+                } catch {
+                    setThisDeviceOnlyFlag(false)
+                    throw error
+                }
+            }
+            do {
+                secrets = try await Task.detached(priority: .userInitiated) {
+                    try RotationSecrets.derive(passphrase: passphrase, recoveryWords: recoveryWords)
+                }.value
+            } catch {
+                if thisDeviceOnly { setThisDeviceOnlyFlag(false) }
+                throw error
+            }
             // VX-99 (local-only road — no vault): since round 2's finding 4
             // only USE CASTLE reaches this road (Replace All Keys refuses
             // above), and entering Castle never carries an Apple copy.
             appleKeyForKeyFile = nil
-            leaves.log("posture switch: local-only — steps 4–7 only")
+            leaves.log("posture switch: local-only — steps 4–7 only\(thisDeviceOnly ? " (this device only: the sync account's keys forgotten)" : "")")
         }
 
         // ————— 4–6: the library, custody, the snapshot —————
-        let outcome = try await rekeyCustodyAndSnapshot(
+        var outcome = try await rekeyCustodyAndSnapshot(
             entersCastle: entersCastle, appleKey: appleKeyForKeyFile, libraryKey: libraryKey,
             keyFile: KeyFileInputs(passphrase: passphrase, kdf: secrets.kdf, recoveryWords: recoveryWords,
                                    recoveryWrapDigest: recoveryWrapDigest),
             material: material, reencrypted: reencrypted, stamp: stamp,
             listPreSwitchPairs: entersCastle)
+        outcome.thisDeviceOnly = thisDeviceOnly
         phase = .done
         return outcome
+    }
+
+    /// VX-110: the forget, then the proof — a re-read of custody must find
+    /// no material (in Standard the silent item answers without a prompt).
+    private func forgetSyncKeysVerified() async throws {
+        if let forget = leaves.forgetSyncKeys {
+            await forget()
+        } else {
+            await leaves.keyStore.offMain { $0.clear() }
+        }
+        guard await leaves.keyStore.offMain({ $0.load() }) == nil else {
+            leaves.log("posture switch: the sync account's keys are still readable after the forget — refused before anything else is written")
+            throw PostureSwitchError.syncKeysNotForgotten
+        }
+        leaves.log("posture switch: this device forgot the sync account's keys (the identity stays)")
     }
 
     // MARK: - pre-13x 2c: THE FOLLOW (§7 — the other devices)
@@ -1373,6 +1461,25 @@ final class PostureSwitchRunner {
         let typedPassphrase = (passphrase?.isEmpty == false) ? passphrase : nil
         let typedWords = (recoveryWords?.isEmpty == false) ? recoveryWords : nil
 
+        // VX-110 — THE LOCAL CASTLE ROAD's resume (only that road writes a
+        // marker entering Castle that is no follow and names no corpus key)
+        // CARRIES THE FORGET: it never finishes beside the sync account's
+        // material. This Mac Only forgot before its first marker, so material
+        // here came back after the crash (the ready's silent Standard enroll
+        // re-lands it on a library the crash left Standard-shaped), or the
+        // marker is a pre-fix build's silent road — either way, finishing with
+        // it in custody is the silent revert at the next signed-in ready.
+        let localCastleRoad = marker.entersCastle && !marker.isFollow && marker.newCorpusKeyID == nil
+            && marker.step != .vaultWrite && marker.step != .reencrypt
+        let thisDeviceOnlyRoad = localCastleRoad && thisDeviceOnlyFlag()
+        var forgotAtResume = false
+        if localCastleRoad, material != nil {
+            if !thisDeviceOnlyRoad { setThisDeviceOnlyFlag(true) }
+            try await forgetSyncKeysVerified()
+            material = nil
+            forgotAtResume = true
+        }
+
         switch marker.step {
         case .vaultWrite, .reencrypt:
             guard enrolled, let vault = leaves.vault, let transport = leaves.transport else {
@@ -1634,7 +1741,8 @@ final class PostureSwitchRunner {
             return Outcome(
                 entersCastle: entersCastle, newKeyFingerprint: newFingerprint,
                 insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch, freshSnapshot: snapshot,
-                reencrypted: reencrypted, material: material)
+                reencrypted: reencrypted, material: material,
+                thisDeviceOnly: localCastleRoad && (thisDeviceOnlyRoad || forgotAtResume))
         }
     }
 
@@ -1686,6 +1794,22 @@ final class PostureSwitchRunner {
     private func clearMarker() async throws {
         try await leaves.database.write { db in try RotationMarker.clear(db) }
         markSwitchPending(false)
+        setThisDeviceOnlyFlag(false)
+    }
+
+    /// VX-110: the This-Mac-Only road's per-store-id flag (beside the dials
+    /// — the marker lives in `Sync/` and cannot carry it): set before the
+    /// forget, cleared with the marker, read by the resume for the honest
+    /// Done. No store id ⇒ nothing to key it by (a library with no key file
+    /// holds no sync custody either).
+    private func setThisDeviceOnlyFlag(_ on: Bool) {
+        guard case .known(let storeID) = StoreIdentity.resolve(besideStore: leaves.storeURL) else { return }
+        ProtectionDefaults.setThisDeviceOnlySwitch(on, scope: leaves.scope, storeID: storeID, in: leaves.defaults())
+    }
+
+    private func thisDeviceOnlyFlag() -> Bool {
+        guard case .known(let storeID) = StoreIdentity.resolve(besideStore: leaves.storeURL) else { return false }
+        return ProtectionDefaults.thisDeviceOnlySwitch(scope: leaves.scope, storeID: storeID, in: leaves.defaults())
     }
 
     /// The steps a marker can name while this library's custody move is
@@ -1814,7 +1938,18 @@ extension PostureSwitchRunner.Leaves {
             // pre-13x 5b (ledger 67): the name the vault client stamps —
             // `AppServices` hands the same `DeviceName.current` to it.
             deviceName: { DeviceName.current },
-            endSwitch: { bootstrap.endSwitch() })
+            endSwitch: { bootstrap.endSwitch() },
+            // VX-110: the forget's ONE act — `EncryptionSession.forgetDeviceKeys`
+            // over the same per-store custody (it also re-projects the
+            // Encryption tab), else the store's own clear when no services
+            // are composed (the re-key's reopen rebuilds them).
+            forgetSyncKeys: {
+                if let encryption = services()?.encryption {
+                    await encryption.forgetDeviceKeys()
+                } else {
+                    await keyStore.offMain { $0.clear() }
+                }
+            })
     }
 }
 

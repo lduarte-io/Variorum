@@ -233,10 +233,17 @@ nonisolated extension ProtectionCopy {
     /// rejoin if you don't want to leave castle."* The old sentence named
     /// the Castle door without saying it is the ACCOUNT that has to move,
     /// or in what order. PROVISIONAL; 13s re-voices (QUESTIONS #138).
+    ///
+    /// **VX-110 (RUN VX-201, U2) — de-capped + a wording pass, her ruling on
+    /// the ticket (PROVISIONAL until she approves the U2 copy drafts):** no
+    /// capitals for emphasis ("the account itself" carries what "the
+    /// ACCOUNT" shouted), the join made conditional ("if you join"), and
+    /// "silently" in the everyday words ("without asking"). Her ruled order
+    /// stands: cancel · put the account in Castle · join again.
     static let joinStandardConsent =
-        "This account is in Standard, so this library will open silently from now on and your Apple "
-        + "account will hold a key to it. If you'd rather not leave Castle: Cancel here, put the "
-        + "ACCOUNT in Castle from a device already signed into it (Settings ▸ Protection ▸ Use "
+        "This account is in Standard, so if you join, this library will open without asking from now on "
+        + "and your Apple account will hold a key to it. If you'd rather stay in Castle: Cancel here, put "
+        + "the account itself in Castle from a device already signed into it (Settings ▸ Protection ▸ Use "
         + "Castle…), then join again."
     static let joinDoor = "Join"
     static let joinCancelDoor = "Cancel"
@@ -318,16 +325,72 @@ nonisolated extension ProtectionCopy {
         "Your other devices will start asking too — Touch ID or Face ID, with your "
         + "passphrase as the fallback — and each gives its own library a new key the "
         + "same way. Each will ask for your passphrase once, to pick up your new sync keys.",
-        "Backups made before today — Variorum's own, Time Machine, copies you made — "
-        + "still open through your Apple account. Delete them, Time Machine included, "
-        + "if you want Castle to cover everything you have ever written. Keep them if "
-        + "you want a way back to what you wrote before today, should you ever lose "
-        + "your passphrase and twelve words.",
+        enterCastleBackupsBullet,
         "If you think someone may already hold your keys — your Apple account, or an "
         + "unlocked device of yours together with your account password — also delete "
         + "your Stargazing account and set sync up again. That gives your sync fresh keys.",
     ]
+    /// The backups bullet, named once (VX-110: the This-Mac-Only explain
+    /// shares it — it is as true of this device's backups on either road).
+    static let enterCastleBackupsBullet =
+        "Backups made before today — Variorum's own, Time Machine, copies you made — "
+        + "still open through your Apple account. Delete them, Time Machine included, "
+        + "if you want Castle to cover everything you have ever written. Keep them if "
+        + "you want a way back to what you wrote before today, should you ever lose "
+        + "your passphrase and twelve words."
     static let enterCastleContinue = "Continue"
+
+    // MARK: VX-110 (RUN VX-201, U2) — THE TWO DOORS for a signed-out library
+    // that still holds its sync keys, the This-Mac-Only screens and Done.
+    // Every sentence PROVISIONAL (the U2 copy drafts, QUESTIONS #215's
+    // bundle); sentence case; the everyday register (no key named).
+
+    /// The two doors' screen (before Screen 1).
+    static let signedOutChoiceTitle = "You're signed out of sync."
+    static let signedOutChoiceBody =
+        "This library still holds the sync keys for your account. To put the account and your other "
+        + "devices in Castle, sign in, then choose Use Castle again. If you can't sign in, or you're "
+        + "leaving that account, you can put only this \(deviceName) in Castle — it forgets those sync "
+        + "keys, and the account and its copy on the server stay as they are."
+    /// The second door (the first is `signInDoor`, "Sign In…").
+    static let useCastleThisDeviceOnlyDoor = "Use Castle on This \(deviceName) Only"
+    /// After Sign In…: the ceremony has ended; the sign-in surface opens.
+    static let signInFirstTitle = "Sign in, then choose Use Castle again."
+    static let signInFirstBody =
+        "Your account and your other devices go into Castle together. Nothing has changed yet."
+    /// §2b Screen 1 on This Mac Only (the account-wide words would be false).
+    static let enterCastleThisDeviceOnlyBody =
+        "Your library on this \(deviceName) gets a new key. From now on this \(deviceName)'s "
+        + "\(credentialName) can't open it, and your Apple account holds no key to it. Opening takes "
+        + "\(biometryName) or your passphrase."
+    static let enterCastleThisDeviceOnlyBullets: [String] = [
+        "Only this \(deviceName) changes. It forgets your sync keys; your sync account and its copy on "
+        + "the server stay as they are, and your other devices aren't asked. If you sign into that "
+        + "account here again, Variorum asks before it changes anything.",
+        enterCastleBackupsBullet,
+    ]
+    /// The This-Mac-Only Done, by the fresh snapshot's fate (the ordinary
+    /// Done's three arms, F2/F3's rule) — never "your other devices will ask".
+    static func enteredCastleThisDeviceOnlyDone(_ snapshot: PostureSwitchRunner.FreshSnapshot) -> String {
+        let backup: String
+        switch snapshot {
+        case .written: backup = " A fresh backup was made under it."
+        case .failed:
+            backup = " A fresh backup could not be made just now — check your Backups folder; your earlier "
+                + "backups are untouched."
+        case .notKept: backup = ""
+        }
+        return "You're in Castle on this \(deviceName). Your library here has a new key that your Apple "
+            + "account never held." + backup + " This \(deviceName) asks for \(biometryName) from now on. "
+            + "Your sync account and its copy on the server are unchanged — delete that account if you "
+            + "still can. If you sign into it here again, Variorum asks before it changes anything."
+    }
+    /// The runner's two refusals on this road.
+    static let thisDeviceOnlySignedInSince =
+        "You signed in while this was open, so nothing was changed. Choose Use Castle again to put your "
+        + "account in Castle."
+    static let thisDeviceOnlyForgetRefused =
+        "This \(deviceName) couldn't forget your sync keys, so nothing was changed. Try again."
 
     // §2b Screen 2 — the passphrase (2a's Screen 2 under this title)
     static let castleNeedsPassphraseTitle = "Castle needs a passphrase."
@@ -868,6 +931,10 @@ nonisolated extension ProtectionCopy {
         guard let outcome else { return enteredCastleDone }
         if outcome.followedAnotherDevicesSwitch {
             return enteredCastleAfterAnotherDevice(device: outcome.otherDeviceName)
+        }
+        // VX-110: This Mac Only — the account and its server copy untouched.
+        if outcome.thisDeviceOnly {
+            return enteredCastleThisDeviceOnlyDone(outcome.freshSnapshot)
         }
         switch outcome.freshSnapshot {
         case .failed: return enteredCastleWithoutFreshBackup

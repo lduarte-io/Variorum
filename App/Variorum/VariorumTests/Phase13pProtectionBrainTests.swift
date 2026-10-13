@@ -216,9 +216,11 @@ struct ProtectionCopyTests {
                 == "This account is in Castle, so this library gets a new key as it joins. Everything you wrote here stays.")
         // RUN A batch A2, row 10 — RE-BASED to HER RULING on QUESTIONS #90
         // (4), ledger 46 (the ruled-change class, not a defect): the consent
-        // now DIRECTS — cancel · put the ACCOUNT in Castle · rejoin.
+        // now DIRECTS — cancel · put the account in Castle · rejoin.
+        // VX-110 (RUN VX-201 U2 — her ruling on the ticket: de-cap "ACCOUNT"
+        // and a wording pass; PROVISIONAL until she approves the drafts).
         #expect(ProtectionCopy.joinStandardConsent
-                == "This account is in Standard, so this library will open silently from now on and your Apple account will hold a key to it. If you'd rather not leave Castle: Cancel here, put the ACCOUNT in Castle from a device already signed into it (Settings ▸ Protection ▸ Use Castle…), then join again.")
+                == "This account is in Standard, so if you join, this library will open without asking from now on and your Apple account will hold a key to it. If you'd rather stay in Castle: Cancel here, put the account itself in Castle from a device already signed into it (Settings ▸ Protection ▸ Use Castle…), then join again.")
         #expect(ProtectionCopy.joinDoor == "Join" && ProtectionCopy.joinCancelDoor == "Cancel")
         #expect(ProtectionCopy.joinLaterLine == "Sync isn't joined on this \(ProtectionCopy.deviceName).")
         #expect(ProtectionCopy.connectCancelDoor == "Cancel")
@@ -432,15 +434,17 @@ struct ProtectionCopyTests {
         #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: nil)
                 .contains("another device showed when it entered Castle"))
 
-        // (4) ledger 46 — RULED: cancel · put the ACCOUNT in Castle · rejoin.
+        // (4) ledger 46 — RULED: cancel · put the account in Castle · rejoin
+        // (VX-110: de-capped — no capitals for emphasis, her rule).
         let consent = ProtectionCopy.joinStandardConsent
         #expect(consent.contains("Cancel here"))
-        #expect(consent.contains("put the ACCOUNT in Castle"))
+        #expect(consent.contains("put the account itself in Castle"))
         #expect(consent.contains("then join again"))
+        #expect(!consent.contains("ACCOUNT"), "no capitals for emphasis")
         #expect(consent.range(of: "Cancel here")!.lowerBound
-                < consent.range(of: "put the ACCOUNT in Castle")!.lowerBound,
+                < consent.range(of: "put the account itself in Castle")!.lowerBound,
                 "her order: cancel first")
-        #expect(consent.range(of: "put the ACCOUNT in Castle")!.lowerBound
+        #expect(consent.range(of: "put the account itself in Castle")!.lowerBound
                 < consent.range(of: "then join again")!.lowerBound)
 
         // (7) MINOR-6 — RULED: the sentence names the website's road (the
