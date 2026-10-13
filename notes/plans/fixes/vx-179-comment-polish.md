@@ -2136,3 +2136,85 @@ keystrokes/key codes deliver everywhere — drive popover keys via `osascript` k
    mechanism.
 2. A ~5-minute runner re-run bundled before/with ROUND 2.
 3. **ROUND 2** (fresh fable-reviewer) over the whole fix stack with this window's evidence.
+
+## U3 PIN LEG (implementer, 2026-10-13 — STAGE WINDOW 5's two runner reds; headless, pin-only)
+
+**Not done in this leg, stated first:** no product line changed (no traced live-relevant mechanism
+was found — below); no stage act (no `xcodebuild test`, no app launch, no window on a display); the
+runner re-run is PENDING (the orchestrator's ~5-minute window). Offscreen probes only, under the
+tightened line (`.prohibited`, in-memory store, the default store folder checked absent at start and
+exit, popover windows alpha 0 and checked against every NSScreen, no sheet probes).
+
+### LIVE STATUS
+- [x] Traces written (below) before any edit.
+- [ ] The two AppKit-host cells remodelled onto the product's own presenter (SwiftUI `.popover`).
+- [ ] Red on old for the remodelled R1-2 cell (announced revert, offscreen, runner shape).
+- [ ] Dispositions + the runner's PENDING list.
+
+### THE TRACES (window 5's log `/tmp/vx179-window5-suites.log`, window 4's `/tmp/vx179-fixleg-suites.log`, the walk's `/tmp/vx179-commentkeys2.log`; offscreen replays in `scratchpad/vx179-u3-pin/`)
+
+**T1 — which window owns the keyboard, per road (read from the DEBUG `comment-keys` lines):**
+
+| road | panel window | key window | parent | reading |
+|---|---|---|---|---|
+| LIVE popover (the walk, 02:31–02:32) | 117391 / 117402 | **117375 = the PARENT** | 117375 | the app's main window stays key; AppKit forwards its keys into the popover's first responder (`delivers`' parent clause) |
+| LIVE sheet (02:33–02:37) | 117417 … | the sheet itself | −1 | the sheet window is key |
+| RUNNER, SwiftUI `.popover` host (`theCloseRung…`, 02:27:49) | 117362 | **117362 = the panel** | 117361 (the off-display anchor) | the popover window itself is key (its borderless anchor can never be) — keys arrive |
+| RUNNER, the suite's AppKit `NSPopover` host (the ladder cell, 02:27:47) | — | — | — | **ZERO lines for two posted ⎋** |
+
+The monitor writes a line for EVERY ⌘⏎/⎋ it sees, before its ownership check; it is installed when
+its view enters the popover's window and released only when the view leaves a window or the
+popover's `willClose` arrives (leg 3). Zero lines for two ⎋ therefore means **the ladder's AppKit
+popover had already closed before its first ⎋** — and, the draft being `""`, before or at the `x`.
+
+**T2 — the AppKit host's popover is never the runner's key window.** Window 4 (pre-leg-3) addressed
+the ladder's keys to the anchor (the popover's parent): `x` never landed and the popover stayed up
+to the end (its final `!isShown` failed). Window 5 addressed them to `NSApp.keyWindow ?? popover`:
+`x` never landed again. Neither the popover nor its anchor was the key window either time — the
+anchor is borderless (`canBecomeKey` false, measured offscreen) and the popover did not take key —
+so **the key window during these cells was a THIRD window**: by elimination one the host app (the
+dev-store test host) or an earlier suite left key. Offscreen the two hosts are structurally alike
+(both `_NSPopoverWindow`, `canBecomeKey` true, parent a borderless `NSWindow`, behavior transient;
+SwiftUI's animates, the suite's does not — `hosts.swift`), so the difference is runner-only: the
+SwiftUI presenter's popover ends up key there (T1), the hand-built one does not.
+
+**T3 — the R1-2 flip (green in window 4, red in window 5) is the same early close, not a leg-3 line.**
+- The R1-2 cell posts NO key, so every leg-3 key-path change — delivery ownership, the
+  first-responder area, the close rung — never runs in it (the monitor returns at `act == nil`).
+- The one leg-3 line on its road is the monitor's own release on `willClose`. It removes the key
+  monitor and its own observer; it touches neither the watcher (`CommentPanelHostWatcher`, a separate
+  observer) nor the model. Replayed offscreen against the leg-3 module in the runner's shape
+  (`sequence.swift`, the cells' steps verbatim): R1-2 alone **PASS**, R1-2 after the two SwiftUI
+  cells in window 5's order **PASS** (stored = the edited text both times).
+- The cell's premise `dirtyCommentIDs.count == 1` PASSED in the runner, then `popover.close()` and 60
+  turns did not save. A `willClose` posted AFTER the edit saves (the replays). The one reading that
+  fits is that the runner's popover **closed BEFORE the edit** — the watcher then ran with nothing
+  dirty, the edit landed in a hidden window, and `close()` on a closed popover posts nothing.
+- That is exactly T1's ladder evidence in the same run: window 5 is the first run where the
+  AppKit-host popover is found closed early, in BOTH cells that use it. What closes it is the
+  runner's key-window machinery around a popover that is not key (a transient popover closes on
+  interaction outside it; window 5 newly sends the ladder's keys to the third window, and newly
+  runs two key-taking SwiftUI popovers before R1-2). The exact event is not observable without the
+  stage and is NOT claimed; no product line R1-2 exercises can produce it.
+- **Live is the product's presenter, not this one:** the walk proved the click-away save in windows
+  4 AND 5 (the R1-2 rows), through SwiftUI's `.popover` from a key main window (T1's first row).
+
+**T4 — a safety disclosure about the old cell:** in window 5 the ladder cell's `x`, ⎋, ⎋ were
+addressed to `NSApp.keyWindow`, which (T2) was not the panel's window — so they went to whatever
+window the TEST HOST had key: possibly the dev-store app's own window (the dev store; never the real
+store). What those three keys did there is not knowable from the log. The remodel never posts a key
+to a window that is not the panel's own or its parent: it REQUIRES that first (below).
+
+### THE REMODEL (the design, written before the code)
+1. Both cells move onto `SwiftUIPopoverHost` — the product's own presenter (`TakesShared.swift`'s
+   `.popover(isPresented:)`; Write and the Takes bottom bar present a sheet), and the host whose keys
+   provably arrive in the runner (T1). The hand-built `NSPopover` host and its helper retire.
+2. Keys go through ONE guarded road: the delivery window is `NSApp.keyWindow` only when it IS the
+   panel's window or its parent, the panel's window when no window is key (offscreen); any other key
+   window FAILS the cell's premise by name — a test never types into the host app's windows. The
+   close-rung cell takes the same road.
+3. Each cell states the popover is still up as a premise before it acts (so an early close in the
+   runner reads as itself, never as a missing save or a missing key).
+4. R1-2 dismisses by the binding — the road the click-away and the panel's own close both end on
+   (`NSPopover` closes → `willClose`); window 5's `aDismissed…` cell proved that road posts `willClose`
+   in the runner (its monitor was released).
