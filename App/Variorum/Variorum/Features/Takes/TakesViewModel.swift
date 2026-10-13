@@ -1367,33 +1367,26 @@ final class TakesViewModel {
             return PaneKey(
                 columnID: columnID, blockID: blockID, variantID: variantID, context: ring.context)
         }
-        // The right-then-left dance: a mid-gap pick BACK to the take the cell
-        // is STILL SHOWING re-points nothing her eye can see — the cell
-        // already renders that take, so the ring returns to it directly (the
-        // refused-pick recovery's own safe read→live flip; a read pane holds
-        // its own words) and the stale park ends. The write below still
-        // records the explicit choice. Accepted residual, recorded in the
-        // ladder section: a stale emission of the overtaken pick arriving
-        // after this flip ends the ring by the adopt end-rule (flushed) —
-        // fail-safe, never another take's words.
-        if let parkedAnchor, shownTake == variantID {
-            parkedFollow = nil
-            parkedTransit = []
-            focus(PaneKey(
-                columnID: columnID, blockID: blockID, variantID: variantID,
-                context: parkedAnchor.context))
-        }
         switch columns[index].kind {
         case .main:
             // J38: nothing is picked here, so this is a REFUSAL — and since
             // 18i lets this class ride to the shell, the class now decides
-            // whether she sees it at all (P-2).
+            // whether she sees it at all (P-2). A refusal arm never ACTS:
+            // the back-dance preamble below belongs to the acting arms only
+            // (the fable ladder's R2 NIT, pinned — it used to run before
+            // this switch and could cancel a ⇧⌥⌘T park here).
             setRefusal(Self.chosenColumnHasNoPickNote)
         case .scratch:
+            reRingShownTakeForMidGapPick(
+                anchor: parkedAnchor, shownTake: shownTake,
+                columnID: columnID, blockID: blockID, variantID: variantID)
             if let follow { followOnceRendered(follow) }  // BEFORE the cell re-points
             columns[index].picks[blockID] = variantID
             saveMemory()
         case .lens(let lensID):
+            reRingShownTakeForMidGapPick(
+                anchor: parkedAnchor, shownTake: shownTake,
+                columnID: columnID, blockID: blockID, variantID: variantID)
             if let follow { followOnceRendered(follow) }  // BEFORE the store write
             // Named lenses are LIVE-edited (no explicit re-save).
             let landed = await run { ops in
@@ -1420,6 +1413,29 @@ final class TakesViewModel {
                 }
             }
         }
+    }
+
+    /// **The right-then-left dance — an ACTING arm's own preamble** (the
+    /// fable ladder's R2 NIT: `pick`'s Chosen arm REFUSES and must not act,
+    /// so this runs only inside the scratch and lens arms, where `follow` is
+    /// consumed): a mid-gap pick BACK to the take the cell is STILL SHOWING
+    /// re-points nothing her eye can see — the cell already renders that
+    /// take, so the ring returns to it directly (the refused-pick recovery's
+    /// own safe read→live flip; a read pane holds its own words) and the
+    /// stale park ends. The arm's write still records the explicit choice.
+    /// Accepted residual, recorded in the ladder section: a stale emission
+    /// of the overtaken pick arriving after this flip ends the ring by the
+    /// adopt end-rule (flushed) — fail-safe, never another take's words.
+    private func reRingShownTakeForMidGapPick(
+        anchor: PaneKey?, shownTake: String?,
+        columnID: String, blockID: String, variantID: String
+    ) {
+        guard let anchor, shownTake == variantID else { return }
+        parkedFollow = nil
+        parkedTransit = []
+        focus(PaneKey(
+            columnID: columnID, blockID: blockID, variantID: variantID,
+            context: anchor.context))
     }
 
     /// DIVERGE HERE: edit-as-this-thread — mints a take branched from what
