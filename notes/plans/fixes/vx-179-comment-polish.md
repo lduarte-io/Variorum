@@ -190,7 +190,7 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 |---|---|---|
 | 1 | Record file + kickoff rulings landed, branch pushed | DONE (93b5b720) |
 | 2 | The `Sync/` line: `tombstonedKinds` + `block_comment` + two-client stale pin (orchestrator) | DONE (37b9a6e7) — pin red-on-old VERIFIED BY REVERT (all 5 expectations fail, the comment purged live, stores diverge); full PurgeConvergenceTests 20/20 green headless |
-| 3 | U1 true delete (core + panel door) | NOT-STARTED |
+| 3 | U1 true delete (core + panel door) | IN-PROGRESS — see the U1 RECORD below |
 | 4 | U2 gutter cards | NOT-STARTED |
 | 5 | U3 panel pristine pass | NOT-STARTED |
 | 6 | Mac-target test runs + the walk (stage via oct12coordinator) | HELD — stage |
@@ -201,3 +201,24 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 
 **MOBILE PARITY (provisional):** the Mac faces are Mac-only; U1's core ops are shared — the phone's
 comments sheet gains no purge door this run (a `notes/MobileSoul.md` ledger row lands at closeout).
+
+## U1 RECORD (implementer, 2026-10-12)
+
+**NOT DONE BY THIS UNIT (first line, by the contract):** no `xcodebuild test`, no walk, no app launch,
+no `/Applications` touch (the stage is the release session's) — every app-target pin RUN and every
+capture is PENDING (stage). No `Sync/` line touched (U0's line is the orchestrator's, landed at
+37b9a6e7). No mobile door (the phone's fold reads the same fenced query and gains no purge door —
+the MOBILE PARITY line above).
+
+**Revert state:** no behavioural revert is in flight. (Reverts run only after the piece is
+COMMITTED; each restore is `git checkout -- <file>` of the committed file; the evidence lands here.)
+
+### LIVE STATUS
+
+| piece | what | status |
+|---|---|---|
+| U1-a | record section + ledger row 3 IN-PROGRESS | IN-PROGRESS — this commit |
+| U1-b | core: `purgeableTables` + the `block_comment` arm (tombstoned; dead block refuses; seal refuses) · `restoreBlockComment` belt · the MCP redo road's belt · the `deletedBlockComments` fence · `restoreCost`'s fence · the core pins | NOT-STARTED |
+| U1-c | red-on-old by behavioural revert, per arm (evidence table below) | NOT-STARTED |
+| U1-d | the panel door: `requestDeleteForever` / `deleteForever` on the model, the fold's "Delete forever…" + the confirm, the receipt; app-target pins WRITTEN (run PENDING stage) | NOT-STARTED |
+| U1-e | verify: touched suites + the full `swift test` headless + ONE plain `xcodebuild build` | NOT-STARTED |
