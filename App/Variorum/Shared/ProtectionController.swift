@@ -1304,6 +1304,15 @@ final class ProtectionController {
         return .changed
     }
 
+    /// 13p ladder R1-M3's re-landing (the bootstrap's ready arm): a PROVEN
+    /// key back into the silent item. VX-202: on the custody queue — the
+    /// save is enqueued at the call, so it runs before any custody move
+    /// enqueued after it and can never land behind that move's delete.
+    func relandSilentItem(_ key: StoreKey) async -> Bool {
+        let guardSeam = self.guardSeam
+        return await Self.onCustodyQueue { guardSeam.saveAuto(key) }
+    }
+
     /// 17h R3-6 — the serial off-main custody hop.
     nonisolated private static let custodyQueue = DispatchQueue(
         label: "io.lduarte.Variorum.store-custody", qos: .userInitiated)
@@ -1423,6 +1432,9 @@ final class ProtectionController {
             vaultReading = reading
             freshReading = reading
         }
+        // VX-202 (belt b): before the posture is re-derived — a lingering
+        // silent item is never read as the posture.
+        await sweepLingeringSilentItem()
         refreshEnvelopeFacts()
         // pre-13x 2c (§7): the follow's verdict from the vault's word and
         // this device's custody — the notice, the silent follow into
@@ -1438,6 +1450,59 @@ final class ProtectionController {
             await reconcileAppleKey()
         }
         refreshNotices(now: now)
+    }
+
+    /// VX-202 (belt b) — THE AT-READY SWEEP. A silent copy of the library
+    /// key beside the GATED item, on a library whose posture — read with
+    /// the gated item as the custody shape, never the silent one — is
+    /// Castle, breaks the custody law (Touch ID ⇒ the silent item
+    /// DELETED): the late R1-M3 save §O.3 traced, or a copy an older build
+    /// left. Deleted (the guard's DP-flagged delete), never read as the
+    /// posture. Without a gated item the silent item IS the shape (corner
+    /// 45's Standard-waiting, a never-followed device) and nothing is
+    /// touched. Bounds: after the bootstrap adopted (the shape is known);
+    /// a DETERMINED Castle (indeterminate writes nothing — decision 35);
+    /// no switch in flight or pending (the runner owns custody then); and
+    /// never the only road in — the silent key either opens nothing
+    /// current (the key this ready opened with is another) or the live key
+    /// file carries a passphrase or twelve-words copy of it. A silent item
+    /// that WAS the open's key stays in hand as the resident (the demanded
+    /// shape's law).
+    private func sweepLingeringSilentItem() async {
+        guard residentAdopted, !switchInProgress else { return }
+        let pending = await readSwitchPending?() ?? false
+        guard !pending, !switchInProgress else { return }
+        let guardSeam = self.guardSeam
+        let gate = self.gate
+        let storeURL = configuration.storeURL
+        let found = await Self.onCustodyQueue { () -> (silent: StoreKey?, gated: Bool, keyFile: StoreKeyEnvelope?) in
+            let silent = guardSeam.loadAuto()
+            guard silent != nil else { return (nil, false, nil) }
+            return (silent, guardSeam.gatedItemExists(), gate.readEnvelope(storeURL).envelope)
+        }
+        guard let silent = found.silent, found.gated else { return }
+        let reading = Posture.derive(
+            legacyMode: gate.legacyMode(scope, configuration.resolvedStoreID()),
+            vaultHasAppleHeldCopy: vaultReading?.hasAppleHeldCopy,
+            keyFile: found.keyFile,
+            rawKeyCustody: .gatedOrNone,
+            enrolled: enrolled)
+        guard reading.determined == .castle else { return }
+        let opensNothingCurrent = residentKey.map { $0 != silent } ?? false
+        let typedRoadRemains = found.keyFile.map {
+            $0.keyFingerprint == StoreKeyEnvelope.fingerprint(of: silent)
+                && ($0.passphrase != nil || $0.recovery != nil)
+        } ?? false
+        guard opensNothingCurrent || typedRoadRemains else {
+            logger.notice("custody sweep: a silent copy of the library key sits beside the gated item, but no passphrase or twelve-words copy of it is on file — left in place (it may be the only road in)")
+            return
+        }
+        guard await Self.onCustodyQueue({ guardSeam.deleteAuto() }) else {
+            logger.notice("custody sweep: the Keychain refused to release the lingering silent item — the next ready retries")
+            return
+        }
+        if residentKey == nil { residentKey = silent }
+        logger.notice("custody sweep: a silent copy of the library key beside the gated item on a Castle library was removed (\(opensNothingCurrent ? "a stale key" : "the current key — kept in hand", privacy: .public))")
     }
 
     /// THE APPLE ARM (§3.8 / the brief's item 2): under Standard with the

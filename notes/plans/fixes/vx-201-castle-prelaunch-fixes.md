@@ -524,3 +524,11 @@ the simulator replay suite; then the six red-on-old revert cycles per the pin ta
 - Env-road note for later windows: TEST_RUNNER_ vars in xcodebuild's ENVIRONMENT pass through under
   `test-without-building` too (the bisect run proves it) — the bake-time trap is only for vars passed as
   command-line arguments.
+- MACHINERY INCIDENT, honestly: 15af56c0 accidentally committed the bisect's REVERTED Shared/ files beside the
+  verdict note — `git checkout 97329acc -- <paths>` had updated the INDEX as well as the worktree, so the
+  restore `git checkout -- App/Variorum/` pulled the pre-U1 files back out of the index, and `git add -A`
+  committed them. Caught one commit later by reading HEAD's stat; FIXED FORWARD (this commit restores the five
+  files from 64761572's U1-intact tree; no history rewrite — 15af56c0 was already pushed). Lesson for every
+  later revert in this run: after a `checkout <rev> -- <paths>` bisect, restore with
+  `git restore --source=HEAD --staged --worktree <paths>` and verify `git diff HEAD --stat` is EMPTY before any
+  commit. The window-B patches use `git apply` (worktree-only), which does not carry this trap.
