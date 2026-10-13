@@ -2163,6 +2163,15 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Crash reports are deleted from Settings \u{25B8} Diagnostics.",
             availability: always),
+        // VX-221 — Settings ▸ Tags' delete: the row's trash + its context
+        // row, ONE confirm (`TagDeletion`). `takesAccess: nil` on the
+        // Diagnostics precedent (not an editing act).
+        Capability(
+            id: .deleteTag, verb: "Delete Tag\u{2026}", scope: .app,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Tags are deleted from Settings \u{25B8} Tags.",
+            availability: always),
 
         // MARK: The MCP door (13n-b U1 — Settings ▸ MCP, R-13n-4/5, R-13nb-5)
         // The Diagnostics shape: `.surface`, app scope, always available as

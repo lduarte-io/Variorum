@@ -923,6 +923,17 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// never by a keystroke from elsewhere — the verbatim-first promise
     /// would otherwise have a door that skips the reading.
     case sendCrashReport, deleteCrashReport
+    /// VX-221 (2026-10-13) — SETTINGS ▸ TAGS' delete, declared at last (the
+    /// registry walk recorded the tag manager's acts as an unclosed gap; this
+    /// one closes as work touches it — create and rename stay the gap). ONE
+    /// act, TWO doors: the row's visible trash (`.surface`, her "more obvious
+    /// delete tag button rather than just two finger click") and the row's
+    /// context menu (`.contextMenu`) — both open ONE confirm naming the
+    /// consequence (the phone's sentence, hoisted — `TagDeletion`), because
+    /// the delete is unrecoverable (the confirmation-consistency principle;
+    /// VX-238 holds the missing restore road). Deliberately NOT `.palette`:
+    /// a taxonomy delete is decided where the taxonomy is shown.
+    case deleteTag
     /// 13n-b U1 — SETTINGS ▸ MCP's acts (R-13n-4/5; R-13nb-5), `.surface`
     /// on the Data Safety / Diagnostics precedent: each acts on the row she
     /// is looking at (a connection request, a client, a grant) or the pane's

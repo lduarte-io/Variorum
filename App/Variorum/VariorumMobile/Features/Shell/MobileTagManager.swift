@@ -79,24 +79,18 @@ final class MobileTagsModel {
     }
 
     /// How many live tags sit UNDER this one (the subtree the delete
-    /// takes along) — pure over the listed taxonomy, the same prefix
-    /// rule the op's own SQL applies.
+    /// takes along). **HOISTED at VX-221 — the rule lives in
+    /// `Shared/TagDeletionCopy.swift`**, once, for both apps (the Mac's
+    /// tag manager confirms with the same words now); this name forwards.
     nonisolated static func subtreeCount(of tag: Tag, in all: [Tag]) -> Int {
-        let prefix = tag.path + "/"
-        return all.count { $0.path.hasPrefix(prefix) }
+        TagDeletion.subtreeCount(of: tag, in: all)
     }
 
     /// The delete confirm's message — the CONSEQUENCE named, never a
-    /// platform (the C3 brief's letter). Two arms: a leaf tag, and a
-    /// tag carrying a subtree.
+    /// platform (the C3 brief's letter). Hoisted at VX-221 with
+    /// `subtreeCount`; this name forwards.
     nonisolated static func deleteConsequence(name: String, subtreeCount: Int) -> String {
-        if subtreeCount == 0 {
-            return "Deleting “\(name)” takes it off every note that wears it. "
-                + "There is no undo for this."
-        }
-        let word = subtreeCount == 1 ? "sub-tag" : "sub-tags"
-        return "Deleting “\(name)” also deletes its \(subtreeCount) \(word) — "
-            + "every note wearing any of them loses those tags. There is no undo for this."
+        TagDeletion.consequence(name: name, subtreeCount: subtreeCount)
     }
 
     // MARK: - The typed-path create brain (FIX-C3a — ONE create rule)

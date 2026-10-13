@@ -999,12 +999,21 @@ private struct ShortcutsSettingsPane: View {
 
 // MARK: - The tag manager (R52)
 
-private struct TagManagerPane: View {
+struct TagManagerPane: View {
+    /// VX-221 — the pane's declared doors (P-1): the delete act's two — the
+    /// row's visible trash and its context row — walked by the registry
+    /// tests. (Create and rename stay the recorded gap.)
+    static let surfaceCapabilities: [CapabilityID] = [.deleteTag]
+    static let contextMenuCapabilities: [CapabilityID] = [.deleteTag]
+
     let session: AppSession
     let tags: TagsViewModel
     @State private var newTagParent: String?
     @State private var newTagSheet = false
     @State private var renameTarget: Tag?
+    /// VX-221: the ONE confirm both delete doors open — the act runs only
+    /// from its button (`TagDeletion` names the consequence).
+    @State private var deleteTarget: Tag?
     @State private var nameField = ""
     @State private var promoteTags: Set<String> = []
     @State private var promoteSheet = false
@@ -1026,6 +1035,19 @@ private struct TagManagerPane: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Spacer()
+                        // VX-221 (her "more obvious delete tag button rather
+                        // than just two finger click"): the act's visible door
+                        // on every row — quiet, always there; it opens the
+                        // same confirm as the context row.
+                        Button {
+                            deleteTarget = tag
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                        .buttonStyle(.borderless)
+                        .foregroundStyle(.secondary)
+                        .help("Delete \u{201C}\(tag.name)\u{201D}\u{2026}")
+                        .accessibilityLabel(CapabilityRegistry.capability(.deleteTag).verb)
                     }
                     .contextMenu {
                         Button("New Child Tag…") {
@@ -1038,8 +1060,11 @@ private struct TagManagerPane: View {
                             renameTarget = tag
                         }
                         Divider()
-                        Button("Delete (with subtree)", role: .destructive) {
-                            Task { await tags.deleteTag(tag.id) }
+                        // VX-221: the same act's second door — the same
+                        // confirm (it deleted on the click before; her
+                        // ratification #VX221-a).
+                        Button(CapabilityRegistry.capability(.deleteTag).verb, role: .destructive) {
+                            deleteTarget = tag
                         }
                     }
                 }
@@ -1088,6 +1113,25 @@ private struct TagManagerPane: View {
                 Task { await tags.renameTag(tag.id, to: name) }
             }
             Button("Cancel", role: .cancel) {}
+        }
+        // VX-221 — the delete act's ONE confirm, for both its doors. The
+        // consequence is the phone's sentence, hoisted (`TagDeletion`): the
+        // subtree goes too, every note loses those tags, and nothing undoes it.
+        .alert(
+            TagDeletion.confirmTitle,
+            isPresented: Binding(
+                get: { deleteTarget != nil },
+                set: { if !$0 { deleteTarget = nil } }),
+            presenting: deleteTarget
+        ) { tag in
+            Button(TagDeletion.confirmVerb, role: .destructive) {
+                Task { await tags.deleteTag(tag.id) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { tag in
+            Text(TagDeletion.consequence(
+                name: tag.name,
+                subtreeCount: TagDeletion.subtreeCount(of: tag, in: tags.tags)))
         }
         .sheet(isPresented: $promoteSheet) {
             PromoteTagsSheet(session: session, tagPaths: promoteTags.sorted())
