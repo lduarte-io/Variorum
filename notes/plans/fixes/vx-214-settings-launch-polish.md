@@ -35,6 +35,7 @@ Surfaces: `App/Variorum/Variorum/Features/Settings/` EXCEPT the MCP pane (`Featu
 | 9 | VX-223 | Small dropdown/menu text: Read ⋯ menu, Blocks, Lenses; Write take's ⋯+dropdown combo icon (keep just the dropdown, probably) | OPEN |
 | 10 | VX-224 | Lock with Settings open leaves an unreadable, unresizable stub settings window ("Open the main window fi…") — likely just close Settings on lock | OPEN |
 | 11 | VX-225 | "Variorum Settings" titlebar text bleeds over the pane top (her screenshot, 2026-10-13) | OPEN |
+| 12 | VX-227 | Lenses board twin of VX-222: ⌃⌘←/→ stepping moves picks under a kept ring (the class sweep's residue — needs its own design beat: follow or end?) | OPEN — minted 2026-10-13; re-own at closeout if it outgrows the run |
 
 Commit messages: `… Part of VX-<member>`. Members close individually on the board as their fixes land; the ONE PR is VX-214's.
 
