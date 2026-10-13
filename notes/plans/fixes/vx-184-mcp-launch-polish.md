@@ -478,3 +478,76 @@ a client that never initializes gets at most 8 answers then the sentence — the
 5. **Noticed, not this unit's (pre-stage):** `MCPShim.pump` never joins its upstream thread (by design for the shipped shim; only the
    tests met the reuse race — fixed there); `MCPHandshake`'s opening read still has no overall deadline (VX-180's risk 3 —
    a silent peer holds a session slot until it closes; the session cap bounds it).
+
+## U2 UNIT RECORD — the gatherings icon: VX-185 (opus-implementer, 2026-10-13 from 01:50 MDT)
+
+**What this unit did NOT do (said first — kept current; the UNIT-CLOSE state replaces it):** IN FLIGHT — nothing is
+closed yet; see LIVE STATUS below. Zero schema, zero `Sync/`, zero custody/keychain, zero editor seam by design.
+
+**Read in full before code (never delegated):** the kickoff `notes/plans/mcp-launch-polish-kickoff.md` (her pre-run
+sitting incl. R-VX185-1 verbatim, the U2 row, "## VX-185 — the gatherings icon", the rules); this record's head and
+the whole U1 record; `notes/SessionResiliencyProtocol.md` whole; the 13n-c plan's R-AIR-12 line, §3 U3 + U6, §7, §8
+"Environment traps" (honored), the U3 UNIT RECORD whole (the icon's birth — the glyph, the hover, the popover with the
+why, Change… = REPLACE T-U3-8, the W-UX-5 Revoke label) and the U6 UNIT RECORD (pieces U6-1/U6-4, traces T-U6-2/T-U6-6
+— `MCPGrantRule.decideGathering` + `Queries.mcpGatheringFacts`). Code: `Queries/MCPShareQueries.swift` whole
+(`mcpBookReaches`, `mcpBookReach`, `mcpReach`, `placeReach`), `Domain/MCPGrantRule.swift` whole (`decide`, `reach`,
+`decideWing`, `decideGathering`, `reaches`, `best`), `Queries/MCPGrantQueries.swift` (the facts, the fence fragments,
+`mcpReachableBookIDs`), `MCPReadTools.listBooks`/`gatheringEntry` (the wire's archived posture), `ShelfQueries`
+(`bookcaseReadings` — the ONE archived choke point), the app's `MCPSharedIcon` + `MCPReachPopover`, `MCPShareRoad`
+(`MCPShareCopy`), `ShelfView.shelfRow`/`bookMenu`, `ShelfViewModel.watchSharing`, `BookSettingsSheet` (the grant row),
+`ScaleFixture` (`wing=1`), `Tools/ScaleFixture/stage.sh`; the suites `MCPShareTests` (core), `MCPShareFacesTests`,
+`TutorialMCPChapterTests` (lesson 3's recipe + lesson 7's icon truth).
+
+**Surfaces:** `Sources/VariorumCore/Queries/MCPShareQueries.swift` (the reach reads) · `Domain/MCPGrantRule.swift` (a pure
+read off `decideGathering`, beside `reach`) · doc lines in `MCPGrantQueries` / `ShelfViewModel` · the DEBUG-only
+`ScaleFixture` (a control wing for the walk) · tests. ZERO schema, zero `Sync/`, zero custody/keychain, zero editor seam.
+
+### LIVE STATUS — U2's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this record + LIVE STATUS + the trace (below), written before code | DONE (this commit) |
+| 1 | the pins, written BEFORE the fix: core `MCPGatheringReachTests` (compiles on the pre-fix tree — old API only) + the Mac `MCPGatheringIconTests` (the Bookcase model + the popover's words); run the core pins on the pre-fix tree → RED | NOT-STARTED |
+| 2 | the fix: `MCPGrantRule.reach(grants:openBook:gathering:)` (read OFF `decideGathering`); `mcpBookReaches` / `mcpBookReach` enumerate gatherings through it; the place's own-scope test none for a gathering; docs | NOT-STARTED |
+| 3 | red-on-old BY REVERT (announced here first; the production files at the pre-fix bytes, the pins kept) → RED; restored | NOT-STARTED |
+| 4 | the DEBUG fixture's control wing (`wing=2`) for the walk's note/book-only leg | NOT-STARTED |
+| 5 | headless finals (core, `VariorumMCPTests`, workbook) + the Mac build-for-testing (`DerivedData/vx184-u2`) | NOT-STARTED |
+| 6 | READY FOR STAGE (turn ends; the orchestrator's GO + claim `vx184-u2`) | NOT-STARTED |
+| 7 | the stage window: the Mac batch + THE WALK (dev store, both voices, light) | NOT-STARTED |
+| 8 | close: self-assessment, PROVISIONALs, OWED | NOT-STARTED |
+
+**No revert is in flight.**
+
+### VX-185 — the trace (written before code)
+
+**Inputs → wrong output.** An APPROVED client holds a live wing grant on wing W (any rung, any duration), or the open
+book is ON; a live, unfenced gathering G lives in W. **The wire** reads G: `list_books` lists it (`kind: "gathering"`),
+`list_notes(book_id: G)` pages its assembly, `search` and `show_in_app` take it — each through
+`MCPGrantAuthority.decide(_:gathering:)` = `MCPGrantRule.decideGathering`, which is `decideWing`'s READ on G's wing (a
+live wing grant there at any rung, or the open book) — R-AIR-12, built at 13n-c U6. **The Bookcase** draws the ONE
+shared icon on a row iff `ShelfViewModel.aiReach[reading.id]` is non-empty (`ShelfView.shelfRow`, ~l.693); `aiReach` is
+the held observation of `Queries.mcpBookReaches(db)` (`ShelfViewModel.watchSharing`). `mcpBookReaches` enumerates
+`SELECT id FROM reading WHERE deleted_at IS NULL AND kind = 'book'` (`MCPShareQueries.swift:266-267`) and decides each
+through `mcpBookFacts` (books only, by design — a grant TARGET's facts) and `MCPGrantRule.reach(... target: .book)` —
+so G is never enumerated, never decided, and its row never wears the icon. The face under-reports exactly the reach
+the wire grants: her report ("gatherings don't show as being shared with AI … even when you've shared the whole
+wing"). The singular `mcpBookReach(readingID: G)` answers `[]` the same way (`mcpBookFacts` nil).
+**Not the cause, checked:** the row view draws whatever the map holds, for books and gatherings alike (one
+`shelfRow`); the popover (`MCPReachPopover`) is kind-blind — it renders a reach's rung, duration, why, and Change… /
+Revoke on the reach's GRANT, which for a gathering can only be a wing grant (Change… → the sheet pre-filled on that
+wing, replacing it — `changeOpening`; Revoke → "Revoke the Home wing grant", W-UX-5).
+
+**The fix shape:** a pure `MCPGrantRule.reach(grants:openBook:gathering:)` read OFF `decideGathering` exactly as the
+existing `reach` is read off `decide` (no parallel rule: `.allow(grantID)` → the grant or the open book; anything else →
+nil); its rung is READ — `decideGathering`'s only rung (a gathering holds nothing to write). `mcpBookReaches`
+enumerates live books AND gatherings and decides each by its kind's rule; a gathering has no own-scope grant (it is
+never a grant's scope), so every reach on it names the wider place — the wing ("Home" for the virtual one) — or the
+open book. `mcpBookReach(readingID:)` answers a gathering the same way (the singular and the map agree for every id).
+**R-VX185-1 holds by construction:** `decideGathering` consults wing grants on G's wing and the open book only — a
+note grant on every member, or a book grant in the wing (any rung), reaches nothing. **Fenced:** a gathering carrying a
+'daily' marker or a Private stamp (only a synced stale row can) answers `.fenced` → no icon (unrelaxed). **Archived:**
+the reach map is REACH, not presentation, as for books — an archived book under a reaching grant is in the map today
+(the wire answers it by id: "Presentation, never reach", `listBooks`'s U4 note) and the Bookcase never draws it
+(`bookcaseReadings` — the ONE archived choke point, both kinds); an archived gathering follows the same rule.
+**P1:** ∝ the live readings × the approved clients (a handful), one facts row per reading — never an assembly, never
+`container` (the held observation still wakes only on `reading`, `wing` and the grants store).
