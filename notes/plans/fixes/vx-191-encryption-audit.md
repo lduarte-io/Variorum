@@ -217,3 +217,9 @@ returns this Mac to Standard). Product behavior + copy → hers (QUESTIONS when 
   (`EncryptionSession.swift:382-410` → the follow into Standard). TODAY (custody kept) the same sign-in reverts SILENTLY
   via the follow-into-Standard arm with only an after-the-fact notice — the two-door fix turns that into the consent.
   Copy NIT for the fix ticket: the consent's "put the ACCOUNT in Castle" capitalizes for emphasis (her no-caps rule).
+
+## X. HANDED ON (2026-10-12, her word: fix 1–4 before launch)
+**RUN VX-201 "Castle pre-launch fixes"** — members: **VX-202** (finding 1, the reopen race) · **VX-110** (finding 2,
+the two doors + the join consent's de-capped wording, her ruling recorded on the ticket) · **VX-203** (finding 3,
+the offer's missed folders) · **VX-204** (finding 4, the guide sentence — her words). Touches custody ⇒ Fable cold
+review. Rows 5–11 of §V stay post-launch (tickets at her word). This audit (VX-191) closes with this record.
