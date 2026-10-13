@@ -205,4 +205,24 @@ struct SettingsLockCloseTests {
                     "the window survives the reopen road's .opening (the Restore door's own sheet lives on it)")
         }
     }
+
+    /// The rule's table: which states mean the library CLOSED under Settings.
+    /// `.opening` never does — it is the reopen roads' in-flight middle.
+    @Test func theLibraryClosedRuleNamesTheSettledClosedStatesAndNeverOpening() async throws {
+        try await withDeps {
+            #expect(!SettingsSceneContent.libraryClosed(.opening))
+            #expect(SettingsSceneContent.libraryClosed(.failed(
+                AppDatabase.StoreOpenError(storePath: "", reason: "x"), recovery: nil)))
+            let world = try demandedWorld()
+            defer { try? FileManager.default.removeItem(at: world.directory) }
+            await world.bootstrap.awaitOpen()
+            guard case .locked = world.bootstrap.state else {
+                Issue.record("expected the demanded world to start .locked")
+                return
+            }
+            #expect(SettingsSceneContent.libraryClosed(world.bootstrap.state))
+            try await unlock(world)
+            #expect(!SettingsSceneContent.libraryClosed(world.bootstrap.state), "ready is open")
+        }
+    }
 }

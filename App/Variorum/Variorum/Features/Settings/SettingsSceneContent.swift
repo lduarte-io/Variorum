@@ -7,7 +7,21 @@
 //  verbatim from the scene closure (VX-224) so a pin can mount exactly what
 //  the window shows, driven by a real `AppBootstrap`.
 //
+//  **VX-224 — the window closes when the library closes under it.** Her
+//  report: locking with Settings open left "a weird variorum settings stub
+//  window … you can't read the text in it, it's not possible to make it
+//  bigger. i feel like we can probably just close this window." The stub
+//  was the non-ready arm below: a lock flipped the scene into it and
+//  nothing closed the window. Now the window closes itself — the AppKit
+//  close its own ✕ performs — the moment the library SETTLES closed
+//  (`libraryClosed`). Never on `.opening`: the reopen roads that run FROM
+//  this window (Data Safety's Restore from Backup → `adoptLibrary`; the
+//  Protection pane's posture switches → `rekeyLibrary`) pass through it
+//  with their sheets on this window. No reopen-on-unlock (none was free);
+//  ⌘, after the unlock opens it fresh.
+//
 
+import AppKit
 import SwiftUI
 import VariorumCore
 
@@ -22,8 +36,31 @@ struct SettingsSceneContent: View {
     /// (the main scene's sheet and this one can never both fire).
     let libraryOpen: LibraryOpenPresenter
     let handOff: LibraryHandOffPresenter
+    /// This content's own window (reported by AppKit, held weakly).
+    @State private var host = HostWindow()
+
+    /// **Whether the library has CLOSED under Settings** — a SETTLED state
+    /// with no open library. `.opening` is not one: it is the in-flight
+    /// middle of every reopen road, two of which run from this window.
+    static func libraryClosed(_ state: AppBootstrap.State) -> Bool {
+        switch state {
+        case .ready, .opening: false
+        case .locked, .waitingForICloudKeychain, .libraryMissing, .failed: true
+        }
+    }
 
     var body: some View {
+        arms
+            .background(WindowKeyReporter(onWindow: { host.window = $0 }, onKey: {}))
+            // A TRANSITION, never the initial value: a window opened while
+            // the library is already closed keeps its arm (VX-224's ruled
+            // scope is the lock engaging under an open window).
+            .onChange(of: Self.libraryClosed(bootstrap.state)) { _, closed in
+                if closed { host.window?.close() }
+            }
+    }
+
+    @ViewBuilder private var arms: some View {
         if case .ready(let session) = bootstrap.state {
             AppSettingsView(
                 session: session, services: services,
@@ -73,4 +110,11 @@ struct SettingsSceneContent: View {
                 .padding(24)
         }
     }
+}
+
+/// The Settings window, held WEAKLY — the scene owns it; this only names it
+/// so the content can close its own window (VX-224).
+@MainActor
+private final class HostWindow {
+    weak var window: NSWindow?
 }
