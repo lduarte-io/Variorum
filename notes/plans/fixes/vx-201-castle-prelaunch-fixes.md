@@ -2017,3 +2017,22 @@ three pin files + six patches; the adopt/restore machinery byte-untouched as con
 - **The VERDICT is window E's drill leg** (the posture + connect drills under their env vars at the tip): green
   ⇒ VX-233 closes with the run (the connect drill's instance proves with it); still red ⇒ the ruled fallback —
   the post-launch ticket stands, the attempt recorded here.
+- **VERDICT (window E phase 1b): PARTIAL HEAL — THE RULED FALLBACK FIRES for the remainder.** The CONNECT drill
+  is fully healed (its failure gone at the stage; migration green beside it). The POSTURE drill's two tests still
+  record the same clock-dependency trap (SyncEngine.swift:19) — the access happens inside the switch runner's
+  own QUEUED work, where a test-scope override does not reach. The remaining fix is drill-world composition
+  surgery (inject the runner's engine leaf with explicit dependency values) or a product-side dependency escape
+  at the runner's queue hop — the second re-opens her test-harness-only ruling by definition; both are
+  post-launch. VX-233 stays OPEN with tonight's attempt + the narrowed diagnosis commented on it; box spend
+  ~45 min of the ~90. The drill's PRODUCT legs complete (window A's reading stands).
+
+### WINDOW E RECORD — PHASES 1+3 (orchestrator, stage claim vx201-u5-tests-p1; the pinned checkout at e6634d0e)
+- **Phase 1 (Mac green pass): `✔ Test run with 318 tests in 51 suites passed after 257.812 seconds`** — U5's
+  whole suite list incl. its 9 pins: the §W.2 round-trip reproduction, the confirm-line pins, the guide pins and
+  the Resume-Sync-road BOUND are all STAGE-VERIFIED at the tip.
+- **Phase 1b:** the VX-233 verdict above (connect healed · posture's two remain · fallback fires).
+- **Phase 3 (phone, 6 struct types): 35 tests / 6 suites,** the only red the standing VX-114 sweep reading
+  exactly its nine pre-existing offenders (the twice-printed list read and counted). U5 adds no phone literal.
+- **Still owed:** phase 2's six revert cycles (queued after vx-184's U4, ~07:35). The FABLE LADDER round 1
+  starts now — no stage, the whole-run diff final and suite-verified at the tip; the cycles verify pins without
+  changing code, so round 1's input is stable. Logs /tmp/vx201-we-*.log.
