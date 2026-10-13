@@ -24,11 +24,11 @@ Surfaces: `App/Variorum/Variorum/Features/Settings/` EXCEPT the MCP pane (`Featu
 
 | # | Ticket | What | Status |
 |---|---|---|---|
-| 1 | VX-215 | Settings panes rewrite — pane by pane WITH HER (MCP pane excluded) | OPEN — in flight with the author |
+| 1 | VX-215 | Settings panes rewrite — pane by pane WITH HER (MCP pane excluded) | IN FLIGHT — General RULED (sitting record 2026-10-13), build landing; Editor next |
 | 2 | VX-216 | Book & gathering menus + Book Settings sheet clarity pass — WITH HER | OPEN |
 | 3 | VX-217 | Gathering foot = book foot: New note button on gatherings; drop the "it shows every note its rule matches…" explainer | OPEN |
 | 4 | VX-218 | Signed-out state: no spacing bottom-left ("doesn't look premium on first login") | OPEN |
-| 5 | VX-219 | Colour picker for the theme's custom palette (custom hex exists — 18g; add a real picker) | OPEN |
+| 5 | VX-219 | Colour picker — PULLED from the round at her word 2026-10-13 ("it can wait"); detached from VX-214, Needs Lillian, she picks it up later | OUT OF RUN |
 | 6 | VX-220 | Services clutter — CONFIRMED the macOS app-menu Services submenu (her word, 2026-10-13); suppress/trim the system entries from the app menu | OPEN — confirmed, ready for a subagent |
 | 7 | VX-221 | Tag delete: an obvious button in the Tags pane (not just the context click) | OPEN |
 | 8 | VX-222 | **BAD bug** — choose button fails on a Write-minted take in Takes mode until ⌘⏎ (onboarding walks this exact flow) | **FIXED** (implementer-closed; awaits the run's cold ladder → **fable**) — pin `TakesChooseRingTests` (58564102; red on old 3 tests/6 issues incl. the original overwritten, red again by behavioural revert); fix de98cd6f (the article ring ends when its take changes, at `adopt`); 91-suite Takes battery green (627 tests); USE walk passed both voices (`notes/plans/vx-214-screens/vx-222/post-*`). Lenses twin → VX-227 (row 12). |
@@ -143,6 +143,10 @@ Deliverables: traced mechanisms + fixes + pins where pinnable (walk captures whe
 ## Author sittings — running record
 
 *(rulings land here verbatim as they happen)*
+
+**2026-10-13 — HER GENERAL PANE RULINGS (verbatim, the pasted list):** "subtitle: I don't even think general needs a subtitle. it's pretty much the only one that doesn't need a subtitle. / Change it from \"Design voice\" to \"Theme\". I also don't think that this needs an explanation at all. / appearance: does not need any explanation. / Colour palette: does not need any explanation under it. also, remove the color picker ticket from tonight's round of work - honestly, it can wait. let me know what ticket number it is and i'll pick it up later though. / Confirmations after an act: only a single paragraph beneath it. explain very simply what the confirmations are. don't use this text exactly but it should be something more direct like: \"Variorum shows confirmations after structural acts. Saving versions, merging blocks, etc.\" There is no need to explain what the options are - cut out the whole part that starts after \"A quiet line\". You can say \"Actions that were refused will still show a note regardless of this setting\". / Open notes: only thing that should be underneath this one is \"This mac only\". / Check for updates automatically: this does not need any text beneath it."
+
+Build notes (orchestrator, same turn): the pane subtitle removed for GENERAL ONLY (her "pretty much the only one"); "Design voice"→"Theme" via the catalog (old names stay as search keywords, the promote precedent); the "Voice" section header drops with the caption so "Theme" reads once (judgment call, flagged to her); Appearance/Palette/Updates captions removed (the Updates unanswered-ask face goes with it — the toggle still answers the ask, the calm-asks machinery untouched); Confirmations gets ONE direct paragraph folding her refusal sentence; Open notes caption = "This Mac only."; search-registry blurbs KEEP their text (search results need context; the pane renders none of it). VX-219 pulled from the round at her word → detached from VX-214, state Needs Lillian.
 
 **2026-10-13 — her VX-224 evidence ratification + the VX-227 ruling (one message):** "yeah that's fine. on VX-224 not being fully tested. and I think if you step the pick under a pane you're editing in takes, the live editor shoud follow the step - it should be visible to you what you've done and it makes editing with the keyboard more ergonomic."
 - **VX-224:** the mounted-pin-plus-close-road-walk evidence plan is RATIFIED; her real-store Castle lock check rides the post-merge checklist.
