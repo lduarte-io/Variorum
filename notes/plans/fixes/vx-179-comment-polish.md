@@ -1977,7 +1977,41 @@ live) and the door-shut answer stay byte-intact. The pins' RUN and the lane re-w
 
 | piece | what | status |
 |---|---|---|
-| FL2-a | this section | DONE (this commit) |
-| FL2-1 | trace F-W-2-R offscreen (overlay style confirmed/forced; the live sequence modelled) — mechanism found or the gap stated | NOT-STARTED |
+| FL2-a | this section | DONE (f53d1621) |
+| FL2-1 | trace F-W-2-R offscreen (overlay style confirmed/forced; the live sequence modelled) — mechanism found or the gap stated | DONE (this commit) — the lane hands presses to an overlay scroller that tracks only on its 6 pt knob part; off it, a dead press (THE TRACE) |
 | FL2-2 | the fix (the lane's press-drag scrolls the card, faded or flashed; door + wheel untouched) | NOT-STARTED |
 | FL2-3 | pins (what the runner can model) + red-on-old by replay; plain build; record closed | NOT-STARTED |
+
+### THE TRACE (offscreen, the real module — `scratchpad/vx179-u2-fix2/knob.swift`; written before any fix)
+
+The real controller renders an overflowing card (10 entries) on a page scroll view in a borderless window
+whose contentRect sits at (−20000, −20000) before it is ever ordered in (`window ever on a display:
+false`); mouse events are built with explicit window locations and dispatched through the app's own
+queue (`postEvent` → `nextEvent` → `NSApp.sendEvent`, so `NSApp.currentEvent` is the event in hit-testing).
+
+**The hypothesis "the probe got LEGACY scrollers" is FALSE:** `NSScroller.preferredScrollerStyle` = 1
+(overlay) on this machine, and the card's scroll view and its scroller both report 1 — leg 1's lane probe
+already printed `style=1`. Forcing legacy is the CONTROL below.
+
+| press (then a 38 pt drag down, 4 steps, up) | overlay (the live style) | legacy (control) |
+|---|---|---|
+| scroller geometry | lane 17 pt wide; KNOB hit part **6 pt** wide (x 8–14), 26 pt tall | knob 11 pt wide (x 3–14) |
+| ON the knob, flashed | `testPart` = knob → hit `NSScroller` → door 0× → **card 0 → 212** | 0 → 189.5 |
+| ON the knob, hover first | 0 → 212 | 0 → 189.5 |
+| ON the knob, after a 4 s fade | 0 → 212 | 0 → 189.5 |
+| the lane's leading edge (x 2) | `testPart` = **none** → hit `NSScroller` → door 0× → **card 0 → 0 (DEAD)** | 0 → 0 |
+| the lane's trailing edge (x 15) | **none → DEAD** (door shut, nothing moves) | 0 → 0 |
+
+**The mechanism (traced):** leg 1's hit rule answers the `NSScroller` for EVERY press on the 17 pt lane,
+but an overlay scroller only tracks a press that lands on its 6 pt knob part; everywhere else in the lane
+`testPart` answers none and `NSScroller.mouseDown` does nothing with it — no drag, no forward to the door.
+That is EXACTLY the live residual (three presses, door shut, zero movement). The live report adds that
+even a press aimed at the flashed knob's own pixels failed; the offscreen knob tracks wherever it is hit,
+so live either the 6 pt part was missed (the collapsed overlay knob draws thinner than its expanded hit
+part and sits at the lane's trailing side), or the overlay scroller's hover/expansion state — which runs
+only in an ACTIVE app's KEY window, unavailable to any probe without taking her focus — gates its
+tracking. **Both explanations share one cure:** stop handing the lane to the `NSScroller`. The card OWNS
+the lane drag itself — the same responder road (`mouseDown` → `mouseDragged` → `mouseUp` to the view
+that took the press) the drag handle beside it has used live since 13 C1 — mapping the pointer's travel
+to the content's at the native knob ratio (content travel ÷ knob travel), so the knob still follows the
+pointer one-to-one as it would under AppKit's own tracking.
