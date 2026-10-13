@@ -32,7 +32,6 @@ final class ServerHarness: @unchecked Sendable {
     /// U2: what the app would have been told (AF-6's asks; the receipts).
     let asks = LockIsolated<[MCPAsk]>([])
     let receipts = LockIsolated<[MCPWriteReceipt]>([])
-    private var openFDs: [Int32] = []
 
     init() throws {
         let database = try AppDatabase.inMemory()
@@ -80,9 +79,12 @@ final class ServerHarness: @unchecked Sendable {
         }
     }
 
+    /// VX-132: stopping the host hangs up every session, and each client the
+    /// harness made then ENDS ITSELF (`HarnessTransport` — its stream drained,
+    /// it disconnects and closes its own socket). No client is left spinning
+    /// and no descriptor is closed under a reader that could reuse its number.
     func tearDown() {
         host.stop()
-        for fd in openFDs { close(fd) }
         try? FileManager.default.removeItem(at: directory)
     }
 
@@ -101,31 +103,45 @@ final class ServerHarness: @unchecked Sendable {
     /// A client connected over the socket and initialized as `name`,
     /// presenting its OWN setup key (VX-168 — what a shim run from the
     /// pane's setup does).
-    func connect(as name: String) async throws -> (client: Client, fd: Int32) {
+    func connect(as name: String) async throws -> HarnessConnection {
         try await connect(as: name, presenting: try setupKey(for: name))
     }
 
     /// The same, presenting `key` as the shim's preamble — nil = a BARE shim.
-    func connect(as name: String, presenting key: String?) async throws -> (client: Client, fd: Int32) {
+    /// VX-132: through the bounded client — the connect fails NAMED past its
+    /// limit, and a connect that fails leaves no client behind.
+    func connect(as name: String, presenting key: String?) async throws -> HarnessConnection {
         guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
             throw HarnessFailure("could not connect")
         }
-        openFDs.append(fd)
         if let key { _ = MCPShim.writeAll(fd, MCPPreamble.line(key: key)) }
-        let transport = StdioTransport(
-            input: FileDescriptor(rawValue: fd), output: FileDescriptor(rawValue: fd))
-        let client = Client(name: name, version: "1.0")
-        _ = try await client.connect(transport: transport)
-        return (client, fd)
+        let transport = HarnessTransport(fd: fd)
+        let sdk = Client(name: name, version: "1.0")
+        await transport.onDrained { await sdk.disconnect() }
+        do {
+            let initialized = try await HarnessDeadline.run(
+                "connect(as: \(name))", onTimeout: { Task { await transport.end() } }
+            ) {
+                try await sdk.connect(transport: transport)
+            }
+            return (HarnessClient(sdk: sdk, transport: transport, initialized: initialized), fd)
+        } catch {
+            Task { await sdk.disconnect() }
+            throw error
+        }
     }
 
     /// VX-168: a RAW opening — the preamble when `key` is given, then an
     /// `initialize` naming `name` with request id `id` — and the server's
-    /// first answer as JSON. The caller closes the descriptor.
+    /// first answer as JSON. The caller closes the descriptor. VX-132: the
+    /// read is bounded by the harness's limit (an answer that never comes
+    /// fails "no JSON answer", never a stalled run).
     func rawOpen(as name: String, presenting key: String?, id: Int = 1) throws -> (fd: Int32, answer: [String: Any]) {
         guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
             throw HarnessFailure("could not connect as \(name)")
         }
+        var timeout = timeval(tv_sec: Int(HarnessDeadline.seconds.rounded(.up)), tv_usec: 0)
+        _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
         if let key { _ = MCPShim.writeAll(fd, MCPPreamble.line(key: key)) }
         let line = """
             {"jsonrpc":"2.0","id":\(id),"method":"initialize","params":{"protocolVersion":"2025-06-18",\
@@ -140,9 +156,10 @@ final class ServerHarness: @unchecked Sendable {
         return (fd, object)
     }
 
-    func hangUp(_ connection: (client: Client, fd: Int32)) async {
+    /// The client hangs up — VX-132: its transport closes the socket once the
+    /// SDK is done reading it (the harness never touches the number after).
+    func hangUp(_ connection: HarnessConnection) async {
         await connection.client.disconnect()
-        shutdown(connection.fd, SHUT_RDWR)
     }
 
     func client(_ name: String) throws -> MCPClient {

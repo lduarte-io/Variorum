@@ -22,7 +22,7 @@ import Testing
 // search serves standing grants only); and its arrival over a real socket.
 
 private func call(
-    _ connection: (client: Client, fd: Int32), _ name: String, _ arguments: [String: Value]
+    _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value]
 ) async throws -> (content: [Tool.Content], isError: Bool?) {
     try await connection.client.callTool(name: name, arguments: arguments)
 }
@@ -110,21 +110,18 @@ struct MCPAdviceServerTests {
     @Test func aRealClientReadsTheAdviceAtInitializeBeforeItHoldsAnything() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
-        guard case .success(let fd) = MCPSocketRoad.connect(directory: h.directory) else {
-            throw HarnessFailure("could not connect")
-        }
-        defer { close(fd) }
         // VX-168 (A JUSTIFIED EDIT, the ritual): a new client arrives with
         // its setup's key — a bare one is refused before `initialize`.
-        _ = MCPShim.writeAll(fd, MCPPreamble.line(key: try h.setupKey(for: "a-new-client")))
-        let transport = StdioTransport(input: FileDescriptor(rawValue: fd), output: FileDescriptor(rawValue: fd))
-        let client = Client(name: "a-new-client", version: "1.0")
-        let result = try await client.connect(transport: transport)
-        #expect(result.instructions == MCPSession.instructions, "the advice, verbatim, at initialize")
-        let tools = try await client.listTools().tools
+        // VX-132 (A JUSTIFIED EDIT, the ritual): through the harness's bounded
+        // client (the same SDK client on the same socket road, its acts
+        // time-limited) instead of a hand-built one; `initialized` is what
+        // `initialize` answered — exactly what `Client.connect` returned here.
+        let connection = try await h.connect(as: "a-new-client")
+        #expect(connection.client.initialized.instructions == MCPSession.instructions,
+                "the advice, verbatim, at initialize")
+        let tools = try await connection.client.listTools().tools
         #expect(tools.isEmpty, "a connection request sees no tools — only the advice")
-        await client.disconnect()
-        shutdown(fd, SHUT_RDWR)
+        await h.hangUp(connection)
     }
 
     // MARK: - Snippets are not reachable (round 5's fact, the docs' sentence, pinned)

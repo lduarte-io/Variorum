@@ -121,17 +121,37 @@ struct MCPShimTests {
     /// The connected shim: a key in its environment → the preamble FIRST,
     /// then the client's bytes verbatim; no key → nothing of its own (the
     /// client's `initialize` is the first line the app reads).
+    /// VX-132 (A JUSTIFIED EDIT, the ritual — the run record's "the SIGPIPE
+    /// flake" trace): `MCPShim.pump` never joins its upstream thread, whose
+    /// last act is `shutdown(socket, SHUT_WR)` once the client's input ends.
+    /// This test used to END the downstream itself (`shutdown(pair[1])`)
+    /// right after closing the input, so the shim thread could close
+    /// `pair[0]` BEFORE that straggling `shutdown` ran; the next iteration's
+    /// `socketpair` reused the number, the straggler shut IT down, and the
+    /// bare iteration's upstream write met a shut socket with no
+    /// `SO_NOSIGPIPE` — the whole test process died of signal 13 (2 runs in 40
+    /// of this suite alone, measured). Now the test waits for the upstream to
+    /// finish (its `shutdown` is the EOF read here) before ending anything,
+    /// joins the shim thread before closing a descriptor, and its socket ends
+    /// carry `SO_NOSIGPIPE` (a stray write fails, never kills the run). Every
+    /// read is bounded (VX-132). The assertions are unchanged.
     @Test func aKeyedShimSpeaksThePreambleFirstAndABareOneNothing() throws {
         for keyed in [true, false] {
             var pair: [Int32] = [-1, -1]
             #expect(socketpair(AF_UNIX, SOCK_STREAM, 0, &pair) == 0)
+            MCPSocketRoad.suppressSIGPIPE(pair[0])
+            MCPSocketRoad.suppressSIGPIPE(pair[1])
+            var timeout = timeval(tv_sec: 10, tv_usec: 0)
+            _ = setsockopt(pair[1], SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
             var input: [Int32] = [-1, -1], output: [Int32] = [-1, -1]
             #expect(pipe(&input) == 0 && pipe(&output) == 0)
             let environment = keyed ? [MCPPreamble.environmentVariable: "vmk1_drill"] : [:]
             let (shimSocket, shimInput, shimOutput) = (pair[0], input[0], output[1])
+            let served = DispatchSemaphore(value: 0)
             let shim = Thread {
                 MCPShim.serve(socket: shimSocket, environment: environment, input: shimInput, output: shimOutput)
                 close(shimSocket)
+                served.signal()
             }
             shim.start()
             let initialize = #"{"jsonrpc":"2.0","id":0,"method":"initialize","params":{}}"#
@@ -144,8 +164,13 @@ struct MCPShimTests {
                 #expect(first == Data(initialize.utf8), "a bare shim says nothing of its own")
             }
             close(input[1])
-            shutdown(pair[1], SHUT_RDWR)
+            var byte: UInt8 = 0
+            #expect(read(pair[1], &byte, 1) == 0, "the input's end reaches the app as EOF — the upstream is done")
+            // The app hangs up. A CLOSE, never `shutdown`: once the peer has
+            // half-closed, macOS answers `shutdown` on an AF_UNIX pair with
+            // ENOTCONN and wakes no reader (measured — the record).
             close(pair[1])
+            #expect(served.wait(timeout: .now() + 10) == .success, "the shim ends when the app hangs up")
             close(input[0])
             close(output[0])
             close(output[1])

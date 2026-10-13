@@ -95,7 +95,7 @@ zero `Sync/`, zero custody/keychain, zero editor seam.
 | piece | what | status |
 |---|---|---|
 | 0 | this record + LIVE STATUS; `notes/plans/vx184-screens/` gitignored (`git check-ignore` verified) | DONE `b6ed4edf` (gitignore) + this commit (record) |
-| 1 | VX-132 — the mechanism traced (below); the pins (a silent server: connect, call); the bounded harness + client hygiene | NOT-STARTED |
+| 1 | VX-132 — the mechanism traced (below); the pins (a silent server: connect, call); the bounded harness + client hygiene | DONE `d4610d06` (pins, all three HANG on the pre-fix harness — 45 s watchdog, sampled) + this commit (the fix) — `MCPHarnessDeadline.swift` (the GCD-timed deadline, task-local limit 30 s) · `MCPHarnessClient.swift` (`HarnessTransport` — the SDK's `StdioTransport` underneath, parks + disconnects at the drained second `receive()`, closes its own socket only after the SDK's read loop is done; `HarnessClient` — `callTool`/`listTools`/`disconnect`/`onNotification` bounded) · `ServerHarness.connect` bounded, a failed connect leaves no client, `rawOpen` read bounded, `tearDown`/`hangUp` never touch a client's number · the ten helpers' type → `HarnessConnection` · `MCPAdviceServerTests`' hand-built client → the harness (justified edit) · **the SIGPIPE flake traced and fixed** (below) in `MCPShimTests.aKeyedShim…` (justified edit). Green: the four VX-132 pins (connect fails named in 1.14 s, call in 1.06 s, the mid-call hang-up in **0.064 s**, the hygiene pin) · `MCPShimTests` **80/80 runs clean** (pre-fix: 2 SIGPIPE deaths in 40) · `VariorumMCPTests` **139/22 green, three consecutive runs, ~11 s each** |
 | 2 | VX-132 red-on-old BY REVERT (announced here first) | NOT-STARTED |
 | 3 | VX-181 — trace; the pin (the shim's closed-app refusal answers the INITIALIZE past a probe); the window in the shim's refusal read; NIT 1's one shared echoable-id predicate | NOT-STARTED |
 | 4 | VX-181 red-on-old BY REVERT | NOT-STARTED |
@@ -153,3 +153,23 @@ zero `Sync/`, zero custody/keychain, zero editor seam.
   answers `initialize` and then nothing → `callTool` fails within its bound (both HANG on the old harness — red
   watched under an outer watchdog); a connection the server closes → the client's message loop asks for its
   stream at most twice (red by reverting the hygiene alone: the count climbs without end).
+
+### VX-132 — the SIGPIPE flake (found on the way, traced, fixed)
+
+The FIRST whole-target run on the fixed harness died of **signal 13** (`swiftpm-testing-helper … exited with
+unexpected signal code 13`) — the flake the brief names. **Reproduced in isolation: `MCPShimTests` alone died of
+SIGPIPE in 2 runs of 40**, both with `aKeyedShimSpeaksThePreambleFirstAndABareOneNothing` in flight. **The trace:**
+`MCPShim.pump` never joins its upstream thread (by design — in the shipped shim the app hanging up must end the run
+even while the client keeps stdin open), and that thread's LAST act is `shutdown(socket, SHUT_WR)` once the client's
+input ends. The test closed the input and then ended the downstream itself, so the shim thread could `close(pair[0])`
+BEFORE the straggling upstream ran its `shutdown`; the loop's next iteration called `socketpair`, got the freed
+number back, the straggler shut THAT socket for writing, and the bare iteration's upstream write met a shut socket
+with no `SO_NOSIGPIPE` — the whole test process died. (In the shipped shim the same straggler can only meet a closed
+number between `close` and `exit`, with nothing opened in between — harmless; recorded, not changed.) **A kernel
+fact measured on the way** (a Python socketpair experiment, scratchpad): once the peer has half-closed, macOS
+answers `shutdown(SHUT_RDWR)` on an AF_UNIX pair with `ENOTCONN` and wakes NO blocked reader — only `close` does — so
+the old test's `shutdown(pair[1])` also never ended its shim (it just never waited). **The fix (the test only):**
+read `pair[1]` to EOF after closing the input (the upstream's `shutdown` IS that EOF — it is done), then `close`
+(never `shutdown`) `pair[1]`, JOIN the shim thread, and only then close anything else; both pair ends carry
+`SO_NOSIGPIPE`; every read is bounded. Assertions unchanged. **Evidence:** 80/80 runs clean after (2/40 SIGPIPE
+before) — a timing race, so the red-on-old is statistical, said plainly.
