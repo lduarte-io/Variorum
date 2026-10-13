@@ -346,6 +346,70 @@ struct CommentTextAreaMountedTests {
         #expect(log.reports == [true, false])
     }
 
+    /// **RED ON OLD — a CRASH, in both the shipped `TextEditor` and this
+    /// control before its fix** (measured offscreen, the record's U3-g): she
+    /// files a comment (⌘⏎), the panel clears the add area PROGRAMMATICALLY,
+    /// and ⌘Z then replayed typing-undo actions that name ranges of the OLD
+    /// text against the now-empty string — `NSRangeException: Range {13, 9}
+    /// out of bounds; string length 0`, an uncaught exception. The fix: each
+    /// area owns its undo history (`undoManager(for:)`), and a programmatic
+    /// replacement ends it. ⌘Z's road is `undo:` up the responder chain to
+    /// the window, which undoes through the first responder's manager.
+    @Test func undoAfterTheAreaIsClearedForHerCannotReplayTheOldText() async throws {
+        final class Draft: ObservableObject { @Published var text = "" }
+        struct Bound: View {
+            @ObservedObject var draft: Draft
+            var body: some View {
+                CommentTextArea(
+                    text: $draft.text,
+                    style: CommentTextStyle(tokens: .terminalLight, ink: VoiceTokens.terminalLight.ink),
+                    placeholder: "Write a comment…", growsWithText: false)
+                    .frame(width: 400, height: 200)
+            }
+        }
+        let draft = Draft()
+        let hosting = NSHostingView(rootView: Bound(draft: draft))
+        hosting.frame = NSRect(x: 0, y: 0, width: 400, height: 200)
+        let window = NSWindow(
+            contentRect: NSRect(x: -20_000, y: -20_000, width: 400, height: 200),
+            styleMask: [.borderless], backing: .buffered, defer: true)
+        window.isReleasedWhenClosed = false
+        defer {
+            window.contentView = nil
+            window.close()
+        }
+        window.contentView = hosting  // never ordered in
+        settle(hosting)
+        let area = try #require(Self.areas(in: hosting).first)
+        let textView = area.textView
+        window.makeFirstResponder(textView)
+        textView.insertText("first thought", replacementRange: textView.selectedRange())
+        textView.breakUndoCoalescing()
+        textView.insertText(" and more", replacementRange: textView.selectedRange())
+        settle(hosting)
+        #expect(draft.text == "first thought and more")
+        #expect(textView.undoManager?.canUndo == true, "her typing is undoable while it is hers")
+
+        // Filed: the panel's model clears the draft; the area adopts "".
+        draft.text = ""
+        settle(hosting)
+        #expect(textView.string.isEmpty)
+        #expect(textView.undoManager?.canUndo == false,
+                "the words left the box — there is nothing in it to undo into")
+        // ⌘Z's own road. On the old tree this line raised NSRangeException.
+        _ = textView.tryToPerform(Selector(("undo:")), with: nil)
+        settle(hosting)
+        #expect(textView.string.isEmpty && draft.text.isEmpty)
+        #expect(area.placeholderView?.isHidden == false)
+
+        // Each area's history is its own: typing after the clear undoes alone.
+        textView.insertText("new", replacementRange: textView.selectedRange())
+        settle(hosting)
+        _ = textView.tryToPerform(Selector(("undo:")), with: nil)
+        settle(hosting)
+        #expect(textView.string.isEmpty && draft.text.isEmpty)
+    }
+
     /// ⎋ with nothing to undo is not the area's: `cancelOperation:` travels
     /// on to the host (the sheet's or popover's own close) — what SwiftUI's
     /// `PlatformTextView` did (measured: neither overrides it).
