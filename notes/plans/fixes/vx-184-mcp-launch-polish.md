@@ -1913,7 +1913,7 @@ Her three product calls (VX-258/259/260, R-VX184-7/8/9) are VX-246's and untouch
 | 6 | (b) `hersAlone` before/after every wire call in the five U5 server suites + one mutation that bites; the U5 record's sentences corrected | DONE (this commit; the pins `db303a88`, the mutation announced `b054ea13`) — NEW `Tests/VariorumMCPTests/MCPHersAloneSupport.swift`: `ServerHarness.hersAlone()` (every reading's `owned` · `sealed_at` · `ai_private_at`, every container's `locked` · `ai_private_at`, tombstoned rows included — the old private helper's exact read, moved) and `callKeepingHersAlone` (reads it before and after ONE wire call and expects it byte-identical, a refused call included, the failure pointing at the call site). Each of the five suites' private `call` routes through it — **all 62 wire call sites** (book state 21 · membership 14 · chapters 13 · the note 8 · the once pins 6). **Honest: a strengthening, not a fix** — no MCP road writes those columns, so this is GREEN on both sides by construction (18 tests / 5 suites, green before and after). **The mutation that proves it bites** (on the committed tree, two temporary writes in `Operations+MCPLibraryEdits.swift`: `archive_note` also stamped the note's `ai_private_at`; `finish_book` also set the book's `owned`): RED exactly at the two acts' call sites — `MCPNoteLibraryServerTests.swift:95` (`archive_note`) and `MCPBookStateServerTests.swift:120` (`finish_book`), "Expectation failed: try h.hersAlone() == before" (+1 downstream issue: the note, now Private, answered the next call with the one not-shared shape). **Restored** `git checkout HEAD -- <the file>`, `git status` clean, zero `MUTATION` lines; the five suites re-run **18/5 green**. The U5 record's two sentences (call 11; the SELF-ASSESSMENT) now say they overclaimed as written and are true since `db303a88`. Logs `logs/p6-hers-alone.log`, `logs/p6-mutation.log`, `logs/p6-restored.log` |
 | 7 | (c) `delete_take`'s description; (d) `delete_book`/`finish_book`'s descriptions + P-VX196-8 | DONE (this commit) — `MCPToolCatalog`: **`delete_take`** now says "The block's chosen take can't be deleted while the block has other active takes" (the reviewer's wording — `deleteVariantRows` refuses the take the chosen POINTER names, not the shown take: a nil pointer shows the default, which deletes; an archived chosen take shows the default, yet refuses) and, from the whole re-read, "Deleting a block's last active take (archived takes don't count) deletes the block … (the block and every take on it, archived ones too, go to the tray)" — I10's last ACTIVE take (`Queries.mcpTakeRoad`); the rest re-read true against the code (the tray lists deleted takes — `Queries.trayTakes`; `put_back` serves them; a locked take refuses on both roads); emphasis caps dropped in the sentence rewritten. **`delete_book`**: every note in the book leaves it, "including any you can't read", a note in no other book lands in the Pool (an owned book's all do), and "One undo for the author, or the Trash's Put back, brings the book back whole, its notes in it again". **`finish_book`**: "every note waiting at its Arrivals is dismissed — including any you can't read", and the undo "brings back everything that was waiting". **P-VX196-8** logged in the U5 PROVISIONALs (options (a) as built and said · (b) refuse while hidden members exist, rejected as the default — its refusal would itself be the oracle). No pin reads the old phrases (grepped). **Run:** the wire-neutrality (no gendered pronoun) and provider-neutrality nets, the catalog walk, the advice, the size caps, `MCPTakeEditServerTests`, `MCPBookStateServerTests` = **47 tests / 7 suites, green**. Log `logs/p7-descriptions.log` |
 | 8 | (e) the re-indent — ONE whitespace-only commit, `git diff -w` empty | DONE (`bb5d7fd0`, the cosmetic commit alone; this commit flips the row) — the twelve extracted bodies of STEP 1 item 5 (`archiveContainerRow`, `unarchiveContainerRow`, `archiveReadingRow`, `finishReadingRows`, `reopenReadingRows`, `deleteReadingRow`, `removeMembershipRow`, `reorderMembershipRow`, `renameSectionRow`, `deleteSectionRow`, `restoreSectionRow`, `reorderSectionRow`) de-indented by exactly 4 spaces each (a script asserted every non-blank body line began with 12 spaces first); 113 lines in, 113 out across the four files; **`git show -w bb5d7fd0` prints no diff (0 bytes)**; `restoreContainerRows` and `assignSectionRow` (pre-run) untouched; the package builds |
-| 9 | (f) the `delete_note` / `delete_block` flush TRACE (read-only) — fixed only if the road stays in the wire/door layer; else a ticket-ready summary | NOT-STARTED |
+| 9 | (f) the `delete_note` / `delete_block` flush TRACE (read-only) — fixed only if the road stays in the wire/door layer; else a ticket-ready summary | DONE (this commit) — THE FLUSH TRACE below: the mechanism is REAL (pending keystrokes survive in memory only; a Put back or ⌥⌘Z returns the take without them unless a later in-session flush lands them; ⌘Q loses them) and a second gap rides with it (a wire `delete_note` posts no navigate-away — her pane stays on the tombstoned note); NO MCP write passes any flush (zero in `Sources/VariorumMCP`; no `MCPHostHooks` seam; the bare `OperationsRunner`), so the fix needs a NEW pre-act seam + the app's flush + the navigate-away, and `delete_block`'s half reaches the editor seam with a Mac-only proof → **NOT fixed; ticket-ready summary written, covering `delete_block`, Fable-reviewed per CLAUDE.md** |
 | 10 | finals: the whole headless package green with counts; the path diff; the close | NOT-STARTED |
 
 **No revert is in flight** (piece 5's revert ran and was RESTORED — `git status` clean, `git diff HEAD` empty).
@@ -2026,6 +2026,56 @@ LIVE arrival the undo left". **Ticket-ready summary:** *"MCP redo revives rows s
 (add_comment(s), create_note/import note/save_version, apply_tag, create_section, add_note_to_book's seat) — key each
 redo's revival on the stamp its inverse wrote (the save_lens/create_book precedent); pins: her delete/un-tag/dismissal
 between the act and ⌥⌘Z, then ⇧⌥⌘Z leaves it removed. Pre-existing (13n-b/U3 entries), headless, no editor seam."*
+
+#### THE `delete_note` / `delete_block` FLUSH TRACE (piece 9 — read-only; NOT fixed here)
+
+**Is there a central flush or coordination road the wire `delete_note` skips? — No: NO MCP write coordinates with her
+open editor at all.** `Sources/VariorumMCP` holds zero `flush`; `MCPHostHooks` (the wire's only seams to the app —
+`refusalWords`, `onAsk`, `onWrite`, `now`, `show`, `wingMoveFrozenWords`) has no flush or navigate-away seam; the
+executor is the session's bare `OperationsRunner` (`extension OperationsRunner: MCPWriteExecutor {}` — a serial actor
+that runs the body and nothing else); `MCPDoor.landReceipt` only delivers the status line. Her flush road lives in the
+APP — `AppSession.flushExistingAutosave(forPost:)` (`NoteDeletion.report`, `ShellActions.toggleSeal`, `VersionActs`,
+`BlockHistoryPane.restore`, `CopyForAI`), `runCopying`, `flushEveryOpenPost` — out of the package's reach.
+
+**The mechanism, traced (inputs → wrong state):** (1) she types in a note's take; `AutosaveCoordinator.record` holds the
+whole block text as PENDING for 500 ms (the debounce), the rows still hold the last flush. (2) A client's `delete_note`
+lands as one runner turn: `tombstoneNoteFamily` tombstones the container, and the triggers cascade its placements,
+blocks and every take — the take she is typing into included. (3) The debounce fires: `flushNow` →
+`ops.autosave(variantID, …)` → `editableVariant` → `liveVariant` throws `variantNotFound`; the coordinator's
+keep-pending posture puts the entry BACK (`isDirty` stays true) and `showOperationError` speaks it; with the buffer dirty
+the editor defers every projection (`applyPendingIfClean`'s guard), so her text stays on screen — in MEMORY only. (4) No
+retry runs by itself (only further typing, a commit, teardown or ⌘Q trigger one). (5) Restored by ⌥⌘Z on the client's
+entry (`revertDeletedNote` → `restoreNoteFamily`) or the Trash's Put back (`restoreContainer`), the take comes back with
+its LAST-FLUSHED text — the tombstone never carried her bytes — and they land only if a later flush runs while this
+session's coordinator still holds them; ⌘Q with the note still in the Trash fails the flush again and the bytes die with
+the process; a Put back in a later session cannot return them. Her own door is the contrast and says why
+(`NoteDeletion.report`): FLUSH first, so the tombstone captures what she typed, and post `.variorumNotesDeleted` after, so
+every pane and window leaves the dead note. **The wire does neither — the second gap is the navigate-away:** after a wire
+`delete_note` her pane stays standing on the tombstoned note (her structural-undo door's WA-3,
+`leaveNotesTheActLeftDead`, posts that signal after an UNDO or REDO, never after the wire's forward act).
+**`delete_block` (13n-b) is the same class one level down:** the block and its takes tombstone under her live editor;
+her pending keystrokes in that block fail the same way and wait in memory; the note stays live, so nothing navigates;
+the full-document editor keeps the dead block's range under her caret with every flush refused until ⌥⌘Z (her
+`deleteBlock` entry, relabeled) or the tray revives the block.
+
+**Why not fixed here (the brief's rule):** the fix needs (i) a NEW `MCPHostHooks` seam the wire awaits BEFORE
+`executor.run` for acts that tombstone or rewrite rows her editor may hold (the flush is itself a runner turn, so it
+cannot run inside the act's body), wired in `MCPDoor` to `session.flushExistingAutosave`; (ii) the navigate-away signal
+after a landed `delete_note`; (iii) for `delete_block`, the editor's handling of a block that vanishes under a pending
+buffer — `EditorViewModel`'s projection deferral and the block-range map: **the editor seam**; and its only meaningful
+proof is a Mac run (the coordinator, the runner and the door live in the app). Even with (i), a keystroke typed between
+the flush and the act's runner turn stays pending — closing that window is an editor/coordination design, not a wire
+line. **Ticket-ready summary (Fable-reviewed per CLAUDE.md — the editor seam):** *"MCP writes don't coordinate with
+her open editor: `delete_note` and `delete_block` tombstone takes she may be typing into without flushing her pending
+autosave (her bytes stay in memory only — lost at quit unless the note/block is restored in-session) and `delete_note`
+leaves her pane on the tombstoned note (no `.variorumNotesDeleted`). Her own Delete door flushes first and navigates
+away after. Needs: a pre-act flush seam in `MCPHostHooks` awaited before the executor, the navigate-away after a landed
+note delete, and the editor's handling of a block deleted under a pending buffer. Mac-proof only. Plausibly wider
+(not traced here): every MCP write that lands on rows her open editor holds unflushed — `edit_take`, `restore_commit`,
+`divide_block`, `merge_blocks` — checks its precondition against the STORED text, never her pending buffer, so her
+next flush can write her whole old buffer back over the act."* Options for the product half (hers): (a) flush first
+and navigate away, as her door does; (b) refuse a delete while the app holds unflushed text for that note or block (a
+"the author is typing there" refusal — a product call); (c) both.
 
 **Noticed, outside the MCP family (her own doors' registrations — out of scope by the brief):** her adopt doors
 (`adoptLensPreservingChosen`, `adoptPicksPreservingChosen` → `revertChosenPointers`) have the value class over her own
