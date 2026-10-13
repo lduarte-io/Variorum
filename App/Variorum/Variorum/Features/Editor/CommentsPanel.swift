@@ -27,11 +27,36 @@
 //  Messages are CLASSED at the door they come from (refusal · receipt, the
 //  status seam's law) and rendered in the voice's own registers.
 //
+//  ── VX-179 U1: TRUE DELETE (her R-VX179-3, 2026-10-12) ────────────────────
+//  Her ask: *"why when a comment is deleted you can go into deleted comments
+//  and not even true delete it from there."* Each deleted row now carries
+//  "Delete forever…" beside Restore, confirming every time. It is the Delete
+//  Now road, not a new one: `requestPurge` writes a purge intent, the fold's
+//  fence (`Queries.deletedBlockComments`) drops the row at once on every
+//  device, and the janitor (or, unsynced, the local sweep) takes the bytes.
+//
+//  ── VX-179 U3: THE CARET, AND THE PRISTINE PASS (her items 1 + 4) ────────
+//  *"the comment pane's cursor to start typing in is misaligned"* — the
+//  placeholder was a SwiftUI overlay placed by a guess at `TextEditor`'s
+//  private insets, 8 pt off on macOS 27 (traced and measured — the run
+//  record's U3 section). Every writing area is now `CommentTextArea`, whose
+//  geometry is ours (`CommentsPanelMetrics`) and whose placeholder and mark
+//  are laid out by the same engine as her text. Then the look: one WRITING
+//  column for every word (the composer's, each comment's, each stamp's) and
+//  one CHROME column for edges; the add area reads as a writing box — the
+//  voice's card paper and hairline, the accent while the caret is in it, its
+//  keys and its Add inside it; the deleted fold a quieter twin of the live
+//  list; every word in `CommentsPanelCopy`; every refusal in words
+//  (`CommentsPanelRefusalCopy`). The §2 D contract is untouched: the add
+//  area owns the leftover room, a click anywhere in it lands the caret,
+//  ⌘⏎ files, ⎋ clears, ⏎ is a newline.
+//
 
 import AppKit
 import Foundation
 import GRDB // AsyncValueObservation iteration
 import Observation
+import os
 import SwiftUI
 import VariorumCore
 
@@ -137,7 +162,7 @@ final class CommentsPanelModel {
             }
         } catch is CancellationError {
         } catch {
-            status = .refusal("Comments observation failed: \(error)")
+            status = .refusal(CommentsPanelCopy.observationFailed)
         }
     }
 
@@ -306,6 +331,48 @@ final class CommentsPanelModel {
         }
     }
 
+    // MARK: - Delete forever (VX-179 — her R-VX179-3)
+
+    /// **The deleted comment "Delete forever…" is asking about.** Her ruling
+    /// is the Delete Now posture: a permanent act asks EVERY time (13j round
+    /// 10 — no don't-ask state exists anywhere, and none may be added). So the
+    /// row's door only RAISES this; the act waits for the confirm.
+    private(set) var pendingDeleteForever: String?
+
+    /// The fold row's door: raises the confirm, never acts. A row that is no
+    /// longer in the fold (restored or purged elsewhere since the listing)
+    /// raises nothing — the door asks only about what it shows.
+    func requestDeleteForever(_ id: String) {
+        guard deleted.contains(where: { $0.id == id }) else { return }
+        pendingDeleteForever = id
+    }
+
+    func cancelDeleteForever() {
+        pendingDeleteForever = nil
+    }
+
+    /// **The confirmed act — the Delete Now road for one comment.** The id is
+    /// PASSED IN by the confirm, never read back from `pendingDeleteForever`
+    /// (13l Act 2's rule: SwiftUI writes the alert's `isPresented = false`
+    /// synchronously inside the button's click, before this task resumes —
+    /// four dead confirm doors were found by reading the pending value back).
+    ///
+    /// ONE op, `requestPurge` (the intent write — the fold's fence drops the
+    /// row at once, on every device), through the panel's own `perform` seam
+    /// so a refusal (the seal, above all) is classed and worded here. Then the
+    /// local sweep, exactly as `TrashPurge.confirm` runs it: on an install with
+    /// no sync chain the cleanup IS the app's, so the bytes go now; under a
+    /// configured chain it is a no-op and the janitor takes them at the
+    /// horizon. No undo entry anywhere — the confirm is the guard.
+    func deleteForever(_ id: String) async {
+        pendingDeleteForever = nil
+        let target = SyncPurgeTarget(table: "block_comment", rowID: id)
+        if await perform({ ops in _ = try ops.requestPurge([target]) }) {
+            status = .receipt(CommentsPanelCopy.deletedForever)
+            await session.sweepLocalPurge()
+        }
+    }
+
     /// Runs one operation and CLASSES what came back. Returns whether it
     /// landed, so the caller can speak its own receipt (a receipt says what
     /// happened, which only the door knows).
@@ -316,18 +383,11 @@ final class CommentsPanelModel {
         do {
             try await session.runner.run(body)
             return true
-        } catch let error as OperationError {
-            switch error {
-            case .lockedPost:
-                status = .refusal(CommentsPanelCopy.sealed)
-            case .invalidCommentText:
-                status = .refusal(CommentsPanelCopy.needsText)
-            default:
-                status = .refusal("Refused: \(error)")
-            }
-            return false
         } catch {
-            status = .refusal(String(describing: error))
+            // Every refusal in words (VX-179 U3, O-3): the seal and the empty
+            // comment exactly as before, the comment races in the panel's
+            // own words, everything else in the app's ONE vocabulary.
+            status = .refusal(CommentsPanelRefusalCopy.message(for: error))
             return false
         }
     }
@@ -341,13 +401,98 @@ enum CommentsPanelCopy {
     /// Emptying a comment is not how you remove one: the door that removes
     /// it is named, and it is one click away on the same row.
     static let emptied = "A comment needs some text — Delete removes it."
-    static let deleted = "Comment deleted — it is under \"deleted\" below, restorable."
+    /// Names the fold by its own word (VX-179 U3: the toggle reads "Deleted").
+    static let deleted = "Comment deleted — it's under Deleted below, restorable."
     static let restored = "Comment restored."
+    /// VX-179 (R-VX179-3) — "Delete forever…" beside Restore in the deleted
+    /// fold. Sentence case throughout (her no-shouty-caps rule); the ellipsis
+    /// says the door asks before it acts.
+    static let deleteForeverVerb = "Delete forever…"
+    static let deleteForeverTitle = "Delete this comment forever?"
+    /// The confirm's body names the two facts that make it permanent: the
+    /// purge travels (the intent syncs — every device drops it), and no door
+    /// brings it back. "There's no putting it back" is the Trash's own phrase
+    /// (`RecoveryCopy.deleteNowConfirm`), so the app says permanence one way.
+    static let deleteForeverMessage =
+        "It leaves every device, and there's no putting it back."
+    static let deleteForeverConfirm = "Delete forever"
+    static let deletedForever = "Comment deleted forever."
+    static let deleteForeverHelp = "Removes this comment from every device. Asks first."
     static let addPlaceholder = "Write a comment…"
-    static let unsavedMark = "unsaved · ⌘⏎"
-    /// The foot's standing line — it teaches all three keys at once and
+    /// Sentence case since VX-179 U3 (her no-shouty-caps rule, read both
+    /// ways: a sentence starts with its capital). The Terminal voice
+    /// lowercases it through `chromeLabel`, exactly as before.
+    static let unsavedMark = "Unsaved · ⌘⏎"
+    /// The composer's standing line — it teaches all three keys at once and
     /// never changes, so nothing under her hands moves as she types.
     static let keysHint = "⏎ new line · ⌘⏎ saves · ⎋ undoes"
+
+    // VX-179 U3 — every word the panel shows lives here (the pass's rule:
+    // one place a pin reads and the walk sees; chrome goes through the
+    // voice's `chromeLabel` at the view).
+    static let title = "Comments"
+    static let close = "Close"
+    static let save = "Save"
+    static let revert = "Revert"
+    static let delete = "Delete"
+    static let restore = "Restore"
+    static let add = "Add"
+    static let cancel = "Cancel"
+    /// The word before a deleted comment's date ("Deleted Oct 12, …"), and
+    /// the fold's own noun.
+    static let deletedWord = "Deleted"
+
+    /// The deleted fold's toggle: its state mark, its noun, its count.
+    static func deletedFold(count: Int, open: Bool) -> String {
+        "\(open ? "▾" : "▸") \(deletedWord) (\(count))"
+    }
+
+    /// A comment's stamp — the one date format both lists wear.
+    static func stamp(_ date: Date) -> String {
+        date.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    /// The live listing could not be read (the observation threw). Said as
+    /// what happened and what to do — never the raw error (O-3's class).
+    static let observationFailed =
+        "This block's comments couldn't be read just now — close this and open it again."
+}
+
+/// **The panel's refusals, in words** (VX-179 U3 — U1's observation O-3: the
+/// `perform` door's fallback printed `Refused: \(error)`, a raw enum with a
+/// UUID in it). `TrayRefusalCopy`'s shape: the surface speaks the cases only
+/// it can word well, then hands everything else to the app's ONE operations
+/// vocabulary (`OpsRefusalCopy.message(for:)`).
+///
+/// The comment cases are the panel's own because nothing else words them:
+/// `commentNotFound` and `commentNotDeleted` are mapped NOWHERE in the
+/// shared table (whose own fallback is still the raw dump), and the table's
+/// `purgeTargetNotDeleted` sentence speaks of the Trash — wrong here, where
+/// it means a comment restored (elsewhere, or by a second press) between the
+/// listing and "Delete forever". Each is a race the panel can meet; each
+/// says nothing was lost.
+enum CommentsPanelRefusalCopy {
+    static let commentGone =
+        "That comment isn't here any more — it may have just been changed on another device."
+    static let commentAlreadyBack = "That comment is already back — it's in the list above."
+    static let nothingToDeleteForever =
+        "That comment was restored, so there's nothing to delete forever — it's in the list above."
+    static let blockGone = "This block is gone, and its comments went with it."
+
+    static func message(for error: Error) -> String {
+        if let error = error as? OperationError {
+            switch error {
+            case .lockedPost: return CommentsPanelCopy.sealed
+            case .invalidCommentText: return CommentsPanelCopy.needsText
+            case .commentNotFound: return commentGone
+            case .commentNotDeleted: return commentAlreadyBack
+            case .purgeTargetNotDeleted: return nothingToDeleteForever
+            case .blockNotFound: return blockGone
+            default: break
+            }
+        }
+        return OpsRefusalCopy.message(for: error)
+    }
 }
 
 // MARK: - Where the caret is (13u3 UNIT A2)
@@ -359,6 +504,21 @@ enum CommentsPanelCopy {
 nonisolated enum CommentPanelFocus: Hashable {
     case add
     case comment(String)
+
+    /// **What one area's first-responder report does to the panel's focus**
+    /// (VX-179 U3 — the reports replaced `@FocusState`). The caret ARRIVING
+    /// in an area makes that area the focus; the caret LEAVING an area clears
+    /// the focus only if that area still held it — so a click from comment
+    /// A to comment B, which AppKit reports as "A left, B arrived", reads as
+    /// A → nil → B, and A's departure can never clear B's arrival whatever
+    /// order the two reports meet. `.onChange(of: focus)` then saves A
+    /// exactly once, as `@FocusState`'s A → B did.
+    static func after(
+        report area: CommentPanelFocus, inArea: Bool, current: CommentPanelFocus?
+    ) -> CommentPanelFocus? {
+        if inArea { return area }
+        return current == area ? nil : current
+    }
 }
 
 // MARK: - The keys (13u3 UNIT A2)
@@ -398,6 +558,43 @@ nonisolated enum CommentPanelKeys {
             return nil
         }
     }
+
+    /// **Is the panel's window where this key will be DELIVERED?** (VX-179 U3
+    /// FIX LEG 3 — superseding fix leg 2's `claims`, which read the event's
+    /// addressed window.) Fix leg 2 measured key ROUTING offscreen, where the
+    /// app is never active and has no key window — and that turned out to be
+    /// an artefact: there, a key addressed anywhere lands in the popover. The
+    /// live app and the runner route by the KEY window, so the honest owner
+    /// test asks the key window: the panel's own window being key (a sheet; a
+    /// popover made key), or the panel's window being a visible CHILD of the
+    /// key window (a transient popover receiving its key parent's keys). A
+    /// panel whose window is HIDDEN never owns a key — that is every stale
+    /// panel a dismissed popover leaves alive (measured: SwiftUI never tears
+    /// popover content down, and each opening makes a new window). With no
+    /// key window at all (an inactive app — only offscreen) the event's own
+    /// window, or its parent, stands in.
+    ///
+    /// Pure over identities so the table pins without real windows.
+    nonisolated static func delivers(
+        panel: ObjectIdentifier, panelParent: ObjectIdentifier?, panelVisible: Bool,
+        keyWindow: ObjectIdentifier?, eventWindow: ObjectIdentifier?
+    ) -> Bool {
+        guard panelVisible else { return false }
+        guard let delivery = keyWindow ?? eventWindow else { return false }
+        return delivery == panel || (panelParent != nil && delivery == panelParent)
+    }
+
+    /// The same rule over the live windows.
+    @MainActor
+    static func delivers(
+        toPanelIn window: NSWindow, keyWindow: NSWindow?, eventWindow: NSWindow?
+    ) -> Bool {
+        delivers(
+            panel: ObjectIdentifier(window), panelParent: window.parent.map(ObjectIdentifier.init),
+            panelVisible: window.isVisible,
+            keyWindow: keyWindow.map(ObjectIdentifier.init),
+            eventWindow: eventWindow.map(ObjectIdentifier.init))
+    }
 }
 
 /// The door: a zero-size view owning a local `keyDown` monitor for the window
@@ -409,10 +606,10 @@ nonisolated enum CommentPanelKeys {
 /// the panel were not there. The monitor sees the event first, asks the pure
 /// rule, and consumes only what it actually handled.
 struct CommentPanelKeyMonitor: NSViewRepresentable {
-    /// Returns whether the act was handled — an unhandled key is passed on,
-    /// so ⎋ with nothing to undo still closes the sheet or popover by the
-    /// host's own standard road.
-    let onAct: (CommentPanelKeys.Act) -> Bool
+    /// Returns whether the act was handled — an unhandled key is passed on.
+    /// The second argument is the area that HOLDS the caret (FIX LEG 3: read
+    /// from the first responder when the key arrives).
+    let onAct: (CommentPanelKeys.Act, CommentPanelFocus) -> Bool
 
     func makeNSView(context: Context) -> MonitorView {
         let view = MonitorView()
@@ -425,18 +622,54 @@ struct CommentPanelKeyMonitor: NSViewRepresentable {
     }
 
     final class MonitorView: NSView {
-        var onAct: ((CommentPanelKeys.Act) -> Bool)?
+        var onAct: ((CommentPanelKeys.Act, CommentPanelFocus) -> Bool)?
         private var monitor: Any?
+        private var hostClosing: NSObjectProtocol?
+
+        #if DEBUG
+        /// FIX LEG 3: one line per ⌘⏎/⎋ this monitor sees — the live key road,
+        /// readable with `log show --predicate 'category == "comment-keys"'`.
+        private static let trace = Logger(subsystem: "io.lduarte.Variorum", category: "comment-keys")
+        /// How many panel key monitors are installed right now (a pin reads
+        /// it: a dismissed popover's panel must stop listening).
+        static var installedMonitors = 0
+        #endif
 
         override var isFlipped: Bool { true }
 
-        override func viewDidMoveToWindow() {
-            super.viewDidMoveToWindow()
+        private func release() {
             if let monitor {
                 NSEvent.removeMonitor(monitor)
                 self.monitor = nil
+                #if DEBUG
+                Self.installedMonitors -= 1
+                #endif
             }
+            if let hostClosing {
+                NotificationCenter.default.removeObserver(hostClosing)
+                self.hostClosing = nil
+            }
+        }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            release()
             guard window != nil else { return }
+            // **A DISMISSED POPOVER RELEASES THE KEYBOARD** (FIX LEG 3 —
+            // measured: a dismissed popover's panel is never torn down, so
+            // its monitor stayed installed for the app's life, one more per
+            // opening). Its host's closing removes it.
+            hostClosing = NotificationCenter.default.addObserver(
+                forName: NSPopover.willCloseNotification, object: nil, queue: .main
+            ) { [weak self] note in
+                let closing = note.object as? NSPopover
+                MainActor.assumeIsolated {
+                    guard let self, let window = self.window,
+                          CommentPanelHostWatcher.isHost(closing, ofPanelIn: window)
+                    else { return }
+                    self.release()
+                }
+            }
             // **THE PANEL ASKS FOR THE KEYBOARD** (the walk's fourth find).
             // The panel opens focused on the add area, so a caret blinks
             // there — but a sheet or popover that comes up NON-KEY (measured:
@@ -449,13 +682,33 @@ struct CommentPanelKeyMonitor: NSViewRepresentable {
                 window.makeKey()
             }
             monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-                guard let self, let window = self.window, event.window === window else {
-                    return event
-                }
-                guard let act = CommentPanelKeys.act(
-                    keyCode: event.keyCode, modifiers: event.modifierFlags) else { return event }
-                return (self.onAct?(act) ?? false) ? nil : event
+                guard let self, let window = self.window,
+                      let act = CommentPanelKeys.act(
+                          keyCode: event.keyCode, modifiers: event.modifierFlags)
+                else { return event }
+                // Whose key (FIX LEG 3): this panel's iff its window is where
+                // the key will be DELIVERED and the caret is in one of its
+                // areas — the area read from the first responder, now.
+                let owns = CommentPanelKeys.delivers(
+                    toPanelIn: window, keyWindow: NSApp.keyWindow, eventWindow: event.window)
+                let area = (window.firstResponder as? CommentNSTextView)?.role
+                var handled = false
+                if owns, let area { handled = self.onAct?(act, area) ?? false }
+                #if DEBUG
+                Self.trace.notice("""
+                    \(String(describing: act), privacy: .public) panel=\(window.windowNumber) \
+                    visible=\(window.isVisible) key=\(NSApp.keyWindow?.windowNumber ?? -1) \
+                    event=\(event.window?.windowNumber ?? -1) \
+                    parent=\(window.parent?.windowNumber ?? -1) \
+                    area=\(String(describing: area), privacy: .public) owns=\(owns) \
+                    handled=\(handled)
+                    """)
+                #endif
+                return handled ? nil : event
             }
+            #if DEBUG
+            Self.installedMonitors += 1
+            #endif
         }
         // (No `deinit`: the view leaves its window before it dies and
         // `viewDidMoveToWindow` removes the monitor then — the
@@ -491,7 +744,20 @@ struct CommentsPanel: View {
     /// The open deleted fold's measured height — it takes what it holds, not
     /// the whole cap.
     @State private var deletedHeight: CGFloat = 0
-    @FocusState private var focus: CommentPanelFocus?
+    /// **Where the caret is** — fed by the writing areas' own first-responder
+    /// reports (VX-179 U3: the areas are AppKit views, whose first responder
+    /// is the one truth; `@FocusState` was the `TextEditor`'s road). Read
+    /// exactly as before: ⌘⏎/⎋ route by it, and leaving an edited comment
+    /// saves it (`.onChange(of: focus)` below).
+    @State private var focus: CommentPanelFocus?
+    /// The add area's counted focus request — raised once when the panel
+    /// opens (it opens ready to write).
+    @State private var addFocusRequest = 0
+    /// The stamp line's MEASURED height (FIX LEG 2 — F-W-3): every row's
+    /// stamp line is one line of the same chrome, so one number serves all;
+    /// a row being edited reveals itself plus this, its gap and its own
+    /// bottom air, so its dirty face never sits below the list's edge.
+    @State private var stampLineHeight: CGFloat = 0
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -507,19 +773,7 @@ struct CommentsPanel: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
-    /// The panel's taste numbers, in one place. **PROVISIONAL** — chosen
-    /// against the real surfaces on the walk, in both voices.
-    private enum Metrics {
-        /// The add area never shrinks below this, however many comments there
-        /// are: a writing box you cannot write two lines in is the complaint
-        /// this unit answers.
-        static let addFloor: CGFloat = 132
-        /// A comment's own area, at one line.
-        static let rowMinHeight: CGFloat = 19
-        static let rowAir: CGFloat = 7
-        static let inset: CGFloat = 12
-        static let deletedListMaxHeight: CGFloat = 132
-    }
+    private typealias Metrics = CommentsPanelMetrics
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -527,7 +781,7 @@ struct CommentsPanel: View {
             if let status = model.status { statusLine(status) }
             hairline
             writingSurface
-            footer
+            deletedFold
         }
         // The shipped panel was 440 × 320 — a list with a one-line field. A
         // writing surface needs room to be one: this is the size at which
@@ -535,7 +789,27 @@ struct CommentsPanel: View {
         // **PROVISIONAL** (a taste number, chosen against the surface).
         .frame(minWidth: 460, minHeight: 440)
         .background(tokens.surface)
-        .background(CommentPanelKeyMonitor(onAct: handle))
+        .background(CommentPanelKeyMonitor(onAct: { handle($0, in: $1) }))
+        // VX-179 (R-VX179-3): "Delete forever…" asks EVERY time — the Delete
+        // Now posture. The pending id rides into the action through
+        // `presenting:` and `deleteForever(_:)` takes it as a parameter (13l
+        // Act 2's rule — never read back after SwiftUI's synchronous
+        // dismissal write). The `BlockHistoryPane` alert shape: a title that
+        // asks, a body that says why it is permanent.
+        .alert(
+            CommentsPanelCopy.deleteForeverTitle,
+            isPresented: Binding(
+                get: { model.pendingDeleteForever != nil },
+                set: { if !$0 { model.cancelDeleteForever() } }),
+            presenting: model.pendingDeleteForever
+        ) { id in
+            Button(CommentsPanelCopy.deleteForeverConfirm, role: .destructive) {
+                Task { await model.deleteForever(id) }
+            }
+            Button(CommentsPanelCopy.cancel, role: .cancel) { model.cancelDeleteForever() }
+        } message: { _ in
+            Text(CommentsPanelCopy.deleteForeverMessage)
+        }
         .task {
             // The park restore runs HERE, not in the model's init (ladder
             // round 3, F1): `.task` runs once per INSTALLED presentation,
@@ -543,8 +817,10 @@ struct CommentsPanel: View {
             // view value the presenting body's re-evaluations construct.
             model.restoreParkedDraft()
             // The panel opens ready to write — the add area is the act it is
-            // usually opened for, and ⎋ (nothing typed) still closes it.
-            focus = .add
+            // usually opened for, and ⎋ (nothing typed) still closes it. The
+            // area serves the request now, or the moment it has a window; its
+            // own report then sets `focus` to `.add`.
+            addFocusRequest += 1
             await model.start()
         }
         .onChange(of: focus) { old, _ in
@@ -557,36 +833,56 @@ struct CommentsPanel: View {
             }
         }
         .onDisappear {
-            // The panel can also leave without a focus change — a popover
-            // dismissed by a click outside it. Every dirty row is committed
-            // the same way; a commit that would write nothing writes nothing,
-            // so this is idempotent beside `close()`.
-            let model = model
-            for id in model.dirtyCommentIDs {
-                Task { await model.commitEdit(id) }
-            }
+            // The panel can also leave without a focus change. Every dirty
+            // row is committed the same way; a commit that would write
+            // nothing writes nothing, so this is idempotent beside `close()`
+            // and the popover watcher below.
+            commitDirtyEdits()
+        }
+        // **A POPOVER HOST'S CLOSING SAVES** (VX-179 U3 FIX LEG 2 — ladder
+        // R1-2, AGREED and measured offscreen): a dismissed popover is only
+        // ordered out — SwiftUI never tears its content down, so neither
+        // `.onDisappear` above nor the caret's departure report ever fires,
+        // and a dirty in-place edit died with this model (pre-existing since
+        // 13u3 A2). The popover's own `willClose` is the one moment every
+        // dismissal road shares (a click away, ⎋, the binding), so it commits
+        // here — the same body `.onDisappear` was always meant to run.
+        .background(CommentPanelHostWatcher(onHostClosing: commitDirtyEdits))
+    }
+
+    /// Commits every comment with unsaved changes — the panel's ONE leaving
+    /// body (Close, `.onDisappear`, a popover host's closing). The model is
+    /// captured, so a commit lands even after the view is gone.
+    private func commitDirtyEdits() {
+        let model = model
+        for id in model.dirtyCommentIDs {
+            Task { await model.commitEdit(id) }
         }
     }
 
     // MARK: Chrome
 
+    /// The title, the count (only when there is something to count — a "0"
+    /// beside an empty panel says nothing the empty panel does not), Close.
     private var header: some View {
-        HStack(spacing: 8) {
-            Text(tokens.chromeLabel("Comments"))
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(tokens.chromeLabel(CommentsPanelCopy.title))
                 .font(tokens.heading)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
-            Text("\(model.comments.count)")
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
-                .lineLimit(1)
+            if !model.comments.isEmpty {
+                Text("\(model.comments.count)")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+            }
             Spacer(minLength: 8)
-            Button(tokens.chromeLabel("Close")) { close() }
+            Button(tokens.chromeLabel(CommentsPanelCopy.close)) { close() }
                 .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
         }
         .padding(.horizontal, Metrics.inset)
-        .padding(.top, Metrics.inset)
-        .padding(.bottom, 8)
+        .padding(.top, Metrics.headerTop)
+        .padding(.bottom, Metrics.headerBottom)
     }
 
     /// The panel's ONE message slot, in the class its door gave it: a refusal
@@ -596,11 +892,17 @@ struct CommentsPanel: View {
             tokens: tokens, text: status.text,
             ink: status.isRefusal ? tokens.alarm : tokens.muted, lines: 3)
             .padding(.horizontal, Metrics.inset)
-            .padding(.bottom, 8)
+            .padding(.bottom, Metrics.headerBottom)
     }
 
     private var hairline: some View {
         Rectangle().fill(tokens.line).frame(height: 1)
+    }
+
+    /// Between two comments: the same hairline, held in from the panel's
+    /// edges — rows of one list, not bands of the panel.
+    private var rowHairline: some View {
+        hairline.padding(.horizontal, Metrics.inset)
     }
 
     // MARK: The writing surface
@@ -613,11 +915,11 @@ struct CommentsPanel: View {
     /// separate boxes rather than one long scroll: the walk built three
     /// comments in the shipped 320 pt panel and the one-scroll version put
     /// the add area entirely below the fold — a writing surface you have to
-    /// go looking for is the complaint this unit answers, not an answer to
+    /// go looking for is the complaint 13u3 A2 answered, not an answer to
     /// it.
     private var writingSurface: some View {
         GeometryReader { geo in
-            let room = max(0, geo.size.height - 1)  // the hairline between them
+            let room = max(0, geo.size.height)
             let cap = max(0, room - Metrics.addFloor)
             // Before the first measurement the list takes its whole cap —
             // otherwise nothing mounts, nothing measures, and the panel
@@ -629,9 +931,8 @@ struct CommentsPanel: View {
                 if listHeight > 0 {
                     commentsList
                         .frame(height: listHeight)
-                    hairline
                 }
-                addArea(height: max(Metrics.addFloor, room - listHeight))
+                composer(height: max(Metrics.addFloor, room - listHeight))
             }
         }
     }
@@ -643,9 +944,10 @@ struct CommentsPanel: View {
                     ForEach(Array(model.comments.enumerated()), id: \.element.id) { pair in
                         commentRow(pair.element)
                             .id(pair.element.id)
-                        if pair.offset < model.comments.count - 1 { hairline }
+                        if pair.offset < model.comments.count - 1 { rowHairline }
                     }
                 }
+                .padding(.top, Metrics.listTop)
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
                     commentsHeight = $0
                 }
@@ -662,46 +964,89 @@ struct CommentsPanel: View {
         }
     }
 
-    /// The add area is a FIXED box the size of the room left over, and the
-    /// only text area in the panel that keeps its own scrolling: a draft
-    /// longer than the room has to follow the caret, which is exactly what
-    /// the text view does by itself and what no outer scroll view would do.
-    private func addArea(height: CGFloat) -> some View {
-        PanelTextArea(
-            text: $model.addDraft, font: tokens.body, ink: tokens.ink,
-            placeholder: tokens.chromeLabel(CommentsPanelCopy.addPlaceholder),
-            placeholderInk: tokens.faint, minHeight: height - 2 * Metrics.rowAir,
-            growsWithText: false)
-            .focused($focus, equals: .add)
-            .padding(.horizontal, Metrics.inset - 5)  // the editor's own 5 pt
-            .padding(.vertical, Metrics.rowAir)
+    /// **THE COMPOSER — the add area, as a place to write** (VX-179 U3, her
+    /// item 4: *"make sure that the comment area is actually pristine"*; the
+    /// screenshot's empty panel read as a void with a word floating in it).
+    ///
+    /// It is still the add area of §2 D, whole: it owns every point the
+    /// comments leave (the card IS that room, at the floor or more), a click
+    /// anywhere in it lands the caret (the text fills the card; its padding
+    /// and its foot ask for the caret too), ⌘⏎ or Add files, ⎋ clears, ⏎ is
+    /// a newline. What changed is only how it reads: the voice's own card
+    /// paper and hairline (`VoicedField`'s idiom — the app's writing box, no
+    /// bezel), the hairline taking the accent while the caret is in it, and
+    /// the keys and the Add door living IN the box they act on rather than in
+    /// a bar below the panel.
+    private func composer(height: CGFloat) -> some View {
+        let live = focus == .add
+        let shape = RoundedRectangle(cornerRadius: Metrics.composerCorner)
+        return VStack(alignment: .leading, spacing: Metrics.composerFootGap) {
+            CommentTextArea(
+                text: $model.addDraft,
+                style: CommentTextStyle(tokens: tokens, ink: tokens.ink),
+                placeholder: tokens.chromeLabel(CommentsPanelCopy.addPlaceholder),
+                growsWithText: false,
+                role: .add,
+                focusRequest: addFocusRequest,
+                onFocusChange: { report(.add, inArea: $0) })
+            HStack(alignment: .center, spacing: 10) {
+                Text(tokens.chromeLabel(CommentsPanelCopy.keysHint))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                    // The words are a hint, not a door: a click on them is a
+                    // click on the composer (the background's caret ask).
+                    .allowsHitTesting(false)
+                Spacer(minLength: 8)
+                Button(tokens.chromeLabel(CommentsPanelCopy.add)) {
+                    Task { await model.fileAddDraft() }
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                .disabled(!model.isAddDraftFilable)
+            }
+        }
+        .padding(.horizontal, Metrics.composerPadding)
+        .padding(.top, Metrics.composerPadding)
+        .padding(.bottom, Metrics.composerFootPadding)
+        .frame(height: max(0, height - Metrics.composerMargin * 2))
+        .background {
+            // Click-anywhere, for the points the text view does not cover —
+            // the card's padding and its foot. (The text's own points are
+            // AppKit's: a click there places the caret where she clicked.)
+            shape.fill(tokens.card)
+                .onTapGesture { addFocusRequest += 1 }
+        }
+        .overlay(
+            shape.stroke(
+                live ? tokens.accent.opacity(Metrics.composerLiveStrokeOpacity) : tokens.line,
+                lineWidth: 1)
+                .allowsHitTesting(false))
+        .padding(.horizontal, Metrics.inset)
+        .padding(.vertical, Metrics.composerMargin)
     }
 
     @ViewBuilder
     private func commentRow(_ comment: BlockComment) -> some View {
         let dirty = model.isDirty(comment.id)
-        VStack(alignment: .leading, spacing: 1) {
-            HStack(alignment: .top, spacing: 0) {
-                // The voice's own comment mark (R1's idiom slot — "// " in
-                // Terminal, nothing in Study). It is a LABEL beside the area,
-                // never part of the text: the shipped row concatenated it
-                // into the string it rendered, which an editable area cannot
-                // do without writing the idiom into her prose.
-                if !tokens.commentPrefix.isEmpty {
-                    Text(tokens.commentPrefix)
-                        .font(tokens.body)
-                        .foregroundStyle(tokens.commentInk.opacity(0.75))
-                        .padding(.top, PanelTextArea.topInset)
-                }
-                PanelTextArea(
-                    text: binding(for: comment), font: tokens.body,
-                    ink: tokens.commentInk, placeholder: nil,
-                    placeholderInk: tokens.faint, minHeight: Metrics.rowMinHeight)
-                    .focused($focus, equals: .comment(comment.id))
-            }
+        VStack(alignment: .leading, spacing: Metrics.stampGap) {
+            // The voice's own comment mark (R1's idiom slot — "// " in
+            // Terminal, nothing in Study) is the AREA's: a twin beside the
+            // text, on the text's own first baseline (VX-179 U3). Never part
+            // of the text — an editable area cannot hold the idiom without
+            // writing it into her prose.
+            CommentTextArea(
+                text: binding(for: comment),
+                style: CommentTextStyle(tokens: tokens, ink: tokens.commentInk),
+                mark: tokens.commentPrefix,
+                revealBelow: Metrics.stampGap + stampLineHeight + Metrics.rowAir,
+                role: .comment(comment.id),
+                onFocusChange: { report(.comment(comment.id), inArea: $0) })
             stampLine(comment, dirty: dirty)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                    if stampLineHeight != height { stampLineHeight = height }
+                }
         }
-        .padding(.horizontal, Metrics.inset - 5)
+        .padding(.horizontal, Metrics.writingInset)
         .padding(.vertical, Metrics.rowAir)
     }
 
@@ -709,7 +1054,7 @@ struct CommentsPanel: View {
     /// unsaved changes, and its doors.
     private func stampLine(_ comment: BlockComment, dirty: Bool) -> some View {
         HStack(spacing: 6) {
-            Text(comment.createdAt.formatted(date: .abbreviated, time: .shortened))
+            Text(CommentsPanelCopy.stamp(comment.createdAt))
                 .font(tokens.small)
                 .foregroundStyle(tokens.faint)
                 .lineLimit(1)
@@ -721,77 +1066,63 @@ struct CommentsPanel: View {
             }
             Spacer(minLength: 8)
             if dirty {
-                Button(tokens.chromeLabel("Save")) {
+                Button(tokens.chromeLabel(CommentsPanelCopy.save)) {
                     Task { await model.commitEdit(comment.id) }
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                Button(tokens.chromeLabel("Revert")) { model.revertEdit(comment.id) }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                Button(tokens.chromeLabel(CommentsPanelCopy.revert)) {
+                    model.revertEdit(comment.id)
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
             }
-            Button(tokens.chromeLabel("Delete")) {
+            Button(tokens.chromeLabel(CommentsPanelCopy.delete)) {
                 Task { await model.delete(comment.id) }
             }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
         }
-        .padding(.leading, 5)
+        // The stamp starts where the row's writing starts — the area's own
+        // first-line origin (its mark's column in Terminal, its text in Study).
+        .padding(.leading, Metrics.firstLineOrigin.x)
     }
 
-    // MARK: The foot — the keys, the deleted fold, the add door
+    // MARK: The foot — the deleted fold
 
-    private var footer: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            if deletedShown && !model.deleted.isEmpty {
+    /// **The deleted fold, at the foot** (§2 D: "never skimpy"; outside the
+    /// writing surface, so the add area's space is never theirs). Only
+    /// present when something is deleted — an empty panel has no foot.
+    ///
+    /// ONE visual language with the live list (VX-179 U3): a deleted row is
+    /// a live row in a quieter register — its words struck through and
+    /// muted, and under them the same stamp line (when it was deleted, then
+    /// its doors at the trailing edge: Restore, the door you probably want,
+    /// and U1's "Delete forever…", present but never calling).
+    @ViewBuilder
+    private var deletedFold: some View {
+        if !model.deleted.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
                 hairline
-                deletedList
-            }
-            hairline
-            HStack(spacing: 10) {
-                Text(tokens.chromeLabel(CommentsPanelCopy.keysHint))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .lineLimit(1)
-                Spacer(minLength: 8)
-                if !model.deleted.isEmpty {
-                    Button(tokens.chromeLabel(
-                        "\(deletedShown ? "▾" : "▸") deleted (\(model.deleted.count))")) {
-                        deletedShown.toggle()
-                    }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                Button(tokens.chromeLabel(CommentsPanelCopy.deletedFold(
+                    count: model.deleted.count, open: deletedShown))) {
+                    deletedShown.toggle()
                 }
-                Button(tokens.chromeLabel("Add")) { Task { await model.fileAddDraft() } }
-                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
-                    .disabled(!model.isAddDraftFilable)
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                // The word, not the button's hover wash, lines up with the
+                // rows' writing: the vocabulary's own label inset, by name.
+                .padding(.horizontal, Metrics.inset - VoicedButtonStyle.labelInset)
+                .padding(.vertical, Metrics.foldToggleAir)
+                if deletedShown { deletedList }
             }
-            .padding(.horizontal, Metrics.inset)
-            .padding(.vertical, 8)
         }
     }
 
-    /// Deleted comments stay VISIBLE and RESURRECTABLE (the never-skimpy
-    /// rule, her 2026-07-17 word) — and they live at the foot, outside the
-    /// writing surface, so the add area's space is never theirs.
     private var deletedList: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(model.deleted, id: \.id) { comment in
-                    HStack(alignment: .top, spacing: 8) {
-                        Text(comment.text)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .strikethrough()
-                            .lineLimit(3)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Spacer(minLength: 8)
-                        Button(tokens.chromeLabel("Restore")) {
-                            Task { await model.restore(comment.id) }
-                        }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                    }
-                    .padding(.vertical, 4)
+                ForEach(Array(model.deleted.enumerated()), id: \.element.id) { pair in
+                    deletedRow(pair.element)
+                    if pair.offset < model.deleted.count - 1 { rowHairline }
                 }
             }
-            .padding(.horizontal, Metrics.inset)
-            .padding(.vertical, 4)
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
                 deletedHeight = $0
             }
@@ -803,7 +1134,50 @@ struct CommentsPanel: View {
         .frame(height: min(max(deletedHeight, 1), Metrics.deletedListMaxHeight))
     }
 
+    private func deletedRow(_ comment: BlockComment) -> some View {
+        VStack(alignment: .leading, spacing: Metrics.stampGap) {
+            Text(comment.text)
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .strikethrough(color: tokens.faint)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 6) {
+                Text(tokens.chromeLabel(CommentsPanelCopy.deletedWord) + " "
+                    + CommentsPanelCopy.stamp(comment.deletedAt ?? comment.updatedAt))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                Spacer(minLength: 8)
+                Button(tokens.chromeLabel(CommentsPanelCopy.restore)) {
+                    Task { await model.restore(comment.id) }
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                // VX-179 (R-VX179-3): the fold is a TRASH SURFACE — every row
+                // in it is already deleted — so the purge door may live here
+                // and nowhere in the writing. Quiet ink: present, never
+                // calling; the confirm is where the destructive register
+                // speaks.
+                Button(tokens.chromeLabel(CommentsPanelCopy.deleteForeverVerb)) {
+                    model.requestDeleteForever(comment.id)
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help(CommentsPanelCopy.deleteForeverHelp)
+            }
+        }
+        .padding(.leading, Metrics.firstLineOrigin.x)
+        .padding(.horizontal, Metrics.writingInset)
+        .padding(.vertical, Metrics.rowAir)
+    }
+
     // MARK: Doors
+
+    /// One writing area says the caret arrived or left (`CommentPanelFocus.
+    /// after(report:inArea:current:)` — the rule, pinned).
+    private func report(_ area: CommentPanelFocus, inArea: Bool) {
+        let next = CommentPanelFocus.after(report: area, inArea: inArea, current: focus)
+        if next != focus { focus = next }
+    }
 
     private func binding(for comment: BlockComment) -> Binding<String> {
         Binding(
@@ -813,127 +1187,184 @@ struct CommentsPanel: View {
 
     /// ⌘⏎ and ⎋, routed by what is focused. Returns whether the panel handled
     /// the key — an unhandled ⎋ falls through to the host's own close.
-    private func handle(_ act: CommentPanelKeys.Act) -> Bool {
+    /// ⌘⏎ and ⎋ for the area that holds the caret (FIX LEG 3: the monitor
+    /// hands the area in, read from the first responder). Returns whether the
+    /// panel handled the key — and now it always does: the close rung is the
+    /// panel's own act.
+    private func handle(_ act: CommentPanelKeys.Act, in area: CommentPanelFocus) -> Bool {
         switch act {
         case .commit:
-            switch focus {
+            switch area {
             case .add:
                 Task { await model.fileAddDraft() }
-                return true
             case .comment(let id):
                 Task { await model.commitEdit(id) }
-                return true
-            case nil:
-                return false
             }
+            return true
         case .escape:
-            switch CommentComposition.escape(writing: model.writing(focus)) {
+            switch CommentComposition.escape(writing: model.writing(area)) {
             case .clearDraft:
                 model.clearAddDraft()
-                return true
             case .revert(let id):
                 model.revertEdit(id)
-                return true
             case .close:
-                // Nothing is being written: let the sheet or the popover
-                // close itself the way every other one does.
-                return false
+                // **Nothing is being written: the panel closes itself** (FIX
+                // LEG 3). It used to pass ⎋ on so the host would close "the
+                // way every other one does" — but where a passed ⎋ lands
+                // depends on the host's key routing: in the Takes host it can
+                // reach the board's own `.onExitCommand` and nothing closes
+                // (the walk's F-W-4-R). Closing here is the same act in every
+                // host, and `close()` commits any dirty row first.
+                close()
             }
+            return true
         }
     }
 
     private func close() {
-        let model = model
-        for id in model.dirtyCommentIDs {
-            Task { await model.commitEdit(id) }
-        }
+        commitDirtyEdits()
         dismiss()
     }
 }
 
-// MARK: - The panel's one writing control
+/// **The panel's host-closing watcher** (VX-179 U3 FIX LEG 2 — R1-2). A
+/// zero-size view that knows its window and hears `NSPopover`'s
+/// `willClose` for the popover whose content lives in that window — and only
+/// that one (the app shows other popovers). A sheet host never posts it, so
+/// in a sheet this view does nothing; Close and `.onDisappear` cover sheets.
+struct CommentPanelHostWatcher: NSViewRepresentable {
+    let onHostClosing: () -> Void
 
-/// **A VOICED, SELF-SIZING TEXT AREA** — the only control in the panel, used
-/// for every comment and for the add draft, so "the whole thing is the text
-/// editor" is true by construction rather than by resemblance.
-///
-/// It grows with its text and never scrolls on its own: the PANEL scrolls.
-/// That is what makes a click anywhere in the add area land the caret (the
-/// area really is that big) and a growing draft push the page rather than
-/// scroll inside a box.
-private struct PanelTextArea: View {
-    @Binding var text: String
-    let font: Font
-    let ink: Color
-    var placeholder: String?
-    var placeholderInk: Color
-    /// The floor — a row's one line, or, for the add area, every point the
-    /// comments left.
-    var minHeight: CGFloat
-    /// A comment ROW grows with its text and never scrolls (the list
-    /// scrolls). The ADD area is the opposite: it is exactly the size of the
-    /// room it was given and scrolls itself, because a draft longer than the
-    /// room must follow the caret — which a text view does and an outer
-    /// scroll view does not.
-    var growsWithText: Bool = true
-
-    @State private var measured: CGFloat = 0
-
-    /// SwiftUI's `TextEditor` lays its text out inside these insets on macOS
-    /// (the same numbers `QuickNoteView`'s placeholder overlay has used since
-    /// it shipped).
-    static let topInset: CGFloat = 8
-    static let leadingInset: CGFloat = 5
-    /// The ruler measures a little NARROWER than the editor's own text area,
-    /// deliberately: a line that would wrap at the very edge wraps in the
-    /// ruler FIRST, so the measurement errs tall. Over-measuring costs a
-    /// line of air; under-measuring would clip her last line, because the
-    /// editor does not scroll.
-    static let rulerSlack: CGFloat = 4
-
-    var body: some View {
-        TextEditor(text: $text)
-            .font(font)
-            .foregroundStyle(ink)
-            .scrollContentBackground(.hidden)
-            .scrollDisabled(growsWithText)
-            .frame(height: growsWithText ? max(minHeight, measured) : max(0, minHeight))
-            .background(alignment: .topLeading) { if growsWithText { ruler } }
-            .overlay(alignment: .topLeading) { placeholderLabel }
+    func makeNSView(context: Context) -> WatcherView {
+        let view = WatcherView()
+        view.onHostClosing = onHostClosing
+        return view
     }
 
-    /// The same string, in the same font, free in height — `fixedSize`
-    /// vertical means it takes its IDEAL height at the proposed width however
-    /// tall the frame around it is, which is exactly the number the editor
-    /// needs and cannot report itself.
-    private var ruler: some View {
-        Text(rulerString)
-            .font(font)
-            .padding(.horizontal, Self.leadingInset + Self.rulerSlack)
-            .padding(.vertical, Self.topInset)
-            .fixedSize(horizontal: false, vertical: true)
-            .opacity(0)
-            .allowsHitTesting(false)
-            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { measured = $0 }
+    func updateNSView(_ nsView: WatcherView, context: Context) {
+        nsView.onHostClosing = onHostClosing
     }
 
-    /// A trailing newline lays out as nothing at all, so ⏎ at the end of a
-    /// draft would not grow the box until the next character arrived. The
-    /// ruler gives that line something to be.
-    private var rulerString: String {
-        if text.isEmpty { return " " }
-        return text.hasSuffix("\n") ? text + " " : text
-    }
+    final class WatcherView: NSView {
+        var onHostClosing: (() -> Void)?
+        private var observer: NSObjectProtocol?
 
-    @ViewBuilder
-    private var placeholderLabel: some View {
-        if let placeholder, text.isEmpty {
-            Text(placeholder)
-                .font(font)
-                .foregroundStyle(placeholderInk)
-                .padding(.top, Self.topInset)
-                .padding(.leading, Self.leadingInset)
-                .allowsHitTesting(false)
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let observer {
+                NotificationCenter.default.removeObserver(observer)
+                self.observer = nil
+            }
+            guard window != nil else { return }
+            observer = NotificationCenter.default.addObserver(
+                forName: NSPopover.willCloseNotification, object: nil, queue: .main
+            ) { [weak self] note in
+                // Read before the hop: the notification itself is not
+                // Sendable; the popover (a main-actor class) is.
+                let closing = note.object as? NSPopover
+                MainActor.assumeIsolated {
+                    guard let self, let window = self.window,
+                          CommentPanelHostWatcher.isHost(closing, ofPanelIn: window)
+                    else { return }
+                    self.onHostClosing?()
+                }
+            }
         }
+        // (No `deinit`: the view leaves its window before it dies, and
+        // `viewDidMoveToWindow` with a nil window removes the observer.)
     }
+
+    /// Is this closing popover the one hosting the panel in `window`? Its
+    /// content view lives in the popover's own window.
+    @MainActor
+    static func isHost(_ popover: NSPopover?, ofPanelIn window: NSWindow) -> Bool {
+        guard let popover, let contentWindow = popover.contentViewController?.view.window
+        else { return false }
+        return contentWindow === window
+    }
+}
+
+// MARK: - The panel's numbers (ONE place — VX-179 U3, the F-U3-1 ruling)
+
+/// **Every number the panel and its writing areas are built from.** The text
+/// geometry is here beside the layout's taste numbers on purpose: the trace
+/// behind VX-179 U3 was a placeholder placed by numbers that lived in one
+/// file while the geometry they described lived in another (a `TextEditor`'s
+/// private insets), so nothing kept them in step. Now the inset, the padding
+/// and every alignment that reads them are one name each.
+///
+/// The TEXT numbers are geometry (what the twins and the stamp line align
+/// to); the rest are taste, **PROVISIONAL** — chosen against the real
+/// surface on the walk, in both voices.
+nonisolated enum CommentsPanelMetrics {
+    // MARK: The writing areas' text geometry (owned)
+
+    /// The text container's inset inside every writing area — OURS (the
+    /// `TextEditor` it replaces had (0, 0) on macOS 27, where the panel had
+    /// assumed (5, 8)). Horizontal air is the panel's padding, not the text's.
+    static let textInset = NSSize(width: 0, height: 2)
+    /// The container's own padding: none — the host pads.
+    static let lineFragmentPadding: CGFloat = 0
+    /// Where an area's first line starts, inside the area — the caret's, the
+    /// first typed glyph's, the placeholder twin's and the mark twin's line.
+    static var firstLineOrigin: CGPoint {
+        CGPoint(x: textInset.width + lineFragmentPadding, y: textInset.height)
+    }
+    /// A row's height from its measured content (`PaneMeasurement`: the
+    /// laid-out text plus the inset, top and bottom) — whole points, so the
+    /// list never lays out on a fraction.
+    static func rowHeight(measured: CGFloat) -> CGFloat {
+        max(0, measured).rounded(.up)
+    }
+    /// The mark's column: its own measured width in the text's font, whole
+    /// points. Horizontal only — the mark's BASELINE is the twin's, never a
+    /// number.
+    static func markColumn(measured: CGFloat) -> CGFloat {
+        max(0, measured).rounded(.up)
+    }
+    /// The mark's ink: the panel row's shipped 0.75 of the comment ink.
+    static let markInkOpacity: CGFloat = 0.75
+
+    // MARK: The panel's layout (taste — PROVISIONAL, VX-179 U3's pass)
+
+    /// THE CHROME COLUMN — the title, the composer card's edge, the
+    /// hairlines, the fold's toggle. (12 before the pass.)
+    static let inset: CGFloat = 16
+    /// The composer card's inner padding, sides and top.
+    static let composerPadding: CGFloat = 12
+    /// **THE WRITING COLUMN** — where every piece of prose in the panel
+    /// starts: the composer's text (the card's edge + its padding), every
+    /// comment and every stamp line, live or deleted. One edge for words,
+    /// one for chrome.
+    static var writingInset: CGFloat { inset + composerPadding }
+    static let headerTop: CGFloat = 14
+    static let headerBottom: CGFloat = 10
+    /// Air between the header's hairline and the first comment.
+    static let listTop: CGFloat = 4
+    /// A row's vertical padding. (7 before the pass — when every row also
+    /// carried 16 pt of dead air under its text, which the pass's control
+    /// retired.)
+    static let rowAir: CGFloat = 9
+    /// Between a comment's text and its stamp line.
+    static let stampGap: CGFloat = 3
+    /// The add area never shrinks below this, however many comments there
+    /// are: a writing box you cannot write two lines in is the complaint
+    /// 13u3 A2 answered. (132 before the pass; the floor now holds the
+    /// composer card's margins and its foot row too, so 156 keeps ≈ 86 pt
+    /// of writing room — three lines of Study, four of Terminal.)
+    static let addFloor: CGFloat = 156
+    /// The composer card's margin above and below.
+    static let composerMargin: CGFloat = 12
+    /// The card's inner padding under its foot row.
+    static let composerFootPadding: CGFloat = 8
+    /// Between the writing and the foot row (the keys, Add).
+    static let composerFootGap: CGFloat = 6
+    /// `VoicedField`'s radius — the app's writing box.
+    static let composerCorner: CGFloat = 8
+    /// The card's hairline while the caret is in it: the accent at
+    /// `VoicedChip`'s "on" strength.
+    static let composerLiveStrokeOpacity: Double = 0.55
+    /// The deleted fold's toggle row, above and below.
+    static let foldToggleAir: CGFloat = 6
+    static let deletedListMaxHeight: CGFloat = 132
 }

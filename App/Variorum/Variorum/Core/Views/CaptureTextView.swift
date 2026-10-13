@@ -158,6 +158,29 @@ struct CaptureTextView: NSViewRepresentable {
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
+    // MARK: The box's own text geometry (VX-179 U3, F-U3-1 ruling Q-2)
+
+    /// **The box's text inset — OWNED here, and read by every host that draws
+    /// something on the text's first line.** Both hosts draw their own
+    /// placeholder behind the box (the box draws none), and a placeholder is
+    /// only right if it sits exactly where her first typed line will. VX-179
+    /// U3 measured the bar drifting by this very number: its `ZStack`
+    /// placeholder sat at the box's top while the text sat 2 pt lower, so the
+    /// words dropped 2 pt the moment she typed (baseline 26 vs 28 in
+    /// Terminal, 29 vs 31 in Study). The pad derived the same 2 by hand. One
+    /// named number, read by the box and by both placeholders, makes the
+    /// agreement structural rather than remembered.
+    nonisolated static let textInset = NSSize(width: 0, height: 2)
+    /// The container's own padding: none (WALK FIND 1, in `makeNSView` — the
+    /// host owns the box's insets).
+    nonisolated static let lineFragmentPadding: CGFloat = 0
+    /// Where the box's first line starts, inside the box — the point a host's
+    /// placeholder must sit at. TK2 lays the first line fragment at the
+    /// container's origin (`textContainerInset`) plus the padding.
+    nonisolated static var firstLineOrigin: CGPoint {
+        CGPoint(x: textInset.width + lineFragmentPadding, y: textInset.height)
+    }
+
     func makeNSView(context: Context) -> NSScrollView {
         // TEXTKIT2 §4's first two defensive practices: opt into TK2
         // EXPLICITLY at init, and never touch a TK1 API afterwards.
@@ -175,13 +198,13 @@ struct CaptureTextView: NSViewRepresentable {
         view.maxSize = NSSize(
             width: CGFloat.greatestFiniteMagnitude,
             height: CGFloat.greatestFiniteMagnitude)
-        view.textContainerInset = NSSize(width: 0, height: 2)
+        view.textContainerInset = Self.textInset
         // WALK FIND 1: `NSTextContainer` ships a 5 pt `lineFragmentPadding`,
         // so the typed text sat a few points right of the placeholder the
         // host draws behind it — the words moved sideways the moment she
         // started typing. The host owns this box's insets; the container
         // owns none.
-        view.textContainer?.lineFragmentPadding = 0
+        view.textContainer?.lineFragmentPadding = Self.lineFragmentPadding
         view.textContainer?.widthTracksTextView = true
         view.textContainer?.size = NSSize(
             width: 0, height: CGFloat.greatestFiniteMagnitude)

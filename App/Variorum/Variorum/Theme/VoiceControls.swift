@@ -28,6 +28,12 @@ struct VoicedButtonStyle: ButtonStyle {
     var role: Role = .secondary
     var font: Font?
 
+    /// The label's own horizontal inset inside the button (its hover wash's
+    /// margin). Named so a host that lines a voiced word up with text beside
+    /// it reads THIS number rather than re-typing it (VX-179 U3 — the
+    /// comments panel's deleted fold).
+    static let labelInset: CGFloat = 5
+
     func makeBody(configuration: Configuration) -> some View {
         BodyView(configuration: configuration, tokens: tokens, role: role, font: font)
     }
@@ -49,7 +55,7 @@ struct VoicedButtonStyle: ButtonStyle {
                 // ("com mit ⌘S").
                 .lineLimit(1)
                 .foregroundStyle(ink)
-                .padding(.horizontal, 5)
+                .padding(.horizontal, VoicedButtonStyle.labelInset)
                 .padding(.vertical, 2)
                 .background(
                     hovering && enabled ? tokens.wash : Color.clear,

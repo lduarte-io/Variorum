@@ -174,6 +174,29 @@ struct RestoreCostTests {
         }
     }
 
+    /// **RED-ON-OLD (VX-179 — the fence, applied to population 3).** A
+    /// comment she already deleted forever ("Delete forever…" in the panel's
+    /// deleted fold) is no longer "still restorable": no door brings it back,
+    /// so the restore's confirm must not count it as something the road
+    /// would take from her. Without the `NOT EXISTS` arm the count stays 2.
+    @Test func aCommentDeletedForeverIsNotCountedAsStillRestorable() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note", profile: .generic)
+            let block = try ops.newBlock(in: note.id, text: "A paragraph.", at: .end)
+            let gone = try ops.addBlockComment(to: block.block.id, text: "deleted forever")
+            let waiting = try ops.addBlockComment(to: block.block.id, text: "still restorable")
+            try ops.deleteBlockComment(gone.id)
+            try ops.deleteBlockComment(waiting.id)
+            #expect(try db.read { try Queries.restoreCost($0, of: note.id) }.deletedComments == 2)
+
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block_comment", rowID: gone.id)])
+
+            let cost = try db.read { try Queries.restoreCost($0, of: note.id) }
+            #expect(cost.deletedComments == 1,
+                    "the confirm counts only what the panel can still restore")
+        }
+    }
+
     // MARK: - The set-aside originals (population 4)
 
     /// **THE MIRROR'S DRIFT GUARD.** `Queries.setAsideOriginals` writes

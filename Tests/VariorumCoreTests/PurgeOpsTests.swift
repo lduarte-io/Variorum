@@ -562,4 +562,281 @@ struct PurgeOpsTests {
             #expect(rows.isEmpty, "purged stays purged — the completed intent still fences")
         }
     }
+
+    // MARK: - VX-179: the comment kind ("Delete forever…", R-VX179-3)
+
+    /// The live-intent count naming one comment — the belt pins' one read.
+    private func liveCommentIntents(_ db: AppDatabase, _ commentID: String) throws -> Int? {
+        try db.fetchInt(
+            """
+            SELECT COUNT(*) FROM purge_intent
+            WHERE table_name = 'block_comment' AND row_id = ? AND deleted_at IS NULL
+            """, [commentID])
+    }
+
+    /// A note with one live block and one comment on it, the comment then
+    /// deleted — the deleted fold's ordinary row.
+    private func deletedComment(
+        _ ops: Operations, text: String = "a note to self"
+    ) throws -> (post: Container, blockID: String, comment: BlockComment) {
+        let post = try ops.createPost(title: "note", profile: .generic)
+        let made = try ops.newBlock(in: post.id, text: "Prose.", at: .end)
+        let comment = try ops.addBlockComment(to: made.block.id, text: text)
+        try ops.deleteBlockComment(comment.id)
+        return (post, made.block.id, comment)
+    }
+
+    @Test func aLiveCommentRefusesOnlyDeletedCommentsPurge() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "note", profile: .generic)
+            let made = try ops.newBlock(in: post.id, text: "Prose.", at: .end)
+            let live = try ops.addBlockComment(to: made.block.id, text: "still here")
+            #expect {
+                try ops.requestPurge([SyncPurgeTarget(table: "block_comment", rowID: live.id)])
+            } throws: { error in
+                error as? OperationError
+                    == .purgeTargetNotDeleted(table: "block_comment", id: live.id)
+            }
+            #expect(try liveCommentIntents(db, live.id) == 0, "a refusal mints nothing")
+        }
+    }
+
+    @Test func aDeletedCommentMintsOneTravellingIntentAndAskingTwiceIsOne() throws {
+        try withOperations { ops, db in
+            let (_, _, comment) = try deletedComment(ops)
+            let target = SyncPurgeTarget(table: "block_comment", rowID: comment.id)
+
+            #expect(try ops.requestPurge([target]) == 1)
+            let intentID = try #require(try db.fetchString(
+                "SELECT id FROM purge_intent WHERE table_name = 'block_comment' AND row_id = ?",
+                [comment.id]))
+            #expect(try db.outboxContains("purge_intent", intentID),
+                    "the intent TRAVELS — every device's fold drops the row")
+            // The act is idempotent by nature: the second ask mints nothing.
+            #expect(try ops.requestPurge([target]) == 0)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM purge_intent WHERE row_id = ?", [comment.id]) == 1)
+            // No undo entry, no content touch: the comment row itself is
+            // untouched until the janitor takes it.
+            #expect(try db.deletedAt("block_comment", comment.id) != nil)
+        }
+    }
+
+    @Test func aMissingCommentRefusesByNameUnlessAlreadyPurged() throws {
+        try withOperations { ops, db in
+            #expect {
+                try ops.requestPurge([SyncPurgeTarget(table: "block_comment", rowID: "ghost")])
+            } throws: { error in
+                error as? OperationError == .commentNotFound(id: "ghost")
+            }
+            // Gone WITH an intent standing (the janitor took it): skip.
+            let (_, _, comment) = try deletedComment(ops)
+            let target = SyncPurgeTarget(table: "block_comment", rowID: comment.id)
+            _ = try ops.requestPurge([target])
+            try db.write { db in
+                try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
+                let family = try PurgeFamily.expand(db, roots: [target])
+                #expect(family.rows == [target], "a comment's family is the row itself")
+                try PurgeFamily.deleteLocal(
+                    db, family: family, stamp: "2026-08-19T00:00:00.000Z")
+            }
+            #expect(try ops.requestPurge([target]) == 0,
+                    "a purged comment is never re-minted — nothing would ever complete it")
+        }
+    }
+
+    /// **RED-ON-OLD (the fence):** without the `NOT EXISTS` arm on
+    /// `deletedBlockComments` the purged comment keeps listing in the fold
+    /// until the janitor's horizon — a "deleted forever" row still offering
+    /// Restore.
+    @Test func anIntentNamedCommentLeavesTheDeletedFoldAtOnce() throws {
+        try withOperations { ops, db in
+            let (_, blockID, doomed) = try deletedComment(ops, text: "going for good")
+            let kept = try ops.addBlockComment(to: blockID, text: "deleted, still restorable")
+            try ops.deleteBlockComment(kept.id)
+            #expect(try db.read {
+                try Queries.deletedBlockComments($0, blockID: blockID)
+            }.map(\.id) == [kept.id, doomed.id])
+
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block_comment", rowID: doomed.id)])
+
+            #expect(try db.read {
+                try Queries.deletedBlockComments($0, blockID: blockID)
+            }.map(\.id) == [kept.id], "the purged comment leaves the fold the moment it is asked")
+            // A COMPLETED intent (the janitor's, or a peer's) still fences —
+            // purged stays purged through the ledger lag.
+            try db.write { db in
+                try db.execute(
+                    sql: """
+                        UPDATE purge_intent SET deleted_at = '2027-01-01T00:00:00.000Z'
+                        WHERE table_name = 'block_comment' AND row_id = ?
+                        """,
+                    arguments: [doomed.id])
+            }
+            #expect(try db.read {
+                try Queries.deletedBlockComments($0, blockID: blockID)
+            }.map(\.id) == [kept.id])
+        }
+    }
+
+    /// **RED-ON-OLD (the restore belt):** without `voidPurgeIntents` in
+    /// `restoreBlockComment` the intent stays LIVE on a live comment.
+    @Test func restoringACommentVoidsItsLiveIntent() throws {
+        try withOperations { ops, db in
+            let (_, _, comment) = try deletedComment(ops)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block_comment", rowID: comment.id)])
+            #expect(try liveCommentIntents(db, comment.id) == 1)
+
+            try ops.restoreBlockComment(comment.id)
+            #expect(try db.deletedAt("block_comment", comment.id) == nil)
+            #expect(try liveCommentIntents(db, comment.id) == 0,
+                    "a restored comment voids the live intent naming it (13j B1)")
+        }
+    }
+
+    /// The belt's consequence, end to end, and the reason the fence is the
+    /// STAMP-AWARE arm and not "any intent at all": restore → delete again
+    /// must list on the fold like any ordinary delete. **Red on old** two
+    /// ways — without the belt (the leftover LIVE intent fences the fresh
+    /// tombstone and the janitor would take it unconfirmed) and under an
+    /// any-state fence (the voided intent would hide it forever).
+    @Test func aReDeletedCommentListsInTheFoldDespiteItsVoidedIntent() throws {
+        try withOperations { ops, db in
+            let (_, blockID, comment) = try deletedComment(ops)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block_comment", rowID: comment.id)])
+            try ops.restoreBlockComment(comment.id)  // voids the intent
+            try ops.deleteBlockComment(comment.id)   // a FRESH, ordinary delete
+
+            #expect(try db.read {
+                try Queries.deletedBlockComments($0, blockID: blockID)
+            }.map(\.id) == [comment.id],
+                    "a re-deleted comment is restorable again — never intent-limbo")
+            #expect(try liveCommentIntents(db, comment.id) == 0)
+        }
+    }
+
+    /// **RED-ON-OLD (the redo road's belt):** an AI client's comment
+    /// (`addComment` — its own undo entry), undone by ⌥⌘Z, deleted forever
+    /// from the fold, then brought back by ⇧⌥⌘Z: `reapplyAddedComment` is a
+    /// REVIVE road, and without the belt the intent stays live on a live
+    /// comment (the 17d P28 class — the redo road that forgot).
+    @Test func theCommentRedoRoadVoidsALiveIntentLikeItsSiblings() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost(title: "note", profile: .generic)
+            let made = try ops.newBlock(in: post.id, text: "Prose.", at: .end)
+            let comment = try ops.addComment(
+                toBlock: made.block.id, text: "the AI's note", undoLabel: "Claude's comment")
+            #expect(try stack.undo(with: ops) == "Claude's comment")
+            #expect(try db.deletedAt("block_comment", comment.id) != nil,
+                    "the undo tombstones it onto the deleted fold")
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block_comment", rowID: comment.id)])
+
+            #expect(try stack.redo(with: ops) == "Claude's comment")
+            #expect(try db.deletedAt("block_comment", comment.id) == nil,
+                    "the redo brought the comment back")
+            #expect(try liveCommentIntents(db, comment.id) == 0,
+                    "…and the leftover intent can never claim it — the B1 rule, redo road")
+        }
+    }
+
+    /// **RED-ON-OLD (the seal — PROVISIONAL, QUESTIONS #23(a)'s posture
+    /// extended):** every comment write refuses under a sealed post, and a
+    /// permanent delete is a write. Without `ensurePlacementUnlocked` in the
+    /// arm the intent mints under the seal.
+    @Test func aSealedPostRefusesACommentsDeleteForever() throws {
+        try withOperations { ops, db in
+            let (post, blockID, comment) = try deletedComment(ops)
+            try ops.lockPost(post.id)
+            #expect(throws: OperationError.lockedPost(id: post.id)) {
+                try ops.requestPurge([SyncPurgeTarget(table: "block_comment", rowID: comment.id)])
+            }
+            #expect(try liveCommentIntents(db, comment.id) == 0)
+            #expect(try db.read {
+                try Queries.deletedBlockComments($0, blockID: blockID)
+            }.map(\.id) == [comment.id], "reading is free under the seal; the row stays listed")
+
+            // Unsealed, the same ask lands.
+            try ops.unlockPost(post.id)
+            #expect(try ops.requestPurge(
+                [SyncPurgeTarget(table: "block_comment", rowID: comment.id)]) == 1)
+        }
+    }
+
+    /// **RED-ON-OLD (the dead-block guard — the hazard it closes, traced in
+    /// the arm's comment):** a CASCADE victim purged alone would revive LIVE
+    /// on its block's restore with its intent still standing. Without
+    /// `liveBlock` in the arm, `ensurePlacementUnlocked` passes a dead block
+    /// silently (no live placement ⇒ no post to ask) and the intent mints.
+    @Test func aCommentUnderADeadBlockRefusesItsOwnPurge() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "note", profile: .generic)
+            let made = try ops.newBlock(in: post.id, text: "Prose.", at: .end)
+            _ = try ops.newBlock(in: post.id, text: "Sibling.", at: .end)
+            let victim = try ops.addBlockComment(to: made.block.id, text: "dies with the block")
+            let earlier = try ops.addBlockComment(to: made.block.id, text: "deleted on its own")
+            try ops.deleteBlockComment(earlier.id)
+            try ops.deleteBlock(made.block.id)
+
+            for comment in [victim, earlier] {
+                #expect(throws: OperationError.blockNotFound(id: made.block.id)) {
+                    try ops.requestPurge(
+                        [SyncPurgeTarget(table: "block_comment", rowID: comment.id)])
+                }
+                #expect(try liveCommentIntents(db, comment.id) == 0)
+            }
+            // The block's own road is untouched: Put back revives the
+            // victim on the stamp, with no intent anywhere to claim it.
+            _ = try ops.restoreBlock(made.block.id)
+            #expect(try db.deletedAt("block_comment", victim.id) == nil)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM purge_intent WHERE table_name = 'block_comment'") == 0)
+        }
+    }
+
+    /// The decided edge's other half: a LIVE block with no live placement
+    /// (released to lineage by divide-W) has no post to seal it, so a
+    /// comment deleted on it purges like any other.
+    @Test func aCommentOnALiveUnplacedBlockPurges() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "note", profile: .generic)
+            let made = try ops.newBlock(
+                in: post.id, text: "First sentence. Second sentence.", at: .end)
+            let comment = try ops.addBlockComment(to: made.block.id, text: "on the original")
+            _ = try ops.divideW(made.block.id, cuts: [made.variant.id: 16])
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM container_block WHERE block_id = ? AND deleted_at IS NULL",
+                [made.block.id]) == 0, "the original is released — live, unplaced")
+            try ops.deleteBlockComment(comment.id)
+
+            #expect(try ops.requestPurge(
+                [SyncPurgeTarget(table: "block_comment", rowID: comment.id)]) == 1)
+        }
+    }
+
+    /// The Delete Now road, driven for the kind on a local install (the
+    /// panel's confirm runs this sweep, `AppSession.sweepLocalPurge`): the
+    /// row is physically removed, the intent completes, and the fold stays
+    /// empty — purged stays purged.
+    @Test func theLocalRoadTakesAPurgedCommentWhole() async throws {
+        try await withOperationsAsync { ops, db in
+            let (_, blockID, comment) = try deletedComment(ops)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block_comment", rowID: comment.id)])
+
+            let report = try await LocalPurge(database: db).sweep()
+            #expect(report.familiesPurged == 1)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM block_comment WHERE id = ?", [comment.id]) == 0,
+                    "the bytes are gone on a local install")
+            #expect(try liveCommentIntents(db, comment.id) == 0, "the intent completed")
+            let fold = try await db.read {
+                try Queries.deletedBlockComments($0, blockID: blockID)
+            }
+            #expect(fold.isEmpty)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM block WHERE id = ? AND deleted_at IS NULL",
+                [blockID]) == 1, "the block it hung on is untouched")
+        }
+    }
 }

@@ -247,6 +247,20 @@ struct QuickNoteView: View {
     @Environment(\.colorScheme) private var scheme
     @Environment(\.dismiss) private var dismiss
 
+    /// The pad draws the box's surface itself, so the inset around the box is
+    /// the HOST's (WALK FIND 2).
+    static let boxPadding = CGSize(width: 6, height: 4)
+    /// **Where the placeholder sits** (VX-179 U3, the F-U3-1 ruling's Q-2):
+    /// the pad's padding plus the box's OWN first-line origin — the one
+    /// number `CaptureTextView` owns. (6, 6), exactly where it has always
+    /// drawn: the pad is the parity proof that the box's static is the number
+    /// the hand-derived 6 already was.
+    static var placeholderOrigin: CGPoint {
+        CGPoint(
+            x: boxPadding.width + CaptureTextView.firstLineOrigin.x,
+            y: boxPadding.height + CaptureTextView.firstLineOrigin.y)
+    }
+
     init(session: AppSession, windows: WindowRegistry) {
         self.session = session
         self.windows = windows
@@ -274,16 +288,20 @@ struct QuickNoteView: View {
                 // placeholder wears, or the words move sideways when she
                 // starts typing (the same class the container padding caused
                 // one file over).
-                .padding(.horizontal, 6)
-                .padding(.vertical, 4)
+                .padding(.horizontal, Self.boxPadding.width)
+                .padding(.vertical, Self.boxPadding.height)
                 .background(tokens.surface)
                 .overlay(alignment: .topLeading) {
                     if pad.text.isEmpty {
+                        // VX-179 U3 (F-U3-1 Q-2): derived from the box's own
+                        // first-line origin + the pad's padding — the same
+                        // (6, 6) it always drew at, now said once.
                         Text(tokens.chromeLabel(QuickNoteCopy.placeholder))
                             .font(tokens.body)
                             .foregroundStyle(tokens.faint)
-                            .padding(.horizontal, 6)
-                            .padding(.top, 6)
+                            .padding(.leading, Self.placeholderOrigin.x)
+                            .padding(.trailing, Self.boxPadding.width)
+                            .padding(.top, Self.placeholderOrigin.y)
                             .allowsHitTesting(false)
                     }
                 }
