@@ -223,3 +223,9 @@ returns this Mac to Standard). Product behavior + copy → hers (QUESTIONS when 
 the two doors + the join consent's de-capped wording, her ruling recorded on the ticket) · **VX-203** (finding 3,
 the offer's missed folders) · **VX-204** (finding 4, the guide sentence — her words). Touches custody ⇒ Fable cold
 review. Rows 5–11 of §V stay post-launch (tickets at her word). This audit (VX-191) closes with this record.
+- **Added to RUN VX-201 at her word:** **VX-206** — entering Castle ends on Settings ▸ General instead of Protection
+  (the info popup shows only on clicking Protection); the ceremony started from Protection must end there.
+- **The post-launch rows, ticketed (Parked, reasons on each):** VX-207 (C-2 AI fence on plain columns) · VX-208
+  (pre-Castle `.md` exports) · VX-209 (B2c) · VX-210 (B1e) · VX-211 (passphrase strength) · VX-212 (S1 Q3's unowned
+  poison-row case) · VX-213 (the NITs) · **VM-15** (the unfollowed sibling phone — Backlog under "Mobile — beta
+  readiness & launch", Pre-launch for MOBILE launch).
