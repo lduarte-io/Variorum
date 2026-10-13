@@ -988,10 +988,14 @@ evidence is complete** (green pass 305/38 + drills disposition + simulator + the
   `Sources/VariorumCore/Persistence/LibraryAsideCopies.swift` + `Tests/VariorumCoreTests/LibraryAsideCopiesTests.swift`
   (6 pins). VERIFIED headless: `swift test --filter "LibraryAsideCopiesTests|LibraryAdoptionTests"` — 13 tests in 2
   suites passed. Revert patches R-a/R-b/R-c in `notes/plans/fixes/vx-201-u3-reverts/` (git-apply-checked).
-- IN-PROGRESS — the three CORE revert cycles (headless, mine to run): the tree is committed; each cycle is `git apply`
-  of one patch, `swift test --filter LibraryAsideCopiesTests`, then `git checkout --
-  Sources/VariorumCore/Persistence/LibraryAsideCopies.swift` (worktree-only — no index trap) and `git diff --stat`
-  empty. If this line still reads IN-PROGRESS, check `git diff` for a reverted file before anything else.
+- DONE — the three CORE revert cycles, run headless by me (each: `git apply`, `swift test --filter
+  LibraryAsideCopiesTests`, `git checkout --` the one file, `git diff --stat` read EMPTY). Results, 6 tests each:
+  **R-a** (no home reached) → RED: (a) the adoption's two copies · (b)'s control line (the Standard-current copy) ·
+  the refusal pin's listing line · the listing pin; green: (c), the plan pin. **R-b** (any key file's `apple`
+  qualifies) → RED: (b) alone — the O.4 two-key-file Castle copies listed, `isAppleOpenable` true, and the remover
+  DELETED them. **R-c** (no naming match) → RED: (c) — the A1 rail folder and every foreign folder listed and
+  removed — and the refusal pin's home-link leg (the patch drops the home-is-a-real-directory legs with the naming
+  block: the remover deleted another library's copy through a planted link). Every bound green where expected.
 - NOT-STARTED — piece 2 (Shared runner + models + faces): the two inert-by-default leaves, `Outcome.preSwitchLibraryCopies`
   + `Outcome.hasOffer`, the counted offer body, the four faces.
 - NOT-STARTED — piece 3 (VX-208): the one line on every Done that entered Castle, both models, four faces.
