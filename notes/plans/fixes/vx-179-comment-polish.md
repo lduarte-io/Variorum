@@ -2295,3 +2295,151 @@ red is a real bug on that road; if provably no, the cell pins an unreachable roa
 stray `x`/⎋⎋ went to the quick-entry bar, which ⎋ clears — the Pool shows NO stray note (its
 vx222-titled 2026-10-13 rows are that session's own suite debris, untouched by me), and the walk
 note's text is unchanged at the glance. No instance left running.
+
+## LADDER ROUND 2 (fable-reviewer, 2026-10-13 — the fix stack `a887bda6..3c0af624`, 37 commits; the cross-model flow's final calls discharged in this session)
+
+**What was reviewed, cold:** the whole round-2 diff read file-by-file in this session
+(`CommentCard.swift`, `CommentsPanel.swift`, `CommentTextArea.swift`, `CommentCardTests.swift`,
+`CommentTextAreaTests.swift`, the record); round 1's findings and every fix leg's traces, reverts and
+orchestrator acceptances in this record; TEXTKIT2_NOTES §3–4 re-read (the diff carries NSTextView
+overrides and decoration-overlay work); the path diff verified ZERO `Sources/` (core), ZERO `Sync/`,
+ZERO `Server/` lines in the range — SyncSpec not re-read this round on that fact (round 1 read it for
+U0). Constraints honored: no `xcodebuild test`, no app launch, no window ordered in, no stage act; the
+full HEADLESS suite re-run by this reviewer at the tip + this round's one edit: **`swift test` EXIT 0 —
+core 2,704 / 307 and workbook 40 / 6 read exactly; VariorumMCPTests ran green in the same invocation.**
+No commit trailer in any of the 37 commits (grep). Mac-target runs stay PENDING (stage) and are marked
+so below.
+
+### The final calls (the cross-model flow — the reviewer's word is the disposition)
+
+**R1-2 — CONFIRMED CLOSED (agree upheld, fix accepted).** The implementer's AGREE was measured (SwiftUI
+never tears popover content down; `.onDisappear` never fires; the approximated old road loses the edit
+the same way — pre-existing class, 13u3 A2), and the fix is the right shape, re-verified here in the
+code: `CommentPanelHostWatcher` is scoped by CONTENT-WINDOW IDENTITY (never global), runs the panel's
+ONE leaving body (`commitDirtyEdits`, shared by Close, `.onDisappear` and the watcher), and the
+accepted double-commit consequence is idempotent twice over (`CommentComposition.commit` answers
+`.unchanged` on the second pass; `editBlockComment`'s own no-op guard behind it). Red-on-old held by
+the discriminating pair (R-FL2c, then the pin leg's R-PL2 — the watcher's call site alone, red on
+exactly the save with premises green). Live-proven TWICE (windows 4 and 5's click-away rows); the
+runner cell GREEN at window 6 after the pin leg's remodel. Nothing further owed.
+
+**R1-3 — CONFIRMED CLOSED, the dispute UPHELD.** The finding's mismatch was real (the doc promised a
+first-moving-event re-decision the code never made) — and the implementer's dispute of my proposed
+one-condition fix is correct: re-deciding mid-gesture is IMPOSSIBLE against AppKit (measured — once a
+scroll view takes a gesture its tracking loop captures the rest un-hit-tested; a `.began` handed to an
+`NSScrollView` never returns), so the latch was rightly retired WHOLE and the decision moved to
+hit-testing per dispatched event (`hitAnswer`), where the owner is whichever scroll view AppKit itself
+hands the gesture's first event to. The zero-delta `.began` row deliberately answers the overflowing
+card — the alternative makes the card unscrollable by any gesture that begins without movement — and
+is table-pinned. The doc now states the real mechanism; W-3 walked FULLY green (window 4: both
+directions, the end-of-card handoff, fits-passes, notch). My one-condition proposal is superseded by
+a strictly better fix; no further action.
+
+### THE OPEN FINDING (stage window 6's ⎋ ladder cell) — THE RULING
+
+**The question, answered: can a LIVE popover window ever become key?** Not provably never —
+`_NSPopoverWindow.canBecomeKey` is true (measured offscreen, the pin leg's T2), the panel itself asks
+`makeKey()`, and macOS owns the policy, so "unreachable forever" cannot be claimed. But it is measured
+NOT to happen on macOS 27.0, twice, with the DEBUG trace read (windows 4–5: the PARENT keeps key
+throughout; the panel's makeKey ask measurably does not take on a live transient popover; AppKit
+forwards the key parent's keys into the popover's first responder).
+
+**Why the reachability question is MOOT for the product:** even if a live popover became key (macOS
+drift, a future host), that road's ladder is ALREADY PINNED GREEN by the sibling cell
+`theCloseRungClosesEvenWhereAPassedEscapeIsSwallowed` — the same presenter (SwiftUI `.popover`), the
+same guarded key road, the identical ladder steps (type → first ⎋ clears and the popover stays →
+second ⎋ closes), on a STRICTLY harder host: its `.onExitCommand {}` swallow punishes any
+pass-through, so an unconsumed first ⎋ fails at the uncleared draft and an unconsumed second fails at
+the still-open popover — every miss the red twin could catch fails in the sibling too. It was green in
+windows 5 AND 6 on exactly the popover-is-key road, and `theKeyIsThePanelsWhereItIsDelivered` pins the
+ownership rule on BOTH roads plus the hidden-panel and no-key arms. **No product mechanism can
+distinguish the twins:** the swallow wrapper sits in the VIEW RESPONDER CHAIN, below the pre-dispatch
+local monitor — it cannot affect whether the monitor consumes. So the runner red was CELL-LOCAL
+environment, not a road defect: the retired cell was the process's FIRST popover cell, and three
+windows produced three DIFFERENT failure shapes on it (window 4: parent-addressed keys never arrived;
+window 5: the key-premise failure; window 6: an unconsumed-⎋ shape) while the sibling stayed green in
+the same runs. **NO PRODUCT FIX — no live-reachable road shows a defect, and the road the runner rims
+is pinned green by the sibling.**
+
+**The cell's honest fate, ruled and IMPLEMENTED (f173bac2):** RETIRED as a strict-subset duplicate;
+the ruling folded into the sibling's doc comment. The coverage ledger after it: the clear AND close
+rungs on the runner's popover-is-key road = the sibling cell; ownership on every road (parent-key,
+popover-key, hidden panels, the no-key fallback) = the pure `delivers` table; the LIVE parent-key road
+end-to-end = window 5's walk with the `comment-keys` trace read — the standing, honestly-stated gap:
+the runner cannot host that road (an off-display anchor can never be key), so it lives on the table +
+the walk. If a macOS point release ever changes popover key policy, the sibling and the table still
+pin the behavior; the per-release re-verify (TEXTKIT2_NOTES §5) and the next walk are where a change
+would show. `CommentPanelFixLeg2Tests` is now **5 tests**; the runner's next window expects 5/5.
+
+### W4-OBS-1 (the click-away dropping a typed, unsubmitted composer draft) — THE RULING
+
+**NOT reviewable on spec grounds — to the author.** The canon is silent on what a dismissal does to an
+unsubmitted draft: #118(a) rules only that leaving never FILES, and the ⎋ ladder's clear is an
+EXPLICIT gesture where a click-away is not ruled either way. Per the standing rule (spec silence on
+product behavior is a question, never a reviewer's ruling), the proposal stays UNBUILT and joins the
+merge-moment QUESTIONS deposit as **P-VX179-R2-1**: (a) park a non-empty add draft on the popover
+host's closing (`CommentDraftPark`, restored with the park's own receipt at the next open) — the
+record's recommendation, spec-coherent ("parking is not filing", the park already exists for
+refusal-time drafts); (b) keep today's behavior (a click-away abandons an unsubmitted draft, as ⎋'s
+clear does deliberately); (c) file it on leaving (reverses #118(a) — her ruling alone). Her call.
+
+### Round-2 findings (severity-ranked)
+
+**R2-1 · NIT · the record (STAGE WINDOW 5's walk-machinery lesson) — the trace line's stated level is
+wrong.** The lesson says the `comment-keys` line "is debug-level; `--info` alone shows nothing", but
+the code has logged it at `.notice` (default level) since it was born at 22a3a587 — never `.debug`
+(git -S). The lesson's ADVICE still works (`--debug` includes default-level lines), so no operational
+harm; recorded here so the next walk's reader trusts the code fact. No code change.
+
+**R2-2 · NIT (recorded consequence, no fix) · CommentCard.swift (`hitTest` → `hitTarget(during:
+NSApp.currentEvent)`).** `NSApp.currentEvent` persists BETWEEN dispatches, so a non-dispatch `hitTest`
+query (tool-tip/tracking machinery) arriving right after a wheel can read the stale wheel and answer
+the STACK where a press query would get the card. Traced to no degradation: both answers name the same
+geometry, tool tips ride tracking rects (not hitTest), and during REAL dispatch the current event IS
+the one being dispatched — the offscreen dispatch replays and the live walk both validated the
+dispatch road. Weighed and recorded; nothing to pin.
+
+**0 BLOCKER · 0 MAJOR · 0 MINOR · 2 NIT.** No new BLOCKER/MAJOR ⇒ **the ladder CLOSES at round 2**
+(the cap-three rule's early close). The one implemented change of this round (the cell retirement,
+f173bac2, test file + record only) is owed the implementer's ONE SANITY PASS per the cross-model flow
+— the orchestrator dispatches it; its scope is a 35-line test deletion plus doc lines.
+
+### Clean bill (load-bearing things specifically checked and found solid this round)
+
+- **U2's fix stack (CommentCard):** `hitAnswer`'s three-way decision re-derived (wheel → the owner's
+  scroll view by hit-testing; lane press → the card's own drag; everything else the door);
+  `laneDragOffset`'s ratio math incl. the proportional-knob fallback (`clip × (1 − clip/doc)`)
+  correct; the drag road is the drag handle's proven `mouseDown`→`mouseDragged`→`mouseUp`; the door
+  still fires on the down, read-tier `nil` answers intact (click-through, no scroller view), the strip
+  arm byte-identical; `badgeFace`'s order (shipped inset where the count fits = byte-identical; the
+  "#" goes before any truncation; never "…"), and `present`'s count-change gate stops the decoration
+  pass undoing a fitted face. The walk's W-3/W-8/F-W-2/F-W-5 rows all green (windows 4–5).
+- **U3's fix stack (CommentsPanel + CommentTextArea):** `delivers`' ten table cells each re-derived
+  (both key roads, the hidden-panel arm closing the stale class, the no-key fallback confined to
+  offscreen); the monitor reads the AREA from the window's FIRST RESPONDER at key time (closing the
+  async-focus class); the close rung is the panel's own `close()` — commits dirty rows, then
+  `dismiss()` — host-independent by construction; the monitor's release and the save watcher are
+  separately scoped observers of the same `willClose`, both keyed on content-window identity;
+  `revealForEditing` is bounded (rows only, never for a row taller than the clip, never during a mouse
+  gesture's tracking, deferred one turn on caret arrival and growth, and structurally non-recursive —
+  `scrollToVisible` is not `scrollRangeToVisible`); the `adopt` writes added this round are plain
+  stored properties (not the A47c gated-write class).
+- **TK2 hygiene over the whole round-2 diff:** zero TK1 API (grep over the range), overlays stay plain
+  views (no rendering attributes), the twin-placeholder machinery untouched, the canary untouched; the
+  new `CommentNSTextView` overrides are super-first and TK2-safe.
+- **Path and process discipline:** the range touches app target + record only (path diff: zero core,
+  zero `Sync/`, zero server); every behavioural revert in the legs was announced first, discriminating,
+  and restored to a zero diff (R-FL; R-FL2a/b/c; R-FL3a/b; R-PL/R-PL2); the honestly-not-red cells are
+  labelled as such in the record; the two sheet-probe incidents led to a tightened offscreen line that
+  the later legs visibly honored; zero commit trailers (37 commits); worktree clean and in sync.
+- **The headless suite at the tip + this round's edit:** `swift test` EXIT 0 (core 2,704/307, workbook
+  40/6 read exactly; the MCP target green in the same invocation); the retired cell's file re-typechecked
+  stage-free against the built module (EXIT 0, with `EditorTestSupport.swift` — non-vacuous: the lone-file
+  invocation errors).
+
+### PENDING (the runner's next window — the orchestrator's; none of it claimed by this round)
+
+- `-only-testing:VariorumTests/CommentPanelFixLeg2Tests` — now **5 tests, expect 5/5 green** (the
+  retirement leaves F-W-3, the ownership table, the close rung, the monitor release, R1-2).
+- The standing U2/U3 suites as regression (unchanged by this round — the one edit was a deletion).
+- Nothing else: round 2 ordered no product change, and the walk rows it leaned on are already walked.
