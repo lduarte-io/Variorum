@@ -179,6 +179,23 @@ struct MCPShimClosedAppTests {
         #expect(finished() == .refused(.notRunning(errno: ENOENT)))
     }
 
+    /// VX-180's ladder, NIT 1: the refusal and the window echo ids by ONE
+    /// rule (`MCPOpeningWindow.isEchoableID`) — a frame the window would answer
+    /// as a request is exactly one whose id the refusal carries back. GREEN ON
+    /// BOTH SIDES by nature (the two copies agreed before; the NIT was
+    /// maintainability — "no red-on-old pin could exist", its reviewer): it
+    /// pins that they can no longer drift.
+    @Test func theRefusalAndTheWindowEchoIDsByOneRule() throws {
+        let ids = [#""s""#, "0", "4.5", "true", "null", #"{"a":1}"#, "[1]"]
+        for id in ids {
+            let frame = Data(#"{"jsonrpc":"2.0","id":\#(id),"method":"tools/list"}"#.utf8)
+            let refusal = MCPShim.refusalResponse(toFirstLine: frame, message: "m")
+            let echoed = try #require(try JSONSerialization.jsonObject(with: refusal.dropLast()) as? [String: Any])["id"]
+            let isRequest = MCPOpeningWindow.classify(frame) == .request
+            #expect((echoed is NSNull) == !isRequest, "id \(id): the refusal echoes it iff the window answers it")
+        }
+    }
+
     /// A first frame that is no request and no notification ends the window
     /// at once: the sentence answers it by its id (the pre-VX-181 road).
     @Test func aFrameThatIsNoRequestHearsTheSentenceAtOnce() throws {
