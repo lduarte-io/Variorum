@@ -23,7 +23,7 @@ schema, zero `Sync/`, zero custody, zero editor seam, zero app faces.
 | 3 | red-on-old BY REVERT (announced here before it starts; the fix committed first) | DONE `d8dc0e1f` (announced `c2f49bae`) — the evidence below, "RED-ON-OLD BY REVERT" |
 | 4 | suites — `VariorumMCPTests` whole target headless; the Mac app target BUILDS | DONE (this commit) — **`VariorumMCPTests` 135 tests / 20 suites, ALL GREEN** headless (`swift test --filter VariorumMCPTests`, 16.1 s; VX-168's close was 122/18 — +13 tests in the 2 new suites; no `skipped:` lines). **The Mac app target: `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx180 build` → `** BUILD SUCCEEDED **`** (the live round's Debug app, `io.lduarte.Variorum.debug`, with its `variorum-mcp` shim). Other suites over the changed types: `VariorumCoreTests` untouched (zero `Sources/VariorumCore` lines); the app's `MCPPaneTests` builds `MCPServerHost` and connects-then-closes (an EOF first read — no window frame), a Mac suite needing the stage: offered for the GO window |
 | 5 | self-assessment (below) | DONE (this commit) |
-| 6 | READY to the orchestrator; THE LIVE ROUND (gated on its GO + a held stage claim — dev store only) | IN-PROGRESS — READY sent after this commit; the live round NOT-STARTED, waiting for the orchestrator's GO + claim name. Its plan: "THE LIVE ROUND — the plan" below |
+| 6 | READY to the orchestrator; THE LIVE ROUND (gated on its GO + a held stage claim — dev store only) | IN-PROGRESS — READY sent (`d39e92a8`); **GO received; stage CLAIMED `vx180-live` 2026-10-12 21:01:58 (60 min)**; the round running per "THE LIVE ROUND — the plan" below. If this line survives a death: check `pgrep -fl 'Variorum.app/Contents/MacOS'` (quit only the DEV instance, by identity), remove the `-s local` registrations `variorum-dev`/`variorum-tee` from the scratch folder, restore the dev store from the newest `scale-prestage-*` dir with `Tools/ScaleFixture/restore.sh`, empty the clipboard, release the stage |
 
 **No revert is in flight** (piece 3's revert ran and was RESTORED — `git diff` empty after `git checkout HEAD --`, the moved test file `cmp`-identical to the committed one).
 
@@ -192,12 +192,12 @@ P2: the window runs on the handshake's own thread (and the over-cap helper threa
    notification inside a bounded window, before the setup key's one decision (VX-180)". No other canon is stale
    (the line never claimed the first frame IS the initialize). The QUESTIONS entries above. MOBILE PARITY: nothing
    mobile-visible.
-2. **Noticed, NOT this unit's (a second surface — the shim binary, `Sources/VariorumMCPSocket/MCPShim.swift`):**
+2. **Noticed, NOT this unit's — now ticket VX-181 (minted under 13n by the orchestrator, Bug + Pre-launch; a second surface — the shim binary, `Sources/VariorumMCPSocket/MCPShim.swift`):**
    when the shim CANNOT reach the app (Variorum closed — "Variorum must be open"; or not inside the app bundle), it
    answers the client's FIRST line and exits (`respondToFirstRequest`). With Claude Code that first line is now the
    probe, so the honest sentence lands on the probe's id and the `initialize` goes unanswered — the connection fails
    either way (correct: the app is closed), but Claude Code may show only "connection closed" instead of "Variorum
-   must be open". A beta tester with Variorum closed would meet it. Candidate ticket (pre-launch?); the fix shape is
+   must be open". A beta tester with Variorum closed would meet it. VX-181 carries it; the fix shape is
    the same window, in the shim's refusal read. Not done here — one surface per batch.
 3. **Her handoff (the kickoff's note):** after the fixed build is installed her clients re-run NOTHING (no key
    binding changes); the Air's `variorum` registration currently runs the BRIDGE (`~/.variorum/mcp-discover-bridge.
