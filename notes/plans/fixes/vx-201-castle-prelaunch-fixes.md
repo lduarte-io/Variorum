@@ -339,6 +339,119 @@ no capitals for emphasis, everyday register (no key names).
 Deletion code must be path-prefix-guarded to the two named homes (never a constructed path outside them). One
 read-only Sonnet for EXTERNAL facts only, if ever. Foreground waits only.
 
+## §F — U4 BRIEF (VX-204 + VX-206: the guide's honest sentence + the ceremony ends on Protection — ONE implementer session, Opus xhigh)
+
+**Product frame first:** the author's own writing app making its privacy guide honest and its ceremony's landing
+calm before public release — the field guide must not claim more than the encryption covers, and entering Castle
+from Settings ▸ Protection must put the user back where they acted, not on General. Defensive work on her code,
+at her request. You are the U4 implementer. Work ONLY in `~/dev/variorum-vx-201`. APPEND
+`## U4 RECORD (VX-204 + VX-206)` to this file — **append-only: never restructure, truncate or rewrite anything
+above your own section** (95879dc3's truncation is the failure class; your close touches only your section).
+LIVE STATUS first, commits per piece ("Part of VX-204" / "Part of VX-206"), push after every commit, no
+attribution trailers. The ENVIRONMENT TRAPS section binds verbatim; `notes/SessionResiliencyProtocol.md` binds
+you — read it. The orchestrator's notes-only commits in this worktree are expected: pull before each commit;
+stop only if CODE files or your own sections move under you.
+
+**Required reading (never delegated):** this file WHOLE — §A's VX-204 and VX-206 entries, the run LIVE STATUS's
+**VX-206 MACHINERY RULING** (it is the binding design for VX-206), her compaction-seam rulings (the re-seed is
+HERS in the morning — NOTHING in this unit touches her real store or re-seeds anything), the U1/U2/U3 records +
+adjudications; `notes/SessionResiliencyProtocol.md`; the member tickets' comments (VX-204, VX-206); then the
+code: `PostureCopy.swift:781` (`privacyLessonOneParagraphs`) and BOTH its seeders (`TutorialSeeder`,
+`MobileTutorialSeeder` — verify both read the ONE copy home; if either carries its own copy, say so before
+building), the website's privacy brief under `notes/brand/` (the honest plain-fields sentence you rhyme with),
+`AppSettingsView.swift:175-192` (`adoptMCPRequest()` — the pattern you mirror) + `MCPDoor.settingsRequest` (the
+request holder's shape), `PostureSwitchModel`/`PostureSwitch.swift` (where the ceremony completes and where the
+re-key teardown closes the Settings window), `ProtectionPane.swift` (the pane's info popup the landing must
+show).
+
+**VX-204 — the guide sentence (copy-only, one structural consequence):**
+1. Amend `privacyLessonOneParagraphs` so the lesson stops overstating: one honest sentence saying that dates,
+   the tag tree's shape, memberships, flags and sizes travel outside the encryption (rhyme with the website
+   privacy brief's own wording; everyday register, no key names; sentence case, no capitals for emphasis).
+   The smallest edit that makes the paragraph true — this is her guide's voice, not a specification.
+2. Both platforms ship it through the one copy home (verify, don't assume). Existing stores keep the stale
+   sentence by design (seeded content): her real store's re-seed is HER morning press (ruled — out of scope
+   here), and U5's guide warning rides the same seed, so one press covers both.
+3. Pin: string-level — the lesson paragraphs carry the honest sentence (red-on-old by revert); plus a
+   seeders-share-the-home pin if none exists.
+
+**VX-206 — end on Protection (the MACHINERY RULING is the design; VX-214's narrow exception binds):**
+1. Build the Protection twin of the MCP request pattern: a request holder the ceremony bumps at its END (the
+   Done, and the teardown road that closes/reopens the Settings window across the re-key) + ONE adopter in
+   `AppSettingsView` mirroring :175-192 — **nothing else in that file** (zero pane internals; VX-214 owns the
+   panes this week; the orchestrator sends them the final hunks after you land).
+2. The request fires only for a ceremony that was OPENED from Settings ▸ Protection (read how the ceremony
+   knows its origin; if it genuinely cannot, bump where the Settings-origin road completes and say so in the
+   record). The adopter selects Protection and shows the pane's info popup — the ticket's words: END on
+   Protection with its info popup showing, not on General.
+3. Pins (red-on-old by behavioral revert): (a) the Settings-origin ceremony's completion bumps the request and
+   the adopter lands Protection + arms the popup; (b) a ceremony NOT from Settings bumps nothing (General's
+   default untouched); (c) the request survives the re-key teardown (whatever holder shape you build, pin its
+   life across the window close). The WALK evidence (§B: "walk-verified") is the ORCHESTRATOR's stage walk —
+   you do not walk, do not launch the app, do not claim it.
+
+**Copy:** every new or changed sentence in `### U4 COPY DRAFTS` for the QUESTIONS #215 bundle — sentence case,
+no capitals for emphasis, everyday register.
+
+**Constraints:** ZERO lines in `Sources/VariorumCore/Sync/`. No schema. Zero pane-internal lines beyond the
+request holder + adopter. Mac-target suites are STAGE work — `build-for-testing` only (Mac AND phone: the
+seeder copy is shared), suites listed PENDING with `-only-testing` arguments; headless `swift test` freely. One
+read-only Sonnet for EXTERNAL facts only, if ever. Foreground waits only.
+
+## §G — U5 BRIEF (VX-209: the way-back revert's confirm line + guide warning — ONE implementer session, Opus xhigh)
+
+**Product frame first:** the author's own writing app being honest at the one door where Castle can quietly
+come undone — opening or restoring an old copy of the library — before public release. Defensive work on her
+code, at her request. You are the U5 implementer. Work ONLY in `~/dev/variorum-vx-201`. APPEND
+`## U5 RECORD (VX-209)` to this file — **append-only: never restructure, truncate or rewrite anything above
+your own section**; your close touches only your section. LIVE STATUS first, commits per piece ("Part of
+VX-209"), push after every commit, no attribution trailers. The ENVIRONMENT TRAPS section binds verbatim;
+`notes/SessionResiliencyProtocol.md` binds you — read it. The orchestrator's notes-only commits are expected:
+pull before each commit; stop only if CODE files or your own sections move under you.
+
+**Required reading (never delegated):** this file WHOLE — §A's VX-209 entry (the deeper fix is DELIBERATELY
+out: the stranding argument; it is recorded on VX-209's ticket — do not build it), her carried-forward
+reminder 2 in the run LIVE STATUS (the trace was READ, never RUN — your first deliverable runs it), the U1
+RECORD + ADJUDICATION (F2 especially: the pre-fix outcome on disk persists, and the guide instruction is that
+victim's road too; and belt c's exact shape — the landing arm refuses only while `switchPending`, so a
+restore's silent-Standard PERSISTS once custody landed), the U2–U4 records; `notes/SessionResiliencyProtocol.md`;
+`notes/plans/fixes/vx-191-encryption-audit.md` §W.2 (the trace, verbatim); `notes/SyncSpec.md` IN FULL (custody
+seams); `notes/plans/phase-13x-library-portability.md` (the Open Library/adopt/restore machinery + decision 11);
+`notes/plans/pre-13x-postures-design.md` §14 corner 45; then the code: `LibraryClassifier`,
+`LibraryOpenModel`/`LibraryOpenCopy.swift`, the Data Safety Restore-from-Backup faces, `StoreBackup.swift` (the
+pair), the plaintext-export adopt arm, `StoreLaunchGate.swift` (`rawKeyCustody`, corner 45, belt c's flag),
+`PostureCopy.swift` (the field guide's Castle section — where your warning lives).
+
+**The build — STRICTLY in this order (§B's amended evidence row; her reminder 2 binds):**
+1. **FIRST, the reproduction pin — §W.2's round trip at HEAD.** A Castle library; open/restore a Standard-era
+   backup pair of the SAME library — it lands Standard silently; then bring the Castle-era copy BACK — the
+   trace claims it ALSO lands Standard (the way-back revert). Pin exactly what the trace claims, at the
+   adopt/classifier level, headless where the machinery allows. If the pin comes out GREEN-ON-HEAD (no
+   reproduction, in whole or in part), STOP that leg: record what actually happens, write NOTHING on the trace,
+   and report to the orchestrator — the confirm line may still proceed on the classifier facts alone, the guide
+   warning must be rewritten against the observed behavior.
+2. **THEN the confirm line** on the Open Library / Restore confirm: when the CURRENT library is Castle and the
+   INCOMING one reads Standard — BOTH classifier arms: a backup pair that reads Standard, AND a plaintext
+   export (always effectively Standard) — one sentence saying the library will open the old way afterwards and
+   naming the road back. Pinned on the classifier for both arms; red-on-old by revert. The line renders on
+   every face that runs the adopt (File ▸ Open Library, the Data Safety twin, Restore from Backup) — one copy
+   home, never three sentences.
+3. **THEN the guide warning** in the field guide's Castle section: instructions for reading an old backup —
+   afterwards check Settings ▸ Protection and choose Use Castle again. Written against U1's LANDED behavior
+   (belt c refuses only while a switch is pending, so the instruction STANDS) and against your reproduced
+   trace, never against the pre-fix code or the unrun reading. It is ALSO the pre-fix victims' road (F2's
+   adjudication) — the sentence serves both honestly. It rides the same seeded guide as VX-204: the re-seed is
+   HER morning press; say nothing about re-seeding.
+
+**Copy:** every new or changed sentence in `### U5 COPY DRAFTS` for the QUESTIONS #215 bundle — sentence case,
+no capitals for emphasis, everyday register (no key names on everyday surfaces).
+
+**Constraints:** ZERO lines in `Sources/VariorumCore/Sync/`. No schema. No change to the adopt/restore
+MACHINERY — this unit is a confirm line, a guide warning and the pins that hold them (the deeper fix is
+VX-209's ticket). Mac-target suites are STAGE work — `build-for-testing` only, suites listed PENDING with
+`-only-testing` arguments; headless `swift test` freely. One read-only Sonnet for EXTERNAL facts only, if ever.
+Foreground waits only.
+
 ## §C — U1 BRIEF (VX-202: the re-key reopen's silent re-save race — ONE implementer session, Opus xhigh)
 
 **Product frame first:** this is the author's own writing app hardening its OWN privacy promise before public
@@ -439,6 +552,14 @@ flipped, everything pushed, PENDING marks honest.
   refinement 3 / U2's born-Castle pin (already binding); 2 = U5's evidence row AMENDED this commit — the
   trace-reproduction pin runs FIRST, before any U5 text is written on it; 3 = the kickoff's standing
   instruction, confirmed (VX-191 closes with this run's PR).
+- 2026-10-13 post-compaction: the orchestrator resumed from the handoff (26ef247a) + this record, state verified
+  by git/ListAgents. Coordinator ACK (verbatim-faithful): both seam rulings received and recorded their side —
+  VX-233 time-boxed tonight inside this run, the re-seed HER hands in the morning, F6 stays pre-cleared. Window
+  C protocol: READY when the pinned checkout finishes its rebuild; the coordinator may SPLIT the window (green
+  pass + phone suites first, the seven revert cycles after another session's short window) if the queue wants
+  it, else one ~90-min claim. The pinned checkout is ADVANCED to a208a24a deliberately — U2-complete and
+  PRE-U3-Shared, so U2's seven revert patches (App/Variorum/Shared/) apply cleanly there while U3 keeps building
+  in the live worktree; U3's own suites run at a later window at U3's tip.
 
 ## U1 RECORD (VX-202)
 
