@@ -1347,6 +1347,23 @@ leg ran red under R-c; headless core 2,697/308 green at close)
   consent pin among the 36); still owed = phase 2's seven revert cycles (queued ~04:35 behind VX-179 + VX-214
   windows). Simulators shut down; stage released after phase 3.
 
+### WINDOW C RECORD — PHASE 2 (orchestrator, stage claim vx201-u2-tests-p2; the pinned checkout at a208a24a)
+All SEVEN U2 revert cycles ran; each RED exactly on its pin-table legs, every restore verified clean (empty
+porcelain), HEAD products rebuilt after the last cycle (exit 0). Per cycle: **R-a** (no doors) — pin (a) on all
+seven asserts; pins (b) and (f) also red as the removed-fork SUPERSET behaving consistently (window B's R-a1
+class; the per-leg attribution stands). **R-b1** (no forget) — pin (b) on 12 asserts (material rides behind the
+gate; the follow re-adds `apple` and moves custody silent); pins (c)/(c2) red on their material-present lines,
+the no-forget superset. **R-b2** (the Apple arm lands) — pin (b) alone, 4 asserts, all key-file/arm lines
+(F-U2-1's red-on-old). **R-c** (resume no forget) — pin (c) alone. **R-c2** (resume ignores the flag) — pin
+(c2) alone (ordinary Done shown). **R-f** (ordinary Done) — pins (b)/(c)/(c2)/(f) exactly on their Done
+asserts. **R-7** (one act) — the item-2 pin alone, 12 asserts across both banner faces and the sync row. The
+THREE BOUND pins (two-store isolation (d) · born-Castle (e) · faces-as-code) stayed GREEN through every cycle —
+and (e) green at the stage means the Done's optional new-account sentence is AVAILABLE for #215 as the U2
+record offered (not shipped in the draft; her call). **U2's red-on-old obligation DISCHARGED; VX-110's
+acceptance evidence is COMPLETE** (green pass 435/60 + the phone pins + the seven cycles). Window D folds U3's
+suites and U4's together at the tip (coordinator queue: batch3impl → vx-184 U3 → us). Logs /tmp/vx201-wc-R-*.log,
+rollup /tmp/vx201-window-c.summary (deleted at closeout per the tidy rule).
+
 ## U4 RECORD (VX-204 + VX-206)
 
 **Not done in this unit (stated first):** OPEN — filled at the close.
