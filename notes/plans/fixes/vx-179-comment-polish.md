@@ -191,7 +191,7 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 | 1 | Record file + kickoff rulings landed, branch pushed | DONE (93b5b720) |
 | 2 | The `Sync/` line: `tombstonedKinds` + `block_comment` + two-client stale pin (orchestrator) | DONE (37b9a6e7) — pin red-on-old VERIFIED BY REVERT (all 5 expectations fail, the comment purged live, stores diverge); full PurgeConvergenceTests 20/20 green headless |
 | 3 | U1 true delete (core + panel door) | BUILT (89b5a9af…, last code f92436e8) — core pins red-on-old by revert + full `swift test` green + the app target builds; app-target pin RUN + the walk PENDING (stage) — see the U1 RECORD |
-| 4 | U2 gutter cards | BUILT (1a7d2242…, last code + pins at the U2-e commit) — plain build green, pins typechecked stage-free, tables replayed; pin RUN + revert + the walk PENDING (stage) — see the U2 RECORD |
+| 4 | U2 gutter cards | BUILT (1a7d2242…b179a9fe) — plain build green, pins typechecked stage-free, tables replayed; pin RUN + revert + the walk PENDING (stage) — see the U2 RECORD |
 | 5 | U3 panel pristine pass | NOT-STARTED |
 | 6 | Mac-target test runs + the walk (stage via oct12coordinator) | HELD — stage |
 | 7 | The ladder (fable-reviewer, whole diff) | NOT-STARTED |
@@ -410,7 +410,7 @@ in the app target, whose test build is stage-gated; red-on-old by revert is PEND
 | U2-b | geometry: `leftCardRect`'s 96 pt cap retires (the pad named `cardHeightPad`, kept at 24); the cap's one pinned cell flipped; the red-on-old-shaped cells | DONE (6c941167) — `Phase13SurfaceTests.aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane`'s cap cell flipped (`== 96` → `== 824`); new `ProseGutterTests.theCardGrowsToTheBlocksOwnHeightWithinTheRhythm` (6 height cells red-on-old by arithmetic — old answers 96; the parity cells green both sides). Compile + RUN + revert PENDING (stage) |
 | U2-c | the card: stacked entries, scroll inside, the wheel routing, the identity reconcile in `renderComments` | DONE (e3629851) — `CommentCardView` + the pure `CommentCardLayout` (arrange · wheelOwner · reconcile) moved to the new `Features/Editor/CommentCard.swift`; `renderComments` reconciles by identity and presents the stacked card; the plain Debug build SUCCEEDED (zero warnings in touched files) |
 | U2-d | pins: the pure tables (arrangement · wheel owner · reconcile) + mounted card + controller cells (app target — WRITTEN only; compile + RUN PENDING stage) | DONE (b193aa1f) — new `VariorumTests/CommentCardTests.swift` (3 suites, 14 tests); the card gained the budget's component-wise `CardContent ==` + two DEBUG counters the pins read. STAGE-FREE EVIDENCE (no test target built, nothing run): `swiftc -typecheck` of the new file AND of the two edited existing functions (extracted verbatim) against the plain build's `Variorum.swiftmodule` — EXIT 0, zero diagnostics (non-vacuity probed: a misspelt member fails it); a source-copy REPLAY of every pure-table cell and every geometry cell (new vs old formula) — all as pinned. RUN + red-on-old by revert PENDING (stage) |
-| U2-e | verify: the plain `xcodebuild … build`; record closed | DONE (this commit) — after the last code change (read-tier cards carry no scroller view; two pin cells for it): `xcodebuild -scheme Variorum -destination 'platform=macOS' build` (Debug, from `App/Variorum/`) **BUILD SUCCEEDED**, EXIT 0, zero warnings in a touched file (the log's 9 warnings are pre-existing, untouched files); the pins re-typechecked EXIT 0 |
+| U2-e | verify: the plain `xcodebuild … build`; record closed | DONE (b179a9fe) — after the last code change (read-tier cards carry no scroller view; two pin cells for it): `xcodebuild -scheme Variorum -destination 'platform=macOS' build` (Debug, from `App/Variorum/`) **BUILD SUCCEEDED**, EXIT 0, zero warnings in a touched file (the log's 9 warnings are pre-existing, untouched files); the pins re-typechecked EXIT 0 |
 
 ### The settled design (written before the code — the record must let a fresh session finish)
 
@@ -519,8 +519,8 @@ a geometry oracle + the walk, red-on-old where a cell is the old law)
 
 | item | disposition |
 |---|---|
-| 1 — geometry (R-VX179-2) | BUILT (6c941167) — the cap's cell flipped (`Phase13SurfaceTests`' `BlockDecorGeometryTests.aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane`: `== 96` → `== 824`); new `ProseGutterTests.theCardGrowsToTheBlocksOwnHeightWithinTheRhythm` (seven height cells RED ON OLD — 96 there — and the parity cells green both sides, confirmed by the source-copy replay below); every other geometry pin unmodified |
-| 2 — the card (R-VX179-1) | BUILT (e3629851 + the U2-d/U2-e refinements: component-wise content equality, DEBUG counters, read-tier cards carry no scroller) — pins in `CommentCardTests.swift` (b193aa1f + U2-e) |
+| 1 — geometry (R-VX179-2) | BUILT (6c941167) — the cap's cell flipped (`Phase13SurfaceTests`' `BlockDecorGeometryTests.aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane`: `== 96` → `== 824`); new `ProseGutterTests.theCardGrowsToTheBlocksOwnHeightWithinTheRhythm` (six height cells RED ON OLD — 96 there — seven with the flipped cap cell; the parity cells green both sides; confirmed by the source-copy replay below); every other geometry pin unmodified |
+| 2 — the card (R-VX179-1) | BUILT (e3629851 + the refinements at b193aa1f/b179a9fe: component-wise content equality, DEBUG counters, read-tier cards carry no scroller) — pins in `CommentCardTests.swift` (b193aa1f, b179a9fe) |
 | 3 — the one law | UNTOUCHED BY CONSTRUCTION — no line in `ProseGutter`, the text views, `PaneSurface` or any measurement road; the change lives in the gutter card and the height arithmetic `roomBelow` already bounds. The one-law pins (`ProseGutterTests`' production-loop cells, `nothingInTheGutterEverCoversProse`, `IndicatorGutterTests`) ride unmodified — RUN PENDING |
 | 4 — pins | WRITTEN: 3 new suites / 14 tests + the new geometry test + the flipped cell; typechecked stage-free; RUN PENDING (stage) |
 
@@ -537,7 +537,7 @@ a geometry oracle + the walk, red-on-old where a cell is the old law)
 - **Source-copy replay of the pure decisions:** a scratch executable compiled from a verbatim copy of
   `CommentCardLayout` + `leftCardRect` (with the OLD formula beside it) checked every table cell in
   `CommentCardLayoutTests` and every height cell of the geometry pin: ALL AS PINNED; the old formula
-  answers 96 on exactly the seven cells the pin calls red-on-old, and the same value on the parity
+  answers 96 on exactly the seven cells the two pins call red-on-old (six + the cap cell), and the same value on the parity
   cells (17 → 41, 72 → 96, room-20 → nil, the shipped 54 / 34 / 21 rhythm cells). A replay of a COPY
   — the stage's revert is still owed.
 
@@ -550,8 +550,8 @@ a geometry oracle + the walk, red-on-old where a cell is the old law)
   -only-testing:VariorumTests/MarginHoverCommentTests -only-testing:VariorumTests/CommentsAndReorderTests`
   (the last two mount `CommentCardView` through the controller and must ride unmodified).
 - **Red-on-old by revert** (geometry): set `leftCardRect`'s ideal back to `min(blockHeight + 24, 96)` →
-  exactly the seven height cells of `theCardGrowsToTheBlocksOwnHeightWithinTheRhythm` + the flipped
-  cap cell go red, nothing else; restore. (The card pins are FEATURE pins — they fail to COMPILE on the
+  exactly the six height cells of `theCardGrowsToTheBlocksOwnHeightWithinTheRhythm` + the flipped
+  cap cell (seven) go red, nothing else; restore. (The card pins are FEATURE pins — they fail to COMPILE on the
   pre-U2 tree, which is their red.)
 - **The walk** — DEV-STORE Debug build, both voices, both appearances, one capture per row:
   W-1 a tall multi-paragraph block with one short comment (the card follows the block; entries at its
