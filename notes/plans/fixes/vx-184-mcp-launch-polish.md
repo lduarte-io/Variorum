@@ -97,3 +97,46 @@ zero `Sync/`, zero custody/keychain, zero editor seam.
 | 13 | close: self-assessment, PROVISIONALs, OWED | NOT-STARTED |
 
 **No revert is in flight.**
+
+### VX-132 — the trace (written before code)
+
+**The symptom on record** (13n-b U3 ladder round 1, `notes/plans/13nb-u3-ladder-round1.md` ~l.307): one
+`VariorumMCPTests` run never finished, the test helper at 100% CPU for 11+ minutes; `sample` showed "the SDK's
+`Client.connect` message loop busy-spinning over `StdioTransport.readLoop`'s poll-sleep while
+`MCPSocketTransport.readLines` sat in `read()`"; 13n-c met it three more times (killed, rerun green).
+
+**The mechanism, read in the pinned SDK (swift-sdk 0.12.1, read-only) and then MEASURED:**
+1. `Client.connect(transport:)` starts its message loop as `repeat { … let stream = await connection.receive();
+   for try await data in stream { … } … } while true`. When the transport's stream FINISHES (the stdio read loop
+   sees EOF — the server closed the socket), the `for try await` ends normally and the `repeat` comes straight
+   back: `receive()` hands out the same finished stream, whose iterator returns nil at once — **a loop with no
+   suspension that ever waits, forever**. Nothing cancels it but `Client.disconnect()`.
+2. The same loop never fails the PENDING requests at EOF: `sendAndAwait` parks a continuation that only a
+   response, `disconnect()` or a cancellation notification resumes — and `requestTask.value` ignores the caller's
+   cancellation. **No request in the SDK has a time limit.** A call whose answer never comes waits forever.
+3. The harness feeds (1) on every test: `ServerHarness.tearDown()` stops the host while the test's SDK clients are
+   still connected (most tests never hang up; a refused `connect` never can — it threw), so every such client's
+   loop spins for the rest of the test process.
+   **Measured (a throwaway probe, never committed; each case its own `swift test` process):** three harness
+   clients whose server then stopped, never disconnected → **6.37 CPU-seconds over 2 s of idle wall time** (one
+   core each, for good); the same three disconnected first → **0.0002 CPU-s**. A whole `VariorumMCPTests` run
+   leaves dozens of these spinning on the cooperative pool, so a later test's awaited answer is processed only
+   when the pool can schedule it — and under (2) any answer that is lost or never sent is waited on forever.
+   That is the sampled hang: a spinning loop beside a reader parked in `read()`.
+
+**The fix shape (the harness only — the SDK is pinned exact and never patched, 13n-c §8):**
+- **Hygiene — no client outlives its connection:** the harness hands the SDK a thin `HarnessTransport` (the SDK's
+  own `StdioTransport` underneath, every call forwarded). When the client's message loop asks for the stream a
+  SECOND time — which it does only once the stream has ended and every line in it has been handled — the
+  transport parks the loop on a stream that never yields (no spin) and disconnects the client, which fails every
+  pending request ("Client disconnected") instead of leaving it waiting. A server that closes now fails the call
+  at once; the loop never spins.
+- **Time limits (the ticket's ask):** `connect` and every `callTool` / `listTools` run under a deadline (default
+  30 s per act, task-local so a pin can shorten it) whose timer is a GCD timer, so it fires whatever the awaited
+  call does; on expiry the connection's socket is shut down (the transport reads EOF → the hygiene above ends the
+  client) and the act throws a `HarnessFailure` naming itself — a hang becomes a bounded, named failure. The
+  harness's raw `rawOpen` read gets a receive timeout of the same bound.
+- **The pins:** a silent peer that never answers `initialize` → `connect` fails within its bound; a peer that
+  answers `initialize` and then nothing → `callTool` fails within its bound (both HANG on the old harness — red
+  watched under an outer watchdog); a connection the server closes → the client's message loop asks for its
+  stream at most twice (red by reverting the hygiene alone: the count climbs without end).
