@@ -2475,3 +2475,11 @@ cleanup). Six minutes, released clean, no instance.
 **Her handoff:** `notes/handoffs/vx-179-handoff.md` (the morning checklist). **Mobile parity:** the
 MobileSoul.md row lands on main at the merge. **The refresh:** the coordinator's one-folded-refresh
 plan governs; the outcome is recorded below at the merge.
+
+**MERGED: PR #154, merge commit d6caafc1 (2026-10-13 ~04:15).** The merge-moment ledger batch landed on
+main with this commit (AppSpec §7/§9 contract lines + the §14 entry with the 13n-a roll, QUESTIONS #215,
+the master plan row retired, MobileSoul PL-46). **The /Applications refresh FOLDED into the night's final
+refresh (oct12coordinator's one-refresh plan — vx-201/VX-214/vx-184 close behind this merge; the last
+merger refreshes from merged main, carrying this change).** VX-179 → Done rides this closeout. Hard stop
+after cleanup; her handoff is `notes/handoffs/vx-179-handoff.md`.
+
