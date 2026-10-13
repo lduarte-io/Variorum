@@ -1724,8 +1724,11 @@ apply-check CLEAN at the tip in the pinned checkout)
   16 suites, ONE red — `CopyRegisterPinTests.theEncryptionBookNamesNoKeyFamilyInternalButItsOneRecordedSentence`,
   `.resourceMissing`: the harness copies no bundle resources (it reads `EncryptionExplained.txt`); a harness
   artifact, not a finding — PENDING its stage run like every other.
-- IN-PROGRESS — the step-3 revert cycles (announced before any starts): `R-209-guide-seed` (the Mac's lesson 2
-  without the paragraph) and `R-209-guide-words` (BOTH copy homes back to §W.2's unverified road — no Resume Sync),
-  made on the committed tree, restored, all six U5 patches `git apply --check` clean at this commit. Same cycle as
-  step 2 (`revert-cycle.sh`; the worktree reverted for seconds, restored by `git checkout --`, diff read EMPTY
-  before any build).
+- DONE (this commit) — THE STEP-3 REVERT CYCLES, both RUN in the harness (announced at `7c7b00fe`; the same
+  cycle; filter `VX209|TutorialPrivacyChapterTests|VX204PrivacyLessonTests`, 13 tests in 5 suites each):
+  **R-209-guide-seed** — 1 issue: the seeded pin (`lessonTwo.contains(privacyOlderCopyParagraph)`), every other pin
+  green (the chapter's two-lesson and copy-§7 pins included) · **R-209-guide-words** — 2 issues: the guide's road
+  pin (`resume != nil && useCastle != nil`) and the confirm's register pin (`line.contains(resumeSyncDoor)`). The
+  BOUND road pin stayed GREEN through both (it proves shipped behavior, not this unit's words). After the cycles the
+  harness re-synced to HEAD: `✔ Test run with 13 tests in 5 suites passed after 3.388 seconds`; the worktree clean.
+- NEXT: the Mac + phone `build-for-testing` (the real project), then the close.
