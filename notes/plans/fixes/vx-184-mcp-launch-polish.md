@@ -2423,3 +2423,59 @@ session, but a reviewer should spot-check them against VX-276's own trace when i
    the house-wide structural-undo shape (her own `deleteBlock` + her Put back) as you judge.
 4. **The bundle at the merge:** P-VX184-R2-1.
 5. **This pass's diff for any sanity read:** `cd9490c1..HEAD`, my commits only (`22f9410c` is yours).
+
+## CLOSEOUT — THE MERGE-MOMENT MAC WINDOW (opus-implementer at MAX effort, 2026-10-13 from ~14:45 MDT)
+
+**What this window did NOT do (said first — kept current; PENDING until the window closes):** the window has not run
+yet — no stage claimed, no `xcodebuild test`, no app launch.
+
+**The job (the orchestrator's brief):** prove the merged tree on the Mac and capture two faces, under the stage claim
+the orchestrator relays (booked by the coordinator as `vx184-close`, ~90 min, the claim may run 120): (1) the WHOLE Mac
+test target, `test-without-building` on the merged tip, every red attributed against main's known list — a new red
+re-run alone; one that reproduces alone stops the window after the release and is reported, never fixed here — with the
+four suites the round-2 fix pass's OWED 1 names (`MCPAskAndReceiptTests`, `MCPGrantSheetTests`, `MCPSetupMenuTests`,
+`TutorialMCPChapterTests`) among the runs; (2) the on-screen look of the round-2 consent sentences, never yet seen —
+Settings ▸ MCP's "Enable the MCP server" blurb and the grant sheet's HOW MUCH line under Edit, in Study and Terminal,
+light — behind an A1 prestage copy of the dev store; (3) cleanup (the Debug app quit by bundle id, the dev store restored
+and `cmp`-verified, the prefs back to 0 keys differing, the stage released promptly). **No code change in this window.**
+Worktree `~/dev/variorum-vx-184`, branch `vx-184-mcp-launch-polish`; evidence `notes/plans/vx184-screens/close/`
+(gitignored).
+
+**Read before acting (never delegated):** CLAUDE.md + its canon; this record's head, LIVE STATUS, every UNIT RECORD's
+stage window and Mac batch list, THE LADDER through ROUND 2 — FIX PASS (its OWED 1 — the four suites and the on-screen
+glance); VX-214's record (RUN CLOSEOUT — the FINAL WHOLE-SUITE PASS, the attribution baseline); `Tools/WalkKit/README.md`
+whole; `notes/SessionResiliencyProtocol.md` whole; `Tools/stage`, `Tools/ScaleFixture/{stage,restore}.sh` and the WalkKit
+scripts (`guard.sh`, `click.sh`, `keys.sh`, `capture-windows.swift`, `wl2.swift`, `scroll.swift`).
+
+**The tree:** the sources are the merged tip `cc39e81d` (main merged in). HEAD moved to `fba7d2f1` during this session's
+reads — the orchestrator's own docs-only commit in this shared worktree (`notes/stargazing-mcp-guide-brief-2026-10-12.md`;
+`git diff cc39e81d fba7d2f1 -- . ':!notes'` is empty), so the build and every run below are of the merged tip's code. My
+commits are pathspec-limited to this record.
+
+**THE ATTRIBUTION BASELINE** (VX-214's whole-target pass on main — "4532 tests in 737 suites … 10 issues (including 5
+known issues)", its RUN CLOSEOUT — plus the coordinator's relay at this window's booking):
+
+| # | test | ticket | expected on this tree |
+|---|---|---|---|
+| 1 | `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` | VX-115 | red — standing |
+| 2 | `ChromeLineLimitTests.everyBareFixedSizeStatesItsLinePolicy` | VX-245 (the two MCP sites' fix moved to VX-246 with the pane rebuild) | red over EXACTLY 8 sites. The pin's own rule, mirrored headlessly by this session (a Python scan, scratchpad), finds the SAME 8 on this tree and on `origin/main`: `Core/Views/SearchPicker.swift:503` · `Features/Library/LibraryBulkRow.swift:93`, `:101`, `:109`, `:113` · `Features/MCP/MCPGrantSheet.swift:285` · `Features/MCP/MCPPane.swift:412` · `Features/Takes/TakesShowFaces.swift:185` (89 sites scanned on each). Any other site is NEW |
+| 3 | `SettingsTitleClearanceTests` · `LibraryHandOffTests` | — (VX-214: environmental) | green on a Standard-posture dev store; red only while the dev store sits in Castle posture (the test host's library never readies) |
+| 4 | `VX209LeavesCastleConfirmTests` | — (VX-214's fold-collision fix) | green |
+| 5 | the LibraryInfiniteScroll redraw pin · DestructiveUndoWarning `redoNeverAsks` | VX-167 | a load-flake class (red only in wide parallel runs; green alone) |
+| 6 | the MCP socket load flakes | VX-279 | a load-flake class (the fd-reuse host bug) |
+| 7 | `BookOutlineLandingTests` | — (CLEARED: U5 row 8c + VX-214's pass) | green — a red here is NEW |
+| 8 | the `withKnownIssue` records | — | known issues, never reds (VX-214's run carried 5) |
+
+### LIVE STATUS — the closeout window's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this section + LIVE STATUS + the attribution baseline | DONE (this commit) |
+| 1 | the Mac `build-for-testing` on the merged tip (`DerivedData/vx184-u5`, incremental; no stage — a build) | NOT-STARTED |
+| 2 | READY FOR STAGE — hand back with the minutes estimate; wait for the GO and its exact claim line | NOT-STARTED |
+| 3 | THE WHOLE MAC TARGET — `test-without-building` launched detached to its log and POLLED IN THE FOREGROUND (the phase-19 precedent); every red attributed; a new red re-run alone | NOT-STARTED |
+| 4 | THE ON-SCREEN LOOK — A1 prestage copy, prefs exported, the Debug app launched; the blurb and the Edit HOW MUCH line captured in Study and Terminal, light | NOT-STARTED |
+| 5 | cleanup — the app quit by bundle id; the dev store restored and `cmp`-verified; prefs 0 keys differing; the stage released | NOT-STARTED |
+| 6 | close — this section's first line, the counts, every red's attribution, the captures, the skips; the result line | NOT-STARTED |
+
+**No revert is in flight, and no code change is planned.**
