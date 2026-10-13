@@ -563,7 +563,16 @@ the simulator replay suite; then the six red-on-old revert cycles per the pin ta
   `MobilePostureSheets.swift` whole, `VariorumApp.swift` (the runner wiring), `AppServices.swift` (custody + the marker
   read), and the harnesses I build on (`PostureSwitchTests`, `VX202ReopenRaceTests`, `Phase13pControllerTests`,
   `SyncEnrollmentTests`).
-- NEXT: the design (below, settled before code), then the fix commits, the pins, build-for-testing (Mac + phone).
+- DONE `2397ae55` (the Apple arm's consent guard, F-U2-1) · `4c4d136c` (item 2 — the banners name the marker's act) ·
+  `7efdc887` (the two doors: model + runner + copy + both faces; the consent de-capped, its three pins re-based) ·
+  `f1a7652a` (the pins, `VX110SignedOutCastleTests`, 9 tests). VERIFIED here: Mac `build-for-testing` green twice
+  (after the fix, after the pins), zero warnings in changed/new lines (the 5 warnings the log shows inside touched
+  FILES are pre-existing lines). Every test RESULT is PENDING the stage (Mac-target suites are stage work).
+- NEXT: the behavioral-revert patches (`notes/plans/fixes/vx-201-u2-reverts/`), the phone `build-for-testing`, the
+  copy drafts, the close.
+- REVERT PATCHES BEING GENERATED (announced before starting, the protocol's rule): each revert is edited onto the
+  COMMITTED tree, captured with `git diff`, and restored with `git checkout -- <its files>` (HEAD = the fix, nothing
+  else uncommitted there); `git diff HEAD --stat` must read only this record afterwards. No revert is left applied.
 
 ### The traced mechanism (pin before fix — every leg read at HEAD `97959e5d`)
 1. **The fork is missing (auditor A, confirmed).** `PostureSwitchModel.start` sends `.enter` straight to `.explain`;
