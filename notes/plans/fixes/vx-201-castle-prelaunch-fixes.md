@@ -195,8 +195,82 @@ commit; synchronous foreground waits only (poll, don't `tail -f`). EVERY `xcodeb
 `swift build`/`swift test` on the core package runs freely. The real Keychain drills (`PostureSwitchDrillTests`)
 are stage work. Work ONLY in `~/dev/variorum-vx-201`.
 
+## §C — U1 BRIEF (VX-202: the re-key reopen's silent re-save race — ONE implementer session, Opus xhigh)
+
+**Product frame first:** this is the author's own writing app hardening its OWN privacy promise before public
+release — after entering Castle, nothing current may still open the old way. Defensive work on her code, at her
+request. You are the U1 implementer. Work ONLY in `~/dev/variorum-vx-201` (branch
+`vx-201-castle-prelaunch-fixes`). Append your record as `## U1 RECORD (VX-202)` in this file, LIVE STATUS first,
+commit per piece, push after every commit (`notes/SessionResiliencyProtocol.md` binds you — read it).
+
+**Required reading before any edit (never delegated):** this file WHOLE (§A's VX-202 refinements are BINDING);
+`notes/plans/fixes/vx-191-encryption-audit.md` §O.2–O.4 (the trace); `notes/SyncSpec.md` IN FULL (custody rule);
+`notes/plans/pre-13x-postures-design.md` §1 (decisions 28/32/35 especially), §3.4, §4, §14 (corners 42/45);
+then the code: `AppBootstrap.swift` (the ready path :500-545, `rekeyLibrary` :810-841, `lock`),
+`PostureSwitch.swift` (the runner: `swapLibrary`, the marker steps, `moveCustodyForSwitch` call sites),
+`ProtectionController.swift` (`moveCustody` :1346-1375, `reconcileFollow`, the Apple arm `reconcileAppleKey`),
+`StoreLaunchGate.swift` (`effectiveGate` :362-383, `rawKeyCustody`), `Sources/VariorumCore/Persistence/StoreKey.swift`
+(+ `StoreKeyGuard`), and the existing pins (`PostureSwitchTests`, `PostureSwitchDrillTests`, `Phase13pControllerTests`).
+
+**The defect (traced, §O.3):** during a Standard→Castle switch (ceremony, follow, or resume), `rekeyLibrary`'s
+reopen reaches `.ready`, where the 13p R1-M3 recovery arm (`AppBootstrap.swift:526-531`) sees an `unlockedKey`
+under a not-yet-demanded gate (custody has not moved yet) and spawns a DETACHED utility task that re-saves L′
+into the SILENT Keychain item. Nothing orders that save against the custody move's `deleteAuto`; a late save
+leaves the current library key readable with no Touch ID and no passphrase, and on a local-only library the
+route's landing arm then wraps L′ under the Apple key at the next launch (a silent, total reversion the Done
+screen never mentioned).
+
+**The fix (three legs, each with its own pin; §A's refinements are part of the spec):**
+1. **Never spawn the R1-M3 re-save while a switch is in flight.** TWO gates, both required, because each covers
+   a window the other cannot:
+   (i) an IN-MEMORY `switchInProgress` on `AppBootstrap`, set synchronously before the re-key's `beginOpening`
+   and cleared only after the runner's custody move completes (the runner owns the clear) — this covers the
+   live path with zero race, because the arm then never spawns the task at all. A marker read INSIDE the
+   detached task is NOT acceptable: the task can be delayed past the custody move and the marker clear, read
+   "clear", and re-land the item AFTER `deleteAuto` — the same bug through the fix.
+   (ii) the persisted `RotationMarker` (the `readSwitchPending` seam already at `AppBootstrap.swift:505-507`)
+   gates the arm at an ORDINARY post-crash launch: the file is already under L′, the silent open fails, the
+   lobby's typed word produces an `unlockedKey`, and without this gate the arm re-lands it silently mid-switch.
+   At that instant no runner is racing (the resume starts later), so the async read is safe THERE and only there.
+2. **Belt: the at-ready sweep.** At every ready under a DEMANDED effective gate, a lingering silent item for the
+   CURRENT store id is a custody-law violation — delete it (the `CustodyHandover`-style delete carrying the DP
+   flags), never read it as posture. Safety bounds (§A): only when the live key file carries P/W wraps for that
+   key or the gated item verifies (never strand a hand-damaged store); prove by pin that it is INERT during a
+   13x adoption's deliberate `landCustody` window (dials reset to Auto there — verify, don't assume).
+3. **Belt: the route's landing arm.** `StoreLaunchGate.effectiveGate`'s landing arm must not land an Apple copy
+   while a switch is pending for that store id. The route runs PRE-OPEN (no database), so the signal is a
+   store-id-scoped flag OUTSIDE the DB, beside the dials' existing UserDefaults home: written when a switch
+   begins, cleared when custody lands (the marker's resume clears it too). Do NOT stretch this to "ever was
+   Castle" — that is VX-209's deeper fix and is deliberately out of tonight's scope (§A's stranding argument).
+
+**The pins (red-on-old verified by BEHAVIORAL REVERT, each):** (a) the race pin at BOOTSTRAP level through the
+PRODUCTION reopen — `AppBootstrap.rekeyLibrary` → `beginOpening` → ready — with the utility save HELD (an
+injectable guard seam / gated `saveAuto`) until after the custody move, asserting the silent item is ABSENT at
+the end; red on the pre-fix code. (b) the post-crash launch arm: marker set + unlockedKey at ready ⇒ no re-save.
+(c) the sweep's delete under a demanded gate + its adoption-window inertness. (d) the landing arm's refusal
+under a pending switch flag. Existing suites stay green. If a pin proves a leg hollow (green on both sides),
+record it and do not fix — the hallucination guard.
+
+**Constraints:** ZERO lines inside `Sources/VariorumCore/Sync/` — if the fix seems to need one, STOP and report
+to the orchestrator (that seam is reserved). Zero user-facing copy in U1. No schema. Match surrounding idiom;
+comments state constraints, not narration. One read-only Sonnet subagent for EXTERNAL facts only, if ever.
+
+**Testing protocol:** headless `swift build` / `swift test` freely in the worktree. Mac-target suites
+(`xcodebuild test`) are STAGE work — do NOT run or claim; instead `xcodebuild build-for-testing` to prove
+compilation, list the exact suites + `-only-testing` arguments as PENDING in your record, and the orchestrator
+runs them at a coordinator window. Confirm the "Test run with N tests" line semantics (skipped tests count —
+read the skipped lines). Foreground waits only (poll, never `tail -f`). End your session with the record
+flipped, everything pushed, PENDING marks honest.
+
 ## LIVE STATUS
 - 2026-10-13 kickoff: preflight complete (CLAUDE.md canon, SyncSpec whole, postures design §1/§3.4/§4/§14, the
   audit record + all three auditor reports, the member tickets + her comments, QUESTIONS tail, board snapshot);
-  main merged into the branch (a1efb7de); §A assessment + §B units written (this commit). NEXT: in-flight row on
-  main, coordinator check-in, U1 implementer.
+  main merged into the branch (a1efb7de); §A assessment + §B units written (c79ccd49); in-flight row on main.
+- Coordinator (oct12coordinator): CUSTODY SLOT GRANTED to VX-201 explicitly (VX-184 and VX-214 both confirmed
+  zero custody); stage READY→GO per window; the /Applications refresh may FOLD into a shared end-of-burst
+  refresh — ask at merge. TWO coordination riders: (1) VX-206's landing may touch the Settings window's
+  open-at-pane machinery, which is VX-214's surface tonight — sequence with settingspaneupdater BEFORE U4
+  builds there; (2) VX-214 may reword Protection/Data Safety pane copy — rhyme-check our field-guide copy with
+  theirs before either merges. (3) The real-store guide re-seed at closeout: cite the skill's standing closeout
+  rule; the coordinator puts it to her if that's not authorization enough — answer owed at closeout.
+- §C U1 brief written (this commit). NEXT: U1 implementer (VX-202).
