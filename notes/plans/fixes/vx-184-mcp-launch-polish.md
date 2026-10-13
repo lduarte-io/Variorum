@@ -35,8 +35,8 @@ dev store only behind an A1 prestage copy, restored verified.
 
 | unit | members | status |
 |---|---|---|
-| U1 — the socket and key road | VX-132 · VX-181 · VX-198 | NOT STARTED — next up; implementer brief being written |
-| U2 — the gatherings icon | VX-185 | NOT STARTED |
+| U1 — the socket and key road | VX-132 · VX-181 · VX-198 | **UNIT CLOSED — DONE** (2026-10-13 01:41 MDT): headless 153/25 MCP · 2,695/308 core · 40/6 workbook; Mac batch 339/47 green; live round PROVEN (real Claude Code; re-bind + replaced-key sentence on the wire; closed-app sentence on initialize id; 300-block 224 KB round-trip byte-equal); dev store restored verified; stage released 22/70 min. 3 PROVISIONALs for the merge; cold review owed with the run's ladder. Noticed-not-fixed → VX tickets (see U1 OWED 3) |
+| U2 — the gatherings icon | VX-185 | IN FLIGHT — implementer spawned 2026-10-13 ~01:50 |
 | U3 — the door's ergonomics | VX-186 · VX-173 · VX-188 · VX-190 · VX-187 | NOT STARTED |
 | U4 — edit parity inside a note | VX-195 | NOT STARTED |
 | U5 — edit parity across the library | VX-196 | NOT STARTED |
@@ -52,6 +52,7 @@ dev store only behind an A1 prestage copy, restored verified.
 - 2026-10-12 night — kickoff registration sent + acknowledged (REQUEST → READY → GO → RELEASE; READY only
   when actually built; refreshes may fold into one shared window at the night's end — send the refresh ask
   at the merge). Zero Sync//custody declared.
+- 2026-10-13 01:19–01:41 — U1's window ran under claim vx184-u1 (GO received, handover taken, released early; result line sent).
 - 2026-10-13 — coordinator: she is away from the Pro all night (tmux only), so walks/live rounds need no extra check with her; READY → GO in queue order.
 
 ## Cross-run coordination (VX-214, settings panes & launch UI polish — author-attended, merges after us)
