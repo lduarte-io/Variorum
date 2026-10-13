@@ -56,6 +56,18 @@
 //  Its marker is the live wing of that name. For the live round:
 //  `Tools/ScaleFixture/stage.sh notes=30,long=1,books=20,shelves=3,wing=1`.
 //
+//  VX-185 (RUN VX-184 U2) — THE GATHERINGS ICON's walk: with `wing=2` the
+//  fixture ALSO mints R-VX185-1's control — the wing "elsewhere" holding the
+//  gathering "every draft" (rule: #draft), the book "the drafts book" and two
+//  #draft notes filed into it, and for every APPROVED client a read · always
+//  grant on EACH note and on the book, but no wing grant there (so the book
+//  wears the icon and the gathering, every note of it shared, stays bare) —
+//  plus, in "variorum" (whose write-new wing grant reaches both), the
+//  archived-book rule's pair: the ARCHIVED book "an old parser book" and the
+//  ARCHIVED gathering "old parser things" (rule: #parser). Its marker is the
+//  live wing "elsewhere". For the walk:
+//  `Tools/ScaleFixture/stage.sh notes=30,long=1,books=20,shelves=3,wing=2`.
+//
 
 #if DEBUG
 import Dependencies
@@ -75,7 +87,8 @@ enum ScaleFixture {
         /// 13n-c U2 — the grant road's books (0 = none, the shipped fixture).
         var books = 0
         var shelves = 8
-        /// 13n-c U6 — the wing on the wire's live round (0 = none).
+        /// 13n-c U6 — the wing on the wire's live round (0 = none); VX-185:
+        /// 2 also mints the gatherings icon's control wing and archived pair.
         var wing = 0
 
         /// `"notes=600,long=2000[,books=160,shelves=9]"`; every part optional;
@@ -104,6 +117,12 @@ enum ScaleFixture {
     /// The wing part's marker and its gathering (13n-c U6).
     nonisolated static let wingName = "variorum"
     nonisolated static let gatheringName = "parser things"
+    /// VX-185's control part (`wing=2`): its marker wing and its readings.
+    nonisolated static let controlWingName = "elsewhere"
+    nonisolated static let controlGatheringName = "every draft"
+    nonisolated static let controlBookName = "the drafts book"
+    nonisolated static let archivedBookName = "an old parser book"
+    nonisolated static let archivedGatheringName = "old parser things"
 
     private static var started = false
 
@@ -122,6 +141,7 @@ enum ScaleFixture {
                     ? "minted \(request.notes) notes + a \(request.longBlocks)-block note"
                         + (request.books > 0 ? " + \(request.books) books on \(request.shelves) shelves" : "")
                         + (request.wing > 0 ? " + the wing \(wingName)" : "")
+                        + (request.wing > 1 ? " + the control wing \(controlWingName)" : "")
                     : "already present — nothing minted")
             } catch {
                 NSLog("ScaleFixture: failed — %@", String(describing: error))
@@ -132,7 +152,7 @@ enum ScaleFixture {
     /// Mints the fixture into the session's store; false when every
     /// requested part's marker already stands.
     static func seed(session: AppSession, request: Request) async throws -> Bool {
-        let (notesPresent, booksPresent, wingPresent) = try await session.database.read { db in
+        let (notesPresent, booksPresent, wingPresent, controlPresent) = try await session.database.read { db in
             (try Int.fetchOne(db, sql: """
                 SELECT COUNT(*) FROM container
                 WHERE kind = 'post' AND deleted_at IS NULL AND title = ?
@@ -140,12 +160,15 @@ enum ScaleFixture {
              try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL AND name = ?",
                               arguments: [grantMarkerBook]) ?? 0,
              try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM wing WHERE deleted_at IS NULL AND name = ?",
-                              arguments: [wingName]) ?? 0)
+                              arguments: [wingName]) ?? 0,
+             try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM wing WHERE deleted_at IS NULL AND name = ?",
+                              arguments: [controlWingName]) ?? 0)
         }
         let mintNotes = notesPresent == 0
         let mintBooks = request.books > 0 && booksPresent == 0
         let mintWing = request.wing > 0 && wingPresent == 0
-        guard mintNotes || mintBooks || mintWing else { return false }
+        let mintControl = request.wing > 1 && controlPresent == 0
+        guard mintNotes || mintBooks || mintWing || mintControl else { return false }
         let base = Date().addingTimeInterval(-2 * 365 * 86_400)
         let notes = request.notes, longBlocks = request.longBlocks
         let books = request.books, shelves = request.shelves
@@ -163,8 +186,61 @@ enum ScaleFixture {
             if mintWing {
                 try mintWingPart()
             }
+            if mintControl {
+                try mintControlPart()
+            }
         }
         return true
+    }
+
+    // MARK: - The gatherings icon's walk (VX-185)
+
+    /// R-VX185-1's control wing, and the archived-book rule's pair in
+    /// "variorum" (when that wing stands — `wing=2` mints it first). No
+    /// provider is named (O-4's net): the grants go to every APPROVED client.
+    nonisolated private static func mintControlPart() throws {
+        let ops = Operations(undoStack: nil)
+        @Dependency(\.database) var database
+        let clients = try database.read { try Queries.mcpClients($0, states: [.approved]) }
+        let wing = try ops.createWing(name: controlWingName)
+        let draft = try ops.createTag(parent: nil, name: "draft", wingID: wing.id)
+        _ = try ops.createReading(
+            name: controlGatheringName, kind: .gathering, querySpec: try RuleGrammar.encode(.tag(draft.id)),
+            wingId: wing.id)
+        let book = try ops.createReading(name: controlBookName, kind: .book, wingId: wing.id)
+        var noteIDs: [String] = []
+        for (index, title) in ["a draft about rivers", "a draft about doors"].enumerated() {
+            let note = try ops.createPost(title: title, wingId: wing.id)
+            _ = try ops.newBlock(in: note.id, text: paragraph(seed: 120 + index, long: false), registeringUndo: false)
+            _ = try ops.applyTag(draft.id, toPost: note.id)
+            _ = try ops.addPostToReading(note.id, to: book.id)
+            noteIDs.append(note.id)
+        }
+        // Every note of the gathering shared ONE BY ONE, and the book holding
+        // them by its own grant — her R-VX185-1: the gathering stays bare.
+        for client in clients {
+            for id in noteIDs {
+                _ = try ops.grantMCPAccess(client.id, .init(rung: .read, scopeKind: .note, scopeID: id, duration: .always))
+            }
+            _ = try ops.grantMCPAccess(client.id, .init(rung: .read, scopeKind: .book, scopeID: book.id, duration: .always))
+        }
+        // The archived-book rule's pair, where a wing grant reaches both.
+        guard let variorum = try database.read({ db in
+            try String.fetchOne(
+                db, sql: "SELECT id FROM wing WHERE deleted_at IS NULL AND name = ?", arguments: [wingName])
+        }) else { return }
+        let oldBook = try ops.createReading(name: archivedBookName, kind: .book, wingId: variorum)
+        try ops.archiveReading(oldBook.id)
+        if let parser = try database.read({ db in
+            try String.fetchOne(
+                db, sql: "SELECT id FROM tag WHERE deleted_at IS NULL AND wing_id = ? AND path = 'parser'",
+                arguments: [variorum])
+        }) {
+            let oldGathering = try ops.createReading(
+                name: archivedGatheringName, kind: .gathering, querySpec: try RuleGrammar.encode(.tag(parser)),
+                wingId: variorum)
+            try ops.archiveReading(oldGathering.id)
+        }
     }
 
     // MARK: - The wing on the wire's live round (13n-c U6)

@@ -196,4 +196,49 @@ struct MCPGatheringIconTests {
             _ = db
         }
     }
+
+    // MARK: - The walk's staging (DEBUG-only, env-gated — `ScaleFixture`'s `wing=2` part)
+
+    /// The walk stages R-VX185-1's control and the archived pair through the
+    /// fixture; this pins that the staged world says what the walk claims —
+    /// read through the SAME map the Bookcase draws from. `wing=1` mints no
+    /// control; `wing=2` adds it once; a relaunch mints nothing.
+    @Test func theFixturesControlPartStagesTheWalksWorldOnce() async throws {
+        try await withSession { session, db in
+            let ops = session.operations
+            _ = try approved(ops)
+            #expect(ScaleFixture.Request.parse("notes=30,long=1,books=20,shelves=3,wing=2")
+                    == ScaleFixture.Request(notes: 30, longBlocks: 1, books: 20, shelves: 3, wing: 2))
+            #expect(try await ScaleFixture.seed(session: session, request: .init(notes: 3, longBlocks: 1, wing: 1)))
+            func id(_ table: String, _ name: String) async throws -> String? {
+                try await db.read { db in
+                    try String.fetchOne(
+                        db, sql: "SELECT id FROM \(table) WHERE deleted_at IS NULL AND name = ?", arguments: [name])
+                }
+            }
+            #expect(try await id("wing", ScaleFixture.controlWingName) == nil, "wing=1 mints no control")
+            #expect(try await ScaleFixture.seed(session: session, request: .init(notes: 3, longBlocks: 1, wing: 2)))
+            #expect(try await ScaleFixture.seed(session: session, request: .init(notes: 3, longBlocks: 1, wing: 2))
+                    == false, "a relaunch mints nothing")
+
+            let all = try await db.read { try Queries.mcpBookReaches($0) }
+            let parser = try #require(try await id("reading", ScaleFixture.gatheringName))
+            let control = try #require(try await id("reading", ScaleFixture.controlGatheringName))
+            let draftsBook = try #require(try await id("reading", ScaleFixture.controlBookName))
+            let oldBook = try #require(try await id("reading", ScaleFixture.archivedBookName))
+            let oldGathering = try #require(try await id("reading", ScaleFixture.archivedGatheringName))
+            #expect(all[parser]?.first?.throughTitle == ScaleFixture.wingName, "iconed through the variorum wing grant")
+            #expect(all[draftsBook] != nil, "the book wears its own grant's icon")
+            #expect(all[control] == nil, "R-VX185-1: every note shared, the gathering bare")
+            #expect(all[oldBook] != nil && all[oldGathering] != nil, "the archived pair: one rule, both in the map")
+            let elsewhere = try #require(try await id("wing", ScaleFixture.controlWingName))
+            let variorum = try #require(try await id("wing", ScaleFixture.wingName))
+            let onBoards = try await db.read { db in
+                Set(try Queries.bookcase(db, wingID: variorum).books.map(\.reading.id))
+                    .union(try Queries.bookcase(db, wingID: elsewhere).books.map(\.reading.id))
+            }
+            #expect(onBoards.isSuperset(of: [parser, control, draftsBook]))
+            #expect(onBoards.isDisjoint(with: [oldBook, oldGathering]), "the archived pair is off the Bookcase")
+        }
+    }
 }
