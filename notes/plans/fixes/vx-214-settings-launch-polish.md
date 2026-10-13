@@ -16,6 +16,8 @@ Surfaces: `App/Variorum/Variorum/Features/Settings/` EXCEPT the MCP pane (`Featu
 
 **Contact points agreed with vx-184 (2026-10-13, cross-session):** vx-184's U6 rebuilds the MCP pane (tabs, Waiting, (i) explainers, the code-block setup command — R-VX184-6: "Only the MCP pane — her other panes are her separate pass"). Shared files, disjoint regions: this run edits `SettingsShape.swift`'s NON-MCP rows only (vx-184 the MCP rows only); this run owns the Settings WINDOW shell this cycle (VX-225 title bleed, VX-224 lock stub) — vx-184 stays inside the MCP pane body and flags any shell/chrome touch to us; anything MCP-pane-shaped arising in her sittings routes to vx-184, never built here. If vx-184 mints a reusable explainer-behind-(i) component, this run REUSES it where her rulings want the idiom (one chrome vocabulary, P-8). Closeouts serialize per the standing rule — expect vx-184 to merge first; this branch rebases.
 
+**VX-201 contact (oct12coordinator, 2026-10-13):** VX-201 (Castle pre-launch fixes) holds tonight's one custody slot — this run needs none (zero `Sync/`, zero custody CODE; Protection/Data Safety pane COPY rewording stays Settings-feature-only and is covered by the fable-review rider, not the custody slot). VX-201's VX-206 touches only the Castle ceremony's landing pane; if its fix turns out to need the Settings window's open-at-pane/selection machinery, that's this run's surface — they flag before building.
+
 ## Members (the ledger — one row per sub-issue; pin-before-fix binds PER MEMBER)
 
 | # | Ticket | What | Status |
