@@ -542,3 +542,95 @@ the simulator replay suite; then the six red-on-old revert cycles per the pin ta
   rot ticketed as VX-233 (her pre-launch-or-after call in the morning bundle). Window A verdict: U1 GREEN —
   305/38 Mac incl. the 10 pins, migration drill green, posture drill pre-existing-red by bisect (VX-233),
   simulator green. Stage released; window B (the six revert cycles) next.
+
+## U2 RECORD (VX-110)
+
+**Not done in this unit (stated first):** PENDING — filled at close.
+
+### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
+- 2026-10-13 — U2 implementer (Opus) started. Reading done in this session, never delegated: this file whole (§A's
+  VX-110 refinements, §B, §D, the U1 RECORD + its adjudication + window A); her carried-forward reminders read
+  VERBATIM from `08479fff` (see F-U2-0 — they are no longer in this file at HEAD); `notes/SessionResiliencyProtocol.md`;
+  `notes/plans/fixes/vx-191-encryption-audit.md` whole (§W / §W.1 / §W.2); auditor A's VX-110 section + its
+  "did not check" list; `notes/SyncSpec.md` in full; `notes/plans/pre-13x-postures-design.md` §1 (all decisions),
+  §4, §5, §14 (all corners); `notes/plans/fixes/vx-99-ladder-round3.md` (the VX-110 MINOR + the banner NIT). Code:
+  `PostureSwitch.swift` whole, `PostureSwitchModel.swift` whole, `EncryptionSession.swift` whole, `EncryptionViews.swift`
+  whole, `PostureCopy.swift` whole, `EncryptionKeychain.swift` whole, `ProtectionController.swift` (the follow verdict,
+  the reconcile, the sweep, the Apple arm, the custody move, `wireOneSecretHooks`), `StoreProtection.swift`
+  (`Posture.derive`, `ProtectionDefaults`), `StoreLaunchGate.swift` (the gate, the route, `syncCustodyPresent`),
+  `AppBootstrap.swift` (the ready road, the R1-M3 arm, `rekeyLibrary`, `endSwitch`), `SyncStatusViews.swift` whole,
+  `ProtectionPane.swift` (the pane's doors, the notice bar, `PostureSwitchSheet`), `MobileProtectionSheet.swift` +
+  `MobilePostureSheets.swift` whole, `VariorumApp.swift` (the runner wiring), `AppServices.swift` (custody + the marker
+  read), and the harnesses I build on (`PostureSwitchTests`, `VX202ReopenRaceTests`, `Phase13pControllerTests`,
+  `SyncEnrollmentTests`).
+- NEXT: the design (below, settled before code), then the fix commits, the pins, build-for-testing (Mac + phone).
+
+### The traced mechanism (pin before fix — every leg read at HEAD `97959e5d`)
+1. **The fork is missing (auditor A, confirmed).** `PostureSwitchModel.start` sends `.enter` straight to `.explain`;
+   `runCeremony`'s `enrolled = vault ∧ transport ∧ signedIn ∧ custody`, so a signed-out library holding sync custody
+   MATERIAL (Standard ⇒ the silent bound item, readable without a prompt) takes the local road
+   (`PostureSwitch.swift` local branch): the vault untouched, the material KEPT and moved behind the gate by the custody
+   move (`SyncCustodyTransition.move` carries a record with material), the ordinary Castle Done.
+2. **The silent revert, step by step.** At the next signed-in ready `reconcileFollow` finds material in hand
+   (`heldSyncMaterial()` reads the session record the gated move left), the ids equal the vault's, the vault carries an
+   Apple-held copy and the NEW key file carries none ⇒ the follow-into-Standard arm runs `followIntoStandard()`: the key
+   file gains `apple`, custody moves silent. Her Castle act undone, one notice after the fact.
+3. **A SECOND silent revert the audit did not trace — the Apple arm (NEW, F-U2-1).** Forgetting the material closes
+   arm 2 but not this: signed in to a Standard account, `Posture.derive` takes the VAULT's word (decision 8) ⇒ determined
+   Standard ⇒ `reconcileAppleKey` reads A (a READ is allowed even when minting is not) and LANDS the key file's `apple`
+   copy over the library's own key (`landAppleCopyOffMain`), before any consent. The same hole exists today for EVERY
+   Castle-born library joining a Standard account (corner 6, the design's "consent at enrollment"):
+   `Phase13pControllerTests`'s (d) case asserts the consent facts, the landing count and custody — never the key file,
+   whose world adopts the resident, so the arm lands there today. Without closing it, "signing into it later will ask
+   before anything changes" would be false. Fixed in this unit (the arm writes nothing while the consent is owed);
+   pinned red-on-old.
+4. **What keeps the Castle shape at the ROUTE after a forget** (§A refinement 2, verified): `forgetDeviceKeys` →
+   `DeviceKeyStore.clear()` keeps the IDENTITY-only bound record; the live gate's `syncCustodyPresent` is record
+   presence (`E2EEKeychainStorage.load != nil`), so the route reads the library ENROLLED ⇒ indeterminate ⇒ the gated
+   shape ⇒ the lobby, and the route's Apple landing arm is skipped. Pinned (bound).
+5. **Item 7 (the NIT):** the Encryption tab's banner + door (`EncryptionViews.swift` `rekeyIncompletePrompt` /
+   `finishReplacingKeysDoor`) and the sync row (`SyncStatusViews.swift` "Finish key replacement…") name ONE act for
+   every pending `RotationMarker`; the panes already read `CeremonyAct(resuming:)`.
+
+### The design (settled before code; PROVISIONALs marked)
+- **The door (model):** `checkDoor` reports `signedOutHoldingSyncKeys` = no session ∧ custody MATERIAL in hand
+  (`DeviceKeyStore.load() != nil` — the identity-only record reads nil). `start()`'s `.enter` arm forks to a new phase
+  `.signedOutChoice` (the two doors) on that fact, else `.explain` byte-unchanged. Pre-sync (no material) and enrolled
+  signed-in libraries keep today's road; signed-in-offline keeps the transport's offline refusal (the door check throws).
+- **Sign In…** ends the ceremony (phase `.signInChosen`); both faces open the account surface over the ceremony sheet
+  and closing it closes the ceremony. No auto-resume (PROVISIONAL, §A refinement 4); the choice screen says to choose
+  Use Castle again after signing in.
+- **Use Castle on This Mac Only** (model flag `thisDeviceOnly`) → an honest explain variant (the account-wide bullets
+  would be false) → the ordinary screens → `runner.enterCastle(…, thisDeviceOnly: true)`.
+- **The runner (the belt + the road):** a signed-out library holding material is REFUSED the local road unless
+  `thisDeviceOnly` (`signInOrThisDeviceOnly` — the model re-offers the two doors); `thisDeviceOnly` with a session at the
+  act is refused (`thisDeviceOnlyWhileSignedIn`). The This-Mac-Only road FORGETS FIRST — before its first marker,
+  verified by a re-read (material must read nil, else `syncKeysNotForgotten`, nothing else changed) — then steps 4–7
+  exactly as a pre-sync library (U1's gate i / `endSwitch` / `switchPending` ride along unchanged — asserted in a pin).
+  Forget-first ELIMINATES the "re-keyed library still holding the old account's material" window rather than racing it:
+  no marker of this road ever exists beside held material, and a crash after the swap meets a signed-in relaunch with
+  nothing for the follow-into-Standard arm to act on (that arm reads no marker — see F-U2-2).
+- **Carried by the resume (the belt):** a pending LOCAL Castle marker (entersCastle ∧ not a follow ∧ no corpus id —
+  only the local road writes that shape) whose resume finds material in custody FORGETS it before finishing (verified):
+  the This-Mac-Only road whose material came back between the crash and the resume (the reconcile's silent Standard
+  enroll re-lands it when the crash left the library Standard-shaped and she signs in), or a pre-fix build's silent road.
+- **The honest Done across a crash:** a per-store-id flag beside the dials (`ProtectionDefaults` —
+  `thisDeviceOnlySwitch`, written before the forget, cleared with the marker) tells the resume this road was This Mac
+  Only (the marker cannot carry it — `RotationMarker` lives in `Sources/VariorumCore/Sync/`). `Outcome.thisDeviceOnly`
+  ⇒ the selector renders the This-Mac-Only Done (by the fresh snapshot's fate), never `enteredCastleDone`.
+- **The Apple arm (F-U2-1's fix):** `reconcileAppleKey` writes nothing while the consent is owed — no sync custody at
+  this ready, the library key behind the gate (resident adopted), and the library's OWN posture Castle. Robust to the
+  stale `vaultReading` an offline ready keeps (unlike keying on `enrollReading`, which a nil reading clears).
+- **The consent** de-capped + a wording pass (PROVISIONAL). **The phone** composes the same model; its sheet renders
+  the two new phases and the explain variant (same copy). **Item 7:** the banner, its door, the sync row's label and
+  door read the pending marker's act (`CeremonyAct(resuming:)`) through a new marker read on `EncryptionSession`.
+- Zero lines in `Sources/VariorumCore/Sync/`; no schema.
+
+### Findings for the orchestrator (dispositions owed by the run)
+- **F-U2-0 — RECORD INTEGRITY: commit `95879dc3` (the U1 record close) truncated this file.** It replaced §C's body from
+  "Append your record as `## U1 RECORD (VX-202)`" through the old LIVE STATUS — §C's required reading, defect, fix,
+  pins, constraints and testing protocol; the run's LIVE STATUS (kickoff, coordinator grants + its three riders); the
+  **VX-206 MACHINERY RULING**; and **HER CARRIED-FORWARD REMINDERS (verbatim)** — with the U1 record's top. The text is
+  intact at `08479fff`/`c2f188b7` (`git show c2f188b7:notes/plans/fixes/vx-201-castle-prelaunch-fixes.md`, lines
+  ~199–300). U4's brief is told to cite the VX-206 ruling that is no longer here. Not restored by me (the orchestrator's
+  sections); flagged so a fresh session never reads the truncated text as the whole.
