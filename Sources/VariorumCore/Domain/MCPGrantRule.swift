@@ -243,7 +243,7 @@ public enum MCPGrantRule {
         return .ask(.notShared, offersAlways: true)
     }
 
-    // MARK: - The WHY (13n-c U3 — VX-271/-7: "readable through the Home wing grant")
+    // MARK: - The WHY (13n-c U3 — VX-271 · VX-164: "readable through the Home wing grant")
 
     /// What lets an approved client reach a target right now.
     public enum Standing: Equatable, Sendable {

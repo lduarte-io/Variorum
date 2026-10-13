@@ -2265,8 +2265,8 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: PrivateMarkCopy.allowHereNoNote,
             availability: noteScoped),
-        // 13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; VX-270 · VX-271/
-        // 7/8 — the case's own comment carries the family). The row and
+        // 13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; VX-270 · VX-271 ·
+        // VX-164 · VX-272 — the case's own comment carries the family). The row and
         // surface doors carry their TARGET (the row, the pick, the book, the
         // place the icon sits on), so their availability is `always`; their
         // render gate is VX-272's (an approved client exists — the window's

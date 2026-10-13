@@ -731,7 +731,7 @@ enum MCPToolCatalog {
         ]),
         scopes: MCPToolDeclaration.everyScope)
 
-    /// 13n-c U6 (VX-160 — VX-160/-9, the brief §10's R1 · T1 · U1): the
+    /// 13n-c U6 (VX-160 — VX-160, the brief §10's R1 · T1 · U1): the
     /// author's own Move to Wing, on the wire. Listed at EDIT (the source's
     /// rung) under any scope kind: a client short on the destination's write
     /// new is still offered it, and its refusal raises that wing's ask.
