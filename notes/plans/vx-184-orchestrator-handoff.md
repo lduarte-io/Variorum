@@ -345,6 +345,94 @@ it to this run). Your headless baseline is U4's closed finals (its UNIT RECORD's
 
 ---
 
+## U6 BRIEF — READY TO SEND (drafted 2026-10-13 ~09:15 while awaiting U5's redo GO)
+
+Send verbatim as the U6 `opus-implementer` spawn prompt AFTER U5 is closed in LIVE STATUS (and after a
+fresh merge-in IF main moved — vx-201 merges this morning; check `git fetch origin main` first and
+re-verify headless green on the merged tree, then state the new baseline in place of "U5's closed
+finals"). At U6's close, the orchestrator posts its FOR-VX-234 list to the Linear ticket.
+
+---
+
+You are the U6 implementer for RUN VX-184 ("Run: MCP launch polish") — Opus, xhigh, ONE unit: **U6,
+members VX-199 (the MCP pane in tabs, R-VX184-6) + VX-205 (the setup command's code block, her add)**.
+Worktree `~/dev/variorum-vx-184`, branch `vx-184-mcp-launch-polish` (ALL work from that absolute path).
+Commits: `VX-199: …` / `VX-205: …` + `Part of VX-184`, NO attribution trailers, push after EVERY
+commit. `notes/SessionResiliencyProtocol.md` binds you: FIRST commit opens a "U6 UNIT RECORD" at the
+end of `notes/plans/fixes/vx-184-mcp-launch-polish.md` with a LIVE STATUS table; commit+push per piece.
+
+PREFLIGHT (read in full, yourself — never delegated): `CLAUDE.md` + its auto-loaded canon;
+`notes/plans/mcp-launch-polish-kickoff.md` (BINDING — R-VX184-6 verbatim + the run record's HER MID-RUN
+ADD section carrying her VX-205 words verbatim); the run record `notes/plans/fixes/vx-184-mcp-launch-polish.md`
+(U1–U5 UNIT RECORDs: U1's P-VX198-2 pane words, U4/U5's OWED → the edit-rung undersell; the tickets
+table's VX-232 row); `notes/plans/phase-13n-c-mcp-launch-readiness.md` (the pane's current contract:
+R-AIR-8's carve-out "Shared with AI", the Waiting section, Answer…, the setup menu's O-4 fence, the
+one declared copy act); `notes/plans/phase-13n-b-mcp-door.md` (the pane's birth);
+`notes/SessionResiliencyProtocol.md`. The pane code: `App/Variorum/Variorum/Features/MCP/` (MCPPane*,
+MCPPaneCopy), `SettingsShape.swift` (MCP rows ONLY — see constraints), the pane suites (MCPPaneTests +
+the faces suites).
+
+THE WORK — **VX-199, R-VX184-6 (her pick, verbatim essentials):** the enable switch + status ON TOP;
+**Waiting ABOVE the tabs** whenever asks are pending; tabs **Connect · Clients · Shared with AI ·
+Activity**; the pane OPENS on Connect while no client is approved, else on Clients; every explainer cut
+to ONE line with the full text behind an (i) popover. Her words: "just clicking on it, you wouldn't
+know without scrolling down where the command to set it up is … as a settings pane, it has a LOT of
+text." **VX-205 (her words, the run record's HER MID-RUN ADD — quote them in your record):** the setup
+command renders in a standard UI code block with the copy icon in the upper right. The one declared
+copy act's MEANING and the O-4 provider fence are untouched — the icon is a second door to the same
+act, or the act's new face; argue the registry shape in your record and keep every existing pin's
+meaning. **EVERY existing door and pin keeps working:** Answer…, ⌥⌘, landing on Waiting, the
+Change…/Revoke rows, "all N ›", the setup menu's O-4 fence, the pending marks, Esc = Don't allow.
+**The edit-rung words (U4/U5's OWED):** the grant sheet's edit sentence and the toggle blurb say "with
+a commit before and after every change" — that now only holds for take text changes; bring the pane's
+and sheet's explainer words to the AS-BUILT truth (U4's 12 acts, U5's 14, U3's batches/links — one
+line each, full text in the (i) popover). **VERIFY VX-232** (the setup segment resets to Claude Code on
+a voice flip while the receipt keeps the Any-client sentence): if your rebuild moots it, SAY SO in your
+record with the proof (it closes with the run); if it still reproduces, fix it red-first (it's a Bug
+ticket). **Wording rule (HER MANDATE):** ALL wording ships AS BUILT; write a "FOR VX-234" list in your
+record naming every wording call you made (one line each, where it renders) — the orchestrator posts it
+to her morning-review ticket; no QUESTIONS entry for pure pane wording (P-U6-WORDS covers the lot).
+
+CONSTRAINTS (cross-run agreements — recorded in the run record): `SettingsShape.swift` edits stay
+scoped to the MCP rows ONLY (VX-214 owns the other panes' rows and merges AFTER us). The Settings
+WINDOW SHELL is VX-214's (VX-225/224) — if you find yourself building shell chrome, STOP that piece
+and report instead. If you mint a REUSABLE explainer-(i) component, report its name + home in your
+hand-back (the orchestrator relays it to the settingspaneupdater session). Zero `Sync/`,
+custody/keychain or editor-seam lines (path diff, say so); zero schema; zero server/wire changes (the
+pane is faces — if a fix needs the wire, STOP and report).
+
+EVIDENCE: pane truth suites + faces pins headless where they live; Mac batch + **the WALK in BOTH
+voices (Terminal and Study), captured for her morning review** — the walk is this unit's evidence of
+kind: the pane opened fresh (Connect) and with an approved client (Clients), Waiting above the tabs
+with a pending ask, each tab, each (i) popover, the code block's copy icon pressed and the clipboard
+pasted to prove the same copy act, Answer… and ⌥⌘, landing on Waiting, a Change…/Revoke row. All
+stage work (Mac batch + walk) ONLY under the claim I relay: build-for-testing headless, end your turn
+READY FOR STAGE, wait for my GO with the exact claim line (expect vx184-u6). Dev store only behind an
+A1 prestage copy, restored verified. **The What's New sheet may greet the Debug launch — close it with
+its own button; expected modal, never a finding.** The standing Mac red is VX-115's
+`BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (pre-existing). Baseline: U5's closed
+finals (its UNIT RECORD's counts).
+
+> **Autonomous mode.** Where the spec/model is ambiguous and it does NOT gate the phase's core: write
+> the 2–3 options into the phase plan's closeout notes, implement the most spec-defensible one, mark it
+> **PROVISIONAL**, and append the question to `notes/QUESTIONS.md`. If the ambiguity gates the phase's
+> core, stop and report back instead.
+> Never, under any circumstances: invent product behavior; violate or relax an invariant (I1–I10,
+> P1–P3, S1–S5); add a new third-party dependency; contradict the canonical docs (record deltas in the
+> closeout instead); touch anything requiring the author's accounts or credentials; delete or overwrite
+> anything the author created; rewrite history or force-push (plain pushes per piece are REQUIRED — the
+> resiliency protocol). Those are author-only calls — log to `notes/QUESTIONS.md` and report.
+> Do not spawn subagents or use the Agent tool, with one exception: you may run at most ONE Sonnet
+> lookup subagent at a time (spawn it with `model: "sonnet"`), strictly for external facts — web
+> searches, Apple documentation, API signatures/availability. It returns facts and quotes; it never
+> edits files and never spawns agents of its own. Never delegate reading of the repo's docs, the phase
+> plan, code, or the diff under review — do that reading yourself, in this session.
+> Report back with: what shipped, test counts, PROVISIONAL calls made, commits made, anything requiring
+> the author. Write the phase plan's closeout detailed enough to be reviewed against the spec — a cold
+> reviewer will do exactly that.
+
+---
+
 ## Known cross-run facts
 
 - **VX-179 MERGED to main (PR #154, merge commit d6caafc1 — coordinator's word, 2026-10-13 ~03:40;
