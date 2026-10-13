@@ -397,8 +397,19 @@ to her morning-review ticket; no QUESTIONS entry for pure pane wording (P-U6-WOR
 `.fixedSize()` sites trip it; TWO are in your files — `MCPPane.swift:412` and `MCPGrantSheet.swift:285`
 (line numbers as of main; re-locate after your edits). Fix BOTH in passing to the suite's own rule
 (read `ChromeLineLimitTests` for the sanctioned form), prove the suite green for those two sites, and
-name them in your hand-back — the orchestrator tells settingspaneupdater (it is ticketing all 8; ours
-come off its list). Do NOT touch the other six sites (not ours).
+name them in your hand-back — the orchestrator posts your fix hash to **VX-245** (VX-214's line-limit
+ticket; it lists ours as fixed-by-VX-184 U6 and owns the other six). Do NOT touch the other six sites.
+
+**VX-214 likely MERGES AHEAD of us** (settingspaneupdater, 2026-10-13 ~11:00). If it has landed on main
+before you spawn, the orchestrator merges it into the branch first, so you build on its shell. Its
+hunks in files you may touch: (1) `AppSettingsView.swift`: the VX-225 constants block (sidebarWidth
+224, **content size 748×520**) and two `.frame` lines, plus the TagManagerPane region (now internal).
+**Your tabbed pane must lay out inside that 748×520 content area. Verify it on the walk: no clipped
+tab row, no scroll needed to reach the setup code block on Connect.** (2) `SettingsShape.swift`:
+its non-MCP General rows only. Your MCP rows are untouched by it. (3) `EditorCommands.swift`: an
+empty `CommandGroup(replacing: .systemServices) {}` after About, and the MCP group's orphaned
+`Divider()` removed. The MCP Settings… button and its chord are untouched, and the
+`before: .systemServices` anchor stays valid.
 
 CONSTRAINTS (cross-run agreements — recorded in the run record): `SettingsShape.swift` edits stay
 scoped to the MCP rows ONLY (VX-214 owns the other panes' rows and merges AFTER us). The Settings
