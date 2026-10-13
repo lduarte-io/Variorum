@@ -498,6 +498,9 @@ final class TakesViewModel {
         // a new landing against this projection.
         board.noteProjectionArrived(new)
         refreshWordCounts(old: projection, new: new)
+        // VX-222: the take the article showed under the ring, read while the
+        // OUTGOING projection is still in hand (`endArticleRingIfItsTakeChanged`).
+        let articleTakeBefore = articleTakeUnderRing(in: projection)
         projection = new
         // THE CONVERGENCE HALF of the buffer-authoritative discipline
         // (review round 2, MAJOR): adoption only runs clean or at settle
@@ -511,6 +514,9 @@ final class TakesViewModel {
         // emission racing settle can flicker one observation cycle before
         // the post-commit emission converges it.
         authority.settle(isPending: { autosave.pending[$0] != nil })
+        // VX-222: a ring whose article cell changed take under it ends here —
+        // BEFORE the landings below may ring the fresh projection.
+        endArticleRingIfItsTakeChanged(from: articleTakeBefore)
         // VX-170: the `show ▾` filter re-reads the fresh projection BEFORE the
         // landings below resolve against it (a landing onto a pane the filter
         // hides opens its block — the filter must already know the shapes).
@@ -643,6 +649,49 @@ final class TakesViewModel {
     func blur() {
         authority.blur()
         Task { await autosave.flushNow() }
+    }
+
+    // MARK: - VX-222 — the article's ring never outlives the take it rang
+
+    /// The take the ARTICLE shows for the ring's block in `projection` — nil
+    /// unless the ring is in the Takes board's article column (the column that
+    /// renders each block's CHOSEN take) and its block is in the note.
+    private func articleTakeUnderRing(in projection: Queries.TakesProjection) -> String? {
+        guard host == .takes, let live = authority.livePane,
+              live.columnID == Self.takesMainColumnID,
+              let slot = projection.slots.first(where: { $0.blockID == live.blockID })
+        else { return nil }
+        return slot.variantID
+    }
+
+    /// **VX-222 — a ring whose article cell changed take under it ENDS** (the
+    /// architect's ruling, 2026-10-13; the trace is the run record's VX-222
+    /// RECORD in `notes/plans/fixes/vx-214-settings-launch-polish.md`).
+    ///
+    /// The article cell is ONE stable-identity pane per block that renders the
+    /// block's chosen take (13b 3F) and keys its liveness by that take's id.
+    /// When the store moves the chosen pointer — her card's "choose", ⌘⏎, an
+    /// agent's `choose_take`, sync, undo — the cell re-resolves under a ring
+    /// keyed to the OLD take: it goes read-only and shows the new take, while
+    /// the ring names a pane nothing renders (the R112 class). Choosing the
+    /// old take back then turned that same pane LIVE in place, and a live
+    /// pane never adopts projection text (it is buffer-authoritative), so the
+    /// page kept the other take's words under the ✓ — and a keystroke there
+    /// would have written them into the wrong take. A ring ⌃⌘→ stepped onto
+    /// the next take's id came back to life the same way when that take was
+    /// chosen.
+    ///
+    /// So when the article's take for the ring's block CHANGES across an
+    /// adoption, the ring ends through `blur()` — whose flush is load-bearing:
+    /// no keystroke may die with the ring. The test is the column's MODEL
+    /// resolution, never the viewport: a ring whose row scrolled away keeps
+    /// its place, and an adoption that leaves the article's take alone never
+    /// touches it. Fan cards render the whole fan, so a ring in a card (her
+    /// click into a take, the ⌘⏎ road) is never in question here.
+    private func endArticleRingIfItsTakeChanged(from before: String?) {
+        guard let before, let after = articleTakeUnderRing(in: projection), after != before
+        else { return }
+        blur()
     }
 
     // MARK: - 13f W7 — the takes room's landing
