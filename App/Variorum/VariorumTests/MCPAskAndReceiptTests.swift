@@ -277,9 +277,28 @@ struct MCPAskAndReceiptTests {
         // U3 (justified edit, the ritual): the server serves edit now, so the
         // sheet offers it (U2's pin: "never offered before it serves").
         #expect(MCPPaneCopy.offeredRungs == [.read, .suggest, .writeNew, .edit])
+        // VX-184 ladder round 2 (A JUSTIFIED EDIT, the ritual — doc-truth):
+        // mockup §3's edit sentence ("it can also edit takes — with a commit
+        // before and after every change, so you can always compare and come
+        // back") stopped being true when U4/U5 grew the rung — it deletes,
+        // archives, finishes and renames as well, none of it bracketed; only a
+        // take's rewrite (`edit_take`, `restore_commit`) keeps its words before
+        // and after as commits. The as-built clause (VX-234 re-voices it); it
+        // names nothing a note grant can't do (W-UX-14's rule), so it reads
+        // true at every scope, and no face promises "every change".
         #expect(MCPPaneCopy.rungDetail(.edit)
-                == "it can also edit takes — with a commit before and after every change, so you can always compare and come back",
-                "mockup §3's edit sentence")
+                == "it can also change, archive and delete what you shared, your own words included — when it "
+                + "rewrites a take, the take's words before and after are kept as commits, so you can always "
+                + "compare and come back",
+                "the edit rung as built")
+        for scope in [MCPGrantRule.ScopeKind.note, .book, .wing] {
+            let line = MCPPaneCopy.rungDetail(.edit, scope: scope)
+            #expect(!line.contains("book") && !line.contains("chapter"),
+                    "the book-level edit acts never act under a note grant (MCPToolFacts): \(line)")
+        }
+        #expect(MCPToolFacts.scopes(of: "delete_book") == [.book, .wing], "why the clause names no book")
+        #expect(!MCPPaneCopy.rungDetail(.edit).contains("every change"))
+        #expect(!MCPPaneCopy.enableBlurb.contains("every change"))
         #expect(MCPPaneCopy.rungDetail(.suggest)
                 == "it can add new takes and comments beside your text, and save a lens of its takes — it cannot touch a word you wrote")
         #expect(MCPPaneCopy.rungDetail(.writeNew) == "it can also make new notes, apply tags and build books")

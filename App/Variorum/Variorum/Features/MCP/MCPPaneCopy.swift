@@ -32,13 +32,18 @@ nonisolated enum MCPPaneCopy {
     /// her words to re-voice at 13s-a. 13n-c U2 (VX-272 — no "AI" in
     /// settings-class wording): "AI work" → "a client's work". 13n-c O-4 (her
     /// ask — no provider hardwired outside the setup): "clients like Claude
-    /// Code" → "MCP clients" (PROVISIONAL, her copy pass).
+    /// Code" → "MCP clients" (PROVISIONAL, her copy pass). VX-184 ladder
+    /// round 2 (doc-truth): "with a commit before and after every change" was
+    /// false once U4/U5 grew the edit rung — only a take's rewrite
+    /// (`edit_take`, `restore_commit`) is bracketed, and its "before" is
+    /// skipped when the take's latest commit already holds those words — so
+    /// the clause says the commits where they are true (VX-234's to re-voice).
     static let enableBlurb =
         "Runs a local MCP server while Variorum is open, so MCP clients can read "
         + "and write here through Variorum's own operations. Nothing is readable until you grant "
         + "it, every grant is revocable, and a client's work lands as takes beside your own \u{2014} a "
-        + "client changes your text only where you grant it edit, with a commit before and after "
-        + "every change."
+        + "client changes your text only where you grant it edit, and when it rewrites a take, the "
+        + "take's words before and after are kept as commits."
 
     /// The status line beside the toggle (mockup §2).
     static func status(_ state: MCPDoor.ServerState) -> String {
@@ -798,6 +803,18 @@ nonisolated enum MCPPaneCopy {
     /// (`create_book` is wing-only) and a note grant makes no new notes, so
     /// those claims are left out where they could never be true (the truth
     /// pin reads `MCPToolFacts`). PROVISIONAL words, her copy pass.
+    ///
+    /// VX-184 ladder round 2 (doc-truth) — EDIT: mockup §3's "it can also
+    /// edit takes — with a commit before and after every change" stopped
+    /// being true when U4/U5 grew the rung: it also deletes notes, books,
+    /// chapters, takes and blocks, archives and finishes books, rewrites her
+    /// comments and renames — and only a take's rewrite (`edit_take`,
+    /// `restore_commit`) keeps commits around the change (its "before"
+    /// skipped when the take's latest commit already holds those words, so
+    /// the words are still kept). The clause names no act a NOTE grant
+    /// can't do ("what you shared" holds at every scope — W-UX-14's rule).
+    /// It is also the ask sheet's lead for an edit ask (`MCPAskCopy.lead`).
+    /// As built, VX-234's to re-voice.
     static func rungDetail(_ rung: MCPGrantRule.Rung, scope: MCPGrantRule.ScopeKind? = nil) -> String {
         switch rung {
         case .read: "it can read and search what you shared"
@@ -811,7 +828,8 @@ nonisolated enum MCPPaneCopy {
             case .wing?, nil: "it can also make new notes, apply tags and build books"
             }
         case .edit:
-            "it can also edit takes \u{2014} with a commit before and after every change, so you "
+            "it can also change, archive and delete what you shared, your own words included \u{2014} "
+                + "when it rewrites a take, the take's words before and after are kept as commits, so you "
                 + "can always compare and come back"
         }
     }
