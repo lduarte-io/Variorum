@@ -87,6 +87,15 @@ final class PostureSwitchModel: Identifiable {
     enum Phase: Equatable {
         /// The door check (online; decision 32).
         case checking
+        /// VX-110: signed out while this library holds its sync account's
+        /// keys — the two doors: Sign In… (the account-wide switch) or Use
+        /// Castle on This Mac Only. A flat refusal would trap the user who
+        /// lost the account (§W).
+        case signedOutChoice
+        /// VX-110: Sign In… was chosen — the ceremony ENDS here (no
+        /// auto-resume across an async sign-in, PROVISIONAL); the faces show
+        /// the sign-in surface, and Use Castle is pressed again after.
+        case signInChosen
         /// §2b Screen 1.
         case explain
         /// §2b Screen 2 (only if no passphrase is set).
@@ -125,7 +134,17 @@ final class PostureSwitchModel: Identifiable {
 
     let id = UUID()
     let mode: Mode
-    private(set) var phase: Phase = .checking
+    private(set) var phase: Phase = .checking {
+        didSet {
+            // VX-206: the road returned (During gave way to its end — the
+            // Done, a refusal, a restart). A ceremony hosted by Settings ▸
+            // Protection asks Settings for that pane, where its sheet lives
+            // (the controller ignores the ask for any other host).
+            if oldValue == .running, phase != .running, controller.activeSwitch === self {
+                controller.requestProtectionPaneForCeremony()
+            }
+        }
+    }
     private(set) var busy = false
     var lastError: String?
     /// The words on the clipboard timer (copy: "clears in 60 seconds").
@@ -144,6 +163,10 @@ final class PostureSwitchModel: Identifiable {
     /// leaving the explain screen; a passphrase handed in from the change
     /// door already IS the new one, so the face hides the checkbox then).
     var wantsNewPassphrase = false
+    /// VX-110: Use Castle on This Mac Only was chosen at the two doors —
+    /// the explain screen speaks for this device alone and the act forgets
+    /// the sync account's keys before it re-keys.
+    private(set) var thisDeviceOnly = false
 
     /// `passphraseInHand` / `wordsInHand` (pre-13x 3b): the secrets a key
     /// door hands over when its checkbox opens Replace All Keys — the NEW
@@ -194,6 +217,21 @@ final class PostureSwitchModel: Identifiable {
     var resumeAskTitle: String { ProtectionCopy.ceremonyResumeTitle(act) }
     /// The Done's body, by the act and the outcome's road (both faces).
     var doneBody: String { ProtectionCopy.ceremonyDoneBody(act: act, outcome: outcome) }
+    /// VX-208: the plain-text exports line under the Done — every road that
+    /// entered Castle, whether or not the weekly export was on (both faces).
+    var plaintextExportsLine: String? { ProtectionCopy.plaintextExportsLine(for: outcome) }
+    /// VX-203: the offer's body with its honest counts — the pairs and the
+    /// set-aside library copies the outcome listed (both faces).
+    var offerBody: String { ProtectionCopy.deleteOldBackupsBody(for: outcome) }
+    /// VX-110: §2b Screen 1's body and bullets, by the road — the account-
+    /// wide ones ("…and so does your sync", "your other devices will start
+    /// asking too") are false on This Mac Only (both faces).
+    var explainBody: String {
+        thisDeviceOnly ? ProtectionCopy.enterCastleThisDeviceOnlyBody : ProtectionCopy.enterCastleBody
+    }
+    var explainBullets: [String] {
+        thisDeviceOnly ? ProtectionCopy.enterCastleThisDeviceOnlyBullets : ProtectionCopy.enterCastleBullets
+    }
     /// pre-13x 3b (Replace All Keys' faces): the Standard addendum renders
     /// on a Standard ACCOUNT; the checkbox hides when a door handed the new
     /// passphrase in (it IS the new one). VX-99 round 2 (finding 2): the
@@ -255,7 +293,11 @@ final class PostureSwitchModel: Identifiable {
                 return
             }
             switch mode {
-            case .enter: phase = .explain
+            case .enter:
+                // VX-110: signed out with the sync account's keys held, the
+                // local road's Castle would revert silently at the next
+                // signed-in ready — the two doors decide first.
+                phase = facts.signedOutHoldingSyncKeys ? .signedOutChoice : .explain
             case .leave: phase = .leaveConfirm
             case .resume: await resume(passphrase: nil)
             case .replaceKeys:
@@ -290,6 +332,24 @@ final class PostureSwitchModel: Identifiable {
         }
         if facts.appleKeyReadable == false { return ProtectionCopy.replaceKeysAppleKeyUnreachable }
         return nil
+    }
+
+    // MARK: - VX-110: the two doors (signed out, the sync account's keys held)
+
+    /// Sign In… — the account-wide switch needs the session: the ceremony
+    /// ends here, nothing written; the faces open the sign-in surface.
+    func chooseSignIn() {
+        guard case .signedOutChoice = phase else { return }
+        phase = .signInChosen
+    }
+
+    /// Use Castle on This Mac Only — the screens follow as ever, under the
+    /// explain screen's this-device words; the act forgets the account's
+    /// keys before it re-keys.
+    func chooseThisDeviceOnly() {
+        guard case .signedOutChoice = phase else { return }
+        thisDeviceOnly = true
+        phase = .explain
     }
 
     // MARK: - §2b Screen 1 → 2 / 3
@@ -471,9 +531,16 @@ final class PostureSwitchModel: Identifiable {
         controller.switchInProgress = true
         defer { controller.switchInProgress = false }
         do {
-            let outcome = try await runner.enterCastle(passphrase: passphrase, recoveryWords: wordsInHand)
+            let outcome = try await runner.enterCastle(
+                passphrase: passphrase, recoveryWords: wordsInHand, thisDeviceOnly: thisDeviceOnly)
             self.outcome = outcome
-            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
+            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: outcome.hasOffer)
+        } catch PostureSwitchError.signInOrThisDeviceOnly {
+            // VX-110: the session lapsed during the screens while custody
+            // holds the account's keys — nothing was written; the two doors
+            // decide (the runner's belt behind the door's own fork).
+            thisDeviceOnly = false
+            phase = .signedOutChoice
         } catch {
             phase = .failed(wording(for: error))
         }
@@ -569,7 +636,7 @@ final class PostureSwitchModel: Identifiable {
             // made this road the FOLLOW into another device's Castle
             // (`runCeremony`'s re-read), the insurance went off and the
             // pre-switch pairs are listed, and the face must say both.
-            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
+            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: outcome.hasOffer)
         } catch {
             phase = .failed(wording(for: error))
         }
@@ -636,7 +703,7 @@ final class PostureSwitchModel: Identifiable {
         do {
             let outcome = try await runner.resume(passphrase: passphrase, recoveryWords: nil)
             self.outcome = outcome
-            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
+            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: outcome.hasOffer)
         } catch PostureSwitchError.passphraseRequired {
             phase = .resumeAsk(needsPassphrase: true)
         } catch PostureSwitchError.restartRequired {
@@ -774,6 +841,13 @@ final class PostureSwitchModel: Identifiable {
             // Use Standard offline" speaks the transport wording), so the gap
             // and a dropped connection read alike.
             return serverUnreachable
+        // VX-110 (PROVISIONAL words — the U2 copy drafts).
+        case PostureSwitchError.signInOrThisDeviceOnly:
+            return ProtectionCopy.signedOutChoiceBody
+        case PostureSwitchError.thisDeviceOnlyWhileSignedIn:
+            return ProtectionCopy.thisDeviceOnlySignedInSince
+        case PostureSwitchError.syncKeysNotForgotten:
+            return ProtectionCopy.thisDeviceOnlyForgetRefused
         case is URLError:
             return serverUnreachable
         default:

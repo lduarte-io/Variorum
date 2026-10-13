@@ -217,7 +217,7 @@ struct ProtectionPane: View {
             get: { controller.ceremony(for: .pane) },
             set: { if $0 == nil { controller.closeSwitch() } })
         ) { model in
-            PostureSwitchSheet(model: model) { controller.closeSwitch() }
+            PostureSwitchSheet(model: model, services: services) { controller.closeSwitch() }
         }
         // pre-13x 2c: the follow, opened from the pane's notice bar or the
         // Encryption tab, held on the controller like the ceremony.
@@ -602,7 +602,7 @@ struct ProtectionNoticeBar: View {
             get: { controller.ceremony(for: .root) },
             set: { if $0 == nil { controller.closeSwitch() } })
         ) { model in
-            PostureSwitchSheet(model: model) { controller.closeSwitch() }
+            PostureSwitchSheet(model: model, services: services) { controller.closeSwitch() }
         }
         .sheet(item: $accountSheetTab) { tab in
             if let services { AccountView(services: services, initialTab: tab) }
@@ -921,6 +921,13 @@ struct FollowSheet: View {
                         .alarmVoice()
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                // VX-208: the plain-text exports line, beside the export story.
+                if let exportsLine = model.plaintextExportsLine {
+                    Text(exportsLine)
+                        .font(.callout)
+                        .alarmVoice()
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 HStack {
                     Spacer()
                     Button("Continue") {
@@ -931,7 +938,7 @@ struct FollowSheet: View {
                 }
             case .offer:
                 Text(ProtectionCopy.deleteOldBackupsTitle).font(.title3.weight(.semibold))
-                Text(ProtectionCopy.deleteOldBackupsBody)
+                Text(model.offerBody)
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1089,6 +1096,10 @@ struct PhraseOnlySheet: View {
 /// (`.privacySensitive()`); the During line reads the runner's phase.
 struct PostureSwitchSheet: View {
     @Bindable var model: PostureSwitchModel
+    /// VX-110: the account surface the two doors' Sign In… opens (over this
+    /// sheet; closing it closes the ceremony). nil ⇒ the face says what to
+    /// do and closes.
+    var services: AppServices? = nil
     var onDone: () -> Void
 
     @State private var passphrase = ""
@@ -1097,12 +1108,28 @@ struct PostureSwitchSheet: View {
     @State private var acknowledged = false
     @State private var newPassphrase = ""
     @State private var newConfirmation = ""
+    @State private var signInSheet = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             switch model.phase {
             case .checking:
                 title("Checking…")
+            case .signedOutChoice:
+                // VX-110: the two doors (signed out, the sync keys held).
+                title(ProtectionCopy.signedOutChoiceTitle)
+                body(ProtectionCopy.signedOutChoiceBody)
+                HStack {
+                    Button("Cancel") { onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.useCastleThisDeviceOnlyDoor) { model.chooseThisDeviceOnly() }
+                    Button(ProtectionCopy.signInDoor) { model.chooseSignIn() }
+                        .keyboardShortcut(.defaultAction)
+                }
+            case .signInChosen:
+                title(ProtectionCopy.signInFirstTitle)
+                body(ProtectionCopy.signInFirstBody)
+                HStack { Spacer(); Button("Close") { onDone() }.keyboardShortcut(.defaultAction) }
             case .explain where model.act == .replaceKeys:
                 // pre-13x 3b — copy §4's Replace All Keys screen (VX-99 round 2,
                 // finding 1: by the ACT — a restarted Replace All Keys marker too).
@@ -1123,9 +1150,10 @@ struct PostureSwitchSheet: View {
                 }
             case .explain:
                 title(ProtectionCopy.enterCastleTitle)
-                body(ProtectionCopy.enterCastleBody)
+                // VX-110: by the road (This Mac Only speaks for this device).
+                body(model.explainBody)
                 VStack(alignment: .leading, spacing: 6) {
-                    ForEach(ProtectionCopy.enterCastleBullets, id: \.self) { line in
+                    ForEach(model.explainBullets, id: \.self) { line in
                         Text("• \(line)")
                             .font(.callout)
                             .fixedSize(horizontal: false, vertical: true)
@@ -1274,6 +1302,13 @@ struct PostureSwitchSheet: View {
                         .alarmVoice()
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                // VX-208: the plain-text exports line, beside the export story.
+                if let exportsLine = model.plaintextExportsLine {
+                    Text(exportsLine)
+                        .font(.callout)
+                        .alarmVoice()
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 HStack {
                     Spacer()
                     Button("Continue") {
@@ -1284,7 +1319,7 @@ struct PostureSwitchSheet: View {
                 }
             case .offer:
                 title(ProtectionCopy.deleteOldBackupsTitle)
-                body(ProtectionCopy.deleteOldBackupsBody)
+                body(model.offerBody)
                 HStack {
                     Button(ProtectionCopy.keepOldBackupsDoor) { model.keepOldBackups(); onDone() }
                         .keyboardShortcut(.cancelAction)
@@ -1351,6 +1386,14 @@ struct PostureSwitchSheet: View {
         .frame(width: 460)
         .task { await model.start() }
         .interactiveDismissDisabled(model.phase == .running)
+        // VX-110: Sign In… opens the account surface over the ended
+        // ceremony; closing it closes the ceremony too.
+        .onChange(of: model.phase) { _, phase in
+            if phase == .signInChosen, services != nil { signInSheet = true }
+        }
+        .sheet(isPresented: $signInSheet, onDismiss: { onDone() }) {
+            if let services { AccountView(services: services, initialTab: .account) }
+        }
     }
 
     private var runningLine: String {

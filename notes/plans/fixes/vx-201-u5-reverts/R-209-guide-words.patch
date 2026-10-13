@@ -1,0 +1,32 @@
+diff --git a/App/Variorum/Shared/LibraryOpenCopy.swift b/App/Variorum/Shared/LibraryOpenCopy.swift
+index ab74d62b..5037f472 100644
+--- a/App/Variorum/Shared/LibraryOpenCopy.swift
++++ b/App/Variorum/Shared/LibraryOpenCopy.swift
+@@ -72,8 +72,9 @@ nonisolated enum LibraryOpenCopy {
+     /// home — every adopt road (File ▸ Open Library…, the lobby faces,
+     /// Restore from Backup) renders the one sheet that reads it.
+     static let confirmLeavesCastle =
+-        "This copy isn't in Castle, so once it's open your library opens the old way — press "
+-        + "Resume Sync, then choose Use Castle again in Settings ▸ Protection to put it back in Castle."
++        // R-209-guide-words (VX-209 revert): §W.2's unverified road — no Resume Sync.
++        "This copy isn't in Castle, so once it's open your library opens the old way — choose "
++        + "Use Castle again in Settings ▸ Protection to put it back in Castle."
+ 
+     // MARK: - The restore-hold banner (round 3, her ratified shape)
+ 
+diff --git a/App/Variorum/Shared/PostureCopy.swift b/App/Variorum/Shared/PostureCopy.swift
+index 37c9f911..d7597789 100644
+--- a/App/Variorum/Shared/PostureCopy.swift
++++ b/App/Variorum/Shared/PostureCopy.swift
+@@ -953,8 +953,9 @@ nonisolated extension ProtectionCopy {
+         "Opening an older copy of your library — a backup in Settings ▸ Data Safety ▸ Restore from "
+         + "Backup, or a copy you pick with File ▸ Open Library… — makes that copy your library, and a "
+         + "copy from before Castle opens the old way. Bringing your Castle library back from Previous "
+-        + "Libraries afterwards may not undo that. So once you're done with an older copy, press Resume "
+-        + "Sync, then check Settings ▸ Protection: if it doesn't say Castle, choose Use Castle again. "
++        // R-209-guide-words (VX-209 revert): §W.2's unverified road — no Resume Sync.
++        + "Libraries afterwards may not undo that. So once you're done with an older copy, "
++        + "check Settings ▸ Protection: if it doesn't say Castle, choose Use Castle again. "
+         + "And any time Protection says Standard when you chose Castle, choose Use Castle again."
+ 
+     /// The two floors, as the chapter states them (copy §7's parenthetical

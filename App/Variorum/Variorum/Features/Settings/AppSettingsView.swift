@@ -174,6 +174,25 @@ struct AppSettingsView: View {
         // window (appear) and on a window already up (the request changing).
         .onAppear { adoptMCPRequest() }
         .onChange(of: mcp?.settingsRequest) { _, _ in adoptMCPRequest() }
+        // VX-206 — a ceremony opened from Protection ENDS on Protection: on a
+        // fresh window (the re-key's reopen rebuilt this one at General) and
+        // on a window already up (the request changing).
+        .onAppear { adoptProtectionRequest() }
+        .onChange(of: protection?.settingsRequest) { _, _ in adoptProtectionRequest() }
+    }
+
+    /// VX-206 — the ceremony's request, adopted once each (the controller's
+    /// counter and this window's "seen" mark, both on the controller —
+    /// `ProtectionController.settingsRequest`). Landing on Protection mounts
+    /// the pane, and the pane presents the ceremony's sheet (held on the
+    /// controller across the re-key): its Done, up where she acted.
+    private func adoptProtectionRequest() {
+        guard let protection,
+              Self.adopts(request: protection.settingsRequest, adopted: protection.settingsRequestAdopted)
+        else { return }
+        protection.settingsRequestAdopted = protection.settingsRequest
+        query = ""
+        pane = .protection
     }
 
     /// ⌥⌘,'s request, adopted once each (the door's counter and this

@@ -58,6 +58,15 @@ nonisolated struct StoreLaunchGate: Sendable {
     /// vault answers, and the route opens it through the custody shape it
     /// has. Defaulted inert for the scripted worlds that never enroll.
     var syncCustodyPresent: @Sendable (_ scope: String, _ storeID: String) -> Bool = { _, _ in false }
+    /// VX-202 (belt c): a posture switch's custody move is PENDING for this
+    /// store id — set by the runner before its first marker, cleared once
+    /// custody lands and at every marker clear. The route cannot read the
+    /// marker (it lives in the store), so the pre-open Apple landing reads
+    /// this instead and never lands while it is set: mid-switch, the live
+    /// key file is the NEW Castle-shaped one and custody has not moved.
+    /// Defaulted inert for the scripted worlds that never switch.
+    var switchPending: @Sendable (_ scope: String, _ storeID: String) -> Bool = { _, _ in false }
+    var setSwitchPending: @Sendable (_ pending: Bool, _ scope: String, _ storeID: String) -> Void = { _, _, _ in }
 
     /// The ONE tri-state sidecar read (pre-13u Act 9, P1/P11 — 17a's
     /// shared root cause). `StoreKeyEnvelope.load` throws `.unreadable`
@@ -118,7 +127,9 @@ nonisolated struct StoreLaunchGate: Sendable {
             let custody = SyncCustodyScope(scope: scope, storeID: storeID)
             return E2EEKeychainStorage.load(scope: custody) != nil
                 || E2EEKeychainStorage.gatedItemExists(scope: custody)
-        })
+        },
+        switchPending: { ProtectionDefaults.switchPending(scope: $0, storeID: $1, in: .standard) },
+        setSwitchPending: { ProtectionDefaults.setSwitchPending($0, scope: $1, storeID: $2, in: .standard) })
 
     /// A scripted gate for tests: fixed dials + an in-memory guard + an
     /// in-memory envelope box.
@@ -128,12 +139,13 @@ nonisolated struct StoreLaunchGate: Sendable {
         envelope: StoreKeyEnvelope? = nil,
         legacyMode: StoreAtOpenMode? = nil,
         appleKey: InMemoryAppleKeyBacking = InMemoryAppleKeyBacking(),
-        syncCustodyPresent: (@Sendable (_ scope: String, _ storeID: String) -> Bool)? = nil
+        syncCustodyPresent: (@Sendable (_ scope: String, _ storeID: String) -> Bool)? = nil,
+        switchPending: ScriptedSwitchPendingBox? = nil
     ) -> StoreLaunchGate {
         scripted(
             dials: ScriptedDialsBox(dials, legacyMode: legacyMode), backing: backing,
             envelope: ScriptedEnvelopeBox(envelope), appleKey: appleKey,
-            syncCustodyPresent: syncCustodyPresent)
+            syncCustodyPresent: syncCustodyPresent, switchPending: switchPending)
     }
 
     /// The fully-scripted form: live boxes so tests observe writes.
@@ -143,7 +155,8 @@ nonisolated struct StoreLaunchGate: Sendable {
         envelope: ScriptedEnvelopeBox,
         stamps: ScriptedStampsBox = ScriptedStampsBox(),
         appleKey: InMemoryAppleKeyBacking = InMemoryAppleKeyBacking(),
-        syncCustodyPresent: (@Sendable (_ scope: String, _ storeID: String) -> Bool)? = nil
+        syncCustodyPresent: (@Sendable (_ scope: String, _ storeID: String) -> Bool)? = nil,
+        switchPending: ScriptedSwitchPendingBox? = nil
     ) -> StoreLaunchGate {
         StoreLaunchGate(
             dials: { _, storeID in dials.dials(for: storeID) },
@@ -171,7 +184,32 @@ nonisolated struct StoreLaunchGate: Sendable {
             setStamp: { date, leaf, _ in stamps.value[leaf] = date },
             // pre-13x 2d: the scripted sync custody presence (nil = never
             // enrolled — the pre-2d worlds' reading, unchanged).
-            syncCustodyPresent: syncCustodyPresent ?? { _, _ in false })
+            syncCustodyPresent: syncCustodyPresent ?? { _, _ in false },
+            // VX-202: nil = no switch ever pending (inert).
+            switchPending: { _, storeID in switchPending?.isPending(storeID) ?? false },
+            setSwitchPending: { pending, _, storeID in switchPending?.set(pending, for: storeID) })
+    }
+}
+
+/// VX-202 (belt c): the scripted per-store switch-pending flag, with the
+/// writes it saw (a pin reads the flag's whole life, not only its end).
+nonisolated final class ScriptedSwitchPendingBox: @unchecked Sendable {
+    private let lock = NSLock()
+    private var pending: Set<String> = []
+    private var _writes: [(storeID: String, pending: Bool)] = []
+    init(pending: Set<String> = []) { self.pending = pending }
+    func isPending(_ storeID: String) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        return pending.contains(storeID)
+    }
+    func set(_ value: Bool, for storeID: String) {
+        lock.lock(); defer { lock.unlock() }
+        if value { pending.insert(storeID) } else { pending.remove(storeID) }
+        _writes.append((storeID, value))
+    }
+    var writes: [(storeID: String, pending: Bool)] {
+        lock.lock(); defer { lock.unlock() }
+        return _writes
     }
 }
 
@@ -359,12 +397,18 @@ nonisolated extension StoreLaunchGate {
     /// custody present — is INDETERMINATE at the route (no vault word can
     /// exist here) and opens through the custody shape it has; the
     /// landing above is a posture-driven WRITE, so it is skipped for it.
+    ///
+    /// VX-202 (belt c): never while a posture switch is pending for the
+    /// store id (`switchPending`) — the live key file is then the switch's
+    /// NEW Castle-shaped one, and a silent item holding its key is a
+    /// mid-switch accident, never a Standard-waiting library.
     func effectiveGate(scope: String, storeID: String?, storeURL: URL?) -> StoreAtOpenMode {
         let guardSeam = guardFor(scope)
         let custody = rawKeyCustody(guardSeam: guardSeam)
         let enrolled = storeID.map { syncCustodyPresent(scope, $0) } ?? false
+        let pendingSwitch = storeID.map { switchPending(scope, $0) } ?? false
         var reading = readEnvelope(storeURL)
-        if !enrolled, custody == .silent, let storeURL, let envelope = reading.envelope,
+        if !enrolled, !pendingSwitch, custody == .silent, let storeURL, let envelope = reading.envelope,
            envelope.apple == nil, envelope.passphrase != nil,
            let key = guardSeam.loadAuto(), envelope.belongs(to: key),
            let apple = appleKeyFor(scope).read() {

@@ -1,0 +1,14 @@
+diff --git a/App/Variorum/Shared/LibraryOpenModel.swift b/App/Variorum/Shared/LibraryOpenModel.swift
+index be1f2f09..58717e6e 100644
+--- a/App/Variorum/Shared/LibraryOpenModel.swift
++++ b/App/Variorum/Shared/LibraryOpenModel.swift
+@@ -291,8 +291,7 @@ final class LibraryOpenModel {
+         sourceAsOf = BackupRestoreCandidates.backupDate(source)
+             ?? (try? FileManager.default.attributesOfItem(atPath: source.path)[.modificationDate]
+                 as? Date)
+-        leavesCastle = Self.leavesCastle(
+-            currentIsCastle: currentLibraryIsCastle, incoming: incomingVerdict)
++        // R-209-model (VX-209 revert): the model never computes the fact.
+         phase = .confirm
+     }
+ 

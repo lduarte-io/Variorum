@@ -60,6 +60,11 @@ final class PostureFollowModel: Identifiable {
     }
 
     var runnerPhase: PostureSwitchRunner.Phase { runner.phase }
+    /// VX-208: the plain-text exports line under the Done — a follow that
+    /// entered Castle (both faces; a Connect or a change notice has no outcome).
+    var plaintextExportsLine: String? { ProtectionCopy.plaintextExportsLine(for: outcome) }
+    /// VX-203: the offer's body with its honest counts (both faces).
+    var offerBody: String { ProtectionCopy.deleteOldBackupsBody(for: outcome) }
     var isAlwaysAskVariant: Bool { notice.kind == .alwaysAskRetiredWord }
     /// pre-13x 3a: the Connect variant (copy §3) — the adopt road, never a
     /// follow; its third door is Cancel.
@@ -109,7 +114,7 @@ final class PostureFollowModel: Identifiable {
             let outcome = try await runner.follow(derivedPassphraseKey: key, kdf: kdf)
             self.outcome = outcome
             controller.followLanded()
-            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
+            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: outcome.hasOffer)
         } catch PostureSwitchError.passphraseRequired {
             phase = .askPassphrase
         } catch {
@@ -219,7 +224,7 @@ final class PostureFollowModel: Identifiable {
             let outcome = try await runner.follow(passphrase: passphrase, recoveryWords: words)
             self.outcome = outcome
             controller.followLanded()
-            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
+            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: outcome.hasOffer)
         } catch VaultEnrollmentError.wrongPassphrase {
             // A Connect's — and a change notice's — word is the ACCOUNT's,
             // not this library's.

@@ -25,6 +25,10 @@ import VariorumCore
 struct MobilePostureSwitchSheet: View {
     @Bindable var model: PostureSwitchModel
     let tokens: VoiceTokens
+    /// VX-110: the account surface the two doors' Sign In… opens (over this
+    /// sheet; closing it closes the ceremony). nil ⇒ the face says what to
+    /// do and closes.
+    var services: AppServices? = nil
     var onDone: () -> Void
 
     @State private var passphrase = ""
@@ -33,6 +37,7 @@ struct MobilePostureSwitchSheet: View {
     @State private var acknowledged = false
     @State private var newPassphrase = ""
     @State private var newConfirmation = ""
+    @State private var signInSheet = false
 
     var body: some View {
         ScrollView {
@@ -40,6 +45,20 @@ struct MobilePostureSwitchSheet: View {
                 switch model.phase {
                 case .checking:
                     title("Checking…")
+                case .signedOutChoice:
+                    // VX-110: the two doors (signed out, the sync keys held) —
+                    // the Mac's, in the phone's register.
+                    title(ProtectionCopy.signedOutChoiceTitle)
+                    prose(ProtectionCopy.signedOutChoiceBody)
+                    VStack(alignment: .leading, spacing: 12) {
+                        offer(ProtectionCopy.signInDoor) { model.chooseSignIn() }
+                        offer(ProtectionCopy.useCastleThisDeviceOnlyDoor) { model.chooseThisDeviceOnly() }
+                        offer("Cancel", quiet: true) { onDone() }
+                    }
+                case .signInChosen:
+                    title(ProtectionCopy.signInFirstTitle)
+                    prose(ProtectionCopy.signInFirstBody)
+                    doors(primary: "Close", { onDone() })
                 case .explain where model.act == .replaceKeys:
                     // pre-13x 3b — copy §4's Replace All Keys screen, the
                     // phone's register (the checkbox as a marked row). VX-99
@@ -86,9 +105,10 @@ struct MobilePostureSwitchSheet: View {
                           quiet: "Cancel", { onDone() })
                 case .explain:
                     title(ProtectionCopy.enterCastleTitle)
-                    prose(ProtectionCopy.enterCastleBody)
+                    // VX-110: by the road (This iPhone Only speaks for this device).
+                    prose(model.explainBody)
                     VStack(alignment: .leading, spacing: 6) {
-                        ForEach(ProtectionCopy.enterCastleBullets, id: \.self) { line in
+                        ForEach(model.explainBullets, id: \.self) { line in
                             Text("• \(line)")
                                 .font(tokens.small)
                                 .foregroundStyle(tokens.ink)
@@ -175,13 +195,14 @@ struct MobilePostureSwitchSheet: View {
                     // selector over the act and the outcome's road, as on the Mac.
                     prose(model.doneBody)
                     if insuranceOff { alarm(ProtectionCopy.insuranceTurnedOffNotice) }
+                    if let exportsLine = model.plaintextExportsLine { alarm(exportsLine) }  // VX-208
                     doors(primary: "Continue", {
                         model.continueFromDone()
                         if model.phase == .closed { onDone() }
                     })
                 case .offer:
                     title(ProtectionCopy.deleteOldBackupsTitle)
-                    prose(ProtectionCopy.deleteOldBackupsBody)
+                    prose(model.offerBody)
                     HStack(spacing: 16) {
                         offer(ProtectionCopy.deleteOldBackupsDoor, alarm: true) {
                             model.deleteOldBackups()
@@ -230,6 +251,17 @@ struct MobilePostureSwitchSheet: View {
         .background(tokens.room.ignoresSafeArea())
         .task { await model.start() }
         .interactiveDismissDisabled(model.phase == .running)
+        // VX-110: Sign In… opens the account surface over the ended
+        // ceremony; closing it closes the ceremony too.
+        .onChange(of: model.phase) { _, phase in
+            if phase == .signInChosen, services != nil { signInSheet = true }
+        }
+        .sheet(isPresented: $signInSheet, onDismiss: { onDone() }) {
+            if let services {
+                AccountView(services: services, initialTab: .account)
+                    .environment(\.sharedPageStyle, SharedPageStyle(tokens: tokens))
+            }
+        }
     }
 
     private var runningLine: String {
@@ -397,6 +429,7 @@ struct MobileFollowSheet: View {
                     // pre-13x 4a: Connect's own done line (copy §3).
                     prose(model.isConnectVariant ? ProtectionCopy.connectDoneBody : ProtectionCopy.followDoneBody, ink: true)
                     if insuranceOff { alarm(ProtectionCopy.insuranceTurnedOffNotice) }
+                    if let exportsLine = model.plaintextExportsLine { alarm(exportsLine) }  // VX-208
                     HStack { offer("Continue") {
                         model.continueFromDone()
                         if model.phase == .closed { onDone() }
@@ -406,7 +439,7 @@ struct MobileFollowSheet: View {
                         .font(tokens.body.weight(.semibold))
                         .foregroundStyle(tokens.ink)
                         .fixedSize(horizontal: false, vertical: true)
-                    prose(ProtectionCopy.deleteOldBackupsBody)
+                    prose(model.offerBody)
                     HStack(spacing: 16) {
                         offer(ProtectionCopy.deleteOldBackupsDoor, alarm: true) {
                             model.deleteOldBackups()

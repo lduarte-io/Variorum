@@ -1,0 +1,13 @@
+diff --git a/App/Variorum/Shared/AppBootstrap.swift b/App/Variorum/Shared/AppBootstrap.swift
+index a558b996..f14adb8d 100644
+--- a/App/Variorum/Shared/AppBootstrap.swift
++++ b/App/Variorum/Shared/AppBootstrap.swift
+@@ -548,7 +548,7 @@ final class AppBootstrap {
+             if let unlockedKey, !switchInProgress, !currentEffectiveGate.isDemanded {
+                 let protection = protection
+                 relanding = Task { [weak self] in
+-                    let pending = await protection.readSwitchPending?() ?? false
++                    let pending = false
+                     guard !pending, let self, !self.switchInProgress, !protection.switchInProgress,
+                           protection.keyInHand() == unlockedKey
+                     else { return }

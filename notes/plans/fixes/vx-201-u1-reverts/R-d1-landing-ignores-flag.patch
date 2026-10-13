@@ -1,0 +1,13 @@
+diff --git a/App/Variorum/Shared/StoreLaunchGate.swift b/App/Variorum/Shared/StoreLaunchGate.swift
+index 66e431b7..dd139e2d 100644
+--- a/App/Variorum/Shared/StoreLaunchGate.swift
++++ b/App/Variorum/Shared/StoreLaunchGate.swift
+@@ -408,7 +408,7 @@ nonisolated extension StoreLaunchGate {
+         let enrolled = storeID.map { syncCustodyPresent(scope, $0) } ?? false
+         let pendingSwitch = storeID.map { switchPending(scope, $0) } ?? false
+         var reading = readEnvelope(storeURL)
+-        if !enrolled, !pendingSwitch, custody == .silent, let storeURL, let envelope = reading.envelope,
++        if !enrolled, custody == .silent, let storeURL, let envelope = reading.envelope,
+            envelope.apple == nil, envelope.passphrase != nil,
+            let key = guardSeam.loadAuto(), envelope.belongs(to: key),
+            let apple = appleKeyFor(scope).read() {

@@ -261,6 +261,11 @@ final class AppServices {
             encryption.rekeyIncompleteCheck = { [database = session.database] in
                 (try? await database.read { try RotationMarker.isSet($0) }) ?? false
             }
+            // VX-110 (item 2): the same marker, read for its ACT.
+            encryption.pendingCeremonyActCheck = { [database = session.database] in
+                let marker = (try? await database.read { try RotationMarker.read($0) }) ?? nil
+                return marker.map(CeremonyAct.init(resuming:))
+            }
         }
         await auth.setOnChange { [weak self] tokens in
             Task { @MainActor [weak self] in

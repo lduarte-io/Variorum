@@ -1,0 +1,18 @@
+diff --git a/App/Variorum/Shared/PostureCopy.swift b/App/Variorum/Shared/PostureCopy.swift
+index 1426a2b8..943fe8ea 100644
+--- a/App/Variorum/Shared/PostureCopy.swift
++++ b/App/Variorum/Shared/PostureCopy.swift
+@@ -894,10 +894,9 @@ nonisolated extension ProtectionCopy {
+         // the one sentence naming what is not. PROVISIONAL (#215).
+         "Your library is encrypted on disk: the file Variorum writes is unreadable without its key — "
+         + "to Finder, to Terminal, to a backup drive, to anyone who copies it. Sync is end-to-end "
+-        + "encrypted: your writing and everything you name — titles, tags, books — are encrypted on "
+-        + "your device before they leave, and the Variorum server can never read them. "
+-        + privacyServerSeesShapeSentence
+-        + " Both modes are like this. What differs between them is only who holds a key.",
++        + "encrypted: everything is encrypted on your device before it leaves, and the Variorum server "
++        + "stores what it can never read. Both modes are like this. What differs between them is only "
++        + "who holds a key.",
+         keystoneAccountPassword,
+         "And one thing no setting changes: while Variorum is open and unlocked, everything in it is "
+         + "readable — that is what open means. Locking is how you end that.",
