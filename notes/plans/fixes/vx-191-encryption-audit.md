@@ -229,3 +229,26 @@ review. Rows 5–11 of §V stay post-launch (tickets at her word). This audit (V
   (pre-Castle `.md` exports) · VX-209 (B2c) · VX-210 (B1e) · VX-211 (passphrase strength) · VX-212 (S1 Q3's unowned
   poison-row case) · VX-213 (the NITs) · **VM-15** (the unfollowed sibling phone — Backlog under "Mobile — beta
   readiness & launch", Pre-launch for MOBILE launch).
+
+### W.2 Third follow-up (same night)
+- **VX-207 stays parked — fix it properly** (her call). Clarified on the ticket: the AI cannot change the Private mark
+  (no MCP tool reaches `setNotePrivate` — callers are the Mac door and a Debug fixture only); the threat is a
+  compromised SYNC SERVER rewriting the unauthenticated plain column. Grants are local-only per Mac (v1_24).
+- **VX-208 → RUN VX-201**, re-scoped to her ruling: ONE line in the Castle process telling people to delete any `.md`
+  exports they made before Castle themselves; no delete offer of our own.
+- **VX-209 → RUN VX-201** (her: "no one would ever expect that"). Orchestrator trace, NOT run: her proposed workaround
+  (open the backup, then Open Library the Castle library back from `Previous Libraries/`) does NOT avoid it for a backup
+  of the SAME library — the store id is shared across re-keys, so `LibraryOpenModel.landCustody`
+  (`:461-500`) finds the BACKUP's key in the silent item for that id ⇒ verdict `adoptOpeningKey`;
+  `StoreLaunchGate.effectiveGate` reads `.silent` + a key file with a passphrase and no Apple copy ⇒ corner 45 ⇒
+  Standard ⇒ `.auto` ⇒ `saveAuto(castleKey)`, `deleteGated()`; the next route's landing arm (`:367-376`) then wraps
+  the Castle key under A. (Opening the backup first had already deleted the Castle library's gated item under the
+  same rule.) The honest guide instruction today: after bringing the Castle library back, check Settings ▸ Protection
+  and choose Use Castle again (it re-keys; no Apple copy). Recommended in the run: a line on the Open/Restore confirm
+  when the outgoing library is Castle and the incoming reads Standard; the deeper fix (corner 45 must not read a
+  previously-Castle store id as Standard-waiting) shares VX-202's landing-arm belt.
+- **VX-212 explained:** a rotation (entering Castle, Replace All Keys) clears the old corpus key only when no server row
+  is still sealed under it; a row sealed under a key the account never held can never be re-encrypted, so the rotation
+  stays "still finishing" forever — the old corpus key kept (wrapped under the NEW master — no exposure) and every
+  later rotation refused, with no user door out. Needs corruption or a hostile holder of the key proof. Availability,
+  not privacy; stays parked.
