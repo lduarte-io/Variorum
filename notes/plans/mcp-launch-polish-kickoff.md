@@ -16,7 +16,7 @@ from main at or after `af0a7747`, and this run's closeout refresh is what gets i
 installed build the same way before trusting it. The closeout's acceptance includes that probe passing WITHOUT
 the bridge on the refreshed install.
 
-## Members, in order (launch-gating first; the tail is the named fall-out if the night runs short)
+## Members, in order — ALL EIGHT ship in this run (her word, 2026-10-12: "I don't want any of these items dropped … we should just choose that now")
 
 | # | ticket | what | gate? |
 |---|---|---|---|
@@ -27,12 +27,14 @@ the bridge on the refreshed install.
 | 5 | **VX-173** (unparked — DOOR HALF ONLY) | Batch writes: `add_takes` (array of {block_id, label, text}) — and, argued under the same unit, `add_comments` — ONE transaction, ONE client-named undo entry. The human bulk face stays parked (her "where it comes"). | ergonomics |
 | 6 | **VX-188** | A client can remove its OWN comment (`delete_comment`, suggest rung). | ergonomics |
 | 6b | **VX-190** (added at her word, 2026-10-12) | `remove_tag(note_id, tag)` at the EDIT rung — §9's removeTag, one client-named undo; untagging stays a NON-event for intake (no book evicts). The tag vocabulary itself (rename/delete) stays human-only. | ergonomics |
-| 7 | **VX-187** | `link_versions` (a `version_of` link between two notes, write-new on both) so Compare pairs AI-made drafts. | ergonomics — first to fall out |
+| 7 | **VX-187** | `link_versions` (a `version_of` link between two notes, write-new on both) so Compare pairs AI-made drafts. | ergonomics |
 
 Units (one implementer session each, strictly sequential — CLAUDE.md's cast): **U1** = #1 + #3 (the socket
 road; VX-132 first so U1's own runs can't hang) · **U2** = #2 (the one UI-visible change — its walk) · **U3** =
 #4 + #5 + #6 + #6b (the wire's ergonomics) · **U4** = #7. Four units, none phase-sized — inside the sizing guidance;
-say so in the record. If time runs short, U4 then U3's #6 fall out first, by name, tickets kept.
+say so in the record. **No member is a fall-out:** the order is the build order, not a priority cut — every unit runs.
+The two STOP rules below (VX-188 authorship, VX-187 note-level linking) still bind: a stop is a question to her
+with the rest of the run continuing, never a silent drop.
 
 ## VX-185 — the gatherings icon (her words, and what is ruled)
 
@@ -53,7 +55,8 @@ allows. Build:
 - Every surface that reads reach treats a gathering the same way (Book Settings' grant row for a gathering, the
   census/listing icons if any).
 - Pins: wing grant ⇒ iconed with the wing named · note- or book-only grants ⇒ not iconed (even when every member
-  is shared — PROVISIONAL, log it: the alternative "iconed when any member is readable" is hers to choose) · open
+  is shared — RULED by her, 2026-10-12: "I think that's fine on the gathering isn't marked shared even if each
+  individual note is marked shared" — R-VX185-1) · open
   book ⇒ iconed · an archived gathering ⇒ follows the archived-book rule. One walk on the dev store under a held
   stage claim, both voices.
 
@@ -63,7 +66,15 @@ allows. Build:
   lens read's `via` coherent; update the tool description + any advice sentence it falsifies (the advice is near
   its 2,000-character cap — measure).
 - **VX-173 door half:** one transaction, one undo entry for the whole batch, the grant guard inside it, a sane
-  cap on items per call (argue it). Partial failure = the whole call refuses (no half-batches).
+  cap on items per call (argue it). Partial failure = the whole call refuses (no half-batches). **State the cap in
+  the tool's own description** (the advice is at 1,941/2,000 characters — no room there), and an over-cap batch
+  refuses with a sentence naming the cap.
+- **Size guidance to the AI (her question, 2026-10-12):** today NO size limit is said to the client. The transport
+  caps are 1 MiB per opening frame (`MCPHandshake.lineLimit`) and 16 MiB per message after admission
+  (`MCPSocketTransport.lineCap`), and an over-cap message ENDS the connection silently. No honest client nears
+  16 MiB, so no advice sentence is owed — but the run should (a) make an over-cap message answer a JSON-RPC error
+  before closing, if the read loop can do it cleanly (argue it; PROVISIONAL if not), and (b) give every batch or
+  bulk tool its item cap in its description (VX-173 above).
 - **VX-188:** only the client's OWN comments; anything else answers the one not-shared shape (no oracle). It
   needs comment authorship: if `block_comment` doesn't already record which client wrote it, **STOP and report**
   — a new synced column is a SyncSpec §12 lockstep event and is NOT tonight's.
