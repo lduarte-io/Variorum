@@ -82,6 +82,8 @@ struct MCPWriteTools: Sendable {
         case batch(BatchJob)
         /// VX-184 U3 (VX-188): a client deleting its OWN comment (`MCPWriteTools+CommentDelete`).
         case deleteComment(commentID: String)
+        /// VX-184 U3 (VX-190): un-tagging a note at edit (`MCPWriteTools+RemoveTag`).
+        case removeTag(noteID: String, path: String)
 
         var tool: String {
             switch self {
@@ -90,6 +92,7 @@ struct MCPWriteTools: Sendable {
             case .deliberate(let job): job.tool
             case .batch(let job): job.tool
             case .deleteComment: "delete_comment"
+            case .removeTag: "remove_tag"
             case .addTake: "add_take"
             case .addComment: "add_comment"
             case .saveLens: "save_lens"
@@ -179,6 +182,7 @@ struct MCPWriteTools: Sendable {
             if name == MCPToolCatalog.deleteComment.name {
                 return .deleteComment(commentID: try requiredString(args, "comment_id"))
             }
+            if name == MCPToolCatalog.removeTag.name { return try parseRemoveTag(args) }
             throw ArgumentFailure(message: "Unknown tool: \(name).")
         }
     }
@@ -394,6 +398,8 @@ struct MCPWriteTools: Sendable {
             return try performBatch(batchJob, job: job, ops: ops, clientName: clientName)
         case .deleteComment(let commentID):
             return try performCommentDelete(commentID, job: job, ops: ops, clientName: clientName)
+        case .removeTag(let noteID, let path):
+            return try performRemoveTag(noteID: noteID, path: path, job: job, ops: ops, clientName: clientName)
         }
     }
 

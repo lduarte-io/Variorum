@@ -320,6 +320,8 @@ nonisolated enum MCPPaneCopy {
         case "add_comments": return "leaving comments in \(at)"
         // VX-188 — a client deleting a comment (its own, at suggest).
         case "delete_comment": return "deleting a comment in \(at)"
+        // VX-190 — un-tagging a note at edit.
+        case "remove_tag": return "removing a tag from \(at)"
         // VX-168 — a connection the setup key turned away, said precisely
         // here (the client hears one sentence for all of them).
         case "connect_bare": return "connecting without a setup key"
@@ -394,6 +396,7 @@ nonisolated enum MCPPaneCopy {
         case "add_takes": return "added takes to \(at)" + times
         case "add_comments": return "left comments in \(at)" + times
         case "delete_comment": return n == 1 ? "deleted a comment in \(at)" : "deleted \(n) comments in \(at)"
+        case "remove_tag": return "removed a tag from \(at)" + times
         // VX-168: a known name's first setup key, bound as it connected.
         case "connect_bound": return "connected with a new setup, now bound to its name" + times
         // VX-198 (R-VX184-5): the newest copied setup took the name.
@@ -1128,6 +1131,8 @@ nonisolated enum MCPReceiptCopy {
             return total == 1 ? "left a comment" : "left \(total) comments"
         // VX-188 — the client's own comment, deleted (PROVISIONAL words).
         case .commentDelete: return n == 1 ? "deleted a comment" : "deleted \(n) comments"
+        // VX-190 — her un-tag, the client's (PROVISIONAL words).
+        case .untag: return n == 1 ? "removed the tag #\(receipts[0].detail ?? "")" : "removed \(n) tags"
         }
     }
 

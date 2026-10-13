@@ -106,6 +106,8 @@ enum MCPToolCatalog {
         // VX-168 U2 — the deliberate acts: VX-169's commit (her settlement:
         // edit) and VX-174's merge button (R-MERGE-1: edit).
         saveCommit, chooseTake, adoptLens,
+        // VX-184 U3 — VX-190: un-tagging a note (her removeTag, §9).
+        removeTag,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -732,6 +734,28 @@ enum MCPToolCatalog {
                 "wing_id": .object(["type": "string", "description": "The wing it goes to (\"\" is Home)."]),
             ]),
             "required": .array(["note_id", "wing_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-184 U3 — VX-190 remove_tag
+
+    /// VX-190: her un-tag — the application only, a non-event for intake.
+    static let removeTag = MCPToolDeclaration(
+        name: "remove_tag", rung: .edit, title: "Remove a tag from a note",
+        description: """
+            Remove a tag from a note, by its path (e.g. "percy/pt-en") — the note stops wearing \
+            it; the tag itself stays in the library. As when the author removes one, nothing else \
+            moves: a book the tag brought the note into keeps it. One undo for the author puts the \
+            tag back. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note."]),
+                "tag": .object(["type": "string", "description": "The tag's path (as read_note's header shows it)."]),
+            ]),
+            "required": .array(["note_id", "tag"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)

@@ -125,6 +125,10 @@ struct MCPWriteServerTests {
             // VX-184 U3 (justified edit, the ritual): a comment of HERS, for
             // VX-188's delete_comment to aim at (suggest deletes only its own).
             let hersComment = try h.operations.addBlockComment(to: one.block.id, text: "her own working note")
+            // VX-184 U3 (justified edit, the ritual): a tag of HERS on the note,
+            // for VX-190's remove_tag to aim at.
+            let hersTag = try h.operations.createTag(name: "hers")
+            _ = try h.operations.applyTag(hersTag.id, toPost: note.id)
             func snapshot() throws -> [String] {
                 try h.database.read { db in
                     let takes = try Row.fetchAll(
@@ -146,7 +150,9 @@ struct MCPWriteServerTests {
                     let herComments = try Row.fetchAll(
                         db, sql: "SELECT * FROM block_comment WHERE id = ?", arguments: [hersComment.id])
                         .map(\.description)
-                    return takes + placements + blocks + commits + dates + rules + filings + herComments
+                    // …and HER tag applications, which remove_tag aims at.
+                    let herTags = try Row.fetchAll(db, sql: "SELECT * FROM post_tag ORDER BY id").map(\.description)
+                    return takes + placements + blocks + commits + dates + rules + filings + herComments + herTags
                 }
             }
             let chapter = try h.operations.createSection(in: book.id, name: "1")
@@ -183,6 +189,9 @@ struct MCPWriteServerTests {
             // aimed at HER comment — refused with her ruled sentence (suggest
             // deletes only a comment on file as the client's own).
             calls.append(("delete_comment", ["comment_id": .string(hersComment.id)]))
+            // VX-184 U3 (justified edit, the ritual): VX-190's remove_tag, aimed
+            // at HER tag — refusing at the rung (edit), her application intact.
+            calls.append(("remove_tag", ["note_id": .string(note.id), "tag": .string("hers")]))
             // The lens picks her NON-chosen take (mutation check 2 of the unit
             // record: picking only chosen takes could not see a lens that
             // moved the chosen pointer — the first draft of this pin did).

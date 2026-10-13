@@ -67,6 +67,8 @@ extension Operations {
         // VX-184 U3 — VX-188's suggest-rung delete of a client's OWN comment
         // ("Undo claude-code's comment deletion").
         case commentDelete = "comment deletion"
+        // VX-184 U3 — VX-190's edit-rung un-tag ("Undo claude-code's tag removal").
+        case untag = "tag removal"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 
@@ -526,6 +528,53 @@ extension Operations {
             inverse: { try $0.revertAppliedTag(applicationID) },
             redo: { try $0.reapplyAppliedTag(applicationID) })
         return application
+    }
+
+    // MARK: - EDIT: a tag removed (VX-184 U3 — VX-190)
+
+    /// What `removeTagForClient` took off.
+    public struct MCPTagRemoval: Equatable, Sendable {
+        public let applicationID: String
+        public let tagID: String
+        /// The tag's path as the library stores it.
+        public let path: String
+    }
+
+    /// **`remove_tag`'s act — her un-tag, by PATH**: the caller's guard first;
+    /// the note live; the path resolved among the LIVE tags of the note's own
+    /// wing (as `applyTagPath` adopts — never minted here; a path naming none
+    /// is `tagNotApplied`, the same answer as a tag the note doesn't wear; a
+    /// path with no segment is `invalidTagName`); then `removeTag`'s own row
+    /// body (`removePostTagApplication`) — the application tombstoned, the
+    /// tag kept as vocabulary, NO intake (un-tag is a non-event, §19). Tags
+    /// stay free under a seal, as her own un-tag does. ONE undo entry,
+    /// `undoLabel`: the inverse revives the very application (`apply_tag`'s
+    /// redo body — an exact-row revival is no applying act, so it seats
+    /// nothing), the redo tombstones it again.
+    @discardableResult
+    public func removeTagForClient(
+        path: String, fromNote postID: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil
+    ) throws -> MCPTagRemoval {
+        let removal: MCPTagRemoval = try database.write { db in
+            try guardian?(db)
+            let post = try livePost(db, postID)
+            let segments = TagPath.segments(path)
+            guard !segments.isEmpty else { throw OperationError.invalidTagName(name: path) }
+            let normalized = segments.joined(separator: "/")
+            let wing = try Queries.wingIsLive(db, id: post.wingId) ? post.wingId : ""
+            guard let tagID = try String.fetchOne(
+                db, sql: "SELECT id FROM tag WHERE path = ? AND wing_id = ? AND deleted_at IS NULL",
+                arguments: [normalized, wing])
+            else { throw OperationError.tagNotApplied(tagID: normalized, targetID: postID) }
+            let applicationID = try removePostTagApplication(db, tagID: tagID, postID: postID)
+            return MCPTagRemoval(applicationID: applicationID, tagID: tagID, path: normalized)
+        }
+        let applicationID = removal.applicationID
+        undoStack?.register(
+            label: undoLabel,
+            inverse: { try $0.reapplyAppliedTag(applicationID) },
+            redo: { try $0.revertAppliedTag(applicationID) })
+        return removal
     }
 
     func revertAppliedTag(_ applicationID: String) throws {
