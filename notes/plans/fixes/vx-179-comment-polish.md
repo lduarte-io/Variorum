@@ -1688,3 +1688,64 @@ inside a popover commits twice — a harmless same-text repeat) is noted for the
 **Next:** the stage window (the U2 and U3 PENDING lists above — suites, optional in-target reverts,
 the mini-walk in both voices + a dark card frame), then LADDER ROUND 2 over the whole fix-leg diff
 (a887bda6-era tip → current) with the R1-2/R1-3 answers returned to the reviewer.
+
+## STAGE WINDOW 4 (orchestrator, 2026-10-13 ~00:50–01:35 — the fix-leg suites + the mini-walk; claim vx179-tests via oct12coordinator, released clean, no instance left)
+
+**The suite run** (pinned checkout advanced to c6d18035; `build-for-testing` pre-built before the claim;
+`test-without-building`, 15 suites): **101 tests — 100 green, ONE red:**
+`CommentPanelFixLeg2Tests/escapeInAPopoverClearsTheDraftFirstThenCloses` — BOTH its expectations fail
+in the runner (`model.addDraft == "x"` the premise, and the final `!popover.isShown`): in the runner's
+environment a key addressed to the parent window never reaches the popover's composer at all. The pin's
+premise, not the product, is the first suspect (the window-2 focus-pin precedent) — but see the walk's
+F-W-4-R below: the LIVE host's key routing differs from BOTH models the offscreen probes used, so the
+pin and the product behavior go back together. Log `/tmp/vx179-fixleg-suites.log`. The in-target revert
+spot-checks were skipped for time (the offscreen reverts stand as the red-on-old evidence; the one
+suite red made the discriminating story moot for F-W-4 anyway).
+
+**THE MINI-WALK** (dev store Debug from the pinned checkout, Study voice, line-wheel events via a fresh
+CGEvent poster — the old /tmp/walk-scroll binary now traps and was replaced; captures kept as crops in
+`/tmp/vx179-walk2`):
+
+| row | result |
+|---|---|
+| W-3 down-wheel over the overflowing card | **GREEN** — the card scrolls (stacked entries, hairline, "Third:" entry scrolled in), the page frozen byte-still |
+| W-3 at the card's end | **GREEN** — the page takes over seamlessly (shown twice); the card then rides away with its block |
+| W-3 up over a mid-scrolled card | **GREEN** — the card scrolls back; topping out hands the remainder to the page natively (no dead wheel) |
+| W-3 up at the card's top | **GREEN** — the page moves |
+| W-3 a card that fits | **GREEN** — wheel passes to the page both directions, never swallowed |
+| W-8 inner place across a page scroll | **GREEN** — card visible through a page scroll keeps its inner position exactly. OBSERVED: a card recycled fully OFF-view and back reminds at its top (virtualization's remint; arguably by design — for round 2's reviewer to weigh) |
+| F-W-2 press on the faded lane | **HALF-GREEN** — the door stays SHUT (three presses, no panel: the walk's harm is gone) but **F-W-2-R (residual):** the knob does NOT track a press-drag in the live app, faded or freshly flashed (cliclick dd/dm/du verified real). The offscreen probe likely got legacy-style scrollers where tracking behaved; the live overlay scroller doesn't. To the U2 fix leg |
+| the card-body press | **GREEN** — the door opens the panel as ever |
+| F-W-5 the badge at 800 pt | **GREEN** — the two-comment block reads a whole "#2" beside "#1" neighbours; no "…" anywhere. (A badge press is not a door — hover-tier face; not a fix row) |
+| F-W-3 dirty row in a capped list (sheet) | **GREEN** — editing the last row of the capped, scrolled list shows "Unsaved · ⌘⏎ · Save · Revert · Delete" wholly in view as the row grows; Revert restored the text. The dirty face also showed correctly in the POPOVER host |
+| the sheet's ⎋ ladder (regression) | **GREEN** — draft, first ⎋ clears + sheet stays, second ⎋ closes. The claims change left the sheet host untouched |
+| F-W-4 the popover's ⎋ ladder | **HALF-GREEN** — the original harm is GONE: no ⎋ ever closed the popover with a draft in it, and the draft was cleared (never dropped). But **F-W-4-R (residual):** the live ladder runs ⎋ #1 = a DEAD press that silently blurs the composer (caret vanishes, reproduced twice), ⎋ #2 = clears the draft, and the CLOSE rung never fires at all (⎋ with an empty composer leaves the popover open; Close and click-away still work). The live host's key addressing differs from both probe models — the panel makes the popover window KEY on open (the ask-for-keyboard dance), so live keys are popover-addressed, not parent-addressed. To the U3 fix leg WITH the red pin |
+| R1-2 dismiss-with-dirty-EDIT (the reviewer's row) | **GREEN — THE SAVE LANDED LIVE.** A dirty in-place edit in the popover survived a click-away dismissal and reopened saved (clean row, new text). The watcher works in her app |
+| the dark frame | **GREEN** — Write's gutter cards and Takes' margin entries in the black room, legible, prose unmoved; appearance restored to Follow system |
+
+**W4-OBS-1:** a click-away dismissal DROPS a typed, unsubmitted composer DRAFT silently (the watcher
+saves dirty EDITS only). The ⎋ road now protects drafts; the click-away road doesn't. Pre-existing and
+possibly acceptable — for round 2's reviewer, and ultimately her taste call if the reviewer thinks it
+rises.
+
+**Honest limits:** the trackpad-gesture arm was NOT walked (no honest synthetic road for phased
+gestures; the U2 leg's dispatch-stack evidence plus her daily use cover it — recorded, not claimed).
+The Terminal-voice re-pass was SKIPPED on reasoning: every fixed mechanism (hitTest, claims, the
+watcher, revealBelow) is voice-blind code shared by both voices, and the first walk covered Terminal's
+voice-specific panel rows; the time went to the residuals instead. VX-222 was queued behind the window.
+
+**Walk-machinery notes:** the old `/tmp/walk-scroll` binary traps (SIGTRAP) — replaced with a minimal
+CGEvent line-scroll poster in the session scratchpad. Mid-window the Data volume hit 100% (ENOSPC);
+freed ~300MB of my own walk artifacts (the first walk's captures — already slated for closeout
+deletion — and full-screen originals whose crops are kept); vx-184's cleanup later freed the volume to
+34 GiB. Only my own artifacts were touched.
+
+**Dispositions out of this window (in order):**
+1. **U3 FIX LEG 3** (next, headless): F-W-4-R — trace the LIVE key addressing (the popover window is
+   key; whose window do its key events carry?), fix the ladder (one ⎋ = clear with a caret still in
+   place, empty ⎋ = close), and make the red pin model the live addressing so it goes red-on-old for
+   the real mechanism; W4-OBS-1 recorded for the reviewer.
+2. **U2 FIX LEG 2** (after U3's leg): F-W-2-R — the overlay scroller's knob must track a live drag;
+   trace with overlay-style scrollers forced in the probe.
+3. Then LADDER ROUND 2 over the whole fix-leg diff, with R1-2's AGREE (now live-proven), R1-3's
+   answer, and this window's record before the reviewer.
