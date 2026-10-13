@@ -170,8 +170,9 @@ enum MCPToolCatalog {
             of its own, the header starts with {v:2} and a "--- next block ---" line separates the \
             blocks instead. Returns the text. With with_ids: true it returns \
             JSON instead — the note's blocks in order, each with its block_id, its name if the \
-            author named it, the shown take's text, every take (take_id, label, chosen, text) and \
-            its comments — the ids add_take, add_comment and save_lens address — plus the note's \
+            author named it, shown_take_id (the take the block shows), every take (take_id, label, \
+            chosen, text — each text once, on its take) and its comments — the ids add_take, \
+            add_comment and save_lens address — plus the note's \
             entry_date and the books (and chapters) holding it that you can read. Ids are live: the \
             author's own merges and divides make new blocks, so an id can go stale between calls \
             (a write with a stale id is refused) — read again to get current ids. with_commits: true \
@@ -185,8 +186,9 @@ enum MCPToolCatalog {
             beyond_grant); with_lenses: true (its saved lenses and the take each shows per block); \
             with_versions: true (its saved versions — version_id reads one, in either form). \
             lens_id reads the note through one of its lenses, in either form: each block shows the \
-            take the lens shows there, else its chosen take; with with_ids each block says which \
-            (via: "lens" or "chosen"), and chosen still marks the note's own chosen take.
+            take the lens shows there, else its chosen take; with with_ids each block's \
+            shown_take_id is that take and via says which ("lens" or "chosen"), and chosen still \
+            marks the note's own chosen take.
             """,
         inputSchema: .object([
             "type": "object",
@@ -335,9 +337,9 @@ enum MCPToolCatalog {
         description: """
             Create a new note inside a shared book (book_id — it joins the book at its end) or a \
             shared wing (wing_id; "" is Home — it lands bookless). Give EITHER text (plain prose: \
-            each paragraph becomes a block) OR blocks (structured: each block's text exactly — a \
-            blank line inside it stays inside the one block — with an optional name and labeled \
-            takes, the same shape read_note's with_ids returns). entry_date (yyyy-MM-dd) sets the \
+            each paragraph becomes a block) OR blocks (structured: each block's shown text exactly \
+            — a blank line inside it stays inside the one block — with an optional name and its \
+            other takes, each with an optional label). entry_date (yyyy-MM-dd) sets the \
             note's date, e.g. for old journal entries. Returns JSON with the note_id and its block_ids.
             """,
         inputSchema: .object([

@@ -327,7 +327,10 @@ struct MCPEditServerTests {
             let noteID = try #require(try json(created)["note_id"] as? String)
             let read = try json(try await call(connection, "read_note", ["note_id": .string(noteID), "with_ids": .bool(true)]))
             let blocks = try #require(read["blocks"] as? [[String: Any]])
-            #expect(blocks.map { $0["text"] as? String } == ["Woke early.\n\nThe kettle, the window.", "Went out."])
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-186): a block no longer
+            // carries its shown text twice; it names its shown take, whose entry
+            // carries the text once (`shownText`). Same assertion, new address.
+            #expect(blocks.map(shownText) == ["Woke early.\n\nThe kettle, the window.", "Went out."])
             #expect(blocks.first?["name"] as? String == "morning")
             #expect((blocks.last?["takes"] as? [[String: Any]])?.last?["label"] as? String == "pt")
             #expect(read["entry_date"] as? String == "2019-03-04")

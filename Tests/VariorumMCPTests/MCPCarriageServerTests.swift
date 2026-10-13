@@ -146,7 +146,10 @@ struct MCPCarriageServerTests {
             ]))
             let versions = try #require(listed["versions"] as? [[String: Any]])
             #expect(versions.map { $0["version_id"] as? String } == [versionID])
-            #expect(blocks(listed).first?["text"] as? String == "Edition two.")
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-186): a block no longer
+            // carries its shown text twice; it names its shown take, whose entry
+            // carries the text once (`shownText`). Same assertion, new address.
+            #expect(blocks(listed).first.flatMap(shownText) == "Edition two.")
 
             let readText = try await call(connection, "read_note", [
                 "note_id": .string(note.id), "version_id": .string(versionID),
@@ -156,7 +159,10 @@ struct MCPCarriageServerTests {
                 "note_id": .string(note.id), "version_id": .string(versionID), "with_ids": .bool(true),
             ]))
             #expect(readJSON["version_of"] as? String == note.id && readJSON["version_id"] as? String == versionID)
-            #expect(blocks(readJSON).first?["text"] as? String == "Edition one.")
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-186): a block no longer
+            // carries its shown text twice; it names its shown take, whose entry
+            // carries the text once (`shownText`). Same assertion, new address.
+            #expect(blocks(readJSON).first.flatMap(shownText) == "Edition one.")
 
             let foreign = try await call(connection, "read_note", [
                 "note_id": .string(note.id), "version_id": .string(strangerVersion.post.id),

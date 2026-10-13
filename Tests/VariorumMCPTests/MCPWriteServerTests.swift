@@ -242,7 +242,10 @@ struct MCPWriteServerTests {
 
             let shaped = try json(try await call(connection, "read_note", ["note_id": .string(prose.id), "with_ids": .bool(true)]))
             let blocks = try #require(shaped["blocks"] as? [[String: Any]])
-            #expect(blocks.first?["text"] as? String == "words")
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-186): a block no longer
+            // carries its shown text twice; it names its shown take, whose entry
+            // carries the text once (`shownText`). Same assertion, new address.
+            #expect(blocks.first.flatMap(shownText) == "words")
             #expect(blocks.first?["name"] as? String == "the opening", "R-13nb-8: a block's name rides where set")
             #expect(blocks.last?["name"] == nil, "and is absent where unset")
             #expect((blocks.first?["takes"] as? [[String: Any]])?.first?["chosen"] as? Bool == true)

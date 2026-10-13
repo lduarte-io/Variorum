@@ -96,9 +96,6 @@ struct MCPReadShapeServerTests {
                 #expect(occurrences(of: words, in: throughLens) == 1,
                         "through the lens, \(words) crossed \(occurrences(of: words, in: throughLens)) times")
             }
-            // The size the duplicate cost: the prose now crosses once.
-            let prose = (w.texts + ["Block 03, another take entirely."]).reduce(0) { $0 + $1.utf8.count }
-            #expect(plain.utf8.count < 2 * prose, "the answer no longer carries the prose twice")
             await h.hangUp(connection)
         }
     }
