@@ -105,8 +105,23 @@ One cold ladder over the run's WHOLE diff before the merge, `notes/REVIEW_PROMPT
 
 **PIN DESIGN.** A mounted-board pin (`TakesChooseRingTests`, the `TakesArticleRenderTests` harness: the real `TakesBoardView` in a window with the observation running): her flow — Write's panel road mints the take (`branchTake` + `focus` + changed words + `teardown` on a panel-shaped model), the `.bloom` landing parked as "Open Takes mode" parks it, the board mounted, then the BUTTON's exact call `model.choose(blockID:variantID:)` new → original. Asserts: the article pane shows the original's text after the second choose, and no editable pane holds text other than its own take's store text. Plus a model-level twin asserting the ring never names an unrendered article pane after a choose. Red on old by behavioural revert of the adopt rule.
 
+## BRIEF — BATCH 2 (the chrome singles: VX-218 · VX-220 · VX-224 · VX-225; second implementer session)
+
+**Required reading:** this file top-to-here — especially ENVIRONMENT TRAPS, the ledger rows 4/6/10/11, and the vx-184/vx-201 contact points (you share Settings-feature files with two other live runs: NEVER touch the MCP pane, its SettingsShape rows, or anything under `Sources/VariorumCore/Sync/`/custody).
+
+Four small window/chrome fixes, one session, each its own commits (`Part of VX-<member>`) and its own ledger flip. Pin-before-fix binds per member where the harness can pin it (the SettingsShapeTests/window-config class); where a defect is pure window chrome the evidence is the walk capture pair (before/after) plus the traced mechanism in your `### BATCH 2 RECORD` — no fix without a self-traced mechanism, ever. Stage protocol for ANY GUI verification or xcodebuild test: READY to the orchestrator, GO before claiming, release promptly, RESULT line back.
+
+- **VX-218 — signed-out bottom-left spacing.** Her words: "signed out has no spacing in the bottom left - doesn't look premium on first login." Find the signed-out account face (main window, bottom-left), give it the spacing the voice's tokens use elsewhere (P-8: `Theme/VoiceControls.swift` is the vocabulary; no literals).
+- **VX-220 — suppress the macOS app-menu Services submenu** (she CONFIRMED the target). Variorum registers no services; the submenu is system clutter ("open in finder, change to chinese, system trace"). Suppress it from the app menu. PROVISIONAL (log in your record): suppress in ALL configurations — she mused "maybe should just be there for debugging," so if a Debug-only keep is genuinely free, say so in the record and the orchestrator decides; do not build a setting for it.
+- **VX-224 — the lock-screen Settings stub.** Her report + screenshot: locking Variorum with Settings open leaves a tiny unreadable, unresizable stub window (truncated "Open the main window fi…"). Her lean: "i feel like we can probably just close this window." TRACE first what the stub is (the Settings scene's content under the locked state). Fix: the Settings window CLOSES when the lock engages (no reopen-on-unlock machinery unless the trace shows it's free). Mind vx-201's VX-206: they may add a Protection-landing request adopter to AppSettingsView — coordinate through the orchestrator if your diff nears theirs.
+- **VX-225 — "Variorum Settings" titlebar text bleeding over the pane top.** Her screenshot: the window title renders past the sidebar region over the content ("sometimes"). Trace the window/titlebar configuration (the Settings scene's style vs the custom sidebar layout) and the "sometimes" trigger; fix the config, don't mask with padding.
+
+Deliverables: traced mechanisms + fixes + pins where pinnable (walk captures where not, in `notes/plans/vx-214-screens/batch2/` — gitignored), targeted suite runs green (SettingsShapeTests + whatever owns the surfaces you touch), ledger rows 4/6/10/11 flipped with hashes, all pushed, one final summary line per member.
+
 ## Author sittings — running record
 
 *(rulings land here verbatim as they happen)*
+
+**2026-10-13 — her ratification of VX-222's riding consequence:** "that's fine on the honest behavior that was riding along." (The keyboard doors that read the ring — ⌘⏎, ⌘T — refusing after a card-choose instead of acting unseen on the stranded take: RATIFIED.)
 
 **2026-10-13 — her Services confirmation (mid-run message):** "I can also confirm that it is the macOS app-menu services submenu." (Resolves row 6's open question; VX-220 retitled on the board. Her resent VX-225 screenshot message disregarded as the duplicate she suspected it was.)
