@@ -27,6 +27,14 @@
 //  Messages are CLASSED at the door they come from (refusal · receipt, the
 //  status seam's law) and rendered in the voice's own registers.
 //
+//  ── VX-179 U1: TRUE DELETE (her R-VX179-3, 2026-10-12) ────────────────────
+//  Her ask: *"why when a comment is deleted you can go into deleted comments
+//  and not even true delete it from there."* Each deleted row now carries
+//  "Delete forever…" beside Restore, confirming every time. It is the Delete
+//  Now road, not a new one: `requestPurge` writes a purge intent, the fold's
+//  fence (`Queries.deletedBlockComments`) drops the row at once on every
+//  device, and the janitor (or, unsynced, the local sweep) takes the bytes.
+//
 
 import AppKit
 import Foundation
@@ -306,6 +314,48 @@ final class CommentsPanelModel {
         }
     }
 
+    // MARK: - Delete forever (VX-179 — her R-VX179-3)
+
+    /// **The deleted comment "Delete forever…" is asking about.** Her ruling
+    /// is the Delete Now posture: a permanent act asks EVERY time (13j round
+    /// 10 — no don't-ask state exists anywhere, and none may be added). So the
+    /// row's door only RAISES this; the act waits for the confirm.
+    private(set) var pendingDeleteForever: String?
+
+    /// The fold row's door: raises the confirm, never acts. A row that is no
+    /// longer in the fold (restored or purged elsewhere since the listing)
+    /// raises nothing — the door asks only about what it shows.
+    func requestDeleteForever(_ id: String) {
+        guard deleted.contains(where: { $0.id == id }) else { return }
+        pendingDeleteForever = id
+    }
+
+    func cancelDeleteForever() {
+        pendingDeleteForever = nil
+    }
+
+    /// **The confirmed act — the Delete Now road for one comment.** The id is
+    /// PASSED IN by the confirm, never read back from `pendingDeleteForever`
+    /// (13l Act 2's rule: SwiftUI writes the alert's `isPresented = false`
+    /// synchronously inside the button's click, before this task resumes —
+    /// four dead confirm doors were found by reading the pending value back).
+    ///
+    /// ONE op, `requestPurge` (the intent write — the fold's fence drops the
+    /// row at once, on every device), through the panel's own `perform` seam
+    /// so a refusal (the seal, above all) is classed and worded here. Then the
+    /// local sweep, exactly as `TrashPurge.confirm` runs it: on an install with
+    /// no sync chain the cleanup IS the app's, so the bytes go now; under a
+    /// configured chain it is a no-op and the janitor takes them at the
+    /// horizon. No undo entry anywhere — the confirm is the guard.
+    func deleteForever(_ id: String) async {
+        pendingDeleteForever = nil
+        let target = SyncPurgeTarget(table: "block_comment", rowID: id)
+        if await perform({ ops in _ = try ops.requestPurge([target]) }) {
+            status = .receipt(CommentsPanelCopy.deletedForever)
+            await session.sweepLocalPurge()
+        }
+    }
+
     /// Runs one operation and CLASSES what came back. Returns whether it
     /// landed, so the caller can speak its own receipt (a receipt says what
     /// happened, which only the door knows).
@@ -343,6 +393,19 @@ enum CommentsPanelCopy {
     static let emptied = "A comment needs some text — Delete removes it."
     static let deleted = "Comment deleted — it is under \"deleted\" below, restorable."
     static let restored = "Comment restored."
+    /// VX-179 (R-VX179-3) — "Delete forever…" beside Restore in the deleted
+    /// fold. Sentence case throughout (her no-shouty-caps rule); the ellipsis
+    /// says the door asks before it acts.
+    static let deleteForeverVerb = "Delete forever…"
+    static let deleteForeverTitle = "Delete this comment forever?"
+    /// The confirm's body names the two facts that make it permanent: the
+    /// purge travels (the intent syncs — every device drops it), and no door
+    /// brings it back. "There's no putting it back" is the Trash's own phrase
+    /// (`RecoveryCopy.deleteNowConfirm`), so the app says permanence one way.
+    static let deleteForeverMessage =
+        "It leaves every device, and there's no putting it back."
+    static let deleteForeverConfirm = "Delete forever"
+    static let deletedForever = "Comment deleted forever."
     static let addPlaceholder = "Write a comment…"
     static let unsavedMark = "unsaved · ⌘⏎"
     /// The foot's standing line — it teaches all three keys at once and
@@ -536,6 +599,26 @@ struct CommentsPanel: View {
         .frame(minWidth: 460, minHeight: 440)
         .background(tokens.surface)
         .background(CommentPanelKeyMonitor(onAct: handle))
+        // VX-179 (R-VX179-3): "Delete forever…" asks EVERY time — the Delete
+        // Now posture. The pending id rides into the action through
+        // `presenting:` and `deleteForever(_:)` takes it as a parameter (13l
+        // Act 2's rule — never read back after SwiftUI's synchronous
+        // dismissal write). The `BlockHistoryPane` alert shape: a title that
+        // asks, a body that says why it is permanent.
+        .alert(
+            CommentsPanelCopy.deleteForeverTitle,
+            isPresented: Binding(
+                get: { model.pendingDeleteForever != nil },
+                set: { if !$0 { model.cancelDeleteForever() } }),
+            presenting: model.pendingDeleteForever
+        ) { id in
+            Button(CommentsPanelCopy.deleteForeverConfirm, role: .destructive) {
+                Task { await model.deleteForever(id) }
+            }
+            Button("Cancel", role: .cancel) { model.cancelDeleteForever() }
+        } message: { _ in
+            Text(CommentsPanelCopy.deleteForeverMessage)
+        }
         .task {
             // The park restore runs HERE, not in the model's init (ladder
             // round 3, F1): `.task` runs once per INSTALLED presentation,
@@ -786,6 +869,16 @@ struct CommentsPanel: View {
                             Task { await model.restore(comment.id) }
                         }
                         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                        // VX-179 (R-VX179-3): the fold is a TRASH SURFACE —
+                        // every row in it is already deleted — so the purge
+                        // door may live here and nowhere in the writing.
+                        // Quiet ink: present, never calling; the confirm is
+                        // where the destructive register speaks.
+                        Button(tokens.chromeLabel(CommentsPanelCopy.deleteForeverVerb)) {
+                            model.requestDeleteForever(comment.id)
+                        }
+                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                        .help("Removes this comment from every device. Asks first.")
                     }
                     .padding(.vertical, 4)
                 }

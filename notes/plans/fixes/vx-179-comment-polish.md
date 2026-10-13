@@ -218,10 +218,10 @@ the MOBILE PARITY line above).
 | piece | what | status |
 |---|---|---|
 | U1-a | record section + ledger row 3 IN-PROGRESS | DONE (89b5a9af) |
-| U1-b | core: `purgeableTables` + the `block_comment` arm (tombstoned; dead block refuses; seal refuses) · `restoreBlockComment` belt · the MCP redo road's belt · the `deletedBlockComments` fence · `restoreCost`'s fence · the core pins | DONE (the commit after 89b5a9af — "U1-b core") — `swift test --filter "PurgeOpsTests\|RestoreCostTests\|BlockCommentTests"`: 43 tests / 3 suites green, 0 skipped (headless) |
-| U1-c | red-on-old by behavioural revert, per arm (evidence table below) | DONE (this commit) — whole-old + R1–R7 all red as designed, each restored, the restored tree 43/3 green |
-| U1-d | the panel door: `requestDeleteForever` / `deleteForever` on the model, the fold's "Delete forever…" + the confirm, the receipt; app-target pins WRITTEN (run PENDING stage) | NOT-STARTED |
-| U1-e | verify: touched suites + the full `swift test` headless + ONE plain `xcodebuild build` | NOT-STARTED |
+| U1-b | core: `purgeableTables` + the `block_comment` arm (tombstoned; dead block refuses; seal refuses) · `restoreBlockComment` belt · the MCP redo road's belt · the `deletedBlockComments` fence · `restoreCost`'s fence · the core pins | DONE (7aad738a) — `swift test --filter "PurgeOpsTests\|RestoreCostTests\|BlockCommentTests"`: 43 tests / 3 suites green, 0 skipped (headless) |
+| U1-c | red-on-old by behavioural revert, per arm (evidence table below) | DONE (874b3e40) — whole-old + R1–R7 all red as designed, each restored, the restored tree 43/3 green |
+| U1-d | the panel door: `requestDeleteForever` / `deleteForever` on the model, the fold's "Delete forever…" + the confirm, the receipt; app-target pins WRITTEN (run PENDING stage) | DONE (this commit) — code + 3 app-target pins WRITTEN in `CommentsPanelEditorTests` (`deleteForeverAsksEveryTimeThenTakesTheRowOffTheFold`, `deleteForeverUnderASealRefusesInTheSealsWords`, `theDeleteForeverWordsAreSentenceCase`); app-target COMPILE PENDING (U1-e's plain build covers the app target only — the test target compiles at the stage-gated run); RUN PENDING (stage) |
+| U1-e | verify: touched suites + the full `swift test` headless + ONE plain `xcodebuild build` | IN-PROGRESS — touched suites 43/3 green; full `swift test` PENDING; the plain app build PENDING |
 
 ### What U1 decided (with the traces)
 
@@ -325,3 +325,24 @@ Feature pins (not bug-class — the door is new): `aLiveCommentRefusesOnlyDelete
 `aDeletedCommentMintsOneTravellingIntentAndAskingTwiceIsOne` (dedup: the second ask mints 0),
 `aMissingCommentRefusesByNameUnlessAlreadyPurged`, `aCommentOnALiveUnplacedBlockPurges`,
 `theLocalRoadTakesAPurgedCommentWhole` — each red on the whole-old run (W), green on the fix.
+
+### The panel door (U1-d) — what was built, and what the walk must check
+
+- `CommentsPanelModel`: `pendingDeleteForever` (the pending id) · `requestDeleteForever(_:)` (raises
+  the confirm only for a row the fold shows) · `cancelDeleteForever()` · `deleteForever(_:)` (the id
+  PASSED IN — 13l Act 2's rule; `requestPurge` through `perform`, a classed receipt
+  "Comment deleted forever.", then `session.sweepLocalPurge()` — D-5). No undo entry.
+- The fold row: "Delete forever…" beside Restore, `VoicedButtonStyle` `.quiet` (present, never
+  calling — the row's own Delete is quiet too), `chromeLabel` like Restore.
+- The confirm: `.alert(presenting:)` on the panel — `BlockHistoryPane`'s shape. Title "Delete this
+  comment forever?", body "It leaves every device, and there's no putting it back." (the Trash's
+  own permanence phrase), buttons Delete forever (destructive) / Cancel. Sentence case throughout.
+- **WALK CHECK, PENDING (stage):** the panel has THREE hosts — two `.sheet`s (`EditorView.swift`,
+  `TakesBottomBar.swift`) and one `.popover` (the Takes margin note, `TakesShared.swift`). Every
+  shipped confirm-each-time door in the app (the tray's `confirmationDialog`, Block History's
+  `.alert`) is hosted in a sheet or inspector, never a popover, so the POPOVER host is the one this
+  unit could not prove headlessly: the walk must press Delete forever… from the Takes margin
+  note's popover and see the confirm appear AND act (the popover is `.transient`). If it does not,
+  the fallback is an INLINE confirm on the fold row (the row's buttons become "Delete forever ·
+  Cancel" under the question) — robust in every host by construction; U3's pass owns the fold's
+  look either way.
