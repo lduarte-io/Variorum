@@ -763,13 +763,16 @@ Recorded so nobody reads it as a VX-185 regression.
 
 ## U3 UNIT RECORD — the door's ergonomics: VX-186 · VX-173 (door half) · VX-188 · VX-190 · VX-187 (opus-implementer, 2026-10-13 from ~03:05 MDT)
 
-**What this unit has NOT done yet (said first — the READY-FOR-STAGE state, 2026-10-13):** (1) **NO Mac test batch has
-run** — the app's new words and `MCPDoorErgonomicsFacesTests` are compiled, not run (the stage window's); (2) **NO live
-round** — no real client has yet used any of the five new doors (the window's legs (a)–(d)); (3) SyncSpec was read AFTER
-the schema commit (below — verified, no change needed); (4) no `notes/QUESTIONS.md` entry and no canon edit (the merging
-session's); no cold review (the run's ladder); (5) U4's edit-rung any-comment delete is NOT built (the brief) — until U4,
-an EDIT-rung client deleting a comment not on file as its own hears her suggest sentence too. Everything else in the U3
-row is built, pinned red-first, red-on-old BY REVERT per member, and green headless.
+**What this unit did NOT do (said first — the UNIT-CLOSE state, 2026-10-13 04:50 MDT):** (1) **the client-write RECEIPTS were
+not captured live** — a quiet receipt fades before a `claude -p` turn returns; their words are pinned (Mac batch green), the
+UNDO receipts were captured in both voices; (2) **VX-190 had no live leg** (the kickoff's four legs; its evidence is the
+server pins incl. a real living book, red-on-old by revert); (3) **no dark appearance** (light only, both voices);
+(4) SyncSpec was read AFTER the schema commit (below — verified, no change needed); (5) U4's edit-rung any-comment delete is
+NOT built (the brief) — until U4, an EDIT-rung client deleting a comment not on file as its own hears her suggest sentence
+too; (6) no `notes/QUESTIONS.md` entry and no canon edit (the merging session's); no cold review (the run's ladder);
+(7) zero `Sync/`, custody/keychain, editor seam; zero SYNCED schema. Everything else in the U3 row is DONE: pinned red-first,
+red-on-old BY REVERT per member, green headless and on the Mac batch, and USED live with a real Claude Code on the dev store
+(THE LIVE ROUND below).
 
 **Read in full before code (never delegated):** the kickoff `notes/plans/mcp-launch-polish-kickoff.md` (her pre-run
 sitting — R-VX187-1, R-VX188-1/2 verbatim, the U3 row, the rules incl. the schema clause, the live-round line); this
@@ -818,8 +821,8 @@ its own commit) · `Operations+MCP{Writes,Ergonomics}` + small extractions in `O
 | 10 | the catalog walk + the suggest PROOF grown (the ritual), the app's words (Activity, receipts) + Mac pins; the advice and the guide checked for falsified sentences | DONE (this commit; the ritual edits and the app's words landed WITH each member's fix, so no commit left the app uncompilable by a missing receipt case) — NEW Mac pins `App/Variorum/VariorumTests/MCPDoorErgonomicsFacesTests.swift` (4: a batch's receipt counts its items and a run of batches sums them; the delete/un-tag/link receipts; the five undo labels and `isUndoable`; every new tool's Activity words allowed + refused; each tool on its rung) — RUN at the stage window (PENDING). The W-UX-13 every-tool walk (`MCPWingFacesTests`) covers the no-raw-id rule for the five automatically. **The advice (`MCPSession.instructions`) and the field guide's MCP chapter — RE-READ against every new tool, NOT CHANGED:** no sentence is falsified (each new act extends a rung's list without contradicting it: "suggest (add takes and comments beside their text, save lenses)", lesson 3's "Suggest: … it can't change a word you wrote" — true of a client deleting its OWN comment — and the grant sheet's rung sentences stay true; nothing in either describes `with_ids`' shape). U7 teaches the new acts. The two TOOL descriptions VX-186 falsified (`read_note`'s with_ids sentence, `create_note`'s "same shape") were fixed at piece 3 |
 | 11 | red-on-old BY REVERT per member (announced here first, committed tree, restored clean) | DONE, all five — **VX-186 DONE** (announced `bd0ba76a`; this commit records it): `b93f268d`'s production hunks reversed (`MCPNoteStructure`, `MCPToolCatalog`), pins kept → **`everyTextCrossesTheWireOnce` RED, 40 issues (every shown text "crossed 2 times", plain and through the lens — identical to the pre-fix run), `eachBlockNamesTheTakeItShows` RED (2)**, and the seven re-addressed standing pins red with them (they read the shown take); restored by `git checkout HEAD -- Sources`, `git status` clean (log `logs/p11-vx186-revert.log`). **VX-173 DONE** (announced `f29ce64b`): `f2d74091`'s production hunks reversed (the two new files gone, the extractions + catalog undone), the new-API core pin aside → **`MCPBatchDoorsServerTests` RED again — 5/5, 12 issues, identical to the pre-fix run** (every call "Unknown tool"), the three catalog-ritual pins red with them; restored, the aside copy `cmp`-identical and deleted, `git status` clean (log `logs/p11-vx173-revert.log`). **Noticed in that run, not this member's:** `MCPServerTests.whileConnectedEndsWhenTheClientsLastConnectionCloses` threw once — "[-32603] Internal error: Client disconnected" — a code path the revert never touched; GREEN 5/5 alone on the restored tree and in every other whole-target run of this unit — a load-sensitive socket transient (U1's VX-132 watch class), recorded for the ladder, not chased. **VX-188 DONE** (announced `44aefcee`): `a073d200`'s production hunks reversed (the two new files gone; `addComment`/`addComments` without `author:`; the catalog without `delete_comment`), the three new-API core pins aside → **`MCPCommentAuthorshipServerTests` RED again — 4/4, 13 issues, identical to the pre-fix run** (no record ×4; "Unknown tool: delete_comment" ×6); restored, the aside copies `cmp`-identical and deleted, `git status` clean (log `logs/p11-vx188-revert.log`). **VX-190 DONE** (announced `d9d7199c`): `d85985a7`'s production hunks reversed → **`MCPRemoveTagServerTests` RED again — 4/4, 9 issues, identical to the pre-fix run** ("Unknown tool: remove_tag" ×5); restored by `git checkout HEAD -- Sources App`, `git status` clean (log `logs/p11-vx190-revert.log`). **VX-187 DONE** (announced `47e836f1`): `6dad7594`'s production hunks reversed, the new-API core pin aside → **`MCPLinkVersionsServerTests` RED again — 3/3, 13 issues, identical to the pre-fix run** ("Unknown tool: link_versions" ×10); restored, the aside copy `cmp`-identical and deleted, `git status` clean (log `logs/p11-vx187-revert.log`) |
 | 12 | headless finals (`VariorumMCPTests`, `VariorumCoreTests`, workbook) + the Mac build-for-testing (`DerivedData/vx184-u3`); READY FOR STAGE | HEADLESS DONE (this commit) — the whole package `swift test` on `12fd53e5`'s sources, EXIT 0 in 4:46: **`VariorumMCPTests` 171/30** (U2's 153/25 + `MCPReadShapeServerTests` 2 · `MCPBatchDoorsServerTests` 5 · `MCPCommentAuthorshipServerTests` 4 · `MCPRemoveTagServerTests` 4 · `MCPLinkVersionsServerTests` 3) · **`VariorumCoreTests` 2,711/313** (U2's 2,703/310 + `MCPBatchActsTests` 3 · `MCPCommentAuthorActsTests` 2 · `MCPVersionLinkActsTests` 1 · `MCPGrantSchemaTests` +2) · **`StringsWorkbookTests` 40/6** — skips = the standing gated ones only (read in the log: the two 13o gated suites + their tests, the drill-fixture mint, the real-server pass, `memberIDPredicateVersusTheJoin`, the workbook's scratch library). Log `logs/p12-finals.log`. **The Mac build-for-testing: `** TEST BUILD SUCCEEDED **`** (`-derivedDataPath DerivedData/vx184-u3`, 2.5 GB, sources `b35bcb6c`): `Debug/Variorum.app` = `io.lduarte.Variorum.debug` with `Contents/MacOS/variorum-mcp` and `PlugIns/VariorumTests.xctest`; 188 warnings — U1's and U2's count — NONE in a file this unit touched (grepped); log `logs/mac-build-for-testing.log`. **READY FOR STAGE** (the turn ends; the orchestrator's GO + claim `vx184-u3`) |
-| 13 | the stage window (after the GO): the Mac batch + THE LIVE ROUND legs (a)–(d), dev store only | IN PROGRESS — the GO came 04:3x MDT; the stage handed over `coord-for-vx184` → **`vx184-u3`** (50 min, claimed 04:32:09); `guard.sh --author` OK, no Variorum instance. **13a THE MAC BATCH — GREEN:** `test-without-building` on `DerivedData/vx184-u3`, two `-only-testing` groups: **198 tests / 23 suites · 154 tests / 22 suites = 352 tests / 45 suites, all passed** (the plan's "46" was a miscount — its list holds 45 names), `MCPDoorErgonomicsFacesTests` 4/4 among them; skips = the gated capture harnesses only (read in the logs); VX-115's standing red not in the set. Logs `logs/mac-batch-g{1,2}.log`. 13b–13f: the A1 copy and THE LIVE ROUND — PENDING |
-| 14 | close: self-assessment, PROVISIONALs, OWED | NOT STARTED |
+| 13 | the stage window (after the GO): the Mac batch + THE LIVE ROUND legs (a)–(d), dev store only | **DONE** (04:32:09–04:48:47 MDT) — the GO came via the coordinator; the stage handed over `coord-for-vx184` → **`vx184-u3`** (50 min, claimed 04:32:09); `guard.sh --author` OK, no Variorum instance. **13a THE MAC BATCH — GREEN:** `test-without-building` on `DerivedData/vx184-u3`, two `-only-testing` groups: **198 tests / 23 suites · 154 tests / 22 suites = 352 tests / 45 suites, all passed** (the plan's "46" was a miscount — its list holds 45 names), `MCPDoorErgonomicsFacesTests` 4/4 among them; skips = the gated capture harnesses only (read in the logs); VX-115's standing red not in the set. Logs `logs/mac-batch-g{1,2}.log`. **13b–13f:** the A1 copy, THE LIVE ROUND legs (b)(a)(c)(d) with a REAL Claude Code (every leg PROVEN — on the wire and on her surfaces; below), the cleanup (her user-scope config byte-identical, the dev store "Restored (verified)", prefs 0 keys differing, 0 whole keys); the stage RELEASED at 04:48:47 (17 of 50 minutes) |
+| 14 | close: self-assessment, PROVISIONALs, OWED | **DONE** (this commit) — the record's first line, THE LIVE ROUND, the post-round SELF-ASSESSMENT, OWED re-written for the cold review and the merge. **UNIT CLOSED.** |
 
 **No revert is in flight** (all five members' reverts ran and were RESTORED — `git checkout HEAD -- …`, aside copies `cmp`-identical then deleted, `git status` clean).
 
@@ -990,6 +993,73 @@ act's transaction and spends their once grants as one union (both or neither). N
 client-named entry: the minted edges tombstoned (exact rows); the redo revives exactly the edges that died on the
 undo's stamp (a live twin keeps the pair). The free-under-a-seal posture of her mark rides (a link writes no text).
 
+### THE LIVE ROUND — the evidence (dev store only, stage `vx184-u3`, 2026-10-13 04:32:09–04:48:47 MDT)
+
+**Machine and guards:** the Pro; the coordinator's hold `coord-for-vx184` handed over to **`vx184-u3`** (50 min) at 04:32:09;
+her `/Applications/Variorum.app` ABSENT throughout — `guard.sh --author` OK before the batch, the copy and every client turn,
+`guard.sh <devpid> x y` OK before every click/key (dev pid frontmost, the point inside its window); every synthetic event
+paced ≥ 2.6 s after the previous one — **no guard trip**. The Debug app `DerivedData/vx184-u3/…/Variorum.app`
+(`io.lduarte.Variorum.debug`, sources `b35bcb6c`), pid 84586, **Study, light**; **no What's New sheet** greeted it
+(`s0-…`). **A1 prestage copy** → `…/Variorum-dev/Backups/safety-copies/scale-prestage-20261013T103505Z` (four files, each
+`cmp`-verified; sha256 sqlite `734fdee2…`, wal `09753c25…`, shm `be657384…`, keys `e357388a…`); the Debug app's prefs exported.
+**Her user-scope servers BEFORE** (`~/.claude.json`, values never printed): `['linear-server', 'variorum']`, fingerprint
+`49c9525391868615`. **The client:** Settings ▸ MCP (`s1-…` — the server running; claude-code approved, 3 grants) ▸ Connect a
+*[removed for publication]*
+line with `-s user` → `-s local` (`variorum-dev`, the REAL Debug shim) + `variorum-tee` (the same shim behind `tee` — the
+WIRE capture, `wire/tee-{in,out}.log`); `claude mcp list` (Claude Code 2.1.296) → **both ✔ Connected** (`wire/a0-…`; the
+same listing showed her user-scope `variorum` — the installed build, her app absent — "✘ Failed to connect — -32000:
+Variorum must be open…", recorded as found, never touched). claude-code's grants read first (`s3-…`): **read, suggest,
+write new and edit · always** on "o ladrão de raios" (+ read and suggest, + read); the open book OFF; the field guide
+unshared. Every leg below is ONE real `claude -p --strict-mcp-config` turn through `variorum-tee`, `--allowedTools` limited
+to the leg's tools, the prompt naming the exact calls — `is_error` false and no permission denial in every turn
+(`wire/{b1,a1,c1,d1,e4}-claude-p.json`).
+
+| leg | what was done | outcome |
+|---|---|---|
+| **(b) a 20-block read WITHOUT the duplicate (VX-186)** | `list_books` → `create_note` into "o ladrão de raios" (blocks form: 20 distinct paragraphs, block 5 with a labeled `alt` take) → `read_note` with_ids | Claude: "note_id 353AE741-…, blocks: 20, block-level 'text' key: no". **On the WIRE** (the read answer line in `tee-out.log`, 6,403 bytes, parsed by script): **20 blocks · 0 block-level `text` keys · 20 `shown_take_id`s · 21 take texts, EACH ONCE** (occurrence counts `[1]`), the shown texts in order |
+| **(a) a batch as ONE ⌥⌘Z (VX-173)** | `read_note` → **`add_takes`** (6 items, labels "english") → **`add_comments`** (3 items) on that note; in the app ⌥⌘O (Show the AI's Last Change) opened the note; the Edit menu read by AX; ⌥⌘Z twice | Claude: "add_takes returned 6 take_ids; add_comments returned 3 comment_ids". **The note** (`a2-…`): three client comments in the gutter (blocks 1–3), ⑂2 on blocks 1–4 and 6, ⑂3 on block 5 (its own `alt` + the batch's). **Edit menu: "Undo claude-code's comments"**; ONE ⌥⌘Z → **all three comments gone**, "Undid: claude-code's comments" at the bar's end (`a3-…`); the menu then **"Undo claude-code's takes"**; ONE more ⌥⌘Z → **all six batch takes gone at once** (only block 5's own ⑂2 remains), "Undid: claude-code's takes" (`a4-…`). Terminal: a second `add_comments` (2 items, `e4-…` — both in the gutter) walked back by ONE ⌥⌘Z, "Undid: claude-code's comments" (`e5-…`) |
+| **(c) `link_versions` + Compare (VX-187)** | `create_note` (a 3-paragraph "second draft") → `read_note` → **`link_versions`** (`note_a` the 20-block note, `note_b` the draft, pairs [A1↔B1, A3↔B2]); in the app the 20-block note → Compare (⌘5); ⌥⌘Z | Claude: "Links returned: 2" (two `edge_id`s on the wire). **Compare paired them** (`c2-…`): the peer column auto-filled with "VX-184 U3 river essay, second draft", headed **"versions · no shared lineage — loose alignment"** with unmark · diff · Open (rows align by shared history, not the pairs — as the tool's description says). **Edit menu "Undo claude-code's version link"**; ONE ⌥⌘Z → the same column reads **"there is no relationship here"** with **"mark as versions"** (`c3-…`); later in Terminal the board offers no version at all ("choose a note — versions of this note come first", `e3-…`) |
+| **(d) the suggest-rung own-comment delete (VX-188)** | Her field-guide lesson **"comments & tags"** (her seeded margin comment; unshared — `d1-…`) shared with claude-code at **SUGGEST, always** through Library ▸ search ▸ row ▸ **Share with AI…** (`d3-…`–`d6-…`: the sheet "Grant suggest on “comments & tags” always"); then `list_notes` → `read_note` with_ids (HER comment's id) → **`add_comment`** on block 1 (MINE) → **`delete_comment` MINE** → **`delete_comment` HERS** | Claude: "Step 4 succeeded: "deleted": true. Step 5 error: You don't have permission to delete that comment. Suggest raising your permission level to edit." **On the WIRE** (script over `tee-{in,out}.log`, the two `delete_comment` calls of the session): MINE → `{"…","deleted":true…}` `isError` false; HERS → **`isError` true, text BYTE-EQUAL to her ruled sentence (96 bytes)**. **Activity, Study** (`d8-…`, `d9-…` the "all 152 ›" sheet): "claude-code **was refused deleting a comment** in “comments & tags”" · "claude-code **deleted a comment** in “comments & tags”" · "claude-code commented in …" · "read …" · "listed its shared notes" — and the earlier legs' lines: "claude-code **linked “VX-184 U3 river essay” and another note as versions**" · "made the note …" · "**left comments in** …". **Activity, Terminal** (`e2-…`): the same lines in the Terminal voice (the pane `e1-…`) |
+
+**Cleanup (04:48–04:48:47):** both `-s local` registrations removed ("Removed MCP server … from local config"; the scratch
+project's servers `[]`); **her user-scope servers AFTER: `['linear-server', 'variorum']`, fingerprint `49c9525391868615` —
+byte-identical to BEFORE**; no whole key anywhere in `~/.claude.json` (0); the scratch setup line, strict config, tee wrapper
+and project DELETED; the clipboard emptied (0 bytes); the dev instance quit BY IDENTITY (`pgrep` empty, no socket left);
+the dev store **"Restored (verified)"** from `scale-prestage-20261013T103505Z` (`logs/restore.txt`) — all four files
+`cmp`-IDENTICAL to the prestage copy; the Debug app's prefs: eight keys had moved (window frame, open notes, the walk's two
+notes' current-block and mode keys, the backup log, the idle-sweep mark) → `defaults import` of the pre-launch export + three
+`defaults delete`s of keys the walk created → **0 keys differ**; a whole-key grep over `vx184-screens/u3/` AND the
+scratchpad: **0 files**; one full-screen grab made while finding a menu (it caught a terminal) DELETED, only window captures
+kept; the tree clean; the stage **RELEASED** ("STAGE RELEASED (was 'vx184-u3')", 04:48:47 — 17 of the 50 minutes).
+**Not captured, said plainly:** the client-write RECEIPTS themselves ("claude-code added 6 takes · ⌥⌘Z undoes", "…deleted a
+comment…") — a quiet receipt fades before a `claude -p` turn returns its reply, in both voices (one triggered capture fired
+early); their words are pinned in `MCPDoorErgonomicsFacesTests` (green in the batch); the UNDO receipts ("Undid: …") were
+captured in both voices. **Machinery note:** the bottom bar's note ▾ menu offers "Allow AI here" (13n-b's read-once door), so
+the suggest grant went through the Library row's Share with AI… (the 13n-c grant road) — a road choice, not a finding.
+
+**Captures** (`notes/plans/vx184-screens/u3/`, gitignored): Study — `s0-…` (the Bookcase at launch, no What's New),
+`s1-…` (the pane, the server running), `s2-…` (Connect a client, the key line), `s3-…` (Shared with AI before),
+`a2-…` / `a3-…` / `a4-…` (leg a), `c2-…` / `c3-…` (leg c), `d1-…` / `d3-…` / `d4-…` / `d5-…` / `d6-…` (leg d's grant road),
+`d8-…` / `d9-…` (Activity); Terminal — `e1-…` (the pane), `e2-…` (Activity), `e3-…` (Compare after the undo), `e4-…` / `e5-…`
+(a batch and its one undo). Wire — `wire/tee-{in,out}.log`, `wire/a0-…`, `wire/{b1,a1,c1,d1,e4}-claude-p.{json,err}`. Logs —
+`logs/mac-batch-g{1,2}.log`, `logs/restore.txt`, and the headless logs of pieces 1–12.
+
+### SELF-ASSESSMENT (post-round — the implementer's, at the unit's close)
+
+**Against the U3 row, now with USE:** every leg was proven on the WIRE and on her surfaces with a REAL Claude Code against
+the dev store. VX-186: a real 20-block read carries 0 block-level texts and every text ONCE. VX-173: a real batch of six
+takes and a batch of three comments are each ONE ⌥⌘Z, named after the client in her Edit menu, in both voices. VX-187: two
+named pairs made Compare pair the notes ("versions · no shared lineage — loose alignment") and one ⌥⌘Z unpaired them.
+VX-188: through a suggest-only share made by HER grant road, the client deleted its own comment and was refused hers with
+her ruled sentence, byte-equal on the wire; Activity says both in words in both voices. VX-190: not a live leg (the round's
+four legs are the kickoff's); its evidence is the four server pins incl. a real living book, red-on-old by revert.
+**Against the spec:** unchanged from the pre-stage assessment (zero `Sync/`/custody/editor seam; the one schema change
+local-only, marker 13; P1).
+**Risks I see (updated):** (1)–(4) of the pre-stage list stand. (5) The round re-confirmed that Compare's ROW alignment
+ignores the named pairs (lineage only) — honest and said in `link_versions`' description, but a client naming pairs may
+expect aligned rows; whether the pairs SHOULD drive alignment is a design question for her (not built — R-VX187-1 asks
+only that one pair makes them peers).
+
 ### SELF-ASSESSMENT (pre-stage — the implementer's)
 
 **Against the U3 row:** VX-186 — the duplicate traced to the line (`MCPNoteStructure.read` copied the shown take's text onto
@@ -1014,7 +1084,7 @@ none — the receipt counts); (4) a socket transient seen once under whole-targe
 
 ### OWED (for the orchestrator)
 
-1. **The stage window** (above) — the Mac batch + the live round legs (a)–(d); then this record's close.
+1. ~~**The stage window**~~ — DONE (the Mac batch 352/45 green; the live round PROVEN, every leg). **Next: the run's cold review** (the map below).
 2. **The cold review's map:** `Operations+MCPBatches` (one transaction, `MCPBatchItemRefusal`, the inverse's all-or-nothing) ·
    `Operations+MCPCommentAuthors` (the record's write inside the comment's transaction; the exact-stamp undo) +
    `MCPWriteTools+CommentDelete` (`mayDelete`, her sentence on the snapshot AND in the guard) · `Operations+MCPVersionLinks`
@@ -1029,6 +1099,11 @@ none — the receipt counts); (4) a socket transient seen once under whole-targe
    P-U3-WORDS. MOBILE PARITY: nothing mobile-visible (the door is Mac-only; the v1_27 table is local-only).
 4. **U4's carry:** `mayDelete`'s edit arm; `Queries.mcpCommentAuthor` is the one read to consult.
 5. **U7's carry:** the advice and the guide teach the five new acts (nothing was falsified, so nothing was changed).
+6. **Noticed in the live round, for her (a design question, not a defect):** Compare aligns rows by shared HISTORY only, so the
+   pairs `link_versions` names make the notes peers but don't line their rows up ("versions · no shared lineage — loose
+   alignment"); whether named pairs should drive Compare's alignment is hers to say (R-VX187-1 asked only for peers).
+7. **The orchestrator's U1/U2 carries met again, recorded as found:** her installed `variorum` registration (her app absent) reads
+   "Variorum must be open…" in `claude mcp list` — untouched.
 
 ### PROVISIONALs (running — each wants a `notes/QUESTIONS.md` entry at the merge)
 
