@@ -402,9 +402,10 @@ struct EditorCommands: Commands {
                 openSettings()
             }
             .keyboardShortcut(",", modifiers: [.command, .option])
-            // Its own section, so it reads with Settings… above it and never
-            // as part of Services below (the verify leg's AX read).
-            Divider()
+            // (Its own `Divider()` stood here so it never read as part of
+            // Services below — retired with Services at VX-220, vx-184's OK:
+            // the system's group separator already sets Hide… apart, and the
+            // two side by side were a doubled separator in the menu model.)
         }
         // Phase 13 (B2): ⌘N = New Post (R41) + the dated home's shortcut.
         CommandGroup(replacing: .newItem) {
