@@ -304,17 +304,29 @@ extension Operations {
     /// gathering finished before 13i-d (or so synced) keeps its Reopen.
     public func lockReading(_ id: String) throws {
         try database.write { db in
+            _ = try finishReadingRows(db, id)
+        }
+    }
+
+    /// `lockReading`'s row work inside a caller's transaction (VX-184 U5 —
+    /// the MCP door's `finish_book` runs it under its guard, and its undo's
+    /// redo and a reopen's undo run it too). Byte-identical behaviour: the
+    /// whole body moved, nothing in it did. Returns the FINISH's stamp — the
+    /// one the pending arrivals were dismissed on — or nil for a sealed book
+    /// (finished already: nothing written).
+    @discardableResult
+    func finishReadingRows(_ db: Database, _ id: String) throws -> Date? {
             var reading = try liveReading(db, id)
             guard reading.kind == .book else {
                 throw OperationError.wrongReadingKind(id: id, expected: .book)
             }
-            guard reading.sealedAt == nil else { return }
+            guard reading.sealedAt == nil else { return nil }
             let now = date.now
             reading.locked = true
             reading.updatedAt = now
             try reading.update(db)
             try dismissPendingArrivals(db, readingID: id, now: now)
-        }
+            return now
     }
 
     /// Un-finishing a living book RESUMES its intake with a CATCH-UP (13i-b
@@ -328,6 +340,13 @@ extension Operations {
     /// states never contradict.
     public func unlockReading(_ id: String) throws {
         try database.write { db in
+            try reopenReadingRows(db, id)
+        }
+    }
+
+    /// `unlockReading`'s row work inside a caller's transaction (VX-184 U5 —
+    /// `reopen_book`, and a finish's undo). Byte-identical behaviour.
+    func reopenReadingRows(_ db: Database, _ id: String) throws {
             var reading = try liveReading(db, id)
             guard reading.sealedAt == nil else {
                 throw OperationError.readingSealed(id: id)
@@ -340,7 +359,6 @@ extension Operations {
             if wasFinished {
                 try intakeSweep(db, book: reading, occasion: .catchUp, now: now)
             }
-        }
     }
 
     /// Tombstone; the reading triggers cascade to its memberships
@@ -357,13 +375,23 @@ extension Operations {
     /// The road is `archiveReading` — it returns when a day arrives.
     public func deleteReading(_ id: String) throws {
         try database.write { db in
+            _ = try deleteReadingRow(db, id)
+        }
+    }
+
+    /// `deleteReading`'s row work inside a caller's transaction (VX-184 U5 —
+    /// `delete_book`, and its undo's redo). Byte-identical behaviour, the
+    /// daily Journal's guard included. Returns the tombstone's stamp (the
+    /// one the cascade stamps the chapters and memberships with).
+    @discardableResult
+    func deleteReadingRow(_ db: Database, _ id: String) throws -> Date {
             var reading = try liveReading(db, id)
             try refuseDeletingTheDailyJournal(reading)
             let now = date.now
             reading.deletedAt = now
             reading.updatedAt = now
             try reading.update(db)
-        }
+            return now
     }
 
     /// THE GUARD, one line for both delete doors (13i-e): keyed on the
@@ -931,6 +959,17 @@ extension Operations {
     @discardableResult
     public func removePostFromReading(_ postID: String, from readingID: String) throws -> Bool {
         try database.write { db in
+            try removeMembershipRow(db, postID: postID, readingID: readingID).bookless
+        }
+    }
+
+    /// `removePostFromReading`'s row work inside a caller's transaction
+    /// (VX-184 U5 — `remove_note_from_book`). Byte-identical behaviour.
+    /// Returns the tombstoned member row (its `deletedAt` is the act's stamp)
+    /// and whether the note is now bookless.
+    func removeMembershipRow(
+        _ db: Database, postID: String, readingID: String
+    ) throws -> (row: ReadingPost, bookless: Bool) {
             let reading = try liveReading(db, readingID)
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)
@@ -940,14 +979,23 @@ extension Operations {
             }
             membership.deletedAt = date.now
             try membership.update(db)
-            return try isBookless(db, postID: postID)
-        }
+            return (membership, try isBookless(db, postID: postID))
     }
 
     public func reorderReadingPost(
         _ postID: String, in readingID: String, to insert: InsertPosition
     ) throws {
         try database.write { db in
+            _ = try reorderMembershipRow(db, postID: postID, readingID: readingID, to: insert)
+        }
+    }
+
+    /// `reorderReadingPost`'s row work inside a caller's transaction (VX-184
+    /// U5 — `move_note_in_book`). Byte-identical behaviour. Returns the member
+    /// row's id and its position before and after.
+    func reorderMembershipRow(
+        _ db: Database, postID: String, readingID: String, to insert: InsertPosition
+    ) throws -> (rowID: String, from: String, to: String) {
             let reading = try liveReading(db, readingID)
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)
@@ -955,9 +1003,10 @@ extension Operations {
             guard var membership = try liveMembership(db, postID: postID, readingID: readingID) else {
                 throw OperationError.postNotInReading(postID: postID, readingID: readingID)
             }
+            let from = membership.position
             membership.position = try readingPosition(db, readingID: readingID, at: insert)
             try membership.update(db)
-        }
+            return (membership.id, from, membership.position)
     }
 
     /// **A BOOK NEVER SPANS WINGS** (13i-d U5 — the sitting record §9; the

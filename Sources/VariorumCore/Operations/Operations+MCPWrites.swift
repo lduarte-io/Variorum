@@ -88,6 +88,25 @@ extension Operations {
         case commitRename = "commit name"
         case noteTitle = "note title"
         case lensDelete = "lens deletion"
+        // VX-184 U5 — VX-196's edit parity across the library (R-VX184-1): every
+        // act ONE client-named entry (P-VX196-1). An OWNED book's removal reads
+        // "release" — her door's own word (§20). PROVISIONAL words
+        // (P-U5-WORDS), 13s-a sweepable.
+        case bookName = "book name"
+        case bookFinish = "finish"
+        case bookReopen = "reopen"
+        case bookArchive = "book archiving"
+        case bookUnarchive = "book unarchiving"
+        case bookDelete = "book deletion"
+        case bookRemove = "removal from a book"
+        case bookRelease = "release from a book"
+        case bookOrder = "move in a book"
+        case chapterName = "chapter name"
+        case chapterDelete = "chapter deletion"
+        case chapterMove = "chapter move"
+        case noteDelete = "note deletion"
+        case noteArchive = "note archiving"
+        case noteUnarchive = "note unarchiving"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 

@@ -338,6 +338,26 @@ nonisolated enum MCPPaneCopy {
         case "rename_commit": return "renaming a commit in \(at)"
         case "rename_note": return "renaming \(at)"
         case "delete_lens": return "deleting a lens of \(at)"
+        // VX-184 U5 — VX-196's edit parity across the library (PROVISIONAL
+        // words, P-U5-WORDS — her copy pass). The book acts log the BOOK; the
+        // chapter acts their chapter's book; the two-sided membership acts the
+        // side that refused (UXR1-1's rule); the note acts the note.
+        case "rename_book": return "renaming \(at)"
+        case "finish_book": return "finishing \(at)"
+        case "reopen_book": return "reopening \(at)"
+        case "archive_book": return "archiving \(at)"
+        case "unarchive_book": return "unarchiving \(at)"
+        case "delete_book": return "deleting \(at)"
+        case "remove_note_from_book":
+            return kind == "book" ? "taking a note out of \(at)" : "taking \(at) out of a book"
+        case "move_note_in_book":
+            return kind == "book" ? "moving a note in \(at)" : "moving \(at) in a book"
+        case "rename_chapter": return "renaming a chapter of \(at)"
+        case "delete_chapter": return "deleting a chapter of \(at)"
+        case "move_chapter": return "moving a chapter of \(at)"
+        case "delete_note": return "deleting \(at)"
+        case "archive_note": return "archiving \(at)"
+        case "unarchive_note": return "unarchiving \(at)"
         // VX-168 — a connection the setup key turned away, said precisely
         // here (the client hears one sentence for all of them).
         case "connect_bare": return "connecting without a setup key"
@@ -431,6 +451,22 @@ nonisolated enum MCPPaneCopy {
         case "rename_commit": return n == 1 ? "renamed a commit in \(at)" : "renamed \(n) commits in \(at)"
         case "rename_note": return "renamed a note to \(at)" + times
         case "delete_lens": return n == 1 ? "deleted a lens of \(at)" : "deleted \(n) lenses of \(at)"
+        // VX-184 U5 — VX-196's edit parity across the library (PROVISIONAL
+        // words, P-U5-WORDS). A renamed book is logged under its NEW name.
+        case "rename_book": return "renamed a book to \(at)" + times
+        case "finish_book": return "finished \(at)" + times
+        case "reopen_book": return "reopened \(at)" + times
+        case "archive_book": return "archived \(at)" + times
+        case "unarchive_book": return "unarchived \(at)" + times
+        case "delete_book": return "deleted \(at)" + times
+        case "remove_note_from_book": return "took \(at) out of a book" + times
+        case "move_note_in_book": return n == 1 ? "moved a note in \(at)" : "moved \(n) notes in \(at)"
+        case "rename_chapter": return n == 1 ? "renamed a chapter of \(at)" : "renamed \(n) chapters of \(at)"
+        case "delete_chapter": return n == 1 ? "deleted a chapter of \(at)" : "deleted \(n) chapters of \(at)"
+        case "move_chapter": return n == 1 ? "moved a chapter of \(at)" : "moved \(n) chapters of \(at)"
+        case "delete_note": return "deleted \(at)" + times
+        case "archive_note": return "archived \(at)" + times
+        case "unarchive_note": return "unarchived \(at)" + times
         // VX-168: a known name's first setup key, bound as it connected.
         case "connect_bound": return "connected with a new setup, now bound to its name" + times
         // VX-198 (R-VX184-5): the newest copied setup took the name.
@@ -1200,6 +1236,44 @@ nonisolated enum MCPReceiptCopy {
                 : "renamed \(n) notes"
         case .lensDelete:
             return n == 1 ? "deleted the lens \(quoted(receipts[0].detail))" : "deleted \(n) lenses"
+        // VX-184 U5 — VX-196's edit parity across the library (PROVISIONAL
+        // words, P-U5-WORDS — her copy pass). A book act's target is the BOOK
+        // (its name); a membership act's the NOTE, its detail the book; a
+        // chapter act's detail the chapter's name.
+        case .bookName:
+            return n == 1 ? "renamed the book \(quoted(receipts[0].detail))" : "renamed \(n) books"
+        case .bookFinish: return n == 1 ? "finished \(quoted(receipts[0].targetTitle))" : "finished \(n) books"
+        case .bookReopen: return n == 1 ? "reopened \(quoted(receipts[0].targetTitle))" : "reopened \(n) books"
+        case .bookArchive: return n == 1 ? "archived \(quoted(receipts[0].targetTitle))" : "archived \(n) books"
+        case .bookUnarchive:
+            return n == 1 ? "unarchived \(quoted(receipts[0].targetTitle))" : "unarchived \(n) books"
+        case .bookDelete:
+            guard n == 1 else { return "deleted \(n) books" }
+            // Her "Delete Book Only" on an OWNED book says where the notes went.
+            return "deleted the book \(quoted(receipts[0].targetTitle))"
+                + (receipts[0].detail.map { " \u{2014} \($0)" } ?? "")
+        case .bookRemove:
+            return n == 1
+                ? "took \(quoted(receipts[0].targetTitle)) out of \(quoted(receipts[0].detail))"
+                : "took \(n) notes out of books"
+        case .bookRelease:
+            return n == 1
+                ? "released \(quoted(receipts[0].targetTitle)) from \(quoted(receipts[0].detail))"
+                : "released \(n) notes from books"
+        case .bookOrder:
+            return n == 1 ? "moved a note in \(quoted(receipts[0].targetTitle))"
+                : "moved \(n) notes in \(quoted(receipts[0].targetTitle))"
+        case .chapterName:
+            return n == 1 ? "renamed a chapter \(quoted(receipts[0].detail))" : "renamed \(n) chapters"
+        case .chapterDelete:
+            return n == 1 ? "deleted the chapter \(quoted(receipts[0].detail))" : "deleted \(n) chapters"
+        case .chapterMove:
+            return n == 1 ? "moved the chapter \(quoted(receipts[0].detail))" : "moved \(n) chapters"
+        case .noteDelete:
+            return n == 1 ? "deleted \(quoted(receipts[0].targetTitle)) (it's in the Trash)" : "deleted \(n) notes"
+        case .noteArchive: return n == 1 ? "archived \(quoted(receipts[0].targetTitle))" : "archived \(n) notes"
+        case .noteUnarchive:
+            return n == 1 ? "unarchived \(quoted(receipts[0].targetTitle))" : "unarchived \(n) notes"
         }
     }
 

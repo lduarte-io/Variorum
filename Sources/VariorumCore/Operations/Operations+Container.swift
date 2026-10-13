@@ -447,11 +447,35 @@ extension Operations {
     /// Domain archive (kept, out of view) — NOT a sync tombstone.
     public func archiveContainer(_ id: String) throws {
         let now = date.now
-        try updateLiveContainer(id, now: now) { $0.archivedAt = now }
+        try database.write { db in
+            try archiveContainerRow(db, id, now: now)
+        }
     }
 
     public func unarchiveContainer(_ id: String) throws {
-        try updateLiveContainer(id) { $0.archivedAt = nil }
+        try database.write { db in
+            try unarchiveContainerRow(db, id)
+        }
+    }
+
+    /// `archiveContainer`'s row work inside a caller's transaction (VX-184
+    /// U5 — `archive_note`): `updateLiveContainer(id, now:)`'s body with the
+    /// archive's one mutation, byte-identical (the clock read stays the
+    /// door's, before the write, exactly as it was).
+    func archiveContainerRow(_ db: Database, _ id: String, now: Date) throws {
+            var container = try liveContainer(db, id)
+            container.archivedAt = now
+            container.updatedAt = now
+            try container.update(db)
+    }
+
+    /// `unarchiveContainer`'s row work inside a caller's transaction (VX-184
+    /// U5 — `unarchive_note`), byte-identical.
+    func unarchiveContainerRow(_ db: Database, _ id: String) throws {
+            var container = try liveContainer(db, id)
+            container.archivedAt = nil
+            container.updatedAt = date.now
+            try container.update(db)
     }
 
     /// Tombstone (S2). The trigger chain cascades: placements and their
