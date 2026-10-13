@@ -79,10 +79,15 @@ struct MCPSetupKeyServerTests {
 
     // MARK: - Two tools under one name, told apart
 
-    /// The impostor — the SAME name with ANOTHER key (a newer copy's) or
-    /// with none — is refused with the one sentence while the real tool's
-    /// session keeps working; the client row is untouched; her Activity
-    /// list says which.
+    /// VX-198 (A JUSTIFIED EDIT, the ritual — R-VX184-5, "the newest copied
+    /// setup wins"; the VX-168 drill's impostor leg re-pinned): this test's
+    /// premise was "the SAME name with ANOTHER key — a newer copy's — is
+    /// refused". Her ruling reverses exactly that arm: a newer copy RE-BINDS
+    /// the name (approval and grants kept), and the tool still holding the key
+    /// it replaced is the one turned away — with its own sentence. Every
+    /// other impostor road keeps the ONE sentence: no key, a key never issued,
+    /// another name's key. The standing session (decided once) keeps working;
+    /// the row the refusals claimed is untouched; her Activity list says which.
     @Test func twoToolsUnderOneNameAreToldApart() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
@@ -90,25 +95,44 @@ struct MCPSetupKeyServerTests {
             let note = try h.operations.createPost(title: "a page")
             let real = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", .init(rung: .read, scopeKind: .note, scopeID: note.id, duration: .always))
-            let before = try h.client("claude-code")
+            let codexKey = try h.setupKey(for: "codex")
+            let codex = try await h.connect(as: "codex")
 
+            // A newer copy of the setup: it takes the name.
             let newer = try h.operations.mintMCPSetupKey()
-            let (otherFD, other) = try h.rawOpen(as: "claude-code", presenting: newer, id: 7)
-            expectRefusal(other, id: 7, "another key under a bound name")
-            expectClosed(otherFD)
+            let (newerFD, rebound) = try h.rawOpen(as: "claude-code", presenting: newer, id: 6)
+            #expect(rebound["id"] as? Int == 6 && rebound["result"] != nil, "the newest setup is admitted: \(rebound)")
+            close(newerFD)
+            let before = try h.client("claude-code")
+            #expect(before.state == .approved && before.isSetupBound, "approval kept, the name bound to the newer key")
+
+            // The key it replaced: its own sentence. Every other road: the one.
+            let (oldFD, old) = try h.rawOpen(as: "claude-code", presenting: try h.setupKey(for: "claude-code"), id: 7)
+            #expect(old["result"] == nil && old["id"] as? Int == 7)
+            #expect((old["error"] as? [String: Any])?["message"] as? String == MCPHandshake.replacedRefusal)
+            expectClosed(oldFD)
             let (bareFD, bare) = try h.rawOpen(as: "claude-code", presenting: nil, id: 8)
             expectRefusal(bare, id: 8, "no key under a bound name")
             expectClosed(bareFD)
+            let (forgedFD, forged) = try h.rawOpen(as: "claude-code", presenting: "vmk1_neverminted", id: 9)
+            expectRefusal(forged, id: 9, "a key never issued under a bound name")
+            expectClosed(forgedFD)
+            let (foreignFD, foreign) = try h.rawOpen(as: "claude-code", presenting: codexKey, id: 10)
+            expectRefusal(foreign, id: 10, "another name's key under a bound name")
+            expectClosed(foreignFD)
 
-            #expect(try h.client("claude-code") == before, "the impostor never touched the row it claimed")
+            #expect(try h.client("claude-code") == before, "no refusal touched the row it claimed")
             #expect(try await real.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)])
-                .isError != true, "the real tool keeps working")
+                .isError != true, "the standing session was decided once — it keeps working")
             #expect(try activity(h) == [
-                "claude-code connect_not_this_names_key refused",
+                "claude-code \(MCPSetupKeyRule.reboundAct) allowed",
+                "claude-code connect_replaced_key refused",
                 "claude-code connect_bare refused",
+                "claude-code connect_not_this_names_key refused",
+                "claude-code connect_not_this_names_key refused",
             ])
-            #expect(try await h.eventually { h.host.connectedClientNames == ["claude-code"] })
             await h.hangUp(real)
+            await h.hangUp(codex)
         }
     }
 

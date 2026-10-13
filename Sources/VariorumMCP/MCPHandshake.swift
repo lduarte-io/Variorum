@@ -1,5 +1,6 @@
 import Darwin
 import Foundation
+import VariorumCore
 import VariorumMCPSocket
 
 /// **A CONNECTION's HANDSHAKE** (VX-168 — the VX-156 brief §12's K2, her
@@ -69,11 +70,30 @@ enum MCPHandshake {
     /// to another key (no oracle; her Activity list speaks precisely).
     /// Technical register (P-13n-1, inside the door); provider-neutral; no
     /// pronouns on the wire. PROVISIONAL P-VX168-U1-4, her copy pass.
+    /// VX-198 (R-VX184-5): its last clause ("If this client's name is already
+    /// set up with another key, the author must deny it there and approve it
+    /// again first.") was falsified — a fresh setup now re-binds the name by
+    /// itself — and is gone.
     static let refusal =
         "Variorum refused this connection: it needs the setup key from this client's own setup. In "
         + "Variorum, copy a fresh setup from Settings \u{25B8} MCP \u{25B8} Connect a client, run it, and "
-        + "reconnect. If this client's name is already set up with another key, the author must deny it "
-        + "there and approve it again first."
+        + "reconnect."
+
+    /// **The REPLACED key's own sentence** (VX-198 — her R-VX184-5: "a newer
+    /// setup replaced this one — run its setup again"): heard ONLY by a
+    /// connection presenting the key a newer setup replaced under the name it
+    /// claims — it tells that key's holder its own key's history and nothing
+    /// about any other key or name, so it opens no oracle. PROVISIONAL
+    /// P-VX198-2, her copy pass.
+    static let replacedRefusal =
+        "Variorum refused this connection: a newer setup replaced this one. Run this client's setup "
+        + "again \u{2014} copy a fresh one from Settings \u{25B8} MCP \u{25B8} Connect a client \u{2014} "
+        + "and reconnect."
+
+    /// The sentence a refusal speaks: the replaced key's own, else the one.
+    static func refusal(for reason: MCPSetupKeyRule.Refusal) -> String {
+        reason == .replaced ? replacedRefusal : refusal
+    }
 
     /// **The STORE-ERROR sentence** (ladder R1, F-1): the admission's store
     /// threw, so the connection fails CLOSED — but the answer must not be the
@@ -219,8 +239,8 @@ enum MCPHandshake {
     }
 
     /// The refusal on the wire: the shim's shape, answering the first frame
-    /// by its id.
-    static func refusalResponse(toFirstFrame frame: Data) -> Data {
-        MCPShim.refusalResponse(toFirstLine: frame, message: refusal)
+    /// by its id (VX-198: in the sentence `reason` speaks).
+    static func refusalResponse(toFirstFrame frame: Data, reason: MCPSetupKeyRule.Refusal? = nil) -> Data {
+        MCPShim.refusalResponse(toFirstLine: frame, message: reason.map(refusal(for:)) ?? refusal)
     }
 }

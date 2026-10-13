@@ -55,6 +55,11 @@ extension Operations {
     ///   (13n-b's first-contact refresh);
     /// - bind: the key leaves the unclaimed set and binds the known name
     ///   (logged — "connected with a new setup");
+    /// - rebind (VX-198 — R-VX184-5, the newest copied setup wins): the key
+    ///   leaves the unclaimed set and REPLACES the name's bound key; approval
+    ///   and grants untouched; logged `connect_rebound` with the REPLACED
+    ///   key's hash as the row's target — the memory that lets that key hear
+    ///   its own sentence later (P-VX198-1);
     /// - request: a new PENDING connection request, bound to the key (the
     ///   waiting room's cap applies, 13n-b's rule);
     /// - refuse: NOTHING about the client changes (an impostor never touches
@@ -69,7 +74,9 @@ extension Operations {
             let facts: MCPSetupKeyRule.Client? = try existing.map {
                 MCPSetupKeyRule.Client(id: $0.id, boundHash: try Queries.mcpSetupKeyHash(db, clientID: $0.id))
             }
-            let standing = try presentedHash.map { try Queries.mcpSetupKeyStanding(db, hash: $0) } ?? .unknown
+            let standing = try presentedHash.map {
+                try Queries.mcpSetupKeyStanding(db, hash: $0, name: trimmed)
+            } ?? .unknown
             let decision = MCPSetupKeyRule.decide(
                 name: trimmed, client: facts, presentedHash: presentedHash, standing: standing)
             switch decision {
@@ -81,17 +88,25 @@ extension Operations {
                 return MCPConnectionAdmission(decision: decision, client: nil)
             case .admit:
                 _ = try recordMCPContact(db, name: trimmed, version: version)
-            case .bind, .request:
+            case .bind, .rebind, .request:
                 guard let presentedHash else { preconditionFailure("the rule claims only a presented key") }
                 let client = try recordMCPContact(db, name: trimmed, version: version)
                 try db.execute(sql: "DELETE FROM mcp_setup_key WHERE key_hash = ?", arguments: [presentedHash])
                 try db.execute(
                     sql: "UPDATE mcp_client SET setup_key_hash = ? WHERE id = ?",
                     arguments: [presentedHash, client.id])
-                if decision == .bind {
+                switch decision {
+                case .bind:
                     try recordMCPActivity(
                         db, clientName: trimmed, act: MCPSetupKeyRule.boundAct, targetKind: nil,
                         targetID: nil, targetTitle: nil, allowed: true)
+                case .rebind:
+                    try recordMCPActivity(
+                        db, clientName: trimmed, act: MCPSetupKeyRule.reboundAct,
+                        targetKind: MCPSetupKeyRule.replacedTargetKind, targetID: facts?.boundHash,
+                        targetTitle: nil, allowed: true)
+                default:
+                    break
                 }
             }
             return MCPConnectionAdmission(decision: decision, client: try Queries.mcpClient(db, name: trimmed))

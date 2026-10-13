@@ -44,13 +44,39 @@ struct MCPSetupKeyRuleTests {
                             standing: .boundTo(clientID: "cl1")) == .admit)
     }
 
-    /// Two tools under one name, told apart: ANY other key refuses — a fresh
-    /// key from a newer copy included (it is another setup's).
+    /// Two tools under one name, told apart: a key bound to ANOTHER name, or
+    /// one never minted here, refuses. VX-198 (A JUSTIFIED EDIT, the ritual —
+    /// R-VX184-5, "the newest copied setup wins"): this arm's premise was
+    /// "a fresh key from a newer copy is another setup's, so it refuses" —
+    /// exactly what her ruling reverses. The fresh (`.unclaimed`) arm now
+    /// RE-BINDS (`aBoundNameRebindsAFreshCopy`); the two arms left keep their
+    /// refusal, unchanged.
     @Test func aBoundNameRefusesEveryOtherKey() {
-        for standing in [Rule.KeyStanding.unclaimed, .unknown, .boundTo(clientID: "cl2")] {
+        for standing in [Rule.KeyStanding.unknown, .boundTo(clientID: "cl2")] {
             #expect(Rule.decide(name: "claude-code", client: bound, presentedHash: other, standing: standing)
                     == .refuse(.notThisNamesKey), "\(standing)")
         }
+    }
+
+    /// VX-198 (R-VX184-5): a FRESH key — minted by a copy, never presented —
+    /// under a bound name RE-BINDS it: the newest copied setup wins.
+    @Test func aBoundNameRebindsAFreshCopy() {
+        #expect(Rule.decide(name: "claude-code", client: bound, presentedHash: other, standing: .unclaimed) == .rebind)
+        #expect(Rule.Decision.rebind.admits)
+    }
+
+    /// VX-198: the key a newer setup replaced refuses with its OWN reason —
+    /// bound name or not (a Deny after the rebind leaves the name unbound;
+    /// the old key is still the replaced one).
+    @Test func aReplacedKeyRefusesWithItsOwnReason() {
+        for client in [bound, unbound] {
+            #expect(Rule.decide(name: "claude-code", client: client, presentedHash: other, standing: .replaced)
+                    == .refuse(.replaced), "\(client)")
+        }
+        #expect(Rule.decide(name: "claude-code", client: nil, presentedHash: other, standing: .replaced)
+                == .refuse(.replaced))
+        #expect(Rule.decide(name: "claude-code", client: bound, presentedHash: nil, standing: .replaced)
+                == .refuse(.bare), "no key is bare first, whatever else")
     }
 
     // MARK: - A name with no key bound
@@ -99,6 +125,8 @@ struct MCPSetupKeyRuleTests {
         let acts = Set(Rule.Refusal.allCases.map(Rule.activityAct))
         #expect(acts.count == Rule.Refusal.allCases.count)
         #expect(!acts.contains(Rule.boundAct))
+        // VX-198: the rebind's own act, distinct from every refusal's.
+        #expect(!acts.contains(Rule.reboundAct) && Rule.reboundAct != Rule.boundAct)
         #expect(acts.allSatisfy { $0.hasPrefix("connect_") })
     }
 }
@@ -187,13 +215,24 @@ struct MCPSetupKeyOperationsTests {
             #expect(bound.client?.state == .approved && bound.client?.isSetupBound == true)
             #expect(try db.read { try Queries.mcpGrants($0, clientID: client.id) }.count == 1, "her grants kept")
 
-            let newer = try ops.mintMCPSetupKey()
-            #expect(try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: newer).decision
-                    == .refuse(.notThisNamesKey), "a second tool with a newer copy is told apart")
+            // VX-198 (A JUSTIFIED EDIT, the ritual — R-VX184-5): this leg's
+            // premise was "a second tool with a newer copy is told apart" —
+            // the arm her ruling reverses: the newer copy RE-BINDS, and the
+            // key it replaced is the one turned away now. A key never issued
+            // keeps the impostor's refusal, and a refused presentation still
+            // claims nothing.
+            let impostor = "vmk1_neverminted"
+            #expect(try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: impostor).decision
+                    == .refuse(.notThisNamesKey), "a key never minted here is told apart")
             #expect(try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: nil).decision
                     == .refuse(.bare))
             #expect(try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: key).decision == .admit)
-            #expect(try db.read { try Queries.mcpSetupKeyStanding($0, hash: MCPSetupKeyRule.hash(newer)) } == .unclaimed,
+            let newer = try ops.mintMCPSetupKey()
+            #expect(try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: newer).decision
+                    == .rebind, "her re-run setup takes the name")
+            #expect(try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: key).decision
+                    == .refuse(.replaced), "the key it replaced is turned away, with its own reason")
+            #expect(try db.read { try Queries.mcpSetupKeyStanding($0, hash: MCPSetupKeyRule.hash(impostor)) } == .unknown,
                     "a refused presentation claims nothing")
         }
     }
@@ -204,7 +243,12 @@ struct MCPSetupKeyOperationsTests {
         try withOperations { ops, db in
             let key = try ops.mintMCPSetupKey()
             let real = try #require(try ops.admitMCPConnection(name: "claude-code", version: "2.1", presentedKey: key).client)
-            let other = try ops.mintMCPSetupKey()
+            // VX-198 (A JUSTIFIED EDIT, the ritual — R-VX184-5): the impostor
+            // presented a fresh MINT, which now re-binds by her ruling; an
+            // impostor is a key this library never handed the name's newest
+            // setup — here one never minted at all. Everything checked below
+            // is unchanged.
+            let other = "vmk1_impostors_own_key"
             let refused = try ops.admitMCPConnection(name: "claude-code", version: "9.9", presentedKey: other)
             #expect(refused.decision == .refuse(.notThisNamesKey) && refused.client == nil)
             let after = try #require(try db.read { try Queries.mcpClient($0, id: real.id) })

@@ -150,7 +150,12 @@ final class MCPSession: @unchecked Sendable {
             return
         }
         guard admission.decision.admits, let admitted = admission.client?.name else {
-            _ = MCPSocketTransport.writeAll(fd, MCPHandshake.refusalResponse(toFirstFrame: opening.firstFrame))
+            // VX-198: a replaced key hears its own sentence; every other
+            // refusal the one.
+            let reason: MCPSetupKeyRule.Refusal? =
+                if case .refuse(let reason) = admission.decision { reason } else { nil }
+            _ = MCPSocketTransport.writeAll(
+                fd, MCPHandshake.refusalResponse(toFirstFrame: opening.firstFrame, reason: reason))
             return
         }
         let transport = MCPSocketTransport(fd: fd, replay: [opening.firstFrame])

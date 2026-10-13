@@ -115,12 +115,16 @@ nonisolated enum MCPPaneCopy {
     /// TRUE-ER, never promising more (the brief's own condition):** the setup
     /// key now ties a name to its setup, and K2's recorded non-defeat — any
     /// program running as her can read the key — is said in the same breath.
-    /// PROVISIONAL P-VX168-U1-5, her copy pass.
+    /// PROVISIONAL P-VX168-U1-5, her copy pass. VX-198 (R-VX184-5 — the
+    /// newest copied setup wins): true of the new rule, no truer — running a
+    /// newer setup moves the name to its key, and a connection with any other
+    /// key (the one it replaced, one never issued, another client's) or none
+    /// is refused. PROVISIONAL P-VX198-2.
     static let clientBoundary =
         "A client names itself when it connects. Each setup copied here carries a key that binds "
-        + "that name to it, and a connection under the name without that key is refused. That tells "
-        + "two tools apart, not programs running as you: any of them can read the key in the "
-        + "client's settings."
+        + "that name to it \u{2014} running a newer setup moves the name to the new key \u{2014} and a "
+        + "connection under the name with any other key, or none, is refused. That tells two tools "
+        + "apart, not programs running as you: any of them can read the key in the client's settings."
 
     /// L1's room (VX-168): its four sentences run past the quiet captions'
     /// three lines at the pane's width.
@@ -131,10 +135,12 @@ nonisolated enum MCPPaneCopy {
     /// What the pane SHOWS where a copy's key goes: a key is minted only by
     /// the copy act and never displayed (the clipboard is its one road out).
     static let shownKey = "\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}"
-    /// The line under the shown setup. PROVISIONAL P-VX168-U1-5.
+    /// The line under the shown setup. PROVISIONAL P-VX168-U1-5. VX-198 (her
+    /// R-VX184-5 words, the kickoff's): "Running it again replaces the old
+    /// setup" — a re-run is the whole road; no Deny, no re-approval.
     static let keyLine =
         "Each copy carries a fresh setup key, shown here as dots, that ties a client's name to that "
-        + "setup. Run a setup again to give a client a new key."
+        + "setup. Running it again replaces the old setup."
     /// Copy setup command with no library open: the key it mints is kept in
     /// the library, so there is nowhere to keep one. PROVISIONAL.
     static let setupNeedsLibrary = "Open your library to copy a setup \u{2014} its key is kept there."
@@ -315,6 +321,8 @@ nonisolated enum MCPPaneCopy {
         case "connect_not_issued": return "connecting with a setup key this library doesn\u{2019}t hold"
         case "connect_another_names_key": return "connecting with another client\u{2019}s setup key"
         case "connect_not_this_names_key": return "connecting with a setup key other than its own"
+        // VX-198: the key a newer setup replaced (PROVISIONAL P-VX198-2).
+        case "connect_replaced_key": return "connecting with a setup a newer one replaced"
         case "connect_unnamed": return "connecting without a name"
         default: return "using " + spokenAct(act)
         }
@@ -378,6 +386,8 @@ nonisolated enum MCPPaneCopy {
         case "adopt_lens": return "made a lens of \(at) the note" + times
         // VX-168: a known name's first setup key, bound as it connected.
         case "connect_bound": return "connected with a new setup, now bound to its name" + times
+        // VX-198 (R-VX184-5): the newest copied setup took the name.
+        case "connect_rebound": return "connected with a newer setup, which replaced its earlier one" + times
         default: return "used " + spokenAct(act) + times
         }
     }

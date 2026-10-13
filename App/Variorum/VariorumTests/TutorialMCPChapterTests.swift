@@ -272,14 +272,27 @@ struct TutorialMCPChapterTests {
             // falsified ("Variorum can't check that name") is true of the
             // build now — and pinned against the rule it describes.
             #expect(!text.contains("Variorum can't check that name"))
-            #expect(text.contains("a key that ties that name to it, so a second tool using the same name is turned away"))
+            // VX-198 (A JUSTIFIED EDIT, the ritual — R-VX184-5): "so a second
+            // tool using the same name is turned away" was falsified (the
+            // newest copied setup takes the name); the sentence says the rule
+            // as built, and is pinned against it here.
+            #expect(!text.contains("a second tool using the same name is turned away"))
+            #expect(text.contains("a key that ties that name to it. Running the setup again moves the name to the "
+                                  + "new key, and a tool still using an older key, or none, is turned away."))
             #expect(text.contains("where any program running as you can read it"), "K2's non-defeat, said")
             #expect(MCPPaneCopy.clientBoundary.contains("binds that name to it"), "L1 says the same")
+            #expect(MCPPaneCopy.clientBoundary.contains("running a newer setup moves the name to the new key"))
             #expect(MCPPaneCopy.clientBoundary.contains("any of them can read the key"))
             let bound = MCPSetupKeyRule.Client(id: "c", boundHash: MCPSetupKeyRule.hash("vmk1_first"))
-            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound,
-                                           presentedHash: MCPSetupKeyRule.hash("vmk1_second"), standing: .unclaimed)
-                    == .refuse(.notThisNamesKey), "a second tool under the name IS turned away")
+            let second = MCPSetupKeyRule.hash("vmk1_second")
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .unclaimed)
+                    == .rebind, "running the setup again moves the name to the new key")
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .replaced)
+                    == .refuse(.replaced), "a tool still using an older key is turned away")
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .unknown)
+                    == .refuse(.notThisNamesKey), "…as is one using a key never issued")
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: nil, standing: .unknown)
+                    == .refuse(.bare), "…or none")
 
             // THE TRUTH. "it can reach nothing yet": a connection request is
             // refused by the one rule, even with the open book on.

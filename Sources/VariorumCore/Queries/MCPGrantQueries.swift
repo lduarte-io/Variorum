@@ -764,15 +764,32 @@ extension Queries {
     }
 
     /// Where a presented key (by its hash) stands: bound to a client, still
-    /// unclaimed, or unknown here.
-    public static func mcpSetupKeyStanding(_ db: Database, hash: String) throws -> MCPSetupKeyRule.KeyStanding {
+    /// unclaimed, or unknown here. VX-198: with the presenting `name`, a key
+    /// that name was bound to until a newer setup re-bound it stands
+    /// `replaced` — remembered by the rebind's own Activity row (keyed on the
+    /// name AND the hash, so the reason belongs to its name only; a row the
+    /// log's cap has pruned is forgotten, and the key reads unknown again —
+    /// P-VX198-1).
+    public static func mcpSetupKeyStanding(
+        _ db: Database, hash: String, name: String? = nil
+    ) throws -> MCPSetupKeyRule.KeyStanding {
         if let clientID = try String.fetchOne(
             db, sql: "SELECT id FROM mcp_client WHERE setup_key_hash = ?", arguments: [hash]) {
             return .boundTo(clientID: clientID)
         }
         let pending = try Bool.fetchOne(
             db, sql: "SELECT EXISTS (SELECT 1 FROM mcp_setup_key WHERE key_hash = ?)", arguments: [hash]) ?? false
-        return pending ? .unclaimed : .unknown
+        if pending { return .unclaimed }
+        if let name, try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT EXISTS (SELECT 1 FROM mcp_activity
+                               WHERE act = ? AND client_name = ? AND target_kind = ? AND target_id = ?)
+                """,
+            arguments: [MCPSetupKeyRule.reboundAct, name, MCPSetupKeyRule.replacedTargetKind, hash]) ?? false {
+            return .replaced
+        }
+        return .unknown
     }
 
     /// How many copied keys wait unpresented (the drill's and the pins' read).
