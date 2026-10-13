@@ -1190,6 +1190,13 @@ final class TakesViewModel {
             stableCellTake(columnID: columnID, blockID: $0.blockID, in: projection)
         }
         mutate()
+        // Rider 1: a follow parked in this column whose take the swap no
+        // longer shows is over — the world moved on before the cell drew it.
+        if let parked = parkedFollow, parked.columnID == columnID,
+           stableCellTake(columnID: columnID, blockID: parked.blockID, in: projection)
+               != parked.variantID {
+            parkedFollow = nil
+        }
         guard let ring else { return }
         let after = stableCellTake(columnID: columnID, blockID: ring.blockID, in: projection)
         guard after != before else { return }

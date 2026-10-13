@@ -156,6 +156,21 @@ struct TakesParkedFollowTests {
         }
     }
 
+    /// Rider 1, the slot-swap arm: replacing the column a follow is parked in
+    /// with one that does not show the parked take ends the park.
+    @Test func aSlotSwapDropsAFollowParkedInItsColumn() async throws {
+        try await withParkWorld("swap") { _, _, world, model in
+            let columnID = try scratchWithRing(model, world)
+            await model.stepTakes(by: 1)
+            let parked = Key(columnID: columnID, blockID: world.blockID, variantID: world.takeB)
+            #expect(model.parkedFollow == parked)
+            model.replaceColumnWithChosen(columnID)
+            #expect(model.parkedFollow == nil, "the Chosen column never shows B — the park is over")
+            model.paneRendered(parked)
+            #expect(model.authority.livePane == nil)
+        }
+    }
+
     /// Rider 1's adoption arm, on a NAMED lens (the pick travels by the store).
     @Test func anAdoptionKeepsTheParkUnlessItMovesTheParkedCellElsewhere() async throws {
         try await withParkWorld("adoption") { session, db, world, model in
