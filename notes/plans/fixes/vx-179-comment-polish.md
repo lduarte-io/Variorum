@@ -1759,7 +1759,7 @@ leg** (the traces below say exactly why); the fix is built to not depend on the 
 its live confirmation — with a DEBUG trace that names the road — is the next stage window's.
 `CommentCard.swift` / `CommentCardTests.swift` untouched.
 
-**Revert state:** no behavioural revert in flight.
+**Revert state:** no behavioural revert in flight — R-FL3a/b ran and were restored (`git checkout --`, zero diff); the restored tree rebuilt green and replayed 0 failures.
 
 ### LIVE STATUS
 
@@ -1767,8 +1767,8 @@ its live confirmation — with a DEBUG trace that names the road — is the next
 |---|---|---|
 | FL3-a | this section + the traces | DONE (0012cb60) |
 | FL3-1 | the fix — ownership by delivery + first responder, the explicit close rung, stale monitors released, a DEBUG trace line | DONE (22a3a587) — `CommentPanelKeys.delivers(…)` (pure over identities + the live-window form) replaces `claims`; the monitor hands `handle` the area read from the window's first responder (`CommentNSTextView.role`, set by the panel: `.add` / `.comment(id)`); `handle(_:in:)` — the close rung is `close()` + consume; the monitor releases itself on its popover host's `willClose` (+ a DEBUG `installedMonitors` count); the DEBUG `comment-keys` trace line. Plain build SUCCEEDED, zero warnings in touched files. Replays (runner shape, the real module, `fl3runner.swift`): 8/8 PASS; the fix-leg-2 pins' replay (`pinrunner`) 11/11 PASS; walk 4's stale sequence (`walk4`) as before |
-| FL3-2 | pins (what the runner CAN model) + replays + reverts | PINS DONE (this commit) — see "The pins" below; REVERTS ANNOUNCED (this commit), next |
-| FL3-3 | record close | NOT-STARTED |
+| FL3-2 | pins (what the runner CAN model) + replays + reverts | DONE — pins 8eeb3bf9 (+ the B3 cell made robust, this commit); reverts announced 8eeb3bf9, run and restored (the table below) |
+| FL3-3 | record close | DONE (this commit) |
 
 ### THE TRACES (offscreen, the real module — and the walk-4 crops in `/tmp/vx179-walk2/`)
 
@@ -1875,3 +1875,60 @@ window, the panel's parent, the first responder's AREA, the ownership verdict an
 - **No revert for the ownership rule itself:** its behaviour differs from the old rule only where the key
   window and the event's window disagree — not constructible offscreen (no key window) — so the table and
   the live trace carry it.
+
+| revert | the replay (runner shape, the rebuilt real module, `fl3runner`) | restored |
+|---|---|---|
+| R-FL3a — the close rung passes ⎋ on (the shipped behaviour) | exactly B2 "closes the panel even where a passed ⎋ is swallowed" FAILS; B1's close stays green (there the passed ⎋ reaches `NSPopover.cancelOperation:`) | yes — zero diff |
+| R-FL3b — no release on the host's closing | first run: B3 went red on its PREMISE (the "count back to before" form was fragile — leaked monitors from earlier cells inflate `before`); the cell was made robust ("this dismissal releases exactly one": `after == open − 1`, in the pin AND the replay); rerun: exactly B3 "its monitor is released" FAILS (1 → 1) | yes — zero diff |
+| the restored tree, rebuilt | `fl3runner` 8/8 · `pinrunner` (fix leg 2's pins) 11/11 · `walk4` (the stale sequence) as before | — |
+
+### W4-OBS-1 — the click-away "drops" a typed draft (PROPOSAL ONLY, not built — it edges on a taste call)
+
+Traced (`walk4.swift`): the draft is not dropped — it lives on, unreachable, in the dismissed popover's
+STALE panel (SwiftUI never tears popover content down; the reopen is a new panel with a new model). Same
+root as this leg's stale monitors, but NOT the ladder's mechanism: the ladder fix releases the stale
+panel's keyboard and leaves its draft where it was. The repair this record proposes for round 2 / her:
+**(a)** on the popover host's closing (the watcher's `willClose`, where dirty edits already save), PARK a
+non-empty add draft in the existing `CommentDraftPark` and let the next open's `restoreParkedDraft()` put
+it back with the park's own receipt — "parking is not filing", so #118(a) (leaving never FILES) stands;
+**(b)** keep today's behaviour (a click-away abandons an unsubmitted draft, like ⎋⎋ does); **(c)** file it
+on leaving (reverses #118(a) — her ruling). Recommended: (a). Not built: it is a taste call on #118(a)'s
+edge, and the brief says propose and wait.
+
+### Observations (NOT fixed here — for the orchestrator)
+
+- **O-FL3-1 (measured leak):** every Comments popover opening leaves the previous panel ALIVE —
+  its model and its STORE OBSERVATION (the panel's `.task` loop never cancels, so each stale panel
+  re-reads its comments on every relevant write) — for the app's life. This leg releases the stale
+  panels' KEY monitors; the observation and model leak remains. Ticket candidate (a panel-level "stop"
+  on the host's closing, or a host that tears its content down).
+- **O-FL3-2 (live, from the walk-4 crops):** in the Takes popover the panel opened with the composer NOT
+  focused (`f4-g`: no caret, no accent) — the open-focused-on-add contract (§2 D) did not hold live there,
+  while it holds in the runner and offscreen. The first responder moved after the panel's focus request
+  (likely the popover becoming key). The DEBUG trace + the next walk should look; not this leg's fix.
+
+### Dispositions (FIX LEG 3)
+
+| row | disposition |
+|---|---|
+| the red F-W-4 pin (runner premise) | its premise modelled fix leg 2's offscreen artefact (parent-addressed keys) — RETRACTED and REWRITTEN onto the delivery road; honestly not red on old there (the record says why) |
+| F-W-4-R — dead first ⎋ | NOT reproduced (no environment available here models the live key road — measured why); the fix removes every dependency this leg could name (addressing, the async focus value, stale panels); the DEBUG `comment-keys` trace names the live road on the next walk — CONFIRMATION PENDING |
+| F-W-4-R — no close rung | FIXED (22a3a587) — the panel closes itself; pin `theCloseRungClosesEvenWhereAPassedEscapeIsSwallowed`, red on old by R-FL3a |
+| stale panels' key monitors (found here) | FIXED (22a3a587) — released on the host's closing; hidden panels never own a key; pin `aDismissedPopoversPanelStopsListening`, red on old by R-FL3b |
+| the sheet host's ladder (regression) | by construction (the key window is the sheet) + the runner + the walk — PENDING (the offscreen sheet replay was stopped on the safety incidents above) |
+| W4-OBS-1 | PROPOSED (a) — not built (a taste call on #118(a)'s edge) |
+
+### PENDING (the runner's next window — none of it claimed)
+
+- **Pin RUN:** `-only-testing:VariorumTests/CommentPanelFixLeg2Tests` (now 7 tests: F-W-3, the rewritten
+  F-W-4 ladder, the ownership table, the close rung, the monitor release, R1-2 — expect all green) + the
+  standing U3 suites (`CommentTextAreaMountedTests` — the control gained `role:`; the others unchanged).
+  Optional in-target reverts R-FL3a/b (expect exactly the named cells red).
+- **The live walk (Takes margin note's popover, both voices if time), with the DEBUG trace captured:**
+  start `log stream --predicate 'subsystem == "io.lduarte.Variorum" && category == "comment-keys"' --info`
+  (or `log show --last 10m … --info` after); open the popover, click into the composer, type a draft:
+  ⎋ #1 clears it and the popover STAYS; ⎋ #2 (empty) CLOSES the popover; reopen — a fresh composer. Read
+  the trace lines for each ⎋ (key window, event window, area, owns, handled) and record them — they are
+  the live road this leg could not observe. Then: the SHEET's ladder (EditorView) — ⎋ clears, ⎋ closes;
+  ⌘⏎ files in both hosts; R1-2's click-away save (unchanged — the monitor release and the save watcher
+  are separate observers of the same `willClose`).

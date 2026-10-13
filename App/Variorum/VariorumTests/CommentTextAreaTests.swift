@@ -887,14 +887,16 @@ struct CommentPanelFixLeg2Tests {
     @Test func aDismissedPopoversPanelStopsListening() async throws {
         try await withEditor(seedBlocks: ["A block."]) { h in
             let (blockID, model) = try await seed(h, ["First note."])
-            let before = CommentPanelKeyMonitor.MonitorView.installedMonitors
             let (driver, anchor, _) = try await swiftUIPopover(h, blockID, model, swallowing: false)
             defer { anchor.orderOut(nil) }
-            #expect(CommentPanelKeyMonitor.MonitorView.installedMonitors == before + 1,
-                    "premise: the open panel listens")
+            // Counted relative to the open moment: other panels in the same
+            // process may be listening (a leak on the old tree), so the
+            // property is "this dismissal releases exactly one".
+            let open = CommentPanelKeyMonitor.MonitorView.installedMonitors
+            #expect(open >= 1, "premise: the open panel listens")
             driver.shown = false
             await turns(40)
-            #expect(CommentPanelKeyMonitor.MonitorView.installedMonitors == before,
+            #expect(CommentPanelKeyMonitor.MonitorView.installedMonitors == open - 1,
                     "once dismissed, its monitor is released")
         }
     }
