@@ -1766,8 +1766,8 @@ its live confirmation — with a DEBUG trace that names the road — is the next
 | piece | what | status |
 |---|---|---|
 | FL3-a | this section + the traces | DONE (0012cb60) |
-| FL3-1 | the fix — ownership by delivery + first responder, the explicit close rung, stale monitors released, a DEBUG trace line | DONE (this commit) — `CommentPanelKeys.delivers(…)` (pure over identities + the live-window form) replaces `claims`; the monitor hands `handle` the area read from the window's first responder (`CommentNSTextView.role`, set by the panel: `.add` / `.comment(id)`); `handle(_:in:)` — the close rung is `close()` + consume; the monitor releases itself on its popover host's `willClose` (+ a DEBUG `installedMonitors` count); the DEBUG `comment-keys` trace line. Plain build SUCCEEDED, zero warnings in touched files. Replays (runner shape, the real module, `fl3runner.swift`): 8/8 PASS; the fix-leg-2 pins' replay (`pinrunner`) 11/11 PASS; walk 4's stale sequence (`walk4`) as before |
-| FL3-2 | pins (what the runner CAN model) + replays + reverts | NOT-STARTED |
+| FL3-1 | the fix — ownership by delivery + first responder, the explicit close rung, stale monitors released, a DEBUG trace line | DONE (22a3a587) — `CommentPanelKeys.delivers(…)` (pure over identities + the live-window form) replaces `claims`; the monitor hands `handle` the area read from the window's first responder (`CommentNSTextView.role`, set by the panel: `.add` / `.comment(id)`); `handle(_:in:)` — the close rung is `close()` + consume; the monitor releases itself on its popover host's `willClose` (+ a DEBUG `installedMonitors` count); the DEBUG `comment-keys` trace line. Plain build SUCCEEDED, zero warnings in touched files. Replays (runner shape, the real module, `fl3runner.swift`): 8/8 PASS; the fix-leg-2 pins' replay (`pinrunner`) 11/11 PASS; walk 4's stale sequence (`walk4`) as before |
+| FL3-2 | pins (what the runner CAN model) + replays + reverts | PINS DONE (this commit) — see "The pins" below; REVERTS ANNOUNCED (this commit), next |
 | FL3-3 | record close | NOT-STARTED |
 
 ### THE TRACES (offscreen, the real module — and the walk-4 crops in `/tmp/vx179-walk2/`)
@@ -1844,3 +1844,34 @@ frame before the guard reached it; I cannot rule that out. No app instance, no s
 verified by reasoning + the runner + the walk (PENDING), not offscreen: in a sheet the key window IS the
 sheet, so `delivers` owns its keys; the first ⎋ clears; the empty ⎋ now `close()`s the sheet (before:
 passed on to the sheet's own `cancelOperation:`, which closed it) — the same outcome by the panel's act.
+
+### The pins (FIX LEG 3) — what the runner CAN model, and the gap stated
+
+Order, honestly: the fix landed (22a3a587) BEFORE these pins; their red-on-old is by announced behavioural
+revert (below), U2's fix-leg road — not pin-before-fix.
+
+| pin | models | red on old? |
+|---|---|---|
+| `escapeInAPopoverClearsTheDraftFirstThenCloses` (REWRITTEN — its fix-leg-2 form addressed keys to the PARENT, the retracted offscreen-artefact road; its premise failed in the runner) | keys addressed to the DELIVERY window (the key window — the runner's popover, made key by the panel's own ask — else the popover) | NO, honestly: on this road the shipped ladder works; it guards the contract on the road the runner has |
+| `theKeyIsThePanelsWhereItIsDelivered` (REPLACES `thePanelClaimsKeysAddressedToItsWindowOrItsParent`, which pinned the superseded `claims`) | the ownership rule as a pure table over identities | a feature pin of the replacement rule; the cells where the old rule differs are named in it (addressed-to-the-panel-but-delivered-elsewhere; hidden panels) |
+| `theCloseRungClosesEvenWhereAPassedEscapeIsSwallowed` (NEW) | the product's SwiftUI `.popover`, the content carrying `.onExitCommand {}` — a host whose chain SWALLOWS a passed ⎋, as the Takes board's does live (there in the MAIN window; here inside the popover — the swallow's place differs, the property tested is the same: the close rung must not depend on where a passed ⎋ lands) | YES — revert R-FL3a below |
+| `aDismissedPopoversPanelStopsListening` (NEW) | a dismissed SwiftUI popover's panel releases its key monitor (DEBUG `installedMonitors`) | YES — revert R-FL3b below |
+
+**THE GAP (stated, per the brief):** the walk's dead FIRST ⎋ is not reproduced by the runner or offscreen.
+The runner's popover becomes truly key and the shipped ladder works there; offscreen has no key window.
+The fix removes every dependency this leg could name (event addressing, the async focus value, a stale
+panel, where a passed ⎋ lands); whether one of them WAS the live first ⎋'s cause is for the DEBUG trace
+line to show on the next live walk (`log show --last 10m --predicate 'subsystem == "io.lduarte.Variorum"
+&& category == "comment-keys"' --info`): each ⌘⏎/⎋ prints the panel's window, the key window, the event's
+window, the panel's parent, the first responder's AREA, the ownership verdict and whether it was handled.
+
+### Behavioural reverts (ANNOUNCED before they run — the fix is committed at 22a3a587; restore by `git checkout -- App/Variorum/Variorum/Features/Editor/CommentsPanel.swift`; replay = `fl3runner` in the runner's shape against the rebuilt real module)
+
+- **R-FL3a (the explicit close):** `handle`'s `.close` returns `false` (passes ⎋ on, the shipped
+  behaviour) instead of `close()` → expect B2's "closes the panel even where a passed ⎋ is swallowed"
+  RED; B1's close stays green (there the passed ⎋ reaches `NSPopover.cancelOperation:`).
+- **R-FL3b (the release):** the monitor's `willClose` observer does not release → expect B3's "its
+  monitor is released" RED.
+- **No revert for the ownership rule itself:** its behaviour differs from the old rule only where the key
+  window and the event's window disagree — not constructible offscreen (no key window) — so the table and
+  the live trace carry it.

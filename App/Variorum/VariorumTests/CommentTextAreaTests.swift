@@ -590,6 +590,9 @@ struct CommentPanelWordsTests {
     }
 }
 
+/// FIX LEG 3: a presentation switch for the SwiftUI-popover host.
+@Observable private final class PopoverDriver { var shown = false }
+
 // MARK: - FIX LEG 2 (the walk's F-W-3/F-W-4, ladder R1-2)
 
 /// **The walk's three panel findings, pinned through the REAL panel** (the
@@ -739,11 +742,14 @@ struct CommentPanelFixLeg2Tests {
         }
     }
 
-    /// **F-W-4 — RED ON OLD.** In a popover the keyboard's events are
-    /// addressed to the PARENT window and AppKit delivers them into the
-    /// popover; the panel's monitor claimed only its own window's, so ⎋ went
-    /// to `cancelOperation:` and closed the popover with the draft in it. The
-    /// ladder holds now: the first ⎋ clears the draft, the second closes.
+    /// **F-W-4 on the DELIVERY road** (FIX LEG 3 — this cell's fix-leg-2 form
+    /// addressed its keys to the PARENT window, a road measured only offscreen
+    /// where the app has no key window — an artefact; in the runner its premise
+    /// failed). Keys go where AppKit delivers them: the key window (the panel's
+    /// popover, made key by the panel's own ask), else the popover. The ladder:
+    /// the first ⎋ clears the draft and the popover stays; the second closes.
+    /// HONESTLY NOT red on old: on this road the shipped ladder already works
+    /// — the walk's dead first ⎋ is not reproducible here (the record).
     @Test func escapeInAPopoverClearsTheDraftFirstThenCloses() async throws {
         try await withEditor(seedBlocks: ["A block."]) { h in
             let (blockID, model) = try await seed(h, ["First note."])
@@ -754,29 +760,143 @@ struct CommentPanelFixLeg2Tests {
                 host.window.makeFirstResponder(composer.textView)
                 await turns()
             }
-            await key("x", keyCode: 7, to: host.anchor)
-            #expect(model.addDraft == "x", "premise: a key addressed to the parent lands in the composer")
-            await key("\u{1b}", keyCode: 53, to: host.anchor)
+            let delivery = NSApp.keyWindow ?? host.window
+            await key("x", keyCode: 7, to: delivery)
+            #expect(model.addDraft == "x", "premise: a key addressed to the delivery window lands in the composer")
+            await key("\u{1b}", keyCode: 53, to: delivery)
             #expect(model.addDraft.isEmpty, "the first ⎋ clears the draft")
             #expect(host.popover.isShown, "…and the popover stays")
-            await key("\u{1b}", keyCode: 53, to: host.anchor)
+            await key("\u{1b}", keyCode: 53, to: delivery)
             #expect(!host.popover.isShown, "with nothing to clear, ⎋ closes it")
         }
     }
 
-    /// The rule behind F-W-4, as a table: a key event is the panel's to
-    /// claim when it is addressed to the panel's window or to that window's
-    /// parent (a popover's — AppKit delivers those into the popover).
-    @Test func thePanelClaimsKeysAddressedToItsWindowOrItsParent() {
-        let panel = NSWindow(), parent = NSWindow(), other = NSWindow()
-        #expect(CommentPanelKeys.claims(eventWindow: panel, panelWindow: panel))
-        #expect(!CommentPanelKeys.claims(eventWindow: parent, panelWindow: panel),
-                "no parent relationship, no claim")
-        parent.addChildWindow(panel, ordered: .above)
-        defer { parent.removeChildWindow(panel) }
-        #expect(CommentPanelKeys.claims(eventWindow: parent, panelWindow: panel))
-        #expect(!CommentPanelKeys.claims(eventWindow: other, panelWindow: panel))
-        #expect(!CommentPanelKeys.claims(eventWindow: nil, panelWindow: panel))
+    /// The ownership rule (FIX LEG 3 — `delivers`, superseding fix leg 2's
+    /// addressed-window `claims`, which this table pinned before): a key is
+    /// the panel's where it will be DELIVERED — the key window is the panel's
+    /// window, or the panel's (visible) window is a child of the key window;
+    /// a HIDDEN panel (a dismissed popover's, left alive) never owns one; with
+    /// no key window (an inactive app) the event's window or its parent.
+    @Test func theKeyIsThePanelsWhereItIsDelivered() {
+        let panelWindow = NSWindow(), parentWindow = NSWindow(), otherWindow = NSWindow()
+        let panel = ObjectIdentifier(panelWindow)
+        let parent = ObjectIdentifier(parentWindow)
+        let other = ObjectIdentifier(otherWindow)
+        func owns(_ visible: Bool, parentOf: ObjectIdentifier?, key: ObjectIdentifier?, event: ObjectIdentifier?) -> Bool {
+            CommentPanelKeys.delivers(
+                panel: panel, panelParent: parentOf, panelVisible: visible, keyWindow: key, eventWindow: event)
+        }
+        // The key window decides, whatever the event's window says.
+        #expect(owns(true, parentOf: parent, key: panel, event: other), "the panel's window is key")
+        #expect(owns(true, parentOf: parent, key: parent, event: other), "its popover's key parent")
+        #expect(!owns(true, parentOf: parent, key: other, event: panel),
+                "addressed to the panel but delivered elsewhere — not the panel's (the old rule said yes)")
+        #expect(!owns(true, parentOf: nil, key: parent, event: parent), "no parent relationship, no ownership")
+        // A hidden panel never owns a key — the stale panels of dismissed popovers.
+        #expect(!owns(false, parentOf: parent, key: panel, event: panel))
+        #expect(!owns(false, parentOf: parent, key: parent, event: parent))
+        // No key window (an inactive app): the event's window or its parent.
+        #expect(owns(true, parentOf: parent, key: nil, event: panel))
+        #expect(owns(true, parentOf: parent, key: nil, event: parent))
+        #expect(!owns(true, parentOf: parent, key: nil, event: other))
+        #expect(!owns(true, parentOf: parent, key: nil, event: nil))
+    }
+
+    /// The panel presented the PRODUCT's way — SwiftUI's `.popover` (its
+    /// `dismiss` is real) — optionally inside content that swallows a passed
+    /// ⎋ (`.onExitCommand {}`), modelling the Takes host: there the board's
+    /// own `.onExitCommand` catches a ⎋ the panel passes on (walk 4).
+    private struct SwiftUIPopoverHost: View {
+        @Bindable var driver: PopoverDriver
+        let session: AppSession
+        let blockID: String
+        let model: CommentsPanelModel
+        let swallowsPassedEscape: Bool
+        var body: some View {
+            Text("anchor").frame(width: 120, height: 40)
+                .popover(isPresented: $driver.shown) {
+                    if swallowsPassedEscape {
+                        CommentsPanel(session: session, blockID: blockID, model: model)
+                            .onExitCommand {}
+                    } else {
+                        CommentsPanel(session: session, blockID: blockID, model: model)
+                    }
+                }
+                .frame(width: 300, height: 200)
+        }
+    }
+
+    private func swiftUIPopover(
+        _ h: EditorHarness, _ blockID: String, _ model: CommentsPanelModel, swallowing: Bool
+    ) async throws -> (PopoverDriver, NSWindow, NSWindow) {
+        let driver = PopoverDriver()
+        let anchor = NSWindow(
+            contentRect: NSRect(x: -20_000, y: -20_000, width: 300, height: 200),
+            styleMask: [.borderless], backing: .buffered, defer: false)
+        anchor.isReleasedWhenClosed = false
+        anchor.alphaValue = 0
+        let before = Set(NSApp.windows.map(ObjectIdentifier.init))
+        anchor.contentView = NSHostingView(rootView: SwiftUIPopoverHost(
+            driver: driver, session: h.session, blockID: blockID, model: model,
+            swallowsPassedEscape: swallowing))
+        anchor.orderFront(nil)  // off every display
+        await turns()
+        driver.shown = true
+        await turns(60)
+        let window = try #require(NSApp.windows.first {
+            !before.contains(ObjectIdentifier($0)) && $0 !== anchor && $0.isVisible
+        })
+        window.alphaValue = 0
+        return (driver, anchor, window)
+    }
+
+    /// **The close rung is the panel's own act — RED ON OLD by behaviour
+    /// (FIX LEG 3, walk 4's F-W-4-R).** With nothing to clear, the shipped
+    /// panel PASSED ⎋ on for the host to close "the way every other one
+    /// does"; where the passed ⎋ lands on a handler that swallows it (the
+    /// Takes board's `.onExitCommand` live; modelled here inside the popover)
+    /// nothing closed. Now the panel closes itself.
+    @Test func theCloseRungClosesEvenWhereAPassedEscapeIsSwallowed() async throws {
+        try await withEditor(seedBlocks: ["A block."]) { h in
+            let (blockID, model) = try await seed(h, ["First note."])
+            let (driver, anchor, window) = try await swiftUIPopover(h, blockID, model, swallowing: true)
+            defer {
+                driver.shown = false
+                anchor.orderOut(nil)
+            }
+            let composer = try #require(Self.areas(in: window.contentView!).first { $0.placeholderView != nil })
+            if window.firstResponder !== composer.textView {
+                window.makeFirstResponder(composer.textView)
+                await turns()
+            }
+            let delivery = NSApp.keyWindow ?? window
+            await key("x", keyCode: 7, to: delivery)
+            #expect(model.addDraft == "x", "premise: typed into the composer")
+            await key("\u{1b}", keyCode: 53, to: delivery)
+            #expect(model.addDraft.isEmpty && driver.shown, "the first ⎋ clears and the popover stays")
+            await key("\u{1b}", keyCode: 53, to: delivery)
+            #expect(!driver.shown, "with nothing to clear, ⎋ closes the panel — even where a passed ⎋ is swallowed")
+        }
+    }
+
+    /// **A dismissed popover's panel stops listening — RED ON OLD by
+    /// behaviour (FIX LEG 3, measured).** SwiftUI never tears a dismissed
+    /// popover's content down and makes a new window per opening, so every
+    /// opening left one more key monitor installed for the app's life. Now the
+    /// host's closing releases it.
+    @Test func aDismissedPopoversPanelStopsListening() async throws {
+        try await withEditor(seedBlocks: ["A block."]) { h in
+            let (blockID, model) = try await seed(h, ["First note."])
+            let before = CommentPanelKeyMonitor.MonitorView.installedMonitors
+            let (driver, anchor, _) = try await swiftUIPopover(h, blockID, model, swallowing: false)
+            defer { anchor.orderOut(nil) }
+            #expect(CommentPanelKeyMonitor.MonitorView.installedMonitors == before + 1,
+                    "premise: the open panel listens")
+            driver.shown = false
+            await turns(40)
+            #expect(CommentPanelKeyMonitor.MonitorView.installedMonitors == before,
+                    "once dismissed, its monitor is released")
+        }
     }
 
     /// **R1-2 — RED ON OLD (the ladder's finding, AGREED).** Dismissing a
