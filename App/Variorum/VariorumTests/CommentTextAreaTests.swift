@@ -810,14 +810,18 @@ struct CommentPanelFixLeg2Tests {
     /// nothing closed. Now the panel closes itself.
     ///
     /// **This cell carries the WHOLE popover ⎋ ladder on the runner's road**
-    /// (LADDER ROUND 2's ruling, the run record): its no-swallow twin
-    /// (`escapeInAPopoverClearsTheDraftFirstThenCloses`) was a strict subset
-    /// of this cell — the swallow punishes any pass-through, so an unconsumed
-    /// first ⎋ fails at the uncleared draft here exactly as it failed there —
-    /// and it red-flagged three stage windows on three different runner-only
-    /// shapes while this twin stayed green on the same presenter and the same
-    /// key road. Retired; the LIVE parent-key road stands on `delivers`' table
-    /// below and the window-5 walk's read trace.
+    /// (LADDER ROUND 2's ruling + the sanity pass's corrections, the run
+    /// record): its no-swallow twin
+    /// (`escapeInAPopoverClearsTheDraftFirstThenCloses`) was a near-strict
+    /// subset of this cell — the swallow punishes any pass-through, so an
+    /// unconsumed first ⎋ fails at the uncleared draft here exactly as it
+    /// failed there. (The one case only the twin could catch — a first ⎋ that
+    /// clears the draft yet still passes the event on — is ruled out by the
+    /// code: the clear consumes.) The twin red-flagged three stage windows on
+    /// three different runner-only shapes — windows 4–5 on its since-retired
+    /// hand-built host, window 6 on this same presenter and key road, where
+    /// this cell stayed green. Retired; the LIVE parent-key road stands on
+    /// `delivers`' table above and the window-5 walk's read trace.
     @Test func theCloseRungClosesEvenWhereAPassedEscapeIsSwallowed() async throws {
         try await withEditor(seedBlocks: ["A block."]) { h in
             let (blockID, model) = try await seed(h, ["First note."])
