@@ -111,7 +111,11 @@ struct ConnectDrillTests {
         }
         let xEngine = SyncEngine(transport: x.mirror, keyProvider: FixedKeys(keys: xMaterial.syncKeys, identity: "x-device"))
         let xPushTime = try await clock.measure {
-            try await withDependencies { $0.database = library } operation: {
+            try await withDependencies {
+                $0.database = library
+                $0.uuid = UUIDGenerator { UUID() }
+                $0.date = DateGenerator { Date() }
+            } operation: {
                 var rounds = 0
                 while try await xEngine.outboxCount() > 0, rounds < 400 { _ = try await xEngine.push(); rounds += 1 }
                 #expect(try await xEngine.outboxCount() == 0, "X's era drained to X's partition")
@@ -192,7 +196,11 @@ struct ConnectDrillTests {
         let siblingEngine = SyncEngine(transport: y.mirror, keyProvider: FixedKeys(keys: yElsewhere.syncKeys, identity: "y-sibling"))
         var siblingApplied = 0, siblingMerged = 0
         let siblingWall = try await clock.measure {
-            try await withDependencies { $0.database = sibling } operation: {
+            try await withDependencies {
+                $0.database = sibling
+                $0.uuid = UUIDGenerator { UUID() }
+                $0.date = DateGenerator { Date() }
+            } operation: {
                 let report = try await siblingEngine.pull()
                 siblingApplied = report.applied; siblingMerged = report.merged
             }
