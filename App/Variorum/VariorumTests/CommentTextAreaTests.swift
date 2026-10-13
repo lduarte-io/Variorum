@@ -723,41 +723,6 @@ struct CommentPanelFixLeg2Tests {
         }
     }
 
-    /// **F-W-4 on the DELIVERY road, in the product's presenter** (FIX LEG 3;
-    /// remodelled at the U3 PIN LEG — its hand-built `NSPopover` was never the
-    /// runner's key window, so its keys went to the test host's own window and
-    /// its popover closed before the first ⎋: the record's T1–T2). The ladder:
-    /// the first ⎋ clears the draft and the popover stays; the second closes.
-    /// HONESTLY NOT red on old: on this road the shipped ladder already works.
-    /// The LIVE road — the main window key, its popover child fed its keys —
-    /// is `delivers`' table below plus the walk's trace (window 5); the runner
-    /// cannot make the off-display anchor key, so it cannot host that road.
-    @Test func escapeInAPopoverClearsTheDraftFirstThenCloses() async throws {
-        try await withEditor(seedBlocks: ["A block."]) { h in
-            let (blockID, model) = try await seed(h, ["First note."])
-            let (driver, anchor, window) = try await swiftUIPopover(h, blockID, model, swallowing: false)
-            defer {
-                driver.shown = false
-                anchor.orderOut(nil)
-            }
-            let content = try #require(window.contentView)
-            let composer = try #require(Self.areas(in: content).first { $0.placeholderView != nil })
-            if window.firstResponder !== composer.textView {
-                window.makeFirstResponder(composer.textView)
-                await turns()
-            }
-            try #require(driver.shown && window.isVisible, "premise: the popover is up")
-            let delivery = try deliveryWindow(for: window)
-            await key("x", keyCode: 7, to: delivery)
-            #expect(model.addDraft == "x", "premise: typed into the composer")
-            await key("\u{1b}", keyCode: 53, to: delivery)
-            #expect(model.addDraft.isEmpty, "the first ⎋ clears the draft")
-            #expect(driver.shown && window.isVisible, "…and the popover stays")
-            await key("\u{1b}", keyCode: 53, to: delivery)
-            #expect(!driver.shown, "with nothing to clear, ⎋ closes it")
-        }
-    }
-
     /// The ownership rule (FIX LEG 3 — `delivers`, superseding fix leg 2's
     /// addressed-window `claims`, which this table pinned before): a key is
     /// the panel's where it will be DELIVERED — the key window is the panel's
@@ -843,6 +808,16 @@ struct CommentPanelFixLeg2Tests {
     /// does"; where the passed ⎋ lands on a handler that swallows it (the
     /// Takes board's `.onExitCommand` live; modelled here inside the popover)
     /// nothing closed. Now the panel closes itself.
+    ///
+    /// **This cell carries the WHOLE popover ⎋ ladder on the runner's road**
+    /// (LADDER ROUND 2's ruling, the run record): its no-swallow twin
+    /// (`escapeInAPopoverClearsTheDraftFirstThenCloses`) was a strict subset
+    /// of this cell — the swallow punishes any pass-through, so an unconsumed
+    /// first ⎋ fails at the uncleared draft here exactly as it failed there —
+    /// and it red-flagged three stage windows on three different runner-only
+    /// shapes while this twin stayed green on the same presenter and the same
+    /// key road. Retired; the LIVE parent-key road stands on `delivers`' table
+    /// below and the window-5 walk's read trace.
     @Test func theCloseRungClosesEvenWhereAPassedEscapeIsSwallowed() async throws {
         try await withEditor(seedBlocks: ["A block."]) { h in
             let (blockID, model) = try await seed(h, ["First note."])
