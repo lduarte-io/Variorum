@@ -1961,3 +1961,23 @@ taste — not built, correctly.
 
 **Next:** the U2 FIX LEG 2 (F-W-2-R) dispatches now; then the short stage window (the two PENDING
 suites' run + the trace-read walk rows), then LADDER ROUND 2.
+
+## U2 FIX LEG 2 (implementer, 2026-10-13 — STAGE WINDOW 4's F-W-2-R: the lane's knob does not track a live press-drag)
+
+**NOT DONE BY THIS LEG (first line, by the contract):** no stage act — no `xcodebuild test`, no app
+launch, no window on any display. Offscreen probes only, under the TIGHTENED line: a probe window's
+position is set off-display (−20000, −20000) BEFORE it is ever ordered in, `.prohibited` activation, no
+SwiftUI sheet-class presentation, no event posted to the system. U3's files (`CommentsPanel.swift`,
+`CommentTextArea.swift`, `CommentTextAreaTests.swift`) untouched. The wheel road (W-3/W-8, all green
+live) and the door-shut answer stay byte-intact. The pins' RUN and the lane re-walk are PENDING.
+
+**Revert state:** no behavioural revert in flight.
+
+### LIVE STATUS
+
+| piece | what | status |
+|---|---|---|
+| FL2-a | this section | DONE (this commit) |
+| FL2-1 | trace F-W-2-R offscreen (overlay style confirmed/forced; the live sequence modelled) — mechanism found or the gap stated | NOT-STARTED |
+| FL2-2 | the fix (the lane's press-drag scrolls the card, faded or flashed; door + wheel untouched) | NOT-STARTED |
+| FL2-3 | pins (what the runner can model) + red-on-old by replay; plain build; record closed | NOT-STARTED |
