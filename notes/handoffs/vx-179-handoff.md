@@ -1,4 +1,4 @@
-# VX-179 — the comment area pristine pass — her morning handoff (2026-10-13, overnight close)
+# VX-179 — the comment area pristine pass — her morning handoff (2026-10-13, overnight close; updated with her answers the same morning)
 
 ## Your checklist — things only your hands can judge
 
@@ -16,18 +16,19 @@
 3. **The popover (Takes margin note).** Type a draft, press ⎋ — it clears and the popover stays;
    ⎋ again closes. Edit a comment in place and click away — the edit SAVES now (round 1's reviewer
    found the loss; it was pre-existing since 13u3). An unsubmitted DRAFT still dies on click-away —
-   **your taste call waits as P-VX179-R2-1** (recommendation: park it and restore on reopen).
+   **ANSWERED: you ruled it should be kept as a draft → VX-257** (not built yet).
 4. **True delete.** A deleted comment's fold now carries "Delete forever…" beside Restore,
    confirm-each-time; it leaves every device by the 13j purge road. Under a SEALED post the purge
-   REFUSES — P-VX179-U1-1 offers the alternatives if that reads wrong in use.
+   REFUSES — **ANSWERED: ratified ("a fair choice").**
 5. **The "#2" badge** at narrow windows now shows its whole count (was "…").
 6. **Edit the last comment of a tall list** (small window, the sheet): the "Unsaved · ⌘⏎ · Save ·
    Revert" line stays in view as the row grows.
 7. **Not walked, needs your eyes when convenient:** IME composition in the composer (W-U3-8); the
    TakesBottomBar sheet host (W-U3-11); the quick pad door (W-U3-13); the inline-strip opt-in with
    stacked cards.
-8. **VX-226 (design call):** Read mode has NO comment face at all — not even a badge — on either
-   arm. Pre-existing, never built. Wants a ruling someday.
+8. **VX-226 — ANSWERED:** the read page stays comment-free; the INDEX view (Read's edit arm) gaining
+   comments is VX-226, re-scoped and in Backlog (a design + build on the editor seam).
+9. **VX-193 — ANSWERED:** fixed before launch (Pre-launch label).
 
 ## Small mysteries explained
 - **The What's New sheet you kept dismissing** was this branch sitting at 0.9.3 while main went
@@ -42,8 +43,9 @@
   a DEBUG trace read (`comment-keys`); two pre-existing undo bugs fixed on the way (⌘Z crash +
   filing-undone-words desync).
 - Found-work tickets: VX-182, VX-183, VX-193 (HIGH), VX-194, VX-226, VX-229, VM-14.
-- The /Applications refresh: per the coordinator's fold, ONE refresh from merged main tonight by
-  whichever closing session merged last — the closeout's final lines say which way it went.
+- The /Applications refresh: DONE — folded into VX-214's closeout refresh (0.9.4 build 6843,
+  2026-10-13 11:27, A1 verified in their record). VX-179 merged first (d6caafc1), so the new comment
+  editor is in your installed app.
 
 ## If anything above misbehaves
 Say the word and the record's traces will carry a fix session straight to the mechanism — nothing

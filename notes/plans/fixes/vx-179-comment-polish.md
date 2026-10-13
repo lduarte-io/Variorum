@@ -2483,3 +2483,15 @@ refresh (oct12coordinator's one-refresh plan — vx-201/VX-214/vx-184 close behi
 merger refreshes from merged main, carrying this change).** VX-179 → Done rides this closeout. Hard stop
 after cleanup; her handoff is `notes/handoffs/vx-179-handoff.md`.
 
+**CORRECTION (2026-10-13, after the close):** STAGE WINDOW 4's "the old `/tmp/walk-scroll` binary traps
+(SIGTRAP) — replaced" was WRONG about the cause. `Tools/WalkKit/scroll.swift` takes `<x> <y> <lines>` and
+the orchestrator called it with ONE argument; the trap is Swift's index-out-of-range on the missing
+arguments (exit 133), i.e. misuse, not a broken binary. The replacement poster was unnecessary. The
+WalkKit README now says so (her word: the walk lessons go into the README).
+
+**THE REFRESH, CONFIRMED (2026-10-13):** the fold landed — VX-214 merged last (8925f38b, which contains
+this run's d6caafc1) and refreshed /Applications from merged main: 0.9.4 build 6843, 11:27, A1 verified in
+the VX-214 record. Her answers to #215 are recorded there (VX-257 born; VX-226 re-scoped and reopened).
+Final cleanup verified: no worktree, branch, test checkout, DerivedData folder, /tmp evidence or session
+scratchpad left from this run.
+
