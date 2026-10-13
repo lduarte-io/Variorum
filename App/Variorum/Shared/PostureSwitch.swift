@@ -301,6 +301,10 @@ final class PostureSwitchRunner {
         /// pins advance the emulated mirror's clock — or nothing, to prove
         /// the server's completion guard and the runner's re-walk alone.
         var horizonWait: (@Sendable () async throws -> Void)? = nil
+        /// VX-202 (gate i): the runner's clear of the bootstrap's in-flight
+        /// switch flag (`AppBootstrap.endSwitch`), called once the switch's
+        /// custody move has landed. Inert in the scripted worlds.
+        var endSwitch: @MainActor () -> Void = {}
     }
 
     /// pre-13x ladder round 1, F1 (BLOCKER-1): how many times the clearing
@@ -1103,6 +1107,9 @@ final class PostureSwitchRunner {
             oldKeyFingerprint: oldFingerprint, newKeyFingerprint: newFingerprint,
             newCorpusKeyID: material?.corpusKeyID, startedAt: stamp, follow: followFlag))
         try await writeNewKeyFile(newKey: newKey, appleKey: appleKey, keyFile: keyFile, material: material)
+        // VX-202 (belt c): again once the new key file exists — a library
+        // that had none until now has its store id only from here.
+        markSwitchPending(true)
         try await swapLibrary(from: libraryKey, to: newKey)
         try await writeMarker(RotationMarker(
             step: .custody, entersCastle: entersCastle,
@@ -1111,6 +1118,7 @@ final class PostureSwitchRunner {
 
         // ————— 5. CUSTODY (both items) —————
         try await moveCustodyForSwitch(entersCastle: entersCastle, accountPosture: accountPosture)
+        leaves.endSwitch()  // VX-202 (gate i): custody landed
         try await writeMarker(RotationMarker(
             step: .snapshot, entersCastle: entersCastle,
             oldKeyFingerprint: oldFingerprint, newKeyFingerprint: newFingerprint,
@@ -1584,6 +1592,7 @@ final class PostureSwitchRunner {
             // moves to the target shape.
             if marker.step == .custody || marker.step == .rekeyLibrary {
                 try await moveCustodyForSwitch(entersCastle: entersCastle)
+                leaves.endSwitch()  // VX-202 (gate i): custody landed
                 try await writeMarker(marker.advanced(to: .snapshot))
             }
             fallthrough
@@ -1663,12 +1672,38 @@ final class PostureSwitchRunner {
         }
     }
 
+    /// VX-202 (belt c): the store-id signal mirrors "the marker names a step
+    /// before custody landed" and is never behind it — set BEFORE such a
+    /// marker is written, cleared only AFTER a later marker (or the clear)
+    /// is durable.
     private func writeMarker(_ marker: RotationMarker) async throws {
+        let pending = Self.custodyPending(at: marker.step)
+        if pending { markSwitchPending(true) }
         try await leaves.database.write { db in try RotationMarker.write(marker, db) }
+        if !pending { markSwitchPending(false) }
     }
 
     private func clearMarker() async throws {
         try await leaves.database.write { db in try RotationMarker.clear(db) }
+        markSwitchPending(false)
+    }
+
+    /// The steps a marker can name while this library's custody move is
+    /// still to come.
+    nonisolated private static func custodyPending(at step: RotationMarker.Step) -> Bool {
+        switch step {
+        case .vaultWrite, .reencrypt, .rekeyLibrary, .custody: return true
+        case .snapshot, .offer: return false
+        }
+    }
+
+    /// VX-202 (belt c): the per-store-id flag the PRE-OPEN route reads in
+    /// the marker's place (the marker lives inside the store). No store id
+    /// (no key file yet) ⇒ nothing to key it by; the runner sets it again
+    /// once its new key file exists.
+    private func markSwitchPending(_ pending: Bool) {
+        guard case .known(let storeID) = StoreIdentity.resolve(besideStore: leaves.storeURL) else { return }
+        leaves.gate.setSwitchPending(pending, leaves.scope, storeID)
     }
 }
 
@@ -1778,7 +1813,8 @@ extension PostureSwitchRunner.Leaves {
             log: { logger.notice("\($0, privacy: .public)") },
             // pre-13x 5b (ledger 67): the name the vault client stamps —
             // `AppServices` hands the same `DeviceName.current` to it.
-            deviceName: { DeviceName.current })
+            deviceName: { DeviceName.current },
+            endSwitch: { bootstrap.endSwitch() })
     }
 }
 
