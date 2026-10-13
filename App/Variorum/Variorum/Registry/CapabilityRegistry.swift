@@ -1891,6 +1891,16 @@ nonisolated enum CapabilityRegistry {
             doors: [.surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "", availability: always),
+        // VX-217 — a new note born inside a gathering: the navigator foot and
+        // the Outline flow's end (`.surface`). `always` for `.editRule`'s
+        // reason — each renderer carries its gathering; where the act can't
+        // land the door GREYS and says why (R-VX214-3), and the op refuses
+        // with the same words (`GatheringMint.Blocker.reason`).
+        Capability(
+            id: .newNoteInGathering, verb: GatheringNoteDoorCopy.verb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: GatheringNoteDoorCopy.unavailableNote, availability: always),
         Capability(
             id: .setJournalTrait, verb: CollectingCopy.journalTraitVerb, scope: .book,
             doors: [.surface],

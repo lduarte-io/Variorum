@@ -798,6 +798,17 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // (they change what she sees, never the store — the Library band's
     // class, U2's registry record).
     case searchThisBook
+    // VX-217 (2026-10-13 — her "make sure that new note button exists on
+    // gatherings … the bottom of a book and the bottom of a gathering should
+    // look the same"; option (A) + R-VX214-3/4, the run record): a NEW NOTE
+    // BORN INSIDE A GATHERING — minted wearing what the rule needs
+    // (`Operations.newPostInGathering`). Its own act beside the book's
+    // undeclared surface door, on the `.removeFromBook`/`.removeRuleTag`
+    // grounds: different words, different refusals. `.surface` — the
+    // gathering's navigator foot and the Outline flow's end, both drawn
+    // ALWAYS and greyed with the reason where the act can't land
+    // (R-VX214-3), never hidden.
+    case newNoteInGathering
     // 13i-d U4 — A BOOK'S ARCHIVED LINE (her #169(a)(1) ruling — the 13i-d
     // plan item 9): its two row doors are **Unarchive** (NEW — the archived
     // line is its one declared renderer; the Library's Archived view carries
