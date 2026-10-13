@@ -476,3 +476,59 @@ extension CompareLensesAlignmentTests {
         }
     }
 }
+
+// MARK: - VX-223 — the Lenses column doors pop at menu size
+
+extension CompareLensesAlignmentTests {
+    /// **VX-223** (her report: "Lenses dropdown text too small"). A column's
+    /// doors — "⧉ Duplicate as Version" on the Chosen column, "⧉ Make this a
+    /// note" on a lens — sit in a row carrying `.controlSize(.mini)`, and the
+    /// menus inherited it: their popped rows drew at the mini 9 pt. RED ON
+    /// OLD by that mechanism; the class lives in `ChromeMenuRowSizeTests`.
+    @Test func theColumnDoorMenusPopAtMenuSize() async throws {
+        try await withBoardWorld { session, _ in
+            let post = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "a note with takes")
+                _ = try ops.newBlock(in: post.id, text: "The first paragraph.", at: .end)
+                return post.id
+            }
+            let suite = "CompareLensesCorrectionTests.\(UUID().uuidString)"
+            let defaults = try #require(UserDefaults(suiteName: suite))
+            defer { defaults.removePersistentDomain(forName: suite) }
+            let model = TakesViewModel(session: session, postID: post, defaults: defaults)
+            let observing = Task { await model.start() }
+            defer {
+                model.teardown()
+                observing.cancel()
+            }
+            #if DEBUG
+            let lenses = LensesGeometry.reader(session.debugProbeScope)
+            lenses.reset()
+            #endif
+            let size = NSSize(width: 1000, height: 700)
+            let window = window(size)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(
+                rootView: LensesBoardView(session: session, postID: post, model: model)
+                    .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(origin: .zero, size: size)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            // The Chosen column plus a lens — both kinds of column door.
+            model.addScratchColumn()
+            #if DEBUG
+            await settle(window, hosting, until: {
+                lenses.frames[.headerCard(0)] != nil && lenses.frames[.headerCard(1)] != nil
+            })
+            #endif
+            await settle(window, hosting, until: { false }, maxTurns: 10)
+            let sizes = ChromeMenuProbe.rowSizes(in: hosting)
+            #expect(sizes.count >= 2, "both columns' doors are pop-ups underneath (\(sizes))")
+            #expect(sizes.allSatisfy { $0 >= ChromeMenuProbe.menuSize },
+                    "every popped row reads at menu size, never mini: \(sizes)")
+        }
+    }
+}
