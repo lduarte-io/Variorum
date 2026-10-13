@@ -12,6 +12,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
+| Comment area pristine pass | VX-179 · `vx-179-comment-polish` | `~/dev/variorum-vx-179` · the Pro | building (U1–U2 done, U3 in flight); ladder + walk pending |
 
 ### Latest closeout
 
