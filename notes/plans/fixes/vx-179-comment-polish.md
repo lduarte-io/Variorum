@@ -1932,3 +1932,32 @@ edge, and the brief says propose and wait.
   the live road this leg could not observe. Then: the SHEET's ladder (EditorView) — ⎋ clears, ⎋ closes;
   ⌘⏎ files in both hosts; R1-2's click-away save (unchanged — the monitor release and the save watcher
   are separate observers of the same `willClose`).
+
+### ORCHESTRATOR VERIFICATION + DISPOSITIONS (the U3 fix leg 3 accepted, 2026-10-13)
+
+Verified by spot-check: the five commits as claimed (0012cb60 … e294e8e4), tree clean and in sync, the
+diff confined to the two panel files, the test file and the record; `delivers` replaces `claims` in
+place with the monitor consulting it; 22 pins in the file. **The retraction is accepted as the
+mechanism of record:** fix leg 2's parent-forwarding model was the inactive probe app's fallback
+routing — the honest correction is exactly what the hallucination guard is for, and the runner's red
+premise was the tell. The new ownership-by-delivery model matches the three environments' facts (live:
+the popover made key; runner: the popover truly key; offscreen: no key window at all), reads the area
+from the first responder instead of the async focus value (closing O-FL3-2's class), and the close
+rung no longer depends on where a passed ⎋ lands (the Takes board's `.onExitCommand` swallow is a
+concrete, measured mechanism for walk 4's missing close). The F-W-4 ladder cell being honestly NOT
+red-on-old is correctly stated — the close-rung and release cells carry the red-on-old burden
+(R-FL3a/b, discriminating exactly).
+
+**The two sheet-probe incidents, adjudicated:** ACCEPTED as disclosed — alpha 0 before any order-in,
+the first aborted instantly, the second guarded within one turn with at most one frame possibly drawn;
+no app instance, no store, no focus change; and the leg STOPPED sheet probes on its own. The tightened
+line going forward: offscreen probes never order in a window whose position has not first been set
+off-display, and SwiftUI-sheet-class presentations are out of bounds offscreen — the sheet regression
+check rides the runner and the walk, where it belongs.
+
+**O-FL3-1 → VX-229 minted** (the stale panel's model + store observation leak; the monitors are
+released by this leg). **W4-OBS-1's park-the-draft proposal is HELD** for round 2's reviewer and her
+taste — not built, correctly.
+
+**Next:** the U2 FIX LEG 2 (F-W-2-R) dispatches now; then the short stage window (the two PENDING
+suites' run + the trace-read walk rows), then LADDER ROUND 2.
