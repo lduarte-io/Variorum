@@ -72,7 +72,7 @@ Agreed with the settingspaneupdater session (2026-10-13, both run files carry it
 
 ## U1 UNIT RECORD — the socket and key road: VX-132 → VX-181 → VX-198 (opus-implementer, 2026-10-12 night)
 
-**What this unit did NOT do (said first):** PENDING — finalized at the unit's close.
+**What this unit did NOT do (said first — the PRE-STAGE state, 2026-10-13 01:10 MDT):** (1) **the Mac batch and THE LIVE ROUND have NOT run** — the Mac build-for-testing hit a full disk ("THE DISK INCIDENT" below) and the stage window waits on space + the orchestrator's GO; every row is therefore pinned and green HEADLESS, but the unit's evidence of kind (use, on the wire, a real client) is still owed — this record does not close on pins; (2) no capture of the changed faces yet (L1, the setup line, the Activity words — both voices, in the window); (3) no `notes/QUESTIONS.md` entry and no canon edit (the merging session's); (4) zero schema, zero `Sync/`, zero custody, zero editor seam.
 
 **Read in full before code (never delegated):** the kickoff `notes/plans/mcp-launch-polish-kickoff.md` (her pre-run
 sitting, the U1 row, the rules); this record's head; `notes/plans/fixes/vx-180-discover-probe.md` whole (the window's
@@ -363,8 +363,9 @@ rebind admits only a key this library minted at her copy press (K2's own trust r
 clipboard could already read the client's settings, K2's recorded non-defeat).
 **Risks I see:** (1) the replaced-key memory lapses past the activity log's 500-row cap (the old key then hears the ONE
 sentence — same remedy) — P-VX198-1; (2) "newest" is newest PRESENTED: an older copy first run later takes the name back
-(recorded, the brief's letter); (3) the over-cap answers ride `id: null`, which some clients' schemas reject (MCP's
-TypeScript SDK types `id` as string|number — a strict client may drop the line and still see only the close) — PROVISIONAL;
+(recorded, the brief's letter); (3) the over-cap answers ride `id: null`, which some clients' schemas may reject (my
+recollection, UNVERIFIED: MCP's TypeScript SDK types an error's `id` as string|number — a strict client may drop the line and
+still see only the close) — PROVISIONAL;
 the live round records what Claude Code does with what it can be sent; (4) the window now governs the shim's refusal read:
 a client that never initializes gets at most 8 answers then the sentence — the same bound as the app's.
 
