@@ -1517,7 +1517,7 @@ every `NSScreen` (ordered out and the run aborted if it touched one — it never
 (0, −19880), x clamped, y off every display; a safety probe with an EMPTY popover ran first,
 `popsafe.swift`). The walk's own captures in `/tmp/vx179-walk/` were read as evidence.
 
-**Revert state:** REVERTS ANNOUNCED (this commit) — R-FL2a/b/c below run next, one at a time, each restored by `git checkout --` before the next; none in flight at this commit.
+**Revert state:** no behavioural revert in flight — R-FL2a/b/c (announced at 618441ea) all ran and were restored (`git checkout --`, zero diff after each); the restored tree rebuilt green and replayed 0 failures.
 
 ### LIVE STATUS
 
@@ -1528,7 +1528,7 @@ every `NSScreen` (ordered out and the run aborted if it touched one — it never
 | FL2-1 | F-W-3 — the dirty row's stamp line: fix + pin red-on-old | FIXED (c166804b) — `CommentTextArea.revealBelow` + `CommentTextAreaView.revealForEditing()` (rows only; never for a row taller than the list); triggered by the caret's arrival (one turn later), the text view's scroll-to-caret (not during a mouse gesture), and growth while focused; the panel MEASURES its stamp line (`onGeometryChange` → `stampLineHeight`) and passes gap + height + row air. Plain build SUCCEEDED, zero warnings in touched files; replays: the pin's two cells RED → GREEN (runner shape); the walk's state re-rendered (`renders/clip-fixed.png`): the edited last row's "Unsaved · ⌘⏎ · Save · Revert · Delete" in view (list visible 54…289 vs 0…235 before); the earlier U3 replays unchanged (undo 10/10, control checks, the focus pin); the six touched-area suites typecheck EXIT 0 |
 | FL2-2 | F-W-4 — popover ⎋ skips the clear rung: fix + pin red-on-old | FIXED (b44f984c) — `CommentPanelKeys.claims(eventWindow:panelWindow:)` (own window OR its parent) behind the monitor's guard; the pure table cell `thePanelClaimsKeysAddressedToItsWindowOrItsParent` joins the pins; plain build SUCCEEDED; replay (runner shape, real module): the F-W-4 cells RED → GREEN (first ⎋ clears + stays; second closes); confirmed in the product's SwiftUI `.popover` host with parent-addressed keys (`swiftpop --anchor`: ⎋ clears, the popover stays) |
 | FL2-3 | R1-2 — the popover dismiss-with-dirty-EDIT: AGREE/DISPUTE + (real ⇒) fix + pin | AGREE (measured, below) · FIXED (aaf9be65) — `CommentPanelHostWatcher` (zero-size; hears `NSPopover.willCloseNotification` for the popover whose content window is the panel's own) runs the panel's ONE leaving body, `commitDirtyEdits()` (now shared by Close, `.onDisappear` and the watcher); plain build SUCCEEDED, zero warnings in touched files; replays: the pin (runner shape, AppKit popover `close()`) RED → GREEN; the product's SwiftUI `.popover` dismissed by a CLICK AWAY and by the BINDING: store 'First note.' → 'First note. — edited in the popover', model no longer dirty. Accepted consequence: Close inside a popover commits twice in flight (Close's body, then the popover's willClose) — the second is the same text, a harmless repeat write; a later teardown finds nothing dirty |
-| FL2-4 | reverts (announced first), plain build, typecheck, record close | NOT-STARTED |
+| FL2-4 | reverts (announced first), plain build, typecheck, record close | DONE (this commit) — reverts announced 618441ea, run and restored (the table below); plain build SUCCEEDED on the restored tree, zero warnings in touched files; the touched-area suites + the new pins typecheck EXIT 0 |
 
 ### THE TRACES (offscreen, the REAL module; written before any fix)
 
@@ -1618,3 +1618,41 @@ Fix below; the walk row the reviewer asked for joins the PENDING list.
 - **R-FL2c (R1-2):** `CommentPanelHostWatcher.isHost` answers false (the watcher hears nothing) →
   expect "the popover's closing saved it" RED. Restore: the same `git checkout --` of `CommentsPanel.swift`.
 After the last: `git diff --stat` empty, rebuild, replay all green.
+
+| revert | the pin replay (runner shape, the rebuilt real module) | restored |
+|---|---|---|
+| R-FL2a — the reveal off | exactly the two F-W-3 cells FAIL (caret arrival; dirty and grown); every premise and every other cell PASS | yes — zero diff |
+| R-FL2b — the own-window claim | exactly "the first ⎋ clears the draft" + "the popover stays" FAIL | yes — zero diff |
+| R-FL2c — the watcher deaf | exactly "the popover's closing saved it" FAIL (store 'First note.') | yes — zero diff |
+| the restored tree, rebuilt | 0 failures (11/11 cells); the earlier U3 replays unchanged | — |
+
+### The sweep — the two NEW mechanism classes this leg found
+
+| class | instances | verdict |
+|---|---|---|
+| a key monitor guarding `event.window === its own window` inside a POPOVER (AppKit addresses a popover's keys to the parent) | `CommentPanelKeyMonitor` (the comments panel — popover AND sheet hosts) | FIXED (F-W-4) |
+| | `PageTurnKeyMonitor` (`NotePagesView`), `WingSwitcherSheet` (a sheet), `PressReporter` (mouse presses — addressed to the window under the pointer, never forwarded) | NOT IN A POPOVER / not keys — safe |
+| popover CONTENT relying on `.onDisappear` (never fires on a popover's dismissal — measured) | the comments panel's `.onDisappear` (dirty edits) | FIXED (R1-2 — the watcher) |
+| | `.onDisappear` in the other popover-presenting files (`LensesBoardView`, `CommitBar`, `BookArrivals`) — attached to the HOST boards/bars (teardown, DEBUG probes), not to popover content; none persists her state | not the class — safe |
+
+### Dispositions (the fix leg's rows)
+
+| row | disposition |
+|---|---|
+| F-W-3 — "a dirty row loses its stamp line" | the face was CLIPPED, not lost (traced) — FIXED c166804b (the edited row stays wholly visible); pin `theEditedRowAndItsStampLineStayInViewInACappedList` (RED on old by behaviour — replay + R-FL2a); the re-walk PENDING |
+| F-W-4 — popover ⎋ drops the draft | FIXED b44f984c (the monitor claims its window's parent's keys); pins `escapeInAPopoverClearsTheDraftFirstThenCloses` (RED on old — replay + R-FL2b) + the pure `thePanelClaimsKeysAddressedToItsWindowOrItsParent`; the re-walk PENDING |
+| R1-2 — popover dismiss-with-dirty-EDIT | AGREE — real, measured, pre-existing class (13u3 A2; the approximated old road loses it too) — FIXED aaf9be65 (the host-closing watcher); pin `closingThePopoverSavesADirtyInPlaceEdit` (RED on old — replay + R-FL2c); the reviewer's walk row joins the PENDING list. Returns to round 2's reviewer for the final call (the cross-model flow) |
+
+### PENDING (the runner's next window — none of it claimed)
+
+- **Pin RUN:** `-only-testing:VariorumTests/CommentPanelFixLeg2Tests` (4 tests — expect all green) + the
+  standing U3 list (`CommentTextAreaMountedTests` — the control gained `revealBelow`, a defaulted memberwise
+  parameter; `CommentPanelGeometryRuleTests`, `CommentPanelWordsTests`, `CommentsPanelModelEditorTests`,
+  `CommentCompositionTests`, `CommentPanelKeysTests`, `CommentPanelParkTests`). Optional in-target revert
+  spot-checks: R-FL2a/b/c as above (expect exactly the named cells red).
+- **The re-walk, both voices, the dev-store Debug build:** F-W-3 — edit the LAST comment of a capped list
+  (three comments, one long) in the EditorView sheet: its "Unsaved · ⌘⏎ · Save · Revert" stays in view while
+  typing and as it grows; F-W-4 — in the Takes margin note's POPOVER, type a draft, ⎋ clears it and the
+  popover STAYS, a second ⎋ closes it; R1-2 (the reviewer's row) — in the same popover edit a comment in
+  place, CLICK AWAY to dismiss, reopen: the edit is saved. Plus a regression look: the sheet host's ⎋ ladder
+  and Close unchanged.
