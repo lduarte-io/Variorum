@@ -24,6 +24,35 @@ those three plus anything a unit's brief names — U1/U2 are closed and verified
   In Progress; members close one by one at the merge (Done rides the PR).
 - Memory run-state: `vx-184-run-state.md` in the shared memory repo (commit+push after updates).
 
+## HER RE-SCOPE (2026-10-13 ~11:40, her words verbatim; supersedes R-VX184-0's "nothing drops" and the
+## kickoff's "U7 is NEVER a fall-out" for THIS run)
+
+*"ok I've made the decision that I want you to finish U5 and move U6 & U7 to a new phase (you can give
+me their ticket #s / make a new linear doc / plan for the new phase, whatever you think is best), and
+I'll add a couple items to that new phase. that will let me get the current MCP changes earlier on my
+own build so that I can test them out a bit more and will let me fold in and handle other feedback.
+We'll do an Opus ladder here + I'll run a cloud review using Fable if I'm able to."*
+
+What it means for this run:
+- **THIS RUN = U1–U5.** After U5 closes: the cold review is an **OPUS ladder** (`opus-reviewer`, her
+  word; REVIEW_PROMPT verbatim, cap three, fresh reviewer per round, same-model flow, so the
+  ORCHESTRATOR arbitrates disputes against the spec and the implementer applies the agreed fixes).
+  She may also run a Fable cloud review herself. That's hers, outside this ladder.
+- **U6 (VX-199, VX-205) and U7 (VX-197) MOVE** to a new RUN with its own ticket and plan file
+  (`notes/plans/mcp-pane-and-docs-kickoff.md`), carrying the drafted U6 brief and the U7 essentials
+  plus every OWED item routed to them (edit-rung undersell, ChromeLineLimit/VX-245, the 748×520
+  shell, VX-232's verify, VX-234 wording, the dev-castle rule, the stargazing DELTA's full form,
+  the instructions bound 3,000 and its link). VX-232 moves with U6. She adds items to it.
+- **Closeout scope shrinks accordingly:** canon deltas for U1–U5 only. The pane tabs (R-VX184-6) and
+  the instructions bound (R-VX184-3) land at the NEW run's close. Members closing at our merge:
+  VX-132, 181, 198, 185, 186, 173, 188, 190, 187, 195, 196.
+- **The stargazing message she's holding:** it still gets a send-ready DELTA at THIS run's close,
+  covering what U1–U5 actually built + the final tool-name list (the page describes acts, not tool
+  names). The new run writes a further delta if its pane/docs change anything the page says.
+- **The honest gap she accepts by this choice:** the field guide's MCP chapter and
+  `MCPSession.instructions` don't yet TEACH U3–U5's tools (the tool descriptions carry their own
+  truth; nothing the docs say becomes false, they only undersell). Her handoff says so.
+
 ## Her mandates (recorded in the run record too)
 
 1. **Goodnight mandate (she is ASLEEP):** run all the way through the night, culminating in the
