@@ -1626,5 +1626,39 @@ apply-check CLEAN at the tip in the pinned checkout)
   unchanged, so the SAME file the stage runs runs here under `swift test` (Swift Testing). Its own process,
   its own defaults domain, temp dirs and in-memory custody only — no stage, no dev store, no Keychain.
   Smoke-verified: the full Mac target compiles there (41 s) and a test runs.
-- NEXT: the reproduction pin of §W.2's round trip at HEAD (brief step 1) — written as a Mac test file, run in
-  the harness, the verdict recorded here BEFORE any copy is drafted.
+- DONE (this commit) — STEP 1, THE REPRODUCTION PIN, RUN AT HEAD: **§W.2's trace REPRODUCES IN WHOLE.**
+  `VariorumTests/VX209WayBackRoundTripTests` (1 test, a CHARACTERIZATION pin of the known hazard — it asserts what
+  the shipped road does, and is to be FLIPPED, never deleted, when VX-209's deeper fix lands). Harness run at HEAD
+  `31a25058` (+ this file): `✔ Test run with 1 test in 1 suite passed after 1.357 seconds` (the file's sha256 in the
+  harness equals the worktree's, printed by `sync.sh`). The world: a LOCAL-ONLY library, Standard era under L_s
+  (key file: passphrase copy + Apple copy), a backup pair made by the app's own `StoreBackup.performPrimaryLeg`,
+  then Castle as the local road leaves it on disk (re-keyed to L_c via `StoreEncryptionMigration.rekey`, a new key
+  file under the SAME store id with the passphrase copy and no Apple copy, the Standard-era file left beside it —
+  O.4 — custody gated L_c, no silent item, A still readable). Driven through the PRODUCTION pieces: the classifier,
+  `LibraryOpenModel` (begin → its own silent/Apple/typed roads → confirm → `confirmAdoption`, whose work is
+  `LibraryAdoption.execute` + `landCustody`), a production `AppBootstrap` (test opener) whose launch routes to the
+  Castle lobby and whose ready road runs after each adoption, and the gate's route read (`effectiveGate`).
+  What the run shows, step by step:
+  - Premise: the launch routes to the lobby (`.biometric`); Touch ID opens; no silent item exists.
+  - **Step 1 (Restore the Standard-era backup):** opens SILENTLY through the Apple road (no unlock phase), lands;
+    the live key file is the backup's (same store id, carries the Apple copy); custody = the silent item holds L_s;
+    **the Castle library's Touch ID item is DELETED**; the next route reads `.auto` (no lobby). §W.2's "lands
+    Standard silently" and its parenthetical (the gated item deleted under the same rule) — both CONFIRMED.
+  - **Step 2 (bring the Castle copy back from `Previous Libraries/<stamp>/`):** the folder classifies as the pair
+    served by the CASTLE key file (the newest of the two beside it); no silent road serves it (the silent item holds
+    L_s, the copy carries no Apple copy, the gated item is gone) — the passphrase opens it; after the adoption the
+    CASTLE key sits in the SILENT item, no Touch ID item exists, and **the brought-back Castle copy's key file has
+    gained an Apple copy that unwraps to the Castle key** — §W.2's way-back revert, CONFIRMED.
+  - **One refinement the run found (the trace said "the next route's landing arm"):** the Apple copy lands ALREADY
+    at the adoption's own reopen — the ready road's R1-M3 condition evaluates `currentEffectiveGate`, whose landing
+    arm writes — so the revert is complete in the SAME session, before any relaunch. The next route then reads
+    `.auto` (Standard, no lobby).
+  - **Attribution check (harness copy only, never the worktree):** corner 45's silent arm mutated
+    (`localReading`'s `case .silent: return .standard` → `.castle`) in the harness's COPY of
+    `StoreProtection.swift`; the same pin then fails on EXACTLY the step-2 facts — `backing.auto == castleKey`,
+    `backing.gated == nil`, the Apple copy at the reopen (4 issues) — while every step-1 assertion stays green. The
+    way-back revert is corner 45's, as the trace says. The copy restored by `sync.sh`, `cmp`-identical to the
+    worktree; `git status` showed only the new pin file.
+  - The Mac-target compile of this file in the real project (`build-for-testing`) — PENDING (one build after the
+    confirm line lands); its stage run — PENDING (listed at the close).
+- NEXT: step 2 — the confirm line on the Open/Restore confirm (the classifier arms), pinned red-on-old.
