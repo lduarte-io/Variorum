@@ -481,6 +481,82 @@ struct ProseGutterTests {
             textLeft: 300, top: 0, blockHeight: 30, roomBelow: 27)?.height == 21)
     }
 
+    /// **VX-179 U2 — THE CARD GROWS TO THE BLOCK** (her ruling R-VX179-2:
+    /// the card may grow to the block's own height plus a small pad, still
+    /// bounded by the rhythm; a one-line block keeps a small card; the 96 pt
+    /// cap retires). Her words behind it: *"sometimes a block is several
+    /// paragraphs but the comment is always just one line."*
+    ///
+    /// **RED ON OLD** (the shipped `ideal = min(blockHeight + 24, 96)`): every
+    /// tall-block HEIGHT cell answers 96 there — the 300 pt and 800 pt cards,
+    /// the 200 pt rhythm bound (194), the narrow gutter's 500 pt block, and
+    /// the one decision's 424 and its rhythm-bounded 404. The rest is green
+    /// on both sides BY DESIGN (the parity half: the pad's value, the 17 pt
+    /// and 72 pt cards, the floor, the width and x, the never-abut check).
+    /// (Red-on-old BY REVERT is PENDING the stage — the app test target is
+    /// stage-gated this session; the arithmetic above is the trace.)
+    @Test func theCardGrowsToTheBlocksOwnHeightWithinTheRhythm() throws {
+        let pad = BlockDecor.cardHeightPad
+        #expect(pad == 24, "the shipped pad, kept — the parity claim stands on it")
+        // A one-line block keeps a small card (Terminal's one line is 17 pt).
+        #expect(BlockDecor.leftCardRect(textLeft: 300, top: 0, blockHeight: 17)?.height == 41)
+        // The old cap's own edge, unmoved: 72 + 24 = 96 on both sides.
+        #expect(BlockDecor.leftCardRect(textLeft: 300, top: 0, blockHeight: 72)?.height == 96)
+        // A tall block's card FOLLOWS the block (red on old: 96, 96).
+        let tall = try #require(BlockDecor.leftCardRect(
+            textLeft: 300, top: 40, blockHeight: 300, roomBelow: 400))
+        #expect(tall == CGRect(x: 62, y: 40, width: 210, height: 300 + pad),
+                "x, width and top are the shipped ones; only the height grew: \(tall)")
+        #expect(BlockDecor.leftCardRect(textLeft: 300, top: 0, blockHeight: 800)?.height
+            == 800 + pad)
+        // …still bounded by the rhythm: the next commented block's face
+        // 200 pt below leaves 194 (the bound is the shipped line; red on old
+        // only because the old ideal, 96, was already under it).
+        #expect(BlockDecor.leftCardRect(
+            textLeft: 300, top: 0, blockHeight: 800, roomBelow: 200)?.height
+            == 200 - BlockDecor.cardRhythmAir)
+        // …and still floored: too little room is the badge's, as shipped.
+        #expect(BlockDecor.leftCardRect(
+            textLeft: 300, top: 0, blockHeight: 800, roomBelow: 20) == nil)
+        // The narrow-gutter width rule is untouched by the height change.
+        let narrow = try #require(BlockDecor.leftCardRect(
+            textLeft: 160, top: 0, blockHeight: 500))
+        #expect(narrow.width == 160 - BlockDecor.leftCardLane && narrow.minX == 0)
+        #expect(narrow.height == 500 + pad)
+
+        // THE ONE DECISION carries it (the renderer and the ring both ask
+        // `commentGutterFaces`): a 400 pt block with a comment gets a 424 pt
+        // card (red on old: 96)…
+        var state = BlockDecor.State()
+        state.textLeft = 300
+        state.textRight = 980
+        state.frames = [
+            .init(entryIndex: 0, blockID: "tall",
+                  frame: CGRect(x: 300, y: 10, width: 680, height: 400)),
+            .init(entryIndex: 1, blockID: "next",
+                  frame: CGRect(x: 300, y: 420, width: 680, height: 17)),
+        ]
+        state.comments["tall"] = [.init(id: "c1", text: "a note")]
+        guard case .card(let card) = BlockDecor.commentGutterFaces(state)["tall"] else {
+            Issue.record("a 300-pt gutter holds a card")
+            return
+        }
+        #expect(card.height == 400 + pad, "the card follows the block: \(card)")
+        // …and when the NEXT block is commented too, the rhythm bounds it:
+        // the neighbour's face begins at 420, so the tall card (ideal 424
+        // from its top at 10) stops at 420 − 10 − 6 = 404 (the cards never
+        // abut — memo §2 B, untouched; red on old: 96).
+        state.comments["next"] = [.init(id: "c2", text: "another")]
+        let faces = BlockDecor.commentGutterFaces(state)
+        guard case .card(let bounded) = faces["tall"],
+              case .card(let below) = faces["next"] else {
+            Issue.record("both blocks hold cards: \(faces)")
+            return
+        }
+        #expect(bounded.height == 420 - 10 - BlockDecor.cardRhythmAir)
+        #expect(bounded.maxY <= below.minY - BlockDecor.cardRhythmAir)
+    }
+
     /// **NOTHING IN THE GUTTER EVER COVERS PROSE** — mounted, at a wide
     /// window and at Write's own floor, over all four decoration
     /// combinations. The successor to

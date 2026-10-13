@@ -483,13 +483,25 @@ nonisolated enum BlockDecor {
     /// abut. A card with too little room to be one answers nil and its block
     /// shows the badge instead. With no glyph and no neighbour the rect is
     /// BYTE-IDENTICAL to what shipped (the parity claim, pinned).
+    ///
+    /// **VX-179 U2 — THE CARD GROWS TO THE BLOCK (her ruling R-VX179-2,
+    /// verbatim at the kickoff: the card may grow to the block's own height
+    /// plus a small pad, still bounded by the rhythm; a one-line block keeps
+    /// a small card; scroll-inside covers overflow; the 96 pt cap retires).**
+    /// Her words behind it: *"sometimes a block is several paragraphs but the
+    /// comment is always just one line."* The ideal is now the block's own
+    /// height plus `cardHeightPad` — the shipped pad, kept, so every card
+    /// under the old cap (a block of 72 pt or less) is byte-identical — and
+    /// the two bounds that were already here stand exactly as they were:
+    /// `roomBelow` minus the rhythm's air (two cards never abut) and the
+    /// `cardMinHeight` floor. Width, x, the handle lane: untouched.
     static func leftCardRect(
         textLeft: CGFloat, top: CGFloat, blockHeight: CGFloat,
         roomBelow: CGFloat? = nil
     ) -> CGRect? {
         let width = min(210, max(0, textLeft - leftCardLane))
         guard width > 0 else { return nil }
-        let ideal = min(blockHeight + 24, 96)
+        let ideal = blockHeight + cardHeightPad
         let height = min(ideal, roomBelow.map { max(0, $0 - cardRhythmAir) } ?? ideal)
         guard height >= cardMinHeight else { return nil }
         return CGRect(
@@ -499,6 +511,13 @@ nonisolated enum BlockDecor {
 
     /// The clearance a left card leaves for the drag-handle lane.
     static let leftCardLane: CGFloat = 28
+
+    /// How far past its block's text a margin card reaches — the shipped
+    /// `+ 24`, named at VX-179 U2 when the 96 pt cap beside it retired. A
+    /// one-line block's card is therefore ~41 pt: room for two or three
+    /// short entries before the card scrolls (R-VX179-2's "a one-line block
+    /// keeps a small card").
+    static let cardHeightPad: CGFloat = 24
 
     // 13l (her 8c rider, verbatim: *"I need the comment + on the left
     // removed … it's too crowded and I don't like the look of seeing it
