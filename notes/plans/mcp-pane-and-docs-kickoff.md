@@ -116,6 +116,14 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
   face (the badge's decoration not invalidated when an MCP write lands), not wrong store data. Trace that
   invalidation road and pin it red-first. **If the trace reaches the editor seam** (`EditorTextView`, the
   decoration layer), read `notes/TEXTKIT2_NOTES.md` first, and the review is Fable's (CLAUDE.md).
+- **VX-268: Library rows never wear the shared-with-AI icon** (notes, books, gatherings; only the Bookcase
+  does). Filed by her Air session, joined at her word: *"this other ticket that should be done in the next round
+  of mcp work"*. **Bug + Pre-launch:** a gap against R-AIR-6's "one icon everywhere" (13n-c U3 built it on
+  Bookcase rows and the in-note indicator only). Every Library row an approved client reaches wears the one
+  `MCPSharedIcon` with its hover and popover, in List, Cards and Timeline. Gathering rows follow VX-185's
+  truth (VX-184). P1: reach is read in proportion to the rows shown. **Hers at kickoff:** (1) Pool rows, the
+  Book Panel's rows and Blocks-scope rows too? (2) With the open book on, every row would wear it, as every
+  Bookcase row does today.
 - **Her bilingual-book agent notes** (`notes/mcp-agent-notes-2026-10-13-bilingual-book.md`, the agent's own
   notes from building 'o ladrão de raios' through the door). Adjudicated 2026-10-13; she asked these to *"ride
   the next fix path"*:

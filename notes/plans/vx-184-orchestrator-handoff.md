@@ -83,7 +83,7 @@ new appends at the end, edit inserts anywhere. VX-246's plan records both.
   for VX-246 is verbatim in its plan.
 - **Tickets minted or moved this run (the handoff lists ALL):** VX-205 (→VX-246) · VX-230 (→VX-246) · VX-231 ·
   VX-232 (→VX-246) · VX-246 (the new run) · VX-252 · VX-253 · VX-254 · VX-255 · VX-256 · VX-258 · VX-259 · VX-260 ·
-  VX-261 · VX-262 (Parked). Plus VX-245 (VX-214's; corrected to credit VX-246).
+  VX-261 · VX-262 (Parked) · VX-267 (R-VX246-4). Plus VX-245 (VX-214's; corrected to credit VX-246) and VX-268 (filed by her Air session, joined VX-246 at her word). VX-246 has 16 members; its rulings so far are R-VX246-1…4 (in its plan).
 
 ## Her mandates (recorded in the run record too)
 
