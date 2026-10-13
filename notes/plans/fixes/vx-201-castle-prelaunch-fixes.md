@@ -286,3 +286,22 @@ flipped, everything pushed, PENDING marks honest.
   their Protection/Data Safety rewording waits for her sitting); our no-caps + two-register rules bind their
   rewording; if both runs are still open when their rewording lands, drafts are swapped before either merges.
   U4's brief cites this entry.
+
+## U1 RECORD (VX-202)
+
+**Not done in this unit (stated first, per the brief's close rule):** PENDING — filled at close.
+
+### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
+- 2026-10-13 — U1 implementer (Opus) started. Required reading done in this session, never delegated: this file
+  whole (§A's VX-202 refinements, §C), `notes/plans/fixes/vx-191-encryption-audit.md` whole (§O.2–O.4 the trace),
+  `notes/SyncSpec.md` in full, `notes/plans/pre-13x-postures-design.md` §1, §3.4, §4, §14 (corners 42/45),
+  `notes/SessionResiliencyProtocol.md`, `notes/plans/fixes/vx-80-castle-follow-recovery-door.md`; code:
+  `AppBootstrap.swift` whole, `PostureSwitch.swift` whole, `ProtectionController.swift` (the follow verdict,
+  `moveCustody`, the reconcile + Apple arm), `StoreLaunchGate.swift` (`effectiveGate`, `rawKeyCustody`),
+  `StoreKeyGuard.swift`, `StoreKey.swift`, `StoreProtection.swift` (`Posture.derive`, `ProtectionDefaults`),
+  `LibraryOpenModel.landCustody`, `PostureSwitchModel`/`PostureFollowModel` (the controller's model-set
+  `switchInProgress`), the existing pins (`PostureSwitchTests` world, `PostureSwitchDrillTests` leaves,
+  `Phase13pControllerTests` world, `VX80CastleFollowRecoveryTests`, `Phase13pLobbyTests` heal pins,
+  `MobileWindowReplayTests` — the one existing pin that runs a follow through `bootstrap.rekeyLibrary`).
+- NEXT: the fix (gate i + gate ii in `AppBootstrap`, the sweep in the controller's reconcile, the store-id flag
+  in `StoreLaunchGate`/`ProtectionDefaults` written by the runner), then the pins file, then build-for-testing.
