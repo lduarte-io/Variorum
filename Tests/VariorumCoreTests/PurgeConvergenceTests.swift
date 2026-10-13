@@ -639,6 +639,66 @@ struct PurgeConvergenceTests {
         #expect(again.familiesPurged == 0 && again.staleIntentsCompleted == 0)
     }
 
+    // MARK: - 10b. VX-179: the comment kind joins the staleness net — a
+    // restored comment is never purged live by its stale intent
+
+    /// VX-179 (2026-10-12, the comment true-delete door): `block_comment`
+    /// joins `purgeableTables`, so the sweep-time staleness net must know
+    /// the kind too — without it, a comment restored between the intent's
+    /// mint and the sweep is purged LIVE (the one outcome B1 forbids).
+    /// Test 10's choreography at comment grain. The intent row is minted
+    /// directly here: the door op is the run's U1 and this pin guards the
+    /// janitor's net beneath it. **RED-ON-OLD (revert-verified):** with
+    /// `block_comment` absent from `familyVerdict`'s `tombstonedKinds`,
+    /// this sweep purges the restored comment.
+    @Test func aPeerRestoredCommentBeforeItsIntentArrivesSurvivesTheSweep() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 90, seed: 2)
+
+        let commentID: String = try a.with { ops, _ in
+            let post = try ops.createPost(title: "annotated", profile: .generic)
+            let made = try ops.newBlock(in: post.id, text: "the prose", at: .end)
+            let comment = try ops.addBlockComment(to: made.block.id, text: "a kept note")
+            try ops.deleteBlockComment(comment.id)
+            return comment.id
+        }
+        try await syncToQuiescence(a, b, server: server)
+        try await round(a)
+        try await round(b)
+
+        // A confirms Delete forever; B restores BEFORE pulling the intent —
+        // B has no intent to void, so only the sweep-time staleness check
+        // stands between the restore and a live purge.
+        try a.with { _, db in
+            try db.write { inner in
+                try PurgeIntent(
+                    id: "aa-intent-comment-0001", ownerId: a.ownerID,
+                    tableName: "block_comment", rowId: commentID,
+                    requestedAt: Date(), createdAt: Date(), updatedAt: Date())
+                    .insert(inner)
+            }
+        }
+        try b.with { ops, _ in try ops.restoreBlockComment(commentID) }
+        try await round(b)  // the restore pushes; the intent arrives after
+        try await round(a)  // A pushes the intent + pulls the restore
+        try await round(b)  // B's cursor passes the intent: it is published
+
+        let report = try await sweep(a, server)
+        #expect(report.familiesPurged == 0,
+                "a restored comment is never purged by its stale intent")
+        #expect(report.staleIntentsCompleted >= 1,
+                "the stale intent completes WITHOUT a purge")
+        #expect(await server.currentRow(table: "block_comment", rowID: commentID) != nil)
+        for client in [a, b] {
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM block_comment WHERE id = ? AND deleted_at IS NULL",
+                [commentID]) == 1, "\(client.name): the restored comment survives")
+        }
+        try await syncToQuiescence(a, b, server: server)
+        #expect(try a.syncedDump() == b.syncedDump())
+    }
+
     // MARK: - 11. 13j ladder B (B3, her round-11 ruling): the LOCAL road
 
     @Test func aNeverSyncedFamilyPurgesLocallyWithNoLedgerAndNoMirrorContact() async throws {
