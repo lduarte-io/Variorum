@@ -788,7 +788,9 @@ under the project at your word:
 
 **Cast and rules.** This is *the* custody/`Sync/` effort while it runs. Fable orchestrates and cold-reviews every round;
 Opus implements, except the `Sync/` lines, which Fable writes. Every bug-class change lands red-on-old. No new
-dependency.
+dependency. Each phase's closeout re-reads the rulings it built against what actually shipped — above all the
+"every", "never" and "all" in the five rules and the scenario test's promises — and tickets any remainder (your
+2026-10-13 closeout rule).
 
 **The riskiest part** is the migration and the open road: a defect there strands someone at launch. **The cut lines** if
 time runs short: the bring-into-Castle choice (rule 4's second sentence then reads "offers to delete them"), the restore
