@@ -376,7 +376,18 @@ struct SyncStatusRow: View {
                 }
             }
             .font(.caption)
+            // VX-218 (her words: "signed out has no spacing in the bottom
+            // left - doesn't look premium on first login"): on the Mac this
+            // arm's only host is the sidebar's bottom family, and the 6 pt
+            // all round put its words 6 pt from the window's edge, inside
+            // the rounded corner. The HOST owns the horizontal inset now
+            // (`RootView.statusRows` — the column's own content edge); the
+            // vertical 6 stays (it shares the bottom bars' baseline).
+            #if os(macOS)
+            .padding(.vertical, 6)
+            #else
             .padding(6)
+            #endif
         }
     }
 
