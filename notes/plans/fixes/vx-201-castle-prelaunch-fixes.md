@@ -1948,3 +1948,42 @@ Sentence case, no capitals for emphasis, the everyday register (no key named), n
   It ran this unit's pins, the six revert cycles, the attribution mutation and two probes; tests that read bundle
   resources fail there. Offered as a possible run tool (the stage stays the canonical run); `sync.sh` +
   `revert-cycle.sh` are its two scripts.
+
+### ORCHESTRATOR ADJUDICATION — U5 (verified against git before adoption: commits 31a25058 → b4a7b261 as
+reported; zero `Sources/` lines across U5's whole span by path diff — so zero `Sync/` — zero trailers; the
+changed set is exactly the two LibraryOpen Shared files + PostureCopy + LibraryOpenDoor + TutorialSeeder + the
+three pin files + six patches; the adopt/restore machinery byte-untouched as constrained)
+
+- **F-U5-1 — THE VERDICT ADOPTED; this is the run's headline finding for the morning handoff.** §W.2 reproduced
+  IN WHOLE at HEAD through the production pieces, with the refinement that the revert COMPLETES IN THE SAME
+  SESSION (the adoption's own reopen reads `currentEffectiveGate`, whose landing arm writes — F-U5-6). Her
+  carried-forward reminder 2 is fully vindicated: the pin-first order caught two things the read-only trace
+  missed (the same-session completion AND the incomplete road back). NOT a new launch blocker: the hazard is
+  §W.2's known one, now proven and honestly worded at both doors; the deeper fix remains VX-228's design space.
+- **F-U5-2 — ADOPTED; the verified road is Resume Sync, then Use Castle.** Both shipped texts carry it, pinned
+  on the reproduced library itself. Actions at closeout: a comment on VX-209's ticket correcting "today's honest
+  instruction", and the morning handoff's wording carries Resume Sync. My U1-F2 adjudication's "the guide
+  sentence STANDS" stands AS AMENDED by this road.
+- **F-U5-3 — (a) CONFIRMED for tonight** (the step-1 line + the guide name Use Castle as the road back, never
+  Previous Libraries); (b) offered in #215 with the implementer's draft (cheap, a custody READ only); (c) is
+  VX-228's. Her call, bundled.
+- **F-U5-4 — bundled:** Alternative B is the shape-independent line (the enrolled shape is traced, not pinned —
+  honestly marked); the #215 bundle flags B's property so her pick is informed. The ladder re-examines the
+  enrolled trace (custody).
+- **F-U5-5 + F-U5-6 — record-only tonight; BOTH land as comments on VX-228** (the corner-45 deeper-fix ticket)
+  at closeout: the resident-as-shape heuristic after an Auto-road adoption, and the read-that-writes vector
+  (`currentEffectiveGate`) that completes the revert mid-session. **F-U5-7 — record-only** (unreachable by hand;
+  the pins sleep).
+- **F-U5-8 — the harness ADOPTED as evidence of its own kind, exactly as marked** (never the stage's; window E
+  is the canonical record). The construction is fully recorded here, so the knowledge survives the scratchpad;
+  offered to her in the morning handoff as a possible standing tool (her call; the stage remains canonical).
+  Cleanup at closeout.
+- **P-U5-1…6 — ALL CONFIRMED** (1/2 read the brief's condition correctly; 3's phone-less guide is right — the
+  phone has neither door; 4's placement PROVISIONAL → #215; 5 is F-U5-2's verified road; 6's
+  characterization-pin polarity — green at HEAD documenting the hazard, FLIP never delete at the deeper fix —
+  is the honest shape and is recorded on VX-228 too).
+- **Copy drafts adopted into the #215 input as written** (the confirm line + alternatives A/B, the guide
+  paragraph + the shorter alternative). U5's acceptance evidence owes WINDOW E: the 9 pins green AS STAGE RUNS,
+  the six revert cycles, the ~50-type Mac existing-suite run, the 6 phone types — at the branch tip, after
+  window D phase 2 releases the pinned checkout. VX-233's time-boxed heal (her ruling: slots after U5) OPENS NOW
+  in the live worktree; its drill re-run folds into window E.
