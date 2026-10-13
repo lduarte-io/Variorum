@@ -1295,3 +1295,54 @@ Sentence case, no capitals for emphasis, the everyday register (no key named; "A
   notes-only commit `6913e6a5` landed in this worktree; resumed in the same session under the amended rule (notes-only
   orchestrator commits are expected). One more: a `git pull --rebase` refused before my `a4a0136c` (my own unstaged
   edits) — the commit and push landed cleanly; later pulls use `--no-rebase` as the orchestrator allowed.
+
+### ORCHESTRATOR ADJUDICATION — U3 (verified against git before adoption: commits c0b96287 → c8329b75 as
+reported, zero `Sources/VariorumCore/Sync/` lines by path diff, zero trailers, the four Mac revert patches
+present and apply-checked per record; the remover's qualification READ by the orchestrator — re-run whole before
+`removeItem`, real-directory-never-symlink at the folder AND the homes, canonical-path comparison, the planted-link
+leg ran red under R-c; headless core 2,697/308 green at close)
+
+- **F-U3-1 — stands ACCEPTED** (pre-build adjudication re-confirmed at hand-back): R-b's red run is the proof the
+  locate-based reading earns its keep — under "any key file" the remover DELETED the O.4 two-key-file Castle copy.
+- **F-U3-2 — RECORD-ONLY.** 13p-era copies openable through the legacy raw escrow item carry no `apple` wrap for
+  the rule to see; population is her own devices; VX-191 §O.2's recommended look stands — named in the morning
+  handoff's optional section, not a tonight action.
+- **F-U3-3 — the owning sentence covers it; the structural question ("should set-aside copies be their own
+  choice?") rides #215** beside P-U3-3's alternative. Accepted as built for tonight.
+- **F-U3-4 — VX-210's (Parked) territory, confirmed:** a note lands on VX-210's ticket at closeout (the one-time
+  offer class now spans pairs AND copies).
+- **F-U3-5 — handled as ruled:** the shipped draft keeps her ruling's letter (Markdown exports); the wider
+  sentence is #215's alternative.
+- **F-U3-6 — overlap within the declared bounds** (ceremony-sheet phases only, zero pane sections); the final
+  ProtectionPane/AppSettingsView hunks go to settingspaneupdater in ONE send after U4 lands.
+- **F-U3-7 — machinery accepted;** the `--no-rebase` allowance stands for every later unit.
+- **P-U3-1/P-U3-4 — CONFIRMED** (the exports line on every entered-Castle Done; the copies ride the pairs'
+  listing rule). **P-U3-2 (the phone shows the line) — CONFIRMED provisionally,** bundled in #215 with the
+  Mac-only alternative (the phone writes no exports; a Mac of the account may have). **P-U3-3 — CONFIRMED,**
+  its alternative bundled (F-U3-3).
+- Copy drafts adopted into the #215 input as written. U3's acceptance evidence still owes the stage: the 4 Mac
+  pins + their four revert cycles + the existing-suite run + the 2 phone files — WINDOW D, at the branch tip,
+  after window C phase 2 (U2's cycles must run at a208a24a, BEFORE the pinned checkout advances past U3's
+  Shared/ changes).
+
+### WINDOW C RECORD — PHASES 1+3 (orchestrator, stage claim vx201-u2-tests-p1; the pinned checkout at a208a24a)
+- **Phase 1 (Mac green pass): `✔ Test run with 435 tests in 60 suites passed after 345.045 seconds`** — U2's
+  whole changed-source list incl. the 9 VX110 pins and the 10 VX202 pins. Log /tmp/vx201-wc-greenpass.log.
+- **Phase 1b (the gated drills):** migration drill + the connect drill's second leg green; the posture drill's 2
+  issues are VX-233's bisect-proven pre-existing rot; the connect drill's sibling-pull leg fails with the
+  IDENTICAL `@Dependency(\.date)` signature (Date.swift:37 via SyncEngine.swift:19) — classified VX-233's class,
+  honestly marked NOT separately bisected; the time-boxed heal's re-run proves or re-opens it. Log
+  /tmp/vx201-wc-drills.log.
+- **Phase 3 (phone, sim by UDID): first attempt silently ran only 2 of 3 requested names** — the counts-read
+  discipline caught it: `-only-testing` matches suite TYPES, and MobileProtectionTests/MobileStructuralTests are
+  multi-struct FILES (window A's MobileWindowReplayTests matched only because file = type there). MACHINERY
+  LESSON (every later phone window): translate file names to the struct names. Re-run with the 10 real types:
+  **37 tests in 10 suites, 36 green, 1 red — `MobileNoRedirectSweepTests.nothingUserFacingNamesTheMac`,
+  PRE-EXISTING** (9 of 10 offenders predate this run at 97329acc: LibraryOpenCopy's five = exactly VX-114
+  [Todo], plus AcknowledgmentsCopy's four "(Mac only)" from 13n — VX-114 EXTENDED by comment, no duplicate
+  minted, the coordinator's dedup catch). The 10th offender was U2's diagnostic log line in PostureSwitch.swift
+  — FIXED (66863d50, device-neutral wording, a log line so no #215 ride); the sweep's re-run rides window D at
+  the tip. Logs /tmp/vx201-wc-phone.log + -phone2.log.
+- **U2's acceptance evidence so far:** green pass + phone pins green (MobilePhoneProtectionCopyTests' re-based
+  consent pin among the 36); still owed = phase 2's seven revert cycles (queued ~04:35 behind VX-179 + VX-214
+  windows). Simulators shut down; stage released after phase 3.
