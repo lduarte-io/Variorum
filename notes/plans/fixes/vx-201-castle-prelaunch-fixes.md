@@ -2036,3 +2036,73 @@ three pin files + six patches; the adopt/restore machinery byte-untouched as con
 - **Still owed:** phase 2's six revert cycles (queued after vx-184's U4, ~07:35). The FABLE LADDER round 1
   starts now — no stage, the whole-run diff final and suite-verified at the tip; the cycles verify pins without
   changing code, so round 1's input is stable. Logs /tmp/vx201-we-*.log.
+
+## FABLE LADDER ROUND 1 (cold reviewer, notes/REVIEW_PROMPT.md verbatim — 2026-10-13)
+
+**Input:** the whole-run diff at `d60d839d`. The brief's `97329acc..HEAD` range contains the `d6caafc1` main
+merge (VX-179's comment-polish files, `Sync/PurgeJanitor.swift` included — that run's own closed ladder reviewed
+them); this round's review object is the BRANCH-ONLY diff (`git diff d6caafc1..HEAD`, 35 files, ~4,600 insertions),
+verified by path diff to carry ZERO `Sources/VariorumCore/Sync/` lines, zero editor-seam files, no schema, no
+commit trailers (all branch commits swept). Read in full: this record (2,039 lines), SyncSpec, the VX-191 audit
+record, every product diff hunk with surrounding context (`Posture.derive`, `DeviceKeyStore.custody`,
+`moveCustody`'s queue, the reconcile), the five pin suites' assertions; ran `LibraryAsideCopiesTests` headless
+(6/6 green). No "Review foci" section exists; §A's binding refinements were taken as the plan-time checks and
+each was verified (dispositions in the hand-back's clean bill).
+
+**VERDICT: 0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT.**
+
+- **R1-1 [MINOR] · `App/Variorum/Shared/PostureSwitch.swift` (`markSwitchPending`/`writeMarker`) +
+  `StoreLaunchGate.effectiveGate` · belt c's per-store flag can OUTLIVE its marker, and nothing ever clears it.**
+  Mechanism: the flag is set BEFORE the first marker write and cleared only by the runner's own
+  `writeMarker(.snapshot/.offer)` / `clearMarker()`. Two roads orphan it: (a) process death inside the
+  set→first-marker window; (b) a crashed switch whose user Opens/Restores another copy — `LibraryAdoption.execute`
+  replaces the store file (the marker is DB rows; the incoming copy carries none) while the UserDefaults flag is
+  keyed on the store id, which the restored copy SHARES. Afterward no marker exists, no resume can run, and the
+  route's corner-45 Apple landing is refused for that store id indefinitely — the code comment's own invariant
+  ("mirrors 'the marker names a step before custody landed'") broken. Direction fail-SAFE (more Castle-ish, never
+  strands: the landing arm only adds a wrap where the silent key already opens), which is why this is MINOR.
+  Fix shape: clear the flag at a ready where `readSwitchPending` reads NO marker and neither switch flag is set
+  (the reconcile already makes that read), and in `resume`'s `nothingToResume` arm. Pinnable red-on-old (stale
+  flag + no marker ⇒ today the landing never returns).
+- **R1-2 [MINOR] · `ProtectionPane.swift:224-229` + `:588-593` · F-U4-6 EXAMINED (the item handed to this
+  ladder): `activeFollow` is presented by BOTH the Settings pane and the main window's notice bar with no host
+  discrimination** — a follow notice arriving while Settings ▸ Protection is open presents the SAME
+  `PostureFollowModel` as a sheet on two windows at once. No correctness hazard traced: `FollowSheet` has no
+  auto-start task, the model's phase/busy guards make presses act once, and dismissing either sheet nils the
+  model and both fall. The degradation is the two-windows theater row 11 retired for the ceremony. Pre-existing
+  (pre-13x 2c), NOT this diff's regression — disposition: a ticket carrying row 11's fix shape (host
+  discrimination for the follow), not a run fix.
+- **R1-3 [NIT] · `PostureSwitch.swift` (`runCeremony`'s This-Mac-Only arm) · `setThisDeviceOnlyFlag(true)`
+  precedes the forget,** so a death in that window orphans the flag with no marker. Traced through every
+  reachable chain: the flag only ever exists for a store id that held sync material and chose This Mac Only, so
+  a later crashed local road's resume wearing the This-Mac-Only Done stays materially honest — hence NIT. Fold
+  its clear into R1-1's marker-less-ready reconciliation.
+- **R1-4 [NIT] · `ProtectionController.relandSilentItem` / `AppBootstrap`'s relanding task · a refused Keychain
+  re-land is silently discarded (`_ =`)** where the sweep logs both its refusal arms; one `logger.notice` would
+  make the R1-M3 heal's failure observable at the next stranded launch. Hygiene parity, additive only.
+
+**Clean bill (verified in this round, mechanism-level):** the branch diff's scope discipline (zero `Sync/`,
+zero editor seam, no schema, no trailers); gate i's synchronous set + runner-owned clear on all three roads,
+throw-leaves-it-set fail-safe, Use Standard untouched; gate ii's ordering argument PROVEN against the code (the
+reland and `moveCustody`'s `transitionCustody` share the ONE serial custody queue; the checks and the enqueue
+share one MainActor stretch; a later switch is caught by three flag re-checks + key-in-hand equality — §C's
+marker-read-inside-the-task trap genuinely closed); belt b's bounds (determined-Castle-with-the-gated-shape,
+decision 35's indeterminate-writes-nothing, the never-strand check, the adoption-window inertness) and the F1
+rebuild concurred with; belt c set-before-every-pending-marker + re-assert after `writeNewKeyFile`, every marker
+clear routed through `clearMarker` (grepped); U2's material-not-identity gate REAL in `DeviceKeyStore` (identity-
+only ⇒ `load()` nil; `clear()` keeps identity; the route's presence-read keeps the landing skipped post-forget;
+the ready's material-read lets the F-U2-1 consent guard fire); forget-first before the first marker with the
+verified re-read; the resume's `localCastleRoad` discriminator correct against enrolled/follow marker shapes;
+the offline-signed-in road NOT regressed (transport-nil is composition, not connectivity); U3's qualification
+(real-dir + canonical-parent + exact stamp round-trip + one store + `locate`-chosen `apple` key file; remover
+re-runs it; A1 rail unmatched; ran the 6 headless pins green); one listing site, all five offer sites on
+`hasOffer`; VX-208's one line on every entered-Castle Done, no delete offer; VX-204's one copy home on both
+seeders; VX-206's holder on the survivor object with exactly the adopter in `AppSettingsView` (the VX-214
+constraint honored), asks guarded to pane-hosted ceremonies, phone inert; U5's `leavesCastle` pure over the
+classifier + decision 8's derive (the Castle copy correctly earns no line — F-U5-3's ruled option (a)), ONE copy
+home on the ONE sheet, the guide's Resume-Sync-first road pinned as a BOUND on the reproduced library; F-U5-4's
+enrolled overstatement honestly bundled (Alternative B); every new sentence PROVISIONAL, register-pinned, de-cap
+pinned (`!consent.contains("ACCOUNT")`); VX-233's fix harness-side only (diff verified); red-on-old discharged
+at the stage for U1–U4 per windows B/C/D with U5's six cycles honestly PENDING window E phase 2 (declared,
+queued, no code change rides them); nothing in the diff copies text across entities, tracks word-level change,
+or scales with corpus size. Findings go to the implementer verbatim per the cross-model flow.
