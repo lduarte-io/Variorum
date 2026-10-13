@@ -121,9 +121,13 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
   of mcp work"*. **Bug + Pre-launch:** a gap against VX-271's "one icon everywhere" (13n-c U3 built it on
   Bookcase rows and the in-note indicator only). Every Library row an approved client reaches wears the one
   `MCPSharedIcon` with its hover and popover, in List, Cards and Timeline. Gathering rows follow VX-185's
-  truth (VX-184). P1: reach is read in proportion to the rows shown. **Hers at kickoff:** (1) Pool rows, the
-  Book Panel's rows and Blocks-scope rows too? (2) With the open book on, every row would wear it, as every
-  Bookcase row does today.
+  truth (VX-184). P1: reach is read in proportion to the rows shown. **Scope audit (2026-10-13, code-level):**
+  the waiting-ask icon renders in nine places, the shared icon in two (the Bookcase and the in-note indicator).
+  The parity criterion, from her one-family ruling: wherever the waiting-ask icon marks a place, the shared icon
+  marks it too. So **the wing switcher's rows (menu + ⌘L sheet) are IN scope.** A shared wing never shows as shared
+  there, and nothing tracked it until this audit. **Hers at kickoff:** (1) the Pool rows and the Book Panel's rows
+  (recommendation: in, by the same parity) and Blocks-scope rows (recommendation: no); (2) with the open book on,
+  every row would wear it, as every Bookcase row does today (recommendation: match the Bookcase).
 - **Her bilingual-book agent notes** (`notes/mcp-agent-notes-2026-10-13-bilingual-book.md`, the agent's own
   notes from building 'o ladrão de raios' through the door). Adjudicated 2026-10-13; she asked these to *"ride
   the next fix path"*:
