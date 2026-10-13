@@ -38,6 +38,11 @@ those three plus anything a unit's brief names — U1/U2 are closed and verified
    ships. U7 appends a DELTA to `notes/stargazing-mcp-guide-brief-2026-10-12.md` (facts the build
    changed + final tool names). The author handoff's checklist LEADS with carrying that brief/delta to
    her site agent BEFORE the build ships.
+   **Her post-compaction word (2026-10-13 ~03:20): she is WAITING to send that message to the site
+   agent until this round completes** — so at the round's end the brief file must read as ONE complete,
+   send-ready message reflecting the AS-BUILT truth (U7's DELTA integrated or appended coherently, final
+   tool names, nothing stale). The orchestrator verifies this at closeout before the checkpoint report;
+   it is not optional and not satisfied by a raw delta that needs hand-assembly.
 
 ## Stage protocol (oct12coordinator — a peer session; ALL stage traffic through it)
 
@@ -150,7 +155,8 @@ current.
    (she says it won't be running; verify anyway). A1 safety copy incl. key files first, codesign verify.
 6. The author handoff `notes/handoffs/vx-184-handoff.md` — HER CHECKLIST AT TOP, leading with: (1) carry
    the stargazing brief + U7's DELTA to the site agent BEFORE the build ships (the page must be live —
-   launch gate); (2) re-run the pane's Claude Code setup on the Air to retire the bridge (+ tell the
+   launch gate; she holds the send until the round completes, so the brief file must be send-ready as
+   one message — verified at closeout per mandate 5); (2) re-run the pane's Claude Code setup on the Air to retire the bridge (+ tell the
    beta tester); (3) Help ▸ Restore Tutorial… for the new chapter (says what it tombstones); (4) the
    PROVISIONALs + VX-234's wording list; (5) ALL tickets minted this run (the table). Self-contained
    for a fresh session.
