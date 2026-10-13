@@ -154,6 +154,8 @@ Deliverables: traced mechanisms + fixes + pins where pinnable (walk captures whe
 
 *(rulings land here verbatim as they happen)*
 
+**2026-10-13 (later still) — R-VX214-2, THE CAPTION PRINCIPLE (her words, verbatim):** "the settings explanations lines should *generally* only be stuff that you wouldn't be able to know just by using the app, hence the explainer line. it'll become obvious to users what actions trigger those respones." — The criterion for EVERY settings caption, this pass and VX-234's: a caption earns its place only by carrying what use cannot teach. (Carried into `notes/plans/vx-214-settings-pane-process.md` the same turn.)
+
 **2026-10-13 (late, as she went to bed) — THE OVERNIGHT MANDATE + four rulings (her message, the binding parts verbatim):**
 - Palette custom-field state notes: "yeah that's fine on the colour palette state notes."
 - Her question "why is it colour? are the rest of the settings also in british english?" — surveyed: rendered copy is CONSISTENTLY British (≈11 "colour" sites + greyed/grey; zero American "color" in rendered strings). Parked on VX-234 for her call.

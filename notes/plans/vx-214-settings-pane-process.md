@@ -12,6 +12,8 @@
 
 ## Standing rules that bind every pane
 
+- **R-VX214-2 — THE CAPTION PRINCIPLE (hers, 2026-10-13, verbatim): "the settings explanations lines should *generally* only be stuff that you wouldn't be able to know just by using the app, hence the explainer line. it'll become obvious to users what actions trigger those respones."** This is the test for every caption: keep it only if it carries what use cannot teach (sync scope, a hidden consequence, a refusal guarantee); cut it if the control's own labels or ordinary use would teach it.
+
 - **No shouty caps in rendered copy** (her standing rule — General's old "REFUSES" was exactly this).
 - **The commit vocabulary says "commit"** (R-13s-31/32); sentences that *define* commit may say "saved moment".
 - Message kinds are refusal · offer · receipt, decided at the door (AppSpec §12) — copy must not promise "Off" silences refusals; her ruled sentence for this is in `ReceiptStyleCopy.help`.
