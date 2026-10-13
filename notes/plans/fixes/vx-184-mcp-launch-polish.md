@@ -291,6 +291,9 @@ touched):** `~/Library/Developer/Xcode/DerivedData` 35 GB · `~/dev/variorum-vx-
 CLOSED 2026-10-12 — eleven folders, 2.4–2.9 GB each) · `~/dev/variorum-vx-168/App/Variorum/DerivedData/*` ~6.8 GB (VX-168,
 CLOSED) · each worktree's `.build` 1.1–3.6 GB. Freeing any of it is the orchestrator's / the author's call (CLAUDE.md:
 never delete what she or another session created). **Ask:** ≥ 10 GB free before the Mac build (headroom for VX-179 too).
+**RESOLVED (2026-10-13, after 01:10 MDT):** the orchestrator swept the CLOSED efforts' DerivedData (`variorum-vx-165` +
+`variorum-vx-168`, ~36 GB, the closeout rule's overdue tidy, no process using them); the data volume read **34 GiB free**
+(re-read here before the build). Nothing else touched.
 
 ### THE STAGE WINDOW — the plan (runs ONLY on the orchestrator's GO, under the claim it names — expected `vx184-u1`)
 
@@ -387,12 +390,13 @@ a client that never initializes gets at most 8 answers then the sentence — the
   (16,777,216 bytes), the most one message may carry. Send smaller messages and reconnect.").
 - **Argued, not provisional:** VX-132's harness design (a transport wrapper + GCD-timed deadlines — the SDK pinned exact,
   never patched); the SIGPIPE fix in the test only (the shipped shim's straggler is harmless — `close` then `exit`);
-  "newest" = newest presented (the brief's letter); the window moved whole into `VariorumMCPSocket` (VX-181's fix needs
+  "newest" = newest presented (the brief's letter — the orchestrator CONFIRMED 2026-10-13 that this follows R-VX184-5 as
+  briefed: an implementation note, no change); the window moved whole into `VariorumMCPSocket` (VX-181's fix needs
   more than the predicate there); the session cap's exactness + linear reader (required by her boundary pin).
 
 ### OWED (for the orchestrator)
 
-1. **Disk space** (the incident above) — ≥ 10 GB free before the Mac build; then my GO window.
+1. ~~**Disk space**~~ — RESOLVED by the orchestrator's sweep (34 GiB free); the Mac build-for-testing follows; then my GO window.
 2. **Canon at the merge** (the kickoff's list carries these): AppSpec §12 THE MCP DOOR — the shim's VX-181 window clause
    (the closed-app sentence answers the `initialize` past a probe); A-4's boundary amended for newest-copy-wins (R-VX184-5:
    a fresh copy re-binds a bound name, approval and grants kept; the replaced key refuses with its own sentence; Deny
