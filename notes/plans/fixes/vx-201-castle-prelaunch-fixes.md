@@ -1724,5 +1724,8 @@ apply-check CLEAN at the tip in the pinned checkout)
   16 suites, ONE red — `CopyRegisterPinTests.theEncryptionBookNamesNoKeyFamilyInternalButItsOneRecordedSentence`,
   `.resourceMissing`: the harness copies no bundle resources (it reads `EncryptionExplained.txt`); a harness
   artifact, not a finding — PENDING its stage run like every other.
-- NEXT: the step-3 revert patches (the seed; the unverified road in both copy homes) + their red runs, then the
-  Mac + phone `build-for-testing`, then the close.
+- IN-PROGRESS — the step-3 revert cycles (announced before any starts): `R-209-guide-seed` (the Mac's lesson 2
+  without the paragraph) and `R-209-guide-words` (BOTH copy homes back to §W.2's unverified road — no Resume Sync),
+  made on the committed tree, restored, all six U5 patches `git apply --check` clean at this commit. Same cycle as
+  step 2 (`revert-cycle.sh`; the worktree reverted for seconds, restored by `git checkout --`, diff read EMPTY
+  before any build).
