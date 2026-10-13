@@ -160,6 +160,8 @@ Deliverables: traced mechanisms + fixes + pins where pinnable (walk captures whe
 
 *(rulings land here verbatim as they happen)*
 
+**2026-10-13 (last before her sleep) — REFUSALS STAY TOAST-ALWAYS (her words):** "no it's fine, I think that refusals being more obvious is a good thing still." (Her probe about the calm inline option is answered CLOSED — the 18i contract stands, no ticket.) She also ordered the mid-run COMPACTION: the handoff is `notes/plans/vx-214-orchestrator-handoff.md`.
+
 **2026-10-13 (later still) — R-VX214-2, THE CAPTION PRINCIPLE (her words, verbatim):** "the settings explanations lines should *generally* only be stuff that you wouldn't be able to know just by using the app, hence the explainer line. it'll become obvious to users what actions trigger those respones." — The criterion for EVERY settings caption, this pass and VX-234's: a caption earns its place only by carrying what use cannot teach. (Carried into `notes/plans/vx-214-settings-pane-process.md` the same turn.)
 
 **2026-10-13 (late, as she went to bed) — THE OVERNIGHT MANDATE + four rulings (her message, the binding parts verbatim):**
