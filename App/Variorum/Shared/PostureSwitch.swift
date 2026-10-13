@@ -605,7 +605,7 @@ final class PostureSwitchRunner {
         // follow-into-Standard would silently undo this Castle. That road
         // runs only as This Mac Only, which forgets the material first.
         if entersCastle, thisDeviceOnly, signedIn {
-            leaves.log("posture switch: This Mac Only reached the runner with a session — refused before anything is written (the account-wide switch is its own press)")
+            leaves.log("posture switch: the this-device-only road reached the runner with a session — refused before anything is written (the account-wide switch is its own press)")
             throw PostureSwitchError.thisDeviceOnlyWhileSignedIn
         }
         if entersCastle, !thisDeviceOnly, !signedIn, custody != nil {
