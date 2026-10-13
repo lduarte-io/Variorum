@@ -44,6 +44,7 @@ private let editTools: Set<String> = [
     // library — every tool is edit's.
     "rename_book", "finish_book", "reopen_book", "archive_book", "unarchive_book", "delete_book",
     "remove_note_from_book", "move_note_in_book", "rename_chapter", "delete_chapter", "move_chapter",
+    "delete_note", "archive_note", "unarchive_note",
 ]
 
 @Suite("13n-b U3 — the MCP server's edit rung end to end", .serialized)
@@ -337,6 +338,9 @@ struct MCPEditServerTests {
                 ("rename_chapter", ["section_id": .string(hersChapter.id), "name": .string("x")]),
                 ("delete_chapter", ["section_id": .string(hersChapter.id)]),
                 ("move_chapter", ["section_id": .string(hersChapter.id), "at": .string("end")]),
+                ("delete_note", ["note_id": .string(note.id)]),
+                ("archive_note", ["note_id": .string(note.id)]),
+                ("unarchive_note", ["note_id": .string(other.id)]),
             ]
             #expect(Set(calls.map(\.0)) == editTools, "every edit door was tried")
             _ = try h.approve("claude-code", spec(.suggest, .wing, ""))

@@ -123,6 +123,8 @@ enum MCPToolCatalog {
         renameBook, finishBook, reopenBook, archiveBook, unarchiveBook, deleteBook,
         // …a book's membership and order, and its chapters.
         removeNoteFromBook, moveNoteInBook, renameChapter, deleteChapter, moveChapter,
+        // …and a note in the library: its Trash road and its archive.
+        deleteNote, archiveNote, unarchiveNote,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -1239,6 +1241,47 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: [.book, .wing])
+
+    /// The note acts' input: one note id.
+    private static let noteIDOnly: Value = .object([
+        "type": "object",
+        "properties": .object([
+            "note_id": .object(["type": "string", "description": "The note."]),
+        ]),
+        "required": .array(["note_id"]),
+        "additionalProperties": false,
+    ])
+
+    /// Her Delete — the Trash, 30 days, restorable.
+    static let deleteNote = MCPToolDeclaration(
+        name: "delete_note", rung: .edit, title: "Delete a note",
+        description: """
+            Delete a note, as the author's Delete does: it goes to the Trash with its saved versions \
+            for 30 days, out of every book it was in, and the author can put it back whole. A \
+            sealed note can still be deleted, as the author's can. One undo for the author brings \
+            it back. Returns JSON.
+            """,
+        inputSchema: noteIDOnly, scopes: MCPToolDeclaration.everyScope)
+
+    /// Her Archive — kept, out of view.
+    static let archiveNote = MCPToolDeclaration(
+        name: "archive_note", rung: .edit, title: "Archive a note",
+        description: """
+            Archive a note, as the author's Archive does: it is kept, out of view, and stays in its \
+            books (list_notes shows it only with include_archived: true). A note already archived \
+            is left as it is. One undo for the author unarchives it. Returns JSON.
+            """,
+        inputSchema: noteIDOnly, scopes: MCPToolDeclaration.everyScope)
+
+    /// Her Unarchive.
+    static let unarchiveNote = MCPToolDeclaration(
+        name: "unarchive_note", rung: .edit, title: "Unarchive a note",
+        description: """
+            Bring an archived note back into view, as the author's Unarchive does. A note that \
+            isn't archived is left as it is. One undo for the author archives it again, as it was. \
+            Returns JSON.
+            """,
+        inputSchema: noteIDOnly, scopes: MCPToolDeclaration.everyScope)
 
     // MARK: - VX-168 U2 — the deliberate acts (VX-169 save_commit; VX-174 the merge button)
 

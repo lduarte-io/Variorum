@@ -34,6 +34,8 @@ extension MCPWriteTools {
         case renameChapter(sectionID: String, name: String)
         case deleteChapter(sectionID: String)
         case moveChapter(sectionID: String, to: Slot)
+        case deleteNote(noteID: String)
+        case setNoteArchived(noteID: String, archived: Bool)
 
         var tool: String {
             switch self {
@@ -47,6 +49,9 @@ extension MCPWriteTools {
             case .renameChapter: MCPToolCatalog.renameChapter.name
             case .deleteChapter: MCPToolCatalog.deleteChapter.name
             case .moveChapter: MCPToolCatalog.moveChapter.name
+            case .deleteNote: MCPToolCatalog.deleteNote.name
+            case .setNoteArchived(_, let archived):
+                archived ? MCPToolCatalog.archiveNote.name : MCPToolCatalog.unarchiveNote.name
             }
         }
     }
@@ -139,6 +144,12 @@ extension MCPWriteTools {
             let slot = try slot(
                 args, after: "after_section_id", before: "before_section_id", moving: sectionID, noun: "chapter")
             return .moveChapter(sectionID: sectionID, to: slot)
+        case MCPToolCatalog.deleteNote.name:
+            return .deleteNote(noteID: try requiredString(args, "note_id"))
+        case MCPToolCatalog.archiveNote.name:
+            return .setNoteArchived(noteID: try requiredString(args, "note_id"), archived: true)
+        case MCPToolCatalog.unarchiveNote.name:
+            return .setNoteArchived(noteID: try requiredString(args, "note_id"), archived: false)
         default:
             return nil
         }
@@ -420,6 +431,30 @@ extension MCPWriteTools {
                         MCPWriteReceipt(clientName: clientName, act: .chapterMove, targetID: bookID,
                                         targetTitle: bookName, detail: chapter,
                                         show: .book(bookID: bookID, sectionID: sectionID)))
+            }
+
+        case .deleteNote(let noteID):
+            // Her Trash road: the note and its saved versions, 30 days,
+            // restorable — and one undo for her.
+            return try onNote(noteID, rung: .edit, job: job, clientName: clientName, spendsAfter: false) { title in
+                _ = try ops.deleteNoteForClient(
+                    noteID, undoLabel: label(.noteDelete), guardedBy: guardEdit(clientName) { _ in [noteID] })
+                return (["note_id": noteID, "deleted": true, "trash_days": TrashWindow.days],
+                        MCPWriteReceipt(clientName: clientName, act: .noteDelete, targetID: noteID,
+                                        targetTitle: title))
+            }
+
+        case .setNoteArchived(let noteID, let archived):
+            return try onNote(noteID, rung: .edit, job: job, clientName: clientName, spendsAfter: false) { title in
+                let act: Operations.MCPWriteAct = archived ? .noteArchive : .noteUnarchive
+                let result = try ops.setNoteArchivedForClient(
+                    noteID, archived: archived, undoLabel: label(act),
+                    guardedBy: guardEdit(clientName) { _ in [noteID] })
+                return (["note_id": noteID, "archived": archived, "changed": result.changed],
+                        result.changed
+                        ? MCPWriteReceipt(clientName: clientName, act: act, targetID: noteID, targetTitle: title,
+                                          show: .note(noteID: noteID, blockID: nil, select: nil))
+                        : nil)
             }
         }
     }

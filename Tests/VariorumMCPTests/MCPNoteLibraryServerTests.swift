@@ -130,6 +130,9 @@ struct MCPNoteLibraryServerTests {
             let privateNote = try h.operations.createPost(title: "not for anyone")
             _ = try h.operations.addPostToReading(privateNote.id, to: book.id)
             _ = try h.operations.setNotePrivate(privateNote.id, true)
+            // (A version needs a note with something in it — fixture fix at
+            // piece 5: the pin's first draft saved one of an empty note.)
+            _ = try h.operations.newBlock(in: target.id, text: "Her words.", registeringUndo: false)
             let version = try h.operations.saveNoteVersion(target.id).post
 
             let maker = try await h.connect(as: "maker")

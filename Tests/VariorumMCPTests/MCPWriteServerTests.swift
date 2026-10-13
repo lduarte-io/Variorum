@@ -307,6 +307,9 @@ struct MCPWriteServerTests {
             calls.append(("rename_chapter", ["section_id": .string(chapter.id), "name": .string("x")]))
             calls.append(("delete_chapter", ["section_id": .string(chapter.id)]))
             calls.append(("move_chapter", ["section_id": .string(chapter.id), "at": .string("end")]))
+            calls.append(("delete_note", ["note_id": .string(note.id)]))
+            calls.append(("archive_note", ["note_id": .string(note.id)]))
+            calls.append(("unarchive_note", ["note_id": .string(otherNote.id)]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).

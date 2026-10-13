@@ -268,7 +268,9 @@ struct MCPServerTests {
                     "rename_book", "finish_book", "reopen_book", "archive_book", "unarchive_book", "delete_book",
                     // …and a book's membership and order, and its chapters.
                     "remove_note_from_book", "move_note_in_book", "rename_chapter", "delete_chapter",
-                    "move_chapter"])
+                    "move_chapter",
+                    // …and a note in the library.
+                    "delete_note", "archive_note", "unarchive_note"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })
