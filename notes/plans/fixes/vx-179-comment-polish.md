@@ -194,7 +194,7 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 | 4 | U2 gutter cards | BUILT (1a7d2242…b179a9fe) — plain build green, pins typechecked stage-free, tables replayed; pin RUN + revert + the walk PENDING (stage) — see the U2 RECORD |
 | 5 | U3 panel pristine pass | BUILT (e5211a8e…) — the caret fixed at mechanism (F-U3-1), the bar's drift (Q-2), the pass, O-3, two pre-existing undo defects (U3-g); plain build green, the real control/panel measured + rendered offscreen, pins typechecked, U3-g red by revert; pin RUN + the walk PENDING (stage) — see the U3 RECORD |
 | 6 | Mac-target test runs + the walk (stage via oct12coordinator) | WINDOWS 1–2 DONE (suites 99/100 → fix leg landed, pin-only); WINDOW 3 = mounted-suite re-check + R-c revert; the WALK blocked on this session's Screen Recording (with her) |
-| 7 | The ladder (fable-reviewer, whole diff) | NOT-STARTED |
+| 7 | The ladder (fable-reviewer, whole diff) | ROUND 1 RUNNING (spawned after window 3) |
 | 8 | Bout-start board snapshot + in-flight row on main | DONE — snapshot was the coordinator's (beb0a30c); in-flight row 5b1c8c94 on main |
 | 9 | Ticket VX-179 description gains branch/record pointers; Done rides the PR merge | pointers DONE; Done at merge |
 | 10 | Closeout: PR → merge commit; worktree + branch removed; debris tidy; MOBILE PARITY line | NOT-STARTED |
@@ -1093,3 +1093,14 @@ exactly this cell red: 3 issues at the served / [true] / [true, false] expectati
   standing rule (relayed by oct12coordinator): stopped immediately, no workaround, my instance
   killed (no real-store instance existed at any point), stage released, the coordinator took the
   grant/restart to her. The walk re-books on READY once this session can capture.
+
+## STAGE WINDOW 3 (the orchestrator, 2026-10-12 ~23:00 — ~10 min)
+
+- CommentTextAreaMountedTests **9/9 GREEN** after the fix leg's pin fix (the runner's own shape).
+- **The R-c discriminating revert, run through the test target:** the windowless-request drop back
+  in → RED on exactly the one focus cell with exactly 3 issues; restored → 9/9 green again. The
+  fixed pin still catches the product mechanism — the feature pin discriminates.
+- Every VX-179 suite is now GREEN in the runner (window 2's 99 + the fixed mounted suite).
+- Remaining stage need: THE WALK only (behind her Screen Recording fix for this session).
+- The LADDER (fable-reviewer, read-only) starts now — the skill's own allowance: screenshot-verify
+  where the environment allows, else record and fold into the next drive; the walk rows stay owed.
