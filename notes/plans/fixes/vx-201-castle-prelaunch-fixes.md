@@ -2126,3 +2126,14 @@ faithful summary, its full text in the session transcript)
 ZERO DISPUTES. The reviewer now makes the final calls and implements its confirmed fixes itself (authorized by
 the orchestrator's follow-up message, per the REVIEW_PROMPT's own rule), then the suite green and one
 implementer sanity pass; round 2 re-reviews the fixes.
+
+### WINDOW E RECORD — PHASE 2 (orchestrator, stage claim vx201-u5-reverts; the pinned checkout at e6634d0e)
+All SIX U5 revert cycles ran; each RED exactly on its pin-table legs, one for one with the implementer's
+recorded harness runs: **R-209-rule** 6 (the classifier pin's four true arms + the model pin's two) ·
+**R-209-plaintext** 2 (the export leg of each) · **R-209-model** 2 (the model pin alone — the rule stands, the
+model never asks it) · **R-209-face** 3 (the sheet's render lines + the one-renderer sweep) · **R-209-guide-seed**
+1 (the seeded lesson) · **R-209-guide-words** 2 (the guide's road pin + the confirm's register pin). The two
+BOUND pins (the register; the Resume-Sync road on the reproduced library) stayed GREEN through every cycle.
+Restores clean, HEAD rebuilt (exit 0). **U5's red-on-old obligation DISCHARGED at the stage — ALL FIVE UNITS'
+suites evidence is COMPLETE across windows A–E** (the walk legs remain the orchestrator's window). Logs
+/tmp/vx201-we-*.log; rollup /tmp/vx201-window-e.summary (deleted at closeout).
