@@ -29,7 +29,7 @@ Surfaces: `App/Variorum/Variorum/Features/Settings/` EXCEPT the MCP pane (`Featu
 | 3 | VX-217 | Gathering foot = book foot: New note button on gatherings; drop the "it shows every note its rule matches…" explainer | OPEN |
 | 4 | VX-218 | Signed-out state: no spacing bottom-left ("doesn't look premium on first login") | OPEN |
 | 5 | VX-219 | Colour picker for the theme's custom palette (custom hex exists — 18g; add a real picker) | OPEN |
-| 6 | VX-220 | "Services" clutter: no Services pane exists — almost certainly the macOS app-menu Services submenu ("open in finder, change to chinese, system trace"); confirm with her, then suppress/trim | OPEN — needs her confirm |
+| 6 | VX-220 | Services clutter — CONFIRMED the macOS app-menu Services submenu (her word, 2026-10-13); suppress/trim the system entries from the app menu | OPEN — confirmed, ready for a subagent |
 | 7 | VX-221 | Tag delete: an obvious button in the Tags pane (not just the context click) | OPEN |
 | 8 | VX-222 | **BAD bug** — choose button fails on a Write-minted take in Takes mode until ⌘⏎ (onboarding walks this exact flow) | IN FLIGHT — mechanism traced + reproduced live (VX-222 RECORD); fix shape APPROVED (architect ruling in the record); pin next; **ladder → fable** |
 | 9 | VX-223 | Small dropdown/menu text: Read ⋯ menu, Blocks, Lenses; Write take's ⋯+dropdown combo icon (keep just the dropdown, probably) | OPEN |
@@ -108,3 +108,5 @@ One cold ladder over the run's WHOLE diff before the merge, `notes/REVIEW_PROMPT
 ## Author sittings — running record
 
 *(rulings land here verbatim as they happen)*
+
+**2026-10-13 — her Services confirmation (mid-run message):** "I can also confirm that it is the macOS app-menu services submenu." (Resolves row 6's open question; VX-220 retitled on the board. Her resent VX-225 screenshot message disregarded as the duplicate she suspected it was.)
