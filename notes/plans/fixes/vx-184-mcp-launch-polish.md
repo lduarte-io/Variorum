@@ -55,6 +55,17 @@ dev store only behind an A1 prestage copy, restored verified.
 - 2026-10-13 01:19–01:41 — U1's window ran under claim vx184-u1 (GO received, handover taken, released early; result line sent).
 - 2026-10-13 — coordinator: she is away from the Pro all night (tmux only), so walks/live rounds need no extra check with her; READY → GO in queue order.
 
+## Tickets minted from this run (THE HANDOFF LISTS ALL OF THESE — her ask, 2026-10-13)
+
+| ticket | born | what | fate |
+|---|---|---|---|
+| VX-205 | her mid-run add | the pane's setup command in a standard code block, copy icon upper right | a U6 MEMBER — closes with the run |
+| VX-230 | U1 live round (OWED 3a) | false ⑂2 fan badge on a single-take block after an MCP create_note, survives scroll | open Todo (Bug) — mechanism untraced, deliberately not fixed in-run |
+| VX-231 | U1 live round (OWED 3b) | Bookcase row counts stale right after a 32k-word note joins a book ("7 notes · 3 ch · 120w") | open Todo (Bug) — same |
+| VX-232 | U1 live round (OWED 3c) | pane setup segment resets to Claude Code on a voice flip; receipt keeps the Any-client sentence | LIKELY MOOTED by U6's pane rebuild — U6 verifies; closes with the run if so, else stays open |
+
+*(Any later unit's mints join this table; the closeout handoff carries the full list.)*
+
 ## Cross-run coordination (VX-214, settings panes & launch UI polish — author-attended, merges after us)
 
 Agreed with the settingspaneupdater session (2026-10-13, both run files carry it):
