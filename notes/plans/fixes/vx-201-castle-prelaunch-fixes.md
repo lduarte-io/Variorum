@@ -1661,4 +1661,28 @@ apply-check CLEAN at the tip in the pinned checkout)
     worktree; `git status` showed only the new pin file.
   - The Mac-target compile of this file in the real project (`build-for-testing`) — PENDING (one build after the
     confirm line lands); its stage run — PENDING (listed at the close).
-- NEXT: step 2 — the confirm line on the Open/Restore confirm (the classifier arms), pinned red-on-old.
+- DONE (this commit) — STEP 2, THE CONFIRM LINE (code + pins; the revert cycles are the next commit):
+  `LibraryOpenCopy.confirmLeavesCastle` (the ONE home, PROVISIONAL — drafts below); `LibraryOpenModel` gains the
+  confirm fact `leavesCastle`, computed at `enterConfirm` (both roads) by the pure, nonisolated
+  `LibraryOpenModel.leavesCastle(currentIsCastle:incoming:)` over the CLASSIFIER's verdict (kept as
+  `incomingVerdict` at `land`): the plaintext arm (`.plaintextExport`/`.plaintextLibrary`) always, the pair arms
+  (`.encryptedLibrary`/`.snapshotPair`/`.folderHoldingPair`) when the picked copy's OWN key file reads Standard by
+  `Posture.derive` with no vault word and no custody in view (decision 8's before-sync rule — an Apple copy, or no
+  passphrase copy at all); "current is Castle" = a library stands (`willStepAside`), the bootstrap is `.ready`, and
+  `protection.posture == .castle` (only a ready library can stand behind this door in Castle: the Castle lobby and
+  the failure face render no Open door; the File menu and Settings exist only at ready). The Mac sheet
+  (`LibraryOpenSheet`, the ONE sheet every adopt road presents) renders it right under the confirm's lead, caption
+  + the alarm voice (PROVISIONAL placement). Zero adopt/restore machinery lines (the brief's constraint): the
+  model's flow, the adoption, custody and the gate are byte-untouched. The reproduction file's world moved into the
+  shared internal `VX209CastleWorld` (+ a plaintext export of the Standard era; the reproduction's assertions are
+  byte-unchanged).
+  Pins `VariorumTests/VX209LeavesCastleConfirmTests` (4): the decision on real classifier verdicts (the backup pair,
+  a carried folder pair, a never-passphrased Standard copy, the export — true over Castle, false over not-Castle;
+  a Castle-era copy and refusal verdicts false) · the model on a Castle library at READY through the real flow (the
+  backup and the export carry the line, a Castle copy of the same library — served by the one Touch ID ask — does
+  not; after the backup is adopted the export no longer earns it) · the face (the sheet renders it under the fact;
+  both presenters compose the one sheet; the File menu and the restore row drive them; the sentence rendered by
+  the sheet ALONE across Shared + Mac + phone) · the register. Harness run at the fix: `✔ Test run with 5 tests in
+  2 suites passed after 2.058 seconds` (both VX-209 suites; the face pin reads the harness's read-only mirrors of
+  the three app folders, re-copied every sync).
+- NEXT: the step-2 revert patches + their red runs (in the harness), then step 3 — the guide warning.

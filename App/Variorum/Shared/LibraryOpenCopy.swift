@@ -61,6 +61,17 @@ nonisolated enum LibraryOpenCopy {
         "This is an unencrypted copy. It gets a fresh key of its own the moment it "
         + "lands, and opens encrypted."
     static let confirmDoor = "Open This Library"
+    /// VX-209 (RUN VX-201, U5 — PROVISIONAL, the QUESTIONS #215 bundle): the
+    /// confirm's Castle line — the CURRENT library is Castle and the picked
+    /// copy is not (`LibraryOpenModel.leavesCastle`). It names Use Castle as
+    /// the road back, never Previous Libraries: the reproduction pin
+    /// (`VX209WayBackRoundTripTests`) shows bringing the Castle copy of the
+    /// same library back lands it the old way too. ONE home — every adopt
+    /// road (File ▸ Open Library…, the lobby faces, Restore from Backup)
+    /// renders the one sheet that reads it.
+    static let confirmLeavesCastle =
+        "This copy isn't in Castle, so once it's open your library opens the old way — choose "
+        + "Use Castle again in Settings ▸ Protection to put it back in Castle."
 
     // MARK: - The restore-hold banner (round 3, her ratified shape)
 

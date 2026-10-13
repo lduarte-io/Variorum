@@ -45,8 +45,6 @@ import VariorumCore
 @MainActor
 @Suite("VX-209 — §W.2's way-back round trip, run (the reproduction pin)", .serialized)
 struct VX209WayBackRoundTripTests {
-    private static let passphrase = "the castle passphrase"
-
     @Test func aCastleLibraryOpenedOnAStandardEraBackupAndBroughtBackLandsStandardBothWays() async throws {
         try await withDependencies {
             $0.date = .constant(Date(timeIntervalSince1970: 1_790_000_000))
@@ -58,7 +56,7 @@ struct VX209WayBackRoundTripTests {
 
     @MainActor
     private func roundTripBody() async throws {
-        let world = try await makeCastleWorld()
+        let world = try await VX209CastleWorld.make()
         defer { try? FileManager.default.removeItem(at: world.dir) }
         let bootstrap = world.bootstrap
         let scope = bootstrap.storeVariant.rawValue
@@ -129,7 +127,7 @@ struct VX209WayBackRoundTripTests {
         // backup's key, the copy carries no Apple copy, the gated item is gone.
         try await waitUntil { second.phase == .unlock }
         #expect(second.passphraseOffered)
-        await second.unlock(passphrase: Self.passphrase)
+        await second.unlock(passphrase: VX209CastleWorld.passphrase)
         try await waitUntil { second.phase == .confirm }
         await second.confirmAdoption()
         #expect(second.phase == .done)
@@ -161,27 +159,42 @@ struct VX209WayBackRoundTripTests {
                 == .auto, "the next launch opens with no lobby — Standard")
     }
 
-    // MARK: - The world
-
-    private struct CastleWorld {
-        var dir: URL
-        var storeURL: URL
-        var storeID: String
-        var standardKey: StoreKey
-        var castleKey: StoreKey
-        var castleKeyFileName: String
-        var apple: AppleKey
-        var snapshot: URL
-        var backing: InMemoryStoreKeyGuardBacking
-        var gate: StoreLaunchGate
-        var bootstrap: AppBootstrap
+    private func waitUntil(
+        _ condition: @MainActor () -> Bool, within seconds: Double = 10
+    ) async throws {
+        try await VX209CastleWorld.waitUntil(condition, within: seconds)
     }
+}
 
-    private func makeCastleWorld() async throws -> CastleWorld {
+// MARK: - The world (shared with `VX209LeavesCastleConfirmTests`)
+
+/// A LOCAL-ONLY Castle library on this Mac that had a Standard era — see the
+/// file header. Built through the production pieces; temp dirs, in-memory
+/// custody and an in-memory iCloud key only.
+@MainActor
+struct VX209CastleWorld {
+    static let passphrase = "the castle passphrase"
+
+    var dir: URL
+    var storeURL: URL
+    var storeID: String
+    var standardKey: StoreKey
+    var castleKey: StoreKey
+    var castleKeyFileName: String
+    var apple: AppleKey
+    /// The Standard-era backup pair's snapshot (the app's own backup road).
+    var snapshot: URL
+    /// A plaintext export of the library, made in its Standard era.
+    var plaintextExport: URL
+    var backing: InMemoryStoreKeyGuardBacking
+    var gate: StoreLaunchGate
+    var bootstrap: AppBootstrap
+
+    static func make() async throws -> VX209CastleWorld {
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent("variorum-vx209-\(UUID().uuidString)", isDirectory: true)
         let storeURL = dir.appendingPathComponent("home/variorum.sqlite")
-        let kdf = Self.fastKDF()
+        let kdf = fastKDF()
         let apple = AppleKey.mint()
 
         // The Standard era: the library under L_s; its key file carries the
@@ -190,7 +203,7 @@ struct VX209WayBackRoundTripTests {
         let standardDatabase = try AppDatabase.openStore(
             at: storeURL, custody: .inMemory(initial: standardKey))
         var standardFile = StoreKeyEnvelope()
-        try standardFile.setPassphraseWrap(key: standardKey, passphrase: Self.passphrase, kdf: kdf)
+        try standardFile.setPassphraseWrap(key: standardKey, passphrase: passphrase, kdf: kdf)
         try standardFile.setAppleWrappedCopy(
             key: standardKey, under: apple.symmetricKey, appleKeyID: apple.id)
         let storeID = standardFile.storeID
@@ -210,6 +223,11 @@ struct VX209WayBackRoundTripTests {
         guard case .written(let snapshot) = written else {
             throw WorldError("the backup road wrote no snapshot")
         }
+        // A plaintext export of the same library (decision 15's door).
+        let exports = dir.appendingPathComponent("exports", isDirectory: true)
+        try FileManager.default.createDirectory(at: exports, withIntermediateDirectories: true)
+        let plaintextExport = exports.appendingPathComponent("variorum-export.sqlite")
+        try StorePlaintextExport.export(from: standardDatabase, to: plaintextExport)
         _ = standardDatabase.asRebindable().binding.lock()
 
         // Castle, entered on this Mac by the local road (its on-disk shape):
@@ -219,7 +237,7 @@ struct VX209WayBackRoundTripTests {
         let castleKey = StoreKey.mint()
         try StoreEncryptionMigration.rekey(at: storeURL, from: standardKey, to: castleKey)
         var castleFile = StoreKeyEnvelope(storeID: storeID)
-        try castleFile.setPassphraseWrap(key: castleKey, passphrase: Self.passphrase, kdf: kdf)
+        try castleFile.setPassphraseWrap(key: castleKey, passphrase: passphrase, kdf: kdf)
         let castleFileURL = castleFile.preferredURL(besideStore: storeURL)
         try castleFile.write(at: castleFileURL)
         try FileManager.default.setAttributes(
@@ -239,32 +257,45 @@ struct VX209WayBackRoundTripTests {
             gate: gate,
             testStoreURL: storeURL,
             // Local-only: no sync custody, ever (never the live Keychain's).
-            syncCustodyLeaves: { _ in Self.noSyncCustody })
+            syncCustodyLeaves: { _ in noSyncCustody })
         await bootstrap.awaitOpen()
-        return CastleWorld(
+        return VX209CastleWorld(
             dir: dir, storeURL: storeURL, storeID: storeID,
             standardKey: standardKey, castleKey: castleKey,
             castleKeyFileName: castleFileURL.lastPathComponent, apple: apple,
-            snapshot: snapshot, backing: backing, gate: gate, bootstrap: bootstrap)
+            snapshot: snapshot, plaintextExport: plaintextExport,
+            backing: backing, gate: gate, bootstrap: bootstrap)
     }
 
-    private struct WorldError: Error, CustomStringConvertible {
+    /// The launch's lobby, unlocked by Touch ID — the Castle library at ready.
+    func unlockIntoReady() async throws {
+        guard case .locked(let lobby) = bootstrap.state else {
+            throw WorldError("a Castle library launches into its lobby, got \(bootstrap.state)")
+        }
+        await lobby.unlockWithBiometrics()
+        await bootstrap.awaitOpen()
+        guard case .ready = bootstrap.state else {
+            throw WorldError("Touch ID opens the Castle library, got \(bootstrap.state)")
+        }
+    }
+
+    struct WorldError: Error, CustomStringConvertible {
         var description: String
         init(_ description: String) { self.description = description }
     }
 
-    private nonisolated static let noSyncCustody = E2EECustodyLeaves(
+    nonisolated static let noSyncCustody = E2EECustodyLeaves(
         saveGated: { _ in true }, savePlain: { _ in true }, loadPlain: { nil },
         gatedExists: { false }, deletePlain: { true }, deleteGated: { true })
 
-    private static func fastKDF() -> PassphraseKDF.Descriptor {
+    static func fastKDF() -> PassphraseKDF.Descriptor {
         PassphraseKDF.Descriptor(
             algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
             memoryKiB: 256, iterations: 1, parallelism: 1,
             salt: PassphraseKDF.randomSalt(), outputBytes: 32)
     }
 
-    private func waitUntil(
+    static func waitUntil(
         _ condition: @MainActor () -> Bool, within seconds: Double = 10
     ) async throws {
         let deadline = Date().addingTimeInterval(seconds)
