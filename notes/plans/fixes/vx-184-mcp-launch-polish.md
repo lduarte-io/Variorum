@@ -76,7 +76,8 @@ Agreed with the settingspaneupdater session (2026-10-13, both run files carry it
   titlebar bleed, VX-224 lock-screen stub) — if the tab rebuild needs shell/window chrome rather than the pane
   body, STOP and flag to the orchestrator, who sequences with VX-214.
 - If U6 mints a reusable explainer-behind-(i) component, its name + home are reported to VX-214 for reuse.
-- Merge order: VX-184 expects to merge first; VX-214 rebases onto us.
+- Merge order: VX-184 expects to merge first; VX-214 rebases onto us (merging main into its branch).
+- Her word via VX-214 as she slept (2026-10-13): no MCP-pane overlap tonight — the pane stays VX-184's; and she minted **VX-234**, a morning-after wording review of ALL settings panes with a fresh agent, the MCP pane explicitly on its list — so U6's words stand AS BUILT and its wording PROVISIONALs point at VX-234 as the scheduled pass (the handoff says so).
 
 ## UNIT RECORDS (one per unit, owned by its implementer from its first commit)
 
