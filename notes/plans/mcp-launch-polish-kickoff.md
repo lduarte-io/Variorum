@@ -45,23 +45,39 @@ members close individually).
 - **R-VX188-1 — comments:** at EDIT, any comment (edit/delete/restore — VX-195). At SUGGEST, a client deletes only
   ITS OWN, known from a new **local-only** authorship record (the grants family's road: local, never synced, zero
   lockstep — her pick, *"local only record is fine for clarity / for now"*). Absent record (another Mac, an adopted
-  library) ⇒ the suggest-rung delete refuses with the one not-shared shape.
+  library) ⇒ the suggest-rung delete refuses — **as a `rungTooLow`-family refusal ("that comment isn't this
+  client's to delete; deleting others' comments needs edit"), NOT the not-shared shape** (orchestrator's call at
+  the pre-run review, PROVISIONAL P-VX184-1: the client can READ the comment — it just got the id — so "doesn't
+  exist" would be a lie that trips clients; 13n-c's R2-6 precedent for a reachable thing past your reach. No oracle
+  is opened: the refusal reveals only that the comment isn't recorded as this client's).
 - **Docs (VX-197), her asks:** the field guide's MCP chapter gets 13s's quality pass (below); it explicitly
   encourages Variorum for ORGANIZATION; its lessons cover every tool this run adds. She confirmed the guide lives
   in the field guide (*"I like the MCP guide being in the field guide, that's solid"*).
+- **R-VX184-5 — newest copied setup wins (VX-198):** *"the whole path where you have to deny it and then reset it
+  is a bit annoying and cumbersome even for my beta testers"* — a key minted by her Copy setup command press
+  re-binds the client's name on first presentation, approval and grants KEPT; the name's previous key then refuses
+  with its own sentence ("a newer setup replaced this one — run its setup again"); an unissued key and a bare shim
+  refuse as today; Deny unchanged. Supersedes P-VX168-U1-1's rotation road as the everyday path. VX-178 parked as
+  superseded.
+- **R-VX184-6 — the MCP pane, her pick (VX-199):** the enable switch + status on top; **Waiting above the tabs**
+  whenever asks are pending; tabs **Connect · Clients · Shared with AI · Activity**; it opens on Connect while no
+  client is approved, else on Clients; every explainer cut to one line with the full text behind an (i) popover.
+  Her words: *"just clicking on it, you wouldn't know without scrolling down where the command to set it up is …
+  as a settings pane, it has a LOT of text."* Only the MCP pane — her other panes are her separate pass.
 
 ## Members and units (strictly sequential, one implementer session per unit)
 
 | unit | members | what |
 |---|---|---|
-| **U1** | VX-132 → VX-181 | The socket road. VX-132 first (the harness gets connect/call time limits, so the night's runs can't hang). VX-181: the shim with the app closed answers the probe AND reads on to the initialize, so "Variorum must be open" reaches the user; one shared echoable-id predicate in `VariorumMCPSocket` for both call sites (VX-180's NIT). Also here: an over-cap message answers a JSON-RPC error before closing where the read loop can do it cleanly (argue it; PROVISIONAL if not) — today 1 MiB opening frames / 16 MiB after admission end the connection silently. **Boundary pins (her 2026-10-12 ask — the size check the Air session didn't finish):** in the headless harness, a message just under each cap is admitted and served, and one just over is answered or closed as built; plus a realistic large write (a `create_note` of a 300-block, ~200 KB document) round-trips through the real shim in the live round. |
+| **U1** | VX-132 → VX-181 → VX-198 | The socket and key road. VX-132 first (the harness gets connect/call time limits, so the night's runs can't hang). VX-181: the shim with the app closed answers the probe AND reads on to the initialize, so "Variorum must be open" reaches the user; one shared echoable-id predicate in `VariorumMCPSocket` for both call sites (VX-180's NIT). Also here: an over-cap message answers a JSON-RPC error before closing where the read loop can do it cleanly (argue it; PROVISIONAL if not) — today 1 MiB opening frames / 16 MiB after admission end the connection silently. **Boundary pins (her 2026-10-12 ask — the size check the Air session didn't finish):** in the headless harness, a message just under each cap is admitted and served, and one just over is answered or closed as built; plus a realistic large write (a `create_note` of a 300-block, ~200 KB document) round-trips through the real shim in the live round. An over-`lineLimit` opening frame has no parseable id mid-line, so its answer, if built, is an error with `id: null` (legal JSON-RPC). **VX-198** (R-VX184-5): the newest-copy re-bind in `MCPSetupKeyRule`/`admitMCPConnection` + its faces (the setup sentence "Running it again replaces the old setup", the Deny confirm, the replaced-key refusal sentence); the VX-168 drill's impostor leg re-pinned to the new rule. **Acceptance on the WIRE, not the client's display** (the pre-run review's point): the shim's refusal answering the initialize is captured on the wire; what Claude Code chooses to display is RECORDED AS FOUND, never the pass/fail. |
 | **U2** | VX-185 | Gatherings wear the shared icon (below). The one walk. |
 | **U3** | VX-186 · VX-173 (door half) · VX-188 · VX-190 · VX-187 | The wire's ergonomics: `read_note` with_ids stops sending each shown text twice (argue the shape; keep `via` coherent) · `add_takes` + `add_comments` batches (one transaction, one undo entry, all-or-nothing, an item cap argued and STATED in each tool's description, over-cap refuses naming it) · suggest-rung delete of a client's own comment (R-VX188-1's local record) · `remove_tag` at edit (§9's removeTag; untagging stays a non-event for intake) · `link_versions` per R-VX187-1 (write new on both notes). |
 | **U4** | VX-195 | Edit parity inside a note (R-VX184-1): comments — edit/delete/restore any; takes — delete (the last take ⇒ the block, R-VX184-1), archive, label, lock/unlock; commits — restore (insured first, as her restore is), rename a message; the note — rename its title, delete a saved lens. |
 | **U5** | VX-196 | Edit parity across the library (her picks): at edit on the book/wing — take a note out of a book (Release on an owned book), reorder notes and chapters, rename/delete a chapter, rename a book, finish/unfinish, archive/unarchive, delete a book (the daily Journal archives, never deletes — its guards stand); at edit on the note — delete (Trash, 30 days) and archive/unarchive. Private/Seal/Own excluded (R-VX184-2). |
-| **U6** | VX-197 | The AI's docs, written LAST so they describe what was built (below). |
+| **U6** | VX-199 | The MCP pane per R-VX184-6 — every existing door and pin kept working (Answer…, ⌥⌘, landing on Waiting, Change…/Revoke rows, "all N ›", the setup menu's O-4 fence); the walk in both voices, captured for her morning review. |
+| **U7** | VX-197 | The AI's docs, written LAST so they describe what was built (below). **NEVER a fall-out (the pre-run review's point):** whatever else ships, U7's truth pass runs over the AS-BUILT state — the instructions, the guide chapter and the website brief's DELTA describe exactly what merged, so neither the public page nor the in-app advice overstates the app on launch day. |
 
-**Sizing, said plainly (per `notes/PhaseSizingGuidance.md`):** six units, none phase-sized, one implementer session
+**Sizing, said plainly (per `notes/PhaseSizingGuidance.md`):** seven units, none phase-sized, one implementer session
 each — inside the guidance, but the largest RUN to date; U4/U5 are many small tools on one proven pattern
 (VX-168 U2's: each tool = an existing §9 op + the grant guard inside its transaction + ONE client-named undo entry
 where her own door has one; an act her door makes undo-less stays undo-less and its description says so).
@@ -106,6 +122,19 @@ the archived-book rule. One walk, dev store, held claim, both voices.
    Tutorial… (it tombstones the old guide into the Trash and mints a fresh one — say so).
 
 ## Rules binding this run
+
+- **VX-173's disposition:** re-scoped to the DOOR half (built in U3, closes at the merge); the human bulk face is
+  its own parked ticket, **VX-200** — nothing evaporates.
+- **Stage contention (the pre-run review's point):** VX-179 is mid-run on the same Pro stage. While the
+  oct12coordinator session is live, every stage ask from this run goes through its REQUEST → READY → GO → RELEASE
+  protocol; no priority claim is assumed for VX-184 — VX-180's priority ended with its merge. If the coordinator
+  has closed, the plain `Tools/stage` claim rules apply.
+- **The canon deltas owed at the merge (listed now, VX-168-style):** AppSpec §12's THE MCP DOOR line — the
+  instructions bound "≤2,000" → "≤3,000" (R-VX184-3); the edit rung's new act families (R-VX184-1, the last-take
+  rule) and the three hers-alone acts (R-VX184-2); the suggest rung's own-comment delete and its local record
+  (§7's grants family gains it); `link_versions`, `remove_tag`, the batch tools, `read_note`'s new shape; the
+  shim's VX-181 window; A-4's boundary amended for newest-copy-wins (R-VX184-5); the pane's tabs (R-VX184-6);
+  the gatherings-icon line (R-VX185-1). QUESTIONS entry for every PROVISIONAL incl. P-VX184-1.
 
 - Preflight in full (CLAUDE.md's list) + `notes/plans/fixes/vx-180-discover-probe.md`,
   `notes/plans/fixes/vx-168-mcp-client-secret.md` (the handshake/secret records and U2's edit-act pattern) + the
