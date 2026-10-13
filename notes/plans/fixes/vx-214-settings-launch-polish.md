@@ -14,6 +14,8 @@ Her framing, faithful: rewriting the settings panes and simplifying them — "we
 
 Surfaces: `App/Variorum/Variorum/Features/Settings/` EXCEPT the MCP pane (`Features/MCP` + VX-199 are VX-184's — **do not touch the MCP pane or its SettingsShape rows**); book/gathering menus + `Features/BookView/BookSettingsSheet.swift`; the Takes board choose path (`Features/Takes/`); mode-row dropdowns across Read/Blocks/Lenses/Write; the lock-screen settings window; the signed-out face. **Zero `Sync/`, zero custody code.** The comment area is VX-179's — stay out. No editor-seam intent (the Takes work is board chrome/view-model); if any member's trace leads INTO `EditorTextView`/`BlockRangeIndex`/`PaneSurface`/the read tier, STOP: `notes/TEXTKIT2_NOTES.md` becomes required reading and the ladder goes to `fable-reviewer`.
 
+**Contact points agreed with vx-184 (2026-10-13, cross-session):** vx-184's U6 rebuilds the MCP pane (tabs, Waiting, (i) explainers, the code-block setup command — R-VX184-6: "Only the MCP pane — her other panes are her separate pass"). Shared files, disjoint regions: this run edits `SettingsShape.swift`'s NON-MCP rows only (vx-184 the MCP rows only); this run owns the Settings WINDOW shell this cycle (VX-225 title bleed, VX-224 lock stub) — vx-184 stays inside the MCP pane body and flags any shell/chrome touch to us; anything MCP-pane-shaped arising in her sittings routes to vx-184, never built here. If vx-184 mints a reusable explainer-behind-(i) component, this run REUSES it where her rulings want the idiom (one chrome vocabulary, P-8). Closeouts serialize per the standing rule — expect vx-184 to merge first; this branch rebases.
+
 ## Members (the ledger — one row per sub-issue; pin-before-fix binds PER MEMBER)
 
 | # | Ticket | What | Status |
