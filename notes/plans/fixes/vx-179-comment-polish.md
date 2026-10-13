@@ -193,10 +193,10 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 | 3 | U1 true delete (core + panel door) | BUILT (89b5a9af…, last code f92436e8) — core pins red-on-old by revert + full `swift test` green + the app target builds; app-target pin RUN + the walk PENDING (stage) — see the U1 RECORD |
 | 4 | U2 gutter cards | BUILT (1a7d2242…b179a9fe) — plain build green, pins typechecked stage-free, tables replayed; pin RUN + revert + the walk PENDING (stage) — see the U2 RECORD |
 | 5 | U3 panel pristine pass | BUILT (e5211a8e…) — the caret fixed at mechanism (F-U3-1), the bar's drift (Q-2), the pass, O-3, two pre-existing undo defects (U3-g); plain build green, the real control/panel measured + rendered offscreen, pins typechecked, U3-g red by revert; pin RUN + the walk PENDING (stage) — see the U3 RECORD |
-| 6 | Mac-target test runs + the walk (stage via oct12coordinator) | HELD — stage |
+| 6 | Mac-target test runs + the walk (stage via oct12coordinator) | WINDOW 1 DONE (see below); WINDOW 2 (U3 suites + the walk) requested |
 | 7 | The ladder (fable-reviewer, whole diff) | NOT-STARTED |
-| 8 | Bout-start board snapshot + in-flight row on main | HELD — until the release session reports |
-| 9 | Ticket VX-179 description gains branch/record pointers; Done rides the PR merge | NOT-STARTED |
+| 8 | Bout-start board snapshot + in-flight row on main | DONE — snapshot was the coordinator's (beb0a30c); in-flight row 5b1c8c94 on main |
+| 9 | Ticket VX-179 description gains branch/record pointers; Done rides the PR merge | pointers DONE; Done at merge |
 | 10 | Closeout: PR → merge commit; worktree + branch removed; debris tidy; MOBILE PARITY line | NOT-STARTED |
 
 **MOBILE PARITY (provisional):** the Mac faces are Mac-only; U1's core ops are shared — the phone's
@@ -995,3 +995,27 @@ dylib, so the rebuilt module is what it runs) → restore by `git checkout --` �
   to `AppDatabase.liveValue`, which opens — and on a fresh machine CREATES — a store at the
   unsandboxed default path (this unit's probe incident, contained and recorded above). The tests are
   safe by the harness's explicit injection; a scratch probe is not. Worth a line in the probe notes.
+
+## STAGE WINDOW 1 (the orchestrator, 2026-10-12 late — granted and coordinated by oct12coordinator)
+
+Pinned checkout `~/dev/variorum-vx179-test` at c0888701 (U0+U1+U2 product code; U3 record-only),
+own DerivedData, claim `vx179-tests`. Results:
+- **All 12 U1/U2 suites GREEN — 83 tests** (64/9: CommentCardLayout/View/Controller, ProseGutter,
+  BlockDecorGeometry, IndicatorGutter, MarginHoverComment, CommentsAndReorder, CommentPanelPark;
+  + 19/3: CommentComposition, CommentPanelKeys, CommentsPanelModelEditor — the type names behind
+  `CommentsPanelEditorTests.swift`; the "CommentsPanelEditorTests" -only-testing name matched no
+  type and ran zero tests, caught by the suite-count check).
+- **U2's red-on-old REVERT CHECK EXACT:** the old `min(blockHeight + 24, 96)` formula back in →
+  exactly 7 cells red (6 in `theCardGrowsToTheBlocksOwnHeightWithinTheRhythm` + the flipped cap
+  cell in BlockDecorGeometryTests), file restored → 24/2 green again.
+- U1's three panel-model pins (deleteForever) rode the CommentsPanelModelEditor suite GREEN.
+Stage released after; result line sent to the coordinator. WINDOW 2 owes: the U3 suite list (the
+U3 RECORD's), a U3-g revert spot-check through the test target, and the walk (U1's popover
+confirm + U2's W-1…10 + U3's W-U3-1…13, both voices).
+
+## FOUND-WORK TICKETS (minted during the run)
+- VX-182 — restoreCost.deleted_takes lacks the purge fence (U1's O-1).
+- VX-183 — comments panel doors undeclared in the capability registry (U1's O-2).
+- VM-14 — the phone's hand-placed comments placeholder (U3's O-U3-1).
+- VX-184 — CaptureTextView's undo desync: ⏎ files undone words (U3's O-U3-3, HIGH; measured).
+- VX-185 — CalmButtonStyle ignores the disabled state app-wide (U3's O-U3-2).
