@@ -511,3 +511,16 @@ the simulator replay suite; then the six red-on-old revert cycles per the pin ta
   restore): `git checkout 97329acc -- App/Variorum/Shared/` + delete the uncommitted-at-97329acc pin file,
   build-for-testing, run the POSTURE drill alone with the env road above. Same failure ⇒ pre-existing harness
   gap (test-side fix, the 13x pattern). Pass ⇒ a real U1 regression to trace before anything else lands.
+- BISECT VERDICT (the revert restored by `git checkout -- App/Variorum/`, tree clean at HEAD): the PRE-U1 tree
+  (97329acc's Shared/, pin file absent) fails the posture drill IDENTICALLY — the same two tests, the same
+  `@Dependency(\.date)` issue at SyncEngine.swift:19, 111.98 s of real work, zero skips. **NOT a U1 regression —
+  a pre-existing drill-harness rot**, somewhere between pre-13x leg 3 (2026-09-07, last recorded green) and
+  tonight's first real run since (VX-191 read the drills, never ran them). The 13x precedent classifies the
+  class as a test-harness gap (a ready-path task missing the test's dependency scope — the detached-task
+  task-local severance is the suspect). TICKETED rather than chased tonight (not a member, not U1's; the drill's
+  PRODUCT work completes — sibling followed, all three seams resumed). U1's drill evidence stands as: migration
+  drill GREEN; posture drill's product legs COMPLETE with the two harness issues documented pre-existing by
+  bisect. Flagged for the morning bundle: whether she wants the drill harness healed before launch.
+- Env-road note for later windows: TEST_RUNNER_ vars in xcodebuild's ENVIRONMENT pass through under
+  `test-without-building` too (the bisect run proves it) — the bake-time trap is only for vars passed as
+  command-line arguments.

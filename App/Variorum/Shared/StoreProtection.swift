@@ -366,22 +366,6 @@ nonisolated enum ProtectionDefaults {
         return defaults.object(forKey: key("relockIdleMinutes", scope: scope)) != nil
     }
 
-    /// VX-202 (belt c): a posture switch's custody move is PENDING for the
-    /// store — device-local beside the dials because the route that reads
-    /// it runs before the store (and its `RotationMarker`) can be opened.
-    static func switchPending(scope: String, storeID: String, in defaults: UserDefaults) -> Bool {
-        defaults.bool(forKey: key("switchPending", scope: scope, storeID: storeID))
-    }
-
-    static func setSwitchPending(_ pending: Bool, scope: String, storeID: String, in defaults: UserDefaults) {
-        let key = key("switchPending", scope: scope, storeID: storeID)
-        if pending {
-            defaults.set(true, forKey: key)
-        } else {
-            defaults.removeObject(forKey: key)
-        }
-    }
-
     // Stamps (reminder + nudge bookkeeping; device-local like the dials).
 
     static func date(_ leaf: String, scope: String, in defaults: UserDefaults) -> Date? {

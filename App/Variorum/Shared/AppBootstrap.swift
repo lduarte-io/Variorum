@@ -116,18 +116,6 @@ final class AppBootstrap {
     /// for the same store. Test-visible so a pin can await the road rather
     /// than poll it.
     @ObservationIgnored private(set) var opening: Task<Void, Never>?
-    /// VX-202 (gate i): a posture switch's re-key is in flight — set by
-    /// `rekeyLibrary` before its reopen, cleared by the runner once the
-    /// switch's custody move has landed (`endSwitch`). While set, the
-    /// ready's R1-M3 re-landing is never scheduled: the reopen hands back
-    /// L′ under a gate that is not demanded YET (custody moves after the
-    /// reopen), and a silent save made there is unordered against the
-    /// move's delete. Not the controller's `switchInProgress` (the ceremony
-    /// models' span); this one belongs to the reopen and the runner.
-    @ObservationIgnored private(set) var switchInProgress = false
-    /// The R1-M3 re-landing in flight (nil = none scheduled since launch).
-    /// Test-visible so a pin can await the road rather than poll it.
-    @ObservationIgnored private(set) var relanding: Task<Void, Never>?
 
     /// TEST-ONLY. Replaces the file work with the caller's own, **and skips
     /// the process-global `prepareDependencies` installs with it** — that
@@ -535,24 +523,10 @@ final class AppBootstrap {
             // PROVEN key so the next launch opens silently instead of
             // failing into the same surface. (The demanded modes' lobby
             // road never lands custody — that is its own law.)
-            // VX-202: never mid-switch. Gate i — a switch's own reopen lands
-            // here before its custody move, so nothing is scheduled at all
-            // (a marker read inside the task could run after the move and
-            // the marker's clear, and re-land L′ behind the delete). Gate ii
-            // — a crashed switch's marker (the ordinary relaunch: the silent
-            // open failed on the re-keyed file, the typed word unlocked):
-            // re-landing L′ silently would open a half-switched library with
-            // no gate. The async marker read is safe only on that road; the
-            // in-memory flags are re-read after it, and the save rides the
-            // custody queue, ahead of any custody move enqueued later.
-            if let unlockedKey, !switchInProgress, !currentEffectiveGate.isDemanded {
-                let protection = protection
-                relanding = Task { [weak self] in
-                    let pending = await protection.readSwitchPending?() ?? false
-                    guard !pending, let self, !self.switchInProgress, !protection.switchInProgress,
-                          protection.keyInHand() == unlockedKey
-                    else { return }
-                    _ = await protection.relandSilentItem(unlockedKey)
+            if let unlockedKey, !currentEffectiveGate.isDemanded {
+                let guardSeam = gate.guardFor(storeVariant.rawValue)
+                Task.detached(priority: .utility) {
+                    _ = guardSeam.saveAuto(unlockedKey)
                 }
             }
             // pre-13x 2a (§11): the migration runs ONCE per store at ready
@@ -841,8 +815,6 @@ final class AppBootstrap {
         guard case .ready = state, let binding else {
             throw PostureSwitchError.libraryKeyUnavailable
         }
-        // VX-202 (gate i): before the reopen below can reach the ready.
-        switchInProgress = true
         await onWillLock?()
         state = .opening
         protection.dropResident()
@@ -867,13 +839,6 @@ final class AppBootstrap {
         beginOpening(unlockedKey: reopenKey)
         await awaitOpen()
         if case .failure(let error) = outcome { throw error }
-    }
-
-    /// VX-202 (gate i): the runner's clear — the switch's custody move has
-    /// landed. A road that throws before it leaves the flag set: the switch
-    /// is still pending (its marker says so), and the resume clears it.
-    func endSwitch() {
-        switchInProgress = false
     }
 
     // MARK: - Re-lock (13p — demanded modes only; Lock Now and the
