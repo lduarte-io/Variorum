@@ -60,7 +60,7 @@ dev store only behind an A1 prestage copy, restored verified.
 | ticket | born | what | fate |
 |---|---|---|---|
 | VX-205 | her mid-run add | the pane's setup command in a standard code block, copy icon upper right | a U6 MEMBER — closes with the run |
-| VX-230 | U1 live round (OWED 3a) | false ⑂2 fan badge on a single-take block after an MCP create_note, survives scroll | open Todo (Bug) — mechanism untraced, deliberately not fixed in-run |
+| VX-230 | U1 live round (OWED 3a) + HER real-store sighting (2026-10-13 ~02:23) | first-block take badge misrenders after MCP writes: U1 saw a darker ⑂2 on a single-take block; she saw a REAL take's badge drawn fully black on block 1 (caret/focus on it, 'o ladrão de raios'); maybe one rendering bug, maybe two — details in the ticket | open Todo (Bug, **Pre-launch** — her word), mechanism untraced, not fixed in-run |
 | VX-231 | U1 live round (OWED 3b) | Bookcase row counts stale right after a 32k-word note joins a book ("7 notes · 3 ch · 120w") | open Todo (Bug) — same |
 | VX-232 | U1 live round (OWED 3c) | pane setup segment resets to Claude Code on a voice flip; receipt keeps the Any-client sentence | LIKELY MOOTED by U6's pane rebuild — U6 verifies; closes with the run if so, else stays open |
 
