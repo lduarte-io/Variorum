@@ -14,6 +14,7 @@ is QUESTIONS **#212**.
    read a Home-wing journal entry — it must come back as a one-ask-at-a-time ask (never a standing
    grant offer, never Always), and a ⌘J entry FILED into another book must still ask per-ask (D-1's
    letter — "per-ask wherever filed"). Anything else is a fence break: stop and flag it.
+   **DONE — she ran it on her real store (her word, 2026-10-13: "i did run the crat attack fence check on my real store.").**
 3. **The Private-BOOK grant test, on your REAL store:** mark a book Private, then open the share sheet
    on one of its notes — Always must be withheld with the why NAMING the book ("…is in “X”, which is
    marked Private…"). This is the one ruled sentence (+4b) never seen on a live screen — it is pinned

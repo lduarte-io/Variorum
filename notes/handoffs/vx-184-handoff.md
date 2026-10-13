@@ -22,11 +22,9 @@
      "a commit before and after every change", which stopped being true).
    - **VX-246's kickoff calls:** VX-268's Pool / Book Panel / Blocks rows and the open-book behavior (recommendations in
      the ticket), VX-253's lens design (your ruling is on the ticket), and anything you add.
-6. **Two answers I still need from you:**
-   - Your round-6 "crat attack" fence check on your real store (13n-c handoff item 2): did you run it? If not, I'll
-     file it as a "Needs Lillian" ticket.
-   - The closeout step I proposed for CLAUDE.md: at every closeout, check each ruling's full wording against what
-     shipped and ticket any remainder. Add it?
+6. **One answer I still need from you:** the closeout step I proposed for CLAUDE.md — at every closeout, check each
+   ruling's full wording against what shipped and ticket any remainder. Add it? (Your round-6 "crat attack" fence check
+   is DONE — your word, 2026-10-13; recorded on the 13n-c handoff.)
 7. **Restore Tutorial is NOT needed for this build** — the field guide's MCP chapter didn't change (that's VX-197, in
    VX-246). Your AI can still learn every new tool by listing the tools: each one's description is accurate.
 
