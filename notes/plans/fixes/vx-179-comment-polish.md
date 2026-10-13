@@ -2270,3 +2270,28 @@ sake. The reworked cells cannot reach it any more by construction.
 
 **Next:** the ~10-minute runner window (CommentPanelFixLeg2Tests expected 6/6 + the standing U3
 suites as regression + the T4 glance), then LADDER ROUND 2.
+
+## STAGE WINDOW 6 (orchestrator, 2026-10-13 ~03:25 — the final pre-round-2 re-run; 9 min, released clean)
+
+**The suite run** (pinned checkout at 8ecf97b1): **49 tests / 8 suites — 48 green, ONE red:**
+`CommentPanelFixLeg2Tests` is 5/6 — `closingThePopoverSavesADirtyInPlaceEdit` is GREEN (the pin
+leg's early-close trace vindicated; the product save was never broken) and the whole standing U3
+regression set is green. The one red is the ⎋ ladder cell again, now failing DIFFERENTLY: the
+remodeled harness's typing works (the SwiftUI presenter receives keys), but a delivered ⎋ neither
+cleared the draft (:754) nor left the popover shown (:755) — in the RUNNER the SwiftUI popover is
+ITSELF the key window (the pin leg's measured fact), and on that road the ⎋ appears to reach
+`NSPopover`'s own close before/instead of the monitor's clear rung. **No live trace shows the
+popover as key** (window 5's trace: the PARENT stays key throughout; the panel's makeKey ask
+measurably does not make a live popover key), so this is third-time runner-vs-model disagreement on
+ONE cell whose live behavior is proven green twice with the trace read. DISPOSITION: no fourth blind
+remodel — the cell goes to **ROUND 2's reviewer as an explicit open finding** (cross-model: the
+reviewer makes the final call; if it judges the runner's popover-key road live-reachable, it
+implements the fix itself; if not, it rules the cell's honest fate — runner-skip with the gap
+stated, or a redesign it can defend). The open question for it, stated precisely: **can a LIVE
+popover window ever become key** (the makeKey ask, a future host, macOS drift)? If yes, the runner
+red is a real bug on that road; if provably no, the cell pins an unreachable road.
+
+**T4 (the old cells' stray keys): CLEAR.** The test host opens on the Bookcase, so windows 4–5's
+stray `x`/⎋⎋ went to the quick-entry bar, which ⎋ clears — the Pool shows NO stray note (its
+vx222-titled 2026-10-13 rows are that session's own suite debris, untouched by me), and the walk
+note's text is unchanged at the glance. No instance left running.
