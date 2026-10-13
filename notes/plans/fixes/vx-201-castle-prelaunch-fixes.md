@@ -251,6 +251,10 @@ that sentence a wording pass. A flat "refuse unless signed in" is WRONG — it t
 6. **The phone:** read `MobileProtectionSheet`'s door conditions. The phone gets the same two doors through the
    shared model, or an honest refusal — NEVER the old silent road with the ordinary Done. The phone target must
    build; faces carry the shared copy.
+7. **The ticket's item 2 (the NIT, in scope):** the Encryption-tab re-key banner/door and the sync-row door
+   (`EncryptionViews.swift` ~:120/:664, `SyncStatusViews.swift` ~:147) still name ONE act for every pending
+   marker — extend VX-99's `CeremonyAct` selector to those faces so the named act matches the marker's. String
+   changes ride the copy-drafts section; a pin at the selector level.
 
 **The pins (red-on-old by behavioral revert, each):** (a) the gate state presents the two doors; the pre-sync
 and enrolled-signed-in states don't. (b) This-Mac-Only then sign-in to the OLD account lands the JOIN CONSENT,
