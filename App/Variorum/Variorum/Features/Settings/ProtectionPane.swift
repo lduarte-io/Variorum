@@ -921,6 +921,13 @@ struct FollowSheet: View {
                         .alarmVoice()
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                // VX-208: the plain-text exports line, beside the export story.
+                if let exportsLine = model.plaintextExportsLine {
+                    Text(exportsLine)
+                        .font(.callout)
+                        .alarmVoice()
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 HStack {
                     Spacer()
                     Button("Continue") {
@@ -931,7 +938,7 @@ struct FollowSheet: View {
                 }
             case .offer:
                 Text(ProtectionCopy.deleteOldBackupsTitle).font(.title3.weight(.semibold))
-                Text(ProtectionCopy.deleteOldBackupsBody)
+                Text(model.offerBody)
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1295,6 +1302,13 @@ struct PostureSwitchSheet: View {
                         .alarmVoice()
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                // VX-208: the plain-text exports line, beside the export story.
+                if let exportsLine = model.plaintextExportsLine {
+                    Text(exportsLine)
+                        .font(.callout)
+                        .alarmVoice()
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 HStack {
                     Spacer()
                     Button("Continue") {
@@ -1305,7 +1319,7 @@ struct PostureSwitchSheet: View {
                 }
             case .offer:
                 title(ProtectionCopy.deleteOldBackupsTitle)
-                body(ProtectionCopy.deleteOldBackupsBody)
+                body(model.offerBody)
                 HStack {
                     Button(ProtectionCopy.keepOldBackupsDoor) { model.keepOldBackups(); onDone() }
                         .keyboardShortcut(.cancelAction)

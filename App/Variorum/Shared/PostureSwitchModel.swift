@@ -207,6 +207,12 @@ final class PostureSwitchModel: Identifiable {
     var resumeAskTitle: String { ProtectionCopy.ceremonyResumeTitle(act) }
     /// The Done's body, by the act and the outcome's road (both faces).
     var doneBody: String { ProtectionCopy.ceremonyDoneBody(act: act, outcome: outcome) }
+    /// VX-208: the plain-text exports line under the Done — every road that
+    /// entered Castle, whether or not the weekly export was on (both faces).
+    var plaintextExportsLine: String? { ProtectionCopy.plaintextExportsLine(for: outcome) }
+    /// VX-203: the offer's body with its honest counts — the pairs and the
+    /// set-aside library copies the outcome listed (both faces).
+    var offerBody: String { ProtectionCopy.deleteOldBackupsBody(for: outcome) }
     /// VX-110: §2b Screen 1's body and bullets, by the road — the account-
     /// wide ones ("…and so does your sync", "your other devices will start
     /// asking too") are false on This Mac Only (both faces).
@@ -518,7 +524,7 @@ final class PostureSwitchModel: Identifiable {
             let outcome = try await runner.enterCastle(
                 passphrase: passphrase, recoveryWords: wordsInHand, thisDeviceOnly: thisDeviceOnly)
             self.outcome = outcome
-            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
+            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: outcome.hasOffer)
         } catch PostureSwitchError.signInOrThisDeviceOnly {
             // VX-110: the session lapsed during the screens while custody
             // holds the account's keys — nothing was written; the two doors
@@ -620,7 +626,7 @@ final class PostureSwitchModel: Identifiable {
             // made this road the FOLLOW into another device's Castle
             // (`runCeremony`'s re-read), the insurance went off and the
             // pre-switch pairs are listed, and the face must say both.
-            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
+            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: outcome.hasOffer)
         } catch {
             phase = .failed(wording(for: error))
         }
@@ -687,7 +693,7 @@ final class PostureSwitchModel: Identifiable {
         do {
             let outcome = try await runner.resume(passphrase: passphrase, recoveryWords: nil)
             self.outcome = outcome
-            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
+            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: outcome.hasOffer)
         } catch PostureSwitchError.passphraseRequired {
             phase = .resumeAsk(needsPassphrase: true)
         } catch PostureSwitchError.restartRequired {

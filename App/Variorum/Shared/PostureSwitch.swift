@@ -169,6 +169,11 @@ final class PostureSwitchRunner {
         /// pre-switch backup with no fresh one beside them would be an
         /// offer to delete the only backups that exist.
         var preSwitchSnapshots: [URL]
+        /// VX-203: the whole-library copies a 13x adoption set aside beside
+        /// the store (`Previous Libraries/<stamp>/`, the adopt safety copy)
+        /// that still open through the Apple account — listed under the same
+        /// rule as the pairs, deleted whole by the same offer.
+        var preSwitchLibraryCopies: [URL] = []
         /// pre-13x ladder round 1, F2 (MAJOR-2): what step 6's fresh
         /// snapshot did — the Done reads it (copy §2b's ordinary line claims
         /// "A fresh backup was made under it"; a FAILED snapshot renders the
@@ -195,6 +200,10 @@ final class PostureSwitchRunner {
         /// this device forgot that account's keys. The Done says so (never
         /// "your other devices will ask").
         var thisDeviceOnly: Bool = false
+
+        /// VX-203: the offer follows the Done when anything was listed —
+        /// pairs, set-aside library copies, or both.
+        var hasOffer: Bool { !preSwitchSnapshots.isEmpty || !preSwitchLibraryCopies.isEmpty }
     }
 
     /// pre-13x 2c (the 2b adjudication's item 6): the seams a scripted
@@ -296,6 +305,15 @@ final class PostureSwitchRunner {
         var preSwitchSnapshots: @Sendable (_ keep: String) -> [URL]
         /// Remove pairs (the snapshot and its key file), returning how many.
         var deleteSnapshotPairs: @Sendable ([URL]) -> Int
+        /// VX-203: the Apple-openable copies a 13x adoption set aside beside
+        /// the store, none under `keep` (production:
+        /// `LibraryAdoption.appleOpenableAsideCopies`). Inert in the scripted
+        /// worlds.
+        var preSwitchLibraryCopies: @Sendable (_ keep: String) -> [URL] = { _ in [] }
+        /// VX-203: remove those copies, each stamp folder whole, returning how
+        /// many (production: `LibraryAdoption.removeAsideCopy`, which re-runs
+        /// the qualification and refuses anything else).
+        var deleteLibraryCopies: @Sendable ([URL]) -> Int = { _ in 0 }
         var defaults: @Sendable () -> UserDefaults
         /// The controller's launch reconcile (the posture re-derives).
         var reconcile: @MainActor () async -> Void
@@ -1213,7 +1231,7 @@ final class PostureSwitchRunner {
             newCorpusKeyID: material?.corpusKeyID, startedAt: stamp, follow: followFlag))
 
         // ————— 6. THE FRESH SNAPSHOT PAIR + the insurance —————
-        let (insuranceOff, preSwitch, snapshot) = await snapshotAndInsurance(
+        let (insuranceOff, preSwitch, libraryCopies, snapshot) = await snapshotAndInsurance(
             entersCastle: entersCastle, newFingerprint: newFingerprint,
             listPreSwitchPairs: listPreSwitchPairs)
         // pre-13x 2d.4: a follow under a Castle account retires the old
@@ -1226,7 +1244,8 @@ final class PostureSwitchRunner {
         leaves.log("posture switch: \(entersCastle ? "Castle entered" : "keys replaced") — library key \(newFingerprint.prefix(8))")
         return Outcome(
             entersCastle: entersCastle, newKeyFingerprint: newFingerprint,
-            insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch, freshSnapshot: snapshot,
+            insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch,
+            preSwitchLibraryCopies: libraryCopies, freshSnapshot: snapshot,
             reencrypted: reencrypted, material: material)
     }
 
@@ -1321,7 +1340,7 @@ final class PostureSwitchRunner {
 
     private func snapshotAndInsurance(
         entersCastle: Bool, newFingerprint: String, listPreSwitchPairs: Bool
-    ) async -> (insuranceOff: Bool, preSwitch: [URL], snapshot: FreshSnapshot) {
+    ) async -> (insuranceOff: Bool, preSwitch: [URL], libraryCopies: [URL], snapshot: FreshSnapshot) {
         phase = .snapshotting
         // F2 (MAJOR-2): the fresh pair's fate is READ, not discarded — the
         // offer below lists the pre-switch pairs only over a WRITTEN one
@@ -1342,10 +1361,19 @@ final class PostureSwitchRunner {
             }
         }
         var preSwitch: [URL] = []
+        var libraryCopies: [URL] = []
         if listPreSwitchPairs, case .written = snapshot {
-            preSwitch = leaves.preSwitchSnapshots(StoreKeyEnvelope.shortFingerprint(newFingerprint))
+            let keep = StoreKeyEnvelope.shortFingerprint(newFingerprint)
+            preSwitch = leaves.preSwitchSnapshots(keep)
+            // VX-203: the ONE listing site the ceremony, the follow and the
+            // resume share — the whole-library copies a 13x adoption set
+            // aside beside the store ride the pairs' rule (auditor B1d).
+            libraryCopies = leaves.preSwitchLibraryCopies(keep)
+            if !libraryCopies.isEmpty {
+                leaves.log("posture switch: \(libraryCopies.count) set-aside library copies still open through the Apple account — offered with the pairs")
+            }
         }
-        return (insuranceOff, preSwitch, snapshot)
+        return (insuranceOff, preSwitch, libraryCopies, snapshot)
     }
 
     /// The Apple-held copy KEPT under Standard's Replace All Keys (decision
@@ -1386,10 +1414,13 @@ final class PostureSwitchRunner {
     // MARK: - §7 THE OFFER's act
 
     /// Delete the app's own PRE-switch pairs the outcome listed — never a
-    /// post-switch one (the listing excluded the new fingerprint).
+    /// post-switch one (the listing excluded the new fingerprint) — and,
+    /// VX-203, the set-aside library copies it listed, each stamp folder
+    /// whole. Returns how many of both went.
     @discardableResult
     func deletePreSwitchSnapshots(_ outcome: Outcome) -> Int {
         leaves.deleteSnapshotPairs(outcome.preSwitchSnapshots)
+            + leaves.deleteLibraryCopies(outcome.preSwitchLibraryCopies)
     }
 
     // MARK: - LEAVING CASTLE (§4's second act)
@@ -1725,7 +1756,7 @@ final class PostureSwitchRunner {
             let oldFile = marker.oldKeyFingerprint.flatMap {
                 try? StoreKeyEnvelope.load(at: StoreKeyEnvelope.url(besideStore: leaves.storeURL, fingerprint: $0))
             }
-            let (insuranceOff, preSwitch, snapshot) = await snapshotAndInsurance(
+            let (insuranceOff, preSwitch, libraryCopies, snapshot) = await snapshotAndInsurance(
                 entersCastle: entersCastle, newFingerprint: newFingerprint,
                 listPreSwitchPairs: entersCastle && (oldFile?.apple != nil))
             // pre-13x 2d.4 (ruling 3): a resumed FOLLOW still retires the old
@@ -1740,7 +1771,8 @@ final class PostureSwitchRunner {
             phase = .done
             return Outcome(
                 entersCastle: entersCastle, newKeyFingerprint: newFingerprint,
-                insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch, freshSnapshot: snapshot,
+                insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch,
+                preSwitchLibraryCopies: libraryCopies, freshSnapshot: snapshot,
                 reencrypted: reencrypted, material: material,
                 thisDeviceOnly: localCastleRoad && (thisDeviceOnlyRoad || forgotAtResume))
         }
@@ -1927,6 +1959,23 @@ extension PostureSwitchRunner.Leaves {
                         }
                     } else if (try? StoreBackup.removeSnapshotPair(url)) != nil {
                         removed += 1
+                    }
+                }
+                return removed
+            },
+            // VX-203: the step-aside copies beside THIS store, by the core's
+            // one rule; the remover refuses anything that rule would not list.
+            preSwitchLibraryCopies: { keep in
+                LibraryAdoption.appleOpenableAsideCopies(besideStore: storeURL, keepingFingerprint: keep)
+            },
+            deleteLibraryCopies: { folders in
+                var removed = 0
+                for folder in folders {
+                    do {
+                        try LibraryAdoption.removeAsideCopy(folder, besideStore: storeURL)
+                        removed += 1
+                    } catch {
+                        logger.notice("posture switch: a set-aside copy was not removed — \(String(describing: error), privacy: .public)")
                     }
                 }
                 return removed

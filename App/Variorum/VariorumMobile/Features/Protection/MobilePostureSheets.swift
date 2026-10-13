@@ -195,13 +195,14 @@ struct MobilePostureSwitchSheet: View {
                     // selector over the act and the outcome's road, as on the Mac.
                     prose(model.doneBody)
                     if insuranceOff { alarm(ProtectionCopy.insuranceTurnedOffNotice) }
+                    if let exportsLine = model.plaintextExportsLine { alarm(exportsLine) }  // VX-208
                     doors(primary: "Continue", {
                         model.continueFromDone()
                         if model.phase == .closed { onDone() }
                     })
                 case .offer:
                     title(ProtectionCopy.deleteOldBackupsTitle)
-                    prose(ProtectionCopy.deleteOldBackupsBody)
+                    prose(model.offerBody)
                     HStack(spacing: 16) {
                         offer(ProtectionCopy.deleteOldBackupsDoor, alarm: true) {
                             model.deleteOldBackups()
@@ -428,6 +429,7 @@ struct MobileFollowSheet: View {
                     // pre-13x 4a: Connect's own done line (copy §3).
                     prose(model.isConnectVariant ? ProtectionCopy.connectDoneBody : ProtectionCopy.followDoneBody, ink: true)
                     if insuranceOff { alarm(ProtectionCopy.insuranceTurnedOffNotice) }
+                    if let exportsLine = model.plaintextExportsLine { alarm(exportsLine) }  // VX-208
                     HStack { offer("Continue") {
                         model.continueFromDone()
                         if model.phase == .closed { onDone() }
@@ -437,7 +439,7 @@ struct MobileFollowSheet: View {
                         .font(tokens.body.weight(.semibold))
                         .foregroundStyle(tokens.ink)
                         .fixedSize(horizontal: false, vertical: true)
-                    prose(ProtectionCopy.deleteOldBackupsBody)
+                    prose(model.offerBody)
                     HStack(spacing: 16) {
                         offer(ProtectionCopy.deleteOldBackupsDoor, alarm: true) {
                             model.deleteOldBackups()

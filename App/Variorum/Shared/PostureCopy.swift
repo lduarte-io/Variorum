@@ -522,13 +522,60 @@ nonisolated extension ProtectionCopy {
         "You're in Castle. Your library has a new key that your Apple account never "
         + "held. This \(deviceName) asks for \(biometryName) from now on; your other "
         + "devices will ask the next time they open."
+    /// **VX-208 (RUN VX-201, U3) — her ruling on the ticket: "no delete offer
+    /// of our own — one line in the Castle process saying plaintext .md
+    /// exports already written … are not covered and should be deleted by
+    /// hand."** PROVISIONAL words and placement (the U3 copy drafts, QUESTIONS
+    /// #215's bundle): every Done that entered Castle, right after the
+    /// insurance notice — whether or not the weekly export was on, since
+    /// Markdown exports made by hand, and an earlier weekly export's folders
+    /// (its pruning stops when it is off), exist either way.
+    static let plaintextExportsNotCovered =
+        "Markdown exports made before today are plain text that Castle can't reach — if you made "
+        + "any (the weekly export keeps them in an md-exports folder inside the backup folder you "
+        + "chose), delete them yourself."
+    /// The Done's export line by the outcome — nil unless the road entered
+    /// Castle (both models; all four faces).
+    static func plaintextExportsLine(for outcome: PostureSwitchRunner.Outcome?) -> String? {
+        outcome?.entersCastle == true ? plaintextExportsNotCovered : nil
+    }
+
     static let deleteOldBackupsTitle = "Delete the backups Variorum made before today?"
-    static let deleteOldBackupsBody =
-        "They still open through your Apple account, and they always will. Deleting "
-        + "them closes that door for what they hold. Variorum can only delete its own "
-        + "backups — Time Machine, copies you made, and anything outside Variorum's "
-        + "folders aren't touched and still open the old way. If your backups are in "
-        + "iCloud Drive, iCloud keeps deleted files for 30 days in Recently Deleted."
+    /// **VX-203 (RUN VX-201, U3) — the offer's honest counts, and the copies
+    /// a 13x adoption set aside owned in one sentence** (auditor B1d; the
+    /// adoption confirm called them a recoverable home, so deleting them
+    /// closes that way back and the offer says so). PROVISIONAL words (the
+    /// U3 copy drafts, QUESTIONS #215's bundle); the sentences after the
+    /// count are the shipped body, unchanged, but for the set-aside one.
+    static func deleteOldBackupsBody(snapshots: Int, libraryCopies: Int) -> String {
+        func counted(_ n: Int, _ one: String, _ many: String) -> String { "\(n) \(n == 1 ? one : many)" }
+        let setAside = "\(counted(libraryCopies, "whole-library copy", "whole-library copies")) Variorum "
+            + "set aside when you opened or restored another library (in Previous Libraries, and "
+            + "with your backups' safety copies)"
+        var body: String
+        switch (snapshots > 0, libraryCopies > 0) {
+        case (true, true): body = "That's \(counted(snapshots, "backup", "backups")), plus \(setAside). "
+        case (false, true): body = "That's \(setAside). "
+        case (true, false): body = "That's \(counted(snapshots, "backup", "backups")). "
+        case (false, false): body = ""
+        }
+        body += "They still open through your Apple account, and they always will. Deleting "
+            + "them closes that door for what they hold."
+        if libraryCopies > 0 {
+            body += " The set-aside copies are also your way back to the library you replaced — "
+                + "delete them only if you won't want it back."
+        }
+        return body + " Variorum can only delete its own backups — Time Machine, copies you made, "
+            + "and anything outside Variorum's folders aren't touched and still open the old way. "
+            + "If your backups are in iCloud Drive, iCloud keeps deleted files for 30 days in "
+            + "Recently Deleted."
+    }
+    /// The offer's body by the outcome (both models; all four faces).
+    static func deleteOldBackupsBody(for outcome: PostureSwitchRunner.Outcome?) -> String {
+        deleteOldBackupsBody(
+            snapshots: outcome?.preSwitchSnapshots.count ?? 0,
+            libraryCopies: outcome?.preSwitchLibraryCopies.count ?? 0)
+    }
     static let deleteOldBackupsDoor = "Delete Them"
     static let keepOldBackupsDoor = "Keep Them"
 

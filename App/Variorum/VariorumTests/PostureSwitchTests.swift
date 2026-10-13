@@ -733,6 +733,7 @@ struct PostureSwitchTests {
     private func leaves(for world: World, faultAt: PostureSwitchRunner.FaultPoint? = nil, keyStore: DeviceKeyStore? = nil, vaultOverride: KeyVaultClient? = nil) -> PostureSwitchRunner.Leaves {
         let calls = world.calls
         let backups = world.backups
+        let storeURL = world.storeURL
         let suiteName = world.suiteName
         let signedIn = world.vaultClient != nil
         let deviceName = world.deviceName
@@ -809,6 +810,14 @@ struct PostureSwitchTests {
                 }
                 calls.deletedPairs.withValue { $0.append(contentsOf: urls) }
                 return removed
+            },
+            // VX-203: the production composition — the core's one rule over
+            // the step-aside homes beside this world's store (`.live`'s own).
+            preSwitchLibraryCopies: { keep in
+                LibraryAdoption.appleOpenableAsideCopies(besideStore: storeURL, keepingFingerprint: keep)
+            },
+            deleteLibraryCopies: { folders in
+                folders.filter { (try? LibraryAdoption.removeAsideCopy($0, besideStore: storeURL)) != nil }.count
             },
             defaults: { UserDefaults(suiteName: suiteName)! },
             reconcile: { calls.reconciles += 1 },
@@ -5418,5 +5427,243 @@ extension PostureSwitchTests {
         await ComposedWordsCopyDoors.click(door, expecting: words)
         #expect(model.copiedWords, "the door reports to the ceremony's model")
         #expect(SurfaceComposition.carries(ProtectionCopy.wordsCopied, in: SurfaceComposition.text(of: sheet.body)))
+    }
+}
+
+// MARK: - VX-203 + VX-208 (RUN VX-201, U3): the offer reaches the copies an
+// adoption set aside, and every Done that entered Castle says one line about
+// plain-text exports. The core rule's own pins are `LibraryAsideCopiesTests`
+// (headless); these drive the runner's three roads, the model and the faces.
+// Reverts: `notes/plans/fixes/vx-201-u3-reverts/R-d…R-g` (the record's table).
+
+extension PostureSwitchTests {
+    /// What `addSetAsideCopies` crafted beside a world's store.
+    struct SetAsideCopies {
+        /// One adoption made while Standard: the dated copy, then its safety twin.
+        var offered: [URL]
+        /// A Castle-era copy (its key file carries no iCloud copy).
+        var castleEra: URL
+        /// An A1-rail safety copy — the author's own, never the adoption's.
+        var a1Rail: URL
+    }
+
+    /// The two homes a 13x adoption writes, beside this world's store: one
+    /// Standard-era adoption (its key file wraps that library's key under
+    /// this world's iCloud key), a Castle-era aside copy, and an A1-rail
+    /// folder holding an Apple-openable copy under the author's own naming.
+    private func addSetAsideCopies(_ world: World) throws -> SetAsideCopies {
+        let previous = LibraryAdoption.previousLibrariesHome(besideStore: world.storeURL)
+        let safety = LibraryAdoption.safetyCopiesHome(besideStore: world.storeURL)
+        func craft(_ folder: URL, apple: Bool) throws -> URL {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            let store = folder.appendingPathComponent("variorum.sqlite")
+            try Data("an earlier library, sealed".utf8).write(to: store)
+            let key = StoreKey.mint()
+            var envelope = StoreKeyEnvelope(storeID: "earlier-\(UUID().uuidString.prefix(6))")
+            try envelope.setPassphraseWrap(key: key, passphrase: "earlier word", kdf: fastKDF())
+            if apple {
+                try envelope.setAppleWrappedCopy(key: key, under: world.apple.symmetricKey, appleKeyID: world.apple.id)
+            }
+            try envelope.write(at: envelope.preferredURL(besideStore: store))
+            return folder
+        }
+        let stamp = "2026-10-01-120000"
+        return SetAsideCopies(
+            offered: [
+                try craft(previous.appendingPathComponent(stamp, isDirectory: true), apple: true),
+                try craft(safety.appendingPathComponent(LibraryAdoption.safetyCopyPrefix + stamp, isDirectory: true),
+                          apple: true),
+            ],
+            castleEra: try craft(previous.appendingPathComponent("2026-10-05-120000", isDirectory: true), apple: false),
+            a1Rail: try craft(safety.appendingPathComponent("variorum-backup-a1-vx201-2026-10-13T031500Z",
+                                                             isDirectory: true), apple: true))
+    }
+
+    private func bytes(of folder: URL) throws -> [String: Data] {
+        var out: [String: Data] = [:]
+        for name in try FileManager.default.subpathsOfDirectory(atPath: folder.path) {
+            out[name] = FileManager.default.contents(atPath: folder.appendingPathComponent(name).path)
+        }
+        return out
+    }
+
+    /// **VX-203 (a)(b)(c) on the CEREMONY's two roads + the RESUME — RED ON
+    /// OLD under R-d (the runner never lists the set-aside copies: the offer
+    /// reached the snapshot pairs alone, auditor B1d) and R-e (the offer's
+    /// act removed pairs only).** Entering Castle over a library that a
+    /// Standard-era adoption once replaced: the outcome lists the adoption's
+    /// two Apple-openable copies — never the Castle-era copy, never the A1
+    /// rail's folder — the offer's body counts them, and Delete Them removes
+    /// each stamp folder whole while everything else stays byte-identical.
+    /// The enrolled road, the local-only road and a local road resumed after
+    /// a crash all reach the same one listing.
+    @Test func theCeremonysOfferReachesTheCopiesAnAdoptionSetAsideAndDeletesThemWhole() async throws {
+        // The enrolled road: one pre-switch pair + the set-aside copies.
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let oldPair = try world.addPreSwitchPair()
+        let aside = try addSetAsideCopies(world)
+        let castleBefore = try bytes(of: aside.castleEra)
+        let a1Before = try bytes(of: aside.a1Rail)
+
+        let outcome = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+        try await expectCastleEndState(world, outcome)
+        #expect(outcome.preSwitchSnapshots == [oldPair])
+        #expect(outcome.preSwitchLibraryCopies.map(\.path) == aside.offered.map(\.path),
+                "the adoption's two Apple-openable copies — and nothing else in those homes")
+        #expect(outcome.hasOffer)
+        let body = ProtectionCopy.deleteOldBackupsBody(for: outcome)
+        #expect(body.hasPrefix("That's 1 backup, plus 2 whole-library copies Variorum set aside"),
+                "the offer's honest counts: \(body)")
+        #expect(body.contains("your way back to the library you replaced"), "the set-aside copies owned")
+
+        #expect(world.runner.deletePreSwitchSnapshots(outcome) == 3, "the pair and the two copies")
+        for folder in aside.offered {
+            #expect(!FileManager.default.fileExists(atPath: folder.path), "\(folder.lastPathComponent) went whole")
+        }
+        #expect(!FileManager.default.fileExists(atPath: oldPair.path))
+        #expect(try bytes(of: aside.castleEra) == castleBefore, "the Castle-era copy is never touched")
+        #expect(try bytes(of: aside.a1Rail) == a1Before, "the A1 rail's folder is never touched")
+        #expect(StoreEncryptionMigration.opens(world.storeURL, key: try #require(world.keyInHand)),
+                "the live library stands")
+
+        // The local-only road (the likely tester shape: no sync, an adoption,
+        // then Castle): the copies alone make the offer — no pair counted.
+        let local = try await makeWorld(enrolled: false, biometry: false)
+        defer { local.tearDown() }
+        let localAside = try addSetAsideCopies(local)
+        let localOutcome = try await local.runner.enterCastle(passphrase: "sesame", recoveryWords: local.words)
+        #expect(localOutcome.entersCastle && localOutcome.preSwitchSnapshots.isEmpty)
+        #expect(localOutcome.preSwitchLibraryCopies.map(\.path) == localAside.offered.map(\.path))
+        #expect(localOutcome.hasOffer, "the set-aside copies alone make the offer")
+        #expect(ProtectionCopy.deleteOldBackupsBody(for: localOutcome).hasPrefix("That's 2 whole-library copies"))
+
+        // The RESUME road (the third caller of the one listing): a local
+        // switch killed before its swap, finished by the marker's resume.
+        let resumed = try await makeWorld(enrolled: false, biometry: false)
+        defer { resumed.tearDown() }
+        let resumedAside = try addSetAsideCopies(resumed)
+        resumed.calls.rekeyFault = .beforeWork
+        await #expect(throws: URLError.self) {
+            _ = try await resumed.runner.enterCastle(passphrase: "sesame", recoveryWords: resumed.words)
+        }
+        let resumedOutcome = try await resumed.runner.resume(passphrase: "sesame", recoveryWords: resumed.words)
+        #expect(resumedOutcome.preSwitchLibraryCopies.map(\.path) == resumedAside.offered.map(\.path),
+                "the resume's offer sees the same copies")
+    }
+
+    /// **VX-203 (d) — THE FOLLOW's offer sees the same copies (B1d's rider)
+    /// — RED ON OLD under R-d.** A Standard-shaped library following its
+    /// account into Castle lists the adoption's Apple-openable copies by the
+    /// same one rule, and the follow's Done carries the exports line (VX-208).
+    @Test func theFollowsOfferSeesTheSameCopiesAnAdoptionSetAside() async throws {
+        let world = try await makeWorld(vaultSaysCastle: true)
+        defer { world.tearDown() }
+        let aside = try addSetAsideCopies(world)
+        let castleBefore = try bytes(of: aside.castleEra)
+
+        let outcome = try await world.runner.follow(passphrase: "sesame", recoveryWords: nil)
+        #expect(outcome.entersCastle)
+        #expect(outcome.preSwitchLibraryCopies.map(\.path) == aside.offered.map(\.path),
+                "the follow lists through the same one rule")
+        #expect(outcome.hasOffer)
+        #expect(ProtectionCopy.plaintextExportsLine(for: outcome) == ProtectionCopy.plaintextExportsNotCovered,
+                "the follow's Done speaks the exports line too")
+        #expect(world.runner.deletePreSwitchSnapshots(outcome) == 2)
+        #expect(aside.offered.allSatisfy { !FileManager.default.fileExists(atPath: $0.path) })
+        #expect(try bytes(of: aside.castleEra) == castleBefore)
+        #expect(FileManager.default.fileExists(atPath: aside.a1Rail.path))
+    }
+
+    /// **VX-203 (e) + VX-208 (f), through the ceremony's model and its Mac
+    /// face — RED ON OLD under R-f (no exports line) and R-g (the offer's
+    /// body without its counts).** The Done that entered Castle carries the
+    /// one line about plain-text exports whether or not the weekly export
+    /// was on (it was off here), composed in the real sheet; the offer's body
+    /// carries the counts; Keep Them leaves every copy and the pair exactly
+    /// where they were. An outcome that did not enter Castle has no line.
+    @Test func decliningTheOfferLeavesEveryCopyAndTheCastleDoneSaysTheExportsLine() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let oldPair = try world.addPreSwitchPair()
+        let aside = try addSetAsideCopies(world)
+        let before = try bytes(of: world.storeURL.deletingLastPathComponent())
+        let controller = makeController(for: world)
+        let tie = VaultTie(
+            hasRecoveryWrap: false,
+            verifyPassphrase: { $0 == "sesame" ? .match : .mismatch("not the account's") },
+            verifyRecoveryWords: { _ in .couldNotCheck("unused") })
+        let model = PostureSwitchModel(mode: .enter, runner: world.runner, controller: controller, vaultTie: tie)
+        await model.start()
+        model.continueFromExplain()
+        guard case .wordsShow(let words) = model.phase else {
+            Issue.record("fresh words are shown: \(model.phase)"); return
+        }
+        model.acknowledgeWordsWritten()
+        model.confirmWords(words.joined(separator: " "))
+        #expect(!MarkdownInsurance.isEnabled(in: world.defaults), "the weekly export was never on")
+        await model.enterCastle(passphrase: "sesame", acknowledged: true)
+        guard case .done(let insuranceOff, let hasOffer) = model.phase else {
+            Issue.record("expected done, got \(model.phase)"); return
+        }
+        #expect(!insuranceOff && hasOffer)
+        #expect(model.plaintextExportsLine == ProtectionCopy.plaintextExportsNotCovered,
+                "the line shows on every Done that entered Castle, the toggle off or on")
+        let doneSheet = PostureSwitchSheet(model: model, onDone: {})
+        await SurfaceComposition.host(doneSheet, size: NSSize(width: 520, height: 640))
+        let doneText = SurfaceComposition.text(of: doneSheet.body)
+        #expect(SurfaceComposition.carries(ProtectionCopy.plaintextExportsNotCovered, in: doneText),
+                "the Mac sheet composes the exports line under the Done")
+
+        model.continueFromDone()
+        #expect(model.phase == .offer)
+        #expect(model.offerBody == ProtectionCopy.deleteOldBackupsBody(snapshots: 1, libraryCopies: 2))
+        #expect(model.offerBody.hasPrefix("That's 1 backup, plus 2 whole-library copies"))
+        let offerSheet = PostureSwitchSheet(model: model, onDone: {})
+        await SurfaceComposition.host(offerSheet, size: NSSize(width: 520, height: 640))
+        #expect(SurfaceComposition.carries(model.offerBody, in: SurfaceComposition.text(of: offerSheet.body)),
+                "the Mac sheet composes the counted offer")
+        model.keepOldBackups()
+        #expect(model.phase == .closed)
+        #expect(FileManager.default.fileExists(atPath: oldPair.path), "Keep Them keeps the pair")
+        for folder in aside.offered + [aside.castleEra, aside.a1Rail] {
+            #expect(FileManager.default.fileExists(atPath: folder.path), "Keep Them keeps \(folder.lastPathComponent)")
+        }
+        let after = try bytes(of: world.storeURL.deletingLastPathComponent())
+        for (name, data) in before where name.contains(LibraryAdoption.previousLibrariesFolderName)
+            || name.contains("safety-copies") {
+            #expect(after[name] == data, "\(name) byte-identical after Keep Them")
+        }
+
+        // Replace All Keys never entered Castle: no line.
+        var notCastle = try #require(model.outcome)
+        notCastle.entersCastle = false
+        #expect(ProtectionCopy.plaintextExportsLine(for: notCastle) == nil)
+        #expect(ProtectionCopy.plaintextExportsLine(for: nil) == nil)
+    }
+
+    /// The four faces render the offer's body and the exports line FROM THE
+    /// MODEL — the Mac's two sheets and the phone's two (the phone's
+    /// ceremony and follow compose the same shared models). A structural
+    /// pin: a face reverted to the old static body, or dropping the line,
+    /// reds it.
+    @Test func everyFaceRendersTheCountedOfferAndTheExportsLineFromItsModel() throws {
+        let appRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        func code(_ path: String) throws -> String {
+            try String(contentsOf: appRoot.appending(path: path), encoding: .utf8)
+                .split(separator: "\n", omittingEmptySubsequences: false)
+                .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }
+                .joined(separator: "\n")
+        }
+        for path in ["Variorum/Features/Settings/ProtectionPane.swift",
+                     "VariorumMobile/Features/Protection/MobilePostureSheets.swift"] {
+            let source = try code(path)
+            #expect(source.components(separatedBy: "model.offerBody").count - 1 == 2,
+                    "\(path): the ceremony's and the follow's offer read the model's counted body")
+            #expect(source.components(separatedBy: "model.plaintextExportsLine").count - 1 == 2,
+                    "\(path): the ceremony's and the follow's Done carry the exports line")
+            #expect(!source.contains("ProtectionCopy.deleteOldBackupsBody"),
+                    "\(path): no face renders an uncounted body")
+        }
     }
 }
