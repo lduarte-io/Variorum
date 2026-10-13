@@ -2189,3 +2189,102 @@ she removed).
 - **`unarchive_take` / `archive_take` descriptions:** AGREED — **FIXED NOW**.
 - **P1 pre-checks:** AGREED — **FIXED NOW** with the `json_each` precedent (P1 is an invariant; the letter binds).
 - **VX-278 garbles:** AGREED — **FIXED NOW** (VX-271 · VX-164; VX-160).
+
+### ROUND 2 — FIX PASS (fresh `opus-implementer` at MAX effort, 2026-10-13; same-model flow)
+
+**What this pass did NOT do (said first; flipped at the close):** PENDING — written at the close. Scope, from the brief:
+the five agreed items only — (1) the edit rung's consent text, (2) `unarchive_take` / `archive_take`'s descriptions + a
+headless guard, (3) P1 in the batch and link pre-checks, (4) VX-278's garbles, (5) doc-truth for the redo-after-quiet-undo
+finding (the BUG stays VX-276's). Out of scope by the brief: the redo class itself (VX-276), the fd-reuse host bug (the
+round-2 disposition's new VX-246 ticket — the brief names it VX-279), VX-258/259/260. HEADLESS ONLY (`swift build` /
+`swift test`, plus ONE Mac `build-for-testing` — no Mac test run, no app launch, no stage); zero `Sync/`, custody/keychain,
+editor-seam or schema lines (path-diffed at the close). Worktree `~/dev/variorum-vx-184`, branch
+`vx-184-mcp-launch-polish`, from tip `cd9490c1`. **No revert is in flight** (any revert this pass runs is announced here
+first, on a committed tree).
+
+#### LIVE STATUS — the round-2 fix pass's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this subsection + its LIVE STATUS + STEP 1 (agree/dispute per item, each re-traced in this session) | DONE (this commit) |
+| 1 | item (4) — VX-278's garbles: the three named + every other `VX-<n>/-<n>` remnant the grep finds, fixed the sweep's way | NOT-STARTED |
+| 2 | item (5) — doc-truth for the redo-after-quiet-undo finding: the round-1 FIX PASS's falsified lines struck/annotated IN PLACE (dated); the code headers corrected | NOT-STARTED |
+| 3 | item (2) — `unarchive_take` (chosen comes back shown) and `archive_take` ("last active take"); the headless guard | NOT-STARTED |
+| 4 | item (3) — P1 in the pre-checks: the given ids drive (`json_each` `CROSS JOIN`), every refusal byte-identical, the batch + link suites UNMODIFIED as the parity proof; the plan pin (STEP 1 item 3) | NOT-STARTED |
+| 5 | item (1) — the edit rung's consent text: one truthful clause per face, the pinned sentence's justified edit, the FOR VX-234 list | NOT-STARTED |
+| 6 | ONE Mac `build-for-testing` (the app and its tests compile) | NOT-STARTED |
+| 7 | finals: the whole headless package with counts; the path diff; the close (dispositions, PROVISIONALs, self-assessment, owed) | NOT-STARTED |
+
+#### STEP 1 — agree / dispute (each item re-traced in THIS session before any code)
+
+1. **(1) The edit rung's consent text — AGREE.** Traced: `MCPPaneCopy.rungDetail(.edit)` renders on two faces — the grant
+   sheet's HOW MUCH line (`MCPGrantSheet`, every scope, the Change… replace sheet included) and the ask sheet's lead
+   (`MCPAskCopy.lead`'s `(_, nil)` arm composes "If you allow it, " + `rungDetail(rung, scope:)` + "." — so the ask
+   sheet's line IS this sentence, one function). Of the edit rung's 39 tools (`MCPToolCatalog.edit`) exactly two bracket a
+   take's text with commits: `edit_take` (`editTakeUnderInsurance`) and `restore_commit` (`restoreCommitForClient`), and
+   in both the "before" is written only when the take's words aren't already its latest commit (`isDirty` — the standing
+   dedupe), the "after" likewise; every other edit act (the deletes of notes, books, chapters, takes, blocks and lenses,
+   archive / finish / reopen, the renames, the moves, the locks, the comment rewrites and restores, choose / adopt, the
+   wing move, put back, the entry date, remove tag, `save_commit`) brackets nothing. So "with a commit before and after
+   every change" is false on all three faces and `enableBlurb`. One constraint on the new clause, from canon's own pin
+   class (13n-c W-UX-14, `anAsksRungSentenceClaimsOnlyWhatItsScopeAllows`): the rung sentence is said per SCOPE, and the
+   book-level edit tools act only under `[.book, .wing]` — so the clause must name nothing a note grant can't do ("what
+   you shared" holds at note, book and wing alike).
+2. **(2) The two descriptions — AGREE.** Traced: `archiveVariantRows` (`Operations+Deletion.swift`) never writes
+   `chosen_variant_id`; `unarchiveVariantRows` flips `status` only; `MCPNoteStructure.read` shows the slot's chosen take
+   when it is ACTIVE, else the default, else the first active, and marks `chosen: id == shown`. So unarchiving the take the
+   slot's pointer still names makes the block show it again, `chosen: true` — "It comes back unchosen." is false there.
+   Two edges traced for the new sentence's honesty: (a) while it is archived, a client's `choose_take` on the take the block
+   shows through the fallback is a NO-OP (P-VX168-U2-5 — the shown take, not the raw pointer), so the pointer keeps naming
+   the archived take; only her ✓ (`chooseVariant`, unconditional) or a choice of a take NOT shown moves it; (b) a slot with
+   NO pointer (a `placeBlock` placement, e.g. a Put back) shows the default; archiving the default reassigns it, so that
+   take comes back unchosen although `read_note` marked it chosen before (`chosen` marks the SHOWN take) — the sentence is
+   written in the model's terms (the block's chosen take), which stay true in both edges. `archive_take`: the refusal is
+   I10's last ACTIVE take (`archiveVariantRows` → `ensureNotLastActive`; an archived take never counts) — "last take" →
+   "last active take".
+3. **(3) P1 in the pre-checks — AGREE with the fix; two premises of the brief corrected (said here, before code — the
+   fix's goal, "cost ∝ the items", is untouched).** Traced: `requireBlocks` (`MCPWriteTools+Batches.swift`) and
+   `placedBlocks` (`MCPWriteTools+LinkVersions.swift`, once per note) read every live placement of the note to check ≤200
+   ids — ∝ the document; the in-transaction re-checks are per item (`livePlacement` — `Operations+MCPBatches`,
+   `Operations+MCPVersionLinks`), so only the wire pre-checks breach P1's letter. **(a) The named precedent's plain JOIN
+   does NOT make this ∝ the items:** on a replica of the two tables and their indexes (SQLite 3.54 CLI, EXPLAIN QUERY PLAN),
+   the pre-fix read plans `SEARCH cb USING INDEX idx_cblock_order (container_id=?)`; the `picks`-shaped `json_each(?) j
+   JOIN container_block cb ON cb.block_id = j.value …` plans THE SAME outer loop (every placement of the note) with `SCAN j`
+   inside it — worse than before; only `json_each(?) j CROSS JOIN container_block cb …` puts the ids outside (`SCAN j`,
+   then `SEARCH cb USING INDEX uq_cblock_ownership (block_id=?)` and the block by key). So the fix uses `CROSS JOIN` — the
+   house's own P1 discipline for `json_each` (`Queries.ownershipFactsSQL` "each id seeks …, pinned on the plan",
+   `Queries.mcpNoteFacts`, `SearchComposer`'s tag join) — PENDING its in-package re-measure at piece 4. **(b) "No red-first
+   pin possible" is not so:** the house pins P1 ON THE PLAN (`OwnershipHideAndBadgesTests.theBadgeFactsAreOnePageDriven…`,
+   `MCPGrantPlacesTests.theOfferedBooksReadIs…`), and (a) is exactly the regression such a pin catches — a reader matching
+   the `picks` precedent would silently put the O(note) read back. So piece 4 writes it: the shipped statement's plan must
+   seek `uq_cblock_ownership` and never touch `idx_cblock_order`; red on the O(note) shapes, green on `CROSS JOIN`. Not a
+   dispute of the item (its substance and its parity proof stand as briefed) — a correction of its method and its record
+   sentence, surfaced first for the orchestrator to overrule (the pin is one new file to drop). **Noticed, NOT fixed:**
+   `MCPWriteTools.picks` itself (`save_lens`'s take-id resolution, 13n-b) plans the same O(note) way on the replica — a
+   pre-existing P1-letter breach, for a ticket.
+4. **(4) VX-278's garbles — AGREE.** Traced the map from VX-278's own commit (`d191c117`, every `R-AIR-N` → one ticket:
+   1→163 · 2→160 · 3→269 · 4→270 · 5→157 · 6→271 · 7→164 · 8→272 · 9→160 · 10→159 · 11→165 · 12→273 · 13→274 · 14→168 ·
+   15→157) and its own convention for a slash list (expanded with " · ", deduped — e.g. "R-AIR-5/6/8/15" became "VX-157 ·
+   VX-271 · VX-272"). `git grep -E "VX-[0-9]+/-[0-9]+"` finds the reviewer's three AND two more in
+   `notes/plans/phase-13n-c-mcp-launch-readiness.md` (l.738 "VX-163/-3/-6/-7/-8/-12/-13/-15", l.2639 "the sitting record
+   VX-160/-9/-12"); a wider grep (a slash after any number the sweep minted) finds one more, wrapped across two comment
+   lines: `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2268–2269` "VX-270 · VX-271/" + "7/8" (was "R-AIR-4/6/" +
+   "7/8"). All six are fixed the sweep's way at piece 1. **Noticed, NOT fixed (a different shape, not a garble — every number
+   names the right ticket):** the sweep left ~18 DOUBLED references where a ticket stood beside its own ruling ("(VX-160,
+   VX-160)", "(VX-163, VX-163)", "VX-258, VX-258 …") — listed at the close for the orchestrator.
+5. **(5) Doc-truth for the redo-after-quiet-undo finding — AGREE (comment and record lines only; the bug is VX-276's).**
+   Traced: `UndoStack.undo` moves ANY inverse that does not throw onto the redo stack — a quiet one included — and each redo
+   checks only that its row is back in the pre-act state, which her undo-less reversal produces exactly (her unlock,
+   reopen, unarchive, Put back, restore, rename back, ✓ back); so act → her reversal → ⌥⌘Z (quiet) → ⇧⌥⌘Z re-applies the
+   act over hers: `setTakeLockQuietly`, `refinishBook` / `reopenBookAgain`, `rearchiveBook`, `redeleteBook`,
+   `redeleteChapter`, `redeleteNote`, `restoreNoteArchived`, `performArchiveVariant` / `unarchiveTakeQuietly`,
+   `redeleteComment`, and every compare-and-set restorer when her value equals the pre-image. The UNDO half stands as the
+   round-1 pass recorded it (stamp-keyed revivals; compare-and-set on the act's value; the lock's undo two-valued). False as
+   written, to be struck/annotated in place at piece 2: STEP 1 item 1's lock sub-bullet ("… the inverse (or redo) would
+   write"); the sweep table's lock/unlock, finish/reopen and archive/unarchive-take HOLLOW rows and the existence row's
+   "(each half acts only on the rows the act or the undo stamped)"; the DISPOSITIONS lock row; the SELF-ASSESSMENT's "now
+   only over the row state the act or the undo left"; and the code headers — the two the brief names
+   (`Operations+MCPNoteEdits`, `Operations+MCPLibraryEdits`) **plus two more carrying the same sentence, found by grep**
+   (`Operations+MCPCarriage`'s "what she set since is never overwritten", `Operations+MCPDeliberate`'s "a slot is set back
+   only while it still points where the act (or the undo) left it … is never overwritten") — corrected the same way,
+   the same finding.
