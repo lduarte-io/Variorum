@@ -53,6 +53,14 @@ What it means for this run:
   `MCPSession.instructions` don't yet TEACH U3–U5's tools (the tool descriptions carry their own
   truth; nothing the docs say becomes false, they only undersell). Her handoff says so.
 
+## EFFORT — HER STANDING WORD FOR THIS RUN (2026-10-13, verbatim)
+
+*"Run everything at max effort - the implementer, reviewer, etc."* Every remaining agent of VX-184 (the
+round-1 fix pass — already running at max; the round-2/3 reviewers; any later implementer) is spawned with
+`effort: max`. (She stopped the first fix-pass agent, *"I want you to think with max effort so I'm restarting
+this"*, and the orchestrator restarted it at max; it had written nothing.) VX-255 is RULED: R-VX246-1, write
+new appends at the end, edit inserts anywhere. VX-246's plan records both.
+
 ## THE LADDER + HER CALLS (2026-10-13 midday) — the live state
 
 - **Round 1 (opus-reviewer) DONE:** 1 MAJOR · 6 MINOR · 5 NIT, recorded VERBATIM in the run record § THE LADDER
