@@ -34,15 +34,15 @@ nonisolated enum ReceiptStyleCopy {
         }
     }
 
-    // Her General-pane ruling, 2026-10-13 (the VX-214 sitting record): ONE
-    // direct paragraph — what the confirmations are, never the options
-    // explained — closing with the refusal sentence the setting must not
-    // leave out (the header's doctrine, in her own words). The paragraph is
-    // HER second draft ("such as" keeps the list non-exhaustive), spelling
-    // fixed; "structural" dropped by the orchestrator for copy truth —
-    // committing is not a structural act in the app's own vocabulary.
+    // Her General-pane rulings, 2026-10-13 (the VX-214 sitting record).
+    // Final form, her floated option taken at the orchestrator's
+    // recommendation: NO what-acts explanation — no word honestly names
+    // the class (receipts confirm acts whose effect doesn't show at the
+    // cursor, and "structural" overclaims) and the option labels already
+    // say what the setting does. What remains is the ONE sentence the
+    // labels can't carry — her refusal sentence, the copy-truth line the
+    // setting must never leave out (the header's doctrine).
     static let help =
-        "Variorum shows a confirmation after acts such as committing, "
-        + "merging blocks, or saving a version. Actions that were refused "
-        + "will still show a note regardless of this setting."
+        "Actions that were refused will still show a note regardless of "
+        + "this setting."
 }
