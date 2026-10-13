@@ -339,6 +339,11 @@ bill stands unchanged.
   confirmed live in the round; Bug + Pre-launch, 13n).
 - **PR #152** (merge commit; the merge-moment ledgers are the merging session's). MOBILE PARITY: nothing
   mobile-visible (the door is Mac-only; the phone has no MCP surface).
+- **Closeout: MERGED (2026-10-12, the merging session)** — PR #152, merge commit `5235c096`; the merge-moment
+  ledgers on latest main (QUESTIONS #214; AppSpec §12's pre-initialize window clause + §14's entry, the 13s-b entry
+  rolled to the archive; the in-flight row retired; the closeout tail sentence; board snapshot); VX-180 Done in
+  Linear. The `/Applications` refresh: PENDING at her zero-instance window (the coordinator confirms) — flipped here
+  when it runs.
 
 ## HANDOFF (for her — the author's checklist)
 

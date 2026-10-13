@@ -2410,3 +2410,21 @@ for now — Deny is the rotation road; the keep-binding-through-Deny + explicit 
 the road). U3-2 still OPEN — her lean recorded ("seems a bit unnecessary… given that" the edit rung carries
 delete_block/move_block), the reasoning delivered (the refusal is accident-insurance, not safety — edit_take's
 bracket commits already insure an emptied take); her call pending, withdraw is a small red-first diff.
+
+#214 — **THE VX-180 RATIFY BUNDLE (merged 2026-10-12 evening, PR #152, launch-critical — Claude Code 2.1.296's
+pre-initialize `server/discover` probe killed every connection; the binding record is
+`notes/plans/fixes/vx-180-discover-probe.md` — the design calls, THE PIN red-on-old by revert, the LADDER CLOSED
+AT ROUND 1 CLEAN with the reviewer's final call, THE LIVE ROUND's evidence, RESULTS and HANDOFF).** Each built as
+stated, a line to reverse: **P-VX180-1** — the pre-initialize window's bound is 8 frames: (a) 8 as built (Claude
+Code sends exactly one probe; headroom without an open door — over the bound takes the one refusal road), (b) 1–2
+(the tightest honest window), (c) a time limit on the whole opening instead of a count. **P-VX180-2** — a
+pre-initialize `ping` is answered with its EMPTY RESULT, not -32601: the reviewer verified the pinned SDK 0.12.1
+itself exempts Ping pre-initialization and answers it empty, so a -32601 would have made ping an initialized-state
+oracle; (b) the kickoff's literal -32601-for-every-request. **P-VX180-3** — the -32601 message is JSON-RPC's own
+"Method not found", nothing of the client echoed: (b) the SDK's wordier "Method not found: Unknown method:
+<method>", (c) a Variorum sentence (her copy pass). **Watch item:** VX-181 (born this run, Bug + Pre-launch) —
+with Variorum CLOSED the shim answers the probe, so "Variorum must be open" never shows and Claude Code reads only
+CONNECTION_CLOSED (seen live on her user-scope entry during the round); it also carries the ladder's
+shared-echoable-id-predicate NIT. **Her handoff lead:** nothing to re-run after the refresh (keys and bindings
+untouched); the Air's bridge keeps working and retires by one setup re-run at her leisure (the beta tester's the
+same). Status: open — her eye at her convenience; nothing gates the launch except her VX-181 call.
