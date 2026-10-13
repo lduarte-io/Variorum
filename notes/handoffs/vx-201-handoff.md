@@ -32,8 +32,11 @@
 
 **Dev-store state after the walk (added after closeout):** my walk left the DEV store in Castle, behind a
 throwaway passphrase and twelve words I set during the ceremony. That locked the store at launch and blocked
-vx-184's live round until the credentials were handed to oct12coordinator directly (never committed). Use
-Standard on the dev store returns it to its old shape. Lesson for later walks: return the store to its
+vx-184's live round until the credentials were handed to oct12coordinator directly (never committed). DONE
+2026-10-13 ~11:17: the dev store is back in Standard through the app's own doors, and its relaunch opens with no
+lock. The Castle state was first set aside whole as W-1's repro at the dev container's
+`Backups/safety-copies/castle-W1-20261013/`, hash-verified; it opens with the credentials at
+`~/.variorum/dev-castle.env`. Lesson for later walks: return the store to its
 starting posture before releasing the stage, or hand the credentials over at release.
 
 ## The headline you should read first
