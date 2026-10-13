@@ -1318,12 +1318,39 @@ final class TakesViewModel {
     func pick(columnID: String, blockID: String, variantID: String) async {
         guard let index = columns.firstIndex(where: { $0.id == columnID }) else { return }
         let ringBefore = authority.livePane
-        let follow: PaneKey? = ringBefore.flatMap { ring in
-            guard ring.columnID == columnID, ring.blockID == blockID,
-                  stableCellTake(columnID: columnID, blockID: blockID, in: projection) != variantID
+        // The fable ladder's MINOR (R1): mid-follow the ring is PARKED, not
+        // gone — a pick in the gap (key repeat, the ‹ › switcher, "Show
+        // take ▸") anchors on the park for THIS cell, so the follow moves
+        // WITH the pick instead of stranding on the overtaken key, where the
+        // arriving adoption would drop it and the follow would be lost.
+        // (Rider 2 holds: a park means the ring is nil, so the two anchors
+        // can never both exist.)
+        let parkedAnchor: PaneKey? = ringBefore == nil
+            ? parkedFollow.flatMap {
+                $0.columnID == columnID && $0.blockID == blockID ? $0 : nil
+            }
+            : nil
+        let shownTake = stableCellTake(columnID: columnID, blockID: blockID, in: projection)
+        let follow: PaneKey? = (ringBefore ?? parkedAnchor).flatMap { ring in
+            guard ring.columnID == columnID, ring.blockID == blockID, shownTake != variantID
             else { return nil }
             return PaneKey(
                 columnID: columnID, blockID: blockID, variantID: variantID, context: ring.context)
+        }
+        // The right-then-left dance: a mid-gap pick BACK to the take the cell
+        // is STILL SHOWING re-points nothing her eye can see — the cell
+        // already renders that take, so the ring returns to it directly (the
+        // refused-pick recovery's own safe read→live flip; a read pane holds
+        // its own words) and the stale park ends. The write below still
+        // records the explicit choice. Accepted residual, recorded in the
+        // ladder section: a stale emission of the overtaken pick arriving
+        // after this flip ends the ring by the adopt end-rule (flushed) —
+        // fail-safe, never another take's words.
+        if let parkedAnchor, shownTake == variantID {
+            parkedFollow = nil
+            focus(PaneKey(
+                columnID: columnID, blockID: blockID, variantID: variantID,
+                context: parkedAnchor.context))
         }
         switch columns[index].kind {
         case .main:
@@ -1347,9 +1374,17 @@ final class TakesViewModel {
             // Keyed on the run's OWN outcome, never the status line (the
             // VX-214 fable ladder's NIT 1: an interleaved refusal from
             // another door must not steal a successful pick's follow).
-            if let follow, !landed, parkedFollow == follow,
-               let ringBefore {
-                focus(ringBefore)
+            if let follow, !landed, parkedFollow == follow {
+                if let ringBefore {
+                    focus(ringBefore)
+                } else if let parkedAnchor {
+                    // A park-based pick that refused: the ORIGINAL follow is
+                    // still owed, so the original park returns. If its cell
+                    // already rendered (its report spent), the ring stays nil
+                    // — the park family's fail-safe direction (never another
+                    // take's words).
+                    parkedFollow = parkedAnchor
+                }
             }
         }
     }
@@ -2861,7 +2896,12 @@ final class TakesViewModel {
     /// ⌃⌘←/→ dispatch (R73): Takes moves the RING across the focused
     /// block's fan cards; Lenses steps the focused pane's column pick.
     func stepTakes(by delta: Int) async {
-        guard let pane = focusedPane,
+        // The fable ladder's MINOR (R1; the architect's scope ruling — the
+        // STEP doors): mid-follow the ring is PARKED, not gone, so the step
+        // chord reads the pane she is in as the live ring, ELSE the parked
+        // follow — key-repeat stepping never meets the click-first refusal
+        // at her own mid-step (R-VX214-1's named ergonomics case).
+        guard let pane = focusedPane ?? parkedFollow,
               let slot = projection.slots.first(where: { $0.blockID == pane.blockID })
         else {
             setRefusal("Click into a take first — ⌃⌘← and ⌃⌘→ step through its siblings.")  // J38
@@ -2954,10 +2994,17 @@ final class TakesViewModel {
     func stepPick(columnID: String, slot: Queries.RenderedBlock, by delta: Int) async {
         guard let column = columns.first(where: { $0.id == columnID }),
               column.kind != .main,
-              let fan = projection.fans[slot.blockID], fan.count > 1,
-              let current = resolvedTake(column: column, slot: slot)
+              let fan = projection.fans[slot.blockID], fan.count > 1
         else { return }
-        guard let index = fan.firstIndex(where: { $0.id == current.variantID }) else { return }
+        // The fable ladder's MINOR (R1): mid-follow the stepping BASE is the
+        // PARKED take — a named lens's pick travels by the store, so the
+        // projection may not have adopted the last step yet, and the resolved
+        // take would re-derive the same step (the press lost). Else the base
+        // is what the column resolves, as ever.
+        let baseID = parkedFollow.flatMap {
+            $0.columnID == columnID && $0.blockID == slot.blockID ? $0.variantID : nil
+        } ?? resolvedTake(column: column, slot: slot)?.variantID
+        guard let baseID, let index = fan.firstIndex(where: { $0.id == baseID }) else { return }
         let next = min(max(index + delta, 0), fan.count - 1)
         guard next != index else { return }
         await pick(columnID: columnID, blockID: slot.blockID, variantID: fan[next].id)
