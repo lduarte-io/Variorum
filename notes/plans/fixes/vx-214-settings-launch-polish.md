@@ -118,6 +118,17 @@ Four small window/chrome fixes, one session, each its own commits (`Part of VX-<
 
 Deliverables: traced mechanisms + fixes + pins where pinnable (walk captures where not, in `notes/plans/vx-214-screens/batch2/` — gitignored), targeted suite runs green (SettingsShapeTests + whatever owns the surfaces you touch), ledger rows 4/6/10/11 flipped with hashes, all pushed, one final summary line per member.
 
+### BATCH 2 RECORD
+
+**NOT DONE (first line, kept current):** everything below is in flight — no member is closed yet. No behavioural revert is in flight.
+
+**LIVE STATUS** (implementer session batch2impl, Opus, 2026-10-13):
+- Reading — DONE: this file top-to-here, the four Linear bodies (no screenshots attached), SessionResiliencyProtocol.
+- VX-225 (titlebar bleed) — IN-PROGRESS: tracing the Settings scene's window/titlebar configuration (`VariorumApp.swift:537` `Settings {}` → `AppSettingsView` fixed 720×520 HStack).
+- VX-224 (lock stub) — IN-PROGRESS: the stub is the `Settings {}` scene's non-ready arm (`VariorumApp.swift:582-585`, `Text("Open the main window first.").padding(24)`); tracing why it truncates and how the lock reaches the window.
+- VX-220 (Services) — NOT-STARTED.
+- VX-218 (signed-out spacing) — NOT-STARTED: the face is `SyncStatusRow`'s Mac arm (`Shared/SyncStatusViews.swift`, `.padding(6)` + `.font(.caption)` + a stock `Button`), handed to the sidebar's bottom by `RootView.statusRows`.
+
 ## Author sittings — running record
 
 *(rulings land here verbatim as they happen)*
