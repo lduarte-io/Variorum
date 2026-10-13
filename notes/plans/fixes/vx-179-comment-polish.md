@@ -225,7 +225,7 @@ the MOBILE PARITY line above).
 | U1-b | core: `purgeableTables` + the `block_comment` arm (tombstoned; dead block refuses; seal refuses) · `restoreBlockComment` belt · the MCP redo road's belt · the `deletedBlockComments` fence · `restoreCost`'s fence · the core pins | DONE (7aad738a) — `swift test --filter "PurgeOpsTests\|RestoreCostTests\|BlockCommentTests"`: 43 tests / 3 suites green, 0 skipped (headless) |
 | U1-c | red-on-old by behavioural revert, per arm (evidence table below) | DONE (874b3e40) — whole-old + R1–R7 all red as designed, each restored, the restored tree 43/3 green |
 | U1-d | the panel door: `requestDeleteForever` / `deleteForever` on the model, the fold's "Delete forever…" + the confirm, the receipt; app-target pins WRITTEN (run PENDING stage) | DONE (f92436e8) — code + 3 app-target pins WRITTEN in `CommentsPanelEditorTests` (`deleteForeverAsksEveryTimeThenTakesTheRowOffTheFold`, `deleteForeverUnderASealRefusesInTheSealsWords`, `theDeleteForeverWordsAreSentenceCase`); app-target COMPILE PENDING (U1-e's plain build covers the app target only — the test target compiles at the stage-gated run); RUN PENDING (stage) |
-| U1-e | verify: touched suites + the full `swift test` headless + ONE plain `xcodebuild build` | DONE (this commit) — touched suites 43/3 green; full `swift test` (headless, this worktree at f92436e8) GREEN: core **2,704 tests / 307 suites** (the VX-168 baseline 2,691/307 + exactly this unit's 13 pins), VariorumMCPTests 122/18, workbook 40/6, EXIT 0; skips = the standing gated measurement/integration tests only; the ONE plain `xcodebuild -scheme Variorum -destination 'platform=macOS' build` (Debug, from `App/Variorum/`): **BUILD SUCCEEDED**, EXIT 0, no warning in a touched file |
+| U1-e | verify: touched suites + the full `swift test` headless + ONE plain `xcodebuild build` | DONE (375007d2) — touched suites 43/3 green; full `swift test` (headless, this worktree at f92436e8) GREEN: core **2,704 tests / 307 suites** (the VX-168 baseline 2,691/307 + exactly this unit's 13 pins), VariorumMCPTests 122/18, workbook 40/6, EXIT 0; skips = the standing gated measurement/integration tests only; the ONE plain `xcodebuild -scheme Variorum -destination 'platform=macOS' build` (Debug, from `App/Variorum/`): **BUILD SUCCEEDED**, EXIT 0, no warning in a touched file |
 
 ### What U1 decided (with the traces)
 
@@ -267,7 +267,7 @@ the MOBILE PARITY line above).
    undo puts that comment on the fold where "Delete forever…" can name it before the redo. The
    precedent decides the direction (the revive wins and voids): `reapplyAddedTake` and 17d P28's
    redo road. Pin `theCommentRedoRoadVoidsALiveIntentLikeItsSiblings`.
-5. **D-5 — the panel road** (U1-d, NOT-STARTED at this commit): the model calls `requestPurge`
+5. **D-5 — the panel road** (U1-d, built at f92436e8): the model calls `requestPurge`
    through `perform`, then `session.sweepLocalPurge()` — the Delete Now road's own act at confirm
    (`TrashPurge.confirm`: on a never-signed-in install the cleanup IS the app's, so the bytes go now;
    a no-op under a configured chain, whose janitor owns it). Pin of the local road for the kind:
