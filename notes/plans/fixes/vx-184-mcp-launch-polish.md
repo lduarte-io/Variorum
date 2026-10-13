@@ -760,3 +760,181 @@ Recorded so nobody reads it as a VX-185 regression.
    orchestrator's disposition above). MOBILE PARITY: nothing mobile-visible (the phone has no MCP door or icon).
 3. **U7's carry:** field-guide lesson 7, "a small icon beside a book means a client can reach it", should say "a book or
    a gathering".
+
+## U3 UNIT RECORD — the door's ergonomics: VX-186 · VX-173 (door half) · VX-188 · VX-190 · VX-187 (opus-implementer, 2026-10-13 from ~03:05 MDT)
+
+**What this unit has NOT done yet (said first — flipped at the unit's close):** the unit is IN FLIGHT. Nothing is
+pinned, built, run or walked until its LIVE STATUS row says so. No Mac test batch and no live round without the
+orchestrator's GO (claim `vx184-u3`). No `notes/QUESTIONS.md` entry and no canon edit (the merging session's).
+
+**Read in full before code (never delegated):** the kickoff `notes/plans/mcp-launch-polish-kickoff.md` (her pre-run
+sitting — R-VX187-1, R-VX188-1/2 verbatim, the U3 row, the rules incl. the schema clause, the live-round line); this
+record's head, the U1 and U2 records whole; `notes/SessionResiliencyProtocol.md` whole; the VX-168 record's UNIT 1
+design calls 1–8 (call 1 = the grants family's storage road) and the UNIT 2 + UNIT 3 records whole (the edit-act
+pattern; VX-172's `via`); the 13n-c plan §8 "Environment traps" (honored) and its U6 row (the two-sided
+`move_note_to_wing`); the 13n-b plan's U2 + U3 records (the suggest/write-new/edit door patterns, P-13nb-U2-4…13,
+P-13nb-U3-1…17); the stargazing brief (what the public page will claim). Code: `MCPWriteTools{,+Edit,+Deliberate,
++Carriage,+WingMove}`, `MCPWriteSupport`, `MCPReadTools.readNote`, `MCPNoteStructure`, `MCPToolCatalog`,
+`MCPGrantAuthority` (`MCPRefusalCopy`, `MCPAsking`), `MCPSession` (the advice), `Operations+MCP{Writes,Edits,
+Deliberate}`, `Operations+Comments`, `Operations+Tag` (`removeTag`), `Operations+Versions` (`insertVersionOfEdge`,
+the canonical `(min,max)` storage, `markPostsAsVersions`), `Queries.versionPeerPosts` / `versionPeerSplit` /
+`blockKinship`, `MCPEditQueries`, `MCPGrantSchema` + `Migrations` (v1_24/v1_26's road), `StorePlaintextExport`,
+`UndoStack`; the app's `MCPPaneCopy` (Activity + receipt words), `CompareBoardView` (how Compare finds peers), the
+field guide's MCP chapter (`TutorialSeeder`) and its truth pins; the suites `MCPServerTests`, `MCPWriteServerTests`
+(the suggest PROOF), `MCPDeliberateServerTests`, `MCPLensDoorsServerTests`, `MCPGrantSchemaTests`, `MigrationTests`,
+`MCPWingFacesTests` (W-UX-13's every-tool walk), `TutorialMCPChapterTests`.
+
+**Surfaces (planned):** `Sources/VariorumCore/Persistence/{MCPGrantSchema,Migrations}.swift` (the ONE schema change,
+its own commit) · `Operations+MCP{Writes,Ergonomics}` + small extractions in `Operations+{Comments,Tag}` ·
+`Queries/MCPEditQueries` · `Sources/VariorumMCP/{MCPNoteStructure,MCPToolCatalog,MCPWriteTools*}` · the app's
+`MCPPaneCopy` (Activity + receipt words) · tests. ZERO `Sync/`, custody/keychain, editor seam; zero SYNCED schema.
+
+### LIVE STATUS — U3's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this record: LIVE STATUS, the traces, the argued design (below) — written before code | DONE (this commit) |
+| 1 | VX-188's SCHEMA, ALONE: `v1_27_mcp_comment_authors` — the local-only `mcp_comment_author` table on the grants family's road (`MCPGrantSchema.tables` + `childFirstOrder`, no `sync_version`, no trigger, export strips it, marker 13) + the schema pins' justified edits | NOT STARTED |
+| 2 | VX-186 — the pins first (each shown text ONCE; the block names its shown take), RED on the pre-fix tree | NOT STARTED |
+| 3 | VX-186 — the fix (`shown_take_id`, no block-level `text`), `read_note`'s + `create_note`'s descriptions made true, the existing pins' justified edits | NOT STARTED |
+| 4 | VX-173 — the pins first (`add_takes` / `add_comments`: one transaction, one undo, all-or-nothing naming the item, the cap stated + over-cap refused naming it), RED on the pre-fix tree; the cap MEASURED | NOT STARTED |
+| 5 | VX-173 — the core batch ops (guard inside the transaction, ONE client-named entry) + the wire tools + catalog | NOT STARTED |
+| 6 | VX-188 — the pins first (the record written on every door-added comment; suggest deletes its own; foreign/unrecorded refuses with her RULED sentence; no oracle for the unreachable), RED on the pre-fix tree | NOT STARTED |
+| 7 | VX-188 — the record's writes (`add_comment`, `add_comments`) + `delete_comment` (suggest; one client-named undo) | NOT STARTED |
+| 8 | VX-190 — pins first (`remove_tag` at edit; un-tagging stays a non-event for intake), RED; then the fix (§9's `removeTag` body + the in-transaction guard + one entry) | NOT STARTED |
+| 9 | VX-187 — pins first (`link_versions`: named pairs, canonical `(min,max)` edges, Compare peers via `versionPeerPosts`, write new on BOTH notes, once grants spent together, one entry), RED; then the fix | NOT STARTED |
+| 10 | the catalog walk + the suggest PROOF grown (the ritual), the app's words (Activity, receipts) + Mac pins; the advice and the guide checked for falsified sentences | NOT STARTED |
+| 11 | red-on-old BY REVERT per member (announced here first, committed tree, restored clean) | NOT STARTED |
+| 12 | headless finals (`VariorumMCPTests`, `VariorumCoreTests`, workbook) + the Mac build-for-testing (`DerivedData/vx184-u3`); READY FOR STAGE | NOT STARTED |
+| 13 | the stage window (after the GO): the Mac batch + THE LIVE ROUND legs (a)–(d), dev store only | NOT STARTED |
+| 14 | close: self-assessment, PROVISIONALs, OWED | NOT STARTED |
+
+**No revert is in flight.**
+
+### The traces (written before code)
+
+**VX-186 — `read_note` with_ids sends every block's shown text twice (bug-class).** `MCPNoteStructure.read`
+(`Sources/VariorumMCP/MCPNoteStructure.swift` ~l.145–193) builds each block as `["block_id", "text": shownText,
+"takes": entries, "comments"]`, where `entries` lists EVERY live active take of the block (`v.status = 'active'`),
+each `["take_id", "chosen": id == shown, "text": its working_text]`, and `shownText` is copied from the very entry
+whose id is the shown one (`if id == shown { shownText = text }`). Under `lens_id` (VX-172) `shownText` is the lens
+pick's `working_text` — a take that is ALSO in `entries` with its text. So for every block, in both forms, exactly one
+take's whole text crosses the wire twice: a fanless note (the ~95% case) ships ~2× its prose. The one exception is a
+block with NO live active take (a sync gap window), whose `text` is `""` and duplicates nothing. Inputs → output: a
+note of N blocks → an answer carrying every shown take's text twice (measured in the pin, below).
+
+**VX-173 — no batch door today (feature row).** `add_take` / `add_comment` each run ONE serial body with ONE undo
+entry per call (`MCPWriteTools.perform` → `Operations.addTake` / `addComment`); a take beside every block of a
+300-block note is 300 calls and 300 ⌥⌘Z presses. Not a bug — red-on-old for the new tools is "Unknown tool" on the
+pre-fix tree.
+
+**VX-188 — no comment can be deleted on the wire today (feature row); no record of who wrote a comment.**
+`block_comment` has no author column (and must not gain one — a synced schema change is a §12 lockstep event, out of
+this run); the activity log names the BLOCK an `add_comment` landed on, never the comment id. So nothing in the store
+can tell a client's comment from hers — hence R-VX188-1's local-only record.
+
+**VX-190 — no un-tag on the wire today (feature row).** `apply_tag` (write new) has no inverse door; §9's
+`Operations.removeTag(_:fromPost:)` (`Operations+Tag.swift` ~l.146) tombstones the live `post_tag` row and does
+nothing else — no intake code runs (OverallModel §2: intake fires on the APPLYING act only; un-tag is a non-event,
+§19). The door will ride that body.
+
+**VX-187 — no version link on the wire today (feature row).** Her doors: `markPostsAsVersions` (one anchor edge on
+the two notes' FIRST blocks — QUESTIONS #19's PROVISIONAL anchor) and `markVersionOf` (one block pair); both write
+`edge(type='version_of')` through `insertVersionOfEdge`, stored canonically `(min(id), max(id))`. Compare's peers are
+`Queries.versionPeerSplit(...).sameWing` over `versionPeerPosts` (ANY live `version_of` edge between the two notes'
+placed blocks — so ONE pair makes them peers); Compare's ROW ALIGNMENT reads `derived_from` lineage only
+(`blockKinship`), so named pairs make the notes peers and show in `with_lineage` (`relation: version_of`), but do not
+align rows — said in the tool's description so no client expects otherwise. Her picker offers only the subject's own
+wing (`NotePicker`, 13i-d U5 / #166(e)); a cross-wing link would make no Compare peer at all (`sameWing`).
+
+### The design, argued (each member)
+
+**VX-186 — the deduped shape: the block NAMES its shown take; the text lives once, on its take.** Each block loses its
+block-level `text` and gains **`shown_take_id`** — the take this read shows there: the note's shown take (the one
+marked `chosen: true`), or, under `lens_id`, the lens's take where `via: "lens"`. Every take keeps its own `text`, so
+each text crosses ONCE; `chosen` keeps meaning the note's own shown take (VX-172's letter: a lens is a view), and
+`via` keeps saying how the shown take resolved — `shown_take_id` is the id `via` was always describing. A block with no
+live active take omits `shown_take_id` (nothing is shown). **Why this shape over the alternatives:** (b) keep the
+block's `text` and drop the shown take's `text` — rejected: a take entry with no `text` reads as a BLANK take, which is
+a legal take since R-VX171-2, so the shape would lie to a model; (c) mirror `create_note`'s input (the shown take's
+id/label/text inline on the block, `takes` = the OTHER takes only) — rejected: the take's own facts (`label`,
+`archived`, `commits`, `parent_take_id`) would then live at the block level beside the BLOCK's own facts (`name`,
+`lineage`), two vocabularies in one object, and `takes` would stop listing every take; (d) per-block shapes (fanless
+vs fanned) — rejected: a model must parse one shape. Cost of (a): one id (~50 bytes) per block instead of the shown
+text. `create_note`'s description claims its blocks are "the same shape read_note's with_ids returns" — false under
+(a) (and only half-true before), so that clause is corrected; `read_note`'s own description says the new shape.
+
+**VX-173 — `add_takes(note_id, takes: [{block_id, text, label?}])` and `add_comments(note_id, comments: [{block_id,
+text}])`, SUGGEST.** One note per call (the decision is ONE note's — `save_lens`'s shape — so the refusal, the ask,
+the receipt, the Activity line and the undo label all name one place); every item's block must be a live block of that
+note. ONE transaction, the grant guard FIRST inside it (re-decides the note at suggest and spends a once grant there —
+the edit-act pattern; the single `add_take`'s decide-then-act gap, P-13nb-U2-8, is not inherited); ONE client-named
+undo entry ("‹client›'s takes" / "‹client›'s comments") whose inverse and redo each run in ONE transaction (any item's
+refusal keeps the whole entry). **All-or-nothing:** an argument fault is refused at the parse, naming the item
+(`takes[3].text must be a string.`); an item whose block is not a live block of the note is refused naming the item
+(`takes[3].block_id isn't a block of this note …` — the same words for an id naming nothing and an id elsewhere: no
+oracle); an op refusal inside the transaction rolls every item back and names the item it met. Blank takes stay
+legal (R-VX171-2); comment text must not be blank (`addBlockComment`'s rule). Labels follow P-13n-3 (`‹client› ·
+suggested · ‹label›`). **THE CAP: PENDING measurement (planned 200 — the house's per-call bound: `list_notes`' page,
+`read_note`'s carriage cap).** Argued against: the time the batch holds HER runner (the door's serial body runs on her
+`OperationsRunner`, AF-8 — her gestures queue behind it), the answer's size, and the all-or-nothing blast radius. The
+cap is stated in each tool's description and an over-cap call refuses naming it.
+
+**VX-188 — the local-only comment-authorship record + `delete_comment` at SUGGEST (her ruled sentence).** Table
+`mcp_comment_author(comment_id TEXT PRIMARY KEY, client_name TEXT NOT NULL, recorded_at TEXT NOT NULL)` on v1_24's
+road exactly (VX-168 call 1): registered in `MCPGrantSchema.tables` + `childFirstOrder`, no `sync_version`, no
+trigger, outside the sync registry, the plaintext export strips it, marker 13, zero lockstep. **Keyed by the client's
+NAME** (A-4: `clientInfo.name` IS the identity, now bound to its setup key — R-VX168-1/R-VX184-5; the activity log's
+own key), **no FK** to `block_comment` (a synced row the 13j purge may physically remove — a dangling record is
+harmless, an FK would block the purge), **one author per comment** (the PK). Written in the SAME transaction as the
+comment, on every comment a client adds through the door (`add_comment`, `add_comments`); never on hers, never on a
+comment that TRAVELS to a structural successor (`copyLiveComments` mints new ids — PROVISIONAL, below). **The rule
+(`delete_comment`, suggest):** the comment must be live on a live block placed in a live note (else the ONE not-shared
+answer — a dead or foreign id is indistinguishable from no id); the note decided at SUGGEST as every suggest act (the
+standard refusal + ask below it); then the record must name THIS client — else the refusal is her RULED sentence,
+verbatim, as a rungTooLow-family refusal: **"You don't have permission to delete that comment. Suggest raising your
+permission level to edit."** (never the not-shared shape: the client can read the comment). One client-named undo
+entry (exact-stamp restore; redo re-deletes) — P-13nb-U2-4's every-MCP-write rule, though her own comment doors
+register none. **For U4 (VX-195):** the record is consulted through ONE query, `Queries.mcpCommentAuthor(db,
+commentID:)`; U4's edit arm (any comment at EDIT) is a second clause beside the ownership clause in the same guard —
+until U4 lands, an EDIT-rung client deleting a foreign comment hears her sentence too (an interim state inside this
+unmerged run, closed by U4).
+
+**VX-190 — `remove_tag(note_id, tag)` at EDIT.** The tag by PATH (`apply_tag`'s address; a leading `#` tolerated, as
+`set_book_rule`'s outflow), resolved inside the act's transaction among the LIVE tags of the note's own wing (never
+minted); §9's `removeTag` body extracted byte-for-byte (her door calls the extraction) and run after the guard (the
+note decided at EDIT, a once grant spent there). ONE client-named entry: the inverse revives the exact application
+row (no live twin — `apply_tag`'s redo body, which is no applying act either, so undo fires no intake); the redo
+tombstones it again. Un-tagging stays a non-event for intake (pinned: a living book the tag seated the note into keeps
+it, no arrival moves).
+
+**VX-187 — `link_versions(note_a, note_b, pairs: [{block_a, block_b}])` at WRITE NEW on BOTH notes (R-VX187-1).** At
+least one pair, each `block_a` a live block of `note_a` and `block_b` of `note_b` (the two notes distinct; no pair
+twice; the cap as VX-173's); every pair minted through `insertVersionOfEdge` (canonical `(min,max)`, `origin_op
+'manual'` — her own mark's value) in ONE transaction; a pair already linked refuses the call naming it (the op's own
+`versionLinkExists`, all-or-nothing). Two decisions, `move_note_to_wing`'s shape: the snapshot decides `note_a` then
+`note_b` at write new (the first refusal raises its ask); the guard re-decides both on ONE standing read inside the
+act's transaction and spends their once grants as one union (both or neither). Notes in two different wings refuse
+(her picker never offers another wing's note; `versionPeerSplit` would make no Compare peer — PROVISIONAL, below). ONE
+client-named entry: the minted edges tombstoned (exact rows); the redo revives exactly the edges that died on the
+undo's stamp (a live twin keeps the pair). The free-under-a-seal posture of her mark rides (a link writes no text).
+
+### PROVISIONALs (running — each wants a `notes/QUESTIONS.md` entry at the merge)
+
+- **P-VX186-1 — the deduped shape** (`shown_take_id`, the block's `text` dropped): (a) as built; (b) keep `text`, drop
+  it from the shown take; (c) the `create_note` mirror. Argued above.
+- **P-VX188-1 — no ask on her refusal sentence:** her ruled words carry no "Variorum has asked…" clause, so the
+  refusal raises no edit ask (options: (a) as built; (b) raise the edit ask and append the asked sentence — changes
+  her ruled words; (c) raise it silently).
+- **P-VX188-2 — a comment that TRAVELS carries no record** (a divide/merge copies her block's comments to the
+  successor with fresh ids — `copyLiveComments`): the client's comment survives on the successor, but the copy is not
+  recorded as its own (options: (a) as built — conservative, edit reaches it; (b) carry the record with every travel —
+  a change inside every structural op).
+- **P-VX188-3 — an adopted library keeps its records** (13x's pair/backup roads copy the whole file; the plaintext
+  export strips them): same-name clients keep their own comments, as they keep their grants (options: (a) as built;
+  (b) clear them at `landMCPAfterAdoption`, as the bindings are).
+- **P-VX187-1 — cross-wing links refuse** (options: (a) as built; (b) allow — the link then shows only as Compare's
+  "other wing" lineage line, no peer). **P-VX187-2 — the parameter names** `note_a`/`note_b`/`pairs[{block_a,block_b}]`
+  (her ruling's spelling for the pair keys).
+- **P-VX173-1 — one note per batch** (options: (a) as built; (b) items across notes, each note decided). **P-U3-WORDS
+  — every new tool description, refusal, Activity phrase, receipt and undo label** (her copy pass; 13s-a-sweepable).
