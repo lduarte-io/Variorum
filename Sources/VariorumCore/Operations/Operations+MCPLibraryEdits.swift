@@ -23,7 +23,11 @@ import GRDB
 // `move_note_to_wing` already wraps her undo-less wing move. Inverses and redos
 // are exact-row from do-time images, keyed on the act's own STAMPS; divergence
 // is QUIET (the world moved past the entry — she put it back already); a
-// finished or sealed book THROWS and keeps the entry (resolvable).
+// finished or sealed book THROWS and keeps the entry (resolvable). A VALUE
+// restore (a name, a place) is COMPARE-AND-SET: it writes only while the row
+// still reads the value its act left there, so a name or place she gave it
+// since through her own undo-less door is never overwritten — checked FIRST,
+// before any refusal (VX-184 ladder round 1, the undo-overwrite class).
 //
 // PRIVATE, SEAL and OWN stay HERS ALONE (R-VX184-2): nothing here writes
 // `ai_private_at`, `sealed_at`, a note's seal or `owned`, and neither
@@ -56,8 +60,8 @@ extension Operations {
     /// the name, trimmed (a blank one reads as the placeholder — `createBook`'s
     /// MCP precedent; the wire refuses a blank name first). A finished or
     /// sealed book renames (her op's posture). The same name writes nothing.
-    /// ONE entry restoring the previous name exactly (no E13 re-check — the
-    /// Put-back tolerance).
+    /// ONE entry restoring the previous name exactly while the book still wears
+    /// the act's name (no E13 re-check — the Put-back tolerance).
     @discardableResult
     public func renameBookForClient(
         _ readingID: String, name: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil
@@ -78,16 +82,19 @@ extension Operations {
         guard let previous else { return MCPBookRename(bookID: readingID, name: newName, changed: false) }
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.restoreBookName(readingID, to: previous) },
-            redo: { try $0.restoreBookName(readingID, to: newName) })
+            inverse: { try $0.restoreBookName(readingID, from: newName, to: previous) },
+            redo: { try $0.restoreBookName(readingID, from: previous, to: newName) })
         return MCPBookRename(bookID: readingID, name: newName, changed: true)
     }
 
-    /// Both halves of the name entry: quiet when the book is gone.
-    func restoreBookName(_ readingID: String, to name: String) throws {
+    /// Both halves of the name entry, COMPARE-AND-SET (VX-184 ladder round 1 —
+    /// the undo-overwrite class): `to` is written only while the book is live
+    /// and still wears `from`. A name she gave it since (her rename door
+    /// registers no entry) is hers — the entry is quiet, and still pops.
+    func restoreBookName(_ readingID: String, from: String, to name: String) throws {
         try database.write { db in
             guard var reading = try Reading.fetchOne(db, key: readingID), reading.deletedAt == nil,
-                  reading.name != name
+                  reading.name == from
             else { return }
             reading.name = name
             reading.updatedAt = date.now
@@ -454,7 +461,8 @@ extension Operations {
     /// behind HER DOORS' gate (`MCPLibraryRefusal.bookNotInManualOrder` — a
     /// book that sorts itself takes no hand placing). Its chapter is
     /// untouched (filing is `file_note_in_chapter`'s). ONE entry restoring the
-    /// member row's exact previous position, the redo the new one.
+    /// member row's exact previous position while the row still stands where
+    /// the act put it, the redo the new one likewise.
     public func moveNoteInBookForClient(
         _ postID: String, book readingID: String, to insert: InsertPosition, undoLabel: String,
         guardedBy guardian: WriteGuard? = nil
@@ -468,16 +476,19 @@ extension Operations {
         }
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.restoreMembershipPosition(moved.rowID, to: moved.from) },
-            redo: { try $0.restoreMembershipPosition(moved.rowID, to: moved.to) })
+            inverse: { try $0.restoreMembershipPosition(moved.rowID, from: moved.to, to: moved.from) },
+            redo: { try $0.restoreMembershipPosition(moved.rowID, from: moved.from, to: moved.to) })
     }
 
-    /// Both halves of the move entry: quiet when the member row is gone; a
-    /// finished book refuses and keeps it.
-    func restoreMembershipPosition(_ rowID: String, to position: String) throws {
+    /// Both halves of the move entry, COMPARE-AND-SET (VX-184 ladder round 1):
+    /// `to` only while the member row is live and still stands at `from` — a
+    /// place she gave the note since (her own order doors register no entry)
+    /// is hers, and the entry is quiet. Checked FIRST; past it, a finished
+    /// book refuses and keeps the entry.
+    func restoreMembershipPosition(_ rowID: String, from: String, to position: String) throws {
         try database.write { db in
             guard var row = try ReadingPost.fetchOne(db, key: rowID), row.deletedAt == nil,
-                  row.status == .member, row.position != position,
+                  row.status == .member, row.position == from,
                   let book = try Reading.fetchOne(db, key: row.readingId), book.deletedAt == nil
             else { return }
             guard !book.locked else { throw OperationError.lockedReading(id: book.id) }
@@ -499,7 +510,8 @@ extension Operations {
     /// **`rename_chapter`'s act — her `renameSection`** (`renameSectionRow`:
     /// trimmed, blank refuses `invalidSectionName`, the same name writes
     /// nothing, ALLOWED under a finished book — rename stays free). ONE entry
-    /// restoring the previous name exactly.
+    /// restoring the previous name exactly while the chapter still wears the
+    /// act's name.
     @discardableResult
     public func renameChapterForClient(
         _ sectionID: String, name: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil
@@ -516,18 +528,21 @@ extension Operations {
             let newName = landed.section.name
             undoStack?.register(
                 label: undoLabel,
-                inverse: { try $0.restoreChapterName(sectionID, to: previous) },
-                redo: { try $0.restoreChapterName(sectionID, to: newName) })
+                inverse: { try $0.restoreChapterName(sectionID, from: newName, to: previous) },
+                redo: { try $0.restoreChapterName(sectionID, from: previous, to: newName) })
         }
         return rename
     }
 
-    /// Both halves of the chapter-name entry: quiet when the chapter is gone
-    /// (rename is free on a finished book, so nothing refuses).
-    func restoreChapterName(_ sectionID: String, to name: String) throws {
+    /// Both halves of the chapter-name entry, COMPARE-AND-SET (VX-184 ladder
+    /// round 1): `to` only while the chapter is live and still wears `from` —
+    /// a name she gave it since (her chapter rename registers no entry) is
+    /// hers, and the entry is quiet. Rename is free on a finished book, so
+    /// nothing refuses.
+    func restoreChapterName(_ sectionID: String, from: String, to name: String) throws {
         try database.write { db in
             guard var section = try ReadingSection.fetchOne(db, key: sectionID), section.deletedAt == nil,
-                  section.name != name
+                  section.name == from
             else { return }
             section.name = name
             section.updatedAt = date.now
@@ -583,8 +598,9 @@ extension Operations {
 
     /// **`move_chapter`'s act — her `reorderSection`** (`reorderSectionRow`:
     /// a finished book refuses; anchors are the SAME book's live chapters —
-    /// `sectionNotFound`). ONE entry restoring the exact previous position,
-    /// the redo the new one. Returns the chapter's book.
+    /// `sectionNotFound`). ONE entry restoring the exact previous position
+    /// while the chapter still stands where the act put it, the redo the new
+    /// one likewise. Returns the chapter's book.
     @discardableResult
     public func moveChapterForClient(
         _ sectionID: String, to insert: InsertPosition, undoLabel: String, guardedBy guardian: WriteGuard? = nil
@@ -597,17 +613,20 @@ extension Operations {
         }
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.restoreChapterPosition(sectionID, to: moved.from) },
-            redo: { try $0.restoreChapterPosition(sectionID, to: moved.to) })
+            inverse: { try $0.restoreChapterPosition(sectionID, from: moved.to, to: moved.from) },
+            redo: { try $0.restoreChapterPosition(sectionID, from: moved.from, to: moved.to) })
         return moved.bookID
     }
 
-    /// Both halves of the chapter-move entry: quiet when the chapter or its
-    /// book is gone; a finished book refuses and keeps it.
-    func restoreChapterPosition(_ sectionID: String, to position: String) throws {
+    /// Both halves of the chapter-move entry, COMPARE-AND-SET (VX-184 ladder
+    /// round 1): `to` only while the chapter and its book are live and the
+    /// chapter still stands at `from` — a place she gave it since (her chapter
+    /// order registers no entry) is hers, and the entry is quiet. Checked
+    /// FIRST; past it, a finished book refuses and keeps the entry.
+    func restoreChapterPosition(_ sectionID: String, from: String, to position: String) throws {
         try database.write { db in
             guard var section = try ReadingSection.fetchOne(db, key: sectionID), section.deletedAt == nil,
-                  section.position != position,
+                  section.position == from,
                   let book = try Reading.fetchOne(db, key: section.readingId), book.deletedAt == nil
             else { return }
             guard !book.locked else { throw OperationError.lockedReading(id: book.id) }

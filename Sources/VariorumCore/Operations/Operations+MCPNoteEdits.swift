@@ -19,10 +19,15 @@ import GRDB
 // comment's edit and restore, a label, a lock, a commit's name, a title, a
 // lens). Inverses and redos are exact-row from do-time images, never a re-run;
 // divergence is QUIET (the world moved past the entry); a seal THROWS and keeps
-// the entry. The insurance commits two acts write on the way (`lock_take` on a
-// dirty take — her lock's own rule; `restore_commit`'s brackets) STAY when ⌥⌘Z
-// walks the act back: commits are append-only (I5), exactly as `edit_take`'s
-// brackets stay (P-13nb-U3-2).
+// the entry. A VALUE restore (a comment's text, a label, a commit's name, a
+// title) is COMPARE-AND-SET: it writes only while the row still reads the value
+// its act left there — checked FIRST, before the seal — so what she wrote since
+// through her own undo-less door is never overwritten (VX-184 ladder round 1;
+// the lock is two-valued and needs no check — her divergence can only be the
+// value the toggle writes). The insurance commits two acts write on the way
+// (`lock_take` on a dirty take — her lock's own rule; `restore_commit`'s
+// brackets) STAY when ⌥⌘Z walks the act back: commits are append-only (I5),
+// exactly as `edit_take`'s brackets stay (P-13nb-U3-2).
 //
 // These ops decide nothing about clients — who may act is the server's
 // per-call rule (`MCPWriteTools+NoteEdits`).
@@ -250,7 +255,8 @@ extension Operations {
     /// **`set_take_label`'s act — her `setTakeLabel`** (`setTakeLabelRows`:
     /// trimmed, nil/blank clears, the same label writes nothing, a seal
     /// refuses, a locked or archived take allowed). As given — no client
-    /// stamp (P-VX195-5). ONE entry restoring the previous label exactly.
+    /// stamp (P-VX195-5). ONE entry restoring the previous label exactly while
+    /// the take still wears the act's label.
     @discardableResult
     public func labelTakeForClient(
         _ variantID: String, label: String?, undoLabel: String, guardedBy guardian: WriteGuard? = nil
@@ -266,19 +272,23 @@ extension Operations {
             let new = landed.label.label
             undoStack?.register(
                 label: undoLabel,
-                inverse: { try $0.restoreTakeLabel(variantID, to: old) },
-                redo: { try $0.restoreTakeLabel(variantID, to: new) })
+                inverse: { try $0.restoreTakeLabel(variantID, from: new, to: old) },
+                redo: { try $0.restoreTakeLabel(variantID, from: old, to: new) })
         }
         return landed.label
     }
 
-    /// Both halves of the label entry: quiet when the take is gone, a seal
-    /// refuses and keeps the entry.
-    func restoreTakeLabel(_ variantID: String, to label: String?) throws {
+    /// Both halves of the label entry, COMPARE-AND-SET (VX-184 ladder round
+    /// 1): `to` only while the take is live and still wears `from` — a label
+    /// she gave it since (her label door registers no entry) is hers, and the
+    /// entry is quiet. Checked FIRST; past it, a seal refuses and keeps the
+    /// entry.
+    func restoreTakeLabel(_ variantID: String, from: String?, to label: String?) throws {
         try database.write { db in
-            guard var take = try Variant.fetchOne(db, key: variantID), take.deletedAt == nil else { return }
+            guard var take = try Variant.fetchOne(db, key: variantID), take.deletedAt == nil,
+                  take.label == from
+            else { return }
             try ensurePlacementUnlocked(db, blockID: take.blockId)
-            guard take.label != label else { return }
             take.label = label
             take.updatedAt = date.now
             try take.update(db)
@@ -423,7 +433,8 @@ extension Operations {
     /// (`renameCommitRows`: the seal checked FIRST, then the no-op; nil/blank
     /// clears through `SavepointName`; a locked or archived take ALLOWED —
     /// QUESTIONS #121; the text is never touched — I5). The message as given
-    /// (P-VX195-5). ONE entry restoring the previous message exactly.
+    /// (P-VX195-5). ONE entry restoring the previous message exactly while the
+    /// commit still wears the act's message.
     @discardableResult
     public func renameCommitForClient(
         _ commitID: String, message: String?, undoLabel: String, guardedBy guardian: WriteGuard? = nil
@@ -440,21 +451,24 @@ extension Operations {
             let new = landed.rename.message
             undoStack?.register(
                 label: undoLabel,
-                inverse: { try $0.restoreCommitMessage(commitID, to: old) },
-                redo: { try $0.restoreCommitMessage(commitID, to: new) })
+                inverse: { try $0.restoreCommitMessage(commitID, from: new, to: old) },
+                redo: { try $0.restoreCommitMessage(commitID, from: old, to: new) })
         }
         return landed.rename
     }
 
-    /// Both halves of the commit-name entry: quiet when the commit's take is
-    /// gone; a seal refuses and keeps the entry.
-    func restoreCommitMessage(_ commitID: String, to message: String?) throws {
+    /// Both halves of the commit-name entry, COMPARE-AND-SET (VX-184 ladder
+    /// round 1): `to` only while the commit's take is live and the commit
+    /// still wears `from` — a name she gave it since (her savepoint rename
+    /// registers no entry) is hers, and the entry is quiet. Checked FIRST;
+    /// past it, a seal refuses and keeps the entry.
+    func restoreCommitMessage(_ commitID: String, from: String?, to message: String?) throws {
         try database.write { db in
             guard var commitPoint = try CommitPoint.fetchOne(db, key: commitID),
+                  commitPoint.message == from,
                   let take = try Variant.fetchOne(db, key: commitPoint.variantId), take.deletedAt == nil
             else { return }
             try ensurePlacementUnlocked(db, blockID: take.blockId)
-            guard commitPoint.message != message else { return }
             commitPoint.message = message
             try commitPoint.update(db)
         }
@@ -475,7 +489,7 @@ extension Operations {
     /// fields' own rule; on a live NOTE; a title is library metadata, so a
     /// SEAL does not freeze it — `updateFloatingNotes`' doc, her op's posture).
     /// No-op-guarded (the metadata setters' convention). ONE entry restoring
-    /// the previous title exactly.
+    /// the previous title exactly while the note still wears the act's title.
     @discardableResult
     public func renameNoteForClient(
         _ postID: String, title: String?, undoLabel: String, guardedBy guardian: WriteGuard? = nil
@@ -497,16 +511,19 @@ extension Operations {
         }
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.restoreNoteTitle(postID, to: old) },
-            redo: { try $0.restoreNoteTitle(postID, to: normalized) })
+            inverse: { try $0.restoreNoteTitle(postID, from: normalized, to: old) },
+            redo: { try $0.restoreNoteTitle(postID, from: old, to: normalized) })
         return MCPNoteRename(noteID: postID, title: normalized, changed: true)
     }
 
-    /// Both halves of the title entry: quiet when the note is gone.
-    func restoreNoteTitle(_ postID: String, to title: String?) throws {
+    /// Both halves of the title entry, COMPARE-AND-SET (VX-184 ladder round
+    /// 1): `to` only while the note is live and still wears `from` — a title
+    /// she gave it since (her title doors register no entry) is hers, and the
+    /// entry is quiet.
+    func restoreNoteTitle(_ postID: String, from: String?, to title: String?) throws {
         try database.write { db in
             guard var post = try Container.fetchOne(db, key: postID), post.deletedAt == nil,
-                  post.title != title
+                  post.title == from
             else { return }
             post.title = title
             post.updatedAt = date.now
