@@ -51,7 +51,7 @@ dev store only behind an A1 prestage copy, restored verified.
 | U6 — the MCP pane in tabs | VX-199 · VX-205 | **MOVED to VX-246** (her re-scope, 2026-10-13 ~11:40 — below); VX-232 moved with it. Plan: `notes/plans/mcp-pane-and-docs-kickoff.md` |
 | U7 — the AI's docs | VX-197 | **MOVED to VX-246** (her re-scope). Until then the guide and `MCPSession.instructions` undersell U3–U5's tools (the tool descriptions are truthful); the stargazing brief still gets a U1–U5 delta at THIS run's close |
 | LADDER (**opus-reviewer** at her word, max effort, whole-run diff U1–U5) | — | **CLOSED at round 2** — R1 1M/6m/5n (the MAJOR confirmed and RULED → VX-258; her rulings → VX-258/259/260; the fix pass red-first across 13 undo families); R2 0B/0M/5m/1n (four fixed, the redo class → VX-276, the fd-reuse bug → VX-279) |
-| CLOSEOUT | — | **MERGED** 2026-10-13 — PR #157, merge commit 98c44900; the merge-moment whole Mac target 4,551/742, three standing reds, no new red; ledgers on main (AppSpec §7/§12/§14 with 13n-b rolled, QUESTIONS #218, the in-flight row retired; nothing mobile-visible — the door is Mac-only). The /Applications refresh: see below |
+| CLOSEOUT | — | **MERGED** 2026-10-13 — PR #157, merge commit 98c44900; the merge-moment whole Mac target 4,551/742, three standing reds, no new red; ledgers on main (AppSpec §7/§12/§14 with 13n-b rolled, QUESTIONS #218, the in-flight row retired; nothing mobile-visible — the door is Mac-only). **REFRESHED:** 0.9.4 (7045) installed, A1 first (`vx184-refresh-20261013T214607Z`, 7/7 cmp-identical), codesign verified, acceptance `claude mcp list` with the app closed → the honest "Variorum must be open" (VX-181 live). **RUN CLOSED.** Her handoff: `notes/handoffs/vx-184-handoff.md` |
 
 **No revert is in flight unless a unit's record says so.**
 
@@ -2563,3 +2563,7 @@ was not made, so VX-167's ticket should carry the command; (2) the ask sheet's w
    `Tools/ScaleFixture/restore.sh <step 3's prestage>` → "Restored (verified)" and a second `cmp` of all five files; the
    prefs diffed against step 3's export → `defaults import` + `defaults delete` of any key the walk added → **0 keys
    differ**; the stage RELEASED at once (`Tools/stage release --who vx184-close`); then the write-up (piece 6).
+
+## CLOSED (2026-10-13)
+
+Merged as PR #157 (merge commit `98c44900`); ledgers on main at `b228e51c`; board snapshot `af548e0e`. The `/Applications` refresh installed 0.9.4 (7045) under claim `vx184-refresh`: A1 first (`Backups/safety-copies/vx184-refresh-20261013T214607Z`, the store + wal + shm, the three key files and the empty `store.sqlite`, all cmp-identical), the new app staged beside the old and codesign-verified before the swap, the installed app "valid on disk" + "satisfies its Designated Requirement", 6843 moved to her Trash, zero instances at every step, nothing launched or quit. Acceptance as amended with the coordinator (no real-store launch without her word): `claude mcp list`, app closed, her bridge-free registration → "✘ Failed to connect — -32000: Variorum must be open: its MCP server is not running. Open Variorum, turn on Settings ▸ MCP ▸ Enable the MCP server, then reconnect." The live tool call is on her checklist. Her handoff: `notes/handoffs/vx-184-handoff.md`.

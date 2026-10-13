@@ -1,5 +1,7 @@
 # VX-184 — Run: MCP launch polish — kickoff + plan
 
+**STATUS: CLOSED 2026-10-13 — merged PR #157 (98c44900). Re-scoped at her word to U1–U5; U6 (the pane) and U7 (the AI's docs) moved to VX-246 (`notes/plans/mcp-pane-and-docs-kickoff.md`). The run record: `notes/plans/fixes/vx-184-mcp-launch-polish.md`.**
+
 **Her word, 2026-10-12 night:** every needed/known MCP improvement runs TONIGHT, together, before tomorrow's
 launch, and **the run runs all the way through** — her pre-run sitting (below) answered every question this plan
 would otherwise stop on. Born from the session that used the door most (her readme editorial session on the Air,

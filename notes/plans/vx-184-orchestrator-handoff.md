@@ -1,5 +1,7 @@
 # VX-184 — orchestrator handoff / resume map (written pre-compaction, 2026-10-13 ~03:10 MDT)
 
+**STATUS: CLOSED 2026-10-13 — the run merged (PR #157) and refreshed (0.9.4 build 7045). This resume map is history; the live record is the run record and her handoff `notes/handoffs/vx-184-handoff.md`.**
+
 **For the vx-184 orchestrator session (Fable, /run-phase) resuming after compaction — or any fresh
 successor.** The repo is the memory: read this file, then the RUN RECORD's LIVE STATUS
 (`notes/plans/fixes/vx-184-mcp-launch-polish.md` — the truth for unit state), then the BINDING plan
