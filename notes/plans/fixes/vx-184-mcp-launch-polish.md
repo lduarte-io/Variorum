@@ -104,8 +104,8 @@ zero `Sync/`, zero custody/keychain, zero editor seam.
 | 7 | VX-198 — the rule + the admission (newest copy re-binds; the replaced key's own sentence) + state-transition pins | DONE `35bd3d76` (pins) + this commit (fix) — `Domain/MCPSetupKeyRule`: `KeyStanding.replaced`, `Decision.rebind` (admits), `Refusal.replaced` (`connect_replaced_key`), `reboundAct` `connect_rebound` + `replacedTargetKind`; `decide`'s bound-name arm splits (own → admit · unclaimed → REBIND · replaced → refuse(.replaced) · boundTo/unknown → notThisNamesKey); `Queries.mcpSetupKeyStanding(db, hash:, name:)` reads the rebind row keyed on (name, hash) after the bound/unclaimed checks; `Operations.admitMCPConnection`'s `.rebind` effect = bind's (key leaves the unclaimed set, binds) + `connect_rebound` with the REPLACED hash as `target_id`; `MCPHandshake`: the ONE sentence loses its falsified deny clause, `replacedRefusal` (her words), `refusal(for:)`; `MCPSession.run` answers each refusal in its reason's sentence. **Justified edits (the ritual, each commented in place):** core `aBoundNameRefusesEveryOtherKey` (the `.unclaimed` arm moved out to `aBoundNameRebindsAFreshCopy`), `anApprovedUnboundNameBinds…` (its "a second tool with a newer copy is told apart" leg → rebind + the replaced refusal; the impostor is now a never-minted key), `aRefusalChangesNothing…` (the impostor's key a never-minted one, all else unchanged); socket `twoToolsUnderOneNameAreToldApart` = **the VX-168 drill's impostor leg re-pinned** (a newer copy admitted; the replaced key hears `replacedRefusal`; bare / never-issued / another name's key hear the ONE sentence; the row untouched; the standing session keeps working). New rule pins `aBoundNameRebindsAFreshCopy`, `aReplacedKeyRefusesWithItsOwnReason`. Green: **`VariorumMCPTests` 153/25** · core key/grant suites **91/11** |
 | 8 | VX-198 faces (the setup sentence, the one refusal sentence, L1, the Deny confirm) + the Mac pins' justified edits | DONE (this commit; the Mac batch is the stage window's) — `MCPPaneCopy.keyLine` ends "Running it again replaces the old setup." (her words) · L1 `clientBoundary` true of the new rule ("…binds that name to it — running a newer setup moves the name to the new key — and a connection under the name with any other key, or none, is refused…") · Activity words `connect_rebound` / `connect_replaced_key` · the Deny confirm REVIEWED, unchanged (still true) · the guide's lesson-2 limit sentence (FALSIFIED: "so a second tool using the same name is turned away") made true of the rule — a minimal truth fix, U7 re-voices. Mac pins: `MCPGrantSheetTests` L1 exact string + `TutorialMCPChapterTests` lesson 2 (its rule pin now asserts rebind / replaced / unknown / bare) — justified edits; NEW `MCPSetupKeyFacesTests` (the setup line, every connection act in words — none had a pin — and the Deny confirm's truth). PENDING: the Mac batch under the stage GO |
 | 9 | VX-198 red-on-old BY REVERT | DONE (announced `a86941c9`; this commit records it) — the five production files + the two justified-edit test files at `35bd3d76`: core `MCPSetupKeyRebindTests` RED again (2/2, 10 issues — identical to the pre-fix run) and socket `MCPSetupKeyRebindServerTests` RED again (the second copy refused). Restored clean (`git status` empty). Log `logs/vx198-revert.log` |
-| 10 | headless finals (`VariorumMCPTests`, `VariorumCoreTests`, workbook) + the Mac target's build-for-testing | NOT-STARTED |
-| 11 | READY FOR STAGE (turn ends; the orchestrator's GO) | NOT-STARTED |
+| 10 | headless finals (`VariorumMCPTests`, `VariorumCoreTests`, workbook) + the Mac target's build-for-testing | HEADLESS DONE (this commit) — on `5ca4bdcc`'s sources, `swift build --build-tests` clean, per target: **`VariorumMCPTests` 153/25** (VX-180's close 135/20 → +18 tests / +5 suites: `MCPHarnessTimeLimitTests` 3, `MCPHarnessHygieneTests` 1, `MCPShimClosedAppTests` 6, `MCPSizeCapTests` 8, `MCPSetupKeyRebindServerTests` 1, minus none) · **`VariorumCoreTests` 2,695/308** (VX-168's close 2,691/307 → +4: `MCPSetupKeyRebindTests` 2 + the two new rule arms) · **`StringsWorkbookTests` 40/6** — all green; skips = the standing gated ones only (8 in core, 1 in the workbook — read, not inferred). **The Mac build-for-testing is BLOCKED — the disk filled (the incident below)**; it needs no stage and runs first when space allows |
+| 11 | READY FOR STAGE (turn ends; the orchestrator's GO) | BLOCKED ON DISK (this commit) — everything headless is done and green; the stage window is fully planned below; the one precondition left is the Mac build-for-testing, which needs ~3 GB the disk does not safely have (the incident below). Turn ends with the report |
 | 12 | the stage window: the Mac batch + THE LIVE ROUND legs (a)–(d), dev store only | NOT-STARTED |
 | 13 | close: self-assessment, PROVISIONALs, OWED | NOT-STARTED |
 
@@ -276,3 +276,130 @@ it" into the ONE sentence for every key refusal (zero oracle, zero memory, but n
 - the field guide's lesson-2 limit sentence ("…so a second tool using the same name is turned away") is FALSIFIED by
   the rebind and pinned against the rule (`TutorialMCPChapterTests`) — minimal truth fix here, U7's quality pass
   re-voices it.
+
+### THE DISK INCIDENT (2026-10-13 ~00:55–01:04 MDT, the Pro) — said plainly
+
+My Mac `xcodebuild … -derivedDataPath App/Variorum/DerivedData/vx184-u1 build-for-testing` (no stage — a build) ran the
+data volume to **134 MiB free of 460 GiB** and failed `ENOSPC` (the tool could not even write its own output file). I
+deleted ONLY that partial build (mine, this session, rebuildable) at once → 1.8 GiB free; nothing of mine is running
+(`pgrep` for xcodebuild/swift-build/clang/test helpers empty). Minutes later the volume read **5.0 GiB free** — freed by
+something not mine. Every commit of this unit was pushed before the build started; `git fsck` clean, the tree clean.
+**Not rebuilt:** a complete Debug build-for-testing here is ~2.6 GB (the other worktrees' folders measure 1.8–2.9 GB), and
+VX-179 is building on the same volume tonight — building now would take the disk back near empty, where her real store's
+writes (if her app is open) and the other session's builds fail. **Reclaimable, NONE of it mine (read-only `du`, nothing
+touched):** `~/Library/Developer/Xcode/DerivedData` 35 GB · `~/dev/variorum-vx-165/App/Variorum/DerivedData/*` ~28 GB (13n-c,
+CLOSED 2026-10-12 — eleven folders, 2.4–2.9 GB each) · `~/dev/variorum-vx-168/App/Variorum/DerivedData/*` ~6.8 GB (VX-168,
+CLOSED) · each worktree's `.build` 1.1–3.6 GB. Freeing any of it is the orchestrator's / the author's call (CLAUDE.md:
+never delete what she or another session created). **Ask:** ≥ 10 GB free before the Mac build (headroom for VX-179 too).
+
+### THE STAGE WINDOW — the plan (runs ONLY on the orchestrator's GO, under the claim it names — expected `vx184-u1`)
+
+**Before the window (no stage):** the disk at ≥ 10 GB free (above); `cd App/Variorum && xcodebuild -scheme Variorum
+-destination 'platform=macOS' -derivedDataPath DerivedData/vx184-u1 build-for-testing` (~5 min) → `** TEST BUILD
+SUCCEEDED **` — the Debug app `io.lduarte.Variorum.debug` with its `variorum-mcp` shim, and the test bundle.
+**In the window (~45–55 min):**
+0. **Guards first, every time:** `Tools/WalkKit/guard.sh --author` (her `/Applications/Variorum.app` ABSENT — if present,
+   STOP and report, never quit or kill it); `pgrep -fl 'Variorum.app/Contents/MacOS'` empty; `Tools/stage claim vx184-u1`.
+1. **The Mac batch (~10–15 min):** `xcodebuild test-without-building … -derivedDataPath DerivedData/vx184-u1` with
+   `-only-testing:VariorumTests/<Suite>` for every suite naming a changed type (grep over `MCPPaneCopy`, `MCPServerHost`,
+   `MCPActivityFace`, `MCPSetupKeyRule`, `MCPSetupClient`, `TutorialSeeder`/`mcpChapter`): CalmAsksTests ·
+   EncryptionBookDoorTests · EncryptionExplainedDrillTests · LaunchFurnitureTests · MCPAskAndReceiptTests ·
+   MCPAsksWaitTests · MCPDeliberateFacesTests · MCPEditFacesTests · MCPGrantSheetTests · MCPGrantSheetU2CaptureTests (gated)
+   · MCPPaneTests · MCPSetupKeyFacesTests · MCPSetupMenuTests · MCPShareFacesTests · MCPWingFacesTests · NewModesTests ·
+   SampleLibraryWelcomeTests · ShellConfirmTests · SnippetOpenTargetTests · SnippetsLandingTests · SnippetTagDoorTests ·
+   TakeCardDoorTests · TourEndCardAsideGateTests · TourEndCardTests · TourEngineTests · TourEntryTests · TourPoolTuckTests ·
+   TourScriptTests · TourSpotlightTests · TutorialBookShapeTests · TutorialBooksLessonTests · TutorialBooksRitualTests ·
+   TutorialBuildFlavorTests · TutorialCurrencyTests · TutorialDeletionActsTests · TutorialDoorTests ·
+   TutorialFannedMatrixTests · TutorialFurnitureFoldTests · TutorialLibraryActsTests · TutorialLookingActsTests ·
+   TutorialMCPChapterCaptureTests (gated) · TutorialMCPChapterTests · TutorialPrivacyChapterTests ·
+   TutorialStructureActsTests · TutorialTakesActsTests · TutorialWherePlacesActsTests · TutorialWritingActsTests (48 suites;
+   standing reds named if met: VX-115's `BookCollectingDoorsTests` is not in the set).
+2. **A1 prestage copy** of the dev store — `Tools/ScaleFixture/stage.sh`'s copy loop WITHOUT its fixture launch (every
+   store file + the key files → `…/Variorum-dev/Backups/safety-copies/scale-prestage-<ts>/`, each `cmp`-verified).
+3. **Launch** the Debug app (`open -n`), Settings ▸ MCP: the server running; Connect a client ▸ Claude Code ▸ **Copy setup
+   command** (cliclick, `guard.sh <devpid> x y` before each click) → key K1 on the clipboard (recorded as its first 9
+   characters). Her user-scope servers read BEFORE (`claude mcp list`/config, expected `['linear-server','variorum']`).
+4. **Leg (a) — a real Claude Code turn:** in a scratch folder, the copied line with `-s user` → `-s local` (registration
+   `variorum-dev`, the REAL fixed Debug shim) + a second `-s local` registration `variorum-tee` running the same shim
+   behind a `tee` wrapper; `claude mcp list` → both Connected (the claude-code name binds or re-binds — Activity says
+   which); then ONE `claude -p --strict-mcp-config --mcp-config <scratch json> --allowedTools mcp__variorum-dev__list_books`
+   turn → served.
+5. **Leg (b) — VX-198, the re-bind:** a SECOND Copy setup command press → K2; the line re-run in the scratch folder (it
+   replaces the local registration); `claude mcp list` → Connected; her Activity: "claude-code connected with a newer setup,
+   which replaced its earlier one"; the client row still approved with its grants (capture). Then, through the REAL shim
+   with a scripted stdio client (python, scratchpad): `VARIORUM_MCP_KEY=K1` under `claude-code` → **the replaced sentence**
+   on the initialize's id (captured on the wire); a bare shim, a never-issued key, and another name's key (an "Any MCP
+   client" copy bound first to a scratch name `vx184-other`) → **the ONE sentence** each; Activity lines captured.
+6. **Leg (c) — VX-181:** quit the dev instance BY BUNDLE ID (`tell application id "io.lduarte.Variorum.debug" to quit`;
+   `pgrep` empty); `claude mcp list` against the scratch registrations; **acceptance = the tee capture**: IN the probe +
+   the initialize, OUT `-32601` on the probe's string id, then "Variorum must be open…" on id 0. What Claude Code displays
+   is RECORDED AS FOUND, never the pass/fail.
+7. **Leg (d) — the realistic large write:** relaunch the dev app; the scripted client through the REAL shim (K2, as
+   `claude-code`) calls `create_note` with a 300-block, ~200 KB document (`blocks` form) on Home — the write-new reach
+   given by answering the just-in-time ask in the pane's Waiting section (cliclick, guarded) if claude-code's grants do not
+   already reach Home — then `read_note` (with_ids) back: every block's text byte-equal; timings recorded.
+8. **Cleanup:** both `-s local` registrations removed; her user-scope servers read AFTER (unchanged); the scripted client's
+   scratch files and keys deleted; the clipboard emptied; the dev instance quit by identity; the dev store
+   `Tools/ScaleFixture/restore.sh <dir>` → "Restored (verified)"; the stage RELEASED; evidence in
+   `notes/plans/vx184-screens/u1/` (gitignored; every key redacted to its first 9 characters — a grep for `vmk1_` whole keys
+   finds none).
+
+### SELF-ASSESSMENT (pre-stage — the implementer's; the live round's evidence still owed)
+
+**Against the U1 row:** VX-132 — every harness connect/call bounded and named (pins red-on-old: they HANG on the old
+harness) AND the hang's mechanism removed at the harness (no spinning SDK loop, no unfailed pending request — measured:
+the old harness's whole run spent 63.6 s user CPU vs ~31 s now; 16,200 receive() calls vs 2 in the hygiene pin by revert);
+the SIGPIPE flake traced (pump's straggling `shutdown` on a reused number) and its test fixed (80/80 vs 2/40). VX-181 — the
+shim's closed-app sentence answers the initialize past a probe (red-on-old by revert); NIT 1 discharged (one predicate, one
+module; VX-180's pins unchanged and green). Over-cap — both caps answer on `id: null` (red-on-old), the 16 MiB cap made
+exact, and its reader made linear (the pre-fix reader never served a message at the cap in 30 s — found by the boundary
+pin). VX-198 — the newest copied setup re-binds (approval + grants kept), the replaced key's own sentence (no oracle), the
+impostor/bare/foreign/unissued arms unchanged; the faces and the falsified guide sentence made true.
+**Against the spec:** zero schema (the replaced-key memory rides the existing local-only activity log — P-VX198-1), zero
+`Sync/`, zero custody/keychain, zero editor seam (`git diff --stat` over the unit names only `Sources/VariorumMCP*`,
+`Sources/VariorumCore/{Domain/MCPSetupKeyRule,Operations/Operations+MCPSetupKeys,Queries/MCPGrantQueries}`, the app's
+`MCPPaneCopy` + `TutorialSeeder`, tests, notes). A-4/K2's boundary: identity is still decided once per connection; the
+rebind admits only a key this library minted at her copy press (K2's own trust root — a process able to read her
+clipboard could already read the client's settings, K2's recorded non-defeat).
+**Risks I see:** (1) the replaced-key memory lapses past the activity log's 500-row cap (the old key then hears the ONE
+sentence — same remedy) — P-VX198-1; (2) "newest" is newest PRESENTED: an older copy first run later takes the name back
+(recorded, the brief's letter); (3) the over-cap answers ride `id: null`, which some clients' schemas reject (MCP's
+TypeScript SDK types `id` as string|number — a strict client may drop the line and still see only the close) — PROVISIONAL;
+the live round records what Claude Code does with what it can be sent; (4) the window now governs the shim's refusal read:
+a client that never initializes gets at most 8 answers then the sentence — the same bound as the app's.
+
+### PROVISIONALs (each wants a `notes/QUESTIONS.md` entry at the merge — the merging session's ledger)
+
+- **P-VX198-1 — where the replaced key is remembered:** (a) **as built** — the rebind's own activity row (zero schema;
+  lapses past the log's 500-row cap to the one sentence); (b) a local-only replaced-keys record on the grants family's road
+  (a schema change — its own commit, outside this unit); (c) no memory — "…or a newer setup replaced it" folded into the ONE
+  sentence for every key refusal (no oracle, no memory, not her "its own sentence").
+- **P-VX198-2 — the words:** the replaced key's sentence ("Variorum refused this connection: a newer setup replaced this one.
+  Run this client's setup again — copy a fresh one from Settings ▸ MCP ▸ Connect a client — and reconnect."), the ONE
+  sentence without its deny clause, L1, `keyLine`'s "Running it again replaces the old setup.", the Activity words
+  ("connected with a newer setup, which replaced its earlier one" / "connecting with a setup a newer one replaced"), the
+  guide's lesson-2 sentence (U7 re-voices) — her copy pass.
+- **P-U1-OVERCAP — the over-cap answers' shape:** (a) **as built** — `-32000` (the door's refusal code) on `id: null`,
+  a sentence naming the cap, then the close; (b) `-32600` "Invalid Request" or `-32700` "Parse error" on `id: null`;
+  (c) drain the line and parse its id from a bounded tail (rejected: a heuristic over unparsed JSON could answer the wrong
+  request). And the words ("…a message before initialize ran past 1 MiB (1,048,576 bytes)." / "…a message ran past 16 MiB
+  (16,777,216 bytes), the most one message may carry. Send smaller messages and reconnect.").
+- **Argued, not provisional:** VX-132's harness design (a transport wrapper + GCD-timed deadlines — the SDK pinned exact,
+  never patched); the SIGPIPE fix in the test only (the shipped shim's straggler is harmless — `close` then `exit`);
+  "newest" = newest presented (the brief's letter); the window moved whole into `VariorumMCPSocket` (VX-181's fix needs
+  more than the predicate there); the session cap's exactness + linear reader (required by her boundary pin).
+
+### OWED (for the orchestrator)
+
+1. **Disk space** (the incident above) — ≥ 10 GB free before the Mac build; then my GO window.
+2. **Canon at the merge** (the kickoff's list carries these): AppSpec §12 THE MCP DOOR — the shim's VX-181 window clause
+   (the closed-app sentence answers the `initialize` past a probe); A-4's boundary amended for newest-copy-wins (R-VX184-5:
+   a fresh copy re-binds a bound name, approval and grants kept; the replaced key refuses with its own sentence; Deny
+   unchanged); the over-cap answers (both caps answer on `id: null` before closing) if she wants a clause. The QUESTIONS
+   entries above. MOBILE PARITY: nothing mobile-visible (the door is Mac-only).
+3. **Her handoff:** with VX-198 her clients re-run NOTHING (no binding changes at install — R-VX168-1's bindings stand);
+   from now on re-running a setup is the whole road (no Deny). VX-178 parked as superseded (the kickoff). The beta tester's
+   bridge note stands (VX-180's handoff).
+4. **Noticed, not this unit's:** `MCPShim.pump` never joins its upstream thread (by design for the shipped shim; only the
+   tests met the reuse race — fixed there); `MCPHandshake`'s opening read still has no overall deadline (VX-180's risk 3 —
+   a silent peer holds a session slot until it closes; the session cap bounds it).
