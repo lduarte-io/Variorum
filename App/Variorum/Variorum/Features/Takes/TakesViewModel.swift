@@ -499,8 +499,13 @@ final class TakesViewModel {
         board.noteProjectionArrived(new)
         refreshWordCounts(old: projection, new: new)
         // VX-222: the take the article showed under the ring, read while the
-        // OUTGOING projection is still in hand (`endArticleRingIfItsTakeChanged`).
-        let articleTakeBefore = articleTakeUnderRing(in: projection)
+        // OUTGOING projection is still in hand (`endRingIfItsTakeChanged`) —
+        // since VX-227 (F5) on the Lenses host's columns too; and the take a
+        // parked follow's cell showed (rider 1's adoption arm).
+        let ringTakeBefore = takeUnderRing(in: projection)
+        let parkedTakeBefore = parkedFollow.flatMap {
+            stableCellTake(columnID: $0.columnID, blockID: $0.blockID, in: projection)
+        }
         projection = new
         // THE CONVERGENCE HALF of the buffer-authoritative discipline
         // (review round 2, MAJOR): adoption only runs clean or at settle
@@ -515,8 +520,11 @@ final class TakesViewModel {
         // the post-commit emission converges it.
         authority.settle(isPending: { autosave.pending[$0] != nil })
         // VX-222: a ring whose article cell changed take under it ends here —
-        // BEFORE the landings below may ring the fresh projection.
-        endArticleRingIfItsTakeChanged(from: articleTakeBefore)
+        // BEFORE the landings below may ring the fresh projection. VX-227
+        // (F5): the same for a ring in any Lenses column; and a parked follow
+        // whose cell re-resolved elsewhere is dropped.
+        endRingIfItsTakeChanged(from: ringTakeBefore)
+        dropParkedFollowIfMovedElsewhere(from: parkedTakeBefore)
         // VX-170: the `show ▾` filter re-reads the fresh projection BEFORE the
         // landings below resolve against it (a landing onto a pane the filter
         // hides opens its block — the filter must already know the shapes).
@@ -582,17 +590,52 @@ final class TakesViewModel {
     /// class everywhere). The fall-through + buffer overlay live in the
     /// AUTHORITY (13b P-3); this maps the column kind to its pick.
     func resolvedTake(column: TakesColumn, slot: Queries.RenderedBlock) -> (variantID: String, text: String)? {
-        let pick: String?
+        authority.resolvedText(
+            pick: columnPick(column, blockID: slot.blockID, in: projection),
+            slot: slot, fan: projection.fans[slot.blockID])
+    }
+
+    /// The column kind's pick for a block, read against `projection` (a
+    /// named lens's picks live in the store; a scratch column's in view
+    /// memory; the Chosen column has none).
+    private func columnPick(
+        _ column: TakesColumn, blockID: String, in projection: Queries.TakesProjection
+    ) -> String? {
         switch column.kind {
-        case .main:
-            pick = nil
-        case .scratch:
-            pick = column.picks[slot.blockID]
-        case .lens(let lensID):
-            pick = projection.lensSelections[lensID]?[slot.blockID]
+        case .main: return nil
+        case .scratch: return column.picks[blockID]
+        case .lens(let lensID): return projection.lensSelections[lensID]?[blockID]
         }
-        return authority.resolvedText(
-            pick: pick, slot: slot, fan: projection.fans[slot.blockID])
+    }
+
+    /// **VX-227 — the take a STABLE-IDENTITY cell renders** for `blockID` in
+    /// `columnID` under `projection`, or nil where that column renders no
+    /// stable cell (or the column/block is gone). Two cell kinds are stable —
+    /// ONE pane per block whose key moves with its resolution: the Takes
+    /// board's ARTICLE (`takes-main`, the block's chosen take — 13b 3F) and
+    /// EVERY Lenses column (its pick, else the chosen — the authority's
+    /// fall-through, the same rule `resolvedTake` asks). Fan cards and the
+    /// Write panel's cards are one pane per TAKE (identity by take id), so a
+    /// ring moved onto one never re-points a pane she is typing in.
+    ///
+    /// Why it matters (the run record's BATCH 4 RECORD, mechanism 3): a LIVE
+    /// pane never receives projection text (`PaneSurface.swift:1514-1524`),
+    /// so a stable cell re-pointed while live — or turned live in the same
+    /// render that re-points it — keeps the OUTGOING take's words under the
+    /// INCOMING take's key, and the next keystroke writes them there.
+    private func stableCellTake(
+        columnID: String, blockID: String, in projection: Queries.TakesProjection
+    ) -> String? {
+        guard let slot = projection.slots.first(where: { $0.blockID == blockID }) else { return nil }
+        switch host {
+        case .takes:
+            return columnID == Self.takesMainColumnID ? slot.variantID : nil
+        case .lenses:
+            guard let column = columns.first(where: { $0.id == columnID }) else { return nil }
+            return authority.resolvedText(
+                pick: columnPick(column, blockID: blockID, in: projection),
+                slot: slot, fan: projection.fans[blockID])?.variantID
+        }
     }
 
     /// A take's displayed text anywhere it renders raw (fan cards, the
@@ -612,6 +655,10 @@ final class TakesViewModel {
     // MARK: - Focus (the ONE live editor migrates)
 
     func focus(_ pane: PaneKey) {
+        // VX-227 (rider 1): any focus that is not the parked key's own
+        // render-report ends a parked follow (`paneRendered` clears its park
+        // before it comes through here).
+        parkedFollow = nil
         // VX-170: the ring never lands on a pane the `show ▾` filter hides —
         // that pane's block opens first (a click only ever reaches a shown
         // pane, so this is the landings', reveals' and find's door).
@@ -647,21 +694,73 @@ final class TakesViewModel {
     }
 
     func blur() {
+        parkedFollow = nil  // VX-227 (rider 1): a blur ends a parked follow too
         authority.blur()
         Task { await autosave.flushNow() }
     }
 
+    // MARK: - VX-227 — THE PARKED FOLLOW (her R-VX214-1; the architect's F2)
+
+    /// The pane the ring follows onto once its cell has RENDERED it — set by
+    /// the doors that re-point a stable cell under the ring (a step, a pick, a
+    /// mint into a column, a blank-and-choose, a transient slot change), nil
+    /// otherwise. Never observed: the cells REPORT to it (`paneRendered`); no
+    /// view reads it to decide anything (P-3 — the authority stays the one
+    /// answer to "is this pane live").
+    ///
+    /// The ONE-RING CONTRACT, extended rather than duplicated: while a follow
+    /// is parked the ring is NIL — never two live panes, never one stranded on
+    /// a key no cell renders (rider 2). The gap lasts one render for a view-
+    /// memory pick and one store round for a named lens's; a keystroke in it
+    /// meets a read pane, never a wrong take. Anything else that moves the
+    /// ring (a focus, a blur) or re-resolves the parked cell elsewhere (an
+    /// adoption) drops the park (rider 1).
+    @ObservationIgnored private(set) var parkedFollow: PaneKey?
+
+    /// End the ring by the flushed blur (no keystroke dies with it), then
+    /// park `key` — the follow lands when the cell reports rendering it.
+    private func followOnceRendered(_ key: PaneKey) {
+        blur()
+        parkedFollow = key
+    }
+
+    /// **A cell reports the key it has RENDERED** (`TakesCellView`'s
+    /// render-report, after the render that drew it — the `onFocusRequest`
+    /// shape: the view reports a fact, the model's one focus door decides).
+    /// Only the parked key is acted on: the pane now shows that take's own
+    /// text READ-ONLY (a read pane adopts the projection), so turning it live
+    /// is a read→live flip of a pane that already holds its own words — the
+    /// re-bind that can never keep another take's words.
+    func paneRendered(_ key: PaneKey) {
+        guard let parked = parkedFollow, parked == key else { return }
+        parkedFollow = nil
+        focus(key)
+    }
+
+    /// Rider 1's adoption arm: a parked follow survives an adoption that
+    /// leaves its cell alone (an echo, another block's edit, the flush's own
+    /// settle) or that BRINGS the parked take (a named lens's pick arriving);
+    /// one that re-resolves the parked cell to any OTHER take, or removes the
+    /// column or block, ends it — the world moved on without her.
+    private func dropParkedFollowIfMovedElsewhere(from before: String?) {
+        guard let parked = parkedFollow else { return }
+        let after = stableCellTake(
+            columnID: parked.columnID, blockID: parked.blockID, in: projection)
+        if after == nil || (after != before && after != parked.variantID) {
+            parkedFollow = nil
+        }
+    }
+
     // MARK: - VX-222 — the article's ring never outlives the take it rang
 
-    /// The take the ARTICLE shows for the ring's block in `projection` — nil
-    /// unless the ring is in the Takes board's article column (the column that
-    /// renders each block's CHOSEN take) and its block is in the note.
-    private func articleTakeUnderRing(in projection: Queries.TakesProjection) -> String? {
-        guard host == .takes, let live = authority.livePane,
-              live.columnID == Self.takesMainColumnID,
-              let slot = projection.slots.first(where: { $0.blockID == live.blockID })
-        else { return nil }
-        return slot.variantID
+    /// The take the ring's STABLE cell shows for its block in `projection` —
+    /// the ARTICLE's (the Takes board's column that renders each block's
+    /// CHOSEN take) or, since VX-227 (F5), a Lenses column's; nil when the
+    /// ring is in a per-take card or its block/column is gone
+    /// (`stableCellTake` is the one rule).
+    private func takeUnderRing(in projection: Queries.TakesProjection) -> String? {
+        guard let live = authority.livePane else { return nil }
+        return stableCellTake(columnID: live.columnID, blockID: live.blockID, in: projection)
     }
 
     /// **VX-222 — a ring whose article cell changed take under it ENDS** (the
@@ -688,8 +787,16 @@ final class TakesViewModel {
     /// its place, and an adoption that leaves the article's take alone never
     /// touches it. Fan cards render the whole fan, so a ring in a card (her
     /// click into a take, the ⌘⏎ road) is never in question here.
-    private func endArticleRingIfItsTakeChanged(from before: String?) {
-        guard let before, let after = articleTakeUnderRing(in: projection), after != before
+    ///
+    /// **VX-227 (the architect's F5 ruling): the same rule on the LENSES
+    /// host's columns** — a lens pick moved by sync, an agent's
+    /// `setLensChoice`/`adopt_lens`, another window or undo, and a choice
+    /// under a Chosen-column ring, re-resolve that column's stable cell exactly
+    /// as VX-222's choose did, so the ring ends. The STEP is not in conflict:
+    /// it parks its follow first (the ring is nil at its own adoption), and a
+    /// parked follow is judged by `dropParkedFollowIfMovedElsewhere` instead.
+    private func endRingIfItsTakeChanged(from before: String?) {
+        guard let before, let after = takeUnderRing(in: projection), after != before
         else { return }
         blur()
     }
@@ -1049,20 +1156,48 @@ final class TakesViewModel {
 
     func replaceColumnWithChosen(_ columnID: String) {
         guard let i = columns.firstIndex(where: { $0.id == columnID }) else { return }
-        columns[i] = TakesColumn(id: columnID, kind: .main)
+        rePointColumn(columnID) { columns[i] = TakesColumn(id: columnID, kind: .main) }
         saveMemory()
     }
 
     func replaceColumnWithLens(_ columnID: String, lensID: String) {
         guard let i = columns.firstIndex(where: { $0.id == columnID }) else { return }
-        columns[i] = TakesColumn(id: columnID, kind: .lens(lensID))
+        rePointColumn(columnID) { columns[i] = TakesColumn(id: columnID, kind: .lens(lensID)) }
         saveMemory()
     }
 
     func replaceColumnWithNewScratch(_ columnID: String) {
         guard let i = columns.firstIndex(where: { $0.id == columnID }) else { return }
-        columns[i] = TakesColumn(id: columnID, kind: .scratch, name: nextAutoName())
+        let name = nextAutoName()
+        rePointColumn(columnID) { columns[i] = TakesColumn(id: columnID, kind: .scratch, name: name) }
         saveMemory()
+    }
+
+    /// **VX-227 — a column RE-POINTED BY MODEL STATE under the ring** (the
+    /// sweep's slot-swap rows: no adoption carries these, so neither the
+    /// step's follow nor `adopt`'s end-rule sees them). Measured on the
+    /// current projection before and after `mutate`: when the ring's block now
+    /// shows another take in that column, the ring ENDS (flushed — the
+    /// pre-ruled end-rule for every road that is not a step; a swap that
+    /// lands the column ON a stranded ring's take is the revival itself, so it
+    /// ends too). `followBack` is for a re-point that is only TRANSIENT — a
+    /// scratch saved as a lens shows the chosen take until the lens's own
+    /// choices arrive — so the ring PARKS on its own key and re-binds when the
+    /// cell shows that take again.
+    private func rePointColumn(_ columnID: String, followBack: Bool = false, _ mutate: () -> Void) {
+        let ring = authority.livePane.flatMap { $0.columnID == columnID ? $0 : nil }
+        let before = ring.flatMap {
+            stableCellTake(columnID: columnID, blockID: $0.blockID, in: projection)
+        }
+        mutate()
+        guard let ring else { return }
+        let after = stableCellTake(columnID: columnID, blockID: ring.blockID, in: projection)
+        guard after != before else { return }
+        if followBack, before == ring.variantID {
+            followOnceRendered(ring)
+        } else {
+            blur()
+        }
     }
 
     func replaceColumnWithNewWrite(_ columnID: String) async {
@@ -1076,8 +1211,10 @@ final class TakesViewModel {
                 try ops.branchAllFans(post: postID)
             }
             guard let i = columns.firstIndex(where: { $0.id == columnID }) else { return }
-            columns[i] = TakesColumn(
-                id: columnID, kind: .scratch, picks: picks, name: nextAutoName())
+            let name = nextAutoName()
+            rePointColumn(columnID) {
+                columns[i] = TakesColumn(id: columnID, kind: .scratch, picks: picks, name: name)
+            }
             saveMemory()
         } catch {
             setRefusal(Self.message(for: error))
@@ -1153,23 +1290,56 @@ final class TakesViewModel {
         await structure.reorderBlock(blockID, before: targetBlockID)
     }
 
+    /// The Chosen column's own refusal (J38) — ONE copy, said by `pick` and by
+    /// ⌃⌘←/→ on that column (VX-227's F3: it has no pick to step).
+    nonisolated static let chosenColumnHasNoPickNote =
+        "The main column shows the note's chosen takes — use ✓ to change them."
+
     /// A scratch/lens column adopts a different take for one slot (a VIEW
     /// change — never touches chosen).
+    ///
+    /// **VX-227 — every door that moves the pick under the ring FOLLOWS** (her
+    /// R-VX214-1; the architect's F2/F4 rulings — ONE body, so ⌃⌘←/→, the
+    /// column's ‹ › switcher and "Show take ▸" are one road): when the ring is
+    /// in THIS column's pane for THIS block and the pick changes what the
+    /// cell renders, the ring ends by the flushed `blur()` and PARKS on the
+    /// newly picked take's key; it re-binds when the cell has RENDERED that
+    /// key (`paneRendered`) — never in the same render that re-points the
+    /// cell, which would keep the outgoing take's words live (see
+    /// `stableCellTake`). A pick on a block or column the ring is not in
+    /// leaves the ring alone.
     func pick(columnID: String, blockID: String, variantID: String) async {
         guard let index = columns.firstIndex(where: { $0.id == columnID }) else { return }
+        let ringBefore = authority.livePane
+        let follow: PaneKey? = ringBefore.flatMap { ring in
+            guard ring.columnID == columnID, ring.blockID == blockID,
+                  stableCellTake(columnID: columnID, blockID: blockID, in: projection) != variantID
+            else { return nil }
+            return PaneKey(
+                columnID: columnID, blockID: blockID, variantID: variantID, context: ring.context)
+        }
         switch columns[index].kind {
         case .main:
             // J38: nothing is picked here, so this is a REFUSAL — and since
             // 18i lets this class ride to the shell, the class now decides
             // whether she sees it at all (P-2).
-            setRefusal("The main column shows the note's chosen takes — use ✓ to change them.")
+            setRefusal(Self.chosenColumnHasNoPickNote)
         case .scratch:
+            if let follow { followOnceRendered(follow) }  // BEFORE the cell re-points
             columns[index].picks[blockID] = variantID
             saveMemory()
         case .lens(let lensID):
+            if let follow { followOnceRendered(follow) }  // BEFORE the store write
             // Named lenses are LIVE-edited (no explicit re-save).
             await run { ops in
                 _ = try ops.setLensChoice(lens: lensID, block: blockID, variant: variantID)
+            }
+            // A refused pick moved nothing: the cell still renders the take
+            // she was in, so the ring goes back there (a read→live flip of a
+            // pane that already shows its own take — never a re-point).
+            if let follow, status?.isRefusal == true, parkedFollow == follow,
+               let ringBefore {
+                focus(ringBefore)
             }
         }
     }
@@ -1256,9 +1426,19 @@ final class TakesViewModel {
 
     /// The column's adoption of a fresh mint + the ring-follow (shared by
     /// the branch and blank cores).
+    ///
+    /// **VX-227 (the architect's F6 ruling):** the ring-follow goes through
+    /// the PARKED FOLLOW, parked BEFORE the column re-points. It used to
+    /// `focus` the mint's key in the same turn the pick moved — a live
+    /// re-point of the column's stable cell, which keeps the SOURCE take's
+    /// words under the fresh take's key (invisible for a branch, whose text
+    /// is a copy; a blank mint's first keystroke wrote the source's words
+    /// into it). A fresh mint is never what the cell already renders, so the
+    /// park is unconditional; the ring re-binds once the cell shows the mint.
     private func adoptMintIntoColumn(
         columnID: String, kind: TakesColumnKind, blockID: String, variantID: String
     ) {
+        followOnceRendered(PaneKey(columnID: columnID, blockID: blockID, variantID: variantID))
         if let i = columns.firstIndex(where: { $0.id == columnID }) {
             switch kind {
             case .main:
@@ -1275,7 +1455,6 @@ final class TakesViewModel {
                 break  // the store carries it; the projection follows
             }
         }
-        focus(PaneKey(columnID: columnID, blockID: blockID, variantID: variantID))
     }
 
     /// 💾 — a scratch column becomes a durable NAMED lens (deliberate; no
@@ -1296,8 +1475,14 @@ final class TakesViewModel {
                 return lens
             }
             if let i = columns.firstIndex(where: { $0.id == columnID }) {
-                columns[i].kind = .lens(lens.id)
-                columns[i].picks = [:]
+                // VX-227: until the lens's choices arrive by adoption the
+                // column reads the chosen takes — a transient re-point under
+                // a ring in it, so the ring parks on its own key and comes
+                // back when the cell shows that take again.
+                rePointColumn(columnID, followBack: true) {
+                    columns[i].kind = .lens(lens.id)
+                    columns[i].picks = [:]
+                }
                 saveMemory()
             }
             return lens
@@ -2255,6 +2440,7 @@ final class TakesViewModel {
     /// call. Internal for the choreographer; everything else focuses
     /// through `focus(_:)`.
     func landAuthorityFocus(_ pane: PaneKey) {
+        parkedFollow = nil  // VX-227 (rider 1): a landing is a focus too
         // VX-170: the entry ring lands where she was — and if the `show ▾`
         // filter folded that block to a line, the block opens (`focus`'s rule).
         lensFilter.reveal(pane)
@@ -2474,7 +2660,10 @@ final class TakesViewModel {
                     + "add a \u{201C}Chosen (the note)\u{201D} column to see it here.")
                 return
             }
-            focus(PaneKey(columnID: main.id, blockID: blockID, variantID: variantID))
+            // VX-227 (the F5/F6 addendum): the Chosen column's stable cell
+            // shows the mint only once the choice arrives by adoption — the
+            // ring PARKS on it and re-binds when the cell shows the blank take.
+            followOnceRendered(PaneKey(columnID: main.id, blockID: blockID, variantID: variantID))
         }
     }
 
@@ -2495,7 +2684,21 @@ final class TakesViewModel {
         let columnID = preferredColumnID
             ?? focusedPane.flatMap { $0.blockID == blockID ? $0.columnID : nil }
             ?? landingColumnID
-        focus(PaneKey(columnID: columnID, blockID: blockID, variantID: variantID))
+        let key = PaneKey(columnID: columnID, blockID: blockID, variantID: variantID)
+        // VX-227: a mint is never what a STABLE cell already shows — on the
+        // article (⇧⌥⌘T: the chosen mint arrives there by adoption) the ring
+        // parks and re-binds once the article shows it; fan and panel cards
+        // are one pane per take, so the ring lands on a fresh card at once.
+        // Unconditional on a stable cell, deliberately: if the adoption raced
+        // ahead of this continuation, a direct focus could still meet a cell
+        // not yet re-rendered (the live re-point); the park is fail-safe in
+        // both orders (at worst the ring stays nil — never another take's
+        // words under the caret).
+        if stableCellTake(columnID: columnID, blockID: blockID, in: projection) != nil {
+            followOnceRendered(key)
+        } else {
+            focus(key)
+        }
     }
 
     // MARK: - Auto-page to the reveal (13b 3F)
@@ -2656,12 +2859,23 @@ final class TakesViewModel {
         }
         switch host {
         case .lenses:
-            if let column = columns.first(where: { $0.id == pane.columnID }),
-               column.kind != .main {
-                await stepPick(columnID: column.id, slot: slot, by: delta)
+            // VX-227: on the Lenses board a step moves the COLUMN's pick and
+            // the live editor follows it (`pick`'s one body). It never falls
+            // through to the Takes arm any more: that arm keyed the ring to
+            // `<column>|<block>|<next>` — on the Chosen column a key no cell
+            // renders (the board has no fan cards), which ⌘⏎ could then revive
+            // over the old chosen's words.
+            guard let column = columns.first(where: { $0.id == pane.columnID }) else {
+                setRefusal("Click into a take first — ⌃⌘← and ⌃⌘→ step through its siblings.")  // J38
                 return
             }
-            fallthrough
+            // F3: the Chosen column has no pick to step — its own refusal,
+            // the ring left where she is (P-2).
+            guard column.kind != .main else {
+                setRefusal(Self.chosenColumnHasNoPickNote)
+                return
+            }
+            await stepPick(columnID: column.id, slot: slot, by: delta)
         case .takes:
             guard let fan = projection.fans[slot.blockID], fan.count > 1,
                   let current = fan.firstIndex(where: { $0.id == pane.variantID })
@@ -2672,8 +2886,23 @@ final class TakesViewModel {
             let next = min(max(current + delta, 0), fan.count - 1)
             guard next != current else { return }
             if !board.expandedBlocks.contains(slot.blockID) { board.bloom(slot.blockID) }
+            // **VX-227 — the step FOLLOWS, visibly (her R-VX214-1).** A step
+            // moves the ring only (no op; chosen never moves — the run record's
+            // step-vs-choose verdict), so the ring lands on the pane that
+            // RENDERS the stepped-to take. The article renders the chosen take
+            // only, so from the article that pane is the take's FAN CARD — the
+            // R2-A reveal mapping (`takesUnchosenRevealColumnID`'s rule) —
+            // paged into view; it used to key `takes-main|<next>`, a pane no
+            // style renders (the ring vanished). Cards are one pane per take,
+            // so this re-bind never re-points the pane she was typing in; the
+            // ring's migration flushes it (`focus`).
+            let columnID = pane.columnID == Self.takesMainColumnID
+                ? Self.takesFanColumnID : pane.columnID
+            if columnID == Self.takesFanColumnID {
+                pageToReveal(blockID: slot.blockID, variantID: fan[next].id)
+            }
             focus(PaneKey(
-                columnID: pane.columnID, blockID: slot.blockID, variantID: fan[next].id))
+                columnID: columnID, blockID: slot.blockID, variantID: fan[next].id))
         }
     }
 

@@ -249,6 +249,16 @@ struct TakesCellView: View {
                 // words. Her report: *"the invitation to write a block is
                 // weird… I want it to return to what it used to look like."*
                 .recordCellChrome(resolved.variantID, [])
+                // **VX-227 — the cell's RENDER-REPORT** (the parked follow, the
+                // architect's F2 ruling): this cell is ONE pane per block whose
+                // key moves with what it shows, and a live pane never takes
+                // projection text — so a follow onto a re-pointed cell may only
+                // turn it live AFTER it has drawn its new take read-only. The
+                // task runs once the render that drew this key is done (on
+                // appear, and whenever the key changes); the model acts only
+                // when it has a follow parked on exactly this key. A fact
+                // reported, never a decision made here (P-3).
+                .task(id: key) { model.paneRendered(key) }
         } else {
             Text("· · ·")  // a gap slot renders a gap, never crashes
                 .foregroundStyle(tokens.muted)

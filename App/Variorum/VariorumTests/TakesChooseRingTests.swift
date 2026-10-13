@@ -298,7 +298,15 @@ struct TakesChooseRingTests {
             let stepped = TakesViewModel.PaneKey(
                 columnID: TakesViewModel.takesMainColumnID,
                 blockID: world.blockID, variantID: world.mintID)
-            #expect(model.focusedPane == stepped, "non-vacuity: ⌃⌘→ moved the article ring to the mint's id")
+            // CONSEQUENTIAL PIN EDIT (VX-227 — her R-VX214-1, the architect's
+            // F1 ruling): the step now FOLLOWS onto the pane that renders the
+            // mint, its FAN card; this line used to pin the article key
+            // (`stepped`), a pane the article never renders. The revival
+            // assert below is byte-unchanged.
+            #expect(model.focusedPane == TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesFanColumnID,
+                blockID: world.blockID, variantID: world.mintID),
+                "non-vacuity: ⌃⌘→ moved the ring to the mint (its fan card — VX-227)")
 
             await model.choose(blockID: world.blockID, variantID: world.mintID)
             model.adopt(try await fresh(db, world.postID))
