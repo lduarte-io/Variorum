@@ -601,6 +601,42 @@ struct TakesStepFollowModelTests {
         }
     }
 
+    /// The sweep's slot-swap row (RED ON OLD): replacing the column she is in
+    /// re-points its cell by MODEL state — no adoption carries it — so the
+    /// ring must not stay on a key the column no longer renders (a later swap
+    /// back onto that take would revive the pane over the other take's words).
+    @Test func aSlotSwapUnderTheRingNeverLeavesItStranded() async throws {
+        try await withStepWorld("swap") { session, db, world, defaults in
+            let model = try await lensesModel(session, db, world, defaults)
+            model.replaceColumnWithNewScratch(try #require(model.columns.first).id)
+            let columnID = try #require(model.columns.first).id
+            await model.pick(columnID: columnID, blockID: world.blockID, variantID: world.takeB)
+            model.focus(.init(columnID: columnID, blockID: world.blockID, variantID: world.takeB))
+            #expect(ringIsRendered(model), "fixture: the ring is on the pane the column shows")
+            model.replaceColumnWithChosen(columnID)
+            #expect(ringIsRendered(model),
+                    "the swap re-pointed the cell — the ring is never left on B (ring: \(String(describing: model.focusedPane)))")
+        }
+    }
+
+    /// The sweep's save-as-lens row (RED ON OLD): until the new lens's choices
+    /// arrive by adoption the column reads the CHOSEN takes — a transient
+    /// re-point under the ring, which must never be a stranded ring.
+    @Test func savingAScratchColumnAsALensNeverStrandsTheRing() async throws {
+        try await withStepWorld("savelens") { session, db, world, defaults in
+            let model = try await lensesModel(session, db, world, defaults)
+            model.replaceColumnWithNewScratch(try #require(model.columns.first).id)
+            let columnID = try #require(model.columns.first).id
+            await model.pick(columnID: columnID, blockID: world.blockID, variantID: world.takeB)
+            model.focus(.init(columnID: columnID, blockID: world.blockID, variantID: world.takeB))
+            await model.saveScratchAsLens(columnID: columnID, name: "kept")
+            #expect(ringIsRendered(model),
+                    "mid-save: the ring is not left on a key the column no longer shows (ring: \(String(describing: model.focusedPane)))")
+            model.adopt(try await fresh(db, world.postID))
+            #expect(ringIsRendered(model), "after the lens's choices arrive")
+        }
+    }
+
     // MARK: - Guards (green on both sides)
 
     /// A pick on a block the ring is NOT in leaves the ring alone (F4's
