@@ -2155,6 +2155,12 @@ exit, popover windows alpha 0 and checked against every NSScreen, no sheet probe
   app rebuilt, `pinleg` rebuilt and run, then restored by
   `git checkout -- App/Variorum/Variorum/Features/Editor/CommentsPanel.swift` and rebuilt. Nothing is
   committed while it is in flight.
+  **R-PL RAN — 12/14:** the R1-2 cell RED on exactly its save (stored `["First note."]`; its three
+  premises green — one dirty edit, the popover up when dismissed, closed after) AND
+  `aDismissedPopoversPanelStopsListening` red (the monitor's release asks the same `isHost`, so the
+  revert silenced both). Restored (`git checkout --`, worktree clean). To isolate the watcher alone:
+  **REVERT R-PL2 ANNOUNCED** — the WatcherView's closure skips `self.onHostClosing?()` (isHost
+  untouched), rebuilt, replayed, restored the same way.
 - [ ] Dispositions + the runner's PENDING list.
 
 ### THE TRACES (window 5's log `/tmp/vx179-window5-suites.log`, window 4's `/tmp/vx179-fixleg-suites.log`, the walk's `/tmp/vx179-commentkeys2.log`; offscreen replays in `scratchpad/vx179-u3-pin/`)
