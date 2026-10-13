@@ -484,9 +484,10 @@ suites PENDING the stage window)
   the never-strand check. Not pinned, recorded. §A's "dials reset to Auto" premise stands CORRECTED by the
   implementer's read (the inertness comes from the custody shape + the key file, not the dials) — a good catch,
   exactly what verify-don't-assume briefs are for.
-- **F6 — ADOPTED.** Two homes: the morning bundle for her, and the refresh ask to the coordinator at closeout
-  (the new build's first ready may remove a lingering silent copy on her real store — the belt working, logged,
-  a custody write named before it happens).
+- **F6 — ADOPTED, then RULED BY HER (2026-10-13, live at the run, her words verbatim):** *"yeah tha's fine on
+  the removign a lingering silent key copy of my store - i have my passphrase, i'm not concerned."* The custody
+  write on her real store is pre-cleared; F6 drops out of the morning bundle, and the refresh ask names it only
+  as a done fact, not a question.
 - **F7 — RECORD-ONLY,** with one hygiene note for the ladder: if the un-wired `endSwitch` leaf in that test
   world ever masks an assertion, wire the inert leaf there; tonight it provably affects nothing.
 
