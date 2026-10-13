@@ -2189,3 +2189,19 @@ re-runs beyond the two pin suites: Phase13pControllerTests (the reconcile) and P
 local road) — the other suites' sources name no changed behavior. Phone: no new phone literal (log lines and
 comments only; no `\bMac\b` in any rendered string). Then the implementer's sanity pass over
 `b3180773` + `cabddd19`, and round 2.
+
+### LADDER R1 — THE IMPLEMENTER'S SANITY PASS (the U5 implementer, read-only; verbatim-faithful)
+**BOTH COMMITS PASS.** b3180773: the clear's guards exclude every mid-road window it knows — with ONE WORDING
+CORRECTION adopted into this record: the SILENT follow-into-Standard road has no model and never sets
+`switchInProgress`; what covers it is THE MARKER PLUS SERIALIZATION (its flag-no-marker window sits inside one
+awaited `writeMarker` whose failure leaves a marker; ready housekeeping is serialized; the runner's nested
+reconciles sit after `clearMarker`). One benign residual named: a user-pressed reconcile (AppleRelinkModel)
+landing exactly inside that road's first database-write await could clear early — that road goes INTO Standard,
+so an early Apple landing only adds the copy the follow itself adds. The adoption-ready corner (F-U5-5/6
+territory) confirmed safe: an adoption is not a switch, and under the clear's guards a set flag is by definition
+the stale road, never a live one's. U5's worlds unreached (scripted gate, no pending-flag box); R1-4 changes no
+return value. cabddd19: the wipe sits in the plain local road's own arm, before its first marker; the real
+This-Mac-Only road takes the other arm; a crashed road's flag a resume still needs is protected by the
+pending-marker refusal at the ceremony door + the runner's busy guard. U2's forget-first and the resume's carry
+untouched. R1-2 MINTED as VX-243 (the reviewer's final call: ticket). **The flow proceeds to ROUND 2** (a fresh
+reviewer re-reviews the fixes).
