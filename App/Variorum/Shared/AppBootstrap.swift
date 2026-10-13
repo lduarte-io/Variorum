@@ -866,6 +866,10 @@ final class AppBootstrap {
         }.value
         beginOpening(unlockedKey: reopenKey)
         await awaitOpen()
+        // VX-206: the reopen rebuilt the Settings scene at its default pane —
+        // a ceremony hosted by Settings ▸ Protection asks for that pane back
+        // (a no-op for every other host; the request outlives the window).
+        protection.requestProtectionPaneForCeremony()
         if case .failure(let error) = outcome { throw error }
     }
 

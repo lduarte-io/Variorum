@@ -134,7 +134,17 @@ final class PostureSwitchModel: Identifiable {
 
     let id = UUID()
     let mode: Mode
-    private(set) var phase: Phase = .checking
+    private(set) var phase: Phase = .checking {
+        didSet {
+            // VX-206: the road returned (During gave way to its end — the
+            // Done, a refusal, a restart). A ceremony hosted by Settings ▸
+            // Protection asks Settings for that pane, where its sheet lives
+            // (the controller ignores the ask for any other host).
+            if oldValue == .running, phase != .running, controller.activeSwitch === self {
+                controller.requestProtectionPaneForCeremony()
+            }
+        }
+    }
     private(set) var busy = false
     var lastError: String?
     /// The words on the clipboard timer (copy: "clears in 60 seconds").

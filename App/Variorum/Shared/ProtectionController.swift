@@ -965,6 +965,31 @@ final class ProtectionController {
         refreshNotices()
     }
 
+    // MARK: - VX-206 — a ceremony opened from Settings ▸ Protection ends there
+
+    /// **A REQUEST that Settings adopts (its pane → Protection)** — the twin of
+    /// `MCPDoor.settingsRequest`, the one programmatic open-at-pane road (the
+    /// VX-214 machinery ruling). The re-key's reopen rebuilds the `.ready`
+    /// tree, and the Settings window's content with it, at its default pane
+    /// (General): a ceremony hosted by the pane kept running with no pane to
+    /// present its sheet, and its Done waited until she found Protection by
+    /// hand. A counter, so every ask is fresh; the window's "seen" mark rides
+    /// beside it HERE, because this controller outlives the re-key (the
+    /// bootstrap's own) and the Settings view does not.
+    private(set) var settingsRequest = 0
+    @ObservationIgnored var settingsRequestAdopted = 0
+
+    /// Ask Settings for Protection — only while the ceremony in progress is
+    /// the pane's (`ceremonyHost`, decided once when it opened). The re-key's
+    /// reopen asks (the During screen comes back where it was) and the road's
+    /// return asks (the Done, or the refusal, is on screen where she acted); a
+    /// ceremony the main window hosts asks nothing, so General's default and
+    /// wherever she left Settings stand.
+    func requestProtectionPaneForCeremony() {
+        guard activeSwitch != nil, ceremonyHost == .pane else { return }
+        settingsRequest += 1
+    }
+
     /// The biometric confirmation (leaving Castle's Touch ID road) —
     /// PROMPTS in production; scripted in tests.
     func confirmPresence(_ reason: String) async -> Bool {
