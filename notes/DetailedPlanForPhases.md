@@ -12,6 +12,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
+| MCP handshake survives Claude Code's pre-initialize `server/discover` probe (launch-critical) | VX-180 · `vx-180-discover-probe` | `~/dev/variorum-vx180` · the Pro | Kicked off 2026-10-12 evening; surfaces `Sources/VariorumMCP/` only — zero `Sync/`, zero custody, zero editor seam, zero schema |
 
 ### Latest closeout
 
