@@ -2147,8 +2147,14 @@ exit, popover windows alpha 0 and checked against every NSScreen, no sheet probe
 
 ### LIVE STATUS
 - [x] Traces written (below) before any edit.
-- [ ] The two AppKit-host cells remodelled onto the product's own presenter (SwiftUI `.popover`).
-- [ ] Red on old for the remodelled R1-2 cell (announced revert, offscreen, runner shape).
+- [x] The two AppKit-host cells remodelled onto the product's own presenter (SwiftUI `.popover`) —
+  8beab85b (test file only; typecheck EXIT 0; `pinleg.swift` replays the four popover cells in suite
+  order, runner shape, real module at the tip: **14/14 green**).
+- [ ] Red on old for the remodelled R1-2 cell — **REVERT R-PL ANNOUNCED** (runs after this commit):
+  `CommentPanelHostWatcher.isHost` answers `false` (the watcher deaf — fix leg 2's R-FL2c road), the
+  app rebuilt, `pinleg` rebuilt and run, then restored by
+  `git checkout -- App/Variorum/Variorum/Features/Editor/CommentsPanel.swift` and rebuilt. Nothing is
+  committed while it is in flight.
 - [ ] Dispositions + the runner's PENDING list.
 
 ### THE TRACES (window 5's log `/tmp/vx179-window5-suites.log`, window 4's `/tmp/vx179-fixleg-suites.log`, the walk's `/tmp/vx179-commentkeys2.log`; offscreen replays in `scratchpad/vx179-u3-pin/`)
