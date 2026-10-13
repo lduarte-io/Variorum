@@ -1901,7 +1901,7 @@ Her three product calls (VX-258/259/260, R-VX184-7/8/9) are VX-246's and untouch
 | 9 | (f) the `delete_note` / `delete_block` flush TRACE (read-only) — fixed only if the road stays in the wire/door layer; else a ticket-ready summary | NOT-STARTED |
 | 10 | finals: the whole headless package green with counts; the path diff; the close | NOT-STARTED |
 
-**A REVERT IS IN FLIGHT (piece 5) — see its row.**
+**No revert is in flight** (piece 5's revert ran and was RESTORED — `git status` clean, `git diff HEAD` empty).
 
 #### STEP 1 — agree / dispute (each finding re-traced in THIS session; the stopped agent's leads verified, never relied on)
 
