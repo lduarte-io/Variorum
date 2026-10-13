@@ -43,7 +43,7 @@ dev store only behind an A1 prestage copy, restored verified.
 |---|---|---|
 | U1 — the socket and key road | VX-132 · VX-181 · VX-198 | **UNIT CLOSED — DONE** (2026-10-13 01:41 MDT): headless 153/25 MCP · 2,695/308 core · 40/6 workbook; Mac batch 339/47 green; live round PROVEN (real Claude Code; re-bind + replaced-key sentence on the wire; closed-app sentence on initialize id; 300-block 224 KB round-trip byte-equal); dev store restored verified; stage released 22/70 min. 3 PROVISIONALs for the merge; cold review owed with the run's ladder. Noticed-not-fixed → VX tickets (see U1 OWED 3) |
 | U2 — the gatherings icon | VX-185 | **UNIT CLOSED — DONE** (2026-10-13 02:51 MDT): core-only fix (`mcpBookReaches` decides gatherings via `decideGathering`; R-VX185-1 by construction); red-on-old 6/6 by revert; headless 2,703/310 green; Mac 401/54 (one red = VX-115's standing); walk PROVEN both voices (W1 her exact case, W2 control, W3 open book, W4 archived Terminal-only; light only — recorded); stage 13/40 min. P-VX185-1/2 as (a) |
-| U3 — the door's ergonomics | VX-186 · VX-173 · VX-188 · VX-190 · VX-187 | IN FLIGHT — implementer spawned 2026-10-13 ~03:00 (owns the ONE allowed schema change: the local-only comment-authorship record) |
+| U3 — the door's ergonomics | VX-186 · VX-173 · VX-188 · VX-190 · VX-187 | **UNIT CLOSED — DONE** (2026-10-13 04:48 MDT): schema commit d0c64e7f (v1_27 `mcp_comment_author`, local-only road, marker 13 untouched) + five fix commits, each pinned red pre-fix AND red by revert; headless MCP 171/30 · core 2,711/313 · workbook 40/6; Mac batch 352/45 all green; live round PROVEN all four legs (20-block read_note with_ids: zero duplicated texts on the wire · both batches one client-named ⌥⌘Z each, both voices · link_versions → Compare peers, undo unpairs · own-comment delete + her R-VX188-2 sentence byte-equal on the wire); dev store restored verified, her user-scope config byte-identical; stage 17/50 min. 8 PROVISIONALs for the merge (the U3 UNIT RECORD). Notables for the ladder: SyncSpec read AFTER the schema commit (verified post-hoc, nothing changed — the record says so); write receipts' words pinned, not captured live; light voice only on captures; edit-rung any-comment delete is U4's (suggest sentence stands till then). For her: `link_versions` makes Compare PEERS but named pairs don't drive row ALIGNMENT — honest, the description says so, her call (the record's OWED) |
 | U4 — edit parity inside a note | VX-195 | NOT STARTED |
 | U5 — edit parity across the library | VX-196 | NOT STARTED |
 | U6 — the MCP pane in tabs | VX-199 · VX-205 | NOT STARTED |
@@ -60,6 +60,10 @@ dev store only behind an A1 prestage copy, restored verified.
   at the merge). Zero Sync//custody declared.
 - 2026-10-13 01:19–01:41 — U1's window ran under claim vx184-u1 (GO received, handover taken, released early; result line sent).
 - 2026-10-13 — coordinator: she is away from the Pro all night (tmux only), so walks/live rounds need no extra check with her; READY → GO in queue order.
+- 2026-10-13 02:38–02:51 — U2's window ran under claim vx184-u2 (13/40 min; result line sent).
+- 2026-10-13 ~03:30 — coordinator's walk heads-up logged: the What's New sheet may greet a Debug launch (cross-run 0.9.3/0.9.4 version flip in the shared dev defaults domain) — close it with its own button before walking; expected modal, never a finding. Relayed to U3; owed to every later unit's brief.
+- 2026-10-13 ~03:40 — coordinator: main MOVED (VX-179 merged, PR #154, d6caafc1; ledger commits follow). Merge-in planned at the U3→U4 boundary; acknowledged.
+- 2026-10-13 04:32–04:48 — U3's window ran under claim vx184-u3 (handover from coord-for-vx184; 17/50 min; no What's New sheet appeared; result line sent).
 
 ## Tickets minted from this run (THE HANDOFF LISTS ALL OF THESE — her ask, 2026-10-13)
 
