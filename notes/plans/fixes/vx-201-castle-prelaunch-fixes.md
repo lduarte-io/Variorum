@@ -2342,3 +2342,13 @@ the run is complete.**
   whether product issue, this store's backup-layout history, or pre-existing presentation is HER call to route
   (U5's restore-round evidence is unaffected — its pins ran the round at the stage, green).
 - The What's New sheet did not greet any launch. The app was QUIT cleanly; no instances; stage released.
+
+## CLOSED (2026-10-13 morning)
+Merged to main by PR #155 (merge commit d2b133fb); the merge-moment ledgers at bcabca10 (QUESTIONS #216 — the
+copy bundle; the in-flight row retired; MobileSoul PL-47). Members VX-202/110/203/204/206/208/209 Done;
+VX-191 CLOSED with the run; VX-201 Done. VX-233 OPEN per the ruled fallback (partial heal recorded). The
+`/Applications` refresh FOLDED into VX-214's merge refresh (oct12coordinator's call at merge time; F6 named
+pre-cleared to the refresher, NO re-seed riding — her checklist carries the one press). Branch deleted
+origin+local; both worktrees and the pinned checkout removed; run logs deleted. Her morning handoff:
+`notes/handoffs/vx-201-handoff.md`. No further Sync/ or custody change owed; the custody slot released at the
+orchestrator's hard stop.
