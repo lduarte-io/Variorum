@@ -1765,8 +1765,11 @@ name, deletion and place; a note's delete and archive/unarchive — each guard-f
 client-named ⌥⌘Z (P-VX196-1), each pinned red-first per family and red again by revert, the once spend proven per tool, two
 mutations biting. The daily Journal never deletes (fenced on the wire, and the op's guard pinned past an allowing guard); an
 owned book's delete is her "book only" and its with-notes choices stay hers (R-VX184-2's list — the Mac pin walks every tool
-name); Private/Seal/Own untouched (the server pins snapshot the columns). **Not met: the USE leg** — no real client has run a U5
-tool; the Castle lock stopped it (OWED 1). The acceptance gate is use, so this unit is NOT fully accepted until that leg runs.
+name); Private/Seal/Own untouched (the server pins snapshot the columns). **USED** (the third window, on the merged tip): a real
+Claude Code renamed her book, took a note out of it, renamed a chapter and deleted a note in one turn — the book's chapters read
+over the wire first — and four ⌥⌘Z, each named after the client in her Edit menu, walked every act back exactly (verified in the
+app and over the wire); Activity said every act in words in both voices. *(At the second window's close this line read "Not met:
+the USE leg — the Castle lock stopped it"; superseded by the third window.)*
 **Against the spec:** every act is a §9 op's own body (byte-for-byte extractions; her suites unmodified as the parity proof —
 the whole core target 2,743/315 and 79 files' Mac suites); the edit rung's two decisions (AF-10 (a)); the one not-shared answer for
 anything unreachable incl. a fenced book and a Private member (no membership oracle — M2), `rungTooLow` + the ask below edit; a
