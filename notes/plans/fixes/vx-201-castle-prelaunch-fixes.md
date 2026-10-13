@@ -1612,7 +1612,19 @@ apply-check CLEAN at the tip in the pinned checkout)
 
 ## U5 RECORD (VX-209)
 
-**Not done in this unit (stated first):** IN PROGRESS — this line is rewritten at the unit's close.
+**Not done in this unit (stated first):** no `xcodebuild test` of any kind (stage work, per §G) — the 9 new Mac
+pins, their six revert cycles and every existing Mac/phone suite below are **PENDING** the orchestrator's stage
+window, AS STAGE RUNS (every new pin and all six cycles DID run headless here, in a scratch-package harness that
+compiles the production Mac + Shared code byte-copied — evidence of a different kind, recorded as such, never as the
+stage's); **no walk** (GUI work needs a held stage claim — the recipe is below, THE WALK); the phone's simulator
+suites not run (the phone's guide and faces are unchanged; its sweeps read the new Shared literals); **the deeper
+fix NOT built** (corner 45 remembering a Castle store id — §A's stranding argument; VX-209's ticket) and **no
+confirm line on the way-back step itself** (the brief's condition does not reach it — F-U5-3, options for her);
+the enrolled-library shape traced from code, NOT pinned (the world is local-only — F-U5-4); her real store
+untouched, nothing re-seeded (her morning press); no `notes/QUESTIONS.md` entry (merge-moment-only — the drafts
+below are #215's input). Zero lines in `Sources/VariorumCore/Sync/`, no schema, no custody code, and **zero
+adopt/restore MACHINERY lines** (the brief's constraint: `LibraryOpenModel`'s flow, `LibraryAdoption`,
+`landCustody`, the gate and custody are byte-untouched — the model gained one computed confirm fact).
 
 ### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 - 2026-10-13 ~04:35 — U5 implementer (Opus) started. Reading done in this session, never delegated: this file
@@ -1757,6 +1769,182 @@ apply-check CLEAN at the tip in the pinned checkout)
 - VERIFIED (the real project): Mac `build-for-testing` (Variorum, `-derivedDataPath DerivedData/vx201`, index store
   off) `** TEST BUILD SUCCEEDED **` at `6c8bfea2`'s tree, zero warnings in the changed files, the three VX-209 files
   compiled; phone `build-for-testing` (VariorumMobile, generic iOS Simulator, same DerivedData) `** TEST BUILD
-  SUCCEEDED **`, the three changed Shared files compiled for the phone, zero warnings in them. Re-run for this
-  commit's pin change: PENDING the next line.
-- NEXT: the Mac `build-for-testing` again (this commit's pin edit), then the close.
+  SUCCEEDED **`, the three changed Shared files compiled for the phone, zero warnings in them.
+- VERIFIED: the Mac `build-for-testing` re-run at `0250cd3f` (the pin's reconcile leg) — `** TEST BUILD SUCCEEDED
+  **`, zero warnings in the changed files; `DerivedData/vx201` holds HEAD's products. **No revert is applied.**
+- CLOSED (this commit): the verdict, the design, the pins + cycles, the stage protocol and suites (struct types),
+  the walk recipe, the copy drafts, the PROVISIONALs, the findings.
+
+### THE VERDICT (the headline) — §W.2's trace REPRODUCED IN WHOLE, one step earlier than it said
+Run at HEAD (U1–U4 in) through the production pieces, a LOCAL-ONLY Castle library that had a Standard era:
+1. **Restoring the Standard-era backup lands Standard silently** — it opens through the Apple road with nothing
+   typed; custody ends as the silent item holding the backup's key; **the Castle library's Touch ID item is
+   deleted** (`landCustody`: `adoptOpeningKey`, the effective gate `.auto` by the backup's Apple copy).
+2. **Bringing the Castle copy back from `Previous Libraries/<stamp>/` lands Standard too** — the passphrase opens
+   it; `landCustody` finds the backup's key in the silent item for the SAME store id ⇒ `adoptOpeningKey`; the gate
+   reads `.silent` + a key file with a passphrase copy and no Apple copy ⇒ corner 45 ⇒ Standard ⇒ `.auto` ⇒ the
+   Castle key saved SILENT, no Touch ID item; **and the key file gains an Apple copy of the Castle key** — not only
+   at "the next route" as §W.2 said, but already at the adoption's own reopen: the ready road's R1-M3 condition
+   reads `currentEffectiveGate`, whose landing arm writes (F-U5-6). The ready housekeeping's reconcile then
+   VERIFIES it (determined Standard, `appleKeyVerified == true`; VX-202's sweep has nothing to act on).
+3. Attribution: corner 45's silent arm mutated in the harness COPY (`.silent → .castle`) reds exactly the step-2
+   facts and nothing of step 1.
+4. U1's belts do not touch it (as the U1 adjudication's F2 predicted): belt c refuses the landing only while
+   `switchPending` is set — nothing sets it on an adoption; belt b needs a Touch ID item beside the silent one.
+
+### What landed (the design)
+- **Step 2 — the confirm line.** `LibraryOpenModel.leavesCastle(currentIsCastle:incoming:)` — pure, nonisolated,
+  over the CLASSIFIER's verdict: the plaintext arm always; the pair arms (`.encryptedLibrary` / `.snapshotPair` /
+  `.folderHoldingPair`) when the picked copy's OWN key file reads Standard by decision 8's before-sync rule
+  (`Posture.derive` with no vault word and no custody in view: an Apple copy, or no passphrase copy at all); every
+  refusal-shaped verdict false. "Current is Castle" = a library stands (`willStepAside`), the bootstrap is `.ready`
+  and `protection.posture == .castle` — only a ready library can stand behind this door in Castle (the Castle lobby
+  and the failure face render no Open door; the File menu and Settings exist only at ready). Computed once at
+  `enterConfirm` (both roads) from the verdict kept at `land`. ONE copy home, `LibraryOpenCopy.confirmLeavesCastle`,
+  rendered by the ONE sheet (`LibraryOpenSheet`) that File ▸ Open Library…, the lobby faces and Restore from Backup
+  all present — right under the confirm's lead, caption + the alarm voice.
+- **Step 3 — the guide warning.** `ProtectionCopy.privacyOlderCopyParagraph`, the LAST paragraph of the MAC's
+  lesson 2 ("Standard and Castle: what you must keep") via `TutorialSeeder` (`privacyLessonTwoParagraphs +
+  [privacyOlderCopyParagraph]`); the phone's edition untouched (it has neither door). Written against the RUN, and
+  RE-VERIFIED (F-U5-2): Resume Sync first, then Use Castle. Its last sentence is also U1 F2's road (a library a
+  pre-VX-202 build left reading Standard).
+
+### THE PINS (9 new) — the harness's runs and the red-on-old protocol (stage runs PENDING)
+| suite (struct type) | test | kind | red under (each RUN in the harness — LIVE STATUS) |
+|---|---|---|---|
+| `VX209WayBackRoundTripTests` | `aCastleLibraryOpenedOnAStandardEraBackupAndBroughtBackLandsStandardBothWays` | CHARACTERIZATION of the known hazard (P-U5-6) | the corner-45 mutation (harness copy): 4 issues, the step-2 facts only |
+| `VX209LeavesCastleConfirmTests` | `theLineRidesThePairArmAndThePlaintextArmOfTheClassifier` | the decision on real verdicts | **R-209-rule** (4) · **R-209-plaintext** (1) |
+| 〃 | `aCastleLibrarysConfirmCarriesTheLineForAStandardEraBackupAndAnExportOnly` | the model at READY, the real flow | **R-209-rule** (2) · **R-209-plaintext** (1) · **R-209-model** (2) |
+| 〃 | `theOneSheetRendersTheLineForEveryAdoptRoad` | the face (source) | **R-209-face** (3) |
+| 〃 | `theLineNamesTheRoadBackInTheEverydayRegister` | the words | **R-209-guide-words** (1) |
+| `VX209GuideWarningTests` | `theWarningNamesTheDoorsAndTheRoadThatWorks` | the words | **R-209-guide-words** (1) |
+| 〃 | `theWarningKeepsTheGuidesRegister` | the register | BOUND (green under every revert) |
+| 〃 | `theMacsGuideClosesTheCastleLessonOnTheWarning` | the SEEDED Mac guide | **R-209-guide-seed** (1) |
+| 〃 | `afterTheWayBackResumeSyncThenUseCastleIsTheRoadThatOpens` | BOUND — the shipped road the words lean on | green under every revert (it proves shipped behavior) |
+`VX209CastleWorld` (in the round-trip file) is a shared fixture, NOT a suite — never pass it to `-only-testing`.
+The six patches: `notes/plans/fixes/vx-201-u5-reverts/{R-209-rule,R-209-plaintext,R-209-model,R-209-face,
+R-209-guide-seed,R-209-guide-words}.patch` (repo-root-relative; all `git apply --check` clean at the close).
+
+**Stage protocol (from `App/Variorum/`, under a held claim):** green first —
+`xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx201
+-only-testing:VariorumTests/VX209WayBackRoundTripTests -only-testing:VariorumTests/VX209LeavesCastleConfirmTests
+-only-testing:VariorumTests/VX209GuideWarningTests` — expect "Test run with 9 tests in 3 suites" (no `.enabled(if:)`
+gates; the round-trip and road pins sleep 1.1 s each between two adoptions — whole-second stamps, F-U5-7). Then each
+revert ALONE: `git apply notes/plans/fixes/vx-201-u5-reverts/<R>.patch` (from the repo root), `build-for-testing`
+(same flags), the same `test-without-building`, read the reds against the table, `git checkout --` the patched
+file(s), confirm `git diff HEAD --stat` EMPTY; rebuild HEAD after the last cycle. (The harness already ran all six;
+the stage's cycles are the canonical record.)
+
+**Existing suites (changed-SOURCE rule — suites whose source names a changed type: `LibraryOpenModel`,
+`LibraryOpenCopy`, `LibraryOpenSheet`/`LibraryOpenPresenter`, `TutorialSeeder`, the privacy-lesson constants;
+`ProtectionCopy` only GAINED a constant, so beyond the lesson readers its suites are covered by the copy sweeps
+below) — PENDING, one stage run** with `-only-testing:VariorumTests/` + each STRUCT TYPE: VX209WayBackRoundTripTests
+VX209LeavesCastleConfirmTests VX209GuideWarningTests LibraryPortabilityDoorTests CapabilityRegistryTests
+CalmAsksTests NewModesTests ShellConfirmTests TakeCardDoorTests SnippetOpenTargetTests SnippetsLandingTests
+SnippetTagDoorTests SampleLibraryWelcomeTests LaunchFurnitureTests EncryptionBookDoorTests EncryptionExplainedDrillTests
+TourScriptTests TourSpotlightTests TourEngineTests TourPoolTuckTests TourEntryTests TourEndCardTests
+TourEndCardAsideGateTests TutorialBooksLessonTests TutorialBooksRitualTests TutorialBuildFlavorTests
+TutorialCurrencyTests TutorialFurnitureFoldTests TutorialMCPChapterTests TutorialMCPChapterCaptureTests
+TutorialBookShapeTests TutorialDoorTests TutorialWritingActsTests TutorialTakesActsTests TutorialStructureActsTests
+TutorialLookingActsTests TutorialLibraryActsTests TutorialDeletionActsTests TutorialWherePlacesActsTests
+TutorialPrivacyChapterTests TutorialFannedMatrixTests VX204PrivacyLessonTests VX202ReopenRaceTests
+CopyRegisterPinTests Phase13pCopySweepTests ProtectionCopyTests TerminologyPinTests RetiredNamesPinTests
+NoLiteralColourTests StatusSeamVocabularyTests UnfiledWordTests. Already green in the harness (a different kind of
+evidence): the three VX-209 suites, TutorialPrivacyChapterTests, VX204PrivacyLessonTests, every suite in
+`TutorialWalkTests.swift`, NoLiteralColourTests, StatusSeamVocabularyTests, UnfiledWordTests, Phase13pCopySweepTests,
+CopyRegisterPinTests bar its one bundle-resource test (`.resourceMissing` — the harness carries no resources).
+Phone (simulator, by UDID — `-only-testing:VariorumMobileTests/` + each STRUCT TYPE; the files are multi-struct):
+MobileStructuralTests MobileNoRedirectSweepTests (expect ONLY VX-114's pre-existing offenders — no new literal names
+the Mac; pinned by the two `\bMac\b` legs here) MobileCopyRegisterSweepTests MobilePhoneProtectionCopyTests
+MobilePocketGuidePrivacyTests MobileTutorialBookShapeTests.
+
+### THE WALK (the orchestrator's window — the DEV store, Debug build, both voices; it ADOPTS copies on the dev store)
+1. Dev store in Standard, local-only, a passphrase and the twelve words set. Settings ▸ Data Safety ▸ Back Up Now (a
+   Standard-era pair). Settings ▸ Protection ▸ Use Castle… → Enter Castle. Relaunch: Touch ID asks.
+2. Settings ▸ Data Safety ▸ Restore from Backup → the Standard-era row's Open… → the CONFIRM carries the Castle line
+   under "Ready to open this library." — capture (Terminal + Study). Cancel. (Optional: File ▸ Open Library… on a
+   plaintext export — the line again, capture.)
+3. Restore it for real (Open This Library). Settings ▸ Protection reads Standard; the hold banner stands — capture.
+4. File ▸ Open Library… → `Previous Libraries/<stamp>/` (the Castle copy) → the passphrase → the confirm carries NO
+   line (F-U5-3, visible) → Open This Library → Protection STILL reads Standard (the reproduced way-back, live) —
+   capture.
+5. Use Castle… → "Resume sync first — this library was just restored from a copy…" — capture. Resume Sync → Use
+   Castle… → Enter Castle → Done; relaunch asks Touch ID — capture.
+6. The guide: Help ▸ Restore Tutorial… (or a fresh dev store) → keeping it private ▸ "Standard and Castle: what
+   you must keep" → its last paragraph, both voices — capture.
+
+### U5 COPY DRAFTS (for the QUESTIONS #215 bundle — every line PROVISIONAL until she approves)
+Sentence case, no capitals for emphasis, the everyday register (no key named), no device literal (the phone's sweep).
+1. **The confirm's Castle line** (`LibraryOpenCopy.confirmLeavesCastle`), under "Ready to open this library." when
+   the library standing here is Castle and the picked copy isn't: *This copy isn't in Castle, so once it's open your
+   library opens the old way — press Resume Sync, then choose Use Castle again in Settings ▸ Protection to put it
+   back in Castle.*
+   - Alternative A (concrete): *This copy isn't in Castle, so once it's open your library opens without asking and
+     through your Apple account — press Resume Sync, then choose Use Castle again in Settings ▸ Protection.*
+   - Alternative B (true for every account shape — F-U5-4): *This copy isn't in Castle. Once it's open, press Resume
+     Sync, then check Settings ▸ Protection — if it doesn't say Castle, choose Use Castle again.*
+2. **The guide's older-copy paragraph** (`ProtectionCopy.privacyOlderCopyParagraph`, the Mac's lesson 2, last):
+   *Opening an older copy of your library — a backup in Settings ▸ Data Safety ▸ Restore from Backup, or a copy you
+   pick with File ▸ Open Library… — makes that copy your library, and a copy from before Castle opens the old way.
+   Bringing your Castle library back from Previous Libraries afterwards may not undo that. So once you're done with
+   an older copy, press Resume Sync, then check Settings ▸ Protection: if it doesn't say Castle, choose Use Castle
+   again. And any time Protection says Standard when you chose Castle, choose Use Castle again.*
+   - Alternative (shorter): *If you open an older copy of your library (Restore from Backup, or File ▸ Open
+     Library…), Castle may not come with it — even after you bring your Castle library back. When you're done,
+     press Resume Sync and check Settings ▸ Protection; if it doesn't say Castle, choose Use Castle again.*
+
+### PROVISIONALs (mine — each defended; the orchestrator's to confirm or bundle)
+- **P-U5-1 — "the current library is Castle"** = a library stands + `.ready` + `protection.posture == .castle` (the
+  acting posture the pane shows, an enrolled library's custody-shape reading included) — the brief's condition.
+- **P-U5-2 — "the incoming copy reads Standard"** = its OWN key file by decision 8's before-sync rule (the classifier
+  facts the brief names), never a prediction of how it lands on THIS Mac (that needs custody reads per store id).
+- **P-U5-3 — the guide paragraph is the Mac's alone, at the END of lesson 2** (the phone has neither door).
+  Alternative: right after the Castle paragraph.
+- **P-U5-4 — the line's placement and voice:** right under the confirm's lead, caption + the alarm voice (the Castle
+  notices' voice).
+- **P-U5-5 — both texts name Resume Sync before Use Castle** (F-U5-2's verified road, not §W.2's).
+- **P-U5-6 — the reproduction pin is a CHARACTERIZATION pin:** it asserts the hazard as it stands, so it is green at
+  HEAD; in the brief's polarity (a pin asserting the Castle promise) it is RED on HEAD at every step-2 fact — the
+  reproduction. When VX-209's deeper fix lands it goes red by design: FLIP it, never delete it.
+
+### Findings for the orchestrator (dispositions owed by the run)
+- **F-U5-1 — THE VERDICT: REPRODUCED IN WHOLE** (above), with one refinement: the Apple copy of the Castle key lands
+  at the adoption's own reopen, not only at the next launch.
+- **F-U5-2 — §W.2's road was INCOMPLETE; both texts carry the verified one.** Every adoption lands HELD, and a
+  standing hold refuses Use Castle at its door (`resumeSyncFirst`, 13x F1 R1-M1). The road that works — Resume Sync,
+  then Use Castle — is PINNED on the reproduced library (`afterTheWayBackResumeSyncThenUseCastleIsTheRoadThatOpens`).
+  The handoff's and VX-209 ticket's wording of "today's honest instruction" should carry Resume Sync too.
+- **F-U5-3 — the way-back step itself earns NO confirm line under the brief's condition** (by then the current
+  library reads Standard), though it lands the old way while she believes she is restoring Castle. Options: (a) AS
+  BUILT — the step-1 line and the guide name Use Castle (never Previous Libraries) as the road back; (b) a second
+  condition and sentence — the picked copy reads Castle by its own key file AND this Mac's custody for the same store
+  id is silent (the landing will read Standard-waiting) — e.g. *"This copy was in Castle, but on this Mac it will
+  open the old way — press Resume Sync, then choose Use Castle again."*; (c) VX-209's deeper fix retires the need.
+  Recommendation: (a) tonight, (c) after launch; (b) only if she wants it before launch (cheap: a custody READ in
+  the model, no machinery line). Hers — a #215 question.
+- **F-U5-4 — the ENROLLED shape (traced from code, NOT pinned — this world is local-only):** a Standard-era backup
+  of an enrolled Castle library lands Castle-SHAPED (the indeterminate custody shape ⇒ behind Touch ID) with an Apple
+  copy live in its key file until the 13x R1-BLOCKER follow re-keys it, and bringing the Castle copy back restores
+  Castle custody. So for enrolled libraries the line's "opens the old way" overstates the gate half (the Apple half
+  is true until the follow); the guide's "may not undo" and "if it doesn't say Castle" hold. Alternative B above is
+  the shape-independent line.
+- **F-U5-5 — the controller's posture projection reads CASTLE right after the way-back adoption** (observed in a
+  harness-only probe): `adoptResident(opener)` makes `libraryKeyCustodyShape` say gated-or-none even under silent
+  custody, so corner 45 reads the passphrase-only key file as Castle until the next envelope refresh — the ready
+  housekeeping's reconcile, milliseconds later in production (a test opener skips it, so the pin calls it). Record-
+  only; the resident-as-shape heuristic after an Auto-road adoption is worth naming on VX-209's deeper-fix ticket.
+- **F-U5-6 — `currentEffectiveGate` is a read with a write** (the route's landing arm): every read — the ready's
+  R1-M3 condition, `lock()`, the phone's relock coordinator, the migration facts — can land an Apple copy on a
+  Standard-waiting-shaped library. By design for corner 45's heal, and exactly the vector that completes the way-back
+  revert mid-session; for VX-209's deeper-fix ticket.
+- **F-U5-7 — whole-second adoption stamps:** two adoptions inside one second collide on the stamp folders (the
+  second refuses at its safety copy, nothing moved) — unreachable by hand through the sheets; the pins sleep 1.1 s.
+  Record-only.
+- **F-U5-8 — the headless harness (tooling, NOT in the repo):** a scratch SwiftPM package (`vx209-harness/` in the
+  session scratchpad) compiles the Mac target + Shared byte-copied (the `@main` attribute stripped from the COPY of
+  `VariorumApp.swift`; the app target's settings for the library, the test target's for the tests; the project's
+  package pins; the `TestSupport` `CopiedRow.swift`; read-only mirrors of the app folders for source-reading pins) and
+  runs Mac test files under `swift test` — its own process and defaults domain, no Keychain, no dev store, no stage.
+  It ran this unit's pins, the six revert cycles, the attribution mutation and two probes; tests that read bundle
+  resources fail there. Offered as a possible run tool (the stage stays the canonical run); `sync.sh` +
+  `revert-cycle.sh` are its two scripts.
