@@ -32,6 +32,11 @@ struct MCPToolDeclaration: Sendable {
     /// the serving roads read, so a tool is never offered to a standing it
     /// can never act for (P-2 on the wire).
     var needsStandingReach: Bool = false
+    /// VX-184 U3: the MCP `destructiveHint` where the rung alone would say it
+    /// wrong — `delete_comment` is a SUGGEST tool that deletes (its own
+    /// comment, a tombstone, one undo), so its hint says so, honest as the
+    /// edit rung's (P-13nb-U3-16). nil = the rung decides (edit ⇒ true).
+    var destructive: Bool?
 
     /// Listed for this standing? Approved, and the open book (read) or a
     /// live grant at this rung of a scope kind the tool acts under —
@@ -49,7 +54,7 @@ struct MCPToolDeclaration: Sendable {
             annotations: .init(
                 // U3: the edit rung changes what is already there (every act
                 // undoable, the delete a tombstone — but honest hints say so).
-                title: title, readOnlyHint: rung == .read, destructiveHint: rung == .edit,
+                title: title, readOnlyHint: rung == .read, destructiveHint: destructive ?? (rung == .edit),
                 idempotentHint: rung == .read, openWorldHint: false))
     }
 
@@ -84,6 +89,8 @@ enum MCPToolCatalog {
         addTake, addComment, saveLens,
         // VX-184 U3 — VX-173's batch doors (one note, one act, the cap stated).
         addTakes, addComments,
+        // VX-184 U3 — VX-188: a client deletes its OWN comment (R-VX188-1).
+        deleteComment,
     ]
     static let writeNew: [MCPToolDeclaration] = [
         createNote, importDocument, applyTag, createBook, addNoteToBook, createSection,
@@ -381,6 +388,29 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-184 U3 (VX-188, R-VX188-1): at suggest, a client deletes only a
+    /// comment Variorum has on file as its own.
+    static let deleteComment = MCPToolDeclaration(
+        name: "delete_comment", rung: .suggest, title: "Delete your comment",
+        description: """
+            Delete a comment this client left (with add_comment or add_comments). At suggest you \
+            may delete only your own: a comment Variorum doesn't have on file as yours (the \
+            author's, another client's, or one left before Variorum kept that record) is refused. \
+            Nothing is destroyed: the comment joins the block's deleted comments, where the author \
+            can bring it back, and the delete is one undo for them. Get comment ids from read_note \
+            with with_ids: true. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "comment_id": .object(["type": "string", "description": "The comment to delete."]),
+            ]),
+            "required": .array(["comment_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope,
+        destructive: true)
 
     static let saveLens = MCPToolDeclaration(
         name: "save_lens", rung: .suggest, title: "Save a lens",

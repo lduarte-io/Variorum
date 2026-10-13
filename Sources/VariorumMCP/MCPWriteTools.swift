@@ -80,6 +80,8 @@ struct MCPWriteTools: Sendable {
         case deliberate(DeliberateJob)
         /// VX-184 U3 (VX-173): the suggest rung's batch doors (`MCPWriteTools+Batches`).
         case batch(BatchJob)
+        /// VX-184 U3 (VX-188): a client deleting its OWN comment (`MCPWriteTools+CommentDelete`).
+        case deleteComment(commentID: String)
 
         var tool: String {
             switch self {
@@ -87,6 +89,7 @@ struct MCPWriteTools: Sendable {
             case .carriage(let job): job.tool
             case .deliberate(let job): job.tool
             case .batch(let job): job.tool
+            case .deleteComment: "delete_comment"
             case .addTake: "add_take"
             case .addComment: "add_comment"
             case .saveLens: "save_lens"
@@ -173,6 +176,9 @@ struct MCPWriteTools: Sendable {
             if let job = try parseCarriage(name, args) { return .carriage(job) }
             if let job = try parseDeliberate(name, args) { return .deliberate(job) }
             if let job = try parseBatch(name, args) { return .batch(job) }
+            if name == MCPToolCatalog.deleteComment.name {
+                return .deleteComment(commentID: try requiredString(args, "comment_id"))
+            }
             throw ArgumentFailure(message: "Unknown tool: \(name).")
         }
     }
@@ -309,7 +315,9 @@ struct MCPWriteTools: Sendable {
             }
         case .addComment(let blockID, let text):
             return try onBlock(blockID, rung: .suggest, job: job, clientName: clientName) { note, title in
-                let comment = try ops.addComment(toBlock: blockID, text: text, undoLabel: label(.comment))
+                // VX-188: the client is put on file as the comment's writer.
+                let comment = try ops.addComment(
+                    toBlock: blockID, text: text, author: clientName, undoLabel: label(.comment))
                 return (["comment_id": comment.id, "block_id": blockID, "note_id": note],
                         MCPWriteReceipt(clientName: clientName, act: .comment, targetID: note, targetTitle: title,
                                         show: .note(noteID: note, blockID: blockID, select: nil)))
@@ -384,6 +392,8 @@ struct MCPWriteTools: Sendable {
             return try performDeliberate(deliberateJob, job: job, ops: ops, clientName: clientName)
         case .batch(let batchJob):
             return try performBatch(batchJob, job: job, ops: ops, clientName: clientName)
+        case .deleteComment(let commentID):
+            return try performCommentDelete(commentID, job: job, ops: ops, clientName: clientName)
         }
     }
 

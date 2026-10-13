@@ -64,6 +64,9 @@ extension Operations {
         // entry per batch, its label plural ("Undo claude-code's takes"); the
         // receipt counts the batch's items (`MCPWriteReceipt.count`).
         case takes, comments
+        // VX-184 U3 — VX-188's suggest-rung delete of a client's OWN comment
+        // ("Undo claude-code's comment deletion").
+        case commentDelete = "comment deletion"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 
@@ -169,9 +172,21 @@ extension Operations {
     /// `addBlockComment`'s act (its refusals: a dead block, a sealed note,
     /// blank text), with the undo entry: the comment tombstoned (it stays on
     /// the block's deleted-comments surface), the redo flipping it back.
+    ///
+    /// VX-184 U3 (VX-188, R-VX188-1): `author` — the client, as it names
+    /// itself — is put on file as the comment's writer in the SAME transaction
+    /// (`mcp_comment_author`, local-only), so the suggest rung's
+    /// `delete_comment` can later know the comment as the client's own. The
+    /// record outlives an undo (it is a fact of who wrote it).
     @discardableResult
-    public func addComment(toBlock blockID: String, text: String, undoLabel: String) throws -> BlockComment {
-        let comment = try addBlockComment(to: blockID, text: text)
+    public func addComment(
+        toBlock blockID: String, text: String, author client: String, undoLabel: String
+    ) throws -> BlockComment {
+        let comment = try database.write { db in
+            let comment = try insertBlockComment(db, to: blockID, text: text)
+            try recordMCPCommentAuthor(db, commentID: comment.id, client: client)
+            return comment
+        }
         let commentID = comment.id
         undoStack?.register(
             label: undoLabel,

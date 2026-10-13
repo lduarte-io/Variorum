@@ -48,9 +48,10 @@ struct MCPWriteServerTests {
             let names = Set(try await connection.client.listTools().tools.map(\.name))
             // U4 (justified edit, the ritual): the read rung gains show_in_app.
             // VX-184 U3 (justified edit, the ritual): suggest gains VX-173's
-            // batch doors.
+            // batch doors and VX-188's delete_comment.
             #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app",
-                              "add_take", "add_comment", "save_lens", "add_takes", "add_comments"],
+                              "add_take", "add_comment", "save_lens", "add_takes", "add_comments",
+                              "delete_comment"],
                     "a suggest grant lists read + suggest, never a write-new door (P-2)")
 
             let read = try json(try await call(connection, "read_note",
@@ -121,6 +122,9 @@ struct MCPWriteServerTests {
             let deletedTake = try h.operations.branchVariant(two.block.id, from: two.variant.id)
             try h.operations.deleteVariant(deletedTake.id)
             let hersTakes = [one.variant.id, two.variant.id, branch.id, gone.variant.id, deletedTake.id]
+            // VX-184 U3 (justified edit, the ritual): a comment of HERS, for
+            // VX-188's delete_comment to aim at (suggest deletes only its own).
+            let hersComment = try h.operations.addBlockComment(to: one.block.id, text: "her own working note")
             func snapshot() throws -> [String] {
                 try h.database.read { db in
                     let takes = try Row.fetchAll(
@@ -137,7 +141,12 @@ struct MCPWriteServerTests {
                         .map(\.description)
                     let filings = try Row.fetchAll(db, sql: "SELECT section_id FROM reading_post ORDER BY id")
                         .map(\.description)
-                    return takes + placements + blocks + commits + dates + rules + filings
+                    // VX-184 U3 (justified edit — the proof's completeness grows
+                    // with the catalog): HER comment, which delete_comment aims at.
+                    let herComments = try Row.fetchAll(
+                        db, sql: "SELECT * FROM block_comment WHERE id = ?", arguments: [hersComment.id])
+                        .map(\.description)
+                    return takes + placements + blocks + commits + dates + rules + filings + herComments
                 }
             }
             let chapter = try h.operations.createSection(in: book.id, name: "1")
@@ -170,6 +179,10 @@ struct MCPWriteServerTests {
             calls.append(("add_comments", ["note_id": .string(note.id), "comments": .array(blockIDs.map {
                 .object(["block_id": .string($0), "text": .string("a note")])
             })]))
+            // VX-184 U3 (justified edit, the ritual): VX-188's delete_comment,
+            // aimed at HER comment — refused with her ruled sentence (suggest
+            // deletes only a comment on file as the client's own).
+            calls.append(("delete_comment", ["comment_id": .string(hersComment.id)]))
             // The lens picks her NON-chosen take (mutation check 2 of the unit
             // record: picking only chosen takes could not see a lens that
             // moved the chosen pointer — the first draft of this pin did).

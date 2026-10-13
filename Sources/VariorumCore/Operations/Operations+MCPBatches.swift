@@ -106,9 +106,12 @@ extension Operations {
     /// same note and block checks as `addTakes`; metadata, no touch, no churn.
     /// ONE undo entry: every comment tombstoned in ONE transaction (each stays
     /// on its block's deleted-comments surface), the redo flipping them back.
+    /// VX-188 (R-VX188-1): each comment is put on file as `author`'s in the
+    /// same transaction (`addComment`'s record).
     @discardableResult
     public func addComments(
-        _ items: [MCPCommentItem], inNote noteID: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil
+        _ items: [MCPCommentItem], inNote noteID: String, author client: String, undoLabel: String,
+        guardedBy guardian: WriteGuard? = nil
     ) throws -> [BlockComment] {
         let comments: [BlockComment] = try database.write { db in
             try guardian?(db)
@@ -116,7 +119,9 @@ extension Operations {
             return try items.enumerated().map { index, item in
                 do {
                     try requireBlock(db, item.blockID, placedIn: noteID)
-                    return try insertBlockComment(db, to: item.blockID, text: item.text)
+                    let comment = try insertBlockComment(db, to: item.blockID, text: item.text)
+                    try recordMCPCommentAuthor(db, commentID: comment.id, client: client)
+                    return comment
                 } catch {
                     throw MCPBatchItemRefusal(index: index, underlying: error)
                 }

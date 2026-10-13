@@ -87,14 +87,17 @@ struct MCPWriteActsTests {
         try withUndo { ops, stack, db in
             let note = try ops.createPost(title: "ch 1")
             let seeded = try ops.seedBlock(in: note.id, text: "text")
-            let comment = try ops.addComment(toBlock: seeded.block.id, text: "Fact check: true.", undoLabel: label(.comment))
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-188): the door's
+            // comment now names its writer (`author:`), put on file with it.
+            let comment = try ops.addComment(
+                toBlock: seeded.block.id, text: "Fact check: true.", author: client, undoLabel: label(.comment))
             #expect(stack.topLabel == "claude-code's comment")
             #expect(try stack.undo(with: ops) != nil)
             #expect(try db.deletedAt("block_comment", comment.id) != nil)
             #expect(try stack.redo(with: ops) != nil)
             #expect(try db.deletedAt("block_comment", comment.id) == nil)
             #expect(throws: OperationError.invalidCommentText) {
-                try ops.addComment(toBlock: seeded.block.id, text: "  ", undoLabel: label(.comment))
+                try ops.addComment(toBlock: seeded.block.id, text: "  ", author: client, undoLabel: label(.comment))
             }
         }
     }

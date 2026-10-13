@@ -153,7 +153,7 @@ extension MCPWriteTools {
                 try requireBlocks(items.map(\.blockID), of: noteID, key: "comments")
                 let comments = try itemized("comments") {
                     try ops.addComments(
-                        items, inNote: noteID, undoLabel: label(.comments),
+                        items, inNote: noteID, author: clientName, undoLabel: label(.comments),
                         guardedBy: guardNotes(clientName, rung: .suggest) { _ in [noteID] })
                 }
                 return (["note_id": noteID, "comment_ids": comments.map(\.id)],

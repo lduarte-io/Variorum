@@ -83,9 +83,11 @@ struct MCPBatchActsTests {
                         == .blockNotInContainer(blockID: foreign.block.id, containerID: note.id))
             }
             do {
+                // VX-188 (A JUSTIFIED EDIT, the ritual): the batch names its
+                // comments' writer (`author:`), put on file with them.
                 _ = try ops.addComments([
                     .init(blockID: one.block.id, text: "good"), .init(blockID: one.block.id, text: "  "),
-                ], inNote: note.id, undoLabel: label(.comments))
+                ], inNote: note.id, author: client, undoLabel: label(.comments))
                 Issue.record("a blank comment must refuse the batch")
             } catch let refusal as Operations.MCPBatchItemRefusal {
                 #expect(refusal.index == 1 && refusal.underlying as? OperationError == .invalidCommentText)
