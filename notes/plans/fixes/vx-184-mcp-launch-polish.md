@@ -64,6 +64,8 @@ dev store only behind an A1 prestage copy, restored verified.
 - 2026-10-13 ~03:30 — coordinator's walk heads-up logged: the What's New sheet may greet a Debug launch (cross-run 0.9.3/0.9.4 version flip in the shared dev defaults domain) — close it with its own button before walking; expected modal, never a finding. Relayed to U3; owed to every later unit's brief.
 - 2026-10-13 ~03:40 — coordinator: main MOVED (VX-179 merged, PR #154, d6caafc1; ledger commits follow). Merge-in planned at the U3→U4 boundary; acknowledged.
 - 2026-10-13 04:32–04:48 — U3's window ran under claim vx184-u3 (handover from coord-for-vx184; 17/50 min; no What's New sheet appeared; result line sent).
+- 2026-10-13 ~05:00 — the U3→U4 boundary merge-in: main merged INTO the branch (a79dbf6a — VX-179 at d6caafc1 + its ledgers; one conflict resolved into U3's reapplyAddedComment body form so the purge belt rides the batch road; one semantic repair 018cf23c, VX-179's new purge pin gains U3's author: param); suites green on the merged tree (MCP 171/30 · core 2,724/313 · workbook 40/6 — the run's new baseline).
+- 2026-10-13 06:18–06:32 — U4's window ran under claim vx184-u4 (handover from coord-for-vx184; 14/60 min; result line sent). Main checked post-U4: unmoved (804b9c4c already merged in).
 
 ## Tickets minted from this run (THE HANDOFF LISTS ALL OF THESE — her ask, 2026-10-13)
 
