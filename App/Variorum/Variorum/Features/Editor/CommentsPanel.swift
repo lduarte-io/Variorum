@@ -35,6 +35,22 @@
 //  fence (`Queries.deletedBlockComments`) drops the row at once on every
 //  device, and the janitor (or, unsynced, the local sweep) takes the bytes.
 //
+//  ── VX-179 U3: THE CARET, AND THE PRISTINE PASS (her items 1 + 4) ────────
+//  *"the comment pane's cursor to start typing in is misaligned"* — the
+//  placeholder was a SwiftUI overlay placed by a guess at `TextEditor`'s
+//  private insets, 8 pt off on macOS 27 (traced and measured — the run
+//  record's U3 section). Every writing area is now `CommentTextArea`, whose
+//  geometry is ours (`CommentsPanelMetrics`) and whose placeholder and mark
+//  are laid out by the same engine as her text. Then the look: one WRITING
+//  column for every word (the composer's, each comment's, each stamp's) and
+//  one CHROME column for edges; the add area reads as a writing box — the
+//  voice's card paper and hairline, the accent while the caret is in it, its
+//  keys and its Add inside it; the deleted fold a quieter twin of the live
+//  list; every word in `CommentsPanelCopy`; every refusal in words
+//  (`CommentsPanelRefusalCopy`). The §2 D contract is untouched: the add
+//  area owns the leftover room, a click anywhere in it lands the caret,
+//  ⌘⏎ files, ⎋ clears, ⏎ is a newline.
+//
 
 import AppKit
 import Foundation
@@ -145,7 +161,7 @@ final class CommentsPanelModel {
             }
         } catch is CancellationError {
         } catch {
-            status = .refusal("Comments observation failed: \(error)")
+            status = .refusal(CommentsPanelCopy.observationFailed)
         }
     }
 
@@ -366,18 +382,11 @@ final class CommentsPanelModel {
         do {
             try await session.runner.run(body)
             return true
-        } catch let error as OperationError {
-            switch error {
-            case .lockedPost:
-                status = .refusal(CommentsPanelCopy.sealed)
-            case .invalidCommentText:
-                status = .refusal(CommentsPanelCopy.needsText)
-            default:
-                status = .refusal("Refused: \(error)")
-            }
-            return false
         } catch {
-            status = .refusal(String(describing: error))
+            // Every refusal in words (VX-179 U3, O-3): the seal and the empty
+            // comment exactly as before, the comment races in the panel's
+            // own words, everything else in the app's ONE vocabulary.
+            status = .refusal(CommentsPanelRefusalCopy.message(for: error))
             return false
         }
     }
@@ -391,7 +400,8 @@ enum CommentsPanelCopy {
     /// Emptying a comment is not how you remove one: the door that removes
     /// it is named, and it is one click away on the same row.
     static let emptied = "A comment needs some text — Delete removes it."
-    static let deleted = "Comment deleted — it is under \"deleted\" below, restorable."
+    /// Names the fold by its own word (VX-179 U3: the toggle reads "Deleted").
+    static let deleted = "Comment deleted — it's under Deleted below, restorable."
     static let restored = "Comment restored."
     /// VX-179 (R-VX179-3) — "Delete forever…" beside Restore in the deleted
     /// fold. Sentence case throughout (her no-shouty-caps rule); the ellipsis
@@ -406,11 +416,82 @@ enum CommentsPanelCopy {
         "It leaves every device, and there's no putting it back."
     static let deleteForeverConfirm = "Delete forever"
     static let deletedForever = "Comment deleted forever."
+    static let deleteForeverHelp = "Removes this comment from every device. Asks first."
     static let addPlaceholder = "Write a comment…"
-    static let unsavedMark = "unsaved · ⌘⏎"
-    /// The foot's standing line — it teaches all three keys at once and
+    /// Sentence case since VX-179 U3 (her no-shouty-caps rule, read both
+    /// ways: a sentence starts with its capital). The Terminal voice
+    /// lowercases it through `chromeLabel`, exactly as before.
+    static let unsavedMark = "Unsaved · ⌘⏎"
+    /// The composer's standing line — it teaches all three keys at once and
     /// never changes, so nothing under her hands moves as she types.
     static let keysHint = "⏎ new line · ⌘⏎ saves · ⎋ undoes"
+
+    // VX-179 U3 — every word the panel shows lives here (the pass's rule:
+    // one place a pin reads and the walk sees; chrome goes through the
+    // voice's `chromeLabel` at the view).
+    static let title = "Comments"
+    static let close = "Close"
+    static let save = "Save"
+    static let revert = "Revert"
+    static let delete = "Delete"
+    static let restore = "Restore"
+    static let add = "Add"
+    static let cancel = "Cancel"
+    /// The word before a deleted comment's date ("Deleted Oct 12, …"), and
+    /// the fold's own noun.
+    static let deletedWord = "Deleted"
+
+    /// The deleted fold's toggle: its state mark, its noun, its count.
+    static func deletedFold(count: Int, open: Bool) -> String {
+        "\(open ? "▾" : "▸") \(deletedWord) (\(count))"
+    }
+
+    /// A comment's stamp — the one date format both lists wear.
+    static func stamp(_ date: Date) -> String {
+        date.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    /// The live listing could not be read (the observation threw). Said as
+    /// what happened and what to do — never the raw error (O-3's class).
+    static let observationFailed =
+        "This block's comments couldn't be read just now — close this and open it again."
+}
+
+/// **The panel's refusals, in words** (VX-179 U3 — U1's observation O-3: the
+/// `perform` door's fallback printed `Refused: \(error)`, a raw enum with a
+/// UUID in it). `TrayRefusalCopy`'s shape: the surface speaks the cases only
+/// it can word well, then hands everything else to the app's ONE operations
+/// vocabulary (`OpsRefusalCopy.message(for:)`).
+///
+/// The comment cases are the panel's own because nothing else words them:
+/// `commentNotFound` and `commentNotDeleted` are mapped NOWHERE in the
+/// shared table (whose own fallback is still the raw dump), and the table's
+/// `purgeTargetNotDeleted` sentence speaks of the Trash — wrong here, where
+/// it means a comment restored (elsewhere, or by a second press) between the
+/// listing and "Delete forever". Each is a race the panel can meet; each
+/// says nothing was lost.
+enum CommentsPanelRefusalCopy {
+    static let commentGone =
+        "That comment isn't here any more — it may have just been changed on another device."
+    static let commentAlreadyBack = "That comment is already back — it's in the list above."
+    static let nothingToDeleteForever =
+        "That comment was restored, so there's nothing to delete forever — it's in the list above."
+    static let blockGone = "This block is gone, and its comments went with it."
+
+    static func message(for error: Error) -> String {
+        if let error = error as? OperationError {
+            switch error {
+            case .lockedPost: return CommentsPanelCopy.sealed
+            case .invalidCommentText: return CommentsPanelCopy.needsText
+            case .commentNotFound: return commentGone
+            case .commentNotDeleted: return commentAlreadyBack
+            case .purgeTargetNotDeleted: return nothingToDeleteForever
+            case .blockNotFound: return blockGone
+            default: break
+            }
+        }
+        return OpsRefusalCopy.message(for: error)
+    }
 }
 
 // MARK: - Where the caret is (13u3 UNIT A2)
@@ -601,7 +682,7 @@ struct CommentsPanel: View {
             if let status = model.status { statusLine(status) }
             hairline
             writingSurface
-            footer
+            deletedFold
         }
         // The shipped panel was 440 × 320 — a list with a one-line field. A
         // writing surface needs room to be one: this is the size at which
@@ -626,7 +707,7 @@ struct CommentsPanel: View {
             Button(CommentsPanelCopy.deleteForeverConfirm, role: .destructive) {
                 Task { await model.deleteForever(id) }
             }
-            Button("Cancel", role: .cancel) { model.cancelDeleteForever() }
+            Button(CommentsPanelCopy.cancel, role: .cancel) { model.cancelDeleteForever() }
         } message: { _ in
             Text(CommentsPanelCopy.deleteForeverMessage)
         }
@@ -666,23 +747,27 @@ struct CommentsPanel: View {
 
     // MARK: Chrome
 
+    /// The title, the count (only when there is something to count — a "0"
+    /// beside an empty panel says nothing the empty panel does not), Close.
     private var header: some View {
-        HStack(spacing: 8) {
-            Text(tokens.chromeLabel("Comments"))
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(tokens.chromeLabel(CommentsPanelCopy.title))
                 .font(tokens.heading)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
-            Text("\(model.comments.count)")
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
-                .lineLimit(1)
+            if !model.comments.isEmpty {
+                Text("\(model.comments.count)")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+            }
             Spacer(minLength: 8)
-            Button(tokens.chromeLabel("Close")) { close() }
+            Button(tokens.chromeLabel(CommentsPanelCopy.close)) { close() }
                 .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
         }
         .padding(.horizontal, Metrics.inset)
-        .padding(.top, Metrics.inset)
-        .padding(.bottom, 8)
+        .padding(.top, Metrics.headerTop)
+        .padding(.bottom, Metrics.headerBottom)
     }
 
     /// The panel's ONE message slot, in the class its door gave it: a refusal
@@ -692,11 +777,17 @@ struct CommentsPanel: View {
             tokens: tokens, text: status.text,
             ink: status.isRefusal ? tokens.alarm : tokens.muted, lines: 3)
             .padding(.horizontal, Metrics.inset)
-            .padding(.bottom, 8)
+            .padding(.bottom, Metrics.headerBottom)
     }
 
     private var hairline: some View {
         Rectangle().fill(tokens.line).frame(height: 1)
+    }
+
+    /// Between two comments: the same hairline, held in from the panel's
+    /// edges — rows of one list, not bands of the panel.
+    private var rowHairline: some View {
+        hairline.padding(.horizontal, Metrics.inset)
     }
 
     // MARK: The writing surface
@@ -709,11 +800,11 @@ struct CommentsPanel: View {
     /// separate boxes rather than one long scroll: the walk built three
     /// comments in the shipped 320 pt panel and the one-scroll version put
     /// the add area entirely below the fold — a writing surface you have to
-    /// go looking for is the complaint this unit answers, not an answer to
+    /// go looking for is the complaint 13u3 A2 answered, not an answer to
     /// it.
     private var writingSurface: some View {
         GeometryReader { geo in
-            let room = max(0, geo.size.height - 1)  // the hairline between them
+            let room = max(0, geo.size.height)
             let cap = max(0, room - Metrics.addFloor)
             // Before the first measurement the list takes its whole cap —
             // otherwise nothing mounts, nothing measures, and the panel
@@ -725,9 +816,8 @@ struct CommentsPanel: View {
                 if listHeight > 0 {
                     commentsList
                         .frame(height: listHeight)
-                    hairline
                 }
-                addArea(height: max(Metrics.addFloor, room - listHeight))
+                composer(height: max(Metrics.addFloor, room - listHeight))
             }
         }
     }
@@ -739,9 +829,10 @@ struct CommentsPanel: View {
                     ForEach(Array(model.comments.enumerated()), id: \.element.id) { pair in
                         commentRow(pair.element)
                             .id(pair.element.id)
-                        if pair.offset < model.comments.count - 1 { hairline }
+                        if pair.offset < model.comments.count - 1 { rowHairline }
                     }
                 }
+                .padding(.top, Metrics.listTop)
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
                     commentsHeight = $0
                 }
@@ -758,27 +849,70 @@ struct CommentsPanel: View {
         }
     }
 
-    /// The add area is a FIXED box the size of the room left over, and the
-    /// only text area in the panel that keeps its own scrolling: a draft
-    /// longer than the room has to follow the caret, which is exactly what
-    /// the text view does by itself and what no outer scroll view would do.
-    private func addArea(height: CGFloat) -> some View {
-        CommentTextArea(
-            text: $model.addDraft,
-            style: CommentTextStyle(tokens: tokens, ink: tokens.ink),
-            placeholder: tokens.chromeLabel(CommentsPanelCopy.addPlaceholder),
-            growsWithText: false,
-            focusRequest: addFocusRequest,
-            onFocusChange: { report(.add, inArea: $0) })
-            .frame(height: max(0, height - 2 * Metrics.rowAir))
-            .padding(.horizontal, Metrics.inset)
-            .padding(.vertical, Metrics.rowAir)
+    /// **THE COMPOSER — the add area, as a place to write** (VX-179 U3, her
+    /// item 4: *"make sure that the comment area is actually pristine"*; the
+    /// screenshot's empty panel read as a void with a word floating in it).
+    ///
+    /// It is still the add area of §2 D, whole: it owns every point the
+    /// comments leave (the card IS that room, at the floor or more), a click
+    /// anywhere in it lands the caret (the text fills the card; its padding
+    /// and its foot ask for the caret too), ⌘⏎ or Add files, ⎋ clears, ⏎ is
+    /// a newline. What changed is only how it reads: the voice's own card
+    /// paper and hairline (`VoicedField`'s idiom — the app's writing box, no
+    /// bezel), the hairline taking the accent while the caret is in it, and
+    /// the keys and the Add door living IN the box they act on rather than in
+    /// a bar below the panel.
+    private func composer(height: CGFloat) -> some View {
+        let live = focus == .add
+        let shape = RoundedRectangle(cornerRadius: Metrics.composerCorner)
+        return VStack(alignment: .leading, spacing: Metrics.composerFootGap) {
+            CommentTextArea(
+                text: $model.addDraft,
+                style: CommentTextStyle(tokens: tokens, ink: tokens.ink),
+                placeholder: tokens.chromeLabel(CommentsPanelCopy.addPlaceholder),
+                growsWithText: false,
+                focusRequest: addFocusRequest,
+                onFocusChange: { report(.add, inArea: $0) })
+            HStack(alignment: .center, spacing: 10) {
+                Text(tokens.chromeLabel(CommentsPanelCopy.keysHint))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                    // The words are a hint, not a door: a click on them is a
+                    // click on the composer (the background's caret ask).
+                    .allowsHitTesting(false)
+                Spacer(minLength: 8)
+                Button(tokens.chromeLabel(CommentsPanelCopy.add)) {
+                    Task { await model.fileAddDraft() }
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                .disabled(!model.isAddDraftFilable)
+            }
+        }
+        .padding(.horizontal, Metrics.composerPadding)
+        .padding(.top, Metrics.composerPadding)
+        .padding(.bottom, Metrics.composerFootPadding)
+        .frame(height: max(0, height - Metrics.composerMargin * 2))
+        .background {
+            // Click-anywhere, for the points the text view does not cover —
+            // the card's padding and its foot. (The text's own points are
+            // AppKit's: a click there places the caret where she clicked.)
+            shape.fill(tokens.card)
+                .onTapGesture { addFocusRequest += 1 }
+        }
+        .overlay(
+            shape.stroke(
+                live ? tokens.accent.opacity(Metrics.composerLiveStrokeOpacity) : tokens.line,
+                lineWidth: 1)
+                .allowsHitTesting(false))
+        .padding(.horizontal, Metrics.inset)
+        .padding(.vertical, Metrics.composerMargin)
     }
 
     @ViewBuilder
     private func commentRow(_ comment: BlockComment) -> some View {
         let dirty = model.isDirty(comment.id)
-        VStack(alignment: .leading, spacing: 1) {
+        VStack(alignment: .leading, spacing: Metrics.stampGap) {
             // The voice's own comment mark (R1's idiom slot — "// " in
             // Terminal, nothing in Study) is the AREA's: a twin beside the
             // text, on the text's own first baseline (VX-179 U3). Never part
@@ -791,7 +925,7 @@ struct CommentsPanel: View {
                 onFocusChange: { report(.comment(comment.id), inArea: $0) })
             stampLine(comment, dirty: dirty)
         }
-        .padding(.horizontal, Metrics.inset)
+        .padding(.horizontal, Metrics.writingInset)
         .padding(.vertical, Metrics.rowAir)
     }
 
@@ -799,7 +933,7 @@ struct CommentsPanel: View {
     /// unsaved changes, and its doors.
     private func stampLine(_ comment: BlockComment, dirty: Bool) -> some View {
         HStack(spacing: 6) {
-            Text(comment.createdAt.formatted(date: .abbreviated, time: .shortened))
+            Text(CommentsPanelCopy.stamp(comment.createdAt))
                 .font(tokens.small)
                 .foregroundStyle(tokens.faint)
                 .lineLimit(1)
@@ -811,14 +945,16 @@ struct CommentsPanel: View {
             }
             Spacer(minLength: 8)
             if dirty {
-                Button(tokens.chromeLabel("Save")) {
+                Button(tokens.chromeLabel(CommentsPanelCopy.save)) {
                     Task { await model.commitEdit(comment.id) }
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                Button(tokens.chromeLabel("Revert")) { model.revertEdit(comment.id) }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                Button(tokens.chromeLabel(CommentsPanelCopy.revert)) {
+                    model.revertEdit(comment.id)
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
             }
-            Button(tokens.chromeLabel("Delete")) {
+            Button(tokens.chromeLabel(CommentsPanelCopy.delete)) {
                 Task { await model.delete(comment.id) }
             }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
@@ -828,72 +964,44 @@ struct CommentsPanel: View {
         .padding(.leading, Metrics.firstLineOrigin.x)
     }
 
-    // MARK: The foot — the keys, the deleted fold, the add door
+    // MARK: The foot — the deleted fold
 
-    private var footer: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            if deletedShown && !model.deleted.isEmpty {
+    /// **The deleted fold, at the foot** (§2 D: "never skimpy"; outside the
+    /// writing surface, so the add area's space is never theirs). Only
+    /// present when something is deleted — an empty panel has no foot.
+    ///
+    /// ONE visual language with the live list (VX-179 U3): a deleted row is
+    /// a live row in a quieter register — its words struck through and
+    /// muted, and under them the same stamp line (when it was deleted, then
+    /// its doors at the trailing edge: Restore, the door you probably want,
+    /// and U1's "Delete forever…", present but never calling).
+    @ViewBuilder
+    private var deletedFold: some View {
+        if !model.deleted.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
                 hairline
-                deletedList
-            }
-            hairline
-            HStack(spacing: 10) {
-                Text(tokens.chromeLabel(CommentsPanelCopy.keysHint))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .lineLimit(1)
-                Spacer(minLength: 8)
-                if !model.deleted.isEmpty {
-                    Button(tokens.chromeLabel(
-                        "\(deletedShown ? "▾" : "▸") deleted (\(model.deleted.count))")) {
-                        deletedShown.toggle()
-                    }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                Button(tokens.chromeLabel(CommentsPanelCopy.deletedFold(
+                    count: model.deleted.count, open: deletedShown))) {
+                    deletedShown.toggle()
                 }
-                Button(tokens.chromeLabel("Add")) { Task { await model.fileAddDraft() } }
-                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
-                    .disabled(!model.isAddDraftFilable)
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                // The word, not the button's hover wash, lines up with the
+                // rows' writing: the vocabulary's own label inset, by name.
+                .padding(.horizontal, Metrics.inset - VoicedButtonStyle.labelInset)
+                .padding(.vertical, Metrics.foldToggleAir)
+                if deletedShown { deletedList }
             }
-            .padding(.horizontal, Metrics.inset)
-            .padding(.vertical, 8)
         }
     }
 
-    /// Deleted comments stay VISIBLE and RESURRECTABLE (the never-skimpy
-    /// rule, her 2026-07-17 word) — and they live at the foot, outside the
-    /// writing surface, so the add area's space is never theirs.
     private var deletedList: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(model.deleted, id: \.id) { comment in
-                    HStack(alignment: .top, spacing: 8) {
-                        Text(comment.text)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .strikethrough()
-                            .lineLimit(3)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Spacer(minLength: 8)
-                        Button(tokens.chromeLabel("Restore")) {
-                            Task { await model.restore(comment.id) }
-                        }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                        // VX-179 (R-VX179-3): the fold is a TRASH SURFACE —
-                        // every row in it is already deleted — so the purge
-                        // door may live here and nowhere in the writing.
-                        // Quiet ink: present, never calling; the confirm is
-                        // where the destructive register speaks.
-                        Button(tokens.chromeLabel(CommentsPanelCopy.deleteForeverVerb)) {
-                            model.requestDeleteForever(comment.id)
-                        }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                        .help("Removes this comment from every device. Asks first.")
-                    }
-                    .padding(.vertical, 4)
+                ForEach(Array(model.deleted.enumerated()), id: \.element.id) { pair in
+                    deletedRow(pair.element)
+                    if pair.offset < model.deleted.count - 1 { rowHairline }
                 }
             }
-            .padding(.horizontal, Metrics.inset)
-            .padding(.vertical, 4)
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
                 deletedHeight = $0
             }
@@ -903,6 +1011,42 @@ struct CommentsPanel: View {
         // (the walk's third find: opening it clipped the live comments).
         // It takes what it holds, up to the cap.
         .frame(height: min(max(deletedHeight, 1), Metrics.deletedListMaxHeight))
+    }
+
+    private func deletedRow(_ comment: BlockComment) -> some View {
+        VStack(alignment: .leading, spacing: Metrics.stampGap) {
+            Text(comment.text)
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .strikethrough(color: tokens.faint)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 6) {
+                Text(tokens.chromeLabel(CommentsPanelCopy.deletedWord) + " "
+                    + CommentsPanelCopy.stamp(comment.deletedAt ?? comment.updatedAt))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                Spacer(minLength: 8)
+                Button(tokens.chromeLabel(CommentsPanelCopy.restore)) {
+                    Task { await model.restore(comment.id) }
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                // VX-179 (R-VX179-3): the fold is a TRASH SURFACE — every row
+                // in it is already deleted — so the purge door may live here
+                // and nowhere in the writing. Quiet ink: present, never
+                // calling; the confirm is where the destructive register
+                // speaks.
+                Button(tokens.chromeLabel(CommentsPanelCopy.deleteForeverVerb)) {
+                    model.requestDeleteForever(comment.id)
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help(CommentsPanelCopy.deleteForeverHelp)
+            }
+        }
+        .padding(.leading, Metrics.firstLineOrigin.x)
+        .padding(.horizontal, Metrics.writingInset)
+        .padding(.vertical, Metrics.rowAir)
     }
 
     // MARK: Doors
@@ -1001,13 +1145,46 @@ nonisolated enum CommentsPanelMetrics {
     /// The mark's ink: the panel row's shipped 0.75 of the comment ink.
     static let markInkOpacity: CGFloat = 0.75
 
-    // MARK: The panel's layout (taste — PROVISIONAL)
+    // MARK: The panel's layout (taste — PROVISIONAL, VX-179 U3's pass)
 
+    /// THE CHROME COLUMN — the title, the composer card's edge, the
+    /// hairlines, the fold's toggle. (12 before the pass.)
+    static let inset: CGFloat = 16
+    /// The composer card's inner padding, sides and top.
+    static let composerPadding: CGFloat = 12
+    /// **THE WRITING COLUMN** — where every piece of prose in the panel
+    /// starts: the composer's text (the card's edge + its padding), every
+    /// comment and every stamp line, live or deleted. One edge for words,
+    /// one for chrome.
+    static var writingInset: CGFloat { inset + composerPadding }
+    static let headerTop: CGFloat = 14
+    static let headerBottom: CGFloat = 10
+    /// Air between the header's hairline and the first comment.
+    static let listTop: CGFloat = 4
+    /// A row's vertical padding. (7 before the pass — when every row also
+    /// carried 16 pt of dead air under its text, which the pass's control
+    /// retired.)
+    static let rowAir: CGFloat = 9
+    /// Between a comment's text and its stamp line.
+    static let stampGap: CGFloat = 3
     /// The add area never shrinks below this, however many comments there
     /// are: a writing box you cannot write two lines in is the complaint
-    /// 13u3 A2 answered.
-    static let addFloor: CGFloat = 132
-    static let rowAir: CGFloat = 7
-    static let inset: CGFloat = 12
+    /// 13u3 A2 answered. (132 before the pass; the floor now holds the
+    /// composer card's margins and its foot row too, so 156 keeps ≈ 86 pt
+    /// of writing room — three lines of Study, four of Terminal.)
+    static let addFloor: CGFloat = 156
+    /// The composer card's margin above and below.
+    static let composerMargin: CGFloat = 12
+    /// The card's inner padding under its foot row.
+    static let composerFootPadding: CGFloat = 8
+    /// Between the writing and the foot row (the keys, Add).
+    static let composerFootGap: CGFloat = 6
+    /// `VoicedField`'s radius — the app's writing box.
+    static let composerCorner: CGFloat = 8
+    /// The card's hairline while the caret is in it: the accent at
+    /// `VoicedChip`'s "on" strength.
+    static let composerLiveStrokeOpacity: Double = 0.55
+    /// The deleted fold's toggle row, above and below.
+    static let foldToggleAir: CGFloat = 6
     static let deletedListMaxHeight: CGFloat = 132
 }

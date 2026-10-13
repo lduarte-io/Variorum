@@ -618,9 +618,9 @@ panel's control verbatim in an `NSHostingView` and reads the real text view's ge
 | U3-b | TRACE: the offscreen probe measures `TextEditor`'s real insets / padding / typing attributes / caret rect vs the hand-assumed `topInset 8 / leadingInset 5`; the sweep measured | DONE (13b8807e) — the numbers and the mechanism below |
 | U3-c | the mechanism decision | STOPPED AT FORK F-U3-1 (13b8807e) — the traced fix is a `PanelTextArea` rewrite; the proposal below, the orchestrator rules |
 | U3-d1 | Q-2: `CaptureTextView` owns `textInset`/`lineFragmentPadding`/`firstLineOrigin` as named statics; `makeNSView` reads them; `QuickEntryBar.placeholderOrigin` = the box's origin (the 2 pt fix); `QuickNoteView.placeholderOrigin` derived = (6, 6), visibly unchanged | DONE (1d347966) — plain build SUCCEEDED, zero warnings in the three files |
-| U3-d2 | Q-1/Q-3: `Features/Editor/CommentTextArea.swift` (the AppKit control — owned geometry, explicit typing attributes, the twin placeholder, the twin `//` mark, measured row height, first-responder reports + counted, HELD focus request); `CommentsPanel` rewired (`PanelTextArea` + its ruler retired; `@FocusState` → `focus` fed by the reports through the pure `CommentPanelFocus.after(report:inArea:current:)`; ONE `CommentsPanelMetrics`) | DONE (this commit) — plain build SUCCEEDED, zero warnings in touched files; the REAL compiled control verified offscreen (the evidence table below). Mark: SwiftUI does NOT bridge `firstBaselineOffsetFromTop` for a representable (measured, `baseline.swift`), so the mark is a second configured twin owned by the control |
+| U3-d2 | Q-1/Q-3: `Features/Editor/CommentTextArea.swift` (the AppKit control — owned geometry, explicit typing attributes, the twin placeholder, the twin `//` mark, measured row height, first-responder reports + counted, HELD focus request); `CommentsPanel` rewired (`PanelTextArea` + its ruler retired; `@FocusState` → `focus` fed by the reports through the pure `CommentPanelFocus.after(report:inArea:current:)`; ONE `CommentsPanelMetrics`) | DONE (fa488500) — plain build SUCCEEDED, zero warnings in touched files; the REAL compiled control verified offscreen (the evidence table below). Mark: SwiftUI does NOT bridge `firstBaselineOffsetFromTop` for a representable (measured, `baseline.swift`), so the mark is a second configured twin owned by the control |
 | U3-d3 | pins: pure geometry tables (the panel's text metrics, the capture origins); mounted pins offscreen-hosted (twin == caret line, mark baseline == text baseline, no dead air, typing attributes); RUN PENDING stage | NOT-STARTED |
-| U3-e | the pristine pass: the add area's empty state, header/footer rhythm, stamp lines, the deleted fold as ONE language (Restore + "Delete forever…"), O-3 (`TrayRefusalCopy`'s shape — panel-own arms, then `OpsRefusalCopy.message(for:)`; note that table's own fallback is still `"Refused: \(error)"` and `commentNotFound`/`commentNotDeleted` are mapped NOWHERE, so the panel words them), sentence case, taste numbers in one Metrics place | NOT-STARTED |
+| U3-e | the pristine pass (the look, both voices, both appearances, sheet + popover hosts — one view): the COMPOSER (the add area as the voice's writing box: card paper + hairline, accent hairline while live, keys + Add inside it), one WRITING column / one CHROME column, inset row hairlines, the header's count only when non-zero, the deleted fold as the live list's quieter twin (struck words, then the stamp line "Deleted <date>" with Restore + "Delete forever…"), Add on `VoicedButtonStyle` (it fades when there is nothing to file — `CalmButtonStyle` ignores disabled), every word in `CommentsPanelCopy` (sentence case), O-3 (`CommentsPanelRefusalCopy`), taste numbers in `CommentsPanelMetrics`; `VoicedButtonStyle.labelInset` named | DONE (this commit) — plain build SUCCEEDED, zero warnings in touched files; REAL panel rendered offscreen (see "the look, rendered" below) |
 | U3-f | verify: plain build green, zero warnings in touched files; record closed; PENDING list | NOT-STARTED |
 
 ### U3-b — THE TRACE (measured, offscreen; macOS 27.0 26A428, Swift 6.4)
@@ -819,3 +819,71 @@ Variorum` — the app's own compiled code, not a copy; `.prohibited` activation,
 Red-on-old (the measured defect on the OLD control, U3-b): +8 pt placeholder vs caret line in both
 voices, 16 pt dead air per row, the mark 8 pt low; the bar 2 pt high. The same checks on the new tree:
 all equal (above). The app-target pins that hold these (U3-d3) can only RUN under the stage.
+
+### U3-e — the pristine pass (what changed, and why each)
+
+1. **The composer.** The add area — still §2 D's add area whole (it owns every point the comments
+   leave; a click anywhere lands the caret: the text fills the card, and the card's padding and foot
+   row raise the counted focus request through a background tap, the hint words passing clicks through;
+   ⌘⏎ / Add files, ⎋ clears, ⏎ is a newline) — now reads as a place to write: the voice's `card`
+   paper and `line` hairline at `VoicedField`'s radius (the app's own writing box, no bezel), the
+   hairline taking the accent at `VoicedChip`'s "on" strength while the caret is in it, and its keys
+   hint + Add door INSIDE the box they act on (they lived in a bar under the whole panel). The
+   screenshot's "void with a word floating in it" becomes a framed, quiet box with its first line
+   ready.
+2. **Two columns.** A WRITING column (`writingInset` = the chrome inset + the card's padding) where
+   every word starts — the composer's text, every comment, every stamp line, live or deleted — and a
+   CHROME column (`inset`) for the title, the card's edge, the hairlines, the fold's toggle. Row
+   separators are held in from the panel's edges (rows of one list, not bands of the panel).
+3. **Header:** the count shows only when non-zero; title and count share a first baseline.
+4. **The deleted fold — one visual language with the live list:** a quiet toggle on the chrome column
+   ("▸ Deleted (n)", its word aligned through the vocabulary's own `VoicedButtonStyle.labelInset`,
+   named in `VoiceControls` rather than re-typed), and each row the live row's twin in a quieter
+   register — the words struck through and muted, then the same stamp line ("Deleted <date>", then
+   Restore and U1's "Delete forever…" at the trailing edge). The fold is present only when something
+   is deleted.
+5. **Add fades when there is nothing to file.** It was a `CalmButtonStyle`, which ignores the
+   disabled state — a live-looking door that did nothing; it is now the panel's own
+   `VoicedButtonStyle(.primary)` like Save, which fades. (The vocabulary gap in `CalmButtonStyle`
+   itself is app-wide — observation O-U3-2, not touched here.)
+6. **Words:** every string the panel shows is in `CommentsPanelCopy` (title, Close, Save, Revert,
+   Delete, Restore, Add, Cancel, the fold toggle, "Deleted", the stamp format, the help line, the
+   observation-failure line); sentence case throughout — `unsavedMark` "unsaved · ⌘⏎" → "Unsaved ·
+   ⌘⏎" (Terminal still lowercases it via `chromeLabel`); the delete receipt names the fold by its
+   word ("…it's under Deleted below, restorable.").
+7. **O-3 — every refusal in words.** `CommentsPanelRefusalCopy.message(for:)` in `TrayRefusalCopy`'s
+   shape: the panel's own arms (seal, empty text — exactly as before — plus `commentNotFound`,
+   `commentNotDeleted`, `purgeTargetNotDeleted`, `blockNotFound`), then `OpsRefusalCopy.message(for:)`.
+   Traced: `commentNotFound`/`commentNotDeleted` are mapped NOWHERE in the app, and the shared table's
+   own fallback is still `"Refused: \(error)"`, so routing through it alone would not have closed O-3
+   for the panel's races; its `purgeTargetNotDeleted` sentence speaks of the Trash (wrong here — in the
+   panel it means the comment was restored between the listing and the confirm). The observation's
+   failure line is worded too (`observationFailed`). PROVISIONAL wording (P-VX179-U3-3).
+8. **Numbers:** `CommentsPanelMetrics` — chrome inset 16 (was 12), card padding 12, header 14/10,
+   list top 4, row air 9 (was 7 — when rows also carried 16 pt of dead air), stamp gap 3 (was 1), add
+   floor 156 (was 132 — the floor now holds the card's margins and foot, so ≈ 86 pt of writing room
+   stays), card margin 12, foot padding 8, foot gap 6, radius 8, live stroke 0.55, fold toggle air 6.
+   All PROVISIONAL, for the walk.
+
+### The look, rendered (the implementer's own check — NOT the walk)
+
+`scratchpad/vx179-u3-probe/real/render.swift` renders the REAL `CommentsPanel` (the compiled app
+module) over a THROWAWAY in-memory store, offscreen, to `scratchpad/vx179-u3-renders/` — Terminal and
+Study × light and dark × {empty, two comments + one deleted, typed, a refusal}: 20 PNGs, every one
+opening with the caret in the add area (the first responder was `CommentNSTextView` in all 20 — the
+open-focused-on-add semantics, through the held request). What the renders cannot show: the caret
+itself (a never-key window draws none), hover washes, the OPEN fold (SwiftUI buttons in a never-key
+window ignore synthetic clicks, and its accessibility tree is not built offscreen — the walk's), and
+the popover host.
+
+**PROBE INCIDENT (machinery honesty — recorded, contained):** the render probe's FIRST run did not
+inject `@Dependency(\.database)`; an access fell to `AppDatabase.liveValue`, which tried to open a
+store at the UNSANDBOXED default path `~/Library/Application Support/Variorum/variorum.sqlite`. The
+open refused (the Keychain save failed, so no encrypted library was created) and the process
+stopped; it had created exactly one directory and one 120-byte key-record file
+(`variorum-keys-2b4ad7a7f6e1873e.json`), both born 22:09:03 by `stat`, during that run. Neither real
+store was touched (both live under `~/Library/Containers/io.lduarte.Variorum(.debug)`); the
+directory did not exist before the run. I removed exactly that file and directory. The probe now
+injects ONE in-memory store with `prepareDependencies` before anything runs, refuses to start if the
+default folder exists, and reports at exit that it was never created ("default store folder created:
+false" on every later run).
