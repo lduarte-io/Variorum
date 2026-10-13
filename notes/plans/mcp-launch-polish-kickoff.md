@@ -45,9 +45,10 @@ members close individually).
 - **R-VX188-1 — comments:** at EDIT, any comment (edit/delete/restore — VX-195). At SUGGEST, a client deletes only
   ITS OWN, known from a new **local-only** authorship record (the grants family's road: local, never synced, zero
   lockstep — her pick, *"local only record is fine for clarity / for now"*). Absent record (another Mac, an adopted
-  library) ⇒ the suggest-rung delete refuses — **as a `rungTooLow`-family refusal ("that comment isn't this
-  client's to delete; deleting others' comments needs edit"), NOT the not-shared shape** (orchestrator's call at
-  the pre-run review, PROVISIONAL P-VX184-1: the client can READ the comment — it just got the id — so "doesn't
+  library) ⇒ the suggest-rung delete refuses — **as a `rungTooLow`-family refusal, NOT the not-shared shape** — her words for the sentence
+  (2026-10-12): **"You don't have permission to delete that comment. Suggest raising your permission level to
+  edit."** (RULED, R-VX188-2 — her sentence, "permissions" → "permission" the only edit). Why not the not-shared
+  shape (the pre-run review's catch, her ratification): the client can READ the comment — it just got the id — so "doesn't
   exist" would be a lie that trips clients; 13n-c's R2-6 precedent for a reachable thing past your reach. No oracle
   is opened: the refusal reveals only that the comment isn't recorded as this client's).
 - **Docs (VX-197), her asks:** the field guide's MCP chapter gets 13s's quality pass (below); it explicitly
