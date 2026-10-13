@@ -188,6 +188,21 @@ final class EncryptionSession {
     /// re-speaks the rerun road here (the banner + its direct Replace
     /// door) while the engine refuses rounds on the same fact.
     private(set) var rekeyIncomplete = false
+    /// VX-110 (the ticket's item 2 — VX-99 round 3's NIT): the pending
+    /// marker's ACT (`CeremonyAct(resuming:)`), so the banner and the sync
+    /// row name what did not finish — entering Castle, a key replacement, a
+    /// follow — never one act for every marker. Wired by `AppServices`
+    /// beside `rekeyIncompleteCheck`; nil = no marker, an undecodable one,
+    /// or no read wired (the faces keep their older words).
+    var pendingCeremonyActCheck: (@Sendable () async -> CeremonyAct?)?
+    /// The act as of the last refresh (nil while `rekeyIncomplete` is false).
+    private(set) var rekeyIncompleteAct: CeremonyAct?
+
+    /// The pending marker's act, read now (the sync row reads it on its own
+    /// cadence — the Encryption tab's refresh may never have run).
+    func readPendingCeremonyAct() async -> CeremonyAct? {
+        await pendingCeremonyActCheck?() ?? nil
+    }
 
     private let store: DeviceKeyStore
     /// nil = the project is unconfigured (ProjectConfig keys empty) — the
@@ -216,6 +231,11 @@ final class EncryptionSession {
         // refresh — a crash mid-re-key must re-speak the rerun road on
         // the next launch, not stay silent behind an "enrolled" reading.
         rekeyIncomplete = await rekeyIncompleteCheck?() ?? false
+        if rekeyIncomplete {
+            rekeyIncompleteAct = await readPendingCeremonyAct()
+        } else {
+            rekeyIncompleteAct = nil
+        }
         guard await signedIn() else {
             state = .signedOut
             return
