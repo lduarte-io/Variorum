@@ -520,7 +520,11 @@ nonisolated enum TakeCardMenuCopy {
     /// names. It lives here so the words and the door cannot drift: the
     /// lesson interpolates this constant, `TakeCardMenu` renders it, and
     /// `TakeCardDoorTests` reads both.
-    static let menuGlyph = "\u{22EF}"
+    ///
+    /// VX-223 (PROVISIONAL P-VX223-a): "▾", the chrome's dropdown mark — it
+    /// was "⋯" beside the borderless style's own chevron, two marks for one
+    /// menu. A guide seeded before this keeps the "⋯" it was seeded with.
+    static let menuGlyph = "\u{25BE}"
 
     /// Every chorded row on the card, paired with the capability that
     /// declares its key — what the drift guard walks.
@@ -596,27 +600,29 @@ struct TakeCardMenu: View {
         let rows = Self.rows(acts)
         // The chrome is Write's panel's — this component was extracted
         // from it, and the board inherits the grammar rather than a second
-        // one being invented for it. (VX-155 moved the mini metric from the
-        // Menu onto the label's own font; the glyph draws at the same size.)
-        Menu {
+        // one being invented for it.
+        //
+        // VX-155 (her 2026-10-11 report) found the class this menu now
+        // shares with every row ⋯: a control size on the Menu is inherited
+        // by the popped `NSMenu`, so all four rows rendered in mini type. The
+        // fix lives in ONE place since VX-223 — `ChromePullDown` pins its
+        // own control size and carries the mini metric on the label.
+        //
+        // VX-223 (PROVISIONAL P-VX223-a, her lean: "it should keep just the
+        // dropdown probably"): the card wore TWO marks — the "⋯" label AND
+        // the borderless style's own chevron. It wears ONE now, the chrome
+        // vocabulary's dropdown mark "▾" (`VoicedMenu`'s "word ▾"), with the
+        // system chevron hidden; 4 pt either side keeps a clickable target
+        // (the glyph alone is 11 pt wide — measured; the old pair was 28).
+        ChromePullDown(showsIndicator: false) {
             ForEach(rows) { row in
                 Button(row.title, role: row.destructive ? .destructive : nil, action: row.act)
             }
         } label: {
-            // VX-155 (her 2026-10-11 report): the mini metric rides the ⋯
-            // LABEL's own font, never the Menu — a control size on the Menu
-            // is inherited by the popped `NSMenu`, so all four rows rendered
-            // in mini type. The glyph keeps exactly the size the mini
-            // control drew it at; the rows read at standard menu size.
             Text(TakeCardMenuCopy.menuGlyph)
-                .font(Font(NSFont.systemFont(ofSize: NSFont.systemFontSize(for: .mini))))
+                .font(ChromePullDownMetric.labelFont)
+                .padding(.horizontal, 4)
         }
-        .menuStyle(.borderlessButton)
-        // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
-        // states its own line policy, so its IDEAL width can never be a
-        // wrapped one (the b6dae25 class's window-sizing hazard).
-        .lineLimit(1)
-        .fixedSize()
         .recordTakeCardDoors(rows.map(\.id))
     }
 }

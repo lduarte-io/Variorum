@@ -66,4 +66,57 @@ struct ChromeMenuRowSizeTests {
         #expect(offenders.isEmpty,
                 "borderless pull-downs outside the chrome component: \(offenders.sorted())")
     }
+
+    /// **THE COMPONENT'S ORACLE (the fix's face):** inside a row of mini
+    /// controls carrying a small host font — the worst host the class has —
+    /// the chrome pull-down pops at menu size AND lays out at exactly the
+    /// frame the old inherited-mini menu had, so nothing around a ⋯ moves.
+    /// The OLD shape is mounted beside it as the control: its rows pop mini
+    /// (the mechanism, measured on both trees).
+    @MainActor
+    @Test func theComponentPopsAtMenuSizeInAMiniRowAndKeepsTheMiniFrame() async throws {
+        let fixed = try await mount(
+            HStack(spacing: 2) { ChromePullDown("⋯") { Button("row") {} } }
+                .font(.system(size: 11)).controlSize(.mini))
+        let old = try await mount(
+            HStack(spacing: 2) {
+                Menu("⋯") { Button("row") {} }
+                    .menuStyle(.borderlessButton).lineLimit(1).fixedSize()
+            }
+            .font(.system(size: 11)).controlSize(.mini))
+        #expect(fixed.rows >= ChromeMenuProbe.menuSize, "the component pops at menu size (\(fixed.rows))")
+        #expect(old.rows < ChromeMenuProbe.menuSize, "the control: an inherited mini pops small (\(old.rows))")
+        #expect(fixed.size == old.size, "the same frame as the mini control: \(fixed.size) vs \(old.size)")
+
+        // …and with the chevron hidden (the book Index's row ⋯, row 21).
+        let fixedBare = try await mount(
+            ChromePullDown("⋯", showsIndicator: false) { Button("row") {} }.controlSize(.mini))
+        let oldBare = try await mount(
+            Menu("⋯") { Button("row") {} }
+                .menuStyle(.borderlessButton).menuIndicator(.hidden)
+                .lineLimit(1).fixedSize().controlSize(.mini))
+        #expect(fixedBare.rows >= ChromeMenuProbe.menuSize)
+        #expect(fixedBare.size == oldBare.size, "\(fixedBare.size) vs \(oldBare.size)")
+    }
+
+    @MainActor
+    private func mount<V: View>(_ view: V) async throws -> (rows: CGFloat, size: CGSize) {
+        let hosting = NSHostingView(rootView: view)
+        hosting.frame = NSRect(x: 0, y: 0, width: 300, height: 60)
+        let window = NSWindow(
+            contentRect: hosting.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.contentView = hosting
+        defer { window.close() }
+        var popUp: NSPopUpButton?
+        for _ in 0..<100 {
+            hosting.layoutSubtreeIfNeeded()
+            popUp = ChromeMenuProbe.popUps(in: hosting).first
+            if popUp != nil { break }
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        let found = try #require(popUp, "a borderless menu is an NSPopUpButton underneath")
+        return (found.font?.pointSize ?? 0, hosting.fittingSize)
+    }
 }
