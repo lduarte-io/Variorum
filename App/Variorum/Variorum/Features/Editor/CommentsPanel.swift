@@ -757,14 +757,30 @@ struct CommentsPanel: View {
             }
         }
         .onDisappear {
-            // The panel can also leave without a focus change — a popover
-            // dismissed by a click outside it. Every dirty row is committed
-            // the same way; a commit that would write nothing writes nothing,
-            // so this is idempotent beside `close()`.
-            let model = model
-            for id in model.dirtyCommentIDs {
-                Task { await model.commitEdit(id) }
-            }
+            // The panel can also leave without a focus change. Every dirty
+            // row is committed the same way; a commit that would write
+            // nothing writes nothing, so this is idempotent beside `close()`
+            // and the popover watcher below.
+            commitDirtyEdits()
+        }
+        // **A POPOVER HOST'S CLOSING SAVES** (VX-179 U3 FIX LEG 2 — ladder
+        // R1-2, AGREED and measured offscreen): a dismissed popover is only
+        // ordered out — SwiftUI never tears its content down, so neither
+        // `.onDisappear` above nor the caret's departure report ever fires,
+        // and a dirty in-place edit died with this model (pre-existing since
+        // 13u3 A2). The popover's own `willClose` is the one moment every
+        // dismissal road shares (a click away, ⎋, the binding), so it commits
+        // here — the same body `.onDisappear` was always meant to run.
+        .background(CommentPanelHostWatcher(onHostClosing: commitDirtyEdits))
+    }
+
+    /// Commits every comment with unsaved changes — the panel's ONE leaving
+    /// body (Close, `.onDisappear`, a popover host's closing). The model is
+    /// captured, so a commit lands even after the view is gone.
+    private func commitDirtyEdits() {
+        let model = model
+        for id in model.dirtyCommentIDs {
+            Task { await model.commitEdit(id) }
         }
     }
 
@@ -1119,11 +1135,65 @@ struct CommentsPanel: View {
     }
 
     private func close() {
-        let model = model
-        for id in model.dirtyCommentIDs {
-            Task { await model.commitEdit(id) }
-        }
+        commitDirtyEdits()
         dismiss()
+    }
+}
+
+/// **The panel's host-closing watcher** (VX-179 U3 FIX LEG 2 — R1-2). A
+/// zero-size view that knows its window and hears `NSPopover`'s
+/// `willClose` for the popover whose content lives in that window — and only
+/// that one (the app shows other popovers). A sheet host never posts it, so
+/// in a sheet this view does nothing; Close and `.onDisappear` cover sheets.
+struct CommentPanelHostWatcher: NSViewRepresentable {
+    let onHostClosing: () -> Void
+
+    func makeNSView(context: Context) -> WatcherView {
+        let view = WatcherView()
+        view.onHostClosing = onHostClosing
+        return view
+    }
+
+    func updateNSView(_ nsView: WatcherView, context: Context) {
+        nsView.onHostClosing = onHostClosing
+    }
+
+    final class WatcherView: NSView {
+        var onHostClosing: (() -> Void)?
+        private var observer: NSObjectProtocol?
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let observer {
+                NotificationCenter.default.removeObserver(observer)
+                self.observer = nil
+            }
+            guard window != nil else { return }
+            observer = NotificationCenter.default.addObserver(
+                forName: NSPopover.willCloseNotification, object: nil, queue: .main
+            ) { [weak self] note in
+                // Read before the hop: the notification itself is not
+                // Sendable; the popover (a main-actor class) is.
+                let closing = note.object as? NSPopover
+                MainActor.assumeIsolated {
+                    guard let self, let window = self.window,
+                          CommentPanelHostWatcher.isHost(closing, ofPanelIn: window)
+                    else { return }
+                    self.onHostClosing?()
+                }
+            }
+        }
+        // (No `deinit`: the view leaves its window before it dies, and
+        // `viewDidMoveToWindow` with a nil window removes the observer.)
+    }
+
+    /// Is this closing popover the one hosting the panel in `window`? Its
+    /// content view lives in the popover's own window.
+    @MainActor
+    static func isHost(_ popover: NSPopover?, ofPanelIn window: NSWindow) -> Bool {
+        guard let popover, let contentWindow = popover.contentViewController?.view.window
+        else { return false }
+        return contentWindow === window
     }
 }
 
