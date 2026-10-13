@@ -191,13 +191,18 @@ enum MCPHandshake {
         } else {
             response["error"] = ["code": methodNotFoundCode, "message": methodNotFoundMessage]
         }
+        // The fallback is unreachable (this dictionary always serializes);
+        // built from the same constants so it can never drift from them
+        // (ladder R1, NIT 2).
         let data = (try? JSONSerialization.data(withJSONObject: response, options: [.sortedKeys]))
-            ?? Data(#"{"error":{"code":-32601,"message":"Method not found"},"id":null,"jsonrpc":"2.0"}"#.utf8)
+            ?? Data(#"{"error":{"code":\#(methodNotFoundCode),"message":"\#(methodNotFoundMessage)"},"id":null,"jsonrpc":"2.0"}"#.utf8)
         return data + Data("\n".utf8)
     }
 
     /// A request id the window answers by — the same rule the refusal echoes
-    /// by (`MCPShim.refusalResponse`): a string or a number.
+    /// by (`MCPShim.refusalResponse`): a string or a number. (Ladder R1,
+    /// NIT 1: one shared predicate in `VariorumMCPSocket`, consulted by both,
+    /// rides VX-181's touch of the shim's refusal read.)
     private static func isEchoableID(_ id: Any) -> Bool {
         id is String || id is NSNumber
     }

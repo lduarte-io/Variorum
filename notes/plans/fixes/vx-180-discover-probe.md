@@ -25,6 +25,7 @@ schema, zero `Sync/`, zero custody, zero editor seam, zero app faces.
 | 5 | self-assessment (below) | DONE `d39e92a8` |
 | 6 | READY to the orchestrator; THE LIVE ROUND (gated on its GO + a held stage claim — dev store only) | **DONE `b4157ede` — PROVEN on the Pro, every leg** (stage `vx180-live` 21:01:58–21:09, released by this session): `claude mcp list` → the REAL fixed shim **✔ Connected** (the kickoff's symptom was CONNECTION_CLOSED), the tee capture shows `server/discover` IN and `-32601` OUT on its string id, then `initialize` answered; one `claude -p` turn served `list_books`; her dev Activity: "claude-code connected with a new setup, now bound to its name" + "claude-code listed books", NO unnamed refusal. **Mac batch `MCPPaneTests` 10 tests / 1 suite GREEN** (`** TEST SUCCEEDED **`). Cleanup complete. The evidence: "THE LIVE ROUND — the evidence" below |
 
+| 7 | LADDER ROUND 1 (`fable-reviewer`, cold) — **CLEAN, 0B/0M/0m/3n**; the implementer's dispositions (cross-model flow): NIT 2 + NIT 3 AGREED and applied, NIT 1 AGREED and deferred to VX-181's touch | DONE (this commit) — the record's "LADDER — ROUND 1" section; `VariorumMCPTests` re-run **135/20 green** after the fixes (the window's pinned answer bytes unchanged) |
 **No revert is in flight** (piece 3's revert ran and was RESTORED — `git diff` empty after `git checkout HEAD --`, the moved test file `cmp`-identical to the committed one).
 
 ## THE PIN — red on the pre-fix tree (piece 1, 2026-10-12)
@@ -267,3 +268,41 @@ Release shim (build 6486), Variorum NOT running — read `✘ Failed to connect 
 mechanism exactly: the shim's closed-app refusal ("Variorum must be open…") answered the FIRST line, which is now the
 probe, and the shim exited with the `initialize` unanswered, so Claude Code showed only CONNECTION_CLOSED. VX-180 does
 not touch the shim, so the fixed build behaves the same there.
+
+## LADDER — ROUND 1 (fable-reviewer, cold, 2026-10-12; relayed by the orchestrator) — CLEAN: 0 BLOCKER / 0 MAJOR / 0 MINOR / 3 NIT
+
+The reviewer: none requires a fix pass before merge. The findings verbatim (as relayed), each with the implementer's
+disposition under the cross-model flow (agree/dispute returns to the reviewer, which makes the final call):
+
+1. **[NIT] `MCPHandshake.swift:201`** — "The echoable-id rule now exists in three places: `MCPHandshake.isEchoableID`,
+   the inline check in `MCPShim.refusalResponse` (`MCPShim.swift:91`), and implicitly in `windowFrame`'s `.request`
+   classification. All three are identical today (`is String || is NSNumber` — booleans included, since CFBoolean is
+   NSNumber, matching the shim's pre-existing behavior byte-for-byte), and both window and refusal answers are
+   pinned, so there is no mechanism of harm now — this is maintainability only, no red-on-old pin could exist. Fix:
+   expose one predicate in `VariorumMCPSocket` (e.g. on `MCPShim`, which `MCPHandshake` already imports) and consult
+   it from both; fine to fold into a later cleanliness pass."
+   **Disposition: AGREE — DEFERRED, riding VX-181's touch.** VX-181 (the shim's closed-app refusal answering the
+   probe) edits exactly `MCPShim`'s refusal read in `Sources/VariorumMCPSocket/MCPShim.swift`, so the shared public
+   predicate lands there with both call sites switched, under that ticket's own pins; doing it tonight would widen
+   this diff into the shim module (the shim binary's surface, which this unit deliberately did not touch). A one-line
+   pointer now sits on `MCPHandshake.isEchoableID`'s doc comment.
+2. **[NIT] `MCPHandshake.swift:194-195`** — "`windowAnswer`'s hardcoded fallback literal (`{"error":{"code":-32601,...}`)
+   duplicates `methodNotFoundCode`/`methodNotFoundMessage` as raw bytes. The fallback is unreachable (serialization
+   of that dictionary cannot fail), but if the constants ever changed the fallback would silently drift. Fix: build
+   the fallback from the constants, or drop the fallback."
+   **Disposition: AGREE — APPLIED (this commit).** The fallback is now interpolated from `methodNotFoundCode` and
+   `methodNotFoundMessage` (same bytes); kept rather than dropped so the function stays total without a `try!`.
+   Doc-and-literal only, unreachable — no pin possible; `theWindowsAnswersAreFixedBytes` re-ran green.
+3. **[NIT] `MCPServerHost.swift:191`** — "The pre-existing "holds at most one thread for ~2 s" sentence in
+   `refuseOverCap`'s doc is now looser still: the window lets a deliberately dripping peer feed up to 9 frames, each
+   read only per-`read()`-bounded by the 2 s `SO_RCVTIMEO` (the same drip-feed hold existed pre-fix via `lineLimit` —
+   the window multiplies the frame count, it does not create the class; the implementer's risks 2–3 record this
+   honestly). The NEW VX-180 paragraph is accurate. Fix: soften "~2 s" to name the per-read timeout. Doc accuracy
+   only; no pin possible."
+   **Disposition: AGREE — APPLIED (this commit).** The sentence now says every read runs under a 2 s receive timeout
+   PER READ — a silent client holds the thread ~2 s, a peer that keeps dripping bytes can hold it longer, bounded by
+   `MCPHandshake`'s `lineLimit` and window.
+
+**After the fixes:** `swift test --filter VariorumMCPTests` → **135 tests in 20 suites passed** (no skips;
+`logs/mcp-whole-r1.log`). Zero wire bytes changed (the window's answers and every refusal are pinned byte-exact and
+green). No dispute is outstanding; the reviewer's final call on NIT 1's deferral is the only open word.
