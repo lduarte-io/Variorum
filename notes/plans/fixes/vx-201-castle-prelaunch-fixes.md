@@ -1093,7 +1093,13 @@ evidence is complete** (green pass 305/38 + drills disposition + simulator + the
 
 ## U3 RECORD (VX-203 + VX-208)
 
-**Not done in this unit (stated first):** IN PROGRESS — this line is rewritten at the close.
+**Not done in this unit (stated first):** no `xcodebuild test` of any kind (stage work, per §E) — the 4 Mac pins,
+their four red-on-old revert cycles and every existing Mac/phone suite below are **PENDING** the orchestrator's stage
+window; **no walk** (GUI work needs a held stage claim, which this unit was not granted — the walk recipe for the
+orchestrator's window is below, under THE WALK); the phone's simulator suites not run. The headless half IS done:
+the core pins and their three revert cycles ran here (below). No `notes/QUESTIONS.md` entry (merge-moment-only — the
+drafts below are #215's input). Out of scope as briefed and untouched: B1e's unreachable second folder (VX-210) and
+B1f's folder-level key files. Zero lines in `Sources/VariorumCore/Sync/`, no schema, no custody code.
 
 ### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 - 2026-10-13 ~03:15 — U3 implementer (Opus) started. Reading done in this session, never delegated: this file
@@ -1130,12 +1136,16 @@ evidence is complete** (green pass 305/38 + drills disposition + simulator + the
 - VERIFIED: Mac `build-for-testing` (Variorum, `-derivedDataPath DerivedData/vx201`) TEST BUILD SUCCEEDED; phone
   `build-for-testing` (VariorumMobile, generic iOS Simulator) TEST BUILD SUCCEEDED; zero warnings in changed lines
   (the three warnings in touched files are pre-existing lines). `df -h` data volume 40 GiB free.
-- IN-PROGRESS — the Mac revert patches R-d…R-g (`notes/plans/fixes/vx-201-u3-reverts/`), each git-apply-checked; the
-  four applied TOGETHER for one compile check (distinct hunks), then restored by `git checkout --` the two Shared
-  files and `git diff --stat` read empty. If this line still reads IN-PROGRESS, check `git diff` for reverted
-  Shared files before anything else. The RUNS are stage work (PENDING).
-- NOT-STARTED — piece 4: the final HEAD build (so DerivedData holds the fix's products), the pin table + stage
-  protocol + suites, the copy drafts, findings, the close.
+- DONE `8b771c05` — the Mac revert patches R-d…R-g (`notes/plans/fixes/vx-201-u3-reverts/`), each `git apply
+  --check` clean; the four applied TOGETHER (distinct hunks) COMPILED (`build-for-testing` TEST BUILD SUCCEEDED),
+  restored by `git checkout --` the two Shared files, `git diff --stat` read EMPTY; then a fresh HEAD
+  `build-for-testing` (TEST BUILD SUCCEEDED) so `DerivedData/vx201` holds the FIX's products. **No revert is applied
+  now.** Their RUNS are stage work (PENDING — the pin table below).
+- VERIFIED headless at the end (`swift test`, the whole core package): **2,697 tests in 308 suites passed** (the
+  prior 2,691/307 + this unit's 6/1), VariorumMCPTests 135/20, the workbook 40/6 — the skips are the standing gated
+  measurement/integration tests (read on the skip lines).
+- CLOSED (this commit): the pin table, the stage protocol and suites, the walk recipe, the copy drafts, the
+  PROVISIONALs and the findings.
 
 ### The settled design (approved by the orchestrator before any code; F-U3-1 ACCEPTED)
 - **F-U3-1 — what "a key file carries `apple`" means:** the key file Variorum itself would open the copy with —
@@ -1159,3 +1169,128 @@ evidence is complete** (green pass 305/38 + drills disposition + simulator + the
 - **VX-208:** one line on every Done that entered Castle, right after the insurance notice, regardless of the weekly
   toggle (manual Markdown exports and an earlier export's leftovers exist either way); PROVISIONAL placement, the
   Mac-only alternative recorded.
+
+### The traced mechanism (pin before fix — read at HEAD, confirmed)
+- **VX-203 (B1d):** the offer's one listing (`PostureSwitchRunner.snapshotAndInsurance` → the `preSwitchSnapshots`
+  leaf → `StoreBackup.existingBackups`) reads only the TOP LEVEL of the container's `Backups/` and the picked
+  folder's `Backups/`, keeping `variorum-backup-<stamp>[-<fp8>].sqlite` files. A 13x adoption made while Standard
+  leaves the outgoing library whole in `Previous Libraries/<stamp>/` (outside `Backups/`) and
+  `Backups/safety-copies/variorum-adopt-safety-<stamp>/` (a subfolder) — each beside a key file whose `apple` copy
+  opens it through the Apple account. Neither is ever a candidate, nothing else deletes them, and the offer's words
+  ("Delete the backups Variorum made… if you want Castle to cover everything you have ever written") imply they are
+  covered. Red on old: R-a (core) and R-d (runner) reproduce the pre-fix listing; the pins fail exactly there.
+- **VX-208 (B3c):** entering Castle turns the weekly export OFF (`snapshotAndInsurance`), which also stops its prune
+  (`MarkdownInsurance.performRun` returns at the toggle guard), and nothing in the Castle process mentions the
+  plain-text folders already written — nor Markdown exports made by hand. Red on old: R-f.
+
+### THE PINS and the red-on-old protocol
+**Core (headless — RUN HERE, all green at HEAD; reverts run, results in LIVE STATUS):**
+`Tests/VariorumCoreTests/LibraryAsideCopiesTests.swift` — 6 tests.
+| pin | test | red under |
+|---|---|---|
+| (a) the adoption's two copies listed, removed whole | `anAdoptedStandardEraLibrarysTwoCopiesAreListedAndEachGoesWhole` | **R-a** ✔ ran red |
+| (b) Castle-era copies (plain + the O.4 two-key-file shape) never listed, survive | `aCastleEraCopyIsNeverListedAndSurvivesTheRemover` | **R-b** ✔ ran red (R-a reds its control line) |
+| (c) only the adoption's naming in its own home (A1 rail untouched) | `onlyTheAdoptionsNamingInItsOwnHomeIsEverMatched` | **R-c** ✔ ran red |
+| the remover's path guard (outside paths, `..`, another store, planted links) | `theRemoverRefusesEveryPathThatIsNotACopyBesideThisStore` | R-c (its home-link leg) · R-a (its listing line) ✔ ran red |
+| (e, core) listing writes nothing; the current key's copy never named | `listingWritesNothingAndNeverNamesTheCurrentKeysCopy` | R-a ✔ ran red |
+| the hoist changed no path | `thePlanStillSpellsBothHomesAsTheAdoptionAlwaysHas` | BOUND (green under all three) |
+
+**Mac (`VariorumTests/PostureSwitchTests`, the U3 extension at the file's end — ALL PENDING, stage):**
+| pin | test | expected red under |
+|---|---|---|
+| (a)(b)(c) through the runner: the enrolled ceremony, the local-only ceremony, the local road's RESUME; counts; Delete removes the two copies whole; the Castle-era copy and the A1 folder byte-identical | `theCeremonysOfferReachesTheCopiesAnAdoptionSetAsideAndDeletesThemWhole` | **R-d** (no copies listed; `hasOffer` false on the local road; delete count 1≠3) · **R-e** (delete count 1≠3, the copies survive) · **R-g** (no count prefix, no owning sentence) |
+| (d) the follow's offer sees the same copies; its Done's exports line | `theFollowsOfferSeesTheSameCopiesAnAdoptionSetAside` | **R-d** · **R-e** (0≠2, copies remain) · **R-f** (the line) |
+| (e)+(f) the model: the Done's exports line with the weekly export OFF, composed in the real `PostureSwitchSheet`; the counted offer composed; Keep Them leaves every copy byte-identical; no line off Castle | `decliningTheOfferLeavesEveryCopyAndTheCastleDoneSaysTheExportsLine` | **R-f** (model line + composition) · **R-g** (the offer body) · **R-d** (the body's counts) |
+| the four faces read the model (Mac FollowSheet + PostureSwitchSheet; the phone's two sheets) | `everyFaceRendersTheCountedOfferAndTheExportsLineFromItsModel` | structural — a face reverted by hand (no patch) |
+
+**Stage protocol (from `App/Variorum/`, under a held claim):** green first —
+`xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx201
+-only-testing:VariorumTests/PostureSwitchTests` (expect the suite's existing count + 4; read the skip lines). Then
+each revert ALONE: `git apply ../../notes/plans/fixes/vx-201-u3-reverts/<R>.patch`, `xcodebuild build-for-testing …`
+(same flags), the same `test-without-building` (a single test may be selected with
+`-only-testing:VariorumTests/PostureSwitchTests/<testName>()`), read which tests fail, then `git checkout --
+App/Variorum/Shared/` and confirm `git diff HEAD --stat` EMPTY (`git apply` is worktree-only — window A's index trap
+does not apply). Rebuild HEAD after the last cycle.
+
+**Existing suites (changed-SOURCE rule — every suite whose source names a changed type or file) — PENDING, one
+stage run** with `-only-testing:VariorumTests/` + each of: PostureSwitchTests VX110SignedOutCastleTests
+VX202ReopenRaceTests VX80CastleFollowRecoveryTests Phase13pControllerTests Phase13pProtectionBrainTests
+EncryptionFlowTests AppleRelinkDoorTests CopyRegisterPinTests ProtectionTierFaceTests ProtectionSurfaceRenderTests
+Phase13pCopySweepTests TravellingDotsIndicatorTests LibraryPortabilityDoorTests PostureSwitchDrillTests (opt-in:
+`TEST_RUNNER_VARIORUM_POSTURE_DRILL=1` in xcodebuild's ENVIRONMENT, plain `test`; VX-233's rot is pre-existing).
+Phone (simulator, by UDID): `VariorumMobileTests/MobileProtectionTests` + `VariorumMobileTests/MobileStructuralTests`
+(the phone's copy-home sweep reads the new literals — none carries a forbidden register word, checked by eye against
+`CopyRegisterPinTests.forbidden`).
+
+### THE WALK (the orchestrator's window — dev store, Debug build, both voices)
+1. Dev store in STANDARD (no sync — the dev store never syncs). File ▸ Send Library to Another Mac… into a scratch
+   folder, then File ▸ Open Library… that folder → confirm. The dev library steps aside: `Previous Libraries/<stamp>/`
+   + `Backups/safety-copies/variorum-adopt-safety-<stamp>/` appear beside the dev store (Standard-era: `apple` in the
+   key file). Capture the two folders (Finder or `ls`).
+2. Settings ▸ Protection ▸ Use Castle… → the screens → Enter Castle. On the Done: the exports line sits under the
+   Done (and under the insurance notice if the weekly export was on). Capture (Terminal + Study).
+3. Continue → the offer: "That's N backups, plus 2 whole-library copies Variorum set aside…" + the owning sentence.
+   Capture. Keep Them → both folders still there (capture). A second round (Use Standard, then Use Castle again, or a
+   fresh dev store) → Delete Them → both stamp folders gone, the A1 rail's `variorum-backup-a1-*` folders untouched.
+
+### U3 COPY DRAFTS (for the QUESTIONS #215 bundle — every line PROVISIONAL until she approves)
+Sentence case, no capitals for emphasis, the everyday register (no key named; "Apple account", never "iCloud key").
+1. **The offer's body, counted** (`ProtectionCopy.deleteOldBackupsBody(snapshots:libraryCopies:)`; the title and the
+   two doors unchanged). The lead by what was listed —
+   - backups and set-aside copies: *That's 3 backups, plus 2 whole-library copies Variorum set aside when you opened
+     or restored another library (in Previous Libraries, and with your backups' safety copies).*
+   - set-aside copies alone: *That's 2 whole-library copies Variorum set aside when you opened or restored another
+     library (in Previous Libraries, and with your backups' safety copies).*
+   - backups alone: *That's 3 backups.* (singular: *1 backup* · *1 whole-library copy*)
+   then the shipped sentences unchanged — *They still open through your Apple account, and they always will.
+   Deleting them closes that door for what they hold.* — then, only when set-aside copies are listed, the owning
+   sentence: *The set-aside copies are also your way back to the library you replaced — delete them only if you
+   won't want it back.* — then the shipped tail unchanged (*Variorum can only delete its own backups — …Recently
+   Deleted.*). Note: one adoption leaves TWO folders (the dated copy and its safety twin), so the count says
+   "copies", never "libraries".
+2. **The plain-text exports line (VX-208)** (`ProtectionCopy.plaintextExportsNotCovered`), under every Done that
+   entered Castle: *Markdown exports made before today are plain text that Castle can't reach — if you made any (the
+   weekly export keeps them in an md-exports folder inside the backup folder you chose), delete them yourself.*
+   - Alternative (wider than her ruling's letter, offered, NOT shipped — F-U3-5): *Markdown exports and unencrypted
+     copies you made before today are plain text that Castle can't reach — if you made any, delete them yourself (the
+     weekly export keeps its copies in an md-exports folder inside the backup folder you chose).*
+
+### PROVISIONALs (mine — each defended; the orchestrator's to confirm or bundle)
+- **P-U3-1 — the exports line shows on EVERY Done that entered Castle, whether or not the weekly export was on**
+  (orchestrator-approved): Markdown exports made by hand, and an earlier weekly export's folders (its prune stops when
+  it is off), exist either way. Placement: right after the insurance notice, in the same alarm voice (the export
+  story's neighborhood, §A's VX-208 entry).
+- **P-U3-2 — the phone shows the line too** (the shared models; the run's phone-parity line). The phone writes no
+  Markdown exports itself, but a Mac of the same account may have. Alternative: Mac-only (a face-level gate).
+- **P-U3-3 — ONE door for pairs and set-aside copies** (the brief's granularity: the whole stamp folder, the confirm
+  owning what they are). Alternative for her: a separate choice for the set-aside copies (see F-U3-3).
+- **P-U3-4 — the copies ride the pairs' listing rule** (a written fresh snapshot; the road entered Castle; on the
+  follow and the resume, this library was Standard-shaped) — the offer stays a Castle-entry event, never a surprise on
+  a Castle follower's key replacement.
+
+### Findings for the orchestrator (dispositions owed by the run)
+- **F-U3-1 — ACCEPTED at the resume** (the orchestrator's adjudication): "a key file carries `apple`" = the key file
+  `StoreKeyEnvelope.locate` would open the copy with, never any key file in the folder (O.4's leftover Standard-era
+  key file travels with a Castle library into the aside home). Pinned (b) with the two-key-file shape; R-b proves it.
+- **F-U3-2 — 13p-era copies** whose key sits RAW in the legacy iCloud escrow item
+  (`io.lduarte.Variorum.store-key-escrow`, VX-191 §O.2's last row) are Apple-openable with no `apple` wrap in their
+  key file; the key-file rule cannot see them (nor can the pairs' listing). Population: her own devices only (13p era).
+  Record-only; O.2 already recommends one look on her Macs.
+- **F-U3-3 — a set-aside copy can be a DIFFERENT library** (Open Library of another library, not a restore of this
+  one): Delete Them then removes that library's only in-container copies. The owning sentence says so in plain words
+  ("…your way back to the library you replaced — delete them only if you won't want it back"). Whether she wants
+  set-aside copies as their own choice (P-U3-3's alternative) is a #215 question.
+- **F-U3-4 — the one-time-offer class extends to the copies:** a Castle follower whose account was already Castle
+  (a key replacement elsewhere) is never offered them, and a declined offer never returns — B1e's class, VX-210's
+  (Parked) territory; recorded for that ticket, not built (P-U3-4).
+- **F-U3-5 — the plaintext SQLite export** (decision 15, manual, warned) made before Castle is also plain text and
+  equally uncovered; her ruling's letter names Markdown exports, so the shipped draft does too and the wider sentence
+  is offered as an alternative.
+- **F-U3-6 — the overlap with VX-214 (declared):** `ProtectionPane.swift` gained 12 lines inside the two ceremony
+  sheets' Done phases (the exports line) and two one-word changes in their offer phases (`model.offerBody`) —
+  nothing of the pane's own sections; the phone's two sheets 4 lines. Copy rhyme: none of these sentences sits on a
+  Settings pane's own text.
+- **F-U3-7 — machinery:** my first pass STOPPED at the reading's end, nothing written, when the orchestrator's
+  notes-only commit `6913e6a5` landed in this worktree; resumed in the same session under the amended rule (notes-only
+  orchestrator commits are expected). One more: a `git pull --rebase` refused before my `a4a0136c` (my own unstaged
+  edits) — the commit and push landed cleanly; later pulls use `--no-rebase` as the orchestrator allowed.
