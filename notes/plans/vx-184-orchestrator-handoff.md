@@ -435,12 +435,18 @@ finals (its UNIT RECORD's counts).
 
 ## Known cross-run facts
 
-- **VX-179 MERGED to main (PR #154, merge commit d6caafc1 — coordinator's word, 2026-10-13 ~03:40;
-  its ledger commits follow on main shortly).** Her rule applies: merge main INTO this branch before
-  ours. **The plan: do the merge-in at the U3→U4 boundary** (never under a live implementer — fetch
-  fresh so the trailing ledger commits ride, merge, headless suites green on the merged tree, THEN
-  spawn U4). VX-179 touched the comment area and U4 touches comment ops — merging before U4 is
-  deliberate. Main may move again (vx-201, others): re-check and merge-in again at our merge moment.
+- **VX-179 MERGED to main (PR #154, d6caafc1)** — merged INTO this branch at the U3→U4 boundary
+  (a79dbf6a + repair 018cf23c; suites green). DONE.
+- **VX-201 MERGED to main (PR #155, d2b133fb + ledgers — coordinator's word, 2026-10-13 ~10:15).**
+  Merge main in at the U5→U6 boundary (NOT mid-U5 — its Mac batch runs test-without-building on
+  products built from the current tip). It brings vx-201's custody/Castle code into the branch —
+  harmless for this run (we touch no custody), but RE-RUN HEADLESS after the merge-in and watch the
+  QUESTIONS tail (vx-201's ledgers likely took #216; ours takes the next free at closeout). The dev
+  store is in CASTLE POSTURE since vx-201's walk (older restore rows read "No key file serves this
+  copy") — U5 prestages/restores that state as-is; later units inherit it.
+- VX-214 (settingspaneupdater) may now also merge before us (its reviewer's gating run went ~10:10) —
+  if so, same road: merge main in at the next boundary; U6's SettingsShape work then lands on its
+  as-merged shell.
 - vx-201 (Castle pre-launch fixes) owns VX-191's close and her carried Castle notes (routed; confirmed).
 - VX-214 (settingspaneupdater) merges AFTER us, rebases/merges onto us; owns Settings window shell.
 - The `variorum` MCP server shows CONNECTION_CLOSED in sessions while her app is closed — expected
