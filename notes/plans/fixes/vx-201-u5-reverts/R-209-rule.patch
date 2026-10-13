@@ -1,0 +1,28 @@
+diff --git a/App/Variorum/Shared/LibraryOpenModel.swift b/App/Variorum/Shared/LibraryOpenModel.swift
+index be1f2f09..76d45f31 100644
+--- a/App/Variorum/Shared/LibraryOpenModel.swift
++++ b/App/Variorum/Shared/LibraryOpenModel.swift
+@@ -317,20 +317,9 @@ final class LibraryOpenModel {
+     nonisolated static func leavesCastle(
+         currentIsCastle: Bool, incoming: LibraryClassifier.Verdict?
+     ) -> Bool {
+-        guard currentIsCastle, let incoming else { return false }
+-        switch incoming {
+-        case .plaintextExport, .plaintextLibrary:
+-            return true
+-        case .encryptedLibrary(_, let keyFile), .snapshotPair(_, let keyFile),
+-             .folderHoldingPair(_, let keyFile):
+-            guard let envelope = try? StoreKeyEnvelope.load(at: keyFile) else { return false }
+-            return Posture.derive(
+-                legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: envelope,
+-                rawKeyCustody: .unknown, enrolled: false).acting == .standard
+-        case .folderHoldingStores, .bareStoreWithoutKeyFile, .newerSchema,
+-             .notAVariorumStore, .unreadable:
+-            return false
+-        }
++        // R-209-rule (VX-209 revert): the old confirm — no line for any copy.
++        _ = (currentIsCastle, incoming)
++        return false
+     }
+ 
+     // MARK: - Step 4: adopt (the U1 brain + the collision rule's write +

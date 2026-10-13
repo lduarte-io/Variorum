@@ -1,0 +1,15 @@
+diff --git a/App/Variorum/Shared/PostureSwitchModel.swift b/App/Variorum/Shared/PostureSwitchModel.swift
+index e930f247..7c8c44f3 100644
+--- a/App/Variorum/Shared/PostureSwitchModel.swift
++++ b/App/Variorum/Shared/PostureSwitchModel.swift
+@@ -140,9 +140,7 @@ final class PostureSwitchModel: Identifiable {
+             // Done, a refusal, a restart). A ceremony hosted by Settings ▸
+             // Protection asks Settings for that pane, where its sheet lives
+             // (the controller ignores the ask for any other host).
+-            if oldValue == .running, phase != .running, controller.activeSwitch === self {
+-                controller.requestProtectionPaneForCeremony()
+-            }
++            // R-done (VX-206 revert): the road's return asks nothing.
+         }
+     }
+     private(set) var busy = false

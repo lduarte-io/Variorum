@@ -140,15 +140,43 @@ public enum LibraryAdoption {
             storeURL: storeURL,
             sourceStore: sourceStore,
             sourceKeyFile: sourceKeyFile,
-            safetyCopyFolder: folder
-                .appendingPathComponent("Backups", isDirectory: true)
-                .appendingPathComponent("safety-copies", isDirectory: true)
-                .appendingPathComponent("variorum-adopt-safety-\(stamp)", isDirectory: true),
-            asideFolder: folder
-                .appendingPathComponent("Previous Libraries", isDirectory: true)
+            safetyCopyFolder: safetyCopiesHome(besideStore: storeURL)
+                .appendingPathComponent(safetyCopyPrefix + stamp, isDirectory: true),
+            asideFolder: previousLibrariesHome(besideStore: storeURL)
                 .appendingPathComponent(stamp, isDirectory: true),
             landedStore: storeURL,
             landedKeyFile: landedKeyFile)
+    }
+
+    // MARK: - The two homes' names (VX-203: ONE spelling — `plan` writes
+    // them, the aside-copies lister reads them)
+
+    /// Step 4's home beside the store: `Previous Libraries/<stamp>/`.
+    public static let previousLibrariesFolderName = "Previous Libraries"
+    /// Step 3's stamp folders: `Backups/safety-copies/variorum-adopt-safety-<stamp>/`.
+    public static let safetyCopyPrefix = "variorum-adopt-safety-"
+
+    /// `<store folder>/Previous Libraries/`.
+    public static func previousLibrariesHome(besideStore storeURL: URL) -> URL {
+        storeURL.deletingLastPathComponent()
+            .appendingPathComponent(previousLibrariesFolderName, isDirectory: true)
+    }
+
+    /// `<store folder>/Backups/safety-copies/` — the standing A1 rail's home,
+    /// which also holds copies the adoption did NOT write.
+    public static func safetyCopiesHome(besideStore storeURL: URL) -> URL {
+        storeURL.deletingLastPathComponent()
+            .appendingPathComponent("Backups", isDirectory: true)
+            .appendingPathComponent("safety-copies", isDirectory: true)
+    }
+
+    /// The stamp an adoption names its folders with, or nil — it must read
+    /// back exactly as `plan` writes it (a foreign name that merely parses is
+    /// not the adoption's).
+    public static func adoptionStamp(_ name: String) -> Date? {
+        guard let date = stampFormatter.date(from: name),
+              stampFormatter.string(from: date) == name else { return nil }
+        return date
     }
 
     /// The acting half. Blocking (library-sized copies) — callers run it

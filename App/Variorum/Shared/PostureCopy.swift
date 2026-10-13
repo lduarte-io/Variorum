@@ -233,10 +233,17 @@ nonisolated extension ProtectionCopy {
     /// rejoin if you don't want to leave castle."* The old sentence named
     /// the Castle door without saying it is the ACCOUNT that has to move,
     /// or in what order. PROVISIONAL; 13s re-voices (QUESTIONS #138).
+    ///
+    /// **VX-110 (RUN VX-201, U2) — de-capped + a wording pass, her ruling on
+    /// the ticket (PROVISIONAL until she approves the U2 copy drafts):** no
+    /// capitals for emphasis ("the account itself" carries what "the
+    /// ACCOUNT" shouted), the join made conditional ("if you join"), and
+    /// "silently" in the everyday words ("without asking"). Her ruled order
+    /// stands: cancel · put the account in Castle · join again.
     static let joinStandardConsent =
-        "This account is in Standard, so this library will open silently from now on and your Apple "
-        + "account will hold a key to it. If you'd rather not leave Castle: Cancel here, put the "
-        + "ACCOUNT in Castle from a device already signed into it (Settings ▸ Protection ▸ Use "
+        "This account is in Standard, so if you join, this library will open without asking from now on "
+        + "and your Apple account will hold a key to it. If you'd rather stay in Castle: Cancel here, put "
+        + "the account itself in Castle from a device already signed into it (Settings ▸ Protection ▸ Use "
         + "Castle…), then join again."
     static let joinDoor = "Join"
     static let joinCancelDoor = "Cancel"
@@ -318,16 +325,72 @@ nonisolated extension ProtectionCopy {
         "Your other devices will start asking too — Touch ID or Face ID, with your "
         + "passphrase as the fallback — and each gives its own library a new key the "
         + "same way. Each will ask for your passphrase once, to pick up your new sync keys.",
-        "Backups made before today — Variorum's own, Time Machine, copies you made — "
-        + "still open through your Apple account. Delete them, Time Machine included, "
-        + "if you want Castle to cover everything you have ever written. Keep them if "
-        + "you want a way back to what you wrote before today, should you ever lose "
-        + "your passphrase and twelve words.",
+        enterCastleBackupsBullet,
         "If you think someone may already hold your keys — your Apple account, or an "
         + "unlocked device of yours together with your account password — also delete "
         + "your Stargazing account and set sync up again. That gives your sync fresh keys.",
     ]
+    /// The backups bullet, named once (VX-110: the This-Mac-Only explain
+    /// shares it — it is as true of this device's backups on either road).
+    static let enterCastleBackupsBullet =
+        "Backups made before today — Variorum's own, Time Machine, copies you made — "
+        + "still open through your Apple account. Delete them, Time Machine included, "
+        + "if you want Castle to cover everything you have ever written. Keep them if "
+        + "you want a way back to what you wrote before today, should you ever lose "
+        + "your passphrase and twelve words."
     static let enterCastleContinue = "Continue"
+
+    // MARK: VX-110 (RUN VX-201, U2) — THE TWO DOORS for a signed-out library
+    // that still holds its sync keys, the This-Mac-Only screens and Done.
+    // Every sentence PROVISIONAL (the U2 copy drafts, QUESTIONS #215's
+    // bundle); sentence case; the everyday register (no key named).
+
+    /// The two doors' screen (before Screen 1).
+    static let signedOutChoiceTitle = "You're signed out of sync."
+    static let signedOutChoiceBody =
+        "This library still holds the sync keys for your account. To put the account and your other "
+        + "devices in Castle, sign in, then choose Use Castle again. If you can't sign in, or you're "
+        + "leaving that account, you can put only this \(deviceName) in Castle — it forgets those sync "
+        + "keys, and the account and its copy on the server stay as they are."
+    /// The second door (the first is `signInDoor`, "Sign In…").
+    static let useCastleThisDeviceOnlyDoor = "Use Castle on This \(deviceName) Only"
+    /// After Sign In…: the ceremony has ended; the sign-in surface opens.
+    static let signInFirstTitle = "Sign in, then choose Use Castle again."
+    static let signInFirstBody =
+        "Your account and your other devices go into Castle together. Nothing has changed yet."
+    /// §2b Screen 1 on This Mac Only (the account-wide words would be false).
+    static let enterCastleThisDeviceOnlyBody =
+        "Your library on this \(deviceName) gets a new key. From now on this \(deviceName)'s "
+        + "\(credentialName) can't open it, and your Apple account holds no key to it. Opening takes "
+        + "\(biometryName) or your passphrase."
+    static let enterCastleThisDeviceOnlyBullets: [String] = [
+        "Only this \(deviceName) changes. It forgets your sync keys; your sync account and its copy on "
+        + "the server stay as they are, and your other devices aren't asked. If you sign into that "
+        + "account here again, Variorum asks before it changes anything.",
+        enterCastleBackupsBullet,
+    ]
+    /// The This-Mac-Only Done, by the fresh snapshot's fate (the ordinary
+    /// Done's three arms, F2/F3's rule) — never "your other devices will ask".
+    static func enteredCastleThisDeviceOnlyDone(_ snapshot: PostureSwitchRunner.FreshSnapshot) -> String {
+        let backup: String
+        switch snapshot {
+        case .written: backup = " A fresh backup was made under it."
+        case .failed:
+            backup = " A fresh backup could not be made just now — check your Backups folder; your earlier "
+                + "backups are untouched."
+        case .notKept: backup = ""
+        }
+        return "You're in Castle on this \(deviceName). Your library here has a new key that your Apple "
+            + "account never held." + backup + " This \(deviceName) asks for \(biometryName) from now on. "
+            + "Your sync account and its copy on the server are unchanged — delete that account if you "
+            + "still can. If you sign into it here again, Variorum asks before it changes anything."
+    }
+    /// The runner's two refusals on this road.
+    static let thisDeviceOnlySignedInSince =
+        "You signed in while this was open, so nothing was changed. Choose Use Castle again to put your "
+        + "account in Castle."
+    static let thisDeviceOnlyForgetRefused =
+        "This \(deviceName) couldn't forget your sync keys, so nothing was changed. Try again."
 
     // §2b Screen 2 — the passphrase (2a's Screen 2 under this title)
     static let castleNeedsPassphraseTitle = "Castle needs a passphrase."
@@ -459,13 +522,60 @@ nonisolated extension ProtectionCopy {
         "You're in Castle. Your library has a new key that your Apple account never "
         + "held. This \(deviceName) asks for \(biometryName) from now on; your other "
         + "devices will ask the next time they open."
+    /// **VX-208 (RUN VX-201, U3) — her ruling on the ticket: "no delete offer
+    /// of our own — one line in the Castle process saying plaintext .md
+    /// exports already written … are not covered and should be deleted by
+    /// hand."** PROVISIONAL words and placement (the U3 copy drafts, QUESTIONS
+    /// #215's bundle): every Done that entered Castle, right after the
+    /// insurance notice — whether or not the weekly export was on, since
+    /// Markdown exports made by hand, and an earlier weekly export's folders
+    /// (its pruning stops when it is off), exist either way.
+    static let plaintextExportsNotCovered =
+        "Markdown exports made before today are plain text that Castle can't reach — if you made "
+        + "any (the weekly export keeps them in an md-exports folder inside the backup folder you "
+        + "chose), delete them yourself."
+    /// The Done's export line by the outcome — nil unless the road entered
+    /// Castle (both models; all four faces).
+    static func plaintextExportsLine(for outcome: PostureSwitchRunner.Outcome?) -> String? {
+        outcome?.entersCastle == true ? plaintextExportsNotCovered : nil
+    }
+
     static let deleteOldBackupsTitle = "Delete the backups Variorum made before today?"
-    static let deleteOldBackupsBody =
-        "They still open through your Apple account, and they always will. Deleting "
-        + "them closes that door for what they hold. Variorum can only delete its own "
-        + "backups — Time Machine, copies you made, and anything outside Variorum's "
-        + "folders aren't touched and still open the old way. If your backups are in "
-        + "iCloud Drive, iCloud keeps deleted files for 30 days in Recently Deleted."
+    /// **VX-203 (RUN VX-201, U3) — the offer's honest counts, and the copies
+    /// a 13x adoption set aside owned in one sentence** (auditor B1d; the
+    /// adoption confirm called them a recoverable home, so deleting them
+    /// closes that way back and the offer says so). PROVISIONAL words (the
+    /// U3 copy drafts, QUESTIONS #215's bundle); the sentences after the
+    /// count are the shipped body, unchanged, but for the set-aside one.
+    static func deleteOldBackupsBody(snapshots: Int, libraryCopies: Int) -> String {
+        func counted(_ n: Int, _ one: String, _ many: String) -> String { "\(n) \(n == 1 ? one : many)" }
+        let setAside = "\(counted(libraryCopies, "whole-library copy", "whole-library copies")) Variorum "
+            + "set aside when you opened or restored another library (in Previous Libraries, and "
+            + "with your backups' safety copies)"
+        var body: String
+        switch (snapshots > 0, libraryCopies > 0) {
+        case (true, true): body = "That's \(counted(snapshots, "backup", "backups")), plus \(setAside). "
+        case (false, true): body = "That's \(setAside). "
+        case (true, false): body = "That's \(counted(snapshots, "backup", "backups")). "
+        case (false, false): body = ""
+        }
+        body += "They still open through your Apple account, and they always will. Deleting "
+            + "them closes that door for what they hold."
+        if libraryCopies > 0 {
+            body += " The set-aside copies are also your way back to the library you replaced — "
+                + "delete them only if you won't want it back."
+        }
+        return body + " Variorum can only delete its own backups — Time Machine, copies you made, "
+            + "and anything outside Variorum's folders aren't touched and still open the old way. "
+            + "If your backups are in iCloud Drive, iCloud keeps deleted files for 30 days in "
+            + "Recently Deleted."
+    }
+    /// The offer's body by the outcome (both models; all four faces).
+    static func deleteOldBackupsBody(for outcome: PostureSwitchRunner.Outcome?) -> String {
+        deleteOldBackupsBody(
+            snapshots: outcome?.preSwitchSnapshots.count ?? 0,
+            libraryCopies: outcome?.preSwitchLibraryCopies.count ?? 0)
+    }
     static let deleteOldBackupsDoor = "Delete Them"
     static let keepOldBackupsDoor = "Keep Them"
 
@@ -776,15 +886,30 @@ nonisolated extension ProtectionCopy {
     /// Lesson 1 — What's true in every mode.
     static let privacyLessonOneTitle = "What's true in every mode"
     static let privacyLessonOneParagraphs: [String] = [
+        // VX-204 (auditor C's C-1): "everything is encrypted… the server
+        // stores what it can never read" overstated — dates, the tag tree's
+        // shape, memberships, flags and sizes travel outside the encryption
+        // (the operator-visible envelope the privacy brief discloses). The
+        // smallest edit that makes the paragraph true: what is sealed, then
+        // the one sentence naming what is not. PROVISIONAL (#215).
         "Your library is encrypted on disk: the file Variorum writes is unreadable without its key — "
         + "to Finder, to Terminal, to a backup drive, to anyone who copies it. Sync is end-to-end "
-        + "encrypted: everything is encrypted on your device before it leaves, and the Variorum server "
-        + "stores what it can never read. Both modes are like this. What differs between them is only "
-        + "who holds a key.",
+        + "encrypted: your writing and everything you name — titles, tags, books — are encrypted on "
+        + "your device before they leave, and the Variorum server can never read them. "
+        + privacyServerSeesShapeSentence
+        + " Both modes are like this. What differs between them is only who holds a key.",
         keystoneAccountPassword,
         "And one thing no setting changes: while Variorum is open and unlocked, everything in it is "
         + "readable — that is what open means. Locking is how you end that.",
     ]
+
+    /// VX-204 — lesson 1's honest sentence: what sync does NOT seal (the
+    /// privacy brief's operator-visible envelope, in the guide's words). The
+    /// pins quote this constant, never a re-typed sentence. PROVISIONAL (#215).
+    static let privacyServerSeesShapeSentence =
+        "What the server can see is the shape around your words: dates, how your tags nest and "
+        + "which notes carry them, which notes are in which books, flags like starred or finished, "
+        + "and sizes."
 
     /// Lesson 2 — Standard and Castle: what you must keep.
     static let privacyLessonTwoTitle = "Standard and Castle: what you must keep"
@@ -811,6 +936,27 @@ nonisolated extension ProtectionCopy {
         // OUTSIDE copy §7's two never-soften sentences — the floors below
         // are byte-untouched. `privacyBookDoorSentence` retired with it.)
     ]
+    /// VX-209 (RUN VX-201, U5 — PROVISIONAL, the QUESTIONS #215 bundle): the
+    /// guide's warning about older copies, the MAC's lesson 2 only (opening
+    /// and restoring copies are Mac doors; the phone's edition has neither).
+    /// Written against what RUNS, not the audit's reading:
+    /// `VX209WayBackRoundTripTests` reproduced §W.2 — a copy from before
+    /// Castle lands the old way, and bringing the Castle copy of the same
+    /// library back from Previous Libraries lands it the old way too (a
+    /// local-only library; an enrolled one's follow re-keys it — hence
+    /// "may not"); belt c (VX-202) refuses the landing only mid-switch, so
+    /// the road back stands. Resume Sync first: every adoption lands held,
+    /// and a standing hold refuses Use Castle (`VX209GuideWarningTests`
+    /// re-verifies the road). The last sentence is also the road for a
+    /// library a pre-VX-202 build left reading Standard (U1's F2).
+    static let privacyOlderCopyParagraph =
+        "Opening an older copy of your library — a backup in Settings ▸ Data Safety ▸ Restore from "
+        + "Backup, or a copy you pick with File ▸ Open Library… — makes that copy your library, and a "
+        + "copy from before Castle opens the old way. Bringing your Castle library back from Previous "
+        + "Libraries afterwards may not undo that. So once you're done with an older copy, press Resume "
+        + "Sync, then check Settings ▸ Protection: if it doesn't say Castle, choose Use Castle again. "
+        + "And any time Protection says Standard when you chose Castle, choose Use Castle again."
+
     /// The two floors, as the chapter states them (copy §7's parenthetical
     /// names them; the pins quote these, never a re-typed sentence).
     static let privacyStandardFloorSentence =
@@ -868,6 +1014,10 @@ nonisolated extension ProtectionCopy {
         guard let outcome else { return enteredCastleDone }
         if outcome.followedAnotherDevicesSwitch {
             return enteredCastleAfterAnotherDevice(device: outcome.otherDeviceName)
+        }
+        // VX-110: This Mac Only — the account and its server copy untouched.
+        if outcome.thisDeviceOnly {
+            return enteredCastleThisDeviceOnlyDone(outcome.freshSnapshot)
         }
         switch outcome.freshSnapshot {
         case .failed: return enteredCastleWithoutFreshBackup

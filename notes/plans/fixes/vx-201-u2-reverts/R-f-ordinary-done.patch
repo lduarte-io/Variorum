@@ -1,0 +1,14 @@
+diff --git a/App/Variorum/Shared/PostureCopy.swift b/App/Variorum/Shared/PostureCopy.swift
+index 5c7875bb..e1acf08a 100644
+--- a/App/Variorum/Shared/PostureCopy.swift
++++ b/App/Variorum/Shared/PostureCopy.swift
+@@ -933,9 +933,6 @@ nonisolated extension ProtectionCopy {
+             return enteredCastleAfterAnotherDevice(device: outcome.otherDeviceName)
+         }
+         // VX-110: This Mac Only — the account and its server copy untouched.
+-        if outcome.thisDeviceOnly {
+-            return enteredCastleThisDeviceOnlyDone(outcome.freshSnapshot)
+-        }
+         switch outcome.freshSnapshot {
+         case .failed: return enteredCastleWithoutFreshBackup
+         case .notKept: return enteredCastleWithoutBackupClaim

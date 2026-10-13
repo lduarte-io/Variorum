@@ -99,7 +99,10 @@ nonisolated struct SyncRowFace: Equatable {
         lastError: String?,
         lastErrorIsOffline: Bool,
         stalled: Bool = false,
-        canCheckForUpdates: Bool = false
+        canCheckForUpdates: Bool = false,
+        // VX-110 (item 2): the pending marker's act, so the rekey row's door
+        // names what did not finish; nil = the older key-replacement words.
+        rekeyAct: CeremonyAct? = nil
     ) -> SyncRowFace {
         // The A4 fence: a dev-store session never syncs — no sign-in door
         // either (the one mirror belongs to the real store; signing in
@@ -145,7 +148,7 @@ nonisolated struct SyncRowFace: Equatable {
                 // CF-16's re-enroll prescription cannot complete a
                 // half-run re-key.
                 return SyncRowFace(kind: .rekeyIncomplete, doors: [
-                    Door(label: "Finish key replacement…", act: .openAccount(.encryption)),
+                    Door(label: Self.rekeyIncompleteDoorLabel(for: rekeyAct), act: .openAccount(.encryption)),
                 ])
             }
             if EncryptionSession.isPayloadCryptoError(error)
@@ -234,6 +237,13 @@ nonisolated struct SyncRowFace: Equatable {
         return rendered == text ? (client, server) : nil
     }
 
+    /// VX-110 (item 2 — PROVISIONAL words): the rekey row's door by the
+    /// pending marker's act — a switch into Castle is not a key replacement
+    /// in the words she reads (the panes' label rule, `entersCastle`).
+    static func rekeyIncompleteDoorLabel(for act: CeremonyAct?) -> String {
+        act?.entersCastle == true ? "Finish entering Castle…" : "Finish key replacement…"
+    }
+
     /// The door's words — the platform's own, identical to the Mac menu's
     /// Variorum ▸ Check for Updates… (`UpdateChannel.checkForUpdatesTitle`;
     /// a Mac pin holds the two equal — `Shared/` cannot see the channel).
@@ -284,6 +294,10 @@ struct SyncStatusRow: View {
     /// CF-14: the ONE sheet, opened at the tab the pressed door names
     /// (nil = not presented).
     @State private var accountSheetTab: AccountTab?
+    /// VX-110 (item 2): the pending marker's act, read on the row's own
+    /// cadence (whenever the row's error changes) — the Encryption tab's
+    /// refresh may never have run.
+    @State private var rekeyAct: CeremonyAct?
 
     private var sync: SyncSession { services.sync }
 
@@ -296,13 +310,17 @@ struct SyncStatusRow: View {
             lastError: sync.status.lastError,
             lastErrorIsOffline: sync.status.lastErrorIsOffline,
             stalled: sync.status.pullStalled,
-            canCheckForUpdates: checkForUpdatesDoor != nil)
+            canCheckForUpdates: checkForUpdatesDoor != nil,
+            rekeyAct: rekeyAct)
     }
 
     var body: some View {
         row
             .sheet(item: $accountSheetTab) { tab in
                 AccountView(services: services, initialTab: tab)
+            }
+            .task(id: sync.status.lastError) {
+                rekeyAct = await services.encryption.readPendingCeremonyAct()
             }
     }
 
@@ -429,7 +447,7 @@ struct SyncStatusRow: View {
                 .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .rekeyIncomplete:
-            Text(Self.rekeyIncompleteLabel)
+            Text(Self.rekeyIncompleteLabel(for: rekeyAct))
                 .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .notEntitled:
@@ -510,6 +528,14 @@ struct SyncStatusRow: View {
     /// persisted marker) — the door beside it opens the Encryption tab,
     /// whose banner carries the completing Replace door.
     static let rekeyIncompleteLabel = "Sync paused — key replacement didn't finish on this device"
+
+    /// VX-110 (item 2 — PROVISIONAL words): the row line by the pending
+    /// marker's act; the older line for a replacement or an unknown act.
+    static func rekeyIncompleteLabel(for act: CeremonyAct?) -> String {
+        act?.entersCastle == true
+            ? "Sync paused — entering Castle didn't finish on this device"
+            : rekeyIncompleteLabel
+    }
 
     private var lastSyncLabel: String {
         guard let last = sync.status.lastSuccessAt else { return "Not synced yet" }

@@ -268,7 +268,11 @@ struct PostureSwitchDrillTests {
         }
         let engine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: keyStore))
         let pushTime = try await seedClock.measure {
-            try await withDependencies { $0.database = view } operation: {
+            try await withDependencies {
+                $0.database = view
+                $0.uuid = UUIDGenerator { UUID() }
+                $0.date = DateGenerator { Date() }
+            } operation: {
                 var rounds = 0
                 while try await engine.outboxCount() > 0, rounds < 200 {
                     _ = try await engine.push()
@@ -352,7 +356,11 @@ struct PostureSwitchDrillTests {
         let clock = ContinuousClock()
         var applied = 0, merged = 0
         let wall = try await clock.measure {
-            try await withDependencies { $0.database = view } operation: {
+            try await withDependencies {
+                $0.database = view
+                $0.uuid = UUIDGenerator { UUID() }
+                $0.date = DateGenerator { Date() }
+            } operation: {
                 let report = try await engine.pull()
                 applied = report.applied; merged = report.merged
             }
@@ -593,7 +601,11 @@ struct PostureSwitchDrillTests {
         let newDeviceURL = world.dir.appendingPathComponent("new-standard-device/variorum.sqlite")
         let newDevice = try AppDatabase.openStore(at: newDeviceURL, custody: .inMemory(initial: .mint()))
         let newDeviceEngine = SyncEngine(transport: world.mirror, keyProvider: DrillKeyProvider(keys: newDeviceMaterial.syncKeys))
-        try await withDependencies { $0.database = newDevice } operation: {
+        try await withDependencies {
+            $0.database = newDevice
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = DateGenerator { Date() }
+        } operation: {
             let report = try await newDeviceEngine.pull()
             #expect(report.applied + report.merged == world.rowsPushed,
                     "the new Standard device applies every row with nothing typed: applied \(report.applied), merged \(report.merged)")
@@ -627,7 +639,11 @@ struct PostureSwitchDrillTests {
         #expect(joinerFile.passphrase == nil, "nothing typed — no passphrase wrap was minted")
         #expect(joiner.encryption?.state == .enrolled(hasRecoveryWrap: false), "\(String(describing: joiner.encryption?.state))")
         let joinerEngine = SyncEngine(transport: world.mirror, keyProvider: DeviceKeySyncProvider(store: joiner.keyStore))
-        try await withDependencies { $0.database = joiner.view } operation: {
+        try await withDependencies {
+            $0.database = joiner.view
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = DateGenerator { Date() }
+        } operation: {
             let report = try await joinerEngine.pull()
             #expect(report.applied + report.merged == world.rowsPushed,
                     "the enrolled device applies every row under its own custody: applied \(report.applied), merged \(report.merged)")
@@ -694,7 +710,11 @@ struct PostureSwitchDrillTests {
         // pulled to head) — then a FRESH device (the Castle new-device road:
         // passphrase once, nothing else) reads the whole corpus under C′.
         let siblingOld = SyncEngine(transport: world.mirror, keyProvider: DeviceKeySyncProvider(store: sibling.keyStore))
-        try await withDependencies { $0.database = sibling.view } operation: {
+        try await withDependencies {
+            $0.database = sibling.view
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = DateGenerator { Date() }
+        } operation: {
             await #expect(throws: SyncError.encryptionKeysReplaced, "the sibling's old-key pull is refused at the fence") {
                 _ = try await siblingOld.pull()
             }
@@ -732,7 +752,11 @@ struct PostureSwitchDrillTests {
         #expect(!StoreEncryptionMigration.opens(sibling.storeURL, key: sibling.oldKey), "the sibling's old library key opens nothing")
         #expect(try await sibling.marker() == nil)
         let siblingNew = SyncEngine(transport: world.mirror, keyProvider: DeviceKeySyncProvider(store: sibling.keyStore))
-        try await withDependencies { $0.database = sibling.view } operation: {
+        try await withDependencies {
+            $0.database = sibling.view
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = DateGenerator { Date() }
+        } operation: {
             let report = try await siblingNew.pull()
             sibling.note("the followed sibling's next pull: applied \(report.applied), merged \(report.merged), cursor \(report.newCursor)")
         }
@@ -746,7 +770,11 @@ struct PostureSwitchDrillTests {
         let freshEnrolled = try await VaultEnrollment(client: world.vaultClient).enroll(passphrase: "sesame")
         #expect(freshEnrolled.corpusKeyID == followed.corpusKeyID && freshEnrolled.rotation == nil)
         let freshEngine = SyncEngine(transport: world.mirror, keyProvider: DrillKeyProvider(keys: freshEnrolled.syncKeys))
-        try await withDependencies { $0.database = freshStore } operation: {
+        try await withDependencies {
+            $0.database = freshStore
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = DateGenerator { Date() }
+        } operation: {
             let report = try await freshEngine.pull()
             #expect(report.applied + report.merged == world.rowsPushed,
                     "a fresh device under the new keys applies every row: applied \(report.applied), merged \(report.merged)")
@@ -797,7 +825,11 @@ struct PostureSwitchDrillTests {
         #expect(try castleJoinerFile.unwrapKey(master: followed.masterSymmetricKey) == castleJoinerKey, "…and under M′")
         #expect(!StoreEncryptionMigration.opens(castleJoiner.storeURL, key: castleJoiner.oldKey), "the fresh library's old key opens nothing")
         let castleJoinerEngine = SyncEngine(transport: world.mirror, keyProvider: DeviceKeySyncProvider(store: castleJoiner.keyStore))
-        try await withDependencies { $0.database = castleJoiner.view } operation: {
+        try await withDependencies {
+            $0.database = castleJoiner.view
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = DateGenerator { Date() }
+        } operation: {
             let report = try await castleJoinerEngine.pull()
             #expect(report.applied + report.merged == world.rowsPushed,
                     "the joined device applies every row under C′: applied \(report.applied), merged \(report.merged)")

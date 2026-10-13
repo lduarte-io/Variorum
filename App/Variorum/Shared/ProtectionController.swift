@@ -965,6 +965,31 @@ final class ProtectionController {
         refreshNotices()
     }
 
+    // MARK: - VX-206 — a ceremony opened from Settings ▸ Protection ends there
+
+    /// **A REQUEST that Settings adopts (its pane → Protection)** — the twin of
+    /// `MCPDoor.settingsRequest`, the one programmatic open-at-pane road (the
+    /// VX-214 machinery ruling). The re-key's reopen rebuilds the `.ready`
+    /// tree, and the Settings window's content with it, at its default pane
+    /// (General): a ceremony hosted by the pane kept running with no pane to
+    /// present its sheet, and its Done waited until she found Protection by
+    /// hand. A counter, so every ask is fresh; the window's "seen" mark rides
+    /// beside it HERE, because this controller outlives the re-key (the
+    /// bootstrap's own) and the Settings view does not.
+    private(set) var settingsRequest = 0
+    @ObservationIgnored var settingsRequestAdopted = 0
+
+    /// Ask Settings for Protection — only while the ceremony in progress is
+    /// the pane's (`ceremonyHost`, decided once when it opened). The re-key's
+    /// reopen asks (the During screen comes back where it was) and the road's
+    /// return asks (the Done, or the refusal, is on screen where she acted); a
+    /// ceremony the main window hosts asks nothing, so General's default and
+    /// wherever she left Settings stand.
+    func requestProtectionPaneForCeremony() {
+        guard activeSwitch != nil, ceremonyHost == .pane else { return }
+        settingsRequest += 1
+    }
+
     /// The biometric confirmation (leaving Castle's Touch ID road) —
     /// PROMPTS in production; scripted in tests.
     func confirmPresence(_ reason: String) async -> Bool {
@@ -1304,6 +1329,21 @@ final class ProtectionController {
         return .changed
     }
 
+    /// 13p ladder R1-M3's re-landing (the bootstrap's ready arm): a PROVEN
+    /// key back into the silent item. VX-202: on the custody queue — the
+    /// save is enqueued at the call, so it runs before any custody move
+    /// enqueued after it and can never land behind that move's delete.
+    func relandSilentItem(_ key: StoreKey) async -> Bool {
+        let guardSeam = self.guardSeam
+        let saved = await Self.onCustodyQueue { guardSeam.saveAuto(key) }
+        if !saved {
+            // VX-201 ladder R1-4: the heal's failure must be observable —
+            // the next launch fails into the same recovery surface.
+            logger.notice("recovery re-land: the Keychain refused to save the proven key into the silent item — the next launch asks again")
+        }
+        return saved
+    }
+
     /// 17h R3-6 — the serial off-main custody hop.
     nonisolated private static let custodyQueue = DispatchQueue(
         label: "io.lduarte.Variorum.store-custody", qos: .userInitiated)
@@ -1423,6 +1463,9 @@ final class ProtectionController {
             vaultReading = reading
             freshReading = reading
         }
+        // VX-202 (belt b): before the posture is re-derived — a lingering
+        // silent item is never read as the posture.
+        await sweepLingeringSilentItem()
         refreshEnvelopeFacts()
         // pre-13x 2c (§7): the follow's verdict from the vault's word and
         // this device's custody — the notice, the silent follow into
@@ -1434,10 +1477,83 @@ final class ProtectionController {
         // Standard-shaped for an instant, and Castle is what is being
         // entered.
         let markerPending = await readSwitchPending?() ?? false
+        // VX-201 ladder R1-1: a switch-pending flag that OUTLIVED its marker
+        // — a death before the first marker write, a marker write that
+        // threw after the flag was set, or an Open/Restore that replaced
+        // the store (the marker is rows inside it; the flag is per-store-id,
+        // which a restored copy shares) — is cleared here: no marker and no
+        // ceremony or follow in flight means no custody move is coming, and
+        // a stale flag would refuse the route's corner-45 landing for good.
+        // The runner re-sets it before its first marker on every later road;
+        // the model roads hold `switchInProgress` (and the controller holds
+        // their models) across every runner call, so this can never fire
+        // inside a road's flag-set-to-first-marker window. The one no-model
+        // road (the silent follow into Standard) is covered by the marker
+        // plus serialization instead: its flag-no-marker window sits inside
+        // one awaited `writeMarker` whose failure leaves a marker, and ready
+        // housekeeping is serialized (the ladder R1 sanity pass's record).
+        if !markerPending, !switchInProgress, activeSwitch == nil, activeFollow == nil,
+           let storeID = configuration.resolvedStoreID(), gate.switchPending(scope, storeID) {
+            gate.setSwitchPending(false, scope, storeID)
+            logger.notice("custody reconcile: a switch-pending flag with no marker behind it was cleared (a crashed switch's leftover, or a restored copy's)")
+        }
         if !switchInProgress && !markerPending {
             await reconcileAppleKey()
         }
         refreshNotices(now: now)
+    }
+
+    /// VX-202 (belt b) — THE AT-READY SWEEP. A silent copy of the library
+    /// key beside the GATED item, on a library whose posture — read with
+    /// the gated item as the custody shape, never the silent one — is
+    /// Castle, breaks the custody law (Touch ID ⇒ the silent item
+    /// DELETED): the late R1-M3 save §O.3 traced, or a copy an older build
+    /// left. Deleted (the guard's DP-flagged delete), never read as the
+    /// posture. Without a gated item the silent item IS the shape (corner
+    /// 45's Standard-waiting, a never-followed device) and nothing is
+    /// touched. Bounds: after the bootstrap adopted (the shape is known);
+    /// a DETERMINED Castle (indeterminate writes nothing — decision 35);
+    /// no switch in flight or pending (the runner owns custody then); and
+    /// never the only road in — the silent key either opens nothing
+    /// current (the key this ready opened with is another) or the live key
+    /// file carries a passphrase or twelve-words copy of it. A silent item
+    /// that WAS the open's key stays in hand as the resident (the demanded
+    /// shape's law).
+    private func sweepLingeringSilentItem() async {
+        guard residentAdopted, !switchInProgress else { return }
+        let pending = await readSwitchPending?() ?? false
+        guard !pending, !switchInProgress else { return }
+        let guardSeam = self.guardSeam
+        let gate = self.gate
+        let storeURL = configuration.storeURL
+        let found = await Self.onCustodyQueue { () -> (silent: StoreKey?, gated: Bool, keyFile: StoreKeyEnvelope?) in
+            let silent = guardSeam.loadAuto()
+            guard silent != nil else { return (nil, false, nil) }
+            return (silent, guardSeam.gatedItemExists(), gate.readEnvelope(storeURL).envelope)
+        }
+        guard let silent = found.silent, found.gated else { return }
+        let reading = Posture.derive(
+            legacyMode: gate.legacyMode(scope, configuration.resolvedStoreID()),
+            vaultHasAppleHeldCopy: vaultReading?.hasAppleHeldCopy,
+            keyFile: found.keyFile,
+            rawKeyCustody: .gatedOrNone,
+            enrolled: enrolled)
+        guard reading.determined == .castle else { return }
+        let opensNothingCurrent = residentKey.map { $0 != silent } ?? false
+        let typedRoadRemains = found.keyFile.map {
+            $0.keyFingerprint == StoreKeyEnvelope.fingerprint(of: silent)
+                && ($0.passphrase != nil || $0.recovery != nil)
+        } ?? false
+        guard opensNothingCurrent || typedRoadRemains else {
+            logger.notice("custody sweep: a silent copy of the library key sits beside the gated item, but no passphrase or twelve-words copy of it is on file — left in place (it may be the only road in)")
+            return
+        }
+        guard await Self.onCustodyQueue({ guardSeam.deleteAuto() }) else {
+            logger.notice("custody sweep: the Keychain refused to release the lingering silent item — the next ready retries")
+            return
+        }
+        if residentKey == nil { residentKey = silent }
+        logger.notice("custody sweep: a silent copy of the library key beside the gated item on a Castle library was removed (\(opensNothingCurrent ? "a stale key" : "the current key — kept in hand", privacy: .public))")
     }
 
     /// THE APPLE ARM (§3.8 / the brief's item 2): under Standard with the
@@ -1493,6 +1609,21 @@ final class ProtectionController {
             appleKeyVerified = false
             appleKeyLandingFailed = false
             appleKeyWaiting = false
+            return
+        }
+        // VX-110 (corner 6 — "consent at enrollment"): a Standard reading that
+        // is the ACCOUNT's word over a library that is Castle by its OWN key
+        // file and custody (the key behind the gate, no sync custody here) is
+        // the join the consent asks about — landing the Apple copy would BE
+        // that join, silently. Nothing is written until Join (whose follow
+        // into Standard lands the copy itself). Keyed on the library's own
+        // shape, never on `enrollReading`, which a nil vault read clears while
+        // the last reading still says Standard.
+        if !syncCustodyPresentAtReady, libraryKeyCustodyShape == .gatedOrNone, libraryOwnPosture == .castle {
+            appleKeyVerified = false
+            appleKeyLandingFailed = false
+            appleKeyWaiting = false
+            logger.notice("apple key reconcile: the account reads Standard but this library is Castle and not joined here — nothing lands before the consent")
             return
         }
         let resident = residentKey

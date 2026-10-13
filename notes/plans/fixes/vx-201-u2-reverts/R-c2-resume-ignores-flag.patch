@@ -1,0 +1,13 @@
+diff --git a/App/Variorum/Shared/PostureSwitch.swift b/App/Variorum/Shared/PostureSwitch.swift
+index f34bfb46..1fa08f0a 100644
+--- a/App/Variorum/Shared/PostureSwitch.swift
++++ b/App/Variorum/Shared/PostureSwitch.swift
+@@ -1471,7 +1471,7 @@ final class PostureSwitchRunner {
+         // it in custody is the silent revert at the next signed-in ready.
+         let localCastleRoad = marker.entersCastle && !marker.isFollow && marker.newCorpusKeyID == nil
+             && marker.step != .vaultWrite && marker.step != .reencrypt
+-        let thisDeviceOnlyRoad = localCastleRoad && thisDeviceOnlyFlag()
++        let thisDeviceOnlyRoad = false
+         var forgotAtResume = false
+         if localCastleRoad, material != nil {
+             if !thisDeviceOnlyRoad { setThisDeviceOnlyFlag(true) }

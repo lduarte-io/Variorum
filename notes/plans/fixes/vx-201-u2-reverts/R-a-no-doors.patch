@@ -1,0 +1,28 @@
+diff --git a/App/Variorum/Shared/PostureSwitch.swift b/App/Variorum/Shared/PostureSwitch.swift
+index f34bfb46..d6d209af 100644
+--- a/App/Variorum/Shared/PostureSwitch.swift
++++ b/App/Variorum/Shared/PostureSwitch.swift
+@@ -590,10 +590,6 @@ final class PostureSwitchRunner {
+             leaves.log("posture switch: This Mac Only reached the runner with a session — refused before anything is written (the account-wide switch is its own press)")
+             throw PostureSwitchError.thisDeviceOnlyWhileSignedIn
+         }
+-        if entersCastle, !thisDeviceOnly, !signedIn, custody != nil {
+-            leaves.log("posture switch: Use Castle reached the runner signed out while custody holds the sync account's keys — refused before anything is written (the two doors decide)")
+-            throw PostureSwitchError.signInOrThisDeviceOnly
+-        }
+         // 17l item 5 (RUN B B3): the derive moved INTO the branches — the
+         // enrolled road derives against the FETCHED vault (an unchanged
+         // word reuses the vault's descriptor, so a sibling's held lobby
+diff --git a/App/Variorum/Shared/PostureSwitchModel.swift b/App/Variorum/Shared/PostureSwitchModel.swift
+index 2ebf349d..c5099f64 100644
+--- a/App/Variorum/Shared/PostureSwitchModel.swift
++++ b/App/Variorum/Shared/PostureSwitchModel.swift
+@@ -281,7 +281,7 @@ final class PostureSwitchModel: Identifiable {
+                 // VX-110: signed out with the sync account's keys held, the
+                 // local road's Castle would revert silently at the next
+                 // signed-in ready — the two doors decide first.
+-                phase = facts.signedOutHoldingSyncKeys ? .signedOutChoice : .explain
++                phase = .explain
+             case .leave: phase = .leaveConfirm
+             case .resume: await resume(passphrase: nil)
+             case .replaceKeys:
