@@ -2471,11 +2471,53 @@ known issues)", its RUN CLOSEOUT — plus the coordinator's relay at this window
 | piece | what | status |
 |---|---|---|
 | 0 | this section + LIVE STATUS + the attribution baseline | DONE (this commit) |
-| 1 | the Mac `build-for-testing` on the merged tip (`DerivedData/vx184-u5`, incremental; no stage — a build) | NOT-STARTED |
-| 2 | READY FOR STAGE — hand back with the minutes estimate; wait for the GO and its exact claim line | NOT-STARTED |
+| 1 | the Mac `build-for-testing` on the merged tip (`DerivedData/vx184-u5`, incremental; no stage — a build) | DONE (2026-10-13 14:46:45–14:47:07 MDT, this commit) — `cd App/Variorum && xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <abs>/App/Variorum/DerivedData/vx184-u5 build-for-testing` → **`** TEST BUILD SUCCEEDED **`, EXIT 0** in 22 s (incremental: it recompiled exactly the two files VX-278's cleanup `cab86eee` touched — `Operations+MCPWingMove.swift`, `MCPToolCatalog.swift`, comments — and relinked the app; nothing under `App/Variorum/VariorumTests` or `Sources/VariorumMCPSocket` changed since the round-2 fix pass's build, `git diff --stat 0c96d5fa HEAD` on those paths empty). `Debug/Variorum.app` = `io.lduarte.Variorum.debug` with `Contents/MacOS/variorum-mcp` and `PlugIns/VariorumTests.xctest`; 3 warnings, all pre-existing `nonisolated(unsafe)` notes in files this run never touched (`VariorumRecord`, `BackupRestoreCandidates`, `LibraryAdoption`). Log `close/logs/mac-build-for-testing.log` |
+| 2 | READY FOR STAGE — hand back with the minutes estimate; wait for the GO and its exact claim line | **READY FOR STAGE** (this commit, ~14:55 MDT) — the stage NOT claimed; no test run, no launch. Pre-window facts read (read-only): the dev store is **byte-identical to U5's restored state** (`cmp` against `scale-prestage-20261013T171947Z`, all five files SAME — the Standard posture U5's live round opened normally), last written 11:19; `appearanceChoice` = `system` and the system is LIGHT (no `AppleInterfaceStyle`); no xcodebuild or Variorum process running. Estimate **~60 min of work (75 with margin) — inside the 90 booked**: the whole target ≈ 32–35 min (VX-214: 4,532 tests; phase 19's 3,812 took 26 min, phase 17's 3,887 took 25 min), attribution + any alone re-runs ≈ 5–10, the on-screen look ≈ 15, cleanup ≈ 5. THE WINDOW's plan below |
 | 3 | THE WHOLE MAC TARGET — `test-without-building` launched detached to its log and POLLED IN THE FOREGROUND (the phase-19 precedent); every red attributed; a new red re-run alone | NOT-STARTED |
 | 4 | THE ON-SCREEN LOOK — A1 prestage copy, prefs exported, the Debug app launched; the blurb and the Edit HOW MUCH line captured in Study and Terminal, light | NOT-STARTED |
 | 5 | cleanup — the app quit by bundle id; the dev store restored and `cmp`-verified; prefs 0 keys differing; the stage released | NOT-STARTED |
 | 6 | close — this section's first line, the counts, every red's attribution, the captures, the skips; the result line | NOT-STARTED |
 
 **No revert is in flight, and no code change is planned.**
+
+### THE WINDOW — the plan (runs ONLY on the orchestrator's GO, under the exact claim line it relays — expected `vx184-close`)
+
+0. **Guards first, every time:** the claim held (`Tools/stage status`); `Tools/WalkKit/guard.sh --author` (her
+   `/Applications/Variorum.app` ABSENT — if present, STOP and report, never quit or kill it); `pgrep -fl
+   'Variorum.app/Contents/MacOS'` empty. Every GUI act through `click.sh` / `keys.sh` (the author checks first, then the
+   full guard), synthetic events ≥ 2.6 s apart (the self-trip rule); every KEY through `keys.sh`, never cliclick.
+1. **Pre-run facts (read-only, ~1 min):** the dev store's five files hashed (`sha256`) and the Debug app's prefs exported
+   (`defaults export io.lduarte.Variorum.debug`) — so the record can say what the suite run itself changed. A safety copy
+   of the dev store BEFORE the run as well (`scale-prestage-<ts>`, the stage.sh copy loop, each file `cmp`-verified) — a
+   fallback only; the restore target stays step 3's prestage, the brief's letter.
+2. **THE WHOLE MAC TARGET (~32–35 min):** `cd App/Variorum && nohup xcodebuild test-without-building -scheme Variorum
+   -destination 'platform=macOS' -derivedDataPath <abs>/DerivedData/vx184-u5 -resultBundlePath
+   <close>/whole.xcresult > <close>/logs/whole-target.log 2>&1 &` — launched detached and POLLED IN THE FOREGROUND (a
+   bounded `grep`/`sleep` loop per call, repeated) until `** TEST EXECUTE SUCCEEDED|FAILED **`; never a turn ended on it.
+   Then: the summary line, the `✘` lines, the `skipped:` lines, the known-issue count; every red attributed against the
+   baseline table above (ChromeLineLimitTests' site list compared line by line with the 8). **A red not on the list:**
+   re-run ALONE (`-only-testing:VariorumTests/<Suite>/<test>()`); green alone + a known load-flake class (VX-167, VX-279) ⇒
+   recorded as that class; reproduces alone ⇒ a REAL regression: the window stops after cleanup and the release, and the
+   report carries the test, its message and the trace — nothing fixed here. The four OWED suites are confirmed by name in
+   the log (`MCPAskAndReceiptTests`, `MCPGrantSheetTests`, `MCPSetupMenuTests`, `TutorialMCPChapterTests`).
+3. **A1 prestage + launch (~3 min):** the dev store's five files → `…/Variorum-dev/Backups/safety-copies/
+   scale-prestage-<ts>/` (the stage.sh copy loop WITHOUT its fixture launch, each file `cmp`-verified); the prefs exported
+   again (the cleanup's baseline — U1–U5's practice); the system appearance re-read (light). `open -n` the
+   `DerivedData/vx184-u5` Debug app, no fixture env; its pid by path. A What's New sheet → closed with its own button; a
+   DEV lock screen → unlocked from `~/.variorum/dev-castle.env` (sourced, never echoed, logged or captured — the screen
+   captured only before the typing or after the unlock).
+4. **THE ON-SCREEN LOOK, Study (light) (~6 min):** Settings ▸ MCP (⌥⌘, or the app menu's MCP Settings…) → capture the
+   "Enable the MCP server" toggle and its blurb (`MCPPaneCopy.enableBlurb`, the round-2 sentence "… a client changes your
+   text only where you grant it edit, and when it rewrites a take, the take's words before and after are kept as
+   commits."). Then THE grant sheet by the nearest grant road that writes nothing: Shared with AI ▸ claude-code's edit
+   grant on "o ladrão de raios" ▸ **Change…** (the REPLACE sheet, pre-filled at HOW MUCH = Edit) → capture the HOW MUCH line
+   under Edit (`rungDetail(.edit)`: "it can also change, archive and delete what you shared, your own words included — when
+   it rewrites a take, the take's words before and after are kept as commits, so you can always compare and come back") →
+   **Cancel** (nothing written). If that road is absent, ⌥⌘A from a note with HOW MUCH set to Edit, then Cancel.
+5. **The same in Terminal (light) (~6 min):** Settings ▸ General ▸ Design voice → Terminal (a synced store setting the
+   restore reverts); the blurb and the sheet's Edit line captured again; Cancel.
+6. **Cleanup (~4 min):** every sheet closed by its own Cancel/Done; the Debug app quit BY IDENTITY (`tell application id
+   "io.lduarte.Variorum.debug" to quit`; `pgrep` empty — a refused quit means a sheet is still up: close it, quit again);
+   `Tools/ScaleFixture/restore.sh <step 3's prestage>` → "Restored (verified)" and a second `cmp` of all five files; the
+   prefs diffed against step 3's export → `defaults import` + `defaults delete` of any key the walk added → **0 keys
+   differ**; the stage RELEASED at once (`Tools/stage release --who vx184-close`); then the write-up (piece 6).
