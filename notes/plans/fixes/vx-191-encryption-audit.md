@@ -191,3 +191,22 @@ door; custody held forever). The fix needs two roads: (a) signed out but the acc
 the account and your other devices come along"; (b) "switch this Mac only" with an HONEST Done (this Mac's library
 is in Castle; the old account's sync copy is unchanged — delete that account to remove it; signing back into it
 returns this Mac to Standard). Product behavior + copy → hers (QUESTIONS when the fix ticket runs).
+
+### W.1 Second follow-up (same night)
+- **The tester's relaunch asked for Touch ID / the passphrase** — the user-visible half passes on their Mac. The
+  command's "No such file" is most likely the pasted path losing its `\ ` escape (the path is correct for the
+  Release container — verified on the Pro); re-run with the quoted two-step form given to her.
+- **Someone else's account signed in on your Mac:** custody holds THAT account's M/C on this Mac (device-only). For
+  the account's owner it is "an enrolled device someone else holds" — the designed answer is **Replace All Keys**
+  from her own device (rotates M and C; the server refuses the old master from then on) plus Sign Out Everywhere;
+  entering Castle elsewhere rotates the same keys AND removes the Apple-held copy. Not a new class.
+- **A new account on the same Mac is designed and pinned** (decision 17's adopt road — re-stamp + `resyncReinitialize`;
+  the Connect door for a foreign-owner library, `ConnectLibraryTests`); the stale custody is replaced at the new
+  enrollment. Not run tonight.
+- **VX-110 recommendation:** while signed out with sync custody held, Use Castle offers TWO doors — *Sign In…* (the
+  real account-wide switch) and *Use Castle on This Mac Only*, which FORGETS the old account's keys here (the
+  mechanism exists — `EncryptionSession.forgetDeviceKeys`, door retired at decision 25) and runs the local road, with
+  an honest Done ("this Mac's library is in Castle; your old sync account and its server copy are unchanged — delete
+  that account if you still can"). Forgetting ends the silent revert (a later sign-in to the old account is an
+  ENROLL with its consent screens, not a follow) and leaves the library clean for a new account (born Castle).
+  Launch-night minimum if the full fix can't land: a copy-only honest Done on that road. Hers to rule.
