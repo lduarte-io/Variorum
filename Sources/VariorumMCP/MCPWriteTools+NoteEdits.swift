@@ -27,6 +27,8 @@ extension MCPWriteTools {
         case lockTake(takeID: String, locked: Bool)
         case restoreCommit(commitID: String)
         case renameCommit(commitID: String, message: String?)
+        case renameNote(noteID: String, title: String?)
+        case deleteLens(lensID: String)
 
         var tool: String {
             switch self {
@@ -39,6 +41,8 @@ extension MCPWriteTools {
             case .lockTake(_, let locked): locked ? MCPToolCatalog.lockTake.name : MCPToolCatalog.unlockTake.name
             case .restoreCommit: MCPToolCatalog.restoreCommit.name
             case .renameCommit: MCPToolCatalog.renameCommit.name
+            case .renameNote: MCPToolCatalog.renameNote.name
+            case .deleteLens: MCPToolCatalog.deleteLens.name
             }
         }
     }
@@ -99,6 +103,13 @@ extension MCPWriteTools {
                 throw ArgumentFailure(message: "message is required: the commit's new name, or null to clear it.")
             }
             return .renameCommit(commitID: try requiredString(args, "commit_id"), message: try optionalString(args, "message"))
+        case MCPToolCatalog.renameNote.name:
+            guard args.keys.contains("title") else {
+                throw ArgumentFailure(message: "title is required: the note's new title, or null to clear it.")
+            }
+            return .renameNote(noteID: try requiredString(args, "note_id"), title: try optionalString(args, "title"))
+        case MCPToolCatalog.deleteLens.name:
+            return .deleteLens(lensID: try requiredString(args, "lens_id"))
         default:
             return nil
         }
@@ -285,6 +296,36 @@ extension MCPWriteTools {
                                           targetTitle: title, detail: result.message,
                                           show: .note(noteID: noteID, blockID: blockID, select: nil))
                         : nil)
+            }
+
+        case .renameNote(let noteID, let newTitle):
+            return try onNote(noteID, rung: .edit, job: job, clientName: clientName, spendsAfter: false) { title in
+                let result = try ops.renameNoteForClient(
+                    noteID, title: newTitle, undoLabel: label(.noteTitle),
+                    guardedBy: guardEdit(clientName) { _ in [noteID] })
+                // The receipt and the activity line name the note as it now
+                // reads (an untitled note reads by its display title).
+                let shown = try database.read { db in
+                    try Queries.mcpScopeTitle(db, kind: .note, id: noteID, calendar: calendar)
+                } ?? title
+                return (["note_id": noteID, "title": result.title ?? NSNull(), "changed": result.changed],
+                        result.changed
+                        ? MCPWriteReceipt(clientName: clientName, act: .noteTitle, targetID: noteID,
+                                          targetTitle: shown, detail: result.title,
+                                          show: .note(noteID: noteID, blockID: nil, select: nil))
+                        : nil)
+            }
+
+        case .deleteLens(let lensID):
+            let noteID = try database.read { try Queries.mcpContainerOf(lens: lensID, $0) } ?? ""
+            return try onNote(noteID, rung: .edit, job: job, clientName: clientName,
+                              logged: ("lens", lensID), spendsAfter: false) { title in
+                let lens = try ops.deleteLensForClient(
+                    lensID, undoLabel: label(.lensDelete),
+                    guardedBy: guardEdit(clientName) { db in [try Queries.mcpContainerOf(lens: lensID, db)] })
+                return (["lens_id": lensID, "note_id": noteID, "deleted": true],
+                        MCPWriteReceipt(clientName: clientName, act: .lensDelete, targetID: noteID, targetTitle: title,
+                                        detail: lens.name, show: .note(noteID: noteID, blockID: nil, select: nil)))
             }
         }
     }

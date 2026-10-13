@@ -116,6 +116,8 @@ enum MCPToolCatalog {
         deleteTake, archiveTake, unarchiveTake, setTakeLabel, lockTake, unlockTake,
         // …the commits family (the restore insured first).
         restoreCommit, renameCommit,
+        // …and the note itself: its title, its saved lenses.
+        renameNote, deleteLens,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -1001,6 +1003,43 @@ enum MCPToolCatalog {
                                     "description": "Its new name (blank or null clears)."]),
             ]),
             "required": .array(["commit_id", "message"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// Her title doors — a title is library metadata (a seal leaves it free).
+    static let renameNote = MCPToolDeclaration(
+        name: "rename_note", rung: .edit, title: "Rename a note",
+        description: """
+            Give a note a new title, or clear its title with null or a blank. A sealed note's title \
+            can still change, as the author's can. One undo for the author puts the old title back. \
+            Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note."]),
+                "title": .object(["type": ["string", "null"], "description": "The new title (blank or null clears)."]),
+            ]),
+            "required": .array(["note_id", "title"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// Her lens delete — the lens and its picks, never what the note shows.
+    static let deleteLens = MCPToolDeclaration(
+        name: "delete_lens", rung: .edit, title: "Delete a lens",
+        description: """
+            Delete one of a note's saved lenses (read_note with with_lenses: true lists them). Only \
+            the lens goes: the note and the takes it shows are untouched. One undo for the author \
+            brings the lens back. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "lens_id": .object(["type": "string", "description": "The lens to delete."]),
+            ]),
+            "required": .array(["lens_id"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)

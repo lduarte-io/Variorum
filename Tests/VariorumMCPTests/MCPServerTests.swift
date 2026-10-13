@@ -262,7 +262,7 @@ struct MCPServerTests {
                     "remove_tag",
                     "edit_comment", "restore_comment",
                     "delete_take", "archive_take", "unarchive_take", "set_take_label", "lock_take", "unlock_take",
-                    "restore_commit", "rename_commit"])
+                    "restore_commit", "rename_commit", "rename_note", "delete_lens"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })

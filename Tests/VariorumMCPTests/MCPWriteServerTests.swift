@@ -167,8 +167,18 @@ struct MCPWriteServerTests {
                     let herTags = try Row.fetchAll(db, sql: "SELECT * FROM post_tag ORDER BY id").map(\.description)
                     // …and every edge (link_versions would mint version_of ones).
                     let edges = try Row.fetchAll(db, sql: "SELECT * FROM edge ORDER BY id").map(\.description)
+                    // VX-184 U4 (justified edit): every title, and HER lens's rows
+                    // (rename_note and delete_lens aim at hers; save_lens may
+                    // add a lens of the client's own, so only hers is fixed).
+                    let titles = try String.fetchAll(db, sql: "SELECT COALESCE(title, '-') FROM container ORDER BY id")
+                    let lenses = try Row.fetchAll(
+                        db, sql: "SELECT * FROM lens WHERE name = 'her own way' ORDER BY id").map(\.description)
+                        + Row.fetchAll(db, sql: """
+                            SELECT lc.* FROM lens_choice lc JOIN lens l ON l.id = lc.lens_id
+                            WHERE l.name = 'her own way' ORDER BY lc.id
+                            """).map(\.description)
                     return takes + placements + blocks + commits + dates + rules + filings + herComments + herTags
-                        + edges
+                        + edges + titles + lenses
                 }
             }
             let chapter = try h.operations.createSection(in: book.id, name: "1")
@@ -272,6 +282,8 @@ struct MCPWriteServerTests {
             calls.append(("unlock_take", ["take_id": .string(one.variant.id)]))
             calls.append(("restore_commit", ["commit_id": .string(hersCommit.id)]))
             calls.append(("rename_commit", ["commit_id": .string(hersCommit.id), "message": .string("x")]))
+            calls.append(("rename_note", ["note_id": .string(note.id), "title": .string("x")]))
+            calls.append(("delete_lens", ["lens_id": .string(hersLens.id)]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).
