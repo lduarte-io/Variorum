@@ -1594,3 +1594,37 @@ apply-check CLEAN at the tip in the pinned checkout)
   alternatives A/B). U4's acceptance evidence owes WINDOW D (folded with U3's): the 5 pins green, the six revert
   cycles red-as-named, the union suite run, the phone union incl. the no-Mac sweep reading ONLY VX-114's
   offenders — then the walk's VX-206 legs at my window.
+
+## U5 RECORD (VX-209)
+
+**Not done in this unit (stated first):** IN PROGRESS — this line is rewritten at the unit's close.
+
+### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
+- 2026-10-13 ~04:35 — U5 implementer (Opus) started. Reading done in this session, never delegated: this file
+  whole (§A's VX-209 entry, §B, §G, the run LIVE STATUS incl. her carried-forward reminder 2, the U1 RECORD +
+  adjudication — F2 and belt c's exact shape — and the U2–U4 records + adjudications);
+  `notes/SessionResiliencyProtocol.md`; `notes/plans/fixes/vx-191-encryption-audit.md` whole (§W.2's trace
+  verbatim); `notes/SyncSpec.md` in full; `notes/plans/phase-13x-library-portability.md` (the design look, the
+  sittings, QA/QB/QC/QD, the restore-hold ruling, the U1 custody-collision memo, U2's settled design, the F1
+  R1-BLOCKER trace); `notes/plans/pre-13x-postures-design.md` §1 (decisions 1–35) + §14 (corners 1–48, 45
+  especially). Code: `LibraryClassifier`, `LibraryAdoption`, `CustodyCollisionRule`, `LibraryOpenModel`
+  (whole), `LibraryOpenCopy` (whole), the Mac faces `LibraryOpenDoor.swift` (the ONE sheet every adopt road
+  renders) + `DataSafetyPane`'s Restore section + `VariorumApp`'s two presenters, `StoreLaunchGate`
+  (`effectiveGate`, `rawKeyCustody`, belt c's `switchPending`, `openWithAppleKey`), `StoreProtection`
+  (`Posture.derive`, corner 45's `localReading`), `StoreKeyEnvelope`, `StoreKeyGuard`/`AppleKeyCustody`
+  (the in-memory backings), `PostureSwitch.writeNewKeyFile`, `PostureCopy`'s privacy lessons + both seeders,
+  and the pins that read lesson 2 (`TutorialWalkTests`, `MobileTutorialWalkTests`, `MobileProtectionTests`,
+  `VX204PrivacyLessonTests`, `MobileNoRedirectSweepTests`).
+- THE HEADLESS HARNESS (built before any repo line, so the reproduction runs HERE, not only at the stage): a
+  scratch SwiftPM package OUTSIDE the repo (the session scratchpad, `vx209-harness/`) that compiles the
+  worktree's `App/Variorum/Shared/**` + `App/Variorum/Variorum/**` BYTE-COPIED (one recorded exception: the
+  `@main` attribute stripped from the COPY of `VariorumApp.swift`, so the library has no entry point beside the
+  test runner's) into a library named `Variorum`, with the app target's Swift settings (Swift 6 mode, default
+  MainActor isolation, approachable concurrency's two upcoming features, member import visibility), the
+  worktree's core package by path, and the Mac target's package products (GRDB fork, swift-dependencies, the
+  MCP SDK, Sparkle 2.10.0 — the xcodeproj's own pins). A Mac test file's `@testable import Variorum` resolves
+  unchanged, so the SAME file the stage runs runs here under `swift test` (Swift Testing). Its own process,
+  its own defaults domain, temp dirs and in-memory custody only — no stage, no dev store, no Keychain.
+  Smoke-verified: the full Mac target compiles there (41 s) and a test runs.
+- NEXT: the reproduction pin of §W.2's round trip at HEAD (brief step 1) — written as a Mac test file, run in
+  the harness, the verdict recorded here BEFORE any copy is drafted.
