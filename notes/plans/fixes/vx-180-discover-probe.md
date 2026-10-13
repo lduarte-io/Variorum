@@ -342,8 +342,15 @@ bill stands unchanged.
 - **Closeout: MERGED (2026-10-12, the merging session)** — PR #152, merge commit `5235c096`; the merge-moment
   ledgers on latest main (QUESTIONS #214; AppSpec §12's pre-initialize window clause + §14's entry, the 13s-b entry
   rolled to the archive; the in-flight row retired; the closeout tail sentence; board snapshot); VX-180 Done in
-  Linear. The `/Applications` refresh: PENDING at her zero-instance window (the coordinator confirms) — flipped here
-  when it runs.
+  Linear. The `/Applications` refresh RAN at the coordinator's GO (2026-10-13 03:49–03:52 UTC, stage `vx180-release`,
+  zero-instance held at every act): A1 safety copy incl. key files `Backups/safety-copies/vx180-release-
+  20261013T034950Z` (all files cmp OK) → **installed 0.9.4 build 6518 from the NOTARIZED release DMG**,
+  codesign + spctl "Notarized Developer ID" verified. **AND — her word the same evening — 0.9.4 RELEASED TO
+  THE WEBSITE** (the one-off notes delegation, the 0.9.3 precedent; the publishing memory's rules honored):
+  `release.sh --version 0.9.4` PASS (commit `ba8db32f`, build 6518, DMG 28,156,162 bytes, sha256 `c6432b70…`,
+  appcast verify PASS, notes embedded verbatim); DMG-first publish per the site runbook — R2 upload, published
+  bytes IDENTICAL (verify PASS), appcast live BYTE-IDENTICAL (verify PASS), the beta page reads 0.9.4; the
+  site repo's commit `85d5213`. Her clients re-run NOTHING; the Air bridge retires at her leisure (HANDOFF).
 
 ## HANDOFF (for her — the author's checklist)
 
