@@ -13,8 +13,14 @@ import GRDB
 // (a), carried to the new acts of this unit). They decide nothing about
 // clients. Because those doors of hers register nothing, a VALUE restore here
 // (the date, the filing, the rule's columns) is COMPARE-AND-SET: it writes
-// only while the row still reads the value its act left there, so what she set
-// since is never overwritten (VX-184 ladder round 1, the undo-overwrite class).
+// only while the row still reads the value its act left there, so the UNDO
+// never overwrites what she set since (VX-184 ladder round 1, the
+// undo-overwrite class). The REDO does not yet keep that promise (VX-184
+// ladder round 2, 2026-10-13): when she has set a value BACK to the pre-act one
+// herself, ⌥⌘Z is quiet yet the entry still moves onto the redo stack
+// (`UndoStack.undo` pops any inverse that does not throw), and the redo —
+// checking only for that pre-act value — re-applies the client's act over
+// hers. VX-276 owns the fix: the redo keyed on what its inverse wrote.
 extension Operations {
     // MARK: - EDIT: put back (the tray — R-13nb-14's named IN)
 

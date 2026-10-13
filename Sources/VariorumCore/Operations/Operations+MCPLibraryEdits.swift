@@ -21,13 +21,25 @@ import GRDB
 // client-named undo entry", carried to acts her own doors leave off the stack
 // (the archive family, the chapter family, finish/reopen, the Trash acts) as
 // `move_note_to_wing` already wraps her undo-less wing move. Inverses and redos
-// are exact-row from do-time images, keyed on the act's own STAMPS; divergence
-// is QUIET (the world moved past the entry — she put it back already); a
-// finished or sealed book THROWS and keeps the entry (resolvable). A VALUE
-// restore (a name, a place) is COMPARE-AND-SET: it writes only while the row
-// still reads the value its act left there, so a name or place she gave it
-// since through her own undo-less door is never overwritten — checked FIRST,
-// before any refusal (VX-184 ladder round 1, the undo-overwrite class).
+// are exact-row from do-time images; the INVERSES are keyed on the act's own
+// STAMPS, and their divergence is QUIET (the world moved past the entry — she
+// put it back already); a finished or sealed book THROWS and keeps the entry
+// (resolvable). A VALUE restore (a name, a place) is COMPARE-AND-SET: it writes
+// only while the row still reads the value its act left there, so the UNDO
+// never overwrites a name or place she gave it since through her own
+// undo-less door — checked FIRST, before any refusal (VX-184 ladder round 1,
+// the undo-overwrite class). THE REDOS DO NOT YET KEEP THAT PROMISE (VX-184
+// ladder round 2, 2026-10-13): after she has put a row BACK herself (her
+// reopen or finish, her unarchive, her Put back, her chapter restore, the old
+// name or place again), ⌥⌘Z is quiet yet still moves the entry onto the redo
+// stack (`UndoStack.undo` pops any inverse that does not throw), and the redos
+// here — `refinishBook`, `reopenBookAgain`, `rearchiveBook`, `redeleteBook`,
+// `redeleteChapter`, `redeleteNote`, `restoreNoteArchived`, each
+// compare-and-set restorer — check only for the pre-act state her reversal
+// produced, so ⇧⌥⌘Z re-applies the client's act over hers. (Keyed redos are
+// safe: `unarchive_book`'s runs only on the archive's original stamp; her
+// re-add of a removed note mints a new row, so `reremoveMembership` is quiet.)
+// VX-276 owns the fix: the redo keyed on what its inverse wrote.
 //
 // PRIVATE, SEAL and OWN stay HERS ALONE (R-VX184-2): nothing here writes
 // `ai_private_at`, `sealed_at`, a note's seal or `owned`, and neither

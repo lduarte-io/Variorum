@@ -21,13 +21,21 @@ import GRDB
 // divergence is QUIET (the world moved past the entry); a seal THROWS and keeps
 // the entry. A VALUE restore (a comment's text, a label, a commit's name, a
 // title) is COMPARE-AND-SET: it writes only while the row still reads the value
-// its act left there — checked FIRST, before the seal — so what she wrote since
-// through her own undo-less door is never overwritten (VX-184 ladder round 1;
-// the lock is two-valued and needs no check — her divergence can only be the
-// value the toggle writes). The insurance commits two acts write on the way
-// (`lock_take` on a dirty take — her lock's own rule; `restore_commit`'s
-// brackets) STAY when ⌥⌘Z walks the act back: commits are append-only (I5),
-// exactly as `edit_take`'s brackets stay (P-13nb-U3-2).
+// its act left there — checked FIRST, before the seal — so the UNDO never
+// overwrites what she wrote since through her own undo-less door (VX-184 ladder
+// round 1; the lock's undo needs no check — two-valued, her divergence can only
+// be the value its inverse writes). THE REDO DOES NOT YET KEEP THAT PROMISE
+// (VX-184 ladder round 2, 2026-10-13): when she has put a row BACK to its
+// pre-act state herself (her unlock, her old label or words again, her
+// unarchive, her re-archive), ⌥⌘Z is quiet yet still moves the entry onto the
+// redo stack (`UndoStack.undo` pops any inverse that does not throw), and each
+// redo here checks only for that pre-act state — so ⇧⌥⌘Z re-applies the
+// client's act over hers. VX-276 owns the fix: the redo keyed on what its
+// inverse wrote (`restoreCommentForClient`'s shape below — its redo runs only
+// on the stamp its inverse recorded). The insurance commits two acts write on
+// the way (`lock_take` on a dirty take — her lock's own rule;
+// `restore_commit`'s brackets) STAY when ⌥⌘Z walks the act back: commits are
+// append-only (I5), exactly as `edit_take`'s brackets stay (P-13nb-U3-2).
 //
 // These ops decide nothing about clients — who may act is the server's
 // per-call rule (`MCPWriteTools+NoteEdits`).
