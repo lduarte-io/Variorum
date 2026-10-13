@@ -1173,11 +1173,66 @@ ZERO schema, `Sync/`, custody/keychain, editor seam.
 | 6 | wire — THE NOTE: `rename_note`, `delete_lens` | DONE (this commit) — `MCPWriteTools+NoteEdits`: `rename_note` (`title` string-or-null, required key; decided at EDIT on the note; the receipt and the activity line name the note as it NOW reads — `mcpScopeTitle` after the act, so an untitled note reads by its display title) and `delete_lens` (`lens_id` alone — `mcpContainerOf(lens:)`, live lenses only; the receipt names the lens). Catalog: both at EDIT, every scope. **Ritual (justified edits):** the catalog walk (+2); the edit PROOF (+2 aimed at her note and her lens — the snapshot already reads lens rows and titles); the suggest PROOF (+2) — its snapshot gains every TITLE and HER lens's rows (`name = 'her own way'` — `save_lens` legitimately adds the client's own lens, so only hers is fixed; a first draft snapshotting every lens row went red on that very `save_lens`, recorded). **Green: `MCPNoteEditServerTests` 3/3 + the three rituals = 36/4.** Log `logs/p6-note.log` |
 | 7 | the rituals: the catalog walk, the suggest PROOF, the edit PROOF (justified edits, commented in place) | DONE — folded into pieces 3–6 (each family's ritual edits landed WITH its tools, so no commit left a ritual red): the catalog walk names all twelve at EDIT; the edit PROOF's `editTools` holds all twelve, each aimed at what is hers (a suggest AND a write-new grant refuse every one at the rung, every row byte-identical — now incl. comments and titles); the suggest PROOF tries every catalog door incl. the twelve (`Set(calls) == catalog − the three list tools` holds) |
 | 8 | red-on-old BY REVERT per family (announced here first, committed tree, restored clean) | DONE (announced `2eb6ab1b`; this commit records it) — on the committed tree `f6d618af`: every production path of the unit back to its pre-unit bytes (`git checkout cabf04fb -- Sources/VariorumCore Sources/VariorumMCP`; the two NEW production files and the new-API core pin moved to the gitignored `vx184-screens/u4/revert-aside/`), the server pins kept → **RED again, every family, the SAME counts as the pre-fix run:** comments **5/5, 23 issues** · takes **7/7, 38** · commits **4/4, 16** · the note **3/3, 12** (identical to piece 1's) · and the once pin **2/2, 17 issues** ("Unknown tool" ×16). **Restored:** `git checkout HEAD -- Sources` (which also brought the two new files back), the aside copies `cmp`-identical to HEAD's and deleted, the core pin moved back and `cmp`-identical, `git status` clean, `git diff HEAD` empty. Logs `logs/p8-revert-*.log`. Earlier, on the committed tree and restored: **MUTATION M1** — `archive_take`'s guard dropped (`guardedBy: nil`) → the once pin RED (2 issues: the act after it LANDED on the never-spent once grant) |
-| 9 | the Mac faces pins (`MCPEditParityFacesTests`) + headless finals + the Mac build-for-testing → READY FOR STAGE | NOT STARTED |
+| 9 | the Mac faces pins (`MCPEditParityFacesTests`) + headless finals + the Mac build-for-testing → READY FOR STAGE | **READY FOR STAGE** (this commit, 2026-10-13 ~07:05 MDT) — NEW Mac pins `App/Variorum/VariorumTests/MCPEditParityFacesTests.swift` (4: every new act's receipt + "⌥⌘Z undoes" — the last-take road reading "deleted a block (its last take)"; the thirteen undo labels and `isUndoable`; Activity allowed + refused for the twelve tools, the last-take line logged on the block; each tool on EDIT, `delete_comment` on suggest, and no tool named for Private / Seal / Own — R-VX184-2) — RUN at the stage window (PENDING). **Headless finals — the whole package `swift test` on `4697ad47`'s sources, EXIT 0 in 4:20:** **`VariorumMCPTests` 192/35** (U3's 171/30 + `MCPCommentEditServerTests` 5 · `MCPTakeEditServerTests` 7 · `MCPCommitEditServerTests` 4 · `MCPNoteEditServerTests` 3 · `MCPNoteEditOnceServerTests` 2) · **`VariorumCoreTests` 2,733/314** (the merged baseline 2,724/313 + `MCPNoteEditActsTests` 9) · **`StringsWorkbookTests` 40/6** — skips = the standing gated ones only (the two 13o gated suites, the real-server pass, `bench(notes:)` — read in the log). Log `logs/p9-finals.log`. **The Mac build-for-testing: `** TEST BUILD SUCCEEDED **`** (4:48, `-derivedDataPath DerivedData/vx184-u4`, 2.5 GB, sources = HEAD's): `Debug/Variorum.app` with `Contents/MacOS/variorum-mcp`; **188 warnings — U1/U2/U3's count — none in a file this unit touched** (grepped); 25 GiB free after. Log `logs/mac-build-for-testing.log`. **Path diff `018cf23c..HEAD` (the merged base):** `Sources/VariorumCore/Operations/{Comments,Deletion,Locks,MCPNoteEdits,MCPWrites,Variant}`, `Sources/VariorumMCP/{MCPToolCatalog,MCPWriteTools,+CommentDelete,+NoteEdits}`, the app's `MCPPaneCopy`, tests, this record — **ZERO `Sync/`, `Persistence/`/schema, custody/keychain, editor seam, `Server/`** (grepped). The stage NOT claimed — waits on the orchestrator's GO + claim (expected `vx184-u4`); THE STAGE WINDOW plan below |
 | 10 | the stage window (on the orchestrator's GO + claim): the Mac batch + THE LIVE ROUND (one real Claude Code turn per family, ⌥⌘Z each) | NOT STARTED |
 | 11 | close: self-assessment, PROVISIONALs, OWED | NOT STARTED |
 
 **No revert is in flight** (piece 8's revert ran and was RESTORED — `git status` clean).
+
+### THE STAGE WINDOW — the plan (runs ONLY on the orchestrator's GO, under the claim it names — expected `vx184-u4`, ~45 min)
+
+**Before the window (no stage) — DONE (row 9):** `DerivedData/vx184-u4` built for testing (sources `4697ad47` + the faces test).
+**In the window:**
+0. **Guards first, every time:** `Tools/WalkKit/guard.sh --author` (her `/Applications/Variorum.app` ABSENT — if present, STOP
+   and report, never quit or kill it); `pgrep -fl 'Variorum.app/Contents/MacOS'` empty; the claim held (`Tools/stage`). Every
+   synthetic event paced ≥ 2.6 s after the previous one; `guard.sh <devpid> x y` before each click. If the Debug app opens with
+   the What's New sheet, close it with its own button first (expected modal, never a finding).
+1. **The Mac batch (~12 min), two `-only-testing` groups** on `DerivedData/vx184-u4`:
+   **A (the door's faces + the guide):** CalmAsksTests · MCPDeliberateFacesTests · MCPAskAndReceiptTests · MCPNavigationTests ·
+   MCPDoorErgonomicsFacesTests · MCPAsksWaitTests · **MCPEditParityFacesTests (new, 4)** · MCPPaneTests · MCPSetupMenuTests ·
+   MCPShareFacesTests · MCPEditFacesTests · MCPGrantSheetTests · MCPSetupKeyFacesTests · MCPWingFacesTests (W-UX-13's every-tool
+   walk) · LaunchFurnitureTests · EncryptionBookDoorTests · EncryptionExplainedDrillTests · NewModesTests ·
+   SampleLibraryWelcomeTests · ShellConfirmTests · TakeCardDoorTests · TutorialBuildFlavorTests · TutorialCurrencyTests ·
+   TutorialMCPChapterTests · TutorialFurnitureFoldTests · TutorialBooksLessonTests · TutorialBooksRitualTests ·
+   SnippetOpenTargetTests · SnippetsLandingTests · SnippetTagDoorTests.
+   **B (her own doors over the extracted bodies + the guide's walk):** ArchivedListingTests · TakeLabelFaceTests ·
+   BlockHistoryPaneTests · BlockHistorySealTests · SavepointNameFaceTests · SavepointNameAskTests · SavepointCommitDoorTests ·
+   SavepointTakesDoorTests · SavepointSealedDoorTests · SavepointRenameDoorTests · SavepointNameCopyTests ·
+   BlockDeletionAndRedoTests · NoteTrayTests · RecoveryDoorsTests · CommentPanelGeometryRuleTests · CommentTextAreaMountedTests ·
+   CommentPanelWordsTests · UndoHintAndRefusalTests · CommitVocabularyTests · LibraryCardNameTests · TutorialBookShapeTests ·
+   TutorialDoorTests · TutorialWritingActsTests · TutorialTakesActsTests · TutorialStructureActsTests · TutorialLookingActsTests ·
+   TutorialLibraryActsTests · TutorialDeletionActsTests · TutorialWherePlacesActsTests · TutorialPrivacyChapterTests ·
+   TutorialFannedMatrixTests. (VX-115's standing red `BookCollectingDoorsTests` is not in the set.)
+2. **A1 prestage copy** of the dev store — `Tools/ScaleFixture/stage.sh`'s copy loop WITHOUT its fixture launch (every store
+   file + the key files → `…/Variorum-dev/Backups/safety-copies/scale-prestage-<ts>/`, each `cmp`-verified); the Debug app's
+   prefs exported. Launch the Debug app (`open -n`, no fixture env).
+3. **The client** (U3's road exactly): her user-scope servers read BEFORE (`~/.claude.json`, values never printed). Settings ▸
+   MCP: the server running; Connect a client ▸ Claude Code ▸ Copy setup command → key K (first 9 characters only); in a
+   scratchpad project the copied line with `-s user` → `-s local` (`variorum-dev`, the REAL Debug shim) + `variorum-tee` (the
+   same shim behind `tee` — the WIRE capture); `claude mcp list` → Connected.
+4. **The note:** the field guide's lesson **"comments & tags"** (her seeded margin comment on block 1 — HER comment, so
+   `edit_comment` shows the edit rung's "any comment"; single-take blocks — so `delete_take` meets the LAST-take road) shared
+   with claude-code at **EDIT, always** through Library ▸ search ▸ row ▸ **Share with AI…** (U3's grant road), captured. Then
+   type a few words at the end of the lesson's block 2 in Write (her unsaved words — so `restore_commit`'s "before" insurance
+   is visible), captured.
+5. **THE TURN — ONE real `claude -p --strict-mcp-config` turn through `variorum-tee`**, `--allowedTools` limited to the calls
+   below, the prompt naming them in order: `list_notes` (find the lesson) → `read_note` with_ids → **`edit_comment`** on her
+   comment (COMMENTS) → `save_commit` on block 2's take ("checkpoint") → **`restore_commit`** of the guide's state? no — of
+   that checkpoint after `rename_commit`? (kept simple:) `save_commit` block 3's take, then **`restore_commit`** of block 2's
+   checkpoint is a no-op — so the order is: `save_commit` block 2 (text with her typed words) → `edit_take` block 2 → **
+   `restore_commit`** of the checkpoint (COMMITS — the "before"/"after" brackets land) → **`delete_take`** on the lesson's
+   LAST block's only take (TAKES — `deleted_block: true`) → **`rename_note`** (THE NOTE). The wire (`tee-out.log`) carries
+   every answer; Claude's reply is captured.
+6. **⌥⌘Z walks each back, in the app:** the note opened by ⌥⌘O; for each act, newest first — the Edit menu's undo item read
+   by AX ("Undo claude-code's note title" · "…'s delete" · "…'s commit restore" · "…'s edit" · "…'s comment edit"), then ⌥⌘Z,
+   then a capture showing it walked back (the title back; the block back; block 2's text back to the edited text, then to her
+   typed words; her comment's words back). Block History on block 2 captured (the brackets stay).
+7. **Both voices:** Activity in Study and in Terminal (every act in words, the last-take line "deleted a block in … (its
+   last take)"), the receipts where a capture catches them (a quiet receipt fades — U3's note).
+8. **Cleanup:** both `-s local` registrations removed; her user-scope servers AFTER (byte-identical fingerprint); scratch
+   keys/scripts/configs deleted; the clipboard emptied; the dev instance quit BY IDENTITY; the dev store
+   `Tools/ScaleFixture/restore.sh <dir>` → "Restored (verified)"; the prefs diffed back; the stage RELEASED; evidence in
+   `notes/plans/vx184-screens/u4/` (gitignored; every key redacted to its first 9 characters — a `vmk1_` whole-key grep: 0).
 
 ### The traces (written before code)
 
