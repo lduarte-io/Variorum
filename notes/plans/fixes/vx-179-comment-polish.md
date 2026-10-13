@@ -1290,3 +1290,24 @@ findings, agree/dispute returns to the reviewer for the final call)
   road offscreen (agree/dispute); the live walk row joins the next stage window's list either way.
 - **R1-3 — to the U2 session with F-W-1:** the wheel fix leg owns the latch; it answers
   agree/dispute while fixing the routing.
+
+## U2 FIX LEG (implementer, 2026-10-12 late — the walk's F-W-1/F-W-2/F-W-5, W-OBS-2, ladder R1-3)
+
+**NOT DONE BY THIS LEG (first line, by the contract):** no `xcodebuild test`, no app launch, no window
+on screen, no stage act — every trace is an OFFSCREEN probe against the real Debug module (U3's
+`real/build.sh` road: `Variorum.debug.dylib`, `@testable`, a never-ordered-in window, `.prohibited`
+activation), kept in the worktree's gitignored `scratchpad/vx179-u2-fix/`. The pins' RUN and the
+re-walk of the fixed rows are PENDING (the runner's next window).
+
+**Revert state:** no behavioural revert in flight.
+
+### LIVE STATUS
+
+| piece | what | status |
+|---|---|---|
+| FL-a | this section | DONE (this commit) |
+| FL-1 | F-W-1 — trace (precise + line events, offscreen, real module), fix at mechanism, table pins red-on-old by replay; R1-3 answered | NOT-STARTED |
+| FL-2 | F-W-2 — a press on the scroller belongs to the scroller; fix + pin | NOT-STARTED |
+| FL-3 | F-W-5 — the "…" badge traced; a badge always carries its count; pin red-on-old | NOT-STARTED |
+| FL-4 | W-OBS-2 — TRACE ONLY (pre-existing or new?), answered before any fix | NOT-STARTED |
+| FL-5 | the plain build; pins typechecked; record closed | NOT-STARTED |
