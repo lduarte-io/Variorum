@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""The app's icon and in-app mark, composed from THE LOGO's ratified edition.
+"""The app's icon and in-app mark, composed from THE LOGO family's cards fan.
 
-13s-b U1a, piece 4 (her rulings R-13s-24/25: the faithful two-tone striped V,
-`variorum-v-faithful-red.svg` — the black V with white between its stripes on
-the red ground #FC120C; placements: the app icon, About, the offer line's
-small mark — Q19 closed). Nothing is redrawn: the V's geometry is copied
-verbatim from the brand files and only placed (translate + one uniform
-scale, identical for every edition). Re-run from the repo root after any
-change to the source editions:
+VX-177 (her word, 2026-10-12): the app's face is the CARDS mark —
+`variorum-cards-faithful.svg`, the fan of cards on the red ground #FC120C —
+superseding R-13s-24/25's striped V as the art while keeping every ruled
+placement (the app icon, About, the offer line's small mark — Q19's set).
+ONE icon, all of the time (her second ruling, same day): the faithful
+edition is pinned for the default AND dark appearances — same red ground,
+same art — so the Dock and Finder never change with the room. The system's
+user-chosen Tinted/Clear icon styles recolour every app's icon and cannot
+be refused; they are fed the same faithful art so the silhouette stays the
+fan. Nothing is redrawn: the fan's geometry is copied verbatim from the
+brand file and only placed (translate + one uniform scale). Re-run from
+the repo root after any change to the source edition:
 
     python3 notes/brand/tools/appicon.py
 
@@ -19,20 +24,17 @@ It writes two things:
    margin baked in, and the ground is the document's fill). The faithful
    edition is a flat print, so the document asks for no Liquid Glass depth
    (no group shadow, no specular, no translucency, the layer's glass off).
-   macOS 26 draws icons in four appearances; the system's own dark and
-   tinted derivations keep a layer's colours, and the faithful V's BLACK body
-   then vanishes into a dark ground, leaving only its white stripes. So the
-   dark and tinted appearances wear the brand's own dark-ground pairing — the
-   ONE-COLOUR master in white on black (`variorum-v-master.svg` /
-   `variorum-v-white-on-black.svg`, the family sheet's own dark cell for this
-   mark) — and the default appearance wears the faithful two-tone on red.
-   Verified headless with Icon Composer's renderer, `ictool` (the U1a RECORD).
+   macOS 26 draws icons in four appearances; left unspecified, the system's
+   own dark derivation would swap the red ground for a dark one. So BOTH
+   the default and dark appearances explicitly pin the faithful edition on
+   the red fill — one icon, never changing with the appearance — and the
+   tinted style (a user's own system-wide choice; it monochromes every
+   app's icon) is fed the same art.
 2. `App/Variorum/Variorum/Assets.xcassets/VariorumMark.imageset/` — the small
    flat mark the offer line and the About window draw (a vector SVG asset):
-   the faithful V on the red ground, on a continuous-corner rounded square in
-   the icon's own proportions, so the in-app mark and the Dock icon read as
-   one. The mockup's inline `vmark()` was an approximation; this is the real
-   asset.
+   the faithful fan on the red ground, on a continuous-corner rounded square
+   in the icon's own proportions, so the in-app mark and the Dock icon read
+   as one.
 """
 import json
 import math
@@ -40,36 +42,33 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-FAITHFUL = ROOT / "notes/brand/variorum-v-faithful-red.svg"
-MASTER = ROOT / "notes/brand/variorum-v-master.svg"
+FAITHFUL = ROOT / "notes/brand/variorum-cards-faithful.svg"
 ICON_DIR = ROOT / "App/Variorum/Variorum/AppIcon.icon"
 MARK_DIR = ROOT / "App/Variorum/Variorum/Assets.xcassets/VariorumMark.imageset"
 
 RED = "#FC120C"      # the brand red (README "Constants")
-BLACK = "#000000"    # the white-on-black edition's ground (and R51's dark room)
 CANVAS = 1024
-# The V's width as a share of the canvas: bold, with the mask's corners well
-# clear of the stripes (TASTE.md through-line 3, "bold structure").
-V_WIDTH_SHARE = 0.62
-# A V's mass sits high (a downward triangle's centroid is a third of the way
-# down), so a box-centred V reads as floating; this nudges it down by a share
-# of its own height — optical centring, never geometry.
-OPTICAL_DROP_SHARE = 0.03
+# The fan's width as a share of the canvas: bold, with the mask's corners
+# well clear of the cards (TASTE.md through-line 3, "bold structure").
+MARK_WIDTH_SHARE = 0.62
+# The fan's mass reads centred (the front card's weight balances the spread),
+# so no optical nudge is needed; kept as a dial for the eye.
+OPTICAL_DROP_SHARE = 0.0
 
 
-def faithful_paths():
-    """The faithful edition's paths, in order: the ink body, then the stripes."""
-    body = FAITHFUL.read_text()
+def edition_paths(source):
+    """One edition's paths, in document order, fills verbatim (the ground
+    rect is the document fill's job, so only <path> elements ride)."""
+    body = source.read_text()
     paths = re.findall(r'<path fill="(#[0-9A-Fa-f]{6})" d="([^"]+)"/>', body)
-    assert paths and paths[0][0].upper() == "#111111", "the ink body leads"
+    assert paths, f"no paths in {source.name}"
     return [(fill.upper(), d, None) for fill, d in paths]
 
 
-def master_paths():
-    """The one-colour master's compound path (carves are real holes), in white."""
-    body = MASTER.read_text()
-    d = re.search(r'<path fill="#111111" fill-rule="evenodd" d="([^"]+)"', body).group(1)
-    return [("#FFFFFF", d, "evenodd")]
+def faithful_paths():
+    paths = edition_paths(FAITHFUL)
+    assert paths[0][0] == "#111111", "the ink card leads"
+    return paths
 
 
 def bbox(d_list):
@@ -82,12 +81,12 @@ def bbox(d_list):
 
 
 def placement(size):
-    """ONE placement for every edition, measured on the faithful V (both
+    """ONE placement for every edition, measured on the faithful fan (both
     editions share the same viewBox and geometry), so the default and dark
-    icons put the V in exactly the same place."""
+    icons put the fan in exactly the same place."""
     x0, y0, x1, y1 = bbox([d for _, d, _ in faithful_paths()])
     w, h = x1 - x0, y1 - y0
-    scale = size * V_WIDTH_SHARE / w
+    scale = size * MARK_WIDTH_SHARE / w
     tx = (size - w * scale) / 2 - x0 * scale
     ty = (size - h * scale) / 2 + h * scale * OPTICAL_DROP_SHARE - y0 * scale
     return f"translate({tx:.3f},{ty:.3f}) scale({scale:.6f})"
@@ -133,21 +132,20 @@ def write_icon():
     assets.mkdir(parents=True, exist_ok=True)
     for stale in assets.iterdir():
         stale.unlink()
-    (assets / "striped-v.svg").write_text(layer_svg(faithful_paths()))
-    (assets / "striped-v-mono.svg").write_text(layer_svg(master_paths()))
+    (assets / "cards.svg").write_text(layer_svg(faithful_paths()))
     manifest = {
         "fill-specializations": [
             {"value": {"solid": srgb(RED)}},
-            {"appearance": "dark", "value": {"solid": srgb(BLACK)}},
+            {"appearance": "dark", "value": {"solid": srgb(RED)}},
         ],
         "groups": [{
             "layers": [{
-                "name": "striped-v",
+                "name": "cards",
                 "glass": False,
                 "image-name-specializations": [
-                    {"value": "striped-v.svg"},
-                    {"appearance": "dark", "value": "striped-v-mono.svg"},
-                    {"appearance": "tinted", "value": "striped-v-mono.svg"},
+                    {"value": "cards.svg"},
+                    {"appearance": "dark", "value": "cards.svg"},
+                    {"appearance": "tinted", "value": "cards.svg"},
                 ],
             }],
             "shadow": {"kind": "none", "opacity": 0.5},
