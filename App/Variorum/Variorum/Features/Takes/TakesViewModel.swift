@@ -1338,13 +1338,16 @@ final class TakesViewModel {
         case .lens(let lensID):
             if let follow { followOnceRendered(follow) }  // BEFORE the store write
             // Named lenses are LIVE-edited (no explicit re-save).
-            await run { ops in
+            let landed = await run { ops in
                 _ = try ops.setLensChoice(lens: lensID, block: blockID, variant: variantID)
             }
             // A refused pick moved nothing: the cell still renders the take
             // she was in, so the ring goes back there (a read→live flip of a
             // pane that already shows its own take — never a re-point).
-            if let follow, status?.isRefusal == true, parkedFollow == follow,
+            // Keyed on the run's OWN outcome, never the status line (the
+            // VX-214 fable ladder's NIT 1: an interleaved refusal from
+            // another door must not steal a successful pick's follow).
+            if let follow, !landed, parkedFollow == follow,
                let ringBefore {
                 focus(ringBefore)
             }
@@ -2975,13 +2978,20 @@ final class TakesViewModel {
     /// The ops-call plumbing: clear the line, run, speak a refusal.
     /// Internal (13e round A, A-2) so the structure controller's doors run
     /// through the SAME body rather than growing a second copy of it.
-    func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
+    /// Returns whether the ops call LANDED (the VX-214 fable ladder's NIT 1):
+    /// a door that must act on ITS OWN outcome reads this return, never the
+    /// shared status line — a refusal another door speaks while this call is
+    /// in flight repaints the line, not this call's result.
+    @discardableResult
+    func run(_ body: @escaping @Sendable (Operations) throws -> Void) async -> Bool {
         clearStatus()
         board.clearArticleLanding()   // her hand (R1-2)
         do {
             try await session.runner.run(body)
+            return true
         } catch {
             setRefusal(Self.message(for: error))
+            return false
         }
     }
 
