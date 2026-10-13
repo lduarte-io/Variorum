@@ -1749,3 +1749,85 @@ deletion — and full-screen originals whose crops are kept); vx-184's cleanup l
    trace with overlay-style scrollers forced in the probe.
 3. Then LADDER ROUND 2 over the whole fix-leg diff, with R1-2's AGREE (now live-proven), R1-3's
    answer, and this window's record before the reviewer.
+
+## U3 FIX LEG 3 (implementer, 2026-10-13 — STAGE WINDOW 4's F-W-4-R and the red F-W-4 pin)
+
+**NOT DONE BY THIS LEG (first line, by the contract):** no stage act of any kind (no `xcodebuild test`, no
+app launch, no window on screen). Offscreen probes only (the accepted machinery; probes in the gitignored
+`scratchpad/vx179-u3-fix3/`). **The live dead first ⎋ is NOT reproduced by anything available to this
+leg** (the traces below say exactly why); the fix is built to not depend on the unmodellable factors, and
+its live confirmation — with a DEBUG trace that names the road — is the next stage window's.
+`CommentCard.swift` / `CommentCardTests.swift` untouched.
+
+**Revert state:** no behavioural revert in flight.
+
+### LIVE STATUS
+
+| piece | what | status |
+|---|---|---|
+| FL3-a | this section + the traces | DONE (this commit) |
+| FL3-1 | the fix — ownership by delivery + first responder, the explicit close rung, stale monitors released, a DEBUG trace line | NOT-STARTED — design below |
+| FL3-2 | pins (what the runner CAN model) + replays + reverts | NOT-STARTED |
+| FL3-3 | record close | NOT-STARTED |
+
+### THE TRACES (offscreen, the real module — and the walk-4 crops in `/tmp/vx179-walk2/`)
+
+1. **My fix-leg-2 F-W-4 model was an artefact — retracted.** Offscreen the app is never active, so it
+   has NO key window, and a key addressed ANYWHERE (window 0, the anchor, the popover) lands in the
+   popover's composer (`keystate.swift`: all three addressings → the composer; the diagnostic monitor saw
+   the first as popover-addressed). The "AppKit forwards parent-addressed keys into the popover" I recorded
+   at fix leg 2 is the inactive app's fallback routing, not the live or the runner's road — exactly what
+   the runner's red premise showed (there, the panel's `makeKey` ask makes the popover truly key, and a
+   parent-addressed key goes to the parent).
+2. **What a ⎋ the panel passes on does in this host:** the composer's chain is `CommentNSTextView →
+   NSClipView → NSScrollView → CommentTextAreaView → AppKitPlatformViewHost → PopoverHostingView →
+   PopoverHostingController → NSPopover* → _NSPopoverWindow* → NSWindow*` (* = overrides
+   `cancelOperation:`; SwiftUI's popover hosting does NOT) — a passed ⎋ that REACHES the composer closes
+   the popover through `NSPopover.cancelOperation:` (`cancelop.swift`), the walk-1 F-W-4. A passed ⎋
+   that is delivered to the MAIN window instead meets the Takes board's own `.onExitCommand {
+   closeAllFans() }` (`TakesBoardView.swift:308`) and is swallowed there — consistent with walk 4's
+   "the close rung never fires".
+3. **Stale panels — MEASURED, a real leak:** a dismissed popover's content is never torn down (fix leg
+   2's R1-2 mechanism), and SwiftUI makes a NEW popover window per presentation; so every opening leaves
+   the whole previous panel alive in its ordered-out window — model, its store observation (the panel's
+   `.task` never cancels), its key monitor installed: after three openings THREE panel monitors listen,
+   two stale (`stale.swift`). W4-OBS-1's "dropped" draft is not dropped — it lives on, unreachable, in the
+   stale panel (`walk4.swift`: 'an earlier draft' still in the old composer after the reopen).
+4. **The stale-monitor double-claim hypothesis — FALSIFIED offscreen:** a closed popover window stops
+   being a child of its parent (`parent` = nil after close), so a stale panel claims neither addressing;
+   replaying walk 4's sequence (open, type, dismiss, reopen, type, ⎋ ×3) under both addressings, the live
+   panel's ladder works (⎋#1 clears, ⎋#2 closes) and the stale draft is untouched (`walk4.swift`).
+5. **The walk-4 crops:** `f4-g` — the popover just opened, the composer NOT focused (no accent hairline,
+   no caret) despite the panel's open-time focus request, so the first responder moved after the request;
+   `f4-h` (clicked in, typed) — caret + ACCENT hairline (the panel's `focus == .add`); `f4-i` after ⎋#1 —
+   identical to `f4-h` (draft and caret intact: a dead press; the reported "blur" is not visible in this
+   frame — the caret blinks); `f4-j` after ⎋#2 — cleared; `f4-k` after ⎋#3 — empty, caret drawn, still
+   open. The caret is drawn in the popover's composer throughout (AppKit draws a caret only in a key
+   window, or a popover receiving its key parent's keys), while the main window's traffic lights stay
+   active. The SHEET's ladder (`24-esc1`) cleared on the FIRST ⎋.
+6. **What is NOT explained:** under every road I can construct, the shipped monitor CLEARS on ⎋#1
+   whenever the event reaches it with `focus == .add` and a draft (`CommentComposition.escape` —
+   `.addDraft(non-empty) → .clearDraft`), and `f4-h` shows both. So live, either the first ⎋ did not
+   reach the panel's monitor at all, or the monitor's view of WHICH area holds the caret (the async
+   `focus` value) disagreed with the first responder at that instant. Neither is observable offscreen
+   (no active app, no real key window) nor in the runner (its popover is truly key — the road where the
+   shipped ladder works: the measured runner state, the red pin's premise failure).
+
+### THE DESIGN (written before the code) — the ladder stops depending on what could not be observed
+
+1. **Ownership by DELIVERY and the FIRST RESPONDER:** a ⌘⏎/⎋ is the panel's iff its window is VISIBLE
+   and is the window AppKit delivers keys to — the key window, or a visible child (a transient popover) of
+   the key window — and that window's first responder IS one of the panel's writing areas; the AREA (the
+   composer or comment N) is read from that responder, never from the async `focus`. No `event.window`
+   addressing, no focus-report timing, no stale panel (its window is hidden) can steer it. Inactive app
+   (no key window — the offscreen fallback): the event's own window or its parent, as before.
+2. **The close rung is the panel's own act:** when the ladder answers `.close`, the panel closes itself
+   (`close()` — commit dirty rows, then `dismiss`) and consumes the key, instead of passing ⎋ on and
+   hoping the host closes (measured: the passed ⎋ can land on the Takes board's `.onExitCommand`). Same
+   contract: with nothing to clear, ⎋ closes the panel — now in every host by construction.
+3. **Stale monitors released:** the panel's key monitor uninstalls when its popover host closes (the
+   watcher's `willClose`), so dismissed panels stop listening (the leak's key half; the stale model's
+   store observation is recorded as an observation for the orchestrator).
+4. **A DEBUG-only trace line** (`Logger` category `comment-keys`) per ⌘⏎/⎋ the panel monitor sees: its
+   window, the key window, the event's window, the first responder's area, the decision — so the next
+   stage window can read the LIVE road in `log show` and confirm or kill this leg's reasoning.
