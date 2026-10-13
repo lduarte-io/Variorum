@@ -11,7 +11,10 @@ import VariorumMCPSocket
 ///
 /// **VX-168 (K2, R-VX168-1): the name must come with its SETUP KEY.** Before
 /// the SDK sees a byte, the session reads the connection's opening
-/// (`MCPHandshake` — the shim's preamble line, then the `initialize` frame)
+/// (`MCPHandshake` — the shim's preamble line, then the `initialize` frame;
+/// VX-180: past any pre-initialize request or notification, which the
+/// handshake's bounded window answers or skips — a request never reaches the
+/// SDK, and the frame the session decides on is still the `initialize`)
 /// and admits or refuses it ONCE, through `Operations.admitMCPConnection`
 /// (the pure `MCPSetupKeyRule`): a refusal answers the frame with one
 /// sentence and ends the connection; an admission replays the frame into the

@@ -186,12 +186,20 @@ public final class MCPServerHost: @unchecked Sendable {
     /// Past the cap: answer the connection's FIRST request with one honest
     /// JSON-RPC error — its id echoed, the shim's refusal shape — then close
     /// (a bare close would leave the client saying only "failed"; P-2's
-    /// honesty on the wire). A short-lived helper thread with a bounded
-    /// receive timeout reads that first line, so a silent client can never
-    /// stall the accept loop and holds at most one thread for ~2 s.
+    /// honesty on the wire). A short-lived helper thread reads that first
+    /// line, so a client can never stall the accept loop; every read it
+    /// makes runs under a 2 s receive timeout (`SO_RCVTIMEO`, per read — so
+    /// a silent client holds the thread ~2 s, while a peer that keeps
+    /// dripping bytes can hold it longer, bounded by `MCPHandshake`'s
+    /// `lineLimit` and window; ladder R1, NIT 3).
     /// VX-168: the opening read is the handshake's — past a setup key's
     /// preamble to the `initialize` frame — so the refusal still answers the
     /// request by its id (a keyed shim's first line is the preamble).
+    /// VX-180: the same read answers a pre-initialize probe on its way (the
+    /// window's answers, before each next read), so the cap's sentence lands
+    /// on the client's `initialize` — the request it reports — never on a
+    /// probe. The window is bounded (`MCPHandshake.preInitializeLimit`) and
+    /// every read in it still runs under the receive timeout.
     private func refuseOverCap(_ fd: Int32) {
         let thread = Thread {
             var timeout = timeval(tv_sec: 2, tv_usec: 0)

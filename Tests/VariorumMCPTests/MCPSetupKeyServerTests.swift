@@ -190,15 +190,26 @@ struct MCPSetupKeyServerTests {
             answers.append(try JSONSerialization.data(withJSONObject: answer, options: [.sortedKeys]))
             close(fd)
         }
-        // A first frame that is not initialize.
+        // A connection that never opens with initialize. VX-180 (A JUSTIFIED
+        // EDIT, the ritual): this arm's premise was "a non-initialize REQUEST
+        // first is refused at once" — exactly what VX-180 changes (a
+        // pre-initialize request is now answered -32601 and the window reads
+        // on). The SAME frame now reaches the refusal past the window's
+        // bound; its answer — the one sentence on id 5 — is unchanged, byte
+        // for byte. (A first frame that is no request at all keeps the
+        // immediate refusal: `MCPPreInitializeWindowTests`.)
         guard case .success(let fd) = MCPSocketRoad.connect(directory: h.directory) else {
             throw HarnessFailure("could not connect")
         }
         _ = MCPShim.writeAll(fd, MCPPreamble.line(key: try h.operations.mintMCPSetupKey()))
+        for window in 0..<MCPHandshake.preInitializeLimit {
+            _ = MCPShim.writeAll(fd, Data((#"{"jsonrpc":"2.0","id":\#(100 + window),"method":"tools/list"}"# + "\n").utf8))
+            #expect(MCPShim.readFirstLine(fd, limit: 1 << 20).range(of: Data("-32601".utf8)) != nil, "inside the window")
+        }
         _ = MCPShim.writeAll(fd, Data((#"{"jsonrpc":"2.0","id":5,"method":"tools/list"}"# + "\n").utf8))
         let line = MCPShim.readFirstLine(fd, limit: 1 << 20)
         let notInitialize = try #require(try JSONSerialization.jsonObject(with: line) as? [String: Any])
-        expectRefusal(notInitialize, id: 5, "a first frame that is not initialize")
+        expectRefusal(notInitialize, id: 5, "a connection that never opens with initialize")
         answers.append(try JSONSerialization.data(withJSONObject: notInitialize, options: [.sortedKeys]))
         close(fd)
         #expect(Set(answers).count == 1, "one sentence, byte for byte, whatever the arm")

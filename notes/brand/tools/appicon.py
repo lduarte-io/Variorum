@@ -2,14 +2,15 @@
 """The app's icon and in-app mark, composed from THE LOGO family's cards fan.
 
 VX-177 (her word, 2026-10-12): the app's face is the CARDS mark —
-`variorum-cards-jadeite.svg`, the fan of cards on the jadeite ground
-#C5DDC9 (her final colour pick, same day; the faithful red and lavender were
-considered and set aside) —
 superseding R-13s-24/25's striped V as the art while keeping every ruled
 placement (the app icon, About, the offer line's small mark — Q19's set).
-ONE icon, all of the time (her second ruling, same day): the faithful
-edition is pinned for the default AND dark appearances — same jadeite ground,
-same art — so the Dock and Finder never change with the room. The system's
+VX-192 (her word, same day, after a live trial build): the edition is
+`variorum-cards-sea-glass.svg`, the fan of cards on the sea-glass ground
+#C2DDD3 — superseding jadeite #C5DDC9, which shipped as 0.9.3/0.9.4's face
+(the faithful red and lavender were considered and set aside before it).
+ONE icon, all of the time (her second VX-177 ruling): the faithful
+edition is pinned for the default AND dark appearances — same sea-glass
+ground, same art — so the Dock and Finder never change with the room. The system's
 user-chosen Tinted/Clear icon styles recolour every app's icon and cannot
 be refused; they are fed the same faithful art so the silhouette stays the
 fan. Nothing is redrawn: the fan's geometry is copied verbatim from the
@@ -27,14 +28,14 @@ It writes two things:
    edition is a flat print, so the document asks for no Liquid Glass depth
    (no group shadow, no specular, no translucency, the layer's glass off).
    macOS 26 draws icons in four appearances; left unspecified, the system's
-   own dark derivation would swap the jadeite ground for a dark one. So BOTH
-   the default and dark appearances explicitly pin the jadeite edition on
+   own dark derivation would swap the sea-glass ground for a dark one. So BOTH
+   the default and dark appearances explicitly pin the sea-glass edition on
    the same fill — one icon, never changing with the appearance — and the
    tinted style (a user's own system-wide choice; it monochromes every
    app's icon) is fed the same art.
 2. `App/Variorum/Variorum/Assets.xcassets/VariorumMark.imageset/` — the small
    flat mark the offer line and the About window draw (a vector SVG asset):
-   the faithful fan on the red ground, on a continuous-corner rounded square
+   the faithful fan on the icon's ground, on a continuous-corner rounded square
    in the icon's own proportions, so the in-app mark and the Dock icon read
    as one.
 """
@@ -44,11 +45,11 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-FAITHFUL = ROOT / "notes/brand/variorum-cards-jadeite.svg"
+FAITHFUL = ROOT / "notes/brand/variorum-cards-sea-glass.svg"
 ICON_DIR = ROOT / "App/Variorum/Variorum/AppIcon.icon"
 MARK_DIR = ROOT / "App/Variorum/Variorum/Assets.xcassets/VariorumMark.imageset"
 
-GROUND = "#C5DDC9"   # jadeite — her final colour pick (2026-10-12)
+GROUND = "#C2DDD3"   # sea-glass — her pick after a live trial (2026-10-12, VX-192)
 CANVAS = 1024
 # The fan's width as a share of the canvas: bold, with the mask's corners
 # well clear of the cards (TASTE.md through-line 3, "bold structure").
