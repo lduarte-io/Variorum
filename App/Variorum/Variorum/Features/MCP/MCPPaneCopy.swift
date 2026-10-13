@@ -1112,6 +1112,14 @@ nonisolated enum MCPReceiptCopy {
             let short = "\(first.clientName) \(wingMovePhrase(first, titled: false))\(tail)"
             if short.count <= budget { return short }
         }
+        // VX-184 U5 (found by the faces pin at the stage window, red first): ONE
+        // owned book's delete keeps WHERE ITS NOTES WENT — her "Delete Book
+        // Only" receipt's point — dropping only the book's name (it is in the
+        // Trash; Open › has nowhere to go) before the count fallback.
+        if run.count == 1, first.act == .bookDelete, let whereNotesWent = first.detail {
+            let short = "\(first.clientName) deleted a book \u{2014} \(whereNotesWent)\(tail)"
+            if short.count <= budget { return short }
+        }
         // 13n-c U6, D-U6-1 (red-on-old): ONE act is "a change", never "1 changes".
         let made = run.count == 1 ? "made a change" : "made \(run.count) changes"
         return "\(first.clientName) \(made)\(tail)"

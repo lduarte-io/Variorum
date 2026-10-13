@@ -43,8 +43,8 @@ struct MCPLibraryParityFacesTests {
             (receipt(.bookArchive), "archived \u{201C}drafts\u{201D}"),
             (receipt(.bookUnarchive), "unarchived \u{201C}drafts\u{201D}"),
             (receipt(.bookDelete), "deleted the book \u{201C}drafts\u{201D}"),
-            (receipt(.bookDelete, detail: "its notes are in the Pool"),
-             "deleted the book \u{201C}drafts\u{201D} \u{2014} its notes are in the Pool"),
+            (receipt(.bookDelete, title: "ab", detail: "its notes are in the Pool"),
+             "deleted the book \u{201C}ab\u{201D} \u{2014} its notes are in the Pool"),
             (receipt(.bookRemove, title: "ch 1", detail: "drafts"), "took \u{201C}ch 1\u{201D} out of \u{201C}drafts\u{201D}"),
             (receipt(.bookRelease, title: "ch 1", detail: "the novel"),
              "released \u{201C}ch 1\u{201D} from \u{201C}the novel\u{201D}"),
@@ -59,6 +59,11 @@ struct MCPLibraryParityFacesTests {
         for (one, words) in expected {
             #expect(MCPReceiptCopy.line([one]) == "claude-code \(words)" + undoes, "\(one.act)")
         }
+        // Stage-window find (red first, justified edit): a longer book name runs
+        // the owned delete past the bar's budget — the line keeps where the
+        // notes went and drops the name, never "made a change".
+        #expect(MCPReceiptCopy.line([receipt(.bookDelete, title: "drafts", detail: "its notes are in the Pool")])
+                == "claude-code deleted a book \u{2014} its notes are in the Pool" + undoes)
         #expect(MCPReceiptCopy.line([receipt(.bookOrder), receipt(.bookOrder)])
                 == "claude-code moved 2 notes in \u{201C}drafts\u{201D}" + undoes, "a run counts its acts")
     }
