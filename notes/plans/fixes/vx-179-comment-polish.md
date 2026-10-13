@@ -1765,8 +1765,8 @@ its live confirmation — with a DEBUG trace that names the road — is the next
 
 | piece | what | status |
 |---|---|---|
-| FL3-a | this section + the traces | DONE (this commit) |
-| FL3-1 | the fix — ownership by delivery + first responder, the explicit close rung, stale monitors released, a DEBUG trace line | NOT-STARTED — design below |
+| FL3-a | this section + the traces | DONE (0012cb60) |
+| FL3-1 | the fix — ownership by delivery + first responder, the explicit close rung, stale monitors released, a DEBUG trace line | DONE (this commit) — `CommentPanelKeys.delivers(…)` (pure over identities + the live-window form) replaces `claims`; the monitor hands `handle` the area read from the window's first responder (`CommentNSTextView.role`, set by the panel: `.add` / `.comment(id)`); `handle(_:in:)` — the close rung is `close()` + consume; the monitor releases itself on its popover host's `willClose` (+ a DEBUG `installedMonitors` count); the DEBUG `comment-keys` trace line. Plain build SUCCEEDED, zero warnings in touched files. Replays (runner shape, the real module, `fl3runner.swift`): 8/8 PASS; the fix-leg-2 pins' replay (`pinrunner`) 11/11 PASS; walk 4's stale sequence (`walk4`) as before |
 | FL3-2 | pins (what the runner CAN model) + replays + reverts | NOT-STARTED |
 | FL3-3 | record close | NOT-STARTED |
 
@@ -1831,3 +1831,16 @@ its live confirmation — with a DEBUG trace that names the road — is the next
 4. **A DEBUG-only trace line** (`Logger` category `comment-keys`) per ⌘⏎/⎋ the panel monitor sees: its
    window, the key window, the event's window, the first responder's area, the decision — so the next
    stage window can read the LIVE road in `log show` and confirm or kill this leg's reasoning.
+
+**PROBE SAFETY — TWO INCIDENTS, disclosed (the sheet-host replay, `sheet.swift`).** To replay the SHEET's
+ladder I presented the real panel by SwiftUI `.sheet` from an off-display window. (1) The first run used a
+TITLED anchor window: AppKit constrains a titled window onto a display when it is ordered in — the window
+had alpha 0 set BEFORE ordering, the display check ran right after `orderFront` and the process aborted at
+once: a fully transparent window was ordered in on a display for an instant; nothing was drawn. (2) The
+rerun, with a borderless anchor, aborted on the SHEET's own window: SwiftUI placed it on a display; the
+guard found it within one ≤ 5 ms turn, set alpha 0 and ordered it out — it may have drawn for up to one
+frame before the guard reached it; I cannot rule that out. No app instance, no store, no focus change
+(`.prohibited`), and I STOPPED sheet probes there — no rerun. The sheet host's ladder is therefore
+verified by reasoning + the runner + the walk (PENDING), not offscreen: in a sheet the key window IS the
+sheet, so `delivers` owns its keys; the first ⎋ clears; the empty ⎋ now `close()`s the sheet (before:
+passed on to the sheet's own `cancelOperation:`, which closed it) — the same outcome by the panel's act.

@@ -132,6 +132,11 @@ struct CommentTextArea: NSViewRepresentable {
     /// "Unsaved · ⌘⏎", Save, Revert — is never left below a capped list's
     /// edge. 0 reveals nothing extra (the add area: it scrolls itself).
     var revealBelow: CGFloat = 0
+    /// **Which of the panel's areas this is** (FIX LEG 3): the composer or
+    /// comment N. The panel's key monitor reads it from the FIRST RESPONDER
+    /// at the moment a key arrives, so ⌘⏎ and ⎋ act on the area that truly
+    /// holds the caret — never on an async focus report's view of it.
+    var role: CommentPanelFocus?
     /// A counted focus REQUEST (`CaptureTextView`'s door): any change puts
     /// the caret here. A request that arrives before the area has a window
     /// is HELD and served on arrival (the panel's open-focused-on-add).
@@ -269,6 +274,7 @@ struct CommentTextArea: NSViewRepresentable {
         /// a live text view is never free, and `updateNSView` runs often).
         func adopt(_ parent: CommentTextArea, into area: CommentTextAreaView) {
             area.revealBelow = parent.revealBelow
+            area.textView.role = parent.role
             if appliedStyle != parent.style {
                 appliedStyle = parent.style
                 area.apply(parent.style)
@@ -584,6 +590,9 @@ final class CommentNSTextView: NSTextView {
     var onMarkedTextChange: (() -> Void)?
     /// Keep the row being edited in view (FIX LEG 2 — F-W-3).
     var onReveal: (() -> Void)?
+    /// Which of the panel's areas this text view is (FIX LEG 3 — read by the
+    /// panel's key monitor from the window's first responder).
+    var role: CommentPanelFocus?
 
     override func becomeFirstResponder() -> Bool {
         let became = super.becomeFirstResponder()

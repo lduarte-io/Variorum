@@ -56,6 +56,7 @@ import AppKit
 import Foundation
 import GRDB // AsyncValueObservation iteration
 import Observation
+import os
 import SwiftUI
 import VariorumCore
 
@@ -558,23 +559,41 @@ nonisolated enum CommentPanelKeys {
         }
     }
 
-    /// **Is this key event the panel's to claim?** (VX-179 U3 FIX LEG 2 — the
-    /// walk's F-W-4, traced offscreen.) Its own window's, of course — and its
-    /// window's PARENT's: in a popover host the keyboard's events are
-    /// addressed to the parent window (which keeps window-server key status)
-    /// and AppKit delivers them into the popover's first responder — measured:
-    /// a key addressed to the parent lands in the popover's composer. Claiming
-    /// only its own window, the panel let ⎋ pass to `cancelOperation:`, which
-    /// closed the popover with her unsubmitted draft in it. What each key
-    /// MEANS is still `act` and the panel's ladder; this only says whose it is
-    /// — and an act the panel does not handle still passes on (⎋ with nothing
-    /// to undo closes the popover, as before).
+    /// **Is the panel's window where this key will be DELIVERED?** (VX-179 U3
+    /// FIX LEG 3 — superseding fix leg 2's `claims`, which read the event's
+    /// addressed window.) Fix leg 2 measured key ROUTING offscreen, where the
+    /// app is never active and has no key window — and that turned out to be
+    /// an artefact: there, a key addressed anywhere lands in the popover. The
+    /// live app and the runner route by the KEY window, so the honest owner
+    /// test asks the key window: the panel's own window being key (a sheet; a
+    /// popover made key), or the panel's window being a visible CHILD of the
+    /// key window (a transient popover receiving its key parent's keys). A
+    /// panel whose window is HIDDEN never owns a key — that is every stale
+    /// panel a dismissed popover leaves alive (measured: SwiftUI never tears
+    /// popover content down, and each opening makes a new window). With no
+    /// key window at all (an inactive app — only offscreen) the event's own
+    /// window, or its parent, stands in.
+    ///
+    /// Pure over identities so the table pins without real windows.
+    nonisolated static func delivers(
+        panel: ObjectIdentifier, panelParent: ObjectIdentifier?, panelVisible: Bool,
+        keyWindow: ObjectIdentifier?, eventWindow: ObjectIdentifier?
+    ) -> Bool {
+        guard panelVisible else { return false }
+        guard let delivery = keyWindow ?? eventWindow else { return false }
+        return delivery == panel || (panelParent != nil && delivery == panelParent)
+    }
+
+    /// The same rule over the live windows.
     @MainActor
-    static func claims(eventWindow: NSWindow?, panelWindow: NSWindow) -> Bool {
-        guard let eventWindow else { return false }
-        if eventWindow === panelWindow { return true }
-        if let parent = panelWindow.parent, eventWindow === parent { return true }
-        return false
+    static func delivers(
+        toPanelIn window: NSWindow, keyWindow: NSWindow?, eventWindow: NSWindow?
+    ) -> Bool {
+        delivers(
+            panel: ObjectIdentifier(window), panelParent: window.parent.map(ObjectIdentifier.init),
+            panelVisible: window.isVisible,
+            keyWindow: keyWindow.map(ObjectIdentifier.init),
+            eventWindow: eventWindow.map(ObjectIdentifier.init))
     }
 }
 
@@ -587,10 +606,10 @@ nonisolated enum CommentPanelKeys {
 /// the panel were not there. The monitor sees the event first, asks the pure
 /// rule, and consumes only what it actually handled.
 struct CommentPanelKeyMonitor: NSViewRepresentable {
-    /// Returns whether the act was handled — an unhandled key is passed on,
-    /// so ⎋ with nothing to undo still closes the sheet or popover by the
-    /// host's own standard road.
-    let onAct: (CommentPanelKeys.Act) -> Bool
+    /// Returns whether the act was handled — an unhandled key is passed on.
+    /// The second argument is the area that HOLDS the caret (FIX LEG 3: read
+    /// from the first responder when the key arrives).
+    let onAct: (CommentPanelKeys.Act, CommentPanelFocus) -> Bool
 
     func makeNSView(context: Context) -> MonitorView {
         let view = MonitorView()
@@ -603,18 +622,54 @@ struct CommentPanelKeyMonitor: NSViewRepresentable {
     }
 
     final class MonitorView: NSView {
-        var onAct: ((CommentPanelKeys.Act) -> Bool)?
+        var onAct: ((CommentPanelKeys.Act, CommentPanelFocus) -> Bool)?
         private var monitor: Any?
+        private var hostClosing: NSObjectProtocol?
+
+        #if DEBUG
+        /// FIX LEG 3: one line per ⌘⏎/⎋ this monitor sees — the live key road,
+        /// readable with `log show --predicate 'category == "comment-keys"'`.
+        private static let trace = Logger(subsystem: "io.lduarte.Variorum", category: "comment-keys")
+        /// How many panel key monitors are installed right now (a pin reads
+        /// it: a dismissed popover's panel must stop listening).
+        static var installedMonitors = 0
+        #endif
 
         override var isFlipped: Bool { true }
 
-        override func viewDidMoveToWindow() {
-            super.viewDidMoveToWindow()
+        private func release() {
             if let monitor {
                 NSEvent.removeMonitor(monitor)
                 self.monitor = nil
+                #if DEBUG
+                Self.installedMonitors -= 1
+                #endif
             }
+            if let hostClosing {
+                NotificationCenter.default.removeObserver(hostClosing)
+                self.hostClosing = nil
+            }
+        }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            release()
             guard window != nil else { return }
+            // **A DISMISSED POPOVER RELEASES THE KEYBOARD** (FIX LEG 3 —
+            // measured: a dismissed popover's panel is never torn down, so
+            // its monitor stayed installed for the app's life, one more per
+            // opening). Its host's closing removes it.
+            hostClosing = NotificationCenter.default.addObserver(
+                forName: NSPopover.willCloseNotification, object: nil, queue: .main
+            ) { [weak self] note in
+                let closing = note.object as? NSPopover
+                MainActor.assumeIsolated {
+                    guard let self, let window = self.window,
+                          CommentPanelHostWatcher.isHost(closing, ofPanelIn: window)
+                    else { return }
+                    self.release()
+                }
+            }
             // **THE PANEL ASKS FOR THE KEYBOARD** (the walk's fourth find).
             // The panel opens focused on the add area, so a caret blinks
             // there — but a sheet or popover that comes up NON-KEY (measured:
@@ -627,17 +682,33 @@ struct CommentPanelKeyMonitor: NSViewRepresentable {
                 window.makeKey()
             }
             monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-                // Whose key (FIX LEG 2, F-W-4): the panel's window's — or its
-                // parent's, which is how a popover host's keys arrive.
                 guard let self, let window = self.window,
-                      CommentPanelKeys.claims(eventWindow: event.window, panelWindow: window)
-                else {
-                    return event
-                }
-                guard let act = CommentPanelKeys.act(
-                    keyCode: event.keyCode, modifiers: event.modifierFlags) else { return event }
-                return (self.onAct?(act) ?? false) ? nil : event
+                      let act = CommentPanelKeys.act(
+                          keyCode: event.keyCode, modifiers: event.modifierFlags)
+                else { return event }
+                // Whose key (FIX LEG 3): this panel's iff its window is where
+                // the key will be DELIVERED and the caret is in one of its
+                // areas — the area read from the first responder, now.
+                let owns = CommentPanelKeys.delivers(
+                    toPanelIn: window, keyWindow: NSApp.keyWindow, eventWindow: event.window)
+                let area = (window.firstResponder as? CommentNSTextView)?.role
+                var handled = false
+                if owns, let area { handled = self.onAct?(act, area) ?? false }
+                #if DEBUG
+                Self.trace.notice("""
+                    \(String(describing: act), privacy: .public) panel=\(window.windowNumber) \
+                    visible=\(window.isVisible) key=\(NSApp.keyWindow?.windowNumber ?? -1) \
+                    event=\(event.window?.windowNumber ?? -1) \
+                    parent=\(window.parent?.windowNumber ?? -1) \
+                    area=\(String(describing: area), privacy: .public) owns=\(owns) \
+                    handled=\(handled)
+                    """)
+                #endif
+                return handled ? nil : event
             }
+            #if DEBUG
+            Self.installedMonitors += 1
+            #endif
         }
         // (No `deinit`: the view leaves its window before it dies and
         // `viewDidMoveToWindow` removes the monitor then — the
@@ -718,7 +789,7 @@ struct CommentsPanel: View {
         // **PROVISIONAL** (a taste number, chosen against the surface).
         .frame(minWidth: 460, minHeight: 440)
         .background(tokens.surface)
-        .background(CommentPanelKeyMonitor(onAct: handle))
+        .background(CommentPanelKeyMonitor(onAct: { handle($0, in: $1) }))
         // VX-179 (R-VX179-3): "Delete forever…" asks EVERY time — the Delete
         // Now posture. The pending id rides into the action through
         // `presenting:` and `deleteForever(_:)` takes it as a parameter (13l
@@ -915,6 +986,7 @@ struct CommentsPanel: View {
                 style: CommentTextStyle(tokens: tokens, ink: tokens.ink),
                 placeholder: tokens.chromeLabel(CommentsPanelCopy.addPlaceholder),
                 growsWithText: false,
+                role: .add,
                 focusRequest: addFocusRequest,
                 onFocusChange: { report(.add, inArea: $0) })
             HStack(alignment: .center, spacing: 10) {
@@ -967,6 +1039,7 @@ struct CommentsPanel: View {
                 style: CommentTextStyle(tokens: tokens, ink: tokens.commentInk),
                 mark: tokens.commentPrefix,
                 revealBelow: Metrics.stampGap + stampLineHeight + Metrics.rowAir,
+                role: .comment(comment.id),
                 onFocusChange: { report(.comment(comment.id), inArea: $0) })
             stampLine(comment, dirty: dirty)
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
@@ -1114,32 +1187,37 @@ struct CommentsPanel: View {
 
     /// ⌘⏎ and ⎋, routed by what is focused. Returns whether the panel handled
     /// the key — an unhandled ⎋ falls through to the host's own close.
-    private func handle(_ act: CommentPanelKeys.Act) -> Bool {
+    /// ⌘⏎ and ⎋ for the area that holds the caret (FIX LEG 3: the monitor
+    /// hands the area in, read from the first responder). Returns whether the
+    /// panel handled the key — and now it always does: the close rung is the
+    /// panel's own act.
+    private func handle(_ act: CommentPanelKeys.Act, in area: CommentPanelFocus) -> Bool {
         switch act {
         case .commit:
-            switch focus {
+            switch area {
             case .add:
                 Task { await model.fileAddDraft() }
-                return true
             case .comment(let id):
                 Task { await model.commitEdit(id) }
-                return true
-            case nil:
-                return false
             }
+            return true
         case .escape:
-            switch CommentComposition.escape(writing: model.writing(focus)) {
+            switch CommentComposition.escape(writing: model.writing(area)) {
             case .clearDraft:
                 model.clearAddDraft()
-                return true
             case .revert(let id):
                 model.revertEdit(id)
-                return true
             case .close:
-                // Nothing is being written: let the sheet or the popover
-                // close itself the way every other one does.
-                return false
+                // **Nothing is being written: the panel closes itself** (FIX
+                // LEG 3). It used to pass ⎋ on so the host would close "the
+                // way every other one does" — but where a passed ⎋ lands
+                // depends on the host's key routing: in the Takes host it can
+                // reach the board's own `.onExitCommand` and nothing closes
+                // (the walk's F-W-4-R). Closing here is the same act in every
+                // host, and `close()` commits any dirty row first.
+                close()
             }
+            return true
         }
     }
 
