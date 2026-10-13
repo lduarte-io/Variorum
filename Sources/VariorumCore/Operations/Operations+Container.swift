@@ -463,19 +463,19 @@ extension Operations {
     /// archive's one mutation, byte-identical (the clock read stays the
     /// door's, before the write, exactly as it was).
     func archiveContainerRow(_ db: Database, _ id: String, now: Date) throws {
-            var container = try liveContainer(db, id)
-            container.archivedAt = now
-            container.updatedAt = now
-            try container.update(db)
+        var container = try liveContainer(db, id)
+        container.archivedAt = now
+        container.updatedAt = now
+        try container.update(db)
     }
 
     /// `unarchiveContainer`'s row work inside a caller's transaction (VX-184
     /// U5 — `unarchive_note`), byte-identical.
     func unarchiveContainerRow(_ db: Database, _ id: String) throws {
-            var container = try liveContainer(db, id)
-            container.archivedAt = nil
-            container.updatedAt = date.now
-            try container.update(db)
+        var container = try liveContainer(db, id)
+        container.archivedAt = nil
+        container.updatedAt = date.now
+        try container.update(db)
     }
 
     /// Tombstone (S2). The trigger chain cascades: placements and their

@@ -48,15 +48,15 @@ extension Operations {
     /// Returns the archive's stamp.
     @discardableResult
     func archiveReadingRow(_ db: Database, _ id: String) throws -> Date {
-            var reading = try liveReading(db, id)
-            guard reading.archivedAt == nil else {
-                throw OperationError.readingAlreadyArchived(id: id)
-            }
-            let now = date.now
-            reading.archivedAt = now
-            reading.updatedAt = now
-            try reading.update(db)
-            return now
+        var reading = try liveReading(db, id)
+        guard reading.archivedAt == nil else {
+            throw OperationError.readingAlreadyArchived(id: id)
+        }
+        let now = date.now
+        reading.archivedAt = now
+        reading.updatedAt = now
+        try reading.update(db)
+        return now
     }
 
     /// **"Archive the book and its N notes"** — the OWNED book's second choice

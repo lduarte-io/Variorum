@@ -316,17 +316,17 @@ extension Operations {
     /// (finished already: nothing written).
     @discardableResult
     func finishReadingRows(_ db: Database, _ id: String) throws -> Date? {
-            var reading = try liveReading(db, id)
-            guard reading.kind == .book else {
-                throw OperationError.wrongReadingKind(id: id, expected: .book)
-            }
-            guard reading.sealedAt == nil else { return nil }
-            let now = date.now
-            reading.locked = true
-            reading.updatedAt = now
-            try reading.update(db)
-            try dismissPendingArrivals(db, readingID: id, now: now)
-            return now
+        var reading = try liveReading(db, id)
+        guard reading.kind == .book else {
+            throw OperationError.wrongReadingKind(id: id, expected: .book)
+        }
+        guard reading.sealedAt == nil else { return nil }
+        let now = date.now
+        reading.locked = true
+        reading.updatedAt = now
+        try reading.update(db)
+        try dismissPendingArrivals(db, readingID: id, now: now)
+        return now
     }
 
     /// Un-finishing a living book RESUMES its intake with a CATCH-UP (13i-b
@@ -347,18 +347,18 @@ extension Operations {
     /// `unlockReading`'s row work inside a caller's transaction (VX-184 U5 —
     /// `reopen_book`, and a finish's undo). Byte-identical behaviour.
     func reopenReadingRows(_ db: Database, _ id: String) throws {
-            var reading = try liveReading(db, id)
-            guard reading.sealedAt == nil else {
-                throw OperationError.readingSealed(id: id)
-            }
-            let wasFinished = reading.locked
-            let now = date.now
-            reading.locked = false
-            reading.updatedAt = now
-            try reading.update(db)
-            if wasFinished {
-                try intakeSweep(db, book: reading, occasion: .catchUp, now: now)
-            }
+        var reading = try liveReading(db, id)
+        guard reading.sealedAt == nil else {
+            throw OperationError.readingSealed(id: id)
+        }
+        let wasFinished = reading.locked
+        let now = date.now
+        reading.locked = false
+        reading.updatedAt = now
+        try reading.update(db)
+        if wasFinished {
+            try intakeSweep(db, book: reading, occasion: .catchUp, now: now)
+        }
     }
 
     /// Tombstone; the reading triggers cascade to its memberships
@@ -385,13 +385,13 @@ extension Operations {
     /// one the cascade stamps the chapters and memberships with).
     @discardableResult
     func deleteReadingRow(_ db: Database, _ id: String) throws -> Date {
-            var reading = try liveReading(db, id)
-            try refuseDeletingTheDailyJournal(reading)
-            let now = date.now
-            reading.deletedAt = now
-            reading.updatedAt = now
-            try reading.update(db)
-            return now
+        var reading = try liveReading(db, id)
+        try refuseDeletingTheDailyJournal(reading)
+        let now = date.now
+        reading.deletedAt = now
+        reading.updatedAt = now
+        try reading.update(db)
+        return now
     }
 
     /// THE GUARD, one line for both delete doors (13i-e): keyed on the
@@ -970,16 +970,16 @@ extension Operations {
     func removeMembershipRow(
         _ db: Database, postID: String, readingID: String
     ) throws -> (row: ReadingPost, bookless: Bool) {
-            let reading = try liveReading(db, readingID)
-            guard !reading.locked else {
-                throw OperationError.lockedReading(id: readingID)
-            }
-            guard var membership = try liveMembership(db, postID: postID, readingID: readingID) else {
-                throw OperationError.postNotInReading(postID: postID, readingID: readingID)
-            }
-            membership.deletedAt = date.now
-            try membership.update(db)
-            return (membership, try isBookless(db, postID: postID))
+        let reading = try liveReading(db, readingID)
+        guard !reading.locked else {
+            throw OperationError.lockedReading(id: readingID)
+        }
+        guard var membership = try liveMembership(db, postID: postID, readingID: readingID) else {
+            throw OperationError.postNotInReading(postID: postID, readingID: readingID)
+        }
+        membership.deletedAt = date.now
+        try membership.update(db)
+        return (membership, try isBookless(db, postID: postID))
     }
 
     public func reorderReadingPost(
@@ -996,17 +996,17 @@ extension Operations {
     func reorderMembershipRow(
         _ db: Database, postID: String, readingID: String, to insert: InsertPosition
     ) throws -> (rowID: String, from: String, to: String) {
-            let reading = try liveReading(db, readingID)
-            guard !reading.locked else {
-                throw OperationError.lockedReading(id: readingID)
-            }
-            guard var membership = try liveMembership(db, postID: postID, readingID: readingID) else {
-                throw OperationError.postNotInReading(postID: postID, readingID: readingID)
-            }
-            let from = membership.position
-            membership.position = try readingPosition(db, readingID: readingID, at: insert)
-            try membership.update(db)
-            return (membership.id, from, membership.position)
+        let reading = try liveReading(db, readingID)
+        guard !reading.locked else {
+            throw OperationError.lockedReading(id: readingID)
+        }
+        guard var membership = try liveMembership(db, postID: postID, readingID: readingID) else {
+            throw OperationError.postNotInReading(postID: postID, readingID: readingID)
+        }
+        let from = membership.position
+        membership.position = try readingPosition(db, readingID: readingID, at: insert)
+        try membership.update(db)
+        return (membership.id, from, membership.position)
     }
 
     /// **A BOOK NEVER SPANS WINGS** (13i-d U5 — the sitting record §9; the
