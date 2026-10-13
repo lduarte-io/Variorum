@@ -117,3 +117,51 @@ What she looked for proves nothing either way: **the iCloud key A is SUPPOSED to
 Castle** (decision 6 — only the copies wrapped under it go). So "no Variorum key in Passwords" is neither a pass
 nor a fail. (Whether an app's synchronizable generic-password item shows in Passwords at all: auditor C.) The
 honest checks are listed in §V (verification road) once the auditors report.
+
+---
+
+## V. THE CONSOLIDATED VERDICT (all four legs in, 2026-10-12 night)
+
+**No finding breaks the core encryption.** The ciphers, nonces, AAD, key wraps, KDF floor-at-read, BIP-39 words, the
+key proof + 13y challenge, RLS / definer functions / the closed vault-UPDATE road, the wire's sealing of every
+user-written or user-named column, and every Keychain item's class/flags/deletes HOLD (auditor C). All ten S1
+questions still HOLD at HEAD (auditor A; 93 core crypto tests green headless). The MCP door shuts on every kind of
+lock before the pool closes (auditor B). The VX-99 class is closed (§O.1).
+
+**What is left is all at the EDGES of the Standard → Castle switch — places where the app can SAY Castle while
+something current is still reachable the old way — plus one copy overstatement.**
+
+| # | finding | severity | source | launch call (orchestrator's recommendation — hers to rule) |
+|---|---|---|---|---|
+| 1 | **The re-key reopen's unordered silent re-save of L′** — can leave the current key in the no-Touch-ID item; a local-only library then silently re-lands an Apple copy at next launch (§O.3) | MAJOR, BLOCKER-candidate (race, not reproduced) | orchestrator | **FIX BEFORE LAUNCH** — a few lines (skip the R1-M3 re-save while a switch marker is set) + a bootstrap-level pin |
+| 2 | **VX-110 — signed-out "Use Castle"** says "You're in Castle" while the vault/server stay Apple-openable; reverts at next sign-in | MAJOR (confirmed at HEAD; VX-99 R3's pin shape is red) | A | **FIX BEFORE LAUNCH** — refuse with the switches' existing offline sentence when sync custody is held but the session is not (one guard) |
+| 3 | **Castle's "delete old backups" offer misses `Previous Libraries/` and `Backups/safety-copies/`** — Standard-era whole-library copies stay Apple-openable after the copy promises "everything you have ever written" | MAJOR (narrow: needs a 13x adoption while Standard) | B1d | fix before launch IF cheap (list those folders too), else at minimum name them in the offer's sentence |
+| 4 | **The field guide says "everything is encrypted"** (`PostureCopy.swift:781`); dates, tag-tree shape, memberships, flags, sizes travel plain (the website brief discloses this correctly) | MAJOR (copy-only) | C-1 | **FIX BEFORE LAUNCH** — one sentence, her words to approve |
+| 5 | server-rewritable plain columns key the MCP AI fence (a malicious server could clear a Private mark for an already-approved client) | MINOR | C-2 | post-launch ticket (needs a lockstep event) |
+| 6 | Previous-Castle plaintext `.md` exports stay in `md-exports/`, unnamed | MINOR | B3c | post-launch, or one line in the Castle offer |
+| 7 | local-only Castle library adopting a Standard-era pair/plaintext export silently becomes Standard | MINOR | B2c | post-launch |
+| 8 | pre-switch pairs in an unreachable second backup folder skipped, offer never returns | MINOR | B1e | post-launch |
+| 9 | unfollowed sibling device (a closed phone + its iCloud device backup) stays Apple-openable until it opens | MINOR + OPEN | A Q11 | post-launch; worth a sentence in the Castle copy |
+| 10 | passphrase: 12-char length floor, no strength check (~1,700 guesses/s/GPU at the shipped Argon2id) | MINOR | A Q10 | post-launch (the twelve words are the strong road) |
+| 11 | VX-109 / VX-108 / VX-107 — confirmed, no exposure (VX-109 only overwrites TOWARD Castle) | MINOR/NIT | A | stay on the board |
+| — | the acting device's leftover Standard-era key file (opens nothing current); `pg_temp` in definer search_path; Q1/Q2/Q6 record corrections | NIT | O.4, B6c, C3, A | tidy-ups |
+
+### V.1 How SHE can verify a Castle switch on a real device (instead of the Passwords app)
+
+The Passwords app is the wrong instrument: the iCloud key is SUPPOSED to stay in iCloud Keychain after Castle
+(decision 6), and whether Passwords lists an app's generic-password item at all is unconfirmed (C, OPEN). What
+actually proves a switch, on the Mac that switched (no new profile needed):
+1. **The key file beside the library carries no Apple copy.** With Variorum quit:
+   `grep -l '"apple"' ~/Library/Containers/io.lduarte.Variorum/Data/Library/Application\ Support/*/variorum-keys-*.json`
+   — the CURRENT file (newest by date) must NOT be listed. (Before finding 1's fix, an older Standard-era file from
+   before the switch may still be listed on the device that switched — it opens nothing current; see O.4.)
+2. **Quit and reopen Variorum: it must ask for Touch ID / the passphrase.** A silent open after a Castle switch is
+   exactly finding 1's failure (or finding 2's revert) — that is the user-visible symptom to watch for.
+3. **Settings ▸ Protection still reads Castle after a relaunch** (and, if synced, after the next sign-in).
+A fresh macOS user profile on the Air is still the best end-to-end check for a NEW user — but only AFTER findings 1
+and 2 are fixed, since the race in 1 is intermittent and a single clean run cannot prove its absence.
+
+### V.2 What this audit did NOT do
+No `xcodebuild test` (the stage is held by oct12coordinator; the Mac-target pins were read, not run); no live
+Supabase reads; no reproduction of finding 1 (it needs a bootstrap-level pin); no hands-on Keychain Access /
+Passwords check; the phone's door conditions read only where shared. No product code changed.
