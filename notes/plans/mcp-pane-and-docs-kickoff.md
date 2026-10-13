@@ -106,6 +106,16 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
 
 *(She adds items here or as sub-issues of VX-246 before kickoff. Whatever she adds is binding on the kickoff.)*
 
+- **VX-230: the first take badge misdrawn after an MCP write** (Bug, Pre-launch). Her word, 2026-10-13:
+  *"I want that fix added to the upcoming session."* The symptom, her words: the first take icon is *"either
+  present when it shouldn't be or a filled in black circle"*. Her new observation: *"I found that going into
+  takes mode and expanding and closing it fixed it, which makes it seem even more like a chrome issue."* The
+  ticket also carries her earlier real-store sighting ('o ladrão de raios', block 1, caret on it) and VX-184
+  U1's darker ⑂2 on a single-take block. **Lead:** a Takes expand/collapse clearing it points at a STALE badge
+  face (the badge's decoration not invalidated when an MCP write lands), not wrong store data. Trace that
+  invalidation road and pin it red-first. **If the trace reaches the editor seam** (`EditorTextView`, the
+  decoration layer), read `notes/TEXTKIT2_NOTES.md` first, and the review is Fable's (CLAUDE.md).
+
 ## Rules binding this run
 
 - Cast per CLAUDE.md: Fable orchestrates by default (she redirects at kickoff); `opus-implementer` per unit,
