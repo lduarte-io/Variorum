@@ -195,6 +195,79 @@ commit; synchronous foreground waits only (poll, don't `tail -f`). EVERY `xcodeb
 `swift build`/`swift test` on the core package runs freely. The real Keychain drills (`PostureSwitchDrillTests`)
 are stage work. Work ONLY in `~/dev/variorum-vx-201`.
 
+## §D — U2 BRIEF (VX-110: the two doors for a signed-out enrolled library — ONE implementer session, Opus xhigh)
+
+**Product frame first:** this is the author's own writing app hardening its OWN privacy promise before public
+release — the app must never say Castle while the account's sync copy stays openable the old way, and it must
+never trap a user who lost their account. Defensive work on her code, at her request. You are the U2
+implementer. Work ONLY in `~/dev/variorum-vx-201`. Append `## U2 RECORD (VX-110)` to this file, LIVE STATUS
+first, commit per piece ("Part of VX-110"), push after every commit, no attribution trailers
+(`notes/SessionResiliencyProtocol.md` binds you — read it). The ENVIRONMENT TRAPS section above binds verbatim.
+
+**Required reading (never delegated):** this file WHOLE — §A's VX-110 refinements, her carried-forward
+reminder 1, the U1 RECORD + its adjudication (U1's `switchInProgress` / `endSwitch` / `switchPending` machinery
+is now in these files; your roads must ride it, never duplicate it); `notes/plans/fixes/vx-191-encryption-audit.md`
+§W/§W.1 (the user-position table + her ruling) and auditor A's VX-110 section; `notes/SyncSpec.md` IN FULL;
+`notes/plans/pre-13x-postures-design.md` §1 (decisions 5/8/9/17/25/26/35), §4, §5 (the doors table), §14
+(corners 26/27/34/43); then the code: `PostureSwitchModel.swift` (`start` ~:258 — where the door forks before
+the explain), `PostureSwitch.swift` (`checkDoor` :413-419, `runCeremony`'s enrolled guard + local road),
+`EncryptionSession.swift` (`forgetDeviceKeys`, `joinStandard` :382-410, the enroll road), `EncryptionViews.swift`
+:431-466 (the join consent), `PostureCopy.swift` (:236-240 the consent, :326-328, :438-441 `enteredCastleDone`),
+`ProtectionController.swift` (`reconcileFollow`'s follow-into-Standard arm :707-717), `ProtectionPane.swift`
+:329-337, `MobileProtectionSheet` (the phone's door conditions — the audit never read them; you do),
+`VariorumApp.swift` :295-304 (runner wiring).
+
+**The defect (auditor A, confirmed at HEAD):** Use Castle on a library with sync custody but no live session
+runs the silent local-only road: the vault and server stay Apple-openable, the Done claims the account-wide
+switch ("your other devices will ask"), backups she deletes at the offer are gone for a Castle that never
+happened, and the next signed-in ready SILENTLY reverts this Mac to Standard via the follow arm.
+
+**Her ruling (the ticket's comment, binding):** signed out with sync custody held, Use Castle offers TWO doors —
+**Sign in…** (the account-wide switch) and **Use Castle on this Mac only** (forget the old account's keys here
+via `forgetDeviceKeys`, then the local road, with an HONEST Done). Signing back into the old Standard account
+then lands on the join consent (Join / Cancel), never a silent revert. De-cap the consent's "ACCOUNT" and give
+that sentence a wording pass. A flat "refuse unless signed in" is WRONG — it traps the lost-account user.
+
+**The build (§A's refinements are part of the spec):**
+1. **The gate:** the fork fires when posture reads Standard AND this store's sync custody holds MATERIAL (not an
+   identity-only record — post-forget identity must NOT re-trigger the doors; in Standard the material is the
+   silent item, readable without prompting) AND there is no live session. A genuinely pre-sync library (no
+   custody material) keeps today's local road byte-untouched. Enrolled + signed in keeps the full road. Signed
+   in but offline keeps the existing offline refusal. No road may reach the OLD silent local-only ceremony while
+   custody material is held and the session is absent.
+2. **Sign in…** routes to the sign-in door and ENDS the ceremony (no auto-resume across an async sign-in —
+   PROVISIONAL, §A refinement 4; the face may say to press Use Castle again after signing in).
+3. **Use Castle on this Mac only:** `forgetDeviceKeys` EARLY — before or atomically with the custody move, and
+   CARRIED BY THE MARKER'S RESUME, so no crash window leaves the re-keyed library with the old account's
+   material still held (§A refinement 1: if the forget runs last and the session dies after the re-key, the
+   next sign-in is the silent revert THROUGH the fix). Then the local road (steps 4–7) exactly as a pre-sync
+   library — it inherits U1's switch machinery automatically; VERIFY (don't assume) that the signed-out road
+   sets and clears U1's per-store `switchPending` flag like the enrolled road does.
+4. **The honest Done** (new copy, PROVISIONAL): this Mac's library is in Castle; the old account and its server
+   copy are unchanged — delete that account if you still can; signing into it later will ask before anything
+   changes. It must NOT say "your other devices will ask." Do not promise what a new account's posture will be
+   unless your born-Castle pin (below) proves it.
+5. **The consent:** de-cap "ACCOUNT" (`PostureCopy.swift:236-240`), wording pass, sentence case — PROVISIONAL.
+6. **The phone:** read `MobileProtectionSheet`'s door conditions. The phone gets the same two doors through the
+   shared model, or an honest refusal — NEVER the old silent road with the ordinary Done. The phone target must
+   build; faces carry the shared copy.
+
+**The pins (red-on-old by behavioral revert, each):** (a) the gate state presents the two doors; the pre-sync
+and enrolled-signed-in states don't. (b) This-Mac-Only then sign-in to the OLD account lands the JOIN CONSENT,
+never the silent follow (red on old: today it silently reverts). (c) the crash window: die between the re-key
+and the forget — the resume completes the forget. (d) two stores, two custody records: forgetting one leaves
+the other intact (her multiple-accounts worry, §A refinement 3). (e) BORN-CASTLE (her carried-forward reminder
+1): sync setup from a Castle library mints a Castle vault (no Apple-held copy) — if this pin cannot be built
+headless against the fake server, say so in the record and SOFTEN the Done instead; never ship copy that leans
+on an untested road. (f) the Done's road shows the honest copy, not `enteredCastleDone`. Existing suites green.
+
+**Copy:** every new or changed sentence lands in your record under `### U2 COPY DRAFTS` (for the QUESTIONS #215
+bundle) — sentence case, no capitals for emphasis, the two-register rule (everyday surfaces name no key).
+
+**Constraints:** ZERO lines in `Sources/VariorumCore/Sync/` (stop and report if needed). No schema. Mac-target
+suites are STAGE work — `build-for-testing` only, list suites + `-only-testing` arguments PENDING; headless
+`swift test` freely. One read-only Sonnet for EXTERNAL facts only, if ever. Foreground waits only.
+
 ## §C — U1 BRIEF (VX-202: the re-key reopen's silent re-save race — ONE implementer session, Opus xhigh)
 
 **Product frame first:** this is the author's own writing app hardening its OWN privacy promise before public
