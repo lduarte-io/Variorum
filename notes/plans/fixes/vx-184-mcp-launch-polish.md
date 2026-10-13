@@ -36,8 +36,8 @@ dev store only behind an A1 prestage copy, restored verified.
 | unit | members | status |
 |---|---|---|
 | U1 — the socket and key road | VX-132 · VX-181 · VX-198 | **UNIT CLOSED — DONE** (2026-10-13 01:41 MDT): headless 153/25 MCP · 2,695/308 core · 40/6 workbook; Mac batch 339/47 green; live round PROVEN (real Claude Code; re-bind + replaced-key sentence on the wire; closed-app sentence on initialize id; 300-block 224 KB round-trip byte-equal); dev store restored verified; stage released 22/70 min. 3 PROVISIONALs for the merge; cold review owed with the run's ladder. Noticed-not-fixed → VX tickets (see U1 OWED 3) |
-| U2 — the gatherings icon | VX-185 | IN FLIGHT — implementer spawned 2026-10-13 ~01:50 |
-| U3 — the door's ergonomics | VX-186 · VX-173 · VX-188 · VX-190 · VX-187 | NOT STARTED |
+| U2 — the gatherings icon | VX-185 | **UNIT CLOSED — DONE** (2026-10-13 02:51 MDT): core-only fix (`mcpBookReaches` decides gatherings via `decideGathering`; R-VX185-1 by construction); red-on-old 6/6 by revert; headless 2,703/310 green; Mac 401/54 (one red = VX-115's standing); walk PROVEN both voices (W1 her exact case, W2 control, W3 open book, W4 archived Terminal-only; light only — recorded); stage 13/40 min. P-VX185-1/2 as (a) |
+| U3 — the door's ergonomics | VX-186 · VX-173 · VX-188 · VX-190 · VX-187 | IN FLIGHT — implementer spawned 2026-10-13 ~03:00 (owns the ONE allowed schema change: the local-only comment-authorship record) |
 | U4 — edit parity inside a note | VX-195 | NOT STARTED |
 | U5 — edit parity across the library | VX-196 | NOT STARTED |
 | U6 — the MCP pane in tabs | VX-199 · VX-205 | NOT STARTED |
