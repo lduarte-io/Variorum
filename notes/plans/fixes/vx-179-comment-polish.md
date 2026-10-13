@@ -2150,7 +2150,7 @@ exit, popover windows alpha 0 and checked against every NSScreen, no sheet probe
 - [x] The two AppKit-host cells remodelled onto the product's own presenter (SwiftUI `.popover`) —
   8beab85b (test file only; typecheck EXIT 0; `pinleg.swift` replays the four popover cells in suite
   order, runner shape, real module at the tip: **14/14 green**).
-- [ ] Red on old for the remodelled R1-2 cell — **REVERT R-PL ANNOUNCED** (runs after this commit):
+- [x] Red on old for the remodelled R1-2 cell — **REVERT R-PL ANNOUNCED** (runs after this commit):
   `CommentPanelHostWatcher.isHost` answers `false` (the watcher deaf — fix leg 2's R-FL2c road), the
   app rebuilt, `pinleg` rebuilt and run, then restored by
   `git checkout -- App/Variorum/Variorum/Features/Editor/CommentsPanel.swift` and rebuilt. Nothing is
