@@ -14,6 +14,12 @@ red-on-old verified by revert.
 VX-187 · U4 VX-195 · U5 VX-196 · U6 VX-199 + VX-205 · U7 VX-197. Nothing drops (R-VX184-0); the order is
 the build order. VX-173's human bulk face is parked as VX-200.
 
+**HER GOODNIGHT MANDATE (2026-10-13, verbatim intent, recorded at her message):** the run continues through
+the night, culminating in the /Applications refresh; if another effort merges main first, merge main INTO this
+branch, then merge; ALL of U6's wording PROVISIONALs route to **VX-234** (her morning settings-pane wording
+review — the ticket now carries the MCP-pane wording items; U6 appends its own at close and ships words
+AS BUILT).
+
 **HER MID-RUN ADD (2026-10-12 night, this chat — minted VX-205, a U6 member):** the pane's setup command
 renders in a standard UI code block with the copy icon in the upper right. Her words, verbatim: *"the block
 that has the code command to be copied should be in one of those nice little code blocks you see in UI's
