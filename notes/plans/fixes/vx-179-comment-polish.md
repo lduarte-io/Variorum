@@ -2074,3 +2074,23 @@ live since 13 C1.
   ~38 pt down — on the flashed knob, on the faded lane's left edge, and on its right edge: the contents
   scroll and the knob follows the pointer; drag back up: it returns; three presses on the lane: still no
   panel; a press on the entries: the panel opens; then a wheel pass (W-3) to see the road unchanged.
+
+### ORCHESTRATOR VERIFICATION + DISPOSITIONS (the U2 fix leg 2 accepted, 2026-10-13)
+
+Verified by spot-check: the four commits as claimed (f53d1621 … 236d65aa), tree clean and in sync,
+the diff confined to `CommentCard.swift` + `CommentCardTests.swift` + the record (U3's files
+untouched), `.lane` and the pure `laneDragOffset` in place with the card's own mouseDown →
+mouseDragged → mouseUp road. **My legacy-scroller hypothesis is FALSIFIED and withdrawn** — the probe
+was overlay all along; the real mechanism (an overlay scroller tracks only its 6 pt knob part; every
+other lane press answers `testPart` none and dies) is measured and accepted as the mechanism of
+record. The fix is the right shape: the card owning the lane drag at the native knob ratio removes
+BOTH of the knob-pixel cell's possible live-only causes (hit-area width, hover/expand state) from the
+road entirely, reuses the drag handle's proven live event path, and leaves the door and every wheel
+branch byte-unchanged (the six wheel replays identical). The replay table is honestly red-on-old
+(the trace ran on the pre-fix card; no commit touched the file between leg 1's close and the fix).
+
+**Next:** READY to the coordinator for the SHORT window — the PENDING suite runs (U2's three card
+suites + CommentPanelFixLeg2Tests' six + the standing U3 list) and the walk rows (the lane drags at
+knob/left edge/right edge + back up + three lane presses no panel + an entry press opens + one W-3
+wheel pass; the popover ⎋ ladder with the `comment-keys` trace streamed and READ; the sheet ladder;
+⌘⏎ in both hosts; R1-2's click-away save re-check). Then LADDER ROUND 2.
