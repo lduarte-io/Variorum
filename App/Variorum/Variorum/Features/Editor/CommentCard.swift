@@ -260,7 +260,7 @@ final class CommentCardView: NSView {
         addSubview(rule)
         scroller.drawsBackground = false
         scroller.borderType = .noBorder
-        scroller.hasVerticalScroller = true
+        scroller.hasVerticalScroller = false  // `presentCard` grants it to a door
         scroller.hasHorizontalScroller = false
         scroller.autohidesScrollers = true
         scroller.scrollerStyle = .overlay
@@ -305,6 +305,11 @@ final class CommentCardView: NSView {
     func presentCard(_ new: CardContent) {
         let switching = !stacked
         showStacked(true)
+        // Only a card she can scroll carries a scroller: the read tier's
+        // cards take no wheel (`hitTest`), so they hold no scroller view at
+        // all. (The controller sets `onClick` before it presents.)
+        let scrollable = onClick != nil
+        if scroller.hasVerticalScroller != scrollable { scroller.hasVerticalScroller = scrollable }
         guard switching || new != content else { return }
         #if DEBUG
         contentApplications += 1

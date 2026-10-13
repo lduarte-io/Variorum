@@ -191,7 +191,7 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 | 1 | Record file + kickoff rulings landed, branch pushed | DONE (93b5b720) |
 | 2 | The `Sync/` line: `tombstonedKinds` + `block_comment` + two-client stale pin (orchestrator) | DONE (37b9a6e7) — pin red-on-old VERIFIED BY REVERT (all 5 expectations fail, the comment purged live, stores diverge); full PurgeConvergenceTests 20/20 green headless |
 | 3 | U1 true delete (core + panel door) | BUILT (89b5a9af…, last code f92436e8) — core pins red-on-old by revert + full `swift test` green + the app target builds; app-target pin RUN + the walk PENDING (stage) — see the U1 RECORD |
-| 4 | U2 gutter cards | IN-PROGRESS — see the U2 RECORD |
+| 4 | U2 gutter cards | BUILT (1a7d2242…, last code + pins at the U2-e commit) — plain build green, pins typechecked stage-free, tables replayed; pin RUN + revert + the walk PENDING (stage) — see the U2 RECORD |
 | 5 | U3 panel pristine pass | NOT-STARTED |
 | 6 | Mac-target test runs + the walk (stage via oct12coordinator) | HELD — stage |
 | 7 | The ladder (fable-reviewer, whole diff) | NOT-STARTED |
@@ -388,8 +388,11 @@ this unit). Pin to flip under (b): `aSealedPostRefusesACommentsDeleteForever` (+
 
 ## U2 RECORD (implementer, 2026-10-12)
 
-**U2 IN PROGRESS.** The gutter comment cards (R-VX179-1/2): the 96 pt cap retires; the margin card
-re-forms as STACKED ENTRIES that scroll inside the card.
+**U2 BUILD CLOSED (2026-10-12) — VERIFICATION PENDING (stage).** The gutter comment cards
+(R-VX179-1/2): the 96 pt cap retired; the margin card re-formed as STACKED ENTRIES that scroll inside
+the card. Everything stage-free is done: the plain app build green, the pins typechecked against the
+built module, every pure-table and geometry cell replayed from a source copy. What remains needs the
+stage (via `oct12coordinator`): the pins' compile-in-target + RUN, red-on-old by revert, and the walk.
 
 **NOT DONE BY THIS UNIT (first line, by the contract):** no `xcodebuild test`, no walk, no app launch,
 no `/Applications` touch (the stage is the release session's) — every app-target pin's COMPILE and
@@ -406,8 +409,8 @@ in the app target, whose test build is stage-gated; red-on-old by revert is PEND
 | U2-a | record section + ledger row 4 IN-PROGRESS | DONE (1a7d2242) |
 | U2-b | geometry: `leftCardRect`'s 96 pt cap retires (the pad named `cardHeightPad`, kept at 24); the cap's one pinned cell flipped; the red-on-old-shaped cells | DONE (6c941167) — `Phase13SurfaceTests.aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane`'s cap cell flipped (`== 96` → `== 824`); new `ProseGutterTests.theCardGrowsToTheBlocksOwnHeightWithinTheRhythm` (6 height cells red-on-old by arithmetic — old answers 96; the parity cells green both sides). Compile + RUN + revert PENDING (stage) |
 | U2-c | the card: stacked entries, scroll inside, the wheel routing, the identity reconcile in `renderComments` | DONE (e3629851) — `CommentCardView` + the pure `CommentCardLayout` (arrange · wheelOwner · reconcile) moved to the new `Features/Editor/CommentCard.swift`; `renderComments` reconciles by identity and presents the stacked card; the plain Debug build SUCCEEDED (zero warnings in touched files) |
-| U2-d | pins: the pure tables (arrangement · wheel owner · reconcile) + mounted card + controller cells (app target — WRITTEN only; compile + RUN PENDING stage) | DONE (this commit) — new `VariorumTests/CommentCardTests.swift` (3 suites, 14 tests); the card gained the budget's component-wise `CardContent ==` + two DEBUG counters the pins read. STAGE-FREE EVIDENCE (no test target built, nothing run): `swiftc -typecheck` of the new file AND of the two edited existing functions (extracted verbatim) against the plain build's `Variorum.swiftmodule` — EXIT 0, zero diagnostics (non-vacuity probed: a misspelt member fails it); a source-copy REPLAY of every pure-table cell and every geometry cell (new vs old formula) — all as pinned. RUN + red-on-old by revert PENDING (stage) |
-| U2-e | verify: ONE plain `xcodebuild … build`; record closed | NOT-STARTED |
+| U2-d | pins: the pure tables (arrangement · wheel owner · reconcile) + mounted card + controller cells (app target — WRITTEN only; compile + RUN PENDING stage) | DONE (b193aa1f) — new `VariorumTests/CommentCardTests.swift` (3 suites, 14 tests); the card gained the budget's component-wise `CardContent ==` + two DEBUG counters the pins read. STAGE-FREE EVIDENCE (no test target built, nothing run): `swiftc -typecheck` of the new file AND of the two edited existing functions (extracted verbatim) against the plain build's `Variorum.swiftmodule` — EXIT 0, zero diagnostics (non-vacuity probed: a misspelt member fails it); a source-copy REPLAY of every pure-table cell and every geometry cell (new vs old formula) — all as pinned. RUN + red-on-old by revert PENDING (stage) |
+| U2-e | verify: the plain `xcodebuild … build`; record closed | DONE (this commit) — after the last code change (read-tier cards carry no scroller view; two pin cells for it): `xcodebuild -scheme Variorum -destination 'platform=macOS' build` (Debug, from `App/Variorum/`) **BUILD SUCCEEDED**, EXIT 0, zero warnings in a touched file (the log's 9 warnings are pre-existing, untouched files); the pins re-typechecked EXIT 0 |
 
 ### The settled design (written before the code — the record must let a fresh session finish)
 
@@ -432,3 +435,157 @@ in the app target, whose test build is stage-gated; red-on-old by revert is PEND
    to its top.
 5. **The voice idiom (PROPOSAL, PROVISIONAL — the walk decides):** Terminal's `// ` PER ENTRY, as a
    hanging mark (wrapped lines align after it), ink at 0.75 — the panel's own row idiom.
+
+### What U2 decided (with the traces)
+
+1. **D-1 — the pad stays 24 (`BlockDecor.cardHeightPad`).** `ideal = blockHeight + 24`, bounded by
+   `roomBelow − cardRhythmAir` and floored at `cardMinHeight` exactly as shipped. Why not a "cleaner"
+   pad (e.g. the card ending at its block's own bottom): every card under the old cap (a block of
+   72 pt or less — nearly every one-to-three-line block) stays BYTE-IDENTICAL, and every existing
+   geometry pin rides unmodified except the one cell that pinned the cap; a different pad would move
+   every shipped card. A one-line block (17 pt Terminal) keeps its 41 pt card — room for two short
+   entries before the inner scroll. Accepted consequences, for the walk: (i) a tall block with a short
+   comment shows a tall card that is mostly its leading rule — a margin bracket along the block, the
+   entries at its top; (ii) a block taller than the window, scrolled so its top is off-screen: the
+   card scrolls with its block (it is an overlay subview in document space, top-aligned to the
+   block's first line), so its entries leave with the block's top and the rule continues along the
+   rest — option for the walk, NOT built: a "sticky" entry stack (needs viewport input in the
+   geometry — a design call); (iii) the card's hit area grows with it: a click in the gutter beside a
+   tall commented block, left of `textLeft − 28`, opens the panel (the card is the block's door, as
+   it was over its first 96 pt).
+2. **D-2 — the stack.** Each comment one wrapping 11 pt label (the shipped size; no line limit, no
+   truncation), the panel's own 1 pt hairline (`tokens.line`) between entries with 4 pt air each side
+   (PROVISIONAL taste numbers), placed by the pure `CommentCardLayout.arrange`. ORDER, traced at both
+   suppliers: `EditorViewModel.observeComments` and `ReadPostViewModel.startDecorContext` both map
+   `Queries.containerComments` (`ORDER BY bc.block_id, bc.created_at, bc.id`; `Dictionary(grouping:)`
+   keeps sequence order within a group) — the panel reads `Queries.blockComments`, ordered
+   `(created_at, id)`: the same order (core pin `Phase13SurfaceQueryTests.containerCommentsGroupsLive
+   NotesPerBlock`). No stamp is drawn (the panel is the stamp's home; a 210 pt read face stays calm),
+   so `BlockDecor.CommentBrief` did NOT grow — `id + text` is what the card renders.
+3. **D-3 — one door, and the events' road (traced).** The window delivers a click and a wheel event
+   to whatever `hitTest` answers. The stacked card now holds an `NSScrollView` → `NSClipView` → the
+   flipped stack view → the entry labels, any of which would otherwise be that answer — swallowing
+   the click (the card's `mouseDown` is the panel's door) and taking the wheel straight into the inner
+   scroll. So an interactive card answers ITSELF for every point (the vertical `NSScroller` excepted,
+   so it stays draggable): `mouseDown` → `onClick` wherever she clicks, and every wheel event reaches
+   the card's router. The read tier (`onClick == nil`) answers nil exactly as shipped, so clicks AND
+   wheel events go to the text view beneath (click-to-focus and the page's scroll intact) — its cards
+   therefore cannot scroll and show what fits (entries past the card's edge are clipped there; the
+   brief's accepted consequence, strictly more than the old four truncated lines) and carry no
+   scroller view at all. The strip and badge arms keep `super.hitTest` exactly.
+4. **D-4 — the wheel's owner (`CommentCardLayout.wheelOwner`, pinned by table).** Content that fits
+   ⇒ the page, always — `super.scrollWheel`, NSResponder's default, hands the event to the next
+   responder (the text view, on up to the clip and the page's scroll view): the very road the event
+   takes over bare gutter. Overflowing ⇒ the card when it can move that way (toward its top while
+   scrolled down, toward its bottom while there is more below), else the page; mostly-horizontal ⇒ the
+   page. A trackpad GESTURE latches: `.mayBegin`/`.began` decide, the rest of the gesture and its
+   momentum follow, the latch clears at `.cancelled` or momentum's end — so neither scroll view sees
+   half a gesture, a card scrolled to its end stops there, and the NEXT gesture moves the page (the
+   Mac's nested-scroll latching). A wheel notch (no phases) decides alone. The sign convention:
+   `scrollingDeltaY > 0` reveals content ABOVE (AppKit moves a flipped clip's origin by −deltaY; the
+   natural-scrolling inversion is already applied) — WALK CHECK W-3; if it were inverted the symptom
+   is unmistakable and the fix is one comparison in `wheelOwner` plus its table.
+5. **D-5 — the pool pairs by IDENTITY (`CommentCardLayout.reconcile`, pinned by table).** Traced: the
+   shipped `pool` paired cards with the visible commented blocks by POSITION — harmless while a card
+   held no state. A scrolled card holds state: a page scroll that moves the visible commented set by
+   one block would hand every card to its neighbour's block, mid-scroll. Now a block keeps the card
+   already showing it (and her inner scroll position); the rest take the free cards in pool order; new
+   cards only when the pool runs out; surplus removed — still a pool. A card that comes to show a
+   different block (`identity` changes) returns to its top.
+6. **D-6 — the budget.** The decoration pass re-presents every visible card on every scroll, layout
+   and caret move. `presentCard` compares the whole `CardContent` first and returns on no change; the
+   colours are compared by sRGB components because the pass re-makes them from the tokens every time
+   (`NSColor(tokens.…)` — object equality across re-made colours is not guaranteed, and a false
+   "changed" would rebuild every entry every pass). Labels are measured only when the entries or the
+   width change; a height-only change (her block grew a line) re-arranges by arithmetic and never
+   re-measures — both pinned by DEBUG counters. Steady-state work is below the shipped pass's (whose
+   `present` removed and re-added a fresh rule `NSView` on every pass). View count per card grows
+   (scroll view + clip + stack + N labels + N−1 hairlines), still ∝ visible commented blocks (P1).
+7. **D-7 — the overflow cue: AppKit's own.** `flashScrollers()` once when a card's content (or its
+   block) changes into an overflowing state, interactive cards only. A bottom fade was considered and
+   not built: a gradient mask's orientation under AppKit-managed (geometry-flipped) backing layers
+   could not be verified without the stage — a walk option (P-VX179-U2-2).
+8. **D-8 — the voice mark: PER ENTRY, HANGING (PROPOSAL, PROVISIONAL — the walk decides).** Terminal's
+   `// ` leads each entry at the panel's 0.75 of the comment ink; wrapped lines align after it (a
+   `headIndent` of the mark's width); a newline inside a comment displays as a LINE separator so its
+   later lines hang too (display only — the stored text untouched). Reasoning: the panel — the one
+   editing home — draws the mark per row as a label BESIDE the text (`CommentsPanel` row, "never part
+   of the text"), so its rows hang; once per card would make entries 2…n read as the first's
+   continuation, which is the joined string's defect re-made. Study has no mark (prefix ""),
+   unchanged.
+
+### Dispositions (U2's rows — the brief's items 1–4; design rows her rulings made, so the evidence is
+a geometry oracle + the walk, red-on-old where a cell is the old law)
+
+| item | disposition |
+|---|---|
+| 1 — geometry (R-VX179-2) | BUILT (6c941167) — the cap's cell flipped (`Phase13SurfaceTests`' `BlockDecorGeometryTests.aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane`: `== 96` → `== 824`); new `ProseGutterTests.theCardGrowsToTheBlocksOwnHeightWithinTheRhythm` (seven height cells RED ON OLD — 96 there — and the parity cells green both sides, confirmed by the source-copy replay below); every other geometry pin unmodified |
+| 2 — the card (R-VX179-1) | BUILT (e3629851 + the U2-d/U2-e refinements: component-wise content equality, DEBUG counters, read-tier cards carry no scroller) — pins in `CommentCardTests.swift` (b193aa1f + U2-e) |
+| 3 — the one law | UNTOUCHED BY CONSTRUCTION — no line in `ProseGutter`, the text views, `PaneSurface` or any measurement road; the change lives in the gutter card and the height arithmetic `roomBelow` already bounds. The one-law pins (`ProseGutterTests`' production-loop cells, `nothingInTheGutterEverCoversProse`, `IndicatorGutterTests`) ride unmodified — RUN PENDING |
+| 4 — pins | WRITTEN: 3 new suites / 14 tests + the new geometry test + the flipped cell; typechecked stage-free; RUN PENDING (stage) |
+
+### Stage-free evidence (what WAS proven tonight — none of it is a pin run)
+
+- **The plain build:** `xcodebuild -scheme Variorum -destination 'platform=macOS' build` (Debug) BUILD
+  SUCCEEDED after every code piece (U2-c, U2-d, U2-e); zero warnings in `CommentCard.swift` /
+  `BlockDecor.swift`.
+- **Typecheck of the pins without the test target:** `swiftc -typecheck` (Swift 6, the test target's
+  upcoming features, the Testing macro plugin) of `CommentCardTests.swift`, and of the two edited
+  existing functions extracted verbatim, against the plain build's `Variorum.swiftmodule` — EXIT 0,
+  zero diagnostics; non-vacuity probed (a misspelt member fails it). This proves the pins COMPILE
+  against today's app module; it does not build the test bundle or run anything.
+- **Source-copy replay of the pure decisions:** a scratch executable compiled from a verbatim copy of
+  `CommentCardLayout` + `leftCardRect` (with the OLD formula beside it) checked every table cell in
+  `CommentCardLayoutTests` and every height cell of the geometry pin: ALL AS PINNED; the old formula
+  answers 96 on exactly the seven cells the pin calls red-on-old, and the same value on the parity
+  cells (17 → 41, 72 → 96, room-20 → nil, the shipped 54 / 34 / 21 rhythm cells). A replay of a COPY
+  — the stage's revert is still owed.
+
+### PENDING (stage-gated — none of it claimed)
+
+- **Pin RUN** (under a held claim, via `oct12coordinator`), suite-level:
+  `-only-testing:VariorumTests/CommentCardLayoutTests -only-testing:VariorumTests/CommentCardViewTests
+  -only-testing:VariorumTests/CommentCardControllerTests -only-testing:VariorumTests/ProseGutterTests
+  -only-testing:VariorumTests/BlockDecorGeometryTests -only-testing:VariorumTests/IndicatorGutterTests
+  -only-testing:VariorumTests/MarginHoverCommentTests -only-testing:VariorumTests/CommentsAndReorderTests`
+  (the last two mount `CommentCardView` through the controller and must ride unmodified).
+- **Red-on-old by revert** (geometry): set `leftCardRect`'s ideal back to `min(blockHeight + 24, 96)` →
+  exactly the seven height cells of `theCardGrowsToTheBlocksOwnHeightWithinTheRhythm` + the flipped
+  cap cell go red, nothing else; restore. (The card pins are FEATURE pins — they fail to COMPILE on the
+  pre-U2 tree, which is their red.)
+- **The walk** — DEV-STORE Debug build, both voices, both appearances, one capture per row:
+  W-1 a tall multi-paragraph block with one short comment (the card follows the block; entries at its
+  top; the rule along the block — D-1 (i)); W-2 three comments on a one-line block (stacked, hairlines,
+  the inner scroll; the scroller flashes once); W-3 THE WHEEL: over an overflowing card at rest,
+  scrolling down moves the card and up moves the page; at the card's end the gesture stops and the next
+  gesture moves the page; over a card that FITS the page always scrolls; a mouse-wheel notch too;
+  W-4 a click anywhere on a card — on an entry's words, between entries, on the empty lower part —
+  opens the panel; W-5 the read tier (workspace read pane, note window read face, book Outline, spread
+  book): stacked entries showing what fits, click-through to the text, the page scrolls over it;
+  W-6 the strip (inline setting) and the badge (a narrow window) unchanged; W-7 the voice mark per entry
+  in Terminal vs none in Study (the D-8 taste call); W-8 a card scrolled mid-way keeps its position while
+  the page scrolls and its block stays visible; W-9 a block taller than the window with its top scrolled
+  off (D-1 (ii)); W-10 two adjacent commented blocks, the first tall — the cards never abut.
+
+### Observations (NOT fixed here — out of this unit's surface; for the orchestrator)
+
+- **O-U2-1:** do the STRIP's and the BADGE's single labels pass a click on their own text through to the
+  card's `mouseDown`? Their `hitTest` stays `super.hitTest` (byte-identical, per the brief), which
+  answers the `NSTextField` label for a point over its text; whether a non-selectable label forwards the
+  press is AppKit's, unverified here. The margin card no longer depends on it (D-3). If the walk finds a
+  dead press on a badge's "#2", it is a ticket candidate, and D-3's one-door rule is the fix shape.
+- **O-U2-2:** Takes' own margin note (`TakesShared.swift` ~724–730 — `tokens.commentPrefix + first.text`)
+  is a separate SwiftUI comment face showing only the FIRST comment; untouched (not the gutter card). If
+  R-VX179-1's spirit should reach it, that is a Takes-surface decision.
+
+### PROVISIONAL — owed to `notes/QUESTIONS.md` at the merge moment (the shared-ledger rule)
+
+- **P-VX179-U2-1 — the voice mark in the stacked card.** Built: (a) per entry, hanging, 0.75 ink (the
+  panel's row idiom). Options: (b) once per card, at the first entry; (c) no mark in the card (the
+  separators carry the grammar).
+- **P-VX179-U2-2 — the overflow cue.** Built: (a) AppKit's scroller flash once per new overflowing
+  content. Options: (b) a bottom fade on an overflowing card; (c) nothing (the cut line is the cue).
+- **P-VX179-U2-3 — a tall block whose top is scrolled off.** Built: (a) the card scrolls with its block
+  (entries leave with the top; the rule continues). Option: (b) a sticky entry stack that stays in view
+  while any of its block is visible (a geometry change — needs the viewport as an input).
+- Taste numbers, PROVISIONAL: entry air 4 pt, hairline 1 pt in `tokens.line`, mark at 0.75 ink, the pad 24.

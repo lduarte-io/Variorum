@@ -470,6 +470,7 @@ struct CommentCardControllerTests {
             == ["first", "second", "third"].map { prefix + $0 })
         #expect(card.toolTip == prefix + "first  ·  second  ·  third")
         #expect(card.identity == "b")
+        #expect(card.innerScrollView.hasVerticalScroller, "a door can scroll, so it carries a scroller")
         // The inline-strip setting (R7, R-13u3-5) stays the ONE line it was.
         controller.render(state([(id: "b", y: 40, comments: ["first", "second"])], inline: true))
         let strip = try #require(cards(textView).first)
@@ -519,5 +520,7 @@ struct CommentCardControllerTests {
         let card = try #require(cards(textView).first)
         #expect(card.showsStackedEntries)
         #expect(card.hitTest(NSPoint(x: card.frame.midX, y: card.frame.midY)) == nil)
+        #expect(!card.innerScrollView.hasVerticalScroller,
+                "a card that can never scroll carries no scroller")
     }
 }
