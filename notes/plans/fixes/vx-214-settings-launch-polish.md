@@ -35,7 +35,7 @@ Surfaces: `App/Variorum/Variorum/Features/Settings/` EXCEPT the MCP pane (`Featu
 | 9 | VX-223 | Small dropdown/menu text: Read ⋯ menu, Blocks, Lenses; Write take's ⋯+dropdown combo icon (keep just the dropdown, probably) | OPEN |
 | 10 | VX-224 | Lock with Settings open leaves an unreadable, unresizable stub settings window ("Open the main window fi…") — likely just close Settings on lock | OPEN |
 | 11 | VX-225 | "Variorum Settings" titlebar text bleeds over the pane top (her screenshot, 2026-10-13) | OPEN |
-| 12 | VX-227 | Lenses board twin of VX-222: ⌃⌘←/→ stepping moves picks under a kept ring (the class sweep's residue — needs its own design beat: follow or end?) | OPEN — minted 2026-10-13; re-own at closeout if it outgrows the run |
+| 12 | VX-227 | Stepping under a live ring: the live editor FOLLOWS the step (her ruling R-VX214-1 — flush, re-bind, visible; Lenses columns + the Takes ⌃⌘→ road; choose doors keep VX-222's end-rule) | OPEN — RULED 2026-10-13, ready for batch 3 |
 
 Commit messages: `… Part of VX-<member>`. Members close individually on the board as their fixes land; the ONE PR is VX-214's.
 
@@ -136,6 +136,10 @@ Deliverables: traced mechanisms + fixes + pins where pinnable (walk captures whe
 ## Author sittings — running record
 
 *(rulings land here verbatim as they happen)*
+
+**2026-10-13 — her VX-224 evidence ratification + the VX-227 ruling (one message):** "yeah that's fine. on VX-224 not being fully tested. and I think if you step the pick under a pane you're editing in takes, the live editor shoud follow the step - it should be visible to you what you've done and it makes editing with the keyboard more ergonomic."
+- **VX-224:** the mounted-pin-plus-close-road-walk evidence plan is RATIFIED; her real-store Castle lock check rides the post-merge checklist.
+- **R-VX214-1 — STEP FOLLOWS (her ruling, scoping mine):** when the stepping gesture (⌃⌘←/→) moves the pick under a pane you're editing, the live editor FOLLOWS the step — flush the outgoing buffer, re-bind the ring to the newly picked take, visibly (her reasons: "it should be visible to you what you've done", keyboard ergonomics). Scope: wherever the stepping gesture moves the pick under a live ring — the Lenses board's columns, and the Takes article's ⌃⌘→-under-ring road (her "in takes"); built as an extension of the one liveness authority's contract, never a second mechanism (P-3's application note). The CHOOSE doors (card button, ⌘⏎, undo, sync, MCP choose_take) keep VX-222's end-the-ring rule — she ratified that separately above; if the trace shows the Takes ⌃⌘→ road is actually a CHOOSE rather than a step, stop and bring it back to her.
 
 **2026-10-13 — her ratification of VX-222's riding consequence:** "that's fine on the honest behavior that was riding along." (The keyboard doors that read the ring — ⌘⏎, ⌘T — refusing after a card-choose instead of acting unseen on the stranded take: RATIFIED.)
 
