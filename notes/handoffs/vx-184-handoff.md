@@ -1,5 +1,7 @@
 # VX-184 handoff — MCP launch polish (closed 2026-10-13)
 
+**RELEASED as 0.9.5 (build 7055) to stargazing.tech — her word, 2026-10-13:** *"I want you to publish this release to the website - I think it's better for me to test and ensure that downloads are working properly through there. it's fine that the notes aren't updated, it's fine that the one security gap exists (only me and potentially one other beta tester will be using this + it'll be fixed in the next update)."* The notes were written at her delegation (*"why don't you just write new notes with what changed?"*) with her one correction (only the General pane was rewritten). Notarized (app + DMG, 0 issues), DMG verified 58/58, appcast verified; published DMG-first: `https://dl.stargazing.tech/variorum/Variorum-0.9.5.dmg` (sha256 c7954fc3…) live and byte-identical, the appcast live and byte-identical, the beta page shows 0.9.5 (site commit b39a0f7). Her installed app is 7045, so Sparkle will offer 7055 — a test of the update road too.
+
 **Your checklist (in this order):**
 
 1. **Send the stargazing brief to your site agent.** `notes/stargazing-mcp-guide-brief-2026-10-12.md` is send-ready as
