@@ -1053,3 +1053,28 @@ R-c — make `CommentTextAreaView.requestFocus()` DROP a windowless request (`Ca
 shipped behaviour: return at the window guard, no hold) → expect the fixed pin's "served on arrival"
 and "reports [true]" cells RED in the runner shape; restore by `git checkout --
 App/Variorum/Variorum/Features/Editor/CommentTextArea.swift`. No revert in flight at this commit.
+
+**THE FIX (the pin, 2ceacf60):** the focus cell settles with `settleLettingTurnsPass` — the suite's
+synchronous `settle` plus `await Task.yield()` and a 10 ms `Task.sleep` per turn (`CaptureFocusReportTests`'
+idiom, green in this runner since 17y B2). Every other mounted cell keeps the synchronous settle: none
+waits on a deferred turn, and all 15 were green in the runner. No product line changed — the trace
+did not demand one. Typecheck EXIT 0.
+
+**EVIDENCE (offscreen, real module, the runner's shape — `real/focusrunner.swift`):**
+
+| tree × settle | served on arrival | reports after arrival | after resign |
+|---|---|---|---|
+| product as committed × the OLD synchronous settle | false | [] | [] — the runner's three reds, reproduced |
+| product as committed × the FIXED settle | true | [true] | [true, false] |
+| R-c (the product's hold removed: a windowless request is dropped) × the FIXED settle | **false** | **[]** | [] — RED: the fixed pin still discriminates the product mechanism |
+| R-c restored (`git checkout --`, `git diff --stat` empty), rebuilt × the FIXED settle | true | [true] | [true, false] |
+
+**Red-on-old reasoning:** the held request is new in this control (the shipped `TextEditor` had
+`@FocusState`; `CaptureTextView.takeFocus` drops a windowless request — R-c is exactly that shipped
+behaviour), so the pin is a FEATURE pin; its discriminating revert is R-c, red as above. The runner's
+red was the pin's environment, never the product: proven by reproducing it with the product unchanged
+and the old settle.
+
+**PENDING (stage):** the runner re-verification — `-only-testing:VariorumTests/CommentTextAreaMountedTests`
+(expect 10/10 incl. this cell) or the whole U3 list again; optionally R-c through the test target (expect
+exactly this cell red: 3 issues at the served / [true] / [true, false] expectations).
