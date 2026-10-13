@@ -324,3 +324,42 @@ green", and read their `skipped:` lines otherwise). Phone (simulator stage): `Va
 - **F7 —** `MobileWindowReplayTests` composes the runner without the new `endSwitch` leaf (inert default): the
   bootstrap flag stays set after its follow, harmless to its assertions; production `.live` wires it on both
   platforms.
+
+### ORCHESTRATOR ADJUDICATION — U1 (verified against git before adoption: the implementer's commits 8054825d →
+95879dc3 interleaved with the orchestrator's 08479fff on one shared branch, HEAD pushed, tree clean; the true
+U1 diff read from 97329acc..HEAD — five `App/Variorum/Shared/` files + the 704-line pin suite + six revert
+patches, ZERO `Sources/VariorumCore/Sync/` lines, zero trailers; the record's counts adopted as recorded,
+suites PENDING the stage window)
+
+- **F1 — ACCEPTED.** The implementer's trace is right and the brief's wording was the imprecise part: "demanded
+  effective gate" is circular for a local-only library (the lingering silent item IS what drives corner 45 to
+  Standard-waiting/`.auto`, so the gate never reads demanded while the violation exists — the leg would have
+  been hollow). The rebuilt discriminator — two items for one key, posture determined Castle with the GATED
+  shape, no switch in flight/pending, the never-strand bound kept — is the custody law stated directly and
+  serves §A's intent (never read as posture, never strand). PROVISIONAL stands for the ladder's re-examination.
+- **F2 — ADOPTED AS SCOPED.** No heal tonight (§C's don't-stretch rule; the stranding tradeoff is VX-209's
+  design space). Actions: the "gated item present ⇒ never land" candidate is RECORDED ON VX-209's ticket (done
+  at this adjudication); U5's guide warning covers the generic symptom honestly (Protection unexpectedly reads
+  Standard ⇒ choose Use Castle again), which is the pre-fix victim's road too. Population: pre-launch builds
+  only (her devices + the one tester).
+- **F3 — ACCEPTED AS DESIGNED.** An unfinished switch asking for the passphrase until the pane's resume is the
+  truthful state — the mid-switch silent reopen was exactly the theater class R13p-14 forbids. VX-80's recovery
+  door and the marker's resume remain the road out (one press). Rider noted: on macOS 27.0.1 (VX-81's crash) a
+  crashed follow is now more user-visible until resumed — accepted, honesty over convenience; the ladder
+  re-examines.
+- **F4 — RECORD-ONLY residual.** No in-app road remains (the custody-queue ordering + key-in-hand check close
+  the one found); the state needs a stale save or corruption. No pin owed — building a production seam solely
+  to simulate an unreachable state is scope creep. The corner-45 class rides VX-209's ticket.
+- **F5 — ACCEPTED as residual.** A refused `deleteGated` is already a custody-law violation; the sweep then
+  restores the lawful shape and the library ASKS instead of opening silently — the safe direction, bounded by
+  the never-strand check. Not pinned, recorded. §A's "dials reset to Auto" premise stands CORRECTED by the
+  implementer's read (the inertness comes from the custody shape + the key file, not the dials) — a good catch,
+  exactly what verify-don't-assume briefs are for.
+- **F6 — ADOPTED.** Two homes: the morning bundle for her, and the refresh ask to the coordinator at closeout
+  (the new build's first ready may remove a lingering silent copy on her real store — the belt working, logged,
+  a custody write named before it happens).
+- **F7 — RECORD-ONLY,** with one hygiene note for the ladder: if the un-wired `endSwitch` leaf in that test
+  world ever masks an assertion, wire the inert leaf there; tonight it provably affects nothing.
+
+NEXT: the stage window (green pass over the listed suites + the 10 pins + both drills under their env vars +
+the simulator replay suite; then the six red-on-old revert cycles per the pin table), via oct12coordinator.
