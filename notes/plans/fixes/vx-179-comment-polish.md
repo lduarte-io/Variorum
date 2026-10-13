@@ -2451,3 +2451,23 @@ f173bac2, test file + record only) is owed the implementer's ONE SANITY PASS per
 2. **The cell history is overstated in two places.** The sibling's new doc line ("three stage windows … while this twin stayed green on the same presenter and the same key road") and the ruling's "while the sibling stayed green in the same runs" are both inaccurate. The retired cell ran on the HAND-BUILT `NSPopover` host in windows 4 and 5, and only window 6 ran it on the SwiftUI presenter. The sibling did not exist in window 4, which ran c6d18035; it was born at 8eeb3bf9. The ruling's conclusion does not depend on either wording.
 3. **"Every revert … discriminating"** in the clean bill: R-PL reddened TWO cells, because the monitor's release shares `isHost`. R-PL2 was the discriminating one, as the pin leg recorded.
 4. **A placement nit:** the sibling's doc says "`delivers`' table below", but the table sits above it.
+
+## CLOSEOUT (orchestrator, 2026-10-13 early morning — her overnight mandate)
+
+**The run:** four units built and accepted (U0 the `Sync/` line · U1 true delete · U2 gutter cards ·
+U3 the panel as a text editor), five fix legs (U2 ×2, U3 ×2 + the pin leg), two walks across six
+stage windows, every fixed row proven in the live app. **The ladder: round 1 0B/0M/2m/1n → the fix
+legs → ROUND 2 0B/0M/0m/2n — CLOSED, no round 3; the sanity pass agreed** (its four accuracy
+corrections recorded; the sibling cell's doc corrected). Final calls: R1-1 discharged at this merge
+(the §7/§9 contract lines + the QUESTIONS bundle); R1-2 confirmed closed; R1-3 confirmed with the
+dispute upheld. Pre-existing bugs found and fixed on the way: the ⌘Z-after-filing crash, the
+filing-undone-words desync, the 13u3 badge-inset truncation, the popover dirty-edit loss, the
+clipped dirty-row face. Found-work tickets: VX-182, VX-183, VX-193 (HIGH), VX-194, VX-226, VX-229,
+VM-14. Main merged INTO the branch pre-close (230cbfc5; 0.9.4 — the What's-New flip ended; merged
+tree `swift test` EXIT 0; round 2's full read at the pre-merge tip: core 2,704/307 · workbook 40/6).
+
+**FINAL MAC SUITE RUN (window 7):** PENDING — counts land here before the PR.
+
+**Her handoff:** `notes/handoffs/vx-179-handoff.md` (the morning checklist). **Mobile parity:** the
+MobileSoul.md row lands on main at the merge. **The refresh:** the coordinator's one-folded-refresh
+plan governs; the outcome is recorded below at the merge.
