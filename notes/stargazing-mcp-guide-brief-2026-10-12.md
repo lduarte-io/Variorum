@@ -34,7 +34,8 @@ and it reaches nothing until you share something. The phone app has no door.
    the client with no access yet — you then share what you want it to reach.
 
 Each copied setup carries its own key, which ties the client's name to that setup; a connection under that name
-without the key is refused. Be clear about the limit, as the app is: this tells two tools apart, but it isn't a
+without the key is refused. If you set a client up again (a new computer setup, a reinstall), just copy and run
+the setup command again: the new setup replaces the old one, and the client keeps everything you shared with it. Be clear about the limit, as the app is: this tells two tools apart, but it isn't a
 defense against other programs running as you on your own Mac.
 
 ### What you can share, and for how long
@@ -83,10 +84,10 @@ by choosing it.
 - Every change an AI makes is one undo for you, named after the client (⌥⌘Z). Commits it saves stay, as yours do.
 - Each change shows a short receipt with **Open ›** to jump to it, and **Show the AI's Last Change** (⌥⌘O) finds
   the latest.
-- **Settings ▸ MCP ▸ Activity** lists what each client did, in words.
+- The **Activity** tab in Settings ▸ MCP lists what each client did, in words.
 - A shared-with-AI icon marks shared books (and gatherings an AI can read through a wing share), and notes show
   whether they're shared; each says who can reach it and why, with **Change…** and **Revoke**.
-- When an AI asks for something it doesn't have, the ask waits quietly for you in Settings ▸ MCP ▸ Waiting — it
+- When an AI asks for something it doesn't have, the ask waits quietly for you at the top of Settings ▸ MCP — it
   never interrupts you.
 
 ### Privacy, in one paragraph
