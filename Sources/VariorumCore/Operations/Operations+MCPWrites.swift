@@ -60,6 +60,10 @@ extension Operations {
         case commit
         case choice = "take choice"
         case lensAdoption = "lens adoption"
+        // VX-184 U3 — VX-173's batch doors (`add_takes`, `add_comments`): ONE
+        // entry per batch, its label plural ("Undo claude-code's takes"); the
+        // receipt counts the batch's items (`MCPWriteReceipt.count`).
+        case takes, comments
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 
@@ -92,18 +96,7 @@ extension Operations {
         toBlock blockID: String, text: String, label: String?, undoLabel: String
     ) throws -> Variant {
         let take: Variant = try database.write { db in
-            _ = try liveBlock(db, blockID)
-            try ensurePlacementUnlocked(db, blockID: blockID)
-            let now = date.now
-            let trimmed = label?.trimmingCharacters(in: .whitespacesAndNewlines)
-            let take = Variant(
-                id: newID(), blockId: blockID, parentVariantId: nil,
-                workingText: text, status: .active, locked: false,
-                label: (trimmed?.isEmpty ?? true) ? nil : trimmed,
-                fanPosition: try fanPosition(db, blockID: blockID, at: .end),
-                createdAt: now, updatedAt: now)
-            try take.insert(db)
-            return take
+            try insertSuggestedTake(db, blockID: blockID, text: text, label: label)
         }
         let takeID = take.id
         undoStack?.register(
@@ -113,36 +106,62 @@ extension Operations {
         return take
     }
 
+    /// `addTake`'s row work inside the caller's transaction (VX-184 U3 —
+    /// extracted byte-for-byte so `addTakes`, the batch door, lands each of
+    /// its takes through the SAME body): one take at the block's fan END,
+    /// parentless, unlocked, labeled `label` (nil/blank = unlabeled).
+    func insertSuggestedTake(_ db: Database, blockID: String, text: String, label: String?) throws -> Variant {
+        _ = try liveBlock(db, blockID)
+        try ensurePlacementUnlocked(db, blockID: blockID)
+        let now = date.now
+        let trimmed = label?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let take = Variant(
+            id: newID(), blockId: blockID, parentVariantId: nil,
+            workingText: text, status: .active, locked: false,
+            label: (trimmed?.isEmpty ?? true) ? nil : trimmed,
+            fanPosition: try fanPosition(db, blockID: blockID, at: .end),
+            createdAt: now, updatedAt: now)
+        try take.insert(db)
+        return take
+    }
+
     func revertAddedTake(_ takeID: String) throws {
-        try database.write { db in
-            guard var take = try Variant.fetchOne(db, key: takeID), take.deletedAt == nil
-            else { return }  // already gone — the world moved past this entry
-            try ensurePlacementUnlocked(db, blockID: take.blockId)
-            let chosenBy = try Int.fetchOne(
-                db,
-                sql: "SELECT COUNT(*) FROM container_block WHERE chosen_variant_id = ? AND deleted_at IS NULL",
-                arguments: [takeID]) ?? 0
-            guard chosenBy == 0 else { throw OperationError.variantIsChosen(id: takeID) }
-            try ensureNotLastActive(db, take)
-            let now = date.now
-            take.deletedAt = now
-            take.updatedAt = now
-            try take.update(db)
-            try reassignDefaultIfNeeded(db, blockID: take.blockId, removing: takeID, now: now)
-        }
+        try database.write { db in try revertAddedTake(db, takeID) }
+    }
+
+    /// `revertAddedTake`'s body inside the caller's transaction (VX-184 U3 —
+    /// the batch's ONE inverse walks every take back in one transaction).
+    func revertAddedTake(_ db: Database, _ takeID: String) throws {
+        guard var take = try Variant.fetchOne(db, key: takeID), take.deletedAt == nil
+        else { return }  // already gone — the world moved past this entry
+        try ensurePlacementUnlocked(db, blockID: take.blockId)
+        let chosenBy = try Int.fetchOne(
+            db,
+            sql: "SELECT COUNT(*) FROM container_block WHERE chosen_variant_id = ? AND deleted_at IS NULL",
+            arguments: [takeID]) ?? 0
+        guard chosenBy == 0 else { throw OperationError.variantIsChosen(id: takeID) }
+        try ensureNotLastActive(db, take)
+        let now = date.now
+        take.deletedAt = now
+        take.updatedAt = now
+        try take.update(db)
+        try reassignDefaultIfNeeded(db, blockID: take.blockId, removing: takeID, now: now)
     }
 
     func reapplyAddedTake(_ takeID: String) throws {
-        try database.write { db in
-            guard var take = try Variant.fetchOne(db, key: takeID), take.deletedAt != nil,
-                  let block = try Block.fetchOne(db, key: take.blockId), block.deletedAt == nil
-            else { return }
-            try ensurePlacementUnlocked(db, blockID: take.blockId)
-            take.deletedAt = nil
-            take.updatedAt = date.now
-            try take.update(db)
-            try voidPurgeIntents(db, table: "variant", rowID: takeID)
-        }
+        try database.write { db in try reapplyAddedTake(db, takeID) }
+    }
+
+    /// `reapplyAddedTake`'s body inside the caller's transaction (VX-184 U3).
+    func reapplyAddedTake(_ db: Database, _ takeID: String) throws {
+        guard var take = try Variant.fetchOne(db, key: takeID), take.deletedAt != nil,
+              let block = try Block.fetchOne(db, key: take.blockId), block.deletedAt == nil
+        else { return }
+        try ensurePlacementUnlocked(db, blockID: take.blockId)
+        take.deletedAt = nil
+        take.updatedAt = date.now
+        try take.update(db)
+        try voidPurgeIntents(db, table: "variant", rowID: takeID)
     }
 
     // MARK: - SUGGEST: a comment
@@ -162,27 +181,33 @@ extension Operations {
     }
 
     func revertAddedComment(_ commentID: String) throws {
-        try database.write { db in
-            guard var comment = try BlockComment.fetchOne(db, key: commentID), comment.deletedAt == nil
-            else { return }
-            try ensurePlacementUnlocked(db, blockID: comment.blockId)
-            let now = date.now
-            comment.deletedAt = now
-            comment.updatedAt = now
-            try comment.update(db)
-        }
+        try database.write { db in try revertAddedComment(db, commentID) }
+    }
+
+    /// `revertAddedComment`'s body inside the caller's transaction (VX-184 U3).
+    func revertAddedComment(_ db: Database, _ commentID: String) throws {
+        guard var comment = try BlockComment.fetchOne(db, key: commentID), comment.deletedAt == nil
+        else { return }
+        try ensurePlacementUnlocked(db, blockID: comment.blockId)
+        let now = date.now
+        comment.deletedAt = now
+        comment.updatedAt = now
+        try comment.update(db)
     }
 
     func reapplyAddedComment(_ commentID: String) throws {
-        try database.write { db in
-            guard var comment = try BlockComment.fetchOne(db, key: commentID), comment.deletedAt != nil,
-                  let block = try Block.fetchOne(db, key: comment.blockId), block.deletedAt == nil
-            else { return }
-            try ensurePlacementUnlocked(db, blockID: comment.blockId)
-            comment.deletedAt = nil
-            comment.updatedAt = date.now
-            try comment.update(db)
-        }
+        try database.write { db in try reapplyAddedComment(db, commentID) }
+    }
+
+    /// `reapplyAddedComment`'s body inside the caller's transaction (VX-184 U3).
+    func reapplyAddedComment(_ db: Database, _ commentID: String) throws {
+        guard var comment = try BlockComment.fetchOne(db, key: commentID), comment.deletedAt != nil,
+              let block = try Block.fetchOne(db, key: comment.blockId), block.deletedAt == nil
+        else { return }
+        try ensurePlacementUnlocked(db, blockID: comment.blockId)
+        comment.deletedAt = nil
+        comment.updatedAt = date.now
+        try comment.update(db)
     }
 
     // MARK: - SUGGEST: a saved lens

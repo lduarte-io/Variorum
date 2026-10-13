@@ -26,19 +26,24 @@ extension Operations {
     /// is not working on the prose (the `setBlockName` doctrine).
     @discardableResult
     public func addBlockComment(to blockID: String, text: String) throws -> BlockComment {
-        try database.write { db in
-            _ = try liveBlock(db, blockID)
-            try ensurePlacementUnlocked(db, blockID: blockID)
-            guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                throw OperationError.invalidCommentText
-            }
-            let now = date.now
-            let comment = BlockComment(
-                id: newID(), ownerId: currentOwnerID(), blockId: blockID,
-                text: text, createdAt: now, updatedAt: now)
-            try comment.insert(db)
-            return comment
+        try database.write { db in try insertBlockComment(db, to: blockID, text: text) }
+    }
+
+    /// `addBlockComment`'s row work inside the caller's transaction (VX-184
+    /// U3 — extracted byte-for-byte so the MCP door's batch lands each of its
+    /// comments through the SAME body, beside its authorship record).
+    func insertBlockComment(_ db: Database, to blockID: String, text: String) throws -> BlockComment {
+        _ = try liveBlock(db, blockID)
+        try ensurePlacementUnlocked(db, blockID: blockID)
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw OperationError.invalidCommentText
         }
+        let now = date.now
+        let comment = BlockComment(
+            id: newID(), ownerId: currentOwnerID(), blockId: blockID,
+            text: text, createdAt: now, updatedAt: now)
+        try comment.insert(db)
+        return comment
     }
 
     /// Rewrites a live comment's text in place. Same refusals as adding;

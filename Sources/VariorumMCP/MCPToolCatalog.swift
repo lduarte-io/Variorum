@@ -80,7 +80,11 @@ public enum MCPToolFacts {
 
 enum MCPToolCatalog {
     static let read: [MCPToolDeclaration] = [listBooks, listNotes, readNote, search, exportNote]
-    static let suggest: [MCPToolDeclaration] = [addTake, addComment, saveLens]
+    static let suggest: [MCPToolDeclaration] = [
+        addTake, addComment, saveLens,
+        // VX-184 U3 — VX-173's batch doors (one note, one act, the cap stated).
+        addTakes, addComments,
+    ]
     static let writeNew: [MCPToolDeclaration] = [
         createNote, importDocument, applyTag, createBook, addNoteToBook, createSection,
         // U4 — the carriage (R-13nb-18, R-13nb-26 f, P-13nb-U3-8 → PROVISIONAL).
@@ -306,6 +310,74 @@ enum MCPToolCatalog {
                 "text": .object(["type": "string", "description": "The comment."]),
             ]),
             "required": .array(["block_id", "text"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-184 U3 (VX-173): `add_take` as ONE act for many blocks of one note.
+    static let addTakes = MCPToolDeclaration(
+        name: "add_takes", rung: .suggest, title: "Add takes to many blocks",
+        description: """
+            Add many takes in one act: each item adds a new take (an alternative text) to one block \
+            of note_id, at the END of that block's fan, exactly as add_take does — labeled with this \
+            client's name (plus the item's label, if given), never chosen and never locked; an \
+            empty text adds a blank take. Every block must be a block of that note (read_note with \
+            with_ids: true gives the ids). One call carries at most 200 takes. All or nothing: if \
+            any item can't land, none does, and the refusal names the item. The whole batch is one \
+            undo for the author. Returns JSON with the new take_ids, in the items' order.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note every block belongs to."]),
+                "takes": .object([
+                    "type": "array", "minItems": 1, "maxItems": .int(MCPWriteTools.batchCap),
+                    "description": "The takes, in order (at most 200).",
+                    "items": .object([
+                        "type": "object",
+                        "properties": .object([
+                            "block_id": .object(["type": "string", "description": "The block to add this take to."]),
+                            "text": .object(["type": "string",
+                                             "description": "The take's text (empty: a blank take)."]),
+                            "label": .object(["type": "string", "description": "A short label, e.g. \"english\"."]),
+                        ]),
+                        "required": .array(["block_id", "text"]),
+                    ]),
+                ]),
+            ]),
+            "required": .array(["note_id", "takes"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-184 U3 (VX-173): `add_comment` as ONE act for many blocks of one note.
+    static let addComments = MCPToolDeclaration(
+        name: "add_comments", rung: .suggest, title: "Comment on many blocks",
+        description: """
+            Leave many working comments in one act, each on one block of note_id (it shows in the \
+            block's gutter; the text is untouched), exactly as add_comment does. Every block must be \
+            a block of that note. One call carries at most 200 comments. All or nothing: if any \
+            item can't land, none does, and the refusal names the item. The whole batch is one undo \
+            for the author. Returns JSON with the new comment_ids, in the items' order.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note every block belongs to."]),
+                "comments": .object([
+                    "type": "array", "minItems": 1, "maxItems": .int(MCPWriteTools.batchCap),
+                    "description": "The comments, in order (at most 200).",
+                    "items": .object([
+                        "type": "object",
+                        "properties": .object([
+                            "block_id": .object(["type": "string", "description": "The block to comment on."]),
+                            "text": .object(["type": "string", "description": "The comment."]),
+                        ]),
+                        "required": .array(["block_id", "text"]),
+                    ]),
+                ]),
+            ]),
+            "required": .array(["note_id", "comments"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)

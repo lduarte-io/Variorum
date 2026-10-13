@@ -315,6 +315,9 @@ nonisolated enum MCPPaneCopy {
         case "save_commit": return "committing a take in \(at)"
         case "choose_take": return "choosing a take in \(at)"
         case "adopt_lens": return "making a lens of \(at) the note"
+        // VX-184 U3 — VX-173's batch doors (PROVISIONAL words, her copy pass).
+        case "add_takes": return "adding takes to \(at)"
+        case "add_comments": return "leaving comments in \(at)"
         // VX-168 — a connection the setup key turned away, said precisely
         // here (the client hears one sentence for all of them).
         case "connect_bare": return "connecting without a setup key"
@@ -384,6 +387,10 @@ nonisolated enum MCPPaneCopy {
         case "save_commit": return n == 1 ? "committed a take in \(at)" : "made \(n) commits in \(at)"
         case "choose_take": return n == 1 ? "chose a take in \(at)" : "chose \(n) takes in \(at)"
         case "adopt_lens": return "made a lens of \(at) the note" + times
+        // VX-184 U3 — VX-173's batch doors: one log row per CALL (the log is
+        // coarse — its row carries no item count; the receipt counts them).
+        case "add_takes": return "added takes to \(at)" + times
+        case "add_comments": return "left comments in \(at)" + times
         // VX-168: a known name's first setup key, bound as it connected.
         case "connect_bound": return "connected with a new setup, now bound to its name" + times
         // VX-198 (R-VX184-5): the newest copied setup took the name.
@@ -1108,6 +1115,14 @@ nonisolated enum MCPReceiptCopy {
         case .choice: return n == 1 ? "chose a take" : "chose \(n) takes"
         case .lensAdoption:
             return n == 1 ? "made the lens \(quoted(receipts[0].detail)) the note" : "adopted \(n) lenses"
+        // VX-184 U3 — VX-173's batch doors: a batch's receipt counts its
+        // ITEMS (`count`), and a run of batches sums them (PROVISIONAL words).
+        case .takes:
+            let total = receipts.reduce(0) { $0 + $1.count }
+            return total == 1 ? "added a take" : "added \(total) takes"
+        case .comments:
+            let total = receipts.reduce(0) { $0 + $1.count }
+            return total == 1 ? "left a comment" : "left \(total) comments"
         }
     }
 

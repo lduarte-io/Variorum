@@ -237,7 +237,10 @@ struct MCPServerTests {
         #expect(MCPToolCatalog.navigation.map(\.name) == ["show_in_app"])
         #expect(MCPToolCatalog.navigation.allSatisfy { $0.rung == .read })
         #expect(Set(MCPToolCatalog.read.map(\.name)) == ["list_books", "list_notes", "read_note", "search", "export_note"])
-        #expect(Set(MCPToolCatalog.suggest.map(\.name)) == ["add_take", "add_comment", "save_lens"])
+        // VX-184 U3 (justified edit, the ritual): suggest gains VX-173's batch
+        // doors, add_takes and add_comments.
+        #expect(Set(MCPToolCatalog.suggest.map(\.name))
+                == ["add_take", "add_comment", "save_lens", "add_takes", "add_comments"])
         // U4 (justified edit, the ritual): the carriage's write tools join
         // write new (save_version, file_note_in_chapter, set_book_rule) and
         // edit (put_back, set_entry_date).

@@ -47,8 +47,10 @@ struct MCPWriteServerTests {
             _ = try h.approve("claude-code", grant(.suggest, .book, book.id))
             let names = Set(try await connection.client.listTools().tools.map(\.name))
             // U4 (justified edit, the ritual): the read rung gains show_in_app.
+            // VX-184 U3 (justified edit, the ritual): suggest gains VX-173's
+            // batch doors.
             #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app",
-                              "add_take", "add_comment", "save_lens"],
+                              "add_take", "add_comment", "save_lens", "add_takes", "add_comments"],
                     "a suggest grant lists read + suggest, never a write-new door (P-2)")
 
             let read = try json(try await call(connection, "read_note",
@@ -159,6 +161,15 @@ struct MCPWriteServerTests {
                 calls.append(("add_take", ["block_id": .string(blockID), "text": .string("ai"), "label": .string("x")]))
                 calls.append(("add_comment", ["block_id": .string(blockID), "text": .string("a note")]))
             }
+            // VX-184 U3 (justified edit — the proof's completeness grows with
+            // the catalog): VX-173's batch doors, a take and a comment beside
+            // each of her blocks in one act each — new rows, never hers touched.
+            calls.append(("add_takes", ["note_id": .string(note.id), "takes": .array(blockIDs.map {
+                .object(["block_id": .string($0), "text": .string("ai"), "label": .string("x")])
+            })]))
+            calls.append(("add_comments", ["note_id": .string(note.id), "comments": .array(blockIDs.map {
+                .object(["block_id": .string($0), "text": .string("a note")])
+            })]))
             // The lens picks her NON-chosen take (mutation check 2 of the unit
             // record: picking only chosen takes could not see a lens that
             // moved the chosen pointer — the first draft of this pin did).
