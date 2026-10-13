@@ -1768,7 +1768,7 @@ its live confirmation — with a DEBUG trace that names the road — is the next
 | FL3-a | this section + the traces | DONE (0012cb60) |
 | FL3-1 | the fix — ownership by delivery + first responder, the explicit close rung, stale monitors released, a DEBUG trace line | DONE (22a3a587) — `CommentPanelKeys.delivers(…)` (pure over identities + the live-window form) replaces `claims`; the monitor hands `handle` the area read from the window's first responder (`CommentNSTextView.role`, set by the panel: `.add` / `.comment(id)`); `handle(_:in:)` — the close rung is `close()` + consume; the monitor releases itself on its popover host's `willClose` (+ a DEBUG `installedMonitors` count); the DEBUG `comment-keys` trace line. Plain build SUCCEEDED, zero warnings in touched files. Replays (runner shape, the real module, `fl3runner.swift`): 8/8 PASS; the fix-leg-2 pins' replay (`pinrunner`) 11/11 PASS; walk 4's stale sequence (`walk4`) as before |
 | FL3-2 | pins (what the runner CAN model) + replays + reverts | DONE — pins 8eeb3bf9 (+ the B3 cell made robust, this commit); reverts announced 8eeb3bf9, run and restored (the table below) |
-| FL3-3 | record close | DONE (this commit) |
+| FL3-3 | record close | DONE (772e89a4) |
 
 ### THE TRACES (offscreen, the real module — and the walk-4 crops in `/tmp/vx179-walk2/`)
 
@@ -1920,7 +1920,7 @@ edge, and the brief says propose and wait.
 
 ### PENDING (the runner's next window — none of it claimed)
 
-- **Pin RUN:** `-only-testing:VariorumTests/CommentPanelFixLeg2Tests` (now 7 tests: F-W-3, the rewritten
+- **Pin RUN:** `-only-testing:VariorumTests/CommentPanelFixLeg2Tests` (now 6 tests: F-W-3, the rewritten
   F-W-4 ladder, the ownership table, the close rung, the monitor release, R1-2 — expect all green) + the
   standing U3 suites (`CommentTextAreaMountedTests` — the control gained `role:`; the others unchanged).
   Optional in-target reverts R-FL3a/b (expect exactly the named cells red).
