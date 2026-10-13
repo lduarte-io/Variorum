@@ -192,7 +192,7 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 | 2 | The `Sync/` line: `tombstonedKinds` + `block_comment` + two-client stale pin (orchestrator) | DONE (37b9a6e7) — pin red-on-old VERIFIED BY REVERT (all 5 expectations fail, the comment purged live, stores diverge); full PurgeConvergenceTests 20/20 green headless |
 | 3 | U1 true delete (core + panel door) | BUILT (89b5a9af…, last code f92436e8) — core pins red-on-old by revert + full `swift test` green + the app target builds; app-target pin RUN + the walk PENDING (stage) — see the U1 RECORD |
 | 4 | U2 gutter cards | BUILT (1a7d2242…b179a9fe) — plain build green, pins typechecked stage-free, tables replayed; pin RUN + revert + the walk PENDING (stage) — see the U2 RECORD |
-| 5 | U3 panel pristine pass | NOT-STARTED |
+| 5 | U3 panel pristine pass | IN-PROGRESS — see the U3 RECORD |
 | 6 | Mac-target test runs + the walk (stage via oct12coordinator) | HELD — stage |
 | 7 | The ladder (fable-reviewer, whole diff) | NOT-STARTED |
 | 8 | Bout-start board snapshot + in-flight row on main | HELD — until the release session reports |
@@ -589,3 +589,29 @@ a geometry oracle + the walk, red-on-old where a cell is the old law)
   (entries leave with the top; the rule continues). Option: (b) a sticky entry stack that stays in view
   while any of its block is visible (a geometry change — needs the viewport as an input).
 - Taste numbers, PROVISIONAL: entry air 4 pt, hairline 1 pt in `tokens.line`, mark at 0.75 ink, the pad 24.
+
+## U3 RECORD (implementer, 2026-10-12)
+
+**U3 IN PROGRESS.** The panel pristine pass (her items 1 + 4): the add area's caret fixed at
+mechanism level, then the look.
+
+**NOT DONE BY THIS UNIT (first line, by the contract — kept current):** no `xcodebuild test`, no walk,
+no app launch, no window shown, no `/Applications` touch (the stage is held) — every app-target pin
+RUN, every red-on-old-by-revert run and every capture is PENDING (stage). Zero `Sources/VariorumCore/`
+lines, zero `Sync/` lines. `CommentComposition` and the key grammar are byte-untouched by design.
+
+**Revert state:** no behavioural revert is in flight, and none will run this session (app-target runs
+are stage-gated).
+
+**The probe carve-out (the brief's):** the trace's measurements come from a HEADLESS OFFSCREEN probe —
+a scratch `swiftc` executable (`.prohibited` activation policy; no `NSApp.run`, no
+`makeKeyAndOrderFront`, no activation; any `NSWindow` it creates is never ordered in) that mounts the
+panel's control verbatim in an `NSHostingView` and reads the real text view's geometry.
+
+### LIVE STATUS
+
+| piece | what | status |
+|---|---|---|
+| U3-a | record section + ledger row 5 IN-PROGRESS | IN-PROGRESS — this commit |
+| U3-b | TRACE: the offscreen probe measures `TextEditor`'s real insets / padding / typing attributes / caret rect vs the hand-assumed `topInset 8 / leadingInset 5` | NOT-STARTED |
+| U3-c | the mechanism decision (a fork the record does not settle ⇒ STOP with the proposal) | NOT-STARTED |
