@@ -971,9 +971,10 @@ enum MCPToolCatalog {
         description: """
             Bring a commit's text back into its take, as the author's own restore does (read_note \
             with with_commits: true lists each take's commits). Variorum first commits the words it \
-            replaces, named "before <your name>'s restore", and then the restored text, named "after \
-            <your name>'s restore", so the author can always compare and come back; both commits \
-            stay even if the restore is undone. A locked or archived take refuses, as does a sealed \
+            replaces, named "before <your name>'s restore" (unless they are already the take's latest \
+            commit — then that commit holds them and the answer has no before_commit_id), and then the \
+            restored text, named "after <your name>'s restore", so the author can always compare and \
+            come back; these commits stay even if the restore is undone. A locked or archived take refuses, as does a sealed \
             note; a take already reading that text changes nothing. One undo for the author puts the \
             replaced words back. Returns JSON with the commit ids.
             """,

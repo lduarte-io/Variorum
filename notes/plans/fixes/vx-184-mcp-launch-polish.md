@@ -44,7 +44,7 @@ dev store only behind an A1 prestage copy, restored verified.
 | U1 — the socket and key road | VX-132 · VX-181 · VX-198 | **UNIT CLOSED — DONE** (2026-10-13 01:41 MDT): headless 153/25 MCP · 2,695/308 core · 40/6 workbook; Mac batch 339/47 green; live round PROVEN (real Claude Code; re-bind + replaced-key sentence on the wire; closed-app sentence on initialize id; 300-block 224 KB round-trip byte-equal); dev store restored verified; stage released 22/70 min. 3 PROVISIONALs for the merge; cold review owed with the run's ladder. Noticed-not-fixed → VX tickets (see U1 OWED 3) |
 | U2 — the gatherings icon | VX-185 | **UNIT CLOSED — DONE** (2026-10-13 02:51 MDT): core-only fix (`mcpBookReaches` decides gatherings via `decideGathering`; R-VX185-1 by construction); red-on-old 6/6 by revert; headless 2,703/310 green; Mac 401/54 (one red = VX-115's standing); walk PROVEN both voices (W1 her exact case, W2 control, W3 open book, W4 archived Terminal-only; light only — recorded); stage 13/40 min. P-VX185-1/2 as (a) |
 | U3 — the door's ergonomics | VX-186 · VX-173 · VX-188 · VX-190 · VX-187 | **UNIT CLOSED — DONE** (2026-10-13 04:48 MDT): schema commit d0c64e7f (v1_27 `mcp_comment_author`, local-only road, marker 13 untouched) + five fix commits, each pinned red pre-fix AND red by revert; headless MCP 171/30 · core 2,711/313 · workbook 40/6; Mac batch 352/45 all green; live round PROVEN all four legs (20-block read_note with_ids: zero duplicated texts on the wire · both batches one client-named ⌥⌘Z each, both voices · link_versions → Compare peers, undo unpairs · own-comment delete + her R-VX188-2 sentence byte-equal on the wire); dev store restored verified, her user-scope config byte-identical; stage 17/50 min. 8 PROVISIONALs for the merge (the U3 UNIT RECORD). Notables for the ladder: SyncSpec read AFTER the schema commit (verified post-hoc, nothing changed — the record says so); write receipts' words pinned, not captured live; light voice only on captures; edit-rung any-comment delete is U4's (suggest sentence stands till then). For her: `link_versions` makes Compare PEERS but named pairs don't drive row ALIGNMENT — honest, the description says so, her call (the record's OWED) |
-| U4 — edit parity inside a note | VX-195 | IN PROGRESS (opus-implementer, from ~05:20 MDT) — see the U4 UNIT RECORD's LIVE STATUS |
+| U4 — edit parity inside a note | VX-195 | **UNIT CLOSED — DONE** (2026-10-13 ~06:45 MDT): twelve tools at EDIT + `delete_comment`'s edit clause; pins red-first per family (23/38/16/12 issues) and red again by revert (same counts + the once pin 17); headless MCP 192/35 · core 2,733/314 · workbook 40/6; Mac batch **493 tests / 61 suites, all green** (two groups 249/30 + 244/31); live round PROVEN with a REAL Claude Code (one turn: `edit_comment` on her comment · `restore_commit` · `delete_take` on a last take ⇒ the block · `rename_note`, all `isError` false) and FIVE ⌥⌘Z each read by name from the Edit menu first and walked back, both voices; dev store restored verified, her user-scope config byte-identical (`49c9525391868615`); stage 14/60 min. PROVISIONALs P-VX195-1…6 + P-U4-WORDS (the U4 UNIT RECORD) |
 | U5 — edit parity across the library | VX-196 | NOT STARTED |
 | U6 — the MCP pane in tabs | VX-199 · VX-205 | NOT STARTED |
 | U7 — the AI's docs | VX-197 | NOT STARTED (always last; runs over whatever merged — never a fall-out) |
@@ -1131,10 +1131,25 @@ none — the receipt counts); (4) a socket transient seen once under whole-targe
 
 ## U4 UNIT RECORD — edit parity inside a note: VX-195 (opus-implementer, 2026-10-13 from ~05:20 MDT)
 
-**What this unit did NOT do (said first — kept current; the UNIT-CLOSE state replaces this line):** IN FLIGHT — nothing
-is closed yet; every claim below marked PENDING is unverified. Zero schema, zero `Sync/`, zero custody/keychain, zero editor
-seam (planned; verified by path diff at the close). No `notes/QUESTIONS.md` entry and no canon edit (the merging session's
-shared ledgers — CLAUDE.md; U1–U3's practice): every PROVISIONAL below is OWED there at the merge.
+**What this unit did NOT do (said first — the UNIT-CLOSE state, 2026-10-13 ~06:45 MDT):** (1) **the live round's
+commits leg ran on the CLIENT's own checkpoint, not "her commit + her unsaved words"** as planned — WalkKit's recorded fact
+(synthetic typing into the full-document TK2 editor drops characters; stage prose through the store) made the typed-words
+step unreliable, so the turn did `save_commit` → `edit_take` → **`restore_commit`**; the take's latest commit already held
+the replaced words both times, so the live round shows the **after** brackets and a DEDUPED before (exactly as built — the
+before bracket over a dirty buffer is pinned headless: `MCPCommitEditServerTests.restoreCommitIsInsuredBothSidesAndOneUndo`,
+`MCPNoteEditActsTests`); (2) **only four families' representative acts ran live** (the brief's bar): `edit_comment`,
+`restore_commit`, `delete_take` (the last-take road), `rename_note` — `restore_comment`, `archive_take`, `unarchive_take`,
+`set_take_label`, `lock_take`, `unlock_take`, `rename_commit`, `delete_lens` and `delete_comment`'s edit clause stand on
+their server pins (red-first, red by revert) and the Mac faces pins, not on a live turn; (3) **the receipts themselves were
+not captured** (a quiet receipt fades before a `claude -p` turn returns — U3's note); the UNDO receipts were ("Undid:
+claude-code's delete", "Undid: claude-code's comment edit"); (4) **light appearance only** (Study and Terminal); (5) one
+DESCRIPTION edited AFTER the Mac batch — `restore_commit`'s, made honest about the deduped before-commit the live turn
+surfaced (a string; no Mac pin reads it; the headless catalog/neutrality suites re-run green 32/5); (6) no
+`notes/QUESTIONS.md` entry and no canon edit (the merging session's shared ledgers — CLAUDE.md; U1–U3's practice): every
+PROVISIONAL below is OWED there at the merge; no cold review yet (the run's ladder); (7) **zero schema, zero `Sync/`, zero
+custody/keychain, zero editor seam** — verified by path diff (row 9). Everything else in the U4 row is DONE: pinned
+red-first per family, red again by revert, green headless and on the Mac batch, and USED with a real Claude Code on the dev
+store with every act walked back by ⌥⌘Z named after the client (THE LIVE ROUND below).
 
 **Read in full before code (never delegated):** CLAUDE.md + the auto-loaded canon (AppSpec §9's ops, §12's THE MCP DOOR
 line); the kickoff `notes/plans/mcp-launch-polish-kickoff.md` whole (R-VX184-0…6, R-VX188-1/2, the U4 row); this record's
@@ -1174,8 +1189,8 @@ ZERO schema, `Sync/`, custody/keychain, editor seam.
 | 7 | the rituals: the catalog walk, the suggest PROOF, the edit PROOF (justified edits, commented in place) | DONE — folded into pieces 3–6 (each family's ritual edits landed WITH its tools, so no commit left a ritual red): the catalog walk names all twelve at EDIT; the edit PROOF's `editTools` holds all twelve, each aimed at what is hers (a suggest AND a write-new grant refuse every one at the rung, every row byte-identical — now incl. comments and titles); the suggest PROOF tries every catalog door incl. the twelve (`Set(calls) == catalog − the three list tools` holds) |
 | 8 | red-on-old BY REVERT per family (announced here first, committed tree, restored clean) | DONE (announced `2eb6ab1b`; this commit records it) — on the committed tree `f6d618af`: every production path of the unit back to its pre-unit bytes (`git checkout cabf04fb -- Sources/VariorumCore Sources/VariorumMCP`; the two NEW production files and the new-API core pin moved to the gitignored `vx184-screens/u4/revert-aside/`), the server pins kept → **RED again, every family, the SAME counts as the pre-fix run:** comments **5/5, 23 issues** · takes **7/7, 38** · commits **4/4, 16** · the note **3/3, 12** (identical to piece 1's) · and the once pin **2/2, 17 issues** ("Unknown tool" ×16). **Restored:** `git checkout HEAD -- Sources` (which also brought the two new files back), the aside copies `cmp`-identical to HEAD's and deleted, the core pin moved back and `cmp`-identical, `git status` clean, `git diff HEAD` empty. Logs `logs/p8-revert-*.log`. Earlier, on the committed tree and restored: **MUTATION M1** — `archive_take`'s guard dropped (`guardedBy: nil`) → the once pin RED (2 issues: the act after it LANDED on the never-spent once grant) |
 | 9 | the Mac faces pins (`MCPEditParityFacesTests`) + headless finals + the Mac build-for-testing → READY FOR STAGE | **READY FOR STAGE** (this commit, 2026-10-13 ~07:05 MDT) — NEW Mac pins `App/Variorum/VariorumTests/MCPEditParityFacesTests.swift` (4: every new act's receipt + "⌥⌘Z undoes" — the last-take road reading "deleted a block (its last take)"; the thirteen undo labels and `isUndoable`; Activity allowed + refused for the twelve tools, the last-take line logged on the block; each tool on EDIT, `delete_comment` on suggest, and no tool named for Private / Seal / Own — R-VX184-2) — RUN at the stage window (PENDING). **Headless finals — the whole package `swift test` on `4697ad47`'s sources, EXIT 0 in 4:20:** **`VariorumMCPTests` 192/35** (U3's 171/30 + `MCPCommentEditServerTests` 5 · `MCPTakeEditServerTests` 7 · `MCPCommitEditServerTests` 4 · `MCPNoteEditServerTests` 3 · `MCPNoteEditOnceServerTests` 2) · **`VariorumCoreTests` 2,733/314** (the merged baseline 2,724/313 + `MCPNoteEditActsTests` 9) · **`StringsWorkbookTests` 40/6** — skips = the standing gated ones only (the two 13o gated suites, the real-server pass, `bench(notes:)` — read in the log). Log `logs/p9-finals.log`. **The Mac build-for-testing: `** TEST BUILD SUCCEEDED **`** (4:48, `-derivedDataPath DerivedData/vx184-u4`, 2.5 GB, sources = HEAD's): `Debug/Variorum.app` with `Contents/MacOS/variorum-mcp`; **188 warnings — U1/U2/U3's count — none in a file this unit touched** (grepped); 25 GiB free after. Log `logs/mac-build-for-testing.log`. **Path diff `018cf23c..HEAD` (the merged base):** `Sources/VariorumCore/Operations/{Comments,Deletion,Locks,MCPNoteEdits,MCPWrites,Variant}`, `Sources/VariorumMCP/{MCPToolCatalog,MCPWriteTools,+CommentDelete,+NoteEdits}`, the app's `MCPPaneCopy`, tests, this record — **ZERO `Sync/`, `Persistence/`/schema, custody/keychain, editor seam, `Server/`** (grepped). The stage NOT claimed — waits on the orchestrator's GO + claim (expected `vx184-u4`); THE STAGE WINDOW plan below |
-| 10 | the stage window (on the orchestrator's GO + claim): the Mac batch + THE LIVE ROUND (one real Claude Code turn per family, ⌥⌘Z each) | NOT STARTED |
-| 11 | close: self-assessment, PROVISIONALs, OWED | NOT STARTED |
+| 10 | the stage window (on the orchestrator's GO + claim): the Mac batch + THE LIVE ROUND (one real Claude Code turn per family, ⌥⌘Z each) | **DONE** (06:18:41–06:32:15 MDT) — the GO came via the coordinator; the stage handed over `coord-for-vx184` → **`vx184-u4`** (60 min, claimed 06:18:41, RELEASED 06:32:15 — 14 of the 60 minutes); `guard.sh --author` OK before every step, no Variorum instance before the launch. **10a THE MAC BATCH — GREEN:** `test-without-building` on `DerivedData/vx184-u4`, two `-only-testing` groups: **A 249 tests / 30 suites (173.6 s) · B 244 tests / 31 suites (73.1 s) = 493 tests / 61 suites, all passed**, `** TEST EXECUTE SUCCEEDED **` ×2; `MCPEditParityFacesTests` 4/4 among them; VX-115's standing red not in the set. (The first group-A invocation exited 65 in 1 s — a zsh word-splitting slip of mine in the `-only-testing` list, no test ran; re-run with an array.) Logs `logs/mac-batch-g{A,B}.log`. **10b–10f:** THE LIVE ROUND below |
+| 11 | close: self-assessment, PROVISIONALs, OWED | **DONE** (this commit) — the record's first line, THE LIVE ROUND, the SELF-ASSESSMENT, OWED. **UNIT CLOSED.** |
 
 **No revert is in flight** (piece 8's revert ran and was RESTORED — `git status` clean).
 
@@ -1231,6 +1246,88 @@ ZERO schema, `Sync/`, custody/keychain, editor seam.
    keys/scripts/configs deleted; the clipboard emptied; the dev instance quit BY IDENTITY; the dev store
    `Tools/ScaleFixture/restore.sh <dir>` → "Restored (verified)"; the prefs diffed back; the stage RELEASED; evidence in
    `notes/plans/vx184-screens/u4/` (gitignored; every key redacted to its first 9 characters — a `vmk1_` whole-key grep: 0).
+
+### THE LIVE ROUND — the evidence (dev store only, stage `vx184-u4`, 2026-10-13 06:18:41–06:32:15 MDT)
+
+**Machine and guards:** the Pro; her `/Applications/Variorum.app` ABSENT throughout — `guard.sh --author` OK before the batch,
+the copy, the launch and the turn; `guard.sh <devpid> x y` OK before every click/key; every synthetic event paced ≥ 2 s after
+the previous one — no guard trip. The Debug app `DerivedData/vx184-u4/…/Variorum.app` (`io.lduarte.Variorum.debug`), pid
+63723, **Study, light**; **no What's New sheet** greeted it. **A1 prestage copy** →
+`…/Variorum-dev/Backups/safety-copies/scale-prestage-20261013T122428Z` (four files, each `cmp`-verified; sha256 keys
+`e357388a…`, sqlite `734fdee2…`, wal `b394615e…`, shm `c9da4107…`); the Debug app's prefs exported. **Her user-scope servers
+BEFORE** (`~/.claude.json`, values never printed): `['linear-server', 'variorum']`, fingerprint `49c9525391868615`.
+Evidence in `notes/plans/vx184-screens/u4/` (gitignored); keys redacted to their first 9 characters.
+
+| leg | what was done | outcome |
+|---|---|---|
+| **the grant** | Library ▸ search "comments & tags" ▸ row ▸ right-click ▸ **Share with AI…** (her grant road) — WHO claude-code, WHERE "A note · comments & tags", HOW MUCH **Edit**, HOW LONG **Always** → "Grant edit on “comments & tags” always" | the sheet's own words captured (`s1-…`); granted (`s2-…`); claude-code's row then read "4 grants" |
+*[removed for publication]*
+| **THE TURN — ONE real `claude -p --strict-mcp-config` turn** through `variorum-tee`, `--allowedTools` = the eight tools named, 06:27:41–06:28:10 (29 s) | the prompt: `list_notes` → `read_note` with_ids → **`edit_comment`** on block 1's comment (HERS — the field guide's seeded margin comment) with its exact `expected_text` → `save_commit` block 2 ("checkpoint before the rewrite") → `edit_take` block 2 → **`restore_commit`** of that checkpoint → **`delete_take`** on the lesson's LAST block's only take → **`rename_note`** | **All eight calls served, `isError` false, zero permission denials** (`wire/t1-claude-p.json`); on the WIRE (`wire/tee-{in,out}.log`, parsed `wire/t1-wire-summary.txt`): `edit_comment` `changed: true` · `save_commit` "claude-code: checkpoint before the rewrite" · `edit_take` `after_commit_id` · **`restore_commit` `changed: true`, `after_commit_id`, NO `before_commit_id`** (the replaced words were already the take's latest commit — `edit_take`'s "after" bracket — the standing dedupe) · **`delete_take` `deleted: true, deleted_block: true`** (R-VX184-1 on the wire) · `rename_note` `changed: true`. **Claude Code's own reading, verbatim in its reply:** "Steps 5 and 6 left out the `before_commit_id` that the tool descriptions say these calls return. My guess is the server skipped the before commit because the take's text was already saved in a commit … this is a mismatch between the server and its own descriptions." — a real agent-side finding: `restore_commit`'s description (mine) FIXED in this commit to say so; `edit_take`'s (13n-b's) carries the same promise — OWED below. **The app after the turn** (⌥⌘O opened the note, `l1-…`): the title "comments & tags (renamed by claude-code)", her comment reading "…(checked by claude-code)" in the gutter, block 2 back to its own words, "block 1/3" with the tray's ⌫1 |
+| **⌥⌘Z walks each back** | for each act, newest first: the Edit menu's undo item read by AX, then ⌥⌘Z, then a capture (`wire/m1-undo-walk.txt`) | **[1] "Undo claude-code's note title"** → the title back · **[2] "Undo claude-code's delete"** → the lesson's last block back in place ("Full disclosure: …", "block 1/4"; bar "Undid: claude-code's delete", `z2-…`) · **[3] "Undo claude-code's commit restore"** → block 2 back to `edit_take`'s text · **[4] "Undo claude-code's edit"** → block 2 back to her words · **[5] "Undo claude-code's comment edit"** → her comment's own words back (bar "Undid: claude-code's comment edit", `z5-…`); after [5] the menu read "Undo Structural Change" (her session's own older entry) — every act of the turn walked back BY NAME, one ⌥⌘Z each. **Block History on block 2 after the walk** (`h1-…`, `h2-…` quiet shown): "after claude-code's restore" (quiet) · "after claude-code's edit" (quiet) · "claude-code: checkpoint before the rewrite" — the brackets STAY when the acts are undone (commits are append-only, I5) |
+| **both voices** | Settings ▸ MCP ▸ Activity, its "all 145 ›" sheet, in Study; then General ▸ voice **Terminal** and the same | **Study** (`a1-…`, `a2-…`, `a3-…`) and **Terminal** (`a4-…`), newest first: "claude-code renamed a note to “comments & tags (renamed by claude-code)”" · **"claude-code deleted a block in “comments & tags” (its last take)"** · "claude-code restored a commit in “comments & tags”" · "claude-code edited “comments & tags”" · "claude-code committed a take in “comments & tags”" · **"claude-code edited a comment in “comments & tags”"** · "claude-code read …" · "claude-code listed its shared notes" · "claude-code connected with a new setup, now bound to its name" — every act in words, none a tool id. The note in Terminal after the walk (`t1-…`) |
+
+**Cleanup (06:31–06:32:15):** both `-s local` registrations removed ("Removed MCP server … from local config"; the scratch
+project's servers `{}`); **her user-scope servers AFTER: `['linear-server', 'variorum']`, fingerprint `49c9525391868615` —
+byte-identical to BEFORE**; `~/.claude.json` carries no setup key (0); the scratch setup line, strict config and tee wrapper
+DELETED; the clipboard emptied (0 bytes); the dev instance quit BY IDENTITY (`pgrep` empty, no socket left); the dev store
+**"Restored (verified)"** from `scale-prestage-20261013T122428Z` (`logs/restore.txt`) — so the grant, the turn's rows, the
+undo walk and the voice switch are all gone; the Debug app's prefs: six keys had moved (window frame, open notes, the walk's
+one current-block key, the backup log, the idle-sweep mark) → `defaults import` of the pre-launch export + one `defaults
+delete` of the key the walk created → **0 keys differ**; a whole-key grep over `vx184-screens/u4/` and the scratchpad: **0
+files**; the tree clean; the stage **RELEASED** ("STAGE RELEASED (was 'vx184-u4')", 06:32:15 — 14 of the 60 minutes). The
+dev-store backups the Debug app takes at launch stay where it puts them (expected — the WalkKit note).
+
+**Captures** (`notes/plans/vx184-screens/u4/`, gitignored): Study — `s1-study-grant-sheet-edit-always.png`,
+`s2-study-granted.png`, `s3-study-copy-setup.png`, `l1-study-after-turn.png`, `z1…z5-study-after-undo.png`,
+`h1-study-block2-history.png`, `h2-study-block2-history-quiet.png`, `a1-study-activity.png`, `a2-study-activity-more.png`,
+`a3-study-activity-all.png`; Terminal — `a4-terminal-activity-all.png`, `t1-terminal-note-after-walk.png`. Wire —
+`wire/a0-claude-mcp-list.txt`, `wire/tee-{in,out}.log`, `wire/t1-claude-p.{json,err}`, `wire/t1-wire-summary.txt`,
+`wire/m0-edit-menu-before.txt`, `wire/m1-undo-walk.txt`. Logs — `logs/mac-batch-g{A,B}.log`, `logs/restore.txt`,
+`logs/cleanup.txt`, the headless logs of pieces 1–9.
+
+### SELF-ASSESSMENT (the implementer's, at the unit's close)
+
+**Against the U4 row, with USE:** R-VX184-1's edit parity inside a note is built as twelve tools on her own doors' row work
+— each guard-first inside its transaction, each ONE client-named ⌥⌘Z — and USED: a real Claude Code edited HER comment,
+restored a commit, deleted a block's LAST take (and the block went, said on the wire, in the receipt road and in Activity)
+and renamed the note, all in one turn; five ⌥⌘Z, each named after the client in her Edit menu, walked every act back. The
+last-take rule holds I10 by construction (the block goes, never a takeless block; a locked take refuses). `delete_comment`
+reaches any comment at edit while a suggest or write-new caller hears her ruled sentence byte-unchanged (U3's pins green,
+unmodified). Private / Seal / Own: no tool, pinned by name.
+**Against the spec:** every act is a §9 op's own body (extracted byte-for-byte; her suites unmodified as the parity proof —
+the whole core target green); the edit rung's two decisions (AF-10 (a)); the one not-shared answer for anything unreachable
+and `rungTooLow` + the ask below edit, pinned per tool; zero schema / `Sync/` / custody / editor seam (path diff); P1 — every
+act ∝ its row(s), `mcpCommentIsRestorable` ∝ one block's deleted comments.
+**Risks I see:** (1) P-VX195-1 reads the kickoff's undo letter through canon §12 + P-13nb-U2-4 — if she rules the literal
+letter instead, eight acts lose their entries and the advice + lesson 1 need re-voicing; (2) the edit-rung WORDS on her pane
+(the grant sheet's "with a commit before and after every change", the toggle blurb) and the guide's lesson 3 now undersell
+the rung and over-promise "every change" (true of take TEXT changes only) — U6/U7/VX-234's (OWED); (3) a deleted comment
+can be restored only by an id the client already holds — reading deleted comments on the wire is VX-148 (Backlog); (4) the
+"before" bracket's dedupe surprises an agent reading a description that promised it (the live turn's own finding) —
+`restore_commit` fixed, `edit_take` OWED.
+
+### OWED (for the orchestrator)
+
+1. **The cold review** (the run's one fable ladder over the whole diff): the map — `Operations+MCPNoteEdits.swift` (the
+   twelve acts, the road re-check in `deleteTakeForClient`, the inverses' divergence rules), the extractions in
+   `Operations+{Comments,Deletion,Locks,Variant}` (byte-for-byte; `performArchiveVariant` private → internal),
+   `MCPWriteTools+NoteEdits.swift` (each tool's snapshot + guard; `restore_comment`'s surface check;
+   `delete_take`'s logged kind), `MCPWriteTools+CommentDelete.swift` (`deleteRung` / `mayDelete` / the guard spending
+   exactly the needed rung's once grant — the comment family's security surface), the catalog's twelve declarations.
+2. **The QUESTIONS entries at the merge:** P-VX195-1…6 and P-U4-WORDS (above, with options).
+3. **Canon at the merge** (AppSpec §12 THE MCP DOOR, the kickoff's list): the edit rung's act families inside a note —
+   comments (edit / restore any; `delete_comment` reaches any at edit), takes (delete — **the LAST take deletes the block**,
+   `delete_block`'s road, R-VX184-1 — archive, unarchive, label, lock, unlock), commits (restore — insured — and rename), the
+   note (rename, delete a lens); every act one client-named ⌥⌘Z. MOBILE PARITY: nothing mobile-visible (the door is Mac-only).
+4. **U7's carries:** teach the twelve acts (the guide's lesson 3 Edit step; the advice's edit list); `edit_take`'s
+   description (13n-b's) promises a "before" commit the standing dedupe can skip — make it say so, as `restore_commit`'s now
+   does (the live turn's agent-side finding — her standing ask to surface such friction); lesson 3's "When it changes a take,
+   Variorum commits the take just before and just after" carries the same nuance.
+5. **U6 / VX-234's carry:** the grant sheet's edit sentence (`MCPPaneCopy.rungDetail(.edit)`) and the toggle blurb
+   (`enableBlurb`) — "with a commit before and after every change" now reads as a claim about every edit act; true for take
+   text changes only.
+6. **Noticed, not this unit's:** her installed `variorum` registration (her app absent) reads "CONNECTION_CLOSED" in
+   `claude mcp list` — VX-181's pre-fix symptom on the build she runs, closed by this run's refresh.
 
 ### The traces (written before code)
 
