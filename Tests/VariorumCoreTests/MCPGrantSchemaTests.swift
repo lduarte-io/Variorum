@@ -27,6 +27,12 @@ struct MCPGrantSchemaTests {
             UPDATE mcp_client SET setup_key_hash = 'bound-hash' WHERE id = 'cl1';
             INSERT INTO mcp_setup_key (key_hash, minted_at) VALUES ('pending-hash', ?);
             """, arguments: [stamp, stamp, stamp, stamp, stamp, stamp, stamp])
+        // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-188): v1_27's
+        // comment-authorship record joins the family, so the family's seed
+        // carries one row of it (the export pin below counts a row per table).
+        try db.execute(sql: """
+            INSERT INTO mcp_comment_author (comment_id, client_name, recorded_at) VALUES ('cm1', 'claude-code', ?)
+            """, arguments: [stamp])
     }
 
     @Test func theFamilyIsLocalOnlyByConstruction() throws {
@@ -39,9 +45,12 @@ struct MCPGrantSchemaTests {
                         "\(table) must not carry sync_version — the grants store never syncs")
                 #expect(SyncSchema.table(named: table) == nil, "\(table) must not be in the sync registry")
             }
+            // VX-184 U3 (A JUSTIFIED EDIT, the ritual): v1_27's table joins
+            // the trigger-free family.
             let triggers = try String.fetchAll(db, sql: """
                 SELECT name FROM sqlite_master WHERE type = 'trigger'
-                  AND tbl_name IN ('mcp_client', 'mcp_grant', 'mcp_activity', 'mcp_switch', 'mcp_setup_key')
+                  AND tbl_name IN ('mcp_client', 'mcp_grant', 'mcp_activity', 'mcp_switch', 'mcp_setup_key',
+                                   'mcp_comment_author')
                 """)
             #expect(triggers.isEmpty, "no trigger — no outbox capture, no index capture — reads the grants store")
         }
@@ -77,6 +86,72 @@ struct MCPGrantSchemaTests {
             try db.execute(sql: "UPDATE mcp_client SET setup_key_hash = NULL")
             #expect(try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") == before,
                     "a setup-key write never reaches the outbox")
+        }
+    }
+
+    // MARK: - VX-188: who wrote a comment (v1_27, local-only — the v1_24 road)
+
+    /// `v1_27_mcp_comment_authors` joins the family LOCAL-ONLY exactly as
+    /// v1_24 and v1_26 did — registered in `MCPGrantSchema.tables` (the
+    /// completeness walk and the export know it), no `sync_version`, outside
+    /// the sync registry, no trigger, never the outbox — and NOT a lockstep
+    /// event (the marker stays 13). One author per comment; no foreign key to
+    /// the synced comment row (a record may outlive a purged comment).
+    @Test func theCommentAuthorRecordIsRegisteredLocalOnlyLikeTheGrantsFamily() throws {
+        #expect(MCPGrantSchema.tables.contains("mcp_comment_author"))
+        #expect(MCPGrantSchema.childFirstOrder.contains("mcp_comment_author"))
+        #expect(SyncSchema.lockstepVersion == 13, "a local-only migration never moves the marker")
+        let db = try AppDatabase.inMemory()
+        try db.read { (db: Database) throws in
+            #expect(SyncSchema.table(named: "mcp_comment_author") == nil)
+            #expect(!SyncSchema.localOnlyTables.contains("mcp_comment_author")
+                    && !SyncSchema.derivedTables.contains("mcp_comment_author"),
+                    "its own family's registration, never sync machinery or a derived index")
+            let columns = try Row.fetchAll(db, sql: "PRAGMA table_info(mcp_comment_author)").map { $0["name"] as String }
+            #expect(columns == ["comment_id", "client_name", "recorded_at"], "an id, a name, a stamp — nothing else")
+            #expect(try Row.fetchAll(db, sql: "PRAGMA foreign_key_list(mcp_comment_author)").isEmpty,
+                    "no foreign key to the synced comment row")
+            #expect(try String.fetchAll(db, sql: """
+                SELECT name FROM sqlite_master WHERE type = 'trigger' AND tbl_name = 'mcp_comment_author'
+                """).isEmpty)
+        }
+        try db.write { db in
+            let before = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") ?? -1
+            try db.execute(sql: """
+                INSERT INTO mcp_comment_author (comment_id, client_name, recorded_at)
+                  VALUES ('no-such-comment', 'claude-code', ?)
+                """, arguments: [stamp])
+            #expect(try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") == before,
+                    "a record write never reaches the outbox")
+        }
+        #expect(throws: (any Error).self, "one author per comment") {
+            try db.write { db in
+                try db.execute(sql: """
+                    INSERT INTO mcp_comment_author (comment_id, client_name, recorded_at)
+                      VALUES ('no-such-comment', 'codex', ?)
+                    """, arguments: [stamp])
+            }
+        }
+    }
+
+    /// A store at v1_26 gains the record EMPTY — no comment that exists before
+    /// it has an author on file (R-VX188-2: such a comment is never a client's
+    /// own) — and keeps every row it had.
+    @Test func aStoreBeforeTheRecordGainsItEmptyAndKeepsItsRows() throws {
+        let queue = try DatabaseQueue()
+        try AppDatabase.migrator.migrate(queue, upTo: "v1_26_mcp_setup_keys")
+        try queue.write { db in
+            #expect(try db.tableExists("mcp_comment_author") == false)
+            try db.execute(sql: """
+                INSERT INTO mcp_client (id, name, version, state, first_seen_at, last_seen_at, decided_at)
+                  VALUES ('cl1', 'claude-code', '2.1', 'approved', ?, ?, ?);
+                """, arguments: [stamp, stamp, stamp])
+        }
+        try AppDatabase.migrator.migrate(queue)
+        try queue.read { (db: Database) throws in
+            #expect(try db.tableExists("mcp_comment_author"))
+            #expect(try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM mcp_comment_author") == 0)
+            #expect(try String.fetchOne(db, sql: "SELECT state FROM mcp_client WHERE id = 'cl1'") == "approved")
         }
     }
 

@@ -36,6 +36,10 @@ struct MigrationTests {
         // VX-168 (A JUSTIFIED EDIT, the ritual): v1_26's per-setup key
         // table joins the local-only grants family.
         "mcp_setup_key",
+        // VX-184 U3 (A JUSTIFIED EDIT, the ritual — VX-188): v1_27's
+        // comment-authorship record joins it too (no explicit index — its key
+        // is the comment id).
+        "mcp_comment_author",
     ]
 
     static let expectedIndexes: Set<String> = [

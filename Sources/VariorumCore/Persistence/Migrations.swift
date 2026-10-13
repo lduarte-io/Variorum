@@ -956,6 +956,23 @@ extension AppDatabase {
         migrator.registerMigration("v1_26_mcp_setup_keys") { db in
             try db.execute(sql: MCPGrantSchema.v1_26DDL)
         }
+        // **VX-188 — WHO WROTE A COMMENT** (VX-184 U3; her ruling R-VX188-1,
+        // the kickoff `notes/plans/mcp-launch-polish-kickoff.md`): the grants
+        // family's `mcp_comment_author` — the comment a client added through
+        // the door, by the client's name — so the suggest rung's
+        // `delete_comment` can delete a client's OWN comment and nothing else.
+        // `Persistence/MCPGrantSchema.swift` carries the shape.
+        //
+        // **NOT a SyncSpec §12 lockstep event** — v1_24's road exactly (the
+        // run's ONE allowed schema change, its own commit): no `sync_version`,
+        // no outbox trigger, nothing pushed, no mirror change, the marker stays
+        // 13. It joins `MCPGrantSchema.tables` (the completeness walk subtracts
+        // it; the plaintext export keeps it EMPTY). No backfill: every comment
+        // that exists before this migration has no record — its author is
+        // unknown, so no client can delete it at suggest (R-VX188-2's refusal).
+        migrator.registerMigration("v1_27_mcp_comment_authors") { db in
+            try db.execute(sql: MCPGrantSchema.v1_27DDL)
+        }
         return migrator
     }
 }
