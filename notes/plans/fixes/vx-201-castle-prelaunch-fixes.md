@@ -1346,3 +1346,21 @@ leg ran red under R-c; headless core 2,697/308 green at close)
 - **U2's acceptance evidence so far:** green pass + phone pins green (MobilePhoneProtectionCopyTests' re-based
   consent pin among the 36); still owed = phase 2's seven revert cycles (queued ~04:35 behind VX-179 + VX-214
   windows). Simulators shut down; stage released after phase 3.
+
+## U4 RECORD (VX-204 + VX-206)
+
+**Not done in this unit (stated first):** OPEN — filled at the close.
+
+### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
+- 2026-10-13 — U4 implementer (Opus) started. Reading done in this session, never delegated: this file whole (§A's
+  VX-204/VX-206 entries, §B, §F, the run LIVE STATUS incl. the VX-206 MACHINERY RULING and her compaction-seam
+  rulings, the U1/U2/U3 records + adjudications + windows A–C); `notes/SessionResiliencyProtocol.md`; VX-204 and
+  VX-206 on the board (no comments on either); auditor C's C-1 + the website privacy brief
+  (`notes/stargazing-privacy-policy-brief-2026-10-04.md` — the operator-visible envelope) + the product page's
+  privacy section; the code: `PostureCopy.swift` (`privacyLessonOneParagraphs`), both seeders, the two existing
+  render pins, `CopyRegisterPinTests`, `AppSettingsView.swift` whole head + the adopter, `MCPDoor.settingsRequest`,
+  the Settings scene in `VariorumApp.swift`, `ProtectionPane.swift` (the presenters), `ProtectionController`'s
+  ceremony-host section, `PostureSwitchModel` (the roads), the runner's re-key step, `AppBootstrap.rekeyLibrary`.
+- Both seeders read the ONE copy home (verified, no own copy): `TutorialSeeder.swift:2465`,
+  `MobileTutorialSeeder.swift:793`.
+- NEXT: piece 1 (VX-204 copy + pin), piece 2 (VX-206 holder + bumps + adopter + pins), the revert patches, builds.
