@@ -26,11 +26,12 @@ the bridge on the refreshed install.
 | 4 | **VX-186** | `read_note` with_ids sends each block's shown text twice (block `text` + the chosen take). | ergonomics |
 | 5 | **VX-173** (unparked — DOOR HALF ONLY) | Batch writes: `add_takes` (array of {block_id, label, text}) — and, argued under the same unit, `add_comments` — ONE transaction, ONE client-named undo entry. The human bulk face stays parked (her "where it comes"). | ergonomics |
 | 6 | **VX-188** | A client can remove its OWN comment (`delete_comment`, suggest rung). | ergonomics |
+| 6b | **VX-190** (added at her word, 2026-10-12) | `remove_tag(note_id, tag)` at the EDIT rung — §9's removeTag, one client-named undo; untagging stays a NON-event for intake (no book evicts). The tag vocabulary itself (rename/delete) stays human-only. | ergonomics |
 | 7 | **VX-187** | `link_versions` (a `version_of` link between two notes, write-new on both) so Compare pairs AI-made drafts. | ergonomics — first to fall out |
 
 Units (one implementer session each, strictly sequential — CLAUDE.md's cast): **U1** = #1 + #3 (the socket
 road; VX-132 first so U1's own runs can't hang) · **U2** = #2 (the one UI-visible change — its walk) · **U3** =
-#4 + #5 + #6 (the wire's ergonomics) · **U4** = #7. Four units, none phase-sized — inside the sizing guidance;
+#4 + #5 + #6 + #6b (the wire's ergonomics) · **U4** = #7. Four units, none phase-sized — inside the sizing guidance;
 say so in the record. If time runs short, U4 then U3's #6 fall out first, by name, tickets kept.
 
 ## VX-185 — the gatherings icon (her words, and what is ruled)
