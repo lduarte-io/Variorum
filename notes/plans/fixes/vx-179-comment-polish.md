@@ -190,7 +190,7 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 |---|---|---|
 | 1 | Record file + kickoff rulings landed, branch pushed | DONE (93b5b720) |
 | 2 | The `Sync/` line: `tombstonedKinds` + `block_comment` + two-client stale pin (orchestrator) | DONE (37b9a6e7) — pin red-on-old VERIFIED BY REVERT (all 5 expectations fail, the comment purged live, stores diverge); full PurgeConvergenceTests 20/20 green headless |
-| 3 | U1 true delete (core + panel door) | IN-PROGRESS — see the U1 RECORD below |
+| 3 | U1 true delete (core + panel door) | BUILT (89b5a9af…, last code f92436e8) — core pins red-on-old by revert + full `swift test` green + the app target builds; app-target pin RUN + the walk PENDING (stage) — see the U1 RECORD |
 | 4 | U2 gutter cards | NOT-STARTED |
 | 5 | U3 panel pristine pass | NOT-STARTED |
 | 6 | Mac-target test runs + the walk (stage via oct12coordinator) | HELD — stage |
@@ -203,6 +203,10 @@ application notes in `.claude/skills/architect-phase/SKILL.md` bind with it)
 comments sheet gains no purge door this run (a `notes/MobileSoul.md` ledger row lands at closeout).
 
 ## U1 RECORD (implementer, 2026-10-12)
+
+**U1 BUILD CLOSED (2026-10-12) — VERIFICATION PENDING (stage).** Everything headless is done and green;
+what remains needs the stage (via `oct12coordinator`): the three app-target pins' compile + run, and
+the walk (one capture per row, both voices — incl. the popover-host check below).
 
 **NOT DONE BY THIS UNIT (first line, by the contract):** no `xcodebuild test`, no walk, no app launch,
 no `/Applications` touch (the stage is the release session's) — every app-target pin RUN and every
@@ -221,7 +225,7 @@ the MOBILE PARITY line above).
 | U1-b | core: `purgeableTables` + the `block_comment` arm (tombstoned; dead block refuses; seal refuses) · `restoreBlockComment` belt · the MCP redo road's belt · the `deletedBlockComments` fence · `restoreCost`'s fence · the core pins | DONE (7aad738a) — `swift test --filter "PurgeOpsTests\|RestoreCostTests\|BlockCommentTests"`: 43 tests / 3 suites green, 0 skipped (headless) |
 | U1-c | red-on-old by behavioural revert, per arm (evidence table below) | DONE (874b3e40) — whole-old + R1–R7 all red as designed, each restored, the restored tree 43/3 green |
 | U1-d | the panel door: `requestDeleteForever` / `deleteForever` on the model, the fold's "Delete forever…" + the confirm, the receipt; app-target pins WRITTEN (run PENDING stage) | DONE (f92436e8) — code + 3 app-target pins WRITTEN in `CommentsPanelEditorTests` (`deleteForeverAsksEveryTimeThenTakesTheRowOffTheFold`, `deleteForeverUnderASealRefusesInTheSealsWords`, `theDeleteForeverWordsAreSentenceCase`); app-target COMPILE PENDING (U1-e's plain build covers the app target only — the test target compiles at the stage-gated run); RUN PENDING (stage) |
-| U1-e | verify: touched suites + the full `swift test` headless + ONE plain `xcodebuild build` | IN-PROGRESS — touched suites 43/3 green; full `swift test` (headless, this worktree at f92436e8) GREEN: core **2,704 tests / 307 suites** (the VX-168 baseline 2,691/307 + exactly this unit's 13 pins), VariorumMCPTests 122/18, workbook 40/6, EXIT 0; skips = the standing gated measurement/integration tests only; the plain app build PENDING |
+| U1-e | verify: touched suites + the full `swift test` headless + ONE plain `xcodebuild build` | DONE (this commit) — touched suites 43/3 green; full `swift test` (headless, this worktree at f92436e8) GREEN: core **2,704 tests / 307 suites** (the VX-168 baseline 2,691/307 + exactly this unit's 13 pins), VariorumMCPTests 122/18, workbook 40/6, EXIT 0; skips = the standing gated measurement/integration tests only; the ONE plain `xcodebuild -scheme Variorum -destination 'platform=macOS' build` (Debug, from `App/Variorum/`): **BUILD SUCCEEDED**, EXIT 0, no warning in a touched file |
 
 ### What U1 decided (with the traces)
 
@@ -346,3 +350,38 @@ Feature pins (not bug-class — the door is new): `aLiveCommentRefusesOnlyDelete
   the fallback is an INLINE confirm on the fold row (the row's buttons become "Delete forever ·
   Cancel" under the question) — robust in every host by construction; U3's pass owns the fold's
   look either way.
+
+### Dispositions (U1's rows, the brief's items 1–5)
+
+| item | disposition |
+|---|---|
+| 1 — `purgeableTables` + the `block_comment` arm | BUILT — pins `aLiveCommentRefusesOnlyDeletedCommentsPurge`, `aMissingCommentRefusesByNameUnlessAlreadyPurged`, `aDeletedCommentMintsOneTravellingIntentAndAskingTwiceIsOne`; seal (D-1, PROVISIONAL) red-on-old R5; dead block (D-2) red-on-old R6; unplaced passes `aCommentOnALiveUnplacedBlockPurges` |
+| 2 — the restore belt | FIXED — `restoringACommentVoidsItsLiveIntent` (R3); EXTENDED to the MCP redo road (D-4, R4) |
+| 3 — the fence + the reader sweep | FIXED — `anIntentNamedCommentLeavesTheDeletedFoldAtOnce` (R1), stamp-aware `aReDeletedCommentListsInTheFoldDespiteItsVoidedIntent` (R2); the sweep found `restoreCost` and fenced it (R7); every other reader proven safe (the sweep tables) |
+| 4 — the panel door | BUILT (f92436e8) — app-target pins WRITTEN; compile + RUN PENDING (stage); the walk PENDING (stage) |
+| 5 — pins | 12 core pins in `PurgeOpsTests` + 1 in `RestoreCostTests` (all red on the whole-old tree W; the bug-class ones red per arm, R1–R7); 3 app-target pins in `CommentsPanelEditorTests` (RUN PENDING) |
+
+### PENDING (stage-gated — none of it claimed)
+
+- App-target pins (`CommentsPanelEditorTests`: `deleteForeverAsksEveryTimeThenTakesTheRowOffTheFold`,
+  `deleteForeverUnderASealRefusesInTheSealsWords`, `theDeleteForeverWordsAreSentenceCase`) — they
+  have NOT been compiled (a plain `build` does not build the test target) nor run. Run with
+  `-only-testing:VariorumTests/CommentsPanelModelEditorTests` + `CommentCompositionTests` under a
+  held claim; the suite file gained `import GRDB` for the two row reads.
+- The walk, both voices, one capture per row: (1) a deleted comment's row shows Restore + "Delete
+  forever…"; (2) the press raises the confirm (title/body/buttons as above); (3) Cancel leaves the
+  row; (4) Delete forever drops it from the fold with the receipt; (5) the POPOVER host (the Takes
+  margin note) — the confirm appears and acts (see U1-d's walk check; fallback named there);
+  (6) under a seal the refusal speaks the seal's words.
+
+### PROVISIONAL — owed to `notes/QUESTIONS.md` at the merge moment (the shared-ledger rule: only the
+merging session touches it, on latest main)
+
+**P-VX179-U1-1 — the comment purge under a SEALED post.** Built: (a) REFUSE (`lockedPost`) —
+QUESTIONS #23(a)'s posture (every comment write refuses under a seal), the brief's decided default.
+Options for her: (a) refuse — as built; (b) ALLOW — a purge of an already-deleted comment changes
+nothing she can read under the seal, and it would match the TAKE arm (a deleted take's Delete Now
+from the tray has no seal check today) and Delete Now of a sealed note in the Trash; (c) refuse for
+comments AND add the same seal check to the take arm (consistency the other way — a change outside
+this unit). Pin to flip under (b): `aSealedPostRefusesACommentsDeleteForever` (+ the app pin
+`deleteForeverUnderASealRefusesInTheSealsWords`).
