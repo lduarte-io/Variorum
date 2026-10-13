@@ -17,13 +17,13 @@ schema, zero `Sync/`, zero custody, zero editor seam, zero app faces.
 
 | piece | what | status |
 |---|---|---|
-| 0 | this record + LIVE STATUS; `notes/plans/vx180-screens/` gitignored (the live round's evidence home) | DONE (this commit) |
-| 1 | THE PIN — socket-road tests replaying the captured pipelined pair through the keyed harness (pre-existing API only, so they compile on the pre-fix tree); watched RED on the pre-fix tree | DONE (this commit) — `Tests/VariorumMCPTests/MCPDiscoverProbeServerTests.swift`, 5 tests; **RED on the pre-fix tree `a3033539`: 5/5 failed, 14 issues** (the evidence below, "THE PIN — red on the pre-fix tree") |
-| 2 | THE FIX — the pre-initialize window in `MCPHandshake.readOpening` (requests answered before the next read; notifications skipped; bounded); its pure pins; the one justified edit of an existing arm | DONE (this commit) — `MCPHandshake` (`preInitializeLimit` · `WindowFrame`/`windowFrame` · `windowAnswer(toRequest:)` · the loop in `readOpening`) + doc comments in `MCPSession` / `MCPServerHost.refuseOverCap` (no code change in either); `MCPPreInitializeWindowTests` (8 — the window's letter); the justified edit of `everyRefusalIsTheSameSentence`'s last arm (see "The justified edit"). The three suites **23/3 green** headless (`MCPDiscoverProbeServerTests` 5 · `MCPPreInitializeWindowTests` 8 · `MCPSetupKeyServerTests` 10) |
-| 3 | red-on-old BY REVERT (announced here before it starts; the fix committed first) | DONE (this commit) — the evidence below, "RED-ON-OLD BY REVERT" |
-| 4 | suites — `VariorumMCPTests` whole target headless; the Mac app target BUILDS | NOT-STARTED — counts PENDING |
-| 5 | self-assessment (below) | NOT-STARTED |
-| 6 | READY to the orchestrator; THE LIVE ROUND (gated on its GO + a held stage claim — dev store only) | NOT-STARTED |
+| 0 | this record + LIVE STATUS; `notes/plans/vx180-screens/` gitignored (the live round's evidence home) | DONE `a3033539` |
+| 1 | THE PIN — socket-road tests replaying the captured pipelined pair through the keyed harness (pre-existing API only, so they compile on the pre-fix tree); watched RED on the pre-fix tree | DONE `5e51abe2` — `Tests/VariorumMCPTests/MCPDiscoverProbeServerTests.swift`, 5 tests; **RED on the pre-fix tree `a3033539`: 5/5 failed, 14 issues** (the evidence below, "THE PIN — red on the pre-fix tree") |
+| 2 | THE FIX — the pre-initialize window in `MCPHandshake.readOpening` (requests answered before the next read; notifications skipped; bounded); its pure pins; the one justified edit of an existing arm | DONE `c65f8de8` — `MCPHandshake` (`preInitializeLimit` · `WindowFrame`/`windowFrame` · `windowAnswer(toRequest:)` · the loop in `readOpening`) + doc comments in `MCPSession` / `MCPServerHost.refuseOverCap` (no code change in either); `MCPPreInitializeWindowTests` (8 — the window's letter); the justified edit of `everyRefusalIsTheSameSentence`'s last arm (see "The justified edit"). The three suites **23/3 green** headless (`MCPDiscoverProbeServerTests` 5 · `MCPPreInitializeWindowTests` 8 · `MCPSetupKeyServerTests` 10) |
+| 3 | red-on-old BY REVERT (announced here before it starts; the fix committed first) | DONE `d8dc0e1f` (announced `c2f49bae`) — the evidence below, "RED-ON-OLD BY REVERT" |
+| 4 | suites — `VariorumMCPTests` whole target headless; the Mac app target BUILDS | DONE (this commit) — **`VariorumMCPTests` 135 tests / 20 suites, ALL GREEN** headless (`swift test --filter VariorumMCPTests`, 16.1 s; VX-168's close was 122/18 — +13 tests in the 2 new suites; no `skipped:` lines). **The Mac app target: `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx180 build` → `** BUILD SUCCEEDED **`** (the live round's Debug app, `io.lduarte.Variorum.debug`, with its `variorum-mcp` shim). Other suites over the changed types: `VariorumCoreTests` untouched (zero `Sources/VariorumCore` lines); the app's `MCPPaneTests` builds `MCPServerHost` and connects-then-closes (an EOF first read — no window frame), a Mac suite needing the stage: offered for the GO window |
+| 5 | self-assessment (below) | DONE (this commit) |
+| 6 | READY to the orchestrator; THE LIVE ROUND (gated on its GO + a held stage claim — dev store only) | IN-PROGRESS — READY sent after this commit; the live round NOT-STARTED, waiting for the orchestrator's GO + claim name. Its plan: "THE LIVE ROUND — the plan" below |
 
 **No revert is in flight** (piece 3's revert ran and was RESTORED — `git diff` empty after `git checkout HEAD --`, the moved test file `cmp`-identical to the committed one).
 
@@ -131,3 +131,107 @@ issues"**: all FIVE probe pins RED (2 + 4 + 2 + 2 + 4 issues — the same issues
 the ten setup-key arms green on their pre-fix letter. **Restored:** `git checkout HEAD --` the three paths; `git
 diff` empty; the moved file `cmp`-identical to the committed one. Re-run → **"Test run with 23 tests in 3 suites
 passed"**. Logs: `notes/plans/vx180-screens/logs/revert-red.log`, `revert-green.log` (gitignored).
+
+## SELF-ASSESSMENT (piece 5 — the implementer's, before the cold review)
+
+**Against the kickoff's acceptance:** the pin (the captured pair, pipelined, through the keyed harness) — RED on the
+pre-fix tree and RED again with the fix reverted, GREEN with it: the probe answered `-32601` on its string id, the
+`initialize` admitted and answered with the advice, `tools/list` listing the grant's tools, a `read_note` served, her
+Activity clean. Notification-first skipped (pinned on the socket road and over a socket pair). A request flood past the
+bound refused with the ONE sentence, byte-identical to a bare arm, logged `connect_unnamed`, claiming no key. Every
+`MCPSetupKeyServerTests` arm green; the refusal sentences untouched; the one arm whose TRIGGER the fix necessarily
+changes is the recorded justified edit (its answer byte-identical). `VariorumMCPTests` whole target green; the Mac
+target builds. The live round — the unit's evidence of kind — is PENDING the orchestrator's GO.
+
+**Against the spec and the model:** zero schema, zero `Sync/`, zero custody (the key's rule, the admission
+transaction, `MCPPreamble` and the shim are untouched — the window sits BEFORE the one decision and decides nothing),
+zero editor seam, zero app face. A-4/K2's boundary is unchanged: identity is still decided once per connection, on
+the `initialize` frame's name and the preamble's key; the window's bytes are a function of the frame alone, so it adds
+no oracle (P-VX168-U1-4's no-oracle letter holds — the flood's refusal is pinned byte-identical to the bare arm's).
+P2: the window runs on the handshake's own thread (and the over-cap helper thread), never the cooperative pool.
+
+**Risks I see, said plainly:**
+1. **A behaviour change for every non-`initialize` first REQUEST** (not only `server/discover`): it is now answered
+   `-32601` and the connection stays open for up to 8 frames, where it was refused at once. That is the fix's point
+   and the kickoff's shape; the only client known to do it is Claude Code. The cost is the justified edit.
+2. **Work per unadmitted connection grows from 1 frame to at most 9** before the refusal (each frame still capped at
+   `lineLimit`, 1 MiB, read a byte at a time). The socket is `0600` in her container (same-user only) and live
+   sessions are capped at 16, so this buys a same-user process nothing it could not already do; recorded, not
+   mitigated.
+3. **Pre-existing, unchanged:** the opening read has no overall deadline — a peer that connects and stays silent
+   holds a session slot until it closes (the session cap bounds it). The window adds no unbounded wait of its own
+   (every iteration needs a new frame from the peer). Not this ticket's; noted for the reviewer.
+4. **`ping` → empty result** goes beyond the kickoff's literal "-32601 for any non-initialize request" — argued in
+   design call 3 from MCP's lifecycle and this server's own SDK; P-VX180-2 offers the literal shape as option (b).
+5. **The test helpers** (`RawSocket`, `CapturedClaudeCode`) are internal to the test target; every new socket read
+   runs under a receive timeout, so a regression fails a pin rather than hanging the suite (the VX-132 class).
+
+## PROVISIONALs (each wants a `notes/QUESTIONS.md` entry at the merge — the merging session's ledger)
+
+- **P-VX180-1 — the window's bound, 8 frames.** How many requests/notifications may a client send before
+  `initialize`? (a) **8, as built** — generous beside Claude Code's one probe, same order as the blank-line
+  tolerance; (b) a tighter 1–2 (exactly the probing known today — a client that probes more is refused); (c) no
+  count, a time bound on the whole opening instead (it would also close the pre-existing silent-peer gap, risk 3).
+- **P-VX180-2 — a `ping` before `initialize` gets the empty result.** (a) **as built** — MCP's lifecycle allows
+  pre-initialize pings, its ping utility requires an empty response, and this server's SDK answers a ping before
+  initialize exactly so; (b) the kickoff's literal shape — `-32601` for every non-`initialize` request, ping
+  included.
+- **P-VX180-3 — the window's words: JSON-RPC's own "Method not found", nothing echoed.** (a) **as built**; (b) the
+  SDK's post-admission wording (`Method not found: Unknown method: <method>` + `data.detail`) — one voice across the
+  window and the SDK, at the cost of echoing client text before the connection is decided; (c) a Variorum sentence
+  (e.g. "Variorum answers initialize first."). Technical register on the wire (P-13n-1); her copy pass if she wants
+  one.
+- **Argued, not provisional:** where the window lives (`readOpening` now writes — design call 1); what ends the
+  window at once (anything that is no well-formed request or notification keeps the pre-fix road — design call 2);
+  `refuseOverCap` inheriting the window (design call 6); no Activity word (design call 8).
+
+## OWED (for the orchestrator)
+
+1. **Canon at the merge (her call whether it earns a line):** AppSpec §12's THE MCP DOOR line could gain one
+   clause — "the handshake answers a pre-initialize request (`-32601`; a ping, its empty result) and skips a
+   notification inside a bounded window, before the setup key's one decision (VX-180)". No other canon is stale
+   (the line never claimed the first frame IS the initialize). The QUESTIONS entries above. MOBILE PARITY: nothing
+   mobile-visible.
+2. **Noticed, NOT this unit's (a second surface — the shim binary, `Sources/VariorumMCPSocket/MCPShim.swift`):**
+   when the shim CANNOT reach the app (Variorum closed — "Variorum must be open"; or not inside the app bundle), it
+   answers the client's FIRST line and exits (`respondToFirstRequest`). With Claude Code that first line is now the
+   probe, so the honest sentence lands on the probe's id and the `initialize` goes unanswered — the connection fails
+   either way (correct: the app is closed), but Claude Code may show only "connection closed" instead of "Variorum
+   must be open". A beta tester with Variorum closed would meet it. Candidate ticket (pre-launch?); the fix shape is
+   the same window, in the shim's refusal read. Not done here — one surface per batch.
+3. **Her handoff (the kickoff's note):** after the fixed build is installed her clients re-run NOTHING (no key
+   binding changes); the Air's `variorum` registration currently runs the BRIDGE (`~/.variorum/mcp-discover-bridge.
+   py`), which keeps working after the fix (pure passthrough + a local `-32601` the app never sees); retiring it =
+   she re-runs the pane's Claude Code setup once, any time after the install. The beta tester's pasted bridge
+   retires the same way. Never reached into from this run.
+4. **The A1 `/Applications` refresh** — the closeout's, at a verified zero-instance window coordinated with her
+   (she is using the real-store app tonight).
+
+## THE LIVE ROUND — the plan (piece 6; runs ONLY on the orchestrator's GO, under the claim name it gives)
+
+Dev store ONLY, the Debug app `App/Variorum/DerivedData/vx180/Build/Products/Debug/Variorum.app`
+(`io.lduarte.Variorum.debug`); the VX-168 U1 drill (leg 4) is the precedent.
+1. **Guards first:** `Tools/WalkKit/guard.sh --author` (her `/Applications` app absent; HID idle) — if her app is
+   running, STOP and report (never quit or kill it); no other `Variorum.app/Contents/MacOS` process. Claim the
+   stage with the given name.
+2. **A1 prestage copy** of the dev store (the store files + key files → `…/Variorum-dev/Backups/safety-copies/
+   scale-prestage-<ts>/`, each `cmp`-verified — `Tools/ScaleFixture/stage.sh`'s copy loop, WITHOUT its fixture
+   launch), so `Tools/ScaleFixture/restore.sh` restores it.
+3. **Launch** the Debug app (`open -n`), confirm the MCP server is ON in Settings ▸ MCP; Settings ▸ MCP ▸ Connect a
+   client ▸ Claude Code ▸ **Copy setup command** (cliclick under the per-step guard) — the clipboard's line minted a
+   fresh key. If `claude-code` is already bound to another key in the dev store, the rotation road (Deny… →
+   Approve…, P-VX168-U1-1) first, recorded.
+4. **The real client, never her user scope:** in a scratch folder, the copied line with `-s user` → `-s local`
+   (registration `variorum-dev`, the REAL fixed shim) plus a second `-s local` registration `variorum-tee` running
+   the same shim behind a `tee` wrapper (to CAPTURE the probe arriving on this Mac and the `-32601` leaving).
+   `claude mcp list` → both **Connected** (the kickoff's symptom was CONNECTION_CLOSED); the tee logs show
+   `server/discover` in, `-32601` out, `initialize` answered. Then ONE `claude -p` turn with `--strict-mcp-config
+   --mcp-config <scratch json for the plain shim>` (isolated from every other registration) calling `list_books`
+   once — served. Her user-scope servers read BEFORE and AFTER (untouched).
+5. **Her Activity** in the dev app: claude-code's acts listed, NO "an unnamed client was refused" — one capture.
+   (No new face exists; one voice suffices — the record says so.)
+6. **Optional, same window:** `xcodebuild test -only-testing:VariorumTests/MCPPaneTests` (the app suite that builds
+   `MCPServerHost`).
+7. **Cleanup:** both `-s local` registrations removed; the dev instance quit BY IDENTITY; the dev store restored
+   (`restore.sh`, "Restored (verified)"); the clipboard emptied; transcripts in `notes/plans/vx180-screens/`
+   (gitignored; every key REDACTED to its first 9 characters); the stage released; evidence recorded here.
