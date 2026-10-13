@@ -2803,7 +2803,15 @@ final class TakesViewModel {
         let columnID = preferredColumnID
             ?? focusedPane.flatMap { $0.blockID == blockID ? $0.columnID : nil }
             ?? landingColumnID
-        return columnID == Self.takesMainColumnID ? Self.takesFanColumnID : columnID
+        return Self.fanCardColumn(for: columnID)
+    }
+
+    /// **The R2-A reveal mapping's ONE line** (the fable ladder's NIT 2): the
+    /// article (`takes-main`) renders CHOSEN only, so the pane that shows any
+    /// OTHER take of its block is that take's FAN card; every other column
+    /// names itself. Shared by the un-chosen reveals and the article's step.
+    nonisolated static func fanCardColumn(for columnID: String) -> String {
+        columnID == takesMainColumnID ? takesFanColumnID : columnID
     }
 
     /// Column resolution on the LENSES host (R2-A): a mint is visible
@@ -2946,8 +2954,7 @@ final class TakesViewModel {
             // style renders (the ring vanished). Cards are one pane per take,
             // so this re-bind never re-points the pane she was typing in; the
             // ring's migration flushes it (`focus`).
-            let columnID = pane.columnID == Self.takesMainColumnID
-                ? Self.takesFanColumnID : pane.columnID
+            let columnID = Self.fanCardColumn(for: pane.columnID)
             if columnID == Self.takesFanColumnID {
                 pageToReveal(blockID: slot.blockID, variantID: fan[next].id)
             }
