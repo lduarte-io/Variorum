@@ -1019,3 +1019,37 @@ confirm + U2's W-1…10 + U3's W-U3-1…13, both voices).
 - VM-14 — the phone's hand-placed comments placeholder (U3's O-U3-1).
 - VX-193 — CaptureTextView's undo desync: ⏎ files undone words (U3's O-U3-3, HIGH; measured).
 - VX-194 — CalmButtonStyle ignores the disabled state app-wide (U3's O-U3-2).
+
+### U3 FIX LEG (implementer, 2026-10-12 — the orchestrator's window-2 red)
+
+**THE RED:** `CommentTextAreaMountedTests/aFocusRequestBeforeAWindowIsHeldAndServedOnArrival`, in the
+xcodebuild runner, alone and in the set (99/100 green): `window.firstResponder === area.textView`
+false (:358), `log.reports == [true]` false (:359), `log.reports == [true, false]` false (:362). No
+`xcodebuild test` in this leg (the stage is not mine); reproduced with offscreen probes against the
+real module.
+
+**THE MECHANISM (traced, measured — `real/focusrunner.swift`):** the runner runs a `@MainActor async`
+test body as a JOB ON THE MAIN QUEUE. The control serves a held focus request one main-queue turn
+after the window arrives (`viewDidMoveToWindow` → `DispatchQueue.main.async` — `CaptureNSTextView`'s
+precedent: let the window settle first) and delivers its first-responder reports on the next turn
+(the B2 NIT-1 rule: never inside a view update). The pin's `settle` only pumps `RunLoop.main.run(until:)`
+synchronously, and a nested run loop does NOT drain main-queue blocks while its caller is itself a
+main-queue job — so neither block could run before the expectations. My earlier probe ran the same
+steps at TOP LEVEL (outside any main-queue job), where the nested run loop does drain the queue —
+which is why it measured green. Reproduced in the runner's shape (the steps inside a main-actor
+`Task` with the main run loop running): sync settle → served **false**, reports **[]** then **[]** —
+exactly the three red expectations; a SUSPENDING settle (yield + a 10 ms sleep per turn, the
+`CaptureFocusReportTests` idiom, green in this same runner since 17y B2) → served **true**, **[true]**,
+**[true, false]**.
+
+**WHICH SIDE IS WRONG: the PIN's environment assumption, not the product.** In the app the main queue
+drains between events, so the held request is served on the turn after arrival (the render probe's 20
+panels all opened with the caret in the add area). The contract the pin holds is unchanged — a
+request raised before a window is HELD and SERVED on arrival, and the area REPORTS arrival and
+departure; only how the pin lets a turn pass changes.
+
+**Revert announced BEFORE it starts (the product side, to prove the fixed pin still discriminates):**
+R-c — make `CommentTextAreaView.requestFocus()` DROP a windowless request (`CaptureTextView.takeFocus`'s
+shipped behaviour: return at the window guard, no hold) → expect the fixed pin's "served on arrival"
+and "reports [true]" cells RED in the runner shape; restore by `git checkout --
+App/Variorum/Variorum/Features/Editor/CommentTextArea.swift`. No revert in flight at this commit.
