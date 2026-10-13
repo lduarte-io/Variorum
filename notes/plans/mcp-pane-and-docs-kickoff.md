@@ -129,10 +129,19 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
     and the house rule** (the catalog: at write new everything new lands at the END — `add_note_to_book` "at its
     end", `create_section` "at the end"; every placing or reordering act is edit — `move_block`,
     `move_note_in_book`, divide, merge): **write new appends new blocks at the note's END only; inserting after a
-    specific block, between her existing paragraphs, needs edit.** Confirm with her at kickoff.
+    specific block, between her existing paragraphs, needs edit.** **RULED — R-VX246-1 (her word, 2026-10-13,
+    verbatim):** *"VX-255: agreed, write new lets them add blocks at the end, edit lets them write blocks
+    anywhere. I think that's a fair line to draw."*
   - **VX-256:** compact / paged `read_note` (ids-only form and/or block-range paging).
-  - **Item 9 → VX-197** (commented): the `add_take` vs `create_note` label inconsistency; U7's descriptions
-    say which applies.
+  - **Item 9 → VX-197** (commented): the label split. At SUGGEST, `add_take`/`add_takes` label a take
+    `"<client> · suggested[ · <label>]"` (`aiLabel`, 13n's P-13n-3 convention, "hers to re-voice"). At WRITE NEW
+    and EDIT, labels are stored exactly as given (`create_note`, `import_document`, `set_take_label` —
+    P-VX195-5). **Orchestrator recommendation (2026-10-13, awaiting her word):** keep the split; it follows
+    the rung's meaning. A suggestion is marked as a suggestion inside HER writing, so her fan always says who
+    proposed it. Work she authorized it to write or edit keeps clean labels (her bilingual book's 3,843
+    "english" takes, not "claude-code · suggested · english"). The fix is the descriptions saying which
+    applies (U7). **VX-253's label match must handle suggestion labels:** argue whether "english" also
+    matches the client's own "<client> · suggested · english" (with the duplicate-label rule).
   - **VX-261 (item 5, her word):** a read tool listing the client's OWN recent acts from the activity log —
     recovery after a dropped call, and resuming a long job after the agent's context is lost. Idempotency
     tokens recorded as the heavier road not taken now (a local-only table + plumbing through every creating
@@ -162,7 +171,9 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
 ## Rules binding this run
 
 - Cast per CLAUDE.md: Fable orchestrates by default (she redirects at kickoff); `opus-implementer` per unit,
-  strictly sequential; the cold review is hers to name at kickoff. **Note for that call:** VX-258 changes the
+  strictly sequential; the cold review is hers to name at kickoff. **Effort: her word during VX-184
+  (2026-10-13, verbatim): *"Run everything at max effort - the implementer, reviewer, etc."*** Spawn every
+  implementer and reviewer at `effort: max` unless she says otherwise at this kickoff. **Note for that call:** VX-258 changes the
   setup key's accept path (the original reason VX-184's kickoff named Fable), and VX-230 may reach the editor
   seam (Fable by CLAUDE.md). The rest is chrome, docs and wire tools.
 - **Sizing:** with her additions this run is well past VX-184's planned U6 + U7. The kickoff sizes it into
