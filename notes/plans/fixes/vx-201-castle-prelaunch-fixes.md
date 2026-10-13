@@ -273,4 +273,16 @@ flipped, everything pushed, PENDING marks honest.
   builds there; (2) VX-214 may reword Protection/Data Safety pane copy — rhyme-check our field-guide copy with
   theirs before either merges. (3) The real-store guide re-seed at closeout: cite the skill's standing closeout
   rule; the coordinator puts it to her if that's not authorization enough — answer owed at closeout.
-- §C U1 brief written (this commit). NEXT: U1 implementer (VX-202).
+- §C U1 brief written (9101432e); U1 implementer dispatched (VX-202 In Progress).
+- **VX-206 MACHINERY RULING (settingspaneupdater, 2026-10-13, recorded in both run files — theirs:
+  `notes/plans/fixes/vx-214-settings-launch-polish.md` "VX-206 machinery ruling"):** Settings pane selection is
+  plain `@State` (`pane`) in `AppSettingsView`; the ONE programmatic open-at-pane road is the MCP request
+  pattern (`MCPDoor.settingsRequest` → `adoptMCPRequest()`, `AppSettingsView.swift:175-192`); no generic door
+  exists and VX-214 is not otherwise changing that machinery. VX-214 AUTHORIZES a narrow exception to the
+  surface split: WE add the Protection twin of the request pattern to `AppSettingsView` (a request holder the
+  ceremony bumps + one adopter mirroring :175-192, nothing else in the file) — or a small generic pane-carrying
+  request if no bigger. We merge first; we send VX-214 the final hunks in their files; they rebase and
+  generalize if her pane rulings want more. COPY RHYME: whoever merges second reconciles (in practice VX-214 —
+  their Protection/Data Safety rewording waits for her sitting); our no-caps + two-register rules bind their
+  rewording; if both runs are still open when their rewording lands, drafts are swapped before either merges.
+  U4's brief cites this entry.
