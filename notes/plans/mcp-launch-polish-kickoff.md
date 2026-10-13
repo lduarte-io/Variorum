@@ -1,103 +1,130 @@
 # VX-184 — Run: MCP launch polish — kickoff + plan
 
 **Her word, 2026-10-12 night:** every needed/known MCP improvement runs TONIGHT, together, before tomorrow's
-launch. Born from the session that used the door most (her readme editorial session on the Air, 2026-10-11/12:
-reads, ~40 takes, ~20 comments, lenses, two note mints through a live Claude Code client). RUN ticket VX-184;
-members are its sub-issues. Run it with `/run-phase vx-184` (the RUN rule: one branch `vx-184-mcp-launch-polish`,
-one PR `VX-184: …`, record `notes/plans/fixes/vx-184-mcp-launch-polish.md`, members close individually).
+launch, and **the run runs all the way through** — her pre-run sitting (below) answered every question this plan
+would otherwise stop on. Born from the session that used the door most (her readme editorial session on the Air,
+2026-10-11/12). RUN ticket VX-184; members are its sub-issues. Run it with `/run-phase vx-184` (the RUN rule: one
+branch `vx-184-mcp-launch-polish`, one PR `VX-184: …`, record `notes/plans/fixes/vx-184-mcp-launch-polish.md`,
+members close individually).
 
-## FIRST — a release fact, not a ticket (read before anything else)
+## FIRST — release facts (read before anything else)
 
-**The installed app on the Air (build 6497) does NOT carry VX-180.** Checked 2026-10-12 with Claude Code's exact
-two-frame opening (`server/discover` then `initialize`) straight at `/Applications/Variorum.app/…/variorum-mcp`:
-refused and closed. VX-180 is merged (`5235c096`, ledgers `af0a7747`), but the installed build predates it — her
-Air connects today only through the bridge (`~/.variorum/mcp-discover-bridge.py`). **The launch build must be cut
-from main at or after `af0a7747`, and this run's closeout refresh is what gets it onto her Macs.** Verify the Pro's
-installed build the same way before trusting it. The closeout's acceptance includes that probe passing WITHOUT
-the bridge on the refreshed install.
+- **VX-180 is now installed on the Air (build 6518), verified 2026-10-12:** a bridge-free Claude Code
+  registration (pointing straight at `/Applications/Variorum.app/Contents/MacOS/variorum-mcp`) passed
+  `claude mcp list` (Connected) and a real `claude -p` tool call (`list_books` answered). Her own user-scope entry
+  still runs the bridge (`~/.variorum/mcp-discover-bridge.py`) until she re-runs the pane's setup.
+- **The Pro's installed build is unverified** — check it the same way before trusting it.
+- The launch build must be cut from main AFTER this run merges; the closeout's acceptance includes a bridge-free
+  `claude mcp list` + one real tool call against the refreshed install.
 
-## Members, in order — ALL EIGHT ship in this run (her word, 2026-10-12: "I don't want any of these items dropped … we should just choose that now")
+## HER PRE-RUN SITTING — the rulings (2026-10-12, the Air; recorded verbatim where quoted)
 
-| # | ticket | what | gate? |
-|---|---|---|---|
-| 1 | **VX-181** | Shim with the app closed answers the probe, not the initialize — "Variorum must be open" never shows. VX-180's pre-initialize window applied in the shim's refusal read (`Sources/VariorumMCPSocket/MCPShim.swift`) + the ladder's shared echoable-id predicate (one predicate in `VariorumMCPSocket`, both call sites). | **launch** |
-| 2 | **VX-185** | Gatherings never wear the shared-with-AI icon. `Queries.mcpBookReaches` (`MCPShareQueries.swift` ~267) selects `kind = 'book'` only, yet a wing grant / the open book READS that wing's gatherings (R-AIR-12). Fix below. | **launch** |
-| 3 | **VX-132** | VariorumMCPTests' socket harness can hang intermittently — give connect/call a time limit. Tonight's suites run on it; a hang costs the night. | reliability |
-| 4 | **VX-186** | `read_note` with_ids sends each block's shown text twice (block `text` + the chosen take). | ergonomics |
-| 5 | **VX-173** (unparked — DOOR HALF ONLY) | Batch writes: `add_takes` (array of {block_id, label, text}) — and, argued under the same unit, `add_comments` — ONE transaction, ONE client-named undo entry. The human bulk face stays parked (her "where it comes"). | ergonomics |
-| 6 | **VX-188** | A client can remove its OWN comment (`delete_comment`, suggest rung). | ergonomics |
-| 6b | **VX-190** (added at her word, 2026-10-12) | `remove_tag(note_id, tag)` at the EDIT rung — §9's removeTag, one client-named undo; untagging stays a NON-event for intake (no book evicts). The tag vocabulary itself (rename/delete) stays human-only. | ergonomics |
-| 7 | **VX-187** | `link_versions` (a `version_of` link between two notes, write-new on both) so Compare pairs AI-made drafts. | ergonomics |
+- **R-VX184-0 — nothing drops:** *"I don't want any of these items dropped particularly. I feel like it's possible
+  to build it all in this single run and we should just choose that now."* Every member ships; the order below is
+  the build order, never a priority cut.
+- **R-VX184-1 — EDIT means as capable as her at the keyboard:** *"We defined Edit as 'as capable as you at the
+  keyboard', we need to make that true."* Every ordinary authoring act she has on a note or a book gets a door
+  tool at the edit rung (VX-195, VX-196). **Deleting a block's LAST take deletes the block** — *"that's just
+  deleting the block at that point, right? and can't AI do that?"* — the same road as `delete_block`, said in the
+  receipt and the tool's description; I10 holds because the block goes, never a takeless block.
+- **R-VX184-2 — three acts stay hers alone: the Private mark, Seal, Own** — *"Private, Seal, and Own can continue
+  being excluded, though the AI should know about them so it can tell a user that they might want that. I'll
+  consider in time if seal and own should be added."* The AI-facing docs explain all three (VX-197).
+- **R-VX184-3 — the AI's instructions bound rises 2,000 → 3,000 characters** (her pick) — room for the
+  organization advice, the new tools, R-VX184-2's awareness and the website line. `MCPSession.instructionsBound`
+  and its pin move together.
+- **R-VX184-4 — a public MCP guide on stargazing.tech, LIVE BEFORE LAUNCH**, linked by one instructions sentence.
+  This repo writes the page's content as a brief for her site agent (the 2026-10-04 privacy/FAQ brief precedent:
+  `notes/stargazing-…-brief-<date>.md`); **she carries it to the stargazing agent** — the run never touches that
+  repo. The instructions sentence names the URL the brief proposes; the handoff says the link is dead until the
+  page is up, and the build MUST NOT ship before it is (a handoff checklist line, first).
+- **R-VX185-1 — gatherings:** *"I think that's fine on the gathering isn't marked shared even if each individual
+  note is marked shared."* Only a wing grant or the open book icons a gathering.
+- **R-VX187-1 — `link_versions`: the AI NAMES the paragraph pairs** (at least one `{block_a, block_b}` across the two
+  notes); never positional guessing. One linked pair makes the notes Compare peers (`Queries.versionPeerPosts`).
+- **R-VX188-1 — comments:** at EDIT, any comment (edit/delete/restore — VX-195). At SUGGEST, a client deletes only
+  ITS OWN, known from a new **local-only** authorship record (the grants family's road: local, never synced, zero
+  lockstep — her pick, *"local only record is fine for clarity / for now"*). Absent record (another Mac, an adopted
+  library) ⇒ the suggest-rung delete refuses with the one not-shared shape.
+- **Docs (VX-197), her asks:** the field guide's MCP chapter gets 13s's quality pass (below); it explicitly
+  encourages Variorum for ORGANIZATION; its lessons cover every tool this run adds. She confirmed the guide lives
+  in the field guide (*"I like the MCP guide being in the field guide, that's solid"*).
 
-Units (one implementer session each, strictly sequential — CLAUDE.md's cast): **U1** = #1 + #3 (the socket
-road; VX-132 first so U1's own runs can't hang) · **U2** = #2 (the one UI-visible change — its walk) · **U3** =
-#4 + #5 + #6 + #6b (the wire's ergonomics) · **U4** = #7. Four units, none phase-sized — inside the sizing guidance;
-say so in the record. **No member is a fall-out:** the order is the build order, not a priority cut — every unit runs.
-The two STOP rules below (VX-188 authorship, VX-187 note-level linking) still bind: a stop is a question to her
-with the rest of the run continuing, never a silent drop.
+## Members and units (strictly sequential, one implementer session per unit)
 
-## VX-185 — the gatherings icon (her words, and what is ruled)
+| unit | members | what |
+|---|---|---|
+| **U1** | VX-132 → VX-181 | The socket road. VX-132 first (the harness gets connect/call time limits, so the night's runs can't hang). VX-181: the shim with the app closed answers the probe AND reads on to the initialize, so "Variorum must be open" reaches the user; one shared echoable-id predicate in `VariorumMCPSocket` for both call sites (VX-180's NIT). Also here: an over-cap message answers a JSON-RPC error before closing where the read loop can do it cleanly (argue it; PROVISIONAL if not) — today 1 MiB opening frames / 16 MiB after admission end the connection silently. **Boundary pins (her 2026-10-12 ask — the size check the Air session didn't finish):** in the headless harness, a message just under each cap is admitted and served, and one just over is answered or closed as built; plus a realistic large write (a `create_note` of a 300-block, ~200 KB document) round-trips through the real shim in the live round. |
+| **U2** | VX-185 | Gatherings wear the shared icon (below). The one walk. |
+| **U3** | VX-186 · VX-173 (door half) · VX-188 · VX-190 · VX-187 | The wire's ergonomics: `read_note` with_ids stops sending each shown text twice (argue the shape; keep `via` coherent) · `add_takes` + `add_comments` batches (one transaction, one undo entry, all-or-nothing, an item cap argued and STATED in each tool's description, over-cap refuses naming it) · suggest-rung delete of a client's own comment (R-VX188-1's local record) · `remove_tag` at edit (§9's removeTag; untagging stays a non-event for intake) · `link_versions` per R-VX187-1 (write new on both notes). |
+| **U4** | VX-195 | Edit parity inside a note (R-VX184-1): comments — edit/delete/restore any; takes — delete (the last take ⇒ the block, R-VX184-1), archive, label, lock/unlock; commits — restore (insured first, as her restore is), rename a message; the note — rename its title, delete a saved lens. |
+| **U5** | VX-196 | Edit parity across the library (her picks): at edit on the book/wing — take a note out of a book (Release on an owned book), reorder notes and chapters, rename/delete a chapter, rename a book, finish/unfinish, archive/unarchive, delete a book (the daily Journal archives, never deletes — its guards stand); at edit on the note — delete (Trash, 30 days) and archive/unarchive. Private/Seal/Own excluded (R-VX184-2). |
+| **U6** | VX-197 | The AI's docs, written LAST so they describe what was built (below). |
 
-Her report: *"gatherings don't show as being shared with AI right now (the icon doesn't appear on them) even
-when you've shared the whole wing with AI. they definitely need to have the shared icon on them even if they're
-just a gathering … but if they're shared as part of the wing, that needs to be clear."*
+**Sizing, said plainly (per `notes/PhaseSizingGuidance.md`):** six units, none phase-sized, one implementer session
+each — inside the guidance, but the largest RUN to date; U4/U5 are many small tools on one proven pattern
+(VX-168 U2's: each tool = an existing §9 op + the grant guard inside its transaction + ONE client-named undo entry
+where her own door has one; an act her door makes undo-less stays undo-less and its description says so).
 
-What stands (R-AIR-12, 13n-c): a gathering is **never a grant's own scope or a write's target** — it holds no
-notes, only a rule, so its contents move whenever a tag does; grants name notes, books and wings. But a wing
-grant (or the open book) **reads** that wing's gatherings. So the bug is the icon telling her less than the door
-allows. Build:
+## VX-185 — the gatherings icon
 
-- A gathering wears the SAME shared icon whenever an approved client reaches it now through a wing grant or the
-  open book (the same `decide` the server consults — never a parallel rule).
-- Its popover says WHY in those terms — e.g. "claude-code can read this through the wing “Home”" — the ruled
-  why-naming idiom of the book popover. **Change… / Revoke act on the reaching WING grant**, and say so (a wider
-  grant's Revoke names the grant it takes — the 13n-c rule). No "share this gathering" door is added.
-- Every surface that reads reach treats a gathering the same way (Book Settings' grant row for a gathering, the
-  census/listing icons if any).
-- Pins: wing grant ⇒ iconed with the wing named · note- or book-only grants ⇒ not iconed (even when every member
-  is shared — RULED by her, 2026-10-12: "I think that's fine on the gathering isn't marked shared even if each
-  individual note is marked shared" — R-VX185-1) · open
-  book ⇒ iconed · an archived gathering ⇒ follows the archived-book rule. One walk on the dev store under a held
-  stage claim, both voices.
+Her report: *"gatherings don't show as being shared with AI right now (the icon doesn't appear on them) even when
+you've shared the whole wing with AI. they definitely need to have the shared icon on them even if they're just a
+gathering … but if they're shared as part of the wing, that needs to be clear."* Cause: `Queries.mcpBookReaches`
+(`MCPShareQueries.swift` ~267) selects `kind = 'book'` only, yet a wing grant / the open book READS that wing's
+gatherings (R-AIR-12 — which stands: a gathering is never a grant's own scope; direct gathering sharing is VX-189,
+post-launch). Build: the same icon whenever an approved client reaches the gathering through a wing grant or the
+open book (the one `decide`, never a parallel rule); the popover says why ("claude-code can read this through the
+wing “Home”"); Change…/Revoke act on that wing grant and say so; every reach surface treats gatherings the same.
+Pins: wing ⇒ iconed, wing named · note/book-only grants ⇒ not (R-VX185-1) · open book ⇒ iconed · archived follows
+the archived-book rule. One walk, dev store, held claim, both voices.
 
-## Notes for the other members
+## VX-197 — the AI's docs (U6)
 
-- **VX-186:** argue the shape (drop the block-level duplicate, or replace it with the chosen take's id); keep the
-  lens read's `via` coherent; update the tool description + any advice sentence it falsifies (the advice is near
-  its 2,000-character cap — measure).
-- **VX-173 door half:** one transaction, one undo entry for the whole batch, the grant guard inside it, a sane
-  cap on items per call (argue it). Partial failure = the whole call refuses (no half-batches). **State the cap in
-  the tool's own description** (the advice is at 1,941/2,000 characters — no room there), and an over-cap batch
-  refuses with a sentence naming the cap.
-- **Size guidance to the AI (her question, 2026-10-12):** today NO size limit is said to the client. The transport
-  caps are 1 MiB per opening frame (`MCPHandshake.lineLimit`) and 16 MiB per message after admission
-  (`MCPSocketTransport.lineCap`), and an over-cap message ENDS the connection silently. No honest client nears
-  16 MiB, so no advice sentence is owed — but the run should (a) make an over-cap message answer a JSON-RPC error
-  before closing, if the read loop can do it cleanly (argue it; PROVISIONAL if not), and (b) give every batch or
-  bulk tool its item cap in its description (VX-173 above).
-- **VX-188:** only the client's OWN comments; anything else answers the one not-shared shape (no oracle). It
-  needs comment authorship: if `block_comment` doesn't already record which client wrote it, **STOP and report**
-  — a new synced column is a SyncSpec §12 lockstep event and is NOT tonight's.
-- **VX-187:** §9's `version_of` edge is BLOCK-to-block; if note-level linking turns out to be a design question,
-  **STOP and log it for her** (QUESTIONS) rather than invent.
+1. **The field guide's "AI & the MCP door" chapter** (`TutorialSeeder.mcpChapter`, its truth suite
+   `TutorialMCPChapterTests`):
+   - **13s's quality pass:** sentence case everywhere, no capitalized word for emphasis mid-sentence (her
+     standing "no shouty caps" rule), the field guide's calm, professional, clear voice; plain sentences, nothing
+     that reads as AI-written (no stacked em-dash asides, no throat-clearing, no inflated adjectives). Known item:
+     lesson 1 says "way in" twice.
+   - **Organization, encouraged explicitly:** an AI can put things into notes and books for you, file notes into
+     chapters, tag notes, and make books that collect by tag rules — worked as recipes beside her existing four.
+   - **Every new tool this run adds**, taught in the lesson it belongs to (batch adds, deleting comments, takes and
+     commits, removing a tag, linking versions, the library acts).
+   - **Private / Seal / Own explained** as hers alone — what each does and why an AI might suggest it (R-VX184-2).
+   - Any sentence a unit falsified (e.g. the connection-limit sentence, the edit rung's description).
+2. **The AI's instructions** (`MCPSession.instructions`, bound now 3,000 — R-VX184-3): the organization advice,
+   R-VX184-2's awareness, the edit rung's new reach, and ONE sentence linking the website guide (R-VX184-4).
+   Provider-neutral (O-4's fence) and truth-pinned as today. Tool descriptions carry their own caps and acts.
+3. **The stargazing.tech MCP guide** (R-VX184-4): ALREADY BRIEFED to her site agent the same night, written from
+   this plan's rulings — `notes/stargazing-mcp-guide-brief-2026-10-12.md` — at the FIXED URL
+   `https://stargazing.tech/variorum/mcp` (the instructions sentence uses exactly that). The page describes acts,
+   not tool names, for what this run builds. U6's job: check the brief against what was BUILT and write a short
+   DELTA (any fact the build changed, plus the final tool-name list) at the end of the brief file, for her to
+   carry to the site agent in the morning.
+4. **Re-seed note for her handoff:** her existing library gains the updated chapter only via Help ▸ Restore
+   Tutorial… (it tombstones the old guide into the Trash and mints a fresh one — say so).
 
 ## Rules binding this run
 
-- Preflight in full (CLAUDE.md's list) + `notes/plans/fixes/vx-180-discover-probe.md` and
-  `notes/plans/fixes/vx-168-mcp-client-secret.md` (the handshake + secret records) + the 13n-c plan (R-AIR-12 and
-  the reach queries). SyncSpec only if a unit discovers it needs a synced change — then STOP.
-- **Cold review: `fable-reviewer`** (the socket/handshake road is the secret's accept path — her protocol, the
-  VX-168/VX-180 precedent). One ladder over the whole run's diff, cap three. Pin-before-fix per member, red-on-old
-  verified by revert.
+- Preflight in full (CLAUDE.md's list) + `notes/plans/fixes/vx-180-discover-probe.md`,
+  `notes/plans/fixes/vx-168-mcp-client-secret.md` (the handshake/secret records and U2's edit-act pattern) + the
+  13n-c plan (R-AIR-12, the reach queries, the chapter's U5/U6 records).
+- **Cold review: `fable-reviewer`** (the socket road is the secret's accept path; the permission core grows). One
+  ladder over the whole run's diff, cap three. Pin-before-fix per member, red-on-old verified by revert.
 - Commits say `Part of VX-184` (and the member id), NO attribution trailers; push after every commit;
   `notes/SessionResiliencyProtocol.md` binds.
-- Zero `Sync/`, custody/keychain or editor-seam lines; zero schema (VX-188's stop rule above).
+- **Zero `Sync/`, custody/keychain or editor-seam lines; zero SYNCED schema.** The one schema change allowed is
+  R-VX188-1's local-only authorship record, on the grants family's road (`MCPGrantSchema`, its own commit, no
+  `sync_version`, no trigger, export strips it; marker 13 untouched). Anything that would need a synced change:
+  STOP that member, log it for her, continue the rest.
 - Stage: every Mac test batch, walk and live round under a held `Tools/stage` claim (the Pro's).
-- **Live round** (evidence of kind for U1 and U3): a real Claude Code client against the Debug app on the dev
-  store — VX-168 U1 leg 4 / VX-180's round as the precedent — including the shim answering "Variorum must be open"
-  with the app closed (VX-181), a batch write landing as one undo, and a 20-block `read_note` without the
-  duplicate.
+- **Live rounds** (evidence of kind): U1 — a real Claude Code client against the Debug app on the dev store,
+  including "Variorum must be open" with the app closed; U3 — a batch write landing as one undo, a 20-block
+  `read_note` without the duplicate, `link_versions` making Compare pair the two notes; U4/U5 — one real client
+  turn exercising a representative act of each family, ⌥⌘Z walking each back.
 - **Closeout:** the A1 `/Applications` refresh at a zero-instance window **coordinated with her** — never quit or
-  kill her running app. After the refresh: the two-frame probe passes WITHOUT the bridge (the FIRST section).
-  Her handoff says: re-run the pane's Claude Code setup once on the Air to retire the bridge (and tell the beta
-  tester the same), and lists the PROVISIONALs.
+  kill her running app. After it: a bridge-free `claude mcp list` + one real call. Her handoff leads with: (1) the
+  stargazing brief to carry to the site agent BEFORE the build ships; (2) re-run the pane's Claude Code setup on
+  the Air to retire the bridge (and tell the beta tester the same); (3) Help ▸ Restore Tutorial… for the new
+  chapter; (4) the PROVISIONALs.
