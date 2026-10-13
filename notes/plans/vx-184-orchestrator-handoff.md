@@ -50,8 +50,12 @@ REQUEST (what + minutes + claim name, early) → READY (separate ping, only when
 (it hands the stage over with an exact claim line to run) → run under the claim → RELEASE + ONE result
 line to it. A FREE stage is never a go-ahead. Headless swift build/test and xcodebuild BUILD never need
 the stage. She is away all night — walks/live rounds need no extra check. Claim names so far:
-vx184-u1 (done), vx184-u2 (done); U3's REQUEST is BOOKED as vx184-u3 (~35 min). At OUR MERGE: send the
-coordinator the refresh ask — it may FOLD refreshes from several runs into ONE window from merged main
+vx184-u1 (done), vx184-u2 (done); U3's REQUEST is BOOKED as vx184-u3 (~35 min). **Walk heads-up
+(coordinator, 2026-10-13 ~03:30, relayed to U3 and owed to every later unit's brief):** the Debug app
+may greet a launch with the What's New sheet — it keys on the marketing version in the shared dev
+defaults domain, and VX-179's 0.9.3 branch alternating with 0.9.4 builds keeps flipping it; close it
+with its own button (cliclick fine) before any walk/live-round leg. Expected modal, never a finding.
+At OUR MERGE: send the coordinator the refresh ask — it may FOLD refreshes from several runs into ONE window from merged main
 (defer to its call; if we run it: A1 safety copy incl. key files → Release build → /Applications →
 codesign verify → acceptance below).
 
