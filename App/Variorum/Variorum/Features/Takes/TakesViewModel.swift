@@ -659,6 +659,7 @@ final class TakesViewModel {
         // render-report ends a parked follow (`paneRendered` clears its park
         // before it comes through here).
         parkedFollow = nil
+        parkedTransit = []
         // VX-170: the ring never lands on a pane the `show ▾` filter hides —
         // that pane's block opens first (a click only ever reaches a shown
         // pane, so this is the landings', reveals' and find's door).
@@ -695,6 +696,7 @@ final class TakesViewModel {
 
     func blur() {
         parkedFollow = nil  // VX-227 (rider 1): a blur ends a parked follow too
+        parkedTransit = []
         authority.blur()
         Task { await autosave.flushNow() }
     }
@@ -717,11 +719,28 @@ final class TakesViewModel {
     /// adoption) drops the park (rider 1).
     @ObservationIgnored private(set) var parkedFollow: PaneKey?
 
+    /// **THE PARK'S TRANSIT SET** (the R1 sanity pass's one issue, confirmed):
+    /// the takes OVERTAKEN by park replacements on this journey — a chained
+    /// step parks B then C while B's own adoption is still in flight, and
+    /// that late adoption is the board's own act arriving, never "the world
+    /// moved on", so the drop clause holds the park when the cell lands on a
+    /// transit take. Transit never blunts rider 1: it only prevents a DROP —
+    /// a park still LANDS exclusively through `paneRendered` on its own
+    /// rendered key, and every focus/blur/swap still clears both.
+    @ObservationIgnored private var parkedTransit: Set<String> = []
+
     /// End the ring by the flushed blur (no keystroke dies with it), then
     /// park `key` — the follow lands when the cell reports rendering it.
+    /// A park REPLACED here (a chained step, a mint over a park) rides into
+    /// transit, so its own late adoption cannot drop the new park.
     private func followOnceRendered(_ key: PaneKey) {
+        var transit = parkedTransit
+        if let replaced = parkedFollow, replaced != key {
+            transit.insert(replaced.variantID)
+        }
         blur()
         parkedFollow = key
+        parkedTransit = transit
     }
 
     /// **A cell reports the key it has RENDERED** (`TakesCellView`'s
@@ -734,6 +753,7 @@ final class TakesViewModel {
     func paneRendered(_ key: PaneKey) {
         guard let parked = parkedFollow, parked == key else { return }
         parkedFollow = nil
+        parkedTransit = []
         focus(key)
     }
 
@@ -746,8 +766,17 @@ final class TakesViewModel {
         guard let parked = parkedFollow else { return }
         let after = stableCellTake(
             columnID: parked.columnID, blockID: parked.blockID, in: projection)
-        if after == nil || (after != before && after != parked.variantID) {
+        guard let after else {
             parkedFollow = nil
+            parkedTransit = []
+            return
+        }
+        // Kept: the cell unchanged, the adoption that BRINGS the parked take,
+        // or a TRANSIT take — the board's own overtaken pick arriving late
+        // (the sanity pass's issue). Anything else is the world moving on.
+        if after != before, after != parked.variantID, !parkedTransit.contains(after) {
+            parkedFollow = nil
+            parkedTransit = []
         }
     }
 
@@ -1196,6 +1225,7 @@ final class TakesViewModel {
            stableCellTake(columnID: columnID, blockID: parked.blockID, in: projection)
                != parked.variantID {
             parkedFollow = nil
+            parkedTransit = []
         }
         guard let ring else { return }
         let after = stableCellTake(columnID: columnID, blockID: ring.blockID, in: projection)
@@ -1348,6 +1378,7 @@ final class TakesViewModel {
         // fail-safe, never another take's words.
         if let parkedAnchor, shownTake == variantID {
             parkedFollow = nil
+            parkedTransit = []
             focus(PaneKey(
                 columnID: columnID, blockID: blockID, variantID: variantID,
                 context: parkedAnchor.context))
@@ -1379,11 +1410,13 @@ final class TakesViewModel {
                     focus(ringBefore)
                 } else if let parkedAnchor {
                     // A park-based pick that refused: the ORIGINAL follow is
-                    // still owed, so the original park returns. If its cell
-                    // already rendered (its report spent), the ring stays nil
-                    // — the park family's fail-safe direction (never another
-                    // take's words).
+                    // still owed, so the original park returns (and leaves
+                    // its own transit — it is the park again, not overtaken).
+                    // If its cell already rendered (its report spent), the
+                    // ring stays nil — the park family's fail-safe direction
+                    // (never another take's words).
                     parkedFollow = parkedAnchor
+                    parkedTransit.remove(parkedAnchor.variantID)
                 }
             }
         }
@@ -2486,6 +2519,7 @@ final class TakesViewModel {
     /// through `focus(_:)`.
     func landAuthorityFocus(_ pane: PaneKey) {
         parkedFollow = nil  // VX-227 (rider 1): a landing is a focus too
+        parkedTransit = []
         // VX-170: the entry ring lands where she was — and if the `show ▾`
         // filter folded that block to a line, the block opens (`focus`'s rule).
         lensFilter.reveal(pane)
