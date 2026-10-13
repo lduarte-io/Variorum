@@ -1487,7 +1487,11 @@ final class ProtectionController {
         // The runner re-sets it before its first marker on every later road;
         // the model roads hold `switchInProgress` (and the controller holds
         // their models) across every runner call, so this can never fire
-        // inside a road's flag-set-to-first-marker window.
+        // inside a road's flag-set-to-first-marker window. The one no-model
+        // road (the silent follow into Standard) is covered by the marker
+        // plus serialization instead: its flag-no-marker window sits inside
+        // one awaited `writeMarker` whose failure leaves a marker, and ready
+        // housekeeping is serialized (the ladder R1 sanity pass's record).
         if !markerPending, !switchInProgress, activeSwitch == nil, activeFollow == nil,
            let storeID = configuration.resolvedStoreID(), gate.switchPending(scope, storeID) {
             gate.setSwitchPending(false, scope, storeID)

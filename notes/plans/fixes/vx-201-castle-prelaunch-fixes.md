@@ -2288,3 +2288,13 @@ legs honest (a marker-backed flag stays, green both sides by design); the R1-2 d
 the fix pass's PENDING list complete and declared with exact expected reds; headless untouched by construction
 (zero package lines in the fix diff); nothing in the fix round copies text across entities, tracks word-level
 change, or scales with corpus size. Findings above are hardening/doc NITs — nothing here re-opens the ladder.
+
+### ORCHESTRATOR — THE LADDER CLOSES AT ROUND 2 (0B/0M/0m/2n; NIT dispositions)
+Per the ladder rule (a new BLOCKER/MAJOR earns round 3; none came), **the VX-201 fable ladder is CLOSED: R1
+0B/0M/2m/2n with zero disputes, the fix pass PASS at the sanity pass, R2 0B/0M/0m/2n.** NIT dispositions:
+**R2-2 APPLIED by the orchestrator** (this commit — the clear's comment gains the marker-plus-serialization
+sentence for the no-model road; a doc-only line, no pin owed). **R2-1 RECORD-ONLY** (trigger SPECULATIVE by the
+reviewer's own label; the hardening shape — `readSwitchPending → Bool?`, nil skips the clear and the Apple arm —
+stays recorded here for whoever next touches the marker read; not owed to this run). Remaining before the PR:
+the fix pass's PENDING stage runs (the two pin suites green + R-L1/R-L3 cycles + the two changed-source suites)
+fold into the orchestrator's combined walk window; then #215 at the merge moment; then closeout.
