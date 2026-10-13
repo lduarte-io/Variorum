@@ -492,10 +492,13 @@ struct VX202ReopenRaceTests {
 
     /// A world for the sweep: a real store under `key`, a scripted key file,
     /// scripted custody, opened silently through the bootstrap (the ready's
-    /// adoption done), its reconcile driven by the pin.
+    /// adoption done), its reconcile driven by the pin. The route reads the
+    /// custody SHAPE it is given (a lingering silent item ⇒ Standard), so
+    /// every world here opens without a lobby — exactly the lingering
+    /// item's harm; `appleBacking` empty keeps the route's landing out.
     private func sweepWorld(
         key: StoreKey, envelope: StoreKeyEnvelope, backing: InMemoryStoreKeyGuardBacking,
-        appleBacking: InMemoryAppleKeyBacking, enrolled: Bool = false
+        appleBacking: InMemoryAppleKeyBacking = InMemoryAppleKeyBacking()
     ) async throws -> (bootstrap: AppBootstrap, box: ScriptedEnvelopeBox, dir: URL) {
         let dir = try temporaryDirectory()
         let storeURL = dir.appendingPathComponent("variorum.sqlite")
@@ -503,7 +506,7 @@ struct VX202ReopenRaceTests {
         let box = ScriptedEnvelopeBox(envelope)
         let gate = StoreLaunchGate.scripted(
             dials: ScriptedDialsBox(ProtectionDials()), backing: backing, envelope: box,
-            appleKey: appleBacking, syncCustodyPresent: { _, _ in enrolled })
+            appleKey: appleBacking)
         let bootstrap = AppBootstrap(
             testOpener: opener(storeURL: storeURL, candidate: LockIsolated(key), fallback: key),
             gate: gate, testStoreURL: storeURL, syncCustodySession: SyncCustodySession())
@@ -558,9 +561,7 @@ struct VX202ReopenRaceTests {
             var envelope = StoreKeyEnvelope(storeID: "vx202-sweep-enrolled")
             try envelope.setPassphraseWrap(key: key, passphrase: passphrase, kdf: fastKDF())
             let backing = InMemoryStoreKeyGuardBacking(auto: key, gated: key, biometryAvailable: true)
-            let world = try await sweepWorld(
-                key: key, envelope: envelope, backing: backing,
-                appleBacking: InMemoryAppleKeyBacking(key: AppleKey.mint()), enrolled: true)
+            let world = try await sweepWorld(key: key, envelope: envelope, backing: backing)
             defer { try? FileManager.default.removeItem(at: world.dir) }
             let protection = world.bootstrap.protection
             protection.isSignedIn = { true }
@@ -586,9 +587,7 @@ struct VX202ReopenRaceTests {
             try envelope.setMasterWrappedCopy(key: key, under: SymmetricKey(size: .bits256))
             #expect(envelope.passphrase == nil && envelope.recovery == nil)
             let backing = InMemoryStoreKeyGuardBacking(auto: key, gated: key, biometryAvailable: true)
-            let world = try await sweepWorld(
-                key: key, envelope: envelope, backing: backing,
-                appleBacking: InMemoryAppleKeyBacking(key: AppleKey.mint()), enrolled: true)
+            let world = try await sweepWorld(key: key, envelope: envelope, backing: backing)
             defer { try? FileManager.default.removeItem(at: world.dir) }
             let protection = world.bootstrap.protection
             protection.isSignedIn = { true }
@@ -596,6 +595,7 @@ struct VX202ReopenRaceTests {
 
             await protection.reconcile()
 
+            #expect(protection.posture == .castle, "the vault's word: a demanded gate")
             #expect(backing.auto == key, "no typed copy of the key is on file — the silent item stays")
         }
     }
@@ -608,8 +608,7 @@ struct VX202ReopenRaceTests {
             var envelope = StoreKeyEnvelope(storeID: "vx202-sweep-waiting")
             try envelope.setPassphraseWrap(key: key, passphrase: passphrase, kdf: fastKDF())
             let backing = InMemoryStoreKeyGuardBacking(auto: key, biometryAvailable: true)
-            let world = try await sweepWorld(
-                key: key, envelope: envelope, backing: backing, appleBacking: InMemoryAppleKeyBacking())
+            let world = try await sweepWorld(key: key, envelope: envelope, backing: backing)
             defer { try? FileManager.default.removeItem(at: world.dir) }
             await world.bootstrap.protection.reconcile()
             #expect(backing.auto == key, "Standard-waiting keeps its silent item (corner 45)")
