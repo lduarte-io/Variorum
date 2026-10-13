@@ -53,6 +53,30 @@ What it means for this run:
   `MCPSession.instructions` don't yet TEACH U3–U5's tools (the tool descriptions carry their own
   truth; nothing the docs say becomes false, they only undersell). Her handoff says so.
 
+## THE LADDER + HER CALLS (2026-10-13 midday) — the live state
+
+- **Round 1 (opus-reviewer) DONE:** 1 MAJOR · 6 MINOR · 5 NIT, recorded VERBATIM in the run record § THE LADDER
+  with dispositions. The MAJOR (VX-198's re-bind lets any fresh key take any bound name with its grants) was
+  CONFIRMED by the orchestrator's own trace.
+- **Her rulings (verbatim in the record):** R-VX184-7 → **VX-258** (keys tied to their tab; an Any-client
+  re-bind waits for her OK); R-VX184-8 → **VX-259** (door name checks only against readable books; duplicates
+  fine); R-VX184-9 → **VX-260** (her edit makes an AI's comment hers). All three ride **VX-246**, Pre-launch.
+  **Timing, her word:** this run fixes only the agreed bugs. **GATE: VX-184's build stays HERS ALONE (no
+  public release) until VX-258 ships.**
+- **Round-1 fix pass:** a fresh `opus-implementer`, HEADLESS ONLY. (a) compare-and-set undo inverses and
+  redos (eight + 13n-b's `restoreBlockName`); (b) `hersAlone` in every library pin; (c) `delete_take`'s
+  description; (d) the book-level descriptions (P-VX196-8); (e) the re-indent; (f) the `delete_note` flush
+  TRACE (fix only if wire-layer; a seam road becomes a ticket for a Fable-reviewed fix). Then ROUND 2 = a
+  FRESH opus-reviewer (REVIEW_PROMPT verbatim) over the fixes; a new BLOCKER/MAJOR earns round 3; cap three.
+- **Her bilingual-book agent notes** (`notes/mcp-agent-notes-2026-10-13-bilingual-book.md`, copied from the
+  Air): adjudicated → **VX-252…256** + **VX-261** (item 5, activity-read road) under VX-246; **VX-262**
+  (item 8) PARKED with her reasoning; item 9 commented on VX-197; VX-255's write-new-append / edit-insert
+  split recorded (her lean). **VX-230** (the take badge) moved into VX-246 at her word. Her schema allowance
+  for VX-246 is verbatim in its plan.
+- **Tickets minted or moved this run (the handoff lists ALL):** VX-205 (→VX-246) · VX-230 (→VX-246) · VX-231 ·
+  VX-232 (→VX-246) · VX-246 (the new run) · VX-252 · VX-253 · VX-254 · VX-255 · VX-256 · VX-258 · VX-259 · VX-260 ·
+  VX-261 · VX-262 (Parked). Plus VX-245 (VX-214's; corrected to credit VX-246).
+
 ## Her mandates (recorded in the run record too)
 
 1. **Goodnight mandate (she is ASLEEP):** run all the way through the night, culminating in the
