@@ -1876,3 +1876,29 @@ at her request mid-read, resumed at her word; reviewed tip fcfb8aa5 = the merged
   Her three calls ride VX-246. **GATE: VX-184's build stays HERS ALONE (no public release) until VX-258 ships.**
 - The book-level-acts MINOR stays PROVISIONAL (a) as dispositioned above (descriptions say every member is
   affected); it enters the QUESTIONS bundle at the merge.
+
+### ROUND 1 — FIX PASS (fresh `opus-implementer` at MAX effort, 2026-10-13; same-model flow)
+
+**An earlier fix-pass agent was stopped by the author before it wrote anything (no commit, no file), so this pass
+restarted from the tip `2d66990f` at max effort.** Its leads reached this pass UNVERIFIED and each is re-traced here
+before it is relied on. Worktree `~/dev/variorum-vx-184`, branch `vx-184-mcp-launch-polish`. HEADLESS ONLY (no stage,
+no Mac run, no app launch); zero `Sync/`, custody/keychain, editor-seam or schema lines (path-diffed at the close).
+Her three product calls (VX-258/259/260, R-VX184-7/8/9) are VX-246's and untouched here.
+
+#### LIVE STATUS — the fix pass's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this subsection + its LIVE STATUS | DONE (this commit) |
+| 1 | STEP 1 — agree/dispute per finding the dispositions mark AGREED or TRACE, each with its own traced rationale | NOT-STARTED |
+| 2 | (a) the pins FIRST, one per family, run on the pre-fix tree → RED (counts); the lock pin's HOLLOW verdict (green on the pre-fix tree) | NOT-STARTED |
+| 3 | (a) the fix — compare-and-set inverses AND redos, divergence checked first and quiet: the finding's seven real families + 13n-b's `restoreBlockName` | NOT-STARTED |
+| 4 | (a) THE SWEEP — every inverse/redo an MCP write registers, dispositioned (same class and real → fixed red-first; hollow; not the class) | NOT-STARTED |
+| 5 | (a) red again BY REVERT (announced here first, on the committed tree, restored clean) | NOT-STARTED |
+| 6 | (b) `hersAlone` before/after every wire call in the five U5 server suites + one mutation that bites; the U5 record's sentences corrected | NOT-STARTED |
+| 7 | (c) `delete_take`'s description; (d) `delete_book`/`finish_book`'s descriptions + P-VX196-8 | NOT-STARTED |
+| 8 | (e) the re-indent — ONE whitespace-only commit, `git diff -w` empty | NOT-STARTED |
+| 9 | (f) the `delete_note` / `delete_block` flush TRACE (read-only) — fixed only if the road stays in the wire/door layer; else a ticket-ready summary | NOT-STARTED |
+| 10 | finals: the whole headless package green with counts; the path diff; the close | NOT-STARTED |
+
+**No revert is in flight.**
