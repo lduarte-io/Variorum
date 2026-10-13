@@ -1,6 +1,16 @@
 # VX-201 — Run: Castle pre-launch fixes (the record)
 
-**Status: NOT STARTED — kickoff below (written 2026-10-13 by the VX-191 audit orchestrator).**
+**Status: OPEN — kicked off 2026-10-13 (architect shape, Fable orchestrator; her kickoff message named the
+pre-build assessment below as the first deliverable). Branch `vx-201-castle-prelaunch-fixes` (cut from
+`origin/vx-191-encryption-audit`, main merged in at kickoff), worktree `~/dev/variorum-vx-201`, the Pro.**
+
+**Binding principles:** the 13b constitution P-1…P-9 binds this run verbatim as carried in
+`.claude/skills/architect-phase/SKILL.md` (in-repo; copied by pointer for record leanness — the one recorded
+deviation from the copy rule). CLAUDE.md's standing rules, the author-only list, SyncSpec §12, and the
+hallucination guard (pin-before-fix PER MEMBER, red-on-old verified by revert) bind as everywhere.
+**Product frame (leads every brief):** this is the author's own writing app hardening its OWN privacy promises
+before public release — when the app says Castle, nothing current may still open the old way. Defensive work on
+her code, at her request.
 
 ## KICKOFF MESSAGE (paste into a fresh session)
 
@@ -65,5 +75,128 @@
 > LIVE STATUS from the first commit, push after each piece. Close with the `/Applications` refresh at a zero-instance
 > window, the PR (merge commit), members closed individually, VX-191 closed with it.
 
+## §A — PRE-BUILD ADVERSARIAL ASSESSMENT (the orchestrator, 2026-10-13 kickoff; her ask: a second layer over the audit agent's self-authored tickets, VX-110 and the backup-adoption roads especially)
+
+Method: every ticket-cited code site re-read at this branch's HEAD by this orchestrator (not delegated, not
+trusted from the audit record): `AppBootstrap.swift:526-531` (the detached R1-M3 re-save) and `rekeyLibrary`
+(:810-841), `PostureSwitch.swift:521/:535` (the enrolled guard) and the local road (:693-700),
+`EncryptionSession.forgetDeviceKeys` (:579-583), `StoreLaunchGate.effectiveGate`'s landing arm (:362-383) and
+`rawKeyCustody` (corner 45). **Every cited mechanism is real as described.** The members stand; the refinements
+below are BINDING on the briefs. Verdict per member:
+
+**VX-202 (the reopen race) — CONCUR, with four binding refinements.**
+1. *Coverage, not just the ceremony:* the ceremony, the follow (both arms) and the marker RESUME all reach
+   `rekeyLibrary` → the same reopen → the same R1-M3 arm. The fix must cover every reopen that is part of a
+   switch. An in-memory `switchInProgress` on `AppBootstrap` (set by `rekeyLibrary`, cleared after the runner's
+   custody move) covers the live path; the persisted `RotationMarker` covers a crash-resume's reopen. Prefer both.
+2. *Belt (b) safety:* the at-ready sweep (a lingering silent item under a DEMANDED effective gate is deleted,
+   never read as posture) must key on the CURRENT store id and fire only when the silent item's key is NOT the
+   only opener left — i.e. the live key file carries P/W wraps for it or the gated item verifies. Under custody
+   law that is always true in Castle, but the belt must check, not assume (a hand-damaged key file must not
+   become an unopenable library). It must also stay inert during a 13x adoption's deliberate `landCustody`
+   window (dials there reset to Auto, so the gate is not demanded — verify with a pin, don't assume).
+3. *Belt (c) reality check:* the route's landing arm runs PRE-OPEN — `RotationMarker` is a database read and
+   cannot be consulted there. The belt needs a store-id-scoped signal outside the DB (the dials' UserDefaults
+   home is the natural neighbor): written when a switch begins, cleared when custody lands. This same signal is
+   the only cheap road to VX-209's deeper fix — see VX-209 below for why we do NOT stretch it that far tonight.
+4. *The pin:* must exercise the PRODUCTION reopen (`AppBootstrap.rekeyLibrary` → `beginOpening` → ready → the
+   R1-M3 arm) with the utility save HELD until after the custody move — red on old by revert. The existing
+   switch pins inject their own `rekeyLibrary` leaf and prove nothing here (the audit's own observation,
+   re-confirmed: `PostureSwitchTests.swift:763`, `PostureSwitchDrillTests.swift:478`).
+
+**VX-110 (the two doors) — CONCUR with her ruled design; five things the ticket does not say, each binding.**
+1. *Crash ordering is the whole game.* If the forget runs LAST and the session dies between the re-key and the
+   forget, custody still holds the old account's material — the next sign-in to that account is the silent
+   follow-into-Standard revert, the exact bug. The forget must happen EARLY in the This-Mac-Only road (before or
+   atomically with the custody move) AND be carried by the marker's resume so no crash window leaves it undone.
+   Pin the crash window (kill between re-key and forget; the resume completes the forget).
+2. *`forgetDeviceKeys` keeps the device identity* (read at :579 — material goes, identity stays). That is the
+   RIGHT shape: a later sign-in to the old account is an ENROLL (the join consent — `EncryptionViews.swift:431-466`),
+   and the identity-only custody record keeps the route's landing arm SKIPPED (`enrolled = syncCustodyPresent`),
+   so the Castle shape is protected at every later launch. Both facts get pins, not prose.
+3. *Her multiple-accounts worry, answered structurally:* custody is per STORE ID and holds exactly ONE account's
+   material (the last enrolled — decision 17's adopt road replaces it). So "the old account" is singular per
+   library, and forgetting on this library never touches another library's custody. The brief demands a pin:
+   two stores, two custody records, forget on one, the other intact. The remaining multi-account corner —
+   sign-in to a NEW account after This-Mac-Only — takes the sync-setup road, and a Castle library's vault is
+   born Castle (decision 17 + corner 26). The audit flagged that road as NEVER EXERCISED BY TESTS; the Done copy
+   leans on it ("delete that account… set up again"), so U2 lands a state-transition pin for born-Castle setup
+   from a Castle library, or the Done copy drops the implication.
+4. *The gate for the two doors* is "signed out AND sync custody material held" — the state from which the silent
+   revert is reachable. A signed-out library with an enrolled-SHAPED key file but NO custody material cannot
+   silently revert (its sign-in is an enroll with consent), so it keeps the plain local road; a genuinely
+   pre-sync library is untouched (the kickoff's own line). The Sign In… door routes to sign-in and ends the
+   ceremony (re-press after signing in); auto-resuming a custody ceremony across an async sign-in is
+   choreography risk for zero honesty gain — PROVISIONAL, bundled.
+5. *The phone:* the runner and copy are `Shared/`, but the audit never read the phone's door conditions
+   (`MobileProtectionSheet`). U2 confirms the phone's Use Castle door state when signed out and gives it the
+   same two-door or refusal shape — never the old silent local road with the ordinary Done.
+
+**VX-203 (the offer's missed folders) — CONCUR; three bounds.** (1) The lister offers only folders whose key
+file carries an `apple` wrap — a Castle-era prior library in `Previous Libraries/` is not Apple-openable and
+must not be swept into a "Standard-era" delete. (2) Granularity is the whole `<stamp>/` folder with honest
+counts in the confirm, and the offer's words must say these are the step-aside/way-back copies (the adoption
+confirm called them a recoverable home — deleting them closes that road; the sentence owns it). (3) The same
+lister serves the follow road (B1d's rider). `Backups/safety-copies/` matching stays on the adopt-safety naming
+plus key-file inspection — never a blanket folder delete.
+
+**VX-204 (the guide sentence) — CONCUR, copy-only, one structural consequence:** the paragraph is SEEDED
+(`TutorialSeeder` + `MobileTutorialSeeder` share `PostureCopy.privacyLessonOneParagraphs`), so existing stores
+keep the stale sentence — the closeout re-seeds her real store's field guide behind the A1 rail (the standing
+closeout rule), and the phone's seeder ships the same words. Draft rides the QUESTIONS #215 bundle.
+
+**VX-206 (end on Protection) — CONCUR; one coordination fact:** VX-214 (settings panes polish, live, author-
+attended) owns the Settings panes' internals this week. U4 keeps this diff to the ceremony's LANDING (restore
+the Protection selection + its popup across the re-key teardown), never pane internals; the overlap is declared
+on the in-flight row and to the coordinator.
+
+**VX-208 (the one line) — CONCUR as ruled** (no delete offer of our own). Home: the insurance-off notice's
+neighborhood (`PostureCopy.swift:434-437`) so the line appears exactly where the export story is told.
+PROVISIONAL placement, bundled with the copy.
+
+**VX-209 (the way-back revert) — CONCUR with her pre-launch scope, and a deliberate refusal of the deeper fix
+tonight.** The confirm line (outgoing Castle + incoming reads Standard, plaintext exports included) and the
+guide warning both land. The deeper fix — corner 45 remembering "this store id was Castle" — looks one belt
+away via VX-202's store-id signal, but it can STRAND a user: a pre-Castle Standard-era backup may carry NO
+passphrase wrap (silent-only era), so forcing a demanded gate on a remembered-Castle store id would leave that
+backup openable only by the twelve words, or not at all. That is a design sitting's tradeoff, not an overnight
+belt (QUESTIONS/ticket per the kickoff's "else ticket it"). SEQUENCING: U5 (VX-209) runs AFTER U1 lands so the
+guide's instruction is written against the shipped behavior, not the pre-fix one.
+
+**Cross-cutting (binding):** every new or changed user-facing sentence is PROVISIONAL and bundles into
+QUESTIONS **#215** before the PR merges; sentence case, no capitals for emphasis (VX-110's consent de-cap
+included). This run is the ONE custody effort in flight (declared; VX-179's custody line closed before our
+kickoff). All `xcodebuild test` under stage claims via `oct12coordinator`; headless `swift test` free. Mac-suite
+closeout coverage follows the changed-SOURCE rule (grep tests for changed types, not changed test files).
+
+## §B — ACCEPTANCE UNITS (strictly sequential; ONE implementer session each; evidence named)
+
+| unit | members | evidence that closes it |
+|---|---|---|
+| U1 | VX-202 | the bootstrap-level race pin red-on-old by revert through the PRODUCTION reopen; belts (b)/(c) pinned incl. the adoption-window inertness; existing switch/drill suites green (stage) |
+| U2 | VX-110 | state-transition pins: two doors offered on the gate state; forget-then-sign-in lands the consent, never the follow; the crash-window resume completes the forget; two-store custody isolation; born-Castle setup pin (or Done copy softened); the consent de-capped; phone door confirmed |
+| U3 | VX-203 + VX-208 | lister pins red-on-old (apple-wrapped stamp folders listed, Castle-era ones not; follow road too); the confirm's honest counts; the one VX-208 line landed PROVISIONAL |
+| U4 | VX-204 + VX-206 | the guide sentence landed on both seeders PROVISIONAL; ceremony-from-Protection ends on Protection with the popup (walk-verified); zero pane-internal lines (VX-214 overlap) |
+| U5 | VX-209 | the Open/Restore confirm line pinned on the classifier (backup pair + plaintext export arms); the guide warning written against U1's landed behavior, PROVISIONAL |
+
+Then: the fable ladder over the WHOLE run diff (members touch custody) with `notes/REVIEW_PROMPT.md` verbatim;
+round 2 re-reviews fixes; my hands-on walk of the ceremony + the two doors on the dev store under a stage claim;
+the QUESTIONS #215 copy bundle; closeout per the skill (refresh at a zero-instance window via the coordinator,
+PR merge commit, members closed individually, VX-191 closed with it, her real store's guide re-seed behind A1).
+
+## ENVIRONMENT TRAPS (every brief carries this verbatim)
+Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store instances are
+treated by STORE and never quit/killed; no Release builds or `/Applications` refreshes while one lives. Mac
+tests from `App/Variorum/`, suite-level `-only-testing` only, confirm the "Test run with N tests" line; NEVER a
+custom build configuration. zsh `pipestatus`. Backups WAL-safe, UTC names, into `Backups/safety-copies/`,
+ALWAYS before touching the real store (A1). Never `git checkout` over uncommitted work; push after every
+commit; synchronous foreground waits only (poll, don't `tail -f`). EVERY `xcodebuild test` needs a held
+`Tools/stage` claim granted by `oct12coordinator` (READY → GO; release + one-line result after). Headless
+`swift build`/`swift test` on the core package runs freely. The real Keychain drills (`PostureSwitchDrillTests`)
+are stage work. Work ONLY in `~/dev/variorum-vx-201`.
+
 ## LIVE STATUS
-- (none yet)
+- 2026-10-13 kickoff: preflight complete (CLAUDE.md canon, SyncSpec whole, postures design §1/§3.4/§4/§14, the
+  audit record + all three auditor reports, the member tickets + her comments, QUESTIONS tail, board snapshot);
+  main merged into the branch (a1efb7de); §A assessment + §B units written (this commit). NEXT: in-flight row on
+  main, coordinator check-in, U1 implementer.
