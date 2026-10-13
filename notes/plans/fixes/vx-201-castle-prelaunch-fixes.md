@@ -1380,4 +1380,15 @@ rollup /tmp/vx201-window-c.summary (deleted at closeout per the tidy rule).
   ceremony-host section, `PostureSwitchModel` (the roads), the runner's re-key step, `AppBootstrap.rekeyLibrary`.
 - Both seeders read the ONE copy home (verified, no own copy): `TutorialSeeder.swift:2465`,
   `MobileTutorialSeeder.swift:793`.
-- NEXT: piece 1 (VX-204 copy + pin), piece 2 (VX-206 holder + bumps + adopter + pins), the revert patches, builds.
+- DONE `ccacac61` — piece 1, VX-204: `privacyLessonOneParagraphs` amended + the new constant
+  `privacyServerSeesShapeSentence` (PostureCopy.swift) + `VariorumTests/VX204PrivacyLessonTests` (2 tests).
+- DONE `3aa029eb` — piece 2, VX-206: the holder + `requestProtectionPaneForCeremony()` (ProtectionController), the
+  reopen's ask (AppBootstrap.rekeyLibrary, one call), the road's-return ask (PostureSwitchModel `phase` didSet), ONE
+  adopter (AppSettingsView: two modifiers + one private func) + `VariorumTests/VX206ProtectionLandingTests` (3 tests).
+- VERIFIED: Mac `build-for-testing` (Variorum, `-derivedDataPath DerivedData/vx201`, index store off) TEST BUILD
+  SUCCEEDED with both pieces; zero warnings in changed lines (the one AppSettingsView warning, :1159, is a
+  pre-existing line). Every test RESULT is PENDING the stage.
+- IN-PROGRESS — the revert patches (`notes/plans/fixes/vx-201-u4-reverts/`): each made by editing the committed
+  tree, `git diff > <R>.patch`, then `git checkout --` the one file; a death mid-step leaves at most ONE file
+  reverted, and `git diff HEAD` shows which (the fix is committed — `git checkout --` is the safe restore).
+  NEXT after: the phone `build-for-testing`, the compile check of the patches, the close.
