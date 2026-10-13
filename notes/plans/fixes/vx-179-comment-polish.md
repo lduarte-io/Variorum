@@ -2250,3 +2250,23 @@ to a window that is not the panel's own or its parent: it REQUIRES that first (b
   early close; "the key window is the panel's or its parent's" = the runner's key window is the host's.
 - The U3 suites beside it, unchanged this leg (`CommentTextAreaTests`' other suites) — regression only.
 
+
+### ORCHESTRATOR VERIFICATION + DISPOSITIONS (the U3 pin leg accepted, 2026-10-13)
+
+Verified by spot-check: six commits as claimed, the diff confined to the test file + the record (the
+R-PL/R-PL2 reverts touched `CommentsPanel.swift` transiently, announced first and restored to a clean
+tree — the standard pattern). The traces are accepted: the runner's reds were the HAND-BUILT host's
+early close (the cells' own harness), the R1-2 flip is that same early close and NO leg-3 line sits
+on its road — proven by the discriminating pair (R-PL2: the watcher's call site alone red on exactly
+the save, premises green). The remodel is the right shape: the product's own presenter, ONE guarded
+key road that fails a premise BY NAME rather than typing into the test host's window, early closes
+reported as themselves. The ladder cell's honestly-not-red-on-old gap is accepted as stated — the
+live parent-key road's evidence of record is the `delivers` table plus window 5's read trace.
+
+**T4 (the old cells' stray keys), adjudicated:** the next stage window glances at the dev store's
+front note for stray characters from windows 4–5's suite runs (an "x" at a caret). The dev store is
+the fenced walk store and the note is expendable walk debris — low stakes, checked for honesty's
+sake. The reworked cells cannot reach it any more by construction.
+
+**Next:** the ~10-minute runner window (CommentPanelFixLeg2Tests expected 6/6 + the standing U3
+suites as regression + the T4 glance), then LADDER ROUND 2.
