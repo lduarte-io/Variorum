@@ -96,7 +96,7 @@ zero `Sync/`, zero custody/keychain, zero editor seam.
 |---|---|---|
 | 0 | this record + LIVE STATUS; `notes/plans/vx184-screens/` gitignored (`git check-ignore` verified) | DONE `b6ed4edf` (gitignore) + this commit (record) |
 | 1 | VX-132 — the mechanism traced (below); the pins (a silent server: connect, call); the bounded harness + client hygiene | DONE `d4610d06` (pins, all three HANG on the pre-fix harness — 45 s watchdog, sampled) + this commit (the fix) — `MCPHarnessDeadline.swift` (the GCD-timed deadline, task-local limit 30 s) · `MCPHarnessClient.swift` (`HarnessTransport` — the SDK's `StdioTransport` underneath, parks + disconnects at the drained second `receive()`, closes its own socket only after the SDK's read loop is done; `HarnessClient` — `callTool`/`listTools`/`disconnect`/`onNotification` bounded) · `ServerHarness.connect` bounded, a failed connect leaves no client, `rawOpen` read bounded, `tearDown`/`hangUp` never touch a client's number · the ten helpers' type → `HarnessConnection` · `MCPAdviceServerTests`' hand-built client → the harness (justified edit) · **the SIGPIPE flake traced and fixed** (below) in `MCPShimTests.aKeyedShim…` (justified edit). Green: the four VX-132 pins (connect fails named in 1.14 s, call in 1.06 s, the mid-call hang-up in **0.064 s**, the hygiene pin) · `MCPShimTests` **80/80 runs clean** (pre-fix: 2 SIGPIPE deaths in 40) · `VariorumMCPTests` **139/22 green, three consecutive runs, ~11 s each** |
-| 2 | VX-132 red-on-old BY REVERT (announced here first) | NOT-STARTED |
+| 2 | VX-132 red-on-old BY REVERT (announced here first) | IN-PROGRESS — announced (this commit); legs (a) + (b) next |
 | 3 | VX-181 — trace; the pin (the shim's closed-app refusal answers the INITIALIZE past a probe); the window in the shim's refusal read; NIT 1's one shared echoable-id predicate | NOT-STARTED |
 | 4 | VX-181 red-on-old BY REVERT | NOT-STARTED |
 | 5 | over-cap answers (opening frame `lineLimit`; the transport's `lineCap` made exact) + the boundary pins (just under served, just over answered) | NOT-STARTED |
@@ -109,7 +109,7 @@ zero `Sync/`, zero custody/keychain, zero editor seam.
 | 12 | the stage window: the Mac batch + THE LIVE ROUND legs (a)–(d), dev store only | NOT-STARTED |
 | 13 | close: self-assessment, PROVISIONALs, OWED | NOT-STARTED |
 
-**No revert is in flight.**
+**A REVERT IS IN FLIGHT (piece 2, VX-132) — starting after this commit (`9c44b9f7` is the fixed tree):** leg (a) the harness files restored to their pre-fix bytes from `78cf9a68` (`MCPServerTests.swift`, the ten helper files, `MCPAdviceServerTests.swift`, `MCPShimTests.swift`) with `MCPHarnessClient.swift` + `MCPHarnessHygieneTests.swift` moved aside to `notes/plans/vx184-screens/u1/prerevert-vx132/` (gitignored); leg (b) the fixed tree with ONLY the hygiene undone in `HarnessTransport.receive()`. Restore = `git checkout HEAD -- Tests/VariorumMCPTests` + the moved files back, verified by `git status` clean. A successor that finds this line: `git diff` shows exactly what is reverted.
 
 ### VX-132 — the trace (written before code)
 
