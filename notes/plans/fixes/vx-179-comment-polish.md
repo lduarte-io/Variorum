@@ -615,8 +615,8 @@ panel's control verbatim in an `NSHostingView` and reads the real text view's ge
 | piece | what | status |
 |---|---|---|
 | U3-a | record section + ledger row 5 IN-PROGRESS | DONE (e5211a8e) |
-| U3-b | TRACE: the offscreen probe measures `TextEditor`'s real insets / padding / typing attributes / caret rect vs the hand-assumed `topInset 8 / leadingInset 5`; the sweep measured | DONE (this commit) — the numbers and the mechanism below |
-| U3-c | the mechanism decision | STOPPED AT FORK F-U3-1 (this commit) — the traced fix is a `PanelTextArea` rewrite; the proposal below, the orchestrator rules |
+| U3-b | TRACE: the offscreen probe measures `TextEditor`'s real insets / padding / typing attributes / caret rect vs the hand-assumed `topInset 8 / leadingInset 5`; the sweep measured | DONE (13b8807e) — the numbers and the mechanism below |
+| U3-c | the mechanism decision | STOPPED AT FORK F-U3-1 (13b8807e) — the traced fix is a `PanelTextArea` rewrite; the proposal below, the orchestrator rules |
 | U3-d | the caret fix as ruled + its pins (pure geometry table; mounted pins written, RUN PENDING stage) | NOT-STARTED — waits for F-U3-1 (the design under option (a) below) |
 | U3-e | the pristine pass: the add area's empty state, header/footer rhythm, stamp lines, the deleted fold as ONE language (Restore + "Delete forever…"), O-3 (the `perform` default arm through `OpsRefusalCopy.message(for:)` — `TrayRefusalCopy`'s idiom, `TrayPanel.swift:743`), sentence case, taste numbers in one Metrics place | NOT-STARTED — waits for F-U3-1 |
 | U3-f | verify: plain build green, zero warnings in touched files; record closed; PENDING list | NOT-STARTED |
