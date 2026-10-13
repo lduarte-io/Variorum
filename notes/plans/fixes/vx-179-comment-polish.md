@@ -1305,9 +1305,89 @@ re-walk of the fixed rows are PENDING (the runner's next window).
 
 | piece | what | status |
 |---|---|---|
-| FL-a | this section | DONE (this commit) |
-| FL-1 | F-W-1 — trace (precise + line events, offscreen, real module), fix at mechanism, table pins red-on-old by replay; R1-3 answered | NOT-STARTED |
+| FL-a | this section | DONE (9667e4d5) |
+| FL-1 | F-W-1 — trace (precise + line events, offscreen, real module), fix at mechanism, table pins red-on-old by replay; R1-3 answered | IN-PROGRESS — traced (this commit); the fix next: hit-testing chooses the scroll view (the stack for a wheel the card takes, the card itself for one the page takes); the card's `scrollWheel` override and latch retire |
 | FL-2 | F-W-2 — a press on the scroller belongs to the scroller; fix + pin | NOT-STARTED |
 | FL-3 | F-W-5 — the "…" badge traced; a badge always carries its count; pin red-on-old | NOT-STARTED |
-| FL-4 | W-OBS-2 — TRACE ONLY (pre-existing or new?), answered before any fix | NOT-STARTED |
+| FL-4 | W-OBS-2 — TRACE ONLY (pre-existing or new?), answered before any fix | DONE (this commit) — PRE-EXISTING: Read mode has never hosted a decoration controller (THE TRACES) |
 | FL-5 | the plain build; pins typechecked; record closed | NOT-STARTED |
+
+### THE TRACES (offscreen, the REAL module — probes in `scratchpad/vx179-u2-fix/`; written before any fix)
+
+**Probe machinery (honesty):** `build.sh` = U3's road (links `Variorum.debug.dylib`, `@testable`). A
+synthetic wheel `NSEvent` is bound to a window only through CG event field 51 (found by a field scan;
+the public window fields 91/92 do not bind it), and its `locationInWindow` is then PINNED at the
+window's top-left corner (no field moves it), so the probes scroll the page to put that corner inside
+the view under test. `NSWindow.sendEvent` dispatches NOTHING into a never-ordered-in window (measured:
+no `scrollWheel` anywhere, the controls included), so the dispatch probes order a BORDERLESS window in
+at (−20000, −20000) — off every display (`NSScreen` intersection checked false at exit), `.prohibited`
+activation (cannot activate, cannot take key), ordered out after each fire; no pointer or keyboard
+event is ever posted to the system (`NSApp.postEvent`/`sendEvent` inside the probe only). The
+"queue road" (post → `nextEvent` → `NSApp.sendEvent`, so `NSApp.currentEvent` IS the event during
+dispatch — measured `current=true`) is the live loop's shape.
+
+**F-W-1 — the wheel over an overflowing card (walk-scroll's exact line events: `units: .line`,
+`wheel1 = −lines`; `hasPreciseScrollingDeltas` false, `scrollingDeltaY` = ∓3, no phases).**
+
+| delivery | down (−3) at rest | up (+3) at rest |
+|---|---|---|
+| straight to the tip's `card.scrollWheel` | CARD 0 → 30, page still | page (the router forwards) |
+| real dispatch, `window.sendEvent`, off-display window (plain page / layer-backed page) | CARD 0 → 30 | PAGE 102 → 72 |
+| real dispatch, the queue road (`currentEvent` set) | CARD 0 → 30 | PAGE 102 → 72 |
+
+So candidates (a) and (c) are DEAD: the table's sign and the latch are right for line deltas (the
+router chooses the card for down, the page for up, and the card moves when the router is reached),
+and the geometry is right (hit-testing answers the card: `hit=CommentCardView`). What the probes
+CANNOT have is the live app's one condition — an ACTIVE app with a KEY window (making the probe active
+would take her focus; not done). The documented responsive-scrolling model (AppKit 10.9 release notes
++ WWDC13/215, via a read-only lookup, paraphrase-grade, no Apple-engineer statement; forum reports that
+it changed again on 14+) is that the scroll VIEW takes the event — "the first event reaches the scroll
+view", later events of a gesture are captured by its tracking loop un-hit-tested. The tip's road
+depended on AppKit calling the CARD's own `scrollWheel` (an `NSView` override on a subview of the
+document) and on hand-delivering the event to a scroll view hit-testing had NOT chosen
+(`scroller.scrollWheel(with:)`): the hit view's nearest enclosing scroll view is the PAGE (measured:
+`enclosing=PAGE`). The walk's symptom — the page takes BOTH directions, the card never moves — is
+exactly what dispatch-to-the-hit-view's-scroll-view does with that hit view. **Mechanism (b),
+refined: the events never reach the card's router in the live (responsive) dispatch, because the
+view hit-testing answered (the card) belongs to the PAGE's scroll view.** Three further measured facts
+the fix stands on: (1) a hit view INSIDE a plain inner `NSScrollView` makes that scroll view scroll
+natively under real dispatch (stand-in 0 → 30); (2) a plain inner scroll view SWALLOWS a wheel it
+cannot take (fits, or pushing past either end — nothing moves; the documented "gobbles" behaviour), so
+"fits/end ⇒ the page" can only come from hit-testing answering a view of the PAGE; (3) an
+`NSScrollView` subclass overriding `scrollWheel` WITHOUT declaring responsive compatibility does not
+scroll at all (its `super` moves nothing) — so the router must not live in a scroll-view subclass
+either. And NSScrollView's `.began` handling blocks in its own tracking loop (a `.began` delivered by
+hand never returned — the probe had to be killed), i.e. the gesture's owner is fixed by whichever
+scroll view takes its first moving event.
+
+**R1-3 (answered below) falls out of the same fact.**
+
+**F-W-2 — a press on the scroller lane.** Tip, offscreen: with the overlay scroller just FLASHED
+(`alpha 1`), `hitTest` at the lane answers the `NSScroller`, the door stays shut and a press-drag
+scrolls the card (0 → 112.5). After the overlay scroller FADES (4 s): `hitTest` at the lane answers
+the CARD, the press OPENS THE PANEL (door 1×) and nothing scrolls — the walk's finding reproduced. A
+faded overlay scroller declines the hit, so `super.hitTest` falls through to my "everything else is
+the door" rule.
+
+**F-W-5 — the "…" badge (the badge arm, NOT a squeezed card; pre-existing since 13u3 A1).** The real
+badge measured: the label's need (the cell's own width) vs its frame:
+
+| `textLeft` | badge | label (after the shipped inset `min(6, max(2, (w − 16)/2))`) | "#1" | "#2"…"#9" | "#12" / "#28" |
+|---|---|---|---|---|---|
+| 28 (Write's floor — an 800 pt window less the sidebar) | 22 | 16 | 15.74 whole | 16.71–17.46 TRUNCATED | 22.14 / 23.94 TRUNCATED |
+| 34 | 28 | 16 (the inset is still 6) | whole | TRUNCATED | TRUNCATED |
+| 60 | 32 | 20 | whole | whole | TRUNCATED |
+
+The inset was tuned to "#1" (the walk that chose `commentBadgeMinWidth` 19 measured "#1"); every other
+digit is ~1 pt wider and two-digit counts ~6 pt — so the count is lost exactly where the badge stands
+in for a card.
+
+**W-OBS-2 — Read mode shows no comment face: PRE-EXISTING (answered, not fixed).** Not a `textLeft`
+question at all: Read mode's files (`ReadModeView`, `ReadEditPane`, `NoteIndexColumn`,
+`NotePagesView`, `ReadNoteLanding`) carry ZERO comment references and have never hosted a
+`BlockDecorOverlayController` (`git log -S` over `Features/ReadMode` + `Surface/`: no such commit; the
+17p sweep table already recorded "take pane: none, it hosts no decor at all"). The `read` arm's rows are
+SwiftUI `ReadPageBlock` texts; the `edit` index's panes are `PaneSurface`s. VX-179's diff touches none
+of these files (`git diff c84eddf1..HEAD --stat` over them: empty). For the orchestrator to ticket:
+Read mode has no comment face of any kind (no card, no badge) — a decoration host is a design decision
+for that surface (gutter room, the read arm being SwiftUI rows), not a fix.
