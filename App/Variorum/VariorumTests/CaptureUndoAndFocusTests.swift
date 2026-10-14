@@ -488,19 +488,16 @@ struct CaptureTourFocusTests {
         let suite = "vx112-tour-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
-        // `TourEntryTests`' own care: the Bookcase reads its fold state from
-        // the dev app's REAL defaults; folded open for the pin, put back.
-        let foldKey = "bookcase.collapsed"
-        let foldWas = UserDefaults.standard.object(forKey: foldKey)
-        UserDefaults.standard.removeObject(forKey: foldKey)
-        defer {
-            if let foldWas { UserDefaults.standard.set(foldWas, forKey: foldKey) }
-            else { UserDefaults.standard.removeObject(forKey: foldKey) }
-        }
+        // Two deliberate departures from `TourEntryTests`' world, so the two
+        // can never trip over each other inside one test process: no write to
+        // the dev app's real defaults (this pin needs no Bookcase row on
+        // screen — it never waits on step 2's ring), and RANDOM ids, so the
+        // engine `TourOracle` (a process-wide DEBUG slot) reports is told
+        // apart from any other suite's by this store's seeded book.
         let db = try AppDatabase.inMemory()
         try await withDependencies {
             $0.database = db
-            $0.uuid = .incrementing
+            $0.uuid = UUIDGenerator { UUID() }
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 53))
         } operation: { @MainActor in
@@ -531,8 +528,9 @@ struct CaptureTourFocusTests {
             #expect(inQuickEntry(), "the precondition: the Bookcase put the caret in its quick entry")
 
             router.tourRequested = true
-            await CaptureRig.settle(window, turns: 200) { TourOracle.overlay != nil }
-            let engine = try #require(TourOracle.overlay, "the request started a tour")
+            let ours = { TourOracle.overlay?.state.seededBookID == sherlock.id }
+            await CaptureRig.settle(window, turns: 200, until: ours)
+            let engine = try #require(ours() ? TourOracle.overlay : nil, "the request started a tour")
             #expect(engine.state.step == .navigation)
             #expect(!inQuickEntry(), "W-U1a-1: the tour's arrival released the caret")
 
@@ -542,15 +540,12 @@ struct CaptureTourFocusTests {
 
             // Step 2 (the Bookcase row of the seeded book).
             engine.next()
-            await CaptureRig.settle(window, turns: 200) {
-                engine.spotlight.frames[.bookcaseRow(sherlock.id)] != nil
-            }
             #expect(engine.state.step == .seededBook)
             await CaptureRig.settle(window, turns: 60)
             #expect(!inQuickEntry(), "step 2: the caret never came back to the quick entry")
 
             engine.endTour()
-            await CaptureRig.settle(window, turns: 200) { TourOracle.overlay == nil }
+            await CaptureRig.settle(window, turns: 20)
         }
         #endif
     }
