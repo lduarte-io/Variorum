@@ -133,7 +133,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #221). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — u5b: W2 the fixed batch minus `CommentPanelReleaseTests` (three groups) + W3 the walk with row 6 as the VX-229 DECIDER (`heap` on our pid: a baseline, then 3 popover · 3 Write-sheet · 3 nested-sheet cycles), then the VX-257/VX-183 rows and row 1 in both voices — ≈40 min.** No rebuild (the products built at `c2b3ba72`); the VX-229 fix stays out. W1 (05:23–05:25, released): VX-257 red on old as predicted; VX-229 and the sheet guards red on old in the runner — the coordinator's ruling: not yet proof, the app decides. VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c`. No claim held; no revert in flight. |
-| U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **READY FOR STAGE — W1 red on old (`QuickEntryLaunchFocusTests` on `vx282-u6-old-products`, 1 issue expected, ≈3 min) · W2 the fixed batch on `vx282-u4` (three groups — the capture/quick-entry/pad suites with the four new ones, the tour suites, the shell-mount and launch/restore suites, ≈12 min) · W3 the walk (the old build's launch for the record; launch in both voices with a typed letter; a restored note window; the tour; the navigation-back scope line, ≈23 min) — ≈38 min.** Trace (headless, real module): the shell's ask reaches the box before its window and is spent (F-FR-1) — at launch and on every navigation back (O-U6-1, left as today). Pins `d35191b6` + correction `ee1facc9` (AppKit auto-selects a window's first text field when it is ordered in — the rig frees it) · fix `3cf0079b`. P-U6-1/2 → QUESTIONS #224. Products: old `vx282-u6-old-products` REBUILT by the revert named at `07f03fa5` (done, restored, `git status` clean); fixed `vx282-u4` rebuilt LAST (U4's final + U5 + U6 — u4b tests what U4 expects). No claim held; no revert in flight. |
+| U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **DONE** — pins `d35191b6` + correction `ee1facc9` · fix `3cf0079b` · window `a1967ac0` (logs) + the walk record. Stage window 05:27:17–05:38:17 (claim `vx282-u6`, RELEASED): W1 red on old exactly as predicted (3 tests, 1 issue — the launch pin's last cell) · W2 the fixed batch 148 tests / 43 suites green · W3 every row held (A0 old: the window; A/A' fixed: the caret in the bar at launch in Study and Terminal, a typed letter lands; C the tour never stolen from; D the navigation back as today — O-U6-1 seen live); row B's restored note window not reachable on this Mac (not restored), a new window walked in its place. P-U6-1/2 → QUESTIONS #224. Posture: Study, unlocked Standard, tour `completed`, the Bookcase, nothing filed. No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -1860,15 +1860,17 @@ first — no `/Applications/Variorum.app` instance, none of ours.
 
 ### U6 — VX-326 (the Bookcase's quick entry isn't focused at launch)
 
-**NOT DONE BY THIS UNIT (first line):** no Mac test has RUN and there is no walk yet — every app-target pin is PENDING
-the stage window (W1 red on old · W2 the Mac batch · W3 the walk). The evidence so far is headless: the trace and the
-fix's effect were measured offscreen on the REAL module (below), never on a key window. **Navigating back to the
-Bookcase is NOT fixed** — it drops the ask exactly as it does today (O-U6-1, the brief's scope line); the main window
-never launches onto a note, so the brief's "restored note" row is a restored NOTE WINDOW (premise correction 3).
+**NOT DONE BY THIS UNIT (first line):** **navigating back to the Bookcase is NOT fixed** — it drops the ask exactly as
+it does today (O-U6-1, the brief's scope line; seen live at W3 row D). The brief's "relaunch with a note open" row could
+not be staged as written: the main window never launches onto a note (premise correction 3), and on this Mac a note
+WINDOW open and key at quit was NOT restored at relaunch (W3 row B) — so P-U6-1's "another window is key" case has no
+live evidence; a new window (File ▸ New Window) was walked in its place. The unit's evidence is the merged-tip-free
+products of `ee1facc9` (built before the branch merged main at `ece30a41`, the coordinator's word: fine for unit
+evidence, the closeout runs the merged tip).
 
-**State: READY FOR STAGE.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Counts marked
-PENDING wait for the window. **Revert state: no behavioural revert in flight** (red-on-old runs on separate OLD
-products, built before the fix — no revert needed).
+**State: DONE — every leg held** (the stage window 05:27:17–05:38:17, below). Implementer: an `opus-implementer` session
+(Opus 5.5, xhigh), 2026-10-14. **Revert state: no behavioural revert in flight** (the old-products revert named at
+`07f03fa5` ran and was restored before the window).
 
 **Her word (2026-10-14, overnight):** *"yeah you can fix this ticket if you think it's an annoying issue: New ticket
 VX-326"* — the orchestrator ruled: fix it (the Bookcase already ASKS for focus on mount; a launch without the caret
@@ -2200,6 +2202,69 @@ From `App/Variorum/`; logs to `notes/plans/vx282-screens/u5/logs/`, captures to 
     in the second voice), on the same note.
   - Then the walk note to the Trash, quit OUR instance by identity, `pgrep` again; the dev store Standard, unlocked, the
     voice as found (Study); release the claim.
+
+#### THE STAGE WINDOW — RUN 2026-10-14 05:27:17 → 05:38:17 (claim `vx282-u6`, handed from `coord-for-vx282`; RELEASED)
+
+`git pull --ff-only` first (the branch already carried main's merge `ece30a41` and the QUESTIONS renumber — this unit's
+entry is **#224**); nothing rebuilt (the coordinator's word). `guard.sh --author` OK before every leg; no Variorum
+instance (`pgrep -lx Variorum`) and no booted simulator at the start or at the end. Logs:
+`notes/plans/vx282-screens/u6/logs/`; captures: `notes/plans/vx282-screens/u6/walk/`.
+
+- **W1 — red on old** (`w1-red-on-old.log`, `vx282-u6-old-products`): "Test run with **3 tests in 1 suite failed** …
+  with **1 issue**" — **exactly as predicted**: `theShellOpeningOnTheBookcasePutsTheCaretInItsQuickEntry` at
+  `QuickEntryLaunchFocusTests.swift:198`, *"the keyboard is on `LaunchFocusWindow`"* (its premise cells — the keyboard
+  free before the opening, the box in its window — green); both guards green. So THIS HOST reproduces the launch's
+  order with the suspend-only settle; the pin is not vacuous.
+- **W2 — the fixed batch, `-derivedDataPath DerivedData/vx282-u4`:** g1 (`w2-g1.log`) "**67 tests in 20 suites
+  passed**"; g2 (`w2-g2.log`) "**29 tests in 8 suites passed**"; g3 (`w2-g3.log`) "**52 tests in 15 suites passed**" —
+  **148 tests / 43 suites, green**; every suite's ✔ line read (all four VX-326 suites, U4's five capture suites, the
+  tour suites, every shell-mounting and launch/restore suite named in the plan), 0 skipped.
+- **W3 — the walk, the DEV store (Standard, unlocked; found in STUDY, appearance `system`, `variorum.tour.offer` =
+  `completed`; no What's New sheet — both builds 0.9.5 as the dev defaults' last version).** One instance at a time,
+  each launched by `open -n` and quit by identity (`tell application id "io.lduarte.Variorum.debug" to quit`, `pgrep`
+  empty after each). The caret's truth read by AX (`AXFocusedUIElement` + the focused window's size); keys by `keys.sh`,
+  clicks by `click.sh`, ≥ 2 s apart; captures by region.
+  - **A0 — the OLD build at launch** (pid 6398): AX `AXWindow` — **the keyboard on the window**, the bar unfocused
+    (`A0-old-launch.png`) — O-U4-3 again, the defect.
+  - **A — the fixed build at launch, Study** (pid 6505): AX **`AXTextArea` "text entry area", value empty, in the main
+    window** — the caret blinks at the start of the quick entry (`A1-launch.png`, `A1b-launch-bar-zoom.png`); `z` typed
+    → the box reads `z`, the title chip offers *name it "z"?* (`A2-typed.png`); ⌫ → empty again (`A3-deleted.png`),
+    nothing filed. **HOLDS.**
+  - **A' — the second voice, Terminal** (⌘K "Use Terminal Voice", quit, relaunch — pid 6800): AX `AXTextArea` at launch;
+    the caret in the bar and **no block cursor beside it** in two captures 0.6 s apart — one cursor (17y (m))
+    (`A4-launch-terminal.png`, `A4b`/`A4c-terminal-bar-zoom*.png`). **HOLDS.** (Seen on the way: after the palette
+    sheet closed, AX read the bar again — AppKit restores a window's first responder after a sheet.)
+  - **B — a restored note window: NOT REACHABLE on this Mac.** `o museu` opened by the Open strip's "Open in New Window"
+    (800×720), the caret put in its editor by a click (AX `AXTextArea` in the 800×720 window, `B0-note-window-before-quit.png`),
+    the app quit with that window key, relaunched (pid 7202): **macOS did not restore the note window** (one window,
+    1380×900); the main window opened on the Bookcase with the caret in the bar (AX `AXTextArea` in the 1380×900
+    window, `B1-relaunch-no-note-window.png`). **In its place — a NEW window (File ▸ New Window), the other "opening"
+    P-U6-2 names:** a second 1240×840 window came up key with **its own quick entry holding the caret** (AX `AXTextArea`
+    in the 1240×840 window, `B2-new-window.png`); closed by its own close button, the main window's bar holding the
+    caret again after. **HOLDS** for what could be staged; P-U6-1's other-window case stays unwalked (record-only).
+  - **C — the tour, no steal:** caret in the bar (AX) → Help ▸ Take the Tour (menu, by AX name) → step 1: AX
+    **`AXWindow`** — the tour's release (W-U1a-1), the Terminal block cursor drawn as its sign (`C1-tour-step1.png`) →
+    the card's "next" → step 2: AX `AXWindow` (`C2-tour-step2.png`) → "end tour": AX `AXWindow`, the bar never took the
+    caret back (`C3-tour-ended.png`); `variorum.tour.offer` still `completed`. **HOLDS.**
+  - **D — the scope line, as today:** ⌘K "Go to Library" ⏎ → AX `AXWindow` (`D0-library.png`) → ⌘K "Go to Bookcase" ⏎ →
+    AX **`AXWindow`**, the Terminal block cursor drawn — **the bar NOT focused on a navigation back**
+    (`D1-navigate-back.png`). Exactly today's behaviour (the brief's line) and **O-U6-1 seen live.**
+  - **Cleanup / posture as left:** the voice restored to **Study** by ⌘K "Use Study Voice" (`Z1-study-restored.png`);
+    appearance `system` (never touched); `variorum.tour.offer` = **`completed`**; the main window on the **Bookcase**;
+    **nothing filed** (the one `z` deleted, no ⏎ in any box; the Bookcase's counts as found); the note window and the
+    new window closed by their own buttons; no lock screen met (Standard, unlocked); no system dialog; our instance
+    quit by identity, `pgrep -lx Variorum` empty, 0 booted simulators; **the claim RELEASED at 05:38:17** (11 of 55
+    minutes).
+
+#### Dispositions
+
+| Row | Disposition |
+|---|---|
+| VX-326 — the Bookcase's quick entry isn't focused at launch | **FIXED** (`3cf0079b`) — red on old in the harness (W1, the launch pin's last cell) and live on the old build (A0); green fixed (W2, 148/43) and in use fixed in both voices (A, A'), a typed letter landing in the bar. |
+| Never steals — a field, a sheet | **HOLDS** — the guards green on both sides (W1/W2); live, the tour's release is never undone (C). |
+| The scope — later Bookcase mounts as today | **HOLDS as briefed** — W2's scope pin; live (D). The gap itself is **O-U6-1** (a ticket, the orchestrator's). |
+| A restored note window keeps its keyboard | **NOT WALKABLE on this Mac** (the window is not restored); the rule never consults other windows (P-U6-1, QUESTIONS #224). |
+| U4's contract (served once, re-take only what it held) | **HOLDS** — U4's five suites green in g1. |
 
 ## Ladder
 
