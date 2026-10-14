@@ -229,4 +229,27 @@ struct MCPLinkVersionsServerTests {
             await h.hangUp(connection)
         }
     }
+
+    // MARK: - VX-298 (VX-336 U6a — APPENDED; nothing above modified)
+
+    /// Her answer (5): the receipt's Open › opens the two side by side in Compare — A, then B
+    /// (`show_in_app`'s compare target, delivered by her press, D-298-6). **RED on old:** the
+    /// receipt opened note A alone (`.note(A)`).
+    @Test func theReceiptsOpenOpensTheTwoInCompare() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let w = try world(h)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.writeNew, .book, w.book.id))
+            let linked = try await call(connection, "link_versions", [
+                "note_a": .string(w.a.id), "note_b": .string(w.b.id), "pairs": .array([pair(w.aBlocks[0], w.bBlocks[0])]),
+            ])
+            #expect(linked.isError != true, "\(text(linked))")
+            let receipt = try #require(h.receipts.value.last)
+            #expect(receipt.act.rawValue == "version link")
+            #expect(showCompareParts(receipt.show) == [w.a.id, w.b.id], "Open › opens Compare: A, then B beside it")
+            await h.hangUp(connection)
+        }
+    }
 }
