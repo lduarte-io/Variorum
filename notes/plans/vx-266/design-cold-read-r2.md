@@ -50,7 +50,15 @@ with the double-forget corner as promise 5's one exception; and three lines for 
 as fresh as that device's words copy, a words-typed follow never gains a master-under-passphrase copy, and the road
 through the Castle-era master is a birth road that any later door replaces.
 
-**The commits:** the design `24a81aba`; the phase-1 plan `a4488456`; the key maps and this record follow.
+**The commits:** the design `24a81aba`; the phase-1 plan `a4488456`; this record `24049659`; the key maps `890dfe89`,
+with six clarifications the maps needed written into the design: when the account's Apple key goes in Use Castle, where
+Use Standard writes the anchor, when the old sync keys' Touch ID item goes, what a follower's new key file is locked
+under, that Replace All Keys in Standard mints nothing for the library, and that a keys-replaced follow in Castle types
+one secret too.
+
+**The Fable reviewer's sign-off** (2026-10-14), after reading this record and checking the revised design and plan
+against every disposition: no pushback, and round 3 is clear to go to a fresh session. Opus's findings were all
+adopted as it proposed, so nothing of its was disputed.
 
 ---
 
