@@ -20,9 +20,10 @@ import Testing
 // parked in a `read`) when the session ends — by each road a session ends in
 // production: the client hangs up (EOF), the server stops (`hangUp()`), a
 // message runs past the cap (the reader's over-limit arm). The moment `run()`
-// returns, the host's own close (`closeConnection()`), then the number is
-// handed to a FRESH socket at once (`dup2` — the reuse POSIX makes likely,
-// made certain), and a byte is written to that socket. If any reader read
+// returns, the session's socket is closed AND its number handed to a FRESH
+// socket in one atomic step (`dup2` — the host's close followed by the reuse
+// POSIX makes likely, made certain, with no window for another test's socket to
+// take the number), and a byte is written to that socket. If any reader read
 // past the session's end, the byte is gone.
 //
 // THE TRACE says it cannot be (the record's piece 2): the host closes only
@@ -129,11 +130,19 @@ struct MCPReaderAfterCloseTests {
         await running.value
 
         // The host's road: the session's close — then the number REUSED at
-        // once by a fresh socket (dup2: the reuse made certain).
-        session.closeConnection()
+        // once by a fresh socket. ONE ATOMIC STEP (`dup2` closes the session's
+        // socket and hands its number to the fresh one): a separate `close`
+        // then `dup2` would leave a window in which ANOTHER test running in
+        // this process opens a socket on the freed number, and the `dup2`
+        // would then silently close THAT test's socket (the VX-279 class this
+        // pin probes — caught at U1b's whole-target run as a SIGPIPE). So the
+        // session's own `closeConnection()` is never called: the number is
+        // this test's until its final `close`.
         var fresh: [Int32] = [-1, -1]
         try #require(socketpair(AF_UNIX, SOCK_STREAM, 0, &fresh) == 0)
-        try #require(dup2(fresh[0], number) == number, "the closed session's number now names a fresh socket")
+        prepare(fresh[0], receiveTimeout: 1)
+        prepare(fresh[1], receiveTimeout: 1)
+        try #require(dup2(fresh[0], number) == number, "the session's number now names a fresh socket")
         prepare(number, receiveTimeout: 1)
         let byte = Data("X".utf8)
         _ = MCPShim.writeAll(fresh[1], byte)
