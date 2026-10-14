@@ -201,14 +201,17 @@ Build everything in §3.2 of the design as values, with their codecs and their c
   union; it can be seeded with fingerprints a key file names but the fold couldn't reach;
 - **this Mac's facts in two homes:** the newer version wins, the retired ids are the union, a library file or a memory
   item replayed — or the memory item deleted — alone changes nothing; a Mac with no memory item finds its section by
-  its hardware marker; a new identity on new hardware takes over every Apple key id its predecessor's section lists
+  its hardware marker — and a second macOS login on the same Mac never does: it starts its own identity (VX-340); a
+  new identity on new hardware takes over every Apple key id its predecessor's section lists
   as its own, and every retired id;
 - **the legacy mode reader** agrees with today's `Posture.derive` on every starting state in §6, corner 45's case
   included;
 - a tampered sealed field fails verification;
 - format-1 and format-2 key files read as the design says;
 - no secret appears in any value written to disk (scan the encodings), and no raw hardware identifier either: the
-  hardware marker is a hash with the record's random salt, recomputed on the same hardware (design §3.2).
+  hardware marker is a hash of the hardware identity and the login's stable identity with the record's random salt,
+  recomputed on the same hardware and login (design §3.2, VX-340). Which login identity is stable enough — one that
+  survives a wiped keychain, such as the account's directory-services UUID — is U1's to choose and record.
 
 ---
 
@@ -400,6 +403,8 @@ Each is a named test:
 - the planted plan;
 - the edited gate style plus an enrolled finger;
 - the cross-Mac prune (VX-302);
+- two macOS logins on one Mac (VX-340), on the same Apple ID and on different Apple IDs: a copy from one login opened
+  in the other adopts nothing — its own identity, `<mac8>` folder, retention and Apple keys;
 - the old key's fold, then retirement — no stranded copy;
 - two libraries on one Apple account: a Mac entering Castle beside a second Mac's local-only Standard library with no
   passphrase — the second Mac updated, and not;
