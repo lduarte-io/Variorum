@@ -4241,3 +4241,41 @@ reviewer's own hands).
 **Next:** the findings go to the implementer verbatim (the cross-model flow as amended 2026-10-13); its
 agree/dispute returns to this reviewer for the final call; the implementer applies the confirmed fixes (F-1 with
 its truth pin red-first), the suite green, then round 2 (`opus-reviewer` at max) re-checks them.
+
+### ROUND 1 — THE FINAL CALLS (the Fable reviewer, 2026-10-14; the amended cross-model flow: the implementer applies)
+
+The implementer AGREED on all four findings, disputing none, with refinements on F-1, F-2 and F-3. The reviewer
+verified each refinement against the tree at `4e5d2943` (the lesson text at `TutorialSeeder.swift:2552–2557`, the
+pin at `TutorialMCPChapterTests.swift:280–281`, `MCPPaneCopy.clientBoundary`'s exact clause, the deleted-helper
+greps, and `FractionalIndex.swift:46`'s dependency read on the accept-thread-spawned task). **Every call below is
+final; the implementer applies every fix — nothing is FINDER-FIXES, and no `Sync/` line exists.**
+
+- **F-1 — CONFIRMED, the refinement ACCEPTED.** The fix is the implementer's proposed lesson paragraph (L1's exact
+  clause, guide register, a literal), the VX-258 line added to the lesson's truth comment, and the pin moved as
+  proposed: the `!contains` on the old sentence, the whole-new-sentence `contains`, and the PARITY GUARD — one
+  shared test-side `let` holding the clause "Running the client's own setup again moves the name to the new key; a
+  setup copied for any MCP client waits for your OK before it takes a name you approved", asserted contained in
+  BOTH the guide's lesson text and `MCPPaneCopy.clientBoundary` (verified byte-exact as a substring of the built
+  L1). Red-on-old: the pin commit first, the red product showing the three designed lines; then the lesson edit,
+  green. The rule-side `decide` arms at `:296–305` stay byte-unchanged. The VX-292 re-check before touching
+  `TutorialSeeder` is right (the U1b hand-back read the in-flight table as VX-246 + VX-282 only; re-check at edit
+  time). **The residual is accepted as stated** (the other-tab-key wait stays unsaid in the guide — not false; U8
+  re-voices). **The `ReleaseNotes-0.9.5.md:9` adjacent is the ORCHESTRATOR'S, not a fix:** the sentence holds on
+  the own-tab reading, release notes are hers — route it to the handoff/VX-234 list, no edit.
+- **F-2 — CONFIRMED, the widening ACCEPTED** (the last sentence replaced as proposed AND the heading retitled to
+  name both families). Doc-only, no pin.
+- **F-3 — CONFIRMED, the refinement ACCEPTED:** name `revertChosenPointersIfUnchanged` — the wrapper is the exact
+  analogue of the deleted name ("called with the other pre-image"), which is what the header's example illustrates.
+  Doc-only, no pin.
+- **F-4 — CONFIRMED, the fix shape ACCEPTED** (the hoisted seeded RNG + the `ScopedRandomExecutor` wrapper around
+  `executor.run`, the headless `SeededExecutor` precedent; task-locals carry across the runner hop in the same
+  task; only the RNG is set so the captured clock/ids stay the harness's). The before/after check (4 warnings → 0,
+  the suite alone) is the right evidence for a test-only NIT; any surviving warning gets its read site traced
+  before anything else moves.
+
+**The fix pass's order as proposed is accepted** (F-1 pin → lesson edit → F-2/F-3 doc edits → F-4 harness; each
+commit naming its member + "Part of VX-246"; headless package green; ONE stage window with the red and fixed
+products). **The reviewer's batch recommendation for that window** (the orchestrator names the final list): the
+changed source file is `TutorialSeeder.swift`, so the Tutorial* family (U1's G2 set) + `TutorialMCPChapterTests`
+alone red/green on the two products, plus `MCPHerEditorDoorTests` for F-4's warning count — the core doc edits
+(F-2/F-3) ride the headless package. Round 2 (`opus-reviewer` at max) then re-checks the fixes.
