@@ -228,8 +228,14 @@ struct MCPPaneTabsTests {
     /// its rule: on Clients once a client was approved — searching "codex" to
     /// add a second client put the Codex setup behind a tab, the very hunt her
     /// ruling ended.
+    ///
+    /// **VX-281 ladder R2-3 (RED ON OLD) — "claude" joins** (her client's
+    /// name heads the Claude Code setup line — a setup word of R1-4's class):
+    /// it tied at the keyword rank between the server switch's row ("claude")
+    /// and Connect's ("claude code"), and the tie went to the switch, listed
+    /// first — so it landed on no tab.
     @Test func aSearchForTheSetupsWordsLandsOnConnect() throws {
-        for word in ["codex", "setup", "json", "stdio", "claude code", "connect"] {
+        for word in ["codex", "setup", "json", "stdio", "claude code", "claude", "connect"] {
             let found = try #require(
                 SettingsSearch.findings(matching: word, in: SettingsSearch.settingsEntries)
                     .first { $0.pane == .mcp && $0.kind == .setting },
@@ -242,6 +248,22 @@ struct MCPPaneTabsTests {
             SettingsSearch.findings(matching: "server", in: SettingsSearch.settingsEntries)
                 .first { $0.pane == .mcp && $0.kind == .setting })
         #expect(MCPPaneTab.holding(findingLead: server.lead) == nil, "the switch sits above the tabs")
+    }
+
+    /// **VX-281 ladder R2-3 (RED ON OLD) — PROVISIONAL P-VX281-R2-1 (b):**
+    /// "client" and "clients" name her Clients tab, where the client list
+    /// lives, so a search for them opens the pane THERE. "client" found
+    /// "Connect a client" (its lead contains the word) and opened the setup;
+    /// "clients" found no MCP row at all.
+    @Test func aSearchForClientsLandsOnTheClientsTab() throws {
+        for word in ["client", "clients"] {
+            let found = try #require(
+                SettingsSearch.findings(matching: word, in: SettingsSearch.settingsEntries)
+                    .first { $0.pane == .mcp && $0.kind == .setting },
+                "“\(word)” finds the MCP pane")
+            #expect(MCPPaneTab.holding(findingLead: found.lead) == .clients,
+                    "“\(word)” lands on Clients, where the clients are (its finding: “\(found.lead)”)")
+        }
     }
 
     // MARK: - One line each (R-VX184-6 — "every explainer cut to one line")
