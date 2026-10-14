@@ -230,6 +230,11 @@ struct CaptureTextView: NSViewRepresentable {
                 coordinator?.parent.onFocusChange?(inBox)
             }
         }
+        // A request already raised when the box is MADE (the pad's 1) is
+        // served once, on its first arrival. A request raised later (the
+        // Bookcase's `.task`, a click on the padding, the title chip) takes
+        // the `takeFocus` road in `updateNSView` (VX-112's trace: the bar's
+        // request is always raised a turn after this, so its flag is false).
         view.wantsInitialFocus = focusRequest > 0
         context.coordinator.lastFocusRequest = focusRequest
         // Spelling follows the app's ONE this-Mac setting (default `off`,
@@ -419,12 +424,31 @@ final class CaptureNSTextView: NSTextView {
     /// Plain ⏎ — what filing means belongs to the host.
     var onFile: (() -> Void)?
 
-    /// The caret lands here when the box reaches a window (the shelf's
-    /// autofocus). Asked ONCE, on arrival, and deferred by one turn so the
-    /// window has become key first — the A2 walk's fourth find, one unit
-    /// over: a caret that blinks in a non-key window swallows every
-    /// keystroke, and a caret you cannot type into is worse than no caret.
+    /// The caret lands here when the box reaches a window (the pad's open —
+    /// a box made with its request already raised). Asked ONCE, on the first
+    /// arrival, and deferred by one turn so the window has become key first —
+    /// the A2 walk's fourth find, one unit over: a caret that blinks in a
+    /// non-key window swallows every keystroke, and a caret you cannot type
+    /// into is worse than no caret.
+    ///
+    /// **Cleared when it is served** (VX-112): it used to be read on EVERY
+    /// arrival and never lowered, so a box made with a request re-claimed
+    /// the keyboard on every SwiftUI detach/re-attach — after a release (the
+    /// tour's, say), and over whatever else held it. A re-attach now answers
+    /// to `heldKeyboardWhenDetached` alone.
     var wantsInitialFocus = false
+
+    /// **VX-112 — the keyboard survives a RE-PARENT, and only what was held
+    /// comes back** (`PaneTextView`'s rule, 18l-c U7 — TEXTKIT2 §3: SwiftUI
+    /// may detach and re-attach a representable's view within one layout
+    /// pass, and AppKit drops a detached first responder to the WINDOW).
+    /// True while the box is detached having held the keyboard; on
+    /// re-attach it takes the keyboard back ONLY when the window itself
+    /// holds it — never from a field, a sheet or anything else that took it
+    /// meanwhile — and a box that did not hold it (released, by the tour or
+    /// anyone) stays away. Her rule, recorded at VX-282's kickoff: *the
+    /// shared capture box re-takes only focus it HELD, never steals.*
+    private var heldKeyboardWhenDetached = false
 
     /// **Where the caret is** (17y B2, item (m)): true when this box becomes
     /// first responder, false when it resigns — reported the moment the
@@ -446,13 +470,37 @@ final class CaptureNSTextView: NSTextView {
         return resigned
     }
 
+    override func viewWillMove(toWindow newWindow: NSWindow?) {
+        if newWindow == nil, let window, window.firstResponder === self {
+            heldKeyboardWhenDetached = true
+        }
+        super.viewWillMove(toWindow: newWindow)
+    }
+
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        guard wantsInitialFocus, window != nil else { return }
-        DispatchQueue.main.async { [weak self] in
-            guard let self, let window = self.window,
-                  window.firstResponder !== self else { return }
-            window.makeFirstResponder(self)
+        guard let window else { return }
+        if wantsInitialFocus {
+            // The initial request, served once — an EXPLICIT ask, so its
+            // guard is today's ("not already mine"), exactly as before.
+            wantsInitialFocus = false
+            heldKeyboardWhenDetached = false
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                guard let window = self.window else {
+                    // Out of its window by the time the turn came: the ask
+                    // waits for the next arrival rather than being lost.
+                    self.wantsInitialFocus = true
+                    return
+                }
+                guard window.firstResponder !== self else { return }
+                window.makeFirstResponder(self)
+            }
+        } else if heldKeyboardWhenDetached {
+            heldKeyboardWhenDetached = false
+            if window.firstResponder == nil || window.firstResponder === window {
+                window.makeFirstResponder(self)
+            }
         }
     }
 
