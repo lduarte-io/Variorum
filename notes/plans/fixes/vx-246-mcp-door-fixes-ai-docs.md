@@ -2044,9 +2044,11 @@ store, its own socket home); the pane's Clients rows, request rows and setup men
 
 ## U4 UNIT RECORD — the faces after big writes: VX-230 · VX-231 (opus-implementer, from 2026-10-14 ~02:15 MDT)
 
-**What this unit has NOT done yet (said first; flipped as pieces land):** no pin has run (every pin is a Mac pin, so its
-red-on-old run is the stage window's W1); both fixes are written and both Mac products are built, but nothing has run on
-a Mac; no stage window has run (no batch, no walk); THE STAGE WINDOW plan is not yet written (PAUSED — piece 6). No `notes/QUESTIONS.md` entry, canon edit or ticket (the merge's and the orchestrator's). Zero
+**What this unit has NOT done (said first; the state at READY, 2026-10-14 ~03:10 MDT):** no pin has run — every pin is a
+Mac pin, so its red-on-old run is W1 and its green W2; both fixes are written and both Mac products are built, but
+nothing has run on a Mac; no stage window has run (no batch, no walk); ORCHESTRATOR'S PROVISIONAL RULING 2 (the
+navigate-away keeps her focus) is NOT built here — its slot in the window is marked for the fresh session that builds it;
+no QUESTIONS entry, canon edit or ticket (the orchestrator's). No `notes/QUESTIONS.md` entry, canon edit or ticket (the merge's and the orchestrator's). Zero
 `Sync/`, custody, Keychain, schema or `Server/` lines planned.
 
 **Read in full before code (never delegated):** CLAUDE.md and its loaded canon (OverallModel §5 P1–P3, AppSpec §4 and
@@ -2088,7 +2090,7 @@ touches the file); Mac pins under `App/Variorum/VariorumTests/`. ZERO `Sync/`, c
 | 3 | VX-230's fix — `refreshBadges`: a badge only from a laid-out fragment; the inline surface lays out what it badges | DONE (`91a56a7a`) — `EditorViewModel.refreshBadges` ONLY: the fragment read keeps a frame only when `state == .layoutAvailable`; on the surface with no scroll view the read passes `.ensuresLayout` (measured first, `probes/probe4`: a mid-document `.ensuresLayout` read is positionally exact — TK2 lays out up to it); the R1-1 oracle (`decorLayoutQueriesInEditTransaction`) counts that forcing read if it ever ran inside the storage-edit transaction. No other function, no other editor file |
 | 4 | VX-231's fix — the Bookcase's one-shot re-read when its own held snapshot moves | DONE (`07f9f28d`) — `ShelfViewModel.start`: a held delivery whose `books` differ from the last held (after the first) calls `followHeldMove()` — a single-flight `Task` re-running `refreshAggregates` (a move during a re-read asks for one more), cancelled at `start`'s exit |
 | 5 | headless finals (core · MCP · workbook) + the FIXED Mac product `DerivedData/vx246-u4` | DONE — **headless, `swift test --skip-build` on `07f9f28d`'s sources, EXIT 0: `VariorumMCPTests` 236 / 49 · `VariorumCoreTests` 2,826 / 326 · `StringsWorkbookTests` 40 / 6**, zero ✘, the skip set the standing gated nine (unchanged from U3 — no core line moved; `u4/logs/p5-finals.log`). **The fixed Mac product BUILT:** `App/Variorum/DerivedData/vx246-u4` (an APFS clone of `vx246-u4-red`, then `build-for-testing` → `** TEST BUILD SUCCEEDED **`, EXIT 0, no warning in a touched file; `u4/logs/mac-build-for-testing.log`) — its sources are `07f9f28d`'s (both fixes) |
-| 6 | THE STAGE WINDOW plan (claim `vx246-u4`: W1 red on old · W2 green + the batch · W3 the walk in both voices) → READY | IN-PROGRESS — **PAUSED 2026-10-14 ~02:50 MDT at the orchestrator's PAUSE (U3's window got its GO); the tree clean and pushed.** Continuation: (a) the W2 suite list — a draft grep of every test file mounting an editor model / the inline surface / a book view / the Bookcase (142 files, ~250 type names; scratch, not committed) is to be cut to suite TYPE names, unioned with U3's `stage-suites-215.txt` and the two new suites, written to `u4/stage-suites.txt` + `run-w1-red.sh` / `run-w2-batch.sh` (U3's scripts' shape, pointing at `vx246-u4-red` / `vx246-u4`); (b) the walk fixture recipe (a long fanned note + a book like hers) and THE STAGE WINDOW section; (c) the self-assessment, PROVISIONALs, OWED (the decoration sibling's ticket; TEXTKIT2_NOTES §3's proposed finding); (d) READY. **Before resuming: `git diff --name-only 07f9f28d..HEAD -- Sources App` must be empty, else rebuild `vx246-u4`** |
+| 6 | THE STAGE WINDOW plan (claim `vx246-u4`: W1 red on old · W2 green + the batch · W3 the walk in both voices) → READY | DONE (this commit) — resumed after U3's window (released 02:54); **the products check: `git diff --name-only 07f9f28d..HEAD -- Sources App` EMPTY → no rebuild** (`vx246-u4-red` = `10629374`'s sources, `vx246-u4` = `07f9f28d`'s). The W2 list `u4/stage-suites.txt` (271 suites = U3's 215 ∪ every suite in a test file that mounts an editor model, the inline surface, a book view or the Bookcase ∪ the two new suites; every name verified to exist as a type) and the scripts `u4/run-w1-red.sh`, `u4/run-w2-batch.sh` (U3's shape; gitignored). THE STAGE WINDOW below, with RULING 2's slot marked. **READY for stage** — the stage NOT claimed; a FRESH session builds ruling 2's fix on this tree first (the orchestrator's word), then runs the window |
 
 **No revert is in flight.**
 
@@ -2217,3 +2219,138 @@ change shows VX-231.
   - Not traced further. The Fable review may weigh it.
 - **The harness warnings** (`@Dependency(\.withRandomNumberGenerator)` has no test implementation, raised while the new
   door pins run) are noise, not a failure. The ladder may ask for the dependency to be pinned in the suite.
+
+### THE STAGE WINDOW — the plan (runs ONLY on the orchestrator's GO, under the exact claim line it relays — expected `vx246-u4`)
+
+**Built (rebuild ONLY if `git diff --name-only 07f9f28d..HEAD -- Sources App` is non-empty — ruling 2's fix WILL make it
+non-empty: rebuild BOTH products then, `vx246-u4-red` from the pins commit's tree plus ruling 2's pin only if its pin
+must be red on old, else as is):**
+- `App/Variorum/DerivedData/vx246-u4-red` — RED-ON-OLD (`10629374`'s sources: the pins, no fix). Runs ONLY W1.
+- `App/Variorum/DerivedData/vx246-u4` — FIXED (`07f9f28d`'s sources): W2 and W3.
+
+**Estimate ~55 min of work → claim 75** (W1 ~4 · W2 ~18 · fixture ~8 · W3 ~18 · ruling 2's proof ~5 · cleanup ~5).
+**Batch-only fallback (~25 min, claim 35):** steps 0–1, W1, W2, cleanup; the walk moves to the next window.
+
+0. **Guards, every step** (U3's, verbatim): `Tools/stage status` shows the claim held; `Tools/WalkKit/guard.sh --author`
+   (her `/Applications/Variorum.app` ABSENT — present ⇒ STOP and report, never quit or kill it); `pgrep -fl
+   'Variorum.app/Contents/MacOS'` empty before any test run; every GUI act through `click.sh` / `keys.sh`, synthetic events
+   ≥ 2.6 s apart; an undismissable system popup → reported word for word, the window paused.
+1. **A1 prestage + prefs, FIRST** (the test host is the dev-store app): every dev-store file + key files →
+   `…/Variorum-dev/Backups/safety-copies/scale-prestage-<ts>/`, each `cmp`-verified, sha256 recorded; `defaults export
+   io.lduarte.Variorum.debug`. (No MCP leg in this window — her user-scope servers are not touched; read them only if a
+   leg is added.)
+2. **W1 — RED ON OLD (~4 min):** `zsh notes/plans/vx246-screens/u4/run-w1-red.sh` (detached to its log, POLLED in the
+   foreground). **Expected, by design:** `FanBadgePlacementTests` **4 of 5 red** — `aBadgeNeverSitsAtAnotherBlocksPlace`,
+   `blockOnesBadgeIsItsOwnAlone`, `aWidthChangeInWriteKeepsEachBadgeHome` (each on "not laid out — its frame is no
+   position" / "stacked on another's place" / "at block 1's place"), `theBookEditorPutsEveryBadgeHomeAfterAWidthChange`
+   (on "its block's first line at y=…" and the stack line) — and the characterization
+   `textKitReportsAnUnlaidFragmentAsZeroAndAZeroRectIntersects` GREEN; `BookcaseOutsideWriteTests`
+   `aNoteJoiningFromOutsideTheBoardReReadsItsWords` RED on "the row's word figure follows the join" (3 read, 12,003 stored)
+   and the row line, `typingInAMemberNoteNeverReReadsTheOneShot` GREEN. A red on a `premise:` line or a `#require` is a
+   harness defect → STOP after cleanup and report, nothing fixed under the claim. **Said honestly:**
+   `aWidthChangeInWriteKeepsEachBadgeHome`'s width road is the one pin whose OLD-tree red rides the stack (the deep fans),
+   not the width road itself — record which lines failed.
+3. **W2 — GREEN + THE MAC BATCH (~18 min):** `zsh notes/plans/vx246-screens/u4/run-w2-batch.sh` — 271 suites on
+   `vx246-u4` (`stage-suites.txt`), detached, polled. Read the summary, every `✘`, the `skipped:` lines (the gated
+   capture suites). Expected: the seven pins green. **A red not designed:** re-run ALONE once
+   (`-only-testing:VariorumTests/<Suite>/<test>()`); green alone + a named load-flake class (VX-167, VX-279) ⇒ recorded as
+   that; reproduces alone ⇒ a REAL regression, reported with the test, its message and a trace (no fix under the claim).
+   Standing reds named if met: VX-115 (`BookCollectingDoorsTests`), VX-245's sites, VX-167. **Watch especially:** any
+   inline/book suite that counts layout passes or first measures (`InlineHeightReportTests`, `InlineEditorWindowTests`,
+   the Book Outline landing suites) — the inline badge read now lays the post out when a fanned block exists.
+4. **THE FIXTURE (~8 min, the dev store, her own Import door — no MCP needed: the mechanism is TK2's, the write
+   incidental, the trace's finding):** in the scratchpad, generate with stdlib Python in the 13n-a document format
+   (`Domain/VariorumDocument.swift` — `alternatesHeader`, `takeMarker(label:ordinal:)`, `alternatesSection`; a malformed
+   file is refused BY LINE at import, so the import itself validates it):
+   - `vx230-long.md` — 140 blocks of ~60 words, block 1 with ONE take, ONE fanned block on the first screen (block 3),
+     then fanned blocks 40, 70, 100, 139 (U1's shape);
+   - `vx230-book/` — two chapter folders, each with two notes of ~70 blocks, **block 1 fanned and ~4 in 5 blocks fanned**
+     (her book's shape: "two takes on most blocks").
+   File ▸ Import… each (the note lands in the Pool, the folder as an unshelved book — its receipt captured once).
+5. **W3 — THE WALK, Study then Terminal (~9 min each; one capture per row into `notes/plans/vx246-screens/u4/`;
+   region captures, `screencapture -x -R`):**
+   - **(a) Write, first open:** the long note from the Pool → Write at its top: block 3's ⑂2 at block 3; NO badge at
+     block 1 (one take); no dark disc anywhere. Capture.
+   - **(b) Write, first open of a book note:** chapter 1's first note in Write: block 1's ⑂2 is ONE muted badge, like
+     every other block's (her `022301` shot, the after). Capture.
+   - **(c) Scrolled:** scroll (wheel, in small steps) to block 40 of the long note: its ⑂2 appears at block 40 as it comes
+     into view; scroll back to the top: still no badge at block 1. Capture each.
+   - **(d) The book view — Outline:** open the book, Outline, expand chapter 1's first note and click into it (the live
+     inline editor): every visible fanned block wears its ⑂2 at its own line, block 1 included, no disc (her `174949`
+     shot, the after). Capture. Then **a width change**: toggle the sidebar (or resize the window ~200 pt narrower) —
+     the badges follow their lines, no disc. Capture.
+   - **(e) The book view — Index / Book / Read:** a glance at each with the same note (whatever surface draws badges
+     there draws each at its own block). One capture each where badges show.
+   - **(f) First LAUNCH:** quit the Debug app by bundle id with the long note open in Write, relaunch (`open -n`): at the
+     note's top, no disc, block 3 badged. Capture. (Her "on first launch, then resolves" — the after.)
+   - **(g) VX-231 — the Bookcase row after a big join:** the Bookcase on screen with the imported book's row visible
+     (its "N notes · …w" read and captured); from a SECOND window (File ▸ New Window, or a note's Book Panel / Add to
+     Book… door — any road that is not a Bookcase door) add the long note (`vx230-long`, ~8,400 words) to the book; back at
+     the Bookcase, WITHOUT leaving it or re-entering: the row reads one more note AND its word figure grew by the note's
+     words. Capture before/after. (If no non-Bookcase add door is reachable with the Bookcase visible, the headless pin
+     stands as the evidence and the walk records the attempt.)
+6. **RULING 2's PROOF — the marked slot (the FRESH session fills it: its pin's name, its red-on-old line, and a ~5-min
+   live check).** ORCHESTRATOR'S PROVISIONAL RULING 2: a navigate-away never takes her focus. The live check's shape:
+   two panes, her caret typing in pane 1's note; pane 2's note deleted from outside pane 1 (U3's W3a road, or her own
+   Delete on pane 2's note from the Library/Trash with pane 1 focused) → pane 2 lands on the Library IN PLACE and her
+   caret STAYS in pane 1 (a keystroke lands there). Capture. *(Not built by U4 — the orchestrator's word: a fresh session
+   builds it on this tree, red-first, rebuilds the products, and runs this window with its proof.)*
+7. **CLEANUP (~5 min):** the imported note and book moved to the Trash is NOT enough — the dev store is RESTORED:
+   the Debug app quit BY BUNDLE ID (`pgrep` empty); prefs `defaults import` + delete every key the window added →
+   re-export, 0 keys differ; `Tools/ScaleFixture/restore.sh <the prestage dir>` → "Restored (verified)" + a second `cmp`
+   (the posture handed over: Standard, unlocked, Study); the voice back to Study if changed (the restore returns it);
+   the scratch fixture files deleted; stray `default.profraw` removed; **`Tools/stage release --who vx246-u4`** at once;
+   ONE result line (claim times, W1's red counts, W2's totals, W3's verdicts, ruling 2's verdict, the posture).
+
+### SELF-ASSESSMENT (pre-stage — the implementer's)
+
+- **Confident:** the mechanism — measured, not inferred (`probes/probe-output.txt`: `.zero` / `.none` for unlaid
+  fragments, every fragment after a width change, the degenerate-rect `intersects`, and a mid-document `.ensuresLayout`
+  read positionally exact); both of her screenshots and U1's sighting follow from it line by line; the fixes are small and
+  local (`refreshBadges`'s read, `ShelfViewModel.start`'s loop); headless green and both products build clean.
+- **Less sure, said plainly:** (1) nothing has run on a Mac — the pins' harness shapes are copied from the N14 / inline
+  width pins, but a premise line may still trip at W1; (2) the inline `.ensuresLayout` read moves the book editor's
+  whole-post layout from the remeasure hop to the badge pass when the badge pass runs first (renderFull's tail, a voice
+  flip's `applyChrome` inside SwiftUI's update) — the same work one hop earlier, but suites that time or count inline
+  layout may notice (W2 watches them); (3) VX-231's follower double-reads the store-wide one-shot after each BOARD act
+  (the act's own explicit refresh + the follow) — human-rate, off the main thread, accepted rather than touching fifteen
+  call sites; (4) Write's width road is argued (the scroll-anchor controller's width restore lays out and refreshes), not
+  traced live — W2's `aWidthChangeInWriteKeepsEachBadgeHome` and W3 (d) are its evidence.
+- **Recorded residuals:** after one large scroll jump in Write, a fanned block exposed by the jump may lack its badge
+  until the next scroll event or keystroke (unchanged in kind from before); a member note's words changing by EDITING
+  still don't reach the Bookcase row until the board re-appears (the one-shot's documented design).
+- **Editor-seam letter:** `refreshBadges` adds no attribute stamp, touches no storage, no `runStructural`, no
+  `BlockRangeIndex`; the one forcing read is off the storage-edit transaction (the R1-1 oracle counts it if it ever ran
+  inside); TK1 untouched (no `.layoutManager`).
+- **MOBILE PARITY:** nothing mobile-visible — the phone's badges are `MobileBlockDecor`'s own (not examined; the TK2
+  facts are platform-shared, so the phone may hold the same class — OWED 3).
+
+### PROVISIONALs (with their options — the orchestrator files them at the merge)
+
+None. (Both fixes restore documented contracts: "unlaid-out blocks simply have no badge until scrolled to", and the
+Bookcase row's counts agreeing with each other.)
+
+### FOR VX-234 (user-facing words, as built)
+
+Nothing — no word changed.
+
+### OWED (for the orchestrator)
+
+1. **VX-327 — the decoration layer's same read** (minted from this trace): `refreshDecorations`' `fragmentFrame(atOffset:)`
+   reads unlaid fragments as positions too (no state check), so decorations — callouts, comment cards, seams, the
+   indicator — of unlaid blocks get zero-height rects at the container origin; Write's visible-window prune hides most of
+   it, the inline surface's whole-post window does not (after a width change, until the next keystroke). A red-first
+   probe before any fix.
+2. **TEXTKIT2_NOTES §3 — a PROPOSED finding** (canon is the orchestrator's at the closeout): *"macOS 27.0 measured finding
+   (VX-246 U4, 2026-10-14 — pinned in `FanBadgePlacementTests.textKitReportsAnUnlaidFragmentAsZeroAndAZeroRectIntersects`):
+   a layout fragment TK2 has not laid out reports `layoutFragmentFrame == .zero` in the `.none` state (an estimated one
+   reports a GUESSED frame), and a WIDTH change returns every fragment to `.none` / `.zero` until the next layout pass; a
+   `.zero` rect offset by the container origin `intersects` any rect holding that point (CGRect's degenerate-rect rule).
+   **The rule:** a frame read with `options: []` is a position only when `state == .layoutAvailable`. A mid-document
+   `.ensuresLayout` read is positionally exact (TK2 lays out up to it)."*
+3. **The phone's twin (not examined):** `MobileBlockDecor` / `MobileEditorTextView` may read fragment frames the same way
+   — a probe on the VM board if the orchestrator wants it checked.
+4. **The Fable cold review** (the editor seam, CLAUDE.md): `EditorViewModel.refreshBadges` — the orchestrator's, after the
+   units.
+5. **Canon at the merge:** none required (AppSpec §12's "a corner badge only on fanned blocks" now holds on every surface).
+
