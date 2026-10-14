@@ -3283,8 +3283,11 @@ a **75-min claim** asked (the plan's). Batch-only fallback (~30 min, claim 40): 
 
 ## U1b UNIT RECORD — VX-258's face and U1's remainder: VX-258 · VX-318 · VX-260 option (b), plus the carried live legs (opus-implementer, from 2026-10-14 ~05:00 MDT)
 
-**Not done yet (first line, kept current — the state at piece 0's close, 2026-10-14 ~06:20 MDT):** pieces 1–5 are not
-built; no stage window has run (no Mac test, no walk, no live round); no QUESTIONS, canon or ticket edit (the merge's).
+**Not done yet (first line, kept current — the state at READY, 2026-10-14 ~07:10 MDT):** NO STAGE WINDOW HAS RUN —
+no Mac test (VX-258's pins are red-first only by construction of `vx246-u1b-red` and `-revert`, their red runs the
+window's W1), no walk, no live round (legs 0–4, U2's W2/W3, ruling 2's real-client check, U4c's W1–W3 — all THE STAGE
+WINDOW below); Codex's leg is N/A (not installed); **VX-318 was NOT fixed — DISMISSED AS HOLLOW** (its trace below);
+no QUESTIONS, canon or ticket edit (the merge's); the field guide untouched (U8, the follow-on run).
 
 **Machinery, said:** PAUSED once before piece 0 (`c0e23c47`, U4b's window took the stage; no merge was started), then
 resumed at the orchestrator's word after U4b's run, U4c's unit and its notes (`a2d84e77`). Since then the scope gained
@@ -3308,13 +3311,13 @@ its design and pieces) after the merge; **`notes/SyncSpec.md` in full, BEFORE pi
 | 1 | VX-258's FACE — (a) the mint call site (THE MERGE GATE), (b) the re-bind row in Waiting, (c) the words, (d) L1 / `keyLine` truth | DONE, its Mac runs PENDING (the window) — **the pins first (`9df5e874`, pre-fix API only):** NEW `MCPSetupTabKeyTests` (each tab's copy carries its client's name; a client's own setup re-run moves its approved name with zero clicks, both tabs; the control — an Any copy under an approved name waits), and the RED PRODUCT built from that tree: `DerivedData/vx246-u1b-red` (`** TEST BUILD SUCCEEDED **`, `u1b/logs/p1-red-build.log`) — its red run is the window's W1 (expected: 3 of 4 cases red — the tag test, both re-run cases — the control green). **The face (`43ee6209`):** (a) `MCPSetupClient.expectedName` (inside its O-4 fence) + `copySetupCommand` minting `copiedFor:` the chosen client's name; (b) Waiting's re-bind row (`MCPRebindRowView`, above the asks; the snapshot reads `Queries.mcpRebindRequests`; Allow / Don't allow through the runner; a gone setup said by Waiting; ⌥⌘,'s count includes the setups; two new `.surface` capabilities); (c) the three Activity lines + the refusal words; (d) L1, `keyLine`, `keySummary` (L1's summary unchanged — still true). NEW `MCPRebindFaceTests` (8) + six JUSTIFIED EDITS (each commented in place). `build-for-testing` into `vx246-u1b` SUCCEEDED, no warning in a touched file (`u1b/logs/p1-face-build.log`); the O-4 sweep green headless 2/2 (the fence now 80 of 120 lines). The design and the words: THE FACE section below |
 | 2 | VX-318 — the trace first; a red-on-old pin; the fix only if the pin is red | DONE — **DISMISSED AS HOLLOW** (no fix; the trace and the evidence: THE VX-318 TRACE below). The pin `7c69369a` — NEW `Tests/VariorumMCPTests/MCPReaderAfterCloseTests.swift` (the production road with the reuse made certain: a real `MCPSession`, a burst in flight, the session ended by each production road, the host's close, `dup2` onto the freed number at once, a byte written to the fresh socket) — **GREEN on the pre-fix tree:** 3 plain runs and 4 runs under 24 CPU hogs (`u1b/logs/p2/loaded-run-*.log`), 304 session endings a run (150 client hang-ups · 150 server stops · 4 over-the-cap), zero bytes taken. **Its detection power proven** by a POSITIVE CONTROL (a temporary, never-committed stray reader reading the number after the close): **RED 150 of 150 on both roads and 4 of 4 over the cap** (`u1b/logs/p2/positive-control.log`); the file restored (`git checkout --`, `git status` clean). The pin stays as the ordering's guard (green both sides by design — said in its header) |
 | 3 | P-VX260-1 option (b) — its own schema commit (v1_29, local-only), then the code, red-first | DONE — **the pins first (`911494e4`, pre-fix API):** NEW `Tests/VariorumMCPTests/MCPCommentWordsServerTests.swift` — **RED on the pre-fix tree: 1 test, 2 issues** (the suggest client's `delete_comment` LANDED on the comment whose words changed with no door — "deleted":true — and the comment was gone); the control `actsThatChangeNoWordLeaveItTheClientsOwn` green (`u1b/logs/p3-pins-red.log`). **The schema ALONE (`dfc1c2cd`)** — `notes/SyncSpec.md` read in full first: `v1_29_mcp_comment_words` → `mcp_comment_author.text_digest` (nullable), local-only on the family's road, NO BACKFILL (NULL = unproven); 2 schema pins + 1 justified edit; the schema/migration/sync-registry/export suites 58/7 green (`p3-schema.log`). **The code (`ead29354`):** `Domain/MCPCommentWords` (digest + `isOwn`), the record's write carries the digest, `Queries.mcpCommentIsOwn`, `deleteRung` reads it. **GREEN:** the wire pin 2/2; NEW core `MCPCommentWordsTests` 5/5; every comment suite unmodified (MCP 13/5 · core 57/20 by filter — `p3-green.log`). THE OPTION (b) DESIGN below |
-| 4 | pins red again by revert per member; headless finals + the Mac build(s) | IN-PROGRESS — **REVERT IN FLIGHT (announced here before it starts):** VX-260 (b)'s five production files back to `911494e4` (the pins commit — `MCPCommentWords.swift` absent there), the new-API core pin file moved aside to `notes/plans/vx246-screens/u1b/prerevert/` (gitignored, inside the worktree); then the wire pin run; then RESTORED (`git checkout HEAD --` + the file back; `git status` clean). VX-318 has no fix to revert (hollow). VX-258's Mac pins: their red product is `vx246-u1b-red` (the pre-fix tree + the pins); a REVERT product follows (HEAD with only the mint call site reverted) |
-| 5 | THE STAGE WINDOW plan (claim `vx246-u1b`) → READY | NOT-STARTED |
+| 4 | pins red again by revert per member; headless finals + the Mac build(s) | DONE — **VX-260 (b) red again by revert** (its production files to `911494e4`, the new-API core pin aside, run on a committed tree): the wire pin **1 test, 2 issues — identical to piece 3** (`p4-revert-260.log`); **RESTORED** (`git checkout HEAD --` + the files back; `git status` clean, `git diff HEAD` empty) → 2/2 + 5/5 (`p4-restored-260.log`). **VX-258's merge gate:** the REVERT product `vx246-u1b-revert` built (HEAD with ONLY the mint call site reverted; `p4-revert-258-build.log`), `MCPDoor.swift` RESTORED after (`git status` clean) — its red run is the window's W1b. **VX-318:** nothing to revert (hollow). **The final product `vx246-u1b` rebuilt on piece 3's tree** (`p4-mac-build.log`, `** TEST BUILD SUCCEEDED **`); all three products verified by symbol (THE PINS below). **Headless finals EXIT 0: MCP 240/51 · core 2,841/329 · workbook 40/6** (after the pin's SIGPIPE fix `24cef7bd` — THE PINS below) |
+| 5 | THE STAGE WINDOW plan (claim `vx246-u1b`) → READY | DONE (this commit) — **READY for stage**; the stage NOT claimed. Scripts `u1b/run-w1-red.sh`, `u1b/run-u4c-w1.sh`, `u1b/run-w2-batch.sh` (`zsh -n` clean), `u1b/stage-suites.txt` (279 suites, every name a declared type), `u1b/driver-u1b.py` (compiled), `u1b/gen_fixture.py` (U4c's). THE STAGE WINDOW below |
 
 **No revert is in flight.**
 
-**Continuation (for a resume):** piece 3 next — P-VX260-1 option (b): the schema commit first (v1_29 adds a local-only
-`text_digest` to `mcp_comment_author`; SyncSpec read), then the delete's compare, red-first headless.
+**Continuation (for a resume):** the build is done — READY. What remains is THE STAGE WINDOW (below), on the
+orchestrator's GO, then its record and the result line.
 
 ### THE VX-318 TRACE (inputs → the feared state; why it cannot be reached)
 
@@ -3344,6 +3347,330 @@ session's descriptor and the process has handed the number to another socket —
 earliest instant, a reader mid-loop, every ending, under load) and is green on the tree it was written against; its
 detection power is proven by the positive control. **VX-318 is DISMISSED AS HOLLOW — no production line changed.** The
 ticket's fix shape (a bounded wait in the session's close for its reader) would guard a state the code cannot reach.
+
+### THE FACE (piece 1) — the design, argued
+
+- **(a) The mint call site — THE MERGE GATE.** `MCPSetupClient.expectedName` (inside the setup menu's O-4 fence — the
+  one place a provider is named): Claude Code `claude-code` (seen live: VX-184 U1's round, Claude Code 2.1.296; the Pro
+  runs 2.1.299 — leg 0 re-reads it), Codex `codex-mcp-client` (an EXTERNAL LOOKUP of its source, U1's trace item 6;
+  Codex is not installed), Any MCP client `nil`. `copySetupCommand(for:)` reads the menu's choice once — after it has
+  made the copied client the chosen one (R1-3's road, fact 5) and BEFORE the mint's await — and mints
+  `copiedFor:` it. So the key minted is always the copied client's, whatever choice lands during the await (R1-3's
+  receipt rule untouched). A client whose real name differs from its tab's connects as a request (unknown name) or
+  waits for her OK (a known one, P-VX258-1) — never refused.
+- **(b) Waiting's re-bind row.** The door's snapshot reads `Queries.mcpRebindRequests` in the same fetch as the rest
+  (GRDB's region tracking puts `mcp_rebind_request` in the observation — no explicit region needed). `MCPRebindRowView`
+  leads Waiting (above the asks — identity before reach), every waiting setup listed (one per client by
+  `uq_mcp_rebind_request_client`, so ∝ clients; no "all N ›"). Its words: "New setup for ‹name›" ·
+  "Connected as ‹name› (version ‹v›) with a setup that wasn't copied for it, ‹age›. It reaches nothing until you allow
+  it; allowing moves the name, with its grants, to this setup." — the declared version is what tells her a stranger
+  from the client she knows. **Allow / Don't allow** call `allowMCPRebind` / `declineMCPRebind` through the session's
+  runner (P2); neither is styled as the default (the safe answer is not to press — a stranger's setup would take the
+  name's grants). A press on a setup no longer waiting (`mcpRebindRequestNotFound`) says "That setup isn't waiting any
+  more." BY WAITING (W-UX-8's place; Settings has no status seam); a landed answer speaks no caption (the row leaving and
+  the Activity line are the answer, as Approve's and Deny's are). ⌥⌘,'s landing counts the setups
+  (`MCPDoor.waitingCount`). No glyph: a waiting setup names a client, not a place in the library, so the ask glyph's
+  places have nothing to mark. **P-1:** two new `.surface` capabilities, `mcpAllowRebind` ("Allow") and
+  `mcpDeclineRebind` (`MCPAskCopy.dontAllow` — the ask sheet's own word, one source), declared on the pane.
+- **(c) The words.** Activity (special-cased before the allowed/refused split — the wait is logged as not allowed per
+  P-VX258-5 but is no refusal of the client): `connect_rebind_waiting` → "‹name› asked to use a setup that wasn't
+  copied for it"; `connect_rebind_allowed` → "‹name› took the new setup you allowed, which replaced its earlier one"
+  (the tail only when the row's target says a key was replaced); `connect_rebind_declined` → "‹name›'s new setup wasn't
+  allowed". The refusal: `mcpRebindRequestNotFound` → "That setup isn't waiting any more."
+- **(d) The truth lines.** L1 (`clientBoundary`): "…Each setup copied here carries a key that binds that name to it.
+  Running the client's own setup again moves the name to the new key; a setup copied for any MCP client waits for your
+  OK before it takes a name you approved; any other key, or none, is refused. That tells two tools apart, not programs
+  running as you: …" — its one-line summary is UNCHANGED (still true: "A setup key tells two clients apart — not
+  programs running as you."). `keyLine`: "…Running a client's own setup again replaces the old one; a setup copied for
+  any MCP client waits for your OK before it takes a name you approved." `keySummary` (it said "running it again
+  replaces the old setup" — false for an Any copy now): "Each copy carries a fresh key; running a client's own setup
+  again replaces the old one." The guide's lesson 2 is U8's (the follow-on run) — OWED there.
+
+### THE OPTION (b) DESIGN (piece 3) — argued
+
+- **The rule:** the authorship record keeps a DIGEST of the words the client wrote (`Domain/MCPCommentWords.digest` —
+  hex SHA-256 over `"variorum.mcp-comment-words.v1:" + text`, byte-exact, the setup key hash's shape), written in the
+  comment's own transaction by both add doors (`addComment`, `addComments`) from the INSERTED row's text. A comment is
+  the client's own only while the record names it AND its words now hash to that digest (`MCPCommentWords.isOwn`,
+  read by `Queries.mcpCommentIsOwn`, read by `delete_comment`'s `deleteRung`). Any change to the words — her edit on
+  any device (arriving by sync, which runs no door here), any client's `edit_comment` — and deleting needs EDIT; acts
+  that change no word (an undo/redo revive, her delete + Put back, a sync arrival of the same words, her no-op edit)
+  leave it as it was; the very words written back make it the client's again ("an unchanged digest means unchanged
+  words"). U1's option (a) — her edit on THIS Mac forgets the record — stays built (harmless and immediate); (b) is
+  what reaches her other devices. `Queries.mcpCommentAuthor` stays the FACT of authorship; ownership is the new read.
+- **Backfill vs NULL-means-legacy — NULL MEANS UNPROVEN (built).** A record written before `v1_29` has no digest.
+  (i) Backfilling the digest from each comment's CURRENT words would bless exactly the comments the rule exists to
+  protect: her daily build (VX-184's) never forgets a record on her edit, and her phone/Air edits arrive by sync — so a
+  record may already name a comment she has rewritten, and its current words cannot say which. (ii) NULL read as the
+  client's own (legacy trust) keeps that same hole open for every pre-upgrade comment. (iii) NULL read as UNPROVEN —
+  never the client's own: the strict reading, "the best protection" her VX-258 words ask of the door. The cost, said:
+  a client's comments written before this build ask EDIT to delete (a client at suggest hears her R-VX188-2 sentence
+  for them). The migration keeps every record (the authorship fact stays) and writes no digest. PROVISIONAL with the
+  options (P-VX260-2 below).
+- **The accepted residual (the orchestrator's, restated):** an EDIT-rung client's rewrite of its own comment also
+  ends its suggest-rung ownership (pinned: `changedWordsFromAnyRoadEndItsOwnership`).
+- **Zero lockstep:** the column is local-only (the grants family's road) — no `sync_version`, no trigger, never the
+  outbox, no mirror, the marker 13, the plaintext export keeps the family empty. The digest never leaves the store.
+
+### THE PINS (each read from its log — `notes/plans/vx246-screens/u1b/logs/`, gitignored)
+
+| member | pin(s) | red on the pre-fix tree | green | red again by revert |
+|---|---|---|---|---|
+| VX-258's face — the merge gate | Mac `MCPSetupTabKeyTests` (4 cases: the tag test, the re-run case ×2 tabs, the Any control) | **PENDING — the window's W1a** on `vx246-u1b-red` (the pins commit `9df5e874`'s tree); expected 3 of 4 cases red, the control green | PENDING — W2 on `vx246-u1b` | **PENDING — the window's W1b** on `vx246-u1b-revert` (HEAD with only the mint call site reverted — built `p4-revert-258-build.log`, verified by symbol below); expected the same 3 red, the control green, `MCPRebindFaceTests` 8/8 green |
+| VX-258's face — the row, the words, the truth | Mac `MCPRebindFaceTests` (8, new API — state transitions) + six justified edits | n/a (new API; the row is a design row — the walk is its oracle) | PENDING — W2 | — |
+| VX-318 | `MCPReaderAfterCloseTests` (headless, 3 cases) | **GREEN — the row is HOLLOW** (7 runs, 4 under 24 hogs; positive control red 150/150 · 150/150 · 4/4, and again 10/10 · 10/10 · 2/2 on the committed atomic form) | 240/51 whole MCP target ×3 | n/a (no fix) |
+| VX-260 (b) | MCP `MCPCommentWordsServerTests` (pre-fix API) + core `MCPCommentWordsTests` (5, new API) + 2 schema pins | wire pin **1 test, 2 issues**; the control green (`p3-pins-red.log`) | 2/2 + 5/5 + every comment suite unmodified (`p3-green.log`) | **1 test, 2 issues — identical** (`p4-revert-260.log`); RESTORED → 2/2 + 5/5 (`p4-restored-260.log`) |
+
+**The three Mac products, verified by symbol** (`nm -n` + `swift demangle`, size = the next symbol's address minus
+this one's; `MCPDoor.copySetupCommand(for:to:)`'s async fragments): **`vx246-u1b`** (the FIXED, merged product — HEAD
+`24cef7bd`'s app sources, dylib 06:44) fragments {208, 220, 272, 616, 660}, `MCPSetupClient.expectedName.getter` 248,
+`MCPRebindRowView` present, `static Queries.mcpCommentIsOwn` 1,400 (piece 3 inside); **`vx246-u1b-revert`** (dylib
+06:40) fragments {196, 220, 248, 580, 660} (the mint call site reverted), `expectedName` 248 and the row present;
+**`vx246-u1b-red`** (dylib 06:08 — the pins commit's tree) fragments {192, 212, 220, 544, 608}, NO `expectedName`, NO
+row. Every product's test bundle carries `MCPSetupTabKeyTests`; `vx246-u1b`'s and `-revert`'s carry
+`MCPRebindFaceTests`.
+
+**Headless finals (piece 4 — the whole package on `24cef7bd`'s tree, EXIT 0, zero ✘; `p4-finals.log`):
+`VariorumMCPTests` 240 / 51 · `VariorumCoreTests` 2,841 / 329 · `StringsWorkbookTests` 40 / 6** — against piece 0's
+236/49 · 2,834/328: MCP +4 / +2 (`MCPReaderAfterCloseTests` 2, `MCPCommentWordsServerTests` 2), core +7 / +1
+(`MCPCommentWordsTests` 5 + the two schema pins). **A finding on the way, fixed (test-only, `24cef7bd`):** the first
+finals run died with SIGPIPE in the MCP target (signal 13) — my VX-318 pin's close-then-`dup2` left a window in which
+another test in the same process could take the freed number, which the `dup2` then closed under it (the very VX-279
+class it probes). The reuse is now ONE atomic `dup2` (the session's own close never called); the MCP target then ran
+240/51 green three times running, and the whole package once more. **Path check (`ec879967^..HEAD` plus the face
+commits):** zero lines under `Sources/VariorumCore/Sync/`, custody/Keychain/`Crypto/`, `Server/`, the editor seam
+(`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, `PaneTextAuthority`, `Shared/EditorBrain`); ONE local-only schema
+step (`v1_29`, its own commit `dfc1c2cd`).
+
+**A machinery note (the products):** every APFS-cloned product of this run carried its SwiftPM artifacts' ABSOLUTE
+paths from the first product, `DerivedData/vx246-u1` (in `SourcePackages/workspace-state.json`), which the coordinator
+deleted mid-unit — so the next build in a clone failed ("There is no XCFramework found at …vx246-u1/…"). Fixed by
+pointing each of my three products' `workspace-state.json` at its own `SourcePackages` (the artifacts are there); the
+builds after that succeeded. Clone-builders: check that file.
+
+### THE STAGE WINDOW — the plan (runs ONLY on the orchestrator's GO, under the exact claim line it relays — expected `vx246-u1b`)
+
+**Built (rebuild ONLY if `git diff --name-only 24cef7bd..HEAD -- App` is non-empty — record-only commits since):**
+`App/Variorum/DerivedData/vx246-u1b` (the FIXED, merged product — the live round, the walks, W2, U4c's W1 and W3),
+`vx246-u1b-red` (W1a) and `vx246-u1b-revert` (W1b) — each verified by symbol above. The shim the live legs run:
+`App/Variorum/DerivedData/vx246-u1b/Build/Products/Debug/Variorum.app/Contents/MacOS/variorum-mcp` (SHIM below).
+Evidence → `notes/plans/vx246-screens/u1b/` (gitignored; keys redacted to their first 9 characters everywhere).
+
+**Estimate ~100 min of work → claim 120.** (A1 + prefs + fingerprint ~3 · W1 ~3 · U4c-W1 ~2 · W2 ~12 · the fixture ~5
+· the live round, Study ~45 · Terminal ~20 · U4c's W3 both voices ~14 · cleanup ~8.) **Batch-only fallback (~25 min,
+claim 35):** steps 0–1, W1, U4c-W1, W2, cleanup — the acceptance then stays OPEN for the live legs and walks.
+
+0. **Guards, every step** (U4b/U4c STAGE RUN's, in force): `Tools/stage status` shows the claim held — never inside an
+   `&&` chain (it exits 1 under a held claim); `Tools/WalkKit/guard.sh --author` (her `/Applications/Variorum.app`
+   ABSENT — present ⇒ STOP and report, never quit or kill it); app instances checked with `pgrep -lx Variorum` (a
+   sibling's headless build matches the `-f` form); every GUI act through `click.sh` / `keys.sh`, synthetic events
+   ≥ 2.6 s apart; an undismissable system popup reported word for word and the window paused. A What's New sheet: its
+   own button. A lock screen: `source ~/.variorum/dev-castle.env`, those values only, never written anywhere; the
+   posture restored before release.
+1. **A1 prestage + prefs + fingerprint, FIRST** (the test host is the dev-store app): every dev-store file and the key
+   files → `…/Variorum-dev/Backups/safety-copies/scale-prestage-<ts>/`, each `cmp`-verified, sha256 recorded
+   (`u1b/store-hash-pre.txt`); `defaults export io.lduarte.Variorum.debug u1b/prefs-pre.plist`; the dev `Backups/`
+   listing saved; **her user-scope MCP servers** read BEFORE (names + the sha256 prefix of the sorted compact
+   `mcpServers` JSON, never values — the last four windows read `['linear-server', 'variorum']`, `bc64543e2f4e8e58`).
+2. **W1 — VX-258's merge-gate pins RED (~3 min):** `zsh notes/plans/vx246-screens/u1b/run-w1-red.sh`, foreground.
+   **Expected, W1a (`vx246-u1b-red`):** `MCPSetupTabKeyTests` **3 of 4 cases RED** — `eachTabsCopyCarriesItsClientsName`
+   (Claude Code's and Codex's copies read `copiedFor` nil: the untagged `vmk1_` form), and
+   `aClientsOwnSetupRerunMovesItsApprovedNameWithZeroClicks` for BOTH tabs (`.awaitRebind`, not `.rebind`; the name
+   kept its first key; a waiting row exists); `anAnyClientCopyUnderAnApprovedNameWaitsForHerOK` GREEN. **W1b
+   (`vx246-u1b-revert`):** the same three red, the control green, AND `MCPRebindFaceTests` **8/8 GREEN**. A red on a
+   `premise:` line or a `#require` ⇒ record it as a harness defect, not evidence (no fix under the claim).
+3. **U4c's W1 (~2 min):** `zsh notes/plans/vx246-screens/u1b/run-u4c-w1.sh` on `vx246-u1b`. Expected (U4c's plan step
+   2, verbatim in force): 2 tests GREEN and the host's decisive line `VX-230 U4c [after pump(), no hop run]: block 40
+   laid out = false` — a `true` means U4c's trace item 2 is wrong in the host: record it (the pin's green stands as the
+   in-use evidence either way).
+4. **W2 — the Mac batch (~12 min):** `zsh notes/plans/vx246-screens/u1b/run-w2-batch.sh` (279 suites,
+   `u1b/stage-suites.txt` — every name a declared type, verified), detached to its log and POLLED in the foreground
+   (`grep -q 'XCODEBUILD EXIT' …; sleep 5`). Expected green but the standing ones, NAMED if met: VX-115's
+   `BookCollectingDoorsTests` (in the set); the gated capture harnesses SKIPPED (5 MCP + `MCPPaneTabsCaptureTests`);
+   `IndexTierMetricsTests`' known issues if any. A red not designed: re-run it ALONE once
+   (`"-only-testing:VariorumTests/<Suite>/<test>()"`); green alone + a named load-flake class ⇒ recorded as that;
+   reproduces alone ⇒ a real red, reported with its message (no fix under the claim). Read every `✘` and the
+   `skipped:` lines; record the per-group counts.
+5. **THE FIXTURE (~5 min, her own Import door — U4c's step 4):** `python3 notes/plans/vx246-screens/u1b/gen_fixture.py
+   notes/plans/vx246-screens/u1b/fixture`; launch `open -n …/vx246-u1b/Build/Products/Debug/Variorum.app` (1380 wide);
+   File ▸ Import… → ⇧⌘G to the fixture → select ONLY `vx230-book` → Import (pressed by AX if a pointer click does not
+   land) → the receipt "Imported 1 book…" captured once.
+6. **THE LIVE ROUND — Study half (the dev store's voice as found).** A scratch project `u1b/live/proj` (an empty folder
+   — `-s local` registrations live there, never her user scope); the tee wrapper `u1b/live/tee-shim.sh` (`#!/bin/zsh` ·
+   `tee -a "$TEE_IN" | <SHIM> | tee -a "$TEE_OUT"`, the env passing through — U1/U3's form). **The setup line the pane
+   copies (`claude mcp remove -s user …; claude mcp add -s user …`) is NEVER run as copied:** only its KEY is taken from
+   the clipboard (a regex on `VARIORUM_MCP_KEY=…` / `"VARIORUM_MCP_KEY": "…"`), and registered `-s local` in the
+   scratch project, or written to a scratch `--mcp-config` JSON for `claude -p --strict-mcp-config` (U3's road). Her
+   user-scope fingerprint re-read after every add/remove: SAME.
+   - **Leg 0 — posture + Claude Code's real name:** Settings ▸ MCP (the app menu's Settings…, then the sidebar's MCP):
+     the switch ON and "running"; the Clients tab: `claude-code`'s row (approved? N grants? — the Deny confirm names
+     them) captured. **Branch:** `claude-code` unknown or pending ⇒ leg 1 starts as a first contact (a request →
+     Approve… with NOTHING picked), then runs as written.
+   - **Leg 1 — a Claude Code TAB key re-binds `claude-code`, zero clicks:** Connect tab ▸ the client menu on Claude Code
+     ▸ the code block's copy icon (help "Copy setup command") → the key reads **`vmk2_claude-code_…`** (record its first
+     9 characters — and the 17-character tag-bearing head) → `claude mcp add -s local variorum-dev -e
+     VARIORUM_MCP_KEY=<key> -- u1b/live/tee-shim.sh` (TEE_IN/TEE_OUT set) in the scratch project → `claude mcp list`
+     → **`variorum-dev` ✔ Connected** — NO pane press (Waiting stays empty: capture) → the tee's first frame: the
+     `initialize` `clientInfo.name` **"claude-code"** (leg 0's live read — record the line) → ONE `claude -p` turn
+     ("list my Variorum notes", allowed `mcp__variorum-dev__list_notes`) → served → Activity tab: "claude-code
+     connected with a newer setup, which replaced its earlier one" (or "…with a new setup, now bound to its name" if it
+     was unbound) — capture.
+   - **THE GRANT for the legs below (U3's deviation, recorded):** `claude-code` ▸ Change… ▸ A wing · Home · Edit · Always
+     (one sheet) — unless leg 0 found an equivalent standing grant. Recorded either way.
+   - **Leg 2a — an Any-client key under `claude-code` WAITS, a REAL Claude Code; her Don't allow:** Connect ▸ Any MCP
+     client ▸ copy icon → the JSON stanza's key **`vmk1_…`** → a SECOND scratch registration `variorum-dev-any`
+     (`claude mcp add -s local variorum-dev-any -e VARIORUM_MCP_KEY=<any key> -- u1b/live/tee-shim.sh`, its own
+     TEE files) → `claude mcp list` → **`variorum-dev-any` ✔ Connected** (admitted to a request's face) → ONE `claude -p
+     --strict-mcp-config` turn whose config holds ONLY the any server, asked to list the books → it finds no Variorum
+     tool (record its words); the tee: an EMPTY `tools/list` → **Settings ▸ MCP: Waiting, above the tabs: "New setup
+     for claude-code" · "Connected as claude-code (version 2.1.299) with a setup that wasn't copied for it, … It
+     reaches nothing until you allow it; …" · Allow · Don't allow** (capture; a crop of the row) → **Don't allow** → the
+     row leaves (capture) → Activity: "claude-code asked to use a setup that wasn't copied for it" and "claude-code's
+     new setup wasn't allowed" (capture) → `claude mcp list`: `variorum-dev-any` **✘** (its tee: the ONE refusal
+     sentence) and `variorum-dev` **✔** (the client she knows never noticed). `claude mcp remove -s local
+     variorum-dev-any`.
+   - **Leg 2b — her Allow serves the SAME connection, no reconnect (the scripted client — `driver-u1b.py`, ruling 1's
+     precedent: `claude -p` cannot hold a session across her press):** Connect ▸ Any MCP client ▸ copy → a fresh `vmk1_`
+     key → `VARIORUM_MCP_KEY=<key> python3 -I u1b/driver-u1b.py <SHIM> claude-code waitallow 180 > u1b/live/2b.jsonl
+     2> u1b/live/2b.err &` → READY → its first line: `"tools": []` and `list_notes` answering the pending sentence
+     ("This client's connection request is waiting in Variorum ▸ Settings ▸ MCP. Nothing is readable until the author
+     approves it.") → the Waiting row (capture) → **Allow** → within seconds the driver's lines: `"list_changed": true`,
+     then `tool_count` > 0 and `list_notes_isError` false — the SAME connection served (capture the pane: no row;
+     Activity "claude-code took the new setup you allowed, which replaced its earlier one") → `claude mcp list`:
+     `variorum-dev` (leg 1's tab key, now REPLACED) ✘ — its tee shows the replaced key's own sentence → **re-run the
+     Claude Code tab's setup** (copy → re-register `variorum-dev` with the fresh tab key) → ✔ zero clicks (Activity
+     "connected with a newer setup…") — the real-client road restored for the legs below.
+   - **Leg 3 — VX-259, the rename to a hidden book's name lands without echo:** her own doors: a new Home book
+     **"u1b secret"** (the Bookcase's new-book door), its Book Settings ▸ State ▸ Private on (her door — R-VX184-2), and
+     a new Home book **"u1b shelf"**; a third, **"u1b open"** (readable through the wing grant). ONE `claude -p` turn
+     (allowed `list_books`, `rename_book`): rename "u1b shelf" to **"U1b Secret"** → LANDS; the tool's answer names
+     only "U1b Secret" — a grep of the tee for the stored casing "u1b secret" finds nothing; the Bookcase shows both
+     (capture). The control, the same or the next turn: rename "U1b Secret" to **"u1b open"** → refuses, naming "u1b
+     open" (BookNameCopy's sentence; the client CAN read it). Name everything back is NOT needed (the store restore).
+   - **Leg 4 — VX-260 (a) and (b) on the wire: a suggest delete of a comment whose words changed hears her sentence:**
+     a Home note **"u1b c4"** with one block ("Comment me."), via the quick entry. The suggest client is the driver:
+     `VARIORUM_MCP_KEY=<fresh Any key> python3 -I driver-u1b.py <SHIM> vx260-suggest hello` → "Connection request —
+     vx260-suggest" → Approve… → Suggest · note "u1b c4" · Always. Driver `call add_comments
+     '{"note_id":"…","comments":[{"block_id":"…","text":"C1 check this."},{"block_id":"…","text":"C2 a source?"},
+     {"block_id":"…","text":"C3 tighten."}]}'` (ids from a driver `call read_note '{"note_id":"…","with_ids":true}'`).
+     **(a) her edit:** her Comments panel ▸ C1 → rewrite to "C1 checked — it's 1971." (capture). **(b) a change with no
+     door of hers:** ONE `claude -p` turn (claude-code at Home EDIT): `edit_comment` C2 to "C2 a source, please?" (the tool
+     needs `expected_text` — the comment's current words; give the id and both texts in the prompt)
+     (the record's digest no longer matches; option (a) alone would have let the suggest client delete it). Then the
+     driver: `call delete_comment` C1 → **"You don't have permission to delete that comment. Suggest raising your
+     permission level to edit."** byte-equal; C2 → the same sentence; C3 → deleted (`"deleted": true`). Her panel: C1
+     (her words) and C2 (the rewrite) live, C3 in the deleted fold (capture).
+   - **U2's W2 — the client's VALUE and TOGGLE directions:** a Home note **"u1b undo"** (One. / Two. / Three., quick
+     entry), open in Write. ONE `claude -p` turn: `rename_note` it to "renamed by claude" and `lock_take` the take of
+     block "One." (tee-captured answers). Her own doors: the title field back to "u1b undo"; the take's card ▾ ▸ Unlock
+     (Takes). Then ⌥⌘Z → the toast **"Nothing to undo — claude-code's take lock was already undone or changed since."**
+     (capture) → ⌥⌘Z → **"Nothing to undo — claude-code's note title was already undone or changed since."** (capture)
+     → the Edit menu open: **Redo DISABLED** (on an empty redo stack the item is disabled — `EditorCommands.swift:576`,
+     U2 STAGE RUN's finding; no toast is expected) → her title and her unlock stand (capture).
+   - **U2's W3 — the REVIVE direction:** ONE `claude -p` turn: `add_comment` on block "One." of "u1b undo" → her
+     Comments panel ▸ delete that comment → ⌥⌘Z → **"Nothing to undo — claude-code's comment was already undone or
+     changed since."** (capture) → Redo disabled → the comment stays deleted (the panel's deleted fold shows it once).
+   - **RULING 2's real-client check — the focus stays where she types:** two Home notes **"u1b r2 a"** (one block "Her
+     page.") and **"u1b r2 b"** (one block "Its page."); ⌘K open "u1b r2 b", then ⌘K open "u1b r2 a" (pane 1) → View ▸
+     Open Beside (the most recently opened note no pane shows: "u1b r2 b", in a new right pane) → click into pane 1's
+     "Her page." (pane 1 focused, its masthead; pane 2 the thin "… · click to edit" line) → type " She types." through
+     `keys.sh` (BEFORE capture) → ONE `claude -p` turn: `delete_note` "u1b r2 b" → **AFTER (capture): pane 2 shows the
+     Library IN PLACE under the thin line; pane 1 keeps its masthead and the caret** → type " Still here." → it lands in
+     "u1b r2 a" (capture). View ▸ Close Split.
+   - **U4c's W3, Study (U4c's plan step 5, verbatim in force):** ⌘K ▸ "vx230-book" → Outline → expand all → click into
+     block 2 of "vx230 book opening" → scroll down (guarded `walk-scroll` steps of 9) until blocks ~38–42 stand in view
+     → click into **block 40**'s text ("block 40/70"; single take) → capture → scroll back UP the same steps to the
+     note's top (block 40 far below; the caret stays in it) → **⌘T** → capture (the receipt; blocks 1–4 ⑂2 at their
+     lines, 5 bare; NO stray ⑂, no disc) → scroll down the same steps → **block 40 wears ⑂2 AT ITS OWN FIRST LINE**,
+     neighbours at theirs, no two ⑂ at one place (capture + crop). ⌘T refusing or doing nothing ⇒ the menu bar's "New
+     Take (Branch)" by AX, recorded.
+7. **THE VOICE SWITCH:** Settings ▸ General ▸ Theme ▸ Terminal (pressed by AX), Settings closed by its own button.
+8. **Terminal half:** **Leg 2c** — the driver with a fresh Any key as `claude-code` (`waitallow 120`, background) → the
+   Waiting row in Terminal (capture) → **Don't allow** → the driver's line `"list_changed": false` at its timeout
+   (record it; its connection still reaches nothing), the row gone, Activity in Terminal (capture). **Leg 2d** — the
+   same with **Allow** → the driver served on the same connection (record), Activity (capture) → re-run the Claude Code
+   tab setup (as in 2b) so `variorum-dev` is ✔ again. **U4c's W3, Terminal:** the same road with **block 45** (40 is
+   fanned by the Study half). **Leg 5 — Codex: N/A** (`which codex` empty at READY, 2026-10-14; its name stands on the
+   external lookup).
+9. **CLEANUP (~8 min):** both scratch registrations removed (`claude mcp get variorum-dev` → "No MCP server named …");
+   her user-scope servers AFTER: byte-identical fingerprint; every scratch key, the mcp-config JSONs and the tee files
+   checked for keys, then deleted; the clipboard emptied (`pbcopy < /dev/null`); a whole-key grep over
+   `vx246-screens/u1b/`, the scratchpad, `~/.claude.json` and the scratch project's transcripts = 0 files; the Debug app
+   quit BY BUNDLE ID (`pgrep -lx Variorum` empty; no shim or driver left); prefs: `defaults import` +
+   `defaults delete` of every key the window added → re-export → 0 keys differ; the store: `Tools/ScaleFixture/restore.sh
+   <the prestage dir>` → "Restored (verified)" + a second `cmp`, the sha256 set equal to the pre-window hashes (the
+   posture handed over: Standard, unlocked, the store's voice — and `claude-code`'s pre-window binding and grants come
+   back with it); no new backup from the launches (the `Backups/` listing diffed); the fixture folder deleted; no stray
+   `default.profraw`; **`Tools/stage release --who vx246-u1b`** at once; ONE result line: the claim times, W1a/W1b,
+   U4c-W1 + the decisive line, W2's totals, each leg's verdict, U2 W2/W3, ruling 2, U4c W3 per voice, the posture, the
+   fingerprint, the A1 copy's path (the coordinator's to prune).
+
+### SELF-ASSESSMENT (pre-stage — the implementer's)
+
+- **Against the brief, per piece:** piece 0 merged with no conflicts and both sides intact (read in the merged
+  `MCPDoor`); piece 1 builds the merge gate exactly as OWED 1 (a) specified and the face (b)–(d) on vx-281's five facts
+  — the row in Waiting above the tabs, the refusal said where she pressed, the words in a single source, L1/keyLine
+  true with their summaries brought along (fact 1); piece 2 traced VX-318 end to end and found it HOLLOW — the pin
+  (production road, reuse certain, every ending, under load) is green on the pre-fix tree and its detection power is
+  proven, so NO fix (the contract's rule 3 over the brief's "fix shape"); piece 3 built option (b) red-first with its
+  schema commit alone and SyncSpec read first, backfill argued against.
+- **Against the spec:** zero `Sync/`, custody/Keychain, `Server/`, editor-seam lines; one LOCAL-ONLY schema step (v1_29,
+  marker 13, zero lockstep); I1–I10/P1–P3/S1–S5 untouched (the new reads are keyed — ∝ one comment, ∝ the clients);
+  AppSpec §12's "a door that did nothing speaks a refusal" holds for the re-bind row; P-1 holds (two new declared
+  `.surface` doors, walked by `surfaceCapabilities`).
+- **Less sure, said plainly:** (1) the face is unseen on a screen — every Mac pin and the row's look are the window's;
+  (2) Codex's `clientInfo.name` is an external lookup, never seen live (leg 5 N/A); a wrong name there costs a Codex user
+  her approval click (the key waits for her OK), never a refusal; (3) option (b)'s strict NULL reading changes the
+  suggest rung's reach over every comment a client wrote before this build (they need EDIT to delete) — the cost is
+  bounded and recorded (P-VX260-2); (4) the window is long — the plan keeps a batch-only fallback.
+- **Context:** this session is at roughly 300–350k tokens of context as the plan is written (an estimate: the run record
+  and the code read in full); under the ~450k line, but the window is long — the orchestrator may prefer a fresh
+  runner for it, and the plan above is written for one.
+
+### PROVISIONALs (with their options — the orchestrator files them at the merge)
+
+- **P-VX258-7 — the re-bind row's place and look:** (a) as built — it LEADS Waiting (above the asks: identity before
+  reach), every waiting setup listed (one per client), Allow and Don't allow equal and quiet (no default); (b) after
+  the asks; (c) Allow styled primary (the request row's Approve… precedent) — rejected for now: the press hands a
+  stranger the name's grants.
+- **P-VX258-8 — what Activity says for the wait:** (a) as built — "‹name› asked to use a setup that wasn't copied for
+  it" (an ask, though logged not-allowed per P-VX258-5); (b) the refusal form "‹name› was refused connecting with a
+  setup that wasn't copied for it" (true of the log's outcome, false of what she can still do).
+- **P-VX260-2 — a record from before the words' digest (v1_29):** (a) as built — NULL = UNPROVEN: never the client's
+  own, so deleting it needs EDIT; (b) backfill the digest from the comment's current words at the migration — blesses
+  any comment she already rewrote on another device or in a build without VX-260's forget; (c) NULL = the record's word
+  (legacy trust) — the hole open for every pre-upgrade comment. **P-VX260-1** itself (her edit on another device)
+  stays provisional with its options (a)/(b)/(c) — (b) is now built.
+
+### FOR VX-234 (user-facing words, as built — her pane-wording pass)
+
+| # | Words (as built) | Where it renders |
+|---|---|---|
+| U1b-1 | "New setup for ‹name›" | Settings ▸ MCP ▸ Waiting, the re-bind row's title (`MCPPaneCopy.rebindTitle`) |
+| U1b-2 | "Connected as ‹name› (version ‹v›) with a setup that wasn't copied for it, ‹age›. It reaches nothing until you allow it; allowing moves the name, with its grants, to this setup." | the row's detail (`rebindDetail`; no version declared ⇒ no parenthesis) |
+| U1b-3 | "Allow" · "Don't allow" | the row's two buttons (`mcpAllowRebind`, `mcpDeclineRebind` — the ask sheet's "Don't allow") |
+| U1b-4 | "That setup isn't waiting any more." | by Waiting, after a press on a setup no longer waiting (`MCPPaneCopy.refusal`) |
+| U1b-5 | "‹name› asked to use a setup that wasn't copied for it" · "‹name› took the new setup you allowed, which replaced its earlier one" (the tail only when a key was replaced) · "‹name›'s new setup wasn't allowed" | the Activity tab and its "all N ›" (`activityLine`) |
+| U1b-6 | L1: "…Running the client's own setup again moves the name to the new key; a setup copied for any MCP client waits for your OK before it takes a name you approved; any other key, or none, is refused. …" | the Clients tab's (i) (`clientBoundary`; its one-line summary unchanged) |
+| U1b-7 | "…Running a client's own setup again replaces the old one; a setup copied for any MCP client waits for your OK before it takes a name you approved." · its line "Each copy carries a fresh key; running a client's own setup again replaces the old one." | the Connect tab, under the code block (`keySummary`) and its (i) (`keyLine`) |
+| U1b-8 | the unavailable note "A client's new setup waits for you in Settings ▸ MCP ▸ Waiting." | the registry's note for both new capabilities (shown where a declared door cannot act) |
+
+### OWED (for the orchestrator)
+
+1. **THE STAGE WINDOW** above (claim `vx246-u1b`) — W1/W2 and every live leg; U2's acceptance closes with W2/W3 there,
+   U4c's with its W1–W3.
+2. **U8 (the follow-on run):** the field guide's lesson 2 still says "Running the setup again moves the name to the new
+   key" for every tab — true now only of a client's own tab; an Any-client re-run waits for her OK. The guide and
+   `MCPSession.instructions` should say the tab rule and the Waiting row (and that a waiting connection sees no tools).
+3. **Canon at the merge** (adding to U1's OWED 5): AppSpec §12 THE MCP DOOR — the re-bind row in Waiting (Allow / Don't
+   allow; a waiting setup admitted with no reach), the mint copied FOR the tab's client; §7's grants-family bullet gains
+   v1_29 (`mcp_comment_author.text_digest`, local-only, marker 13, zero lockstep) beside v1_28; the comment-ownership
+   rule (VX-260 (a)+(b): her edit on this Mac forgets the record; any change to the words, from any device, ends a
+   client's ownership; a pre-v1_29 record is unproven). MOBILE PARITY: nothing mobile-visible (the phone's comment edit
+   reaches option (b) through sync — the phone holds no record).
+4. **VX-318 → close as HOLLOW** (no fix; the trace and the pin are its record; the pin stays as the ordering's guard).
+5. **Housekeeping:** the three products (`vx246-u1b`, `-red`, `-revert`) are the window's; after it, `-red` and
+   `-revert` can go. The cloned-product absolute-path trap (the machinery note above) for whoever clones next.
 
 ## U4c UNIT RECORD — the inline editor's badge regression: VX-230 (opus-implementer, from 2026-10-14 ~05:35 MDT)
 
