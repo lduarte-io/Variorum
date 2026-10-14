@@ -76,7 +76,32 @@ final class CommentsPanelModel {
         // the panel is presented, which are then discarded. The park
         // restore lives in `restoreParkedDraft()`, called from the panel's
         // `.task` — the installed lifecycle, once per real presentation.
+        #if DEBUG
+        // VX-229's pins ask which models of THEIR session are still alive
+        // (weakly held — a DEBUG-only record with no behaviour; a phantom's
+        // entry dies with the phantom).
+        Self.debugMade.removeAll { $0.model == nil }
+        Self.debugMade.append(DebugWeakModel(model: self))
+        #endif
     }
+
+    #if DEBUG
+    /// **VX-229 — every panel model this process made, held WEAKLY** (a pin's
+    /// road: a dismissed host's panel must let go of its model and its store
+    /// observation). Filtered by session, because suites run in one process
+    /// and harness ids repeat across them.
+    struct DebugWeakModel { weak var model: CommentsPanelModel? }
+    private static var debugMade: [DebugWeakModel] = []
+    static func debugAliveModels(of session: AppSession) -> [CommentsPanelModel] {
+        debugMade.removeAll { $0.model == nil }
+        return debugMade.compactMap(\.model).filter { $0.session === session }
+    }
+    #endif
+
+    /// Whether this model's store observation is running right now (VX-229 —
+    /// a dismissed panel must not keep re-reading its comments on every
+    /// write for the app's life).
+    @ObservationIgnored private(set) var isObserving = false
 
     /// **RUN A ladder round 2 (the MAJOR, binding 5's sweep) — the open of
     /// the SAME block's panel reads a REFUSED draft back**, amended twice
@@ -152,6 +177,8 @@ final class CommentsPanelModel {
 
     /// Live for the panel's lifetime — one block's notes, both lists.
     func start() async {
+        isObserving = true
+        defer { isObserving = false }
         do {
             for try await value in session.database.observe({ [blockID] db in
                 Snapshot(
