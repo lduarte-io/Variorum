@@ -4299,5 +4299,36 @@ VX-246 and VX-282; no VX-292 branch exists on the remote; VX-282's branch touche
 | 2 | F-1's lesson edit (VX-258) | DONE (this commit) — `TutorialSeeder.swift`, lesson 2's third paragraph: "Running the client's own setup again moves the name to the new key; a setup copied for any MCP client waits for your OK before it takes a name you approved; and a tool still using an older key, or none, is turned away." (L1's clause verbatim, a literal, the guide's register); the truth comment gains its VX-258 line. Checked statically (the literals joined as the seeder joins them): the three designed lines now hold, the K2 clause stays, and no rendered text says "Running the setup again". The run is the window's |
 | 3 | F-2 + F-3, the doc edits (VX-277) | DONE (this commit) — **F-2:** `Operations+MCPDeliberate.swift` `restoreChosenPointersIfUnchanged`'s doc: the heading names BOTH families ("THE POINTER ENTRIES' RESTORE, COMPARE-AND-SET — the client's acts and HER adopt doors alike"); the false last sentence is replaced by the truth (her adopt doors run on this rule through `registerPointerEntry`, VX-246 U2 — VX-277; no unconditional pointer restore remains; the three deleted helpers named as deleted, and why bringing one back re-opens VX-277's class). **F-3:** `Operations+UndoInverses.swift`'s header example names `revertChosenPointersIfUnchanged` (the half-level op called with the other pre-image — `registerPointerEntry`'s `back` for the undo, `moves` for the redo), re-wrapped. Doc only, no pin (clarity class). The re-grep: the deleted names now appear ONLY in F-2's "were deleted" clause |
 | 4 | F-4, the harness (VX-275) | DONE (this commit) — `MCPHerEditorDoorTests.swift`: a private `ScopedRandomExecutor` (`MCPWriteExecutor`) wraps the door's own executor — her `OperationsRunner`, unchanged — in `withDependencies { $0.withRandomNumberGenerator = rng }` around `inner.run(body)` (the headless `SeededExecutor` precedent); `withDoorEditor` hoists ONE `WithRandomNumberGenerator(SeededGenerator(seed: 275))`, used by the pin's scope AND passed to the wrapper in the door's `makeHost` closure. Only the RNG is set (the runner's captured `Operations` keep the harness's clock and ids); the body still runs on her runner (task-locals carry across the actor hop in the same task). Compiles: piece 6's `build-for-testing` ran on exactly this tree (no warning in the file). Test-only; the evidence is the window's warning count (4 → 0, the suite alone) — a surviving warning gets its read site traced before anything else moves |
-| 5 | the whole headless package green, with counts | — |
-| 6 | the FIXED product `DerivedData/vx246-final` | — |
+| 5 | the whole headless package green, with counts | DONE — on `22e8685f` (every fix in): `swift build --build-tests` EXIT 0, then `swift test --skip-build` **EXIT 0 in 270 s: `VariorumMCPTests` 240 / 51 · `VariorumCoreTests` 2,841 / 329 · `StringsWorkbookTests` 40 / 6**, zero ✘ — exactly the U1b finals and the reviewer's own run (F-2/F-3 are doc lines; the other three fixes live in the Mac target). Log `vx246-screens/r1/logs/headless-finals.log` |
+| 6 | the FIXED product `DerivedData/vx246-final` | DONE — an APFS clone of `vx246-r1-red` with its `workspace-state.json` re-pointed, then `build-for-testing` → **`** TEST BUILD SUCCEEDED **`**, EXIT 0 (61 GiB free first), on the tree `22e8685f` commits (`git diff HEAD -- App Sources` empty after that commit). 151 distinct warnings, the same count as the red build, none in a touched file (the clone's "Stale file" lines aside, as in 1b). The product checked: `Variorum.debug.dylib` carries the NEW lesson chunk and not the old one; the test bundle carries `ScopedRandomExecutor`. Log `vx246-screens/r1/logs/final-build-for-testing.log` |
+
+**The record's state:** every piece DONE; NO Mac test run (the orchestrator's call). The pass's commits: `a657d779` (F-1's
+pin) · `b261e498` (F-1's lesson edit) · `09d83aae` (F-2 + F-3) · `22e8685f` (F-4) · this record commit. Zero `Sync/`,
+custody, Keychain or editor-seam lines; zero schema; no commit trailers.
+
+#### Per finding — what landed, the pin, and what the window owes
+
+- **F-1 (VX-258).** Pin `a657d779`, fix `b261e498`.
+  - **The pin:** `TutorialMCPChapterTests.lessonTwoConnectingAClient`, its three designed lines `:288` (the old
+    sentence gone), `:290` (the whole new sentence) and `:296` (the guide half of the parity guard). `:297` is L1's
+    half, a guard green on both trees. The rule-side `decide` arms are byte-unchanged.
+  - **Its state:** red on old by construction (checked statically against the seeder's joined literals, and the red
+    product still carries the old chunk); green after by the same check. **Not yet RUN: the window's step 1 runs it.**
+- **F-2 + F-3 (VX-277).** `09d83aae`, doc only, no pin (clarity class). Nothing owed to the window: the headless
+  package compiled and ran them.
+- **F-4 (VX-275).** `22e8685f`, test-only. **Owed to the window:** the warning count. The suite has run with "(including
+  4 warnings)" at the U3, U4, U4b and U1b windows; on the fixed product it must run with none. A surviving warning gets
+  its read site traced before anything else moves.
+
+#### THE CLOSEOUT WINDOW — its first steps (the orchestrator's window after round 2; it names the claim and the rest)
+
+From `App/Variorum`, each step is `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS'
+-derivedDataPath DerivedData/<product> -only-testing:VariorumTests/<Suite>…`, with a log and a result bundle per step.
+Nothing here writes the dev store beyond what the test host always does.
+
+| step | product | suites | expected |
+|---|---|---|---|
+| R1 | `vx246-r1-red` | `TutorialMCPChapterTests` | `lessonTwoConnectingAClient` **RED with exactly 3 issues, at `:288`, `:290` and `:296`**: the old sentence still rendered, the new sentence absent, the guide lacking L1's clause. `:297` (L1's half) green. Every other test in the suite green. A failure anywhere else is a defect of the pin, not of the lesson |
+| R1b *(cheap, optional — the same-window "before" for F-4)* | `vx246-r1-red` | `MCPHerEditorDoorTests` | 4/4 green, the summary reading "(including 4 warnings)" — the old harness (`vx246-r1-red` predates `22e8685f`) |
+| F1 | `vx246-final` | `TutorialMCPChapterTests` + the Tutorial* family: TutorialBookShapeTests · TutorialBooksLessonTests · TutorialBooksRitualTests · TutorialBuildFlavorTests · TutorialCurrencyTests · TutorialDeletionActsTests · TutorialDoorTests · TutorialFannedMatrixTests · TutorialFurnitureFoldTests · TutorialLibraryActsTests · TutorialLookingActsTests · TutorialPrivacyChapterTests · TutorialStructureActsTests · TutorialTakesActsTests · TutorialWherePlacesActsTests · TutorialWritingActsTests (+ TutorialMCPChapterCaptureTests, a gated capture — expected SKIPPED) + `MCPHerEditorDoorTests` | All green; `lessonTwoConnectingAClient` green (F-1 red → green). **No warnings in the summary** (F-4: 4 → 0; with R1b in the same window). Any red re-runs ALONE once, and standing reds are named |
+| … | `vx246-final` | the merge-moment whole target (the orchestrator's) | — |
