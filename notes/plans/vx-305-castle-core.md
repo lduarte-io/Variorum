@@ -531,24 +531,14 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
 
 ## 7. LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 
-- U1 — the model: **IN-PROGRESS** (implementer session started 2026-10-14; the reading done — CLAUDE.md and its canon,
-  the resiliency protocol, the design whole, this plan whole, SyncSpec §3, pre-13x §1–§7 and §14, the Apple facts, the
-  listed code). The pieces, each its own commit, flipped here as each lands:
-  - (a) Names · the mode · the seal (HKDF + HMAC) and `Sealed<T>` — DONE (this commit; its 9 tests green, filtered run).
-  - (b) the protection record (library facts, family tree, device sections, hardware marker) · what this Mac remembers ·
-    plans — DONE (this commit; 18 tests green, filtered run). Landed with it, because what this Mac remembers mirrors
-    the key file: `KeyFile.swift` (format 3's values, wraps, roads and history opening) and `CastleAnchor.swift` (the
-    anchor's sealing and opening), and `ProtectionGuards` with U1's five guards — their own tests ride (c) and (e).
-  - (c) key file format 3 (wraps, history, the Castle anchor, the master's words copy, the four crossings) — DONE
-    (this commit; 17 tests green, filtered run).
-  - (d) the legacy readers (formats 1 and 2, the legacy mode reader, the old marker's read and clearing check, today's
-    item names and values) — DONE (this commit; 9 tests green, filtered run — the mode reader checked against a verbatim
-    transcription of today's `Posture.derive` over the whole 360-point input space).
-  - (e) `ProtectionGuards` for U1's guards + the secret / marker scans — DONE (this commit; 7 tests green, filtered
-    run — each of U1's five guards red with its off-switch, DEBUG only).
-  - (f) the record (§8), both configurations' runs — IN-PROGRESS (the U1 suites: 60 tests in 18 suites; the record
-    next, the counts PENDING the runs).
-- U2 — assess, roads, route finder, catalog, retention: **NOT-STARTED.**
+- U1 — the model: **DONE** (2026-10-14; the record is §8's U1 record). Pieces: (a) names · the mode · the seal —
+  `246e8ecb`; (b) the record, the family tree, this Mac's facts in two homes, the hardware marker, the memory, plans —
+  `add6a601`; (c) key file format 3 and its crossings, the Castle anchor — `5a31d440`; (d) the legacy readers —
+  `6f848c3a`; (e) `ProtectionGuards` and the scans — `09f54557`; (f) the record — this commit. The U1 suites: 60 tests in
+  18 suites green in Debug; 55 in 17 green under `-c release` (the DEBUG-only mutation suite compiled out) — run on a
+  scratch copy, because the core test target does not build under `-c release` on main today (a pre-existing gap, the
+  record's first line). The full core suite green in Debug.
+- U2 — assess, roads, route finder, catalog, retention: **NEXT.**
 - U3 — the executor and the acts: **NOT-STARTED.**
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
 - The go/no-go record: **NOT-STARTED.**
@@ -557,7 +547,136 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
 
 ## 8. Records (each unit appends its record here: what shipped, tests and counts, PROVISIONAL calls, commits, machinery notes)
 
-*(empty)*
+### U1 RECORD — the model (Opus implementer, 2026-10-14; one session, no deaths)
+
+**Not done, first:** the core test target (`VariorumCoreTests`) does not build under `swift test -c release` on main
+today — `MarkdownSyntaxTests.swift` (lines 299–306), `MarkdownEditingTests.swift` (361–363) and
+`MarkdownCaretRescueTests.swift` (195–197) use the DEBUG-only `MarkdownScanCount` unguarded. Pre-existing, outside U1's
+surface, so not fixed here: U1's release run was made on a scratch copy of the package with those three files removed
+(the repo untouched). §1 item 1 (both configurations) needs it fixed before the GO — **owner: the orchestrator** (a
+VX ticket, or the U4 session). Also not done: the QUESTIONS entries for the PROVISIONAL calls below — CLAUDE.md keeps
+`notes/QUESTIONS.md` to merge moments on latest main, so they wait for the closeout (§11 already lists them).
+
+**What shipped** — `Sources/VariorumCore/Protection/` (pure values; nothing reads a Keychain, a file or the network):
+- `ProtectionGuards.swift` — the one guards value; U1's five guards (two homes · hardware marker · the tree's two homes
+  · the anchor carried by every re-key · the anchor written first), off-switches `#if DEBUG` only, `…On` a constant
+  `true` in Release. U3/U4 add theirs to the same value.
+- `Model/ProtectionVocabulary.swift` — `ProtectionMode` (a key's kind for life = the library's mode), `ProtectionAct`
+  (the §2 act list, stored raw values), `GateStyle`.
+- `Model/Names.swift` — every new item and file name with the scope in every item name: custody
+  `<scope>-<fp16>-<silent|touchid>` (service `…library-key`), sync keys `<scope>-<accountID>-<class>` (`…sync-keys`),
+  memory `<scope>-<libraryID>` (`…memory`), Apple keys `<scope>-apple-key-<id>` beside the old shared
+  `<scope>-apple-key` (today's `…apple-key` service), `variorum-library-keys.json`, `variorum-plan.json`,
+  `Backups/<library8>/<mac8>`. STRICT parsers (exact `<scope>-` prefix and a well-formed tail), so `Variorum` never
+  parses a `Variorum-dev` item.
+- `Model/Seal.swift` — `HMAC-SHA256(HKDF-SHA256(ikm: L, salt: libraryID, info: "variorum.seal.v1:"+purpose),
+  canonical JSON)`, naming the sealing key's fingerprint; `Sealed<T>` keeps and verifies the STORED canonical bytes
+  (never re-encodes), opens through a `reach` (the history) when the act has re-keyed. Purposes `memory`, `plan`,
+  `device-section`.
+- `Model/HardwareMarker.swift` — `HMAC-SHA256(key: the record's 32-byte salt, "variorum.hardware-marker.v1" ‖
+  len‖hardware ‖ len‖login)`; `MachineIdentity` is never `Codable` and prints redacted.
+- `Model/FamilyTree.swift` — entries (fingerprint, kind for life, Mac, made, retired, reached), a normal form,
+  birth/retire/seed (unknown kind ⇒ Castle), the union (commutative · associative · idempotent), `atOpen` (two homes).
+- `Model/DeviceSection.swift` — the section (identity, marker, act in flight with a never-reused sequence, settings,
+  Apple key records with purpose/origin/retirement, the old shared key's id and retirement, a version that only
+  grows) and `DeviceFacts`: `reconcile` (newer wins, retired ids and the old shared key's retirement the union),
+  `resolveIdentity` (continuing · found by marker · new identity with or without a predecessor), `takingOver` (a
+  replacement Mac: the key file's own wrap ids, the predecessor's own library ids, every retired id of any section;
+  Always ask), `thisMacsSection` (composed).
+- `Model/ProtectionRecord.swift` — the library's facts, the marker salt, one SEALED section per device;
+  `recordingRekey` (old retired, new born with kind and Mac, epoch +1, mode = the new key's kind, confirmed),
+  `verifiedSections`, `storing`, `clearingActsInFlight` (a copy opened: acts cleared, re-sealed, unverifiable
+  sections dropped).
+- `Model/DeviceMemory.swift` — what this Mac remembers (scope, fingerprint, epoch, last confirmed mode+account, the
+  biometry hash as a hint, the vault facts, nudge dismissals, the key-file mirror, the tree mirror, the section's
+  second home), sealed whole; a memory failing its seal or naming another library opens as nil (it loses).
+- `Model/Plan.swift` — the plan (device, sequence, act, keys, steps), sealed, `resumable` → `.unsealed` /
+  `.notNamed` / the plan.
+- `Model/Secrets.swift` — `PassphraseKey` (descriptor kept), `WordsKey`, `AppleKeyMaterial`, `ProtectionSecret` (the
+  floor checked before any derivation), and the one RFC 3394 lock primitive.
+- `Model/KeyFile.swift` — format 3: the wraps (P with descriptor, W, M with the master's words copy beside it, this
+  Mac's own Apple wrap, the old shared wrap riding beside), the history (each older key directly under the current,
+  verified by fingerprint), the anchor and the kept anchors, `roads`, `heldFingerprints`; the key doors re-wrap the
+  current key only.
+- `Model/CastleAnchor.swift` — the anchor: the outgoing key, its whole history and its kept anchors in one
+  AES-256-GCM bundle (AAD binds the outgoing fingerprint) under a fresh anchor key; birth-time locks only —
+  `.pressingDevice` (P and W) or `.follower` (the typed secret, plus the outgoing key with its copied locks; the
+  master's road left out on request); `open` by every road; `roads` for the words. No API re-locks it.
+- `Model/KeyFileCrossings.swift` — `rekeyed(.withinMode / .enteringCastle(openers:) / .leavingCastle)` and
+  `building` (creation, landing), `writingAnchor` (first), per design §3.4; entering Castle refuses an Apple lock; a
+  re-key drops the old shared wrap.
+- `Model/LegacyReaders.swift` — `KeyFileDocument` (format 3 vs 1/2, newer refused), `LegacyKeyFile` (format 2's
+  Apple wrap read as the OLD SHARED key's; attribution: an Apple wrap ⇒ Standard, none ⇒ Castle), `LegacyModeReader`
+  (today's `Posture.derive`, its inputs exactly, `isCorner45Ambiguous`, `migrationRecord` = §3.13 step 2),
+  `LegacyItems` (today's per-library-ID, escrow, sync-custody and old-shared-key names, cited per name, and their
+  values: the raw key, `{deviceID, material}` and the 14b bare blob, `{id, key}`), `LegacyRotationMarker` (today's
+  JSON, the undecodable-reads-`.vaultWrite` rule, `read(db)`, the clearing check `resolve(evidence)`).
+
+**Tests** — `Tests/VariorumCoreTests/Protection/` (the §2 `ModelTests` split by subject for size, a recorded
+refinement): `ProtectionFixtures`, `NamesAndSealTests` (9), `RecordModelTests` (18), `KeyFileTests` (17),
+`LegacyReadersTests` (9), `ProtectionScanTests` (1), `ProtectionGuardTests` (6: 1 + the DEBUG-only 5). Every bullet of
+§3's test list has its test (the mapping is the suite and test names, which read as the plan's sentences).
+- Debug, U1 filtered: `✔ Test run with 60 tests in 18 suites passed after 0.034 seconds.`
+- Release (`swift test -c release --filter …`, on the scratch copy described above): `✔ Test run with 55 tests in 17
+  suites passed after 0.027 seconds.` (the DEBUG-only mutation suite is compiled out — 60 − 5, 18 − 1). Wall time
+  6:50, the release build included.
+- Full core suite, Debug (`swift test`, 4:57 wall): `✔ Test run with 2920 tests in 348 suites passed after 221.140
+  seconds.` · `✔ Test run with 240 tests in 51 suites passed after 22.793 seconds.` · `✔ Test run with 40 tests in 6
+  suites passed after 51.802 seconds.` (skips: the existing gated suites only).
+- The guards are live: each of the five, switched off, lets its bug through (`ProtectionGuardMutationTests`).
+
+**PROVISIONAL calls (for QUESTIONS at the closeout — CLAUDE.md's merge-moment rule):**
+- **P-U1-1 — which login identity the marker covers (VX-340's open half, U1's to choose).** Chosen: (a) the login's
+  directory-services UUID, `GeneratedUID` — the user record's own identity (Apple keys APFS volume ownership and
+  FileVault's crypto users on it), outside the keychain and the password, minted fresh for a re-created account (the
+  safe side: a new device). Set aside: (b) the numeric UID — Apple documents it as not unique, and a re-created
+  account commonly re-uses it (502), which would adopt the deleted login's section; (c) the short name or home path —
+  both renameable. Measured 2026-10-14 on the Pro (macOS 27.0, an unsandboxed CLI): OpenDirectory's
+  `kODAttributeTypeGUID` and Collaboration's `CBUserIdentity(posixUID:authority:.local()).uniqueIdentifier` both
+  return `dscl`'s `GeneratedUID` (`mbr_uid_to_uuid` is not exposed to Swift). The hardware identity is the hardware
+  UUID (`IOPlatformUUID`). The one Sonnet lookup found Apple documents neither identifier's lifecycle directly, nor
+  their availability under the App Sandbox (IOKit is public API per DTS; OpenDirectory/Collaboration unknown) —
+  **hand-forward to phase 2's leaf:** read both in a SANDBOXED Debug build, and check GeneratedUID across a password
+  reset, a keychain reset and an OS update. The phone (one login) needs its own leaf choice there too
+  (`identifierForVendor` changes on reinstall).
+- **P-U1-2 — identity resolution's order when a memory item from other hardware sits beside this Mac's own marked
+  section.** Chosen: (a) the section wins (`foundByMarker`) — the marker is the evidence of who this Mac is (§3.6 "a
+  Mac finds its own section by its hardware"). Other: (b) the literal §3.13 reading — always a new identity naming
+  the memory's identity as predecessor. A rare edge (Migration Assistant into an account that had opened the library).
+- **P-U1-3 — two homes disagreeing on a key's kind.** Chosen: (a) Castle wins — the safe side the migration's
+  unknown-kind rule already takes. Other: (b) a kind recorded at birth beats an inferred one (needs a provenance
+  field).
+- **P-U1-4 — two homes of this Mac's facts at EQUAL versions.** Chosen: the record's (inside the encrypted library),
+  with the retired ids still unioned. Others: the memory's; or flag the fault. Only a fault can produce it.
+- **P-U1-5 — the clearing check on a fingerprint-less old marker** (`vaultWrite` / `reencrypt` / a 14c value).
+  Chosen: (a) never happened, library-wise — no new library key was ever minted, so the library opens under its old
+  key and no new key exists by construction; the account side is the vault's (step 1's bullets). Other: (b) commit
+  happened at `reencrypt` (the account's commit point passed). Moot for the mode: such markers are written only on
+  synced roads, where step 2 takes the vault's word or records "not yet confirmed" either way.
+- **P-U1-6 — corner 45's ambiguous case, exactly.** Chosen: local-only, no stored 13p mode, a passphrase wrap, no
+  Apple wrap, the raw key in the SILENT item (the proposal's own words; VX-202's victims read the same). `.unknown`
+  custody reads today's Castle and is not flagged. Other: flag `.unknown` too.
+- **P-U1-7 — a brand-new identity with no predecessor** (a copy opened by another login, a library landing) starts
+  with NO gate choice (`noChoiceYet`), its act's own press deciding (§3.10, "a device with no choice yet — a landed
+  library"); only a replacement Mac's takeover starts on Always ask. Other: Always ask for every new identity.
+- **P-U1-8 — formats** (not product behaviour, recorded): each device section sealed separately inside the record
+  (the "two sealed homes" read literally, beside SQLCipher's own page authentication); the anchor bundle AES-256-GCM
+  with its held fingerprints in the clear (fingerprints are not secret; the catalog needs them unopened).
+
+**Commits:** `c86586ca` (LIVE STATUS opened) · `246e8ecb` (a) · `add6a601` (b) · `5a31d440` (c) · `6f848c3a` (d) ·
+`09f54557` (e) · the record's own commit (f). Each pushed to `origin/vx-305-castle-core` as it landed.
+
+**Machinery notes:**
+- `PassphraseKDF.floor` is the PRODUCTION floor under `-c release` (the test-host relaxation is `#if DEBUG`), so every
+  U1 passphrase road takes a `floor:` and the tests pass `.relaxedForTests` explicitly — U3/U4's world must do the same.
+- `swift build -c release --build-tests` fails ("unable to resolve Swift module dependency") — testability isn't on;
+  `swift test -c release` is the road.
+- Hand-forwards: phase 2 — an app-target test running `LegacyModeReader` against the REAL `Posture.derive` over the
+  same exhaustive space (U1 checks a verbatim transcription; the app can't be imported in core); the two leaves of
+  P-U1-1. U2/U3 — the `ProtectionGuards` value is theirs to extend; `DeviceFacts.thisMacsSection` and
+  `FamilyTree.atOpen` are the open's two meeting points; `CopiedLocks.copying(includeMasterRoad:)` is the executor's
+  to decide from the vault.
+- The one Sonnet lookup (external facts only, read-only) ran in the background while code was written.
 
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions)
 
