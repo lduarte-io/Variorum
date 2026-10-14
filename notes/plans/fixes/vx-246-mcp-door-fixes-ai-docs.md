@@ -1289,3 +1289,50 @@ Both shared with the phone's door through `StructuralUndoCopy`, but the phone do
     pass; otherwise it is dispositioned there.
 - **OWED 2 is now VM-16** (the phone's quiet press). **OWED 3** (AppSpec §9's contract line) is carried to the
   closeout.
+
+## U2 STAGE RUN — the trimmed window (a fresh stage runner, from 2026-10-14 ~00:20 MDT)
+
+**What this run does NOT do (said first):** steps 4–6 of U2's THE STAGE WINDOW (the MCP detour, W2, W3) are NOT this
+run's. They move to U1b's window (THE ORCHESTRATOR ON U2's HAND-BACK). No MCP client is registered or run here, so step
+7's MCP-registration lines (the `-s local` removal, her user-scope servers read before/after, the key grep) don't apply.
+No product code is changed under the claim. U2's acceptance stays OPEN until W2/W3 run.
+
+**Read in full before READY (never delegated):** this record's header, Hard rules, LIVE STATUS, the Stage traffic log,
+U1's THE STAGE WINDOW (G1–G3 and its step 2's A1 text), U2's UNIT RECORD whole, THE ORCHESTRATOR ON U2's HAND-BACK;
+`notes/SessionResiliencyProtocol.md`; `Tools/stage`, `Tools/WalkKit/` (`guard.sh`, `click.sh`, `keys.sh`, the README),
+`Tools/ScaleFixture/` (`stage.sh`'s copy loop, `restore.sh`); the memory notes walk-driving-lessons and
+walk-restores-dev-store-posture. Code read for W1's words: `StructuralUndoCopy`, `ShellActions.structuralUndo/Redo`, the
+quick-entry mint (`QuickEntryModel.submit` → `importPost`, `SegmentationRules.bulkSegments`: one line = one block under
+paragraph segmentation), the Delete Block capability (menu bar Block ▸, palette, context menu) and the tray's door
+(`TrayPath`, the note's inspector `tray` icon; tabs Leaving · Archived; `RecoveryCopy.putBackVerb` "Put back").
+
+**The build check (before READY):** `git diff --name-only ef2ef588..HEAD -- Sources App` lists ONLY
+`App/Variorum/VariorumTests/JumpAndUndoTests.swift` (the justified edit); the tree is clean; the built products in
+`App/Variorum/DerivedData/vx246-u2` (the app and `VariorumTests.xctest`, 00:11:21) postdate every source, the test edit
+included (00:09:44) → **no rebuild**. Host grants probed (no prompt): `AX: true SCREEN: true`. `Tools/WalkKit/wl2`
+compiled (gitignored). Free disk 65 GiB.
+
+**The batch's suite list:** the record's own names, extracted and diffed against the text: U2-A **110** names (the
+plan's "113" counts differently; the 110 are exactly its listed names) + G1 18 + G2 22 + G3 11 = **148 unique** after
+the overlap (the 14 Tutorial suites, `MCPWingFacesTests`). Every name is a declared type in `VariorumTests` (0 missing).
+All Swift Testing. The list and the run script sit beside the evidence (`notes/plans/vx246-screens/u2/stage-suites-148.txt`,
+`run-batch.sh`; gitignored).
+
+**Two process choices, said here:**
+- **The A1 prestage copy is taken BEFORE the batch** (the plan's step 2, moved up): the test host IS the dev-store app,
+  so a copy taken after the batch could hold the batch's side effects. VX-184's close took its fallback copy at the same
+  point for the same reason. The prefs export rides with it. After the batch the store is hashed against the copy; if
+  it moved, that is recorded and the restore still returns the pre-window state.
+- **The batch runs detached to its log and is POLLED IN THE FOREGROUND** (VX-184's close, the phase-19 precedent): one
+  `xcodebuild` past the Bash tool's 10-minute limit can't run in a single foreground call. The turn never ends on it.
+
+### LIVE STATUS — the stage run's steps
+
+| step | what | status |
+|---|---|---|
+| R | read-in, the build check, the suite list, this section → READY | DONE (this commit) — READY reported; the claim is the orchestrator's GO |
+| 0 | guards on every step (`guard.sh --author`, `pgrep` empty, the claim line; `guard.sh <pid> x y` per click; ≥ 2.6 s between synthetic events) | NOT-STARTED — waits for the GO's exact claim line |
+| 2 (moved up) | A1 prestage copy (every store file + key files → `…/Variorum-dev/Backups/safety-copies/scale-prestage-<ts>/`, each `cmp`-verified) + `defaults export io.lduarte.Variorum.debug` | NOT-STARTED |
+| 1 | the Mac batch, 148 suites, one `test-without-building` (`run-batch.sh`), result bundle `u2/batch.xcresult`; a red re-run ALONE once; standing reds named | NOT-STARTED |
+| 3 | W1 — her own door, the delete direction (VX-277), both voices | NOT-STARTED |
+| 7 | cleanup: the Debug app quit BY BUNDLE ID; prefs imported back (0 keys differ); `restore.sh` → "Restored (verified)"; stray `default.profraw` removed; `Tools/stage release`; one result line | NOT-STARTED |
