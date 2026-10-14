@@ -1864,9 +1864,9 @@ first — no `/Applications/Variorum.app` instance, none of ours.
 it does today (O-U6-1, the brief's scope line; seen live at W3 row D). The brief's "relaunch with a note open" row could
 not be staged as written: the main window never launches onto a note (premise correction 3), and on this Mac a note
 WINDOW open and key at quit was NOT restored at relaunch (W3 row B) — so P-U6-1's "another window is key" case has no
-live evidence; a new window (File ▸ New Window) was walked in its place. The unit's evidence is the merged-tip-free
-products of `ee1facc9` (built before the branch merged main at `ece30a41`, the coordinator's word: fine for unit
-evidence, the closeout runs the merged tip).
+live evidence; a new window (File ▸ New Window) was walked in its place. The unit's evidence comes from products built
+at `ee1facc9`, before the branch merged main at `ece30a41` (the coordinator's word: fine for unit evidence; the
+closeout runs the merged tip).
 
 **State: DONE — every leg held** (the stage window 05:27:17–05:38:17, below). Implementer: an `opus-implementer` session
 (Opus 5.5, xhigh), 2026-10-14. **Revert state: no behavioural revert in flight** (the old-products revert named at
