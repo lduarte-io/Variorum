@@ -27,7 +27,7 @@ units) are scope, not durations.
 | Run | What it is | Members | Cast (implement / cold review) | Can start |
 |---|---|---|---|---|
 | **VX-266** Castle & backups | the custody and backup redesign (project + flagship) | the Castle project | Fable leads and writes the `Sync/` lines; Opus implements the rest | after her Castle decisions |
-| **VX-246** MCP door fixes & AI docs | the door's security, correctness, wire asks, then the AI's docs last | 20 | Opus / **Fable** | now |
+| **VX-246** MCP door fixes & AI docs | the door's security, correctness, wire asks, then the AI's docs last | 21 | Opus / **Fable** | now |
 | **VX-281** MCP settings pane & shared icon | the pane in tabs, the code block, the Library's shared icon | 4 | Opus / Opus | now |
 | **VX-282** Editor & notes fixes | backspace, the italics flicker, take panel, capture box, comments family | 9 | Opus / **Fable** (editor seam) | now |
 | **VX-283** Sidebar & Library polish | the Open list, navigate-away, Library polish, exports, the test reds | 16 | Opus / Opus | now |
@@ -115,8 +115,8 @@ Rules binding every run (on top of CLAUDE.md):
 ### VX-246 — Run: MCP door fixes & AI docs
 **Plan:** `notes/plans/mcp-pane-and-docs-kickoff.md` (its U6 section and the VX-268 bullet now belong to
 VX-281; everything else stands). **Members:** VX-258 · VX-259 · VX-260 · VX-279 · VX-280 · VX-276 ·
-VX-277 · VX-119 · VX-275 · VX-230 · VX-231 · VX-255 · VX-252 · VX-253 · VX-267 · VX-298 · VX-254 · VX-256 ·
-VX-261 · VX-197. All pre-launch.
+VX-277 · VX-119 · VX-275 · VX-230 · VX-231 · VX-255 · VX-252 · VX-253 · VX-267 · VX-298 · VX-311 · VX-254 ·
+VX-256 · VX-261 · VX-197. All pre-launch.
 
 **Her MCP list, accounted for:** every ticket on it is in VX-246 or VX-281, and both run before launch.
 Nothing on it is delayed except VX-262 (lenses on import), which stays parked at her word and was never in
@@ -134,8 +134,9 @@ the run. VX-245's two MCP sites ride VX-281.
    - VX-231: stale Bookcase counts.
    - Editor seam: read `notes/TEXTKIT2_NOTES.md`.
 4. **Wire asks:** VX-255 (insert blocks: write new appends at the end, edit inserts anywhere — ruled),
-   VX-252, VX-253 (ruled), VX-267 (labels drop "suggested"), and VX-298 (AI opens Compare — her calls are on
-   the ticket).
+   VX-252, VX-253 (ruled), VX-267 (labels drop "suggested"), VX-298 (AI opens Compare — all six of her calls
+   answered on the ticket, incl. *replace the columns*), and VX-311 (`duplicate_note`, her Duplicate as Version on
+   the wire — her pushback: *"the duplicate note tool should be easy?"*).
 5. **Agent ergonomics:** VX-254, VX-256, VX-261.
 6. **LAST — the AI's docs** (VX-197). This unit starts only after VX-281 has merged and main is merged in.
 
@@ -197,7 +198,7 @@ Read `notes/TEXTKIT2_NOTES.md`. **Mobile-visible:** VX-296's shared face reaches
 1. **The Open list's layout and closing:** VX-285, VX-286, VX-287, VX-289. **Her ruling on VX-287:** Close
    Note = **⇧⌘W** (⌘W keeps closing the window), landing on **the next note in the list** — *"that way you
    can close them all quickly."* Verify ⇧⌘W is free first.
-2. **The drag:** VX-288 (her call on its shape is still open — §6) + VX-70.
+2. **The drag:** VX-288 — **the light version first** (her ruling) — + VX-70.
 3. **Navigate-away and Library revivals:** VX-123, VX-122 — one signal each, on the existing roads.
 4. **Library polish:** VX-19, VX-20, VX-121, VX-175.
 5. **The exports:** VX-125, VX-126 — the format's one home stays `Domain/VariorumDocument`.
@@ -212,8 +213,9 @@ and the shared-constant pin in `StarredScrollTests` (Starred keeps its 7, her wo
   sets the star; pre-launch at her word) · VX-247 (tag-delete undo) · VX-111 (the shared-note notice).
 - The honest disabled button: VX-194.
 - The book view: **VX-303** (every open door lands in Write at her block — a bug against the deep-link rule,
-  her words) · **VX-304** (Index takes badges, an in-place Takes sheet, "Takes" + "open in Write here" in the
-  box, Outline → Index keeps the block) · VX-291 (the ▸ target) · VX-21 (Book Panel grips) · VX-69 (order
+  her words) · **VX-304** (an "open in Write" door in the left note box in every book mode — her ask: the title's
+  "open ↗" is hard to see in a long note — plus Index takes badges, an in-place Takes sheet, "Takes" in Index's box,
+  and Outline → Index keeps the block) · VX-291 (the ▸ target) · VX-21 (Book Panel grips) · VX-69 (order
   popover Escape).
 - The reds: VX-77 · VX-115.
 - Last, with her: VX-216.
@@ -260,7 +262,7 @@ directly. Nothing builds before the plan file `notes/plans/vx-266-castle-backups
 | Her readme and letter text | before launch, if the launch carries them | VX-105 |
 | The MCP guide page + the privacy page (her site agent) | after VX-246's docs (MCP); any time (privacy) | VX-197 · VX-294 |
 | The release notes (she writes them) | at release | — |
-| The QUESTIONS #218 bundle (VX-184's provisionals) | before VX-246's kickoff, ideally | — |
+| The QUESTIONS #218 bundle (VX-184's provisionals) | **answered 2026-10-13** — all ratified as built | — |
 
 ---
 
@@ -292,24 +294,21 @@ at a zero-instance window with no commits during it, then DMG first and appcast 
 - Code blocks (VX-295) and the held markdown mode (VX-293) come later.
 - Public launch is gated on Castle being properly done, however long it takes.
 
-**Still open — answerable any time; a run's kickoff will raise whichever reaches it first:**
-- **VX-288, the Open-list drag:** shape S first, with her walk deciding on M (recommended), or M from the start.
-- **VX-268's row calls** (on the ticket; VX-281):
-  - the Pool and Book Panel rows (recommended: in);
-  - Blocks-scope rows (recommended: no);
-  - the open book (recommended: match the Bookcase).
-- **VX-298, AI opens Compare** (six calls on the ticket; VX-246). Recommended:
-  - any two notes her picker would offer, with no link required;
-  - open with "related blocks only" off when the notes share no lineage;
-  - up to three peers;
-  - `link_versions`' "Open ›" opens Compare.
+**Answered later the same evening** (each on its ticket in her words):
+- VX-288: the light drag version first.
+- VX-268: her calls — Pool and Book Panel rows in, Blocks-scope rows out, the open book matches the Bookcase.
+- VX-298: any two notes her picker offers; "related blocks only" off when there's no shared lineage; up to three
+  peers; `link_versions`' "Open ›" opens Compare; **replace the columns**. `duplicate_note` is pre-launch too
+  (VX-311, her pushback).
+- VX-296: fix (a), caret-aware in the live editor only.
+- **QUESTIONS #218:** every provisional ratified as built. Named pairs aligning Compare rows → VX-315 (after
+  launch). An icon on AI-made commits, with no name in them → VX-316 (after launch). The capacity count is
+  accepted: a capped book's `max_notes` counts fenced notes, so an AI can infer how many hidden notes there are.
+  The wording items → her VX-234 pass.
+- VX-304 gains the left-box "open in Write" door in every book mode (her ask).
+- After launch: VX-312, ⌘1–⌘6 working from the caret inside a book (her ask).
 
-  Undecided: replace the open columns or fill the empty ones. A `duplicate_note` tool would be its own
-  ticket after launch.
-- **VX-296's fix shape:** (a) caret-aware in the live editor only (recommended), or (b) drop the closer half
-  of the flanking rule app-wide, which changes her ruled grammar.
-- **QUESTIONS #218** (VX-184's provisionals), ideally before VX-246's kickoff.
-- **VX-113's home:** the Castle session's to place.
+**Still open:** VX-113's home, for the Castle session to place. Nothing else is waiting on her.
 
 ---
 
@@ -321,6 +320,9 @@ at a zero-instance window with no commits during it, then DMG first and appcast 
   mid-fling are the likely causes; relates to VX-17.
 - VX-295: multi-line code blocks, and VX-293 (18e, whether a markdown mode exists at all).
 - VX-138: the stack fan style without the chosen take.
+- VX-312: ⌘1–⌘6 open the caret's note in that mode from inside a book.
+- VX-315: named block pairs line Compare rows up.
+- VX-316: an icon on AI-made commits (with the AI's name kept out of the commit's name).
 - VX-248: the live-pane root fix.
 - VX-244 / VX-242: the Takes and Lenses edges.
 - VX-238: restoring a deleted tag (design first).
