@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-246 — Run: MCP door fixes & AI docs** (21 members, all pre-launch; the runway `notes/plans/vx-33-release-runway.md` §3) | VX-246 · `vx-246-mcp-door-fixes-ai-docs` | `~/dev/variorum-vx-246` · the Pro | KICKOFF 2026-10-13 (orchestrator session variorum-84, Opus 5.5 at max): plan `notes/plans/mcp-pane-and-docs-kickoff.md`; record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`; zero `Sync/`/custody; may reach the editor seam (VX-275, VX-230) — Fable cold review; the docs unit (VX-197) waits for VX-281's merge |
+| **VX-281 — Run: MCP settings pane & shared icon** (members VX-199 · VX-205 · VX-232 · VX-268 + VX-245's two MCP sites; the runway `notes/plans/vx-33-release-runway.md` §3) | VX-281 · `vx-281-run-mcp-settings-pane-shared-icon` | `~/dev/variorum-vx-281` · the Pro | KICKOFF 2026-10-13 (orchestrator session variorum-75, Opus 5.5): plan `notes/plans/mcp-pane-and-docs-kickoff.md` (U6 + the VX-268 bullet); record `notes/plans/fixes/vx-281-mcp-settings-pane-shared-icon.md`; Opus implements / Opus cold-reviews at max; zero `Sync/`/custody/editor seam; VX-246's docs unit (VX-197) waits on this merge |
 
 ### Latest closeout
 
