@@ -2565,3 +2565,26 @@ Recorded, not a question: your ruling supersedes #140(c) on the Mac ("a draft ty
 the close"). The phone is unchanged — its comments sheet still drops an unsubmitted draft on close (your ruling named the
 Mac popover); a VM ticket is the orchestrator's to mint.
 Status: open — your eye in daily use.
+
+#223 — **VX-326 (U6), the Bookcase's quick entry takes the caret when the app opens — two readings built PROVISIONAL**
+(the binding record is `notes/plans/fixes/vx-282-editor-notes-fixes.md` § U6 — the trace, the pins, the walk; your
+word: *"yeah you can fix this ticket if you think it's an annoying issue"*). What was wrong: the Bookcase asked for the
+caret before its box was in the window, the ask was spent, and nothing tried again — so the app opened with the
+keyboard nowhere. Now the ask waits until the box is in its window and takes the caret only if nothing else in that
+window has the keyboard (never from a field, never under a sheet); it is decided once. *(Numbering: the next free
+number when written; the merging session renumbers if a sibling run took it.)* Each is built as stated, with a line to
+reverse it:
+**P-U6-1 — the ask is decided when the box reaches its window, on that window alone.** Built (a): if nothing in the
+Bookcase's window holds the keyboard and no sheet is on it, the caret goes into the quick entry; other windows are not
+consulted. So if a note opened in its own window comes back at launch in front, that note keeps its keyboard, and when
+you click over to the main window the caret is already in the quick entry. Options: (b) wait until the main window
+itself becomes the front window and decide then, dropping the ask if another window came to the front first; (c) as
+(a), but drop the ask whenever another window of the app is in front at that moment (then the quick entry is not ready
+when you click over).
+**P-U6-2 — only a window that OPENS on the Bookcase asks.** Built (a): launching, unlocking, and a new window each put
+the caret in the quick entry; coming BACK to the Bookcase from a note or the Library does not (it never did — measured:
+that road drops the ask the same way, and it is left exactly as it was). Options: (b) every arrival at the Bookcase puts
+the caret there — "the shelf opens with the cursor already in the bar" (R102) read for every visit — which needs the
+quick entry to stay out of the way while the tour runs (a tour started from a note walks you to the Bookcase); (c) only
+the app's very first window at launch (not after an unlock, not a new window).
+Status: open — your eye in daily use.

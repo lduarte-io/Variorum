@@ -143,7 +143,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — W1 red on old (the host suites + the model suites, ≈4 min; VX-229 decided here) · W2 the fixed batch (three groups, ≈12 min) · W3 the walk (7 rows incl. a live `heap` count, row 1 in both voices, ≈25 min) — ≈42 min.** VX-229: fix REVERTED `7d798f82` (offscreen artefact — the CORRECTION); expected HOLLOW. VX-257: fix `1ca8fe72`; QUESTIONS #222. VX-183: `a765683c`. VX-182: pins `f38fb93c` red on old (headless), fix `fd4c260c`, R-182 ran + restored. Pins hardened `dab712d8`. Core 2,801/320 + MCP 212/41 + workbook 40/6 headless green; the phone builds. Old products `DerivedData/vx282-u5-old-products` REBUILT (the named revert at `3a6bad6d` — done, restored, `git status` clean); fixed `DerivedData/vx282-u5` rebuilt at the tip. No claim held; no revert in flight. |
-| U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **IN-PROGRESS — the trace DONE (headless, recorded below): the shell's ask for the caret reaches the box before the box is in its window and is dropped (F-FR-1), at launch AND on every navigation back to the Bookcase. Next: the pins (red-on-old, ahead of the fix), the fix, the products.** No claim held; no revert in flight. |
+| U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **READY FOR STAGE — W1 red on old (`QuickEntryLaunchFocusTests` on `vx282-u6-old-products`, 1 issue expected, ≈3 min) · W2 the fixed batch on `vx282-u4` (three groups — the capture/quick-entry/pad suites with the four new ones, the tour suites, the shell-mount and launch/restore suites, ≈12 min) · W3 the walk (the old build's launch for the record; launch in both voices with a typed letter; a restored note window; the tour; the navigation-back scope line, ≈23 min) — ≈38 min.** Trace (headless, real module): the shell's ask reaches the box before its window and is spent (F-FR-1) — at launch and on every navigation back (O-U6-1, left as today). Pins `d35191b6` (red-on-old) · fix `3cf0079b` (the opening ask: decided when the box reaches its window, takes only a free keyboard, the shell's once). P-U6-1/2 → QUESTIONS #223. Products: old `vx282-u6-old-products`, fixed `vx282-u4` (U4's final + U5 + U6 — u4b tests what U4 expects). No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -1836,13 +1836,252 @@ first — no `/Applications/Variorum.app` instance, none of ours.
 
 ### U6 — VX-326 (the Bookcase's quick entry isn't focused at launch)
 
-**NOT DONE BY THIS UNIT YET (first line):** no Mac test has RUN and no walk — every app-target pin is PENDING the stage
-window; the fix is not yet built.
+**NOT DONE BY THIS UNIT (first line):** no Mac test has RUN and there is no walk yet — every app-target pin is PENDING
+the stage window (W1 red on old · W2 the Mac batch · W3 the walk). The evidence so far is headless: the trace and the
+fix's effect were measured offscreen on the REAL module (below), never on a key window. **Navigating back to the
+Bookcase is NOT fixed** — it drops the ask exactly as it does today (O-U6-1, the brief's scope line); the main window
+never launches onto a note, so the brief's "restored note" row is a restored NOTE WINDOW (premise correction 3).
 
-**State: IN-PROGRESS.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Counts marked PENDING
-wait for the window. **Revert state: no behavioural revert in flight.**
+**State: READY FOR STAGE.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Counts marked
+PENDING wait for the window. **Revert state: no behavioural revert in flight** (red-on-old runs on separate OLD
+products, built before the fix — no revert needed).
 
-#### The trace (headless, against `c2b3ba72`) — PENDING its write-up in this section's next commit
+**Her word (2026-10-14, overnight):** *"yeah you can fix this ticket if you think it's an annoying issue: New ticket
+VX-326"* — the orchestrator ruled: fix it (the Bookcase already ASKS for focus on mount; a launch without the caret
+falls short of the existing intent — R102, `phase-13-ui-design.md:1659`: *"The shelf also opens with the cursor already
+IN the bar ('start typing' is literal now)"*). No canon line or ruling says the Bookcase should NOT take the caret at
+launch (the STOP condition was checked: R-13s-3 places the box at the foot and says nothing on focus; "no popup greets
+a first open" is about popups; W-U1a-1 is about the TOUR's start).
+
+#### The trace (headless, against `c2b3ba72`) — candidate 2 of the brief: the ask fires before the box is in a window
+
+1. **The ask.** The Bookcase builds its bar with `autofocus: true` (`ShelfView.swift:984` at `c2b3ba72`), and the bar
+   asks once from its `.task`: `if autofocus { focusRequest += 1 }` (`QuickEntryBar.swift:312-314`).
+2. **The serve.** `CaptureTextView.updateNSView` sees the counted request change, bumps `lastFocusRequest` and calls
+   `takeFocus()` (`CaptureTextView.swift:266-269`), whose first line is `guard let view, let window = view.window
+   else { return }` (`:398`). A windowless box returns there with the ask already SPENT. Nothing retries it:
+   `viewDidMoveToWindow` (`:486-511`) serves only `wantsInitialFocus` (set at make from a request already > 0, `:238`
+   — the pad's road; the bar's is raised a turn later, so false) and U4's held-keyboard re-take (the box held nothing).
+3. **The launch's order.** The main window is not born showing the shell: `beginOpening` sets `.opening`
+   (`AppBootstrap.swift:243`) and the store opens off the main actor; the window shows `StoreOpeningView`
+   (`VariorumApp.swift:426-430`) until `finish` writes `.ready` (`AppBootstrap.swift:514`), and `mainWindowContent`
+   SWAPS `RootView` in. The shell's first focused selection is always the Bookcase (`WorkspaceModel.swift:45`,
+   `[.primary: .shelf]`; `RootView.paneDetail` `.shelf, nil` → `ShelfView`). In a swap, SwiftUI runs the new bar's
+   `.task` — and the update its raise causes — a pass BEFORE it puts the box in the window.
+4. **MEASURED, not reasoned (two scratch probes, never committed, `.prohibited`, every window off every display and
+   alpha 0, checked against every `NSScreen` before and after ordering in; the unsandboxed store folders checked
+   absent before and after; no defaults domain left behind):**
+   - *Pure SwiftUI + AppKit* (a representable logging its serve and its arrival, a `.task { request += 1 }` like the
+     bar's): in every shape — the hosting view's first content, a launch swap, a deeper swap, a navigation back — the
+     serve ran with **`window = nil`, ~5 ms before `viewDidMoveToWindow`**.
+   - *The REAL module* (linked against `Variorum.debug.dylib` of `DerivedData/vx282-u4` with `@testable import
+     Variorum`, an in-memory store by `prepareDependencies`; the production `RootView` behind an opening face, flipped
+     ready from a main-actor task as `finish` does; every `makeFirstResponder` call logged by the window, every arrival
+     of a `CaptureNSTextView` logged; the box's coordinator read at the end):
+
+     | shape | pre-fix (`c2b3ba72`) | fixed (`3cf0079b`) |
+     |---|---|---|
+     | `RootView` as the window's FIRST content (the test suites' mount) | box arrives, then `makeFirstResponder(box)`: **the caret lands** | the caret lands (the opening road) |
+     | **the LAUNCH swap** (opening face → `RootView`) | box arrives 0.453 s, **no `makeFirstResponder` call ever**; `lastFocusRequest = 1` — the ask was SPENT; the window keeps the keyboard | `makeFirstResponder(box)` at arrival + one turn: **the caret lands** |
+     | a navigation Library → Bookcase | the new box arrives, no call, `lastFocusRequest = 1`; **the window keeps the keyboard** | the same — **the window keeps the keyboard** (the brief's scope; O-U6-1) |
+
+   So the brief's other two candidates are excluded on this evidence: the launch road DOES run the mount ask (step 1,
+   spent), and key-ness is not the gate — `makeFirstResponder` seats a first responder in a window that is not key
+   (the "first content" row above, in a never-key `.prohibited` window), so a request served windowed lands whatever
+   the key state. This is F-FR-1 (17y B2, `phase-17-standing-fixes.md:2630` — "a focus request raised before the
+   capture box is in a window is DROPPED … untraced in the real app"), now traced in the real composition, and
+   O-U4-3's live sighting is its launch face.
+5. **Why the suites never saw it:** `TourEntryTests` and `CaptureTourFocusTests` mount `RootView` as the window's
+   FIRST content and settle with a forced layout before each run-loop slice — the order in which the box is in its
+   window before the ask is served (their precondition "the Bookcase put the caret in its quick entry" holds on the
+   old tree too). The launch's own order needs the swap and a settle that only suspends.
+
+**Three premise corrections for the orchestrator (the brief's rule list, read against the trace):**
+1. **The gate is the WINDOW, not the key.** The brief's rule reads "as soon as its window is key". The ask is lost
+   because the box has no window yet; a box in a window that is not yet key can hold the first responder, and the
+   caret is live the moment the window becomes key. Built on that reading — PROVISIONAL **P-U6-1** below.
+2. **A navigation back to the Bookcase drops the ask TODAY** (measured, the table's third row; consistent with U4's
+   walk row E1, where a tour started from a note landed on the Bookcase with the WINDOW holding the keyboard — U4's
+   static trace had predicted the caret in the bar there, which is how P-U4-2 came to be raised and withdrawn). So R102
+   holds at no in-place mount in the running app. "Navigating to the Bookcase later behaves exactly as today" is
+   honoured — it still drops — and the gap is **O-U6-1** for the orchestrator to ticket (one unit = one surface; the
+   tour interplay is why it is not a one-liner: see O-U6-1).
+3. **The main window never launches onto a note.** Its workspace always opens on the Bookcase (`WorkspaceModel.swift:45`);
+   VX-139 restores the Open STRIP at launch (`restoreRememberedOpenNotes`), never the selection. "Launching onto a
+   restored note" exists only as a restored NOTE WINDOW (`noteWindows`, `VariorumApp.swift:461-492`), which the box
+   never touches: the rule decides on the facts of the box's OWN window, and `makeFirstResponder` on the main window
+   moves neither the key window nor the note window's editor. W3 row B checks it live.
+
+#### The fix (`3cf0079b`; pins ahead at `d35191b6`) — four files, zero `Sources/`, `Sync/`, custody, Keychain, schema, `Shared/`
+
+- **`Core/Views/CaptureTextView.swift` — the shared box gains a second counted ask, the OPENING ask.**
+  - `CaptureOpeningFocus` (`:123`, a pure `nonisolated enum` beside `CaptureKeys`): facts `inWindow` · `keyboard`
+    (`.nobody` = the window itself or nothing is first responder · `.theBox` · `.someoneElse`) · `sheetOnWindow` →
+    verdict `.wait` (not in a window) · `.take` (free keyboard, no sheet) · `.drop` (anything else holds this
+    window's keyboard, or a sheet is on it) · `.alreadyHeld`.
+  - `CaptureTextView.openingFocusRequest` (`:211`, default 0 — the pad and the Library's bar never raise it); the
+    coordinator's `lastOpeningFocusRequest` (made boxes do not inherit an earlier ask, `:306`); `updateNSView` arms
+    the box when it changes (`:338-339`).
+  - `CaptureNSTextView.armOpeningFocus()` (`:541`) raises `openingFocusPending` and decides on the NEXT main-queue
+    turn — never inside the SwiftUI update or layout pass that delivered it, so the window's keyboard is read after
+    that pass settles; `decideOpeningFocus()` (`:552`) applies the rule ONCE and lowers the flag on `take`, `drop` or
+    `alreadyHeld`; `viewDidMoveToWindow` re-schedules the decision while the flag is up (`:627`). Never steals, never
+    served late, served once; other windows are never consulted.
+  - Unchanged: `takeFocus()` and its guard (`:469-470` — the explicit asks: her click on the padding, the title chip,
+    and every later Bookcase mount's raise), the pad's `wantsInitialFocus`, U4's held-keyboard re-take, the undo
+    history, the keys, the geometry. Two comments corrected (F-FR-1 is no longer "UNTRACED").
+- **`Features/Shelf/QuickEntryBar.swift`** — `QuickEntryOpeningFocus` (`:181`, a one-bit `@MainActor` claim: `claim()`
+  is true exactly once); the bar takes it as an optional `openingFocus` (defaulted nil — the Library's bar and every
+  harness mount unchanged) and its `.task` claims it: the claim won → `openingFocusRequest += 1` (`:343`); otherwise
+  `focusRequest += 1` exactly as before (`:351`).
+- **`Features/Shelf/ShelfView.swift`** (`:96`, `:988`) and **`RootView.swift`** (`:98`, `:1168`) — the shell owns ONE
+  claim per `RootView` (`@State` — one per window, a fresh one after every unlock, as VX-139's per-shell claim) and
+  hands it to the Bookcase. **Both files are outside the run's declared surfaces** (two pass-through lines each,
+  plus a doc comment) — said here and in the report. Nothing in `BlockDecor`, the gutter, `EditorSurfaceController`,
+  `BlockRangeIndex`, `EditorEditRoute`/`SeamCarvePlan`, `EditorViewModel.storageDidEdit` or the markdown face.
+- **The scope, as built:** a shell OPENING on the Bookcase — a launch, an unlock (the lock screen swaps in the same
+  way), a new window — asks through the opening road; every later Bookcase mount in that shell (a navigation back, a
+  wing switch's remount) finds the claim spent and keeps today's raise. PROVISIONAL **P-U6-2**.
+
+#### The pins — `VariorumTests/QuickEntryLaunchFocusTests.swift` (new)
+
+**Committed AHEAD of the fix (`d35191b6`) — the OLD products are the build of that commit.** The production shell in the
+launch's own shape: `LaunchShell` is `mainWindowContent`'s switch in miniature (an opening face, then `RootView` when
+"ready"); the window (`LaunchWindow`) reports key when the pin says so and posts AppKit's own `didBecomeKey`
+(`WindowsTests`' road — this host never makes a window key); every settle only SUSPENDS (no forced layout, no nested
+run loop), so SwiftUI's own pass decides when the box reaches its window — the forced layout of the other suites'
+settles inserts the box before the ask and would make the pin vacuous.
+
+| Suite · test | Asserts | Old | Fixed |
+|---|---|---|---|
+| `QuickEntryLaunchFocusTests` · `theShellOpeningOnTheBookcasePutsTheCaretInItsQuickEntry` | opening face → ready; the Bookcase's box arrives in the window; the window turns key → the box is the first responder | **RED (1 issue — the last cell)** | green |
+| `QuickEntryLaunchFocusTests` · `aFieldHoldingTheKeyboardKeepsItAcrossTheOpening` | a field holds the keyboard before the shell opens → it keeps it through the opening, the key moment and a re-attach of the box | GUARD (green — the ask is dropped windowless) | green (dropped: `.someoneElse`) |
+| `QuickEntryLaunchFocusTests` · `aSheetOnTheWindowAtTheOpeningKeepsTheKeyboardFromTheQuickEntry` | a sheet on the window when the shell opens → the box never takes the keyboard, during it or after it closes | GUARD (green) | green (dropped: the sheet) |
+
+**Added WITH the fix (`3cf0079b`) — they name what the old tree lacks, so they are GUARDS of the fixed product:**
+
+| Suite · test | Asserts |
+|---|---|
+| `CaptureOpeningFocusRuleTests` · `outOfItsWindowTheAskWaits`, `inItsWindowTheAskTakesOnlyAFreeKeyboard` | the rule as a table (every cell) |
+| `CaptureOpeningFocusBoxTests` · `anAskArmedOutOfTheWindowIsDecidedOnArrival` | the launch's order at the box (the host detached, the ask armed, `openingFocusPending` up while out of the window; re-attached → the caret, the flag down) |
+| `CaptureOpeningFocusBoxTests` · `anAskNeverStealsAndIsNeverServedLate` | a field takes the keyboard while the ask waits → kept; the flag down (dropped); a later release + re-attach serves nothing |
+| `CaptureOpeningFocusBoxTests` · `anAskOnAFreeWindowTakesTheCaretAndIsServedOnce` | through the representable: raised on a free window → the caret; after a release + re-attach the box stays away (VX-112's contract unchanged) |
+| `CaptureOpeningFocusBoxTests` · `anAskWithASheetOnTheWindowIsDropped` | through the representable: a sheet on the window → dropped; the sheet's close serves nothing |
+| `QuickEntryOpeningScopeTests` · `theClaimIsTrueExactlyOnce` | the claim object |
+| `QuickEntryOpeningScopeTests` · `aNavigationBackToTheBookcaseKeepsTheBarsRaiseAsItWas` | the shell opens (the opening road: `lastOpeningFocusRequest == 1`, `lastFocusRequest == 0`, the caret in the box); Library and back → the NEW Bookcase box raised `focusRequest` (1) and no opening ask (0) — the scope line, asserted on the asks rather than on the outcome (the outcome is today's drop, O-U6-1) |
+
+**The harness facts the pins live with:** this host has no key window (`WindowsTests`' header), so the launch pin's
+key moment is the posted notification and `isKeyWindow` — AppKit's own posting under a real hand is the walk's (W3).
+The "another window is key" case (a restored note window) is not buildable here (`NSApp.keyWindow` stays nil) and the
+rule never consults other windows anyway; W3 row B is its evidence. U4's `CaptureFocusReattachTests` and
+`CaptureTourFocusTests` are untouched and expected green (they use the counted ask, and the RootView mount's opening
+ask lands in the first-content order exactly as the counted one did).
+
+#### The products (no new full tree, as briefed)
+
+- **Old:** `App/Variorum/DerivedData/vx282-u6-old-products` — `build-for-testing` of `d35191b6` (the pins over the pre-fix
+  app — U4's and U5's final code included) into `vx282-u4`, TEST BUILD SUCCEEDED; `Build/Products` APFS-cloned out
+  (`cp -c`, ≈456 MB logical). Its test bundle carries the pins (`nm`: 58 `QuickEntryLaunchFocusTests` symbols); its app
+  dylib carries no `openingFocus` symbol.
+- **Fixed:** `App/Variorum/DerivedData/vx282-u4` — rebuilt LAST at `3cf0079b`, TEST BUILD SUCCEEDED; no new warning in a
+  touched file (the five `ShelfView.swift` warnings in the log are pre-existing lines — `+` on `Text`, `placement`).
+  **For U4's u4b:** this tree now holds U4's final code + U5's committed code + U6 (additive); U4's five suites test
+  what they tested (the undo suites and the reattach suite never touch the opening ask; `CaptureTourFocusTests`' shell
+  mount takes the caret by the opening road where it took it by the counted one — the offscreen replay's "first
+  content" row shows the caret landing on both). `vx282-u4-old-products` is untouched.
+- No core file touched → no `swift test` owed. No phone file touched → no phone build owed (`Core/Views/` and the
+  Bookcase are Mac-only; the phone's capture is its own road). MOBILE PARITY: nothing mobile-visible.
+
+#### PROVISIONALs (QUESTIONS #223)
+
+- **P-U6-1 — the opening ask is decided when the box reaches its window, on that window's facts alone.** Built (a):
+  take the caret when this window's keyboard is free and no sheet is on it, else drop; other windows never consulted
+  — so with a restored note window key at launch, the note keeps its editor and the main window's bar holds the caret
+  for when she clicks back there (AppKit's per-window first responder). Options: (b) the brief's literal — wait until
+  THIS window becomes key and decide then, dropping the ask if a different window becomes key first (a key-change
+  watch; a brand-new window, which AppKit keys just after its content arrives, then needs its own allowance); (c) as
+  (a), but also drop when another window of the app is key at the decision.
+- **P-U6-2 — the opening ask is the shell's, once.** Built (a): the first Bookcase bar of each shell — a launch, every
+  unlock, a new window — asks through the opening road; every later Bookcase mount (a navigation back, a wing
+  switch's remount) keeps today's raise (which still drops — O-U6-1). Options: (b) every Bookcase mount through the
+  opening road (R102's letter, "the shelf opens with the cursor already in the bar"), with the bar standing down while
+  a tour runs (W-U1a-1 — a tour started away from the Bookcase lands there after its release); (c) the process's
+  first shell only (not after an unlock, not in a new window).
+
+#### Observations (not fixed — for the orchestrator)
+
+- **O-U6-1 — a navigation back to the Bookcase never puts the caret in the bar** (R102's in-place half; measured above).
+  Pre-existing since 13u3 UNIT C made the box an AppKit representable (the SwiftUI field's `@FocusState` had waited for
+  its window by itself). Fixing it is the same rule pointed at every mount (P-U6-2 (b)), BUT a tour started away from
+  the Bookcase navigates there after its release (W-U1a-1), so the bar must stand down while a tour runs, or the tour
+  must release again when its navigation lands (P-U4-2's withdrawn options). A ticket, pre-launch at her call.
+- **O-U6-2 — the run record's first ten lines** (above its title) are a stray copy of U5's W2 plan; left untouched
+  (U5's text).
+- **O-U6-3 — U4's candidate 2 trace** ("the bar's `.task` raise lands at least one turn later → `takeFocus` → the
+  caret in the bar") assumed the box was windowed at the raise; the real composition drops it windowless. E1's live
+  result already agreed; nothing to change in U4's code.
+
+#### THE WINDOW PLAN (≈38 min; runs only on the orchestrator's claim line; `guard.sh --author` before every leg)
+
+From `App/Variorum/`; logs to `notes/plans/vx282-screens/u6/logs/`, captures to `notes/plans/vx282-screens/u6/`.
+`pgrep -fl 'Variorum.app/Contents/MacOS'` first — no `/Applications/Variorum.app` instance, none of ours.
+
+- **W1 — red on old (≈3 min):** `xcodebuild test-without-building -xctestrun
+  DerivedData/vx282-u6-old-products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination 'platform=macOS'
+  -only-testing:VariorumTests/QuickEntryLaunchFocusTests` → `w1-red-on-old.log`. EXPECTED: **1 test failed with 1
+  issue** (`theShellOpeningOnTheBookcasePutsTheCaretInItsQuickEntry`, its last cell — the keyboard on the window), the
+  two guards green. A GREEN on old means this host's run loop did not reproduce the launch's order — recorded as
+  such (the walk then carries the red-on-old evidence; U4's `00-launch.png` and W3 row A0 are its live form).
+- **W2 — the fixed Mac batch, `-derivedDataPath DerivedData/vx282-u4` (≈12 min), three groups (suite TYPE names,
+  grepped; every suite's ✔/✘ line and the skips read):**
+  (g1) `QuickEntryLaunchFocusTests` `CaptureOpeningFocusRuleTests` `CaptureOpeningFocusBoxTests`
+  `QuickEntryOpeningScopeTests` `CaptureUndoHistoryTests` `CaptureUndoSyncTests` `CaptureHostsUndoFilingTests`
+  `CaptureFocusReattachTests` `CaptureTourFocusTests` `CaptureFocusReportTests` `CaptureKeysTests`
+  `CaptureTextViewKeyTests` `CaptureHandOffTests` `QuickEntryBarTests` `BookcaseQuickEntryPlacementTests`
+  `QuickNoteMintTests` `QuickNoteDoorTests` `QuickNoteWindowTests` `QuickNoteWordTests` `QuickNoteParkTests` →
+  `w2-g1.log`;
+  (g2) the tour: `TourScriptTests` `TourSpotlightTests` `TourEngineTests` `TourPoolTuckTests` `TourEntryTests`
+  `TourEndCardTests` `TourEndCardAsideGateTests` `TourOfferLineTests` → `w2-g2.log`;
+  (g3) every suite that mounts the real shell, and the launch/restore suites: `ShellChromeTests`
+  `ShellLandingMountTests` `ShellLandingDoorTests` `NavigationDoorsTests` `PaneSplitDoorTests` `NoteBoxSlotTests`
+  `NoteBoxCompositionTests` `AscentRoutingTests` `BookPanelActingTests` `DebugOracleTwoWindowTests`
+  `TwoWindowMountTests` `CreationTargetTests` `WindowRegistryTests` `OpenNotesRestoreTests`
+  `OpenNotesModelRestoreTests` → `w2-g3.log`. EXPECTED: all green (none of the standing reds VX-115/VX-245/VX-167 is
+  in these groups).
+- **W3 — the walk (≈23 min), `DerivedData/vx282-u4/Build/Products/Debug/Variorum.app` on the DEV store only.** Launch by
+  `open -n <that path>`; the dev store opens unlocked (Standard). **If a What's New sheet greets a launch:** dismiss it
+  with its own button, quit OUR instance by identity, relaunch (it greets once per version), and only then take the
+  launch row's readings — a sheet on the window at the opening drops the ask by the rule. Keys through `keys.sh` only,
+  ≥ 2 s apart; captures by REGION (`screencapture -x -R`); the caret's truth read by AX (`tell (first application
+  process whose unix id is <pid>) to get {role of (value of attribute "AXFocusedUIElement"), name of (value of
+  attribute "AXFocusedWindow")}` — the box is an `AXTextArea`). Record the voice and appearance found, and
+  `defaults read io.lduarte.Variorum.debug variorum.tour.offer` (expect `completed`).
+  - **A0 — the OLD build at launch, for the record (≈2 min):** `open -n
+    DerivedData/vx282-u6-old-products/Debug/Variorum.app` → AX reads the WINDOW (capture `A0-old-launch.png`) → quit
+    it by identity.
+  - **A — launch onto the Bookcase (the fixed build):** AX reads `AXTextArea` in the main window, the caret blinking in
+    the quick entry (capture `A1-launch.png`); `keys.sh` types `z` → the box shows `z` and the title chip may offer
+    a name (capture `A2-typed.png`); ⌫ → empty again, nothing filed.
+  - **A' — the second voice:** ⌘K "Use Terminal Voice" (or Study, whichever is not current) → quit by identity →
+    relaunch → AX `AXTextArea`; the Terminal block cursor is NOT drawn beside the caret (one cursor — 17y (m)) (capture
+    `A3-launch-other-voice.png`) → switch the voice back (⌘K) at the end of the walk.
+  - **B — a restored note window:** ⌘K → open any note → its note ▾ ▸ Open in New Window (by AX name) → the note
+    window key (AX: its editor, or its window) → quit by identity → relaunch. If macOS restores the note window and it
+    comes up key: AX reads the NOTE window's element (its editor keeps the keyboard; capture `B1-note-window.png`) and
+    the main window shows no caret in front of her; then click the main window's TITLE BAR only (no content) → AX: the
+    main window's `AXTextArea` (P-U6-1 (a): the bar held the caret for when she came back — capture `B2-main.png`).
+    Close the note window by its close button. If the note window is NOT restored on this Mac, record that (the
+    row then has nothing to check) and close nothing.
+  - **C — the tour, no steal:** on the Bookcase with the caret in the bar (AX) → Help ▸ Take the Tour (menu, by AX
+    name) → step 1: AX reads the WINDOW (the tour's release, W-U1a-1) (capture `C1-step1.png`) → the card's "next"
+    by AX name → step 2: AX the window (capture `C2-step2.png`) → "End tour" by AX name. No keystroke during the tour.
+  - **D — the scope line, as today (≈2 min):** ⌘K → `Library` ⏎ → ⌘K → `Bookcase` ⏎ → AX: NOT the box (O-U6-1 —
+    expected the window or the palette's leftover; capture `D1-navigate-back.png`).
+  - **Cleanup:** nothing filed (every `z` deleted); the note window closed; the voice restored as found;
+    `variorum.tour.offer` re-read (expected `completed` — U4's walk ended its tours the same way and the record stayed
+    `completed`; record what it reads); the main window left on the Bookcase; quit OUR instance by identity
+    (`tell application id "io.lduarte.Variorum.debug" to quit`), `pgrep` empty after; the dev store Standard and
+    unlocked; release the claim.
 
 ## Ladder
 
