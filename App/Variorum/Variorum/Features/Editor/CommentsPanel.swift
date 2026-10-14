@@ -757,6 +757,65 @@ struct CommentPanelKeyMonitor: NSViewRepresentable {
 
 // MARK: - The panel
 
+/// **THE COMMENTS PANEL — the face every host presents** (Write's sheet, the
+/// Takes bar's sheet, the take panel's nested sheet, the Takes margin note's
+/// popover). It owns the host's lifecycle; the writing surface — which owns
+/// the panel's model — is `CommentsPanelSurface` below.
+///
+/// **VX-229 — a dismissed popover lets go of its panel.** SwiftUI never tears
+/// a dismissed popover's content down, and it makes a NEW popover window per
+/// opening (measured — VX-179's `stale.swift`, re-measured at VX-282 U5 by a
+/// standalone probe), so every opening of the margin note's comments left the
+/// previous panel whole in its ordered-out window: its model, and its store
+/// observation re-reading the block's comments on every write, for the app's
+/// life. The host's own closing is the one moment every dismissal road shares,
+/// so this view hears it (`CommentPanelHostWatcher`, scoped to the popover
+/// whose content is this panel's window):
+///  · at `willClose` the panel LEAVES — its one leaving body, `leave()`
+///    (dirty edits commit; VX-257's draft parks), exactly where VX-179 FIX
+///    LEG 2's save already ran;
+///  · at `didClose` the surface is removed: its `.task` — the observation —
+///    is cancelled, its views leave the window (their key monitor and
+///    observers with them), and nothing holds the model it owned.
+/// Measured by the same probe: a state flip in the dismissed content IS
+/// processed (the content removed, its `.task` cancelled, its `@State`
+/// released). The torn-down content is never shown again — each opening is a
+/// new window with new content (the pins' premise says so by name if SwiftUI
+/// ever reuses one). A SHEET host posts neither notification: SwiftUI removes a
+/// dismissed sheet's content itself (measured by the pins' guards), and the
+/// surface's `.onDisappear` is its leaving road.
+struct CommentsPanel: View {
+    let session: AppSession
+    let blockID: String
+    /// A pin's road in (it reads the model the surface runs); the app passes
+    /// nil and the surface mints its own, as it always has.
+    private let model: CommentsPanelModel?
+    /// Set when the panel's POPOVER host has closed (VX-229) — the surface,
+    /// and with it the model it owns and its observation, let go.
+    @State private var hostClosed = false
+
+    init(session: AppSession, blockID: String, model: CommentsPanelModel? = nil) {
+        self.session = session
+        self.blockID = blockID
+        self.model = model
+    }
+
+    var body: some View {
+        // The model lives in the SURFACE's `@State`, never here: this view
+        // stays in a dismissed popover's graph, and SwiftUI keeps its latest
+        // view VALUE — a `State(initialValue:)` struct carries the object it
+        // was built with, so a model owned here would outlive any nil written
+        // to it (measured at U5 against the real module: the observation
+        // stopped, the model stayed). Removing the surface drops its value,
+        // its `@State` and its `.task` together.
+        if !hostClosed {
+            CommentsPanelSurface(
+                session: session, blockID: blockID, model: model,
+                onHostClosed: { hostClosed = true })
+        }
+    }
+}
+
 /// **THE COMMENTS PANEL AS A TEXT EDITOR** (13u3 UNIT A2 — the gutter memo's
 /// §2 D, her item 3: *"the comment add box is so small and it doesn't make
 /// sense given how big the overall comment box is that the whole thing isn't
@@ -772,10 +831,11 @@ struct CommentPanelKeyMonitor: NSViewRepresentable {
 /// **R-13u3-6 is why this exists:** comment editing lives in the panel ONLY —
 /// the margin card in the gutter is a read face and a door. One live-text
 /// home for a comment, exactly as the page has one live editor.
-struct CommentsPanel: View {
-    let session: AppSession
-    let blockID: String
+private struct CommentsPanelSurface: View {
     @State private var model: CommentsPanelModel
+    /// The popover host's close is over (VX-229): `CommentsPanel` removes this
+    /// surface, which lets go of the model and its observation.
+    let onHostClosed: () -> Void
     @State private var deletedShown = false
     /// The comments' own measured height, which is what decides how much
     /// space is left for the add area.
@@ -801,11 +861,13 @@ struct CommentsPanel: View {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
-    init(session: AppSession, blockID: String, model: CommentsPanelModel? = nil) {
-        self.session = session
-        self.blockID = blockID
+    init(
+        session: AppSession, blockID: String, model: CommentsPanelModel?,
+        onHostClosed: @escaping () -> Void
+    ) {
         _model = State(initialValue: model
             ?? CommentsPanelModel(session: session, blockID: blockID))
+        self.onHostClosed = onHostClosed
     }
 
     private var tokens: VoiceTokens {
@@ -872,21 +934,23 @@ struct CommentsPanel: View {
             }
         }
         .onDisappear {
-            // The panel can also leave without a focus change. Every dirty
-            // row is committed the same way; a commit that would write
-            // nothing writes nothing, so this is idempotent beside `close()`
-            // and the popover watcher below.
+            // The panel can also leave without a focus change — a sheet's
+            // dismissal, and (VX-229) a popover's content let go after its
+            // close. Every road runs the same leaving body; a commit that
+            // would write nothing writes nothing, so this is idempotent
+            // beside `close()` and the popover host's own closing.
             commitDirtyEdits()
         }
         // **A POPOVER HOST'S CLOSING SAVES** (VX-179 U3 FIX LEG 2 — ladder
         // R1-2, AGREED and measured offscreen): a dismissed popover is only
-        // ordered out — SwiftUI never tears its content down, so neither
-        // `.onDisappear` above nor the caret's departure report ever fires,
-        // and a dirty in-place edit died with this model (pre-existing since
-        // 13u3 A2). The popover's own `willClose` is the one moment every
-        // dismissal road shares (a click away, ⎋, the binding), so it commits
-        // here — the same body `.onDisappear` was always meant to run.
-        .background(CommentPanelHostWatcher(onHostClosing: commitDirtyEdits))
+        // ordered out — SwiftUI never tears its content down on its own, so
+        // neither `.onDisappear` above nor the caret's departure report fires
+        // at the close. The popover's own `willClose` is the one moment every
+        // dismissal road shares (a click away, ⎋, the binding), so the
+        // leaving body runs there; at its `didClose` (VX-229) the close is
+        // over and `CommentsPanel` removes this surface.
+        .background(CommentPanelHostWatcher(
+            onHostClosing: commitDirtyEdits, onHostClosed: onHostClosed))
     }
 
     /// The panel's ONE leaving body (Close, `.onDisappear`, a popover host's
@@ -1262,51 +1326,64 @@ struct CommentsPanel: View {
     }
 }
 
-/// **The panel's host-closing watcher** (VX-179 U3 FIX LEG 2 — R1-2). A
-/// zero-size view that knows its window and hears `NSPopover`'s
-/// `willClose` for the popover whose content lives in that window — and only
-/// that one (the app shows other popovers). A sheet host never posts it, so
-/// in a sheet this view does nothing; Close and `.onDisappear` cover sheets.
+/// **The panel's host-closing watcher** (VX-179 U3 FIX LEG 2 — R1-2; grown at
+/// VX-229). A zero-size view that knows its window and hears `NSPopover`'s
+/// `willClose` and `didClose` for the popover whose content lives in that
+/// window — and only that one (the app shows other popovers). A sheet host
+/// never posts them, so in a sheet this view does nothing; Close and
+/// `.onDisappear` cover sheets.
 struct CommentPanelHostWatcher: NSViewRepresentable {
-    let onHostClosing: () -> Void
+    /// The popover's `willClose` — the panel leaves (VX-179 FIX LEG 2).
+    var onHostClosing: () -> Void = {}
+    /// The popover's `didClose` — the close is over; the panel lets go of
+    /// its model (VX-229).
+    var onHostClosed: () -> Void = {}
 
     func makeNSView(context: Context) -> WatcherView {
         let view = WatcherView()
         view.onHostClosing = onHostClosing
+        view.onHostClosed = onHostClosed
         return view
     }
 
     func updateNSView(_ nsView: WatcherView, context: Context) {
         nsView.onHostClosing = onHostClosing
+        nsView.onHostClosed = onHostClosed
     }
 
     final class WatcherView: NSView {
         var onHostClosing: (() -> Void)?
-        private var observer: NSObjectProtocol?
+        var onHostClosed: (() -> Void)?
+        private var observers: [NSObjectProtocol] = []
 
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
-            if let observer {
-                NotificationCenter.default.removeObserver(observer)
-                self.observer = nil
-            }
+            for observer in observers { NotificationCenter.default.removeObserver(observer) }
+            observers.removeAll()
             guard window != nil else { return }
-            observer = NotificationCenter.default.addObserver(
-                forName: NSPopover.willCloseNotification, object: nil, queue: .main
+            observers.append(observe(NSPopover.willCloseNotification) { $0.onHostClosing?() })
+            observers.append(observe(NSPopover.didCloseNotification) { $0.onHostClosed?() })
+        }
+
+        private func observe(
+            _ name: Notification.Name, _ act: @escaping @MainActor (WatcherView) -> Void
+        ) -> NSObjectProtocol {
+            NotificationCenter.default.addObserver(
+                forName: name, object: nil, queue: .main
             ) { [weak self] note in
                 // Read before the hop: the notification itself is not
                 // Sendable; the popover (a main-actor class) is.
-                let closing = note.object as? NSPopover
+                let popover = note.object as? NSPopover
                 MainActor.assumeIsolated {
                     guard let self, let window = self.window,
-                          CommentPanelHostWatcher.isHost(closing, ofPanelIn: window)
+                          CommentPanelHostWatcher.isHost(popover, ofPanelIn: window)
                     else { return }
-                    self.onHostClosing?()
+                    act(self)
                 }
             }
         }
         // (No `deinit`: the view leaves its window before it dies, and
-        // `viewDidMoveToWindow` with a nil window removes the observer.)
+        // `viewDidMoveToWindow` with a nil window removes the observers.)
     }
 
     /// Is this closing popover the one hosting the panel in `window`? Its

@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS** — VX-229: the trace + the SwiftUI probe DONE (below); pins NEXT. VX-257 / VX-183 / VX-182 NOT-STARTED. No revert in flight. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS** — VX-229: pins `46080f5b`/`075473c2`, fix (this commit), offscreen replay red-on-old 3·3·3 → fixed 0·0·0; stage runs PENDING. VX-257: pins `7650b6ce`; fix NEXT. VX-183 / VX-182 NOT-STARTED. Old products `DerivedData/vx282-u5-old-products` (the build of `7650b6ce`, no revert). No revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -1503,6 +1503,54 @@ revert in flight.**
    `WriteTakesPanel.swift:241-246`) are expected to tear their content down on dismissal (the panel's `.onDisappear`
    leaving body has relied on it since 13u3 A2) — NOT assumed: guard pins measure it per host shape (three openings
    each), in the stage window (sheet presentations are out of bounds for offscreen probes — VX-179's tightened line).
+
+#### VX-229 — the fix (`CommentsPanel.swift`; zero `Sources/`, `Sync/`, schema)
+
+- **`CommentsPanel` becomes the host-lifecycle wrapper** (its API unchanged: `init(session:blockID:model:)`, every host
+  byte-unchanged). It holds only `@State hostClosed` and renders `CommentsPanelSurface` (the panel as it was —
+  private, owning the model in its own `@State`) while `!hostClosed`.
+- **The surface's watcher hears the popover's `didClose` too** (`CommentPanelHostWatcher` grows `onHostClosed`, one
+  observer per moment, both scoped by content-window identity as before): `willClose` runs the leaving body (VX-179
+  FIX LEG 2's save, unchanged); `didClose` sets `hostClosed` → the surface is removed → its `.task` (the observation)
+  is cancelled, its views leave the window (key monitor, watcher, areas), and nothing holds the model.
+- **Why the model is NOT owned by the wrapper (measured, not reasoned):** the first build of this fix put the model in
+  the wrapper's `@State` and nil'd it at `didClose`. Replayed offscreen against the real module, the observation
+  stopped but the model stayed alive (1, 2, 3). Traced: the wrapper STAYS in the dismissed popover's graph, SwiftUI keeps
+  its latest view VALUE, and a `State(initialValue:)` struct carries the object it was built with — so a nil written to
+  the state never drops it. The pure-SwiftUI probe had released its model because the model lived in the CHILD that was
+  removed. So the model lives in the removed child — the surface — exactly where it always lived.
+- The leaving body (`leave()`, moved onto the model at VX-257's pins commit) runs from Close, `.onDisappear` and the
+  popover's `willClose`; at the teardown `.onDisappear` runs it once more — idempotent (a commit that would write
+  nothing writes nothing; VX-179's accepted double-commit, unchanged).
+- **The premise the teardown rests on:** a dismissed popover's content is never shown again — each opening is a NEW
+  window with new content (measured by both probes; VX-179 FL3's monitor release already rests on it). The popover pin
+  asserts it per opening, so a SwiftUI that reused a popover would fail that premise by name, not blank a panel silently.
+
+**Offscreen replay of the pin's sequence against the REAL module** (VX-179's accepted probe road: a scratch executable
+linked dynamically against the tree's `Variorum.debug.dylib` with `@testable import Variorum`; an in-memory store
+injected by `prepareDependencies` before anything runs; the unsandboxed default store folder checked absent at start and
+exit — never created; `.prohibited`; the anchor off-display before ordering in, alpha 0; each popover window alpha 0 the
+turn it appears and checked against every `NSScreen` — never touched one). Three open/dismiss cycles, the product's
+`CommentsPanel(session:blockID:)` in a SwiftUI `.popover`:
+
+| product | after dismissal 1 / 2 / 3: models alive · observing | a later write re-read by |
+|---|---|---|
+| OLD (`vx282-u5-old-products` — the pins commit `7650b6ce`) | 1·1 / 2·2 / 3·3 | **3** stale panels |
+| FIXED (this commit) | 0·0 / 0·0 / 0·0 | **0** |
+
+(The replay is evidence beside the pins, not in place of them — the pins RUN in the stage window.)
+
+**The pins — `CommentPanelReleaseTests` (`CommentPanelHostLifecycleTests.swift`, `.serialized`; product construction in
+every host, the models read through the DEBUG weak record filtered by the test's session):**
+
+| Test | Asserts | Old |
+|---|---|---|
+| `aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation` | the margin note's `.popover` presenter ×3: each opening a NEW window with a mounted, observing panel; after the third dismissal no model alive, none observing, a later write re-read by none | RED (3 · 3 · 3) — PENDING |
+| `aDismissedSheetLetsGoOfItsPanel` | the `.sheet(item:)` host ×3: after each dismissal no model alive | GUARD — PENDING (measures the sheet-teardown premise) |
+| `theTakePanelsNestedCommentsSheetLetsGoOfItsPanel` | the real `WriteTakesPanel` as a sheet, the comments as its sheet ×3: after each dismissal no model alive | GUARD — PENDING |
+
+Standing pins this touches (expected green, PENDING): `CommentPanelFixLeg2Tests` (the monitor release counts one per
+dismissal; the R1-2 save at `willClose`; the close rung) and the rest of the comment set.
 
 ## Ladder
 
