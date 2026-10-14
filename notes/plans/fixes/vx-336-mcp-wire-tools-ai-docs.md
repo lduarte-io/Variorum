@@ -52,9 +52,9 @@ Her launch line: *"message the oct13coordinator to claim whatever stage you need
   the fixes; a new BLOCKER/MAJOR earns round 3; hard cap three. A final round's fixes get the orchestrator's
   line-by-line check.
 
-**Members (11, sub-issues of VX-336):** VX-267 · VX-253 · VX-252 · VX-255 · VX-311 · VX-298 · VX-254 · VX-256 · VX-261 ·
-VX-197 · VX-342. All pre-launch except VX-342 (a one-word copy fix she added: *"if it's a tiny wording issue you can add
-it to the 336 run i suppose."*).
+**Members (12, sub-issues of VX-336):** VX-267 · VX-253 · VX-252 · VX-255 · VX-311 · VX-298 · VX-330 · VX-254 · VX-256 ·
+VX-261 · VX-197 · VX-342. All pre-launch except VX-342 (a one-word copy fix she added: *"if it's a tiny wording issue you
+can add it to the 336 run i suppose."*). VX-330 joined mid-run at her word (Her rulings during the run).
 
 **The gates this run carries.**
 - **The stargazing page (R-VX184-4):** a build whose `MCPSession.instructions` carries the link to
@@ -72,7 +72,7 @@ guidance. Each unit's evidence is named before its spawn.
 |---|---|---|---|
 | **U5a** — the label pair | VX-267 · VX-253 | `aiLabel`'s form; `save_lens` by label (the matcher, `unmatched_blocks`, the ambiguity refusal, `picks` first) | red-first pins per member, red again by revert; the headless package green; the live round is U5b's (shared) |
 | **U5b** — the block-writing pair | VX-252 · VX-255 | `create_note`'s answer (take ids, `section_id`), `import_document`'s answer if the same gap; the new `insert_blocks` | red-first pins; headless green; a Mac batch; ONE real-client live round covering U5a and U5b |
-| **U6** — Compare from the wire (+ VX-342) | VX-311 · VX-298 · VX-342 | `duplicate_note`; `show_in_app`'s Compare target; `link_versions`' Open › opening Compare; the undo warning's one word (Mac + phone) | red-first pins; a Mac batch; a real-client live round; the Compare board walked in BOTH voices |
+| **U6** — Compare from the wire (+ VX-330, VX-342) | VX-311 · VX-298 · VX-330 · VX-342 | `duplicate_note`; `show_in_app`'s Compare target; `link_versions`' Open › opening Compare; the Book Panel's collapsed one-note chapter row wearing both MCP glyphs; the undo warning's one word (Mac + phone) | red-first pins; a Mac batch; a real-client live round; the Compare board AND sherlock's Book Panel walked in BOTH voices |
 | **U7** — the agent's read-backs | VX-254 · VX-256 · VX-261 | write-reply digests on EVERY take-writing tool (U5's and U6's new ones included); a compact/paged `read_note`; the client's own recent acts | red-first pins; a Mac batch if app code moves; a real-client live round |
 | **U8** — the AI's docs (LAST) | VX-197 | the field guide's MCP chapter; `MCPSession.instructions` (bound 3,000, the link); the tool descriptions; the stargazing brief's delta | the truth pins (`TutorialMCPChapterTests`, the advice's caps); the chapter walked in both voices; a real client reading the instructions |
 | **LADDER** | the whole run's diff | R1 Fable (cross-model) → R2/R3 `opus-reviewer` max | — |
@@ -148,13 +148,17 @@ guidance. Each unit's evidence is named before its spawn.
 - **Disk.** Build into `App/Variorum/DerivedData/vx336-<unit>` (gitignored); check free space before a Mac build.
 - **Context:** past ~500k, stop at the next clean seam (committed, green, the continuation written in the record) and
   report.
+- **Tickets this run FILES are triaged before it closes** (her word 2026-10-14, now CLAUDE.md's closeout ritual): a kind
+  label (Bug / Improvement / Feature / Debt), exactly one Evidence label (Confirmed · Suspected · Test-only), a Priority
+  (Linear's field), Pre-launch if it gates launch, Wording for text-only fixes, and "Needs Lillian" if it waits on her.
+  A unit that mints a ticket proposes those fields in its record's OWED.
 
 ## LIVE STATUS (orchestrator — flipped as units land)
 
 | unit | status |
 |---|---|
-| U5a — the label pair | NOT-STARTED — the next spawn (U5a BRIEF below) |
-| U5b — the block-writing pair | NOT-STARTED |
+| U5a — the label pair | **BUILT, headless green at `590c0cb8`** (U5a UNIT RECORD): VX-267 and VX-253 fixed, each pin red on old and red again by revert; MCP 251/54 · core 2,860/330 · workbook 40/6 (the orchestrator re-ran the seven pin suites: 35 tests green). No app file moved. Its acceptance closes in U5b's window (LIVE LEGS A–C, D optional). Implementer retired (~437k) |
+| U5b — the block-writing pair | NOT-STARTED — the next spawn |
 | U6 — Compare from the wire (+ VX-342) | NOT-STARTED |
 | U7 — the agent's read-backs | NOT-STARTED |
 | U8 — the AI's docs (LAST) | NOT-STARTED |
@@ -185,7 +189,13 @@ guidance. Each unit's evidence is named before its spawn.
 
 ## Her rulings during the run (verbatim; each also on its ticket)
 
-*(none yet beyond the kickoff answers above)*
+- **VX-330 JOINS (2026-10-14 ~13:45 MDT, in chat), verbatim:** *"I want you to add VX-330 to somewhere in the run - you
+  can choose where it would slot in best. It's an issue where combined chapter / note headings don't show any AI symbol
+  but that's how the example sherlock holmes looks and i think people might share that book with AI as an example so i
+  want it fixed pre launch."* Promoted to Pre-launch, parented under VX-336. **Slotted into U6** (the orchestrator, at
+  her delegation): U6 is the first unit with app-side code and a both-voices walk with a real client connected, and it
+  lands before U8, so the guide's shared-icon sentence describes the panel as fixed. Also in the plan's HER ADDITIONS
+  (`d7edfea1`).
 
 ## ORCHESTRATOR'S PROVISIONAL RULINGS (her away-mode delegation, kickoff answer 4 — each for her ratification)
 
@@ -261,7 +271,8 @@ doc-truth (U8).
      must belong to the book the note joins (and be live, in a book that accepts it — the §9 gate); a section in a book
      the client can't read answers the one not-shared shape.
    - Check `import_document`'s answer for the same gap, and close it the same way if it is real.
-   - Name the answer shape once (a shared encoder) so `insert_blocks` (below) and U6's `duplicate_note` reuse it.
+   - Name the answer shape once (a shared encoder) so `insert_blocks` (below) and U6's `duplicate_note` reuse it. U7's
+     VX-254 will add a per-take digest to it, so leave the per-take record room to grow (no positional arrays).
 2. **VX-255: `insert_blocks` into an existing note.**
    - **RULED, her word:** *"VX-255: agreed, write new lets them add blocks at the end, edit lets them write blocks
      anywhere. I think that's a fair line to draw."*
@@ -339,6 +350,17 @@ any time (one word). VX-311 and VX-298 are ruled pre-launch; each ticket is the 
    Find any pin that asserts the string and move it; if none, add a small one. The phone line makes this run
    mobile-visible: record it for the closeout's MOBILE PARITY line, and name the phone suite that would run it (its run
    rides a simulator stage only if a phone pin changes — say which).
+4. **VX-330: the Book Panel's collapsed one-note chapter row wears neither MCP glyph.** **Her words, verbatim:** *"It's an
+   issue where combined chapter / note headings don't show any AI symbol but that's how the example sherlock holmes looks
+   and i think people might share that book with AI as an example so i want it fixed pre launch."* Found by VX-281 U2's
+   walk (its record `notes/plans/fixes/vx-281-mcp-settings-pane-shared-icon.md`, U2 OWED item 5). The row stands for a
+   note (a chapter heading and its one note shown as one row — every chapter of the seeded sherlock), but wears neither
+   `MCPAskGlyph` nor `MCPSharedIcon`, so VX-268's parity rule ("wherever the ask glyph marks a place, the shared icon marks
+   it too") never reached it. **Build:** both glyphs on that row, the same as the panel's note rows (hover, popover,
+   pending mark), the note's reach read through the ONE `MCPRowReach` hold the panel already uses (`entryIDs`) — never a
+   second rule; reach read only for the rows drawn (P1), nothing read while no client is approved. Pin red-first (the row's
+   glyph decision, on the face's pure seam where VX-281 put one; read its record's U2 for the pin forms it used). Sweep
+   the panel's other row shapes in the record (instance × glyph: FIXED or provably SAFE) so no sibling shape is left.
 
 **Lanes.** Compare's board is no other run's surface. If a trace reaches the editor seam (vx-282's merged files are
 main's now, but the seam rule stands): STOP and report.
@@ -348,7 +370,9 @@ WINDOW plan (claim `vx336-u6`; minutes; a batch-only fallback): a Mac batch over
 REAL-client live round on the dev store — `claude -p` turns: `duplicate_note` an existing note, edit the copy,
 `show_in_app` with a Compare target naming the pair (rows line up), then an unrelated pair (opens with "related blocks
 only" off), and `link_versions`' Open ›; **the Compare board walked in BOTH voices** with captures (`show_in_app` moves
-only while Variorum is frontmost, so the walk keeps it in front); the undo warning's new word seen once (Mac).
+only while Variorum is frontmost, so the walk keeps it in front); **sherlock's Book Panel walked in BOTH voices** — the
+book shared with the client (its chapter rows wear the shared icon) and a per-ask pending on one of its notes (that row
+wears the waiting mark), captured; the undo warning's new word seen once (Mac).
 
 **Out of scope:** U7–U8's members; the guide (U8) beyond doc-truth for any description this unit makes false.
 
@@ -736,3 +760,24 @@ never rendered); the Activity line for a refused or landed `save_lens` uses the 
    fills).
 5. **For U7 (VX-254's sweep table):** `save_lens` writes no take text — no digest owed; `add_take`/`add_takes` write take
    text and keep VX-267's label (their digest row is U7's).
+
+### THE ORCHESTRATOR ON U5a's HAND-BACK (2026-10-14 ~14:05 MDT)
+
+- **Verified, not trusted:** the nine commits `f43cef82`…`590c0cb8` are on the branch and pushed, the tree is clean, and
+  no revert is in flight. The diff is wire-only (`Sources/VariorumMCP` plus `Tests/VariorumMCPTests`, 806+/23−). The
+  orchestrator re-ran the seven touched and new pin suites headless (`MCPTakeLabelFormServerTests`,
+  `MCPLensByLabelServerTests`, `MCPLensRulePlanTests`, `MCPLensDoorsServerTests`, `MCPBatchDoorsServerTests`,
+  `MCPWriteServerTests` and their kin) and got 35 tests in 7 suites, green. `aiLabel` reads `<client>` / `<client> · <label>`
+  as ruled.
+- **P-VX253-1 (a) and P-VX253-2 (a) stand as built**, PROVISIONAL for QUESTIONS at the merge. For (a) of 2: refusing a
+  label that matches nowhere follows §12's "a door that did nothing speaks a refusal", and it spares her a lens a suggest
+  client can't delete. The per-block ruling is untouched, since a partly-matching label still saves and lists its
+  unmatched blocks.
+- **The argued items are accepted:** `label` with `pin_chosen` refuses, no fill refuses, `pin_chosen` = Save Choices as
+  Lens, the 200 bound with a count, and the refusal names the matching takes.
+- **U5a's acceptance closes in U5b's window** (LIVE LEGS A–C, D optional). OWED 2 (the MCPSpec clause) and 3 (QUESTIONS)
+  ride the closeout. OWED 4 rides U8's brief, and OWED 5 rides U7's sweep table.
+- **VX-330's owed record edits are applied in this commit:** the member list, THE UNITS' U6 row, Her rulings during the
+  run, and the U6 BRIEF's item 4 with its walk leg. So is CLAUDE.md's new triage rule for filed tickets (Hard rules).
+- **Next:** U5b (a fresh `opus-implementer` at xhigh from the U5b BRIEF), and REQUEST `vx336-u5` to the coordinator.
+
