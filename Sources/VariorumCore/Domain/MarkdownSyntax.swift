@@ -177,7 +177,31 @@ public enum MarkdownSyntax {
     /// CONTAINS that line's inline spans — deliberately, so a styler applying
     /// them in order composes (`# **Big**` = heading, then bold within it).
     /// Nothing else overlaps.
-    public static func spans(in text: String) -> [Span] {
+    ///
+    /// **`caret` — the LIVE EDITOR'S insertion point, and only its (VX-296,
+    /// her ruling on the ticket: fix (a), "your fix is good").** A UTF-16
+    /// offset into `text`, or nil. Nil — the default, and what every reader
+    /// that is not a live editor passes by omission (the read pages, export,
+    /// search, the formatting acts) — reads `text` EXACTLY as before: the
+    /// argument changes nothing else anywhere.
+    ///
+    /// With a caret, ONE thing differs: a closing marker that sits RIGHT AT
+    /// the caret still closes although whitespace precedes it — the closer
+    /// half of the minimal flanking rule yields to the caret. That is her
+    /// typing flow inside a pair she already has (⌘I's `*|*`, or both stars
+    /// typed first): `*hello |*` — the caret between the space she just
+    /// typed and the closing star — stays italic, where the caret-blind
+    /// reading flipped it plain at every word boundary and back at the next
+    /// letter. It applies to every closer the flanking rule governs (`*`,
+    /// `**`, `~~`) and to `_`, which shares the rule (PROVISIONAL — the run
+    /// record's P-U2-2). The OPENER half is untouched (P-U2-1), which is what
+    /// keeps arithmetic safe at every caret position: in `2 * 3 * 4` every
+    /// star is followed by a space, so no opener ever forms and no closer is
+    /// ever consulted.
+    ///
+    /// A non-nil caret that names no grapheme boundary in `text` rescues
+    /// nothing (it matches no character's start).
+    public static func spans(in text: String, caret: Int? = nil) -> [Span] {
         #if DEBUG
         MarkdownScanCount.add(text.utf16.count)
         #endif
@@ -188,13 +212,19 @@ public enum MarkdownSyntax {
         offsets.reserveCapacity(chars.count + 1)
         for char in chars { offsets.append(offsets[offsets.count - 1] + char.utf16Width) }
 
+        // The CHARACTER index the caret names (nil with no caret, or when it
+        // falls inside a grapheme) — the closers compare indices, not offsets.
+        let rescue = caret.flatMap { characterIndex(atOffset: $0, offsets) }
+
         var result: [Span] = []
         var lineStart = 0
         var index = 0
         while index <= chars.count {
             if index == chars.count || chars[index].isNewline {
                 if lineStart < index {
-                    scanLine(chars, offsets, from: lineStart, to: index, into: &result)
+                    scanLine(
+                        chars, offsets, from: lineStart, to: index, rescue: rescue,
+                        into: &result)
                 }
                 lineStart = index + 1
             }
@@ -203,18 +233,32 @@ public enum MarkdownSyntax {
         return result
     }
 
+    /// The character index whose START is the UTF-16 `offset`, or nil
+    /// (binary search — `offsets` ascends strictly; its last entry is the
+    /// text's end, which no closer can sit at, so it is never returned).
+    private static func characterIndex(atOffset offset: Int, _ offsets: [Int]) -> Int? {
+        var low = 0
+        var high = offsets.count - 2
+        while low <= high {
+            let mid = (low + high) / 2
+            if offsets[mid] == offset { return mid }
+            if offsets[mid] < offset { low = mid + 1 } else { high = mid - 1 }
+        }
+        return nil
+    }
+
     // MARK: - One line
 
     private static func scanLine(
         _ chars: [Character], _ offsets: [Int],
-        from start: Int, to end: Int, into result: inout [Span]
+        from start: Int, to end: Int, rescue: Int?, into result: inout [Span]
     ) {
         var contentStart = start
         if let leading = leadingSpan(chars, offsets, from: start, to: end) {
             result.append(leading.span)
             contentStart = leading.contentIndex
         }
-        scanInline(chars, offsets, from: contentStart, to: end, into: &result)
+        scanInline(chars, offsets, from: contentStart, to: end, rescue: rescue, into: &result)
     }
 
     /// The line-leading kinds.
@@ -371,11 +415,11 @@ public enum MarkdownSyntax {
 
     private static func scanInline(
         _ chars: [Character], _ offsets: [Int],
-        from: Int, to: Int, into result: inout [Span]
+        from: Int, to: Int, rescue: Int?, into result: inout [Span]
     ) {
         var index = from
         while index < to {
-            if let match = matchInline(chars, offsets, at: index, limit: to) {
+            if let match = matchInline(chars, offsets, at: index, limit: to, rescue: rescue) {
                 result.append(match.span)
                 index = match.next
             } else {
@@ -388,7 +432,7 @@ public enum MarkdownSyntax {
     }
 
     private static func matchInline(
-        _ chars: [Character], _ offsets: [Int], at index: Int, limit: Int
+        _ chars: [Character], _ offsets: [Int], at index: Int, limit: Int, rescue: Int?
     ) -> (span: Span, next: Int)? {
         switch chars[index] {
         case "`":
@@ -410,7 +454,9 @@ public enum MarkdownSyntax {
                 close + 1)
 
         case "*" where index + 1 < limit && chars[index + 1] == "*":
-            guard let close = closingPair("*", chars, openerEnd: index + 2, to: limit) else {
+            guard let close = closingPair(
+                "*", chars, openerEnd: index + 2, to: limit, rescue: rescue)
+            else {
                 return nil
             }
             return (
@@ -418,7 +464,9 @@ public enum MarkdownSyntax {
                 close + 2)
 
         case "~" where index + 1 < limit && chars[index + 1] == "~":
-            guard let close = closingPair("~", chars, openerEnd: index + 2, to: limit) else {
+            guard let close = closingPair(
+                "~", chars, openerEnd: index + 2, to: limit, rescue: rescue)
+            else {
                 return nil
             }
             return (
@@ -429,7 +477,8 @@ public enum MarkdownSyntax {
             // A `**` that failed to close is NOT an empty italic over its two
             // stars — `**unfinished` must read as plain text.
             guard index + 1 < limit, chars[index + 1] != "*",
-                  let close = closingSingle("*", chars, openerEnd: index + 1, to: limit)
+                  let close = closingSingle(
+                      "*", chars, openerEnd: index + 1, to: limit, rescue: rescue)
             else { return nil }
             return (
                 pairSpan(.italic, offsets, open: index, close: close, width: 1),
@@ -441,7 +490,8 @@ public enum MarkdownSyntax {
             // or closes a span.
             guard isWordStart(chars, at: index),
                   index + 1 < limit, chars[index + 1] != "_",
-                  let close = closingUnderscore(chars, openerEnd: index + 1, to: limit)
+                  let close = closingUnderscore(
+                      chars, openerEnd: index + 1, to: limit, rescue: rescue)
             else { return nil }
             return (
                 pairSpan(.italic, offsets, open: index, close: close, width: 1),
@@ -473,14 +523,17 @@ public enum MarkdownSyntax {
     /// there) — AND the content never ENDS in an underscore (ladder R1-11,
     /// the orchestrator's rule for the corner: `_a__` is LITERAL; an italic
     /// `a_` is nonsense, and the opener already refuses content that
-    /// STARTS with one — `__bold__`).
+    /// STARTS with one — `__bold__`). VX-296: the whitespace test — and only
+    /// it — yields to the live caret (`spans(in:caret:)`); the word-end and
+    /// the no-trailing-underscore tests hold at the caret too.
     private static func closingUnderscore(
-        _ chars: [Character], openerEnd: Int, to: Int
+        _ chars: [Character], openerEnd: Int, to: Int, rescue: Int?
     ) -> Int? {
         guard openerEnd < to, !chars[openerEnd].isWhitespace else { return nil }
         var index = openerEnd + 1
         while index < to {
-            if chars[index] == "_", !chars[index - 1].isWhitespace, chars[index - 1] != "_",
+            if chars[index] == "_",
+               closerFlanks(chars, at: index, rescue: rescue), chars[index - 1] != "_",
                index + 1 >= to || !isWordCharacter(chars[index + 1]) {
                 return index
             }
@@ -553,13 +606,19 @@ public enum MarkdownSyntax {
     /// false positive a prose writer would actually hit — for two comparisons
     /// per candidate. Content is required NON-EMPTY for the same family, so
     /// `****` and `* *` stay literal.
+    ///
+    /// **VX-296 — the closer half yields to the live caret, the opener half
+    /// never does.** `closerFlanks` is the closer test; `rescue` is the
+    /// character index of the live editor's caret (nil for every other
+    /// reader, which therefore reads exactly what it read before).
     private static func closingPair(
-        _ char: Character, _ chars: [Character], openerEnd: Int, to: Int
+        _ char: Character, _ chars: [Character], openerEnd: Int, to: Int, rescue: Int?
     ) -> Int? {
         guard openerEnd < to, !chars[openerEnd].isWhitespace else { return nil }
         var index = openerEnd + 1
         while index <= to - 2 {
-            if chars[index] == char, chars[index + 1] == char, !chars[index - 1].isWhitespace {
+            if chars[index] == char, chars[index + 1] == char,
+               closerFlanks(chars, at: index, rescue: rescue) {
                 return index
             }
             index += 1
@@ -568,15 +627,26 @@ public enum MarkdownSyntax {
     }
 
     private static func closingSingle(
-        _ char: Character, _ chars: [Character], openerEnd: Int, to: Int
+        _ char: Character, _ chars: [Character], openerEnd: Int, to: Int, rescue: Int?
     ) -> Int? {
         guard openerEnd < to, !chars[openerEnd].isWhitespace else { return nil }
         var index = openerEnd + 1
         while index < to {
-            if chars[index] == char, !chars[index - 1].isWhitespace { return index }
+            if chars[index] == char, closerFlanks(chars, at: index, rescue: rescue) {
+                return index
+            }
             index += 1
         }
         return nil
+    }
+
+    /// The closer half of the minimal flanking rule: a closing marker at
+    /// `index` may not be preceded by whitespace — UNLESS the live caret sits
+    /// exactly there (VX-296), between the space she just typed and the
+    /// marker she has not reached. Every caller has `index > openerEnd >= 1`,
+    /// so `index - 1` is always a character of the same line.
+    private static func closerFlanks(_ chars: [Character], at index: Int, rescue: Int?) -> Bool {
+        !chars[index - 1].isWhitespace || index == rescue
     }
 
     private static func firstIndex(
