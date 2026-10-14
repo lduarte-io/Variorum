@@ -100,7 +100,8 @@ struct InlineEditorWindowTests {
     /// - `pump()` is a run loop nested in this main-actor job, and it runs NO
     ///   main-queue block, so that remeasure never ran. Its display pass laid
     ///   out only the frame's END and ESTIMATED the rest: block 40 read a
-    ///   guessed frame (~350 pt off its line in the rig).
+    ///   guessed frame (~350 pt off its line in the rig). Proven in the U1b
+    ///   window: right after `pump()`, block 40 was not laid out.
     /// - The tree before U4 badged that guess; U4's forced read laid block 40
     ///   out ahead of its unlaid predecessors (U4b's poison). Both passed,
     ///   because the pin checked presence, never the line. U4b refuses a guess
@@ -121,9 +122,6 @@ struct InlineEditorWindowTests {
             }
             coordinator.remeasure()
             pump()
-            // The transient the first version read in (the run record's U4c
-            // trace), printed for the window's log: block 40 is not laid out.
-            print("VX-230 U4c [after pump(), no hop run]: block 40 laid out = \(laidLine(entry: 40, h) != nil)")
             await settle(window)
             #expect(h.textView.visibleRect.height < h.textView.bounds.height,
                     "the container clips the inline surface (the book-view shape)")
