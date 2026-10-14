@@ -31,6 +31,7 @@
 //  grant to change or revoke: its row says where the switch lives.
 //
 
+import AppKit
 import SwiftUI
 import VariorumCore
 
@@ -89,8 +90,86 @@ struct MCPSharedIcon: View {
             .accessibilityLabel(MCPShareCopy.iconHelp(reaches))
             .popover(isPresented: $shown, arrowEdge: arrowEdge) {
                 MCPReachPopover(reaches: reaches, road: road, onChanged: onChanged) { shown = false }
+                    .sharedIconPopoverProbe(reaches)
             }
+            .sharedIconAnchorProbe()
         }
+    }
+}
+
+#if DEBUG
+/// **VX-281 ladder R1-5 — the icon's DEBUG oracle** (a no-op outside DEBUG):
+/// where each drawn icon sits in its WINDOW (an AppKit anchor behind the
+/// button — never a click target), and which popovers presented and are up,
+/// by the first reaching client's name. In-process, SwiftUI builds no
+/// accessibility nodes (`ComposedSliders`' measured note), so a pin that
+/// clicks the icon needs its own road to the icon's frame — this is it.
+@MainActor
+enum MCPSharedIconProbe {
+    final class Anchor {
+        weak var view: NSView?
+        init(_ view: NSView) { self.view = view }
+    }
+
+    static var anchors: [Anchor] = []
+    /// Every presentation, in order, by the first reaching client's name.
+    static var presented: [String] = []
+    /// The popovers up now, by the first reaching client's name.
+    static var up: [String: Int] = [:]
+
+    /// The icons drawn in `window` now, in window coordinates.
+    static func frames(in window: NSWindow) -> [NSRect] {
+        anchors.removeAll { $0.view == nil }
+        return anchors.compactMap(\.view)
+            .filter { $0.window === window && !$0.isHiddenOrHasHiddenAncestor }
+            .map { $0.convert($0.bounds, to: nil) }
+    }
+
+    static func presentations(of client: String) -> Int {
+        presented.filter { $0 == client }.count
+    }
+}
+
+/// The anchor behind the icon's button: transparent to every click.
+private struct MCPSharedIconAnchor: NSViewRepresentable {
+    final class AnchorView: NSView {
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    }
+
+    func makeNSView(context: Context) -> AnchorView {
+        let view = AnchorView()
+        MCPSharedIconProbe.anchors.append(.init(view))
+        return view
+    }
+
+    func updateNSView(_ view: AnchorView, context: Context) {}
+}
+#endif
+
+extension View {
+    /// The icon's place, for the DEBUG click pins (a no-op outside DEBUG).
+    @ViewBuilder
+    fileprivate func sharedIconAnchorProbe() -> some View {
+        #if DEBUG
+        background(MCPSharedIconAnchor())
+        #else
+        self
+        #endif
+    }
+
+    /// The popover's presentations, for the DEBUG pins (a no-op outside DEBUG).
+    @ViewBuilder
+    fileprivate func sharedIconPopoverProbe(_ reaches: [MCPPlaceReach]) -> some View {
+        #if DEBUG
+        let name = reaches.first?.clientName ?? ""
+        onAppear {
+            MCPSharedIconProbe.presented.append(name)
+            MCPSharedIconProbe.up[name, default: 0] += 1
+        }
+        .onDisappear { MCPSharedIconProbe.up[name, default: 0] -= 1 }
+        #else
+        self
+        #endif
     }
 }
 

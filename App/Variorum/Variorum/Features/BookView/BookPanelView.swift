@@ -55,12 +55,24 @@ struct BookPanelView: View {
         session: AppSession, postID: String, membership: NoteMembershipModel,
         recentBookIDs: [String] = [], onClose: (() -> Void)? = nil
     ) {
+        self.init(
+            session: session, postID: postID, membership: membership,
+            model: BookPanelModel(session: session, postID: postID),
+            recentBookIDs: recentBookIDs, onClose: onClose)
+    }
+
+    /// The pins' seam (VX-281 ladder R1-5): a model the harness drives by
+    /// hand — the `PoolPostsView` / `LibraryCatalogView` shape.
+    init(
+        session: AppSession, postID: String, membership: NoteMembershipModel,
+        model: BookPanelModel, recentBookIDs: [String] = [], onClose: (() -> Void)? = nil
+    ) {
         self.session = session
         self.postID = postID
         self.membership = membership
         self.recentBookIDs = recentBookIDs
         self.onClose = onClose
-        _model = State(initialValue: BookPanelModel(session: session, postID: postID))
+        _model = State(initialValue: model)
     }
 
     private var tokens: VoiceTokens {
