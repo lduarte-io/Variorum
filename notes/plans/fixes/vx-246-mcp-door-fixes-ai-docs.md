@@ -1432,3 +1432,183 @@ All Swift Testing. The list and the run script sit beside the evidence (`notes/p
 | 7 | cleanup: the Debug app quit BY BUNDLE ID; prefs imported back (0 keys differ); `restore.sh` → "Restored (verified)"; stray `default.profraw` removed; `Tools/stage release`; one result line | DONE but the release (00:37–00:38) — the Debug app quit by `tell application id "io.lduarte.Variorum.debug" to quit` 00:37:23, `pgrep` empty. **Prefs:** the window had moved 9 keys (the batch's 5 + the Settings window frame, the open-notes memory, two `currentBlock.*`). `defaults import` of `prefs-pre.plist` MERGES, so it left the one key the walk ADDED (`currentBlock.5968B82C…`, the scratch note's caret) → `defaults delete` of that key → re-export: **1,548 keys, 0 differ**. **The dev store:** `Tools/ScaleFixture/restore.sh …/scale-prestage-20261014T062331Z` → **"Restored (verified)"** (`u2/logs/restore.log`); then each file `cmp`'d against the A1 copy → **all five SAME**, and the sha256 set equals the pre-window hashes (`store-hash-restored.txt` = `store-hash-pre.txt`) → the store is byte-identical to the state the coordinator handed over (Standard, unlocked, Study). The launch took no new backup into `Backups/`. No stray `default.profraw`; the tree clean. MCP lines N/A (no client registered). **RELEASED 00:38:15 MDT** (`Tools/stage release --who vx246-u2` → STAGE FREE), 35 of the 90 claimed minutes |
 
 **THE RESULT LINE (for the coordinator):** claim `vx246-u2` 00:23:24–00:38:15 MDT, RELEASED; the Mac batch 1,084 tests in 148 suites passed (1,078 passed + 6 gated skips, 0 failed; U2-A 110/846 · G1 18/132+6 · G2 22/148 · G3 11/49); W1 PROVEN in both voices (her Put back, then ⌥⌘Z speaks "Nothing to undo — Delete Block was already undone or changed since.", the entry retires, no redo re-deletes; the normal Undid/Redid road unchanged); posture as left: **Standard/unlocked, cmp-SAME vs the A1 copy** (Study voice in the restored store), prefs 0 keys differ. **U2's acceptance stays OPEN for W2/W3 (U1b's window).**
+
+## U3 UNIT RECORD — her editor vs the wire: VX-275 (opus-implementer, from 2026-10-14 ~01:00 MDT)
+
+**What this unit has NOT done yet (said first; flipped as pieces land):** no code yet — this commit is the record, the
+LIVE STATUS and the traces, written before any code. No stage window has run (none may without the orchestrator's GO).
+No `notes/QUESTIONS.md` entry, no canon edit, no ticket minted (the merge's and the orchestrator's). Everything below
+"The traces" is the plan, not a claim.
+
+**Read in full before code (never delegated):** CLAUDE.md and its loaded canon (AppSpec §9's standing conventions and
+structural undo, §12's THE MCP DOOR line); this record's header, THE UNITS, the hard rules, LIVE STATUS, Cross-run
+coordination (vx-282's file list), Her rulings during the run (VX-275's (a)), the U3 BRIEF, and U1's and U2's UNIT
+RECORDs (skimmed for the tree: VX-258's keys and the waiting re-bind, VX-260's comment authorship, U2's
+`UndoStack.Outcome` rule); the plan `notes/plans/mcp-pane-and-docs-kickoff.md` whole; the runway §2 (the conflict map —
+"the navigate-away road", "the markdown face and the editor seam") and §3 (VX-246, VX-282, VX-283); VX-184's record —
+THE `delete_note` / `delete_block` FLUSH TRACE whole, U4's and U5's traces and designs (where `delete_take`,
+`restore_commit`, `lock_take`, `archive_take`, `delete_note` were built); `notes/TEXTKIT2_NOTES.md` whole (BEFORE any
+editor-seam edit); `notes/SessionResiliencyProtocol.md` whole. Code read: `MCPWriteTools.call` and `perform` whole, every
+`Job` family (`+Edit`, `+NoteEdits`, `+LibraryEdits`, `+Carriage`, `+Deliberate`, `+Batches`, `+CommentDelete`,
+`+RemoveTag`, `+LinkVersions`), `MCPWriteSupport` (`MCPHostHooks`, `MCPWriteReceipt`), `MCPSession`'s call routing,
+`MCPServerHost`; the core acts `editTakeUnderInsurance`, `divideBlock`, `mergeBlocks`, `deleteTakeForClient`,
+`archiveTakeForClient`, `lockTakeForClient`, `restoreCommitForClient`, `deleteNoteForClient`, `autosave`,
+`editableVariant`; the app's `MCPDoor` (attach, `reconcileServer`'s hooks, `landReceipt`), `NoteDeletion` whole,
+`AppSession`'s coordinator registry (`autosave(forPost:)`, `flushExistingAutosave`, `flushEveryOpenPost`,
+`heldPostIDs`, `releaseAutosave`), `AutosaveCoordinator` whole, `ShellActions.structuralUndo/Redo` and
+`leaveNotesTheActLeftDead`, `WorkspaceModel.notesDeleted`, RootView's and NoteWindowView's listeners; the editor:
+`EditorViewModel.applyProjection` / `applyPendingIfClean` / `caretIdentity`, `EditorProjectionPolicy.decide`,
+`EditorSurfaceController.renderFull` / `applyDifferential` / `runStructural` / `applyStructuralResult` /
+`deleteCaretBlock` / `runDeleteBlock` / `caretLandingAfterRemoving`, `BlockRangeIndex.caretLandingAfterRemoving`; her
+Takes-board doors (`TakesViewModel.run`, `setTakeLocked`, `archiveTake`); vx-282's branch diff on the editor files
+(read-only: `git diff origin/main...origin/vx-282-editor-notes-fixes` — it does NOT touch `renderFull`,
+`applyProjection` or `applyPendingIfClean`); vx-281's branch diff on `MCPDoor.swift` (read-only — it does not touch
+`reconcileServer`'s hooks).
+
+**Surfaces (planned):** the wire `Sources/VariorumMCP/{MCPWriteSupport,MCPWriteTools,MCPWriteTools+Edit,
+MCPWriteTools+NoteEdits,MCPWriteTools+LibraryEdits,MCPWriteTools+Carriage,MCPWriteTools+Deliberate,
+MCPWriteTools+Batches}.swift` (the hook, the one await, each job's answer); one core doc line
+(`Operations+MCPNoteEdits.restoreCommitForClient`'s "the wire has none to flush", false since this unit); the app
+`App/Variorum/Variorum/Features/MCP/MCPDoor.swift` — **the hooks' construction lines only** (the brief's limit) — and a
+NEW `App/Variorum/Variorum/Features/MCP/MCPDoor+HerEditor.swift` (outside VX-281's lane: not `MCPPane*`, `MCPPaneCopy`,
+`MCPGrantSheet`); **THE EDITOR SEAM:** `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift`
+`renderFull` only (the caret by identity when the caret's block left — none of vx-282's listed functions); tests
+(headless `Tests/VariorumMCPTests/`, Mac `App/Variorum/VariorumTests/`). ZERO `Sync/`, custody/Keychain, schema,
+`Server/`, `BlockRangeIndex`, `PaneSurface`, the markdown face, `storageDidEdit`, the selection delegate, the carve.
+The navigate-away rides THE ONE ROAD (`.variorumNotesDeleted` → `WorkspaceModel.notesDeleted`) — no second road.
+
+### LIVE STATUS — U3's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this record + LIVE STATUS + the traces and the design (before code) | DONE (this commit) |
+| 1 | THE SEAM (behaviour-identical): `MCPHostHooks.beforeWrite` declared and never awaited; `MCPWriteReceipt.notesLeftDead` declared and never set; the door wired to both (`MCPDoor+HerEditor.swift` + the hooks lines); the harness's optional turn log (test support) | NOT-STARTED |
+| 2 | the pins FIRST, on the seam tree: headless (`MCPHerEditorServerTests` — the order, the act list, one per family) RED, counts recorded; Mac (`MCPHerEditorDoorTests` through the real door + `ExternalBlockRemovalCaretTests`) written and COMPILED (build-for-testing into `DerivedData/vx246-u3-red` — the red-on-old product, run at W1) | NOT-STARTED |
+| 3 | THE FIX (the wire): `Job.flushesHerEditorFirst` (exhaustive, every job family answers), the one await in `MCPWriteTools.call` before `executor.run`, `delete_note`'s receipt names the dead note; the core doc line → headless GREEN, every existing suite unmodified | NOT-STARTED |
+| 4 | red again BY REVERT (announced first, on a committed tree; restored and verified) | NOT-STARTED |
+| 5 | THE EDITOR SEAM: `renderFull` lands the caret by her Delete Block's rule when the caret's block left the projection | NOT-STARTED |
+| 6 | headless finals (core · MCP · workbook) + the Mac `build-for-testing` into `DerivedData/vx246-u3` | NOT-STARTED |
+| 7 | THE STAGE WINDOW plan (claim `vx246-u3`; W1 red on old, W2 green + the batch, W3 the live round) → READY | NOT-STARTED |
+
+**No revert is in flight.**
+
+### The traces (written before code)
+
+**1. THE MECHANISM, re-traced on this tree (VX-184's trace holds, line for line).** Inputs → wrong state:
+(1) She types in a note's take. Every surface on a post shares ONE `AutosaveCoordinator` (`AppSession.autosave(forPost:)`
+— Write `EditorViewModel.swift:49`, Takes, the block TOC, Compare, Canvas, the book's Index edit model); `record`
+(`AutosaveCoordinator.swift:106`) holds the WHOLE take text as pending and schedules a 500 ms debounce; the row still
+holds the last flush. (2) A client's write is ONE runner turn: `MCPWriteTools.call` parses, then
+`executor.run { perform }` (`MCPWriteTools.swift:43–44`) — the app's executor IS `session.runner`
+(`MCPDoor.swift:27`). `Sources/VariorumMCP` holds no flush and `MCPHostHooks` (`MCPWriteSupport.swift:107`) has no seam
+for one (`refusalWords`, `onAsk`, `onWrite`, `now`, `show`, `wingMoveFrozenWords`). (3) The act reads and writes the
+STORED rows. (4) The debounce fires: `flushNow` (`:142`) → `ops.autosave` → `editableVariant`
+(`Operations+Variant.swift:479`: live, not archived, not locked, placement unsealed). A refusal puts the entry BACK
+(`:160`) — `isDirty` stays true, `showOperationError` speaks it — and while dirty the editor defers every projection
+(`EditorViewModel.swift:837`, `EditorProjectionPolicy.decide`'s `busy` arm), so her text stays on screen, IN MEMORY
+only. Nothing retries by itself; ⌘Q's `savepointOnLeaving` flushes, is refused again, and the bytes die with the process.
+**Her doors are the contrast:** `NoteDeletion.report` flushes the named notes FIRST (`NoteDeletion.swift:173–174`), acts,
+then posts `.variorumNotesDeleted` (`:191`); `runStructural` flushes first and fences the keyboard for the flight
+(`EditorSurfaceController.swift:2927–2950`); `BlockHistoryPane.restore`, `commitCaret` (⌘S), `VersionActs` and
+`runCopying` flush first. The wire does neither half.
+
+**2. THE ACT LIST — every write tool, argued (IN = the pre-act flush runs; the brief's "argue the act list").** The test
+of an act: after it lands, does her pending flush (a) get REFUSED (bytes stranded in memory), (b) write her old buffer
+OVER the act or into a row the act left behind, or (c) does the act SNAPSHOT the store without her last words?
+
+| family | tools | the wrong state on this tree, traced | IN? |
+|---|---|---|---|
+| TOMBSTONE | `delete_note` (`tombstoneNoteFamily`), `delete_block` (`deleteBlock`), `delete_take` both roads (`deleteVariantRows`; the LAST take → `deleteBlockRows`) | her take is tombstoned on one stamp; her flush → `liveVariant` throws `variantNotFound` → stranded; ⌥⌘Z / Put back return the take WITHOUT her bytes (the tombstone never carried them) | **IN** (the ticket's three) |
+| FREEZE | `lock_take` (`setVariantLockRows`, insuring the STORED text), `archive_take` (`archiveVariantRows`) | her flush → `lockedVariant` / `archivedVariant` → stranded exactly as a tombstone strands them; `lock_take`'s insurance commit captures the stale stored text, not hers | **IN** (the same refused-flush class — VX-275's "her pending keystrokes are refused and live only in memory") |
+| REWRITE | `edit_take` (`expected_text` vs STORED, `Operations+MCPEdits.swift:86`), `restore_commit` (no precondition; its "before" commit insures the STORED text) | the act lands over the stale row; her flush then writes her whole buffer OVER it — the client was told it landed, the take silently reads hers again (insured only in the act's "after" commit) | **IN** (the wider class) |
+| STRUCTURE | `divide_block` (`divideBlock`'s `expectedText` = the shown take's STORED text, `:299`), `merge_blocks` (`mergeBlocks` reads both STORED chosen takes) | divide (one take): A keeps identity as the first half, so her flush writes the WHOLE old block + her typing into A — the second half reads twice (runStructural's named "text-duplication class"); a fanned divide or a merge RELEASES her block (`last_container_id`, unplaced), her flush lands in that lineage block (unplaced ⇒ `ensurePlacementUnlocked` passes) — her words leave the note | **IN** (the wider class) |
+| COPY | `save_commit` (`commitTakeForClient` snapshots `working_text`), `save_version` (a full family copy) | the commit / the version misses her last words while answering success; nothing is lost (her words stay in the live take), but her own ⌘S (`commitCaret`) and her own Save Version (`VersionActs`: "a caller whose act READS or COPIES the store … must consult it") flush first | **IN** (her doors' rule, applied) |
+| SAFE — text untouched | `add_take`, `add_takes`, `add_comment(s)`, `delete_comment`, `edit_comment`, `restore_comment`, `save_lens`, `delete_lens`, `set_block_name`, `set_take_label`, `unarchive_take`, `unlock_take`, `rename_commit`, `rename_note`, `create_note`, `import_document`, `create_book`, `create_section`, `apply_tag`, `remove_tag`, `link_versions`, `add_note_to_book`, `file_note_in_chapter`, `set_book_rule`, `set_entry_date`, `put_back`, the twelve book/chapter/membership acts, `archive_note`/`unarchive_note`, `move_note_to_wing` | none of them reads, rewrites, copies, freezes or kills a take's `working_text`; her pending flush lands where she typed it (comments and titles are drafts committed on her own act — `CommentsPanel.commitEdit`, `PostDetailView.rename` — never the coordinator's pending text, so they are outside this class) | OUT |
+| SAFE — pointer or place | `move_block` (same variant, another place or note), `choose_take`, `adopt_lens` | her flush still lands in the take she typed in (live, active, unlocked); the editor's deferred projection then shows the new arrangement — nothing of hers is overwritten or lost | OUT |
+| BOOKS | `delete_book` (book only — an owned book's notes go to the Pool, alive), `archive_book`, `finish_book`, `remove_note_from_book`, `delete_chapter` (memberships keep their pointer) | **no wire act takes a note down with a book or chapter** — `deleteReadingWithNotes` / `archiveReadingWithNotes` are hers alone (R-VX184-2); her text in a member note lands normally | OUT (the brief's "any book or chapter act that takes notes down" — there is none on the wire) |
+
+**3. THE NAVIGATE-AWAY.** Of the wire's acts, only `delete_note` leaves a note dead (the table above; `save_version`
+mints, `move_note_to_wing` keeps it live, the undo/redo of a client's create or import is HER door, which WA-3's
+`leaveNotesTheActLeftDead` already covers). `delete_note`'s receipt is delivered through `onWrite` and nothing posts
+`.variorumNotesDeleted` (`MCPDoor.swift:372` → `landReceipt` only), so a pane and the Open strip stand on the tombstone
+(the code's own record: `NoteDeletion`'s header, WA-3's reason).
+
+**4. `delete_block` UNDER HER CARET — the editor seam.** With the flush FIRST, her bytes are stored and her coordinator
+is clean when the act lands, so the delivery that follows takes the projection road every external change takes:
+`applyProjection(fromDelivery:)` → `.refetchFresh` → `applyPendingIfClean` → a fresh read → `.fullRender` →
+`renderFull(new, preserveTail: true)` — the SAME rewrite her own Delete Block uses (`runDeleteBlock` →
+`runStructural` → `applyStructuralResult(seam: nil)` → `renderFull`). The range is dropped by the existing road; no
+second structural door is needed (`runStructural` stays the one structural door — the wire's act is not a gesture of
+hers). **The one difference is the caret:** her door lands the caret BY IDENTITY on the block below's start, else the
+block above's end (`caretLandingAfterRemoving`); `renderFull` restores the caret by identity only when its block
+SURVIVES (`EditorSurfaceController.swift:179`), so when the caret's block left, the wholesale storage replacement parks
+her insertion point at the DOCUMENT'S END (renderFull's own row-49 record) — her next keystroke lands at the note's end.
+**The fix:** in `renderFull`, when the caret's block is not in the new projection, land by her Delete Block's rule —
+the first block BELOW the caret's in the old tiling that survives, at its start, else the first surviving block ABOVE,
+at its end — read from the old index before the rewrite (the rule `BlockRangeIndex.caretLandingAfterRemoving` states,
+asked at the caret's own position; `BlockRangeIndex` itself untouched). It reaches every external removal of the caret's
+block (a sync apply, another window), which all share the same parking today. **Attribute stamps:** the edit adds none
+(the rewrite and its attributes are `renderFull`'s, unchanged); TEXTKIT2 §3's clamp rule is untouched. **Her own acts are
+unchanged:** `applyStructuralResult` re-lands the caret on its outcome after `renderFull`, as before.
+
+**5. THE RESIDUAL WINDOW.** The flush is its own runner turn and the act is the next one; between the flush's capture
+(`flushNow`'s `let batch = pending`) and the act's commit the main actor is free, so a keystroke typed in that window is
+pending again. Its length: one MainActor hop back to the session's task plus the runner's queue — normally well under a
+few milliseconds; longer only while the runner holds other work. **What happens to such a keystroke:**
+- after a TOMBSTONE or FREEZE act: exactly today's stranding, narrowed to those few characters — refused, kept pending in
+  memory (spoken), landed by a later flush only if ⌥⌘Z (the client's entry) or Put back revives the take in this
+  session; lost at ⌘Q otherwise. For `delete_block` the editor also stays dirty, so the dead block stays on screen
+  until then (the pre-fix experience, for the window's characters only).
+- after a REWRITE or STRUCTURE act: her next flush writes her buffer over the act (or into the released block) — but
+  only when the client's precondition still matched her flushed text, i.e. she was NOT typing in that take before the
+  flush and began inside the window. The act's own "after" commit (edit/restore) insures the client's words.
+- after a COPY act: the commit/version misses those characters; nothing is lost.
+**Closing it is not cheap:** the only complete close is a keyboard fence over every open editor for the act's flight
+(`runStructural`'s `isEditable = false` + `beginDeferringKeystrokes`, generalized to every surface the coordinator map
+names, released after the act's projection lands, her deferred keys replayed at the landed caret) — an editor-seam
+change across Write, Takes panes, the book's Index and Compare. A second flush AFTER the act cannot help (a refused
+write stays refused; a landed one is the overwrite). **PROVISIONAL P-VX275-2** below; (a) is built.
+
+### The design (argued)
+
+1. **The hook — `MCPHostHooks.beforeWrite: (@Sendable (_ tool: String) async -> Void)?`**, awaited in
+   `MCPWriteTools.call` AFTER the arguments parse and BEFORE `executor.run`, only for a job whose
+   `flushesHerEditorFirst` is true. Its own turn, never inside the act's (the act's body is synchronous on the runner;
+   the app's flush is itself a runner turn). A malformed call never flushes (it never reaches the hook). Nil = no app
+   around the host (headless hosts flush nothing).
+2. **The list is the `Job`'s, answered by EVERY job family through an exhaustive `switch` with no `default`** — a future
+   tool cannot compile without saying whether it meets her text (U2's sweep principle; U5's `insert_blocks` and U6's
+   `duplicate_note` will have to answer — the latter is a COPY).
+3. **The app's flush — `session.flushEveryOpenPost()`, not the per-note `flushExistingAutosave(forPost:)` the brief
+   names** (PROVISIONAL **P-VX275-1**; both are `coordinator.flushNow()`, the house's two entries to one act). Why every
+   open post: (i) **no address resolution outside the act's transaction** — a block, take, commit or comment id would be
+   resolved to its note BEFORE the act's turn, a second read racing the act's own (the decide/act gap AF-10 (a)'s guard
+   closed); (ii) **no oracle** — the resolution would run before the grant decision, so how long a call takes would say
+   whether she is typing in a note the client cannot reach (F-7); flushing every open post costs the same whatever id is
+   named; (iii) **coverage without a resolver per tool** — `move_block` across notes, `merge_blocks`' two blocks, U6's
+   copies; (iv) **the house's precedent for exactly this** — `flushEveryOpenPost`'s own doc (13e E10): a source "named
+   by a block, not by a post … Flushing every open coordinator answers it without a lookup, and costs nothing when
+   nothing is pending" — ∝ the notes open, never the corpus (P1). Her Delete door's posture rides too: the flush's
+   outcome is not consulted (a refused write keeps its bytes pending, exactly as before); the act lands.
+4. **The navigate-away — a FACT on the receipt, posted on THE ONE ROAD.** `MCPWriteReceipt.notesLeftDead: [String]`
+   (default empty), set by `delete_note` to its note. The door's `onWrite` hop posts `.variorumNotesDeleted` with those
+   ids (exactly what `NoteDeletion` posts — the named ids; each window filters to its panes) and then lands the receipt.
+   A signal, never a decision (P-4). No second road: VX-283's VX-123 builds on this one.
+5. **The editor seam — `renderFull`'s caret** (trace 4). A pure helper over the old tiling and the new projection's
+   block ids, so the rule is pinnable; `renderFull` lands by identity on its answer when the caret's block left.
+6. **Words:** none new. The wire's answers and refusals are unchanged (a stale `edit_take` hears the op's existing
+   `bufferChangedSinceGesture` in her words). **FOR VX-234: nothing** (no pane word changes).
+
+### PROVISIONALs (with their options — the orchestrator files them at the merge)
+
+- **P-VX275-1 — the flush's reach:** (a) AS BUILT — every open post (`flushEveryOpenPost`), before every listed act;
+  (b) the brief's wording — only the act's own note(s) through `flushExistingAutosave(forPost:)`, resolved from the
+  act's ids before its turn (a read outside the act's transaction, and a timing oracle on unreachable ids); (c) (b) with
+  the resolution moved after the snapshot decision — the act split into two runner turns (decide, then flush, then act),
+  re-opening the decide/act gap the guard closes.
+- **P-VX275-2 — the residual window:** (a) AS BUILT — accepted and recorded (milliseconds; a keystroke in it meets
+  today's behaviour, narrowed to those characters); (b) a keyboard fence over every open editor for the wire act's
+  flight (`runStructural`'s fence generalized, keys deferred and replayed at the landed caret) — closes it, at the cost
+  of an editor-seam change across every live surface and her typing paused for each wire write; (c) refuse a wire
+  TOMBSTONE/FREEZE act while the app holds unflushed text for that take (a "the author is typing there" refusal — the
+  product call VX-184's trace offered as option (b), not ruled; she ruled (a)).
