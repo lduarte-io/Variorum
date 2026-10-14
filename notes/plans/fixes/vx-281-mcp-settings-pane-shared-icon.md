@@ -1132,8 +1132,8 @@ VX-283's six offenders · no literal colour, no trailers, no rewrites · the rec
 | # | Piece | State |
 |---|---|---|
 | 1 | dispositions written (R2-1/R2-3/R2-4/R2-5 AGREED, R2-2 to its pins, none disputed) | DONE (this commit) |
-| 2 | the pins, red-first: R2-1 · R2-2 (a)+(b) · R2-3 | NOT-STARTED |
-| 3 | the OLD tree (the tip + the pins) built for testing → `DerivedData/vx281-r2-old` | NOT-STARTED |
+| 2 | the pins, red-first: R2-1 · R2-2 (a)+(b) · R2-3 | DONE — R2-1 `18f25d9a` (+ compile fix `90ec0d3b`: the model leg's helper made main-actor isolated) · R2-2 `f137cf20` · R2-3 `b52ab180` |
+| 3 | the OLD tree (the tip + the pins) built for testing → `DerivedData/vx281-r2-old` | DONE — built from `90ec0d3b` in `DerivedData/vx281-r2` (`** TEST BUILD SUCCEEDED **`, `logs/build-old.log` under `notes/plans/vx281-screens/r2/`, gitignored), then APFS-cloned to `DerivedData/vx281-r2-old` (the xctestrun's products are `__TESTROOT__`-relative, so the clone runs as built); `vx281-r2` goes on as the incremental NEW tree. The only warnings in a touched file are round 1's own (`MCPSharedIconClickTests.swift:446–447`, the R1-2 pin's nested `popoverGone`) |
 | 4 | the fixes: R2-1 · R2-3 · R2-4 · R2-5 (one commit each) | NOT-STARTED |
 | 5 | the NEW tree built; R2-2's patch tree built (the patch reverted after) | NOT-STARTED |
 | 6 | STAGE WINDOW `vx281-r2fix` — red on old, R2-2's call, the batch | NOT-STARTED |
