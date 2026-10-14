@@ -2717,12 +2717,19 @@ to reverse it.
     (b) require a real client for the timing leg (not reachable with a model-driven client).
   - **Ruling 2** — a navigate-away never takes your focus: when a note is deleted while it shows in a pane you are NOT
     typing in, that pane goes to the Library in place and your caret stays where it is — on every road, your own
-    Delete door included. Option: (b) as before: the re-routed pane takes the focus.
+    Delete door included. Option: (b) as before: the re-routed pane takes the focus. **ANSWERED 2026-10-14 — RATIFIED,
+    her words: *"i think the focus sounds fine - it would be annoying for claude to move where you're working, you
+    should be able to work fine in the app while the AI is working (though the undo stack is shared and i'm aware of
+    that)."***
   - **Ruling 3** — the night's merge carried the four FIX units (U1–U4 and their follow-ups); U5–U8 (the wire tools'
     shapes, Compare from the wire, the agent's read-backs, the AI's docs) moved to **VX-336 "Run: MCP wire tools & AI
     docs"**, unstarted, every member keeping its ruling. Option: (b) hold the merge until all eight units land.
+    **ANSWERED 2026-10-14 — RATIFIED, her words: *"that's fine on them moving to 336 I suppose."***
 - **For your eye, not provisional:** 0.9.5's release notes (`ReleaseNotes-0.9.5.md:9`, "Running a client's setup
-  again simply replaces the old setup…") now hold only for a client's own tab — the next notes are yours · Codex's
+  again simply replaces the old setup…") now hold only for a client's own tab — the next notes are yours (**ANSWERED
+  2026-10-14: she delegated the line — *"you can design the release notes line it's fine"* — and asked for a publish
+  — *"you can go ahead and run a publish to the website since it's fixing a security bug and other phases have merged
+  in too"*; the 0.9.6 notes are drafted for her look before the release runs, her standing rule**) · Codex's
   client name (`codex-mcp-client`) is an outside lookup never seen live (Codex isn't installed); if it's wrong, a
   Codex re-run waits for one Allow, never a refusal · comments a client wrote before this build need EDIT to delete
   (P-VX260-2's cost) · two residuals stay recorded, unchanged: `finish_book`'s reopen-then-refinish (books carry no
