@@ -119,8 +119,8 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | unit | status |
 |---|---|
 | U1 — the door's security and correctness | CORE DONE, headless green at `ab552c5a` (MCP 223/48 · core 2,800/324 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~678k context (the cutover rule). The rest is U1b, below. U1's Mac batch rides U2's stage window (orchestrator call, see THE ORCHESTRATOR ON U1's HAND-BACK) |
-| U1b — VX-258's face and U1's remainder | WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5) |
-| U2 — the undo class | IN-PROGRESS — implementer spawned from the U2 BRIEF below |
+| U1b — VX-258's face and U1's remainder | WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5), and U2's MCP walk legs W2/W3 (no detour needed once the face exists) |
+| U2 — the undo class | BUILT, headless green at `10223a2d` (MCP 223/48 · core 2,826/326 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~634–690k context (the cutover rule). Its stage window (the Mac batch with U1's groups, plus W1, her own door) goes to a FRESH runner; W2/W3 move to U1b's window. The acceptance closes when W1–W3 have run |
 | U3 — her editor vs the wire | NOT-STARTED |
 | U4 — the faces after big writes | NOT-STARTED |
 | U5 — the write tools' shapes | NOT-STARTED |
@@ -148,6 +148,10 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
   Every live leg except leg 0 needs the face (or a Deny → re-run → Approve detour), and U1 can't merge before the face
   anyway, so the live round moves whole to U1b. U1's Mac batch rides U2's window: one claim instead of two on a
   contended night. Nothing was asked of the coordinator, so nothing needs cancelling.
+- 2026-10-14, ~00:20 MDT: U2 reported READY (~110 min whole, ~50 batch-only). The orchestrator trimmed it to the Mac
+  batch plus W1, her own door (~75 min). The MCP legs W2/W3 and their Deny → re-run → Approve detour (U2's step 4)
+  move to U1b's window, where the face connects `claude-code` with no detour. REQUEST sent for claim `vx246-u2`.
+  READY follows once the fresh runner has read in.
 
 ## Cross-run coordination
 
@@ -158,6 +162,18 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
   - vx-281 pings the orchestrator at its merge. U8 waits on that merge, and so does U1b.
   - 2026-10-13 ~23:20 MDT: the orchestrator sent vx-281 the face's file list (U1's OWED 1), so its own work can flag
     a collision. No reply was asked unless one exists.
+  - **vx-281's answer (2026-10-13 ~23:25 MDT; its HEAD `3e31f78b`, merging after its ladder): no collision, but four
+    facts U1b builds on:**
+    1. `clientBoundary` and `keyLine` are unchanged, but each now renders as a one-line SUMMARY on the face (e.g.
+       `MCPPaneCopy.clientBoundarySummary`), with the full sentence behind an (i) via the new
+       `Core/Views/ExplainerLine.swift`. A change to either full sentence brings its summary along.
+    2. The setup menu moved out of `MCPPane.swift` into a new `MCPSetupMenu.swift`: the code block, the client choice
+       in its header, and the copy icon upper right, which is the same one copy act.
+    3. `MCPDoor` gained the setup choice (VX-232): `setupClient` + `chooseSetupClient(_:)`. A copy makes its client
+       the chosen one, and choosing another client clears a stale receipt. The `copySetupCommand` line passing the name
+       reads the client from there.
+    4. Waiting sits ABOVE the tabs, with connection requests beside it. The re-bind row goes there, next to the grant
+       asks. The pane remembers its tab on the door (`paneTab`).
 - **VX-283** (VX-123's navigate-away road, VX-122's revival signal): U3 builds on the one navigate-away road
   (`.variorumNotesDeleted` → `WorkspaceModel.notesDeleted`). U4 checks VX-122's signal before inventing a refresh of
   its own (the runway, §2).
@@ -186,6 +202,11 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 - **VX-275, 2026-10-13 ~21:45 MDT, asked in chat.** The orchestrator proposed option (a): before a wire delete, flush
   her typing and navigate her pane away from the dead note, exactly as her own Delete door does. Her answer: *"yeah
   that's fine on that call."* U3 builds (a).
+- **P-VX258-2 (U1's bind arm) RATIFIED, 2026-10-13 ~23:35 MDT, in chat.** The orchestrator told her what was built:
+  an approved client name with no key tied to it yet (after opening a library from another Mac, or after a deny and
+  a re-approve) accepts a key copied from that client's own setup tab with no clicks; any other new key waits for her
+  OK. Her answer: *"i ratify what you built"*. It covers only that call; P-VX260-1's option (b) isn't built yet and
+  stays provisional. On VX-258 as a comment.
 
 ## Tickets minted from this run
 
@@ -194,6 +215,7 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | ticket | born | what | fate |
 |---|---|---|---|
 | VX-318 | U1's OWED 3 (the implementer, 2026-10-13) | MCP socket: a session's reader thread can read another socket's bytes after the host closes its descriptor. Same fd-reuse class as VX-279; traced by reading | a member (sub-issue of VX-246, Pre-launch); built in U1b with a red-first pin |
+| VM-16 | U2's OWED 2 (the implementer, 2026-10-14) | The phone's undo door says "Undid: …" on a quiet press: `MobileUndoDoor` still calls `undo(with:)`/`redo(with:)`. The fix is the Mac door's two lines; the rule itself already reaches the phone | the VM board (Mobile — editor & capture faces, Backlog); it needs a simulator stage; related to VX-276 |
 
 ## UNIT BRIEFS (the orchestrator's; each unit's implementer is spawned from its brief)
 
@@ -765,7 +787,7 @@ noticed-not-fixed VX-279 neighbour (OWED 3).
   (`notThisNamesKey`, the one sentence) — stricter, but a client whose real name differs from its tab's (a rename, a
   mistaken mapping) then has no road but the Any tab. Under an UNKNOWN name any fresh key is a connection request
   (first contact is always her approval; refusing would dead-end a mis-mapped client on its first connection).
-- **P-VX258-2 — the BIND arm (a known, approved, UNBOUND name — every client after an adoption, a Deny-then-approve, a
+- **[RATIFIED by her, 2026-10-13 ~23:35 MDT — *"i ratify what you built"*: option (a) stands.]** **P-VX258-2 — the BIND arm (a known, approved, UNBOUND name — every client after an adoption, a Deny-then-approve, a
   client approved before VX-168):** (a) as built — an untagged (or another name's) key waits for her OK there too, the
   same hole closed the same way; a key copied for the name binds at once (R-VX168-1 unchanged for the tabs); (b) leave
   the bind arm as VX-168 built it — the MAJOR's hole stays open for unbound approved names (after every adoption, all of
@@ -845,7 +867,7 @@ the guide's lesson-2 sentence (U8) — a client's own setup re-run moves its nam
 - **The PROVISIONALs.**
   - **P-VX258-1, -3, -4, -5 and -6 stand as built.** Each is the defensible pick. The ladder reads them, and they go
     into QUESTIONS at the merge.
-  - **P-VX258-2, the bind arm, stands as built.** It is the safer reading of her ruling's words (*"the best protection
+  - **P-VX258-2, the bind arm, stands as built** — *and she RATIFIED it the same evening (her rulings section)*. It is the safer reading of her ruling's words (*"the best protection
     at each level"*). It goes to her in chat; QUESTIONS takes it at the merge unless she answers first.
   - **P-VX260-1 is rebuilt as option (b), for U1b.** Her rule reads "Once she has edited an AI's comment, deleting it
     needs EDIT". An edit on her phone or the Air is still her edit, and (a) leaves those comments deletable.
@@ -1235,3 +1257,35 @@ Both shared with the phone's door through `StructuralUndoCopy`, but the phone do
 4. **The ladder's attention:** the per-entry records (THE SWEEP TABLE's FIXED (parts) rows) and the two default-pointer
    behaviour changes (Risk 2).
 
+
+### THE ORCHESTRATOR ON U2's HAND-BACK (2026-10-14, ~00:20 MDT)
+
+- **Accepted as reported.** Green suites were not re-run (rule 6).
+  - The path check across `736d29e7..10223a2d` finds `UndoStack.swift`, 27 `Operations+*.swift` files, the Mac
+    door's two App files (`Shared/StructuralUndoCopy.swift`, `Registry/ShellActions.swift`), one Mac test, and the
+    record. There are zero lines in `Sync/`, `Persistence/`, custody/Keychain/`Crypto/`, `Server/`, the editor seam,
+    or `Features/MCP/`.
+- **The cutover.** The implementer handed back at ~634k context (the harness's count; ~690k by its own). It finished
+  past the line, at a clean seam and on purpose: its argument is in its self-assessment, and it is accepted for the
+  build. The stage window goes to a FRESH runner. Screenshots and a long window would push that session toward its
+  limit while it held a claim and a prestaged store, which is the worst place for a session to fail.
+- **The window, trimmed.** Steps 0–3 and 7 run now: the Mac batch (U2-A plus U1's G1–G3) and W1, her own door, in both
+  voices, then the cleanup.
+  - Steps 4–6 (the detour, W2 and W3) move to U1b's window. There the face connects `claude-code` through U1's leg 1
+    with zero clicks, so the Deny → re-run → Approve detour on the old pane is never needed.
+  - Nothing on the critical path waits for them: the ladder follows U8, which waits for VX-281's merge exactly as U1b
+    does. U2's acceptance closes after U1b's window.
+- **The PROVISIONALs.** P-VX276-1, -2, -3 and -4 and P-VX277-1 stand as built. Each is the defensible pick, and -2 is
+  §12's own letter ("a door that did nothing speaks a refusal"). They go into QUESTIONS at the merge.
+- **The two behaviour changes beyond the class are accepted, with the ladder's attention (OWED 4).** Each makes an
+  undo truthfully report that it changed nothing when it changed nothing:
+  - `revertDeleteVariant` / `revertArchiveVariant` are quiet when the take is already live or active;
+  - `restorePlacementLocation` doesn't write when the block is already there.
+- **The residuals go to the ladder, unticketed for now.**
+  - `finish_book`'s reopen-then-refinish is the compare-and-set's recorded ABA: books carry no finish stamp, as
+    VX-184's record says.
+  - `add_note_to_book`'s seat undo restores the arrival's pre-image POSITION over a reorder of hers made after it.
+    That reads as a part (P-VX276-3) the undo writes over. A reviewer that confirms it gets it fixed in the ladder's
+    pass; otherwise it is dispositioned there.
+- **OWED 2 is now VM-16** (the phone's quiet press). **OWED 3** (AppSpec §9's contract line) is carried to the
+  closeout.
