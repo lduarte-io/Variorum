@@ -231,6 +231,9 @@ public enum FollowKind: Equatable, Sendable {
 
 /// An act owed — a press, a notice, or an act the executor runs on a plan.
 public enum OwedAct: Equatable, Sendable {
+    /// A library with no record yet: the migration (§3.13), once, as a plan —
+    /// its mode is the legacy reader's until then, and nothing else runs.
+    case migrate
     /// The account's mode or keys changed elsewhere: the follow. Every follow
     /// into or out of Castle types one secret; it holds its library re-key
     /// while a rotation is in progress.
@@ -314,6 +317,8 @@ public enum JoinPlan: Equatable, Sendable {
 
 public enum DoorRefusal: Equatable, Sendable {
     case locked
+    /// A library with no record yet: the migration runs first.
+    case migrationOwed
     case wrongMode(ProtectionMode)
     /// The mode isn't confirmed — corner 45's notice, or the vault, answers it.
     case modeNotConfirmed

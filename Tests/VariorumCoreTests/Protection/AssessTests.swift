@@ -182,6 +182,17 @@ struct AssessVaultTests {
         #expect(try replaced.assessed().acts.contains(.follow(.keysReplaced, typesOneSecret: true, holdsLibraryRekey: false)))
     }
 
+    /// This device's own leave, mid-way: its plan finishes it — never read as
+    /// the account moving elsewhere, and never offered as another's to finish.
+    @Test func thisDevicesOwnActInFlightIsNotAFollow() throws {
+        var world = try Self.synced(.castle, vault: .leavingCastle(appleKeyID: PF.id())).0
+        world.section = world.section.beginningAct(.leaveCastle, from: PF.fp(world.key), to: nil, at: PF.t0).section
+        world.recordSection = world.section
+        let assessed = try world.assessed()
+        #expect(!assessed.acts.contains { if case .follow = $0 { return true } else { return false } })
+        #expect(assessed.vault?.unfinishedLeave == nil)
+    }
+
     @Test func aVaultReadForAnotherAccountIsNoReadingAtAll() throws {
         let x = PF.id()
         var world = try AWorld(.castle, account: x)
@@ -195,16 +206,31 @@ struct AssessVaultTests {
 
 @Suite("VX-305 U2 — assess: the mode, confirmed or not; corner 45; before unlock nothing decides")
 struct AssessModeTests {
-    /// Corner 45's ambiguous case (P-U1-6's exact shape): local-only, a
-    /// passphrase, no Apple wrap, the raw key in the silent item.
+    /// Corner 45's ambiguous case (P-U1-6's exact shape: local-only, a
+    /// passphrase, no Apple wrap, the raw key in the silent item) as the
+    /// migration records it: Castle, not yet confirmed, no account.
     static func corner45() throws -> AWorld {
+        var world = try AWorld(.castle)
+        world.confirmed = false
+        world.custody = [CustodyItemFact(fingerprint: PF.fp(world.key), itemClass: .silent)]
+        world.section.settings = .noChoiceYet
+        world.recordSection = world.section
+        return world
+    }
+
+    /// A library with no record yet: the legacy reader's mode, the migration
+    /// owed, nothing else runs.
+    @Test func aLibraryWithNoRecordOwesTheMigrationAndNothingElse() throws {
         var world = try AWorld(.castle)
         world.noRecord = true
         world.legacyInputs = LegacyModeInputs(
             keyFile: LegacyKeyFileFacts(hasAppleWrap: false, hasPassphraseWrap: true), rawKeyCustody: .silent, enrolled: false)
         world.custody = [CustodyItemFact(fingerprint: PF.fp(world.key), itemClass: .silent)]
-        world.section.settings = .noChoiceYet
-        return world
+        let assessed = try world.assessed()
+        #expect(assessed.mode.mode == .castle && !assessed.mode.confirmed && assessed.mode.corner45)
+        #expect(assessed.acts == [.migrate])
+        #expect(assessed.repairs.isEmpty)
+        #expect(assessed.doors.values.allSatisfy { $0 == .refused(.migrationOwed) })
     }
 
     @Test func cornerFortyFiveRecordsCastleNotYetConfirmedAndRepairsNothing() throws {

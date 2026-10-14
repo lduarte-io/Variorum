@@ -218,9 +218,12 @@ public enum AssessRules {
     ) -> (repairs: [Repair], faults: [Fault]) {
         var repairs: [Repair] = []
         var faults: [Fault] = []
+        // A library with no record yet: the migration is owed, and it does its
+        // own steps — no repair runs before it (§3.13).
+        guard let record = unlocked.record else { return (repairs, faults) }
         // ALWAYS: the two homes agree — nothing lost by construction (newer
         // wins, the retired ids and the tree are unions).
-        if let record = unlocked.record {
+        do {
             let memory = unlocked.memory
             let stale = memory == nil
                 || memory?.currentFingerprint != record.currentFingerprint
@@ -374,7 +377,11 @@ public enum AssessRules {
     ) -> [OwedAct] {
         var acts: [OwedAct] = []
         guard let current = mode.mode else { return acts }
+        guard unlocked.record != nil else { return [.migrate] }
         let reading = facts.freshVault(for: account.account)
+        // This device's own act in flight is its plan's to finish — never read
+        // as the account moving elsewhere.
+        let ownActInFlight = unlocked.thisMac.actInFlight != nil
         if !mode.confirmed {
             if mode.corner45 {
                 // Corner 45: the one-time notice; her answer confirms — a key
@@ -387,7 +394,7 @@ public enum AssessRules {
             } else if let settled = vault?.mode.settled {
                 acts.append(.confirmMode(settled, isKeyChange: settled != current))
             }
-        } else if let vault, let reading {
+        } else if let vault, let reading, !ownActInFlight {
             // The account moved elsewhere: the follow.
             let known = unlocked.memory?.vaultFacts?.corpusKeyID
             switch vault.mode {
@@ -552,6 +559,10 @@ public enum AssessRules {
             for door in Door.allCases { doors[door] = .refused(.locked) }
             return doors
         }
+        guard unlocked.record != nil else {
+            for door in Door.allCases { doors[door] = .refused(.migrationOwed) }
+            return doors
+        }
         let section = unlocked.thisMac
         let reading = facts.freshVault(for: account.account)
         let followOwed = acts.contains { if case .follow = $0 { return true } else { return false } }
@@ -633,7 +644,8 @@ public enum AssessRules {
         // press, never the old shared key).
         doors[.relinkAccount] = {
             if let refusal = gate(syncedAct: true) { return .refused(refusal) }
-            guard current == .standard, mode.confirmed else { return .refused(.wrongMode(current)) }
+            guard current == .standard else { return .refused(.wrongMode(current)) }
+            guard mode.confirmed else { return .refused(.modeNotConfirmed) }
             guard inSync, let reading else { return .refused(inSync ? .needsFreshVault : .notSynced) }
             let unreadable = reading.appleKeyID.map { !facts.appleKeys.readable.contains($0) } ?? true
             let onOldKey = reading.appleKeyID != nil && reading.appleKeyID == oldSharedID(facts)
