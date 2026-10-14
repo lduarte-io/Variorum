@@ -41,12 +41,18 @@ At #216 and in her review of both documents:
   backups if they lost their passphrase / words / touchID + they're going into castle, so long as they're adequately
   warned about it. they can always export it as plaintext if they want to, but going into castle means going into
   protection and I agree with deleting the iCloud key when they go into castle."* Her Keychain Access check confirmed
-  why: the dev scope's Apple key was revealed with the login password, on the Pro and on the Air. **The shape of the
-  old shared key's retirement (§3.5) is PROVISIONAL, hers to confirm** (§9): the review found that key is shared by
-  every library on the Apple account, which this ruling's question didn't put in front of her. Asked about a
-  *keep it for now* choice, she asked: *"if keeping it for now is offered, what are the implications of that? what
-  risk does it expose? do you think it's owrth having to keep that door open forever?"* — answered on VX-301; the
-  design drops it (§3.5 point 4).
+  why: the dev scope's Apple key was revealed with the login password, on the Pro and on the Air. The review then
+  found that key is shared by every library on the Apple account, which this ruling's question hadn't put in front of
+  her. Asked about a *keep it for now* choice, she asked: *"if keeping it for now is offered, what are the
+  implications of that? what risk does it expose? do you think it's owrth having to keep that door open forever?"* —
+  answered on VX-301. **Ruled 2026-10-13:** she confirmed the shape §3.5 point 4 draws — Use Castle always retires
+  the old shared key after its checks, no keep-for-now, and a library already in Castle gets one calm ask and a door
+  that goes once pressed.
+- **Leaving an account (§3.8), ruled 2026-10-13.** Asked whether a Castle library leaving its account should re-key,
+  with its copies from while it synced staying reachable through that account while it's in Standard, she said:
+  *"so basically backups from when it was in standard still open to the standard account that remains? i imagine
+  that's fine"*. (The nuance said back to her: the reach covers every copy made while it synced, including ones made
+  while the account was in Castle, if the account later returns to Standard.)
 - **Never opening a copy without asking** (the second opinion's fourth decision) is withdrawn as redundant under
   VX-301; the record is on VX-266.
 - **The rest — *"My rulings: I want to go with your recommendations on all of these"*:**
@@ -272,7 +278,7 @@ The earlier rulings this design keeps are in §3.12 (the signed-out screen, the 
      Standard thing has an Apple key of its own, which reaches other devices wherever iCloud Keychain carries it.
   3. **An older build keeps using the old key,** and its Re-link can land an account's vault copy under it. Nothing on
      this build moves a vault off it automatically.
-  4. **Retiring it is a step of Use Castle** — **PROVISIONAL in this shape, hers to confirm** (§9):
+  4. **Retiring it is a step of Use Castle** — **her ruling, 2026-10-13** (§1):
      - **The checks, before the sheet:** the moves of point 2 run again. Then the route finder looks, with the old key
        taken away, at every copy in the catalog — other libraries' and other Macs' in a shared backup folder included
        — and at every account vault this device can read. It lists:
@@ -438,7 +444,7 @@ open its file. So:
   Castle re-keys at that act, with both secrets typed, so its current key is never left under a master it no longer
   holds. Its copies from while it synced stay under that account's keys, and open through that account while it
   stays in Standard — said at the act, and in Data Safety (§3.1 rule 2's second exception). The account's Apple key
-  is left alone: the account's other devices still use it. **PROVISIONAL, hers to confirm** (§9).
+  is left alone: the account's other devices still use it. **Her ruling, 2026-10-13** (§1).
 - **Joining or moving into an account** in Castle is entering Castle for this library: the re-key, its own Apple keys
   retired, and the old shared key's checks (§3.5). Joining or moving into an account in Standard is leaving Castle for
   it, with rule 5's sentence at the consent.
@@ -921,15 +927,9 @@ drill), VX-152 (Lock reentrancy), VX-240 (a wrong instruction mid-act).
 
 ## 9. Open (decided at the phase that meets it, recorded PROVISIONAL, logged in QUESTIONS)
 
-- **The old shared key's retirement as Use Castle's step, with no keep-for-now** (§3.5 point 4), and a door only for
-  a library already in Castle before this change — PROVISIONAL, hers to confirm. Her VX-301 ruling predates the
-  finding that the key is shared by every library on the Apple account; her question about keep-for-now is answered
-  on VX-301.
 - **A different library lands under a key of this Mac's own** (§3.7; the review's MAJOR 2): in Castle, landing asks
-  for its passphrase and words — PROVISIONAL, hers to confirm.
-- **A Castle library leaving an account re-keys at that act** (§3.8; MAJOR 3), and its copies from while it synced
-  stay reachable through that account while it stays in Standard (rule 2's second exception) — PROVISIONAL, hers to
-  confirm.
+  for its passphrase and words — PROVISIONAL. She asked what happens if you don't want Castle, and whose passphrase
+  it asks for; answered in the chat, her call pending.
 - **The real-store refresh waits for phase 3's close** (§5; MINOR 21) — hers to confirm.
 - **The exact Touch ID re-arm and retirement-sheet copy:** her approval at phase 4 and phase 5's walks.
 - **A retention rule for older libraries:** kept as today until she rules.
