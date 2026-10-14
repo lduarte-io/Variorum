@@ -204,7 +204,7 @@ struct MCPSharedRowsTests {
             #expect(try await settle { model.rowExtras(for: notes[0].id).reach.first?.viaOpenBook == true })
 
             // The picker writes the mode; the view's onChange asks `modeChanged()`.
-            func pick(_ mode: LibraryCatalogModel.Mode) async {
+            @MainActor func pick(_ mode: LibraryCatalogModel.Mode) async {
                 let moved = model.pickMode(mode)
                 let owesARead = model.modeChanged()
                 if moved || owesARead { await model.search() }
