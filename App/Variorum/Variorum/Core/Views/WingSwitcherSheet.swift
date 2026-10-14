@@ -99,9 +99,15 @@ nonisolated enum WingSwitcherKeys {
         case closeSwitcher
     }
 
-    /// SEAM — the pre-fix decision: Esc always closed the switcher.
+    /// Esc takes the topmost thing first — macOS's own rule, and this
+    /// sheet's precedent (an ask's sheet over it keeps its own Esc): a row's
+    /// reach popover goes and the switcher stays (her typed filter with it);
+    /// with nothing over the rows, Esc closes the switcher. Decided from what
+    /// the sheet KNOWS is up, never from which window happens to be key (the
+    /// popover holds plain buttons and the field keeps focus, so the sheet's
+    /// window hears the Esc — U2's walk saw it close the switcher).
     static func escape(rowPopoverShown: Bool) -> EscapeAct {
-        .closeSwitcher
+        rowPopoverShown ? .dismissRowPopover : .closeSwitcher
     }
 
     /// The monitor's ONE road from a real event to a key (13n-c held walks
@@ -185,6 +191,9 @@ struct WingSwitcherSheet: View {
     /// VX-268: THE grant sheet a row's shared icon opened (its popover's
     /// Change…) — presented OVER the switcher, the nested ask's twin.
     @State private var nestedGrant: MCPGrantOpening?
+    /// VX-281 ladder R1-2: the row whose reach popover is up — so Esc takes
+    /// the popover before the switcher (`WingSwitcherKeys.escape`).
+    @State private var popoverRow: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -250,8 +259,8 @@ struct WingSwitcherSheet: View {
                 act(model.brain.commandReleased())
                 return false
             case .escape:
-                switch WingSwitcherKeys.escape(rowPopoverShown: false) {
-                case .dismissRowPopover: break
+                switch WingSwitcherKeys.escape(rowPopoverShown: popoverRow != nil) {
+                case .dismissRowPopover: popoverRow = nil
                 case .closeSwitcher: close()
                 }
                 return true
@@ -317,7 +326,18 @@ struct WingSwitcherSheet: View {
             // VX-268: the ONE shared icon — a wing grant on it, or the open
             // book (`WingsModel.reach`, decideWing's read) — then a waiting
             // ask. Each its own button: the row's pick never fires for them.
-            MCPSharedIcon(reaches: model.wings.reach[row.id] ?? [], tokens: tokens)
+            // VX-281 R1-2: the sheet holds which row's popover is up (its Esc).
+            MCPSharedIcon(
+                reaches: model.wings.reach[row.id] ?? [], tokens: tokens,
+                isPresented: Binding(
+                    get: { popoverRow == row.id },
+                    set: { up in
+                        if up {
+                            popoverRow = row.id
+                        } else if popoverRow == row.id {
+                            popoverRow = nil
+                        }
+                    }))
             MCPAskGlyph(.wing(row.id), tokens: tokens)
             Spacer(minLength: 0)
         }

@@ -56,8 +56,15 @@ struct MCPSharedIcon: View {
     var arrowEdge: SwiftUI.Edge = .bottom
     /// After a Revoke lands (a one-shot face re-reads; a held one ignores it).
     var onChanged: () -> Void = {}
+    /// **VX-281 ladder R1-2:** a host that must KNOW when the popover is up
+    /// holds its state here — ⌘L's sheet, whose Esc takes a row's popover
+    /// before the switcher. nil (every other host): the icon's own.
+    var isPresented: Binding<Bool>? = nil
     @Environment(\.mcpShareRoad) private var road
     @State private var shown = false
+
+    /// Whose state the popover rides: the host's when it holds one.
+    private var presented: Binding<Bool> { isPresented ?? $shown }
 
     /// **13n-c UX walk W-UX-7 — the glyph's weight at row size.** The dotted
     /// triangle's strokes are hairlines; at `tokens.small` beside a row's
@@ -75,7 +82,7 @@ struct MCPSharedIcon: View {
         // reaches measures exactly what it did.
         if !reaches.isEmpty {
             Button {
-                shown.toggle()
+                presented.wrappedValue.toggle()
             } label: {
                 Image(systemName: Self.symbol)
                     .font(font ?? tokens.small)
@@ -88,9 +95,11 @@ struct MCPSharedIcon: View {
             .buttonStyle(.plain)
             .help(MCPShareCopy.iconHelp(reaches))
             .accessibilityLabel(MCPShareCopy.iconHelp(reaches))
-            .popover(isPresented: $shown, arrowEdge: arrowEdge) {
-                MCPReachPopover(reaches: reaches, road: road, onChanged: onChanged) { shown = false }
-                    .sharedIconPopoverProbe(reaches)
+            .popover(isPresented: presented, arrowEdge: arrowEdge) {
+                MCPReachPopover(reaches: reaches, road: road, onChanged: onChanged) {
+                    presented.wrappedValue = false
+                }
+                .sharedIconPopoverProbe(reaches)
             }
             .sharedIconAnchorProbe()
         }
