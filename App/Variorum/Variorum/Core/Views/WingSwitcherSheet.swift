@@ -307,12 +307,7 @@ struct WingSwitcherSheet: View {
     }
 
     private func rowView(_ row: WingSwitcherBrain.Row, highlighted: Bool) -> some View {
-        // VX-281 R1-2: READ here, in the rendering — a Binding's own closures
-        // are not tracked, so a write the row never read (Esc's dismissal from
-        // the key catcher) would leave the popover up (the R1 window caught
-        // exactly that: the switcher stayed, the popover too).
-        let popoverUp = popoverRow == row.id
-        return HStack(alignment: .firstTextBaseline, spacing: 8) {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
             // The palette's › marker rides the highlight (13b 3E's grammar).
             Text(highlighted ? tokens.selectionMarker.trimmingCharacters(in: .whitespaces) : " ")
                 .font(tokens.body.weight(.bold))
@@ -335,7 +330,7 @@ struct WingSwitcherSheet: View {
             MCPSharedIcon(
                 reaches: model.wings.reach[row.id] ?? [], tokens: tokens,
                 isPresented: Binding(
-                    get: { popoverUp },
+                    get: { popoverRow == row.id },
                     set: { up in
                         if up {
                             popoverRow = row.id
