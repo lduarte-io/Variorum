@@ -230,6 +230,7 @@ extension ProtectionExecutor {
             do {
                 try await program.run(step, ctx)
             } catch let stop as ActRollback {
+                try dropUnlandedAccountKey(ctx)
                 try rollBack(&ctx.library, act: ctx.act)
                 throw ActRolledBack(act: ctx.act, refusal: stop.refusal)
             }
@@ -394,6 +395,18 @@ extension ProtectionExecutor {
     }
 
     // MARK: - Roll back (before the commit point)
+
+    /// Two devices minted for one account and the vault's CAS kept the other's
+    /// (§3.5): the key this act minted, which the vault does not name, is
+    /// deleted and recorded retired — it wraps nothing.
+    func dropUnlandedAccountKey(_ ctx: ActContext) throws {
+        guard let minted = ctx.parameters.accountAppleKeyID, let account = ctx.accountID else { return }
+        if freshVaults[account]?.format.appleKeyID == minted { return }
+        try leaves.apple.deleteAppleKey(id: minted)
+        try ctx.updateSection {
+            $0.retiringAppleKey(id: minted, purpose: .account, accountID: account, origin: .minted, at: now())
+        }
+    }
 
     /// Undo an act that never reached its commit point: the staged file
     /// discarded, the live key file restored from the sealed mirror when the

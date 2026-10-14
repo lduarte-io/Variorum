@@ -224,10 +224,15 @@ public final class ProtectionExecutor {
     // MARK: - Unlock: every home verified with the key in hand
 
     /// The library as this Mac holds it, opened with `key` (a road's key).
-    public func unlock(with key: StoreKey) throws -> UnlockedLibrary {
+    /// `alsoInHand`: every other key the lobby's road reached on the way (the
+    /// live key file's current key when the library opened through its
+    /// history — a library file swapped for an older one) — a home sealed under
+    /// any of them still verifies, so a replayed library file alone loses to
+    /// the newer memory (§3.6).
+    public func unlock(with key: StoreKey, alsoInHand: [StoreKey] = []) throws -> UnlockedLibrary {
         guard try leaves.library.libraryOpens(with: key) else { throw ExecutorRefusal.keyDoesNotOpenLibrary }
         let liveFile = try liveFormat3()
-        let reach = reach(key: key, keyFile: liveFile)
+        let reach = reach(key: key, keyFile: liveFile, extra: alsoInHand)
         let record = try leaves.library.readRecord(with: key)
         let slotLibrary = record?.libraryID ?? libraryID
         let memory = try leaves.memory.readMemory(libraryID: slotLibrary)

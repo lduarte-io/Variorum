@@ -297,7 +297,11 @@ extension ActContext {
             let gate = parameters.gate ?? library.section.settings.gateStyle
             let biometry = leaves.biometry.biometry()
             if gate == .touchID, biometry.hardware, biometry.enrolled {
-                try leaves.syncKeys.writeSyncKeys(held, accountID: account, itemClass: .touchid)
+                // Idempotent: the item already holding exactly these keys is
+                // left as it is.
+                if try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: .touchid) != held {
+                    try leaves.syncKeys.writeSyncKeys(held, accountID: account, itemClass: .touchid)
+                }
                 leaves.syncKeys.holdInSession(nil, accountID: account)
             } else {
                 try drop(.touchid)
@@ -305,7 +309,9 @@ extension ActContext {
             }
             try drop(.silent)
         } else {
-            try leaves.syncKeys.writeSyncKeys(held, accountID: account, itemClass: .silent)
+            if try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: .silent) != held {
+                try leaves.syncKeys.writeSyncKeys(held, accountID: account, itemClass: .silent)
+            }
             try drop(.touchid)
             leaves.syncKeys.holdInSession(nil, accountID: account)
         }

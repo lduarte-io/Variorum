@@ -92,6 +92,9 @@ public struct ActParameters: Codable, Equatable, Sendable {
     public var rekeys: Bool?
     /// The account this Mac stops using (its sync keys forgotten).
     public var forgetsAccount: String?
+    /// Resume Sync after a landing: the secret made new there — "passphrase"
+    /// or "words" — becomes the account's (§3.7).
+    public var adoptsMadeNewSecret: String?
 
     public init(
         gate: GateStyle? = nil, synced: Bool? = nil, accountID: String? = nil, doorRevision: Int? = nil,
