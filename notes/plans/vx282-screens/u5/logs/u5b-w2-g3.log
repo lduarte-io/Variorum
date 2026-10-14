@@ -1,0 +1,186 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -scheme Variorum -destination platform=macOS -derivedDataPath DerivedData/vx282-u5 "-only-testing:VariorumTests/WriteTakesPanelRoutedCommandTests" "-only-testing:VariorumTests/WriteTakesPanelKeysTests"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  EventSource: https://github.com/mattt/eventsource.git @ 1.5.1
+  mcp-swift-sdk: https://github.com/modelcontextprotocol/swift-sdk.git @ 0.12.1
+  swift-atomics: https://github.com/apple/swift-atomics.git @ 1.3.1
+  Sparkle: https://github.com/sparkle-project/Sparkle @ 2.10.0
+  VariorumCore: <home>/dev/variorum-vx-282 @ local
+  SQLCipher: https://github.com/sqlcipher/SQLCipher.swift.git @ 4.18.0
+  swift-collections: https://github.com/apple/swift-collections.git @ 1.7.2
+  swift-log: https://github.com/apple/swift-log.git @ 1.16.1
+  GRDB: https://github.com/lduarte-io/GRDB.swift.git @ 7.11.1+sqlcipher.1
+  swift-dependencies: https://github.com/pointfreeco/swift-dependencies.git @ 1.14.1
+  swift-nio: https://github.com/apple/swift-nio.git @ 2.104.0
+  swift-clocks: https://github.com/pointfreeco/swift-clocks @ 1.1.0
+  combine-schedulers: https://github.com/pointfreeco/combine-schedulers @ 1.2.0
+  swift-system: https://github.com/apple/swift-system.git @ 1.8.1
+  swift-concurrency-extras: https://github.com/pointfreeco/swift-concurrency-extras @ 1.4.1
+  swift-syntax: https://github.com/swiftlang/swift-syntax @ 602.0.0
+  xctest-dynamic-overlay: https://github.com/pointfreeco/xctest-dynamic-overlay @ 1.11.0
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:x86_64, id:<device-udid>, name:My Mac }
+2026-10-14 05:43:23.536497-0600 Variorum[10659:59592585] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to <home>/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/io.lduarte.Variorum.debug.savedState
+2026-10-14 05:43:23.789788-0600 Variorum[10659:59592585] [global-hotkey] InstallEventHandler system=carbon status=0
+2026-10-14 05:43:23.789908-0600 Variorum[10659:59592585] [global-hotkey] RegisterEventHotKey system=carbon quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 05:43:24.011373-0600 Variorum[10659:59592723] [logging-persist] cannot open file at line 53009 of [8fa8248e30]
+2026-10-14 05:43:24.011397-0600 Variorum[10659:59592723] [logging-persist] os_unix.c:53009: (2) open(/private/var/db/DetachedSignatures) - No such file or directory
+2026-10-14 05:43:24.206379-0600 Variorum[10659:59592585] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 05:43:24.288028-0600 Variorum[10659:59592585] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 05:43:24.288340-0600 Variorum[10659:59592585] [sample-library] sample library (the adventures of sherlock holmes): alreadySeeded
+2026-10-14 05:43:24.288512-0600 Variorum[10659:59592585] [starred-gathering] starred gathering: alreadySeeded
+2026-10-14 05:43:24.288658-0600 Variorum[10659:59592585] [sample-library] welcome arrangement: alreadySettled
+Test Suite 'Selected tests' started at 2026-10-14 05:43:24.323.
+Test Suite 'VariorumTests.xctest' started at 2026-10-14 05:43:24.323.
+Test Suite 'VariorumTests.xctest' passed at 2026-10-14 05:43:24.323.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-14 05:43:24.323.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite "Write's take panel — the take keys act on the panel's block (VX-150)" started.
+◇ Test theStepKeysMoveTheRingThroughThePanelsTakes() started.
+2026-10-14 05:43:24.467645-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:24.470419-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:24.472463-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test theStepKeysMoveTheRingThroughThePanelsTakes() passed after 0.358 seconds.
+◇ Test theArchiveKeyArchivesTheTakeTheRingIsIn() started.
+2026-10-14 05:43:24.816909-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:24.818728-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:24.820251-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test theArchiveKeyArchivesTheTakeTheRingIsIn() passed after 0.218 seconds.
+◇ Test theMintKeysGrowThePanelsBlockAndTheRingFollows() started.
+2026-10-14 05:43:25.037189-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.039125-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.040743-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.149358-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.149491-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.257360-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.257493-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.367723-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.367856-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test theMintKeysGrowThePanelsBlockAndTheRingFollows() passed after 0.433 seconds.
+◇ Test theBranchKeyWithoutARingCopiesWhatIsShown() started.
+2026-10-14 05:43:25.463647-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.465673-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.467387-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.524789-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.524910-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test theBranchKeyWithoutARingCopiesWhatIsShown() passed after 0.210 seconds.
+◇ Test theKeysOnAGoneBlockWriteNothing() started.
+2026-10-14 05:43:25.674625-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.676539-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:25.678290-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test theKeysOnAGoneBlockWriteNothing() passed after 0.869 seconds.
+◇ Test theBloomAndLensKeysStillReachWriteAndEverythingReturnsWhenThePanelCloses() started.
+2026-10-14 05:43:26.561848-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:26.563877-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:26.565422-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test theBloomAndLensKeysStillReachWriteAndEverythingReturnsWhenThePanelCloses() passed after 0.344 seconds.
+✔ Suite "Write's take panel — the take keys act on the panel's block (VX-150)" passed after 2.435 seconds.
+◇ Suite "Write's take panel — every routed command acts on the panel's block (VX-154)" started.
+◇ Test commitAsksForTheTakeTheRingIsInAndFilesIt() started.
+2026-10-14 05:43:26.902212-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:26.904992-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:26.907071-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test commitAsksForTheTakeTheRingIsInAndFilesIt() passed after 0.278 seconds.
+◇ Test commitWithNoRingAsksForWhatTheBlockShows() started.
+2026-10-14 05:43:27.167150-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:27.169261-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:27.171630-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test commitWithNoRingAsksForWhatTheBlockShows() passed after 0.174 seconds.
+◇ Test commentsOpenOnThePanelsBlockInThePanel() started.
+2026-10-14 05:43:27.339979-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:27.342312-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:27.344682-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test commentsOpenOnThePanelsBlockInThePanel() passed after 0.698 seconds.
+◇ Test theCalloutFramesThePanelsBlock() started.
+2026-10-14 05:43:28.040912-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:28.042772-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:28.044347-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test theCalloutFramesThePanelsBlock() passed after 0.158 seconds.
+◇ Test copyAllTakesCopiesThePanelsFan() started.
+2026-10-14 05:43:28.199864-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:28.202415-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:28.204732-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test copyAllTakesCopiesThePanelsFan() passed after 0.172 seconds.
+◇ Test aTakeIntoABlockBelowMovesTheRingsTakeAndTheRingStaysHome() started.
+2026-10-14 05:43:28.371729-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:28.373570-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:28.375138-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test aTakeIntoABlockBelowMovesTheRingsTakeAndTheRingStaysHome() passed after 0.746 seconds.
+◇ Test aTakeIntoABlockBelowWithNoRingRefusesAndMovesNothing() started.
+2026-10-14 05:43:29.119427-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:29.121583-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:29.123248-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test aTakeIntoABlockBelowWithNoRingRefusesAndMovesNothing() passed after 0.168 seconds.
+◇ Test allTakesIntoBlocksActsOnThePanelsBlock() started.
+2026-10-14 05:43:29.285072-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:29.287296-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:29.289011-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test allTakesIntoBlocksActsOnThePanelsBlock() passed after 0.160 seconds.
+◇ Test blockHistoryOpensForThePanelsBlock() started.
+2026-10-14 05:43:29.446698-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:29.448541-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:29.450166-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test blockHistoryOpensForThePanelsBlock() passed after 0.684 seconds.
+◇ Test originOpensThePanelsBlocksOriginals() started.
+2026-10-14 05:43:30.136629-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:30.138442-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:30.139967-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:30.468551-0600 Variorum[10659:59592585] [WarnOnce] It's not legal to call -layoutSubtreeIfNeeded on a view which is already being laid out.  If you are implementing the view's -layout method, you can call -[super layout] instead.  Break on void _NSDetectedLayoutRecursion(void) to debug.  This will be logged only once.  This may break in the future.
+✔ Test originOpensThePanelsBlocksOriginals() passed after 0.699 seconds.
+◇ Test deleteBlockDeletesThePanelsBlockAndTheRingNeverLeavesIt() started.
+2026-10-14 05:43:30.836289-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:30.838626-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:30.840254-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test deleteBlockDeletesThePanelsBlockAndTheRingNeverLeavesIt() passed after 0.813 seconds.
+◇ Test archiveBlockArchivesThePanelsBlock() started.
+2026-10-14 05:43:31.663411-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:31.665326-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:31.666905-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test archiveBlockArchivesThePanelsBlock() passed after 0.174 seconds.
+◇ Test theWriteVerbsAreGreyWhileThePanelIsUpAndNeverReachTheCaret() started.
+2026-10-14 05:43:31.821966-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:31.824131-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:31.825920-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test theWriteVerbsAreGreyWhileThePanelIsUpAndNeverReachTheCaret() passed after 0.536 seconds.
+◇ Test showTakesClosesThePanel() started.
+2026-10-14 05:43:32.355086-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:32.356934-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:32.358561-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test showTakesClosesThePanel() passed after 0.102 seconds.
+◇ Test theArchiveReceiptNamesThePanelsOwnList() started.
+2026-10-14 05:43:32.458707-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:32.460543-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:32.462104-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test theArchiveReceiptNamesThePanelsOwnList() passed after 0.212 seconds.
+◇ Test theNoteCommandsStillReachWrite() started.
+2026-10-14 05:43:32.671839-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:32.673784-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:32.675783-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test theNoteCommandsStillReachWrite() passed after 0.111 seconds.
+◇ Test whenThePanelClosesEveryCommandIsWritesAgain() started.
+2026-10-14 05:43:32.784158-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:32.786235-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 05:43:32.787888-0600 Variorum[10659:59592585] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test whenThePanelClosesEveryCommandIsWritesAgain() passed after 0.336 seconds.
+✔ Suite "Write's take panel — every routed command acts on the panel's block (VX-154)" passed after 6.231 seconds.
+✔ Test run with 23 tests in 2 suites passed after 8.667 seconds.
+2026-10-14 05:43:33.319 xcodebuild[10633:59591690] [MT] IDETestOperationsObserverDebug: 10.603 elapsed -- Testing started completed.
+2026-10-14 05:43:33.319 xcodebuild[10633:59591690] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 05:43:33.319 xcodebuild[10633:59591690] [MT] IDETestOperationsObserverDebug: 10.603 sec, +10.603 sec -- end
+
+Test session results, code coverage, and logs:
+	<home>/dev/variorum-vx-282/App/Variorum/DerivedData/vx282-u5/Logs/Test/Test-Variorum-2026.10.14_05-43-22--0600.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started

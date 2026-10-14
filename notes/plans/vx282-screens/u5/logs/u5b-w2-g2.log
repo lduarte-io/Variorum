@@ -1,0 +1,249 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -scheme Variorum -destination platform=macOS -derivedDataPath DerivedData/vx282-u5 "-only-testing:VariorumTests/CommentPanelFixLeg2Tests" "-only-testing:VariorumTests/CommentTextAreaMountedTests" "-only-testing:VariorumTests/CommentPanelGeometryRuleTests" "-only-testing:VariorumTests/CommentPanelWordsTests" "-only-testing:VariorumTests/CommentCardLayoutTests" "-only-testing:VariorumTests/CommentCardViewTests" "-only-testing:VariorumTests/CommentCardControllerTests" "-only-testing:VariorumTests/MarginHoverCommentTests" "-only-testing:VariorumTests/IndicatorGutterTests" "-only-testing:VariorumTests/ProseGutterTests" "-only-testing:VariorumTests/BlockDecorGeometryTests"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  swift-log: https://github.com/apple/swift-log.git @ 1.16.1
+  swift-system: https://github.com/apple/swift-system.git @ 1.8.1
+  swift-collections: https://github.com/apple/swift-collections.git @ 1.7.2
+  VariorumCore: <home>/dev/variorum-vx-282 @ local
+  Sparkle: https://github.com/sparkle-project/Sparkle @ 2.10.0
+  swift-nio: https://github.com/apple/swift-nio.git @ 2.104.0
+  SQLCipher: https://github.com/sqlcipher/SQLCipher.swift.git @ 4.18.0
+  swift-dependencies: https://github.com/pointfreeco/swift-dependencies.git @ 1.14.1
+  swift-atomics: https://github.com/apple/swift-atomics.git @ 1.3.1
+  swift-clocks: https://github.com/pointfreeco/swift-clocks @ 1.1.0
+  EventSource: https://github.com/mattt/eventsource.git @ 1.5.1
+  GRDB: https://github.com/lduarte-io/GRDB.swift.git @ 7.11.1+sqlcipher.1
+  combine-schedulers: https://github.com/pointfreeco/combine-schedulers @ 1.2.0
+  mcp-swift-sdk: https://github.com/modelcontextprotocol/swift-sdk.git @ 0.12.1
+  swift-syntax: https://github.com/swiftlang/swift-syntax @ 602.0.0
+  xctest-dynamic-overlay: https://github.com/pointfreeco/xctest-dynamic-overlay @ 1.11.0
+  swift-concurrency-extras: https://github.com/pointfreeco/swift-concurrency-extras @ 1.4.1
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:x86_64, id:<device-udid>, name:My Mac }
+2026-10-14 05:42:28.408913-0600 Variorum[10585:59590260] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to <home>/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/io.lduarte.Variorum.debug.savedState
+2026-10-14 05:42:28.694344-0600 Variorum[10585:59590260] [global-hotkey] InstallEventHandler system=carbon status=0
+2026-10-14 05:42:28.694465-0600 Variorum[10585:59590260] [global-hotkey] RegisterEventHotKey system=carbon quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 05:42:28.974929-0600 Variorum[10585:59590569] [logging-persist] cannot open file at line 53009 of [8fa8248e30]
+2026-10-14 05:42:28.974951-0600 Variorum[10585:59590569] [logging-persist] os_unix.c:53009: (2) open(/private/var/db/DetachedSignatures) - No such file or directory
+Test Suite 'Selected tests' started at 2026-10-14 05:42:29.057.
+Test Suite 'VariorumTests.xctest' started at 2026-10-14 05:42:29.058.
+Test Suite 'VariorumTests.xctest' passed at 2026-10-14 05:42:29.058.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-14 05:42:29.058.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite "The stacked comment card's pure decisions (VX-179 U2)" started.
+◇ Test theStackArrangesEntriesTopDownWithSeparatorsBetween() started.
+✔ Test theStackArrangesEntriesTopDownWithSeparatorsBetween() passed after 0.001 seconds.
+◇ Test theWheelGoesToTheCardOnlyWhenTheCardCanMoveThatWay() started.
+✔ Test theWheelGoesToTheCardOnlyWhenTheCardCanMoveThatWay() passed after 0.001 seconds.
+◇ Test thePoolKeepsEachBlockOnTheCardAlreadyShowingIt() started.
+✔ Test thePoolKeepsEachBlockOnTheCardAlreadyShowingIt() passed after 0.001 seconds.
+◇ Test theHitDecisionGivesEachEventToItsOwnersScrollView() started.
+✔ Test theHitDecisionGivesEachEventToItsOwnersScrollView() passed after 0.001 seconds.
+◇ Test theLaneDragFollowsTheKnobRatioAndStopsAtTheEnds() started.
+✔ Test theLaneDragFollowsTheKnobRatioAndStopsAtTheEnds() passed after 0.001 seconds.
+◇ Test aBadgeAlwaysCarriesItsWholeCount() started.
+✔ Test aBadgeAlwaysCarriesItsWholeCount() passed after 0.001 seconds.
+✔ Suite "The stacked comment card's pure decisions (VX-179 U2)" passed after 0.001 seconds.
+◇ Suite "The stacked comment card, mounted (VX-179 U2)" started.
+◇ Test cardColoursCompareByComponentsNotByObject() started.
+✔ Test cardColoursCompareByComponentsNotByObject() passed after 0.001 seconds.
+◇ Test aCardStacksEachCommentAsItsOwnEntryInOrder() started.
+2026-10-14 05:42:29.122881-0600 Variorum[10585:59590448] [connection] nw_connection_copy_protocol_metadata_internal_block_invoke [C3] Client called nw_connection_copy_protocol_metadata_internal on unconnected nw_connection
+2026-10-14 05:42:29.123594-0600 Variorum[10585:59590448] [connection] nw_connection_copy_protocol_metadata_internal_block_invoke [C3] Client called nw_connection_copy_protocol_metadata_internal on unconnected nw_connection
+2026-10-14 05:42:29.123601-0600 Variorum[10585:59590448] [connection] nw_connection_copy_protocol_metadata_internal_block_invoke [C3] Client called nw_connection_copy_protocol_metadata_internal on unconnected nw_connection
+2026-10-14 05:42:29.123606-0600 Variorum[10585:59590448] [connection] nw_connection_copy_connected_local_endpoint_block_invoke [C3] Client called nw_connection_copy_connected_local_endpoint on unconnected nw_connection
+2026-10-14 05:42:29.123610-0600 Variorum[10585:59590448] [connection] nw_connection_copy_connected_remote_endpoint_block_invoke [C3] Client called nw_connection_copy_connected_remote_endpoint on unconnected nw_connection
+2026-10-14 05:42:29.123869-0600 Variorum[10585:59590448] [quic] quic_conn_process_inbound [C1.1.1.1:2] [-0163371f321106cbf461811f2a1168cbf4210b96] unable to parse packet
+✔ Test aCardStacksEachCommentAsItsOwnEntryInOrder() passed after 0.009 seconds.
+◇ Test entriesTallerThanTheCardScrollInsideIt() started.
+✔ Test entriesTallerThanTheCardScrollInsideIt() passed after 0.005 seconds.
+◇ Test anUnchangedPassDoesNoEntryWorkAndAHeightChangeNoMeasuring() started.
+✔ Test anUnchangedPassDoesNoEntryWorkAndAHeightChangeNoMeasuring() passed after 0.003 seconds.
+◇ Test changedEntriesReuseTheCardsLabels() started.
+✔ Test changedEntriesReuseTheCardsLabels() passed after 0.003 seconds.
+◇ Test theInteractiveCardIsOneDoorAndTheReadTierClicksThrough() started.
+✔ Test theInteractiveCardIsOneDoorAndTheReadTierClicksThrough() passed after 0.003 seconds.
+◇ Test theStripAndTheBadgeKeepTheirOneLabel() started.
+✔ Test theStripAndTheBadgeKeepTheirOneLabel() passed after 0.005 seconds.
+◇ Test theTerminalMarkHangsAndStudyHasNone() started.
+✔ Test theTerminalMarkHangsAndStudyHasNone() passed after 0.001 seconds.
+◇ Test aNewBlockStartsAtTheTopAndTheSameBlockKeepsItsScroll() started.
+✔ Test aNewBlockStartsAtTheTopAndTheSameBlockKeepsItsScroll() passed after 0.004 seconds.
+◇ Test aWheelTheCardCanTakeIsHitTestedIntoItsOwnScrollView() started.
+✔ Test aWheelTheCardCanTakeIsHitTestedIntoItsOwnScrollView() passed after 0.007 seconds.
+◇ Test aPressDragAnywhereOnTheLaneScrollsTheCard() started.
+✔ Test aPressDragAnywhereOnTheLaneScrollsTheCard() passed after 0.005 seconds.
+◇ Test aBadgeShowsItsWholeCountAtWritesFloor() started.
+✔ Test aBadgeShowsItsWholeCountAtWritesFloor() passed after 0.003 seconds.
+✔ Suite "The stacked comment card, mounted (VX-179 U2)" passed after 0.053 seconds.
+◇ Suite "The stacked comment card through the decoration controller (VX-179 U2)" started.
+◇ Test aBlocksCommentsRenderAsStackedEntriesInTheBriefsOrder() started.
+✔ Test aBlocksCommentsRenderAsStackedEntriesInTheBriefsOrder() passed after 0.005 seconds.
+◇ Test aCardStaysWithItsBlockWhenThePageScrolls() started.
+✔ Test aCardStaysWithItsBlockWhenThePageScrolls() passed after 0.004 seconds.
+◇ Test theReadTiersStackedCardsStayClickThrough() started.
+✔ Test theReadTiersStackedCardsStayClickThrough() passed after 0.003 seconds.
+✔ Suite "The stacked comment card through the decoration controller (VX-179 U2)" passed after 0.014 seconds.
+◇ Suite "The comments panel's text geometry and focus rule (VX-179 U3)" started.
+◇ Test theAreasGeometryIsOwnedAndItsFirstLineIsTheInset() started.
+✔ Test theAreasGeometryIsOwnedAndItsFirstLineIsTheInset() passed after 0.001 seconds.
+◇ Test aRowIsItsMeasuredTextInWholePoints() started.
+✔ Test aRowIsItsMeasuredTextInWholePoints() passed after 0.001 seconds.
+◇ Test theCaptureBoxOwnsItsOriginAndBothHostsReadIt() started.
+✔ Test theCaptureBoxOwnsItsOriginAndBothHostsReadIt() passed after 0.001 seconds.
+◇ Test aCaretReportFocusesItsAreaAndALeavingOneClearsOnlyItsOwn() started.
+✔ Test aCaretReportFocusesItsAreaAndALeavingOneClearsOnlyItsOwn() passed after 0.001 seconds.
+✔ Suite "The comments panel's text geometry and focus rule (VX-179 U3)" passed after 0.001 seconds.
+◇ Suite "The comment writing area, mounted offscreen (VX-179 U3)" started.
+◇ Test thePlaceholderLiesOnTheCaretsOwnLine(voice:) started.
+◇ Test case passing 1 argument voice → .terminal to thePlaceholderLiesOnTheCaretsOwnLine(voice:) started.
+​◇ Test case passing 1 argument voice → .study to thePlaceholderLiesOnTheCaretsOwnLine(voice:) started.
+​✔ Test thePlaceholderLiesOnTheCaretsOwnLine(voice:) with 2 test cases passed after 0.256 seconds.
+◇ Test thePlaceholderInkIsExactlyTheTypedInk(voice:) started.
+◇ Test case passing 1 argument voice → .terminal to thePlaceholderInkIsExactlyTheTypedInk(voice:) started.
+​◇ Test case passing 1 argument voice → .study to thePlaceholderInkIsExactlyTheTypedInk(voice:) started.
+2026-10-14 05:42:30.749750-0600 Variorum[10585:59590260] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+​✔ Test thePlaceholderInkIsExactlyTheTypedInk(voice:) with 2 test cases passed after 2.618 seconds.
+◇ Test theEmptyAreaTypesInTheStylesFontAndTheTwinFollowsTheText() started.
+✔ Test theEmptyAreaTypesInTheStylesFontAndTheTwinFollowsTheText() passed after 0.518 seconds.
+◇ Test aRowIsItsTextWithNoDeadAir(voice:) started.
+◇ Test case passing 1 argument voice → .terminal to aRowIsItsTextWithNoDeadAir(voice:) started.
+​◇ Test case passing 1 argument voice → .study to aRowIsItsTextWithNoDeadAir(voice:) started.
+​✔ Test aRowIsItsTextWithNoDeadAir(voice:) with 2 test cases passed after 0.519 seconds.
+◇ Test theMarkSitsOnTheTextsFirstBaseline() started.
+✔ Test theMarkSitsOnTheTextsFirstBaseline() passed after 0.259 seconds.
+◇ Test aFocusRequestBeforeAWindowIsHeldAndServedOnArrival() started.
+2026-10-14 05:42:33.362439-0600 Variorum[10585:59590260] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 05:42:33.620077-0600 Variorum[10585:59590260] [sample-library] sample library (the adventures of sherlock holmes): alreadySeeded
+2026-10-14 05:42:33.620442-0600 Variorum[10585:59590260] [starred-gathering] starred gathering: alreadySeeded
+2026-10-14 05:42:33.620753-0600 Variorum[10585:59590260] [sample-library] welcome arrangement: alreadySettled
+✔ Test aFocusRequestBeforeAWindowIsHeldAndServedOnArrival() passed after 1.775 seconds.
+◇ Test undoAfterTheAreaIsClearedForHerCannotReplayTheOldText() started.
+✔ Test undoAfterTheAreaIsClearedForHerCannotReplayTheOldText() passed after 0.892 seconds.
+◇ Test escapeFallsThroughToTheHostsClose() started.
+✔ Test escapeFallsThroughToTheHostsClose() passed after 0.142 seconds.
+◇ Test theCaptureBoxLaysItsFirstLineAtItsOwnOrigin(voice:) started.
+◇ Test case passing 1 argument voice → .terminal to theCaptureBoxLaysItsFirstLineAtItsOwnOrigin(voice:) started.
+​◇ Test case passing 1 argument voice → .study to theCaptureBoxLaysItsFirstLineAtItsOwnOrigin(voice:) started.
+​✔ Test theCaptureBoxLaysItsFirstLineAtItsOwnOrigin(voice:) with 2 test cases passed after 0.262 seconds.
+✔ Suite "The comment writing area, mounted offscreen (VX-179 U3)" passed after 7.245 seconds.
+◇ Suite "The comments panel's words and refusals (VX-179 U3)" started.
+◇ Test everyPanelWordIsSentenceCase() started.
+✔ Test everyPanelWordIsSentenceCase() passed after 0.001 seconds.
+◇ Test aRefusalIsAlwaysWords() started.
+✔ Test aRefusalIsAlwaysWords() passed after 0.001 seconds.
+◇ Test thePanelsRacesSpeakWordsNotTheEnum() started.
+✔ Test thePanelsRacesSpeakWordsNotTheEnum() passed after 0.062 seconds.
+✔ Suite "The comments panel's words and refusals (VX-179 U3)" passed after 0.063 seconds.
+◇ Suite "The comments panel's fix leg 2 — F-W-3, F-W-4, R1-2 (VX-179)" started.
+◇ Test theEditedRowAndItsStampLineStayInViewInACappedList() started.
+2026-10-14 05:42:36.575396-0600 Variorum[10585:59590260] [Window] Warning: -[NSWindow makeKeyWindow] called on <NSWindow: 0x77a3b2cf00> windowNumber=201fd which returned NO from -[NSWindow canBecomeKeyWindow].
+✔ Test theEditedRowAndItsStampLineStayInViewInACappedList() passed after 0.991 seconds.
+◇ Test theKeyIsThePanelsWhereItIsDelivered() started.
+✔ Test theKeyIsThePanelsWhereItIsDelivered() passed after 0.018 seconds.
+◇ Test theCloseRungClosesEvenWhereAPassedEscapeIsSwallowed() started.
+2026-10-14 05:42:38.725559-0600 Variorum[10585:59590260] [comment-keys] escape panel=131586 visible=true key=-1 event=131586 parent=131585 area=Optional(Variorum.CommentPanelFocus.add) owns=true handled=true
+2026-10-14 05:42:38.951632-0600 Variorum[10585:59590260] [comment-keys] escape panel=131586 visible=true key=-1 event=131586 parent=131585 area=Optional(Variorum.CommentPanelFocus.add) owns=true handled=true
+✔ Test theCloseRungClosesEvenWhereAPassedEscapeIsSwallowed() passed after 1.670 seconds.
+◇ Test aDismissedPopoversPanelStopsListening() started.
+✔ Test aDismissedPopoversPanelStopsListening() passed after 1.432 seconds.
+◇ Test closingThePopoverSavesADirtyInPlaceEdit() started.
+✔ Test closingThePopoverSavesADirtyInPlaceEdit() passed after 2.103 seconds.
+✔ Suite "The comments panel's fix leg 2 — F-W-3, F-W-4, R1-2 (VX-179)" passed after 6.216 seconds.
+◇ Suite "The margin's comment faces (13e E7 · 13l 8c)" started.
+◇ Test hoveringAnUncommentedBlockOffersNoMarginPlus() started.
+✔ Test hoveringAnUncommentedBlockOffersNoMarginPlus() passed after 0.033 seconds.
+◇ Test everyMarginCommentFaceSitsLeftOfTheText() started.
+✔ Test everyMarginCommentFaceSitsLeftOfTheText() passed after 0.030 seconds.
+✔ Suite "The margin's comment faces (13e E7 · 13l 8c)" passed after 0.064 seconds.
+◇ Suite "The editing ring respects the gutter (13u4 UNIT S3, row 63)" started.
+◇ Test theRingStopsAtTheCalloutGlyphItUsedToCrossBy4Points() started.
+✔ Test theRingStopsAtTheCalloutGlyphItUsedToCrossBy4Points() passed after 0.001 seconds.
+◇ Test theRingStopsAtTheCommentBadgeToo() started.
+✔ Test theRingStopsAtTheCommentBadgeToo() passed after 0.001 seconds.
+◇ Test aMarginCardNeverMovesTheRing() started.
+✔ Test aMarginCardNeverMovesTheRing() passed after 0.001 seconds.
+◇ Test anEmptyGutterLeavesTheShippedRectByteIdentical() started.
+✔ Test anEmptyGutterLeavesTheShippedRectByteIdentical() passed after 0.001 seconds.
+◇ Test theRingOnlyEverYieldsAndNeverReachesTheProse() started.
+✔ Test theRingOnlyEverYieldsAndNeverReachesTheProse() passed after 0.001 seconds.
+◇ Test inlineCommentsLeaveTheGutterEmpty() started.
+✔ Test inlineCommentsLeaveTheGutterEmpty() passed after 0.001 seconds.
+◇ Test theBlockHighlightTakesTheSameGutterEdge() started.
+✔ Test theBlockHighlightTakesTheSameGutterEdge() passed after 0.001 seconds.
+◇ Test theGutterDecisionIsOneRuleWithThreeAnswers() started.
+✔ Test theGutterDecisionIsOneRuleWithThreeAnswers() passed after 0.001 seconds.
+✔ Suite "The editing ring respects the gutter (13u4 UNIT S3, row 63)" passed after 0.001 seconds.
+◇ Suite "BlockDecor geometry (Phase 13 C1)" started.
+◇ Test seamsSitMidGapBetweenConsecutiveBlocksOnly() started.
+✔ Test seamsSitMidGapBetweenConsecutiveBlocksOnly() passed after 0.001 seconds.
+◇ Test theWhiteGapRuleCapsCalloutPadding() started.
+✔ Test theWhiteGapRuleCapsCalloutPadding() passed after 0.001 seconds.
+◇ Test adjacentCalloutsAlwaysKeepBreathingRoom() started.
+✔ Test adjacentCalloutsAlwaysKeepBreathingRoom() passed after 0.001 seconds.
+◇ Test theIndicatorRectWearsTheOutlineOffset() started.
+✔ Test theIndicatorRectWearsTheOutlineOffset() passed after 0.001 seconds.
+◇ Test dropBoundariesMapDragYsToEntryIndexes() started.
+✔ Test dropBoundariesMapDragYsToEntryIndexes() passed after 0.001 seconds.
+◇ Test narrowGuttersDegradeCardsToBadges() started.
+✔ Test narrowGuttersDegradeCardsToBadges() passed after 0.001 seconds.
+◇ Test aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane() started.
+✔ Test aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane() passed after 0.001 seconds.
+◇ Test aQuietCommentCardIsClickThrough() started.
+✔ Test aQuietCommentCardIsClickThrough() passed after 0.001 seconds.
+✔ Suite "BlockDecor geometry (Phase 13 C1)" passed after 0.001 seconds.
+◇ Suite "The prose gutter — the one law (13u3 UNIT A1)" started.
+◇ Test theProseColumnIsAPureFunctionOfTheSurfacesWidth() started.
+✔ Test theProseColumnIsAPureFunctionOfTheSurfacesWidth() passed after 0.001 seconds.
+◇ Test theGutterMovesOnlyWithTheSurfacesOwnWidth() started.
+✔ Test theGutterMovesOnlyWithTheSurfacesOwnWidth() passed after 0.001 seconds.
+◇ Test everyTextSurfaceCarriesTheOneGutterRule() started.
+✔ Test everyTextSurfaceCarriesTheOneGutterRule() passed after 0.003 seconds.
+◇ Test theTwoContainedSurfacesPlaceTheirProseIdentically() started.
+✔ Test theTwoContainedSurfacesPlaceTheirProseIdentically() passed after 0.001 seconds.
+◇ Test aGutteredSurfaceStaysOnTextKit2() started.
+✔ Test aGutteredSurfaceStaysOnTextKit2() passed after 0.009 seconds.
+◇ Test noDecorationMovesTheProseColumnOnAnySurface() started.
+✔ Test noDecorationMovesTheProseColumnOnAnySurface() passed after 0.011 seconds.
+◇ Test theReadTiersProseIsUnmovedByACommentThroughTheProductionLoop() started.
+✔ Test theReadTiersProseIsUnmovedByACommentThroughTheProductionLoop() passed after 0.042 seconds.
+◇ Test theContainedEditorsProseIsUnmovedByACommentThroughTheProductionLoop() started.
+✔ Test theContainedEditorsProseIsUnmovedByACommentThroughTheProductionLoop() passed after 0.038 seconds.
+◇ Test theCalloutWashHugsTheProseColumn() started.
+✔ Test theCalloutWashHugsTheProseColumn() passed after 0.001 seconds.
+◇ Test theGlyphSitsInTheGutterAndYieldsWhereThereIsNone() started.
+✔ Test theGlyphSitsInTheGutterAndYieldsWhereThereIsNone() passed after 0.001 seconds.
+◇ Test theStackPutsTheGlyphFirstAndTheCommentFaceUnderIt() started.
+✔ Test theStackPutsTheGlyphFirstAndTheCommentFaceUnderIt() passed after 0.001 seconds.
+◇ Test theBadgeNeverStandsOnProse() started.
+✔ Test theBadgeNeverStandsOnProse() passed after 0.001 seconds.
+◇ Test twoCommentedBlocksCardsNeverAbut() started.
+✔ Test twoCommentedBlocksCardsNeverAbut() passed after 0.001 seconds.
+◇ Test theCardGrowsToTheBlocksOwnHeightWithinTheRhythm() started.
+✔ Test theCardGrowsToTheBlocksOwnHeightWithinTheRhythm() passed after 0.001 seconds.
+◇ Test nothingInTheGutterEverCoversProse() started.
+✔ Test nothingInTheGutterEverCoversProse() passed after 0.021 seconds.
+◇ Test aLeadingGlyphIsExactlyOneGrapheme() started.
+✔ Test aLeadingGlyphIsExactlyOneGrapheme() passed after 0.001 seconds.
+✔ Suite "The prose gutter — the one law (13u3 UNIT A1)" passed after 0.131 seconds.
+✔ Test run with 76 tests in 11 suites passed after 13.792 seconds.
+2026-10-14 05:42:43.190 xcodebuild[10389:59588974] [MT] IDETestOperationsObserverDebug: 17.786 elapsed -- Testing started completed.
+2026-10-14 05:42:43.190 xcodebuild[10389:59588974] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 05:42:43.190 xcodebuild[10389:59588974] [MT] IDETestOperationsObserverDebug: 17.786 sec, +17.786 sec -- end
+
+Test session results, code coverage, and logs:
+	<home>/dev/variorum-vx-282/App/Variorum/DerivedData/vx282-u5/Logs/Test/Test-Variorum-2026.10.14_05-42-24--0600.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started

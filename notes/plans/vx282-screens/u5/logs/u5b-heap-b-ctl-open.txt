@@ -1,0 +1,20 @@
+       2       2560    1280.0   CommentNSTextView                                 Swift   Variorum.debug.dylib
+       2       1280     640.0   CommentTextAreaView                               Swift   Variorum.debug.dylib
+       2        640     320.0   CommentTextArea.Coordinator                       Swift   Variorum.debug.dylib
+       2        160      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.Array<VariorumCore.BlockComment>>  Swift   libswiftCore.dylib
+       1        384     384.0   SwiftUI.(BoxVTable in $22ef9ddbc)<SwiftUI.(StatePropertyBox in $22efc3810)<Variorum.CommentsPanelModel>>  Swift   SwiftUI
+       1        256     256.0   GRDB.ValueConcurrentObserver<GRDB.ValueReducers.RemoveDuplicates<GRDB.ValueReducers.Fetch<Variorum.CommentsPanelModel.Snapshot>>, GRDB.TaskValueObservationScheduler>  Swift   Variorum.debug.dylib
+       1        160     160.0   CommentsPanelModel                                Swift   Variorum.debug.dylib
+       1         80      80.0   Swift.AsyncThrowingStream<Variorum.CommentsPanelModel.Snapshot, Swift.Error>._Storage<>  Swift   libswift_Concurrency.dylib
+       1         80      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.Dictionary<Swift.String, Swift.String>>  Swift   libswiftCore.dylib
+       1         80      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.Int>  Swift   libswiftCore.dylib
+       1         80      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.Optional<Swift.String>>  Swift   libswiftCore.dylib
+       1         80      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.Optional<Variorum.RecoveryStatus>>  Swift   libswiftCore.dylib
+       1         80      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.Set<Swift.String>>  Swift   libswiftCore.dylib
+       1         80      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.String>  Swift   libswiftCore.dylib
+       1         80      80.0   SwiftUI.StoredLocation<Variorum.CommentsPanelModel>  Swift   SwiftUI
+       1         64      64.0   SwiftUI.LocationBox<SwiftUI.(ProjectedLocation in $22efac2a0)<SwiftUI.StoredLocationBase<Variorum.CommentsPanelModel>, Swift.WritableKeyPath<Variorum.CommentsPanelModel, Swift.String>>>  Swift   SwiftUI
+       1         48      48.0   Swift.AsyncThrowingStream<Variorum.CommentsPanelModel.Snapshot, Swift.Error>._Context<>  Swift   libswift_Concurrency.dylib
+       1         48      48.0   Swift._ContiguousArrayStorage<Variorum.CommentsPanelModel.DebugWeakModel>  Swift   libswiftCore.dylib
+       1         32      32.0   GRDB.Mutex<GRDB.ValueConcurrentObserver<GRDB.ValueReducers.RemoveDuplicates<GRDB.ValueReducers.Fetch<Variorum.CommentsPanelModel.Snapshot>>, GRDB.TaskValueObservationScheduler>.FetchingState<>>  Swift   Variorum.debug.dylib
+       1         32      32.0   SwiftUI.(_AnyHashableBox in $22ef94774)<Swift.WritableKeyPath<Variorum.CommentsPanelModel, Swift.String>>  Swift   SwiftUI
