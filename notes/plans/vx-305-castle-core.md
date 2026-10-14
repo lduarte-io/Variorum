@@ -1,6 +1,7 @@
 # VX-305 — Castle rebuild, phase 1: the headless core
 
-**Status: READY, not started (plan written 2026-10-13; revised the same night to the design's round-2 shape).**
+**Status: READY, not started (plan written 2026-10-13; revised the same night to the design's round-2 shape, and on
+2026-10-14 to round 3 and its late extra read).**
 
 - **Ticket:** VX-305, in project "Castle & backups before launch" (flagship VX-266).
 - **The binding design:** `notes/plans/vx-266-castle-backups-prelaunch.md`. Her rulings are its §1.
@@ -80,8 +81,10 @@ The four-session split exists so each session holds one coherent piece.
 launch."* It needs all of the following:
 
 1. **The generated scenario runs are green** across at least 20 seeds, each running at least 1,000 action sequences
-   of up to 60 steps, under `swift test` in a reasonable time. Record the time.
-2. **Every fixed scenario in §6 is green.**
+   of up to 60 steps, under `swift test` in a reasonable time — and under `swift test -c release` too, since the core
+   compiles in both configurations from this phase on and nothing may meet the optimizer for the first time at the
+   release switch (design §5). Record both times.
+2. **Every fixed scenario in §6 is green**, in both configurations.
 3. **Every mutation pin is red with its guard disabled** and green with it.
 4. **A Fable cold-review ladder is closed** — at most three rounds, with every finding dispositioned here.
 5. **The model half of the key-map table is written:** one row per element of the target key map, naming the test
@@ -103,6 +106,8 @@ launch."* It needs all of the following:
 Sources/VariorumCore/Protection/
   Model/      ProtectionRecord (the library's facts + the family tree + one device section per device) ·
               KeyFile (format 3: wraps + history + the Castle anchor; readers for formats 1 and 2) ·
+              LegacyReaders (read-only, outliving the release switch — design §3.15: today's mode rule as one
+              pure function, and the reads of today's per-library-ID items and 13p escrow items) ·
               DeviceMemory (+ sealed fields, + key-file mirror, + the device section's second home, + the hardware
               marker) · Plan (+ seal) · Seal (HKDF + HMAC) · Names (custody item by fingerprint and kind, sync-keys
               item, memory item, Apple key: <scope>-apple-key-<id> per library per Mac and per account, the old
@@ -126,7 +131,10 @@ Tests/VariorumCoreTests/Protection/
 
 - **The executor is the only thing that calls a writing leaf.** `assess` takes plain values and calls nothing.
 - **Guards the mutation pins switch off** live in one `ProtectionGuards` value whose off-switches exist only under
-  `#if DEBUG`. Release builds strip them, as with the store's DEBUG oracles.
+  `#if DEBUG`. Release builds strip them, as with the store's DEBUG oracles, so the mutation pins run in the Debug
+  configuration and everything else runs in both.
+- **The core compiles in both configurations** (design §5, PROVISIONAL): "off in Release" means the app's wiring,
+  which phase 2 owns. Nothing in this phase is behind `#if DEBUG` except the guards' off-switches.
 
 ---
 
@@ -149,10 +157,11 @@ Build everything in §3.2 of the design as values, with their codecs and their c
     retirement date;
   - **the Castle anchor**: the outgoing Castle key with its whole history (and any earlier anchor kept beside it),
     sealed under one anchor key — on the device that presses Use Standard, wrapped under the passphrase and the words
-    typed there; on a follower, wrapped under the outgoing Castle key itself, with that key's own locks from the
-    device's key file copied beside it (its passphrase or words wrap, its master wrap and the master's words copy),
-    the master's road left out when the vault's master was never changed. Never re-locked: it keeps the secrets of its
-    day, and every later re-key carries it unchanged;
+    typed there; on a follower, wrapped under the secret typed at its follow and under the outgoing Castle key itself,
+    with that key's own locks from the device's key file copied beside it (its passphrase or words wrap, its master
+    wrap and the master's words copy), the master's road left out when the vault's master was never changed. Both are
+    birth-time locks. Never re-locked after it's written: it keeps the secrets of its day, and every later re-key
+    carries it unchanged;
   - the master's twelve-words copy (design §3.5a), when the file has a master wrap;
   - **re-keying, per design §3.4:** entering Castle takes everything (the anchor folded back in; an anchor the typed
     secrets can't open is kept beside the history, unchanged, and never fails the entry); within a mode, the old key
@@ -160,6 +169,9 @@ Build everything in §3.2 of the design as values, with their codecs and their c
     writes the anchor first;
   - the same format serves another library's key file in `Backups/<library8>/<mac8>/` (design §3.5).
 - **Readers for formats 1 and 2.** Old key files are read forever, and the catalog and route finder use them.
+- **The legacy mode reader:** today's mode rule (`Posture.derive`'s inputs and corner 45's test) as one pure,
+  read-only function — the migration calls it once per store, and a copy with no record calls it forever (design
+  §3.7, §3.15). It decides nothing else and writes nothing.
 - **What this Mac remembers:** the device identity with its hardware marker (also kept in the device section), the
   biometry state hash (a hint, never a verdict), the vault facts, the key-file mirror (wraps, history and anchor), the
   family tree's mirror, and the device section's second home — sealed whole.
@@ -176,15 +188,18 @@ Build everything in §3.2 of the design as values, with their codecs and their c
 - **the crossings:** entering Castle takes everything; leaving Castle takes nothing, and the anchor opens with the
   passphrase and with the words; Castle → Standard → Castle folds the anchor back; a landing starts empty; within a
   mode the history grows; an unopenable anchor is kept and doesn't fail the entry;
-- **the anchor keeps the secrets of its day:** no door re-locks it; every re-key carries it unchanged; a follower's
-  anchor opens with exactly what opened that device (the secret it held its key under, or the words through the master
-  copy) and needs no secret at the follow; with the vault's master unchanged since Castle, the master's road is left
-  out; and no value ever holds a master under the passphrase;
+- **the anchor keeps the secrets of its day:** no door re-locks it after it's written; every re-key carries it
+  unchanged; a follower's anchor opens with the secret typed at its follow and with exactly what opened that device
+  (the secret it held its key under, or the words through the master copy); with the vault's master unchanged since
+  Castle, the master's road is left out; and no value ever holds a master under the passphrase;
 - **the family tree:** every key a re-key or a landing mints is recorded with its kind and its Mac; its two homes
   union; it can be seeded with fingerprints a key file names but the fold couldn't reach;
 - **this Mac's facts in two homes:** the newer version wins, the retired ids are the union, a library file or a memory
   item replayed — or the memory item deleted — alone changes nothing; a Mac with no memory item finds its section by
-  its hardware marker; a new identity on new hardware takes over its predecessor's Apple key ids;
+  its hardware marker; a new identity on new hardware takes over every Apple key id its predecessor's section lists
+  as its own, and every retired id;
+- **the legacy mode reader** agrees with today's `Posture.derive` on every starting state in §6, corner 45's case
+  included;
 - a tampered sealed field fails verification;
 - format-1 and format-2 key files read as the design says;
 - no secret appears in any value written to disk (scan the encodings).
@@ -202,18 +217,27 @@ Build everything in §3.2 of the design as values, with their codecs and their c
 - **The rules it encodes:**
   - design §3.3, guards included (no repair changes a key's kind; no repair acts destructively on a Standard record's
     word alone; a lost Apple road offers Re-link's library arm);
-  - §3.5 — one Apple key per library per Mac and one per account; the old shared key: what still needs it, what its
-    retirement would leave with no road, what would then depend on an Apple key alone, and the door-time check;
+  - §3.5 — one Apple key per library per Mac and one per account; entering Castle owing the retirement of every key
+    this Mac's section lists as its own for the library; copies under a key this Mac can't delete (left in a former
+    Apple ID) named at Use Castle's door; the old shared key: what still needs it, what its retirement would leave with
+    no road, what would then depend on an Apple key alone, and the door-time check;
+  - §3.9 — the vault's mode in three states: an Apple wrap — Standard; an id with no wrap — leaving Castle, in
+    progress (a follower holds its re-key; only a device that reads the named key completes it); neither — Castle;
   - §3.7 — the open rule's verdicts: the family tree deciding "ours"; a different library landing under a fresh key
     with one secret typed and the other typed or made new, or, for a Standard pair through a readable Apple key, with
-    none; a copy with no record worked out by today's rules;
+    none; a copy with no record worked out by the legacy mode reader;
   - §3.8 — the four account situations; every leave re-keying in both modes; the joining rules;
   - §3.10 — the Touch ID road, with VX-310's lobby rule as data: the button whenever a Touch ID item for the current
     key exists, what pressing it says when Touch ID is only unusable for now, the line when there's no item or no
-    finger, and the "changed" line after a press fails.
+    finger, and the "changed" line after a press fails; the re-arm question owed only after a press fails on an item
+    that exists; a choice of Touch ID with no item behind it owing a quiet Always ask; a new device identity starting
+    on Always ask.
 - **The route finder** over a catalog, for every copy kind, with the anchor as a road and one *Opens with* line per
-  copy (naming the day when an anchor or a words copy is from an earlier one) — and the same finder with the old shared
-  key taken away, which is how the retirement's checks list what would stop opening.
+  copy (naming the day when an anchor or a words copy is from an earlier one; on a follower, naming the secret typed at
+  its follow and what its copied locks open, the twelve words alone where none is the passphrase) — and the same
+  finder with the old shared key taken away, which is how the retirement's checks list what would stop opening. It
+  also gives each door that replaces a secret while an anchor exists its one sentence (design §3.9), for this
+  device's anchor and its day — the reset road naming that day's words, never the forgotten passphrase.
 - **The catalog's one name parser,** covering every filename today's builds have written. Read the three existing
   parsers and keep their union.
 - **Attribution and retention** per design §3.7.
@@ -221,7 +245,9 @@ Build everything in §3.2 of the design as values, with their codecs and their c
 **Tests:** table-driven.
 
 - every row of the four-account table;
-- every road combination, the anchor included;
+- the vault's three states, and a follower's hold in the middle one;
+- every road combination, the anchor included — a follower's anchor with each typed secret, and with stale copied
+  locks;
 - every copy kind against every library state — this library's own Castle-era copy after a leave reads as ours;
 - retention over a shared folder holding two Macs' and two libraries' copies, where nothing foreign is pruned;
 - the route finder's words agree with the roads it found, and every *Opens with* line names only roads that open;
@@ -249,25 +275,32 @@ Build everything in §3.2 of the design as values, with their codecs and their c
 - **the crossings** (design §3.4):
   - Use Castle: the old shared key's checks at the door (a vault on it stops the act), the anchor folded back, and the
     scheduled export turned off;
-  - Use Standard: both secrets, the words typed and never made new; the anchor first; synced, the rotation, with the
-    new sync keys and the previous corpus key in Castle-kind custody until the one write that completes it and adds
-    the account's Apple copy, and an actor lost mid-rotation finished by another device at a press (the `Sync/` half
-    is phase 3's — model it here);
-  - every follow into or out of Castle typing one secret, for the new master; a follower's anchor needs none (it goes
-    under the outgoing key); a follower that sees a rotation in progress holds its re-key until the completing write;
+  - Use Standard: both secrets, the words typed and never made new; the anchor first; synced, the rotation — its
+    first vault write naming the account's fresh Apple key's id with no wrap, past which a crash resumes and never
+    rolls back; sync keys held by what they reach (the new keys and the previous corpus key the Castle way, on every
+    device, until the previous key leaves the vault); the one completing write that adds the account's Apple wrap,
+    made only by a device that reads the named key, and just the wrap when an older build has already cleared the
+    previous key; and an actor lost mid-rotation, finished at a press that names the leave and waits for the named
+    key, minting only if it never arrives — while a rotation with no id is completed by anyone with no Apple copy (the
+    `Sync/` half is phase 3's — model it here);
+  - every follow into or out of Castle typing one secret, for the new master; a follower's anchor locked under that
+    typed secret and under the outgoing key with its copied locks; a follower that sees a rotation in progress — a
+    previous key, or an id with no wrap — holds its re-key until the vault reads Standard or Castle;
   - every leave re-keying (Castle: both secrets; Standard: the passphrase typed or set new, the words typed or made
-    new);
+    new — and, in Standard, the new key under this Mac's existing own Apple key, minting nothing);
   - a different library's landing: a fresh key, an empty history, one secret with the other typed or made new — or
     none for a Standard pair through a readable Apple key — and this Mac's own Apple key in Standard; a synced pair's
     made-new secret becoming the account's at Resume Sync;
   - Send Library, with no sharing note;
-  - the key doors re-wrapping the current key only, the new-words door saying the anchor keeps the old words;
+  - the key doors re-wrapping the current key only, and every door that replaces a secret while an anchor exists
+    carrying its sentence (design §3.9) in its plan's Done;
   - Re-link's library arm: a fresh own Apple key for every Standard key file whose own key can't be read here;
 - the Apple-key rules of §3.5:
   - names by id; one per library per Mac, one per account, the vault only;
   - one minter; the vault's CAS keeps one account key; a device waits only for silent setup;
-  - on entering Castle, this Mac's own key retired and recorded; the account's once its rotation completes; a follower
-    records the account's and its own, never the old shared key; a replacement Mac takes over its predecessor's;
+  - on entering Castle, every key this Mac's section lists as its own for the library retired and recorded, with no
+    sheet; the account's once its rotation completes; a follower records the account's and its own, never the old
+    shared key; a replacement Mac takes over every own id its predecessor's section lists;
   - delete on sight, by recorded id only;
   - fresh keys on leaving;
   - Re-link mints a fresh account key, never re-landing under the old shared key;
@@ -310,7 +343,8 @@ The design's §4.1, whole:
   - file systems with copies, Time Machine rollback and container deletion;
   - a vault with CAS, the key proof and the rotation fields;
 - **an older build as an actor** on any device: it reads and mints only the old shared key, writes its wraps under it,
-  and its Re-link re-lands the account's vault copy under it;
+  and its Re-link re-lands the account's vault copy under it; it reads the vault's mode from the Apple wrap alone, and
+  completes any rotation it finds, carrying the vault's other fields — `apple_key_id` among them — through;
 - real key files and wraps, with test-speed KDF parameters (the existing test descriptors), and stand-in library
   files keyed by their key fingerprint and carrying their record.
 
@@ -382,16 +416,30 @@ Each is a named test:
 - leaving Castle, local and synced, with followers typing the passphrase and typing the words: the anchor written
   first; every copy from before the leave opening with the passphrase or the words and through nothing Apple-reachable;
   the Apple account opening the library and the copies made after (promise 13); a crash at every step, on Touch ID and
-  on Always ask;
+  on Always ask — past the rotation's first write, a resume, never a roll-back;
+- a follower reaching the head first during a leave: it walks and re-encrypts but never clears the previous key while
+  the vault's id stands with no wrap, and the account never reads Castle in between;
+- an older build completing a leave's rotation: the vault still reads a leave in progress, followers keep holding, and
+  a device that reads the named key adds the wrap;
+- an acting device lost mid-way through a Castle Replace All Keys: finished by anyone, with no Apple copy, the account
+  never lowered;
 - a follow into Standard with the follower's iCloud Keychain off: it follows on the typed secret;
 - Castle → Standard → Castle: the anchor folds back, and every older copy opens with nothing more typed;
-- after a leave, a changed passphrase and new words — on this device and on another device of the account: copies
-  from before the leave still opening with the leave day's passphrase or words everywhere, the day named, the
-  new-words door having said so;
+- after a leave, a changed passphrase, new words and a reset forgotten passphrase — on this device and on another
+  device of the account: copies from before the leave still opening with the leave day's passphrase or words
+  everywhere, the day named, each door having said its sentence (the reset road naming the words);
+- the passphrase changed during Castle on another device, which then leaves Castle: a follower that never had the new
+  passphrase typed follows typing it, and its anchor opens with it;
+- a Standard library that leaves its account, is backed up, then enters Castle: no copy from before the leave opens
+  through anything Apple-reachable, every own key retired; and Re-link's library arm, then Use Castle: both own keys
+  retired;
+- a Mac that switched Apple ID, with Standard copies under its former Apple ID's key, then entering Castle: the door
+  names them, and their *Opens with* line says the former account still opens them;
 - an Always-ask follower relocked after the rotation, and a words-typed follower: each anchor opening with what opened
   that device; a follow after an older build's leave: the master's road left out;
-- a follower meeting a rotation in progress: it holds its re-key until the completing write; an acting device lost
-  mid-rotation, finished by another device at a press;
+- a follower meeting a rotation in progress: it holds its re-key, its rotation-window keys the Castle way, until the
+  completing write; an acting device lost mid-rotation, finished by another device at a press that names the leave
+  and waits for the named key;
 - a Castle library joining a Standard account whose passphrase differs: the anchor keeping the secrets of its day;
 - this library's own Castle-era copy restored after a leave: ours by the family tree, opening with the passphrase or
   words, taking the Standard mode, with no raise;
@@ -411,6 +459,9 @@ Each is a named test:
 - the lid closed at Castle entry;
 - a biometry change, then the re-arm question; and the stored hash moving with nothing changed: the button stays, a
   press opens, nothing is asked;
+- both homes rolled back past a switch to Always ask, with a finger enrolled since: the restored choice says Touch ID,
+  no item exists, nothing is asked, and Always ask is recorded quietly;
+- a replacement Mac's first open: it starts on Always ask, and Touch ID comes on only from Settings;
 - her signed-in/out/other-account sequence (the design's §3.8 walk);
 - a Castle copy from another Mac into a Standard library (it raises, never lowers);
 - a copy made before this change, of another library, Standard with no passphrase: it lands in Standard, never
@@ -420,8 +471,9 @@ Each is a named test:
 - a living Mac cloned onto new hardware (Quick Start, Migration Assistant, or a Time Machine restore to another Mac),
   the original still in use: either entering Castle costs the other its Apple
   road, which Re-link's library arm heals, and nothing stops opening;
-- a silently-joined device leaving Castle by its follow: its anchor opens with the words only, and its copies'
-  *Opens with* line says so;
+- a follower that only ever had the words typed — a silently-joined device that then typed the words at its follows
+  among them — leaving Castle by its follow: its anchor opens with the words, and its copies' *Opens with* line says
+  the twelve words, not the passphrase;
 - the memory item deleted alone on an Always-ask Castle Mac with an enrolled finger: nothing changes;
 - a Standard library's own Apple key lost (iCloud Keychain reset, a switch of Apple ID): Re-link's library arm, then
   promise 3 settles — local-only too;
@@ -436,7 +488,9 @@ DEBUG only) and **must fail**. That is the red-on-old for new code. Record the f
 include the design's — a plan the record doesn't name, the two homes of this Mac's facts, the device section's
 hardware marker, no repair making a Touch ID item, gifts only for this Mac's copies, the re-key at every crossing, the
 anchor written first and carried by every re-key, the family tree's own-line check and its two homes, the door-time
-vault check, the export-off step, and Castle-kind custody through a leave's rotation — and the old shared key's: the move keeping the
+vault check, the export-off step, Castle-kind custody through a leave's rotation on every device, the leave's id
+gating its completion, a follower's anchor locked under the secret typed at its follow, every own Apple key retired
+at entering Castle, and no re-arm question without an existing item — and the old shared key's: the move keeping the
 old wrap, the retirement's re-run of the moves, delete on sight by recorded id only, and the fresh pair after the
 move.
 
@@ -475,8 +529,8 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
 - The design's §1 gains any new ruling.
 - QUESTIONS gets the PROVISIONAL calls.
 - **The next phase's plan, `notes/plans/vx-306-castle-open-road.md`, is written just-in-time** with its kickoff
-  message — every phase's new code compiled into Debug builds only until her release switch, which phase 2's plan
-  names, with a check that a Release build still runs today's road (design §5, her rulings).
+  message — every phase's new code on in Debug builds only until her release switch (VX-329), with a check that a
+  Release build still runs today's road (design §5, her rulings).
 - The handoff `notes/handoffs/vx-305-handoff.md` comes last, with her checklist at the top.
 - The PR merges to `main` as a merge commit, at her word.
 - MOBILE PARITY: "nothing mobile-visible" (headless phase).

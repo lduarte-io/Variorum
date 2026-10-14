@@ -1,6 +1,8 @@
 # VX-266 — Castle & backups before launch: the design and the plan
 
-**Status: DESIGN RULED, 2026-10-13; revised the same night at her round-2 ruling (§1). Nothing built yet.** This file
+**Status: DESIGN RULED, 2026-10-13; revised at her round-2 ruling the same night and her round-3 rulings on
+2026-10-14 (§1), then for the late extra read of round 3, with calls made provisionally overnight at her word (§9).
+Nothing built yet.** This file
 is the binding design for the effort ("Castle & backups before launch", flagship VX-266) and its phase map. Each phase
 gets its own just-in-time execution plan beside this file, with a kickoff message at its top (the split-phase rule,
 `notes/PhaseSizingGuidance.md` §3). The first one is already written: `notes/plans/vx-305-castle-core.md`.
@@ -21,8 +23,10 @@ file follows the second opinion as she ruled it.
 (`notes/plans/vx-266/first-designer-review.md`), then by cold readers: round 1 (`design-cold-read-r1.md`), and round 2,
 read by a Fable reviewer and an Opus reviewer in parallel (`design-cold-read-r2-fable.md`, and
 `design-cold-read-r2-opus.md` with its answer to her question on improving the system). Round 2's findings, the
-reviewers' agreement and her ruling reshaped §3 and §4. Every finding and its disposition is in those files and in
-`design-cold-read-r2.md`.
+reviewers' agreement and her ruling reshaped §3 and §4. Round 3 was read by an Opus reviewer
+(`design-cold-read-r3-opus.md`); the Fable reviewer started beside it finished late, on Opus, as an extra read that
+isn't a ladder round (`design-cold-read-r3-extra.md`). Every finding and its disposition is in those files and in
+`design-cold-read-r2.md` and `design-cold-read-r3.md`, each settled with the round-2 Fable reviewer.
 
 ---
 
@@ -64,6 +68,8 @@ At #216, in her review of both documents, and after each review round:
     her other devices, she said: *"i think that it's probably good to leave it fixed on the day you left ... i think
     that's fine that the anchor doesn't follow your pasphrase and words - c opies before you left castle open with the
     passphrase you had when you lefti s solid. leaving castle doesn't make words so your current is good - solid."*
+    On a device that follows out of Castle, her sentence holds because that device's anchor is locked at its birth
+    with the secret typed at its follow as well (§3.4) — a call made provisionally overnight, for her confirm (§9).
   - Asked whether the design ever changes a backup's keys behind her back, she was told no: a backup's locks are
     written once, with it, and never touched again, and a key changes only at an act she takes (§3.4, §3.12).
 - **VX-209 — the mode belongs to the library; opening a copy never lowers it.** This reverses her earlier yes to the
@@ -181,6 +187,9 @@ its phase.
    - *A retirement made while this Mac's iCloud Keychain is off* holds on this Mac at once, and everywhere once iCloud
      Keychain carries the deletion (§3.5).
    - *A Markdown export you turn back on in Castle* is plain text, by your choice at that door (§3.9).
+   - *Copies locked under an Apple key in an Apple account this Mac has left* — made in Standard before the Mac
+     switched Apple ID — open through that former account for as long as its iCloud Keychain keeps the key; this Mac
+     can't delete it there (§3.5). Their *Opens with* line says so, and they can be deleted.
 3. **In Standard, your Apple account opens your library and every copy Variorum made of it since it came into
    Standard** — created there, left Castle, or arrived on this Mac — through iCloud Keychain, when it's on, which
    Variorum can't see; and so does anyone who can sign in to this Mac. Said on the Standard card.
@@ -189,7 +198,9 @@ its phase.
 5. **Leaving Castle gives your Apple account your library from then on: the library itself, with everything you wrote
    in it, and every copy made after you leave. No copy made before you left opens through it** — those open with the
    passphrase or the twelve words you had on the day you left. Leaving never makes new words, so that day's paper keeps
-   working. Said in those words on every road into Standard: the leave screen, joining or moving to an account in
+   working. Your other devices each follow with one secret typed, so their own copies from before open with the words,
+   and with the passphrase when it was the one typed there; each copy's *Opens with* line says which, and from which
+   day (§3.4). Said in those words on every road into Standard: the leave screen, joining or moving to an account in
    Standard, and the typed step of a follow.
 6. **Signing out never changes how your library is protected.** Signing in to a different account changes nothing
    until you choose to move the library there.
@@ -207,7 +218,7 @@ its phase.
 | **The library identity for exports** — the library ID alone | a small plain table the plaintext export keeps (the derived-tables precedent: local, never synced, kept by the export) | the executor | yes, including in plaintext exports |
 | **The key file, format 3** — library ID; the current key's fingerprint and epoch; the current key wrapped under P (with its KDF descriptor), W, M (when bound) and, for a Standard key only, A — this Mac's own Apple key for the library (each Apple wrap names its key's id; on stores from before this change the old shared key's wrap rides beside it until that key is retired, §3.5); **the history** — the older keys the current key takes (§3.4), each wrapped directly under it; **the Castle anchor**, after a leave — the keys from before the leave, sealed under one anchor key that only the secrets of that day open, carried unchanged by every later re-key (§3.4); and, when bound, **that master wrapped under the twelve words**, copied from the vault's recovery wrap (§3.5a) | **one** file beside the library, `variorum-library-keys.json` (a name older builds never read) — and, for each other library this Mac holds copies of whose newest copy is in Standard, this Mac's own key file for it in `Backups/<library8>/<mac8>/`: in the container, and beside this Mac's copies of it in the far folder (§3.5). Each backup pair carries a frozen copy written with it, never rewritten | the executor only | yes — as the pair's frozen copy |
 | **Custody items** — one Keychain item per library key, of the key's own kind for life: `silent` for a Standard key (`WhenUnlockedThisDeviceOnly`), `touchid` for a Castle key (`.biometryCurrentSet`), none for a Castle key under Always ask. An item goes when its key is replaced; nothing moves a key from one kind of item to the other | device keychain, service `io.lduarte.Variorum.library-key`, account `<scope>-<fingerprint16>-<class>` | the executor only | no |
-| **Sync keys** — M, C, J for the bound account | device keychain, one item per account, `silent` or `touchid` (none under Always ask: session memory) — service `io.lduarte.Variorum.sync-keys`, account `<scope>-<accountID>-<class>` | the executor only | no |
+| **Sync keys** — M, C, J for the bound account, **held by what they can reach**: the Castle way (`touchid`, or session memory under Always ask) while they reach a Castle-era key — in Castle, and through a leave's rotation until the previous corpus key leaves the vault — and `silent` otherwise (§3.9). Kind for life is a library key's rule; a sync key's custody follows its reach | device keychain, one item per account, `silent` or `touchid` (none under Always ask: session memory) — service `io.lduarte.Variorum.sync-keys`, account `<scope>-<accountID>-<class>` | the executor only | no |
 | **What this Mac remembers** — per library ID: its location (scope), current fingerprint and epoch, mode and account last confirmed, **the device identity** (`<mac8>` is its first eight characters) with a hardware marker that mints a new identity when the item turns up on other hardware (§3.13) — both also kept in this Mac's device section, so a Mac whose memory item is gone finds its own section by its hardware (§3.6) — the biometry state hash when its Touch ID item was made (a hint for the lobby, §3.10), the vault facts today's key file caches (the KDF descriptor, corpus key id and recovery-wrap digest), nudge dismissals, a mirror of the key file's wraps, history and anchor and of the family tree, and **the second home of this Mac's device section** (the same fields and version, §3.6) | one non-secret Keychain item per library ID (device-only), service `io.lduarte.Variorum.memory`, account `<scope>-<libraryID>`; **sealed** (§3.6) | the executor | no |
 | **"A library lived here"** | a marker file in the app's own container beside the slot | the executor | no — deleting the container starts fresh |
 | **Plans** (one per library at a time) | `variorum-plan.json` beside the library, excluded from backups (`NSURLIsExcludedFromBackupKey`), **sealed and named by the act in flight** (§3.6), never holding a secret | the executor only | no |
@@ -296,20 +307,24 @@ its phase.
   is locked only with what opened that device's library on the day it left Castle, never with anything the Apple
   account or the login password reaches:
   - **on the device that presses Use Standard,** under the passphrase and the words typed there;
-  - **on a device that follows out of Castle,** under the outgoing Castle key itself, with that key's own locks from
-    the device's key file copied beside it: the passphrase or words that device held it under, and the Castle-era
-    master with its words copy (§3.5a). The follow needs no secret for this, because the library is open and the
-    outgoing key is in hand. If the vault's master is still the Castle-era one — an older build left without changing
-    it, and put it under the old shared Apple key — the master's road is left out. A device that joined sync without
-    typing a secret held its key under the master alone (§3.5a), so its anchor opens with the words only, and its
-    copies' *Opens with* line says the twelve words, not the passphrase.
+  - **on a device that follows out of Castle,** under the secret typed at its follow — it opened the vault, so it is
+    current — and under the outgoing Castle key itself, with that key's own locks from the device's key file copied
+    beside it: the passphrase or words that device held it under, and the Castle-era master with its words copy
+    (§3.5a). Both are birth-time locks, made with what's in hand as the anchor is sealed: the secret just typed, and
+    the open library's own key. If the vault's master is still the Castle-era one — an older build left without
+    changing it, and put it under the old shared Apple key — the master's road is left out. So a follower's anchor
+    opens with the secret typed at its follow and with whatever opened that device that day. Where none of those is
+    the passphrase — a device that only ever had the words typed — its copies' *Opens with* line says the twelve
+    words, not the passphrase.
 
   It lives in the key file, so it rides frozen into every later backup pair, and every later re-key carries it
   unchanged. There is one at a time.
-- **It keeps the secrets of its day** (her ruling, §1). The anchor is locked once, at the leave, and never re-locked:
-  copies from before you left open with the passphrase or the words you had that day. Leaving never makes new words,
-  so that day's paper keeps opening them. When you later make new words while an anchor exists, that door says so:
-  *"Copies from before 12 October still open with the words you're replacing — keep that paper."*
+- **It keeps the secrets of its day** (her ruling, §1). The anchor is locked once, when it's written — at the leave,
+  or on a follower at its follow — and never re-locked: copies from before you left open with the passphrase or the
+  words you had that day. Leaving never makes new words, so that day's paper keeps opening them. Locking a follower's
+  anchor under the secret typed at its follow is part of writing it, not a later re-lock: no door ever re-locks an
+  anchor after it's written. Every door that replaces a secret while an anchor exists says what still opens the
+  copies from before the leave (§3.9's key doors).
 - **How it's held:** the history wraps each key it takes directly under the current key. The executor unwraps the
   old history with the old key, which is in hand during any re-key, and re-wraps what the new key takes.
 - **It runs backwards only.** A key opens older keys, never newer ones, so an old key opens nothing written after it.
@@ -333,10 +348,11 @@ its phase.
   synchronizable, so a replacement Mac on the same Apple account recovers through them: "this Mac's own" means minted
   and named by it.
 - **One minter.** Apple keys are minted only by a deliberate act or the migration, always under a fresh id:
-  - for a library: creating it in Standard; leaving Castle, by the act or its follow; leaving an account in Standard;
-    landing a different library in Standard; setting up sync or joining an account in Standard (this device's own key
-    for its key file, if it has none); Re-link's library arm, for a Standard key file whose own Apple key can't be read
-    here (§3.9); and the migration's keys of its own (below);
+  - for a library: creating it in Standard; leaving Castle, by the act or its follow; landing a different library in
+    Standard; setting up sync or joining an account in Standard (this device's own key for its key file, if it has
+    none); Re-link's library arm, for a Standard key file whose own Apple key can't be read here (§3.9); and the
+    migration's keys of its own (below). Leaving an account in Standard mints nothing: the account's key never locks
+    the library, so its new library key goes under this Mac's existing own key, as Replace All Keys' does;
   - for an account: sync setup in Standard; Use Standard on a synced library; Re-link; and Replace All Keys on an
     account still on the old shared key, which re-links first (§3.9, point 7 below). If two devices mint for one
     account, the vault's CAS keeps one, and the other device deletes the key it minted and drops its wrap.
@@ -348,23 +364,31 @@ its phase.
   - Two devices therefore never create the same item. This replaces the shared-name mint guards (F2/F3) and corner
     34's device-own key with one rule that can't race: every device already has its own. Its convergence pins live in
     phase 3.
-- **Entering Castle retires this Mac's own Apple key for the library.** After the switch commits it's deleted, and its
-  id recorded as retired in this Mac's device section. The account's key goes when the account itself enters Castle:
-  its rotation rewrites the vault with no Apple copy, and once the rotation completes the acting device deletes the key
-  and records it as retired. A device that follows records the account's key and its own as retired, and deletes its
+- **Entering Castle retires every Apple key of this Mac's own for the library** — every id this Mac's device section
+  lists as its own for the library and not yet retired, not only the one the live key file names. A Mac can hold
+  more than one: Re-link's library arm mints a new one beside a key it couldn't read, and a replacement Mac adopts
+  its predecessor's. After the switch commits each is deleted, with no sheet, and its id recorded as retired in this
+  Mac's device section; a key this Mac can't reach is deleted on sight if it ever comes back. One it can never reach —
+  left in an Apple account this Mac no longer uses — can't be deleted from here: copies locked under it are §3.1 rule
+  2's last stated exception, and Use Castle's door names them. The account's key goes when the account itself enters
+  Castle: its rotation rewrites the vault with no Apple copy, and once the rotation completes the acting device
+  deletes the key and records it as retired. A device that follows records the account's key and its own as retired, and deletes its
   own. Deletes of synchronizable items reach every device, and app-made items have no recovery; a delete made while
   this Mac's iCloud Keychain is off reaches only this Mac until it's on again, when delete on sight finishes it (§8).
 - **A replacement Mac takes over its predecessor's keys.** A new device identity on new hardware (§3.13) adopts, for
-  each library it holds, the Apple key ids its live key file's wraps name as its own, and every id any device section
-  of the record lists as retired — a retired key is dead everywhere. So entering Castle there retires the
-  predecessor's own key too, and delete on sight keeps working.
+  each library it holds, the Apple key ids its live key file's wraps name as its own, every other id its predecessor's
+  device section lists as its own (the predecessor is the identity named by the memory item it came with), and every
+  id any device section of the record lists as retired, since a retired key is dead everywhere. So entering Castle
+  there retires all of the predecessor's own keys too, and delete on sight keeps working.
 - **Delete on sight, by recorded id.** In Castle, a key whose id this Mac's device section lists as retired is deleted
   again if it reappears — a key deleted while sync was off can come back when sync does. Nothing is ever deleted for
   belonging to "this library" by ID: another Mac's copy of the same library may be in Standard under a key of its own.
 - **Leaving Castle mints fresh keys** — this Mac's own for the new library key and, synced, a fresh account key for
-  the new master, which joins the vault only in the write that completes the rotation (§3.9), so the vault never holds a Castle-era
-  corpus key under anything Apple-reachable. Every other device types one secret at its follow (§3.9) and needs no
-  Apple key to follow.
+  the new master. The rotation's first vault write names that account key's id in the vault's existing
+  `apple_key_id` field with no wrap beside it, so every device can read the rotation as a leave; the wrap itself
+  joins the vault only in the write that completes the rotation (§3.9), so the vault never holds a Castle-era corpus
+  key under anything Apple-reachable. Every other device types one secret at its follow (§3.9) and needs no Apple key
+  to follow.
 - **The old shared key — today's `<scope>-apple-key`.** There is one per Apple account and scope, shared by every
   library and account on it, on every device. Deleting it deletes it everywhere, with no recovery. So:
   1. **This build never writes under it.** It reads it only to move things off it, and the route finder counts it as
@@ -490,8 +514,9 @@ open its file. So:
 - **The limit, stated** (§8): in Castle, someone who rolls back both homes at once — the library file and the memory
   item together, with the key file and the plan — returns this Mac's settings to that earlier state, and nothing local can
   tell it from the real one (a synced library's vault can). It never opens what was written before the rollback to
-  them: a rollback brings back no key they can use, and a Touch ID item made before their finger was enrolled stays
-  closed to it. What's written after it is protected as the restored state says.
+  them: a rollback brings back no key they can use, a Touch ID item made before their finger was enrolled stays
+  closed to it, and a rolled-back choice of Touch ID with no item behind it records Always ask quietly — no question
+  offers to make a new item (§3.10). What's written after it is protected as the restored state says.
 
 ### 3.7 Copies
 
@@ -550,8 +575,8 @@ open its file. So:
     says so. **Decision 33's asymmetry, stated:** a landing accepts one secret, because her
     guarantee is that either one lands it; raising your own library to Castle keeps both typed.
   - **A copy with no record** — any copy made before this change — has its mode worked out once with today's rules,
-    as the migration does (§3.13). An exposed-era Standard copy with no passphrase or words is never defaulted to
-    Castle.
+    as the migration does (§3.13), through the read-only legacy mode reader that outlives the switch (§3.15). An
+    exposed-era Standard copy with no passphrase or words is never defaulted to Castle.
   - **Send Library** writes the pair and says nothing about sharing: nothing is shared, since the other Mac lands it
     under a key of its own. Like any backup, the pair opens with its own locks.
   - **A plaintext export** carries its library ID. If it's the same library, it is encrypted under the current key
@@ -611,8 +636,9 @@ open its file. So:
 
 - **Use Castle.**
   - The door: the passphrase and the words typed (decision 33, kept); the floor warning; *Export a plain copy first*
-    offered; and, while the store still has the old shared key, its checks — a vault that names it stops the act
-    here — and its sheet (§3.5 point 4).
+    offered; any copies here locked under an Apple key this Mac can't delete — one left in an Apple account it no
+    longer uses — named, with what that means (§3.5); and, while the store still has the old shared key, its checks —
+    a vault that names it stops the act here — and its sheet (§3.5 point 4).
   - Synced: the rotation, exactly today's protocol, with VX-109's fix — `begin` takes the door's vault revision.
   - The new key: its custody item (a Touch ID item, made at this press, or none under Always ask), then the new key
     file (P, W, plus M when synced; the history taking every older key, the anchor folded in; no Apple wrap), then the
@@ -620,8 +646,8 @@ open its file. So:
   - Then what this Mac remembers. The old custody item, every silent item, the per-library-ID items the migration
     kept, the 13p escrow items, and the format-1/2 key files beside the library all go — each only once the history
     verifiably holds its key. **This device's scheduled Markdown export turns off, with one notice** (today's step,
-    kept). A fresh backup is made, and this Mac's own Apple key for the library is deleted and recorded as retired;
-    synced, the account's was deleted and recorded as retired when the rotation completed (§3.5).
+    kept). A fresh backup is made, and every Apple key of this Mac's own for the library is deleted and recorded as
+    retired; synced, the account's was deleted and recorded as retired when the rotation completed (§3.5).
   - Last, the old shared key is retired (§3.5).
 - **Use Standard** — a key change, like Use Castle's (her rulings, §1).
   - The door: your passphrase and your twelve words, typed — the words are never made new here, so the paper you have
@@ -630,15 +656,30 @@ open its file. So:
   - **The anchor first:** the outgoing Castle key and its whole history, sealed under the typed passphrase and words
     (§3.4), written into the current key file before any other step, and carried into the new one.
   - Synced: the rotation, as Use Castle's — a new master and sync key, your writing on the server re-encrypted, and the
-    vault rewritten with the new master under your passphrase and your words. Until the rotation completes, the new
-    sync keys and the previous corpus key stay in Castle-kind custody (a Touch ID item, or session memory under Always
-    ask), so no Castle-era key is ever within the login password's reach. **One write completes the rotation and adds
-    the account's fresh Apple key to the vault**, its previous-corpus-key window closed, so no Castle-era corpus key
-    ever sits under anything Apple-reachable; then the new sync keys move to a silent item, and the old ones' Touch ID
-    item goes. If this device never finishes, another device of the account finishes it at a press, minting the
-    account's key if this one's never arrived (the vault's CAS keeps one). A key the lost device minted that never
+    vault rewritten with the new master under your passphrase and your words. **The rotation's first write also names
+    the account's fresh Apple key** — minted at this press, in iCloud Keychain before the write — in the vault's
+    `apple_key_id`, with no wrap: the mark that this rotation is a leave. That write is the account's commit point, as
+    Use Castle's always was: past it a crash resumes, never rolls back.
+  - **How every device reads the vault's mode:** a wrap present — Standard; an id with no wrap — leaving Castle, in
+    progress; neither — Castle. Today's builds read only the wrap, so they see Castle until the wrap lands.
+  - **Sync keys are held by what they can reach** (§3.2). Until the previous corpus key leaves the vault, the new
+    master reaches a Castle-era key through it, so the new sync keys and the previous corpus key stay in Castle-kind
+    custody — the account's Touch ID sync item, made at this press and holding all three, or session memory under
+    Always ask — and no Castle-era key is ever within the login password's reach.
+  - **One write completes the leave:** it adds the account's Apple wrap of the new master under the key the vault
+    names, with the previous-corpus-key window closed — so no Castle-era corpus key ever sits under anything
+    Apple-reachable. Only a device that can read that named key makes it: this one, or another device of the account
+    once iCloud Keychain carries the key there. Other devices walk and re-encrypt, but never clear the previous key
+    while an id stands with no wrap. If an older build clears it first (it can: any enrolled device completes a
+    rotation today, and its write carries the id through untouched), the leave still reads as in progress, and the
+    completing write is then just the wrap. Once the window is closed, the new sync keys reach nothing Castle-era, so
+    they move to a silent item and the Touch ID item goes.
+  - **If this device never finishes,** another device of the account finishes it at a press that reads the vault's
+    id — *"Finish leaving Castle, started on [device] on [day]"*. It waits for the named key, and mints a fresh
+    account key only if that one never arrives (the vault's CAS keeps one). A key the lost device minted that never
     landed wraps nothing; if it ever surfaces in iCloud, it is left alone, as an older build's re-minted old key is
-    (§3.5 point 5). These are `Sync/` lines: Fable's, phase 3.
+    (§3.5 point 5). A rotation with no id is Use Castle's or a Castle Replace All Keys: any device completes it, and no
+    finisher ever adds an Apple copy to it. These are `Sync/` lines: Fable's, phase 3.
   - The new library key: its silent item, then the new key file (this Mac's fresh Apple key, P, W, plus the new master
     when synced; an empty history; the anchor), then the record written into the staged file, then the swap. Copies
     pause from the prepare to the swap.
@@ -649,21 +690,24 @@ open its file. So:
   - As today, on a plan that carries every fact a resume needs: "another device switched", the words rule (VX-107).
   - **Every follow into or out of Castle types one secret, once** — the passphrase or the words, through the vault.
     Until then the library opens on its current key and you can write; sync waits, with the banner. No such follow
-    waits on an Apple key. A device that sees the master replaced while the vault still carries a previous corpus key
-    — a rotation in progress — follows the keys but holds its own library's re-key until that one write settles the
-    account's mode. A keys-replaced follow in Castle types one secret too, since the new master is under only
-    the passphrase and the words. A keys-replaced follow in Standard reads the new master through the account's Apple
+    waits on an Apple key. A device that sees the master replaced while the vault reads a rotation in progress — a
+    previous corpus key standing, or an id with no wrap (a leave not yet complete) — follows the keys but holds its own
+    library's re-key until the vault reads Standard or Castle. While it holds, the keys it takes are held by what they
+    reach, as the acting device's are: in its Castle-kind custody while the previous corpus key stands. A
+    keys-replaced follow in Castle types one secret too, since the new master is under only the passphrase and the
+    words. A keys-replaced follow in Standard reads the new master through the account's Apple
     key, as today, or takes the passphrase or the words when that key can't be read here.
   - **A follower's new key file** is locked under the secret it typed and under the new master, with that master's
     words copy beside it (§3.5a) — so the words open it either way, and the passphrase directly when it was the one
     typed — plus, in Standard, this Mac's own fresh Apple key.
   - Into Castle: the new master from the vault; a new library key of Castle's kind (a Touch ID item made at this
-    press where this device's gate style says so, or none), its history taking every older key; this Mac's own Apple
-    key deleted and recorded as retired, with the account's; the scheduled Markdown export off, with one notice.
-  - Into Standard: the anchor first (§3.4 — under the outgoing Castle key, with that key's own locks from this
-    device's key file copied beside it); then a new library key of Standard's kind (its silent item, this Mac's own
-    fresh Apple key) with an empty history; the Castle key's Touch ID item goes with its key; rule 5's sentence at the
-    typed step.
+    press where this device's gate style says so, or none), its history taking every older key; every Apple key of
+    this Mac's own for the library deleted and recorded as retired, with the account's; the scheduled Markdown export
+    off, with one notice.
+  - Into Standard: the anchor first (§3.4 — under the secret just typed, and under the outgoing Castle key with that
+    key's own locks from this device's key file copied beside it); then a new library key of Standard's kind (its
+    silent item, this Mac's own fresh Apple key) with an empty history; the Castle key's Touch ID item goes with its
+    key; rule 5's sentence at the typed step.
   - Keys replaced, same mode: the history grows.
   - Typing the old passphrase after it was changed elsewhere is refused with the change named (VX-113, her #205
     ruling): *"Your passphrase was changed on [device] on [day] — enter the new one."*
@@ -672,8 +716,21 @@ open its file. So:
   §3.8's rules: every leave re-keys.
 - **The key doors:** change passphrase (verifying the current one) and new words (asking the passphrase). They re-wrap
   the current key and re-lock nothing else: the history needs no secret, and the anchor keeps the secrets of its day
-  (§3.4). When an anchor exists, the new-words door says so: *"Copies from before 12 October still open with the words
-  you're replacing — keep that paper."*
+  (§3.4).
+- **Every door that replaces a secret while an anchor exists says what still opens the copies from before the
+  leave** — one sentence, from the route finder, for this device's anchor and its day:
+  - every door that replaces the words — new words, Replace All Keys, a leave from an account, sync setup's choice to
+    make new words — *"Copies from before 12 October still open with the words you're replacing — keep that paper."*;
+  - change passphrase: *"Copies from before 12 October still open with the passphrase you're replacing, or that day's
+    words."*;
+  - Standard's reset road for a forgotten passphrase: *"Copies from before 12 October now open with that day's twelve
+    words — keep that paper."* It never points you at a passphrase you've told it you forgot;
+  - Use Castle that can't fold an anchor in, because the secrets typed at its door changed since that leave: the
+    anchor stays beside the history, unchanged, and the door says which secrets, of which day, still open the copies
+    it holds.
+
+  Where this device's anchor doesn't open with what the sentence names (§3.4's words-only devices), the route finder
+  says what does instead.
 - **Re-link your Apple account** (17m's door, for a Standard account whose Apple key no device can read — after an
   iCloud Keychain reset or a change of Apple ID): Use Standard's key step on an account that's already Standard — a
   fresh account key, minted at the press, landed under the vault's CAS. It never re-lands under the old shared key,
@@ -694,17 +751,22 @@ open its file. So:
 - **The choice is stored per device, in this Mac's facts** (§3.6): Touch ID or Always ask. Nothing acts on a momentary
   reading: a closed lid (`builtInSensorInaccessible`), a disconnected or unpaired keyboard, or a lockout takes the
   passphrase road for that one open and changes nothing.
-- **A device with no choice yet** — a landed library, a first follow into Castle, a new device identity — starts on
-  Touch ID where this Mac has an enrolled finger, the item made at that act's own press, and on Always ask otherwise;
-  its idle lock at the default, and its scheduled export off.
+- **A device with no choice yet** — a landed library, a first follow into Castle — starts on Touch ID where this Mac
+  has an enrolled finger, the item made at that act's own press, and on Always ask otherwise; its idle lock at the
+  default, and its scheduled export off. **A new device identity** (a replacement Mac, §3.13) has no act and so no
+  press: it starts on Always ask, and Touch ID comes on only when you turn it on in Settings, with the passphrase.
 - **The stored biometry state hash is a hint, never a verdict:** a macOS update can move it with no enrollment change.
   It's kept in what this Mac remembers when the item is made, and it only chooses which line to show after a press
   fails.
-- **When this device's choice is Touch ID but its item doesn't open** — a press fails because a biometry change
-  invalidated it, or the item was deleted, or the keychain was wiped — Variorum asks, after the passphrase opens the
-  library: *"Touch ID can't open Variorum on this Mac any more. Set it up again? Every finger enrolled on this Mac will
-  open it."* — one honest sentence, whatever the cause. It makes a new item only on yes; a no records
-  Always ask, at that press. No repair ever makes one.
+- **When a press fails against an item that exists** — a biometry change invalidated it — Variorum asks, after the
+  passphrase opens the library: *"Touch ID can't open Variorum on this Mac any more. Set it up again? Every finger
+  enrolled on this Mac will open it."* It makes a new item only on yes; a no records Always ask, at that press. No
+  repair ever makes one.
+- **When this device's choice is Touch ID but no item exists** — it was deleted, the keychain was wiped, or both of
+  this Mac's homes were rolled back past a switch to Always ask — nothing is asked. Always ask is recorded quietly,
+  the lobby's quiet line says Touch ID isn't set up for this library, and Touch ID comes back only from Settings, with
+  the passphrase. A question that appears by itself after an item vanished could be answered yes to a choice you had
+  undone, with someone else's finger enrolled (the rollback in §3.6); a press in Settings can't be steered that way.
 - **A Mac without Touch ID hardware:** the Castle switch says so, and Always ask is recorded only at your press.
 - **The lobby's Touch ID line and button follow the real road** (VX-310):
   - Whenever this scope has a Touch ID item for the library's current key, the **Unlock with Touch ID button is
@@ -714,7 +776,7 @@ open its file. So:
   - With no item, or no finger enrolled on this Mac, there is no button, and one quiet line says why: Touch ID isn't
     set up here, or isn't set up for this library.
   - A press that fails because the item no longer opens shows *Touch ID changed since you set it up — unlock with the
-    passphrase*, and the re-arm question follows the unlock.
+    passphrase*, and the re-arm question follows the unlock. With no item there's no press, so no question.
   - Before unlock, the lobby reads what this Mac remembers as a display hint only; it decides nothing.
   - This is her pick read to its words — *the button whenever a Touch ID item exists* (§1); the "changed" line waits
     for a press because the stored hash can't tell a changed finger from a macOS update.
@@ -749,7 +811,7 @@ open its file. So:
 
 - the cryptographic primitives;
 - the vault protocol: the key proof and challenge, CAS, the rotation seq, version-neutral re-encryption, one rotation
-  at a time;
+  at a time — a leave's id with no wrap (§3.9) is this build's reading of an existing field, with no server change;
 - decision 30 (a Standard Replace All Keys stays under the account's Apple key — re-linked first for an account still
   on the old shared key, §3.5);
 - decision 33 (both secrets typed for the rotation doors), with two stated narrowings: a landing accepts one secret
@@ -770,9 +832,11 @@ open its file. So:
 It runs once, at first unlock on the new build, **as a plan** — and on a Release build only once she has turned the
 new system on at release (§5):
 
-1. **Finish anything in flight with today's runner.** VX-235's stuck marker is cleared on proof that the switch never
-   happened: the library still opens under its old key, and the new key file never landed.
-2. **Work out the mode once with today's rules.**
+1. **Finish anything in flight with today's runner** — its finish path, kept read-and-finish-only for one release
+   after the switch (§3.15). VX-235's stuck marker is cleared on proof that the switch never happened: the library
+   still opens under its old key, and the new key file never landed.
+2. **Work out the mode once with today's rules** — the legacy mode reader (§3.15), a pure function of today's
+   inputs.
    - A synced library with the vault in reach takes the vault's word; without it, the mode is recorded as *not yet
      confirmed*.
    - Corner 45's ambiguous case records Castle, not yet confirmed, with a one-time notice — carrying the floor sentence
@@ -794,8 +858,8 @@ new system on at release (§5):
 6. **Write the format-3 key file** and fold every reachable older key into the history:
    - keys from the old key files, through the old shared Apple key when it is readable;
    - keys reachable through the passphrase, **typed once if needed**;
-   - custody;
-   - the 13p escrow items (a raw key in iCloud Keychain, named by store id).
+   - custody — today's items named by library ID, read by the legacy readers (§3.15);
+   - the 13p escrow items (a raw key in iCloud Keychain, named by store id), read the same way.
 
    Old key files stay — for one release, and in any case until the history verifiably holds their key. A key the fold
    couldn't reach (say, one under a passphrase from long ago) keeps its file: it's that copy's only road. The 13p
@@ -829,16 +893,20 @@ It is `Sync/` work: Fable writes it, under a convergence pin, with its own SyncS
 ### 3.15 What gets deleted (her ruling: *"I'm fine getting rid of each of those already built things"*)
 
 **When:** today's code stays alive on main until her release switch, because Release builds keep running it until then
-(§5). So everything below is deleted at that switch, in the same change that turns the new system on — never phase by
-phase. Each phase's plan says which of today's writers its new code replaces, so the switch's change can list them all.
+(§5). So nothing below is deleted phase by phase: it goes at that switch, in the same change that turns the new system
+on (VX-329). Each phase's plan says which of today's writers its new code replaces, so the switch's change can list
+them all.
 
-- corner 45 and `RawKeyCustody`;
-- `Posture.derive`'s five-input derivation and the 13p legacy read-through, after migration;
+**What dies at the switch — every deciding and writing role of today's code:**
+
+- corner 45 and `RawKeyCustody` as deciders;
+- `Posture.derive` as the app's decision, and the 13p legacy read-through as a road the app opens through;
 - every reading that writes: `effectiveGate`'s Apple landing, `landCustody`'s Keychain writes and
   `CustodyCollisionRule`, `ensuredEnvelope`'s set-aside and new ID, and the item read that writes key files;
-- custody named by library ID;
+- custody named by library ID, as a place anything is written or decided;
 - several key files per folder and the newest-modified rule;
-- the in-file `RotationMarker` (`sync_state.rekey_in_progress`) and the `switchPending` / `thisDeviceOnly` defaults;
+- the in-file `RotationMarker` (`sync_state.rekey_in_progress`) as a live marker, and the `switchPending` /
+  `thisDeviceOnly` defaults;
 - the five definitions of "enrolled";
 - the session-stamped owner;
 - Castle settings in UserDefaults;
@@ -852,6 +920,18 @@ phase. Each phase's plan says which of today's writers its new code replaces, so
 - the confirm's "leaving Castle" line and the guide's older-copy warning;
 - the Finder-revealing "Restore from a Backup";
 - the identity-only silent sync item.
+
+**What stays, as read-only legacy readers in the core** — because the migration runs after the switch ships, at each
+store's next unlock, and copies made before this change exist forever:
+
+- **today's mode rule**, as one pure function of today's inputs (`Posture.derive`'s inputs and corner 45's test): the
+  migration's step 2 calls it once per store, and opening a copy with no record calls it for as long as such copies
+  exist (§3.7). It decides nothing else and writes nothing;
+- **the fold's reads** of today's per-library-ID custody items and the 13p escrow items (§3.13 step 6), reading only;
+- **the `RotationMarker` read and today's runner's finish path**, so the migration's step 1 can finish an act a
+  crash left in flight on the last old build — kept for one release after the switch, then deleted.
+
+The phase-1 plan's legacy readers (formats 1 and 2, and a copy with no record worked out by today's rules) are these.
 
 ---
 
@@ -888,7 +968,8 @@ A headless world, run under `swift test`. It contains:
 - turn iCloud Keychain off and on; switch Apple ID; wipe a keychain; replace a Mac;
 - crash at any step of any act;
 - **run an older build on a device:** it reads and mints only the old shared key, writes its wraps under it, and its
-  Re-link re-lands the account's vault copy under it.
+  Re-link re-lands the account's vault copy under it; it reads the vault's mode from the Apple wrap alone, and
+  completes any rotation it finds, carrying the vault's other fields through.
 
 **The adversary's actions** are in it too, all with the login password:
 
@@ -983,18 +1064,33 @@ retired-key clause, 3 and 7 once the world settles (propagation done, followers 
 - **leaving Castle:** the anchor is written first; every copy from before the leave opens with the passphrase or the
   words of the leave day and through nothing Apple-reachable; the Apple account opens the library and the copies made
   after; synced and local, with followers typing the passphrase, and the words — an Always-ask follower relocked
-  after the rotation among them — each follower's anchor opening with what opened that device that day; a crash at
-  every step, on Touch ID and on Always ask; a follower that sees the rotation still in progress holds its re-key
-  until the one completing write; an acting device lost mid-rotation, finished by another device at a press;
+  after the rotation among them — each follower's anchor opening with the secret typed at its follow and with what
+  opened that device that day; a crash at every step, on Touch ID and on Always ask; a follower that sees the rotation
+  still in progress holds its re-key, its rotation-window keys in Castle-kind custody, until the one completing write;
+  **a follower reaching the head first**, which walks and re-encrypts but never clears the previous key while the
+  vault's id stands with no wrap, so the account never reads Castle in between; **an older build completing the
+  leave's rotation**: the vault still reads a leave in progress, followers keep holding, and a device that reads the
+  named key adds the wrap; an acting device lost mid-rotation, finished by another device at a press that names the
+  leave, waiting for the named key and minting only if it never arrives; **an acting device lost mid-way through a
+  Castle Replace All Keys**: finished with no Apple copy, the account never lowered;
 - **a follow after an older build's leave** (no change of keys, the master under the old shared key): the follower's
   anchor leaves the master's road out, and nothing this build writes is Apple-reachable;
 - **a follow into Standard with that device's iCloud Keychain off:** it follows on the typed secret, and promises 2, 7
   and 13 hold;
 - **Castle → Standard → Castle:** the second Use Castle folds the anchor back in, and every copy from both Castle
   stretches and before opens with nothing more typed;
-- **after a leave, change the passphrase and make new words — on this device, and on another device of the account:**
-  copies from before the leave still open with the leave day's passphrase or words on every device; the route finder
-  names the day, and the new-words door said so;
+- **after a leave, change the passphrase and make new words — on this device, and on another device of the account —
+  and reset a forgotten passphrase:** copies from before the leave still open with the leave day's passphrase or words
+  on every device; the route finder names the day, and each door said its sentence (§3.9) — the reset road naming the
+  words, never the forgotten passphrase;
+- **the passphrase changed during Castle on another device, which then left Castle:** a follower that never had the
+  new passphrase typed follows out typing it, and its anchor opens with it; **a follower that typed the words:** its
+  copies' *Opens with* line says the twelve words;
+- **a Standard library leaves its account, is backed up, then enters Castle:** no copy from before the leave opens
+  through anything Apple-reachable — every Apple key of this Mac's own for the library retired, the one minted before
+  the leave included; and **Re-link's library arm, then Use Castle:** both own keys retired;
+- **a Mac that switched Apple ID** with Standard copies under its former Apple ID's key, then enters Castle: the door
+  names those copies, and their *Opens with* line says the former account still opens them;
 - **this library's own Castle-era copy, restored after a leave:** the family tree knows it; it opens with the
   passphrase or words, takes the Standard mode, and the confirm says so — no raise, no "made on another Mac";
 - **one library on two Macs from before this change:** the stated exception holds, and the retirement sheet names the
@@ -1028,6 +1124,9 @@ retired-key clause, 3 and 7 once the world settles (propagation done, followers 
   Re-link's library arm, and nothing stops opening;
 - **the memory item deleted alone** on an Always-ask Castle Mac where a finger has been enrolled: the Mac finds its own
   device section by its hardware, and nothing changes — no Touch ID item, no question;
+- **both homes rolled back past a switch to Always ask,** with a finger enrolled since: the restored choice says Touch
+  ID, no item exists, nothing is asked, and Always ask is recorded quietly;
+- **a replacement Mac's first open:** it starts on Always ask, and Touch ID comes on only from Settings;
 - **a Standard library's own Apple key lost** (iCloud Keychain reset, or a switch of Apple ID): the assessment offers
   Re-link's library arm, and after it promise 3 settles — for a local-only library too;
 - **today's Standard-waiting and exposed libraries through the migration:** each current key takes the mode step 2
@@ -1039,9 +1138,11 @@ retired-key clause, 3 and 7 once the world settles (propagation done, followers 
 
 Each is shown to **fail** when its guard is removed from the new code, and to pass with it. The guards include a plan
 the record doesn't name, the two homes of this Mac's facts, the device section's hardware marker, no repair making a
-Touch ID item, gifts only for this Mac's copies, the re-key at every crossing, the anchor written first and carried by
-every re-key, the family tree's own-line check and its two homes, the door-time vault check, the export-off step, and
-Castle-kind custody through a leave's rotation.
+Touch ID item, no re-arm question without an existing item, gifts only for this Mac's copies, the re-key at every
+crossing, the anchor written first and carried by every re-key, a follower's anchor locked under the secret typed at
+its follow, the family tree's own-line check and its two homes, the door-time vault check, the export-off step,
+Castle-kind custody through a leave's rotation on every device, the leave's id gating its completion, and every own
+Apple key retired at entering Castle.
 
 ### 4.2 The gates the model can't reach
 
@@ -1099,36 +1200,59 @@ The cast, in every phase:
 | phase | ticket | what | acceptance units and evidence | members |
 |---|---|---|---|---|
 | **1 — the headless core** | VX-305 | `Sources/VariorumCore/Protection/`: the record with its family tree and device sections, key file v3 with the history and the anchor, what the Mac remembers and its seals, the custody/Apple-key/vault interfaces, `assess`, the executor and sealed plans, the catalog and route finder with attribution and retention, and §4.1's scenario world | **one phase-sized unit** (the posture model), built in four sessions (model · assess and routes · executor · the world). Evidence: the generated runs green across seeds; every fixed scenario green; every mutation pin red without its guard. **GO / NO-GO at close** — a quality gate; her word is "go even if it delays launch" | VX-228 (corner 45's model), VX-235 (plans), VX-263 (the history, the anchor, the family tree), VX-302 (attribution), VX-313 (this Mac's facts in two homes, sealed plans) |
-| **2 — the open road and the migration** | VX-306 | the route and lobby on roads; per-key items, what the Mac remembers, the record and key file v3 going live; the migration (§3.13); the phone builds and opens — **compiled into Debug builds only, like every phase's new code, until her release switch** (§5 below) | two units (the open road · the migration). Evidence: the migration drill per §3.13 shape; the Keychain leg on a throwaway scope; the dev store under a held claim; her stores rehearsed on byte-copies; the restore drill | VX-228, VX-235 (the migration clears today's stuck markers), VX-209 (the open rule's road), VX-263 (the fold), VX-301 (keys of their own beside the old shared key, the fresh pair), VX-213 (the leftover key file), VX-310 (the lobby's Touch ID); the device identity's new home and hardware marker (second opinion §2.5) |
-| **3 — the acts** | VX-307 | Use Castle (its checks at the door; the export-off step), Use Standard (a key change: the anchor; history flows into Castle, never out), Replace All Keys and the follow (every follow typing one secret) on sealed plans; the Apple keys' lifecycle (VX-301); the `Sync/` lines (VX-107, VX-109, the marker leaving the library file — `SyncEngine.refuseIfRekeyIncomplete` reads the plan — and the leave's one completing write that adds the account's Apple copy, with Castle-kind custody until it); the old shared key's checks and retirement; copies pausing between an act's prepare and its swap; VX-233's drill healed | one road per session. Evidence: each road's drill; the posture drill green; convergence suites for the Apple-key mint/wait/delete rules | VX-235 (prepare-then-commit, the record naming the act), VX-263 (the anchor, leaving Castle), VX-301, VX-313, VX-107, VX-108, VX-109, VX-113, VX-233 |
-| **4 — accounts and the key doors** | VX-308 | the binding and rows owned by it (VX-314); the four situations; the one-road signed-out screens both ways; Stop syncing here; Move; setup, enroll and connect; every leave re-keying, in both modes (§3.8), carrying any anchor; change passphrase and new words (the new-words door's anchor sentence); the Touch ID re-arm; the gate style in this Mac's facts; Re-link minting a fresh account key, and its library arm; the one presenter | one door per session. Evidence: each door's drill; the account-sequence walk (signed in, out, into another account, back) | VX-314, VX-313, VX-263 (the anchor carried by every leave; the new-words sentence), VX-301 (Re-link and its library arm), VX-264 (the signed-out screen, the leaving rules), VX-239, VX-243 |
+| **2 — the open road and the migration** | VX-306 | the route and lobby on roads; per-key items, what the Mac remembers, the record and key file v3 going live; the migration (§3.13); the phone builds and opens — **on in Debug builds only, like every phase's new code, until her release switch** (VX-329, §5 below) | two units (the open road · the migration). Evidence: the migration drill per §3.13 shape; the Keychain leg on a throwaway scope; the dev store under a held claim; her stores rehearsed on byte-copies; the restore drill | VX-228, VX-235 (the migration clears today's stuck markers), VX-209 (the open rule's road), VX-263 (the fold), VX-301 (keys of their own beside the old shared key, the fresh pair), VX-213 (the leftover key file), VX-310 (the lobby's Touch ID); the device identity's new home and hardware marker (second opinion §2.5) |
+| **3 — the acts** | VX-307 | Use Castle (its checks at the door; the export-off step), Use Standard (a key change: the anchor; history flows into Castle, never out), Replace All Keys and the follow (every follow typing one secret) on sealed plans; the Apple keys' lifecycle (VX-301); the `Sync/` lines (VX-107, VX-109, the marker leaving the library file — `SyncEngine.refuseIfRekeyIncomplete` reads the plan — the leave marked in the vault by the account key's id with no wrap, and its one completing write — made only by a device that reads that key — adding the account's Apple copy; sync keys held by what they reach, on every device, through the window); every Apple key of this Mac's own retired at entering Castle; the old shared key's checks and retirement; copies pausing between an act's prepare and its swap; VX-233's drill healed | one road per session. Evidence: each road's drill; the posture drill green; convergence suites for the Apple-key mint/wait/delete rules | VX-235 (prepare-then-commit, the record naming the act), VX-263 (the anchor, leaving Castle), VX-301, VX-313, VX-107, VX-108, VX-109, VX-113, VX-233 |
+| **4 — accounts and the key doors** | VX-308 | the binding and rows owned by it (VX-314); the four situations; the one-road signed-out screens both ways; Stop syncing here; Move; setup, enroll and connect; every leave re-keying, in both modes (§3.8), carrying any anchor; change passphrase, new words and the reset road, with every door that replaces a secret while an anchor exists saying its sentence (§3.9); the Touch ID re-arm (only after a press fails on an item that exists; a new device identity starting on Always ask, §3.10); the gate style in this Mac's facts; Re-link minting a fresh account key, and its library arm; the one presenter | one door per session. Evidence: each door's drill; the account-sequence walk (signed in, out, into another account, back) | VX-314, VX-313, VX-263 (the anchor carried by every leave; the per-door sentences), VX-301 (Re-link and its library arm), VX-264 (the signed-out screen, the leaving rules), VX-239, VX-243 |
 | **5 — copies and words** | VX-309 | the restore list over the catalog (older libraries included); Open Library and the open rule (the family tree deciding "ours"; a different library landing under a fresh key, the other secret typed or made new); Send Library with no sharing sentence; the plaintext export's ID; retention per library and Mac; the Castle offer under VX-301, with the old shared key's sheet and notice; the *Opens with* line everywhere; Data Safety and `RESTORE.md`; the field guide's try-it-yourself line; VX-211; VX-264's and VX-210's words; the lock-time copy named from the file's own key; adoption writing the key file before the store lands | two units (copies · words). Evidence: walks in both voices; the restore drill; **the key-map table (§4.3)** | VX-209, VX-210, VX-211, VX-263 (the route finder's words), VX-264, VX-265, VX-301 (the sheet's words), VX-302, VX-317, VX-213 (the record corrections, the privacy text) |
 | **6 — VX-212** | VX-212 | designed with her first (§3.14), then built under Fable | one repair rule. Evidence: convergence suites plus one live two-device round | VX-212 |
+| **the release switch — at her word** | VX-329 | the new system on in Release builds, in one change in one place; §3.15's deletions; the legacy readers kept | its own run and ladder. Evidence: the scenario suite and soak under `swift test -c release`; the real-scope branch rehearsed before her live stores migrate (§9), every Apple key id it mints logged; a Release build of the switch's change on byte-copies of her stores behind the A1 rail; the restore drill; a Fable cold review of the switch's diff; her acceptance on both Macs and the phone | VX-329 |
 
 **Sizing is guidance** (her ruling, §1). Phases may hold more than two phase-sized units, or merge, at the
 orchestrator's judgment, recorded in the phase plan. The split above is a recommendation for ladders a cold reviewer
 can hold in one read, not a rule.
 
 **Order and gates.** 1 → (go/no-go) → 2 → 3 → 4 → 5 → 6, each merging to main as it closes, all in Debug builds only;
-then the release switch at her word (below). VX-212 (phase 6) comes *"once the first plan is working"* (her word): its
+then the release switch at her word (VX-329, below). VX-212 (phase 6) comes *"once the first plan is working"* (her word): its
 design sitting follows phase 5's close, and whether the release waits for it is hers. A phase closes on its kind's
 evidence, never on a pin alone.
 
-**The release switch: the new system stays in Debug builds until her word.** Each phase merges to main as it closes,
-like every other run, and other efforts' refreshes and beta builds would carry anything left on in Release. So **every
-phase's new code — the new road, the migration, the acts, the doors and the copies — is compiled into Debug builds
-only**: no Release build — hers, the phone's, a tester's, or one another effort refreshes or cuts — contains it. Debug
+**The release switch: the new system stays off in Release builds until her word.** Each phase merges to main as it
+closes, like every other run, and other efforts' refreshes and beta builds would carry anything turned on in Release.
+So **every phase's new code — the new road, the migration, the acts, the doors and the copies — is on in Debug builds
+only**: no Release build — hers, the phone's, a tester's, or one another effort refreshes or cuts — runs it. Debug
 builds use the fenced dev store, so until the switch the new system touches only the dev store and byte-copies of her
 stores; today's code stays alive on main because Release still runs it (§3.15). **Her rulings:** *"phase 2 can be
 copied on dev s tore and my store copies and then we can release it to my store / the store of my beta testers"*,
 *"my mac and phone can wait for phase 3 to be done"*, after round 2 *"yes phase 2 will stay in debug builds until phase
 3"*, and at round 3, told that phases 4 and 5 rebuild doors that write keys too, *"that's fine on my devices waiting
 for the new system til the end of phase 5"* and *"yeah we'll wait to turn the new system on in release builds / wait to
-put it in release builds til i'm ready to release it."* **The switch is one change in one place**, made at her word
-when she's ready to release — after phase 5 at the earliest: the new system turns on for Release builds, the migration
-runs on her Mac, her phone and her testers' stores at their next unlock, and §3.15's deletions land in the same change.
-Phase 2's plan names the switch and adds a check proving a Release build still runs today's road. The runway and the
-stage coordinator are told at this design's merge.
+put it in release builds til i'm ready to release it."*
+
+- **What "off in Release" means** (PROVISIONAL, for her confirm — §9): the app's wiring. The core compiles in both
+  configurations and is tested in both from phase 1 (`swift test` and `swift test -c release`), so no new code meets
+  the optimizer for the first time at the switch; Release builds carry it dormant, and the switch flips the wiring.
+  The literal reading — the new code left out of Release builds entirely until the switch — is the other option.
+- **The switch is one change in one place, with its own ticket, run and ladder (VX-329)**, made at her word when she's
+  ready to release — after phase 5 at the earliest: the new system turns on for Release builds, the migration runs on
+  her Mac, her phone and her testers' stores at their next unlock, and §3.15's deletions land in the same change.
+  Phase 2's plan adds a check proving a Release build still runs today's road.
+- **The switch's evidence**, beyond the phases': the scenario suite and soak under `swift test -c release`; the
+  real-scope branch rehearsed before her live stores migrate — Debug builds use the dev scope and the Keychain
+  tripwire keeps tests off the real one, so the migration's fold through the real old shared key would otherwise run
+  for the first time on her store (how it's rehearsed is §9's, decided with her; the rehearsal logs every Apple key id
+  it mints, so a stray key can be deleted by id); a Release build of the switch's change on byte-copies of her stores
+  behind the A1 rail before anything reaches `/Applications`; the restore drill; a Fable cold review of the switch's
+  diff, since it deletes custody code; and her acceptance on both Macs and the phone.
+- **Today's bugs stay live in Release until the switch.** Keeping the new code off in Release keeps its fixes off too:
+  VX-209's silent drop out of Castle when a Standard-era copy is opened, VX-302's cross-Mac pruning, VX-317's banner,
+  VX-107, VX-108, VX-109, VX-113 and VX-213's tidy-ups all stay as they are in every Release build, hers and her
+  testers', until the switch. Whether any of them gets a small fix on today's road first is hers (§9).
+- **The dev store after phases 2 and 3.** Once a Debug build from main has migrated the dev store, and phase 3's first
+  act has re-keyed it, a Debug build from a branch cut before phase 2's merge can't open it — other efforts' walks and
+  the phone's Debug build among them; before that re-key, such a build still opens it but writes today's key files
+  beside it. Efforts merge main before walking the dev store.
+- **Told at this design's merge:** the release runway and the stage coordinator — the switch, VX-329, and the dev
+  store's note above.
 
 **The riskiest part** is phase 2's migration, which touches every existing store. **The cut lines, if ever needed:**
 the restore list's older-libraries section and the per-Mac far-folder subfolders (a filename tag would do).
@@ -1141,32 +1265,33 @@ the restore list's older-libraries section and the per-Mac far-folder subfolders
 |---|---|---|
 | VX-209 the way-back revert | the record + per-key items + the open rule (the family tree decides "ours"; a copy takes the current facts; a different library lands under a fresh key, the other secret typed or made new); FLIP `VX209WayBackRoundTripTests` | 2, 5 |
 | VX-228 corner 45 | deleted; the mode recorded; confirming it is a key change | 1, 2 |
-| VX-263 W-1 | the history and the Castle anchor (into Castle, everything; out of Castle, nothing; the anchor keeps the secrets of its day and rides every re-key); the family tree in two homes; the migration's fold; the route finder's words | 1, 2, 3, 4, 5 |
+| VX-263 W-1 | the history and the Castle anchor (into Castle, everything; out of Castle, nothing; the anchor keeps the secrets of its day and rides every re-key; a follower's anchor locked at its birth under the secret typed at its follow); the family tree in two homes; the migration's fold; the route finder's words | 1, 2, 3, 4, 5 |
 | VX-264 her #216 rulings | §3.11 / §3.8 (the leaving and joining rules included) | 4, 5 |
 | VX-265 a separate delete choice | the offer's other-libraries group | 5 |
 | VX-210 other folders | §3.7's reworded line | 5 |
 | VX-235 the unfinishable marker | prepare-then-commit; sealed plans; the migration clears today's stuck markers | 1, 2, 3 |
 | VX-107 the double crash | the follow's plan carries the facts (`Sync/` — Fable) | 3 |
 | VX-108 doors on a stale reading | doors read `assess`; the acts read the vault they fetch | 3 |
-| VX-109 `begin` re-fetches | `begin` takes the door's revision (`Sync/` — Fable) | 3 |
+| VX-109 `begin` re-fetches | `begin` takes the door's revision; and the leave's rotation: the account key's id written at its start with no wrap, the three-state reading, completion only by a device that reads that key, the lost actor's finish naming the leave, sync keys held by what they reach (`Sync/` — Fable) | 3 |
 | VX-212 the poison row | its own design | 6 |
 | VX-213 tidy-ups | the leftover key file (fold, then retire); escrow items removed; `pg_temp` at her go; the record corrections and privacy text | 2, 5 |
 | VX-211 passphrase strength | §3.11 | 5 |
 | VX-239 / VX-243 sheets | one presenter | 4 |
 | VX-233 drill rot | the runner takes dependencies explicitly | 3 |
-| VX-301 retire the Apple key | §3.5: one Apple key per library per Mac and one per account (the vault only); the migration's keys of their own beside the old shared key; accounts stay on it until Castle or Re-link; Use Castle retires this Mac's own key, and the old shared key after its checks at the door; a replacement Mac takes over its predecessor's keys; delete on sight by recorded id; Re-link mints fresh, and its library arm mints a library's own key when it's lost | 2 (the moves), 3 (lifecycle, retirement), 4 (Re-link and its library arm), 5 (the sheet's words) |
+| VX-301 retire the Apple key | §3.5: one Apple key per library per Mac and one per account (the vault only); the migration's keys of their own beside the old shared key; accounts stay on it until Castle or Re-link; Use Castle retires every key of this Mac's own for the library, and the old shared key after its checks at the door; leaving an account mints nothing; a replacement Mac takes over all its predecessor's own keys; a key left in a former Apple ID is a stated exception; delete on sight by recorded id; Re-link mints fresh, and its library arm mints a library's own key when it's lost | 2 (the moves), 3 (lifecycle, retirement), 4 (Re-link and its library arm), 5 (the sheet's words) |
 | VX-302 cross-Mac pruning | §3.7 attribution and retention | 1, 5 |
 | VX-113 the changed-elsewhere refusal | §3.9: the follow names the change | 3 |
 | VX-313 seals | §3.6: this Mac's facts in two sealed homes, newer wins, the device section found by its hardware marker; plans sealed and named by the act in flight; copies carry only the library's facts; no repair makes a Touch ID item; the claims scoped to Castle | 1 (the model), 3, 4 |
 | VX-314 rows owned by the library's account | §3.8 | 4 |
-| VX-310 the lobby's Touch ID | §3.10: the button whenever an item exists; the stored hash a hint | 2 |
+| VX-310 the lobby's Touch ID | §3.10: the button whenever an item exists; the stored hash a hint (the re-arm question that follows a failed press is phase 4's door, asked only when the item exists) | 2 |
 | VX-317 Resume Sync's banner | clears only when the hold marker is gone | 5 |
+| VX-329 the release switch | §5: the new system on in Release at her word; §3.15's deletions and legacy readers; its own run and evidence | after 5 |
 | VX-266 flagship | this file | — |
 
 **Also in the phases' scope**, from the second opinion's research and rounds 2 and 3, each with a red-on-old pin: the
 device identity's move into what this Mac remembers and the device section, with its hardware marker (phase 2,
-VX-306); the release switch and the check that a Release build still runs today's road (named in phase 2's plan,
-VX-306, turned at her word); the lock-time copy named from the file's own key, and adoption writing the key file
+VX-306); the check that a Release build still runs today's road (phase 2's plan, VX-306), the switch itself being
+VX-329's; the lock-time copy named from the file's own key, and adoption writing the key file
 before the store lands (phase 5, VX-309).
 
 Outside the project, settled in passing and hers to fold in: VX-100 (asked twice — the open and the enrollment in one
@@ -1209,7 +1334,8 @@ followed into Castle — VX-301 and the follow's typed secret settle it: the pho
   - Corner 4: pre-Castle copies stop opening through the Apple account.
   - Corner 14: each account its own Apple key, locking only its vault.
   - Corner 34 is retired: every device has its own key per library.
-  - Corner 36: the stored choice, per device.
+  - Corner 36: the stored choice, per device; the re-arm question only after a press fails on an item that exists,
+    and a new device identity starts on Always ask.
   - Corner 45 is retired.
   - Corner 33 (a library arriving by AirDrop needs no new key): a landing lands under a fresh key, one secret typed and
     the other typed or made new.
@@ -1222,9 +1348,12 @@ followed into Castle — VX-301 and the follow's typed secret settle it: the pho
   fresh key, one secret typed and the other typed or made new); the line "so a Mac new to a library enrolls" follows
   the identity's move; the restore list's reach; one restore door; the offer under VX-301; the *Opens with* line.
 - **The 13x plan:** the row-4 custody-collision memo and ledger 5 (an export lands under its own library ID).
-- **SyncSpec §3's pre-13x paragraph:** custody per key; the device identity and the per-store sentence follow the
-  identity's move; the rotation's resume record leaves the library file; a Castle → Standard rotation adds the
-  account's Apple copy only once it completes. VX-212 adds its own line.
+- **SyncSpec §3's pre-13x paragraph:** custody per key, and sync keys held by what they can reach; the device identity
+  and the per-store sentence follow the identity's move; the rotation's resume record leaves the library file; a
+  Castle → Standard rotation names the account's fresh Apple key's id in `apple_key_id` at its start with no wrap
+  (the vault reads: a wrap — Standard; an id with no wrap — leaving Castle, in progress; neither — Castle), and only
+  a device that reads that key completes it, adding the wrap once the previous corpus key is cleared. VX-212 adds its
+  own line.
 - **OverallModel:** none. No invariant is relaxed.
 
 ---
@@ -1248,7 +1377,12 @@ followed into Castle — VX-301 and the follow's typed secret settle it: the pho
     that device updated.
   - §3.5a's: the words changing while a silently-joined device hasn't refreshed or followed.
   - copies from before a leave keep the secrets of the leave day (her ruling): change both your passphrase and your
-    words later, and they need the old ones — the new-words door says so, and the route finder names the day.
+    words later, and they need the old ones — every door that replaces a secret says so, and the route finder names
+    the day.
+  - a follower's anchor opens with the secret typed at its follow, and through the master's words copy with the words
+    only as fresh as that device's copy was when it left: words made new during Castle while that device was offline
+    aren't among them, and a passphrase changed elsewhere and never typed there isn't either. Its *Opens with* line
+    names what does open it.
   - an older build's leave or follow puts the Castle-era master under the old shared Apple key with no change of keys;
     this build never adds to it (its follow leaves the master's road out of its anchor), and it ends when the old key
     is retired.
@@ -1270,6 +1404,11 @@ followed into Castle — VX-301 and the follow's typed secret settle it: the pho
     the original until either one crosses a line or retires that key. If one enters Castle, the other's Apple road
     goes, and the other heals with Re-link's library arm; its silent item and its passphrase and words keep opening
     it meanwhile.
+  - copies locked under an Apple key left in an Apple account this Mac no longer uses open through that account until
+    its keychain loses the key; this Mac can't delete it there (rule 2's last stated exception). Use Castle's door
+    names them, and they can be deleted.
+  - today's bugs stay live in every Release build until her release switch (§5): the new code that fixes them is off
+    in Release until then. Whether any gets a small fix on today's road first is hers (§9).
 
 ---
 
@@ -1283,4 +1422,27 @@ followed into Castle — VX-301 and the follow's typed secret settle it: the pho
   and verified against the shipped build. The companion explainer (§4.3) is its first draft, re-verified or deleted
   then.
 - **The cast at each kickoff** (§5).
-- **The release switch:** her word, when she's ready to release — after phase 5 at the earliest (§5).
+- **The release switch:** her word, when she's ready to release — after phase 5 at the earliest (§5, VX-329).
+
+**Called provisionally overnight, 2026-10-14, at her word** — *"i want you two to continue through to handoff, ruling
+provisionally where needed ... document decisions and why they were made for me in enough detail that i can discuss it
+with a session tomorrow"* — each settled with the round-2 Fable reviewer, which had the final say at her word. The
+options and the reasons are in `design-cold-read-r3.md` (the extra read's section) and the design handoff:
+
+- **A follower's anchor is also locked at its birth under the secret typed at its follow** (§3.4), and rule 5 says
+  what opens a follower's copies (§3.1). PROVISIONAL, for her confirm: it touches the premise of her ruling that the
+  anchor keeps the secrets of its day. The other option was to change nothing in the mechanism and only say the truth
+  — that on a follower, copies from before the leave open with whatever opened that device then, which is often not
+  the passphrase she had when she left.
+- **"Off in Release" means the app's wiring; the core compiles and is tested in both configurations from phase 1**
+  (§5). PROVISIONAL, for her confirm: her words were *"wait to put it in release builds"*. The other option is the
+  literal one — the new code left out of Release builds entirely until the switch.
+- **How the real-scope branch of the migration is rehearsed before her live stores migrate** (§5): open, decided with
+  her in VX-329's plan. The options: a spare macOS user on the same Apple ID; the Air first, as a canary; or the
+  rehearsal taken as the first leg of the real migration. Whatever runs logs every Apple key id it mints.
+- **Today's bugs in Release until the switch** (§5, §8): whether VX-209, VX-302 and VX-317 get small fixes on today's
+  road first, and the rest wait — hers, bug by bug, from the table in the handoff.
+- **The Touch ID re-arm question asks only after a press fails on an item that exists**; with no item, Always ask is
+  recorded quietly and Touch ID comes back from Settings (§3.10). PROVISIONAL: it narrows when the question appears
+  (round 3 had it ask after a delete or a wipe too); VX-310's button rule is untouched.
+- **A new device identity starts on Always ask** (§3.10). PROVISIONAL, with her words at phase 4's walk.
