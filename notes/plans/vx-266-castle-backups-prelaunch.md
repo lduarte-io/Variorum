@@ -1244,7 +1244,8 @@ put it in release builds til i'm ready to release it."*
   behind the A1 rail before anything reaches `/Applications`; the restore drill; a Fable cold review of the switch's
   diff, since it deletes custody code; and her acceptance on both Macs and the phone.
 - **Today's bugs stay live in Release until the switch.** Keeping the new code off in Release keeps its fixes off too:
-  VX-209's silent drop out of Castle when a Standard-era copy is opened, VX-302's cross-Mac pruning, VX-317's banner,
+  VX-209's drop out of Castle when a Standard-era copy is opened (warned at the confirm since VX-201's stopgap),
+  VX-302's cross-Mac pruning, VX-317's banner,
   VX-107, VX-108, VX-109, VX-113 and VX-213's tidy-ups all stay as they are in every Release build, hers and her
   testers', until the switch. Whether any of them gets a small fix on today's road first is hers (§9).
 - **The dev store after phases 2 and 3.** Once a Debug build from main has migrated the dev store, and phase 3's first
@@ -1454,8 +1455,10 @@ options and the reasons are in `design-cold-read-r3.md` (the extra read's sectio
 - **How the real-scope branch of the migration is rehearsed before her live stores migrate** (§5): open, decided with
   her in VX-329's plan. The options: a spare macOS user on the same Apple ID; the Air first, as a canary; or the
   rehearsal taken as the first leg of the real migration. Whatever runs logs every Apple key id it mints.
-- **Today's bugs in Release until the switch** (§5, §8): whether VX-209, VX-302 and VX-317 get small fixes on today's
-  road first, and the rest wait — hers, bug by bug, from the table in the handoff.
+- **Today's bugs in Release until the switch** (§5, §8): hers, bug by bug, from the table in the handoff. The
+  recommendation: offer small fixes on today's road for VX-302 (a data-loss class) and VX-317 (trivial); let VX-209
+  wait, since VX-201's shipped confirm line already says it and names the road back (a refusal is her option if
+  she'd rather block than warn); the rest wait.
 - **The Touch ID re-arm question asks only after a press fails on an item that exists**; with no item, Always ask is
   recorded quietly and Touch ID comes back from Settings (§3.10). PROVISIONAL: it narrows when the question appears
   (round 3 had it ask after a delete or a wipe too); VX-310's button rule is untouched.
