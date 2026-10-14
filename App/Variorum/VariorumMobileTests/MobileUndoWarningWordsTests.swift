@@ -25,6 +25,7 @@ private func shoutedWords(_ text: String) -> [String] {
         .filter { $0.count >= 2 && $0 == $0.uppercased() && $0 != $0.lowercased() }
 }
 
+@MainActor
 @Suite("VX-342 — the undo-overwrite warning says \"before\", never shouted (the phone's door)")
 struct MobileUndoWarningWordsTests {
     @Test func theWarningsDetailSaysBeforeInLowercaseAndShoutsNothing() {
