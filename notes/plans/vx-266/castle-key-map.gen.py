@@ -3,6 +3,7 @@
 
   python3 keymap_gen2.py full   <out.html>   # today and the new design, for understanding
   python3 keymap_gen2.py target <out.html>   # ONLY the system the VX-266 plan builds — the acceptance artifact
+  python3 keymap_gen2.py cycle  <out.html>   # the key cycle alone: into Castle and back, as a flow chart
 
 Every map shares one layout (You · This Mac · Apple · Variorum server). Chip text is HTML
 inside the SVG (foreignObject), so key names can be letters or icons (the toggle at the top).
@@ -643,6 +644,228 @@ ANIM_JS = r"""
 """
 
 
+# ---- the cycle as a flow chart: what you have, the step, what's new, what goes away -------------
+def _kind(text):
+    m = TOKEN_RE.search(text)
+    return m.group(1) if m else "file"
+
+
+def _pills(items, dead=False):
+    return "".join(pill(x, _kind(x), dead) + " " for x in items)
+
+
+CYCLE_IN = dict(
+    head="Into Castle — a synced library, from Standard",
+    start=[("On this Mac", ["{L} · silent item", "{M}+{C} · silent item"]),
+           ("The key file", ["{L} · locked with {A}", "{L} · locked with {P}", "{L} · locked with {W}",
+                             "{L} · locked with {M}", "older keys · locked with {L}", "{M} · locked with {W}"]),
+           ("Every backup", ["{L} · locked with {A}", "{L} · locked with {P}", "{L} · locked with {W}",
+                             "{L} · locked with {M}"]),
+           ("iCloud Keychain", ["{A} · the account's Apple key", "{A} · the old shared key (older stores)"]),
+           ("The vault", ["{M} · locked with {P}", "{M} · locked with {W}", "{M} · locked with {A}",
+                          "{C} · locked with {M}"]),
+           ("Your writing", ["the library file · under {L}", "the synced copy · under {C}"])],
+    start_who=((Y, "everything"), (Y, "everything")),
+    steps=[
+        dict(t="You press Use Castle",
+             d="You type your passphrase and your twelve words, and you're told plainly what losing them would cost, "
+               "with a plain copy offered first.",
+             who=((Y, "everything"), (Y, "everything"))),
+        dict(t="New sync keys",
+             d="A new master and sync key. Your writing on the server is re-encrypted, and the vault is rewritten "
+               "with no Apple copy.",
+             new=["{M′} · locked with {P}", "{M′} · locked with {W}", "{C′} · locked with {M′}",
+                  "{M′}+{C′} · Touch ID item", "the synced copy · under {C′}"],
+             gone=["{M} · locked with {A} — the vault's Apple copy", "{M} · locked with {P}", "{M} · locked with {W}",
+                   "{C} · locked with {M}"],
+             who=((Y, "the library and every backup"), (Y, "the library and every backup — not the server's copy"))),
+        dict(t="A new library key",
+             d="It goes into a Touch ID item made at your press (or nowhere, with Always ask). Copies pause until the "
+               "swap.",
+             new=["{L′} · Touch ID item"],
+             who=((Y, "the library and every backup"), (Y, "the library and every backup"))),
+        dict(t="The new key file",
+             d="One key file, rewritten around the new key. The old key goes into its history, so old backups keep "
+               "opening for you.",
+             new=["{L′} · locked with {P}", "{L′} · locked with {W}", "{L′} · locked with {M′}",
+                  "{L} and older keys · locked with {L′}", "{M′} · locked with {W}"],
+             gone=["{L} · locked with {A}, {P}, {W}, {M} — from the key file (every backup still has them)",
+                   "{M} · locked with {W}"],
+             who=((Y, "the library and every backup"), (Y, "the library and every backup"))),
+        dict(t="The swap",
+             d="The record, now saying Castle, goes into the staged copy; then the library file is swapped to the new "
+               "key. From here the library is in Castle.",
+             new=["the library file · under {L′}"], gone=["the library file · under {L}"],
+             who=((Y, "older backups only"), (Y, "older backups only"))),
+        dict(t="The old key's copies go",
+             d="Its silent items — and any older per-library items, escrow items and old key files, each once the "
+               "history holds its key.",
+             gone=["{L} · silent item", "{M}+{C} · silent item"],
+             who=((Y, "older backups only — through the Apple key Keychain Access reveals"), (Y, "older backups only"))),
+        dict(t="A fresh backup",
+             d="A new backup under the new key; its key file carries the history.",
+             new=["a backup · {L′} locked with {P}, {W}, {M′}, with the history"],
+             who=((Y, "older backups only"), (Y, "older backups only"))),
+        dict(t="The Apple keys go",
+             d="Deleted from iCloud Keychain on every device, with no recovery — and recorded, so a copy that comes "
+               "back is deleted on sight.",
+             gone=["{A} · the account's Apple key"],
+             dead=["{L} · locked with {A} — in every backup"],
+             who=((N, "nothing"), (N, "nothing (older stores: after the next step)"))),
+        dict(t="Older stores only: the old shared key goes",
+             d="After its checks, and the sheet you saw at the start.",
+             gone=["{A} · the old shared key"], dead=["older copies' locks under it"],
+             who=((N, "nothing"), (N, "nothing"))),
+        dict(t="Your other devices follow",
+             d="Each asks for your passphrase or words once, gets the new master, re-keys its own library and deletes "
+               "its Apple keys and silent items.",
+             gone=["their silent items"], dead=["{L} · locked with {M} — the old master is gone everywhere"],
+             who=((N, "nothing, on any device"), (N, "nothing"))),
+    ],
+    end=[("On this Mac", ["{L′} · Touch ID item", "{M′}+{C′} · Touch ID item"]),
+         ("The key file", ["{L′} · locked with {P}", "{L′} · locked with {W}", "{L′} · locked with {M′}",
+                           "{L} and older keys · locked with {L′}", "{M′} · locked with {W}"]),
+         ("Backups", ["new ones · like the key file", "older ones · their own {P} and {W} locks, and the history"]),
+         ("iCloud Keychain", ["nothing of this library"]),
+         ("The vault", ["{M′} · locked with {P}", "{M′} · locked with {W}", "{C′} · locked with {M′}"]),
+         ("Your writing", ["the library file · under {L′}", "the synced copy · under {C′}"])],
+    end_who=((N, "nothing"), (N, "nothing")),
+)
+
+CYCLE_OUT = dict(
+    head="Back to Standard — the same library, leaving Castle",
+    start=None,
+    steps=[
+        dict(t="You press Use Standard",
+             d="You type your passphrase and your twelve words: leaving Castle changes the key too. You're told plainly: "
+               "your Apple account will open this library from now on, and its copies from before Castle — never the "
+               "ones made in Castle.",
+             who=((N, "nothing"), (N, "nothing"))),
+        dict(t="New sync keys",
+             d="A new master and sync key; your writing re-encrypted; the vault gets the new master under your "
+               "passphrase, your words and a fresh account Apple key.",
+             new=["{A} · a fresh account Apple key", "{M″} · locked with {P}", "{M″} · locked with {W}",
+                  "{M″} · locked with {A}", "{C″} · locked with {M″}", "{M″}+{C″} · silent item",
+                  "the synced copy · under {C″}"],
+             gone=["{M′} · locked with {P}", "{M′} · locked with {W}", "{C′} · locked with {M′}",
+                   "{M′}+{C′} · Touch ID item"],
+             who=((Y, "the server's copy"), (Y, "the server's copy"))),
+        dict(t="A new library key — and Castle's keys stay behind",
+             d="The new key goes into a silent item. The rewritten key file's history takes back only the keys from "
+               "before Castle. History flows into Castle, never out.",
+             new=["{L″} · silent item", "{L″} · locked with {A}", "{L″} · locked with {P}", "{L″} · locked with {W}",
+                  "{L″} · locked with {M″}", "keys from before Castle · locked with {L″}"],
+             gone=["{L′} · locked with {P}, {W}, {M′} — from the key file"],
+             stays=["{L′} and every key made in Castle — only their own backups' {P} and {W} locks open them"],
+             who=((Y, "the server's copy"), (Y, "the server's copy"))),
+        dict(t="The swap",
+             d="The record, now saying Standard, goes into the staged copy; then the library file is swapped to the "
+               "new key.",
+             new=["the library file · under {L″}"], gone=["the library file · under {L′}"],
+             who=((Y, "the library, and copies from before Castle"), (Y, "the library, and copies from before Castle"))),
+        dict(t="Castle's Touch ID item goes; a fresh backup",
+             d="The Touch ID item for the Castle key is deleted, and a new backup is made under the new key.",
+             new=["a backup · {L″} locked with {A}, {P}, {W}, {M″}"], gone=["{L′} · Touch ID item"],
+             who=((Y, "the library, and copies from before Castle"), (Y, "the library, and copies from before Castle"))),
+        dict(t="Your other devices follow",
+             d="Without asking, once the fresh Apple key arrives; each re-keys its own library the same way, leaving its "
+               "Castle keys behind.",
+             who=((Y, "the same, on every device"), (Y, "the same, on every device"))),
+    ],
+    end=[("On this Mac", ["{L″} · silent item", "{M″}+{C″} · silent item"]),
+         ("The key file", ["{L″} · locked with {A}", "{L″} · locked with {P}", "{L″} · locked with {W}",
+                           "{L″} · locked with {M″}", "keys from before Castle · locked with {L″}"]),
+         ("iCloud Keychain", ["{A} · the fresh account Apple key"]),
+         ("The vault", ["{M″} · locked with {P}", "{M″} · locked with {W}", "{M″} · locked with {A}",
+                        "{C″} · locked with {M″}"]),
+         ("Stays behind", ["every key made in Castle — opened only by its backups' own {P} and {W} locks"])],
+    end_who=((Y, "everything outside Castle — never what was written in Castle"),
+             (Y, "everything outside Castle — never what was written in Castle")),
+)
+
+
+def _who(pair):
+    (lc, lt), (ac, at) = pair
+    return (f'<div class="fwho"><span>This Mac’s login password: <b class="{lc}">{rich(lt)}</b></span>'
+            f'<span>Your Apple account: <b class="{ac}">{rich(at)}</b></span></div>')
+
+
+def _inv(groups):
+    return '<div class="inv">' + "".join(f'<div class="g">{E(g)}</div><div>{_pills(items)}</div>' for g, items in groups) + "</div>"
+
+
+def _flow(c, start_title):
+    out = ['<div class="flow">']
+    if c["start"]:
+        out.append(f'<div class="fcard edge"><div class="fh">{E(start_title)}</div>{_inv(c["start"])}{_who(c["start_who"])}</div>')
+        out.append('<div class="farrow" aria-hidden="true">↓</div>')
+    for n, st in enumerate(c["steps"], 1):
+        rows = ""
+        if st.get("new"):
+            rows += f'<div class="frow"><span class="flab plus">＋ new</span>{_pills(st["new"])}</div>'
+        if st.get("gone"):
+            rows += f'<div class="frow"><span class="flab minus">− goes away</span>{_pills(st["gone"], True)}</div>'
+        if st.get("dead"):
+            rows += f'<div class="frow"><span class="flab minus">⊘ stops opening</span>{_pills(st["dead"], True)}</div>'
+        if st.get("stays"):
+            rows += f'<div class="frow"><span class="flab stay">◆ stays behind</span>{_pills(st["stays"])}</div>'
+        out.append(f'<div class="fcard"><div class="fnum">{n}</div><div class="fbody"><div class="ft">{E(st["t"])}</div>'
+                   f'<p>{rich(st["d"])}</p>{rows}{_who(st["who"])}</div></div>')
+        out.append('<div class="farrow" aria-hidden="true">↓</div>')
+    out.append(f'<div class="fcard edge"><div class="fh">You end with</div>{_inv(c["end"])}{_who(c["end_who"])}</div>')
+    out.append("</div>")
+    return "".join(out)
+
+
+def cycle_section():
+    return ('<p class="lede">The whole cycle as a flow: what you have, what each step does, what’s new, what goes away, '
+            'and who else can open your library after it. Each pill wears the colour of its key; a struck pill is gone '
+            'or opens nothing any more.</p>'
+            f'<h4 class="cyh">{E(CYCLE_IN["head"])}</h4>{_flow(CYCLE_IN, "You start with")}'
+            f'<h4 class="cyh">{E(CYCLE_OUT["head"])}</h4><p class="lede">You start where the flow above ended.</p>'
+            f'{_flow(CYCLE_OUT, "")}')
+
+
+CYCLE_CSS = r"""
+.flow{max-width:880px;margin:8px 0 18px}
+.fcard{display:grid;grid-template-columns:34px 1fr;gap:6px 12px;border:1px solid var(--rule);border-radius:12px;
+padding:10px 14px;background:var(--box)}
+.fcard.edge{display:block;background:var(--chip);border-color:var(--accent)}
+.fcard .fh{font-weight:650;font-size:15.5px;margin-bottom:6px}
+.fnum{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);font-weight:700;font-size:14px;
+display:flex;align-items:center;justify-content:center;margin-top:1px}
+.fbody .ft{font-weight:650;font-size:15.5px}
+.fbody p{margin:2px 0 6px;font-size:14.5px}
+.frow{display:flex;flex-wrap:wrap;gap:5px 6px;align-items:center;margin:4px 0}
+.flab{font-size:12.5px;font-weight:650;min-width:104px;color:var(--muted)}
+.flab.plus{color:var(--accent)}.flab.minus{color:var(--warn)}.flab.stay{color:var(--k-M)}
+.fwho{font-size:13.5px;margin-top:6px;display:flex;flex-wrap:wrap;gap:3px 22px;color:var(--muted)}
+.fwho b.y{color:var(--warn)}.fwho b.n{color:var(--accent)}
+.farrow{text-align:center;color:var(--muted);font-size:18px;line-height:1;margin:5px 0}
+.inv{display:grid;grid-template-columns:max-content 1fr;gap:5px 14px;align-items:start}
+.inv .g{font-size:13px;color:var(--muted);padding-top:3px}
+.cyh{font-size:16px;margin:16px 0 4px}
+@media (max-width:600px){.inv{grid-template-columns:1fr}.flab{min-width:0}}
+"""
+
+
+def cycle_page():
+    body = f"""<main>
+<h1>Castle key cycle</h1>
+<p class="lede">What happens to every key when a synced library goes into Castle, and back out to Standard — step by
+step. The binding text is <code>notes/plans/vx-266-castle-backups-prelaunch.md</code>; the full map is
+<code>castle-target-key-map.html</code>.</p>
+<h2 id="cast">The cast</h2>
+{legend()}
+<h2 id="cycle">The cycle, step by step</h2>
+{cycle_section()}
+<h2 id="watch">The same, on the map</h2>
+{controls()}
+{anim_section()}
+</main>"""
+    return html_page("Castle key cycle", body)
+
+
 # ---- shared page parts ---------------------------------------------------------------------
 CSS = r"""
 :root{--bg:#fbfaf7;--fg:#1d1c1a;--muted:#6b675f;--rule:#e3dfd6;--box:#f3f0ea;--chip:#ffffff;--accent:#2f6f62;
@@ -767,7 +990,7 @@ def controls():
 
 def legend():
     items = [
-        ("{L} — the library key", "Opens your library file. One per library file; replaced when you enter Castle or replace your keys.", "L"),
+        ("{L} — the library key", "Opens your library file. Replaced whenever the mode changes (into Castle or out of it), or when you replace your keys.", "L"),
         ("{P} — your passphrase", "In your head. Opens a locked copy of the library key (and, synced, of the master).", "P"),
         ("{W} — your twelve words", "On paper. The same power as the passphrase — your way back if you forget it.", "W"),
         ("{A} — an Apple key", "Lives in iCloud Keychain. Standard's silent road: anyone in your Apple account holds it.", "A"),
@@ -776,7 +999,7 @@ def legend():
         ("{touch} — a Touch ID item", "This Mac's copy of a key, released only to your finger (Castle). Keychain Access can't read it.", "touch"),
         ("Silent item", "This Mac's copy that opens without asking (Standard). Keychain Access reveals it with the login password.", "L"),
         ("Locked copy (a padlock)", "A key locked with another key. Whoever holds the second key gets the first. A key file is a set of these.", "file"),
-        ("This Mac's memory", "Which key is current, the mode, the account, your settings — no secret, and sealed so edits are caught.", "memory"),
+        ("This Mac's memory", "Which key is current, and the mode and account it last saw — no secret, decides nothing, sealed so edits are caught. Your settings live in the protection record, inside the library.", "memory"),
     ]
     return '<div class="legend">' + "".join(
         f'<div class="card k-{k}" style="--c:var(--k-{k})"><b>{rich(t)}</b><span class="d">{E(d)}</span></div>'
@@ -939,7 +1162,7 @@ def checklist_table():
 def html_page(title, body):
     return (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
             f'<meta name="viewport" content="width=device-width, initial-scale=1">'
-            f'<title>{E(title)}</title><style>{CSS}\n{ANIM_CSS}\n{actor_css()}</style></head>'
+            f'<title>{E(title)}</title><style>{CSS}\n{ANIM_CSS}\n{CYCLE_CSS}\n{actor_css()}</style></head>'
             f'<body data-actor="you" data-glyphs="letters">{icon_defs()}{body}<script>{JS}\n{ANIM_JS}</script></body></html>')
 
 
@@ -972,6 +1195,7 @@ dashed chips are keys that don't exist or no longer open anything. The buttons l
 {''.join(map_section(k, m) for k, m in NEW_FULL.items())}
 <h3 id="history">The key history</h3><figure>{history_svg()}</figure>
 <h2 id="moves">Moving between them</h2>
+<h3 id="cycle">The cycle, step by step</h3>{cycle_section()}
 <h3>Entering Castle</h3>{steps(ENTER)}
 <h3 id="watch">Watch it happen</h3>{anim_section()}
 <h3>Leaving Castle</h3>{steps(LEAVE)}
@@ -1019,6 +1243,7 @@ apply, and below.</div>
 {map_section("t-std-sync", TARGET["t-std-sync"])}
 <h3 id="history">The key history (both modes)</h3><figure>{history_svg()}</figure>
 <h2 id="moves">Every move</h2>
+<h3 id="cycle">The cycle, step by step</h3>{cycle_section()}
 <h3>Entering Castle</h3>{steps(ENTER)}
 <h3 id="watch">Watch it happen</h3>{anim_section()}
 <h3>Leaving Castle</h3>{steps(LEAVE)}
@@ -1051,5 +1276,5 @@ blocks the close.</p>
 if __name__ == "__main__":
     kind, out = sys.argv[1], sys.argv[2]
     with open(out, "w", encoding="utf-8") as f:
-        f.write(full_page() if kind == "full" else target_page())
+        f.write(full_page() if kind == "full" else cycle_page() if kind == "cycle" else target_page())
     print("wrote", out)

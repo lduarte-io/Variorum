@@ -811,8 +811,9 @@ on a throwaway scope and through the Debug app on the dev store.
 - Castle and Standard, local and synced;
 - every key's home and locks;
 - the history;
-- every act's steps, with entering Castle animated step by step (a synced library: every locked copy, what each step
-  makes or kills, and who can open what after it);
+- every act's steps, with the whole cycle — into Castle and back out — as a flow chart (what you have, each step, what's
+  new, what goes away, who can open what after it), and entering Castle animated on the map. The cycle alone is also
+  its own page, `notes/plans/vx-266/castle-key-cycle.html`;
 - who can open what.
 
 The final phase's closeout carries **the map table**: one row per map element, each naming the test, drill or walk
