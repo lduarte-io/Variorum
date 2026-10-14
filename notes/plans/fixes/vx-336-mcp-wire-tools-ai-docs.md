@@ -2668,3 +2668,95 @@ change as the Mac). **VX-330: nothing mobile-visible** (the Book Panel and the M
    U6a's `vx336-u6-red` serve only the window and may be deleted after it; `vx336-u6` stays until the ladder's needs are
    known. (`vx336-u5`, 2.6 GB, is still on disk — not U6b's.)
 6. **Context:** ~240k by this session's own estimate at READY (the harness count governs).
+
+
+## U6 STAGE RUN — the whole window (a fresh stage runner, from 2026-10-14)
+
+**What this run does NOT do (said first):** no product code is written or changed, before the claim or under it — a red
+that needs code is RECORDED as a FINDING and reported, never fixed here; no rebuild (the window runs the five products
+exactly as U6a row 8b and U6b row 6 built them); no canon, QUESTIONS or ticket edits; never her real store, never
+`/Applications/Variorum.app`, never her USER-scope MCP registrations (the copied setup line is never run as copied — only
+its key is taken, into a scratch `--mcp-config` JSON in the runner's scratchpad, OUTSIDE the repo, deleted at cleanup);
+`castle-W1-20261013` left alone. The plan is the U6b UNIT RECORD's THE STAGE WINDOW (steps 0–11); its step 8 is the U6a
+UNIT RECORD's LIVE LEGS FOR U6b's WINDOW (FINAL), run exactly as written there, and its step 1 carries U6a's THE MAC
+SUITES FOR U6b's BATCH.
+
+**Read in full before READY (never delegated):** this record's header, Hard rules, LIVE STATUS, Stage traffic log and
+Cross-run coordination; the U6b UNIT RECORD whole; the U6a UNIT RECORD's first lines, LIVE STATUS (rows 0–9, the products
+and the red-run notes of rows 6a/8b), LIVE LEGS FOR U6b's WINDOW (FINAL), THE MAC SUITES FOR U6b's BATCH, its
+self-assessment, OWED and the two rulings; THE ORCHESTRATOR ON U5's WINDOW; the U5 STAGE RUN whole and the U5b STAGE
+WINDOW it ran (steps 0–13 — the exact commands U6b's steps 4, 5 and 10 point at); `notes/SessionResiliencyProtocol.md`
+(the implementer rules and the addenda); `Tools/stage`; `Tools/WalkKit/` (README, `guard.sh`, `click.sh`, `keys.sh`);
+`Tools/ScaleFixture/` (`stage.sh`'s copy loop, `restore.sh`); the memory note walk-driving-lessons.
+
+**The build check (READY, 2026-10-14 ~18:15 MDT):**
+- **The final product matches the tree.** HEAD `2e90594f` (the orchestrator's U6-ready commit); `git diff --name-only
+  006e45f8..HEAD -- Sources App Package.swift` is EMPTY (the only file changed since is this record); the tree is clean;
+  no `.swift`/plist/pbxproj/xcstrings/entitlements/`Package.swift` under `Sources`, `App/Variorum` or the root is newer
+  than `vx336-u6`'s `Variorum.debug.dylib` (17:39).
+- **The red products' trees are as recorded:** `git diff 99dd1177..006e45f8` (Mac red → final) and `e10d3f57..006e45f8`
+  (phone red → final), over `Sources App Package.swift`, are EXACTLY the fix lines — `BookPanelModel.swift`'s SEAM comment
+  + `case .chapter: nil` → `case .chapter(_, let collapsed): collapsed?.postID`; "BEFORE" → "before" in `ShellActions.swift`
+  and `MobileUndoDoor.swift` — plus, for the Mac red only, the phone pin's `@MainActor` (outside the Mac product).
+  `vx336-u6-red` = `c30fa9a7` with only `4ef02349`'s seven router lines reverted: the router blob at `a846a5f1` is
+  `47db0c25` and at `c30fa9a7`/HEAD `71504ce0` (U6a row 8b's two blobs).
+- **The five products exist** (2.4–2.5 GB each), each read from its binaries:
+  *[removed for publication]*
+    `.xctestrun`; the dylib "as it was before the " ×1 / "BEFORE" ×0, `CompareLanding` 64 symbols, `MCPAskGlyphProbe` 73,
+    "duplicating a note in" ×1.
+  - `vx336-u6-red` (17:10): signed the same; "BEFORE" ×1 (U6b not in it), `MCPAskGlyphProbe` 0; its test bundle carries
+    `MCPCompareLandingTests` (592 symbols) and both ruled pin names (`aLandingSheOutruns…` 50, `aLandingWhoseNoteLeaves…` 67).
+  - `vx336-u6b-red` (17:33): signed the same; "BEFORE" ×1, "before" ×0, `MCPAskGlyphProbe` 73 (the seam is in it).
+  - `vx336-u6b-ios` (17:41): `VariorumMobile.debug.dylib` "before" ×2, "BEFORE" ×0; the `…iphonesimulator27.0-arm64-x86_64.xctestrun`.
+  - `vx336-u6b-ios-red` (17:36): "BEFORE" ×2, "before" ×0; the same `.xctestrun` name.
+- **The suites are real types** (`nm -j` + `swift-demangle --simplified`, matched on word edges — a name that matches no
+  type runs 0 tests silently): all **125** of `notes/plans/vx336-screens/u6b/batch-suites.txt` (= U6a's 38 verbatim + the
+  plan's 87, no duplicate, checked name by name against the plan's text) in BOTH `vx336-u6` and `vx336-u6b-red`, ≥ 56
+  symbols each (the least `UndoWarningWordsTests`); `BookPanelMCPMarksTests` 471 and its three test names, and
+  `UndoWarningWordsTests`' one test name, in both; `MCPWingFacesTests.activitySpeaksEveryActInWordsNeverAToolID` present.
+  Phone, in both bundles: `MobileUndoWarningWordsTests` 62 · `MobileUndoDoorTests` 891 · `MobileRefusalTableTests` 325.
+
+**Host and tools:** `AX: true SCREEN: true` (a compiled non-prompting probe); `walk-cap` / `walk-scroll` compiled into the
+runner's scratchpad; `Tools/WalkKit/wl2` present in this worktree (gitignored, compiled at U5); Claude Code **2.1.300**;
+`cliclick` present. Free disk **57 GiB**. No Variorum instance (`pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"`
+both empty; the loose form empty too). **No simulator booted.** The phone's device for step 3: no iPhone 17 Pro is listed
+*[removed for publication]*
+
+**Her user-scope MCP servers (names + a sha256 prefix of the sorted compact `mcpServers` JSON, never values):**
+`['linear-server', 'variorum']`, **`bc64543e2f4e8e58`** — SAME as U5's windows.
+
+**The dev store (read-only listing):** `variorum.sqlite` (14 Oct 08:50), `-wal` 09:17, `-shm` 15:13 (U5's restore keeps
+the A1's stamps), key files `variorum-keys-b831b428ce0d67b1.json` · `variorum-keys-e86ed514dc8dab5a.json`; `Backups/` 57
+entries; `Backups/safety-copies/` holds only `castle-W1-20261013` (left alone — U5's A1 copy already pruned). Prefs 1,596
+keys, `variorum.whatsNew.lastVersion` 0.9.6, `appearanceChoice` system. The stage log shows no window since U5's release
+(15:49:56).
+
+**The stage at READY:** `STAGE HELD by 'oct13coordinator' — HOLD: coordinator queue` (claimed 17:48:31). Not ours; the
+GO's relayed line is run exactly as relayed.
+
+**Process choices (the earlier windows' lessons applied):** the Mac batch FIRST, then the two Mac red runs, then the phone
+red and green, each detached to its log and POLLED in the foreground (a `grep -q` loop, never `tail -f | grep -m1`); the
+SEAM after them; the A1 copy, prefs export and fingerprint after the SEAM; every GUI act through `click.sh` / `keys.sh`
+(keys only by System Events), at least 2.6 s apart; region captures (`screencapture -x -R`); `á`/`·` never typed (every
+fixture is ASCII); the Debug app quit BY BUNDLE ID; prefs restored by import, then re-export, diff, delete every added key
+until 0 differ; keys redacted to their first 9 characters in every record and capture name; the `claude -p` turns from a
+scratch project directory in the scratchpad, prompts on STDIN, each answer tee'd to `notes/plans/vx336-screens/u6/<leg>.json`.
+
+### LIVE STATUS — the stage run's steps
+
+| step | what | status |
+|---|---|---|
+| R | read-in, the build check, the fingerprint, this section → READY | DONE (this commit) — READY reported; the stage is NOT claimed (the orchestrator relays the coordinator's GO and its exact line) |
+| 0 | guards; the claim from the GO's line; HEAD at the GO | NOT-STARTED |
+| 1 | the Mac batch (125 suites on `vx336-u6`, `test-without-building`, detached + polled) | NOT-STARTED |
+| 2 | the Mac red runs: U6a's `MCPCompareLandingTests` on `vx336-u6-red` (expect 7 · 2 failed · 9 issues); U6b's two suites on `vx336-u6b-red` (expect 4 · 4 failed · 15 issues) | NOT-STARTED |
+| 3 | the phone: red on `vx336-u6b-ios-red` (expect 1 · 1 failed · 4 issues), green ×3 suites on `vx336-u6b-ios`; the simulator shut down | NOT-STARTED |
+| SEAM | steps 1–3's counts recorded, committed, pushed; the claim KEPT; turn ended "SEAM" | NOT-STARTED |
+| 4 | A1 prestage copy (cmp + sha256) + prefs export + `Backups/` + the fingerprint BEFORE + the clipboard saved | NOT-STARTED |
+| 5 | launch `vx336-u6`, connect (the Claude Code tab key → scratch `u6-mcp.json`), the first turn binds | NOT-STARTED |
+| 6 | VX-330's walk: W0 sherlock · W1 the book grant at READ · W2 the panel + popover (Study) · W3 a waiting ask · W4 Terminal + the mark's press | NOT-STARTED |
+| 7 | VX-342's word once on the Mac (the A12 warning) | NOT-STARTED |
+| 8 | U6a's grant (Home · Edit · Always) + L0 · L1a · L1b · L2 · L3 · L4 · L5 | NOT-STARTED |
+| 9 | U6a's Terminal pass (L2, L3) → back to Study | NOT-STARTED |
+| 10 | cleanup → cmp SAME vs A1, prefs 0 differ, fingerprint SAME, 0 sims booted, instances quit by their own menu | NOT-STARTED |
+| 11 | release + THE RESULT LINE | NOT-STARTED |
