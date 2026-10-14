@@ -188,6 +188,25 @@ every input axis — hover, scroll, list change — never computed before layout
 - VX-287: one Close Note act (registry entry + a menu item + ⇧⌘W) that removes the row AND moves the focused pane
   to the next note in the Open list (fallbacks as ruled above). ⇧⌘W collision check FIRST, recorded.
 - VX-289: Close All (registry entry; the Open list's right-click + a menu twin), landing by VX-287's rule.
+- **The tickets' traces (read-only, 2026-10-13, against an older main — VERIFY each against this tip; paths under
+  `App/Variorum/Variorum/`):**
+  - VX-285: the list's scroll view is capped at row height × 7.5 = 225 pt (`Features/Library/SidebarView.swift:749-752`,
+    `Core/Views/SidebarLayout.swift:160,182-191`); the half row is deliberate (the 8th row clips mid-text by design).
+    The empty space below is the outer last-resort scroll's unused room (`SidebarView.swift:283-311`); the sync
+    footer sits OUTSIDE that scroll (`RootView.swift:584-601`).
+  - VX-286: macOS overlay scroll bars draw over the scroll view's trailing edge; each row fills the full width and
+    the ✕ sits only 8 pt in (`SidebarView.swift:435-446`, `:811-815`); the 12-pt side margin is applied OUTSIDE the
+    scroll view (`:761`), so the bar lands on the ✕. Starred's ★ overlaps the same way past 7 stars (`:491-503`,
+    `:552-556`).
+  - VX-287: no close-note shortcut exists. The ✕ (`SidebarView.swift:811`) and the right-click Close (`:868`) call
+    `WorkspaceModel.closeNote` (`Workspace/WorkspaceModel.swift:342-345`), which removes the ROW ONLY — an on-screen
+    note stays shown with no row until opened again (which re-adds the row, `:283-286`). The app never binds ⌘W
+    (`EditorCommands.swift:158-340`), so ⌘W is the system's File ▸ Close (closes the window). Context for the
+    collision check: ⌘W is on the reserved list (`notes/plans/vx-156-grant-ux-brief.md:424`); the note-only and
+    quick-note windows keep ⌘W closing them (the pad's "⌘W files it", `notes/plans/phase-13u3-faces.md:1432`);
+    ⌃⌘W was checked free on 2026-10-11 (`brief:430`).
+  - VX-289: there is no selection model (out of scope now — VX-344); the highlight is the pane's current note
+    (`SidebarView.swift:779-781`), a plain click navigates (`:839`). `WorkspaceModel.move` already takes several rows.
 - **Evidence:** pure-function + model tests (the height function; close-and-land: next / previous / empty →
   Library; Close All) red-on-old where a bug is fixed (VX-286's padding if a layout pin can see it; VX-285's cap);
   the registry walk green with the new doors; the Mac batch over every suite that exercises a changed source file;
@@ -201,6 +220,16 @@ every input axis — hover, scroll, list change — never computed before layout
   below is reachable; downward drops no longer land one row short); an END ZONE reaches the last slot; a 2-pt
   ring-colour insertion line on hover (the book navigator's precedent, `BookView.swift:838-876`); an animated
   settle on the move; the compact title chip at the cursor (R-LWP-3's precedent, the Bookcase's chip).
+- **The ticket's trace (read-only, 2026-10-13 — verify against this tip):** the list uses the system drag —
+  `.draggable` plus a drop target on each row (`Features/Library/SidebarView.swift:844-853`); no hover feedback, the
+  drag image is a snapshot of the whole row, the move isn't animated (`Workspace/WorkspaceModel.swift:382-385`).
+  **The bug under the jank:** every drop lands BEFORE the row under the pointer — dropping on the row just below does
+  nothing (`move([0], toOffset: 1)`), every downward drop lands one row short, the last slot can't be reached (no end
+  zone); the tests check only the move arithmetic (`VariorumTests/WorkspaceNavigationTests.swift:226-275`) and their
+  comment still describes the old List drag. Precedents: the editor's block drag (direct mouse tracking, a pure
+  midpoint rule, a 2.5-pt ring-colour bar — `BlockDecor.swift:448-460`, `:1156-1191`, `:1268-1305`); the book
+  navigator (a 2-pt ring-colour line on the hovered row + a 28-pt end zone — `BookView.swift:838-876`); the
+  Bookcase's compact title chip under the cursor (R-LWP-3).
 - **Evidence:** the drop arithmetic pinned RED-FIRST on the old code (`WorkspaceNavigationTests` — and its stale
   List-drag comment corrected); the Mac batch; **the Opus walk** with real drags (`cliclick dd/dm/du`):
   screenshots mid-drag showing the line and the chip, after-drop orders for a drop on the row just below, a long
@@ -257,8 +286,20 @@ to claim whatever stage you need at any point in time."*). **Only the orchestrat
 - **EVERY `xcodebuild test` (Mac or simulator), every Debug-app launch and every walk needs a HELD claim.** At that
   point: commit, push, write `READY FOR STAGE — <what>, ≈<minutes>` on the unit's LIVE STATUS row, report to the
   orchestrator exactly what the window will run, and END YOUR TURN. The orchestrator requests the window and, on
-  the coordinator's GO, sends the exact claim line (`Tools/stage claim vx283-uN …`) — never claim without it.
-  Release the claim the moment the window's work is done (`Tools/stage release`) and report the release.
+  the coordinator's GO, sends the exact claim line (the coordinator's form: `Tools/stage release --who
+  coord-for-vx283 && Tools/stage claim --who <name> …`) — never claim without it; a FREE stage is never an
+  invitation. Release the claim the moment the window's work is done (`Tools/stage release`) and report the
+  release in one line, saying whether the dev store and the Debug prefs were restored. `Tools/stage status` exits
+  1 while a claim is held — never put it in an `&&` chain.
+- **Debug prefs:** export them before a window (`defaults export io.lduarte.Variorum.debug <file>`); after it,
+  `defaults import` MERGES rather than replaces, so re-export after importing and diff against the pre-window export.
+- **Walkers:** if a system popup appears that you can't dismiss, STOP and report exactly what it says (the
+  coordinator passes it to her).
+- **Leave alone:** the dev store's `Backups/safety-copies/castle-W1-20261013` is her undispositioned repro — never
+  touch it. Any Castle or credential step uses `~/.variorum/dev-castle.env` exactly.
+- **Castle phase 2 (VX-306):** once it merges and migrates the dev store, a Debug build from a branch cut before it
+  can't open the dev store — the orchestrator merges main into this branch before any walk after that point (the
+  coordinator asks at the GO).
 - Mac tests from `App/Variorum/`: `xcodebuild -scheme Variorum -destination 'platform=macOS' test` with
   suite-level `-only-testing` only; confirm the "Test run with N tests" line (it COUNTS SKIPPED tests — read the
   skipped lines); zsh `pipestatus`. Never add a custom build configuration.
@@ -269,7 +310,8 @@ to claim whatever stage you need at any point in time."*). **Only the orchestrat
   `~/.variorum/dev-castle.env` (source it; never echo, log, capture or commit the values); if anything about
   posture is unexpected, stop, release cleanly, report.
 - **Never** touch her real store or `/Applications/Variorum.app`; never quit or kill an instance you did not launch.
-  Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'`, discriminated by PATH.
+  Instance checks, the coordinator's STRICT forms: `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` (the
+  loose `-f "Variorum.app/Contents/MacOS"` matches headless xcodebuild lines), then discriminate by PATH.
 - Before a behavioural revert (red-on-old proof): commit first, name the revert in the LIVE STATUS, restore by
   `git checkout -- <file>` from the commit, verify by `git diff`.
 
