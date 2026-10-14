@@ -2648,8 +2648,8 @@ Both are pin defects, not product defects. Write's own faces walked clean in bot
 
 ## U4b UNIT RECORD — the inline editor's badges, and ruling 2: VX-230's remainder · ruling 2 (opus-implementer, from 2026-10-14 ~04:00 MDT)
 
-**What this unit has NOT done (said first; flipped as pieces land):** nothing has run on a Mac yet (every pin is a Mac
-pin: its red-on-old run is W1, its green W2); no stage window has run; no QUESTIONS entry, canon edit or ticket (the
+**What this unit has NOT done (said first; the state at READY, 2026-10-14 ~05:00 MDT):** nothing has run on a Mac yet (every pin is a Mac
+pin: its red-on-old run is W1, its green W2); no stage window has run (no batch, no walk — READY, the stage not claimed); no QUESTIONS entry, canon edit or ticket (the
 orchestrator's at the merge). Zero `Sync/`, custody, Keychain, schema, `Server/`, `BlockRangeIndex`, `PaneSurface`,
 `runStructural`, VX-281's lane; in vx-282's files, ONLY the one cleared call in `InlineEditorSurface.Coordinator.remeasure`
 (`EditorView.swift`), nowhere near its two touches (the fan-panel sheet, the selection delegate).
@@ -2687,7 +2687,7 @@ cleared call in `InlineEditorSurface.Coordinator.remeasure`; the workspace — `
 | 3 | VX-230's inline fix — `refreshBadges` (no forcing read; the inline region is the whole post) + the one cleared call in `remeasure` | DONE (this commit) — `EditorViewModel.refreshBadges` ONLY: the read is `options: []` on both surfaces (U4's `.layoutAvailable` check kept); `wholePost = scrollView == nil` skips the frame clip; U4's R1-1 oracle line for the forcing read removed with the read; the doc rewritten to the measured mechanism. `EditorView.swift`: ONE call, `if reportHeight != nil { model.refreshBadges() }` at the end of `InlineEditorSurface.Coordinator.remeasure` (vx-282's two touches untouched). Compiled in the fixed product (piece 5) with no warning in a touched file |
 | 4 | ruling 2's fix — `WorkspaceModel.select(_:in:takingFocus:)` + `notesDeleted` lands in place | DONE (this commit) — `select` gains `takingFocus: Bool = true` (every existing caller unchanged): `false` skips `focusedPane = pane` and raises `onFocusedSubjectChanged` only when the landing pane is the focused one; a DEBUG `assert` that an in-place landing is never a note. `notesDeleted` passes `false`. Compiled in the fixed product (piece 5) with no warning in a touched file |
 | 5 | the FIXED product `DerivedData/vx246-u4b` + the headless finals (core · MCP · workbook) | DONE — **the fixed product** `vx246-u4b` = `cd843647`'s App/Sources (both fixes + the pins; an APFS clone of `vx246-u4b-red`, `build-for-testing` → `** TEST BUILD SUCCEEDED **`, EXIT 0, no warning in a touched file; `u4b/logs/mac-build-for-testing.log`), **verified by symbol:** `refreshBadges()` 3,696 bytes (neither U4's 4,276 nor the pre-U4 3,336) and `WorkspaceModel.select(_:in:takingFocus:)` present. **Headless, `swift build --build-tests` then `swift test --skip-build` on the same tree, EXIT 0: `VariorumMCPTests` 236 / 49 · `VariorumCoreTests` 2,826 / 326 · `StringsWorkbookTests` 40 / 6**, zero ✘, the skip set the standing gated nine — identical to U4's finals (no core line moved; `u4b/logs/p5-finals.log`) |
-| 6 | THE STAGE WINDOW plan (claim `vx246-u4b`) → READY | NOT-STARTED |
+| 6 | THE STAGE WINDOW plan (claim `vx246-u4b`) → READY | DONE (this commit) — **READY for stage**; the stage NOT claimed. The scripts `u4b/run-w1-red.sh` (W1a + W1b) and `u4b/run-w2-batch.sh` (304 suites, `u4b/stage-suites.txt`, every name a declared type) parse (`zsh -n`); the fixture generator copied to `u4b/gen_fixture.py` (the scratchpad copy is not durable); the single-test `-only-testing:…/<test>()` form checked against U4's alone-rerun log. THE STAGE WINDOW below |
 
 **No revert is in flight** (the pre-U4 build's revert ran and was restored: `git diff` empty after `git checkout --`, before any fix).
 
@@ -2820,3 +2820,193 @@ is asserted (DEBUG) to carry a non-note destination, so the same-note rule's foc
   - **Second arm, as now:** the focused pane showing a dead note lands on the Library, stays focused, and raises the
     signal once.
   - **RED on `vx246-u4b-red`** on "the focus stays where she is".
+
+### THE STAGE WINDOW — the plan (runs ONLY on the orchestrator's GO, under the exact claim line it relays — expected `vx246-u4b`)
+
+**Built (rebuild ONLY if `git diff --name-only cd843647..HEAD -- Sources App` is non-empty; record-only commits since):**
+- `App/Variorum/DerivedData/vx246-u4b-red`: `7209cf2d`'s tree (U4's fix, the U4b pins, no U4b fix). W1a only.
+- `App/Variorum/DerivedData/vx246-u4b-red-pre-u4`: the same tree with U4's `refreshBadges` hunk reverted. W1b only (the
+  re-designed phantom pin).
+- `App/Variorum/DerivedData/vx246-u4`: `cd843647`'s App/Sources (both fixes). W2 and W3.
+- **Each verified by symbol** (piece 2 / piece 5): `refreshBadges()` measures 4,276 / 3,336 / 3,696 bytes, and
+  `select(_:in:takingFocus:)` is present only in the fixed product.
+
+**Estimate ~60 min of work → claim 75** (A1 + prefs ~3 · W1 ~3 · W2 ~12 · the fixture import ~6 · W3 ~28 for both voices ·
+cleanup ~8). **Batch-only fallback (~30 min, claim 40):** steps 0–1, W1, W2, cleanup; the walk moves to the next window.
+
+0. **Guards, every step** (U3's and U4's, verbatim):
+   - `Tools/stage status` shows the claim held. It exits 1 while a claim is held, so never put it inside an `&&` chain
+     (U4 STAGE RUN's note).
+   - `Tools/WalkKit/guard.sh --author`: her `/Applications/Variorum.app` must be ABSENT. Present ⇒ STOP and report; never
+     quit or kill it.
+   - `pgrep -fl 'Variorum.app/Contents/MacOS'` is empty before any test run.
+   - Every GUI act goes through `click.sh` / `keys.sh`, with synthetic events ≥ 2.6 s apart.
+   - An undismissable system popup is reported word for word, and the window pauses.
+1. **A1 prestage + prefs, FIRST** (the test host is the dev-store app):
+   - Copy every dev-store file and the key files to `…/Variorum-dev/Backups/safety-copies/scale-prestage-<ts>/`, each
+     `cmp`-verified, sha256 recorded.
+   - `defaults export io.lduarte.Variorum.debug`.
+   - No MCP leg runs in this window, so her user-scope servers are not touched (U5's live round carries ruling 2's
+     real-client check).
+2. **W1 — RED ON OLD (~3 min):** `zsh notes/plans/vx246-screens/u4b/run-w1-red.sh`, foreground, about two minutes. Logs:
+   `u4b/logs/w1a-red-on-old.log`, `w1b-red-pre-u4.log`. **Expected, by design:**
+   - **W1a, `vx246-u4b-red`:**
+     - `FanBadgePlacementTests` **2 of 6 red.**
+       - `theBookEditorBadgesEveryFanRightAfterItMounts` on "every fanned block wears its badge right after the mount —
+         1 of 80, not block 1 alone" (the `#expect` at ~404). Block 1's own badge is home, so no home line fails.
+       - `theBookEditorPutsEveryBadgeHomeAfterAWidthChange` on "every fanned block keeps a badge after the width change"
+         (~330) and "entry N's badge at y=…, its block's first line at y=…" (~160), as U4's W2 measured.
+     - **Green:** `aBadgeNeverSitsAtAnotherBlocksPlace` (U4's state check covers Write; its PREMISE line ~221 must hold, a
+       `.zero` fan in the band), `blockOnesBadgeIsItsOwnAlone`, the corrected characterization, and the poison
+       characterization.
+     - `NoteDeletionNavigateAwayTests` **1 red,** `aNavigateAwayNeverTakesHerFocus`, on "the focus stays where she is"
+       (~445), "no focused-subject change is announced" (~450) and arm 2's "announced once" (~457; old: `[.library,
+       .library]`). Its other four tests are green.
+   - **W1b, `vx246-u4b-red-pre-u4`:** `aBadgeNeverSitsAtAnotherBlocksPlace` RED on the phantom ("⑂ button(s) at block 1's
+     place, and block 1 has ONE take", ~168), the stack (~164) and "stands on a fragment TextKit 2 has NOT laid out"
+     (~158), with both premise lines (~215, ~221) holding.
+   - **Not the STOP case:** a red on a `premise:` line or a `#require` is a harness defect. Stop after cleanup and report;
+     nothing is fixed under the claim.
+   - **If W1a's phantom premise (~221) fails:** TK2 estimated the whole band in the host, so the re-design is hollow too.
+     Record it; the pin goes to the orchestrator.
+3. **W2 — GREEN + THE MAC BATCH (~12 min):** `zsh notes/plans/vx246-screens/u4b/run-w2-batch.sh` runs 304 suites on
+   `vx246-u4b` (`u4b/stage-suites.txt`: U4's 271 ∪ 33 workspace / navigation suites), detached and polled in the
+   foreground.
+   - **Read:** the summary, every `✘`, the `skipped:` lines (the gated capture suites).
+   - **Expected:** every U4b pin green (the five `FanBadgePlacementTests`, both characterizations included, and
+     `aNavigateAwayNeverTakesHerFocus`), and `BookcaseOutsideWriteTests` 2/2.
+   - **A red not designed:** re-run it ALONE once, `"-only-testing:VariorumTests/<Suite>/<test>()"`.
+     - Green alone and in a named load-flake class (VX-167's `redoNeverAsks`, VX-279) ⇒ recorded as that.
+     - Reproduces alone ⇒ a REAL regression, reported with the test, its message and a trace (no fix under the claim).
+     - Standing reds, named if met: VX-115, VX-245's sites, VX-167. The 4 known issues are `IndexTierMetricsTests`'.
+   - **Watch especially:**
+     - `InlineEditorWindowTests`: the per-keystroke budget now carries the remeasure's badge re-run.
+     - `InlineHeightReportTests`: the report counts.
+     - `InlineEditorWidthReflowTests`, the Book Outline and Index landing suites, `SpreadBookViewTests`.
+     - `EditorDecorTransactionTests`: the R1-1 oracle at zero.
+     - `WorkspaceModelTests`, `PaneSplit*`, `WingFollowTests`, `SavepointOnLeaveTests`: `select`'s new parameter.
+4. **THE FIXTURE (~6 min, the dev store, her own Import door, as U4's window did):**
+   - `python3 notes/plans/vx246-screens/u4b/gen_fixture.py notes/plans/vx246-screens/u4b/fixture`. This is U4's
+     generator, copied here; the scratchpad copy is not durable.
+   - It writes `vx230-long.md` and `vx230-long-two.md` (140 blocks, block 1 one take, fans 3/40/70/100/139) and
+     `vx230-book/` (two chapters × two notes × 70 blocks, block 1 fanned, every fifth block single-take).
+   - File ▸ Import… → ⇧⌘G to the fixture folder → select all three → Import. The receipt reads "Imported 1 book and 2
+     notes…"; capture it once.
+5. **W3 — THE WALK, Study then Terminal (~14 min each).** One capture per row into
+   `notes/plans/vx246-screens/u4b/w3/<voice>/`, as region captures (`screencapture -x -R`), with crops of the badge
+   column. The window starts at 1380 wide.
+   - **(a) The Outline's live editor right after it MOUNTS (her `d3`):**
+     - Open `vx230-book`, choose Outline, press **expand all**, and click into block 2 of chapter one's first note (the
+       live inline editor, "this note · editing").
+     - At once, every visible fanned block wears its ⑂2 at its own first line: blocks 1–4 and 6, with block 5 bare. Not
+       block 1 alone.
+     - No ⑂ stands below the live editor's bottom edge over the next note's row (the transient the design argued against,
+       its point 5).
+   - **(b) The Outline after a WIDTH change, at the top and deep (her `d6`/`d8`):** set the window to 1100 wide by
+     System Events.
+     - Capture the top: every ⑂ at its line.
+     - Scroll the live note (`walk-scroll`, small guarded steps) to blocks ~50–60 and capture: every fanned block's ⑂ at
+       its own first line, the single-take blocks (55, 60) bare.
+     - Back to 1380, then capture the same deep stretch again: at their lines, not ~30 pt below (U4's live red).
+   - **(c) The Book spread's LIVE left page (her `e2`):**
+     - Choose Book mode and click into the left page: every fanned block on the left page is badged at its line, not
+       block 1 alone. Capture it.
+     - Then a width change (1380 → 1100) and capture: at their lines.
+   - **(d) Write, a width change** (this replaces the removed pin as use evidence):
+     - ⌘K ▸ "vx230 long" → Write at its top, at 1380: block 3's ⑂2 at its line, block 1 bare.
+     - Set 1100 and capture: block 3's ⑂2 at its new line, block 1 bare, no disc.
+     - Back to 1380 and capture.
+   - **(e) RULING 2 — her own Delete, from pane 1, on the note open in pane 2:**
+     - Open "vx230 long two" (⌘K), then View ▸ Open Beside so it stands in pane 2.
+     - In pane 1, the focused pane with its ring, go to the Library.
+     - Find the row "vx230 long two" and use Delete… → the confirm → Move to Trash.
+     - **Expected:** pane 2 shows the Library IN PLACE; the focus ring and the keyboard stay in pane 1. A keystroke check:
+       ⌘F or a typed letter lands in pane 1's Library, never pane 2's. Capture before and after.
+     - **The pre-fix product would have moved the ring to pane 2** (U3 STAGE RUN's finding A). Afterwards, View ▸ Close
+       Split.
+     - **Terminal's half re-imports the second long note:** the Study half deletes it, so it goes back through File ▸
+       Import… with the generator's file, or Study's Put back from the Trash.
+   - **The voice switch, between halves:** Settings ▸ General ▸ Theme ▸ Terminal (pressed by AX, as U4's runner did),
+     and Settings closed by its own button.
+6. **CLEANUP (~8 min):** moving the imported notes and book to the Trash is NOT enough; the dev store is RESTORED.
+   - Quit the Debug app BY BUNDLE ID (`pgrep` empty).
+   - Prefs: `defaults import` the pre-window export, `defaults delete` every key the window added, re-export, and diff
+     until 0 keys differ.
+   - Store: `Tools/ScaleFixture/restore.sh <the prestage dir>` → "Restored (verified)", then a second `cmp`. The posture
+     handed over: Standard, unlocked, Study voice.
+   - Delete the fixture folder (the generator stays) and any stray `default.profraw`.
+   - **`Tools/stage release --who vx246-u4b`** at once.
+   - ONE result line: the claim times, W1's red counts, W2's totals, W3's verdicts (rows a–e per voice), the posture.
+
+### SELF-ASSESSMENT (pre-stage — the implementer's)
+
+- **Confident:**
+  - **The mechanism is measured, not inferred.** Probes 5–9 (macOS 27.0) show:
+    - a read ahead of unlaid predecessors poisons the next whole walk (996 / 1,662 / 1,600 pt);
+    - one viewport pass settles every fragment, whether a top pass or a deep one;
+    - the heal's read is exact;
+    - a clean walk, or one after a TOP mount pass, is exact for every fan.
+  - **Every sighting follows from it:** U4's W2 red (51 of 80, 7 → 657 pt above), her live `d3`/`e2` (block 1 alone, by
+    `inlineHeight = 24`), and her live narrow-then-widen `d6`/`d8` (below the lines, the TALL poison of widening).
+  - **The fix is small:** one read option, one region test, one call. Both products build clean, and the headless finals
+    are identical to U4's.
+- **Less sure, said plainly:**
+  - (1) Nothing has run on a Mac. The mount pin's harness (async report, 24-pt frame) is new, and its trace on both trees
+    is argued. W1 is its evidence.
+  - (2) The phantom pin's premise (a `.zero` fan in band 5–30) rests on W1's measured `.none` band (entries 8–18 in
+    `blockOnesBadgeIsItsOwnAlone`). A host that estimates the whole band makes the premise RED, never hollow green.
+  - (3) The re-run runs per coalesced remeasure, i.e. per keystroke on the inline surface. Its cost is argued (one O(fans)
+    pass, plus the decor walk only when decorated) against the pinned 16.7-ms budget, not separately measured.
+  - (4) The transient badge below a not-yet-grown frame is argued away (AppKit lays out before it draws), and W3 (a)
+    looks for it.
+  - (5) In the scrolled-deep width case, the exact positions wait for the settle net's heal (one display pass). Between
+    the walk and the heal the badges show the walk's positions for at most a frame or two.
+- **Editor-seam letter:**
+  - `refreshBadges` adds no attribute stamp, touches no storage, forces NO layout now (U4's forcing read is gone), and
+    touches no `runStructural` or `BlockRangeIndex`.
+  - The `remeasure` call runs on the coordinator's hop, outside any storage-edit transaction (R1-1).
+  - TK1 is untouched (no `.layoutManager`).
+  - vx-282's two `EditorView.swift` touches are untouched.
+- **MOBILE PARITY:** nothing mobile-visible. VM-17 gains the poison fact (OWED 3).
+
+### PROVISIONALs (with their options — the orchestrator files them at the merge)
+
+**No new PROVISIONAL.** Ruling 2 is the orchestrator's own provisional ruling, already in its list. Its built letter adds no
+product call: the focused-subject signal is now raised only when the landing pane is the focused one. That follows from
+the ruling, since nothing she looks at changed. Its one consumer, `WingFollow`, follows a note's wing, and the Library
+has none, so the old raise on an unfocused landing moved nothing either.
+
+### FOR VX-234 (user-facing words, as built)
+
+Nothing. No word changed.
+
+### OWED (for the orchestrator)
+
+1. **TEXTKIT2_NOTES §3: U4's PROPOSED finding (its OWED 2) must NOT land as written.** Its last sentence, "A mid-document
+   `.ensuresLayout` read is positionally exact (TK2 lays out up to it)", is FALSE: U4's probe4 compared two poisoned
+   layouts. The PROPOSED replacement (canon is the orchestrator's at the closeout):
+   *"macOS 27.0 measured finding (VX-246 U4/U4b, 2026-10-14; pinned in `FanBadgePlacementTests`' two characterizations):
+   a fragment TK2 has not laid out reports `layoutFragmentFrame == .zero` in the `.none` state (an estimated one a GUESSED
+   frame), a width change returns every fragment to `.none`, and a `.zero` rect at the container origin `intersects` any
+   rect holding that point. A layout that runs AHEAD of unlaid predecessors (a mid-document `.ensuresLayout` enumeration,
+   or a viewport pass over a mid-document window) places those fragments at estimated offsets, and a following whole
+   `.ensuresLayout` walk does NOT re-position them (996 pt cold, 1,662 pt after 700 → 420, on 120 paragraphs); the next
+   viewport pass re-positions every fragment to the settled layout, and a whole walk with nothing laid out ahead of it is
+   exact. This is the mechanism of the 18l first-measure finding above. **The rules:** a frame read with `options: []` is
+   a position only in `.layoutAvailable`; never force layout from a mid-document location on a whole-post surface; read
+   geometry after the whole walk, and again after the settle net's heal."*
+2. **VX-327 (the decoration sibling): facts for its red-first probe.**
+   - The decor pass's inline region is the same `textView.bounds`, the transiently-short frame of this unit's (A).
+   - The model's pre-remeasure hop may run the decor pass's edge lookups at a mid-document point (the old frame bottom),
+     which is the poison's shape.
+   - U4b's `remeasure` re-run now re-reads decorations after every walk, the heal's included. That is observed, not
+     claimed: VX-327 stays open for its own probe.
+3. **VM-17 (the phone): add the poison fact to its probe.** Any TK2 surface that forces a mid-document read before a whole
+   walk may badge off the settled layout.
+4. **The 18l settle net, observed:** with U4's forcing read gone, a fanned inline post no longer has its first post-reflow
+   report poisoned by the badge pass. The remaining poison source is a deep viewport pass, and the heal covers it.
+5. **The Fable cold review** (CLAUDE.md: the editor seam) covers `refreshBadges` and the one `remeasure` call. It is the
+   orchestrator's, at the run's end.
+6. **U5's live round** keeps ruling 2's real-client check, unchanged.
+7. **Canon at the merge:** none beyond OWED 1 (AppSpec §12's "a corner badge only on fanned blocks" holds; ruling 2 is
+   view state, not canon).
