@@ -325,12 +325,10 @@ as the author ruled them (never beyond — and as a CONTRACT line plus a
 pointer to the plan's ruling, never a paragraph of history: AppSpec's
 size is a context cost every session pays); the effort's board tickets
 closed or re-owned — no orphans; **every ticket the effort FILED
-triaged before it closes** (her word 2026-10-14): a kind label (Bug /
-Improvement / Feature / Debt), exactly one Evidence label (Confirmed ·
-Suspected · Test-only), a Priority (Urgent · High · Medium · Low,
-Linear's own field), Pre-launch if it gates launch, Wording for
-text-only fixes, and the "Needs Lillian" state if it waits on her call
-— the handoff lists the filed tickets grouped by priority; the PR
+triaged before it closes** (her word 2026-10-14) to CLAUDE.md's
+labeling rule (one kind, Evidence on a Bug/Improvement/Debt, one Area,
+a Priority, Pre-launch only at her call, Wording, "Needs Lillian",
+never an assignee) — the handoff lists the filed tickets grouped by priority; the PR
 merges to `main` as a MERGE COMMIT;
 the MOBILE PARITY line (a `notes/MobileSoul.md` ledger row, or the
 words "nothing mobile-visible"); the author handoff
