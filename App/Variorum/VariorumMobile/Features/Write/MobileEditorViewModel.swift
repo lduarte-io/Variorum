@@ -2073,23 +2073,6 @@ final class MobileEditorViewModel {
     /// most two LINES (P1). Attributes only: no character, no identity.
     func settleMarkdownCaret() {
         guard let storage else { return }
-        // VX-282 R1-3 (re-opened and confirmed at the closeout's merged-tip
-        // run — C-1): never while the gate has armed an edit that has not
-        // landed. With the editor first responder in a NON-key window (the
-        // phone target's posture after another suite's window stays key — a
-        // manual keyboard), UIKit's input roads (`insertText` of a run,
-        // `UITextInput.replace(_:withText:)` — autocorrect, the spelling
-        // Replace, dictation) report the selection INSIDE their own
-        // `coordinateEditing` transaction BEFORE the character change, where the
-        // shared face's `editedMask` guard still reads empty; a settle there
-        // joins the character edit in ONE `processEditing` report widened to the
-        // line, the armed edit no longer binds, the fallback verdict crosses the
-        // separator, and the route refuses (the U2 window's W2b class). Skipping
-        // consumes nothing: the edit's own `storageDidEdit` consumes the arming
-        // and notes the edit, and the post-edit report (`textViewDidChange`, the
-        // next selection change) settles with the ledger's edit mark forcing the
-        // re-honour.
-        guard pendingEdit == nil else { return }
         // VX-282 R1-7: a non-editable editor holds no caret of hers — the
         // read tier's stood-down surface (another tab holds the pen), a gone
         // note, the page under the open takes browser or comments sheet — so
