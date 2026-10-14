@@ -121,7 +121,22 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 
 ## FOR VX-234 (every wording call this run makes, where it renders — posted to VX-234 at close)
 
-*(empty — each unit appends its rows)*
+*(each unit appends its rows)*
+
+**U1 — the pane in tabs (words AS BUILT; the full texts behind each (i) are UNCHANGED unless a row says so):**
+
+| # | Words (as built) | Where it renders | Note |
+|---|---|---|---|
+| U1-1 | "Connect" | Settings ▸ MCP, the tab row's first tab (`MCPPaneCopy.connectTab`) | the other three tabs reuse their sections' titles: "Clients" · "Shared with AI" · "Activity"; Connect's own section keeps "Connect a client" (the field guide's lesson 2 says "under Connect a client") |
+| U1-2 | "A local MCP server while Variorum is open — nothing is readable until you grant it." | Settings ▸ MCP, under "Enable the MCP server" (`enableSummary`) | (i) → `enableBlurb`, VX-184 round 2's sentence, unchanged |
+| U1-3 | "A setup key tells two clients apart — not programs running as you." | the Clients tab, under the client rows (`clientBoundarySummary`) | (i) → L1 (`clientBoundary`), unchanged; the line keeps L1's own caveat so it never promises more |
+| U1-4 | "Each copy carries a fresh key, shown as dots; running it again replaces the old setup." | the Connect tab, under the code block (`keySummary`) | (i) → `keyLine`, unchanged; her R-VX184-5 words kept in the line |
+| U1-5 | "A standard MCP server over stdio — one program, at this path:" | the Connect tab, above the program's path (`stdioSummary`) | (i) → `stdioLine`, unchanged |
+| U1-6 | "Run it in a terminal, then start a new Claude Code session." · "Run it in a terminal, then start a new Codex session." · "Paste it into your client's MCP settings, then restart the client." | the Connect tab, under the code block, per chosen client (`MCPSetupClient.summary`) | (i) → each client's sentence, unchanged except U1-7 |
+| U1-7 | "…or give a client that asks for a command the path below, with the environment variable this sets." | Any MCP client's sentence, in its (i) | "above" → "below": the path now sits under the code block (truth of placement, not a re-voicing) |
+| U1-8 | "it can add new takes and comments beside your text — it cannot touch a word you wrote" (suggest) · "it can also change, archive and delete what you shared, your own words included" (edit) | the grant sheet's HOW MUCH line (`rungSummary`) — every grant road: Settings ▸ MCP, ⌥⌘A, the note ▾ / row menus, the Library's bulk door, a row's Change… | (i) → `rungDetail`, unchanged (the edit sentence is VX-184 round 2's as-built clause); read and write new already one line (no (i)); the ask sheet's lead keeps the whole sentence |
+| U1-9 | "More about this" | the (i)'s tooltip and VoiceOver name, everywhere `ExplainerLine` renders | |
+| U1-10 | "Copy setup command" — now the copy ICON's tooltip and VoiceOver name, no longer a button's visible label | the Connect tab's code block, upper right | her R-13nb-5 words, unchanged; the field guide's lesson 2 ("press Copy setup command") is VX-197's to re-say for the icon (OWED) |
 
 ## Unit records
 
@@ -218,8 +233,8 @@ lines; `SettingsShape.swift` untouched; `TutorialSeeder` untouched (VX-197's lan
 |---|---|---|
 | 1 | this record opened (traces, design) | DONE (`05b5977b`) |
 | 2 | VX-232's red-on-old pin + the geometry oracle, committed on the OLD pane; the old tree built for the red run | DONE (`341e8991`, `98a74f96`) — `MCPPaneTabsTests` (`aRemountedPaneShowsTheClientItsCopyReceiptNames`, `aFreshPaneOpensOnConnectWithItsCodeBlockInSight(voice:)`); the OLD tree built from `98a74f96` (old pane + the two pins) into `DerivedData/vx281-u1-old` (`** TEST BUILD SUCCEEDED **`) — the red run is STAGE WINDOW 1's (PENDING) |
-| 3 | VX-245 — the two MCP `.fixedSize()` sites to `.lineLimit(1)` | DONE (this commit) — the lint's rule replicated over the source (`scratchpad/u1/lint.py`, the suite's exact rule: a code line's bare `.fixedSize()` needs `lineLimit(` within the four lines above or on its line): **old tree `98a74f96` → 89 sites, 8 offenders** (exactly VX-245's list, `MCPPane.swift:412` and `MCPGrantSheet.swift:285` among them); **this commit → 89 sites, 6 offenders** — `SearchPicker.swift:503`, `TakesShowFaces.swift:185`, `LibraryBulkRow.swift:93/101/109/113`, all VX-283's, untouched. The suite stays red on those six (recorded, not this run's); the Mac run reads it at STAGE WINDOW 1 (PENDING) |
-| 4 | `ExplainerLine` + the one-line summaries (`MCPPaneCopy`) + FOR VX-234 rows | NOT-STARTED |
+| 3 | VX-245 — the two MCP `.fixedSize()` sites to `.lineLimit(1)` | DONE (`3d00a166` — the hash for VX-245) — the lint's rule replicated over the source (`scratchpad/u1/lint.py`, the suite's exact rule: a code line's bare `.fixedSize()` needs `lineLimit(` within the four lines above or on its line): **old tree `98a74f96` → 89 sites, 8 offenders** (exactly VX-245's list, `MCPPane.swift:412` and `MCPGrantSheet.swift:285` among them); **this commit → 89 sites, 6 offenders** — `SearchPicker.swift:503`, `TakesShowFaces.swift:185`, `LibraryBulkRow.swift:93/101/109/113`, all VX-283's, untouched. The suite stays red on those six (recorded, not this run's); the Mac run reads it at STAGE WINDOW 1 (PENDING) |
+| 4 | `ExplainerLine` + the one-line summaries (`MCPPaneCopy`) + FOR VX-234 rows | DONE (this commit; COMPILE PENDING — the new tree's build is piece 9) — `Core/Views/ExplainerLine.swift` (the reusable component: its NAME and HOME for the settings effort); `MCPPaneCopy.{enableSummary, clientBoundarySummary, keySummary, stdioSummary, rungSummary(_:scope:), connectTab}`, `MCPSetupClient.summary` (inside its O-4 fence: 64 lines of the 120 allowed; the other fence 109), Any MCP client's "path above" → "below"; FOR VX-234 rows U1-1…U1-10 |
 | 5 | VX-232's fix — the door holds the setup choice and the tab memory | NOT-STARTED |
 | 6 | VX-205 — the setup menu as the code block (`MCPSetupMenu.swift`) | NOT-STARTED |
 | 7 | VX-199 — the tabbed pane + the search's landing | NOT-STARTED |
