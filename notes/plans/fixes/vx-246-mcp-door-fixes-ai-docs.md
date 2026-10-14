@@ -2645,3 +2645,178 @@ Both are pin defects, not product defects. Write's own faces walked clean in bot
   check of ruling 2.
 - **The cutover.** U4's implementer was at ~513k. U4b is a FRESH implementer: the remainder is small, but it needs a
   clear head on the editor seam.
+
+## U4b UNIT RECORD — the inline editor's badges, and ruling 2: VX-230's remainder · ruling 2 (opus-implementer, from 2026-10-14 ~04:00 MDT)
+
+**What this unit has NOT done (said first; flipped as pieces land):** nothing has run on a Mac yet (every pin is a Mac
+pin: its red-on-old run is W1, its green W2); no stage window has run; no QUESTIONS entry, canon edit or ticket (the
+orchestrator's at the merge). Zero `Sync/`, custody, Keychain, schema, `Server/`, `BlockRangeIndex`, `PaneSurface`,
+`runStructural`, VX-281's lane; in vx-282's files, ONLY the one cleared call in `InlineEditorSurface.Coordinator.remeasure`
+(`EditorView.swift`), nowhere near its two touches (the fan-panel sheet, the selection delegate).
+
+**Read in full before code (never delegated):** CLAUDE.md and its loaded canon; this record's header, THE UNITS, the hard
+rules, LIVE STATUS, Cross-run coordination, ORCHESTRATOR'S PROVISIONAL RULINGS, the U4 and U4b BRIEFs, U4's UNIT RECORD
+whole, U4 STAGE RUN whole, THE ORCHESTRATOR ON U4's WINDOW; `notes/plans/mcp-pane-and-docs-kickoff.md` whole;
+**`notes/TEXTKIT2_NOTES.md` whole, BEFORE any editor-seam edit**; `notes/SessionResiliencyProtocol.md` whole;
+`notes/plans/phase-18l-navigation-feel.md`'s ITEM 2 (the settle net — the 631-pt class). Code read: `EditorView.swift`
+(`EditorView.surfaceColumn` — `@State inlineHeight = 24`, `.frame(height: inlineHeight)`; `EditorSurface.Coordinator`;
+`InlineEditorSurface` + its `Coordinator` whole — `install`, the composed width and settle doors, `scheduleRemeasure`,
+`displayPassSettled`, `remeasure`; `BadgeOverlayController`; `ScrollAnchorController`), `EditorViewModel` (`attach`'s two
+doors, `overlayLayoutDidSettle`, `refreshBadges` as U4 left it, `pushBadgesToSink`, `viewportBounds`, every
+`overlayGeometryGeneration` bump, `keepingReadingPosition`, `restoreReadingAnchor`, the projection arms),
+`EditorTextView` (`onLayoutSettle`/`viewWillDraw`, `onWidthReflow`/`setFrameSize`/`applyFrameHeight`,
+`makeInlineEditor`), `PaneMeasurement.height`/`extent`, `EditorProjectionPolicy.decide`, `WorkspaceModel` whole to line
+420 (`select`, `reportingFocusMove`, `reportingDepartures`, `notesDeleted`, `focus`, `openBeside`), `RootView`'s
+`.variorumNotesDeleted` listener, `WingFollow.wire`; the pins `FanBadgePlacementTests` whole, `InlineEditorWindowTests`
+(`makeInlineWindow`, the whole-post / budget / width-reflow pins, `withInlineEditor`), `FocusHandoffTests`'
+`withEditorWorld`/`focus`, `EditorHarness`, `NoteDeletionNavigateAwayTests`, the `notesDeleted` arms of
+`MCPHerEditorDoorTests` and `DocumentImportDoorTests`.
+
+**Surfaces (planned):** THE EDITOR SEAM — `EditorViewModel.refreshBadges` (U4's function; no other function) and the ONE
+cleared call in `InlineEditorSurface.Coordinator.remeasure`; the workspace — `WorkspaceModel.select`/`notesDeleted`
+(VX-283's road, no running session lists it); Mac pins in `FanBadgePlacementTests.swift` and
+`NoteDeletionDoorsTests.swift`. The TK2 probes live in `notes/plans/vx246-screens/u4b/probes/` (gitignored).
+
+### LIVE STATUS — U4b's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this record + the trace re-run (confirm / correct the runner's) + the design, before code; the TK2 probes 5–7 | DONE (this commit) — probes `u4b/probes/probe5.swift`…`probe7.swift` + `*-output.txt` (macOS 27.0, 26A428) |
+| 1 | the pins FIRST, on the pre-fix tree (U4's fix in place): the inline mount pin (new), the inline width pin (U4's, kept), the Write phantom pin RE-DESIGNED, the hollow Write width pin REMOVED, the characterization CORRECTED + the poison characterization (new), ruling 2's pin (new) | NOT-STARTED |
+| 2 | the RED products: `DerivedData/vx246-u4b-red` (the pins commit: U4's fix, no U4b fix) and `DerivedData/vx246-u4b-red-pre-u4` (the pins commit with U4's `refreshBadges` hunk reverted in the working tree — for the re-designed Write pin only; announced below before it starts) | NOT-STARTED |
+| 3 | VX-230's inline fix — `refreshBadges` (no forcing read; the inline region is the whole post) + the one cleared call in `remeasure` | NOT-STARTED |
+| 4 | ruling 2's fix — `WorkspaceModel.select(_:in:takingFocus:)` + `notesDeleted` lands in place | NOT-STARTED |
+| 5 | the FIXED product `DerivedData/vx246-u4b` + the headless finals (core · MCP · workbook) | NOT-STARTED |
+| 6 | THE STAGE WINDOW plan (claim `vx246-u4b`) → READY | NOT-STARTED |
+
+**No revert is in flight.**
+
+### The trace, re-run (inputs → wrong output) — the runner's trace CONFIRMED in shape, CORRECTED in two places
+
+**Measured first, on a bare TK2 rig that replays the inline surface's order** (`u4b/probes/probe5`–`7`: an inline-shaped
+`NSTextView` — not vertically resizable, width-tracking container, 8-pt inset — in an un-ordered window, the pin's own
+120-block text; `displayIfNeeded` does not draw an un-ordered window, so the display pass's TK2 viewport layout is
+`layoutViewport()` called explicitly; numbers are view-space y):
+
+1. **A layout that runs AHEAD of unlaid predecessors poisons the next whole walk.** Cold, a whole `.ensuresLayout` walk
+   with nothing laid out before it is EXACT (11,570 pt = the settled layout = a fresh view's). But a sparse mid-document
+   `.ensuresLayout` read first (exactly U4's fixed badge read on the inline surface), THEN the whole walk: 10,574 pt, the
+   fans up to **996 pt** off the settled place (probe7 `[mount]`). After a width change 700 → 420: the walk with no read
+   ahead of it is exact (18,050); after U4's sparse read, the read itself and the walk sit up to **1,662 pt** off
+   (probe5: S vs settled, R = S); after a viewport pass over a MID-document window (her scrolled-deep walk), the walk is
+   **1,600 pt** off (probe7 `[scrolled deep]`). TK2 places a fragment laid out ahead of its predecessors at an estimated
+   offset, and the whole walk does not re-position it.
+2. **The next viewport pass re-positions EVERY fragment to the settled layout**, and a read taken after the settle net's
+   heal is exact: heal-read vs settled 0.0, settled vs a fresh view 0.0, stable over ten further passes (probe5, all
+   three widths; probe7 `[scrolled deep]`).
+3. **So U4's premise was false, and its probe could not see it:** probe4 compared a sparse `.ensuresLayout` walk with the
+   whole walk run right AFTER it, and both carry the same poison. This is TEXTKIT2_NOTES §3's 18l finding ("the first full
+   measure after a reflow can be 1–5 % off the layout the next display pass settles to", the settle net's reason), with
+   its mechanism now identified: out-of-order partial layout.
+
+**The red, traced through the code (the pin `theBookEditorPutsEveryBadgeHomeAfterAWidthChange`, and her live (d)/(e)):**
+- **(A) the region — CONFIRMED, with a correction.** `refreshBadges` keeps a badge only when its frame `intersects`
+  `viewportBounds` = **`textView.bounds`** on the inline surface — the frame SwiftUI LAST APPLIED. On a width change the
+  model's width door queues its badge hop before the coordinator's remeasure (`install`'s composed `onWidthReflow`: the
+  model's handler first), so the hop clips to the OLD height: fans laid out below it get no badge (29 of 80 in the pin).
+  **The correction:** the remeasure does NOT grow the view in the app. It writes a SwiftUI `@Binding`
+  (`InlineEditorSurface.install`'s closure → `EditorView.inlineHeight`), and the frame lands on SwiftUI's next pass. So a
+  badge re-run inside `remeasure` that kept the `bounds` clip would still clip to the old height in the app (the pin's
+  harness sets the frame synchronously, which hides this).
+- **THE MOUNT — the same clip, traced (her "only block 1 badged"):** `@State inlineHeight = 24`, so a freshly mounted
+  inline editor is 24 pt tall until its first report lands. Every badge pass before that (the model's width hop at the
+  mount's 0 → W width, renderFull's tail, the post-edit settle hop) badges only what lies in the top 24 pt — block 1 —
+  and marks the generation delivered; the frame then grows with NO width change and NO storage edit, so nothing
+  re-runs the pass. Her Terminal `d3` and both voices' spread `e2` exactly.
+- **(B) the positions — CONFIRMED in shape, the cause CORRECTED.** The runner read "frames that aren't the settled
+  layout's". The cause is fact 1: U4's own forcing read (sparse `.ensuresLayout` from each fanned block) lays the deep
+  fans out ahead of their predecessors, so the badges AND the remeasure's report sit off the settled layout. The settle
+  net (`displayPassSettled`) heals the HEIGHT on the next display pass, but no badge pass follows the heal. In the pin
+  the drift is upward and grows down the post, 7 → 657 pt (the poisoned layout is short at 420, as in probe5). Live after
+  narrow-then-widen it was downward (the poisoned layout is TALL when widening — probe5 `420 → 700`).
+- **The common factor, as the runner said:** nothing re-runs the badge pass after the layout the inline surface settles
+  on. The settle is the heal's remeasure (fact 2), so the re-run belongs in `remeasure`, and on a region the frame's
+  timing can't clip.
+
+### The design (argued; the code follows the pins)
+
+1. **`EditorViewModel.refreshBadges` (U4's function):**
+   - (a) **No forcing read on either surface** (`options: []`, as before U4). U4's `.layoutAvailable` state check STAYS
+     (Write's proven half: an unlaid fragment is no position).
+   - (b) **The inline surface's badge region is the whole post** (no `bounds` clip when `scrollView == nil`). The doc's
+     own contract ("whole-post overlay work is the accepted inline cost model") made literal. The frame's height is
+     SwiftUI's to apply later, and a laid-out fan below a frame that hasn't grown yet is still a fan of this post.
+   - The R1-1 oracle line U4 added for the forcing read goes with it (no forcing read is left to count).
+2. **`InlineEditorSurface.Coordinator.remeasure` — the one cleared call:** after the report, `model.refreshBadges()`.
+   - Every remeasure runs the whole `.ensuresLayout` walk first, so the pass reads a fully laid-out post: the mount's
+     first report, a width change, an update pass, a storage edit — and **the settle net's heal**, the moment the
+     positions are the settled ones (fact 2).
+   - Unconditional, never gated on "the height moved". A coalesced remeasure can be superseded and land AFTER the
+     model's own settle hop, and that hop no longer forces layout, so the remeasure must always deliver.
+   - Skipped once `uninstall` has run (`reportHeight == nil`), so a late hop never refreshes a dismantled surface.
+3. **Cost (P1):** the inline surface's model has been whole-post since Phase 10. The remeasure already walks the whole post
+   per edit (`PaneMeasurement`'s walk). The re-run adds one O(fans) badge pass, plus the decor pass that rides it (whole-
+   post on this surface, and skipped entirely in the calm default), per COALESCED remeasure, not per trigger. The pinned
+   per-keystroke budget (`InlineEditorWindowTests.inlineHeightMaintenanceStaysInsideTheFrameBudgetAtTenThousandWords`:
+   keystroke + remeasure < 16.7 ms at 10k words) carries it, and W2 runs it.
+4. **What this does NOT change:** the detail editor (Write) — its region, its reads, its width road; the decoration
+   pass's own reads and region (VX-327's, below); `viewportBounds`; the settle net; the generation hop.
+5. **Said plainly — a transient, argued not measured:** between a remeasure that grew the content and SwiftUI applying the
+   new height, a badge may stand below the text view's current frame. AppKit lays out (the hosting view's update) before
+   it draws in the same cycle, so it should never be drawn there. W3's mount rows look for a stray badge below the editor.
+6. **VX-327, observed, not claimed:** `refreshDecorations` rides every `refreshBadges`, so on the inline surface the
+   decorations are also re-read after each remeasure, the heal included. Their own reads (`.zero` for unlaid fragments)
+   and their `bounds`-clipped region are unchanged, so VX-327 stays open for its red-first probe. It gains one fact: the
+   inline decor region is the same transiently-short frame as the badges' (A).
+
+**Ruling 2 — the mechanism (inputs → wrong state):** a note shown in pane 2 is deleted while her caret is in pane 1
+(focused) → `.variorumNotesDeleted` → `RootView`'s listener → `WorkspaceModel.notesDeleted` → `select(.library, in: pane2)`
+→ `select` writes `focusedPane = pane2` (`WorkspaceModel.swift:186`) and raises `onFocusedSubjectChanged` → her focus
+(and the one live surface, `PaneMount`) moves to pane 2; her note drops to the read tier. **The fix:** `select` gains
+`takingFocus: Bool = true` (the ONE door keeps its recording and departure halves; every other caller unchanged), and
+`notesDeleted` passes `false`: the dead pane goes to the Library IN PLACE. The focused-subject signal is raised only when
+the landing pane IS the focused one (its subject changed, as now). A focused pane showing the dead note still lands in
+place and stays focused (the ruling: "only a pane that is itself focused stays focused, as now"). `takingFocus: false`
+is asserted (DEBUG) to carry a non-note destination, so the same-note rule's focus move can never meet it.
+
+### The pins (planned; each RED on its old tree on its designed line — the expectations W1 checks)
+
+- **`FanBadgePlacementTests.theBookEditorBadgesEveryFanRightAfterItMounts` (NEW — the mount, her `d3`/`e2`):** the
+  inline editor mounted at the app's shape — a 24-pt frame, a width change at the mount (600 → 700), the coordinator
+  installed, and the height report applied on the NEXT main-queue turn (SwiftUI's binding, never inside the report),
+  80 of 120 blocks fanned. **RED on `vx246-u4b-red`** on "every fanned block wears its badge right after the mount"
+  (expected: 1 of 80 — block 1 alone, the 24-pt clip) and the home lines. The async report is load-bearing: a fix that
+  re-ran the pass in `remeasure` but kept the `bounds` clip would stay red here.
+- **`theBookEditorPutsEveryBadgeHomeAfterAWidthChange` (U4's, KEPT unchanged):** red on the U4 tree, recorded at U4's W2
+  (51 of 80, 7 → 657 pt off). Re-run red in W1.
+- **`aBadgeNeverSitsAtAnotherBlocksPlace` (RE-DESIGNED — U1's phantom, Write):**
+  - **Why it was hollow:** its deep fans (40/70/100/119) are ESTIMATED in the harness, so their guessed frames lie below
+    the viewport and never intersect it.
+  - **The re-design** fans a contiguous band past the viewport (entries 5–30), where TK2 leaves fragments in `.none` with
+    a `.zero` frame, like `blockOnesBadgeIsItsOwnAlone`'s red entries 8–18 at W1. Block 1 keeps ONE take.
+  - **The premise line names the trigger state:** at least one fan reads `.none` with a `.zero` frame. If TK2 ever
+    estimates all of them, the premise goes RED loudly instead of the pin going hollow.
+  - **RED on the pre-U4 tree** (`vx246-u4b-red-pre-u4`) on the phantom ("⑂ at block 1's place, block 1 has ONE take")
+    and stack lines. GREEN on `vx246-u4b-red` (U4's Write half covers it).
+- **`aWidthChangeInWriteKeepsEachBadgeHome` — RECORDED HOLLOW AND REMOVED.**
+  - **What it claimed:** Write's width road. Its old tree has no defect to be red against (W1: green, the end state clean
+    on old).
+  - **Why not re-design it:** making it red would borrow the phantom pin's band mechanism, a second copy of one red.
+  - **What carries Write's width road:** W3 gets a Write width-change row, as use evidence.
+- **`textKitReportsAnUnlaidFragmentAsZeroAndAZeroRectIntersects` (CORRECTED):**
+  - **Removed:** line 397's claim. "A fragment far below the viewport is not laid out" is false in the host on both
+    trees. The host lays out the document's LAST fragment in the viewport pass, which U4's own probe output also showed
+    (`p159 state=3`), and the badge road depends on no fact about that fragment.
+  - **Kept:** its four held facts (cold `.zero`/`.none`; the width change's return to `.zero`/`.none`; the degenerate-rect
+    `intersects`).
+- **`textKitPlacesAFragmentLaidOutAheadOfItsPredecessorsOffItsSettledPlace` (NEW characterization — fact 1 + fact 2, on
+  probe7's exact rig):** a whole walk with nothing laid out ahead is exact; a sparse read ahead poisons it; one viewport
+  pass settles it. Green on both trees by design (no product code), the mechanism's evidence, and a point-release tripwire
+  (TEXTKIT2_NOTES §5).
+- **`NoteDeletionNavigateAwayTests.aNavigateAwayNeverTakesHerFocus` (NEW — ruling 2):**
+  - **The case:** two panes, focus in pane 1 (her note), pane 2's note dies.
+  - **The expectations:** pane 2 goes to the Library, pane 1 stays on her note and stays focused, and the focused-subject
+    signal is NOT raised.
+  - **Second arm, as now:** the focused pane showing a dead note lands on the Library, stays focused, and raises the
+    signal once.
+  - **RED on `vx246-u4b-red`** on "the focus stays where she is".
