@@ -316,6 +316,8 @@ its phase.
   - for an account: sync setup in Standard; Use Standard on a synced library; Re-link; and Replace All Keys on an
     account still on the old shared key, which re-links first (§3.9, point 7 below). If two devices mint for one
     account, the vault's CAS keeps one, and the other device deletes the key it minted and drops its wrap.
+  - Replace All Keys in Standard isn't a crossing: its new library key goes under this Mac's existing Apple key for the
+    library, and nothing is minted for the library.
   - A device that can't read the key the vault names **waits for silent setup only**: its own key file never waits,
     since it's under its own key. Whether the key hasn't arrived, iCloud Keychain is off, or the device is on another
     Apple ID, the app can't tell, and the passphrase or the words always open the vault.
@@ -324,8 +326,9 @@ its phase.
     phase 3.
 - **Entering Castle retires this Mac's own Apple key for the library.** After the switch commits it's deleted, and its
   id recorded as retired in this Mac's device section. The account's key goes when the account itself enters Castle:
-  its rotation removes the vault's Apple copy, and the acting device deletes the key. A device that follows records
-  the account's key and its own as retired, and deletes its own. Deletes of synchronizable items reach every device, and
+  its rotation rewrites the vault with no Apple copy, and once the rotation completes the acting device deletes the key
+  and records it as retired. A device that follows records the account's key and its own as retired, and deletes its
+  own. Deletes of synchronizable items reach every device, and
   app-made items have no recovery; a delete made while this Mac's iCloud Keychain is off reaches only this Mac until it's
   on again, when delete on sight finishes it (§8).
 - **Delete on sight, by recorded id.** In Castle, a key whose id this Mac's device section lists as retired is deleted
@@ -570,19 +573,20 @@ open its file. So:
   - Then what this Mac remembers. The old custody item, every silent item, the per-library-ID items the migration
     kept, the 13p escrow items, and the format-1/2 key files beside the library all go — each only once the history
     verifiably holds its key. **This device's scheduled Markdown export turns off, with one notice** (today's step,
-    kept). A fresh backup is made, and this Mac's own Apple key for the library is deleted and recorded as retired; the
-    account's goes with the account's own rotation (§3.5).
+    kept). A fresh backup is made, and this Mac's own Apple key for the library is deleted and recorded as retired;
+    synced, the account's was deleted and recorded as retired when the rotation completed (§3.5).
   - Last, the old shared key is retired (§3.5).
 - **Use Standard** — a key change, like Use Castle's (her rulings, §1).
   - The door: your passphrase and your twelve words, typed — the words are never made new here, so the paper you have
     keeps opening what stays behind — plus rule 5's sentence, saying plainly that the library itself, with everything
     written in Castle, opens through the Apple account from now on.
   - **The anchor first:** the outgoing Castle key and its whole history, sealed under the typed passphrase and words
-    (§3.4).
+    (§3.4), written into the current key file before any other step, and carried into the new one.
   - Synced: the rotation, as Use Castle's — a new master and sync key, your writing on the server re-encrypted, and the
-    vault rewritten with the new master under your passphrase and your words. **The account's fresh Apple key joins the
-    vault only once the rotation completes**, its previous-corpus-key window closed, so no Castle-era corpus key ever
-    sits under anything Apple-reachable (a `Sync/` line: Fable's, phase 3).
+    vault rewritten with the new master under your passphrase and your words. The new sync keys go into a silent item,
+    and the old ones' Touch ID item goes once it verifies. **The account's fresh Apple key joins the vault only once
+    the rotation completes**, its previous-corpus-key window closed, so no Castle-era corpus key ever sits under
+    anything Apple-reachable (a `Sync/` line: Fable's, phase 3).
   - The new library key: its silent item, then the new key file (this Mac's fresh Apple key, P, W, plus the new master
     when synced; an empty history; the anchor), then the record written into the staged file, then the swap. Copies
     pause from the prepare to the swap.
@@ -593,8 +597,12 @@ open its file. So:
   - As today, on a plan that carries every fact a resume needs: "another device switched", the words rule (VX-107).
   - **Every follow into or out of Castle types one secret, once** — the passphrase or the words, through the vault.
     Until then the library opens on its current key and you can write; sync waits, with the banner. No such follow
-    waits on an Apple key. A keys-replaced follow in Standard reads the new master through the account's Apple key, as
-    today, or takes the passphrase or the words when that key can't be read here.
+    waits on an Apple key. A keys-replaced follow in Castle types one secret too, since the new master is under only
+    the passphrase and the words. A keys-replaced follow in Standard reads the new master through the account's Apple
+    key, as today, or takes the passphrase or the words when that key can't be read here.
+  - **A follower's new key file** is locked under the secret it typed and under the new master, with that master's
+    words copy beside it (§3.5a) — so the words open it either way, and the passphrase directly when it was the one
+    typed — plus, in Standard, this Mac's own fresh Apple key.
   - Into Castle: the new master from the vault; a new library key of Castle's kind (a Touch ID item made at this
     press where this device's gate style says so, or none), its history taking every older key; this Mac's own Apple
     key deleted and recorded as retired, with the account's; the scheduled Markdown export off, with one notice.
