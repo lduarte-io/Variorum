@@ -150,4 +150,62 @@ struct MobileMarkdownCaretTests {
             #expect(model.identityAuditFailures == 0)
         }
     }
+
+    /// **PIN FIRST — the round-1 review's R1-3 (SPECULATIVE): does the
+    /// settle's pending-edit guard have a window on the phone?** The guard
+    /// (`MarkdownFace.settleCaret`'s `editedMask` check) is empty between
+    /// `beginEditing` and the first change inside a transaction. If UIKit
+    /// reports the selection inside `coordinateEditing` BEFORE the character
+    /// change — the roads autocorrect, the spelling Replace and dictation take
+    /// go through `UITextInput.replace(_:withText:)`, and only `insertText` was
+    /// observed at U2 — a settle at a rescue point would write inside the
+    /// transaction: the W2b class (the edit's report widened to the line, the
+    /// armed edit unbound, the route refusing, the surface desynced). Driven
+    /// through the real `replace(_:withText:)` with her caret at `*hello |*`:
+    /// a same-length replacement (the review's shape), a shorter one and a
+    /// longer one (the caret shifts — a selection report is certain). RED ⇒
+    /// the window is real and the phone's settle gains the `pendingEdit`
+    /// guard; GREEN ⇒ R1-3 is hollow and nothing is changed. Assertions are
+    /// muted so a desync reads as its counter, never a crash.
+    @Test(arguments: ["Hello", "hi", "hello there"])
+    func aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(
+        _ replacement: String
+    ) async throws {
+        try await withEditorAssertionsMuted {
+            try await withEditorWorld { session, _ in
+                MobileEditorStyle.voice = .study
+                defer { MobileEditorStyle.voice = .terminal }
+                let postID = try await makePost(session, blocks: ["*hello *", "next block"])
+                let (model, surface) = await makeSurfaceEditor(session, postID: postID)
+                let window = host(surface)
+                defer { window.isHidden = true; window.rootViewController = nil }
+                let view = surface.textView
+                let storage = view.textStorage
+
+                view.selectedRange = NSRange(location: 7, length: 0)
+                #expect(unstyled(storage, 1..<7).isEmpty,
+                        "non-vacuity: the caret is honoured before the replace")
+                let start = try #require(view.position(from: view.beginningOfDocument, offset: 1))
+                let end = try #require(view.position(from: start, offset: 5))
+                let range = try #require(view.textRange(from: start, to: end))
+                view.replace(range, withText: replacement)
+
+                #expect(model.desyncRecoveryCount == 0,
+                        "the replace never desynced the surface (R1-3's window)")
+                #expect(storage.string == "*\(replacement) *\nnext block")
+                #expect(model.identityAuditFailures == 0)
+                // The face reads as the landed caret says: honoured exactly
+                // when the caret still sits between the space and the star.
+                let length = (replacement as NSString).length
+                let caret = view.selectedRange
+                if caret == NSRange(location: length + 2, length: 0) {
+                    #expect(unstyled(storage, 1..<(length + 2)).isEmpty,
+                            "the caret at the rescue point: honoured")
+                } else {
+                    #expect(!anyFace(storage, 0..<(length + 3)),
+                            "the caret elsewhere (\(caret)): caret-blind")
+                }
+            }
+        }
+    }
 }
