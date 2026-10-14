@@ -3691,8 +3691,38 @@ final class EditorViewModel {
     }
 
     /// Badges for fanned blocks currently laid out near the viewport.
-    /// Cost ∝ fanned blocks (fans are opt-in and rare) — no ensureLayout,
-    /// unlaid-out blocks simply have no badge until scrolled to (P1).
+    /// Cost ∝ fanned blocks (fans are opt-in and rare) — no ensureLayout on
+    /// the detail editor: unlaid-out blocks simply have no badge until
+    /// scrolled to (P1).
+    ///
+    /// **VX-230 (Run VX-246 U4) — a fragment's frame is a POSITION only once
+    /// TextKit 2 has laid it out.** Measured on macOS 27.0 (the run record's
+    /// U4 trace): a fragment TK2 has not laid out reports a `.zero` frame in
+    /// the `.none` state — cold, below the viewport, and EVERY fragment after
+    /// a width change until the next layout — and a `.zero` rect at the
+    /// container origin `intersects` any viewport holding that point. This
+    /// pass read the frame with no state check, so every fanned block TK2
+    /// had not laid out was badged at the container's origin — block 1's
+    /// place — and the translucent badges stacked into her black disc (and
+    /// U1's "⑂2" on a one-take block 1). So: a badge only from a fragment in
+    /// `.layoutAvailable` (the house's own laid-out predicate —
+    /// `LongBlockLayout`'s candidates read exactly it); anything else is no
+    /// position, and the block waits for its layout.
+    ///
+    /// **The INLINE surface lays out what it badges.** The book/spread/pool
+    /// editor (no scroll view of its own) badges the WHOLE post by design
+    /// (`viewportBounds`), on the premise that it "is laid out to content
+    /// already". It was not, at the one moment that mattered: a width change
+    /// queues this pass (the model's width door) BEFORE the coordinator's
+    /// whole-post remeasure, so the pass met nothing laid out and nothing
+    /// re-ran it after the remeasure — her book view's one disc and no badge
+    /// anywhere else. Its read therefore passes `.ensuresLayout`, which makes
+    /// the premise true at the read whatever order the hops run in (measured:
+    /// a mid-document `.ensuresLayout` read is positionally exact — TK2 lays
+    /// out up to it). No new cost class: the remeasure lays out the same whole
+    /// post on every storage edit and width change (`PaneMeasurement`'s
+    /// `.ensuresLayout` walk), so whichever runs first pays it and the other
+    /// finds it done — the inline surface's accepted model since Phase 10.
     func refreshBadges() {
         defer { refreshDecorations() }  // the decor layer rides every badge
                                         // refresh trigger (scroll, layout,
@@ -3715,6 +3745,18 @@ final class EditorViewModel {
         // from zero, so a note with many fans paid O(fans × blocks) on a
         // pass that re-runs on every scroll and every projection.
         let ranges = index.entryRanges()
+        // VX-230: the inline surface (no scroll view — `viewportBounds`'s own
+        // test) lays out what it badges; the detail editor never forces.
+        let readOptions: NSTextLayoutFragment.EnumerationOptions =
+            scrollView == nil ? [.ensuresLayout] : []
+        #if DEBUG
+        // The R1-1 oracle reaches this pass's forcing read too: a layout-
+        // forcing query inside the storage-edit transaction is the sampled
+        // spin's precondition (`refreshDecorations` carries the class).
+        if inStorageEditTransaction, !readOptions.isEmpty, slots.contains(where: \.hasFan) {
+            decorLayoutQueriesInEditTransaction += 1
+        }
+        #endif
         for (i, slot) in slots.enumerated() where slot.hasFan {
             guard i < ranges.count else { break }
             let range = ranges[i]
@@ -3722,8 +3764,12 @@ final class EditorViewModel {
                 contentManager.documentRange.location, offsetBy: range.location)
             else { continue }
             var frame: CGRect?
-            layoutManager.enumerateTextLayoutFragments(from: location, options: []) { fragment in
-                frame = fragment.layoutFragmentFrame
+            layoutManager.enumerateTextLayoutFragments(from: location, options: readOptions) { fragment in
+                // VX-230: not laid out ⇒ not a position (a `.zero` frame or a
+                // TK2 estimate) — no badge until its layout lands.
+                if fragment.state == .layoutAvailable {
+                    frame = fragment.layoutFragmentFrame
+                }
                 return false
             }
             if let frame {
