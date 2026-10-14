@@ -60,8 +60,15 @@ public enum SettleOutcome: Equatable, Sendable {
 }
 
 /// A step's way of saying the act must roll back now (before its commit
-/// point): the account moved elsewhere before this device's first write.
+/// point): the account moved elsewhere before this device's first write, or a
+/// resume no longer holds what only the press had (a copy's key).
 struct ActRollback: Error {
+    var refusal: ExecutorRefusal
+}
+
+/// The act rolled back (`drive` caught an `ActRollback` and undid it).
+struct ActRolledBack: Error {
+    var act: ProtectionAct
     var refusal: ExecutorRefusal
 }
 
@@ -208,7 +215,11 @@ extension ProtectionExecutor {
             executor: self, library: library, plan: plan, secrets: secrets, typed: typed, toKey: toKey,
             resuming: false)
         defer { library = ctx.library }
-        try await drive(program, ctx)
+        do {
+            try await drive(program, ctx)
+        } catch let rolledBack as ActRolledBack {
+            throw rolledBack.refusal
+        }
         return ctx.outcome
     }
 
@@ -220,7 +231,7 @@ extension ProtectionExecutor {
                 try await program.run(step, ctx)
             } catch let stop as ActRollback {
                 try rollBack(&ctx.library, act: ctx.act)
-                throw stop.refusal
+                throw ActRolledBack(act: ctx.act, refusal: stop.refusal)
             }
             if ctx.plan.firstUnfinishedStep == index { ctx.plan.steps[index].done = true }
             try leaves.plans.writePlan(try ctx.plan.sealed(under: ctx.library.key))
@@ -289,7 +300,11 @@ extension ProtectionExecutor {
             }
         }
         if let resumable {
-            return .resumed(try await resume(resumable, &library, typed: typed))
+            do {
+                return .resumed(try await resume(resumable, &library, typed: typed))
+            } catch let rolledBack as ActRolledBack {
+                return .rolledBack(rolledBack.act)
+            }
         }
         // No plan to trust. Past the commit point (the library opens under
         // the act's new key, or the act re-keys nothing): finish from the

@@ -564,7 +564,9 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   Always ask, synced, plan dropped; the follower's hold; the refusals) — `8b3b1e39`; (c) the account acts — set up
   sync, enroll by the joining rules, the three leaves (This Mac Only carrying a mode while signed out), Move — DONE,
   13 tests in 2 suites green filtered — `843ef37c`;
-  (d) copies — open a copy, land, Send Library, plaintext export, the offer's delete — NOT-STARTED; (e) the key doors,
+  (d) copies — open a copy (the current key, the current facts, no act carried), land (a fresh key, an empty history,
+  one secret then the other typed or made new, none through a readable Apple key), Send Library, the plaintext export,
+  the offer's delete — DONE, 11 tests in 3 suites green filtered — this commit; (e) the key doors,
   device settings, the re-arm, confirm mode, create library, Re-link (both arms), the old shared key's move and
   retirement, the migration — NOT-STARTED; (f) U3's guards with their DEBUG mutation pins, the log scan, decision 35,
   the failed seals — NOT-STARTED; (g) the record — NOT-STARTED.

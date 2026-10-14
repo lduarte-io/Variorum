@@ -180,6 +180,11 @@ public final class ProtectionExecutor {
     public internal(set) var freshVaults: [String: VaultSnapshot] = [:]
     /// Every account whose vault this session has read (present or absent).
     var vaultsReadThisSession: Set<String> = []
+    /// A copy act's in-hand facts, for its span only (never stored): the
+    /// copy's own key, its record, a landing's new record and section.
+    var copyOpenerInHand: StoreKey?
+    var copyRecordInHand: ProtectionRecord?
+    var landingInHand: (record: ProtectionRecord, section: DeviceSection)?
 
     public init(leaves: ExecutorLeaves, configuration: ExecutorConfiguration, guards: ProtectionGuards = .all) {
         self.leaves = leaves
@@ -224,8 +229,9 @@ public final class ProtectionExecutor {
         let liveFile = try liveFormat3()
         let reach = reach(key: key, keyFile: liveFile)
         let record = try leaves.library.readRecord(with: key)
-        let memory = try leaves.memory.readMemory(libraryID: libraryID)
-            .flatMap { DeviceMemory.opening($0, libraryID: libraryID, reach: reach) }
+        let slotLibrary = record?.libraryID ?? libraryID
+        let memory = try leaves.memory.readMemory(libraryID: slotLibrary)
+            .flatMap { DeviceMemory.opening($0, libraryID: slotLibrary, reach: reach) }
         guard let record else {
             // A library from before this change: the migration builds this
             // Mac's section from its own facts.
@@ -235,6 +241,8 @@ public final class ProtectionExecutor {
                 key: key, record: nil, section: section, resolution: .newIdentity(predecessorID: nil),
                 memory: memory, keyFile: liveFile, familyTree: memory?.familyTree ?? FamilyTree())
         }
+        // The executor serves the slot's library (a landing changes it).
+        configuration.libraryID = record.libraryID
         let sections = record.verifiedSections(reach: reach)
         let (section, resolution) = DeviceFacts.thisMacsSection(
             memory: memory, recordSections: sections, marker: record.marker(for: configuration.machine),

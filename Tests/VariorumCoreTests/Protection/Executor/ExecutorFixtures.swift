@@ -17,7 +17,7 @@ final class EX {
     static let scope = "Variorum-test"
 
     let world: ExecutorWorld
-    let libraryID = PF.id()
+    var libraryID = PF.id()
     let deviceID = PF.id()
     let passphrase = "the day I left"
     let words: [String]
@@ -168,6 +168,7 @@ final class EX {
         let typed = typed ?? self.typed
         let opened = try #require(openByRoads(typed), "no road opens the library after the crash")
         key = opened
+        if let slot = world.live?.record?.libraryID { libraryID = slot }
         let executor = executor(guards: guards)
         var library = try executor.unlock(with: opened)
         let outcome = try await executor.settle(&library, typed: typed)
@@ -180,8 +181,9 @@ final class EX {
     var liveRecord: ProtectionRecord? { world.live?.record }
 
     func memoryValue(_ key: StoreKey? = nil) -> DeviceMemory? {
-        guard let sealed = world.memories[libraryID] else { return nil }
-        return try? sealed.open(purpose: .memory, libraryID: libraryID, key: key ?? self.key)
+        let slot = world.live?.record?.libraryID ?? libraryID
+        guard let sealed = world.memories[slot] else { return nil }
+        return try? sealed.open(purpose: .memory, libraryID: slot, key: key ?? self.key)
     }
 
     func custody(_ itemClass: ProtectionNames.CustodyClass, _ key: StoreKey) -> Bool {

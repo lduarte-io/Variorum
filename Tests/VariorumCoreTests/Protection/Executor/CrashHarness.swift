@@ -32,6 +32,9 @@ enum CrashHarness {
     static func everywhere(
         _ make: () async throws -> EX, act: ActRun, finished: WorldState, neverHappened: WorldState,
         dropPlan: Bool = false, typed: ((EX) -> TypedSecrets)? = nil,
+        /// A copy act's resume holds no copy key after a relaunch: before its
+        /// swap it rolls back (PROVISIONAL P-U3-6) — still never a third state.
+        resumeMayRollBack: Bool = false,
         sourceLocation: SourceLocation = #_sourceLocation
     ) async throws {
         let (clean, cleanLibrary) = try await cleanRun(make, act)
@@ -62,7 +65,7 @@ enum CrashHarness {
             let done = finished(fixture, settled), never = neverHappened(fixture, settled)
             #expect(done != never, "crash after write \(crashAt) (\(clean.world.writes[crashAt - 1])): \(done ? "both" : "neither") — a third state",
                     sourceLocation: sourceLocation)
-            if !dropPlan, crashAt >= firstPlan {
+            if !dropPlan, !resumeMayRollBack, crashAt >= firstPlan {
                 #expect(done, "crash after write \(crashAt) (\(clean.world.writes[crashAt - 1])): the plan's resume did not finish",
                         sourceLocation: sourceLocation)
             }

@@ -95,7 +95,7 @@ extension ActContext {
     /// §3.5): its id stamped in the plan first (a crash after the add still
     /// knows it), the item added, the id recorded in this Mac's section.
     /// Idempotent: a key this act already minted is read back.
-    func mintAppleKey(purpose: AppleKeyPurpose) throws -> AppleKeyMaterial {
+    func mintAppleKey(purpose: AppleKeyPurpose, recordedInThisSection: Bool = true) throws -> AppleKeyMaterial {
         let stamped = purpose == .library ? parameters.ownAppleKeyID : parameters.accountAppleKeyID
         var key: AppleKeyMaterial
         if let stamped, let minted = try leaves.apple.readAppleKey(id: stamped) {
@@ -112,7 +112,7 @@ extension ActContext {
         }
         // Recorded in this Mac's section — also on a resume after a crash
         // between the add and the record.
-        if !library.section.appleKeys.contains(where: { $0.id == key.id }) {
+        if recordedInThisSection, !library.section.appleKeys.contains(where: { $0.id == key.id }) {
             try updateSection {
                 $0.recordingAppleKey(AppleKeyRecord(
                     id: key.id, purpose: purpose, accountID: purpose == .account ? accountID : nil, origin: .minted))

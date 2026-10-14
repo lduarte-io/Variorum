@@ -9,9 +9,6 @@ struct PendingProgram: ActProgram {
     func run(_ step: String, _ ctx: ActContext) async throws { throw ExecutorRefusal.nothingToDo }
 }
 
-func OpenCopyProgram() -> PendingProgram { PendingProgram(act: .openCopy) }
-func LandProgram() -> PendingProgram { PendingProgram(act: .land) }
-func SendLibraryProgram() -> PendingProgram { PendingProgram(act: .sendLibrary) }
 func MigrationProgram() -> PendingProgram { PendingProgram(act: .migration) }
 func ConfirmModeProgram() -> PendingProgram { PendingProgram(act: .confirmMode) }
 func MoveOffSharedKeyProgram() -> PendingProgram { PendingProgram(act: .moveOffSharedKey) }
@@ -21,8 +18,6 @@ func CreateLibraryProgram() -> PendingProgram { PendingProgram(act: .createLibra
 func KeyDoorProgram(act: ProtectionAct) -> PendingProgram { PendingProgram(act: act) }
 func DeviceSettingsProgram() -> PendingProgram { PendingProgram(act: .deviceSettings) }
 func TouchIDRearmProgram() -> PendingProgram { PendingProgram(act: .touchIDRearm) }
-func OfferDeleteProgram() -> PendingProgram { PendingProgram(act: .offerDelete) }
-func PlaintextExportProgram() -> PendingProgram { PendingProgram(act: .plaintextExport) }
 
 extension ProtectionExecutor {
     /// WIP: the moves (§3.5 point 2) — written with the old shared key's acts.
