@@ -185,6 +185,10 @@ struct CaptureTextView: NSViewRepresentable {
         // TEXTKIT2 §4's first two defensive practices: opt into TK2
         // EXPLICITLY at init, and never touch a TK1 API afterwards.
         let view = CaptureNSTextView(usingTextLayoutManager: true)
+        // Named before anything can ask the delegate for this view's undo
+        // manager (VX-193 — `Coordinator.undoManager(for:)` answers only
+        // for its own view).
+        context.coordinator.view = view
         view.delegate = context.coordinator
         view.onFile = { [weak coordinator = context.coordinator] in
             coordinator?.parent.onFile()
@@ -244,7 +248,6 @@ struct CaptureTextView: NSViewRepresentable {
         scroll.hasVerticalScroller = false
         scroll.drawsBackground = false
         scroll.autohidesScrollers = true
-        context.coordinator.view = view
         return scroll
     }
 
@@ -252,13 +255,7 @@ struct CaptureTextView: NSViewRepresentable {
         guard let view = context.coordinator.view else { return }
         context.coordinator.parent = self
         if view.string != text {
-            // A programmatic adopt keeps the caret where it can (the host
-            // clears the box on a completed hand-off; nothing else writes).
-            let selected = view.selectedRange()
-            view.string = text
-            let end = (text as NSString).length
-            view.setSelectedRange(
-                NSRange(location: min(selected.location, end), length: 0))
+            context.coordinator.adopt(text, into: view)
         }
         context.coordinator.apply(style, to: view)
         if focusRequest != context.coordinator.lastFocusRequest {
@@ -298,6 +295,7 @@ struct CaptureTextView: NSViewRepresentable {
 
     static func dismantleNSView(_ scroll: NSScrollView, coordinator: Coordinator) {
         coordinator.canary.disarm()
+        coordinator.stopObservingUndo()
     }
 
     @MainActor
@@ -308,7 +306,72 @@ struct CaptureTextView: NSViewRepresentable {
         var lastFocusRequest = 0
         private var appliedStyle: CaptureTextStyle?
 
-        init(_ parent: CaptureTextView) { self.parent = parent }
+        /// **The box's own undo history** (VX-193 — VX-179 U3-g's mechanism,
+        /// carried from the comments panel's `CommentTextArea` unchanged).
+        /// Two defects lived in the box while its typing history was the
+        /// WINDOW's (the text view's default): ⌘Z moved the box's text
+        /// without `textDidChange`, so the binding — the thing both hosts
+        /// FILE — kept the words she had undone and ⏎ filed them; and a
+        /// programmatic clear (a completed hand-off, an EMPTY filing that
+        /// leaves the box on screen) left that history standing, so ⌘Z then
+        /// replayed ranges of the old text against the new one
+        /// (`NSRangeException`, measured). Undo is PER BOX and a
+        /// programmatic replacement ends it (P-VX179-U3-4, carried — PROVISIONAL
+        /// here as P-U4-1): ⌘Z in the box undoes the box's own typing and
+        /// nothing that other text left on the window's stack. ⌘Z still
+        /// arrives by AppKit's road — `undo:` travels to the window, which
+        /// undoes through the first responder's `undoManager`, answered here.
+        let undoHistory = UndoManager()
+        private var undoObservers: [NSObjectProtocol] = []
+
+        init(_ parent: CaptureTextView) {
+            self.parent = parent
+            super.init()
+            // **An undo or a redo is an edit the binding must hear.** AppKit
+            // sends no `textDidChange` for either (measured — VX-179 U3-g on
+            // this box, and again at VX-193). This manager is the box's own,
+            // so its two notifications are exactly "this box's text was
+            // undone or redone" — and they arrive SYNCHRONOUSLY inside
+            // `undo()` (measured at VX-193), so no view update can run in
+            // between and re-adopt the stale binding over the undo.
+            for name in [Notification.Name.NSUndoManagerDidUndoChange,
+                         .NSUndoManagerDidRedoChange] {
+                undoObservers.append(NotificationCenter.default.addObserver(
+                    forName: name, object: undoHistory, queue: .main
+                ) { [weak self] _ in
+                    MainActor.assumeIsolated { self?.textChangedOutsideTyping() }
+                })
+            }
+        }
+
+        func stopObservingUndo() {
+            for token in undoObservers { NotificationCenter.default.removeObserver(token) }
+            undoObservers.removeAll()
+        }
+
+        func undoManager(for view: NSTextView) -> UndoManager? {
+            view === self.view ? undoHistory : nil
+        }
+
+        /// The box's text moved without `textDidChange` (an undo or a
+        /// redo): the binding follows it, exactly as after a keystroke.
+        private func textChangedOutsideTyping() {
+            guard let view, parent.text != view.string else { return }
+            parent.text = view.string
+        }
+
+        /// **A programmatic adopt** — the host replaced the box's text (a
+        /// completed hand-off clears it; the pad's park restores it; nothing
+        /// else writes). The caret stays where it can, and the box's history
+        /// ENDS: the words it described have left the box (VX-193).
+        func adopt(_ text: String, into view: CaptureNSTextView) {
+            let selected = view.selectedRange()
+            view.string = text
+            let end = (text as NSString).length
+            view.setSelectedRange(
+                NSRange(location: min(selected.location, end), length: 0))
+            undoHistory.removeAllActions()
+        }
 
         /// WRITE-GATED, the A47c lesson: an unguarded property write on a
         /// live text view is never free, and `updateNSView` runs often.
