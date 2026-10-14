@@ -2827,7 +2827,7 @@ is asserted (DEBUG) to carry a non-note destination, so the same-note rule's foc
 - `App/Variorum/DerivedData/vx246-u4b-red`: `7209cf2d`'s tree (U4's fix, the U4b pins, no U4b fix). W1a only.
 - `App/Variorum/DerivedData/vx246-u4b-red-pre-u4`: the same tree with U4's `refreshBadges` hunk reverted. W1b only (the
   re-designed phantom pin).
-- `App/Variorum/DerivedData/vx246-u4`: `cd843647`'s App/Sources (both fixes). W2 and W3.
+- `App/Variorum/DerivedData/vx246-u4b`: `cd843647`'s App/Sources (both fixes). W2 and W3.
 - **Each verified by symbol** (piece 2 / piece 5): `refreshBadges()` measures 4,276 / 3,336 / 3,696 bytes, and
   `select(_:in:takingFocus:)` is present only in the fixed product.
 
@@ -2873,7 +2873,7 @@ cleanup ~8). **Batch-only fallback (~30 min, claim 40):** steps 0–1, W1, W2, c
    `vx246-u4b` (`u4b/stage-suites.txt`: U4's 271 ∪ 33 workspace / navigation suites), detached and polled in the
    foreground.
    - **Read:** the summary, every `✘`, the `skipped:` lines (the gated capture suites).
-   - **Expected:** every U4b pin green (the five `FanBadgePlacementTests`, both characterizations included, and
+   - **Expected:** every U4b pin green (all six `FanBadgePlacementTests`, both characterizations included, and
      `aNavigateAwayNeverTakesHerFocus`), and `BookcaseOutsideWriteTests` 2/2.
    - **A red not designed:** re-run it ALONE once, `"-only-testing:VariorumTests/<Suite>/<test>()"`.
      - Green alone and in a named load-flake class (VX-167's `redoNeverAsks`, VX-279) ⇒ recorded as that.
