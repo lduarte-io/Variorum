@@ -206,4 +206,44 @@ The report follows, committed unedited. The dispositions are at the end.
 
 ## Dispositions
 
-*(Written below once the fixes land — every finding gets one.)*
+Every mechanism was traced before a fix: the four MAJORs against the design's own text and against the code they
+cite. LibraryHandOff.swift copies the live key file byte for byte. PostureSwitch.swift's Standard Replace All Keys
+reads the one Apple key it can and wraps M′ under it. Leaving Castle doesn't rotate the master. The 13p escrow item
+is left when it holds another key's. `RestoreHoldModel.resume()` clears the banner without checking the marker's
+removal. No finding is disputed.
+
+| # | finding | disposition | where |
+|---|---|---|---|
+| M1 | Seals carry no freshness: a replayed plan or memory value passes | **Fixed.** Nothing that decides lives where a replay of one item reaches it alone. **(1)** The settings that could weaken protection move into the protection record, per device — inside the encrypted library. That is VX-313's ruling built stronger. **(2)** Plans are named by the record's act in flight and resume only when named. A missing or unmatched plan never blocks: it rolls back before the commit point and finishes from the record after it, so VX-235's class stays closed. **(3)** No repair makes a Touch ID item; a missing working item while the record says Touch ID gets the re-arm question, and a no records Always ask. **(4)** A whole-state rollback is the stated limit: it never opens the library to the one who did it. The reviewer's sequence-in-the-seal alone wasn't enough: rolling back the library file (same key) replays the sequence too. Removing the target from the memory closes that | design §3.2, §3.3, §3.6, §3.10, §4.1 (promise 10, the adversary's replay, pins), §8; plan §3, §5 |
+| M2 | One library on two Macs has no consistent key rule | **(a) Fixed, PROVISIONAL:** a different library lands under a key of this Mac's own, re-encrypted with an empty history, so no key is ever held by two Macs; in Castle the landing asks for both secrets. **(c) Fixed:** gifts only for copies the catalog attributes to this Mac, made once per library per Mac. **(b) Stated:** a library sent before this change shares its key with the other Mac until one of them changes it — rule 2's third exception — and the retirement sheet names the other Mac's key file whenever it can see it. Fixed scenarios added for each | design §3.1, §3.4, §3.5, §3.7, §4.1, §9 |
+| M3 | Leaving an account doesn't cut the library loose from its keys | **Fixed, PROVISIONAL.** A Castle library leaving an account re-keys at that act, with both secrets typed. Use Castle retires only the keys this library alone uses; the account's key goes with the account's own rotation, never when one library leaves (no orphaned vault copy). The record lists every Apple key id that ever wrapped its keys. The account-era copies are rule 2's second exception, said at the act and in Data Safety. Joining or moving into Castle is entering Castle; into Standard is leaving it, with rule 5's sentence | design §3.1, §3.2, §3.4, §3.5, §3.8, §3.9, §4.1, §9; map A-3, C-4 |
+| M4 | Accounts on the old shared key: the rules contradict | **Fixed, one rule:** nothing is ever written under the old shared key. Enrolling reads; a device that must land a new wrap (in practice, one joining) uses a key of its own — corner 34's road with its trigger; Replace All Keys on such an account re-links it first with Re-link's consent, so decision 30 holds under the account's own key. Promise 3 restated for a settled world, counting a device's own wrap | design §3.3, §3.5 (one minter, point 7), §3.9, §3.12, §4.1; map S-3, S-5 |
+| m5 | The residue is narrower than its mechanism | **Fixed:** restated for the words changing alone or with the master; the old words still open the file | design §3.5a, §8, promise 5 |
+| m6 | The escrow item isn't a fold source, repair target or starting state | **Fixed:** all three, and Use Castle removes it once the history holds its key | design §3.3, §3.9, §3.13; plan §6 |
+| m7 | The unconfirmed-mode guard blocks only Apple-reachable writes | **Fixed:** no custody repair either way until confirmed; the notice carries the floor sentence and Export | design §3.3, §3.13, promise 4 |
+| m8 | A copy can carry the new key with the old record | **Fixed:** the record goes into the staged file before the swap; copies pause from the prepare to the swap and are named from the file's own key | design §3.7, §3.9; plan §5; map T-1 |
+| m9 | The retirement check and door use mismatched conditions | **Fixed:** the act's own account is excepted and re-read fresh at the last step; the door and the exception share one condition from the record | design §3.5 point 4 |
+| m10 | The biometry hash has no home | **Fixed:** what this Mac remembers holds it; "working item" defined; a no records Always ask | design §3.2, §3.10; map lobby |
+| m11 | Corner 34's key has no trigger | **Fixed:** a device joining an account still on the old shared key; kept until Castle or the library's last copy | design §3.5 |
+| m12 | Retirement depends on unseen iCloud Keychain state | **(a) Stated** (delete on sight finishes it when sync returns); **(b) Fixed:** followers record every Apple key id their key file names; **(c) Fixed:** the fakes' same-name rule | design §3.5, §4.1, §8 |
+| m13 | The raise rule lost "from another Mac" | **Fixed:** restored; an own-line Castle copy takes the current mode (rule 4) | design §3.7 |
+| m14 | Rule 5's sentence only on the leave screen | **Fixed:** on every road into Standard, and as a notice after a follow | design §3.1, §3.8, §3.9; map follow |
+| m15 | Promises that fail a per-step check | **Fixed:** 8 per decision 28, scoped to followed devices; 11 at her press; 4 exempts corner 45's recording; 3 and 7 checked once the world settles | design §4.1 |
+| m16 | §5 and §6 disagree on membership | **Fixed:** reconciled | design §5, §6 |
+| m17 | Canon deltas missing | **Fixed:** decision 7, decision 3 / identity / decision 13, §3.4's audit tables, §6's sentence, SyncSpec §3's identity sentence, AppSpec §12's enroll line, the dials row | design §7 |
+| m18 | The phase-1 plan understates the design | **Fixed:** plural Apple wraps; CreateLibrary and DeleteAccountHere; the retirement-list oracle completed | plan §2, §3, §4 |
+| m19 | Two lobby rules were dropped in the merge | **Fixed:** the lobby enumerates this scope's custody items and takes the route finder's roads; a missing library is missing in both modes; a missing key file or memory item isn't fatal | design §3.3; map R-4 |
+| m20 | Second-opinion items with no home | **Fixed:** VX-317 minted (Resume Sync's banner); the device identity's move (phase 2) — memory is device-only, so a new Mac starts its own; the lock-time copy's naming and adoption order (phase 5), each with a pin | design §3.2, §5, §6 |
+| m21 | Old acts and new storage together on her real store | **Fixed, hers to confirm:** the real-store refresh waits for phase 3's close | design §5, §9 |
+| N1–N8 | the nits | **Fixed:** N1 §3.5; N2 §3.8; N3 and N5 §3.2's memory row; N4 §3.7's catalog; N6 the map (the older-backup step, Standard's "if set", rows T-8 and S-6); N7 §3.3; N8 §3.7 | as named |
+
+**Why none of this brings back what the design solved:**
+- **The record carries only the act's identity** (sequence and keys). The plan stays beside the library, and a missing plan never blocks, so the in-file marker's trap (VX-235) doesn't return.
+- **No new key is ever written under a shared name**, and no key is held by two Macs after this change.
+- **No vault moves automatically** (round 3).
+- **The account's key dies only with the account's own rotation**, so no vault copy is orphaned.
+- **Every new mint is per id**, at a deliberate act or the migration.
+
+**The ladder:** the MAJORs earn round 2, a fresh reviewer re-reading the fixes. Fable reviews it once the usage limit
+clears, as she was told when she picked Opus for round 1. Three calls are hers (design §9): M2's landing re-key, M3's
+leaving rules, and m21's refresh timing.

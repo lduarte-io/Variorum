@@ -109,8 +109,9 @@ Sources/VariorumCore/Protection/
   Executor/   Leaves (protocols: Custody, SyncKeys, AppleKeys, Vault, LibraryFile, KeyFileStore, MemoryStore,
               PlanStore, Backups, Clock, IDs, Biometry/LAEnvironment) · Executor (repairs + plan runner) ·
               Acts/ (one file per act: EnterCastle, LeaveCastle, ReplaceAllKeys, Follow, OpenCopy, Migration,
-              MoveOffSharedKey, RetireSharedKey, RelinkApple, SetUpSync, Enroll, Move, ThisMacOnly,
-              StopSyncingHere, ChangePassphrase, RegenerateWords, GateStyle, TouchIDRearm)
+              MoveOffSharedKey, RetireSharedKey, RelinkApple, CreateLibrary, SetUpSync, Enroll, Move,
+              ThisMacOnly, StopSyncingHere, DeleteAccountHere, ChangePassphrase, RegenerateWords, GateStyle,
+              TouchIDRearm)
 Tests/VariorumCoreTests/Protection/
   ModelTests · AssessTests · RouteFinderTests · CatalogTests · RetentionTests · ExecutorTests (per act,
   per step, per crash point) · Scenario/ (World, Fakes, Alphabet, Promises, Generator, FixedScenarios,
@@ -129,17 +130,20 @@ Tests/VariorumCoreTests/Protection/
 
 Build everything in §3.2 of the design as values, with their codecs and their crypto:
 
-- **The protection record**, as a value and its fields, including the Apple key ids it has retired. The SQLite table
+- **The protection record**, as a value and its fields: the act in flight, the per-device settings that could weaken
+  protection, and every Apple key id that ever wrapped one of its keys (its role, retired or not). The SQLite table
   comes in phase 2.
 - **Key file format 3:**
-  - the current key's wraps — passphrase with its KDF descriptor, words, master, Apple key with its id;
+  - the current key's wraps — passphrase with its KDF descriptor, words, master, and every Apple wrap with its key's
+    id (the library's or account's own, a device's own, the old shared key's);
   - the history: every older key wrapped directly under the current key, with fingerprint, epoch and retirement date;
   - the master's twelve-words copy (design §3.5a), when the file has a master wrap;
   - re-keying: L → L′ re-wraps the whole history under L′ and adds L;
   - the same format serves another library's key file in `Backups/<library8>/` (design §3.5).
 - **Readers for formats 1 and 2.** Old key files are read forever, and the catalog and route finder use them.
-- **What this Mac remembers:** its fields, the key-file mirror and the sealed subset.
-- **Plans,** sealed under the key in hand, naming its fingerprint.
+- **What this Mac remembers:** its fields — nothing that decides or weakens: the device identity, the biometry state
+  hash, the vault facts — and the key-file mirror, sealed whole.
+- **Plans,** sealed under the key in hand, naming its fingerprint and the record's act sequence.
 - **The seal:** `HMAC-SHA256(HKDF-SHA256(ikm: L, salt: libraryID, info: "variorum.seal.v1:" + purpose), canonical
   JSON)`.
 - **The item and Apple-key names**, with the store-variant scope in every name.
@@ -150,6 +154,8 @@ Build everything in §3.2 of the design as values, with their codecs and their c
 - every wrap opens with the right secret and refuses a wrong one;
 - the history survives three re-keys, with every old key still reachable from the newest and never the reverse;
 - a tampered sealed field fails verification;
+- a replayed earlier plan or memory value changes nothing: the plan isn't the one the record names, and no setting
+  lives in the memory;
 - format-1 and format-2 key files read as the design says;
 - no secret appears in any value written to disk (scan the encodings).
 
@@ -165,9 +171,10 @@ Build everything in §3.2 of the design as values, with their codecs and their c
   - the words, as typed reasons for later phases to render.
 - **The rules it encodes:** design §3.3 (guards included), §3.5 (the old shared key: what still needs it, what its
   retirement would leave with no road, and what would then depend on an Apple key alone), §3.7 (the open rule's
-  verdicts), §3.8 (the four account situations), §3.10 (the Touch ID road, with VX-310's lobby rule as data: the
-  button whenever a Touch ID item exists, what pressing it says when Touch ID is only unusable for now, and which of
-  the two lines shows when no item can work).
+  verdicts, a different library landing under this Mac's own key), §3.8 (the four account situations, and the
+  leaving and joining rules), §3.10 (the Touch ID road, with VX-310's lobby rule as data: the button whenever a
+  working Touch ID item exists, what pressing it says when Touch ID is only unusable for now, and which of the two
+  lines shows when no item can work).
 - **The route finder** over a catalog, for every copy kind — and the same finder with the old shared key taken away,
   which is how the retirement's checks list what would stop opening.
 - **The catalog's one name parser,** covering every filename today's builds have written. Read the three existing
@@ -181,8 +188,10 @@ Build everything in §3.2 of the design as values, with their codecs and their c
 - every copy kind against every library state;
 - retention over a shared folder holding two Macs' and two libraries' copies, where nothing foreign is pruned;
 - the route finder's words agree with the roads it found;
-- the retirement's list: every copy whose only road is the old shared key, and every Standard library or copy with no
-  passphrase or words, is on it — and nothing else is.
+- the retirement's list: every copy whose only road is the old shared key, every Standard library or copy with no
+  passphrase or words, every account it can't check, and every other Mac's key file holding one of this library's
+  keys, is on it — and nothing else is; and a readable vault still on the old key, other than the act's own
+  account, blocks the retirement.
 
 ---
 
@@ -190,11 +199,15 @@ Build everything in §3.2 of the design as values, with their codecs and their c
 
 **The executor** runs:
 
-- the repairs of design §3.3, each idempotent, verified before any delete;
+- the repairs of design §3.3, each idempotent, verified before any delete — and none of them makes a Touch ID item;
 - every act of design §3.9 as a **sealed plan**:
   - steps resume from the first unfinished one;
   - prepare-then-commit: the new key's custody item and the new key file — with the old key in its history — exist
-    before the library is re-encrypted;
+    before the library is re-encrypted, and the record is written into the staged file before the swap; copies pause
+    from the prepare to the swap;
+  - the record names the act in flight; a plan resumes only when it's the one named; a missing or unmatched plan rolls
+    the act back before its commit point and finishes it from the record after;
+  - a Castle library leaving an account re-keys; a different library lands under this Mac's own key;
 - the Apple-key rules of §3.5:
   - names by id;
   - one minter, so followers wait, and the vault's CAS keeps one account key;
@@ -258,6 +271,8 @@ Every shape today's builds leave, built as fixtures from the old formats:
 - older libraries of other libraries, in Standard and in Castle, and libraries this Mac holds only backups of;
 - Standard libraries with no passphrase and no words;
 - a device that joined sync without typing a secret;
+- 13p escrow items;
+- one library on two Macs from a hand-off;
 - two Macs sharing an iCloud Drive backup folder.
 
 ### The promises
@@ -289,6 +304,19 @@ Each is a named test:
   if it has no passphrase or words;
 - one local-only library on two Macs (sent, no sync), one entering Castle: the other's own key never deleted;
 - a silently-joined device losing its Keychain after the account entered Castle elsewhere: the words open its file;
+- a replayed plan and a replayed memory item, changing nothing; a whole-state rollback, opening nothing to the one who
+  did it;
+- Send Library after this change: the receiver lands under a key of its own, and the sender entering Castle leaves it
+  whole;
+- one library on two Macs from before this change: the stated exception, and the sheet naming the other Mac's key
+  file;
+- a Castle library leaving its account by each of the four acts, then the account leaving Castle elsewhere: the
+  current key stays out of reach;
+- This-Mac-Only Castle from an account in Standard: the account's key untouched;
+- Replace All Keys on an account still on the old shared key, its follow, and a new device joining one;
+- corner 45's ambiguous case: no custody repair until the notice is answered;
+- a 13p escrow item: folded, then removed in Castle;
+- the key file and memory item both deleted on a local-only Castle library: the lobby still opens it;
 - a follow while the fresh Apple key hasn't arrived (no second key minted);
 - the lid closed at Castle entry;
 - a biometry change, then the re-arm question;
