@@ -232,7 +232,11 @@ nonisolated enum MarkdownFace {
     /// read), so any honour clears. ATTRIBUTES ONLY, like every write here:
     /// no character, no block identity (TEXTKIT2 §3's stamp rule is about
     /// identity stamps; the face's ranges are the tokenizer's own, inside
-    /// one line). Returns whether anything was restyled.
+    /// one line). Returns whether either line's restyle WROTE — not whether
+    /// the ledger planned (VX-282 round 2, F-3): a caret on a star no opener
+    /// pairs with (`hello |*x`) plans an honour that writes nothing, and every
+    /// consumer acts on this answer as "the face moved" (Write's overlay
+    /// generation and redraw, a pane's paint record and remeasure).
     @discardableResult
     static func settleCaret(
         _ ledger: inout MarkdownCaretRescue.Ledger, selection: NSRange?,
@@ -260,16 +264,16 @@ nonisolated enum MarkdownFace {
         // jumps when attributes update" is paid once, not twice).
         storage.beginEditing()
         defer { storage.endEditing() }
-        if let clear = plan.clear {
+        let clearWrote = plan.clear.map {
             restyle(
-                storage, range: NSRange(location: clear, length: 0),
+                storage, range: NSRange(location: $0, length: 0),
                 base: base, palette: palette)
-        }
-        if let honour = plan.honour {
-            let caret = NSRange(location: honour, length: 0)
-            restyle(storage, range: caret, base: base, palette: palette, caret: caret)
-        }
-        return true
+        } ?? false
+        let honourWrote = plan.honour.map {
+            let caret = NSRange(location: $0, length: 0)
+            return restyle(storage, range: caret, base: base, palette: palette, caret: caret)
+        } ?? false
+        return clearWrote || honourWrote
     }
 
     // MARK: - One span
