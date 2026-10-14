@@ -40,6 +40,9 @@ struct MigrationTests {
         // comment-authorship record joins it too (no explicit index — its key
         // is the comment id).
         "mcp_comment_author",
+        // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 U1): v1_28's waiting
+        // re-binds join the local-only grants family.
+        "mcp_rebind_request",
     ]
 
     static let expectedIndexes: Set<String> = [
@@ -85,6 +88,9 @@ struct MigrationTests {
         "uq_mcp_client_name", "idx_mcp_grant_client",
         // VX-168: v1_26's bound-key uniqueness + the unclaimed keys' order.
         "uq_mcp_client_setup_key", "idx_mcp_setup_key_minted",
+        // VX-258 (A JUSTIFIED EDIT, the ritual): v1_28's one wait per client
+        // and one per key.
+        "uq_mcp_rebind_request_client", "uq_mcp_rebind_request_key",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).
@@ -159,13 +165,15 @@ struct MigrationTests {
         let after = try indexes()
         // 13i-a: the full chain past v1_16 now adds v1_17's day-search
         // index AND v1_18's shelf-order index; 13o: v1_22's two; 13n-b:
-        // v1_24's two grants-store indexes; VX-168: v1_26's two.
+        // v1_24's two grants-store indexes; VX-168: v1_26's two; VX-258 (A
+        // JUSTIFIED EDIT, the ritual): v1_28's two.
         #expect(after.subtracting(before) == [
             "idx_commit_created", "idx_shelf_wing",
             "uq_search_doc_src", "idx_container_undated_created",
             "uq_mcp_client_name", "idx_mcp_grant_client",
             "uq_mcp_client_setup_key", "idx_mcp_setup_key_minted",
-        ], "v1_17 + v1_18 + v1_22 + v1_24 + v1_26 add exactly these indexes")
+            "uq_mcp_rebind_request_client", "uq_mcp_rebind_request_key",
+        ], "v1_17 + v1_18 + v1_22 + v1_24 + v1_26 + v1_28 add exactly these indexes")
         #expect(after == Self.expectedIndexes)
     }
 

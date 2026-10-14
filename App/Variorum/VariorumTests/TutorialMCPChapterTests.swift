@@ -277,16 +277,44 @@ struct TutorialMCPChapterTests {
             // newest copied setup takes the name); the sentence says the rule
             // as built, and is pinned against it here.
             #expect(!text.contains("a second tool using the same name is turned away"))
-            #expect(text.contains("a key that ties that name to it. Running the setup again moves the name to the "
-                                  + "new key, and a tool still using an older key, or none, is turned away."))
+            // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 ladder round 1,
+            // F-1): "Running the setup again moves the name to the new key"
+            // was falsified in its turn — only a CLIENT'S OWN setup (a key
+            // copied for its name) re-binds with zero clicks; an "Any MCP
+            // client" copy under a name she approved waits for her OK
+            // (`MCPSetupKeyRule.decide`'s `.unclaimed` arm, pinned below). The
+            // lesson now says L1's clause verbatim, and the parity guard holds
+            // the guide and the pane to the one rule.
+            #expect(!text.contains("Running the setup again moves the name"),
+                    "the unscoped re-run sentence (false for an Any-client copy since VX-258)")
+            #expect(text.contains("a key that ties that name to it. Running the client's own setup again moves the "
+                                  + "name to the new key; a setup copied for any MCP client waits for your OK before "
+                                  + "it takes a name you approved; and a tool still using an older key, or none, is "
+                                  + "turned away."))
+            let oneRule = "Running the client's own setup again moves the name to the new key; a setup copied for "
+                + "any MCP client waits for your OK before it takes a name you approved"
+            #expect(text.contains(oneRule), "the guide says L1's clause")
+            #expect(MCPPaneCopy.clientBoundary.contains(oneRule), "…and L1 says it (the parity guard)")
             #expect(text.contains("where any program running as you can read it"), "K2's non-defeat, said")
             #expect(MCPPaneCopy.clientBoundary.contains("binds that name to it"), "L1 says the same")
-            #expect(MCPPaneCopy.clientBoundary.contains("running a newer setup moves the name to the new key"))
+            // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 U1b): L1 scopes the
+            // re-run to the client's OWN setup and says the Any-client wait (the
+            // guide's lesson 2 is U8's to re-voice — the follow-on run's).
+            #expect(MCPPaneCopy.clientBoundary.contains("Running the client's own setup again moves the name to the new key"))
+            #expect(MCPPaneCopy.clientBoundary.contains("a setup copied for any MCP client waits for your OK"))
             #expect(MCPPaneCopy.clientBoundary.contains("any of them can read the key"))
             let bound = MCPSetupKeyRule.Client(id: "c", boundHash: MCPSetupKeyRule.hash("vmk1_first"))
             let second = MCPSetupKeyRule.hash("vmk1_second")
-            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .unclaimed)
+            // VX-258 (A JUSTIFIED EDIT, the ritual — her ruling: a key re-binds
+            // with zero clicks only the name its setup was copied FOR): "running
+            // the setup again" is the client's OWN setup, so the key carries its
+            // name; an "Any MCP client" copy waits for her OK (pinned beside, so
+            // the sentence's scope is said). U8's guide pass re-voices lesson 2.
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second,
+                                           copiedFor: "claude-code", standing: .unclaimed)
                     == .rebind, "running the setup again moves the name to the new key")
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .unclaimed)
+                    == .awaitRebind, "an Any-client copy under an approved name waits for her OK (VX-258)")
             #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .replaced)
                     == .refuse(.replaced), "a tool still using an older key is turned away")
             #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .unknown)

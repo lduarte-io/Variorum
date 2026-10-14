@@ -1009,4 +1009,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// the in-menu picker (a view choice); a CHORD and a cycling door are
     /// doors, and P-1 declares doors.
     case mcpOpenAsk, mcpSettings, switchWing
+    /// VX-258 (VX-246 U1b) — A SETUP WAITING FOR HER OK: a connection that
+    /// presented, under the name of a client she approved, a setup key not
+    /// copied for that client waits in Settings ▸ MCP ▸ Waiting (admitted with
+    /// no reach). `mcpAllowRebind` — Allow: the name, its approval and grants
+    /// untouched, moves to the new setup (`allowMCPRebind`);
+    /// `mcpDeclineRebind` — Don't allow: the key forgotten
+    /// (`declineMCPRebind`). `.surface` on the MCP family's precedent — the
+    /// row carries its ask, and the pane is their only renderer.
+    case mcpAllowRebind, mcpDeclineRebind
 }

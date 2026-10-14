@@ -54,6 +54,20 @@ extension MCPWriteTools {
                 archived ? MCPToolCatalog.archiveNote.name : MCPToolCatalog.unarchiveNote.name
             }
         }
+
+        /// VX-275 (`Job.flushesHerEditorFirst`): a NOTE's delete tombstones
+        /// every take of it (her own Delete door flushes first —
+        /// `NoteDeletion.report`). No book or chapter act takes a note down
+        /// (a book deletes "book only"; its notes live on), and an archived
+        /// note still takes her autosave.
+        var flushesHerEditorFirst: Bool {
+            switch self {
+            case .deleteNote: true
+            case .renameBook, .setFinished, .archiveBook, .unarchiveBook, .deleteBook, .removeNote, .moveNote,
+                 .renameChapter, .deleteChapter, .moveChapter, .setNoteArchived:
+                false
+            }
+        }
     }
 
     /// Where a move puts a note in its book's order, or a chapter in its
@@ -294,7 +308,8 @@ extension MCPWriteTools {
             return try onBook(bookID, rung: .edit, job: job, clientName: clientName, spendsAfter: false) { _ in
                 let result = try ops.renameBookForClient(
                     bookID, name: name, undoLabel: label(.bookName),
-                    guardedBy: guardBooks(clientName, .edit) { _ in [bookID] })
+                    guardedBy: guardBooks(clientName, .edit) { _ in [bookID] },
+                    namesCountedBy: readableBooks(clientName))
                 // The receipt and the activity line name the book as it NOW reads.
                 return (["book_id": bookID, "name": result.name, "changed": result.changed],
                         result.changed
@@ -439,9 +454,11 @@ extension MCPWriteTools {
             return try onNote(noteID, rung: .edit, job: job, clientName: clientName, spendsAfter: false) { title in
                 _ = try ops.deleteNoteForClient(
                     noteID, undoLabel: label(.noteDelete), guardedBy: guardEdit(clientName) { _ in [noteID] })
+                // VX-275: the note is DEAD — the app sends every pane and the
+                // Open strip off it on the one navigate-away road.
                 return (["note_id": noteID, "deleted": true, "trash_days": TrashWindow.days],
                         MCPWriteReceipt(clientName: clientName, act: .noteDelete, targetID: noteID,
-                                        targetTitle: title))
+                                        targetTitle: title, notesLeftDead: [noteID]))
             }
 
         case .setNoteArchived(let noteID, let archived):

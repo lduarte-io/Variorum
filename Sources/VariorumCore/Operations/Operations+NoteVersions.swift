@@ -55,10 +55,7 @@ extension Operations {
         let result: PostCopyResult = try database.write { db in
             try mintNoteVersion(db, of: postID)
         }
-        undoStack?.register(
-            label: "Save a Version",
-            inverse: { try $0.revertMintedContainer(result.post.id) },
-            redo: { try $0.reapplyMintedContainer(result.post.id) })
+        registerMintedContainerEntry(label: "Save a Version", result.post.id)
         return result
     }
 

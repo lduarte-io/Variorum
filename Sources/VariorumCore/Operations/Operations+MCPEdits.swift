@@ -109,16 +109,9 @@ extension Operations {
                     TextPreImage(variantID: variantID, text: old, postOpText: newText))
         }
         if let preImage = landed.preImage {
-            undoStack?.register(
+            registerStructuralEntry(
                 label: undoLabel,
-                inverse: {
-                    try $0.revertStructural(
-                        restoringTexts: [preImage], tombstoningBlocks: [], revivingPlacementRows: [])
-                },
-                redo: {
-                    try $0.reapplyStructural(
-                        restoringTexts: [preImage], untombstoningBlocks: [], releasingPlacementRows: [])
-                },
+                restoringTexts: [preImage],
                 insuring: [preImage])
         }
         return landed.edit
@@ -176,15 +169,17 @@ extension Operations {
     /// gave it since (her block-name door registers no entry), is the world
     /// moving past the entry (quiet); past that check, a sealed note refuses
     /// and keeps it (resolvable).
-    func restoreBlockName(_ blockID: String, from: String?, to name: String?) throws {
+    @discardableResult
+    func restoreBlockName(_ blockID: String, from: String?, to name: String?) throws -> Bool {
         try database.write { db in
             guard var block = try Block.fetchOne(db, key: blockID), block.deletedAt == nil,
                   block.name == from
-            else { return }
+            else { return false }
             try ensurePlacementUnlocked(db, blockID: blockID)
             block.name = name
             block.updatedAt = date.now
             try block.update(db)
+            return true
         }
     }
 
@@ -204,27 +199,54 @@ extension Operations {
             return try insertSection(db, in: readingID, name: name, at: .end)
         }
         let sectionID = section.id
+        // VX-246 U2: the redo revives the chapter only on the stamp its own
+        // undo wrote — her delete since (another stamp) is hers to keep.
+        let undoneOn = LockIsolated<String?>(nil)
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.flipCreatedSection(sectionID, alive: false) },
-            redo: { try $0.flipCreatedSection(sectionID, alive: true) })
+            inverse: { ops in
+                guard let stamp = try ops.tombstoneCreatedSection(sectionID) else { return false }
+                undoneOn.setValue(stamp)
+                return true
+            },
+            redo: { try $0.reviveCreatedSection(sectionID, undoneOn: undoneOn.value) })
         return section
     }
 
     /// The chapter entry's two halves: a reading gone, or the row already as
     /// asked, is quiet; a finished (locked) reading refuses and keeps the
     /// entry (the chapter-structure rule).
-    func flipCreatedSection(_ id: String, alive: Bool) throws {
+    /// The undo: the live chapter tombstoned; returns the stamp, nil when it
+    /// was already gone (VX-246 U2 — a quiet half).
+    func tombstoneCreatedSection(_ id: String) throws -> String? {
         try database.write { db in
-            guard var section = try ReadingSection.fetchOne(db, key: id),
-                  (section.deletedAt == nil) != alive,
+            guard var section = try ReadingSection.fetchOne(db, key: id), section.deletedAt == nil,
                   let reading = try Reading.fetchOne(db, key: section.readingId), reading.deletedAt == nil
-            else { return }
+            else { return nil }
             guard !reading.locked else { throw OperationError.lockedReading(id: reading.id) }
             let now = date.now
-            section.deletedAt = alive ? nil : now
+            section.deletedAt = now
             section.updatedAt = now
             try section.update(db)
+            return DateFormatter.variorumISO8601.string(from: now)
+        }
+    }
+
+    /// The redo: the chapter back only while it is dead on `stamp` — the
+    /// stamp its own undo wrote (VX-246 U2); returns whether it revived.
+    @discardableResult
+    func reviveCreatedSection(_ id: String, undoneOn stamp: String?) throws -> Bool {
+        guard let stamp else { return false }
+        return try database.write { db in
+            guard var section = try ReadingSection.fetchOne(db, key: id),
+                  section.deletedAt.map({ DateFormatter.variorumISO8601.string(from: $0) }) == stamp,
+                  let reading = try Reading.fetchOne(db, key: section.readingId), reading.deletedAt == nil
+            else { return false }
+            guard !reading.locked else { throw OperationError.lockedReading(id: reading.id) }
+            section.deletedAt = nil
+            section.updatedAt = date.now
+            try section.update(db)
+            return true
         }
     }
 

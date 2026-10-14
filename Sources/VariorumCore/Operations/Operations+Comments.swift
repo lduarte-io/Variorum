@@ -48,8 +48,19 @@ extension Operations {
 
     /// Rewrites a live comment's text in place. Same refusals as adding;
     /// a no-op edit writes nothing.
+    ///
+    /// **VX-260 — her edit makes the comment HERS** (VX-184's ladder round 1;
+    /// her pick, "Your edit makes it yours"): when the words really change,
+    /// the comment's MCP authorship record (`mcp_comment_author`, local-only)
+    /// is forgotten in the same transaction, so no client can delete it at
+    /// suggest any more — deleting it needs edit, and a suggest caller hears
+    /// her R-VX188-2 sentence. A no-op edit and a refused one leave the record
+    /// as it was; a client's `edit_comment` never runs this door.
     public func editBlockComment(_ id: String, text: String) throws {
-        try database.write { db in _ = try rewriteComment(db, id, text: text) }
+        try database.write { db in
+            guard try rewriteComment(db, id, text: text) != nil else { return }
+            try forgetMCPCommentAuthor(db, commentID: id)
+        }
     }
 
     /// `editBlockComment`'s row work inside the caller's transaction (VX-184

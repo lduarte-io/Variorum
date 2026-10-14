@@ -28,18 +28,19 @@ import GRDB
 // only while the row still reads the value its act left there, so the UNDO
 // never overwrites a name or place she gave it since through her own
 // undo-less door — checked FIRST, before any refusal (VX-184 ladder round 1,
-// the undo-overwrite class). THE REDOS DO NOT YET KEEP THAT PROMISE (VX-184
-// ladder round 2, 2026-10-13): after she has put a row BACK herself (her
-// reopen or finish, her unarchive, her Put back, her chapter restore, the old
-// name or place again), ⌥⌘Z is quiet yet still moves the entry onto the redo
-// stack (`UndoStack.undo` pops any inverse that does not throw), and the redos
-// here — `refinishBook`, `reopenBookAgain`, `rearchiveBook`, `redeleteBook`,
-// `redeleteChapter`, `redeleteNote`, `restoreNoteArchived`, each
-// compare-and-set restorer — check only for the pre-act state her reversal
-// produced, so ⇧⌥⌘Z re-applies the client's act over hers. (Keyed redos are
-// safe: `unarchive_book`'s runs only on the archive's original stamp; her
-// re-add of a removed note mints a new row, so `reremoveMembership` is quiet.)
-// VX-276 owns the fix: the redo keyed on what its inverse wrote.
+// the undo-overwrite class). THE REDOS KEEP THE SAME PROMISE (VX-246 U2 —
+// VX-276): each half answers whether it wrote, and the stack RETIRES an entry
+// whose half was quiet (`UndoStack`'s header) — so after she has put a row
+// BACK herself (her reopen or finish, her unarchive, her Put back, her chapter
+// restore, the old name or place again), ⌥⌘Z is quiet, the entry retires, and
+// no ⇧⌥⌘Z re-applies the client's act over hers. The inverses keep their
+// stamps (above), and two redos are keyed on their own: `unarchive_book`'s
+// runs only on the archive's original stamp, and `reremoveMembership` acts
+// only on the act's own row (her re-add of a removed note mints a new one).
+// One residual stays, recorded (VX-184's; accepted again at VX-246's ladder
+// round 2): her reopen-then-refinish BEFORE ⌥⌘Z is indistinguishable from the
+// act's finish — `reading` carries no finish stamp — so `finish_book`'s undo
+// then reopens the book, writing only the act's own pre-image.
 //
 // PRIVATE, SEAL and OWN stay HERS ALONE (R-VX184-2): nothing here writes
 // `ai_private_at`, `sealed_at`, a note's seal or `owned`, and neither
@@ -74,9 +75,14 @@ extension Operations {
     /// sealed book renames (her op's posture). The same name writes nothing.
     /// ONE entry restoring the previous name exactly while the book still wears
     /// the act's name (no E13 re-check — the Put-back tolerance).
+    /// VX-259: `namesCountedBy` — the readings the guard counts (the wire
+    /// passes the ones the client can READ, so the guard never names a book it
+    /// cannot reach — her ruling: an accidental duplicate is fine); nil counts
+    /// every reading, E13 whole.
     @discardableResult
     public func renameBookForClient(
-        _ readingID: String, name: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil
+        _ readingID: String, name: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil,
+        namesCountedBy reach: BookNameReach? = nil
     ) throws -> MCPBookRename {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let newName = trimmed.isEmpty ? DisplayTitle.placeholder : trimmed
@@ -84,7 +90,7 @@ extension Operations {
             try guardian?(db)
             var reading = try liveReading(db, readingID)
             guard reading.name != newName else { return nil }
-            try requireBookNameFree(db, newName, excluding: readingID)
+            try requireBookNameFree(db, newName, excluding: readingID, counting: reach)
             let old = reading.name
             reading.name = newName
             reading.updatedAt = date.now
@@ -103,14 +109,16 @@ extension Operations {
     /// the undo-overwrite class): `to` is written only while the book is live
     /// and still wears `from`. A name she gave it since (her rename door
     /// registers no entry) is hers — the entry is quiet, and still pops.
-    func restoreBookName(_ readingID: String, from: String, to name: String) throws {
+    @discardableResult
+    func restoreBookName(_ readingID: String, from: String, to name: String) throws -> Bool {
         try database.write { db in
             guard var reading = try Reading.fetchOne(db, key: readingID), reading.deletedAt == nil,
                   reading.name == from
-            else { return }
+            else { return false }
             reading.name = name
             reading.updatedAt = date.now
             try reading.update(db)
+            return true
         }
     }
 
@@ -164,12 +172,14 @@ extension Operations {
                 label: undoLabel,
                 inverse: { try $0.revertFinishedBook(readingID, finishedOn: finishedOn.value) },
                 redo: { ops in
-                    if let stamp = try ops.refinishBook(readingID) { finishedOn.setValue(stamp) }
+                    guard let stamp = try ops.refinishBook(readingID) else { return false }
+                    finishedOn.setValue(stamp)
+                    return true
                 })
         } else {
             undoStack?.register(
                 label: undoLabel,
-                inverse: { _ = try $0.refinishBook(readingID) },
+                inverse: { try $0.refinishBook(readingID) != nil },
                 redo: { try $0.reopenBookAgain(readingID) })
         }
         return result
@@ -177,11 +187,12 @@ extension Operations {
 
     /// A finish's inverse: quiet unless the book is still finished; a book
     /// SEALED since refuses and keeps the entry (Unseal is hers).
-    func revertFinishedBook(_ readingID: String, finishedOn stamp: String) throws {
+    @discardableResult
+    func revertFinishedBook(_ readingID: String, finishedOn stamp: String) throws -> Bool {
         try database.write { db in
             guard let reading = try Reading.fetchOne(db, key: readingID), reading.deletedAt == nil,
                   reading.locked
-            else { return }
+            else { return false }
             guard reading.sealedAt == nil else { throw OperationError.readingSealed(id: readingID) }
             let dismissed = try ReadingPost.fetchAll(
                 db,
@@ -199,6 +210,7 @@ extension Operations {
                 try row.update(db)
             }
             try reopenReadingRows(db, readingID)
+            return true
         }
     }
 
@@ -215,12 +227,14 @@ extension Operations {
 
     /// A reopen's redo: her reopen body again — quiet when the book is gone
     /// or already open; a book SEALED since refuses and keeps the entry.
-    func reopenBookAgain(_ readingID: String) throws {
+    @discardableResult
+    func reopenBookAgain(_ readingID: String) throws -> Bool {
         try database.write { db in
             guard let reading = try Reading.fetchOne(db, key: readingID), reading.deletedAt == nil,
                   reading.locked
-            else { return }
+            else { return false }
             try reopenReadingRows(db, readingID)
+            return true
         }
     }
 
@@ -247,19 +261,23 @@ extension Operations {
             label: undoLabel,
             inverse: { try $0.revertArchivedBook(readingID, archivedOn: archivedOn.value) },
             redo: { ops in
-                if let stamp = try ops.rearchiveBook(readingID) { archivedOn.setValue(stamp) }
+                guard let stamp = try ops.rearchiveBook(readingID) else { return false }
+                archivedOn.setValue(stamp)
+                return true
             })
         return stamp
     }
 
     /// An archive's inverse: her unarchive body, only while the book wears
     /// the archive's exact stamp (quiet otherwise).
-    func revertArchivedBook(_ readingID: String, archivedOn stamp: String) throws {
+    @discardableResult
+    func revertArchivedBook(_ readingID: String, archivedOn stamp: String) throws -> Bool {
         try database.write { db in
             guard let reading = try Reading.fetchOne(db, key: readingID), reading.deletedAt == nil,
                   reading.archivedAt.map({ DateFormatter.variorumISO8601.string(from: $0) }) == stamp
-            else { return }
+            else { return false }
             _ = try unarchiveReading(db, id: readingID, now: date.now)
+            return true
         }
     }
 
@@ -311,11 +329,12 @@ extension Operations {
     /// An unarchive's inverse: the book and the notes it returned, archived
     /// again on the original stamp — quiet when the book is gone or archived
     /// again since (a note archived or gone since keeps its own state).
-    func restoreBookArchive(_ readingID: String, on stamp: Date, notes postIDs: [String]) throws {
+    @discardableResult
+    func restoreBookArchive(_ readingID: String, on stamp: Date, notes postIDs: [String]) throws -> Bool {
         try database.write { db in
             guard var reading = try Reading.fetchOne(db, key: readingID), reading.deletedAt == nil,
                   reading.archivedAt == nil
-            else { return }
+            else { return false }
             let now = date.now
             for postID in postIDs {
                 guard var note = try Container.fetchOne(db, key: postID), note.deletedAt == nil,
@@ -328,6 +347,7 @@ extension Operations {
             reading.archivedAt = stamp
             reading.updatedAt = now
             try reading.update(db)
+            return true
         }
     }
 
@@ -365,19 +385,23 @@ extension Operations {
             label: undoLabel,
             inverse: { try $0.revertDeletedBook(readingID, deletedOn: deletedOn.value) },
             redo: { ops in
-                if let stamp = try ops.redeleteBook(readingID) { deletedOn.setValue(stamp) }
+                guard let stamp = try ops.redeleteBook(readingID) else { return false }
+                deletedOn.setValue(stamp)
+                return true
             })
         return MCPBookDeletion(bookID: readingID, releasedNotes: landed.owned)
     }
 
     /// A delete's inverse: her restore body, only while the book wears the
     /// delete's exact stamp (Put back since, or purged — quiet).
-    func revertDeletedBook(_ readingID: String, deletedOn stamp: String) throws {
+    @discardableResult
+    func revertDeletedBook(_ readingID: String, deletedOn stamp: String) throws -> Bool {
         try database.write { db in
             guard let reading = try Reading.fetchOne(db, key: readingID),
                   reading.deletedAt.map({ DateFormatter.variorumISO8601.string(from: $0) }) == stamp
-            else { return }
+            else { return false }
             try restoreReadingRows(db, id: readingID)
+            return true
         }
     }
 
@@ -428,14 +452,17 @@ extension Operations {
             label: landed.owned ? releaseUndoLabel : removeUndoLabel,
             inverse: { try $0.reviveRemovedMembership(rowID, removedOn: removedOn.value) },
             redo: { ops in
-                if let stamp = try ops.reremoveMembership(rowID) { removedOn.setValue(stamp) }
+                guard let stamp = try ops.reremoveMembership(rowID) else { return false }
+                removedOn.setValue(stamp)
+                return true
             })
         return MCPMembershipRemoval(
             noteID: postID, bookID: readingID, released: landed.owned, bookless: landed.bookless)
     }
 
     /// A removal's inverse — see `removeNoteFromBookForClient`.
-    func reviveRemovedMembership(_ rowID: String, removedOn stamp: String) throws {
+    @discardableResult
+    func reviveRemovedMembership(_ rowID: String, removedOn stamp: String) throws -> Bool {
         try database.write { db in
             guard var row = try ReadingPost.fetchOne(db, key: rowID), row.status == .member,
                   row.deletedAt.map({ DateFormatter.variorumISO8601.string(from: $0) }) == stamp,
@@ -443,11 +470,12 @@ extension Operations {
                   let note = try Container.fetchOne(db, key: row.postId), note.deletedAt == nil,
                   try sameEffectiveWing(db, note.wingId, book.wingId),
                   try livePairRow(db, postID: row.postId, readingID: row.readingId) == nil
-            else { return }
+            else { return false }
             guard !book.locked else { throw OperationError.lockedReading(id: book.id) }
             row.deletedAt = nil
             try row.update(db)
             try enforceOwnershipAfterRevival(db, postIDs: [row.postId], now: date.now)
+            return true
         }
     }
 
@@ -497,15 +525,17 @@ extension Operations {
     /// place she gave the note since (her own order doors register no entry)
     /// is hers, and the entry is quiet. Checked FIRST; past it, a finished
     /// book refuses and keeps the entry.
-    func restoreMembershipPosition(_ rowID: String, from: String, to position: String) throws {
+    @discardableResult
+    func restoreMembershipPosition(_ rowID: String, from: String, to position: String) throws -> Bool {
         try database.write { db in
             guard var row = try ReadingPost.fetchOne(db, key: rowID), row.deletedAt == nil,
                   row.status == .member, row.position == from,
                   let book = try Reading.fetchOne(db, key: row.readingId), book.deletedAt == nil
-            else { return }
+            else { return false }
             guard !book.locked else { throw OperationError.lockedReading(id: book.id) }
             row.position = position
             try row.update(db)
+            return true
         }
     }
 
@@ -551,14 +581,16 @@ extension Operations {
     /// a name she gave it since (her chapter rename registers no entry) is
     /// hers, and the entry is quiet. Rename is free on a finished book, so
     /// nothing refuses.
-    func restoreChapterName(_ sectionID: String, from: String, to name: String) throws {
+    @discardableResult
+    func restoreChapterName(_ sectionID: String, from: String, to name: String) throws -> Bool {
         try database.write { db in
             guard var section = try ReadingSection.fetchOne(db, key: sectionID), section.deletedAt == nil,
                   section.name == from
-            else { return }
+            else { return false }
             section.name = name
             section.updatedAt = date.now
             try section.update(db)
+            return true
         }
     }
 
@@ -581,19 +613,23 @@ extension Operations {
             label: undoLabel,
             inverse: { try $0.reviveDeletedChapter(sectionID, deletedOn: deletedOn.value) },
             redo: { ops in
-                if let stamp = try ops.redeleteChapter(sectionID) { deletedOn.setValue(stamp) }
+                guard let stamp = try ops.redeleteChapter(sectionID) else { return false }
+                deletedOn.setValue(stamp)
+                return true
             })
         return section
     }
 
     /// A chapter delete's inverse — see `deleteChapterForClient`.
-    func reviveDeletedChapter(_ sectionID: String, deletedOn stamp: String) throws {
+    @discardableResult
+    func reviveDeletedChapter(_ sectionID: String, deletedOn stamp: String) throws -> Bool {
         try database.write { db in
             guard let section = try ReadingSection.fetchOne(db, key: sectionID),
                   section.deletedAt.map({ DateFormatter.variorumISO8601.string(from: $0) }) == stamp,
                   try Reading.fetchOne(db, key: section.readingId)?.deletedAt == nil
-            else { return }
+            else { return false }
             try restoreSectionRow(db, sectionID)
+            return true
         }
     }
 
@@ -635,16 +671,18 @@ extension Operations {
     /// chapter still stands at `from` — a place she gave it since (her chapter
     /// order registers no entry) is hers, and the entry is quiet. Checked
     /// FIRST; past it, a finished book refuses and keeps the entry.
-    func restoreChapterPosition(_ sectionID: String, from: String, to position: String) throws {
+    @discardableResult
+    func restoreChapterPosition(_ sectionID: String, from: String, to position: String) throws -> Bool {
         try database.write { db in
             guard var section = try ReadingSection.fetchOne(db, key: sectionID), section.deletedAt == nil,
                   section.position == from,
                   let book = try Reading.fetchOne(db, key: section.readingId), book.deletedAt == nil
-            else { return }
+            else { return false }
             guard !book.locked else { throw OperationError.lockedReading(id: book.id) }
             section.position = position
             section.updatedAt = date.now
             try section.update(db)
+            return true
         }
     }
 
@@ -674,19 +712,23 @@ extension Operations {
             label: undoLabel,
             inverse: { try $0.revertDeletedNote(postID, deletedOn: deletedOn.value) },
             redo: { ops in
-                if let stamp = try ops.redeleteNote(postID) { deletedOn.setValue(stamp) }
+                guard let stamp = try ops.redeleteNote(postID) else { return false }
+                deletedOn.setValue(stamp)
+                return true
             })
         return stamp
     }
 
     /// A note delete's inverse — see `deleteNoteForClient`.
-    func revertDeletedNote(_ postID: String, deletedOn stamp: String) throws {
+    @discardableResult
+    func revertDeletedNote(_ postID: String, deletedOn stamp: String) throws -> Bool {
         try database.write { db in
             guard let note = try Container.fetchOne(db, key: postID),
                   note.deletedAt.map({ DateFormatter.variorumISO8601.string(from: $0) }) == stamp
-            else { return }
+            else { return false }
             try restoreNoteFamily(db, id: postID)
             try enforceOwnershipAfterRevival(db, postIDs: [postID], now: date.now)
+            return true
         }
     }
 
@@ -746,15 +788,17 @@ extension Operations {
     /// Both halves of the note-archive entry: `archived_at` set to `to` only
     /// while the note is live and still wears `from` (compared by its stored
     /// spelling) — quiet otherwise.
-    func restoreNoteArchived(_ postID: String, from: Date?, to: Date?) throws {
+    @discardableResult
+    func restoreNoteArchived(_ postID: String, from: Date?, to: Date?) throws -> Bool {
         let spelled = { (date: Date?) in date.map { DateFormatter.variorumISO8601.string(from: $0) } }
-        try database.write { db in
+        return try database.write { db in
             guard var note = try Container.fetchOne(db, key: postID), note.deletedAt == nil,
                   spelled(note.archivedAt) == spelled(from)
-            else { return }
+            else { return false }
             note.archivedAt = to
             note.updatedAt = date.now
             try note.update(db)
+            return true
         }
     }
 }

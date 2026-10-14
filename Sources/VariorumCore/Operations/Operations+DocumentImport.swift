@@ -85,10 +85,7 @@ extension Operations {
                 alternateCount: minted.alternateCount, tagIDs: tagIDs)
         }
         let postID = result.post.id
-        undoStack?.register(
-            label: Self.importUndoLabel,
-            inverse: { try $0.revertMintedContainer(postID) },
-            redo: { try $0.reapplyMintedContainer(postID) })
+        registerMintedContainerEntry(label: Self.importUndoLabel, postID)
         return result
     }
 
@@ -180,9 +177,11 @@ extension Operations {
                 // real deletion wrote — the redo would otherwise look for
                 // rows that died on the fresh stamp and leave the first
                 // undo's books in the Trash.
-                if let stamp = try ops.revertImportedBook(readingID, posts: postIDs) {
-                    undoneOn.setValue(stamp)
-                }
+                // (VX-246 U2: and the nil answers the stack — nothing
+                // tombstoned retires the entry.)
+                guard let stamp = try ops.revertImportedBook(readingID, posts: postIDs) else { return false }
+                undoneOn.setValue(stamp)
+                return true
             },
             redo: { try $0.reapplyImportedBook(readingID, posts: postIDs, undoneOn: undoneOn.value) })
         return result
@@ -318,14 +317,15 @@ extension Operations {
     /// bookless, as they were; a note she deleted by hand stays deleted. What
     /// has come back meanwhile (Put back from the Trash) is live and passes
     /// over — obsolete, quiet; nil (no inverse ever ran) is obsolete too.
+    @discardableResult
     func reapplyImportedBook(
         _ readingID: String, posts postIDs: [String], undoneOn stamp: String?
-    ) throws {
-        guard let stamp else { return }
+    ) throws -> Bool {
+        guard let stamp else { return false }
         func diedOnTheUndo(_ deletedAt: Date?) -> Bool {
             deletedAt.map { DateFormatter.variorumISO8601.string(from: $0) } == stamp
         }
-        try database.write { db in
+        return try database.write { db in
             var revived: [String] = []
             for postID in postIDs {
                 guard let post = try Container.fetchOne(db, key: postID),
@@ -334,11 +334,14 @@ extension Operations {
                 try restoreNoteFamily(db, id: postID)
                 revived.append(postID)
             }
+            var revivedBook = false
             if let reading = try Reading.fetchOne(db, key: readingID),
                diedOnTheUndo(reading.deletedAt) {
                 try restoreReadingRows(db, id: readingID)
+                revivedBook = true
             }
             try enforceOwnershipAfterRevival(db, postIDs: revived, now: date.now)
+            return revivedBook || !revived.isEmpty
         }
     }
 }

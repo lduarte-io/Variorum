@@ -52,10 +52,66 @@ struct InlineEditorWindowTests {
         return (window, coordinator)
     }
 
+    /// The app's idle, reached the app's way: `await` turns let every queued
+    /// main-queue hop land (the width door's remeasure, the overlay hop, the
+    /// settle net's heal), with a display pass offered on each.
+    private func settle(_ window: NSWindow, turns: Int = 24) async {
+        for _ in 0..<turns {
+            window.displayIfNeeded()
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+    }
+
+    /// Entry `i`'s first fragment's line in view coordinates — only when
+    /// TextKit 2 has LAID IT OUT (read with `options: []`, so the read lays
+    /// nothing out); nil for an unlaid or estimated fragment, which is no
+    /// position (VX-230).
+    private func laidLine(entry i: Int, _ h: EditorHarness) -> CGFloat? {
+        guard let layoutManager = h.textView.textLayoutManager,
+              let contentManager = layoutManager.textContentManager,
+              let location = contentManager.location(
+                contentManager.documentRange.location,
+                offsetBy: h.model.index.range(ofEntryAt: i).location)
+        else { return nil }
+        var line: CGFloat?
+        layoutManager.enumerateTextLayoutFragments(from: location, options: []) { fragment in
+            if fragment.state == .layoutAvailable {
+                line = fragment.layoutFragmentFrame.minY + h.textView.textContainerOrigin.y
+            }
+            return false
+        }
+        return line
+    }
+
     /// MINOR 5 (red-on-old): a fanned block far below the container's
     /// clipped viewport still badges — inline overlays cover the whole
     /// focused post, because nothing re-fires them when the CONTAINER
     /// scrolls (the staleness class is removed, not raced).
+    ///
+    /// **VX-230 (Run VX-246 U4c) — the harness waits as the app runs, and the
+    /// badge must stand at its own line.** As first written, the pin read the
+    /// post in a transient the app never idles in, and its green on the older
+    /// trees was a badge OFF its line (the run record's U4c trace, measured on
+    /// bare TK2 probes, macOS 27.0):
+    /// - `remeasure()` walks at the harness's 600-pt width, and its own report
+    ///   widens the frame to 700, so every fragment is unlaid again; the width
+    ///   door queues the remeasure that re-lays the post.
+    /// - `pump()` is a run loop nested in this main-actor job, and it runs NO
+    ///   main-queue block, so that remeasure never ran. Its display pass laid
+    ///   out only the frame's END and ESTIMATED the rest: block 40 read a
+    ///   guessed frame (~350 pt off its line in the rig). Proven in the U1b
+    ///   window: right after `pump()`, block 40 was not laid out.
+    /// - The tree before U4 badged that guess; U4's forced read laid block 40
+    ///   out ahead of its unlaid predecessors (U4b's poison). Both passed,
+    ///   because the pin checked presence, never the line. U4b refuses a guess
+    ///   (an unlaid fragment is no position), which is what turned it red.
+    /// In use the inline post is laid out in the steady state and stays laid
+    /// through display passes and host scrolls, so a fan adopted with NO text
+    /// change is badged at once. The pin now waits for that state, fans
+    /// through BOTH no-text-change roads — her branch (the panel's op) and a
+    /// client's `add_take` (the MCP door's op), delivered the way the
+    /// observation delivers — and asserts each badge at its own laid line.
     @Test func inlineBadgesCoverTheWholePostNotJustTheClippedViewport() async throws {
         try await withInlineEditor(seedBlocks: corpus) { h in
             let (window, coordinator) = makeInlineWindow(h)
@@ -66,20 +122,32 @@ struct InlineEditorWindowTests {
             }
             coordinator.remeasure()
             pump()
+            await settle(window)
             #expect(h.textView.visibleRect.height < h.textView.bounds.height,
                     "the container clips the inline surface (the book-view shape)")
 
-            // Fan a block far below the visible region.
+            // Fan two blocks far outside the clipped viewport (the container
+            // shows the frame's END), with NO text change.
             let slots = try h.storeSlots()
             let deep = slots[40]
+            let deeper = slots[45]
             _ = try h.session.operations.branchVariant(deep.blockID, from: deep.variantID!)
-            try h.reload()
-            h.model.refreshBadges()
-            #expect(h.model.badges.map(\.blockID) == [deep.blockID],
-                    "the off-viewport fanned block badges — no stale pruning")
-            let frame = try #require(h.model.badges.first?.frame)
-            #expect(!h.textView.visibleRect.intersects(frame),
-                    "and it really is outside the clipped viewport")
+            _ = try h.session.operations.addTake(
+                toBlock: deeper.blockID, text: "A client's take.", label: nil, undoLabel: "Add Take")
+            // The observation's road (a delivery): the chosen takes and their
+            // text are unchanged, so it is adopted with no storage edit.
+            h.model.applyProjection(try h.storeSlots(), fromDelivery: true)
+            #expect(h.model.badges.map(\.blockID) == [deep.blockID, deeper.blockID],
+                    "the off-viewport fanned blocks badge at once — no stale pruning, no wait")
+            for (entry, blockID) in [(40, deep.blockID), (45, deeper.blockID)] {
+                let badge = try #require(h.model.badges.first { $0.blockID == blockID })
+                let line = try #require(laidLine(entry: entry, h),
+                                        "entry \(entry) is laid out in the steady state")
+                #expect(abs(badge.frame.minY - line) < 1,
+                        "entry \(entry)'s badge at y=\(badge.frame.minY), its own line at y=\(line)")
+                #expect(!h.textView.visibleRect.intersects(badge.frame),
+                        "and it really is outside the clipped viewport")
+            }
         }
     }
 

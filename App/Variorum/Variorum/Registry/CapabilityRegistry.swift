@@ -2387,6 +2387,22 @@ nonisolated enum CapabilityRegistry {
         // 13n-c U4 — ASKS WAIT QUIETLY (arrival X). The glyph and Waiting's
         // row each carry their ask, so `always` is honest; the glyph renders
         // only while that ask waits (P-2 — a calm target draws nothing).
+        // VX-258 (VX-246 U1b): Waiting's re-bind row. Each row carries its
+        // waiting setup, so `always` is honest; the row renders only while
+        // the setup waits (P-2). "Don't allow" is the ask sheet's own word
+        // (`MCPAskCopy.dontAllow`), one source. PROVISIONAL words (VX-234).
+        Capability(
+            id: .mcpAllowRebind, verb: "Allow", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A client's new setup waits for you in Settings \u{25B8} MCP \u{25B8} Waiting.",
+            availability: always),
+        Capability(
+            id: .mcpDeclineRebind, verb: MCPAskCopy.dontAllow, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A client's new setup waits for you in Settings \u{25B8} MCP \u{25B8} Waiting.",
+            availability: always),
         Capability(
             id: .mcpOpenAsk, verb: "Answer\u{2026}", scope: .app,
             doors: [.surface],

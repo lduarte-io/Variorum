@@ -35,7 +35,9 @@ struct MCPSetupKeyRebindServerTests {
             let codex = try await h.connect(as: "codex")   // another name, its own key bound
 
             // She runs the setup again (a second Copy setup command press).
-            let rerun = try h.operations.mintMCPSetupKey()
+            // VX-258 (A JUSTIFIED EDIT, the ritual — her ruling: a key re-binds with zero clicks only the name its setup was copied FOR): the
+            // second copy is from Claude Code's own tab.
+            let rerun = try h.operations.mintMCPSetupKey(copiedFor: "claude-code")
             let newer = try await h.connect(as: "claude-code", presenting: rerun)
             let read = try await newer.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)])
             #expect(read.isError != true && text(read).contains("the harbour at dawn"),

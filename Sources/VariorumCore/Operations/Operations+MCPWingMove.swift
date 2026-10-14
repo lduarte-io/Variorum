@@ -101,14 +101,14 @@ extension Operations {
         undoStack?.register(
             label: undoLabel,
             inverse: { ops in
-                if let stamp = try ops.revertMCPWingMove(rows, forwardStamp: forward.value) {
-                    backward.setValue(stamp)
-                }
+                guard let stamp = try ops.revertMCPWingMove(rows, forwardStamp: forward.value) else { return false }
+                backward.setValue(stamp)
+                return true
             },
             redo: { ops in
-                if let stamp = try ops.reapplyMCPWingMove(rows, backwardStamp: backward.value) {
-                    forward.setValue(stamp)
-                }
+                guard let stamp = try ops.reapplyMCPWingMove(rows, backwardStamp: backward.value) else { return false }
+                forward.setValue(stamp)
+                return true
             })
         return landed.result
     }

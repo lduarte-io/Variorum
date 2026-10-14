@@ -389,4 +389,8 @@ public enum OperationError: Error, Equatable, Sendable {
     /// shared one ask at a time), and a fenced note never takes "always"
     /// (R-13n-4; R-13nb-1/4).
     case mcpGrantScopeFenced(kind: String, id: String)
+    /// VX-258: an answer to a setup that is no longer waiting for her OK
+    /// (already answered, replaced by a newer wait, or dropped by a Deny or
+    /// an adoption).
+    case mcpRebindRequestNotFound(id: String)
 }

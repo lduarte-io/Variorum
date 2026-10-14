@@ -41,6 +41,15 @@ struct MCPWriteTools: Sendable {
         let args = arguments ?? [:]
         do {
             let job = try parse(name, args)
+            // VX-275 (her ruling (a) — the VX-246 record's U3): an act that
+            // meets a take her open editor may hold unflushed waits for HER
+            // FLUSH first — its own turn, before the act's, never inside it —
+            // so her typing is in the rows the act reads, rewrites, copies,
+            // freezes or tombstones. Whatever the target (the flush's cost
+            // never depends on the id named), and only once the call parsed.
+            if job.flushesHerEditorFirst, let beforeWrite = hooks.beforeWrite {
+                await beforeWrite(job.tool)
+            }
             let result: Result<Landed, Refused> = try await executor.run { ops in
                 try self.perform(job, ops: ops, clientName: clientName)
             }
@@ -110,6 +119,32 @@ struct MCPWriteTools: Sendable {
             case .applyTag: "apply_tag"
             case .createBook: "create_book"
             case .addNoteToBook: "add_note_to_book"
+            }
+        }
+
+        /// **VX-275 — does this act meet a take her open editor may hold
+        /// unflushed?** True for the act list the VX-246 record's U3 trace
+        /// argues, tool by tool: an act that TOMBSTONES her take (her flush
+        /// would then be refused — her bytes stranded in memory), FREEZES it
+        /// (a lock or an archive refuses her flush the same way), REWRITES or
+        /// RESTRUCTURES it (it reads the STORED row, so her flush would write
+        /// her old buffer over the act, or into a block it released), or
+        /// COPIES it (a commit or a version would miss her last words — her
+        /// own ⌘S and Save Version flush first). Every family answers through
+        /// an exhaustive switch, so a new tool cannot compile without saying.
+        var flushesHerEditorFirst: Bool {
+            switch self {
+            case .edit(let job): job.flushesHerEditorFirst
+            case .carriage(let job): job.flushesHerEditorFirst
+            case .deliberate(let job): job.flushesHerEditorFirst
+            case .batch(let job): job.flushesHerEditorFirst
+            case .noteEdit(let job): job.flushesHerEditorFirst
+            case .libraryEdit(let job): job.flushesHerEditorFirst
+            // New takes, comments, lenses, notes, books, tags and links touch
+            // no take's text: her flush lands where she typed it.
+            case .addTake, .addComment, .saveLens, .createNote, .importNote, .importBook, .applyTag,
+                 .createBook, .addNoteToBook, .deleteComment, .removeTag, .linkVersions:
+                false
             }
         }
     }
@@ -385,7 +420,8 @@ struct MCPWriteTools: Sendable {
             }
         case .createBook(let name, let wingID):
             return try inWing(wingID, job: job, clientName: clientName) {
-                let book = try ops.createBook(named: name, inWing: wingID, undoLabel: label(.book))
+                let book = try ops.createBook(
+                    named: name, inWing: wingID, undoLabel: label(.book), namesCountedBy: readableBooks(clientName))
                 return (["book_id": book.id, "name": book.name],
                         MCPWriteReceipt(clientName: clientName, act: .book, targetID: book.id, targetTitle: book.name,
                                         show: .book(bookID: book.id, sectionID: nil)))
@@ -632,6 +668,48 @@ struct MCPWriteTools: Sendable {
         try database.write { db in try grants.consumeMCPOnceGrant(db, grantID) }
     }
 
+    /// **The statement `picks` resolves the given take ids with — P1 by
+    /// construction** (VX-280; VX-184's ladder round 2 measured the shape it
+    /// replaced): the GIVEN ids drive, each finding its take by key and then
+    /// its block's ONE live placement through `uq_cblock_ownership` — ∝ the
+    /// takes given, never the note's blocks. **`CROSS JOIN`, twice, on
+    /// purpose** (the house's P1 discipline for `json_each` —
+    /// `placedBlocksSQL`, `Queries.ownershipFactsSQL`): with plain JOINs the
+    /// planner drove from the note's placements (`idx_cblock_order`), then
+    /// every take of each block (`idx_variant_block`), with `json_each`
+    /// scanned innermost. A `CROSS JOIN` keeps its left table outside its
+    /// right, so the only order left is ids → take → placement. Membership
+    /// per id is the old statement's (a live take of a block live-placed in
+    /// this note), so every refusal `picks` speaks is unchanged. Pinned on the
+    /// plan (`MCPPicksPlanTests`). Two placeholders: the ids as a JSON array,
+    /// then the note.
+    static let picksSQL = """
+        SELECT v.id, v.block_id FROM json_each(?) j
+        CROSS JOIN variant v ON v.id = j.value AND v.deleted_at IS NULL
+        CROSS JOIN container_block cb ON cb.block_id = v.block_id AND cb.deleted_at IS NULL
+        WHERE cb.container_id = ?
+        """
+
+    /// **The books a name check counts on the wire** (VX-259 — VX-184's ladder
+    /// round 1; her ruling: "it's fine if an accidental book name duplicate is
+    /// made - there's no schema protection against it and we already ruled
+    /// that it's ok if that happens"): a reading counts only while THIS client
+    /// can READ it now — the one rule `list_books` reads (a book at read under
+    /// its grants or the open book, never a fenced one; a gathering under its
+    /// wing's reach) — so `rename_book` and `create_book` never refuse with,
+    /// or because of, a book the client cannot reach (F-7: anything it can't
+    /// reach answers as if it did not exist). Non-consuming: a name check
+    /// never spends a once grant. Asked inside the act's transaction, only of
+    /// a reading whose name collides.
+    func readableBooks(_ clientName: String) -> Operations.BookNameReach {
+        { db, readingID in
+            let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
+            return MCPGrantAuthority.decide(
+                standing, reading: try MCPGrantAuthority.readPlace(db, readingID: readingID)
+            ).isAllowed
+        }
+    }
+
     /// The lens's picks from take ids, resolved ONLY among the takes of THIS
     /// note's placed blocks — an id from anywhere else answers one way (no
     /// oracle on take ids), and two takes of one block refuse.
@@ -639,15 +717,7 @@ struct MCPWriteTools: Sendable {
         let owners: [String: String] = try database.read { db in
             let json = String(decoding: try JSONEncoder().encode(takeIDs), as: UTF8.self)
             var owners: [String: String] = [:]
-            for row in try Row.fetchAll(
-                db,
-                sql: """
-                    SELECT v.id, v.block_id FROM json_each(?) j
-                    JOIN variant v ON v.id = j.value AND v.deleted_at IS NULL
-                    JOIN container_block cb ON cb.block_id = v.block_id AND cb.deleted_at IS NULL
-                    WHERE cb.container_id = ?
-                    """,
-                arguments: [json, noteID]) {
+            for row in try Row.fetchAll(db, sql: Self.picksSQL, arguments: [json, noteID]) {
                 owners[row["id"]] = row["block_id"]
             }
             return owners

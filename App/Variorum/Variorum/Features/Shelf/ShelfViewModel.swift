@@ -52,6 +52,13 @@ final class ShelfViewModel {
     /// members (one-shot — the read touches `container`, so it never rides
     /// the held snapshot; U1's P1 pin).
     private(set) var archivedCounts: [String: Int] = [:]
+    #if DEBUG
+    /// **VX-231's P1 witness:** how many times the one-shot half was read
+    /// (`refreshAggregates`). The one-shot is a STORE-WIDE read, so the pins
+    /// hold it to its occasions — appearance, the board's own acts, and a
+    /// held-snapshot move — and never autosave rate. Counted, never consulted.
+    @ObservationIgnored private(set) var oneShotReads = 0
+    #endif
     /// 13n-b U2 (P-13n-3) → 13n-c U3 (VX-271): the books — and since VX-185
     /// the gatherings, read through a wing grant or the open book — an
     /// approved MCP client reaches now, WITH who and why — the row's ONE shared icon
@@ -240,18 +247,68 @@ final class ShelfViewModel {
     }
 
     /// The held half: one wing's shelves + books (author-scale).
+    ///
+    /// **VX-231 (Run VX-246 U4) — the one-shot half FOLLOWS this one.** The
+    /// one-shot aggregates (`refreshAggregates`) used to be re-read only on
+    /// appearance and after the board's OWN acts, so a note joining a book
+    /// from anywhere else — an MCP client's write, a sync apply, the Book
+    /// Panel, another window — moved this held snapshot ("7 notes") and left
+    /// the words from before the join ("120w", VX-184 U1's live round). Now a
+    /// held delivery whose BOOKS differ from the last one held re-reads the
+    /// one-shot half (`followHeldMove` — single-flight). The first delivery
+    /// is the appearance, which `ShelfView`'s own `.task` already reads. P1:
+    /// this region never wakes at autosave rate (pinned —
+    /// `theHeldSnapshotsRegionIsBlindToAutosave`), so the store-wide re-read
+    /// runs at membership / reading-change rate, never per keystroke (pinned —
+    /// `typingInAMemberNoteNeverReReadsTheOneShot`). A member note's words
+    /// changing by EDITING stays the one-shot's documented staleness.
     func start() async {
         let wing = wingID
+        defer {
+            heldMoveFollow?.cancel()
+            heldMoveFollow = nil
+        }
         do {
+            var held = false
             for try await value in session.database.observe({ db in
                 ShelfSnapshot(bookcase: try Queries.bookcase(db, wingID: wing))
             }) {
+                let booksMoved = held && value.bookcase.books != books
                 books = value.bookcase.books
                 shelves = value.bookcase.shelves
+                held = true
+                if booksMoved { followHeldMove() }
             }
         } catch is CancellationError {
         } catch {
             lastError = String(describing: error)
+        }
+    }
+
+    /// VX-231: the one-shot re-read that follows a held move — never inside
+    /// the observation loop's own turn, and SINGLE-FLIGHT: a move landing
+    /// while a re-read runs asks for exactly one more after it. Reads coalesce
+    /// ONLY when moves land during a read in flight; a paced client (each
+    /// join its own call, landing after the last read finished) costs one
+    /// store-wide read per join. There is no debounce — the rate stays
+    /// membership-change rate, never keystroke rate (the P1 argument above).
+    @ObservationIgnored private var heldMoveFollow: Task<Void, Never>?
+    @ObservationIgnored private var heldMoveAgain = false
+
+    private func followHeldMove() {
+        guard heldMoveFollow == nil else {
+            heldMoveAgain = true
+            return
+        }
+        heldMoveFollow = Task { [weak self] in
+            guard let self else { return }
+            repeat {
+                heldMoveAgain = false
+                await refreshAggregates()
+            } while heldMoveAgain && !Task.isCancelled
+            // A cancelled follow was already released by `start`'s exit —
+            // never clear a handle that may now be a later board's.
+            if !Task.isCancelled { heldMoveFollow = nil }
         }
     }
 
@@ -287,6 +344,9 @@ final class ShelfViewModel {
     /// reading and consulted per wing row); `bookcaseAggregates` is the
     /// wing's own. All one-shot — none rides the held snapshot.
     func refreshAggregates() async {
+        #if DEBUG
+        oneShotReads += 1
+        #endif
         let wing = wingID
         do {
             let (words, tags, rules, aggregates) = try await session.database.read { db in

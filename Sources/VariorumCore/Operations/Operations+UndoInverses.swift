@@ -14,8 +14,9 @@ import GRDB
 // pre-images, never a re-run of the forward operation (a re-run would mint
 // fresh UUIDs and strand the inverse that captured the old ones). Most
 // re-applies are the existing inverse called with the other pre-image
-// (`restorePlacementLocation`, `revertChosenPointers`); the two that need
-// their own body are `reapplyStructural` and `reapplyMintedContainer`.
+// (`restorePlacementLocation`, `revertChosenPointersIfUnchanged`); the two
+// that need their own body are `reapplyStructural` and
+// `reapplyMintedContainer`.
 // None of them registers — so a redo, like an undo, never clears the redo
 // stack from under itself.
 extension Operations {
@@ -27,13 +28,16 @@ extension Operations {
     /// a since-locked container refuses (resolve, then retry the undo).
     /// A block already alive (restored from the tray meanwhile) makes this
     /// entry obsolete — a quiet no-op success, so the pop happens and the
-    /// stack never wedges on an unresolvable refusal.
-    func revertDeleteBlock(_ blockID: String) throws {
+    /// stack never wedges on an unresolvable refusal. Returns whether it
+    /// revived the block (VX-246 U2: a quiet `false` retires the entry, so
+    /// its redo never re-deletes the block she put back).
+    @discardableResult
+    func revertDeleteBlock(_ blockID: String) throws -> Bool {
         try database.write { db in
             guard var block = try Block.fetchOne(db, key: blockID) else {
                 throw OperationError.blockNotFound(id: blockID)
             }
-            guard let deletedAt = block.deletedAt else { return }
+            guard let deletedAt = block.deletedAt else { return false }
             let stamp = DateFormatter.variorumISO8601.string(from: deletedAt)
             let now = date.now
 
@@ -61,6 +65,7 @@ extension Operations {
             // naming it, or a Delete Now confirmed BETWEEN the delete and
             // this undo would still purge the row she just brought back.
             try voidPurgeIntents(db, table: "block", rowID: blockID)
+            return true
         }
     }
 
@@ -70,31 +75,42 @@ extension Operations {
     /// would strand a live variant under a dead block) and its post unsealed
     /// (the seal refuses everything under the post, undo included); either
     /// refusal leaves the entry on the stack for retry.
-    func revertDeleteVariant(_ variantID: String, wasDefault: Bool) throws {
+    ///
+    /// **A take already live is not the act's result any more** (VX-246 U2):
+    /// her tray Put back (`restoreVariant`, no entry) brought it back and set
+    /// its own pointers, so this inverse is QUIET — it writes nothing, not
+    /// even the default pointer (that would overwrite what her Put back left),
+    /// and returns `false` so the stack retires the entry and its redo never
+    /// re-deletes the take she restored.
+    @discardableResult
+    func revertDeleteVariant(_ variantID: String, wasDefault: Bool) throws -> Bool {
         try database.write { db in
             guard var variant = try Variant.fetchOne(db, key: variantID) else {
                 throw OperationError.variantNotFound(id: variantID)
             }
+            guard variant.deletedAt != nil else { return false }
             _ = try liveBlock(db, variant.blockId)
             try ensurePlacementUnlocked(db, blockID: variant.blockId)
             let now = date.now
-            if variant.deletedAt != nil {
-                variant.deletedAt = nil
-                variant.updatedAt = now
-                try variant.update(db)
-                // 13j ladder B (B1): the ⌥⌘Z road voids any live intent
-                // naming the restored take (revertDeleteBlock's reason).
-                try voidPurgeIntents(db, table: "variant", rowID: variantID)
-            }
+            variant.deletedAt = nil
+            variant.updatedAt = now
+            try variant.update(db)
+            // 13j ladder B (B1): the ⌥⌘Z road voids any live intent
+            // naming the restored take (revertDeleteBlock's reason).
+            try voidPurgeIntents(db, table: "variant", rowID: variantID)
             if wasDefault {
                 try restoreDefaultVariant(db, blockID: variant.blockId, to: variantID, now: now)
             }
+            return true
         }
     }
 
     /// Inverse of `archiveVariant`: back to active, default pointer
-    /// restored. Same seal guard as every other write under a post.
-    func revertArchiveVariant(_ variantID: String, wasDefault: Bool) throws {
+    /// restored. Same seal guard as every other write under a post. A take
+    /// already active (her unarchive, no entry) is QUIET — `false`, nothing
+    /// written (VX-246 U2: `revertDeleteVariant`'s reason).
+    @discardableResult
+    func revertArchiveVariant(_ variantID: String, wasDefault: Bool) throws -> Bool {
         try database.write { db in
             try unarchiveTakeRow(db, variantID: variantID, wasDefault: wasDefault)
         }
@@ -104,31 +120,37 @@ extension Operations {
     /// is this in its own transaction, and `revertStructural` runs it inside
     /// the transaction that also tombstones the blocks a take↔block
     /// conversion minted — one archive-inverse brain, two callers.
+    @discardableResult
     private func unarchiveTakeRow(
         _ db: Database, variantID: String, wasDefault: Bool
-    ) throws {
+    ) throws -> Bool {
         var variant = try liveVariant(db, variantID)
+        guard variant.status == .archived else { return false }
         try ensurePlacementUnlocked(db, blockID: variant.blockId)
         let now = date.now
-        if variant.status == .archived {
-            variant.status = .active
-            variant.updatedAt = now
-            try variant.update(db)
-        }
+        variant.status = .active
+        variant.updatedAt = now
+        try variant.update(db)
         if wasDefault {
             try restoreDefaultVariant(db, blockID: variant.blockId, to: variantID, now: now)
         }
+        return true
     }
 
     /// Inverse of `moveBlock` and `reorder`: put the live placement back at
     /// its exact pre-image location — same container, same position string.
+    /// A placement already there writes nothing and returns `false` (VX-246
+    /// U2 — her other moves register their own entries, so LIFO hands this
+    /// one the block where its act left it; already-there is the quiet case).
+    @discardableResult
     func restorePlacementLocation(
         _ blockID: String, containerID: String, position: String
-    ) throws {
+    ) throws -> Bool {
         try database.write { db in
             guard var placement = try livePlacement(db, blockID: blockID) else {
                 throw OperationError.blockNotPlaced(id: blockID)
             }
+            guard placement.containerId != containerID || placement.position != position else { return false }
             try ensureUnlocked(try liveContainer(db, placement.containerId))
             if placement.containerId != containerID {
                 try ensureUnlocked(try liveContainer(db, containerID))
@@ -137,6 +159,7 @@ extension Operations {
             placement.position = position
             placement.updatedAt = date.now
             try placement.update(db)
+            return true
         }
     }
 
@@ -145,14 +168,16 @@ extension Operations {
     /// The `restorePlacementLocation` shape, one table over — exact-row, never
     /// a fresh key. The take must still be live and its post unsealed; either
     /// refusal leaves the entry on the stack for retry.
-    func restoreFanPosition(_ variantID: String, position: String) throws {
+    @discardableResult
+    func restoreFanPosition(_ variantID: String, position: String) throws -> Bool {
         try database.write { db in
             var variant = try liveVariant(db, variantID)
             try ensurePlacementUnlocked(db, blockID: variant.blockId)
-            guard variant.fanPosition != position else { return }
+            guard variant.fanPosition != position else { return false }
             variant.fanPosition = position
             variant.updatedAt = date.now
             try variant.update(db)
+            return true
         }
     }
 
@@ -163,6 +188,18 @@ extension Operations {
         let variantID: String
         let text: String
         let postOpText: String
+    }
+
+    /// Which parts of a structural entry one half changed (VX-246 U2): the
+    /// buffers (variant ids), the minted blocks, the placement rows, the
+    /// converted takes. The other half acts on exactly these.
+    struct StructuralParts: Sendable, Equatable {
+        var texts: Set<String> = []
+        var blocks: Set<String> = []
+        var placements: Set<String> = []
+        var takes: Set<String> = []
+
+        var isEmpty: Bool { texts.isEmpty && blocks.isEmpty && placements.isEmpty && takes.isEmpty }
     }
 
     /// **The insurance question, asked ONCE (13d batch 5 — ledger A12).**
@@ -245,27 +282,41 @@ extension Operations {
     /// empty, so every pre-13e caller reads unchanged. The takes come back
     /// FIRST — restoring the source block's fan before the mints go, so no
     /// intermediate state has a live block with nothing in it.
+    ///
+    /// **`only` and the answer (VX-246 U2 — an entry with PARTS):** returns
+    /// exactly the parts it changed (a text it restored, a mint it
+    /// tombstoned, a placement it revived, a take it unarchived), and, given
+    /// `only`, touches no part outside it. The structural entry
+    /// (`registerStructuralEntry`) hands each half the parts its partner
+    /// changed, so an undo after a partly-quiet redo takes back only what
+    /// that redo put back — never a block she put back from the tray herself.
+    /// `nil` = every part (the first undo, after the act).
+    @discardableResult
     func revertStructural(
         restoringTexts: [TextPreImage],
         tombstoningBlocks: [MintedPreImage],
         revivingPlacementRows: [String],
-        unarchivingTakes: [(variantID: String, wasDefault: Bool)] = []
-    ) throws {
+        unarchivingTakes: [(variantID: String, wasDefault: Bool)] = [],
+        only: StructuralParts? = nil
+    ) throws -> StructuralParts {
         try database.write { db in
             let now = date.now
+            var changed = StructuralParts()
 
-            for take in unarchivingTakes {
+            for take in unarchivingTakes where only?.takes.contains(take.variantID) ?? true {
                 // Divergence is quiet (the standing bucket): a take deleted
                 // since — or whose row is gone — means the world moved past
                 // this entry. A SEALED post still throws, keeping the entry.
                 guard let variant = try Variant.fetchOne(db, key: take.variantID),
                       variant.deletedAt == nil
                 else { continue }
-                try unarchiveTakeRow(
-                    db, variantID: take.variantID, wasDefault: take.wasDefault)
+                if try unarchiveTakeRow(
+                    db, variantID: take.variantID, wasDefault: take.wasDefault) {
+                    changed.takes.insert(take.variantID)
+                }
             }
 
-            for preImage in restoringTexts {
+            for preImage in restoringTexts where only?.texts.contains(preImage.variantID) ?? true {
                 var variant = try liveVariant(db, preImage.variantID)
                 _ = try liveBlock(db, variant.blockId)
                 try ensurePlacementUnlocked(db, blockID: variant.blockId)
@@ -286,9 +337,10 @@ extension Operations {
                 variant.workingText = preImage.text
                 variant.updatedAt = now
                 try variant.update(db)
+                changed.texts.insert(preImage.variantID)
             }
 
-            for minted in tombstoningBlocks {
+            for minted in tombstoningBlocks where only?.blocks.contains(minted.blockID) ?? true {
                 guard var block = try Block.fetchOne(db, key: minted.blockID),
                       block.deletedAt == nil
                 else { continue }  // already gone — the world moved past this
@@ -306,9 +358,10 @@ extension Operations {
                 block.deletedAt = now
                 block.updatedAt = now
                 try block.update(db)
+                changed.blocks.insert(minted.blockID)
             }
 
-            for rowID in revivingPlacementRows {
+            for rowID in revivingPlacementRows where only?.placements.contains(rowID) ?? true {
                 guard let row = try ContainerBlock.fetchOne(db, key: rowID),
                       row.deletedAt != nil,
                       let block = try Block.fetchOne(db, key: row.blockId),
@@ -322,7 +375,9 @@ extension Operations {
                 revived.deletedAt = nil
                 revived.updatedAt = now
                 try revived.update(db)
+                changed.placements.insert(rowID)
             }
+            return changed
         }
     }
 
@@ -353,17 +408,22 @@ extension Operations {
     /// unchanged. Same divergence rule as everywhere here: a take that died
     /// or is already archived is left alone quietly; a sealed post throws
     /// and keeps the entry.
+    ///
+    /// `only` and the answer: `revertStructural`'s, mirrored (VX-246 U2).
+    @discardableResult
     func reapplyStructural(
         restoringTexts: [TextPreImage],
         untombstoningBlocks: [MintedPreImage],
         releasingPlacementRows: [String],
-        rearchivingTakes: [String] = []
-    ) throws {
+        rearchivingTakes: [String] = [],
+        only: StructuralParts? = nil
+    ) throws -> StructuralParts {
         try database.write { db in
             let now = date.now
             let nowStamp = DateFormatter.variorumISO8601.string(from: now)
+            var changed = StructuralParts()
 
-            for variantID in rearchivingTakes {
+            for variantID in rearchivingTakes where only?.takes.contains(variantID) ?? true {
                 guard let take = try Variant.fetchOne(db, key: variantID),
                       take.deletedAt == nil, take.status == .active
                 else { continue }
@@ -380,11 +440,12 @@ extension Operations {
                 try archived.update(db)
                 try reassignDefaultIfNeeded(
                     db, blockID: take.blockId, removing: take.id, now: now)
+                changed.takes.insert(variantID)
             }
 
             // Mirror of the inverse's revive: the sources the forward op
             // released to lineage go back out of the post.
-            for rowID in releasingPlacementRows {
+            for rowID in releasingPlacementRows where only?.placements.contains(rowID) ?? true {
                 guard let row = try ContainerBlock.fetchOne(db, key: rowID),
                       row.deletedAt == nil,
                       let container = try Container.fetchOne(db, key: row.containerId),
@@ -395,13 +456,14 @@ extension Operations {
                 released.deletedAt = now
                 released.updatedAt = now
                 try released.update(db)
+                changed.placements.insert(rowID)
             }
 
             // Mirror of the inverse's tombstone: the minted blocks come
             // back with their placement row and stamp-matched cascade
             // victims — `revertDeleteBlock`'s exact shape, since that is
             // literally the transition being reversed.
-            for minted in untombstoningBlocks {
+            for minted in untombstoningBlocks where only?.blocks.contains(minted.blockID) ?? true {
                 guard var block = try Block.fetchOne(db, key: minted.blockID),
                       let deletedAt = block.deletedAt
                 else { continue }  // already alive, or gone — obsolete, quiet
@@ -429,9 +491,10 @@ extension Operations {
                 // brought back, and an ordinary re-delete before the next
                 // sweep would purge it with no 30-day window at all.
                 try voidPurgeIntents(db, table: "block", rowID: minted.blockID)
+                changed.blocks.insert(minted.blockID)
             }
 
-            for preImage in restoringTexts {
+            for preImage in restoringTexts where only?.texts.contains(preImage.variantID) ?? true {
                 var variant = try liveVariant(db, preImage.variantID)
                 _ = try liveBlock(db, variant.blockId)
                 try ensurePlacementUnlocked(db, blockID: variant.blockId)
@@ -443,7 +506,9 @@ extension Operations {
                 variant.workingText = preImage.postOpText
                 variant.updatedAt = now
                 try variant.update(db)
+                changed.texts.insert(preImage.variantID)
             }
+            return changed
         }
     }
 
@@ -452,21 +517,92 @@ extension Operations {
     /// `restoreContainer`'s exact-stamp cascade contract is precisely the
     /// reverse of the tombstone the inverse wrote. Already live (restored
     /// from the recovery surface meanwhile) ⇒ obsolete, quiet.
-    func reapplyMintedContainer(_ containerID: String) throws {
-        let stillDead = try database.read { db in
-            try Container.fetchOne(db, key: containerID)?.deletedAt != nil
+    ///
+    /// **Keyed on the stamp its own inverse wrote (VX-119 — the F1 shape,
+    /// `reapplyImportedBook`'s):** the post comes back only while it is
+    /// still dead on `undoneOn`. Dead on ANY other stamp — her Trash after a
+    /// Put back, another device's tombstone converged by sync (neither
+    /// clears the redo future) — it is not the undo's result, and the redo
+    /// is quiet. Returns whether it revived the post.
+    @discardableResult
+    func reapplyMintedContainer(_ containerID: String, undoneOn stamp: String?) throws -> Bool {
+        guard let stamp else { return false }
+        let stillDeadOnTheUndo = try database.read { db in
+            try Container.fetchOne(db, key: containerID)?.deletedAt
+                .map { DateFormatter.variorumISO8601.string(from: $0) } == stamp
         }
-        guard stillDead else { return }
+        guard stillDeadOnTheUndo else { return false }
         try restoreContainer(containerID)
+        return true
+    }
+
+    /// **ONE entry over the single-container pair** (VX-119): the minted
+    /// post's tombstone on undo, its stamp-keyed revival on redo. Every door
+    /// that mints one container (the copies, the outline, the version, a
+    /// promoted lens, the single-file import, Copy In, the MCP door's notes)
+    /// registers through here, so the pair keeps one shape: the inverse
+    /// records the stamp it wrote (nil — R2-1's rule — when it tombstoned
+    /// nothing, which retires the entry), and the redo revives only on it.
+    func registerMintedContainerEntry(label: String, _ containerID: String) {
+        let undoneOn = LockIsolated<String?>(nil)
+        undoStack?.register(
+            label: label,
+            inverse: { ops in
+                guard let stamp = try ops.revertMintedContainer(containerID) else { return false }
+                undoneOn.setValue(stamp)
+                return true
+            },
+            redo: { try $0.reapplyMintedContainer(containerID, undoneOn: undoneOn.value) })
     }
 
     /// The RE-APPLY half of `revertImportedBlocks` (13c 1B): the imported
     /// blocks come back — per block, exactly `revertDeleteBlock`'s
-    /// transition (it is the same tombstone being reversed).
-    func reapplyImportedBlocks(_ blockIDs: [String]) throws {
-        for blockID in blockIDs {
-            try revertDeleteBlock(blockID)
+    /// transition (it is the same tombstone being reversed). Given `only`,
+    /// just those blocks (VX-246 U2 — the ones its undo tombstoned); returns
+    /// the blocks it revived.
+    @discardableResult
+    func reapplyImportedBlocks(_ blockIDs: [String], only: Set<String>? = nil) throws -> Set<String> {
+        var revived: Set<String> = []
+        for blockID in blockIDs where only?.contains(blockID) ?? true {
+            if try revertDeleteBlock(blockID) { revived.insert(blockID) }
         }
+        return revived
+    }
+
+    /// **One structural entry over `revertStructural` / `reapplyStructural`,
+    /// with the PARTS record (VX-246 U2).** Every block-minting and
+    /// buffer-restoring structural act registers through here: each half
+    /// runs with `only` = the parts its partner last changed (nil after the
+    /// act: everything), records what IT changed, and answers whether it
+    /// changed anything — so a half never runs over a part its partner did
+    /// not move (a mint she put back from the tray between a redo and the
+    /// next undo; a released source she re-homed).
+    func registerStructuralEntry(
+        label: String,
+        restoringTexts texts: [TextPreImage] = [],
+        minting minted: [MintedPreImage] = [],
+        releasingPlacementRows released: [String] = [],
+        archivingTakes archived: [(variantID: String, wasDefault: Bool)] = [],
+        insuring: [TextPreImage] = []
+    ) {
+        let parts = LockIsolated<StructuralParts?>(nil)
+        undoStack?.register(
+            label: label,
+            inverse: { ops in
+                let changed = try ops.revertStructural(
+                    restoringTexts: texts, tombstoningBlocks: minted, revivingPlacementRows: released,
+                    unarchivingTakes: archived, only: parts.value)
+                parts.setValue(changed)
+                return !changed.isEmpty
+            },
+            redo: { ops in
+                let changed = try ops.reapplyStructural(
+                    restoringTexts: texts, untombstoningBlocks: minted, releasingPlacementRows: released,
+                    rearchivingTakes: archived.map(\.variantID), only: parts.value)
+                parts.setValue(changed)
+                return !changed.isEmpty
+            },
+            insuring: insuring)
     }
 
     private func restoreDefaultVariant(

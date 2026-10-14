@@ -973,6 +973,44 @@ extension AppDatabase {
         migrator.registerMigration("v1_27_mcp_comment_authors") { db in
             try db.execute(sql: MCPGrantSchema.v1_27DDL)
         }
+        // **VX-258 — A SETUP WAITING FOR HER OK** (VX-246 U1; her ruling: an
+        // "Any MCP client" key under a name that carries her approval
+        // "re-binds only after my ok" — the run record
+        // `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`): the grants
+        // family's `mcp_rebind_request` — a claimed key waiting to bind an
+        // approved name until she allows it. `Persistence/MCPGrantSchema.swift`
+        // carries the shape.
+        //
+        // **NOT a SyncSpec §12 lockstep event** — v1_24's road exactly (its own
+        // commit, ahead of the code that uses it): no `sync_version`, no outbox
+        // trigger, nothing pushed, no mirror change, the marker stays 13. It
+        // joins `MCPGrantSchema.tables` (the completeness walk subtracts it;
+        // the plaintext export keeps it EMPTY). No backfill: nothing waits
+        // before this migration.
+        migrator.registerMigration("v1_28_mcp_rebind_requests") { db in
+            try db.execute(sql: MCPGrantSchema.v1_28DDL)
+        }
+        // **P-VX260-1, OPTION (b) — THE WORDS A CLIENT WROTE** (VX-246 U1b; the
+        // run record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`, THE
+        // ORCHESTRATOR ON U1's HAND-BACK): `mcp_comment_author` gains
+        // `text_digest`, so a comment is a client's own only while its words
+        // are still the ones it wrote — her edit on ANY device makes deleting
+        // it need EDIT. `Persistence/MCPGrantSchema.swift` carries the shape.
+        //
+        // **NOT a SyncSpec §12 lockstep event** — v1_24's road exactly (its own
+        // commit, ahead of the code that uses it): no `sync_version`, no outbox
+        // trigger, nothing pushed, no mirror change, the marker stays 13; the
+        // plaintext export keeps the family EMPTY. **NO BACKFILL — NULL MEANS
+        // UNPROVEN (argued in the record):** a record written before this
+        // migration may name a comment she has since rewritten on another
+        // device or in a build without VX-260's forget, and its current words
+        // cannot say which; a backfill would bless exactly those as the
+        // client's. So a NULL digest is never the client's own (deleting it
+        // needs EDIT) — the strict reading, at the cost of a client's
+        // pre-upgrade comments asking edit to delete.
+        migrator.registerMigration("v1_29_mcp_comment_words") { db in
+            try db.execute(sql: MCPGrantSchema.v1_29DDL)
+        }
         return migrator
     }
 }

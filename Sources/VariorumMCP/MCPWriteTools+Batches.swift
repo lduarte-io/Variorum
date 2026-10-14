@@ -38,6 +38,14 @@ extension MCPWriteTools {
             case .comments: MCPToolCatalog.addComments.name
             }
         }
+
+        /// VX-275 (`Job.flushesHerEditorFirst`): new takes and comments touch
+        /// no take's text.
+        var flushesHerEditorFirst: Bool {
+            switch self {
+            case .takes, .comments: false
+            }
+        }
     }
 
     /// The most items one batch carries (argued above).

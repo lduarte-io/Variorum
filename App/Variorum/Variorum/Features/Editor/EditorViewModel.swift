@@ -3778,9 +3778,51 @@ final class EditorViewModel {
         }
     }
 
-    /// Badges for fanned blocks currently laid out near the viewport.
-    /// Cost ∝ fanned blocks (fans are opt-in and rare) — no ensureLayout,
-    /// unlaid-out blocks simply have no badge until scrolled to (P1).
+    /// Badges for fanned blocks currently laid out near the viewport (the
+    /// whole post on the inline surface).
+    /// Cost ∝ fanned blocks (fans are opt-in and rare) — no ensureLayout on
+    /// either surface: unlaid-out blocks simply have no badge until laid out
+    /// (scrolled to, in Write; the remeasure's walk, inline — P1).
+    ///
+    /// **VX-230 (Run VX-246 U4) — a fragment's frame is a POSITION only once
+    /// TextKit 2 has laid it out.** Measured on macOS 27.0 (the run record's
+    /// U4 trace): a fragment TK2 has not laid out reports a `.zero` frame in
+    /// the `.none` state — cold, below the viewport, and EVERY fragment after
+    /// a width change until the next layout — and a `.zero` rect at the
+    /// container origin `intersects` any viewport holding that point. This
+    /// pass read the frame with no state check, so every fanned block TK2
+    /// had not laid out was badged at the container's origin — block 1's
+    /// place — and the translucent badges stacked into her black disc (and
+    /// U1's "⑂2" on a one-take block 1). So: a badge only from a fragment in
+    /// `.layoutAvailable` (the house's own laid-out predicate —
+    /// `LongBlockLayout`'s candidates read exactly it); anything else is no
+    /// position, and the block waits for its layout.
+    ///
+    /// **The INLINE surface (VX-246 U4b — U4's first cut here, CORRECTED by
+    /// measurement; the run record's U4b UNIT RECORD, bare-rig probes 5–9 on
+    /// macOS 27.0).** The book/spread/pool editor (no scroll view of its own)
+    /// badges the WHOLE post by design. U4 made this read force layout
+    /// (`.ensuresLayout`) and kept clipping to `textView.bounds`. Both were
+    /// wrong, for two measured reasons:
+    /// - **A read that forces layout from mid-document POISONS the layout.** It
+    ///   lays the fanned blocks out AHEAD of their unlaid predecessors, at
+    ///   estimated offsets, and the remeasure's whole walk after it does not
+    ///   re-position them. The badges and the reported height then sat up to
+    ///   1,662 pt off the settled layout, until the next viewport pass (the
+    ///   settle net's heal) moved every fragment home and nothing re-read the
+    ///   badges. So this read never forces layout on either surface.
+    ///   `InlineEditorSurface.Coordinator.remeasure` re-runs this pass right
+    ///   after its whole walk, the heal's included, so the inline pass always
+    ///   meets a post that is laid out, and laid out where it settles.
+    /// - **`textView.bounds` is the frame SwiftUI last APPLIED, not the
+    ///   post.** That is 24 pt at mount (`EditorView.inlineHeight`'s start),
+    ///   and the old height after a width change. The coordinator's report
+    ///   lands on SwiftUI's next pass, never inside the report. So the inline
+    ///   region is the whole post, with no frame clip: every laid-out fanned
+    ///   block is badged, and a badge below a frame that has not grown yet is
+    ///   simply drawn once it has. This is `viewportBounds`' own contract
+    ///   ("whole-post overlay work is the accepted inline cost model") made
+    ///   literal; the decoration pass's region is unchanged (VX-327's).
     func refreshBadges() {
         defer { refreshDecorations() }  // the decor layer rides every badge
                                         // refresh trigger (scroll, layout,
@@ -3803,6 +3845,9 @@ final class EditorViewModel {
         // from zero, so a note with many fans paid O(fans × blocks) on a
         // pass that re-runs on every scroll and every projection.
         let ranges = index.entryRanges()
+        // VX-246 U4b: the inline surface's region is the whole post (the doc
+        // above) — no clip to a frame SwiftUI may not have grown yet.
+        let wholePost = scrollView == nil
         for (i, slot) in slots.enumerated() where slot.hasFan {
             guard i < ranges.count else { break }
             let range = ranges[i]
@@ -3810,13 +3855,19 @@ final class EditorViewModel {
                 contentManager.documentRange.location, offsetBy: range.location)
             else { continue }
             var frame: CGRect?
+            // Never `.ensuresLayout` (U4b: a forced read from mid-document
+            // poisons the layout the remeasure then walks — the doc above).
             layoutManager.enumerateTextLayoutFragments(from: location, options: []) { fragment in
-                frame = fragment.layoutFragmentFrame
+                // VX-230: not laid out ⇒ not a position (a `.zero` frame or a
+                // TK2 estimate) — no badge until its layout lands.
+                if fragment.state == .layoutAvailable {
+                    frame = fragment.layoutFragmentFrame
+                }
                 return false
             }
             if let frame {
                 let viewFrame = frame.offsetBy(dx: origin.x, dy: origin.y)
-                if viewFrame.intersects(visible) {
+                if wholePost || viewFrame.intersects(visible) {
                     result.append(BlockBadge(
                         blockID: slot.blockID,
                         variantCount: slot.activeVariantCount,

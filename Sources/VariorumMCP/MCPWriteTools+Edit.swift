@@ -44,6 +44,23 @@ extension MCPWriteTools {
             case .moveToWing: MCPToolCatalog.moveNoteToWing.name
             }
         }
+
+        /// VX-275 (`Job.flushesHerEditorFirst`): the edit rung's text acts.
+        var flushesHerEditorFirst: Bool {
+            switch self {
+            // REWRITE: `expected_text` is checked against the STORED row.
+            case .editTake: true
+            // STRUCTURE: the cut and the join read the STORED takes; a divide
+            // keeps her block's identity as its first half (her old buffer
+            // would land there whole), a merge releases her block.
+            case .divide, .merge: true
+            // TOMBSTONE: her take dies with the block.
+            case .delete: true
+            // A place, a name, a chapter, a wing: her take's text untouched,
+            // her flush lands in the take she typed in.
+            case .move, .name, .createSection, .moveToWing: false
+            }
+        }
     }
 
     /// `edit_take`'s one refusal of a blank text (VX-168 U3, P-VX171-2 —

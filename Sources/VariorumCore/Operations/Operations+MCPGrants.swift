@@ -134,6 +134,9 @@ extension Operations {
             try db.execute(
                 sql: "UPDATE mcp_client SET setup_key_hash = NULL WHERE id = ? AND setup_key_hash IS NOT NULL",
                 arguments: [clientID])
+            // VX-258: a setup waiting for her OK to take this name is
+            // answered by the Deny too — its key forgotten.
+            try db.execute(sql: "DELETE FROM mcp_rebind_request WHERE client_id = ?", arguments: [clientID])
             guard client.state != .denied else { return }
             try db.execute(
                 sql: "UPDATE mcp_client SET state = 'denied', decided_at = ? WHERE id = ?",
@@ -397,6 +400,9 @@ extension Operations {
             guard acknowledged != holdStamp else { return false }
             try db.execute(sql: "UPDATE mcp_client SET setup_key_hash = NULL WHERE setup_key_hash IS NOT NULL")
             try db.execute(sql: "DELETE FROM mcp_setup_key")
+            // VX-258: a key waiting for her OK left another Mac's clipboard
+            // too — released with the rest.
+            try db.execute(sql: "DELETE FROM mcp_rebind_request")
             let now = DateFormatter.variorumISO8601.string(from: date.now)
             for (key, value) in [(MCPSwitch.server.rawValue, "0"), (Queries.mcpAdoptionAckKey, holdStamp)] {
                 try db.execute(

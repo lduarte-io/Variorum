@@ -24,15 +24,16 @@ import GRDB
 // its act left there — checked FIRST, before the seal — so the UNDO never
 // overwrites what she wrote since through her own undo-less door (VX-184 ladder
 // round 1; the lock's undo needs no check — two-valued, her divergence can only
-// be the value its inverse writes). THE REDO DOES NOT YET KEEP THAT PROMISE
-// (VX-184 ladder round 2, 2026-10-13): when she has put a row BACK to its
+// be the value its inverse writes). THE REDO KEEPS THE SAME PROMISE (VX-246
+// U2 — VX-276): each half answers whether it wrote (the lock's toggle too —
+// `setVariantLockRows`' own answer), and the stack RETIRES an entry whose half
+// was quiet (`UndoStack`'s header) — so when she has put a row BACK to its
 // pre-act state herself (her unlock, her old label or words again, her
-// unarchive, her re-archive), ⌥⌘Z is quiet yet still moves the entry onto the
-// redo stack (`UndoStack.undo` pops any inverse that does not throw), and each
-// redo here checks only for that pre-act state — so ⇧⌥⌘Z re-applies the
-// client's act over hers. VX-276 owns the fix: the redo keyed on what its
-// inverse wrote (`restoreCommentForClient`'s shape below — its redo runs only
-// on the stamp its inverse recorded). The insurance commits two acts write on
+// unarchive, her re-archive), ⌥⌘Z is quiet, the entry retires, and no ⇧⌥⌘Z
+// re-applies the client's act over hers. The stamp-keyed halves stay keyed
+// (`restoreCommentForClient`'s shape below — its redo runs only on the stamp
+// its inverse recorded), and `restore_commit` keeps its text as the entry's
+// PARTS (`registerStructuralEntry`). The insurance commits two acts write on
 // the way (`lock_take` on a dirty take — her lock's own rule;
 // `restore_commit`'s brackets) STAY when ⌥⌘Z walks the act back: commits are
 // append-only (I5), exactly as `edit_take`'s brackets stay (P-13nb-U3-2).
@@ -91,16 +92,18 @@ extension Operations {
     /// Both halves of the comment-edit entry: `to` written only while the
     /// comment is live on a live block and still reads `from`; a seal refuses
     /// and keeps the entry.
-    func rewriteCommentIfUnchanged(_ commentID: String, from: String, to: String) throws {
+    @discardableResult
+    func rewriteCommentIfUnchanged(_ commentID: String, from: String, to: String) throws -> Bool {
         try database.write { db in
             guard var comment = try BlockComment.fetchOne(db, key: commentID), comment.deletedAt == nil,
                   comment.text == from,
                   try Block.fetchOne(db, key: comment.blockId)?.deletedAt == nil
-            else { return }
+            else { return false }
             try ensurePlacementUnlocked(db, blockID: comment.blockId)
             comment.text = to
             comment.updatedAt = date.now
             try comment.update(db)
+            return true
         }
     }
 
@@ -124,10 +127,13 @@ extension Operations {
         undoStack?.register(
             label: undoLabel,
             inverse: { ops in
-                if let stamp = try ops.redeleteComment(commentID) { deletedOn.setValue(stamp) }
+                guard let stamp = try ops.redeleteComment(commentID) else { return false }
+                deletedOn.setValue(stamp)
+                return true
             },
             redo: { ops in
-                if let stamp = deletedOn.value { try ops.reviveDeletedComment(commentID, deletedOn: stamp) }
+                guard let stamp = deletedOn.value else { return false }
+                return try ops.reviveDeletedComment(commentID, deletedOn: stamp)
             })
         return comment
     }
@@ -195,7 +201,7 @@ extension Operations {
             undoStack?.register(
                 label: takeUndoLabel,
                 inverse: { try $0.revertDeleteVariant(variantID, wasDefault: wasDefault) },
-                redo: { _ = try $0.performDeleteVariant(variantID, quietWhenGone: true) })
+                redo: { try $0.performDeleteVariant(variantID, quietWhenGone: true) != nil })
         }
         return landed.deletion
     }
@@ -217,7 +223,7 @@ extension Operations {
         undoStack?.register(
             label: undoLabel,
             inverse: { try $0.revertArchiveVariant(variantID, wasDefault: wasDefault) },
-            redo: { _ = try $0.performArchiveVariant(variantID, quietWhenGone: true) })
+            redo: { try $0.performArchiveVariant(variantID, quietWhenGone: true) != nil })
         return true
     }
 
@@ -237,17 +243,18 @@ extension Operations {
         guard changed else { return false }
         undoStack?.register(
             label: undoLabel,
-            inverse: { _ = try $0.performArchiveVariant(variantID, quietWhenGone: true) },
+            inverse: { try $0.performArchiveVariant(variantID, quietWhenGone: true) != nil },
             redo: { try $0.unarchiveTakeQuietly(variantID) })
         return true
     }
 
     /// The unarchive entry's redo: back into the fan, quiet when the take is
     /// gone; a seal refuses and keeps the entry.
-    func unarchiveTakeQuietly(_ variantID: String) throws {
+    @discardableResult
+    func unarchiveTakeQuietly(_ variantID: String) throws -> Bool {
         try database.write { db in
-            guard let take = try Variant.fetchOne(db, key: variantID), take.deletedAt == nil else { return }
-            _ = try unarchiveVariantRows(db, variantID)
+            guard let take = try Variant.fetchOne(db, key: variantID), take.deletedAt == nil else { return false }
+            return try unarchiveVariantRows(db, variantID)
         }
     }
 
@@ -291,15 +298,17 @@ extension Operations {
     /// she gave it since (her label door registers no entry) is hers, and the
     /// entry is quiet. Checked FIRST; past it, a seal refuses and keeps the
     /// entry.
-    func restoreTakeLabel(_ variantID: String, from: String?, to label: String?) throws {
+    @discardableResult
+    func restoreTakeLabel(_ variantID: String, from: String?, to label: String?) throws -> Bool {
         try database.write { db in
             guard var take = try Variant.fetchOne(db, key: variantID), take.deletedAt == nil,
                   take.label == from
-            else { return }
+            else { return false }
             try ensurePlacementUnlocked(db, blockID: take.blockId)
             take.label = label
             take.updatedAt = date.now
             try take.update(db)
+            return true
         }
     }
 
@@ -341,10 +350,11 @@ extension Operations {
     }
 
     /// Both halves of the lock entry.
-    func setTakeLockQuietly(_ variantID: String, locked: Bool) throws {
+    @discardableResult
+    func setTakeLockQuietly(_ variantID: String, locked: Bool) throws -> Bool {
         try database.write { db in
-            guard let take = try Variant.fetchOne(db, key: variantID), take.deletedAt == nil else { return }
-            _ = try setVariantLockRows(db, variantID, locked: locked)
+            guard let take = try Variant.fetchOne(db, key: variantID), take.deletedAt == nil else { return false }
+            return try setVariantLockRows(db, variantID, locked: locked).changed
         }
     }
 
@@ -378,8 +388,9 @@ extension Operations {
     /// `restoreCommitRows` (her body — the churn hers exactly), and "after
     /// <client>'s restore" of the restored text, stamped one millisecond later
     /// so the history reads before → after. Her own road writes no savepoint
-    /// (it flushes her editor's pending keystrokes first — the wire has none to
-    /// flush); the client's insures what would otherwise be reachable only by
+    /// (it flushes her editor's pending keystrokes first — and since VX-275 so
+    /// does the wire's door, before this act's turn, so the "before" commit
+    /// holds what she last typed); the client's insures what would otherwise be reachable only by
     /// ⌥⌘Z while the session lives. ONE entry: the buffer back to its
     /// pre-restore text (the fourth occasion insures a buffer she edited
     /// since), the redo the restore again — exact pre-images. The brackets stay.
@@ -413,17 +424,7 @@ extension Operations {
                     TextPreImage(variantID: variant.id, text: written.old, postOpText: written.new))
         }
         if let preImage = landed.preImage {
-            undoStack?.register(
-                label: undoLabel,
-                inverse: {
-                    try $0.revertStructural(
-                        restoringTexts: [preImage], tombstoningBlocks: [], revivingPlacementRows: [])
-                },
-                redo: {
-                    try $0.reapplyStructural(
-                        restoringTexts: [preImage], untombstoningBlocks: [], releasingPlacementRows: [])
-                },
-                insuring: [preImage])
+            registerStructuralEntry(label: undoLabel, restoringTexts: [preImage], insuring: [preImage])
         }
         return landed.restore
     }
@@ -470,15 +471,17 @@ extension Operations {
     /// still wears `from` — a name she gave it since (her savepoint rename
     /// registers no entry) is hers, and the entry is quiet. Checked FIRST;
     /// past it, a seal refuses and keeps the entry.
-    func restoreCommitMessage(_ commitID: String, from: String?, to message: String?) throws {
+    @discardableResult
+    func restoreCommitMessage(_ commitID: String, from: String?, to message: String?) throws -> Bool {
         try database.write { db in
             guard var commitPoint = try CommitPoint.fetchOne(db, key: commitID),
                   commitPoint.message == from,
                   let take = try Variant.fetchOne(db, key: commitPoint.variantId), take.deletedAt == nil
-            else { return }
+            else { return false }
             try ensurePlacementUnlocked(db, blockID: take.blockId)
             commitPoint.message = message
             try commitPoint.update(db)
+            return true
         }
     }
 
@@ -528,14 +531,16 @@ extension Operations {
     /// 1): `to` only while the note is live and still wears `from` — a title
     /// she gave it since (her title doors register no entry) is hers, and the
     /// entry is quiet.
-    func restoreNoteTitle(_ postID: String, from: String?, to title: String?) throws {
+    @discardableResult
+    func restoreNoteTitle(_ postID: String, from: String?, to title: String?) throws -> Bool {
         try database.write { db in
             guard var post = try Container.fetchOne(db, key: postID), post.deletedAt == nil,
                   post.title == from
-            else { return }
+            else { return false }
             post.title = title
             post.updatedAt = date.now
             try post.update(db)
+            return true
         }
     }
 
@@ -559,7 +564,9 @@ extension Operations {
             label: undoLabel,
             inverse: { try $0.reapplySavedLens(lensID, undoneOn: deletedOn.value) },
             redo: { ops in
-                if let stamp = try ops.revertSavedLens(lensID) { deletedOn.setValue(stamp) }
+                guard let stamp = try ops.revertSavedLens(lensID) else { return false }
+                deletedOn.setValue(stamp)
+                return true
             })
         return lens
     }

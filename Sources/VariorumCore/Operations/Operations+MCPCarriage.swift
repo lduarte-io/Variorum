@@ -15,12 +15,15 @@ import GRDB
 // (the date, the filing, the rule's columns) is COMPARE-AND-SET: it writes
 // only while the row still reads the value its act left there, so the UNDO
 // never overwrites what she set since (VX-184 ladder round 1, the
-// undo-overwrite class). The REDO does not yet keep that promise (VX-184
-// ladder round 2, 2026-10-13): when she has set a value BACK to the pre-act one
-// herself, ⌥⌘Z is quiet yet the entry still moves onto the redo stack
-// (`UndoStack.undo` pops any inverse that does not throw), and the redo —
-// checking only for that pre-act value — re-applies the client's act over
-// hers. VX-276 owns the fix: the redo keyed on what its inverse wrote.
+// undo-overwrite class). The REDO keeps the same promise (VX-246 U2 —
+// VX-276): each half answers whether it wrote, and the stack RETIRES an entry
+// whose half was quiet (`UndoStack`'s header) — so when she has set a value
+// BACK to the pre-act one herself, ⌥⌘Z is quiet, the entry retires, and no
+// ⇧⌥⌘Z re-applies the client's act over hers. Where an entry has PARTS it
+// keeps them: `set_book_rule` records the columns its last half changed (a
+// column she set back between ⌥⌘Z and ⇧⌥⌘Z is never re-written), and
+// `save_version`'s redo revives the version only while it is dead on its
+// undo's own stamp (`registerMintedContainerEntry`).
 extension Operations {
     // MARK: - EDIT: put back (the tray — R-13nb-14's named IN)
 
@@ -60,12 +63,13 @@ extension Operations {
         let status = try restoreVariant(variantID, guardedBy: guardian)
         undoStack?.register(
             label: undoLabel,
-            inverse: { _ = try $0.performDeleteVariant(variantID, quietWhenGone: true) },
+            inverse: { try $0.performDeleteVariant(variantID, quietWhenGone: true) != nil },
             redo: { ops in
                 do {
                     _ = try ops.restoreVariant(variantID)
+                    return true
                 } catch OperationError.variantNotDeleted {
-                    return  // already back — the world moved past the entry
+                    return false  // already back — the world moved past the entry
                 }
             })
         return status
@@ -87,10 +91,7 @@ extension Operations {
             return try mintNoteVersion(db, of: postID)
         }
         let versionID = result.post.id
-        undoStack?.register(
-            label: undoLabel,
-            inverse: { try $0.revertMintedContainer(versionID) },
-            redo: { try $0.reapplyMintedContainer(versionID) })
+        registerMintedContainerEntry(label: undoLabel, versionID)
         return result
     }
 
@@ -136,12 +137,14 @@ extension Operations {
     /// — the undo-overwrite class): `to` only while the note is live and still
     /// reads `from`. A gone note, or a date she gave it since (her date door
     /// registers no entry), is the world moving past the entry (quiet).
-    func restoreEntryDate(_ postID: String, from: String?, to entryDate: String?) throws {
+    @discardableResult
+    func restoreEntryDate(_ postID: String, from: String?, to entryDate: String?) throws -> Bool {
         try database.write { db in
             guard let post = try Container.fetchOne(db, key: postID), post.deletedAt == nil,
                   post.entryDate == from
-            else { return }
+            else { return false }
             try writeEntryDate(db, postID: postID, entryDate)
+            return true
         }
     }
 
@@ -190,15 +193,17 @@ extension Operations {
     /// (resolvable — the chapter-structure rule); a chapter deleted since is
     /// restored as the pointer it was (a dangling pointer reads unfiled —
     /// `deleteSection`'s doctrine).
-    func refileMembership(_ rowID: String, from: String?, to sectionID: String?) throws {
+    @discardableResult
+    func refileMembership(_ rowID: String, from: String?, to sectionID: String?) throws -> Bool {
         try database.write { db in
             guard var membership = try ReadingPost.fetchOne(db, key: rowID), membership.deletedAt == nil,
                   membership.status == .member, membership.sectionId == from,
                   let reading = try Reading.fetchOne(db, key: membership.readingId), reading.deletedAt == nil
-            else { return }
+            else { return false }
             guard !reading.locked else { throw OperationError.lockedReading(id: reading.id) }
             membership.sectionId = sectionID
             try membership.update(db)
+            return true
         }
     }
 
@@ -334,13 +339,31 @@ extension Operations {
         }
         if result.changed {
             let before = result.before, after = result.after
+            // VX-246 U2 — an entry with PARTS (the three columns): each half
+            // writes only the columns its partner last changed (nil after the
+            // act: every column the act changed), so a column she set BACK
+            // herself between ⌥⌘Z and ⇧⌥⌘Z is never re-written by the redo.
+            let columns = LockIsolated<Set<CollectingColumn>?>(nil)
             undoStack?.register(
                 label: undoLabel,
-                inverse: { try $0.restoreCollectingColumns(readingID, from: after, to: before) },
-                redo: { try $0.restoreCollectingColumns(readingID, from: before, to: after) })
+                inverse: { ops in
+                    let changed = try ops.restoreCollectingColumns(
+                        readingID, from: after, to: before, only: columns.value)
+                    columns.setValue(changed)
+                    return !changed.isEmpty
+                },
+                redo: { ops in
+                    let changed = try ops.restoreCollectingColumns(
+                        readingID, from: before, to: after, only: columns.value)
+                    columns.setValue(changed)
+                    return !changed.isEmpty
+                })
         }
         return result
     }
+
+    /// The three collecting columns, as parts of one entry (VX-246 U2).
+    enum CollectingColumn: Sendable, Hashable { case rule, outflow, seating }
 
     /// Both halves of the book-rule entry, COMPARE-AND-SET PER COLUMN (VX-184
     /// ladder round 1 — the undo-overwrite class): each column the act CHANGED
@@ -350,26 +373,29 @@ extension Operations {
     /// registers no entry) is hers. No intake runs — an undo is never an
     /// applying act, and seats stay. A reading gone, or every changed column
     /// hers since, is the world moving past the entry (quiet).
+    @discardableResult
     func restoreCollectingColumns(
-        _ readingID: String, from: MCPCollectingColumns, to columns: MCPCollectingColumns
-    ) throws {
+        _ readingID: String, from: MCPCollectingColumns, to columns: MCPCollectingColumns,
+        only: Set<CollectingColumn>? = nil
+    ) throws -> Set<CollectingColumn> {
         try database.write { db in
-            guard let reading = try Reading.fetchOne(db, key: readingID), reading.deletedAt == nil else { return }
+            guard let reading = try Reading.fetchOne(db, key: readingID), reading.deletedAt == nil else { return [] }
             var querySpec = reading.querySpec, autoTagIDs = reading.autoTagIds, seating = reading.intakeSeating
-            var changed = false
-            if from.querySpec != columns.querySpec, querySpec == from.querySpec {
+            var changed: Set<CollectingColumn> = []
+            let may = { (column: CollectingColumn) in only?.contains(column) ?? true }
+            if may(.rule), from.querySpec != columns.querySpec, querySpec == from.querySpec {
                 querySpec = columns.querySpec
-                changed = true
+                changed.insert(.rule)
             }
-            if from.autoTagIDs != columns.autoTagIDs, autoTagIDs == from.autoTagIDs {
+            if may(.outflow), from.autoTagIDs != columns.autoTagIDs, autoTagIDs == from.autoTagIDs {
                 autoTagIDs = columns.autoTagIDs
-                changed = true
+                changed.insert(.outflow)
             }
-            if from.intakeSeating != columns.intakeSeating, seating == from.intakeSeating {
+            if may(.seating), from.intakeSeating != columns.intakeSeating, seating == from.intakeSeating {
                 seating = columns.intakeSeating
-                changed = true
+                changed.insert(.seating)
             }
-            guard changed else { return }
+            guard !changed.isEmpty else { return [] }
             try db.execute(
                 sql: """
                     UPDATE reading SET query_spec = ?, auto_tag_ids = ?, intake_seating = ?, updated_at = ?
@@ -377,6 +403,7 @@ extension Operations {
                     """,
                 arguments: [querySpec, autoTagIDs, seating?.rawValue,
                             DateFormatter.variorumISO8601.string(from: date.now), readingID])
+            return changed
         }
     }
 }

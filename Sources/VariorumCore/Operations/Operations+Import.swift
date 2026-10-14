@@ -72,10 +72,7 @@ extension Operations {
             let blockIDs = try mintSegments(db, segments, into: post.id)
             return ImportResult(container: post, blockIDs: blockIDs, createdContainer: true)
         }
-        undoStack?.register(
-            label: undoLabel,
-            inverse: { try $0.revertMintedContainer(result.container.id) },
-            redo: { try $0.reapplyMintedContainer(result.container.id) })
+        registerMintedContainerEntry(label: undoLabel, result.container.id)
         return result
     }
 
@@ -97,10 +94,22 @@ extension Operations {
             return ImportResult(container: container, blockIDs: blockIDs, createdContainer: false)
         }
         let blockIDs = result.blockIDs
+        // VX-246 U2 — an entry with PARTS (the blocks): each half moves only
+        // the blocks its partner last moved, so a block she put back from the
+        // tray between ⌥⌘Z and ⇧⌥⌘Z is never tombstoned by the next ⌥⌘Z.
+        let moved = LockIsolated<Set<String>?>(nil)
         undoStack?.register(
             label: "Import",
-            inverse: { try $0.revertImportedBlocks(blockIDs) },
-            redo: { try $0.reapplyImportedBlocks(blockIDs) })
+            inverse: { ops in
+                let tombstoned = try ops.revertImportedBlocks(blockIDs, only: moved.value)
+                moved.setValue(tombstoned)
+                return !tombstoned.isEmpty
+            },
+            redo: { ops in
+                let revived = try ops.reapplyImportedBlocks(blockIDs, only: moved.value)
+                moved.setValue(revived)
+                return !revived.isEmpty
+            })
         return result
     }
 
@@ -138,9 +147,11 @@ extension Operations {
     /// inverses never push entries). Already-dead blocks are obsolete
     /// no-ops; `last_container_id` stamps so an undone import stays
     /// reachable in the tray (the insurance doctrine).
-    func revertImportedBlocks(_ blockIDs: [String]) throws {
+    @discardableResult
+    func revertImportedBlocks(_ blockIDs: [String], only: Set<String>? = nil) throws -> Set<String> {
         try database.write { db in
-            for blockID in blockIDs {
+            var tombstoned: Set<String> = []
+            for blockID in blockIDs where only?.contains(blockID) ?? true {
                 guard var block = try Block.fetchOne(db, key: blockID),
                       block.deletedAt == nil
                 else { continue }
@@ -152,7 +163,9 @@ extension Operations {
                 block.deletedAt = now
                 block.updatedAt = now
                 try block.update(db)
+                tombstoned.insert(blockID)
             }
+            return tombstoned
         }
     }
 }

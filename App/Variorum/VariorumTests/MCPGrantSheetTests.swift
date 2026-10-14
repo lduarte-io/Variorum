@@ -303,11 +303,17 @@ struct MCPGrantSheetTests {
         // NEWER setup's key, which now re-binds the name; L1 says the rule as
         // built — the newer setup moves the name, any other key or none is
         // refused — and still no truer.
+        // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 U1b; her ruling "tie
+        // keys to their tab … the re-bind waits for my ok"): the client's OWN
+        // setup, run again, moves the name; a setup copied for any MCP client
+        // waits for her OK before it takes a name she approved; any other
+        // key, or none, is refused — still no truer.
         #expect(MCPPaneCopy.clientBoundary
                 == "A client names itself when it connects. Each setup copied here carries a key that binds "
-                + "that name to it \u{2014} running a newer setup moves the name to the new key \u{2014} and a "
-                + "connection under the name with any other key, or none, is refused. That tells two tools "
-                + "apart, not programs running as you: any of them can read the key in the client's settings.",
+                + "that name to it. Running the client's own setup again moves the name to the new key; a setup "
+                + "copied for any MCP client waits for your OK before it takes a name you approved; any other "
+                + "key, or none, is refused. That tells two tools apart, not programs running as you: any of "
+                + "them can read the key in the client's settings.",
                 "L1 — true of the build, and no truer")
     }
 

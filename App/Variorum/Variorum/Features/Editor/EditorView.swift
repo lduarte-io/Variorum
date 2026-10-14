@@ -801,6 +801,18 @@ struct InlineEditorSurface: NSViewRepresentable {
                 announcedShowing = true
                 onShowing?()
             }
+            // **VX-230 (Run VX-246 U4b) — the badges follow the walk.** The
+            // walk above has just laid the whole post out. On the settle
+            // net's heal it is the layout the post SETTLES to: a layout run
+            // ahead of unlaid fragments (a viewport pass over mid-post, after
+            // a width change or a mount) leaves the first walk off until the
+            // next display pass moves every fragment home. That is measured,
+            // the run record's U4b trace. Nothing else re-read the badges
+            // after it, so they kept the off positions, or the 24-pt mount
+            // frame's one badge. Re-read here, every time: the model's own
+            // settle hop no longer forces layout, and a superseded remeasure
+            // can land after it. Not after `uninstall` (no report road).
+            if reportHeight != nil { model.refreshBadges() }
         }
 
         func uninstall() {

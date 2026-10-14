@@ -60,9 +60,21 @@ struct MCPSetupKeyRuleTests {
 
     /// VX-198 (R-VX184-5): a FRESH key — minted by a copy, never presented —
     /// under a bound name RE-BINDS it: the newest copied setup wins.
+    /// VX-258 (A JUSTIFIED EDIT, the ritual — her ruling): only a copy made
+    /// FOR that name re-binds with zero clicks; an untagged ("Any MCP client")
+    /// copy, or another name's, WAITS for her OK while the name carries her
+    /// approval; a name without approval keeps the old arm.
     @Test func aBoundNameRebindsAFreshCopy() {
-        #expect(Rule.decide(name: "claude-code", client: bound, presentedHash: other, standing: .unclaimed) == .rebind)
+        #expect(Rule.decide(name: "claude-code", client: bound, presentedHash: other, copiedFor: "claude-code",
+                            standing: .unclaimed) == .rebind)
         #expect(Rule.Decision.rebind.admits)
+        #expect(Rule.decide(name: "claude-code", client: bound, presentedHash: other, standing: .unclaimed)
+                == .awaitRebind, "an untagged copy waits for her OK")
+        #expect(Rule.decide(name: "claude-code", client: bound, presentedHash: other, copiedFor: "codex-mcp-client",
+                            standing: .unclaimed) == .awaitRebind, "another client's copy waits too")
+        let pending = Rule.Client(id: "cl1", boundHash: mine, approved: false)
+        #expect(Rule.decide(name: "claude-code", client: pending, presentedHash: other, standing: .unclaimed)
+                == .rebind, "no approval to inherit: the old arm")
     }
 
     /// VX-198: the key a newer setup replaced refuses with its OWN reason —
@@ -83,8 +95,17 @@ struct MCPSetupKeyRuleTests {
 
     /// R-VX168-1: an approved name with no key binds the FIRST fresh setup
     /// presented under it — no revoke, no re-approval.
+    /// VX-258 (A JUSTIFIED EDIT, the ritual — PROVISIONAL P-VX258-2): a setup
+    /// copied FOR that name; an untagged one waits for her OK while the name
+    /// carries her approval (the bind arm's half of the hole); a name without
+    /// approval binds as before.
     @Test func aKnownUnboundNameBindsAnUnclaimedKey() {
-        #expect(Rule.decide(name: "claude-code", client: unbound, presentedHash: mine, standing: .unclaimed) == .bind)
+        #expect(Rule.decide(name: "claude-code", client: unbound, presentedHash: mine, copiedFor: "claude-code",
+                            standing: .unclaimed) == .bind)
+        #expect(Rule.decide(name: "claude-code", client: unbound, presentedHash: mine, standing: .unclaimed)
+                == .awaitRebind)
+        let denied = Rule.Client(id: "cl1", boundHash: nil, approved: false)
+        #expect(Rule.decide(name: "claude-code", client: denied, presentedHash: mine, standing: .unclaimed) == .bind)
     }
 
     /// K2: an unknown name presenting a fresh key becomes a connection
@@ -209,7 +230,9 @@ struct MCPSetupKeyOperationsTests {
 
             #expect(try ops.admitMCPConnection(name: "claude-code", version: "2.1", presentedKey: nil).decision
                     == .refuse(.bare), "a bare arrival refuses even unbound — no grandfathering")
-            let key = try ops.mintMCPSetupKey()
+            // VX-258 (A JUSTIFIED EDIT, the ritual — her ruling: a key re-binds with zero clicks only the name its setup was copied FOR): her
+            // re-run is Claude Code's own setup, both times.
+            let key = try ops.mintMCPSetupKey(copiedFor: "claude-code")
             let bound = try ops.admitMCPConnection(name: "claude-code", version: "2.2", presentedKey: key)
             #expect(bound.decision == .bind)
             #expect(bound.client?.state == .approved && bound.client?.isSetupBound == true)
@@ -227,7 +250,7 @@ struct MCPSetupKeyOperationsTests {
             #expect(try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: nil).decision
                     == .refuse(.bare))
             #expect(try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: key).decision == .admit)
-            let newer = try ops.mintMCPSetupKey()
+            let newer = try ops.mintMCPSetupKey(copiedFor: "claude-code")
             #expect(try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: newer).decision
                     == .rebind, "her re-run setup takes the name")
             #expect(try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: key).decision
@@ -279,7 +302,10 @@ struct MCPSetupKeyOperationsTests {
             _ = try ops.admitMCPConnection(name: "codex", version: nil, presentedKey: try ops.mintMCPSetupKey())
             let client = try ops.recordMCPContact(name: "claude-code", version: nil)
             try ops.approveMCPClient(client.id, granting: nil)
-            _ = try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: try ops.mintMCPSetupKey())
+            // VX-258 (A JUSTIFIED EDIT, the ritual — her ruling: a key re-binds with zero clicks only the name its setup was copied FOR): Claude
+            // Code's own setup binds its approved name.
+            _ = try ops.admitMCPConnection(
+                name: "claude-code", version: nil, presentedKey: try ops.mintMCPSetupKey(copiedFor: "claude-code"))
             let log = try db.read { db in
                 try Row.fetchAll(db, sql: "SELECT client_name, act, outcome FROM mcp_activity ORDER BY id")
                     .map { "\($0["client_name"] as String) \($0["act"] as String) \($0["outcome"] as String)" }
@@ -306,7 +332,9 @@ struct MCPSetupKeyOperationsTests {
                     == .refuse(.notIssued), "the released key is gone, not returned to the unclaimed set")
 
             try ops.approveMCPClient(client.id, granting: nil)
-            let fresh = try ops.mintMCPSetupKey()
+            // VX-258 (A JUSTIFIED EDIT, the ritual — her ruling: a key re-binds with zero clicks only the name its setup was copied FOR): the
+            // fresh setup is Claude Code's own.
+            let fresh = try ops.mintMCPSetupKey(copiedFor: "claude-code")
             #expect(try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: fresh).decision == .bind)
             #expect(try boundHash(db, "claude-code") == MCPSetupKeyRule.hash(fresh))
         }
@@ -329,7 +357,10 @@ struct MCPSetupKeyOperationsTests {
             #expect(try db.read { try Queries.mcpGrants($0, clientID: client.id) }.count == 1, "grants kept")
             #expect(try db.read { try Queries.mcpClient($0, id: client.id) }?.state == .approved)
 
-            let here = try ops.mintMCPSetupKey()
+            // VX-258 (A JUSTIFIED EDIT, the ritual — her ruling: a key re-binds with zero clicks only the name its setup was copied FOR): the
+            // setup run on this Mac is Claude Code's own (an untagged one waits
+            // for her OK — the adoption's case of P-VX258-2).
+            let here = try ops.mintMCPSetupKey(copiedFor: "claude-code")
             #expect(try ops.admitMCPConnection(name: "claude-code", version: nil, presentedKey: here).decision == .bind)
             #expect(try ops.landMCPAfterAdoption(holdStamp: "2026-10-12T09:00:00.000Z") == false)
             #expect(try boundHash(db, "claude-code") == MCPSetupKeyRule.hash(here),

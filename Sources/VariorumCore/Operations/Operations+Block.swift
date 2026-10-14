@@ -77,18 +77,9 @@ extension Operations {
         }
         guard registeringUndo else { return result }
         let minted = MintedPreImage(result.block.id, [result.variant])
-        undoStack?.register(
+        registerStructuralEntry(
             label: "New Block",
-            inverse: {
-                try $0.revertStructural(
-                    restoringTexts: [], tombstoningBlocks: [minted],
-                    revivingPlacementRows: [])
-            },
-            redo: {
-                try $0.reapplyStructural(
-                    restoringTexts: [], untombstoningBlocks: [minted],
-                    releasingPlacementRows: [])
-            })
+            minting: [minted])
         return result
     }
 

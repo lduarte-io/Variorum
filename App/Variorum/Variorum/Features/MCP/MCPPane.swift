@@ -121,6 +121,8 @@ struct MCPPane: View {
         // 13n-c UX walk W-UX-19: every Shared-with-AI row's Change… (a new
         // renderer is a new line).
         .mcpChangeGrant,
+        // VX-258 (VX-246 U1b): Waiting's re-bind row — Allow / Don't allow.
+        .mcpAllowRebind, .mcpDeclineRebind,
     ]
 
     /// 13n-c U4 — where ⌥⌘, lands the pane when an ask waits.
@@ -157,8 +159,9 @@ struct MCPPane: View {
     private func landAtWaiting(_ proxy: ScrollViewProxy) {
         let request = door.settingsRequest
         guard request > door.settingsRequestScrolled else { return }
+        // VX-258: a setup waiting for her OK waits in Waiting too.
         let scrolls = Self.scrollsToWaiting(
-            request: request, scrolled: door.settingsRequestScrolled, waitingCount: door.waiting.count)
+            request: request, scrolled: door.settingsRequestScrolled, waitingCount: door.waitingCount)
         door.settingsRequestScrolled = request
         guard scrolls else { return }
         Task { @MainActor in
@@ -198,11 +201,17 @@ struct MCPPane: View {
             // 13n-c UX walk W-UX-8: Waiting also stays while its own caption
             // speaks — a press on its only row whose place is gone says so
             // HERE, where she pressed, not at the pane's head.
-            if !door.waiting.isEmpty || door.note?.place == .waiting {
+            // VX-258 (VX-246 U1b): a SETUP waiting for her OK — a key presented
+            // under a name she approved, which it was not copied for — waits
+            // here too, beside the asks (vx-281's fact 4), each row answered
+            // by Allow / Don't allow. At most one per client, so every one is
+            // listed (no "all N ›"); identity before reach, so they lead.
+            if !door.waiting.isEmpty || !door.snapshot.rebinds.isEmpty || door.note?.place == .waiting {
                 Section(MCPPaneCopy.waitingSection) {
                     if let note = door.note, note.place == .waiting {
                         caption(note.text)
                     }
+                    ForEach(door.snapshot.rebinds) { request in rebindRow(request) }
                     ForEach(door.waiting.prefix(MCPDoor.waitingCap)) { entry in waitingRow(entry) }
                     allRoad(door.waiting.count, shown: min(door.waiting.count, MCPDoor.waitingCap), .waiting)
                 }
@@ -368,6 +377,15 @@ struct MCPPane: View {
 
     // MARK: - Waiting (13n-c U4)
 
+    /// VX-258 — one setup waiting for her OK (its Allow / Don't allow).
+    private func rebindRow(_ request: MCPRebindRequest) -> some View {
+        MCPRebindRowView(request: request, tokens: tokens) {
+            door.allowRebind(request.id)
+        } decline: {
+            door.declineRebind(request.id)
+        }
+    }
+
     private func waitingRow(_ entry: MCPAskQueue.Entry) -> some View {
         MCPWaitingRowView(
             entry: entry, distinguisher: Self.distinguisher(entry.ask, distinguishers), tokens: tokens
@@ -518,6 +536,53 @@ struct MCPWaitingRowView: View {
             Button(CapabilityRegistry.capability(.mcpOpenAsk).verb, action: answer)
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
         }
+    }
+}
+
+/// **One setup waiting for her OK in Settings ▸ MCP ▸ Waiting** (VX-258 —
+/// VX-246 U1b): a connection presented, under the name of a client she
+/// approved, a setup key that was not copied for that client (an "Any MCP
+/// client" copy, another client's, or one minted before VX-258). Admitted
+/// with no reach while it waits; Allow moves the name — its approval and
+/// grants untouched — to the new setup; Don't allow forgets the key. The
+/// declared version is what tells her a stranger from the client she knows.
+/// Neither answer is styled as the default: the safe one is not to press.
+struct MCPRebindRowView: View {
+    let request: MCPRebindRequest
+    let tokens: VoiceTokens
+    let allow: () -> Void
+    let decline: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(MCPPaneCopy.rebindTitle(request.clientName))
+                .font(.callout.weight(.semibold))
+                .lineLimit(1)
+            // The age reads live (every half-minute — never per frame).
+            SwiftUI.TimelineView(.periodic(from: .now, by: 30)) { context in
+                Text(MCPPaneCopy.rebindDetail(
+                    name: request.clientName, version: request.version,
+                    firstSeen: Self.age(request.askedAt, now: context.date)))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            HStack(spacing: 10) {
+                Button(CapabilityRegistry.capability(.mcpAllowRebind).verb, action: allow)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                Button(CapabilityRegistry.capability(.mcpDeclineRebind).verb, action: decline)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                Spacer(minLength: 0)
+            }
+        }
+        .padding(.vertical, 2)
+    }
+
+    /// "2 minutes ago", from the stored stamp (its raw text if unreadable).
+    static func age(_ stamp: String, now: Date) -> String {
+        guard let date = DateFormatter.variorumISO8601.date(from: stamp) else { return stamp }
+        return MCPPane.relative(date, now: now)
     }
 }
 

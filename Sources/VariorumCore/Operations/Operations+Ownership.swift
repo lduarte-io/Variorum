@@ -325,10 +325,7 @@ extension Operations {
                 copy: copy, membership: membership, answeredArrivalID: arrival?.id)
         }
         let copyID = result.copy.id
-        undoStack?.register(
-            label: "Copy In",
-            inverse: { try $0.revertMintedContainer(copyID) },
-            redo: { try $0.reapplyMintedContainer(copyID) })
+        registerMintedContainerEntry(label: "Copy In", copyID)
         return result
     }
 

@@ -86,7 +86,12 @@ struct MCPPaneTests {
             let copied = try #require(pasteboard.string(forType: .string))
             #expect(copied.contains("variorum-dev"), "the test host is the Debug build")
             #expect(copied.contains("/Contents/MacOS/variorum-mcp"))
-            #expect(copied.contains("VARIORUM_MCP_KEY=vmk1_"), "a fresh key rides the copy")
+            // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 U1b, the merge
+            // gate): Claude Code's copy mints its key FOR Claude Code's name
+            // (`vmk2_claude-code_…`), so a re-run takes the name with zero
+            // clicks; still a fresh key on every copy.
+            #expect(copied.contains("VARIORUM_MCP_KEY=\(MCPSetupKeyRule.copiedForPrefix)claude-code_"),
+                    "a fresh key, copied for Claude Code, rides the copy")
             #expect(door.setupCommand.contains(MCPPaneCopy.shownKey), "the shown command masks it")
             // VX-281 ladder R2-5: the client's own receipt (the alias is gone).
             #expect(door.note == MCPDoor.Note(text: MCPSetupClient.claudeCode.copiedReceipt, place: .connect),

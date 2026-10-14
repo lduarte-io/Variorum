@@ -178,8 +178,10 @@ public final class MCPServerHost: @unchecked Sendable {
         onConnectionsChanged?()
         Task { [weak self] in
             await session.run()
-            close(fd)
-            self?.ended(session)
+            // VX-279: the host lets go of the session BEFORE its number is
+            // freed (`ended` closes it after deregistering), so a stop that
+            // snapshots the sessions afterwards never sees it.
+            if let self { self.ended(session) } else { session.closeConnection() }
         }
     }
 
@@ -215,12 +217,22 @@ public final class MCPServerHost: @unchecked Sendable {
 
     /// A connection closed: if it was its client's LAST, the client's
     /// while-connected grants end with it (R-13n-4).
+    ///
+    /// **VX-279 — deregister, THEN close** (VX-184's ladder, round 2): the
+    /// session leaves `sessions` under the host lock first, and only then is
+    /// its descriptor closed. Until this fix the descriptor was closed while
+    /// the session was still registered, so `stop()` could snapshot it and
+    /// hang up a number some other socket of the process had just been handed.
+    /// (A stop that snapshotted the session BEFORE it left is safe too: its
+    /// hang-up is a no-op once the session has closed — `MCPSession`'s one
+    /// lock.)
     private func ended(_ session: MCPSession) {
         let (name, stillConnected): (String?, Bool) = lock.withLock {
             sessions[session.id] = nil
             let name = session.clientName
             return (name, sessions.values.contains { $0.clientName == name && name != nil })
         }
+        session.closeConnection()
         if let name, !stillConnected,
            let client = try? database.read({ try Queries.mcpClient($0, name: name) }) {
             try? operations.endMCPConnectionGrants(clientID: client.id)
@@ -249,13 +261,16 @@ public final class MCPServerHost: @unchecked Sendable {
 
     /// Everything the tool list depends on, in one small value: the decided
     /// clients, the grants' stamps, the switches (the grants store is small
-    /// and bounded — the pending room and the log are capped).
+    /// and bounded — the pending room and the log are capped). VX-258: and
+    /// each decided client's binding — her Allow of a waiting setup changes
+    /// it, and the waiting connection is told its tools changed.
     static func grantsFingerprint(_ db: Database) throws -> String {
         try String.fetchOne(
             db,
             sql: """
                 SELECT
-                  (SELECT IFNULL(group_concat(id || ':' || state, ','), '') FROM mcp_client WHERE state <> 'pending')
+                  (SELECT IFNULL(group_concat(id || ':' || state || ':' || IFNULL(setup_key_hash, ''), ','), '')
+                   FROM mcp_client WHERE state <> 'pending')
                   || '|' || (SELECT COUNT(*) || ':' || IFNULL(MAX(created_at), '') || ':'
                              || IFNULL(MAX(revoked_at), '') || ':' || IFNULL(MAX(consumed_at), '') FROM mcp_grant)
                   || '|' || (SELECT IFNULL(group_concat(key || value, ','), '') FROM mcp_switch)

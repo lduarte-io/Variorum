@@ -177,6 +177,17 @@ final class EditorSurfaceController {
         // last block with nothing re-landing it (row 49's "block 262/262").
         // The scroll anchor was already preserved; the caret now is too.
         let caret = model.caretIdentity()
+        // VX-275 (Run VX-246's U3, trace 4): when the caret's OWN block left
+        // the projection — a client's `delete_block`, a sync apply, another
+        // window — her caret lands where her own Delete Block lands it, read
+        // from the tiling BEFORE the rewrite. Without it the wholesale
+        // replacement below parks the insertion point at the document's end
+        // and her next keystroke lands there.
+        let landing = caret.flatMap {
+            Self.caretLanding(
+                whenBlockLeft: $0.blockID, oldEntries: model.index.entries,
+                survivors: Set(new.map(\.blockID)))
+        }
         let (attributed, newIndex) = EditorDocument.materialize(new, tail: tail)
         model.setSurfaceContent(attributed)
         model.adoptRewrite(index: newIndex, slots: new, tailText: tail ?? "")
@@ -185,6 +196,11 @@ final class EditorSurfaceController {
             let range = model.index.range(ofEntryAt: i)
             textView.setSelectedRange(NSRange(
                 location: range.location + min(caret.offset, range.length), length: 0))
+        } else if let landing,
+                  let i = model.index.entries.firstIndex(where: { $0.blockID == landing.blockID }) {
+            let range = model.index.range(ofEntryAt: i)
+            textView.setSelectedRange(NSRange(
+                location: landing.atEnd ? range.upperBound : range.location, length: 0))
         }
         textView.undoManager?.removeAllActions()
         if let anchor {
@@ -219,6 +235,31 @@ final class EditorSurfaceController {
         }
         model.updateCaretContext()
         model.refreshBadges()
+    }
+
+    /// **VX-275 — where her caret goes when its block LEFT under a rewrite
+    /// from the store** (Run VX-246's U3, trace 4). Her own Delete Block's
+    /// rule — `caretLandingAfterRemoving`'s: the START of the block below,
+    /// else the END of the block above — asked at the caret's OWN block, over
+    /// the tiling before the rewrite, and counting only blocks the new
+    /// projection still holds (a merge elsewhere takes the block below hers
+    /// too). Nil while the caret's block survives (the caret then keeps its
+    /// place by identity, unchanged) or when no block survives. One pass over
+    /// the old tiling — the same order as the rewrite it rides (`renderFull`
+    /// materializes the whole note).
+    nonisolated static func caretLanding(
+        whenBlockLeft blockID: String, oldEntries: [BlockRangeIndex.Entry], survivors: Set<String>
+    ) -> (blockID: String, atEnd: Bool)? {
+        guard !survivors.contains(blockID),
+              let i = oldEntries.firstIndex(where: { $0.blockID == blockID })
+        else { return nil }
+        if let below = oldEntries[(i + 1)...].first(where: { survivors.contains($0.blockID) }) {
+            return (below.blockID, false)
+        }
+        if let above = oldEntries[..<i].last(where: { survivors.contains($0.blockID) }) {
+            return (above.blockID, true)
+        }
+        return nil
     }
 
     // MARK: - Structural gestures (Phase 9)

@@ -47,7 +47,7 @@ extension Operations {
     /// Structural undo AND redo (the `archiveVariant` class): both halves are
     /// exact-row work over the same block id.
     public func archiveBlock(_ id: String) throws {
-        try performArchiveBlock(id, quietWhenGone: false)
+        _ = try performArchiveBlock(id, quietWhenGone: false)
         undoStack?.register(
             label: "Archive Block",
             inverse: { try $0.revertArchiveBlock(id) },
@@ -59,16 +59,18 @@ extension Operations {
     /// bucket — a block that has since died or been archived another way
     /// means the world moved past that entry, so redo pops quietly instead of
     /// wedging the stack).
-    func performArchiveBlock(_ id: String, quietWhenGone: Bool) throws {
+    /// Returns whether it archived the block (`false` only on the quiet road).
+    @discardableResult
+    func performArchiveBlock(_ id: String, quietWhenGone: Bool) throws -> Bool {
         try database.write { db in
             let existing = try Block.fetchOne(db, key: id)
             guard let existing, existing.deletedAt == nil else {
-                if quietWhenGone { return }
+                if quietWhenGone { return false }
                 throw OperationError.blockNotFound(id: id)
             }
             var block = existing
             guard block.archivedAt == nil else {
-                if quietWhenGone { return }
+                if quietWhenGone { return false }
                 throw OperationError.blockAlreadyArchived(id: id)
             }
             try ensurePlacementUnlocked(db, blockID: id)
@@ -82,6 +84,7 @@ extension Operations {
             block.archivedAt = now
             block.updatedAt = now
             try block.update(db)
+            return true
         }
     }
 
@@ -95,27 +98,30 @@ extension Operations {
     /// would teach that Put back did something), and a sealed note.
     @discardableResult
     public func unarchiveBlock(_ id: String) throws -> BlockUnarchiveLanding {
-        let landing = try performUnarchiveBlock(id, quietWhenGone: false)
+        // Never nil here: the loud road throws where the quiet one is nil.
+        let landing = try performUnarchiveBlock(id, quietWhenGone: false) ?? .unplaced(home: nil)
         undoStack?.register(
             label: "Unarchive Block",
             inverse: { try $0.performArchiveBlock(id, quietWhenGone: true) },
-            redo: { _ = try $0.performUnarchiveBlock(id, quietWhenGone: true) })
+            redo: { try $0.performUnarchiveBlock(id, quietWhenGone: true) != nil })
         return landing
     }
 
+    /// nil on the quiet road (VX-246 U2: the block already gone or already
+    /// unarchived — nothing written).
     @discardableResult
     func performUnarchiveBlock(
         _ id: String, quietWhenGone: Bool
-    ) throws -> BlockUnarchiveLanding {
+    ) throws -> BlockUnarchiveLanding? {
         try database.write { db in
             let existing = try Block.fetchOne(db, key: id)
             guard let existing, existing.deletedAt == nil else {
-                if quietWhenGone { return .unplaced(home: nil) }
+                if quietWhenGone { return nil }
                 throw OperationError.blockNotFound(id: id)
             }
             var block = existing
             guard let archivedAt = block.archivedAt else {
-                if quietWhenGone { return .unplaced(home: nil) }
+                if quietWhenGone { return nil }
                 throw OperationError.blockNotArchived(id: id)
             }
             let stamp = DateFormatter.variorumISO8601.string(from: archivedAt)
@@ -164,8 +170,9 @@ extension Operations {
     /// as the public door minus its own registration (the `revert…` family's
     /// rule: an inverse never registers, so undo never clears the redo stack
     /// from under itself).
-    func revertArchiveBlock(_ id: String) throws {
-        _ = try performUnarchiveBlock(id, quietWhenGone: true)
+    @discardableResult
+    func revertArchiveBlock(_ id: String) throws -> Bool {
+        try performUnarchiveBlock(id, quietWhenGone: true) != nil
     }
 
     private func insertPlacementForUnarchive(

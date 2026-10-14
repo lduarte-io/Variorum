@@ -246,23 +246,9 @@ extension Operations {
     /// store to the post-op rows with every ID intact.
     private func registerTakeConversions(_ conversions: [TakeConversion], label: String) {
         guard !conversions.isEmpty else { return }
-        undoStack?.register(
+        registerStructuralEntry(
             label: label,
-            inverse: {
-                try $0.revertStructural(
-                    restoringTexts: [],
-                    tombstoningBlocks: conversions.map(\.minted),
-                    revivingPlacementRows: [],
-                    unarchivingTakes: conversions.map {
-                        ($0.sourceVariantID, $0.sourceWasDefault)
-                    })
-            },
-            redo: {
-                try $0.reapplyStructural(
-                    restoringTexts: [],
-                    untombstoningBlocks: conversions.map(\.minted),
-                    releasingPlacementRows: [],
-                    rearchivingTakes: conversions.map(\.sourceVariantID))
-            })
+            minting: conversions.map(\.minted),
+            archivingTakes: conversions.map { ($0.sourceVariantID, $0.sourceWasDefault) })
     }
 }

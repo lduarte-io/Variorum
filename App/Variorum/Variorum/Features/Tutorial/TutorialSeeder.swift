@@ -2548,13 +2548,20 @@ enum TutorialSeeder {
             // second tool using the same name is turned away" was falsified in
             // its turn — the newest copied setup now takes the name — so the
             // clause says the rule as built (a minimal truth fix; U7's quality
-            // pass re-voices the chapter).
+            // pass re-voices the chapter). VX-258 (VX-246 ladder round 1,
+            // F-1): "Running the setup again moves the name to the new key"
+            // was falsified in its turn — only a client's OWN setup (a key
+            // copied for its name) re-binds with zero clicks; an "Any MCP
+            // client" copy under a name she approved waits for her OK. The
+            // sentence now says the pane's L1 clause verbatim (another minimal
+            // truth fix; U8 re-voices the chapter).
             "One honest limit: a client names itself when it connects. The "
             + "setup you copy carries a key that ties that name to it. Running "
-            + "the setup again moves the name to the new key, and a tool still "
-            + "using an older key, or none, is turned away. But the key sits "
-            + "in the client's own settings, where any program running as you "
-            + "can read it.",
+            + "the client's own setup again moves the name to the new key; a "
+            + "setup copied for any MCP client waits for your OK before it "
+            + "takes a name you approved; and a tool still using an older key, "
+            + "or none, is turned away. But the key sits in the client's own "
+            + "settings, where any program running as you can read it.",
         ])
 
         _ = try lesson(door, mcpLessons[2], [

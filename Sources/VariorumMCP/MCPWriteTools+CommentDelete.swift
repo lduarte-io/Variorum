@@ -13,10 +13,15 @@ import VariorumCore
 ///   note the client cannot reach (and a deleted comment, and an id naming
 ///   nothing) answers the ONE not-shared shape (no oracle); a note it reads
 ///   but cannot suggest in hears the rung's refusal and raises the ask;
-/// - then the LOCAL-ONLY authorship record (`Queries.mcpCommentAuthor`) must
-///   name THIS client. Anything else — her comment, another client's, one with
+/// - then the LOCAL-ONLY authorship record must name THIS client with the
+///   comment's words unchanged since (`Queries.mcpCommentIsOwn` — the one
+///   read). Anything else — her comment, another client's, one with
 ///   no record (written before the record existed, synced from another Mac,
-///   travelled to a structural successor) — refuses with HER RULED SENTENCE,
+///   travelled to a structural successor, or — VX-260 — one SHE has edited
+///   since: her edit makes it hers), and — P-VX260-1 (b), VX-246 U1b — one
+///   whose WORDS have changed since the client wrote them (her edit on any
+///   device, arriving by sync; another client's rewrite; a record from before
+///   the words' digest, unproven) — refuses with HER RULED SENTENCE,
 ///   verbatim (`notYourCommentWords`): a rungTooLow-family refusal, never the
 ///   not-shared shape, because the client CAN read that comment (13n-c's R2-6
 ///   precedent). It opens no oracle: it says only that the comment is not on
@@ -74,11 +79,12 @@ extension MCPWriteTools {
         }
     }
 
-    /// The rung deleting this comment needs: SUGGEST for one the record names
-    /// as this client's own (R-VX188-1), EDIT for any other (VX-195 — the edit
-    /// clause). `Queries.mcpCommentAuthor` is the one read.
+    /// The rung deleting this comment needs: SUGGEST for one still this
+    /// client's own — the record names it AND its words are the ones it wrote
+    /// (R-VX188-1; P-VX260-1 (b)) — EDIT for any other (VX-195 — the edit
+    /// clause). `Queries.mcpCommentIsOwn` is the one read.
     func deleteRung(_ db: Database, _ commentID: String, _ clientName: String) throws -> MCPGrantRule.Rung {
-        try Queries.mcpCommentAuthor(db, commentID: commentID) == clientName ? .suggest : .edit
+        try Queries.mcpCommentIsOwn(db, commentID: commentID, client: clientName) ? .suggest : .edit
     }
 
     /// May this client delete this comment? Its OWN at suggest (the record

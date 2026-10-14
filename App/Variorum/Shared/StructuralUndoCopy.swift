@@ -43,6 +43,21 @@ nonisolated enum StructuralUndoCopy {
     static let nothingToRedo = "No structural change to redo."
     static let undoCancelled = "Undo cancelled — nothing changed."
 
+    /// **A press that found nothing of its entry's to change** (VX-246 U2 —
+    /// VX-276/VX-277/VX-119): the act's result was already gone (put back,
+    /// restored, renamed back, chosen again — by her own undo-less door or a
+    /// sync), so the stack RETIRED the entry instead of writing over hers.
+    /// The door did nothing, so it speaks a REFUSAL (AppSpec §12), naming
+    /// the entry (an MCP entry keeps its client's name). Words as built —
+    /// on the FOR VX-234 list.
+    static func undoFoundNothing(_ label: String) -> String {
+        "Nothing to undo — \(label) was already undone or changed since."
+    }
+
+    static func redoFoundNothing(_ label: String) -> String {
+        "Nothing to redo — it changed again after \(label) was undone."
+    }
+
     /// **The door's in-flight refusal** (18k C5, 17e P33): a second press
     /// while the first is still landing. The door reads the stack across
     /// suspensions (the A12 warning, then the act), so a press inside the

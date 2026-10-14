@@ -1,3 +1,4 @@
+import Dependencies
 import Foundation
 
 /// Session-scoped, in-memory undo for STRUCTURAL operations only (AppSpec §9,
@@ -30,6 +31,25 @@ import Foundation
 ///   learns redo exists either;
 /// - **any new structural act clears the redo stack** — the standard
 ///   discipline: once the timeline forks, the abandoned future is gone.
+///
+/// **A HALF ONLY EVER RUNS AFTER ITS PARTNER CHANGED SOMETHING** (VX-246 U2 —
+/// VX-276 · VX-277 · VX-119, the undo class: *an undo writes only over the
+/// act's own result, and a redo after a quiet undo stays quiet*). Every
+/// inverse and re-apply in the house is QUIET on divergence — it writes
+/// nothing when the world has already moved past its entry (her Put back,
+/// restore, unlock, rename back, ✓ back; a sync apply), so the stack never
+/// wedges. Each half therefore RETURNS whether it changed anything, and the
+/// stack acts on the answer: an undo that changed something moves its entry
+/// onto the redo stack; a QUIET undo RETIRES the entry (there is nothing for
+/// its redo to put back — before this rule its redo ran anyway, against rows
+/// her own undo-less door had put back in the pre-act state, and wrote the
+/// act over hers). Redo is the exact mirror: a quiet re-apply retires the
+/// entry rather than handing its next undo a result that is not the act's.
+/// A retired entry leaves the OTHER stack as it was (P-VX276-1): it adds no
+/// history and abandons no future. An entry with PARTS (several slots,
+/// blocks, columns, rows) keeps its own record of which parts its last half
+/// changed and acts only on those (the F1 stamp box's shape, `importBook`);
+/// a compound does the same for its legs, here.
 public final class UndoStack: @unchecked Sendable {
     public struct Entry {
         /// Registration-order token so a completed undo removes exactly the
@@ -39,12 +59,15 @@ public final class UndoStack: @unchecked Sendable {
         /// Human-readable operation name ("Delete Block") — Phase 7 wires
         /// "Undo Divide"-style menu labeling from this.
         public let label: String
-        let inverse: (Operations) throws -> Void
+        /// The undo half. Returns whether it CHANGED anything — false when it
+        /// found the act's result already gone and wrote nothing (VX-246 U2).
+        let inverse: (Operations) throws -> Bool
         /// The RE-APPLY half (13c 1B): puts back exactly what `inverse`
-        /// un-did. Nil ⇒ this entry is not redoable, and undoing it CLEARS
-        /// the redo stack — redo is strictly LIFO, so an entry that cannot
-        /// be re-applied is never skipped over.
-        let redo: ((Operations) throws -> Void)?
+        /// un-did, and returns whether it changed anything. Nil ⇒ this entry
+        /// is not redoable, and undoing it CLEARS the redo stack — redo is
+        /// strictly LIFO, so an entry that cannot be re-applied is never
+        /// skipped over.
+        let redo: ((Operations) throws -> Bool)?
         /// The buffer pre-images this entry's inverse would RESTORE (13d
         /// batch 5 — A12). The same values the inverse passes to
         /// `revertStructural`, carried as DATA so the warning can be asked
@@ -53,6 +76,20 @@ public final class UndoStack: @unchecked Sendable {
         /// discard nothing, so they are silent by construction rather than
         /// by a per-site decision.
         let insuring: [Operations.TextPreImage]
+    }
+
+    /// What one press did (VX-246 U2): the entry's label, and whether its
+    /// half CHANGED anything. A quiet press (`changed == false`) retired its
+    /// entry; the door that pressed speaks a refusal (AppSpec §12: a door that
+    /// did nothing says so).
+    public struct Outcome: Equatable, Sendable {
+        public let label: String
+        public let changed: Bool
+
+        public init(label: String, changed: Bool) {
+            self.label = label
+            self.changed = changed
+        }
     }
 
     /// What the NEXT undo would set aside — A12's whole input (author
@@ -132,6 +169,15 @@ public final class UndoStack: @unchecked Sendable {
     /// is re-applied rather than silently shipping a hole in redo — pass
     /// `nil` deliberately, and undoing past it clears the redo stack.
     ///
+    /// **Each half returns whether it CHANGED anything** (VX-246 U2): `true`
+    /// only when it wrote some part of the act's result back or forth;
+    /// `false` when every part it would touch had already moved (it found
+    /// the world past its entry and wrote nothing). The stack retires an
+    /// entry on a `false` — so a half that answers `true` without having
+    /// written would let its partner run over rows that are hers, and a site
+    /// must return the truth (THE SWEEP TABLE in the VX-246 record is every
+    /// site's answer).
+    ///
     /// Registering is a NEW structural act, so it clears the redo stack
     /// (including during a compound's collection — the compound as a whole
     /// is the new act). The inverses and re-applies themselves never
@@ -139,8 +185,8 @@ public final class UndoStack: @unchecked Sendable {
     /// `UndoStackTests` pins that.
     func register(
         label: String,
-        inverse: @escaping (Operations) throws -> Void,
-        redo: ((Operations) throws -> Void)?,
+        inverse: @escaping (Operations) throws -> Bool,
+        redo: ((Operations) throws -> Bool)?,
         insuring: [Operations.TextPreImage] = []
     ) {
         let collected: Bool = lock.withLock {
@@ -205,26 +251,43 @@ public final class UndoStack: @unchecked Sendable {
             let result = try body()
             let collected = drainCollector()
             if !collected.isEmpty {
+                // VX-246 U2: the compound is an entry with PARTS — its legs.
+                // Each leg's state is kept here: APPLIED (its result stands,
+                // so the next undo runs its inverse), REVERTED (its inverse
+                // changed something, so the next redo runs its re-apply), or
+                // RETIRED (a half of it was quiet — the world moved past that
+                // leg, and no later half ever runs over it). A half runs only
+                // the legs whose partner changed something, and the compound's
+                // half CHANGED something while any leg it ran did. The state
+                // moves leg by leg as each runs, so a leg that throws keeps
+                // the entry for retry with every finished leg already counted.
+                let start = [LegState](repeating: .applied, count: collected.count)
+                let legs = LockIsolated(start)
                 // The compound's REDO mirrors its inverse: the collected
                 // re-applies run OLDEST-FIRST (forward order), exactly as
                 // the original operations ran. A compound is redoable only
                 // when EVERY leg is — a half-re-applied compound is not a
                 // state the model should ever be able to reach.
                 let redos = collected.map(\.redo)
-                let compoundRedo: ((Operations) throws -> Void)? =
+                let compoundRedo: ((Operations) throws -> Bool)? =
                     redos.allSatisfy { $0 != nil }
                     ? { ops in
-                        for entry in collected {
-                            try entry.redo?(ops)
+                        for (index, entry) in collected.enumerated() where legs.value[index] == .reverted {
+                            let changed = try entry.redo?(ops) ?? false
+                            legs.withValue { $0[index] = changed ? .applied : .retired }
                         }
+                        return legs.value.contains(.applied)
                     }
                     : nil
                 register(
                     label: label,
                     inverse: { ops in
-                        for entry in collected.reversed() {
-                            try entry.inverse(ops)
+                        for (index, entry) in collected.enumerated().reversed()
+                        where legs.value[index] == .applied {
+                            let changed = try entry.inverse(ops)
+                            legs.withValue { $0[index] = changed ? .reverted : .retired }
                         }
+                        return legs.value.contains(.reverted)
                     },
                     redo: compoundRedo,
                     // A12: a compound insures whatever its legs would — the
@@ -236,6 +299,8 @@ public final class UndoStack: @unchecked Sendable {
         } catch {
             var remaining = drainCollector()
             while let entry = remaining.last {
+                // A rolled-back leg's answer does not matter here: the leg is
+                // gone from history either way (its act never completed).
                 if (try? entry.inverse(operations)) == nil { break }
                 remaining.removeLast()
             }
@@ -273,15 +338,27 @@ public final class UndoStack: @unchecked Sendable {
     /// Runs the newest inverse (LIFO) and removes it on success; a failed
     /// inverse (e.g. the post was locked after the fact) stays on the stack
     /// so the user can resolve and retry. Returns the undone entry's label,
-    /// or nil when there is nothing to undo. The inverse runs outside the
+    /// or nil when there is nothing to undo — a QUIET undo's label included
+    /// (`undoReporting` says which it was). The inverse runs outside the
     /// lock (it is a DB write); removal is by entry id, so a registration
     /// racing the inverse can never make undo pop someone else's entry.
     @discardableResult
     public func undo(with operations: Operations) throws -> String? {
+        try undoReporting(with: operations)?.label
+    }
+
+    /// `undo`, saying what the press did (VX-246 U2). An inverse that CHANGED
+    /// something moves its entry onto the redo stack (or, with no re-apply,
+    /// ends the redo future — LIFO); a QUIET inverse RETIRES its entry: it
+    /// leaves the undo stack, never reaches the redo stack (its redo would
+    /// put back nothing of the act's — it would only write the act over
+    /// whatever put the rows back), and the redo stack stays as it was.
+    public func undoReporting(with operations: Operations) throws -> Outcome? {
         guard let entry = lock.withLock({ entries.last }) else { return nil }
-        try entry.inverse(operations)
+        let changed = try entry.inverse(operations)
         lock.withLock {
             entries.removeAll { $0.id == entry.id }
+            guard changed else { return }
             if entry.redo != nil {
                 redoEntries.append(entry)
             } else {
@@ -291,7 +368,7 @@ public final class UndoStack: @unchecked Sendable {
             }
         }
         notifyChange()
-        return entry.label
+        return Outcome(label: entry.label, changed: changed)
     }
 
     /// Re-applies the most recently undone entry (13c 1B — A10) and moves
@@ -303,16 +380,25 @@ public final class UndoStack: @unchecked Sendable {
     /// say — and press again), and removal is by entry id.
     @discardableResult
     public func redo(with operations: Operations) throws -> String? {
+        try redoReporting(with: operations)?.label
+    }
+
+    /// `redo`, saying what the press did (VX-246 U2) — `undoReporting`'s
+    /// mirror: a re-apply that CHANGED something moves its entry back onto
+    /// the undo stack; a QUIET one retires it (its next undo would take back
+    /// nothing of the act's — only whatever moved the rows since), and the
+    /// undo stack stays as it was.
+    public func redoReporting(with operations: Operations) throws -> Outcome? {
         guard let entry = lock.withLock({ redoEntries.last }),
               let reapply = entry.redo
         else { return nil }
-        try reapply(operations)
+        let changed = try reapply(operations)
         lock.withLock {
             redoEntries.removeAll { $0.id == entry.id }
-            entries.append(entry)
+            if changed { entries.append(entry) }
         }
         notifyChange()
-        return entry.label
+        return Outcome(label: entry.label, changed: changed)
     }
 
     /// **THE ABANDONED FUTURE, CLEARED BY AN ACT THAT REGISTERS NOTHING**
@@ -345,6 +431,9 @@ public final class UndoStack: @unchecked Sendable {
         }
         if hadFuture { notifyChange() }
     }
+
+    /// A compound leg's place in the undo↔redo ping-pong (VX-246 U2).
+    private enum LegState: Sendable { case applied, reverted, retired }
 
     /// Empties BOTH stacks. **No production caller, deliberately (17f/P44):**
     /// no app road clears undo history — a session's stack dies with its

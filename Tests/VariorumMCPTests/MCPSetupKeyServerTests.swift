@@ -99,7 +99,11 @@ struct MCPSetupKeyServerTests {
             let codex = try await h.connect(as: "codex")
 
             // A newer copy of the setup: it takes the name.
-            let newer = try h.operations.mintMCPSetupKey()
+            // VX-258 (A JUSTIFIED EDIT, the ritual — her ruling: a key re-binds with zero clicks only the name its setup was copied FOR): the
+            // newer copy is Claude Code's own tab's, so it carries the name;
+            // an "Any MCP client" copy here waits for her OK instead
+            // (`MCPSetupKeyImpostorServerTests`, `MCPSetupKeyTabServerTests`).
+            let newer = try h.operations.mintMCPSetupKey(copiedFor: "claude-code")
             let (newerFD, rebound) = try h.rawOpen(as: "claude-code", presenting: newer, id: 6)
             #expect(rebound["id"] as? Int == 6 && rebound["result"] != nil, "the newest setup is admitted: \(rebound)")
             close(newerFD)
@@ -174,7 +178,11 @@ struct MCPSetupKeyServerTests {
             expectRefusal(bare, id: 1, "unbound, a bare arrival still refuses")
             expectClosed(bareFD)
 
-            let rerun = try h.operations.mintMCPSetupKey()   // she re-runs the setup
+            // VX-258 (A JUSTIFIED EDIT, the ritual — her ruling: a key re-binds with zero clicks only the name its setup was copied FOR): she
+            // re-runs Claude Code's OWN setup, so its key carries the name (an
+            // untagged copy here waits for her OK — VX-258's bind arm,
+            // `MCPSetupKeyImpostorTests`).
+            let rerun = try h.operations.mintMCPSetupKey(copiedFor: "claude-code")   // she re-runs the setup
             let bound = try await h.connect(as: "claude-code", presenting: rerun)
             #expect(try h.client("claude-code").isSetupBound)
             #expect(try h.client("claude-code").state == .approved, "her approval kept")
