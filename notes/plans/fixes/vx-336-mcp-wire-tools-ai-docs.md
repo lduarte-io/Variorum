@@ -1509,3 +1509,74 @@ otherwise rule (her away-mode answer); each goes to QUESTIONS at the merge with 
   RECORD's design and these rulings. It then writes THE STAGE WINDOW (`vx336-u5`, with U5a's LIVE LEGS A–C, D optional,
   and D8's leg) and reports READY.
 
+
+## U5 STAGE RUN — the whole window (a fresh stage runner, from 2026-10-14)
+
+**What this run does NOT do (said first):** no product code is written or changed, before the claim or under it — a red
+that needs code is RECORDED as a FINDING and reported, never fixed here; no rebuild (the window runs the `vx336-u5`
+products exactly as piece 7 built them); no canon, QUESTIONS or ticket edits; never her real store, never
+`/Applications/Variorum.app`, never her USER-scope MCP registrations (the copied setup line is never run as copied — only
+its key is taken, into a scratch `--mcp-config` JSON in the runner's scratchpad, OUTSIDE the repo); `castle-W1-20261013`
+left alone. The plan is the U5b UNIT RECORD's THE STAGE WINDOW (steps 0–13); step 11 is the U5a UNIT RECORD's LIVE LEGS
+FOR U5b's WINDOW, run exactly as written there.
+
+**Read in full before READY (never delegated):** this record's header, Hard rules (the stage and live-round machinery),
+LIVE STATUS, Stage traffic log and Cross-run coordination; the U5b UNIT RECORD's LIVE STATUS, "What this unit has NOT
+done", THE STAGE WINDOW, PROVISIONALs and FOR VX-234 (and its build plan, OWED and self-assessment); the U5a UNIT RECORD's
+LIVE LEGS FOR U5b's WINDOW; VX-246's `## U1b STAGE RUN — the whole window` whole (the A1 copy, `restore.sh`, the
+fingerprint, the AX theme switch, `defaults import` merging); `notes/SessionResiliencyProtocol.md` (the implementer rules
+and the addenda); `Tools/stage`; `Tools/WalkKit/` (README, `guard.sh`, `click.sh`, `keys.sh`); `Tools/ScaleFixture/`
+(`stage.sh`'s copy loop, `restore.sh`); the memory notes walk-driving-lessons, walk-restores-dev-store-posture and the
+Castle coordinator note.
+
+**The build check (READY, 2026-10-14 ~15:11 MDT):**
+- **The product matches the tree.** HEAD `93edbc2e` (U5b piece 8's READY commit); `git diff --name-only c9c7f637..HEAD --
+  Sources App Package.swift` is EMPTY; the tree is clean; no `.swift`/plist/pbxproj/xcstrings/entitlements/`Package.swift`
+  under `Sources`, `App/Variorum` or the root is newer than the product's `Variorum.debug.dylib` (15:03).
+- **The products exist:** `App/Variorum/DerivedData/vx336-u5/Build/Products/Debug/Variorum.app` (signed
+  *[removed for publication]*
+  `Contents/PlugIns/VariorumTests.xctest`, and `Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun` (15:03). The
+  dylib carries "added blocks to" (U5b's Activity words).
+- **The 31 suites are real type names in the test bundle** (`nm` + `swift demangle`, a `-only-testing` name that matches
+  no type runs 0 tests silently): every one of the 31 found (≥ 119 symbols each); `activitySpeaksEveryActInWordsNeverAToolID`
+  present.
+- **Host and tools:** `AX: true SCREEN: true` (a compiled non-prompting probe); `walk-cap` / `walk-scroll` compiled into
+  the runner's scratchpad; `Tools/WalkKit/wl2` compiled into this worktree (gitignored — `guard.sh <pid>` needs it, and this
+  worktree had only `wl2.swift`); Claude Code **2.1.300**; `cliclick` present. Free disk **68 GiB**. No Variorum instance
+  (`pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both empty).
+- **Her user-scope MCP servers (names + a sha256 prefix of the sorted compact `mcpServers` JSON, never values):**
+  `['linear-server', 'variorum']`, **`bc64543e2f4e8e58`** — SAME as U5b's READY read and VX-246's windows.
+- **The dev store (read-only listing):** `variorum.sqlite` (14 Oct 08:50), `-wal`, `-shm` (09:17/09:19), key files
+  `variorum-keys-b831b428ce0d67b1.json` · `variorum-keys-e86ed514dc8dab5a.json`; `Backups/` 57 entries;
+  `Backups/safety-copies/` holds only `castle-W1-20261013` (left alone).
+- **The stage at READY:** `STAGE HELD by 'oct13coordinator' — HOLD: coordinator queue` (claimed 15:07:31). Not ours; the
+  GO's relayed line is run exactly as relayed.
+
+**Process choices (the earlier windows' lessons applied):** the Mac batch FIRST, detached to its log and POLLED in the
+foreground (a `grep -q` loop, never `tail -f | grep -m1`); the SEAM after it; the A1 copy, prefs export and fingerprint
+after the SEAM (the A1 copy then holds the batch's test-host side effects — the Hard rules' order); every GUI act through
+`click.sh` / `keys.sh` (keys only by System Events), at least 2.6 s apart; region captures (`screencapture -x -R`); the
+Debug app quit BY BUNDLE ID; prefs restored by import, then re-export, diff, delete every added key until 0 differ; keys
+redacted to their first 9 characters in every record and capture name; the `claude -p` turns from a scratch project
+directory in the scratchpad, each answer tee'd to `notes/plans/vx336-screens/u5/<leg>.json`.
+
+### LIVE STATUS — the stage run's steps
+
+| step | what | status |
+|---|---|---|
+| R | read-in, the build check, the fingerprint, this section → READY | DONE (this commit) — READY reported; the stage is NOT claimed (the orchestrator relays the coordinator's GO and its exact line) |
+| 0 | guards on every step; the claim from the GO's line; HEAD at the GO | NOT-STARTED |
+| 1 | the Mac batch (31 suites, `test-without-building`, detached + polled) | NOT-STARTED |
+| SEAM | the batch's counts recorded, committed, pushed; the claim KEPT; turn ended "SEAM" | NOT-STARTED |
+| 2 | A1 prestage copy (cmp + sha256) + `defaults export` + `Backups/` listed + the fingerprint BEFORE | NOT-STARTED |
+| 3 | launch, connect (the Claude Code tab key → scratch `u5-mcp.json`), the first turn binds; THE GRANT Home · Write new · Always | NOT-STARTED |
+| 4 | the fixture book "vx336 u5b" | NOT-STARTED |
+| 5 | V252-a — `create_note` with `section_id` answers its records; filed under "um" | NOT-STARTED |
+| 6 | V255-a — `insert_blocks` at the end at write new; her ⌥⌘Z and ⇧⌥⌘Z | NOT-STARTED |
+| 7 | V255-b — write new with an anchor / `at: "start"` → the rung's sentence + her Waiting ask; Don't allow | NOT-STARTED |
+| 8 | the re-grant Home · Edit · Always | NOT-STARTED |
+| 9 | V255-c — at edit, after the first block and at the start | NOT-STARTED |
+| 10 | D8-a (her caret beside the run) · D8-b (her open tail) | NOT-STARTED |
+| 11 | U5a's LIVE LEGS 0, A–C (D optional) | NOT-STARTED |
+| 12 | the Terminal pass (leg A's card, V255-c's order, one `insert_blocks` + ⌥⌘Z); back to Study | NOT-STARTED |
+| 13 | cleanup → cmp SAME vs A1, prefs 0 differ, fingerprint SAME, instances quit, claim released; THE RESULT LINE | NOT-STARTED |
