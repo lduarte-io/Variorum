@@ -224,8 +224,12 @@ private final class CommentPopoverRig {
         driver.shown = true
         var found: Int?
         await CommentHostRig.turns(until: {
+            // OUR popover only: a new, visible window that is a CHILD of this
+            // rig's anchor (a popover's window is its anchor's child while it
+            // is shown) — never a window another suite running in the same
+            // process happens to present.
             if let window = NSApp.windows.first(where: {
-                !before.contains($0.windowNumber) && $0 !== anchor && $0.isVisible
+                !before.contains($0.windowNumber) && $0.parent === anchor && $0.isVisible
             }) {
                 window.alphaValue = 0
                 found = window.windowNumber
@@ -348,6 +352,16 @@ private final class CommentTakePanelRig {
         window.close()
     }
 }
+
+// MARK: - The two members' mounted cells, serialized TOGETHER
+
+/// ONE serialized parent for VX-229's and VX-257's mounted suites: both present
+/// popovers and sheets, and Swift Testing runs suites in parallel inside one
+/// process — two hosts presenting at once would read each other's windows.
+/// (`-only-testing:VariorumTests/CommentPanelHostSuites` runs both.)
+@MainActor
+@Suite("VX-282 U5 — the comments panel's hosts", .serialized)
+struct CommentPanelHostSuites {
 
 // MARK: - VX-229 — a dismissed host lets go of its panel
 
@@ -555,3 +569,5 @@ struct CommentPanelHostLeavingTests {
         }
     }
 }
+
+}  // CommentPanelHostSuites
