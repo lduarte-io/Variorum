@@ -3123,6 +3123,25 @@ empty throughout; nothing rebuilt; no launch, no walk, no popup. Logs: `notes/pl
   08:36:59. The dev store untouched.
 orchestrator's) and F-3 (taken, with its pin); docs for F-1 and F-5; F-4 recorded only.
 
+
+### THE ORCHESTRATOR'S LINE-BY-LINE CHECK OF THE FINAL ROUND'S FIXES (2026-10-14 ~08:35; the final round's fixes are read by no later round — CLAUDE.md "Two reviews")
+
+- **F-2 (`ddcfda66`) against the reviewer's call — MATCHES.** `holdsCaret` reads `structuralInFlight ? noteIsEditable :
+  textView.isEditable` exactly; `noteIsEditable` is `header.map { !$0.locked } ?? false` (the call's "the note's own
+  editability from the header"); `adoptHeader` keeps the `isEditable` write under `!structuralInFlight` (writing
+  `noteIsEditable`, byte-equivalent to the old `value.map { !$0.locked } ?? false` once `header = value`); the re-settle
+  keys on the NOTE-level flip (`wasNoteEditable` captured before `header = value`) and runs flight or not — the unseal
+  mirror included. Zero `EditorSurfaceController` lines. Edge noted, harmless: a first header load (nil → unlocked) is a
+  flip, so one settle runs at load — the ledger is empty then, so it writes nothing.
+- **F-3 (`b963184e`) — MATCHES.** Both restyles still run (clear, then honour); the return is `clearWrote ||
+  honourWrote` from the restyles' own answers; the doc comment says why.
+- **Pins:** both red on old exactly as designed (r2fix W1, 4 issues on the two pins) and green on the fixed products
+  (W2 20/4 Mac · W2b 4/1 phone), the R1-1/R1-2/R1-7 pins still green after F-3.
+
+**THE LADDER IS CLOSED** (2026-10-14 08:37): R1 Opus 0B/0M/6m/4n — all agreed, fixed or dispositioned (R1-3 hollow) ·
+R2 Fable 0B/0M/2m/3n — all confirmed, F-2/F-3 fixed red-first, F-1/F-4/F-5 recorded. No round 3 (no new BLOCKER/MAJOR).
+R1-8 (the VX-229 known issues under the whole-target run) is the closeout's watch.
+
 ## Closeout
 
 *(Pending.)*
