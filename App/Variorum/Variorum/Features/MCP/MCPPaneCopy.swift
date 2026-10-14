@@ -536,7 +536,10 @@ nonisolated enum MCPPaneCopy {
         "Claude Code registers Variorum with one command. Copy it, run it in a terminal, then "
         + "start a new Claude Code session \u{2014} it adds Variorum for every folder (user scope), "
         + "replacing an earlier Variorum setup there."
-    static let copiedReceipt = "Copied. Run it in a terminal, then start a new Claude Code session."
+    /// Claude Code's copy receipt — its one-line next step with "Copied." in
+    /// front (VX-281 ladder R1-8: each receipt DERIVES from its client's
+    /// summary — one sentence, one constant).
+    static var copiedReceipt: String { MCPSetupClient.claudeCode.copiedReceipt }
 
     /// The name the client registers the server under: the Debug build's is
     /// its own, so a dev setup never replaces the real one in Claude Code's
@@ -632,9 +635,6 @@ nonisolated enum MCPPaneCopy {
         return escaped + "\""
     }
 
-    /// Copied receipts beside Claude Code's (`copiedReceipt`, unchanged).
-    static let copiedCodexReceipt = "Copied. Run it in a terminal, then start a new Codex session."
-    static let copiedJSONReceipt = "Copied. Paste it into your client's MCP settings, then restart the client."
     // O-4 SETUP COPY END
 
     // MARK: - The "all N" road (R-13n-10)
@@ -1033,13 +1033,12 @@ nonisolated enum MCPSetupClient: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    var copiedReceipt: String {
-        switch self {
-        case .claudeCode: MCPPaneCopy.copiedReceipt
-        case .codex: MCPPaneCopy.copiedCodexReceipt
-        case .anyClient: MCPPaneCopy.copiedJSONReceipt
-        }
-    }
+    /// The copy's receipt: the client's one-line next step (`summary`) with
+    /// "Copied." in front — VX-281 ladder R1-8: one sentence, one constant
+    /// (they were two, word for word; the strings are byte-identical). That
+    /// a copy then says the next step on two adjacent lines is hers to word
+    /// (FOR VX-234).
+    var copiedReceipt: String { "Copied. " + summary }
     // O-4 SETUP COPY END
 }
 

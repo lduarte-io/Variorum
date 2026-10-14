@@ -146,6 +146,13 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 | U1-10 | "Copy setup command" — now the copy ICON's tooltip and VoiceOver name, no longer a button's visible label | the Connect tab's code block, upper right | her R-13nb-5 words, unchanged; the field guide's lesson 2 ("press Copy setup command") is VX-197's to re-say for the icon (OWED) |
 | U1-11 | the rung's (i) popover shows the sentence in the line's own fragment form ("it can also change, archive and delete…" — lowercase, no closing period) | the grant sheet's HOW MUCH (i) on suggest and edit (`terminal-07`) | words unchanged (VX-184 round 2's as-built clause); whether the popover should read as a capitalized sentence is hers |
 
+**Ladder round 1's fix pass (words AS BUILT):**
+
+| # | Words (as built) | Where it renders | Note |
+|---|---|---|---|
+| R1-4w | "Connect a client" (title — the Connect section's existing words) · "The setup for your MCP client, ready to copy: a command for a terminal, or settings to paste into the client." (blurb, NEW) | Settings search results (the `mcpConnect` catalog row); the title also heads the Connect tab's section, now drawn from the catalog | the blurb is new words — hers to reword; it names no provider (O-4) |
+| R1-8w | the next step said twice after a copy: "Run it in a terminal, then start a new Claude Code session." (the line) and "Copied. Run it in a terminal, then start a new Claude Code session." (the receipt) — likewise Codex's and Any MCP client's | the Connect tab, under the code block, after a copy | now ONE sentence in code (the receipt = "Copied. " + the line); whether the line should hide while the receipt shows, or the receipt say only "Copied.", is hers |
+
 **U2 — the shared icon (VX-268): no new words.** The icon, its hover and its popover are 13n-c's, unchanged; the ▾ menu's row mark is an image. One taste note for her pass: the icon reads large beside the Book Panel's small type (`vx281-screens/u2/walk/s16`).
 
 ## Unit records
