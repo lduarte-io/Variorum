@@ -352,7 +352,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | READY FOR STAGE — the ⌘⇧W menu check by AX, the Mac batch (216 suites), three behavioural reverts (R-A · R-B · R-C); ≈55 min (the U1 section's P5 plan) |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | STOPPED — the ⇧⌘W check found a COLLISION in tabbed windows (AppKit's File ▸ Close Window ⇧⌘W); her call on the chord; the batch and reverts not yet run |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -375,9 +375,10 @@ author — PENDING until verified. The walker appends the WALK RECORD under it.)
 screenshot walk (a fresh walker's, after the stage window); any stage work until the orchestrator hands over a claim.
 
 **LIVE STATUS (per piece)**
-- P0 — the ⇧⌘W collision check (VX-287's FIRST step): IN-PROGRESS — the app-code sweep is DONE and FREE (below);
-  the system-provided half (AppKit's own File-menu items under window tabbing) is PENDING an external lookup and the
-  stage window's AX enumeration of the Debug app's menus.
+- P0 — the ⇧⌘W collision check (VX-287's FIRST step): **COLLISION FOUND (measured, stage window 2026-10-14
+  15:03–15:06)** — the app-code half is FREE, but in the TABBED state AppKit's own File ▸ "Close Window" wears ⇧⌘W
+  and takes the chord from View ▸ Close Note (below). Per the brief: restored, released, STOPPED — the chord is
+  the author's call; nothing was rebound.
 - P1 — VX-286 (the scroll bar rides in the margin, Open + Starred): DONE (`2f2daba2`) — headless build green; its
   mounted pin and the behavioural revert are PENDING the stage window.
 - P2 — VX-285 (the Open list grows to the sync footer; the constant splits): DONE (`2f2daba2` — the same commit as
@@ -388,8 +389,10 @@ screenshot walk (a fresh walker's, after the stage window); any stage work until
   landing rule, one set of pins) — headless green; pins PENDING the stage window.
 - P6 — her ruling at READY, "THE ✕ ON THE NOTE YOU'RE LOOKING AT" (f02f63cb): DONE (`bc80a9fb`) —
   headless build-for-testing green; its red-on-old pin (R-C) and the batch PENDING the stage window.
-- P5 — the stage window: **READY FOR STAGE** — the plan below (≈55 min, R-C added); nothing of it has run. No revert
-  is in flight; the tree is clean at the commit carrying this line.
+- P5 — the stage window: **STOPPED AT STEP 1 (the collision), as the plan says.** Claim `vx283-u1` 15:03:37 →
+  released 15:06:22. Ran: step 0 (preconditions, the store copy, the prefs export), step 1 (the menu check), step 4
+  (restore + verify). NOT run: step 2 (the 216-suite batch) and step 3 (R-A · R-B · R-C) — every pin of the unit is
+  still PENDING. No revert is in flight; the tree is clean.
 
 **P0 — the ⇧⌘W check, the app's own half (2026-10-14, on `a2a27a10`) — FREE:**
 - `EditorCommands.keyEquivalent(for:)`: no `w` chord of any modifier set.
@@ -416,6 +419,32 @@ screenshot walk (a fresh walker's, after the stage window); any stage work until
   list. So the system half is decided by MEASUREMENT: the stage window's FIRST step enumerates the Debug app's
   File / View / Window menus by AX — one window, then two windows merged into tabs (Window ▸ Merge All Windows) —
   and looks for any other item wearing ⇧⌘W. A hit = STOP and report before the batch runs.
+
+**P0 — THE SYSTEM HALF, MEASURED (the stage window, 2026-10-14 15:03–15:06, the Debug build of `5887cf43`; the
+listings and a capture in the gitignored `notes/plans/vx283-screens/u1/p0/`):**
+- **ONE window** (File / View / Window enumerated by AX with each menu OPEN): File ▸ Close **⌘W**, File ▸ Close All
+  **⌥⌘W**; View ▸ **Close Note ⇧⌘W** (ours; grey on the Bookcase, as designed) and View ▸ Close All Notes (keyless).
+  Nothing else wears W. ⇧⌘W is free here.
+- **TWO windows merged into tabs** (File ▸ New Window, then Window ▸ Merge All Windows): AppKit RE-TITLES and ADDS
+  File-menu items by itself — File ▸ **Close Window ⇧⌘W** (AX: `AXMenuItemCmdChar` W, `AXMenuItemCmdModifiers` 1),
+  File ▸ Close All (⌥⇧⌘), File ▸ **Close Tab ⌘W** (AX name "Close"), File ▸ Close Other Tabs (⌥⌘W) — and our View ▸
+  Close Note **LOSES its key** (`AXMenuItemCmdChar` missing, modifiers 1): AppKit resolves the duplicate in its own
+  item's favour. The capture `p0/file-menu-two-tabs.png` shows "Close Window ⇧⌘W" and "Close Tab ⌘W". So in any
+  tabbed window ⇧⌘W would CLOSE THE WHOLE WINDOW (every tab), never close a note. (A SwiftUI `WindowGroup` window
+  tabs by the system's default; nothing in the app sets `allowsAutomaticWindowTabbing` / `tabbingMode`.)
+- **THE CALL IS HERS (never rebound silently).** Options: **(a)** keep ⇧⌘W and turn native window tabbing OFF for
+  Variorum (`NSWindow.allowsAutomaticWindowTabbing = false` at launch — Window ▸ Merge All Windows, Show Tab Bar and
+  the Close Window/Close Tab pair leave the app; a feature removed, hers to rule); **(b)** her rejected alternative
+  ⌃⌘W (checked free on 2026-10-11; re-sweep owed) — ⇧⌘W then stays AppKit's Close Window in tabbed windows, matching
+  Safari/Finder; **(c)** keep ⇧⌘W and accept the tabbed-state loss (⇧⌘W closes the window there) — not recommended:
+  a destructive-feeling surprise in exactly the state she might use. Everything else in U1 is independent of the
+  chord (the act, its menu item, the ✕ ruling, the layout) and stands.
+- Restore: the dev store's three files were already byte-identical after the quit (the launch wrote nothing); copied
+  back from `store-before/<stamp>/` and `cmp`-verified anyway. The Debug prefs changed four keys (the window frame,
+  the backup log, the idle-sweep mark, What's New's last version) — `defaults import` of `prefs-before.plist`, re-export,
+  diff clean (none added, none removed, none changed). No new file in `Backups/`; `castle-W1-20261013` untouched; the
+  dev store opened Standard/unlocked (no lock screen) and was left so; the extra tab was closed and the tab bar hidden
+  before the quit (by identity); zero dev instances at release.
 
 **P1 — VX-286, the trace verified on this tip (`a2a27a10`):** each row fills the group's width with the ✕ only
 `rowPadding` (8 pt) in (`SidebarView.swift:435-446` rowChrome, `:811-815` the ✕); the group's `groupPadding` (12 pt)
