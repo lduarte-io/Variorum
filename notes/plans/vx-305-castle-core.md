@@ -548,8 +548,10 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   `RouteFinderRoadTests` + `AnchorSentenceTests` + `RetirementRoutesTests`, 12 tests green, filtered — every named
   opener's witness road WALKED with the real secret of its day; with a recorded model refinement:
   `CastleAnchor.directFingerprints`, and the catalog's aside key files carry their folder's day and listed dates); (d) `assess`: facts,
-  the mode and account verdicts, the vault's three states, the four situations, the Touch ID road — NOT-STARTED;
-  (e) `assess`: repairs with §3.3's guards, acts owed, doors with reasons, the open rule — NOT-STARTED; (f) U2's
+  the mode and account verdicts, the vault's three states, the four situations, the Touch ID road — IN-PROGRESS
+  (WIP commit: `Facts.swift`, `Assessment.swift`, `Assess.swift`, `OpenRule.swift` compile; the tests are next — PENDING);
+  (e) `assess`: repairs with §3.3's guards, acts owed, doors with reasons, the open rule — IN-PROGRESS (in the same WIP
+  code; its tests PENDING); (f) U2's
   `ProtectionGuards` and their DEBUG mutation tests, both configurations' runs, the record — NOT-STARTED.
 - U3 — the executor and the acts: **NOT-STARTED.**
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
