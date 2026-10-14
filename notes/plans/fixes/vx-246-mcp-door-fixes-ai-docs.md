@@ -4542,7 +4542,7 @@ whole Mac target.
 
 ## CLOSEOUT RECORD (the closeout implementer — opus-implementer, from 2026-10-14 ~11:30 MDT)
 
-**Not done yet (first line, kept current):** PHASE A only — the kickoff plan re-aimed (`bb958d51`), the drafts below
+**Not done yet (first line, kept current):** PHASE A is DONE — the kickoff plan re-aimed (`bb958d51`), the drafts below
 and the handoff draft. NO shared ledger is touched (AppSpec, TEXTKIT2_NOTES, QUESTIONS, the master plan, the archives,
 MobileSoul): every one waits for PHASE C, on latest main. No merge of main yet (PHASE B, after the coordinator's "main
 moved"); no Mac build or test; no claim; no Linear edit (the orchestrator's).
@@ -4551,7 +4551,7 @@ moved"); no Mac build or test; no claim; no Linear edit (the orchestrator's).
 |---|---|---|
 | A1 | the kickoff plan: STATUS banner (VX-246 closed with its fix units; VX-336 carries U5–U8), SPLIT AGAIN note, the kickoff message re-aimed at VX-336, DONE marks | DONE (`bb958d51`) |
 | A2 | ### CLOSEOUT DRAFTS below, exactly as they will land | DONE (this commit) |
-| A3 | the handoff draft `notes/handoffs/vx-246-handoff.md` | next |
+| A3 | the handoff draft `notes/handoffs/vx-246-handoff.md` (what to know first, her checklist, what shipped, how it was checked, the tickets, the other runs, left on disk; every «…» filled at PHASE C) | DONE (this commit) — **PHASE A DONE** |
 | B | merge `origin/main` (after VX-282) as a merge commit; headless package green; a fresh `vx246-final`; THE CLOSEOUT WINDOW's plan (claim `vx246-close`); READY | waits for "main moved" |
 | C | the drafts applied on latest main; the handoff finalized | after the window |
 
