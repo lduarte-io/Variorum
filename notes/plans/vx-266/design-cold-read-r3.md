@@ -8,9 +8,12 @@ same time - the two agent strategy caught real issues"*.
 
 - **Opus at max effort**, as the design owner's subagent: 0 BLOCKER · 5 MAJOR · 11 MINOR · 7 NIT. Its report:
   `design-cold-read-r3-opus.md`.
-- **Fable**, in its own session (`round3fablecastlereviewer`), which she started with the owner's prompt: its safeguards
-  stopped it twice before it reported, and at her word — *"in 20 min if it's not doing anything just move on without
-  it"* — round 3 went on without it. No Fable report was received.
+- **Fable**, in its own session (`round3fablecastlereviewer`), which she started with the owner's prompt: it was
+  attempted twice — once more after she restarted it with a new prompt — and paused each time on its safeguards'
+  `[cyber]` flag (three pauses in all, the last stuck in a retry loop). At her word — *"in 20 min if it's not doing
+  anything just move on without it"* — round 3 went on without it. No Fable report was received. The asymmetry is
+  circumstance, not choice. Fable's eyes on this custody design come back at her last step: a Fable reviewer checks
+  the final documents and decisions before her handoff; rounds 4 and 5 are Opus at max effort, per her process.
 
 **Her rulings during the round** (design §1), verbatim:
 
