@@ -29,6 +29,7 @@ BOXES = {
     "rows":     ("server", 242, 116, "Synced writing"),
 }
 COL_TITLES = {"you": "You", "mac": "This Mac", "apple": "Apple (iCloud)", "server": "Variorum server"}
+LAYOUT = {"boxes": BOXES, "h": H}   # swapped while the animation's frames are drawn
 CHIP_H = 34
 
 # ---- glyphs: letters or icons --------------------------------------------------------------
@@ -80,7 +81,7 @@ def rich(text):
 
 # ---- chips ------------------------------------------------------------------------------
 def slot(box, ci, ri, cols=None):
-    col, by, bh, _ = BOXES[box]
+    col, by, bh, _ = LAYOUT["boxes"][box]
     cx, cw = COLS[col]
     pad, gap = 10, 8
     if cols is None:
@@ -99,7 +100,8 @@ def chip(box, ci, ri, text, sub="", kind="file", lockby=None, reach="", state=""
     x, y, w = slot(box, ci, ri)
     if span > 1:
         w = w * span + 8 * (span - 1)
-    full_reach = (reach + (" you" if state != "dead" else "")).strip()
+    dead = "dead" in state.split()
+    full_reach = (reach + ("" if dead else " you")).strip()
     parts = [f'<g class="chip k-{kind}{(" " + state) if state else ""}" data-reach="{E(full_reach)}">',
              f'<rect class="bg" x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{CHIP_H}" rx="7"/>',
              f'<rect class="bar" x="{x:.1f}" y="{y:.1f}" width="5" height="{CHIP_H}" rx="2"/>']
@@ -111,7 +113,7 @@ def chip(box, ci, ri, text, sub="", kind="file", lockby=None, reach="", state=""
     parts.append(f'<foreignObject x="{fx:.1f}" y="{y:.1f}" width="{x + w - fx - 3:.1f}" height="{CHIP_H}">'
                  f'<div xmlns="http://www.w3.org/1999/xhtml" class="cc"><div class="t">{rich(text)}</div>'
                  f'{sub_html}</div></foreignObject>')
-    if state == "dead":
+    if dead:
         parts.append(f'<line class="strike" x1="{x + 8:.1f}" y1="{y + CHIP_H / 2:.1f}" '
                      f'x2="{x + w - 8:.1f}" y2="{y + CHIP_H / 2:.1f}"/>')
     parts.append("</g>")
@@ -119,17 +121,17 @@ def chip(box, ci, ri, text, sub="", kind="file", lockby=None, reach="", state=""
 
 
 def note(box, ri, text):
-    col, by, _, _ = BOXES[box]
+    col, by, _, _ = LAYOUT["boxes"][box]
     cx, _ = COLS[col]
     return f'<text class="nt" x="{cx + 14:.1f}" y="{by + 26 + ri * (CHIP_H + 6) + 20:.1f}">{E(text)}</text>'
 
 
 def svg_map(title, chips, notes=(), inactive=()):
-    out = [f'<svg class="map" viewBox="0 0 {W} {H}" role="img" aria-label="{E(title)}">']
+    out = [f'<svg class="map" viewBox="0 0 {W} {LAYOUT["h"]}" role="img" aria-label="{E(title)}">']
     for col, (cx, _) in COLS.items():
         dim = " inactive" if col in inactive else ""
         out.append(f'<text class="colt{dim}" x="{cx + 4}" y="24">{E(COL_TITLES[col])}</text>')
-    for bid, (col, by, bh, bt) in BOXES.items():
+    for bid, (col, by, bh, bt) in LAYOUT["boxes"].items():
         cx, cw = COLS[col]
         dim = " inactive" if (col in inactive or bid in inactive) else ""
         out.append(f'<rect class="box{dim}" x="{cx}" y="{by}" width="{cw}" height="{bh}" rx="10"/>'
@@ -361,6 +363,282 @@ def history_svg():
     out.append('<text class="nt" x="40" y="134">never the other way round: an old key opens nothing written after it.</text>')
     out.append("</svg>")
     return "".join(out)
+
+
+# ---- the switch, animated: a synced library going from Standard to Castle ---------------------
+ANIM_H = 410
+ANIM_BOXES = {
+    "you":      ("you", 40, 358, "Your head, paper, finger"),
+    "keychain": ("mac", 40, 114, "This Mac's Keychain"),
+    "folder":   ("mac", 164, 152, "Library folder"),
+    "backups":  ("mac", 326, 72, "Backups folder"),
+    "ikc":      ("apple", 40, 112, "iCloud Keychain"),
+    "idrive":   ("apple", 162, 236, "iCloud Drive"),
+    "vault":    ("server", 40, 192, "The vault (keys, locked)"),
+    "rows":     ("server", 242, 156, "Synced writing"),
+}
+
+
+def switch_chips(s):
+    """The chips at step s (0–11) of a synced library entering Castle. A just-changed chip pulses; a dead one is struck."""
+    fin = s == 11
+    def j(k):
+        return " just" if s == k else ""
+    swapped = s >= 5
+    c = [chip("you", 0, 0, "{P} · passphrase", "in your head", kind="P", state=j(1).strip()),
+         chip("you", 0, 1, "{W} · twelve words", "on paper", kind="W", state=j(1).strip()),
+         chip("you", 0, 2, "{touch} · your finger", "on this Mac", kind="touch")]
+    # This Mac's Keychain: the old silent items on top, the new Touch ID items below
+    if s < 6:
+        c += [chip("keychain", 0, 0, "{L} · silent item", "opens without asking", "L", reach=L_),
+              chip("keychain", 1, 0, "{M}+{C} · silent item", "the sync keys", "M", reach=L_)]
+    elif not fin:
+        c += [chip("keychain", 0, 0, "{L} · silent item", "deleted", "L", state="dead" + j(6)),
+              chip("keychain", 1, 0, "{M}+{C} · silent item", "deleted", "M", state="dead" + j(6))]
+    c.append(chip("keychain", 2, 0, "This Mac's memory", "sealed · decides nothing", "memory"))
+    row = 0 if fin else 1
+    if s >= 2:
+        c.append(chip("keychain", 1, row, "{M′}+{C′} · Touch ID item", "the new sync keys", "touch", state="new" + j(2)))
+    if s >= 3:
+        c.append(chip("keychain", 0, row, "{L′} · Touch ID item", "made at your press", "touch", state="new" + j(3)))
+    # The library folder: the library file, the one key file's locked copies, the record, the plan
+    c.append(chip("folder", 0, 0, "Library file", "encrypted with {L′}" if swapped else "encrypted with {L}",
+                  reach="" if swapped else LA, state=j(5).strip()))
+    if s < 4:
+        c += [chip("folder", 1, 0, "{L} · locked with {A}", "the account's key", "L", lockby="A", reach=LA),
+              chip("folder", 2, 0, "{L} · locked with {P}", "the key file", "L", lockby="P"),
+              chip("folder", 0, 1, "{L} · locked with {W}", "the key file", "L", lockby="W"),
+              chip("folder", 1, 1, "History: older keys", "each locked with {L}", "L", lockby="L", reach=LA),
+              chip("folder", 2, 1, "{M} · locked with {W}", "copied from the vault", "M", lockby="W"),
+              chip("folder", 2, 2, "{L} · locked with {M}", "the key file", "L", lockby="M", reach=LA if s < 2 else L_)]
+    else:
+        if not fin:
+            c.append(chip("folder", 1, 0, "{L} · locked with {A}", "left the key file", "L", lockby="A",
+                          state="dead" + j(4)))
+        c += [chip("folder", 2, 0, "{L′} · locked with {P}", "the new key file", "L", lockby="P", state="new" + j(4)),
+              chip("folder", 0, 1, "{L′} · locked with {W}", "the new key file", "L", lockby="W", state="new" + j(4)),
+              chip("folder", 1, 1, "History: older keys", "each locked with {L′}", "L", lockby="L", state="new" + j(4)),
+              chip("folder", 2, 1, "{M′} · locked with {W}", "copied from the vault", "M", lockby="W", state="new" + j(4)),
+              chip("folder", 2, 2, "{L′} · locked with {M′}", "the new key file", "L", lockby="M", state="new" + j(4))]
+    c.append(chip("folder", 0, 2, "Record: Castle" if swapped else "Record: Standard", "settings live here too",
+                  "memory", state=j(5).strip()))
+    planned = 1 <= s <= 9
+    c.append(chip("folder", 1, 2, "Plan: Use Castle" if planned else "No plan in flight",
+                  "named by the record" if planned else "", "memory", state=j(1).strip()))
+    # The backups folder: the frozen key files' locked copies
+    c.append(chip("backups", 0, 0, "This Mac's backups",
+                  "plus a fresh one under {L′}" if s >= 7 else "each with a frozen key file",
+                  reach=LA if s < 8 else "", state=("new" + j(7)) if s >= 7 else ""))
+    if fin:
+        c.append(chip("backups", 1, 0, "Older backups", "via the history", "L", lockby="L"))
+    elif s < 8:
+        c.append(chip("backups", 1, 0, "{L} · locked with {A}", "in each backup", "L", lockby="A", reach=LA))
+    else:
+        c.append(chip("backups", 1, 0, "{L} · locked with {A}", "its lock key is gone", "L", lockby="A", state="dead" + j(8)))
+    if s < 10:
+        c.append(chip("backups", 2, 0, "{L} · locked with {M}",
+                      "in each backup" if s < 6 else "until devices follow",
+                      "L", lockby="M", reach=LA if s < 2 else (L_ if s < 6 else "")))
+    elif not fin:
+        c.append(chip("backups", 2, 0, "{L} · locked with {M}", "old master gone", "L", lockby="M",
+                      state="dead" + j(10)))
+    # iCloud Keychain and iCloud Drive
+    if s < 8:
+        c.append(chip("ikc", 0, 0, "{A} · the account's", "named by its own id", "A", reach=LA))
+    else:
+        c.append(chip("ikc", 0, 0, "{A} · the account's" if not fin else "No Apple key",
+                      "deleted · no recovery", "A", state="dead" + j(8)))
+    if s < 9:
+        c.append(chip("ikc", 0, 1, "{A} · the old shared key", "older stores only", "A", reach=LA,
+                      state="warn" if s == 8 else ""))
+    elif not fin:
+        c.append(chip("ikc", 0, 1, "{A} · the old shared key", "retired after the checks", "A", state="dead" + j(9)))
+    c.append(chip("idrive", 0, 0, "Backups", "if you picked iCloud" if s < 8 else "open only with you now",
+                  reach=LA if s < 8 else ""))
+    # The server: the vault and the synced writing
+    if s < 2:
+        c += [chip("vault", 0, 0, "{M} · locked with {P}", "", "M", lockby="P"),
+              chip("vault", 0, 1, "{M} · locked with {W}", "", "M", lockby="W"),
+              chip("vault", 0, 2, "{M} · locked with {A}", "the Apple copy", "M", lockby="A", reach=LA),
+              chip("vault", 0, 3, "{C} · locked with {M}", "", "C", lockby="M", reach=LA)]
+    else:
+        c += [chip("vault", 0, 0, "{M′} · locked with {P}", "the new master", "M", lockby="P", state="new" + j(2)),
+              chip("vault", 0, 1, "{M′} · locked with {W}", "", "M", lockby="W", state="new" + j(2)),
+              chip("vault", 0, 2, "No Apple copy", "removed by the rotation", "A", state="dead" + j(2)),
+              chip("vault", 0, 3, "{C′} · locked with {M′}", "the new sync key", "C", lockby="M", state="new" + j(2))]
+    c += [chip("rows", 0, 0, "Your writing", "re-encrypted with {C′}" if s >= 2 else "encrypted with {C}",
+               reach=LA if s < 2 else "", state=j(2).strip()),
+          chip("rows", 0, 1, "Some plain facts", "dates, tag shape, sizes", "plain", reach=S_)]
+    return c
+
+
+Y, N = "y", "n"
+SWITCH_CAPS = [
+    dict(t="Before: Standard, synced",
+         d="Everything opens without asking — for you, for anyone who can sign in to this Mac, and for your Apple "
+           "account. Each padlock wears the colour of the key that opens it. The old shared key at the right exists "
+           "only on stores from before this change.",
+         who=("everything", (Y, "everything — through the silent items, and the Apple key Keychain Access reveals"),
+              (Y, "everything — the Apple key opens the vault's master and every key file")),
+         locks=["{L} locked with {A}, {P}, {W} and {M} — in the key file, and in every backup's",
+                "{M} locked with {P}, {W} and {A} in the vault; {C} locked with {M}"]),
+    dict(t="You press Use Castle",
+         d="You type your passphrase and your twelve words: they'll lock the new keys. The screen says plainly: lose "
+           "them and every Touch ID item, and this library and its older copies are gone — Export a plain copy first "
+           "is offered. On a store from before this change, the old shared key's checks run here, and the sheet "
+           "lists anything they'd stop opening.",
+         who=("everything", (Y, "everything — nothing has changed yet"), (Y, "everything — nothing has changed yet")),
+         locks=["nothing yet — a plan is written beside the library, sealed and named by the record"]),
+    dict(t="New sync keys, and a vault with no Apple copy",
+         d="A new master {M′} and sync key {C′} are made and kept in a Touch ID item made at your press. Your writing "
+           "on the server is re-encrypted with {C′}, and the vault is rewritten: {M′} locked with your passphrase and "
+           "with your words — and no Apple copy.",
+         who=("everything", (Y, "the library and every backup — the silent items and the Apple key are still here"),
+              (Y, "the library and every backup, through the key files' Apple locks — but no longer the server's copy")),
+         locks=["new: {M′} locked with {P} · {M′} locked with {W} · {C′} locked with {M′}",
+                "gone: {M} locked with {A} — the vault's Apple copy"]),
+    dict(t="A new library key",
+         d="A new library key {L′} goes into its own Touch ID item (or nowhere, with Always ask). From now until the "
+           "swap, backups and other copies pause, so none can carry a half-made change.",
+         who=("everything", (Y, "the library and every backup — the silent items and the Apple key are still here"),
+              (Y, "the library and every backup, through the key files' Apple locks")),
+         locks=["new: {L′} in a Touch ID item — only your finger opens it"]),
+    dict(t="The new key file",
+         d="The one key file is rewritten: {L′} locked with your passphrase, your words and the new master; the old "
+           "key {L} — and every older one — locked with {L′} in the history; the master's words copy refreshed for "
+           "{M′}. No Apple lock. From here, a crash at any point still leaves a road in.",
+         who=("everything", (Y, "the library and every backup — the library file is still under {L}"),
+              (Y, "the library and every backup, through every backup's Apple lock on {L}")),
+         locks=["new: {L′} locked with {P} · with {W} · with {M′}",
+                "new: {L} and every older key, locked with {L′} — the history",
+                "new: {M′} locked with {W} — the master's words copy",
+                "dropped from the live key file: {L} locked with {A} — every backup's key file still has it"]),
+    dict(t="The swap — the commit point",
+         d="The record, now saying Castle, is written into the staged copy; then the library file is swapped to "
+           "{L′}. From this moment the library is in Castle. Copies resume, each carrying a key and a record that "
+           "match.",
+         who=("everything", (Y, "older backups only — the silent item's {L} opens them, but not the library"),
+              (Y, "older backups only, through their Apple locks")),
+         locks=["the library file: now encrypted with {L′}", "the record: Castle"]),
+    dict(t="The old key's copies go",
+         d="The silent items for {L} and the old sync keys are deleted — with any older per-library items, escrow "
+           "items and old key files, each only once the history holds its key.",
+         who=("everything", (Y, "older backups only — through the Apple key Keychain Access reveals"),
+              (Y, "older backups only, through their Apple locks")),
+         locks=["gone: {L} in a silent item · {M}+{C} in a silent item"]),
+    dict(t="A fresh backup",
+         d="A new backup under {L′}. Its frozen key file carries the history, so every older backup opens through "
+           "it, with nothing more typed.",
+         who=("everything", (Y, "older backups only — through the Apple key Keychain Access reveals"),
+              (Y, "older backups only, through their Apple locks")),
+         locks=["new: a backup whose key file locks {L′} with {P}, {W} and {M′}, with the history"]),
+    dict(t="The Apple keys go",
+         d="The account's Apple key — and any other Apple key this library alone used — is deleted from iCloud "
+           "Keychain on every device, with no recovery, and its id recorded, so a copy that comes back is deleted on "
+           "sight. Every backup's Apple lock is now dead: the key that opened it no longer exists.",
+         who=("everything", (N, "nothing — no silent item, no Apple key, and a Touch ID item can't be read"),
+              (N, "nothing — no Apple key and no Apple copy (a store from before this change: not until step 9)")),
+         locks=["gone: {A}, the account's Apple key", "dead: {L} locked with {A}, in every backup's key file"]),
+    dict(t="Stores from before this change: the old shared key goes too",
+         d="Last, after its checks and the sheet you saw at step 1, the old shared Apple key is retired, and every "
+           "older copy's lock under it is dead too. A store made after this change never had this key.",
+         who=("everything", (N, "nothing"), (N, "nothing")),
+         locks=["gone: the old shared Apple key", "dead: every older copy's lock under it"]),
+    dict(t="Your other devices follow",
+         d="Each of your other devices asks for your passphrase or words once, gets {M′} and {C′}, re-keys its own "
+           "library — its old key joins its history — and deletes its Apple keys and silent items. The old master "
+           "now opens nothing anywhere.",
+         who=("everything, on every device", (N, "nothing, on any device that has followed"), (N, "nothing")),
+         locks=["gone: the silent items on your other devices",
+                "dead: {L} locked with {M} in older backups — the old master is gone everywhere"]),
+    dict(t="After: Castle",
+         d="Only you. Touch ID, your passphrase or your words open {L′}, and through its history every older backup. "
+           "Lose all three and it's gone — said at the door, with a plain copy offered first. Leaving Castle later "
+           "would give your Apple account a key to all of it again, and the leave screen says so.",
+         who=("everything — Touch ID, your passphrase or your words", (N, "nothing"), (N, "nothing")),
+         locks=["{L′} locked with {P}, {W} and {M′}; the history locked with {L′}",
+                "{M′} locked with {P} and {W}; {C′} locked with {M′}",
+                "Touch ID items that only your finger opens"]),
+]
+
+
+def anim_section():
+    LAYOUT["boxes"], LAYOUT["h"] = ANIM_BOXES, ANIM_H
+    try:
+        svgs = [svg_map(f"Entering Castle, step {i}: {cap['t']}", switch_chips(i)) for i, cap in enumerate(SWITCH_CAPS)]
+    finally:
+        LAYOUT["boxes"], LAYOUT["h"] = BOXES, H
+    frames = []
+    for i, (svg, cap) in enumerate(zip(svgs, SWITCH_CAPS)):
+        you, login, apple = cap["who"]
+        who = (f'<b>You</b><span>{rich(you)}</span>'
+               f'<b>This Mac’s login password</b><span class="{login[0]}">{rich(login[1])}</span>'
+               f'<b>Your Apple account</b><span class="{apple[0]}">{rich(apple[1])}</span>')
+        locks = "".join(f"<li>{rich(x)}</li>" for x in cap["locks"])
+        frames.append(f'<div class="frame" data-step="{i}"><figure>{svg}</figure>'
+                      f'<div class="cap"><h4>{i}. {E(cap["t"])}</h4><p>{rich(cap["d"])}</p>'
+                      f'<div class="who">{who}</div><div class="lockh">Locked copies in this step</div>'
+                      f'<ul class="locks">{locks}</ul></div></div>')
+    dots = "".join(f'<button type="button" data-go="{i}" aria-label="Step {i}">{i}</button>' for i in range(len(SWITCH_CAPS)))
+    return ('<p class="lede">A synced library going from Standard to Castle, one step at a time. Each padlock wears the '
+            'colour of the key that opens it; a struck chip opens nothing any more; a pulsing one just changed. The '
+            'buttons at the top still light up what each person can open, at whichever step is showing.</p>'
+            '<div class="anim" id="switch-anim" tabindex="0" aria-label="Entering Castle, step by step">'
+            '<div class="anim-controls"><button type="button" data-anim="prev">Back</button>'
+            '<button type="button" data-anim="play">Play</button><button type="button" data-anim="next">Next</button>'
+            f'<span class="dots">{dots}</span></div>{"".join(frames)}</div>')
+
+
+ANIM_CSS = r"""
+.anim{margin:12px 0 6px;border:1px solid var(--rule);border-radius:12px;padding:12px 12px 4px}
+.anim:focus{outline:2px solid var(--accent);outline-offset:2px}
+.anim-controls{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:0 0 6px}
+.anim-controls button{font:inherit;font-size:13.5px;border:1px solid var(--rule);background:var(--box);color:var(--fg);
+border-radius:999px;padding:5px 12px;cursor:pointer}
+.anim-controls .dots{display:flex;flex-wrap:wrap;gap:4px}
+.anim-controls .dots button{padding:2px 9px;font-size:12.5px}
+.anim-controls .dots button[aria-current="step"]{background:var(--hlbg);border-color:var(--hl);font-weight:650}
+.anim .frame{display:none}
+.anim .frame.on{display:block;animation:fadein .45s ease-out}
+@keyframes fadein{from{opacity:.2}to{opacity:1}}
+.map .chip.new .bg{stroke:var(--accent);stroke-width:2.4}
+.map .chip.just .bg{stroke-width:3.2}
+.map .chip.dead.just .bg{stroke:var(--warn)}
+.anim .frame.on .chip.just{animation:pulse 1.6s ease-out 1}
+@keyframes pulse{0%{opacity:.15}55%{opacity:1}100%{opacity:1}}
+.cap h4{margin:8px 0 4px;font-size:16px}
+.cap p{margin:4px 0 8px}
+.cap .who{display:grid;grid-template-columns:max-content 1fr;gap:3px 12px;font-size:14px;margin:6px 0 8px}
+.cap .who span.y:before{content:"can open: "}
+.cap .who span.n:before{content:"can't open: "}
+.cap .who span.y{color:var(--warn);font-weight:600}.cap .who span.n{color:var(--accent);font-weight:600}
+.cap .lockh{font-size:13px;color:var(--muted);margin-top:6px}
+.cap ul.locks{margin:4px 0 6px;padding-left:20px;font-size:14px}
+@media (max-width:600px){.cap .who{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){.anim .frame.on,.anim .frame.on .chip.just{animation:none}}
+"""
+
+ANIM_JS = r"""
+(function(){
+  var root=document.getElementById('switch-anim'); if(!root) return;
+  var frames=root.querySelectorAll('.frame'), dots=root.querySelectorAll('[data-go]');
+  var play=root.querySelector('[data-anim="play"]'), i=0, timer=null;
+  function show(n){ i=(n+frames.length)%frames.length;
+    frames.forEach(function(f,k){ f.classList.toggle('on',k===i); });
+    dots.forEach(function(d,k){ d.setAttribute('aria-current',k===i?'step':'false'); }); }
+  function stop(){ if(timer){ clearInterval(timer); timer=null; } play.textContent='Play'; }
+  function start(){ stop(); timer=setInterval(function(){ if(i===frames.length-1){ stop(); return; } show(i+1); },5200);
+    play.textContent='Pause'; }
+  root.querySelector('[data-anim="prev"]').addEventListener('click',function(){ stop(); show(i-1); });
+  root.querySelector('[data-anim="next"]').addEventListener('click',function(){ stop(); show(i+1); });
+  play.addEventListener('click',function(){ if(timer){ stop(); } else { if(i===frames.length-1){ show(0); } start(); } });
+  dots.forEach(function(d){ d.addEventListener('click',function(){ stop(); show(+d.getAttribute('data-go')); }); });
+  root.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'){ stop(); show(i+1); e.preventDefault(); }
+    if(e.key==='ArrowLeft'){ stop(); show(i-1); e.preventDefault(); } });
+  var m=/step=(\d+)/.exec(location.hash||''); show(m?+m[1]:0);
+})();
+"""
 
 
 # ---- shared page parts ---------------------------------------------------------------------
@@ -656,8 +934,8 @@ def checklist_table():
 def html_page(title, body):
     return (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
             f'<meta name="viewport" content="width=device-width, initial-scale=1">'
-            f'<title>{E(title)}</title><style>{CSS}\n{actor_css()}</style></head>'
-            f'<body data-actor="you" data-glyphs="letters">{icon_defs()}{body}<script>{JS}</script></body></html>')
+            f'<title>{E(title)}</title><style>{CSS}\n{ANIM_CSS}\n{actor_css()}</style></head>'
+            f'<body data-actor="you" data-glyphs="letters">{icon_defs()}{body}<script>{JS}\n{ANIM_JS}</script></body></html>')
 
 
 def full_page():
@@ -689,6 +967,7 @@ dashed chips are keys that don't exist or no longer open anything. The buttons l
 <h3 id="history">The key history</h3><figure>{history_svg()}</figure>
 <h2 id="moves">Moving between them</h2>
 <h3>Entering Castle</h3>{steps(ENTER)}
+<h3 id="watch">Watch it happen</h3>{anim_section()}
 <h3>Leaving Castle</h3>{steps(LEAVE)}
 <h3>Another device follows</h3>{steps(FOLLOW)}
 <h3>Opening an older backup</h3>
@@ -733,6 +1012,7 @@ apply, and below.</div>
 <h3 id="history">The key history (both modes)</h3><figure>{history_svg()}</figure>
 <h2 id="moves">Every move</h2>
 <h3>Entering Castle</h3>{steps(ENTER)}
+<h3 id="watch">Watch it happen</h3>{anim_section()}
 <h3>Leaving Castle</h3>{steps(LEAVE)}
 <h3>Replace All Keys</h3>{steps(REPLACE)}
 <h3>Another device follows</h3>{steps(FOLLOW)}

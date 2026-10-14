@@ -780,7 +780,8 @@ on a throwaway scope and through the Debug app on the dev store.
 - Castle and Standard, local and synced;
 - every key's home and locks;
 - the history;
-- every act's steps;
+- every act's steps, with entering Castle animated step by step (a synced library: every locked copy, what each step
+  makes or kills, and who can open what after it);
 - who can open what.
 
 The final phase's closeout carries **the map table**: one row per map element, each naming the test, drill or walk
