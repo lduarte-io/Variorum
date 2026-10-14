@@ -338,6 +338,41 @@ struct MCPPaneTabsTests {
         }
     }
 
+    /// **VX-281 ladder R1-3 (RED ON OLD):** a choice made while a copy is in
+    /// flight. The copy sets the menu to its client, then waits on the key's
+    /// mint (a store write — the writer may be busy with a sync round, an
+    /// import, an MCP batch); she picks another client in that window. The
+    /// copy that lands must never speak the OLD client's receipt under the NEW
+    /// client's menu (VX-232's invariant: the receipt names the shown client),
+    /// and the ✓ — which asks the same question of the receipt — never flashes
+    /// beside the new client's text. Her press still completes: the copied
+    /// client's setup is on the clipboard, exactly as a copy and then a choice.
+    @Test func aChoiceMadeWhileACopyIsInFlightNeverLandsTheOldClientsReceipt() async throws {
+        try await withPaneWorld { session, _ in
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-vx281-inflight-\(UUID().uuidString)"))
+            defer { pasteboard.releaseGlobally() }
+
+            let copy = Task { await door.copySetupCommand(for: .anyClient, to: pasteboard) }
+            // The copy's first line ran (the menu on its client); it now waits
+            // on the mint — the main actor is ours until we await.
+            for _ in 0..<200 where door.setupClient != .anyClient { await Task.yield() }
+            #expect(door.setupClient == .anyClient, "non-vacuity: the copy is under way")
+            door.chooseSetupClient(.claudeCode)  // her press, mid-copy
+            await copy.value
+
+            #expect(door.setupClient == .claudeCode, "her later choice stands")
+            #expect(door.note == nil || door.note?.text == door.setupClient.copiedReceipt,
+                    "the receipt names the shown client — got “\(door.note?.text ?? "")” under \(door.setupClient.label)")
+            #expect(door.note != MCPDoor.Note(text: MCPSetupClient.anyClient.copiedReceipt, place: .connect),
+                    "the ✓'s question (the copied client's receipt landed) answers no — it never flashes beside Claude Code")
+            #expect(pasteboard.string(forType: .string)?.contains("\"mcpServers\"") == true,
+                    "her press completed: the copied client's setup is on the clipboard")
+        }
+    }
+
     // MARK: - The geometry oracle (her ruling's shape — a design row)
 
     /// Inside VX-214's Settings content (748×520), a FRESH pane — no client
