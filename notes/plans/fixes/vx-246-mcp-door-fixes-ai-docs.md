@@ -2689,7 +2689,7 @@ cleared call in `InlineEditorSurface.Coordinator.remeasure`; the workspace — `
 | 5 | the FIXED product `DerivedData/vx246-u4b` + the headless finals (core · MCP · workbook) | NOT-STARTED |
 | 6 | THE STAGE WINDOW plan (claim `vx246-u4b`) → READY | NOT-STARTED |
 
-**No revert is in flight.**
+**A REVERT IS IN FLIGHT (from `7209cf2d`, the committed pins tree):** U4's `refreshBadges` hunk (`91a56a7a`, `EditorViewModel.swift` only) is reverse-applied in the WORKING TREE to build `DerivedData/vx246-u4b-red-pre-u4`. The restore is `git checkout -- App/Variorum/Variorum/Features/Editor/EditorViewModel.swift` (safe: the file is committed and this unit has not touched it yet), verified by an empty `git diff`. If this line still stands, the working tree may be mid-revert: run that checkout first.
 
 ### The trace, re-run (inputs → wrong output) — the runner's trace CONFIRMED in shape, CORRECTED in two places
 
