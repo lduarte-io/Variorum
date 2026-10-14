@@ -236,9 +236,23 @@ nonisolated enum MarkdownFace {
     @discardableResult
     static func settleCaret(
         _ ledger: inout MarkdownCaretRescue.Ledger, selection: NSRange?,
-        in storage: NSMutableAttributedString,
+        in storage: NSTextStorage,
         base: MarkdownFaceFont, palette: Palette
     ) -> Bool {
+        // NEVER WHILE AN EDIT IS PENDING (the U2 stage window's W2b finding,
+        // traced from the crash report): UIKit's keyboard insert
+        // (`_insertText:fromKeyboard:` → `NSTextStorage coordinateEditing:`)
+        // can report the selection INSIDE its transaction. A restyle there
+        // joins the character edit in ONE `processEditing` report whose range
+        // starts at the line's first marker, the gate's armed edit no longer
+        // binds, the fallback verdict crosses the separator, and the route
+        // refuses — the surface desyncs. Skipping consumes NOTHING: the
+        // ledger is untouched (this guard sits before `settle`), the edit's
+        // own `processEditing` notes it, and the surface's post-edit report
+        // (`textViewDidChange` on the phone, `textDidChange` on a pane, the
+        // selection change AppKit posts after `processEditing` on the Mac)
+        // settles with the edit mark forcing the re-honour.
+        guard storage.editedMask.isEmpty else { return false }
         guard let plan = ledger.settle(selection: selection, in: storage.string as NSString)
         else { return false }
         // One editing session for both lines: the storage reports ONE

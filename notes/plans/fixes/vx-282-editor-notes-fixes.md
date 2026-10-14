@@ -112,7 +112,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-290 — the empty-block backspace's caret landing | **DONE** — fix `385aa1fc`; W1 red on old + W2 the Mac batch green `be826a5d`; W3 the walk, every row held `a7a63949`. Stage released 22:01:26 and 23:47:00. One observation for the orchestrator to ticket (the bar's word counter, not this unit's road). No revert in flight. |
-| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | IN-PROGRESS — **window run 22:59–23:39, claim `vx282-u2` HELD for U1's chained handover.** W1 red on old as designed (Mac 23/3, 9 issues; phone 2/1, 3 issues — all designed). **W2 Mac batch GREEN 190 tests / 26 suites.** **W3 walk HOLDS (Study): A italic at every keystroke incl. right after each space, B plain when the caret leaves / italic when it returns, C arithmetic plain.** **W2b phone FINDING: `leavingATrailingSpace…` hits the DEBUG desync fatal on the fixed product only — UIKit's `coordinateEditing` insert reports the selection mid-transaction, the settle's attribute write joins the edit's report, the verdict refuses.** NEXT: the one-line fix (settle never writes while `storage.editedMask` is non-empty), headless builds, then a phone re-run (W2b) + the Mac g1 re-run in a later window. Second voice not walked. No revert in flight. |
+| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **READY FOR STAGE — u2b: phone W2b suites (-collect-test-diagnostics never) + Mac g1, ≈12 min.** The W2b fix built: `MarkdownFace.settleCaret` never writes while `storage.editedMask` is non-empty (before the ledger, so a skip consumes nothing); the trace of why a skipped settle is never lost is recorded; the red pin is `MobileMarkdownCaretTests.leavingATrailingSpaceBehindUnstylesTheSpanHonestly` (red on the pre-guard product by its crash). Rebuilt headless into the EXISTING `vx282-u2` + `vx282-u2-ios` only. Earlier: W1 red on old as designed, W2 Mac 190/26 green, W3 walk holds (Study). No claim held; no revert in flight. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | NOT-STARTED |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
@@ -647,6 +647,69 @@ and no booted simulator at the start). Logs: `notes/plans/vx282-screens/u2/logs/
 - **Posture left:** our instance quit by identity (`pgrep` → 0 instances); the dev store as found — Standard (custody
   never touched), unlocked, voice Study (unchanged), appearance "system" (unchanged); 0 simulators booted; **the claim
   `vx282-u2` still HELD** (~20 min left at 23:39) for U1's chained handover.
+
+**THE W2b FIX — the settle never writes while an edit is pending (built after the window, at the coordinator's
+word; no stage needed).**
+- **The guard:** `MarkdownFace.settleCaret` (`Shared/MarkdownFace/MarkdownFaceCore.swift`) opens with
+  `guard storage.editedMask.isEmpty else { return false }`, BEFORE the ledger is consulted — so a skipped settle
+  consumes nothing (the ledger's claim and its edit mark are untouched). The parameter narrows from
+  `NSMutableAttributedString` to `NSTextStorage` (`editedMask` is a text-storage property; every live caller already
+  passes one; the Mac forward in `Theme/MarkdownStyling.swift` follows). One line of behaviour, in the shared face, so
+  all three live surfaces carry it.
+- **THE RED PIN:** `MobileMarkdownCaretTests.leavingATrailingSpaceBehindUnstylesTheSpanHonestly` — **RED on the
+  pre-guard product** (`657bb57c`'s, the W2b crash: the DEBUG desync fatal through `coordinateEditing:` →
+  `storageDidEdit`'s `.refuse` arm), expected GREEN on the guarded product (PENDING the u2b window). Its sibling
+  `herFlow…` (single-character inserts) was already green and must stay so.
+- **Why a skipped settle is never lost — traced road by road:**
+  - **The phone's keyboard insert (the crash road):** the mid-transaction selection report is skipped →
+    `endEditing` → `processEditing` → `storageDidEdit` notes the edit (`noteEdit`: claim shifted, edit mark set) and
+    runs its caret-blind restyle → UIKit then reports `textViewDidChange` — its contract is "called in response to
+    user-initiated changes", which the keyboard's `insertText` is — and that report, wired to the settle since
+    `657bb57c`, runs after the transaction has closed: `editedMask` is empty, the edit mark forces the settle, and the
+    landed caret is honoured. **Evidence from W2b:** `herFlow…`'s space keystroke was honoured before `insertText`
+    returned (the pin read italic on the very next line), so a report AFTER UIKit's transaction exists on this road;
+    the multi-character insert runs through the same `_insertText:fromKeyboard:`. That it is `textViewDidChange` (and
+    not a second selection report) is inferred, not measured, and it does not matter: the u2b re-run's `leaving…` pin
+    asserts the italic on the line right after `insertText("hello ")`, so a lost settle would read red there.
+  - **The phone's programmatic roads:** the bar's formatting acts apply each edit through UIKit's input replace and
+    THEN set `textView.selectedRange` (`MobileMarkdownActs.apply`, `:85-106`); the structural roads place the caret
+    after their writes; the model's own writes (`EditorSurfaceStorage.replace`, the voice re-face session) never set
+    the selection inside their `beginEditing` sessions. Every final placement is a report after the edit closed.
+  - **The Mac Write editor and the inline editor:** the settle runs only from `textViewDidChangeSelection`, which
+    AppKit posts after `processEditing` completes (measured: `editedMask == 0`, for typing, raw inserts and full
+    replacements), so the guard never trips there; ⌘B/⌘I (`MarkdownActs.apply`, `:182-201`) place the selection only
+    after every edit. Behaviour on the Mac is unchanged (the W2 batch's 190 stand on that).
+  - **A Mac live pane:** the settle runs at `textDidChange` (posted after `processEditing` and after the selection
+    change, measured) and on pure caret moves (no edit in flight) — the guard never trips.
+  - **A road where it IS lost:** none found for an input-road edit. The recorded edge stands unchanged and does not
+    grow: a programmatic write followed by NO caret report (a voice/palette re-face; a raw write on the caret's line)
+    re-reads caret-blind until her next keystroke or caret move — and a skip needs a pending edit, whose end the input
+    roads always follow with a report.
+- **Headless:** `build-for-testing` into the EXISTING trees only — `DerivedData/vx282-u2` (Mac) and
+  `DerivedData/vx282-u2-ios` (phone): **TEST BUILD SUCCEEDED** ×2; no new tree, the `-old` trees untouched. No core
+  file changed (no `swift test` owed).
+
+**THE u2b WINDOW PLAN (≈12 min; on the orchestrator's claim line; `guard.sh --author` before each leg). From
+`App/Variorum/`; logs to `notes/plans/vx282-screens/u2/logs/`. The coordinator erases the iOS simulators before it —
+the run is a first boot and a fresh install (budgeted).**
+1. `xcrun simctl list devices available | grep "iPhone 17 Pro"` — confirm the device still exists after the erase
+   (if the erase deleted devices rather than wiping them, take any iPhone on iOS 26.2 or 27.0 from that list; the
+   product is a generic-simulator build, deployment target iOS 26).
+2. **The phone (W2b re-run):** `xcodebuild test-without-building -scheme VariorumMobile -destination
+   'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' -derivedDataPath DerivedData/vx282-u2-ios
+   -collect-test-diagnostics never` with `-only-testing:VariorumMobileTests/` ×10 — `MobileMarkdownCaretTests`
+   `MobileMarkdownRenderTests` `MobileMarkdownReturnTests` `MobileMarkdownActsTests` `MobileCheckboxTapTests`
+   `MobileEditorMaterializationTests` `MobileEditorRoutingTests` `MobileEditRoutingBindingTests`
+   `MobileIdentityAuditSeparatorTests` `MobileEditRoutingCrashTests` → `u2b-w2b-phone.log`. EXPECTED: all ten suites
+   green in ONE launch (no "Restarting after unexpected exit"; W2b's "33 tests" line counted only the launch after
+   its crash, so read the ✔/✘ lines per suite rather than compare totals).
+3. **The Mac g1 re-run (the shared settle changed):** `xcodebuild test-without-building -scheme Variorum -destination
+   'platform=macOS' -derivedDataPath DerivedData/vx282-u2` with `-only-testing:VariorumTests/` ×13 —
+   `MarkdownCaretFaceTests` `PaneMarkdownCaretFaceTests` `MarkdownFaceTests` `ProgrammaticReplaceFaceTests`
+   `MarkdownActsTests` `FormattingSurfacesTests` `MarkdownPaletteWritersTests` `IdentityProjectionAuditWalkTests`
+   `MacIdentityAuditWiringTests` `EditorSessionTests` `ReviewRoundFixTests` `CommitFlowTests` `FanFlowTests` →
+   `u2b-w2-g1.log`. EXPECTED: 106 tests / 13 suites green, as at W2.
+4. `xcrun simctl shutdown all`; confirm 0 booted; release the claim (unless told to hold it).
 
 ## Ladder
 

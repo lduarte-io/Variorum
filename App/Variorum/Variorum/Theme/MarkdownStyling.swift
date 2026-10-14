@@ -164,7 +164,7 @@ nonisolated enum MarkdownStyling {
     @discardableResult
     static func settleCaret(
         _ ledger: inout MarkdownCaretRescue.Ledger, selection: NSRange?,
-        in storage: NSMutableAttributedString
+        in storage: NSTextStorage
     ) -> Bool {
         MarkdownFace.settleCaret(
             &ledger, selection: selection, in: storage,
