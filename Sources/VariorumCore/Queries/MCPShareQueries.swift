@@ -311,7 +311,7 @@ extension Queries {
             case .note(let facts): MCPGrantRule.reach(grants: grants, openBook: openBook, target: .note(facts))
             case .book(let facts): MCPGrantRule.reach(grants: grants, openBook: openBook, target: .book(facts))
             case .gathering(let facts): MCPGrantRule.reach(grants: grants, openBook: openBook, gathering: facts)
-            case .wing(let id): Self.wingReach(grants: grants, openBook: openBook, wingID: id)
+            case .wing(let id): MCPGrantRule.reach(grants: grants, openBook: openBook, wing: id)
             }
         }
 
@@ -325,28 +325,6 @@ extension Queries {
             case .gathering: false
             case .wing(let id): grant.scopeKind == .wing && grant.scopeID == id
             }
-        }
-
-        /// **A WING's reach, read OFF `MCPGrantRule.decideWing`** (VX-268) —
-        /// the twin of `MCPGrantRule.reach(…target:)`, which is read off
-        /// `decide` the same way: from the top rung down, the first rung
-        /// `decideWing` allows (a non-consuming probe — it spends nothing),
-        /// its `.allow(grantID)` naming the grant (nil = the open book). Never
-        /// a parallel rule: what a wing row says is what `list_notes` /
-        /// `create_note` / `create_book` would be allowed on that wing.
-        static func wingReach(
-            grants: [MCPGrantRule.Grant], openBook: Bool, wingID: String
-        ) -> MCPGrantRule.Reach? {
-            for rung in MCPGrantRule.Rung.allCases.reversed() {
-                guard case .allow(let grantID, _) = MCPGrantRule.decideWing(
-                    client: .approved, grants: grants, openBook: openBook, wingID: wingID,
-                    rung: rung, consumes: false)
-                else { continue }
-                guard let grantID else { return MCPGrantRule.Reach(rung: rung, standing: .openBook) }
-                guard let grant = grants.first(where: { $0.id == grantID }) else { continue }
-                return MCPGrantRule.Reach(rung: rung, standing: .grant(grant))
-            }
-            return nil
         }
     }
 
