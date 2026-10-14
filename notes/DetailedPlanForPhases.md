@@ -13,7 +13,6 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-246 — Run: MCP door fixes & AI docs** (21 members, all pre-launch; the runway `notes/plans/vx-33-release-runway.md` §3) | VX-246 · `vx-246-mcp-door-fixes-ai-docs` | `~/dev/variorum-vx-246` · the Pro | KICKOFF 2026-10-13 (orchestrator session vx-246 — named variorum-84 at kickoff — Opus 5.5 at max): plan `notes/plans/mcp-pane-and-docs-kickoff.md`; record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`; zero `Sync/`/custody; may reach the editor seam (VX-275, VX-230) — Fable cold review; the docs unit (VX-197) waits for VX-281's merge |
-| **VX-282 — Run: Editor & notes fixes** (members VX-290 · VX-296 · VX-154 · VX-193 · VX-112 · VX-257 · VX-229 · VX-183 · VX-182, all pre-launch; the runway `notes/plans/vx-33-release-runway.md` §3) | VX-282 · `vx-282-editor-notes-fixes` | `~/dev/variorum-vx-282` · the Pro | KICKOFF 2026-10-13 (orchestrator session vx-282, Opus 5.5 at max): record `notes/plans/fixes/vx-282-editor-notes-fixes.md`; her cast word: Opus implements at xhigh, Opus cold-reviews at max, ONE Fable cold review over the whole diff at the run's end (the editor seam: VX-290 `EditorTextView` + `BlockRangeIndex`, VX-296 the live-storage restyle in the shared markdown face); zero `Sync/`/custody (confirmed at preflight) |
 
 ### Latest closeout
 
