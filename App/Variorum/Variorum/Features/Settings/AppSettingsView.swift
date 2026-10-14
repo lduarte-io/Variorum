@@ -131,6 +131,8 @@ struct AppSettingsView: View {
         .shortcuts: [],
         .tags: ["tagManager"],
         // 13n-c U4: Waiting renders while an ask waits (the catalog row says so).
+        // VX-281 U1: the open book renders in the Shared with AI tab, and a
+        // search finding it opens the pane on that tab (`MCPPaneTab.holding`).
         .mcp: ["mcpServer", "mcpWaiting", "mcpOpenBook"],
         .protection: ["protection"],
         .dataSafety: ["backups"],
@@ -330,6 +332,11 @@ struct AppSettingsView: View {
                     tokens: tokens, query: query,
                     onOpen: { finding in
                         query = ""
+                        // VX-281 U1: the MCP pane is in tabs — a finding whose
+                        // row lives behind one (the open book) opens it there.
+                        if finding.pane == .mcp, let tab = MCPPaneTab.holding(findingLead: finding.lead) {
+                            mcp?.paneTab = tab
+                        }
                         pane = finding.pane
                     })
             }
