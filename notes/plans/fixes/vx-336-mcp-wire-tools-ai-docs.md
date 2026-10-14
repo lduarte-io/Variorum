@@ -781,3 +781,276 @@ never rendered); the Activity line for a refused or landed `save_lens` uses the 
   run, and the U6 BRIEF's item 4 with its walk leg. So is CLAUDE.md's new triage rule for filed tickets (Hard rules).
 - **Next:** U5b (a fresh `opus-implementer` at xhigh from the U5b BRIEF), and REQUEST `vx336-u5` to the coordinator.
 
+
+## U5b UNIT RECORD — the block-writing pair: VX-252 · VX-255, plus U5's shared window (opus-implementer, from 2026-10-14 ~14:15 MDT)
+
+**What this unit has NOT done (said first; updated at every piece):** (1) **no code yet** — this commit is the record,
+the traces and the design, and it STOPS at the design forks below for the orchestrator's ruling (the brief: a fork it
+doesn't settle is proposed, committed and ruled before that half is built); (2) no stage window, no Mac build, no live
+round (THE STAGE WINDOW is written at READY, after the build); (3) the guide and `MCPSession.instructions` untouched
+(U8's — the doc-truth sweep below finds nothing false); (4) no `notes/QUESTIONS.md` entry and no canon edit (the
+merge's). Everything below "The design" is a plan, not a claim.
+
+**Read in full before code (never delegated):** CLAUDE.md and its loaded canon (AppSpec §9's newBlock, merge, import,
+the standing conventions and structural undo; §12's THE MCP DOOR summary); this run record — header, Her kickoff
+answers, THE UNITS, Hard rules, LIVE STATUS, Stage traffic log, Cross-run coordination, Her rulings during the run,
+the U5a/U5b/U6/U7 BRIEFs, the U5a UNIT RECORD whole and THE ORCHESTRATOR ON U5a's HAND-BACK; the plan
+`notes/plans/mcp-pane-and-docs-kickoff.md` whole; `notes/MCPSpec.md` whole; VX-246's record — Hard rules, THE RUN AS IT
+MERGES, the U5 BRIEF there, the U2 UNIT RECORD (the quiet-half rule, THE SWEEP TABLE — rows 2–13 `registerStructuralEntry`,
+25–34 `registerMintedContainerEntry`, 36 imported paste blocks, 82 `add_note_to_book`), the U3 UNIT RECORD (the act
+list, `flushesHerEditorFirst`, the editor's delivery road) and the U1b STAGE RUN whole (the live round's worked form);
+`notes/SessionResiliencyProtocol.md` whole; `notes/mcp-agent-notes-2026-10-13-bilingual-book.md` whole (items 1, 4, 10);
+the two tickets' bodies (VX-252, VX-255 — read-only, matching the brief's quotes). Code read: `MCPWriteTools.swift` whole
+(`parse`, `noteBlocks`, `place`, `parseImport`, `perform`'s `createNote`/`importNote`/`importBook`/`addNoteToBook` arms,
+`onNote`, `noteIntoBook`, `into`, `inWing`, `land`, `noteAnswer`, `aiLabel`); `+Batches` whole (the guard pattern for a
+new act, `placedBlocksSQL`, `batchCap`, `itemized`); `+Edit` whole (`move_block`'s anchors and `at`, `guardEdit` /
+`guardNotes` / `guardBook`); `MCPWriteSupport` whole (`MCPWriteReceipt`, `MCPHostHooks`, `MCPWireRefusalCopy`);
+`MCPToolCatalog` (the rungs' lists; `create_note`, `import_document`, `add_note_to_book`, `create_section`, `move_block`,
+`add_takes` declarations); `MCPGrantAuthority`'s `MCPRefusalCopy` / `MCPAsking`; `MCPNoteStructure.read` (read_note's
+with-ids record — the vocabulary an answer should share); `MCPSession.instructions`; core `Operations+MCPWrites` whole
+(`createNote`, `createStructuredNote`, `importNote`, `mintNoteEntry`, `addNoteToBook`, `MCPWriteAct`),
+`Operations+DocumentImport` whole (`mintDocument`, `DocumentImport`, `importBook`), `Operations+Block.newBlock`,
+`Operations+Import` whole (`importBlocks` — paste into an existing note, its parts entry), `Operations+MCPBatches` whole,
+`Operations.swift` (`InsertPosition`, `listPosition` / `containerPosition`, the seal guards), `mintBlock` /
+`mintFanBlock`, `registerStructuralEntry` / `revertStructural` / `reapplyStructural`, `registerMintedContainerEntry` /
+`revertMintedContainer`, `Operations+Sections` (`assignSectionRow`, `liveSection`), `Operations+Reading`
+(`addPostToReading`, her `newPostInReading` — New Note in a Book with a chapter); the app's `MCPPaneCopy` Activity table
+and `MCPReceiptCopy.phrase` (the one exhaustive switch over `MCPWriteAct` in the app); read-only for D8's argument: the
+crystallizer's mint (`TailCrystallizer.mintBlocks` — `newBlock(at: .end)`) and `EditorProjectionPolicy.decide`
+(`Shared/EditorBrain` — READ ONLY, no line changes). Tests read: the harness (`MCPServerTests.ServerHarness`), the catalog
+pins (`MCPServerTests.everyDeclaredTool…`), the suggest proof (`MCPWriteServerTests.aSuggestGrantProvablyCannot…` — it
+calls every declared tool), the create/import pins (`MCPEditServerTests` structured create + format v2,
+`MCPLensDoorsServerTests` blank takes), the app's every-tool walks (`MCPWingFacesTests.activitySpeaksEveryAct…`, the
+hers-alone name sweeps), `MCPWireNeutralityTests` / `MCPProviderNeutralityTests` (no pronoun, no provider in any literal).
+
+**Surfaces (planned — final list at READY):** wire `Sources/VariorumMCP/{MCPWriteTools.swift, MCPToolCatalog.swift}`, a
+NEW `MCPWriteTools+InsertBlocks.swift` (the parse, the rung, the anchor check, the arm), a NEW `MCPMintedBlocks.swift`
+(THE shared answer encoder); core `Operations+DocumentImport.swift` (`MintedDocument`/`DocumentImport` carry what was
+minted per block), `Operations+MCPWrites.swift` (`createNote`/`createStructuredNote` take `section`; a NEW
+`MCPWriteAct.blocks`), a NEW `Operations+MCPInsertBlocks.swift` (the act); app
+`App/Variorum/Variorum/Features/MCP/MCPPaneCopy.swift` (Activity words + the receipt phrase for `.blocks` — the
+exhaustive switch makes it compulsory); tests. ZERO `Sync/`, custody, schema, `Server/`, editor seam, `TutorialSeeder`.
+An app file moves ⇒ a Mac `build-for-testing` (into `App/Variorum/DerivedData/vx336-u5`) and the Mac batch in the window.
+
+### LIVE STATUS — U5b's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this record + LIVE STATUS + the traces and the design; the FORKS proposed for the orchestrator's ruling | DONE (this commit) — **STOPPED here for the ruling** (FORKS F-1…F-6 below) |
+| 1 | VX-252 — the pins on the OLD tree (wire: `create_note` + single `import_document` answer per-block take records; `section_id` files in the same call, its refusals; the book form a guard), RED | NOT-STARTED — after the ruling |
+| 2 | VX-252 — the fix (core: what was minted rides `DocumentImport`; `section`; wire: `MCPMintedBlocks`, `noteAnswer`, the parse + catalog) + any justified edits, GREEN | NOT-STARTED |
+| 3 | VX-252 — red again BY REVERT (announced first, committed tree, restored, verified) | NOT-STARTED |
+| 4 | VX-255 — the pins on the OLD tree (wire: end at write new, anchor/start refused at write new with the rungTooLow family, anywhere at edit, one undo walks it back whole and redo returns it, a sealed note refuses, anchor of another note refused alike, the fence), RED by absence | NOT-STARTED |
+| 5 | VX-255 — the fix (the act, the wire, the catalog, `MCPWriteAct.blocks`, the app's words) + justified edits (the catalog set, the suggest proof), GREEN | NOT-STARTED |
+| 6 | VX-255 — red again BY REVERT | NOT-STARTED |
+| 7 | headless finals (MCP · core · workbook) + the Mac `build-for-testing` (`DerivedData/vx336-u5`) | NOT-STARTED |
+| 8 | THE STAGE WINDOW plan (claim `vx336-u5`; Mac batch; the live round incl. U5a's LEGS A–C, D optional; A1 + restore; fingerprint) → READY | NOT-STARTED |
+
+**No revert is in flight.**
+
+### The traces (written before code)
+
+**VX-252 — the write mints ids it never says (agent ergonomics, ruled; a pure addition).** Inputs → output: a client
+calls `create_note(book_id, title, blocks: [{text: "Olá.", takes: [{text: "Hello.", label: "english"}]}, …])` →
+`MCPWriteTools.perform`'s `.createNote` arm (`MCPWriteTools.swift:404–415`) → `ops.createStructuredNote` →
+`mintNoteEntry` (`Operations+MCPWrites.swift:517–558`) → `mintDocument` (`Operations+DocumentImport.swift:213–248`) →
+per block `mintFanBlock(texts: [shown] + takes, labels: [nil] + labels)` (`Operations+Structural.swift:1296`) — which
+RETURNS every minted variant — but `mintDocument` keeps only `minted.block.id` (`:237`), so `MintedDocument` and then
+`DocumentImport` carry `blockIDs` and an `alternateCount`, never a take id → `noteAnswer` (`MCPWriteTools.swift:757–766`)
+answers `{"note_id","block_ids","tag_ids"}`. To learn the take ids the write itself minted (to `save_lens` them, to
+`edit_take` one) the client must `read_note with_ids` the note it just wrote — 100–133k characters per chapter in her
+run (25 reads, ~2.7M characters). `add_take` answers its `take_id` (`:370`): the two disagree. **`import_document` with
+ONE document** rides the same road (`.importNote` → `ops.importNote` → `mintNoteEntry` → `noteAnswer`): **the same gap,
+real** — a document's Alternates sections mint takes whose ids are dropped the same way. **`import_document` with a
+`book`** (`.importBook` → `ops.importBook(_:wingId:undoLabel:)` → `BookImport`) answers `{"book_id","note_ids",
+"chapter_ids"}`: no block ids at all — a wider gap, argued at D3. **`section_id`:** `create_note`'s parse never reads it
+(`MCPWriteTools.swift:202–214`), and the server's parse ignores a key the schema doesn't name (U5a's red-on-old run
+proved the class: `label`/`pin_chosen` were silently ignored) — so today `create_note(book_id, section_id, …)` LANDS the
+note UNSECTIONED and answers success. The red-on-old pin reads exactly that (the membership's `section_id` NULL).
+
+**VX-255 — the door cannot add a paragraph to a note (R-VX184-1's parity gap; a pure addition).** Her doors add a block
+anywhere: ⌘⇧⏎ (`newBlock(at: .after(block))`), the Return key's act (`TypedReturn` → `newBlock` below/above), paste
+(`importBlocks(into:)` — segmented into an existing note, one parts entry). The wire has none: a client can only mint a
+whole note (`create_note`) or `divide_block` a block whose text already holds the words (the agent's chapter-16 case:
+four late paragraphs would have been "a chain of divides"). On the old tree `insert_blocks` answers `Unknown tool:
+insert_blocks.` (`MCPWriteTools.swift:240`) — red by its absence.
+
+### The design (argued — the brief's "argue" items; the FORKS it leaves are proposed at the end, NOT built until ruled)
+
+**D1 — THE SHARED ANSWER SHAPE: one record per minted block (VX-252; reused by `insert_blocks` and U6's
+`duplicate_note`; U7's VX-254 grows it).** Named ONCE: a NEW `Sources/VariorumMCP/MCPMintedBlocks.swift`,
+`MCPMintedBlocks.records(_:) -> [[String: Any]]`, fed by a core value the op returns from what it MINTED (no second read,
+no race, ∝ the write): `Operations.MintedBlockTakes { blockID, shownTakeID, takes: [MintedTake { id, label }] }`, built
+in `mintDocument` from `mintFanBlock`'s own variants and carried on `MintedDocument` → `DocumentImport.blocks`. Each
+record, in note order:
+```json
+{"block_id": "…", "shown_take_id": "…", "takes": [{"take_id": "…"}, {"take_id": "…", "label": "english"}]}
+```
+- **`takes` lists EVERY take in fan order, the shown one included** (at mint the first — the in-place text, chosen AND
+  default), so every take has an OBJECT record U7's digest can join (`{"take_id", "label", "sha256"}` — no positional
+  arrays anywhere); `shown_take_id` names which take the block shows (read_note's own word; a `duplicate_note` copy's
+  shown take need not be first in its fan, so the field is not redundant for U6).
+- **read_note's vocabulary, no text:** `block_id`, `shown_take_id`, `takes[].take_id`, `takes[].label` (omitted when the
+  take has none — read_note's convention); a blank take is a take and is listed.
+- **The answer keeps `block_ids`** (byte-unchanged for every existing caller and pin) and gains `blocks`:
+  `{"note_id", "block_ids", "blocks", "tag_ids"}` (+ `section_id` when one was given, `add_note_to_book`'s echo).
+  Size, honestly: her biggest chapter (253 blocks, one extra take each) answers ≈ 60k characters with `blocks` — under a
+  read_note of the same note (100–133k), and the first answer that needs no read at all; keeping `block_ids` costs one
+  id per block (~16% of it). FORK F-6 offers dropping it.
+
+**D2 — `create_note`'s `section_id` (VX-252) — its rung and refusals.**
+- **Rung: WRITE NEW on the book**, the note's own decision (`into(.book)`) — filing under a chapter of the SAME book adds
+  no reach (`add_note_to_book`'s `section_id` and `file_note_in_chapter` are write new already). Nothing new is decided.
+- **The parse (before any decision — independent of any target, so no oracle):** `section_id` without `book_id` refuses
+  "section_id goes with book_id: it files the note under a chapter of the book the note joins." (with `wing_id`, or
+  with neither).
+- **Inside the act's ONE transaction, her own door's order** (`newPostInReading` — New Note in a Book, with a chapter):
+  the book's gates first, exactly as today (a live BOOK, not a gathering, not finished or sealed, capacity, the wing —
+  `mintNoteEntry` + `addPostToReading`), then the chapter: `liveSection` + `readingId == book` (`sectionNotFound` /
+  `sectionNotInReading`), checked BEFORE anything is minted; then the mint, the membership and its chapter pointer in
+  the same transaction. Any refusal mints nothing.
+- **The words — the brief's "a section in a book the client can't read answers the one not-shared shape":** the book is
+  decided first (an unreachable book answers the ONE not-shared sentence before any chapter is looked at, byte-identical
+  with or without `section_id`). For a REACHABLE book, every `section_id` that isn't a live chapter of THAT book —
+  naming nothing, a deleted chapter, a chapter of another book the client reads, or of one it can't — answers ONE
+  sentence, byte-identical: `MCPWireRefusalCopy`'s existing "section_id isn't a chapter of this book (list_notes or
+  create_section gives chapter ids)." (what `add_note_to_book` and `file_note_in_chapter` say today). So a chapter in a
+  book the client can't read is indistinguishable from a missing id — hidden never told from missing. The literal
+  "not-shared shape" for those ids is FORK F-3.
+- **Undo:** unchanged — the ONE minted-container entry (`registerMintedContainerEntry`, SWEEP TABLE rows 25–34) takes the
+  filing with the note (the membership dies on the note's stamp) and the redo returns it filed (the row revives with its
+  `section_id`). The receipt and its Open › unchanged (the note).
+
+**D3 — `import_document`.** The ONE-document form has the same gap and closes the same way (`noteAnswer` is shared — the
+`blocks` records ride both doors, from the same `DocumentImport`). The BOOK form's answer stays as it is: FORK F-2.
+
+**D4 — `insert_blocks`' shape (VX-255, ruled `insert_blocks(note_id, after_block_id?, blocks)`).** `blocks` is
+`create_note`'s structured shape, parsed by the SAME `noteBlocks` (`[{text, name?, takes?: [{text, label?}]}]`): each
+block's text is exactly ONE block (a blank line inside stays inside — I4; create_note's structured rule, so "segmentation
+as create_note does it" is: none), its name set, its takes at the fan's end unchosen, labels stored AS GIVEN (VX-197's
+split — work a client is authorized to write keeps clean labels; `aiLabel` is suggest's alone), blank takes legal
+(R-VX171-2). 1 to 200 blocks per call (FORK F-5). A `text` payload is FORK F-4.
+
+**D5 — WHERE the blocks land, and the rung (the brief's "argue which reads cleaner" — FORK F-1, and "argue at the
+start" — FORK F-1b).** Proposed: the rung is read from the call's ARGUMENTS alone —
+- no anchor (or `at: "end"`) → the note's END, at **WRITE NEW**;
+- `after_block_id` (ANY block — the note's last included) → right after it, at **EDIT**;
+- `at: "start"` → before the first block, at **EDIT** (`move_block`'s own word and enum, `at: "start" | "end"`).
+`after_block_id` with `at` refuses at the parse ("Pass after_block_id or at, not both."). The argument for "any anchor
+needs edit" over "the last block counts as the end": (1) her line is about the END, a place — "write new lets them add
+blocks at the end" — while naming a block places relative to HER blocks, which the catalog keeps at edit (`move_block`'s
+`after_block_id`/`before_block_id`/`at`); (2) the rung is legible from the call itself — the description says it in one
+sentence and the decision is one rule (`onNote` at the call's rung), with no read of the note's order before it;
+(3) **no flip under her:** the note's last block moves while she types (type-time crystallization mints a block at the
+end for each paragraph she types past — `TailCrystallizer.mintBlocks`, `newBlock(at: .end)`), so a call naming "the
+last block" a second after its read could flip rung, or — at edit — land ABOVE her newest paragraph; an anchorless call
+always lands at the current end. **The refusal:** a write-new holder passing an anchor is decided on the note at EDIT and
+hears the rungTooLow family's sentence ("This client may only read, suggest and write new here." + the asked sentence
+when an edit ask was raised) — never the not-shared shape for a note it can read; the ask queues quietly for her.
+**The anchor's check (after the note's decision, so an unreachable note never reveals a block):** a live block
+live-placed in THIS note (`placedBlocksSQL`, ∝ the one id), else "after_block_id isn't a block of this note —
+read_note with with_ids: true gives its block ids." — the same words for a block of another note and for nothing (the
+batches' rule); inside the transaction the op re-resolves the anchor (`containerPosition(.after)` → `blockNotPlaced`,
+spoken in those same words) so a block that left since never anchors.
+
+**D6 — the act (core, NEW `Operations+MCPInsertBlocks.swift`): `insertBlocks(_:intoNote:at:undoLabel:guardedBy:)` on
+§9 newBlock's road.** ONE transaction: the guard FIRST (it re-decides the note at the call's rung inside the act and
+spends a once grant atomically — the batch doors' pattern for a new act, VX-184 U3); the note live, a post, not sealed
+(`ensureUnlocked` → `lockedPost` — "a sealed post refuses"); per block, in order: its position
+(`containerPosition(at:)` for the first, `.after(previous)` for each next — the run keeps its order wherever it lands),
+`mintFanBlock` (the shown text chosen AND default, the takes after it unchosen and unlocked with their labels, blank
+takes kept), its name, and `registerTextChange(charDelta: shown text)` — newBlock's stamp rule: minting text IS working
+on the post (touch + churn), fan growth never churns. **Locks, as her doors have them:** the post's seal refuses; a
+LOCKED take anywhere — the anchor's included — never refuses (her ⌘⇧⏎ below a locked take doesn't: the act touches no
+take); no take is born locked or chosen. **ONE entry, newBlock's own helper:** `registerStructuralEntry(label: "‹client›'s
+blocks", minting: [MintedPreImage per block])` — an untouched block vanishes on ⌥⌘Z, one she has typed into since TRAYS
+(the insurance doctrine, `revertStructural`), a sealed note refuses the undo and keeps the entry; **U2's question is
+answered by the helper:** each half returns the parts it changed and `!changed.isEmpty` (SWEEP TABLE rows 2–13's road),
+so a quiet half retires the entry. A NEW `MCPWriteAct.blocks = "blocks"` ("Undo claude-code's blocks" — the takes
+batch's twin, "claude-code's takes"); `isUndoable` true.
+
+**D7 — the wire.** `insert_blocks` joins the WRITE NEW list (listed from write new up; scopes: note · book · wing — a
+grant reaching the note at write new, `apply_tag`'s scopes). The snapshot: `onNote(noteID, rung: <the call's rung>,
+spendsAfter: false)` (the refusal and the ask); the act's guard: `guardNotes(clientName, rung: <the same>) { _ in
+[noteID] }`. The answer: `{"note_id", "block_ids", "blocks"}` — D1's records. The receipt: act `.blocks`, `count` = the
+blocks, Open › at the note's first new block. **Words (FOR VX-234, as built):** Activity "added blocks to “X”" / refused
+"adding blocks to “X”" (the takes batch's family); the receipt "added a block" / "added N blocks" (summed over a run).
+
+**D8 — `flushesHerEditorFirst`: FALSE, argued (U3's exhaustive switch; the add family's answer, `create_note`/`add_take`).**
+The act adds blocks and reads, rewrites, copies, freezes or tombstones no take's text. (i) **Her caret in the block it
+inserts after:** her pending typing is that block's take's text; the take is untouched (same row, live, unlocked, same
+place), so her debounce flush lands where she typed. While her editor is dirty the delivery defers
+(`EditorProjectionPolicy.decide`'s busy arm); once clean, the structure changed, so a full render rebuilds from the store —
+the new blocks below her block — and restores her caret BY IDENTITY because her block survives (U3's trace 4:
+`renderFull`'s survivor restore). Nothing of hers moves. (ii) **She is typing at the note's end:** an open tail is editor
+state, not a take (nothing pending in a row); the act appends after the last STORED block; the full render keeps her
+tail (`preserveTail`) below the new blocks, and when she types past it the crystallizer mints her paragraph at
+`.end` — after the AI's blocks, exactly where the screen showed it. Nothing is overwritten, reordered or refused. (iii)
+**Her ⏎ in flight:** `runStructural` flushes first and acts on the store's current order (a block below hers lands
+between hers and the AI's run). The editor seam is READ, not touched.
+
+**D9 — P1.** Every new read and answer ∝ what it names: the parse ∝ the call; the anchor pre-check ∝ one id
+(`placedBlocksSQL`); per block one position seek (`idx_cblock_order`) and its own rows; the answer ∝ the blocks minted
+(D1's records come from the op's return, no read). `create_note`'s records add nothing to its read cost (none).
+
+**D10 — the fence and Private / Seal / Own:** untouched — every decision is the one rule's (`onNote` / `into`), an
+unreachable note or book answers the ONE not-shared sentence byte-identical whatever else the call names (the anchor,
+the chapter and the blocks are looked at only after it allows); nothing writes `ai_private_at`, `sealed_at` or `owned`.
+
+**The doc-truth sweep (minimal; U8 re-voices):** `create_note`'s description says "Returns JSON with the note_id and its
+block_ids" — true and incomplete; it gains the records and `section_id` in this unit (its own tool). `import_document`'s
+"Returns JSON with the new ids" — true; it gains the records' sentence. `MCPSession.instructions` ("write new (new notes,
+books, chapters, tags, versions)") and the field guide's MCP chapter undersell `insert_blocks` but state nothing false —
+U8's. The stargazing brief: U8's.
+
+### THE FORKS — proposed, for the orchestrator's ruling BEFORE the halves they touch are built
+
+- **F-1 (VX-255, the brief's "argue which") — the write-new anchor rule:** (a) PROPOSED — the rung is read from the
+  arguments: no anchor = the end at write new; ANY `after_block_id` (the last block included) = edit (D5's three
+  reasons — her "at the end" is a place; one legible rule; no flip as her typing moves the last block); (b) an
+  `after_block_id` naming the note's CURRENT last block is allowed at write new (reads "after the last block" as "the
+  end"; needs the note's order read before the rung, and flips under her typing).
+- **F-1b (VX-255, "argue at the start") — the start door at edit:** (a) PROPOSED — `at: "start"` (`move_block`'s word;
+  `at: "end"` accepted as the default's spelling); (b) `before_block_id` (any block, edit — a second anchor kind the
+  ruling's shape didn't name); (c) no start door (insert after the first block, then `move_block` it down).
+- **F-2 (VX-252, "check import_document's answer") — the BOOK form's answer:** (a) PROPOSED — unchanged (`book_id`,
+  `note_ids`, `chapter_ids`): closing it "the same way" would answer every note's every block and take, ∝ the WHOLE
+  book (her bilingual book: 3,843 blocks ≈ 0.8M characters — eight times a client's tool-output cap, VX-256's very
+  failure); the single-document form closes, the book form reads its notes as needed; (b) per note the D1 records (∝ the
+  book); (c) per note its `block_ids` only (still ~150k characters for her book).
+- **F-3 (VX-252, the brief's "a section in a book the client can't read answers the one not-shared shape"):** (a)
+  PROPOSED — the book decided first (unreachable ⇒ the one not-shared sentence); then EVERY `section_id` that isn't a live
+  chapter of that book answers ONE sentence, byte-identical — the existing `MCPWireRefusalCopy` chapter sentence
+  `add_note_to_book` and `file_note_in_chapter` already speak — so a chapter of an unreadable book can't be told from a
+  missing id (D2); (b) the not-shared sentence for every such `section_id` (oracle-free too, but it tells a client with
+  a mistyped chapter in a book it CAN write in that the book isn't shared — false — and disagrees with the two siblings);
+  (c) not-shared only for a chapter of an unreadable book — an ORACLE (it differs from a missing id), rejected.
+- **F-4 (VX-255) — the payload:** (a) PROPOSED — `blocks` only (the ruled shape; "segmentation as create_note does it"
+  read as its structured rule — none); (b) also `text` (plain prose, segmented by the NOTE's effective default — paste's
+  road, `importBlocks`), as `create_note` offers both.
+- **F-5 (VX-255) — a cap:** (a) PROPOSED — at most 200 blocks per call, stated in the description, refused naming it
+  (`batchCap`, the house's per-call bound: the act runs on HER runner while her note may be open — the takes batch's
+  argument; `insert_blocks` exists partly to write big documents in chunks); (b) no cap (`create_note` has none — it
+  took 253 blocks in her run).
+- **F-6 (VX-252) — `block_ids` in the answer:** (a) PROPOSED — kept beside `blocks` (additive: every existing caller and
+  pin byte-unchanged; ~16% of the answer); (b) dropped (`blocks[].block_id` says it; two pins become justified edits;
+  any client habit breaks).
+- **Confirm, too, the D1 record shape** (U6 and U7 build on it): `blocks: [{block_id, shown_take_id, takes: [{take_id,
+  label?}]}]`, every take an object, the shown one included.
+
+### PROVISIONALs (with their options — the orchestrator files them at the merge)
+
+*(Pending the ruling: whichever of F-1…F-6 the orchestrator rules "provisional" lands here as P-VX252-n / P-VX255-n with
+its options as above.)*
+
+### FOR VX-234 (user-facing words, as built)
+
+*(Pending the build: the Activity line for `insert_blocks` (allowed and refused), its receipt phrase, and its undo
+label "‹client›'s blocks".)*
+
+### OWED (for the orchestrator)
+
+1. **The ruling on F-1…F-6** (and the D1 shape) before pieces 1–6.
+2. *(Recorded, not proposed for this run:)* `import_document` could take a `section_id` too (one document into a
+   chapter) — not asked by VX-252; a client files it with `file_note_in_chapter` after. A ticket only if the orchestrator
+   wants one.
