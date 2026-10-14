@@ -1,10 +1,11 @@
 # VX-266 — the first designer's review of the merged design, and its dispositions
 
-**What this is:** the record of two review rounds of `notes/plans/vx-266-castle-backups-prelaunch.md` by
+**What this is:** the record of three review rounds of `notes/plans/vx-266-castle-backups-prelaunch.md` by
 **firstcastleredesigner**, the session that wrote the first design (`design-proposal.md`), at the author's ask on
 2026-10-13. It changed no file. Round 1 reached the design's owner (variorum-08) through her; round 2 came back
-directly, answering the owner's proposed resolutions. Every finding is dispositioned below, and the design, the
-phase-1 plan and the target key map changed in the same commit as this file.
+directly, answering the owner's proposed resolutions; round 3 answered the commit that folded round 2 in
+(`5e9dc070`). Every finding is dispositioned below; the design, the phase-1 plan and the target key map changed with
+each round.
 
 Her standing instruction for this work, verbatim: *"DO NOT get into a game of whackamole - do not solve this issue in a
 way that brings back one of the other issues that your design resolved. … focus on a robust design that handles the
@@ -174,34 +175,55 @@ it to linear and make its actual # clear, the other session has a point there."*
 > If that device's Keychain dies first and the account key was retired, only the server copy recovers it, and its
 > unsynced edits are lost. List it with your other residue.
 
+## Round 3 (the reviewer's message after commit 5e9dc070, verbatim)
+
+> §3.5 still breaks in one place: the move off the shared key can quietly turn Apple-account recovery into this-Mac-only recovery when the Mac's iCloud Keychain is off.
+>
+> The mechanism: point 2 moves the live library to its own Apple key and drops the old-key wrap "only after the new wrap verifies". But that check can only read the key back on this Mac. If iCloud Keychain is off, which macOS can't detect (corner 46), the new key never leaves the Mac. The old shared key may well be in iCloud from before it was turned off. The library has now traded a cloud-backed road for a local-only one, and nothing can tell.
+>
+> The retirement checks won't catch it either: from this Mac everything still opens, so the list is empty and the key is retired. If that Mac is later lost, a Standard library with no passphrase or words has no road anywhere, though before the migration it would have opened through the Apple account. The same applies to the per-library keys minted for other libraries' copies: "exactly as before" holds only until retirement.
+>
+> Two fixes, both cheap:
+> (a) The live key file keeps its old shared-key wrap beside the new one until retirement. Keeping it isn't writing under it, so "never writes under it" still holds.
+> (b) The retirement checks flag every Standard library this Mac holds that has no passphrase or twelve words, because its only portable road is an Apple key whose arrival in iCloud can't be verified. The sheet says "set a passphrase first, or this library opens only on this Mac if iCloud Keychain isn't carrying its key". The route finder can already see that no passphrase or words road exists.
+>
+> Smaller: the format-3 key file written for other libraries goes to Backups/<library8>/. In a shared far folder that path is common to every Mac. Two Macs' migrations would overwrite each other's file, or leave iCloud Drive "… 2.json" conflict copies, each under its own Apple key and with its own history. Put it under <mac8>/ or merge on write.
+>
+> No reply needed.
+
 ---
 
 ## Dispositions
 
-**The whole-situation answer to the glaring finding** (design §3.5, "the old shared key"). The fix is not a better
-question; it is making the shared key unneeded before it can go:
+**The whole-situation answer to the glaring finding** (design §3.5, "the old shared key"), as it stands after round
+3. The fix is not a better question; it is giving everything a road of its own before the shared key can go, without
+taking any road away until the author retires it:
 
-1. **This build never writes under the old shared key** — it reads it only to move things off it.
-2. **Each device's migration moves everything it holds in Standard off it**, while it's still readable: the fold
-   first; then every other library this Mac holds copies of whose newest copy is in Standard gets a key file of its own
-   (in `Backups/<library8>/`) under an Apple key of its own; then the live library moves to its own key (a synced
-   account only with a fresh vault read, under the vault's CAS); then a fresh backup pair.
-3. **An older build can put things back** (its Re-link). The next device on this build moves the vault off again (a
-   repair), and the retirement repeats every move before deleting anything.
-4. **Retirement stays Use Castle's step** — her VX-301 ruling's shape — after checks: the moves again; the route
-   finder over every copy this Mac can see (other libraries' and other Macs' in a shared folder included) and every
-   vault it can read; a vault still naming the old key stops the retirement; the sheet lists by name what would stop
-   opening and says what the Mac can't see, in the reviewer's wording. *Keep it for now* is offered only when the list
-   isn't empty; a store already in Castle gets one notice and a standing door. **PROVISIONAL, hers to confirm** — the
-   reviewer is right that her ruling's question didn't show her the key's reach.
+1. **This build never writes under the old shared key** — it reads it, and keeps the wraps that already exist.
+2. **Each device's migration gives everything it holds in Standard a key of its own, beside the old one:** the fold
+   first; then every other library this Mac holds copies of whose newest copy is in Standard gets this Mac's own key
+   file for it (in `Backups/<library8>/<mac8>/`, beside its copies) under an Apple key of its own; then a local-only
+   live library gains its own Apple key, its old-key wrap kept beside it; then a fresh backup pair. **The move only
+   adds roads** (promise 12), so iCloud Keychain being off — which macOS can't report — costs nothing before
+   retirement.
+3. **Accounts stay on the old key until they enter Castle or are re-linked.** The vault holds one Apple copy, so a
+   move would trade a key other devices can read for one that may never have left this Mac. Nothing moves a vault
+   automatically, which also leaves an older build's Re-link nothing to undo.
+4. **Retirement stays Use Castle's step** — her VX-301 ruling's shape — after checks: the move again; the route
+   finder, with the old key taken away, over every copy this Mac can see (other libraries' and other Macs' in a
+   shared folder included) and every vault it can read. The sheet lists what would stop opening, and every Standard
+   library or copy here with no passphrase or words; a vault still naming the old key stops the retirement; the
+   sheet says what the Mac can't see. *Keep it for now* is offered only when the list isn't empty; a store already in
+   Castle gets one notice and a standing door. **PROVISIONAL, hers to confirm** — the reviewer is right that her
+   ruling's question didn't show her the key's reach.
 5. **Retiring records the key's id**; delete on sight acts on recorded ids only.
 
 **Why this doesn't bring back what the design solved:** no shared-name item is ever written (the F2/F3 races stay
-gone); every new key has a fresh id and an account keeps one through the vault's CAS (the second opinion's cold read,
-M1); no vault copy
-is orphaned, because a vault on the old key stops the retirement; the moves are executor acts and repairs, never a
-reader writing; nothing decides before unlock; and Castle's promise is kept by construction once the key is retired,
-with the one exception stated wherever it applies until then.
+gone); every new key has a fresh id, the migration mints no account key, and an account keeps one key through the
+vault's CAS at the deliberate acts (the second opinion's cold read, M1); no vault this device can read is orphaned,
+because a vault on the old key stops the retirement, and the ones it can't read are named on the sheet; the move is
+an executor act that removes nothing; nothing decides before unlock; and Castle's promise is kept by construction once
+the key is retired, with the one exception stated wherever it applies until then.
 
 | # | finding | disposition | where |
 |---|---|---|---|
@@ -211,9 +233,9 @@ with the one exception stated wherever it applies until then.
 | R1-4 | Old per-ID silent items must go when entering Castle | **Fixed**, said outright | design §3.3, §3.9, §3.13 step 4 |
 | R1-5 | VX-310 departs from "always" | **To her**, PROVISIONAL with the R2-8 wording | design §3.10, §9 |
 | R1-6 | A silently-joined device whose Keychain dies before it follows | **Fixed**: the master's twelve-words copy in key files | design §3.5a |
-| R2-1 | Older libraries of other libraries aren't rehomed | **Fixed**, more fully than suggested: a key file and Apple key of their own *when their newest copy is in Standard* (a silent item wouldn't survive a Mac replacement); a library whose newest copy is in Castle gets none, since its pre-Castle copies are what retirement is for; backups-only libraries included | design §3.5 point 2, §3.2 |
+| R2-1 | Older libraries of other libraries aren't rehomed | **Fixed**, more fully than suggested: a key file and Apple key of their own *when their newest copy is in Standard* (a silent item wouldn't survive a Mac replacement); a library whose newest copy is in Castle gets none, since its pre-Castle copies are what retirement is for; backups-only libraries included. The key file's place moved to `<library8>/<mac8>/` in round 3 | design §3.5 point 2, §3.2 |
 | R2-2 | The window after rehoming | **Fixed**: the migration ends with a fresh pair | design §3.5 point 2, §3.13 step 7 |
-| R2-3 | Mixed builds: an older build's Re-link undoes the move | **Fixed**: the vault's move-back repair, and a vault still on the old key stops the retirement; our own Re-link mints fresh | design §3.3, §3.5 points 3–4, §3.9 |
+| R2-3 | Mixed builds: an older build's Re-link undoes the move | **Fixed, then simplified in round 3**: the migration no longer moves vaults at all, so there is nothing to undo; a vault this device can read that still names the old key stops the retirement; our own Re-link mints fresh. (Round 2's move-back repair is withdrawn: it was a vault move by another name.) | design §3.3, §3.5 points 3–4, §3.9 |
 | R2-4 | The sheet understates the cost | **Fixed**: the reviewer's sentence, adopted | design §3.5 point 4 |
 | R2-5 | The device list misses devices; the separate act departs from her D3 | **Withdrawn markers** (the catalog's concrete list replaces them); retirement **returned to Use Castle's step**, with *keep it for now* only when something listed would stop opening; **to her** for confirmation | design §3.5, §9 |
 | R2-6 | Rule 2's scope: a library sent to another Mac without sync | **Fixed**: rule 2 scoped to this Mac's copies and the account's devices; delete on sight by recorded id only | design §3.1, §3.3, §3.5 |
@@ -222,6 +244,9 @@ with the one exception stated wherever it applies until then.
 | R2-9 | Delete old key files only after verifying their key is in the history | **Fixed** | design §3.3, §3.9, §3.13 step 6 |
 | R2-10 | VX-310 wording: two lines | **Fixed**, still hers to confirm | design §3.10 |
 | R2-11 | Residue: words regenerated while a silently-joined device is offline | **Listed** | design §3.5a, §8 |
+| R3-1 | The move can trade an Apple-account road for a this-Mac-only one when iCloud Keychain is off | **Fixed, and generalized**: the move only adds — key files keep their old-key wrap beside the new one until retirement (keeping isn't writing); the same trap in the vault's single Apple slot is why accounts no longer move at migration; promise 12 and a fixed scenario (iCloud Keychain off) pin it; rule 3 now says "through iCloud Keychain, when it's on" | design §3.1, §3.5 point 2, §4.1 |
+| R3-2 | The retirement checks can't see that risk | **Fixed**: the checks list every Standard library or copy here with no passphrase or words; the sheet asks for a passphrase first; the sentence covers other devices' libraries too | design §3.5 point 4, §8 |
+| R3-3 | Other libraries' key files collide in a shared far folder | **Fixed**: `Backups/<library8>/<mac8>/`, this Mac's own, in the container and beside this Mac's (or unattributed legacy) copies in the far folder | design §3.2, §3.5 point 2 |
 
 The owner's own residue (1a) is listed too: backups an older build made on a silently-joined device, under a key a
 Standard Replace All Keys retired before that device updated (design §8).

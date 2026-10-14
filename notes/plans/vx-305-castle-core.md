@@ -163,8 +163,8 @@ Build everything in §3.2 of the design as values, with their codecs and their c
   - every door with its reason;
   - the repairs owed and the acts owed;
   - the words, as typed reasons for later phases to render.
-- **The rules it encodes:** design §3.3 (guards included, the vault's move-back repair among the repairs), §3.5 (the
-  old shared key: what still needs it, and what its retirement would leave with no road), §3.7 (the open rule's
+- **The rules it encodes:** design §3.3 (guards included), §3.5 (the old shared key: what still needs it, what its
+  retirement would leave with no road, and what would then depend on an Apple key alone), §3.7 (the open rule's
   verdicts), §3.8 (the four account situations), §3.10 (the Touch ID road, with VX-310's lobby rule as data: the
   button whenever a Touch ID item exists, what pressing it says when Touch ID is only unusable for now, and which of
   the two lines shows when no item can work).
@@ -181,7 +181,8 @@ Build everything in §3.2 of the design as values, with their codecs and their c
 - every copy kind against every library state;
 - retention over a shared folder holding two Macs' and two libraries' copies, where nothing foreign is pruned;
 - the route finder's words agree with the roads it found;
-- the retirement's list: every copy whose only road is the old shared key is on it, and nothing else is.
+- the retirement's list: every copy whose only road is the old shared key, and every Standard library or copy with no
+  passphrase or words, is on it — and nothing else is.
 
 ---
 
@@ -201,9 +202,10 @@ Build everything in §3.2 of the design as values, with their codecs and their c
   - delete on sight, by recorded id only;
   - a fresh key on leaving;
   - Re-link mints a fresh account key, never re-landing under the old shared key;
-  - the old shared key: the moves off it (folds first, other libraries' copies, the live library, the fresh pair), the
-    vault's move-back repair, and its retirement as Use Castle's last step — the checks run again first, *keep it for
-    now* when the list isn't empty, and its own door on a store already in Castle.
+  - the old shared key: keys of their own beside it (folds first, other libraries' copies, a local-only live library,
+    the fresh pair — the move removes nothing; accounts stay on it until Castle or Re-link), and its retirement as Use
+    Castle's last step — the moves again, the checks, a readable vault still on it stopping it, *keep it for now* when
+    the list isn't empty, and its own door on a store already in Castle.
 
 **Its leaves are protocols.** U3 tests against simple in-memory leaves; U4 brings the realistic fakes.
 
@@ -228,7 +230,8 @@ The design's §4.1, whole:
 - the fakes, with real semantics:
   - a device keychain where Touch ID items die on an enrollment change, a closed lid is transient, and Keychain
     Access can read, edit and delete every item that isn't a Touch ID item;
-  - an iCloud Keychain with a propagation delay, delete propagation and no recovery;
+  - an iCloud Keychain with a propagation delay, delete propagation and no recovery, and a per-device off switch the
+    app can't see — what a device makes while it's off never leaves that device;
   - file systems with copies, Time Machine rollback and container deletion;
   - a vault with CAS, the key proof and the rotation fields;
 - **an older build as an actor** on any device: it reads and mints only the old shared key, writes its wraps under it,
@@ -259,7 +262,7 @@ Every shape today's builds leave, built as fixtures from the old formats:
 
 ### The promises
 
-The design's §4.1 list (eleven), checked after every step.
+The design's §4.1 list (twelve), checked after every step.
 
 ### Fixed scenarios
 
@@ -280,8 +283,10 @@ Each is a named test:
 - an older library of another library, Standard with no passphrase, opening after retirement on its own key; and one
   whose library later entered Castle, whose pre-Castle copies stop opening through the Apple account;
 - the window after the move: the Mac lost right after moving off the old key, its fresh pair opening elsewhere;
-- an older build's Re-link putting the account back on the old key: the repair moves it off again, and the retirement
-  re-checks before deleting;
+- an older build's Re-link landing an account's vault on the old key: nothing moves it automatically, and the
+  retirement stops while a vault it can read names it;
+- iCloud Keychain off on the Mac whose library moves: the move removes no road, and the retirement lists the library
+  if it has no passphrase or words;
 - one local-only library on two Macs (sent, no sync), one entering Castle: the other's own key never deleted;
 - a silently-joined device losing its Keychain after the account entered Castle elsewhere: the words open its file;
 - a follow while the fresh Apple key hasn't arrived (no second key minted);
@@ -294,8 +299,8 @@ Each is a named test:
 
 Each fixed scenario that guards against a known bug runs once more with its guard switched off (`ProtectionGuards`,
 DEBUG only) and **must fail**. That is the red-on-old for new code. Record the failing assertion for each. The guards
-include the retirement's re-run of the moves, its refusal while a vault it can read names the old key, delete on sight
-by recorded id only, and the fresh pair after the move.
+include the move keeping the old wrap, the retirement's re-run of the moves, its refusal while a vault it can read
+names the old key, delete on sight by recorded id only, and the fresh pair after the move.
 
 ### The generator
 

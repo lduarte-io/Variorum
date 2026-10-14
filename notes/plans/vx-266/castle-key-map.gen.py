@@ -317,13 +317,14 @@ TARGET = {
     "t-std-local": dict(title="Standard — this Mac only", inactive=("server",), chips=std_target(False),
                         notes=[note("vault", 0, "not used — no sync")],
                         roads=[("On this Mac", "the silent item — nothing asked."),
-                               ("On a new Mac", "this library's Apple key arrives through iCloud Keychain and opens it — or your passphrase or words."),
+                               ("On a new Mac", "this library's Apple key arrives through iCloud Keychain (when it's on — Variorum can't see it) and opens it — or your passphrase or words."),
                                ("What it means", "your Apple account, and anyone who can sign in to this Mac, can open the library and every copy Variorum keeps."),
-                               ("Other libraries' copies here", "an older library, or backups, of a library whose newest copy is in Standard: a key file of its own in its backup folder, under an Apple key of its own — it opens as before. Deleting a library's last copy deletes its key.")]),
+                               ("Other libraries' copies here", "an older library, or backups, of a library whose newest copy is in Standard: this Mac's own key file for it, beside its copies, under an Apple key of its own — it opens through the Apple account as before. Deleting a library's last copy deletes its key.")]),
     "t-std-sync": dict(title="Standard — synced", chips=std_target(True),
                        roads=[("On this Mac", "the silent item — nothing asked."),
-                              ("A new device", "sign in to iCloud and Variorum: the account's Apple key opens the vault's master, nothing typed."),
-                              ("What it means", "the same as this-Mac-only, for every device of the account.")]),
+                              ("A new device", "sign in to iCloud and Variorum: the account's Apple key opens the vault's master, nothing typed (when iCloud Keychain carried it)."),
+                              ("What it means", "the same as this-Mac-only, for every device of the account."),
+                              ("Accounts from before this change", "stay on the old shared Apple key until they enter Castle or are re-linked.")]),
 }
 
 NEW_FULL = {
@@ -564,22 +565,22 @@ MIGRATE = [
     "The record, this Mac's memory (sealed) and the device identity are written; per-key items added; old items left untouched for one release (entering Castle removes them once the history holds their key).",
     "Existing copies are attributed to their library and Mac; new backups go to per-library, per-Mac folders.",
     "The one key file is written and every reachable older key folded into the history — through the old shared Apple key while it's still readable, and the passphrase if needed (asked once). An old key file stays until the history holds its key; one the fold couldn't reach stays for good.",
-    "Everything this Mac holds in Standard moves off the old shared Apple key: other libraries' copies first (a key file and Apple key of their own), then the live library (a synced account only with a fresh vault read), then <b>a fresh backup</b>, so the newest copy carries the history and the new locks.",
+    "Everything this Mac holds in Standard gains an Apple key of its own beside the old shared one — other libraries' copies first (this Mac's own key file for each), then a local-only live library — then <b>a fresh backup</b>, so the newest copy carries the history and every lock. Nothing is removed; a synced account stays on the old key until it enters Castle or is re-linked.",
     "A store already in Castle gets one notice: copies from before Castle still open through the Apple account until the old key is retired — with the door to retire it.",
 ]
 SHARED = [
-    "<b>One key, every library.</b> Today's builds lock every Standard library on an Apple account with one shared Apple key, on every device. Deleting it deletes it everywhere, with no recovery — so it goes only after everything that needs it has moved off.",
-    "<b>The moves</b> (each device's migration): every library this Mac holds in Standard gets an Apple key of its own — the live library, and other libraries' older copies; a synced account's key goes to the vault under its CAS; then a fresh backup. An older build can put an account back on the old key (its Re-link); the next device on this build moves it off again.",
-    "<b>The checks</b> (Use Castle, or the door on a store already in Castle): the moves run again; then every copy this Mac can see — other libraries' and other Macs' in a shared backup folder included — and every account vault it can read are checked for anything that would stop opening. A vault still on the old key stops the retirement.",
-    "<b>The sheet</b> lists those things by name, and says what the Mac can't see: a device not yet updated keeps its library working there, but if it's lost or reset before it updates, its library and backups open only with a passphrase or the words — and without either, not at all.",
-    "<b>Retiring</b> deletes the old key and records its id, so a copy that comes back is deleted on sight. <i>Keep it for now</i> is offered only when something listed would stop opening; until it's retired, every Castle surface says copies from before Castle still open through the Apple account.",
+    "<b>One key, every library.</b> Today's builds lock every Standard library on an Apple account with one shared Apple key, on every device. Deleting it deletes it everywhere, with no recovery — so nothing loses its road through it before you choose to retire it.",
+    "<b>The move</b> (each device's migration) only adds: everything this Mac holds in Standard gains an Apple key of its own beside the old one — a local-only live library, and other libraries' copies (this Mac's own key file for each) — then a fresh backup. A synced account stays on the old key until it enters Castle or is re-linked: its vault has room for one Apple copy, and macOS can't say whether iCloud Keychain carried a new key.",
+    "<b>The checks</b> (Use Castle, or the door on a store already in Castle): the move runs again; then, with the old key taken away, every copy this Mac can see — other libraries' and other Macs' in a shared backup folder included — and every account vault it can read. They list what would stop opening, and every Standard library or copy here with no passphrase or words. A vault still on the old key stops the retirement.",
+    "<b>The sheet</b> lists those things by name, and says what the Mac can't see: give any library still in Standard on your other devices a passphrase or words first — one with neither, on a device that's lost or reset, opens elsewhere only if iCloud Keychain carried its key, or not at all if that device hadn't been updated.",
+    "<b>Retiring</b> deletes the old key and records its id, so a copy that comes back is deleted on sight. <i>Keep it for now</i> is offered only when the list isn't empty; until it's retired, every Castle surface says copies from before Castle still open through the Apple account.",
 ]
 
 
 def who_table(target):
     rows = [
         ("You, on your Mac", "Touch ID or passphrase", "opens, nothing asked"),
-        ("You, on a new Mac, with your Apple account only", "no — needs your passphrase or words", "yes"),
+        ("You, on a new Mac, with your Apple account only", "no — needs your passphrase or words", "yes, when iCloud Keychain carried the key"),
         ("You, on a new Mac, with your passphrase or words", "yes", "yes"),
         ("Someone who knows this Mac's login password", '<span class="n">nothing</span> (Markdown exports you made are plain text)', '<span class="y">everything</span>'),
         ("Someone in your Apple account", '<span class="n">nothing</span>', '<span class="y">everything Variorum keeps</span>'),
@@ -619,7 +620,7 @@ CHECKLIST = [
     ("S-1", "Standard: the library key's device copy is a silent item per key; no Touch ID item", "scenario promise 3 · drill"),
     ("S-2", "Standard: the key file locks the current key with this library's Apple key (named by its id), the passphrase and the words", "model test · drill"),
     ("S-3", "Standard: Apple keys are minted only by a deliberate act or the migration, under fresh ids; an account keeps the one its vault names; other devices wait for it", "convergence suite (the follow race)"),
-    ("S-4", "Standard, synced: the vault's Apple copy is under the account's own Apple key, named by its id; a vault on the old shared key is moved off it", "fake-server suite · fixed scenario (an older build's Re-link)"),
+    ("S-4", "Standard, synced: the vault's Apple copy is under the account's Apple key, named by its id — its own key once made or re-linked by this build; an account from before stays on the old shared key until it enters Castle or is re-linked; nothing moves a vault automatically", "fake-server suite · fixed scenario (an older build's Re-link)"),
     ("S-5", "Re-link mints a fresh account key under the vault's CAS; nothing this build writes is locked with the old shared key", "executor tests · drill"),
     ("R-1", "The protection record inside the library file states the mode and account; this Mac's memory agrees", "scenario promise 1"),
     ("R-2", "This Mac's memory holds no secret; its protection-weakening fields are sealed; an edited one reads as the stricter value", "scenario promise 10 · adversary scenarios"),
@@ -630,8 +631,8 @@ CHECKLIST = [
     ("T-3", "Replace All Keys and the follow run as drawn; the old key joins the history; the refusal names a change made elsewhere", "executor tests · drills · walk"),
     ("T-4", "Opening an older backup brings it in under today's key and mode, never lowering it, nothing more typed", "fixed scenario VX-209 · restore drill · walk"),
     ("T-5", "A Castle copy from another Mac raises a Standard library to Castle; an unknown-key copy is flagged; a different library keeps its own mode, said concretely", "fixed scenarios · walk"),
-    ("T-6", "The migration runs as drawn: the fold, then every Standard library moved to a key of its own, then a fresh backup", "migration drills per shape · her stores' byte-copies · fixed scenario (the window after the move)"),
-    ("T-7", "Retiring the old shared key runs as drawn: the moves again, the checks, the sheet's list exactly what would stop opening, a vault still on it stopping the retirement, keep-for-now only with a list", "fixed scenarios (two libraries on one Apple account; an older build's Re-link) · walk"),
+    ("T-6", "The migration runs as drawn: the fold, then keys of their own beside the old one for everything in Standard, then a fresh backup — removing no road", "migration drills per shape · her stores' byte-copies · scenario promise 12 · fixed scenarios (the window after the move; iCloud Keychain off)"),
+    ("T-7", "Retiring the old shared key runs as drawn: the move again, the checks, the sheet listing exactly what would stop opening and every Standard thing with no passphrase or words, a vault still on it stopping the retirement, keep-for-now only with a list", "fixed scenarios (two libraries on one Apple account; an older build's Re-link) · walk"),
     ("A-1", "The four account situations behave as the table says; signing in or out changes nothing", "account-sequence walk · scenario promise 4"),
     ("A-2", "New writing belongs to the library's account", "state-transition suite"),
     ("L-1", "The lobby's Touch ID line and button follow the table (VX-310)", "lobby tests · walk on a Mac with and without an enrolled finger"),
