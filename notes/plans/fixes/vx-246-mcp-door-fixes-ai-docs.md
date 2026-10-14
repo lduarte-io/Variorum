@@ -122,8 +122,8 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | U1b — VX-258's face and U1's remainder | WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5), and U2's MCP walk legs W2/W3 (no detour needed once the face exists). Note for W2/W3: on an empty redo stack the Redo item is DISABLED (`EditorCommands.swift:576`, unchanged), so "nothing to redo" reads as a disabled item, never a toast (U2 STAGE RUN's finding 1) |
 | U2 — the undo class | **WINDOW 1 PROVEN 2026-10-14 00:23–00:38** (U2 STAGE RUN below): the Mac batch 1,084 tests / 148 suites green (1,078 + 6 gated skips, 0 failed — U1's G1–G3 included), W1 proven in both voices, the dev store restored cmp-SAME. Open only for W2/W3 in U1b's window. — Earlier: BUILT, headless green at `10223a2d` (MCP 223/48 · core 2,826/326 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~634–690k context (the cutover rule). Its stage window (the Mac batch with U1's groups, plus W1, her own door) goes to a FRESH runner; W2/W3 move to U1b's window. The acceptance closes when W1–W3 have run |
 | U3 — her editor vs the wire | **WINDOW PROVEN 2026-10-14 02:18–02:54** (U3 STAGE RUN below): W1 red on old 7/8 (17 issues) as designed; W2 1,470 tests / 215 suites green, the one failure VX-167's standing `redoNeverAsks` (alone: green); W3a (a real Claude Code, both voices) and W3b (53 ms / 51 ms after her last keystroke) proven; the store restored cmp-SAME. Finding A (a wire note delete in the OTHER pane moves her focus) is ruled provisionally (ruling 2) and fixed after U4's plan, its proof riding U4's window. — Earlier: BUILT, headless green at `61ec7723` (MCP 236/49 · core 2,826/326 · workbook 40/6; both Mac products built: `vx246-u3-red` is the red-on-old product, `vx246-u3` the fixed one). The implementer is retired at ~620k context (cutover). Its window (`vx246-u3`: the Mac pins red on old, the 215-suite batch, Claude Code by U1's detour, and the timing driver) goes to a FRESH runner. VX-323 (the wider class) was born and fixed here |
-| U4 — the faces after big writes | BUILT, PAUSED at `3d1c5dd6` for U3's window (~499k context). VX-230 traced: TK2 reports unlaid paragraphs as empty frames at the top-left, so badges piled at block 1; fixed in `EditorViewModel.refreshBadges`. VX-231 traced: the Bookcase word count was re-read only on appear and its own buttons; fixed in `ShelfViewModel.start`. Mac pins are written but not run, and both products are built. Next: the same implementer writes piece 6 (the batch list and THE STAGE WINDOW plan), then a FRESH session adds ruling 2's fix and runs U4's window with its proof |
-| U5 — the write tools' shapes | NOT-STARTED |
+| U4 — the faces after big writes | **READY FOR STAGE** at `dcfb6123`: piece 6 written (271-suite batch, THE STAGE WINDOW plan for `vx246-u4`, self-assessment, OWED). Products: `vx246-u4-red` (U4's pins, no fix) and `vx246-u4` (both fixes). The window goes to a FRESH runner; its step 6 (ruling 2's proof) moves to U5's window, where ruling 2 is built (orchestrator call). — Earlier: BUILT, PAUSED at `3d1c5dd6` for U3's window (~499k context). VX-230 traced: TK2 reports unlaid paragraphs as empty frames at the top-left, so badges piled at block 1; fixed in `EditorViewModel.refreshBadges`. VX-231 traced: the Bookcase word count was re-read only on appear and its own buttons; fixed in `ShelfViewModel.start`. Mac pins are written but not run, and both products are built. Next: the same implementer writes piece 6 (the batch list and THE STAGE WINDOW plan), then a FRESH session adds ruling 2's fix and runs U4's window with its proof |
+| U5 — the write tools' shapes | NEXT — spawns from the U5 BRIEF below once U4's runner reports READY, under the PAUSE protocol. Its piece 0 is ruling 2's fix |
 | U6 — Compare from the wire | NOT-STARTED |
 | U7 — the agent's read-backs | NOT-STARTED |
 | U8 — the AI's docs (LAST) | NOT-STARTED — waits for VX-281's merge |
@@ -271,7 +271,10 @@ list holds the calls that would otherwise have waited for her.)*
      note, never to move her typing elsewhere, and a calm surface never steals the caret.
    - **The side effect, said:** her own door deleting from one pane a note open in the OTHER pane no longer moves her
      focus either.
-   - **Built:** after U4's plan, red-first, with its proof in U4's window.
+   - ~~**Built:** after U4's plan, red-first, with its proof in U4's window.~~ *[re-placed 2026-10-14 ~03:20 by
+     the orchestrator]* **Built as U5's piece 0,** red-first. **Proven in U5's window** with a REAL client: a
+     `delete_note` on the note in her other pane while her caret types in the first, and her caret stays. U4's window
+     runs on its products as built, so it isn't held for a rebuild.
 
 ## Tickets minted from this run
 
@@ -284,6 +287,7 @@ list holds the calls that would otherwise have waited for her.)*
 | VX-324 | U3's OWED 2 (the implementer, 2026-10-14) | The Takes board's Lock / Archive / Delete-take doors may not flush her typing first. Her own doors; noticed, not reproduced | Todo, v1 release readiness, Bug. Probe red-first before any fix; NOT this run's |
 | VX-327 | U4's OWED (the implementer, 2026-10-14) | Callouts, comment cards and seams may read TK2's empty frames for unlaid paragraphs the same way the badges did, and pile at the top in the book view's editor after a width change | Todo, v1 release readiness, Bug. Probe red-first before any fix; NOT this run's |
 | VX-328 | U3 STAGE RUN's finding B (the runner, 2026-10-14) | With a split open, the Library catalog in the right pane draws past the divider and clips the left pane's header (both voices) | Todo, v1 release readiness, Bug; possibly VX-283's. NOT this run's |
+| VM-17 | U4's OWED 3 (the implementer, 2026-10-14) | The phone's fan badges may pile at the first block on long fanned notes, like VX-230 on the Mac (if they read TK2 fragment frames the same way) | the VM board (Mobile — editor & capture faces, Backlog). Probe first |
 | VM-16 | U2's OWED 2 (the implementer, 2026-10-14) | The phone's undo door says "Undid: …" on a quiet press: `MobileUndoDoor` still calls `undo(with:)`/`redo(with:)`. The fix is the Mac door's two lines; the rule itself already reaches the phone | the VM board (Mobile — editor & capture faces, Backlog); it needs a simulator stage; related to VX-276 |
 
 ## UNIT BRIEFS (the orchestrator's; each unit's implementer is spawned from its brief)
@@ -649,6 +653,88 @@ orchestrator's to run after the units; keep the record reviewable.
 **Context:** past ~500k, stop at the next clean seam (committed, green, the continuation written) and report.
 
 **Out of scope:** every other unit's members; U1b; the guide (U8).
+
+### U5 BRIEF — the write tools' shapes (VX-267 · VX-253 · VX-252 · VX-255)
+
+**Order:** VX-267 first (VX-253's matcher needs its form), then VX-253, VX-252 and VX-255. Every member is ruled;
+its ticket is the record, quoted here.
+
+1. **VX-267: AI take labels drop "suggested".**
+   - **HER RULING, verbatim:** *"why do we need claude-code \* suggested \* english. isn't it obvious it's suggested if
+     it's claude? seems like an extra word."*
+   - Since her label-split ruling (VX-197), the client prefix appears only on takes an AI adds at SUGGEST, inside
+     her writing, so the name already says it was proposed.
+   - `aiLabel` (13n's P-13n-3 convention, hers to re-voice) becomes `<client>` or `<client> · <label>`.
+   - Existing takes keep their labels: labels are text, so no migration. VX-253's matcher accepts both forms.
+     `aiLabel`'s tests are re-pinned.
+   - **Truth:** any tool description or instructions line that states the OLD form is now false; correct it in this
+     unit (doc-truth). U8 re-voices the docs later.
+   - Pre-launch: settle the convention before public users create takes in the old form.
+2. **VX-253: `save_lens` by take label.** RULED, her word: *"I like your 253 recommendation"*, with her
+   clarification built in:
+   - **Three explicit fills, never a magic word:** `picks`, `label`, or `pin_chosen: true`. `picks` ride on either
+     rule as per-block overrides, applied FIRST, so a block a pick covers is never ambiguous.
+   - **A block with no take of that label** shows its chosen take and is listed in `unmatched_blocks`.
+   - **An AMBIGUOUS block** (two takes of that label) that no pick covers refuses the whole call, naming those
+     blocks. The retry passes the same rule plus `picks` for exactly those blocks, or the first call does when the
+     agent already knows.
+   - **Labels match exactly as stored,** plus one convenience: a client's OWN suggestions match by their own part.
+     Per VX-267 the stored form is `<client> · <label>`, and the legacy `<client> · suggested · <label>` matches too.
+     Never another client's. Her "english" plus the AI's suggested "english" on one block counts as two matches, so
+     the call refuses.
+   - `save_lens` stays at SUGGEST. Its cost is proportional to the note's blocks: the lens names one take per block.
+3. **VX-252: `create_note` returns take ids, and accepts `section_id`.**
+   - Per block, it answers the shown take's id plus each extra take's id and label, in order. This matches
+     `add_take`, which already returns `take_id`.
+   - An optional `section_id` files the note in a chapter in the same call. Argue its rung and its refusals: the
+     chapter must belong to the book the note joins.
+   - Check `import_document`'s answer for the same gap, and close it the same way if it is real.
+4. **VX-255: `insert_blocks` into an existing note.**
+   - **RULED, her word:** *"VX-255: agreed, write new lets them add blocks at the end, edit lets them write blocks
+     anywhere. I think that's a fair line to draw."*
+   - The shape is `insert_blocks(note_id, after_block_id?, blocks)`, using `create_note`'s block shape.
+   - At WRITE NEW it appends at the note's END only. Inserting after a specific block needs EDIT, the line the
+     catalog already draws for every placing act.
+   - It runs as ONE transaction with ONE client-named undo, on §9 newBlock's road. The entry follows U2's undo rule:
+     each half answers whether it changed anything.
+   - It answers `flushesHerEditorFirst` (U3's exhaustive switch), argued in the record.
+   - Pre-launch: it closes an R-VX184-1 parity gap ("as capable as her at the keyboard").
+
+**Lanes and words.**
+- Tool descriptions live in `Sources/VariorumMCP` (ours). If a new act's Activity words or a pane refusal's words
+  live in VX-281's lane (`MCPPaneCopy.swift` and the like), don't edit them: record the words as OWED for U1b, after
+  VX-281's merge. A sentence that falls back to a tool id meanwhile goes on that list.
+- **Wording ships as built** and goes on the FOR VX-234 list.
+
+**Evidence that closes U5.**
+- **Pins**, red-first per member and red again by revert. A pure addition (a new parameter or tool) is red by its
+  absence on the old tree.
+- **The whole headless package green,** with counts.
+- **THE STAGE WINDOW plan** in your record (claim `vx246-u5`; minutes; a batch-only fallback):
+  - a Mac batch over every changed source file's suites;
+  - a REAL-client live round on the dev store: `claude -p` turns that use each new shape;
+  - the round's acts: `create_note` answering ids and filing into a chapter; `save_lens` by label meeting an
+    ambiguous block, then its `picks` retry; `insert_blocks` at the end at WRITE NEW, refused mid-note at WRITE NEW,
+    then anywhere at EDIT; and the new label form seen in Takes, captured.
+  - `claude-code` connects by U1's documented detour (Deny → re-run → Approve), registered `-s local` in a scratch
+    project only; her user-scope servers are fingerprinted before and after.
+
+**Context:** past ~500k, stop at the next clean seam (committed, green, the continuation written) and report.
+
+**Out of scope:** every other unit's members; U1b; the guide and `MCPSession.instructions` beyond doc-truth (U8).
+
+**PIECE 0, before the members: ruling 2's fix** (ORCHESTRATOR'S PROVISIONAL RULINGS, ruling 2: a navigate-away never
+takes her focus).
+- **The defect:** `WorkspaceModel.notesDeleted` sends each pane showing a dead note to the Library through
+  `select(.library, in:)`, and `select` sets `focusedPane = pane` (`WorkspaceModel.swift`, about line 186).
+- **The fix:** a pane showing a dead note goes to the Library IN PLACE, and the focused pane stays focused.
+- **Pin:** red-first, a Mac pin with two panes, focus in pane 1, and pane 2's note dying; its red run is part of your
+  window. Search the Mac tests for `WorkspaceModel`, `notesDeleted` and the navigate-away suites, and add every suite
+  that reaches it to your batch.
+- **Proof:** in your live round, while her caret types in pane 1, a real client's `delete_note` takes down the note
+  in pane 2. Pane 2 goes to the Library and her caret stays in pane 1, captured in both voices.
+- **Lanes:** this is VX-283's road (VX-123), and VX-123 carries a comment about it. Neither vx-281 nor vx-282 lists
+  `WorkspaceModel`.
 
 ## UNIT RECORDS
 
