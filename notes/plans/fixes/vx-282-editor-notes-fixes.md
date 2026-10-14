@@ -2929,6 +2929,67 @@ final call → the IMPLEMENTER applies the confirmed fixes (red-on-old per bug-c
 writes no fix (no `Sync/` lines exist; it marked nothing FINDER-FIXES); this being the final round, its fixes get the
 orchestrator's line-by-line check against each finding. Responses and the final call: PENDING below.
 
+#### THE IMPLEMENTER'S RESPONSES (the round-1 fix leg's `opus-implementer` session, 2026-10-14; read-only — no code changed)
+
+Each finding re-traced in the tree at `dcc42b6c`.
+
+- **F-1 — AGREE (doc-only, as proposed).** Traced: `closingSingle`/`closingPair` (`MarkdownSyntax.swift:614-640`) walk
+  forward from the opener and return the FIRST index `closerFlanks` (`:648-650`) accepts; with `rescue == 5` in
+  `*foo *bar*` the interior star at 5 is accepted before the real closer at 9, so the span becomes `foo ` and `bar*`
+  reads plain — the test's own line (`MarkdownCaretRescueTests.swift:130`) asserts exactly that. Reachable by a caret
+  MOVE onto the interior star (an arrow left from `*foo *|bar*`, a click), not by forward typing (typing a star there
+  leaves the caret after it, a gate-negative point). It is the ruled letter ("a closer right at the caret still
+  closes"), but my R1-5 sentence in #220 — "a caret only ever changes the reading at the one spot" — reads as
+  add-only, which this falsifies: the reading changes only WHILE the caret sits at that spot, and the change can
+  shorten a span that already stood. The leg: #220 gains two sentences naming the class (`*foo *bar*`, `*2 * 3 = 6*`)
+  and the narrowing as her option (b) — rescue only where no caret-blind span already covers that marker — and the U2
+  record's "Edges recorded" list gains the line. No pin (no behaviour changes).
+- **F-2 — AGREE (a real residual of R1-7; MINOR is right).** Traced: `adoptHeader` (`EditorViewModel.swift:806-816`)
+  writes neither `isEditable` nor the flip-settle while `structuralInFlight`; `runStructural`'s defer
+  (`EditorSurfaceController.swift:2962-2963`) re-derives `isEditable` from the header DIRECTLY, with no settle. Two
+  variants reach the stale honour, and both matter to the fix's shape: (i) the reviewer's — the act's landing
+  (`applyStructuralResult`) falls on a rescue point while a locked header has already been adopted mid-flight;
+  `holdsCaret` reads the flight fence as "holds a caret" and honours it; (ii) a NO-landing flight — the caret honoured
+  before the act, a seal adopted mid-flight, and the op itself refuses (a sealed post refuses the authoring write), so
+  no selection change ever happens and the honour simply persists past the defer. Reach is a sync-delivered seal racing
+  a few-ms flight (her own seal door awaits the chain first — `finalizeWork` — so it never lands inside one). **Two fix
+  shapes, the reviewer's call:** (a) the reviewer's — one line in `runStructural`'s defer after the editable re-derive,
+  `model.settleMarkdownCaret()`; covers (i) and (ii) (the defer drops `structuralInFlight` first, so `holdsCaret` reads
+  the sealed `isEditable`). BUT `EditorSurfaceController` is VX-246's declared lane (the run's overlap section; the
+  orchestrator was to tell vx-246 before this run edits it). (b) model-side, zero lines in `EditorSurfaceController`:
+  `holdsCaret` reads the NOTE's editability during a flight (`structuralInFlight ? header.map { !$0.locked } ?? false :
+  isEditable`) and `adoptHeader` re-settles when that note-level editability FLIPS whether or not a flight is up (a
+  settle is attributes-only and guards `editedMask`; a header delivery reaches the main actor only at the flight's
+  `await` points, never inside a synchronous rewrite). (b) clears the honour the moment the seal arrives and keeps the
+  landing from re-honouring — both variants. I lean (b) for the lane alone; (a) is the smaller diff. Pin, either shape:
+  red on current — hold the writer (`aKeystrokeDuringTheFlightIsDeferredNeverDropped`'s rig), honour the caret at a
+  rescue point, start a structural act, `adoptHeader` a LOCKED header while `structuralInFlight`, release, flush;
+  assert the span plain and `isEditable == false`. Variant (ii) is the deterministic one to build (no landing needed at
+  a rescue point); whether the op refuses or lands elsewhere, the assertion holds only on the fixed tree.
+- **F-3 — AGREE; I would TAKE it into the F-2 leg.** Traced: `MarkdownFaceCore.settleCaret` (`:237-271`) returns `true`
+  whenever the ledger planned, discarding both inner `restyle` results (`:264-272`), and `restyle` returns `false`
+  exactly when the lines carry no span and no prior face (`:183`). A gate-positive caret no opener pairs with
+  (`hello |*x`) therefore makes Write bump the generation and redraw the viewport (R1-2), and a pane reset its paint
+  record (R1-1 — the next read update then re-adds paint over itself, an A47c-class attribute write) and remeasure, on
+  every such caret move. Cost only, bounded; the fix is the reviewer's (`return clearWrote || honourWrote`), one line in
+  the shared face, both platforms (the phone discards the result). A cheap red-on-old pin exists: on `hello *x`, a caret
+  move onto offset 6 leaves `overlayGeometryGeneration` unchanged (red on current — it bumps).
+- **F-4 — AGREE it is speculative; RECORD, do not fix.** Re-checked the roads I can name: the coordinator returns
+  `true` from `shouldChangeTextIn` always (it observes, never gates), typing/paste/undo/redo/drag-move/marked text each
+  end in `textDidChange`, and a read pane (`isEditable == false`) never reaches the delegate's change question. No
+  concrete road leaves `pendingEditReplaced` set, so there is no red-on-old pin to write, and contract rule 3 says a
+  fix without a traced mechanism waits. Consequence if a road ever appears: pure caret settles wait for the next
+  keystroke (a lagging italic, self-healing). The record line goes in the U2 edges beside F-5's.
+- **F-5 — AGREE (doc-only).** Traced: the settle's CLEAR arm restyles the line the caret LEFT, wherever it is; in Study
+  that re-wraps it (±1–2 lines at a paragraph's scale — W1 measured one line, 22 pt, at 200 words). Whether the page
+  nudges is TextKit's: TEXTKIT2 §3 records that 27.0's viewport pass moves the clip to compensate an estimated-stretch
+  re-base ABOVE the viewport (18k C6) while an edit has no such pass, and this road now asks for a display pass (R1-2's
+  `needsDisplay`) — so the nudge's size on screen is unmeasured here. The line in the U2 record's edges says the
+  occasion (caret parked at a rescue point, a scroll away, a click), the physics, and that it is unmeasured.
+
+**Summary for the reviewer's call:** agree all five; code for F-2 (shape (a) or (b) — the lane question is the
+orchestrator's) and F-3 (taken, with its pin); docs for F-1 and F-5; F-4 recorded only.
+
 ## Closeout
 
 *(Pending.)*
