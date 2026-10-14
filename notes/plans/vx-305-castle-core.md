@@ -547,7 +547,18 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   commit. The U1+U2 suites: 154 tests in 35 suites green in Debug; 134 in 32 green under `swift test -c release` (the
   three DEBUG-only mutation suites compiled out). The full core suite green in Debug (its first run met one
   perf-timing issue under load, green alone and on the re-run — the record's first line).
-- U3 — the executor and the acts: **NEXT.**
+- U3 — the executor and the acts: **IN-PROGRESS** (Opus implementer, 2026-10-14; reading done — the canon, the
+  resiliency protocol, the design whole, this plan whole, SyncSpec §3, pre-13x §1–§7 and §14, the Apple facts, U1's and
+  U2's code whole, today's runner `PostureSwitch.swift` and `CorpusRotation.swift`'s driver). Pieces, each its own
+  commit: (a) the leaves, the vault model (the `Sync/` half MODELLED in `Protection/Executor/`, zero `Sync/` lines),
+  the executor's core — the session at unlock, this Mac's facts written in both homes, the plan runner (begin, steps,
+  resume, the commit point, roll back before it, finish from the record after), the repairs with their preconditions
+  verified — and the in-memory test world — NOT-STARTED; (b) the crossings — Use Castle, Use Standard, Replace All
+  Keys, the follows — NOT-STARTED; (c) the account acts — set up sync, enroll, the four leaves, Move — NOT-STARTED;
+  (d) copies — open a copy, land, Send Library, plaintext export, the offer's delete — NOT-STARTED; (e) the key doors,
+  device settings, the re-arm, confirm mode, create library, Re-link (both arms), the old shared key's move and
+  retirement, the migration — NOT-STARTED; (f) U3's guards with their DEBUG mutation pins, the log scan, decision 35,
+  the failed seals — NOT-STARTED; (g) the record — NOT-STARTED.
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
 - The go/no-go record: **NOT-STARTED.**
 
