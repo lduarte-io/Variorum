@@ -3,9 +3,14 @@
 **STATUS: OPEN — kickoff 2026-10-13 (evening).** Run ticket **VX-282** (project *v1 release readiness*) ·
 branch `vx-282-editor-notes-fixes` · worktree `~/dev/variorum-vx-282` on the Pro · PR `VX-282: …` (merge commit
 only). Shape: `/run-phase` on the run ticket, at her word. Orchestrator: session **variorum-da** (Opus 5.5).
-Cast (CLAUDE.md's standing rule, the runway §1): `opus-implementer` builds, ONE fresh session per unit, strictly
-sequential; **`fable-reviewer`** cold-reviews the whole run's diff (VX-290 is `EditorTextView` +
-`BlockRangeIndex`; VX-296 restyles the live storage). No agent runs concurrently with another.
+Cast — **her word at kickoff (2026-10-13, verbatim):** *"you're running as the orchestrator Opus at Max thinking -
+run implementers on xhigh and Opus cold review on Max. Run a fable cold review when you need to if you do & at the
+end of the phase if you didn't need that."* So: `opus-implementer` at **xhigh**, ONE fresh session per unit,
+strictly sequential; the ladder's cold reviews are **`opus-reviewer` at max** (same-model: the orchestrator
+arbitrates against the spec); **one `fable-reviewer` cold review over the whole run's diff** — the editor seam
+(VX-290 `EditorTextView` + `BlockRangeIndex`; VX-296's live-storage restyle) is the need CLAUDE.md names, and it
+lands at the run's end, where it covers the whole diff (cross-model flow for its findings: Fable makes the final
+call and implements its confirmed fixes). No agent runs concurrently with another.
 
 **The kickoff is the runway's section** — `notes/plans/vx-33-release-runway.md` § "VX-282 — Run: Editor & notes
 fixes" (quoted whole below), plus §2's conflict map and §3's rules for every run. Each member's ticket body
@@ -116,6 +121,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
   dev store last left Standard + unlocked (vx-184, 15:35) — leave it so; walks need "walk" plainly in the
   REQUEST (it checks she isn't using the Pro); /Applications stays 7045 until the next release; no real-store
   MCP calls or real-app launches without her recorded word.
+- 2026-10-13 — REQUEST sent early for `vx282-u1` (≈40 min: the Mac batch + the red-on-old revert run + a short walk); coordinator: queued FIRST, nobody ahead; zero-slot recorded for VX-282; at READY it checks she isn't using the Pro before the walk part (if she is, the GO covers batch + revert, the walk gets its own short GO).
 
 ## Unit records
 
