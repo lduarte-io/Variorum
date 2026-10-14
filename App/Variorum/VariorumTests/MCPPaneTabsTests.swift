@@ -220,6 +220,28 @@ struct MCPPaneTabsTests {
         #expect(AppSettingsView.rowIDsRendered[.mcp] == ["mcpServer", "mcpWaiting", "mcpOpenBook"])
     }
 
+    /// **VX-281 ladder R1-4 (RED ON OLD):** the setup's own words land on
+    /// CONNECT — where R-VX184-6 put the setup. They were keywords on the
+    /// server switch's row, whose lead lands on no tab, so the pane opened by
+    /// its rule: on Clients once a client was approved — searching "codex" to
+    /// add a second client put the Codex setup behind a tab, the very hunt her
+    /// ruling ended.
+    @Test func aSearchForTheSetupsWordsLandsOnConnect() throws {
+        for word in ["codex", "setup", "json", "stdio", "claude code", "connect"] {
+            let found = try #require(
+                SettingsSearch.findings(matching: word, in: SettingsSearch.settingsEntries)
+                    .first { $0.pane == .mcp && $0.kind == .setting },
+                "“\(word)” finds the MCP pane")
+            #expect(MCPPaneTab.holding(findingLead: found.lead) == .connect,
+                    "“\(word)” lands on Connect, where the setup is (its finding: “\(found.lead)”)")
+        }
+        // The pane's other words still find it, and land as before.
+        let server = try #require(
+            SettingsSearch.findings(matching: "server", in: SettingsSearch.settingsEntries)
+                .first { $0.pane == .mcp && $0.kind == .setting })
+        #expect(MCPPaneTab.holding(findingLead: server.lead) == nil, "the switch sits above the tabs")
+    }
+
     // MARK: - One line each (R-VX184-6 — "every explainer cut to one line")
 
     /// A summary's ideal width in SwiftUI's own `.caption` (measured, not
