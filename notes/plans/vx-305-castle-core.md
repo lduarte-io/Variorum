@@ -534,7 +534,7 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
 - U1 — the model: **IN-PROGRESS** (implementer session started 2026-10-14; the reading done — CLAUDE.md and its canon,
   the resiliency protocol, the design whole, this plan whole, SyncSpec §3, pre-13x §1–§7 and §14, the Apple facts, the
   listed code). The pieces, each its own commit, flipped here as each lands:
-  - (a) Names · the mode · the seal (HKDF + HMAC) and `Sealed<T>` — NOT-STARTED.
+  - (a) Names · the mode · the seal (HKDF + HMAC) and `Sealed<T>` — DONE (this commit; its 9 tests green, filtered run).
   - (b) the protection record (library facts, family tree, device sections, hardware marker) · what this Mac remembers ·
     plans — NOT-STARTED.
   - (c) key file format 3 (wraps, history, the Castle anchor, the master's words copy, the four crossings) —
