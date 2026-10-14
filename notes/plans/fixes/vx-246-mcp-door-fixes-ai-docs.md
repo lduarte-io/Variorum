@@ -1691,13 +1691,17 @@ min, claim 30):** steps 0, W1, W2 and the release — the live round then moves 
      **Approve…** → the grant sheet: the HOME wing · Edit · Always (the dev store; restored after).
    - **delete_block while she types:** a fresh note **"vx275 e"** ("One." ⇧⏎ "Two." ⇧⏎ "Three." ⏎) open in Write; the
      driver armed (`… driver.py <shim> vx275-driver delete_block "vx275 e" "Three." <scratch>/go-e`, background, READY read
-     from its stderr); the caret clicked to the end of "Three."; then IN ONE Bash call `keys.sh <pid> type " pending words"`
-     immediately followed by `touch <scratch>/go-e` → the driver's answer (`isError` false, `ms_after_trigger`) → capture:
+     from its stderr); the caret clicked to the end of "Three."; then IN ONE Bash call `Tools/WalkKit/keys.sh <pid>
+     'keystroke " pending words"'`, `python3 -I -c 'import time;print(time.time())'` (the moment her typing ended), and
+     `touch <scratch>/go-e` → the driver's answer (`isError` false, `fired_at`, `answered_at`). **The timing is the
+     evidence:** `answered_at` − the typing's end < 0.5 s ⇒ the act landed INSIDE her debounce, so only the pre-act flush
+     can have saved her words (if a leg comes in over 0.5 s it proves nothing about the hook — re-run it once) → capture:
      the block gone, the caret at the END of "Two." (no block below — the block above's end). This Note's Tray ▸ Leaving ▸
      "Three. pending words" ▸ Put back → **"Three. pending words"** on the page (capture) — her keystrokes, typed
      milliseconds before the delete, survived it.
-   - **delete_note while she types:** a fresh note **"vx275 f"** ("Fresh line." ⏎) open in Write, the driver armed for
-     `delete_note "vx275 f"`; type " pending words" + touch the trigger in one call → the pane leaves the note (capture) →
+   - **delete_note while she types:** a fresh note **"vx275 f"** ("Fresh line." ⏎) open in Write, the caret at the end of
+     its line, the driver armed for `delete_note "vx275 f"`; the same one-call keystroke + time + trigger (the same < 0.5 s
+     reading) → the pane leaves the note (capture) →
      the Trash ▸ "vx275 f" ▸ Put back → **"Fresh line. pending words"** (capture).
    - Both voices are covered by W3a's faces; W3b is the pending half's evidence (Study). **Optional, only if minutes
      remain (the red contrast on the real app):** quit, `open -n` the `vx246-u3-red` app, repeat the delete_block leg once →
