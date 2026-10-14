@@ -552,7 +552,9 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   `570583d9`, tests in this piece's commit); (e) `assess`: repairs with §3.3's guards, acts owed, doors with reasons,
   the old shared key's checks and the move's subjects, the open rule — DONE (this piece's commit; the seven
   `Assess…Tests` suites + `OpenRuleTests`, 50 tests green, filtered); (f) U2's
-  `ProtectionGuards` and their DEBUG mutation tests, both configurations' runs, the record — NOT-STARTED.
+  `ProtectionGuards` and their DEBUG mutation tests — DONE (this piece's commit: `AssessGuardsOnTests` +
+  `AssessGuardMutationTests`, 15 tests green, filtered — each of the fourteen assess/open-rule guards red with its
+  switch off; retention's fifteenth beside its suite); both configurations' runs and the record — IN-PROGRESS (PENDING).
 - U3 — the executor and the acts: **NOT-STARTED.**
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
 - The go/no-go record: **NOT-STARTED.**
