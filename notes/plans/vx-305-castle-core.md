@@ -1,7 +1,19 @@
 # VX-305 — Castle rebuild, phase 1: the headless core
 
-**Status: READY, not started (plan written 2026-10-13; revised the same night to the design's round-2 shape, and on
-2026-10-14 to round 3 and its late extra read).**
+**Status: OPEN — kicked off 2026-10-14 (`/architect-phase vx-305`; plan written 2026-10-13; revised the same night to
+the design's round-2 shape, and on 2026-10-14 to round 3 and its late extra read).**
+
+> **KICKOFF SITTING (2026-10-14, the author via the question tool — recorded before the first spawn):**
+> - **The cast: the standing default, her pick** — Fable (this session) orchestrates and cold-reviews
+>   (`fable-reviewer`); Opus implements at xhigh, one unit per session. (The runway's Opus-orchestrates economy was
+>   offered beside it and not taken.)
+> - **VX-340: option (a) CONFIRMED** — the hardware marker is a hash of the hardware identity AND the macOS login's
+>   stable identity, with the record's random salt, so a second login on the same Mac starts its own device identity.
+>   The §1/VX-340 PROVISIONAL mark is resolved; option (b) (hardware-only marker + a refusal on a mismatched login)
+>   was offered beside it and not taken. U1 still chooses and records WHICH login identity is stable enough (the
+>   plan's §3 note).
+> - Workspace: `vx-305-castle-core` cut from `origin/main` at `f2eb1aa4`; worktree `~/dev/variorum-vx-305` (the Pro);
+>   the in-flight row holds the ONE Sync/-or-custody slot; no stage (headless).
 
 - **Ticket:** VX-305, in project "Castle & backups before launch" (flagship VX-266).
 - **The binding design:** `notes/plans/vx-266-castle-backups-prelaunch.md`. Her rulings are its §1.
