@@ -5008,10 +5008,17 @@ no history rewrite; no commit trailer. No product code is written: the merge is 
 | # | piece | state |
 |---|---|---|
 | 1 | merge `origin/main` at `f3cc8d07` (VX-282's PR #160 merge `19be2f01` + its ledgers `3ddec585` + its handoff) as a MERGE COMMIT | DONE (`8c47f877`) — see "The merge" below |
-| 2 | the headless package green, with counts (MCP, core, workbook) | NOT-STARTED |
+| 2 | the headless package green, with counts (MCP, core, workbook) | DONE — on `60e3e9e8` (the merged tree; no source after `8c47f877`): `swift build --build-tests` EXIT 0 (10:08:15–10:08:58), then `swift test --skip-build` **EXIT 0 (10:08:58–10:13:28): `VariorumMCPTests` 240 / 51 · `VariorumCoreTests` 2,860 / 330 · `StringsWorkbookTests` 40 / 6**, zero ✘. The core delta over the branch's own finals (2,841 / 329) is exactly VX-282's (+19 tests, +1 suite: main's base `fa3bc6e1` 2,790/321 → VX-282's 2,809/322); MCP and the workbook unchanged. Log `vx246-screens/closeout/logs/headless.log` (gitignored) |
 | 3 | a headless phone build (`VariorumMobile`, iOS Simulator SDK, `build` — launches nothing, boots nothing, no claim) | NOT-STARTED |
 | 4 | `vx246-final` rebuilt on the merged tree (`build-for-testing`, no claim); the u1b products' fate | NOT-STARTED |
 | 5 | THE CLOSEOUT WINDOW's plan (claim `vx246-close`) → READY | NOT-STARTED |
+
+**Machinery note (honesty, 10:07):** the first push after the merge ran `git pull --rebase` first (the run's habit), and
+with a LOCAL merge commit that linearizes: git began replaying VX-282's commits one by one onto `ac035da0` and stopped
+at a conflict at step 15. `git rebase --abort` at once restored the branch exactly (HEAD `60e3e9e8`, its parent the
+merge `8c47f877` with both parents `ac035da0` + `f3cc8d07`; the tree clean); nothing had been pushed. The branch's
+upstream had nothing new (`git log HEAD..origin/…` empty), so the push went plain. From here, pulls on this branch are
+`git pull --ff-only` (or `--rebase=merges`), never a bare `--rebase` over the merge commit.
 
 #### The merge (piece 1)
 
