@@ -327,6 +327,18 @@ final class CommentsPanelModel {
         }
     }
 
+    /// **THE PANEL'S ONE LEAVING BODY** — Close, `.onDisappear`, a popover
+    /// host's closing (VX-179 U3 FIX LEG 2's `commitDirtyEdits`, moved onto the
+    /// model so every road runs the same body and a pin can drive it). Every
+    /// comment with unsaved changes is committed; each commit captures this
+    /// model, so it lands even after the view is gone. A commit that would
+    /// write nothing writes nothing, so running this twice is harmless.
+    func leave() {
+        for id in dirtyCommentIDs {
+            Task { await self.commitEdit(id) }
+        }
+    }
+
     /// ⎋ in a comment: back to what is stored.
     func revertEdit(_ id: String) {
         drafts[id] = nil
@@ -877,14 +889,10 @@ struct CommentsPanel: View {
         .background(CommentPanelHostWatcher(onHostClosing: commitDirtyEdits))
     }
 
-    /// Commits every comment with unsaved changes — the panel's ONE leaving
-    /// body (Close, `.onDisappear`, a popover host's closing). The model is
-    /// captured, so a commit lands even after the view is gone.
+    /// The panel's ONE leaving body (Close, `.onDisappear`, a popover host's
+    /// closing) — the model's `leave()`.
     private func commitDirtyEdits() {
-        let model = model
-        for id in model.dirtyCommentIDs {
-            Task { await model.commitEdit(id) }
-        }
+        model.leave()
     }
 
     // MARK: Chrome

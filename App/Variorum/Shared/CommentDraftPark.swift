@@ -62,13 +62,21 @@ final class CommentDraftPark {
         /// THE CLEAR KEY: the insurance clears only when this same draft
         /// lands (round 3's raise).
         var commentID: String?
+        /// Why it is held: the store REFUSED it (true — every park before
+        /// VX-257, and every phone park), or she LEFT it unfiled in the Mac
+        /// panel's box when its host closed (false — VX-257). Only a refusal
+        /// earns the restored line ("…couldn't be saved"): a draft she merely
+        /// left was never refused, and the line would say so falsely.
+        var refused = true
     }
 
     private(set) var held: Held?
 
     /// A refusal parks what was SUBMITTED. Newest wins, across blocks too.
-    func park(blockID: String, text: String, commentID: String?) {
-        held = Held(blockID: blockID, text: text, commentID: commentID)
+    /// `refused: false` is the Mac panel's leaving (VX-257) — the same one
+    /// held draft, the same newest-wins rule.
+    func park(blockID: String, text: String, commentID: String?, refused: Bool = true) {
+        held = Held(blockID: blockID, text: text, commentID: commentID, refused: refused)
     }
 
     /// **The open of the SAME block reads it back — and the park KEEPS
