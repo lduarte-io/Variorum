@@ -543,7 +543,7 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   the Apple facts, the listed core and app files). Pieces, each its own commit: (a) the catalog — the one name parser
   (the union of `StoreBackup.date(fromBackupURL:)`/`BackupRestoreCandidates.backupDate`, `LibraryClassifier`'s pair
   rules, and `LibraryAdoption.adoptionStamp`/`LibraryAsideCopies`' stamp folders) and attribution to library + Mac —
-  DONE (this piece's commit; `CatalogNameTests` + `CatalogAttributionTests`, 7 tests green, filtered); (b) retention per library per Mac — NOT-STARTED; (c) the route finder, the *Opens with* line, the
+  DONE (this piece's commit; `CatalogNameTests` + `CatalogAttributionTests`, 7 tests green, filtered); (b) retention per library per Mac — DONE (this piece's commit, with U2's fifteen guards declared in `ProtectionGuards` — each proven by its piece's DEBUG mutation pin; `RetentionTests` + `RetentionGuardMutationTests`, 6 tests green, filtered); (c) the route finder, the *Opens with* line, the
   finder without the old shared key, the retirement's list, the anchor sentences — NOT-STARTED; (d) `assess`: facts,
   the mode and account verdicts, the vault's three states, the four situations, the Touch ID road — NOT-STARTED;
   (e) `assess`: repairs with §3.3's guards, acts owed, doors with reasons, the open rule — NOT-STARTED; (f) U2's
