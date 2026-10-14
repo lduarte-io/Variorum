@@ -1,0 +1,1442 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -scheme Variorum -destination platform=macOS -derivedDataPath DerivedData/vx282-u3 "-only-testing:VariorumTests/TakeToBlockDoorTests" "-only-testing:VariorumTests/CopyAllTakesDoorTests" "-only-testing:VariorumTests/OriginBlockDoorTests" "-only-testing:VariorumTests/ArchivedListingTests" "-only-testing:VariorumTests/TakesChooseRingTests" "-only-testing:VariorumTests/TakesArticleScrollTests" "-only-testing:VariorumTests/SavepointTakesDoorTests" "-only-testing:VariorumTests/SavepointCommitDoorTests" "-only-testing:VariorumTests/RecoveryDoorsTests" "-only-testing:VariorumTests/BlockHistoryPaneTests" "-only-testing:VariorumTests/NewModesTests" "-only-testing:VariorumTests/NoteTrayTests" "-only-testing:VariorumTests/TutorialTakesActsTests" "-only-testing:VariorumTests/TutorialDeletionActsTests"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  SQLCipher: https://github.com/sqlcipher/SQLCipher.swift.git @ 4.18.0
+  swift-log: https://github.com/apple/swift-log.git @ 1.16.1
+  EventSource: https://github.com/mattt/eventsource.git @ 1.5.1
+  Sparkle: https://github.com/sparkle-project/Sparkle @ 2.10.0
+  swift-syntax: https://github.com/swiftlang/swift-syntax @ 602.0.0
+  swift-system: https://github.com/apple/swift-system.git @ 1.8.1
+  swift-collections: https://github.com/apple/swift-collections.git @ 1.7.2
+  swift-dependencies: https://github.com/pointfreeco/swift-dependencies.git @ 1.14.1
+  swift-clocks: https://github.com/pointfreeco/swift-clocks @ 1.1.0
+  swift-nio: https://github.com/apple/swift-nio.git @ 2.104.0
+  VariorumCore: <home>/dev/variorum-vx-282 @ local
+  GRDB: https://github.com/lduarte-io/GRDB.swift.git @ 7.11.1+sqlcipher.1
+  mcp-swift-sdk: https://github.com/modelcontextprotocol/swift-sdk.git @ 0.12.1
+  swift-concurrency-extras: https://github.com/pointfreeco/swift-concurrency-extras @ 1.4.1
+  swift-atomics: https://github.com/apple/swift-atomics.git @ 1.3.1
+  xctest-dynamic-overlay: https://github.com/pointfreeco/xctest-dynamic-overlay @ 1.11.0
+  combine-schedulers: https://github.com/pointfreeco/combine-schedulers @ 1.2.0
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:x86_64, id:<device-udid>, name:My Mac }
+2026-10-14 01:23:10.527918-0600 Variorum[81160:58646655] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to <home>/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/io.lduarte.Variorum.debug.savedState
+2026-10-14 01:23:11.068926-0600 Variorum[81160:58646655] [global-hotkey] InstallEventHandler system=carbon status=0
+2026-10-14 01:23:11.070612-0600 Variorum[81160:58646655] [global-hotkey] RegisterEventHotKey system=carbon quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 01:23:11.508462-0600 Variorum[81160:58646731] [logging-persist] cannot open file at line 53009 of [8fa8248e30]
+2026-10-14 01:23:11.508486-0600 Variorum[81160:58646731] [logging-persist] os_unix.c:53009: (2) open(/private/var/db/DetachedSignatures) - No such file or directory
+2026-10-14 01:23:11.613816-0600 Variorum[81160:58646655] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 01:23:11.692607-0600 Variorum[81160:58646655] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 01:23:11.692974-0600 Variorum[81160:58646655] [sample-library] sample library (the adventures of sherlock holmes): alreadySeeded
+2026-10-14 01:23:11.693151-0600 Variorum[81160:58646655] [starred-gathering] starred gathering: alreadySeeded
+2026-10-14 01:23:11.693305-0600 Variorum[81160:58646655] [sample-library] welcome arrangement: alreadySettled
+Test Suite 'Selected tests' started at 2026-10-14 01:23:12.862.
+Test Suite 'VariorumTests.xctest' started at 2026-10-14 01:23:12.862.
+Test Suite 'VariorumTests.xctest' passed at 2026-10-14 01:23:12.862.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-14 01:23:12.863.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite "The Block History pane (post-13l polish round, G2)" started.
+◇ Test everyRegionReadsAsASectionAndTheListIsGone() started.
+2026-10-14 01:23:13.197355-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<Optional<ThemeStore>>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.197527-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<ColorScheme>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.197600-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<Optional<ThemeStore>>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.197640-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<ColorScheme>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.197682-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<Optional<ThemeStore>>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.197723-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<ColorScheme>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.197789-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<Optional<ThemeStore>>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.197830-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<ColorScheme>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.197890-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<Optional<ThemeStore>>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.197998-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<ColorScheme>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.198058-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<Optional<ThemeStore>>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.198102-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<ColorScheme>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.198147-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<Optional<ThemeStore>>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.198190-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<ColorScheme>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.198257-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<Optional<ThemeStore>>'s value outside of being installed on a View. This will always read the default value and will not update.
+2026-10-14 01:23:13.198287-0600 Variorum[81160:58646655] [SwiftUI] Accessing Environment<ColorScheme>'s value outside of being installed on a View. This will always read the default value and will not update.
+✔ Test everyRegionReadsAsASectionAndTheListIsGone() passed after 0.340 seconds.
+◇ Test theHistoryActIsDeclaredOnBothBarsBesideCommit() started.
+✔ Test theHistoryActIsDeclaredOnBothBarsBesideCommit() passed after 0.001 seconds.
+◇ Test theHistoryPaneOffersPutBackAndUnarchiveAndNoPurgeDoor() started.
+✔ Test theHistoryPaneOffersPutBackAndUnarchiveAndNoPurgeDoor() passed after 0.001 seconds.
+◇ Test theMountedDetailOpensTheHistoryPaneInItsRealSidePanel() started.
+✔ Test theMountedDetailOpensTheHistoryPaneInItsRealSidePanel() passed after 0.269 seconds.
+◇ Test aHistoryRequestForAnUnmountedPostIsRefusedSoTheBarCanFallBack() started.
+✔ Test aHistoryRequestForAnUnmountedPostIsRefusedSoTheBarCanFallBack() passed after 0.183 seconds.
+◇ Test theCameFromRegionShowsEveryOriginOfAMerge() started.
+✔ Test theCameFromRegionShowsEveryOriginOfAMerge() passed after 0.078 seconds.
+◇ Test everyLiveTakesSavepointRunIsInThePane() started.
+✔ Test everyLiveTakesSavepointRunIsInThePane() passed after 0.117 seconds.
+◇ Test anOrdinaryBlockHasAnEmptyHistoryAndTheCopySaysWhat() started.
+✔ Test anOrdinaryBlockHasAnEmptyHistoryAndTheCopySaysWhat() passed after 0.129 seconds.
+◇ Test aRestoreFlushesThePendingBufferBeforeItLands() started.
+✔ Test aRestoreFlushesThePendingBufferBeforeItLands() passed after 0.045 seconds.
+◇ Test theRowFacesSayWhenAndWhatAndNothingElse() started.
+✔ Test theRowFacesSayWhenAndWhatAndNothingElse() passed after 0.001 seconds.
+◇ Test onlyFormattingCondensesBehindTheAaDoor() started.
+✔ Test onlyFormattingCondensesBehindTheAaDoor() passed after 0.001 seconds.
+◇ Test theRealBarDrawsFewerDoorsAtRestThanWithAaOpen() started.
+✔ Test theRealBarDrawsFewerDoorsAtRestThanWithAaOpen() passed after 0.913 seconds.
+◇ Test theJumpOffersItselfOnlyWhenTheCaretIsInAnotherBlockOfThisNote() started.
+✔ Test theJumpOffersItselfOnlyWhenTheCaretIsInAnotherBlockOfThisNote() passed after 0.017 seconds.
+◇ Test theCaretFactIsRecordedForTheOpenNoteAndNobodyElse() started.
+✔ Test theCaretFactIsRecordedForTheOpenNoteAndNobodyElse() passed after 0.036 seconds.
+◇ Test movingTheCaretIntoAnotherBlockReportsItToTheRouter() started.
+✔ Test movingTheCaretIntoAnotherBlockReportsItToTheRouter() passed after 0.038 seconds.
+◇ Test theMountedPaneDrawsItsJumpDoorOnlyWhenTheCaretIsElsewhere() started.
+✔ Test theMountedPaneDrawsItsJumpDoorOnlyWhenTheCaretIsElsewhere() passed after 0.171 seconds.
+◇ Test everyDoorThatDeletesABlockOffersToArchiveItToo() started.
+✔ Test everyDoorThatDeletesABlockOffersToArchiveItToo() passed after 0.003 seconds.
+◇ Test theTakeCardsCarryTheSameFourActsOnBothSurfaces() started.
+✔ Test theTakeCardsCarryTheSameFourActsOnBothSurfaces() passed after 0.001 seconds.
+✔ Suite "The Block History pane (post-13l polish round, G2)" passed after 2.350 seconds.
+◇ Suite "The mode row with Read's two faces (the Act 10 correction round)" started.
+◇ Test theRowReadsAsRuledAndTheKeysFollowIt() started.
+✔ Test theRowReadsAsRuledAndTheKeysFollowIt() passed after 0.001 seconds.
+◇ Test theMemoryDecodesTheRetiredTabsIntoTheirSuccessors() started.
+✔ Test theMemoryDecodesTheRetiredTabsIntoTheirSuccessors() passed after 0.001 seconds.
+◇ Test readIsEditableOnlyWhileItsEditFaceIsAttached() started.
+✔ Test readIsEditableOnlyWhileItsEditFaceIsAttached() passed after 0.001 seconds.
+◇ Test theReadFaceOpensOnEditByRulingAndIsRememberedPerNote() started.
+✔ Test theReadFaceOpensOnEditByRulingAndIsRememberedPerNote() passed after 0.002 seconds.
+◇ Test theFieldGuideTeachesTheMergedTab() started.
+✔ Test theFieldGuideTeachesTheMergedTab() passed after 0.001 seconds.
+◇ Test theColumnDeclaresItsRowMenuActsUnderBothNames() started.
+✔ Test theColumnDeclaresItsRowMenuActsUnderBothNames() passed after 0.001 seconds.
+✔ Suite "The mode row with Read's two faces (the Act 10 correction round)" passed after 0.003 seconds.
+◇ Suite "The note's tray (13j J2/J6/J8a)" started.
+◇ Test theBadgeCountsDeletedOnlyAndHidesWhenThereAreNone() started.
+✔ Test theBadgeCountsDeletedOnlyAndHidesWhenThereAreNone() passed after 0.001 seconds.
+◇ Test theConstantIconsAreUnchangedByTheTrayDoor() started.
+✔ Test theConstantIconsAreUnchangedByTheTrayDoor() passed after 0.001 seconds.
+◇ Test theBadgeTooltipNamesTheDeletedCountAndNeverOriginals() started.
+✔ Test theBadgeTooltipNamesTheDeletedCountAndNeverOriginals() passed after 0.001 seconds.
+◇ Test theTrayIsDeclaredOnceWithAllItsDoors() started.
+✔ Test theTrayIsDeclaredOnceWithAllItsDoors() passed after 0.001 seconds.
+◇ Test aTrayDoorWithNoSidePanelToOpenFallsBackToItsOwnSheet() started.
+✔ Test aTrayDoorWithNoSidePanelToOpenFallsBackToItsOwnSheet() passed after 0.032 seconds.
+◇ Test theTrayListsWhatIsLeavingAndNotAnOriginalThatIsKept() started.
+✔ Test theTrayListsWhatIsLeavingAndNotAnOriginalThatIsKept() passed after 0.053 seconds.
+◇ Test theTraysSectionsNameOnlyStatesTheProductCanProduce() started.
+✔ Test theTraysSectionsNameOnlyStatesTheProductCanProduce() passed after 0.001 seconds.
+◇ Test putBackReturnsADeletedBlockToItsOwnPlace() started.
+✔ Test putBackReturnsADeletedBlockToItsOwnPlace() passed after 0.045 seconds.
+◇ Test putBackSaysAtTheEndWhenNoOldPlaceCanRevive() started.
+✔ Test putBackSaysAtTheEndWhenNoOldPlaceCanRevive() passed after 0.053 seconds.
+◇ Test putBackReturnsAPreservedOriginalBesideItsSuccessors() started.
+✔ Test putBackReturnsAPreservedOriginalBesideItsSuccessors() passed after 0.052 seconds.
+◇ Test putBackLandsAtTheEndWhenNoSuccessorSurvives() started.
+✔ Test putBackLandsAtTheEndWhenNoSuccessorSurvives() passed after 0.058 seconds.
+◇ Test putBackUnderASealedNoteDiagnosesInsteadOfDumpingTheEnum() started.
+✔ Test putBackUnderASealedNoteDiagnosesInsteadOfDumpingTheEnum() passed after 0.046 seconds.
+◇ Test theDeleteReceiptNamesTheRealTrayAndItsRealDoor() started.
+✔ Test theDeleteReceiptNamesTheRealTrayAndItsRealDoor() passed after 0.001 seconds.
+◇ Test everyDeleteDoorStillSpeaksTheOneGraduatedReceipt() started.
+✔ Test everyDeleteDoorStillSpeaksTheOneGraduatedReceipt() passed after 0.039 seconds.
+◇ Test noShippedCopyStillPointsAtTheRemovedUnplacedListing() started.
+✔ Test noShippedCopyStillPointsAtTheRemovedUnplacedListing() passed after 0.001 seconds.
+◇ Test theUnplacedQuerySurvivesAsTheDeveloperSafetyNet() started.
+✔ Test theUnplacedQuerySurvivesAsTheDeveloperSafetyNet() passed after 0.045 seconds.
+◇ Test aRowShowsOneLineAndAnHonestStamp() started.
+✔ Test aRowShowsOneLineAndAnHonestStamp() passed after 0.001 seconds.
+◇ Test aRevealForABlockThisTrayDoesNotHoldSaysSo() started.
+✔ Test aRevealForABlockThisTrayDoesNotHoldSaysSo() passed after 0.031 seconds.
+◇ Test aRevealForAKeptOriginalSaysItLivesInLineage() started.
+✔ Test aRevealForAKeptOriginalSaysItLivesInLineage() passed after 0.044 seconds.
+◇ Test aRevealThatSucceedsIsNotFollowedByTheNotFoundLine() started.
+✔ Test aRevealThatSucceedsIsNotFollowedByTheNotFoundLine() passed after 0.031 seconds.
+◇ Test theTrayTellsAReceiptFromARefusal() started.
+✔ Test theTrayTellsAReceiptFromARefusal() passed after 0.049 seconds.
+✔ Suite "The note's tray (13j J2/J6/J8a)" passed after 0.589 seconds.
+◇ Suite "The released original's door (13f W10)" started.
+◇ Test theCeremonyCopyNamesTheRecoverySurface() started.
+✔ Test theCeremonyCopyNamesTheRecoverySurface() passed after 0.001 seconds.
+◇ Test theCompletionNamesTheDestinationOnlyWhenSomethingRodeAway() started.
+✔ Test theCompletionNamesTheDestinationOnlyWhenSomethingRodeAway() passed after 0.001 seconds.
+◇ Test confirmingWithUncheckedTakesSpeaksTheDestination() started.
+✔ Test confirmingWithUncheckedTakesSpeaksTheDestination() passed after 0.048 seconds.
+◇ Test confirmingWithEveryTakeCheckedKeepsTheOrdinaryCompletion() started.
+✔ Test confirmingWithEveryTakeCheckedKeepsTheOrdinaryCompletion() passed after 0.044 seconds.
+◇ Test aSeedParkedAtItsStartDoesNotGetTheSplitAcrossBothReceipt() started.
+✔ Test aSeedParkedAtItsStartDoesNotGetTheSplitAcrossBothReceipt() passed after 0.047 seconds.
+◇ Test aSeedCutMidBlockStillCountsWhatRodeOntoTheFirst() started.
+✔ Test aSeedCutMidBlockStillCountsWhatRodeOntoTheFirst() passed after 0.047 seconds.
+◇ Test theRegistryDeclaresTheDoorAsABlockScopedContextAct() started.
+✔ Test theRegistryDeclaresTheDoorAsABlockScopedContextAct() passed after 0.001 seconds.
+◇ Test onlyASuccessorOfAReleasedOriginalRendersTheDoor() started.
+✔ Test onlyASuccessorOfAReleasedOriginalRendersTheDoor() passed after 0.044 seconds.
+◇ Test aPlainDividesSuccessorGetsNoDoorBecauseItsOriginIsStillOnThePage() started.
+✔ Test aPlainDividesSuccessorGetsNoDoorBecauseItsOriginIsStillOnThePage() passed after 0.044 seconds.
+◇ Test theDoorOpensTheBlocksHistoryAtItsCameFrom() started.
+✔ Test theDoorOpensTheBlocksHistoryAtItsCameFrom() passed after 0.031 seconds.
+◇ Test theBoardsProjectionCarriesTheOriginsAndItsDoorActs() started.
+✔ Test theBoardsProjectionCarriesTheOriginsAndItsDoorActs() passed after 0.041 seconds.
+✔ Suite "The released original's door (13f W10)" passed after 0.351 seconds.
+◇ Suite "The recovery doors — J3's peek, J5's lens notice, deleted takes (13j)" started.
+◇ Test theDoorsWordsNameTheActThatReleasedTheOriginal() started.
+✔ Test theDoorsWordsNameTheActThatReleasedTheOriginal() passed after 0.001 seconds.
+◇ Test theLensNoticeSaysWhichStateThePickIsIn() started.
+✔ Test theLensNoticeSaysWhichStateThePickIsIn() passed after 0.001 seconds.
+◇ Test theLineageActDeclaresItsThreeSummonedDoors() started.
+✔ Test theLineageActDeclaresItsThreeSummonedDoors() passed after 0.001 seconds.
+◇ Test theDeletedTakesDoorIsDeclaredWhereItIsRendered() started.
+✔ Test theDeletedTakesDoorIsDeclaredWhereItIsRendered() passed after 0.001 seconds.
+◇ Test theContextRowOpensThePeekAtTheOriginAndItShowsItsTakes() started.
+✔ Test theContextRowOpensThePeekAtTheOriginAndItShowsItsTakes() passed after 0.048 seconds.
+◇ Test theCameFromRegionsTwoDoorsBringBackAndOpenTheTray() started.
+✔ Test theCameFromRegionsTwoDoorsBringBackAndOpenTheTray() passed after 0.051 seconds.
+◇ Test theCameFromsBringBackDiagnosesASealedNote() started.
+✔ Test theCameFromsBringBackDiagnosesASealedNote() passed after 0.050 seconds.
+◇ Test theRoutedActSpeaksWhereTheBlockHasNoOriginal() started.
+✔ Test theRoutedActSpeaksWhereTheBlockHasNoOriginal() passed after 0.032 seconds.
+◇ Test theBlockHistoryPaneCarriesLineageAndDeletedTakes() started.
+✔ Test theBlockHistoryPaneCarriesLineageAndDeletedTakes() passed after 0.064 seconds.
+◇ Test theBlockHistoryPanesPutBackReturnsTheTakeToTheFan() started.
+✔ Test theBlockHistoryPanesPutBackReturnsTheTakeToTheFan() passed after 0.038 seconds.
+◇ Test theBlockHistoryPanesPutBackDiagnosesASealedNote() started.
+✔ Test theBlockHistoryPanesPutBackDiagnosesASealedNote() passed after 0.041 seconds.
+◇ Test theBlockHistoryPaneStartsItsOwnObservationWhenMounted() started.
+✔ Test theBlockHistoryPaneStartsItsOwnObservationWhenMounted() passed after 0.076 seconds.
+◇ Test putBackOfAnArchivedDeletedTakeDoesNotClaimTheFan() started.
+✔ Test putBackOfAnArchivedDeletedTakeDoesNotClaimTheFan() passed after 0.048 seconds.
+◇ Test theLensRestoreOfAnArchivedDeletedPickSaysItCameBackArchived() started.
+✔ Test theLensRestoreOfAnArchivedDeletedPickSaysItCameBackArchived() passed after 0.053 seconds.
+◇ Test theHistoryRequestCarriesTheCaretsBlockAndItsTake() started.
+✔ Test theHistoryRequestCarriesTheCaretsBlockAndItsTake() passed after 0.037 seconds.
+◇ Test onlyALensColumnWithADanglingPickShowsTheNotice() started.
+✔ Test onlyALensColumnWithADanglingPickShowsTheNotice() passed after 0.043 seconds.
+◇ Test theNoticesRestoreRoundTripsBothStates() started.
+✔ Test theNoticesRestoreRoundTripsBothStates() passed after 0.058 seconds.
+◇ Test aPickWithNoRoadBackSaysSo() started.
+✔ Test aPickWithNoRoadBackSaysSo() passed after 0.032 seconds.
+✔ Suite "The recovery doors — J3's peek, J5's lens notice, deleted takes (13j)" passed after 0.681 seconds.
+◇ Suite "The commit door asks for a name (13u3 UNIT D)" started.
+◇ Test commandSThenReturnFilesOneUnnamedSavepoint() started.
+✔ Test commandSThenReturnFilesOneUnnamedSavepoint() passed after 0.043 seconds.
+◇ Test aTypedNameRidesTheSavepointAndTheReceiptSaysIt() started.
+✔ Test aTypedNameRidesTheSavepointAndTheReceiptSaysIt() passed after 0.039 seconds.
+◇ Test cancellingTheFieldFilesNothingAtAll() started.
+✔ Test cancellingTheFieldFilesNothingAtAll() passed after 0.033 seconds.
+◇ Test theDoorRefusesBeforeItOpensAFieldItCannotFile() started.
+✔ Test theDoorRefusesBeforeItOpensAFieldItCannotFile() passed after 0.032 seconds.
+◇ Test theNamedSavepointReadsBackNameFirst() started.
+✔ Test theNamedSavepointReadsBackNameFirst() passed after 0.037 seconds.
+✔ Suite "The commit door asks for a name (13u3 UNIT D)" passed after 0.186 seconds.
+◇ Suite "The takes board's commit door asks too (13u3 UNIT D)" started.
+◇ Test theTakesDoorOpensTheFieldAndFilesWhatItIsGiven() started.
+✔ Test theTakesDoorOpensTheFieldAndFilesWhatItIsGiven() passed after 0.041 seconds.
+✔ Suite "The takes board's commit door asks too (13u3 UNIT D)" passed after 0.041 seconds.
+◇ Suite "The take↔block doors (13e E5/E6b, A20/A21)" started.
+◇ Test theBoardDoorMovesTheTakeYoureInAndTheRingFollowsIt() started.
+✔ Test theBoardDoorMovesTheTakeYoureInAndTheRingFollowsIt() passed after 0.047 seconds.
+◇ Test theBoardsStructuralReceiptsAreNotAlarms() started.
+✔ Test theBoardsStructuralReceiptsAreNotAlarms() passed after 0.053 seconds.
+◇ Test aBoardDoorThatCouldNotActStillSpeaksUnderEverySetting() started.
+✔ Test aBoardDoorThatCouldNotActStillSpeaksUnderEverySetting() passed after 0.034 seconds.
+◇ Test theCardDoorActsOnItsOwnTakeNotTheFocusedOne() started.
+✔ Test theCardDoorActsOnItsOwnTakeNotTheFocusedOne() passed after 0.049 seconds.
+◇ Test theDoorFlushesFirstSoTheNewBlockCarriesWhatSheJustTyped() started.
+✔ Test theDoorFlushesFirstSoTheNewBlockCarriesWhatSheJustTyped() passed after 0.053 seconds.
+◇ Test aRefusalArrivesInWordsNotAsAnEnumDump() started.
+✔ Test aRefusalArrivesInWordsNotAsAnEnumDump() passed after 0.032 seconds.
+◇ Test theConversionCountsItsBlocksAndNamesTheBlanksItSkipped() started.
+✔ Test theConversionCountsItsBlocksAndNamesTheBlanksItSkipped() passed after 0.058 seconds.
+◇ Test theConversionRefusesHonestlyWhenThereIsNoOtherTake() started.
+✔ Test theConversionRefusesHonestlyWhenThereIsNoOtherTake() passed after 0.033 seconds.
+◇ Test bothActsAreDeclaredWithTheirChordsDoorsAndParity() started.
+✔ Test bothActsAreDeclaredWithTheirChordsDoorsAndParity() passed after 0.001 seconds.
+✔ Suite "The take↔block doors (13e E5/E6b, A20/A21)" passed after 0.363 seconds.
+◇ Suite "Copy all takes (13e E6, A21)" started.
+◇ Test theDoorCopiesTheWholeFanInTheRatifiedShapeAndCountsIt() started.
+✔ Test theDoorCopiesTheWholeFanInTheRatifiedShapeAndCountsIt() passed after 0.039 seconds.
+◇ Test aBlockWithNoTextCopiesNothingAndLeavesTheClipboardAlone() started.
+✔ Test aBlockWithNoTextCopiesNothingAndLeavesTheClipboardAlone() passed after 0.031 seconds.
+◇ Test theDoorCarriesWhatSheJustTypedNotTheStoresLastWord() started.
+✔ Test theDoorCarriesWhatSheJustTypedNotTheStoresLastWord() passed after 0.037 seconds.
+◇ Test withNoBlockInHandTheDoorSaysWhatToDo() started.
+✔ Test withNoBlockInHandTheDoorSaysWhatToDo() passed after 0.033 seconds.
+◇ Test theRightClicksTargetIsTheCardsOwnBlockNotTheFocusedOne() started.
+✔ Test theRightClicksTargetIsTheCardsOwnBlockNotTheFocusedOne() passed after 0.034 seconds.
+◇ Test theActIsDeclaredWithItsChordBothDoorsAndTakesParity() started.
+✔ Test theActIsDeclaredWithItsChordBothDoorsAndTakesParity() passed after 0.001 seconds.
+✔ Suite "Copy all takes (13e E6, A21)" passed after 0.177 seconds.
+◇ Suite "The takes article's scroll memory and its reveal rule (17p a, row 1)" started.
+◇ Test aThreeBlockNoteEnteredOnItsLastBlockOpensAtTheTop() started.
+2026-10-14 01:23:17.779470-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:17.781675-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:17.783310-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:17.783523-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test aThreeBlockNoteEnteredOnItsLastBlockOpensAtTheTop() passed after 1.096 seconds.
+◇ Test aBoardLeftScrolledComesBackWhereSheLeftIt() started.
+2026-10-14 01:23:18.938184-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=796 derived=2 exactAbove=N | content=776 | content=842 | 00000000-0000-0000-0000-000000000009 DONE: settled at top=0.0 after 0 hops, 1133 ms
+2026-10-14 01:23:18.938230-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=796 derived=2 exact=0 hops=0 content=2 ms=1133 end=settled top=0
+2026-10-14 01:23:18.962286-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.962596-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.964290-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.965934-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.967197-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.968503-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.969769-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.971299-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.972900-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.974160-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.975415-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.976515-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.977640-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.978792-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.979934-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.980984-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.982020-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.983069-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.984112-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:18.985222-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:19.430710-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:19.434934-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:19.439240-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:19.443142-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:19.447147-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:19.451157-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:19.455235-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:19.457755-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:19.459283-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:19.460499-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:19.461589-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.136603-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.136889-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.138422-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.139832-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.141210-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.142326-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.143356-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.144355-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.145308-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.146274-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.147260-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.148235-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.149200-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.150164-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.151195-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.152283-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.153474-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.154485-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.155464-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.156436-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.192762-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.194081-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.195296-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.196370-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.197439-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.198486-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.199512-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.200664-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.201725-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.202744-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.203742-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.204781-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.205805-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:20.206790-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test aBoardLeftScrolledComesBackWhereSheLeftIt() passed after 2.413 seconds.
+◇ Test aLongNoteEnteredOnAFarBlockRevealsItWithoutHaulingItToTheTop() started.
+2026-10-14 01:23:21.258453-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:21.259954-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:21.261386-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:21.262616-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:21.263655-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:21.264676-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:21.265628-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:21.266608-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:21.267557-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:21.268480-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:21.269416-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:21.270358-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:21.270510-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test aLongNoteEnteredOnAFarBlockRevealsItWithoutHaulingItToTheTop() passed after 1.050 seconds.
+◇ Test theRevealDecisionOnlyMovesForARowThatIsNotFullyOnScreen() started.
+✔ Test theRevealDecisionOnlyMovesForARowThatIsNotFullyOnScreen() passed after 0.001 seconds.
+◇ Test theLandingWaitsForRowsAimsByDirectionAndStaysUntilHerHand() started.
+2026-10-14 01:23:22.226513-0600 Variorum[81160:58646655] TakesArticle landing — far LAND | manifest rows=4 target=3 offset=-1 total=3000 derived=2 exactAbove=N | far DONE: her scroll
+2026-10-14 01:23:22.226582-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=4 target=3 offset=-1 total=3000 derived=2 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+✔ Test theLandingWaitsForRowsAimsByDirectionAndStaysUntilHerHand() passed after 0.003 seconds.
+◇ Test theLandingEndsForAGoneRowAndAfterItsBoundedAims() started.
+2026-10-14 01:23:22.230636-0600 Variorum[81160:58646655] TakesArticle landing — gone LAND | manifest rows=1 target=-1 offset=-1 total=3000 derived=0 exactAbove=N | gone DONE: the row left the note
+2026-10-14 01:23:22.230706-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=1 target=-1 offset=-1 total=3000 derived=0 exact=0 hops=0 content=0 ms=0 end=gaveup top=-9999
+2026-10-14 01:23:22.231322-0600 Variorum[81160:58646655] TakesArticle landing — late LAND | manifest rows=2 target=1 offset=-1 total=3000 derived=1 exactAbove=Y | late DONE: the reveal's aims ran out
+2026-10-14 01:23:22.231369-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=2 target=1 offset=-1 total=3000 derived=1 exact=1 hops=0 content=0 ms=1 end=gaveup top=-9999
+✔ Test theLandingEndsForAGoneRowAndAfterItsBoundedAims() passed after 0.003 seconds.
+◇ Test theLandingAimsAtTheHeadForARowAboveTheRealizedOnes() started.
+✔ Test theLandingAimsAtTheHeadForARowAboveTheRealizedOnes() passed after 0.004 seconds.
+◇ Test herOwnScrollCancelsAPendingLanding() started.
+2026-10-14 01:23:22.240805-0600 Variorum[81160:58646655] TakesArticle landing — far LAND | far DONE: her scroll
+2026-10-14 01:23:22.240860-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=0 target=-1 offset=-1 total=0 derived=0 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+✔ Test herOwnScrollCancelsAPendingLanding() passed after 0.002 seconds.
+◇ Test aBoardLeftAtTheTopComesBackAtTheTop() started.
+2026-10-14 01:23:22.311412-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000024 LAND | manifest rows=12 target=11 offset=-1 total=1102 derived=11 exactAbove=N | content=1082 | content=1346 | content=1339 | content=1346 | 00000000-0000-0000-0000-000000000024 DONE: settled at top=0.0 after 0 hops, 1026 ms
+2026-10-14 01:23:22.311450-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=12 target=11 offset=-1 total=1102 derived=11 exact=0 hops=0 content=4 ms=1026 end=settled top=0
+2026-10-14 01:23:22.327788-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:22.328060-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:22.329815-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:22.331283-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:22.332394-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:22.333378-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:22.334356-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:22.335525-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:22.336501-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:22.337454-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:22.338396-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:22.339349-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:22.340277-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.417558-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.417825-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.419220-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.420514-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.421559-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.422573-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.423806-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.424807-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.425839-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.426860-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.428004-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.429024-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:23.430005-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test aBoardLeftAtTheTopComesBackAtTheTop() passed after 2.141 seconds.
+◇ Test theTopOfThePageIsRememberedAsTheTopAndRestoresWithoutAScroll() started.
+✔ Test theTopOfThePageIsRememberedAsTheTopAndRestoresWithoutAScroll() passed after 0.005 seconds.
+◇ Test herBoardGesturesEndAPendingLanding() started.
+2026-10-14 01:23:24.439911-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=0 derived=3 exactAbove=N | 00000000-0000-0000-0000-000000000009 DONE: her gesture
+2026-10-14 01:23:24.439951-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=0 derived=3 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+2026-10-14 01:23:24.439986-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=0 derived=3 exactAbove=N | 00000000-0000-0000-0000-000000000009 DONE: her gesture
+2026-10-14 01:23:24.439995-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=0 derived=3 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+2026-10-14 01:23:24.440038-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=0 derived=3 exactAbove=N | 00000000-0000-0000-0000-000000000009 DONE: her gesture
+2026-10-14 01:23:24.441349-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=0 derived=3 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+2026-10-14 01:23:24.441379-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=0 derived=3 exactAbove=N | 00000000-0000-0000-0000-000000000009 DONE: her gesture
+2026-10-14 01:23:24.441396-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=0 derived=3 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+2026-10-14 01:23:24.443403-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=0 derived=3 exactAbove=N | 00000000-0000-0000-0000-000000000009 DONE: her gesture
+2026-10-14 01:23:24.443418-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=0 derived=3 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+2026-10-14 01:23:24.443499-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=0 derived=3 exactAbove=N | 00000000-0000-0000-0000-000000000009 DONE: her gesture
+2026-10-14 01:23:24.443507-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=0 derived=3 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+2026-10-14 01:23:24.445743-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=0 derived=3 exactAbove=N | 00000000-0000-0000-0000-000000000009 DONE: her gesture
+2026-10-14 01:23:24.445759-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=0 derived=3 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+2026-10-14 01:23:24.456106-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=0 derived=3 exactAbove=N | 00000000-0000-0000-0000-000000000009 DONE: her gesture
+2026-10-14 01:23:24.456149-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=0 derived=3 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+2026-10-14 01:23:24.473902-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=0 derived=3 exactAbove=N | 00000000-0000-0000-0000-000000000009 DONE: her gesture
+2026-10-14 01:23:24.473949-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=0 derived=3 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+2026-10-14 01:23:24.478155-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=0 derived=3 exactAbove=N | 00000000-0000-0000-0000-000000000009 DONE: her gesture
+2026-10-14 01:23:24.478191-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=0 derived=3 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+2026-10-14 01:23:24.478221-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=0 derived=3 exactAbove=N | 00000000-0000-0000-0000-000000000009 DONE: her gesture
+2026-10-14 01:23:24.478230-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=0 derived=3 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+2026-10-14 01:23:24.478691-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000009 LAND | manifest rows=3 target=2 offset=-1 total=0 derived=3 exactAbove=N | 00000000-0000-0000-0000-000000000009 DONE: her gesture
+2026-10-14 01:23:24.478700-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=3 target=2 offset=-1 total=0 derived=3 exact=0 hops=0 content=0 ms=0 end=handedover top=-9999
+✔ Test herBoardGesturesEndAPendingLanding() passed after 0.096 seconds.
+◇ Test endingANothingPendingLandingWakesNoObserver() started.
+✔ Test endingANothingPendingLandingWakesNoObserver() passed after 0.001 seconds.
+◇ Test herBloomAboveTheLandedRowLeavesThePageWhereItIs() started.
+2026-10-14 01:23:24.574459-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:24.575898-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:24.577093-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:24.578287-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:24.579250-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:24.580184-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:24.581103-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:24.582016-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:24.582918-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:24.583856-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:24.584829-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:24.585838-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:24.586006-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:25.518851-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000024 LAND | manifest rows=12 target=11 offset=-1 total=1102 derived=11 exactAbove=N | content=1082 | content=1346 | content=1339 | content=1346 | 00000000-0000-0000-0000-000000000024 DONE: her gesture
+2026-10-14 01:23:25.518924-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=12 target=11 offset=-1 total=1102 derived=11 exact=0 hops=0 content=4 ms=920 end=handedover top=0
+✔ Test herBloomAboveTheLandedRowLeavesThePageWhereItIs() passed after 1.647 seconds.
+◇ Test herCalloutAboveTheLandedRowLeavesThePageWhereItIs() started.
+2026-10-14 01:23:26.134999-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.136433-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.138071-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.139565-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.140808-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.142020-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.143190-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.144323-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.145479-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.146638-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.147811-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.152438-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.239532-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.240803-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.242253-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.243319-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.244288-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.245226-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.246139-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.247055-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.247984-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.248908-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.249828-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.250764-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:26.250917-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:27.194144-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000024 LAND | manifest rows=12 target=11 offset=-1 total=1102 derived=11 exactAbove=N | content=1082 | content=1346 | content=1339 | content=1346 | 00000000-0000-0000-0000-000000000024 DONE: her gesture
+2026-10-14 01:23:27.194218-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=12 target=11 offset=-1 total=1102 derived=11 exact=0 hops=0 content=4 ms=930 end=handedover top=0
+2026-10-14 01:23:27.226152-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test herCalloutAboveTheLandedRowLeavesThePageWhereItIs() passed after 1.800 seconds.
+◇ Test herNoteWideSplitEndsTheLandingAndSpendsNoAim() started.
+2026-10-14 01:23:28.018128-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:28.019847-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:28.021547-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:28.022877-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:28.024029-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:28.025234-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:28.026467-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:28.027457-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:28.028450-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:28.029608-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:28.030584-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:28.031560-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:28.031721-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.004466-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000024 LAND | manifest rows=12 target=11 offset=-1 total=1102 derived=11 exactAbove=N | content=1082 | content=1687 | content=1529 | content=1547 | content=1563 | HOP 1 at 313 ms (top was 190.5) | content=1576 | content=1713 | content=1687 | content=1717 | content=1687 | 00000000-0000-0000-0000-000000000024 DONE: her gesture
+2026-10-14 01:23:29.004543-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=12 target=11 offset=-1 total=1102 derived=11 exact=0 hops=1 content=10 ms=959 end=handedover top=0
+2026-10-14 01:23:29.055048-0600 Variorum[81160:58646655] [Invalid Configuration] Geometry action is cycling between duplicate values.
+2026-10-14 01:23:29.055161-0600 Variorum[81160:58646655] [Invalid Configuration] Geometry action is cycling between duplicate values.
+2026-10-14 01:23:29.100433-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.103739-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.126282-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.129103-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.130277-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.153016-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.155773-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.157028-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.203078-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.203524-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.205817-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.207022-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.208091-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.209138-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.260543-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.260965-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.263213-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.264314-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.265735-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.266744-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.319595-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:29.326347-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test herNoteWideSplitEndsTheLandingAndSpendsNoAim() passed after 2.291 seconds.
+◇ Test herPickAboveTheLandedRowLeavesThePageWhereItIs() started.
+2026-10-14 01:23:30.315804-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:30.317363-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:30.318786-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:30.319919-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:30.320958-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:30.322008-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:30.323053-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:30.324100-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:30.325134-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:30.326214-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:30.327304-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:30.328534-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:30.328725-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:31.277496-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000024 LAND | manifest rows=12 target=11 offset=-1 total=1102 derived=11 exactAbove=N | content=1082 | content=1346 | content=1339 | content=1346 | 00000000-0000-0000-0000-000000000024 DONE: her gesture
+2026-10-14 01:23:31.277569-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=12 target=11 offset=-1 total=1102 derived=11 exact=0 hops=0 content=4 ms=935 end=handedover top=0
+✔ Test herPickAboveTheLandedRowLeavesThePageWhereItIs() passed after 1.939 seconds.
+◇ Test herPickAndDeleteAboveTheLandedRowLeavesThePageWhereItIs() started.
+2026-10-14 01:23:32.253619-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:32.255100-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:32.256385-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:32.257460-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:32.258572-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:32.259628-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:32.260622-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:32.261587-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:32.262693-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:32.263749-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:32.265070-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:32.266098-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:32.266251-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:33.211148-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000024 LAND | manifest rows=12 target=11 offset=-1 total=1102 derived=11 exactAbove=N | content=1082 | content=1346 | content=1339 | content=1346 | 00000000-0000-0000-0000-000000000024 DONE: her gesture
+2026-10-14 01:23:33.211222-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=12 target=11 offset=-1 total=1102 derived=11 exact=0 hops=0 content=4 ms=923 end=handedover top=0
+✔ Test herPickAndDeleteAboveTheLandedRowLeavesThePageWhereItIs() passed after 1.977 seconds.
+◇ Test theLandingStepReadsTheSlotOrderOnlyWhenARequestIsPending() started.
+✔ Test theLandingStepReadsTheSlotOrderOnlyWhenARequestIsPending() passed after 0.003 seconds.
+◇ Test aMemoryOfARowTheNoteNoLongerHoldsSettlesAndLetsTheLandingLand() started.
+2026-10-14 01:23:34.232596-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:34.234028-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:34.235355-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:34.236436-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:34.237471-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:34.238482-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:34.239680-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:34.240697-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:34.241662-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:34.242625-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:34.243998-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:34.245293-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:34.245463-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.261068-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000024 LAND | manifest rows=12 target=11 offset=-1 total=1102 derived=11 exactAbove=N | content=1082 | content=1346 | content=1339 | content=1346 | 00000000-0000-0000-0000-000000000024 DONE: settled at top=0.0 after 0 hops, 1002 ms
+2026-10-14 01:23:35.261146-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=12 target=11 offset=-1 total=1102 derived=11 exact=0 hops=0 content=4 ms=1002 end=settled top=0
+✔ Test aMemoryOfARowTheNoteNoLongerHoldsSettlesAndLetsTheLandingLand() passed after 1.216 seconds.
+◇ Test aRememberedRowTheNoteNoLongerHoldsSettlesAtOnce() started.
+✔ Test aRememberedRowTheNoteNoLongerHoldsSettlesAtOnce() passed after 0.010 seconds.
+◇ Test theLandingOutranksAMoveToAnotherBlockButNotAPlainRoundTrip() started.
+✔ Test theLandingOutranksAMoveToAnotherBlockButNotAPlainRoundTrip() passed after 0.013 seconds.
+◇ Test aLandingOnAnotherBlockWinsOverTheRememberedPlace() started.
+2026-10-14 01:23:35.594184-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.594488-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.596260-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.597905-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.599326-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.600712-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.602043-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.603321-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.604542-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.606295-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.607773-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.609138-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.610610-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.612135-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.613465-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.614746-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.615999-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.617346-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.618637-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:35.619866-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.073188-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.077321-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.081061-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.084750-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.088413-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.092363-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.096134-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.098021-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.099246-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.100293-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.101399-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.787885-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.789427-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.790833-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.791967-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.793129-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.794351-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.795501-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.796553-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.797624-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.798702-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.800295-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.801558-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.802618-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.803629-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.804695-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.805744-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.806753-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.807740-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.808703-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.847396-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.848776-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.849917-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.850998-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.852060-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.853093-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.854118-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.855131-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.856111-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.857072-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.858035-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.859028-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.860036-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.861057-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.862056-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.863641-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.864673-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.865618-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.866589-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.867528-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.868490-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.869498-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.870450-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.871426-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.872370-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.873309-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.874223-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.875152-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.876090-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.877095-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.878041-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.879003-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.879943-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.880888-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.881830-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.882755-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.883696-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.884630-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.885560-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.886480-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.887420-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:36.887561-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:37.007078-0600 Variorum[81160:58646655] [Invalid Configuration] <OnScrollGeometryChange Modifier> tried to update multiple times per frame.
+2026-10-14 01:23:37.839844-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-0000000000B4 LAND | manifest rows=60 target=59 offset=-1 total=2734 derived=59 exactAbove=N | content=2714 | content=3110 | content=3005 | content=3010 | HOP 1 at 453 ms (top was 1.5) | content=3110 | 00000000-0000-0000-0000-0000000000B4 DONE: settled at top=0.0 after 1 hops, 1013 ms
+2026-10-14 01:23:37.839915-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=60 target=59 offset=-1 total=2734 derived=59 exact=0 hops=1 content=5 ms=1013 end=settled top=0
+✔ Test aLandingOnAnotherBlockWinsOverTheRememberedPlace() passed after 2.610 seconds.
+◇ Test theEntryRingsOwnRoadComesBackThenRevealsHerBlock() started.
+2026-10-14 01:23:38.210145-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.211613-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.213001-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.214116-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.215190-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.216290-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.217370-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.218507-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.219728-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.220911-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.221992-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.223021-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.224048-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.225057-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.226076-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.227073-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.228067-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.229068-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.230069-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.266455-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.268016-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.269287-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.270356-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.271399-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.272452-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.273526-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.274583-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.275591-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.276677-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.277747-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.279048-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.280111-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.281117-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.282094-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.283058-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.284048-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.285528-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.286635-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.287638-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.288621-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.289641-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.289797-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:38.385672-0600 Variorum[81160:58646655] [Invalid Configuration] <OnScrollGeometryChange Modifier> tried to update multiple times per frame.
+2026-10-14 01:23:38.391496-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.252825-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-00000000007B LAND | manifest rows=60 target=40 offset=-1 total=2734 derived=59 exactAbove=N | content=2714 | content=3110 | content=3134 | content=3749 | content=3811 | 00000000-0000-0000-0000-00000000007B DONE: settled at top=0.0 after 0 hops, 1004 ms
+2026-10-14 01:23:39.252891-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=60 target=40 offset=-1 total=2734 derived=59 exact=0 hops=0 content=5 ms=1005 end=settled top=0
+2026-10-14 01:23:39.965723-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.967199-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.968762-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.970082-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.971263-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.972350-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.973406-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.974496-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.975618-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.976735-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.977797-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.979389-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.980822-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.981870-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.982907-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.983894-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.984915-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.985967-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:39.987237-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.021218-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.022665-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.023843-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.024977-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.026169-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.027296-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.028418-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.029443-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.035267-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.036507-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.037594-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.038649-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.039666-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.040665-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.041716-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.042755-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.044336-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.045362-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.046334-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.047290-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.048248-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.049216-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.049370-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.050343-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:40.051282-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.069539-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-00000000007B LAND | manifest rows=60 target=40 offset=-1 total=2714 derived=35 exactAbove=N | content=3132 | content=3098 | content=3116 | HOP 1 at 320 ms (top was 258.0) | content=3133 | content=3268 | content=3297 | content=3304 | 00000000-0000-0000-0000-00000000007B DONE: settled at top=0.0 after 1 hops, 1002 ms
+2026-10-14 01:23:41.069611-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=60 target=40 offset=-1 total=2714 derived=35 exact=0 hops=1 content=7 ms=1002 end=settled top=0
+✔ Test theEntryRingsOwnRoadComesBackThenRevealsHerBlock() passed after 3.135 seconds.
+◇ Test aPlainRoundTripComesBackExactlyWhereSheLeftIt() started.
+2026-10-14 01:23:41.334310-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.334598-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.336428-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.337977-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.339199-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.340341-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.341452-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.342568-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.343667-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.344728-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.345770-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.346814-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.347840-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.348872-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.349906-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.350985-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.352172-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.353416-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.354520-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.355616-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.807361-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.811583-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.815598-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.819961-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.824251-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.828117-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.829881-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.831259-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.832486-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.833660-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:41.834991-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.876278-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.877995-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.879428-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.880626-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.881726-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.882854-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.883918-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.885012-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.886084-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.887098-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.888102-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.889095-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.890114-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.891112-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.892108-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.893126-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.894158-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.894324-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.895395-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.896436-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.935846-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.937291-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.938467-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.939544-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.940588-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.941647-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.942702-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.943745-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.944746-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.945743-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.946752-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.947745-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.948726-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:42.949717-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:43.982022-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000033 LAND | manifest rows=60 target=16 offset=-1 total=2714 derived=36 exactAbove=Y | content=3132 | content=3082 | content=3110 | content=3136 | 00000000-0000-0000-0000-000000000033 DONE: settled at top=0.0 after 0 hops, 1020 ms
+2026-10-14 01:23:43.982104-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=60 target=16 offset=-1 total=2714 derived=36 exact=1 hops=0 content=4 ms=1020 end=settled top=0
+✔ Test aPlainRoundTripComesBackExactlyWhereSheLeftIt() passed after 2.903 seconds.
+◇ Test theBloomDoorStillGoesToTheBlockTheRingWasLastIn() started.
+2026-10-14 01:23:44.238530-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.240042-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.241415-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.242572-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.243697-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.245397-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.246615-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.247682-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.248733-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.249756-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.250762-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.251842-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.253036-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.254531-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.255560-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.256576-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.257555-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.258555-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.259560-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.295390-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.296752-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.297919-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.299032-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.300101-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.301192-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.302326-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.303521-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.304569-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.305587-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.306580-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.307551-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.308520-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.309896-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.311642-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.312690-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.313690-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.314692-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.315688-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.316749-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.317796-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.318819-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.318969-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:44.420288-0600 Variorum[81160:58646655] [Invalid Configuration] <OnScrollGeometryChange Modifier> tried to update multiple times per frame.
+2026-10-14 01:23:44.426228-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.285828-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-00000000007B LAND | manifest rows=60 target=40 offset=-1 total=2734 derived=59 exactAbove=N | content=2714 | content=3110 | content=3224 | content=3775 | content=3828 | 00000000-0000-0000-0000-00000000007B DONE: settled at top=0.0 after 0 hops, 1007 ms
+2026-10-14 01:23:45.285896-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=60 target=40 offset=-1 total=2734 derived=59 exact=0 hops=0 content=5 ms=1008 end=settled top=0
+2026-10-14 01:23:45.962617-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.964694-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.966202-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.967359-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.968441-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.969463-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.970465-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.971464-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.972523-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.973500-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.974464-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.975467-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.976507-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.977570-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.978629-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.979606-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.980583-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.981561-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:45.982554-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.016334-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.017660-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.019062-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.020890-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.027643-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.029074-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.031063-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.032183-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.033259-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.034303-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.035328-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.036669-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.037722-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.038705-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.039689-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.040646-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.041591-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.042534-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.043467-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.044417-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.045424-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.412136-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.412354-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.426784-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:46.947296-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-00000000007B LAND | manifest rows=60 target=40 offset=-1 total=3773 derived=48 exactAbove=N | content=3782 | 00000000-0000-0000-0000-00000000007B DONE: settled at top=0.0 after 0 hops, 1002 ms
+2026-10-14 01:23:46.947381-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=60 target=40 offset=-1 total=3773 derived=48 exact=0 hops=0 content=1 ms=1002 end=settled top=0
+✔ Test theBloomDoorStillGoesToTheBlockTheRingWasLastIn() passed after 3.209 seconds.
+◇ Test aBloomLandingRidesThroughTheRestoreInBothOrders() started.
+2026-10-14 01:23:47.249368-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test aBloomLandingRidesThroughTheRestoreInBothOrders() passed after 0.017 seconds.
+◇ Test theRestoreRemembersWhereTheRowSatAndPutsItBackThere() started.
+✔ Test theRestoreRemembersWhereTheRowSatAndPutsItBackThere() passed after 0.008 seconds.
+◇ Test aShortRowStraddlingTheFoldComesBackAboveIt() started.
+2026-10-14 01:23:47.461324-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.461586-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.463124-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.464549-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.465759-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.466895-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.468136-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.469575-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.470784-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.471874-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.472967-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.474064-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.475144-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.476246-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.477324-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.478377-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.479404-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.480467-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.481533-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.482536-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.572230-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.834982-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-00000000007B LAND | manifest rows=60 target=40 offset=-1 total=2714 derived=23 exactAbove=N | content=3132 | content=3093 | content=3115 | HOP 1 at 329 ms (unreported) | content=3135 | HOP 2 at 663 ms (top was 1.5) | content=3345 | content=3353 | content=3371 | HOP 3 at 1501 ms (top was 20.0) | content=3378 | content=3375 | 00000000-0000-0000-0000-00000000007B DONE: settled at top=0.0 after 3 hops, 1773 ms
+2026-10-14 01:23:47.835022-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=60 target=40 offset=-1 total=2714 derived=23 exact=0 hops=3 content=9 ms=1773 end=settled top=0
+2026-10-14 01:23:47.938908-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.943054-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.947075-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.951023-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.955201-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.957438-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.958814-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.960055-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.961165-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.962247-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:47.964113-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.628315-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.628580-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.629983-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.631346-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.632486-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.633563-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.634652-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.635696-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.636739-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.637798-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.638839-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.639901-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.640943-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.641996-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.643051-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.644161-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.645308-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.646358-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.647366-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.648430-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.683074-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.690000-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.692143-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.693505-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.694620-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.695686-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.696758-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.697812-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.698858-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.699878-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.700896-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.701902-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.702887-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.703878-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.704886-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.705911-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.706908-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.707905-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.708889-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:48.709897-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test aShortRowStraddlingTheFoldComesBackAboveIt() passed after 2.766 seconds.
+◇ Test aPlainRoundTripComesBackToTheSameLineNotOnlyTheSameRow() started.
+2026-10-14 01:23:50.234196-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.235710-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.237195-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.238429-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.239665-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.240826-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.241950-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.243062-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.244202-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.245374-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.246817-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.248425-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.249857-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.251016-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.252061-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.253094-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.254136-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.255182-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.256218-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.291161-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.293542-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.295523-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.297113-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.298395-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.299989-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.301198-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.302311-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.303383-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.304446-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.305514-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.306544-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.307581-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.308611-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.309706-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.310885-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.312255-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.313443-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.314512-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.315536-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.316574-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.317614-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.317765-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:50.420496-0600 Variorum[81160:58646655] [Invalid Configuration] <OnScrollGeometryChange Modifier> tried to update multiple times per frame.
+2026-10-14 01:23:50.426458-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.282040-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-00000000007B LAND | manifest rows=60 target=40 offset=-1 total=2734 derived=59 exactAbove=N | content=2714 | content=3110 | content=3224 | content=3775 | content=3828 | 00000000-0000-0000-0000-00000000007B DONE: settled at top=0.0 after 0 hops, 1007 ms
+2026-10-14 01:23:51.282107-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=60 target=40 offset=-1 total=2734 derived=59 exact=0 hops=0 content=5 ms=1008 end=settled top=0
+2026-10-14 01:23:51.309069-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.312268-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.314026-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.315242-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.316356-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.317430-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.318477-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.319516-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.320546-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.980389-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.981859-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.983202-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.984367-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.985494-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.986566-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.987644-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.988672-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.989702-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.990716-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.991775-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.992935-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.995420-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.997147-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.998650-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:51.999844-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.001082-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.002406-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.004758-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.040459-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.041766-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.042943-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.044188-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.045437-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.046535-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.047592-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.048622-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.049675-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.050706-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.051777-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.052909-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.054027-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.055035-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.056015-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.057027-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.058025-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.059017-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.066082-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.067219-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.068264-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.069299-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.069445-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.070469-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.071475-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.072475-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.073461-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.074464-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.075454-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.077375-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.078393-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.079408-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.080392-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.081376-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.082852-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.083863-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:52.084835-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.106463-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-00000000007B LAND | manifest rows=60 target=40 offset=-1 total=2714 derived=27 exactAbove=N | content=3132 | content=3029 | content=3040 | content=3049 | content=3058 | 00000000-0000-0000-0000-00000000007B DONE: settled at top=0.0 after 0 hops, 1004 ms
+2026-10-14 01:23:53.106531-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=60 target=40 offset=-1 total=2714 derived=27 exact=0 hops=0 content=5 ms=1005 end=settled top=0
+✔ Test aPlainRoundTripComesBackToTheSameLineNotOnlyTheSameRow() passed after 3.196 seconds.
+◇ Test theRestoreReadsTheMemoryEvenWhenTheFirstGeometryPrecedesAppear() started.
+2026-10-14 01:23:53.427704-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.427998-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.429629-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.431012-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.432137-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.433216-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.434271-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.435334-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.436344-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.437370-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.438364-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.439385-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.440387-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.441378-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.442404-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.443477-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.444668-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.445770-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.446773-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.447771-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.996112-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.997529-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:53.998855-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.000217-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.001713-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.003110-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.004555-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.005725-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.006845-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.008011-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.009210-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.777091-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.777315-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.778604-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.779811-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.780897-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.781944-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.782961-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.783997-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.785057-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.786118-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.787232-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.788215-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.789177-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.790136-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.792572-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.793716-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.794677-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.795624-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.796560-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.809724-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.810963-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.811999-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.813009-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.814028-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.815003-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.815974-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.816925-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.817893-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.818930-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.820046-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.821034-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.821967-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.822896-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:54.823838-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test theRestoreReadsTheMemoryEvenWhenTheFirstGeometryPrecedesAppear() passed after 2.667 seconds.
+◇ Test aRowFramesArrivalReDerivesTheMemoryTheScrollHookWroteOneStepStale() started.
+✔ Test aRowFramesArrivalReDerivesTheMemoryTheScrollHookWroteOneStepStale() passed after 0.003 seconds.
+◇ Test theSessionsMemoryFollowsTheRowsFrameReports() started.
+✔ Test theSessionsMemoryFollowsTheRowsFrameReports() passed after 0.057 seconds.
+◇ Test theTakesBoardIsTheTakesBoardFromConstruction() started.
+✔ Test theTakesBoardIsTheTakesBoardFromConstruction() passed after 0.030 seconds.
+◇ Test aTopMemoryInTheAppsOrderKeepsEveryLandingAlive() started.
+✔ Test aTopMemoryInTheAppsOrderKeepsEveryLandingAlive() passed after 0.003 seconds.
+◇ Test aPageLeftAtRestComesBackAtRestThenRevealsHerBlock() started.
+2026-10-14 01:23:56.231461-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.232848-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.234114-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.235357-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.236562-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.237609-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.238584-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.240068-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.241126-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.242102-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.243086-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.244065-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.245045-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.246041-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.246990-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.247899-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.248818-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.249741-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.554958-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.556276-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.557384-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.558414-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.559478-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.560600-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.561676-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.562672-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.563655-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.564619-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.565567-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.566490-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.567458-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.568446-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.569393-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.570331-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.571233-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.572143-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.573045-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.573950-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.574871-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.575931-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.576973-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.577130-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.578211-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:56.579179-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test aPageLeftAtRestComesBackAtRestThenRevealsHerBlock() passed after 1.449 seconds.
+◇ Test theMemoryFollowsTheRowsWhenTheRememberedRowLeaves() started.
+2026-10-14 01:23:57.451504-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test theMemoryFollowsTheRowsWhenTheRememberedRowLeaves() passed after 0.100 seconds.
+◇ Test tearingTheBoardDownLeavesTheMemoryWhereTheLastGeometryPutIt() started.
+2026-10-14 01:23:57.709304-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.735057-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.735308-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.736662-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.737901-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.739027-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.740105-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.741163-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.742219-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.743341-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.744733-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.745989-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.747100-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.748129-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.749147-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.750157-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.751292-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.752371-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.753514-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.754608-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.755686-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:57.976587-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-00000000007B LAND | manifest rows=60 target=40 offset=-1 total=2714 derived=59 exactAbove=N | content=3110 | content=3364 | HOP 1 at 279 ms (unreported) | content=3440 | content=3726 | HOP 2 at 649 ms (top was 1.5) | content=3734 | content=3742 | content=3759 | HOP 3 at 1447 ms (top was 20.0) | content=3767 | content=3764 | 00000000-0000-0000-0000-00000000007B DONE: settled at top=0.0 after 3 hops, 1718 ms
+2026-10-14 01:23:57.976626-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=60 target=40 offset=-1 total=2714 derived=59 exact=0 hops=3 content=9 ms=1718 end=settled top=0
+2026-10-14 01:23:58.208551-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:58.212220-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:58.215804-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:58.219082-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:58.222146-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:58.225412-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:58.228923-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:58.232289-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:58.235660-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:58.238452-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:58.239910-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test tearingTheBoardDownLeavesTheMemoryWhereTheLastGeometryPutIt() passed after 1.527 seconds.
+◇ Test aLongRowAtTheFoldComesBackWhereItSatNotAFractionOfIt() started.
+2026-10-14 01:23:59.158777-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:59.159048-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:59.160643-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:59.162140-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:59.163355-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:59.164488-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:59.166190-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:59.167385-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:59.168602-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:59.169922-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:59.171358-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:59.172516-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:23:59.173643-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.519766-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.520025-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.521428-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.522795-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.523900-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.524949-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.526595-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.527705-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.528741-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.529795-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.530829-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.531836-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:00.532872-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test aLongRowAtTheFoldComesBackWhereItSatNotAFractionOfIt() passed after 2.760 seconds.
+◇ Test aTallStraddlerComesBackAboveTheFoldAndStaysThere() started.
+2026-10-14 01:24:01.930199-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:01.930476-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:01.931978-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:01.933365-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:01.934516-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:01.935647-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:01.937980-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:01.939637-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:01.941320-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:01.942473-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:01.943596-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:01.944695-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:01.945768-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.315887-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.316366-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.319518-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.321608-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.323021-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.324312-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.326701-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.328359-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.329661-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.330871-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.332041-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.333119-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:03.334192-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test aTallStraddlerComesBackAboveTheFoldAndStaysThere() passed after 2.800 seconds.
+◇ Test theRestoreHoldsThePlaceUntilHerHandOrALanding() started.
+✔ Test theRestoreHoldsThePlaceUntilHerHandOrALanding() passed after 0.008 seconds.
+✔ Suite "The takes article's scroll memory and its reveal rule (17p a, row 1)" passed after 46.987 seconds.
+◇ Suite "Takes choose — the article ring (VX-222)" started.
+◇ Test choosingTheOriginalBackShowsItAndNoKeystrokeReachesTheWrongTake() started.
+2026-10-14 01:24:04.763390-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:04.763534-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:04.772685-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:04.775807-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:04.778336-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:04.802951-0600 Variorum[81160:58646655] TakesArticle landing — 00000000-0000-0000-0000-000000000003 LAND | manifest rows=2 target=0 offset=-1 total=1079 derived=1 exactAbove=Y | content=1005 | content=1045 | 00000000-0000-0000-0000-000000000003 DONE: her gesture
+2026-10-14 01:24:04.802991-0600 Variorum[81160:58646655] [landing] landing surface=TakesArticle rows=2 target=0 offset=-1 total=1079 derived=1 exact=1 hops=0 content=2 ms=21 end=handedover top=0
+2026-10-14 01:24:04.842320-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:04.899548-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test choosingTheOriginalBackShowsItAndNoKeystrokeReachesTheWrongTake() passed after 0.592 seconds.
+◇ Test aChoiceThatChangesTheArticlesTakeEndsTheRing() started.
+✔ Test aChoiceThatChangesTheArticlesTakeEndsTheRing() passed after 0.063 seconds.
+◇ Test aSteppedRingIsNotRevivedLiveByChoosingItsTake() started.
+✔ Test aSteppedRingIsNotRevivedLiveByChoosingItsTake() passed after 0.047 seconds.
+◇ Test theRingSurvivesScrollAwayAndAdoptionsThatLeaveItsTakeAlone() started.
+✔ Test theRingSurvivesScrollAwayAndAdoptionsThatLeaveItsTakeAlone() passed after 0.051 seconds.
+◇ Test aRingInAFanCardSurvivesChoosingItsTake() started.
+✔ Test aRingInAFanCardSurvivesChoosingItsTake() passed after 0.047 seconds.
+✔ Suite "Takes choose — the article ring (VX-222)" passed after 0.802 seconds.
+◇ Suite "Archived takes reach the Takes board (13b 3D — N1)" started.
+◇ Test archivedCountsAndRowsFeedTheDoorAndUnarchiveReturnsToTheFan() started.
+✔ Test archivedCountsAndRowsFeedTheDoorAndUnarchiveReturnsToTheFan() passed after 0.048 seconds.
+◇ Test everyArchiveDoorSpeaksTheRoadBack() started.
+✔ Test everyArchiveDoorSpeaksTheRoadBack() passed after 0.062 seconds.
+◇ Test refusalsSurfaceInsteadOfFalseRoadSpeech() started.
+✔ Test refusalsSurfaceInsteadOfFalseRoadSpeech() passed after 0.042 seconds.
+✔ Suite "Archived takes reach the Takes board (13b 3D — N1)" passed after 0.154 seconds.
+◇ Suite "Tutorial acts — takes" started.
+◇ Test branchAndBlankTakesGrowTheLighthouseFan() started.
+✔ Test branchAndBlankTakesGrowTheLighthouseFan() passed after 0.736 seconds.
+◇ Test branchOnAClosedFanRevealsTheNewTake() started.
+2026-10-14 01:24:07.119433-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:07.119663-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:07.121037-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:07.122388-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:07.129728-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:07.131666-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:07.196158-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:07.199083-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+2026-10-14 01:24:07.199205-0600 Variorum[81160:58646655] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✔ Test branchOnAClosedFanRevealsTheNewTake() passed after 0.888 seconds.
+◇ Test choosingMovesThePostAmongTheFourTakes() started.
+✔ Test choosingMovesThePostAmongTheFourTakes() passed after 0.724 seconds.
+◇ Test commitHistoryAndRestoreKeepTheTakeSafe() started.
+✔ Test commitHistoryAndRestoreKeepTheTakeSafe() passed after 0.722 seconds.
+◇ Test archiveLeavesTheBoardAndUnarchiveBringsItBack() started.
+✔ Test archiveLeavesTheBoardAndUnarchiveBringsItBack() passed after 0.751 seconds.
+✔ Suite "Tutorial acts — takes" passed after 3.823 seconds.
+◇ Suite "Tutorial acts — deleting & getting it back" started.
+◇ Test everyDoorTheChapterNamesIsADoorTheAppHas() started.
+✔ Test everyDoorTheChapterNamesIsADoorTheAppHas() passed after 0.752 seconds.
+◇ Test theChapterIsStagedForItsActs() started.
+✔ Test theChapterIsStagedForItsActs() passed after 0.731 seconds.
+◇ Test aWholeParagraphSelectionDeletesTheScratchBlockAndUndoBringsItBack() started.
+✔ Test aWholeParagraphSelectionDeletesTheScratchBlockAndUndoBringsItBack() passed after 0.765 seconds.
+◇ Test theTwoScratchParagraphsGoUnderOneUndoEntry() started.
+✔ Test theTwoScratchParagraphsGoUnderOneUndoEntry() passed after 0.757 seconds.
+◇ Test commandZAfterTheLessonsDeleteNamesTheStructuralUndo() started.
+✔ Test commandZAfterTheLessonsDeleteNamesTheStructuralUndo() passed after 0.762 seconds.
+◇ Test theThreeVerbsSendTheirBlocksToThreeDifferentPlaces() started.
+✔ Test theThreeVerbsSendTheirBlocksToThreeDifferentPlaces() passed after 0.772 seconds.
+◇ Test theTrayPutsBackWhatTheNoteSetAside() started.
+✔ Test theTrayPutsBackWhatTheNoteSetAside() passed after 0.799 seconds.
+◇ Test theLessonItselfGoesToTheTrashAndComesBackIntoItsChapter() started.
+✔ Test theLessonItselfGoesToTheTrashAndComesBackIntoItsChapter() passed after 0.814 seconds.
+◇ Test thePurgeDoorsAreTrashOnlyAndAskEveryTime() started.
+✔ Test thePurgeDoorsAreTrashOnlyAndAskEveryTime() passed after 0.773 seconds.
+◇ Test theDividedBlocksPastNamesItsPreservedOriginalAndPutsItBack() started.
+✔ Test theDividedBlocksPastNamesItsPreservedOriginalAndPutsItBack() passed after 0.755 seconds.
+◇ Test theDeletingChaptersDivideLessonTeachesKeepOnTop() started.
+✔ Test theDeletingChaptersDivideLessonTeachesKeepOnTop() passed after 0.758 seconds.
+◇ Test theDeletedSpareTakeWaitsInTheBlocksPastAndComesBack() started.
+✔ Test theDeletedSpareTakeWaitsInTheBlocksPastAndComesBack() passed after 0.933 seconds.
+◇ Test theOriginalMovesOntoTheFamilysClockWhenItsLastDescendantGoes() started.
+✔ Test theOriginalMovesOntoTheFamilysClockWhenItsLastDescendantGoes() passed after 0.800 seconds.
+✔ Suite "Tutorial acts — deleting & getting it back" passed after 10.178 seconds.
+✔ Test run with 161 tests in 14 suites passed after 66.693 seconds.
+2026-10-14 01:24:31.820 xcodebuild[81072:58644860] [MT] IDETestOperationsObserverDebug: 82.709 elapsed -- Testing started completed.
+2026-10-14 01:24:31.820 xcodebuild[81072:58644860] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 01:24:31.820 xcodebuild[81072:58644860] [MT] IDETestOperationsObserverDebug: 82.709 sec, +82.709 sec -- end
+
+Test session results, code coverage, and logs:
+	<home>/dev/variorum-vx-282/App/Variorum/DerivedData/vx282-u3/Logs/Test/Test-Variorum-2026.10.14_01-23-08--0600.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started
