@@ -4590,8 +4590,8 @@ Anchor: the sentence ending "…no FK (purge-safe), the export strips it; the re
 
 > **A half runs only after its partner changed something** (VX-246 U2 — VX-276 · VX-277 · VX-119; her own doors and
 > the MCP door's entries alike): an undo that finds its act's result already gone (her undo-less door — Put back, a
-> restore, a rename, her ✓, a lock, the rule editor's Save — or a sync apply) changes nothing, speaks a refusal naming
-> the entry, and RETIRES it, leaving the other stack as it was; a redo re-applies exactly what its undo un-did, parts
+> restore, a rename, her ✓, a lock, the rule editor's Save — or a sync apply) changes nothing and RETIRES it, leaving
+> the other stack as it was (the Mac's door says so as a refusal naming the entry, §12's status seam); a redo re-applies exactly what its undo un-did, parts
 > and stamps included (an entry with several parts moves only the parts its partner moved; a revive revives only rows
 > dead on its own undo's stamp), so it never writes over a change of hers (PROVISIONAL #220: P-VX276-1…4, P-VX277-1;
 > the record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`, whose SWEEP TABLE dispositions every registration).
@@ -4624,8 +4624,8 @@ is 13n-a's format":
 > **setup keys are tied to their tab (VX-258, her ruling; the bind arm hers by ratification, 2026-10-13):** a copy
 > from the Claude Code or Codex tab carries that client's name inside the key (`vmk2_<name>_…`, authenticated by the
 > key's own hash), and under an APPROVED name, bound or not, such a key binds or re-binds with zero clicks; any other
-> fresh key under an approved name (an Any-client copy, another tab's) WAITS — admitted with no tools, every call
-> answered with the pending sentence, one waiting setup per name (the newer replacing the older), shown in Waiting above
+> fresh key under an approved name (an Any-client copy, another tab's) WAITS — admitted with no tools, every known tool
+> answering the pending sentence, one waiting setup per name (the newer replacing the older), shown in Waiting above
 > the tabs as "New setup for ‹name›" with the version the connection declared, Allow and Don't allow equal and quiet;
 > her Allow binds it and serves the same connection at once (the tool list re-announced), her Don't allow forgets it
 > (its holder then hears the ONE refusal sentence), and a Deny or an adopted library drops every wait; an unknown name
@@ -4765,7 +4765,7 @@ identity" bullet) and before "**Spell check / completion**":
 >     partner does nothing (the Edit menu then offers a "Redo …" that does nothing).
 >   - **P-VX276-2** — a quiet press speaks a refusal (a toast) naming the entry: "Nothing to undo — ‹label› was already
 >     undone or changed since." / "Nothing to redo — it changed again after ‹label› was undone." Option: (b) a quiet
->     receipt. (After a quiet undo the Redo item is simply disabled.)
+>     receipt. (When nothing is left to redo, the Redo item is simply disabled and no sentence is spoken.)
 >   - **P-VX276-3** — an entry with several parts (slots, columns, blocks, rows, a merge's mint and its sources) moves
 >     back and forth only the parts its partner moved, while your change to another part stands. Option: (b) any
 >     divergence makes the whole entry quiet (simpler; the parts you never touched become un-undoable).
