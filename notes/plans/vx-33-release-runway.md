@@ -98,6 +98,13 @@ The dependencies, all of them:
 ## 3. The runs — kickoff sections
 
 Rules binding every run (on top of CLAUDE.md):
+- **Cast (her call, 2026-10-13):** each run is **orchestrated by Opus**, to keep Fable free for the cold
+  reviews. Her words: *"I decided to orchestrate with Opus to reduce load on Fable and make sure there was enough
+  for reviews."* Opus implements; Fable cold-reviews wherever a run's section says so. Castle's `Sync/` lines
+  stay Fable-written (CLAUDE.md).
+- **The cross-model fix step (her ruling 2026-10-13, now in CLAUDE.md):** Fable reviews and makes the final call on
+  each finding; the Opus implementer applies the confirmed fixes, and the next fresh reviewer re-checks them. Fable
+  writes a fix itself only for `Sync/` lines or a finding it marks FINDER-FIXES.
 - **Effort.** Her VX-184 word was "Run everything at max effort". VX-246's plan carries it; for the other
   runs it's her call at kickoff.
 - **Stage.** Asks go through the live coordinator session (REQUEST → READY → GO → RELEASE).
