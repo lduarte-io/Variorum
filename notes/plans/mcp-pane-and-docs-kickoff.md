@@ -1,6 +1,6 @@
 # VX-246 — Run: MCP pane, docs & door fixes — kickoff + plan
 
-**STATUS: IN PROGRESS — VX-246 kicked off 2026-10-13, 21:20 MDT (orchestrator variorum-84). Its live state is the
+**STATUS: IN PROGRESS — VX-246 kicked off 2026-10-13, 21:20 MDT (orchestrator session vx-246, named variorum-84 at kickoff). Its live state is the
 run record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`: the units, the cast she set at kickoff, LIVE STATUS.
 (Written 2026-10-13 at VX-184's re-scope.)**
 

@@ -1,6 +1,6 @@
 # VX-246 — Run: MCP door fixes & AI docs (the RUN record)
 
-**STATUS: OPEN. Kickoff 2026-10-13, 21:20 MDT, by the orchestrator session variorum-84 (Opus 5.5 at max effort, her
+**STATUS: OPEN. Kickoff 2026-10-13, 21:20 MDT, by the orchestrator session vx-246, named variorum-84 at kickoff (Opus 5.5 at max effort, her
 launch) on the Pro. This file is the live state; read its LIVE STATUS first on any resume.**
 
 **The binding sources.** Every implementer reads these in full, in its own context, before touching code:
@@ -21,7 +21,7 @@ fixes land; every commit names its member and `Part of VX-246`.
 and the runway's "Opus / Fable":** *"you're running as the orchestrator Opus at Max thinking - run implementers on
 xhigh and Opus cold review on Max. Run a fable cold review when you need to if you do & at the end of the phase if
 you didn't need that."*
-- **Orchestrator:** variorum-84 (Opus 5.5, max effort).
+- **Orchestrator:** session vx-246 (Opus 5.5, max effort; renamed by her from variorum-84, 2026-10-13 ~22:00 MDT).
 - **Implementers:** `opus-implementer` at `effort: xhigh`, one fresh one per unit, strictly sequential.
 - **The ladder:** `opus-reviewer` at `effort: max`, cold, over the whole run's diff, capped at three rounds, a fresh
   reviewer each round. Same-model flow (CLAUDE.md): the orchestrator arbitrates disputes against the spec, and the
@@ -29,7 +29,15 @@ you didn't need that."*
 - **Fable:** a `fable-reviewer` cold review WHEN NEEDED. CLAUDE.md requires one whenever the diff touches `Sync/`,
   custody/keychain or the editor seam: here U3 (VX-275's `delete_block` half) and probably U4 (VX-230's badge). If no
   unit needs one, there is ONE Fable cold review at the end of the run anyway, her rule. A Fable review follows the
-  cross-model flow: Fable makes the final call on disputes and implements its confirmed fixes itself.
+  cross-model flow, ~~Fable makes the final call on disputes and implements its confirmed fixes itself~~ *[amended
+  2026-10-13 by her ruling, main `75f6f275` — CLAUDE.md "Two reviews", the fable-reviewer agent, both phase skills,
+  ProcessHistory, the runway §3]*: Fable makes the final call on every finding; the OPUS IMPLEMENTER applies the
+  confirmed fixes (red-on-old per finding, the suite green); the next fresh reviewer re-checks them, and a FINAL
+  round's fixes (no later round reads them) get the orchestrator's line-by-line check against each finding. Fable
+  writes a fix itself ONLY for `Sync/` lines (this run has none) or a finding it marks **FINDER-FIXES** (one line
+  why), and the implementer then gets one sanity pass over its diff. The orchestrator's message handing Fable the
+  implementer's answers authorizes exactly that and spells the rule out (a loaded agent definition may predate it).
+  Her reason: Fable's weekly budget goes to finding and judging, not typing.
 - **Why the review matters here:** VX-258 changes the setup key's accept path and VX-279 is the socket road; the
   runway named Fable for both. Under her redirect, the max-effort Opus ladder carries them, and the Fable review
   (needed for the editor-seam units, or held to the end) reads the whole run.
@@ -50,7 +58,7 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 
 | unit | members | the surface | acceptance evidence | notes |
 |---|---|---|---|---|
-| **U1** — the door's security and correctness | VX-258 · VX-259 · VX-260 · VX-279 · VX-280 | the setup-key rule and the admission; the wire's book-name check; comment authorship; the server host; the lens picks read | pins red-first per member, red again by revert; the MCP target green across repeated whole-target runs (VX-279); a Mac batch; a REAL-client live round on the dev store | VX-258's ask FACE is built on VX-281's tabbed pane after VX-281 merges (agreed with variorum-75, 2026-10-13). Its core goes first |
+| **U1** — the door's security and correctness | VX-258 · VX-259 · VX-260 · VX-279 · VX-280 | the setup-key rule and the admission; the wire's book-name check; comment authorship; the server host; the lens picks read | pins red-first per member, red again by revert; the MCP target green across repeated whole-target runs (VX-279); a Mac batch; a REAL-client live round on the dev store | VX-258's ask FACE is built on VX-281's tabbed pane after VX-281 merges (agreed with variorum-75, now vx-281, 2026-10-13). Its core goes first |
 | **U2** — the undo class | VX-276 · VX-277 · VX-119 | the structural undo stack's rule (a redo after a quiet undo stays quiet), for MCP entries and her own doors alike | the round-2 probes plus one pin per family, red-first; the sweep (every registration whose redo reads current state: FIXED or provably SAFE); a Mac batch; her Edit menu walked for one family per direction | core only. No pane; no editor seam expected |
 | **U3** — her editor vs the wire | VX-275 | a pre-act seam (the app's flush, then the navigate-away) before a wire write tombstones what her editor holds; `delete_block` under her caret | pins; a Mac live round: her pending keystrokes survive a wire delete, and her pane leaves the dead note | **EDITOR SEAM** (the `delete_block` half): read TEXTKIT2_NOTES first. The navigate-away road is shared with VX-283 (VX-123): one road, never a second |
 | **U4** — the faces after big writes | VX-230 · VX-231 | the fan badge's placement and refresh (her evening lead on VX-230: badges of many fanned blocks drawn at the first block before layout reaches them); the Bookcase row's counts | red-first pins; a walk in both voices on the dev store with a large fanned note (U1-of-VX-184's repro and hers) | likely the **EDITOR SEAM** (the decoration layer): TEXTKIT2_NOTES first. Check VX-283's VX-122 revival signal before inventing one |
@@ -74,11 +82,11 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 - **The editor seam** (`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, `PaneTextAuthority`, the decoration layer,
   `Shared/EditorBrain`): read `notes/TEXTKIT2_NOTES.md` first. Attribute stamps clamp to the verdict's range;
   `runStructural` is the one structural door.
-- **VX-281's lane** belongs to variorum-75 (worktree `~/dev/variorum-vx-281`). It covers:
+- **VX-281's lane** belongs to session vx-281, formerly variorum-75 (worktree `~/dev/variorum-vx-281`). It covers:
   - `App/Variorum/Variorum/Features/MCP/MCPPane*.swift`, `MCPPaneCopy.swift` and `MCPGrantSheet.swift`;
   - the shared-with-AI icon on the Library, Pool, Book Panel and wing-switcher rows.
 
-  STOP and tell the orchestrator before editing any of them; the orchestrator sequences with variorum-75.
+  STOP and tell the orchestrator before editing any of them; the orchestrator sequences with vx-281.
 - **The stage.** Every `xcodebuild test`, walk, live round, Debug launch and dev-store reset goes through the
   orchestrator to the stage coordinator (session oct13coordinator):
   1. REQUEST: what, how many minutes, the claim name.
@@ -110,8 +118,9 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 
 | unit | status |
 |---|---|
-| U1 — the door's security and correctness | IN-PROGRESS — implementer spawned from the U1 BRIEF below |
-| U2 — the undo class | NOT-STARTED |
+| U1 — the door's security and correctness | CORE DONE, headless green at `ab552c5a` (MCP 223/48 · core 2,800/324 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~678k context (the cutover rule). The rest is U1b, below. U1's Mac batch rides U2's stage window (orchestrator call, see THE ORCHESTRATOR ON U1's HAND-BACK) |
+| U1b — VX-258's face and U1's remainder | WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5) |
+| U2 — the undo class | IN-PROGRESS — implementer spawned from the U2 BRIEF below |
 | U3 — her editor vs the wire | NOT-STARTED |
 | U4 — the faces after big writes | NOT-STARTED |
 | U5 — the write tools' shapes | NOT-STARTED |
@@ -135,29 +144,56 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 
   Zero-slot was confirmed after preflight. The coordinator's ordering call: VX-281 goes first when both runs are READY,
   unless our request is ≤10 min or gates a merge.
+- 2026-10-13, ~23:15 MDT: U1 reported READY for a window (~75 min, or ~25 min batch-only). **No request was sent.**
+  Every live leg except leg 0 needs the face (or a Deny → re-run → Approve detour), and U1 can't merge before the face
+  anyway, so the live round moves whole to U1b. U1's Mac batch rides U2's window: one claim instead of two on a
+  contended night. Nothing was asked of the coordinator, so nothing needs cancelling.
 
 ## Cross-run coordination
 
-- **VX-281** (variorum-75, `~/dev/variorum-vx-281`, branch `vx-281-run-mcp-settings-pane-shared-icon`).
+- **VX-281** (session vx-281, formerly variorum-75; `~/dev/variorum-vx-281`, branch `vx-281-run-mcp-settings-pane-shared-icon`).
   - Its lane is listed under the hard rules above.
   - VX-258's ask face is built on the tabbed pane after VX-281 merges (agreed 2026-10-13). Per R-VX184-6 it is a row
     type in the Waiting section, which sits above the tabs, beside the existing grant asks.
-  - variorum-75 pings the orchestrator at its merge. U8 waits on that merge.
+  - vx-281 pings the orchestrator at its merge. U8 waits on that merge, and so does U1b.
+  - 2026-10-13 ~23:20 MDT: the orchestrator sent vx-281 the face's file list (U1's OWED 1), so its own work can flag
+    a collision. No reply was asked unless one exists.
 - **VX-283** (VX-123's navigate-away road, VX-122's revival signal): U3 builds on the one navigate-away road
   (`.variorumNotesDeleted` → `WorkspaceModel.notesDeleted`). U4 checks VX-122's signal before inventing a refresh of
   its own (the runway, §2).
-- **VX-282** (the editor seam: VX-290, VX-296): U3's and U4's editor-seam lines say so. Neither changes another run's
-  landing or styling rules without saying so.
+- **VX-282** (session vx-282, formerly variorum-da; `~/dev/variorum-vx-282`; the editor seam: VX-290, VX-296): U3's
+  and U4's editor-seam lines say so. Neither changes another run's landing or styling rules without saying so.
+  - **Its lane note, 2026-10-13 evening (no reply asked).** Both units are committed on `vx-282-editor-notes-fixes`.
+    - **Its U2 (VX-296, caret-aware italics):**
+      - `EditorViewModel.swift`: one call at the top of `storageDidEdit`, plus a new `settleMarkdownCaret`;
+      - `EditorView.swift`: one call in the selection-change delegate;
+      - `Surface/PaneSurface.swift`: the pane coordinator;
+      - `Shared/MarkdownFace/MarkdownFaceCore.swift` and `Theme/MarkdownStyling.swift`: `restyle` gains an optional
+        `caret:` that defaults to today's output, plus a new `settleCaret`;
+      - core: an optional `caret:` on `MarkdownSyntax.spans` and a new `Domain/MarkdownCaretRescue.swift`;
+      - the phone: `MobileEditorViewModel.swift`.
+    - **Its U1 (VX-290):** `BlockRangeIndex`, `EditorEditRoute`/`SeamCarvePlan` and `EditorSurfaceController` (the
+      carve's caret landing only).
+    - **What it means here:** VX-275's `delete_block` half reaches EditorViewModel's projection deferral, and VX-230
+      may reach `PaneSurface`. So U3 and U4 land on top of these files. The orchestrator messages vx-282 before either
+      unit starts, and whoever merges second merges main in first.
 - **VX-292** (her tutorial session) and **VX-266** (Castle's words in the guide) also edit `TutorialSeeder`. U8 never
   runs at the same time as VX-292, and rebases onto whichever lands first.
 - **VX-266** (Castle) is THE `Sync/`-custody effort. This run never touches `Sync/`, custody or the Keychain.
 
+## Her rulings during the run (verbatim; each also on its ticket)
+
+- **VX-275, 2026-10-13 ~21:45 MDT, asked in chat.** The orchestrator proposed option (a): before a wire delete, flush
+  her typing and navigate her pane away from the dead note, exactly as her own Delete door does. Her answer: *"yeah
+  that's fine on that call."* U3 builds (a).
+
 ## Tickets minted from this run
 
-*(none yet; any unit's mints join this table, and the closeout handoff lists them all)*
+*(any unit's mints join this table, and the closeout handoff lists them all)*
 
 | ticket | born | what | fate |
 |---|---|---|---|
+| VX-318 | U1's OWED 3 (the implementer, 2026-10-13) | MCP socket: a session's reader thread can read another socket's bytes after the host closes its descriptor. Same fd-reuse class as VX-279; traced by reading | a member (sub-issue of VX-246, Pre-launch); built in U1b with a red-first pin |
 
 ## UNIT BRIEFS (the orchestrator's; each unit's implementer is spawned from its brief)
 
@@ -235,6 +271,119 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 
 **Out of scope:** the guide and `MCPSession.instructions` (U8); every other member; anything in VX-281's lane before
 the orchestrator's word.
+
+### U2 BRIEF — the undo class (VX-276 · VX-277 · VX-119)
+
+**The one rule, for every family, MCP entries and her own doors alike:** an undo writes only over the act's own
+result, and a redo after a QUIET undo (an inverse that wrote nothing) stays quiet. One mechanism; one pin per family,
+red-first.
+
+**What binds, per member.** Each ticket's text is the record, quoted VERBATIM below; its rulings came through
+VX-184's ladder dispositions.
+
+1. **VX-276: a redo after a quiet undo re-applies the client's act over her own reversal (every direction).**
+   > **Also in scope (VX-184 round-2 fix pass):** `delete_block` / `delete_take` after she Puts the block back from the
+   > tray — her Put back registers no undo entry, so ⌥⌘Z (quiet) then ⇧⌥⌘Z re-deletes what she restored.
+   >
+   > **WIDENED at VX-184's review round 2 (2026-10-13):** the whole class — **a redo after a QUIET undo re-applies the
+   > client's act** in EVERY direction, not just reviving a removed row. `UndoStack.undo` moves any non-throwing
+   > inverse onto the redo stack, even one that wrote nothing, so: the client acts → she reverses it with an undo-less
+   > door of hers (unlock, reopen, rename back, Put back, restore a chapter or a comment, unarchive) → ⌥⌘Z is quiet →
+   > ⇧⌥⌘Z writes the client's act over hers. Covers: lock, finish/reopen, archive_book, delete_book, delete_chapter,
+   > delete_note, archive/unarchive_note, delete_comment, the compare-and-set value family when she sets the value
+   > back (rename_book, …), the pre-existing set_entry_date, file_note_in_chapter, set_book_rule, set_block_name,
+   > choose_take, adopt_lens, and `reapplyMCPWingMove` proceeding with a nil `backwardStamp`. **One fix for all:**
+   > each entry's inverse records whether it wrote; the redo returns quietly when the last inverse wrote nothing (the
+   > house precedent: `restoreCommentForClient`, `save_lens`, `link_versions`); the compare-and-set stays. Pins: the
+   > round-2 reviewer's probes (`lockRedoAfterQuietUndo`, `finishRedoAfterQuietUndo`,
+   > `renameBackToOriginalThenQuietUndoThenRedo`, `deleteNoteRedoAfterHerPutBackAndAQuietUndo`,
+   > `deleteChapterRedoAfterHerRestoreAndAQuietUndo` — red on VX-184's tip), one per family. Detail: the VX-184 run
+   > record `notes/plans/fixes/vx-184-mcp-launch-polish.md` § THE LADDER (round 2).
+   >
+   > Found by VX-184's round-1 fix-pass sweep (the adjacent class to the compare-and-set fix): when an MCP act's undo
+   > goes quiet because she has since changed things, the REDO still revives rows she removed by hand. Affected:
+   > `add_comment(s)`, `create_note` / an imported note / `save_version`, `apply_tag`, `create_section`, and
+   > `add_note_to_book`'s seat case. House precedent for the fix: a stamp-keyed redo, as `save_lens` and `create_book`
+   > already do — revive only rows still carrying the act's own stamp. Red-first pins per family. Detail: the VX-184
+   > run record § THE LADDER → ROUND 1 — FIX PASS.
+2. **VX-277: her own doors' undo/redo overwrite what she changed since (lens adopt; a block delete after a tray Put
+   back).**
+   > **Widened (VX-184 round-2 fix pass):** the same shape outside the MCP family also hits her own Delete Block
+   > gesture — she deletes a block (an undo entry), Puts it back from the tray (no entry), then ⌥⌘Z / ⇧⌥⌘Z act over
+   > her restore. One rule for her doors, the MCP road's (VX-276): a redo after a quiet undo stays quiet; an undo
+   > writes only over the act's own result.
+   >
+   > Found by VX-184's round-1 fix-pass sweep, outside the MCP family: her own "✓ Make this the note" adopt doors
+   > restore every chosen pointer on undo unconditionally. Choosing a take registers no undo entry, so adopting a lens,
+   > then choosing a different take on some block, then ⌥⌘Z (undoing the adopt) silently overwrites her later choice.
+   > The MCP road was fixed in VX-184 with a per-slot compare-and-set (`restoreChosenPointersIfUnchanged`); her doors
+   > keep the old helper. Fix: route them through the same rule, red-first.
+3. **VX-119: the undo-pair class — `reapplyMintedContainer`'s redo resurrects a hand-deleted note.**
+   > Found adjacent to 13n-a's F1 (fixed for `importBook` at `1a3036bf`): the SHARED single-container pair
+   > `revertMintedContainer`/`reapplyMintedContainer` (since 13c; the copy ops and now the single-file import door
+   > ride it) keys its redo on current state, not the stamp the undo wrote. Traced by READING ONLY (no probe run):
+   > import one file → delete the note by hand → ⌥⌘Z (no-op, already dead) → ⇧⌥⌘Z brings back the note she deleted.
+   > Pin-before-fix: write the red probe FIRST; then the F1 fix shape (a LockIsolated stamp box). SWEEP instruction
+   > (the class-completeness rule): enumerate every structural-undo registration whose redo reads current state
+   > instead of the undo's stamp — instance × host table, each FIXED or provably SAFE. Record:
+   > `notes/plans/13na-ladder-round1.md` (the fix-round report's first left-undone item).
+   >
+   > **R2-1's rule rides this sweep (2026-10-09, ladder round 2):** an inverse that tombstones NOTHING must return nil
+   > and never overwrite the stamp box — else each fixed pair inherits the retried-undo regression (fixed for
+   > `revertImportedBook` at `ead486c4`, pin `aRetriedCompoundUndoStillRedoesEveryBook`).
+
+**Read before code** (in your own context; this list adds to the run's binding sources):
+- `Sources/VariorumCore/Operations/UndoStack.swift` whole, and the registration sites the tickets name.
+- VX-184's record: THE LADDER's ROUND 1 — FIX PASS, THE SWEEP TABLE and its ROUND 2 READING (from about line 2010),
+  and ROUND 2's findings and dispositions (from about line 2195).
+- `notes/plans/13na-ladder-round1.md`.
+
+**Argue in the record, before code:**
+- **Where the rule lives.**
+  - (a) In `UndoStack` itself: `undo` learns from the inverse whether it wrote, and a quiet undo's entry then redoes
+    nothing, or never reaches the redo stack.
+  - (b) Per entry: each inverse records what it wrote, and its redo keys on that. This is the house precedent:
+    `restoreCommentForClient`, `save_lens`'s `undoneOn:`, `link_versions`, and `importBook`'s F1 stamp box.
+  - Weigh the redo-future rules: a new structural act clears it, and undoing past a `redo: nil` entry ends it. Weigh
+    how many files hold registrations, and whether a future registration could forget the rule.
+  - Whichever road you pick, the compare-and-set on the UNDO side stays.
+- **What she sees on a quiet press.** What ⌥⌘Z and ⇧⌥⌘Z say when nothing changes, on AppSpec §12's one status seam,
+  where a door that did nothing speaks a refusal. Keep the client-named words of MCP entries. Wording ships as built
+  and goes on the FOR VX-234 list.
+- **The revive direction:** a stamp-keyed redo that revives only rows still carrying the act's own stamp, under
+  R2-1's nil rule.
+
+**THE SWEEP (VX-119's class-completeness rule, over BOTH families):** every structural-undo registration whose inverse
+or redo reads current state instead of what the act or the inverse wrote. Build it as an instance × host table, each
+row FIXED (red-first) or provably SAFE (one line of reason). Start from VX-184's SWEEP TABLE and ROUND 2 READING;
+VX-184's dated strike-throughs mark which of its verdicts were false.
+
+**STOP and report before:**
+- **any edit on the editor seam:** `EditorViewModel`, `EditorSurfaceController`, `EditorTextView`, `BlockRangeIndex`,
+  `PaneSurface`, `PaneTextAuthority`, or the editor half of the structural door. vx-282's lane is live there, and an
+  editor-seam diff brings a Fable review.
+- any edit in VX-281's lane (the hard rules above);
+- an author-only call, or an ambiguity that gates the core.
+
+**Evidence that closes U2:**
+- **Pins:** the five round-2 probes red-first, plus one pin per family — the revive families, VX-277's adopt doors,
+  Delete Block after Put back, and VX-119's single-file import and copy ops. Each goes red again by revert.
+- **The sweep table, complete.**
+- **The whole headless package green,** with counts: core, MCP and the workbook.
+- **A Mac batch, one claim, `vx246-u2`.** It covers every changed SOURCE file's suites (grep the tests for the changed
+  types; 13x's lesson). It also runs U1's planned batch: U1's THE STAGE WINDOW, its three groups. U1's live legs are
+  NOT yours (they wait for U1b).
+- **Her Edit menu walked on the dev store,** one family per direction (value, toggle, delete, revive), through ⌥⌘Z /
+  ⇧⌥⌘Z. At least one MCP family is driven by a real `claude -p` turn, and at least one is her own door. Capture any
+  face whose words change.
+  - **If `claude-code` needs a fresh setup on the dev store:** U1's core makes an untagged key WAIT under an approved
+    name, and nothing on screen can answer it yet. The road around it is U1's: THE STAGE WINDOW's legs 3–4 (Deny →
+    re-run the setup → Approve). Its existing bound key keeps working.
+
+**Context:** if your context passes ~500k before the unit is done, stop at the next clean seam: committed, green, the
+continuation written in your LIVE STATUS. Then report; the orchestrator continues with a fresh session.
+
+**Out of scope:** every other unit's members; VX-318 and the rest of U1b; the guide (U8).
 
 ## UNIT RECORDS
 
@@ -680,3 +829,33 @@ the guide's lesson-2 sentence (U8) — a client's own setup re-run moves its nam
    door's book-name check (VX-259); her edit makes a comment hers (VX-260). MOBILE PARITY: nothing mobile-visible except
    VX-260 riding her shared comment door (the phone's comment edit clears the record too — on the phone's own store,
    which never holds a record).
+
+### THE ORCHESTRATOR ON U1's HAND-BACK (2026-10-13, ~23:15 MDT)
+
+- **Accepted as reported.** Green suites were not re-run (rule 6). The path check across `3b0d641d..ab552c5a` finds zero
+  lines in `Sync/`, custody/Keychain, `Server/`, `Features/MCP/` or the editor seam. The only App file is a test, and
+  the one schema step is `Persistence/MCPGrantSchema.swift` + `Migrations.swift` (local-only v1_28).
+- **The cutover.** The implementer handed back at ~678k context, past the ~500k quality line. It stops at this clean
+  seam (committed, green, the record complete), and U1b gets a fresh implementer.
+- **The window.** None was requested; the Stage traffic log says why. U1's planned Mac batch (THE STAGE WINDOW above,
+  its three groups) rides U2's window. Its live legs 0–5 move whole to U1b, after the face exists.
+- **`MCPDoor`'s one line early (the hand-back's question): declined.** On its own it closes nothing: the names it must
+  pass live in `MCPSetupClient`, inside VX-281's `MCPPaneCopy.swift` (O-4's fence). And the gap only bites a build
+  carrying U1's core without the face, which the merge gate already forbids.
+- **The PROVISIONALs.**
+  - **P-VX258-1, -3, -4, -5 and -6 stand as built.** Each is the defensible pick. The ladder reads them, and they go
+    into QUESTIONS at the merge.
+  - **P-VX258-2, the bind arm, stands as built.** It is the safer reading of her ruling's words (*"the best protection
+    at each level"*). It goes to her in chat; QUESTIONS takes it at the merge unless she answers first.
+  - **P-VX260-1 is rebuilt as option (b), for U1b.** Her rule reads "Once she has edited an AI's comment, deleting it
+    needs EDIT". An edit on her phone or the Air is still her edit, and (a) leaves those comments deletable.
+    - Option (b) adds a local-only digest of the comment's words to the authorship record and compares it at delete.
+      That honors her words wherever she edits, with no `Sync/` line and no trigger. An unchanged digest means
+      unchanged words, so her "only when the words change" stays exact.
+    - U1b gives it its own schema commit on the grants family's road. It argues in the record between backfill and a
+      NULL-means-legacy rule, and pins red-first: a text change with no door (a synced edit's shape), then the suggest
+      delete hears her sentence.
+    - Accepted residual: an EDIT-rung client's rewrite also makes a comment undeletable at SUGGEST.
+    - It is still PROVISIONAL, with options (a)/(b)/(c) kept for her.
+- **OWED 3 is now VX-318,** a member of this run, built in U1b.
+- **OWED 5, the canon at the merge,** is carried to the closeout as written.
