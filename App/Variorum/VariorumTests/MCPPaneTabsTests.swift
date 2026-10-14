@@ -143,8 +143,7 @@ struct MCPPaneTabsTests {
             let shown = MCPSetupClient.allCases[menu.selectedSegment]
 
             #expect(door.note == nil || door.note?.text == shown.copiedReceipt,
-                    "the receipt beneath the menu names the client it shows (shown \(shown.label), "
-                    + "receipt “\(door.note?.text ?? "")”)")
+                    "the receipt beneath the menu names the client it shows (shown \(shown.label), receipt “\(door.note?.text ?? "")”)")
             #expect(shown == .anyClient, "the choice she made survives the pane going away")
         }
     }
@@ -189,8 +188,7 @@ struct MCPPaneTabsTests {
             // three lines of the 11-pt mono setup (≈ 14 pt each) plus the
             // block's padding are in sight below the menu, unscrolled.
             #expect(menuFrame.minY - visible.minY >= 56,
-                    "\(voice): the setup's first lines are in sight below the menu "
-                    + "(\(menuFrame.minY - visible.minY) pt)")
+                    "\(voice): the setup's first lines are in sight below the menu (\(menuFrame.minY - visible.minY) pt)")
         }
     }
 }
