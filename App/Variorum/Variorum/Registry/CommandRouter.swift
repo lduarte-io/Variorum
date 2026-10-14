@@ -127,6 +127,9 @@ final class CommandRouter {
         if let landing = pendingLensLanding, landing.postID != postID {
             pendingLensLanding = nil
         }
+        if let landing = pendingCompareLanding, landing.postID != postID {
+            pendingCompareLanding = nil
+        }
         return token
     }
 
@@ -149,6 +152,7 @@ final class CommandRouter {
         pendingWriteIntent = nil
         pendingTakesLanding = nil
         pendingLensLanding = nil
+        pendingCompareLanding = nil
         pendingTrayRequest = nil
         focusedBlockIdentity = nil
         focusedOffset = nil
@@ -462,6 +466,9 @@ final class CommandRouter {
         }
         if pendingLensLanding != nil, mode != .lenses {
             pendingLensLanding = nil
+        }
+        if pendingCompareLanding != nil, mode != .compare {
+            pendingCompareLanding = nil
         }
     }
 
