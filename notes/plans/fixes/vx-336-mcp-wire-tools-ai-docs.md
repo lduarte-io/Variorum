@@ -1665,8 +1665,9 @@ typed instead as ⌥e a and ⌥⇧9.
 
 **NOT DONE YET (THE CLOSER's first line — a fresh, narrow opus-implementer from 2026-10-14 ~17:30 MDT, briefed by THE
 ORCHESTRATOR'S RULING ON U6a's ONE OPEN DECISION, (a)): the ruled pin is WRITTEN (row 6a) but NOT RUN — it is an app
-test, its red on the one-property tree and its green with the clears are U6b's batch to read (PENDING). Rows 6b–9 (the
-three clears, the revert checks, the headless finals, both Mac products, the legs' final form) are in progress below.**
+test, so its red on `vx336-u6-red` and its green on `vx336-u6` are U6b's batch to read (PENDING). The live legs are
+WRITTEN, not run (U6b's window). Everything else is DONE: the three clears (6b), both revert checks (7), the headless
+finals (8), both Mac products (8b), the legs' final form and the suite list (9).**
 No stage claimed, no app launched, no `xcodebuild test`, no store touched by this session.
 
 **(The build continuation's first line, kept:) NOT DONE YET (the build continuation's first line, per the contract — 2026-10-14 ~17:05 MDT): pieces 7–9 (the revert
@@ -1718,7 +1719,7 @@ wire's `create_note`/`save_version` arms, `MCPWriteTools+WingMove.swift` (the tw
 | 7 | revert checks (announced here first, committed before reverting) | **DONE (the closer — both as expected).** **VX-311 — DONE, as expected** (announced `8fe762f2`, run on that committed tree): `MCPDuplicateNoteActsTests.swift` moved aside, `git show 6a8423c4 -- Sources/ \| git apply -R` (`Operations+MCPDuplicate.swift` and `MCPWriteTools+DuplicateNote.swift` deleted, `MCPWriteAct.duplicate`, the Job/parse/perform arms and the catalog entry reverted); `swift build --build-tests` EXIT 0. `MCPDuplicateNoteServerTests|MCPHerEditorServerTests`: **21 tests, 8 failed, 13 passed, 16 issues; the 16 test × line pairs IDENTICAL to piece 3's (`diff p3-pins-red.pairs p7-311-red.pairs` empty)** (`p7-311-red.log`). The justified edits, `MCPServerTests|MCPWriteServerTests` (24 tests, 2 issues): **each red on the expectation it feeds** — `everyDeclaredToolIsHandledAndEveryHandledToolDeclared` at `MCPServerTests.swift:259` (the write-new set the edit extended at `:262`), `aSuggestGrantProvablyCannotModifyAnExistingTake` at `MCPWriteServerTests.swift:338` (the completeness the appended call at `:326` feeds) (`p7-311-justified.log`). **Restored:** `git checkout HEAD -- Sources/ Tests/`, the aside copy `cmp`-SAME as the restored pin and removed, `git status` empty, `git diff --quiet HEAD`; rebuilt EXIT 0 and **green: MCP 45 / 4 + core 4 / 1, EXIT 0** (`p7-311-restore-green.log` — piece 4's exact counts). **VX-298 — DONE, as expected** (announced `aebd2317`, run on that committed tree): `git show a846a5f1 -- Sources/ \| git apply -R` (`MCPShowTool.swift`, `MCPToolCatalog.swift`, `MCPWriteTools+LinkVersions.swift` reverted); `swift build --build-tests` EXIT 0. `MCPShowCompareServerTests|MCPLinkVersionsServerTests`: **9 tests, 6 failed, 3 passed, 25 issues; the 25 test × line pairs IDENTICAL to piece 5's (`diff p5-pins-red.pairs p7-298-red.pairs` empty)** (`p7-298-red.log`). No justified test edit exists for VX-298 (`a846a5f1` touched no `Tests/` file). **Restored:** `git checkout HEAD -- Sources/`, `git status` empty, `git diff --quiet HEAD`; rebuilt EXIT 0 and **green: 17 / 4 (the VX-298 pins + `MCPShowServerTests` + `MCPWingReachServerTests`), EXIT 0** (`p7-298-restore-green.log` — piece 6's exact counts). (The app pins are red by compilation, or — the closer's 6a — by assertion on `vx336-u6-red`; neither is revert-run here.) The steps as written: **after the ruling** (its outcome touches only app files, so these headless steps stand as written). **VX-311:** announce in this row and commit; on the committed tree `git show 6a8423c4 -- Sources/ \| git apply -R` (the fix's package files: `Operations+MCPDuplicate.swift` and `MCPWriteTools+DuplicateNote.swift` removed, `MCPWriteAct.duplicate`, the Job and the catalog entry reverted — VX-298's later catalog hunks are disjoint); move `Tests/VariorumCoreTests/MCPDuplicateNoteActsTests.swift` (new-API) aside to `notes/plans/vx336-screens/u6a/prerevert-311/`; KEEP the two justified edits → expect `p3-pins-red.pairs`' 16 pairs IDENTICAL (`diff` empty) plus each justified edit red on its edited line (`MCPServerTests` write-new set, `MCPWriteServerTests` completeness); restore (`git checkout HEAD -- Sources/ Tests/`, the aside folder removed, `git status` clean) and re-run green. **VX-298:** `git show a846a5f1 -- Sources/ \| git apply -R` (`MCPShowTool.swift`, the catalog's `show_in_app` + `link_versions` hunks, `MCPWriteTools+LinkVersions.swift`) → expect `p5-pins-red.pairs`' 25 pairs IDENTICAL; restore; green. (The app pins are red by compilation only — stated, not revert-run.) |
 | 8 | headless finals (MCP · core · workbook) | **DONE (the closer, on `b139044e`'s sources — the final package tree; the clears are app-only) — `swift build --build-tests` EXIT 0, then `swift test --skip-build` on the whole package: MCP 278 / 59 · core 2,871 / 333 · workbook 40 / 6, EXIT 0, zero ✘ — exactly the expected counts below** (`p8-finals.log`). `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` PASSED in the whole run at **14.889 s against its 15 s bound** (load average 19–29 at the end — another worktree building), so no re-run was needed; 0.11 s of margin is VX-353's point, recorded for it, the pin untouched. The plan as written: `swift build --build-tests` then `swift test --skip-build` on the whole package (expected, from U5b's finals 264/57 · 2,867/332 · 40/6: **MCP 278/59** — +7/+1 duplicate, +1 HerEditor, +5/+1 compare, +1 link — **core 2,871/333**, workbook 40/6; `MCPHarnessTimeLimitTests` is load-sensitive — two full-target runs this session exceeded its 15 s bound at load 9 and 67, each passing alone in ~1 s — run the finals on a quiet machine or re-run that suite alone and say so). |
 | 8b | the Mac products for U6b: `vx336-u6` (the final tree) + `vx336-u6-red` (ONLY the three clears reverted) | **DONE (the closer).** Both built from `App/Variorum/` with `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<name> build-for-testing`, detached to a log and polled in the foreground; 63–66 GiB free throughout (2.5 GB each). NO `xcodebuild test`, no launch, no store. **`App/Variorum/DerivedData/vx336-u6` — the final tree, `c30fa9a7`** (status clean): TEST BUILD SUCCEEDED, XCB-EXIT 0, zero `error:`, no warning in either touched file (`p8b-mac-final-2.log`; the first build on `398a9d26`, `p8b-mac-final.log`, was superseded by the pin's (ii) refinement). **`App/Variorum/DerivedData/vx336-u6-red` — `c30fa9a7` with ONLY the three clears reverted:** made by `git show 4ef02349 -- App/Variorum/Variorum/Registry/CommandRouter.swift \| git apply -R` in the working copy (−7 lines; the reverted router's blob `47db0c25` = `a846a5f1`'s, the one-property router exactly); TEST BUILD SUCCEEDED, XCB-EXIT 0, zero `error:` (`p8b-mac-red-2.log`; the first red build, `p8b-mac-red.log`, superseded the same way). **The tree restored:** `git checkout HEAD -- App/Variorum/Variorum/Registry/CommandRouter.swift` → `git status` empty, `git diff --quiet HEAD`, the router's blob `71504ce0` = HEAD's, `pendingCompareLanding` ×6. **Each product:** the Debug app signed `io.lduarte.Variorum.debug`; its test bundle (17:09:49 / 17:10:52) carries both new pin names; `Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun` present. **U6b's use:** the red product runs ONE suite once, by `test-without-building -xctestrun App/Variorum/DerivedData/vx336-u6-red/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun -only-testing:VariorumTests/MCPCompareLandingTests` under the stage claim (THE MAC SUITES FOR U6b's BATCH) |
-| 9 | LIVE LEGS for U6b's window (final form) | DRAFT below — L1–L5 written for the design as built; finalized with the ruling (a leg for the orphaned landing only under (a)/(b)). **The Mac suites for U6b's batch (U6a's share) are listed below the draft** |
+| 9 | LIVE LEGS for U6b's window (final form) | DONE (this commit; the closer) — **LIVE LEGS FOR U6b's WINDOW (FINAL)** below: the turn form (prompts on STDIN, ids by substitution, Variorum frontmost per `show_in_app` turn), L0 (the fixture through the wire), L1a (`duplicate_note` + read_note's equality, her ⌥⌘Z/⇧⌥⌘Z), L1b (the AI edits the copy), L2 (Compare on the pair from a fresh open — rows aligned, "versions", related-only ON), L3 (the stranger on the MOUNTED board — the column replaced, "there is no relationship here", related-only OFF), L4 (`link_versions`' Open › → Compare A\|B, "versions · no shared lineage — loose alignment"), L5 (not frontmost: the exact sentence, nothing moved), THE TERMINAL PASS (L2 and L3 again); no live leg for the orphaned landing (tens of ms — the pin carries it). **THE MAC SUITES FOR U6b's BATCH** updated: 38 suites (`NoteOpenLandingTests` joins; the pin lives in `MCPCompareLandingTests`, now 7 tests) + the ONE red run on `vx336-u6-red` with its expected 9 pairs |
 
 ### THE ONE OPEN DECISION — the Compare landing's "one round" (found at piece 6; for the orchestrator)
 
@@ -2033,29 +2034,138 @@ her ratification in the QUESTIONS bundle at the merge.)*
 - Not changed, for her eye: the write-new rung's consent sentence ("make new notes…") already covers a duplicate (a new
   note); it names no duplicate, as it names no link or block insert.
 
-### LIVE LEGS FOR U6b's WINDOW (DRAFT — the final form lands with piece 9; claim `vx336-u6`)
+### LIVE LEGS FOR U6b's WINDOW (FINAL — the closer, after the ruling; claim `vx336-u6`; NOT run here)
 
-Setup as U5's window (`vx336-u5`'s worked form: the Debug app, the tab key bound with zero clicks, a scratch `-s local`
-registration, her user-scope fingerprint before/after). Grants: Home · Edit · Always (covers read + write new on the
-wing). Prompts on STDIN (`--allowedTools` swallows a trailing prompt). Variorum FRONTMOST for every `show_in_app` leg
-(it moves nothing otherwise).
-- **L1 — duplicate an existing note, then edit the copy.** Fixture: a Home note "u6a source" with three blocks, block 2
-  fanned (two takes, the second chosen). Turn: `list_notes` → `duplicate_note(note_id)` → `edit_take` on the copy's block
-  1 shown take ("…edited by the AI"). Expect: the answer's `blocks` — three records, block 2's `shown_take_id` its second
-  take, each with `source_block_id`; `landed` "the Pool of Home"; the receipt "claude-code duplicated “u6a source”" with
-  Open ›; the copy in the Pool with the source's tags; the source untouched. Capture: the Pool row, the copy in Write.
-- **L2 — `show_in_app` Compare on the pair (rows line up).** Turn: `show_in_app(target: "compare", note_id: source,
-  peer_ids: [copy])`. Expect `{"shown": true}`; the window in Compare, source first, copy beside it, every row aligned
-  with lineage rails, "related blocks only: on", the edited block reading the AI's words. Capture in BOTH voices (Study,
-  then Terminal).
-- **L3 — an unrelated pair.** Fixture: a `create_note` draft "u6a stranger". Turn: `show_in_app` compare source |
-  stranger. Expect the board showing both whole, "related blocks only: off", no rails. Capture both voices.
-- **L4 — `link_versions`' Open › opens Compare A|B.** Turn: `link_versions(source, stranger, pairs: [block 1 ↔ its
-  block 1])`; she presses the receipt's Open › (or ⌥⌘O). Expect Compare with A then B, the relationship line naming
-  them versions, related-only off (no lineage). Capture.
-- **L5 — the etiquette.** With another app frontmost, the L2 turn answers the not-frontmost sentence; nothing moves.
+**Setup and cleanup are U6b's STAGE WINDOW** in U5's worked form (THE STAGE WINDOW steps 0–3 and 13 in the U5b record,
+run as the U5 STAGE RUN ran them): the products are `App/Variorum/DerivedData/vx336-u6` (`c30fa9a7`, the final tree —
+the app launched from it) and `vx336-u6-red` (only for the one red run in THE MAC SUITES below — never launched); the
+A1 prestage copy, the prefs export, her user-scope fingerprint before and after; the Claude Code tab key taken from the
+clipboard into a scratch `u6-mcp.json` OUTSIDE the repo (`{"mcpServers":{"variorum-dev":{"command":"<the shim's absolute
+path>","env":{"VARIORUM_MCP_KEY":"<the key>"}}}}`), never `-s user`, never run as copied. **THE GRANT for every leg:**
+claude-code's Shared-with-AI row ▸ Change… ▸ **A wing · Home · Edit · Always** (read for `show_in_app`/`read_note`;
+write new for `create_note`, `apply_tag`, `duplicate_note` — which acts only under a WING grant — and `link_versions`;
+edit for `choose_take`, `edit_take`). Captures into `notes/plans/vx336-screens/u6/` (gitignored), one per face below.
 
-### THE MAC SUITES FOR U6b's BATCH (U6a's share — every suite that reaches an app type this unit changed; grep of `App/Variorum/VariorumTests` at `a846a5f1`)
+**Every turn's form** (prompts on STDIN — `--allowedTools` is variadic and swallows a trailing prompt; U5's lesson), from
+a scratch project directory:
+
+```sh
+cat > "$SCRATCH/u6-<leg>.prompt" <<'PROMPT'
+<the leg's prompt, its <ID> placeholders substituted from the earlier answers>
+PROMPT
+claude -p --strict-mcp-config --mcp-config "$SCRATCH/u6-mcp.json" --output-format json \
+  --allowedTools "<the leg's list>" < "$SCRATCH/u6-<leg>.prompt" \
+  | tee notes/plans/vx336-screens/u6/<leg>.json
+```
+
+Each `claude -p` is a fresh client with no memory, so ids travel by substitution: the runner reads them from the tee'd
+answers and writes them into the next prompt — `SOURCE_ID`, `SOURCE_B1`, `STRANGER_ID`, `STRANGER_B1` from L0;
+`COPY_ID`, `COPY_B1_TAKE` from L1a. (The copy keeps the source's title — two "u6a source" notes — so no prompt finds a
+note by title.) **Variorum is FRONTMOST for every `show_in_app` turn** — `osascript -e 'tell application id
+"io.lduarte.Variorum.debug" to activate'` right before it (the claude process runs in the runner's shell and never
+takes focus) — except L5, which is the not-frontmost leg. All fixture text is ASCII (System Events drops non-ASCII).
+
+- **L0 — the fixture (~3 min).** Allowed `mcp__variorum-dev__create_note,mcp__variorum-dev__apply_tag,mcp__variorum-dev__choose_take`:
+  > In Variorum, call create_note with wing_id "" (Home), title "u6a source", and blocks [{"text": "The first paragraph
+  > of the source."}, {"text": "The second paragraph, first take.", "takes": [{"text": "The second paragraph, second
+  > take.", "label": "alt"}]}, {"text": "The third paragraph of the source."}]. Then call apply_tag on that note with tag
+  > "u6a/demo". Then call choose_take with the take_id of block 2's take labelled "alt". Then call create_note with
+  > wing_id "", title "u6a stranger", and blocks [{"text": "A stranger's first paragraph."}, {"text": "A stranger's
+  > second paragraph."}]. Reply with both create_note answers verbatim, and say whether apply_tag and choose_take
+  > succeeded.
+
+  **Expected:** both create_note answers land (keys `block_ids`, `blocks`, `note_id`, `tag_ids`), the source's block 2
+  record with two takes (`[{"take_id"}, {"take_id", "label": "alt"}]`); apply_tag and choose_take succeed. Record
+  `SOURCE_ID`, `SOURCE_B1` (its first `block_id`), `STRANGER_ID`, `STRANGER_B1`. **Her face:** "u6a source" in Write
+  reads first paragraph / "The second paragraph, second take." / third paragraph, wearing u6a/demo (capture `L0-source`).
+
+- **L1a — `duplicate_note`, then her undo and redo (~7 min, VX-311).** Before: the window on the Bookcase. Allowed
+  `mcp__variorum-dev__duplicate_note,mcp__variorum-dev__read_note`:
+  > In Variorum, call duplicate_note with note_id "<SOURCE_ID>". Then call read_note on the copy's note_id with
+  > with_ids true. Reply with duplicate_note's answer verbatim, and say whether its blocks (each block_id,
+  > shown_take_id, and every take's take_id and label) match what read_note reports for the copy.
+
+  **Expected:** lands; keys `block_ids`, `blocks`, `landed`, `note_id`, `source_note_id`; `source_note_id` =
+  `SOURCE_ID`; `landed` **"the Pool of Home"**; `blocks` three records in order, each with `source_block_id` = the
+  source's block 1, 2, 3 ids (L0's answer); block 2's record carries two takes `[{"take_id"}, {"take_id", "label":
+  "alt"}]` and its `shown_take_id` is the SECOND (the chosen take, carried); blocks 1 and 3 one take each; the client
+  says they match read_note. Record `COPY_ID` and `COPY_B1_TAKE` (block 1's `shown_take_id`).
+  **Her face, in this order:** the receipt **"claude-code duplicated “u6a source” · ⌥⌘Z undoes"** with Open ›
+  (capture `L1a-receipt`); press Open › → the COPY in Write: the three paragraphs with "The second paragraph, second
+  take.", wearing u6a/demo, in no book (capture `L1a-copy-write`); Settings ▸ MCP ▸ Activity **"claude-code duplicated
+  “u6a source”"** (capture `L1a-activity`); the Pool lists two "u6a source" rows (capture `L1a-pool`). **Her undo, from
+  the Pool (no pane showing the copy):** the Edit menu reads **"Undo claude-code's duplicate"** (capture
+  `L1a-edit-menu`) → ⌥⌘Z → one "u6a source" left, the undo receipt **"Undid: claude-code's duplicate"** (capture
+  `L1a-undone`) → ⇧⌥⌘Z → the copy back in the Pool (capture `L1a-redone`). The source never changes. (L1b's edit of
+  `COPY_B1_TAKE` landing proves the redo revived the SAME rows.)
+
+- **L1b — the AI edits the copy (~3 min).** Allowed `mcp__variorum-dev__edit_take,mcp__variorum-dev__read_note`:
+  > In Variorum, call edit_take with take_id "<COPY_B1_TAKE>", expected_text "The first paragraph of the source.", and
+  > text "The first paragraph, edited by the AI in the copy." Then call read_note on note "<SOURCE_ID>" and on note
+  > "<COPY_ID>". Reply with edit_take's answer verbatim and each note's first block's shown text.
+
+  **Expected:** lands; the copy's first block reads the edit; the source's still "The first paragraph of the source."
+  **Her face:** the receipt for claude-code's edit (it may coalesce with L1a's into one line — the door's 120 s
+  same-client/same-note run, `MCPDoor.receiptWindow`, as designed) (capture `L1b-receipt`).
+
+- **L2 — `show_in_app` Compare on the pair: the rows line up (~4 min, VX-298).** Before: Variorum FRONTMOST, the window
+  on the Bookcase (no note open — so the delivery takes the open → register → park road, the board MOUNTING onto the
+  landing). Allowed `mcp__variorum-dev__show_in_app`:
+  > In Variorum, call show_in_app with target "compare", note_id "<SOURCE_ID>" and peer_ids ["<COPY_ID>"]. Reply with
+  > its answer verbatim.
+
+  **Expected:** `{"shown":true}`. **Her face:** the window in Compare (the mode row on Compare), "u6a source" first,
+  the copy beside it; the copy column's relationship line **"versions"** (lineage and the version link); the chip
+  **"related blocks only: on"** (every named peer shares lineage — F-9 (a)); three rows aligned with lineage rails; the
+  copy's row 1 reads "The first paragraph, edited by the AI in the copy.", row 2 "The second paragraph, second take."
+  in both columns (capture `L2-study`); Activity "claude-code showed you “u6a source”" (capture `L2-activity`).
+
+- **L3 — an unrelated pair, on the MOUNTED board (~3 min).** Before: L2's Compare still showing (the board mounted —
+  this leg proves the already-mounted board's consumption on change, the other road). Allowed as L2:
+  > In Variorum, call show_in_app with target "compare", note_id "<SOURCE_ID>" and peer_ids ["<STRANGER_ID>"]. Reply
+  > with its answer verbatim.
+
+  **Expected:** `{"shown":true}`. **Her face:** the copy's column REPLACED by "u6a stranger" — ONE peer column, not two
+  (her answer (4)); its relationship line **"there is no relationship here"**; the chip **"related blocks only: off"**;
+  both notes whole, no rails, no "related blocks only — nothing from this note" honesty line (capture `L3-study`).
+
+- **L4 — `link_versions`' Open › opens Compare A|B (~4 min).** Before: the window moved off that board — open the copy
+  in Write (a Pool row, or a `show_in_app` note turn). Allowed `mcp__variorum-dev__link_versions`:
+  > In Variorum, call link_versions with note_a "<SOURCE_ID>", note_b "<STRANGER_ID>", and pairs [{"block_a":
+  > "<SOURCE_B1>", "block_b": "<STRANGER_B1>"}]. Reply with its answer verbatim.
+
+  **Expected:** `{"links":[{"block_a":"<SOURCE_B1>","block_b":"<STRANGER_B1>","edge_id":"…"}],"note_a":"<SOURCE_ID>",
+  "note_b":"<STRANGER_ID>"}`. **Her face:** the receipt **"claude-code linked “u6a source” and “u6a stranger” as
+  versions · ⌥⌘Z undoes"** with Open › (capture `L4-receipt`); press **Open ›** (click; if it has faded, ⌥⌘O — "Show
+  the AI's Last Change" — the same show) → Compare: "u6a source" first, "u6a stranger" beside it; the relationship line
+  **"versions · no shared lineage — loose alignment"**; the chip **"related blocks only: off"** (no lineage); the
+  stranger's column offers "unmark" (capture `L4-compare`). Her press has no frontmost gate (she is at the app).
+
+- **L5 — the etiquette: nothing moves while she is away (~2 min).** Before: `osascript -e 'tell application "Finder"
+  to activate'` (Variorum NOT frontmost); Variorum's window shows L4's Compare. Allowed as L2:
+  > In Variorum, call show_in_app with target "compare", note_id "<SOURCE_ID>" and peer_ids ["<COPY_ID>"]. Reply with
+  > its answer verbatim. Do not retry.
+
+  **Expected:** `isError`, EXACTLY **"The author isn't at Variorum right now, so nothing was moved — showing happens
+  only while Variorum is the app in front. Ask them to switch to it, then call again."** **Her face:** Variorum
+  re-activated: the window still on L4's source | stranger — nothing moved and nothing waits to move (the etiquette
+  gate refuses before any landing is parked) (capture `L5-unmoved`).
+
+- **THE TERMINAL PASS (~6 min — the Compare board in her second voice).** Settings ▸ General ▸ Theme → Terminal (U1b's
+  AX road). The window on the Bookcase, Variorum frontmost: re-run L2's turn → the same face in Terminal (capture
+  `L2-terminal`); then L3's turn on the mounted board → the same face (capture `L3-terminal`). Flip back to Study.
+
+- **No live leg for the orphaned landing** (the ruling's (a) case): the window between her Compare request and the
+  board's mount is tens of ms — not reachable from her keyboard. The ruled pin carries it (row 6a), run red on
+  `vx336-u6-red` and green on `vx336-u6` in U6b's batch (below).
+
+### THE MAC SUITES FOR U6b's BATCH (U6a's share — every suite that reaches an app type this unit changed; grep of `App/Variorum/VariorumTests` at `a846a5f1`, brought to `c30fa9a7` by the closer)
+
+**Run on `vx336-u6` (the final tree), all GREEN expected.** The closer's changes after `a846a5f1` are the three clears
+(`CommandRouter.registerDetail` / `unregisterDetail` / `noteMode`, `pendingCompareLanding` only) and the ruled pin, which
+lives IN `MCPCompareLandingTests` (now 7 tests: piece 5's 5 + the pin's 2) — so no new suite joins for the pin itself;
+`NoteOpenLandingTests` joins because it drives the very functions the clears sit in (`registerDetail` and `noteMode`,
+12 calls).
 
 - **Compare's board, model and brain** (`CompareViewModel` · `CompareComposition` · `CompareBoardView` · `CompareLanding`):
   `MCPCompareLandingTests` (NEW) · `CompareCompositionTests` · `CompareViewModelTests` · `CompareAnchorWholeTests` ·
@@ -2070,23 +2180,52 @@ wing). Prompts on STDIN (`--allowedTools` swallows a trailing prompt). Variorum 
   `MCPPaneTabsTests` · `MCPDeliberateFacesTests` · `MCPSetupMenuTests` · `MCPGrantSheetU2CaptureTests` ·
   `MCPSetupKeyFacesTests` · `MCPRebindFaceTests` · `MCPShareFacesTests` · `TutorialMCPChapterCaptureTests` ·
   `TutorialMCPChapterTests`.
-- **The router's landings** (`CommandRouter` — one additive observed property; 54 test files hold a router, these are
-  the ones that exercise its parked landings): `CommandRouterTests` · `StaleWriteIntentTests` · `TakesLandingTests` ·
-  `BlockHistoryPaletteDoorTests`.
-- **37 suites** (U6b adds VX-330's and VX-342's). Under ruling (a) the new router pin's suite joins.
+- **The router's landings** (`CommandRouter` — one additive observed property and, since the closer, its three clears;
+  54 test files hold a router, these are the ones that exercise its parked landings or the three functions the clears
+  sit in): `CommandRouterTests` · `StaleWriteIntentTests` · `TakesLandingTests` · `BlockHistoryPaletteDoorTests` ·
+  `NoteOpenLandingTests` (joined by the closer).
+- **38 suites** (37 + `NoteOpenLandingTests`; U6b adds VX-330's and VX-342's).
+- **AND ONE RED RUN on `vx336-u6-red`** (`c30fa9a7` with ONLY the three clears reverted — row 8b), under the same claim,
+  before or after the batch, the ruled pin's red-on-old shown on the Mac: from `App/Variorum/`, `xcodebuild
+  test-without-building -xctestrun DerivedData/vx336-u6-red/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun
+  -destination 'platform=macOS' -only-testing:VariorumTests/MCPCompareLandingTests`. **Expected: 7 tests, 2 FAILED, 5
+  passed, 9 issues** — `aLandingSheOutrunsWithAnotherModeIsDroppedAndHerOwnCompareKeepsHerColumns` at
+  `MCPCompareLandingTests.swift:272`, `:239`, `:241`; `aLandingWhoseNoteLeavesBeforeTheBoardTakesItIsDroppedAndHerOwnCompareKeepsHerColumns`
+  at `:300`, `:239`, `:241`, `:317`, `:239`, `:241` (row 6a). The same two GREEN in the batch on `vx336-u6` = the pin
+  red-on-old and green-on-new; any other red there is a finding. The red product runs ONLY as this one run's test host — never launched for a walk or the live round.
+
+### SELF-ASSESSMENT (the closer's — the ruled fix and its pin)
+
+- **What the fix is:** three clears, each a line-for-line twin of the lens landing's, on `pendingCompareLanding` only.
+  The main road traced against them (row 6b): the detail registers once per note, and a mode switch is its `@State`
+  reported through `noteMode`, so the delivery's own `.compare` report keeps the landing.
+- **The one ordering I checked hardest** — a note opened fresh whose REMEMBERED mode is neither Write nor Compare (its
+  `onAppear` sets the mode, so its `onChange(of: mode)` reports later): the navigator's park and `requestMode(.compare)`
+  run synchronously in ONE main-actor job, so that report either comes BEFORE anything is parked (harmless) or, after
+  both, reports the coalesced final value `.compare` (kept). No window drops a landing the board was about to take; the
+  lens landing rests on the same fact. L2 (fresh open from the Bookcase) and L3/L4 (a mounted board, and her press)
+  walk the real roads.
+- **What the pin is, honestly:** a model of her ⌘5 driven by hand in the board's own order (`onAppear`'s consume, then
+  the observation's adopts — the test host never fires `.task`), not the SwiftUI lifecycle itself. Its red-on-old and
+  green-on-new are by ASSERTION on two built products, read in U6b's batch; nothing app-side ran here. The (ii)
+  refinement (`c30fa9a7`) keeps the modeled world honest — the teardown races a board not yet mounted.
+- **Not done here (by the brief):** no stage, no app launch, no `xcodebuild test`, no store; the live legs are written,
+  not run; no new user-facing words (FOR VX-234 unchanged), no new PROVISIONAL, nothing for QUESTIONS.
 
 ### OWED (for the orchestrator)
 
 1. ~~The rulings on F-1…F-9~~ — DONE (`6502db0d`). ~~Telling vx-283 about the one property~~ — DONE (the build brief).
-2. **THE ONE OPEN DECISION's ruling** (the Compare landing's "one round": (a) three router lines beside the lens clears +
-   one app pin [recommended], (b) the navigator bounds the parcel, (c) accept) — and under (a), vx-283 told about three
-   more lines in `CommandRouter.swift`.
-3. Then pieces 7–9 (rows 7–9's exact steps) — by this session on resume, or a fresh implementer from this record alone.
-4. **A ticket to propose (not filed):** `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`
-   fails its 15 s bound under heavy machine load (16.3 s at load average 9, 16.7 s at 67 — two whole-MCP-target runs this
-   session), passing alone in ~1 s each time; a finals run on a busy Pro can read red for no product reason. Proposed
-   triage: **Debt · Test-only · Low**, not Pre-launch, project 13n (the harness's VX-132 home).
-5. **Context:** the build continuation stopped at ~205k (well inside the line); it can resume pieces 7–9 itself.
+2. ~~THE ONE OPEN DECISION's ruling~~ — RULED (a) (`cdcccbd0`), vx-283 told by the orchestrator; BUILT by the closer:
+   the pin `a2e6dfd6` (refined `c30fa9a7`), the three clears `4ef02349`.
+3. ~~Pieces 7–9~~ — DONE by the closer (rows 7, 8, 8b, 9).
+4. ~~A ticket to propose~~ — minted as VX-353 by the orchestrator. The closer's finals add one data point for it: the
+   pin passed at 14.889 s of its 15 s bound under load 19–29 (row 8).
+5. **For U6b's window** (its STAGE WINDOW plan writes the setup and cleanup): THE MAC SUITES' 38-suite batch on
+   `vx336-u6` AND the ONE red run of `MCPCompareLandingTests` on `vx336-u6-red` (the expected 9 pairs), then LIVE LEGS
+   L0–L5 + the Terminal pass. Both products are on disk at `App/Variorum/DerivedData/vx336-u6{,-red}` (2.5 GB each);
+   if main moves before the window (VX-306's Castle migration of the dev store), the brief's merge-main rule applies
+   and both products are rebuilt from the merged tree the same way (row 8b's exact steps).
+6. **Context:** the closer stopped at ~150k (well inside the line).
 
 ### THE ORCHESTRATOR'S RULINGS ON U6a's FORKS (2026-10-14 ~16:30 MDT — binding on pieces 2–9)
 
