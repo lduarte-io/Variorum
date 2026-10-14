@@ -175,4 +175,17 @@ of them against its own earlier positions. **No disagreement was left open.**
 **The settlement, in the reviewer's words:** *"No deadlocks to flag — the handoff's her-eye set stays as already agreed
 (MAJOR 3's provisional adoption, MAJOR 5's two flags, MINOR 9's table, MINOR 6's re-arm narrowing noted)."*
 
-**The commits:** the extra read's report `23cc1183`; this design and plan revision and this record follow.
+**One more, from the ripple survey.** While checking the website privacy brief, the owner found that the design never
+said what the hardware marker is. A raw hardware UUID would have been a fair phase-1 reading, and the record — with every
+device section — travels inside every copy, so whoever opens a copy would read a hardware identifier for every Mac
+that opened the library. The reviewer agreed and strengthened the fix. **Fixed:** the marker is a hash of the Mac's
+hardware identity with a random salt the record carries, never the identifier itself (§3.2). It recomputes on the
+same hardware, after unlock where every decision runs, and a marker that leaks alone names no Mac. Phase 1's encoding
+scan asserts no raw hardware identifier is written. Other Macs' sections stay in copies, since a rollback and a
+replacement Mac's adoption need them. The privacy brief's "a copy carries no device identity" stays true until the
+release switch; its at-the-switch delta is VX-329's to hand the site agent. It says that a copy carries, in its
+record, each device's random identity, a salted hardware hash and that device's protection settings, used only on
+that device.
+
+**The commits:** the extra read's report `23cc1183`; the design and plan revision `624f1bf0`; this record
+`cb1bd4f4`; the hardware marker's clause follows.

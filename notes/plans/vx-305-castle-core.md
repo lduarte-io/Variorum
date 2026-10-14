@@ -202,7 +202,8 @@ Build everything in §3.2 of the design as values, with their codecs and their c
   included;
 - a tampered sealed field fails verification;
 - format-1 and format-2 key files read as the design says;
-- no secret appears in any value written to disk (scan the encodings).
+- no secret appears in any value written to disk (scan the encodings), and no raw hardware identifier either: the
+  hardware marker is a hash with the record's random salt, recomputed on the same hardware (design §3.2).
 
 ---
 
