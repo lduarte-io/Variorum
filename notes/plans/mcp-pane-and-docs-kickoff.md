@@ -1,8 +1,12 @@
 # VX-246 — Run: MCP pane, docs & door fixes — kickoff + plan
 
-**STATUS: IN PROGRESS — VX-246 kicked off 2026-10-13, 21:20 MDT (orchestrator session vx-246, named variorum-84 at kickoff). Its live state is the
-run record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`: the units, the cast she set at kickoff, LIVE STATUS.
-(Written 2026-10-13 at VX-184's re-scope.)**
+**STATUS: VX-246 CLOSED 2026-10-14 — it merged its FIX units (U1 + U1b, U2, U3, U4 + U4b + U4c: the door's security
+and correctness, the undo class, her editor vs the wire, the faces after big writes) through its PR "VX-246: MCP door
+fixes (security, undo, editor vs wire, faces)"; its record is `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`.
+Its other four units (U5–U8) moved to **VX-336 "Run: MCP wire tools & AI docs"** (the orchestrator's provisional
+ruling 3 under her overnight mandate, for her ratification at the VX-246 bundle in `notes/QUESTIONS.md`). VX-336 is NOT
+STARTED: she kicks it off. This file now serves VX-336, and its kickoff message below is VX-336's. (Written 2026-10-13 at
+VX-184's re-scope; re-aimed at VX-246's closeout, 2026-10-14.)**
 
 **SPLIT 2026-10-13 (the release runway, `notes/plans/vx-33-release-runway.md`).** This file now serves TWO runs:
 - **VX-281 "Run: MCP settings pane & shared icon"** takes the **U6 section** and the **VX-268 bullet** under HER
@@ -16,31 +20,81 @@ run record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`: the units, the 
 - The runway's VX-246 section carries the suggested unit order.
 - Every rule under "Rules binding this run" binds both runs.
 
-## Kickoff message (for `/run-phase vx-246`)
+**SPLIT AGAIN 2026-10-14 (VX-246's ruling 3).** VX-246 sized its work into eight units and merged the four that FIX
+the door and her editor (U1–U4 with their follow-ups U1b, U4b, U4c). The other four went to **VX-336**, with every
+member keeping its ruling and its ticket:
+- **U5 — the write tools' shapes:** VX-267 · VX-253 · VX-252 · VX-255;
+- **U6 — Compare from the wire:** VX-311 · VX-298;
+- **U7 — the agent's read-backs:** VX-254 · VX-256 · VX-261;
+- **U8 — the AI's docs, LAST:** VX-197. Its plan is this file's "U7: the AI's docs" section below (VX-246 renumbered
+  it U8 when it sized the run).
 
-> Run VX-246, "Run: MCP door fixes & AI docs" (retitled twice on 2026-10-13 at her word; the plan file keeps its
-> original name because tickets point at it).
+## Kickoff message (for `/run-phase vx-336`)
+
+> Run VX-336, "Run: MCP wire tools & AI docs". It is VX-246's follow-on, minted at VX-246's closeout (2026-10-14) under
+> the orchestrator's provisional ruling 3, which she ratifies or reverses at the VX-246 bundle in `notes/QUESTIONS.md`.
+> VX-246 merged the door's FIX units; this run carries its other four units, unstarted. This plan file keeps its
+> original name because tickets point at it.
 >
-> **Members:** its 21 sub-issues in Linear, the runway's list (`notes/plans/vx-33-release-runway.md` §3): VX-258 ·
-> VX-259 · VX-260 · VX-279 · VX-280 · VX-276 · VX-277 · VX-119 · VX-275 · VX-230 · VX-231 · VX-267 · VX-253 · VX-252 ·
-> VX-255 · VX-311 · VX-298 · VX-254 · VX-256 · VX-261 · VX-197 (U7 below). The U6 section and the VX-268 bullet are
-> VX-281's, not this run's.
+> **Members (re-parented under VX-336 in Linear, each with its ruling and ticket):**
+> - **U5 — the write tools' shapes:** VX-267 · VX-253 · VX-252 · VX-255;
+> - **U6 — Compare from the wire:** VX-311 · VX-298;
+> - **U7 — the agent's read-backs:** VX-254 · VX-256 · VX-261 (after U5 and U6, so the digests cover the new tools);
+> - **U8 — the AI's docs, LAST:** VX-197 (this file's "U7: the AI's docs" section is its plan).
 >
-> **Coordinates:** one branch `vx-246-mcp-door-fixes-ai-docs`; one PR `VX-246: …` (merge commit); the record
-> `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`, whose THE UNITS table is the build order. Members close
+> **Coordinates:** a fresh branch named for the run ticket, in its own worktree (`~/dev/variorum-vx-336`); one PR
+> `VX-336: …` (merge commit); a fresh run record `notes/plans/fixes/vx-336-<slug>.md`, minted at kickoff. Members close
 > individually.
+>
+> **The drafted briefs live in VX-246's record** (`notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`):
+> - **THE UNITS** table: the U5–U8 rows (each unit's members, surface and acceptance evidence) are the sizing;
+> - **### U5 BRIEF**: VX-267 first (VX-253's matcher needs its form), then VX-253, VX-252, VX-255, every member ruled
+>   and quoted. Its old piece 0 (ruling 2: a navigate-away never takes her focus) is DONE at VX-246 (built in U4b,
+>   proven on her own door and with a real client), so skip it.
+> - **U6 and U7 have their THE UNITS rows only.** Their briefs are this run's orchestrator's to write, from the rows,
+>   the tickets and HER ADDITIONS below.
+> - **U8's brief** is this file's "U7: the AI's docs" section.
+>
+> **Carried facts (each binding):**
+> - **The stargazing gate (R-VX184-4):** a build whose `MCPSession.instructions` carries the link to
+>   `https://stargazing.tech/variorum/mcp` ships only after that page is live. U8 appends its delta to
+>   `notes/stargazing-mcp-guide-brief-2026-10-12.md` and leaves it one send-ready message, and the closeout's handoff
+>   leads with carrying it to her site agent.
+> - **The instructions bound rises 2,000 → 3,000 (R-VX184-3)** in U8, with its pin, and AppSpec §12's "≤2,000" moves
+>   with it at this run's merge. VX-246 deliberately left both at 2,000 (its round 2, R2-7b).
+> - **Lesson 2 needs re-voicing.** VX-246 landed only a truth stopgap in the field guide's MCP lesson 2 (its ladder's
+>   F-1): "Running the client's own setup again moves the name to the new key; a setup copied for any MCP client waits
+>   for your OK before it takes a name you approved…", with that clause shared with the pane's `clientBoundary` by a
+>   parity pin in `TutorialMCPChapterTests`. U8 re-voices the lesson. It and `MCPSession.instructions` teach VX-258's
+>   tab rule: a client's own setup moves its name with no clicks, while any other new setup waits in Settings ▸ MCP ▸
+>   Waiting for her Allow and sees no tools until then.
+> - **The shared icon's new rows belong in the guide.** VX-281 put the one shared icon on Library, Pool, Book Panel
+>   and ⌘L wing rows, but lesson 7 still says only the Bookcase wears it. Lesson 2 still says "press Copy setup
+>   command", and the copy act is now an icon on the setup's code block. U8 teaches the pane and the rows as built.
+> - **What VX-246 changed that the docs describe:** a wire act that meets a take she may be typing in lands her
+>   pending typing first; a client's comment stays its own only while its words are unchanged; a book name is checked
+>   only against books the client can read; ⌥⌘Z on an act she already reversed says so and offers no redo. AppSpec
+>   §12's VX-246 clause is the contract.
+> - **Every new tool answers two questions the compiler asks:** whether it meets her text (`flushesHerEditorFirst`,
+>   an exhaustive switch per job family; U5's `insert_blocks` and U6's `duplicate_note`, a copy, must answer), and,
+>   for every undo half it registers, whether that half changed anything (U2's `Bool`).
+> - **Schema** stays allowed if needed: local-only on the grants family's road, its own commit, SyncSpec read first.
+>   Zero `Sync/` and custody lines.
+> - **The cast is hers at kickoff.** VX-246 ran her word: implementers at xhigh, the Opus ladder at max, one Fable
+>   review.
 >
 > **Reading, in order:**
 > 1. This file, in full.
-> 2. The runway's VX-246 section and its conflict map (§2).
-> 3. VX-184's record (`notes/plans/fixes/vx-184-mcp-launch-polish.md`): its U1–U5 UNIT RECORDs say what the door now
->    does, THE LADDER is where most members were found and ruled, and its OWED sections are routed here.
+> 2. VX-246's record: THE UNITS, the U5 BRIEF, THE RUN AS IT MERGES, the ladder's dispositions, and the U1/U1b, U2
+>    and U3 UNIT RECORDs (what the door does now).
+> 3. The runway's VX-246 section and its conflict map (`notes/plans/vx-33-release-runway.md` §2–§3).
+> 4. VX-184's record (`notes/plans/fixes/vx-184-mcp-launch-polish.md`) where a member's ruling points there.
 >
-> The binding rulings below, and on each member's ticket, are hers, verbatim where quoted. U7 (the docs) runs LAST,
-> over the as-built state, after VX-281 merges.
+> The binding rulings below, and on each member's ticket, are hers, verbatim where quoted. U8 (the docs) runs LAST,
+> over the as-built state.
 >
-> *(The kickoff orchestrator updated this message on 2026-10-13 to match the split: members, branch and record names.
-> The earlier text named VX-281's U6 members and the pre-split branch.)*
+> *(Re-aimed at VX-336 at VX-246's closeout, 2026-10-14. The earlier text was VX-246's kickoff: its 21 members, branch
+> `vx-246-mcp-door-fixes-ai-docs`, and the record named above.)*
 
 ## Why this run exists (her words, 2026-10-13)
 
@@ -136,7 +190,7 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
 
 *(She adds items here or as sub-issues of VX-246 before kickoff. Whatever she adds is binding on the kickoff.)*
 
-- **VX-230: the first take badge misdrawn after an MCP write** (Bug, Pre-launch). Her word, 2026-10-13:
+- **DONE at VX-246 (2026-10-14; U4, U4b, U4c).** **VX-230: the first take badge misdrawn after an MCP write** (Bug, Pre-launch). Her word, 2026-10-13:
   *"I want that fix added to the upcoming session."* The symptom, her words: the first take icon is *"either
   present when it shouldn't be or a filled in black circle"*. Her new observation: *"I found that going into
   takes mode and expanding and closing it fixed it, which makes it seem even more like a chrome issue."* The
@@ -145,7 +199,7 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
   face (the badge's decoration not invalidated when an MCP write lands), not wrong store data. Trace that
   invalidation road and pin it red-first. **If the trace reaches the editor seam** (`EditorTextView`, the
   decoration layer), read `notes/TEXTKIT2_NOTES.md` first, and the review is Fable's (CLAUDE.md).
-- **VX-268: Library rows never wear the shared-with-AI icon** (notes, books, gatherings; only the Bookcase
+- **DONE at VX-281 (2026-10-14).** **VX-268: Library rows never wear the shared-with-AI icon** (notes, books, gatherings; only the Bookcase
   does). Filed by her Air session, joined at her word: *"this other ticket that should be done in the next round
   of mcp work"*. **Bug + Pre-launch:** a gap against VX-271's "one icon everywhere" (13n-c U3 built it on
   Bookcase rows and the in-note indicator only). Every Library row an approved client reaches wears the one
@@ -181,7 +235,7 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
     already says it. `aiLabel` (13n's P-13n-3, hers to re-voice) becomes `<client>` or `<client> · <label>`.
     Existing takes keep their labels (no migration); VX-253's matcher accepts both forms; U7's descriptions
     and the guide say the new form.
-  - **VX-231 (stale Bookcase counts) — her call whether it joins:** possibly the same root cause as VX-230 (a
+  - **DONE at VX-246 (2026-10-14; U4).** **VX-231 (stale Bookcase counts) — her call whether it joins:** possibly the same root cause as VX-230 (a
     face not refreshed after an MCP write; both were seen right after big MCP writes). Filed under 13n for now.
   - **VX-254:** content digests on write replies (stored-text digest per take; the algorithm and byte rule
     stated).
@@ -214,7 +268,8 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
 - **VX-184's ladder round 1 (opus-reviewer) — three of HER RULINGS, fixed here** (record:
   `notes/plans/fixes/vx-184-mcp-launch-polish.md` § THE LADDER). Her word on timing: *"it's fine to put it in
   VX-246 - I won't put this release up for everyone, it'll be just for me until the fix goes out."* **→ GATE:
-  VX-184's build stays HERS ALONE (no public release) until VX-258 ships.**
+  VX-184's build stays HERS ALONE (no public release) until VX-258 ships.** **All three DONE at VX-246 (2026-10-14;
+  U1 and U1b): VX-258 shipped, so the gate lifts with VX-246's merge.**
   - **VX-258 (re-bind, Pre-launch):** VX-198's re-bind lets ANY fresh key take ANY bound name with
     its approval and grants. Her ruling, verbatim: *"tie keys to their tab and for the general \"Any MCP
     client\" case, we should probably do the re-bind waits for my ok? i don't want everyone who isn't using
@@ -253,6 +308,9 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
   `notes/SessionResiliencyProtocol.md` binds.
 - **Canon deltas owed at THIS run's merge** (moved here from VX-184): AppSpec §12 THE MCP DOOR line, with the
   instructions bound "≤2,000" → "≤3,000" (R-VX184-3), the pane's tabs (R-VX184-6), and the docs' as-built
-  teaching. QUESTIONS entry for every PROVISIONAL.
+  teaching. QUESTIONS entry for every PROVISIONAL. *(2026-10-14: the pane's tabs landed at VX-281's merge; the bound
+  and the docs' as-built teaching are VX-336's, at U8 — VX-246 left both untouched.)*
+- *(The effort line above was VX-184's word. VX-246's kickoff ran her own cast word instead: implementers at xhigh,
+  the Opus ladder at max, a Fable review when needed or once at the end. VX-336's cast is hers at its kickoff.)*
 - **Closeout:** the /Applications refresh; the handoff leads with carrying the stargazing brief to her site
   agent, BEFORE any build carrying the instructions link ships.
