@@ -536,11 +536,6 @@ nonisolated enum MCPPaneCopy {
         "Claude Code registers Variorum with one command. Copy it, run it in a terminal, then "
         + "start a new Claude Code session \u{2014} it adds Variorum for every folder (user scope), "
         + "replacing an earlier Variorum setup there."
-    /// Claude Code's copy receipt — its one-line next step with "Copied." in
-    /// front (VX-281 ladder R1-8: each receipt DERIVES from its client's
-    /// summary — one sentence, one constant).
-    static var copiedReceipt: String { MCPSetupClient.claudeCode.copiedReceipt }
-
     /// The name the client registers the server under: the Debug build's is
     /// its own, so a dev setup never replaces the real one in Claude Code's
     /// config (the A4 fence, extended to the client's registration).

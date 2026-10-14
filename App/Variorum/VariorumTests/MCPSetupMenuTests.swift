@@ -85,7 +85,10 @@ struct MCPSetupMenuTests {
                 "a dev setup never replaces the real registration (P-13nb-U1-10)")
         #expect(MCPSetupClient.claudeCode.sentence == MCPPaneCopy.connectSentence)
         #expect(MCPPaneCopy.connectSentence.contains("replacing an earlier Variorum setup there"))
-        #expect(MCPSetupClient.claudeCode.copiedReceipt == MCPPaneCopy.copiedReceipt)
+        // VX-281 ladder R2-5: the receipt's own pin went with its alias
+        // (`MCPPaneCopy.copiedReceipt` WAS this value since R1-8 — the line
+        // compared it with itself); each client's receipt is pinned by the
+        // copy pins below, against the door's note.
     }
 
     /// Codex's setup (the U5 record's external fact: `codex mcp add <name>

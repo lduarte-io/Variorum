@@ -88,7 +88,8 @@ struct MCPPaneTests {
             #expect(copied.contains("/Contents/MacOS/variorum-mcp"))
             #expect(copied.contains("VARIORUM_MCP_KEY=vmk1_"), "a fresh key rides the copy")
             #expect(door.setupCommand.contains(MCPPaneCopy.shownKey), "the shown command masks it")
-            #expect(door.note == MCPDoor.Note(text: MCPPaneCopy.copiedReceipt, place: .connect),
+            // VX-281 ladder R2-5: the client's own receipt (the alias is gone).
+            #expect(door.note == MCPDoor.Note(text: MCPSetupClient.claudeCode.copiedReceipt, place: .connect),
                     "the receipt sits under its button, never below the fold")
         }
     }

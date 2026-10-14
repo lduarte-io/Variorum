@@ -12,9 +12,11 @@
 //  THE BUG'S PINS, red-first. Each host's road, end to end on a real session:
 //  the host's model HOLDS the reach of the rows it shows (the Library's near-window
 //  row slices and its listed books, the Pool's drawn rows, the Book Panel's entries,
-//  the Timeline's loaded rows, the wings), a grant made while the rows show reaches
-//  them at once and a revoke takes it off (held, never one-shot), the open book
-//  reaches every row, and with no approved client nothing does (VX-272). And the
+//  the Timeline's near window — since VX-281 ladder R1-1 the pages around the rows
+//  on screen, never every loaded row — and the wings), a grant made while the rows
+//  show reaches them at once and a revoke takes it off (held, never one-shot), the
+//  open book reaches every row, and with no approved client nothing does (VX-272),
+//  and the Library holds nothing under the Timeline (ladder R2-1). And the
 //  two List lines DRAW the icon on the title's own baseline (the DEBUG
 //  `BaselineProbe`, both voices) — nothing at all when nobody reaches the row.
 //
@@ -315,7 +317,10 @@ struct MCPSharedRowsTests {
 
     // MARK: - The Timeline's rows
 
-    @Test func theTimelinesLoadedRowsHoldTheirReach() async throws {
+    /// The Timeline's rows hold their reach over its NEAR WINDOW — the ids
+    /// the view holds (`reachIDs`, VX-281 ladder R1-1: the pages around the
+    /// rows on screen; here, a fresh two-note listing's first page).
+    @Test func theTimelinesWindowedRowsHoldTheirReach() async throws {
         try await withSession { session, _ in
             let ops = session.operations
             let claude = try approved(ops)
@@ -323,8 +328,8 @@ struct MCPSharedRowsTests {
             let second = try note(ops, "second")
             let model = TimelineViewModel(session: session)
             await model.setLens(.library)   // the total surface: every note, whatever its stamps
-            let ids = model.items.map(\.postID)
-            #expect(Set(ids).isSuperset(of: [first.id, second.id]))
+            let ids = model.reachIDs
+            #expect(Set(ids).isSuperset(of: [first.id, second.id]), "the window covers the fresh listing's first page")
             let hold = Task { await model.holdReach(ids) }
             defer { hold.cancel() }
 
