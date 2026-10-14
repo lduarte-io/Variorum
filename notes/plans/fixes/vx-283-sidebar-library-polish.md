@@ -344,7 +344,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | NOT-STARTED |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | IN-PROGRESS — the implementer's headless work (its section's LIVE STATUS) |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -359,6 +359,42 @@ trailer of any kind.
 *(Each unit's implementer writes its section here: the traced mechanism with file:line, the pins (red-on-old, how
 verified), the diff summary, headless counts, the stage window's Mac counts, PROVISIONAL calls, anything for the
 author — PENDING until verified. The walker appends the WALK RECORD under it.)*
+
+### U1 — the Open list's layout and closing (VX-286 · VX-285 · VX-287 · VX-289)
+
+**Implementer:** Opus 5.5 at xhigh (fresh session, 2026-10-14). Worktree `~/dev/variorum-vx-283`, DerivedData
+`App/Variorum/DerivedData/vx283-u1`. **Not done by this session (the record's first line, per the brief):** the
+screenshot walk (a fresh walker's, after the stage window); any stage work until the orchestrator hands over a claim.
+
+**LIVE STATUS (per piece)**
+- P0 — the ⇧⌘W collision check (VX-287's FIRST step): IN-PROGRESS — the app-code sweep is DONE and FREE (below);
+  the system-provided half (AppKit's own File-menu items under window tabbing) is PENDING an external lookup and the
+  stage window's AX enumeration of the Debug app's menus.
+- P1 — VX-286 (the scroll bar rides in the margin, Open + Starred): NOT-STARTED.
+- P2 — VX-285 (the Open list grows to the sync footer; the constant splits): NOT-STARTED.
+- P3 — VX-287 (Close Note ⌘⇧W, landing next / previous / the Library): NOT-STARTED.
+- P4 — VX-289 (Close All Notes: the Open list's right-click + the View-menu twin): NOT-STARTED.
+- P5 — the stage window (the Mac batch + the red-on-old reverts): NOT-STARTED.
+
+**P0 — the ⇧⌘W check, the app's own half (2026-10-14, on `a2a27a10`) — FREE:**
+- `EditorCommands.keyEquivalent(for:)`: no `w` chord of any modifier set.
+- every `.keyboardShortcut(` call site in `Variorum/` and `Shared/`: no `"w"` at all (⌘W is not bound by the app —
+  it is the system's File ▸ Close, which closes the window, and stays so).
+- every `NSMenuItem(… keyEquivalent:)`: all `""` (MarkdownActs ×3, EditorTextView, CalloutMenu ×2, PaneSurface).
+- the registry's declared labels: none carries W.
+- the key overrides: `EditorTextView.performKeyEquivalent` (⌘S + the non-consuming ⌘Z/⇧⌘Z hint arm); the `keyDown`
+  trio (`EditorTextView` ⇧⏎ + the flight's deferral, `PaneSurface` ⇧⏎, `CaptureTextView` ⏎/⇧⏎) — key
+  equivalents never reach `keyDown`.
+- the local monitors: `CommentPanelKeys` (⌘⏎, ⎋), `PageTurnKeys` (unmodified ←/→), `WingSwitcherKeys` +
+  `OneWingChord` (⌘L, ⎋, ⌘-up), `DivideWSheet` (passes every ⌘/⌃ event), `CalmAsks` / `ProtectionController`
+  (observe only), `PressReporter` / `PaneFocusCatcher` (mouse).
+- the system hot key table: [.quickNote] ⌃⌥⌘N only.
+- the note-only window (`NoteWindowView`) and the quick-note pad (`QuickNoteView`) bind no W; ⌘W keeps closing them
+  (the pad's "closing files it too"). Close Note is gated to a FULL key window, so ⇧⌘W is grey there.
+- **The system half — PENDING:** AppKit's `MenuCommands.loctable` carries "Close Tab" / "Close Window" / "Close
+  All", i.e. AppKit re-titles File ▸ Close and may insert a "Close Window" item while a window is in a native tab
+  group. Whether that item wears ⇧⌘W (and whether it appears in this SwiftUI app) is being checked; if it does,
+  that is a collision in the tabbed state and goes to the orchestrator BEFORE the chord ships.
 
 ## Ladder
 
