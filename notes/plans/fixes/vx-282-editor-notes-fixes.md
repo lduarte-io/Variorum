@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS** — VX-229: pins `46080f5b`/`075473c2`, fix (this commit), offscreen replay red-on-old 3·3·3 → fixed 0·0·0; stage runs PENDING. VX-257: pins `7650b6ce`; fix NEXT. VX-183 / VX-182 NOT-STARTED. Old products `DerivedData/vx282-u5-old-products` (the build of `7650b6ce`, no revert). No revert in flight. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS** — VX-229: the fix `ee86dd8c` is being REVERTED — its offscreen evidence was an artefact (CORRECTION below); expected HOLLOW, W1 decides; pins being reshaped. VX-257: pins `7650b6ce`; fix built, UNCOMMITTED, saved at `scratchpad/vx282-u5/vx257-fix-uncommitted.patch` (re-applied after the old-products rebuild). VX-183 / VX-182 NOT-STARTED. **In flight:** `CommentsPanel.swift` + `CommentTextArea.swift` going back to `7650b6ce`. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -1551,6 +1551,37 @@ every host, the models read through the DEBUG weak record filtered by the test's
 
 Standing pins this touches (expected green, PENDING): `CommentPanelFixLeg2Tests` (the monitor release counts one per
 dismissal; the R1-2 save at `willClose`; the close rung) and the rest of the comment set.
+
+#### VX-229 — CORRECTION (same session, before any stage run): the offscreen leak was the probes' own artefact
+
+**The fix `ee86dd8c` is being REVERTED (its code; the record stays as history).** Measured after it landed, by the same
+real-module replay made faithful to a run loop:
+- **Undrained autorelease pools.** Both probes above ran every cycle inside one `MainActor.assumeIsolated` block and
+  never drained a pool; typing and AppKit's delegate traffic autorelease the popover's window/content chain, which then
+  lives until the (never-reached) drain. With every turn and every cycle in its own `autoreleasepool` — what the app's
+  run loop does each iteration — the **OLD product releases each dismissed panel**: its model gone and its observation
+  ended within the dismissal's turns, three cycles running, typed or not, with the app's long-lived `ThemeStore` in the
+  environment or not (`idpanel.swift`, by model identity: `[] [] []`).
+- **A held window.** The OLD product keeps a dismissed panel alive AND observing for exactly as long as something holds
+  its popover WINDOW strongly — my first pins did (`let window = …` across `rig.dismiss(window)`), and my first replay did
+  (`w`). Nothing in the app holds a dismissed popover's window.
+- The pure-SwiftUI probe's leak (`popteardown.swift`) survives pool drains for a third reason of its own: its popover
+  CONTENT closure read the long-lived driver's observable `counter`, so the stale content stayed subscribed. The
+  product's content closure (`CommentsPanel(session:blockID:)`) reads no observable.
+
+So VX-179 FIX LEG 3's measurement (`stale.swift`, offscreen, `.prohibited`, the same probe shape) is, on this evidence, the
+same artefact — and VX-229 is **expected HOLLOW**. That cannot be settled offscreen (the probe app is never active; the
+runner and the live app are), so: the fix comes out (never ship a fix a red-on-old run has not justified — contract
+rule 3), the pins are RESHAPED so no window is ever held across a dismissal (the rigs keep window NUMBERS only), the old
+products are rebuilt with them, and **W1 decides**: red on old ⇒ the leak is real in the runner and the fix is re-applied
+(`git revert` of this revert) with one more window; green on old ⇒ VX-229 DISMISSED AS HOLLOW, the pins kept as guards.
+The live arbiter rides W3: `heap` on the running OLD Debug app after three open/dismiss cycles of the margin note's
+popover — the live count of `CommentsPanelModel` instances.
+
+**State of the tree for this step (named before it starts):** the app code goes back to `7650b6ce`'s (the pins commit:
+seams only) for `CommentsPanel.swift` and `CommentTextArea.swift`; VX-257's fix, built but UNCOMMITTED, is kept at
+`scratchpad/vx282-u5/vx257-fix-uncommitted.patch` (gitignored, in the worktree) with whole-file copies beside it, and
+is re-applied after the old products are rebuilt. The probes are kept in the same folder.
 
 ## Ladder
 
