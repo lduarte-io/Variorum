@@ -138,7 +138,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **DONE** — VX-229 DISMISSED AS HOLLOW in use (the u5b heap decider; the fix `ee86dd8c` reverted `7d798f82`; the runner's retention a known issue `c46f999d`, cause untraced) · VX-257 FIXED `1ca8fe72` (pins `7650b6ce`/`075473c2`, reshaped `dab712d8`/`eaf42b27`; QUESTIONS #223) · VX-183 FIXED `a765683c` · VX-182 FIXED `fd4c260c` (pins `f38fb93c`). Verified: core 2,801/320 + MCP 212/41 + workbook 40/6 headless; W1 / u5c red on old as designed; u5b g2 76/11, g3 23/2; **u5d g1 113 tests / 13 suites passed (9 known issues — the VX-229 runner fact)**; the u5b walk, every row held, both voices. Windows released 05:25:17, 05:57:46, 06:13:57, 06:19:43. Posture as found (Standard, unlocked, Study); no instance; no revert in flight. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **DONE** — pins `d35191b6` + correction `ee1facc9` · fix `3cf0079b` · window `a1967ac0` (logs) + the walk record. Stage window 05:27:17–05:38:17 (claim `vx282-u6`, RELEASED): W1 red on old exactly as predicted (3 tests, 1 issue — the launch pin's last cell) · W2 the fixed batch 148 tests / 43 suites green · W3 every row held (A0 old: the window; A/A' fixed: the caret in the bar at launch in Study and Terminal, a typed letter lands; C the tour never stolen from; D the navigation back as today — O-U6-1 seen live); row B's restored note window not reachable on this Mac (not restored), a new window walked in its place. P-U6-1/2 → QUESTIONS #224. Posture: Study, unlocked Standard, tour `completed`, the Bookcase, nothing filed. No claim held; no revert in flight. |
-| Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
+| Ladder | round 1 `opus-reviewer` (0B/0M/6m/4n, dispositioned) → its FIX LEG; round 2 = the run's one `fable-reviewer` | IN-PROGRESS — round 1's fix leg (the `### ROUND 1 — FIX LEG` subsection) |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
 ## Stage traffic log (oct13coordinator protocol)
@@ -2574,6 +2574,27 @@ run 2,809/322 · MCP 212/41 · workbook 40/6 green · 21 stage logs spot-checked
 - R1-8 **AGREED (watch)** — the closeout's whole-target run reads those cells; if they fail, mark intermittent.
 - R1-9 **AGREED** — one test-only run of both burst pins against the drain-rule revert in the fix window.
 - R1-10 **AGREED** — the record line corrected.
+
+### ROUND 1 — FIX LEG (an `opus-implementer` session, Opus 5.5 xhigh, 2026-10-14)
+
+**NOT DONE BY THIS LEG (first line):** R1-8 (the closeout's whole-target run watches it) and the handoff are not this
+leg's. Every count and every "red"/"green" below is **PENDING** until the r1fix stage window runs it.
+
+**LIVE STATUS (this leg):**
+
+| Finding | State |
+|---|---|
+| R1-1 find paint × the read-going settle | IN-PROGRESS — pin, then the fix |
+| R1-2 Write's overlays after a settle re-wrap | NOT-STARTED |
+| R1-3 the phone's guard window (PIN FIRST) | NOT-STARTED |
+| R1-4 the comments panel to `Core/Views/` | NOT-STARTED |
+| R1-5 #220's disclosure line | NOT-STARTED |
+| R1-6 O-4 re-verified | NOT-STARTED |
+| R1-7 a caret in a non-editable editor | NOT-STARTED |
+| R1-9 the burst pins against R2-1's revert | NOT-STARTED |
+| R1-10 the U5 record's adopt line | NOT-STARTED |
+
+**Revert state: no behavioural revert in flight.**
 
 ## Closeout
 
