@@ -43,6 +43,23 @@ carries its own trace and pins (read them in Linear, or ask the orchestrator to 
 > Read `notes/TEXTKIT2_NOTES.md`. **Mobile-visible:** VX-296's shared face reaches the phone's live editor too
 > (say so in the MOBILE PARITY line); VX-290 is Mac-only (the phone has no carve).
 
+## Her overnight mandate (2026-10-14, ~00:50, verbatim)
+
+*"I want you to continue on through the night ending in a merge to main - the final merge in of the night can be the
+only one to do an applications refresh. Rule provisionally in my absence and leave me a handoff with any needed
+information to note down."* So: the run closes and merges tonight; every open product call is built PROVISIONAL and
+logged to `notes/QUESTIONS.md` under the VX-282 heading; the `/Applications` refresh runs ONLY if this run is the
+night's final merge (the stage coordinator calls the order — passed to vx-281 and vx-246 too); the handoff is
+`notes/handoffs/vx-282-handoff.md`, her checklist at the top.
+
+## Tickets born during the run
+
+VX-319 (Write's word count one short after a carve — U1 walk, untraced) · VX-320 (File ▸ Export Block… hits the caret
+block under the take panel — U3 O-1) · VX-321 (Move Take into a Block Below's receipt "archived · n" — U3 O-3) ·
+VX-322 (the capture box's `entryFocused` may stay true across a re-attach to another responder — U4 O-U4-1, untraced) ·
+VX-325 (⌘K queues behind the take panel — U3 O-6). All in *12 — Hardening & perf validation*, Todo; pre-launch is hers.
+U4's O-U4-2 (the box's history left the window's shared undo stack under P-U4-1) — no symptom traced, no work: recorded.
+
 ## Her rulings that bind this run (from the tickets, verbatim where she wrote them)
 
 - **VX-290** — her report IS the caret-landing ruling (QUESTIONS #33(d) already decides WHICH block goes):
