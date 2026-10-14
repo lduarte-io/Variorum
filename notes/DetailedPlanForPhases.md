@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | Castle rebuild, phase 1 — the headless core | VX-305 · `vx-305-castle-core` | `~/dev/variorum-vx-305` · the Pro | In progress (architect shape; plan `notes/plans/vx-305-castle-core.md`). Holds the ONE Sync/-or-custody slot. Surfaces: NEW `Sources/VariorumCore/Protection/` + `Tests/VariorumCoreTests/Protection/` only — no `App/`, no `Sync/`, no migrations; headless, no stage. |
+| Run: MCP wire tools & AI docs | VX-336 · `vx-336-mcp-wire-tools-ai-docs` | `~/dev/variorum-vx-336` · the Pro | In progress (architect shape, kicked off 2026-10-14; plan `notes/plans/mcp-pane-and-docs-kickoff.md`, record `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md`). Zero `Sync/`/custody. Surfaces: `Sources/VariorumMCP/` (the wire tools), the ops they wrap, the app's MCP navigator + Compare's show target, `TutorialSeeder`'s MCP chapter (U8 — never beside VX-292), `ShellActions`' undo copy (VX-342). Stage via the coordinator: Mac batches + real-client live rounds on the dev store. |
 
 ### Latest closeout
 
