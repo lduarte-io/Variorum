@@ -114,7 +114,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U1 | VX-290 — the empty-block backspace's caret landing | **DONE** — fix `385aa1fc`; W1 red on old + W2 the Mac batch green `be826a5d`; W3 the walk, every row held `a7a63949`. Stage released 22:01:26 and 23:47:00. One observation for the orchestrator to ticket (the bar's word counter, not this unit's road). No revert in flight. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **READY FOR STAGE — u2b: phone W2b suites (-collect-test-diagnostics never) + Mac g1, ≈12 min.** The W2b fix built: `MarkdownFace.settleCaret` never writes while `storage.editedMask` is non-empty (before the ledger, so a skip consumes nothing); the trace of why a skipped settle is never lost is recorded; the red pin is `MobileMarkdownCaretTests.leavingATrailingSpaceBehindUnstylesTheSpanHonestly` (red on the pre-guard product by its crash). Rebuilt headless into the EXISTING `vx282-u2` + `vx282-u2-ios` only. Earlier: W1 red on old as designed, W2 Mac 190/26 green, W3 walk holds (Study). No claim held; no revert in flight. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **READY FOR STAGE — W1 red on old (old products) + W1b revert B (the ring guard) + W2 the Mac batch g1/g2 (fixed) + W3 a short walk on the dev store (both voices), ≈42 min.** Record `4e5d3464`; seams `04e0369f`; pins ahead of the fix `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Three product sets built headless, TEST BUILD SUCCEEDED: `DerivedData/vx282-u3-old-products`, `…-revB-products`, `DerivedData/vx282-u3` (fixed). Revert B DONE and RESTORED (`git diff` empty). PROVISIONALs P-U3-1…7 (QUESTIONS #220). No claim held; no revert in flight. Every count PENDING. |
-| U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
+| U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **IN-PROGRESS** — the traces re-done (both members; VX-112's two candidates and a third reading of her walk's evidence, recorded in § U4); next: the pins ahead of the fix, then the old products, then the fix. No claim held; no revert in flight. Every count PENDING. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
@@ -958,6 +958,101 @@ first — no `/Applications/Variorum.app` instance, none of ours).** From `App/V
      from its badge, click into a take, ⌘S (capture the field in the panel) → ⎋ → ⌘⇧T → restore the voice found.
   Then the walk note to the Trash (residue recorded), quit OUR instance by identity, `pgrep` again, the dev store left
   Standard and unlocked with its voice as found, release the claim.
+
+### U4 — VX-193 + VX-112 (the capture box: the undo desync and the focus re-grab)
+
+**State: IN-PROGRESS.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Every count and every
+"green"/"red" below is **PENDING** until it runs (headless) or the stage window runs it.
+
+**The surface:** `Core/Views/CaptureTextView.swift` (the ONE capture box, 13u3 UNIT C) and its two hosts —
+`Features/Shelf/QuickEntryBar.swift` (the Bookcase's and the Library's bar) and `Features/QuickNote/QuickNoteView.swift`
+(the quick-note pad). Both members live in the box's coordinator and its `NSTextView` subclass; neither host needs a line
+(traced below).
+
+#### VX-193 — the trace (re-done in this session against `8ba431b2`)
+
+1. Typing reaches the binding by ONE road: `CaptureTextView.Coordinator.textDidChange` → `parent.text = view.string`
+   (`CaptureTextView.swift:334-337`). Both hosts file the BINDING, never the view: the bar's ⏎ → `QuickEntryBar.submit()`
+   → `QuickEntryModel.submit()` reads `text` (`QuickEntryBar.swift:79-80`, `:317-321`); the pad's ⏎ / ⌘⏎ / close / quit →
+   `QuickNotePad.take()` reads `text` (`QuickNoteView.swift:158-159`, `:414-428`, `:391-411`). The placeholders and the
+   title chip read the binding too (`QuickEntryBar.swift:229`, `:280`; `QuickNoteView.swift:295`, `:310`).
+2. **⌘Z / ⇧⌘Z change the box's text with NO `textDidChange`.** MEASURED again here (a windowless TK2 `NSTextView` probe,
+   no window, nothing on screen; the scratch program is not committed): type `first thought`, break coalescing, type
+   ` and more` → two `textDidChange`; `undo()` → the view reads `first thought` with ZERO `textDidChange`; `redo()` →
+   `first thought and more`, again zero. VX-179's U3-g measured the same on the real box (O-U3-3).
+3. So after ⌘Z the box shows one text and the binding holds the pre-undo text, and ⏎ files the words she undid — in
+   both hosts (the pad's ⌘⏎ button and its close/quit filing read the same stale binding). After ⌘Z → ⌘Z → ⇧⌘Z the
+   binding is still the last TYPED state, so redo desyncs as well.
+4. **The sibling defect, same mechanism class (VX-179 U3-g's FIRST half — not named on the ticket, found by carrying
+   the precedent):** the box's typing history lives in the WINDOW's undo manager (the coordinator implements no
+   `undoManager(for:)`; `allowsUndo = true`, `CaptureTextView.swift:193`), and a programmatic adopt
+   (`updateNSView`'s `view.string = text`, `:254-262`) leaves that history standing — MEASURED here (windowless probe:
+   `canUndo` stays true after `string = ""`) — and ⌘Z then replays typing ranges of the OLD text against the new one:
+   MEASURED, `NSRangeException … Range {0, 3} out of bounds; string length 0`. The box is cleared programmatically on
+   every completed hand-off (`QuickEntryModel.submit` `:118-121`, `QuickNotePad.take` `:199-202`), and — the road where
+   the box STAYS on screen with the caret in it — on an EMPTY filing: a whitespace-only or tokens-only capture
+   (`QuickEntryModel.submit` `:82-91`; `QuickNotePad.take` `:166-175`, the pad stays open on `.nothingToFile`,
+   `:426`). Type three spaces, ⏎, ⌘Z: the exception.
+
+**The fix — VX-179 U3-g's mechanism, carried unchanged** (`CommentTextArea.swift:215-298`; the trace shows the capture
+box needs nothing different): the coordinator owns the box's `UndoManager` and answers `undoManager(for:)` with it (⌘Z's
+road: `undo:` travels to the window, which undoes through the first responder's manager — VX-179's measurement); it
+hears its OWN manager's `NSUndoManagerDidUndoChange` / `DidRedoChange` and re-syncs the binding; a programmatic adopt
+ENDS the history (`removeAllActions()`). Measured here before relying on it: the observer (queue `.main`) runs
+SYNCHRONOUSLY inside `undo()`, top level and inside a main-queue job alike — so no SwiftUI update can run between the
+undo and the binding's sync with the stale text (which would re-adopt it and erase the undo).
+
+**P-VX179-U3-4 carried:** "undo is PER AREA and a programmatic replacement ends it" (#215 — still open there, her eye in
+daily use). For the capture box it reads: ⌘Z in the box undoes the box's own typing and nothing else (on the old tree it
+could reach whatever else sat on the window's stack), and after a hand-off or an empty filing there is nothing to undo
+into. Carried as PROVISIONAL here with the same options (P-U4-1).
+
+#### VX-112 — the trace (re-done in this session against `8ba431b2`)
+
+What can put the caret in the box (every `makeFirstResponder(box)` road in the code): (i) `CaptureNSTextView
+.viewDidMoveToWindow` while `wantsInitialFocus` (`CaptureTextView.swift:386-394`); (ii) `Coordinator.takeFocus()` from
+`updateNSView` when the counted `focusRequest` changed (`:264-267`, `:323-332`); (iii) her click. Nothing else in the app's
+names the box.
+
+- **Candidate 1 — the "asked ONCE" flag is never cleared: a REAL defect of the shared box.** `wantsInitialFocus` is set
+  once in `makeNSView` from `focusRequest > 0` (`:229`) and read on EVERY arrival in a window (`:386-394`); the doc says
+  "Asked ONCE, on arrival" (`:359-363`). So a box MADE with a raised request re-claims the keyboard on every
+  re-attach — after any release, and over any other responder (the deferred block checks only `firstResponder !==
+  self`). **Which boxes carry the flag:** the pad's, always (`QuickNoteView.focusRequest` starts at 1, `:244`). The
+  bar's, on NO traced road: its request is raised by `QuickEntryBar`'s `.task` (`:312-314`), which runs at least one
+  main-queue turn after `makeNSView` built the box with the request still 0 — so the bar's flag is false and candidate
+  1 cannot re-grab the bar. **The held-focus half is broken the other way on the bar:** a re-attach while the bar HOLDS
+  the caret drops it to the window (TEXTKIT2 §3, 18l-c U7) and nothing re-takes it (its flag is false) — the keyboard
+  lost silently, `PaneTextView`'s pre-U7 class.
+- **Candidate 2 — the Bookcase's own mount autofocus (R102, `QuickEntryBar.swift:312-314`): live when the Bookcase
+  MOUNTS after the tour's release.** `startTour()` (`RootView.swift:990-1002`) sets the engine; the engine's `init`
+  performs `navigate(.bookcase)` in that same turn (`TourEngine.swift:57-69`) when she is elsewhere; the overlay and the
+  Bookcase mount in the following update, the probe's arrival releases the window's first responder synchronously
+  (`TourOverlay.swift:76-80`, `:523-528`), and the bar's `.task` raise lands at least one turn later → `takeFocus` → the
+  caret in the bar during step 1. So a tour started AWAY from the Bookcase (Help ▸ Take the Tour from a note) ends step
+  1's first turn with the caret in the bar. **Not her walk's road:** that tour started from the offer line, which lives
+  only on the Bookcase (`ShelfView.swift:240`; `RootView.swift:975-978`, `:1161`), and `navigate` returns early when
+  she is already there (`RootView.swift:1015-1018`) — no mount, no raise.
+- **A third reading of her walk's evidence (the 13s U2 WALK RECORD, `phase-13s-voice-onboarding.md:567`):** the walk ran
+  in DARK TERMINAL and the evidence it quotes is "the caret block visible mid-tour". The Terminal voice draws a blinking
+  accent BLOCK cursor in the empty bar exactly while the box does NOT hold the caret (`QuickEntryBar.swift:235-246`,
+  17y B2 (m)) — so the tour's release itself turns that block ON. Nothing in that record says a key was typed into the
+  box. On my static trace neither candidate fires on her road, and the block cursor explains the sighting completely.
+  **W3 decides it** (both voices — Study draws no block cursor — with the focused element read by AX and one keystroke).
+
+**The rule built (her ruling as recorded in this run: "the shared capture box re-takes only focus it HELD, never
+steals"):** `PaneTextView`'s rule (`PaneSurface.swift:583-620`), in the shared box. The initial request is served ONCE,
+on the first arrival, and cleared (the doc's own "asked ONCE"); a box that held the keyboard when it was detached
+re-takes it on re-attach, and only when the window itself holds the keyboard (nil or the window) — so it never steals
+from a field, a sheet or anything else that took it meanwhile, and a box that did NOT hold it (released by the tour or
+anyone) stays away. The counted request (`takeFocus` — her padding click, the title chip, the Bookcase's mount raise) is
+unchanged: an explicit request is not a re-take. **Candidate 2 is NOT changed** (the brief: the first-mount autofocus
+works where it does today): whether the Bookcase's mount autofocus should stand down while a tour runs is a product call
+the rulings do not make — P-U4-2. **The residual race, recorded as the 13s record did:** a release that lands WHILE the
+box is detached (the window already holds the keyboard, so the release changes nothing observable) cannot be told from
+the detach's own drop; the box re-takes. `PaneTextView` carries the same residual.
+
+*(Pins, the diff, the products, the window plan: next pieces — PENDING.)*
 
 ## Ladder
 
