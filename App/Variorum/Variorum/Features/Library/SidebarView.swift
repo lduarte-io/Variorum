@@ -129,6 +129,12 @@ struct SidebarView: View {
         .moveNoteToWing, .copyNoteToWing,
     ]
 
+    /// **The OPEN LIST's own right-click acts** (VX-289, the VX-283 run) —
+    /// beyond the shared note-row grammar above, which the Library's and the
+    /// Pool's rows render too. Close All Notes is about the LIST, so only the
+    /// list renders it (the walk's union carries this as its own line).
+    static let openListMenuCapabilities: [CapabilityID] = [.closeAllNotes]
+
     /// The five areas, in R44's ruled order (+ Archived at the end, the
     /// post-13l polish round's addition). ONE table the column iterates —
     /// the row count the fit test reads is this table's count.
@@ -954,6 +960,14 @@ struct SidebarView: View {
                 }
             }
             Button("Close") { workspace.closeNote(noteID) }
+            // VX-289 (the VX-283 run): Close All Notes — every row closes; a
+            // pane showing a note lands by ⌘⇧W's rule (the list empty: the
+            // Library), through the column's own navigation road (the
+            // selection binding the shell adopts). Declared in
+            // `openListMenuCapabilities`; the View menu carries its twin.
+            Button(CapabilityRegistry.capability(.closeAllNotes).verb) {
+                if let landing = workspace.closeAllNotes() { selection = landing }
+            }
         }
     }
 }

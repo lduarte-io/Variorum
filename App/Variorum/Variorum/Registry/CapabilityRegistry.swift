@@ -1450,6 +1450,53 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "\u{2325}\u{2318}]", takesAccess: nil,
             unavailableNote: "Nothing to go forward to — you haven't gone back.",
             availability: { ctx in ctx.canNavigateForward ? .act : .unavailable }),
+        // VX-287 (the VX-283 run, U1) — **CLOSE NOTE**, her ruling verbatim:
+        // *"for command W - can we do shift command W? i like that better than
+        // control, it's more natural to type. i think landing in the next note
+        // on the list is perfect-that way you can close them all quickly."*
+        // The focused pane's note leaves the Open list AND the pane moves on —
+        // to the next row, else the previous one, else the Library
+        // (`WorkspaceModel.closeFocusedNote`; the fallbacks PROVISIONAL, the
+        // ticket's). VIEW-ONLY: the note itself is untouched. ⌘W is not ours
+        // and stays the system's File ▸ Close (it closes the window).
+        //
+        // THE COLLISION SWEEP (2026-10-14, on `a2a27a10` — the U1 record's P0):
+        // ⌘⇧W is FREE in the app — no `w` chord in `EditorCommands.keyEquivalent`,
+        // no "w" at any `.keyboardShortcut(` call site in `Variorum/` and
+        // `Shared/`, every `NSMenuItem` keyEquivalent "", no `w` in the one
+        // `performKeyEquivalent` override (⌘S + the ⌘Z/⇧⌘Z hint arm) or any
+        // local key monitor, the system hot keys [.quickNote] only; the
+        // note-only and quick-note windows bind no W, and the gate below greys
+        // the key there (only a FULL window has an Open list). The system half
+        // (AppKit's own File-menu items under window tabbing) is the record's
+        // measured check.
+        //
+        // App scope, `takesAccess: nil`: a workspace act like its neighbours.
+        Capability(
+            id: .closeNote, verb: "Close Note", scope: .app,
+            doors: [.menuBar],
+            shortcutLabel: "\u{2318}\u{21e7}W", takesAccess: nil,
+            unavailableNote: "There's no note in this pane to close — open one and "
+                + "\u{2318}\u{21e7}W closes it and moves on to the next.",
+            availability: { ctx in
+                ctx.windowKind == .full && ctx.focusedPaneShowsNote ? .act : .unavailable
+            }),
+        // VX-289 (the VX-283 run, U1) — **CLOSE ALL NOTES**, her triage word
+        // (2026-10-14): *"close all now is good"* (the selection half is VX-344).
+        // Every Open row closes; a pane showing a note lands by Close Note's
+        // rule — with the list empty, the Library. Two doors: the Open list's
+        // right-click (`SidebarView.openListMenuCapabilities`) and the View
+        // menu's twin. Keyless — the ruling named the doors, not a chord.
+        // VIEW-ONLY like its sibling. The verb says "Notes" because the bare
+        // "Close All" is the system's own File-menu word for closing WINDOWS.
+        Capability(
+            id: .closeAllNotes, verb: "Close All Notes", scope: .app,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "No notes are open in this window — the Open list is already empty.",
+            availability: { ctx in
+                ctx.windowKind == .full && ctx.openNoteCount > 0 ? .act : .unavailable
+            }),
         // 13f batch 4 — the SPLIT (her W1/A25 ruling). The menu door puts
         // the most recently opened OTHER note beside this one; the row
         // doors (`.contextMenu`) put the row you point at. Both refuse the

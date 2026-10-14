@@ -683,6 +683,11 @@ struct RootView: View {
         session.commandRouter.canStarCurrent = {
             StarTargeting.target(for: windows.activeRouter?.workspace.focusedSelection) != nil
         }
+        // VX-287 (the VX-283 run): Close Note's gate — is the key window's
+        // focused pane showing a note it can close?
+        session.commandRouter.focusedPaneShowsNote = {
+            windows.activeRouter?.workspace.closeNoteTarget != nil
+        }
         // 18o U1 (17e (12)): the key window's kind — the sidebar toggle's
         // gate, now a registry fact the View-menu item reads back.
         session.commandRouter.windowKind = { windows.activeWindowKind }

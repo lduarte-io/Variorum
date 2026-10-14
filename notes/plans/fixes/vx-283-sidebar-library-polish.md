@@ -370,12 +370,14 @@ screenshot walk (a fresh walker's, after the stage window); any stage work until
 - P0 — the ⇧⌘W collision check (VX-287's FIRST step): IN-PROGRESS — the app-code sweep is DONE and FREE (below);
   the system-provided half (AppKit's own File-menu items under window tabbing) is PENDING an external lookup and the
   stage window's AX enumeration of the Debug app's menus.
-- P1 — VX-286 (the scroll bar rides in the margin, Open + Starred): DONE (the commit carrying this line; hash
-  in the next flip) — headless build green; its mounted pin and the behavioural revert are PENDING the stage window.
-- P2 — VX-285 (the Open list grows to the sync footer; the constant splits): DONE (same commit as P1 — the two
-  share `SidebarView.openGroup`'s lines) — headless build green; pins + revert PENDING the stage window.
-- P3 — VX-287 (Close Note ⌘⇧W, landing next / previous / the Library): NOT-STARTED.
-- P4 — VX-289 (Close All Notes: the Open list's right-click + the View-menu twin): NOT-STARTED.
+- P1 — VX-286 (the scroll bar rides in the margin, Open + Starred): DONE (`2f2daba2`) — headless build green; its
+  mounted pin and the behavioural revert are PENDING the stage window.
+- P2 — VX-285 (the Open list grows to the sync footer; the constant splits): DONE (`2f2daba2` — the same commit as
+  P1; the two share `SidebarView.openGroup`'s lines) — headless build green; pins + revert PENDING the stage window.
+- P3 — VX-287 (Close Note ⌘⇧W, landing next / previous / the Library): DONE (the commit carrying this line) —
+  headless build-for-testing green; its pins PENDING the stage window; the chord's system half PENDING (P0).
+- P4 — VX-289 (Close All Notes: the Open list's right-click + the View-menu twin): DONE (same commit as P3 — one
+  landing rule, one set of pins) — headless green; pins PENDING the stage window.
 - P5 — the stage window (the Mac batch + the red-on-old reverts): NOT-STARTED.
 
 **P0 — the ⇧⌘W check, the app's own half (2026-10-14, on `a2a27a10`) — FREE:**
@@ -433,6 +435,61 @@ empty column below) + `…inAShortColumnTheListTakesItsFloorAndTheColumnScrolls`
 **PROVISIONAL P-U1-4 — the floor's number.** The record says "floored at a few rows" and names none. Built: 3½ rows
 (three and the half row that says there is more — Starred's own idiom). Options: (a) 3½ [built]; (b) 3 whole rows;
 (c) 5½. Her eye at the walk decides.
+
+**P3 — VX-287, Close Note (⌘⇧W).** The trace, verified on this tip: no close-note shortcut existed; the ✕
+(`SidebarView.swift:811`) and the right-click Close (`:868`) call `WorkspaceModel.closeNote` (`:360-363` on this tip),
+which removes the ROW only — an on-screen note stays shown with no row until opened again (`visit` re-adds it,
+`:301-304`); the app binds no ⌘W (`EditorCommands.keyEquivalent`), so ⌘W is the system's File ▸ Close. **Built:**
+- the registry: `.closeNote` ("Close Note", app scope, `[.menuBar]`, "⌘⇧W" — the registry's own glyph order, as
+  ⌘⇧D/⌘⇧N read), gated `windowKind == .full && focusedPaneShowsNote` (a new `CapabilityContext` fact, wired in
+  `RootView.wireWorkspace` to the KEY window's `workspace.closeNoteTarget`, the `canStarCurrent` shape) — grey on a
+  place, a book or a scraps container, and in the note-only and quick-note windows (⌘W keeps closing those);
+- the menu: View ▸ Close Note (⌘⇧W) under the Open Notes submenu (the ticket: "a View-menu item"), its key in
+  `EditorCommands.keyEquivalent`; the ⌘/ helper's "Windows & panes" row and its "the Open list" entry;
+- the act: `WorkspaceModel.closeFocusedNote()` closes the focused pane's row and RETURNS the landing —
+  `landingAfterClosing` over the pure `OpenNotes.neighbour(ofClosing:skipping:)`: the next row in STRIP order, else
+  the previous, else `.library`; the door (`EditorCommands.closeNote(in:)`) routes it through the EXISTING open-note
+  road — `ShellRouter.pendingSelection`, adopted by `RootView` via `ShellRouter.adopt` (⌘⇧1–9's road) — so no new
+  landing authority, no `ShellRouter.swift` edit (VX-284's lane), and ShellRouter's RULE ONE (only `adopt` calls
+  `select` from outside the workspace) holds. Arriving is an ordinary navigation, so the closed note's
+  savepoint-on-leave fires like any departure. VIEW-ONLY: no row of the store is written.
+- **PROVISIONAL P-U1-1 (the ticket's fallbacks, kept):** the last row lands on the previous note; an empty list on
+  the Library. Options: (a) next → previous → Library [built]; (b) next → the Library (never backwards); (c) next →
+  previous → the Bookcase.
+- **PROVISIONAL P-U1-2 (two edges the ruling does not reach):** (i) in a SPLIT, a candidate the other pane shows is
+  passed over (a split never shows one note twice — landing on it would move the FOCUS and speak the same-note
+  refusal instead); (ii) a note shown with NO row (its ✕ pressed while it stayed on screen) is still closable — the
+  pane leaves it, landing on the LAST row (it reads as sitting past the end, where a re-open would put it). Options
+  for (ii): (a) closable, lands on the last row [built]; (b) ⌘⇧W grey without a row; (c) closable, lands on the
+  Library. **Not changed:** the ✕ and the right-click "Close" keep closing the ROW only (the shipped act, its help
+  "the note itself is untouched") — whether a ✕ on the shown note's own row should also move the pane on is hers to
+  ask for; recorded, not built.
+
+**P4 — VX-289, Close All Notes.** The trace: no selection model (VX-344 holds that half); `OpenNotes.close` closes
+one row. **Built:** `.closeAllNotes` ("Close All Notes", `[.menuBar, .contextMenu]`, keyless — the ruling named the
+doors; the verb says "Notes" because bare "Close All" is the system's File-menu word for closing WINDOWS), gated
+`windowKind == .full && openNoteCount > 0`; the doors: every Open row's right-click (after "Close";
+`SidebarView.openListMenuCapabilities` — the walk's union gains it as its own line, a JUSTIFIED EDIT of
+`theContextMenusRenderExactlyTheDeclaredContextDoors`; the shared note-row grammar is untouched, so the Library's and
+the Pool's rows do not grow it) and View ▸ Close All Notes. The act: `WorkspaceModel.closeAllNotes()` empties the list
+(`OpenNotes.closeAll`) and returns the focused pane's landing (the Library when it showed a note — VX-287's rule with
+the list empty); the menu routes it through `pendingSelection`, the right-click through the column's own selection
+binding (which the shell adopts through the same `RootView.adopt`). **PROVISIONAL P-U1-3:** the OTHER pane of a
+split, if it shows a note, lands on the Library IN PLACE with the focus kept (`notesDeleted`'s road, VX-246) —
+"all" includes the pane she is not in, and a closed note left on screen with no row is the state the ticket names.
+Options: (a) every note-showing pane lands [built]; (b) only the focused pane lands; (c) Close All also folds the
+split back to one pane.
+
+**Pins (P3/P4), all PENDING the stage window:** `OpenListLandingTests` (pure ×8: next, last → previous, only → nil,
+strip order not recency, the split's pass-over, the rowless note, repeated presses close them all, closeAll),
+`WorkspaceCloseActTests` (×9: the row leaves and the pane has not moved until the door routes it; last → previous →
+Library; the closed note departs on landing; nothing to close on a place or a scraps container; the split's landing;
+Close All from a note, from a place, with a split; closing writes nothing to the store or the outbox),
+`OpenListCloseDoorTests` (×6: declared + keyed ⌘⇧W + the helper; ⌘W untaken; Close All's two doors and not the
+note-row grammar; the row menu renders the registry's verb (source read); the two gates), and
+`OpenListCloseShellTests.theMenuActsLandThePaneThroughTheShell` (a mounted `RootView`: ⌘⇧W's act lands next, then
+previous, Close All lands the Library, the menu's gates follow, the notes untouched). New acts, so exact-behaviour
+pins — no red-on-old owed (the brief).
 
 ## Ladder
 

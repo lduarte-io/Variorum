@@ -352,6 +352,10 @@ struct CapabilityRegistryTests {
             // context door (`.deleteTag`, declared at last — its visible twin
             // is the surface walk's line).
             .union(TagManagerPane.contextMenuCapabilities)
+            // VX-289 (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line): the Open list's own right-click act, Close All Notes,
+            // beyond the shared note-row grammar its rows also render.
+            .union(SidebarView.openListMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
     }
 
