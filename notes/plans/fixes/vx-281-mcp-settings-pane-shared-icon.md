@@ -506,7 +506,24 @@ The ask glyph (`MCPAskGlyph`) is rendered at nine hosts. Against each, this unit
 
 ### P1, per site (how each read scales)
 
-*(filled as each host lands — PENDING)*
+Every read is one of the three core reads (one rule), HELD by the host while it shows, and re-aimed only when the
+rows it shows change. **The cost the house rule names** (`AppDatabase.observe`): a NOTE read touches `container`,
+which every autosave rewrites whole, so a host's note hold re-runs at autosave rate while it is on screen — ONE
+bounded batch, and ONLY while an approved client holds a live grant or the open book is on (`mcpReachStandings`
+stops the read at the grants store otherwise, so `container` is never in its region — pinned headless:
+`noApprovedClientMeansNoReachAndTheNotesAreNeverRead`). Correctness wins over a named-region hold here: a note marked
+Private, moved to another wing or trashed changes only `container`, and the icon must leave at once (a privacy
+affordance that lags is a surprise). The batch is two statements however many rows (pinned:
+`theBatchedReadsStatementsDoNotGrowWithTheRows` — 2 rows and 40 rows run the same statements).
+
+| Host | Read | Scales with | Wakes at autosave? |
+|---|---|---|---|
+| the Library's note rows (List, Cards, the answer sheet's heads) | `mcpNoteReaches` over the NEAR WINDOW (`nearNoteIDs` — the pages around what is on screen, ≤ 3 × 80), beside the owned-by facts, re-aimed at page boundaries | the window, never the listing (however deep she scrolls) | only with live reach; and the Library is never on screen beside an editor |
+| the Library's book + gathering rows | `mcpBookReaches(readingIDs:)` over `listedBookIDs` | the listed books (the Library lists its wing's books whole — the Bookcase's own class) | never (`reading`, `wing`, the grants store) |
+| the Timeline's rows | `mcpNoteReaches` over the LOADED rows | the pages she loaded (each "Load More" is her act — the order of the Timeline's own reads) | only with live reach; never beside an editor |
+| the Pool's rows | `mcpNoteReaches` over `drawnIDs` | the Pool's own window (200 loose, + the tucked run while shown) | only with live reach |
+| the Book Panel's rows | `mcpNoteReaches` over the panel's entries | the panel's own window (`entryWindow` = 300) — the panel's snapshot already re-runs per autosave over the same window | only with live reach (the one host beside an editor — one batch per autosave, the snapshot's own class) |
+| the wing switcher (⌘L's rows, the ▾ menu) | `mcpWingReaches` | the wings × the approved clients | never (no `container`, no `reading`) |
 
 ### LIVE STATUS — U2's pieces (flipped in the same commit as each piece)
 
@@ -514,11 +531,30 @@ The ask glyph (`MCPAskGlyph`) is rendered at nine hosts. Against each, this unit
 |---|---|---|
 | 0 | this record: the trace, the site list, the design | DONE (this commit) |
 | 1 | THE SEAM + THE PINS, red-first: the final API with the PRE-FIX BEHAVIOUR behind it (no surface reads reach, no row draws it, the core reads answer nothing) + the core pins + the Mac pins; the core pins RED headless; the seam tree built for testing | DONE (`68cc4ab1`): the seam (`Queries.mcpNoteReaches` / `mcpBookReaches(readingIDs:)` / `mcpWingReaches` answering `[:]`; `LibraryNoteRowExtras.reach` never set, `LibraryCatalogModel.bookReach` + `holdBookReach` empty, `PoolPostsModel` / `BookPanelModel` / `TimelineViewModel` `.reach` + `holdReach` empty, `BookPanelModel.entryIDs(for:)`, `WingsModel.reach` + `watchSharing` empty; `CatalogNoteLine` / `CatalogBookLine` take `reach:` and draw nothing) + **core `MCPRowReachTests` 6 tests — RED on the seam headless: 6/6 failed, 43 issues** (`swift test --filter MCPRowReachTests`, log `vx281-screens/u2/logs/core-pins-seam.log`; every positive leg; the guards — VX-272's empty map, no `container` read — green by nature, each paired with a red control) + Mac `MCPSharedRowsTests` 10 tests (the hosts' holds, the open book, VX-272, the two List lines' faces on the title's baseline). the seam tree BUILT for testing — `DerivedData/vx281-u2-old` from `68cc4ab1` (`** TEST BUILD SUCCEEDED **`, `logs/build-seam.log`; an APFS clone of U1's build for speed — its stale-path warnings name U1's directory, which the build refused to touch; the products are fresh in their own directory). DONE but for the Mac red run, which is STAGE WINDOW 1's |
-| 2 | THE FIX: the core reads; the icon's calm state; the hosts' held reads and faces; the declarations and their ritual pins | IN-PROGRESS — WIP committed (this commit, NOT YET COMPILED for the Mac): core `mcpReachStandings` + the three reads + `MCPReachPlace.wing` (read off `decideWing`) — **core GREEN headless: `MCPRowReachTests` 6/6 + `MCPShareTests` + `MCPGatheringReach*` = 30 tests / 4 suites** (`logs/core-pins-fixed.log`; two PIN-AUTHORING errors found by the first green run and fixed in the pins, not the code: line 115 forgot codex's Home wing grant still reaches the note — now asserts claude-code LEAVES and codex stays; the wing agreement iterated a deleted wing, which has no row — now iterates the live wings); app: `MCPSharedIcon`'s calm state = no view, `MCPRowReach.hold` (Core/Views), the Library's near-window reach hold + listed-book hold + row faces (List line, card, book line), Pool / Book Panel / Timeline holds + faces, `WingsModel.watchSharing` (RootView task), ⌘L's row icon + `MCPShareRoad.openingHere` + the nested grant sheet, the ▾ menu's `rowMark`, the declarations; ritual pins `BookPanelTests` (exact set) + `CapabilityRegistryTests` (the walk's Timeline line); new design suite `MCPSharedRowsRulesTests`. REMAINS: build for testing (`DerivedData/vx281-u2`) |
-| 3 | headless finals + the fixed tree built for testing | NOT-STARTED |
-| 4 | STAGE WINDOW 1 — red on the seam tree, the Mac batch on the fixed tree | NOT-STARTED |
+| 2 | THE FIX: the core reads; the icon's calm state; the hosts' held reads and faces; the declarations and their ritual pins | DONE (`c3946402`; COMPILED — `DerivedData/vx281-u2`, `** TEST BUILD SUCCEEDED **`, `logs/build-fixed.log`, no new warning in a touched file — the two seen are pre-existing lines, identical in the seam build): core `mcpReachStandings` + the three reads + `MCPReachPlace.wing` (read off `decideWing`) — **core GREEN headless: `MCPRowReachTests` 6/6 + `MCPShareTests` + `MCPGatheringReach*` = 30 tests / 4 suites** (`logs/core-pins-fixed.log`; two PIN-AUTHORING errors found by the first green run and fixed in the pins, not the code: line 115 forgot codex's Home wing grant still reaches the note — now asserts claude-code LEAVES and codex stays; the wing agreement iterated a deleted wing, which has no row — now iterates the live wings); app: `MCPSharedIcon`'s calm state = no view, `MCPRowReach.hold` (Core/Views), the Library's near-window reach hold + listed-book hold + row faces (List line, card, book line), Pool / Book Panel / Timeline holds + faces, `WingsModel.watchSharing` (RootView task), ⌘L's row icon + `MCPShareRoad.openingHere` + the nested grant sheet, the ▾ menu's `rowMark`, the declarations; ritual pins `BookPanelTests` (exact set) + `CapabilityRegistryTests` (the walk's Timeline line); new design suite `MCPSharedRowsRulesTests` (3: the calm icon takes no width or spacing; the menu row's one mark; every host declares the icon's acts, the menu none) |
+| 3 | headless finals + the fixed tree built for testing | DONE (this commit) — the whole package `swift test` on the fixed tree: **`VariorumMCPTests` 212/41 · core 2,788/320 (VX-184's 2,782/319 + `MCPRowReachTests` 6/1) · workbook 40/6 — 0 failures**; skips = the standing gated nine (read, `logs/headless-finals.log`) |
+| 4 | STAGE WINDOW 1 — red on the seam tree, the Mac batch on the fixed tree | **READY FOR STAGE** (this commit) — the plan below ("STAGE WINDOW 1 — the plan"); the stage NOT claimed (the orchestrator relays the claim line) |
 | 5 | STAGE WINDOW 2 — the walk | NOT-STARTED |
 | 6 | close: self-assessment, PROVISIONALs, OWED | NOT-STARTED |
+
+### STAGE WINDOW 1 — the plan (runs ONLY under the claim the orchestrator relays — expected `vx281-u2`, ~30 min)
+
+0. **Guards, every time:** `Tools/WalkKit/guard.sh --author` (her `/Applications/Variorum.app` absent — if present,
+   STOP and report); `pgrep -fl 'Variorum.app/Contents/MacOS'` empty; the claim held. No Debug launch in this window.
+1. **RED ON THE SEAM TREE** (`DerivedData/vx281-u2-old`, built from `68cc4ab1`): `xcodebuild test-without-building
+   -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx281-u2-old
+   -only-testing:VariorumTests/MCPSharedRowsTests` → expected **9 tests, all RED** (every host's settle times out;
+   VX-272's guard green with its control red; both faces' `#require` on the shared probe nil). Log
+   `logs/a-red-on-seam.log`.
+2. **THE BATCH ON THE FIXED TREE** (`DerivedData/vx281-u2`, HEAD's sources): `test-without-building` with
+   `-only-testing:VariorumTests/<Suite>` for the **149 suites** that exercise a changed source file (derived by
+   script — every test file naming a changed type; the list: `logs/batch-suites.txt`) → `MCPSharedRowsTests` 9 and
+   `MCPSharedRowsRulesTests` 3 GREEN, the ritual pins green. Standing reds named if met (not this unit's): VX-115's
+   `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads`; VX-167's order-dependent pair
+   (`LibraryInfiniteScrollTests.aPageLandingReDrawsNoRowAlreadyBuilt`, `DestructiveUndoWarningTests.redoNeverAsks` —
+   the latter is not in this set). Log `logs/b-batch.log`; `skipped:` lines read (the gated capture harnesses and
+   rigs skip).
+3. Release the claim at once; record the counts; a red that is this unit's is fixed before window 2 (the walk).
 
 ## The ladder
 
