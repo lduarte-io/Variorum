@@ -407,6 +407,96 @@ struct FanBadgePlacementTests {
         }
     }
 
+    /// **U4c — a fan adopted with NO text change, far off-screen, INSIDE the
+    /// width transient** (the run record's U4c trace, item 4). A client's
+    /// `add_take` (the MCP door's op) lands on a block far outside the clip
+    /// (the container shows the frame's END) in the same turn as a width change: every fragment is unlaid, and the
+    /// width door's remeasure is queued but has not run. The observation's
+    /// delivery is adopted with no storage edit (`.adoptEcho`).
+    /// - At the adoption the far fan has NO badge: its fragment is unlaid, so
+    ///   it has no position. Not a badge at block 1's place (the tree before
+    ///   U4), and not one laid out ahead of its predecessors (U4's forced read).
+    /// - The remeasure ALREADY queued lays the post out, and U4b's call re-runs
+    ///   the pass after it (and after the settle net's heal). So the badge
+    ///   lands at its own line with nothing more from her: no keystroke, no
+    ///   second width change.
+    /// Green on U4b's tree by the trace. The tree before U4 and U4's are red
+    /// here by the same trace (the origin badge; a poisoned place never
+    /// re-read after the heal), NOT run: no product carries this pin with
+    /// their code. In the STEADY state the inline post is laid out and a fan
+    /// adopted with no text change badges at once
+    /// (`InlineEditorWindowTests.inlineBadgesCoverTheWholePostNotJustTheClippedViewport`).
+    @Test func aFanAddedFarOffScreenMidReflowIsBadgedByTheQueuedRemeasure() async throws {
+        try await withInlineEditor(seedBlocks: longNote(120)) { h in
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 700, height: 300),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let container = NSView(frame: NSRect(x: 0, y: 0, width: 700, height: 300))
+            window.contentView = container
+            let textView = h.textView
+            var wrapperWidth: CGFloat = 700
+            // SwiftUI sets the wrapper's width before any height report (18k C2).
+            textView.frame.size.width = wrapperWidth
+            container.addSubview(textView)
+            let coordinator = InlineEditorSurface.Coordinator(model: h.model)
+            coordinator.install(textView: textView) { height in
+                textView.frame = NSRect(x: 0, y: 0, width: wrapperWidth, height: height)
+            }
+            window.orderFrontRegardless()
+            defer {
+                coordinator.uninstall()
+                window.orderOut(nil)
+                window.close()
+            }
+            let top = 3
+            let far = 100
+            try fan(h, entries: [top])
+            let slots = try h.storeSlots()
+
+            // THE STEADY STATE (the premise, not the defect): the whole post
+            // laid out, the top fan's badge delivered (the region is the whole post).
+            coordinator.remeasure()
+            window.layoutIfNeeded()
+            window.display()
+            await pump(window)
+            #expect(h.model.badges.map(\.blockID) == [slots[top].blockID],
+                    "premise: the steady state badges the fan near the top")
+
+            // THE TRANSIENT: the width door fires (every fragment unlaid, the
+            // remeasure hop queued) and, in the same turn, a client's take
+            // lands on a block far outside the clip — adopted with no storage edit.
+            wrapperWidth = 420
+            textView.setFrameSize(NSSize(width: 420, height: textView.frame.height))
+            #expect(firstFragment(entry: far, model: h.model, textView: textView)?.laidOut == false,
+                    "premise: the width change left the far block's fragment unlaid (the transient)")
+            _ = try h.session.operations.addTake(
+                toBlock: slots[far].blockID, text: "A client's take.", label: nil, undoLabel: "Add Take")
+            h.model.applyProjection(try h.storeSlots(), fromDelivery: true)
+            #expect(!h.model.badges.contains { $0.blockID == slots[far].blockID },
+                    "inside the transient the far fan has no badge — an unlaid fragment is no position")
+
+            // The remeasure already queued lands, with nothing more from her.
+            let fanned = [top, far]
+            await pumpUntil(window) {
+                h.model.badges.count == fanned.count && fanned.allSatisfy { i in
+                    guard let badge = h.model.badges.first(where: { $0.blockID == slots[i].blockID }),
+                          let truth = firstFragment(entry: i, model: h.model, textView: textView)
+                    else { return false }
+                    return truth.laidOut && abs(badge.frame.minY - truth.frame.minY) < 1
+                }
+            }
+            await pump(window)
+
+            #expect(h.model.badges.map(\.blockID) == fanned.map { slots[$0].blockID },
+                    "the far fan wears its badge once the queued remeasure has laid the post out")
+            let farBadge = try #require(h.model.badges.first { $0.blockID == slots[far].blockID })
+            #expect(!textView.visibleRect.intersects(farBadge.frame),
+                    "non-vacuity: the far fan really is outside the clipped viewport")
+            try expectEveryBadgeHome(h, fanned: Set(fanned), "the book editor, a fan adopted mid-reflow")
+        }
+    }
+
     /// **The mechanism's TextKit 2 facts — a CHARACTERIZATION, green on both
     /// trees by design** (the U4 trace's two measured facts, and a
     /// point-release tripwire per TEXTKIT2_NOTES §5): (1) a fragment TK2 has
