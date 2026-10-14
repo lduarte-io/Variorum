@@ -203,4 +203,122 @@ struct MCPCompareLandingTests {
             #expect(applied == [.compare], "the mode never switched behind her back")
         }
     }
+
+    // MARK: - The landing's ONE ROUND (THE ORCHESTRATOR'S RULING ON U6a's ONE OPEN DECISION, (a))
+
+    /// A door for the wire's show, standing as the frontmost main window (the delivery pin's).
+    private func showDoor(_ session: AppSession) -> MCPDoor {
+        let door = MCPDoor(serverAllowed: false)
+        door.attach(session: session)
+        let router = ShellRouter()
+        door.standingProvider = { (.frontmostMainWindow, router) }
+        return door
+    }
+
+    /// HER OWN ⌘5 on `anchor`, with no wire act behind it: the detail switches to Compare and
+    /// reports it, then the board mounts — its `onAppear` consumes whatever landing is parked
+    /// for this note, and its observation adopts the projection (twice: the first auto-fills the
+    /// linked version, the second reads that column). The test host never fires `.task`, so this
+    /// drives the board's own calls in the board's own order.
+    private func herOwnCompare(
+        _ session: AppSession, _ db: AppDatabase, on anchor: String
+    ) async throws -> CompareViewModel {
+        #expect(session.commandRouter.requestMode(.compare))
+        session.commandRouter.noteMode(.compare)
+        let board = CompareViewModel(session: session, anchorPostID: anchor)
+        board.consumePendingCompareLanding()
+        try await adoptFresh(board, db, anchor: anchor, peers: board.peerSlots.compactMap(\.postID))
+        try await adoptFresh(board, db, anchor: anchor, peers: board.peerSlots.compactMap(\.postID))
+        return board
+    }
+
+    /// HER columns — what her own Compare opens on with nothing parked: the linked version (the
+    /// duplicate) beside the anchor, "related blocks only" at her default ON (#47(c)). An orphaned
+    /// landing would have REPLACED them with the stranger and turned the filter off.
+    private func expectHerColumns(_ board: CompareViewModel, twin: String) {
+        #expect(board.peerSlots.map(\.postID) == [twin],
+                "her own Compare keeps HER columns — never the AI's set, long after the call (R-13nb-23)")
+        #expect(board.relatedOnly, "her default stands — no landing posture applied")
+    }
+
+    /// **A landing she outruns with another mode is dropped** (Round-2 MINOR-R2's aborted-round
+    /// window — the lens landing's twin): the wire parks a landing and requests Compare, the
+    /// detail reports Compare (the landing KEPT — the ordering-safety half), and she presses ⌘2
+    /// before the board takes it. The round is over: the landing goes, and her own ⌘5 later
+    /// opens her board, not the AI's columns.
+    /// RED on the one-property tree (`a846a5f1`) BY ASSERTION: the landing survives the ⌘2
+    /// report and her ⌘5's board replaces its columns with the stranger, the filter off.
+    @Test func aLandingSheOutrunsWithAnotherModeIsDroppedAndHerOwnCompareKeepsHerColumns() async throws {
+        try await withCompareWorld { session, db in
+            let world = try await makeWorld(session)
+            let door = showDoor(session)
+            defer { door.detach() }
+            var applied: [PostMode] = []
+            let token = session.commandRouter.registerDetail(postID: world.anchor, mode: .write) {
+                applied.append($0)
+            }
+            defer { session.commandRouter.unregisterDetail(token) }
+            let parked = CompareLanding(postID: world.anchor, peerIDs: [world.stranger])
+
+            #expect(await door.agentShow(.compare(noteID: world.anchor, peerIDs: [world.stranger])) == .navigate)
+            #expect(applied == [.compare])
+            session.commandRouter.noteMode(.compare)
+            #expect(session.commandRouter.pendingCompareLanding == parked,
+                    "reporting the landing's own mode keeps the landing")
+
+            // Her ⌘2 in the tens of ms before the board mounts.
+            #expect(session.commandRouter.requestMode(.takes))
+            session.commandRouter.noteMode(.takes)
+            #expect(session.commandRouter.pendingCompareLanding == nil,
+                    "any other mode report ends the landing's round")
+
+            let board = try await herOwnCompare(session, db, on: world.anchor)
+            expectHerColumns(board, twin: world.twin)
+            #expect(applied == [.compare, .takes, .compare])
+            board.teardown()
+        }
+    }
+
+    /// **A landing whose note leaves before the board takes it is dropped** — the detail
+    /// re-registering for ANOTHER note (a P→Q switch; Q's `onAppear` may run before P's
+    /// `onDisappear`, so the drop rides registration) or tearing down with no successor ends its
+    /// round, as each ends the lens landing's. Her own ⌘5 on the anchor afterwards opens her
+    /// board each time, not the AI's columns.
+    /// RED on the one-property tree BY ASSERTION: both landings survive (a same-note
+    /// re-registration keeps a parcel) and both of her boards land the stranger, the filter off.
+    @Test func aLandingWhoseNoteLeavesBeforeTheBoardTakesItIsDroppedAndHerOwnCompareKeepsHerColumns() async throws {
+        try await withCompareWorld { session, db in
+            let world = try await makeWorld(session)
+            let door = showDoor(session)
+            defer { door.detach() }
+
+            // (i) Another note's detail registers before the board mounts.
+            let first = session.commandRouter.registerDetail(postID: world.anchor, mode: .write) { _ in }
+            #expect(await door.agentShow(.compare(noteID: world.anchor, peerIDs: [world.stranger])) == .navigate)
+            #expect(session.commandRouter.pendingCompareLanding != nil, "parked")
+            let elsewhere = session.commandRouter.registerDetail(postID: world.other, mode: .write) { _ in }
+            #expect(session.commandRouter.pendingCompareLanding == nil,
+                    "another note's registration ends the landing's round")
+            session.commandRouter.unregisterDetail(first)  // P's late teardown — stale, a no-op
+            // She goes back to the anchor (its onAppear before the other's onDisappear) and ⌘5s.
+            let back = session.commandRouter.registerDetail(postID: world.anchor, mode: .write) { _ in }
+            session.commandRouter.unregisterDetail(elsewhere)  // stale, a no-op
+            let afterSwitch = try await herOwnCompare(session, db, on: world.anchor)
+            expectHerColumns(afterSwitch, twin: world.twin)
+            afterSwitch.teardown()
+
+            // (ii) The detail tears down with no successor before the board mounts.
+            #expect(await door.agentShow(.compare(noteID: world.anchor, peerIDs: [world.stranger])) == .navigate)
+            #expect(session.commandRouter.pendingCompareLanding != nil, "parked again")
+            session.commandRouter.unregisterDetail(back)
+            #expect(session.commandRouter.pendingCompareLanding == nil,
+                    "a genuine teardown ends the landing's round")
+            // She opens the anchor again and ⌘5s.
+            let again = session.commandRouter.registerDetail(postID: world.anchor, mode: .write) { _ in }
+            defer { session.commandRouter.unregisterDetail(again) }
+            let afterTeardown = try await herOwnCompare(session, db, on: world.anchor)
+            expectHerColumns(afterTeardown, twin: world.twin)
+            afterTeardown.teardown()
+        }
+    }
 }
