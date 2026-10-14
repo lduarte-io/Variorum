@@ -91,6 +91,19 @@ nonisolated enum WingSwitcherKeys {
         acted && key != .commandUp
     }
 
+    /// **VX-281 ladder R1-2 — what Esc does while the switcher is up.**
+    nonisolated enum EscapeAct: Equatable, Sendable {
+        /// A row's reach popover is up: it goes, the switcher stays.
+        case dismissRowPopover
+        /// Nothing over the rows: the switcher closes (as it always has).
+        case closeSwitcher
+    }
+
+    /// SEAM — the pre-fix decision: Esc always closed the switcher.
+    static func escape(rowPopoverShown: Bool) -> EscapeAct {
+        .closeSwitcher
+    }
+
     /// The monitor's ONE road from a real event to a key (13n-c held walks
     /// D-W4 — pinned with real NSEvents). A flagsChanged event has NO
     /// characters: reading `charactersIgnoringModifiers` on one RAISES, and
@@ -237,7 +250,10 @@ struct WingSwitcherSheet: View {
                 act(model.brain.commandReleased())
                 return false
             case .escape:
-                close()
+                switch WingSwitcherKeys.escape(rowPopoverShown: false) {
+                case .dismissRowPopover: break
+                case .closeSwitcher: close()
+                }
                 return true
             }
         })

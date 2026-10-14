@@ -380,4 +380,61 @@ struct MCPSharedIconClickTests {
         #expect(MCPSharedIconProbe.presentations(of: name) == 1,
                 "the popover never presents itself when the reach returns (presented \(MCPSharedIconProbe.presentations(of: name))×, up now \(MCPSharedIconProbe.up[name] ?? 0))")
     }
+
+    // MARK: - R1-2 — ⌘L: Esc over a row's popover dismisses the popover, never the switcher
+
+    /// The pure decision (macOS's own rule: Esc dismisses the topmost
+    /// transient; the nested ask sheet already keeps its own Esc).
+    @Test func escapeOverARowsPopoverDismissesThePopoverAndAloneClosesTheSwitcher() {
+        #expect(WingSwitcherKeys.escape(rowPopoverShown: true) == .dismissRowPopover,
+                "a row's popover up: Esc takes the popover, the switcher stays")
+        #expect(WingSwitcherKeys.escape(rowPopoverShown: false) == .closeSwitcher,
+                "nothing over the rows: Esc closes the switcher, as it always has")
+    }
+
+    private static func view<T: NSView>(_ type: T.Type, in root: NSView) -> T? {
+        if let found = root as? T { return found }
+        for sub in root.subviews {
+            if let found = view(type, in: sub) { return found }
+        }
+        return nil
+    }
+
+    /// U2's walk, as a pin: ⌘L up, a row's shared icon clicked open, then Esc
+    /// as the switcher's own key catcher hears it (its window kept key — the
+    /// field keeps focus, the popover holds plain buttons). The popover goes;
+    /// the switcher, and her typed filter, stay. A second Esc closes it.
+    @Test func escapeOverARowsPopoverLeavesTheSwitcherUp() async throws {
+        try await withWorld { session, _ in
+            let ops = session.operations
+            let client = try approved(ops, "r12-client")
+            _ = try ops.grantMCPAccess(client.id, grant(.read, .wing, ""))
+            _ = try ops.createWing(name: "elsewhere")
+            let wings = WingsModel(session: session)
+            await wings.load()
+            let watch = Task { await wings.watchSharing() }
+            defer { watch.cancel() }
+            #expect(try await settle { wings.reach[""] != nil }, "Home's row is reached (its wing grant)")
+
+            let closes = SharedIconCounter()
+            let rig = SharedIconRig(
+                WingSwitcherSheet(
+                    model: WingSwitcherModel(wings: wings), tokens: .studyLight,
+                    close: { closes.count += 1 }),
+                width: 440, height: 420)
+            defer { rig.close() }
+            try await clickTheOneIcon(rig, client: "r12-client", host: "⌘L's Home row") { closes.count }
+            #expect((MCPSharedIconProbe.up["r12-client"] ?? 0) == 1, "the row's popover is up")
+
+            let catcher = try #require(
+                Self.view(WingSwitcherKeyCatcher.CatcherView.self, in: rig.hosting), "the switcher's key catcher")
+            #expect(catcher.onKey?(.escape) == true, "Esc is the switcher's to act on")
+            await rig.poll(timeout: 1.5) { (MCPSharedIconProbe.up["r12-client"] ?? 0) == 0 }
+            #expect(closes.count == 0, "the switcher stays — Esc took the row's popover")
+            #expect((MCPSharedIconProbe.up["r12-client"] ?? 0) == 0, "the popover is gone")
+
+            #expect(catcher.onKey?(.escape) == true)
+            #expect(closes.count == 1, "with nothing over the rows, Esc closes the switcher")
+        }
+    }
 }
