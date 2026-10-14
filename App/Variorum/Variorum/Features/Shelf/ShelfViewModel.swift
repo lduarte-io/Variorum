@@ -247,18 +247,66 @@ final class ShelfViewModel {
     }
 
     /// The held half: one wing's shelves + books (author-scale).
+    ///
+    /// **VX-231 (Run VX-246 U4) — the one-shot half FOLLOWS this one.** The
+    /// one-shot aggregates (`refreshAggregates`) used to be re-read only on
+    /// appearance and after the board's OWN acts, so a note joining a book
+    /// from anywhere else — an MCP client's write, a sync apply, the Book
+    /// Panel, another window — moved this held snapshot ("7 notes") and left
+    /// the words from before the join ("120w", VX-184 U1's live round). Now a
+    /// held delivery whose BOOKS differ from the last one held re-reads the
+    /// one-shot half (`followHeldMove` — single-flight). The first delivery
+    /// is the appearance, which `ShelfView`'s own `.task` already reads. P1:
+    /// this region never wakes at autosave rate (pinned —
+    /// `theHeldSnapshotsRegionIsBlindToAutosave`), so the store-wide re-read
+    /// runs at membership / reading-change rate, never per keystroke (pinned —
+    /// `typingInAMemberNoteNeverReReadsTheOneShot`). A member note's words
+    /// changing by EDITING stays the one-shot's documented staleness.
     func start() async {
         let wing = wingID
+        defer {
+            heldMoveFollow?.cancel()
+            heldMoveFollow = nil
+        }
         do {
+            var held = false
             for try await value in session.database.observe({ db in
                 ShelfSnapshot(bookcase: try Queries.bookcase(db, wingID: wing))
             }) {
+                let booksMoved = held && value.bookcase.books != books
                 books = value.bookcase.books
                 shelves = value.bookcase.shelves
+                held = true
+                if booksMoved { followHeldMove() }
             }
         } catch is CancellationError {
         } catch {
             lastError = String(describing: error)
+        }
+    }
+
+    /// VX-231: the one-shot re-read that follows a held move — never inside
+    /// the observation loop's own turn, and SINGLE-FLIGHT: a move landing
+    /// while a re-read runs asks for exactly one more after it (a burst of
+    /// joins — a client filing many notes — reads the store once or twice,
+    /// not once per join).
+    @ObservationIgnored private var heldMoveFollow: Task<Void, Never>?
+    @ObservationIgnored private var heldMoveAgain = false
+
+    private func followHeldMove() {
+        guard heldMoveFollow == nil else {
+            heldMoveAgain = true
+            return
+        }
+        heldMoveFollow = Task { [weak self] in
+            guard let self else { return }
+            repeat {
+                heldMoveAgain = false
+                await refreshAggregates()
+            } while heldMoveAgain && !Task.isCancelled
+            // A cancelled follow was already released by `start`'s exit —
+            // never clear a handle that may now be a later board's.
+            if !Task.isCancelled { heldMoveFollow = nil }
         }
     }
 
