@@ -555,7 +555,16 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   gaps — `5fbe5cb5`; the record — this commit. The protection suites (U1+U2+U3): 268 tests in 55 suites green in Debug;
   228 in 51 green under `swift test -c release` (the four DEBUG-only mutation suites compiled out). The full core suite
   green in Debug (3128 / 385, 240 / 51, 40 / 6). Not done (the record's first line): the empty-slot landing → phase 5.
-- U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NEXT.**
+- U4 — the scenario world, fixed scenarios, mutation pins, the generator: **IN-PROGRESS** (Opus implementer,
+  2026-10-14; reading done — the design whole, this plan, SyncSpec §3, pre-13x §1–§7/§14, the Apple facts, U1–U3's
+  code and test scaffolding, today's `StoreKeyEnvelope`, `AppleRelinkModel`, `AppleKeyCustody`, `PostureSwitch`'s
+  leave/follow). Pieces, each its own commit: (a) the world and its fakes — two Macs and a phone, two Apple accounts,
+  two Variorum accounts, the device keychains (Touch ID, the lid, the state hash, Keychain Access), iCloud Keychain
+  (delay, the off switch, the same-name rule, deletes with no recovery), the file systems (copies, Time Machine,
+  container deletion), the vault (CAS, the proof, the rotation fields), the leaves over them — NOT-STARTED;
+  (b) the starting states from the old formats and the older build as an actor — NOT-STARTED; (c) the alphabet and the
+  thirteen promises — NOT-STARTED; (d) the fixed scenarios — NOT-STARTED; (e) the mutation pins — NOT-STARTED; (f) the
+  generator and the soak switch — NOT-STARTED; (g) the runs and the record — NOT-STARTED.
 - The go/no-go record: **NOT-STARTED.**
 
 ---
