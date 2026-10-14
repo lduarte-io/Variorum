@@ -632,13 +632,25 @@ struct MCPWriteTools: Sendable {
         try database.write { db in try grants.consumeMCPOnceGrant(db, grantID) }
     }
 
-    /// The statement `picks` resolves the given take ids with — two
-    /// placeholders: the ids as a JSON array, then the note. (VX-280's
-    /// pin reads its plan, `MCPPicksPlanTests`.)
+    /// **The statement `picks` resolves the given take ids with — P1 by
+    /// construction** (VX-280; VX-184's ladder round 2 measured the shape it
+    /// replaced): the GIVEN ids drive, each finding its take by key and then
+    /// its block's ONE live placement through `uq_cblock_ownership` — ∝ the
+    /// takes given, never the note's blocks. **`CROSS JOIN`, twice, on
+    /// purpose** (the house's P1 discipline for `json_each` —
+    /// `placedBlocksSQL`, `Queries.ownershipFactsSQL`): with plain JOINs the
+    /// planner drove from the note's placements (`idx_cblock_order`), then
+    /// every take of each block (`idx_variant_block`), with `json_each`
+    /// scanned innermost. A `CROSS JOIN` keeps its left table outside its
+    /// right, so the only order left is ids → take → placement. Membership
+    /// per id is the old statement's (a live take of a block live-placed in
+    /// this note), so every refusal `picks` speaks is unchanged. Pinned on the
+    /// plan (`MCPPicksPlanTests`). Two placeholders: the ids as a JSON array,
+    /// then the note.
     static let picksSQL = """
         SELECT v.id, v.block_id FROM json_each(?) j
-        JOIN variant v ON v.id = j.value AND v.deleted_at IS NULL
-        JOIN container_block cb ON cb.block_id = v.block_id AND cb.deleted_at IS NULL
+        CROSS JOIN variant v ON v.id = j.value AND v.deleted_at IS NULL
+        CROSS JOIN container_block cb ON cb.block_id = v.block_id AND cb.deleted_at IS NULL
         WHERE cb.container_id = ?
         """
 
