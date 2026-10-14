@@ -152,6 +152,40 @@ struct MarkdownCaretFaceTests {
         }
     }
 
+    /// **RED ON OLD (the round-1 review's R1-7).** A SEALED note's Write is
+    /// selectable but not editable — no caret is drawn there, so her selection
+    /// is not a caret she types at, and the face must not honour it (the live
+    /// pane's own rule: a read pane honours no caret). On the pre-fix tree a
+    /// click at the rescue point turned the italic on with no caret in sight,
+    /// and sealing while the caret sat there left the italic standing.
+    @Test func aSealedNoteHonoursNoCaret() async throws {
+        try await withEditor(seedBlocks: ["*hello *", "next block"]) { h in
+            let storage = try #require(h.textView.textStorage)
+            // Editable first: the road reaches the settle (non-vacuity).
+            h.textView.setSelectedRange(NSRange(location: 7, length: 0))
+            #expect(unstyled(storage, 1..<7).isEmpty, "non-vacuity: an editable Write honours the caret")
+
+            // Sealed while her caret sits at the rescue point.
+            try h.session.operations.lockPost(h.postID)
+            try h.reload()
+            #expect(!h.textView.isEditable, "a sealed note's Write is not editable")
+            #expect(!anyFace(storage, 0..<8),
+                    "RED ON OLD: sealing re-reads the honoured line caret-blind — no caret is drawn")
+
+            // A click at the rescue point (the selection she can still make).
+            h.textView.setSelectedRange(NSRange(location: 0, length: 0))
+            h.textView.setSelectedRange(NSRange(location: 7, length: 0))
+            #expect(!anyFace(storage, 0..<8), "RED ON OLD: a sealed note's selection is not her caret")
+
+            // Unsealed with the caret still there: honoured again.
+            try h.session.operations.unlockPost(h.postID)
+            try h.reload()
+            #expect(h.textView.isEditable)
+            #expect(unstyled(storage, 1..<7).isEmpty, "editable again, the caret where it was: honoured")
+            #expect(h.model.identityAuditFailures == 0)
+        }
+    }
+
     /// **GUARD (green both sides).** `2 * 3 * 4` — typed keystroke by
     /// keystroke, then with the caret parked at every position — never
     /// wears the face anywhere: no opener ever forms, so no caret can rescue

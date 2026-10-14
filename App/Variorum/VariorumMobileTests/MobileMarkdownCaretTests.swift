@@ -116,4 +116,38 @@ struct MobileMarkdownCaretTests {
             #expect(model.identityAuditFailures == 0)
         }
     }
+
+    // MARK: - VX-282 round 1 (R1-7, R1-3)
+
+    /// **RED ON OLD (the round-1 review's R1-7, the phone's half).** A
+    /// stood-down editor (the read tier — another tab holds the pen, a hidden
+    /// stack's surface) is not editable: whatever selection it carries is not
+    /// her caret, and the face must not honour it — the live pane's rule. The
+    /// settle is called as the gate delegate calls it, so the pin reads the
+    /// model's decision whatever UIKit reports to a resigned view.
+    @Test func aStoodDownEditorHonoursNoCaret() async throws {
+        try await withEditorWorld { session, _ in
+            MobileEditorStyle.voice = .study
+            defer { MobileEditorStyle.voice = .terminal }
+            let postID = try await makePost(session, blocks: ["*hello *", "next block"])
+            let (model, surface) = await makeSurfaceEditor(session, postID: postID)
+            let window = host(surface)
+            defer { window.isHidden = true; window.rootViewController = nil }
+            let view = surface.textView
+            let storage = view.textStorage
+
+            view.selectedRange = NSRange(location: 7, length: 0)
+            model.settleMarkdownCaret()
+            #expect(unstyled(storage, 1..<7).isEmpty, "non-vacuity: a live editor honours the caret")
+
+            model.standDown()
+            #expect(!view.isEditable, "the read tier: not editable")
+            view.selectedRange = NSRange(location: 0, length: 0)
+            model.settleMarkdownCaret()
+            view.selectedRange = NSRange(location: 7, length: 0)
+            model.settleMarkdownCaret()
+            #expect(!anyFace(storage, 0..<8), "RED ON OLD: a stood-down editor honours no caret")
+            #expect(model.identityAuditFailures == 0)
+        }
+    }
 }
