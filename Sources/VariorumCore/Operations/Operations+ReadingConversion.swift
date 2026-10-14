@@ -212,18 +212,23 @@ extension Operations {
         // id (ladder F-R1-1: the revert flips its rows to the dismissal
         // class, so the redo must restore what each row WAS — a member
         // returns a member, a waiting arrival returns waiting).
-        let takenAtRevert = LockIsolated<[(id: String, status: MembershipStatus)]>([])
+        // VX-246 U2: the box also carries the stamp the revert tombstoned
+        // the rows on, so the redo revives only rows still dead on it; the
+        // revert answers whether it changed anything (a book already deleted
+        // — by her Delete since — is quiet, and retires the entry).
+        let takenAtRevert = LockIsolated<SmartConversionUndone?>(nil)
         undoStack?.register(
             label: "Convert to Book",
             inverse: {
-                let taken = try $0.revertSmartConversion(
+                let undone = try $0.revertSmartConversion(
                     readingID: readingID,
                     sortField: preImage.sortField, sortDir: preImage.sortDir)
-                takenAtRevert.setValue(taken)
+                takenAtRevert.setValue(undone)
+                return undone != nil
             },
             redo: {
                 try $0.reapplySmartConversion(
-                    readingID: readingID, taken: takenAtRevert.value)
+                    readingID: readingID, undone: takenAtRevert.value)
             })
         return result
     }
@@ -271,15 +276,24 @@ extension Operations {
     /// obsolete, quiet, nothing taken (its cascade already took the rows); a
     /// book FINISHED meanwhile ⇒ throws, so the entry stays on the stack for
     /// retry after un-finishing.
+    /// What the revert did (VX-246 U2): the rows it took, each with its
+    /// undo-time status, and the stamp it tombstoned them on.
+    struct SmartConversionUndone: Sendable {
+        let taken: [(id: String, status: MembershipStatus)]
+        let stamp: String
+    }
+
+    /// Returns what it did — nil when it changed nothing (the book gone, or
+    /// already the gathering it was with no row standing).
     @discardableResult
     func revertSmartConversion(
         readingID: String,
         sortField: SortField, sortDir: SortDirection
-    ) throws -> [(id: String, status: MembershipStatus)] {
+    ) throws -> SmartConversionUndone? {
         try database.write { db in
             guard var reading = try Reading.fetchOne(db, key: readingID),
                   reading.deletedAt == nil
-            else { return [] }
+            else { return nil }
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)
             }
@@ -300,16 +314,18 @@ extension Operations {
             // Pre-images by construction: the loop mutates COPIES (`var
             // row`), so `standing`'s elements still carry each row's
             // undo-time status.
-            let taken = standing.map { (id: $0.id, status: $0.status) }
+            let undone = SmartConversionUndone(
+                taken: standing.map { (id: $0.id, status: $0.status) },
+                stamp: DateFormatter.variorumISO8601.string(from: now))
             guard reading.kind != .gathering || reading.sortField != sortField
                 || reading.sortDir != sortDir
-            else { return taken }
+            else { return standing.isEmpty ? nil : undone }
             reading.kind = .gathering
             reading.sortField = sortField
             reading.sortDir = sortDir
             reading.updatedAt = now
             try reading.update(db)
-            return taken
+            return undone
         }
     }
 
@@ -338,20 +354,24 @@ extension Operations {
     /// revival would cross treats its ENTRY as obsolete — PROVISIONAL
     /// P-13id-U6-1 records the row-level alternative). A fresh bind by hand
     /// gives the current assembly, which is wing-scoped by construction.
+    /// Returns whether it re-applied anything (VX-246 U2); revives only rows
+    /// still dead on the revert's own stamp.
+    @discardableResult
     func reapplySmartConversion(
-        readingID: String, taken: [(id: String, status: MembershipStatus)]
-    ) throws {
-        try database.write { db in
+        readingID: String, undone: SmartConversionUndone?
+    ) throws -> Bool {
+        guard let undone else { return false }
+        return try database.write { db in
             guard var reading = try Reading.fetchOne(db, key: readingID),
                   reading.deletedAt == nil
-            else { return }
+            else { return false }
             // The rows this redo WOULD revive, read before any write (each
             // taken row is a distinct note — one live row per pair at the
             // revert — so reading them up front is the loop's own answer).
             var revivable: [(membership: ReadingPost, status: MembershipStatus)] = []
-            for row in taken {
+            for row in undone.taken {
                 guard let membership = try ReadingPost.fetchOne(db, key: row.id),
-                      membership.deletedAt != nil
+                      membership.deletedAt.map({ DateFormatter.variorumISO8601.string(from: $0) }) == undone.stamp
                 else { continue }
                 let postIsLive = try Bool.fetchOne(
                     db,
@@ -367,13 +387,14 @@ extension Operations {
             for entry in revivable {
                 guard try Queries.membershipRevivalStaysInOneWing(
                     db, postID: entry.membership.postId, readingID: readingID)
-                else { return }
+                else { return false }
             }
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)
             }
             let now = date.now
             var revived: [String] = []
+            var flipped = false
             for entry in revivable {
                 var membership = entry.membership
                 membership.status = entry.status
@@ -386,6 +407,7 @@ extension Operations {
                 reading.sortField = .manual
                 reading.updatedAt = now
                 try reading.update(db)
+                flipped = true
             }
             // 13i-c U2 (the 13i-c plan §4 row 9): the redo REVIVES rows, so
             // ownership is re-asserted over them — a note claimed by an owned
@@ -393,6 +415,7 @@ extension Operations {
             // AFTER the kind flip: the pass reads BOOKS' rows only, and until
             // the flip this row is a gathering's.
             try enforceOwnershipAfterRevival(db, postIDs: revived, now: now)
+            return flipped || !revived.isEmpty
         }
     }
 }

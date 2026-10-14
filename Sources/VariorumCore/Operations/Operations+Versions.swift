@@ -214,10 +214,7 @@ extension Operations {
                 db, from: postID, to: copy.post.id, wingID: source.wingId, now: date.now)
             return copy
         }
-        undoStack?.register(
-            label: "Duplicate as Version",
-            inverse: { try $0.revertMintedContainer(result.post.id) },
-            redo: { try $0.reapplyMintedContainer(result.post.id) })
+        registerMintedContainerEntry(label: "Duplicate as Version", result.post.id)
         return result
     }
 
@@ -282,10 +279,7 @@ extension Operations {
             return PostCopyResult(
                 post: outline, blockCopies: blockCopies, versionEdge: versionEdge)
         }
-        undoStack?.register(
-            label: "Make Outline Note",
-            inverse: { try $0.revertMintedContainer(result.post.id) },
-            redo: { try $0.reapplyMintedContainer(result.post.id) })
+        registerMintedContainerEntry(label: "Make Outline Note", result.post.id)
         return result
     }
 
@@ -305,10 +299,7 @@ extension Operations {
             return try copyPost(
                 db, sourceID: lens.containerId, chosenPicks: picks, carryFans: carryFans)
         }
-        undoStack?.register(
-            label: "Promote Lens",
-            inverse: { try $0.revertMintedContainer(result.post.id) },
-            redo: { try $0.reapplyMintedContainer(result.post.id) })
+        registerMintedContainerEntry(label: "Promote Lens", result.post.id)
         return result
     }
 
@@ -328,11 +319,7 @@ extension Operations {
             return try applyAdoptedPicks(db, postID: post.id, picks: picks)
         }
         guard !moved.isEmpty else { return }
-        let halves = adoptUndoHalves(moved)
-        undoStack?.register(
-            label: "Adopt Lens",
-            inverse: { try $0.revertChosenPointers(halves.previous) },
-            redo: { try $0.revertChosenPointers(halves.adopted) })
+        registerPointerEntry(label: "Adopt Lens", moves: adoptedPointerMoves(moved))
     }
 
     /// ADOPT-SWAP (taste checkpoint, Sitting 9 — R89/R92: "adopting swaps,
@@ -352,11 +339,7 @@ extension Operations {
             try adoptSwapRows(db, lensID: lensID)
         }
         if !moved.isEmpty {
-            let halves = adoptUndoHalves(moved)
-            undoStack?.register(
-                label: "Adopt Lens",
-                inverse: { try $0.revertChosenPointers(halves.previous) },
-                redo: { try $0.revertChosenPointers(halves.adopted) })
+            registerPointerEntry(label: "Adopt Lens", moves: adoptedPointerMoves(moved))
         }
         return preservation
     }
@@ -403,11 +386,7 @@ extension Operations {
             return (preservation, moved)
         }
         if !moved.isEmpty {
-            let halves = adoptUndoHalves(moved)
-            undoStack?.register(
-                label: "Adopt Lens",
-                inverse: { try $0.revertChosenPointers(halves.previous) },
-                redo: { try $0.revertChosenPointers(halves.adopted) })
+            registerPointerEntry(label: "Adopt Lens", moves: adoptedPointerMoves(moved))
         }
         return preservation
     }
@@ -427,10 +406,7 @@ extension Operations {
         let result: PostCopyResult = try database.write { db in
             try copyPost(db, sourceID: postID, chosenPicks: picks, carryFans: carryFans)
         }
-        undoStack?.register(
-            label: "Make Into a Note",
-            inverse: { try $0.revertMintedContainer(result.post.id) },
-            redo: { try $0.reapplyMintedContainer(result.post.id) })
+        registerMintedContainerEntry(label: "Make Into a Note", result.post.id)
         return result
     }
 
@@ -580,16 +556,14 @@ extension Operations {
         let adopted: String?
     }
 
-    /// The two pointer sets the adopt doors register (13c 1B): `inverse`
-    /// restores `previous`, `redo` restores `adopted` — both through the
-    /// SAME `revertChosenPointers` body, so there is exactly one pointer-
-    /// restore brain.
-    func adoptUndoHalves(
-        _ moved: [AdoptedPointer]
-    ) -> (previous: [(placementID: String, chosen: String?)],
-          adopted: [(placementID: String, chosen: String?)]) {
-        (moved.map { (placementID: $0.placementID, chosen: $0.previous) },
-         moved.map { (placementID: $0.placementID, chosen: $0.adopted) })
+    /// The slots the adopt doors register (13c 1B; VX-246 U2 — VX-277): each
+    /// slot's pointer before (`previous`) and after (`adopted`) the adopt, as
+    /// the ONE pointer entry's moves (`registerPointerEntry`) — the client's
+    /// `choose_take` / `adopt_lens` rule, slot by slot, so the undo never
+    /// overwrites her later ✓ and the redo never re-chooses over her ✓ back.
+    /// One pointer-restore brain for her doors and the client's alike.
+    func adoptedPointerMoves(_ moved: [AdoptedPointer]) -> [PointerMove] {
+        moved.map { (placementID: $0.placementID, from: $0.previous, to: $0.adopted) }
     }
 
     /// "chosen until Jul 18, 2026" — the adopt-swap preservation lens's
@@ -838,44 +812,21 @@ extension Operations {
     /// `restoreContainer` remains the recovery door if the author undoes a
     /// copy she had already worked in (deleted posts are recoverable —
     /// nothing typed becomes unreachable). Already-dead ⇒ obsolete no-op.
-    func revertMintedContainer(_ containerID: String) throws {
+    ///
+    /// Returns the stamp it wrote — nil when the container was already dead
+    /// (her Delete since, a sync tombstone): R2-1's rule, so the entry
+    /// retires and its stamp-keyed redo (`reapplyMintedContainer`) never runs
+    /// (VX-119, VX-246 U2).
+    func revertMintedContainer(_ containerID: String) throws -> String? {
         try database.write { db in
             guard var container = try Container.fetchOne(db, key: containerID),
                   container.deletedAt == nil
-            else { return }
+            else { return nil }
             let now = date.now
             container.deletedAt = now
             container.updatedAt = now
             try container.update(db)
-        }
-    }
-
-    /// Inverse of `adoptLens`: put the pre-image chosen pointers back.
-    /// Slots re-pointed or unlocked-refused since keep the standing refusal
-    /// buckets: dead placement ⇒ skip quietly (the world moved on); a
-    /// sealed post throws (unlock, retry).
-    func revertChosenPointers(_ preImages: [(placementID: String, chosen: String?)]) throws {
-        try database.write { db in
-            try restoreChosenPointers(db, preImages)
-        }
-    }
-
-    /// `revertChosenPointers`' body inside the caller's transaction (VX-168
-    /// U2: the MCP door's lens adoption restores its pointers AND its
-    /// preservation lens in ONE transaction — the same pointer brain).
-    func restoreChosenPointers(_ db: Database, _ preImages: [(placementID: String, chosen: String?)]) throws {
-        let now = date.now
-        for preImage in preImages {
-            guard var placement = try ContainerBlock.fetchOne(db, key: preImage.placementID),
-                  placement.deletedAt == nil
-            else { continue }
-            try ensureUnlocked(try liveContainer(db, placement.containerId))
-            // A pre-image pointing at a variant that has since died is
-            // healed by the read-time fallback; restore it anyway —
-            // exact-row inverse, the fallback covers rendering.
-            placement.chosenVariantId = preImage.chosen
-            placement.updatedAt = now
-            try placement.update(db)
+            return DateFormatter.variorumISO8601.string(from: now)
         }
     }
 }

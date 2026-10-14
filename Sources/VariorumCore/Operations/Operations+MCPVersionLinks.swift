@@ -84,7 +84,9 @@ extension Operations {
         undoStack?.register(
             label: undoLabel,
             inverse: { ops in
-                if let stamp = try ops.revertVersionLinks(ids) { undoneOn.setValue(stamp) }
+                guard let stamp = try ops.revertVersionLinks(ids) else { return false }
+                undoneOn.setValue(stamp)
+                return true
             },
             redo: { try $0.reapplyVersionLinks(ids, undoneOn: undoneOn.value) })
         return edges
@@ -107,9 +109,11 @@ extension Operations {
 
     /// The redo: the edges that died on the undo's stamp, back — each only
     /// while both its blocks live and no live twin joins the pair.
-    func reapplyVersionLinks(_ ids: [String], undoneOn stamp: String?) throws {
-        guard let stamp else { return }
-        try database.write { db in
+    @discardableResult
+    func reapplyVersionLinks(_ ids: [String], undoneOn stamp: String?) throws -> Bool {
+        guard let stamp else { return false }
+        return try database.write { db in
+            var revived = false
             for id in ids {
                 guard let row = try Row.fetchOne(
                     db,
@@ -131,7 +135,9 @@ extension Operations {
                 guard !twin else { continue }
                 try db.execute(sql: "UPDATE edge SET deleted_at = NULL WHERE id = ?", arguments: [id])
                 try voidPurgeIntents(db, table: "edge", rowID: id)
+                revived = true
             }
+            return revived
         }
     }
 }

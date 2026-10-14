@@ -78,24 +78,46 @@ extension Operations {
             }
         }
         let ids = takes.map(\.id)
+        // VX-246 U2 — an entry with PARTS (the takes): the undo tombstones
+        // only the takes its partner last brought back (every take, after the
+        // act) and records each one's stamp; the redo revives only those,
+        // each on its own stamp — so a take she put back from the tray in
+        // between is never taken again by the next undo.
+        let parts = LockIsolated(BatchParts(ids: ids))
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.revertAddedTakes(ids) },
-            redo: { try $0.reapplyAddedTakes(ids) })
+            inverse: { ops in
+                let undone = try ops.revertAddedTakes(ids, only: parts.value.standing)
+                parts.withValue { $0.undo(undone) }
+                return !undone.isEmpty
+            },
+            redo: { ops in
+                let redone = try ops.reapplyAddedTakes(ids, undoneOn: parts.value.undone)
+                parts.withValue { $0.redo(redone) }
+                return !redone.isEmpty
+            })
         return takes
     }
 
     /// The batch's inverse — every take back out, ONE transaction, newest first.
-    func revertAddedTakes(_ ids: [String]) throws {
+    func revertAddedTakes(_ ids: [String], only: Set<String>) throws -> [String: String] {
         try database.write { db in
-            for id in ids.reversed() { try revertAddedTake(db, id) }
+            var undone: [String: String] = [:]
+            for id in ids.reversed() where only.contains(id) {
+                if let stamp = try revertAddedTake(db, id) { undone[id] = stamp }
+            }
+            return undone
         }
     }
 
     /// The batch's redo — the very rows back, ONE transaction, in order.
-    func reapplyAddedTakes(_ ids: [String]) throws {
+    func reapplyAddedTakes(_ ids: [String], undoneOn stamps: [String: String]) throws -> Set<String> {
         try database.write { db in
-            for id in ids { try reapplyAddedTake(db, id) }
+            var redone: Set<String> = []
+            for id in ids where stamps[id] != nil {
+                if try reapplyAddedTake(db, id, undoneOn: stamps[id]) { redone.insert(id) }
+            }
+            return redone
         }
     }
 
@@ -128,22 +150,63 @@ extension Operations {
             }
         }
         let ids = comments.map(\.id)
+        // VX-246 U2 — the takes batch's parts record, over comments.
+        let parts = LockIsolated(BatchParts(ids: ids))
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.revertAddedComments(ids) },
-            redo: { try $0.reapplyAddedComments(ids) })
+            inverse: { ops in
+                let undone = try ops.revertAddedComments(ids, only: parts.value.standing)
+                parts.withValue { $0.undo(undone) }
+                return !undone.isEmpty
+            },
+            redo: { ops in
+                let redone = try ops.reapplyAddedComments(ids, undoneOn: parts.value.undone)
+                parts.withValue { $0.redo(redone) }
+                return !redone.isEmpty
+            })
         return comments
     }
 
-    func revertAddedComments(_ ids: [String]) throws {
+    func revertAddedComments(_ ids: [String], only: Set<String>) throws -> [String: String] {
         try database.write { db in
-            for id in ids.reversed() { try revertAddedComment(db, id) }
+            var undone: [String: String] = [:]
+            for id in ids.reversed() where only.contains(id) {
+                if let stamp = try revertAddedComment(db, id) { undone[id] = stamp }
+            }
+            return undone
         }
     }
 
-    func reapplyAddedComments(_ ids: [String]) throws {
+    func reapplyAddedComments(_ ids: [String], undoneOn stamps: [String: String]) throws -> Set<String> {
         try database.write { db in
-            for id in ids { try reapplyAddedComment(db, id) }
+            var redone: Set<String> = []
+            for id in ids where stamps[id] != nil {
+                if try reapplyAddedComment(db, id, undoneOn: stamps[id]) { redone.insert(id) }
+            }
+            return redone
+        }
+    }
+
+    /// A batch entry's parts (VX-246 U2): which of its rows stand as the act
+    /// (or the last redo) left them, and the stamp each was tombstoned on by
+    /// the last undo.
+    struct BatchParts: Sendable {
+        /// Rows whose last half put them back — the next undo's to take.
+        private(set) var standing: Set<String>
+        /// Rows the last undo tombstoned, each with its stamp — the next
+        /// redo's to revive.
+        private(set) var undone: [String: String] = [:]
+
+        init(ids: [String]) { standing = Set(ids) }
+
+        mutating func undo(_ tombstoned: [String: String]) {
+            undone = tombstoned
+            standing = []
+        }
+
+        mutating func redo(_ revived: Set<String>) {
+            standing = revived
+            undone = [:]
         }
     }
 

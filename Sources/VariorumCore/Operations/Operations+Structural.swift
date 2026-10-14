@@ -141,21 +141,11 @@ extension Operations {
                     TextPreImage(variantID: context.rendered.id, text: text, postOpText: remainder)
                 )
             }
-        undoStack?.register(
+        // A12: the source buffer this undo would restore.
+        registerStructuralEntry(
             label: "Extract",
-            inverse: {
-                try $0.revertStructural(
-                    restoringTexts: [sourcePreImage],
-                    tombstoningBlocks: [.init(result.block.id, [result.variant])],
-                    revivingPlacementRows: [])
-            },
-            redo: {
-                try $0.reapplyStructural(
-                    restoringTexts: [sourcePreImage],
-                    untombstoningBlocks: [.init(result.block.id, [result.variant])],
-                    releasingPlacementRows: [])
-            },
-            // A12: the source buffer this undo would restore.
+            restoringTexts: [sourcePreImage],
+            minting: [.init(result.block.id, [result.variant])],
             insuring: [sourcePreImage])
         return result
     }
@@ -198,21 +188,11 @@ extension Operations {
                 try guardian?(db)
                 return try divideRows(db, blockID: blockID, cut: cut)
             }
-        undoStack?.register(
+        // A12: the source buffer this undo would restore.
+        registerStructuralEntry(
             label: "Divide",
-            inverse: {
-                try $0.revertStructural(
-                    restoringTexts: [sourcePreImage],
-                    tombstoningBlocks: [.init(result.block.id, [result.variant])],
-                    revivingPlacementRows: [])
-            },
-            redo: {
-                try $0.reapplyStructural(
-                    restoringTexts: [sourcePreImage],
-                    untombstoningBlocks: [.init(result.block.id, [result.variant])],
-                    releasingPlacementRows: [])
-            },
-            // A12: the source buffer this undo would restore.
+            restoringTexts: [sourcePreImage],
+            minting: [.init(result.block.id, [result.variant])],
             insuring: [sourcePreImage])
         return result
     }
@@ -363,26 +343,13 @@ extension Operations {
         // at the 18f ladder, R1-9): every OTHER caller wraps this op in a
         // compound labelled "Divide", so this is what the Edit menu reads
         // after "Divide choosing takes…" alone.
-        undoStack?.register(
+        registerStructuralEntry(
             label: "Divide choosing takes",
-            inverse: {
-                try $0.revertStructural(
-                    restoringTexts: [],
-                    tombstoningBlocks: [
-                        .init(result.first.block.id, result.first.variants),
-                        .init(result.second.block.id, result.second.variants),
-                    ],
-                    revivingPlacementRows: [result.releasedPlacementID])
-            },
-            redo: {
-                try $0.reapplyStructural(
-                    restoringTexts: [],
-                    untombstoningBlocks: [
-                        .init(result.first.block.id, result.first.variants),
-                        .init(result.second.block.id, result.second.variants),
-                    ],
-                    releasingPlacementRows: [result.releasedPlacementID])
-            })
+            minting: [
+                .init(result.first.block.id, result.first.variants),
+                .init(result.second.block.id, result.second.variants),
+            ],
+            releasingPlacementRows: [result.releasedPlacementID])
         return result
     }
 
@@ -670,26 +637,13 @@ extension Operations {
                 first: successors[0], second: successors[1],
                 releasedPlacementID: context.placement.id)
         }
-        undoStack?.register(
+        registerStructuralEntry(
             label: "Divide",
-            inverse: {
-                try $0.revertStructural(
-                    restoringTexts: [],
-                    tombstoningBlocks: [
-                        .init(result.first.block.id, result.first.variants),
-                        .init(result.second.block.id, result.second.variants),
-                    ],
-                    revivingPlacementRows: [result.releasedPlacementID])
-            },
-            redo: {
-                try $0.reapplyStructural(
-                    restoringTexts: [],
-                    untombstoningBlocks: [
-                        .init(result.first.block.id, result.first.variants),
-                        .init(result.second.block.id, result.second.variants),
-                    ],
-                    releasingPlacementRows: [result.releasedPlacementID])
-            })
+            minting: [
+                .init(result.first.block.id, result.first.variants),
+                .init(result.second.block.id, result.second.variants),
+            ],
+            releasingPlacementRows: [result.releasedPlacementID])
         return result
     }
 
@@ -842,21 +796,12 @@ extension Operations {
         let preImages = landing.preImages
         let minted = landing.minted
         let released = landing.released
-        undoStack?.register(
+        // A12: the buffers this undo would restore.
+        registerStructuralEntry(
             label: "Split at Newlines",
-            inverse: {
-                try $0.revertStructural(
-                    restoringTexts: preImages,
-                    tombstoningBlocks: minted,
-                    revivingPlacementRows: released)
-            },
-            redo: {
-                try $0.reapplyStructural(
-                    restoringTexts: preImages,
-                    untombstoningBlocks: minted,
-                    releasingPlacementRows: released)
-            },
-            // A12: the buffers this undo would restore.
+            restoringTexts: preImages,
+            minting: minted,
+            releasingPlacementRows: released,
             insuring: preImages)
         return landing.result
     }
@@ -986,24 +931,10 @@ extension Operations {
                 releasedFirstPlacementID: first.placement.id,
                 releasedSecondPlacementID: second.placement.id)
         }
-        undoStack?.register(
+        registerStructuralEntry(
             label: "Merge",
-            inverse: {
-                try $0.revertStructural(
-                    restoringTexts: [],
-                    tombstoningBlocks: [.init(result.block.id, [result.variant])],
-                    revivingPlacementRows: [
-                        result.releasedFirstPlacementID, result.releasedSecondPlacementID,
-                    ])
-            },
-            redo: {
-                try $0.reapplyStructural(
-                    restoringTexts: [],
-                    untombstoningBlocks: [.init(result.block.id, [result.variant])],
-                    releasingPlacementRows: [
-                        result.releasedFirstPlacementID, result.releasedSecondPlacementID,
-                    ])
-            })
+            minting: [.init(result.block.id, [result.variant])],
+            releasingPlacementRows: [result.releasedFirstPlacementID, result.releasedSecondPlacementID])
         return result
     }
 
@@ -1247,24 +1178,10 @@ extension Operations {
                 releasedFirstPlacementID: first.placement.id,
                 releasedSecondPlacementID: second.placement.id)
         }
-        undoStack?.register(
+        registerStructuralEntry(
             label: "Merge Takes",
-            inverse: {
-                try $0.revertStructural(
-                    restoringTexts: [],
-                    tombstoningBlocks: [.init(result.block.id, result.variants)],
-                    revivingPlacementRows: [
-                        result.releasedFirstPlacementID, result.releasedSecondPlacementID,
-                    ])
-            },
-            redo: {
-                try $0.reapplyStructural(
-                    restoringTexts: [],
-                    untombstoningBlocks: [.init(result.block.id, result.variants)],
-                    releasingPlacementRows: [
-                        result.releasedFirstPlacementID, result.releasedSecondPlacementID,
-                    ])
-            })
+            minting: [.init(result.block.id, result.variants)],
+            releasingPlacementRows: [result.releasedFirstPlacementID, result.releasedSecondPlacementID])
         return result
     }
 

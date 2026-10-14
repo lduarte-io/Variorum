@@ -57,7 +57,9 @@ extension Operations {
             label: undoLabel,
             inverse: { try $0.reviveDeletedComment(commentID, deletedOn: deletedOn.value) },
             redo: { ops in
-                if let stamp = try ops.redeleteComment(commentID) { deletedOn.setValue(stamp) }
+                guard let stamp = try ops.redeleteComment(commentID) else { return false }
+                deletedOn.setValue(stamp)
+                return true
             })
         return comment
     }
@@ -75,18 +77,20 @@ extension Operations {
 
     /// The inverse: the comment back while it is deleted on `stamp` and its
     /// block lives; a seal refuses and keeps the entry.
-    func reviveDeletedComment(_ commentID: String, deletedOn stamp: String) throws {
+    @discardableResult
+    func reviveDeletedComment(_ commentID: String, deletedOn stamp: String) throws -> Bool {
         try database.write { db in
             guard var comment = try BlockComment.fetchOne(db, key: commentID),
                   let deletedAt = comment.deletedAt,
                   DateFormatter.variorumISO8601.string(from: deletedAt) == stamp,
                   try Block.fetchOne(db, key: comment.blockId)?.deletedAt == nil
-            else { return }
+            else { return false }
             try ensurePlacementUnlocked(db, blockID: comment.blockId)
             comment.deletedAt = nil
             comment.updatedAt = date.now
             try comment.update(db)
             try voidPurgeIntents(db, table: "block_comment", rowID: commentID)
+            return true
         }
     }
 

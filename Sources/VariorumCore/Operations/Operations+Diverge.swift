@@ -36,6 +36,7 @@
 //  writes instead — same rules, one transaction.
 //
 
+import Dependencies
 import Foundation
 import GRDB
 
@@ -111,17 +112,24 @@ extension Operations {
         let copyID = result.copy.post.id
         let copyMembershipID = result.copyMembershipID
         let originalMembershipID = result.originalMembershipID
+        // VX-246 U2: the undo records what it did (the stamp, and which of its
+        // three rows it moved); the redo re-applies only those, the copy only
+        // while it is still dead on that stamp — a copy she deleted herself
+        // before the undo is hers, and the redo never brings it back.
+        let undone = LockIsolated<DivergeUndone?>(nil)
         undoStack?.register(
             label: "Diverge for This Book",
             inverse: {
-                try $0.revertDiverge(
+                let did = try $0.revertDiverge(
                     copyID: copyID, copyMembershipID: copyMembershipID,
                     originalMembershipID: originalMembershipID)
+                undone.setValue(did)
+                return did != nil
             },
             redo: {
                 try $0.reapplyDiverge(
                     copyID: copyID, copyMembershipID: copyMembershipID,
-                    originalMembershipID: originalMembershipID)
+                    originalMembershipID: originalMembershipID, undone: undone.value)
             })
         return result
     }
@@ -146,30 +154,41 @@ extension Operations {
     /// crossing, so a retry-throw would wedge the stack). A half-undo — the
     /// copy out, the original not back — would leave the book short a note;
     /// a book never spans wings (§9).
+    /// What a diverge's undo did (VX-246 U2): its stamp, and which rows.
+    struct DivergeUndone: Sendable {
+        let stamp: String
+        var copyRow = false
+        var original = false
+        var copy = false
+    }
+
+    /// Returns what it did — nil when it changed nothing (quiet).
     func revertDiverge(
         copyID: String, copyMembershipID: String, originalMembershipID: String
-    ) throws {
+    ) throws -> DivergeUndone? {
         try database.write { db in
             // ONE fetch serves the guard and the flip (13f cold review,
             // R1-6 — the row was fetched twice for no reason).
             guard var copyRow = try ReadingPost.fetchOne(db, key: copyMembershipID),
                   let reading = try Reading.fetchOne(db, key: copyRow.readingId),
                   reading.deletedAt == nil
-            else { return }
+            else { return nil }
             if let originalRow = try ReadingPost.fetchOne(db, key: originalMembershipID),
                originalRow.deletedAt != nil,
                try postIsLive(db, originalRow.postId),
                try !Queries.membershipRevivalStaysInOneWing(
                    db, postID: originalRow.postId, readingID: copyRow.readingId) {
-                return
+                return nil
             }
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: copyRow.readingId)
             }
             let now = date.now
+            var did = DivergeUndone(stamp: DateFormatter.variorumISO8601.string(from: now))
             if copyRow.deletedAt == nil {
                 copyRow.deletedAt = now
                 try copyRow.update(db)
+                did.copyRow = true
             }
             // The original's row revives with its slot intact — the swap
             // never rewrote its position or its `section_id`, which is what
@@ -185,13 +204,16 @@ extension Operations {
                 // membership; R2's shape, applied locally.
                 try enforceOwnershipAfterRevival(
                     db, postIDs: [originalRow.postId], now: now)
+                did.original = true
             }
             if var container = try Container.fetchOne(db, key: copyID),
                container.deletedAt == nil {
                 container.deletedAt = now
                 container.updatedAt = now
                 try container.update(db)
+                did.copy = true
             }
+            return did.copyRow || did.original || did.copy ? did : nil
         }
     }
 
@@ -219,9 +241,20 @@ extension Operations {
     /// than one transaction (`restoreContainer` opens its own write); the
     /// guard-then-restore window is the headless sub-ms class, recorded
     /// rather than papered over.
+    ///
+    /// VX-246 U2: re-applies only what `undone` says its undo did — the copy
+    /// back only while it is dead on the undo's own stamp, the copy's row
+    /// only while dead on it, the original's row out again only if the undo
+    /// brought it back. Returns whether it re-applied anything.
+    @discardableResult
     func reapplyDiverge(
-        copyID: String, copyMembershipID: String, originalMembershipID: String
-    ) throws {
+        copyID: String, copyMembershipID: String, originalMembershipID: String,
+        undone: DivergeUndone?
+    ) throws -> Bool {
+        guard let undone else { return false }
+        func onTheUndo(_ deletedAt: Date?) -> Bool {
+            deletedAt.map { DateFormatter.variorumISO8601.string(from: $0) } == undone.stamp
+        }
         // Guards first, read-only: a book deleted meanwhile ⇒ obsolete,
         // quiet (its cascade already took the memberships); FINISHED
         // meanwhile ⇒ throws, so the entry stays on the stack for a retry.
@@ -247,27 +280,35 @@ extension Operations {
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: membership.readingId)
             }
-            return try Container.fetchOne(db, key: copyID)?.deletedAt != nil
+            guard undone.copy else { return false }
+            return onTheUndo(try Container.fetchOne(db, key: copyID)?.deletedAt)
         }
-        guard let copyStillDead else { return }
+        guard let copyStillDead else { return false }
         if copyStillDead {
             try restoreContainer(copyID)
         }
-        try database.write { db in
+        let rows = try database.write { db -> Bool in
             let now = date.now
-            if var originalRow = try ReadingPost.fetchOne(db, key: originalMembershipID),
+            var wrote = false
+            if undone.original,
+               var originalRow = try ReadingPost.fetchOne(db, key: originalMembershipID),
                originalRow.deletedAt == nil {
                 originalRow.deletedAt = now
                 try originalRow.update(db)
+                wrote = true
             }
-            if var copyRow = try ReadingPost.fetchOne(db, key: copyMembershipID),
-               copyRow.deletedAt != nil, try postIsLive(db, copyRow.postId) {
+            if undone.copyRow || undone.copy,
+               var copyRow = try ReadingPost.fetchOne(db, key: copyMembershipID),
+               onTheUndo(copyRow.deletedAt), try postIsLive(db, copyRow.postId) {
                 copyRow.deletedAt = nil
                 try copyRow.update(db)
                 // 13i-c U2 (row 9): the redo REVIVES the copy's membership.
                 try enforceOwnershipAfterRevival(db, postIDs: [copyRow.postId], now: now)
+                wrote = true
             }
+            return wrote
         }
+        return copyStillDead || rows
     }
 
     /// `restoreReading`'s live-parent guard, shared: a live membership row

@@ -170,14 +170,19 @@ struct ShellActions {
                         return
                     }
                 }
-                let label = try await session.runner.run { ops in
-                    try undoStack.undo(with: ops)
+                let outcome = try await session.runner.run { ops in
+                    try undoStack.undoReporting(with: ops)
                 }
                 // 18i: an act that came back is a RECEIPT; "nothing to
-                // undo" is a refusal and keeps the toast.
-                if let label {
+                // undo" is a refusal and keeps the toast. VX-246 U2: so is a
+                // QUIET press — its entry found the act's result already
+                // gone and was retired without writing (a door that did
+                // nothing speaks a refusal, AppSpec §12).
+                if let outcome, outcome.changed {
                     await leaveNotesTheActLeftDead()
-                    status.receipt(StructuralUndoCopy.undone(label))
+                    status.receipt(StructuralUndoCopy.undone(outcome.label))
+                } else if let outcome {
+                    status.refuse(StructuralUndoCopy.undoFoundNothing(outcome.label))
                 } else {
                     status.refuse(StructuralUndoCopy.nothingToUndo)
                 }
@@ -208,12 +213,15 @@ struct ShellActions {
         Task { @MainActor in
             defer { session.endStructuralUndoDoor() }
             do {
-                let label = try await session.runner.run { ops in
-                    try undoStack.redo(with: ops)
+                let outcome = try await session.runner.run { ops in
+                    try undoStack.redoReporting(with: ops)
                 }
-                if let label {
+                if let outcome, outcome.changed {
                     await leaveNotesTheActLeftDead()
-                    status.receipt(StructuralUndoCopy.redone(label))
+                    status.receipt(StructuralUndoCopy.redone(outcome.label))
+                } else if let outcome {
+                    // VX-246 U2: a quiet re-apply retired its entry.
+                    status.refuse(StructuralUndoCopy.redoFoundNothing(outcome.label))
                 } else {
                     status.refuse(StructuralUndoCopy.nothingToRedo)
                 }

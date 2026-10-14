@@ -19,7 +19,7 @@ extension Operations {
                 inverse: { try $0.revertArchiveVariant(id, wasDefault: wasDefault) },
                 // 13c 1B (A10): re-archive — the same row transition, run
                 // again from the same captured id.
-                redo: { _ = try $0.performArchiveVariant(id, quietWhenGone: true) })
+                redo: { try $0.performArchiveVariant(id, quietWhenGone: true) != nil })
         }
     }
 
@@ -144,7 +144,7 @@ extension Operations {
             label: "Delete Variant",
             inverse: { try $0.revertDeleteVariant(id, wasDefault: wasDefault) },
             // 13c 1B (A10): re-tombstone the same variant row.
-            redo: { _ = try $0.performDeleteVariant(id, quietWhenGone: true) })
+            redo: { try $0.performDeleteVariant(id, quietWhenGone: true) != nil })
     }
 
     /// The row work behind `deleteVariant`, shared with structural REDO
@@ -265,25 +265,29 @@ extension Operations {
     /// (13c 1B — A10; `quietWhenGone` per `performArchiveVariant`).
     /// Internal (was private) since 13n-b U4: `put_back`'s inverse
     /// re-tombstones a put-back block through this exact row work.
+    /// Returns whether it tombstoned the block (`false`: already gone, on
+    /// the quiet road — VX-246 U2's answer for the stack).
+    @discardableResult
     func performDeleteBlock(
         _ id: String, quietWhenGone: Bool, requiring precondition: BlockDeletionPrecondition,
         guardedBy guardian: WriteGuard? = nil
-    ) throws {
+    ) throws -> Bool {
         try database.write { db in
             try guardian?(db)
-            try deleteBlockRows(db, id, quietWhenGone: quietWhenGone, requiring: precondition)
+            return try deleteBlockRows(db, id, quietWhenGone: quietWhenGone, requiring: precondition)
         }
     }
 
     /// `performDeleteBlock`'s row work inside the caller's transaction
     /// (VX-184 U4 — extracted byte-for-byte so the MCP door's `delete_take`
     /// deletes a block's LAST take by `delete_block`'s exact road, R-VX184-1).
+    @discardableResult
     func deleteBlockRows(
         _ db: Database, _ id: String, quietWhenGone: Bool, requiring precondition: BlockDeletionPrecondition
-    ) throws {
+    ) throws -> Bool {
         let existing = try Block.fetchOne(db, key: id)
         guard let existing, existing.deletedAt == nil else {
-            if quietWhenGone { return }
+            if quietWhenGone { return false }
             throw OperationError.blockNotFound(id: id)
         }
         var block = existing
@@ -298,6 +302,7 @@ extension Operations {
         block.deletedAt = now
         block.updatedAt = now
         try block.update(db)
+        return true
     }
 
     /// `BlockDeletionPrecondition`, enforced. The counted reads mirror

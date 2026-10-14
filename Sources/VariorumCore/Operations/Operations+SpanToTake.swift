@@ -142,10 +142,22 @@ extension Operations {
         }
         // (4) ONE entry — the compound of the two effects, not two entries.
         let mintID = result.take.id
+        // VX-246 U2 — an entry with two PARTS (the source's words, the
+        // minted take): each half moves only the parts its partner last
+        // moved, and the redo revives the take only on its undo's stamp.
+        let parts = LockIsolated(SpanParts(text: true, mint: true, mintStamp: nil))
         undoStack?.register(
             label: "Move into a New Take",
-            inverse: { try $0.revertSpanToNewTake(mintedTakeID: mintID, preImage: preImage) },
-            redo: { try $0.reapplySpanToNewTake(mintedTakeID: mintID, preImage: preImage) },
+            inverse: { ops in
+                let undone = try ops.revertSpanToNewTake(mintedTakeID: mintID, preImage: preImage, only: parts.value)
+                parts.setValue(undone)
+                return undone.changed
+            },
+            redo: { ops in
+                let redone = try ops.reapplySpanToNewTake(mintedTakeID: mintID, preImage: preImage, only: parts.value)
+                parts.setValue(redone)
+                return redone.changed
+            },
             // A12: the buffer this undo would restore, carried as data so the
             // destructive-undo warning can be asked BEFORE the act.
             insuring: [preImage])
@@ -171,15 +183,28 @@ extension Operations {
     /// (`wouldInsure`), exactly as `revertStructural`'s does: text she typed
     /// into the source take since the move is committed before it is
     /// overwritten.
-    func revertSpanToNewTake(mintedTakeID: String, preImage: TextPreImage) throws {
+    /// Which of the entry's two parts a half changed (VX-246 U2), and the
+    /// stamp an undo tombstoned the minted take on.
+    struct SpanParts: Sendable {
+        var text: Bool
+        var mint: Bool
+        var mintStamp: String?
+
+        var changed: Bool { text || mint }
+    }
+
+    func revertSpanToNewTake(
+        mintedTakeID: String, preImage: TextPreImage, only: SpanParts
+    ) throws -> SpanParts {
         try database.write { db in
             let now = date.now
+            var undone = SpanParts(text: false, mint: false, mintStamp: nil)
 
             var source = try liveVariant(db, preImage.variantID)
             _ = try liveBlock(db, source.blockId)
             try ensurePlacementUnlocked(db, blockID: source.blockId)
             try ensureEditable(source)
-            if source.workingText != preImage.text {
+            if only.text, source.workingText != preImage.text {
                 if Self.wouldInsure(
                     currentText: source.workingText, preImage: preImage,
                     dirty: try isDirty(db, source)) {
@@ -189,11 +214,13 @@ extension Operations {
                 source.workingText = preImage.text
                 source.updatedAt = now
                 try source.update(db)
+                undone.text = true
             }
 
-            guard var mint = try Variant.fetchOne(db, key: mintedTakeID),
+            guard only.mint,
+                  var mint = try Variant.fetchOne(db, key: mintedTakeID),
                   mint.deletedAt == nil
-            else { return }  // already gone — the world moved past this entry
+            else { return undone }  // already gone — the world moved past this entry
             try ensurePlacementUnlocked(db, blockID: mint.blockId)
             let chosenBy = try Int.fetchOne(
                 db,
@@ -211,6 +238,9 @@ extension Operations {
             try mint.update(db)
             try reassignDefaultIfNeeded(
                 db, blockID: mint.blockId, removing: mintedTakeID, now: now)
+            undone.mint = true
+            undone.mintStamp = DateFormatter.variorumISO8601.string(from: now)
+            return undone
         }
     }
 
@@ -218,11 +248,16 @@ extension Operations {
     /// images — the minted take's tombstone flips back (never a fresh mint,
     /// which would strand the inverse's captured id) and the source buffer
     /// returns to its post-op text. Refusal buckets mirror the inverse's.
-    func reapplySpanToNewTake(mintedTakeID: String, preImage: TextPreImage) throws {
+    func reapplySpanToNewTake(
+        mintedTakeID: String, preImage: TextPreImage, only: SpanParts
+    ) throws -> SpanParts {
         try database.write { db in
             let now = date.now
+            var redone = SpanParts(text: false, mint: false, mintStamp: nil)
 
-            if var mint = try Variant.fetchOne(db, key: mintedTakeID), mint.deletedAt != nil {
+            if only.mint, let stamp = only.mintStamp,
+               var mint = try Variant.fetchOne(db, key: mintedTakeID),
+               mint.deletedAt.map({ DateFormatter.variorumISO8601.string(from: $0) }) == stamp {
                 _ = try liveBlock(db, mint.blockId)
                 try ensurePlacementUnlocked(db, blockID: mint.blockId)
                 mint.deletedAt = nil
@@ -232,19 +267,23 @@ extension Operations {
                 // intent naming it — a leftover intent must never claim the
                 // take a redo just brought back.
                 try voidPurgeIntents(db, table: "variant", rowID: mintedTakeID)
+                redone.mint = true
             }
 
+            guard only.text else { return redone }
             var source = try liveVariant(db, preImage.variantID)
             _ = try liveBlock(db, source.blockId)
             try ensurePlacementUnlocked(db, blockID: source.blockId)
             try ensureEditable(source)
-            guard source.workingText != preImage.postOpText else { return }
+            guard source.workingText != preImage.postOpText else { return redone }
             if source.workingText != preImage.text, try isDirty(db, source) {
                 _ = try insertCommit(db, variant: source, kind: .auto, message: nil, now: now)
             }
             source.workingText = preImage.postOpText
             source.updatedAt = now
             try source.update(db)
+            redone.text = true
+            return redone
         }
     }
 }

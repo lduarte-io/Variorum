@@ -142,10 +142,18 @@ extension Operations {
             try insertSuggestedTake(db, blockID: blockID, text: text, label: label)
         }
         let takeID = take.id
+        // VX-246 U2: the redo revives the take only on the stamp its own undo
+        // wrote (the F1 shape) — a take that died since on another stamp (her
+        // delete after a Put back, a sync tombstone) is not the undo's.
+        let undoneOn = LockIsolated<String?>(nil)
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.revertAddedTake(takeID) },
-            redo: { try $0.reapplyAddedTake(takeID) })
+            inverse: { ops in
+                guard let stamp = try ops.revertAddedTake(takeID) else { return false }
+                undoneOn.setValue(stamp)
+                return true
+            },
+            redo: { try $0.reapplyAddedTake(takeID, undoneOn: undoneOn.value) })
         return take
     }
 
@@ -168,15 +176,17 @@ extension Operations {
         return take
     }
 
-    func revertAddedTake(_ takeID: String) throws {
+    /// Returns the stamp it tombstoned on — nil when already gone (VX-246 U2).
+    func revertAddedTake(_ takeID: String) throws -> String? {
         try database.write { db in try revertAddedTake(db, takeID) }
     }
 
     /// `revertAddedTake`'s body inside the caller's transaction (VX-184 U3 —
     /// the batch's ONE inverse walks every take back in one transaction).
-    func revertAddedTake(_ db: Database, _ takeID: String) throws {
+    @discardableResult
+    func revertAddedTake(_ db: Database, _ takeID: String) throws -> String? {
         guard var take = try Variant.fetchOne(db, key: takeID), take.deletedAt == nil
-        else { return }  // already gone — the world moved past this entry
+        else { return nil }  // already gone — the world moved past this entry
         try ensurePlacementUnlocked(db, blockID: take.blockId)
         let chosenBy = try Int.fetchOne(
             db,
@@ -189,22 +199,29 @@ extension Operations {
         take.updatedAt = now
         try take.update(db)
         try reassignDefaultIfNeeded(db, blockID: take.blockId, removing: takeID, now: now)
+        return DateFormatter.variorumISO8601.string(from: now)
     }
 
-    func reapplyAddedTake(_ takeID: String) throws {
-        try database.write { db in try reapplyAddedTake(db, takeID) }
+    /// Revives the take only while it is dead on `stamp` — the stamp its own
+    /// undo wrote (VX-246 U2); returns whether it did.
+    func reapplyAddedTake(_ takeID: String, undoneOn stamp: String?) throws -> Bool {
+        try database.write { db in try reapplyAddedTake(db, takeID, undoneOn: stamp) }
     }
 
     /// `reapplyAddedTake`'s body inside the caller's transaction (VX-184 U3).
-    func reapplyAddedTake(_ db: Database, _ takeID: String) throws {
-        guard var take = try Variant.fetchOne(db, key: takeID), take.deletedAt != nil,
+    @discardableResult
+    func reapplyAddedTake(_ db: Database, _ takeID: String, undoneOn stamp: String?) throws -> Bool {
+        guard let stamp,
+              var take = try Variant.fetchOne(db, key: takeID),
+              take.deletedAt.map({ DateFormatter.variorumISO8601.string(from: $0) }) == stamp,
               let block = try Block.fetchOne(db, key: take.blockId), block.deletedAt == nil
-        else { return }
+        else { return false }
         try ensurePlacementUnlocked(db, blockID: take.blockId)
         take.deletedAt = nil
         take.updatedAt = date.now
         try take.update(db)
         try voidPurgeIntents(db, table: "variant", rowID: takeID)
+        return true
     }
 
     // MARK: - SUGGEST: a comment
@@ -228,37 +245,51 @@ extension Operations {
             return comment
         }
         let commentID = comment.id
+        // VX-246 U2: the stamp-keyed revive (`addTake`'s reason).
+        let undoneOn = LockIsolated<String?>(nil)
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.revertAddedComment(commentID) },
-            redo: { try $0.reapplyAddedComment(commentID) })
+            inverse: { ops in
+                guard let stamp = try ops.revertAddedComment(commentID) else { return false }
+                undoneOn.setValue(stamp)
+                return true
+            },
+            redo: { try $0.reapplyAddedComment(commentID, undoneOn: undoneOn.value) })
         return comment
     }
 
-    func revertAddedComment(_ commentID: String) throws {
+    /// Returns the stamp it tombstoned on — nil when already gone (VX-246 U2).
+    func revertAddedComment(_ commentID: String) throws -> String? {
         try database.write { db in try revertAddedComment(db, commentID) }
     }
 
     /// `revertAddedComment`'s body inside the caller's transaction (VX-184 U3).
-    func revertAddedComment(_ db: Database, _ commentID: String) throws {
+    @discardableResult
+    func revertAddedComment(_ db: Database, _ commentID: String) throws -> String? {
         guard var comment = try BlockComment.fetchOne(db, key: commentID), comment.deletedAt == nil
-        else { return }
+        else { return nil }
         try ensurePlacementUnlocked(db, blockID: comment.blockId)
         let now = date.now
         comment.deletedAt = now
         comment.updatedAt = now
         try comment.update(db)
+        return DateFormatter.variorumISO8601.string(from: now)
     }
 
-    func reapplyAddedComment(_ commentID: String) throws {
-        try database.write { db in try reapplyAddedComment(db, commentID) }
+    /// Revives the comment only while it is dead on `stamp` — the stamp its
+    /// own undo wrote (VX-246 U2); returns whether it did.
+    func reapplyAddedComment(_ commentID: String, undoneOn stamp: String?) throws -> Bool {
+        try database.write { db in try reapplyAddedComment(db, commentID, undoneOn: stamp) }
     }
 
     /// `reapplyAddedComment`'s body inside the caller's transaction (VX-184 U3).
-    func reapplyAddedComment(_ db: Database, _ commentID: String) throws {
-        guard var comment = try BlockComment.fetchOne(db, key: commentID), comment.deletedAt != nil,
+    @discardableResult
+    func reapplyAddedComment(_ db: Database, _ commentID: String, undoneOn stamp: String?) throws -> Bool {
+        guard let stamp,
+              var comment = try BlockComment.fetchOne(db, key: commentID),
+              comment.deletedAt.map({ DateFormatter.variorumISO8601.string(from: $0) }) == stamp,
               let block = try Block.fetchOne(db, key: comment.blockId), block.deletedAt == nil
-        else { return }
+        else { return false }
         try ensurePlacementUnlocked(db, blockID: comment.blockId)
         comment.deletedAt = nil
         comment.updatedAt = date.now
@@ -268,6 +299,7 @@ extension Operations {
         // before ⇧⌥⌘Z — so the B1 belt rides here exactly as it does on
         // `reapplyAddedTake` and `restoreBlockComment`.
         try voidPurgeIntents(db, table: "block_comment", rowID: commentID)
+        return true
     }
 
     // MARK: - SUGGEST: a saved lens
@@ -316,7 +348,9 @@ extension Operations {
         undoStack?.register(
             label: undoLabel,
             inverse: { ops in
-                if let stamp = try ops.revertSavedLens(lensID) { undoneOn.setValue(stamp) }
+                guard let stamp = try ops.revertSavedLens(lensID) else { return false }
+                undoneOn.setValue(stamp)
+                return true
             },
             redo: { try $0.reapplySavedLens(lensID, undoneOn: undoneOn.value) })
         return lens
@@ -329,9 +363,10 @@ extension Operations {
     }
 
     /// The lens back, with exactly the choices that died on the undo's stamp.
-    func reapplySavedLens(_ lensID: String, undoneOn stamp: String?) throws {
-        guard let stamp else { return }
-        try database.write { db in try reviveSavedLens(db, lensID, undoneOn: stamp) }
+    @discardableResult
+    func reapplySavedLens(_ lensID: String, undoneOn stamp: String?) throws -> Bool {
+        guard let stamp else { return false }
+        return try database.write { db in try reviveSavedLens(db, lensID, undoneOn: stamp) }
     }
 
     /// `revertSavedLens`' body inside the caller's transaction (VX-168 U2 —
@@ -347,12 +382,13 @@ extension Operations {
     }
 
     /// `reapplySavedLens`' body inside the caller's transaction (VX-168 U2).
-    func reviveSavedLens(_ db: Database, _ lensID: String, undoneOn stamp: String) throws {
+    @discardableResult
+    func reviveSavedLens(_ db: Database, _ lensID: String, undoneOn stamp: String) throws -> Bool {
         guard var lens = try Lens.fetchOne(db, key: lensID),
               let deletedAt = lens.deletedAt,
               DateFormatter.variorumISO8601.string(from: deletedAt) == stamp,
               try Container.fetchOne(db, key: lens.containerId)?.deletedAt == nil
-        else { return }
+        else { return false }
         let now = DateFormatter.variorumISO8601.string(from: date.now)
         lens.deletedAt = nil
         lens.updatedAt = date.now
@@ -363,6 +399,7 @@ extension Operations {
                 WHERE lens_id = ? AND deleted_at = ?
                 """,
             arguments: [now, lensID, stamp])
+        return true
     }
 
     // MARK: - WRITE NEW: a note (plain prose, or one Level 0 document)
@@ -516,10 +553,7 @@ extension Operations {
                 alternateCount: minted.alternateCount, tagIDs: tagIDs)
         }
         let postID = result.post.id
-        undoStack?.register(
-            label: undoLabel,
-            inverse: { try $0.revertMintedContainer(postID) },
-            redo: { try $0.reapplyMintedContainer(postID) })
+        registerMintedContainerEntry(label: undoLabel, postID)
         return result
     }
 
@@ -566,10 +600,18 @@ extension Operations {
             return try insertPostTag(db, tagID: tag.id, postID: postID, now: date.now)
         }
         let applicationID = application.id
+        // VX-246 U2: the redo revives the application only on the stamp its
+        // own undo wrote — her un-tag since tombstoned the very row on HER
+        // stamp, and that is not the undo's to bring back.
+        let undoneOn = LockIsolated<String?>(nil)
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.revertAppliedTag(applicationID) },
-            redo: { try $0.reapplyAppliedTag(applicationID) })
+            inverse: { ops in
+                guard let stamp = try ops.revertAppliedTag(applicationID) else { return false }
+                undoneOn.setValue(stamp)
+                return true
+            },
+            redo: { try $0.reapplyAppliedTag(applicationID, undoneOn: undoneOn.value) })
         return application
     }
 
@@ -598,7 +640,7 @@ extension Operations {
     public func removeTagForClient(
         path: String, fromNote postID: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil
     ) throws -> MCPTagRemoval {
-        let removal: MCPTagRemoval = try database.write { db in
+        let (removal, removedAt): (MCPTagRemoval, String?) = try database.write { db in
             try guardian?(db)
             let post = try livePost(db, postID)
             let segments = TagPath.segments(path)
@@ -610,43 +652,62 @@ extension Operations {
                 arguments: [normalized, wing])
             else { throw OperationError.tagNotApplied(tagID: normalized, targetID: postID) }
             let applicationID = try removePostTagApplication(db, tagID: tagID, postID: postID)
-            return MCPTagRemoval(applicationID: applicationID, tagID: tagID, path: normalized)
+            let removedAt = try String.fetchOne(
+                db, sql: "SELECT deleted_at FROM post_tag WHERE id = ?", arguments: [applicationID])
+            return (MCPTagRemoval(applicationID: applicationID, tagID: tagID, path: normalized), removedAt)
         }
         let applicationID = removal.applicationID
+        // VX-246 U2 — the mirror of `applyTagPath`'s entry: the undo revives
+        // the application only while it is dead on the stamp the act (then
+        // each redo) wrote; the redo re-removes it and records its own stamp.
+        let removedOn = LockIsolated(removedAt)
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.reapplyAppliedTag(applicationID) },
-            redo: { try $0.revertAppliedTag(applicationID) })
+            inverse: { try $0.reapplyAppliedTag(applicationID, undoneOn: removedOn.value) },
+            redo: { ops in
+                guard let stamp = try ops.revertAppliedTag(applicationID) else { return false }
+                removedOn.setValue(stamp)
+                return true
+            })
         return removal
     }
 
-    func revertAppliedTag(_ applicationID: String) throws {
+    /// Tombstones the live application; returns the stamp it wrote — nil
+    /// when the row was already dead (VX-246 U2: a quiet half).
+    func revertAppliedTag(_ applicationID: String) throws -> String? {
         try database.write { db in
+            let stamp = DateFormatter.variorumISO8601.string(from: date.now)
             try db.execute(
                 sql: "UPDATE post_tag SET deleted_at = ? WHERE id = ? AND deleted_at IS NULL",
-                arguments: [DateFormatter.variorumISO8601.string(from: date.now), applicationID])
+                arguments: [stamp, applicationID])
+            return db.changesCount > 0 ? stamp : nil
         }
     }
 
-    func reapplyAppliedTag(_ applicationID: String) throws {
-        try database.write { db in
+    /// Revives the application only while it is dead on `stamp` — the
+    /// stamp its partner half wrote (VX-246 U2); returns whether it did.
+    @discardableResult
+    func reapplyAppliedTag(_ applicationID: String, undoneOn stamp: String?) throws -> Bool {
+        guard let stamp else { return false }
+        return try database.write { db in
             guard let row = try Row.fetchOne(
                 db,
                 sql: """
                     SELECT pt.tag_id, pt.post_id FROM post_tag pt
                     JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
                     JOIN container c ON c.id = pt.post_id AND c.deleted_at IS NULL
-                    WHERE pt.id = ? AND pt.deleted_at IS NOT NULL
+                    WHERE pt.id = ? AND pt.deleted_at = ?
                     """,
-                arguments: [applicationID])
-            else { return }
+                arguments: [applicationID, stamp])
+            else { return false }
             // A live twin (re-applied by hand since) keeps the pair; this
             // row stays dead (`uq_post_tag_live`).
             guard try liveApplication(db, table: "post_tag", tagID: row["tag_id"],
                                       targetColumn: "post_id", targetID: row["post_id"]) == nil
-            else { return }
+            else { return false }
             try db.execute(sql: "UPDATE post_tag SET deleted_at = NULL WHERE id = ?", arguments: [applicationID])
             try voidPurgeIntents(db, table: "post_tag", rowID: applicationID)
+            return true
         }
     }
 
@@ -683,7 +744,9 @@ extension Operations {
         undoStack?.register(
             label: undoLabel,
             inverse: { ops in
-                if let stamp = try ops.revertImportedBook(readingID, posts: []) { undoneOn.setValue(stamp) }
+                guard let stamp = try ops.revertImportedBook(readingID, posts: []) else { return false }
+                undoneOn.setValue(stamp)
+                return true
             },
             redo: { try $0.reapplyImportedBook(readingID, posts: [], undoneOn: undoneOn.value) })
         return reading
@@ -723,50 +786,82 @@ extension Operations {
             return (membership, prior)
         }
         let landed = membership
+        // VX-246 U2: the redo re-applies only over what its undo left — the
+        // row back at the door as `prior` (the seat case), or dead on the
+        // undo's own stamp (a fresh membership). Her dismissal at the door,
+        // or a tombstone on another stamp, since the undo is hers to keep.
+        let undoneOn = LockIsolated<String?>(nil)
         undoStack?.register(
             label: undoLabel,
-            inverse: { try $0.revertAddedMembership(landed, waitingAs: prior) },
-            redo: { try $0.reapplyAddedMembership(landed) })
+            inverse: { ops in
+                guard let undone = try ops.revertAddedMembership(landed, waitingAs: prior) else { return false }
+                undoneOn.setValue(undone)
+                return true
+            },
+            redo: { try $0.reapplyAddedMembership(landed, waitingAs: prior, undoneOn: undoneOn.value) })
         return membership
     }
 
-    func revertAddedMembership(_ landed: ReadingPost, waitingAs prior: ReadingPost?) throws {
+    ///
+    /// Returns what it did, for the redo (VX-246 U2): the stamp it tombstoned
+    /// a fresh membership on, `""` when it demoted a seat back to the door,
+    /// nil when it found nothing of the act's to undo (quiet).
+    func revertAddedMembership(_ landed: ReadingPost, waitingAs prior: ReadingPost?) throws -> String? {
         try database.write { db in
             guard var row = try ReadingPost.fetchOne(db, key: landed.id), row.deletedAt == nil,
                   row.status == .member
-            else { return }
+            else { return nil }
             let book = try liveReading(db, row.readingId)
             guard !book.locked else { throw OperationError.lockedReading(id: book.id) }
             if let prior {
                 row.status = prior.status
                 row.position = prior.position
                 row.sectionId = prior.sectionId
-            } else {
-                row.deletedAt = date.now
+                try row.update(db)
+                return ""
             }
+            let now = date.now
+            row.deletedAt = now
             try row.update(db)
+            return DateFormatter.variorumISO8601.string(from: now)
         }
     }
 
-    func reapplyAddedMembership(_ landed: ReadingPost) throws {
-        try database.write { db in
+    ///
+    /// Keyed on what its undo did (VX-246 U2): a fresh membership revives
+    /// only while it is dead on the undo's own stamp (`undoneOn`); a seat
+    /// re-seats only while the row still waits at the door exactly as the
+    /// undo left it (live, `prior`'s status). Anything else since — her
+    /// dismissal, her own removal, another stamp — is not the undo's result,
+    /// and the redo is quiet. Returns whether it re-applied.
+    @discardableResult
+    func reapplyAddedMembership(
+        _ landed: ReadingPost, waitingAs prior: ReadingPost?, undoneOn: String?
+    ) throws -> Bool {
+        guard let undoneOn else { return false }
+        return try database.write { db in
             guard var row = try ReadingPost.fetchOne(db, key: landed.id),
                   let book = try Reading.fetchOne(db, key: row.readingId), book.deletedAt == nil,
                   try Container.fetchOne(db, key: row.postId)?.deletedAt == nil
-            else { return }
+            else { return false }
+            if let prior {
+                guard row.deletedAt == nil, row.status == prior.status, row.status != .member else { return false }
+            } else {
+                guard row.deletedAt.map({ DateFormatter.variorumISO8601.string(from: $0) }) == undoneOn
+                else { return false }
+            }
             guard !book.locked else { throw OperationError.lockedReading(id: book.id) }
             if row.deletedAt != nil {
                 // A live twin for the pair (added again since) keeps it.
-                guard try livePairRow(db, postID: row.postId, readingID: row.readingId) == nil else { return }
+                guard try livePairRow(db, postID: row.postId, readingID: row.readingId) == nil else { return false }
                 row.deletedAt = nil
-            } else if row.status == .member {
-                return
             }
             row.status = .member
             row.position = landed.position
             row.sectionId = landed.sectionId
             try row.update(db)
             try enforceOwnershipAfterRevival(db, postIDs: [row.postId], now: date.now)
+            return true
         }
     }
 }
