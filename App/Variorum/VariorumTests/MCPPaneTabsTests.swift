@@ -148,6 +148,196 @@ struct MCPPaneTabsTests {
         }
     }
 
+    // MARK: - The tabs (R-VX184-6 — pure)
+
+    @Test func theTabsAreHerFourInHerOrder() {
+        #expect(MCPPaneTab.allCases.map(\.label) == Self.tabLabels, "R-VX184-6, her four, her order")
+        #expect(MCPPaneCopy.connectTab == "Connect")
+        // The other three are their sections' own titles — the guide's pinned
+        // words ("under Activity", "under Waiting") read the same constants.
+        #expect(MCPPaneTab.clients.label == MCPPaneCopy.clientsSection)
+        #expect(MCPPaneTab.shared.label == MCPPaneCopy.sharedSection)
+        #expect(MCPPaneTab.activity.label == MCPPaneCopy.activitySection)
+        // Connect's section keeps lesson 2's "Connect a client".
+        #expect(MCPPaneCopy.connectSection == "Connect a client")
+    }
+
+    /// Her ruling: "it opens on Connect while no client is approved, else on
+    /// Clients" — and a tab she picks is remembered for the session.
+    @Test func thePaneOpensOnConnectUntilAClientIsApprovedAndKeepsHerPick() {
+        #expect(MCPPaneTab.opening(remembered: nil, approvedCount: 0) == .connect)
+        #expect(MCPPaneTab.opening(remembered: nil, approvedCount: 1) == .clients)
+        #expect(MCPPaneTab.opening(remembered: nil, approvedCount: 7) == .clients)
+        for picked in MCPPaneTab.allCases {
+            #expect(MCPPaneTab.opening(remembered: picked, approvedCount: 0) == picked, "her pick wins")
+            #expect(MCPPaneTab.opening(remembered: picked, approvedCount: 3) == picked, "her pick wins")
+        }
+        let door = MCPDoor(serverAllowed: false)
+        #expect(door.paneTab == nil, "nothing is remembered before she picks")
+    }
+
+    /// The pick is the door's (app-lived): a pane mounted after a pick opens
+    /// on it, and her press on the tab row is what writes it.
+    @Test func herPickedTabIsRememberedAcrossTheSettingsWindow() async throws {
+        try await withPaneWorld { session, _ in
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            door.paneTab = .activity
+            do {
+                let (window, host) = mount(MCPPane(door: door), size: NSSize(width: 523, height: 700))
+                defer { unmount(window) }
+                await settle(host, until: { tabRow(in: host) != nil })
+                let tabs = try #require(tabRow(in: host), "the tab row renders")
+                #expect(tabs.selectedSegment == 3, "the pane opens on the tab she picked (Activity)")
+                // Her press — the control's own action (AppKit's road).
+                tabs.selectedSegment = 2
+                _ = tabs.sendAction(tabs.action, to: tabs.target)
+                await settle(host, until: { door.paneTab == .shared })
+                #expect(door.paneTab == .shared, "her press is remembered")
+            }
+            // The Settings window closed and opened again (a fresh pane).
+            let (window, host) = mount(MCPPane(door: door), size: NSSize(width: 523, height: 700))
+            defer { unmount(window) }
+            await settle(host, until: { tabRow(in: host) != nil })
+            #expect(tabRow(in: host)?.selectedSegment == 2, "…and the pane opens there again")
+        }
+    }
+
+    /// The catalog's promise (`AppSettingsView.rowIDsRendered`): a search
+    /// never names a row the pane does not show — the open book lives in
+    /// Shared with AI, so finding it opens that tab; the server switch and
+    /// Waiting sit above the tabs, so they name none.
+    @Test func aSearchForTheOpenBookLandsOnItsTab() throws {
+        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpOpenBook")) == .shared)
+        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpServer")) == nil)
+        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpWaiting")) == nil)
+        let found = try #require(
+            SettingsSearch.findings(matching: "open book", in: SettingsSearch.settingsEntries)
+                .first { $0.pane == .mcp && $0.kind == .setting },
+            "“open book” finds the MCP pane's row")
+        #expect(MCPPaneTab.holding(findingLead: found.lead) == .shared, "the finding's own lead lands the tab")
+        #expect(AppSettingsView.rowIDsRendered[.mcp] == ["mcpServer", "mcpWaiting", "mcpOpenBook"])
+    }
+
+    // MARK: - One line each (R-VX184-6 — "every explainer cut to one line")
+
+    /// A summary's ideal width in SwiftUI's own `.caption` (measured, not
+    /// assumed).
+    private func idealWidth(_ text: String) -> CGFloat {
+        NSHostingController(rootView: Text(text).font(.caption).lineLimit(1).fixedSize())
+            .sizeThatFits(in: CGSize(width: 10_000, height: 200)).width
+    }
+
+    /// The pane's row room for a line beside its (i): the detail column
+    /// (523) less the grouped form's insets and the (i) — taken
+    /// conservatively at 420 pt. The grant sheet's: 600 − 2 × 20 − the (i)
+    /// → 520 pt.
+    static let paneLineRoom: CGFloat = 420
+    static let sheetLineRoom: CGFloat = 520
+
+    @Test func everyPaneExplainerIsOneLineWithTheWholeTextBehindItsInfo() {
+        var pairs: [(String, String)] = [
+            (MCPPaneCopy.enableSummary, MCPPaneCopy.enableBlurb),
+            (MCPPaneCopy.clientBoundarySummary, MCPPaneCopy.clientBoundary),
+            (MCPPaneCopy.keySummary, MCPPaneCopy.keyLine),
+            (MCPPaneCopy.stdioSummary, MCPPaneCopy.stdioLine),
+        ]
+        for client in MCPSetupClient.allCases { pairs.append((client.summary, client.sentence)) }
+        for (line, whole) in pairs {
+            #expect(ExplainerLine.opens(line: line, detail: whole), "an (i) holds the rest: \(line)")
+            let width = idealWidth(line)
+            #expect(width <= Self.paneLineRoom, "one line at the pane's room: \(width) pt — \(line)")
+            #expect(line.range(of: #"\bAI\b"#, options: .regularExpression) == nil, "VX-272: \(line)")
+            #expect(line.range(of: #"\b(?!MCP\b|JSON\b)[A-Z]{3,}\b"#, options: .regularExpression) == nil,
+                    "no shouted word: \(line)")
+        }
+        // The whole texts stand as they were (their own truth pins read them):
+        // her R-VX184-5 words, L1's caveat, the stdio facts.
+        #expect(MCPPaneCopy.keyLine.hasSuffix("Running it again replaces the old setup."))
+        #expect(MCPPaneCopy.keySummary.hasSuffix("running it again replaces the old setup."), "her words, in the line")
+        #expect(MCPPaneCopy.clientBoundary.contains("not programs running as you"))
+        #expect(MCPPaneCopy.clientBoundarySummary.contains("not programs running as you"),
+                "L1's line never promises more than L1")
+        #expect(MCPPaneCopy.stdioLine.contains("standard MCP server") && MCPPaneCopy.stdioLine.contains("one program"))
+        // The path moved below the block — the sentence says so.
+        #expect(MCPSetupClient.anyClient.sentence.contains("the path below"))
+        #expect(!MCPSetupClient.anyClient.sentence.contains("the path above"))
+        // A line that is the whole text has no (i) — never a door onto the same words.
+        #expect(!ExplainerLine.opens(line: "x", detail: "x"))
+        #expect(!ExplainerLine.opens(line: "x", detail: ""))
+    }
+
+    /// The grant sheet's HOW MUCH: one line per rung at every scope; the
+    /// edit rung's line is the as-built clause (VX-184 round 2) — true at
+    /// every scope, never "every change", nothing a note grant can't do.
+    @Test func theGrantSheetsRungLineIsOneLineAndTheEditLineStaysAsBuilt() {
+        for rung in MCPPaneCopy.offeredRungs {
+            for scope in [MCPGrantRule.ScopeKind?.none, .note, .book, .wing] {
+                let line = MCPPaneCopy.rungSummary(rung, scope: scope)
+                let whole = MCPPaneCopy.rungDetail(rung, scope: scope)
+                #expect(idealWidth(line) <= Self.sheetLineRoom, "\(rung) \(String(describing: scope)): \(line)")
+                switch rung {
+                case .read, .writeNew:
+                    #expect(line == whole && !ExplainerLine.opens(line: line, detail: whole),
+                            "already one line — no (i)")
+                case .suggest, .edit:
+                    #expect(ExplainerLine.opens(line: line, detail: whole), "cut — the rest behind the (i)")
+                    #expect(whole.hasPrefix(line.components(separatedBy: " \u{2014} ").first ?? line),
+                            "the line is the sentence's own lead: \(line)")
+                }
+            }
+        }
+        let edit = MCPPaneCopy.rungSummary(.edit)
+        #expect(edit == "it can also change, archive and delete what you shared, your own words included")
+        #expect(MCPPaneCopy.rungDetail(.edit).hasPrefix(edit), "the edit line is the as-built clause's head")
+        for scope in [MCPGrantRule.ScopeKind.note, .book, .wing] {
+            let line = MCPPaneCopy.rungSummary(.edit, scope: scope)
+            #expect(!line.contains("book") && !line.contains("chapter") && !line.contains("every change"), "\(line)")
+        }
+        #expect(MCPPaneCopy.rungSummary(.suggest).contains("cannot touch a word you wrote"),
+                "the suggest rung's promise stays in its line")
+    }
+
+    // MARK: - VX-205 — the copy icon is the ONE copy act's new face
+
+    @Test func theCopyIconIsTheOneCopyActsNewFace() {
+        let act = CapabilityRegistry.capability(.mcpCopySetupCommand)
+        #expect(act.verb == "Copy setup command", "R-13nb-5, her words — the icon's help and VoiceOver name")
+        #expect(act.doors == [.surface], "one act, one door kind")
+        #expect(MCPPane.surfaceCapabilities.filter { $0 == .mcpCopySetupCommand }.count == 1,
+                "declared once — rendered once (the icon)")
+        #expect(MCPSetupCodeBlock.copySymbol == "doc.on.doc", "the standard copy glyph")
+        #expect(MCPSetupCodeBlock.copiedSymbol == "checkmark")
+    }
+
+    // MARK: - VX-232 — the door's choice and its receipt
+
+    /// Choosing another client clears ITS receipt (it names one client's next
+    /// step); choosing the same keeps it; a refusal at the pane's head stays;
+    /// a copy makes its client the chosen one.
+    @Test func theChoiceAndTheReceiptMoveTogetherOnTheDoor() async throws {
+        try await withPaneWorld { session, _ in
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-vx281-choice-\(UUID().uuidString)"))
+            defer { pasteboard.releaseGlobally() }
+            #expect(door.setupClient == .claudeCode, "Claude Code first, as 13n-b shipped it")
+            await door.copySetupCommand(for: .codex, to: pasteboard)
+            #expect(door.setupClient == .codex, "the copy's client is the chosen one")
+            #expect(door.note == MCPDoor.Note(text: MCPSetupClient.codex.copiedReceipt, place: .connect))
+            door.chooseSetupClient(.codex)
+            #expect(door.note?.text == MCPSetupClient.codex.copiedReceipt, "the same choice keeps its receipt")
+            door.chooseSetupClient(.anyClient)
+            #expect(door.setupClient == .anyClient)
+            #expect(door.note == nil, "another client's receipt would be a lie under this one")
+            door.note = MCPDoor.Note(text: "a refusal", place: .top)
+            door.chooseSetupClient(.claudeCode)
+            #expect(door.note?.place == .top, "a refusal at the head stays")
+        }
+    }
+
     // MARK: - The geometry oracle (her ruling's shape — a design row)
 
     /// Inside VX-214's Settings content (748×520), a FRESH pane — no client
