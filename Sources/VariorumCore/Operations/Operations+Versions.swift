@@ -172,6 +172,14 @@ extension Operations {
         /// Source block id → its copy, in position order.
         public let blockCopies: [(source: String, copy: String)]
         public let versionEdge: Edge
+        /// VX-311 (VX-336 U6a — D-311-4): what the copy MINTED, per copied
+        /// block in position order — VX-252's record (`MintedBlockTakes`), its
+        /// `sourceBlockID` set — built from the copy machine's own rows, never
+        /// a second read. Filled by `copyPost`; empty where a caller builds
+        /// its own result (the outline, the saved version). Outside `==`
+        /// (a projection of the rows `blockCopies` already names), so every
+        /// existing construction and comparison is unchanged.
+        public var blocks: [MintedBlockTakes] = []
 
         public static func == (lhs: PostCopyResult, rhs: PostCopyResult) -> Bool {
             lhs.post == rhs.post && lhs.versionEdge == rhs.versionEdge
@@ -208,14 +216,24 @@ extension Operations {
     @discardableResult
     public func duplicateAsVersion(_ postID: String) throws -> PostCopyResult {
         let result: PostCopyResult = try database.write { db in
-            let copy = try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true)
-            let source = try livePost(db, postID)
-            try copyLiveTags(
-                db, from: postID, to: copy.post.id, wingID: source.wingId, now: date.now)
-            return copy
+            try duplicateAsVersionBody(db, postID)
         }
         registerMintedContainerEntry(label: "Duplicate as Version", result.post.id)
         return result
+    }
+
+    /// **Duplicate as Version's ROWS, inside the caller's transaction** — her
+    /// door's body, extracted ONCE (VX-311, VX-336 U6a — D-311-1, the
+    /// orchestrator's ruling) so her door and the MCP door's `duplicate_note`
+    /// (`duplicateNoteForClient`, its guard first) run the very same brain and
+    /// can never drift: the copy machine with the source's own chosen and
+    /// whole fans, then the note's live tags riding (17y item (c)).
+    func duplicateAsVersionBody(_ db: Database, _ postID: String) throws -> PostCopyResult {
+        let copy = try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true)
+        let source = try livePost(db, postID)
+        try copyLiveTags(
+            db, from: postID, to: copy.post.id, wingID: source.wingId, now: date.now)
+        return copy
     }
 
     /// MAKE OUTLINE POST (taste checkpoint, Sitting 9 — R99; her batch-10
@@ -660,7 +678,8 @@ extension Operations {
         try copy.update(db)
 
         return PostCopyResult(
-            post: copy, blockCopies: outcome.blockCopies, versionEdge: versionEdge)
+            post: copy, blockCopies: outcome.blockCopies, versionEdge: versionEdge,
+            blocks: outcome.minted)
     }
 
     /// What one run of the block-copy loop produced.
@@ -670,6 +689,9 @@ extension Operations {
         /// `(source block, its copy)` for the FIRST slot that copied — the
         /// `version_of` anchor's pair where a caller mints one.
         var firstPair: (String, String)?
+        /// VX-311 (VX-336 U6a — D-311-4): each copied block's record, from the
+        /// rows this loop wrote (additive — no caller's rows change).
+        var minted: [MintedBlockTakes] = []
     }
 
     /// **The block-copy loop, over an EXISTING target container** (the
@@ -797,6 +819,23 @@ extension Operations {
 
             if outcome.firstPair == nil { outcome.firstPair = (block.id, blockCopy.id) }
             outcome.blockCopies.append((source: block.id, copy: blockCopy.id))
+            // VX-311 (VX-336 U6a — D-311-4, F-3 (a)): what this slot MINTED,
+            // said from the rows just written (never a second read): the copy's
+            // ACTIVE takes in the store's own fan order — the copies' own
+            // `(fan_position, id)`, exactly what `read_note` lists — and the
+            // take it SHOWS by the read-time rule (the chosen copy while it is
+            // an active take, else the default copy, else the first active —
+            // AppSpec §7's fallback, read_note's own). Archived copies ride the
+            // note (her door's) but sit outside the fan, as read_note's resting
+            // answer has them.
+            let activeCopies = copiedVariants.filter { $0.status == .active }
+                .sorted { ($0.fanPosition, $0.id) < ($1.fanPosition, $1.id) }
+            let activeIDs = Set(activeCopies.map(\.id))
+            let shownCopyID = [chosenCopyID, defaultCopyID].compactMap { $0 }.first(where: activeIDs.contains)
+                ?? activeCopies.first?.id ?? defaultCopyID
+            outcome.minted.append(MintedBlockTakes(
+                blockID: blockCopy.id, shownTakeID: shownCopyID,
+                takes: activeCopies.map { MintedTake(id: $0.id, label: $0.label) }, sourceBlockID: block.id))
             if let shownText = (chosenCopyID.flatMap { id in copiedVariants.first { $0.id == id } }
                                 ?? copiedVariants.first(where: { $0.id == defaultCopyID }))?
                 .workingText, !shownText.isEmpty {

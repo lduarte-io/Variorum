@@ -18,10 +18,15 @@ import VariorumCore
 /// per-take digest as one more field, and nothing anywhere is positional.
 /// Built from the core's record of what the act minted
 /// (`Operations.MintedBlockTakes`), never a second read: ∝ the write.
+///
+/// VX-311 (VX-336 U6a — D-311-4, F-4 (a)): a COPIED block's record also names
+/// the block it was copied from (`source_block_id` — `duplicate_note`'s), so a
+/// client edits "the copy of block X" without guessing by position. Emitted
+/// only when set, so every mint's answer is byte-unchanged.
 enum MCPMintedBlocks {
     static func records(_ blocks: [Operations.MintedBlockTakes]) -> [[String: Any]] {
         blocks.map { block in
-            [
+            var record: [String: Any] = [
                 "block_id": block.blockID,
                 "shown_take_id": block.shownTakeID,
                 "takes": block.takes.map { take -> [String: Any] in
@@ -30,6 +35,8 @@ enum MCPMintedBlocks {
                     return record
                 },
             ]
+            if let source = block.sourceBlockID { record["source_block_id"] = source }
+            return record
         }
     }
 }

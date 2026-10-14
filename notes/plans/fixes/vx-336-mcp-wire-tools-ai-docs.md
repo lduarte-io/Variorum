@@ -1669,6 +1669,16 @@ open), and for the LANE edits that need vx-283 told first (`Registry/CommandRout
 `Registry/Capability.swift`). No trace reached the editor seam (the Compare board's cells are `PaneSurface` panes over
 `PaneTextAuthority`, but the design only calls the board model's existing slot API — no seam file is edited).
 
+**THE BUILD CONTINUATION (a FRESH opus-implementer, from 2026-10-14 ~16:40 MDT — pieces 2–9).** Built from this record
+alone: the traces, D-311-1…8, D-298-1…8, the LANES and THE ORCHESTRATOR'S RULINGS ON U6a's FORKS below (binding).
+Read in, in its own context: CLAUDE.md + its canon; this record's header, Hard rules, LIVE STATUS, Cross-run
+coordination, the U6 BRIEF items 1–2, this UNIT RECORD whole and the rulings; U5b's D1 + its RULINGS; `notes/MCPSpec.md`
+in full; `notes/SessionResiliencyProtocol.md`'s implementer section; and the code each design item names, every pointer
+re-verified at `6502db0d`. The lane go (the orchestrator's brief): ONE stored property
+`CommandRouter.pendingCompareLanding: CompareLanding?`, `CompareLanding` in `Features/Takes/CompareBoardView.swift`;
+nothing in `WorkspaceModel`, `ShellRouter`, `ShellActions.swift` or any other registry file. Headless only (no
+`xcodebuild test`, no app launch, no store). Logs: `notes/plans/vx336-screens/u6a/logs/` (gitignored).
+
 **Read in (in full, this session's own context):** CLAUDE.md + its canon; this record's header, Hard rules, LIVE STATUS,
 Cross-run coordination, Her rulings, the U6 BRIEF, THE ORCHESTRATOR ON U5's WINDOW, U5b's D1 + its RULINGS + D6;
 `notes/MCPSpec.md`; `notes/SessionResiliencyProtocol.md`'s implementer section; VX-246's U3 act table (the COPY row). Code:
@@ -1684,9 +1694,9 @@ wire's `create_note`/`save_version` arms, `MCPWriteTools+WingMove.swift` (the tw
 | # | piece | status |
 |---|---|---|
 | 0 | read-in, the traces, the design, the forks, the lane flags, the draft live legs | DONE (this commit) |
-| 1 | the orchestrator's rulings on F-1…F-9 + the lane edits told to vx-283 | PENDING (the orchestrator) |
-| 2 | VX-311 seam (core): the copy machine says what it minted (`PlacementCopyOutcome`/`PostCopyResult` carry `[MintedBlockTakes]`; `MintedBlockTakes` gains `sourceBlockID`; `duplicateAsVersion`'s body extracted, behaviour unchanged) + the encoder's one field | NOT-STARTED — D-311-3/4 |
-| 3 | VX-311 pins (core acts + wire), RED on the seam tree | NOT-STARTED — D-311-8 |
+| 1 | the orchestrator's rulings on F-1…F-9 + the lane edits told to vx-283 | DONE (`6502db0d` — THE ORCHESTRATOR'S RULINGS ON U6a's FORKS; vx-283 told, the CommandRouter go in the build brief) |
+| 2 | VX-311 seam (core): the copy machine says what it minted (`PlacementCopyOutcome`/`PostCopyResult` carry `[MintedBlockTakes]`; `MintedBlockTakes` gains `sourceBlockID`; `duplicateAsVersion`'s body extracted, behaviour unchanged) + the encoder's one field | DONE (this commit) — `Operations+DocumentImport.swift`: `MintedBlockTakes.sourceBlockID: String?` (nil for every mint) + an internal memberwise init (the mint init delegates to it). `Operations+Versions.swift`: `PostCopyResult.blocks: [MintedBlockTakes]` (a `var`, default `[]`, outside its custom `==`; `copyPost` fills it from `outcome.minted`, the outline and the saved version keep `[]`); `PlacementCopyOutcome.minted` appended per copied block from the rows just written — the copy's ACTIVE takes sorted by the copies' own `(fanPosition, id)`, `shownTakeID` = `[chosenCopyID, defaultCopyID]`'s first ACTIVE id, else the first active, else the default (read_note's rule, `MCPNoteStructure.swift:152`), `sourceBlockID` = the source block; `duplicateAsVersion`'s transaction body extracted byte-for-byte into internal `duplicateAsVersionBody(_:_:)` (her door calls it inside its own write, registration unchanged). `MCPMintedBlocks.records` emits `source_block_id` only when set. **Behaviour unchanged, measured:** `swift build` clean; the copy family and the minted-answer suites — `DuplicateCarriesTagsTests`, `VersionOperationsTests`, `NoteVersionsTests`, `MCPMintedBlocksActsTests` + 2 more core suites, `MCPMintedAnswerServerTests`, `MCPInsertBlocksServerTests` (both suites), `MCPCarriageServerTests` — **90 tests in 10 suites green, EXIT 0** (`p2-seam-regress.log`) |
+| 3 | VX-311 pins (core acts + wire), RED on the seam tree | NOT-STARTED — D-311-8. **The honest form (U5b's precedent, pieces 4–5):** the WIRE pins compile on the seam tree (`MCPWriteAct` read by `rawValue`, the fence sentence a literal) and run RED by absence (`Unknown tool: duplicate_note.`); the CORE acts pins name the new `Operations.duplicateNoteForClient`, so they cannot compile on the seam tree — they land with the fix as NEW-API state pins (green by construction, the house's rule for a pure addition) and are moved aside by piece 7's revert |
 | 4 | VX-311 fix: `Operations.duplicateNoteForClient` + `duplicate_note` on the wire (+ the app's words) | NOT-STARTED — D-311-1…7 |
 | 5 | VX-298 pins (headless show + link receipt; the app's landing pins compiled) RED | NOT-STARTED — D-298-8 |
 | 6 | VX-298 fix: `.compare` target (wire), its delivery and the board's landing (app), link_versions' Open › | NOT-STARTED — D-298-1…7; lane edits only after piece 1 |

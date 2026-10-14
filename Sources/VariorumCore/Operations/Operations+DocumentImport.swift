@@ -72,11 +72,25 @@ extension Operations {
         public let blockID: String
         public let shownTakeID: String
         public let takes: [MintedTake]
+        /// VX-311 (VX-336 U6a — the run record's D-311-4, F-4 (a)): the block
+        /// this one was COPIED from, so a client that read the source with ids
+        /// edits "the copy of block X" without positional guessing. nil for
+        /// every mint (`create_note`, `import_document`, `insert_blocks` —
+        /// their answers byte-unchanged); set only by the copy machine
+        /// (`copyPlacements`).
+        public let sourceBlockID: String?
 
         init(_ minted: MintedFanBlock, shownIndex: Int = 0) {
-            blockID = minted.block.id
-            shownTakeID = minted.variants[shownIndex].id
-            takes = minted.variants.map { MintedTake(id: $0.id, label: $0.label) }
+            self.init(
+                blockID: minted.block.id, shownTakeID: minted.variants[shownIndex].id,
+                takes: minted.variants.map { MintedTake(id: $0.id, label: $0.label) }, sourceBlockID: nil)
+        }
+
+        init(blockID: String, shownTakeID: String, takes: [MintedTake], sourceBlockID: String?) {
+            self.blockID = blockID
+            self.shownTakeID = shownTakeID
+            self.takes = takes
+            self.sourceBlockID = sourceBlockID
         }
     }
 
