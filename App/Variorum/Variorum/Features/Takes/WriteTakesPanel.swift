@@ -78,11 +78,22 @@ struct WriteTakesPanel: View {
         .unarchiveTake, .archiveTake, .labelTake, .lockTake, .deleteTake,
     ]
 
-    init(session: AppSession, postID: String, blockID: String) {
+    /// VX-154: how the panel closes itself — `EditorView` passes the sheet's
+    /// own binding road; nil (a direct host) falls back to `dismiss`.
+    private let onClose: (() -> Void)?
+
+    /// `model` is a pin's road in (it reads the request state the panel's
+    /// acts set); the app passes nil and the panel builds its own, exactly as
+    /// before — the construction P39b moved here stays here.
+    init(
+        session: AppSession, postID: String, blockID: String,
+        onClose: (() -> Void)? = nil, model: TakesViewModel? = nil
+    ) {
         self.session = session
         self.postID = postID
         self.blockID = blockID
-        _model = State(initialValue: TakesViewModel(session: session, postID: postID))
+        self.onClose = onClose
+        _model = State(initialValue: model ?? TakesViewModel(session: session, postID: postID))
     }
 
     private var slot: Queries.RenderedBlock? {
