@@ -131,7 +131,7 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 | U1 — the pane in tabs | **UNIT CLOSED — DONE** (2026-10-13 ~22:35 MDT, opus-implementer): VX-199 · VX-205 · VX-232 (FIXED red-first) · VX-245's two MCP sites (`3d00a166`); red on old 4 issues; Mac batch 250/31 (one issue — VX-283's six lint sites); the walk in both voices DONE, dev store restored `cmp`-SAME. 3 PROVISIONALs (P-VX281-U1-1…3) for QUESTIONS at the merge; the cold review is the ladder's. See the U1 UNIT RECORD |
 | U2 — the shared icon | **UNIT CLOSED — DONE** (2026-10-14 ~00:20 MDT, opus-implementer): VX-268 — the one icon on every row the ask glyph marks + the ticket's book/gathering and Timeline rows; red first (core 43, Mac 27 issues on the seam), Mac batch 812/149 (one issue — VX-115's standing pin); the walk in both voices DONE, the dev store restored `cmp`-SAME against the original. 5 PROVISIONALs (P-VX281-U2-1…5) for QUESTIONS at the merge; the cold review is the ladder's. See the U2 UNIT RECORD |
 | the ladder | **CLOSED at ROUND 3** (~03:45): rounds 1 + 2 closed; round 3, the end-of-run Fable round, 0B/0M/0m/2n — **F-1 FIXED** (`2870fa6f`, Fable confirmed), **F-2 DISMISSED AS HOLLOW** (Fable withdrew it on the implementer's trace). No further round. NEXT: the closeout — main merged in, the merged tip built, the merge-moment WHOLE-target Mac run (`vx281-merge`) |
-| closeout | NOT-STARTED |
+| closeout | IN-PROGRESS — main merged in (`bb05c642`, a merge commit, no conflict: main carried only notes/CLAUDE.md/skill/agent-definition lines); the merged tip built for testing into ONE fresh tree `DerivedData/vx281-merge` (`** TEST BUILD SUCCEEDED **`, 2.5 GB, no warning in F-1's file); NEXT the merge-moment WHOLE-target Mac run (claim `vx281-merge`) — PENDING its GO; the ledgers are the orchestrator's |
 
 ## FOR VX-234 (every wording call this run makes, where it renders — posted to VX-234 at close)
 
@@ -1219,3 +1219,9 @@ final; the implementer applies; the orchestrator checks each fix line by line)*
 ## Closeout
 
 *(results, finals, the ratify list, the MOBILE PARITY line, the merge)*
+
+**Finals (the implementer's — the ledgers are the orchestrator's):**
+- **The tip:** `bb05c642` (main merged in; the ladder closed at round 3 — F-1 `2870fa6f`).
+- **Headless:** the merged tip's Mac `build-for-testing` → `DerivedData/vx281-merge` `** TEST BUILD SUCCEEDED **` (log `notes/plans/vx281-screens/r2/logs/build-merge.log`, gitignored). No core line changed since round 2's headless finals (U2's `VariorumMCPTests` 212/41 · core 2,788/320 · workbook 40/6; R1-7's `MCPWingReachRuleTests` +2 since — Fable re-ran the reach suites 8/8 and O-4 2/2 at round 3), so no `swift test` re-run is owed.
+- **The merge-moment WHOLE Mac target** (claim `vx281-merge`): PENDING the GO. The plan: guards (`Tools/WalkKit/guard.sh --author`; `pgrep -fl 'Variorum.app/Contents/MacOS'` empty; the dev store Standard, unlocked — a Castle-locked test host reds `SettingsTitleClearanceTests`/`LibraryHandOffTests`, VX-214's lesson); `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx281-merge -only-testing:VariorumTests` launched detached to `logs/whole.log` and POLLED IN THE FOREGROUND (VX-184's precedent, ~45 min at 4,551 tests); every issue attributed by name to its ticket, a new red re-run alone; release the moment it ends; `vx281-merge` deleted after.
+
