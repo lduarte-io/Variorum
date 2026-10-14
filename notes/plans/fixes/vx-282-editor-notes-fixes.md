@@ -1045,14 +1045,43 @@ steals"):** `PaneTextView`'s rule (`PaneSurface.swift:583-620`), in the shared b
 on the first arrival, and cleared (the doc's own "asked ONCE"); a box that held the keyboard when it was detached
 re-takes it on re-attach, and only when the window itself holds the keyboard (nil or the window) — so it never steals
 from a field, a sheet or anything else that took it meanwhile, and a box that did NOT hold it (released by the tour or
-anyone) stays away. The counted request (`takeFocus` — her padding click, the title chip, the Bookcase's mount raise) is
-unchanged: an explicit request is not a re-take. **Candidate 2 is NOT changed** (the brief: the first-mount autofocus
+anyone) stays away. The EXPLICIT requests keep today's behaviour exactly — the counted request (`takeFocus` — her padding
+click, the title chip, the Bookcase's mount raise) and the initial request's own deferred serve (its guard is still
+"not already mine", so the pad opens with the caret wherever it does today, whatever SwiftUI's hosting view holds at
+that moment); an explicit request is not a re-take. One robustness line: an initial request whose deferred serve finds
+the box out of its window is re-armed for the next arrival rather than lost (the old never-cleared flag served it there
+by accident). **Candidate 2 is NOT changed** (the brief: the first-mount autofocus
 works where it does today): whether the Bookcase's mount autofocus should stand down while a tour runs is a product call
 the rulings do not make — P-U4-2. **The residual race, recorded as the 13s record did:** a release that lands WHILE the
 box is detached (the window already holds the keyboard, so the release changes nothing observable) cannot be told from
 the detach's own drop; the box re-takes. `PaneTextView` carries the same residual.
 
-*(Pins, the diff, the products, the window plan: next pieces — PENDING.)*
+#### The pins — `VariorumTests/CaptureUndoAndFocusTests.swift` (new; committed AHEAD of the fix, `c4f2a893`)
+
+Five suites (suite TYPE names). The box is the production `CaptureTextView` in a real titled window beside an
+`NSTextField` (another responder); the hosts are the production `QuickEntryBar` and `QuickNoteView` over an in-memory
+store (`AppDatabase.inMemory()`, injected — never the default path). ⌘Z/⇧⌘Z go by their own road (`undo:`/`redo:` up the
+responder chain from the box); ⏎ is the real `keyDown` with a Return event. Settles suspend (yield + 10 ms per turn) so
+the box's deferred focus serve and the hosts' filing `Task`s run (VX-179 U3's FIX LEG lesson). RED ON OLD = against the
+build of `c4f2a893` (the pins over the pre-fix app).
+
+| Suite · test | Asserts | Old |
+|---|---|---|
+| `CaptureUndoSyncTests` · `anUndoAndARedoReachTheBinding` | type `first thought` + ` and more`; ⌘Z, ⌘Z, ⇧⌘Z: after each, the binding == the box (non-vacuity: the box really moved) | RED (3 — each binding cell) |
+| `CaptureUndoSyncTests` · `aProgrammaticClearEndsTheBoxsOwnHistory` | the box's undo manager is NOT the window's; the host clears the binding → `canUndo == false` (a `#require`, so the old tree stops BEFORE the ⌘Z that raised there); ⌘Z changes nothing; new words undo alone, binding and all | RED (2 — the identity cell and the `#require`) |
+| `CaptureHostsUndoFilingTests` · `theBarFilesWhatTheBoxShows(.undo / .undoTwiceThenRedo)` | the real bar: `alpha` + ` beta`, the gesture, the box shows `alpha`; ⏎ → the opened note's blocks == `["alpha"]` | RED ×2 (old files `alpha beta`) |
+| `CaptureHostsUndoFilingTests` · `thePadFilesWhatTheBoxShows(.undo / .undoTwiceThenRedo)` | the real pad: the same; ⏎ → ONE note, blocks == `["alpha"]` | RED ×2 |
+| `CaptureHostsUndoFilingTests` · `anEmptyFilingLeavesNothingToUndoIntoInEitherHost` | bar then pad: three spaces, ⏎ → the box cleared and still on screen; `#require(canUndo == false)`; ⌘Z brings nothing back; nothing filed | RED (1 — the bar's `#require`; the pad's half never runs on old) |
+| `CaptureFocusReattachTests` · `theFirstMountAutofocusStillLands(bornAsking: true/false)` | the pad's birth (request 1 at make) and the bar's (0, raised once up) both open with the caret; a later counted request still takes it from a field | GUARD ×2 |
+| `CaptureFocusReattachTests` · `aReleasedBoxStaysAwayAcrossAReattach(true/false)` | holds → `makeFirstResponder(nil)` (the tour's act) → detach + re-attach → the box does NOT hold the keyboard | RED for `true` (candidate 1); GUARD for `false` |
+| `CaptureFocusReattachTests` · `aBoxThatHeldTheKeyboardKeepsItAcrossAReattach(true/false)` | holds → detach (AppKit drops it to the window — asserted) → re-attach → the box holds it again | RED for `false` (the bar's silent loss); GUARD for `true` |
+| `CaptureFocusReattachTests` · `aReattachNeverStealsFromAnotherResponder(true/false)` | holds → detach → the field takes the keyboard → re-attach → the box leaves it there | RED for `true` (the old arrival claim stole); GUARD for `false` |
+| `CaptureTourFocusTests` · `stepsOneAndTwoNeverPutTheCaretBackInTheQuickEntry` | the REAL shell (`TourEntryTests`' world): the caret in the Bookcase's quick entry, the tour requested on the Bookcase (her road), released at arrival, then step 1 and step 2 settle — the box never holds the caret | **EXPECTED GREEN on both sides** (the static trace finds no re-grab on this road) — a red on old would mean the harness reproduces a re-grab the trace missed; the result is a finding either way |
+
+Expected on old: **13 issues** (3 + 2 + 2 + 2 + 1 + 1 + 1 + 1) across 10 failing cases, every other case green; expected
+on the fixed product: all green.
+
+*(The diff, the products, the window plan: next pieces — PENDING.)*
 
 ## Ladder
 
