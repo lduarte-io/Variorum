@@ -82,6 +82,14 @@ retitled to Close All; VX-288 notes the chip; the run and its nine members In Pr
   note-only and quick-note windows); if it collides, STOP and report — never rebind silently.
 - **VX-289:** *"close all now is good"* — Close All only, landing by VX-287's rule; closing stays VIEW-ONLY (the
   note itself is untouched — `SidebarView.swift:109-115`).
+- **THE ✕ ON THE NOTE YOU'RE LOOKING AT — her ruling at U1's READY (2026-10-14, the question tool):** asked
+  *"Clicking a row's ✕ (or right-click ▸ Close) on the note you're currently looking at: today the row disappears but
+  the note stays on screen with no row. Should it behave like ⇧⌘W and move you to the next note?"*, she chose **"Yes,
+  same as ⇧⌘W"** — closing the open note's row moves the pane to the next note (else the previous, else the
+  Library), like closing the active tab in Safari; a ✕ on any other row just removes that row, as today. This
+  supersedes P-U1-2's "the ✕ and right-click Close still close the row only". **PROVISIONAL edge (the orchestrator,
+  P-U1-5):** a row whose note the OTHER pane of a split shows moves that pane in place, focus kept (Close All's
+  P-U1-3 road); the focused pane's takes the shell's open-note road as ⇧⌘W does.
 - **VX-288** (2026-10-13): *"the dragging between open notes in there needs to be smoother - it should be as smooth
   as the editor drag with a nice little line showing as you hover and a nice fit / snap into place because right
   now it feels janky to use."* Her ruling on the shape: **the light version first** (the ticket's shape S); her walk
