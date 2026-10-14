@@ -150,6 +150,11 @@ struct StructuralUndoTests {
                         maxActive.withValue { $0 = max($0, active.value) }
                         Thread.sleep(forTimeInterval: 0.03)   // widen any overlap window
                         active.withValue { $0 -= 1 }
+                        // JUSTIFIED EDIT (VX-246 U2): a half now answers
+                        // whether it changed anything — this toy stands for an
+                        // inverse that did; the serialization it pins is
+                        // untouched.
+                        return true
                     },
                     // 13c 1B: the serialization test cares only about the
                     // inverse; a synthetic entry with no re-apply is exactly

@@ -862,8 +862,11 @@ the guide's lesson-2 sentence (U8) — a client's own setup re-run moves its nam
 
 ## U2 UNIT RECORD — the undo class: VX-276 · VX-277 · VX-119 (opus-implementer, from 2026-10-13 ~23:40 MDT)
 
-**What this unit has NOT done yet (said first; rewritten at every seam):** no revert proof yet, no sweep table, no
-stage window (no Mac test run, no walk) — the design, the red pins and the fix (green headless) are in. Everything below "The design" is the
+**What this unit has NOT done yet (said first; the state at READY, 2026-10-14 ~01:50 MDT):** (1) **no stage window has
+run** — no Mac test batch, no Edit-menu walk, no real `claude -p` turn (THE STAGE WINDOW below, waiting on the GO); so
+the quiet-press refusal words have never been seen on screen; (2) **the phone's undo door is untouched** — the rule
+reaches the phone (same `UndoStack`), its quiet-press words do not (MOBILE PARITY, OWED 2); (3) no `notes/QUESTIONS.md`
+entry or canon edit (the merge's). Everything else is built, pinned red-first, red again by revert, and green headless. Everything below "The design" is the
 plan, not a claim.
 
 **Read in full before code (never delegated):** CLAUDE.md and its loaded canon (AppSpec §9's structural undo/redo
@@ -893,8 +896,8 @@ under `Sources/VariorumCore/Operations/` (each half says whether it changed anyt
 | 3 | red again BY REVERT (announced first, on a committed tree; restored and verified) | DONE (`e63c8dd0` reverted; this commit records it) — announced in its own commit before it ran; on the committed tree `e63c8dd0`: the 27 changed files under `Sources/VariorumCore/Operations/` back to the pins commit `dfcb6531` (`git checkout dfcb6531 -- <the 27>`), the pins kept → **RED again: 22 of 22 failed, 22 issues, the test × line set IDENTICAL to piece 1** (diffed) (`p3-revert-red.log`). **RESTORED:** `git checkout HEAD -- Sources/VariorumCore/Operations/`, `git status` clean, `git diff HEAD` empty → 22/22 green (`p3-restored.log`). **Two more pins added after the revert (this commit):** `aDivergedCopySheDeletedStaysDeletedThroughTheRedo` (the diverge entry — its logic changed most; its own red-by-revert is piece 3b) and NEW `UndoStackQuietRuleTests` (3 — the stack's rule on the new API: a quiet undo retires and leaves the redo future; a quiet redo retires; a compound runs only the legs whose partner changed — green by construction, state transitions); **26/26 green** across the two suites |
 | 3b | the diverge pin red by revert (announced here; the new-API suite moved aside inside the worktree while it runs) | DONE (this commit) — the same 27 files back to `dfcb6531`, `UndoStackQuietRuleTests.swift` moved aside → `UndoQuietPressTests` **23 of 23 failed, 23 issues** — the 22 as before plus `aDivergedCopySheDeletedStaysDeletedThroughTheRedo` on its "her delete of the copy stands" line (`p3b-revert-red.log`); **RESTORED** (`git checkout HEAD -- Sources/VariorumCore/Operations/`, the file moved back, `git status` clean but this record) → **26/26 green** (`p3b-restored.log`) |
 | 4 | THE SWEEP TABLE complete — every one of the 85 registrations FIXED or SAFE with its reason | DONE (this commit) — below |
-| 5 | headless finals (core · MCP · workbook) + the Mac `build-for-testing` | NOT-STARTED |
-| 6 | THE STAGE WINDOW plan (claim `vx246-u2`; the Mac batch incl. U1's three groups; the Edit-menu walk with a real `claude -p` turn; a batch-only fallback) → READY | NOT-STARTED |
+| 5 | headless finals (core · MCP · workbook) + the Mac `build-for-testing` | DONE (this commit) — **the whole package, `swift test --skip-build` on `ef2ef588`'s sources, EXIT 0 in 4:06: `VariorumMCPTests` 223 / 48 · `VariorumCoreTests` 2,826 / 326 · `StringsWorkbookTests` 40 / 6**, zero ✘ (core = U1's 2,800/324 + `UndoQuietPressTests` 23 + `UndoStackQuietRuleTests` 3; MCP and workbook unchanged); the standing gated skips only (`p5-finals.log`). **The Mac `build-for-testing`** into `App/Variorum/DerivedData/vx246-u2` (an APFS clone of U1's folder, then incremental; 65 GiB free first) → **`** TEST BUILD SUCCEEDED **`**, EXIT 0, no warning in a touched file (`mac-build-for-testing.log`). It first failed on ONE Mac test: `JumpAndUndoTests.swift` (`StructuralUndoTests.concurrentUndosExecuteOneAtATime`) registers a toy entry whose inverse returned nothing — a **JUSTIFIED EDIT** (the ritual comment in place): the toy now answers `true` (it stands for an inverse that changed something); the serialization it pins is untouched |
+| 6 | THE STAGE WINDOW plan (claim `vx246-u2`; the Mac batch incl. U1's three groups; the Edit-menu walk with a real `claude -p` turn; a batch-only fallback) → READY | DONE (this commit) — THE STAGE WINDOW below; **READY for stage** (the stage NOT claimed — the orchestrator's GO) |
 
 **No revert is in flight** (pieces 3 and 3b ran and were RESTORED — `git diff HEAD` empty under `Sources/`).
 
@@ -1029,7 +1032,7 @@ and `UndoStackQuietRuleTests` (3, the stack itself).
 | 45 | `MCPCarriage:176` `file_note_in_chapter` | `refileMembership(from:to:)` ×2 | **FIXED** — as 44 (exact row + compare-and-set, P-VX184-R1-2) |
 | 46 | `MCPCarriage:337` `set_book_rule` | `restoreCollectingColumns` ×2 | **FIXED (parts)** — the columns record: a column she set BACK between ⌥⌘Z and ⇧⌥⌘Z is never re-written. Pin `aBookRulesRedoLeavesTheColumnSheSetBackAlone` |
 | 47 | `MCPCommentAuthors:56` `delete_comment` | `reviveDeletedComment(deletedOn:)` / `redeleteComment` | **FIXED** — round 2's `redeleteComment` after her restore + a quiet undo: closed by the stack (the inverse's stamp key makes it quiet; it now says so). Family pins: the delete probes |
-| 48 | `MCPDeliberate`… — see 40–41; `MCPEdits:166` `set_block_name` | `restoreBlockName(from:to:)` ×2 | **FIXED** — as 44 |
+| 48 | `MCPEdits:166` `set_block_name` | `restoreBlockName(from:to:)` ×2 | **FIXED** — as 44 |
 | 49 | `MCPEdits:207` `create_section` | `flipCreatedSection` ×2 → `tombstoneCreatedSection` / `reviveCreatedSection(undoneOn:)` | **FIXED** — O1 by the stack; the redo revives only on its undo's stamp (O2 on another road). Pin `aChapterSheDeletedStaysDeleted` |
 | 50 | `MCPLibraryEdits:100` `rename_book` | `restoreBookName(from:to:)` ×2 | **FIXED** — the value family. Pins `renameBackToOriginalThenQuietUndoThenRedo`, `anUndoAfterAQuietRedoLeavesHerValueAlone` (O4) |
 | 51 | `:168` `finish_book` | `revertFinishedBook(finishedOn:)` / `refinishBook` | **FIXED** — O1 (her reopen) by the stack. Pin `finishRedoAfterQuietUndo`. Residual unchanged (VX-184's record): her reopen-then-refinish before ⌥⌘Z is indistinguishable from the act's finish (no finish stamp on `reading`) |
@@ -1073,4 +1076,162 @@ that act on ANY live row" (`rearchiveBook`, `redeleteBook`, `redeleteChapter`, `
 (the stack for O1, the stamp key for the other roads); (3) VX-277's two halves (her adopt doors' value class; Delete
 Block after a tray Put back) are FIXED and pinned; (4) VX-119's pair and every copy op riding it are FIXED, and the
 F1 box's R2-1 nil rule is now enforced by the stack (a nil inverse retires its entry) as well as by each box.
+
+### THE STAGE WINDOW — the plan (runs ONLY on the orchestrator's GO, under the exact claim line it relays — expected `vx246-u2`)
+
+**Built:** `App/Variorum/DerivedData/vx246-u2` (the Debug app `io.lduarte.Variorum.debug` + the test bundle, from
+`ef2ef588`'s sources plus the justified Mac test edit — rebuild first if the branch moved). **~110 min whole; batch-only
+fallback ~50 min.**
+0. **Guards, every step:** `Tools/WalkKit/guard.sh --author` (her `/Applications/Variorum.app` ABSENT — if present,
+   STOP; never quit or kill it); `pgrep -fl 'Variorum.app/Contents/MacOS'` empty; then the claim line the GO relays;
+   `guard.sh <devpid> x y` before each click; ≥ 2.6 s between synthetic events.
+1. **The Mac batch (~50 min)** — `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS'
+   -derivedDataPath DerivedData/vx246-u2` with `-only-testing:VariorumTests/<Suite>`, four groups:
+   - **U2-A — every Mac suite that reaches the structural undo (113 suites in 43 files; grepped for `undoStack`,
+     `UndoStack`, `structuralUndo`/`structuralRedo`, `StructuralUndoCopy`, `undo(with`/`redo(with`, `redoDepth`,
+     `topLabel`):** BlockDeletionAndRedoTests · BlockHighlightTests · BlockHistoryPaletteDoorTests ·
+     BlockSelectionRegistryTests · BlockSelectionRuleTests · BlocksWorkbenchTests · BlockTOCStatusTests · BlockTOCTests ·
+     BoardBlockSelectionTests · BoardDeleteRedoSurvivalTests · BoardDeleteRollbackTests · BoardDeliveryPolicyTests ·
+     BoardMergeDiagnosisTests · BookOrderConversionTests · BoundaryClampTests · BoundaryFluidityTests ·
+     CanvasAndPoolTests · CanvasBoardGeometryTests · CanvasFocusedBlockFactTests · CanvasHostedRealizationTests ·
+     CanvasOrderAndOverviewTests · CanvasRealizationTests · CanvasTakesSwitcherTests · CommandRouterTests ·
+     CommitFlowTests · CompareCompositionTests · CompareViewModelTests · CrossBlockCompoundTests ·
+     DestructiveUndoWarningTests · DifferentialApplyTests · DivideExtractGestureTests · DivideWCeremonyTests ·
+     DocumentImportDoorTests · DropAndRefusalCopyTests · EditorSessionTests · EncryptionExplainedSeedTests · FanFlowTests
+     · FannedDefaultsBoardTests · FannedDefaultsTests · FanReorderDoorTests · FragmentLinesTests · GestureSoakTests ·
+     ImportFacesTests · JekyllTakemaniaSeedTests · JumpCorrectionLoopTests · LaunchFurnitureTests · LensesReorderTests ·
+     MakeBlockGestureTests · MCPWingFacesTests · MenuFlightDoorAwaitTests · MergeArrangementTests ·
+     MergeCeremonySheetTests · MergeGestureTests · MergeSelectionTests · MoveAndExecuteTests · NoteDeleteConfirmEdgeTests
+     · NoteDeletionActTests · NoteDeletionDeclarationTests · NoteDeletionNavigateAwayTests · QuickNoteDoorTests ·
+     QuickNoteMintTests · QuickNoteWindowTests · QuickNoteWordTests · QuitFinalizeSurfacesTests · ReturnKeyTraceTests ·
+     ReturnKeyUndoSignTests · ReviewRound1FixTests · ReviewRound2FixTests · ReviewRound3FixTests · ReviewRoundFixTests ·
+     SampleLibraryTests · SampleLibraryWelcomeTests · SealDoorTests · SeamMergeTests · ShellConfirmTests ·
+     SoftNewlineTests · SpanToTakeDoorTests · SpanToTakeGesturePlanTests · SplitAtNewlinesDoorTests ·
+     StaleWriteIntentTests · StatusCenterTests · StructuralRewriteDoorTests · StructuralUndoTests ·
+     TakeCardMenuTitleTests · TakesBoardTests · TakesBufferConvergenceTests · TakesDivideTests · TakesFindReplaceTests ·
+     TakesLandingTests · TakesPresentationTests · TakesReplaceRuleTests · TakesWordCountTests · the 13 Tutorial*
+     suites in that set (TutorialBookShapeTests · TutorialBooksLessonTests · TutorialBooksRitualTests ·
+     TutorialDeletionActsTests · TutorialDoorTests · TutorialFannedMatrixTests · TutorialLibraryActsTests ·
+     TutorialLookingActsTests · TutorialMCPChapterTests · TutorialPrivacyChapterTests · TutorialStructureActsTests ·
+     TutorialTakesActsTests · TutorialWherePlacesActsTests · TutorialWritingActsTests) · TypedReturnKeyTests ·
+     UndoHintAndRefusalTests · WholeBlockDeleteTests · WriteBlockSelectionTests.
+   - **U1's G1, G2, G3 exactly as U1's THE STAGE WINDOW lists them** (their overlap with U2-A runs once).
+   - **Standing reds, named if met:** VX-167's `DestructiveUndoWarningTests.redoNeverAsks` (red only under in-process
+     parallelism — re-run alone if met); VX-245's sites; VX-115's `BookCollectingDoorsTests` (not in the set).
+   - **Watch for:** any suite whose assertion reads "Undid: …" after an undo that is now QUIET (a door test pressing
+     ⌥⌘Z over an entry the world moved past) — that pin met the rule's new face; record it as a justified edit with
+     the refusal's words, never a silent change.
+2. **A1 prestage copy** of the dev store (U1's step 2, verbatim: every store file + the key files →
+   `…/Variorum-dev/Backups/safety-copies/scale-prestage-<ts>/`, each `cmp`-verified); the Debug app's prefs plist saved;
+   her user-scope MCP servers read BEFORE (names + a fingerprint, never values). A What's New sheet: its own button. A
+   lock screen: `source ~/.variorum/dev-castle.env`, those values only, posture restored before release.
+3. **Leg W1 — her own door, the DELETE direction (VX-277), both voices:** launch (`open -n` the Debug app); a scratch
+   note in Home with three short blocks ("One." / "Two." / "Three."). Delete block "Two." (its block ▾ ▸ Delete
+   Block) → This Note's Tray ▸ Leaving ▸ Put back → ⌥⌘Z → **capture the refusal toast** ("Nothing to undo — Delete
+   Block was already undone or changed since.") and the Edit menu open (its Undo/Redo items no longer name Delete
+   Block) → ⇧⌥⌘Z → "No structural change to redo." → "Two." still on the page (capture). Then the NORMAL road on the
+   same note: Delete "Three." → ⌥⌘Z (the receipt "Undid: Delete Block", the block back) → ⇧⌥⌘Z ("Redid: Delete
+   Block", gone) — the ping-pong unchanged. Flip the voice (Settings ▸ Appearance) and capture the refusal again.
+4. **The MCP road (U1's legs 3–4 detour — U1's core makes an untagged copy WAIT under an approved name, and no face
+   can answer it yet):** in a scratch project, read the Clients list's `claude-code` row; if a `-s local`
+   registration with its bound key no longer exists: the row ▸ Deny… (confirm) → Settings ▸ MCP ▸ Connect a client ▸
+   Copy (an untagged key; first 9 characters recorded) → register it `-s local` as `variorum-dev` (`claude mcp
+   add`, the JSON stanza's command + env by hand) → `claude mcp list` ✔ → the row ▸ Approve… → the grant sheet: EDIT
+   on the scratch note's book… — simplest: EDIT on the scratch NOTE (always), cliclick, guarded.
+5. **Leg W2 — the client's VALUE and TOGGLE directions, one real `claude -p --strict-mcp-config` turn:** ask it to
+   `rename_note` the scratch note to "renamed by claude" and `lock_take` the take of block "One." (tee-captured
+   tool answers). Then her own doors: retitle the note back to its old title (the title field) and unlock the take
+   (its card ▾ ▸ Unlock). ⌥⌘Z → refusal "Nothing to undo — claude-code's take lock was already undone or changed
+   since." (capture) → ⌥⌘Z → refusal for "claude-code's note title" (capture) → ⇧⌥⌘Z → "No structural change to
+   redo." → her title and her unlock stand (capture).
+6. **Leg W3 — the client's REVIVE direction, one `claude -p` turn:** `add_comment` on block "One." → her Comments
+   panel ▸ delete that comment → ⌥⌘Z → refusal ("Nothing to undo — claude-code's comment was already undone or
+   changed since.") → ⇧⌥⌘Z → nothing to redo → the comment stays deleted (the panel's deleted fold shows it once).
+7. **Cleanup:** the `-s local` registration removed; her user-scope servers read AFTER (byte-identical fingerprint);
+   the dev instance quit BY BUNDLE ID; the prefs restored; the dev store `Tools/ScaleFixture/restore.sh <dir>` →
+   "Restored (verified)" (it also returns `claude-code`'s pre-window binding and approval); scratch keys deleted, the
+   clipboard emptied, a whole-key grep over the evidence = 0; stray `default.profraw` removed; `Tools/stage release`;
+   one result line. Evidence → `notes/plans/vx246-screens/u2/` (gitignored; keys redacted to 9 characters).
+
+**Path check (`748b21d9^..HEAD`, this unit's commits):** `Sources/VariorumCore/Operations/` — `UndoStack.swift` + 27
+`Operations+*.swift` files; `App/Variorum/Shared/StructuralUndoCopy.swift` and `App/Variorum/Variorum/Registry/ShellActions.swift`
+(the Mac door's quiet words); tests (`UndoQuietPressTests`, `UndoStackQuietRuleTests`, the Mac `JumpAndUndoTests`
+justified edit); this record. **ZERO** lines under `Sync/`, `Persistence/` (no schema), custody/Keychain/`Crypto/`,
+`Server/`, the editor seam (`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, `PaneTextAuthority`, `Shared/EditorBrain`),
+or `Features/MCP/` (VX-281's lane) — grepped.
+
+**Batch-only fallback (~50 min):** steps 0–1 alone; the walk legs move to the next window (the record then says the
+acceptance unit is NOT closed — the brief's evidence includes the walk).
+
+### SELF-ASSESSMENT (pre-stage — the implementer's)
+
+**Against the brief:** the ONE RULE lives in one place — `UndoStack` — and every half of every entry (85) now answers
+whether it changed anything, so a redo after a quiet undo never runs (and its mirror); entries with parts keep a record
+of which parts their last half moved; revives are keyed on the stamp their own undo wrote (the F1 shape). The five
+round-2 probes and one pin per family are red-first (22 of 22, then 23 of 23 with the diverge pin), red again by revert
+with identical test×line sets, green after; the stack's own rule has three new-API pins. THE SWEEP TABLE dispositions
+every registration. Headless whole package green (223/48 · 2,826/326 · 40/6) with every pre-existing pin UNMODIFIED;
+one Mac test needed a justified edit (a toy inverse now answers `true`).
+**Against the spec:** AppSpec §9's structural undo/redo ("each registration carries its inverse AND an exact-row
+redo…") holds, sharpened: the redo now re-applies exactly what its undo un-did, never what the rows happen to read;
+"undo and redo emit ordinary operations" holds (no new write road); "any new structural act clears the redo future"
+and "undoing a `redo: nil` entry ends it" are unchanged; §12's "a door that did nothing speaks a refusal" now holds for
+the structural doors. I1–I10, P1 (every half ∝ its own rows), S1–S5 untouched; zero `Sync/`, custody, schema,
+`Server/`, editor seam, VX-281's lane (path-diffed below).
+**Risks I see:** (1) **the truthfulness of 85 `Bool` answers** is the whole mechanism — a half answering `true` without
+writing would quietly re-open the class for its entry; each was read and dispositioned, but a reviewer should
+spot-check the per-entry records (structural parts, diverge, conversion, span-to-take, batches); (2) behaviour that
+CHANGED on purpose, beyond the class: `revertDeleteVariant` / `revertArchiveVariant` no longer re-assert the default
+pointer over a take her Put back or unarchive already brought back (they used to, which made the undo "write");
+`restorePlacementLocation` no longer bumps `updated_at` when the placement is already there; the comments, takes,
+tags, chapters, memberships and minted notes are revived ONLY on their undo's stamp (a row dead on another stamp — a
+sync tombstone — stays dead); (3) the quiet-press refusal words are UNSEEN (no Mac run yet) and the phone still speaks
+its receipt on a quiet press (OWED 2); (4) residuals recorded, not changed: `finish_book`'s indistinguishable
+reopen-then-refinish (no finish stamp — VX-184's record), and `add_note_to_book`'s undo restoring the seat's
+pre-image position over a reorder of hers made after it; (5) this session ran past the ~500k guideline (to ~690k) to
+finish at a clean seam — the knowledge-bound pieces (the conversions and the sweep) could not move to a fresh session
+cheaply (the resiliency note's 2026-08-31 clarification); every claim above is in a log or a commit.
+
+### PROVISIONALs (with their options — the orchestrator files them at the merge)
+
+- **P-VX276-1 — what a QUIET half does to the stacks:** (a) AS BUILT — it retires its own entry and leaves the other
+  stack as it was; (b) it also ends the redo future, as undoing a `redo: nil` entry does — stricter, it throws away
+  redos her earlier presses earned; (c) the entry moves on marked quiet and its partner is a no-op (the house
+  precedent's letter) — the Edit menu then offers a "Redo …" that does nothing (a false offer).
+- **P-VX276-2 — a quiet press's kind:** (a) AS BUILT — a refusal (toasts), naming the entry; (b) a quiet receipt.
+- **P-VX276-3 — PARTS:** (a) AS BUILT — an entry with several parts (slots, columns, blocks, rows, a merge's mint and
+  released sources) re-applies exactly the parts its partner moved, so the undo/redo can walk PART of an act back and
+  forth while her change to another part stands; (b) whole-entry — any divergence makes the whole entry quiet (simpler
+  to explain; the parts she never touched become un-undoable).
+- **P-VX276-4 — revives keyed on the undo's own stamp (the F1 shape) for every revive redo:** (a) AS BUILT — a row
+  dead on any other stamp (her Trash after a Put back; another device's tombstone) is never revived by a redo; (b)
+  revive any dead row the entry names (the pre-run behaviour for most entries) — would let a redo undo another
+  device's delete.
+- **P-VX277-1 — her own adopt doors on the client's per-slot rule:** (a) AS BUILT — the undo restores a slot only while
+  it still shows the adopted take; (b) her doors restore every pointer unconditionally (the pre-run behaviour) — her
+  later ✓ on an adopted block is overwritten by her own ⌥⌘Z.
+
+### FOR VX-234 (user-facing words, as built)
+
+1. **The structural undo door's quiet press** (Mac, the bottom bar's toast — a refusal): "Nothing to undo — ‹label›
+   was already undone or changed since." (`StructuralUndoCopy.undoFoundNothing`; ‹label› is the entry's own name:
+   "Delete Block", "Adopt Lens", "claude-code's note title"…).
+2. **The structural redo door's quiet press:** "Nothing to redo — it changed again after ‹label› was undone."
+   (`StructuralUndoCopy.redoFoundNothing`).
+Both shared with the phone's door through `StructuralUndoCopy`, but the phone does not speak them yet (OWED 2).
+
+### OWED (for the orchestrator)
+
+1. **THE STAGE WINDOW** above (claim `vx246-u2`), on the GO; U1's batch rides it.
+2. **MOBILE PARITY — the phone's quiet press:** `VariorumMobile/Features/Write/MobileUndoDoor.swift` still calls
+   `undo(with:)`/`redo(with:)` and speaks "Undid: ‹label›" (with a Redo offer) on a quiet press; the fix is the Mac
+   door's two lines (`undoReporting`/`redoReporting` + the two refusals) — a VM ticket (it needs a simulator stage).
+   The rule itself (no redo after a quiet undo) already reaches the phone.
+3. **Canon at the merge:** AppSpec §9's structural undo/redo bullet gains the contract line — "a half runs only after
+   its partner changed something: an undo that finds its act's result already gone (her undo-less door, a sync apply)
+   changes nothing, says so, and retires its entry; a redo re-applies exactly what its undo un-did (parts and stamps
+   included), so it never writes over a change of hers" — with a pointer to this record; §12's status-seam line is
+   already the letter for the refusal.
+4. **The ladder's attention:** the per-entry records (THE SWEEP TABLE's FIXED (parts) rows) and the two default-pointer
+   behaviour changes (Risk 2).
 
