@@ -795,12 +795,16 @@ never rendered); the Activity line for a refused or landed `save_lens` uses the 
 
 ## U5b UNIT RECORD — the block-writing pair: VX-252 · VX-255, plus U5's shared window (opus-implementer, from 2026-10-14 ~14:15 MDT)
 
-**What this unit has NOT done (said first; updated at every piece):** (1) **no code yet** — this commit is the record,
-the traces and the design, and it STOPS at the design forks below for the orchestrator's ruling (the brief: a fork it
-doesn't settle is proposed, committed and ruled before that half is built); (2) no stage window, no Mac build, no live
-round (THE STAGE WINDOW is written at READY, after the build); (3) the guide and `MCPSession.instructions` untouched
-(U8's — the doc-truth sweep below finds nothing false); (4) no `notes/QUESTIONS.md` entry and no canon edit (the
-merge's). Everything below "The design" is a plan, not a claim.
+**What this unit has NOT done (said first; updated at every piece):** (1) **the build is in progress** — pieces 1–8
+are a CONTINUATION's (below); each LIVE STATUS row says what landed; (2) no stage window, no Mac build, no live round yet
+(THE STAGE WINDOW is written at READY, after the build); (3) the guide and `MCPSession.instructions` untouched (U8's — the
+doc-truth sweep below finds nothing false); (4) no `notes/QUESTIONS.md` entry and no canon edit (the merge's). Everything
+below "The design" is the ruled plan; a claim is only what a LIVE STATUS row says DONE with its log.
+
+**THE CONTINUATION (pieces 1–8): a FRESH opus-implementer (xhigh), from 2026-10-14 ~14:45 MDT,** built from this record,
+the U5b BRIEF and THE ORCHESTRATOR'S RULINGS ON U5b's FORKS alone (the designer retired at ~468k after piece 0). It re-read
+the cited code before relying on any line: the design's pointers hold (`perform`'s `createNote` arm 404–415, `noteAnswer`
+757–766, `mintDocument` 213–248 keeping only `minted.block.id` at 237, the parse's silence on `section_id` 202–214).
 
 **Read in full before code (never delegated):** CLAUDE.md and its loaded canon (AppSpec §9's newBlock, merge, import,
 the standing conventions and structural undo; §12's THE MCP DOOR summary); this run record — header, Her kickoff
@@ -848,7 +852,7 @@ An app file moves ⇒ a Mac `build-for-testing` (into `App/Variorum/DerivedData/
 | piece | what | status |
 |---|---|---|
 | 0 | this record + LIVE STATUS + the traces and the design; the FORKS proposed for the orchestrator's ruling | DONE (this commit) — **STOPPED here for the ruling** (FORKS F-1…F-6 below) |
-| 1 | VX-252 — the pins on the OLD tree (wire: `create_note` + single `import_document` answer per-block take records; `section_id` files in the same call, its refusals; the book form a guard), RED | NOT-STARTED — after the ruling |
+| 1 | VX-252 — the pins on the OLD tree (wire: `create_note` + single `import_document` answer per-block take records; `section_id` files in the same call, its refusals; the book form a guard), RED | DONE (this commit) — NEW `Tests/VariorumMCPTests/MCPMintedAnswerServerTests.swift`, 5 tests, wire only: `createNoteAnswersEveryBlocksTakesInFanOrderWithTheShownOne` (structured + prose payloads: the answer's `blocks` == `read_note with_ids`' block id, shown take and every take with its label in fan order — a blank take listed; `block_ids` kept, F-6) · `importDocumentAnswersTheSameRecordsForOneDocumentAndABookKeepsItsAnswer` (an exported document with an Alternates section; the BOOK form's keys exactly `book_id`/`note_ids`/`chapter_ids` — F-2's GUARD) · `sectionIDFilesTheNewNoteUnderItsChapterInTheSameCallAndTheSameUndo` (filed, echoed, ONE `claude-code's note` entry, ⌥⌘Z then ⇧⌥⌘Z returns it filed) · `everySectionIDThatIsntALiveChapterOfTheBookAnswersOneSentenceAndMintsNothing` (nothing · a deleted chapter · a READABLE book's · a HIDDEN book's → one sentence, nothing minted; `section_id` with `wing_id` or with no place → the parse sentence) · `anUnreachableBookAnswersTheOneNotSharedSentenceWithOrWithoutASection` (THE GUARD, F-3). **RED on the old tree (`f50c77e6`'s sources): 4 of 5 failed, 15 issues, each on its designed line, no premise line** — no `blocks` in either answer (`:119`, `:133`, `:167`); the note landed UNSECTIONED with no echo (`:204`, `:205`, `:212`); all four bad chapters LANDED (`:241` ×4, `:244`, `:246`) and the parse sentence never spoken (`:255` ×2, `:258`); **the guard green, by design** (log `notes/plans/vx336-screens/u5b/logs/p1-pins-red.log`, gitignored) |
 | 2 | VX-252 — the fix (core: what was minted rides `DocumentImport`; `section`; wire: `MCPMintedBlocks`, `noteAnswer`, the parse + catalog) + any justified edits, GREEN | NOT-STARTED |
 | 3 | VX-252 — red again BY REVERT (announced first, committed tree, restored, verified) | NOT-STARTED |
 | 4 | VX-255 — the pins on the OLD tree (wire: end at write new, anchor/start refused at write new with the rungTooLow family, anywhere at edit, one undo walks it back whole and redo returns it, a sealed note refuses, anchor of another note refused alike, the fence), RED by absence | NOT-STARTED |
