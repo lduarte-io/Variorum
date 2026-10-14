@@ -2540,3 +2540,28 @@ Bookcase with the keyboard on the window, not in the bar. Nothing to decide. (An
 blinking block in the Terminal voice's quick entry is its decorative block cursor, which shows exactly when the box does
 NOT have the caret — the tour's release turns it on; keystrokes there landed nowhere, in both voices.)
 Status: P-U4-1 open — your eye in daily use.
+
+#222 — **VX-257 (U5), your half-typed comment survives a click away — four readings built PROVISIONAL** (the binding
+record is `notes/plans/fixes/vx-282-editor-notes-fixes.md` § U5; your ruling on P-VX179-R2-1, #215: *"yes, clicking away
+should save your half typed comment on a draft."*). When the comments panel closes, whatever is in its box is kept for
+that block and comes back when you open the block's comments again; ⎋ still clears it deliberately (its first press
+empties the box, its second closes, so nothing is kept); keeping never files a comment (#118(a) stands).
+*(Numbering: the next free number when written; the merging session renumbers if a sibling run took it.)* Each is built
+as stated, with a line to reverse it:
+**P-U5-1 — the panel keeps ONE draft at a time, the newest.** Leaving block B's comments with words in the box replaces
+a draft kept for block A — including one the store refused (a sealed note's). That is the park's existing one-draft rule
+(#140(a)), now reached by a click away too. Options: (b) one kept draft PER BLOCK (the park becomes a small per-block
+table — on the phone's park too); (c) a refused draft is never displaced by a merely unfinished one.
+**P-U5-2 — Close keeps the draft too**, not only a click away: every way out except ⎋⎋ keeps what is in the box (one
+leaving road for all of them). Option: (b) the Close button abandons the draft, as ⎋⎋ does.
+**P-U5-3 — a kept draft comes back silently, with the caret after it**, ready to go on typing. A refused draft still
+comes back with its line (*"the comment that couldn't be saved — here to try again"*). Options: (b) a line of its own for
+a kept draft (say, "your unfinished comment — still here"); (c) the caret at the start, as a refused draft's restore had
+it.
+**P-U5-4 — emptying the box and leaving lets a kept draft go — a refused one included.** So ⎋⎋ after a refused draft
+comes back abandons it; before, the refused words came back on every open until they landed (#140(b)). Option: (b) an
+emptied box leaves a REFUSED draft kept; only an unfinished one goes.
+Recorded, not a question: your ruling supersedes #140(c) on the Mac ("a draft typed and never submitted still dies with
+the close"). The phone is unchanged — its comments sheet still drops an unsubmitted draft on close (your ruling named the
+Mac popover); a VM ticket is the orchestrator's to mint.
+Status: open — your eye in daily use.
