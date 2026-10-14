@@ -344,7 +344,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | IN-PROGRESS — the implementer's headless work (its section's LIVE STATUS) |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | READY FOR STAGE — the ⌘⇧W menu check by AX, the Mac batch (215 suites), two behavioural reverts; ≈50 min (the U1 section's P5 plan) |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -374,11 +374,12 @@ screenshot walk (a fresh walker's, after the stage window); any stage work until
   mounted pin and the behavioural revert are PENDING the stage window.
 - P2 — VX-285 (the Open list grows to the sync footer; the constant splits): DONE (`2f2daba2` — the same commit as
   P1; the two share `SidebarView.openGroup`'s lines) — headless build green; pins + revert PENDING the stage window.
-- P3 — VX-287 (Close Note ⌘⇧W, landing next / previous / the Library): DONE (the commit carrying this line) —
+- P3 — VX-287 (Close Note ⌘⇧W, landing next / previous / the Library): DONE (`9292d1db`) —
   headless build-for-testing green; its pins PENDING the stage window; the chord's system half PENDING (P0).
 - P4 — VX-289 (Close All Notes: the Open list's right-click + the View-menu twin): DONE (same commit as P3 — one
   landing rule, one set of pins) — headless green; pins PENDING the stage window.
-- P5 — the stage window (the Mac batch + the red-on-old reverts): NOT-STARTED.
+- P5 — the stage window: **READY FOR STAGE** — the plan below (≈50 min); nothing of it has run. No revert is in
+  flight; the tree is clean at the commit carrying this line.
 
 **P0 — the ⇧⌘W check, the app's own half (2026-10-14, on `a2a27a10`) — FREE:**
 - `EditorCommands.keyEquivalent(for:)`: no `w` chord of any modifier set.
@@ -490,6 +491,45 @@ note-row grammar; the row menu renders the registry's verb (source read); the tw
 `OpenListCloseShellTests.theMenuActsLandThePaneThroughTheShell` (a mounted `RootView`: ⌘⇧W's act lands next, then
 previous, Close All lands the Library, the menu's gates follow, the notes untouched). New acts, so exact-behaviour
 pins — no red-on-old owed (the brief).
+
+**Headless evidence (no stage):** `xcodebuild … -derivedDataPath DerivedData/vx283-u1 build-for-testing` → TEST
+BUILD SUCCEEDED on `9292d1db`'s code (no new warning in a touched file).
+
+**P5 — THE STAGE WINDOW PLAN (≈50 min; run in this order; the record flips per step):**
+0. *Preconditions (≈3 min).* `pgrep -lx Variorum`; `pgrep -lf "MacOS/Variorum$"` — discriminate by PATH, never touch
+   a `/Applications` instance. The host's Accessibility trust checked before any System Events call (WalkKit's rule).
+   `defaults export io.lduarte.Variorum.debug notes/plans/vx283-screens/u1/prefs-before.plist`. With ZERO dev
+   instances, copy `variorum.sqlite{,-wal,-shm}` from the dev container's `Variorum-dev/` into
+   `notes/plans/vx283-screens/u1/store-before/<UTC stamp>/` (the walk protocol's restore rule; never the key files,
+   `Backups/` or `Previous Libraries/`; castle-W1 untouched).
+1. *The ⌘⇧W check's SYSTEM half (≈8 min) — FIRST, before anything ships on the chord.* `open -n
+   App/Variorum/DerivedData/vx283-u1/Build/Products/Debug/Variorum.app` (dismiss What's New by its own button).
+   By System Events on that PID: open File, then View, then Window, enumerating each item's name +
+   `AXMenuItemCmdChar` + `AXMenuItemCmdModifiers` (⇧⌘ = 1) with the menu OPEN (AppKit re-titles File ▸ Close on
+   validation), ⎋ after each. Then File ▸ New Window, Window ▸ Merge All Windows (two tabs), and enumerate File and
+   Window again. **Any item other than View ▸ Close Note wearing W with modifiers 1 ⇒ a COLLISION: restore the store
+   and prefs, release, STOP and report — the chord does not ship.** Free ⇒ record the listing here. Quit the dev
+   instance by identity (`tell application id "io.lduarte.Variorum.debug" to quit`), re-check both pgreps.
+2. *The Mac batch (≈25 min).* From `App/Variorum/`: `xcodebuild -scheme Variorum -destination 'platform=macOS'
+   -derivedDataPath DerivedData/vx283-u1 test` with one `-only-testing:VariorumTests/<Suite>` per suite of every test
+   file that exercises a changed source — the files matching `SidebarLayout|SidebarView|SidebarGeometry|OpenNotes|
+   openNotes|closeNote|EditorCommands\.|HelperView|CapabilityRegistry\.doored|menuRendered|contextMenuCapabilities|
+   keyEquivalent\(for|RootView\(|CapabilityContext\(` (86 files → 215 top-level suites, incl. the six new ones);
+   `pipestatus` checked; the "Test run with N tests" line AND its skipped lines recorded.
+3. *The red-on-old reverts (≈10 min) — each named here before it starts, restored by `git checkout --
+   App/Variorum/Variorum/Features/Library/SidebarView.swift`, verified by an empty `git diff`:*
+   - **R-A (VX-285):** in `openGroup`, `.frame(maxHeight: maxHeight)` → `.frame(maxHeight:
+     SidebarLayout.scrollingSectionMaxHeight(rowHeight: rowHeight))` and the `fixedSize` `vertical:` →
+     `shown.count <= SidebarLayout.scrollingSectionWindow`. Run `-only-testing:VariorumTests/OpenListLayoutMountTests`.
+     Expected: `inATallColumnTheListRunsDownToTheFooterAndStops` and `inAShortColumnTheListTakesItsFloorAndTheColumnScrolls`
+     RED; `bothScrollingSectionsKeepTheirBarInTheMargin` green.
+   - **R-B (VX-286):** delete both `.padding(.horizontal, Self.scrollingSectionMargin)` lines and put
+     `.padding(.horizontal, Self.groupPadding)` back on the two sections' VStacks (where the "(VX-286: …)" comments
+     stand). Same suite. Expected: `bothScrollingSectionsKeepTheirBarInTheMargin` RED.
+4. *Release (≈2 min).* Dev store copied back with zero dev instances and `cmp`-verified per file; prefs `defaults
+   import` → re-export → diff against `prefs-before.plist` (delete any key the window added); `Tools/stage release`;
+   the one-line release report ("dev store restored + verified, prefs diff clean, posture Standard/unlocked,
+   castle-W1 untouched").
 
 ## Ladder
 
