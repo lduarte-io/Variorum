@@ -244,6 +244,19 @@ public enum AssessRules {
                     repairs.append(.restoreKeyFileFromMirror)
                 }
             }
+            // Both gone — the live file and its mirror (a login-password holder
+            // deleted the two): the newest catalogued copy of the current
+            // key's file comes back (the lobby opened through such a file).
+            if liveKeyFile(facts, unlocked) == nil,
+               memory?.keyFileMirror.map({ $0.fingerprint != unlocked.currentFingerprint }) ?? true,
+               let copy = facts.catalog.keyFiles
+                .filter({ file in
+                    if case .format3(let keyFile)? = file.document { return keyFile.fingerprint == unlocked.currentFingerprint }
+                    return false
+                })
+                .max(by: { ($0.frozenAt ?? .distantPast, $0.id) < ($1.frozenAt ?? .distantPast, $1.id) }) {
+                repairs.append(.restoreKeyFileFromCopy(keyFileID: copy.id))
+            }
             if stale { repairs.append(.refreshMemory) }
             if unlocked.recordSection != unlocked.thisMac { repairs.append(.refreshRecordSection) }
         }

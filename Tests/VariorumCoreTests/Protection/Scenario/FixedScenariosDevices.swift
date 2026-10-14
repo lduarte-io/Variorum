@@ -14,6 +14,22 @@ import Testing
 
 @Suite("VX-305 U4 fixed — devices: Touch ID, replacement and cloned Macs, two logins, replays")
 struct DeviceScenarios {
+    /// "the key file and memory item both deleted on a local-only Castle
+    /// library: the lobby still opens it" — through the newest pair's key
+    /// file; the live key file comes back from that pair (its Apple wraps
+    /// never re-added), and the next act runs whole.
+    @Test func theKeyFileAndTheMemoryItemBothDeleted() async throws {
+        for gate in [GateStyle.touchID, .alwaysAsk] {
+            let world = try scenarioWorld { w in try w.today(on: w.macA, TodaySpec(mode: .castle, gate: gate)) }
+            await world.done([.launch("macA"), .backup("macA"), .tamper("macA", .deleteKeyFileAndMemory)])
+            #expect(world.macA.isOpen, "\(gate): the lobby didn't open it")
+            #expect(world.liveKeyFile(world.macA)?.fingerprint == world.macA.slot?.fingerprint, "\(gate): no live key file came back")
+            await world.done([.useStandard("macA"), .settle])
+            #expect(world.macA.slot?.record?.mode == .standard)
+            expectPromisesKept(world, "\(gate)")
+        }
+    }
+
     /// "a replacement Mac's first open: it starts on Always ask, and Touch ID
     /// comes on only from Settings" — on new hardware, its memory item left
     /// behind (Migration Assistant reportedly doesn't carry Local Items — the

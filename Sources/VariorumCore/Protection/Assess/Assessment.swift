@@ -198,6 +198,10 @@ public enum Repair: Hashable, Sendable {
     /// mirror. Never an Apple wrap: those leave legitimately (a retirement, a
     /// re-key) and are never re-added by a repair.
     case restoreKeyFileFromMirror
+    /// Always: the live key file AND its mirror are gone (both deleted) but a
+    /// copy's frozen key file of the CURRENT key is catalogued — the newest is
+    /// put back as the live file (its Apple wraps never re-added). VX-305 U4.
+    case restoreKeyFileFromCopy(keyFileID: String)
     /// §3.10: this device's choice says Touch ID and no item exists — Always
     /// ask is recorded quietly (a settings write; never an item).
     case recordAlwaysAskQuietly

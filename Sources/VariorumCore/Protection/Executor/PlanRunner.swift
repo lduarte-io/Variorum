@@ -75,6 +75,10 @@ struct ActRolledBack: Error {
 /// **One act's program.**
 protocol ActProgram {
     var act: ProtectionAct { get }
+    /// The act reads or re-keys the live key file — it never begins without
+    /// one of the current key (it would refuse inside its plan, leaving the
+    /// act in flight with nothing able to finish it — VX-305 U4).
+    var needsLiveKeyFile: Bool { get }
     /// The steps, in order, for these parameters.
     func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String]
     /// The steps that write anything for the act's NEW key — reset when the
@@ -87,6 +91,16 @@ protocol ActProgram {
 }
 
 extension ActProgram {
+    var needsLiveKeyFile: Bool {
+        switch act {
+        case .deviceSettings, .touchIDRearm, .confirmMode, .offerDelete, .plaintextExport, .openCopy, .land,
+             .createLibrary, .migration, .moveOffSharedKey, .retireSharedKey, .relinkApple:
+            return false
+        default:
+            return true
+        }
+    }
+
     func newKeySteps(_ parameters: ActParameters) -> Set<String> { [] }
     func finishingSteps(_ library: UnlockedLibrary) -> [String] { [] }
 }
@@ -198,6 +212,7 @@ extension ProtectionExecutor {
     ) async throws -> ActOutcome {
         guard library.record != nil else { throw ExecutorRefusal.migrationOwed }
         if let inFlight = library.section.actInFlight { throw ExecutorRefusal.actInFlight(inFlight.act) }
+        if program.needsLiveKeyFile, library.keyFile?.fingerprint != library.fingerprint { throw ExecutorRefusal.noLiveKeyFile }
         let at = now()
         let (section, sequence) = library.section.beginningAct(
             program.act, from: library.fingerprint, to: toKey.map(Self.fp), at: at)

@@ -73,6 +73,7 @@ extension ProtectionExecutor {
         case .refreshMemory: return "refreshMemory"
         case .refreshRecordSection: return "refreshRecordSection"
         case .restoreKeyFileFromMirror: return "restoreKeyFileFromMirror"
+        case .restoreKeyFileFromCopy: return "restoreKeyFileFromCopy"
         case .recordAlwaysAskQuietly: return "recordAlwaysAskQuietly"
         case .makeTouchIDItem: return "makeTouchIDItem"
         case .deleteTouchIDItem: return "deleteTouchIDItem"
@@ -190,6 +191,30 @@ extension ProtectionExecutor {
             restored.apple = live?.fingerprint == mirror.fingerprint ? live?.apple : nil
             restored.sharedApple = live?.fingerprint == mirror.fingerprint ? live?.sharedApple : nil
             try writeLiveKeyFile(restored, &library)
+            try writeMemory(&library)
+            return nil
+
+        case .restoreKeyFileFromCopy(let id):
+            guard try liveFormat3() == nil else { return .nothingThere }
+            guard case .format3(var copy)? = try leaves.keyFiles.readKeyFile(catalogID: id),
+                  copy.fingerprint == library.fingerprint, copy.libraryID == library.record?.libraryID
+            else { return .preconditionDoesNotVerify }
+            // Never an Apple wrap re-added: those leave legitimately.
+            copy.apple = nil
+            copy.sharedApple = nil
+            try writeLiveKeyFile(copy, &library)
+            try writeMemory(&library)
+            return nil
+
+        case .restoreKeyFileFromCopy(let id):
+            guard try liveFormat3() == nil else { return .nothingThere }
+            guard case .format3(var copy)? = try leaves.keyFiles.readKeyFile(catalogID: id),
+                  copy.fingerprint == library.fingerprint, copy.libraryID == library.record?.libraryID
+            else { return .preconditionDoesNotVerify }
+            // Never an Apple wrap re-added: those leave legitimately.
+            copy.apple = nil
+            copy.sharedApple = nil
+            try writeLiveKeyFile(copy, &library)
             try writeMemory(&library)
             return nil
 
