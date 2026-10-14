@@ -1,10 +1,10 @@
 # VX-246 — Run: MCP pane, docs & door fixes — kickoff + plan
 
 **STATUS: VX-246 CLOSED 2026-10-14 — it merged its FIX units (U1 + U1b, U2, U3, U4 + U4b + U4c: the door's security
-and correctness, the undo class, her editor vs the wire, the faces after big writes) through its PR "VX-246: MCP door
-fixes (security, undo, editor vs wire, faces)"; its record is `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`.
+and correctness, the undo class, her editor vs the wire, the faces after big writes) through PR #162 "VX-246: MCP
+door fixes (security, undo, editor vs wire, faces)"; its record is `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`.
 Its other four units (U5–U8) moved to **VX-336 "Run: MCP wire tools & AI docs"** (the orchestrator's provisional
-ruling 3 under her overnight mandate, for her ratification at the VX-246 bundle in `notes/QUESTIONS.md`). VX-336 is NOT
+ruling 3 under her overnight mandate, for her ratification at the VX-246 bundle, `notes/QUESTIONS.md` #226). VX-336 is NOT
 STARTED: she kicks it off. This file now serves VX-336, and its kickoff message below is VX-336's. (Written 2026-10-13 at
 VX-184's re-scope; re-aimed at VX-246's closeout, 2026-10-14.)**
 
@@ -32,7 +32,7 @@ member keeping its ruling and its ticket:
 ## Kickoff message (for `/run-phase vx-336`)
 
 > Run VX-336, "Run: MCP wire tools & AI docs". It is VX-246's follow-on, minted at VX-246's closeout (2026-10-14) under
-> the orchestrator's provisional ruling 3, which she ratifies or reverses at the VX-246 bundle in `notes/QUESTIONS.md`.
+> the orchestrator's provisional ruling 3, which she ratifies or reverses at the VX-246 bundle, `notes/QUESTIONS.md` #226.
 > VX-246 merged the door's FIX units; this run carries its other four units, unstarted. This plan file keeps its
 > original name because tickets point at it.
 >
