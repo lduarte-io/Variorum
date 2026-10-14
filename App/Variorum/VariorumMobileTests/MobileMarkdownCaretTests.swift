@@ -26,14 +26,36 @@ import VariorumCore
 @MainActor
 @Suite("VX-296 — the caret-aware face in the phone's Write editor", .serialized)
 struct MobileMarkdownCaretTests {
+    /// The posture her phone is always in: the editor's window is the
+    /// foreground SCENE's key window and its text view the one first
+    /// responder (VX-282 C-1 — a bare frame window is never the scene's key
+    /// window, and a text view an earlier suite left first responder in a
+    /// hidden window keeps the hardware keyboard's input session; in that
+    /// polluted posture an `insertText` of a run desyncs the phone editor with
+    /// or without the caret settle — VM-19 owns that gate gap).
     private func host(_ surface: MobileWriteSurfaceView) -> UIWindow {
-        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 700))
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let scene = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
+        let window = scene.map { UIWindow(windowScene: $0) }
+            ?? UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 700))
+        window.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
         let controller = UIViewController()
         controller.view.addSubview(surface)
         window.rootViewController = controller
+        // Whatever an earlier suite left holding the keyboard lets go first.
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         window.makeKeyAndVisible()
         _ = surface.textView.becomeFirstResponder()
         return window
+    }
+
+    /// The window's teardown: the text view resigns BEFORE the window hides,
+    /// so no first responder outlives the test.
+    private func dismiss(_ window: UIWindow, _ surface: MobileWriteSurfaceView) {
+        _ = surface.textView.resignFirstResponder()
+        window.isHidden = true
+        window.rootViewController = nil
     }
 
     private func isItalic(_ storage: NSTextStorage, at offset: Int) -> Bool {
@@ -68,7 +90,7 @@ struct MobileMarkdownCaretTests {
             let postID = try await makePost(session, blocks: ["**", "after"])
             let (model, surface) = await makeSurfaceEditor(session, postID: postID)
             let window = host(surface)
-            defer { window.isHidden = true; window.rootViewController = nil }
+            defer { dismiss(window, surface) }
             let view = surface.textView
             let storage = view.textStorage
 
@@ -95,7 +117,7 @@ struct MobileMarkdownCaretTests {
             let postID = try await makePost(session, blocks: ["**", "next block"])
             let (model, surface) = await makeSurfaceEditor(session, postID: postID)
             let window = host(surface)
-            defer { window.isHidden = true; window.rootViewController = nil }
+            defer { dismiss(window, surface) }
             let view = surface.textView
             let storage = view.textStorage
 
@@ -132,7 +154,7 @@ struct MobileMarkdownCaretTests {
             let postID = try await makePost(session, blocks: ["*hello *", "next block"])
             let (model, surface) = await makeSurfaceEditor(session, postID: postID)
             let window = host(surface)
-            defer { window.isHidden = true; window.rootViewController = nil }
+            defer { dismiss(window, surface) }
             let view = surface.textView
             let storage = view.textStorage
 
@@ -178,7 +200,7 @@ struct MobileMarkdownCaretTests {
                 let postID = try await makePost(session, blocks: ["*hello *", "next block"])
                 let (model, surface) = await makeSurfaceEditor(session, postID: postID)
                 let window = host(surface)
-                defer { window.isHidden = true; window.rootViewController = nil }
+                defer { dismiss(window, surface) }
                 let view = surface.textView
                 let storage = view.textStorage
 
