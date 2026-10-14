@@ -379,6 +379,17 @@ struct SettleRewrapOverlayTests {
         }
     }
 
+    /// Display passes WITHOUT forcing one — only what the surface itself
+    /// asked to draw is drawn — and the queue turns behind them. The act's
+    /// road: a settle that restyled must bring its own display pass.
+    private func drawIfNeeded(_ h: EditorHarness) async {
+        for _ in 0..<4 {
+            h.textView.window?.displayIfNeeded()
+            pump()
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+    }
+
     /// Ground truth: entry `i`'s first layout fragment, laid out, in view
     /// coordinates — the frame `refreshBadges` reads.
     private func fragmentY(_ h: EditorHarness, entry i: Int) -> CGFloat? {
@@ -403,8 +414,9 @@ struct SettleRewrapOverlayTests {
     /// **RED ON OLD.** An italic paragraph honoured at her caret (`*… |*`),
     /// a fanned block below it; an arrow past the closing star un-styles the
     /// span (the trailing space left behind), the paragraph re-wraps longer
-    /// and the fanned block moves down — and after the display pass the ⑂
-    /// badge stands on the block's NEW place.
+    /// and the fanned block moves down — and after the display pass the
+    /// surface itself asks for (none is forced after the act) the ⑂ badge
+    /// stands on the block's NEW place.
     @Test func aSettleThatRewrapsAParagraphMovesTheBadgeBelowIt() async throws {
         let current = EditorTypography.current
         let adopted = EditorTypography.isAdopted
@@ -467,7 +479,7 @@ struct SettleRewrapOverlayTests {
             #expect(h.textView.selectedRange() == NSRange(location: paragraphLength, length: 0))
             #expect(h.documentText == text, "attributes only — no character edit")
             #expect(!isItalic(storage, at: 1), "the trailing space left behind: the span un-styled")
-            await draw(h)
+            await drawIfNeeded(h)  // nothing forced: the settle's own display request
 
             let after = try #require(fragmentY(h, entry: 1))
             try #require(after - before > 10,

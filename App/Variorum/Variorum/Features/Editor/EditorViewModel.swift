@@ -3518,9 +3518,31 @@ final class EditorViewModel {
     /// character, no block identity, nothing registered with text undo.
     func settleMarkdownCaret() {
         guard let textView, let storage = textView.textStorage else { return }
-        MarkdownStyling.settleCaret(
+        let restyled = MarkdownStyling.settleCaret(
             &markdownCaret, selection: holdsCaret(textView) ? textView.selectedRange() : nil,
             in: storage)
+        // VX-282 R1-2: a settle writes ATTRIBUTES only, yet in a proportional
+        // voice an italic toggled on or off re-wraps its paragraph (Study's
+        // Iowan italic is ~14 % narrower than its roman) and moves every block
+        // below it — a geometry event with no character edit, so the overlay
+        // generation must hear it (N14's inputs: the storage's characters, the
+        // attach, a width reflow — and now a settle that restyled). Delivery
+        // rides N14's own road: the next display pass reports through
+        // `viewWillDraw` → `overlayLayoutDidSettle`, whose hop lands after the
+        // pass that laid the restyled line out. The pass is made CERTAIN here
+        // (`needsDisplay` — the line a caret LEFT may be off screen above the
+        // viewport, moving visible text with no glyph of its own to draw;
+        // one viewport redraw per restyling settle, which only a caret's
+        // arrival at or departure from a rescue point makes). Deliberately not
+        // a direct `overlayLayoutDidSettle()` the way the width road calls it:
+        // a direct hop can run BEFORE the layout pass that consumes the
+        // restyle — a note opening with its remembered caret at a rescue point
+        // — reading pre-layout frames and spending the generation, so the
+        // pass's own report then delivers nothing: N14's cold-mount class.
+        if restyled {
+            overlayGeometryGeneration &+= 1
+            textView.needsDisplay = true
+        }
     }
 
     /// VX-282 R1-7: does this surface hold a caret of hers? A non-editable
