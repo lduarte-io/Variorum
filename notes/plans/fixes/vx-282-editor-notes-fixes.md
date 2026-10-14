@@ -138,7 +138,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **DONE** — VX-229 DISMISSED AS HOLLOW in use (the u5b heap decider; the fix `ee86dd8c` reverted `7d798f82`; the runner's retention a known issue `c46f999d`, cause untraced) · VX-257 FIXED `1ca8fe72` (pins `7650b6ce`/`075473c2`, reshaped `dab712d8`/`eaf42b27`; QUESTIONS #223) · VX-183 FIXED `a765683c` · VX-182 FIXED `fd4c260c` (pins `f38fb93c`). Verified: core 2,801/320 + MCP 212/41 + workbook 40/6 headless; W1 / u5c red on old as designed; u5b g2 76/11, g3 23/2; **u5d g1 113 tests / 13 suites passed (9 known issues — the VX-229 runner fact)**; the u5b walk, every row held, both voices. Windows released 05:25:17, 05:57:46, 06:13:57, 06:19:43. Posture as found (Standard, unlocked, Study); no instance; no revert in flight. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **DONE** — pins `d35191b6` + correction `ee1facc9` · fix `3cf0079b` · window `a1967ac0` (logs) + the walk record. Stage window 05:27:17–05:38:17 (claim `vx282-u6`, RELEASED): W1 red on old exactly as predicted (3 tests, 1 issue — the launch pin's last cell) · W2 the fixed batch 148 tests / 43 suites green · W3 every row held (A0 old: the window; A/A' fixed: the caret in the bar at launch in Study and Terminal, a typed letter lands; C the tour never stolen from; D the navigation back as today — O-U6-1 seen live); row B's restored note window not reachable on this Mac (not restored), a new window walked in its place. P-U6-1/2 → QUESTIONS #224. Posture: Study, unlocked Standard, tour `completed`, the Bookcase, nothing filed. No claim held; no revert in flight. |
-| Ladder | round 1 `opus-reviewer` (0B/0M/6m/4n, dispositioned) → its FIX LEG; round 2 = the run's one `fable-reviewer` | round 1's FIX LEG **DONE** (the r1fix window 07:53–08:00, released): R1-1/R1-2/R1-7 FIXED red-on-old → green · R1-3 DISMISSED AS HOLLOW · R1-4/5/6/9/10 done · R1-8 the closeout's watch. **NEXT: round 2 = the run's one `fable-reviewer`** |
+| Ladder | round 1 `opus-reviewer` (0B/0M/6m/4n, dispositioned) → its FIX LEG; round 2 = the run's one `fable-reviewer` | round 1's FIX LEG DONE (r1fix, released) · round 2 (the one Fable review) 0B/0M/2m/3n, all five CONFIRMED → its FIX LEG: **READY FOR STAGE — r2fix, ≈8 min** (F-2 + F-3 red-on-old then green; F-1/F-5 docs, F-4 recorded) |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
 ## Stage traffic log (oct13coordinator protocol)
@@ -3031,8 +3031,73 @@ Each finding re-traced in the tree at `dcc42b6c`.
 
 ### ROUND 2 — FIX LEG (the same `opus-implementer` session, 2026-10-14)
 
-**LIVE STATUS:** IN-PROGRESS — the final calls recorded (this commit); next: the two pins ahead of the fixes, the old
-products, the fixes, the docs, the fixed products. **Revert state: no behavioural revert in flight.**
+**LIVE STATUS: READY FOR STAGE — r2fix (≈8 min).** Every finding applied as called; the two pins ahead of the fixes;
+the products built headless. No claim held; **no behavioural revert in flight** (none was needed — the old products
+are the pins commit's own build).
+
+| Finding | State |
+|---|---|
+| F-1 the rescue can reshape a stable span | **DONE (doc)** `5609a1e3` + `beb6f705` — #220's two sentences + option (b); R1-5's "one spot" sentence corrected; the U2 edges line |
+| F-2 a seal arriving mid-flight (R1-7's residual) | **BUILT** — pin `5a869dbb` (+ its compile fix `936bb4ca`), fix `ddcfda66` (shape (b), `EditorViewModel.swift` only); red-on-old + green PENDING |
+| F-3 the settle answers what it wrote | **BUILT** — pin `5a869dbb`/`936bb4ca`, fix `b963184e` (one line of logic in the shared face); red-on-old + green PENDING |
+| F-4 a pane's stale pending edit | **RECORDED** `5609a1e3` (the U2 edges) — no road, no fix |
+| F-5 the clear's re-wrap far above the viewport | **RECORDED** `5609a1e3` (the U2 edges) — the nudge UNMEASURED, 18k C6 cited |
+
+**F-2 — the diff (`ddcfda66`, `EditorViewModel.swift` only, zero `EditorSurfaceController` lines):** a private
+`noteIsEditable` (`header.map { !$0.locked } ?? false`); `holdsCaret` = `structuralInFlight ? noteIsEditable :
+textView.isEditable`; `adoptHeader` keeps its `isEditable` write under `!structuralInFlight` exactly as before (the
+flight's defer still re-derives it) and re-settles when `noteIsEditable` FLIPS, flight or not (R1-7's flip was keyed on
+the view's `isEditable` and lived inside the flight guard — the residual's half). A first delivery after attach is a
+flip from "none loaded" — its settle is the O(1) gate's no-op at an ordinary caret.
+**The pin** `MarkdownCaretFaceTests.aSealArrivingDuringAStructuralFlightClearsTheCaretsHonour` (variant (ii), the
+deterministic one): `["*hello *", "next block"]`, the caret honoured at 7; the store SEALED (`lockPost`) with its header
+read but not delivered; the writer held 0.4 s (the `aKeystrokeDuringTheFlightIsDeferredNeverDropped` rig); ⌘⇧⏎'s act
+started (`insertBlockBelowCaret`) and spun until `structuralInFlight`; the sealed header ADOPTED mid-flight → the span
+plain at once (RED on current); release, the flight (its op refuses under the seal — nothing lands), flush → plain,
+`isEditable == false`, still two blocks, no identity failure. **The landing variant (i) is NOT built** — no structural
+act lands the caret right before a closer with a space behind it in a shape a rig can stage cheaply (divide, merge, the
+carve and ⌘⇧⏎ land at a block's start or end); (i) and (ii) share the one rule the fix states, and (ii) is its
+arrival-time proof. *(The pin first committed at `5a869dbb` did not compile — `#require` over a capture-list closure
+tripped the macro and the read inside an async body resolves to the async overload; `936bb4ca` reads first with
+`try await`, then requires. Test-only.)*
+
+**F-3 — the diff (`b963184e`, `Shared/MarkdownFace/MarkdownFaceCore.swift`):** `settleCaret` keeps both line restyles
+(each evaluated into its own `let` before the `||`) and returns `clearWrote || honourWrote`; the doc says what the
+answer means. Both platforms carry it; the phone discards the answer. **The pin**
+`MarkdownCaretFaceTests.aCaretOnAStarNoOpenerPairsWithMovesNoOverlayGeometry`: `["hello *x", "*hi *"]`, non-vacuity —
+offset 6 is gate-positive (`MarkdownCaretRescue.point`); a caret move 0 → 6 leaves `overlayGeometryGeneration` unchanged
+(RED on current: it bumps); the control — a move onto `*hi |*`'s real rescue point bumps it exactly once (on current it
+reads two).
+
+**The products (no new tree; the old copy replaced):**
+- `DerivedData/vx282-r1fix-old-products` (Mac, Products-only clone, REPLACED) — the build of `936bb4ca`: the round-2
+  pins over the pre-fix app (`nm`: no `noteIsEditable`).
+- `DerivedData/vx282-u1` (Mac) — the build of `ddcfda66` (F-3 + F-2; `nm`: `noteIsEditable` present).
+- `DerivedData/vx282-u2-ios` (phone) — the build of `ddcfda66` (the shared face changed).
+All TEST BUILD SUCCEEDED (`DerivedData/vx282-r2fix-*.log`). No `Sources/` file — no `swift test` owed. The commits
+after `ddcfda66` are docs only.
+
+#### THE r2fix WINDOW PLAN (≈8 min; on the orchestrator's claim line; `guard.sh --author` first; `pgrep -lx Variorum` empty; no launch, no walk)
+
+From `App/Variorum/`; logs to `notes/plans/vx282-screens/r2fix/logs/` (create it).
+- **W1 — red on old, Mac (≈1 min):** `xcodebuild test-without-building -xctestrun
+  DerivedData/vx282-r1fix-old-products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination 'platform=macOS'
+  -only-testing:VariorumTests/MarkdownCaretFaceTests` → `w1-red-on-old.log`. EXPECTED RED: exactly
+  `aSealArrivingDuringAStructuralFlightClearsTheCaretsHonour` (2 issues: at the arrival, after the flight) and
+  `aCaretOnAStarNoOpenerPairsWithMovesNoOverlayGeometry` (2: the no-opener move, the control's count); the suite's
+  other seven green.
+- **W2 — the fixed Mac set, `-derivedDataPath DerivedData/vx282-u1` (≈2 min), ONE invocation:**
+  `-only-testing:VariorumTests/` × `MarkdownCaretFaceTests` `SettleRewrapOverlayTests` `PaneMarkdownCaretFaceTests`
+  `PaneFindFaceTests` → `w2-mac.log`. EXPECTED all green (the shell must pass the list as SEPARATE arguments — an array;
+  the r1fix window's one harness slip).
+- **W2b — the fixed phone, `-derivedDataPath DerivedData/vx282-u2-ios` (≈2 min incl. the boot):** `-destination
+  'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' -collect-test-diagnostics never
+  -only-testing:VariorumMobileTests/MobileMarkdownCaretTests` → `w2b-phone.log`. EXPECTED all green (4 tests + R1-3's 3
+  cases). Then `xcrun simctl shutdown all`; 0 booted; release the claim.
+
+**READY FOR STAGE — r2fix: W1 (Mac red-on-old: F-2, F-3) · W2 (MarkdownCaretFaceTests, SettleRewrapOverlayTests,
+PaneMarkdownCaretFaceTests, PaneFindFaceTests on the fixed product) · W2b (MobileMarkdownCaretTests on the fixed phone),
+≈8 min.**
 orchestrator's) and F-3 (taken, with its pin); docs for F-1 and F-5; F-4 recorded only.
 
 ## Closeout
