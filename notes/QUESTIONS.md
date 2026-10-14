@@ -2645,6 +2645,9 @@ Status: answered, all six.
 
 ## VX-246 — Run: MCP door fixes (2026-10-14)
 
+#226 — **ANSWERED 2026-10-14 — RATIFIED WHOLE.** Her words: *"that's fine in regards to #226"*. Every PROVISIONAL
+below stands as built, and so do the orchestrator's rulings 1–3. She added on `show_in_app`: *"that's fine for the AI
+to move your view if you ask it to."*
 #226 — **THE VX-246 RATIFY BUNDLE (merged 2026-10-14, PR #162, merge commit 712bbb4f; the binding record is
 `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md` — her rulings during the run, ORCHESTRATOR'S PROVISIONAL
 RULINGS, each UNIT RECORD's PROVISIONALs block with its options, THE LADDER (Fable round 1 → Opus round 2, closed);
