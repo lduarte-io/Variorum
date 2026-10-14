@@ -172,9 +172,7 @@ struct TimelineReachWindowTests {
         try await withWorld { session in
             try world(session, notes: 360)
             let model = TimelineViewModel(session: session)
-            await loadSevenPages(model)
-            let first = try #require(model.items.first?.postID)
-            let last = try #require(model.items.last?.postID)
+            await model.reload()
 
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: 700, height: 520),
@@ -188,7 +186,14 @@ struct TimelineReachWindowTests {
                 window.orderOut(nil)
                 window.close()
             }
+            // The view's own `.task` reloads on appear where the host runs it
+            // — so her six "Load More" presses come AFTER the mount settles.
             await settle(window, hosting, timeout: 1)
+            for _ in 0..<6 { await model.loadMore() }
+            await settle(window, hosting, timeout: 0.6)
+            #expect(model.items.count >= 300, "non-vacuity: \(model.items.count) rows loaded")
+            let first = try #require(model.items.first?.postID)
+            let last = try #require(model.items.last?.postID)
             #expect(model.reachIDs.contains(first), "non-vacuity: the top is held while it shows")
 
             await scrollToTheEnd(window, hosting)

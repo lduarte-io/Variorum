@@ -216,7 +216,11 @@ struct MCPSharedIconClickTests {
         _ rig: SharedIconRig, client: String, host: String, opens: () -> Int
     ) async throws {
         let drawn = await rig.poll(timeout: 8) { MCPSharedIconProbe.frames(in: rig.window).count == 1 }
-        #expect(drawn, "\(host): exactly one row wears the icon (\(MCPSharedIconProbe.frames(in: rig.window).count) drawn)")
+        // A host's own `.task` may re-read its rows on appear (where the host
+        // runs it): let the first turns settle, then read the frame afresh.
+        await rig.poll(timeout: 0.6) { false }
+        #expect(drawn && MCPSharedIconProbe.frames(in: rig.window).count == 1,
+                "\(host): exactly one row wears the icon (\(MCPSharedIconProbe.frames(in: rig.window).count) drawn)")
         let frame = try #require(MCPSharedIconProbe.frames(in: rig.window).first, "\(host): the icon drew")
         #expect(frame.width >= 6 && frame.height >= 6, "\(host): the icon has a body to click (\(frame))")
         let before = MCPSharedIconProbe.presentations(of: client)
