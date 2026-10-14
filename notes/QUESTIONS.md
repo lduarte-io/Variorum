@@ -2493,6 +2493,14 @@ only, your report's literal case.
 always did at that one spot: it inserts a new `**` pair (one letter later, at `*hello w|*`, ⌘I unwraps the span).
 Built: (a) unchanged — the acts are among "every other reader" your ruling left untouched. Option: (b) the acts read
 the caret-aware reading when nothing is selected, so ⌘I unwraps what the face shows.
+**Said plainly, so it isn't a surprise (the run's round-1 review, R1-5):** the fix you approved was worded "the grammar
+… untouched", but the caret rule was built INSIDE the grammar's module — `MarkdownSyntax.spans(in:caret:)` takes an
+optional caret, and the closers ask one new question (`closerFlanks`: no space before me, or the caret sits exactly
+here). With no caret — every reader except the live editors: the read pages, export, the phone's read page, search,
+⌘B/⌘I — the reading is byte-for-byte what it was (the grammar's own suites run unchanged and green, and a pin walks
+every caret position of nineteen texts to show a caret only ever changes the reading at the one spot). It lives there so
+there is ONE grammar with one extra input, rather than a second matcher in the face that could drift from it. If you'd
+rather the grammar file itself stayed untouched, the rule can move out into the face at the cost of that second copy.
 Status: open — your eye in daily use.
 
 #221 — **VX-154 (U3), Write's take panel answers every routed command about a block or a take on ITS block — seven

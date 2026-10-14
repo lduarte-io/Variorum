@@ -972,9 +972,19 @@ pre-fix app) · `DerivedData/vx282-u3-revB-products` (the fix minus the guard) �
 - **O-3 (the rider's twin):** `TakeStructureCopy.movedNote` (⌥⌘⏎'s receipt, shared by Write and the boards) names
   "“archived · n” under its takes" — read in the panel now, and in Write, whose road back is this panel's "archived
   takes". Shared copy on Write's road — not changed here.
-- **O-4 (the recorded two-windows keying family):** the handler stack and the grey fact are app-wide; with the panel up in
+- ~~**O-4 (the recorded two-windows keying family):** the handler stack and the grey fact are app-wide; with the panel up in
   one window it answers commands meant for another window's surface. Pre-existing (VX-135's registration); U3 widens what
-  the panel answers.
+  the panel answers.~~ **WITHDRAWN at the round-1 fix leg (R1-6) — its premise is false.** `PaneMount.kind(of:focused:windowIsKey:)`
+  (`Workspace/WorkspaceNavigation.swift:85-87`, consulted at `RootView.swift:1124` and `Workspace/NoteWindowView.swift:92`)
+  mounts a live surface — Write, the sheet it hosts and every routed-command handler — in exactly ONE window, the
+  `WindowRegistry`'s sticky last-known-key (`activeWindowID`, `Workspace/WindowRegistry.swift:116-120`; only REGISTERED
+  windows move it — a full window, a note-only window, the quick-note pad). A window that stops being that one re-renders
+  its pane read-cheap (`ReadPostView`): its `EditorView` leaves, the take panel's sheet (`EditorView.swift:186`) leaves with
+  its host, and the panel's `.onDisappear` (`WriteTakesPanel.swift:267-272`) unregisters its handler and detaches its grey
+  fact. So the panel is never up in a window other than the one whose surface owns the handler stack — there is no other
+  window's surface for it to answer for. (The app-wide keying that the 13u2b ladder's NIT 1 and the 18l record name is a
+  different thing — session-scoped probe registries and `activePostID` — and the panel touches neither.) Traced by
+  reading, not walked; no ticket.
 - **O-5 (U5 overlap):** the panel is now a FOURTH host of `CommentsPanel` (a nested sheet — Write's sheet, the Takes bar's
   sheet and `TakesShared`'s popover are the others). VX-257's park-on-host-closing must cover a sheet host the way it
   covers the bar's. No overlap with VX-183's registry declarations (U3 declares no comment door).
@@ -1676,8 +1686,14 @@ back by `git revert 7d798f82`'s code half (the surface split at `ee86dd8c`) and 
 - **The restore speaks the refusal's line only for a refusal** (`Held.refused`): her own words back in the box need no
   explaining, and "couldn't be saved" would be false.
 - **The caret after a restored draft** (`CommentTextAreaView.adoptText`): text arriving into an EMPTY area leaves the
-  caret after it — what typing it would have done — so a restored draft is picked up where she stopped. Every other
-  programmatic adopt (a clear, a revert, a store arrival) keeps the caret where it can be, as before.
+  caret after it — what typing it would have done — so a restored draft is picked up where she stopped. ~~Every other
+  programmatic adopt (a clear, a revert, a store arrival) keeps the caret where it can be, as before.~~ **CORRECTED at
+  the round-1 fix leg (R1-10):** the rule is keyed on the area being EMPTY, not on the adopt being a restore — so ANY
+  adopt into an empty area lands the caret at the end, the MOUNT FILL included (every area is born empty and its first
+  `adopt` from `makeNSView` fills it: a live comment row's edit area now opens with its caret at the end of the comment,
+  where it opened at the start before VX-257), and a store arrival into an area she had emptied likewise. An adopt into
+  a NON-empty area (a clear, a revert, a store arrival over text) keeps the caret where it can be, as before. The record
+  line was wrong; the code is unchanged (a click into a row places the caret where she clicks either way).
 - **The shared park type** gains `Held.refused` (default `true`) and `park(…refused:)` (default `true`): every existing
   park — the phone's included — is unchanged in behaviour and in source.
 - Every host is covered by construction: the popover (its `willClose` → the leaving body), the `.sheet(item:)` hosts —
@@ -2584,15 +2600,15 @@ leg's. Every count and every "red"/"green" below is **PENDING** until the r1fix 
 
 | Finding | State |
 |---|---|
-| R1-1 find paint × the read-going settle | IN-PROGRESS — pin, then the fix |
-| R1-2 Write's overlays after a settle re-wrap | NOT-STARTED |
-| R1-3 the phone's guard window (PIN FIRST) | NOT-STARTED |
-| R1-4 the comments panel to `Core/Views/` | NOT-STARTED |
-| R1-5 #220's disclosure line | NOT-STARTED |
-| R1-6 O-4 re-verified | NOT-STARTED |
-| R1-7 a caret in a non-editable editor | NOT-STARTED |
-| R1-9 the burst pins against R2-1's revert | NOT-STARTED |
-| R1-10 the U5 record's adopt line | NOT-STARTED |
+| R1-1 find paint × the read-going settle | BUILT — pin `49ebe4c4`, fix `833b1ba7`; red-on-old + green PENDING the window |
+| R1-2 Write's overlays after a settle re-wrap | BUILT — pin `174b64f3` (road-honest at `9f9980cb`), fix `9f9980cb` (a deliberate refinement — see below); red-on-old + green PENDING |
+| R1-3 the phone's guard window (PIN FIRST) | PIN ONLY — `706008eb`; the guard prepared, NOT on the branch; the window decides |
+| R1-4 the comments panel to `Core/Views/` | DONE `b7fece88` (build green headless) |
+| R1-5 #220's disclosure line | DONE (this commit) |
+| R1-6 O-4 re-verified | DONE (this commit) — premise FALSE, the U3 line withdrawn; no ticket |
+| R1-7 a caret in a non-editable editor | BUILT — pins `ebd327d0`, fix `26c2e448`; red-on-old + green PENDING |
+| R1-9 the burst pins against R2-1's revert | NOT-STARTED — the revert product is built after the docs |
+| R1-10 the U5 record's adopt line | DONE (this commit) |
 
 **Revert state: no behavioural revert in flight.**
 
