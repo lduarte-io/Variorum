@@ -114,7 +114,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U1 | VX-290 — the empty-block backspace's caret landing | **DONE** — fix `385aa1fc`; W1 red on old + W2 the Mac batch green `be826a5d`; W3 the walk, every row held `a7a63949`. Stage released 22:01:26 and 23:47:00. One observation for the orchestrator to ticket (the bar's word counter, not this unit's road). No revert in flight. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **READY FOR STAGE — u2b: phone W2b suites (-collect-test-diagnostics never) + Mac g1, ≈12 min.** The W2b fix built: `MarkdownFace.settleCaret` never writes while `storage.editedMask` is non-empty (before the ledger, so a skip consumes nothing); the trace of why a skipped settle is never lost is recorded; the red pin is `MobileMarkdownCaretTests.leavingATrailingSpaceBehindUnstylesTheSpanHonestly` (red on the pre-guard product by its crash). Rebuilt headless into the EXISTING `vx282-u2` + `vx282-u2-ios` only. Earlier: W1 red on old as designed, W2 Mac 190/26 green, W3 walk holds (Study). No claim held; no revert in flight. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **READY FOR STAGE — W1 red on old (old products) + W1b revert B (the ring guard) + W2 the Mac batch g1/g2 (fixed) + W3 a short walk on the dev store (both voices), ≈42 min.** Record `4e5d3464`; seams `04e0369f`; pins ahead of the fix `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Three product sets built headless, TEST BUILD SUCCEEDED: `DerivedData/vx282-u3-old-products`, `…-revB-products`, `DerivedData/vx282-u3` (fixed). Revert B DONE and RESTORED (`git diff` empty). PROVISIONALs P-U3-1…7 (QUESTIONS #220). No claim held; no revert in flight. Every count PENDING. |
-| U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **IN-PROGRESS** — traces `324bfda8`; pins ahead of the fix `c4f2a893` (+ the tour pin's isolation edit `bfd3ca38`); fix VX-193 `0c31fcc5`, VX-112 `6bb9c7c9` (TEST BUILD SUCCEEDED headless). **REVERT IN FLIGHT (named before it starts):** `App/Variorum/Variorum/Core/Views/CaptureTextView.swift` checked out from `c4f2a893` (the pre-fix box) to rebuild the OLD products with the pins as edited at `bfd3ca38`; restore = `git checkout HEAD -- <that file>`, verified by `git diff` empty. No claim held. Every count PENDING. |
+| U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — W1 red on old (old products) + W2 the Mac batch g1/g2 (fixed) + W3 a walk on the dev store (the bar, the pad, the tour in Terminal and Study, the away start), ≈42 min.** Traces `324bfda8`; pins ahead of the fix `c4f2a893` (+ the tour pin's isolation `bfd3ca38`); fix VX-193 `0c31fcc5`, VX-112 `6bb9c7c9`. Products built headless, TEST BUILD SUCCEEDED ×2: `DerivedData/vx282-u4-old-products` (pins over the pre-fix box, by the named revert `cdc842f0` — DONE and RESTORED, `git diff` empty) and `DerivedData/vx282-u4` (fixed). PROVISIONALs P-U4-1/2 (QUESTIONS #221). No claim held; no revert in flight. Every count PENDING. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
@@ -961,7 +961,7 @@ first — no `/Applications/Variorum.app` instance, none of ours).** From `App/V
 
 ### U4 — VX-193 + VX-112 (the capture box: the undo desync and the focus re-grab)
 
-**State: IN-PROGRESS.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Every count and every
+**State: READY FOR STAGE** (the window plan at the end of this section). Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Every count and every
 "green"/"red" below is **PENDING** until it runs (headless) or the stage window runs it.
 
 **The surface:** `Core/Views/CaptureTextView.swift` (the ONE capture box, 13u3 UNIT C) and its two hosts —
@@ -1079,9 +1079,109 @@ build of `c4f2a893` (the pins over the pre-fix app).
 | `CaptureTourFocusTests` · `stepsOneAndTwoNeverPutTheCaretBackInTheQuickEntry` | the REAL shell (`TourEntryTests`' world): the caret in the Bookcase's quick entry, the tour requested on the Bookcase (her road), released at arrival, then step 1 and step 2 settle — the box never holds the caret | **EXPECTED GREEN on both sides** (the static trace finds no re-grab on this road) — a red on old would mean the harness reproduces a re-grab the trace missed; the result is a finding either way |
 
 Expected on old: **13 issues** (3 + 2 + 2 + 2 + 1 + 1 + 1 + 1) across 10 failing cases, every other case green; expected
-on the fixed product: all green.
+on the fixed product: all green. *(The tour pin was edited at `bfd3ca38` — it no longer writes the dev app's real
+defaults and reads `TourOracle` only when the slot reports THIS store's seeded book, so it cannot collide with
+`TourEntryTests` inside one test process; the old products were rebuilt with that edit, below.)*
 
-*(The diff, the products, the window plan: next pieces — PENDING.)*
+#### The diff (ONE production file; zero hosts, zero `Sources/`, `Sync/`, custody, Keychain, schema, `Shared/`)
+
+`App/Variorum/Variorum/Core/Views/CaptureTextView.swift` (+58/−10):
+- **VX-193 (`0c31fcc5`):** `Coordinator` gains `undoHistory` (its own `UndoManager`), `undoManager(for:)` (answers for
+  its own view only), the did-undo/did-redo observers (`queue: .main`, `MainActor.assumeIsolated` — `CommentTextArea`'s
+  exact form) → `textChangedOutsideTyping()` (binding ← view, only when they differ), `stopObservingUndo()` (called from
+  `dismantleNSView`), and `adopt(_:into:)` — `updateNSView`'s programmatic adopt moved verbatim, plus
+  `undoHistory.removeAllActions()`. `makeNSView` names `coordinator.view` before the delegate is wired (it was the last
+  line), so `undoManager(for:)` can never answer nil for the box's own view.
+- **VX-112 (`6bb9c7c9`):** `CaptureNSTextView` gains `heldKeyboardWhenDetached` and `viewWillMove(toWindow:)` (notes a
+  held keyboard on detach); `viewDidMoveToWindow` serves `wantsInitialFocus` ONCE (cleared; its deferred serve keeps
+  today's guard; re-armed if the serve finds the box out of its window), else re-takes a held keyboard only when the
+  window holds it (nil or the window itself). Docs corrected ("the shelf's autofocus" → the pad's; the trace's reason
+  the bar's flag is false is written at `makeNSView`).
+- Not touched: `QuickEntryBar.swift`, `QuickNoteView.swift` (neither needs a line — both file the binding, which now
+  follows), `takeFocus()`, the keys, the geometry statics, the canary. Nothing on VX-246's courtesy list; nothing outside
+  the run's declared surfaces (the new test file aside).
+
+#### The products (one new tree, as briefed; `Build/Products` set aside once, 456 MB)
+
+- **Old:** `App/Variorum/DerivedData/vx282-u4-old-products` — the pins as at `bfd3ca38` over the PRE-FIX box. Built by a
+  NAMED revert (`cdc842f0` named it first): `CaptureTextView.swift` checked out from `c4f2a893`, `build-for-testing`
+  into `vx282-u4` → TEST BUILD SUCCEEDED → products copied → restored by `git checkout HEAD --`, `git diff` empty,
+  verified. Its dylib's `CaptureNSTextView` carries no `viewWillMove` and its `Coordinator` no `undoHistory` (`nm`).
+- **Fixed:** `App/Variorum/DerivedData/vx282-u4` — the build of `bfd3ca38` (= the fix at `6bb9c7c9` + the edited pins)
+  → TEST BUILD SUCCEEDED; zero warnings in `CaptureTextView.swift` and the new test file. Its dylib carries both members'
+  symbols (`nm`).
+- No core file touched → no `swift test` owed. No phone file touched → no phone build owed (`Core/Views/` is Mac-only;
+  the phone's capture is a SwiftUI `TextField`, its own road — `MobileQuickNote.swift:1229`).
+
+#### PROVISIONALs (QUESTIONS #221)
+
+- **P-U4-1 — undo is the box's own, and a programmatic replacement ends it** (P-VX179-U3-4 carried, #215 still open
+  there). Built (a). Options: (b) the window's shared history (⌘Z in an empty box reaches other text's stack); (c) the
+  clear itself undoable (a duplicate-filing hazard).
+- **P-U4-2 — candidate 2, a tour started AWAY from the Bookcase lands with the caret in the bar** (traced by code
+  order; W3 checks it live). Built (a): unchanged — R102 stands, the tour releases once at its arrival. Options: (b) the
+  tour releases again when its own navigation lands; (c) the bar's mount autofocus stands down while a tour runs.
+
+#### Observations (not fixed — for the orchestrator)
+
+- **O-U4-1 (untraced):** the box reports its caret's departure only through `resignFirstResponder`; `CommentNSTextView`
+  also reports it at `viewWillMove(toWindow: nil)` because a detached first responder "does not always hear" resign. If
+  that holds for the box, a re-attach that finds ANOTHER responder holding the keyboard leaves the bar's `entryFocused`
+  true (the Terminal block cursor stays hidden). Pre-existing; the rule built here is unaffected.
+- **O-U4-2:** on the old tree the box's typing history sat on the window's undo manager — the one Write's editor and the
+  panes use (no other app text view supplies its own; `grep undoManager(for:`). P-U4-1 takes the box off that stack; no
+  cross-surface symptom was traced.
+
+#### THE WINDOW PLAN (≈42 min; runs only on the orchestrator's claim line; `guard.sh --author` before every leg)
+
+From `App/Variorum/`; logs to `notes/plans/vx282-screens/u4/logs/`, captures to `notes/plans/vx282-screens/u4/`.
+`pgrep -fl 'Variorum.app/Contents/MacOS'` first — no `/Applications/Variorum.app` instance, none of ours.
+
+- **W1 — red on old (≈5 min):** `xcodebuild test-without-building -xctestrun
+  DerivedData/vx282-u4-old-products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination 'platform=macOS'
+  -only-testing:VariorumTests/CaptureUndoSyncTests -only-testing:VariorumTests/CaptureHostsUndoFilingTests
+  -only-testing:VariorumTests/CaptureFocusReattachTests -only-testing:VariorumTests/CaptureTourFocusTests` →
+  `w1-red-on-old.log`. EXPECTED: 13 issues in the 10 cases the pin table marks RED, every GUARD green, NO crash (the two
+  `#require` cells stop the old tree before its ⌘Z). The tour pin's result on old is a FINDING either way (expected
+  green).
+- **W2 — the fixed Mac batch (≈12 min), `-derivedDataPath DerivedData/vx282-u4`, two groups (suite TYPE names,
+  grepped):**
+  (g1) `CaptureUndoSyncTests` `CaptureHostsUndoFilingTests` `CaptureFocusReattachTests` `CaptureTourFocusTests`
+  `CaptureFocusReportTests` `CaptureKeysTests` `CaptureTextViewKeyTests` `CaptureHandOffTests` `QuickEntryBarTests`
+  `QuickNoteMintTests` `QuickNoteDoorTests` `QuickNoteWindowTests` `QuickNoteWordTests` `QuickNoteParkTests` →
+  `w2-g1.log`;
+  (g2) `CaptureMicrosyntaxDoorTests` `CaptureMicrosyntaxLineEndingTests` `CaptureLineEndingDoorTests`
+  `CRLFImportDoorTests` `TitleSuggestionChipTests` `CommentTextAreaMountedTests` `CommentPanelGeometryRuleTests`
+  `SystemHotKeyChordTests` `SystemHotKeyDeclarationTests` `SystemHotKeyRoadTests` `TourEntryTests` `TourSpotlightTests`
+  `TourEngineTests` `TourOfferLineTests` `BookcaseQuickEntryPlacementTests` `ShelfModelTests` `PromoteAndPaletteTests`
+  → `w2-g2.log`. Read every suite's ✔/✘ line and the skips (a wrong name runs 0 tests and still "succeeds").
+- **W3 — the walk (≈25 min), `DerivedData/vx282-u4/Build/Products/Debug/Variorum.app` on the DEV store only**
+  (`open -n`; dismiss a What's New sheet with its own button if one shows; the voice and appearance as found, recorded).
+  Keys through `keys.sh` only, ≥ 2 s apart; captures by REGION (`screencapture -x -R`), the pad by window id (it floats,
+  layer 19). The caret's truth is read by AX, never from a screenshot alone: `tell (first application process whose unix
+  id is <pid>) to get role of (value of attribute "AXFocusedUIElement")` (the box is an `AXTextArea`).
+  - **A — the quick-entry bar (VX-193):** on the Bookcase, the caret in the bar (AX). Type `VX-193 bar one`, ← then →
+    (a caret move ends the typing undo group), type ` two` (capture) → ⌘Z: the box reads `VX-193 bar one` (capture) →
+    ⌘Z: empty, the placeholder back (capture) → ⇧⌘Z: `VX-193 bar one` (capture) → ⏎: the note opens reading `VX-193 bar
+    one` — never `two` (capture). Back to the Bookcase (⌘K). **A2 (the sibling):** three spaces, ⏎ → the box clears and
+    stays → ⌘Z → nothing comes back, no alert (capture).
+  - **B — the quick-note pad (VX-193):** File ▸ Quick Note (menu, by AX name) → the pad (capture by id). The same:
+    `VX-193 pad one`, ←→, ` two`, ⌘Z, ⌘Z, ⇧⌘Z (capture each) → ⏎ → the pad files and closes (the receipt). Proof of what
+    filed: ⌘K, type `VX-193 pad` → the passage reads `VX-193 pad one` (capture); `pad two` finds nothing (capture).
+  - **C — VX-112, her road, in TERMINAL** (her walk's voice; switched by ⌘K "Use Terminal Voice" if the store is in
+    Study): on the Bookcase with the caret in the bar (AX: `AXTextArea`) → Help ▸ Take the Tour → step 1: capture the bar
+    (the Terminal block cursor — expected VISIBLE, the release's own sign) + AX focus (expected NOT the box) → one
+    keystroke `x` → the bar stays empty (capture) → the card's "next ⟶" (by AX name) → step 2: capture + AX + `x` again.
+  - **D — the same in STUDY** (⌘K "Use Study Voice"; Help ▸ Take the Tour starts over at step 1): no block cursor; AX +
+    `x` at steps 1 and 2.
+  - **E — P-U4-2 live (the away start):** open the VX-193 bar note (⌘K) → Help ▸ Take the Tour → the tour lands on the
+    Bookcase → AX focus + capture (EXPECTED by the trace: the caret IS in the bar — the R102 raise after the release); no
+    keystroke here (it would start a note). Then "End tour" by its AX name.
+  - **Cleanup:** the two walk notes to the Trash (note ▾ ▸ Delete Note… ▸ Delete; residue recorded); any `x` that landed
+    deleted by ⌫; the voice restored as found; the tour record left as found (`variorum.tour.offer` read `completed`
+    before the window — a later tour never downgrades it, re-read after); quit OUR instance by identity (`tell
+    application id "io.lduarte.Variorum.debug" to quit`), `pgrep` again; the dev store Standard and unlocked; release
+    the claim.
 
 ## Ladder
 

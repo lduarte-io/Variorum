@@ -2518,3 +2518,23 @@ itself — close the takes panel first."
 ⌘⇧L). The ones that show something show it beneath or after the panel. Options: (b) grey them while the panel is up;
 (c) the panel shows them itself.
 Status: open — your eye in daily use.
+
+#221 — **VX-193 + VX-112 (U4), the capture box — two readings built PROVISIONAL** (the binding record is
+`notes/plans/fixes/vx-282-editor-notes-fixes.md` § U4 — the traces, the pins, the walk). *(Numbering: the next free
+number when written; the merging session renumbers if a sibling run took it.)* Each is built as stated, with a line to
+reverse it:
+**P-U4-1 — undo in the quick-entry bar and the quick-note pad is the BOX's own, and filing ends it** (your comments
+panel's P-VX179-U3-4, #215 — still open there — carried to the capture box). ⌘Z in the box undoes the box's typing and
+nothing else; after the box is cleared for you (a note filed, or an empty filing — three spaces and ⏎ — which keeps the
+box on screen) there is nothing to undo into. Built (a): the panel's rule; it is also what makes ⌘Z after an empty filing
+safe (on the old tree it replayed the old words' ranges into the empty box — an exception, measured). Options: (b) one
+shared history with the window (the old road — ⌘Z in an empty box then reaches whatever other text left on the window's
+stack); (c) the clear itself undoable (⌘Z after ⏎ brings the filed words back into the box — a duplicate-filing hazard,
+and after a completed filing the box is gone anyway).
+**P-U4-2 — a tour started AWAY from the Bookcase lands with the caret in the quick entry.** The tour takes you to the
+Bookcase and releases the keyboard as it arrives; the Bookcase's own "open with the cursor in the bar" (R102) then runs
+one moment later, so step 1 shows the caret in the bar (a keystroke there would start a note) — traced in the code; the walk checks it live. A tour started FROM the
+Bookcase — your walk's road — does not do this (no new Bookcase arrives). Built (a): unchanged — R102 stands, and the
+tour releases once, at its own arrival. Options: (b) the tour releases the keyboard again when its own trip to the
+Bookcase lands; (c) the bar's arrival autofocus stands down while a tour is running (it resumes after the tour).
+Status: open — your eye on your walk (VX-112 was yours to judge there).
