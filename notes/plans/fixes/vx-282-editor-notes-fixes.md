@@ -2988,6 +2988,35 @@ Each finding re-traced in the tree at `dcc42b6c`.
   occasion (caret parked at a rescue point, a scroll away, a click), the physics, and that it is unmeasured.
 
 **Summary for the reviewer's call:** agree all five; code for F-2 (shape (a) or (b) — the lane question is the
+
+#### THE REVIEWER'S FINAL CALLS (the Fable reviewer, relayed by the orchestrator verbatim; all five CONFIRMED, none FINDER-FIXES — the implementer applies)
+
+- **F-1 — CONFIRMED, doc only.** Two sentences in #220 naming the re-shape class (`*foo *bar*`, `*2 * 3 = 6*`): the
+  reading changes only WHILE the caret sits there, and it can shorten a span that already stood; the narrowing offered
+  as her option (b) (rescue only where no caret-blind span already covers that marker); one line in the U2 edges. No pin.
+- **F-2 — CONFIRMED, SHAPE (b)** (technical merit: it states the true rule where the rule lives and clears at the
+  seal's ARRIVAL). `holdsCaret` becomes `structuralInFlight ? (header.map { !$0.locked } ?? false) : textView.isEditable`;
+  `adoptHeader`'s `textView.isEditable` write stays guarded by `!structuralInFlight` exactly as today (the defer still
+  re-derives it); track NOTE-level editability (the previous header's `locked`) and re-settle on a FLIP regardless of
+  flight (the unseal mirror comes free). Pin: variant (ii)'s deterministic shape — held writer, honour at a rescue
+  point, structural act started, a LOCKED header adopted while `structuralInFlight`, release, flush → the span reads
+  plain and `isEditable == false`, RED on current; the landing variant (i) as a second cell if the rig makes it cheap.
+  The diff lands entirely in `EditorViewModel.swift` — zero `EditorSurfaceController` lines.
+- **F-3 — CONFIRMED, taken into this leg.** `settleCaret` returns `clearWrote || honourWrote` (one line in the shared
+  face); all three consumers (R1-1's reset, the pane's remeasure, R1-2's generation bump) become correct, not just
+  cheaper. Pin: on `hello *x`, a caret move to offset 6 leaves `overlayGeometryGeneration` unchanged — RED on current.
+- **F-4 — CONFIRMED, record only, no fix.** One line in the U2 edges.
+- **F-5 — CONFIRMED, doc only.** One line in the U2 edges: the occasion, the physics (±1–2 lines; W1 measured 22 pt at
+  200 words), the on-screen nudge UNMEASURED, citing 18k C6.
+- **Products and the window:** headless builds into the existing trees (`vx282-u1`, `vx282-u2-ios`); the pins
+  committed ahead of the fixes, the old Products-only copy reused/replaced (`vx282-r1fix-old-products`); the stage set =
+  the two new pins red-on-old then green, plus the Mac `MarkdownCaretFaceTests` `SettleRewrapOverlayTests`
+  `PaneMarkdownCaretFaceTests` `PaneFindFaceTests` and the phone `MobileMarkdownCaretTests` (the shared file changed).
+
+### ROUND 2 — FIX LEG (the same `opus-implementer` session, 2026-10-14)
+
+**LIVE STATUS:** IN-PROGRESS — the final calls recorded (this commit); next: the two pins ahead of the fixes, the old
+products, the fixes, the docs, the fixed products. **Revert state: no behavioural revert in flight.**
 orchestrator's) and F-3 (taken, with its pin); docs for F-1 and F-5; F-4 recorded only.
 
 ## Closeout
