@@ -199,7 +199,7 @@ its phase.
    in it, and every copy made after you leave. No copy made before you left opens through it** — those open with the
    passphrase or the twelve words you had on the day you left. Leaving never makes new words, so that day's paper keeps
    working. Your other devices each follow with one secret typed, so their own copies from before open with the words,
-   and with the passphrase when it was the one typed there; each copy's *Opens with* line says which, and from which
+   and with the passphrase when it was the one you typed there to follow; each copy's *Opens with* line says which, and from which
    day (§3.4). Said in those words on every road into Standard: the leave screen, joining or moving to an account in
    Standard, and the typed step of a follow.
 6. **Signing out never changes how your library is protected.** Signing in to a different account changes nothing
@@ -622,8 +622,8 @@ open its file. So:
   - **In Standard:** this Mac holds the key, so the new key's silent item and this Mac's own Apple key carry it with
     nothing remembered; the passphrase is typed or set new (Standard's forgot road), and the words typed or made new.
   - The account's Apple key is left alone: the account's other devices still use it.
-- **Joining or moving into an account** in Castle is entering Castle for this library: the re-key, this Mac's own Apple
-  key retired, and the old shared key's checks (§3.5). Joining or moving into an account in Standard from Castle is
+- **Joining or moving into an account** in Castle is entering Castle for this library: the re-key, every Apple key of
+  this Mac's own for the library retired, and the old shared key's checks (§3.5). Joining or moving into an account in Standard from Castle is
   leaving Castle for it: its key change and anchor (§3.4), with rule 5's sentence at the consent. Joining an account
   in the library's own mode — Standard from Standard, or Castle from Castle — adds the master's wrap and takes nothing
   away, so the key stays. When the library's passphrase differs from the account's, enrolling re-wraps the library
@@ -665,7 +665,9 @@ open its file. So:
   - **Sync keys are held by what they can reach** (§3.2). Until the previous corpus key leaves the vault, the new
     master reaches a Castle-era key through it, so the new sync keys and the previous corpus key stay in Castle-kind
     custody — the account's Touch ID sync item, made at this press and holding all three, or session memory under
-    Always ask — and no Castle-era key is ever within the login password's reach.
+    Always ask — and no Castle-era key is ever within the login password's reach. It replaces the account's Castle-era
+    item (one per account); phase 3 orders the writes so that a crash before the commit point still finds the old
+    keys.
   - **One write completes the leave:** it adds the account's Apple wrap of the new master under the key the vault
     names, with the previous-corpus-key window closed — so no Castle-era corpus key ever sits under anything
     Apple-reachable. Only a device that can read that named key makes it: this one, or another device of the account
