@@ -2073,8 +2073,15 @@ final class MobileEditorViewModel {
     /// most two LINES (P1). Attributes only: no character, no identity.
     func settleMarkdownCaret() {
         guard let storage else { return }
+        // VX-282 R1-7: a non-editable editor holds no caret of hers — the
+        // read tier's stood-down surface (another tab holds the pen), a gone
+        // note, the page under the open takes browser or comments sheet — so
+        // its selection is never honoured (the Mac pane's rule). A SEALED
+        // note stays editable here (the gate refuses its keystrokes and its
+        // caret is drawn), so its caret is honoured as she sees it.
+        let selection = textView.flatMap { $0.isEditable ? $0.selectedRange : nil }
         MarkdownFace.settleCaret(
-            &markdownCaret, selection: textView?.selectedRange, in: storage,
+            &markdownCaret, selection: selection, in: storage,
             base: MobileEditorStyle.baseFont, palette: MobileEditorStyle.markdownPalette)
     }
 

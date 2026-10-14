@@ -804,7 +804,15 @@ final class EditorViewModel {
         // The flight's defer re-derives editability from the freshest
         // header at flight end.
         if !structuralInFlight {
-            textView?.isEditable = value.map { !$0.locked } ?? false
+            let editable = value.map { !$0.locked } ?? false
+            let flipped = textView.map { $0.isEditable != editable } ?? false
+            textView?.isEditable = editable
+            // VX-282 R1-7: the caret's honour follows the editability — a note
+            // SEALED while her caret sits at a rescue point re-reads that line
+            // caret-blind (no caret is drawn on a sealed page), and unsealed it
+            // honours the caret where it still stands. Only on a flip: a header
+            // delivery rides every autosave's touch stamp.
+            if flipped { settleMarkdownCaret() }
         }
     }
 
@@ -3511,7 +3519,21 @@ final class EditorViewModel {
     func settleMarkdownCaret() {
         guard let textView, let storage = textView.textStorage else { return }
         MarkdownStyling.settleCaret(
-            &markdownCaret, selection: textView.selectedRange(), in: storage)
+            &markdownCaret, selection: holdsCaret(textView) ? textView.selectedRange() : nil,
+            in: storage)
+    }
+
+    /// VX-282 R1-7: does this surface hold a caret of hers? A non-editable
+    /// Write — a SEALED note, selectable but never typed in, no caret drawn —
+    /// holds none, so its selection is never honoured (the live pane's rule:
+    /// `PaneSurface`'s settle hands no selection while the pane reads). The
+    /// structural flight's few-ms fence is the one non-editable state that
+    /// still holds her caret: the act lands the caret INSIDE the flight
+    /// (`applyStructuralResult`) and the fence lifts after it with no
+    /// selection change of its own, so reading the fence as "no caret" would
+    /// leave a landing at a rescue point caret-blind until her next move.
+    private func holdsCaret(_ textView: NSTextView) -> Bool {
+        textView.isEditable || structuralInFlight
     }
 
     func updateCaretContext() {
