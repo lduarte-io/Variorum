@@ -130,7 +130,7 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 | kickoff: worktree, branch, in-flight row (main 94f0a2fb), tickets In Progress, this record | DONE (orchestrator) |
 | U1 — the pane in tabs | **UNIT CLOSED — DONE** (2026-10-13 ~22:35 MDT, opus-implementer): VX-199 · VX-205 · VX-232 (FIXED red-first) · VX-245's two MCP sites (`3d00a166`); red on old 4 issues; Mac batch 250/31 (one issue — VX-283's six lint sites); the walk in both voices DONE, dev store restored `cmp`-SAME. 3 PROVISIONALs (P-VX281-U1-1…3) for QUESTIONS at the merge; the cold review is the ladder's. See the U1 UNIT RECORD |
 | U2 — the shared icon | **UNIT CLOSED — DONE** (2026-10-14 ~00:20 MDT, opus-implementer): VX-268 — the one icon on every row the ask glyph marks + the ticket's book/gathering and Timeline rows; red first (core 43, Mac 27 issues on the seam), Mac batch 812/149 (one issue — VX-115's standing pin); the walk in both voices DONE, the dev store restored `cmp`-SAME against the original. 5 PROVISIONALs (P-VX281-U2-1…5) for QUESTIONS at the merge; the cold review is the ladder's. See the U2 UNIT RECORD |
-| the ladder | **ROUND 1 CLOSED** (2026-10-14 ~01:55 MDT): 1B/0M/5m/3n → R1-1, R1-2, R1-3, R1-4 FIXED red-first (red on old → green); R1-5 evidence gap closed (four host clicks green, no defect); R1-6, R1-7, R1-8 FIXED (cleanliness); R1-9 DISMISSED AS HOLLOW; none disputed. Windows R1 (`vx281-r1fix`, 01:36:39–01:43:28) and R1b (`vx281-r1b`, 01:50:43–01:52:07). Next: ROUND 2 — a fresh reviewer over the fixes |
+| the ladder | ROUND 1 CLOSED (~01:55); **ROUND 2 DONE** (~02:30, 0B/0M/1m/4n — recorded below with the orchestrator's R2-3 rulings); round-2 fixes IN-PROGRESS (a fresh implementer); then the end-of-run FABLE round (her redirect) as the run's final round |
 | closeout | NOT-STARTED |
 
 ## FOR VX-234 (every wording call this run makes, where it renders — posted to VX-234 at close)
@@ -1021,6 +1021,107 @@ U2 OWED 1) all answered.
 1. **The follow-up's red on the FIRST fix** — from the temporary worktree's `App/Variorum` (`<scratchpad>/r1/oldtree`, now `06aad3f8` with `WingSwitcherSheet.swift` at `f66a3f95`): `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-281/DerivedData/vx281-r1-old -only-testing:VariorumTests/MCPSharedIconClickTests` → `logs/c-followup-red.log`. Expected: ONLY `escapeOverARowsPopoverLeavesTheSwitcherUp` RED on the AppKit oracle (the popover window still visible) — the mechanism confirmed. If it is GREEN there, the R1 red was the probe's: the follow-up's code change is HOLLOW and is reverted (`git revert` of its source lines, the oracle kept).
 2. **The fixed tree** (`vx281-r1-new`, `06aad3f8`): the seven suites naming the changed types — `CapabilityRegistryTests`, `MCPAsksWaitCaptureTests`, `MCPShareFacesCaptureTests`, `MCPShareFacesTests`, `MCPSharedIconClickTests`, `MCPSharedRowsRulesTests`, `WingSwitcherChordTests` → `logs/d-followup-green.log`. Expected all green (the capture harnesses skip without their env var).
 3. Release at once; record; remove the worktree (`git worktree remove`) and delete both r1 trees.
+
+### ROUND 2 — Opus cold review at max (a FRESH `opus-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-281), 2026-10-14 ~02:30
+
+**Tip reviewed:** `65332645` (the diff `a9ebe0a4..HEAD` whole; round 1's fixes `0e907a24..HEAD` line by line against
+R1-1…R1-9). **Tally: 0 BLOCKER · 0 MAJOR · 1 MINOR · 4 NIT** — no new BLOCKER/MAJOR, so the ladder owes no round 3 on
+its own account; the end-of-run Fable round (her redirect) follows these fixes as the run's final round. The
+reviewer's findings, condensed faithfully:
+
+**R2-1 [MINOR] · `Features/Library/LibraryCatalogView.swift:279–280` (lifecycle), `:205–219` (the mode switch) ·
+`LibraryCatalogPaging.swift:180–211` · `LibraryCatalogModel.swift:605–609`, `:689`**
+- In Timeline mode the Library keeps a reach hold over rows it does not draw. `LibraryCatalogView` stays mounted
+  in Timeline mode (its body swaps its content to `TimelineView`), so `.onAppear { holdNearFacts() }` /
+  `.onDisappear { stopHoldingFacts() }` never end the hold; `search()` → `read()` loads `noteHits` whatever the
+  mode and re-arms `holdNearFacts()` after every read (`:689`); `holdNearFacts()` starts `reachHold` over up to
+  4 × 80 notes with no mode check. With live reach, `mcpNoteFacts` reads `container`, rewritten per autosave
+  (`Operations+Variant.swift:626`) — so the Library in Timeline mode in a split pane beside an editor runs TWO
+  note-reach batches per autosave, one of them (≤ 320 notes) drawn nowhere.
+- Breaks U2's acceptance line ("reach is read in proportion to the rows shown", plan `:135`, record `:120`),
+  `AppDatabase.observe`'s rule ("UI layers hold observations for on-screen projections only (P3)", `:248`), and
+  the record's own claim (`:725`). Before this run the same lifecycle held only `ownershipFacts` (never woken by
+  an autosave). Bounded, hence MINOR — R1-1's own scenario, which R1-1's pins (TimelineView mounted alone) could
+  not see.
+- **Pin (red on the tip):** an approved client, the open book on, > 80 notes; `await model.search();
+  model.holdNearFacts()`; List mode → `#expect(model.reachHold != nil)`; switch to `.timeline` (the fix's mode road,
+  or mount `LibraryCatalogView` and switch its picker) → `#expect(model.reachHold == nil)`.
+- **Fix:** make the near-window reach hold mode-aware — hold only where note rows are drawn (List, Cards, the
+  answer sheet); re-aim on a mode change through the existing `.onChange(of: model.mode)` / `.task(id:)`
+  (entering Timeline cancels, leaving re-holds). The ownership hold may follow the same gate; the listed-books
+  hold (`:272`) outlives its rows too but never wakes at autosave rate (optional).
+
+**R2-2 [NIT · SPECULATIVE] · `Core/Views/WingSwitcherSheet.swift:196`, `:262`, `:300–302`, `:330–340` ·
+`Core/Views/MCPSharedIcon.swift:83–105` · `VariorumTests/MCPSharedIconClickTests.swift:365–386`**
+- R1-2 hoisted the row popover's state into `popoverRow`; one road out is unpinned: her typed filter removing the
+  row whose popover is up (the field keeps focus, so she can type). `ForEach(model.brain.visible)` drops the row
+  and its presenting icon; if SwiftUI doesn't write `false` back through the binding on that teardown,
+  `popoverRow` stays set → the next Esc is `.dismissRowPopover` and visibly does nothing, and clearing the filter
+  brings the row back with `isPresented` already true. R1-9's road (reach emptied while the popover is up) turns
+  on the same unknown, and R1-9's HOLLOW pin counts presentations only (`presentations(of:) == 1`, `:384`) — it
+  cannot tell "SwiftUI wrote false back" from "`shown` stayed true and SwiftUI doesn't present on re-insertion"
+  (the second leaves a dead first click). STAGE WINDOW R1b already found SwiftUI doesn't report a dismissed
+  popover's content leaving, so write-back on teardown is not a safe assumption.
+- **Pin (decides it either way):** (a) extend R1-9's pin — after the reach returns, ONE click must present
+  (`presentations == 2`); (b) in `escapeOverARowsPopoverLeavesTheSwitcherUp`'s rig: click Home's icon open,
+  `type("zzz")`, settle, `catcher.onKey?(.escape)` → `closes.count == 1`, `type("")` → no visible popover window.
+  Green → hollow; red → fix: clear `popoverRow` when the presenter leaves (e.g. `.onChange(of: model.brain.query)`),
+  or decide Esc from `popoverRow` only while that row is visible and reached; for the icon's own `shown`, R1-9's
+  held `.onDisappear` patch.
+
+**R2-3 [NIT] · `Features/Settings/SettingsShape.swift:318–331`, `:435–444` · `MCPPaneTabsTests.swift:231–245`**
+- R1-4's landing depends on rank ties and catalog order. **"claude"** (her client's name, the setup's first word):
+  `mcpServer` matches keyword "claude", `mcpConnect` keyword "claude code", both rank 3; ties break by catalog
+  order with `mcpServer` first → the lead is "Enable the MCP server", `holding` nil, the pane opens on Clients once
+  a client is approved; R1-4's pin omits "claude". **"client":** "Connect a client" contains it (rank 2),
+  outranking `mcpServer`/`mcpWaiting` (rank 3) → lands on Connect while the clients are listed on Clients (the
+  implementer's risk 2). Both rows still appear (ranking, not a lost road); which tab each word opens is a
+  product call no ruling makes.
+- **Fix:** add "claude" to the pin; list `mcpConnect` before `mcpServer` so ties go to Connect (or record
+  "claude"'s landing as hers); for "client", a Clients catalog row with `holding → .clients`, or a PROVISIONAL /
+  FOR VX-234 line.
+
+**R2-4 [NIT] · `Core/Views/MCPSharedIcon.swift:123–155`** — the DEBUG probe's statics grow without bound in every
+DEBUG build (`makeNSView` appends an `Anchor` per icon mount incl. recycled List rows; `presented` appends per
+presentation; only `frames(in:)` prunes, only in the click pins). **Fix:** prune dead anchors on append (or
+`NSHashTable.weakObjects()`), clear `presented` per pin; optionally move the ~80-line harness to its own file.
+
+**R2-5 [NIT] · leftovers from round 1's moves** — `MCPSetupMenuTests.swift:88` + `MCPPaneCopy.swift:539–542`: after
+R1-8 `MCPPaneCopy.copiedReceipt` is a test-only alias of `MCPSetupClient.claudeCode.copiedReceipt` and the pin
+compares a value with itself (fix: point the pins at the client's receipt, drop the alias).
+`MCPSharedRowsTests.swift:12–16`, `:238`: after R1-1 the header and `theTimelinesLoadedRowsHoldTheirReach` still
+describe the Timeline holding "its loaded rows" (fix: re-word to the window).
+
+**The reviewer's clean bill (condensed):** not Fable's mandatory scope (no `Sync/`, `Server/`, `Persistence/`,
+custody, editor seam, schema, `Sources/VariorumMCP`, `MCPGrantRule.swift`, `TutorialSeeder`; no default changes
+meaning; `SettingsShape` edits on the MCP rows only) · R1-1…R1-9 re-checked sound (R1-1's window bounded to 4
+pages with stale-window guards; R1-2's final sheet byte-equal to `f66a3f95`; R1-3's guard + `copyLanded`; R1-4's
+row and ritual; R1-5's four clicks; R1-6's one gate with the Bookcase unchanged; R1-7's 60-case grid; R1-8
+byte-identical; R1-9 never applied) · one rule per kind, batched and singular reads share `placeReach`, probes
+spend no once grant, VX-272 SQL-trace pinned · the autosave-rate argument holds for the Book Panel and Pool
+(their own listings already read `container`) · U1 matches R-VX184-6 · headless on the tip: VariorumMCPTests
+212/41, core 2,790/321, workbook 40/6, reach suites 32/5, O-4 sweep 2/2 · a replica of the P-8 lint leaves exactly
+VX-283's six offenders · no literal colour, no trailers, no rewrites · the record's red/green claims match its logs.
+
+**The orchestrator's rulings on R2-3 (her overnight mandate — "rule provisionally in my absence"):**
+- **"claude" lands on Connect — DERIVED, not provisional.** It is a setup word of exactly R1-4's class (her
+  client's name heads the Claude Code setup line), so R1-4's rule covers it: list `mcpConnect` before `mcpServer`
+  so the tie goes to Connect, and add "claude" to the pin.
+- **"client" / "clients" lands on Clients — PROVISIONAL P-VX281-R2-1.** Options: (a) Connect, as built (the row
+  "Connect a client" contains the word); (b) **a Clients catalog row whose `holding` answers `.clients`, ordered so
+  "client"/"clients" reach it — built**, because the word names her tab and the client list lives there, while
+  every setup word still lands on Connect; (c) no landing for the word (the pane's normal opening rule). The new
+  row's title/blurb ride FOR VX-234. Hers to reverse.
+
+**Round 2 dispositions** *(same-model: the implementer agrees/disputes; the orchestrator arbitrates against the spec)*
+
+| # | Sev | Disposition | What changed (hash) |
+|---|---|---|---|
+| R2-1 | MINOR | PENDING | |
+| R2-2 | NIT | PENDING (the pins decide) | |
+| R2-3 | NIT | PENDING (rulings above) | |
+| R2-4 | NIT | PENDING | |
+| R2-5 | NIT | PENDING | |
 
 ## Closeout
 
