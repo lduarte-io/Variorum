@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #220. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #221). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS — u5c (the coordinator's narrow leg): the three cells reshaped `eaf42b27`; A NAMED REVERT IN FLIGHT for the old-products rebuild** — six files back to `7d798f82` and `CommentPanelDoorsTests.swift` set aside (the § u5c note); restore by `git checkout HEAD --`. VX-229 DISMISSED AS HOLLOW (final). VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c`. No claim held. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — u5c: the three reshaped cells red-on-old + fixed, plus g1 re-run, ≈8 min** (W1c `CommentPanelHostSuites` on the old products: the VX-229 guard green, VX-257's three host cells red; W2c g1 with the whole host parent on the fixed products: all green). Reshape `eaf42b27`; the named revert DONE and RESTORED (`git status` clean); old products rebuilt (`nm` 0), fixed rebuilt (`nm` 63). VX-229 DISMISSED AS HOLLOW (final, the coordinator's ruling). VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c`. No claim held; no revert in flight. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **DONE** — pins `d35191b6` + correction `ee1facc9` · fix `3cf0079b` · window `a1967ac0` (logs) + the walk record. Stage window 05:27:17–05:38:17 (claim `vx282-u6`, RELEASED): W1 red on old exactly as predicted (3 tests, 1 issue — the launch pin's last cell) · W2 the fixed batch 148 tests / 43 suites green · W3 every row held (A0 old: the window; A/A' fixed: the caret in the bar at launch in Study and Terminal, a typed letter lands; C the tour never stolen from; D the navigation back as today — O-U6-1 seen live); row B's restored note window not reachable on this Mac (not restored), a new window walked in its place. P-U6-1/2 → QUESTIONS #224. Posture: Study, unlocked Standard, tour `completed`, the Bookcase, nothing filed. No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
@@ -2391,6 +2391,29 @@ bundle go back to it for ONE build — `CommentsPanel.swift`, `CommentTextArea.s
 RestoreCost.swift` (`git checkout 7d798f82 --`), and `VariorumTests/CommentPanelDoorsTests.swift` set aside to
 `scratchpad/vx282-u5/`; the reshaped `CommentPanelHostLifecycleTests.swift` stays (the pins as now). Restore by
 `git checkout HEAD -- <each>` (the Doors file included); `git status` clean.
+
+**The products (rebuilt into the existing trees; no new tree):** OLD — the named revert above DONE and RESTORED (`git
+checkout HEAD --` of all seven, `git status` clean, `git diff` empty); built → `DerivedData/vx282-u5-old-products` replaced
+(its dylib carries neither VX-257's keeping nor VX-183's rule — `nm` 0; the reshaped pins in its test bundle). FIXED —
+rebuilt at the tip into `DerivedData/vx282-u5` (TEST BUILD SUCCEEDED; `nm` 63). Disk 29 GiB free.
+
+#### THE u5c WINDOW PLAN (≈8 min; on the orchestrator's claim line; `guard.sh --author` first; no app launch, no walk)
+
+From `App/Variorum/`, logs to `notes/plans/vx282-screens/u5/logs/`:
+- **W1c — the reshaped cells on OLD (≈2 min):** `xcodebuild test-without-building -xctestrun
+  DerivedData/vx282-u5-old-products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination 'platform=macOS'
+  -only-testing:VariorumTests/CommentPanelHostSuites` → `u5c-w1-old.log`. EXPECTED: `CommentPanelReleaseTests` (the GUARD)
+  **green** — its printed census `models alive 0, observing 0` after each dismissal; `CommentPanelHostLeavingTests` **red
+  in all three cells** (the popover, the sheet, the nested sheet — the text and the caret each: 6 issues in 3 cases), the
+  sheet cells printing which leaving road ran.
+- **W2c — the fixed products, g1 re-run with the whole host parent (≈4 min):** `-derivedDataPath DerivedData/vx282-u5`
+  with `-only-testing:VariorumTests/` × `CommentPanelHostSuites` `CommentPanelLeaveTests` `CommentPanelDoorsTests`
+  `CommentPanelParkTests` `CommentsPanelModelEditorTests` `CommentCompositionTests` `CommentPanelKeysTests`
+  `CommentsAndReorderTests` `CapabilityRegistryTests` `TrashSurfaceTests` `NoteVersionsPaneTests` → `u5c-w2-g1.log`.
+  EXPECTED: all green (u5b's 110 + `CommentPanelReleaseTests`' 3 = 113 tests / 13 suites).
+- Read the census lines (`grep "VX-229 guard\|VX-257 the"`) — they are the evidence of which road the runner took. If the
+  guard is red on either side, its census says whether the runner still retains dismissed panels under the drained
+  shape; report it rather than re-run.
 
 ## Ladder
 
