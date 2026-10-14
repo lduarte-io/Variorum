@@ -3104,3 +3104,78 @@ Nothing. No word changed.
 6. **U5's live round** keeps ruling 2's real-client check, unchanged.
 7. **Canon at the merge:** none beyond OWED 1 (AppSpec §12's "a corner badge only on fanned blocks" holds; ruling 2 is
    view state, not canon).
+
+## U4b STAGE RUN — the whole window (a fresh stage runner, from 2026-10-14 ~04:40 MDT)
+
+**What this run does NOT do (said first):** no product code is written or changed, under the claim or before it; a red
+that needs code is recorded and reported, never fixed here. No MCP client is registered or run (ruling 2's real-client
+check stays U5's); her user-scope servers are only fingerprinted, before and after. No canon, QUESTIONS or ticket edits.
+No rebuild: the window runs the three products exactly as built, even after the next unit merges main into this branch
+(expected before the GO — the products hold U4b's sources, which is what this window proves).
+
+**Read in full before READY (never delegated):** this record's header, Hard rules, LIVE STATUS, the Stage traffic log,
+ORCHESTRATOR'S PROVISIONAL RULINGS (ruling 2), the U4b BRIEF; U2, U3 and U4 STAGE RUN whole (the A1 copy BEFORE the
+batch; `defaults import` merges, so re-export and diff; the batch detached and polled in the foreground; `Tools/stage
+status` exits 1 under a held claim, never in an `&&` chain); the U4b UNIT RECORD whole (the re-trace, the design, the
+pins, THE STAGE WINDOW, the self-assessment, OWED); `notes/SessionResiliencyProtocol.md`; `Tools/stage`, `Tools/WalkKit/`
+(README, `guard.sh`, `click.sh`, `keys.sh`), `Tools/ScaleFixture/` (`stage.sh`'s copy loop, `restore.sh`); U4b's
+`run-w1-red.sh`, `run-w2-batch.sh`, `stage-suites.txt`, `gen_fixture.py`; the memory notes walk-driving-lessons and
+walk-restores-dev-store-posture. Code read for (e): `WorkspaceModel.select`/`openBeside`/`notesDeleted`,
+`ShellRouter.openBesideMostRecent` (the View menu door opens the most recently opened note NO pane shows),
+`PaneHost.nameLine` (an UNFOCUSED pane wears a thin "‹name› · click to edit" line in place of a masthead — "the
+difference … IS the focus signal"), `RootView`'s palette rows (⌘K "Go to …" adopt in `focusedPane`), the Library row's
+destructive `RecoveryCopy.deleteNoteTitle` door and the one confirm host (`deleteNoteConfirmDialog`: "Delete" / "Cancel").
+
+**The build check (before READY):**
+- **No source moved since the fixed product was built.** HEAD `d430bea8`; `git diff --name-only cd843647..HEAD -- Sources
+  App` is EMPTY (record-only commits since, `52f6cc17`/`63410c1a`/`d430bea8`); `7209cf2d..cd843647` touches exactly the
+  three fix files (`EditorView.swift`, `EditorViewModel.swift`, `WorkspaceModel.swift`); no test file moved since
+  `7209cf2d`; no `.swift`/plist/pbxproj/xcstrings/`Package.swift` under `Sources` or `App/Variorum` is newer than the fixed
+  dylib (04:25:32; the fix files 04:20:29–04:20:54; the pin files 04:04:31/04:09:46, before the red dylib 04:10:47). The
+  tree is clean.
+- **Each product is what its name says, read from its symbols** (`nm -n` + `swift-demangle`, size = the next text symbol's
+  address minus this one's): `EditorViewModel.refreshBadges()` **4,276** bytes in `vx246-u4b-red` (U4's body), **3,336** in
+  `vx246-u4b-red-pre-u4` (the pre-U4 body), **3,696** in `vx246-u4b` (U4b's); `WorkspaceModel.select(_:in:takingFocus:)`
+  present ONLY in `vx246-u4b` (1,652 bytes + its default argument and closures). All three test bundles carry
+  `theBookEditorBadgesEveryFanRightAfterItMounts`, `theBookEditorPutsEveryBadgeHomeAfterAWidthChange`,
+  `aBadgeNeverSitsAtAnotherBlocksPlace`, `textKitPlacesAFragmentLaidOutAheadOfItsPredecessorsOffItsSettledPlace`,
+  `textKitReportsAnUnlaidFragmentAsZeroAndAZeroRectIntersects` and `aNavigateAwayNeverTakesHerFocus`, and none carries the
+  removed `aWidthChangeInWriteKeepsEachBadgeHome`. **→ no rebuild.**
+- **The W2 list:** `run-w2-batch.sh`'s `-only-testing` names diffed against `stage-suites.txt`: IDENTICAL, 304 unique.
+- **Host and tools:** grants probed with no prompt, `AX: true SCREEN: true`; `walk-cap` / `walk-scroll` compiled into the
+  scratchpad; `Tools/WalkKit/wl2` present; `cliclick` present. Free disk **39 GiB**.
+- **Her user-scope MCP servers (names + a sha256 prefix of the sorted, compact `mcpServers` JSON, never values):**
+  `['linear-server', 'variorum']`, **`bc64543e2f4e8e58`** — the same fingerprint U3's and U4's windows recorded. Re-read at
+  the window's start and after cleanup.
+
+**Process choices (U2's, U3's and U4's lessons applied):** the A1 copy, the prefs export and the fingerprint come FIRST,
+before W1 (the test host is the dev-store app); W1 in the foreground (about two minutes), W2 detached to its log and POLLED
+in the foreground; every GUI act through `click.sh` / `keys.sh`, at least 2.6 s apart; region captures; the Debug app quit
+BY BUNDLE ID; the prefs restored by import, then a re-export and a diff, deleting every key the window added, until 0
+differ. The fixture is generated under the claim (step F) into `u4b/fixture/` and deleted at cleanup.
+
+**(e)'s road, made exact from the code (a refinement of the plan's wording, said):** open "vx230 long two" (⌘K) in pane 1
+→ ⌘K "Go to Library" in pane 1 → View ▸ Open Beside (its candidate is the most recently opened note no pane shows, so
+"vx230 long two" lands in a NEW right pane, which takes the focus) → one click on pane 1's thin "click to edit" line
+focuses pane 1 (the masthead returns there, the thin line moves to pane 2) → CAPTURE (before) → pane 1's Library row
+"vx230 long two" ▸ right-click ▸ the delete door ▸ the confirm's **Delete** → CAPTURE (after). **The focus evidence is the
+pane's own focus signal** (the full masthead vs. the thin "click to edit" line): pane 2 must show the Library wearing the
+THIN line, pane 1 keep its masthead. **The keyboard check** (in place of "⌘F or a typed letter"): ⌘K ▸ "Go to Pool" ⏎ —
+the palette adopts in `focusedPane`, so pane 1 must turn to the Pool and pane 2 stay on the Library; the pre-fix road
+would have turned pane 2. Then View ▸ Close Split. Terminal's half restores the note first by Put back from the Trash.
+
+**Minutes:** ~60 of work expected (A1 + prefs ~3 · W1 ~3 · W2 ~12 · the fixture ~6 · W3 ~28 for both voices · cleanup ~8);
+a **75-min claim** asked (the plan's). Batch-only fallback (~30 min, claim 40): steps 1, W1, W2, cleanup.
+
+### LIVE STATUS — the stage run's steps
+
+| step | what | status |
+|---|---|---|
+| R | read-in, the build check, the fingerprint, this section → READY | DONE (this commit) — READY reported; the stage is NOT claimed (the orchestrator relays the GO's exact line) |
+| 0 | guards on every step; the claim from the GO's line; the HEAD at the GO | NOT-STARTED |
+| 1 | A1 prestage copy (every store file + key files, each `cmp`-verified, sha256 recorded) + `defaults export io.lduarte.Variorum.debug` + her user-scope fingerprint BEFORE | NOT-STARTED |
+| W1 | `run-w1-red.sh` — W1a (`vx246-u4b-red`: `FanBadgePlacementTests` 2 of 6 red, `NoteDeletionNavigateAwayTests` 1 red) + W1b (`vx246-u4b-red-pre-u4`: the re-designed phantom pin red); a red on a `premise:` line or a `#require` ⇒ STOP that leg and report | NOT-STARTED |
+| W2 | `run-w2-batch.sh` — 304 suites on `vx246-u4b`; a red re-run alone once; standing reds named (VX-167, VX-245, VX-115) | NOT-STARTED |
+| F | the fixture generated, then through File ▸ Import… (two long notes → the Pool; the folder → an unshelved book) | NOT-STARTED |
+| W3 | the walk, Study then Terminal: (a) Outline right after mount · (b) Outline after a width change, top and deep · (c) the spread's live left page (+ a width change) · (d) Write's width road · (e) ruling 2, her own Delete from pane 1 on the note in pane 2 | NOT-STARTED |
+| C | cleanup: the Debug app quit by bundle id; prefs 0 keys differ; `restore.sh` → "Restored (verified)" + cmp SAME; the fingerprint AFTER; the fixture deleted; `Tools/stage release --who vx246-u4b`; the result line | NOT-STARTED |
