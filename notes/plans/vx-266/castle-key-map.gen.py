@@ -307,13 +307,13 @@ TARGET = {
                                   ("Older copies", "today's key opens the history, so every older backup opens with nothing more typed."),
                                   ("On a new Mac", "your passphrase or words; the newest backup's history opens every older one."),
                                   ("Lose the passphrase, the words and every Touch ID item", "the library and every copy are gone — said at the door, with Export a plain copy offered first."),
-                                  ("Stores from before this change", "until the old shared Apple key is retired, copies made under it before Castle still open through the Apple account. Use Castle retires it unless you keep it for now; Settings ▸ Protection has the door.")]),
+                                  ("A library already in Castle before this change", "until it retires the old shared Apple key, its copies made under that key before Castle still open through the Apple account — one press in Settings ▸ Protection. Use Castle always retires it.")]),
     "t-castle-sync": dict(title="Castle — synced", chips=castle_target(True),
                           roads=[("On this Mac", "Touch ID, or the passphrase."),
                                  ("A new device", "sign in, then your passphrase or words once."),
                                  ("The server", "locked keys and encrypted writing only; no Apple copy anywhere."),
                                  ("A device that joined without typing anything", "its key file also holds the master locked with your twelve words, so the words open it even after the master changes."),
-                                 ("Stores from before this change", "until the old shared Apple key is retired, copies made under it before Castle still open through the Apple account. Use Castle retires it unless you keep it for now; Settings ▸ Protection has the door.")]),
+                                 ("A library already in Castle before this change", "until it retires the old shared Apple key, its copies made under that key before Castle still open through the Apple account — one press in Settings ▸ Protection. Use Castle always retires it.")]),
     "t-std-local": dict(title="Standard — this Mac only", inactive=("server",), chips=std_target(False),
                         notes=[note("vault", 0, "not used — no sync")],
                         roads=[("On this Mac", "the silent item — nothing asked."),
@@ -527,7 +527,7 @@ ENTER = [
     f"The old key's item, every {pill('silent item', 'L', True)} of the library, the per-library-ID items and the old key files go — each only once the history holds its key.",
     f"A fresh backup is made under {pill('{L′}', 'L')}.",
     f"This library's (or the account's) {pill('{A} Apple key', 'A', True)} is deleted from iCloud Keychain — every device, no recovery — and its id recorded as retired, so a copy of it that comes back is deleted on sight. Synced: each other device asks for your passphrase once, re-encrypts its own library, and deletes and records its own Apple keys too.",
-    f"Last, the old shared {pill('{A} Apple key', 'A', True)} is retired — unless you chose <i>Use Castle, keep the old Apple key for now</i>. Then every older copy's Apple lock is dead, wherever the copy is.",
+    f"Last, the old shared {pill('{A} Apple key', 'A', True)} is retired, so every older copy's Apple lock is dead, wherever the copy is. (There is no keep-for-now: to deal with something the sheet listed first, cancel and come back.)",
 ]
 LEAVE = [
     "You confirm with Touch ID or the passphrase, after the plain warning: your Apple account — and anyone who can sign in to this Mac — will be able to open this library and every copy Variorum kept, including copies made while you were in Castle.",
@@ -566,14 +566,14 @@ MIGRATE = [
     "Existing copies are attributed to their library and Mac; new backups go to per-library, per-Mac folders.",
     "The one key file is written and every reachable older key folded into the history — through the old shared Apple key while it's still readable, and the passphrase if needed (asked once). An old key file stays until the history holds its key; one the fold couldn't reach stays for good.",
     "Everything this Mac holds in Standard gains an Apple key of its own beside the old shared one — other libraries' copies first (this Mac's own key file for each), then a local-only live library — then <b>a fresh backup</b>, so the newest copy carries the history and every lock. Nothing is removed; a synced account stays on the old key until it enters Castle or is re-linked.",
-    "A store already in Castle gets one notice: copies from before Castle still open through the Apple account until the old key is retired — with the door to retire it.",
+    "A library already in Castle gets one calm ask: copies from before Castle still open through the Apple account until the old key is retired — with the checks, the sheet and a door in Settings ▸ Protection.",
 ]
 SHARED = [
     "<b>One key, every library.</b> Today's builds lock every Standard library on an Apple account with one shared Apple key, on every device. Deleting it deletes it everywhere, with no recovery — so nothing loses its road through it before you choose to retire it.",
     "<b>The move</b> (each device's migration) only adds: everything this Mac holds in Standard gains an Apple key of its own beside the old one — a local-only live library, and other libraries' copies (this Mac's own key file for each) — then a fresh backup. A synced account stays on the old key until it enters Castle or is re-linked: its vault has room for one Apple copy, and macOS can't say whether iCloud Keychain carried a new key.",
     "<b>The checks</b> (Use Castle, or the door on a store already in Castle): the move runs again; then, with the old key taken away, every copy this Mac can see — other libraries' and other Macs' in a shared backup folder included — and every account vault it can read. They list what would stop opening, and every Standard library or copy here with no passphrase or words. A vault still on the old key stops the retirement.",
     "<b>The sheet</b> lists those things by name, and says what the Mac can't see: give any library still in Standard on your other devices a passphrase or words first — one with neither, on a device that's lost or reset, opens elsewhere only if iCloud Keychain carried its key, or not at all if that device hadn't been updated.",
-    "<b>Retiring</b> deletes the old key and records its id, so a copy that comes back is deleted on sight. <i>Keep it for now</i> is offered only when the list isn't empty; until it's retired, every Castle surface says copies from before Castle still open through the Apple account.",
+    "<b>Retiring</b> deletes the old key and records its id, so a copy that comes back is deleted on sight. Use Castle always retires it — there is no keep-for-now. A library that was already in Castle before this change gets one calm ask and a door in Settings ▸ Protection; until it's pressed, every Castle surface there says copies from before Castle still open through the Apple account.",
 ]
 
 
@@ -604,7 +604,7 @@ LOBBY = ("<table><thead><tr><th>this Mac, right now</th><th>the lobby shows</th>
          "<tr><td>the same item, but the lid closed, the keyboard unplugged, or a lockout</td><td>the button stays; pressing it says why (<i>“Open the lid…”</i>) — nothing is changed or removed; the passphrase road beside it</td></tr>"
          "<tr><td>Touch ID hardware, but no finger enrolled</td><td>no button; one quiet line — Touch ID isn't set up on this Mac — and the passphrase road</td></tr>"
          "<tr><td>after a finger was added or removed (or macOS updated)</td><td>no button; one quiet line — Touch ID changed since you set it up — and the passphrase road; once open, the question <i>“Touch ID changed on this Mac … Use Touch ID for Variorum again? Every finger enrolled on this Mac will open it.”</i> — re-armed only on yes</td></tr>"
-         "</tbody></table><p class=\"lede\">PROVISIONAL, hers to confirm: this reads her <i>“there should always be a button”</i> as always, wherever Touch ID can work.</p>")
+         "</tbody></table><p class=\"lede\">Her pick, 2026-10-13: <i>“there should always be a button”</i> reads as always, wherever Touch ID can work.</p>")
 
 
 CHECKLIST = [
@@ -632,7 +632,7 @@ CHECKLIST = [
     ("T-4", "Opening an older backup brings it in under today's key and mode, never lowering it, nothing more typed", "fixed scenario VX-209 · restore drill · walk"),
     ("T-5", "A Castle copy from another Mac raises a Standard library to Castle; an unknown-key copy is flagged; a different library keeps its own mode, said concretely", "fixed scenarios · walk"),
     ("T-6", "The migration runs as drawn: the fold, then keys of their own beside the old one for everything in Standard, then a fresh backup — removing no road", "migration drills per shape · her stores' byte-copies · scenario promise 12 · fixed scenarios (the window after the move; iCloud Keychain off)"),
-    ("T-7", "Retiring the old shared key runs as drawn: the move again, the checks, the sheet listing exactly what would stop opening and every Standard thing with no passphrase or words, a vault still on it stopping the retirement, keep-for-now only with a list", "fixed scenarios (two libraries on one Apple account; an older build's Re-link) · walk"),
+    ("T-7", "Retiring the old shared key runs as drawn: the move again, the checks, the sheet listing exactly what would stop opening and every Standard thing with no passphrase or words, a vault still on it stopping the retirement; no keep-for-now; the door only on a library already in Castle before this change, gone once pressed", "fixed scenarios (two libraries on one Apple account; an older build's Re-link) · walk"),
     ("A-1", "The four account situations behave as the table says; signing in or out changes nothing", "account-sequence walk · scenario promise 4"),
     ("A-2", "New writing belongs to the library's account", "state-transition suite"),
     ("L-1", "The lobby's Touch ID line and button follow the table (VX-310)", "lobby tests · walk on a Mac with and without an enrolled finger"),
@@ -663,8 +663,8 @@ def full_page():
 new design (your rulings of 2026-10-13). A companion to <code>second-opinion.html</code>; the build target alone is
 <code>castle-target-key-map.html</code>.</p>
 <div class="okbox"><b>The whole idea in two lines.</b> In Castle, your Apple account opens nothing of this library —
-not the library, not any copy Variorum made of it on this Mac or a device of your account (stores from before this
-change: once the old shared Apple key is retired). In Standard, it opens your library and every copy Variorum made of
+not the library, not any copy Variorum made of it on this Mac or a device of your account (a library already in
+Castle before this change: once it retires the old shared Apple key). In Standard, it opens your library and every copy Variorum made of
 it. <i>In Castle = safe. Out of Castle = not safe.</i></div>
 <h2 id="cast">The cast</h2>
 <p>Every key is a random 256-bit number except your passphrase and words, which you hold. A <b>locked copy</b> is one key
@@ -712,8 +712,8 @@ text is <code>notes/plans/vx-266-castle-backups-prelaunch.md</code>.</p>
 <div class="okbox"><b>The two rules.</b> In Castle, nothing reachable through your Apple account or this Mac's login
 password opens your library, or any copy Variorum made of it on this Mac or on a device of your account once it has
 followed. In Standard, your Apple account — and anyone who can sign in to this Mac — opens your library and every copy
-Variorum made of it. <i>In Castle = safe. Out of Castle = not safe.</i> The one stated exception, for stores from before
-this change, is the old shared Apple key's, until it's retired (below).</div>
+Variorum made of it. <i>In Castle = safe. Out of Castle = not safe.</i> The one stated exception — a library already in
+Castle before this change, until it retires the old shared Apple key — is below.</div>
 <h2 id="cast">The cast</h2>
 {legend()}
 {controls()}
@@ -740,9 +740,9 @@ this change, is the old shared Apple key's, until it's retired (below).</div>
 and <span class="n">green</span> means they can't. Synced and this-Mac-only libraries answer the same way; synced
 libraries add the server column's facts.</p>
 {who_table(True)}
-<p class="lede">Stores from before this change: until the old shared Apple key is retired, copies made under it before
-Castle still open for the two red rows' people in the Castle column too. Every Castle surface says so until it's
-retired.</p>
+<p class="lede">A library already in Castle before this change: until it retires the old shared Apple key, its copies
+from before Castle still open for the two red rows' people in the Castle column too, and every Castle surface says
+so.</p>
 <h2 id="checklist">The acceptance checklist</h2>
 <p>Filled at the effort's close (phase 5). Every row needs its proof and a result; a row without one, or a mismatch,
 blocks the close.</p>

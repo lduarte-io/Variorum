@@ -213,9 +213,9 @@ taking any road away until the author retires it:
    finder, with the old key taken away, over every copy this Mac can see (other libraries' and other Macs' in a
    shared folder included) and every vault it can read. The sheet lists what would stop opening, and every Standard
    library or copy here with no passphrase or words; a vault still naming the old key stops the retirement; the
-   sheet says what the Mac can't see. *Keep it for now* is offered only when the list isn't empty; a store already in
-   Castle gets one notice and a standing door. **PROVISIONAL, hers to confirm** — the reviewer is right that her
-   ruling's question didn't show her the key's reach.
+   sheet says what the Mac can't see. **No keep-for-now** (her question below): cancel, fix, come back. A library
+   already in Castle before this change gets one calm ask and a door that goes once pressed. **PROVISIONAL, hers to
+   confirm** — the reviewer is right that her ruling's question didn't show her the key's reach.
 5. **Retiring records the key's id**; delete on sight acts on recorded ids only.
 
 **Why this doesn't bring back what the design solved:** no shared-name item is ever written (the F2/F3 races stay
@@ -237,7 +237,7 @@ the key is retired, with the one exception stated wherever it applies until then
 | R2-2 | The window after rehoming | **Fixed**: the migration ends with a fresh pair | design §3.5 point 2, §3.13 step 7 |
 | R2-3 | Mixed builds: an older build's Re-link undoes the move | **Fixed, then simplified in round 3**: the migration no longer moves vaults at all, so there is nothing to undo; a vault this device can read that still names the old key stops the retirement; our own Re-link mints fresh. (Round 2's move-back repair is withdrawn: it was a vault move by another name.) | design §3.3, §3.5 points 3–4, §3.9 |
 | R2-4 | The sheet understates the cost | **Fixed**: the reviewer's sentence, adopted | design §3.5 point 4 |
-| R2-5 | The device list misses devices; the separate act departs from her D3 | **Withdrawn markers** (the catalog's concrete list replaces them); retirement **returned to Use Castle's step**, with *keep it for now* only when something listed would stop opening; **to her** for confirmation | design §3.5, §9 |
+| R2-5 | The device list misses devices; the separate act departs from her D3 | **Withdrawn markers** (the catalog's concrete list replaces them); retirement **returned to Use Castle's step**; *keep it for now* first offered when something was listed, then **dropped** after her question (below); **to her** for confirmation | design §3.5, §9 |
 | R2-6 | Rule 2's scope: a library sent to another Mac without sync | **Fixed**: rule 2 scoped to this Mac's copies and the account's devices; delete on sight by recorded id only | design §3.1, §3.3, §3.5 |
 | R2-7 | Fixed scenarios | **Added**: two libraries on one Apple account; an older library of another library (in Standard, and later in Castle); the window after the move; an older build's Re-link; one library on two Macs; a silently-joined device | design §4.1; `vx-305-castle-core.md` §6 |
 | R2-8 | Drop the D labels; D4 needs a home | **Fixed** (R1-2) | design §1 |
@@ -250,3 +250,25 @@ the key is retired, with the one exception stated wherever it applies until then
 
 The owner's own residue (1a) is listed too: backups an older build made on a silently-joined device, under a key a
 Standard Replace All Keys retired before that device updated (design §8).
+
+## After round 3: her question about *keep it for now*
+
+Asked to confirm the retirement's shape, she asked instead, verbatim: *"if keeping it for now is offered, what are the
+implications of that? what risk does it expose? do you think it's owrth having to keep that door open forever?"*
+
+The owner's answer: not worth it.
+
+- **What it would expose:** a library that says Castle while every copy from before Castle — backups, older
+  libraries, Time Machine, the iCloud Drive folder — still opens through the Apple account, and on that Mac for anyone
+  with its login password. That is exactly the halfway posture she ruled out (*"in castle = safe. out of castle = not
+  safe"*). It would last as long as nobody pressed the door, with the exception sentence on every Castle surface the
+  whole time.
+- **What it would buy:** time to update another device or give a library a passphrase before the key goes. Cancel
+  buys the same, with no halfway state: fix what the sheet listed, then Use Castle.
+- **The one door that has to exist:** a library that was already in Castle before this change can't press Use Castle
+  again, so it gets one calm ask and a door in Settings ▸ Protection (her calm-asks rule: an ask is always answerable
+  in Settings). The door shows only while copies of that library still open through an old shared key, so it goes
+  for good once pressed, and no library entering Castle after this change ever sees it.
+
+The design now says so (§3.1 rule 2, §3.5 point 4, §3.13 step 8), still PROVISIONAL until she confirms. Her VX-310
+answer, same question set: the designed reading (§3.10), recorded in the design's §1.

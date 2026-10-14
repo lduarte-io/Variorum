@@ -204,8 +204,8 @@ Build everything in §3.2 of the design as values, with their codecs and their c
   - Re-link mints a fresh account key, never re-landing under the old shared key;
   - the old shared key: keys of their own beside it (folds first, other libraries' copies, a local-only live library,
     the fresh pair — the move removes nothing; accounts stay on it until Castle or Re-link), and its retirement as Use
-    Castle's last step — the moves again, the checks, a readable vault still on it stopping it, *keep it for now* when
-    the list isn't empty, and its own door on a store already in Castle.
+    Castle's last step — the moves again, the checks, a readable vault still on it stopping it, no keep-for-now — and
+    its own door only on a library already in Castle before this change.
 
 **Its leaves are protocols.** U3 tests against simple in-memory leaves; U4 brings the realistic fakes.
 

@@ -42,7 +42,10 @@ At #216 and in her review of both documents:
   protection and I agree with deleting the iCloud key when they go into castle."* Her Keychain Access check confirmed
   why: the dev scope's Apple key was revealed with the login password, on the Pro and on the Air. **The shape of the
   old shared key's retirement (§3.5) is PROVISIONAL, hers to confirm** (§9): the review found that key is shared by
-  every library on the Apple account, which this ruling's question didn't put in front of her.
+  every library on the Apple account, which this ruling's question didn't put in front of her. Asked about a
+  *keep it for now* choice, she asked: *"if keeping it for now is offered, what are the implications of that? what
+  risk does it expose? do you think it's owrth having to keep that door open forever?"* — answered on VX-301; the
+  design drops it (§3.5 point 4).
 - **Never opening a copy without asking** (the second opinion's fourth decision) is withdrawn as redundant under
   VX-301; the record is on VX-266.
 - **The rest — *"My rulings: I want to go with your recommendations on all of these"*:**
@@ -65,7 +68,8 @@ At #216 and in her review of both documents:
 - **Two more items placed here, at her word:**
   - VX-113, the follow's wrong-passphrase sentence, which should name the change;
   - VX-310, the lobby's Touch ID line and button — her report: *"there should always be a button you can click to
-    launch the touchid prompt"*.
+    launch the touchid prompt"*. **Ruled 2026-10-13:** asked which reading, she picked the one §3.10 draws — the
+    button whenever a Touch ID item exists; a line instead with no finger enrolled or after Touch ID changed.
 - **The acceptance artifact.** *"make me a new version of the castle-key-map that has JUST the posture that is being
   built by your plan file. checking the final code against that map will be a part of the acceptance criteria for the
   phase."*
@@ -104,9 +108,11 @@ The earlier rulings this design keeps are in §3.12 (the signed-out screen, the 
    follows.** Your passphrase, your twelve words, or Touch ID on a device you enrolled open it. Lose all three and it
    is gone — said at the door, with *Export a plain copy first* offered. A copy you sent to another Mac without sync
    is that Mac's library, protected as it is there.
-   **The stated exception, for stores from before this change:** copies made under the old shared Apple key (§3.5)
-   open through your Apple account, and on this Mac for anyone with its login password, until that key is retired.
-   Use Castle retires it unless you choose to keep it for now; while it remains, every Castle surface says so.
+   **The stated exception, for a library already in Castle before this change:** its copies from before Castle, made
+   under the old shared Apple key (§3.5), open through your Apple account, and on this Mac for anyone with its login
+   password, until you retire that key — one press, asked once and kept in Settings ▸ Protection. Every Castle surface
+   says so until then. A library entering Castle after this change never has the exception: Use Castle retires the
+   key.
 3. **In Standard, your Apple account opens your library and every copy Variorum made of it** — through iCloud
    Keychain, when it's on, which Variorum can't see — and so does anyone who can sign in to this Mac. Said on the
    Standard card.
@@ -259,14 +265,20 @@ The earlier rulings this design keeps are in §3.12 (the signed-out screen, the 
        only if iCloud Keychain carried its key, which Variorum can't check — or, if that device hadn't been updated,
        not at all."* It also says that another Variorum account still in Standard on this Apple account sets up new
        devices with its passphrase until it's re-linked.
-     - **Use Castle** then retires the old key as its last step, after the library's own. When the list isn't empty,
-       a second button, *Use Castle, keep the old Apple key for now*, does everything else. Cancel is always there.
-     - **A store already in Castle** — at the migration, or after *keep it for now* — gets one notice, and a standing
-       door in Settings ▸ Protection, *Retire the old Apple key…*, with the same checks and sheet.
+     - **Use Castle** then retires the old key as its last step, after the library's own. There is no *keep it for
+       now*: it would leave a library that says Castle with its older copies open through the Apple account — the
+       halfway posture she ruled out. To deal with something the sheet lists first, cancel, deal with it, and come
+       back.
+     - **A library that was already in Castle before this change** — the one way a library can be in Castle with the
+       old key alive — gets one ask, at a calm moment, and the same checks and sheet behind a door in Settings ▸
+       Protection, *Retire the old Apple key…*. The door shows only while copies of this library still open through
+       an old shared key, so it goes for good once pressed, and a library entering Castle after this change never
+       sees it.
   5. **Retiring** deletes the key and records its id as retired in the record; delete on sight covers it from then on.
      A new old-key item that an older build mints later has a new id. It holds nothing of a Castle library, and it is
      left alone.
-  6. **Until it's retired,** §3.1 rule 2's stated exception shows on every Castle surface.
+  6. **Until it's retired,** on a library that was already in Castle, §3.1 rule 2's stated exception shows on every
+     Castle surface.
 
 ### 3.5a The master's twelve-words copy in key files
 
@@ -384,7 +396,7 @@ open its file. So:
     the migration kept, and the format-1/2 key files beside the library all go — each only once the history verifiably
     holds its key. A fresh backup is made, and the library's (or account's) own Apple key is deleted and recorded as
     retired.
-  - Last, the old shared key is retired (§3.5), unless you chose to keep it for now.
+  - Last, the old shared key is retired (§3.5).
 - **Use Standard.**
   - The door: Touch ID or the passphrase, plus the §3.1 rule 5 sentence.
   - A fresh Apple key, minted only here; the key file gains the Apple wrap; synced, the vault gains M under it.
@@ -407,7 +419,8 @@ open its file. So:
   Variorum can't see.
 - **Opening a copy** (§3.7).
 - **The migration** (§3.13).
-- **Retiring the old shared key** (§3.5): Use Castle's last step, or its own door on a store already in Castle.
+- **Retiring the old shared key** (§3.5): Use Castle's last step, or its own door on a library already in Castle
+  before this change.
 - **Gate-style changes and the Touch ID re-arm** (§3.10).
 
 ### 3.10 Touch ID
@@ -428,8 +441,8 @@ open its file. So:
     - no finger enrolled on this Mac: Touch ID isn't set up here;
     - the item was invalidated by an enrollment change: Touch ID changed since you set it up — unlock with the
       passphrase, and Variorum asks about Touch ID again (the re-arm question, above).
-  - This reads her *"there should always be a button"* as "always, wherever Touch ID can work". **PROVISIONAL,
-    hers to confirm** (§9).
+  - This reads her *"there should always be a button"* as "always, wherever Touch ID can work" — **her pick,
+    2026-10-13** (§1).
 
 ### 3.11 Words (copy)
 
@@ -497,8 +510,8 @@ It runs once, at first unlock on the new build, **as a plan**:
 7. **Give everything this Mac holds in Standard a key of its own, beside the old one** (§3.5 point 2): other
    libraries' copies first, then a local-only live library, then **a fresh backup pair** of the live library. Nothing
    is removed.
-8. **A store already in Castle** gets one notice: copies from before Castle still open through the Apple account until
-   the old key is retired, with the door to retire it (§3.5 point 4).
+8. **A library already in Castle** gets one ask, at a calm moment: copies from before Castle still open through the
+   Apple account until the old key is retired — with the checks, the sheet and the door to retire it (§3.5 point 4).
 9. **The road back.** Until the first re-key under the new build, an older build still opens the library, because its
    items and files are untouched. After that, the road back is the A1 safety copy with the passphrase or words.
 
@@ -552,8 +565,7 @@ A headless world, run under `swift test`. It contains:
 **Every user act** is in its action alphabet:
 
 - create a library; set or change the passphrase; regenerate the words;
-- Use Castle (with or without keeping the old shared key for now); Use Standard; Replace All Keys; Re-link the Apple
-  account; retire the old shared key;
+- Use Castle; Use Standard; Replace All Keys; Re-link the Apple account; retire the old shared key (its door);
 - turn on sync; sign in as X or Y; sign out; This Mac Only; Stop syncing here; delete the account; Move;
 - back up; restore backup *n*; open older library *n*; open a plaintext export; send a library to the other Mac;
 - lock and unlock;
@@ -581,8 +593,9 @@ after every action:**
 1. **Known:** one record per live library, and what this Mac remembers agrees with it.
 2. **Castle means Castle:** no silent item holds any of the library's keys; no Apple key the record lists as retired
    exists; no Apple key wraps the current key; the vault has no Apple copy; and nothing a login-password holder can
-   read opens the library or any copy made on this Mac or on a device of its account that has followed — except
-   copies under the old shared key while it exists (the stated exception).
+   read opens the library or any copy made on this Mac or on a device of its account that has followed — except, on
+   a library already in Castle before this change, copies under the old shared key until it's retired (the stated
+   exception).
 3. **Standard means Standard:** the Apple wrap exists whenever the library's or account's Apple key is readable;
    otherwise the assessment says "waiting".
 4. **No silent change:** the mode and account change only at a deliberate act or its follow. A copy never lowers the
@@ -780,11 +793,10 @@ drill), VX-152 (Lock reentrancy), VX-240 (a wrong instruction mid-act).
 
 ## 9. Open (decided at the phase that meets it, recorded PROVISIONAL, logged in QUESTIONS)
 
-- **The old shared key's retirement as Use Castle's step** (§3.5 point 4), with *keep it for now* offered only when
-  something listed would stop opening, and its own door for a store already in Castle — PROVISIONAL, hers to confirm.
-  Her VX-301 ruling predates the finding that the key is shared by every library on the Apple account.
-- **VX-310's reading of "always"** (§3.10): the button is always there wherever a Touch ID item exists, and gives way
-  to a line naming why when none can work — PROVISIONAL, hers to confirm.
+- **The old shared key's retirement as Use Castle's step, with no keep-for-now** (§3.5 point 4), and a door only for
+  a library already in Castle before this change — PROVISIONAL, hers to confirm. Her VX-301 ruling predates the
+  finding that the key is shared by every library on the Apple account; her question about keep-for-now is answered
+  on VX-301.
 - **The exact Touch ID re-arm and retirement-sheet copy:** her approval at phase 4 and phase 5's walks.
 - **A retention rule for older libraries:** kept as today until she rules.
 - **VX-212's design:** her sitting before phase 6.
