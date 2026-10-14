@@ -160,6 +160,12 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 | R1-4w | "Connect a client" (title — the Connect section's existing words) · "The setup for your MCP client, ready to copy: a command for a terminal, or settings to paste into the client." (blurb, NEW) | Settings search results (the `mcpConnect` catalog row); the title also heads the Connect tab's section, now drawn from the catalog | the blurb is new words — hers to reword; it names no provider (O-4) |
 | R1-8w | the next step said twice after a copy: "Run it in a terminal, then start a new Claude Code session." (the line) and "Copied. Run it in a terminal, then start a new Claude Code session." (the receipt) — likewise Codex's and Any MCP client's | the Connect tab, under the code block, after a copy | now ONE sentence in code (the receipt = "Copied. " + the line); whether the line should hide while the receipt shows, or the receipt say only "Copied.", is hers |
 
+**Ladder round 2's fix pass (words AS BUILT):**
+
+| # | Words (as built) | Where it renders | Note |
+|---|---|---|---|
+| R2-3w | "Clients" (title — the Clients tab's own label) · "Every client you've approved or denied: whether it's connected now, how many grants it holds, and Change… or Deny… for each." (blurb, NEW) | Settings search results (the `mcpClients` catalog row, PROVISIONAL P-VX281-R2-1 (b)); the title is the tab's label | the blurb is new words — hers to reword; it names no provider (O-4) |
+
 **U2 — the shared icon (VX-268): no new words.** The icon, its hover and its popover are 13n-c's, unchanged; the ▾ menu's row mark is an image. One taste note for her pass: the icon reads large beside the Book Panel's small type (`vx281-screens/u2/walk/s16`).
 
 ## Unit records
@@ -1134,9 +1140,23 @@ VX-283's six offenders · no literal colour, no trailers, no rewrites · the rec
 | 1 | dispositions written (R2-1/R2-3/R2-4/R2-5 AGREED, R2-2 to its pins, none disputed) | DONE (this commit) |
 | 2 | the pins, red-first: R2-1 · R2-2 (a)+(b) · R2-3 | DONE — R2-1 `18f25d9a` (+ compile fix `90ec0d3b`: the model leg's helper made main-actor isolated) · R2-2 `f137cf20` · R2-3 `b52ab180` |
 | 3 | the OLD tree (the tip + the pins) built for testing → `DerivedData/vx281-r2-old` | DONE — built from `90ec0d3b` in `DerivedData/vx281-r2` (`** TEST BUILD SUCCEEDED **`, `logs/build-old.log` under `notes/plans/vx281-screens/r2/`, gitignored), then APFS-cloned to `DerivedData/vx281-r2-old` (the xctestrun's products are `__TESTROOT__`-relative, so the clone runs as built); `vx281-r2` goes on as the incremental NEW tree. The only warnings in a touched file are round 1's own (`MCPSharedIconClickTests.swift:446–447`, the R1-2 pin's nested `popoverGone`) |
-| 4 | the fixes: R2-1 · R2-3 · R2-4 · R2-5 (one commit each) | NOT-STARTED |
-| 5 | the NEW tree built; R2-2's patch tree built (the patch reverted after) | NOT-STARTED |
-| 6 | STAGE WINDOW `vx281-r2fix` — red on old, R2-2's call, the batch | NOT-STARTED |
+| 4 | the fixes: R2-1 · R2-3 · R2-4 · R2-5 (one commit each) | DONE — R2-1 `06f0c9d9` · R2-3 `1e4a44bc` · R2-4 `713d3890` · R2-5 `e55440e4`. Headless: `MCPProviderNeutralityTests` 2/2 GREEN (the O-4 fences after the alias left one); the search's ranking replicated over the five MCP rows in a script — every setup word → Connect, "claude" → Connect, "client"/"clients"/"approve"/"deny" → Clients, "server"/"mcp"/"grant" → the switch, "open book" → the open book ("ai" → Waiting, as before: its lead contains the letters) |
+| 5 | the NEW tree built; R2-2's patch tree built (the patch reverted after) | DONE — NEW from `e55440e4` (incremental in the OLD tree's own directory, `build-new.log`) → cloned to `DerivedData/vx281-r2-new`; then R2-2's patch (R1-9's held `.onDisappear`, saved as `notes/plans/vx281-screens/r2/r22-ondisappear.patch`) applied, built (`build-n22.log`) → `DerivedData/vx281-r2-n22`, and the patch REVERTED (the tree clean at `e55440e4`). All `** TEST BUILD SUCCEEDED **`; no new warning in a touched file (the three seen in recompiled files — `LibraryCatalogPaging.swift:218`'s GRDB import-visibility line from 2026-10-05, `LibraryCatalogView.swift:1561`, `AppSettingsView.swift:1236`'s standing `spec(paths:joinAll:)` — are pre-existing lines; `MCPSharedIconClickTests.swift:446–447` are round 1's) |
+| 6 | STAGE WINDOW `vx281-r2fix` — red on old, R2-2's call, the batch | PENDING — the plan below; the request is the orchestrator's to relay |
+
+**PROVISIONAL built this pass:** **P-VX281-R2-1 (b)** — "client"/"clients" land on the Clients tab through a new `mcpClients` catalog row (the orchestrator's ruling; options (a) Connect as built · (b) a Clients row — BUILT · (c) no landing; recorded under ROUND 2 above). For QUESTIONS at the merge.
+
+**Batch suites (91):** every test file naming a type this pass changed — `LibraryCatalogModel`, `LibraryCatalogView`, `SettingsCatalog`/`SettingsSearch`/`SettingsPane`/`SettingsRow`, `AppSettingsView`, `MCPPane`/`MCPPaneTab`/`MCPPaneCopy`, `MCPSharedIcon`/`MCPSharedIconProbe`/`MCPReachPopover`, `MCPSetupClient` — plus the five changed test files and `ChromeLineLimitTests` + `NoLiteralColourTests` (they sweep every source); derived by script into `notes/plans/vx281-screens/r2/batch-suites.txt` (gitignored, on this machine).
+
+### STAGE WINDOW `vx281-r2fix` — the plan (runs ONLY under the claim the orchestrator relays; ~25 min)
+
+Every run goes through `notes/plans/vx281-screens/r2/run.sh <tree> <log> <suites…|@batch>` (a bash ARRAY of `-only-testing` flags — round 1's zsh word-splitting slip cannot recur), which prints the counts and every failed test.
+
+0. **Guards, every time:** `Tools/WalkKit/guard.sh --author` (her `/Applications/Variorum.app` absent — present ⇒ STOP and report); `pgrep -fl 'Variorum.app/Contents/MacOS'` empty; the claim held. No Debug launch, no dev-store touch (every suite runs on in-memory stores).
+1. **RED ON OLD** (`vx281-r2-old`, built from `90ec0d3b` — the tip + the pins): `run.sh vx281-r2-old a-red-on-old MCPSharedRowsTests MCPSharedIconClickTests MCPPaneTabsTests`. **Expected:** R2-1's two pins RED (`theLibrarysNearHoldFollowsTheRowsItDrawsAndNeverHoldsUnderTheTimeline`, `theLibraryViewEndsItsNoteHoldsWhenItShowsTheTimeline`); R2-3's two RED (`aSearchForTheSetupsWordsLandsOnConnect` on "claude", `aSearchForClientsLandsOnTheClientsTab`); R2-2's two DECIDE (`anIconWhoseReachLeavesAndReturnsNeverPresentsItsPopoverByItself`'s (a) leg, `aRowFilteredAwayWithItsPopoverUpLeavesNoPopoverStateBehind`); every other test GREEN.
+2. **R2-2's call:** RED ⇒ `run.sh vx281-r2-n22 c-r22-patched MCPSharedIconClickTests` (expected all GREEN), the patch is committed (`git apply notes/plans/vx281-screens/r2/r22-ondisappear.patch`, `R2-2: …`), and the batch runs on `vx281-r2-n22`. GREEN ⇒ **HOLLOW**, the patch discarded, the batch runs on `vx281-r2-new`.
+3. **THE BATCH:** `run.sh <tree> b-batch @batch` (the 91 suites). **Standing reds, not ours (named if met):** VX-115's `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (not in this set); VX-167's order-dependent `LibraryInfiniteScrollTests` pair; `ChromeLineLimitTests`' six VX-283 sites.
+4. **Release the claim at once**; then the record — the verdicts per finding, the counts; delete the three trees.
 
 ## Closeout
 
