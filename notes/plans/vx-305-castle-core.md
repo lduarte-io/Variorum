@@ -547,34 +547,15 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   commit. The U1+U2 suites: 154 tests in 35 suites green in Debug; 134 in 32 green under `swift test -c release` (the
   three DEBUG-only mutation suites compiled out). The full core suite green in Debug (its first run met one
   perf-timing issue under load, green alone and on the re-run — the record's first line).
-- U3 — the executor and the acts: **IN-PROGRESS** (Opus implementer, 2026-10-14; reading done — the canon, the
-  resiliency protocol, the design whole, this plan whole, SyncSpec §3, pre-13x §1–§7 and §14, the Apple facts, U1's and
-  U2's code whole, today's runner `PostureSwitch.swift` and `CorpusRotation.swift`'s driver). Pieces, each its own
-  commit: (a) the leaves, the vault model (the `Sync/` half MODELLED in `Protection/Executor/`, zero `Sync/` lines),
-  the executor's core — the session at unlock, this Mac's facts written in both homes, the plan runner (begin, steps,
-  resume, the commit point, roll back before it, finish from the record after), the repairs with their preconditions
-  verified — and the in-memory test world — WIP COMMITTED (compiling; the remaining acts stubbed in `Acts/Pending.swift`
-  until their pieces) — `9f694b5c`; its core tests DONE — 14 in 2 suites green filtered (a planted, a replayed, an
-  unnamed and a stray plan each ignored and reported, the act rolling back; a memory item failing its seal losing to
-  the record's section; a plan never holding a secret; every repair's precondition verified before a delete; no repair
-  while an act is in flight; no Touch ID item by a repair; nothing destructive on a Standard record's word; delete on
-  sight by recorded id only; decision 35; the mirror never re-adding an Apple wrap) — `53e94d82`;
-  (b) the crossings — Use Castle, Use Standard, Replace All Keys, the follows (the finish of a lost device's leave
-  included) — DONE, 26 tests in 4 suites green filtered (the exact writes; a crash after EVERY write — Touch ID,
-  Always ask, synced, plan dropped; the follower's hold; the refusals) — `8b3b1e39`; (c) the account acts — set up
-  sync, enroll by the joining rules, the three leaves (This Mac Only carrying a mode while signed out), Move — DONE,
-  13 tests in 2 suites green filtered — `843ef37c`;
-  (d) copies — open a copy (the current key, the current facts, no act carried), land (a fresh key, an empty history,
-  one secret then the other typed or made new, none through a readable Apple key), Send Library, the plaintext export,
-  the offer's delete — DONE, 11 tests in 3 suites green filtered — `469044e6`; (e) the key doors,
-  device settings, the re-arm, confirm mode, create library, Re-link (both arms), the old shared key's move and
-  retirement, the migration — DONE, 19 tests in 4 suites green filtered (every act now real — `Acts/Pending.swift`
-  deleted; 83 U3 tests in 15 suites green together) — `9217cfb8`; (f) U3's guards with their DEBUG mutation pins, the log scan, decision 35,
-  the failed seals — DONE (21 guard tests in 2 suites — 20 DEBUG mutation pins, each guard off letting its bug
-  through beside the guarded run; the log scan; decision 35 at the act level; Use Castle's door-time vault check added
-  executor-side; 106 U3 tests in 18 suites green together, Debug) — this commit; `swift test -c release` and the
-  full core suite PENDING; (g) the record — NOT-STARTED.
-- U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
+- U3 — the executor and the acts: **DONE** (2026-10-14; the record is §8's U3 record). Pieces: (a) the leaves, the
+  vault model (the `Sync/` half modelled, zero `Sync/` lines), the core, the repairs, the in-memory world — WIP
+  `9f694b5c`, its tests `53e94d82`; (b) the crossings — `8b3b1e39`; (c) the account acts — `843ef37c`; (d) copies —
+  `469044e6`; (e) the remaining acts (key doors, settings, re-arm, confirm, create, Re-link, the old shared key, the
+  migration) — `9217cfb8`; (f) the guards and their mutation pins, the log scan — `ca09dc95`, the self-review's four
+  gaps — `5fbe5cb5`; the record — this commit. The protection suites (U1+U2+U3): 268 tests in 55 suites green in Debug;
+  228 in 51 green under `swift test -c release` (the four DEBUG-only mutation suites compiled out). The full core suite
+  green in Debug (3128 / 385, 240 / 51, 40 / 6). Not done (the record's first line): the empty-slot landing → phase 5.
+- U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NEXT.**
 - The go/no-go record: **NOT-STARTED.**
 
 ---
@@ -882,6 +863,173 @@ Each pushed to `origin/vx-305-castle-core` as it landed.
 - U3's hand-forwards (the repair preconditions, `restoreKeyFileFromMirror`, `OwedAct.migrate`, `DoorSpec`,
   `MovePlan`, the fresh-KDF-descriptor invariant) and U4's (the file-swap fixed scenario, `AWorld`/`walk`) are in
   the U2 record above.
+
+### U3 RECORD — the executor and the acts (Opus implementer, 2026-10-14; one session, no deaths)
+
+**Not done, first:** (1) **a landing into an EMPTY slot** (a fresh Mac receiving Send Library with no library of its
+own) — `land` takes the slot's unlocked library (it goes aside, the landing named in both); the empty-slot road (no
+outgoing library to name the act in — `createLibrary`'s no-plan pattern) is **hand-forwarded to phase 5** (Open
+Library), U4 building its receivers with a library of their own. (2) The `Sync/` half is MODELLED, not built
+(`Executor/VaultModel.swift` + the `VaultLeaf`; zero `Sync/` lines) — phase 3's, Fable's. (3) Two account acts carry
+their protection half only: *delete the account from this Mac* (the server's deletion is the account lifecycle's —
+phase 4) and Move (its re-stamp and resync — phase 4). (4) The QUESTIONS entries for the PROVISIONAL calls below wait
+for the closeout, as U1's and U2's do (CLAUDE.md's merge-moment rule; §11 lists them).
+
+**What shipped** — `Sources/VariorumCore/Protection/Executor/` (the ONLY code that calls a writing leaf):
+- `Leaves.swift` — the leaves as protocols (custody, today's items, sync keys with session memory, Apple keys by id
+  plus the old shared key's compare-then-delete, the vault, the library file with its staged file and swap, key files,
+  the memory, the plan, backups with the copy pause, clock, IDs — every random thing one seedable leaf, the fresh KDF
+  descriptor included — biometry, Diagnostics as a TYPED entry so none can carry a secret); `ExecutorLeaves`.
+- `VaultModel.swift` — the vault MODELLED from the real `KeyVaultFormat` (Crypto/): a vault's creation, a rotation's
+  first write (M′ under P on the door's descriptor and W, the previous corpus key under M′, the Apple copy kept under
+  the SAME account key — decision 30 — or none, or a leave's fresh id with NO wrap), the completing write (the wrap under
+  the NAMED key with the window closed — just the wrap when an older build cleared it), the follower's read, the
+  master by a typed secret; `VaultSnapshot` reads as U2's `VaultReading` (§3.9's three states); `VaultRefusal`.
+- `Executor.swift` — `ProtectionExecutor`: the configuration (scope, the slot's library, the machine — hashed, never
+  stored — device name, floor, session); `unlock(with:alsoInHand:)` — every home verified with the key in hand and every
+  key the lobby's road reached (so a library file swapped for an older one loses to the newer memory — U2's file-swap
+  hand-forward, the executor's share), this Mac's section resolved by U1's `thisMacsSection`, the executor following the
+  slot's library id; this Mac's facts written into BOTH homes; the vault read fresh this session (decision 35's
+  freshness, an absent vault counting as a read — sync setup's); `ExecutorRefusal` (every refusal named).
+- `PlanRunner.swift` — `ActProgram` (steps per parameters, the new-key steps, the plan-less finishing steps) and the
+  runner: BEGIN (the act named in both homes FIRST, then the plan sealed under the key in hand), idempotent steps each
+  re-sealing the plan, END (cleared in both homes, the plan deleted, copies resumed); `settle` at open — a plan the
+  section names resumes (the secrets a resume needs re-typed: a plan never holds one); a planted, replayed, unnamed or
+  stray plan ignored and REPORTED; no usable plan → ROLL BACK before the commit point (the staged file discarded, the live
+  key file restored from the sealed mirror, the new key's items deleted, an own Apple key the act minted that wraps
+  nothing retired) or FINISH FROM THE RECORD after it; a new key never made durable re-minted; a step's `ActRollback`
+  rolling back on the spot (the account moved before this device's first write; the losing device's unlanded account
+  key deleted and recorded retired); an act that ended between its two homes' writes leaves the memory following the
+  newer home.
+- `ExecutorRepairs.swift` — §3.3's repairs, each precondition VERIFIED by the executor before any delete (the history
+  opened with the current key; a typed road matched by the SEALED mirror byte for byte; the item still holding that
+  key); none while an act is in flight; none makes a Touch ID item; nothing destructive on a Standard record's word; the
+  Castle repairs only on a confirmed Castle record; delete on sight by recorded id only; decision 35; the key file back
+  from its mirror never re-adding an Apple wrap.
+- `Acts/` — `CommonSteps.swift` (the re-key in PREPARE-THEN-COMMIT order: the new key's custody item → the new key file
+  with the history it takes and the anchor carried → the staged re-encryption → the record into the staged file, every
+  verifying section re-sealed under the new key → THE SWAP → the memory → the outgoing key's items, Castle's sweep only
+  once the history verifiably holds each key; copies paused from the prepare to the swap; the account's rotation with
+  the new corpus id stamped in the plan BEFORE the write; the walk; the completing write gated on the named key; sync keys
+  held by what they reach; the anchor written FIRST and never twice; the old shared key's retirement); `EnterCastle`,
+  `LeaveCastle`, `ReplaceAllKeys`, `Follow` (into Castle, into Standard, keys replaced; the hold; the finish of a lost
+  device's leave minting only at the press that stops waiting), `AccountActs` (set up sync, enroll by the joining rules,
+  This Mac Only — carrying a mode while signed out — Stop syncing here, delete the account here, Move, Resume Sync after a
+  landing), `Copies` (open a copy, land, Send Library, plaintext export, the offer's delete), `KeyDoors`, `DeviceActs`
+  (settings, the re-arm, confirm mode, create library), `SharedKeyAndRelink` (the move, the retirement, Re-link's two
+  arms), `Migration` (§3.13). Every `ProtectionAct` case has its program (shape refinement, recorded: the account family
+  and the copy acts each share one file — their rules are one table each).
+- `Model/Plan.swift` — **a recorded refinement of U1's plan:** `ActParameters` (optional, sealed with the plan) — what the
+  press chose that a resume needs and that is NOT a secret: the gate at this press, the door's vault revision (VX-109),
+  the door's KDF descriptor, the stamped corpus ids, the Apple key ids an act minted, the crossing's kinds, the copy's id,
+  the follow's kind and typed secret's kind, the move's subjects. The plan's format number is unchanged (no plan exists
+  on disk yet; an older plan decodes with none).
+- `ProtectionGuards.swift` — U3's eleven guards (off-switches `#if DEBUG` only): `planNamedBySection`,
+  `repairPreconditionsVerified`, `repairNeverMakesTouchIDItem`, `prepareBeforeCommit`, `exportOffAtCastle`,
+  `followerAnchorTypedLock`, `oldSharedKeyDeletedByRecordedID`, `copyActClearedOnOpen`, `moveKeepsOldWrap`,
+  `retirementRerunsMoves`, `freshPairAfterMove`; the executor also reads U2's `everyOwnKeyRetiredAtCastle`,
+  `leaveIDGatesCompletion`, `castleKindCustodyThroughLeave`, `freshVaultBeforeAppleWrite`, `rekeyAtEveryCrossing`,
+  `doorTimeVaultCheck`, `standardRecordNoDestructiveRepair` and `deleteOnSightByIDOnly` where it acts on the same rule.
+
+**Tests** — `Tests/VariorumCoreTests/Protection/Executor/`: `ExecutorWorld` (every leaf in memory; a write log in
+order; a crash injectable after ANY write — the write lands, the process dies, session memory and the copy pause go
+with it; a shared `ICloudKeychain` and `ExecutorVault` — CAS, the key proof, one rotation at a time, completion refused
+while rows remain), `ExecutorFixtures` (`EX`: a library in each shape, a second device on the same account, the lobby's
+roads after a relaunch, `expectSettled`), `CrashHarness` (a crash after EVERY write of a clean run — stronger than every
+step — then relaunch, settle, and the world classified: finished or never happened, never both or neither; with the
+plan kept a resume must finish, with it dropped the act rolls back before its swap and finishes from the record after);
+the suites — `UseCastleTests` 7, `UseStandardTests` 8, `ReplaceAllKeysTests` 5, `FollowTests` 6, `SettleSealTests` 6,
+`ExecutorRepairTests` 9, `AccountJoinTests` 6, `LeaveAccountTests` 7, `OpenCopyTests` 4, `LandTests` 4,
+`SmallCopyActTests` 3, `ExecutorKeyDoorTests` 5, `ExecutorDeviceActTests` 4, `SharedKeyActTests` 6,
+`ProtectionMigrationTests` 4, `ExactWritesTests` 5, `ExecutorEdgeTests` 3, `ExecutorLogScanTests` 1,
+`ExecutorGuardsOnTests` 1, `ExecutorGuardMutationTests` 20 (DEBUG) — 114 tests in 20 suites. §5's list, each met: the
+exact writes in order (Use Castle local and synced, Use Standard local and synced, Castle Replace All Keys, opening a
+copy, the follow into Castle, a leave, a landing, a synced key door, the settings, the re-arm — each read against the
+design's order before it was pinned); a crash after every write then a resume that finishes or rolls back, never a third
+state (Use Castle — Touch ID, Always ask, synced Always ask, plan dropped; Use Standard — local, Always ask, plan dropped,
+synced Always ask; Replace All Keys; a follow into Standard on an Always-ask device; a leave — Always ask, plan dropped;
+an enroll into Castle; opening a copy; a landing; the migration); every refusal named; the log scan; decision 35 (the
+repair, and an act offline); the failed seals (an unsealed or unnamed plan ignored and the act rolled back or finished
+from the record; a memory item failing its seal losing to the record's section).
+- Debug, the protection suites (U1+U2+U3 — 55): `✔ Test run with 268 tests in 55 suites passed after 0.889 seconds.`
+  (U3: 114 tests in 20 suites.)
+- Release (`swift test -c release --filter …` over the same 55 names, on THIS tree): `✔ Test run with 228 tests in 51
+  suites passed after 0.460 seconds.` (the four DEBUG-only mutation suites compiled out: 268 − 40, 55 − 4). Wall 526 s,
+  the release build included.
+- Full core suite, Debug (`swift test`, 314 s wall): `✔ Test run with 3128 tests in 385 suites passed after 195.978
+  seconds.` · `✔ Test run with 240 tests in 51 suites passed after 23.262 seconds.` · `✔ Test run with 40 tests in 6
+  suites passed after 47.347 seconds.` (U2's 3014 + U3's 114; 365 + 20.)
+- The guards are live: each of U3's eleven, and the eight U2 guards the executor reads, switched off lets its bug through
+  beside the guarded run (`ExecutorGuardMutationTests` — the failing assertion is each test's expectation on the
+  unguarded run: a replayed plan changing this Mac's settings; the only road deleted; a Touch ID item made by a repair;
+  no road opening the library after a crash at a swap made before its key file; the export left on; a follower's anchor
+  not opening with the passphrase typed at its follow; a newer old-name item deleted; a copy's act carried; the old wrap
+  dropped; no fresh pair; another library's copy stranded at the retirement; a re-linked own key left unretired at Castle;
+  the previous key cleared while the leave's id stands; silent sync keys in a leave's window; an Apple wrap landed with
+  no fresh read; a Standard leave keeping its key; the old key deleted though a vault names it; Use Castle's door opening
+  on a vault on the old key; a Touch ID item deleted on a Standard record's word; another Mac's Apple key deleted).
+- **Two real gaps the crash harness found while building, fixed and pinned:** an Apple key added but not yet recorded in
+  this Mac's section (a crash between) is recorded on the resume; Replace All Keys' re-link-first carries its own vault
+  revision forward (its rotation's CAS otherwise refused its own write).
+
+**PROVISIONAL calls (for QUESTIONS at the closeout):**
+- **P-U3-1 — a held follow's library half asks its one secret again.** A follow into Standard meeting a leave in progress
+  writes the anchor (under the secret typed then), picks up the keys and holds; its library re-key runs at the NEXT
+  follow press, which types one secret again. Chosen: (a) ask again at that press. Others: (b) keep the derived key in
+  session memory across the hold, asking only after a relaunch; (c) lock the new key file under the master, its words
+  copy and the Apple key only, the passphrase lock landing when next typed (today's 2c rule).
+- **P-U3-2 — a synced act's plan lost past the account's commit point** (the vault rotated, the library not yet swapped).
+  Chosen: (a) the library half rolls back and the device finishes the account half as any follower would (§3.6: "a
+  synced rotation resumes from the server's own rotation state" — the finish door / the follow, pinned). Other: (b)
+  finish the library half from the record — it needs both secrets re-typed, which no plan holds.
+- **P-U3-3 — a leave forgets the old account's sync keys AFTER the swap** (VX-110 forgot first). Chosen: (a) after — the
+  record's binding is what governs, and a roll back then leaves the device still enrolled. Other: (b) first, as VX-110
+  (a roll back leaves the library bound to an account whose keys this Mac forgot).
+- **P-U3-4 — This Mac Only carries a mode while signed out** (§3.8's one plain road: Use Castle's or Use Standard's
+  crossing applied to this Mac only, in the leave's one act). Chosen: (a) one act. Other: (b) two acts in sequence (the
+  leave, then the crossing — two re-keys).
+- **P-U3-5 — Re-link's library arm for another library's own key file** reaches that library's key only through the old
+  shared key's wrap while it exists; otherwise it is reported, not guessed (it needs that library's secret). Chosen: (a)
+  skip and report. Others: (b) ask that library's passphrase or words at the door; (c) re-lock nothing for it.
+- **P-U3-6 — a copy act's resume without the copy's key** (opening a copy, a landing — the copy's key is in hand only at
+  the press) rolls back before its swap. Chosen: (a) roll back (she opens it again). Other: (b) leave the act in flight,
+  asking for the copy's secret again.
+- **P-U3-7 — no repair runs while an act is in flight** (mid-act the live key file is the new key's while the library is
+  still under the old one; a repair would read "the file lost a road" and undo the act). Chosen: (a) every repair
+  skipped, reported `.actInFlight`. Other: (b) only the non-destructive ones (`refreshMemory`). Hand-forward: `assess`
+  owing none while an act is in flight.
+- **P-U3-8 — the migration's custody items:** a confirmed Castle library gets a per-key Touch ID item only where today's
+  gated item stood and this Mac's gate says Touch ID (the choice she made then; the migration is an act, not a repair);
+  none under Always ask; an unconfirmed mode adds none. Others: (b) none until a press in Settings; (c) one on every Mac
+  with an enrolled finger.
+- **P-U3-9 — Resume Sync after a landing tells which secret was made new by what opens what** (the one the vault opens is
+  the account's; the other must open the landed key file and becomes the account's). Chosen: (a) by what opens what.
+  Other: (b) a fact stored at the landing (a record field — a schema change).
+
+**Commits:** `76215573` (LIVE STATUS opened) · `9f694b5c` (a/b WIP: the core, the crossings, the world) · `8b3b1e39`
+(b: the crossings' tests) · `53e94d82` (a: the core's tests) · `843ef37c` (c: the account acts) · `9632f98a` (LIVE STATUS
+flips) · `469044e6` (d: copies) · `9217cfb8` (e: the remaining acts) · `ca09dc95` (f: the guards, the log scan) ·
+`5fbe5cb5` (f: the self-review's four gaps) · the record's own commit. Each pushed to `origin/vx-305-castle-core` as it
+landed.
+
+**Machinery notes:**
+- Swift 6: the executor is a non-Sendable final class and the leaves `AnyObject` protocols; only the vault is `async`.
+  Phase 3's real vault leaf drops in behind the same protocol.
+- The crash harness crashes after every WRITE, which subsumes "after every step" (a step is one or more writes plus the
+  plan's). A crash before the plan's first write is, by design, an act with no plan: it rolls back.
+- The record is written into the staged file with every section that verifies re-sealed under the new key, so after a
+  leave (an empty history) other devices' sections stay verifiable.
+- Sync keys are re-filed only when they differ (one item per account, the other class dropped).
+- Hand-forwards — **U4:** `ExecutorWorld`, `EX`, `CrashHarness` and `ExecutorVault` are the simple leaves U4's world
+  replaces with realistic fakes (propagation, the off switch, the same-name rule, an older build); the empty-slot landing
+  above; the file-swap fixed scenario's world half (the executor's share is `unlock(alsoInHand:)`, pinned); the held
+  follow's second press (P-U3-1). **Phase 2:** the leaves' real Keychain/file/SQLCipher implementations; the lobby passes
+  `alsoInHand` every key its road reached; `settle` runs at every open before any repair; `assess` owes no repair while an
+  act is in flight (P-U3-7). **Phase 3 (Fable, `Sync/`):** the `VaultLeaf` over `KeyVaultClient` and `CorpusRotation`
+  — the stamped corpus id, the door's revision, the leave's mark (`apple_key_id` with no wrap), the completion gated on
+  the named key, the walk; `SyncEngine.refuseIfRekeyIncomplete` reading the plan; the key provider reading sync keys by
+  reach and session memory.
+- The one Sonnet lookup was not used.
 
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions)
 
