@@ -10,6 +10,12 @@ merged. The key files:
 
 Nothing is built: this is design and plan only.
 
+> **Her answers, the morning of 2026-10-14** (recorded in the design's §9): call 1 confirmed (*"i'm good to confirm it
+> either way"*); call 2 confirmed (*"dormant in release is what i meant"*); call 4 — small fixes on today's road
+> for VX-302 and VX-317, VX-209 and the rest wait (*"yeah we can do the small bug fix"*); calls 5 and 6 confirmed
+> (*"that's fine on calls 5 and 6"*); call 3 — she asked to decide it now, the options laid out to her that
+> morning, her pick to land in QUESTIONS and on VX-329. She approved the branch the same message; it merged by PR.
+
 ## Your checklist
 
 1. **Confirm or change the six calls made overnight** (the next section; the design's §9 marks each PROVISIONAL). Each

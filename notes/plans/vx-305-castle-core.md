@@ -134,7 +134,8 @@ Tests/VariorumCoreTests/Protection/
 - **Guards the mutation pins switch off** live in one `ProtectionGuards` value whose off-switches exist only under
   `#if DEBUG`. Release builds strip them, as with the store's DEBUG oracles, so the mutation pins run in the Debug
   configuration and everything else runs in both.
-- **The core compiles in both configurations** (design §5, PROVISIONAL): "off in Release" means the app's wiring,
+- **The core compiles in both configurations** (design §5, confirmed by her 2026-10-14 — *"dormant in release is what
+  i meant."*): "off in Release" means the app's wiring,
   which phase 2 owns. Nothing in this phase is behind `#if DEBUG` except the guards' off-switches.
 
 ---

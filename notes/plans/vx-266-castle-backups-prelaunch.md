@@ -1,7 +1,8 @@
 # VX-266 — Castle & backups before launch: the design and the plan
 
 **Status: DESIGN RULED, 2026-10-13; revised at her round-2 ruling the same night and her round-3 rulings on
-2026-10-14 (§1), then for the late extra read of round 3, with calls made provisionally overnight at her word (§9).
+2026-10-14 (§1), then for the late extra read of round 3, with calls made provisionally overnight at her word and
+confirmed by her the same morning (§9) — the rehearsal's method excepted, hers to pick (§9).
 Nothing built yet.** This file
 is the binding design for the effort ("Castle & backups before launch", flagship VX-266) and its phase map. Each phase
 gets its own just-in-time execution plan beside this file, with a kickoff message at its top (the split-phase rule,
@@ -69,7 +70,8 @@ At #216, in her review of both documents, and after each review round:
     that's fine that the anchor doesn't follow your pasphrase and words - c opies before you left castle open with the
     passphrase you had when you lefti s solid. leaving castle doesn't make words so your current is good - solid."*
     On a device that follows out of Castle, her sentence holds because that device's anchor is locked at its birth
-    with the secret typed at its follow as well (§3.4) — a call made provisionally overnight, for her confirm (§9).
+    with the secret typed at its follow as well (§3.4) — a call made provisionally overnight and confirmed by her on
+    2026-10-14: *"i think that's fine, i'm good to confirm it either way."* (§9).
   - Asked whether the design ever changes a backup's keys behind her back, she was told no: a backup's locks are
     written once, with it, and never touched again, and a key changes only at an act she takes (§3.4, §3.12).
 - **VX-209 — the mode belongs to the library; opening a copy never lowers it.** This reverses her earlier yes to the
@@ -1250,10 +1252,11 @@ copied on dev s tore and my store copies and then we can release it to my store 
 for the new system til the end of phase 5"* and *"yeah we'll wait to turn the new system on in release builds / wait to
 put it in release builds til i'm ready to release it."*
 
-- **What "off in Release" means** (PROVISIONAL, for her confirm — §9): the app's wiring. The core compiles in both
+- **What "off in Release" means** (her confirm, 2026-10-14: *"dormant in release is what i meant."* — §9): the app's wiring. The core compiles in both
   configurations and is tested in both from phase 1 (`swift test` and `swift test -c release`), so no new code meets
   the optimizer for the first time at the switch; Release builds carry it dormant, and the switch flips the wiring.
-  The literal reading — the new code left out of Release builds entirely until the switch — is the other option.
+  The literal reading — the new code left out of Release builds entirely until the switch — was the other option,
+  not taken.
 - **The switch is one change in one place, with its own ticket, run and ladder (VX-329)**, made at her word when she's
   ready to release — after phase 5 at the earliest: the new system turns on for Release builds, the migration runs on
   her Mac, her phone and her testers' stores at their next unlock, and §3.15's deletions land in the same change.
@@ -1461,7 +1464,8 @@ followed into Castle — VX-301 and the follow's typed secret settle it: the pho
 - **The cast at each kickoff** (§5).
 - **The release switch:** her word, when she's ready to release — after phase 5 at the earliest (§5, VX-329).
 
-**Called provisionally overnight, 2026-10-14, at her word** — *"i want you two to continue through to handoff, ruling
+**Called provisionally overnight, 2026-10-14, at her word — and CONFIRMED by her the same morning, the rehearsal's
+method excepted (her words below each)** — *"i want you two to continue through to handoff, ruling
 provisionally where needed ... document decisions and why they were made for me in enough detail that i can discuss it
 with a session tomorrow"* — each settled with the round-2 Fable reviewer, which had the final say at her word. The
 options and the reasons are in `design-cold-read-r3.md` (the extra read's section) and the design handoff:
@@ -1470,18 +1474,25 @@ options and the reasons are in `design-cold-read-r3.md` (the extra read's sectio
   what opens a follower's copies (§3.1). PROVISIONAL, for her confirm: it touches the premise of her ruling that the
   anchor keeps the secrets of its day. The other option was to change nothing in the mechanism and only say the truth
   — that on a follower, copies from before the leave open with whatever opened that device then, which is often not
-  the passphrase she had when she left.
+  the passphrase she had when she left. **CONFIRMED, 2026-10-14:** *"i think that's fine, i'm good to confirm it
+  either way."*
 - **"Off in Release" means the app's wiring; the core compiles and is tested in both configurations from phase 1**
   (§5). PROVISIONAL, for her confirm: her words were *"wait to put it in release builds"*. The other option is the
-  literal one — the new code left out of Release builds entirely until the switch.
+  literal one — the new code left out of Release builds entirely until the switch. **CONFIRMED, 2026-10-14:**
+  *"dormant in release is what i meant."*
 - **How the real-scope branch of the migration is rehearsed before her live stores migrate** (§5): open, decided with
   her in VX-329's plan. The options: a spare macOS user on the same Apple ID; the Air first, as a canary; or the
-  rehearsal taken as the first leg of the real migration. Whatever runs logs every Apple key id it mints.
+  rehearsal taken as the first leg of the real migration. Whatever runs logs every Apple key id it mints. **2026-10-14:
+  she asked to decide it now** (*"call 3 - we can decide this now. what are my options?"*); the options were laid out
+  for her that morning, and her pick lands in QUESTIONS and on VX-329.
 - **Today's bugs in Release until the switch** (§5, §8): hers, bug by bug, from the table in the handoff. The
   recommendation: offer small fixes on today's road for VX-302 (a data-loss class) and VX-317 (trivial); let VX-209
   wait, since VX-201's shipped confirm line already says it and names the road back (a refusal is her option if
-  she'd rather block than warn); the rest wait.
+  she'd rather block than warn); the rest wait. **RULED, 2026-10-14:** *"yeah we can do the small bug fix."* VX-302
+  and VX-317 each get a small fix on today's road, its own ticket run, before the switch; VX-209 and the rest wait.
 - **The Touch ID re-arm question asks only after a press fails on an item that exists**; with no item, Always ask is
   recorded quietly and Touch ID comes back from Settings (§3.10). PROVISIONAL: it narrows when the question appears
-  (round 3 had it ask after a delete or a wipe too); VX-310's button rule is untouched.
-- **A new device identity starts on Always ask** (§3.10). PROVISIONAL, with her words at phase 4's walk.
+  (round 3 had it ask after a delete or a wipe too); VX-310's button rule is untouched. **CONFIRMED, 2026-10-14:**
+  *"that's fine on calls 5 and 6."*
+- **A new device identity starts on Always ask** (§3.10). **CONFIRMED, 2026-10-14** (*"that's fine on calls 5 and
+  6."*); the exact words stay hers at phase 4's walk.
