@@ -433,3 +433,183 @@ captures (a fresh dev-store field guide via the product door); a real client rea
 organization ask by the advice.
 
 ## UNIT RECORDS
+
+## U5a UNIT RECORD — the label pair: VX-267 · VX-253 (opus-implementer, from 2026-10-14 ~13:35 MDT)
+
+**What this unit has NOT done (said first; updated at every piece):** (1) **no stage window of its own** (the brief: U5a's
+live legs ride U5b's window — LIVE LEGS FOR U5b's WINDOW below, written as exact `claude -p` turns, NOT run); so the new
+label has not been seen in Takes and `save_lens` by label has not met a real client; (2) the field guide and
+`MCPSession.instructions` are untouched beyond doc-truth (U8) — and the doc-truth sweep found nothing there stating the
+old form (the sweep below); (3) no `notes/QUESTIONS.md` entry and no canon edit (the merge's). Everything else is the plan
+below until each LIVE STATUS row says DONE with its log.
+
+**Read in full before code (never delegated):** CLAUDE.md and its loaded canon (AppSpec §9's standing conventions and
+structural undo, §12's THE MCP DOOR summary); this run record's header, Her kickoff answers, THE UNITS, Hard rules, LIVE
+STATUS, Stage traffic log, Cross-run coordination, the U5a BRIEF and the U5b BRIEF; the plan
+`notes/plans/mcp-pane-and-docs-kickoff.md` whole; `notes/MCPSpec.md` whole; VX-246's record — its Hard rules, THE RUN AS
+IT MERGES, the U1 UNIT RECORD (VX-280's `picksSQL` trace, fix and plan pin), the U2 UNIT RECORD (the quiet-half rule and
+THE SWEEP TABLE — `save_lens` is row 78, SAFE, already stamp-keyed), the U3 UNIT RECORD (the act list and
+`flushesHerEditorFirst`); the U5 BRIEF there (the source of this one); `notes/SessionResiliencyProtocol.md` whole;
+`notes/mcp-agent-notes-2026-10-13-bilingual-book.md` whole (items 2 and 9); the two tickets' bodies (VX-253, VX-267 —
+read-only, matching the brief's quotes; VX-253 also names its DESIGN CALLS (a) no magic label value, (b) refuse or pick
+deterministically, (c) the match rule must say which form it compares). Code read: `MCPWriteTools.swift` whole
+(`aiLabel` and its call sites, `parse`, `perform`'s `saveLens` arm, `onNote`, `land`, `picks`/`picksSQL`),
+`MCPWriteTools+Batches.swift` whole (`add_takes`' call site, `placedBlocksSQL`), `MCPToolCatalog.swift`'s read and suggest
+declarations (`add_take`, `add_takes`, `save_lens`, `read_note`), `MCPSession.instructions`, `MCPNoteStructure.read` and
+`lenses` (the shown-take rule on the wire; read_note's `picks` shape), the core `Operations.saveLens` + its undo halves,
+`setLensChoice`, `Queries.effectiveLensSelection` / `danglingLensPicks`, `Queries.renderedVariantIDs` (the one render
+rule), her own Save Choices as Lens doors (`TakesViewModel.saveCurrentChoicesAsLens`,
+`EditorViewModel.saveCurrentChoicesAsLens`), `MCPPaneCopy`'s `save_lens` Activity words (unchanged — the act is the
+same tool), the field guide's MCP chapter (`TutorialSeeder` lessons 1–7); tests: `MCPWriteServerTests`,
+`MCPLensDoorsServerTests`, `MCPBatchDoorsServerTests`, `MCPPicksPlanTests`, `MCPServerTests`' harness.
+
+**Surfaces (planned):** `Sources/VariorumMCP/MCPWriteTools.swift` (`aiLabel`; the `saveLens` job, parse and arm),
+a NEW `Sources/VariorumMCP/MCPWriteTools+LensRule.swift` (the lens rule: the matcher, its one read, the answer and the
+refusal), `Sources/VariorumMCP/MCPToolCatalog.swift` (`save_lens`' schema and description; `add_take`/`add_takes`
+descriptions only if the doc-truth sweep needs them); tests under `Tests/VariorumMCPTests/`. ZERO core op change (the
+lens rule resolves to picks; `Operations.saveLens` and its undo entry are untouched), ZERO `Sync/`, custody, schema,
+`Server/`, editor seam, app files (no Activity word changes — `save_lens` keeps its words), `MCPSession.instructions`
+(doc-truth found nothing to fix). So **no Mac build is owed** unless a piece moves an app file (the record will say).
+
+### LIVE STATUS — U5a's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this record + LIVE STATUS + the traces and the design (before code); `notes/plans/vx336-screens/` gitignored | DONE (this commit) |
+| 1 | VX-267 — the pin on the OLD tree (the wire: `add_take` and `add_takes` store `<client>` / `<client> · <label>`), RED | NOT-STARTED |
+| 2 | VX-267 — the fix (`aiLabel`'s body + doc) + the three old pins re-pinned as JUSTIFIED EDITS + the doc-truth sweep, GREEN | NOT-STARTED |
+| 3 | VX-267 — red again BY REVERT (announced first, on a committed tree; restored and verified) | NOT-STARTED |
+| 4 | VX-253 — the pins on the OLD tree (wire only: label fill, unmatched, ambiguity refusal + retry, own-suggestion forms, pin_chosen, the malformed combinations, the not-shared guard), RED | NOT-STARTED |
+| 5 | VX-253 — the fix (parse, the rule, the read, the answer, the catalog) + the new-API pins (the pure matcher, the plan pin), GREEN | NOT-STARTED |
+| 6 | VX-253 — red again BY REVERT (announced first; the new-API test file moved aside inside the worktree) | NOT-STARTED |
+| 7 | headless finals (MCP · core · workbook) | NOT-STARTED |
+| 8 | LIVE LEGS FOR U5b's WINDOW + FOR VX-234 + PROVISIONALs + self-assessment → the report | NOT-STARTED |
+
+**No revert is in flight.**
+
+### The traces (written before code)
+
+**VX-267 — the label an AI take wears (a convention row, her ruling — not a bug; the pin is a FORM pin).** Inputs →
+output: a client named `claude-code` at SUGGEST calls `add_take(block_id, text, label: "english")` →
+`MCPWriteTools.perform`'s `.addTake` arm (`MCPWriteTools.swift:358–366`) → `ops.addTake(…, label:
+Self.aiLabel(client: clientName, own: takeLabel))` → `aiLabel` (`:752–756`) builds `"claude-code · suggested"`, then
+`" · english"` → stored in `variant.label` → her Takes card shows **"claude-code · suggested · english"**. `add_takes`
+(`MCPWriteTools+Batches.swift:145–148`) relabels every item through the same function. Those are its ONLY two call sites
+(grep: `aiLabel` appears nowhere else under `Sources/`, `App/` or `Tests/`); every other take-writing tool stores labels
+as given (`create_note`'s blocks, `import_document`, `set_take_label` — P-VX195-5, her VX-197 split). **The ruled form:**
+`<client>` or `<client> · <label>` (the label trimmed as today; a blank label → the client alone). Existing takes keep
+their stored labels (text, no migration). **Who else reads the form:** nothing in the app parses an AI label (grep for
+`· suggested` under `App/` and `Sources/`: only `aiLabel` itself); three MCP pins assert the old form
+(`MCPWriteServerTests.swift:82`, `MCPLensDoorsServerTests.swift:84`, `MCPBatchDoorsServerTests.swift:122–123`) — they
+become JUSTIFIED EDITS (the ritual comment in place), each asserting the new form.
+**The doc-truth sweep (the brief: any description, instructions line or guide sentence that states the OLD form):**
+- `add_take`'s description — "labeled with this client's name (plus your label, if given)": TRUE of the new form; it
+  never stated "suggested". `add_takes`' — the same words, TRUE. `create_note`/`import_document`/`set_take_label` say
+  nothing of a client prefix (true — they store labels as given).
+- `MCPSession.instructions` — no label sentence at all ("suggest (add takes and comments beside their text, save
+  lenses)"): nothing false.
+- The field guide's MCP chapter (`TutorialSeeder` lessons 1–7) — no sentence states an AI label's form (lesson 3 says
+  "Suggest: it can add new takes and comments beside your text"; lesson 6 says new takes "join the block's takes
+  unchosen"; lesson 7's "Undo ‹name›'s take" is the undo label, not the take label): nothing false.
+- `notes/stargazing-mcp-guide-brief-2026-10-12.md` (her site agent's brief — U8's file): no label form either.
+So **VX-267's doc-truth is nothing to correct**; the matcher's description (VX-253) is the one place that must STATE the
+form, and it states the new one plus the legacy match. Said so U8 knows the guide's label sentence is still to write
+(her VX-197 split: "every take-writing tool's description says which label rule applies" — U8's).
+
+**VX-253 — a lens by label costs one UUID per block (agent ergonomics, ruled — a pure addition).** Inputs → cost: the
+bilingual book (25 notes, 3,843 blocks, two lenses each) — `save_lens(note_id, name, take_ids: [one per block])`
+(`MCPWriteTools.swift:188–194` parses `take_ids`; `:376–384` resolves them through `picks(noteID:takeIDs:)` → VX-280's
+`picksSQL`, ∝ the ids) → about 7,700 take ids retyped by a model, each learned first from a full `read_note with_ids`.
+Today a `label` argument is silently IGNORED (the parse reads only `take_ids`, `?? []`), so `save_lens(note, name,
+label: "english")` lands an EMPTY lens (no picks: every block falls through to its chosen take) and answers success —
+the red-on-old pins read exactly that. **The ruled behaviour** (the brief, the ticket — quoted there, not repeated):
+three explicit fills — picks, `label`, `pin_chosen: true` — picks first; an unmatched block shows its chosen take and is
+listed in `unmatched_blocks`; an AMBIGUOUS uncovered block refuses the whole call naming those blocks; labels match
+exactly as stored plus the client's OWN suggestions by their own part (`<client> · <label>`, and the legacy
+`<client> · suggested · <label>`), never another client's; `save_lens` stays at SUGGEST; cost ∝ the note's blocks.
+
+### The design (argued — the brief's three "argue" items, and the edges it leaves)
+
+1. **The picks fill IS `take_ids`** (PROVISIONAL **P-VX253-1**). The ruling's "picks" is the fill a lens has always been
+   given — explicit take ids, one per block — and the wire's name for it is `take_ids` (read_note's `with_lenses` answers
+   a lens's `picks` as `[{block_id, take_id}]`, the read side of the same thing). Kept: one wire name per concept, every
+   existing caller and pin byte-unchanged; `take_ids` stops being REQUIRED (a rule may now stand alone) and its
+   description calls them the per-block picks, applied first. Options: (a) AS BUILT; (b) rename to `picks` (breaks every
+   existing caller's habit for a word); (c) accept both names (two words for one thing on one tool).
+2. **The fills and their combinations (refusals at the PARSE — before any decision, so no oracle):**
+   - `take_ids` alone — today's call, unchanged (an explicit `[]` stays legal: an empty lens, as today).
+   - `label` (a non-blank string) — with or without `take_ids`.
+   - `pin_chosen: true` — with or without `take_ids`. `pin_chosen: false` reads as not given (a boolean, never a magic
+     value); a non-boolean refuses "pin_chosen must be true or false."
+   - `label` AND `pin_chosen: true` → refused: "Pass label or pin_chosen, not both — take_ids can ride either." (two
+     rules for the same uncovered blocks contradict each other; no precedence is ruled, so none is invented).
+   - **none of the three** → refused: "Pass take_ids (the take to show per block), label, or pin_chosen: true." — the
+     ruling's "explicit": the old schema REQUIRED `take_ids`, so no conforming client ever sent nothing; the lenient
+     parse's empty lens for an absent key was an accident, not a door.
+   - a blank `label` (empty or whitespace) → "label can't be blank."; a non-string → "label must be a string." The label
+     is otherwise compared EXACTLY as given (no trimming — "exactly as stored").
+3. **What `pin_chosen: true` means exactly — her own door, on the wire.** Today a lens block with no pick falls through to
+   the note's chosen take AT READ TIME (`effectiveLensSelection`; the Lenses board), so the lens moves when her ✓ moves.
+   `pin_chosen` makes it an EXPLICIT pick of the take each block shows NOW — exactly her **Save Choices as Lens…** (⌘⇧L,
+   `EditorViewModel.saveCurrentChoicesAsLens` / `TakesViewModel.saveCurrentChoicesAsLens`: "a lens whose EXPLICIT pick on
+   every renderable slot is what the post currently shows"), so a later ✓ never moves it. "Shows now" is the store's ONE
+   render rule (`Queries.renderedVariantIDs` / `Operations.renderedVariant`: the chosen take while it is live, active and
+   on this block, else the block's default), restricted to ACTIVE takes because a lens may only name an active take
+   (`setLensChoice` / `saveLens` refuse an archived one); a block whose rendered take is an archived default (a render
+   edge — the default is normally reassigned on archive) gets no pick, still shows it, and is listed in
+   `unmatched_blocks` (honest, never a refusal).
+4. **The matcher (VX-253's design call (c) — which form it compares).** For the calling client C (the session's
+   name — the same name the take was labelled with) and the given label L, a take MATCHES when its stored label is
+   exactly `L`, or exactly `C · L` (VX-267's form), or exactly `C · suggested · L` (the legacy form). Three byte-exact
+   comparisons, case-sensitive; the separator is ` \u{00B7} ` (`aiLabel`'s). Never another client's: D's `D · english`
+   matches C's `english` only if C passes `D · english` itself (exact as stored — its own read showed it that label). Only
+   LIVE, ACTIVE takes of the note's live-placed blocks are candidates (a lens may name nothing else). A take that would
+   match by two roads counts once (a set). **Recorded limit:** a label SHE typed by hand as `claude-code · english`
+   reads, for claude-code, as its own suggestion — labels are text; the form cannot know who typed it.
+5. **Picks first, then the rule, per block** (the ruling): a block named by `take_ids` takes that pick and is never
+   ambiguous or unmatched; every other live-placed block gets — under `label` — its ONE matching take (a pick), no pick
+   when nothing matches (listed in `unmatched_blocks`), or makes the call AMBIGUOUS when two or more match; under
+   `pin_chosen` — its rendered active take (a pick). The resolved picks go to the UNCHANGED `Operations.saveLens` (which
+   re-validates every pick inside its transaction: live, active, this note — a race refuses in its existing words).
+6. **The ambiguity refusal (the brief's "the refusal's block ids").** One refusal for the whole call, nothing saved:
+   `label "‹L›" matches more than one take on ‹one block | N blocks›, and a lens shows one take per block. Call again with
+   the same label and take_ids naming the take to show on each of these blocks:` then one line of JSON —
+   `{"ambiguous_blocks":[{"block_id":…,"takes":[{"label":…,"take_id":…}, …]}, …]}` — the blocks in note order, each
+   block's MATCHING takes in fan order with their stored labels, so the retry needs no `read_note` (the cost the ticket
+   exists to remove). Capped at 200 blocks (`MCPNoteStructure.carriageCap`, the house's per-answer bound) with
+   `"ambiguous_count"` the total (the retry then meets the rest). **No oracle:** every id named is a block of the note
+   the decision ALREADY allowed at suggest (≥ read) and an active take of it — exactly what `read_note with_ids` shows
+   this client; the refusal runs inside the act's closure, after the decision, so an unreachable note answers the ONE
+   not-shared shape byte-identical whatever fill it was given (a guard pin).
+7. **The answer's shape.** `take_ids` alone: `{"lens_id","note_id"}` — byte-unchanged. With a rule: plus
+   `"unmatched_blocks"` (block ids in note order, the first 200) and `"unmatched_count"` (the total) — so an agent checks
+   at a glance that every block it expected was matched, with an answer bounded however long the note is (a 3,000-block
+   note with a mistyped label would otherwise answer 100k characters). Every id is a block of the allowed note.
+8. **A label that matches nothing anywhere in the note refuses** (PROVISIONAL **P-VX253-2**): "No take in this note is
+   labelled “‹L›” — nothing was saved." Such a lens names no take by label, so it reads exactly as the note (or as its
+   picks alone): a mistyped label would leave her a junk lens a suggest client cannot delete (`delete_lens` is edit). §12's
+   "a door that did nothing speaks a refusal", applied. Options: (a) AS BUILT — refuse when no active take of the note
+   matches; (b) the letter alone — save it, every block listed in `unmatched_blocks`; (c) refuse only when, besides, no
+   take_ids were given.
+9. **Cost (P1).** The rule's read is ∝ the note's blocks and their takes — necessarily (a rule speaks of every block),
+   which is the brief's own bound — in TWO statements on the read_note shape: the note's live placements by
+   `idx_cblock_order (container_id=?)` (with each block's chosen and default ids), then their live active takes by
+   `json_each` → `idx_variant_block (block_id=? AND status=?)` (`CROSS JOIN`, the house's `json_each` discipline). Both
+   statements are named constants pinned on the plan (no table scan; the takes driven by the ids). The given `take_ids`
+   still resolve through VX-280's `picksSQL` (∝ the ids) — built on, never around. The core op's validation is ∝ the
+   picks (one per block).
+10. **`flushesHerEditorFirst` — false, argued (U3's exhaustive switch; `.saveLens` already answers false).** A lens names
+    takes; it never reads, rewrites, copies, freezes or tombstones a take's TEXT. The rule reads LABELS (her label edits
+    are committed by her own act, `setTakeLabel` — never pending in the autosave coordinator) and the CHOSEN pointer
+    (her ✓ is an immediate op, never debounced). Her pending typing is text in a take the lens may name — it lands in
+    that take by her own debounce, exactly as before; the lens shows whatever the take holds. Nothing to flush.
+11. **The undo entry (U2's rule) — unchanged.** One `Operations.saveLens` call, one client-named entry (`"‹client›'s
+    lens"`), whose halves already answer whether they changed anything (THE SWEEP TABLE row 78: the inverse returns the
+    stamp it wrote or nil — quiet, retires; the redo revives only on that stamp). The rule adds no half.
+12. **The fence and Private/Seal/Own:** untouched — the decision is `onNote(noteID, rung: .suggest)` as today, before
+    anything of the rule runs; a lens is allowed under a seal (lens CRUD's posture, unchanged).
+13. **The descriptions (doc-truth for this unit's own tool):** `save_lens` says the three fills, picks first, the match
+    rule with the stored forms (`<client> · <label>`, and older takes' `<client> · suggested · <label>`), unmatched
+    blocks showing their chosen take and the cap, the ambiguity refusal and its retry, and `pin_chosen` as the note's
+    current takes made explicit. Words AS BUILT (FOR VX-234 lists tool descriptions only for the record — they are the
+    model's, not her pane's; nothing renders in her app).
