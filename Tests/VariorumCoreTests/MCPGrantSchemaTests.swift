@@ -33,6 +33,12 @@ struct MCPGrantSchemaTests {
         try db.execute(sql: """
             INSERT INTO mcp_comment_author (comment_id, client_name, recorded_at) VALUES ('cm1', 'claude-code', ?)
             """, arguments: [stamp])
+        // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 U1): v1_28's waiting
+        // re-bind joins the family, so the seed carries one row of it too.
+        try db.execute(sql: """
+            INSERT INTO mcp_rebind_request (id, client_id, key_hash, version, asked_at)
+              VALUES ('rb1', 'cl1', 'waiting-hash', '0.1', ?)
+            """, arguments: [stamp])
     }
 
     @Test func theFamilyIsLocalOnlyByConstruction() throws {
@@ -50,7 +56,7 @@ struct MCPGrantSchemaTests {
             let triggers = try String.fetchAll(db, sql: """
                 SELECT name FROM sqlite_master WHERE type = 'trigger'
                   AND tbl_name IN ('mcp_client', 'mcp_grant', 'mcp_activity', 'mcp_switch', 'mcp_setup_key',
-                                   'mcp_comment_author')
+                                   'mcp_comment_author', 'mcp_rebind_request')
                 """)
             #expect(triggers.isEmpty, "no trigger — no outbox capture, no index capture — reads the grants store")
         }
@@ -131,6 +137,71 @@ struct MCPGrantSchemaTests {
                       VALUES ('no-such-comment', 'codex', ?)
                     """, arguments: [stamp])
             }
+        }
+    }
+
+    // MARK: - VX-258: a setup waiting for her OK (v1_28, local-only — the v1_24 road)
+
+    /// `v1_28_mcp_rebind_requests` joins the family LOCAL-ONLY exactly as its
+    /// siblings did — registered in `MCPGrantSchema.tables` and the strip
+    /// order (before `mcp_client`, which it names), no `sync_version`, outside
+    /// the sync registry, no trigger, never the outbox, the marker 13. One
+    /// waiting setup per client, one row per key, a real client named.
+    @Test func theWaitingRebindIsRegisteredLocalOnlyLikeTheGrantsFamily() throws {
+        #expect(MCPGrantSchema.tables.contains("mcp_rebind_request"))
+        let order = MCPGrantSchema.childFirstOrder
+        #expect(try #require(order.firstIndex(of: "mcp_rebind_request")) < #require(order.firstIndex(of: "mcp_client")),
+                "stripped before the client rows it names")
+        #expect(SyncSchema.lockstepVersion == 13, "a local-only migration never moves the marker")
+        let db = try AppDatabase.inMemory()
+        try db.read { (db: Database) throws in
+            #expect(SyncSchema.table(named: "mcp_rebind_request") == nil)
+            #expect(!SyncSchema.localOnlyTables.contains("mcp_rebind_request")
+                    && !SyncSchema.derivedTables.contains("mcp_rebind_request"),
+                    "its own family's registration, never sync machinery or a derived index")
+            let columns = try Row.fetchAll(db, sql: "PRAGMA table_info(mcp_rebind_request)").map { $0["name"] as String }
+            #expect(columns == ["id", "client_id", "key_hash", "version", "asked_at"], "a hash, never the key")
+            #expect(try String.fetchAll(db, sql: """
+                SELECT name FROM sqlite_master WHERE type = 'trigger' AND tbl_name = 'mcp_rebind_request'
+                """).isEmpty)
+        }
+        try db.write { db in
+            let before = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") ?? -1
+            try seedGrantRows(db)
+            #expect(try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") == before,
+                    "a waiting re-bind never reaches the outbox")
+            try db.execute(sql: """
+                INSERT INTO mcp_client (id, name, state, first_seen_at, last_seen_at) VALUES ('cl2', 'codex', 'approved', ?, ?)
+                """, arguments: [stamp, stamp])
+        }
+        for (sql, why) in [
+            ("INSERT INTO mcp_rebind_request (id, client_id, key_hash, asked_at) VALUES ('rb2', 'cl1', 'another-hash', '\(stamp)')",
+             "one waiting setup per client"),
+            ("INSERT INTO mcp_rebind_request (id, client_id, key_hash, asked_at) VALUES ('rb2', 'cl2', 'waiting-hash', '\(stamp)')",
+             "one row per key"),
+            ("INSERT INTO mcp_rebind_request (id, client_id, key_hash, asked_at) VALUES ('rb2', 'nobody', 'other', '\(stamp)')",
+             "a real client named"),
+        ] {
+            #expect(throws: (any Error).self, "\(why)") { try db.write { db in try db.execute(sql: sql) } }
+        }
+    }
+
+    /// A store at v1_27 gains the waiting table EMPTY and keeps its rows.
+    @Test func aStoreBeforeTheWaitGainsItEmptyAndKeepsItsRows() throws {
+        let queue = try DatabaseQueue()
+        try AppDatabase.migrator.migrate(queue, upTo: "v1_27_mcp_comment_authors")
+        try queue.write { db in
+            #expect(try db.tableExists("mcp_rebind_request") == false)
+            try db.execute(sql: """
+                INSERT INTO mcp_client (id, name, version, state, first_seen_at, last_seen_at, decided_at)
+                  VALUES ('cl1', 'claude-code', '2.1', 'approved', ?, ?, ?);
+                """, arguments: [stamp, stamp, stamp])
+        }
+        try AppDatabase.migrator.migrate(queue)
+        try queue.read { (db: Database) throws in
+            #expect(try db.tableExists("mcp_rebind_request"))
+            #expect(try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM mcp_rebind_request") == 0)
+            #expect(try String.fetchOne(db, sql: "SELECT state FROM mcp_client WHERE id = 'cl1'") == "approved")
         }
     }
 

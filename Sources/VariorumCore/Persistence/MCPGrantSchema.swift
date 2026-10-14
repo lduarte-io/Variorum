@@ -60,18 +60,35 @@ import GRDB
 ///   day remove it physically, while this one is local — a record naming a
 ///   gone comment is harmless (nothing can delete a gone comment), a foreign
 ///   key would block the purge.
+///
+/// **VX-258 — A SETUP WAITING FOR HER OK** (`v1_28_mcp_rebind_requests`; the
+/// run record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`, U1 — her
+/// ruling: an "Any MCP client" key presented under a name that carries her
+/// approval "re-binds only after my ok"): the family's SEVENTH table, born
+/// LOCAL-ONLY on the same road — zero lockstep, the marker untouched (13).
+/// - `mcp_rebind_request` — a copied key a connection presented under an
+///   APPROVED name it was not copied for: the key's HASH (claimed by that
+///   presentation — it has left `mcp_setup_key`), the client it would bind,
+///   the version the connection declared, and when. ONE per client (a newer
+///   wait replaces the older) and one per key. Her Allow binds the key to the
+///   name and removes the row; her Don't allow removes it and the key is
+///   forgotten. A foreign key to `mcp_client` (both rows are this family's
+///   and local; a waiting row only ever names an approved client, which no
+///   cap ever deletes).
 public enum MCPGrantSchema {
     /// The family's tables — the registration the completeness walk and the
     /// plaintext export consult.
     public static let tables: Set<String> = [
         "mcp_client", "mcp_grant", "mcp_activity", "mcp_switch", "mcp_setup_key", "mcp_comment_author",
+        "mcp_rebind_request",
     ]
 
     /// The family in CHILD-FIRST order (`mcp_grant` references
     /// `mcp_client`) — the order a whole-family row strip must take with
     /// foreign keys on. Pinned to cover `tables` exactly.
     public static let childFirstOrder: [String] = [
-        "mcp_grant", "mcp_activity", "mcp_switch", "mcp_setup_key", "mcp_comment_author", "mcp_client",
+        "mcp_grant", "mcp_activity", "mcp_switch", "mcp_setup_key", "mcp_comment_author", "mcp_rebind_request",
+        "mcp_client",
     ]
 
     /// `v1_24_mcp_grants`' DDL — FROZEN with the migration that runs it (a
@@ -154,5 +171,23 @@ public enum MCPGrantSchema {
           client_name TEXT NOT NULL,
           recorded_at TEXT NOT NULL
         );
+        """
+
+    /// `v1_28_mcp_rebind_requests`' DDL (VX-258, VX-246 U1) — FROZEN with the
+    /// migration that runs it. `key_hash` is `MCPSetupKeyRule.hash` of the
+    /// waiting key (never the key); `version` is what the waiting connection
+    /// declared in `initialize` (what tells her a stranger from the client she
+    /// knows). Both uniques are bare, like the family's others: these rows are
+    /// never synced, never tombstoned.
+    static let v1_28DDL = """
+        CREATE TABLE mcp_rebind_request (
+          id         TEXT PRIMARY KEY,
+          client_id  TEXT NOT NULL REFERENCES mcp_client(id),
+          key_hash   TEXT NOT NULL,
+          version    TEXT,
+          asked_at   TEXT NOT NULL
+        );
+        CREATE UNIQUE INDEX uq_mcp_rebind_request_client ON mcp_rebind_request(client_id);
+        CREATE UNIQUE INDEX uq_mcp_rebind_request_key ON mcp_rebind_request(key_hash);
         """
 }

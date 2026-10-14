@@ -973,6 +973,23 @@ extension AppDatabase {
         migrator.registerMigration("v1_27_mcp_comment_authors") { db in
             try db.execute(sql: MCPGrantSchema.v1_27DDL)
         }
+        // **VX-258 — A SETUP WAITING FOR HER OK** (VX-246 U1; her ruling: an
+        // "Any MCP client" key under a name that carries her approval
+        // "re-binds only after my ok" — the run record
+        // `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`): the grants
+        // family's `mcp_rebind_request` — a claimed key waiting to bind an
+        // approved name until she allows it. `Persistence/MCPGrantSchema.swift`
+        // carries the shape.
+        //
+        // **NOT a SyncSpec §12 lockstep event** — v1_24's road exactly (its own
+        // commit, ahead of the code that uses it): no `sync_version`, no outbox
+        // trigger, nothing pushed, no mirror change, the marker stays 13. It
+        // joins `MCPGrantSchema.tables` (the completeness walk subtracts it;
+        // the plaintext export keeps it EMPTY). No backfill: nothing waits
+        // before this migration.
+        migrator.registerMigration("v1_28_mcp_rebind_requests") { db in
+            try db.execute(sql: MCPGrantSchema.v1_28DDL)
+        }
         return migrator
     }
 }
