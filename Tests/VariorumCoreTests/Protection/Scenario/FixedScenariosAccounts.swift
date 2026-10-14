@@ -42,6 +42,22 @@ struct AccountScenarios {
         expectPromisesKept(world)
     }
 
+    /// A device that migrates after its account moved (here: entered Castle on
+    /// another Mac) owes the follow first: every synced door refuses at its
+    /// door — nothing begun, nothing left in flight — and the follow is owed.
+    @Test func aDeviceMigratedAfterItsAccountMovedFollowsFirst() async throws {
+        let (world, _) = try syncedWorld(.standard, devices: ["macA", "phone"])
+        await world.done([.useCastle("macA", .alwaysAsk, newWords: false), .launch("phone")])
+        for door in [Action.replaceAllKeys("phone", newWords: false), .useCastle("phone", .touchID, newWords: false)] {
+            let result = await world.step(door)
+            #expect(result != .done, "\(door) ran on a device that owes the follow")
+            #expect(world.phone.library?.section.actInFlight == nil, "\(door) left its act in flight")
+        }
+        #expect(world.owedFollow(world.phone) == .intoCastle)
+        await world.done([.follow("phone", .passphrase), .settle])
+        expectPromisesKept(world)
+    }
+
     @Test func theKeyDoorsOnAnAlwaysAskDeviceUnlockedOffline() async throws {
         for door in [Action.changePassphrase("macA"), .regenerateWords("macA")] {
             let (world, _) = try syncedWorld(.castle, devices: ["macA"], gate: .alwaysAsk)

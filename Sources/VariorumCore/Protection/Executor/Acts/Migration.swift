@@ -110,7 +110,19 @@ struct MigrationProgram: ActProgram {
             // Decision 35: a synced library's own Apple key only on a fresh vault read.
             if record.mode == .standard, let account = record.account, !ctx.executor.readThisSession(account) { return }
             try await ctx.executor.moveOffSharedKey(ctx, freshPair: false)
-        case "memory": try ctx.rememberNewKey()
+        case "memory":
+            try ctx.rememberNewKey()
+            // What this Mac remembers of the vault is what today's key file was
+            // last reconciled against — never the vault as read now: a vault
+            // that moved before the migration is a follow owed (VX-305 U4).
+            if let today = try ctx.leaves.keyFiles.legacyKeyFilesBesideLibrary()
+                .first(where: { $0.file.fingerprint == ctx.library.fingerprint })?.file.envelope,
+               today.vaultCorpusKeyID != nil {
+                try ctx.executor.writeMemory(&ctx.library) {
+                    $0.vaultFacts = VaultFacts(kdf: today.vaultKDF, corpusKeyID: today.vaultCorpusKeyID,
+                                               recoveryWrapDigest: today.vaultRecoveryWrapDigest)
+                }
+            }
         case "backup":
             // The fresh pair — the move's, and the migration's last (with the
             // guard off, the move's pair is not taken).

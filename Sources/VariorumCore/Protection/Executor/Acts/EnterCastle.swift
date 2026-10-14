@@ -119,6 +119,10 @@ extension ProtectionExecutor {
             if let known = library.memory?.vaultFacts?.corpusKeyID, known != vault.corpusKeyID {
                 throw ExecutorRefusal.accountMoved
             }
+            // The account in another mode than the library: the follow comes
+            // first (a door begun here would refuse inside its plan, leaving
+            // the act in flight — VX-305 U4, found by the scenario world).
+            if let settled = vault.mode.settled, settled != library.record?.mode { throw ExecutorRefusal.accountMoved }
             guard let text = typed.passphrase else { throw ExecutorRefusal.secretMissing }
             try vault.format.kdf.validateFloor(configuration.floor)
             let passphrase = try PassphraseKey.derive(text, kdf: vault.format.kdf)
