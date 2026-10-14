@@ -4435,3 +4435,32 @@ orchestrator's; neither is touched here. Zero `Sync/`, custody, Keychain, editor
 editor-seam or schema lines; no commit trailers. **For the closeout window:** round 1's steps (R1, R1b, F1, above) stand
 unchanged. F1 and the merge-moment whole target run on `vx246-final` as rebuilt here, at `bd0bea0d`. R2-6's pin
 (`InlineEditorWindowTests`) rides the whole target; it should no longer print anything.
+
+### ROUND 2 — THE ORCHESTRATOR'S LINE-BY-LINE CHECK (the final round's fixes; no later round reads them — CLAUDE.md "Two reviews", 2026-10-14 ~11:00 MDT)
+
+Read in the diff `8cf83a3b..ae2dab9c`, nine files, every hunk, against each finding:
+- **R2-1 — MATCHES** (`d16228ca`).
+  - All four headers (MCPDeliberate, MCPCarriage, MCPLibraryEdits, MCPNoteEdits) now state the rule as built: each half
+    answers whether it wrote, and the stack RETIRES an entry whose half was quiet.
+  - Each family's parts and stamps are named from THE SWEEP TABLE. The `finish_book` residual stays recorded, as both
+    rounds accepted it.
+  - A grep of `Sources`/`App` finds 0 occurrences of "pops any inverse", "VX-276 owns the fix", "does not yet keep" or
+    "still moves the entry".
+- **R2-3 — MATCHES** (`41a9e3a1`). `LegState` and its one-line doc moved above `removeAll()`'s doc comment, which
+  attaches to `removeAll()` again. No code moved otherwise.
+- **R2-4 — MATCHES** (`b3b92b09`).
+  - `MCPWriteTools+CommentDelete.swift`'s doc names `Queries.mcpCommentIsOwn` as the one read, with "words unchanged
+    since".
+  - `mcpCommentAuthor`'s doc is the plain authorship fact; the false "VX-188's one read — U4's edit rung consults the
+    same fact" is gone.
+  - The query is kept, since tests read it.
+- **R2-5 — MATCHES** (`edd7bc4b`). `ShelfViewModel`'s sentence now says reads coalesce ONLY when moves land during a read
+  in flight; a paced client costs one store-wide read per join; no debounce. The code is unchanged.
+- **R2-6 — MATCHES** (`bd0bea0d`). The `print` and its two comment lines are gone, and the pin's doc carries the proven
+  fact. The removed line's `laidLine` read laid nothing out, so the pin's flow is unchanged.
+- **Headless on `bd0bea0d`:** MCP 240/51 · core 2,841/329 · workbook 40/6, EXIT 0 (the implementer's run, not re-run
+  here). `vx246-final` was rebuilt on that tip.
+
+**THE LADDER IS CLOSED.** Round 1 (Fable) and round 2 (Opus max) found no BLOCKER or MAJOR, and every finding has a
+written disposition. Owed to the closeout window: F-1's red/green run, F-4's 4 → 0 warnings, and the merge-moment
+whole Mac target.
