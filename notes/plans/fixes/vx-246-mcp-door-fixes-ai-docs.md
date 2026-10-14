@@ -3300,3 +3300,34 @@ stage window got its GO) — piece 0's merge was NOT started, per the PAUSE's "n
 brief's named sections in full (the U1b BRIEF, U1's UNIT RECORD, the orchestrator on U1's hand-back, U2's stage window
 steps 4–6, the U2/U3/U4 STAGE RUN sections, the kickoff file, the resiliency protocol); then piece 0 — `git merge
 origin/main` as a merge commit ("Merge origin/main (VX-281) into VX-246 … Part of VX-246"), never a rebase.
+
+## U4c UNIT RECORD — the inline editor's badge regression: VX-230 (opus-implementer, from 2026-10-14 ~05:35 MDT)
+
+**Not done yet (first line, kept current):** nothing built; the trace is being measured (piece 0). No stage window has
+run; no QUESTIONS entry, canon edit or ticket (the orchestrator's). Zero `Sync/`, custody, Keychain, schema, `Server/`,
+`BlockRangeIndex`, `PaneSurface`, `runStructural`, VX-281's lane; in `EditorView.swift`, nothing near vx-282's two
+touches (the fan-panel sheet near line 186, `textViewDidChangeSelection` near line 858).
+
+**Read in full before code (never delegated):** CLAUDE.md and its loaded canon; this record's header, THE UNITS, the hard
+rules, LIVE STATUS, Cross-run coordination; the U4c BRIEF; the U4 UNIT RECORD's traces; U4 STAGE RUN's trace; the U4b
+UNIT RECORD whole and the U4b STAGE RUN whole; `notes/plans/mcp-pane-and-docs-kickoff.md`'s VX-230 entry;
+**`notes/TEXTKIT2_NOTES.md` whole, BEFORE any editor-seam edit**; `notes/SessionResiliencyProtocol.md` whole. Code read:
+`InlineEditorWindowTests` whole (the regressed pin's harness, `makeInlineWindow`), `withEditorWorld` / `EditorWorldHarness.focus`
+(the 600×100 text view), `EditorHarness.reload`, `EditorViewModel.applyProjection` (the `.adoptEcho` arm), `attach`'s two
+doors, `overlayLayoutDidSettle`, `refreshBadges` (U4b's), `refreshDecorations`' gate, `viewportBounds`;
+`InlineEditorSurface.Coordinator` whole (`install`, `scheduleRemeasure`, `displayPassSettled`, `remeasure`);
+`EditorTextView.setFrameSize` / `applyFrameHeight` / `viewWillDraw` / `makeInlineEditor`; `LongBlockLayout.considerLongBlockLayout`
+(inert on the inline surface); U4b's probes 5–9.
+
+### LIVE STATUS — U4c's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this record + the trace MEASURED on bare TK2 probes (the decisive number: block 40's fragment state at the pin's `:76`) | IN-PROGRESS — probes in `notes/plans/vx246-screens/u4c/probes/` (gitignored) |
+| 1 | the in-use pin, if the regressed test doesn't cover it — committed BEFORE the fix | NOT-STARTED |
+| 2 | the RED product `DerivedData/vx246-u4c-red` (the pins, no fix) if a new pin lands | NOT-STARTED |
+| 3 | the fix (never a forced mid-document `.ensuresLayout` read) | NOT-STARTED |
+| 4 | the FIXED product `DerivedData/vx246-u4c` + the headless finals | NOT-STARTED |
+| 5 | THE STAGE WINDOW plan (claim `vx246-u4c`) → READY | NOT-STARTED |
+
+**No revert is in flight.**
