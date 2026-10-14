@@ -148,6 +148,10 @@ guidance. Each unit's evidence is named before its spawn.
 - **Disk.** Build into `App/Variorum/DerivedData/vx336-<unit>` (gitignored); check free space before a Mac build.
 - **Context:** past ~500k, stop at the next clean seam (committed, green, the continuation written in the record) and
   report.
+- **Labeling (CLAUDE.md since `ebd16909`, her triage sitting 2026-10-14):** every ticket this run files gets ONE kind,
+  an Evidence label on Bug/Improvement/Debt, ONE Area, a Priority; Pre-launch only at her call; **never an assignee**.
+  Riders: the open Low/Medium tickets in the run's Areas were offered to her mid-run (the MCP area, 2026-10-14 ~17:45),
+  awaiting her pick.
 - **Tickets this run FILES are triaged before it closes** (her word 2026-10-14, now CLAUDE.md's closeout ritual): a kind
   label (Bug / Improvement / Feature / Debt), exactly one Evidence label (Confirmed · Suspected · Test-only), a Priority
   (Linear's field), Pre-launch if it gates launch, Wording for text-only fixes, and "Needs Lillian" if it waits on her.
@@ -159,7 +163,7 @@ guidance. Each unit's evidence is named before its spawn.
 |---|---|
 | U5a — the label pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): legs A–D all passed in a real Claude Code 2.1.300 round on the dev store — the new `claude-code · english` label on Takes cards in both voices, `save_lens` by label refusing the ambiguous block and its `take_ids` retry, the legacy form matched as its own, `pin_chosen` holding. Built at `590c0cb8` (U5a UNIT RECORD) |
 | U5b — the block-writing pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): the 31-suite Mac batch green (251 tests, 0 failed, 7 gated skips); V252-a (create_note's `blocks` = read_note's records; filed under its chapter), V255-a/b/c (the end at write new with her ⌥⌘Z/⇧⌥⌘Z; any anchor at write new hears the rung sentence and asks her; anywhere at edit), D8-a passed; D8-b's open tail is unreachable from the keyboard (THE ORCHESTRATOR ON U5's WINDOW). The store was restored cmp-SAME. Built `7a15376c`…`93edbc2e` (U5b UNIT RECORD, three sessions) |
-| U6 — Compare from the wire (+ VX-330, VX-342) | U6a DESIGNED, FORKS RULED (U6a UNIT RECORD piece 0 `bf5adcca`; THE ORCHESTRATOR'S RULINGS ON U6a's FORKS). Pieces 2–9 go to a FRESH implementer. U6b (VX-330 + VX-342 + the window) follows |
+| U6 — Compare from the wire (+ VX-330, VX-342) | **BUILT, READY FOR STAGE** — U6a closed headless (`48e250e0`; MCP 278/59 · core 2,871/333 · workbook 40/6; revert checks identical); U6b built (`12efb039`…`a1a094dc`; VX-330 + VX-342, no package line). Products: `vx336-u6` (final, from `006e45f8`), `vx336-u6-red`, `vx336-u6b-red`, `vx336-u6b-ios`, `vx336-u6b-ios-red`. The window is in the U6b UNIT RECORD (claim `vx336-u6`, about 105 min of work, 130 asked; batch-only 35); a FRESH runner takes it |
 | U7 — the agent's read-backs | NOT-STARTED |
 | U8 — the AI's docs (LAST) | NOT-STARTED |
 | LADDER | NOT-STARTED |
@@ -224,6 +228,8 @@ guidance. Each unit's evidence is named before its spawn.
 
 | ticket | born | what | fate |
 |---|---|---|---|
+| VX-354 | U6b's sweep (OWED 2) | Book Panel: the header's book name and its gatherings names wear neither MCP glyph (outside VX-268's parity and VX-330) | Todo, 13n, Improvement · Confirmed · MCP · Low; Pre-launch is her call |
+| VM-20 | U6b (OWED 5) | The phone's undo warning says "It is saved first" where the Mac says "committed" — the commit vocabulary (R-13s-31/32) looks missed there | VM Backlog, Improvement · Confirmed · Wording · Low |
 | VX-353 | U6a's build (the implementer, 2026-10-14) | `MCPHarnessTimeLimitTests`' never-answers-initialize pin overruns its 15 s bound under heavy machine load (16.3–16.7 s at load 9–67; green alone) | Todo, 13n, Debt · Test-only · Low; not pre-launch; not this run's |
 | VX-352 | U5 STAGE RUN step 12 (the runner's note 2) | Takes card header tail-truncates an AI take's label to "claude-code · e…" in Terminal at the margin-grid card width | Todo, 13n, Improvement · Confirmed · Low; not pre-launch; FOR VX-234's eye too |
 
