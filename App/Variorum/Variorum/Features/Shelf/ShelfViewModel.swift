@@ -287,9 +287,11 @@ final class ShelfViewModel {
 
     /// VX-231: the one-shot re-read that follows a held move — never inside
     /// the observation loop's own turn, and SINGLE-FLIGHT: a move landing
-    /// while a re-read runs asks for exactly one more after it (a burst of
-    /// joins — a client filing many notes — reads the store once or twice,
-    /// not once per join).
+    /// while a re-read runs asks for exactly one more after it. Reads coalesce
+    /// ONLY when moves land during a read in flight; a paced client (each
+    /// join its own call, landing after the last read finished) costs one
+    /// store-wide read per join. There is no debounce — the rate stays
+    /// membership-change rate, never keystroke rate (the P1 argument above).
     @ObservationIgnored private var heldMoveFollow: Task<Void, Never>?
     @ObservationIgnored private var heldMoveAgain = false
 
