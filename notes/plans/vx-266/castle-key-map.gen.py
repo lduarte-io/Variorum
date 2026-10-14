@@ -320,7 +320,7 @@ TARGET = {
                         notes=[note("vault", 0, "not used — no sync")],
                         roads=[("On this Mac", "the silent item — nothing asked."),
                                ("On a new Mac", "this library's Apple key arrives through iCloud Keychain (when it's on — Variorum can't see it) and opens it — or your passphrase or words."),
-                               ("What it means", "your Apple account, and anyone who can sign in to this Mac, can open the library and every copy Variorum keeps."),
+                               ("What it means", "your Apple account, and anyone who can sign in to this Mac, can open the library and every copy Variorum keeps from outside Castle. Copies made while it was in Castle keep opening only with your passphrase or words."),
                                ("Other libraries' copies here", "an older library, or backups, of a library whose newest copy is in Standard: this Mac's own key file for it, beside its copies, under an Apple key of its own — it opens through the Apple account as before. Deleting a library's last copy deletes its key.")]),
     "t-std-sync": dict(title="Standard — synced", chips=std_target(True),
                        roads=[("On this Mac", "the silent item — nothing asked."),
@@ -337,13 +337,13 @@ NEW_FULL = {
     "std-new": dict(title="Standard — the new design (synced parts marked)", chips=std_target(True),
                     roads=[("On this Mac", "the silent item — nothing asked."),
                            ("On a new Mac", "your Apple account brings everything back, nothing typed."),
-                           ("What it means", "your Apple account — and anyone with this Mac's login password — can open the library and every copy Variorum keeps. Out of Castle means not safe, said plainly.")]),
+                           ("What it means", "your Apple account — and anyone with this Mac's login password — can open the library and every copy Variorum keeps from outside Castle. Out of Castle means not safe, said plainly; what was written in Castle stays Castle's.")]),
 }
 
 
 # ---- the history chain ------------------------------------------------------------------
 def history_svg():
-    w, h = 1000, 150
+    w, h = 1000, 168
     keys = [("{L3}", "today's key", "touch"), ("{L2}", "before Replace All Keys", "L"),
             ("{L1}", "entered Castle", "L"), ("{L0}", "the first key", "L")]
     out = [f'<svg class="map" viewBox="0 0 {w} {h}" role="img" aria-label="the key history chain">']
@@ -360,7 +360,8 @@ def history_svg():
                        f'<path class="arrowhead" d="M{ax + gap - 12} 63 L{ax + gap - 4} 68 L{ax + gap - 12} 73 Z"/>'
                        f'<text class="nt" x="{ax}" y="58">opens</text>')
     out.append('<text class="nt" x="40" y="118">Each newer key holds every older one, locked. Whatever opens today’s key opens the past —</text>')
-    out.append('<text class="nt" x="40" y="134">never the other way round: an old key opens nothing written after it.</text>')
+    out.append('<text class="nt" x="40" y="134">never the other way round: an old key opens nothing written after it. And history flows into Castle,</text>')
+    out.append('<text class="nt" x="40" y="150">never out: leaving Castle starts a key that takes back the keys from before Castle, never Castle’s own.</text>')
     out.append("</svg>")
     return "".join(out)
 
@@ -554,7 +555,8 @@ SWITCH_CAPS = [
     dict(t="After: Castle",
          d="Only you. Touch ID, your passphrase or your words open {L′}, and through its history every older backup. "
            "Lose all three and it's gone — said at the door, with a plain copy offered first. Leaving Castle later "
-           "would give your Apple account a key to all of it again, and the leave screen says so.",
+           "would start a new key that leaves Castle's keys behind: your Apple account would open what comes after, "
+           "and copies from before Castle — never what was written here.",
          who=("everything — Touch ID, your passphrase or your words", (N, "nothing"), (N, "nothing")),
          locks=["{L′} locked with {P}, {W} and {M′}; the history locked with {L′}",
                 "{M′} locked with {P} and {W}; {C′} locked with {M′}",
@@ -808,11 +810,13 @@ ENTER = [
     f"Last, the old shared {pill('{A} Apple key', 'A', True)} is retired, so every older copy's Apple lock is dead, wherever the copy is. (There is no keep-for-now: to deal with something the sheet listed first, cancel and come back.)",
 ]
 LEAVE = [
-    "You confirm with Touch ID or the passphrase, after the plain warning: your Apple account — and anyone who can sign in to this Mac — will be able to open this library and every copy Variorum kept, including copies made while you were in Castle.",
-    f"A fresh {pill('{A} Apple key', 'A')} is made, with a new id. Only this device makes it; your other devices wait for it.",
-    f"The key file gains {pill('{L} · locked with {A}', 'A')}; synced, the vault gains {pill('{M} · locked with {A}', 'A')}.",
-    f"{pill('{L}', 'L')} moves from its {pill('{touch} item', 'touch')} to a {pill('silent item', 'L')}; the record and this Mac's memory say Standard.",
-    "Your other devices follow without asking anything; each adds its own Apple lock when the new key arrives.",
+    "You type your passphrase and your twelve words — leaving Castle is a key change, like entering it — after the plain warning: from now on your Apple account, and anyone who can sign in to this Mac, can open this library and its copies from before you entered Castle. Copies made while you were in Castle keep opening only with your passphrase or words.",
+    f"Synced only: a new master {pill('{M″}', 'M')} and sync key {pill('{C″}', 'C')}; your writing on the server re-encrypted; the vault rewritten with the new master under your passphrase, your words and a fresh account {pill('{A} Apple key', 'A')}.",
+    f"A new library key {pill('{L″}', 'L')} goes into a {pill('silent item', 'L')}; a fresh {pill('{A} Apple key', 'A')} is made with a new id — only this device makes it.",
+    f"The new key file: {pill('{L″} · locked with {A}', 'A')} {pill('{L″} · locked with {P}', 'P')} {pill('{L″} · locked with {W}', 'W')} (and the new master, synced). <b>Its history takes back the keys from before Castle — never the keys made in Castle.</b> History flows into Castle, never out.",
+    f"The record, now saying Standard, goes into the staged copy; the library file is swapped to {pill('{L″}', 'L')}. Copies pause from the new key to the swap.",
+    f"Castle's {pill('{touch} items', 'touch', True)} go; a fresh backup is made under {pill('{L″}', 'L')}.",
+    "Your other devices follow without asking anything once the new Apple key arrives; each re-keys its own library the same way, leaving its Castle keys behind.",
 ]
 REPLACE = [
     "For a key someone may have used, or a device someone may have had: you type your passphrase and twelve words (or make new words).",
@@ -860,8 +864,8 @@ def who_table(target):
         ("You, on your Mac", "Touch ID or passphrase", "opens, nothing asked"),
         ("You, on a new Mac, with your Apple account only", "no — needs your passphrase or words", "yes, when iCloud Keychain carried the key"),
         ("You, on a new Mac, with your passphrase or words", "yes", "yes"),
-        ("Someone who knows this Mac's login password", '<span class="n">nothing</span> (Markdown exports you made are plain text)', '<span class="y">everything</span>'),
-        ("Someone in your Apple account", '<span class="n">nothing</span>', '<span class="y">everything Variorum keeps</span>'),
+        ("Someone who knows this Mac's login password", '<span class="n">nothing</span> (Markdown exports you made are plain text)', '<span class="y">everything</span> — except copies made while it was in Castle'),
+        ("Someone in your Apple account", '<span class="n">nothing</span>', '<span class="y">everything Variorum keeps</span> — except copies made while it was in Castle'),
         ("The Variorum server", 'your writing <span class="n">no</span> · dates, tag shape, sizes yes', 'the same'),
         ("Someone who steals one backup file", '<span class="n">no</span> (needs a key)', '<span class="n">no</span> (needs a key)'),
     ]
@@ -896,6 +900,7 @@ CHECKLIST = [
     ("C-6", "Castle, synced: the sync keys live only in a Touch ID item (session memory under Always ask)", "scenario promise 2 · drill"),
     ("C-7", "Castle, synced: the vault holds the master locked with the passphrase and words, the sync key locked with the master — no Apple copy", "fake-server suite · live round"),
     ("C-8", "Synced key files carry the master locked with the twelve words, copied from the vault and refreshed while that master is current", "model test · fixed scenario (a silently-joined device)"),
+    ("C-9", "After leaving Castle, nothing the Apple account or the login password can reach opens anything written while the library was in Castle", "scenario promise 13 · fixed scenarios (leaving Castle; a Castle copy sent to another Mac) · drill"),
     ("S-1", "Standard: the library key's device copy is a silent item per key; no Touch ID item", "scenario promise 3 · drill"),
     ("S-2", "Standard: the key file locks the current key with this library's Apple key (named by its id), the passphrase and the words", "model test · drill"),
     ("S-3", "Standard: Apple keys are minted only by a deliberate act or the migration, under fresh ids; an account keeps the one its vault names; other devices wait for it; a device joining an account still on the old shared key uses a key of its own", "convergence suite (the follow race) · fixed scenario (a device joining an old-key account)"),
@@ -907,7 +912,7 @@ CHECKLIST = [
     ("R-3", "Plans live beside the library, sealed and named by the record's act in flight, never in a backup; a plan the record doesn't name is ignored and reported; a missing one never blocks", "scenario promises 6, 10 · mutation pins (planted, replayed)"),
     ("R-4", "Before unlock nothing decides: the lobby offers only self-verifying roads — the enumerated custody items and the route finder's — and a missing key file or memory item isn't fatal", "assess tests · the file-swap scenario · fixed scenario (key file and memory deleted)"),
     ("T-1", "Use Castle runs §‘Entering Castle’ in order, prepare-then-commit — the record in the staged copy before the swap, copies paused — and survives a crash at every step", "executor tests · crash scenarios · the posture drill"),
-    ("T-2", "Use Standard runs §‘Leaving Castle’ in order; its warning is said; other devices follow without asking", "executor tests · walk"),
+    ("T-2", "Use Standard runs §‘Leaving Castle’ in order — a key change with both secrets, its history leaving Castle's keys behind; its sentence is said; other devices follow without asking and re-key the same way", "executor tests · fixed scenario (leaving Castle) · walk"),
     ("T-3", "Replace All Keys and the follow run as drawn; the old key joins the history; the refusal names a change made elsewhere", "executor tests · drills · walk"),
     ("T-4", "Opening an older backup brings it in under today's key and mode, never lowering it, nothing more typed", "fixed scenario VX-209 · restore drill · walk"),
     ("T-5", "A Castle copy from another Mac raises a Standard library to Castle; an unknown-key copy is flagged; a different library keeps its mode and its key (passphrase or words alone open it), gains this Mac's own Apple key in Standard, and the shared key is said at Send Library", "fixed scenarios (Send Library after this change) · walk"),
@@ -947,8 +952,9 @@ new design (your rulings of 2026-10-13). A companion to <code>second-opinion.htm
 <div class="okbox"><b>The whole idea in two lines.</b> In Castle, your Apple account opens nothing of this library —
 not the library, not any copy Variorum made of it on this Mac or a device of your account (the stated exceptions
 aside: a library already in Castle before this change, until it retires the old shared Apple key; copies from while a
-library synced with an account still in Standard; copies under a key shared with another Mac by Send Library). In Standard, it opens your library and every copy Variorum made of
-it. <i>In Castle = safe. Out of Castle = not safe.</i></div>
+library synced with an account in Standard; copies under a Standard key shared with another Mac by Send Library). In
+Standard, it opens your library and every copy Variorum made of it outside Castle; what was written in Castle stays
+Castle's. <i>In Castle = safe. Out of Castle = not safe.</i></div>
 <h2 id="cast">The cast</h2>
 <p>Every key is a random 256-bit number except your passphrase and words, which you hold. A <b>locked copy</b> is one key
 locked with another; the padlock's colour says which key opens it. Nothing on the server — and nothing in a key file —
@@ -980,8 +986,9 @@ library is now Standard. Bringing your Castle library back finds the silent slot
 you, plain text: what you can do. In the rows about other people, <span class="y">red</span> means they can open it and
 <span class="n">green</span> means they can't.</p>
 {who_table(False)}
-<p class="lede">Leaving Castle: the Standard column applies from then on — including to copies made while you were in
-Castle. Said plainly on the leave screen.</p>
+<p class="lede">Leaving Castle: the Standard column applies from then on, and to copies from before you entered Castle —
+never to copies made while you were in Castle, which keep opening only with your passphrase or words. Said on the
+leave screen.</p>
 </main>"""
     return html_page("Castle key map", body)
 
@@ -996,9 +1003,10 @@ text is <code>notes/plans/vx-266-castle-backups-prelaunch.md</code>.</p>
 <div class="okbox"><b>The two rules.</b> In Castle, nothing reachable through your Apple account or this Mac's login
 password opens your library, or any copy Variorum made of it on this Mac or on a device of your account once it has
 followed. In Standard, your Apple account — and anyone who can sign in to this Mac — opens your library and every copy
-Variorum made of it. <i>In Castle = safe. Out of Castle = not safe.</i> The stated exceptions — a library already in
+Variorum made of it outside Castle; what was written in Castle stays Castle's. <i>In Castle = safe. Out of Castle = not
+safe.</i> The stated exceptions — a library already in
 Castle before this change, until it retires the old shared Apple key; copies from while a library synced with an
-account still in Standard; and copies under a key shared with another Mac by Send Library — are said where they
+account in Standard; and copies under a Standard key shared with another Mac by Send Library — are said where they
 apply, and below.</div>
 <h2 id="cast">The cast</h2>
 {legend()}
@@ -1029,8 +1037,9 @@ libraries add the server column's facts.</p>
 {who_table(True)}
 <p class="lede">The stated exceptions, where the Castle column's red rows can still open something: a library already in
 Castle before this change, until it retires the old shared Apple key (its copies from before Castle; every Castle
-surface says so); copies made while a library synced with an account still in Standard (through that account); and
-copies under a key shared with another Mac by Send Library (wherever that Mac's copy opens).</p>
+surface says so); copies made while a library synced with an account in Standard (through that account, while it
+stays in Standard); and copies under a Standard key shared with another Mac by Send Library (wherever that Mac's copy
+opens, while it's in Standard).</p>
 <h2 id="checklist">The acceptance checklist</h2>
 <p>Filled at the effort's close (phase 5). Every row needs its proof and a result; a row without one, or a mismatch,
 blocks the close.</p>

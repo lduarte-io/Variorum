@@ -138,7 +138,8 @@ Build everything in §3.2 of the design as values, with their codecs and their c
     id (the library's or account's own, a device's own, the old shared key's);
   - the history: every older key wrapped directly under the current key, with fingerprint, epoch and retirement date;
   - the master's twelve-words copy (design §3.5a), when the file has a master wrap;
-  - re-keying: L → L′ re-wraps the whole history under L′ and adds L;
+  - re-keying: L → L′ re-wraps the whole history under L′ and adds L — except that history flows into Castle, never
+    out: a key made while in Castle never enters the history of a key made outside it (design §3.4);
   - the same format serves another library's key file in `Backups/<library8>/` (design §3.5).
 - **Readers for formats 1 and 2.** Old key files are read forever, and the catalog and route finder use them.
 - **What this Mac remembers:** its fields — nothing that decides or weakens: the device identity, the biometry state
@@ -153,6 +154,7 @@ Build everything in §3.2 of the design as values, with their codecs and their c
 - round-trips for each value;
 - every wrap opens with the right secret and refuses a wrong one;
 - the history survives three re-keys, with every old key still reachable from the newest and never the reverse;
+- leaving Castle: the new key's history holds every key from before Castle and none made in Castle;
 - a tampered sealed field fails verification;
 - a replayed earlier plan or memory value changes nothing: the plan isn't the one the record names, and no setting
   lives in the memory;
@@ -207,6 +209,7 @@ Build everything in §3.2 of the design as values, with their codecs and their c
     from the prepare to the swap;
   - the record names the act in flight; a plan resumes only when it's the one named; a missing or unmatched plan rolls
     the act back before its commit point and finishes it from the record after;
+  - Use Standard is a key change (both secrets; synced, the rotation), leaving Castle's keys behind;
   - a Castle library leaving an account re-keys; a Standard landing mints this Mac's own Apple key; Send Library and
     a landing note the hand-off in the record;
 - the Apple-key rules of §3.5:
@@ -278,7 +281,7 @@ Every shape today's builds leave, built as fixtures from the old formats:
 
 ### The promises
 
-The design's §4.1 list (twelve), checked after every step.
+The design's §4.1 list (thirteen), checked after every step.
 
 ### Fixed scenarios
 
@@ -307,8 +310,12 @@ Each is a named test:
 - a silently-joined device losing its Keychain after the account entered Castle elsewhere: the words open its file;
 - a replayed plan and a replayed memory item, changing nothing; a whole-state rollback, opening nothing to the one who
   did it;
-- Send Library after this change: a Castle copy lands with its passphrase alone, and with its words alone; a Standard
-  copy gains the receiver's own Apple key, so the sender entering Castle leaves it whole; the shared key said;
+- Send Library after this change: a Castle copy lands with its passphrase alone, and with its words alone, and the
+  receiver leaving Castle later exposes nothing of the sender's; a Standard copy gains the receiver's own Apple key, so
+  the sender entering Castle leaves it whole; the shared Standard key said;
+- leaving Castle, local and synced, with a device following late: Castle-era backups open only with the passphrase or
+  words, backups from before Castle through the new key's history, and the Apple account opens nothing from the Castle
+  era (promise 13);
 - one library on two Macs from before this change: the stated exception, and the sheet naming the other Mac's key
   file;
 - a Castle library leaving its account by each of the four acts, then the account leaving Castle elsewhere: the

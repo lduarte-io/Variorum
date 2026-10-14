@@ -36,7 +36,8 @@ At #216 and in her review of both documents:
 - **VX-209 — the mode belongs to the library; opening a copy never lowers it.** This reverses her earlier yes to the
   "you'll be leaving Castle" confirm line.
 - **VX-263 — the key history is locked under the current key.** *"if you leave castle, your apple account can open
-  the copies variorum made while you were in castle. again, if stated clearly, i'm fine with that."*
+  the copies variorum made while you were in castle. again, if stated clearly, i'm fine with that."* Reshaped by her
+  later ruling the same day (history flows into Castle, never out — below): those copies now stay safe.
 - **VX-301 — retire the Apple key when entering Castle.** *"I think it's fine for people to lose access to previosu
   backups if they lost their passphrase / words / touchID + they're going into castle, so long as they're adequately
   warned about it. they can always export it as plaintext if they want to, but going into castle means going into
@@ -53,6 +54,14 @@ At #216 and in her review of both documents:
   *"so basically backups from when it was in standard still open to the standard account that remains? i imagine
   that's fine"*. (The nuance said back to her: the reach covers every copy made while it synced, including ones made
   while the account was in Castle, if the account later returns to Standard.)
+- **History flows into Castle, never out (§3.4), ruled 2026-10-13.** Her question: *"why don't we just enforce key
+  rotation when they go to standard or something? … it seems to me like maybe we could avoid a LOT of this key changing
+  confusion from standard to castle and castle to standard and leaving sync and starting new if we just enforced key
+  rotation at every posture switch. thoughts?"* Asked whether leaving Castle should change the key with Castle's keys
+  staying behind, she picked yes. Leaving Castle now re-keys; the new key's history takes back the keys from before
+  Castle and never the keys made in Castle. This supersedes the consequence she accepted for VX-263 (*"if you leave
+  castle, your apple account can open the copies variorum made while you were in castle"*): those copies now stay
+  safe. It also shrinks the leaving-an-account nuance below — copies made while the account was in Castle stay safe.
 - **Landing a library from another Mac (§3.7), ruled 2026-10-13:** *"i think you should be able to land a Castle
   library with just the passphrase OR the words - that's what we guarantee for being able to access it."* So a landed
   library keeps the key it came with — a fresh key could keep both secrets' roads only if both were typed — and the
@@ -124,21 +133,25 @@ The earlier rulings this design keeps are in §3.12 (the signed-out screen, the 
      key (§3.5), open through your Apple account, and on this Mac for anyone with its login password, until you
      retire that key — one press, asked once and kept in Settings ▸ Protection. Every Castle surface says so until
      then. A library entering Castle after this change never has this exception: Use Castle retires the key.
-   - *A library that synced with an account and left it:* its copies from while it synced open through that account
-     for as long as the account stays in Standard (§3.8). Said when it leaves, and in Data Safety.
-   - *A library sent to another Mac without sync:* the two copies share the key it had when it was sent, so this
-     library's copies under that key open wherever the other copy's keys do — through that Mac's Apple account too,
-     whenever that copy is in Standard. Said at Send Library, where the sharing starts, and on Use Castle's sheet and
-     the leave screen; the record notes every hand-off made or received after this change, and the sheet also names
-     another Mac's key file whenever it can see one (§3.5).
-3. **In Standard, your Apple account opens your library and every copy Variorum made of it** — through iCloud
+   - *A library that synced with an account and left it:* its copies from while it synced with that account in
+     Standard open through that account for as long as the account stays in Standard (§3.8). Said when it leaves, and
+     in Data Safety.
+   - *A library sent to another Mac without sync while it was in Standard:* the two copies share that Standard key,
+     so when either one enters Castle, its copies from before then stay openable through the other copy's keys —
+     through that Mac's Apple account while that copy is in Standard. Said at Send Library, where the sharing starts,
+     and on Use Castle's sheet; the record notes every hand-off made or received after this change, and the sheet also
+     names another Mac's key file whenever it can see one (§3.5). A copy sent while in Castle exposes nothing: leaving
+     Castle on either Mac starts a key that can't open Castle's (§3.4).
+3. **In Standard, your Apple account opens your library and every copy Variorum made of it outside Castle** — through iCloud
    Keychain, when it's on, which Variorum can't see — and so does anyone who can sign in to this Mac. Said on the
    Standard card.
 4. **Opening a backup brings back your writing as it was, in the mode your library is in now.** A synced library
    then catches up when you resume sync.
-5. **Leaving Castle gives your Apple account a key to your library and every copy Variorum kept of it, including
-   copies made while you were in Castle.** Said on every road into Standard: the leave screen, joining or moving to
-   an account in Standard, and — since a follow into Standard asks nothing — a notice after it (VX-263).
+5. **Leaving Castle gives your Apple account a key to your library from then on, and to its copies from before you
+   entered Castle — never to copies made while you were in Castle, which keep opening only with your passphrase or
+   your twelve words.** Said on every road into Standard: the leave screen, joining or moving to an account in
+   Standard, and — since a follow into Standard asks nothing — a notice after it (VX-263, as her ruling of
+   2026-10-13 reshaped it, §1).
 6. **Signing out never changes how your library is protected.** Signing in to a different account changes nothing
    until you choose to move the library there.
 
@@ -215,9 +228,14 @@ The earlier rulings this design keeps are in §3.12 (the signed-out screen, the 
 
 ### 3.4 The key history (VX-263)
 
-- **Every re-key adds the old key to the history.** The re-keys are entering Castle, Replace All Keys, a follow,
-  raising a copy from another Mac into Castle, and a Castle library leaving an account (§3.8). Landing a different
-  library is not one: it keeps the key it came with (§3.7).
+- **Every re-key adds the old key to the history.** The re-keys are entering Castle, leaving Castle, Replace All Keys,
+  a follow, raising a copy from another Mac into Castle, and a Castle library leaving an account (§3.8). Landing a
+  different library is not one: it keeps the key it came with (§3.7).
+- **History flows into Castle, never out of it** (her ruling, §1). Entering Castle carries every older key into the
+  new key's history, so old backups keep opening for you. Leaving Castle re-keys too, and the new key's history takes
+  back only the keys from before Castle: the keys made in Castle stay behind, openable only through their own copies'
+  passphrase and words locks — for good. So nothing the Apple account or this Mac's login password can reach ever
+  opens anything written in Castle.
 - **How it's held:** the new key file wraps every older key directly under the new key. The executor unwraps the old
   history with the old key, which is in hand during any re-key, and re-wraps it.
 - **It runs backwards only.** A key opens older keys, never newer ones, so an old key opens nothing written after it.
@@ -255,8 +273,8 @@ The earlier rulings this design keeps are in §3.12 (the signed-out screen, the 
 - **Delete on sight, by recorded id.** In Castle, a key whose id the record lists as retired is deleted again if it
   reappears — a key deleted while sync was off can come back when sync does. Nothing is ever deleted for belonging to
   "this library" by ID: another Mac's unsynced copy of the same library may be in Standard under a key of its own.
-- **Leaving Castle mints a fresh key.** The other devices wait for it to arrive, keeping their keys in silent items
-  meanwhile.
+- **Leaving Castle mints a fresh key** — for the new library key it makes (§3.4), and, synced, for the new master. The
+  other devices wait for it to arrive, keeping their keys in silent items meanwhile.
 - **The old shared key — today's `<scope>-apple-key`.** There is one per Apple account and scope, shared by every
   library and account on it, on every device. Deleting it deletes it everywhere, with no recovery. So:
   1. **This build never writes under it.** It reads it only to move things off it, and the route finder counts it as
@@ -455,7 +473,7 @@ open its file. So:
   is left alone: the account's other devices still use it. **Her ruling, 2026-10-13** (§1).
 - **Joining or moving into an account** in Castle is entering Castle for this library: the re-key, its own Apple keys
   retired, and the old shared key's checks (§3.5). Joining or moving into an account in Standard is leaving Castle for
-  it, with rule 5's sentence at the consent.
+  it: its key change (§3.4), with rule 5's sentence at the consent.
 - **Signed out, Use Castle and Use Standard each offer one plain road:** the mode applies to this Mac only, and this
   Mac stops using the old account. This is her #216 screen for Castle, mirrored for Standard. *Stop syncing this
   library on this Mac* sits beside them.
@@ -474,17 +492,24 @@ open its file. So:
     verifiably holds its key. A fresh backup is made, and the Apple keys this library alone uses — its own and every
     device-own key — are deleted and recorded as retired; the account's goes with the account's own rotation (§3.5).
   - Last, the old shared key is retired (§3.5).
-- **Use Standard.**
-  - The door: Touch ID or the passphrase, plus the §3.1 rule 5 sentence.
-  - A fresh Apple key, minted only here; the key file gains the Apple wrap; synced, the vault gains M under it.
-  - Custody moves to silent; the record and what this Mac remembers change.
+- **Use Standard** — a key change, like Use Castle's (her ruling, §1).
+  - The door: your passphrase and your twelve words (decision 33's rule for the key-changing doors), plus rule 5's
+    sentence.
+  - Synced: the rotation, as Use Castle's — a new master and sync key, your writing on the server re-encrypted, and
+    the vault rewritten with the new master under your passphrase, your words and a fresh account Apple key.
+  - The new library key: its silent item, then the new key file (a fresh Apple key minted only here, P, W, plus the
+    new master when synced; the history taking back the keys from before Castle, never Castle's), then the record
+    written into the staged file, then the swap. Copies pause from the prepare to the swap.
+  - Then what this Mac remembers; Castle's Touch ID items go; a fresh backup.
 - **Replace All Keys.** As today (decision 30 included), on a plan, with the history. On an account still on the old
   shared key, it re-links the account first (§3.5 point 7).
 - **The follow** (into Castle, into Standard, keys replaced).
   - As today, on a plan that carries every fact a resume needs: "another device switched", the words rule (VX-107).
   - The history grows, and the device deletes its own Apple keys when following into Castle.
   - Until you type the secret, the library opens and you can write; sync waits, with the banner.
-  - A follow into Standard asks nothing, so it ends with rule 5's sentence as a notice (§3.1).
+  - A follow into Standard asks nothing when the account's new Apple key is readable (it reads the new master
+    through it); it re-keys its own library the same way, leaving Castle's keys behind, and ends with rule 5's
+    sentence as a notice (§3.1).
   - Typing the old passphrase after it was changed elsewhere is refused with the change named (VX-113, her #205
     ruling): *"Your passphrase was changed on [device] on [day] — enter the new one."*
 - **The account acts:** set up sync, enroll/join, connect/Move, This Mac Only, Stop syncing here, deleting the
@@ -712,6 +737,8 @@ library on two Macs from a hand-off. **The promises, checked after every action 
 11. **Own copies only:** retention never touches another library's or another Mac's copies; the offer touches another
     library's only at your press, and another Mac's never.
 12. **Moving adds:** the migration's move off the old shared key removes no road; only its retirement does.
+13. **What Castle wrote stays Castle's:** after leaving Castle, nothing the Apple account or a login-password holder can
+    reach opens anything written while the library was in Castle.
 
 **Red-on-old for new code: mutation pins.** Each known bug's sequence is a fixed scenario:
 
@@ -738,9 +765,13 @@ library on two Macs from a hand-off. **The promises, checked after every action 
   (§3.5a);
 - **a replayed plan, and a replayed memory item** (the old gate style, the scheduled export): neither changes anything;
   and a whole-state rollback, which returns the earlier state and opens nothing to the one who did it;
-- **Send Library after this change:** a Castle copy lands with its passphrase alone, and with its words alone; a
-  Standard copy gains an Apple key of the receiving Mac's own, so the sender entering Castle leaves it whole; the
-  shared key is said at the send and on Use Castle's sheet;
+- **Send Library after this change:** a Castle copy lands with its passphrase alone, and with its words alone, and
+  the receiving Mac later leaving Castle exposes nothing of the sender's; a Standard copy gains an Apple key of the
+  receiving Mac's own, so the sender entering Castle leaves it whole, and the shared Standard key is said at the send
+  and on Use Castle's sheet;
+- **leaving Castle:** the Castle-era backups open only with the passphrase or the words; the backups from before
+  Castle open through the new key's history; the Apple account opens nothing from the Castle era — synced and
+  local, with a device that follows late;
 - **one library on two Macs from before this change:** the stated exception holds, and the retirement sheet names the
   other Mac's key file when it can see it;
 - **a Castle library leaves its account** (each of the four acts), then another device turns Castle off for the
@@ -806,7 +837,7 @@ The cast, in every phase:
 |---|---|---|---|---|
 | **1 — the headless core** | VX-305 | `Sources/VariorumCore/Protection/`: the record, key file v3 and history, what the Mac remembers and its seals, the custody/Apple-key/vault interfaces, `assess`, the executor and sealed plans, the catalog and route finder with attribution and retention, and §4.1's scenario world | **one phase-sized unit** (the posture model), built in four sessions (model · assess and routes · executor · the world). Evidence: the generated runs green across seeds; every fixed scenario green; every mutation pin red without its guard. **GO / NO-GO at close** — a quality gate; her word is "go even if it delays launch" | VX-228 (corner 45's model), VX-235 (plans), VX-263 (history), VX-302 (attribution), VX-313 (the record's settings, sealed plans) |
 | **2 — the open road and the migration** | VX-306 | the route and lobby on roads; per-key items, what the Mac remembers, the record and key file v3 going live; the migration (§3.13); the phone builds and opens | two units (the open road · the migration). Evidence: the migration drill per §3.13 shape; the Keychain leg on a throwaway scope; the dev store under a held claim; her stores rehearsed on byte-copies; the restore drill | VX-228, VX-235 (the migration clears today's stuck markers), VX-209 (the open rule's road), VX-263 (the fold), VX-301 (keys of their own beside the old shared key, the fresh pair), VX-213 (the leftover key file), VX-310 (the lobby's Touch ID); the device identity's new home (second opinion §2.5) |
-| **3 — the acts** | VX-307 | Use Castle, Use Standard, Replace All Keys and the follow on sealed plans; the Apple keys' lifecycle (VX-301); the `Sync/` lines (VX-107, VX-109, the marker leaving the library file — `SyncEngine.refuseIfRekeyIncomplete` reads the plan); the old shared key's checks and retirement; copies pausing between an act's prepare and its swap; VX-233's drill healed | one road per session. Evidence: each road's drill; the posture drill green; convergence suites for the Apple-key mint/wait/delete rules | VX-235 (prepare-then-commit, the record naming the act), VX-301, VX-313, VX-107, VX-108, VX-109, VX-113, VX-233 |
+| **3 — the acts** | VX-307 | Use Castle, Use Standard (now a key change too — history flows into Castle, never out), Replace All Keys and the follow on sealed plans; the Apple keys' lifecycle (VX-301); the `Sync/` lines (VX-107, VX-109, the marker leaving the library file — `SyncEngine.refuseIfRekeyIncomplete` reads the plan); the old shared key's checks and retirement; copies pausing between an act's prepare and its swap; VX-233's drill healed | one road per session. Evidence: each road's drill; the posture drill green; convergence suites for the Apple-key mint/wait/delete rules | VX-235 (prepare-then-commit, the record naming the act), VX-301, VX-313, VX-107, VX-108, VX-109, VX-113, VX-233 |
 | **4 — accounts and the key doors** | VX-308 | the binding and rows owned by it (VX-314); the four situations; the one-road signed-out screens both ways; Stop syncing here; Move; setup, enroll and connect; change passphrase and regenerate; the Touch ID re-arm; the gate style in the record; Re-link minting a fresh account key; the leaving and joining rules (§3.8 — a Castle library leaving an account re-keys); the one presenter | one door per session. Evidence: each door's drill; the account-sequence walk (signed in, out, into another account, back) | VX-314, VX-313, VX-301 (Re-link), VX-264 (the signed-out screen, the leaving rules), VX-239, VX-243 |
 | **5 — copies and words** | VX-309 | the restore list over the catalog (older libraries included); Open Library and the open rule (a different library keeping its key, with this Mac's own Apple key in Standard); Send Library's sentence and the record's hand-offs; the plaintext export's ID; retention per library and Mac; the Castle offer under VX-301, with the old shared key's sheet and notice; Data Safety and `RESTORE.md`; VX-211; VX-264's and VX-210's words; the lock-time copy named from the file's own key; adoption writing the key file before the store lands | two units (copies · words). Evidence: walks in both voices; the restore drill; **the key-map table (§4.3)** | VX-209, VX-210, VX-211, VX-263 (the route finder's words), VX-264, VX-265, VX-301 (the sheet's words), VX-302, VX-317, VX-213 (the record corrections, the privacy text) |
 | **6 — VX-212** | VX-212 | designed with her first (§3.14), then built under Fable | one repair rule. Evidence: convergence suites plus one live two-device round | VX-212 |
@@ -838,7 +869,7 @@ the restore list's older-libraries section and the per-Mac far-folder subfolders
 |---|---|---|
 | VX-209 the way-back revert | the record + per-key items + the open rule (a copy takes the current record; a different library keeps its key, plus this Mac's own Apple key in Standard); FLIP `VX209WayBackRoundTripTests` | 2, 5 |
 | VX-228 corner 45 | deleted; the mode recorded | 1, 2 |
-| VX-263 W-1 | the history; the migration's fold; the route finder's words | 1, 2, 5 |
+| VX-263 W-1 | the history (flowing into Castle, never out — her ruling); the migration's fold; the route finder's words | 1, 2, 3, 5 |
 | VX-264 her #216 rulings | §3.11 / §3.8 (the leaving and joining rules included) | 4, 5 |
 | VX-265 a separate delete choice | the offer's other-libraries group | 5 |
 | VX-210 other folders | §3.7's reworded line | 5 |
@@ -881,7 +912,8 @@ drill), VX-152 (Lock reentrancy), VX-240 (a wrong instruction mid-act).
   - Decision 6 and corner 5: the Apple key is **retired** on entering Castle; the old shared key, by Use Castle's
     last step after its checks.
   - Corner 46 (iCloud Keychain's state can't be seen) reaches the words: rule 3 says "when it's on".
-  - Decision 7: leaving Castle always mints a fresh key, never "read, minted if absent".
+  - Decision 7: leaving Castle re-keys — the new key's history leaves Castle's keys behind — and mints a fresh Apple
+    key, never "read, minted if absent".
   - Decision 3, §3.3's device-identity row and decision 13's identity clause: the device identity moves to what this
     Mac remembers; sync keys are per account, not per store.
   - §3.4's credential-audit tables ("STAYS in iCloud", "minted if absent") follow the retirement.
@@ -928,8 +960,8 @@ drill), VX-152 (Lock reentrancy), VX-240 (a wrong instruction mid-act).
     one who did it.
   - a retirement made while this Mac's iCloud Keychain is off deletes only this Mac's copy until it's on again; the
     key lives on in iCloud meanwhile, and delete on sight finishes the job.
-  - rule 2's second and third exceptions: copies made while a library synced with an account still in Standard, and
-    copies under a key shared with another Mac by a hand-off.
+  - rule 2's second and third exceptions: copies made while a library synced with an account in Standard (while it
+    stays in Standard), and copies under a Standard key shared with another Mac by a hand-off.
   - a Standard library with no passphrase or words on a Mac whose iCloud Keychain is off: after the old key is
     retired, it opens only on that Mac. The sheet lists the ones this Mac holds and says it for the rest.
   - another Variorum account still in Standard on the same Apple account: after the old key is retired, it sets up
