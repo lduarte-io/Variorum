@@ -584,6 +584,22 @@ all green. The markdown suites alone at `962a7305`: 106/7.
 - A raw programmatic storage write AFTER the caret on its own line, with no selection change, re-reads that line
   caret-blind until the next keystroke or caret move (no such road is known on the caret's own block mid-typing).
 - The emphasis-nesting sibling the ticket names (`*a **b** c*`) is untouched — "ticket it if she ever hits it".
+- **(Round 2, F-1 — added at the round-2 fix leg.)** The rescue can RESHAPE a stable span: the closer scans
+  (`MarkdownSyntax.closingSingle`/`closingPair`) take the EARLIEST closer `closerFlanks` accepts, so a caret parked before
+  an INNER star (`*foo *|bar*`, `*2 *| 3 = 6*`) closes the span there — italic `foo ` + plain `bar*` — for as long as the
+  caret sits there; it reverts when the caret moves (a caret move, never forward typing, reaches it). The ruled letter;
+  said to her in #220 with option (b) (rescue only where no caret-blind span already covers that marker).
+- **(Round 2, F-4 — recorded, not fixed.)** A pane's `shouldChangeTextIn` never followed by `textDidChange` would leave
+  `pendingEditReplaced` set, and the pure caret moves after it would skip their settle until the next keystroke's
+  `textDidChange` clears it — a lagging italic, self-healing. No road is known: the coordinator always answers yes, and
+  typing, paste, undo, redo, a drag-move and marked text all end in `textDidChange`; a read pane never asks. Fix it the
+  day a road is traced (a stale pair treated as spent when `editedMask` is empty).
+- **(Round 2, F-5 — recorded, not fixed.)** The settle's CLEAR restyles the line the caret LEFT, wherever it is: with a
+  caret parked at a rescue point, a scroll away and then a click, the cleared line may sit far above the viewport, and
+  in Study its italic→roman re-wrap moves everything below it by ±1–2 lines (W1 of the r1fix window measured 22 pt at
+  200 words). Whether the page visibly nudges under the pointer is TextKit's: 27.0's viewport pass moves the clip to
+  compensate a re-base above the viewport (TEXTKIT2 §3, 18k C6) while an edit has no such pass, and this road now asks
+  for a display pass (R1-2). The on-screen nudge is UNMEASURED.
 
 **THE WINDOW PLAN (runs only on the orchestrator's claim line; `guard.sh --author` before every leg; no
 `/Applications/Variorum.app` instance before or after, no simulator booted by anyone else).** Logs and captures go to

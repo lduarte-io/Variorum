@@ -2498,7 +2498,13 @@ the caret-aware reading when nothing is selected, so ⌘I unwraps what the face 
 optional caret, and the closers ask one new question (`closerFlanks`: no space before me, or the caret sits exactly
 here). With no caret — every reader except the live editors: the read pages, export, the phone's read page, search,
 ⌘B/⌘I — the reading is byte-for-byte what it was (the grammar's own suites run unchanged and green, and a pin walks
-every caret position of nineteen texts to show a caret only ever changes the reading at the one spot). It lives there so
+every caret position of nineteen texts to show a caret changes nothing except where it sits right after a space and
+right before a star). **One more thing it does there, so it isn't a surprise either (the run's round-2 review, F-1):**
+when that star is an INNER one, the rule can reshape a span that already read fine — `*foo *bar*` reads as one italic
+over `foo *bar`, but with your caret just before the inner star it reads as an italic `foo ` and a plain `bar*`, and
+`*2 * 3 = 6*` does the same with the caret before the middle star; it changes only WHILE the caret sits there, and goes
+back the moment it moves. Option (b), if you'd rather it never did that: the caret rescues a star only where no span
+already covers it, so a stable span is never shortened. It lives there so
 there is ONE grammar with one extra input, rather than a second matcher in the face that could drift from it. If you'd
 rather the grammar file itself stayed untouched, the rule can move out into the face at the cost of that second copy.
 Status: open — your eye in daily use.
