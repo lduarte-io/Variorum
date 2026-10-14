@@ -1435,10 +1435,15 @@ All Swift Testing. The list and the run script sit beside the evidence (`notes/p
 
 ## U3 UNIT RECORD — her editor vs the wire: VX-275 (opus-implementer, from 2026-10-14 ~01:00 MDT)
 
-**What this unit has NOT done yet (said first; flipped as pieces land):** no code yet — this commit is the record, the
-LIVE STATUS and the traces, written before any code. No stage window has run (none may without the orchestrator's GO).
-No `notes/QUESTIONS.md` entry, no canon edit, no ticket minted (the merge's and the orchestrator's). Everything below
-"The traces" is the plan, not a claim.
+**What this unit has NOT done yet (said first; the state at READY, 2026-10-14 ~02:10 MDT):** (1) **no stage window has
+run** — the eight Mac pins have never executed (their red-on-old run is W1, their green W2), no Mac batch, no live round
+(THE STAGE WINDOW below, waiting on the GO); so the editor seam's caret fix is proven only by compile and by trace until
+W1/W2; (2) the residual window is NOT closed (P-VX275-2 (a), accepted and recorded); (3) a model-driven client (Claude
+Code) can never land a call inside her 500 ms debounce, so the live round's "pending keystrokes" half rides a scripted
+client on the REAL shim (W3b) — Claude Code's turn (W3a) proves the navigate-away and the editor's half; (4) no
+`notes/QUESTIONS.md` entry, no canon edit, no ticket minted (the merge's and the orchestrator's — the wider class's
+ticket is the orchestrator's to mint from this report). Everything else is built, pinned red-first, red again by revert
+(headless), and green headless.
 
 **Read in full before code (never delegated):** CLAUDE.md and its loaded canon (AppSpec §9's standing conventions and
 structural undo, §12's THE MCP DOOR line); this record's header, THE UNITS, the hard rules, LIVE STATUS, Cross-run
@@ -1487,8 +1492,8 @@ The navigate-away rides THE ONE ROAD (`.variorumNotesDeleted` → `WorkspaceMode
 | 3 | THE FIX (the wire): `Job.flushesHerEditorFirst` (exhaustive, every job family answers), the one await in `MCPWriteTools.call` before `executor.run`, `delete_note`'s receipt names the dead note; the core doc line → headless GREEN, every existing suite unmodified | DONE (this commit) — `MCPWriteTools.call`: after `parse`, `if job.flushesHerEditorFirst, let beforeWrite = hooks.beforeWrite { await beforeWrite(job.tool) }`, then `executor.run` as before. `Job.flushesHerEditorFirst` and one per family (`EditJob`, `CarriageJob`, `DeliberateJob`, `BatchJob`, `NoteEditJob`, `LibraryEditJob`) — exhaustive switches, no `default`; TRUE exactly for the record's IN rows: `edit_take`, `divide_block`, `merge_blocks`, `delete_block`, `save_version`, `save_commit`, `delete_take`, `archive_take`, `lock_take` (lock only — `.lockTake(_, locked)` answers `locked`), `restore_commit`, `delete_note`. `delete_note`'s receipt: `notesLeftDead: [noteID]`. Core: `restoreCommitForClient`'s doc no longer says "the wire has none to flush". **GREEN:** `MCPHerEditorServerTests` **13/13** (`u3/logs/p3-pins-green.log`); the whole MCP target **236 / 49**, zero failures, every existing pin UNMODIFIED (= U2's 223/48 + these 13/1; `p3-mcp-target.log`) |
 | 4 | red again BY REVERT (announced first, on a committed tree; restored and verified) | DONE (announced `0a60d647`, recorded in this commit) — on the committed tree `9a96d46c` the seven wire files of the fix went back to the pins commit `29a53c38` (`git checkout 29a53c38 -- <the seven>`; `git diff HEAD --stat` named exactly those seven, −119/+1), the pins kept → **RED again: 12 of 13 failed, 26 issues, the test × line set IDENTICAL to piece 2's** (diffed: 26 lines, no difference; `u3/logs/p4-revert-red.log`). **RESTORED:** `git checkout HEAD -- Sources/VariorumMCP/`, `git diff HEAD -- Sources` empty → 13/13 green (`p4-restored.log`). The editor seam's revert is the red product itself (W1 — the Mac pins run against `vx246-u3-red`, whose sources are the pre-fix tree) |
 | 5 | THE EDITOR SEAM: `renderFull` lands the caret by her Delete Block's rule when the caret's block left the projection | DONE (this commit) — `EditorSurfaceController.renderFull`: reads `caretLanding(whenBlockLeft:oldEntries:survivors:)` from the OLD tiling before the rewrite (nil while the caret's block survives); after the rewrite, when the caret's block is gone, lands by identity on the answer — the block below's START, else the block above's END. The new `nonisolated static func caretLanding` is pure (one pass over the old tiling; only blocks the new projection holds count). No attribute stamp is added (the rewrite and its attributes are `renderFull`'s, unchanged); `BlockRangeIndex`, `runStructural`, the carve and every vx-282 function untouched (`git diff origin/main -- <vx-282's files>` shows this hunk in `renderFull` and the new helper only). **The Mac product with BOTH fixes BUILT:** `App/Variorum/DerivedData/vx246-u3` (an APFS clone of `vx246-u3-red`, then `build-for-testing` → `** TEST BUILD SUCCEEDED **`, EXIT 0; 188 warnings — the standing count — NONE in a touched file; `u3/logs/mac-build-for-testing.log`). **PENDING the stage:** `ExternalBlockRemovalCaretTests` red on `vx246-u3-red` (W1), green on `vx246-u3` (W2) |
-| 6 | headless finals (core · MCP · workbook) + the Mac `build-for-testing` into `DerivedData/vx246-u3` | NOT-STARTED |
-| 7 | THE STAGE WINDOW plan (claim `vx246-u3`; W1 red on old, W2 green + the batch, W3 the live round) → READY | NOT-STARTED |
+| 6 | headless finals (core · MCP · workbook) + the Mac `build-for-testing` into `DerivedData/vx246-u3` | DONE (this commit) — **the whole package, `swift test --skip-build` on `e43024c1`'s sources, EXIT 0: `VariorumMCPTests` 236 / 49 · `VariorumCoreTests` 2,826 / 326 · `StringsWorkbookTests` 40 / 6**, zero ✘ (MCP = U2's 223/48 + `MCPHerEditorServerTests` 13/1; core and workbook unchanged — the core change is one doc line); the skipped set IDENTICAL to U2's finals (9 lines, diffed — the standing gated suites only) (`u3/logs/p6-finals.log`). **The Mac `build-for-testing`** (piece 5): `DerivedData/vx246-u3`, `** TEST BUILD SUCCEEDED **`, 188 warnings, none in a touched file |
+| 7 | THE STAGE WINDOW plan (claim `vx246-u3`; W1 red on old, W2 green + the batch, W3 the live round) → READY | DONE (this commit) — THE STAGE WINDOW below (~60 min, claim 80; batch-only fallback ~20 min, claim 30); the scripts and the suite list beside the evidence (`notes/plans/vx246-screens/u3/run-w1-red.sh`, `run-w2-batch.sh`, `stage-suites-215.txt`, `driver.py` — gitignored); **READY for stage** (the stage NOT claimed — the orchestrator's GO) |
 
 **No revert is in flight** (piece 4's ran and was RESTORED — `git diff HEAD -- Sources` empty).
 
@@ -1612,3 +1617,148 @@ write stays refused; a landed one is the overwrite). **PROVISIONAL P-VX275-2** b
   of an editor-seam change across every live surface and her typing paused for each wire write; (c) refuse a wire
   TOMBSTONE/FREEZE act while the app holds unflushed text for that take (a "the author is typing there" refusal — the
   product call VX-184's trace offered as option (b), not ruled; she ruled (a)).
+
+### THE STAGE WINDOW — the plan (runs ONLY on the orchestrator's GO, under the exact claim line it relays — expected `vx246-u3`)
+
+**Built (no rebuild unless the branch moved — check `git diff --name-only e43024c1..HEAD -- Sources App`):**
+- `App/Variorum/DerivedData/vx246-u3-red` — the RED-ON-OLD product: the seam and the pins, NO fix (sources = `29a53c38`'s
+  App/Sources; the record commits after it touch docs only). It runs ONLY W1.
+- `App/Variorum/DerivedData/vx246-u3` — the FIXED product (both fixes, `e43024c1`'s sources): W2 and W3.
+
+**Estimate ~60 min of work → claim 80 min** (W1 ~4 · W2 ~15 · W3a ~20 · W3b ~12 · cleanup ~6). **Batch-only fallback (~20
+min, claim 30):** steps 0, W1, W2 and the release — the live round then moves to the next window.
+
+0. **Guards, every step:** `Tools/stage status` shows the claim held; `Tools/WalkKit/guard.sh --author` (her
+   `/Applications/Variorum.app` ABSENT — if present, STOP and report, never quit or kill it); `pgrep -fl
+   'Variorum.app/Contents/MacOS'` empty before any test run; every GUI act through `click.sh` / `keys.sh` (the author check,
+   then `guard.sh <devpid> x y`), synthetic events ≥ 2.6 s apart (the self-trip rule). An undismissable system popup →
+   reported word for word, the window paused.
+1. **W1 — RED ON OLD (~4 min):** `zsh notes/plans/vx246-screens/u3/run-w1-red.sh` (the two Mac suites against
+   `vx246-u3-red`; detached to its log if it runs long, POLLED IN THE FOREGROUND — never a turn ended on it). **Expected,
+   by design:** `MCPHerEditorDoorTests` **4 of 4 red** — delete_note (her words not in the tombstone; no navigate-away
+   signal within the 5 s settle; Put back without them), delete_block (the tombstone without her words; her editor still
+   dirty, the dead block's range kept, the caret still in it), edit_take (the stale edit ANSWERED SUCCESS), divide_block
+   ("Second half" twice after her debounce); `ExternalBlockRemovalCaretTests` **3 of 4 red** (the caret parked at the
+   document's end / in the tail) and the survivor characterization GREEN. Every issue read against its designed line; a
+   red on a PREMISE line (a `#require`, the door never serving, the socket client failing) is a harness defect — STOP the
+   window after cleanup and report, nothing fixed under the claim.
+2. **W2 — GREEN + THE MAC BATCH (~12–15 min):** `zsh notes/plans/vx246-screens/u3/run-w2-batch.sh` — 215 suites on
+   `vx246-u3`: the eight new pins, every suite in a test file that mounts the full-document editor (`renderFull` runs at
+   every editor's first render and every structural result — 96 files), every Mac `MCP*` suite (the door's hooks), the
+   note-deletion, autosave and projection families (`stage-suites-215.txt`; 93 of them ran green in U2's window). Detached,
+   polled in the foreground. Read: the summary line, every `✘`, the `skipped:` lines (the gated capture suites expected
+   skipped). **A red not designed:** re-run ALONE once (`-only-testing:VariorumTests/<Suite>/<test>()`); green alone + a
+   named load-flake class (VX-167, VX-279) ⇒ recorded as that class; reproduces alone ⇒ a REAL regression: the window
+   proceeds to cleanup and the release, and the report carries the test, its message and the trace — nothing fixed here.
+3. **A1 PRESTAGE + LAUNCH (~3 min):** the dev store's files + key files → `…/Variorum-dev/Backups/safety-copies/
+   scale-prestage-<ts>/` (the stage.sh copy loop without its fixture launch; each file `cmp`-verified; sha256 recorded); the
+   Debug app's prefs exported (`defaults export io.lduarte.Variorum.debug`); her user-scope Claude servers read (names + a
+   fingerprint of `~/.claude.json`'s `mcpServers`, never values). `open -n` the `vx246-u3` Debug app; its pid by PATH. A
+   What's New sheet → closed with its own button; a DEV lock screen → `source ~/.variorum/dev-castle.env` and unlock with
+   exactly those values (never echoed, logged, captured or written), posture restored before release.
+4. **W3a — A REAL CLAUDE CODE TURN (~20 min, Study first):**
+   - **Connect `claude-code` — U1's detour, the existing faces' road** (U1b's face is NOT on this branch: the app still
+     mints untagged keys, so a re-run setup under a bound, approved `claude-code` WAITS for an OK no pane can give; if U1b
+     has merged into this branch by the window, skip the detour and copy from the Claude Code tab instead — say which):
+     Settings ▸ MCP — **leg 0, the posture read** (the server running; `claude-code`'s row: approved? bound? its grants),
+     captured → `claude-code`'s row ▸ **Deny…** (confirm) → Connect a client ▸ Claude Code ▸ **Copy setup command** (the
+     key's first 9 characters recorded) → in a scratchpad project the copied line with `-s user` → `-s local`:
+     `variorum-dev` (the REAL Debug shim) → `claude mcp list` ✔ Connected (a denied name binds the fresh key) → the row ▸
+     **Approve…** → the grant sheet. **NO standing grant yet** — the grants come from her note doors below.
+   - **Two scratch notes** through the Bookcase quick-entry bar (U2's W1 recipe, held-shift returns): **"vx275 a"** —
+     "Alpha one." ⇧⏎ "Alpha two." ⏎; **"vx275 b"** — "One." ⇧⏎ "Two." ⇧⏎ "Three." ⏎. Each note ▸ `note ▾` ▸ **Share with
+     AI…** → claude-code · Edit · Always (her grant road; the sheet's words captured once).
+   - **Her panes:** "vx275 a" open in pane 1, "vx275 b" beside it (Open Beside) in pane 2, both in Write; in "vx275 a"
+     type " She was typing here." at the end of "Alpha two." (then ≥ 600 ms pass — her debounce lands it; said plainly:
+     a model's call cannot arrive inside 500 ms, so THIS turn proves the navigate-away and the editor's half, and W3b proves
+     the pending half); the caret placed in "Two." of "vx275 b" (click), the note bar reading its block "2/3". Capture.
+   - **ONE `claude -p --strict-mcp-config` turn** (`--allowedTools` `mcp__variorum-dev__list_notes`,
+     `…__read_note`, `…__delete_block`, `…__delete_note`): "In Variorum, in the note 'vx275 b' delete the block 'Two.'; then
+     delete the note 'vx275 a'." **Expected:** both served, `isError` false; pane 2's "Two." GONE with the caret at the
+     START of "Three." (the note bar "2/2"; capture) — her Delete Block's landing; pane 1 LEFT "vx275 a" (it shows the
+     Library; the Open strip has no "vx275 a" row; capture) — THE ONE ROAD; the receipt lines "claude-code deleted a block…"
+     and "…deleted a note…" (capture). Then the Trash ▸ "vx275 a" ▸ **Put back** → its text reads "Alpha one." / "Alpha two.
+     She was typing here." (capture); This Note's Tray on "vx275 b" ▸ Leaving ▸ "Two." ▸ **Put back** (capture).
+   - **Terminal:** Settings ▸ General ▸ voice Terminal; repeat with fresh notes "vx275 c" (as a) and "vx275 d" (as b) —
+     grants, panes, ONE turn naming c and d, the same captures. (The voice lives in the store; the restore returns it.)
+5. **W3b — HER PENDING KEYSTROKES, the real shim and a scripted client (~12 min, Study):** `notes/plans/vx246-screens/u3/
+   driver.py` (stdlib Python, `python3 -I`): it spawns the Debug build's REAL `Contents/MacOS/variorum-mcp` with a copied
+   setup key in `VARIORUM_MCP_KEY` (as every setup the pane copies), initializes as **`vx275-driver`**, finds the note by
+   title through `list_notes` (and the block through `read_note` with ids), prints READY, then fires its ONE call the
+   instant a trigger file appears — milliseconds after her last keystroke.
+   - **The driver's door:** Connect a client ▸ **Any MCP client** ▸ Copy (key's first 9 recorded) → `VARIORUM_MCP_KEY=…
+     python3 -I driver.py <shim> vx275-driver hello x` (a first contact — her pane shows the request) → its row ▸
+     **Approve…** → the grant sheet: the HOME wing · Edit · Always (the dev store; restored after).
+   - **delete_block while she types:** a fresh note **"vx275 e"** ("One." ⇧⏎ "Two." ⇧⏎ "Three." ⏎) open in Write; the
+     driver armed (`… driver.py <shim> vx275-driver delete_block "vx275 e" "Three." <scratch>/go-e`, background, READY read
+     from its stderr); the caret clicked to the end of "Three."; then IN ONE Bash call `keys.sh <pid> type " pending words"`
+     immediately followed by `touch <scratch>/go-e` → the driver's answer (`isError` false, `ms_after_trigger`) → capture:
+     the block gone, the caret at the END of "Two." (no block below — the block above's end). This Note's Tray ▸ Leaving ▸
+     "Three. pending words" ▸ Put back → **"Three. pending words"** on the page (capture) — her keystrokes, typed
+     milliseconds before the delete, survived it.
+   - **delete_note while she types:** a fresh note **"vx275 f"** ("Fresh line." ⏎) open in Write, the driver armed for
+     `delete_note "vx275 f"`; type " pending words" + touch the trigger in one call → the pane leaves the note (capture) →
+     the Trash ▸ "vx275 f" ▸ Put back → **"Fresh line. pending words"** (capture).
+   - Both voices are covered by W3a's faces; W3b is the pending half's evidence (Study). **Optional, only if minutes
+     remain (the red contrast on the real app):** quit, `open -n` the `vx246-u3-red` app, repeat the delete_block leg once →
+     the Put-back block WITHOUT " pending words" (capture), quit.
+6. **CLEANUP (~6 min):** the `-s local` registrations removed (`claude mcp remove -s local …`), her user-scope servers read
+   AFTER (the fingerprint byte-identical to step 3's), the driver's key and setup lines deleted, the clipboard emptied, a
+   whole-key grep over `vx246-screens/u3/` and the scratchpad = 0 files; the Debug app quit BY BUNDLE ID (`tell application
+   id "io.lduarte.Variorum.debug" to quit`; `pgrep` empty; no socket left); the prefs: `defaults import` of step 3's export
+   + `defaults delete` of every key the walk ADDED (`import` merges — U2's finding) → re-export, **0 keys differ**; the dev
+   store `Tools/ScaleFixture/restore.sh <the prestage dir>` → "Restored (verified)" and a second `cmp` of every file (the
+   posture the coordinator handed over: Standard, unlocked, Study); stray `default.profraw` removed; **`Tools/stage release
+   --who vx246-u3`** at once; then ONE result line for the orchestrator (claim times, W1's red counts, W2's totals, W3's
+   verdicts, the posture as left). Evidence → `notes/plans/vx246-screens/u3/` (gitignored; keys redacted to 9 characters).
+
+### SELF-ASSESSMENT (pre-stage — the implementer's)
+
+- **Confident:** the mechanism (traced line by line on this tree, and every family's wrong state reproduced headless —
+  the red counts are the trace made executable); the seam's ORDER (the flush awaited before `executor.run`, structurally
+  outside the act's synchronous body, pinned by the turn log); the act list (each tool argued, the exhaustive switches
+  make a future tool answer); THE ONE ROAD (the door posts exactly what `NoteDeletion` posts — the named ids — and the
+  listeners are unchanged).
+- **Less sure, said plainly:** (1) the Mac pins and the editor-seam fix have only compiled — their first run is W1/W2;
+  the socket client in `MCPHerEditorDoorTests` is new test plumbing (a detached task per read so the main actor stays free
+  for the hook) and may need a harness adjustment at W1 if a premise line trips; (2) `renderFull`'s landing is the house
+  rule asked at the caret's block — a MERGE elsewhere lands on the first surviving block below (her text's new home, the
+  merged block, is a NEW id the old tiling cannot name); better than the document's end, not the merged block itself (a
+  recorded limit, below); (3) P-VX275-1 departs from the brief's wording (every open post, not `flushExistingAutosave` for
+  the act's note) — argued, and the options are listed; (4) the flush runs before the grant decision, so an act that then
+  refuses still flushed her text: harmless (her own text into her own store, what her debounce does 500 ms later), and
+  the timing it exposes is "something was pending somewhere", never which note.
+- **Recorded limits (not defects of this unit):** the residual window (P-VX275-2); her own Takes-board Lock / Archive /
+  Delete-take doors run without a flush (`TakesViewModel.run` — "flushing before every ops call would make every board
+  door pay") — the same refused-flush class may reach HER doors when she clicks within 500 ms of typing into that take
+  (NOT traced to a repro here — OWED 2); comments and titles are drafts committed on her own act, outside this class; a
+  book deleted under her book surface has no navigate-away road of its own (her own book Delete door neither — not this
+  ticket's class, notes stay alive).
+
+### FOR VX-234 (user-facing words, as built)
+
+Nothing. No pane word, receipt, refusal or tool description changed; a stale `edit_take` hears the op's existing
+`bufferChangedSinceGesture` words.
+
+### OWED (for the orchestrator)
+
+1. **The wider class's ticket** (the brief: "I mint its ticket from your report"): *"MCP rewrites, restructures, freezes
+   and copies read the STORED row, never her pending buffer — `edit_take` landed on a stale row and her next flush wrote
+   over it (the client was told it landed); `restore_commit` likewise, its 'before' commit insuring the stale row;
+   `divide_block` (one take) left her whole old block in the first half — the second half read twice; `merge_blocks` and a
+   fanned divide released her block, so her flush landed outside the note; `lock_take`/`archive_take` refused her flush —
+   stranded like a delete; `save_commit`/`save_version` missed her last words. Fixed in VX-246 U3 by the same pre-act
+   flush as VX-275 (every listed act; the list argued in the record's U3 trace); pins `MCPHerEditorServerTests` (one per
+   family, red 26 issues on the seam tree, red again by revert) and the Mac `MCPHerEditorDoorTests` (edit_take, divide)."*
+2. **A possible sibling on HER doors (not traced to a repro — for a ticket or a dismissal):** the Takes board's Lock,
+   Archive and Delete-take doors call the op without flushing (`TakesViewModel.run`, by design for cost); if she types into
+   a take's pane and clicks its Lock within the 500 ms debounce, the lock's insurance commit holds the stale row and her
+   flush is refused (the same class, on her own door). Worth one red-first probe before anyone fixes it.
+3. **VX-283 (VX-123) builds on this road:** the wire's navigate-away now rides `.variorumNotesDeleted` from
+   `MCPDoor.landWireWrite` (fact: `MCPWriteReceipt.notesLeftDead`). VX-123's sync applies and `deleteReadingWithNotes`
+   should post on the same road, never a second.
+4. **The Fable cold review** of the editor seam (CLAUDE.md): `EditorSurfaceController.renderFull` + `caretLanding` — the
+   orchestrator's to run after the units.
+5. **Canon at the merge (proposed, not written):** AppSpec §12's THE MCP DOOR line could gain one clause — "a wire act
+   that meets a take she may be typing in (delete, lock/archive, edit/restore, divide/merge, commit/version) lands her
+   pending typing first, as her own doors do, and a wire note delete sends every pane off the note".
