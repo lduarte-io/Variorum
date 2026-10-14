@@ -138,7 +138,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **DONE** — VX-229 DISMISSED AS HOLLOW in use (the u5b heap decider; the fix `ee86dd8c` reverted `7d798f82`; the runner's retention a known issue `c46f999d`, cause untraced) · VX-257 FIXED `1ca8fe72` (pins `7650b6ce`/`075473c2`, reshaped `dab712d8`/`eaf42b27`; QUESTIONS #223) · VX-183 FIXED `a765683c` · VX-182 FIXED `fd4c260c` (pins `f38fb93c`). Verified: core 2,801/320 + MCP 212/41 + workbook 40/6 headless; W1 / u5c red on old as designed; u5b g2 76/11, g3 23/2; **u5d g1 113 tests / 13 suites passed (9 known issues — the VX-229 runner fact)**; the u5b walk, every row held, both voices. Windows released 05:25:17, 05:57:46, 06:13:57, 06:19:43. Posture as found (Standard, unlocked, Study); no instance; no revert in flight. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **DONE** — pins `d35191b6` + correction `ee1facc9` · fix `3cf0079b` · window `a1967ac0` (logs) + the walk record. Stage window 05:27:17–05:38:17 (claim `vx282-u6`, RELEASED): W1 red on old exactly as predicted (3 tests, 1 issue — the launch pin's last cell) · W2 the fixed batch 148 tests / 43 suites green · W3 every row held (A0 old: the window; A/A' fixed: the caret in the bar at launch in Study and Terminal, a typed letter lands; C the tour never stolen from; D the navigation back as today — O-U6-1 seen live); row B's restored note window not reachable on this Mac (not restored), a new window walked in its place. P-U6-1/2 → QUESTIONS #224. Posture: Study, unlocked Standard, tour `completed`, the Bookcase, nothing filed. No claim held; no revert in flight. |
-| Ladder | round 1 `opus-reviewer` (0B/0M/6m/4n, dispositioned) → its FIX LEG; round 2 = the run's one `fable-reviewer` | IN-PROGRESS — round 1's fix leg: **READY FOR STAGE — r1fix, ≈35 min** (the `### ROUND 1 — FIX LEG` subsection: W1/W1b/W1c red-on-old + the R2-1 revert, W2 the fixed Mac batch, W2b the phone + R1-3's verdict, W2c only on a red R1-3) |
+| Ladder | round 1 `opus-reviewer` (0B/0M/6m/4n, dispositioned) → its FIX LEG; round 2 = the run's one `fable-reviewer` | round 1's FIX LEG **DONE** (the r1fix window 07:53–08:00, released): R1-1/R1-2/R1-7 FIXED red-on-old → green · R1-3 DISMISSED AS HOLLOW · R1-4/5/6/9/10 done · R1-8 the closeout's watch. **NEXT: round 2 = the run's one `fable-reviewer`** |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
 ## Stage traffic log (oct13coordinator protocol)
@@ -268,8 +268,9 @@ archive keep `caretLandingAfterRemoving`. Mac-only (the phone has no carve).
     `["alpha","x","beta"]` (was `["alpha","","xbeta"]`). **RED ON OLD.**
   - **RE-POINTED, purpose kept:** `aBurstWithASeamBackspaceHoldsWhenTheCarveLandsBelow` keeps its name and its R2-1
     job (one burst pin per landing arm) on a shape that still lands BELOW: `["","beta"]`, ⏎ ⌫ ⏎ x at beta's start →
-    `["","","xbeta"]`. Green both sides by design (not re-run against R2-1's own revert — the re-point keeps the
-    arm, it does not re-prove R2-1).
+    `["","","xbeta"]`. Green both sides by design (not re-run against R2-1's own revert here — the re-point keeps the
+    arm). **Re-proven at the round-1 fix leg (R1-9, the r1fix window): RED under R2-1's named revert, as are both its
+    siblings — each burst pin carries R2-1 on its own landing.**
 - New-API pins (cannot be red-on-old — the API is new; they pin the pure decision): `EditorEditRouteTableTests
   .theCarvesLandingIsWhereTheDeletedBreakWas` (six shapes, both sides, #33(d)'s both-empty case) and
   `BlockDeletionAndRedoTests.theCarveNamesTheSurvivorAcrossTheSeparatorAndTheAnswerIsUnchanged`. The table
@@ -2594,24 +2595,26 @@ run 2,809/322 · MCP 212/41 · workbook 40/6 green · 21 stage logs spot-checked
 ### ROUND 1 — FIX LEG (an `opus-implementer` session, Opus 5.5 xhigh, 2026-10-14)
 
 **NOT DONE BY THIS LEG (first line):** R1-8 (the closeout's whole-target run watches it) and the handoff are not this
-leg's. Every count and every "red"/"green" below is **PENDING** until the r1fix stage window runs it.
+leg's. No walk (no fix changes anything she sees except through the pins' roads). Every row below is VERIFIED in the
+r1fix window (its record at the end of this subsection).
 
-**LIVE STATUS (this leg):** READY FOR STAGE — r1fix (the plan at the end). No claim held; no revert in flight
-(`git diff` empty after every one, each verified); the side branch `vx-282-r1-3-guard` is NOT merged.
+**LIVE STATUS (this leg): DONE (2026-10-14 08:00).** The window ran 07:53:31–08:00:50 (claim `vx282-r1fix`, RELEASED);
+no claim held, no revert in flight (`git diff` empty after every named revert, each verified), the simulators shut down
+(0 booted), no Variorum instance. The side branch `vx-282-r1-3-guard` is DELETED (GitHub and local) — R1-3 is hollow.
 
-| Finding | State |
+| Finding | Disposition |
 |---|---|
-| R1-1 find paint × the read-going settle | BUILT — pin `49ebe4c4`, fix `833b1ba7`; red-on-old (W1) + green (W2) PENDING |
-| R1-2 Write's overlays after a settle re-wrap | BUILT — pin `174b64f3` (made road-honest in `9f9980cb`), fix `9f9980cb` — a deliberate refinement of the agreed shape (below); W1 + W2 PENDING |
-| R1-3 the phone's guard window (PIN FIRST) | PIN ONLY on the branch — `706008eb`; the guard is the side branch's `47606e46`, its products built; W2b DECIDES |
-| R1-4 the comments panel to `Core/Views/` | DONE `b7fece88` (headless build green); W2 g3 PENDING |
-| R1-5 #220's disclosure line | DONE `f411c213` |
-| R1-6 O-4 re-verified | DONE `f411c213` — premise FALSE, U3's O-4 WITHDRAWN in the U3 record; no ticket |
-| R1-7 a caret in a non-editable editor | BUILT — pins `ebd327d0`, fix `26c2e448`; W1 + W1c + W2 + W2b PENDING |
-| R1-9 the burst pins against R2-1's revert | PRODUCTS BUILT (the revert named, applied, built, restored); W1b PENDING |
-| R1-10 the U5 record's adopt line | DONE `f411c213` |
+| R1-1 find paint × the read-going settle | **FIXED** `833b1ba7` — pin `49ebe4c4`: W1 red on old (2 issues: the colour, the runs), W2 g1 green |
+| R1-2 Write's overlays after a settle re-wrap | **FIXED** `9f9980cb` (a deliberate refinement of the agreed shape — below, for the Fable round) — pin `174b64f3`/`9f9980cb`: W1 red on old (1 issue: badge 318 vs block 340 — the block moved 22 pt, one line), W2 g1 green |
+| R1-3 the phone's guard window (PIN FIRST) | **DISMISSED AS HOLLOW** — the pin `706008eb` green on the current product (W2b) and on old (W1c), all three replacements; no fix; the guard branch deleted; the pin stays as a guard |
+| R1-4 the comments panel to `Core/Views/` | **DONE** `b7fece88` — W2 g3a + g3b green (73/10 with the 9 VX-229 known issues; 67/10) |
+| R1-5 #220's disclosure line | **DONE** `f411c213` |
+| R1-6 O-4 re-verified | **DONE** `f411c213` — premise FALSE, U3's O-4 WITHDRAWN in the U3 record; no ticket |
+| R1-7 a caret in a non-editable editor | **FIXED** `26c2e448` — pins `ebd327d0`: W1 red on old (Mac, 2 issues: the seal arrival AND the click), W1c red on old (phone, 1), W2 g1 + W2b green |
+| R1-9 the burst pins against R2-1's revert | **DONE** — W1b: all THREE burst pins red under R2-1's named revert, nothing else; each carries R2-1 (the test's doc and the U1 record say so) |
+| R1-10 the U5 record's adopt line | **DONE** `f411c213` |
 
-#### R1-1 — the find paint the read-going settle erased (FIXED, pin PENDING)
+#### R1-1 — the find paint the read-going settle erased (FIXED; red on old and green — the window below)
 
 - **Mechanism, confirmed by re-reading the road:** `PaneSurfaceView.updateNSView` paints FIRST
   (`paintFind(live: false)`, `PaneSurface.swift:1427` — it writes `.backgroundColor` over the matches and sets
@@ -2629,7 +2632,7 @@ leg's. Every count and every "red"/"green" below is **PENDING** until the r1fix 
   match `{1,4}`, born live; the caret at 6 (non-vacuity: italic at 1); `isLive = false` → `.backgroundColor` at 1 ==
   `matchTint` and the painted runs == `[{1,4}]`. **RED ON OLD expected** (2 issues: the colour, the runs) — W1.
 
-#### R1-2 — Write's overlays after a settle re-wrap (FIXED, a refinement of the agreed shape; pin PENDING)
+#### R1-2 — Write's overlays after a settle re-wrap (FIXED, a refinement of the agreed shape; red on old and green)
 
 - **Mechanism, confirmed:** `EditorViewModel.settleMarkdownCaret` writes attributes only; `overlayGeometryGeneration`'s
   inputs were the storage's character edits (`storageDidEdit`, `:1222`), the attach (`:427`), a width reflow (`:439`)
@@ -2664,7 +2667,7 @@ leg's. Every count and every "red"/"green" below is **PENDING** until the r1fix 
   re-wrap); the badge's y within 1 pt of the block's laid-out fragment. **RED ON OLD expected** (1 issue: the badge) — W1.
   An honest pin: the re-wrap is real in the host (Study's font ships), the act is the app's own key road.
 
-#### R1-3 — the phone's guard window (PIN FIRST — undecided until W2b)
+#### R1-3 — the phone's guard window (PIN FIRST — DISMISSED AS HOLLOW at W2b)
 
 - **The question (the review's, SPECULATIVE):** the shared settle's guard is `storage.editedMask.isEmpty`, which reads
   empty between `beginEditing` and the transaction's first change; if UIKit reports the selection inside
@@ -2682,6 +2685,14 @@ leg's. Every count and every "red"/"green" below is **PENDING** until the r1fix 
   `e243a87d` + that one commit), its phone products built (`DerivedData/vx282-r1fix-guard-ios-products`). RED in W2b ⇒
   the second window runs those products, then the commit is cherry-picked onto the run branch (byte-identical code);
   GREEN ⇒ R1-3 DISMISSED AS HOLLOW, the side branch deleted, no fix.
+- **THE VERDICT — GREEN ⇒ DISMISSED AS HOLLOW.** W2b (the run tip's phone product, no guard): all three replacements
+  passed — no desync, the text right, the identity audit clean, the face reading as the landed caret says; W1c (the
+  pre-fix phone) the same. On iOS 26.2's simulator UIKit's `replace(_:withText:)` does not report the selection inside
+  its transaction before the character change, so the `editedMask` guard has no window on this road. No fix landed;
+  `47606e46` is gone with its branch (`git push origin --delete vx-282-r1-3-guard`; `git branch -D`), its products
+  deleted. The pin stays on the branch as a guard: the day a UIKit point release reorders the reports, it goes red
+  (the record of the fix then is this section). Autocorrect's and dictation's own drivers may differ from the public
+  `replace(_:withText:)` they call — not reachable in a test host; recorded, not owed.
 
 #### R1-4 — the comments panel moves to the shared home (DONE)
 
@@ -2709,7 +2720,7 @@ and every routed handler); a window that stops being it re-renders read-cheap, a
 (`WriteTakesPanel.swift:267-272`) unregisters and detaches. The U3 record's O-4 line is struck through with the trace
 beside it. The orchestrator owes no ticket for it.
 
-#### R1-7 — a caret in a non-editable editor (FIXED, pins PENDING)
+#### R1-7 — a caret in a non-editable editor (FIXED; red on old and green, both platforms)
 
 - **Mechanism, confirmed:** both platforms' settles handed the face the selection whatever the editability, while the pane
   hands none when not editable (`PaneSurface.swift:2009-2015`). The Mac's Write on a SEALED note is selectable and not
@@ -2732,7 +2743,7 @@ beside it. The orchestrator owes no ticket for it.
   `standDown()` a selection at the rescue point, settled as the delegate settles, → plain). **RED ON OLD expected:** Mac 1–2
   issues (the click certainly; the seal arrival unless the harness's reload re-renders the storage) — W1; phone 1 — W1c.
 
-#### R1-9 — the burst pins against R2-1's revert (products built; W1b PENDING)
+#### R1-9 — the burst pins against R2-1's revert (DONE — all three red under the revert)
 
 R2-1 = the 18c ladder's round-2 MAJOR (`use-report-round-2026-09-06.md:2019-2025`): the stash drained at the end of the
 NEWEST arming, not when the surface is IDLE; fixed at `0ce1040f` by `replayDeferredKeystrokesIfIdle`'s one drain rule
@@ -2822,6 +2833,50 @@ by the pins' roads (an italic's honour in two non-editable states; a badge's pla
 **READY FOR STAGE — r1fix: W1 (Mac red-on-old: R1-1, R1-2, R1-7) · W1b (R1-9, the R2-1 revert) · W1c (phone red-on-old,
 R1-7) · W2 (the fixed Mac batch, five groups) · W2b (the fixed phone batch + R1-3's verdict) · W2c only if W2b's R1-3 is
 red, ≈35 min (≈38 with W2c).**
+
+#### THE r1fix WINDOW — RUN 2026-10-14 07:53:31 → 08:00:50 (claim `vx282-r1fix`, handed from `coord-for-vx282`; RELEASED)
+
+The coordinator's GO (pre-checks at 07:53: no instance, no booted simulator, disk 65 GiB, the dev store Standard and
+unlocked). `git pull --ff-only` first (the tip `7444caf8`, the products' code); `guard.sh --author` OK before every leg;
+`pgrep -lx Variorum` empty throughout; nothing rebuilt; no app launch, no walk, no system popup. Logs:
+`notes/plans/vx282-screens/r1fix/logs/`.
+- **W1 — red on old, Mac — AS DESIGNED** (`w1-red-on-old.log`, 07:53:38–07:54:09): "Test run with **18 tests in 4 suites
+  failed** … **5 issues**", every one on a designed expectation — `aPaneGoingReadAtACaretRescuePointKeepsItsMatchPainted` 2
+  (`PaneFindFaceTests.swift:308` the colour at 1, `:310` the painted runs); `aSettleThatRewrapsAParagraphMovesTheBadgeBelowIt`
+  1 (`MarkdownCaretFaceTests.swift:488`: badge y 318.0, the block's fragment 340.0 — the roman re-wrap moved it 22 pt, one
+  line, past the `#require`'s 10); `aSealedNoteHonoursNoCaret` 2 (`:172` the seal's arrival — the harness's reload did NOT
+  re-render, so the flip half is red on old too — and `:178` the click). GREEN on old: the other 15 (the U2 pins, the find
+  suite's eight standing tests, the pane suite).
+- **W1b — R1-9, R2-1's revert** (`w1b-r21-revert.log`, 07:54:22–07:54:45): "**27 tests in 1 suite failed** … **4
+  issues**" — EXACTLY the three burst pins: `aBurstWithASeamBackspaceKeepsTheTextBehindTheReturnItFollowed` 1 (the
+  store), `aBurstWithASeamBackspaceHoldsWhenTheCarveLandsBelow` 2 (the store; 2 entries where 3 belong),
+  `aBurstWithASeamBackspaceAboveABlockLandsWhereTheBreakWas` 1 (the store); the other 24 green. **So each of the three
+  carries R2-1 on its own landing** — the re-pointed pin included (the review's question); the flipped pin is a second
+  R2-1 pin besides VX-290's. (The stores print `<not evaluated>` — `#expect` does not decompose a `try` call — so the old
+  stores are the trace's, not the log's.)
+- **W1c — red on old, phone** (`w1c-phone-red-on-old.log`, iPhone 17 Pro iOS 26.2, `-collect-test-diagnostics never`,
+  07:54:56–07:55:23): "**4 tests in 1 suite failed** … **1 issue**" — `aStoodDownEditorHonoursNoCaret`
+  (`MobileMarkdownCaretTests.swift:149`); green: the two U2 pins and R1-3's three cases (informative). One launch, no
+  restart.
+- **W2 — THE FIXED MAC BATCH, GREEN** (`DerivedData/vx282-u1`, the tip's build): g1 (`w2-g1.log`, 07:55:41–07:56:40)
+  "**125 tests in 16 suites passed**" — R1-1's, R1-2's and R1-7's pins ✔ (R1-2's on the UNFORCED display road: the
+  fix's own display request delivered the overlays); g2 (`w2-g2.log`) "**68 tests in 12 suites passed**"; g3a
+  (`w2-g3a.log`) "**73 tests in 10 suites passed** … with **9 known issues**" (exactly U5's VX-229 runner fact — the
+  `━` lines on `CommentPanelReleaseTests` and its parent; both host child suites listed); g3b (`w2-g3b.log`) "**67
+  tests in 10 suites passed**"; g4 (`w2-g4.log`) "**137 tests in 8 suites passed**". **470 tests / 56 suites, 0
+  skipped** (every log's suite count matched the names given; `** TEST EXECUTE SUCCEEDED **` ×5). *(Machinery honesty:
+  the first g1 call passed the `-only-testing` list as ONE argument — zsh does not word-split a string — and xcodebuild
+  refused it as an unknown build action before running anything; re-run at once with an array.)*
+- **W2b — THE FIXED PHONE BATCH + R1-3's VERDICT, GREEN** (`w2b-phone.log`, `DerivedData/vx282-u2-ios`,
+  08:00:08–08:00:40): "**79 tests in 11 suites passed**", one launch, no restart — `aStoodDownEditorHonoursNoCaret` ✔ and
+  `aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` "with 3 test cases passed". **R1-3: HOLLOW** (above).
+- **W2c — NOT RUN** (R1-3 green). The side branch deleted on GitHub and locally; `DerivedData/vx282-r1fix-guard-ios-products`
+  deleted.
+- **Close:** `xcrun simctl shutdown all` → **0 booted**; no Variorum instance; `Tools/stage release --who vx282-r1fix` at
+  08:00:50 → STAGE FREE. The dev store untouched (no launch). Products kept for the Fable round: the two trees +
+  `vx282-r1fix-old-products`, `vx282-r1fix-r21revert-products`, `vx282-r1fix-old-ios-products`.
+- **After the window (doc only, no rebuild owed):** `ReturnKeyTraceTests`' re-pointed pin's doc and the U1 record's line
+  now say it was re-proven against R2-1's revert.
 
 ## Closeout
 

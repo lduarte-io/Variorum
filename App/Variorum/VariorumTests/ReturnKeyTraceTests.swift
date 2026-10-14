@@ -862,9 +862,12 @@ struct TypedReturnKeyTests {
     /// that block (the caret stays at `beta`'s start — the landing below), ⏎
     /// pushes `beta` down again, and `x` lands in `beta`. An early drain would
     /// type `x` at beta's start BEFORE the queued ⏎ acts — the same
-    /// misordering the first shape caught, on this landing arm. (Not re-run
-    /// against R2-1's revert at VX-290: the re-point keeps the arm, it does
-    /// not re-prove R2-1.)
+    /// misordering the first shape caught, on this landing arm. **Re-proven
+    /// against R2-1's own named revert at VX-282's round-1 fix leg (R1-9,
+    /// the r1fix window):** with the drain's `pendingCrossBlockTask == nil`
+    /// half removed this pin goes red (two entries where three belong), as do
+    /// its sibling above and the flipped pin below — each of the three burst
+    /// pins carries R2-1 on its own landing.
     @Test func aBurstWithASeamBackspaceHoldsWhenTheCarveLandsBelow() async throws {
         try await withEditor(seedBlocks: ["", "beta"]) { h in
             let window = try hosted(h)

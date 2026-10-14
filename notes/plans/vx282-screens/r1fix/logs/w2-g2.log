@@ -1,0 +1,242 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -scheme Variorum -destination platform=macOS -derivedDataPath DerivedData/vx282-u1 "-only-testing:VariorumTests/InlineEditorWindowTests" "-only-testing:VariorumTests/ReadTierTests" "-only-testing:VariorumTests/EditorWindowSmokeTests" "-only-testing:VariorumTests/IndicatorGutterTests" "-only-testing:VariorumTests/BlockDecorGeometryTests" "-only-testing:VariorumTests/ProseGutterTests" "-only-testing:VariorumTests/EditorDecorTransactionTests" "-only-testing:VariorumTests/RefontViewportTests" "-only-testing:VariorumTests/RefontGapTopTests" "-only-testing:VariorumTests/WriteFloatingViewportTests" "-only-testing:VariorumTests/UntouchedLineKeeperTests" "-only-testing:VariorumTests/InlineHeightReportTests"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  swift-log: https://github.com/apple/swift-log.git @ 1.16.1
+  swift-dependencies: https://github.com/pointfreeco/swift-dependencies.git @ 1.14.1
+  swift-nio: https://github.com/apple/swift-nio.git @ 2.104.0
+  Sparkle: https://github.com/sparkle-project/Sparkle @ 2.10.0
+  combine-schedulers: https://github.com/pointfreeco/combine-schedulers @ 1.2.0
+  GRDB: https://github.com/lduarte-io/GRDB.swift.git @ 7.11.1+sqlcipher.1
+  swift-system: https://github.com/apple/swift-system.git @ 1.8.1
+  VariorumCore: <home>/dev/variorum-vx-282 @ local
+  swift-concurrency-extras: https://github.com/pointfreeco/swift-concurrency-extras @ 1.4.1
+  swift-atomics: https://github.com/apple/swift-atomics.git @ 1.3.1
+  mcp-swift-sdk: https://github.com/modelcontextprotocol/swift-sdk.git @ 0.12.1
+  swift-collections: https://github.com/apple/swift-collections.git @ 1.7.2
+  xctest-dynamic-overlay: https://github.com/pointfreeco/xctest-dynamic-overlay @ 1.11.0
+  swift-clocks: https://github.com/pointfreeco/swift-clocks @ 1.1.0
+  swift-syntax: https://github.com/swiftlang/swift-syntax @ 602.0.0
+  SQLCipher: https://github.com/sqlcipher/SQLCipher.swift.git @ 4.18.0
+  EventSource: https://github.com/mattt/eventsource.git @ 1.5.1
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:x86_64, id:<device-udid>, name:My Mac }
+2026-10-14 07:56:58.706731-0600 Variorum[57114:59965455] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to <home>/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/io.lduarte.Variorum.debug.savedState
+2026-10-14 07:56:58.945378-0600 Variorum[57114:59965455] [global-hotkey] InstallEventHandler system=carbon status=0
+2026-10-14 07:56:58.945503-0600 Variorum[57114:59965455] [global-hotkey] RegisterEventHotKey system=carbon quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 07:56:59.222189-0600 Variorum[57114:59965550] [logging-persist] cannot open file at line 53009 of [8fa8248e30]
+2026-10-14 07:56:59.222227-0600 Variorum[57114:59965550] [logging-persist] os_unix.c:53009: (2) open(/private/var/db/DetachedSignatures) - No such file or directory
+2026-10-14 07:56:59.347511-0600 Variorum[57114:59965455] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 07:56:59.424505-0600 Variorum[57114:59965455] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 07:56:59.424818-0600 Variorum[57114:59965455] [sample-library] sample library (the adventures of sherlock holmes): alreadySeeded
+2026-10-14 07:56:59.424978-0600 Variorum[57114:59965455] [starred-gathering] starred gathering: alreadySeeded
+2026-10-14 07:56:59.425123-0600 Variorum[57114:59965455] [sample-library] welcome arrangement: alreadySettled
+Test Suite 'Selected tests' started at 2026-10-14 07:56:59.436.
+Test Suite 'VariorumTests.xctest' started at 2026-10-14 07:56:59.436.
+Test Suite 'VariorumTests.xctest' passed at 2026-10-14 07:56:59.436.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-14 07:56:59.437.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite "The decoration pass stays out of the edit transaction (13u3 ladder R1-1)" started.
+◇ Test theIndicatorRefreshNeverForcesLayoutInsideTheEditTransaction() started.
+✔ Test theIndicatorRefreshNeverForcesLayoutInsideTheEditTransaction() passed after 0.102 seconds.
+◇ Test aPlainCaretMoveStillRefreshesTheIndicatorSynchronously() started.
+✔ Test aPlainCaretMoveStillRefreshesTheIndicatorSynchronously() passed after 0.034 seconds.
+✔ Suite "The decoration pass stays out of the edit transaction (13u3 ladder R1-1)" passed after 0.137 seconds.
+◇ Suite "10k-word window smoke (Step 8)" started.
+◇ Test tenThousandWordPostStaysSnappyAndAnchored() started.
+✔ Test tenThousandWordPostStaysSnappyAndAnchored() passed after 0.730 seconds.
+◇ Test structuralGesturesOnTheTenThousandWordWindowedPost() started.
+Phase 9 Step 8(v): full gesture (divide op + full re-render + caret) on 10k words: 21.737417 ms
+✔ Test structuralGesturesOnTheTenThousandWordWindowedPost() passed after 0.515 seconds.
+◇ Test rewriteStrategyLatencies(paragraphs:) started.
+◇ Test case passing 1 argument paragraphs → 50 to rewriteStrategyLatencies(paragraphs:) started.
+Phase 9 Step 8(v) [10000w]: DIFFERENTIAL divide (op + seam edit + caret): 22.541792 ms
+Phase 9 Step 8(v) [10000w]: FULL W-confirm (op + full re-render + caret): 46.133958 ms
+​◇ Test case passing 1 argument paragraphs → 250 to rewriteStrategyLatencies(paragraphs:) started.
+Phase 9 Step 8(v) [50000w]: DIFFERENTIAL divide (op + seam edit + caret): 26.897917 ms
+Phase 9 Step 8(v) [50000w]: FULL W-confirm (op + full re-render + caret): 178.2085 ms
+​✔ Test rewriteStrategyLatencies(paragraphs:) with 2 test cases passed after 1.507 seconds.
+✔ Suite "10k-word window smoke (Step 8)" passed after 2.753 seconds.
+◇ Suite "The editing ring respects the gutter (13u4 UNIT S3, row 63)" started.
+◇ Test theRingStopsAtTheCalloutGlyphItUsedToCrossBy4Points() started.
+✔ Test theRingStopsAtTheCalloutGlyphItUsedToCrossBy4Points() passed after 0.001 seconds.
+◇ Test theRingStopsAtTheCommentBadgeToo() started.
+✔ Test theRingStopsAtTheCommentBadgeToo() passed after 0.001 seconds.
+◇ Test aMarginCardNeverMovesTheRing() started.
+✔ Test aMarginCardNeverMovesTheRing() passed after 0.001 seconds.
+◇ Test anEmptyGutterLeavesTheShippedRectByteIdentical() started.
+✔ Test anEmptyGutterLeavesTheShippedRectByteIdentical() passed after 0.001 seconds.
+◇ Test theRingOnlyEverYieldsAndNeverReachesTheProse() started.
+✔ Test theRingOnlyEverYieldsAndNeverReachesTheProse() passed after 0.001 seconds.
+◇ Test inlineCommentsLeaveTheGutterEmpty() started.
+✔ Test inlineCommentsLeaveTheGutterEmpty() passed after 0.001 seconds.
+◇ Test theBlockHighlightTakesTheSameGutterEdge() started.
+✔ Test theBlockHighlightTakesTheSameGutterEdge() passed after 0.001 seconds.
+◇ Test theGutterDecisionIsOneRuleWithThreeAnswers() started.
+✔ Test theGutterDecisionIsOneRuleWithThreeAnswers() passed after 0.001 seconds.
+✔ Suite "The editing ring respects the gutter (13u4 UNIT S3, row 63)" passed after 0.001 seconds.
+◇ Suite "Inline editor in a window (Phase 10 round 1)" started.
+◇ Test inlineBadgesCoverTheWholePostNotJustTheClippedViewport() started.
+✔ Test inlineBadgesCoverTheWholePostNotJustTheClippedViewport() passed after 0.263 seconds.
+◇ Test inlineHeightMaintenanceStaysInsideTheFrameBudgetAtTenThousandWords() started.
+Phase 10 round 1 [10k words]: warm inline remeasure 0.11630903333333334 ms
+Phase 10 round 1 [10k words]: inline keystroke + remeasure 4.574838883333333 ms
+✔ Test inlineHeightMaintenanceStaysInsideTheFrameBudgetAtTenThousandWords() passed after 0.551 seconds.
+◇ Test inlineBadgesTrackAWidthReflow() started.
+✔ Test inlineBadgesTrackAWidthReflow() passed after 0.082 seconds.
+✔ Suite "Inline editor in a window (Phase 10 round 1)" passed after 0.898 seconds.
+◇ Suite "Inline editor height report (18k C2)" started.
+◇ Test theFirstHeightArrivesOnTheTurnAfterTheMountNeverInsideIt() started.
+✔ Test theFirstHeightArrivesOnTheTurnAfterTheMountNeverInsideIt() passed after 0.182 seconds.
+◇ Test anUpdatePassReportsOnTheTurnAfterItNeverInsideIt() started.
+✔ Test anUpdatePassReportsOnTheTurnAfterItNeverInsideIt() passed after 0.219 seconds.
+◇ Test aReflowsLateSettleIsReportedToo() started.
+[18l U0 settle] at 420: reports [18713.0, 19344.0] · frame 19344.0 · settled 19344.0 · fresh 19344.0
+[18l U0 settle] at 700: reports [11168.0, 10929.0] · frame 10929.0 · settled 10929.0 · fresh 10929.0
+[18l U0 settle] at 520: reports [14844.0, 14718.0927062269] · frame 14718.0927062269 · settled 14718.0927062269 · fresh 14380.0
+✔ Test aReflowsLateSettleIsReportedToo() passed after 0.468 seconds.
+◇ Test aBurstOfEditsAndUpdatesInOneTurnReportsOnce() started.
+✔ Test aBurstOfEditsAndUpdatesInOneTurnReportsOnce() passed after 0.252 seconds.
+◇ Test aFreshlyMountedLongNoteReachesItsMeasuredHeight() started.
+✔ Test aFreshlyMountedLongNoteReachesItsMeasuredHeight() passed after 0.695 seconds.
+✔ Suite "Inline editor height report (18k C2)" passed after 1.818 seconds.
+◇ Suite "BlockDecor geometry (Phase 13 C1)" started.
+◇ Test seamsSitMidGapBetweenConsecutiveBlocksOnly() started.
+✔ Test seamsSitMidGapBetweenConsecutiveBlocksOnly() passed after 0.001 seconds.
+◇ Test theWhiteGapRuleCapsCalloutPadding() started.
+✔ Test theWhiteGapRuleCapsCalloutPadding() passed after 0.001 seconds.
+◇ Test adjacentCalloutsAlwaysKeepBreathingRoom() started.
+✔ Test adjacentCalloutsAlwaysKeepBreathingRoom() passed after 0.001 seconds.
+◇ Test theIndicatorRectWearsTheOutlineOffset() started.
+✔ Test theIndicatorRectWearsTheOutlineOffset() passed after 0.001 seconds.
+◇ Test dropBoundariesMapDragYsToEntryIndexes() started.
+✔ Test dropBoundariesMapDragYsToEntryIndexes() passed after 0.001 seconds.
+◇ Test narrowGuttersDegradeCardsToBadges() started.
+✔ Test narrowGuttersDegradeCardsToBadges() passed after 0.001 seconds.
+◇ Test aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane() started.
+✔ Test aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane() passed after 0.001 seconds.
+◇ Test aQuietCommentCardIsClickThrough() started.
+✔ Test aQuietCommentCardIsClickThrough() passed after 0.001 seconds.
+✔ Suite "BlockDecor geometry (Phase 13 C1)" passed after 0.001 seconds.
+◇ Suite "The prose gutter — the one law (13u3 UNIT A1)" started.
+◇ Test theProseColumnIsAPureFunctionOfTheSurfacesWidth() started.
+✔ Test theProseColumnIsAPureFunctionOfTheSurfacesWidth() passed after 0.002 seconds.
+◇ Test theGutterMovesOnlyWithTheSurfacesOwnWidth() started.
+✔ Test theGutterMovesOnlyWithTheSurfacesOwnWidth() passed after 0.001 seconds.
+◇ Test everyTextSurfaceCarriesTheOneGutterRule() started.
+✔ Test everyTextSurfaceCarriesTheOneGutterRule() passed after 0.001 seconds.
+◇ Test theTwoContainedSurfacesPlaceTheirProseIdentically() started.
+✔ Test theTwoContainedSurfacesPlaceTheirProseIdentically() passed after 0.001 seconds.
+◇ Test aGutteredSurfaceStaysOnTextKit2() started.
+✔ Test aGutteredSurfaceStaysOnTextKit2() passed after 0.007 seconds.
+◇ Test noDecorationMovesTheProseColumnOnAnySurface() started.
+✔ Test noDecorationMovesTheProseColumnOnAnySurface() passed after 0.012 seconds.
+◇ Test theReadTiersProseIsUnmovedByACommentThroughTheProductionLoop() started.
+✔ Test theReadTiersProseIsUnmovedByACommentThroughTheProductionLoop() passed after 0.039 seconds.
+◇ Test theContainedEditorsProseIsUnmovedByACommentThroughTheProductionLoop() started.
+✔ Test theContainedEditorsProseIsUnmovedByACommentThroughTheProductionLoop() passed after 0.033 seconds.
+◇ Test theCalloutWashHugsTheProseColumn() started.
+✔ Test theCalloutWashHugsTheProseColumn() passed after 0.001 seconds.
+◇ Test theGlyphSitsInTheGutterAndYieldsWhereThereIsNone() started.
+✔ Test theGlyphSitsInTheGutterAndYieldsWhereThereIsNone() passed after 0.001 seconds.
+◇ Test theStackPutsTheGlyphFirstAndTheCommentFaceUnderIt() started.
+✔ Test theStackPutsTheGlyphFirstAndTheCommentFaceUnderIt() passed after 0.001 seconds.
+◇ Test theBadgeNeverStandsOnProse() started.
+✔ Test theBadgeNeverStandsOnProse() passed after 0.001 seconds.
+◇ Test twoCommentedBlocksCardsNeverAbut() started.
+✔ Test twoCommentedBlocksCardsNeverAbut() passed after 0.001 seconds.
+◇ Test theCardGrowsToTheBlocksOwnHeightWithinTheRhythm() started.
+✔ Test theCardGrowsToTheBlocksOwnHeightWithinTheRhythm() passed after 0.001 seconds.
+◇ Test nothingInTheGutterEverCoversProse() started.
+✔ Test nothingInTheGutterEverCoversProse() passed after 0.022 seconds.
+◇ Test aLeadingGlyphIsExactlyOneGrapheme() started.
+✔ Test aLeadingGlyphIsExactlyOneGrapheme() passed after 0.001 seconds.
+✔ Suite "The prose gutter — the one law (13u3 UNIT A1)" passed after 0.122 seconds.
+◇ Suite "Read tier (Phase 10 Step 2)" started.
+◇ Test projectionFidelityJoinsBlocksWithTheEditorSeparator() started.
+✔ Test projectionFidelityJoinsBlocksWithTheEditorSeparator() passed after 0.029 seconds.
+◇ Test blankTakesRenderAsEmptySlotsAndGapsAsGapsNeverCrash() started.
+✔ Test blankTakesRenderAsEmptySlotsAndGapsAsGapsNeverCrash() passed after 0.020 seconds.
+◇ Test badgesAppearExactlyOnFannedBlocks() started.
+✔ Test badgesAppearExactlyOnFannedBlocks() passed after 0.020 seconds.
+◇ Test selectionSurvivesADifferentialProjectionRefresh() started.
+✔ Test selectionSurvivesADifferentialProjectionRefresh() passed after 0.035 seconds.
+◇ Test aOneSlotChangeCostsThatSlotNeverTheDocument() started.
+✔ Test aOneSlotChangeCostsThatSlotNeverTheDocument() passed after 0.108 seconds.
+◇ Test aSequenceChangeReRendersFully() started.
+✔ Test aSequenceChangeReRendersFully() passed after 0.032 seconds.
+◇ Test aDetachReattachCycleRendersTheFreshSurface() started.
+✔ Test aDetachReattachCycleRendersTheFreshSurface() passed after 0.029 seconds.
+◇ Test aRemadeReadSurfaceStillRendersDecorAndBadges() started.
+✔ Test aRemadeReadSurfaceStillRendersDecorAndBadges() passed after 0.050 seconds.
+◇ Test aPlainClickReportsItsOffsetWhileASelectionDoesNot() started.
+✔ Test aPlainClickReportsItsOffsetWhileASelectionDoesNot() passed after 0.030 seconds.
+✔ Suite "Read tier (Phase 10 Step 2)" passed after 0.358 seconds.
+◇ Suite "A re-font at a paragraph-gap top keeps HER line at the top (18k C6b — W-4)" started.
+◇ Test theCaptureAtAGapTopNamesHerLine(_:) started.
+◇ Test case passing 1 argument zone → belowThePreviousBaseline to theCaptureAtAGapTopNamesHerLine(_:) started.
+​◇ Test case passing 1 argument zone → belowTheParagraph to theCaptureAtAGapTopNamesHerLine(_:) started.
+​◇ Test case passing 1 argument zone → onTheBlankLine to theCaptureAtAGapTopNamesHerLine(_:) started.
+​◇ Test case passing 1 argument zone → belowTheBlankLine to theCaptureAtAGapTopNamesHerLine(_:) started.
+​✔ Test theCaptureAtAGapTopNamesHerLine(_:) with 4 test cases passed after 6.020 seconds.
+◇ Test aGapTopRefontKeepsHerLineAtTheTop(_:) started.
+◇ Test case passing 1 argument zone → belowThePreviousBaseline to aGapTopRefontKeepsHerLineAtTheTop(_:) started.
+​◇ Test case passing 1 argument zone → belowTheParagraph to aGapTopRefontKeepsHerLineAtTheTop(_:) started.
+​◇ Test case passing 1 argument zone → onTheBlankLine to aGapTopRefontKeepsHerLineAtTheTop(_:) started.
+​◇ Test case passing 1 argument zone → belowTheBlankLine to aGapTopRefontKeepsHerLineAtTheTop(_:) started.
+​✔ Test aGapTopRefontKeepsHerLineAtTheTop(_:) with 4 test cases passed after 8.306 seconds.
+◇ Test aTypedNotesGapTopKeepsHerLineAtTheTop() started.
+✔ Test aTypedNotesGapTopKeepsHerLineAtTheTop() passed after 2.050 seconds.
+◇ Test aLineStraddlingTheEdgeStaysTheAnchor() started.
+✔ Test aLineStraddlingTheEdgeStaysTheAnchor() passed after 1.790 seconds.
+✔ Suite "A re-font at a paragraph-gap top keeps HER line at the top (18k C6b — W-4)" passed after 18.169 seconds.
+◇ Suite "A re-font keeps her reading position (13u4 UNIT F2 — row 53)" started.
+◇ Test aShrinkingRefontKeepsTheLineAtTheViewportTop() started.
+✔ Test aShrinkingRefontKeepsTheLineAtTheViewportTop() passed after 1.168 seconds.
+◇ Test herFixtureGestureLeavesThePageDrawn() started.
+✔ Test herFixtureGestureLeavesThePageDrawn() passed after 1.424 seconds.
+◇ Test aRefontNeverMovesTheCaret() started.
+✔ Test aRefontNeverMovesTheCaret() passed after 1.169 seconds.
+◇ Test aGrowingRefontKeepsTheLineAtTheViewportTopToo() started.
+✔ Test aGrowingRefontKeepsTheLineAtTheViewportTopToo() passed after 1.199 seconds.
+◇ Test aVoiceSwitchKeepsHerPlaceInBothDirections() started.
+✔ Test aVoiceSwitchKeepsHerPlaceInBothDirections() passed after 1.471 seconds.
+◇ Test aColourOnlyChangeMovesNothing() started.
+✔ Test aColourOnlyChangeMovesNothing() passed after 1.111 seconds.
+✔ Suite "A re-font keeps her reading position (13u4 UNIT F2 — row 53)" passed after 7.547 seconds.
+◇ Suite "Write keeps the lines above a tail ⏎ still on a floating viewport (18l-b U-B5 — KnownIssues row 88)" started.
+◇ Test aTailReturnOnAFloatingViewportLeavesTheLinesAboveItStill(_:) started.
+◇ Test case passing 1 argument voice → .study to aTailReturnOnAFloatingViewportLeavesTheLinesAboveItStill(_:) started.
+​◇ Test case passing 1 argument voice → .terminal to aTailReturnOnAFloatingViewportLeavesTheLinesAboveItStill(_:) started.
+​✔ Test aTailReturnOnAFloatingViewportLeavesTheLinesAboveItStill(_:) with 2 test cases passed after 5.349 seconds.
+✔ Suite "Write keeps the lines above a tail ⏎ still on a floating viewport (18l-b U-B5 — KnownIssues row 88)" passed after 5.349 seconds.
+◇ Suite "The differential road's keeper holds only untouched lines that moved (18l-b U-B5)" started.
+◇ Test theRuleIsTheLinesStartBeforeTheEditAndItsScreenPlace() started.
+✔ Test theRuleIsTheLinesStartBeforeTheEditAndItsScreenPlace() passed after 0.002 seconds.
+◇ Test theKeeperRunsExactlyWhereTextKitMovedTheLine(_:) started.
+◇ Test case passing 1 argument carve → true to theKeeperRunsExactlyWhereTextKitMovedTheLine(_:) started.
+​◇ Test case passing 1 argument carve → false to theKeeperRunsExactlyWhereTextKitMovedTheLine(_:) started.
+​✔ Test theKeeperRunsExactlyWhereTextKitMovedTheLine(_:) with 2 test cases passed after 4.747 seconds.
+◇ Test anActThatWritesAboveTheReadingLineKeepsItsOwnMovement() started.
+✔ Test anActThatWritesAboveTheReadingLineKeepsItsOwnMovement() passed after 0.997 seconds.
+✔ Suite "The differential road's keeper holds only untouched lines that moved (18l-b U-B5)" passed after 5.748 seconds.
+✔ Test run with 68 tests in 12 suites passed after 42.909 seconds.
+2026-10-14 07:57:42.722 xcodebuild[57106:59965045] [MT] IDETestOperationsObserverDebug: 44.771 elapsed -- Testing started completed.
+2026-10-14 07:57:42.722 xcodebuild[57106:59965045] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 07:57:42.722 xcodebuild[57106:59965045] [MT] IDETestOperationsObserverDebug: 44.771 sec, +44.771 sec -- end
+
+Test session results, code coverage, and logs:
+	<home>/dev/variorum-vx-282/App/Variorum/DerivedData/vx282-u1/Logs/Test/Test-Variorum-2026.10.14_07-56-57--0600.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started
