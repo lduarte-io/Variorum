@@ -3303,12 +3303,12 @@ origin/main` as a merge commit ("Merge origin/main (VX-281) into VX-246 … Part
 
 ## U4c UNIT RECORD — the inline editor's badge regression: VX-230 (opus-implementer, from 2026-10-14 ~05:35 MDT)
 
-**Not done yet (first line, kept current):** the trace is MEASURED and it overturns the brief's premise: there is NO
-product regression to fix (the finding below), so NO product line changes. Not yet done: the regressed pin's harness
-correction (piece 1), its build, the headless finals, THE STAGE WINDOW plan; no stage window has run; no QUESTIONS
-entry, canon edit or ticket (the orchestrator's). Zero `Sync/`, custody, Keychain, schema, `Server/`,
-`BlockRangeIndex`, `PaneSurface`, `runStructural`, VX-281's lane; in `EditorView.swift`, nothing near vx-282's two
-touches (the fan-panel sheet near line 186, `textViewDidChangeSelection` near line 858).
+**Not done (first line, kept current; the state at READY, 2026-10-14 ~06:15 MDT):** NO product line changed — the trace
+(measured) found no product defect, so there is no fix; the work is the regressed pin's HARNESS (corrected) and one
+in-use pin. Nothing has run on a Mac (both pins are Mac pins: W1 and W2 below); no stage window has run (READY, the
+stage NOT claimed); no walk; no QUESTIONS entry, canon edit or ticket (the orchestrator's). Zero `Sync/`, custody,
+Keychain, schema, `Server/`, `BlockRangeIndex`, `PaneSurface`, `runStructural`, VX-281's lane — and zero product files:
+`EditorView.swift` and `EditorViewModel.swift` are untouched (vx-282's two touches with them).
 
 **Read in full before code (never delegated):** CLAUDE.md and its loaded canon; this record's header, THE UNITS, the hard
 rules, LIVE STATUS, Cross-run coordination; the U4c BRIEF; the U4 UNIT RECORD's traces; U4 STAGE RUN's trace; the U4b
@@ -3329,8 +3329,8 @@ doors, `overlayLayoutDidSettle`, `refreshBadges` (U4b's), `refreshDecorations`' 
 | 1 | the pins: the regressed pin's HARNESS corrected (it waits as the app runs; the in-use road folded in; the badge asserted at its own laid line) + the transient arm (a fan adopted mid-reflow) | DONE (this commit) — `InlineEditorWindowTests.inlineBadgesCoverTheWholePostNotJustTheClippedViewport` (after `remeasure(); pump()`, `await settle(window)` — 24 turns of display + `Task.yield` + 5 ms — so the width door's queued remeasure lands; then block 40 fanned by `branchVariant` (her panel's op) AND block 45 by `Operations.addTake` (the MCP door's op), adopted through `applyProjection(_, fromDelivery: true)` (the observation's road → `.adoptEcho`) with NO explicit refresh and NO wait; both badged at once, each at its own LAID line, outside the clip; the transient's state printed for the window's log, `VX-230 U4c [after pump(), no hop run]`); NEW `FanBadgePlacementTests.aFanAddedFarOffScreenMidReflowIsBadgedByTheQueuedRemeasure` (a client's take on block 100 adopted in the SAME turn as a width change 700 → 420: no badge at the adoption — premise: the fragment unlaid — then, with nothing more from her, the already-queued remeasure lays the post out and the badge stands at its own line, outside the clip, `expectEveryBadgeHome`). Compiled in `vx246-u4c` (piece 4); no warning in a touched line (the one at `InlineEditorWindowTests.swift:48` is `makeInlineWindow`'s pre-existing forced cast, in U4b's log too) |
 | 2 | a RED product | NOT APPLICABLE — no product fix, so no red-first product: the OLD pin's red on `vx246-u4b` is U4b STAGE RUN W2's (reproduced alone, `:78`/`:80`), and the trace explains it (piece 0). The new transient arm's old-tree red (the origin badge before U4; a poisoned place never re-read after the heal on U4) is by trace only, NOT run (no product carries it with their code) — said in its doc |
 | 3 | the fix | NONE — **DISMISSED AS HOLLOW** as a product defect (piece 0's trace): the inline post is laid in the steady state and a no-text-change fan is badged at once; in a transient the already-queued remeasure re-runs the pass. Zero product lines |
-| 4 | the product `DerivedData/vx246-u4c` + the headless finals | IN-PROGRESS — **the product BUILT:** an APFS clone of `vx246-u4b`, `build-for-testing` → `** TEST BUILD SUCCEEDED **`, EXIT 0 (`u4c/logs/mac-build-for-testing.log`); **its app code IS U4b's, by symbol:** `EditorViewModel.refreshBadges()` 3,696 bytes and `WorkspaceModel.select(_:in:takingFocus:)` 1,652 in both `vx246-u4b` and `vx246-u4c` (`git diff --name-only cd843647..HEAD -- Sources App` was EMPTY before this commit; this commit touches two test files only). The headless finals PENDING. **A machinery note:** the clone's build removed the XCFramework copies (`Sparkle.framework`, `SQLCipher.framework`, their dSYMs, three xpc/app dSYMs) and the VFS `all-product-headers.yaml` from the SOURCE product's `Build/Products/Debug` — the same in every product this run cloned from (`vx246-u1` … `vx246-u4b-red`); each app bundle keeps its embedded frameworks, and those products ran their windows after it (W1a on `vx246-u4b-red`), so it is harmless to `test-without-building` |
-| 5 | THE STAGE WINDOW plan (claim `vx246-u4c`) → READY | NOT-STARTED |
+| 4 | the product `DerivedData/vx246-u4c` + the headless finals | DONE — **the product BUILT:** an APFS clone of `vx246-u4b`, `build-for-testing` → `** TEST BUILD SUCCEEDED **`, EXIT 0 (`u4c/logs/mac-build-for-testing.log`); **its app code IS U4b's, by symbol:** `EditorViewModel.refreshBadges()` 3,696 bytes and `WorkspaceModel.select(_:in:takingFocus:)` 1,652 in both `vx246-u4b` and `vx246-u4c` (`git diff --name-only cd843647..HEAD -- Sources App` was EMPTY before this commit; this commit touches two test files only). **Headless, `swift build --build-tests` then `swift test --skip-build` on `885f9d8e`'s tree, EXIT 0: `VariorumMCPTests` 236 / 49 · `VariorumCoreTests` 2,826 / 326 · `StringsWorkbookTests` 40 / 6**, zero ✘, the skip set the standing gated nine — identical to U4b's finals (no core line moved; `u4c/logs/p4-finals.log`). **A machinery note:** the clone's build removed the XCFramework copies (`Sparkle.framework`, `SQLCipher.framework`, their dSYMs, three xpc/app dSYMs) and the VFS `all-product-headers.yaml` from the SOURCE product's `Build/Products/Debug` — the same in every product this run cloned from (`vx246-u1` … `vx246-u4b-red`); each app bundle keeps its embedded frameworks, and those products ran their windows after it (W1a on `vx246-u4b-red`), so it is harmless to `test-without-building` |
+| 5 | THE STAGE WINDOW plan (claim `vx246-u4c`) → READY | DONE (this commit) — **READY for stage**; the stage NOT claimed. The scripts `u4c/run-w1.sh` (the two pins alone) and `u4c/run-w2-batch.sh` (`u4c/stage-suites.txt`, 13 suites, every name a declared type) parse (`zsh -n`); the fixture generator copied to `u4c/gen_fixture.py`. THE STAGE WINDOW below |
 
 **No revert is in flight.**
 
@@ -3390,3 +3390,136 @@ green as written, and it would put the badge at a guessed or poisoned place. The
 (piece 1): the harness waits as the app runs (the hops land), the in-use road is folded in (a fan through the MCP's
 `addTake`, delivered on the observation's road), and the badge is asserted at its own laid line, which the old pin
 never checked.
+
+### THE STAGE WINDOW — the plan (runs ONLY on the orchestrator's GO, under the exact claim line it relays — expected `vx246-u4c`)
+
+**Built (rebuild ONLY if `git diff --name-only 885f9d8e..HEAD -- Sources App` is non-empty; record-only commits since):**
+`App/Variorum/DerivedData/vx246-u4c` — `885f9d8e`'s tree: U4b's app code exactly (verified by symbol, piece 4) + the two
+pins. No red product exists (no fix); the OLD pin's red on `vx246-u4b` is U4b STAGE RUN W2's, reproduced alone there.
+
+**Estimate ~35 min of work → claim 45** (A1 + prefs ~3 · W1 ~2 · W2 ~6 · the fixture import ~4 · W3 ~14 for both
+voices · cleanup ~6). **Batch-only fallback (~15 min, claim 20):** steps 0–1, W1, W2, cleanup; the walk moves to the
+next window.
+
+0. **Guards, every step** (U4b STAGE RUN's, verbatim in force): `Tools/stage status` shows the claim held — never inside
+   an `&&` chain (it exits 1 under a held claim); `Tools/WalkKit/guard.sh --author` (her `/Applications/Variorum.app`
+   ABSENT; present ⇒ STOP and report, never quit or kill it); app instances checked with `pgrep -lx Variorum` (a
+   sibling's headless build matches the `-f` form); every GUI act through `click.sh` / `keys.sh`, synthetic events ≥ 2.6 s
+   apart; an undismissable system popup reported word for word and the window paused.
+1. **A1 prestage + prefs, FIRST** (the test host is the dev-store app): every dev-store file and the key files copied to
+   `…/Variorum-dev/Backups/safety-copies/scale-prestage-<ts>/`, each `cmp`-verified, sha256 recorded
+   (`u4c/store-hash-pre.txt`); `defaults export io.lduarte.Variorum.debug u4c/prefs-pre.plist`; the dev `Backups/`
+   listing saved. No MCP leg runs, so her user-scope servers are not touched (fingerprint not needed; read it anyway if
+   cheap, names + a sha256 prefix only — U4b's `bc64543e2f4e8e58`).
+2. **W1 — the two pins alone (~2 min):** `zsh notes/plans/vx246-screens/u4c/run-w1.sh`, foreground; log `u4c/logs/w1.log`.
+   **Expected: 2 tests GREEN**, and the decisive line printed by the host:
+   `VX-230 U4c [after pump(), no hop run]: block 40 laid out = false` — the bare rig's transient (probe 12 §I) confirmed
+   in the real host. **Read as found:**
+   - the line reads `true` ⇒ the host lays block 40 out inside `pump()`, so the trace's item 2 is wrong in the host:
+     record it, and re-trace before any claim (the pin's green stands as the in-use evidence either way);
+   - a red on a `premise:` line or a `#require` (the mid-reflow pin's "the width change left the far block's fragment
+     unlaid", the steady-state premise) is a harness defect, not evidence: record it, nothing fixed under the claim;
+   - any other red is a FOUND product defect on the in-use road: re-run it ALONE once, then record it with its message
+     (no fix under the claim).
+3. **W2 — the inline-editor and badge family (~6 min):** `zsh notes/plans/vx246-screens/u4c/run-w2-batch.sh` (13 suites,
+   `u4c/stage-suites.txt`), detached to its log and POLLED in the foreground (`grep -q 'XCODEBUILD EXIT' …; sleep 5`).
+   Read the summary, every `✘`, the `skipped:` lines. **Expected: all green** — `InlineEditorWindowTests` 3/3 (the budget
+   pin's "inline keystroke + remeasure" line read and recorded), `FanBadgePlacementTests` 7/7, the rest as at U4b's W2.
+   A red not designed: re-run it ALONE once (`"-only-testing:VariorumTests/<Suite>/<test>()"`); green alone and in a named
+   load-flake class ⇒ recorded as that; reproduces alone ⇒ a real red, reported with its message (no fix under the claim).
+   VX-167's `redoNeverAsks` is not in this set.
+4. **THE FIXTURE (~4 min, her own Import door):** `python3 notes/plans/vx246-screens/u4c/gen_fixture.py
+   notes/plans/vx246-screens/u4c/fixture`, then the fixed app `open -n DerivedData/vx246-u4c/Build/Products/Debug/Variorum.app`
+   (window 1380 wide; a What's New sheet closed by its own button; a lock screen unlocked from `~/.variorum/dev-castle.env`
+   and the posture restored before release) → File ▸ Import… → ⇧⌘G to the fixture → select ONLY the `vx230-book` folder →
+   Import (pressed by AX if a pointer click does not land — U4b's lesson) → the receipt "Imported 1 book…" captured once.
+   The book: two chapters × two notes × 70 blocks, every block fanned (⑂2) but each fifth (5, 10, …, 70 single-take).
+5. **W3 — THE WALK, Study then Terminal (~7 min each):** one region capture per row into
+   `notes/plans/vx246-screens/u4c/w3/<voice>/`, crops of the badge column. **The road (her own door, ⌘T "New Take
+   (Branch)", `EditorViewModel.mintCaretTake(blank: false)` — the caret block, no text change → `.adoptEcho`):**
+   - **(a) mount + caret:** ⌘K ▸ "vx230-book" → Outline → **expand all** → click into block 2 of "vx230 book opening"
+     (the live inline editor, "editing") → `walk-scroll` down in guarded steps (9 per step) until blocks ~38–42 stand in
+     view → click into the TEXT of **block 40** (Study; **block 45** in Terminal — 40 is fanned by then) — the indicator
+     reads "block 40/70" (45) → capture: block 40 BARE (single take), its fanned neighbours each ⑂2 at their own lines.
+   - **(b) the fan lands far off-screen:** `walk-scroll` back UP the same number of steps to the note's top (block 40 far
+     below the view; the caret stays in it) → ⌘T through `keys.sh` → capture: the receipt ("New take added on this block —
+     ⌘⇧T shows the takes.", or its quiet bottom-bar line), the top unchanged (blocks 1–4 ⑂2 at their lines, 5 bare), NO
+     stray ⑂ and no disc at block 1's place. If ⌘T refuses or does nothing on this surface: the menu bar's "New Take
+     (Branch)" by AX — recorded as the road taken.
+   - **(c) scrolled to:** `walk-scroll` down the same steps → capture: **block 40 (45) wears ⑂2 AT ITS OWN FIRST LINE**,
+     its neighbours at theirs, no two ⑂ at one place, the single-take blocks around it bare.
+   - **The voice switch, between halves:** Settings ▸ General ▸ Theme ▸ Terminal (pressed by AX), Settings closed by its
+     own button.
+6. **CLEANUP (~6 min):** the Debug app quit BY BUNDLE ID (`pgrep -lx Variorum` empty); prefs: `defaults import`
+   `u4c/prefs-pre.plist`, `defaults delete` every key the window added, re-export, diff until 0 keys differ; the store:
+   `Tools/ScaleFixture/restore.sh <the prestage dir>` → "Restored (verified)" + a second `cmp`, the sha256 set equal to the
+   pre-window hashes — the posture handed over (Standard, unlocked, Study voice); no new backup from the launch (the
+   `Backups/` listing diffed); the fixture folder deleted (the generator stays); no stray `default.profraw`;
+   **`Tools/stage release --who vx246-u4c`** at once; ONE result line: the claim times, W1 (both green + the decisive
+   line), W2's totals, W3's verdicts per voice, the posture.
+
+### SELF-ASSESSMENT (pre-stage — the implementer's)
+
+- **Confident:**
+  - **The mechanism is measured, and it is two facts, each by its own probe.** Probe 11: a run loop nested in a
+    main-actor job runs no main-queue hop (an `await` does). Probe 12 §I: in the pin's real order, block 40 is
+    `estimated` at the read (a guess, ~350 pt off its settled line), and the queued hop would have laid it out. Probe 13
+    repeats both at 400 blocks.
+  - **The in-use claim is measured too** (probe 12 §II, probe 13 §II): in the steady state every fragment of the inline
+    post is laid out and stays laid through display passes and host scrolls. Fragments leave that state only on the two
+    doors that queue the coordinator's remeasure, whose walk U4b's call follows with the badge pass.
+  - **No product line moved**, so nothing can regress the U4b window's walk or batch. The product's app code is U4b's by
+    symbol, and the headless finals are identical.
+- **Less sure, said plainly:**
+  - (1) The probes are a bare rig: the system 14-pt monospace and an off-display borderless window, not the test host's
+    titled window, the app's attribute set or its overlays. W1's printed line is the host's confirmation of the
+    decisive number; if it reads `true`, the trace's item 2 is wrong in the host and W1's record says so.
+  - (2) The corrected pin's `settle` is a fixed 24 turns (the FanBadgePlacement idiom). The hops it waits for need two or
+    three turns, plus the heal's display pass.
+  - (3) The mid-reflow pin's old-tree red is argued, not run: no product carries it with older code. Its premise (the far
+    fragment unlaid right after a width change) is U4's fact 1, already green in this host
+    (`textKitReportsAnUnlaidFragmentAsZeroAndAZeroRectIntersects`).
+  - (4) The heal's edge trigger (a display pass that moves fragments without moving the last one's bottom re-runs
+    nothing) is U4b's design, unchanged here; the mid-reflow pin has the same shape as U4b's green width pin.
+- **The judgement this unit makes, for the orchestrator to accept or overturn:** it corrects a pre-existing pin rather than
+  the product. The case: the old pin's red is a harness-order read of a transient the app never idles in, and its old
+  green was a badge off its line. Making it green as written needs a synchronous lay-out inside `refreshBadges` (the
+  brief bans the forced read), which would put the badge at a guessed or poisoned place, against VX-230's own rule. The
+  corrected pin is STRONGER (the line, two roads, no explicit refresh, no wait after the adoption).
+- **Editor-seam letter:** no editor-seam line changed (test files only). TK1 untouched. vx-282's two `EditorView.swift`
+  touches untouched.
+- **MOBILE PARITY:** nothing mobile-visible.
+
+### PROVISIONALs (with their options — the orchestrator files them at the merge)
+
+**None.** No product behavior was decided: the corrected pin asserts U4/U4b's accepted contract (an unlaid fragment is no
+position; the inline region is the whole post), and the mid-reflow pin asserts the same.
+
+### FOR VX-234 (user-facing words, as built)
+
+Nothing. No word changed.
+
+### OWED (for the orchestrator)
+
+1. **The U4b STAGE RUN trace's "what it would mean in use" paragraph is FALSE** (piece 0, item 4): a no-text-change fan
+   is badged at once in the steady state, and in a transient by the already-queued hop. It must not reach the handoff,
+   the ticket or canon as a known gap.
+2. **TEXTKIT2_NOTES — a PROPOSED harness fact** (canon is the orchestrator's at the closeout), beside §3's existing
+   "HARNESS fact (the walk/test families)" bullet: *"HARNESS fact (VX-246 U4c, 2026-10-14; probe-verified): Swift Testing
+   runs a `@MainActor` test's body as a main-actor job, inside a main dispatch queue callback, and a run loop nested there
+   (`RunLoop.main.run(until:)`) services display passes and timers but runs NO `DispatchQueue.main.async` block; an
+   `await` (one `Task.yield()`) does. A pin that pumps the run loop and expects a queued hop (a remeasure, an overlay
+   settle, the settle net's heal) to have run is reading the transient before it."* And one TK2 fact for U4b's proposed
+   §3 finding: *"after a width change returns every fragment to `.none`, a display pass lays out only the viewport and
+   ESTIMATES the rest (a guessed frame, ~350 pt off on 50 paragraphs)."*
+3. **A sweep candidate (not this unit's):** other Mac pins may pump with `RunLoop.main.run` inside a main-actor body and
+   expect a queued hop to have run. A pin like that can be hollow or flaky in the way this one was. Worth a ticket only if
+   the orchestrator wants the audit.
+4. **VX-327 (the decoration sibling) gains one fact:** the inline post is fully laid in the steady state (probe 12 §II),
+   so the decor pass's `.zero` reads on the inline surface can occur only in the two transients — the probe should drive
+   one.
+5. **The machinery note** (piece 4): an APFS-cloned product's first build removes the SOURCE product's XCFramework copies
+   from its `Build/Products/Debug`. Harmless to `test-without-building` (the app bundle embeds them), but a reason never to
+   clone FROM a product a pending window still needs, without checking afterwards.
+6. **The Fable cold review** covers U4b's `refreshBadges` and `remeasure` call; this unit adds only the two pins and this
+   trace for it to weigh.
