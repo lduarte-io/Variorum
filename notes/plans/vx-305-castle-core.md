@@ -542,7 +542,8 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   - (c) key file format 3 (wraps, history, the Castle anchor, the master's words copy, the four crossings) — DONE
     (this commit; 17 tests green, filtered run).
   - (d) the legacy readers (formats 1 and 2, the legacy mode reader, the old marker's read and clearing check, today's
-    item names and values) — NOT-STARTED.
+    item names and values) — DONE (this commit; 9 tests green, filtered run — the mode reader checked against a verbatim
+    transcription of today's `Posture.derive` over the whole 360-point input space).
   - (e) `ProtectionGuards` for U1's guards + the secret / marker scans — NOT-STARTED.
   - (f) the record (§8), both configurations' runs — NOT-STARTED.
 - U2 — assess, roads, route finder, catalog, retention: **NOT-STARTED.**
