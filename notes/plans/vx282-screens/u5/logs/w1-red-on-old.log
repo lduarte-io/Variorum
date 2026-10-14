@@ -1,0 +1,266 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -xctestrun DerivedData/vx282-u5-old-products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination platform=macOS "-only-testing:VariorumTests/CommentPanelHostSuites" "-only-testing:VariorumTests/CommentPanelLeaveTests" "-only-testing:VariorumTests/CommentPanelParkTests"
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64e, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:x86_64, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64e, variant:Mac Catalyst, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64, variant:Mac Catalyst, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:x86_64, variant:Mac Catalyst, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64e, variant:DriverKit, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64, variant:DriverKit, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64e, variant:Designed for [iPad,iPhone], id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:<device-udid>, name:My Mac }
+2026-10-14 05:23:33.118212-0600 Variorum[4777:59537960] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to <home>/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/io.lduarte.Variorum.debug.savedState
+2026-10-14 05:23:33.370800-0600 Variorum[4777:59537960] [global-hotkey] InstallEventHandler system=carbon status=0
+2026-10-14 05:23:33.370913-0600 Variorum[4777:59537960] [global-hotkey] RegisterEventHotKey system=carbon quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 05:23:33.627747-0600 Variorum[4777:59538264] [logging-persist] cannot open file at line 53009 of [8fa8248e30]
+2026-10-14 05:23:33.627777-0600 Variorum[4777:59538264] [logging-persist] os_unix.c:53009: (2) open(/private/var/db/DetachedSignatures) - No such file or directory
+Test Suite 'Selected tests' started at 2026-10-14 05:23:33.707.
+Test Suite 'VariorumTests.xctest' started at 2026-10-14 05:23:33.707.
+Test Suite 'VariorumTests.xctest' passed at 2026-10-14 05:23:33.708.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-14 05:23:33.708.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite "VX-282 U5 — the comments panel's hosts" started.
+◇ Suite "VX-229 — a dismissed comments host lets go of its panel's model and observation" started.
+◇ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() started.
+2026-10-14 05:23:34.091459-0600 Variorum[4777:59537960] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 05:23:34.300982-0600 Variorum[4777:59537960] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 05:23:34.301561-0600 Variorum[4777:59537960] [sample-library] sample library (the adventures of sherlock holmes): alreadySeeded
+2026-10-14 05:23:34.301727-0600 Variorum[4777:59537960] [starred-gathering] starred gathering: alreadySeeded
+2026-10-14 05:23:34.301874-0600 Variorum[4777:59537960] [sample-library] welcome arrangement: alreadySettled
+✘ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() recorded an issue at CommentPanelHostLifecycleTests.swift:412:13: Expectation failed: alive.filter(\.isObserving).isEmpty
+↳ no dismissed panel still observes the store (3 do)
+↳ alive.filter(\.isObserving).isEmpty → false
+↳   alive.filter(\.isObserving) → [Variorum.CommentsPanelModel, Variorum.CommentsPanelModel, Variorum.CommentsPanelModel]
+↳   isEmpty → false
+✘ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() recorded an issue at CommentPanelHostLifecycleTests.swift:414:13: Expectation failed: alive.isEmpty
+↳ no dismissed panel's model is still alive (3 are)
+↳ alive.isEmpty → false
+↳   alive → [Variorum.CommentsPanelModel, Variorum.CommentsPanelModel, Variorum.CommentsPanelModel]
+↳   isEmpty → false
+✘ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() recorded an issue at CommentPanelHostLifecycleTests.swift:422:13: Expectation failed: rereads.isEmpty
+↳ a later write is re-read by no dismissed panel (3 did)
+↳ rereads.isEmpty → false
+↳   rereads → [Variorum.CommentsPanelModel, Variorum.CommentsPanelModel, Variorum.CommentsPanelModel]
+↳   isEmpty → false
+✘ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() failed after 9.410 seconds with 3 issues.
+↳ /// **The ticket's measurement, through the product's presenter — RED ON
+↳ /// OLD if VX-229's leak is real in the runner; EXPECTED GREEN ON BOTH
+↳ /// SIDES** (the run record's CORRECTION: pools drained and no window held,
+↳ /// the old product released every dismissed panel offscreen). Three
+↳ /// openings of the margin note's popover, each dismissed: every one was a
+↳ /// NEW window holding a live, observing panel, and after the third
+↳ /// dismissal NONE of the three panels' models is alive, none observes the
+↳ /// store, and a comment written afterwards is re-read by nobody.
+◇ Test aDismissedSheetLetsGoOfItsPanel() started.
+✘ Test aDismissedSheetLetsGoOfItsPanel() recorded an issue at CommentPanelHostLifecycleTests.swift:443:17: Expectation failed: CommentHostRig.alive(h.session).isEmpty
+↳ opening 1: the dismissed sheet's panel is gone
+↳ CommentHostRig.alive(h.session).isEmpty → false
+↳   CommentHostRig.alive(h.session) → [Variorum.CommentsPanelModel]
+↳   isEmpty → false
+✘ Test aDismissedSheetLetsGoOfItsPanel() recorded an issue at CommentPanelHostLifecycleTests.swift:443:17: Expectation failed: CommentHostRig.alive(h.session).isEmpty
+↳ opening 2: the dismissed sheet's panel is gone
+↳ CommentHostRig.alive(h.session).isEmpty → false
+↳   CommentHostRig.alive(h.session) → [Variorum.CommentsPanelModel, Variorum.CommentsPanelModel]
+↳   isEmpty → false
+✘ Test aDismissedSheetLetsGoOfItsPanel() recorded an issue at CommentPanelHostLifecycleTests.swift:443:17: Expectation failed: CommentHostRig.alive(h.session).isEmpty
+↳ opening 3: the dismissed sheet's panel is gone
+↳ CommentHostRig.alive(h.session).isEmpty → false
+↳   CommentHostRig.alive(h.session) → [Variorum.CommentsPanelModel, Variorum.CommentsPanelModel, Variorum.CommentsPanelModel]
+↳   isEmpty → false
+✘ Test aDismissedSheetLetsGoOfItsPanel() failed after 15.170 seconds with 3 issues.
+↳ /// **GUARD — measured, not assumed: a SHEET host tears its panel down.**
+↳ /// Write's and the Takes bar's presenter, three openings: after each
+↳ /// dismissal no model of this session is alive.
+◇ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() started.
+2026-10-14 05:23:59.099062-0600 Variorum[4777:59537960] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✘ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() recorded an issue at CommentPanelHostLifecycleTests.swift:465:17: Expectation failed: CommentHostRig.alive(h.session).isEmpty
+↳ opening 1: the nested sheet's panel is gone
+↳ CommentHostRig.alive(h.session).isEmpty → false
+↳   CommentHostRig.alive(h.session) → [Variorum.CommentsPanelModel]
+↳   isEmpty → false
+✘ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() recorded an issue at CommentPanelHostLifecycleTests.swift:465:17: Expectation failed: CommentHostRig.alive(h.session).isEmpty
+↳ opening 2: the nested sheet's panel is gone
+↳ CommentHostRig.alive(h.session).isEmpty → false
+↳   CommentHostRig.alive(h.session) → [Variorum.CommentsPanelModel, Variorum.CommentsPanelModel]
+↳   isEmpty → false
+✘ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() recorded an issue at CommentPanelHostLifecycleTests.swift:465:17: Expectation failed: CommentHostRig.alive(h.session).isEmpty
+↳ opening 3: the nested sheet's panel is gone
+↳ CommentHostRig.alive(h.session).isEmpty → false
+↳   CommentHostRig.alive(h.session) → [Variorum.CommentsPanelModel, Variorum.CommentsPanelModel, Variorum.CommentsPanelModel]
+↳   isEmpty → false
+✘ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() failed after 16.454 seconds with 3 issues.
+↳ /// **GUARD — the take panel's NESTED comments sheet (U3's O-5) tears its
+↳ /// panel down too.** The real `WriteTakesPanel` as a sheet, the comments
+↳ /// as its sheet, three openings.
+✘ Suite "VX-229 — a dismissed comments host lets go of its panel's model and observation" failed after 41.036 seconds with 9 issues.
+◇ Suite "VX-257 — a host's closing keeps the half-typed comment; the reopen shows it" started.
+◇ Test aClickAwayFromThePopoverKeepsTheDraftForTheReopen() started.
+✘ Test aClickAwayFromThePopoverKeepsTheDraftForTheReopen() recorded an issue at CommentPanelHostLifecycleTests.swift:507:9: Expectation failed: state.text == Self.half
+↳ the popover: the half-typed comment is back
+↳ state.text == Self.half → false
+↳   state.text → ""
+↳   Self.half → "half a thought, left by a click away "
+✘ Test aClickAwayFromThePopoverKeepsTheDraftForTheReopen() recorded an issue at CommentPanelHostLifecycleTests.swift:508:9: Expectation failed: state.caret == NSRange(location: (Self.half as NSString).length, length: 0)
+↳ the popover: the caret sits after it
+↳ state.caret == NSRange(location: (Self.half as NSString).length, length: 0) → false
+↳   state.caret → {0, 0}
+↳     location → 0
+↳     length → 0
+↳   NSRange(location: (Self.half as NSString).length, length: 0) → {37, 0}
+↳     location → 37
+↳     length → 0
+✘ Test aClickAwayFromThePopoverKeepsTheDraftForTheReopen() failed after 3.131 seconds with 2 issues.
+↳ /// **RED ON OLD — the popover (the Takes margin note's), her ruling's
+↳ /// road.**
+◇ Test aSheetsClosingKeepsTheDraftForTheReopen() started.
+✘ Test aSheetsClosingKeepsTheDraftForTheReopen() recorded an issue at CommentPanelHostLifecycleTests.swift:507:9: Expectation failed: state.text == Self.half
+↳ the sheet: the half-typed comment is back
+↳ state.text == Self.half → false
+↳   state.text → ""
+↳   Self.half → "half a thought, left by a click away "
+✘ Test aSheetsClosingKeepsTheDraftForTheReopen() recorded an issue at CommentPanelHostLifecycleTests.swift:508:9: Expectation failed: state.caret == NSRange(location: (Self.half as NSString).length, length: 0)
+↳ the sheet: the caret sits after it
+↳ state.caret == NSRange(location: (Self.half as NSString).length, length: 0) → false
+↳   state.caret → {0, 0}
+↳     location → 0
+↳     length → 0
+↳   NSRange(location: (Self.half as NSString).length, length: 0) → {37, 0}
+↳     location → 37
+↳     length → 0
+✘ Test aSheetsClosingKeepsTheDraftForTheReopen() failed after 4.233 seconds with 2 issues.
+↳ /// **RED ON OLD — Write's / the Takes bar's sheet** (`.sheet(item:)`),
+↳ /// dismissed by its binding.
+◇ Test theTakePanelsNestedSheetKeepsTheDraftForTheReopen() started.
+2026-10-14 05:24:22.941504-0600 Variorum[4777:59537960] [SwiftUI] Modifying state during view update, this will cause undefined behavior.
+✘ Test theTakePanelsNestedSheetKeepsTheDraftForTheReopen() recorded an issue at CommentPanelHostLifecycleTests.swift:507:9: Expectation failed: state.text == Self.half
+↳ the nested sheet: the half-typed comment is back
+↳ state.text == Self.half → false
+↳   state.text → ""
+↳   Self.half → "half a thought, left by a click away "
+✘ Test theTakePanelsNestedSheetKeepsTheDraftForTheReopen() recorded an issue at CommentPanelHostLifecycleTests.swift:508:9: Expectation failed: state.caret == NSRange(location: (Self.half as NSString).length, length: 0)
+↳ the nested sheet: the caret sits after it
+↳ state.caret == NSRange(location: (Self.half as NSString).length, length: 0) → false
+↳   state.caret → {0, 0}
+↳     location → 0
+↳     length → 0
+↳   NSRange(location: (Self.half as NSString).length, length: 0) → {37, 0}
+↳     location → 37
+↳     length → 0
+✘ Test theTakePanelsNestedSheetKeepsTheDraftForTheReopen() failed after 5.483 seconds with 2 issues.
+↳ /// **RED ON OLD — the take panel's NESTED comments sheet** (U3's O-5: the
+↳ /// fourth host), closed by its request's binding.
+✘ Suite "VX-257 — a host's closing keeps the half-typed comment; the reopen shows it" failed after 12.849 seconds with 6 issues.
+↳ /// Her ruling (2026-10-13, verbatim): *"yes, clicking away should save your
+↳ /// half typed comment on a draft."* Each host's closing road, end to end
+↳ /// through the product's presenter: the composer typed into by the real input
+↳ /// road, the host closed by its binding (a popover's click away ends there —
+↳ /// `NSPopover` closes → `willClose`; a sheet's programmatic dismissal tears its
+↳ /// content down → `.onDisappear`), then a NEW presentation on the same block.
+↳ /// The model-level cells — ⎋, another block, a refused draft, a panel that
+↳ /// never opened — are `CommentPanelLeaveTests`.
+✘ Suite "VX-282 U5 — the comments panel's hosts" failed after 53.886 seconds with 15 issues.
+↳ /// ONE serialized parent for VX-229's and VX-257's mounted suites: both present
+↳ /// popovers and sheets, and Swift Testing runs suites in parallel inside one
+↳ /// process — two hosts presenting at once would read each other's windows.
+↳ /// (`-only-testing:VariorumTests/CommentPanelHostSuites` runs both.)
+◇ Suite "VX-257 — the panel's leaving keeps a half-typed comment, and ⎋ still clears" started.
+◇ Test leavingWithAHalfTypedCommentKeepsItForTheSameBlock() started.
+✘ Test leavingWithAHalfTypedCommentKeepsItForTheSameBlock() recorded an issue at CommentPanelLeaveTests.swift:65:28: Expectation failed: h.session.commentDraftPark.held
+↳ the leaving parked the draft
+↳ h.session.commentDraftPark.held → nil
+↳   h.session.commentDraftPark → Variorum.CommentDraftPark
+↳     held → nil
+↳   held → nil
+✘ Test leavingWithAHalfTypedCommentKeepsItForTheSameBlock() failed after 0.072 seconds with 1 issue.
+↳ /// **RED ON OLD — her ruling.** A half-typed comment left in the box when
+↳ /// the panel's host closes comes back, verbatim, at the next open of the
+↳ /// same block — with no line claiming it "couldn't be saved" (nothing was
+↳ /// refused) — and nothing was filed.
+◇ Test escapeClearsAndTheReopenIsEmpty() started.
+✔ Test escapeClearsAndTheReopenIsEmpty() passed after 0.035 seconds.
+◇ Test escapeAfterARestoreAbandonsTheDraftForGood() started.
+✘ Test escapeAfterARestoreAbandonsTheDraftForGood() recorded an issue at CommentPanelLeaveTests.swift:110:17: Expectation failed: second.addDraft == Self.half
+↳ premise: the left draft was restored
+↳ second.addDraft == Self.half → false
+↳   second.addDraft → ""
+↳   Self.half → "a half-typed thought, not done yet "
+✘ Test escapeAfterARestoreAbandonsTheDraftForGood() failed after 0.032 seconds with 1 issue.
+↳ /// **RED ON OLD (at its restore premise) — ⎋ abandons a RESTORED draft
+↳ /// for good.** Left once (parked), reopened (restored), then ⎋-cleared and
+↳ /// closed: the park lets it go, and the next open is empty.
+◇ Test anotherBlocksPanelGetsNoForeignDraft() started.
+✘ Test anotherBlocksPanelGetsNoForeignDraft() recorded an issue at CommentPanelLeaveTests.swift:132:13: Expectation failed: h.session.commentDraftPark.held?.blockID == a
+↳ A's draft is still held
+↳ h.session.commentDraftPark.held?.blockID == a → false
+↳   h.session.commentDraftPark.held?.blockID → nil
+↳   a → "00000000-0000-0000-0000-000000000001"
+✘ Test anotherBlocksPanelGetsNoForeignDraft() recorded an issue at CommentPanelLeaveTests.swift:133:13: Expectation failed: open(h, a).addDraft == Self.half
+↳ …and A's reopen brings it back
+↳ open(h, a).addDraft == Self.half → false
+↳   open(h, a).addDraft → ""
+↳   Self.half → "a half-typed thought, not done yet "
+✘ Test anotherBlocksPanelGetsNoForeignDraft() failed after 0.034 seconds with 2 issues.
+↳ /// **RED ON OLD (its held half) — another block's panel gets no foreign
+↳ /// draft**, and the first block's draft stays held for its own reopen.
+◇ Test aRefusedDraftLeftAsItWasKeepsItsLine() started.
+✔ Test aRefusedDraftLeftAsItWasKeepsItsLine() passed after 0.037 seconds.
+◇ Test aPanelThatNeverOpenedLeavesTheParkAlone() started.
+✔ Test aPanelThatNeverOpenedLeavesTheParkAlone() passed after 0.036 seconds.
+✘ Suite "VX-257 — the panel's leaving keeps a half-typed comment, and ⎋ still clears" failed after 0.250 seconds with 4 issues.
+◇ Suite "RUN A ladder round 2 — the Mac panel's refused drafts survive its close" started.
+◇ Test aRefusedAddDraftComesBackAtTheNextOpenOfItsBlocksPanel() started.
+✔ Test aRefusedAddDraftComesBackAtTheNextOpenOfItsBlocksPanel() passed after 0.033 seconds.
+◇ Test aRefusedInPlaceEditRidesTheParkOntoItsRow() started.
+✔ Test aRefusedInPlaceEditRidesTheParkOntoItsRow() passed after 0.033 seconds.
+◇ Test aLandedSubmitClearsTheParkSoNothingComesBackAsAGhost() started.
+✔ Test aLandedSubmitClearsTheParkSoNothingComesBackAsAGhost() passed after 0.033 seconds.
+◇ Test anUnsubmittedDraftStaysHerOrdinaryAbandon() started.
+✔ Test anUnsubmittedDraftStaysHerOrdinaryAbandon() passed after 0.030 seconds.
+◇ Test aDifferentBlocksPanelShowsNothingAndLeavesItHeld() started.
+✔ Test aDifferentBlocksPanelShowsNothingAndLeavesItHeld() passed after 0.031 seconds.
+◇ Test aRestoredDraftSurvivesACloseSheNeverFiledFrom() started.
+✔ Test aRestoredDraftSurvivesACloseSheNeverFiledFrom() passed after 0.030 seconds.
+◇ Test aPhantomModelConstructionDoesNotEatThePark() started.
+✔ Test aPhantomModelConstructionDoesNotEatThePark() passed after 0.031 seconds.
+◇ Test aLandedSubmitOfADifferentDraftLeavesTheParkHolding() started.
+✔ Test aLandedSubmitOfADifferentDraftLeavesTheParkHolding() passed after 0.041 seconds.
+✔ Suite "RUN A ladder round 2 — the Mac panel's refused drafts survive its close" passed after 0.267 seconds.
+✘ Test run with 20 tests in 5 suites failed after 54.404 seconds with 19 issues.
+2026-10-14 05:24:43.364 xcodebuild[4774:59537800] [MT] IDETestOperationsObserverDebug: 72.848 elapsed -- Testing started completed.
+2026-10-14 05:24:43.364 xcodebuild[4774:59537800] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 05:24:43.364 xcodebuild[4774:59537800] [MT] IDETestOperationsObserverDebug: 72.848 sec, +72.848 sec -- end
+
+Test session results, code coverage, and logs:
+	<home>/Library/Developer/Xcode/DerivedData/Variorum-awotdivmbogduuencprxenocsvue/Logs/Test/Test-Variorum-2026.10.14_05-23-30--0600.xcresult
+
+Failing tests:
+	CommentPanelReleaseTests.aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation()
+	CommentPanelReleaseTests.aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation()
+	CommentPanelReleaseTests.aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation()
+	CommentPanelReleaseTests.aDismissedSheetLetsGoOfItsPanel()
+	CommentPanelReleaseTests.aDismissedSheetLetsGoOfItsPanel()
+	CommentPanelReleaseTests.aDismissedSheetLetsGoOfItsPanel()
+	CommentPanelReleaseTests.theTakePanelsNestedCommentsSheetLetsGoOfItsPanel()
+	CommentPanelReleaseTests.theTakePanelsNestedCommentsSheetLetsGoOfItsPanel()
+	CommentPanelReleaseTests.theTakePanelsNestedCommentsSheetLetsGoOfItsPanel()
+	CommentPanelHostLeavingTests.aClickAwayFromThePopoverKeepsTheDraftForTheReopen()
+	CommentPanelHostLeavingTests.aClickAwayFromThePopoverKeepsTheDraftForTheReopen()
+	CommentPanelHostLeavingTests.aSheetsClosingKeepsTheDraftForTheReopen()
+	CommentPanelHostLeavingTests.aSheetsClosingKeepsTheDraftForTheReopen()
+	CommentPanelHostLeavingTests.theTakePanelsNestedSheetKeepsTheDraftForTheReopen()
+	CommentPanelHostLeavingTests.theTakePanelsNestedSheetKeepsTheDraftForTheReopen()
+	CommentPanelLeaveTests.leavingWithAHalfTypedCommentKeepsItForTheSameBlock()
+	CommentPanelLeaveTests.escapeAfterARestoreAbandonsTheDraftForGood()
+	CommentPanelLeaveTests.anotherBlocksPanelGetsNoForeignDraft()
+	CommentPanelLeaveTests.anotherBlocksPanelGetsNoForeignDraft()
+
+** TEST EXECUTE FAILED **
+
+Testing started

@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #220. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #221). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — W1 red on old (the host suites + the model suites, ≈4 min; VX-229 decided here) · W2 the fixed batch (three groups, ≈12 min) · W3 the walk (7 rows incl. a live `heap` count, row 1 in both voices, ≈25 min) — ≈42 min.** VX-229: fix REVERTED `7d798f82` (offscreen artefact — the CORRECTION); expected HOLLOW. VX-257: fix `1ca8fe72`; QUESTIONS #223. VX-183: `a765683c`. VX-182: pins `f38fb93c` red on old (headless), fix `fd4c260c`, R-182 ran + restored. Pins hardened `dab712d8`. Core 2,801/320 + MCP 212/41 + workbook 40/6 headless green; the phone builds. Old products `DerivedData/vx282-u5-old-products` REBUILT (the named revert at `3a6bad6d` — done, restored, `git status` clean); fixed `DerivedData/vx282-u5` rebuilt at the tip. No claim held; no revert in flight. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **STOPPED AFTER W1 — awaiting the orchestrator's re-plan.** Window 05:23:19–05:25:17 (claim `vx282-u5`, RELEASED): W1 red on old — VX-257 10 issues / 6 cases exactly as predicted, its guards + `CommentPanelParkTests` green; **VX-229 RED ON OLD in the runner (3 alive · 3 observing · 3 re-reads — the leak is real; the CORRECTION's "hollow" was wrong for the runner) and the SHEET guards red on old too** (a model alive after each dismissal, both sheet shapes). W2/W3 NOT run; no app launched; dev store untouched. VX-229's fix (`ee86dd8c`, popover-only) is OUT of the tree and owed again, now with a sheet road. VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c` (headless red→green) — their stage runs PENDING. No claim held; no revert in flight. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **READY FOR STAGE — W1 red on old (`QuickEntryLaunchFocusTests` on `vx282-u6-old-products`, 1 issue expected, ≈3 min) · W2 the fixed batch on `vx282-u4` (three groups — the capture/quick-entry/pad suites with the four new ones, the tour suites, the shell-mount and launch/restore suites, ≈12 min) · W3 the walk (the old build's launch for the record; launch in both voices with a typed letter; a restored note window; the tour; the navigation-back scope line, ≈23 min) — ≈38 min.** Trace (headless, real module): the shell's ask reaches the box before its window and is spent (F-FR-1) — at launch and on every navigation back (O-U6-1, left as today). Pins `d35191b6` + correction `ee1facc9` (AppKit auto-selects a window's first text field when it is ordered in — the rig frees it) · fix `3cf0079b`. P-U6-1/2 → QUESTIONS #224. Products: old `vx282-u6-old-products` REBUILT by the revert named at `07f03fa5` (done, restored, `git status` clean); fixed `vx282-u4` rebuilt LAST (U4's final + U5 + U6 — u4b tests what U4 expects). No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
@@ -1500,13 +1500,14 @@ withdrawn. Born for the orchestrator: O-U4-1 (untraced), O-U4-2, O-U4-3 (now thi
 
 ### U5 — VX-229 · VX-257 · VX-183 · VX-182 (the comments family VX-179 left)
 
-**NOT DONE BY THIS UNIT YET (first line):** no Mac test has RUN — every app-target pin below is PENDING the stage window
-(W1 red on old · W2 the fixed batch · W3 the walk); **VX-229 is UNDECIDED** — its fix was built, then reverted when the
-offscreen evidence behind it proved to be the probes' own artefact (the CORRECTION below), and W1 decides between
-DISMISSED AS HOLLOW (expected) and re-applying the fix; the phone has no VX-257 change (its sheet still drops an
-unsubmitted draft — MOBILE PARITY below).
+**NOT DONE BY THIS UNIT YET (first line):** the window STOPPED AFTER W1 at the coordinator's rule — **VX-229 is RED ON OLD
+in the runner (the leak is real: 3 · 3 · 3), so its fix is owed again, and the SHEET hosts leak too in the runner**
+(W1 below — the CORRECTION's "expected hollow" was wrong for the runner); W2 (the fixed batch) and W3 (the walk) did NOT
+run, so VX-257, VX-183 and the fixed products are unverified on the stage; the phone has no VX-257 change (MOBILE PARITY
+below).
 
-**State: READY FOR STAGE.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Counts marked
+**State: STOPPED AFTER W1 — awaiting the orchestrator's re-plan.** Implementer: an `opus-implementer` session (Opus 5.5,
+xhigh), 2026-10-14. Counts marked
 PENDING wait for the window. **Revert state: no behavioural revert in flight** (R-182 ran and was restored; `git diff`
 empty).
 
@@ -1587,6 +1588,11 @@ Standing pins this touches (expected green, PENDING): `CommentPanelFixLeg2Tests`
 dismissal; the R1-2 save at `willClose`; the close rung) and the rest of the comment set.
 
 #### VX-229 — CORRECTION (same session, before any stage run): the offscreen leak was the probes' own artefact
+
+> **SUPERSEDED BY W1 (2026-10-14 05:24):** in the RUNNER the old product leaks exactly as the ticket says — three
+> models alive and observing after three dismissals, a later write re-read by all three — with every premise held. The
+> drained offscreen probe (`.prohibited`, never active) does NOT model the runner; its "released" result is recorded
+> below as what it measured, not as the product's behaviour. The fix is owed again (the orchestrator re-plans).
 
 **The fix `ee86dd8c` is being REVERTED (its code; the record stays as history).** Measured after it landed, by the same
 real-module replay made faithful to a run loop:
@@ -2116,6 +2122,39 @@ From `App/Variorum/`; logs to `notes/plans/vx282-screens/u6/logs/`, captures to 
     `completed`; record what it reads); the main window left on the Bookcase; quit OUR instance by identity
     (`tell application id "io.lduarte.Variorum.debug" to quit`), `pgrep` empty after; the dev store Standard and
     unlocked; release the claim.
+
+#### THE STAGE WINDOW — RUN 2026-10-14 05:23:19 → 05:25:17 (claim `vx282-u5`, chained from `vx282-u4b`; RELEASED) — STOPPED AFTER W1
+
+The coordinator's GO, part 2 of its chained window: `Tools/stage release --who vx282-u4b && Tools/stage claim --who
+vx282-u5 …` (claimed 05:23:19). `git pull --ff-only` first (already at the tip, `03b24597`; nothing rebuilt — the products
+are the ones built at `c2b3ba72`). `guard.sh --author` OK (idle 455 s); `pgrep -lx Variorum` and the `MacOS/Variorum$`
+anchor: no instance; no booted simulator. Log: `notes/plans/vx282-screens/u5/logs/w1-red-on-old.log`.
+
+- **W1 — red on old** (`vx282-u5-old-products`, the build of `7d798f82` + the hardened pins via the named revert at
+  `3a6bad6d`; `CommentPanelHostSuites` `CommentPanelLeaveTests` `CommentPanelParkTests`, 05:23:29–05:24:45): "**20 tests
+  in 5 suites failed … 19 issues**", EXIT 65.
+  - **VX-257 — RED ON OLD EXACTLY AS PREDICTED: 10 issues in 6 cases** — the three mounted cells 2 each (the text, the
+    caret), `leavingWithAHalfTyped…` 1, `escapeAfterARestore…` 1 (its premise), `anotherBlocks…` 2. GREEN on old: the
+    three model guards (`escapeClears…`, `aRefusedDraftLeftAsItWas…`, `aPanelThatNeverOpened…`) and
+    `CommentPanelParkTests` 8/8.
+  - **VX-229 — THE DECIDING CELL IS RED ON OLD:** `aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation` — "no
+    dismissed panel still observes the store (**3 do**)", "no dismissed panel's model is still alive (**3 are**)", "a
+    later write is re-read by no dismissed panel (**3 did**)"; every premise held (three openings, three NEW windows, each
+    a mounted, observing panel; each closed). **The leak is REAL in the runner** — the ticket's own numbers.
+  - **NEW — the sheet guards are RED on old too:** `aDismissedSheetLetsGoOfItsPanel` (the `.sheet(item:)` host — Write's
+    and the Takes bar's shape) and `theTakePanelsNestedCommentsSheetLetsGoOfItsPanel` (the real `WriteTakesPanel`'s
+    nested sheet) — after EACH of the three dismissals a model of the session was still alive within the 150-turn wait
+    (3 issues each; every premise held). So in the runner the sheet hosts do not let go of the panel either. These cells
+    assert ALIVE only — whether those sheet models were still OBSERVING is not known from this run. The reverted fix
+    (`ee86dd8c`: the popover's `didClose` removes the surface) would not reach a sheet (a sheet posts no `NSPopover`
+    notification) — the re-plan needs a road for the sheet hosts as well, and a measurement of their observation.
+- **STOPPED** at the coordinator's rule (red on old ⇒ stop; no rebuild mid-window): **W2 and W3 NOT run.** No app was
+  launched and the dev store was untouched (as found: Standard, unlocked, Study — U4's report at the handover); no walk
+  note; no simulator. **Claim `vx282-u5` RELEASED 05:25:17** (`Tools/stage release --who vx282-u5`; status FREE).
+- **Why the offscreen probe disagreed (recorded, not resolved):** the probe app is `.prohibited` (never active, no key
+  window) and pumps its own event loop; the runner is the active dev-store app inside `NSApplication.run`. Something in
+  the second — not traced — keeps a dismissed host's panel alive. The undrained-pool and held-window effects measured
+  offscreen are real effects of those probes, but they are not why the runner leaks.
 
 ## Ladder
 
