@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #220. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #221). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — u5c: the three reshaped cells red-on-old + fixed, plus g1 re-run, ≈8 min** (W1c `CommentPanelHostSuites` on the old products: the VX-229 guard green, VX-257's three host cells red; W2c g1 with the whole host parent on the fixed products: all green). Reshape `eaf42b27`; the named revert DONE and RESTORED (`git status` clean); old products rebuilt (`nm` 0), fixed rebuilt (`nm` 63). VX-229 DISMISSED AS HOLLOW (final, the coordinator's ruling). VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c`. No claim held; no revert in flight. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **u5c STOPPED AFTER W1c (06:12:37–06:13:57, claim `vx282-u5c` RELEASED) — awaiting the coordinator.** W1c on old: VX-257's three host cells red as designed (6 issues; the sheet cells took the fallback road — the runner kept the dismissed panel alive); **the VX-229 GUARD RED under the drained shape — the census: models alive AND observing 1 → 2 → 3 on the popover, the sheet and the nested sheet** (9 issues) ⇒ the runner retains dismissed hosts whatever the pools; the guard cannot be honest-green in this runner as built. W2c NOT run. VX-229 DISMISSED AS HOLLOW in use (final). VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c`. No claim held; no revert in flight. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **DONE** — pins `d35191b6` + correction `ee1facc9` · fix `3cf0079b` · window `a1967ac0` (logs) + the walk record. Stage window 05:27:17–05:38:17 (claim `vx282-u6`, RELEASED): W1 red on old exactly as predicted (3 tests, 1 issue — the launch pin's last cell) · W2 the fixed batch 148 tests / 43 suites green · W3 every row held (A0 old: the window; A/A' fixed: the caret in the bar at launch in Study and Terminal, a typed letter lands; C the tour never stolen from; D the navigation back as today — O-U6-1 seen live); row B's restored note window not reachable on this Mac (not restored), a new window walked in its place. P-U6-1/2 → QUESTIONS #224. Posture: Study, unlocked Standard, tour `completed`, the Bookcase, nothing filed. No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
@@ -2414,6 +2414,39 @@ From `App/Variorum/`, logs to `notes/plans/vx282-screens/u5/logs/`:
 - Read the census lines (`grep "VX-229 guard\|VX-257 the"`) — they are the evidence of which road the runner took. If the
   guard is red on either side, its census says whether the runner still retains dismissed panels under the drained
   shape; report it rather than re-run.
+
+#### THE u5c WINDOW — RUN 2026-10-14 06:12:37 → 06:13:57 (claim `vx282-u5c`, chained from `coord-for-vx282`; RELEASED) — STOPPED AFTER W1c
+
+`git pull --ff-only` first (nothing rebuilt); `guard.sh --author` OK; `pgrep -lx Variorum` — none; no app launched.
+
+- **W1c — the reshaped cells on the OLD products** (`u5c-w1-old.log`, 06:12:42–06:13:49): "**6 tests in 3 suites failed …
+  15 issues**", EXIT 65.
+  - **VX-257 — RED ON OLD AS DESIGNED, all three host cells** (6 issues in 3 cases: the reopened composer's text and caret,
+    `:538`/`:539`). The two SHEET cells took the fallback road: *"VX-257 the sheet: the runner kept 1 dismissed panel(s)
+    alive — the cell ran the leaving body as the sheet's .onDisappear calls it"* and the same for *the nested sheet* — the
+    old `leave()` dropped the draft, as designed.
+  - **THE VX-229 GUARD IS RED ON OLD under the drained shape (9 issues)** — the runner still keeps EVERY dismissed panel
+    alive AND observing, accumulating one per opening. The census, verbatim:
+    ```
+    VX-229 guard — popover, after dismissal 1: models alive 1, observing 1
+    VX-229 guard — popover, after dismissal 2: models alive 2, observing 2
+    VX-229 guard — popover, after dismissal 3: models alive 3, observing 3
+    VX-229 guard — popover, after the wait: models alive 3, observing 3
+    VX-229 guard — sheet, after dismissal 1: models alive 1, observing 1
+    VX-229 guard — sheet, after dismissal 2: models alive 2, observing 2
+    VX-229 guard — sheet, after dismissal 3: models alive 3, observing 3
+    VX-229 guard — nested sheet, after dismissal 1: models alive 1, observing 1
+    VX-229 guard — nested sheet, after dismissal 2: models alive 2, observing 2
+    VX-229 guard — nested sheet, after dismissal 3: models alive 3, observing 3
+    ```
+    (popover `:439` observing, `:441` alive, `:449` re-reads; the sheet `:472` ×3; the nested sheet `:496` ×3.) The same
+    lifecycle code is on the fixed products (VX-229's fix is out), so the guard would read the same there.
+  - **What it means:** explicit per-turn `autoreleasepool`s do NOT make the runner let go — so the runner's retention is
+    not (only) the autorelease pool this reshape drains; something in the test host keeps a dismissed host's content alive
+    and its `.task` running for the whole test, where the app (the u5b heap) releases within ~2 s. The VX-229 cells cannot
+    be an honest green guard in this runner as built; VX-257's sheet cells are robust to it (they ran the fallback road).
+- **STOPPED** at the coordinator's rule (a red guard ⇒ record, release, report; no fix in the window): **W2c NOT run.**
+  **Claim `vx282-u5c` RELEASED 06:13:57** (status FREE). No app launched; the dev store untouched.
 
 ## Ladder
 
