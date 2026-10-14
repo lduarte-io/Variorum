@@ -2294,9 +2294,11 @@ merge with the record's options.
 
 ## U6b UNIT RECORD — the Book Panel's collapsed chapter row (VX-330) · the undo warning's one word (VX-342) · U6's shared window (opus-implementer, from 2026-10-14 ~18:00 MDT)
 
-**NOT DONE YET (the record's first line, per the contract):** no stage claimed, no app launched, no `xcodebuild test`, no
-store touched by this session. Every app pin's red and green are U6's window's to read (PENDING). The live legs are
-written, not run.
+**NOT DONE YET (the record's first line, per the contract — READY 2026-10-14):** THE STAGE WINDOW is not run: no stage
+claimed, no app launched, no `xcodebuild test`, no simulator booted, no store touched by this session. So every app
+pin's red and green (VX-330's three, VX-342's Mac and phone, U6a's `MCPCompareLandingTests`), the 125-suite batch,
+VX-330's walk, VX-342's word on screen and U6a's live legs are PENDING. Everything else is DONE: the traces, the seam,
+the pins, both fixes, the four products (no revert ever applied), the suite list, the window plan.
 
 **Read in (in full, this session's own context):** CLAUDE.md + its canon; this record's header, Hard rules, LIVE STATUS,
 Cross-run coordination, Her rulings (VX-330's verbatim), the U6 BRIEF items 3–4 + Lanes + Evidence, THE ORCHESTRATOR ON
@@ -2597,3 +2599,66 @@ forms only; `Tools/stage status` exits 1 while held — never in `&&`; the What'
 tests FIRST and pings SEAM before the A1; the Castle heads-up (VX-306 merged ⇒ merge main first, STOP here); `claude -p
 --allowedTools <list>` swallows a trailing prompt (prompts on STDIN); System Events drops non-ASCII (every fixture here is
 ASCII); `Tools/WalkKit/wl2` per worktree; a system popup Variorum can't dismiss = STOP, its exact words reported.
+
+### PROVISIONALs
+
+*None.* VX-330's one product question — which reach a collapsed row wears — has one answer (D-330-1, argued); VX-342 is
+her rule applied to one word. Nothing for `notes/QUESTIONS.md`.
+
+### FOR VX-234 (user-facing words, as built)
+
+- **The Mac's A12 warning detail** (`ShellActions.discardingUndoDetail`, the alert under "Undo <label>?"): "One take
+  has been edited since — undoing puts back the text as it was before the <label>, so that writing is set aside. It is
+  committed first, so you can bring it back from the take's history (⌘S's list) at any time." — only "before" changed.
+- **The phone's twin** (`MobileUndoDoor.discardingUndoDetail`): "… as it was before the <label>, so that writing is set
+  aside. It is saved first, so you can bring it back from the block's Block History at any time." — only "before"
+  changed. **For her eye, not changed here:** the phone says "It is saved first" where the Mac says "It is committed
+  first" (13s-b's commit vocabulary, R-13s-31/32, said "commit" on both platforms where a savepoint was named).
+- **VX-330: no new words.** The collapsed chapter row wears the existing icon (hover "Shared with … — click for details",
+  its popover) and the existing waiting mark (hover "‹client› asks to … here — press to answer.").
+
+### MOBILE PARITY (for the closeout's line)
+
+**VX-342 is mobile-visible:** the phone's undo-overwrite warning now reads "before" in lowercase (the same one-word
+change as the Mac). **VX-330: nothing mobile-visible** (the Book Panel and the MCP door are Mac-only).
+
+### SELF-ASSESSMENT (the implementer's, pre-stage)
+
+- **The trace held to the line:** the collapsed row's reach was ALREADY held (`entryIDs` maps every entry) and its asks
+  were already on the window's board — only the face was missing. So the fix adds no read: P1 and VX-272 are untouched
+  by construction, and the one decision (`markedNote`) feeds ONE face helper for both row kinds, so the collapsed row
+  wears exactly the note row's two views.
+- **The seam carries one refactor, said plainly:** piece 1 moved the note row's two glyphs into `noteMarks(for:)` (the
+  same two views, the same arguments). The red product therefore runs that refactor too; the pins' red is the collapsed
+  row only, and the note rows' marks are re-proven green in the sweep and in VX-281's suites in the batch
+  (`MCPSharedIconClickTests`, `MCPSharedRowsTests`, `MCPSharedRowsRulesTests`).
+- **No revert was ever applied:** the pins were committed ahead of both fixes, so the red products are the committed
+  pre-fix trees; `git diff` red → final shows only the fix lines (row 6).
+- **One pin-authoring error,** caught by the first phone build and fixed in the pin (`e10d3f57`): the phone suite needs
+  `@MainActor`.
+- **What is NOT proven yet:** every app pin's red and green, the phone runs, both walks and U6a's legs — the window's.
+  The mounts' synthetic presses follow R1-5's rig exactly; the ask glyph's press is new ground for that rig (the probe is
+  the icon's shape). If the glyph press misses in the batch while the frame is found, that is a rig finding to report,
+  not a product red.
+- **Risks I see:** (1) the DEBUG ask-glyph anchor adds an AppKit view behind every drawn glyph in DEBUG builds (∝ the
+  glyphs alive, pruned on append; Release draws exactly what it drew); (2) the 125-suite batch carries VX-115's standing
+  red and may meet VX-167's order-dependent one; (3) the dev store's standing claude-code grants are unknown to me (I
+  never read the store) — W1 reads them before W3 relies on an ask arising.
+
+### OWED (for the orchestrator)
+
+1. **THE WINDOW:** REQUEST `vx336-u6` (a 130-minute claim; the batch-only fallback 35) to the coordinator; relay the
+   GO's exact line. The runner: this session if resumed, else a fresh stage runner reading THE STAGE WINDOW above, U6a's
+   LIVE LEGS and THE MAC SUITES, and U5's worked run.
+2. **Observed, not built (the sweep's OUTSIDE rows):** the Book Panel's HEADER (the shown book's name) and its
+   GATHERINGS line's names are places that wear neither glyph. Both sit outside VX-268's parity rule (no ask glyph marks
+   them; `MCPAskTarget` has no gathering) and outside VX-330. To weigh; if filed: *"Book Panel: the shown book's name and
+   the gatherings line wear no shared icon"* — Improvement · Confirmed · Low · project 13n; not Pre-launch; no Needs
+   Lillian.
+3. **Canon at the merge (MCPSpec, THE PANE AND THE SHARED ICON):** "…Pool rows, Book Panel rows (a collapsed one-note
+   chapter row is its note's row and wears its marks — VX-330) and ⌘L's wing rows…".
+4. **The closeout's MOBILE PARITY line:** VX-342's phone word (above).
+5. **Disk after the window:** `DerivedData/vx336-u6b-red`, `vx336-u6b-ios`, `vx336-u6b-ios-red` (≈ 2.4–2.5 GB each) and
+   U6a's `vx336-u6-red` serve only the window and may be deleted after it; `vx336-u6` stays until the ladder's needs are
+   known. (`vx336-u5`, 2.6 GB, is still on disk — not U6b's.)
+6. **Context:** ~240k by this session's own estimate at READY (the harness count governs).
