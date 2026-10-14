@@ -482,8 +482,8 @@ lens rule resolves to picks; `Operations.saveLens` and its undo entry are untouc
 | 4 | VX-253 — the pins on the OLD tree (wire only: label fill, unmatched, ambiguity refusal + retry, own-suggestion forms, pin_chosen, the malformed combinations, the not-shared guard), RED | DONE (this commit) — NEW `Tests/VariorumMCPTests/MCPLensByLabelServerTests.swift`, 7 tests, wire only: `aLabelPicksEachBlocksTakeOfThatLabelAndListsTheBlocksWithNone` (hers exact, its own in VX-267's and the legacy form, never another client's; `unmatched_blocks`/`_count`; the page unchanged; one client-named undo; another client's FULL label matches exactly as stored) · `anAmbiguousBlockRefusesTheWholeCallNamingItsTakesAndTheRetryWithTakeIdsLands` (her "english" + its own suggested "english" on one block, her "english" + a legacy own one on another → one refusal naming both blocks and their matching takes, nothing saved; the retry with `take_ids` for exactly those lands) · `pinChosenPinsWhatEachBlockShowsNowWithThePicksFirst` (the pick first, every other block pinned; her later ✓ never moves it) · `everyMalformedFillRefusesAndSavesNothing` (8 cases) · `anUnreachableNoteAnswersTheOneNotSharedShapeWhateverTheFill` (the GUARD) · `unmatchedBlocksCarryTheFirstTwoHundredAndTheCountTheWhole` · `theAmbiguityRefusalNamesTheFirstTwoHundredAndTheCountTheWhole`. **RED on the old tree (`f5f86487`'s sources): 6 of 7 failed, 35 issues, every one on its designed line, no premise line** — the old parse ignores `label` and `pin_chosen` and saves an EMPTY lens (`picked → [:]`; the ambiguous call `isError → false`; the 8 malformed calls each LANDED a lens); **the guard green, by design** (an unreachable note answered the one not-shared shape on the old tree too — it pins what the fix must not change) (log `p4-pins-red.log`) |
 | 5 | VX-253 — the fix (parse, the rule, the read, the answer, the catalog) + the new-API pins (the pure matcher, the plan pin), GREEN | DONE (this commit) — **the fix:** `MCPWriteTools.swift` — `Job.saveLens` carries `rule: LensRule?`; the parse reads `take_ids` (now optional), the rule (`parseLensRule`), and refuses no fill at all; the arm resolves the picks FIRST (VX-280's `picksSQL`, unchanged), then `fillLens` over the uncovered blocks inside the act's closure (after the decision), merges, answers `unmatched_blocks` (≤200) + `unmatched_count` only when a rule was given (a `take_ids`-only answer byte-unchanged), and calls the UNCHANGED `Operations.saveLens`. NEW `MCPWriteTools+LensRule.swift` — `LensRule`, `labelAnswers` (the matcher: exact, `‹client› · ‹label›`, `‹client› · suggested · ‹label›`), `parseLensRule`, the two statements (`lensRulePlacementsSQL`, `lensRuleTakesSQL`), `fillLens`, `ambiguityWords` (the sentence + one JSON line). `MCPToolCatalog.saveLens` — the schema (`take_ids` optional, `label`, `pin_chosen`; required `note_id`, `name`) and the description (below, AS BUILT). **The plans (printed once by a temporary line, removed before this commit — `p5-plans.log`):** placements `SEARCH cb USING INDEX idx_cblock_order (container_id=?)` → `SEARCH b USING INDEX sqlite_autoindex_block_1 (id=?)` → `USE TEMP B-TREE FOR LAST TERM OF ORDER BY`; takes `SCAN j VIRTUAL TABLE INDEX 1:` → `SEARCH v USING INDEX idx_variant_block (block_id=? AND status=?)` → `USE TEMP B-TREE FOR ORDER BY` — ∝ the note's blocks and their takes, no table scanned. **NEW-API PINS (green by construction, state):** `Tests/VariorumMCPTests/MCPLensRulePlanTests.swift` — the matcher's cases (exact; its own in both forms; never another client's by its own part, but by its FULL label; case- and byte-exact; the client alone; nil), the round trip (what `aiLabel` writes the matcher finds for its own client only), the plan pin (both statements). **GREEN:** `MCPLensByLabelServerTests` **7/7** (`p5-pins-green.log`); `MCPLensRulePlanTests` 3/3 (`p5-newapi.log`); the whole MCP target **251 / 54**, EXIT 0, zero ✘ (= piece 2's 241/52 + 7 + 3, two suites; every existing pin UNMODIFIED — `MCPPicksParityServerTests` and every `take_ids` caller included) (`p5-mcp-target.log`) |
 | 6 | VX-253 — red again BY REVERT (announced first; the new-API test file moved aside inside the worktree) | DONE (announced `fa348102`, recorded in this commit) — on the committed tree `fa348102`: `MCPWriteTools.swift` + `MCPToolCatalog.swift` back to the pins commit `d030deaa`, `MCPWriteTools+LensRule.swift` and `MCPLensRulePlanTests.swift` moved aside to `notes/plans/vx336-screens/u5a/prerevert-253/` (gitignored) → **RED again: 6 of 7 failed, 35 issues, the test × line set IDENTICAL to piece 4's** (35 pairs, `diff` empty — `p4-pins-red.pairs` vs `p6-revert-red.pairs`); the guard green as before (`p6-revert-red.log`). **RESTORED:** `git checkout HEAD -- Sources/VariorumMCP/ Tests/VariorumMCPTests/`, `git status` clean, `git diff HEAD` empty, the aside folder removed → **10/10 green** across the two suites (`p6-restored.log`) |
-| 7 | headless finals (MCP · core · workbook) | NOT-STARTED |
-| 8 | LIVE LEGS FOR U5b's WINDOW + FOR VX-234 + PROVISIONALs + self-assessment → the report | NOT-STARTED |
+| 7 | headless finals (MCP · core · workbook) | DONE (this commit) — **the whole package, `swift test --skip-build` on `580e2867`'s sources (the tree clean), EXIT 0 in 6:44: `VariorumMCPTests` 251 / 54 · `VariorumCoreTests` 2,860 / 330 · `StringsWorkbookTests` 40 / 6**, zero ✘; the standing gated skips only (the 13o measurements, the real-server convergence pass, the fixture/bench probes) (`p7-finals.log`). MCP = main's target + `MCPTakeLabelFormServerTests` 1 + `MCPLensByLabelServerTests` 7 + `MCPLensRulePlanTests` 3; core and workbook untouched by this unit (no core line moved). **No Mac `build-for-testing` owed:** no app file moved (`git diff --name-only 501c367e..HEAD -- App` is empty — the app's `save_lens` Activity words are the same tool's, unchanged) |
+| 8 | LIVE LEGS FOR U5b's WINDOW + FOR VX-234 + PROVISIONALs + self-assessment → the report | DONE (this commit) — the sections below; U5a's acceptance closes with U5b's window (the brief) |
 
 **No revert is in flight** (pieces 3 and 6 ran their reverts and RESTORED them — `git status` clean, `git diff HEAD` empty).
 
@@ -613,3 +613,126 @@ exactly as stored plus the client's OWN suggestions by their own part (`<client>
     blocks showing their chosen take and the cap, the ambiguity refusal and its retry, and `pin_chosen` as the note's
     current takes made explicit. Words AS BUILT (FOR VX-234 lists tool descriptions only for the record — they are the
     model's, not her pane's; nothing renders in her app).
+
+### LIVE LEGS FOR U5b's WINDOW (U5a's share of the shared round — NOT run here; claim `vx336-u5`)
+
+**Where they sit in U5b's window:** after U5b's connect leg (the Claude Code TAB key re-binding `claude-code` with zero
+clicks — VX-246 U1b STAGE RUN leg 1's worked form) and its grant (`claude-code` ▸ Change… ▸ a wing · Home · Edit · Always
+reaches every leg here — suggest is inside edit). The product is U5b's Debug build (`DerivedData/vx336-u5`, which carries
+this unit's sources). The client is a REAL Claude Code over the REAL shim
+(`…/Build/Products/Debug/Variorum.app/Contents/MacOS/variorum-mcp`), configured by a scratch JSON —
+`$SCRATCH/u5a-mcp.json` = `{"mcpServers":{"variorum-dev":{"command":"<the shim, or U1b's tee-shim.sh wrapping it>",
+"env":{"VARIORUM_MCP_KEY":"<the tab key>"}}}}` — and `claude -p --strict-mcp-config --mcp-config $SCRATCH/u5a-mcp.json
+--output-format json`, each answer tee'd to `notes/plans/vx336-screens/u5/u5a-<leg>.json` (keys redacted to 9 characters in
+every record and capture name). Never her user scope; her user-scope fingerprint read before and after (U5b's). **~20
+minutes**, Study first, the label capture again in Terminal.
+
+0. **The fixture, through her own doors (≈3 min):** Bookcase quick entry: `{t:"vx336 u5a"}Olá.` ⇧⏎ `Tudo bem?` ⇧⏎
+   `Adeus.` ⇧⏎ `Fim.` ⏎ — a note of four blocks in Home (if the chip's Return makes blocks differently, use four ⏎ — the
+   evidence needs four blocks, not a recipe). Capture the page.
+1. **Leg A — VX-267, the new label seen in Takes (≈5 min, BOTH voices).** ONE turn, allowed
+   `mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note,mcp__variorum-dev__add_take,mcp__variorum-dev__add_takes`:
+   > In Variorum, find the note titled "vx336 u5a" (list_notes, then read_note with with_ids true). Add a take labelled
+   > english to its FIRST block with add_take, text "Hello.". Then in ONE add_takes call add takes labelled english to its
+   > second block (text "All good?") and third block (text "Goodbye."). Then read_note with with_ids true again and reply
+   > with each new take's take_id and the label read back.
+   **Expected:** three take ids; every label read back **`claude-code · english`** (never "suggested"). **Her face:** the
+   note in Takes (⌘2) — each of blocks 1–3 shows a new card labelled **"claude-code · english"**, unchosen; the page
+   unchanged. Capture one card's label as a crop; flip the voice (Settings ▸ General ▸ Theme) and capture the same card
+   in Terminal; flip back.
+2. **Leg B — VX-253, save_lens by label meets an ambiguous block, then its retry (≈5 min).** Her own door first: in
+   Takes, on block 1 ("Olá."), ＋ new take (blank) → type `Hi.` → label it **`english`** (the take's label field) — block
+   1 now holds her "english" AND claude-code's "claude-code · english" (her ruling's case: two matches). Capture. ONE
+   turn, allowed `mcp__variorum-dev__list_notes,mcp__variorum-dev__save_lens,mcp__variorum-dev__read_note`:
+   > In Variorum, on the note titled "vx336 u5a", call save_lens with name "english" and label "english", and do NOT pass
+   > take_ids. It should refuse, naming a block and its matching takes. Then call save_lens again with the same name and
+   > label, plus take_ids holding exactly the take labelled "claude-code · english" on the block the refusal named. Quote
+   > both answers verbatim.
+   **Expected:** answer 1 `isError` — "label "english" matches more than one take on one block, and a lens shows one take
+   per block. Call again…" + the JSON naming block 1 with two takes (labels `english`, `claude-code · english`); answer 2
+   `{"lens_id":…,"note_id":…,"unmatched_blocks":["<block 4>"],"unmatched_count":1}` (block 4 "Fim." has no english take).
+   **Her face:** Lenses (⌘4) — the "english" lens column reads "Hello." / "All good?" / "Goodbye." / "Fim." (the last
+   its chosen take, unmatched). Capture. Activity: one "saved a lens" line and the refused one before it, in words.
+3. **Leg C — VX-253, an own suggestion in the LEGACY form matches (≈4 min).** Her own door: on block 4 ("Fim."), ＋ new
+   take (blank) → type `The end.` → label it by hand **`claude-code · suggested · english`** (a take as a pre-VX-267
+   client left it — labels are text). ONE turn, allowed `mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note,
+   mcp__variorum-dev__save_lens`:
+   > In Variorum, on the note "vx336 u5a", call save_lens with name "english, legacy too", label "english", and take_ids
+   > holding exactly the take labelled "claude-code · english" on the first block. Then read_note with with_lenses true
+   > and reply with that lens's picks and the answer's unmatched_blocks.
+   **Expected:** lands; `unmatched_blocks` `[]`, `unmatched_count` 0; the lens's picks name block 4's **"The end."** take
+   (the legacy form matched as claude-code's own). **Her face:** the new lens column reads "…/ The end." Capture.
+4. **Leg D — optional, if minutes remain (≈3 min): `pin_chosen`.** ONE turn (save_lens only): `save_lens(name: "as it
+   reads", pin_chosen: true)` → `unmatched_count` 0. Her ✓ on block 2's "claude-code · english" take (Takes); Lenses: the
+   "as it reads" column still shows "Tudo bem?" (pinned, not a fall-through). Capture.
+5. **Nothing to clean beyond U5b's:** the notes live in the dev store, which U5b's window restores from its A1 copy
+   (`Tools/ScaleFixture/restore.sh` → "Restored (verified)").
+
+**A red here is a finding, never a fix under the claim:** record the answer and the capture, finish the window's
+cleanup, and report.
+
+### PROVISIONALs (with their options — the orchestrator files them at the merge)
+
+- **P-VX253-1 — the picks fill keeps the wire name `take_ids`:** (a) AS BUILT — `take_ids` is the ruling's "picks" (the
+  explicit per-block takes a lens has always been given; read_note's `picks` is the same thing read back), now optional;
+  (b) rename it `picks` (every existing caller re-learns a word); (c) accept both names.
+- **P-VX253-2 — a label that no take in the note wears refuses:** (a) AS BUILT — "No take in this note is labelled
+  “‹L›” — nothing was saved." (a lens naming nothing by label reads as the note: a mistyped label would leave her a junk
+  lens a suggest client can't delete — §12's "a door that did nothing speaks a refusal"); (b) the ruling's letter alone —
+  save it, every block listed in `unmatched_blocks`; (c) refuse only when no `take_ids` were given either.
+
+**Argued, not provisional (the brief's own "argue" items — design §2, §3, §6, §7):** `label` with `pin_chosen` refuses
+(no precedence is ruled, so none is invented); no fill at all refuses (the old schema required `take_ids`); `pin_chosen`
+means her Save Choices as Lens (an explicit pick of each block's rendered ACTIVE take); the answer and the refusal list at
+most 200 blocks with a count of the whole (the house's per-answer bound); the refusal names each ambiguous block's
+matching takes so the retry needs no read. **Recorded limits:** a label she typed by hand as `‹client› · ‹label›` reads,
+for that client, as its own suggestion (labels are text); `pin_chosen` on a block whose rendered take is an archived
+default (a render edge) leaves that block unpinned and lists it.
+
+### FOR VX-234 (user-facing words, as built)
+
+1. **An AI take's label on her Takes cards, the take panel and the Lenses board** (VX-267, her ruling): **`‹client› ·
+   ‹label›`**, or **`‹client›`** alone when the client gave no label — "suggested" dropped (was `‹client› · suggested ·
+   ‹label›`). Takes made before keep their old labels (text, no migration). Written by `MCPWriteTools.aiLabel`.
+
+Nothing else she sees changed: `save_lens`' description, its refusals and its answer are the model's words (on the wire,
+never rendered); the Activity line for a refused or landed `save_lens` uses the pane's existing words.
+
+### SELF-ASSESSMENT (the implementer's)
+
+- **Against the brief:** VX-267 first, then VX-253, as ordered. VX-267: the form is exactly the ruling's (`‹client›` or
+  `‹client› · ‹label›`), at both call sites, existing takes untouched; the doc-truth sweep found nothing stating the old
+  form (said with what was read, so U8 knows the label sentence is still to write). VX-253: the three explicit fills, the
+  picks first, `unmatched_blocks`, the whole-call ambiguity refusal naming the uncovered blocks, the match rule exactly as
+  ruled (exact, own in both forms, never another's — her "english" plus its suggested "english" refuses), SUGGEST
+  unchanged, VX-280's picks read built on. Each member pinned red-first on the wire (VX-267 1 test / 2 issues; VX-253 6 of
+  7 / 35 issues, the guard green by design) and red again by revert (VX-267 4 tests / 6 issues; VX-253 the identical 35
+  test × line pairs), green after; the whole package green (MCP 251/54 · core 2,860/330 · workbook 40/6).
+- **Against the spec:** every write is still ONE §9 operation (`saveLens`, unchanged) with ONE client-named undo entry
+  whose halves already answer U2's question; `flushesHerEditorFirst` stays false, argued (§10 of the design); the fence
+  holds (the rule runs only after the decision — the guard pin; malformed fills refuse at the parse, independent of any
+  note); Private/Seal/Own untouched; P1 — the rule's read ∝ the note's blocks and their takes, both statements pinned on
+  the plan, the picks still ∝ the ids. Zero `Sync/`, custody, schema, `Server/`, editor seam, app files, core lines
+  (path-checked: `git diff --name-only 501c367e..HEAD` = the record, `.gitignore`, three `Sources/VariorumMCP` files, six
+  `Tests/VariorumMCPTests` files — plus the kickoff plan, which only the orchestrator's `d7edfea1` touched, VX-330's
+  join into U6).
+- **Less sure, said plainly:** (1) the description of `save_lens` is long (the rule has several edges and the model needs
+  each); U8 may tighten it — the facts it states are pinned by the wire tests; (2) the ambiguity refusal mixes a sentence
+  and a line of JSON in one error text — chosen so the retry needs no read, readable by a model and a person alike, but
+  it is the first refusal of that shape on the wire; (3) nothing here has met a real client yet (U5b's window).
+
+### OWED (for the orchestrator)
+
+1. **U5b's window runs LIVE LEGS A–C (D optional)** above; U5a's acceptance closes there.
+2. **Canon at the merge (proposed, not written):** MCPSpec's THE MCP DOOR line gains a clause — "an AI take's label is
+   `‹client›` or `‹client› · ‹label›` (VX-267; earlier takes keep `‹client› · suggested · ‹label›`); `save_lens` fills
+   explicitly by `take_ids`, `label` or `pin_chosen: true` (VX-253) — the picks first, a label matching exactly as stored
+   plus the client's own suggestions in either form, an unmatched block shown by its chosen take and listed, an
+   ambiguous uncovered block refusing the whole call by name, `pin_chosen` her Save Choices as Lens" — with a pointer to
+   this record.
+3. **QUESTIONS at the merge:** P-VX253-1 and P-VX253-2.
+4. **For U8 (docs):** the guide and `MCPSession.instructions` say nothing yet of a label rule or of `save_lens` by label
+   (true, but they undersell); the stargazing brief's FURTHER delta should carry both (the label form, `save_lens`' three
+   fills).
+5. **For U7 (VX-254's sweep table):** `save_lens` writes no take text — no digest owed; `add_take`/`add_takes` write take
+   text and keep VX-267's label (their digest row is U7's).
