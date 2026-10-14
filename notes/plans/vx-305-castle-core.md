@@ -538,7 +538,16 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   18 suites green in Debug; 55 in 17 green under `-c release` (the DEBUG-only mutation suite compiled out) — run on a
   scratch copy, because the core test target does not build under `-c release` on main today (a pre-existing gap, the
   record's first line). The full core suite green in Debug.
-- U2 — assess, roads, route finder, catalog, retention: **NEXT.**
+- U2 — assess, roads, route finder, catalog, retention: **IN-PROGRESS** (Opus implementer, 2026-10-14; reading done —
+  CLAUDE.md and canon, the resiliency protocol, the design whole, this plan whole, SyncSpec §3, pre-13x §1–§7 and §14,
+  the Apple facts, the listed core and app files). Pieces, each its own commit: (a) the catalog — the one name parser
+  (the union of `StoreBackup.date(fromBackupURL:)`/`BackupRestoreCandidates.backupDate`, `LibraryClassifier`'s pair
+  rules, and `LibraryAdoption.adoptionStamp`/`LibraryAsideCopies`' stamp folders) and attribution to library + Mac —
+  NOT-STARTED; (b) retention per library per Mac — NOT-STARTED; (c) the route finder, the *Opens with* line, the
+  finder without the old shared key, the retirement's list, the anchor sentences — NOT-STARTED; (d) `assess`: facts,
+  the mode and account verdicts, the vault's three states, the four situations, the Touch ID road — NOT-STARTED;
+  (e) `assess`: repairs with §3.3's guards, acts owed, doors with reasons, the open rule — NOT-STARTED; (f) U2's
+  `ProtectionGuards` and their DEBUG mutation tests, both configurations' runs, the record — NOT-STARTED.
 - U3 — the executor and the acts: **NOT-STARTED.**
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
 - The go/no-go record: **NOT-STARTED.**
