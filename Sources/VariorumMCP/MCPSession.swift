@@ -206,15 +206,33 @@ final class MCPSession: @unchecked Sendable {
         try? await server.notify(ToolListChangedNotification.message())
     }
 
+    /// **The descriptor's end, under ONE lock** (VX-279 — VX-184's ladder,
+    /// round 2): a session's number is only ever shut down or closed here,
+    /// and once closed it is never touched again. A closed number is free —
+    /// POSIX hands it to the next descriptor the PROCESS opens (any thread) —
+    /// so a hang-up that arrived after the close would shut THAT socket down.
+    private let connectionLock = NSLock()
+    private var connectionClosed = false
+
     /// End the connection (server stop): the reader unblocks, the loop ends.
+    /// VX-279: a no-op once the session has closed its descriptor — the
+    /// number may already be another socket's.
     func hangUp() {
-        shutdown(fd, SHUT_RDWR)
+        connectionLock.withLock {
+            guard !connectionClosed else { return }
+            _ = shutdown(fd, SHUT_RDWR)
+        }
     }
 
     /// The host's close of this session's descriptor once `run()` has
-    /// returned (VX-279's seam — the host's own `close(fd)`, moved here so
-    /// the session sees its descriptor's end).
+    /// returned and the host has let go of the session (VX-279): once, under
+    /// the same lock as `hangUp()`, so a stop's hang-up can never land on the
+    /// number after it was freed.
     func closeConnection() {
-        close(fd)
+        connectionLock.withLock {
+            guard !connectionClosed else { return }
+            connectionClosed = true
+            _ = close(fd)
+        }
     }
 }
