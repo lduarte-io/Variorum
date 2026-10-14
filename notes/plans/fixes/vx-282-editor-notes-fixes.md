@@ -106,7 +106,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-290 — the empty-block backspace's caret landing | **READY FOR STAGE** — the Mac batch (the reverted products' red-on-old run of `CarveCaretLandingTests` + `TypedReturnKeyTests` + `EditorEditRouteTableTests`, then the fixed products' 13 suites in two `-only-testing` groups) + a SHORT WALK on the dev-store Debug build (rows A–D in the U1 record's window plan), ≈40 min. Fix `385aa1fc`; both product sets built; the revert build is DONE AND RESTORED (`git diff` empty) — no revert in flight. |
+| U1 | VX-290 — the empty-block backspace's caret landing | IN-PROGRESS — **W1 RED ON OLD DONE, W2 MAC BATCH GREEN** (stage `vx282-u1` 21:58:14–22:01:26, released; record below). **W3, the walk, is HELD** on the coordinator's word (she may be on the Pro) — next: on the orchestrator's "W3 GO" + claim line, walk rows A–D, record, flip to DONE. Fix `385aa1fc`. No revert in flight. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | NOT-STARTED |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | NOT-STARTED |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
@@ -282,6 +282,36 @@ Logs and captures go to `notes/plans/vx282-screens/u1/` (`logs/` for the runs). 
   the dev store as found (Standard, unlocked), release the claim. Voice: the dev store's current one, recorded — the
   landing is a caret position with no face of its own (no chrome, no voice-dependent code on the road); the
   mounted pins run under the harness's Terminal metrics.
+
+**THE STAGE WINDOW, W1 + W2 — DONE** (the coordinator's GO; `Tools/stage` handed `coord-for-vx282` → **`vx282-u1`**,
+claimed 21:58:14, RELEASED 22:01:26 — 4 of the 20 minutes; `guard.sh --author` OK before each leg; no Variorum
+instance before or after, no simulator). Logs: `notes/plans/vx282-screens/u1/logs/`.
+- **W1 — RED ON OLD, as designed** (`test-without-building` on `DerivedData/vx282-u1-revert`, the one-line revert;
+  `w1-red-on-old.log`): "Test run with **55 tests in 3 suites failed** … **12 issues**", 0 skipped. Every issue sits
+  in the five designed pins and nowhere else:
+  - `herReportBackspaceInAnEmptyBlockMovesUpIntoTheLineAbove` — 3 (the caret NOT in alpha, NOT at 5, the second ⌫
+    did not read `["alph","",""]`);
+  - `aBackspaceTypedDuringTheCarvesFlightLandsAboveToo` — 1 (the store after the replayed press);
+  - `returnThenBackspacePutsTheCaretBackWhereItWas` — 3 (the caret, the offset, `["alph","beta"]`);
+  - `forwardDeleteAtAParagraphsEndKeepsTheCaretThere` — 3 (the caret, the offset, `["alphax","beta"]`);
+  - `TypedReturnKeyTests.aBurstWithASeamBackspaceAboveABlockLandsWhereTheBreakWas` — 2 (the store, the caret's
+    block).
+  GREEN on old: the three guards (`backspaceAtAParagraphsStartUnderAnEmptyBlockKeepsItsStart`,
+  `forwardDeleteInsideAnEmptyBlockKeepsTheCaretOnItsLine`, `theDeleteAndArchiveDoorsKeepTheirOwnLanding` ×2), the
+  re-pointed `aBurstWithASeamBackspaceHoldsWhenTheCarveLandsBelow`, its sibling
+  `aBurstWithASeamBackspaceKeepsTheTextBehindTheReturnItFollowed`, the rest of `TypedReturnKeyTests`, and the whole
+  table suite (its pins pin the plan, which the revert leaves in place). *(The store expectations print
+  `<not evaluated>` for the actual value — `#expect` does not decompose a `try` call — so the old stores are the
+  trace's, not the log's.)*
+- **W2 — THE FIXED MAC BATCH, GREEN** (`test-without-building` on `DerivedData/vx282-u1`, the build of `385aa1fc`):
+  (g1, `w2-g1.log`) "**120 tests in 7 suites passed**" — `CarveCaretLandingTests` `BlockDeletionAndRedoTests`
+  `TypedReturnKeyTests` `ReturnKeyTraceTests` `SoftNewlineTests` `EditorEditRouteTableTests` `SeamMergeTests`;
+  (g2, `w2-g2.log`) "**60 tests in 6 suites passed**" — `WriteTopAirTests` `WriteFloatingViewportTests`
+  `UntouchedLineKeeperTests` `WholeBlockDeleteTests` `BoundaryClampTests` `CrossBlockCompoundTests`.
+  **180 tests / 13 suites, all passed, 0 skipped** (every suite's ✔ line read in the logs; `** TEST EXECUTE
+  SUCCEEDED **` ×2).
+- **W3 — HELD** by the coordinator until she confirms she is off the Pro; no "W3 GO" had reached this session when
+  W2 ended, so the claim was released, per the GO's instruction. PENDING.
 
 ## Ladder
 
