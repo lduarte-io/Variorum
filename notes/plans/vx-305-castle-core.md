@@ -1031,6 +1031,25 @@ landed.
   reach and session memory.
 - The one Sonnet lookup was not used.
 
+### ORCHESTRATOR NOTE after U3 (2026-10-14)
+
+- **U3 verified, not trusted:** all 55 protection suites re-run by the orchestrator — `✔ Test run with 268 tests in
+  55 suites passed` (the exact claimed count) — tree clean and level with origin, §7 flipped. **Scope re-verified by
+  diff against the branch base:** outside `Protection/`, the whole branch touches only the plan file and VX-345's
+  three `#if DEBUG` test guards — zero `Sync/`, `App/`, `Server/`, `Persistence/`, migration or `Package.swift`
+  lines, exactly as the kickoff's hard limits demand.
+- **The `Model/Plan.swift` refinement accepted:** `ActParameters` (the non-secret choices a resume needs — the gate
+  chosen, the door's vault revision and KDF descriptor, stamped corpus ids, minted Apple key ids). Recorded with its
+  reason.
+- **Tracked hand-off:** the EMPTY-SLOT landing (a fresh Mac with no library of its own receiving Send Library) is
+  deliberately phase 5's (Open Library's road) — carried to §11's closeout so VX-309's plan inherits it. U4 gives
+  its receivers a library of their own meanwhile.
+- The crash harness found and fixed two real bugs in-flight (the unrecorded Apple key on resume; Replace All Keys'
+  re-link-first vault revision), both pinned.
+- **For her bundle:** P-U3-1 (a follow that waited out a leave asks its one secret again at the next press) and
+  P-U3-6 (a copy act that crashes before its swap rolls back and is redone) are the two calls with faces she would
+  meet; both PROVISIONAL, options in the U3 record, QUESTIONS at the closeout.
+
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions)
 
 *(empty)*
