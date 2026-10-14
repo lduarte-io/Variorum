@@ -17,7 +17,11 @@ Nothing is built: this is design and plan only.
    (round 4) then traced each one as ordinary design text: each holds, and each is rightly yours to confirm.
 2. **Today's bugs in Release:** say which get a small fix on today's road before the release switch (the table
    below). The recommendation is VX-302 and VX-317 yes, VX-209 wait.
-3. **The final Fable review** of this handoff, the branch and Linear: <the result, filled in when it reports>.
+3. **The final Fable review** of this handoff, the branch and Linear: **no MAJOR · 2 MINOR · 4 NIT, all fixed.** Its clean
+   bill says the design, the plan, the maps and the tickets agree, and every decision is saved correctly. One missing
+   row (the Castle offer's "they always will") was added to the surfaces list below; one ticket comment (VX-102) was
+   corrected; the rest were wording. Records: `notes/plans/vx-266/final-review-fable.md` (unedited) and
+   `final-review.md` (the dispositions). Nothing needs your eye from it.
 4. **Approve the branch.** Then:
    - merge `origin/main` into the branch;
    - open the PR "VX-266: Castle & backups before launch — the design and the plan" and merge it with a merge
@@ -39,8 +43,9 @@ Each call below gives the decision, the other option, why this one, and what cha
 
 ### 1. A follower's anchor is also locked under the secret typed at its follow (design §3.4, rule 5 in §3.1)
 
-**The problem it answers** (the late extra read's MAJOR 3). Your ruling: *"leave it fixed on the day you left ...
-copies before you left castle open with the passphrase you had when you left"*. On the Mac that presses Use Standard,
+**The problem it answers** (the late extra read's MAJOR 3). Your ruling, verbatim: *"i think that it's probably good
+to leave it fixed on the day you left ... c opies before you left castle open with the passphrase you had when you lefti
+s solid."* On the Mac that presses Use Standard,
 that's exactly true. On your other devices it often wasn't: each device's anchor was locked only with what that device
 happened to hold, so it carried locks that could be stale. For example:
 - you change the passphrase on the Pro;
@@ -104,7 +109,7 @@ Whatever runs logs every Apple key id it mints, so a stray key can be deleted by
 | VX-209 | Opening a Standard-era copy into a Castle library brings the library back in Standard. VX-201's shipped confirm line says so and names the road back: *"This copy isn't in Castle, so once it's open your library opens the old way — press Resume Sync, then choose Use Castle again in Settings ▸ Protection to put it back in Castle."* The field guide warns too | **wait** (a refusal is your option) | It's warned, not silent: the ticket's title predates VX-201. It's the interim behaviour you once said yes to. A refusal would only block a click-through, at the cost of a mini-ladder on code the switch deletes |
 | VX-302 | Two Macs sharing a backup folder prune each other's backups | **offer a small fix on today's road** | A data-loss class, live for any tester whose Macs share an iCloud Drive backup folder (your Air doesn't share the Pro's) |
 | VX-317 | Resume Sync clears the hold banner even when removing the marker failed, so the next launch comes up held with no explanation | **offer** | Trivial, and it confuses without warning |
-| VX-107, VX-108, VX-109, VX-113, VX-213 | the follow's double-crash sentence; the doors reading a stale posture; `begin` re-fetching the vault; the changed-elsewhere refusal's words; the encryption tidy-ups | **wait** | Phase 3 rebuilds each wholesale, so a today-road fix would be thrown away |
+| VX-107, VX-108, VX-109, VX-113, VX-213 | the follow's double-crash sentence; the doors reading a stale posture; `begin` re-fetching the vault; the changed-elsewhere refusal's words; the encryption tidy-ups | **wait** | The rebuild redoes each of them — VX-213's items in phases 2 and 5 (its `pg_temp` item at your go), the rest in phase 3 — so a today-road fix would be thrown away |
 
 **How the call moved:**
 1. The Fable reviewer first said wait on all of them.
@@ -192,6 +197,7 @@ switch. The website changes at the switch.
 | The lobby and the Touch ID re-arm | `PostureCopy.swift` (§3) | the button rule (VX-310); the re-arm question only after a failed press; the quiet no-item line | 2 (lobby), 4 (re-arm) |
 | The signed-out screens and the account acts | `PostureCopy.swift` | VX-264's words; every leave re-keys | 4 |
 | Settings ▸ Protection, the cards | `PostureCopy.swift` (§1) | the Standard card's login-password truth: "anyone who can sign in to this Mac" | 5 (VX-309) |
+| The Castle offer, *"Delete the backups Variorum made before today?"* | `PostureCopy.swift` (`deleteOldBackupsBody`; and `backupsStandardSentence` / `backupsCastleSentence`, which Data Safety shows) | "They still open through your Apple account, and they always will" retires; the offer under VX-301 — other libraries' copies as their own choice (VX-265), VX-210's reworded line, the Markdown line | 5 |
 | Data Safety, the restore list, Open Library | `DataSafetyCopy.swift`, `LibraryOpenCopy.swift` | the *Opens with* line per copy; the concrete confirm; "made on another Mac, or not by you"; a landing's other secret; Send Library with no sharing sentence; the "leaving Castle" confirm line retires | 5 |
 | The field guide's privacy chapter | `ProtectionCopy` (`PostureCopy.swift`), rendered by `TutorialSeeder` | the older-copy warning retires; the try-it-yourself line arrives | 5 |
 | `RESTORE.md` in every backup folder | the backup service | the new roads | 5 |
@@ -226,7 +232,10 @@ All of it is co-signed by the round-2 Fable reviewer.
   - VM-15: the typed follow settles it. Until the phone follows, its own Apple key is untouched by design. My first
     comment said otherwise and was corrected in place.
   - VX-81: phase 3 re-checks the crash on the new road.
-  - VX-102: its premise shifted.
+  - VX-102: the protection-facts half of its premise shifted (mode, account and the family tree now come from the
+    library). Its file-flags item and the stray sidecar stay its own, re-checked at phase 5. The final review caught
+    my first comment answering the flags with the family tree, and it's corrected in place.
+  - VX-209: a reply now marks its 03:20 comment, which carried the round-1 landing rule, as superseded at round 2.
 - **Unchanged and correctly placed:** VX-108, VX-113, VX-211, VX-233, VX-239 and VX-243.
 
 ## For a fresh session picking this up

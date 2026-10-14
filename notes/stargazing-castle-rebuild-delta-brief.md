@@ -59,7 +59,9 @@ two ways:
   so nothing more is typed. A restored copy takes the library's current mode and never lowers it. Copies from before
   you left Castle open with the passphrase or the twelve words you had on the day you left. On your other devices,
   copies open with at least the secret you typed there when that device followed. Each copy's *Opens with* line says
-  which, and from which day.
+  which, and from which day. The entry's fact "a backup carries no sync key and no device identity" becomes **no sync
+  key**: a backup's protection record names each device that has opened it, by a random identity and a salted hardware
+  hash, as the Tier 2 change below says.
 - **"My twelve words were seen" / "I forgot my passphrase."** If your library left Castle earlier, every door that
   replaces a secret says what still opens the copies from before the leave:
   - new words: the old words still open them — keep that paper;
