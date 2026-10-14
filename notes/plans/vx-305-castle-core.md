@@ -561,9 +561,13 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   leave/follow). Pieces, each its own commit: (a) the world and its fakes — two Macs and a phone, two Apple accounts,
   two Variorum accounts, the device keychains (Touch ID, the lid, the state hash, Keychain Access), iCloud Keychain
   (delay, the off switch, the same-name rule, deletes with no recovery), the file systems (copies, Time Machine,
-  container deletion), the vault (CAS, the proof, the rotation fields), the leaves over them — NOT-STARTED;
-  (b) the starting states from the old formats and the older build as an actor — NOT-STARTED; (c) the alphabet and the
-  thirteen promises — NOT-STARTED; (d) the fixed scenarios — NOT-STARTED; (e) the mutation pins — NOT-STARTED; (f) the
+  container deletion), the vault (CAS, the proof, the rotation fields), the leaves over them — DONE (this commit,
+  WIP-compiling with (b)/(c)'s first halves; `WorldSmokeTests` 3 green: a store built from today's formats migrates and
+  enters Castle on the new build, the old shared key retired; the Touch ID and iCloud Keychain semantics);
+  (b) the starting states from the old formats and the older build as an actor — IN-PROGRESS (`OlderBuild.swift`:
+  `today(on:)`, `todayAccount`, `todayOtherLibrary`, the older build's leave, follow, Re-link, completion and backup;
+  the fixtures named per §6's list land with their scenarios); (c) the alphabet and the thirteen promises —
+  IN-PROGRESS (`Alphabet.swift` written; `Promises.swift` NOT-STARTED); (d) the fixed scenarios — NOT-STARTED; (e) the mutation pins — NOT-STARTED; (f) the
   generator and the soak switch — NOT-STARTED; (g) the runs and the record — NOT-STARTED.
 - The go/no-go record: **NOT-STARTED.**
 
