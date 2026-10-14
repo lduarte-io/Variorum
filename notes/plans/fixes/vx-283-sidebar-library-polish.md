@@ -386,7 +386,7 @@ screenshot walk (a fresh walker's, after the stage window); any stage work until
   headless build-for-testing green; its pins PENDING the stage window; the chord's system half PENDING (P0).
 - P4 — VX-289 (Close All Notes: the Open list's right-click + the View-menu twin): DONE (same commit as P3 — one
   landing rule, one set of pins) — headless green; pins PENDING the stage window.
-- P6 — her ruling at READY, "THE ✕ ON THE NOTE YOU'RE LOOKING AT" (f02f63cb): DONE (the commit carrying this line) —
+- P6 — her ruling at READY, "THE ✕ ON THE NOTE YOU'RE LOOKING AT" (f02f63cb): DONE (`bc80a9fb`) —
   headless build-for-testing green; its red-on-old pin (R-C) and the batch PENDING the stage window.
 - P5 — the stage window: **READY FOR STAGE** — the plan below (≈55 min, R-C added); nothing of it has run. No revert
   is in flight; the tree is clean at the commit carrying this line.
