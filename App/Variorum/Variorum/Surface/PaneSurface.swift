@@ -2008,10 +2008,20 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         @discardableResult
         private func settleMarkdownCaret(in view: PaneTextView) -> Bool {
             guard let storage = view.textStorage else { return false }
-            return MarkdownStyling.settleCaret(
+            let restyled = MarkdownStyling.settleCaret(
                 &markdownCaret,
                 selection: view.isEditable ? view.selectedRange() : nil,
                 in: storage)
+            // VX-282 R1-1: the face's line restyle OWNS `.backgroundColor` on
+            // every face run it re-derives — a find match painted inside the
+            // honoured span goes with it. A pane going read paints its matches
+            // BEFORE the liveness note's settle runs (`updateNSView`), so the
+            // record must learn what the settle rewrote, or the change-gated
+            // repaint at the update's end writes nothing and the match stays
+            // unpainted. The same rule every other road that rewrites the
+            // storage's attributes keeps (`findPaintWasReset`'s other callers).
+            if restyled { findPaintWasReset() }
+            return restyled
         }
 
         /// Measure and publish, through the ONE door. The Stage 4 gate's
