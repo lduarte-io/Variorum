@@ -157,9 +157,9 @@ guidance. Each unit's evidence is named before its spawn.
 
 | unit | status |
 |---|---|
-| U5a — the label pair | **BUILT, headless green at `590c0cb8`** (U5a UNIT RECORD): VX-267 and VX-253 fixed, each pin red on old and red again by revert; MCP 251/54 · core 2,860/330 · workbook 40/6 (the orchestrator re-ran the seven pin suites: 35 tests green). No app file moved. Its acceptance closes in U5b's window (LIVE LEGS A–C, D optional). Implementer retired (~437k) |
-| U5b — the block-writing pair | **DESIGNED, FORKS RULED** (U5b UNIT RECORD piece 0 `9b05e442`; THE ORCHESTRATOR'S RULINGS ON U5b's FORKS below). Pieces 1–8 go to a FRESH implementer (the designer's context was ~468k at its stop) |
-| U6 — Compare from the wire (+ VX-342) | NOT-STARTED |
+| U5a — the label pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): legs A–D all passed in a real Claude Code 2.1.300 round on the dev store — the new `claude-code · english` label on Takes cards in both voices, `save_lens` by label refusing the ambiguous block and its `take_ids` retry, the legacy form matched as its own, `pin_chosen` holding. Built at `590c0cb8` (U5a UNIT RECORD) |
+| U5b — the block-writing pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): the 31-suite Mac batch green (251 tests, 0 failed, 7 gated skips); V252-a (create_note's `blocks` = read_note's records; filed under its chapter), V255-a/b/c (the end at write new with her ⌥⌘Z/⇧⌥⌘Z; any anchor at write new hears the rung sentence and asks her; anywhere at edit), D8-a passed; D8-b's open tail is unreachable from the keyboard (THE ORCHESTRATOR ON U5's WINDOW). The store was restored cmp-SAME. Built `7a15376c`…`93edbc2e` (U5b UNIT RECORD, three sessions) |
+| U6 — Compare from the wire (+ VX-330, VX-342) | NOT-STARTED — split U6a (VX-311 + VX-298) / U6b (VX-330 + VX-342 + U6's window), THE ORCHESTRATOR ON U5's WINDOW |
 | U7 — the agent's read-backs | NOT-STARTED |
 | U8 — the AI's docs (LAST) | NOT-STARTED |
 | LADDER | NOT-STARTED |
@@ -170,6 +170,16 @@ guidance. Each unit's evidence is named before its spawn.
 ## Stage traffic log (the oct13coordinator protocol)
 
 - *(Newest first from here.)*
+- 2026-10-14 15:49:56: **RELEASE `vx336-u5`** (37 of 110 min). Result line to the coordinator: batch green (251 / 31, 0 failed); dev store
+  cmp-SAME vs A1; prefs 0 differ (1,596 keys); user-scope fingerprint same (`bc64543e2f4e8e58`, no `-s local` ever
+  made); posture Standard/unlocked; castle-W1 untouched. The A1 copy `scale-prestage-20261014T211517Z` is the
+  coordinator's to prune.
+- ~15:15: **SEAM** (the batch green); the coordinator answered "continue" (nobody else READY; vx-283 waits on her ruling).
+- 15:12: **GO for `vx336-u5`**, carrying `Tools/stage release --who coord-for-vx336 && Tools/stage claim --who vx336-u5
+  --reason "VX-336 U5: 31-suite Mac batch, SEAM, then real-client MCP live round on the Debug dev store (A1 prestage)"
+  --minutes 110`. The coordinator's pre-checks: no instances, no booted sims, 68 GiB free, the dev store restored and
+  verified after vx-283's 15:03–15:06 window, Standard/unlocked. Run at 15:13:00.
+- ~15:10: READY sent (the fresh stage runner read in, the product matched `c9c7f637`).
 - 2026-10-14 ~14:05: REQUEST `vx336-u5` (~60–75 min: the batch, SEAM, then the live round) sent early; the coordinator
   queued it. Ahead of it in READY order: vx-283's `vx283-u1` (~35 min batch), then `vx283-u1-walk` (~45 min). We may get
   the gap between them. A short window slots in only at our SEAM, never mid-round. At the GO it checks the dev store
@@ -214,6 +224,7 @@ guidance. Each unit's evidence is named before its spawn.
 
 | ticket | born | what | fate |
 |---|---|---|---|
+| VX-352 | U5 STAGE RUN step 12 (the runner's note 2) | Takes card header tail-truncates an AI take's label to "claude-code · e…" in Terminal at the margin-grid card width | Todo, 13n, Improvement · Confirmed · Low; not pre-launch; FOR VX-234's eye too |
 
 ## UNIT BRIEFS (the orchestrator's; each unit's implementer is spawned from its brief)
 
@@ -1613,3 +1624,38 @@ header truncates "choose claude-code · e…" at the margin-grid width (Study sh
 “u5b ch…and added 2 blocks" is the existing 120 s same-client-same-note run (`MCPDoor.receiptWindow`), not this unit's; (4) machinery: `claude -p`'s
 `--allowedTools` is variadic and eats a trailing prompt (the runner passes the prompt on stdin); System Events' `keystroke` drops non-ASCII (á, ·) —
 typed instead as ⌥e a and ⌥⇧9.
+
+### THE ORCHESTRATOR ON U5's WINDOW (2026-10-14 ~15:55 MDT)
+
+- **Verified, not trusted:**
+  - `Tools/stage status` reads FREE; both strict instance guards are empty; the tree is clean at `617c5498`.
+  - Her user-scope fingerprint re-read by the orchestrator: `['linear-server', 'variorum']` `bc64543e2f4e8e58`, SAME.
+  - 49 Study and 9 Terminal captures exist. Four were viewed by the orchestrator: V252-a's Outline (the note under
+    "um"), V255-a's Edit menu ("Undo claude-code's blocks"), leg A's Takes board, and the Terminal card crop.
+  - **U5 (U5a + U5b) is PROVEN**, and its members' acceptance is closed. VX-267, VX-253, VX-252 and VX-255 close at the
+    merge.
+- **D8-b's premise was the orchestrator's error, not a product red.** The rulings' D8 leg assumed she can open a tail
+  from the keyboard. She can't on the Mac: with the segmentation chip ON, ⏎ is the structural gesture; with it OFF, ⏎ is
+  content and no tail crystallizes. The runner read it at `BlockRangeIndex.swift:180–187` and measured it; AppSpec §7
+  agrees: "the tail opens only from a newline arriving as text". The adapted end-of-note leg passed: her words stayed
+  where typed, and the AI's block landed below. The open-tail case's evidence is the headless pin
+  `MCPInsertBlocksHerEditorTests` (D8's tail arm). Recorded; nothing owed.
+- **Two notes, neither a finding:**
+  - VX-352 was minted (the Terminal card truncation; it is on VX-234's list too).
+  - `create_note`'s and `insert_blocks`' receipts merged into one line by the door's existing 120 s
+    same-client/same-note rule (`MCPDoor.receiptWindow`), as designed.
+- **The machinery lessons**, for every later runner:
+  - `claude -p --allowedTools <list>` swallows a trailing prompt, so pass the prompt on stdin.
+  - System Events drops `á` and `·`, so type them by their option chords.
+  - `Tools/WalkKit/wl2` must be compiled per worktree, since `guard.sh <pid>` needs it.
+- **U6 is SPLIT before its spawn** (the lesson of U5b: an implementer spends ~450k reading in, so a four-member unit
+  ran three sessions):
+  - **U6a** = VX-311 (`duplicate_note`) + VX-298 (`show_in_app`'s Compare target, `link_versions`' Open ›): the
+    Compare pair. Headless pins, plus a Mac `build-for-testing` if app code moves. Its live legs are written for U6b's
+    window.
+  - **U6b** = VX-330 (the Book Panel's chapter row) + VX-342 (the one word) + U6's shared window: the Mac batch, the
+    live round, the Compare board and sherlock's Book Panel walked in both voices.
+  - Each gets a narrow reading list.
+  - Before ANY edit to `WorkspaceModel`, `ShellRouter`, `Registry/ShellActions.swift` or a registry file, the
+    implementer records it and stops; the orchestrator tells vx-283 first.
+
