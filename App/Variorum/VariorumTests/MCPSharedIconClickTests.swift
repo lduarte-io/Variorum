@@ -383,6 +383,16 @@ struct MCPSharedIconClickTests {
         await rig.poll(timeout: 1.2) { MCPSharedIconProbe.presentations(of: name) > 1 }
         #expect(MCPSharedIconProbe.presentations(of: name) == 1,
                 "the popover never presents itself when the reach returns (presented \(MCPSharedIconProbe.presentations(of: name))×, up now \(MCPSharedIconProbe.up[name] ?? 0))")
+
+        // **VX-281 ladder R2-2 (a):** …and her NEXT click presents it. A count of
+        // presentations alone cannot tell "SwiftUI wrote `false` back" from
+        // "`shown` stuck true and SwiftUI does not present on re-insertion" —
+        // the second would swallow her first click (a dead click: the toggle
+        // writes `false`, nothing shows). Green ⇒ the state left with its
+        // button; red ⇒ the icon's state outlived its presenter.
+        try await clickTheOneIcon(rig, client: name, host: "R2-2(a) — her first click after the reach returned") { 0 }
+        #expect(MCPSharedIconProbe.presentations(of: name) == 2,
+                "her first click after the reach returned presents the popover (presented \(MCPSharedIconProbe.presentations(of: name))×)")
     }
 
     // MARK: - R1-2 — ⌘L: Esc over a row's popover dismisses the popover, never the switcher
@@ -449,6 +459,75 @@ struct MCPSharedIconClickTests {
 
             #expect(catcher.onKey?(.escape) == true)
             #expect(closes.count == 1, "with nothing over the rows, Esc closes the switcher")
+        }
+    }
+
+    /// "Gone" is AppKit's word — no visible popover window.
+    private static func popoverGone() -> Bool {
+        !NSApp.windows.contains { $0.isVisible && String(describing: type(of: $0)).contains("Popover") }
+    }
+
+    private static var popoverWindowsVisible: Int {
+        NSApp.windows.filter { $0.isVisible && String(describing: type(of: $0)).contains("Popover") }.count
+    }
+
+    /// **VX-281 ladder R2-2 (b):** R1-2 hoisted the row popover's state into
+    /// the sheet (`popoverRow`, written through the icon's `isPresented`
+    /// binding). Her typed filter can take away the row whose popover is up
+    /// (the field keeps focus). If SwiftUI does not write `false` back through
+    /// that binding as the row tears down, `popoverRow` stays set: clearing the
+    /// filter brings the row back with its popover's state already true (it
+    /// could present itself — never-present-yourself, R-13nb-23/26g), and the
+    /// next Esc is `.dismissRowPopover` and visibly does nothing. Green ⇒
+    /// SwiftUI writes it back (HOLLOW); red ⇒ the state outlived its row.
+    @Test func aRowFilteredAwayWithItsPopoverUpLeavesNoPopoverStateBehind() async throws {
+        try await withWorld { session, _ in
+            let ops = session.operations
+            let name = "r22-client"
+            let client = try approved(ops, name)
+            _ = try ops.grantMCPAccess(client.id, grant(.read, .wing, ""))
+            _ = try ops.createWing(name: "elsewhere")
+            let wings = WingsModel(session: session)
+            await wings.load()
+            let watch = Task { await wings.watchSharing() }
+            defer { watch.cancel() }
+            #expect(try await settle { wings.reach[""] != nil }, "Home's row is reached (its wing grant)")
+
+            let closes = SharedIconCounter()
+            let switcher = WingSwitcherModel(wings: wings)
+            let rig = SharedIconRig(
+                WingSwitcherSheet(model: switcher, tokens: .studyLight, close: { closes.count += 1 }),
+                width: 440, height: 420)
+            defer { rig.close() }
+            try await clickTheOneIcon(rig, client: name, host: "⌘L's Home row") { closes.count }
+            #expect(!Self.popoverGone(), "non-vacuity: AppKit shows the row's popover")
+            let catcher = try #require(
+                Self.view(WingSwitcherKeyCatcher.CatcherView.self, in: rig.hosting), "the switcher's key catcher")
+
+            // Her filter takes the row away, popover and all…
+            switcher.type("zzz")
+            await rig.poll(timeout: 2) { MCPSharedIconProbe.frames(in: rig.window).isEmpty }
+            #expect(MCPSharedIconProbe.frames(in: rig.window).isEmpty, "no wing matches: Home's row and its icon left")
+            await rig.poll(timeout: 0.6) { false }
+            // …and clearing it brings the row back CALM: no popover presents itself.
+            switcher.type("")
+            await rig.poll(timeout: 2) { MCPSharedIconProbe.frames(in: rig.window).count == 1 }
+            await rig.poll(timeout: 1.2) { MCPSharedIconProbe.presentations(of: name) > 1 }
+            #expect(MCPSharedIconProbe.presentations(of: name) == 1,
+                    "the row came back and its popover never presented itself (presented \(MCPSharedIconProbe.presentations(of: name))×)")
+            #expect(Self.popoverGone(), "no popover over the returned row (\(Self.popoverWindowsVisible) visible)")
+
+            // Away again — and Esc, with nothing over the rows, closes the switcher.
+            switcher.type("zzz")
+            await rig.poll(timeout: 2) { MCPSharedIconProbe.frames(in: rig.window).isEmpty }
+            await rig.poll(timeout: 0.6) { false }
+            #expect(catcher.onKey?(.escape) == true, "Esc is the switcher's to act on")
+            #expect(closes.count == 1,
+                    "nothing is over the rows: Esc closes the switcher (a stale popover row swallows it — closes \(closes.count))")
+            switcher.type("")
+            await rig.poll(timeout: 2) { MCPSharedIconProbe.frames(in: rig.window).count == 1 }
+            await rig.poll(timeout: 1.0) { false }
+            #expect(Self.popoverGone(), "the row came back calm (\(Self.popoverWindowsVisible) popover windows visible)")
         }
     }
 }
