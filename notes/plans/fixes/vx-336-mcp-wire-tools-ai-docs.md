@@ -2116,3 +2116,29 @@ merge with the record's options.
 - **Next:** a FRESH `opus-implementer` builds pieces 2–9 from this record: the U6a UNIT RECORD and these rulings. Its live
   legs L1–L5 go to U6b's window.
 
+### THE ORCHESTRATOR'S RULING ON U6a's ONE OPEN DECISION (2026-10-14 ~17:20 MDT)
+
+- **(a) RULED: three clears for `pendingCompareLanding` in `CommandRouter.swift`, one beside each of the lens landing's,
+  plus one app pin, red-first.** The three clears:
+  - `registerDetail` drops a landing parked for another note (beside `:127–128`);
+  - `unregisterDetail` drops it at teardown (beside `:151`);
+  - `noteMode` drops it once the mode leaves `.compare` (beside `:463–464`).
+- **Why (a):**
+  - The design named the lens target's model, and the model's "one round" lives in those router clears (Round-2
+    MINOR-R2's aborted-round window).
+  - Without them, a landing she pre-empts (⌘1–⌘4 before the board mounts, or a teardown) waits on the router. It then
+    replaces her own columns the next time she opens Compare: a queued move, which R-13nb-23 forbids.
+  - (b) departs from the named model and makes her own Open › wait.
+  - (c) leaves a real hole open.
+- **The pin:** a landing parked, then the mode changed away (and the detail re-registered for another note) before the
+  board consumes it, then her own ⌘5 on that note: her columns are untouched. It must be red on the one-property tree
+  (`a846a5f1`) and green with the clears. The pin and the clears go in their own commits.
+- **Lane:** vx-283 has been told about the three extra lines (the orchestrator's message with this ruling). The build
+  continuation may make exactly those edits in `CommandRouter.swift`, and nothing else in the registry.
+- **Context:** the harness reports the build session at ~570k (its own estimate said ~210k; the harness count governs).
+  Pieces 7–9 plus this fix go to a FRESH, narrow continuation: the ruling's clears and pin, the two revert checks (row
+  7's exact steps), the headless finals, and the LIVE LEGS' final form for U6b.
+- **The flake** the build met (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`,
+  16.3–16.7 s against its 15 s bound at load average 9–67, green alone) is minted as VX-353 (Debt · Test-only · Low, 13n,
+  not pre-launch). It's not this run's.
+
