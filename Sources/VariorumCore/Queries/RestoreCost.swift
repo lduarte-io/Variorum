@@ -137,9 +137,21 @@ extension Queries {
                   (SELECT COUNT(*) FROM commit_point c
                      JOIN variant v ON v.id = c.variant_id AND v.deleted_at IS NULL
                     WHERE v.block_id IN (SELECT value FROM json_each(:ids))) AS moments,
+                  -- VX-182: a take she already deleted forever (Delete Now on
+                  -- the tray's take row) is not "waiting in Block History" —
+                  -- the face and the tray fence it out (`deletedTakes`), so
+                  -- the confirm must not count it. The standing STAMP-AWARE
+                  -- arm, exactly as the comments' below: a live intent fences,
+                  -- a completed one fences only the tombstone it covered, and
+                  -- a voided one (a Put back, then a re-delete) never hides
+                  -- the fresh tombstone.
                   (SELECT COUNT(*) FROM variant v
                     WHERE v.block_id IN (SELECT value FROM json_each(:ids))
-                      AND v.deleted_at IS NOT NULL) AS deleted_takes,
+                      AND v.deleted_at IS NOT NULL
+                      AND NOT EXISTS (SELECT 1 FROM purge_intent pi
+                        WHERE pi.table_name = 'variant' AND pi.row_id = v.id
+                          AND (pi.deleted_at IS NULL OR pi.deleted_at >= v.deleted_at))
+                  ) AS deleted_takes,
                   -- VX-179: a comment she already deleted forever is not
                   -- "still restorable" — the panel's fence, applied here so
                   -- the confirm never counts what no door can bring back.

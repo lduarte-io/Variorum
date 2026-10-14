@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS** — VX-229: fix REVERTED `7d798f82` (its offscreen evidence was an artefact — CORRECTION below); pins reshaped; expected HOLLOW, W1 decides. VX-257: pins `7650b6ce`; fix (this commit), offscreen replay red-on-old → fixed; stage PENDING. Old products `DerivedData/vx282-u5-old-products` = the build of `7d798f82` (no revert in flight). VX-183: declared + rendered from the rule (this commit), pins PENDING the stage. VX-182 NEXT. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS** — VX-229: fix REVERTED `7d798f82` (its offscreen evidence was an artefact — CORRECTION below); pins reshaped; expected HOLLOW, W1 decides. VX-257: pins `7650b6ce`; fix (this commit), offscreen replay red-on-old → fixed; stage PENDING. Old products `DerivedData/vx282-u5-old-products` = the build of `7d798f82` (no revert in flight). VX-183: declared + rendered from the rule (this commit), pins PENDING the stage. VX-182: pins `f38fb93c` red on old (headless), fence (this commit) green 8/1; **revert R-182 (the stamp clause off) NAMED — runs next, restore by `git checkout --` RestoreCost.swift.** |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -1709,6 +1709,31 @@ if-statements, emphasis included; the panel declares exactly the six) · `delete
 `everyDoorActsThroughTheOneDispatch` (Add files, Revert puts back, Save writes, Delete folds, Restore returns, Delete
 forever asks and the confirm takes it — against the store) · `CapabilityRegistryTests
 .theSurfacesRenderExactlyTheDeclaredSurfaceActs` (its new line). The walk (W3) presses each door live.
+
+#### VX-182 — `restoreCost.deleted_takes` gains the purge fence (core, headless)
+
+**The trace (against `d9e1eaf2`):** `Queries.restoreCost` — the version-restore confirm's only source of facts — counts
+population 2 as `variant … deleted_at IS NOT NULL` with no fence (`Queries/RestoreCost.swift:140-142`). Every READER of
+deleted takes fences purge intents stamp-aware — Block History's `Queries.deletedTakes` (`Queries/EditorSupport.swift:146-153`)
+and the tray's take rows — so a take Delete-Now'd from the tray (its intent standing until the janitor's horizon under a
+sync chain; on a never-signed-in install the local sweep removes the row at once, so only synced stores show it) was
+listed nowhere yet still counted as "waiting in Block History" in the confirm (`VersionsCopy` renders the count). VX-179
+U1 item 3 fenced the comments' twin (population 3, `:146-152`) and left this one (its O-1).
+
+**The fix:** the comments' STAMP-AWARE arm, copied onto the takes' count — `NOT EXISTS (purge_intent pi WHERE
+pi.table_name = 'variant' AND pi.row_id = v.id AND (pi.deleted_at IS NULL OR pi.deleted_at >= v.deleted_at))`: a live
+intent fences; a completed one fences only the tombstone it covered; a VOIDED one (`restoreVariant` voids — 13j ladder B,
+B1) never hides a fresh re-delete. Read-side only: zero `Sync/`, zero `PurgeJanitor`, zero schema.
+
+**Pins (`Tests/VariorumCoreTests/RestoreCostTests.swift`, headless):**
+- `aTakeDeletedForeverIsNotCountedAsStillRestorable` — **RED ON OLD, run:** at `f38fb93c` (pins, query unfixed)
+  `swift test --filter RestoreCostTests` → 8 tests, **1 issue** (`cost.deletedTakes == 1` read 2); fixed (this commit) →
+  **8 tests / 1 suite passed**.
+- `aTakePutBackAndDeletedAgainCountsAgain` — GUARD (green both sides): the stamp clause's own pin — an any-state fence
+  would hide the re-deleted take Block History lists. **Discriminating revert R-182 (named here, runs next):** the stamp
+  clause `AND (pi.deleted_at IS NULL OR pi.deleted_at >= v.deleted_at)` removed from the new arm → expect exactly this
+  guard red; restore by `git checkout -- Sources/VariorumCore/Queries/RestoreCost.swift` from this commit, `git diff`
+  empty.
 
 ## Ladder
 
