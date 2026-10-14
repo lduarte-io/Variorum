@@ -41,14 +41,10 @@ extension LibraryCatalogModel {
     /// **The near window** (pure): the pages holding the visible rows, one
     /// page beyond on each side — a page boundary is the only thing that moves
     /// it. Nothing visible yet (a fresh listing) is the first page and the next.
+    /// The rule itself is `NearWindow`'s (the shared home since VX-281's
+    /// ladder R1-1 — the Timeline's reach hold moves by it too).
     nonisolated static func window(visible: Set<Int>, count: Int) -> ClosedRange<Int> {
-        let lastPage = max(0, (count - 1) / pageSize)
-        guard let low = visible.min(), let high = visible.max() else {
-            return 0...min(1, lastPage)
-        }
-        let from = max(0, low / pageSize - 1)
-        let to = min(lastPage, high / pageSize + 1)
-        return from...max(from, to)
+        NearWindow.pages(visible: visible, count: count, pageSize: pageSize)
     }
 
     /// Rebuild the position index after the listing changed (a read; a page).
