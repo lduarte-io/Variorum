@@ -1,0 +1,258 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -scheme Variorum -destination platform=macOS -derivedDataPath DerivedData/vx282-u4 "-only-testing:VariorumTests/ShellChromeTests" "-only-testing:VariorumTests/ShellLandingMountTests" "-only-testing:VariorumTests/ShellLandingDoorTests" "-only-testing:VariorumTests/NavigationDoorsTests" "-only-testing:VariorumTests/PaneSplitDoorTests" "-only-testing:VariorumTests/NoteBoxSlotTests" "-only-testing:VariorumTests/NoteBoxCompositionTests" "-only-testing:VariorumTests/AscentRoutingTests" "-only-testing:VariorumTests/BookPanelActingTests" "-only-testing:VariorumTests/DebugOracleTwoWindowTests" "-only-testing:VariorumTests/TwoWindowMountTests" "-only-testing:VariorumTests/CreationTargetTests" "-only-testing:VariorumTests/WindowRegistryTests" "-only-testing:VariorumTests/OpenNotesRestoreTests" "-only-testing:VariorumTests/OpenNotesModelRestoreTests"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  GRDB: https://github.com/lduarte-io/GRDB.swift.git @ 7.11.1+sqlcipher.1
+  swift-dependencies: https://github.com/pointfreeco/swift-dependencies.git @ 1.14.1
+  swift-syntax: https://github.com/swiftlang/swift-syntax @ 602.0.0
+  Sparkle: https://github.com/sparkle-project/Sparkle @ 2.10.0
+  SQLCipher: https://github.com/sqlcipher/SQLCipher.swift.git @ 4.18.0
+  EventSource: https://github.com/mattt/eventsource.git @ 1.5.1
+  VariorumCore: <home>/dev/variorum-vx-282 @ local
+  swift-clocks: https://github.com/pointfreeco/swift-clocks @ 1.1.0
+  swift-collections: https://github.com/apple/swift-collections.git @ 1.7.2
+  swift-nio: https://github.com/apple/swift-nio.git @ 2.104.0
+  xctest-dynamic-overlay: https://github.com/pointfreeco/xctest-dynamic-overlay @ 1.11.0
+  mcp-swift-sdk: https://github.com/modelcontextprotocol/swift-sdk.git @ 0.12.1
+  swift-log: https://github.com/apple/swift-log.git @ 1.16.1
+  swift-atomics: https://github.com/apple/swift-atomics.git @ 1.3.1
+  swift-concurrency-extras: https://github.com/pointfreeco/swift-concurrency-extras @ 1.4.1
+  swift-system: https://github.com/apple/swift-system.git @ 1.8.1
+  combine-schedulers: https://github.com/pointfreeco/combine-schedulers @ 1.2.0
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:x86_64, id:<device-udid>, name:My Mac }
+2026-10-14 05:30:57.559263-0600 Variorum[6229:59557316] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to <home>/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/io.lduarte.Variorum.debug.savedState
+2026-10-14 05:30:57.799271-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=carbon status=0
+2026-10-14 05:30:57.801293-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=carbon quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 05:30:58.069660-0600 Variorum[6229:59557539] [logging-persist] cannot open file at line 53009 of [8fa8248e30]
+2026-10-14 05:30:58.069680-0600 Variorum[6229:59557539] [logging-persist] os_unix.c:53009: (2) open(/private/var/db/DetachedSignatures) - No such file or directory
+2026-10-14 05:30:58.222454-0600 Variorum[6229:59557316] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+Test Suite 'Selected tests' started at 2026-10-14 05:30:58.285.
+Test Suite 'VariorumTests.xctest' started at 2026-10-14 05:30:58.285.
+Test Suite 'VariorumTests.xctest' passed at 2026-10-14 05:30:58.286.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-14 05:30:58.286.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+2026-10-14 05:30:58.290446-0600 Variorum[6229:59557316] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 05:30:58.291215-0600 Variorum[6229:59557316] [sample-library] sample library (the adventures of sherlock holmes): alreadySeeded
+2026-10-14 05:30:58.291374-0600 Variorum[6229:59557316] [starred-gathering] starred gathering: alreadySeeded
+2026-10-14 05:30:58.291516-0600 Variorum[6229:59557316] [sample-library] welcome arrangement: alreadySettled
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite "The shell routes the ascent (13f W20 a)" started.
+◇ Test openingABookAtAPostNavigatesAndPushesHistory() started.
+2026-10-14 05:30:58.395278-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:30:58.395325-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test openingABookAtAPostNavigatesAndPushesHistory() passed after 0.446 seconds.
+✔ Suite "The shell routes the ascent (13f W20 a)" passed after 0.447 seconds.
+◇ Suite "Book Panel — the acts over the existing ops (13i-d U2)" started.
+◇ Test theMenuTwinsMoveTheBookThroughTheExistingOps() started.
+✔ Test theMenuTwinsMoveTheBookThroughTheExistingOps() passed after 0.081 seconds.
+◇ Test panelDropsFileAndReorderThroughTheSameOps() started.
+✔ Test panelDropsFileAndReorderThroughTheSameOps() passed after 0.053 seconds.
+◇ Test aFinishedBookRefusesInWordsAndNothingMoves() started.
+✔ Test aFinishedBookRefusesInWordsAndNothingMoves() passed after 0.051 seconds.
+◇ Test removeFromTheRowMenuIsTheOneRoadWithItsReceipt() started.
+✔ Test removeFromTheRowMenuIsTheOneRoadWithItsReceipt() passed after 0.033 seconds.
+◇ Test theClickThroughRidesTheAscentRoad() started.
+✔ Test theClickThroughRidesTheAscentRoad() passed after 0.031 seconds.
+◇ Test theClickThroughLandsTheBookInThePane() started.
+2026-10-14 05:30:59.138019-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:30:59.138074-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test theClickThroughLandsTheBookInThePane() passed after 0.427 seconds.
+✔ Suite "Book Panel — the acts over the existing ops (13i-d U2)" passed after 0.680 seconds.
+◇ Suite "The keyed DEBUG oracles answer for the window still open (18k UNIT C4)" started.
+◇ Test aBookInTwoWindowsKeepsTheOpenWindowsDoorAndNavigator() started.
+✔ Test aBookInTwoWindowsKeepsTheOpenWindowsDoorAndNavigator() passed after 2.330 seconds.
+◇ Test oneNoteReadInTwoWindowsKeepsTheOpenWindowsFrames() started.
+✔ Test oneNoteReadInTwoWindowsKeepsTheOpenWindowsFrames() passed after 1.562 seconds.
+◇ Test aBookIndexInTwoWindowsKeepsTheOpenWindowsColumnAndPanes() started.
+2026-10-14 05:31:03.675209-0600 Variorum[6229:59557316] BookOutline landing — page-00000000-0000-0000-0000-000000000007 LAND | manifest rows=5 target=4 offset=246 total=292 derived=3 exactAbove=N | page-00000000 h=46 | page-00000000-0000-0000-0000-000000000007 top=349.0 hops=0 | page-00000000 h=46 | page-00000000 h=46 | chapter-00000 h=57 | chapter-00000 h=57 | content=519 | page-00000000 h=50 | page-00000000-0000-0000-0000-000000000007 top=357.0 hops=0 | page-00000000 h=50 | page-00000000 h=50 | HOP 1 at 264 ms (top was 357.0) | HOP 2 at 526 ms (top was 357.0) | HOP 3 at 912 ms (top was 357.0) | HOP 4 at 1172 ms (top was 357.0) | HOP 5 at 1456 ms (top was 357.0) | HOP 6 at 1731 ms (top was 357.0) | HOP 7 at 1989 ms (top was 357.0) | HOP 8 at 2277 ms (top was 357.0) | HOP 9 at 2541 ms (top was 357.0) | HOP 10 at 2793 ms (top was 357.0) | HOP 11 at 3043 ms (top was 357.0) | HOP 12 at 3333 ms (top was 357.0) | HOP 13 at 3595 ms (top was 357.0) | HOP 14 at 3898 ms (top was 357.0) | page-00000000-0000-0000-0000-000000000007 DONE: gave up at top=357.0 after 14 hops,
+2026-10-14 05:31:03.675576-0600 Variorum[6229:59557316] [landing] landing surface=BookOutline rows=5 target=4 offset=246 total=292 derived=3 exact=0 hops=14 content=1 ms=4149 end=gaveup top=357
+✔ Test aBookIndexInTwoWindowsKeepsTheOpenWindowsColumnAndPanes() passed after 1.550 seconds.
+◇ Test aReadingFlowInTwoWindowsKeepsTheOpenWindowsRowTops() started.
+✔ Test aReadingFlowInTwoWindowsKeepsTheOpenWindowsRowTops() passed after 2.503 seconds.
+◇ Test aNoteInTwoShellsKeepsTheOpenShellsRail() started.
+2026-10-14 05:31:07.520595-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:07.520677-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 05:31:08.355964-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:08.356036-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test aNoteInTwoShellsKeepsTheOpenShellsRail() passed after 1.695 seconds.
+◇ Test aBookInTwoShellsKeepsTheOpenShellsNoteBox() started.
+2026-10-14 05:31:09.218906-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:09.218992-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 05:31:10.083980-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:10.084075-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test aBookInTwoShellsKeepsTheOpenShellsNoteBox() passed after 1.755 seconds.
+✔ Suite "The keyed DEBUG oracles answer for the window still open (18k UNIT C4)" passed after 11.399 seconds.
+◇ Suite "The note box's composition and the gutter's retirement (18d batch 1)" started.
+◇ Test aBookOpeningPutsTheBoxOnTheColumnSayingNoNoteSelected() started.
+2026-10-14 05:31:11.000518-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:11.000612-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test aBookOpeningPutsTheBoxOnTheColumnSayingNoNoteSelected() passed after 0.338 seconds.
+◇ Test theBookPublishesItsNoteAndTheIdentityTheNavigatorHolds() started.
+✔ Test theBookPublishesItsNoteAndTheIdentityTheNavigatorHolds() passed after 0.260 seconds.
+◇ Test theCaretDoorsActOnTheEditorSheIsWritingInNotTheLastToAttach() started.
+✔ Test theCaretDoorsActOnTheEditorSheIsWritingInNotTheLastToAttach() passed after 0.245 seconds.
+◇ Test theBooksEditingSurfacesMountNoBarOfTheirOwn() started.
+✔ Test theBooksEditingSurfacesMountNoBarOfTheirOwn() passed after 1.368 seconds.
+◇ Test aKeystrokeInABookNoteReRunsTheBoxAndNotTheShell() started.
+2026-10-14 05:31:13.194758-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:13.194844-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+[round-end Fable pass · MAJOR-1] twenty caret-context updates ran the sidebar's body 0 times
+✔ Test aKeystrokeInABookNoteReRunsTheBoxAndNotTheShell() passed after 1.466 seconds.
+✔ Suite "The note box's composition and the gutter's retirement (18d batch 1)" passed after 3.679 seconds.
+◇ Suite "The sidebar's rail slot never empties between a note and a book (VX-141)" started.
+◇ Test focusReturningToAReadBookNeverStandsAPhantomEmptyBox() started.
+2026-10-14 05:31:14.652070-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:14.652142-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+[VX-141 r1] occupants after focus returned to A: ["box", "empty"]
+✔ Test focusReturningToAReadBookNeverStandsAPhantomEmptyBox() passed after 0.342 seconds.
+◇ Test thePaneFocusPublishFiresOnGainOnly() started.
+✔ Test thePaneFocusPublishFiresOnGainOnly() passed after 0.481 seconds.
+◇ Test goingFromANoteToABookNeverEmptiesTheSlot() started.
+2026-10-14 05:31:15.484244-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:15.484337-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+[VX-141] slot occupants after the switch: ["rail", "box", "box", "box"]
+✔ Test goingFromANoteToABookNeverEmptiesTheSlot() passed after 0.302 seconds.
+✔ Suite "The sidebar's rail slot never empties between a note and a book (VX-141)" passed after 1.126 seconds.
+◇ Suite "The remembered strip's pure restore (VX-139)" started.
+◇ Test restoreKeepsStoredOrderDropsDeadAndCollapsesDuplicates() started.
+✔ Test restoreKeepsStoredOrderDropsDeadAndCollapsesDuplicates() passed after 0.001 seconds.
+◇ Test restoreHonorsTheTrackedCapByRecency() started.
+✔ Test restoreHonorsTheTrackedCapByRecency() passed after 0.001 seconds.
+◇ Test aTornRecencyListIsReconciledToTheBack() started.
+✔ Test aTornRecencyListIsReconciledToTheBack() passed after 0.001 seconds.
+✔ Suite "The remembered strip's pure restore (VX-139)" passed after 0.001 seconds.
+◇ Suite "The launch restore through the model (VX-139)" started.
+◇ Test theFirstShellRestoresLiveRowsAndWritesBackTheSecondStaysEmpty() started.
+✔ Test theFirstShellRestoresLiveRowsAndWritesBackTheSecondStaysEmpty() passed after 0.196 seconds.
+◇ Test theClaimReleasesWithItsShellAndTheNextOneRestores() started.
+✔ Test theClaimReleasesWithItsShellAndTheNextOneRestores() passed after 0.033 seconds.
+◇ Test theSettingOffRestoresNothingButStillClaims() started.
+✔ Test theSettingOffRestoresNothingButStillClaims() passed after 0.025 seconds.
+✔ Suite "The launch restore through the model (VX-139)" passed after 0.255 seconds.
+◇ Suite "The split's doors (13f batch 4)" started.
+◇ Test theSplitDoorsAreDeclaredAndGreyWhereTheyCannotAct() started.
+✔ Test theSplitDoorsAreDeclaredAndGreyWhereTheyCannotAct() passed after 0.001 seconds.
+◇ Test theShellSpeaksTheSameNoteRefusalAndOpensTheSplitOtherwise() started.
+✔ Test theShellSpeaksTheSameNoteRefusalAndOpensTheSplitOtherwise() passed after 0.001 seconds.
+◇ Test aSplitWindowMountsExactlyOneDetailAndOneCommandHandler() started.
+2026-10-14 05:31:15.987087-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:15.987132-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test aSplitWindowMountsExactlyOneDetailAndOneCommandHandler() passed after 0.212 seconds.
+✔ Suite "The split's doors (13f batch 4)" passed after 0.213 seconds.
+◇ Suite "The flat shell (correction round, row 2) and the strip's pitch (row 3)" started.
+◇ Test theShellMountsFlatAndTheStripRowsAreGenerous() started.
+2026-10-14 05:31:16.195215-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:16.195258-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test theShellMountsFlatAndTheStripRowsAreGenerous() passed after 0.163 seconds.
+◇ Test theSidebarHeadersSitOnTheirRowsEdgeWithAirBeforeTheWash() started.
+2026-10-14 05:31:16.475260-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:16.475319-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+[17o d row 13 keys] headers ["Open", "this note"] · rows ["Open", "this note"]
+[17o d row 13] this note: words (20.0, 245.0, 48.0, 14.0) · row (20.0, 272.0, 34.0, 16.0) · box (12.0, 265.0, 206.0, 30.0)
+[17o d row 13] Open: words (20.0, 504.0, 29.5, 14.0) · row (20.0, 531.0, 190.0, 16.0) · box (12.0, 524.0, 206.0, 30.0)
+✔ Test theSidebarHeadersSitOnTheirRowsEdgeWithAirBeforeTheWash() passed after 0.512 seconds.
+◇ Test theSeamsGripIsWideCentredAndReachesIntoBothSides() started.
+2026-10-14 05:31:16.899219-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:16.899312-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+[17o d row 9] grip (223.5, 52.0, 14.0, 792.0) · line (230.0, 52.0, 1.0, 792.0)
+✔ Test theSeamsGripIsWideCentredAndReachesIntoBothSides() passed after 0.105 seconds.
+◇ Test thePaneSeamsGripIsWideCentredAndReachesIntoBothPanes() started.
+2026-10-14 05:31:17.007963-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:17.008024-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test thePaneSeamsGripIsWideCentredAndReachesIntoBothPanes() passed after 0.214 seconds.
+◇ Test theSidebarWidthIsClampedToAUsableColumn() started.
+✔ Test theSidebarWidthIsClampedToAUsableColumn() passed after 0.001 seconds.
+◇ Test theSidebarToggleIsDeclaredOnItsTwoDoors() started.
+✔ Test theSidebarToggleIsDeclaredOnItsTwoDoors() passed after 0.001 seconds.
+✔ Suite "The flat shell (correction round, row 2) and the strip's pitch (row 3)" passed after 0.996 seconds.
+◇ Suite "A navigation expires the park (17o c/d/e round 1, MAJOR-2)" started.
+◇ Test aTripAwayAndBackExpiresTheParkAndLandsAtTheRememberedCaret() started.
+2026-10-14 05:31:17.205167-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:17.205252-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test aTripAwayAndBackExpiresTheParkAndLandsAtTheRememberedCaret() passed after 0.644 seconds.
+◇ Test aRemountAfterAFocusRoundTripLandsAtTheRememberedCaret() started.
+2026-10-14 05:31:17.849305-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:17.849347-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test aRemountAfterAFocusRoundTripLandsAtTheRememberedCaret() passed after 0.494 seconds.
+✔ Suite "A navigation expires the park (17o c/d/e round 1, MAJOR-2)" passed after 1.139 seconds.
+◇ Suite "The shell's block-naming door navigates AND parks (17o c/d/e round 2, MINOR-1)" started.
+◇ Test theDoorNavigatesAndLeavesItsLandingParked() started.
+2026-10-14 05:31:18.335785-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:18.335831-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test theDoorNavigatesAndLeavesItsLandingParked() passed after 0.077 seconds.
+✔ Suite "The shell's block-naming door navigates AND parks (17o c/d/e round 2, MINOR-1)" passed after 0.077 seconds.
+◇ Suite "The window registry (13f batch 5b)" started.
+◇ Test theKeyIsStickyAndFallsBackToTheFirstWindowRegistered() started.
+✔ Test theKeyIsStickyAndFallsBackToTheFirstWindowRegistered() passed after 0.014 seconds.
+◇ Test theNavigationTargetIsTheKeyFullWindowElseTheMostRecentFullOne() started.
+✔ Test theNavigationTargetIsTheKeyFullWindowElseTheMostRecentFullOne() passed after 0.001 seconds.
+✔ Suite "The window registry (13f batch 5b)" passed after 0.014 seconds.
+◇ Suite "Two hosted windows (13f batch 5b — the gate's conditions)" started.
+◇ Test twoWindowsMountExactlyOneDetailAndOneCommandHandler() started.
+2026-10-14 05:31:18.434961-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:18.435004-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 05:31:18.489296-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:18.489345-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test twoWindowsMountExactlyOneDetailAndOneCommandHandler() passed after 0.308 seconds.
+◇ Test theStickyKeySurvivesAppDeactivation() started.
+2026-10-14 05:31:18.745114-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:18.745162-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 05:31:18.792818-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:18.792867-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test theStickyKeySurvivesAppDeactivation() passed after 0.505 seconds.
+◇ Test theMenuGatesAndTheNavigationBroadcastsFollowTheKeyWindow() started.
+2026-10-14 05:31:19.286489-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:19.286569-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 05:31:19.346288-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:19.346351-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test theMenuGatesAndTheNavigationBroadcastsFollowTheKeyWindow() passed after 0.883 seconds.
+✔ Suite "Two hosted windows (13f batch 5b — the gate's conditions)" passed after 1.697 seconds.
+◇ Suite "Creation acts land where they can be shown (13f cold review R1-3)" started.
+◇ Test theCreationRouterIsTheNavigationTargetsAndGreysOnlyWithNoFullWindow() started.
+2026-10-14 05:31:20.095998-0600 Variorum[6229:59557316] [Invalid Configuration] Geometry action is cycling between duplicate values.
+2026-10-14 05:31:20.096062-0600 Variorum[6229:59557316] [Invalid Configuration] Geometry action is cycling between duplicate values.
+2026-10-14 05:31:20.096100-0600 Variorum[6229:59557316] [Invalid Configuration] Geometry action is cycling between duplicate values.
+2026-10-14 05:31:20.096125-0600 Variorum[6229:59557316] [Invalid Configuration] Geometry action is cycling between duplicate values.
+✔ Test theCreationRouterIsTheNavigationTargetsAndGreysOnlyWithNoFullWindow() passed after 0.062 seconds.
+◇ Test newPostWithANoteOnlyWindowKeyLandsInTheFullWindow() started.
+2026-10-14 05:31:20.185427-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:20.185476-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test newPostWithANoteOnlyWindowKeyLandsInTheFullWindow() passed after 0.200 seconds.
+✔ Suite "Creation acts land where they can be shown (13f cold review R1-3)" passed after 0.263 seconds.
+◇ Suite "The navigation doors (13f batch 3)" started.
+◇ Test theKeyTableHasNoCollisionsAndTheNavigationKeysAreOurs() started.
+✔ Test theKeyTableHasNoCollisionsAndTheNavigationKeysAreOurs() passed after 0.077 seconds.
+◇ Test theNavigationDoorsAreDeclaredAndRendered() started.
+✔ Test theNavigationDoorsAreDeclaredAndRendered() passed after 0.001 seconds.
+◇ Test theNavigationDoorsAreGreyWhereTheyCannotAct() started.
+✔ Test theNavigationDoorsAreGreyWhereTheyCannotAct() passed after 0.001 seconds.
+◇ Test theShellDoorsRouteTheRightDestination() started.
+✔ Test theShellDoorsRouteTheRightDestination() passed after 0.001 seconds.
+◇ Test mountingTheShellWiresTheContextAndSeedsThePane() started.
+2026-10-14 05:31:20.459625-0600 Variorum[6229:59557316] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 05:31:20.459678-0600 Variorum[6229:59557316] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test mountingTheShellWiresTheContextAndSeedsThePane() passed after 0.070 seconds.
+◇ Test aPaneWithNowhereToGoAsksForNothing() started.
+✔ Test aPaneWithNowhereToGoAsksForNothing() passed after 0.014 seconds.
+✔ Suite "The navigation doors (13f batch 3)" passed after 0.163 seconds.
+✔ Test run with 52 tests in 15 suites passed after 22.156 seconds.
+2026-10-14 05:31:20.792 xcodebuild[6210:59556386] [MT] IDETestOperationsObserverDebug: 23.974 elapsed -- Testing started completed.
+2026-10-14 05:31:20.792 xcodebuild[6210:59556386] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 05:31:20.792 xcodebuild[6210:59556386] [MT] IDETestOperationsObserverDebug: 23.974 sec, +23.974 sec -- end
+
+Test session results, code coverage, and logs:
+	<home>/dev/variorum-vx-282/App/Variorum/DerivedData/vx282-u4/Logs/Test/Test-Variorum-2026.10.14_05-30-56--0600.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started
+EXIT 0
