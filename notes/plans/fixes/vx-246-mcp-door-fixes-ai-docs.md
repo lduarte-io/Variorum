@@ -4995,3 +4995,47 @@ The closeout paragraph's MOBILE PARITY sentence (if D7b lands) names PL-54 as ab
    `Shared/StructuralUndoCopy.swift`. Compile `VariorumMobile` (an `xcodebuild build` for the iOS Simulator SDK, which
    launches nothing, so it needs no claim). VM-16's door fix stays VM-16's; this only proves the phone still compiles.
 4. **The numbers** (QUESTIONS #220, PL-54, §14's roll): re-checked on latest main at PHASE C, as proposed.
+
+### PHASE B — THE MERGE OF MAIN (the closeout's PHASE B implementer — opus-implementer, from 2026-10-14 10:00 MDT)
+
+**What this phase does NOT do (said first):** no shared ledger (QUESTIONS, AppSpec, the master plan, MobileSoul,
+TEXTKIT2_NOTES, the archives) — those are PHASE C's; no Linear edit; no Mac test, walk, Debug launch or MCP client
+before the coordinator's GO (the window below runs ONLY under the GO's exact claim line, relayed by the orchestrator);
+no history rewrite; no commit trailer. No product code is written: the merge is the only source change.
+
+#### LIVE STATUS — PHASE B's pieces (flipped in the same commit as each piece)
+
+| # | piece | state |
+|---|---|---|
+| 1 | merge `origin/main` at `f3cc8d07` (VX-282's PR #160 merge `19be2f01` + its ledgers `3ddec585` + its handoff) as a MERGE COMMIT | DONE (`8c47f877`) — see "The merge" below |
+| 2 | the headless package green, with counts (MCP, core, workbook) | NOT-STARTED |
+| 3 | a headless phone build (`VariorumMobile`, iOS Simulator SDK, `build` — launches nothing, boots nothing, no claim) | NOT-STARTED |
+| 4 | `vx246-final` rebuilt on the merged tree (`build-for-testing`, no claim); the u1b products' fate | NOT-STARTED |
+| 5 | THE CLOSEOUT WINDOW's plan (claim `vx246-close`) → READY | NOT-STARTED |
+
+#### The merge (piece 1)
+
+`git merge --no-ff origin/main` at `f3cc8d07` → **"Automatic merge went well": NO textual conflict.** The expected
+conflicts did not materialize because every overlapping change sits in a separate region. Six files changed on BOTH
+sides since the last merge base (`fa3bc6e1`); each was read hunk by hunk, both sides, and the merged text keeps both
+meanings:
+
+| file | vx-282's change (main) | ours (VX-246) | resolution |
+|---|---|---|---|
+| `Features/Editor/EditorSurfaceController.swift` | VX-290: `runDeleteBlock`'s doc (A7's backspace has its own body and landing); the `[String]` helper's aside drops "A7's empty-block carve"; the `Int` helper's doc gains "The Delete Block and archive doors' rule, and theirs alone since VX-290"; `runEmptyBlockDeletion` lands by the new `caretLanding(afterCarving:)` | U3 (VX-275): `renderFull`'s external-removal caret landing + the static `caretLanding(whenBlockLeft:oldEntries:survivors:)` | auto-merged; both kept. Our doc's "her own Delete Block's rule — `caretLandingAfterRemoving`'s" stays TRUE after VX-290 (VX-290 narrows the CARVE's landing, not Delete Block's), so no wording changes. The two `caretLanding` overloads differ by labels and by static/instance — the build (piece 4) compiles them |
+| `Features/Editor/EditorView.swift` | VX-154: the `.sheet(item: $model.fanPanel)` passes `onClose:`; VX-296: `textViewDidChangeSelection` calls `settleMarkdownCaret()` first | U4b (VX-230): one `refreshBadges()` call at the end of `InlineEditorSurface.Coordinator.remeasure` | auto-merged; both kept |
+| `Features/Editor/EditorViewModel.swift` | VX-296's settle (`settleMarkdownCaret`, the `holdsCaret`/`noteIsEditable` fence, the overlay-generation bump + `needsDisplay` on a restyle) | U4/U4b: `refreshBadges`' `.layoutAvailable` gate, no forced layout | auto-merged, separate regions (theirs at ~336–1240 and ~3513; ours in `refreshBadges` ~3826). Their restyle road delivers badges through `overlayLayoutDidSettle` → `refreshBadges`, which now reads only laid-out frames — compatible by construction; the whole Mac target re-checks both |
+| `Registry/Capability.swift` | `writeTakesPanelAttached` (VX-154) and the six comment-panel doors (VX-183) | `mcpAllowRebind`, `mcpDeclineRebind` (VX-258) | auto-merged; both kept |
+| `Registry/CapabilityRegistry.swift` | `outsideWritesTakesPanel` wrapping the block verbs; the comment-panel `Capability` rows | the two re-bind `Capability` rows | auto-merged; both kept |
+| `.gitignore` | `notes/plans/vx282-screens/` | `notes/plans/vx246-screens/` | auto-merged; both kept |
+
+`EditorViewModel.swift` and `TakesViewModel.swift` were the brief's "possibly": `TakesViewModel` changed on main only.
+**`TutorialSeeder.swift` is untouched by the merge** (`git diff fa3bc6e1 origin/main -- …/TutorialSeeder.swift` is
+empty), so F-1's lesson-2 paragraph is byte-for-byte what `vx246-r1-red` (old) and the fix pass (new) built, and
+`vx246-r1-red`'s red stays the right "before" for R1. No product intent had to be inferred.
+
+**For PHASE C (the coordinator's FYI, not acted on here):** VX-282's ledgers took **QUESTIONS #220–#224** (our bundle
+becomes **#225**, the next free on the merged tree), **MobileSoul PL-54** (ours becomes **PL-55**), and **§14's roll of
+the VX-168 entry** — VX-282's entry now leads §14 ("Most recent canon deltas — VX-282", then VX-281, VX-184, VX-179,
+VX-180), so ours leads with "Before it — **VX-282**…" and OUR roll is the **VX-180** entry (D4's own fallback). D6, D8
+and D4's numbers move accordingly; every number is re-read on latest main at PHASE C.
