@@ -13,8 +13,9 @@ import VariorumCore
 ///   note the client cannot reach (and a deleted comment, and an id naming
 ///   nothing) answers the ONE not-shared shape (no oracle); a note it reads
 ///   but cannot suggest in hears the rung's refusal and raises the ask;
-/// - then the LOCAL-ONLY authorship record (`Queries.mcpCommentAuthor`) must
-///   name THIS client. Anything else — her comment, another client's, one with
+/// - then the LOCAL-ONLY authorship record must name THIS client with the
+///   comment's words unchanged since (`Queries.mcpCommentIsOwn` — the one
+///   read). Anything else — her comment, another client's, one with
 ///   no record (written before the record existed, synced from another Mac,
 ///   travelled to a structural successor, or — VX-260 — one SHE has edited
 ///   since: her edit makes it hers), and — P-VX260-1 (b), VX-246 U1b — one

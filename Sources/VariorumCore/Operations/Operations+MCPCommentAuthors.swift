@@ -116,13 +116,13 @@ extension Operations {
 }
 
 extension Queries {
-    /// **Who wrote this comment, as the record has it** (VX-188's one read —
-    /// U4's edit rung consults the same fact): the client's name, or nil when
-    /// no client is on file for it (hers, one synced from another Mac, one
-    /// written before the record existed, one that travelled to a structural
-    /// successor — and, since VX-260, one she has edited since). A FACT of
-    /// authorship; whether the comment is still the client's OWN is
-    /// `mcpCommentIsOwn` (P-VX260-1 (b) — its words unchanged).
+    /// **Who wrote this comment, as the record has it:** the client's name, or
+    /// nil when no client is on file for it (hers, one synced from another
+    /// Mac, one written before the record existed, one that travelled to a
+    /// structural successor — and, since VX-260, one she has edited since).
+    /// The plain FACT of authorship, nothing more; whether the comment is
+    /// still the client's OWN is `mcpCommentIsOwn` (P-VX260-1 (b) — its words
+    /// unchanged).
     public static func mcpCommentAuthor(_ db: Database, commentID: String) throws -> String? {
         try String.fetchOne(
             db, sql: "SELECT client_name FROM mcp_comment_author WHERE comment_id = ?", arguments: [commentID])
