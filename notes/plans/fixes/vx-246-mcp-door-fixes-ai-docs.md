@@ -119,11 +119,11 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | unit | status |
 |---|---|
 | U1 — the door's security and correctness | CORE DONE, headless green at `ab552c5a` (MCP 223/48 · core 2,800/324 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~678k context (the cutover rule). The rest is U1b, below. U1's Mac batch rides U2's stage window (orchestrator call, see THE ORCHESTRATOR ON U1's HAND-BACK) |
-| U1b — VX-258's face and U1's remainder | WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5), and U2's MCP walk legs W2/W3 (no detour needed once the face exists). Note for W2/W3: on an empty redo stack the Redo item is DISABLED (`EditorCommands.swift:576`, unchanged), so "nothing to redo" reads as a disabled item, never a toast (U2 STAGE RUN's finding 1) |
+| U1b — VX-258's face and U1's remainder | **UNBLOCKED 2026-10-14 ~04:15** (VX-281 merged: PR #159, `0f5efe1c`; ledgers `3d42df78`; handoff `fa3bc6e1`). IN-PROGRESS: a FRESH implementer from the U1b BRIEF below (~04:35), piece 0 the merge of main. — Earlier: WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5), and U2's MCP walk legs W2/W3 (no detour needed once the face exists). Note for W2/W3: on an empty redo stack the Redo item is DISABLED (`EditorCommands.swift:576`, unchanged), so "nothing to redo" reads as a disabled item, never a toast (U2 STAGE RUN's finding 1) |
 | U2 — the undo class | **WINDOW 1 PROVEN 2026-10-14 00:23–00:38** (U2 STAGE RUN below): the Mac batch 1,084 tests / 148 suites green (1,078 + 6 gated skips, 0 failed — U1's G1–G3 included), W1 proven in both voices, the dev store restored cmp-SAME. Open only for W2/W3 in U1b's window. — Earlier: BUILT, headless green at `10223a2d` (MCP 223/48 · core 2,826/326 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~634–690k context (the cutover rule). Its stage window (the Mac batch with U1's groups, plus W1, her own door) goes to a FRESH runner; W2/W3 move to U1b's window. The acceptance closes when W1–W3 have run |
 | U3 — her editor vs the wire | **WINDOW PROVEN 2026-10-14 02:18–02:54** (U3 STAGE RUN below): W1 red on old 7/8 (17 issues) as designed; W2 1,470 tests / 215 suites green, the one failure VX-167's standing `redoNeverAsks` (alone: green); W3a (a real Claude Code, both voices) and W3b (53 ms / 51 ms after her last keystroke) proven; the store restored cmp-SAME. Finding A (a wire note delete in the OTHER pane moves her focus) is ruled provisionally (ruling 2) and fixed after U4's plan, its proof riding U4's window. — Earlier: BUILT, headless green at `61ec7723` (MCP 236/49 · core 2,826/326 · workbook 40/6; both Mac products built: `vx246-u3-red` is the red-on-old product, `vx246-u3` the fixed one). The implementer is retired at ~620k context (cutover). Its window (`vx246-u3`: the Mac pins red on old, the 215-suite batch, Claude Code by U1's detour, and the timing driver) goes to a FRESH runner. VX-323 (the wider class) was born and fixed here |
 | U4 — the faces after big writes | **WINDOW RUN 2026-10-14 03:05–03:41** (U4 STAGE RUN below). **VX-231 PROVEN** (the Bookcase row follows an outside join live, in both voices). **VX-230 PARTLY:** Write is proven (no disc, block 1 bare, scrolled badges at home, first launch clean), but the book view's INLINE editor still misplaces badges after a width change and drops them right after mount (W2's red reproduces alone; seen live in both voices). Two pins are hollow as written, and one characterization pin is defective. → **U4b** below. — Earlier: READY FOR STAGE at `dcfb6123`: piece 6 written (271-suite batch, THE STAGE WINDOW plan for `vx246-u4`, self-assessment, OWED). Products: `vx246-u4-red` (U4's pins, no fix) and `vx246-u4` (both fixes). The window goes to a FRESH runner; its step 6 (ruling 2's proof) moves to U5's window, where ruling 2 is built (orchestrator call). — Earlier: BUILT, PAUSED at `3d1c5dd6` for U3's window (~499k context). VX-230 traced: TK2 reports unlaid paragraphs as empty frames at the top-left, so badges piled at block 1; fixed in `EditorViewModel.refreshBadges`. VX-231 traced: the Bookcase word count was re-read only on appear and its own buttons; fixed in `ShelfViewModel.start`. Mac pins are written but not run, and both products are built. Next: the same implementer writes piece 6 (the batch list and THE STAGE WINDOW plan), then a FRESH session adds ruling 2's fix and runs U4's window with its proof |
-| U4b — the inline editor's badges, and ruling 2 | IN-PROGRESS — a FRESH implementer from the U4b BRIEF below (2026-10-14 ~03:50), then a short window (`vx246-u4b`) |
+| U4b — the inline editor's badges, and ruling 2 | **READY FOR STAGE** at `63410c1a` (U4b UNIT RECORD). The re-trace corrected the runner's: the inline height lands on SwiftUI's NEXT pass, and U4's forced `.ensuresLayout` read poisoned the layout, measured up to 1,662 pt off. Fixed in `refreshBadges` plus the one cleared `remeasure` call (`5aaf01b4`); ruling 2 is `select(_:in:takingFocus:)` (`cd843647`). Pins red-first, three products built, headless unchanged. Its window (`vx246-u4b`, 75 min) is run by the SAME session (~250k), queued after U1b's merge commit |
 | U5 — the write tools' shapes | NEXT, after U4b. *(9edd8439's "spawned" was premature: U4's GO came first, so U5 never started.)* VX-267/253/252/255 are already In Progress. Ruling 2 moved from U5's piece 0 to U4b; U5's live round adds the real-client check of it |
 | U6 — Compare from the wire | NOT-STARTED |
 | U7 — the agent's read-backs | NOT-STARTED |
@@ -135,6 +135,10 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 **No revert is in flight unless a unit's record says so.**
 
 ## Stage traffic log (the oct13coordinator protocol)
+
+- *(Newest first from here.)* 2026-10-14 ~04:15: **VX-281 merged**, the coordinator relaying: `0f5efe1c`, then the
+  ledgers at `3d42df78` (QUESTIONS #219; AppSpec §12/§14) and the handoff at `fa3bc6e1`. Main is to be merged in
+  before our merge, and our merge-moment ledger edits land on top of VX-281's §12/§14 lines.
 
 - 2026-10-13, ~21:00 MDT: the kickoff announcement went to oct13coordinator, and its protocol came back:
   - the stage runs REQUEST → READY → GO → RELEASE, with READY sent only once built;
@@ -663,6 +667,96 @@ orchestrator's to run after the units; keep the record reviewable.
 **Context:** past ~500k, stop at the next clean seam (committed, green, the continuation written) and report.
 
 **Out of scope:** every other unit's members; U1b; the guide (U8).
+
+### U1b BRIEF — VX-258's face and U1's remainder (VX-258 · VX-318 · VX-260's option (b)), plus the carried live legs
+
+VX-281 MERGED (PR #159, merge commit `0f5efe1c`; its ledgers on main at `3d42df78`; its handoff at `fa3bc6e1`), so its lane is main's now. Merge `origin/main` at `fa3bc6e1` or later.
+- QUESTIONS is now at #219.
+- AppSpec §12's MCP DOOR line gained "THE PANE AND THE SHARED ICON".
+
+**THE MERGE GATE:** U1's core must not merge or reach her build without piece 1(a).
+
+**vx-281's merge note (~04:15), what the face builds on:**
+- **The pane:** the switch and status on top; Waiting and the connection requests ABOVE the tabs; the tabs are Connect ·
+  Clients · Shared with AI · Activity.
+- **The setup:** a code block (`MCPSetupMenu.swift`) with the client in its header and the copy ICON upper right. Its
+  tooltip and VoiceOver name are "Copy setup command". The chosen client lives on `MCPDoor.setupClient` /
+  `chooseSetupClient`.
+- **`copySetupCommand(for:)` has NO default argument now,** and its receipt lands only while the menu still shows that
+  client.
+- **The summaries:** `clientBoundary` and `keyLine` render as one-line summaries (`MCPPaneCopy.clientBoundarySummary` /
+  `keySummary`) via `Core/Views/ExplainerLine`.
+- **The shared icon** marks the Library, Pool, Book Panel and ⌘L rows; the field guide still says Bookcase only (U8's).
+- **New files:** `Domain/MCPGrantRule+Wing.swift` (the wing reach read-off) and `Core/Views/NearWindow.swift`.
+
+**Piece 0: merge main in.**
+- `git fetch origin && git merge origin/main` into this branch. It must be a MERGE COMMIT: never rebase, never
+  force-push.
+- Resolve every conflict keeping BOTH sides' meaning. Expected: `MCPDoor.swift`, where our U3 hook construction lines
+  meet VX-281's `setupClient` / `chooseSetupClient(_:)` (VX-232) and its R1-3 change to `copySetupCommand(for:)`.
+  Possibly tests that both sides touched.
+- After the merge: the whole headless package green, with counts, and a Mac `build-for-testing`.
+- Record each conflict and its resolution in your record.
+
+**Piece 1: VX-258's FACE** (U1's OWED 1, read whole, plus vx-281's five facts under Cross-run coordination).
+- **(a) The mint call site. NOT optional; it is the merge gate.**
+  - `MCPSetupClient`, inside O-4's fence, gains each tab's expected `clientInfo.name`: Claude Code `claude-code`, Codex
+    `codex-mcp-client` (an external lookup, said as such), Any MCP client `nil`.
+  - `MCPDoor.copySetupCommand(for:)` passes it on: `mintMCPSetupKey(copiedFor: client.expectedName)`. Read the client
+    from the door's `setupClient` (fact 3), as R1-3 left the function (fact 5).
+  - `MCPSetupMenuTests`' key regex then reads `vmk2_<name>_…` for the two tabs and `vmk1_…` for Any: a justified
+    edit.
+- **(b) The re-bind row** in the Waiting section. Waiting sits ABOVE the tabs, beside the connection requests (fact 4).
+  - It reads `Queries.mcpRebindRequests`, and the door's store observation must include `mcp_rebind_request`.
+  - Allow → `allowMCPRebind(id)`; Don't allow → `declineMCPRebind(id)`. Both throw `mcpRebindRequestNotFound` for a
+    gone ask, which is said where she pressed.
+  - Add the pending marks and counts if the face counts asks.
+- **(c) The words:** Activity words for `connect_rebind_waiting` / `_allowed` / `_declined`, and the pane's refusal
+  words for `mcpRebindRequestNotFound`.
+- **(d) The truth of L1 (`clientBoundary`) and `keyLine`,** each with its one-line SUMMARY (fact 1, `ExplainerLine`):
+  a client's own setup re-run moves its name, and an Any-client setup waits for her OK. U8 re-voices the guide.
+- Every word ships as built and goes on the FOR VX-234 list. Her ruled rule (P-VX258-2's bind arm, RATIFIED) holds.
+
+**Piece 2: VX-318** (U1's OWED 3).
+- `MCPSocketTransport`'s reader thread may outlive `session.run()`. A reader descheduled between two `read`s could
+  read another socket's bytes after the host closes the descriptor and its number is reused.
+- The fix shape: the session's close waits, bounded, for its transport's reader to exit.
+- Pin red-first; a deterministic test seam is fine.
+
+**Piece 3: P-VX260-1, rebuilt as option (b)** (THE ORCHESTRATOR ON U1's HAND-BACK).
+- Add a local-only digest of the comment's words to `mcp_comment_author`, compared at delete. Any change to the words,
+  from any device or client, makes deleting need EDIT.
+- It gets its own schema commit on the grants family's road: no `sync_version`, no trigger, stripped by the export,
+  marker 13 untouched. Read `notes/SyncSpec.md` in full first.
+- Argue backfill against NULL-means-legacy.
+- Pin red-first: a change to the text with no door (a synced edit's shape), then the suggest delete hears her
+  R-VX188-2 sentence.
+
+**Piece 4: THE STAGE WINDOW plan** (claim `vx246-u1b`; minutes; a batch-only fallback).
+- **The Mac batch:** every changed source file's suites. That includes every MCP pane suite on the merged tree,
+  `MCPSetupMenuTests`, and the suites the merge touched. Re-run U1's G1–G3 on the merged tree.
+- **The live round on the DEV store.**
+  - **U1's legs:**
+    - leg 0: Claude Code 2.1.299's real `clientInfo.name`;
+    - leg 1: a Claude Code TAB key re-binds `claude-code` with zero clicks;
+    - leg 2: an Any-client key under `claude-code` WAITS with no reach; the Waiting row, her Allow (tools arrive
+      without a reconnect) and her Don't allow, captured in BOTH voices;
+    - leg 3: the rename to a hidden book's name lands without echo;
+    - leg 4: a suggest delete of a comment she edited hears her sentence, plus option (b)'s doorless edit;
+    - leg 5: Codex, which is not installed, so record it N/A.
+  - **U2's W2 and W3:** the MCP value, toggle and revive directions with quiet presses. Redo is a DISABLED item on an
+    empty redo stack, so expect no toast.
+  - **Ruling 2's real-client check:** while her caret types in pane 1, a client's `delete_note` takes down the note in
+    pane 2. Pane 2 goes to the Library and the focus stays in pane 1, captured.
+  - **The setup line the pane copies** runs `claude mcp remove -s user …; claude mcp add -s user …`. NEVER run it as
+    copied: take only the key, and register it `-s local` in a scratch project (U3 STAGE RUN's handling). Her
+    user-scope servers are fingerprinted before and after and must stay SAME. Scratch keys are deleted and the clipboard
+    emptied.
+
+**Context:** this unit is big. If you pass ~450k by the time the plan is written, say so: a fresh runner takes the
+window. Past ~500k mid-piece, stop at the next clean seam (committed, green, the continuation written) and report.
+
+**Out of scope:** U5–U8's members; the guide (U8).
 
 ### U4b BRIEF — the inline editor's badges, and ruling 2 (VX-230's remainder · ruling 2)
 
