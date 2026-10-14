@@ -3468,4 +3468,22 @@ empty; no launch, no walk; `-derivedDataPath DerivedData/vx282-u2-ios` = the tip
   `MobileStructuralTests.nothingUserFacingNamesTheMac` + the 4 declared known issues; one launch.
 - Then `xcrun simctl shutdown all` → 0 booted; release; record; report.
 
-**READY FOR STAGE — c1final: (i) the two-suite repro, (ii) the whole phone target, on the tip `0c5dbfe8`, ≈12 min.**
+~~READY FOR STAGE — c1final~~ — RUN, below.
+
+**THE FINAL c1 WINDOW — RUN 2026-10-14 09:53:15 → 10:01:22 (claim `vx282-c1final`, handed from `coord-for-vx282`;
+RELEASED) — on the exact tip `0c5dbfe8` (`DerivedData/vx282-u2-ios`; no guard, the keyfix's posture).** Pre-checks 09:53
+(no instance, no booted simulator); `guard.sh --author` OK before each leg; nothing rebuilt; no launch, no walk.
+Extract: `closeout/logs/c1-final-extract.txt`.
+- **(i) the two-suite repro — GREEN** (09:53:15–09:53:44): `MobileLivenessTests` then `MobileMarkdownCaretTests`, "**22
+  tests in 2 suites passed**", no crash, no restart, no desync.
+- **(ii) the WHOLE phone target — AS EXPECTED** (09:53:50–10:01:22): "**824 tests in 129 suites failed … 5 issues
+  (including 4 known)**", ONE launch, no restart, no fatal — the only red the standing
+  `MobileStructuralTests.nothingUserFacingNamesTheMac` (`AcknowledgmentsCopy.swift`'s "(Mac only)", on main since 13n-b);
+  the 4 known issues the declared ones (`MobileTrashTests` 2 · `MobileTutorialWalkTests` 2); every
+  `MobileMarkdownCaretTests` test green (`herFlow…`, `leaving…`, `aStoodDownEditor…`, R1-3's three cases).
+- `xcrun simctl shutdown all` → **0 booted**; no instance; released at 10:01:22.
+
+**C-1: CLOSED.** The run's phone half is green on its exact tip (the settle ON, no guard, the caret suite in a real
+phone's posture); the pre-existing gate gap the polluted posture reaches is VM-19's. The Mac half's merged-tip run stands
+(4,666 / 767; the three standing reds; the two load-dependent Takes reds the orchestrator's to ticket). This is the
+implementer's last record on the run; the merge is the orchestrator's.
