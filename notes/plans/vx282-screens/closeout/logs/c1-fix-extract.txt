@@ -1,0 +1,15 @@
+# C-1 fix leg (a): the two-suite repro on the guarded product (12d55d12), extract of c1-repro.full.log (gitignored)
+VariorumMobile/MobileEditorViewModel.swift:2001: Fatal error: mobile editor surface desynced from the block index
+2026-10-14 09:34:47.394739-0600 VariorumMobile[78785:60219546] VariorumMobile/MobileEditorViewModel.swift:2001: Fatal error: mobile editor surface desynced from the block index
+Restarting after unexpected exit, crash, or test timeout; summary will include totals from previous launches.
+✘ Test run with 2 tests in 1 suite failed after 0.288 seconds with 2 issues.
+✘ Test aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:) recorded an issue with 1 argument replacement → "hi" at MobileMarkdownCaretTests.swift:193:17: Expectation failed: model.desyncRecoveryCount == 0
+✘ Test aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:) recorded an issue with 1 argument replacement → "hello there" at MobileMarkdownCaretTests.swift:193:17: Expectation failed: model.desyncRecoveryCo
+​✘ Test aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:) with 3 test cases failed after 0.180 seconds with 2 issues.
+✘ Test run with 2 tests in 1 suite failed after 0.288 seconds with 2 issues.
+↳   model.desyncRecoveryCount → 1
+↳   model.desyncRecoveryCount → 1
+non-key-window warnings: 7
+
+# The crash report ~/Library/Logs/DiagnosticReports/VariorumMobile-2026-10-14-093457.ips — the crashed thread, frames 0-22
+0 _assertionFailure · 3 EditorAssertionSeam.fire · 4 MobileEditorViewModel.desyncRecovery · 5 recoverFromUnroutableEdit · 6 storageDidEdit(_:changeInLength:) · 7-14 MobileStorageObserver.textStorage(_:didProcessEditing:…) · 15 -[NSTextStorage processEditing] · 16 endEditing · 17 coordinateEditing: · 18 -[UITextInputController _insertText:fromKeyboard:] · 19 insertText: · 20 -[UITextView insertText:] · 21 MobileEditorTextView.insertText(_:) · 22 MobileMarkdownCaretTests.leavingATrailingSpaceBehindUnstylesTheSpanHonestly

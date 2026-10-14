@@ -3299,3 +3299,34 @@ gitignored, extracts committed):
 - Then `xcrun simctl shutdown all` → 0 booted; release; record; report.
 
 **READY FOR STAGE — c1fix: (a) the two-suite repro, (b) the whole phone target, ≈15 min.**
+
+**THE c1fix WINDOW — RUN 2026-10-14 09:34:23 → 09:35:13 (claim `vx282-c1fix`, handed from `coord-for-vx282`; RELEASED)
+— STOPPED AFTER (a) BY THE STOP RULE: the guard is NOT the cause.** Pre-checks 09:34 (no instance, no booted simulator);
+`guard.sh --author` OK; nothing rebuilt; no launch, no walk. Extract: `closeout/logs/c1-fix-extract.txt`.
+- **(a) the two-suite repro on the guarded product (`12d55d12`) — STILL RED, IDENTICAL:** `leavingATrailingSpaceBehindUnstylesTheSpanHonestly`
+  hit the same DEBUG fatal (`MobileEditorViewModel.swift:2001`, 09:34:47) and the run restarted; R1-3's pin desynced
+  again for `"hi"` and `"hello there"` (`desyncRecoveryCount → 1` each; `"Hello"` green); 7 non-key-window warnings.
+- **(b) NOT RUN** (the stop rule). `xcrun simctl shutdown all` → **0 booted**; no instance; released at 09:35:13.
+- **What the crash report says (read after the release — `~/Library/Logs/DiagnosticReports/VariorumMobile-2026-10-14-093457.ips`,
+  the crashed thread):** the test's `MobileEditorTextView.insertText("hello ")` → `-[UITextView insertText:]` →
+  `-[UITextInputController _insertText:fromKeyboard:]` → `-[NSTextStorage coordinateEditing:]` → `endEditing` →
+  `processEditing` → `MobileStorageObserver` → `storageDidEdit` → `recoverFromUnroutableEdit` → `desyncRecovery` → the
+  seam's assertion. The settle is NOT on the stack at the crash (it would have returned earlier if it wrote); so the stack
+  cannot say whether a settle write joined the transaction.
+- **The guard's premise is falsified for this posture**, so the inference the fix leg rested on (a settle inside the
+  transaction AFTER the gate armed) is wrong here. **Two candidate mechanisms, NOT traced — for the orchestrator's ruling:**
+  - **(H1) the settle still writes inside the transaction, with NO armed edit** — UIKit reports the selection before the
+    gate is consulted, or does not consult the gate (`shouldChangeTextIn`) at all on this road in a non-key window — so a
+    guard keyed on `pendingEdit` cannot see it.
+  - **(H2) the desync does not involve the settle at all** — in the non-key posture `insertText` of a run and
+    `replace(_:withText:)` may reach the storage WITHOUT the gate's arming; the unarmed fallback verdict then reads the
+    edit's report as widened by attribute fixing to the paragraph AND its terminator (TEXTKIT2 §3, the iOS 26 fixing
+    finding) and refuses as crossing the separator — a pre-existing phone-gate gap that only this branch's NEW pins
+    exercise (main has neither the settle nor these pins).
+  - **The decider (one short window after one phone build):** the same two-suite repro on a product with the phone settle
+    DISABLED (a named one-line test-only revert: `settleMarkdownCaret()` returns at its top) — RED ⇒ (H2), the settle is
+    innocent and the pins expose a pre-existing gap; GREEN ⇒ (H1), the settle is the cause. A cheaper read first, no stage:
+    log `pendingEdit`'s state and `editedMask` at each settle under a DEBUG trace in the same repro — still a window.
+- **State of the branch:** `12d55d12` (the `pendingEdit` guard) stays on the branch for now — a belt that is correct by
+  construction (a settle never writes over an armed, unlanded edit) but has NOT fixed C-1; the orchestrator rules whether
+  it stays. Nothing else changed. C-1 stays OPEN.
