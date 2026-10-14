@@ -122,8 +122,9 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | U1b — VX-258's face and U1's remainder | WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5), and U2's MCP walk legs W2/W3 (no detour needed once the face exists). Note for W2/W3: on an empty redo stack the Redo item is DISABLED (`EditorCommands.swift:576`, unchanged), so "nothing to redo" reads as a disabled item, never a toast (U2 STAGE RUN's finding 1) |
 | U2 — the undo class | **WINDOW 1 PROVEN 2026-10-14 00:23–00:38** (U2 STAGE RUN below): the Mac batch 1,084 tests / 148 suites green (1,078 + 6 gated skips, 0 failed — U1's G1–G3 included), W1 proven in both voices, the dev store restored cmp-SAME. Open only for W2/W3 in U1b's window. — Earlier: BUILT, headless green at `10223a2d` (MCP 223/48 · core 2,826/326 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~634–690k context (the cutover rule). Its stage window (the Mac batch with U1's groups, plus W1, her own door) goes to a FRESH runner; W2/W3 move to U1b's window. The acceptance closes when W1–W3 have run |
 | U3 — her editor vs the wire | **WINDOW PROVEN 2026-10-14 02:18–02:54** (U3 STAGE RUN below): W1 red on old 7/8 (17 issues) as designed; W2 1,470 tests / 215 suites green, the one failure VX-167's standing `redoNeverAsks` (alone: green); W3a (a real Claude Code, both voices) and W3b (53 ms / 51 ms after her last keystroke) proven; the store restored cmp-SAME. Finding A (a wire note delete in the OTHER pane moves her focus) is ruled provisionally (ruling 2) and fixed after U4's plan, its proof riding U4's window. — Earlier: BUILT, headless green at `61ec7723` (MCP 236/49 · core 2,826/326 · workbook 40/6; both Mac products built: `vx246-u3-red` is the red-on-old product, `vx246-u3` the fixed one). The implementer is retired at ~620k context (cutover). Its window (`vx246-u3`: the Mac pins red on old, the 215-suite batch, Claude Code by U1's detour, and the timing driver) goes to a FRESH runner. VX-323 (the wider class) was born and fixed here |
-| U4 — the faces after big writes | **READY FOR STAGE** at `dcfb6123`: piece 6 written (271-suite batch, THE STAGE WINDOW plan for `vx246-u4`, self-assessment, OWED). Products: `vx246-u4-red` (U4's pins, no fix) and `vx246-u4` (both fixes). The window goes to a FRESH runner; its step 6 (ruling 2's proof) moves to U5's window, where ruling 2 is built (orchestrator call). — Earlier: BUILT, PAUSED at `3d1c5dd6` for U3's window (~499k context). VX-230 traced: TK2 reports unlaid paragraphs as empty frames at the top-left, so badges piled at block 1; fixed in `EditorViewModel.refreshBadges`. VX-231 traced: the Bookcase word count was re-read only on appear and its own buttons; fixed in `ShelfViewModel.start`. Mac pins are written but not run, and both products are built. Next: the same implementer writes piece 6 (the batch list and THE STAGE WINDOW plan), then a FRESH session adds ruling 2's fix and runs U4's window with its proof |
-| U5 — the write tools' shapes | IN-PROGRESS — implementer spawned from the U5 BRIEF below (2026-10-14 ~03:10), under the PAUSE protocol (U4's window may interrupt it). Its piece 0 is ruling 2's fix; VX-267/253/252/255 In Progress |
+| U4 — the faces after big writes | **WINDOW RUN 2026-10-14 03:05–03:41** (U4 STAGE RUN below). **VX-231 PROVEN** (the Bookcase row follows an outside join live, in both voices). **VX-230 PARTLY:** Write is proven (no disc, block 1 bare, scrolled badges at home, first launch clean), but the book view's INLINE editor still misplaces badges after a width change and drops them right after mount (W2's red reproduces alone; seen live in both voices). Two pins are hollow as written, and one characterization pin is defective. → **U4b** below. — Earlier: READY FOR STAGE at `dcfb6123`: piece 6 written (271-suite batch, THE STAGE WINDOW plan for `vx246-u4`, self-assessment, OWED). Products: `vx246-u4-red` (U4's pins, no fix) and `vx246-u4` (both fixes). The window goes to a FRESH runner; its step 6 (ruling 2's proof) moves to U5's window, where ruling 2 is built (orchestrator call). — Earlier: BUILT, PAUSED at `3d1c5dd6` for U3's window (~499k context). VX-230 traced: TK2 reports unlaid paragraphs as empty frames at the top-left, so badges piled at block 1; fixed in `EditorViewModel.refreshBadges`. VX-231 traced: the Bookcase word count was re-read only on appear and its own buttons; fixed in `ShelfViewModel.start`. Mac pins are written but not run, and both products are built. Next: the same implementer writes piece 6 (the batch list and THE STAGE WINDOW plan), then a FRESH session adds ruling 2's fix and runs U4's window with its proof |
+| U4b — the inline editor's badges, and ruling 2 | IN-PROGRESS — a FRESH implementer from the U4b BRIEF below (2026-10-14 ~03:50), then a short window (`vx246-u4b`) |
+| U5 — the write tools' shapes | NEXT, after U4b. *(9edd8439's "spawned" was premature: U4's GO came first, so U5 never started.)* VX-267/253/252/255 are already In Progress. Ruling 2 moved from U5's piece 0 to U4b; U5's live round adds the real-client check of it |
 | U6 — Compare from the wire | NOT-STARTED |
 | U7 — the agent's read-backs | NOT-STARTED |
 | U8 — the AI's docs (LAST) | NOT-STARTED — waits for VX-281's merge |
@@ -176,6 +177,12 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
   --reason "VX-246 U3: pins + 215-suite batch + dev-store live round (A1, MCP fingerprint)" --minutes 90`. The
   coordinator held the stage 15 min while U4's implementer paused at a clean seam (3d1c5dd6). Its pre-checks: no
   instances, no sims, 50 GiB free; the dev store Standard/unlocked/Study, the tour offer completed (vx-282's walk, 02:12).
+- ~03:05: **GO for `vx246-u4`** at once (nobody ahead), carrying `Tools/stage release --who coord-for-vx246 && Tools/stage
+  claim --who vx246-u4 --reason "VX-246 U4: pins + 271-suite batch + import + dev-store walk both voices (A1)"
+  --minutes 90`. U5 hadn't been spawned, so the runner started straight away.
+- 03:41:03: **RELEASE** (35 of 90 min). Result lines and posture went to the coordinator: Standard/unlocked, cmp-SAME vs
+  A1; prefs 1,549 keys, 0 differ; fingerprint SAME. The A1 copy `scale-prestage-20261014T090551Z` is the coordinator's
+  to prune. A tooling note: `Tools/stage status` exits 1 while a claim is held, so it can't sit in an `&&` chain.
 - ~03:05: REQUEST, then READY for `vx246-u4` (the runner at 4c874e63: ~60 min of work, a 90-min claim asked; a 35-min
   batch-only split offered if vx-282 is mid-window). The coordinator: vx-281's short fix window on stage, then us and
   vx-282's combined window in READY order.
@@ -657,6 +664,61 @@ orchestrator's to run after the units; keep the record reviewable.
 
 **Out of scope:** every other unit's members; U1b; the guide (U8).
 
+### U4b BRIEF — the inline editor's badges, and ruling 2 (VX-230's remainder · ruling 2)
+
+1. **VX-230's remainder: the book view's inline editor.** Read U4 STAGE RUN whole.
+   - **After a width change,** badges below the first screen stay at the old layout's offsets. W2's
+     `theBookEditorPutsEveryBadgeHomeAfterAWidthChange` reproduces alone on the fixed product: 51 of 80 badges
+     misplaced, 7 pt growing to 657 pt down the post.
+   - **Right after the inline editor mounts,** fanned blocks can be unbadged, with only block 1 wearing one. This was
+     seen live in both voices: the Book spread's live left page, and Outline in Terminal.
+   - **The runner's trace** (by reading, in the record): on the inline surface the badge pass reads with
+     `.ensuresLayout`, but it runs BEFORE the remeasure that grows the text view. Its visible region is
+     `textView.bounds`, so fans below the old height get no badge, the frames it reads aren't the settled layout's,
+     and nothing re-runs the pass after the remeasure.
+   - **The cure U4 set aside:** re-run the badge pass after `InlineEditorSurface.Coordinator.remeasure`
+     (`EditorView.swift`). **That ONE call is cleared** (vx-282 notified, 2026-10-14 ~03:50). Stay out of vx-282's
+     two `EditorView.swift` touches: the selection-change delegate (VX-296) and VX-154's line.
+   - **Trace it yourself first,** confirm or correct the trace, then fix red-first. Read U4's UNIT RECORD for the
+     measured TK2 facts.
+2. **The pins U4's window exposed.**
+   - **Two pins are hollow as written:** `aBadgeNeverSitsAtAnotherBlocksPlace` and `aWidthChangeInWriteKeepsEachBadgeHome`
+     were GREEN on the red product, because TK2 estimates their deep fans in the harness and never reports `.zero`.
+     Re-design each to be red on old, forcing the unlaid state deterministically, or record it hollow and remove it.
+     Say which.
+   - **One pin is defective:** the characterization `textKitReportsAnUnlaidFragmentAsZeroAndAZeroRectIntersects`
+     fails on BOTH trees at `:397`, because the test host lays the deep fragment out after `layoutViewport()`. Make it
+     state what the host actually does, or remove it, and say so in the record.
+3. **Ruling 2** (ORCHESTRATOR'S PROVISIONAL RULINGS): a navigate-away never takes her focus.
+   - `WorkspaceModel.notesDeleted`'s `select(.library, in:)` sets `focusedPane = pane`. A pane showing a dead note
+     must go to the Library IN PLACE, with the focused pane staying focused.
+   - Pin it red-first on the Mac: two panes, focus in pane 1, pane 2's note dies.
+   - It moved here from U5's piece 0, so the two small app-side fixes share one window.
+
+**THE EDITOR SEAM.** Read `notes/TEXTKIT2_NOTES.md` first. Decorations stay off the live storage, and no TK1 API.
+The Fable review covers this at the run's end.
+
+**Lanes.** Stay out of vx-282's listed files and functions, except the ONE cleared `remeasure` call. VX-281's lane is
+out. `WorkspaceModel` is VX-283's road (VX-123 carries a comment about it); no running session lists it.
+
+**Evidence that closes U4b, and with it VX-230.**
+- **Pins**, red-first and red again by revert, on a red product.
+- **The headless package green,** with counts; these are app-side fixes, so it should be unchanged.
+- **THE STAGE WINDOW plan** (claim `vx246-u4b`; minutes; a batch-only fallback):
+  - **W1:** the new and re-designed pins on the red product.
+  - **W2:** a Mac batch over every changed source file's suites: the inline editor, the book views, and the workspace
+    and note-deletion suites.
+  - **W3, a short walk in BOTH voices:** the book's Outline and the Book spread, after a width change and right after
+    mount, with every fanned block badged at its own line. Plus ruling 2's in-app check: her own Delete door, used
+    from pane 1, deletes the note open in pane 2; pane 2 goes to the Library and the focus stays in pane 1.
+  - The fixture goes through her File ▸ Import… door, as U4's window did; its fixture generator is in
+    `notes/plans/vx246-screens/u4/`.
+  - The real-client version of ruling 2's check rides U5's window.
+
+**Context:** past ~500k, stop at the next clean seam and report.
+
+**Out of scope:** every other unit; U5's members.
+
 ### U5 BRIEF — the write tools' shapes (VX-267 · VX-253 · VX-252 · VX-255)
 
 **Order:** VX-267 first (VX-253's matcher needs its form), then VX-253, VX-252 and VX-255. Every member is ruled;
@@ -726,8 +788,9 @@ its ticket is the record, quoted here.
 
 **Out of scope:** every other unit's members; U1b; the guide and `MCPSession.instructions` beyond doc-truth (U8).
 
-**PIECE 0, before the members: ruling 2's fix** (ORCHESTRATOR'S PROVISIONAL RULINGS, ruling 2: a navigate-away never
-takes her focus).
+**~~PIECE 0, before the members: ruling 2's fix~~** *[moved to U4b, 2026-10-14 ~03:50; what stays for U5 is the
+real-client check in its live round, the last bullet below]* (ORCHESTRATOR'S PROVISIONAL RULINGS, ruling 2: a
+navigate-away never takes her focus).
 - **The defect:** `WorkspaceModel.notesDeleted` sends each pane showing a dead note to the Library through
   `select(.library, in:)`, and `select` sets `focusedPane = pane` (`WorkspaceModel.swift`, about line 186).
 - **The fix:** a pane showing a dead note goes to the Library IN PLACE, and the focused pane stays focused.
@@ -2565,3 +2628,20 @@ cure's shape is the orchestrator's call (and vx-282's lane, if it lands in `Edit
 - The characterization's `:397` does not hold in the test host on either tree.
 
 Both are pin defects, not product defects. Write's own faces walked clean in both voices.
+
+### THE ORCHESTRATOR ON U4's WINDOW (2026-10-14, ~03:50 MDT)
+
+- **VX-231 is accepted as proven:** the pin went red to green, the P1 guard is green, and the live row follows an
+  outside join in both voices. It closes at the merge.
+- **VX-230 is NOT closed.**
+  - Write's half is proven. The inline book editor's half fails: W2's real red, seen live in both voices.
+  - The runner's trace is plausible but unrun. U4b re-traces it before fixing.
+  - The cure's one call is in `EditorView.swift`, a vx-282 file. It is cleared for that call alone (a different
+    function from vx-282's two touches), and vx-282 was messaged.
+- **The pins.** Two are hollow as written (green on old, because TK2 estimates in the harness) and one characterization
+  is defective (red on both trees). By the hallucination guard, a pin green on both sides proves nothing: U4b
+  re-designs or removes them, and the record says which.
+- **Ruling 2 moves to U4b,** so the two small app-side fixes share one window. U5's live round keeps the real-client
+  check of ruling 2.
+- **The cutover.** U4's implementer was at ~513k. U4b is a FRESH implementer: the remainder is small, but it needs a
+  clear head on the editor seam.
