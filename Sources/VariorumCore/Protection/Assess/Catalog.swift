@@ -1,0 +1,385 @@
+import Foundation
+
+// VX-305 U2 — THE CATALOG (design §3.7, VX-302): one place that knows every
+// place copies live —
+//   - the container's backups (`Backups/<library8>/<mac8>/`, and today's
+//     legacy flat `Backups/` files, lock-time copies among them: a lock-time
+//     copy and a backup share today's name),
+//   - the far folder (`<picked>/Variorum/Backups/…`, and its folder key files),
+//   - `Previous Libraries/<stamp>/`,
+//   - the adoption safety copies (`Backups/safety-copies/variorum-adopt-
+//     safety-<stamp>/`),
+//   - the `.stale-*` key files (and today's other key files) beside the slot —
+// with ONE name parser (`CatalogNames`) and an attribution of every copy to
+// its LIBRARY (from the pair's key file) and its MAC (from the subfolder).
+// The restore list, Open Library, the Castle offer, retention and the route
+// finder all read it.
+//
+// Pure: the leaf lists the two roots and reads every key file's bytes; this
+// builds the catalog from that listing and touches nothing. Key-file bytes
+// are non-secret by design (wraps, salts, ids), so the catalog holds them
+// decoded.
+
+/// The two roots a listing is taken under.
+public enum CatalogPlace: String, Codable, Sendable, CaseIterable {
+    /// The folder the slot lives in, in this Mac's own container: the slot's
+    /// key files, `Backups/…` and `Previous Libraries/…`.
+    case container
+    /// The picked far folder's `Variorum/` (its `Backups/…` and the folder
+    /// key files today's builds write beside them).
+    case farFolder
+}
+
+/// One file the leaf listed: its root, the folders below the root, its
+/// name, and — for every name `CatalogNames.parseFile` calls a key file —
+/// its bytes (nil when it could not be read).
+public struct CatalogEntry: Equatable, Sendable {
+    public var place: CatalogPlace
+    public var folders: [String]
+    public var name: String
+    public var bytes: Data?
+
+    public init(place: CatalogPlace, folders: [String] = [], name: String, bytes: Data? = nil) {
+        self.place = place
+        self.folders = folders
+        self.name = name
+        self.bytes = bytes
+    }
+
+    public var id: String { Catalog.id(place: place, folders: folders, name: name) }
+}
+
+/// Which Mac a copy or key file belongs to.
+public enum MacAttribution: Equatable, Hashable, Sendable {
+    /// From its `Backups/<library8>/<mac8>/` subfolder.
+    case mac8(String)
+    /// In this Mac's own container but outside a Mac subfolder — today's
+    /// legacy flat copies, `Previous Libraries/`, the safety copies, the
+    /// slot's own key files: this Mac's by their place (the container is
+    /// per Mac and per login).
+    case thisMacsContainer
+    /// In the far folder outside a Mac subfolder — any Mac sharing the
+    /// folder could have written it (VX-302's shared iCloud Drive folder).
+    case unattributed
+
+    /// Is this `mac8`'s? A container copy outside a subfolder is this Mac's
+    /// by place; an unattributed far copy is never claimed.
+    public func isMac(_ mac8: String) -> Bool {
+        switch self {
+        case .mac8(let other): return other == mac8.lowercased()
+        case .thisMacsContainer: return true
+        case .unattributed: return false
+        }
+    }
+}
+
+public enum CopyKind: String, Codable, Sendable, CaseIterable {
+    /// A snapshot pair in `Backups/<library8>/<mac8>/` (this build's).
+    case backup
+    /// A snapshot in a `Backups/` root — today's flat files, lock-time copies
+    /// among them. Listed, never pruned automatically (§3.7).
+    case legacyFlatBackup
+    /// `Previous Libraries/<stamp>/` — a library an adoption set aside.
+    case previousLibrary
+    /// `Backups/safety-copies/variorum-adopt-safety-<stamp>/`.
+    case adoptionSafetyCopy
+}
+
+public enum KeyFileRole: String, Codable, Sendable, CaseIterable {
+    /// `variorum-library-keys.json` beside the slot — the live key file.
+    case live
+    /// A format-1/2 key file beside the slot (today's live file, or one left
+    /// from an older key).
+    case besideLibrary
+    /// A `.stale-*` key file beside the slot (today's set-aside shape).
+    case setAside
+    /// A snapshot's own key file (`<snapshot>.keys.json`).
+    case snapshotPair
+    /// A fingerprint-named or legacy key file in a `Backups/` root or the far
+    /// folder's root (today's folder key files).
+    case folderKeyFile
+    /// `variorum-library-keys.json` in `Backups/<library8>/<mac8>/` — this
+    /// Mac's own key file for that library (§3.5 point 2).
+    case ownKeyFile
+    /// A key file inside a `Previous Libraries` or safety-copy folder.
+    case asideCopy
+}
+
+public struct CatalogKeyFile: Equatable, Sendable, Identifiable {
+    public var id: String
+    public var place: CatalogPlace
+    public var folders: [String]
+    public var name: String
+    public var role: KeyFileRole
+    /// The decoded file; nil when it could not be read or decoded.
+    public var document: KeyFileDocument?
+    public var mac: MacAttribution
+
+    /// The library it belongs to (its `libraryID` / today's `storeID`).
+    public var library: String? { document?.libraryID }
+    /// Its current key's fingerprint.
+    public var fingerprint: String? { document?.fingerprint }
+    /// Every fingerprint it leads to without a secret — current, history,
+    /// anchors.
+    public var heldFingerprints: [String] { document?.heldFingerprints ?? [] }
+    /// The day the file was frozen, when its place says (a snapshot pair's
+    /// stamp; a set-aside file's epoch).
+    public var frozenAt: Date?
+}
+
+public struct CatalogCopy: Equatable, Sendable, Identifiable {
+    public var id: String
+    public var place: CatalogPlace
+    public var folders: [String]
+    public var name: String
+    public var kind: CopyKind
+    /// The stamp its name or folder carries.
+    public var stamp: Date?
+    /// The fp8 a snapshot's name carries.
+    public var nameFingerprint8: String?
+    /// The key files that serve it, best first (ids into `Catalog.keyFiles`)
+    /// — today's pair rules, restated.
+    public var servingKeyFiles: [String]
+    /// The key it is under, when the catalog can tell keylessly: its own
+    /// pair's (or its folder's only) key file's current key.
+    public var fingerprint: String?
+    /// When it can't (several key files beside an aside copy), every key it
+    /// could be under — the route finder names only what opens them all.
+    public var candidateFingerprints: [String]
+    /// The library it belongs to, from the serving key files (nil when none
+    /// reads, or they name different libraries).
+    public var library: String?
+    public var mac: MacAttribution
+}
+
+/// A name in a copy's place that no build writes — listed, never touched.
+public struct CatalogForeignEntry: Equatable, Sendable {
+    public var place: CatalogPlace
+    public var folders: [String]
+    public var name: String
+}
+
+public struct Catalog: Equatable, Sendable {
+    public var copies: [CatalogCopy]
+    public var keyFiles: [CatalogKeyFile]
+    public var foreign: [CatalogForeignEntry]
+
+    public init(copies: [CatalogCopy] = [], keyFiles: [CatalogKeyFile] = [], foreign: [CatalogForeignEntry] = []) {
+        self.copies = copies
+        self.keyFiles = keyFiles
+        self.foreign = foreign
+    }
+
+    static func id(place: CatalogPlace, folders: [String], name: String) -> String {
+        "\(place.rawValue):" + (folders + [name]).joined(separator: "/")
+    }
+
+    // MARK: - Reading
+
+    public func keyFile(id: String) -> CatalogKeyFile? { keyFiles.first { $0.id == id } }
+
+    public func servingKeyFiles(of copy: CatalogCopy) -> [CatalogKeyFile] {
+        copy.servingKeyFiles.compactMap { keyFile(id: $0) }
+    }
+
+    /// The live key file beside the slot, if one is listed.
+    public var liveKeyFile: CatalogKeyFile? { keyFiles.first { $0.role == .live } }
+
+    /// Every key file that leads to `fingerprint` (current, history or
+    /// anchor) — "any key file the catalog knows that holds K" (§3.7).
+    public func keyFiles(holding fingerprint: String) -> [CatalogKeyFile] {
+        keyFiles.filter { $0.heldFingerprints.contains(fingerprint) }
+    }
+
+    public func copies(ofLibrary libraryID: String) -> [CatalogCopy] {
+        copies.filter { $0.library == libraryID }
+    }
+
+    // MARK: - Building
+
+    /// Where an entry sits, from its parsed folders.
+    enum Location: Equatable {
+        case besideLibrary
+        case farRoot
+        case backupsRoot
+        case macFolder(library8: String, mac8: String)
+        case adoptionSafety(stamp: Date)
+        case previousLibrary(stamp: Date)
+        /// A home of copies that holds none of the app's own files directly
+        /// (`Backups/<library8>/` itself, `Backups/safety-copies/` itself —
+        /// where the A1 rail keeps its copies): every file there is foreign.
+        case copyHome
+        /// Hers, not a copy's place (`md-exports/`, a hand-off folder).
+        case notACopyPlace
+    }
+
+    static func location(of entry: CatalogEntry) -> Location? {
+        var parent: CatalogNames.FolderName? = entry.place == .farFolder ? .variorum : nil
+        var library8: String?
+        for folder in entry.folders {
+            guard let parsed = CatalogNames.parseFolder(folder, under: parent) else { return nil }
+            if case .libraryFolder(let l8) = parsed { library8 = l8 }
+            parent = parsed
+        }
+        switch parent {
+        case nil: return .besideLibrary
+        case .variorum?: return .farRoot
+        case .backups?: return .backupsRoot
+        case .macFolder(let mac8)?: return library8.map { .macFolder(library8: $0, mac8: mac8) }
+        case .adoptionSafetyCopy(let stamp)?: return .adoptionSafety(stamp: stamp)
+        case .previousLibrary(let stamp)?: return .previousLibrary(stamp: stamp)
+        case .libraryFolder?, .safetyCopies?, .previousLibraries?:
+            return .copyHome
+        case .markdownExports?, .handOff?:
+            return .notACopyPlace
+        }
+    }
+
+    /// **Build the catalog from a listing.** Every entry whose folders or name
+    /// no build writes is FOREIGN — listed, never a candidate, never pruned.
+    public static func build(_ entries: [CatalogEntry]) -> Catalog {
+        var keyFiles: [CatalogKeyFile] = []
+        var foreign: [CatalogForeignEntry] = []
+        var placed: [(entry: CatalogEntry, location: Location, name: CatalogNames.FileName)] = []
+        for entry in entries.sorted(by: { $0.id < $1.id }) {
+            guard let location = location(of: entry) else {
+                foreign.append(CatalogForeignEntry(place: entry.place, folders: entry.folders, name: entry.name))
+                continue
+            }
+            guard let name = CatalogNames.parseFile(entry.name) else {
+                // A name in an export or hand-off folder is hers, not foreign
+                // to a copy's place; everywhere else it is listed as foreign.
+                if location != .notACopyPlace {
+                    foreign.append(CatalogForeignEntry(place: entry.place, folders: entry.folders, name: entry.name))
+                }
+                continue
+            }
+            if location == .notACopyPlace { continue }
+            if location == .copyHome {
+                foreign.append(CatalogForeignEntry(place: entry.place, folders: entry.folders, name: entry.name))
+                continue
+            }
+            placed.append((entry, location, name))
+            guard name.isKeyFile, let role = keyFileRole(name, location) else { continue }
+            keyFiles.append(CatalogKeyFile(
+                id: entry.id, place: entry.place, folders: entry.folders, name: entry.name, role: role,
+                document: entry.bytes.flatMap { try? KeyFileDocument.decode($0) },
+                mac: mac(entry.place, location), frozenAt: frozenAt(name)))
+        }
+        var copies: [CatalogCopy] = []
+        for (entry, location, name) in placed {
+            switch (name, location) {
+            case (.snapshot(let stamp, let fp8), .backupsRoot), (.snapshot(let stamp, let fp8), .macFolder):
+                let kind: CopyKind = location == .backupsRoot ? .legacyFlatBackup : .backup
+                copies.append(copy(
+                    entry, kind: kind, stamp: stamp, fp8: fp8, location: location,
+                    serving: snapshotServing(entry, fp8: fp8, location: location, keyFiles: keyFiles)))
+            case (.library, .previousLibrary(let stamp)), (.library, .adoptionSafety(let stamp)):
+                let kind: CopyKind
+                if case .previousLibrary = location { kind = .previousLibrary } else { kind = .adoptionSafetyCopy }
+                let serving = keyFiles.filter { $0.place == entry.place && $0.folders == entry.folders }
+                    .sorted { servingOrder($0) < servingOrder($1) }
+                copies.append(copy(entry, kind: kind, stamp: stamp, fp8: nil, location: location, serving: serving))
+            default:
+                continue
+            }
+        }
+        return Catalog(copies: copies, keyFiles: keyFiles, foreign: foreign)
+    }
+
+    private static func keyFileRole(_ name: CatalogNames.FileName, _ location: Location) -> KeyFileRole? {
+        switch (location, name) {
+        case (.besideLibrary, .keyFile): return .live
+        case (.besideLibrary, .fingerprintKeyFile), (.besideLibrary, .legacyKeyFile): return .besideLibrary
+        case (.besideLibrary, .setAsideKeyFile): return .setAside
+        case (_, .snapshotKeyFile): return .snapshotPair
+        case (.macFolder, .keyFile): return .ownKeyFile
+        case (.previousLibrary, _), (.adoptionSafety, _): return .asideCopy
+        case (.backupsRoot, _), (.farRoot, _), (.macFolder, _): return .folderKeyFile
+        case (.besideLibrary, _), (.notACopyPlace, _), (.copyHome, _): return nil
+        }
+    }
+
+    private static func mac(_ place: CatalogPlace, _ location: Location) -> MacAttribution {
+        if case .macFolder(_, let mac8) = location { return .mac8(mac8) }
+        return place == .container ? .thisMacsContainer : .unattributed
+    }
+
+    private static func frozenAt(_ name: CatalogNames.FileName) -> Date? {
+        switch name {
+        case .snapshotKeyFile(let stamp, _): return stamp
+        case .setAsideKeyFile(_, let at): return at
+        default: return nil
+        }
+    }
+
+    /// An aside folder's key files, best first: format 3 (the one key file a
+    /// library has under this build), then today's fingerprint-named files,
+    /// then the legacy name.
+    private static func servingOrder(_ file: CatalogKeyFile) -> String {
+        switch CatalogNames.parseFile(file.name) {
+        case .keyFile?: return "0" + file.name
+        case .fingerprintKeyFile?: return "1" + file.name
+        default: return "2" + file.name
+        }
+    }
+
+    /// TODAY'S PAIR RULES (`LibraryClassifier.classifyOpaque`, restated) for a
+    /// snapshot: (1) its own pair, when it agrees with the name's fp8;
+    /// (2) a backup-named snapshot with an fp8: the folder's (and, in the far
+    /// folder, the root's) fingerprint-named file of that fp8 — this build
+    /// adds the Mac folder's own format-3 key file; (3) a stamp-only name:
+    /// every key file its folder (and the far root) holds — the route finder
+    /// names only what opens them all.
+    private static func snapshotServing(
+        _ entry: CatalogEntry, fp8: String?, location: Location, keyFiles: [CatalogKeyFile]
+    ) -> [CatalogKeyFile] {
+        let pairName = String(entry.name.dropLast(".sqlite".count)) + ".keys.json"
+        let pair = keyFiles.first { $0.place == entry.place && $0.folders == entry.folders && $0.name == pairName }
+        if let pair, let fp8, let fingerprint = pair.fingerprint,
+           StoreKeyEnvelope.shortFingerprint(fingerprint) != fp8 {
+            // A mismatched pair does not open this snapshot — never offered as
+            // if it did (today's rule).
+        } else if let pair, pair.document != nil {
+            return [pair]
+        }
+        var folderFiles = keyFiles.filter {
+            $0.place == entry.place && $0.folders == entry.folders && $0.role != .snapshotPair
+        }
+        if entry.place == .farFolder, location == .backupsRoot {
+            folderFiles += keyFiles.filter { $0.place == .farFolder && $0.folders.isEmpty }
+        }
+        guard let fp8 else { return folderFiles.sorted { servingOrder($0) < servingOrder($1) } }
+        return folderFiles.filter { file in
+            file.heldFingerprints.contains { StoreKeyEnvelope.shortFingerprint($0) == fp8 }
+                || (CatalogNames.parseFile(file.name).flatMap { name -> String? in
+                    if case .fingerprintKeyFile(let fingerprint) = name { return fingerprint }
+                    return nil
+                }.map { $0.hasPrefix(fp8) } ?? false)
+        }.sorted { servingOrder($0) < servingOrder($1) }
+    }
+
+    private static func copy(
+        _ entry: CatalogEntry, kind: CopyKind, stamp: Date?, fp8: String?, location: Location,
+        serving: [CatalogKeyFile]
+    ) -> CatalogCopy {
+        let readable = serving.filter { $0.document != nil }
+        // The key it is under: the serving file whose current key the name
+        // (or the folder's only file) pins.
+        var fingerprint: String?
+        if let fp8 {
+            fingerprint = readable.lazy.compactMap(\.fingerprint)
+                .first { StoreKeyEnvelope.shortFingerprint($0) == fp8 }
+                ?? readable.lazy.flatMap(\.heldFingerprints).first { StoreKeyEnvelope.shortFingerprint($0) == fp8 }
+        } else if readable.count == 1 || (readable.first.map { CatalogNames.parseFile($0.name) == .keyFile } ?? false) {
+            fingerprint = readable.first?.fingerprint
+        }
+        let candidates = fingerprint.map { [$0] } ?? Array(Set(readable.compactMap(\.fingerprint))).sorted()
+        let libraries = Set(readable.compactMap(\.library))
+        return CatalogCopy(
+            id: entry.id, place: entry.place, folders: entry.folders, name: entry.name, kind: kind,
+            stamp: stamp, nameFingerprint8: fp8, servingKeyFiles: serving.map(\.id),
+            fingerprint: fingerprint, candidateFingerprints: candidates,
+            library: libraries.count == 1 ? libraries.first : nil, mac: mac(entry.place, location))
+    }
+}
