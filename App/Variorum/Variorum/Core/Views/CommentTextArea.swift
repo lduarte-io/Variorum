@@ -3,7 +3,10 @@
 //  Variorum (Mac)
 //
 //  VX-179 U3 — THE COMMENTS PANEL'S WRITING CONTROL (the F-U3-1 ruling,
-//  2026-10-12: option (a), the panel-private home).
+//  2026-10-12: option (a), the panel-private home — beside its one consumer,
+//  `CommentsPanel`; both moved to `Core/Views/` at VX-282's round-1 fix leg,
+//  R1-4, because the panel is consumed by two features — Editor and Takes —
+//  and CLAUDE.md's shared-home rule binds at the next touch).
 //
 //  ── WHY THIS REPLACED A `TextEditor` ────────────────────────────────────
 //  Her report: *"the comment pane's cursor to start typing in is misaligned"*
