@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS** — VX-229: fix REVERTED `7d798f82` (its offscreen evidence was an artefact — CORRECTION below); pins reshaped; expected HOLLOW, W1 decides. VX-257: pins `7650b6ce`; fix (this commit), offscreen replay red-on-old → fixed; stage PENDING. Old products `DerivedData/vx282-u5-old-products` = the build of `7d798f82` (no revert in flight). VX-183: declared + rendered from the rule (this commit), pins PENDING the stage. VX-182: pins `f38fb93c` red on old (headless), fence (this commit) green 8/1; **revert R-182 (the stamp clause off) NAMED — runs next, restore by `git checkout --` RestoreCost.swift.** |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — W1 red on old (4 suites, ≈4 min; VX-229 decided here) · W2 the fixed batch (25 suites in two groups, ≈10 min) · W3 the walk (7 rows incl. a live `heap` count, both voices on row 1, ≈25 min) — ≈40 min.** VX-229: fix REVERTED `7d798f82` (offscreen artefact — the CORRECTION); expected HOLLOW. VX-257: fix `1ca8fe72`, pins `7650b6ce`/`075473c2`; QUESTIONS #222. VX-183: `a765683c`. VX-182: pins `f38fb93c` red on old (headless), fix `fd4c260c` green, R-182 ran + restored. Core 2,801/320 + MCP 212/41 + workbook 40/6 headless green; phone builds. Old products `DerivedData/vx282-u5-old-products` (the build of `7d798f82`), fixed `DerivedData/vx282-u5`. No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -1472,9 +1472,15 @@ to `notes/plans/vx282-screens/u4/logs/`:
 
 ### U5 — VX-229 · VX-257 · VX-183 · VX-182 (the comments family VX-179 left)
 
-**State: IN-PROGRESS.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Every count and every
-"green"/"red" below is **PENDING** until it runs (headless) or the stage window runs it. **Revert state: no behavioural
-revert in flight.**
+**NOT DONE BY THIS UNIT YET (first line):** no Mac test has RUN — every app-target pin below is PENDING the stage window
+(W1 red on old · W2 the fixed batch · W3 the walk); **VX-229 is UNDECIDED** — its fix was built, then reverted when the
+offscreen evidence behind it proved to be the probes' own artefact (the CORRECTION below), and W1 decides between
+DISMISSED AS HOLLOW (expected) and re-applying the fix; the phone has no VX-257 change (its sheet still drops an
+unsubmitted draft — MOBILE PARITY below).
+
+**State: READY FOR STAGE.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Counts marked
+PENDING wait for the window. **Revert state: no behavioural revert in flight** (R-182 ran and was restored; `git diff`
+empty).
 
 #### VX-229 — the trace (re-done in this session against `d9e1eaf2`)
 
@@ -1734,6 +1740,88 @@ B1) never hides a fresh re-delete. Read-side only: zero `Sync/`, zero `PurgeJani
   clause `AND (pi.deleted_at IS NULL OR pi.deleted_at >= v.deleted_at)` removed from the new arm → expect exactly this
   guard red; restore by `git checkout -- Sources/VariorumCore/Queries/RestoreCost.swift` from this commit, `git diff`
   empty.
+
+**Revert R-182 — RAN, as designed:** the stamp clause off → `swift test --filter RestoreCostTests` 8 tests, **1 issue,
+exactly the guard** (`aTakePutBackAndDeletedAgainCountsAgain`: 0 for 1 — the any-state fence hid the re-deleted take);
+restored by `git checkout -- Sources/VariorumCore/Queries/RestoreCost.swift`, `git diff` empty, 8/1 green again.
+
+#### U5 — headless counts, products, observations
+
+- **Core, whole package at the unit's tip (`fd4c260c` + the record):** `swift test` → **VariorumCoreTests 2,801 tests /
+  320 suites passed** (U2's 2,799 + VX-182's two), VariorumMCPTests 212/41, workbook 40/6 — EXIT 0.
+- **Mac:** `build-for-testing` at the tip → TEST BUILD SUCCEEDED (`DerivedData/vx282-u5` — the FIXED products: VX-257,
+  VX-183, VX-182; VX-229 reverted). **OLD products:** `DerivedData/vx282-u5-old-products` = the build of `7d798f82` (the
+  VX-229/VX-257 pins over the pre-fix app; VX-183's pins post-date it by design — not red-on-old; VX-182's red-on-old ran
+  headless). One new tree, as briefed (the old products an APFS clone of its `Build/Products`).
+- **Phone:** `xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'` (same tree) → BUILD
+  SUCCEEDED with the shared park's two defaulted additions; `MobileComments.swift` byte-unchanged.
+- **The diff (U5 whole):** `Features/Editor/CommentsPanel.swift` (the model's `leave()`/`keepAddDraftOnLeaving()`/`opened`/
+  the restore's line rule/`act(_:on:)`/`isObserving`/the DEBUG weak record; `CommentsPanelDoors`; the rows rendering from
+  it; `surfaceCapabilities`), `Features/Editor/CommentTextArea.swift` (the caret after text arriving into an empty area),
+  `Shared/CommentDraftPark.swift` (`Held.refused`, `park(…refused:)`), `Registry/Capability.swift` +
+  `Registry/CapabilityRegistry.swift` (six declarations), `Sources/VariorumCore/Queries/RestoreCost.swift` (the fence);
+  tests `CommentPanelHostLifecycleTests.swift` (new), `CommentPanelLeaveTests.swift` (new), `CommentPanelDoorsTests.swift`
+  (new), `CommentPanelParkTests.swift` (one doc), `CapabilityRegistryTests.swift` (one walk line),
+  `Tests/VariorumCoreTests/RestoreCostTests.swift` (two pins). Zero `Sync/`, custody, Keychain, schema; nothing in
+  `BlockDecor`, the gutter cards, `ProseGutter`, `EditorSurfaceController`, `BlockRangeIndex`, `EditorEditRoute`/
+  `SeamCarvePlan`, `EditorViewModel.storageDidEdit` or the markdown face. **Outside the run's declared surfaces:**
+  `CommentTextArea.swift` (one adopt rule, VX-257's restore caret) — said here and in the report.
+- **O-U5-1 (for the orchestrator — VX-179's record):** VX-179 FIX LEG 3's stale-panel finding (`stale.swift`) and the
+  monitor release it motivated rest on the same undrained-pool offscreen shape this unit's CORRECTION exposed; on this
+  evidence a dismissed popover's panel is released by SwiftUI once nothing holds its window. The release code is harmless
+  and stays; its pin (`aDismissedPopoversPanelStopsListening`) may be pinning a road the runner never takes. W3's live
+  `heap` count speaks to both.
+- **O-U5-2 (untraced past this):** `restoreCost.deletedTakes` has no 30-day window, while Block History's
+  `deletedTakes` lists only the last 30 days — so past the window the confirm may count a take Block History no longer
+  offers (if expired tombstones are not otherwise removed — not checked). Comments agree on both sides (neither is
+  windowed). Pre-existing; not VX-182's fence; a ticket candidate.
+
+#### THE WINDOW PLAN (≈40 min; runs only on the orchestrator's claim line; `guard.sh --author` before every leg)
+
+From `App/Variorum/`; logs to `notes/plans/vx282-screens/u5/logs/`, captures to `notes/plans/vx282-screens/u5/`. `pgrep`
+first — no `/Applications/Variorum.app` instance, none of ours.
+- **W1 — red on old (≈4 min):** `xcodebuild test-without-building -xctestrun
+  DerivedData/vx282-u5-old-products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination 'platform=macOS'`
+  with `-only-testing:VariorumTests/` × `CommentPanelReleaseTests` `CommentPanelLeaveTests` `CommentPanelHostLeavingTests`
+  `CommentPanelParkTests` → `w1-red-on-old.log`. EXPECTED: VX-257 RED — `CommentPanelLeaveTests`
+  `leavingWithAHalfTyped…` (1), `escapeAfterARestore…` (1, its premise), `anotherBlocks…` (2); `CommentPanelHostLeavingTests`
+  all three (2 each: the text, the caret) — **10 issues in 6 cases**; GREEN — the three model guards and
+  `CommentPanelParkTests` (8). **VX-229 — THE DECIDING CELL:** `CommentPanelReleaseTests` EXPECTED GREEN on old (hollow) —
+  if `aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation` is RED on old, the leak is real in the runner: report it,
+  and the fix comes back (`ee86dd8c`'s surface split) with a rebuild and a W2 re-run. Its two sheet guards: green.
+- **W2 — the fixed batch, `-derivedDataPath DerivedData/vx282-u5` (≈10 min), two groups (suite TYPE names, grepped):**
+  (g1) `CommentPanelReleaseTests` `CommentPanelHostLeavingTests` `CommentPanelLeaveTests` `CommentPanelDoorsTests`
+  `CommentPanelParkTests` `CommentsPanelModelEditorTests` `CommentCompositionTests` `CommentPanelKeysTests`
+  `CommentPanelGeometryRuleTests` `CommentTextAreaMountedTests` `CommentPanelWordsTests` `CommentPanelFixLeg2Tests`
+  `CommentsAndReorderTests` → `w2-g1.log`; (g2) `CapabilityRegistryTests` `TrashSurfaceTests`
+  `WriteTakesPanelRoutedCommandTests` `WriteTakesPanelKeysTests` `CommentCardLayoutTests` `CommentCardViewTests`
+  `CommentCardControllerTests` `MarginHoverCommentTests` `IndicatorGutterTests` `ProseGutterTests`
+  `BlockDecorGeometryTests` `NoteVersionsPaneTests` → `w2-g2.log`. EXPECTED: all green. Read every suite's ✔/✘ line and
+  the skips.
+- **W3 — the walk (≈25 min), `DerivedData/vx282-u5/Build/Products/Debug/Variorum.app` on the DEV store only** (dismiss a
+  What's New sheet with its own button if shown; the voice as found, recorded; Study if it is the dev store's). Stage a
+  note through the shelf's quick-entry bar: `{t:"VX-257 walk"}alpha` ⇧⏎ `beta` ⏎ → it opens in Write; give `alpha` one
+  comment through ⌘⇧' (type `first`, ⌘⏎, Close) so its Takes margin note exists. Region captures before/after each row:
+  1. **The popover (her ruling's road):** ⌘2 (Takes) → click `alpha`'s margin note → type `half a thou` → click away (on
+     the page, outside the popover) → click the margin note again: **`half a thou` is back, the caret after it**, no
+     refusal line (capture).
+  2. **⎋ clears:** in that reopened popover ⎋ (the box empties, the popover stays) → ⎋ (it closes) → reopen: **empty**.
+  3. **Write's sheet:** ⌘1 → caret in `alpha` → ⌘⇧' → type `sheet draft` → Close → ⌘⇧' again: **back** (capture) → ⎋ ⎋
+     → ⌘⇧': empty.
+  4. **The take panel's nested sheet:** caret in `beta`, ⌘T (a fan) → ⌘↑ (caret back in `alpha`) → open `beta`'s panel from
+     its ⑂ badge → ⌘⇧' (the comments over the panel) → type `nested draft` → Close → ⌘⇧' again: **back** (capture) → Close
+     → ⌘⇧T closes the panel.
+  5. **The doors still work (VX-183):** in `alpha`'s comments (⌘⇧'): **Add** (type `second`, the Add button) → the row;
+     a row's **Delete** → the fold shows it ("Comment deleted — it's under Deleted below, restorable."); open the fold →
+     **Restore** → back; Delete it again → **Delete forever…** → the confirm appears ("Delete this comment forever?") →
+     **Cancel** → still in the fold (captures). Close.
+  6. **VX-229, live (the arbiter):** in Takes, open and click-away-dismiss `alpha`'s margin popover three times, then
+     `heap <our pid> | grep -E "CommentsPanelModel"` → record the instance count (0 = released: VX-229 hollow live; 3 =
+     the leak is real). If `heap` cannot attach without a prompt, skip it and say so — never answer a system dialog.
+  7. **The second voice** (⌘K "Use Terminal Voice" / "Use Study Voice", whichever is not current): repeat row 1's
+     click-away and reopen (capture) → restore the voice found.
+  Then the walk note to the Trash (residue recorded), quit OUR instance by identity, `pgrep` again, the dev store left
+  Standard and unlocked with its voice as found, release the claim.
 
 ## Ladder
 
