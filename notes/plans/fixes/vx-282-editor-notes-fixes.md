@@ -2610,7 +2610,22 @@ leg's. Every count and every "red"/"green" below is **PENDING** until the r1fix 
 | R1-9 the burst pins against R2-1's revert | NOT-STARTED — the revert product is built after the docs |
 | R1-10 the U5 record's adopt line | DONE (this commit) |
 
-**Revert state: no behavioural revert in flight.**
+**Revert state: the three builds below are NAMED before any starts (each: commit first, apply to the working tree only,
+build, set the products aside, restore by `git checkout HEAD -- <file>`, verify `git diff` empty).**
+- **OLD-MAC (red-on-old products, rebuilt so they carry the FINAL pins — the R1-2 pin changed at `9f9980cb`):**
+  `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift` and `App/Variorum/Variorum/Surface/PaneSurface.swift`
+  back to `706008eb`'s (the pins commit — the pre-fix app); every test file and the R1-4 move stay at HEAD → build into
+  `DerivedData/vx282-u1`, its `Build/Products` cloned to `DerivedData/vx282-r1fix-old-products` (replacing the first
+  copy). The OLD-PHONE products need no rebuild: `DerivedData/vx282-r1fix-old-ios-products` is the build of `706008eb`
+  itself (every phone pin is final there; the phone's only fix is `26c2e448`).
+- **R2-1-REVERT (R1-9, test-only run):** in `EditorSurfaceController.replayDeferredKeystrokesIfIdle`, the 18c ladder's own
+  named revert — `guard !structuralInFlight, pendingCrossBlockTask == nil else { return }` → `guard !structuralInFlight
+  else { return }` (drain whenever no flight is up) → build into `DerivedData/vx282-u1`, cloned to
+  `DerivedData/vx282-r1fix-r21revert-products`.
+- **R1-3 GUARD (prepared, NOT on the run branch):** the one guard on a side branch `vx-282-r1-3-guard` (pushed), built
+  for the phone into `DerivedData/vx282-u2-ios`, cloned to `DerivedData/vx282-r1fix-guard-ios-products` — so a red
+  verdict's second window needs no build.
+Then the FIXED products are rebuilt at the run branch's tip into `DerivedData/vx282-u1` and `DerivedData/vx282-u2-ios`.
 
 ## Closeout
 
