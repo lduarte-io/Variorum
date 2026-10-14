@@ -224,6 +224,7 @@ guidance. Each unit's evidence is named before its spawn.
 
 | ticket | born | what | fate |
 |---|---|---|---|
+| VX-353 | U6a's build (the implementer, 2026-10-14) | `MCPHarnessTimeLimitTests`' never-answers-initialize pin overruns its 15 s bound under heavy machine load (16.3–16.7 s at load 9–67; green alone) | Todo, 13n, Debt · Test-only · Low; not pre-launch; not this run's |
 | VX-352 | U5 STAGE RUN step 12 (the runner's note 2) | Takes card header tail-truncates an AI take's label to "claude-code · e…" in Terminal at the margin-grid card width | Todo, 13n, Improvement · Confirmed · Low; not pre-launch; FOR VX-234's eye too |
 
 ## UNIT BRIEFS (the orchestrator's; each unit's implementer is spawned from its brief)
