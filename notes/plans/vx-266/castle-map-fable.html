@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Castle &amp; Standard</title>
+<style>
+:root{
+  --bg:#f7f6f2; --card:#ffffff; --ink:#201f1c; --muted:#6c675d; --line:#e4e0d5; --soft:#efede6;
+  --castle:#5b21b6; --castle-soft:#f2ecfb; --std:#0a6ea4; --std-soft:#e8f3fa;
+  --open:#b42318; --shut:#067647;
+  --kL:#0f766e; --kP:#15803d; --kW:#a16207; --kA:#c2410c; --kM:#be185d; --kC:#1d4ed8;
+  --kT:#0284c7; --kX:#5b21b6; --kF:#64748b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15140f; --card:#1e1d18; --ink:#ebe8e0; --muted:#a39d90; --line:#32302a; --soft:#262520;
+    --castle:#b79bf0; --castle-soft:#271c3a; --std:#6fc0ea; --std-soft:#102b3a;
+    --open:#f08477; --shut:#58c08a;
+    --kL:#4cc4b2; --kP:#6fce84; --kW:#dcae4e; --kA:#f29a63; --kM:#ef7fb2; --kC:#8ba3f5;
+    --kT:#62b8ea; --kX:#b79bf0; --kF:#9aa6b5;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15140f; --card:#1e1d18; --ink:#ebe8e0; --muted:#a39d90; --line:#32302a; --soft:#262520;
+  --castle:#b79bf0; --castle-soft:#271c3a; --std:#6fc0ea; --std-soft:#102b3a;
+  --open:#f08477; --shut:#58c08a;
+  --kL:#4cc4b2; --kP:#6fce84; --kW:#dcae4e; --kA:#f29a63; --kM:#ef7fb2; --kC:#8ba3f5;
+  --kT:#62b8ea; --kX:#b79bf0; --kF:#9aa6b5;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Arial,sans-serif;
+  -webkit-text-size-adjust:100%}
+main{max-width:740px;margin:0 auto;padding:28px 16px 90px}
+h1{font-size:28px;line-height:1.15;margin:0 0 4px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:20px;margin:44px 0 10px;font-weight:700}
+h3{font-size:16px;margin:22px 0 6px;font-weight:650}
+p{margin:8px 0;max-width:68ch}
+.lede{color:var(--muted)}
+small,.fine{font-size:13px;color:var(--muted)}
+.rulebox{border:1.5px solid var(--ink);border-radius:14px;padding:14px 16px;margin:18px 0;background:var(--card)}
+.rulebox b{font-size:17px}
+.spine{border-left:4px solid var(--castle);background:var(--castle-soft);border-radius:0 12px 12px 0;
+  padding:12px 16px;margin:14px 0;font-size:15.5px}
+.k{display:inline-flex;align-items:baseline;gap:.3em;padding:.06em .5em;border-radius:7px;white-space:nowrap;
+  font-size:.92em;font-weight:600;color:var(--c);border:1px solid var(--c);
+  background:color-mix(in srgb, var(--c) 9%, transparent)}
+.k.gone{text-decoration:line-through;opacity:.62}
+.kL{--c:var(--kL)}.kP{--c:var(--kP)}.kW{--c:var(--kW)}.kA{--c:var(--kA)}.kM{--c:var(--kM)}
+.kC{--c:var(--kC)}.kT{--c:var(--kT)}.kX{--c:var(--kX)}.kF{--c:var(--kF)}
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:10px;margin:14px 0}
+.lcard{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);
+  border-radius:10px;padding:9px 12px}
+.lcard b{display:block;font-size:14.5px;color:var(--c)}
+.lcard span{font-size:13px;color:var(--muted)}
+/* mode switch */
+.modebar{display:flex;gap:8px;margin:14px 0 0}
+.modebar button{flex:1;font:inherit;font-size:16px;font-weight:650;padding:11px 10px;border-radius:12px;
+  border:1.5px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer}
+.modebar button[aria-pressed="true"].bstd{border-color:var(--std);color:var(--std);background:var(--std-soft)}
+.modebar button[aria-pressed="true"].bcas{border-color:var(--castle);color:var(--castle);background:var(--castle-soft)}
+.modepanel{border:1.5px solid var(--line);border-top:none;border-radius:0 0 14px 14px;background:var(--card);
+  padding:14px 14px 10px;margin-bottom:6px}
+.modewrap{border-radius:14px;margin:0 0 10px}
+.place{padding:9px 0;border-top:1px dashed var(--line)}
+.place:first-child{border-top:none}
+.place b{display:block;font-size:13px;text-transform:none;color:var(--muted);font-weight:650;margin-bottom:4px}
+.place .row{display:flex;flex-wrap:wrap;gap:6px}
+.whoanswer{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;display:grid;gap:5px;font-size:14.5px}
+.whoanswer div b{font-weight:650}
+.yes{color:var(--open);font-weight:650}.no{color:var(--shut);font-weight:650}
+[hidden]{display:none !important}
+/* steppers */
+.journey{border:1.5px solid var(--line);border-radius:14px;background:var(--card);padding:14px;margin:12px 0}
+.jtabs{display:flex;gap:8px;margin-bottom:12px}
+.jtabs button{flex:1;font:inherit;font-size:15px;font-weight:650;padding:9px;border-radius:10px;cursor:pointer;
+  border:1.5px solid var(--line);background:var(--bg);color:var(--muted)}
+.jtabs button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);background:var(--soft)}
+.stepctl{display:flex;align-items:center;gap:10px;margin:4px 0 12px}
+.stepctl button{font:inherit;font-size:15px;font-weight:650;padding:8px 16px;border-radius:999px;
+  border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.stepctl button:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--line);cursor:pointer}
+.dots i.on{background:var(--ink);transform:scale(1.25)}
+.step h3{margin:0 0 6px;font-size:16.5px}
+.step h3 em{font-style:normal;color:var(--muted);font-weight:600;font-size:13.5px;margin-right:.5em}
+.step p{font-size:15px;margin:6px 0}
+.delta{display:grid;grid-template-columns:86px 1fr;gap:6px 10px;margin:10px 0;font-size:14px;align-items:baseline}
+.delta .lab{font-weight:650;font-size:12.5px}
+.delta .plus{color:var(--shut)}.delta .minus{color:var(--open)}.delta .seal{color:var(--kX)}
+.delta .row{display:flex;flex-wrap:wrap;gap:5px}
+.delta .k{white-space:normal}
+.who3{margin-top:12px;border-top:1px dashed var(--line);padding-top:9px;display:grid;gap:4px;font-size:13.5px}
+.who3 div b{font-weight:650;color:var(--muted)}
+.step{animation:fade .35s ease-out}
+@keyframes fade{from{opacity:.25}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.step{animation:none}}
+/* boundaries */
+.bounds{display:grid;gap:10px;margin:14px 0}
+.bcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.bcard b{font-size:15.5px}
+.bcard p{font-size:14.5px;margin:5px 0 0}
+.bcard .tag{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--castle)}
+/* anchor figure */
+.anchorfig{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:12px 0}
+.abox{flex:1 1 200px;border-radius:12px;padding:11px 13px;font-size:14px;border:1.5px solid var(--line);background:var(--card)}
+.abox.cas{border-color:var(--castle);background:var(--castle-soft)}
+.abox.std{border-color:var(--std);background:var(--std-soft)}
+.abox b{display:block;margin-bottom:4px}
+/* table */
+table{border-collapse:collapse;width:100%;font-size:14px;margin:12px 0;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top;min-width:120px}
+th{background:var(--soft)}
+td:first-child,th:first-child{min-width:140px}
+/* simpler list */
+.simp{display:grid;gap:10px;margin:14px 0}
+.scard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14.5px}
+.scard .q{font-weight:650;display:block;margin-bottom:5px}
+.scard .was{color:var(--muted)}
+.scard .was::before{content:"was — ";font-weight:650;font-size:12px;color:var(--open)}
+.scard .now{display:block;margin-top:4px}
+.scard .now::before{content:"now — ";font-weight:650;font-size:12px;color:var(--shut)}
+.honest{border-left:4px solid var(--open);background:var(--card);border-radius:0 12px 12px 0;
+  padding:11px 14px;margin:10px 0;font-size:14.5px}
+footer{margin-top:50px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+code{font:12.5px ui-monospace,Menlo,monospace;background:var(--soft);padding:1px 5px;border-radius:5px}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Castle &amp; Standard</h1>
+<p class="lede">The settled shape, revised 2026-10-14 — what each mode means, what every switch does to every key, and why a copy can never betray you. A companion page; the binding text is <code>notes/plans/vx-266-castle-backups-prelaunch.md</code> and the acceptance artifact is <code>castle-target-key-map.html</code>.</p>
+
+<div class="rulebox">
+  <b>The rules.</b>
+  <p style="margin:6px 0 0">In <b>Castle</b>, only you open your library and every copy Variorum made of it: your finger, your passphrase, or your twelve words — with the stated exceptions the target map lists. In <b>Standard</b>, your Apple account opens it, through iCloud Keychain when it's on — and so can anyone who signs in to this Mac. <i>In Castle&nbsp;=&nbsp;safe. Out of Castle&nbsp;=&nbsp;not safe.</i></p>
+  <p style="margin:6px 0 0"><b>Leaving Castle</b> gives your Apple account the library from then on — the library itself, with everything you wrote in it, and every copy made after you leave. No copy made before you left opens through it: those open with the passphrase or the twelve words you had on the day you left, and leaving never makes new words, so that day's paper keeps working. Your other devices each follow with one secret typed, so their own copies from before open with the words, and with the passphrase when it was the one you typed there to follow; each copy's <i>Opens with</i> line says which, and from which day.</p>
+</div>
+
+<div class="spine"><b>The one mechanism under everything:</b> a library gets a <b>fresh key</b> whenever it crosses a boundary — into Castle, out of Castle, leaving an account, landing on another Mac. What a key could open before a boundary, it can never open after. Your own past rides forward: fully into Castle; out of Castle it waits in the <b>anchor</b>, behind the passphrase and words you had the day you left.</div>
+
+<h2>The cast</h2>
+<div class="legend">
+  <div class="lcard" style="--c:var(--kP)"><b>P · your passphrase</b><span>In your head. Opens a locked copy of the library key.</span></div>
+  <div class="lcard" style="--c:var(--kW)"><b>W · your twelve words</b><span>On paper. The same power as the passphrase — the way back if you forget it.</span></div>
+  <div class="lcard" style="--c:var(--kL)"><b>L · the library key</b><span>Opens the library file. Born Castle or Standard, and it keeps that kind for life.</span></div>
+  <div class="lcard" style="--c:var(--kA)"><b>A · Apple keys</b><span>In iCloud Keychain. One per Mac per library, plus one per account that locks only the vault's master. Standard's silent road.</span></div>
+  <div class="lcard" style="--c:var(--kM)"><b>M · the master key</b><span>One per sync account. Opens the sync key and proves you to the server.</span></div>
+  <div class="lcard" style="--c:var(--kC)"><b>C · the sync key</b><span>Encrypts everything sent to the server, which never holds it unlocked.</span></div>
+  <div class="lcard" style="--c:var(--kT)"><b>Touch ID item</b><span>A Castle key's home on this Mac — released only to your finger. The login password can't read it.</span></div>
+  <div class="lcard" style="--c:var(--kF)"><b>Silent item</b><span>A Standard key's home — opens without asking. The login password reveals it.</span></div>
+  <div class="lcard" style="--c:var(--kX)"><b>The anchor</b><span>Written when you leave Castle: the outgoing Castle key and its whole history, sealed under what opened that Mac's library the day you left — on a Mac that followed, under the secret typed at its follow too. Locked once, when it's written, never re-locked; never anything Apple can reach.</span></div>
+  <div class="lcard" style="--c:var(--kF)"><b>The history &amp; the family tree</b><span>The history: older keys, each locked under today's key — your roads to old copies. The tree: a plain list of every key the library ever had, so copies are recognized without opening anything.</span></div>
+</div>
+
+<h2>The two modes</h2>
+<div class="modewrap">
+  <div class="modebar" role="tablist">
+    <button class="bstd" data-mode="std" aria-pressed="true">Standard</button>
+    <button class="bcas" data-mode="cas" aria-pressed="false">Castle</button>
+  </div>
+
+  <div class="modepanel" id="panel-std">
+    <div class="place"><b>You</b><div class="row">
+      <span class="k kP">P — if set</span><span class="k kW">W — if made</span></div></div>
+    <div class="place"><b>This Mac's Keychain</b><div class="row">
+      <span class="k kL">L · silent item</span><span class="k kM">M + C · silent (synced)</span>
+      <span class="k kF">this Mac's facts · sealed, two homes</span></div></div>
+    <div class="place"><b>The library folder</b><div class="row">
+      <span class="k kL">library file · under L</span>
+      <span class="k kA">L locked with A — this Mac's own</span>
+      <span class="k kP">L locked with P</span><span class="k kW">L locked with W</span>
+      <span class="k kL">history · Standard keys</span>
+      <span class="k kF">record: Standard</span></div></div>
+    <div class="place"><b>Apple (iCloud Keychain)</b><div class="row">
+      <span class="k kA">A · this Mac's key for this library</span>
+      <span class="k kA">A · the account's key (synced — locks the vault's master only)</span></div></div>
+    <div class="place"><b>Variorum server (synced)</b><div class="row">
+      <span class="k kM">M under P · W · A</span><span class="k kC">C under M</span>
+      <span class="k kC">your writing · under C</span></div></div>
+    <div class="whoanswer">
+      <div><b>You:</b> everything, nothing asked.</div>
+      <div><b>This Mac's login password:</b> <span class="yes">everything outside Castle's seal.</span></div>
+      <div><b>Your Apple account:</b> <span class="yes">everything Variorum keeps outside Castle's seal</span>, through iCloud Keychain when it's on.</div>
+      <div><b>The server:</b> <span class="no">your writing, never</span> — dates, sizes, tag shape, yes.</div>
+    </div>
+  </div>
+
+  <div class="modepanel" id="panel-cas" hidden>
+    <div class="place"><b>You</b><div class="row">
+      <span class="k kP">P</span><span class="k kW">W</span><span class="k kT">your finger</span></div></div>
+    <div class="place"><b>This Mac's Keychain</b><div class="row">
+      <span class="k kT">L · Touch ID item (or nowhere — Always ask)</span>
+      <span class="k kT">M + C · Touch ID (synced)</span>
+      <span class="k kF">this Mac's facts · sealed, two homes</span></div></div>
+    <div class="place"><b>The library folder</b><div class="row">
+      <span class="k kL">library file · under L</span>
+      <span class="k kP">L locked with P</span><span class="k kW">L locked with W</span>
+      <span class="k kL">history · everything, folded in</span>
+      <span class="k kF">record: Castle</span></div></div>
+    <div class="place"><b>Apple (iCloud Keychain)</b><div class="row">
+      <span class="k kA gone" style="white-space:normal">nothing of this library — its keys deleted everywhere, deleted again on sight</span></div></div>
+    <div class="place"><b>Variorum server (synced)</b><div class="row">
+      <span class="k kM">M under P · W — no Apple copy</span><span class="k kC">C under M</span>
+      <span class="k kC">your writing · under C</span></div></div>
+    <div class="whoanswer">
+      <div><b>You:</b> Touch ID, your passphrase, or your words — the library and, through the history, every older copy.</div>
+      <div><b>This Mac's login password:</b> <span class="no">nothing</span> (Markdown exports you made are plain text).</div>
+      <div><b>Your Apple account:</b> <span class="no">nothing.</span></div>
+      <div><b>The server:</b> <span class="no">your writing, never</span> — dates, sizes, tag shape, yes.</div>
+      <div class="fine">The stated exceptions, where the Apple account or the login password can still open a copy, are listed under “Who can open what” on <code>castle-target-key-map.html</code>.</div>
+    </div>
+  </div>
+</div>
+<p class="fine">Lose the passphrase, the words and every Touch ID item, and a Castle library is gone — said at the door, with <i>Export a plain copy first</i> offered. That floor is the sign the lock is real.</p>
+
+<h2>Switching, step by step</h2>
+<p class="lede">Press through a switch and watch every key. A struck chip is gone for good; the three lines under each step say who could open the library and its copies at that exact moment. Local-only libraries skip the server steps.</p>
+
+<div class="journey" id="journey">
+  <div class="jtabs">
+    <button data-jt="in" aria-pressed="true">Into Castle</button>
+    <button data-jt="out" aria-pressed="false">Out of Castle</button>
+  </div>
+
+  <div class="stepctl">
+    <button data-nav="prev">Back</button>
+    <div class="dots" id="dots"></div>
+    <button data-nav="next">Next</button>
+  </div>
+
+  <div id="track-in">
+    <section class="step">
+      <h3><em>0</em>Before: Standard</h3>
+      <p>Everything opens without asking — for you, for the login password, for your Apple account. Convenient, and exactly as exposed as it sounds.</p>
+      <div class="who3"><div><b>Login password:</b> <span class="yes">everything</span></div><div><b>Apple account:</b> <span class="yes">everything</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>1</em>You press Use Castle</h3>
+      <p>You type your passphrase and your twelve words — set or regenerate them here if you have to. The screen says the floor plainly and offers a plain export first, and names any copies here locked under an Apple key this Mac can't delete — one left in an Apple account it no longer uses. On a store from before this change, the old shared Apple key's checks run at this door, and the sheet lists anything retiring it would strand.</p>
+      <div class="who3"><div><b>Login password:</b> <span class="yes">everything — nothing has changed yet</span></div><div><b>Apple account:</b> <span class="yes">everything</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>2</em>New sync keys; the vault loses its Apple copy</h3>
+      <p>Synced only: a new master and sync key, born Castle. Your writing on the server is re-encrypted, and the vault is rewritten — the master under your passphrase and words, and <b>no Apple copy</b>.</p>
+      <div class="delta">
+        <span class="lab plus">+ new</span><div class="row"><span class="k kM">M′ under P</span><span class="k kM">M′ under W</span><span class="k kC">C′ under M′</span></div>
+        <span class="lab minus">− gone</span><div class="row"><span class="k kA gone">M under A — the vault's Apple copy</span></div>
+      </div>
+      <div class="who3"><div><b>Login password:</b> <span class="yes">the library and every backup</span></div><div><b>Apple account:</b> <span class="yes">the library and backups — no longer the server's copy</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>3</em>A new library key, born Castle</h3>
+      <p>It goes into a Touch ID item made at your press — or nowhere, with Always ask. A Castle-born key never gets an Apple lock and never sits in a silent item, for its whole life. Backups and copies pause from here to the swap.</p>
+      <div class="delta"><span class="lab plus">+ new</span><div class="row"><span class="k kT">L′ · Touch ID item</span></div></div>
+      <div class="who3"><div><b>Login password:</b> <span class="yes">the library and every backup — the old key's items are still here</span></div><div><b>Apple account:</b> <span class="yes">the library and every backup</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>4</em>The new key file — everything folds in</h3>
+      <p>One key file, rewritten around the new key: locked with your passphrase, your words, and the new master. Every older key — and the anchor from any earlier stay in Castle — folds into its history, so your whole past opens with whatever opens the library. (An anchor the secrets you typed can't open — they changed since that leave — is kept beside the history, unchanged, still answering to the secrets of its day, and the door says which secrets, of which day.)</p>
+      <div class="delta">
+        <span class="lab plus">+ new</span><div class="row"><span class="k kP">L′ under P</span><span class="k kW">L′ under W</span><span class="k kM">L′ under M′</span><span class="k kL">history: every older key, under L′</span></div>
+        <span class="lab minus">− gone</span><div class="row"><span class="k kA gone">L under A — from the live key file</span></div>
+      </div>
+      <div class="who3"><div><b>Login password:</b> <span class="yes">the library and every backup — the file is still under the old key</span></div><div><b>Apple account:</b> <span class="yes">the same, through every backup's Apple lock</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>5</em>The swap</h3>
+      <p>The record, now saying Castle, is written into the staged file; then the library is swapped to the new key. From this moment the library is in Castle. Copies resume, each carrying a key and a record that match. A crash anywhere still leaves a road in.</p>
+      <div class="who3"><div><b>Login password:</b> <span class="yes">older backups only — not the library</span></div><div><b>Apple account:</b> <span class="yes">older backups only</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>6</em>The old key's items go; a fresh backup</h3>
+      <p>The silent items are deleted — with any older per-library items, escrow items and old key files, each only once the history provably holds its key. The scheduled plaintext export turns off, with one notice. A new backup lands under the new key; its frozen key file carries the history, so it alone can reopen your whole past on a new Mac.</p>
+      <div class="delta"><span class="lab minus">− gone</span><div class="row"><span class="k kF gone">L · silent item</span><span class="k kF gone">M + C · silent item</span></div></div>
+      <div class="who3"><div><b>Login password:</b> <span class="yes">older backups only — through the Apple key, until the next step</span></div><div><b>Apple account:</b> <span class="yes">older backups only</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>7</em>Every Apple key of this Mac's own for the library is deleted</h3>
+      <p>This Mac deletes every Apple key of its own for this library — not only the one its key file names, since a Mac can hold more than one (Re-link's library arm mints one beside a key it couldn't read, and a replacement Mac takes over its predecessor's) — with no sheet, everywhere those keys synced, with no recovery, and records each id: a copy that ever comes back is deleted on sight. One left in an Apple account this Mac no longer uses can't be deleted from here; its copies are a stated exception, named at the door. Each of your other Macs deletes every key of its own as it follows; nothing is ever deleted just for "belonging to this library", since another Mac's copy may be in Standard under a key of its own. The account's key goes with the account's rotation; on old stores, the old shared key is retired last, after the checks you saw at the door.</p>
+      <div class="delta"><span class="lab minus">− gone</span><div class="row"><span class="k kA gone">A · every key of this Mac's own for this library</span><span class="k kA gone">this Mac's backups' Apple locks — now dead</span></div></div>
+      <div class="who3"><div><b>Login password:</b> <span class="no">nothing</span></div><div><b>Apple account:</b> <span class="no">nothing</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>8</em>Your other devices follow</h3>
+      <p>Each asks for your passphrase or words once, takes the new master, re-keys its own library with a Castle-born key of its own — its history taking every older key, and its anchor when the typed secret opens it — and deletes its own Apple keys and silent items. Until a device follows, it writes under its old key and sync waits.</p>
+      <div class="who3"><div><b>Login password:</b> <span class="no">nothing, on every device that has followed</span></div><div><b>Apple account:</b> <span class="no">nothing</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>9</em>After: Castle</h3>
+      <p>Only you. Touch ID, your passphrase or your words open the library — and through its history, every older copy, nothing more typed. Lose all three and it is gone; that is the point, and it was said at the door.</p>
+      <div class="who3"><div><b>Login password:</b> <span class="no">nothing</span></div><div><b>Apple account:</b> <span class="no">nothing</span></div></div>
+    </section>
+  </div>
+
+  <div id="track-out" hidden>
+    <section class="step">
+      <h3><em>0</em>Before: Castle</h3>
+      <p>Only you can open anything. You're about to trade that for convenience — knowingly.</p>
+      <div class="who3"><div><b>Login password:</b> <span class="no">nothing</span></div><div><b>Apple account:</b> <span class="no">nothing</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>1</em>You press Use Standard</h3>
+      <p>You type your passphrase and your twelve words. The screen says the one thing no design can soften: <b>from now on your Apple account — and anyone who signs in to this Mac — opens this library, including everything you wrote while in Castle, because the library keeps it.</b> Your copies from before this moment stay sealed: they open with the passphrase or the words you have today. Leaving makes no new words, so today's paper keeps working. Your other devices each follow with one secret typed, so their own copies from before open with the words, and with the passphrase when it was the one you typed there to follow; each copy's <i>Opens with</i> line says which, and from which day.</p>
+      <div class="who3"><div><b>Login password:</b> <span class="no">nothing yet</span></div><div><b>Apple account:</b> <span class="no">nothing yet</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>2</em>The anchor is written first</h3>
+      <p>Before anything else changes, one sealed bundle is written: the outgoing Castle key and its whole history, locked under the passphrase and words you just typed — and under nothing Apple can ever reach. It is locked once, here, and never re-locked: it keeps today's secrets, and every later re-key and backup carries it unchanged. This is where your past waits.</p>
+      <div class="delta"><span class="lab seal">◆ sealed</span><div class="row"><span class="k kX">the anchor · L′ + every older key, under today's P and W</span></div></div>
+      <div class="who3"><div><b>Login password:</b> <span class="no">nothing</span></div><div><b>Apple account:</b> <span class="no">nothing</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>3</em>New sync keys — the vault marked as leaving</h3>
+      <p>Synced only: a new master and sync key; your writing re-encrypted; the vault rewritten with the new master under your passphrase and your words. The rotation's first write also names the account's fresh Apple key — minted at your press — in the vault, <b>with no wrap</b>: the mark that this rotation is a leave. Past that write a crash resumes, never rolls back. Every device reads the vault's mode in three states: a wrap means Standard; a key named with no wrap, leaving Castle, in progress; neither, Castle.</p>
+      <p>Sync keys are held by what they can reach: until the previous sync key leaves the vault, the new keys and the previous one are held the Castle way — the account's Touch ID sync item, made at your press, or session memory with Always ask — so nothing from the Castle era is ever within the login password's reach.</p>
+      <div class="delta">
+        <span class="lab plus">+ new</span><div class="row"><span class="k kM">M″ under P · W</span><span class="k kC">C″ under M″</span><span class="k kA">A · the account's, fresh — named in the vault, no wrap</span><span class="k kT">M″ + C″, and the previous C′ · the account's Touch ID sync item</span></div>
+        <span class="lab minus">− gone</span><div class="row"><span class="k kM gone">M′ · the Castle master, replaced</span></div>
+      </div>
+      <div class="who3"><div><b>Login password:</b> <span class="no">nothing yet</span></div><div><b>Apple account:</b> <span class="no">nothing yet — its fresh key is named, but wraps nothing</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>4</em>One write completes the leave</h3>
+      <p>Synced only: one write adds the account's Apple wrap of the new master, under the key the vault names, and closes the previous sync key's window in the same write — so nothing from the Castle era ever sits under anything Apple can reach. Only a device that can read that named key makes it: this Mac, or another of your devices once iCloud Keychain carries the key there. The others re-encrypt, but never clear the previous key while a key stands named with no wrap; if an older build clears it first, the leave still reads as in progress, and the completing write is just the wrap. Then the new sync keys move to a silent item, and the Touch ID item goes.</p>
+      <p>If this Mac never finishes, another of your devices finishes it at a press that names it — <i>“Finish leaving Castle, started on [device] on [day]”</i> — waiting for the named key, and minting a fresh one only if it never arrives. A rotation with no key named — Use Castle's, or Replace All Keys in Castle — is finished by any device, and never with an Apple copy.</p>
+      <div class="delta">
+        <span class="lab plus">+ new</span><div class="row"><span class="k kM">M″ under A — the wrap</span><span class="k kF">M″ + C″ · silent item</span></div>
+        <span class="lab minus">− gone</span><div class="row"><span class="k kT gone">M″ + C″ + C′ · the Touch ID sync item</span><span class="k kC gone">the previous C′</span></div>
+      </div>
+      <div class="who3"><div><b>Login password:</b> <span class="yes">the server's copy, through the new sync keys' silent item</span></div><div><b>Apple account:</b> <span class="yes">the server's copy, through the account's Apple wrap</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>5</em>A new library key, born Standard — with an empty history</h3>
+      <p>The new key goes into a silent item. The key file locks it with this Mac's own fresh Apple key, your passphrase, your words and the new master. Its history starts <b>empty</b>: out of Castle, nothing crosses. Not the Castle keys, and not the keys from before Castle either — they all wait in the anchor.</p>
+      <div class="delta">
+        <span class="lab plus">+ new</span><div class="row"><span class="k kF">L″ · silent item</span><span class="k kA">L″ under A — this Mac's own</span><span class="k kP">L″ under P</span><span class="k kW">L″ under W</span></div>
+      </div>
+      <div class="who3"><div><b>Login password:</b> <span class="yes">the server's copy</span> — <span class="no">not the library: its file is still under the Castle key</span></div><div><b>Apple account:</b> <span class="yes">the server's copy</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>6</em>The swap</h3>
+      <p>The record, now saying Standard, goes into the staged file; the library is swapped to the new key; the Castle key's Touch ID item goes; a fresh backup lands. The library — all of it, Castle-era writing included — now opens the Standard way.</p>
+      <div class="delta"><span class="lab minus">− gone</span><div class="row"><span class="k kT gone">L′ · Touch ID item</span></div></div>
+      <div class="who3"><div><b>Login password:</b> <span class="yes">the library, every new copy and the server's copy</span></div><div><b>Apple account:</b> <span class="yes">the library, every new copy and the server's copy</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>7</em>Your other devices follow — one typed secret each</h3>
+      <p>There is no silent way out of Castle. Each device asks for your passphrase or words once, for the new master. A device that sees the rotation still running — the previous sync key still in the vault, or the account's key named with no wrap — holds its re-key until the vault reads Standard or Castle, and keeps the keys it takes the Castle way while the previous sync key stands. Then it writes its own anchor first, under the secret it just typed — that secret opened the vault, so it is current — and under its outgoing Castle key, with that key's own locks from its key file copied beside it. The one secret typed does both jobs, and nothing re-locks the anchor after it's written. So its anchor opens with the secret typed at its follow and with whatever opened that device that day; only a device that never had the passphrase typed has an anchor that opens with the words alone, and its copies' <i>Opens with</i> line says the twelve words. (After an older build's leave, which never changed the master, the master's road is left out.) Then it re-keys to a Standard-born key of its own.</p>
+      <div class="delta"><span class="lab seal">◆ sealed</span><div class="row"><span class="k kX">each device's own anchor · under the secret typed at its follow, and its outgoing Castle key</span></div></div>
+      <div class="who3"><div><b>Login password:</b> <span class="yes">the same, on each device as it follows</span></div><div><b>Apple account:</b> <span class="yes">the same</span></div></div>
+    </section>
+    <section class="step" hidden>
+      <h3><em>8</em>After: Standard — the anchor is the road back</h3>
+      <p>Your Apple account opens the library and everything new. Every copy from before the leave — Castle-era and earlier — answers only to the passphrase or words you had the day you left, through the anchor; on a device that followed, to the words, and to the passphrase when it was the one you typed there to follow — each copy's <i>Opens with</i> line says which. Re-enter Castle later, and the anchor folds back into the history whole, so your past opens with nothing more typed again — or, if the secrets you type then can't open it, it's kept beside the history, still answering to that day's.</p>
+      <div class="who3"><div><b>Login password:</b> <span class="yes">the library and new copies</span> · <span class="no">old copies: the leave day's passphrase or words only</span></div><div><b>Apple account:</b> <span class="yes">the same</span></div></div>
+    </section>
+  </div>
+</div>
+
+<h2>The four boundaries</h2>
+<p class="lede">Same rule at every one: a fresh key, and the old key's reach ends at the line.</p>
+<div class="bounds">
+  <div class="bcard"><span class="tag">INTO CASTLE</span><br><b>Everything folds in.</b>
+    <p>A fresh Castle-born key; every older key and any waiting anchor joins its history (an anchor the secrets you type can't open waits beside it, unchanged). Your whole past opens with Touch ID, your passphrase or your words — and with nothing else, anywhere, ever again.</p></div>
+  <div class="bcard"><span class="tag">OUT OF CASTLE</span><br><b>Nothing crosses.</b>
+    <p>A fresh Standard-born key with an empty history. The past — Castle keys and pre-Castle keys alike — waits in the anchor, behind the passphrase and words you had that day, never re-locked. Re-entering folds it back in whole.</p></div>
+  <div class="bcard"><span class="tag">LEAVING AN ACCOUNT</span><br><b>Both modes re-key.</b>
+    <p>The account you leave opens only the copies from its Standard days — until it replaces its keys or enters Castle — and never anything you write after. Any anchor rides along unchanged. In Standard the switch needs nothing remembered: the silent item and this Mac's Apple key carry it, and a forgotten passphrase is simply reset at the door.</p></div>
+  <div class="bcard"><span class="tag">LANDING ON ANOTHER MAC</span><br><b>A copy becomes its own library.</b>
+    <p>A sent library lands under a fresh key with an empty history: unlock with one secret, then type the other — or mint a new one, since the one you typed proved it's yours. No two Macs ever share a key — except a library sent before this change, until either crosses a line — so sending a copy never ties your safety to someone else's choices. (A Standard copy on the same Apple account can land with nothing typed; it lands on the Apple road, secrets offered — declined, it opens through that Mac and its Apple account only.)</p></div>
+</div>
+
+<h2>The anchor, in one picture</h2>
+<div class="anchorfig">
+  <div class="abox cas"><b>In Castle</b>today's key opens the history → every older key → every older copy. One chain, backwards only. An old key never opens anything newer.</div>
+  <div class="abox"><b>At the leave</b>the chain is lifted whole into the anchor and sealed under that day's P and W (on a Mac that followed, under the secret typed at its follow and its own locks for the outgoing key). The new Standard key starts a new, empty chain.</div>
+  <div class="abox std"><b>In Standard, after</b>Apple opens the new chain only. The anchor answers to the passphrase or words you had the day you left — it keeps the secrets of its day, and nothing re-seals it. Leaving makes no new words, so that day's paper keeps working.</div>
+</div>
+<p class="fine">The one thing to keep: that day's paper. Every door that replaces a secret while an anchor exists says what still opens the copies from before the leave. New words, Replace All Keys, a leave from an account and sync setup's new words say <i>“Copies from before 12 October still open with the words you're replacing — keep that paper.”</i> Change passphrase says <i>“Copies from before 12 October still open with the passphrase you're replacing, or that day's words.”</i> Standard's reset road for a forgotten passphrase says <i>“Copies from before 12 October now open with that day's twelve words — keep that paper.”</i> A Use Castle that can't fold an anchor in says which secrets, of which day, still open the copies it holds. Change both your passphrase and your words, and those copies need the old ones; each copy's <i>Opens with</i> line names the day.</p>
+
+<h2>Who can open what</h2>
+<table>
+<thead><tr><th>who</th><th>Castle</th><th>Standard</th></tr></thead>
+<tbody>
+<tr><td><b>You, on your Mac</b></td><td>Touch ID or your passphrase — everything, past included</td><td>everything, nothing asked</td></tr>
+<tr><td><b>You, on a new Mac, Apple account only</b></td><td class="no">no — your passphrase or words</td><td class="yes">yes, when iCloud Keychain carried the key (Variorum can't see whether it did)</td></tr>
+<tr><td><b>You, with your passphrase or words</b></td><td class="yes">yes — at least the secrets of that copy's day; whatever opens the library opens them too</td><td class="yes">yes, if set — at least the secrets of that copy's day</td></tr>
+<tr><td><b>Someone with this Mac's login password</b></td><td class="no">nothing — Markdown exports you made are plain text</td><td class="yes">everything outside Castle's seal</td></tr>
+<tr><td><b>Someone in your Apple account</b></td><td class="no">nothing</td><td class="yes">everything Variorum keeps outside Castle's seal</td></tr>
+<tr><td><b>The Variorum server</b></td><td class="no">your writing, never</td><td class="no">your writing, never</td></tr>
+<tr><td><b>Someone who steals one backup file</b></td><td class="no">nothing — it needs a key</td><td class="no">nothing — it needs a key</td></tr>
+</tbody>
+</table>
+<p class="fine">"Castle's seal" after a leave means: every copy from before you left, which answers only to the passphrase or words you had the day you left, through the anchor. The library you keep using is Standard's from the moment you leave.</p>
+
+<h2>What got simpler</h2>
+<p class="lede">Each of these was an open question with a long, conditional answer. The boundary rule closed them.</p>
+<div class="simp">
+  <div class="scard"><span class="q">"Which mode is this library in?"</span>
+    <span class="was">derived from five separate inputs, each changed as a side effect by something else; one ambiguous state could record the wrong mode.</span>
+    <span class="now">written in the record — and structurally, the mode is just the kind of the current key. A key is born Castle or Standard and never changes kind, so there is nothing to derive.</span></div>
+  <div class="scard"><span class="q">"Which key file and Keychain slot count?"</span>
+    <span class="was">several key files per folder with newest-modified winning, and one Keychain slot shared by every copy of a library — restoring a backup silently overwrote the live key.</span>
+    <span class="now">one key file; one item per key. A restore never evicts anything, and opening a copy can never lower the mode.</span></div>
+  <div class="scard"><span class="q">"What opens an old backup?"</span>
+    <span class="was">each copy kept only its own day's keys; a library with no passphrase could lose everything with the Mac.</span>
+    <span class="now">the history: whatever opens your library opens everything older, nothing more typed — except, after a leave from Castle, what came before it, which the anchor holds under that day's secrets.</span></div>
+  <div class="scard"><span class="q">"What does leaving Castle expose?"</span>
+    <span class="was">three rulings in a row wrestled with which eras re-open to Apple, and the answer needed era bookkeeping on every key.</span>
+    <span class="now">the anchor: out of Castle, nothing crosses; back in, everything folds back — or waits beside the history, unchanged, if the secrets you type then can't open it. One object instead of a filtering rule.</span></div>
+  <div class="scard"><span class="q">"What does AirDropping a library share?"</span>
+    <span class="was">both Macs shared one key and its whole history forever — a standing exception, a hand-off ledger, caveats at Send Library, and the round-2 reviews' worst finding.</span>
+    <span class="now">a landing mints a fresh key with an empty history. A sent copy is just a copy: no two Macs ever share a key — except a library sent before this change, until either crosses a line — and the hand-off ledger and the caveats are gone.</span></div>
+  <div class="scard"><span class="q">"Can the account I left still read my library?"</span>
+    <span class="was">yes, silently — the old account's master kept opening the library's current key through old backups, including everything written after leaving.</span>
+    <span class="now">leaving re-keys in both modes: the old account opens only copies from its synced Standard days, until it replaces its keys or enters Castle — never anything after.</span></div>
+  <div class="scard"><span class="q">"Which Apple key wraps what?"</span>
+    <span class="was">one shared Apple key for every library and every account, never deleted — the root of Castle's gap, the "delete your old backups?" offer, and a special case for devices joining old accounts.</span>
+    <span class="now">one key per Mac per library, one per account for the vault's master only. Entering Castle deletes every key of this Mac's own for this library, by its id; the special case no longer exists.</span></div>
+  <div class="scard"><span class="q">"Is a half-finished switch dangerous?"</span>
+    <span class="was">crash markers lived inside the library file, rode into backups, and one stuck marker could refuse sync forever.</span>
+    <span class="now">sealed plans named by the record; a missing plan never blocks; copies pause around the swap, so every backup is whole.</span></div>
+  <div class="scard"><span class="q">"Can something on the Mac flip my protection?"</span>
+    <span class="was">the gate style, the idle lock and the scheduled export sat where any login-password holder could edit them, and pre-unlock code decided from what it found on disk.</span>
+    <span class="now">before unlock, nothing decides — the lobby offers only roads that prove themselves by opening the file. Weakening settings live in two sealed homes, newer wins, and a Mac finds its own section by its hardware; no repair ever makes a Touch ID item; the plaintext export turns off on the way into Castle.</span></div>
+  <div class="scard"><span class="q">"Who owns new writing?"</span>
+    <span class="was">whoever happened to be signed in stamped the rows, and "enrolled" had five meanings.</span>
+    <span class="now">the record names the account; writing belongs to the library's account. Signing in or out changes nothing.</span></div>
+</div>
+
+<h2>The three honest sentences</h2>
+<p class="lede">What remains isn't complexity — it's truth the design states instead of hiding.</p>
+<div class="honest"><b>Leaving Castle opens the library you keep.</b> Everything you wrote in Castle is still in it. The anchor protects your old copies — nothing can make the live library private again except going back into Castle.</div>
+<div class="honest"><b>A copy's locks are frozen the day it's made, and so are the anchor's.</b> Your current passphrase and words follow the library — but a copy, or an anchor, left behind in an era whose secrets you discarded answers only to the secrets of its day. Every copy says what opens it, in one line, wherever it's listed.</div>
+<div class="honest"><b>Variorum can't see iCloud Keychain.</b> Whether the Apple road actually reached iCloud is Apple's to know. The passphrase and the words are the durable roads, in both modes.</div>
+
+<footer>
+The shape agreed 2026-10-13 after two parallel round-2 cold reviews (Fable and Opus) and their joint resolution — this page was made by the Fable reviewer, independently of the generator pages. It is a companion explainer, second to them: the binding text is <code>notes/plans/vx-266-castle-backups-prelaunch.md</code> and the acceptance artifact is <code>castle-target-key-map.html</code>; wherever this page and the maps differ, the maps win. At phase 5's closeout it is re-verified against the maps, or deleted.
+</footer>
+</main>
+
+<script>
+(function(){
+  // mode toggle
+  var mbs=document.querySelectorAll('.modebar button');
+  mbs.forEach(function(b){b.addEventListener('click',function(){
+    mbs.forEach(function(x){x.setAttribute('aria-pressed',String(x===b));});
+    document.getElementById('panel-std').hidden=(b.dataset.mode!=='std');
+    document.getElementById('panel-cas').hidden=(b.dataset.mode!=='cas');
+  });});
+  // stepper
+  var tabs=document.querySelectorAll('[data-jt]'), dots=document.getElementById('dots');
+  var cur='in', idx=0;
+  function steps(){return document.querySelectorAll('#track-'+cur+' .step');}
+  function render(){
+    var ss=steps();
+    document.getElementById('track-in').hidden=(cur!=='in');
+    document.getElementById('track-out').hidden=(cur!=='out');
+    ss.forEach(function(s,k){s.hidden=(k!==idx);});
+    dots.innerHTML='';
+    ss.forEach(function(_,k){
+      var d=document.createElement('i'); if(k===idx)d.className='on';
+      d.addEventListener('click',function(){idx=k;render();});
+      dots.appendChild(d);
+    });
+    document.querySelector('[data-nav="prev"]').disabled=(idx===0);
+    document.querySelector('[data-nav="next"]').disabled=(idx===ss.length-1);
+  }
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.setAttribute('aria-pressed',String(x===t));});
+    cur=t.dataset.jt; idx=0; render();
+  });});
+  document.querySelector('[data-nav="prev"]').addEventListener('click',function(){if(idx>0){idx--;render();}});
+  document.querySelector('[data-nav="next"]').addEventListener('click',function(){if(idx<steps().length-1){idx++;render();}});
+  document.getElementById('journey').addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'&&idx<steps().length-1){idx++;render();e.preventDefault();}
+    if(e.key==='ArrowLeft'&&idx>0){idx--;render();e.preventDefault();}
+  });
+  render();
+})();
+</script>
+</body>
+</html>
