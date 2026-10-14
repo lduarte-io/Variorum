@@ -2,7 +2,7 @@
 
 The Pro's stage coordinator from 17:04 MDT on the 13th to the close at ~12:50 on the 14th, under
 `.claude/skills/stage-coordinator`. Three overnight runs went through the queue to their merges, and the night's one
-`/Applications` refresh ran last. Your mandate to the runs (relayed via vx-282, ~00:50): *"continue on through the night
+`/Applications` refresh ran last. The window closed at her word; she then kept the same session on as coordinator (compacted) for the Castle phase and the next wave, so this file records that run of work. Your mandate to the runs (relayed via vx-282, ~00:50): *"continue on through the night
 ending in a merge to main - the final merge in of the night can be the only one to do an applications refresh."*
 
 ## Your checklist
