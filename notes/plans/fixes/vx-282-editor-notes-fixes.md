@@ -112,7 +112,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-290 — the empty-block backspace's caret landing | IN-PROGRESS — **W1 RED ON OLD DONE, W2 MAC BATCH GREEN** (stage `vx282-u1` 21:58:14–22:01:26, released; record below). **W3, the walk, is HELD** on the coordinator's word (she may be on the Pro) — next: on the orchestrator's "W3 GO" + claim line, walk rows A–D, record, flip to DONE. Fix `385aa1fc`. No revert in flight. |
-| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | IN-PROGRESS — stage `vx282-u2` HELD (claimed 22:59:49, do NOT release — U1's walk follows by chained handover). **W1 red on old as designed** (Mac 23 tests/3 suites, 9 issues all designed; phone 2/1, 3 issues all designed). **W2 Mac batch GREEN 190 tests / 26 suites.** **W2b phone: a FINDING — `leavingATrailingSpaceBehindUnstylesTheSpanHonestly` hit the DEBUG desync fatal (`MobileEditorViewModel.swift:2001`) on the fixed product; NOT on the old product → caused by the phone settle; the phone fix needs a rebuild (none allowed this window); everything else on the phone green incl. her-flow pin.** Simulator shut down. NOW: W3 the walk. |
+| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | IN-PROGRESS — **window run 22:59–23:39, claim `vx282-u2` HELD for U1's chained handover.** W1 red on old as designed (Mac 23/3, 9 issues; phone 2/1, 3 issues — all designed). **W2 Mac batch GREEN 190 tests / 26 suites.** **W3 walk HOLDS (Study): A italic at every keystroke incl. right after each space, B plain when the caret leaves / italic when it returns, C arithmetic plain.** **W2b phone FINDING: `leavingATrailingSpace…` hits the DEBUG desync fatal on the fixed product only — UIKit's `coordinateEditing` insert reports the selection mid-transaction, the settle's attribute write joins the edit's report, the verdict refuses.** NEXT: the one-line fix (settle never writes while `storage.editedMask` is non-empty), headless builds, then a phone re-run (W2b) + the Mac g1 re-run in a later window. Second voice not walked. No revert in flight. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | NOT-STARTED |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
@@ -541,6 +541,72 @@ all green. The markdown suites alone at `962a7305`: 106/7.
   current voice (recorded); then Study↔Terminal via Settings ▸ Appearance's AX road and repeat A's space capture and
   B's leave capture; restore the voice found. Then the walk note to the Trash (residue recorded), quit OUR instance by
   identity, re-check `pgrep`, leave the dev store Standard and unlocked, release the claim.
+
+**THE STAGE WINDOW — RUN 2026-10-13, 22:59:49 → 23:39 (the coordinator's GO; claim `vx282-u2`, HELD at the end —
+NOT released, U1's walk follows by a chained handover; `guard.sh --author` OK before every leg; no Variorum instance
+and no booted simulator at the start). Logs: `notes/plans/vx282-screens/u2/logs/`; captures beside them.**
+- **W1 — RED ON OLD, AS DESIGNED.**
+  - Mac (`w1-mac-red-on-old.log`, the `44ad276b` product): "Test run with **23 tests in 3 suites failed** … **9
+    issues**", every one on a designed expectation — `herFlow…` 1 (the italic dropped after typing `"hello "` and
+    `"hello world "`), `aBoldPair…` 1 (flickered at `"two "`), `leaving…` 3 (the three italic expectations),
+    `aCaretMoveCosts…` 1 (`arriving > 0` — nothing honoured the caret), `aLivePaneKeeps…` 1 (dropped at `"hello "`),
+    `aPaneThatLoses…` 2 (its two italic expectations). GREEN on old: `arithmeticStays…`, the rest of `aCaretMoveCosts…`,
+    and the whole of `MarkdownFaceTests` (16).
+  - Phone (`w1-phone-red-on-old.log`, the old iOS product, iPhone 17 Pro iOS 26.2): "**2 tests in 1 suite failed** …
+    **3 issues**" — `herFlow…` 1, `leaving…` 2 (its italic expectations); NO crash on the old product.
+- **W2 — THE MAC BATCH, GREEN** (the `657bb57c` product): g1 (`w2-g1.log`) "**106 tests in 13 suites passed**"; g2
+  (`w2-g2.log`) "**84 tests in 13 suites passed**" — **190 tests / 26 suites, 0 skipped**, `** TEST EXECUTE SUCCEEDED
+  **` ×2. The two new Mac suites green there (her flow, the bold pair, leaving, arithmetic, the P1 cost; the live pane
+  and the pane going read).
+- **W2b — THE PHONE: A FINDING** (`w2b-phone.log`, the fixed iOS product): 33 tests in 5 suites passed (the four
+  `MobileMarkdown*` suites incl. her-flow pin `herFlowTypingInsideAnItalicPairNeverDropsTheItalicAtASpace` ✔, plus the
+  edit-routing, identity-separator, materialization and routing suites ✔), BUT
+  **`MobileMarkdownCaretTests.leavingATrailingSpaceBehindUnstylesTheSpanHonestly` hit the DEBUG fatal "mobile editor
+  surface desynced from the block index"** (`MobileEditorViewModel.swift:2001`) → the runner restarted → `** TEST
+  EXECUTE FAILED **`, the one failing test that one. **Caused by the phone settle** — the same test on the OLD product
+  recorded only its italic issues and did not crash. **The backtrace** (`~/Library/Logs/DiagnosticReports/
+  VariorumMobile-2026-10-13-232041.ips`, its Problem Reporter window captured as
+  `w2b-problem-report-VariorumMobile.png`): the test's `view.insertText("hello ")` (ONE multi-character insert) →
+  `MobileEditorTextView.insertText` → `UITextInputController _insertText:fromKeyboard:` → **`NSTextStorage
+  coordinateEditing:`** → `endEditing` → `processEditing` → `MobileStorageObserver` → `storageDidEdit`'s `.refuse` arm
+  (`:1917`) → `recoverFromUnroutableEdit` → `desyncRecovery`'s `EditorAssertionSeam.fire`. **The mechanism (traced
+  from the stack; the iOS ordering itself is inferred, not yet measured):** UIKit wraps that insert in ONE
+  `coordinateEditing` transaction and reports the selection to the delegate INSIDE it, before `endEditing`; the
+  settle's attribute write then joins the character edit in the one `processEditing` report, whose range now starts
+  at the line's first marker — so the gate's armed edit no longer binds, `fallbackVerdict` recomputes over a range
+  that crosses the separator, and the route refuses. (On the Mac the selection change is posted only after
+  `processEditing` — measured — and the Mac batch, which inserts the same `"hello "` in one call, is green.)
+  **The fix, designed, NOT BUILT (no rebuilds this window, the coordinator's word):** `MarkdownFace.settleCaret` never
+  writes while its storage has an edit pending — `guard storage.editedMask.isEmpty` (the edit's own `processEditing`
+  then notes it, and `textViewDidChange` — already wired, after the edit closes — settles with the ledger's edit mark
+  forcing the re-honour). One line in the shared face, so the Mac's two roads carry the same belt (behaviour there
+  unchanged: the Mac never settles mid-edit). The red pin for it already exists (this crash). **Next:** build it
+  headless, then a phone window (W2b re-run) and the Mac g1 re-run (the shared settle changed).
+  **Harness fact:** both phone runs lost 600 s to xcodebuild's "Failure collecting diagnostics from simulator: Timed
+  out after 600.0 seconds" (W1's elapsed 1008 s) — a phone leg costs ≈ 18 min as run; the next one should pass
+  `-collect-test-diagnostics never`. The simulator was shut down by the run (re-checked: 0 booted).
+- **W3 — THE WALK, Study (the dev store's voice, recorded; never switched), the `vx282-u2` Debug app on the dev store**
+  (opened unlocked, "Sync off (dev store)", no What's New sheet). Staged through the quick-entry bar
+  (`{t:"VX-296 walk"}*hello*` — the box curled the quotes, the microsyntax took them; `w3-00-quickentry.png`) → ⏎ opened
+  it in Write (`w3-01-opened.png`, `*hello*` italic, stars dimmed). Keys one per `keys.sh` call, ≥ 2 s apart — **no
+  character dropped**:
+  - **A (her flow) — HOLDS:** caret before the closing star (`w3-A0-caret-before-star.png`) → SPACE: `*hello |*` stays
+    ITALIC, both stars dimmed (`w3-A1-after-space.png` — the state that read plain before the fix) → `w`
+    (`w3-A2-midword-w.png`) → `o` (`w3-A3-midword-wo.png`) → SPACE again (`w3-A4-after-second-space.png`): italic at
+    every step.
+  - **B (leaving) — HOLDS:** → past the star: the whole line reads PLAIN, stars undimmed — the trailing space left
+    behind (`w3-B1-right-past-star.png`); ← back between the space and the star: italic again (`w3-B2-left-back.png`).
+  - **C (arithmetic) — HOLDS:** ⌘→, ⏎ (a new block — which also moved the caret to another line), `2 * 3 * 4` typed
+    key by key: plain, no dimmed stars; and the first line, its caret gone, reads plain (`w3-C1-arithmetic-typed.png`).
+  - **The second voice — NOT WALKED** (the voice switch is the Settings AX road, not cheap in the window's remaining
+    time; the brief's "otherwise do Study"). Recorded as such; the pins run under the harness's Terminal metrics.
+  - **Residue:** the walk note moved to the Trash by its own `note ▾ › Delete Note…` and the app's confirm
+    (`w3-D0-note-menu.png`; the receipt "Note moved to the Trash — 30 days to put it back."). The W2b crash's Problem
+    Reporter window ("Problem Report for VariorumMobile", buttons Hide Details/OK — my run's artifact, its report kept)
+    was dismissed by its named OK button.
+- **Posture left:** our instance quit by identity (`pgrep` → 0 instances); the dev store as found — Standard (custody
+  never touched), unlocked, voice Study (unchanged), appearance "system" (unchanged); 0 simulators booted; **the claim
+  `vx282-u2` still HELD** (~20 min left at 23:39) for U1's chained handover.
 
 ## Ladder
 
