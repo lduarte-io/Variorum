@@ -272,6 +272,16 @@ CLAUDE.md, incl. the /Applications refresh at a zero-instance window unless the 
    and Terminal (light and dark where the unit names it) into `notes/plans/vx283-screens/uN/`, named
    `<row>-<voice>-<appearance>.png`. Region captures for the sidebar (a whole-window capture shrinks the Open
    list's ✕ to a few pixels — crop or capture at 2× the sidebar's rect).
+   **The dev store is restored after every walk (the coordinator's ask, 2026-10-14):** opening and closing notes
+   writes to it (close-time auto-savepoints, touch stamps). BEFORE the first launch, with zero dev instances
+   running, copy the three store files — `variorum.sqlite`, `variorum.sqlite-wal`, `variorum.sqlite-shm` from
+   `~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Application Support/Variorum-dev/` — into a
+   uniquely named folder inside this worktree's gitignored `notes/plans/vx283-screens/uN/store-before/` (never the
+   store's own `Backups/`). AFTER the last quit, with zero dev instances, copy them back and verify with `cmp`
+   each file byte-identical to the copy. Never touch the folder's key files, `Backups/` or `Previous Libraries/`.
+   Debug prefs: `defaults export io.lduarte.Variorum.debug` before; after, `defaults import` then re-export and
+   diff against the before-export (import MERGES, so a key the walk added must be deleted by hand). The RELEASE
+   line says: "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
 4. The walker writes its WALK RECORD into the unit's section (each row: what was done, what the screenshot shows,
    HOLDS / DOES NOT HOLD), commits it (screenshots stay gitignored), pushes, releases the claim, and reports.
 5. The orchestrator opens every screenshot. Anything that does not look right → a fix leg (the implementer resumed
