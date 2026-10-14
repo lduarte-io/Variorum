@@ -369,7 +369,9 @@ final class MCPDoor {
             // her": the Mac's own table.
             refusalWords: { OpsRefusalCopy.message(for: $0) },
             onAsk: { [weak self] ask in Task { @MainActor in self?.enqueue(ask) } },
-            onWrite: { [weak self] receipt in Task { @MainActor in self?.landReceipt(receipt) } },
+            // VX-275: a landed write first sends every pane off a note it
+            // killed (THE ONE navigate-away road), then speaks its receipt.
+            onWrite: { [weak self] receipt in Task { @MainActor in self?.landWireWrite(receipt) } },
             // U4 (AF-11 F-3): the move dial's delivery — the rule applied on
             // the main actor, in the same hop as any move.
             show: { [weak self] target in
@@ -377,7 +379,10 @@ final class MCPDoor {
             },
             // 13n-c U6: her Move to Wing door's own sentence for a frozen book
             // (the server speaks it where the client can read the book).
-            wingMoveFrozenWords: Self.wingMoveFrozenWords)
+            wingMoveFrozenWords: Self.wingMoveFrozenWords,
+            // VX-275 (her ruling (a)): her typing lands before a wire act
+            // meets the take she may be typing in — `MCPDoor+HerEditor`.
+            beforeWrite: { [weak self] _ in await self?.flushHerEditorBeforeWrite() })
         host = fresh
         starting = true
         // The start sweeps the while-connected grants (a write) and binds —

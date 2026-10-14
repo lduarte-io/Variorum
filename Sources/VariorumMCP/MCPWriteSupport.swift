@@ -87,10 +87,18 @@ public struct MCPWriteReceipt: Sendable, Equatable {
     /// 13n-c U6: how many books a WING MOVE took the note out of (her own
     /// door's receipt says it — "it left 2 books"); nil for every other act.
     public var leftBooks: Int?
+    /// **VX-275 — the notes this act left DEAD** (a FACT, never a decision —
+    /// P-4): the app posts them on THE ONE navigate-away road
+    /// (`.variorumNotesDeleted` → every window's `WorkspaceModel.notesDeleted`),
+    /// exactly as her own Delete door posts the notes it tombstoned, so no
+    /// pane and no Open row is left standing on a tombstone. Empty for every
+    /// act that kills no note.
+    public var notesLeftDead: [String]
 
     public init(
         clientName: String, act: Operations.MCPWriteAct, targetID: String?, targetTitle: String?,
-        detail: String? = nil, count: Int = 1, show: MCPShowTarget? = nil, leftBooks: Int? = nil
+        detail: String? = nil, count: Int = 1, show: MCPShowTarget? = nil, leftBooks: Int? = nil,
+        notesLeftDead: [String] = []
     ) {
         self.clientName = clientName
         self.act = act
@@ -100,6 +108,7 @@ public struct MCPWriteReceipt: Sendable, Equatable {
         self.count = count
         self.show = show
         self.leftBooks = leftBooks
+        self.notesLeftDead = notesLeftDead
     }
 }
 
@@ -129,6 +138,19 @@ public struct MCPHostHooks: Sendable {
     /// book (names stay with grants — AF-10 (f)); otherwise, and with no app
     /// around the host, the op's own refusal speaks through `refusalWords`.
     public var wingMoveFrozenWords: (@Sendable (_ noteTitle: String, _ bookName: String) -> String)?
+    /// **VX-275 — HER EDITOR FIRST** (her ruling (a), 2026-10-13: before a
+    /// wire delete lands, the app saves what she has typed, exactly as her
+    /// own Delete door does). Awaited by `MCPWriteTools.call` AFTER the
+    /// arguments parse and BEFORE the act's turn on the executor — its own
+    /// turn, never inside the act's — for every act that tombstones,
+    /// freezes, rewrites, restructures or copies a take her open editor may
+    /// hold unflushed (`MCPWriteTools.Job.flushesHerEditorFirst`, argued in
+    /// the VX-246 record's U3 trace). The app's answer is her own flush (the
+    /// Mac's `AppSession.flushEveryOpenPost`); its outcome is not consulted —
+    /// a refused write keeps its bytes pending, as her Delete door's does —
+    /// and the act lands after it. `tool` is the act's tool name. Nil = no
+    /// app around the host (a headless host has no editor to flush).
+    public var beforeWrite: (@Sendable (_ tool: String) async -> Void)?
 
     public init(
         refusalWords: @escaping @Sendable (Error) -> String? = { _ in nil },
@@ -136,7 +158,8 @@ public struct MCPHostHooks: Sendable {
         onWrite: (@Sendable (MCPWriteReceipt) -> Void)? = nil,
         now: @escaping @Sendable () -> Date = { Date() },
         show: (@Sendable (MCPShowTarget) async -> MCPShowRule.Verdict)? = nil,
-        wingMoveFrozenWords: (@Sendable (_ noteTitle: String, _ bookName: String) -> String)? = nil
+        wingMoveFrozenWords: (@Sendable (_ noteTitle: String, _ bookName: String) -> String)? = nil,
+        beforeWrite: (@Sendable (_ tool: String) async -> Void)? = nil
     ) {
         self.refusalWords = refusalWords
         self.onAsk = onAsk
@@ -144,6 +167,7 @@ public struct MCPHostHooks: Sendable {
         self.now = now
         self.show = show
         self.wingMoveFrozenWords = wingMoveFrozenWords
+        self.beforeWrite = beforeWrite
     }
 }
 
