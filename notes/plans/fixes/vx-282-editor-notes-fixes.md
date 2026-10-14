@@ -138,7 +138,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **DONE** — VX-229 DISMISSED AS HOLLOW in use (the u5b heap decider; the fix `ee86dd8c` reverted `7d798f82`; the runner's retention a known issue `c46f999d`, cause untraced) · VX-257 FIXED `1ca8fe72` (pins `7650b6ce`/`075473c2`, reshaped `dab712d8`/`eaf42b27`; QUESTIONS #223) · VX-183 FIXED `a765683c` · VX-182 FIXED `fd4c260c` (pins `f38fb93c`). Verified: core 2,801/320 + MCP 212/41 + workbook 40/6 headless; W1 / u5c red on old as designed; u5b g2 76/11, g3 23/2; **u5d g1 113 tests / 13 suites passed (9 known issues — the VX-229 runner fact)**; the u5b walk, every row held, both voices. Windows released 05:25:17, 05:57:46, 06:13:57, 06:19:43. Posture as found (Standard, unlocked, Study); no instance; no revert in flight. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **DONE** — pins `d35191b6` + correction `ee1facc9` · fix `3cf0079b` · window `a1967ac0` (logs) + the walk record. Stage window 05:27:17–05:38:17 (claim `vx282-u6`, RELEASED): W1 red on old exactly as predicted (3 tests, 1 issue — the launch pin's last cell) · W2 the fixed batch 148 tests / 43 suites green · W3 every row held (A0 old: the window; A/A' fixed: the caret in the bar at launch in Study and Terminal, a typed letter lands; C the tour never stolen from; D the navigation back as today — O-U6-1 seen live); row B's restored note window not reachable on this Mac (not restored), a new window walked in its place. P-U6-1/2 → QUESTIONS #224. Posture: Study, unlocked Standard, tour `completed`, the Bookcase, nothing filed. No claim held; no revert in flight. |
-| Ladder | round 1 `opus-reviewer` (0B/0M/6m/4n, dispositioned) → its FIX LEG; round 2 = the run's one `fable-reviewer` | round 1's FIX LEG DONE (r1fix, released) · round 2 (the one Fable review) 0B/0M/2m/3n, all five CONFIRMED → its FIX LEG: **READY FOR STAGE — r2fix, ≈8 min** (F-2 + F-3 red-on-old then green; F-1/F-5 docs, F-4 recorded) |
+| Ladder | round 1 `opus-reviewer` (0B/0M/6m/4n, dispositioned) → its FIX LEG; round 2 = the run's one `fable-reviewer` | round 1's FIX LEG DONE (r1fix) · round 2 (the one Fable review) 0B/0M/2m/3n, all five CONFIRMED → its FIX LEG **DONE** (r2fix 08:34–08:37, released): F-2 + F-3 FIXED red-on-old → green; F-1/F-5 docs; F-4 recorded. The orchestrator's line-by-line check of the final round's fixes: its own record |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
 ## Stage traffic log (oct13coordinator protocol)
@@ -3031,15 +3031,15 @@ Each finding re-traced in the tree at `dcc42b6c`.
 
 ### ROUND 2 — FIX LEG (the same `opus-implementer` session, 2026-10-14)
 
-**LIVE STATUS: READY FOR STAGE — r2fix (≈8 min).** Every finding applied as called; the two pins ahead of the fixes;
-the products built headless. No claim held; **no behavioural revert in flight** (none was needed — the old products
-are the pins commit's own build).
+**LIVE STATUS: DONE (2026-10-14 08:37).** Every finding applied as called; the r2fix window ran 08:34:35–08:36:59
+(claim `vx282-r2fix`, RELEASED): F-2 and F-3 red on old, green on the fixed products. No claim held; no behavioural
+revert in flight (none was needed — the old products are the pins commit's own build); simulators shut down (0 booted).
 
 | Finding | State |
 |---|---|
 | F-1 the rescue can reshape a stable span | **DONE (doc)** `5609a1e3` + `beb6f705` — #220's two sentences + option (b); R1-5's "one spot" sentence corrected; the U2 edges line |
-| F-2 a seal arriving mid-flight (R1-7's residual) | **BUILT** — pin `5a869dbb` (+ its compile fix `936bb4ca`), fix `ddcfda66` (shape (b), `EditorViewModel.swift` only); red-on-old + green PENDING |
-| F-3 the settle answers what it wrote | **BUILT** — pin `5a869dbb`/`936bb4ca`, fix `b963184e` (one line of logic in the shared face); red-on-old + green PENDING |
+| F-2 a seal arriving mid-flight (R1-7's residual) | **FIXED** `ddcfda66` (shape (b), `EditorViewModel.swift` only) — pin `5a869dbb`/`936bb4ca`: W1 red on old (2 issues: at the arrival, after the flight), W2 green |
+| F-3 the settle answers what it wrote | **FIXED** `b963184e` (the shared face) — pin `5a869dbb`/`936bb4ca`: W1 red on old (2 issues: the no-opener move bumped 2 → 3, the control read 4 for 3), W2 + W2b green |
 | F-4 a pane's stale pending edit | **RECORDED** `5609a1e3` (the U2 edges) — no road, no fix |
 | F-5 the clear's re-wrap far above the viewport | **RECORDED** `5609a1e3` (the U2 edges) — the nudge UNMEASURED, 18k C6 cited |
 
@@ -3098,6 +3098,29 @@ From `App/Variorum/`; logs to `notes/plans/vx282-screens/r2fix/logs/` (create it
 **READY FOR STAGE — r2fix: W1 (Mac red-on-old: F-2, F-3) · W2 (MarkdownCaretFaceTests, SettleRewrapOverlayTests,
 PaneMarkdownCaretFaceTests, PaneFindFaceTests on the fixed product) · W2b (MobileMarkdownCaretTests on the fixed phone),
 ≈8 min.**
+
+#### THE r2fix WINDOW — RUN 2026-10-14 08:34:35 → 08:36:59 (claim `vx282-r2fix`, handed from `coord-for-vx282`; RELEASED)
+
+The coordinator's GO (pre-checks 08:34: no instance, no booted simulator, disk 61 GiB). `git pull --ff-only` first (tip
+`f6c65cda`; the products' code is `ddcfda66`, docs after); `guard.sh --author` OK before each leg; `pgrep -lx Variorum`
+empty throughout; nothing rebuilt; no launch, no walk, no popup. Logs: `notes/plans/vx282-screens/r2fix/logs/`.
+- **W1 — red on old, Mac — AS DESIGNED** (`w1-red-on-old.log`, the build of `936bb4ca`, 08:34:39–08:35:06): "**8 tests in
+  1 suite failed** … **4 issues**", exactly the two new pins — `aSealArrivingDuringAStructuralFlightClearsTheCaretsHonour`
+  2 (`MarkdownCaretFaceTests.swift:231`, the span still faced at the seal's arrival mid-flight; `:238`, still faced after
+  the flight) and `aCaretOnAStarNoOpenerPairsWithMovesNoOverlayGeometry` 2 (`:260`, the no-opener move bumped the
+  generation 2 → 3; `:266`, the control read 4 where one bump past `before` is 3); the suite's other six green. *(The
+  log's sub-value print for the two `!anyFace` failures reads `anyFace → false` — Swift Testing's display of a negated
+  call re-evaluated after the fact; the recorded issue is the failure.)*
+- **W2 — the fixed Mac set, GREEN** (`w2-mac.log`, `DerivedData/vx282-u1` = `ddcfda66`, ONE invocation, the list passed as
+  an array, 08:35:19–08:36:01): "**20 tests in 4 suites passed**" — `MarkdownCaretFaceTests` `SettleRewrapOverlayTests`
+  `PaneMarkdownCaretFaceTests` `PaneFindFaceTests`, all four suites' ✔ lines read; both new pins ✔; R1-1's, R1-2's and
+  R1-7's pins still ✔ through the F-3 change.
+- **W2b — the fixed phone, GREEN** (`w2b-phone.log`, `DerivedData/vx282-u2-ios` = `ddcfda66`, iPhone 17 Pro iOS 26.2,
+  `-collect-test-diagnostics never`, 08:36:06–08:36:58): "**4 tests in 1 suite passed**" (`MobileMarkdownCaretTests`: her
+  flow, leaving, the stood-down editor, and R1-3's pin with its 3 cases) — one launch, no restart; the shared face's
+  F-3 change carried.
+- **Close:** `xcrun simctl shutdown all` → **0 booted**; no instance; `Tools/stage release --who vx282-r2fix` at
+  08:36:59. The dev store untouched.
 orchestrator's) and F-3 (taken, with its pin); docs for F-1 and F-5; F-4 recorded only.
 
 ## Closeout

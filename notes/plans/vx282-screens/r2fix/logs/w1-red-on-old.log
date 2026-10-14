@@ -1,0 +1,164 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -xctestrun DerivedData/vx282-r1fix-old-products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination platform=macOS "-only-testing:VariorumTests/MarkdownCaretFaceTests"
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64e, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:x86_64, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64e, variant:Mac Catalyst, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64, variant:Mac Catalyst, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:x86_64, variant:Mac Catalyst, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64e, variant:DriverKit, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64, variant:DriverKit, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64e, variant:Designed for [iPad,iPhone], id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:<device-udid>, name:My Mac }
+2026-10-14 08:34:44.072313-0600 Variorum[66195:60066981] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to <home>/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/io.lduarte.Variorum.debug.savedState
+2026-10-14 08:34:44.575501-0600 Variorum[66195:60066981] [global-hotkey] InstallEventHandler system=carbon status=0
+2026-10-14 08:34:44.575633-0600 Variorum[66195:60066981] [global-hotkey] RegisterEventHotKey system=carbon quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 08:34:45.015096-0600 Variorum[66195:60067758] [logging-persist] cannot open file at line 53009 of [8fa8248e30]
+2026-10-14 08:34:45.015134-0600 Variorum[66195:60067758] [logging-persist] os_unix.c:53009: (2) open(/private/var/db/DetachedSignatures) - No such file or directory
+2026-10-14 08:34:46.176713-0600 Variorum[66195:60066981] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+Test Suite 'Selected tests' started at 2026-10-14 08:34:46.290.
+Test Suite 'VariorumTests.xctest' started at 2026-10-14 08:34:46.291.
+Test Suite 'VariorumTests.xctest' passed at 2026-10-14 08:34:46.291.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-14 08:34:46.291.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite "VX-296 — the caret-aware face in the Write editor" started.
+◇ Test herFlowTypingInsideAnItalicPairNeverDropsTheItalicAtASpace() started.
+✔ Test herFlowTypingInsideAnItalicPairNeverDropsTheItalicAtASpace() passed after 0.093 seconds.
+◇ Test aBoldPairStaysBoldAtASpaceToo() started.
+✔ Test aBoldPairStaysBoldAtASpaceToo() passed after 0.039 seconds.
+◇ Test leavingATrailingSpaceBehindUnstylesTheSpanHonestly() started.
+✔ Test leavingATrailingSpaceBehindUnstylesTheSpanHonestly() passed after 0.040 seconds.
+◇ Test aSealedNoteHonoursNoCaret() started.
+2026-10-14 08:34:46.511786-0600 Variorum[66195:60066981] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+✔ Test aSealedNoteHonoursNoCaret() passed after 0.046 seconds.
+◇ Test aSealArrivingDuringAStructuralFlightClearsTheCaretsHonour() started.
+2026-10-14 08:34:46.558051-0600 Variorum[66195:60066981] [sample-library] sample library (the adventures of sherlock holmes): alreadySeeded
+2026-10-14 08:34:46.558223-0600 Variorum[66195:60066981] [starred-gathering] starred gathering: alreadySeeded
+2026-10-14 08:34:46.558373-0600 Variorum[66195:60066981] [sample-library] welcome arrangement: alreadySettled
+✘ Test aSealArrivingDuringAStructuralFlightClearsTheCaretsHonour() recorded an issue at MarkdownCaretFaceTests.swift:231:13: Expectation failed: !anyFace(storage, 0..<8)
+↳ RED ON CURRENT: the seal's arrival re-reads the honoured line caret-blind
+↳ !anyFace(storage, 0..<8) → true
+↳   anyFace(storage, 0..<8) → false
+↳     storage → ()
+↳     0..<8 → *{
+          NSColor = "sRGB IEC61966-2.1 (extended) colorspace hdrm(1) 0.552941 0.521569 0.470588 1";
+          NSFont = "\".AppleSystemUIFontMonospaced-Regular 14.00 pt. P [] (0x75d03fc280) fobj=0x75d03fc280, spc=8.65\"";
+          NSParagraphStyle = "Alignment Natural, LineSpacing 0, ParagraphSpacing 7, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 0 LineBreakMode WordWrapping, Tabs (\n    28L,\n    56L,\n    84L,\n    112L,\n    140L,\n    168L,\n    196L,\n    224L,\n    252L,\n    280L,\n    308L,\n    336L\n), DefaultTabInterval 0, Blocks (\n), Lists (\n), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents (\n) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''";
+          "io.lduarte.variorum.blockID" = "00000000-0000-0000-0000-000000000001";
+          "io.lduarte.variorum.markdownFace" = "Catalog color: #$customDynamic variorum.prose.ink.terminal";
+      }hello {
+          NSColor = "Catalog color: #$customDynamic variorum.prose.ink.terminal";
+          NSFont = "\".AppleSystemUIFontMonospaced-RegularItalic 14.00 pt. P [] (0x75d11fef80) fobj=0x75d11fef80, spc=8.65\"";
+          NSParagraphStyle = "Alignment Natural, LineSpacing 0, ParagraphSpacing 7, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 0 LineBreakMode WordWrapping, Tabs (\n    28L,\n    56L,\n    84L,\n    112L,\n    140L,\n    168L,\n    196L,\n    224L,\n    252L,\n    280L,\n    308L,\n    336L\n), DefaultTabInterval 0, Blocks (\n), Lists (\n), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents (\n) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''";
+          "io.lduarte.variorum.blockID" = "00000000-0000-0000-0000-000000000001";
+          "io.lduarte.variorum.markdownFace" = "Catalog color: #$customDynamic variorum.prose.ink.terminal";
+      }*{
+          NSColor = "sRGB IEC61966-2.1 (extended) colorspace hdrm(1) 0.552941 0.521569 0.470588 1";
+          NSFont = "\".AppleSystemUIFontMonospaced-Regular 14.00 pt. P [] (0x75d03fc280) fobj=0x75d03fc280, spc=8.65\"";
+          NSParagraphStyle = "Alignment Natural, LineSpacing 0, ParagraphSpacing 7, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 0 LineBreakMode WordWrapping, Tabs (\n    28L,\n    56L,\n    84L,\n    112L,\n    140L,\n    168L,\n    196L,\n    224L,\n    252L,\n    280L,\n    308L,\n    336L\n), DefaultTabInterval 0, Blocks (\n), Lists (\n), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents (\n) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''";
+          "io.lduarte.variorum.blockID" = "00000000-0000-0000-0000-000000000001";
+          "io.lduarte.variorum.markdownFace" = "Catalog color: #$customDynamic variorum.prose.ink.terminal";
+      }
+      {
+          NSColor = "Catalog color: #$customDynamic variorum.prose.ink.terminal";
+          NSFont = "\".AppleSystemUIFontMonospaced-Regular 14.00 pt. P [] (0x75d03fc280) fobj=0x75d03fc280, spc=8.65\"";
+          NSParagraphStyle = "Alignment Natural, LineSpacing 0, ParagraphSpacing 7, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 0 LineBreakMode WordWrapping, Tabs (\n    28L,\n    56L,\n    84L,\n    112L,\n    140L,\n    168L,\n    196L,\n    224L,\n    252L,\n    280L,\n    308L,\n    336L\n), DefaultTabInterval 0, Blocks (\n), Lists (\n), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents (\n) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''";
+      }next block{
+          NSColor = "Catalog color: #$customDynamic variorum.prose.ink.terminal";
+          NSFont = "\".AppleSystemUIFontMonospaced-Regular 14.00 pt. P [] (0x75d03fc280) fobj=0x75d03fc280, spc=8.65\"";
+          NSParagraphStyle = "Alignment Natural, LineSpacing 0, ParagraphSpacing 7, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 0 LineBreakMode WordWrapping, Tabs (\n    28L,\n    56L,\n    84L,\n    112L,\n    140L,\n    168L,\n    196L,\n    224L,\n    252L,\n    280L,\n    308L,\n    336L\n), DefaultTabInterval 0, Blocks (\n), Lists (\n), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents (\n) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''";
+          "io.lduarte.variorum.blockID" = "00000000-0000-0000-0000-000000000004";
+      }
+✘ Test aSealArrivingDuringAStructuralFlightClearsTheCaretsHonour() recorded an issue at MarkdownCaretFaceTests.swift:238:13: Expectation failed: !anyFace(storage, 0..<8)
+↳ RED ON CURRENT: the sealed page keeps no italic — the act refused, nothing landed
+↳ !anyFace(storage, 0..<8) → true
+↳   anyFace(storage, 0..<8) → false
+↳     storage → ()
+↳     0..<8 → *{
+          NSColor = "sRGB IEC61966-2.1 (extended) colorspace hdrm(1) 0.552941 0.521569 0.470588 1";
+          NSFont = "\".AppleSystemUIFontMonospaced-Regular 14.00 pt. P [] (0x75d03fc280) fobj=0x75d03fc280, spc=8.65\"";
+          NSParagraphStyle = "Alignment Natural, LineSpacing 0, ParagraphSpacing 7, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 0 LineBreakMode WordWrapping, Tabs (\n    28L,\n    56L,\n    84L,\n    112L,\n    140L,\n    168L,\n    196L,\n    224L,\n    252L,\n    280L,\n    308L,\n    336L\n), DefaultTabInterval 0, Blocks (\n), Lists (\n), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents (\n) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''";
+          "io.lduarte.variorum.blockID" = "00000000-0000-0000-0000-000000000001";
+          "io.lduarte.variorum.markdownFace" = "Catalog color: #$customDynamic variorum.prose.ink.terminal";
+      }hello {
+          NSColor = "Catalog color: #$customDynamic variorum.prose.ink.terminal";
+          NSFont = "\".AppleSystemUIFontMonospaced-RegularItalic 14.00 pt. P [] (0x75d11fef80) fobj=0x75d11fef80, spc=8.65\"";
+          NSParagraphStyle = "Alignment Natural, LineSpacing 0, ParagraphSpacing 7, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 0 LineBreakMode WordWrapping, Tabs (\n    28L,\n    56L,\n    84L,\n    112L,\n    140L,\n    168L,\n    196L,\n    224L,\n    252L,\n    280L,\n    308L,\n    336L\n), DefaultTabInterval 0, Blocks (\n), Lists (\n), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents (\n) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''";
+          "io.lduarte.variorum.blockID" = "00000000-0000-0000-0000-000000000001";
+          "io.lduarte.variorum.markdownFace" = "Catalog color: #$customDynamic variorum.prose.ink.terminal";
+      }*{
+          NSColor = "sRGB IEC61966-2.1 (extended) colorspace hdrm(1) 0.552941 0.521569 0.470588 1";
+          NSFont = "\".AppleSystemUIFontMonospaced-Regular 14.00 pt. P [] (0x75d03fc280) fobj=0x75d03fc280, spc=8.65\"";
+          NSParagraphStyle = "Alignment Natural, LineSpacing 0, ParagraphSpacing 7, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 0 LineBreakMode WordWrapping, Tabs (\n    28L,\n    56L,\n    84L,\n    112L,\n    140L,\n    168L,\n    196L,\n    224L,\n    252L,\n    280L,\n    308L,\n    336L\n), DefaultTabInterval 0, Blocks (\n), Lists (\n), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents (\n) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''";
+          "io.lduarte.variorum.blockID" = "00000000-0000-0000-0000-000000000001";
+          "io.lduarte.variorum.markdownFace" = "Catalog color: #$customDynamic variorum.prose.ink.terminal";
+      }
+      {
+          NSColor = "Catalog color: #$customDynamic variorum.prose.ink.terminal";
+          NSFont = "\".AppleSystemUIFontMonospaced-Regular 14.00 pt. P [] (0x75d03fc280) fobj=0x75d03fc280, spc=8.65\"";
+          NSParagraphStyle = "Alignment Natural, LineSpacing 0, ParagraphSpacing 7, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 0 LineBreakMode WordWrapping, Tabs (\n    28L,\n    56L,\n    84L,\n    112L,\n    140L,\n    168L,\n    196L,\n    224L,\n    252L,\n    280L,\n    308L,\n    336L\n), DefaultTabInterval 0, Blocks (\n), Lists (\n), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents (\n) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''";
+      }next block{
+          NSColor = "Catalog color: #$customDynamic variorum.prose.ink.terminal";
+          NSFont = "\".AppleSystemUIFontMonospaced-Regular 14.00 pt. P [] (0x75d03fc280) fobj=0x75d03fc280, spc=8.65\"";
+          NSParagraphStyle = "Alignment Natural, LineSpacing 0, ParagraphSpacing 7, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 0 LineBreakMode WordWrapping, Tabs (\n    28L,\n    56L,\n    84L,\n    112L,\n    140L,\n    168L,\n    196L,\n    224L,\n    252L,\n    280L,\n    308L,\n    336L\n), DefaultTabInterval 0, Blocks (\n), Lists (\n), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents (\n) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''";
+          "io.lduarte.variorum.blockID" = "00000000-0000-0000-0000-000000000004";
+      }
+✘ Test aSealArrivingDuringAStructuralFlightClearsTheCaretsHonour() failed after 0.456 seconds with 2 issues.
+↳ /// **RED ON CURRENT (round 2, F-2 — R1-7's residual).** A seal that
+↳ /// ARRIVES while a structural flight is up (a sync-delivered seal racing a
+↳ /// few-ms flight — her own seal door awaits the chain, so only the sync road
+↳ /// gets here): `adoptHeader` skipped the editability write and its R1-7
+↳ /// flip-settle under the flight, and the flight's defer re-derives
+↳ /// `isEditable` directly with no settle — so when the act itself refused
+↳ /// (the store already sealed: no landing, no selection change) the italic
+↳ /// stood on the sealed, caret-less page until her next click. The NOTE's
+↳ /// editability is the rule now: the seal's arrival clears the honour at
+↳ /// once, flight or not. Deterministic: the store is sealed first (the
+↳ /// header not yet delivered), the writer held so the flight stays up.
+◇ Test aCaretOnAStarNoOpenerPairsWithMovesNoOverlayGeometry() started.
+✘ Test aCaretOnAStarNoOpenerPairsWithMovesNoOverlayGeometry() recorded an issue at MarkdownCaretFaceTests.swift:260:13: Expectation failed: h.model.overlayGeometryGeneration == before
+↳ RED ON CURRENT: nothing was restyled, so no overlay geometry moved
+↳ h.model.overlayGeometryGeneration == before → false
+↳   h.model.overlayGeometryGeneration → 3
+↳   before → 2
+✘ Test aCaretOnAStarNoOpenerPairsWithMovesNoOverlayGeometry() recorded an issue at MarkdownCaretFaceTests.swift:266:13: Expectation failed: h.model.overlayGeometryGeneration == before + 1
+↳ the control: a settle that restyled still bumps, once
+↳ h.model.overlayGeometryGeneration == before + 1 → false
+↳   h.model.overlayGeometryGeneration → 4
+↳   before + 1 → 3
+✘ Test aCaretOnAStarNoOpenerPairsWithMovesNoOverlayGeometry() failed after 0.040 seconds with 2 issues.
+↳ /// **RED ON CURRENT (round 2, F-3).** A caret on a star that NO opener
+↳ /// pairs with (`hello |*x` — a gate-positive point: a star with a space
+↳ /// before it) plans an honour, yet the restyle writes nothing. The shared
+↳ /// face answered "restyled" whenever the ledger planned, so Write bumped
+↳ /// its overlay generation and asked for a viewport redraw (and a pane reset
+↳ /// its find paint and remeasured) on every such caret move. It answers what
+↳ /// the restyles WROTE now. The control: a real rescue point still bumps.
+◇ Test arithmeticStaysPlainAtEveryCaretPositionAndAsItIsTyped() started.
+✔ Test arithmeticStaysPlainAtEveryCaretPositionAndAsItIsTyped() passed after 0.041 seconds.
+◇ Test aCaretMoveCostsAtMostTwoLinesAndNothingWhereItCannotMatter() started.
+✔ Test aCaretMoveCostsAtMostTwoLinesAndNothingWhereItCannotMatter() passed after 0.249 seconds.
+✘ Suite "VX-296 — the caret-aware face in the Write editor" failed after 1.008 seconds with 4 issues.
+✘ Test run with 8 tests in 1 suite failed after 1.008 seconds with 4 issues.
+2026-10-14 08:35:03.428 xcodebuild[66190:60066820] [MT] IDETestOperationsObserverDebug: 22.723 elapsed -- Testing started completed.
+2026-10-14 08:35:03.429 xcodebuild[66190:60066820] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 08:35:03.429 xcodebuild[66190:60066820] [MT] IDETestOperationsObserverDebug: 22.723 sec, +22.723 sec -- end
+
+Test session results, code coverage, and logs:
+	<home>/Library/Developer/Xcode/DerivedData/Variorum-gryjbmozwyljmfemogjwstyxwdcx/Logs/Test/Test-Variorum-2026.10.14_08-34-40--0600.xcresult
+
+Failing tests:
+	MarkdownCaretFaceTests.aSealArrivingDuringAStructuralFlightClearsTheCaretsHonour()
+	MarkdownCaretFaceTests.aSealArrivingDuringAStructuralFlightClearsTheCaretsHonour()
+	MarkdownCaretFaceTests.aCaretOnAStarNoOpenerPairsWithMovesNoOverlayGeometry()
+	MarkdownCaretFaceTests.aCaretOnAStarNoOpenerPairsWithMovesNoOverlayGeometry()
+
+** TEST EXECUTE FAILED **
+
+Testing started
