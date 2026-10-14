@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS** — VX-229: the trace + the SwiftUI probe DONE (below); pins NEXT. VX-257 / VX-183 / VX-182 NOT-STARTED. No revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -1469,6 +1469,40 @@ to `notes/plans/vx282-screens/u4/logs/`:
   `CaptureFocusReattachTests` `CaptureTourFocusTests` → `u4b-w1b-red-on-old.log`. EXPECTED: 13 issues in 10 cases.
 - **W2b (≈4 min):** the same five suites on `-derivedDataPath DerivedData/vx282-u4` → `u4b-w2b.log`. EXPECTED: all green.
   (The rest of the u4 batch needs no re-run: the app code changed by doc comments only.)
+
+### U5 — VX-229 · VX-257 · VX-183 · VX-182 (the comments family VX-179 left)
+
+**State: IN-PROGRESS.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Every count and every
+"green"/"red" below is **PENDING** until it runs (headless) or the stage window runs it. **Revert state: no behavioural
+revert in flight.**
+
+#### VX-229 — the trace (re-done in this session against `d9e1eaf2`)
+
+1. The Takes margin note presents the panel as SwiftUI popover content: `CommentMarginNote`'s
+   `.popover(isPresented: $panelShown) { CommentsPanel(session:blockID:) }` (`TakesShared.swift:782-784`). The panel
+   mints its model in `State(initialValue:)` (`CommentsPanel.swift:765-770`) and runs the store observation from its
+   `.task` — `model.restoreParkedDraft(); addFocusRequest += 1; await model.start()` (`:813-825`), where `start()` is a
+   `for try await` over `session.database.observe` that re-reads both comment lists on every relevant write
+   (`:154-167`). The loop ends only when its task is cancelled — i.e. when SwiftUI removes the view.
+2. A dismissed popover's content is never removed. MEASURED AGAIN in this session by a standalone probe (pure SwiftUI
+   + AppKit, no app module, no store; `.prohibited` activation; the anchor window placed off-display before it is
+   ordered in, alpha 0; every popover window alpha 0 the turn it appears and checked against every `NSScreen` —
+   never touched one): three open/dismiss cycles of a `.popover` whose content holds a `@State` object and a `.task`
+   → **each opening is a NEW window; after the third dismissal 3 tasks still run and the objects are all alive;
+   `.onDisappear` fired 0 times** (the record of VX-179's `stale.swift`, reproduced).
+3. So every opening of the Takes margin note's comments leaves the previous panel whole in its ordered-out window: the
+   model, its observation loop (one more re-read per comment write, per stale panel, for the app's life), its views.
+   VX-179 FIX LEG 3 released only the stale panels' KEY MONITORS (`CommentPanelKeyMonitor.MonitorView.release()` on
+   the host's `willClose`, `:654-672`).
+4. **The fix's premise, measured by the same probe:** a STATE FLIP inside the dismissed content, made at the popover's
+   `didClose` (an observer scoped by content-window identity, `CommentPanelHostWatcher.isHost`'s rule) **IS
+   processed** — the inner view is removed, its `.task` cancelled (tasks 0), its `@State` object released (0 alive),
+   `.onDisappear` fires once per dismissal — and the next opening is again a new window with fresh content. (The probe
+   source stays in the session scratchpad; it is not committed.)
+5. **The sheet hosts** (`EditorView.swift:225-229`, `TakesBottomBar.swift:309-314`, the take panel's nested sheet
+   `WriteTakesPanel.swift:241-246`) are expected to tear their content down on dismissal (the panel's `.onDisappear`
+   leaving body has relied on it since 13u3 A2) — NOT assumed: guard pins measure it per host shape (three openings
+   each), in the stage window (sheet presentations are out of bounds for offscreen probes — VX-179's tightened line).
 
 ## Ladder
 
