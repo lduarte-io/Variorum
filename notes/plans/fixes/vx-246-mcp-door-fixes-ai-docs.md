@@ -119,17 +119,17 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | unit | status |
 |---|---|
 | U1 — the door's security and correctness | CORE DONE, headless green at `ab552c5a` (MCP 223/48 · core 2,800/324 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~678k context (the cutover rule). The rest is U1b, below. U1's Mac batch rides U2's stage window (orchestrator call, see THE ORCHESTRATOR ON U1's HAND-BACK) |
-| U1b — VX-258's face and U1's remainder | **BUILT, READY FOR STAGE at `edfc0f12`** (U1b UNIT RECORD).<br>• **Main merged in clean** (`5be99e6d`, no conflicts).<br>• **VX-258's face:** the mint call site (the merge gate closed), the Waiting re-bind row, the words and the truth lines.<br>• **VX-318 is HOLLOW:** traced, and the pin stayed green on the pre-fix tree under load while its positive control went red. No product change.<br>• **P-VX260-1 (b)** is built with **v1_29**, a local-only `mcp_comment_author.text_digest`.<br>• **Headless:** MCP 240/51 · core 2,841/329 · workbook 40/6.<br>• The implementer is retired at ~652k; a FRESH runner takes the window (`vx246-u1b`, claim 120).<br>Its window ALSO carries U4c's W1–W3, U2's W2/W3, and ruling 2's real-client check. **UNBLOCKED 2026-10-14 ~04:15** (VX-281 merged: PR #159, `0f5efe1c`; ledgers `3d42df78`; handoff `fa3bc6e1`). IN-PROGRESS: a FRESH implementer from the U1b BRIEF below (~04:35), piece 0 the merge of main. — Earlier: WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5), and U2's MCP walk legs W2/W3 (no detour needed once the face exists). Note for W2/W3: on an empty redo stack the Redo item is DISABLED (`EditorCommands.swift:576`, unchanged), so "nothing to redo" reads as a disabled item, never a toast (U2 STAGE RUN's finding 1) |
-| U2 — the undo class | **WINDOW 1 PROVEN 2026-10-14 00:23–00:38** (U2 STAGE RUN below): the Mac batch 1,084 tests / 148 suites green (1,078 + 6 gated skips, 0 failed — U1's G1–G3 included), W1 proven in both voices, the dev store restored cmp-SAME. Open only for W2/W3 in U1b's window. — Earlier: BUILT, headless green at `10223a2d` (MCP 223/48 · core 2,826/326 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~634–690k context (the cutover rule). Its stage window (the Mac batch with U1's groups, plus W1, her own door) goes to a FRESH runner; W2/W3 move to U1b's window. The acceptance closes when W1–W3 have run |
+| U1b — VX-258's face and U1's remainder | **PROVEN 2026-10-14 07:06–07:52** (U1b STAGE RUN).<br>• **Pins:** W1a/W1b red on old as designed, so the merge gate is exactly the mint call site.<br>• **W2:** 1,838 tests / 279 suites green except VX-115's standing red.<br>• **The live round passed every leg in both voices,** with a real Claude Code 2.1.299:<br>&nbsp;&nbsp;– legs 0, 1, 2a–2d, 3 and 4;<br>&nbsp;&nbsp;– U2's W2/W3;<br>&nbsp;&nbsp;– ruling 2 with a real client's delete;<br>&nbsp;&nbsp;– U4c's W3.<br>• Leg 5 (Codex) is N/A. The store was restored cmp-SAME. — Earlier: **BUILT, READY FOR STAGE at `edfc0f12`** (U1b UNIT RECORD).<br>• **Main merged in clean** (`5be99e6d`, no conflicts).<br>• **VX-258's face:** the mint call site (the merge gate closed), the Waiting re-bind row, the words and the truth lines.<br>• **VX-318 is HOLLOW:** traced, and the pin stayed green on the pre-fix tree under load while its positive control went red. No product change.<br>• **P-VX260-1 (b)** is built with **v1_29**, a local-only `mcp_comment_author.text_digest`.<br>• **Headless:** MCP 240/51 · core 2,841/329 · workbook 40/6.<br>• The implementer is retired at ~652k; a FRESH runner takes the window (`vx246-u1b`, claim 120).<br>Its window ALSO carries U4c's W1–W3, U2's W2/W3, and ruling 2's real-client check. **UNBLOCKED 2026-10-14 ~04:15** (VX-281 merged: PR #159, `0f5efe1c`; ledgers `3d42df78`; handoff `fa3bc6e1`). IN-PROGRESS: a FRESH implementer from the U1b BRIEF below (~04:35), piece 0 the merge of main. — Earlier: WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5), and U2's MCP walk legs W2/W3 (no detour needed once the face exists). Note for W2/W3: on an empty redo stack the Redo item is DISABLED (`EditorCommands.swift:576`, unchanged), so "nothing to redo" reads as a disabled item, never a toast (U2 STAGE RUN's finding 1) |
+| U2 — the undo class | **PROVEN WHOLE:** W2/W3 (the MCP value, toggle and revive directions) passed in U1b's window, 07:06–07:52. — **WINDOW 1 PROVEN 2026-10-14 00:23–00:38** (U2 STAGE RUN below): the Mac batch 1,084 tests / 148 suites green (1,078 + 6 gated skips, 0 failed — U1's G1–G3 included), W1 proven in both voices, the dev store restored cmp-SAME. Open only for W2/W3 in U1b's window. — Earlier: BUILT, headless green at `10223a2d` (MCP 223/48 · core 2,826/326 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~634–690k context (the cutover rule). Its stage window (the Mac batch with U1's groups, plus W1, her own door) goes to a FRESH runner; W2/W3 move to U1b's window. The acceptance closes when W1–W3 have run |
 | U3 — her editor vs the wire | **WINDOW PROVEN 2026-10-14 02:18–02:54** (U3 STAGE RUN below): W1 red on old 7/8 (17 issues) as designed; W2 1,470 tests / 215 suites green, the one failure VX-167's standing `redoNeverAsks` (alone: green); W3a (a real Claude Code, both voices) and W3b (53 ms / 51 ms after her last keystroke) proven; the store restored cmp-SAME. Finding A (a wire note delete in the OTHER pane moves her focus) is ruled provisionally (ruling 2) and fixed after U4's plan, its proof riding U4's window. — Earlier: BUILT, headless green at `61ec7723` (MCP 236/49 · core 2,826/326 · workbook 40/6; both Mac products built: `vx246-u3-red` is the red-on-old product, `vx246-u3` the fixed one). The implementer is retired at ~620k context (cutover). Its window (`vx246-u3`: the Mac pins red on old, the 215-suite batch, Claude Code by U1's detour, and the timing driver) goes to a FRESH runner. VX-323 (the wider class) was born and fixed here |
 | U4 — the faces after big writes | **WINDOW RUN 2026-10-14 03:05–03:41** (U4 STAGE RUN below). **VX-231 PROVEN** (the Bookcase row follows an outside join live, in both voices). **VX-230 PARTLY:** Write is proven (no disc, block 1 bare, scrolled badges at home, first launch clean), but the book view's INLINE editor still misplaces badges after a width change and drops them right after mount (W2's red reproduces alone; seen live in both voices). Two pins are hollow as written, and one characterization pin is defective. → **U4b** below. — Earlier: READY FOR STAGE at `dcfb6123`: piece 6 written (271-suite batch, THE STAGE WINDOW plan for `vx246-u4`, self-assessment, OWED). Products: `vx246-u4-red` (U4's pins, no fix) and `vx246-u4` (both fixes). The window goes to a FRESH runner; its step 6 (ruling 2's proof) moves to U5's window, where ruling 2 is built (orchestrator call). — Earlier: BUILT, PAUSED at `3d1c5dd6` for U3's window (~499k context). VX-230 traced: TK2 reports unlaid paragraphs as empty frames at the top-left, so badges piled at block 1; fixed in `EditorViewModel.refreshBadges`. VX-231 traced: the Bookcase word count was re-read only on appear and its own buttons; fixed in `ShelfViewModel.start`. Mac pins are written but not run, and both products are built. Next: the same implementer writes piece 6 (the batch list and THE STAGE WINDOW plan), then a FRESH session adds ruling 2's fix and runs U4's window with its proof |
 | U4b — the inline editor's badges, and ruling 2 | **WINDOW RUN 2026-10-14 04:42–05:16** (U4b STAGE RUN below). W1a/W1b were red on old exactly as designed, so the re-designed phantom pin is no longer hollow. **The walk passed in both voices:** the Outline right after mount, the width change top and deep, the spread's live page, and Write. **RULING 2 IS PROVEN** on her own Delete door. **W2 found ONE REAL REGRESSION from U4b's `refreshBadges`:** `InlineEditorWindowTests.inlineBadgesCoverTheWholePostNotJustTheClippedViewport` (an off-screen fan made with no text change stays unbadged on the inline surface). → **U4c.** — Earlier: READY FOR STAGE at `63410c1a` (U4b UNIT RECORD). The re-trace corrected the runner's: the inline height lands on SwiftUI's NEXT pass, and U4's forced `.ensuresLayout` read poisoned the layout, measured up to 1,662 pt off. Fixed in `refreshBadges` plus the one cleared `remeasure` call (`5aaf01b4`); ruling 2 is `select(_:in:takingFocus:)` (`cd843647`). Pins red-first, three products built, headless unchanged. Its window (`vx246-u4b`, 75 min) is run by the SAME session (~250k), queued after U1b's merge commit |
-| U4c — the inline badge regression | **BUILT at `6d5dbd90`, with NO product change** (U4c UNIT RECORD). Measured bare TK2 probes show the regressed pin's HARNESS never ran the queued remeasure: `pump()` runs no main-queue hop, and the pin's own height report widened the frame. The in-use road is covered (probes 12–13, 50 and 400 blocks). The pin is corrected to be stronger (it checks the line, covers two roads, and allows no refresh after adoption), and a new mid-reflow pin is added. The orchestrator ACCEPTS this provisionally, with the live walk as the arbiter. **Its window (W1 the two pins, W2 13 suites, W3 the far-off-screen ⌘T walk in both voices) rides U1b's window, on the MERGED product** |
+| U4c — the inline badge regression | **PROVEN in U1b's window:** W1 green, the host printing `block 40 laid out = false` (its trace confirmed); W3 passed in both voices, with the ⌘T take far off-screen wearing its badge at its own line. **VX-230 is CLOSED** at the merge. — **BUILT at `6d5dbd90`, with NO product change** (U4c UNIT RECORD). Measured bare TK2 probes show the regressed pin's HARNESS never ran the queued remeasure: `pump()` runs no main-queue hop, and the pin's own height report widened the frame. The in-use road is covered (probes 12–13, 50 and 400 blocks). The pin is corrected to be stronger (it checks the line, covers two roads, and allows no refresh after adoption), and a new mid-reflow pin is added. The orchestrator ACCEPTS this provisionally, with the live walk as the arbiter. **Its window (W1 the two pins, W2 13 suites, W3 the far-off-screen ⌘T walk in both voices) rides U1b's window, on the MERGED product** |
 | U5 — the write tools' shapes | **MOVED to the follow-on run** (ORCHESTRATOR'S PROVISIONAL RULINGS, ruling 3); its brief travels with it. — Earlier: NEXT, after U4b. *(9edd8439's "spawned" was premature: U4's GO came first, so U5 never started.)* VX-267/253/252/255 are already In Progress. Ruling 2 moved from U5's piece 0 to U4b; U5's live round adds the real-client check of it |
 | U6 — Compare from the wire | **MOVED to the follow-on run** (ruling 3); its brief is drafted for that run |
 | U7 — the agent's read-backs | **MOVED to the follow-on run** (ruling 3); its brief is drafted for that run |
 | U8 — the AI's docs (LAST) | **MOVED to the follow-on run** (ruling 3), since the docs must describe U5–U7's tools. VX-281 has merged, so it is unblocked there |
-| LADDER | NOT-STARTED. Round 1 is the ONE Fable review (`fable-reviewer`, cold, REVIEW_PROMPT verbatim) over the whole diff, under the cross-model flow as amended 2026-10-13: Fable makes the final call, the Opus implementer applies the fixes. Rounds 2 and 3 are `opus-reviewer` at max, re-checking the fixes. Capped at three rounds |
+| LADDER | **ROUND 1 SPAWNED 2026-10-14 ~08:00:** the ONE Fable review, `fable-reviewer`, cold, REVIEW_PROMPT verbatim with PHASE=VX-246. — Plan: Round 1 is the ONE Fable review (`fable-reviewer`, cold, REVIEW_PROMPT verbatim) over the whole diff, under the cross-model flow as amended 2026-10-13: Fable makes the final call, the Opus implementer applies the fixes. Rounds 2 and 3 are `opus-reviewer` at max, re-checking the fixes. Capped at three rounds |
 | FABLE review (when needed, or once at the end) | Folded into the LADDER as its round 1. The editor-seam units (U3, U4, U4b, U4c) need it, and putting it first lets an Opus round re-check Fable's confirmed fixes |
 | CLOSEOUT | NOT-STARTED |
 
@@ -137,7 +137,17 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 
 ## Stage traffic log (the oct13coordinator protocol)
 
-- *(Newest first from here.)* 2026-10-14 05:16:26: **RELEASE `vx246-u4b`** (34 of 75 min). The result lines went to
+- *(Newest first from here.)* 2026-10-14 07:52:05: **RELEASE `vx246-u1b`** (45 of 120 min). Every live leg passed;
+  posture Standard/unlocked, cmp-SAME vs A1; prefs 1,580 keys, 0 differ; fingerprint SAME; the `-s local` registrations
+  gone; the A1 copy `scale-prestage-20261014T131848Z` is the coordinator's to prune. Our next stage use is the closeout's
+  merge run, after the ladder.
+- ~07:40: **SEAM** (the batch half done: 1,838 / 279, only VX-115's standing red). vx-282 hadn't asked for its merge
+  run, so the coordinator answered "continue", on the same claim.
+- ~07:06: **GO for `vx246-u1b`** under the coordinator's SEAM PLAN: the batch first with no A1 copy, then "SEAM" before
+  the A1 copy, so vx-282's merge-gating run could slot in. The claim line was `Tools/stage release --who
+  coord-for-vx246 && Tools/stage claim --who vx246-u1b --reason "VX-246 U1b: red-on-old + U4c W1 + 279-suite batch |
+  SEAM | live round both voices (A1, MCP fingerprint)" --minutes 120`.
+- 2026-10-14 05:16:26: **RELEASE `vx246-u4b`** (34 of 75 min). The result lines went to
   the coordinator. W2 found ONE REAL REGRESSION, now U4c's. Posture: Standard/unlocked, cmp-SAME vs A1; prefs 1,567
   keys, 0 differ; fingerprint SAME. The A1 copy `scale-prestage-20261014T104214Z` is the coordinator's to prune. A guard
   note: vx-282's headless build command line matches `pgrep -f 'Variorum.app/Contents/MacOS'`, so use
@@ -329,6 +339,55 @@ list holds the calls that would otherwise have waited for her.)*
 | VX-333 | U4c's OWED 3 (the implementer, 2026-10-14) | Test harness: `pump()` runs no main-queue hop inside a main-actor test, so pins relying on it read the state before a queued hop. Sweep them | Todo, v1 release readiness, Debt. NOT this run's |
 | VM-17 | U4's OWED 3 (the implementer, 2026-10-14) | The phone's fan badges may pile at the first block on long fanned notes, like VX-230 on the Mac (if they read TK2 fragment frames the same way) | the VM board (Mobile — editor & capture faces, Backlog). Probe first |
 | VM-16 | U2's OWED 2 (the implementer, 2026-10-14) | The phone's undo door says "Undid: …" on a quiet press: `MobileUndoDoor` still calls `undo(with:)`/`redo(with:)`. The fix is the Mac door's two lines; the rule itself already reaches the phone | the VM board (Mobile — editor & capture faces, Backlog); it needs a simulator stage; related to VX-276 |
+
+## THE RUN AS IT MERGES — the map (orchestrator, before the ladder)
+
+*(A factual map for the ladder and the closeout. Each unit's record above is the evidence; this section adds no claim of
+its own.)*
+
+**Scope (ORCHESTRATOR'S PROVISIONAL RULINGS, ruling 3).**
+- **Tonight's merge carries the FIX units:** U1 + U1b, U2, U3, U4 + U4b + U4c.
+- **U5, U6, U7 and U8 moved to a follow-on run** (VX-267 · VX-253 · VX-252 · VX-255 · VX-311 · VX-298 · VX-254 ·
+  VX-256 · VX-261 · VX-197). Their briefs above stay as drafts for that run, and no code of theirs is on this branch.
+
+**Members in this merge, and where each one's record is:**
+
+| member | what | unit record | state at the ladder |
+|---|---|---|---|
+| VX-258 | setup keys tied to their tab; an Any-client re-bind waits for her OK (the core v1_28, the face) | U1, U1b | PROVEN (U1b STAGE RUN, legs 0–2d) |
+| VX-259 | book names checked only against books the client can read | U1 | PROVEN (leg 3) |
+| VX-260 | her edit makes an AI's comment hers (option (b), the v1_29 digest) | U1, U1b | PROVEN (leg 4, (a) and (b)) |
+| VX-279 | the server host's fd reuse | U1 | built; proven by pin + probe |
+| VX-280 | `save_lens`' picks read (P1) | U1 | built; plan pin |
+| VX-318 | the reader thread after close | U1b | HOLLOW, not fixed; pin kept as a guard |
+| VX-276 · VX-277 · VX-119 | the undo class: a quiet half retires its entry | U2 | PROVEN (W1 in U2's window; W2/W3 in U1b's) |
+| VX-275 · VX-323 | the pre-act flush before wire writes; the caret landing; the navigate-away | U3 | proven (U3 STAGE RUN) |
+| VX-230 · VX-231 | the badge pile; the Bookcase count | U4, U4b, U4c | PROVEN (U4, U4b; U4c's W3 in U1b's window) |
+| ruling 2 | a navigate-away never takes her focus | U4b | PROVEN (her door in U4b's window; a real client in U1b's) |
+
+**Schema:** two LOCAL-ONLY steps on the grants family's road, each its own commit: v1_28 `mcp_rebind_request` (U1)
+and v1_29 `mcp_comment_author.text_digest` (U1b). Marker 13 untouched, zero lockstep, no `Sync/` lines.
+
+**The editor seam** (the reason Fable reviews):
+- U3's external-removal caret landing in `EditorSurfaceController.renderFull`;
+- U4/U4b's `EditorViewModel.refreshBadges`;
+- U4b's one call in `InlineEditorSurface.Coordinator.remeasure` (`EditorView.swift`);
+- U4c's pins.
+
+**Main merged in:** `5be99e6d` (VX-281's PR #159 plus its ledgers and handoff), clean.
+
+**Known and owed before the merge (the orchestrator's list):**
+- the field guide's MCP chapter, lesson 2 (`TutorialSeeder.swift` ~l.2552): its "Running the setup again moves the
+  name…" sentence is now true only of a client's own tab. A minimal truth edit plus `TutorialMCPChapterTests`' pin,
+  in the first fix pass;
+- canon at the closeout: AppSpec §7's grants family gains v1_28 and v1_29; §9's structural undo/redo contract line
+  (U2's OWED 3); §12 THE MCP DOOR's A-4 amendment as VX-258 built it, the book-name check, her-edit-makes-it-hers by
+  digest, and the pre-act flush and navigate-away (U3's OWED 5); TEXTKIT2_NOTES §3's measured facts (U4b's corrected
+  proposal and U4c's harness fact);
+- the QUESTIONS bundle (the PROVISIONALs of every unit, and the orchestrator's rulings 1–3), from #220.
+- **for VX-234's wording pass, from U1b's live round:** while the ask is fresh, the re-bind row's detail reads
+  "…with a setup that wasn't copied for it, now. It reaches…".
+
 
 ## UNIT BRIEFS (the orchestrator's; each unit's implementer is spawned from its brief)
 
