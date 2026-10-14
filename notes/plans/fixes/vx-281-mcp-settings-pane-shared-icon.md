@@ -48,6 +48,13 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
   (`fable-reviewer`) whenever the diff earns one (an editor-seam, custody, `Sync/` or default's-meaning line),
   and otherwise ONE Fable cold review at the end of the run. (This supersedes the plan file's "max for every
   implementer" for this run.)
+- **HER OVERNIGHT MANDATE (2026-10-14 ~00:55, verbatim):** *"I want you to continue on through the night ending
+  in a merge to main - the final merge in of the night can be the only one to do an applications refresh. Rule
+  provisionally in my absence and leave me a handoff with any needed information to note down."* So: the run
+  goes to its merge tonight; `/Applications` is refreshed only if the stage coordinator names VX-281 the night's
+  LAST merge (her same word relayed through the coordinator, ~00:50); a product ambiguity is built to the most
+  spec-defensible option, marked PROVISIONAL, and filed in QUESTIONS at the merge (the author-only list in
+  CLAUDE.md stays hers); the handoff `notes/handoffs/vx-281-handoff.md` is the run's last act, her checklist on top.
 - **The cross-model fix rule — HER PROCESS CHANGE (2026-10-13, now CLAUDE.md "Two reviews"; the history in
   `notes/ProcessHistory.md`):** in the end-of-run Fable round, Fable's findings go to the Opus implementer
   verbatim, its agree/dispute returns to Fable, and Fable makes the final call. The **implementer** then applies
