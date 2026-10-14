@@ -2440,3 +2440,70 @@ Nothing — no word changed.
    units.
 5. **Canon at the merge:** none required (AppSpec §12's "a corner badge only on fanned blocks" now holds on every surface).
 
+
+## U4 STAGE RUN — the window minus ruling 2 (a fresh stage runner, from 2026-10-14 ~03:00 MDT)
+
+**What this run does NOT do (said first):** step 6 of U4's THE STAGE WINDOW (RULING 2's PROOF) is NOT this run's; it
+moved to U5's window, where ruling 2 is built (ORCHESTRATOR'S PROVISIONAL RULINGS, ruling 2). No product code is
+written or changed, under the claim or before it; a red that needs code is recorded and reported, never fixed here. No
+MCP client is registered or run (the trace's finding: the mechanism is TK2's and the write incidental), so the fixture
+lands through her own File ▸ Import… door. No canon, QUESTIONS or ticket edits.
+
+**Read in full before READY (never delegated):** this record's header, Hard rules, LIVE STATUS, the Stage traffic log,
+ORCHESTRATOR'S PROVISIONAL RULINGS; U2 STAGE RUN and U3 STAGE RUN whole (the A1 copy BEFORE the batch; `defaults import`
+merges, so re-export and diff; the batch detached and polled in the foreground); U4's UNIT RECORD whole (the traces,
+THE STAGE WINDOW, the self-assessment, OWED); `notes/SessionResiliencyProtocol.md`; `Tools/stage`, `Tools/WalkKit/`
+(README, `guard.sh`, `click.sh`, `keys.sh`), `Tools/ScaleFixture/` (`stage.sh`'s copy loop, `restore.sh`); U4's
+`run-w1-red.sh`, `run-w2-batch.sh`, `stage-suites.txt`; the memory notes walk-driving-lessons and
+walk-restores-dev-store-posture. Code read for the window: the import door (`DocumentImporter.choose` — files AND
+folders, multiple selection, prompt "Import"; `VariorumDocumentFolder` — `.md` accepted, subfolders = chapters, digit-aware
+order), the format (`VariorumDocument` — header, the Alternates section, `take: N`), the badge face
+(`BadgeOverlayController.render` — an `NSButton` titled `⑂<n>`), the Pool's every-row "Add to Book ▾" (W3 (g)'s
+non-Bookcase road).
+
+**The build check (before READY):**
+- **No source moved since either product was built.** `git diff --name-only 07f9f28d..HEAD -- Sources App` is EMPTY;
+  `git diff --name-only 10629374..HEAD -- App/Variorum/VariorumTests Tests` is EMPTY; the tree is clean at `23e87826`
+  (record-only commits since). The newest sources (`EditorViewModel.swift` 02:06:42, `ShelfViewModel.swift` 02:07:24)
+  predate the fixed product's dylib and test bundle (02:11:41); the pins (02:00:43, 02:03:40) predate the red product's
+  (02:05:29–30), and both fix files' edits postdate it.
+- **Each product is what its name says, read from its symbols** (`nm` + `swift demangle`): `vx246-u4` — `followHeldMove`
+  15 (VX-231's fix), `EditorViewModel.refreshBadges()` 4,276 bytes (VX-230's fix); `vx246-u4-red` — `followHeldMove` 0,
+  `refreshBadges()` 3,336 bytes (the pre-fix body); both carry the seam (`oneShotReads` 7) and both pin suites in their
+  test bundles (`FanBadgePlacementTests`, `BookcaseOutsideWriteTests`). **→ no rebuild.**
+- **The W2 list:** `run-w2-batch.sh`'s `-only-testing` names = `stage-suites.txt`, 271 unique (U4's piece 6 verified each
+  as a declared type).
+- **Host and tools:** grants probed with no prompt, `AX: true SCREEN: true`; `walk-cap` / `walk-scroll` compiled into the
+  scratchpad, plus a READ-ONLY AX probe `badges <pid>` (every `AXButton` titled `⑂…` with its screen frame, and any
+  point holding more than one — the stack, read as numbers beside each capture; it posts no event); `Tools/WalkKit/wl2`
+  present; `cliclick` present. Free disk **46 GiB**.
+- **Her user-scope MCP servers, read now (names + a sha256 prefix of the `mcpServers` block, never values):**
+  `['linear-server', 'variorum']`, **`bc64543e2f4e8e58`** (`u4/userscope-ready.txt`) — re-read at the window's start and
+  after cleanup.
+- **The fixture, generated (no stage act):** `notes/plans/vx246-screens/u4/fixture/` (gitignored; under home so the
+  Open panel reads it plainly — the plan said "the scratchpad"; the generator `gen_fixture.py` stays there):
+  `vx230-long.md` and `vx230-long-two.md` (140 blocks of ~60 words each, every block opening "Block NNN …"; block 1 ONE
+  take; blocks 3, 40, 70, 100, 139 fanned ⑂2) and `vx230-book/` (`1 chapter one/`, `2 chapter two/`, two notes each, 70
+  blocks, block 1 fanned, every block fanned but each fifth). The SECOND long note exists so W3 (g) can run once per
+  voice (each half adds a different note to the book).
+
+**Process choices (U2's and U3's lessons applied):** the A1 copy and the prefs export come FIRST, before W1 (the test
+host is the dev-store app); W1 runs in the foreground (about a minute), W2 detached to its log and POLLED in the
+foreground; every GUI act through `click.sh` / `keys.sh`, at least 2.6 s apart; the Debug app quit by bundle id; the
+prefs restored by import, then a re-export and a diff, deleting every key the window added, until 0 differ.
+
+**Minutes:** ~60 of work expected (W1 ~2 · W2 ~10 · the import ~6 · W3 ~30 for both voices · cleanup ~8); a **90-min
+claim** asked. Batch-only fallback (~25 min, claim 35): steps 1, W1, W2, cleanup.
+
+### LIVE STATUS — the stage run's steps
+
+| step | what | status |
+|---|---|---|
+| R | read-in, the build check, the fixture generated, this section → READY | DONE (this commit) — READY reported; the stage is NOT claimed (the orchestrator relays the GO's exact line) |
+| 0 | guards on every step; the claim from the GO's line | NOT-STARTED |
+| 1 | A1 prestage copy (every store file + key files, each `cmp`-verified, sha256 recorded) + `defaults export io.lduarte.Variorum.debug` + her user-scope fingerprint BEFORE | NOT-STARTED |
+| W1 | `run-w1-red.sh` — the seven pins against `vx246-u4-red`; expected `FanBadgePlacementTests` 4 of 5 red + the characterization green, `BookcaseOutsideWriteTests` 1 of 2 red + the P1 guard green; a red on a `premise:` line or a `#require` ⇒ STOP after cleanup and report | NOT-STARTED |
+| W2 | `run-w2-batch.sh` — 271 suites on `vx246-u4`; a red re-run alone once; standing reds named (VX-167, VX-245, VX-115) | NOT-STARTED |
+| F | the fixture through File ▸ Import… (the two long notes → the Pool; the folder → an unshelved book) | NOT-STARTED |
+| W3 | the walk, Study then Terminal: (a) Write first open · (b) a book note in Write · (c) scrolled · (d) Outline + a width change · (e) Index / Book / Read · (f) first launch · (g) the Bookcase row after a join from the Pool's Add to Book | NOT-STARTED |
+| C | cleanup: the Debug app quit by bundle id; prefs 0 keys differ; `restore.sh` → "Restored (verified)" + cmp SAME; her user-scope fingerprint AFTER; `Tools/stage release --who vx246-u4`; the result line | NOT-STARTED |
