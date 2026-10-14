@@ -1,34 +1,14 @@
 # VX-246 handoff — the MCP door's fixes: security, undo, your editor vs the AI, badges (2026-10-14)
 
-**Run:** VX-246 "Run: MCP door fixes & AI docs" · «PR #N, merged to `main` as a merge commit» · the record
-`notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md` (your rulings, the orchestrator's provisional rulings, every unit
-record, both ladder rounds, the stage log) · built overnight 2026-10-13/14 under your mandate: *"continue on through the
-night ending in a merge to main … Rule provisionally in my absence and leave me a handoff with any needed information
-to note down."*
-
-*(DRAFT — written at PHASE A, before the merge. Every «…» is filled at the closeout's last step.)*
-
-## What to know first
-
-- **The security gap from 0.9.5 is closed in this build.** VX-258 shipped: a setup key copied from a client's own tab
-  (Claude Code, Codex) carries that client's name, and any other new setup under a name you approved waits in Settings
-  ▸ MCP ▸ Waiting for your Allow. So the "this build is yours alone" rule on VX-184's build ends here. 0.9.5 on the
-  website still has the gap; publishing this build is your call (release notes drafted, shown to you and approved
-  first, as always).
-- **Only the fixes merged.** The night's merge carried the four units that fix the door and your editor. The new wire
-  tools and the AI's docs (the other four units) moved to a new run, **VX-336 "Run: MCP wire tools & AI docs"**,
-  which hasn't started. That split was a provisional call made overnight (ruling 3 below), so you can reverse it.
-- **Your app in `/Applications` is refreshed** (this was the night's last merge): «Variorum build N», a Release build of
-  merged `main`, with an A1 copy of your real store first. It also carries VX-282's editor and notes fixes, which
-  merged just before this one.
-- **Nothing to do for the AI clients you already use.** A client whose key you approved keeps connecting with it. If
-  you re-run Claude Code's setup (or Codex's), the name moves to the new key with no clicks, as before. A setup copied
-  from **Any MCP client** under a name you already approved now waits in Waiting for you: "New setup for ‹name›",
-  with Allow and Don't allow. If a client of yours ever shows up there, Allow is the road.
+**Run:** VX-246 "Run: MCP door fixes & AI docs" · PR #162, merged to `main` as a merge commit («merge SHA») · the
+record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md` (your rulings, the orchestrator's provisional rulings,
+every unit record, both ladder rounds, the stage log) · built overnight 2026-10-13/14 under your mandate: *"continue on
+through the night ending in a merge to main … Rule provisionally in my absence and leave me a handoff with any needed
+information to note down."*
 
 ## Your checklist
 
-1. **Ratify or reverse the provisional calls: QUESTIONS #220.** Each was built as stated, with a line to reverse it:
+1. **Ratify or reverse the provisional calls: QUESTIONS #226.** Each was built as stated, with a line to reverse it:
    - **Setup keys:** a key from one client's tab used under a different approved name waits for your OK · what a
      waiting connection sees (no tools, the waiting sentence) · one waiting setup per name, the newer replacing the
      older · the wait logged once in Activity · the client's name in plain text inside the key · the "New setup" row
@@ -50,16 +30,29 @@ to note down."*
 2. **The release-notes line is yours.** 0.9.5's notes say "Running a client's setup again simply replaces the old
    setup and keeps everything you shared — no need to deny it first." (`ReleaseNotes-0.9.5.md:9`). That now holds for
    a client's own tab; a setup copied for any MCP client waits for your OK. Whether the next notes say so is yours.
-3. **Your wording pass, VX-234, has this run's pane words** (each where it renders):
-   - Waiting's row: "New setup for ‹name›" · "Connected as ‹name› (version ‹v›) with a setup that wasn't copied for
-     it, ‹age›. It reaches nothing until you allow it; allowing moves the name, with its grants, to this setup." ·
-     Allow · Don't allow · after a press on a setup that's gone: "That setup isn't waiting any more." While the ask is
-     fresh the detail reads "…copied for it, now. It reaches…" (a wording note from the live round).
+3. **Your wording pass, VX-234, has every word this run added** (each where it renders, as built):
+   - Waiting's re-bind row: the title "New setup for ‹name›" · the detail "Connected as ‹name› (version ‹v›) with a
+     setup that wasn't copied for it, ‹age›. It reaches nothing until you allow it; allowing moves the name, with its
+     grants, to this setup." (no version declared, no parenthesis) · the buttons Allow · Don't allow · after a press on
+     a setup that's gone: "That setup isn't waiting any more." **A wording note from the live round:** while the ask is
+     fresh, the detail reads "…with a setup that wasn't copied for it, now. It reaches…".
    - Activity: "‹name› asked to use a setup that wasn't copied for it" · "‹name› took the new setup you allowed,
-     which replaced its earlier one" · "‹name›'s new setup wasn't allowed".
-   - The Clients tab's (i) and the Connect tab's line under the code block now say the tab rule.
-   - The two undo refusals: "Nothing to undo — ‹label› was already undone or changed since." · "Nothing to redo — it
-     changed again after ‹label› was undone."
+     which replaced its earlier one" (the tail only when a key was replaced) · "‹name›'s new setup wasn't allowed".
+   - The Clients tab's (i): "…Running the client's own setup again moves the name to the new key; a setup copied for
+     any MCP client waits for your OK before it takes a name you approved; any other key, or none, is refused. …" (its
+     one-line summary is unchanged).
+   - The Connect tab's line under the code block: "Each copy carries a fresh key; running a client's own setup again
+     replaces the old one." · and its (i), the whole text: "Each copy carries a fresh setup key, shown here as dots,
+     that ties a client's name to that setup. Running a client's own setup again replaces the old one; a setup copied
+     for any MCP client waits for your OK before it takes a name you approved."
+   - Where a declared door can't act, the note for Allow and Don't allow: "A client's new setup waits for you in
+     Settings ▸ MCP ▸ Waiting."
+   - The two undo refusals (the bottom bar's toast, Mac): "Nothing to undo — ‹label› was already undone or changed
+     since." · "Nothing to redo — it changed again after ‹label› was undone."
+   - Not pane words, listed so every changed sentence is in one place: the field guide's MCP lesson 2 now says
+     "Running the client's own setup again moves the name to the new key; a setup copied for any MCP client waits for
+     your OK before it takes a name you approved; and a tool still using an older key, or none, is turned away." (VX-336
+     re-voices the chapter) · and the release-notes line in item 2, which is yours, not VX-234's.
 4. **Kick off VX-336 when you want it.** Its plan is `notes/plans/mcp-pane-and-docs-kickoff.md` (the kickoff message
    at its top). Its members: VX-267 · VX-253 · VX-252 · VX-255 (the write tools' shapes) · VX-311 · VX-298 (Compare
    from the wire) · VX-254 · VX-256 · VX-261 (the agent's read-backs) · VX-197 (the AI's docs, last). **The stargazing
@@ -76,6 +69,24 @@ to note down."*
 6. **The field guide changed one sentence** (lesson 2 of the MCP chapter, the setup rule). It reaches your library
    only through Help ▸ Restore Tutorial…, which moves the old guide to the Trash and makes a fresh one. VX-336 rewrites
    that chapter, so waiting for it is fine.
+
+## What to know
+
+- **The security gap from 0.9.5 is closed in this build.** VX-258 shipped: a setup key copied from a client's own tab
+  (Claude Code, Codex) carries that client's name, and any other new setup under a name you approved waits in Settings
+  ▸ MCP ▸ Waiting for your Allow. So the "this build is yours alone" rule on VX-184's build ends here. 0.9.5 on the
+  website still has the gap; publishing this build is your call (release notes drafted, shown to you and approved
+  first, as always).
+- **Only the fixes merged.** The night's merge carried the four units that fix the door and your editor. The new wire
+  tools and the AI's docs (the other four units) moved to a new run, **VX-336 "Run: MCP wire tools & AI docs"**,
+  which hasn't started. That split was a provisional call made overnight (ruling 3 above), so you can reverse it.
+- **Your app in `/Applications` is refreshed** (this was the night's last merge): «refresh build», a Release build of
+  merged `main`, with an A1 copy of your real store first. It also carries VX-282's editor and notes fixes, which
+  merged just before this one.
+- **Nothing to do for the AI clients you already use.** A client whose key you approved keeps connecting with it. If
+  you re-run Claude Code's setup (or Codex's), the name moves to the new key with no clicks, as before. A setup copied
+  from **Any MCP client** under a name you already approved now waits in Waiting for you: "New setup for ‹name›",
+  with Allow and Don't allow. If a client of yours ever shows up there, Allow is the road.
 
 ## What shipped
 
@@ -111,8 +122,13 @@ to note down."*
 - **The review ladder, closed at round 2.** Round 1, the Fable review: 1 minor (the field guide's setup sentence was
   no longer true — fixed) and 3 nits, all fixed. Round 2, Opus at max: 2 minor and 5 nits, all fixed (none changed
   behaviour) except one, which belongs to the phone (VM-16, below). The orchestrator checked the final fixes line by line.
-- **The numbers:** headless MCP 240/51 · core 2,841/329 · workbook 40/6; the merge-moment run of the whole Mac test
-  target «N tests in M suites — the standing reds named, no new red».
+- **The closeout window, on the code exactly as it merges** (main merged in first, with VX-282's fixes; the dev store
+  restored byte for byte after): the field guide's test failed on the build before its fix and passed on the merged
+  one; the door tests ran with no warning (four before); and the whole Mac test target ran once.
+- **The numbers:** headless MCP 240/51 · core 2,860/330 · workbook 40/6 on the merged tree; the whole Mac test target
+  4,695 tests in 773 suites, with 16 issues, 14 of them known and declared (VX-184's five, VX-229's nine). The two reds
+  both stand on main already: VX-115 (the Book Settings door) and VX-245/VX-283 (six line-limit sites outside the MCP
+  pane). No new red.
 
 ## Tickets born from this run
 
@@ -134,26 +150,29 @@ to note down."*
 
 ## For the other runs
 
-- **VX-336:** start from its kickoff message. U5's brief is drafted in VX-246's record; U6 and U7 have only their
-  sizing rows there. Every new tool must answer whether it meets your typing (the save-first list) and whether each
+- **VX-336:** start from its kickoff message. Its U5, U6 and U7 briefs are drafted in VX-246's record, marked as
+  drafts for VX-336. Every new tool must answer whether it meets your typing (the save-first list) and whether each
   undo half changed anything; the compiler asks both.
 - **VX-283:** when an AI deletes a note, the pane leaves it on the one road (`.variorumNotesDeleted`, from
   `MCPDoor+HerEditor.swift`); a sync arrival or a book deleted with its notes should post on the same road, never a
   second one. `WorkspaceModel.select` gained `takingFocus:`.
 - **The phone (VM-16, VM-17):** the measured TextKit facts are in `notes/TEXTKIT2_NOTES.md` §3 (the VX-246 block).
+  The phone already compiles against this core (headless Release and Debug builds at the closeout).
 
 ## Left on disk
 
-- «The dev store's A1 copies from this run's windows (`scale-prestage-20261014T…` in the DEV container's
-  `Backups/safety-copies/`) — kept or pruned by the coordinator; the list at the closeout.»
-- «Your real store's A1 copy from the refresh — its path.»
+- The dev store's A1 copy from the closeout window, which the dev store was restored from and verified the same:
+  `~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Application Support/Variorum-dev/Backups/safety-copies/scale-prestage-20261014T162804Z`.
+  The earlier windows' copies are the stage coordinator's to prune.
+- Your real store's A1 copy from the refresh: «refresh A1 path».
 - Nothing else: the run's screenshots, logs and build folders are deleted after the merge.
 
-**MOBILE PARITY:** PL-54 in `notes/MobileSoul.md` — the undo rule reaches the phone through shared code and VM-16 must
+**MOBILE PARITY:** PL-55 in `notes/MobileSoul.md` — the undo rule reaches the phone through shared code and VM-16 must
 land with it; VM-17 probes the badges; nothing else is mobile-visible (the MCP door is Mac-only; a comment you edit on
 the phone reaches the Mac by sync, where the rule applies).
 
 ## For a fresh session
 
 Everything lives in `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`: its CLOSEOUT RECORD names what landed
-where. The next MCP run is VX-336; its plan, `notes/plans/mcp-pane-and-docs-kickoff.md`, is self-contained.
+where (PHASE C lists every ledger and its commit). The next MCP run is VX-336; its plan,
+`notes/plans/mcp-pane-and-docs-kickoff.md`, is self-contained.
