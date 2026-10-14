@@ -1988,3 +1988,162 @@ store, its own socket home); the pane's Clients rows, request rows and setup men
 | W3a | a REAL Claude Code turn, Study then Terminal: U1's detour (Deny → copy → `-s local` → `claude mcp list` → Approve), two scratch notes shared Edit · Always, two panes, ONE `claude -p --strict-mcp-config` turn (delete_block under her caret, delete_note of the other pane's note), captures, Put back ×2 | NOT-STARTED |
 | W3b | the timing driver on the REAL shim (`vx275-driver`, Any MCP client key, Home wing Edit · Always): delete_block and delete_note each fired within ms of keys.sh's last keystroke; the answer inside 0.5 s; Put back shows " pending words" | NOT-STARTED |
 | 6 | cleanup: `-s local` registrations removed, her user-scope fingerprint AFTER identical, keys/scratch deleted, the clipboard emptied, a whole-key grep = 0; the Debug app quit by bundle id; prefs 0 keys differ; `restore.sh` → "Restored (verified)" + a second `cmp` = SAME; `Tools/stage release`; the result line | NOT-STARTED |
+
+## U4 UNIT RECORD — the faces after big writes: VX-230 · VX-231 (opus-implementer, from 2026-10-14 ~02:15 MDT)
+
+**What this unit has NOT done yet (said first; flipped as pieces land):** no pin has run (every pin is a Mac pin, so its
+red-on-old run is the stage window's W1); no fix is written; no Mac product is built; no stage window has run (no
+batch, no walk). No `notes/QUESTIONS.md` entry, canon edit or ticket (the merge's and the orchestrator's). Zero
+`Sync/`, custody, Keychain, schema or `Server/` lines planned.
+
+**Read in full before code (never delegated):** CLAUDE.md and its loaded canon (OverallModel §5 P1–P3, AppSpec §4 and
+§12's editor language: "a corner badge only on fanned blocks"); this record's header, THE UNITS, the hard rules, LIVE
+STATUS, the stage traffic log, Cross-run coordination (vx-281's and vx-282's lanes), the U4 BRIEF, and U1–U3's UNIT
+RECORDs and STAGE RUN sections (skimmed for the tree and the window shape); `notes/plans/mcp-pane-and-docs-kickoff.md`
+whole; VX-184's U1 UNIT RECORD (LIVE STATUS, THE STAGE WINDOW, THE LIVE ROUND — leg (d)'s two sightings — and OWED
+4a/4b); `notes/plans/phase-13n-a-document-format.md`'s WALK-FIX PASS (WA-3, WA-4 — VX-122's trace); **`notes/TEXTKIT2_NOTES.md`
+whole, BEFORE any editor-seam edit**; `notes/SessionResiliencyProtocol.md` whole; her two screenshots
+(`~/shots/shot-20261013-022301.png` — Write, block 1 of 160 with its caret, a BLACK filled disc at block 1's badge place
+while every other block wears its own muted ⑂2; `~/shots/shot-20261013-174949.png` — the book "o ladrão de raios" in
+Outline, the focused note's live inline editor ("this note · editing"), ONE black disc at block 1's badge place and
+**no badge on any other visible block**, though most of them are fanned). Code read: `EditorViewModel.refreshBadges` /
+`refreshDecorations` / `overlayLayoutDidSettle` / `attach` / `viewportBounds` / `restoreReadingAnchor` / the N14 doc;
+`EditorView.swift` — `EditorSurface.Coordinator`, `InlineEditorSurface.Coordinator` (install, the composed
+`onWidthReflow` / `onLayoutSettle`, `remeasure`), `BadgeOverlayController`, `ScrollAnchorController`;
+`EditorTextView.setFrameSize`/`applyFrameHeight`/`viewWillDraw`/the two factories; `PaneMeasurement.height`/`extent`;
+`ReadPostViewModel` (`remeasure`, `refreshBadges`); `LongBlockLayout` (its `.layoutAvailable` predicate);
+`JumpPrimitive.jump`'s head; `BookView`'s expanded row (the ZStack of `ReadPostView` and the inline `EditorView`); the
+Mac pins `InlineEditorWindowTests` and `TutorialWalkTests`' N14 / starved-host badge pins (their harness shapes); the
+Bookcase: `ShelfViewModel` (the held/one-shot split, `start`, `refreshAggregates`), `ShelfView` (every
+`refreshAggregates` caller), `BookcaseRowMeta.facts`, `Queries.bookcase` / `ShelfBook` / `bookWordCounts`;
+`BookcaseBoardTests`' session harness; vx-282's branch diff on `EditorViewModel.swift` and `EditorView.swift`
+(read-only — `storageDidEdit`'s top, `settleMarkdownCaret`, the fan-panel sheet's `onClose`, the selection delegate).
+
+**Surfaces (planned):** THE EDITOR SEAM — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift`,
+`refreshBadges` ONLY (none of vx-282's functions; `EditorView.swift` — on vx-282's file list — is NOT touched); the
+Bookcase — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift` (`start`'s loop + one helper; no sibling run
+touches the file); Mac pins under `App/Variorum/VariorumTests/`. ZERO `Sync/`, custody/Keychain, schema, `Server/`,
+`BlockRangeIndex`, `PaneSurface`, `runStructural`, the decoration overlay, the read tier, VX-281's lane.
+
+### LIVE STATUS — U4's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this record + LIVE STATUS + the traces and the design (before code); the TK2 probes saved beside the evidence | DONE (this commit) — `notes/plans/vx246-screens/u4/probes/` (gitignored): `probe.swift`, `probe2.swift`, `probe3.swift` + `probe-output.txt` (macOS 27.0, 26A428) |
+| 1 | the pins FIRST (Mac — `FanBadgePlacementTests` for VX-230, `BookcaseOutsideWriteTests` for VX-231), committed on the pre-fix tree | NOT-STARTED |
+| 2 | the RED-ON-OLD Mac product: `build-for-testing` → `App/Variorum/DerivedData/vx246-u4-red` (the pins, NO fix — W1 runs against it) | NOT-STARTED |
+| 3 | VX-230's fix — `refreshBadges`: a badge only from a laid-out fragment; the inline surface lays out what it badges | NOT-STARTED |
+| 4 | VX-231's fix — the Bookcase's one-shot re-read when its own held snapshot moves | NOT-STARTED |
+| 5 | headless finals (core · MCP · workbook) + the FIXED Mac product `DerivedData/vx246-u4` | NOT-STARTED |
+| 6 | THE STAGE WINDOW plan (claim `vx246-u4`: W1 red on old · W2 green + the batch · W3 the walk in both voices) → READY | NOT-STARTED |
+
+**No revert is in flight.**
+
+### The traces (written before code)
+
+**VX-230 — the mechanism, MEASURED (inputs → wrong output).** The badge pass is `EditorViewModel.refreshBadges`
+(`EditorViewModel.swift` ~3696). For every FANNED slot it reads the block's first fragment with
+`enumerateTextLayoutFragments(from:options: [])` — no layout forced, by design ("unlaid-out blocks simply have no badge
+until scrolled to (P1)", its own doc) — offsets `fragment.layoutFragmentFrame` by `textContainerOrigin`, and keeps the
+badge when `viewFrame.intersects(visible)`. `BadgeOverlayController.render` then places the button at
+`y = badge.frame.minY`. The doc's promise is false on two measured facts (`probes/probe-output.txt`, a bare TK2
+`NSTextView` on this Mac, macOS 27.0):
+1. **A fragment TK2 has not laid out reports `layoutFragmentFrame == .zero`, `state == .none`** — cold, every fragment;
+   after a viewport layout, every fragment outside the viewport that TK2 did not estimate (an estimated one,
+   `state == .estimatedUsageBounds`, reports a GUESSED frame); and **after ANY width change, EVERY fragment, until the
+   next layout pass** (probe2: a fully laid-out 160-paragraph document, `setFrameSize` 700 → 360, then all seven
+   sampled fragments read `s0 y0 h0`).
+2. **`CGRect.zero.offsetBy(origin).intersects(visible)` is TRUE** whenever `visible` contains the container origin —
+   CGRect's degenerate-rect rule (`(40,20,0,0).intersects((0,0,700,500))` → `true`, measured).
+
+So every fanned block whose fragment is not laid out gets a badge AT THE CONTAINER'S ORIGIN — the top of block 1's first
+line — whenever the top of the note is in view. Her badges are `NSButton`s with the translucent `.badge` bezel; N of
+them stacked at one point darken into one filled disc (her "fully black filled disc"; U1's "darker ⑂2"). **The MCP
+write is incidental:** the trigger is a note with fanned blocks TK2 has not laid out, which any long fanned note is.
+- **Write (her `022301` shot, U1's sighting):** the detail editor lays out only its viewport (+ TK2's overdraw), so
+  every fanned block below the fold stacks on block 1 while the top of the note is in view. Block 1's own badge (hers)
+  sits under the stack; U1's block 1 had ONE take and wore the stack alone — the "phantom ⑂2" is its neighbours'
+  badges (the six fanned blocks were 22/72/122/172/222/272; 22 was on screen and badged itself; the five below
+  stacked). "Resolves a little, then is fixed": scrolling lays blocks out (`ScrollAnchorController.boundsChanged` →
+  `refreshBadges`), and each block, once laid out, moves its badge home.
+- **The book Outline (her `174949` shot — the INLINE editor, `InlineEditorSurface`, no scroll view of its own):**
+  the inline badge region is the WHOLE post by design (`viewportBounds` returns `textView.bounds` — "Whole-post overlay
+  work is the accepted inline cost model (the inline surface is laid out to content already…)"). Its badge pass is
+  delivered by (a) `renderFull`'s tail and (b) the N14 settle hop. On a WIDTH change the composed
+  `InlineEditorSurface.Coordinator.onWidthReflow` calls the MODEL's handler first — generation bump +
+  `overlayLayoutDidSettle()`, which queues the badge hop S — and THEN `scheduleRemeasure()`, which queues the
+  remeasure R (whose `PaneMeasurement.height` is the `.ensuresLayout` walk over the whole post). The main queue runs S
+  BEFORE R: S reads a document the width change has just returned to `state .none` — every fanned fragment `.zero` —
+  so EVERY fanned block's badge lands at the origin, and none at its block; R then lays the whole post out, and nothing
+  re-runs the badge pass (no generation bump, no scroll observer on this surface, and the next display pass's settle
+  finds the generation delivered). That is her shot exactly: one black disc, no visible block badged. (The attach-time
+  doc — "delivery stays on the next runloop turn, after this cycle's remeasure has laid the new width out" — assumed
+  the opposite order; the coalescing remeasure can also be superseded by a later `viewUpdated` trigger and land later
+  still.) "Taking Takes mode and back fixed it": a remount re-runs the cold order, where the projection arrives after
+  the width settled and the post-layout settle hop delivers real frames.
+- **Which book surface draws badges, and whether it should:** the focused note's inline editor (the one live editor,
+  P3) and every other expanded note's read tier (`ReadPostView`, whose `refreshBadges` always follows its own
+  `.ensuresLayout` remeasure — laid out by construction; examined, SAFE). AppSpec §12: "a corner badge only on fanned
+  blocks", on every surface that shows the text — so the book view SHOULD badge its fanned blocks, each at its own
+  block. Her "where it shouldn't" reads as the stack (no badge belongs at block 1's place for the others), not as
+  "the book view should draw none" — the fix keeps the badges and puts each one home.
+
+**VX-230 — the fix (designed, PENDING the pins):**
+1. **The geometry rule, both surfaces:** `refreshBadges` places a badge only from a fragment whose
+   `state == .layoutAvailable` — the house's own "laid out" predicate (`LongBlockLayout`'s candidates read exactly
+   it). A `.zero` frame or a TK2 estimate is never a position. A fanned block TK2 has not laid out gets NO badge until
+   it is laid out — the function's own documented contract, made true.
+2. **The inline surface lays out what it badges:** on the surface with no scroll view (the book / spread / pool
+   editor, whose badge region is the whole post) the fragment read passes `.ensuresLayout`. That makes the doc's own
+   premise ("the inline surface is laid out to content already") TRUE at the read instead of assumed, regardless of
+   which hop runs first. Cost: ZERO net layout over a mount or a width change — the remeasure lays out the same whole
+   post on every storage edit and width change (`PaneMeasurement.extent`'s `.ensuresLayout` walk), so whichever of the
+   two runs first pays it and the other finds it done (P1: the inline surface's accepted cost model since Phase 10 —
+   no new class). The detail editor keeps `options: []` (P1 — only its viewport is ever laid out).
+3. **Not built, argued:** a trigger in `InlineEditorSurface.Coordinator.remeasure` (re-run the badges after the whole-post
+   layout) — `EditorView.swift` is on vx-282's file list, and a trigger keeps the ordering dependence that is today's
+   defect; a display-pass re-delivery for the DETAIL editor after a width change — its width change is followed by
+   `ScrollAnchorController`'s width road (`restoreReadingAnchor` → `JumpPrimitive.jump`, which lays out its target, then
+   `refreshBadges`), so no mechanism is traced to a defect there; the pin `aWidthChangeInWriteKeepsEachBadgeHome`
+   characterizes it (green on the fixed product is the evidence; red there would be a found residual, reported, never
+   patched under the claim).
+4. **Recorded residual (pre-existing, unchanged in kind):** after a single large scroll jump in Write (⌘↓, a scroller
+   click), the badge pass runs at `boundsChanged`, before TK2 lays out the region the jump exposed; a fanned block whose
+   fragment is still unlaid there gets no badge until the next scroll event or keystroke (before this fix: the same —
+   its `.zero` frame missed the moved viewport). TK2's overdraw makes it rare under continuous scrolling.
+
+**VX-230 — the decoration sibling (traced by reading; NOT this unit's — OWED):** `refreshDecorations` reads
+`fragmentFrame(atOffset:)` with `options: []` and no state check too, so a decorated block (a callout, a comment card,
+the seams, the indicator) whose fragments are unlaid gets a zero-height rect at the container's origin, and
+`frame.intersects(visible)` keeps it. Write prunes it to the visible character window (its two edge lookups force
+layout there), which hides most of it; the INLINE surface's window is the whole post, so after a width change its
+decorations would stack at the top until the next keystroke. Same TK2 facts, a different face (the decoration
+overlay), not her report — a ticket with a red-first probe, not a rider on this fix.
+
+**VX-231 — the mechanism (inputs → wrong output).** The Bookcase holds two cost tiers by contract
+(`ShelfViewModel`'s header): the HELD half (`start()` — `Queries.bookcase`, one wing's shelves and books with
+`postCount`, `sectionCount`, arrival counts; its tracked region never includes `container`, pinned
+`theHeldSnapshotsRegionIsBlindToAutosave`) and the ONE-SHOT half (`refreshAggregates()` — `bookWordCounts`, the tags
+column, rule paths, last-edited, gathering and archived counts) re-read ONLY on appearance (`ShelfView`'s `.task`) and
+after the board's OWN acts (fifteen call sites, every one a door on the board). A note joining a book from anywhere
+else — an MCP `add_note_to_book` / `create_note` into a book (U1's leg (d)), a sync apply, the Book Panel, another
+window, ⌘J — moves the held snapshot (the row's "6 notes" → "7 notes" at once) and leaves the one-shot as it was, so
+the row pairs a fresh note count with the stale word figure ("7 notes · 3 ch · 120w" right after a 32,347-word note
+joined). The same pairing reaches the archived count, the tags column and a gathering's count.
+- **Not VX-122's signal:** VX-122 is the LIBRARY's one-shot listing missing revivals, wanting one cross-surface revival
+  signal. This defect needs no signal: the Bookcase already HOLDS an observation that moves exactly when membership does;
+  only its one-shot twin does not follow it. The brief's preference ("the existing observation roads over a new
+  notification") is the fix.
+
+**VX-231 — the fix (designed, PENDING the pin):** in `start()`'s held loop, a snapshot whose `books` differ from the
+last one held (after the first delivery, which `.task`'s own appearance read covers) re-reads the one-shot half —
+single-flight (a change landing while a re-read runs asks for exactly one more after it), never inside the observation
+loop's own turn. P1: the held region never wakes at autosave rate (pinned), so this re-read runs at membership /
+shelf / rule-change rate — the same store-wide one-shot every board act already re-runs; nothing new reads `container`
+at keystroke rate. A note's words changing by EDITING (no membership move) stays the one-shot's documented staleness
+— not this ticket.
+
+**Shared cause?** No. VX-230 is a geometry read treating TextKit 2's "not laid out" as a position (plus one delivery
+order on the inline surface); VX-231 is a refresh trigger the one-shot tier never had. Both were first seen right
+after a big MCP write, and in both the write is incidental: any long fanned note shows VX-230; any outside membership
+change shows VX-231.
