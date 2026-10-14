@@ -113,7 +113,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 |---|---|---|
 | U1 | VX-290 — the empty-block backspace's caret landing | **DONE** — fix `385aa1fc`; W1 red on old + W2 the Mac batch green `be826a5d`; W3 the walk, every row held `a7a63949`. Stage released 22:01:26 and 23:47:00. One observation for the orchestrator to ticket (the bar's word counter, not this unit's road). No revert in flight. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **READY FOR STAGE — u2b: phone W2b suites (-collect-test-diagnostics never) + Mac g1, ≈12 min.** The W2b fix built: `MarkdownFace.settleCaret` never writes while `storage.editedMask` is non-empty (before the ledger, so a skip consumes nothing); the trace of why a skipped settle is never lost is recorded; the red pin is `MobileMarkdownCaretTests.leavingATrailingSpaceBehindUnstylesTheSpanHonestly` (red on the pre-guard product by its crash). Rebuilt headless into the EXISTING `vx282-u2` + `vx282-u2-ios` only. Earlier: W1 red on old as designed, W2 Mac 190/26 green, W3 walk holds (Study). No claim held; no revert in flight. |
-| U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | NOT-STARTED |
+| U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **IN-PROGRESS** — trace + command table + the rule recorded (§ U3); next: the behaviour-neutral seams, the pins ahead of the fix, the fix. Every count PENDING. No revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
@@ -710,6 +710,93 @@ the run is a first boot and a fresh install (budgeted).**
    `MacIdentityAuditWiringTests` `EditorSessionTests` `ReviewRoundFixTests` `CommitFlowTests` `FanFlowTests` →
    `u2b-w2-g1.log`. EXPECTED: 106 tests / 13 suites green, as at W2.
 4. `xcrun simctl shutdown all`; confirm 0 booted; release the claim (unless told to hold it).
+
+### U3 — VX-154 (the take panel's remaining routed commands)
+
+**State: IN-PROGRESS.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-13/14. Every count and
+every "green"/"red" below is **PENDING** until it runs (headless) or the stage window runs it.
+
+**The ticket (verbatim):** *"every OTHER routed command still falls through to Write caret handlers under the sheet —
+⌘S commit, comments, callout, take↔block commands, block delete/archive/insert, the structural verbs, history and
+origin; ⌘⇧T swaps the sheet to the caret block panel. Same mechanism class; the panel registration is the worked fix
+(0deda5b4, 2e5784ca). Rider nit: the panel archive receipt says archived · n while its own list header reads archived
+takes."*
+
+**The mechanism, re-traced in this session against `67344257` (VX-143's pointers verified; the code agrees):**
+1. Every menu-bar door (`EditorCommands.swift:519/526/635-660/671-794/825/846`), and every ⌘K act row
+   (`ShellActions.paletteAction`, `ShellActions.swift:797-840`), ends in `CommandRouter.dispatch`, which walks the
+   handler stack LIFO — `handlers.reversed()`, the first handler that returns true consumes (`CommandRouter.swift:694-702`).
+2. Write's take panel registers on appear and unregisters on disappear (`WriteTakesPanel.swift:193-195`, `:204-209`) —
+   the LIFO top while it is up. Its handler claims ONLY `.takes(…)` (`guard case .takes` at `:226`) and of those hands
+   `.toggleFan/.closeAll/.saveLens` back (`:273-274`). Every other `RoutedCommand` returns false.
+3. The next handler down is Write's own (`EditorView.handleRouted`, `EditorView.swift:309`), registered by the
+   `EditorView` the sheet hangs from (`:200`). Its arms address Write's CARET — `caretBlockID` / `caretVariantID`
+   (the take Write SHOWS at the caret). So with the panel up, each falls through to the caret block beneath the sheet:
+   a different block whenever the panel came from another block's ⑂ badge (`EditorView.swift:947`), and even on the
+   caret's own block it acts at Write's caret, not on the take whose pane is live in the panel.
+4. Where Write's arm PRESENTS something it is a second sheet on the same window (comments `EditorView.swift:222`, the
+   lens name `:192`, the two ceremonies `:227/:232`, the tray/history/versions fallbacks) — AppKit queues a second
+   `beginSheet` behind the one up, so it appears only after the panel closes (on the caret block). The savepoint
+   name field is a popover on Write's bar beneath the sheet.
+5. The panel's `TakesViewModel` is its OWN instance (`WriteTakesPanel.swift:85`; `authority` is per-instance,
+   `TakesViewModel.swift:321`), so its ring can only stand in the panel's block — every card keys the panel's
+   `blockID` (`:290`). That invariant holds today only because nothing in the panel ever focuses another block; the
+   board's structural arms DO (`choreography.parkFocus` → `consumeLandings` → `focus(…takes-main…)`,
+   `TakesChoreographer.swift:139`, `:151-159`), which matters to the rule below.
+
+**Why ⌘⇧T, ⎋ and ⌘⇧L reached Write deliberately at VX-150** (`vx-143-write-chrome-feedback.md:124/:132/:136`,
+ladder r1 item 4): VX-150's member was the TAKE keys — acts on a take of a block. These three were judged "not take
+acts on a block": ⌘⇧T is a surface toggle ("takes at the block you're in"), ⎋ (`.closeAll`) closes the board's blooms
+(grey in Write, a no-op arm there), ⌘⇧L saves the NOTE's choices (post scope). The same record's observation (2) left
+⌘⇧T's swap as "arguably right ('takes at the block you're in'), arguably a jump; a taste call, untouched" — so it was
+left, not ruled; VX-154's own body lists the swap among the symptoms. ⎋ and ⌘⇧L keep their reasons (unchanged here);
+⌘⇧T changes (P-U3-4).
+
+**Every routed command that can fire while the panel is up** (the panel's panes carry only the stock text menu and
+Format — no `variorumMenu` is wired at `WriteTakesPanel.swift:331` — and Write's context menus and bars are beneath a
+window-modal sheet, so the live doors are the MENU BAR and its keys; ⌘K's palette is a `.sheet` on `RootView`
+(`RootView.swift:313`), expected to queue behind the panel like Write's own sheets — walk-verified at W3):
+
+| # | Command · door/key | Today with the panel up (Write's arm) — which block | Built (U3) |
+|---|---|---|---|
+| 1 | `.commit` · File ▸ Commit Take ⌘S, ⌘K | `commitCaretVariant` → `askSavepointName` (`EditorViewModel.swift:3259/3268`): the field for Write's CARET take, a popover on Write's bar beneath the sheet | the take the panel's ring is in, else the take the block shows (the ring moves onto it, then the ask) — the board's `askSavepointName`; the field in the panel (P-U3-1) |
+| 2 | `.comments` · Block ▸ Comments… ⌘⇧' | `openCaretComments` (`:3947`) → a queued comments sheet on the CARET block | the panel's block — the board's request, named; the panel presents the comments sheet (the Takes bar's twin, `TakesBottomBar.swift:309`) |
+| 3 | `.callout(…)` · Block ▸ Callout, ⌥⌘C | `applyCallout` (`:3960`) frames the CARET block | frames the panel's block (`applyCallout(_:blockID:)`, 13k K6's named target) — silent, as on every surface (the panel draws no frame: P-U3-5) |
+| 4 | `.copyAllTakes` · ⌘⇧C | `copyCaretBlockTakes` (`:3981`) — the CARET block's fan | the panel's block's fan (`copyAllTakes(blockID:)`), the receipt in the panel |
+| 5 | `.takeToBlockBelow` · ⌥⌘⏎ | `moveCaretTakeIntoBlockBelow` — Write's shown take at the caret | the take the ring is in, named; no ring ⇒ the board's own refusal (strict — ⌘⇧A's precedent, P-U3-3) |
+| 6 | `.takesToBlocks` · ⌥⇧⌘⏎ | `turnCaretBlockTakesIntoBlocks` — the CARET block | the panel's block (`turnTakesIntoBlocks(blockID:)`) |
+| 7 | `.showBlockHistory` · ⌘K, the bars | `requestBlockHistory` (`:3335`) — the CARET block | the panel's block — the router first (the inspector), else the board's fallback sheet, presented by the panel |
+| 8 | `.showOriginBlock` · ⌘K | `revealCaretBlockOrigin` (`:2936`) — the CARET block | the panel's block's originals (into History, as everywhere), or the honest `OriginPeekCopy.noOriginHere` |
+| 9 | `.deleteBlock` · Block ▸ Delete Block, ⌘K | `deleteCaretBlock` — the CARET block | the panel's block (the board's arm, named); the panel's own gone face + the receipt; ⌥⌘Z (P-U3-2) |
+| 10 | `.archiveBlock` · Block ▸ Archive Block | `archiveCaretBlock` — the CARET block | the panel's block (likewise) |
+| 11 | `.insertBlockBelow` · ⌘⇧⏎, ⌘K | `insertBlockBelowCaret` — a block below the CARET, Write's caret into it | GREY while the panel is up (registry data); consumed with the panel's line if dispatched (P-U3-2) |
+| 12 | `.addBlockAtEnd` · Block menu, ⌘K | `jumpToDocumentEnd` — Write's caret moves beneath the sheet | GREY (same) |
+| 13 | `.structural(…)` · ⌘⇧D ⌥⌘⇧D ⌘⇧E ⌘⇧K ⌘⇧M ⌥⌘⇧M | `invokeGesture` at Write's caret/selection; the ceremony sheets queue | GREY (same) |
+| 14 | `.deleteInEveryTake` · Block menu | over Write's selection beneath the sheet | GREY (same) |
+| 15 | `.takes(.toggleFan)` · ⌘⇧T | `openCaretFan` (`:3377`): the caret's block ⇒ no-op; another block ⇒ the sheet SWAPS to the caret block's panel | CLOSES the panel — the toggle's close half (P-U3-4) |
+| 16 | `.takes(.saveLens)` · ⌘⇧L | the NOTE's lens-name sheet (queued) | unchanged — note scope (VX-150's ruling) |
+| 17 | `.takes(.closeAll)` · Block menu | grey in Write (registry: the Takes board only) | unchanged |
+| 18 | `.pageFan(±1)` · ⌥⌘←/→ | grey in Write; Write declines | unchanged |
+| 19–22 | `.toggleSeal` · `.saveNoteVersion` ⌘⇧S · `.showNoteVersions` · `.showNoteTray` | Write's — the NOTE (the same note the panel shows) | unchanged — note scope |
+| 23 | `.find(…)` · ⌘F ⌥⌘F ⌘G ⇧⌘G ⌘E, Replace in Every Take | Write's find bar in its own scroll view beneath the sheet — the NOTE's text | unchanged — note scope |
+| — | `.takes(.choose/.stepPrev/.stepNext/.archive/.branch/.blank/.blankChoose)` | already the panel's (VX-135/VX-150) | unchanged, + the archive receipt's words (the rider) |
+
+**The rule built.** While Write's take panel is up, a routed command about a block or a take acts on the PANEL's
+block — the take its ring is in where the act needs a take — through the Takes board's own arm with the panel's block
+NAMED (13k K6's named-target convention: a named target never falls back to the routed one). Where the act needs a
+take and the ring is in none: an ADDITIVE act (⌘S) takes what the block shows, P-VX150-1's ratified rule for ⌘T; an act
+that takes a take OUT of the fan (⌥⌘⏎) refuses as the board does, ⌘⇧A's precedent (VX-150). The acts that cut, join or
+add blocks where she writes (rows 11–14) cannot act honestly from a one-block sheet — their results land on blocks the
+panel never shows, the board carries most of them to Write by a mode switch that a sheet over Write cannot make, and
+the board's insert/divide arms park the ring on a block the panel does not render — so by P-2's last sentence ("a door
+that can never act in its context isn't rendered") they are GREY while the panel is up, by registry data (the panel
+reports itself to the router, the takes-board attachment's shape — P-1), and a dispatch that reaches the panel anyway
+is consumed with one line, never handed to Write's caret. ⌘⇧T closes the panel. Commands about the NOTE keep reaching
+Write — the note is the same note either way. One more invariant, made structural rather than coincidental: **the
+panel's ring never stands outside its block** — the board's delete/archive and take-to-block arms park the ring on a
+survivor or a minted block (`parkFocus`), a pane the panel never renders, after which ⌘⏎ / ⌘⇧A / ⌃⌘→ would act on a
+block the panel does not show (this ticket's class, one step later). `TakesViewModel.writePanelBlockID` (set only by
+the panel) makes `focus(_:)` blur instead of landing on another block.
 
 ## Ladder
 
