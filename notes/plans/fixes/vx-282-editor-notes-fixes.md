@@ -113,7 +113,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 |---|---|---|
 | U1 | VX-290 — the empty-block backspace's caret landing | **DONE** — fix `385aa1fc`; W1 red on old + W2 the Mac batch green `be826a5d`; W3 the walk, every row held `a7a63949`. Stage released 22:01:26 and 23:47:00. One observation for the orchestrator to ticket (the bar's word counter, not this unit's road). No revert in flight. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. Claim `vx282-u2b` HELD for U3's handover. |
-| U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **READY FOR STAGE — W1 red on old (old products) + W1b revert B (the ring guard) + W2 the Mac batch g1/g2 (fixed) + W3 a short walk on the dev store (both voices), ≈42 min.** Record `4e5d3464`; seams `04e0369f`; pins ahead of the fix `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Three product sets built headless, TEST BUILD SUCCEEDED: `DerivedData/vx282-u3-old-products`, `…-revB-products`, `DerivedData/vx282-u3` (fixed). Revert B DONE and RESTORED (`git diff` empty). PROVISIONALs P-U3-1…7 (QUESTIONS #220). No claim held; no revert in flight. Every count PENDING. |
+| U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — W1 red on old (old products) + W2 the Mac batch g1/g2 (fixed) + W3 a walk on the dev store (the bar, the pad, the tour in Terminal and Study, the away start), ≈42 min.** Traces `324bfda8`; pins ahead of the fix `c4f2a893` (+ the tour pin's isolation `bfd3ca38`); fix VX-193 `0c31fcc5`, VX-112 `6bb9c7c9`. Products built headless, TEST BUILD SUCCEEDED ×2: `DerivedData/vx282-u4-old-products` (pins over the pre-fix box, by the named revert `cdc842f0` — DONE and RESTORED, `git diff` empty) and `DerivedData/vx282-u4` (fixed). PROVISIONALs P-U4-1/2 (QUESTIONS #221). No claim held; no revert in flight. Every count PENDING. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
@@ -1004,7 +1004,53 @@ and 0 booted simulators at the start). Logs: `notes/plans/vx282-screens/u3/logs/
   "**87 tests in 10 suites passed**"; g2 (`w2-g2.log`, 01:22:18–01:24:34) "**161 tests in 14 suites passed**" — **248 tests /
   24 suites, 0 skipped** (every suite's ✔ line read; the two "skipped" grep hits are a test's NAME), `** TEST EXECUTE
   SUCCEEDED **` ×2.
-- **W3 — the walk: IN PROGRESS.**
+- **W3 — THE WALK, EVERY ROW HELD** (01:25–01:34; the `vx282-u3` Debug app — the build of `26ecec8c`, pid 81959 — on the
+  DEV store: "Sync off (dev store)", unlocked, no lock screen met, no What's New sheet, voice **Study** as found; every key
+  through `keys.sh`, every click through `click.sh`, ≥ 3 s apart — a 1 s gap tripped the guard on my OWN click's HID event
+  once, before any keystroke was sent; idle had been 2,914 s). Staged through the shelf's quick-entry bar:
+  `{t:"VX-154 walk"}alpha` ⇧⏎ `beta` ⏎ → opened in Write; ⌘↓ ⌘T ⌘T (beta ⑂3), ⌘↑ (the caret back in `alpha`, block 1/2);
+  `beta`'s panel opened from its ⑂ badge — **the panel's block is NOT the caret block** (`w3-00`, `w3-01`). Captures:
+  `notes/plans/vx282-screens/u3/` (window captures, downsized; the one full-screen menu capture cropped to the app's
+  region and the full frame deleted — it held the desktop).
+  1. **⌘S — HOLDS.** Ring in take 2 → ⌘S: the name field opened **in the panel** under its header (`w3-02`), not on Write's
+     bar beneath → `walk` ⏎ → "Committed “walk” — an immutable saved moment of this take." in the panel and the bar
+     (`w3-03`). **Where it landed** (checked after the panel closed, the caret put in `beta`, Block History from the bar):
+     take 1 of 3 — 0 · **take 2 of 3 — 1** · take 3 — 0 (`w3-13`): the ring's take of the PANEL's block; `alpha` committed nothing.
+  2. **⌘⇧' — HOLDS.** The comments sheet came up **over the panel at once** (`w3-04` — before the fix Write's comments sheet
+     would queue behind the panel, on the caret block); a comment filed with ⌘⏎ shows in the page's gutter **beside
+     `beta`** (`w3-05`). Closed by its own Close.
+  3. **The Block menu — HOLDS.** Enabled states read through System Events (`logs/w3-block-menu-panel-up.txt`): GREY —
+     Divide Block at Cursor, Divide choosing takes…, Extract Selection, Make Block from Selection, Merge Blocks, Merge
+     choosing takes…, Delete in Every Take, New Block at End of Note, New Block Below (the nine), plus Close All Takes and
+     the two page items (Write's standing grey); LIVE — Delete Block, Archive Block, the take family, Save Choices as Lens…,
+     Copy All Takes, Move Take into a Block Below, Turn All Takes into Blocks, Previous/Next Block, Comments…, Callout, Toggle
+     Block Seams. The menu opened and captured (`w3-06`). **⌘⇧D → nothing** (`w3-07`: `alpha`/`beta`, block 1/2, the fan
+     and the line unchanged).
+  4. **⌘K — O-6 CONFIRMED.** The palette did **not** open over the panel (`w3-08`); it was QUEUED and came up the moment the
+     panel closed at row 6 (`w3-11`). So History/origin/seal/Versions/tray have no live door while the panel is up (their
+     arms stay the panel's, pinned); the queued-palette-appears-later behaviour is pre-existing (the palette is `RootView`'s
+     sheet) — for the orchestrator to ticket.
+  5. **Block ▸ Archive Block — HOLDS.** The PANEL's block went: the panel's own face "This block is no longer in the note."
+     with "Block archived — it's kept, with no countdown, in This Note's Tray … ⌥⌘Z undoes this."; Write beneath kept
+     `alpha` (block 1/1) (`w3-09`). **⌥⌘Z** → `beta` back with its fan and comment, "Undid: Archive Block", and **no card holds
+     the ring** — the guard blurred it instead of landing it on `alpha` (`w3-10`).
+  6. **⌘⇧T — HOLDS.** The panel **closed**; Write with the caret still in `alpha`, no sheet swapped in for `alpha` (`w3-11`,
+     where the queued palette then appeared — dismissed with ⎋).
+  7. **Lifecycle — HOLDS.** With the panel closed, ⌘S opened **Write's own** field at the bar's commit door for `alpha`'s
+     take (`w3-12`) → ⎋.
+  8. **The second voice (Terminal, via ⌘K "Use Terminal Voice") — HOLDS.** Caret back in `alpha`, `beta`'s panel reopened
+     from its badge (`w3-14`); **⌘S with NO take clicked into** (P-U3-1's road): the field opened in the panel (`w3-15`) and,
+     after ⎋, the ring stood in the **chosen** take (`w3-16`); ⌘⇧T closed the panel (`w3-17`). Voice restored to **Study** via
+     ⌘K "Use Study Voice" (`w3-18`).
+  - **Walk finding W-1 (taste, recorded as P-U3-8):** the ⌘S field hangs below the panel's HEADER, so it covers the FIRST
+    card — in the no-ring case exactly the take being committed (the ring on it is hidden until the field closes)
+    (`w3-15`). Option: anchor the ask on the take's own card (the in-sidebar-box placement's "nearer where she typed").
+  - **Residue:** the note "VX-154 walk" moved to the Trash by its own note ▾ › Delete Note… › Delete ("Note moved to the
+    Trash — 30 days to put it back.", `w3-19`) — with it beta's commit "walk" and the comment "walk comment on beta".
+  - **Posture as left:** our instance quit by identity (`tell application id "io.lduarte.Variorum.debug" to quit`;
+    `pgrep -x Variorum` → none — two loose `pgrep -f` hits were the VX-246 session's `nm` command lines, not apps); 0
+    booted simulators; the dev store Standard (custody never touched), unlocked, voice **Study** (as found), appearance
+    `system` (unchanged). **Claim RELEASED 01:35:12** (`Tools/stage release --who vx282-u3`; status FREE).
 
 ### U4 — VX-193 + VX-112 (the capture box: the undo desync and the focus re-grab)
 

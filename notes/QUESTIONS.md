@@ -2517,6 +2517,8 @@ itself — close the takes panel first."
 **P-U3-7 — the note's own commands still reach Write while the panel is up** (seal, ⌘⇧S, Versions, the tray, Find,
 ⌘⇧L). The ones that show something show it beneath or after the panel. Options: (b) grey them while the panel is up;
 (c) the panel shows them itself.
+**P-U3-8 — where ⌘S's name field sits in the panel** (the walk's finding): under the panel's header, so it covers the
+first card — when nothing was clicked into, exactly the take being committed. Option: (b) hang it from the take's own card.
 Status: open — your eye in daily use.
 
 #221 — **VX-193 + VX-112 (U4), the capture box — two readings built PROVISIONAL** (the binding record is
