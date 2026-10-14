@@ -229,6 +229,26 @@ struct ExecutorRepairTests {
         #expect(read.done.count == 1 && fixture.world.liveFormat3?.apple?.keyID == fixture.ownApple!.id)
     }
 
+    @Test func decision35_AnActWritesNothingAppleReachableOffline() async throws {
+        // The move on a synced Standard library: no fresh vault read, no own
+        // Apple key minted, no wrap landed — refused before any write.
+        let fixture = try EX(.standard, synced: true)
+        fixture.world.liveKeyFile = .format3(try #require(fixture.world.liveFormat3).droppingApple())
+        fixture.world.icloud.oldShared = AppleKeyMaterial.mint()
+        fixture.world.server.reachable = false
+        let executor = fixture.executor()
+        var library = try fixture.unlocked(executor)
+        await #expect(throws: VaultRefusal.unreachable) { _ = try await executor.moveOffSharedKey(&library, subjects: []) }
+        #expect(fixture.world.writes.isEmpty)
+        // Use Standard on a synced Castle library offline: refused at its door.
+        let castle = try EX(.castle, synced: true)
+        castle.world.server.reachable = false
+        let e2 = castle.executor()
+        var l2 = try castle.unlocked(e2)
+        await #expect(throws: VaultRefusal.unreachable) { _ = try await e2.useStandard(&l2, typed: castle.typed) }
+        #expect(castle.world.writes.isEmpty)
+    }
+
     @Test func theKeyFileComesBackFromTheSealedMirrorButNeverItsAppleWrap() async throws {
         let fixture = try EX(.standard)
         let live = try #require(fixture.world.liveFormat3)

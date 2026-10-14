@@ -569,8 +569,11 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   the offer's delete — DONE, 11 tests in 3 suites green filtered — `469044e6`; (e) the key doors,
   device settings, the re-arm, confirm mode, create library, Re-link (both arms), the old shared key's move and
   retirement, the migration — DONE, 19 tests in 4 suites green filtered (every act now real — `Acts/Pending.swift`
-  deleted; 83 U3 tests in 15 suites green together) — this commit; (f) U3's guards with their DEBUG mutation pins, the log scan, decision 35,
-  the failed seals — NOT-STARTED; (g) the record — NOT-STARTED.
+  deleted; 83 U3 tests in 15 suites green together) — `9217cfb8`; (f) U3's guards with their DEBUG mutation pins, the log scan, decision 35,
+  the failed seals — DONE (21 guard tests in 2 suites — 20 DEBUG mutation pins, each guard off letting its bug
+  through beside the guarded run; the log scan; decision 35 at the act level; Use Castle's door-time vault check added
+  executor-side; 106 U3 tests in 18 suites green together, Debug) — this commit; `swift test -c release` and the
+  full core suite PENDING; (g) the record — NOT-STARTED.
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
 - The go/no-go record: **NOT-STARTED.**
 

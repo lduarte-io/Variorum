@@ -70,9 +70,11 @@ extension ActContext {
 
 extension ProtectionExecutor {
     /// **Use Castle** — `gate`: Touch ID (an item made at this press, where a
-    /// finger is enrolled) or Always ask.
+    /// finger is enrolled) or Always ask; `moves`: the serving key files of the
+    /// other libraries the old shared key's retirement re-runs the move for
+    /// (assess's MovePlan — keys of this Mac's own before the old one goes).
     public func useCastle(
-        _ library: inout UnlockedLibrary, typed: TypedSecrets, gate: GateStyle
+        _ library: inout UnlockedLibrary, typed: TypedSecrets, gate: GateStyle, moves: [String] = []
     ) async throws -> ActOutcome {
         guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
         if record.mode == .castle && record.modeConfirmed { throw ExecutorRefusal.wrongMode(.castle) }
@@ -80,6 +82,16 @@ extension ProtectionExecutor {
         var parameters = ActParameters(
             gate: gate, synced: record.account != nil, accountID: record.account, newKind: .castle,
             outgoingAppleKeyID: library.keyFile?.apple?.keyID)
+        parameters.keyFileIDs = moves.isEmpty ? nil : moves
+        // §3.5 point 4, read at the act as at the door: a vault this device can
+        // read — other than the account this very act moves into Castle — that
+        // still names the old shared key stops Use Castle here.
+        if guards.doorTimeVaultCheckOn, let session = configuration.session.accountID, session != record.account,
+           let shared = try library.section.oldSharedKey?.id ?? leaves.apple.readOldSharedAppleKey()?.id,
+           let vault = try await readVault(accountID: session),
+           vault.format.masterWrappedByAppleHeld != nil, vault.format.appleKeyID == shared {
+            throw ExecutorRefusal.vaultOnOldSharedKey(account: session)
+        }
         let secrets = try await doorSecrets(library, typed: typed, wordsMayBeNew: true, parameters: &parameters)
         if let account = record.account, let vault = freshVaults[account] {
             parameters.retiringAccountAppleKeyID = vault.format.masterWrappedByAppleHeld != nil ? vault.format.appleKeyID : nil

@@ -82,8 +82,8 @@ extension ActContext {
     /// Touch ID and a finger is enrolled — else none (Always ask: the key file
     /// and the history are the road). Copies pause from here to the swap.
     func newCustodyItem(kind: ProtectionMode) throws {
-        leaves.backups.pauseCopies()
         let key = try requireToKey()
+        if !(try libraryOpens(key)) { leaves.backups.pauseCopies() }
         switch kind {
         case .standard:
             try leaves.custody.writeCustody(key, itemClass: .silent)
@@ -99,8 +99,8 @@ extension ActContext {
     /// the crossing (§3.4); `crossing` nil builds a file with no past (a
     /// landing, a creation).
     func newKeyFile(_ crossing: KeyFileCrossing?, locks: NewKeyLocks) throws {
-        leaves.backups.pauseCopies()
         let key = try requireToKey()
+        if !(try libraryOpens(key)) { leaves.backups.pauseCopies() }
         if let live = library.keyFile, live.fingerprint == Self.fp(key) { return }
         guard let from = fromKey, let outgoing = library.keyFile, outgoing.fingerprint == Self.fp(from) else {
             throw ExecutorRefusal.noLiveKeyFile

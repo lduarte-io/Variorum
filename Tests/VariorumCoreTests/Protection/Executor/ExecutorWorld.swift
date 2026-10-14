@@ -523,10 +523,25 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
         return clockTime
     }
 
+    /// Every secret this world ever minted — the log scan's needles.
+    var minted: [Data] = []
+
     func mintID() -> String { UUID().uuidString.lowercased() }
-    func mintLibraryKey() -> StoreKey { StoreKey.mint() }
-    func mintAppleKey() -> AppleKeyMaterial { AppleKeyMaterial.mint() }
-    func mintSymmetricKey() -> SymmetricKey { SymmetricKey(size: .bits256) }
+    func mintLibraryKey() -> StoreKey {
+        let key = StoreKey.mint()
+        minted.append(key.data)
+        return key
+    }
+    func mintAppleKey() -> AppleKeyMaterial {
+        let key = AppleKeyMaterial.mint()
+        minted.append(PF.bytes(key.key))
+        return key
+    }
+    func mintSymmetricKey() -> SymmetricKey {
+        let key = SymmetricKey(size: .bits256)
+        minted.append(PF.bytes(key))
+        return key
+    }
     func mintPassphraseKDF() -> PassphraseKDF.Descriptor { PF.fastKDF() }
 
     func biometry() -> BiometryFacts { bio }
