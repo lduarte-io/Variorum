@@ -106,7 +106,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-290 — the empty-block backspace's caret landing | IN-PROGRESS — fix + pins committed, both schemes build headless; next: the reverted build into its own DerivedData (then restored), then READY FOR STAGE. No revert in flight. |
+| U1 | VX-290 — the empty-block backspace's caret landing | IN-PROGRESS — fix + pins committed (`385aa1fc`), both schemes build headless. **REVERT IN FLIGHT (working tree only, uncommitted):** `EditorSurfaceController.swift` `runEmptyBlockDeletion`'s landing line → `caretLandingAfterRemoving(plan.entryIndex)`, built into `DerivedData/vx282-u1-revert`; restore = `git checkout -- App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift` from `385aa1fc`, verify `git diff` empty. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | NOT-STARTED |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | NOT-STARTED |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
