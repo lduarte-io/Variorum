@@ -3303,8 +3303,10 @@ origin/main` as a merge commit ("Merge origin/main (VX-281) into VX-246 … Part
 
 ## U4c UNIT RECORD — the inline editor's badge regression: VX-230 (opus-implementer, from 2026-10-14 ~05:35 MDT)
 
-**Not done yet (first line, kept current):** nothing built; the trace is being measured (piece 0). No stage window has
-run; no QUESTIONS entry, canon edit or ticket (the orchestrator's). Zero `Sync/`, custody, Keychain, schema, `Server/`,
+**Not done yet (first line, kept current):** the trace is MEASURED and it overturns the brief's premise: there is NO
+product regression to fix (the finding below), so NO product line changes. Not yet done: the regressed pin's harness
+correction (piece 1), its build, the headless finals, THE STAGE WINDOW plan; no stage window has run; no QUESTIONS
+entry, canon edit or ticket (the orchestrator's). Zero `Sync/`, custody, Keychain, schema, `Server/`,
 `BlockRangeIndex`, `PaneSurface`, `runStructural`, VX-281's lane; in `EditorView.swift`, nothing near vx-282's two
 touches (the fan-panel sheet near line 186, `textViewDidChangeSelection` near line 858).
 
@@ -3323,7 +3325,7 @@ doors, `overlayLayoutDidSettle`, `refreshBadges` (U4b's), `refreshDecorations`' 
 
 | piece | what | status |
 |---|---|---|
-| 0 | this record + the trace MEASURED on bare TK2 probes (the decisive number: block 40's fragment state at the pin's `:76`) | IN-PROGRESS — probes in `notes/plans/vx246-screens/u4c/probes/` (gitignored) |
+| 0 | this record + the trace MEASURED on bare TK2 probes (the decisive number: block 40's fragment state at the pin's `:76`) | DONE (this commit) — probes 10–13 + `*-output.txt` in `notes/plans/vx246-screens/u4c/probes/` (gitignored; macOS 27.0, 26A428). **The decisive number: block 40 is `estimated` at `:76` (y = 14,909, a GUESS; settled 14,560).** The finding: a HARNESS-order defect, no product defect (below) |
 | 1 | the in-use pin, if the regressed test doesn't cover it — committed BEFORE the fix | NOT-STARTED |
 | 2 | the RED product `DerivedData/vx246-u4c-red` (the pins, no fix) if a new pin lands | NOT-STARTED |
 | 3 | the fix (never a forced mid-document `.ensuresLayout` read) | NOT-STARTED |
@@ -3331,3 +3333,60 @@ doors, `overlayLayoutDidSettle`, `refreshBadges` (U4b's), `refreshDecorations`' 
 | 5 | THE STAGE WINDOW plan (claim `vx246-u4c`) → READY | NOT-STARTED |
 
 **No revert is in flight.**
+
+### The trace, MEASURED (inputs → wrong output) — the runner's trace CORRECTED: the pin reads a transient its own pump cannot leave
+
+**The rig** (`u4c/probes/probe10`/`12`/`13`): a bare TK2 `NSTextView` shaped like `makeInlineEditor` (inset 8, not
+vertically resizable, a width-tracking container, Terminal's 14-pt monospace, `paragraphSpacing` 7), the pin's own
+50-block corpus, the harness's `600×100` frame (`EditorWorldHarness.focus`), the caret parked at the end (the fill), in a
+borderless window positioned off-display BEFORE it is ordered in (`.prohibited` activation — the VX-179 offscreen probe
+rules), so the run loop drives a REAL display pass (`viewWillDraw` counted). Numbers are container-space y.
+
+1. **The pin's `pump()` runs NO main-queue hop** (probe 11). Swift Testing runs a `@MainActor` test's body as a main-actor
+   job — inside a main dispatch queue callback — and CFRunLoop does not service the main queue from a run loop nested in
+   one: `RunLoop.main.run(until: +0.05 s)` left a `DispatchQueue.main.async` block un-run; one `await Task.yield()` ran it.
+   (This is why the sibling pins wait with `await` — `inlineBadgesTrackAWidthReflow`'s "async polling drains the settle
+   trigger's main-queue hop".)
+2. **The pin's sequence, in its REAL order** (probe 12 §I; 400 blocks in probe 13 §I, the same shape):
+   - `:67` `coordinator.remeasure()` walks the post at the harness's 600-pt width (all 50 laid), and its OWN report sets
+     the frame to 700 × h — a WIDTH change, which returns EVERY fragment to `.none` (U4's fact 1). The width door queues
+     the remeasure hop that would re-lay the post at 700.
+   - `:68` `pump()`: one display pass and NO hop (fact 1 above). The viewport is the frame's END (the container is not
+     flipped; vis 20,901–21,201, past the 700-pt text's end): TK2 lays out block 49 alone, ahead of its 49 unlaid
+     predecessors, and ESTIMATES the rest. **Block 40 reads `estimated`, y = 14,909 — a guess** (settled: 14,560).
+   - `:75`–`:77` `branchVariant` + `reload()` → `.adoptEcho` (`slots = new`, `refreshBadges()`, no storage edit) and the
+     direct `refreshBadges()`: both read block 40 `estimated`. U4b's `refreshBadges` (U4's `.layoutAvailable` check) gives
+     it NO badge — **its documented contract** ("unlaid-out blocks simply have no badge until laid out … the remeasure's
+     walk, inline"). `:78` red; `:80`'s `#require` falls with it.
+   - Had the queued hop run (the app's order — the next `await`), its walk lays all 50 out (block 40 `laid`, y = 14,560)
+     and U4b's call re-runs the badge pass after it.
+3. **The runner's trace, corrected in two places:** (a) nothing UN-laid block 40 "in between" — the `:67` walk laid it
+   out at the OLD width, and the same call's report changed the width; (b) the display pass did not un-lay anything (it
+   never does in the steady state, item 4) — it laid the END out ahead and left block 40 estimated, because the hop that
+   would have re-laid the post never ran inside `pump()`.
+4. **The in-use road is COVERED — the runner's "what it means in use" does not hold** (probe 12 §II; probe 13 §II at
+   400 blocks, ~80k words). The inline editor mounted the app's way (a 24-pt frame, the first remeasure's walk, SwiftUI
+   applying the height on a later pass, display passes): **every fragment `laid`**, and it STAYS laid through display
+   passes and host scrolls to mid-post, the end and back. Fragments leave `laid` only on the two doors that queue the
+   coordinator's remeasure: a storage edit (the edited paragraph `none`, then `estimated` after a display pass, until
+   the hop's walk) and a width change (every fragment `none`, then the viewport `laid` and the rest `estimated`, until
+   the hop's walk). So a fan adopted with no text change (an MCP `add_take`, a sync arrival, a take branched from a
+   panel — all `.adoptEcho`) meets a laid post in the steady state and is badged AT ONCE, at its own line; adopted
+   inside one of the two transients, it is unbadged until the hop that is ALREADY queued walks the post and U4b's call
+   re-runs the badges (the same burst, the next main-queue turn), never "until her next keystroke or a width change".
+5. **Why the pin was green on the older trees — for the wrong reason, both times.** It asserts PRESENCE and "outside
+   the clip", never the line. On `vx246-u3` (no state check) the transient read badged block 40 at TK2's GUESS
+   (14,909 + 8, ~350 pt off its line in the rig — VX-230's own estimate class, U4's trace). On `vx246-u4` the forced
+   `.ensuresLayout` read laid block 40 out AHEAD of its unlaid predecessors — U4b's poison (fact 1 of its record). U4b's
+   correct refusal to badge a guess is what turned it red.
+6. **Write (the brief's "say which"):** the same transient reading exists by design and is no gap: the detail editor
+   lays out only its viewport, an off-screen fan has no badge until it is scrolled to, and `ScrollAnchorController`'s
+   scroll road re-runs the pass (U4's proven half). Unchanged.
+
+**The disposition this trace forces (the hallucination guard):** no product mechanism is wrong, so there is no fix and
+no red-first product pin — VX-230's U4c row is **DISMISSED AS A PRODUCT DEFECT (hollow); the defect is the PIN's
+harness.** A forced read (banned), or any synchronous lay-out inside `refreshBadges`, is the only way to make the pin
+green as written, and it would put the badge at a guessed or poisoned place. The work left is the pin itself
+(piece 1): the harness waits as the app runs (the hops land), the in-use road is folded in (a fan through the MCP's
+`addTake`, delivered on the observation's road), and the badge is asserted at its own laid line, which the old pin
+never checked.
