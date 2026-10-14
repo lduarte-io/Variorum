@@ -3306,15 +3306,44 @@ its design and pieces) after the merge; **`notes/SyncSpec.md` in full, BEFORE pi
 |---|---|---|
 | 0 | merge `origin/main` (`fa3bc6e1`, VX-281) into the branch — a merge commit; then headless finals + Mac `build-for-testing` into `App/Variorum/DerivedData/vx246-u1b` | DONE (`5be99e6d` the merge; this commit the record) — **NO CONFLICTS:** git's automatic merge joined the three files both sides touched — `App/Variorum/Variorum/Features/MCP/MCPDoor.swift` (ours: U3's hooks — `onWrite` → `landWireWrite`, `beforeWrite` → `flushHerEditorBeforeWrite`; theirs: VX-232's `setupClient` / `chooseSetupClient(_:)` and ladder R1-3's `copySetupCommand(for:)` with no default argument — both intact, read in the merged file), `.gitignore` (both screens folders kept), `notes/plans/mcp-pane-and-docs-kickoff.md` (their U6-done marks beside ours). **Headless finals on the merged tree** (`swift build --build-tests` then `swift test --skip-build`, EXIT 0, zero ✘; `u1b/logs/p0-finals.log`): **`VariorumMCPTests` 236 / 49 · `VariorumCoreTests` 2,834 / 328 · `StringsWorkbookTests` 40 / 6** — core +8 tests / +2 suites against U4c's 2,826/326, exactly what main brought (VX-281's core suites); MCP and the workbook unchanged. **The Mac `build-for-testing`** into `DerivedData/vx246-u1b` (an APFS clone of `vx246-u4c` — U4c's window rides this product, so the source product is spent; its OWED 5 noted) → `** TEST BUILD SUCCEEDED **`, EXIT 0 (`u1b/logs/p0-mac-build-for-testing.log`) |
 | 1 | VX-258's FACE — (a) the mint call site (THE MERGE GATE), (b) the re-bind row in Waiting, (c) the words, (d) L1 / `keyLine` truth | DONE, its Mac runs PENDING (the window) — **the pins first (`9df5e874`, pre-fix API only):** NEW `MCPSetupTabKeyTests` (each tab's copy carries its client's name; a client's own setup re-run moves its approved name with zero clicks, both tabs; the control — an Any copy under an approved name waits), and the RED PRODUCT built from that tree: `DerivedData/vx246-u1b-red` (`** TEST BUILD SUCCEEDED **`, `u1b/logs/p1-red-build.log`) — its red run is the window's W1 (expected: 3 of 4 cases red — the tag test, both re-run cases — the control green). **The face (`43ee6209`):** (a) `MCPSetupClient.expectedName` (inside its O-4 fence) + `copySetupCommand` minting `copiedFor:` the chosen client's name; (b) Waiting's re-bind row (`MCPRebindRowView`, above the asks; the snapshot reads `Queries.mcpRebindRequests`; Allow / Don't allow through the runner; a gone setup said by Waiting; ⌥⌘,'s count includes the setups; two new `.surface` capabilities); (c) the three Activity lines + the refusal words; (d) L1, `keyLine`, `keySummary` (L1's summary unchanged — still true). NEW `MCPRebindFaceTests` (8) + six JUSTIFIED EDITS (each commented in place). `build-for-testing` into `vx246-u1b` SUCCEEDED, no warning in a touched file (`u1b/logs/p1-face-build.log`); the O-4 sweep green headless 2/2 (the fence now 80 of 120 lines). The design and the words: THE FACE section below |
-| 2 | VX-318 — the trace first; a red-on-old pin; the fix only if the pin is red | NOT-STARTED |
+| 2 | VX-318 — the trace first; a red-on-old pin; the fix only if the pin is red | DONE — **DISMISSED AS HOLLOW** (no fix; the trace and the evidence: THE VX-318 TRACE below). The pin `7c69369a` — NEW `Tests/VariorumMCPTests/MCPReaderAfterCloseTests.swift` (the production road with the reuse made certain: a real `MCPSession`, a burst in flight, the session ended by each production road, the host's close, `dup2` onto the freed number at once, a byte written to the fresh socket) — **GREEN on the pre-fix tree:** 3 plain runs and 4 runs under 24 CPU hogs (`u1b/logs/p2/loaded-run-*.log`), 304 session endings a run (150 client hang-ups · 150 server stops · 4 over-the-cap), zero bytes taken. **Its detection power proven** by a POSITIVE CONTROL (a temporary, never-committed stray reader reading the number after the close): **RED 150 of 150 on both roads and 4 of 4 over the cap** (`u1b/logs/p2/positive-control.log`); the file restored (`git checkout --`, `git status` clean). The pin stays as the ordering's guard (green both sides by design — said in its header) |
 | 3 | P-VX260-1 option (b) — its own schema commit (v1_29, local-only), then the code, red-first | NOT-STARTED |
 | 4 | pins red again by revert per member; headless finals + the Mac build(s) | NOT-STARTED |
 | 5 | THE STAGE WINDOW plan (claim `vx246-u1b`) → READY | NOT-STARTED |
 
 **No revert is in flight.**
 
-**Continuation (for a resume):** piece 2 next — VX-318's trace (`MCPSocketTransport`'s reader thread vs the host's
-close); a red-on-old pin on the production road; the fix only if the pin is red.
+**Continuation (for a resume):** piece 3 next — P-VX260-1 option (b): the schema commit first (v1_29 adds a local-only
+`text_digest` to `mcp_comment_author`; SyncSpec read), then the delete's compare, red-first headless.
+
+### THE VX-318 TRACE (inputs → the feared state; why it cannot be reached)
+
+The feared state (U1's OWED 3): `MCPSocketTransport`'s reader THREAD issues a `read(fd)` after the host has closed the
+session's descriptor and the process has handed the number to another socket — reading that socket's bytes.
+
+1. The host closes a session's descriptor only after `session.run()` returns (`MCPServerHost.serve`: `await
+   session.run()`, then `ended(session)` → `closeConnection()`; VX-279's order).
+2. `run()` returns only after `await server.waitUntilCompleted()` — the SDK's message-loop task has ended (and then
+   `server.stop()` → `transport.disconnect()`).
+3. That loop (`swift-sdk` `Server.start`, `for try await data in stream`) ends only when the transport's stream FINISHES
+   (it never throws: the transport only ever calls `finish()`), or when its task is cancelled — and only
+   `server.stop()` cancels it, which only `run()` calls, after step 2. `MCPSession.server` is private; nothing else
+   reaches it. The SDK never stops itself (an initialize hook's throw answers an error and keeps looping).
+4. The stream finishes in exactly two places: the reader thread's own `continuation.finish()`, AFTER `readLines`
+   returned — i.e., after its LAST `read` returned ≤ 0, or after the over-cap arm, which reads nothing more — and
+   `disconnect()`, which (step 3) runs only after the loop already ended, so only after the reader's own finish.
+5. Therefore the host's close is always preceded by the reader's last `read`: a reader "descheduled between two reads"
+   is still before its last read, so the stream is unfinished, the loop alive, `run()` unreturned, and the
+   descriptor open — its next `read` lands on its own socket (EOF after the shutdown), never a reused number. The
+   handshake's reader thread (`MCPHandshake.openingOutcome`) resumes `run()` only when it has finished reading — the
+   same ordering, no timeout.
+6. The writes are ordered too: `send` and the over-cap answer run on the transport actor and guard `isConnected`,
+   which `disconnect()` clears on that same actor before `run()` returns — so no write lands after the close either.
+
+**Disposition (the hallucination guard):** the pin reproduces the feared input on the production road (reuse at the
+earliest instant, a reader mid-loop, every ending, under load) and is green on the tree it was written against; its
+detection power is proven by the positive control. **VX-318 is DISMISSED AS HOLLOW — no production line changed.** The
+ticket's fix shape (a bounded wait in the session's close for its reader) would guard a state the code cannot reach.
 
 ## U4c UNIT RECORD — the inline editor's badge regression: VX-230 (opus-implementer, from 2026-10-14 ~05:35 MDT)
 
