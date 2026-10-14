@@ -157,10 +157,10 @@ footer { margin-top: 44px; color: var(--muted); font-size: 13px; }
     <ul>
       <li>Your VX-214 follow-ups (short receipts, greyed hovers, NOT terms) and undo for tag delete.</li>
       <li>Disabled buttons that look disabled.</li>
-      <li>The bigger ▸ in the book view, plus small book fixes and two reds on main.</li>
+      <li>Book doors that open the note at your block, not the top (VX-303). The bigger ▸ in the book view, plus small book fixes and two reds on main.</li>
       <li>Last, with you: the book and gathering menus clarity pass.</li>
     </ul>
-    <div class="meta"><span class="chip go">start now or next</span><span class="chip">Opus</span><span class="chip">12 tickets</span></div>
+    <div class="meta"><span class="chip go">start now or next</span><span class="chip">Opus</span><span class="chip">13 tickets</span></div>
   </div>
 
 </div>
@@ -240,7 +240,7 @@ footer { margin-top: 44px; color: var(--muted); font-size: 13px; }
       <li><strong>VX-268's row calls:</strong> Pool and Book Panel rows <span class="rec">(in)</span>, Blocks-scope rows <span class="rec">(no)</span>, the open book <span class="rec">(match the Bookcase)</span>.</li>
       <li id="call-compare"><strong>AI opens Compare (VX-298):</strong> your own Compare already takes any note in the same wing, with no link needed, so the AI can open the same thing. One catch: two notes with no shared history open to empty columns, because “related blocks only” is on by default. <span class="rec">I'd suggest: any two notes your picker would offer, with “related blocks only” off when they share no history, up to three notes, and <code>link_versions</code>' Open › opening Compare. Undecided: replace the open columns or fill the empty ones.</span></li>
       <li id="call-desktop"><strong>Claude Desktop (VX-299):</strong> never tested, and nothing blocks it. The “Any MCP client” setup is already the shape Desktop's config reads; it's installed here but has never been connected. (a) Out for launch; (b) one live round of about an hour, with your OK to edit your Claude config, plus a docs paragraph; or (c) that round plus a Claude Desktop setup tab, about half a day. <span class="rec">I'd do (b) at least: writers who aren't developers are far more likely to use Claude Desktop than Claude Code.</span></li>
-      <li id="call-book"><strong>Editing from the book view (VX-300):</strong> “Open in editor” lands at the top, Index ↔ Outline and “view in outline” forget your place, and Index has no block tools or takes. Canon already allows the core fix: deep links keep their targets. <span class="rec">The sizing trace is still running; it lands on the ticket, then you decide pre-launch or not.</span></li>
+      <li id="call-book"><strong>Editing from the book view.</strong> VX-303 is your “it just doesn't work”: five book doors pass only the note, so they break the deep-link rule. It's small, and it's in VX-284. Your one call there: land in Write at the block (my pick), or in the note's last mode. VX-300 is the rest. <span class="rec">I'd take its smallest useful version before launch (Index gets takes and a Takes sheet, plus Takes and “open in Write here” in its box, and Outline → Index keeps your block): one session, no editor risk. Keeping your place inside Outline and the full Index bar would come after launch.</span></li>
     </ul>
   </div>
   <div class="box">
@@ -250,8 +250,8 @@ footer { margin-top: 44px; color: var(--muted); font-size: 13px; }
       <li><strong>VX-249</strong>: collecting an existing note sets the star its gathering needs. <span class="rec">Small; it rides VX-284 if yes.</span></li>
       <li><strong>VX-138</strong>: your stack style that doesn't repeat the chosen take. <span class="rec">One fan style; it rides VX-282 if yes.</span></li>
       <li><strong>VX-248</strong>: the live-pane root fix. <span class="rec">After launch. Every case you can reach is already closed, and it changes the editor right before launch.</span></li>
-      <li><strong>VX-296</strong>: the italics flip. Which did you see: (a) while typing, where bold inside italics drops the italics and <code>**</code> flickers, or (b) while clicking between blocks, where the markers show and hide? <span class="rec">After launch, unless (a) bites you daily.</span></li>
-      <li><strong>My additions, yours to veto:</strong> VX-277 and VX-119 join VX-246 (the same undo rule as VX-276). VX-241 joins VX-284 (the same sentence VX-250 rewrites).</li>
+      <li><strong>VX-296</strong>, the italics flicker. Your answer confirmed it: the parser won't take a closing <code>*</code> with a space in front of it, so every space flips the italics off until the next letter. <span class="rec">Fix: while your caret sits there, the live editor keeps the italics, and the grammar stays as it is everywhere else. Small to medium. I'd say yes, in VX-282.</span></li>
+      <li><strong>My additions, yours to veto:</strong> VX-277 and VX-119 join VX-246 (the same undo rule as VX-276). VX-241 joins VX-284 (the same sentence VX-250 rewrites). VX-303 joins VX-284 (your “it just doesn't work”; small).</li>
     </ul>
   </div>
   <div class="box">
@@ -281,17 +281,18 @@ footer { margin-top: 44px; color: var(--muted); font-size: 13px; }
   <tr><td>VX-293</td><td>18e: markdown marks and a markdown mode (it had no ticket)</td><td>parked</td></tr>
   <tr><td>VX-294</td><td>The privacy page, a v1 gate (the brief exists; the page doesn't)</td><td>yours · pre-launch</td></tr>
   <tr><td>VX-295</td><td>Multi-line code blocks</td><td>parked · after launch</td></tr>
-  <tr><td>VX-296</td><td>The italics flip</td><td>needs your answer</td></tr>
+  <tr><td>VX-296</td><td>Italics flicker off while typing: a space beside the * breaks the span</td><td>your answer recorded · pre-launch?</td></tr>
   <tr><td>VX-297</td><td>Library Cards beachballs on a fast scroll</td><td>after launch</td></tr>
   <tr><td>VX-298</td><td>The AI opens Compare with two (or more) notes side by side</td><td>VX-246 · pre-launch · your calls</td></tr>
   <tr><td>VX-299</td><td>Claude Desktop: verify live, then a tab, a docs line, or out</td><td>needs your a / b / c</td></tr>
-  <tr><td>VX-300</td><td>Editing from the book view without losing your place</td><td>sizing on the way · your call</td></tr>
+  <tr><td>VX-300</td><td>Editing from the book view: keep your place, and reach takes from Index</td><td>sized · smallest version pre-launch?</td></tr>
+  <tr><td>VX-303</td><td>The book's open doors drop your block (a bug against the deep-link rule)</td><td>VX-284 · your one call</td></tr>
 </table></div>
 
 <h2>After launch</h2>
 <div class="box">
   <ul>
-    <li>Code blocks (VX-295), the markdown mode (VX-293), and the italics flip (VX-296), unless you move it up.</li>
+    <li>Code blocks (VX-295) and the markdown mode (VX-293).</li>
     <li>The Cards beachball (VX-297), with the older Library scroll smoothness ticket (VX-17).</li>
     <li>Restoring a deleted tag (VX-238); the 15-star limit (VX-251); the Settings titlebar trace (VX-236); lenses on import (VX-262); the colour picker (VX-219, yours).</li>
   </ul>

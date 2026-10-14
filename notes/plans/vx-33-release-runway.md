@@ -28,7 +28,7 @@ needs her word is listed in §6.
 | **VX-281** MCP settings pane & shared icon | the pane in tabs, the code block, the Library's shared icon | 4 | Opus / Opus | now |
 | **VX-282** Editor & notes fixes | backspace, take panel, capture box, comments family | 8 | Opus / **Fable** (editor seam) | now |
 | **VX-283** Sidebar & Library polish | the Open list, navigate-away, Library polish, exports | 14 | Opus / Opus | now |
-| **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's small fixes, VX-216 last | 12 | Opus / Opus | now |
+| **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's fixes, VX-216 last | 13 | Opus / Opus | now |
 
 Plus **her own track** (§4) and **the release itself** (§5).
 
@@ -197,7 +197,8 @@ and the shared-constant pin in `StarredScrollTests` (Starred keeps its 7, her wo
 - Gatherings and tags: VX-250 (her copy, NOT terms; closes VX-240) · VX-240 · VX-241 (the planner's
   addition) · VX-247 (tag-delete undo) · VX-111 (the shared-note notice).
 - The honest disabled button: VX-194.
-- The book view: VX-291 (the ▸ target) · VX-21 (Book Panel grips) · VX-69 (order popover Escape).
+- The book view: VX-303 (the open doors drop her block, a bug against the deep-link rule — the planner's
+  addition) · VX-291 (the ▸ target) · VX-21 (Book Panel grips) · VX-69 (order popover Escape).
 - The reds: VX-77 · VX-115.
 - Last, with her: VX-216.
 
@@ -206,7 +207,9 @@ and the shared-constant pin in `StarredScrollTests` (Starred keeps its 7, her wo
    greying visible app-wide (fold the one-off gathering face back in).
 2. **VX-247, tag-delete undo:** one structural entry with an exact-row redo; the bigger restore road stays
    VX-238.
-3. **The book view's small fixes and reds:** VX-291, VX-21, VX-69, VX-77, VX-115, VX-111.
+3. **The book view's fixes and reds:** VX-303 (every open door carries her block; her one call: land in
+   Write), VX-291, VX-21, VX-69, VX-77, VX-115, VX-111. If she says yes to VX-300's minimum slice, it joins
+   here as its own unit.
 4. **LAST, author-attended — VX-216,** the clarity pass on the book and gathering menus and settings sheets.
    She can pull it out to run alone.
 
@@ -285,15 +288,20 @@ at a zero-instance window with no commits during it, then DMG first and appcast 
   shape Desktop's config reads. (a) Out for launch, (b) verify live (about an hour, with her OK to edit
   her Claude config) plus a docs paragraph, or (c) verify plus a Desktop setup tab (about half a day).
   Recommended: (b) at least.
-- **VX-300, editing from the book view without losing her place** (her report, 2026-10-13):
-  - "Open in editor" lands at the note's top.
-  - Index ↔ Outline and "view in outline" forget the position.
-  - Index offers no block tools and no takes.
-  
-  Canon already allows the core fix (R-18l-1: deep links keep their targets). The size and a minimum
-  slice come from a read-only trace that was still running when this was written; the result lands on
-  the ticket. Then she decides pre-launch: likely a minimum slice riding VX-284 (the book surfaces),
-  or its own run.
+- **VX-303 and VX-300, editing from the book view** (her report, 2026-10-13).
+  - **VX-303:** "Open in editor" lands at the note's top. Her words: *"it doesn't follow the existing
+    deep-link canon rule, it just doesn't work."* Five book doors pass only the note. Size S, no editor seam;
+    in VX-284 as the planner's addition. Her one call: land in Write at the block (the search-hit
+    precedent), or in the note's remembered mode.
+  - **VX-300, the rest.** Index ↔ Outline and "view in outline" forget the position; Index has no block
+    tools and no takes. Size L, about two sessions.
+    - **Minimum slice, a candidate for pre-launch** (one S–M Opus session, no editor seam): takes badges and
+      an in-place Takes sheet in Index; Takes and "open in Write here" in Index's box; Outline → Index
+      carries the block.
+    - **After launch** (Fable): landing at a block inside Outline, Index → Outline, Read at block level,
+      the full Index bar.
+    - **Her calls:** pre-launch for the slice; QUESTIONS #99(b) → option (ii); whether book editing
+      feeds the per-note memory; Read ▸ Scroll tracking (her A6 ruling removed it).
 
 **Pre-launch, yes or no** (none is labelled Pre-launch until she says so):
 - **VX-175, the Library controls row at the default 1240-pt window:** the search field squeezes and the info
@@ -307,12 +315,16 @@ at a zero-instance window with no commits during it, then DMG first and appcast 
 - **VX-295, multi-line code blocks:** phase-sized (two units: editor seam, a format change, both platforms),
   with eight design questions on the ticket. **After launch**, as she said for a big one, and designed after
   her markdown-mode question in **VX-293** (18e, held), which it depends on.
-- **VX-296, the italics flip:** she needs to say which one she saw. (a) Typing: emphasis doesn't nest (bold
-  inside italics drops the italics; `**` flickers through italic). (b) Clicking between blocks: the live block
-  shows dimmed markers and blocks at rest hide them, which is intended; 18e's fade is the designed fix.
-  Recommended after launch unless (a) bites her daily.
+- **VX-296, the italics flicker** (her answer: *"every time theres a space next to this symbol * it stops
+  being in italics, once it's a character it's in italics again"*). Verified: the parser's flanking rule
+  refuses a closing `*` with a space before it (`MarkdownSyntax.swift:549-579`). The rule exists to keep
+  `2 * 3 * 4` plain, but the opener half alone already does that.
+  - **Recommended fix:** caret-aware, live editor only. While her caret sits at that closer, it still
+    counts. The grammar and the read pages stay as they are.
+  - **Size:** S–M, Fable-reviewed. Would ride VX-282. **Recommended pre-launch:** she hits it whenever she
+    types in italics.
 - **The planner's additions, hers to veto:** VX-277 and VX-119 (into VX-246, same rule as VX-276); VX-241
-  (into VX-284, same sentence as VX-250).
+  (into VX-284, same sentence as VX-250); VX-303 (into VX-284 — her "it just doesn't work", size S).
 
 **Answered by the record** (no call needed):
 - VX-217, the gathering foot's New note: **done** (VX-214, in 0.9.5).
@@ -327,7 +339,6 @@ at a zero-instance window with no commits during it, then DMG first and appcast 
 
 - VX-297: Library Cards beachballs on a fast scroll. Heavy cards built in bulk and big page landings mid-fling
   are the likely causes. Diagnosis takes one session; relates to VX-17.
-- VX-296: the italics flip, unless her answer moves it up.
 - VX-295: multi-line code blocks, and VX-293 (18e, whether a markdown mode exists at all).
 - VX-238: restoring a deleted tag (design first).
 - VX-251: the 15-star limit.
