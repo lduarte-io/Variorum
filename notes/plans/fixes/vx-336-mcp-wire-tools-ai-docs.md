@@ -865,7 +865,10 @@ An app file moves ⇒ a Mac `build-for-testing` (into `App/Variorum/DerivedData/
 
 **THE SEAM (2026-10-14 ~15:05 MDT): this continuation STOPPED here, after piece 3, at ~500k context** (the brief's rule:
 past ~500k, stop at the next clean seam — committed, green, the continuation written). VX-252 is whole (pins red-first,
-red again by revert, green; the MCP target 256/55). **Pieces 4–8 go to a FRESH implementer**, who builds from THE
+red again by revert, green; the MCP target 256/55; at the seam the core and workbook targets ran too, `swift test
+--skip-build` on `0ca63296`'s sources: **`VariorumCoreTests` 2,863 / 331 · `StringsWorkbookTests` 40 / 6**, EXIT 0, zero ✘
+— U5a's 2,860/330 + `MCPMintedBlocksActsTests` 3/1; the counts include the standing gated skips — log
+`p3-seam-core.log`). **Pieces 4–8 go to a FRESH implementer**, who builds from THE
 CONTINUATION'S BUILD PLAN below (no design latitude left; every line pointer re-verified at `50fb1564`).
 
 ### THE CONTINUATION'S BUILD PLAN — pieces 4–8 (written at the seam; the rulings applied to code)
