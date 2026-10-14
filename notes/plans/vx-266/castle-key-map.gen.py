@@ -5,8 +5,8 @@
   python3 -I castle-key-map.gen.py target <out.html>   # ONLY the system the VX-266 plan builds — the acceptance artifact
   python3 -I castle-key-map.gen.py cycle  <out.html>   # the key cycle alone: into Castle and back, as a flow chart
 
-The binding text is notes/plans/vx-266-castle-backups-prelaunch.md (revised at her round-2 ruling, 2026-10-13):
-every word here follows its §3.
+The binding text is notes/plans/vx-266-castle-backups-prelaunch.md (revised at her round-3 rulings, 2026-10-14 —
+the anchor keeps the secrets of its day; the release switch): every word here follows its §1, §3 and §4.1.
 
 Every map shares one layout (You · This Mac · Apple · Variorum server). Chip text is HTML
 inside the SVG (foreignObject), so key names can be letters or icons (the toggle at the top).
@@ -277,14 +277,14 @@ TODAY = {
 def castle_target(synced):
     c = you(finger=True) + [
         chip("keychain", 0, 0, "{L} · Touch ID item", "or none: Always ask", "touch"),
-        chip("keychain", 2, 0, "This Mac's memory", "its facts' second home", "memory"),
+        chip("keychain", 2, 0, "This Mac's memory", "second home: facts, tree", "memory"),
         chip("folder", 0, 0, "Library file", "encrypted with {L}"),
         chip("folder", 1, 0, "{L} · locked with {P}", "the one key file", "L", lockby="P"),
         chip("folder", 2, 0, "{L} · locked with {W}", "the one key file", "L", lockby="W"),
         chip("folder", 1, 1, "History: every older key", "each locked with {L} · the anchor folded in", "L",
              lockby="L", span=2),
         chip("folder", 0, 2, "Record: Castle", "the library's own facts", "memory"),
-        chip("folder", 1, 2, "Family tree", "every key, its kind", "memory"),
+        chip("folder", 1, 2, "Family tree", "every key · two homes", "memory"),
         chip("folder", 2, 2, "This Mac's section", "its facts' first home", "memory"),
         chip("folder", 0, 3, "Plans for long acts", "sealed, named by the act", "memory"),
         chip("backups", 0, 0, "This Mac's backups", "key file + history"),
@@ -310,25 +310,25 @@ def castle_target(synced):
 def std_target(synced):
     c = you(p="in your head, if set", w="on paper, if made") + [
         chip("keychain", 0, 0, "{L} · silent item", "opens without asking", "L", reach=L_),
-        chip("keychain", 2, 0, "This Mac's memory", "its facts' second home", "memory"),
+        chip("keychain", 2, 0, "This Mac's memory", "second home: facts, tree", "memory"),
         chip("folder", 0, 0, "Library file", "encrypted with {L}", reach=L_),
         chip("folder", 1, 0, "{L} · locked with {A}", "this Mac's own {A}", "L", lockby="A", reach=LA),
         chip("folder", 2, 0, "{L} · locked with {P}", "if set", "L", lockby="P"),
         chip("folder", 0, 1, "{L} · locked with {W}", "if made", "L", lockby="W"),
         chip("folder", 1, 1, "History: older keys", "each locked with {L}", "L", lockby="L", reach=LA,
              span=1 if synced else 2),
-        chip("folder", 0, 2, "Castle anchor", "after a leave · {P} or {W}", "P", lockby="P",
+        chip("folder", 0, 2, "Castle anchor", "the leave day's {P} or {W}", "P", lockby="P",
              span=1 if synced else 2),
         chip("folder", 0, 3, "Record: Standard", "the library's own facts", "memory"),
-        chip("folder", 1, 3, "Family tree", "every key, its kind", "memory"),
+        chip("folder", 1, 3, "Family tree", "every key · two homes", "memory"),
         chip("folder", 2, 3, "This Mac's section", "its facts' first home", "memory"),
         chip("backups", 0, 0, "Since Standard", "key file + history", reach=L_),
-        chip("backups", 1, 0, "Before a leave", "{P} or {W}, the anchor"),
+        chip("backups", 1, 0, "Before a leave", "that day's {P} or {W}"),
         chip("backups", 2, 0, "Other libraries'", "own key file + {A}", reach=L_),
         chip("ikc", 0, 0, "{A} · this Mac's own", "locks its key file", "A", reach=LA),
         chip("ikc", 0, 2 if synced else 1, "{A} · other libraries'", "this Mac's own, each", "A", reach=LA),
         chip("idrive", 0, 0, "Since Standard", "backups, if picked", reach=LA),
-        chip("idrive", 0, 1, "Before a leave", "backups · {P} or {W}"),
+        chip("idrive", 0, 1, "Before a leave", "backups · that day's {P}, {W}"),
         chip("idrive", 0, 2, "Markdown exports", "plain text, if on", "plain", reach=LA),
     ]
     if not synced:
@@ -356,6 +356,14 @@ SENT = ("Sent to another Mac",
         "it lands there under a fresh key with an empty history — nothing is shared. Your passphrase alone, or your "
         "words alone, unlocks the pair, and the landing asks for the other one, typed or made new. Either Mac "
         "entering or leaving Castle later changes nothing on the other.")
+SENT_SYNCED = (SENT[0], SENT[1] + " A synced pair lands held, as today: a secret made new at its landing becomes the "
+               "account's at Resume Sync, through the account's own forgot road with the secret just typed, and the "
+               "landing says so.")
+LOST_APPLE = ("If this Mac's own Apple key is lost",
+              "an iCloud Keychain reset, or a change of Apple ID: no repair mints a new one. The assessment says the "
+              "Apple road is lost and offers Re-link's library arm, which mints a fresh own key for this Mac and "
+              "re-locks the key file under it — and every other Standard key file here that needs one, other "
+              "libraries' included — re-keying nothing. Local-only libraries get it too.")
 
 
 def _target_maps():
@@ -364,7 +372,7 @@ def _target_maps():
             title="Castle — this Mac only", inactive=("server",), layout=True, chips=castle_target(False),
             notes=[note("vault", 0, "not used — no sync")],
             roads=[("On this Mac", "Touch ID — or your passphrase every time, with Always ask (then no Touch ID item exists)."),
-                   ("Older copies", "today's key opens the history, which took everything when the library entered Castle — a Castle anchor from an earlier leave folded back in — so every older backup opens with nothing more typed."),
+                   ("Older copies", "today's key opens the history, which took everything when the library entered Castle — a Castle anchor from an earlier leave folded back in — so every older backup opens with nothing more typed. An anchor the typed secrets couldn't open (they had changed since that leave) was kept beside the history, unchanged: its copies open with the secrets of its day."),
                    ("On a new Mac", "your passphrase or words; the newest backup's history opens every older one."),
                    SENT,
                    ("Lose the passphrase, the words and every Touch ID item", "the library and every copy are gone — said at the door, with Export a plain copy offered first."),
@@ -373,10 +381,11 @@ def _target_maps():
             title="Castle — synced", layout=True, chips=castle_target(True),
             roads=[("On this Mac", "Touch ID, or the passphrase."),
                    ("A new device", "sign in, then your passphrase or words once."),
-                   ("Another device follows", "it types your passphrase or your words once, re-keys its own library into a new Castle key whose history takes every older key, deletes its own Apple key, records it and the account's as retired, and turns its scheduled Markdown export off."),
+                   ("Another device follows", "it types your passphrase or your words once, for the new master, and re-keys its own library into a new Castle key whose history takes every older key — and its anchor, when the secret it typed opens it; if not, the anchor is kept beside the history, unchanged. Its new key file is locked with the secret it typed and the new master, with the master's words copy beside it — so the words open it either way, and the passphrase directly when it was the one typed. It deletes its own Apple key, records it and the account's as retired, and turns its scheduled Markdown export off."),
                    ("The server", "locked keys and encrypted writing only; no Apple copy anywhere."),
                    ("A device that joined without typing anything", "its key file also holds the master locked with your twelve words, so the words open it even after the master changes."),
-                   ("Leaving the account", "the library re-keys, both secrets typed. The account you left opens only the copies from while it synced, never what you write after — and through the Apple account only if that account returns to Standard."),
+                   SENT_SYNCED,
+                   ("Leaving the account", "the library re-keys, both secrets typed — the passphrase typed, the words typed or made new. The new key's history takes the old one, so your copies keep opening for you, and any anchor rides along unchanged. The account you left opens only the copies from while it synced in Standard — until it replaces its keys or enters Castle — never what you write after."),
                    OLDER_CASTLE]),
         "t-std-local": dict(
             title="Standard — this Mac only", inactive=("server",), layout=True, chips=std_target(False),
@@ -384,16 +393,19 @@ def _target_maps():
             roads=[("On this Mac", "the silent item — nothing asked."),
                    ("On a new Mac", "this Mac's own Apple key for the library arrives through iCloud Keychain (when it's on — Variorum can't see it) and opens the newest backup's key file — or your passphrase or words."),
                    ("What it means", "your Apple account, and anyone who can sign in to this Mac, open the library and every copy Variorum made of it since it came into Standard."),
-                   ("After leaving Castle", "that means the library itself — with everything written in it, in Castle too — and every copy made after the leave. No copy made before the leave opens through them: those open with your passphrase or your words, through the Castle anchor. A Castle-era copy you open into the library is known by its family tree, takes Standard, and the confirm says its writing will then open through the Apple account."),
-                   ("Your passphrase and words", "changing the passphrase, or making new words, re-locks the anchor under the new one. Setting a new passphrase because you forgot it asks for your words once when there's an anchor; declined, the words alone keep opening it."),
+                   ("After leaving Castle", "that means the library itself — with everything written in it, in Castle too — and every copy made after the leave. No copy made before the leave opens through them: those open with the passphrase or the twelve words you had on the day you left, through the Castle anchor. Leaving never makes new words, so that day's paper keeps working. A Castle-era copy you open into the library is known by its family tree, takes Standard, and the confirm says its writing will then open through the Apple account."),
+                   ("Your passphrase and words", "changing the passphrase, or making new words, re-locks the current key and nothing else. The Castle anchor keeps the secrets of the day you left: it was locked once, at the leave, is never re-locked, and every later re-key carries it unchanged. While there's an anchor, the new-words door says so: “Copies from before 12 October still open with the words you're replacing — keep that paper.”"),
                    ("Other libraries' copies here", "an older library, or backups, of a library whose newest copy is in Standard: this Mac's own key file for it, beside its copies, under an Apple key of its own — it opens through the Apple account as before. Deleting a library's last copy deletes its key file and its Apple key."),
-                   ("Sent to another Mac", "it lands there under a fresh key with an empty history — nothing is shared. If that Mac can read the Apple key that opens the pair, it lands with nothing typed, under an Apple key of that Mac's own; otherwise one secret unlocks it and the other is typed or made new.")]),
+                   ("Sent to another Mac", "it lands there under a fresh key with an empty history — nothing is shared. If that Mac can read the Apple key that opens the pair, it lands with nothing typed, under an Apple key of that Mac's own, and the passphrase and words are offered as Standard offers them — declined, the confirm says the landed library opens through that Mac and its Apple account only. Otherwise one secret unlocks it and the other is typed or made new."),
+                   LOST_APPLE]),
         "t-std-sync": dict(
             title="Standard — synced", layout=True, chips=std_target(True),
             roads=[("On this Mac", "the silent item — nothing asked."),
                    ("A new device", "sign in to iCloud and Variorum: the account's Apple key opens the vault's master, nothing typed (when iCloud Keychain carried it). The device then locks its own key file under an Apple key of its own."),
                    ("What it means", "the same as this-Mac-only, for every device of the account. The account's Apple key locks only the master in the vault; each device's key file is under that device's own."),
-                   ("Leaving the account", "the library re-keys: a new key with its silent item and a fresh Apple key of this Mac's own; the passphrase typed or set new, the words typed or made new. The account you left opens only the copies from while it synced, never what you write after. The account's Apple key is left to its other devices."),
+                   ("Leaving the account", "the library re-keys: a new key with its silent item and a fresh Apple key of this Mac's own; the passphrase typed or set new, the words typed or made new. The new key's history takes the old one, and any anchor rides along unchanged. The account you left opens only the copies from while it synced in Standard — until it replaces its keys or enters Castle — never what you write after. The account's Apple key is left to its other devices."),
+                   ("Sent to another Mac", "as this-Mac-only — and a synced pair lands held, as today: a secret made new at its landing becomes the account's at Resume Sync, through the account's own forgot road with the secret just typed, and the landing says so."),
+                   (LOST_APPLE[0], LOST_APPLE[1] + " The account's own Apple key, when no device can read it, is Re-link's: a fresh account key, landed under the vault's compare-and-set."),
                    ("Accounts from before this change", "their vault stays on the old shared Apple key until they enter Castle or are re-linked; nothing is written under it, and each device locks its own key file under a key of its own.")]),
     }
 
@@ -405,7 +417,7 @@ def _new_full_maps():
     return {
         "castle-new": dict(
             title="Castle — the new design (synced parts marked)", layout=True, chips=castle_target(True),
-            roads=[("On this Mac", "Touch ID (or the passphrase) opens the library — and, through the history, every older copy, nothing typed. Entering Castle took everything: the old key, its history, and a Castle anchor from an earlier leave, folded back in."),
+            roads=[("On this Mac", "Touch ID (or the passphrase) opens the library — and, through the history, every older copy, nothing typed. Entering Castle took everything: the old key, its history, and a Castle anchor from an earlier leave, folded back in (or kept beside the history, unchanged, when the typed secrets couldn't open it)."),
                    ("On a new Mac", "your passphrase or words; the newest backup's history opens every older one."),
                    ("Sent to another Mac", "it lands there under a fresh key of its own; nothing is shared."),
                    ("Lose the passphrase, the words and every Touch ID item", "the library and its older copies are gone — said at the door; export a plain copy first if you want one.")]),
@@ -414,7 +426,8 @@ def _new_full_maps():
             roads=[("On this Mac", "the silent item — nothing asked."),
                    ("On a new Mac", "your Apple account brings it back, nothing typed: this Mac's own Apple key opens its key file, and, synced, the account's opens the vault's master — when iCloud Keychain carried them."),
                    ("What it means", "your Apple account — and anyone with this Mac's login password — can open the library and every copy Variorum made of it since it came into Standard. Out of Castle means not safe, said plainly."),
-                   ("After leaving Castle", "the library itself opens to them, with everything written in it, in Castle too, and every copy made after the leave. No copy made before the leave does: those open with your passphrase or your words, through the Castle anchor.")]),
+                   ("After leaving Castle", "the library itself opens to them, with everything written in it, in Castle too, and every copy made after the leave. No copy made before the leave does: those open with the passphrase or the twelve words you had on the day you left, through the Castle anchor — leaving never makes new words, so that day's paper keeps working."),
+                   LOST_APPLE]),
     }
 
 
@@ -437,7 +450,7 @@ def _harrow(ax, bx, y):
 
 def history_svg():
     """The history and the Castle anchor: a library that was Standard, entered Castle, replaced its keys there, and left."""
-    w, h = 1000, 300
+    w, h = 1000, 318
     out = [f'<svg class="map" viewBox="0 0 {w} {h}" role="img" aria-label="the key history and the Castle anchor">',
            '<text class="rowt" x="40" y="24">In Castle — and within any one mode — each newer key holds every older one, '
            'locked.</text>',
@@ -455,8 +468,8 @@ def history_svg():
                'before the leave is sealed in the Castle anchor.</text>')
     out.append(_hchip(40, 154, 160, "{L4}", "Standard · empty history", "L", reach="login apple you"))
     out.append('<rect class="anchorbox" x="226" y="134" width="744" height="84" rx="10"/>'
-               '<text class="anchort" x="240" y="150">The Castle anchor — its key locked with your passphrase and your '
-               'words, never with anything Apple-reachable</text>')
+               '<text class="anchort" x="240" y="150">The Castle anchor — locked once, with the leave day’s passphrase '
+               'and words, never anything Apple-reachable</text>')
     ix, igap, icw = 240, 50, 138
     for i, (k, kind) in enumerate([("{L3}", "touch"), ("{L2}", "touch"), ("{L1}", "L"), ("{L0}", "L")]):
         x = ix + i * (icw + igap)
@@ -465,9 +478,10 @@ def history_svg():
             out.append(_harrow(x + icw + 6, x + icw + igap - 4, 182))
     for n, line in enumerate([
             "A key opens older keys, never newer ones: an old key opens nothing written after it. Entering Castle, the new key’s history takes everything —",
-            "the old key, its history and the anchor, opened with the passphrase and words typed at the door. Within a mode, the history grows. Leaving",
-            "Castle, or a different library landing on a Mac, takes nothing: what came before keeps its own locks. The family tree, a list with no secrets,",
-            "still names every key the library has had, so your own older copies are always known as yours."]):
+            "the old key, its history and the anchor, opened with the secrets typed at the door (or the one typed at a follow); an anchor they can’t open is",
+            "kept beside it, unchanged. Within a mode, the history grows and the anchor rides along unchanged. Leaving Castle, or a different library landing,",
+            "takes nothing: what came before keeps its own locks. The anchor is locked once, at the leave, and never re-locked — it keeps the secrets of its day.",
+            "The family tree — no secrets, two homes — still names every key the library has had, so your own older copies are always known as yours."]):
         out.append(f'<text class="nt" x="40" y="{244 + 16 * n}">{E(line)}</text>')
     out.append("</svg>")
     return "".join(out)
@@ -506,7 +520,7 @@ def switch_chips(s):
     elif not fin:
         c += [chip("keychain", 0, 0, "{L} · silent item", "deleted", "L", state="dead" + j(OLDGO)),
               chip("keychain", 1, 0, "{M}+{C} · silent item", "deleted", "M", state="dead" + j(OLDGO))]
-    c.append(chip("keychain", 2, 0, "This Mac's memory", "its facts' second home", "memory",
+    c.append(chip("keychain", 2, 0, "This Mac's memory", "second home: facts, tree", "memory",
                   state=j(OLDGO, EXPORT, OWNA).strip()))
     row = 0 if fin else 1
     if s >= ROTATE:
@@ -526,7 +540,7 @@ def switch_chips(s):
                    reach=LA if s < ROTATE else L_),
               chip("folder", 2, 1, "{M} · locked with {W}", "copied from the vault", "M", lockby="W"),
               chip("folder", 0, 2, "History: older keys", "each locked with {L}", "L", lockby="L", reach=LA),
-              chip("folder", 1, 2, "Castle anchor", "an earlier leave · {P}, {W}", "P", lockby="P")]
+              chip("folder", 1, 2, "Castle anchor", "that leave's {P}, {W}", "P", lockby="P")]
     else:
         if not fin:
             c += [chip("folder", 1, 0, "{L} · locked with {A}", "left the key file", "L", lockby="A",
@@ -623,9 +637,11 @@ SWITCH_CAPS = [
          locks=["{L} locked with this Mac's {A}, {P}, {W} and {M} — in the key file, and in every backup's since "
                 "Standard",
                 "{M} locked with {P}, {W} and the account's {A} in the vault; {C} locked with {M}",
-                "the Castle anchor: everything from before the earlier leave, under {P} and {W} only"]),
+                "the Castle anchor: everything from before the earlier leave, under the {P} and {W} of that leave's day "
+                "only — locked once, never re-locked"]),
     dict(t="You press Use Castle",
-         d="You type your passphrase and your twelve words: they'll lock the new keys, and they open the anchor. The "
+         d="You type your passphrase and your twelve words: they'll lock the new keys, and they open the anchor (one "
+           "they can't open — they changed since that leave — is kept beside the history, unchanged). The "
            "screen says plainly: lose them and every Touch ID item, and this library and its older copies are gone — "
            "Export a plain copy first is offered. On a store from before this change, the old shared key's checks run "
            "here, at the door: a vault still on that key stops Use Castle before anything starts, and the sheet lists "
@@ -666,7 +682,7 @@ SWITCH_CAPS = [
     dict(t="The swap — the commit point",
          d="The record, now saying Castle, its family tree naming {L′} as a Castle key, is written into the staged "
            "copy; then the library file is swapped to {L′}. From this moment the library is in Castle. Copies resume, "
-           "each carrying a key and a record that match, and none carrying an act in flight.",
+           "each carrying a key and a record that match; any copy's act in flight is cleared whenever it's opened.",
          who=("everything", (Y, "copies since Standard only — the silent item's {L} opens them, but not the library"),
               (Y, "copies since Standard only, through their Apple locks")),
          locks=["the library file: now encrypted with {L′}", "the record: Castle; the family tree names {L′}"]),
@@ -719,8 +735,8 @@ SWITCH_CAPS = [
          d="Only you. Touch ID, your passphrase or your words open {L′}, and through its history every older backup. "
            "Lose all three and it's gone — said at the door, with a plain copy offered first. Leaving Castle later is "
            "another key change: the new key starts with an empty history, everything from before the leave goes into "
-           "a Castle anchor that only your passphrase and your words open, and your Apple account opens the library "
-           "itself — with everything in it — and the copies made after the leave, never a copy from before it.",
+           "a Castle anchor that only the passphrase and words of that day open, and your Apple account opens the "
+           "library itself — with everything in it — and the copies made after the leave, never a copy from before it.",
          who=("everything — Touch ID, your passphrase or your words", (N, "nothing"), (N, "nothing")),
          locks=["{L′} locked with {P}, {W} and {M′}; the history locked with {L′}",
                 "{M′} locked with {P} and {W}; {C′} locked with {M′}",
@@ -821,7 +837,9 @@ def _pills(items, dead=False):
     return "".join(out)
 
 
-ANCHOR = ("the Castle anchor · {P} or {W} only", "P")
+ANCHOR = ("the Castle anchor · the leave day's {P} or {W}", "P")
+OLDER_LEAVE = ("An older build's leave (promise 13's one exception) puts the Castle-era master under the old shared Apple "
+               "key with no change of keys; this build never adds to it.")
 
 CYCLE_IN = dict(
     head="Into Castle — a synced library, from Standard",
@@ -864,7 +882,8 @@ CYCLE_IN = dict(
         dict(t="The new key file — everything comes along",
              d="One key file, rewritten around the new key. Its history takes everything: the old key, its history, and "
                "the Castle anchor if there is one, opened with the passphrase and words you typed and folded back in. "
-               "So every old backup keeps opening for you. No Apple lock.",
+               "So every old backup keeps opening for you. No Apple lock. (An anchor they can't open — they changed "
+               "since the leave — is kept beside the history, unchanged, and keeps opening with the secrets of its day.)",
              new=["{L′} · locked with {P}", "{L′} · locked with {W}", "{L′} · locked with {M′}",
                   "{L}, its history and the anchor's keys · locked with {L′}", "{M′} · locked with {W}"],
              gone=["{L} · locked with this Mac's {A}, {P}, {W}, {M} — from the key file (every backup still has them)",
@@ -932,29 +951,38 @@ CYCLE_OUT = dict(
              d="You type your passphrase and your twelve words — never new words here, so the paper you have keeps "
                "opening what stays behind. You're told plainly: the library itself, with everything you wrote in it "
                "in Castle, opens through your Apple account from now on, and so does every copy made after you leave. "
-               "No copy made before you leave does: those keep Castle's locks, your passphrase or your words.",
+               "No copy made before you left opens through it — those open with the passphrase or the twelve words you "
+               "had on the day you left. Leaving never makes new words, so that day's paper keeps working.",
              who=((N, "nothing"), (N, "nothing"))),
         dict(t="The Castle anchor, first",
-             d="Before anything else is written, the outgoing Castle key and its whole history are sealed under one "
-               "fresh anchor key, locked with the passphrase and the words you just typed — never with anything "
-               "Apple-reachable. It lives in the key file.",
+             d="Before anything else is written, the outgoing Castle key and its whole history — and any earlier anchor "
+               "kept beside it — are sealed under one fresh anchor key, locked with the passphrase and the words you just "
+               "typed — never with anything Apple-reachable. It lives in the key file. It's locked once, here, and never "
+               "re-locked: it keeps the secrets of this day, and every later re-key carries it unchanged.",
              new=[("the Castle anchor · {L′} and its whole history", "P"), ("the anchor key · locked with {P}", "P"),
                   ("the anchor key · locked with {W}", "W")],
              who=((N, "nothing"), (N, "nothing"))),
         dict(t="New sync keys",
-             d="The rotation, as Use Castle's: a new master and sync key, in a silent item; your writing on the server "
-               "re-encrypted; the vault rewritten with the new master under your passphrase and your words.",
+             d="The rotation, as Use Castle's: a new master and sync key; your writing on the server re-encrypted; the "
+               "vault rewritten with the new master under your passphrase and your words. Until the rotation completes, "
+               "the new sync keys and the previous corpus key stay in Castle-kind custody — a Touch ID item, or session "
+               "memory under Always ask — so no Castle-era key is ever within the login password's reach.",
              new=["{M″} · locked with {P}", "{M″} · locked with {W}", "{C″} · locked with {M″}",
-                  "{M″}+{C″} · silent item", "the synced copy · under {C″}"],
-             gone=["{M′} · locked with {P}", "{M′} · locked with {W}", "{C′} · locked with {M′}",
-                   "{M′}+{C′} · Touch ID item"],
-             who=((Y, "the server's copy, through the new sync keys' silent item"), (N, "nothing yet"))),
-        dict(t="The account's fresh Apple key",
-             d="Only once the rotation completes — its window for the Castle-era sync key closed — a fresh account "
-               "Apple key is made, and the new master locked with it joins the vault. So no Castle-era sync key ever "
-               "sits under anything Apple-reachable.",
-             new=["{A} · a fresh account Apple key", "{M″} · locked with the account's {A}"],
-             who=((Y, "the server's copy"), (Y, "the server's copy"))),
+                  ("{M″}+{C″}, with the previous {C′} · Castle-kind custody", "touch"), "the synced copy · under {C″}"],
+             gone=["{M′} · locked with {P}", "{M′} · locked with {W}", "{C′} · locked with {M′}"],
+             who=((N, "nothing new — the new sync keys and the previous corpus key are out of its reach"),
+                  (N, "nothing new — the vault has no Apple copy yet"))),
+        dict(t="One write completes the rotation, with the account's fresh Apple key",
+             d="One write completes the rotation and adds the account's fresh Apple key to the vault — its window for "
+               "the previous corpus key closed — so no Castle-era corpus key ever sits under anything Apple-reachable. "
+               "Then the new sync keys move to a silent item, and the old ones' Touch ID item goes. If this device never "
+               "finishes, another device of the account finishes it at a press, minting the account's key if this "
+               "one's never arrived (the vault's compare-and-set keeps one).",
+             new=["{A} · a fresh account Apple key", "{M″} · locked with the account's {A}", "{M″}+{C″} · silent item"],
+             gone=["{M′}+{C′} · Touch ID item", ("the Castle-kind custody of {M″}+{C″} and {C′}", "touch"),
+                   ("the previous {C′} · its window closed", "C")],
+             who=((Y, "the server's copy, through the new sync keys' silent item"),
+                  (Y, "the server's copy, through the account's fresh Apple key"))),
         dict(t="A new library key, born Standard — with an empty history",
              d="It goes into a silent item, with a fresh Apple key of this Mac's own. The rewritten key file locks it "
                "with that Apple key, your passphrase, your words and the new master — and takes nothing back: its "
@@ -963,7 +991,8 @@ CYCLE_OUT = dict(
                   "{L″} · locked with {P}", "{L″} · locked with {W}", "{L″} · locked with {M″}",
                   "{M″} · locked with {W}", ("an empty history", "L")],
              gone=["{L′} · locked with {P}, {W}, {M′} — from the key file", "{M′} · locked with {W}"],
-             stays=[("{L′} and every key from before the leave — in the anchor, which only {P} and {W} open", "P")],
+             stays=[("{L′} and every key from before the leave — in the anchor, which only the leave day's {P} and {W} "
+                     "open", "P")],
              who=((Y, "the server's copy"), (Y, "the server's copy"))),
         dict(t="The swap",
              d="The record, now saying Standard — its family tree naming the new key as a Standard key — goes into the "
@@ -982,12 +1011,18 @@ CYCLE_OUT = dict(
              who=((Y, "the library and every copy from now on — none from before the leave"),
                   (Y, "the library and every copy from now on — none from before the leave"))),
         dict(t="Your other devices follow",
-             d="Each types your passphrase or your words once, through the vault — no follow waits on an Apple key. "
-               "It writes its own anchor first, under the secret it typed and under the Castle-era master, with that "
-               "master's words copy beside it; then a new Standard key with an empty history, its silent item and a "
-               "fresh Apple key of its own. Its Castle key's Touch ID item goes. Until then it opens on its Castle "
-               "key and you can write; sync waits, with the banner.",
-             new=[("each device's anchor · under the typed secret and {M′}", "P"), "{A} · each device's own, fresh"],
+             d="Each types your passphrase or your words once, through the vault, for the new master — no follow waits "
+               "on an Apple key, and one that sees the rotation still in progress holds its own library's re-key until "
+               "the write that completes it. It writes its own anchor first, needing no secret for it: under its "
+               "outgoing Castle key itself — in hand, since the library is open — with that key's own locks from its key "
+               "file copied beside it (the passphrase or words it held the key under, and the Castle-era master with its "
+               "words copy), so it opens with exactly what opened that device that day. If the vault's master is still "
+               "the Castle-era one — an older build left without changing it, and put it under the old shared Apple "
+               "key — the master's road is left out. Then a new Standard key with an empty history, its silent item and "
+               "a fresh Apple key of its own. Its Castle key's Touch ID item goes. Until then it opens on its Castle key "
+               "and you can write; sync waits, with the banner.",
+             new=[("each device's anchor · under its outgoing Castle key, with that key's own locks", "P"),
+                  "{A} · each device's own, fresh"],
              gone=["their Castle keys' Touch ID items"],
              who=((Y, "the same, on every device that has followed"), (Y, "the same, on every device that has followed"))),
     ],
@@ -1038,15 +1073,17 @@ def _flow(c, start_title):
     return "".join(out)
 
 
-def cycle_section():
+def cycle_section(older_line=False):
     return ('<p class="lede">The whole cycle as a flow: what you have, what each step does, what’s new, what goes away, '
             'and who else can open your library after it. Both crossings make a fresh key, born Castle or Standard for '
             'life. Into Castle, everything older comes along; out of Castle, nothing does — what came before goes into '
-            'the Castle anchor, which only your passphrase and your words open. Each pill wears the colour of its key; '
-            'a struck pill is gone or opens nothing any more.</p>'
+            'the Castle anchor, which only the passphrase and words you had that day open: it keeps the secrets of its '
+            'day, and every later re-key carries it unchanged. Each pill wears the colour of its key; a struck pill is '
+            'gone or opens nothing any more.</p>'
             f'<h4 class="cyh">{E(CYCLE_IN["head"])}</h4>{_flow(CYCLE_IN, "You start with")}'
             f'<h4 class="cyh">{E(CYCLE_OUT["head"])}</h4><p class="lede">You start where the flow above ended.</p>'
-            f'{_flow(CYCLE_OUT, "")}')
+            f'{_flow(CYCLE_OUT, "")}'
+            + (f'<p class="lede">{E(OLDER_LEAVE)}</p>' if older_line else ''))
 
 
 CYCLE_CSS = r"""
@@ -1086,7 +1123,7 @@ came before. Out of Castle and onto another Mac, the new key starts clean: what 
 <h2 id="cast">The cast</h2>
 {legend()}
 <h2 id="cycle">The cycle, step by step</h2>
-{cycle_section()}
+{cycle_section(older_line=True)}
 <h2 id="watch">The same, on the map</h2>
 {controls()}
 {anim_section()}
@@ -1222,20 +1259,20 @@ def controls():
 def legend():
     items = [
         ("{L} — the library key", "Opens your library file. A fresh one whenever the library crosses a line — into or out of Castle, out of an account, onto another Mac — or you replace your keys. Born Castle or Standard, it keeps that kind for life.", "L"),
-        ("{P} — your passphrase", "In your head. Opens a locked copy of the library key (and, synced, of the master), and the Castle anchor.", "P"),
-        ("{W} — your twelve words", "On paper. The same power as the passphrase — your way back if you forget it.", "W"),
-        ("{A} — an Apple key", "Lives in iCloud Keychain, named by its own id; anyone in your Apple account holds it. One per library per Mac — this Mac's own, locking its Standard key file — and one per sync account, locking only the account's master in the vault.", "A"),
+        ("{P} — your passphrase", "In your head. Opens a locked copy of the library key (and, synced, of the master) — and, as it was on the day you left Castle, the Castle anchor.", "P"),
+        ("{W} — your twelve words", "On paper. The same power as the passphrase — your way back if you forget it. Leaving Castle never makes new words, so that day's paper keeps opening the anchor.", "W"),
+        ("{A} — an Apple key", "Lives in iCloud Keychain, named by its own id; anyone in your Apple account holds it. One per library per Mac — this Mac's own, locking its Standard key file (a replacement Mac takes over its predecessor's) — and one per sync account, locking only the account's master in the vault.", "A"),
         ("{M} — the master key", "One per sync account. Opens the sync key and proves to the server that it's you.", "M"),
         ("{C} — the sync key", "Encrypts everything sent to the server. The server never holds it unlocked.", "C"),
         ("{touch} — a Touch ID item", "This Mac's copy of a Castle key, released only to your finger — never to the login password. A Castle key only ever has this, or nothing under Always ask.", "touch"),
         ("Silent item", "This Mac's copy of a Standard key, opened without asking. Keychain Access reveals it with the login password. A Standard key only ever has this, and an Apple lock.", "L"),
         ("Locked copy (a padlock)", "A key locked with another key. Whoever holds the second key gets the first. A key file is a set of these.", "file"),
-        ("The history", "In the key file: older keys, each locked with the current key. Into Castle it takes everything; within a mode it grows; out of Castle, and for a library landing from another Mac, it starts empty.", "L"),
-        ("The Castle anchor", "Written first at every leave from Castle: the outgoing Castle key with its whole history, locked under one anchor key that only your passphrase and your words open. It rides in the key file and every later backup, and folds back in when you enter Castle again.", "P"),
+        ("The history", "In the key file: older keys, each locked with the current key. Into Castle it takes everything; within a mode it grows, the anchor riding along unchanged; out of Castle, and for a library landing from another Mac, it starts empty.", "L"),
+        ("The Castle anchor", "Written first at every leave from Castle: the outgoing Castle key with its whole history (and any earlier anchor kept beside it), under one anchor key locked once with what opened that Mac's library the day it left — never anything Apple-reachable. It keeps the secrets of its day: never re-locked, carried unchanged by every later re-key and backup. It folds back in when you enter Castle again.", "P"),
         ("The protection record", "A table inside the library file. The library's own facts, which every copy carries: its mode (the current key's kind), its account, and the family tree. And one section per Mac with that Mac's own facts.", "memory"),
-        ("The family tree", "In the record, with no secrets: every key the library has had — its kind, which Mac made it, when it was made and retired. It decides whether a copy is this library's own.", "memory"),
-        ("This Mac's facts", "The gate style, the idle lock, the scheduled export, the retired Apple key ids, the act in flight and the device identity. Two sealed homes — this Mac's section of the record and this Mac's memory — and the newer wins. Copies never carry them.", "memory"),
-        ("This Mac's memory", "A Keychain item per library, no secret, sealed: which key is current, the mode and account last confirmed, and the second home of this Mac's facts. Before unlock it's only a hint and decides nothing.", "memory"),
+        ("The family tree", "With no secrets: every key the library has had — its kind, which Mac made it, when it was made and retired. Two homes, unioned at open: the record, and a sealed mirror in this Mac's memory. Seeded at the migration with every fingerprint the catalog's key files name. It decides whether a copy is this library's own, so a rolled-back library file can't make its own copies look foreign.", "memory"),
+        ("This Mac's facts", "The device identity and its hardware marker, the gate style, the idle lock, the scheduled export, the Apple key ids this Mac minted or followed and which are retired, and the act in flight. Two sealed homes — this Mac's section of the record and this Mac's memory: the newer wins, and the retired ids are the union. A Mac whose memory item is gone finds its own section by its hardware. Copies never carry them.", "memory"),
+        ("This Mac's memory", "A Keychain item per library, no secret, sealed: which key is current, the mode and account last confirmed, the device identity with its hardware marker (on other hardware a new identity is minted), a mirror of the key file and of the family tree, and the second home of this Mac's facts. Deleting it changes nothing on its own: the Mac finds its own section by its hardware. Before unlock it's only a hint and decides nothing.", "memory"),
     ]
     return '<div class="legend">' + "".join(
         f'<div class="card k-{k}" style="--c:var(--k-{k})"><b>{rich(t)}</b><span class="d">{E(d)}</span></div>'
@@ -1259,55 +1296,55 @@ def steps(items):
 
 
 ENTER = [
-    "You type your passphrase and twelve words (set now if you have none). The screen says plainly: lose them and every Touch ID item, and this library and its older copies are gone — <b>Export a plain copy first</b> is offered. While the store still has the old shared Apple key, its checks run here, at the door: a vault that still names it — one this device can read, or the library's former account — stops Use Castle before anything starts, unless it's the account this very act moves into Castle, and the door names the way through. The sheet shows what the rest found (below).",
+    "You type your passphrase and twelve words (set now if you have none). The screen says plainly: lose them and every Touch ID item, and this library and its older copies are gone — <b>Export a plain copy first</b> is offered. While the store still has the old shared Apple key, its checks run here, at the door: a vault that still names it — one this device can read, or, while signed out, the account the record still names — stops Use Castle before anything starts, unless it's the account this very act moves into Castle, and the door names the way through. The sheet shows what the rest found (below).",
     f"Synced only: a new master {pill('{M′}', 'M')} and sync key {pill('{C′}', 'C')} go into a {pill('{touch} item', 'touch')} made at this press (session memory, under Always ask); your writing on the server is re-encrypted with {pill('{C′}', 'C')}; the vault is rewritten with {pill('{M′}', 'M')} under your passphrase and your words, and no Apple copy. The account's {pill('{A} Apple key', 'A', True)} goes with this rotation.",
     f"A new library key {pill('{L′}', 'L')} — born Castle, and a Castle key for life — goes into its own {pill('{touch} item', 'touch')}, made at this press (or nowhere, with Always ask). Copies pause from here to the swap.",
-    f"The new key file is written: {pill('{L′} · locked with {P}', 'P')} {pill('{L′} · locked with {W}', 'W')} (and, synced, {pill('{L′} · locked with {M′}', 'M')} with the master's words copy). <b>Its history takes everything</b> — the old key, its history, and the Castle anchor if you left Castle before, opened with the passphrase and words you typed and folded back in. (An anchor those can't open is kept, listed in Diagnostics, and never fails the entry.) No Apple lock. Now any crash still leaves a road in.",
-    f"The record — saying Castle, its family tree naming {pill('{L′}', 'L')} as a Castle key — is written into the staged copy; then the library file is swapped to {pill('{L′}', 'L')}: the commit point. Copies resume, each carrying a matching key and record, and none an act in flight. Then this Mac's memory follows.",
+    f"The new key file is written: {pill('{L′} · locked with {P}', 'P')} {pill('{L′} · locked with {W}', 'W')} (and, synced, {pill('{L′} · locked with {M′}', 'M')} with the master's words copy). <b>Its history takes everything</b> — the old key, its history, and the Castle anchor if you left Castle before, opened with the passphrase and words you typed and folded back in. (An anchor those can't open — they changed since the leave — is kept beside the history, unchanged, listed in Diagnostics, and never fails the entry; it keeps opening with the secrets of its day, and a later leave seals it inside the new anchor.) No Apple lock. Now any crash still leaves a road in.",
+    f"The record — saying Castle, its family tree naming {pill('{L′}', 'L')} as a Castle key — is written into the staged copy; then the library file is swapped to {pill('{L′}', 'L')}: the commit point. Copies resume, each carrying a matching key and record; any copy's act in flight is cleared whenever it's opened. Then this Mac's memory follows.",
     f"The old key's item, every {pill('silent item', 'L', True)} the library has had, the per-library-ID items the migration kept, the escrow items and the old key files go — each only once the history holds its key.",
     f"This Mac's {pill('scheduled Markdown export', 'plain', True)} turns off, with one notice. Turning it back on in Castle is your choice at that door: it writes plain text.",
     f"A fresh backup is made under {pill('{L′}', 'L')}.",
-    f"This Mac's own {pill('{A} Apple key', 'A', True)} for the library is deleted from iCloud Keychain — every device, no recovery — and its id recorded as retired in this Mac's facts, so a copy that comes back is deleted on sight (by that id only: another Mac's own key for its copy is never touched). Synced: each other device types your passphrase or your words once, re-keys its own library into a new Castle key, deletes its own Apple key, records it and the account's as retired, and turns its scheduled export off.",
+    f"This Mac's own {pill('{A} Apple key', 'A', True)} for the library is deleted from iCloud Keychain — every device, no recovery — and its id recorded as retired in this Mac's facts, so a copy that comes back is deleted on sight (by that id only: another Mac's own key for its copy is never touched). Synced: each other device types your passphrase or your words once, re-keys its own library into a new Castle key — its history taking every older key, and the anchor when the typed secret opens it — deletes its own Apple key, records it and the account's as retired, and turns its scheduled export off.",
     f"Last, while the store still has it, the old shared {pill('{A} Apple key', 'A', True)} is retired — deleted only by the id this device recorded — so every older copy's Apple lock under it is dead, wherever the copy is. Its vault check is read fresh again here: if an older build's Re-link put a vault back on it in between, the key stays, and the library lands with the door and the stated exception showing. There is no keep-for-now: to deal with something the sheet listed first, cancel and come back.",
 ]
 LEAVE = [
-    "You type your passphrase and your twelve words — leaving Castle is a key change, like entering it, and the words are never made new here, so the paper you have keeps opening what stays behind. The leave screen says plainly: <b>from now on your Apple account, and anyone who can sign in to this Mac, opens the library itself — with everything you wrote in it, in Castle too — and every copy made after you leave. No copy made before you leave opens through them</b>; those keep Castle's locks, your passphrase or your twelve words.",
-    f"<b>The Castle anchor, first.</b> Before anything else is written, the outgoing Castle key with its whole history is sealed under one fresh anchor key, locked with {pill('{P}', 'P')} and {pill('{W}', 'W')} as you just typed them — never with anything the Apple account or the login password reaches. It lives in the key file and rides frozen into every later backup.",
-    f"Synced only: the rotation, as Use Castle's — a new master {pill('{M″}', 'M')} and sync key {pill('{C″}', 'C')} in a {pill('silent item', 'L')}; your writing on the server re-encrypted; the vault rewritten with the new master under your passphrase and your words.",
-    f"Synced only: once the rotation completes — its window for the Castle-era sync key closed — a fresh account {pill('{A} Apple key', 'A')} is made, and the new master locked with it joins the vault. No Castle-era sync key ever sits under anything Apple-reachable.",
+    "You type your passphrase and your twelve words — leaving Castle is a key change, like entering it, and the words are never made new here, so the paper you have keeps opening what stays behind. The leave screen says plainly: <b>from now on your Apple account, and anyone who can sign in to this Mac, opens the library itself — with everything you wrote in it, in Castle too — and every copy made after you leave. No copy made before you leave opens through them</b>; those open with the passphrase or the twelve words you had on the day you left — leaving never makes new words, so that day's paper keeps working.",
+    f"<b>The Castle anchor, first.</b> Before anything else is written, the outgoing Castle key with its whole history — and any earlier anchor kept beside it — is sealed under one fresh anchor key, locked with {pill('{P}', 'P')} and {pill('{W}', 'W')} as you just typed them — never with anything the Apple account or the login password reaches. It lives in the key file and rides frozen into every later backup. <b>It keeps the secrets of its day:</b> locked once, here, and never re-locked; every later re-key carries it unchanged.",
+    f"Synced only: the rotation, as Use Castle's — a new master {pill('{M″}', 'M')} and sync key {pill('{C″}', 'C')}; your writing on the server re-encrypted; the vault rewritten with the new master under your passphrase and your words. <b>Until the rotation completes, the new sync keys and the previous corpus key stay in Castle-kind custody</b> — a {pill('{touch} item', 'touch')}, or session memory under Always ask — so no Castle-era key is ever within the login password's reach.",
+    f"Synced only: <b>one write completes the rotation and adds the account's fresh {pill('{A} Apple key', 'A')} to the vault</b>, its window for the previous corpus key closed — so no Castle-era corpus key ever sits under anything Apple-reachable. Then the new sync keys move to a {pill('silent item', 'L')}, and the old ones' {pill('{touch} item', 'touch', True)} goes. If this device never finishes, another device of the account finishes it at a press, minting the account's key if this one's never arrived (the vault's compare-and-set keeps one).",
     f"A new library key {pill('{L″}', 'L')} — born Standard — goes into a {pill('silent item', 'L')}, with a fresh {pill('{A} Apple key', 'A')} of this Mac's own, minted under a new id. The new key file: {pill('{L″} · locked with {A}', 'A')} {pill('{L″} · locked with {P}', 'P')} {pill('{L″} · locked with {W}', 'W')} (and the new master, synced); <b>an empty history</b>; the anchor.",
     f"The record, now saying Standard — its family tree naming {pill('{L″}', 'L')} as a Standard key — goes into the staged copy; the library file is swapped to {pill('{L″}', 'L')}. Copies pause from the new key to the swap.",
     f"Then this Mac's memory; the Castle key's {pill('{touch} item', 'touch', True)} goes with its key; a fresh backup is made under {pill('{L″}', 'L')}.",
-    "Your other devices follow, each typing your passphrase or your words once — no follow waits on an Apple key. Each writes its own anchor first, then a new Standard key with an empty history and an Apple key of its own (below).",
+    "Your other devices follow, each typing your passphrase or your words once, for the new master — no follow waits on an Apple key. Each writes its own anchor first, under its outgoing Castle key, needing no secret for it; then a new Standard key with an empty history and an Apple key of its own (below).",
 ]
 REPLACE = [
     "For a key someone may have used, or a device someone may have had: you type your passphrase and twelve words (or make new words).",
     f"New {pill('{M}', 'M')} and {pill('{C}', 'C')}; the server's writing re-encrypted; the vault rewritten (in Standard the new master is locked with the account's Apple key — an account still on the old shared key is re-linked first, with a fresh key of its own — and Castle is the answer to an Apple-account intruder).",
-    "A new library key of the same kind, the old one added to its history, so your copies keep opening. In Castle each other device follows by typing a secret once; in Standard it reads the new master through the account's Apple key, or takes the passphrase or the words where that key can't be read.",
+    "A new library key of the same kind, the old one added to its history, so your copies keep opening, and any Castle anchor carried over unchanged. In Castle each other device follows by typing a secret once; in Standard it reads the new master through the account's Apple key, or takes the passphrase or the words where that key can't be read.",
 ]
 FOLLOW = [
     "Another of your devices entered Castle, left it, or replaced the keys; this device sees the vault changed.",
-    "<b>Into or out of Castle, it asks for one secret, once</b> — your passphrase or your words, through the vault. Until then the library opens on its current key and you can write; sync waits, with a banner saying why. No such follow waits on an Apple key. Typing the old passphrase after a change elsewhere is refused with the change named: <i>“Your passphrase was changed on [device] on [day] — enter the new one.”</i>",
-    f"<b>Into Castle:</b> the new master {pill('{M′}', 'M')} from the vault; a new library key of Castle's kind — a {pill('{touch} item', 'touch')} made at this press where this device's gate style says so, or none — its history taking every older key; this Mac's own {pill('{A} Apple key', 'A', True)} deleted and recorded as retired, with the account's; the scheduled Markdown export off, with one notice.",
-    f"<b>Into Standard:</b> the anchor first — this device's outgoing Castle key and its history, locked under the secret it typed and under the Castle-era master {pill('{M′}', 'M')}, with that master's words copy beside it, so your words always open it (typed the words, the passphrase road lands the next time the passphrase is verified there). Then a new library key of Standard's kind — its {pill('silent item', 'L')} and a fresh {pill('{A} Apple key', 'A')} of this Mac's own — with an empty history; the Castle key's {pill('{touch} item', 'touch', True)} goes with its key. The typed step says the leave screen's sentence: from now on the Apple account opens this library, with everything in it, and every copy made after — no copy made before.",
-    "<b>Keys replaced, same mode:</b> a new key of the same kind; the history grows. In Standard it reads the new master through the account's Apple key, as today, or takes the passphrase or the words when that key can't be read here.",
+    "<b>Into or out of Castle, it asks for one secret, once</b> — your passphrase or your words, through the vault, for the new master. Until then the library opens on its current key and you can write; sync waits, with a banner saying why. No such follow waits on an Apple key. A device that sees the master replaced while the vault still carries a previous corpus key — a rotation in progress — follows the keys but holds its own library's re-key until the one write that completes the rotation settles the account's mode. Its new key file is locked with the secret it typed and the new master, with that master's words copy beside it — so the words open it either way, and the passphrase directly when it was the one typed. Typing the old passphrase after a change elsewhere is refused with the change named: <i>“Your passphrase was changed on [device] on [day] — enter the new one.”</i>",
+    f"<b>Into Castle:</b> the new master {pill('{M′}', 'M')} from the vault; a new library key of Castle's kind — a {pill('{touch} item', 'touch')} made at this press where this device's gate style says so, or none — its history taking every older key, and the anchor if there is one when the typed secret opens it (one it can't open is kept beside the history, unchanged); this Mac's own {pill('{A} Apple key', 'A', True)} deleted and recorded as retired, with the account's; the scheduled Markdown export off, with one notice.",
+    f"<b>Into Standard:</b> the anchor first — this device's outgoing Castle key and its whole history, sealed under one anchor key locked with that outgoing Castle key itself, with that key's own locks from this device's key file copied beside it: the passphrase or words this device held it under, and the Castle-era master {pill('{M′}', 'M')} with its words copy. So it opens with exactly what opened this device that day, and the follow needs no secret for it — the library is open, the key in hand. If the vault's master is still the Castle-era one — an older build left without changing it, and put it under the old shared Apple key — the master's road is left out. Then a new library key of Standard's kind — its {pill('silent item', 'L')} and a fresh {pill('{A} Apple key', 'A')} of this Mac's own — with an empty history; the Castle key's {pill('{touch} item', 'touch', True)} goes with its key. The typed step says the leave screen's sentence: from now on the Apple account opens this library, with everything in it, and every copy made after — no copy made before, which opens with the passphrase or the words you had on the day you left.",
+    "<b>Keys replaced, same mode:</b> a new key of the same kind; the history grows, and any anchor rides along unchanged. In Standard it reads the new master through the account's Apple key, as today, or takes the passphrase or the words when that key can't be read here.",
 ]
 KEY_DOORS = [
-    "<b>Change passphrase</b> (it verifies the current one) and <b>new words</b> (they ask the passphrase) re-lock the current key and, after a leave, the Castle anchor under the new secret. They re-lock nothing else; the history needs no secret.",
-    "<b>Standard's set-a-new-passphrase road</b> (for a forgotten passphrase) can't open the anchor by itself, so when there is one it asks for your words once to carry it over; declined, the words alone keep opening it.",
-    "<b>The one corner:</b> a forgotten passphrase reset and lost words replaced, before either re-lock, leave the anchor under the secrets of an earlier day — the route finder names the day.",
-    "<b>Re-link your Apple account</b> (a Standard account whose Apple key no device can read): a fresh account Apple key, minted at the press and landed under the vault's compare-and-set — never under the old shared key — re-keying nothing. Its consent says the new key reaches other devices only through iCloud Keychain, which Variorum can't see.",
+    "<b>Change passphrase</b> (it verifies the current one) and <b>new words</b> (they ask the passphrase) re-lock the current key and nothing else: the history needs no secret, and the Castle anchor keeps the secrets of its day — locked once, at the leave, and never re-locked.",
+    "<b>So copies from before a leave open with the passphrase or the words you had that day.</b> Leaving never makes new words, so that day's paper keeps opening them. When there's an anchor, the new-words door says so: <i>“Copies from before 12 October still open with the words you're replacing — keep that paper.”</i> Change both your passphrase and your words later, and those copies need the old ones; the route finder names the day.",
+    "<b>Re-link your Apple account</b> (a Standard account whose Apple key no device can read — after an iCloud Keychain reset or a change of Apple ID): a fresh account Apple key, minted at the press and landed under the vault's compare-and-set — never under the old shared key — re-keying nothing. Its consent says the new key reaches other devices only through iCloud Keychain, which Variorum can't see.",
+    "<b>Its library arm</b> — for a Standard library whose own Apple key this Mac can't read (an iCloud Keychain reset, a change of Apple ID), local-only libraries included: it mints a fresh own Apple key for this Mac and re-locks the key file under it, for every Standard key file this Mac holds that needs one, other libraries' included. The assessment offers it wherever a Standard library's Apple road is lost — no repair mints one by itself. It re-keys nothing.",
 ]
 OPEN_OLD = [
     "Inside Variorum, you pick an older backup of this library (or one is found at its place, say after a Time Machine rollback). Whatever unlocks your library comes first either way: Touch ID or the passphrase in Castle, the silent item in Standard.",
-    "The family tree says it's this library's own, whatever its kind. Its key is found through the history — today's key opens the older ones — so nothing more is typed. After a leave from Castle, a copy from before the leave opens with your passphrase or your words, through the Castle anchor.",
-    "The copy is re-encrypted with today's key, straight into place, and takes the library's current facts — its mode, account and family tree from the record, and this Mac's facts from the newer of their two homes, so a restored copy can't weaken delete on sight. The library you had joins your older libraries.",
+    "The family tree — its two homes unioned — says it's this library's own, whatever its kind. Its key is found through the history — today's key opens the older ones — so nothing more is typed. After a leave from Castle, a copy from before the leave opens with the passphrase or the words you had on the day you left, through the Castle anchor.",
+    "Its act in flight, if it carries one, is cleared. The copy is re-encrypted with today's key, straight into place, and takes the library's current facts — its mode, account and family tree from the record, and this Mac's facts from the newer of their two homes, so a restored copy can't weaken delete on sight. The library you had joins your older libraries.",
     "Your library is back as it was then, in the mode it's in now. A Castle library stays in Castle. A Castle-era copy opened into a Standard library takes Standard, and the confirm says its writing will then open through your Apple account.",
 ]
 OPEN_OTHER = [
     "<b>A Castle copy not in this library's family tree, into a Standard library here:</b> opening it raises the library to Castle through Use Castle's own steps — your passphrase and words, a fresh key — or you cancel. A copy never lowers the mode.",
     "<b>A copy whose key isn't in the family tree:</b> the restore list and the confirm mark it <i>“made on another Mac, or not by you”</i> before anything happens.",
-    "<b>A different library, landing from another Mac:</b> it keeps its own mode and lands under a <b>fresh key with an empty history</b> (her ruling). Its passphrase alone, or its words alone, unlocks the pair; the landing then asks for the other one — typed, or made new (a new passphrase if it's forgotten, since the words proved access; new words if they're lost, since the passphrase did) — so both open it from the start. A Standard pair that opens through an Apple key this Mac can read lands with nothing typed, under an Apple key of this Mac's own, and the passphrase and words are offered as Standard offers them. The sent pair is never written and keeps its own locks; the library you had joins your older libraries. No key is ever held by two Macs.",
+    "<b>A different library, landing from another Mac:</b> it keeps its own mode and lands under a <b>fresh key with an empty history</b> (her ruling). Its passphrase alone, or its words alone, unlocks the pair; the landing then asks for the other one — typed, or made new (a new passphrase if it's forgotten, since the words proved access; new words if they're lost, since the passphrase did) — so both open it from the start. A Standard pair that opens through an Apple key this Mac can read lands with nothing typed, under an Apple key of this Mac's own, and the passphrase and words are offered as Standard offers them; if they're declined, the confirm says the landed library opens through this Mac and its Apple account only. The sent pair is never written and keeps its own locks; the library you had joins your older libraries. No key is ever held by two Macs. <b>A synced pair</b> lands held, as today: a secret made new at its landing becomes the account's at Resume Sync, through the account's own forgot road with the secret just typed, and the landing says so.",
     "<b>Send Library</b> writes the pair and says nothing about sharing: nothing is shared, since the other Mac lands it under a key of its own. Like any backup, the pair opens with its own locks.",
     "<b>A plaintext export</b> carries its library ID. If it's this library's, it comes in under today's key and mode; otherwise it becomes a new library in Standard, and the confirm says so.",
     "<b>A copy with no record</b> — anything made before this change — has its mode worked out once with today's rules, as the migration does. An exposed-era Standard copy with no passphrase or words is never defaulted to Castle.",
@@ -1315,18 +1352,18 @@ OPEN_OTHER = [
 MIGRATE = [
     "Anything in flight finishes first, with today's runner; a stuck switch marker is cleared on proof that the switch never happened.",
     "The mode is worked out once with today's rules: a synced library takes the vault's word, and without it the mode is recorded as not yet confirmed. Corner 45's ambiguous case records Castle, not yet confirmed, with a one-time notice — the floor sentence, <b>Export a plain copy first</b>, and Use Standard offered as the key change it now is. <b>Until the mode is confirmed, no custody repair runs in either direction</b>: the library keeps today's custody shape, and nothing Apple-reachable is written. Confirming a mode the current key wasn't born in is a key change, never a move.",
-    "The record, this Mac's memory (sealed, with this Mac's section in both homes) and the device identity are written — the identity carried over from the sync-keys item, with a hardware marker. The family tree's first entries are every key the fold reaches: an old key file with an Apple lock marks a Standard key, one without a Castle key, and an unknown one counts as Castle's, the safe side.",
+    "The record, this Mac's memory (sealed, with this Mac's section in both homes) and the device identity are written — the identity carried over from the sync-keys item, with a hardware marker, so no new device cursor is created. The family tree's first entries: the current key takes the mode step 2 records; every older key the fold reaches is attributed by its key file — an Apple lock marks a Standard key, none a Castle key, and an unknown one counts as Castle's, the safe side, which strands nothing since all stay openable through the history; and every fingerprint the catalog's key files name for this library is listed, reached or not, so its own copies read as its own.",
     "Per-key custody items are added, each of its key's kind; the old per-library items stay, unread, for one release (entering Castle removes them once the history holds their key).",
     "Existing copies are attributed to their library and Mac; new backups go to per-library, per-Mac folders.",
     "The one key file is written and every reachable older key folded into the history — through the old shared Apple key while it's still readable, the passphrase if needed (asked once), custody, and the escrow items (removed once folded). An old key file stays until the history holds its key; one the fold couldn't reach stays for good.",
-    "<b>Everything this Mac holds in Standard gains an Apple key of its own, beside the old shared one</b> — other libraries' copies first (this Mac's own key file for each), then the live library, local or synced — then <b>a fresh backup</b>, so the newest copy carries the history and every lock. Nothing is removed; a synced account's vault stays on the old key until it enters Castle or is re-linked.",
+    "<b>Everything this Mac holds in Standard gains an Apple key of its own, beside the old shared one</b> — other libraries' copies first (this Mac's own key file for each), then the live library, local or synced, once its mode is confirmed Standard — then <b>a fresh backup</b>, so the newest copy carries the history and every lock. Nothing is removed; a synced account's vault stays on the old key until it enters Castle or is re-linked.",
     "A library already in Castle gets one calm ask on each device: copies from before Castle still open through the Apple account until the old key is retired — with the checks, the sheet and a door in Settings ▸ Protection.",
     "The road back: until the first re-key under the new build, an older build still opens the library; after that, the road back is the A1 safety copy, with the passphrase or words.",
 ]
 SHARED = [
     "<b>One key, every library.</b> Today's builds lock every Standard library on an Apple account with one shared Apple key, on every device. Deleting it deletes it everywhere, with no recovery — so nothing loses its road through it before it's retired, and this build never writes under it.",
     "<b>The move</b> (each device's migration) only adds: everything this Mac holds in Standard gains an Apple key of its own beside the old one — the live library, local or synced, and this Mac's copies of other libraries (its own key file for each) — then a fresh backup. A synced account's vault stays on the old key until it enters Castle or is re-linked: it has room for one Apple copy, and macOS can't say whether iCloud Keychain carried a new key. A device joining such an account locks its own key file under its own key; nothing is ever written under the old one.",
-    "<b>The checks, at Use Castle's door</b> (or the door on a store already in Castle): the move runs again; then, with the old key taken away, every copy this Mac can see — other libraries' and other Macs' in a shared backup folder included — and every account vault it can read. They list what would stop opening, every Standard library or copy here with no passphrase or words, and any other Mac's key file holding this library's keys — a library sent there before this change. <b>A vault still on the old key stops Use Castle at its door</b> — one this device can read, or the library's former account — unless it's the account this act moves into Castle; the door names the way through: that account's own Castle, or Re-link on one of its devices.",
+    "<b>The checks, at Use Castle's door</b> (or the door on a store already in Castle): the move runs again; then, with the old key taken away, every copy this Mac can see — other libraries' and other Macs' in a shared backup folder included — and every account vault it can read. They list what would stop opening, every Standard library or copy here with no passphrase or words, and any other Mac's key file holding this library's keys — a library sent there before this change. <b>A vault still on the old key stops Use Castle at its door</b> — one this device can read, or, while signed out, the account the record still names — unless it's the account this act moves into Castle; the door names the way through: that account's own Castle, or Re-link on one of its devices.",
     "<b>The sheet</b> lists those things by name, and says what the Mac can't see: give any library still in Standard on your other devices a passphrase or words first — one with neither, on a device that's lost or reset, opens elsewhere only if iCloud Keychain carried its key, or not at all if that device hadn't been updated. It also says that another Variorum account still in Standard on this Apple account sets up new devices with its passphrase until it's re-linked.",
     "<b>Retiring</b> — Use Castle's last step, or its own door on a library already in Castle — deletes the old-name item only when its id is the one this device's section lists, and records it as retired there, so a copy that comes back is deleted on sight. A device that follows records the account's key and its own as retired, never the old shared key. There is no keep-for-now. A library that was already in Castle before this change gets one calm ask on each device and a door in Settings ▸ Protection that goes once pressed; until then, its Castle surfaces there say copies from before Castle still open through the Apple account.",
 ]
@@ -1336,7 +1373,7 @@ def who_table(target):
     rows = [
         ("You, on your Mac", "Touch ID or passphrase", "opens, nothing asked"),
         ("You, on a new Mac, with your Apple account only", "no — needs your passphrase or words", "yes, when iCloud Keychain carried the key"),
-        ("You, on a new Mac, with your passphrase or words", "yes", "yes"),
+        ("You, on a new Mac, with your passphrase or words", "yes — the ones of that copy's day", "yes, if set — the ones of that copy's day"),
         ("Someone who knows this Mac's login password", '<span class="n">nothing</span> (Markdown exports you made are plain text)',
          '<span class="y">the library and every copy since it came into Standard</span> — after a leave from Castle, the '
          'library with everything in it, but <span class="n">no copy from before the leave</span>'),
@@ -1353,17 +1390,19 @@ def who_table(target):
 
 ACCOUNT_MOVES = (
     "<p><b>Leaving an account</b> (This Mac Only, Stop syncing here, deleting the account from this Mac, Move) <b>re-keys "
-    "the library, in either mode</b>. The new key's history takes the old one, so your copies keep opening for you; the "
-    "account you left opens only the copies from while it synced — through its keys, and through the Apple account only "
-    "while that account is in Standard — never what you write after. <b>In Castle:</b> both secrets — the passphrase "
+    "the library, in either mode</b>. The new key's history takes the old one, so your copies keep opening for you, and any "
+    "anchor rides along unchanged; the account you left opens only the copies from while it synced in Standard — until it "
+    "replaces its keys or enters Castle — and never what you write after. <b>In Castle:</b> both secrets — the passphrase "
     "typed, the words typed or made new. <b>In Standard:</b> this Mac holds the key, so the new key's silent item and a "
     "fresh Apple key of this Mac's own carry it with nothing remembered; the passphrase is typed or set new (Standard's "
     "forgot road), and the words typed or made new. The account's Apple key is left alone: the account's other devices "
     "still use it. <i>(Her rulings, 2026-10-13.)</i></p>"
     "<p><b>Joining or moving into an account</b> in Castle is entering Castle for this library: the re-key, this Mac's own "
     "Apple key retired, and the old shared key's checks. Into an account in Standard from Castle is leaving Castle for "
-    "it: its key change and anchor, with the leave screen's sentence at the consent. Into an account in Standard from "
-    "Standard adds the master's lock and takes nothing away, so the key stays. Signing back in to an account the library "
+    "it: its key change and anchor, with the leave screen's sentence at the consent. Joining an account in the library's "
+    "own mode — Standard from Standard, or Castle from Castle — adds the master's lock and takes nothing away, so the key "
+    "stays. When the library's passphrase differs from the account's, enrolling re-locks the library key under the "
+    "account's; the anchor, if any, is untouched and keeps the secrets of its day. Signing back in to an account the library "
     "left is an ordinary turn-on-sync, with its consent.</p>")
 
 ACCOUNTS = ("<table><thead><tr><th>the library belongs to</th><th>signed in as</th><th>what happens</th></tr></thead><tbody>"
@@ -1380,7 +1419,7 @@ LOBBY = ("<table><thead><tr><th>this Mac, right now</th><th>the lobby shows</th>
          "<tr><td>the same item, but the lid closed, the keyboard disconnected or unpaired, or a lockout</td><td>the button stays; pressing it says why (<i>“Open the lid…”</i>) and nothing changes; the passphrase road beside it</td></tr>"
          "<tr><td>the stored Touch ID state hash moved with nothing changed (a macOS update)</td><td>the button stays, and a press opens; nothing is asked — the stored hash is only a hint</td></tr>"
          "<tr><td>no Touch ID item for the current key, or no finger enrolled on this Mac</td><td>no button; one quiet line says why — Touch ID isn't set up here, or isn't set up for this library — and the passphrase road. When this device's choice is Touch ID but its item is gone (deleted, or the keychain wiped), the re-arm question below follows the passphrase unlock</td></tr>"
-         "<tr><td>a press that fails because the item no longer opens (a finger was added or removed since it was made)</td><td><i>Touch ID changed since you set it up — unlock with the passphrase</i>; once the passphrase opens it, the question <i>“Touch ID changed on this Mac — a finger was added or removed, or macOS was updated. Use Touch ID for Variorum again? Every finger enrolled on this Mac will open it.”</i> — a new item only on yes; a no records Always ask, at that press. No repair ever makes one.</td></tr>"
+         "<tr><td>a press that fails because the item no longer opens (a biometry change invalidated it)</td><td><i>Touch ID changed since you set it up — unlock with the passphrase</i>; once the passphrase opens it, the question <i>“Touch ID can't open Variorum on this Mac any more. Set it up again? Every finger enrolled on this Mac will open it.”</i> — one honest sentence, whatever the cause; a new item only on yes; a no records Always ask, at that press. No repair ever makes one.</td></tr>"
          "</tbody></table><p class=\"lede\">Before unlock, the lobby reads what this Mac remembers as a display hint only; it decides "
          "nothing. Her pick, 2026-10-13: <i>the button whenever a Touch ID item exists</i>; the “changed” line waits for a "
          "press, because the stored hash can't tell a changed finger from a macOS update.</p>"
@@ -1395,44 +1434,46 @@ LOBBY = ("<table><thead><tr><th>this Mac, right now</th><th>the lobby shows</th>
 CHECKLIST = [
     # (id, element, what proves it)
     ("C-1", "Castle: a Castle key's only device copy is its Touch ID item — none under Always ask; no silent item for any key the library has had, the migration's per-library items included", "scenario promise 2 · real-Keychain drill"),
-    ("C-2", "Castle: the one key file locks the current key with the passphrase and the twelve words (and the master, synced) — never an Apple lock; a planted Apple lock on a Castle key is answered with a re-key", "model test · the posture drill · adversary scenario (edit a key file)"),
-    ("C-3", "Castle: the history holds every older key, each locked with today's key — entering Castle took everything, a Castle anchor folded back in; an old key opens nothing newer", "model test · fixed scenario (Castle → Standard → Castle) · scenario promise 8"),
+    ("C-2", "Castle: the one key file locks the current key with the passphrase and the twelve words (and, synced, the master, beside the master's words copy) — on a follower, with the secret it typed, the master and the master's words copy — never an Apple lock; a planted Apple lock on a Castle key is answered with a re-key", "model test · the posture drill · adversary scenario (edit a key file)"),
+    ("C-3", "Castle: the history holds every older key, each locked with today's key — entering Castle took everything, a Castle anchor folded back in (one the typed secrets can't open kept beside it, unchanged, listed in Diagnostics, never failing the entry); an old key opens nothing newer", "model test · fixed scenario (Castle → Standard → Castle) · scenario promise 8"),
     ("C-4", "Castle: this Mac's own Apple key for the library was retired at entering Castle, and the account's was deleted and recorded as retired once the account's rotation completed; no Apple key this Mac's facts list as retired exists, and one that reappears is deleted on sight — by its recorded id only, never by library ID, so another Mac's own key for its copy is never touched", "scenario promise 2 · iCloud Keychain drill · fixed scenarios (one library on two Macs; This-Mac-Only Castle; replays — a rollback across a retirement)"),
     ("C-5", "Castle: every backup carries its day's key file; older backups open through the history with Touch ID, the passphrase or the words", "scenario promise 5 · the restore drill"),
     ("C-6", "Castle, synced: the sync keys live only in a Touch ID item (session memory under Always ask)", "scenario promise 2 · drill"),
     ("C-7", "Castle, synced: the vault holds the master locked with the passphrase and words, the sync key locked with the master — no Apple copy", "fake-server suite · live round"),
     ("C-8", "Key files with a master lock carry the master locked with the twelve words, copied from the vault and refreshed while that master is current", "model test · fixed scenario (a silently-joined device)"),
     ("C-9", "Entering Castle turns this device's scheduled Markdown export off, with one notice — on Use Castle and on every follow into Castle", "fixed scenario (entering Castle with the scheduled Markdown export on) · mutation pin (the export-off step)"),
-    ("C-10", "After leaving Castle, nothing the Apple account or a login-password holder can reach opens any copy made before the leave, or any key made in Castle; the library itself, with everything written in it, opens to them from the leave on, and the leave screen says so", "scenario promise 13 · fixed scenarios (leaving Castle; a follow into Standard with iCloud Keychain off) · drill"),
+    ("C-10", "After leaving Castle, nothing the Apple account or a login-password holder can reach opens any copy made before the leave, or any key made in Castle — through the leave's rotation too, the new sync keys and the previous corpus key staying in Castle-kind custody until the one write that completes it; the library itself, with everything written in it, opens to them from the leave on, and the leave screen says so. The one exception: a leave or follow made by an older build, which puts the Castle-era master under the old shared Apple key with no change of keys — this build never adds to it", "scenario promise 13 · fixed scenarios (leaving Castle; a follow after an older build's leave; a follow into Standard with iCloud Keychain off) · mutation pin (Castle-kind custody through a leave's rotation) · drill"),
     ("H-1", "A fresh key at every crossing — entering and leaving Castle, leaving an account in either mode, a different library landing on a Mac — plus Replace All Keys and the follow; every key is born Castle or Standard and keeps that kind for life, and no repair changes it", "model test · fixed scenarios (leaving Castle; a library leaves its account; Send Library after this change) · mutation pin (the re-key at every crossing)"),
-    ("H-2", "The history: entering Castle takes everything (an anchor folded back in); within a mode it grows; leaving Castle and a landing take nothing — the new key's history starts empty", "model test · fixed scenarios (Castle → Standard → Castle; Send Library after this change)"),
-    ("H-3", "The Castle anchor: written first at every leave, by the act and by each follow — the outgoing Castle key with its whole history under one anchor key that only the passphrase and the words open, never anything Apple-reachable; a follower's under the secret it typed and the Castle-era master, with that master's words copy beside it; in the key file and every later pair", "fixed scenario (leaving Castle — followers typing the passphrase, and the words; a crash at every step, on Touch ID and on Always ask) · mutation pin (the anchor written first)"),
-    ("H-4", "The anchor follows the secrets: change passphrase and new words re-lock it; Standard's set-a-new-passphrase road asks the words once when an anchor exists; the one corner (both replaced before either re-lock) leaves it under an earlier day's secrets, and the route finder names the day", "fixed scenarios (after a leave, change the passphrase and make new words, then restore a Castle-era copy; the one corner) · walk"),
-    ("H-5", "The family tree lists every key the library has had — its kind, the Mac that made it, its dates — with no secret, and decides whether a copy is this library's own", "model test · fixed scenario (this library's own Castle-era copy, restored after a leave) · mutation pin (the family tree's own-line check)"),
+    ("H-2", "The history: entering Castle takes everything (an anchor folded back in, or kept beside it, unchanged, when the typed secrets can't open it); within a mode it grows, the anchor carried over unchanged; leaving Castle and a landing take nothing — the new key's history starts empty", "model test · fixed scenarios (Castle → Standard → Castle; Send Library after this change)"),
+    ("H-3", "The Castle anchor: written first at every leave, by the act and by each follow — the outgoing Castle key with its whole history (and any earlier anchor kept beside it) under one anchor key locked only with what opened that device's library on the day it left, never anything Apple-reachable: on the acting device, the passphrase and words typed there; on a follower, the outgoing Castle key itself, with that key's own locks from its key file copied beside it, needing no secret at the follow — the master's road left out when the vault's master is still the Castle-era one (an older build's leave); in the key file and every later pair", "fixed scenarios (leaving Castle — followers typing the passphrase, and the words, an Always-ask follower relocked after the rotation among them; a crash at every step, on Touch ID and on Always ask; a follow after an older build's leave) · mutation pin (the anchor written first)"),
+    ("H-4", "The anchor keeps the secrets of its day: locked once, at the leave, and never re-locked — change passphrase and new words re-lock only the current key; every later re-key (Replace All Keys, a follow that keeps the mode, leaving an account) carries it unchanged, and enrolling under a differing account passphrase leaves it untouched; copies from before the leave open with the leave day's passphrase or words on every device, the route finder names the day, and while an anchor exists the new-words door says “Copies from before 12 October still open with the words you're replacing — keep that paper.”", "fixed scenarios (after a leave, change the passphrase and make new words — on this device, and on another device of the account; a library leaves its account, carrying any anchor; a Castle library joins a Standard account whose passphrase differs) · mutation pin (the anchor written first and carried by every re-key) · walk"),
+    ("H-5", "The family tree lists every key the library has had — its kind, the Mac that made it, its dates — with no secret, in two homes unioned at open (the record, and a sealed mirror in what this Mac remembers), seeded at the migration with every fingerprint the catalog's key files name for this library, reached or not; it decides whether a copy is this library's own", "model test · fixed scenarios (this library's own Castle-era copy, restored after a leave; a Time Machine rollback past a re-key) · mutation pin (the family tree's own-line check and its two homes)"),
     ("S-1", "Standard: a Standard key's device copy is its silent item; never a Touch ID item", "scenario promise 3 · drill"),
     ("S-2", "Standard: each device's key file locks its current key with that device's own Apple key for the library (named by its id) and, synced, with the master, beside the master's words copy; with the passphrase and the words where that device has them — a follower's carries the secret it typed", "model test · fixed scenario (leaving Castle, synced, with followers) · drill"),
     ("S-3", "Apple keys: one per library per Mac, minted and named by that Mac for its key file, and one per account, locking only the account's master in the vault; minted only by a deliberate act or the migration, under fresh ids; if two devices mint for one account, the vault's compare-and-set keeps one and the other deletes its own; a device that can't read the account's key waits for silent setup only — its own key file never waits", "convergence suite (the mint, wait and delete rules) · fixed scenario (a new device joining an old-key account)"),
     ("S-4", "Standard, synced: the vault's Apple copy is under the account's Apple key, named by its id; an account from before this change stays on the old shared key until it enters Castle or is re-linked; nothing moves a vault automatically", "fake-server suite · fixed scenario (an older build's Re-link)"),
     ("S-5", "Re-link mints a fresh account key under the vault's compare-and-set, and Replace All Keys re-links an account still on the old shared key first; nothing this build writes is locked with the old shared key", "executor tests · drill · fixed scenario (Replace All Keys on an old-key account)"),
-    ("S-6", "Standard: the history holds the older keys since the library came into Standard, each locked with today's key; older copies open through it, and copies from before a leave through the anchor", "model test · the restore drill"),
+    ("S-6", "Standard: the history holds the older keys since the library came into Standard, each locked with today's key; older copies open through it, and copies from before a leave through the anchor, with the leave day's passphrase or words", "model test · the restore drill"),
+    ("S-7", "Re-link's library arm: where a Standard library's own Apple key can't be read here (an iCloud Keychain reset, a change of Apple ID), no repair mints one — the assessment says the Apple road is lost and offers the arm, which mints a fresh own Apple key for this Mac and re-locks under it every Standard key file here that needs one, other libraries' and local-only libraries' included, re-keying nothing; then promise 3 settles", "fixed scenario (a Standard library's own Apple key lost — iCloud Keychain reset, or a switch of Apple ID — for a local-only library too) · executor tests · drill"),
     ("R-1", "The protection record inside the library file states the library's own facts — its mode (the current key's kind) and whether it's confirmed, its account, its family tree — and every copy carries them; what this Mac remembers agrees", "scenario promise 1"),
-    ("R-2", "This Mac's facts — the gate style, idle lock, scheduled export, retired Apple key ids, the act in flight, the device identity — live in two sealed homes, this Mac's section of the record and what this Mac remembers; the newer wins and the retired ids are the union; a file, memory item or plan replayed alone changes nothing; copies never carry them", "scenario promise 10 · fixed scenarios (replays) · mutation pin (the two homes)"),
-    ("R-3", "Plans live beside the library, sealed and named by the act in flight in this Mac's section, never in a backup; every copy is written with the act in flight cleared; a plan the section doesn't name is ignored and reported; a missing one never blocks", "scenario promises 6, 10 · mutation pins (planted, replayed) · fixed scenario (an act in flight when a backup is taken)"),
+    ("R-2", "This Mac's facts — the device identity and its hardware marker, the gate style, idle lock, scheduled export, the Apple key ids this Mac minted or followed and which are retired, the act in flight — live in two sealed homes, this Mac's section of the record and what this Mac remembers; the newer wins and the retired ids are the union; a Mac whose memory item is gone finds its own section by its hardware; in Castle, a file, memory item or plan planted, edited, replayed or deleted alone changes nothing (in Standard, where a login-password holder holds the library key, no repair deletes or re-keys on the record's word alone); copies never carry them", "scenario promise 10 · fixed scenarios (replays; the memory item deleted alone on an Always-ask Castle Mac with an enrolled finger) · mutation pins (the two homes; the device section's hardware marker)"),
+    ("R-3", "Plans live beside the library, sealed and named by the act in flight in this Mac's section, never in a backup; any copy's act in flight is cleared whenever it's opened, lock-time copies included; a plan the section doesn't name is ignored and reported; a missing one never blocks", "scenario promises 6, 10 · mutation pins (planted, replayed) · fixed scenario (an act in flight when a backup is taken)"),
     ("R-4", "Before unlock nothing decides: the lobby offers only self-verifying roads — the enumerated custody items and the route finder's, the history and the anchor among them — and a missing key file or memory item isn't fatal", "assess tests · the file-swap scenario · fixed scenario (key file and memory deleted)"),
-    ("R-5", "The device identity lives in what this Mac remembers, with a hardware marker: on other hardware a new identity is minted, so two Macs never share a device cursor or a backups folder", "fixed scenario (a memory item that turns up on new hardware)"),
+    ("R-5", "The device identity and its hardware marker live in what this Mac remembers and in this Mac's section of the record: on other hardware a new identity is minted, so two Macs never share a device cursor or a backups folder; on the same hardware, a Mac whose memory item is gone keeps its identity, found by its marker", "fixed scenarios (a memory item that turns up on new hardware; the memory item deleted alone)"),
+    ("R-6", "A replacement Mac — a new identity on new hardware — takes over its predecessor's Apple keys: for each library it holds, the Apple key ids its live key file's locks name as its own, and every id any device section of the record lists as retired; so entering Castle there retires the predecessor's own key too, and delete on sight keeps working", "fixed scenario (a memory item that turns up on new hardware — a replacement Mac entering Castle retires its predecessor's own key) · iCloud Keychain drill"),
     ("T-1", "Use Castle runs ‘Entering Castle’ in order: the door-time check, a vault still on the old shared key stopping the act before anything starts; prepare-then-commit, the record in the staged copy before the swap, copies paused; the export-off step; this Mac's own Apple key retired; last, the old shared key retired by its recorded id — and survives a crash at every step", "executor tests · crash scenarios · the posture drill · mutation pins (the door-time vault check; the export-off step)"),
-    ("T-2", "Use Standard runs ‘Leaving Castle’ in order: both secrets typed, the words never made new; the anchor first; synced, the rotation, with the account's fresh Apple key joining the vault only after it completes; a new Standard key with an empty history, its silent item and a fresh Apple key of this Mac's own; the leave screen's sentence said", "executor tests · fixed scenario (leaving Castle, synced and local, a crash at every step) · walk"),
-    ("T-3", "Replace All Keys runs as drawn, the old key joining the history; every follow into or out of Castle types one secret, once, and never waits on an Apple key — writing the follower's anchor first on the way into Standard; the refusal names a change made elsewhere", "executor tests · fixed scenario (a follow into Standard with iCloud Keychain off) · drills · walk"),
-    ("T-4", "Opening an older backup of this library — the family tree says it's ours — brings it in under today's key and mode, never lowering it: through the history with nothing more typed, or, from before a leave, with the passphrase or the words through the anchor, the confirm saying its writing will then open through the Apple account", "fixed scenarios (VX-209's way back; this library's own Castle-era copy, restored after a leave) · restore drill · walk"),
-    ("T-5", "A Castle copy not in the family tree raises a Standard library to Castle through Use Castle's steps; an unknown-key copy is flagged; a different library keeps its mode and lands under a fresh key with an empty history — one secret unlocks the pair, the other typed or made new; a Standard pair through a readable Apple key lands with nothing typed, under this Mac's own Apple key; no key is held by two Macs, and Send Library says nothing about sharing", "fixed scenarios (Send Library after this change; one local-only library on two Macs) · walk"),
-    ("T-6", "The migration runs as drawn: no custody repair in either direction until the mode is confirmed, corner 45's notice offering Use Standard as a key change; the family tree's first entries; the fold; then this Mac's copies of other libraries and the live library, local or synced, gain an Apple key of their own beside the old shared one; then a fresh backup — removing no road", "migration drills per shape · her stores' byte-copies · scenario promise 12 · fixed scenarios (corner 45's ambiguous case; the window after the move; iCloud Keychain off)"),
+    ("T-2", "Use Standard runs ‘Leaving Castle’ in order: both secrets typed, the words never made new; the anchor first; synced, the rotation, the new sync keys and the previous corpus key in Castle-kind custody until one write completes it and adds the account's fresh Apple key, then the sync keys moving to a silent item and the old ones' Touch ID item going — another device finishing it at a press if this one never does; a new Standard key with an empty history, its silent item and a fresh Apple key of this Mac's own; the leave screen's sentence said", "executor tests · fixed scenario (leaving Castle, synced and local, a crash at every step; an acting device lost mid-rotation) · mutation pin (Castle-kind custody through a leave's rotation) · walk"),
+    ("T-3", "Replace All Keys runs as drawn, the old key joining the history and any anchor carried over unchanged; every follow into or out of Castle types one secret, once, for the new master, and never waits on an Apple key — on the way into Standard writing the follower's anchor first, under its outgoing Castle key with that key's own locks beside it, no secret needed for it; a follower that sees a rotation in progress holds its re-key until the one completing write; the refusal names a change made elsewhere", "executor tests · fixed scenarios (a follow into Standard with iCloud Keychain off; a follow after an older build's leave; leaving Castle — a follower that sees the rotation still in progress) · drills · walk"),
+    ("T-4", "Opening an older backup of this library — the family tree says it's ours — brings it in under today's key and mode, never lowering it: through the history with nothing more typed, or, from before a leave, with the passphrase or the words of the leave day through the anchor, the confirm saying its writing will then open through the Apple account", "fixed scenarios (VX-209's way back; this library's own Castle-era copy, restored after a leave) · restore drill · walk"),
+    ("T-5", "A Castle copy not in the family tree raises a Standard library to Castle through Use Castle's steps; an unknown-key copy is flagged; a different library keeps its mode and lands under a fresh key with an empty history — one secret unlocks the pair, the other typed or made new; a Standard pair through a readable Apple key lands with nothing typed, under this Mac's own Apple key — the passphrase and words offered, and if they're declined the confirm says it opens through this Mac and its Apple account only; a synced pair lands held, a secret made new there becoming the account's at Resume Sync through the account's forgot road, as the landing says; no key is held by two Macs, and Send Library says nothing about sharing", "fixed scenarios (Send Library after this change; one local-only library on two Macs; a synced pair landed with a passphrase made new) · walk"),
+    ("T-6", "The migration runs as drawn: no custody repair in either direction until the mode is confirmed, corner 45's notice offering Use Standard as a key change; the family tree's first entries — the current key taking the mode recorded, every fingerprint the catalog's key files name listed; the fold; then this Mac's copies of other libraries and the live library, local or synced once its mode is confirmed Standard, gain an Apple key of their own beside the old shared one; then a fresh backup — removing no road", "migration drills per shape · her stores' byte-copies · scenario promise 12 · fixed scenarios (corner 45's ambiguous case; today's Standard-waiting and exposed libraries through the migration; the window after the move; iCloud Keychain off)"),
     ("T-7", "Retiring the old shared key runs as drawn: the move again and the checks at Use Castle's door, a vault still on it stopping the act there; the sheet listing exactly what would stop opening and every Standard thing with no passphrase or words; no keep-for-now; deleted only by its recorded id; the last-step race landing with the door and the exception; the door only on a library already in Castle before this change, gone once pressed", "fixed scenarios (two libraries on one Apple account; an older build's Re-link) · walk"),
     ("T-8", "A plaintext export lands under today's key and mode when it carries this library's ID, otherwise as a new library in Standard — said in the confirm", "fixed scenario · the restore drill"),
     ("A-1", "The four account situations behave as the table says; signing in or out changes nothing", "account-sequence walk · scenario promise 4"),
     ("A-2", "New writing belongs to the library's account", "state-transition suite"),
-    ("A-3", "Leaving an account re-keys the library in either mode — Castle: both secrets; Standard: the passphrase typed or set new, the words typed or made new — and the account left opens only the copies from while it synced, never what's written after; the account's Apple key is left to the account", "fixed scenarios (a library leaves its account — each of the four acts, in Castle and in Standard; This-Mac-Only Castle from an account in Standard) · account-sequence walk"),
-    ("A-4", "Joining or moving into an account takes its mode: in Castle as entering Castle; in Standard from Castle as leaving Castle, with its anchor and the leave screen's sentence; in Standard from Standard keeping the key", "executor tests · account-sequence walk"),
-    ("L-1", "The lobby follows the table (VX-310): the Unlock with Touch ID button whenever this scope has a Touch ID item for the current key; no item or no finger enrolled — no button and one quiet line; a press that fails — “Touch ID changed since you set it up — unlock with the passphrase”, then the re-arm question; the stored hash only a hint", "lobby tests · fixed scenario (the stored Touch ID hash moves with nothing changed) · walk on a Mac with and without an enrolled finger"),
+    ("A-3", "Leaving an account re-keys the library in either mode — Castle: both secrets; Standard: the passphrase typed or set new, the words typed or made new — the new key's history taking the old one, any anchor riding along unchanged; the account left opens only the copies from while it synced in Standard — until it replaces its keys or enters Castle — never what's written after; the account's Apple key is left to the account", "fixed scenarios (a library leaves its account — each of the four acts, in Castle and in Standard; This-Mac-Only Castle from an account in Standard) · account-sequence walk"),
+    ("A-4", "Joining or moving into an account takes its mode: in Castle as entering Castle; in Standard from Castle as leaving Castle, with its anchor and the leave screen's sentence; in the library's own mode (Standard from Standard, Castle from Castle) keeping the key; a library passphrase that differs from the account's re-locks the library key under the account's, the anchor untouched", "executor tests · fixed scenario (a Castle library joins a Standard account whose passphrase differs) · account-sequence walk"),
+    ("L-1", "The lobby follows the table (VX-310): the Unlock with Touch ID button whenever this scope has a Touch ID item for the current key; no item or no finger enrolled — no button and one quiet line; a press that fails — “Touch ID changed since you set it up — unlock with the passphrase”, then the re-arm question, “Touch ID can't open Variorum on this Mac any more. Set it up again? Every finger enrolled on this Mac will open it.” — a new item only on yes; the stored hash only a hint", "lobby tests · fixed scenario (the stored Touch ID hash moves with nothing changed) · walk on a Mac with and without an enrolled finger"),
     ("K-1", "Retention and the offer act only on this Mac's copies of this library", "scenario promise 11 · fixed scenario (the cross-Mac prune)"),
     ("K-2", "Every sentence about what opens a copy comes from the route finder and is true", "scenario promise 9"),
     ("K-3", "Other libraries' copies whose newest copy is in Standard keep opening through this Mac's own key file and Apple key for them; deleting a library's last copy deletes its key file and its Apple key", "fixed scenario (an older library of another library) · walk"),
@@ -1449,7 +1490,7 @@ def checklist_table():
 
 EXCEPTIONS = [
     "<b>A library already in Castle before this change:</b> its copies from before Castle, made under the old shared Apple key, open through your Apple account — and on this Mac for anyone with its login password — until that key is retired: one press, asked once on each device and kept in Settings ▸ Protection. A library entering Castle after this change retires it as Use Castle's last step (if that step's last check stops it, the same door shows).",
-    "<b>A library that synced with an account and left it:</b> its copies from while it synced open through that account's keys for as long as the account stays in Standard. Nothing written after it left does.",
+    "<b>A library that synced with an account in Standard and later left it:</b> its copies from those Standard days open through that account until the account replaces its keys or enters Castle. Nothing written after it left does, and nothing made while the account was in Castle ever does.",
     "<b>A library sent to another Mac before this change:</b> the two copies share its key until either one crosses a line; the retirement sheet names the other Mac's key file when it can see one. A library sent after this change shares nothing: it lands under a key of its own.",
     "<b>A retirement made while this Mac's iCloud Keychain is off</b> holds on this Mac at once, and everywhere once iCloud Keychain carries the deletion.",
     "<b>A Markdown export you turn back on in Castle</b> is plain text, by your choice at that door.",
@@ -1463,10 +1504,11 @@ def exceptions_list():
 THE_RULES = (
     "In Castle, nothing reachable through your Apple account or this Mac's login password opens your library, or any "
     "copy Variorum made of it on this Mac — or, once it syncs, on any device of your account after that device follows. "
-    "In Standard, your Apple account — and anyone who can sign in to this Mac — opens your library and every copy "
-    "Variorum made of it since it came into Standard. <b>Leaving Castle</b> gives them the library itself, with "
-    "everything you wrote in it, and every copy made after the leave; no copy made before the leave opens through them — "
-    "those keep Castle's locks, your passphrase or your twelve words. <b>The library's key changes whenever it crosses a "
+    "In Standard, your Apple account opens your library and every copy Variorum made of it since it came into Standard — "
+    "through iCloud Keychain, when it's on — and so does anyone who can sign in to this Mac. <b>Leaving Castle</b> gives "
+    "them the library itself, with everything you wrote in it, and every copy made after the leave; no copy made before "
+    "the leave opens through them — those open with the passphrase or the twelve words you had on the day you left, and "
+    "leaving never makes new words, so that day's paper keeps working. <b>The library's key changes whenever it crosses a "
     "line</b> — into or out of Castle, out of an account, onto another Mac: into Castle, every older copy comes along; "
     "out of an account, your copies come along too, and the account you left keeps only what came before; out of Castle "
     "and onto another Mac, the new key starts clean, and what came before keeps its own locks. <i>In Castle = safe. Out "
@@ -1484,7 +1526,7 @@ def full_page():
     body = f"""<main>
 <h1>Castle key map</h1>
 <p class="lede">What each key is, where it lives, what it's locked with, and what the server holds — today, and in the
-new design (your rulings of 2026-10-13). A companion to <code>second-opinion.html</code>; the build target alone is
+new design (your rulings of 2026-10-13, and round 3's of 2026-10-14). A companion to <code>second-opinion.html</code>; the build target alone is
 <code>castle-target-key-map.html</code>.</p>
 <div class="okbox"><b>The whole idea.</b> {THE_RULES} The stated exceptions are listed at the end.</div>
 <h2 id="cast">The cast</h2>
@@ -1508,6 +1550,7 @@ dashed chips are keys that don't exist or no longer open anything. The buttons l
 <h3>Entering Castle</h3>{steps(ENTER)}
 <h3 id="watch">Watch it happen</h3>{anim_section()}
 <h3>Leaving Castle</h3>{steps(LEAVE)}
+<p class="lede">{E(OLDER_LEAVE)}</p>
 <h3>Another device follows</h3>{steps(FOLLOW)}
 <h3>Leaving or joining an account</h3>{ACCOUNT_MOVES}
 <h3>Opening an older backup</h3>
@@ -1523,8 +1566,8 @@ you, plain text: what you can do. In the rows about other people, <span class="y
 {who_table(False)}
 <p class="lede">Leaving Castle: from then on the Standard column applies to the library itself — with everything
 written in it, in Castle too — and to every copy made after the leave. No copy made before the leave opens through the
-Apple account or the login password: those open with your passphrase or your words, through the Castle anchor. Said on
-the leave screen.</p>
+Apple account or the login password: those open with the passphrase or the twelve words you had on the day you left,
+through the Castle anchor. Said on the leave screen.</p>
 <p>The stated exceptions, each said on the affected copy's <i>Opens with</i> line:</p>
 {exceptions_list()}
 </main>"""
@@ -1555,12 +1598,16 @@ who-can-open table.</div>
 <h3>Entering Castle</h3>{steps(ENTER)}
 <h3 id="watch">Watch it happen</h3>{anim_section()}
 <h3>Leaving Castle</h3>{steps(LEAVE)}
+<p class="lede">{E(OLDER_LEAVE)}</p>
 <h3>Replace All Keys</h3>{steps(REPLACE)}
 <h3>Another device follows</h3>{steps(FOLLOW)}
 <h3>The key doors</h3><ul class="roads">{''.join(f'<li>{x}</li>' for x in KEY_DOORS)}</ul>
 <h3>Opening an older backup</h3>{steps(OPEN_OLD)}
 <h3>Other copies, and a library landing from another Mac</h3><ul class="roads">{''.join(f'<li>{x}</li>' for x in OPEN_OTHER)}</ul>
-<h3>Existing stores, once (the migration)</h3>{steps(MIGRATE)}
+<h3>Existing stores, once (the migration)</h3>
+<p class="lede">It runs once, at first unlock on the new build, as a plan. The whole new system stays in Debug builds until
+her word at release, so on a Release build it runs only once she has turned the new system on.</p>
+{steps(MIGRATE)}
 <h3 id="shared">The old shared Apple key (stores from before this change)</h3>{steps(SHARED)}
 <h2 id="accounts">Accounts</h2>{ACCOUNTS}
 <h2 id="lobby">The lobby and Touch ID</h2>{LOBBY}
