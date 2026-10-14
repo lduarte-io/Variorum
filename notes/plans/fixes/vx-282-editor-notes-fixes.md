@@ -2622,7 +2622,7 @@ no claim held, no revert in flight (`git diff` empty after every named revert, e
 |---|---|
 | R1-1 find paint × the read-going settle | **FIXED** `833b1ba7` — pin `49ebe4c4`: W1 red on old (2 issues: the colour, the runs), W2 g1 green |
 | R1-2 Write's overlays after a settle re-wrap | **FIXED** `9f9980cb` (a deliberate refinement of the agreed shape — below, for the Fable round) — pin `174b64f3`/`9f9980cb`: W1 red on old (1 issue: badge 318 vs block 340 — the block moved 22 pt, one line), W2 g1 green |
-| R1-3 the phone's guard window (PIN FIRST) | ~~DISMISSED AS HOLLOW~~ **RE-OPENED at the closeout's merged-tip run (C-1):** green ALONE (W2b, W1c — the test's window key), RED in the whole phone target and in a deterministic two-suite repro (a non-key window; `"hi"`/`"hello there"` desync) — the orchestrator's call; the guard `47606e46` survives as an object |
+| R1-3 the phone's guard window (PIN FIRST) | **FINAL — the guard HOLLOW (no pin shows it fixing anything), reverted `f16fc09f`.** Re-opened at the merged-tip run (C-1), then decided at c1decide: in the polluted test posture (an earlier suite's stale first responder) the settle's write can desync a `replace`; in a real phone's posture it does not (the keyfix, settle ON); the posture gap is **VM-19**'s |
 | R1-4 the comments panel to `Core/Views/` | **DONE** `b7fece88` — W2 g3a + g3b green (73/10 with the 9 VX-229 known issues; 67/10) |
 | R1-5 #220's disclosure line | **DONE** `f411c213` |
 | R1-6 O-4 re-verified | **DONE** `f411c213` — premise FALSE, U3's O-4 WITHDRAWN in the U3 record; no ticket |
@@ -3431,3 +3431,41 @@ no launch, no walk. Extract: `closeout/logs/c1-decide-extract.txt`.
 3. Ready to land on the ruling (none committed): the KEYFIX as a TEST-ONLY commit (`scratchpad/vx282-c1/keyfix.patch` —
    `MobileMarkdownCaretTests.host`/`dismiss`); the DISABLE stays prepared (`disable-phone-settle.patch` + its products) if
    the orchestrator prefers the settle off given finding 2. `12d55d12` stays for the ruling.
+
+#### C-1 — THE ORCHESTRATOR'S RULING AND ITS LANDING
+
+**The ruling (on the c1decide evidence):** (1) the `leaving…` crash is a PRE-EXISTING phone-gate gap reached only in the
+polluted test posture (a stale first responder left in a hidden window by an earlier suite) — **VM-19** ("A stale first
+responder in a hidden window desyncs the phone editor on insertText"), minted by the orchestrator; (2) **R1-3, FINAL:
+the `pendingEdit` guard is HOLLOW — reverted.** In the clean posture R1-3 is green WITHOUT the guard (r1fix W2b, 79/11);
+in the polluted posture it desyncs WITH the guard (c1fix (a)); no pin shows the guard fixing anything, so under the
+hallucination guard it does not ship. **R1-3's final disposition:** in the polluted posture the settle's write can
+desync a `replace` (gone with the settle off — D); in the posture a real phone is in it does not (K, settle ON); the
+posture gap is VM-19's. (3) the keyfix lands test-only; (4) the phone tree rebuilt at the new tip and one final window on
+that exact tip; (5) the c1 products and patches deleted.
+
+**Landed:**
+- `f16fc09f` — `git revert` of `12d55d12` (a new commit; message reworded before its first push to state the reason).
+  `MobileEditorViewModel.settleMarkdownCaret` is back to the r2fix tip's (the R1-7 `isEditable` gate, no guard).
+- `0c5dbfe8` — the KEYFIX, TEST-ONLY (`MobileMarkdownCaretTests.host(_:)` on the foreground `UIWindowScene`, key, any
+  leftover first responder resigned first; `dismiss(_:_:)` resigns before hiding; the doc names VM-19). Its message states
+  the mechanism and K's evidence (22/2; the whole phone target 824/129, only the standing red).
+- **The product:** `DerivedData/vx282-u2-ios` rebuilt at `0c5dbfe8` — TEST BUILD SUCCEEDED (`vx282-c1-final-build.log`;
+  app `a9d0b410` — differs from the guarded `7d891e87`, the guard gone; tests `324de5fc`). The Mac is unaffected (the
+  guard was phone-only; the keyfix is a phone test) — `vx282-u1` stands.
+- **Deleted:** `DerivedData/vx282-c1-decider-ios-products`, `…-keyfix-ios-products`, `…-disable-ios-products` and
+  `scratchpad/vx282-c1/` (the decider/keyfix/disable patches — the keyfix is now a commit; the disable was not needed).
+  Still on disk from the ladder: `vx282-r1fix-old-products`, `vx282-r1fix-r21revert-products`,
+  `vx282-r1fix-old-ios-products` (the orchestrator's to clear at the merge).
+
+**THE FINAL c1 WINDOW PLAN (≈12 min; on the orchestrator's claim line; `guard.sh --author` first; `pgrep -lx Variorum`
+empty; no launch, no walk; `-derivedDataPath DerivedData/vx282-u2-ios` = the tip `0c5dbfe8`; iPhone 17 Pro iOS 26.2,
+`-collect-test-diagnostics never`; logs `closeout/logs/`):**
+- **(i) the two-suite repro (≈1 min):** `-only-testing:VariorumMobileTests/MobileLivenessTests
+  -only-testing:VariorumMobileTests/MobileMarkdownCaretTests` → `c1-final-repro.full.log`. EXPECTED green — no crash, no
+  restart, no desync (the settle ON, no guard, the keyfix's posture).
+- **(ii) the WHOLE phone target (≈9 min):** no `-only-testing` → `c1-final-whole.full.log`. EXPECTED: only the standing
+  `MobileStructuralTests.nothingUserFacingNamesTheMac` + the 4 declared known issues; one launch.
+- Then `xcrun simctl shutdown all` → 0 booted; release; record; report.
+
+**READY FOR STAGE — c1final: (i) the two-suite repro, (ii) the whole phone target, on the tip `0c5dbfe8`, ≈12 min.**
