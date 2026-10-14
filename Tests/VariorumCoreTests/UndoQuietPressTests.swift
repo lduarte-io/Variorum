@@ -401,6 +401,27 @@ struct UndoQuietPressTests {
         }
     }
 
+    /// Diverge for This Book (the copy family): she deletes the copy (her
+    /// Delete clears the redo future, never the undo stack); ⌥⌘Z brings the
+    /// original's membership back (it WROTE); ⇧⌥⌘Z must not revive the copy
+    /// she deleted — it never died on the undo's stamp.
+    @Test func aDivergedCopySheDeletedStaysDeletedThroughTheRedo() throws {
+        try withUndo { ops, stack, db in
+            let book = try ops.createReading(name: "lessons", kind: .book)
+            let note = try ops.createPost(title: "ch 1")
+            _ = try ops.seedBlock(in: note.id, text: "Her opening.")
+            _ = try ops.addPostToReading(note.id, to: book.id)
+            stack.removeAll()
+
+            let diverged = try ops.divergePostForReading(note.id, in: book.id)
+            try ops.deleteContainer(diverged.copy.post.id)
+            _ = try stack.undo(with: ops)
+            #expect(try db.deletedAt("reading_post", diverged.originalMembershipID) == nil)
+            _ = try stack.redo(with: ops)
+            #expect(try db.deletedAt("container", diverged.copy.post.id) != nil, "her delete of the copy stands")
+        }
+    }
+
     // MARK: - Entries with parts, the mirror order (her own and the client's)
 
     /// Her merge: the merged block carries her later words, so ⌥⌘Z sends it to
