@@ -2489,3 +2489,32 @@ always did at that one spot: it inserts a new `**` pair (one letter later, at `*
 Built: (a) unchanged — the acts are among "every other reader" your ruling left untouched. Option: (b) the acts read
 the caret-aware reading when nothing is selected, so ⌘I unwraps what the face shows.
 Status: open — your eye in daily use.
+
+#220 — **VX-154 (U3), Write's take panel answers every routed command about a block or a take on ITS block — seven
+readings built PROVISIONAL** (the binding record is `notes/plans/fixes/vx-282-editor-notes-fixes.md` § U3 — the command
+table, the traced mechanism, the pins). *(Numbering: the next free number when written; the merging session renumbers if
+a sibling run took it.)* Each is built as stated, with a line to reverse it:
+**P-U3-1 — ⌘S in the panel with no take clicked into commits the take the block shows**, and the ring moves onto it first
+so you see which take you are committing. Built (a): P-VX150-1's rule (#210, ratified for ⌘T), and what ⌘S already did
+when the panel was the caret block's. Options: (b) refuse, as the Takes board does ("Click into a take first — ⌘S commits
+the take you're in."); (c) commit the shown take without moving the ring.
+**P-U3-2 — which block acts the panel does and which go grey.** Built (a): the panel acts on its own block for Delete
+Block, Archive Block, Move Take into a Block Below and Turn All Takes into Blocks (you see the result in the panel: its
+"no longer in the note" face, takes leaving its list); the nine verbs that cut, join or add blocks where you write
+(Divide, Divide choosing takes, Extract, Make Block, Merge, Merge choosing takes, Delete in Every Take, New Block Below,
+New Block at End) are grey while the panel is up. Options: (b) those nine close the panel and run in Write at the panel's
+block (needs new editor machinery, not built); (c) grey the four block acts too, so the panel never changes the note's
+blocks; (d) act on all of them as the Takes board does (their results land on blocks the panel doesn't show).
+**P-U3-3 — Move Take into a Block Below (⌥⌘⏎) needs a take clicked into**; with none it refuses as the Takes board does.
+Option: (b) move the take the block shows (that is the chosen take — the riskier default).
+**P-U3-4 — ⌘⇧T over the panel closes it** (the toggle's close half — ⌘⇧T opens it). Before, it swapped the panel to the
+block your Write caret is in when the panel came from another block's ⑂ badge. Options: (b) keep the swap; (c) nothing.
+**P-U3-5 — a callout set from the panel is silent** (as everywhere — the frame is the feedback), and the panel draws no
+frame, so you see it on the page when the panel closes. Options: (b) a receipt in the panel; (c) the panel wears the frame.
+**P-U3-6 — copy (your copy pass):** the panel's archive receipt "Take archived — never gone: “archived takes” below brings
+it back." (the ticket's rider — it named the board's "archived · n") and the grey verbs' line "That works in the note
+itself — close the takes panel first."
+**P-U3-7 — the note's own commands still reach Write while the panel is up** (seal, ⌘⇧S, Versions, the tray, Find,
+⌘⇧L). The ones that show something show it beneath or after the panel. Options: (b) grey them while the panel is up;
+(c) the panel shows them itself.
+Status: open — your eye in daily use.

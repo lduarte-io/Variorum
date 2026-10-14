@@ -113,7 +113,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 |---|---|---|
 | U1 | VX-290 — the empty-block backspace's caret landing | **DONE** — fix `385aa1fc`; W1 red on old + W2 the Mac batch green `be826a5d`; W3 the walk, every row held `a7a63949`. Stage released 22:01:26 and 23:47:00. One observation for the orchestrator to ticket (the bar's word counter, not this unit's road). No revert in flight. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **READY FOR STAGE — u2b: phone W2b suites (-collect-test-diagnostics never) + Mac g1, ≈12 min.** The W2b fix built: `MarkdownFace.settleCaret` never writes while `storage.editedMask` is non-empty (before the ledger, so a skip consumes nothing); the trace of why a skipped settle is never lost is recorded; the red pin is `MobileMarkdownCaretTests.leavingATrailingSpaceBehindUnstylesTheSpanHonestly` (red on the pre-guard product by its crash). Rebuilt headless into the EXISTING `vx282-u2` + `vx282-u2-ios` only. Earlier: W1 red on old as designed, W2 Mac 190/26 green, W3 walk holds (Study). No claim held; no revert in flight. |
-| U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **IN-PROGRESS** — record `4e5d3464`; seams `04e0369f`; pins ahead of the fix `fa90e851` (its product built headless and set aside: `DerivedData/vx282-u3-old-products`); the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel), fixed product built headless (`DerivedData/vx282-u3`). **REVERT B IN FLIGHT** (the ring-scope guard only: `TakesViewModel.ringMayStand` returns true — applied to the working tree, NEVER committed; restore = `git checkout -- App/Variorum/Variorum/Features/Takes/TakesViewModel.swift` from `26ecec8c`, verify by `git diff`). Every count PENDING. |
+| U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **READY FOR STAGE — W1 red on old (old products) + W1b revert B (the ring guard) + W2 the Mac batch g1/g2 (fixed) + W3 a short walk on the dev store (both voices), ≈42 min.** Record `4e5d3464`; seams `04e0369f`; pins ahead of the fix `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Three product sets built headless, TEST BUILD SUCCEEDED: `DerivedData/vx282-u3-old-products`, `…-revB-products`, `DerivedData/vx282-u3` (fixed). Revert B DONE and RESTORED (`git diff` empty). PROVISIONALs P-U3-1…7 (QUESTIONS #220). No claim held; no revert in flight. Every count PENDING. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
@@ -797,6 +797,167 @@ panel's ring never stands outside its block** — the board's delete/archive and
 survivor or a minted block (`parkFocus`), a pane the panel never renders, after which ⌘⏎ / ⌘⇧A / ⌃⌘→ would act on a
 block the panel does not show (this ticket's class, one step later). `TakesViewModel.writePanelBlockID` (set only by
 the panel) makes `focus(_:)` blur instead of landing on another block.
+
+**Where canon decides, and where it does not.** AppSpec §9's ops are untouched (every act is an existing operation
+through the board's existing body). P-1/P-2 decide the grey (gating is data; a door that can never act in its context
+is not rendered). 13k K6 decides the named target (a scoped surface names its block; a named target never falls back).
+P-VX150-1 (ratified, QUESTIONS #210) decides ⌘S's no-ring fallback by extension, and VX-150's own ⌘⇧A arm decides
+⌥⌘⏎'s strictness by the same reading. VX-150's "fall through by design" for ⌘⇧L decides the note family. Nothing rules
+⌘⇧T's meaning over an open panel, the act/grey split, or the copy — PROVISIONAL below.
+
+**The diff (seven app files, one new test file, one test edited; zero `Sources/`, `Sync/`, custody, Keychain, schema,
+`Shared/`; nothing in `EditorSurfaceController`, `BlockRangeIndex`, `EditorEditRoute`/`SeamCarvePlan`,
+`EditorViewModel`, `runStructural` or the markdown face):**
+- `Registry/Capability.swift` — `CapabilityContext.writeTakesPanelAttached` (default false). `Registry/CommandRouter.swift`
+  — `attachWriteTakesPanel()` / `detachWriteTakesPanel(_:)`, a token set + an observable flag (the takes board's
+  attachment shape), carried into `currentContext()`. `Registry/CapabilityRegistry.swift` — `outsideWritesTakesPanel(_:)`
+  wraps the nine verbs' OWN rules (`divideAvailability` ×2, `structural` ×5, `takeFamily` ×2); with the panel down every
+  answer is byte-unchanged (`ae2277b7`).
+- `Features/Takes/WriteTakesPanel.swift` — the init gains `onClose:` (the host's close road; nil = `dismiss`) and a pin's
+  road in for its model (`model:`; nil = it builds its own, as before) (`04e0369f`); it scopes its model to its block
+  (`writePanelBlockID`), attaches to the registry on appear and detaches on disappear, claims the commands per the table
+  (`handleRouted` → the new arms + `handleTakesKey`, VX-150's arms moved verbatim), and presents what its arms raise —
+  the savepoint name ask (on its header, arrow below), comments, Block History's fallback and its tray (the Takes bar's
+  presentations, same model requests, `TakesBottomBar.swift:292-351`'s twins; a shared modifier for both hosts is a
+  possible follow-up, not built — it would move the bar's code, outside this unit) (`26ecec8c`).
+- `Features/Takes/TakesViewModel.swift` — `writePanelBlockID` + `ringMayStand(on:)` guarding `focus(_:)` and
+  `landAuthorityFocus(_:)` (nil ⇒ always true: the boards unchanged); `archiveTake`'s panel receipt
+  (`writePanelArchiveReceipt`); the named-target form for `requestComments`, `revealFocusedBlockOrigin`,
+  `deleteFocusedBlock`, `archiveFocusedBlock` (`applyCallout`/`copyAllTakes`'s shape; nil ⇒ byte-for-byte the routed
+  target). `Features/Takes/TakesStructureController.swift` — `deleteFocusedBlock(blockID:)`/`archiveFocusedBlock(blockID:)`
+  through `targetSlot(named:)` (a named block is looked up, never replaced by the routed target), and
+  `clickIntoATakeToMoveIt` hoisted to ONE literal for the board and the panel.
+- `Features/Editor/EditorView.swift` — the sheet passes `onClose: { model.fanPanel = nil }` (its own binding). Not on
+  VX-246's courtesy list (`EditorView` ≠ `EditorSurfaceController`/`EditorViewModel.storageDidEdit`).
+- **Outside the run's declared surfaces** ("the Write take panel's routed-command registration"): the three Registry
+  files, `TakesViewModel`/`TakesStructureController` (additive named-target parameters and the scope fact), and
+  `EditorView`'s one-line sheet wiring — each is the panel's routing's own consequence; said here and in the report.
+
+**The pins — `WriteTakesPanelRoutedCommandTests` (new, `.serialized`; `WriteTakesPanelRoutedTests.swift`).** The real
+panel mounted over a fanned block that is NOT Write's caret block, a stand-in for Write's handler beneath it consuming
+EVERY routed command (as the real one does), the router's `writeEditorAttached` wired true (Write is mounted beneath in
+the app), the panel's own model passed in. Store-asserted wherever the act writes. RED ON OLD = against the pins-first
+product (`fa90e851`'s, whose app code is pre-fix; the seams it carries are behaviour-neutral):
+
+| Test | Asserts | Old |
+|---|---|---|
+| `commitAsksForTheTakeTheRingIsInAndFilesIt` | ring in take 2 → ⌘S: stand-in never saw it; the ask names take 2; filing writes ONE commit on take 2, named; none on the caret take | RED |
+| `commitWithNoRingAsksForWhatTheBlockShows` | no ring → ⌘S: the ask names the shown take; the ring moved onto it | RED |
+| `commentsOpenOnThePanelsBlockInThePanel` | ⌘⇧': the request is the panel's block; a sheet is attached (the panel presented it) | RED |
+| `theCalloutFramesThePanelsBlock` | ⌥⌘C: the panel block's `presentation` is a callout; the caret block's stays nil | RED |
+| `copyAllTakesCopiesThePanelsFan` | ⌘⇧C: the general pasteboard holds the panel's fan, not the caret block's (saved + restored around the test — `PlainPasteDoorTests`' precedent) | RED |
+| `aTakeIntoABlockBelowMovesTheRingsTakeAndTheRingStaysHome` | ring in take 2 → ⌥⌘⏎: the page reads caret · shown · "the second take"; take 2 archived on the panel's block; caret block untouched; **`focusedPane == nil` after** (the scope guard) | RED |
+| `aTakeIntoABlockBelowWithNoRingRefusesAndMovesNothing` | no ring → ⌥⌘⏎: a refusal in the panel; nothing minted; no take left the fan; stand-in never saw it | RED |
+| `allTakesIntoBlocksActsOnThePanelsBlock` | ⌥⇧⌘⏎: the page reads caret · shown · second · third; caret block untouched | RED |
+| `blockHistoryOpensForThePanelsBlock` | History: the request is the panel's block, presented by the panel (no detail in the harness ⇒ the fallback) | RED |
+| `originOpensThePanelsBlocksOriginals` | the panel's block is a MERGE: the origin door opens ITS History | RED |
+| `deleteBlockDeletesThePanelsBlockAndTheRingNeverLeavesIt` | ring in take 2 → Delete Block: the panel block tombstoned, caret block live, the gone face, **`focusedPane == nil` after** (not the survivor) | RED |
+| `archiveBlockArchivesThePanelsBlock` | Archive Block: the panel block's `archived_at` set; the caret block's not | RED |
+| `theWriteVerbsAreGreyWhileThePanelIsUpAndNeverReachTheCaret` | the nine are `isEnabled == false`; dispatched anyway: none reaches the stand-in, the panel refuses, the page still has 2 blocks | RED |
+| `showTakesClosesThePanel` | ⌘⇧T: the host's close road called once; the stand-in never saw it | RED |
+| `theArchiveReceiptNamesThePanelsOwnList` | ⌘⇧A (ring in take 2): a receipt containing "archived takes", not "archived · n" | RED |
+| `theNoteCommandsStillReachWrite` | seal, ⌘⇧S, Versions, tray, ⌘⇧L, close-all, ⌘F all reach the stand-in | GUARD |
+| `whenThePanelClosesEveryCommandIsWritesAgain` | after unmount: Divide / New Block Below enabled again; every claimed command reaches the stand-in (the lifecycle pin) | GUARD |
+
+- **Edited:** `WriteTakesPanelKeysTests.theBloomAndLensKeysStillReachWriteAndEverythingReturnsWhenThePanelCloses` — ⌘⇧T
+  left its "still reaches Write" list (now `[.closeAll, .saveLens]`), pointing at `showTakesClosesThePanel` (P-U3-4).
+  Green on both sides as edited.
+- **Not red-on-old by construction, so proven by a discriminating revert — REVERT B (the ring-scope guard alone):** on the
+  old product the acts that park the ring never reach the panel, so the guard's two `focusedPane == nil` expectations
+  cannot be red there. Revert B (`ringMayStand` returns true; applied to the working tree only, built, restored by
+  `git checkout --` from `26ecec8c`, `git diff` empty, the fixed product rebuilt) — EXPECTED: ONLY those two expectations
+  red, everything else in the suite green.
+
+**The products (one new tree, two products set aside — 455 MB each, `Build/Products` only; the `.xctestrun` is
+relocatable via `__TESTROOT__`):** `DerivedData/vx282-u3-old-products` (the build of `fa90e851`: pins + seams + the
+pre-fix app) · `DerivedData/vx282-u3-revB-products` (the fix minus the guard) · `DerivedData/vx282-u3` (the build of
+`26ecec8c`, the fixed product). All three **TEST BUILD SUCCEEDED**; zero warnings in the touched files. No core or
+`Shared/` file touched — no `swift test` and no phone build owed.
+
+**PROVISIONALs (QUESTIONS #220):**
+- **P-U3-1 — ⌘S with no take clicked into commits what the block shows**, the ring moved onto it first. Built (a): P-VX150-1's
+  ratified rule, and what Write's caret arm committed when the panel was the caret block's (no regression there).
+  Options: (b) refuse as the Takes board does ("Click into a take first — ⌘S commits the take you're in."); (c) ask for the
+  shown take without moving the ring.
+- **P-U3-2 — the act/grey split.** Built (a): the panel ACTS on its own block for delete block, archive block and the
+  take↔block pair (results the panel can show: its gone face, takes leaving its fan); the nine verbs that cut, join or add
+  blocks where she writes are GREY while the panel is up. Options: (b) those nine close the panel and run in Write AT THE
+  PANEL'S BLOCK (fire-and-DO — needs a new road for an already-mounted Write editor to take a carried landing: editor-seam
+  machinery, not built); (c) grey delete/archive and the take↔block pair too (the panel never changes the note's blocks);
+  (d) act on all of them as the Takes board does (divide/insert would land on blocks the panel never shows, and
+  extract/merge have no native board road — they carry to Write).
+- **P-U3-3 — ⌥⌘⏎ needs the ring.** Built (a): no ring ⇒ the board's own refusal (an act that takes a take OUT of the fan,
+  ⌘⇧A's precedent). Option: (b) the shown take, P-VX150-1's rule (what Write's caret arm moved in the caret-block case) —
+  moving the CHOSEN take out is the riskier default.
+- **P-U3-4 — ⌘⇧T over the panel CLOSES it** (the toggle's close half; the board's ⌘⇧T closes a bloom). Options: (b) the
+  swap to the caret block's panel (VX-150's untouched "arguably right" — the ticket lists it as a symptom); (c) nothing.
+- **P-U3-5 — a callout set from the panel is silent** (as on every surface — the frame is the feedback) and the panel draws
+  no frame; it shows on Write's page the moment the panel closes. Options: (b) a receipt in the panel; (c) the panel wears
+  the frame (the board's `TakesCalloutFrame`) — a new face, not built.
+- **P-U3-6 — copy (her copy pass):** the archive receipt "Take archived — never gone: “archived takes” below brings it
+  back." (the rider) and the grey verbs' line "That works in the note itself — close the takes panel first." (heard only
+  by a dispatch that bypasses the greyed menu).
+- **P-U3-7 — the note's own commands keep reaching Write while the panel is up** (seal, ⌘⇧S, Versions, the tray, find,
+  ⌘⇧L — VX-150's ⌘⇧L ruling widened to the note family). Those that PRESENT something do so beneath or after the panel
+  (Write's find bar, ⌘⇧L's name sheet, the no-inspector hosts' fallback sheets queue behind it). Options: (b) grey them
+  while the panel is up; (c) the panel presents them.
+
+**Observations (not fixed — for the orchestrator to ticket or dispose):**
+- **O-1 (same class, not routed):** File ▸ Export Block… (`ShellActions.exportCaretBlock`, `ShellActions.swift:350`) exports
+  Write's CARET block while the panel is up — a direct call, outside the routed vocabulary this ticket covers.
+- **O-2:** ⌃⌘↑/⌃⌘↓ (previous/next block, a direct editor call) move Write's caret beneath the sheet — invisible, writes nothing.
+- **O-3 (the rider's twin):** `TakeStructureCopy.movedNote` (⌥⌘⏎'s receipt, shared by Write and the boards) names
+  "“archived · n” under its takes" — read in the panel now, and in Write, whose road back is this panel's "archived
+  takes". Shared copy on Write's road — not changed here.
+- **O-4 (the recorded two-windows keying family):** the handler stack and the grey fact are app-wide; with the panel up in
+  one window it answers commands meant for another window's surface. Pre-existing (VX-135's registration); U3 widens what
+  the panel answers.
+- **O-5 (U5 overlap):** the panel is now a FOURTH host of `CommentsPanel` (a nested sheet — Write's sheet, the Takes bar's
+  sheet and `TakesShared`'s popover are the others). VX-257's park-on-host-closing must cover a sheet host the way it
+  covers the bar's. No overlap with VX-183's registry declarations (U3 declares no comment door).
+- **O-6:** ⌘K's palette is a `.sheet` on `RootView`; expected NOT to open while the panel is up (AppKit queues a second
+  sheet) — W3 probes it. If so, History, origin, seal, Versions and the tray have no live door while the panel is up; their
+  arms are still the panel's for any road that reaches.
+
+**THE WINDOW PLAN (≈42 min; runs only on the orchestrator's claim line; `guard.sh --author` before every leg; `pgrep`
+first — no `/Applications/Variorum.app` instance, none of ours).** From `App/Variorum/`; logs to
+`notes/plans/vx282-screens/u3/logs/`, captures to `notes/plans/vx282-screens/u3/`.
+- **W1 — red on old (≈5 min):** `xcodebuild test-without-building -xctestrun
+  DerivedData/vx282-u3-old-products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination 'platform=macOS'
+  -only-testing:VariorumTests/WriteTakesPanelRoutedCommandTests -only-testing:VariorumTests/WriteTakesPanelKeysTests`
+  → `w1-red-on-old.log`. EXPECTED: the fifteen RED rows above red; the two GUARDS green; `WriteTakesPanelKeysTests`
+  wholly green.
+- **W1b — revert B (≈3 min):** the same with `-xctestrun DerivedData/vx282-u3-revB-products/Variorum_Variorum_macosx27.0-arm64.xctestrun`,
+  `-only-testing:VariorumTests/WriteTakesPanelRoutedCommandTests` → `w1b-revB.log`. EXPECTED: ONLY
+  `aTakeIntoABlockBelow…StaysHome` and `deleteBlock…NeverLeavesIt` red, each on its `focusedPane == nil` alone.
+- **W2 — the fixed Mac batch (≈12 min), `-derivedDataPath DerivedData/vx282-u3`, two groups (suite TYPE names, grepped):**
+  (g1) `WriteTakesPanelRoutedCommandTests` `WriteTakesPanelKeysTests` `WriteTakesPanelChooseTests` `WriteTakesPanelTests`
+  `PostDetailRoutingTests` `CommandRouterTests` `MoveAndExecuteTests` `TakesLandingTests` `CapabilityRegistryTests`
+  `TakeCardDoorTests` → `w2-g1.log`; (g2) `TakeToBlockDoorTests` `CopyAllTakesDoorTests` `OriginBlockDoorTests`
+  `ArchivedListingTests` `TakesChooseRingTests` `TakesArticleScrollTests` `SavepointTakesDoorTests`
+  `SavepointCommitDoorTests` `RecoveryDoorsTests` `BlockHistoryPaneTests` `NewModesTests` `NoteTrayTests`
+  `TutorialTakesActsTests` `TutorialDeletionActsTests` → `w2-g2.log`. Read every suite's ✔/✘ line and the skips (a wrong
+  name runs 0 tests and still "succeeds").
+- **W3 — the walk (≈22 min), `DerivedData/vx282-u3/Build/Products/Debug/Variorum.app` on the DEV store only** (dismiss a
+  What's New sheet if shown; the voice as found, recorded). Stage the note through the shelf's quick-entry bar:
+  `{t:"VX-154 walk"}alpha` ⇧⏎ `beta` ⏎ → it opens in Write. Caret into `beta` (⌘↓), ⌘T twice (a fan of three), then
+  ⌘↑ (the caret back in `alpha` — the caret block is NOT the panel's). Open `beta`'s panel from its ⑂ badge (located by a
+  region capture, clicked by `cliclick`); click into its second take. Region captures before/after each row:
+  1. **⌘S** → the name field in the panel (capture) → type `walk` ⏎ → the receipt (capture); `alpha`'s take untouched.
+  2. **⌘⇧'** → the comments sheet for `beta`'s block over the panel (capture) → close it by its own Close.
+  3. **The Block menu opened** (`cliclick` on the menu bar) — Divide, Extract, Make Block, Merge, the two "choosing
+     takes", Delete in Every Take, New Block Below, New Block at End GREY; Delete/Archive Block live (capture) → ⎋;
+     then **⌘⇧D** → nothing happens (capture).
+  4. **⌘K** → does the palette open over the panel? (capture — O-6); if it does, "Block History" ⏎ → `beta`'s history
+     (capture).
+  5. **Block ▸ Archive Block** → the panel's gone face + the receipt; Write beneath keeps `alpha` (capture) → **⌥⌘Z** →
+     `beta` returns (capture).
+  6. **⌘⇧T** → the panel CLOSES; Write, caret still in `alpha`, no swapped sheet (capture).
+  7. **Lifecycle:** ⌘S now → Write's own name field for `alpha`'s take (capture) → ⎋.
+  8. **The second voice** (⌘K "Use Terminal Voice" / "Use Study Voice", whichever is not current): reopen `beta`'s panel
+     from its badge, click into a take, ⌘S (capture the field in the panel) → ⎋ → ⌘⇧T → restore the voice found.
+  Then the walk note to the Trash (residue recorded), quit OUR instance by identity, `pgrep` again, the dev store left
+  Standard and unlocked with its voice as found, release the claim.
 
 ## Ladder
 
