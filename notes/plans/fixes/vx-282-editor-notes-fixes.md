@@ -1012,7 +1012,7 @@ into. Carried as PROVISIONAL here with the same options (P-U4-1).
 What can put the caret in the box (every `makeFirstResponder(box)` road in the code): (i) `CaptureNSTextView
 .viewDidMoveToWindow` while `wantsInitialFocus` (`CaptureTextView.swift:386-394`); (ii) `Coordinator.takeFocus()` from
 `updateNSView` when the counted `focusRequest` changed (`:264-267`, `:323-332`); (iii) her click. Nothing else in the app's
-names the box.
+code names the box (AppKit's own key-view loop on Tab aside).
 
 - **Candidate 1 — the "asked ONCE" flag is never cleared: a REAL defect of the shared box.** `wantsInitialFocus` is set
   once in `makeNSView` from `focusRequest > 0` (`:229`) and read on EVERY arrival in a window (`:386-394`); the doc says
