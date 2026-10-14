@@ -400,11 +400,16 @@ struct WriteTakesPanelKeysTests {
         async throws
     {
         try await withPanel(seed: 154) { fixture, window, hosting, writeSaw in
-            for key in [TakesCommand.toggleFan, .closeAll, .saveLens] {
+            // VX-154 (the VX-282 run, U3 — PROVISIONAL P-U3-4): ⌘⇧T left this
+            // list. While the panel is up it CLOSES the panel (the toggle's
+            // close half) instead of reaching Write's caret arm, which swapped
+            // the sheet to the caret block's panel — pinned in
+            // `WriteTakesPanelRoutedCommandTests.showTakesClosesThePanel`.
+            for key in [TakesCommand.closeAll, .saveLens] {
                 press(key, fixture)
             }
-            #expect(writeSaw.value == [.toggleFan, .closeAll, .saveLens],
-                    "⌘⇧T, ⎋ and ⌘⇧L are not the panel's — they reach Write (saw \(writeSaw.value))")
+            #expect(writeSaw.value == [.closeAll, .saveLens],
+                    "⎋ and ⌘⇧L are not the panel's — they reach Write (saw \(writeSaw.value))")
 
             // Lifecycle: with the panel gone, every take key is Write's again.
             window.contentView = NSView()
