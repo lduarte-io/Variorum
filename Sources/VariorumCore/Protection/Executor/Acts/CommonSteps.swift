@@ -469,7 +469,7 @@ extension ActContext {
         if recorded?.retiredAt != nil { return }
         guard readable != nil || recorded != nil else { return }
         if executor.guards.retirementRerunsMovesOn {
-            try await executor.moveOffSharedKey(self)
+            try await executor.moveOffSharedKey(self, freshPair: true)
         }
         if executor.guards.doorTimeVaultCheckOn, let account = executor.configuration.session.accountID,
            let vault = try await executor.readVault(accountID: account),

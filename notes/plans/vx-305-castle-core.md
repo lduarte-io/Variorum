@@ -566,9 +566,10 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   13 tests in 2 suites green filtered — `843ef37c`;
   (d) copies — open a copy (the current key, the current facts, no act carried), land (a fresh key, an empty history,
   one secret then the other typed or made new, none through a readable Apple key), Send Library, the plaintext export,
-  the offer's delete — DONE, 11 tests in 3 suites green filtered — this commit; (e) the key doors,
+  the offer's delete — DONE, 11 tests in 3 suites green filtered — `469044e6`; (e) the key doors,
   device settings, the re-arm, confirm mode, create library, Re-link (both arms), the old shared key's move and
-  retirement, the migration — NOT-STARTED; (f) U3's guards with their DEBUG mutation pins, the log scan, decision 35,
+  retirement, the migration — DONE, 19 tests in 4 suites green filtered (every act now real — `Acts/Pending.swift`
+  deleted; 83 U3 tests in 15 suites green together) — this commit; (f) U3's guards with their DEBUG mutation pins, the log scan, decision 35,
   the failed seals — NOT-STARTED; (g) the record — NOT-STARTED.
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
 - The go/no-go record: **NOT-STARTED.**

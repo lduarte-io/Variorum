@@ -408,6 +408,12 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
         try wrote(.discardStaged)
     }
 
+    func createLibrary(with key: StoreKey, record: ProtectionRecord) throws {
+        guard live == nil else { throw ExecutorRefusal.nothingToDo }
+        live = LibraryFile(fingerprint: PF.fp(key), record: record, generation: 1)
+        try wrote(.record(f8(key)))
+    }
+
     func exportPlaintext(with key: StoreKey, to destination: String) throws {
         guard try libraryOpens(with: key) else { throw ExecutorRefusal.keyDoesNotOpenLibrary }
         exports.append(destination)

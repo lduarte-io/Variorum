@@ -121,6 +121,8 @@ public protocol LibraryFileLeaf: AnyObject {
     /// the outgoing library as an older library (`Previous Libraries/`).
     func swapStaged(setAside: Bool) throws
     func discardStaged() throws
+    /// A new library in the empty slot, under `key`, its record inside.
+    func createLibrary(with key: StoreKey, record: ProtectionRecord) throws
     /// A plaintext export carrying its library ID (§3.7).
     func exportPlaintext(with key: StoreKey, to destination: String) throws
     /// Today's in-file `RotationMarker` (`sync_state.rekey_in_progress`).
