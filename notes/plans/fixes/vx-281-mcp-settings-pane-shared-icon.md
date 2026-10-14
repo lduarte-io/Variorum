@@ -114,7 +114,7 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 | Piece | State |
 |---|---|
 | kickoff: worktree, branch, in-flight row (main 94f0a2fb), tickets In Progress, this record | DONE (orchestrator) |
-| U1 — the pane in tabs | NOT-STARTED |
+| U1 — the pane in tabs | IN-PROGRESS (opus-implementer) — the U1 UNIT RECORD below holds the design, traces and pieces |
 | U2 — the shared icon | NOT-STARTED |
 | the ladder | NOT-STARTED |
 | closeout | NOT-STARTED |
@@ -127,6 +127,107 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 
 *(each unit writes its own section here: pieces with hashes, traces, pins with red-on-old proof, PROVISIONALs,
 the walk, OWED)*
+
+## U1 UNIT RECORD — the pane in tabs: VX-199 · VX-205 · VX-232 · VX-245's two MCP sites (opus-implementer, 2026-10-13 evening)
+
+**State: IN PROGRESS.** *(This line becomes "what this unit did NOT do", said first, at the unit's close.)* **No revert
+is in flight unless a line below says so.**
+
+**Read in full before code (never delegated):** this record; `notes/plans/mcp-pane-and-docs-kickoff.md` (the U6
+section, the binding rulings, the rules, the VX-268 bullet); `notes/plans/vx-33-release-runway.md` §2–§3;
+`notes/SessionResiliencyProtocol.md`; `notes/plans/phase-13n-c-mcp-launch-readiness.md` §3 (U3, U6) and the
+UX-walk dispositions + the fix-pass rows that touch the pane (W-UX-2, W-UX-4, W-UX-8, W-UX-10, W-UX-16, W-UX-18,
+W-UX-19, UXR1-2, UXR1-6); `notes/plans/fixes/vx-184-mcp-launch-polish.md` (the cross-run lines ~95–110, U1's OWED 3c
+= VX-232, U4's risk 2 and the round-2 FOR VX-234 consent sentences); `notes/plans/mcp-launch-polish-kickoff.md`
+(R-VX184-6 as she ruled it); the four tickets (VX-199, VX-205, VX-232, VX-245) on the board; the walk lessons. Code:
+`Features/MCP/` whole (`MCPPane`, `MCPPaneCopy`, `MCPGrantSheet`, `MCPDoor`'s note/copy/settings-request road),
+`Features/Settings/{AppSettingsView,SettingsShape,SettingsSceneContent}`, `Registry/CapabilityRegistry`'s MCP
+rows, `Shared/Theme/VoiceTokens`, `Theme/VoiceControls`; tests `MCPPaneTests`, `MCPSetupMenuTests`,
+`MCPAsksWaitTests` (the ⌥⌘, pins), `MCPAskAndReceiptTests` (the rung truth pins), `MCPGrantSheetTests` (VX-272/L1),
+`MCPSetupKeyFacesTests`, `TutorialMCPChapterTests` (lesson 2's and 7's pane-word pins), `ChromeLineLimitTests`,
+`NoLiteralColourTests`, `Tests/VariorumMCPTests/MCPProviderNeutralityTests` (the O-4 fences).
+
+**Surfaces (chrome only):** `Features/MCP/{MCPPane,MCPPaneCopy,MCPGrantSheet,MCPDoor}.swift`, a new
+`Features/MCP/MCPSetupMenu.swift` (the setup menu moved out of `MCPPane.swift`, rebuilt as the code block), a new
+`Core/Views/ExplainerLine.swift`, `Features/Settings/AppSettingsView.swift` (the search's landing on the open-book
+row's tab — one closure), tests. **Zero** `Sync/`, custody/keychain, editor-seam, schema, `Sources/` or MCP-wire
+lines; `SettingsShape.swift` untouched; `TutorialSeeder` untouched (VX-197's lane — see OWED).
+
+### The traces (made before any code — the hallucination guard)
+
+- **VX-232 (bug class) — the mechanism, traced:** `MCPPane` held the setup menu's choice as VIEW state
+  (`@State private var setupClient: MCPSetupClient = .claudeCode`, `MCPPane.swift:38`), while the copy act's receipt
+  lives on the DOOR (`MCPDoor.note`, place `.connect`, set by `copySetupCommand(for:)` at `MCPDoor.swift:493`), which
+  is app-lived. Anything that remounts the pane — switching to General to flip the voice and back (VX-184 U1's live
+  round did exactly that), another pane, closing Settings — re-runs `@State`'s initial value: the segment comes back
+  as Claude Code, the receipt still reads `copiedJSONReceipt` ("Copied. Paste it into your client's MCP
+  settings…"), and the menu's own `.onChange(of: client)` never fires (an initial value is not a change). Inputs: Any
+  MCP client chosen → copied → the pane remounted. Wrong state: segment = Claude Code under the Any-client receipt —
+  the exact lie `clearConnectNote`'s doc names ("a 'Copied … Claude Code' caption under Codex's text would be a
+  lie"). **Not mooted by tabs alone** — a tabbed pane with the same `@State` would reset the same way — so it is
+  FIXED, red-first: the choice moves onto the door beside the receipt it explains (`MCPDoor.setupClient`, session-
+  lived like the tab memory R-VX184-6 asks for), choosing another client clears the receipt in the door
+  (`chooseSetupClient`), and a copy makes its client the chosen one, so the receipt always names the shown client.
+- **VX-245 (lint class):** `ChromeLineLimitTests.everyBareFixedSizeStatesItsLinePolicy` lists
+  `MCPPane.swift:412` (the setup segment's `.fixedSize()`) and `MCPGrantSheet.swift:285` (HOW LONG's segmented
+  picker) — no `lineLimit(` within the four lines above either. A segmented control's labels are one line by
+  nature, so the sanctioned form is `.lineLimit(1)` stated at the site.
+- **VX-199 / VX-205 (design rows — a geometry oracle + the walk, not red-on-old):** today's pane is ONE grouped
+  form of eight sections with the setup at the very bottom (her "you wouldn't know without scrolling down where the
+  command to set it up is"), five explainers running 2–6 lines.
+
+### The design (settled at kickoff; each call said, PROVISIONALs listed below)
+
+1. **The pane (R-VX184-6):** one grouped form, top to bottom — the server section (the switch, its status, ONE
+   explainer line with (i)), **Waiting** (whenever an ask waits — unchanged rows, Answer…, "all N ›", its caption,
+   ⌥⌘,'s anchor), **Connection requests** (whenever one waits — see P-VX281-U1-1), then the **tab row** (a segmented
+   control: Connect · Clients · Shared with AI · Activity) heading the chosen tab's content. Connect = the setup
+   (its section keeps the title "Connect a client", so the field guide's "under Connect a client" stays true);
+   Clients = the clients, their "all N ›", L1 as one line with (i); Shared with AI = the act rows (Change… · Revoke
+   unchanged), "all N ›", then the Open book switch; Activity = the coarse log and its "all N ›".
+2. **The opening tab (R-VX184-6):** a pure rule — her pick this session, else Connect while no client is approved,
+   else Clients (`MCPPaneTab.opening`). Her pick is remembered on the door (app-lived — "per session" read as this
+   app session; never stored), so it survives pane switches and Settings closing.
+3. **The (i) component:** `ExplainerLine` (`Core/Views/ExplainerLine.swift` — Mac chrome's shared home, for the
+   settings effort to reuse): one line, never wrapping, and an (i) whose popover holds the whole text; no (i) when
+   the line already is the whole text. Token-free (semantic styles only), so any Settings pane can use it.
+4. **The code block (VX-205):** the docs-site idiom — a rounded block on the voice's `codeTint`, a header strip
+   holding the client choice (Claude Code · Codex · Any MCP client, the same segmented menu) on the left and THE copy
+   icon (`doc.on.doc`, a ✓ for a moment after a copy lands) in the upper right, then the setup text in mono, masked
+   key as before. **Registry shape — the act's NEW FACE, not a second door:** `.mcpCopySetupCommand` stays ONE
+   act on ONE surface; the icon IS its door, its verb ("Copy setup command", her R-13nb-5 words, pinned) rendered as
+   the icon's help and accessibility label, so P-1's declared ⇔ rendered holds and every pin keeps its meaning (the
+   verb, `surfaceCapabilities`, the copy's key mint and receipt, the O-4 fence, the guide's "press Copy setup
+   command" pin). A visible "Copy setup command" button beside the icon would be two doors to one act on one surface —
+   exactly what her "very standard look" leaves out.
+5. **The explainers cut to one line** (pane: the server blurb, L1, the key line, the stdio line, each client's
+   sentence; the grant sheet: HOW MUCH's rung line, where the edit rung's line is the brief's named case). The
+   full texts are UNCHANGED and live in the popovers — every truth pin on them stands. **The edit rung's truth was
+   already brought to the as-built reach by VX-184's ladder round 2** ("…change, archive and delete what you
+   shared, your own words included — when it rewrites a take, the take's words before and after are kept as
+   commits…" — `MCPPaneCopy.rungDetail(.edit)` and `enableBlurb`, pinned in
+   `MCPAskAndReceiptTests.theGrantSheetOffersTheServedRungsWithTheMockupsSentences`); this unit re-checks it against
+   the shipped catalog and gives it the one-line form.
+6. **The search's landing:** a Settings search finding the open-book row now opens the pane ON the Shared with AI
+   tab (the row lives there) — `rowIDsRendered`'s contract (the search never names a row the pane does not show)
+   kept through the tabs.
+
+### Pieces (LIVE STATUS — flipped in the same commit as each piece)
+
+| # | Piece | State |
+|---|---|---|
+| 1 | this record opened (traces, design) | DONE (this commit) |
+| 2 | VX-232's red-on-old pin + the geometry oracle, committed on the OLD pane; the old tree built for the red run | NOT-STARTED |
+| 3 | VX-245 — the two MCP `.fixedSize()` sites to `.lineLimit(1)` | NOT-STARTED |
+| 4 | `ExplainerLine` + the one-line summaries (`MCPPaneCopy`) + FOR VX-234 rows | NOT-STARTED |
+| 5 | VX-232's fix — the door holds the setup choice and the tab memory | NOT-STARTED |
+| 6 | VX-205 — the setup menu as the code block (`MCPSetupMenu.swift`) | NOT-STARTED |
+| 7 | VX-199 — the tabbed pane + the search's landing | NOT-STARTED |
+| 8 | the grant sheet's rung line with (i) | NOT-STARTED |
+| 9 | the pins (pure rules, the one-line fits, the registry shape) + the capture harness; the new tree built | NOT-STARTED |
+| 10 | STAGE WINDOW 1 — the Mac batch, the red-on-old runs on the old tree, the captures | NOT-STARTED |
+| 11 | STAGE WINDOW 2 — the walk in both voices | NOT-STARTED |
+| 12 | close: self-assessment, PROVISIONALs, OWED | NOT-STARTED |
 
 ## The ladder
 
