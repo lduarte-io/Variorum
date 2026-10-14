@@ -796,6 +796,7 @@ final class EditorViewModel {
 
     /// Internal so tests can drive the header without the observation.
     func adoptHeader(_ value: Queries.ContainerHeader?) {
+        let wasNoteEditable = noteIsEditable
         header = value
         // The structural flight's non-editable fence must hold for the
         // WHOLE flight (review round 1, MINOR 2): the op's own touch stamp
@@ -804,17 +805,25 @@ final class EditorViewModel {
         // The flight's defer re-derives editability from the freshest
         // header at flight end.
         if !structuralInFlight {
-            let editable = value.map { !$0.locked } ?? false
-            let flipped = textView.map { $0.isEditable != editable } ?? false
-            textView?.isEditable = editable
-            // VX-282 R1-7: the caret's honour follows the editability — a note
-            // SEALED while her caret sits at a rescue point re-reads that line
-            // caret-blind (no caret is drawn on a sealed page), and unsealed it
-            // honours the caret where it still stands. Only on a flip: a header
-            // delivery rides every autosave's touch stamp.
-            if flipped { settleMarkdownCaret() }
+            textView?.isEditable = noteIsEditable
         }
+        // VX-282 R1-7 (+ round 2, F-2): the caret's honour follows the NOTE's
+        // editability — a note SEALED while her caret sits at a rescue point
+        // re-reads that line caret-blind (no caret is drawn on a sealed page),
+        // and unsealed it honours the caret where it still stands. Keyed on
+        // the note, NOT on the view's `isEditable`, and run whether or not a
+        // flight is up: a seal delivered DURING a flight (sync racing an act)
+        // must clear at its arrival, because the flight's defer re-derives
+        // `isEditable` with no settle of its own and an act that refused under
+        // the seal lands no selection change either. Only on a flip: a header
+        // delivery rides every autosave's touch stamp.
+        if noteIsEditable != wasNoteEditable { settleMarkdownCaret() }
     }
+
+    /// The note's own editability, as its header decides it (a sealed note,
+    /// or none loaded, is not editable) — what `isEditable` reads outside a
+    /// structural flight, and what it will read again when the flight ends.
+    private var noteIsEditable: Bool { header.map { !$0.locked } ?? false }
 
     private func observeSlots() async {
         do {
@@ -3549,13 +3558,14 @@ final class EditorViewModel {
     /// Write — a SEALED note, selectable but never typed in, no caret drawn —
     /// holds none, so its selection is never honoured (the live pane's rule:
     /// `PaneSurface`'s settle hands no selection while the pane reads). The
-    /// structural flight's few-ms fence is the one non-editable state that
-    /// still holds her caret: the act lands the caret INSIDE the flight
-    /// (`applyStructuralResult`) and the fence lifts after it with no
-    /// selection change of its own, so reading the fence as "no caret" would
-    /// leave a landing at a rescue point caret-blind until her next move.
+    /// structural flight's few-ms fence is NOT the note's editability: the act
+    /// lands the caret INSIDE the flight (`applyStructuralResult`) and the
+    /// fence lifts after it with no selection change of its own, so during a
+    /// flight the NOTE decides (round 2, F-2 — a seal adopted mid-flight makes
+    /// the landing honour nothing; an unsealed note's landing at a rescue point
+    /// is honoured, as before).
     private func holdsCaret(_ textView: NSTextView) -> Bool {
-        textView.isEditable || structuralInFlight
+        structuralInFlight ? noteIsEditable : textView.isEditable
     }
 
     func updateCaretContext() {
