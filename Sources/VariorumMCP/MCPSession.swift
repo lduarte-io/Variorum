@@ -210,4 +210,11 @@ final class MCPSession: @unchecked Sendable {
     func hangUp() {
         shutdown(fd, SHUT_RDWR)
     }
+
+    /// The host's close of this session's descriptor once `run()` has
+    /// returned (VX-279's seam — the host's own `close(fd)`, moved here so
+    /// the session sees its descriptor's end).
+    func closeConnection() {
+        close(fd)
+    }
 }

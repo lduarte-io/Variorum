@@ -178,7 +178,7 @@ public final class MCPServerHost: @unchecked Sendable {
         onConnectionsChanged?()
         Task { [weak self] in
             await session.run()
-            close(fd)
+            session.closeConnection()
             self?.ended(session)
         }
     }
