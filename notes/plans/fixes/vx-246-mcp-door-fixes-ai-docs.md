@@ -1988,6 +1988,38 @@ store, its own socket home); the pane's Clients rows, request rows and setup men
 *[removed for publication]*
 *[removed for publication]*
 *[removed for publication]*
+**THE FINDINGS (for the orchestrator — none fixed, none touched under the claim):**
+- **FINDING A — a wire note delete in the OTHER pane takes her focus.** `WorkspaceModel.notesDeleted` re-routes each pane on
+  the dead note with `select(.library, in: pane)`, and `select` sets `focusedPane = pane` (`WorkspaceModel.swift:186`). So when
+  a client deletes the note in the pane she is NOT in, her focus jumps to that pane (now the Library) and her own note falls to
+  the read tier. Seen in both voices (`w3a/18`–`20`, `39`). The road is shared with her own Delete door, but there she is
+  usually in the pane she deletes from. A product call (keep her focus where it was?), likely VX-283's road or its own ticket.
+- **FINDING B — the Library at half width overlaps the other pane.** With a split open, the Library catalog drawn in the right
+  pane extends left past the divider and covers the left pane's edge, clipping its header ("clicl"; `w3a/18`–`26`, `30`, `39`).
+  Layout, not this unit's. A ticket if it isn't known.
+- **FINDING C — the red product did NOT strand her words on the live `delete_block` road.** On `vx246-u3-red` there was no
+  refusal toast, the page dropped the block, and both the tray and the store after Put back held "Three. pending words". The
+  `delete_note` road DID lose them (above). The headless and Mac pins hold the debounce still, and the live app does not. Where
+  the words went between the tombstone and the revive (a flush into the tombstoned take, or an in-memory pending overlay that
+  Put back's door then flushed) is unexplained on this evidence. Worth one trace before the record calls `delete_block`'s
+  stranding half proven live. The fix's live `delete_block` evidence (W3a's caret, W3b's 53 ms leg) stands either way.
+- **The 4 dependency warnings** in W1 and W2 come from the new door pins' harness (`withRandomNumberGenerator` read outside the
+  pin's `withDependencies`). Test-only noise.
+- **Two plan deviations, said:** (1) claude-code's grant was ONE wing grant (Home · Edit · Always) instead of a per-note Share
+  with AI…; (2) the Terminal half's turn was split in two to see the caret live before Finding A's focus move. W3b ran in
+  Terminal.
+
+**THE RESULT LINE (for the coordinator):** claim `vx246-u3` 02:18:04–02:54:00 MDT, RELEASED.
+- **W1** red on old as designed: 7 of 8 failed, 17 issues (door pins 4/4, caret pins 3/4, the survivor green, no premise line).
+- **W2:** 1,470 tests in 215 suites: 1,457 passed, 12 gated skips, 1 failed. The one red is VX-167's standing `redoNeverAsks`
+  under parallelism, green when re-run alone. The 8 pins are green.
+- **W3a PROVEN, both voices**, with a real Claude Code 2.1.299 turn via U1's detour: the caret lands at the start of the block
+  below, the pane leaves the dead note, and Put back returns her words.
+- **W3b PROVEN** with the timing driver on the real shim: answered 0.053 s (`delete_block`) and 0.051 s (`delete_note`) after
+  her last keystroke, and both Put backs returned " pending words". The red contrast lost them on `delete_note`.
+- **Posture as left: Standard/unlocked, cmp-SAME vs the A1 copy** (Study voice in the restored store), prefs 0 keys differ.
+- The MCP fingerprint is SAME (`bc64543e2f4e8e58`), the scratch project's `-s local` server is gone, and the key grep finds 0.
+- The A1 copy `scale-prestage-20261014T081813Z` is the coordinator's to prune. Findings A–C go to the orchestrator.
 
 ## U4 UNIT RECORD — the faces after big writes: VX-230 · VX-231 (opus-implementer, from 2026-10-14 ~02:15 MDT)
 
@@ -2147,36 +2179,3 @@ at keystroke rate. A note's words changing by EDITING (no membership move) stays
 order on the inline surface); VX-231 is a refresh trigger the one-shot tier never had. Both were first seen right
 after a big MCP write, and in both the write is incidental: any long fanned note shows VX-230; any outside membership
 change shows VX-231.
-
-**THE FINDINGS (for the orchestrator — none fixed, none touched under the claim):**
-- **FINDING A — a wire note delete in the OTHER pane takes her focus.** `WorkspaceModel.notesDeleted` re-routes each pane on
-  the dead note with `select(.library, in: pane)`, and `select` sets `focusedPane = pane` (`WorkspaceModel.swift:186`). So when
-  a client deletes the note in the pane she is NOT in, her focus jumps to that pane (now the Library) and her own note falls to
-  the read tier. Seen in both voices (`w3a/18`–`20`, `39`). The road is shared with her own Delete door, but there she is
-  usually in the pane she deletes from. A product call (keep her focus where it was?), likely VX-283's road or its own ticket.
-- **FINDING B — the Library at half width overlaps the other pane.** With a split open, the Library catalog drawn in the right
-  pane extends left past the divider and covers the left pane's edge, clipping its header ("clicl"; `w3a/18`–`26`, `30`, `39`).
-  Layout, not this unit's. A ticket if it isn't known.
-- **FINDING C — the red product did NOT strand her words on the live `delete_block` road.** On `vx246-u3-red` there was no
-  refusal toast, the page dropped the block, and both the tray and the store after Put back held "Three. pending words". The
-  `delete_note` road DID lose them (above). The headless and Mac pins hold the debounce still, and the live app does not. Where
-  the words went between the tombstone and the revive (a flush into the tombstoned take, or an in-memory pending overlay that
-  Put back's door then flushed) is unexplained on this evidence. Worth one trace before the record calls `delete_block`'s
-  stranding half proven live. The fix's live `delete_block` evidence (W3a's caret, W3b's 53 ms leg) stands either way.
-- **The 4 dependency warnings** in W1 and W2 come from the new door pins' harness (`withRandomNumberGenerator` read outside the
-  pin's `withDependencies`). Test-only noise.
-- **Two plan deviations, said:** (1) claude-code's grant was ONE wing grant (Home · Edit · Always) instead of a per-note Share
-  with AI…; (2) the Terminal half's turn was split in two to see the caret live before Finding A's focus move. W3b ran in
-  Terminal.
-
-**THE RESULT LINE (for the coordinator):** claim `vx246-u3` 02:18:04–02:54:00 MDT, RELEASED.
-- **W1** red on old as designed: 7 of 8 failed, 17 issues (door pins 4/4, caret pins 3/4, the survivor green, no premise line).
-- **W2:** 1,470 tests in 215 suites: 1,457 passed, 12 gated skips, 1 failed. The one red is VX-167's standing `redoNeverAsks`
-  under parallelism, green when re-run alone. The 8 pins are green.
-- **W3a PROVEN, both voices**, with a real Claude Code 2.1.299 turn via U1's detour: the caret lands at the start of the block
-  below, the pane leaves the dead note, and Put back returns her words.
-- **W3b PROVEN** with the timing driver on the real shim: answered 0.053 s (`delete_block`) and 0.051 s (`delete_note`) after
-  her last keystroke, and both Put backs returned " pending words". The red contrast lost them on `delete_note`.
-- **Posture as left: Standard/unlocked, cmp-SAME vs the A1 copy** (Study voice in the restored store), prefs 0 keys differ.
-- The MCP fingerprint is SAME (`bc64543e2f4e8e58`), the scratch project's `-s local` server is gone, and the key grep finds 0.
-- The A1 copy `scale-prestage-20261014T081813Z` is the coordinator's to prune. Findings A–C go to the orchestrator.
