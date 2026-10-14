@@ -2291,3 +2291,113 @@ merge with the record's options.
   16.3–16.7 s against its 15 s bound at load average 9–67, green alone) is minted as VX-353 (Debt · Test-only · Low, 13n,
   not pre-launch). It's not this run's.
 
+
+## U6b UNIT RECORD — the Book Panel's collapsed chapter row (VX-330) · the undo warning's one word (VX-342) · U6's shared window (opus-implementer, from 2026-10-14 ~18:00 MDT)
+
+**NOT DONE YET (the record's first line, per the contract):** no stage claimed, no app launched, no `xcodebuild test`, no
+store touched by this session. Every app pin's red and green are U6's window's to read (PENDING). The live legs are
+written, not run.
+
+**Read in (in full, this session's own context):** CLAUDE.md + its canon; this record's header, Hard rules, LIVE STATUS,
+Cross-run coordination, Her rulings (VX-330's verbatim), the U6 BRIEF items 3–4 + Lanes + Evidence, THE ORCHESTRATOR ON
+U5's WINDOW, the U6a UNIT RECORD's LIVE STATUS (rows 0–9), LIVE LEGS FOR U6b's WINDOW (FINAL), THE MAC SUITES FOR U6b's
+BATCH, its self-assessment and OWED, the U5b record's THE STAGE WINDOW and the U5 STAGE RUN whole; VX-281's U2 UNIT RECORD
+whole (the trace, the site list, the design, P1 per site, the walk, the PROVISIONALs, OWED item 5 — this ticket's origin)
+and its round-1 R1-5 row (the click pins); `notes/MCPSpec.md` in full; `notes/SessionResiliencyProtocol.md`'s implementer
+section + the machinery addenda. Code at `48e250e0`: `BookPanelView.swift` and `BookPanelModel.swift` whole,
+`MCPRowReach`, `MCPSharedIcon` (+ its DEBUG probe), `MCPAskGlyph`, `MCPAskBoard`, `MCPShareRoad`,
+`BookOutlineRows.noteLineCollapsesIntoChapter`, the glyph hosts app-wide (grep), the pins `MCPSharedIconClickTests`,
+`MCPSharedRowsTests`, `DestructiveUndoWarningTests`, `MobileUndoDoorTests`' A12 leg; `ShellActions.discardingUndoDetail`,
+`MobileUndoDoor.discardingUndoDetail`, `StructuralUndoCopy`; the sherlock seed (`SampleLibrarySeeder` — one note per
+chapter, each chapter's heading its note's title).
+
+**Lanes.** VX-342's two edits are the brief's go: the ONE word in `Registry/ShellActions.swift` (`discardingUndoDetail`;
+vx-283 told by the orchestrator) and its phone twin `VariorumMobile/Features/Write/MobileUndoDoor.swift`. Nothing else in
+the registry, `WorkspaceModel` or `ShellRouter`. VX-330's trace stays in `Features/BookView/` and `Core/Views/` (the ask
+glyph's DEBUG probe) — no registry file, no editor-seam file.
+
+### LIVE STATUS — U6b's pieces (flipped in the same commit as each piece)
+
+| # | piece | status |
+|---|---|---|
+| 0 | read-in, the traces, the design, the sweep table | DONE (this commit) |
+| 1 | VX-330 SEAM + harness: `BookPanelBrain.markedNote` with the OLD behaviour (a chapter line stands for no note), ONE face helper on both rows, the ask glyph's DEBUG probe | NOT-STARTED |
+| 2 | VX-330 pins (pure + two mounts), red on the seam by assertion — PENDING for the window's red run | NOT-STARTED |
+| 3 | VX-330 fix (one line: a collapsed chapter line stands for its note) | NOT-STARTED |
+| 4 | VX-342 pins (Mac + phone, new pure suites), red on the old words by assertion | NOT-STARTED |
+| 5 | VX-342 fix ("BEFORE" → "before", both doors) | NOT-STARTED |
+| 6 | the products: `vx336-u6` rebuilt from the final tree; `vx336-u6b-red` (my two fixes reverted); phone `vx336-u6b-ios` + `vx336-u6b-ios-red` | NOT-STARTED |
+| 7 | the batch's suite list (grep), every name verified in the test bundles | NOT-STARTED |
+| 8 | THE STAGE WINDOW plan (claim `vx336-u6`) → READY | NOT-STARTED |
+
+### The traces (written before code)
+
+**VX-330 — the collapsed one-note chapter row wears neither MCP glyph (bug class).** Inputs → wrong output:
+- An approved client reaches note N (a note, book or wing grant, or the open book), or an ask waits on N. N is the ONE
+  note of chapter C and its title says C's name (`BookOutlineRows.noteLineCollapsesIntoChapter`,
+  `BookOutlineRows.swift:237–242` — `BookNaming.sameName`). That is every chapter of the seeded sherlock. The Book Panel
+  shows N's book.
+- `BookPanelBrain.lines` (`BookPanelModel.swift:203–220`) emits ONE `.chapter(C, collapsed: N)` line and NO `.note(N)`
+  line (`if collapsed == nil { lines += … }`).
+- `BookPanelView.lineView` (`BookPanelView.swift:211–229`) sends `.chapter` to `chapterRow` (`:232–277`), whose label
+  (`:244–259`) draws the grip, the open note's marker and the chapter's name — and no `MCPSharedIcon`, no `MCPAskGlyph`.
+  Only `noteRow` (`:279–316`) draws them (`:297`, `:300`).
+- **The reach IS held, never drawn:** `entryIDs(for:)` (`BookPanelModel.swift:470–473`) maps every snapshot entry, the
+  collapsed one included, so `holdReach` lands `model.reach[N]`; the window's ask board carries `.note(N)`'s face. Neither
+  reaches a view.
+- **Wrong output:** the row that stands for N (its click opens N in its book, `:242`; its menu carries N's menu,
+  `:268–271`) wears neither glyph, while every sibling note row in the same panel does. A sherlock panel shows no glyph at
+  all under a grant that reaches the whole book — her report.
+- **Not the cause:** the rule, the core reads and the hold (VX-281 U2's, unchanged); the icon and the glyph are
+  place-blind. Only the face is missing.
+
+**VX-342 — the undo-overwrite warning's "BEFORE" (copy).** `ShellActions.discardingUndoDetail`
+(`Registry/ShellActions.swift:637–646`) and its phone twin `MobileUndoDoor.discardingUndoDetail`
+(`VariorumMobile/Features/Write/MobileUndoDoor.swift:279–286`) each build "…undoing puts back the text as it was BEFORE
+the <label>…" — shouty caps in rendered text, against her rule. The shared `StructuralUndoCopy` (`Shared/`) was checked
+whole: its question ("Undo <label>?") and every other sentence there are sentence case — nothing to change. **No pin
+asserts the word on either platform** (grep of `VariorumTests` and `VariorumMobileTests`: `DestructiveUndoWarningTests`
+reads "One take has been edited", "set aside", "history"; `MobileUndoDoorTests`' A12 leg reads the phone's road name and
+no "⌘"), so each door gets a small new pin.
+
+### The design (argued — no fork; the brief's "which note's reach" is one-answer here)
+
+- **D-330-1 — which note's reach the row reads: the note it collapsed.** The collapsed row IS the note's row (row 8,
+  `BookPanelBrain.Line.chapter`'s own doc: "that line IS the note's"): her click is the note's click-through, the row's
+  menu is the note's menu, the open-note marker is the note's. A chapter is no MCP place: a grant scopes a note, book or
+  wing (`MCPGrantRule.ScopeKind`), an ask targets a note, book or wing (`MCPAskTarget`), and the reach rule decides notes,
+  books, gatherings and wings only (`MCPReachPlace`). So exactly one reach and one ask target exist for the row — the
+  note's. Argued, not provisional.
+- **D-330-2 — ONE decision, ONE face, both rows.** A pure `BookPanelBrain.markedNote(_ line:) -> String?` (the note a
+  line stands for: a note line's note, a collapsed chapter line's note, nil for a plain heading and "unfiled"); ONE view
+  helper `noteMarks(for:)` draws `MCPSharedIcon(reaches: model.reach[id])` then `MCPAskGlyph(.note(id))` — the note
+  row's exact pair, so hover, popover, the pending mark and the nested-button click are the same views on both rows.
+- **D-330-3 — no new read (P1, VX-272).** The hold is unchanged: the collapsed note was already one of `entryIDs(for:)`'s
+  ids (the panel's own window, ≤ `entryWindow` 300 — VX-281's P1 table). With no approved client `mcpReachStandings`
+  still stops the read at the grants store. Nothing new is read anywhere.
+- **D-330-4 — placement:** grip · marker · chapter name · shared icon · waiting ask — the note row's order, the
+  Bookcase's (name, then the icon, then the ask). The marks keep the note row's font (`tokens.small`, the icon's own
+  `rowScale`).
+- **D-330-5 — the pins' form (VX-281 U2's and R1-5's).** App pins can't run headless and a pure addition can't be
+  revert-run, so the SEAM form: piece 1 lands the decision and the one face helper with the OLD behaviour (a chapter
+  line stands for no note — exactly what the old face drew: note rows both marks, every chapter row none); the pins
+  follow; the fix is the one line flipping the collapsed case. The red product is the final tree with ONLY that line
+  (and VX-342's words) reverted, so the pins compile there and fail by ASSERTION. The ask glyph gets a DEBUG anchor
+  probe in `MCPAskGlyph.swift` (`MCPAskGlyphProbe` — the icon's R1-5 shape: an AppKit anchor behind the button, never a
+  click target; Release draws exactly what it drew), so a mount pin can find and press it.
+- **D-342-1 — the word:** "before", both doors; nothing else in either sentence moves. The pins are NEW pure suites
+  (one per platform), not appended to `DestructiveUndoWarningTests` (that suite carries VX-167's order-dependent
+  `redoNeverAsks`; a one-suite red run must not meet it).
+
+### THE SWEEP — the Book Panel's shapes × the two glyphs
+
+| shape (`BookPanelBrain.Line` / face) | drawn by | shared icon | waiting ask | disposition |
+|---|---|---|---|---|
+| `.note(entry, indented: true)` — a note under a chapter | `noteRow` | yes (VX-268) | yes (13n-c U4) | **SAFE** — unchanged behaviour; now drawn through `noteMarks(for:)` on the same reads (pinned in the sweep mount) |
+| `.note(entry, indented: false)` — a chapterless book's notes, or under "unfiled" | `noteRow` | yes | yes | **SAFE** — the same |
+| `.chapter(C, collapsed: N)` — the collapsed one-note chapter row | `chapterRow` | **no → yes** | **no → yes** | **FIXED (VX-330)** |
+| `.chapter(C, collapsed: nil)` — a plain chapter heading | `chapterRow` | no | no | **SAFE** — a chapter is no MCP place (no grant scope, no ask target, no reach rule); `markedNote` answers nil (pure pin + the sweep mount) |
+| `.unfiled` — the heading over chapterless notes | `lineView` | no | no | **SAFE** — a heading, no place; nil (pinned the same) |
+| the header — the shown book's name, or the switcher menu | `header` | no | no | **OUTSIDE the parity rule** — the ask glyph never marks it (VX-268's site list row 5 is the panel's NOTE rows). It names a place (a book), so it is observed for the orchestrator in OWED, not built |
+| "appears in N gatherings" and the gathering names it opens | `gatheringsLine` | no | no | **OUTSIDE the parity rule** — no ask targets a gathering (`MCPAskTarget`); observed in OWED with the header |
+| "Showing the first 300 notes…", "This note is in no book…" | `contents`, `body` | no | no | **SAFE** — words, not places |
