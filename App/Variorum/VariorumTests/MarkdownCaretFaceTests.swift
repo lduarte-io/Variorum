@@ -186,6 +186,86 @@ struct MarkdownCaretFaceTests {
         }
     }
 
+    /// **RED ON CURRENT (round 2, F-2 — R1-7's residual).** A seal that
+    /// ARRIVES while a structural flight is up (a sync-delivered seal racing a
+    /// few-ms flight — her own seal door awaits the chain, so only the sync road
+    /// gets here): `adoptHeader` skipped the editability write and its R1-7
+    /// flip-settle under the flight, and the flight's defer re-derives
+    /// `isEditable` directly with no settle — so when the act itself refused
+    /// (the store already sealed: no landing, no selection change) the italic
+    /// stood on the sealed, caret-less page until her next click. The NOTE's
+    /// editability is the rule now: the seal's arrival clears the honour at
+    /// once, flight or not. Deterministic: the store is sealed first (the
+    /// header not yet delivered), the writer held so the flight stays up.
+    @Test func aSealArrivingDuringAStructuralFlightClearsTheCaretsHonour() async throws {
+        try await withEditor(seedBlocks: ["*hello *", "next block"]) { h in
+            let storage = try #require(h.textView.textStorage)
+            h.textView.setSelectedRange(NSRange(location: 7, length: 0))
+            #expect(unstyled(storage, 1..<7).isEmpty, "non-vacuity: the caret honoured at the rescue point")
+
+            // The seal lands in the store; its header has not reached the editor.
+            try h.session.operations.lockPost(h.postID)
+            let sealed = try #require(try h.database.read { [postID = h.postID] in
+                try Queries.containerHeader($0, containerID: postID)
+            })
+            #expect(sealed.locked)
+
+            let database = h.database
+            let hold = Task.detached {
+                try database.write { _ in Thread.sleep(forTimeInterval: 0.4) }
+            }
+            try await Task.sleep(for: .milliseconds(30))  // the hold takes the writer
+            let flight = Task { @MainActor in await h.model.insertBlockBelowCaret() }
+            var spins = 0
+            while !h.model.structuralInFlight, spins < 3000 {
+                spins += 1
+                await Task.yield()
+                try await Task.sleep(for: .milliseconds(1))
+            }
+            try #require(h.model.structuralInFlight, "the flight is up, waiting on the writer")
+
+            // The sealed header ARRIVES mid-flight.
+            h.model.adoptHeader(sealed)
+            #expect(!anyFace(storage, 0..<8),
+                    "RED ON CURRENT: the seal's arrival re-reads the honoured line caret-blind")
+
+            try await hold.value
+            await flight.value
+            await h.flush()
+            #expect(!h.textView.isEditable, "the flight's end re-derives the sealed editability")
+            #expect(!anyFace(storage, 0..<8),
+                    "RED ON CURRENT: the sealed page keeps no italic — the act refused, nothing landed")
+            #expect(try h.storeSlots().count == 2, "the act refused under the seal: no block was made")
+            #expect(h.model.identityAuditFailures == 0)
+        }
+    }
+
+    /// **RED ON CURRENT (round 2, F-3).** A caret on a star that NO opener
+    /// pairs with (`hello |*x` — a gate-positive point: a star with a space
+    /// before it) plans an honour, yet the restyle writes nothing. The shared
+    /// face answered "restyled" whenever the ledger planned, so Write bumped
+    /// its overlay generation and asked for a viewport redraw (and a pane reset
+    /// its find paint and remeasured) on every such caret move. It answers what
+    /// the restyles WROTE now. The control: a real rescue point still bumps.
+    @Test func aCaretOnAStarNoOpenerPairsWithMovesNoOverlayGeometry() async throws {
+        try await withEditor(seedBlocks: ["hello *x", "*hi *"]) { h in
+            let text = h.documentText as NSString
+            #expect(MarkdownCaretRescue.point(in: text, selection: NSRange(location: 6, length: 0)) == 6,
+                    "non-vacuity: offset 6 is gate-positive (a star, a space before it)")
+            h.textView.setSelectedRange(NSRange(location: 0, length: 0))
+            let before = h.model.overlayGeometryGeneration
+            h.textView.setSelectedRange(NSRange(location: 6, length: 0))
+            #expect(h.model.overlayGeometryGeneration == before,
+                    "RED ON CURRENT: nothing was restyled, so no overlay geometry moved")
+
+            // The control: `*hi |*` in the second block is a real rescue point.
+            let rescue = h.model.index.range(ofEntryAt: 1).location + 4
+            h.textView.setSelectedRange(NSRange(location: rescue, length: 0))
+            #expect(h.model.overlayGeometryGeneration == before + 1,
+                    "the control: a settle that restyled still bumps, once")
+        }
+    }
+
     /// **GUARD (green both sides).** `2 * 3 * 4` — typed keystroke by
     /// keystroke, then with the caret parked at every position — never
     /// wears the face anywhere: no opener ever forms, so no caret can rescue
