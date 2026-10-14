@@ -123,7 +123,7 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 | kickoff: worktree, branch, in-flight row (main 94f0a2fb), tickets In Progress, this record | DONE (orchestrator) |
 | U1 — the pane in tabs | **UNIT CLOSED — DONE** (2026-10-13 ~22:35 MDT, opus-implementer): VX-199 · VX-205 · VX-232 (FIXED red-first) · VX-245's two MCP sites (`3d00a166`); red on old 4 issues; Mac batch 250/31 (one issue — VX-283's six lint sites); the walk in both voices DONE, dev store restored `cmp`-SAME. 3 PROVISIONALs (P-VX281-U1-1…3) for QUESTIONS at the merge; the cold review is the ladder's. See the U1 UNIT RECORD |
 | U2 — the shared icon | **UNIT CLOSED — DONE** (2026-10-14 ~00:20 MDT, opus-implementer): VX-268 — the one icon on every row the ask glyph marks + the ticket's book/gathering and Timeline rows; red first (core 43, Mac 27 issues on the seam), Mac batch 812/149 (one issue — VX-115's standing pin); the walk in both voices DONE, the dev store restored `cmp`-SAME against the original. 5 PROVISIONALs (P-VX281-U2-1…5) for QUESTIONS at the merge; the cold review is the ladder's. See the U2 UNIT RECORD |
-| the ladder | NOT-STARTED |
+| the ladder | ROUND 1 DONE (1B/0M/5m/3n — findings recorded below); fixes IN-PROGRESS (a fresh implementer) |
 | closeout | NOT-STARTED |
 
 ## FOR VX-234 (every wording call this run makes, where it renders — posted to VX-234 at close)
@@ -863,6 +863,72 @@ read by accessibility before its Deny is pressed by description) → the Library
 ## The ladder
 
 *(round records and every finding's disposition land here before the next round spawns)*
+
+### ROUND 1 — Opus cold review at max (fresh `opus-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-281), 2026-10-14 ~00:20
+
+**Diff reviewed:** `a9ebe0a4..0e907a24`. **Tally: 1 BLOCKER · 0 MAJOR · 5 MINOR · 3 NIT.** The reviewer's findings, verbatim
+(its clean bill follows them). Dispositions land in the table under them BEFORE round 2 spawns.
+
+**R1-1 [BLOCKER] · `App/Variorum/Variorum/Features/Timeline/TimelineView.swift:206` (also `:78`, `:99–124`)**
+- **What's wrong:** the Timeline's shared-icon hold watches reach for every row she has loaded, not the rows on screen. The set grows with each Load More press, and the whole batch re-runs on every `container` write while any client can reach anything.
+- **How it happens:** the `.task(id: model.items.map(\.postID)) { await model.holdReach(model.items.map(\.postID)) }` call hands the hold all of `items`. `loadMore()` adds 50 rows per press; in the stamp lenses those rows come from every wing (walk W4); in `.library` it re-reads a growing top-N (`limit = items.count + pageSize`, `:104`). If any approved client holds a live grant, or the open book is on, `mcpReachStandings` (`MCPShareQueries.swift:400`) lets `mcpNoteReaches` read `mcpNoteFacts`, which reads `container`. `container` is rewritten as a whole row on every autosave (`registerTextChange`, `Operations+Variant.swift:626`), and by every MCP write and sync apply. `AppDatabase.observe` tracks whole tables (`:239–249`), so each such write re-runs one batch over every loaded row while the Timeline is mounted (list surfaces mount whole in a split pane beside an editor, `RootView.paneDetail`). After k presses, each write costs the facts of 50(k+1) notes plus one rule read per note per approved client — set by how far she paged, up to every note.
+- **What it breaks:** the unit's acceptance line "P1: reach is read in proportion to the rows shown" (kickoff plan `:135`, record `:113`); the house rule at `AppDatabase.swift:243–247` ("A held observation's fetch must itself be viewport-shaped … Observing an unbounded projection is a P1 violation waiting for a keystroke"); the record's own claims "every read is sized to what its host shows" (`:711`) and "one bounded batch per autosave" (`:717`), which its risk 3 (`:721`) contradicts. Every other new note hold is bounded (Library ≤ 3 × 80, Pool ≤ 200 + the windowed tucked run, Book Panel ≤ 300).
+- **Pin (red on the tip):** make the id choice a seam, e.g. `TimelineViewModel.reachIDs`, the view's `.task(id:)` reading it; on the tip it answers `items.map(\.postID)`. Load ≥ 6 pages over a store of ≥ 300 notes; assert `reachIDs.count` stays under a fixed bound (the visible window ± a page) however many pages are loaded.
+- **Fix:** hold reach over a window of the visible rows — rows report appear/disappear, the Library's pure `window(visible:count:)` decides the window, the hold re-aims only when the window crosses a page; rows outside keep their last answer, as the Library's do.
+
+**R1-2 [MINOR] · `App/Variorum/Variorum/Core/Views/WingSwitcherSheet.swift:239–240` (also `:228`, `:304`)**
+- Escape to dismiss a row's reach popover closes the whole ⌘L switcher. This run adds the first popover inside the sheet (`MCPSharedIcon` at `:304`); the sheet's `WingSwitcherKeyCatcher` acts on every Escape whose `event.window` is the sheet's window and calls `close()`; the popover holds only plain buttons and the switcher's field keeps focus (`.task { fieldFocused = true }`, `:228`), so the popover doesn't become key and her Escape reaches the sheet — the switcher closes, the popover with it, her typed filter lost (U4-6b only passes keys through for a nested sheet, its own key window). The record's walk saw exactly this ("A popover's Escape closed the ⌘L switcher with it", `:634`) and filed it as a driving slip; the key-window step is inferred.
+- **Pin:** a pure seam for the sheet's Escape decision with a row popover up (dismiss the popover, keep the switcher) — red on the tip. **Fix:** tell the sheet when a row popover is presented (an optional `isPresented` binding on `MCPSharedIcon`, or a preference) and have `.escape` dismiss the popover first; or let the popover's content take key so its own Escape closes it.
+
+**R1-3 [MINOR] · `App/Variorum/Variorum/Features/MCP/MCPDoor.swift:512–524` (also `:210`, `MCPSetupMenu.swift:48–51`)**
+- VX-232's "the receipt always names the shown client" (record `:214`) fails if she switches client while a copy is in flight: `copySetupCommand(for:)` sets `setupClient = client` (`:513`) before `await runner.run { mintMCPSetupKey }` (`:520`); a `chooseSetupClient` (`:210`) during the mint (writer busy with a sync round, an import, an MCP batch) chooses the new client and clears the receipt; the copy then lands the old client's text on the clipboard and the old client's receipt (`:524`) — the menu shows the new client under the old receipt, and the ✓ flashes (`MCPSetupMenu.swift:51` compares against `copying.copiedReceipt`).
+- **Pin (red on the tip):** `let copy = Task { await door.copySetupCommand(for: .anyClient, to: pb) }` · yield until suspended at its write · `door.chooseSetupClient(.claudeCode)` · `await copy.value` · `#expect(door.note == nil || door.note?.text == door.setupClient.copiedReceipt)`.
+- **Fix:** after the await, land the receipt only if `setupClient == client` (else nothing or a neutral "Copied."); gate the ✓ the same way. **Related nit:** the default argument `for client: MCPSetupClient = .claudeCode` now quietly switches the menu for any caller relying on it — drop the default or default to `setupClient`.
+
+**R1-4 [MINOR] · `App/Variorum/Variorum/Features/MCP/MCPPane.swift:71–73` (also `AppSettingsView.swift:337–338`, `SettingsShape.swift:316–320`)**
+- A Settings search for the setup's own words no longer lands on the setup: the setup words ("setup", "connect", "codex", "json", "stdio", "claude code") are keywords on the `mcpServer` catalog row (13n-c U5: "so the search finds the pane by those words too"); that finding's lead is `enableTitle`, for which `MCPPaneTab.holding` answers nil, so `onOpen` leaves `paneTab` alone and the pane opens by its normal rule — on Clients once any client is approved. With Claude Code approved, searching "codex" to add a second client lands on Clients with the Codex setup behind the Connect tab — re-opening through the search the problem R-VX184-6 fixed. Where setup words should land is not ruled; if Connect isn't taken as obvious, a QUESTIONS entry.
+- **Pin (pure, red on the tip):** the MCP finding from `SettingsSearch.findings(matching: "codex", in: SettingsSearch.settingsEntries)` lands on `.connect`. **Fix:** an `mcpConnect` catalog row ("Connect a client") carrying the setup words, rendering on Connect, `holding` answering `.connect` (SettingsShape's MCP rows only).
+
+**R1-5 [MINOR] · record U2 self-assessment (`:695–697`) against the U2 walk (`:616–631`)**
+- "every place … now wears the ONE icon with its hover and popover" has no proof for four hosts: the walk opened the popover only from the Library's List rows and ⌘L's rows; Cards (W3), Timeline (W4), Book Panel (W9) and Pool (W10) captured the icon only; no Mac pin presses the icon there; two hosts nest the icon's button inside a row-wide `Button(.plain)` — the Timeline inside a `List` (`TimelineView.swift:177–183`) and the Book Panel row (`BookPanelView.swift:272–293`) — and U3's synthetic probe proved the inner click only for the Bookcase row. Speculative as a defect (a click could open the note instead of the popover); certain as an evidence gap.
+- **Fix:** one icon click per host in a walk, both voices, or a synthetic-click mount pin in U3's shape.
+
+**R1-6 [MINOR] · `Sources/VariorumCore/Queries/MCPShareQueries.swift:270–284` against `:400–408`**
+- The reach gate exists twice: the Bookcase's `mcpBookReaches(_ db:)` keeps its own gate (approved clients, open book, any live grant) while `mcpReachStandings` holds the same logic for every row read; the record's design (`:550–551`, "nil = every live reading, the Bookcase's call byte-unchanged") describes one function with an optional id list, two shipped. A future gate change (e.g. P-VX281-U2-3's option (b)) must be made twice or the Bookcase and the Library's book rows disagree. Cleanliness only; no pin could be red on old.
+- **Fix:** build the Bookcase's map on `mcpReachStandings` + the shared `reaches(…)`, or one function taking `readingIDs: [String]?`.
+
+**R1-7 [NIT] · `MCPShareQueries.swift:331–343`** — `MCPReachPlace.wingReach` is a pure rule living in `Queries`; its two twins live in `Domain/MCPGrantRule.swift` with pure grid pins; CLAUDE.md puts pure rules in Domain. The record left `MCPGrantRule` untouched on purpose (another run's lane). **Fix:** move it beside its twins with a pure pin once that lane allows.
+
+**R1-8 [NIT] · `MCPPaneCopy.swift:1028–1033` against `:539`, `:636–637`** — each client's one-line summary is its copy receipt minus "Copied. "; after a copy the Connect tab shows the same next step twice on adjacent lines, one sentence in two constants. **Fix:** onto FOR VX-234 beside U1-6; derive one constant from the other.
+
+**R1-9 [NIT · SPECULATIVE] · `Core/Views/MCPSharedIcon.swift:59`, `:75`** — the empty state now lives inside the icon; in hosts that don't guard it (Cards, Pool, Timeline, Book Panel, ⌘L) the view and its `@State shown` survive the reach emptying. If reach empties while the popover is up without `close()` running (an AI act spends a once grant, moves the note to another wing, removes it from the granting book), the button and popover vanish with `shown` still true; if SwiftUI doesn't write `false` back, the popover would present itself when reach returns — breaking never-present-yourself (R-13nb-23/26g). Before VX-268 both hosts guarded the whole view. Unconfirmed; a mount pin (reach set, emptied, restored with `shown` set) would settle it. **Defensive fix:** `.onChange(of: reaches.isEmpty) { _, empty in if empty { shown = false } }`.
+
+**The reviewer's clean bill (condensed):** not Fable's round (no `Sync/`, `Server/`, `Persistence/`, custody, editor
+seam, `Sources/VariorumMCP`, `MCPGrantRule`, `SettingsShape` or `TutorialSeeder` lines; no default changes
+meaning) · one rule per kind (notes/books off `decide`, gatherings off `decideGathering`, wings off `decideWing`;
+probes spend no once grant; single and batched reads share `placeReach`; re-ran `MCPRowReachTests|MCPGatheringReach|MCPShareTests`
+30/4 green) · VX-272 holds (`mcpReachStandings` stops at the client/switch/grant tables, SQL-trace pinned; book and
+wing reads never touch `container`) · icons update at once (every decided fact is inside the held fetch's tables) ·
+the Library/Pool/Book Panel holds bounded, cancelled cleanly, equality-guarded · an empty icon draws nothing, List
+baselines kept · P-1 declared ⇔ rendered on the five hosts · VX-232's mechanism traced and red on old · VX-205 one
+declared act, O-4 sweep covers the new file · R-VX184-6 layout, the opening rule pure and pinned, ⌥⌘,'s landing,
+the open-book search landing · no rendered "every change" left · VX-245's sites and the new pickers state
+`.lineLimit(1)` · no trailers, no rewrites · no plan-time review foci; the implementer's review maps (U1 OWED 6,
+U2 OWED 1) all answered.
+
+**Round 1 dispositions** *(same-model: the implementer agrees/disputes; the orchestrator arbitrates against the spec)*
+
+| # | Sev | Disposition | What changed (hash) |
+|---|---|---|---|
+| R1-1 | BLOCKER | PENDING | |
+| R1-2 | MINOR | PENDING | |
+| R1-3 | MINOR | PENDING | |
+| R1-4 | MINOR | PENDING | |
+| R1-5 | MINOR | PENDING | |
+| R1-6 | MINOR | PENDING | |
+| R1-7 | NIT | PENDING | |
+| R1-8 | NIT | PENDING | |
+| R1-9 | NIT | PENDING | |
 
 ## Closeout
 
