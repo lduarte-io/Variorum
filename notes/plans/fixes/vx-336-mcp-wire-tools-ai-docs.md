@@ -476,7 +476,7 @@ lens rule resolves to picks; `Operations.saveLens` and its undo entry are untouc
 | piece | what | status |
 |---|---|---|
 | 0 | this record + LIVE STATUS + the traces and the design (before code); `notes/plans/vx336-screens/` gitignored | DONE (this commit) |
-| 1 | VX-267 — the pin on the OLD tree (the wire: `add_take` and `add_takes` store `<client>` / `<client> · <label>`), RED | NOT-STARTED |
+| 1 | VX-267 — the pin on the OLD tree (the wire: `add_take` and `add_takes` store `<client>` / `<client> · <label>`), RED | DONE (this commit) — NEW `Tests/VariorumMCPTests/MCPTakeLabelFormServerTests.swift` (`aSuggestedTakeIsLabelledWithTheClientAloneOrTheClientAndItsLabel`: `add_take` with a label, none and a blank one; `add_takes` with and without; the control — `create_note` at write new keeps "english" exactly). Wire only, so it compiles on the old tree. **RED on the old tree (`f43cef82`'s sources): 1 test, 2 issues, each on its designed line** — `singles → ["claude-code · suggested · english", "claude-code · suggested", "claude-code · suggested"]` and `batched → ["claude-code · suggested · english", "claude-code · suggested"]`; the control GREEN, by design (log `notes/plans/vx336-screens/u5a/logs/p1-pin-red.log`, gitignored) |
 | 2 | VX-267 — the fix (`aiLabel`'s body + doc) + the three old pins re-pinned as JUSTIFIED EDITS + the doc-truth sweep, GREEN | NOT-STARTED |
 | 3 | VX-267 — red again BY REVERT (announced first, on a committed tree; restored and verified) | NOT-STARTED |
 | 4 | VX-253 — the pins on the OLD tree (wire only: label fill, unmatched, ambiguity refusal + retry, own-suggestion forms, pin_chosen, the malformed combinations, the not-shared guard), RED | NOT-STARTED |
