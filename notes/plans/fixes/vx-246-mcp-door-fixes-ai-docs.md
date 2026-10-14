@@ -3303,7 +3303,7 @@ origin/main` as a merge commit ("Merge origin/main (VX-281) into VX-246 … Part
 
 ## U4c UNIT RECORD — the inline editor's badge regression: VX-230 (opus-implementer, from 2026-10-14 ~05:35 MDT)
 
-**Not done (first line, kept current; the state at READY, 2026-10-14 ~06:15 MDT):** NO product line changed — the trace
+**Not done (first line, kept current; the state at READY, 2026-10-14 ~05:50 MDT):** NO product line changed — the trace
 (measured) found no product defect, so there is no fix; the work is the regressed pin's HARNESS (corrected) and one
 in-use pin. Nothing has run on a Mac (both pins are Mac pins: W1 and W2 below); no stage window has run (READY, the
 stage NOT claimed); no walk; no QUESTIONS entry, canon edit or ticket (the orchestrator's). Zero `Sync/`, custody,
