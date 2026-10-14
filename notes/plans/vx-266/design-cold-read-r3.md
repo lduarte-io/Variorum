@@ -181,7 +181,11 @@ device section — travels inside every copy, so whoever opens a copy would read
 that opened the library. The reviewer agreed and strengthened the fix. **Fixed:** the marker is a hash of the Mac's
 hardware identity with a random salt the record carries, never the identifier itself (§3.2). It recomputes on the
 same hardware, after unlock where every decision runs, and a marker that leaks alone names no Mac. Phase 1's encoding
-scan asserts no raw hardware identifier is written. Other Macs' sections stay in copies, since a rollback and a
+scan asserts no raw hardware identifier is written. The random salt guards only a marker that leaks alone (a log, a
+Diagnostics dump, a support bundle), where the library ID would have been ambient; for anyone who can open a copy,
+the salt sits beside the markers, and the design claims no more. So, at the reviewer's addition, no log line,
+Diagnostics entry or support bundle ever carries a marker or the salt, and phase 1's executor tests scan the logs
+for it. Other Macs' sections stay in copies, since a rollback and a
 replacement Mac's adoption need them. The privacy brief's "a copy carries no device identity" stays true until the
 release switch; its at-the-switch delta is VX-329's to hand the site agent. It says that a copy carries, in its
 record, each device's random identity, a salted hardware hash and that device's protection settings, used only on

@@ -319,6 +319,8 @@ Build everything in §3.2 of the design as values, with their codecs and their c
 - a crash injected after every step, then a resume that finishes or rolls back, never a third state — Use Standard
   and a follow into Standard on an Always-ask device included;
 - every refusal named;
+- a log scan: no log line or Diagnostics entry the executor writes carries key material, a hardware marker or the
+  record's salt (design §3.2);
 - decision 35's guard: nothing Apple-reachable without a fresh vault read;
 - a failed seal: an unsealed or unnamed plan is ignored, and the act rolls back or finishes from the record; a memory
   item that fails its seal loses to the record's device section.
