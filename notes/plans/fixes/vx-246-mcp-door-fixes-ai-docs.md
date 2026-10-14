@@ -1986,8 +1986,8 @@ store, its own socket home); the pane's Clients rows, request rows and setup men
 | W2 | `run-w2-batch.sh` — 215 suites on `vx246-u3`; a red re-run alone once; standing reds named (VX-167, VX-245, VX-115) | DONE (02:19:35 → 02:25:41) — "✘ Test run with **1470 tests in 215 suites** failed after 322.350 seconds with 7 issues (including 4 warnings)" (`u3/logs/w2-batch.log`, `u3/w2-batch.xcresult`): **1,457 passed · 12 skipped · 1 failed**. **The eight pins GREEN on the fixed product:** `MCPHerEditorDoorTests` 4/4 (delete_note, delete_block, edit_take, divide_block) and `ExternalBlockRemovalCaretTests` 4/4. **The one red is VX-167's standing one:** `DestructiveUndoWarningTests.redoNeverAsks()` (3 issues, `:141–143`, under the batch's parallelism) → **re-run ALONE once (02:25:53): ✔ passed** (`u3/logs/w2-rerun-redoNeverAsks.log`) — recorded as VX-167's load-flake class, not a regression. The 12 skips are the gated set: the 7 UNKEYED-oracle singleton tests (`VARIORUM_ORACLE_SINGLETON_WINDOWS` off) and the 5 capture harnesses (MCPAsksWait/GrantSheet/GrantSheetU2/ShareFaces captures). VX-245's and VX-115's suites are not in the set. **The 4 warnings recur on the fixed product, the same text as W1's** ("@Dependency(\.withRandomNumberGenerator) has no test implementation, but was accessed from a test context", test «unknown», while `MCPHerEditorDoorTests` ran): a harness noise of the NEW door pins (something on the served socket's side reads the dependency outside the pin's `withDependencies` scope), not an issue of any test — reported for the orchestrator, nothing changed under the claim |
 | 3 | launch `vx246-u3` (`open -n`); a What's New sheet closed by its own button; a lock screen per the env file | DONE (02:26:50) — pid 3355, window 1380×900 at (60,36), **Study, light, the Bookcase; no What's New sheet, no lock screen** (`u3/w3a/launch/w0.png`) |
 *[removed for publication]*
-| W3b | the timing driver on the REAL shim | DONE (02:30–02:47), captures + the driver's answers `u3/w3b/`. **Run in TERMINAL, said:** the voice is irrelevant to a timing proof and the store restore returns Study. **The driver's door:** Connect a client ▸ Any MCP client ▸ Copy (`02`) → key **`vmk1_<dev-key-prefix>…`** (from the copied JSON, never shown) → `driver.py <the vx246-u3 shim> vx275-driver hello` → `{"initialize": true}` → "Connection request — vx275-driver" (`03`) ▸ Approve… ▸ A wing · Home · Edit · Always (`04`–`07`, "1 grant"). **delete_block while she types:** "vx275 e" (One. / Two. / Three.) open in Write, the driver armed (READY), the caret at the end of "Three." (block 3/3, `10`) → ONE Bash call: `keys.sh … 'keystroke " pending words"'`, the clock, `touch go-e` → the driver: `delete_block` `isError` false, **fired 0.006 s and ANSWERED 0.053 s after her typing ended** (`drv-delete-block.*`) — inside her 500 ms debounce, so only the pre-act flush can have saved her words → the block gone, the **caret at the END of "Two."** (no block below — the block above's end), note bar "block 2/2" (`11`, crop `11b`) → ⌘K ▸ Trash ▸ "Three.…" Put back (`12`) → **"Three. pending words"** on the page (`13`). **delete_note while she types:** "vx275 f" ("Fresh line.") open, the driver armed, the caret at the line's end (`16`; a first click landed on the TITLE and opened its rename field — nothing typed, the second click into the body closed it unchanged, `15`/`16`) → the same one call → `delete_note` `isError` false, **fired 0.009 s, answered 0.051 s after her typing ended** (`drv-delete-note.*`) → the pane LEFT the note (the Library; the receipt "vx275-driver deleted “vx275 f” (it's in the Trash) · ⌥⌘Z undoes", `17`) → Trash ▸ "vx275 f" Put back (`18`) → **"Fresh line. pending words"** (`19`). **W3b's verdict: her keystrokes typed milliseconds before a wire delete survived it, both roads, on the real shim.** |
-| 6 | cleanup: `-s local` registrations removed, her user-scope fingerprint AFTER identical, keys/scratch deleted, the clipboard emptied, a whole-key grep = 0; the Debug app quit by bundle id; prefs 0 keys differ; `restore.sh` → "Restored (verified)" + a second `cmp` = SAME; `Tools/stage release`; the result line | NOT-STARTED |
+*[removed for publication]*
+*[removed for publication]*
 
 ## U4 UNIT RECORD — the faces after big writes: VX-230 · VX-231 (opus-implementer, from 2026-10-14 ~02:15 MDT)
 
@@ -2147,3 +2147,36 @@ at keystroke rate. A note's words changing by EDITING (no membership move) stays
 order on the inline surface); VX-231 is a refresh trigger the one-shot tier never had. Both were first seen right
 after a big MCP write, and in both the write is incidental: any long fanned note shows VX-230; any outside membership
 change shows VX-231.
+
+**THE FINDINGS (for the orchestrator — none fixed, none touched under the claim):**
+- **FINDING A — a wire note delete in the OTHER pane takes her focus.** `WorkspaceModel.notesDeleted` re-routes each pane on
+  the dead note with `select(.library, in: pane)`, and `select` sets `focusedPane = pane` (`WorkspaceModel.swift:186`). So when
+  a client deletes the note in the pane she is NOT in, her focus jumps to that pane (now the Library) and her own note falls to
+  the read tier. Seen in both voices (`w3a/18`–`20`, `39`). The road is shared with her own Delete door, but there she is
+  usually in the pane she deletes from. A product call (keep her focus where it was?), likely VX-283's road or its own ticket.
+- **FINDING B — the Library at half width overlaps the other pane.** With a split open, the Library catalog drawn in the right
+  pane extends left past the divider and covers the left pane's edge, clipping its header ("clicl"; `w3a/18`–`26`, `30`, `39`).
+  Layout, not this unit's. A ticket if it isn't known.
+- **FINDING C — the red product did NOT strand her words on the live `delete_block` road.** On `vx246-u3-red` there was no
+  refusal toast, the page dropped the block, and both the tray and the store after Put back held "Three. pending words". The
+  `delete_note` road DID lose them (above). The headless and Mac pins hold the debounce still, and the live app does not. Where
+  the words went between the tombstone and the revive (a flush into the tombstoned take, or an in-memory pending overlay that
+  Put back's door then flushed) is unexplained on this evidence. Worth one trace before the record calls `delete_block`'s
+  stranding half proven live. The fix's live `delete_block` evidence (W3a's caret, W3b's 53 ms leg) stands either way.
+- **The 4 dependency warnings** in W1 and W2 come from the new door pins' harness (`withRandomNumberGenerator` read outside the
+  pin's `withDependencies`). Test-only noise.
+- **Two plan deviations, said:** (1) claude-code's grant was ONE wing grant (Home · Edit · Always) instead of a per-note Share
+  with AI…; (2) the Terminal half's turn was split in two to see the caret live before Finding A's focus move. W3b ran in
+  Terminal.
+
+**THE RESULT LINE (for the coordinator):** claim `vx246-u3` 02:18:04–02:54:00 MDT, RELEASED.
+- **W1** red on old as designed: 7 of 8 failed, 17 issues (door pins 4/4, caret pins 3/4, the survivor green, no premise line).
+- **W2:** 1,470 tests in 215 suites: 1,457 passed, 12 gated skips, 1 failed. The one red is VX-167's standing `redoNeverAsks`
+  under parallelism, green when re-run alone. The 8 pins are green.
+- **W3a PROVEN, both voices**, with a real Claude Code 2.1.299 turn via U1's detour: the caret lands at the start of the block
+  below, the pane leaves the dead note, and Put back returns her words.
+- **W3b PROVEN** with the timing driver on the real shim: answered 0.053 s (`delete_block`) and 0.051 s (`delete_note`) after
+  her last keystroke, and both Put backs returned " pending words". The red contrast lost them on `delete_note`.
+- **Posture as left: Standard/unlocked, cmp-SAME vs the A1 copy** (Study voice in the restored store), prefs 0 keys differ.
+- The MCP fingerprint is SAME (`bc64543e2f4e8e58`), the scratch project's `-s local` server is gone, and the key grep finds 0.
+- The A1 copy `scale-prestage-20261014T081813Z` is the coordinator's to prune. Findings A–C go to the orchestrator.
