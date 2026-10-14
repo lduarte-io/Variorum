@@ -14,8 +14,9 @@ import GRDB
 // pre-images, never a re-run of the forward operation (a re-run would mint
 // fresh UUIDs and strand the inverse that captured the old ones). Most
 // re-applies are the existing inverse called with the other pre-image
-// (`restorePlacementLocation`, `revertChosenPointers`); the two that need
-// their own body are `reapplyStructural` and `reapplyMintedContainer`.
+// (`restorePlacementLocation`, `revertChosenPointersIfUnchanged`); the two
+// that need their own body are `reapplyStructural` and
+// `reapplyMintedContainer`.
 // None of them registers — so a redo, like an undo, never clears the redo
 // stack from under itself.
 extension Operations {

@@ -149,14 +149,18 @@ extension Operations {
         try database.write { db in try restoreChosenPointersIfUnchanged(db, moves, only: only) }
     }
 
-    /// **THE MCP POINTER ACTS' RESTORE, COMPARE-AND-SET** (VX-184 ladder round
-    /// 1 — the undo-overwrite class): each slot's `chosen_variant_id` becomes
-    /// `to` only while the slot is live and still reads `from`; a slot she has
+    /// **THE POINTER ENTRIES' RESTORE, COMPARE-AND-SET — the client's acts
+    /// and HER adopt doors alike** (VX-184 ladder round 1 — the
+    /// undo-overwrite class): each slot's `chosen_variant_id` becomes `to`
+    /// only while the slot is live and still reads `from`; a slot she has
     /// re-chosen since (her ✓ registers no entry) is hers, and is skipped
     /// quietly. Past that check a sealed note refuses (the pointer brain's
-    /// rule) — the whole transaction rolls back and the entry stays. HER adopt
-    /// doors keep `restoreChosenPointers` (their entries are hers, outside the
-    /// MCP family this pass covers — noted in the run record's sweep).
+    /// rule) — the whole transaction rolls back and the entry stays. Her
+    /// adopt doors run on this same rule through `registerPointerEntry`
+    /// (VX-246 U2 — VX-277). No unconditional pointer restore remains: the
+    /// old helpers (`restoreChosenPointers`, `revertChosenPointers`,
+    /// `adoptUndoHalves`) were deleted, and bringing one back re-opens
+    /// VX-277's class (an undo overwriting her later ✓).
     @discardableResult
     func restoreChosenPointersIfUnchanged(
         _ db: Database, _ moves: [PointerMove], only: Set<String>? = nil
