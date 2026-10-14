@@ -4539,3 +4539,313 @@ Read in the diff `8cf83a3b..ae2dab9c`, nine files, every hunk, against each find
 **THE LADDER IS CLOSED.** Round 1 (Fable) and round 2 (Opus max) found no BLOCKER or MAJOR, and every finding has a
 written disposition. Owed to the closeout window: F-1's red/green run, F-4's 4 → 0 warnings, and the merge-moment
 whole Mac target.
+
+## CLOSEOUT RECORD (the closeout implementer — opus-implementer, from 2026-10-14 ~11:30 MDT)
+
+**Not done yet (first line, kept current):** PHASE A only — the kickoff plan re-aimed (`bb958d51`), the drafts below
+and the handoff draft. NO shared ledger is touched (AppSpec, TEXTKIT2_NOTES, QUESTIONS, the master plan, the archives,
+MobileSoul): every one waits for PHASE C, on latest main. No merge of main yet (PHASE B, after the coordinator's "main
+moved"); no Mac build or test; no claim; no Linear edit (the orchestrator's).
+
+| phase | what | state |
+|---|---|---|
+| A1 | the kickoff plan: STATUS banner (VX-246 closed with its fix units; VX-336 carries U5–U8), SPLIT AGAIN note, the kickoff message re-aimed at VX-336, DONE marks | DONE (`bb958d51`) |
+| A2 | ### CLOSEOUT DRAFTS below, exactly as they will land | DONE (this commit) |
+| A3 | the handoff draft `notes/handoffs/vx-246-handoff.md` | next |
+| B | merge `origin/main` (after VX-282) as a merge commit; headless package green; a fresh `vx246-final`; THE CLOSEOUT WINDOW's plan (claim `vx246-close`); READY | waits for "main moved" |
+| C | the drafts applied on latest main; the handoff finalized | after the window |
+
+**Found while drafting (for the orchestrator):**
+1. **U6 and U7 have no drafted brief in this record.** LIVE STATUS says "its brief is drafted for that run" for both,
+   but the record holds only the U5 BRIEF (and THE UNITS rows for U6/U7). The re-aimed kickoff says exactly that:
+   U6/U7's briefs are VX-336's orchestrator's to write from the rows, the tickets and HER ADDITIONS.
+2. **The master plan's closeout paragraph conflicts with CLAUDE.md and the latest precedent.** CLAUDE.md: "Bug fixes
+   and tech debt never go in the master plan"; VX-184's and VX-281's merge-moment ledgers (`b228e51c`, `3d42df78`)
+   retired their in-flight rows and wrote NO closeout paragraph (the 13n-c paragraph still stands, with VX-168 and
+   VX-180 appended to it as sentences). The paragraph is drafted below as the brief asks; the orchestrator picks:
+   (a) retire the row only (the precedent; the handoff and §14 carry the record), (b) append one sentence to the
+   standing paragraph (the VX-168/VX-180 form), or (c) the full paragraph, rolling 13n-c's to the archive.
+3. **The phone was not built in this run.** U2 changed the core undo API and `Shared/StructuralUndoCopy.swift`; the
+   phone's calls (`withCompound(label:operations:)`, `undo(with:)`/`redo(with:)`) keep their signatures, so it should
+   compile, but no `VariorumMobile` build ran. PHASE B's plan adds a headless phone `build` (no stage needed).
+4. **Numbers that collide at the merge:** VX-282 merges first and may take QUESTIONS #220, the PL-54 MobileSoul row
+   and §14's oldest-entry roll. Every number below is re-checked against latest main at PHASE C.
+
+### CLOSEOUT DRAFTS (exactly as they will land at PHASE C; each anchor quoted)
+
+#### D1 — AppSpec §7, the grants-family bullet (append after its VX-184 sentence)
+
+Anchor: the sentence ending "…no FK (purge-safe), the export strips it; the record
+`notes/plans/fixes/vx-184-mcp-launch-polish.md`." Append, in the same paragraph:
+
+> GROWN again at VX-246 (v1_28 + v1_29, 2026-10-14, local-only on the same road, each its own commit ahead of its code,
+> marker 13 untouched, zero lockstep): `mcp_rebind_request` — a setup key waiting for her OK under an approved name (one
+> row per client, the newer replacing the older; the key's hash, never the key, and the version the connection
+> declared), dropped by her Allow (which binds it), her Don't allow, a Deny or an adopted library — and
+> `mcp_comment_author.text_digest` — a digest of the words the client wrote, so a comment stays the client's own only
+> while its words are unchanged (NULL, every record from before v1_29, reads as unproven: never the client's own); the
+> record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`.
+
+#### D2 — AppSpec §9, the Structural undo / redo bullet (append after "Two presses inside one flight refuse the second.")
+
+> **A half runs only after its partner changed something** (VX-246 U2 — VX-276 · VX-277 · VX-119; her own doors and
+> the MCP door's entries alike): an undo that finds its act's result already gone (her undo-less door — Put back, a
+> restore, a rename, her ✓, a lock, the rule editor's Save — or a sync apply) changes nothing, speaks a refusal naming
+> the entry, and RETIRES it, leaving the other stack as it was; a redo re-applies exactly what its undo un-did, parts
+> and stamps included (an entry with several parts moves only the parts its partner moved; a revive revives only rows
+> dead on its own undo's stamp), so it never writes over a change of hers (PROVISIONAL #220: P-VX276-1…4, P-VX277-1;
+> the record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`, whose SWEEP TABLE dispositions every registration).
+
+#### D3 — AppSpec §12, THE MCP DOOR line (three in-place edits and one new block)
+
+**D3a**, replace:
+> **A-4 amended (R-VX184-5, VX-198):** a fresh setup key presented under a BOUND name re-binds it — approval and
+> grants kept — and the replaced key then refuses with its own sentence; **VX-258 (ruled, pre-launch) narrows it before
+> any public release:** a key re-binds only the name of the setup tab it was copied from (Claude Code, Codex), and an
+> Any-client key re-binds only after her OK.
+
+with:
+> **A-4 amended (R-VX184-5, VX-198), narrowed by VX-258 (built at VX-246 — THE DOOR'S FIXES below):** a fresh setup key
+> copied from a client's OWN setup tab re-binds its name — approval and grants kept — and the replaced key then refuses
+> with its own sentence; any other fresh key under an approved name waits for her OK.
+
+**D3b**, replace "a SUGGEST client deletes only comments on file as its OWN (§7's local-only record)" with:
+> a SUGGEST client deletes only comments on file as its OWN with their words unchanged since (§7's local-only record
+> and its digest — VX-260, below)
+
+**D3c**, replace "an MCP undo writes back only while the row still reads the act's value, otherwise it is quiet (a redo
+after a quiet undo is VX-276's, pre-launch)" with:
+> an MCP undo writes back only while the row still reads the act's value; otherwise it is quiet and retires its entry,
+> so no redo re-applies the act (VX-276, built at VX-246 — §9)
+
+**D3d**, insert after the VX-281 block (after "…and nothing is read while no client is approved.") and before " Level 0
+is 13n-a's format":
+> **THE DOOR'S FIXES (VX-246, 2026-10-14; the record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`):**
+> **setup keys are tied to their tab (VX-258, her ruling; the bind arm hers by ratification, 2026-10-13):** a copy
+> from the Claude Code or Codex tab carries that client's name inside the key (`vmk2_<name>_…`, authenticated by the
+> key's own hash), and under an APPROVED name, bound or not, such a key binds or re-binds with zero clicks; any other
+> fresh key under an approved name (an Any-client copy, another tab's) WAITS — admitted with no tools, every call
+> answered with the pending sentence, one waiting setup per name (the newer replacing the older), shown in Waiting above
+> the tabs as "New setup for ‹name›" with the version the connection declared, Allow and Don't allow equal and quiet;
+> her Allow binds it and serves the same connection at once (the tool list re-announced), her Don't allow forgets it
+> (its holder then hears the ONE refusal sentence), and a Deny or an adopted library drops every wait; an unknown name
+> is a connection request as before (PROVISIONAL #220: P-VX258-1, -3…-8). **A book name is checked only against books
+> the client can READ** (VX-259): `rename_book` and `create_book` count a colliding book only while this client's
+> reach reads it, so a book it can't read neither blocks the name nor is named; her own doors keep the full guard.
+> **A comment stays the client's own only while its words are unchanged** (VX-260, PROVISIONAL #220): her edit on
+> this Mac forgets the authorship record, and any change to the words, from any device or client, compared by the
+> record's digest, makes deleting it need EDIT; a record from before the digest is unproven. **Her pending typing
+> lands first (VX-275 · VX-323, her ruling (a)):** before every wire act that meets a take she may be typing in —
+> `edit_take`, `restore_commit`, `divide_block`, `merge_blocks`, `delete_block`, `delete_take`, `archive_take`,
+> `lock_take` (locking only), `save_commit`, `save_version`, `delete_note` — the door flushes every open note's pending
+> typing, in its own turn ahead of the act (PROVISIONAL #220: every open note, so no id resolves before the grant
+> decides; every job family answers the question exhaustively); a caret whose block the act removed lands as her own
+> Delete Block's does (the block below's start, else the block above's end); a wire note delete sends every pane off
+> the note on THE ONE road (`.variorumNotesDeleted`, her Delete door's), and **a pane showing a dead note goes to the
+> Library IN PLACE: her focus stays where it was, on every road, her own Delete door included** (the orchestrator's
+> ruling 2, PROVISIONAL #220).
+
+**NOT applied (round 2's R2-7b):** the kickoff plan's "≤2,000 → ≤3,000" and "the docs' as-built teaching" are VX-336's
+(U8). `MCPSession.instructionsBound` stays `2_000`; §12's "(≤2,000 characters, truth-pinned, provider-neutral)" stands.
+
+#### D4 — AppSpec §14, the new entry (it leads "Most recent canon deltas —"; the VX-281 entry becomes "Before it —")
+
+> **Most recent canon deltas — VX-246 (a RUN, 2026-10-13/14 overnight, `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`
+> — MCP door fixes: security, undo, editor vs wire, faces; her kickoff cast word, her ruling (a) on VX-275, her overnight
+> mandate and her ratification of P-VX258-2; the orchestrator's provisional rulings 1–3 (ruling 3: the four FIX units
+> merge, U5–U8 move to VX-336 "Run: MCP wire tools & AI docs"); units U1+U1b · U2 · U3 · U4+U4b+U4c, each proven by
+> red-on-old pins, a Mac batch and a dev-store walk or real-client live round in both voices across five stage windows;
+> the ladder CLOSED at round 2 — Fable R1 0B/0M/1m/3n (F-1, the field guide's lesson-2 truth stopgap, among them) →
+> Opus max R2 0B/0M/2m/5n (R2-2 deferred to VM-16), the final fixes checked line by line):** §7's grants family gains
+> v1_28 (`mcp_rebind_request`) and v1_29 (`mcp_comment_author.text_digest`); §9's structural undo gains the quiet-half
+> rule; §12's THE MCP DOOR line gains THE DOOR'S FIXES (tab-tied setup keys and the Waiting re-bind row, the
+> readable-books name check, comment ownership by the words' digest, the pre-act flush with the caret landing and the
+> navigate-away on the one road, focus kept) and reads A-4, the SUGGEST delete and the MCP undo as built; TEXTKIT2_NOTES
+> §3 gains the 27.0 out-of-order layout finding and the harness fact. Zero `Sync/` and custody lines; the editor seam
+> (U3's caret landing in `renderFull`, U4b's `refreshBadges` and its one `remeasure` call) Fable-reviewed; marker 13
+> untouched; zero lockstep. Finals: headless VariorumMCPTests 240/51 · core 2,841/329 · workbook 40/6; Mac: the
+> merge-moment WHOLE target «N tests / M suites — the closeout window's result, standing reds named». The ratify bundle
+> QUESTIONS #220; «PR #N»; VX-258 shipped, so VX-184's "hers alone" gate lifts. Before it — **VX-281 …** *(unchanged)*
+
+The roll (CLAUDE.md, the 2026-09-26 rule): the OLDEST entry still in §14 moves verbatim to `notes/AppSpecDeltaArchive.md`
+under "## Rolled at the VX-246 closeout (2026-10-14)", and the italic roll list at §14's end gains "the ‹X› entry
+rolled to `notes/AppSpecDeltaArchive.md` at the VX-246 closeout, 2026-10-14;". On today's tree that is VX-168's entry;
+if VX-282 rolls VX-168 first, ours is VX-180's.
+
+#### D5 — TEXTKIT2_NOTES §3 (U4b's CORRECTED proposal + U4c's TK2 and harness facts; U4's original "positionally exact" sentence and the U4b runner's "in use" paragraph are FALSE and do not land)
+
+**D5a**, append to the 18k block's fourth bullet (the 18l first-measure finding, ending "…Re-measure at 27.1** (the
+settle net's trigger assumptions are this point release's).") the sentence:
+> Its mechanism, measured at VX-246: out-of-order partial layout (the VX-246 finding below).
+
+**D5b**, a new block after the 18k block's last bullet (the "AppKit's paragraph-style FIXING is decided by OBJECT
+identity" bullet) and before "**Spell check / completion**":
+
+> **macOS 27.0 measured findings (VX-246 U4/U4b/U4c, 2026-10-14 — VX-230's badges; probes 5–13 on bare TK2 rigs;
+> pinned in `FanBadgePlacementTests`' two characterizations, `textKitReportsAnUnlaidFragmentAsZeroAndAZeroRectIntersects`
+> and `textKitPlacesAFragmentLaidOutAheadOfItsPredecessorsOffItsSettledPlace`; the record
+> `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`, U4b's and U4c's traces)**
+> - **An unlaid fragment is no position.** A layout fragment TK2 has not laid out reports `layoutFragmentFrame ==
+>   .zero` in the `.none` state (an ESTIMATED one reports a guessed frame). A WIDTH change returns every fragment to
+>   `.none`, after which a display pass lays out only the viewport and estimates the rest (a guess about 350 pt off on 50
+>   paragraphs). A `.zero` rect offset by the container origin `intersects` any rect holding that point (CGRect's
+>   degenerate-rect rule), so unlaid blocks' badges piled at the first block (VX-230's dark disc). **The rule:** a frame
+>   read with `options: []` is a position only in `.layoutAvailable`.
+> - **A layout that runs AHEAD of unlaid predecessors poisons the next whole walk.** A mid-document `.ensuresLayout`
+>   enumeration, or a viewport pass over a mid-document window, places those fragments at estimated offsets, and a
+>   following whole `.ensuresLayout` walk does NOT re-position them (996 pt off cold, 1,662 pt after a 700 → 420 width
+>   change, 1,600 pt after a scrolled-deep pass, on 120 paragraphs). The next viewport pass re-positions every fragment
+>   to the settled layout, and a whole walk with nothing laid out ahead of it is exact. This is the mechanism of the 18l
+>   first-measure finding above. **The rules:** never force layout from a mid-document location on a whole-post
+>   surface; read geometry after the whole walk, and again after the settle net's heal (the inline editor re-runs its
+>   badge pass at the end of every remeasure, the heal's included). Re-measure at 27.1.
+> - **HARNESS fact (the walk/test families): a run loop nested in a main-actor test runs no main-queue hop.** Swift
+>   Testing runs a `@MainActor` test's body as a main-actor job, inside a main dispatch queue callback, and a run loop
+>   nested there (`RunLoop.main.run(until:)`) services display passes and timers but runs NO
+>   `DispatchQueue.main.async` block; an `await` (one `Task.yield()`) does. A pin that pumps the run loop and expects a
+>   queued hop (a remeasure, an overlay settle, the settle net's heal) to have run is reading the transient before it
+>   (probe 11; the sweep of such pins is VX-333).
+
+#### D6 — `notes/QUESTIONS.md`, the bundle (a new section at the end; #220 unless taken)
+
+> ## VX-246 — Run: MCP door fixes (2026-10-14)
+>
+> #220 — **THE VX-246 RATIFY BUNDLE (merged 2026-10-14, «PR #N»; the binding record is
+> `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md` — her rulings during the run, ORCHESTRATOR'S PROVISIONAL
+> RULINGS, each UNIT RECORD's PROVISIONALs block with its options, THE LADDER (Fable round 1 → Opus round 2, closed);
+> your handoff `notes/handoffs/vx-246-handoff.md`).** Built overnight under your mandate (*"Rule provisionally in my
+> absence and leave me a handoff with any needed information to note down."*). Each was built as stated, with a line
+> to reverse it.
+> - **Setup keys (VX-258, U1 and U1b):**
+>   - **P-VX258-1** — a key from one client's tab presented under ANOTHER approved name waits for your OK, as an
+>     Any-client key does (a tag only ever adds the zero-click right for its own name). Option: (b) refuse it with the
+>     one sentence — stricter, but a client whose real name differs from its tab's then has only the Any tab.
+>   - **P-VX258-2 — ANSWERED.** The bind arm (an approved name with no key tied to it — after opening a library from
+>     another Mac, a Deny then an approve, or a client approved before VX-168) takes a key copied from that client's own
+>     tab with no clicks, and any other new key waits for your OK. Your word, 2026-10-13: *"i ratify what you built"*.
+>   - **P-VX258-3** — a waiting connection sees no tools, every known tool answers the pending sentence, and an
+>     unknown name hears "Unknown tool" as anyone would. Residual: a MALFORMED call to a known tool still tells a waiting
+>     connection from a first-contact one. Options: (b) route the waiting session through every tool's standing read
+>     (closes the residual; touches every tool); (c) refuse the waiting connection at the handshake with its own
+>     sentence (simplest, but tells its holder the name is approved, and needs a reconnect after your Allow).
+>   - **P-VX258-4** — one waiting setup per name: a newer one replaces the older, whose key is forgotten. Option: (b)
+>     one row per key — several asks for one name that you cannot tell apart.
+>   - **P-VX258-5** — the wait is logged once in Activity as not allowed; a re-presentation logs nothing, and a waiting
+>     connection's calls log nothing. Option: (b) log it as connected, and/or log its calls one by one.
+>   - **P-VX258-6** — the key's tag is the client's name in plain text (`vmk2_<name>_…`; 1–64 of letters, digits, `.`
+>     `_` `-`; a name outside that is refused at the copy). Option: (b) an encoded tag that carries any name and that
+>     nobody can read.
+>   - **P-VX258-7** — the "New setup for ‹name›" row leads Waiting, above the connection requests, with Allow and
+>     Don't allow equal and quiet. Options: (b) after the requests; (c) Allow styled as the primary button (set aside:
+>     the press hands a stranger the name's grants).
+>   - **P-VX258-8** — Activity words the wait as an ask: "‹name› asked to use a setup that wasn't copied for it".
+>     Option: (b) the refusal form, "‹name› was refused connecting with a setup that wasn't copied for it".
+> - **Comments (VX-260, U1 and U1b):**
+>   - **P-VX260-1** — your edit on ANOTHER device. As built: (a) your edit on this Mac forgets the AI's authorship
+>     record, AND (b) the record keeps a digest of the words the client wrote, so any change to them from any device or
+>     client makes deleting it need EDIT. Options: (a) alone (comments you edit on the phone or the Air stay deletable at
+>     suggest); (c) compare `updated_at` (set aside: an undo, a delete and Put back, and every sync apply bump it with
+>     no word changed). Accepted residual: an edit-level client's own rewrite also ends its suggest-level ownership.
+>   - **P-VX260-2** — a record from before the digest existed counts as UNPROVEN, so deleting that comment needs EDIT.
+>     Options: (b) backfill the digest from today's words (would bless a comment you already rewrote on another device
+>     or under the earlier build); (c) trust the old record (the hole stays open for every comment written before this
+>     build).
+> - **Her editor vs the wire (VX-275, U3):**
+>   - **P-VX275-1** — before every listed act the door flushes EVERY open note's pending typing. Options: (b) only the
+>     act's own note, resolved from its ids before the act (a read outside the act's transaction, and a timing oracle
+>     on notes the client can't reach); (c) (b) after the grant decides, by splitting the act into turns (re-opens the
+>     gap the decide-and-act guard closed).
+>   - **P-VX275-2** — the remaining window (a keystroke typed in the milliseconds between the flush and the act meets
+>     the old behaviour, narrowed to those characters) is accepted and recorded. Options: (b) a keyboard fence over
+>     every open editor for each wire act's flight (an editor-seam change; your typing pauses for each AI write);
+>     (c) refuse a wire delete or freeze while the app holds unsaved typing for that take.
+> - **The undo class (VX-276 · VX-277 · VX-119, U2):**
+>   - **P-VX276-1** — a quiet half retires its own entry and leaves the other stack as it was. Options: (b) it also ends
+>     the redo future (throws away redos your earlier presses earned); (c) the entry moves on marked quiet and its
+>     partner does nothing (the Edit menu then offers a "Redo …" that does nothing).
+>   - **P-VX276-2** — a quiet press speaks a refusal (a toast) naming the entry: "Nothing to undo — ‹label› was already
+>     undone or changed since." / "Nothing to redo — it changed again after ‹label› was undone." Option: (b) a quiet
+>     receipt. (After a quiet undo the Redo item is simply disabled.)
+>   - **P-VX276-3** — an entry with several parts (slots, columns, blocks, rows, a merge's mint and its sources) moves
+>     back and forth only the parts its partner moved, while your change to another part stands. Option: (b) any
+>     divergence makes the whole entry quiet (simpler; the parts you never touched become un-undoable).
+>   - **P-VX276-4** — every revive is keyed on its own undo's stamp: a row deleted on any other stamp (your Trash after a
+>     Put back, another device's delete) is never brought back by a redo. Option: (b) revive any dead row the entry names
+>     (would let a redo undo another device's delete).
+>   - **P-VX277-1** — your own adopt doors (✓ Make this the note) undo per block: a block is restored only while it still
+>     shows the adopted take. Option: (b) restore every block unconditionally (your later ✓ on an adopted block is
+>     overwritten by your own ⌥⌘Z).
+> - **The orchestrator's provisional rulings (ORCHESTRATOR'S PROVISIONAL RULINGS in the record):**
+>   - **Ruling 1** — on U3's timing leg a scripted client stood in for "a real client": Claude Code answers in seconds
+>     and can't land a call inside your 500 ms autosave pause, so a small driver on the real Debug shim proved the
+>     timing (answered 53 ms and 51 ms after the last keystroke), and a real Claude Code turn proved the rest. Option:
+>     (b) require a real client for the timing leg (not reachable with a model-driven client).
+>   - **Ruling 2** — a navigate-away never takes your focus: when a note is deleted while it shows in a pane you are NOT
+>     typing in, that pane goes to the Library in place and your caret stays where it is — on every road, your own
+>     Delete door included. Option: (b) as before: the re-routed pane takes the focus.
+>   - **Ruling 3** — the night's merge carried the four FIX units (U1–U4 and their follow-ups); U5–U8 (the wire tools'
+>     shapes, Compare from the wire, the agent's read-backs, the AI's docs) moved to **VX-336 "Run: MCP wire tools & AI
+>     docs"**, unstarted, every member keeping its ruling. Option: (b) hold the merge until all eight units land.
+> - **For your eye, not provisional:** 0.9.5's release notes (`ReleaseNotes-0.9.5.md:9`, "Running a client's setup
+>   again simply replaces the old setup…") now hold only for a client's own tab — the next notes are yours · Codex's
+>   client name (`codex-mcp-client`) is an outside lookup never seen live (Codex isn't installed); if it's wrong, a
+>   Codex re-run waits for one Allow, never a refusal · comments a client wrote before this build need EDIT to delete
+>   (P-VX260-2's cost) · two residuals stay recorded, unchanged: `finish_book`'s reopen-then-refinish (books carry no
+>   finish stamp) and `add_note_to_book`'s seat undo (dismissed at round 1 as the act's own reversal) · the pane words
+>   (U1b-1…8, the two quiet-press refusals, the re-bind row's "…, now. It reaches…") ride VX-234. Cross-refs: VX-258 ·
+>   VX-259 · VX-260 · VX-275 · VX-276 · VX-277 · VX-119 · VX-323 · VX-336 · VM-16. Status: open — your eye; the handoff's
+>   checklist leads with this bundle.
+
+#### D7 — the master plan (`notes/DetailedPlanForPhases.md`) — see "Found while drafting" 2 for the choice
+
+**D7a**, always: retire VX-246's in-flight row (the row beginning "| **VX-246 — Run: MCP door fixes & AI docs**").
+
+**D7b**, only under choice (c) (the brief's ask): the new "### Latest closeout" paragraph; 13n-c's paragraph rolls
+VERBATIM to `notes/PhaseCloseoutArchive.md`, and the italic roll note under it is rewritten to name that roll.
+
+> **→ VX-246 CLOSED 2026-10-14 — Run: MCP door fixes (security, undo, editor vs wire, faces) (the record
+> `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`; «PR #N»).** Built overnight 2026-10-13/14 on the Pro under her
+> overnight mandate and her kickoff cast (Opus orchestrates at max, Opus implements at xhigh, the Opus ladder at max, one
+> Fable review). Sized into eight units; the orchestrator's provisional ruling 3 merged the four FIX units and moved
+> U5–U8 to **VX-336 "Run: MCP wire tools & AI docs"** (unstarted, her kickoff; the plan
+> `notes/plans/mcp-pane-and-docs-kickoff.md`). Shipped: VX-258 (setup keys tied to their tab; any other new setup under an
+> approved name waits in Settings ▸ MCP ▸ Waiting for her Allow, so VX-184's "hers alone" gate lifts) · VX-259 (book
+> names checked against readable books only) · VX-260 (her edit makes an AI's comment hers, by the words' digest) ·
+> VX-279 / VX-280 (the server host's descriptor reuse; `save_lens`' picks read in proportion to the picks) · VX-276 /
+> VX-277 / VX-119 (a quiet undo retires its entry, so no redo writes over her change, on her doors and the AI's alike) ·
+> VX-275 / VX-323 (wire acts land her pending typing first; her caret lands as her Delete Block's; a deleted note's pane
+> leaves on the one road with her focus kept, ruling 2) · VX-230 / VX-231 (fan badges at their own lines in Write and the
+> book's inline editor; the Bookcase row follows an outside join) · VX-318 dismissed as hollow, its pin kept. Two
+> local-only schema steps (v1_28, v1_29), marker 13, zero lockstep; zero `Sync/` and custody lines. Each unit proven on
+> the dev store across five stage windows, with real Claude Code live rounds in both voices. LADDER: Fable R1
+> 0B/0M/1m/3n → Opus max R2 0B/0M/2m/5n (R2-2 to VM-16), closed at round 2. FINALS: headless MCP 240/51 · core
+> 2,841/329 · workbook 40/6; Mac merge-moment whole target «N/M, standing reds». Canon: AppSpec §7, §9, §12 and §14;
+> TEXTKIT2_NOTES §3; QUESTIONS #220. Born: VX-318 (hollow), VX-323 (fixed here), VX-324, VX-327, VX-328, VX-333, VM-16,
+> VM-17; VX-336 minted. MOBILE PARITY: PL-54 (the undo rule rides to the phone in shared core; VM-16, widened by round
+> 2's R2-2, lands with or before the phone takes it; VM-17 probes the phone's badges). The night's one `/Applications`
+> refresh: «build N»; the handoff `notes/handoffs/vx-246-handoff.md`.
+
+#### D8 — MOBILE PARITY: a `notes/MobileSoul.md` ledger row (PL-54 unless taken), in the newest-rows list
+
+> - **PL-54 (VX-246, 2026-10-14 — MCP door fixes):** the MCP door is Mac-only, so VX-258's keys, VX-259's name check,
+>   VX-275's pre-act flush and ruling 2's in-place landing are Mac faces and wire, and v1_28/v1_29 are LOCAL-ONLY (the
+>   grants family's road; marker 13 untouched, nothing refuses). **One shared rule reaches the phone at its next build:
+>   U2's undo rule lives in `UndoStack` (shared core) — a quiet half retires its entry — and the phone's door
+>   (`MobileUndoDoor`) still calls `undo(with:)`/`redo(with:)`, so after a quiet press it says "Undid: X" and offers a
+>   Redo that runs a DIFFERENT, earlier-undone entry (round 2's R2-2; before U2 the same taps re-applied X over her
+>   change — the class moved, it did not go). VM-16 (widened by R2-2) is the fix — the Mac door's two lines
+>   (`undoReporting`/`redoReporting`, a refusal, no ping-pong action on a quiet outcome) — and it lands WITH or BEFORE
+>   the phone takes this core.** The two refusal sentences already live in `Shared/StructuralUndoCopy`. **VX-260's
+>   digest** rides her shared comment door: a comment edited on the phone reaches the Mac by sync, where the digest
+>   makes a client's delete need edit; the phone holds no record. **VM-17** probes whether the phone's fan badges read
+>   TK2 fragment frames the way the Mac's did (U4's unlaid-fragment fact and U4b's out-of-order fact, TEXTKIT2_NOTES
+>   §3). No phone build ran in this run (PHASE B's headless `build` is the check).
+
+The closeout paragraph's MOBILE PARITY sentence (if D7b lands) names PL-54 as above.
+
+#### D9 — the run record's own closing edits (PHASE C)
+
+- The STATUS banner (line 3): "**STATUS: CLOSED 2026-10-14 — merged as «PR #N»; U5–U8 moved to VX-336.**" ahead of
+  the kickoff sentence.
+- LIVE STATUS's CLOSEOUT row: the window's result line, the ledgers' commit, the refresh build.
+- "Tickets minted from this run": a VX-336 row (the follow-on run, minted by the orchestrator at the closeout).
