@@ -285,8 +285,16 @@ struct TutorialMCPChapterTests {
             #expect(MCPPaneCopy.clientBoundary.contains("any of them can read the key"))
             let bound = MCPSetupKeyRule.Client(id: "c", boundHash: MCPSetupKeyRule.hash("vmk1_first"))
             let second = MCPSetupKeyRule.hash("vmk1_second")
-            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .unclaimed)
+            // VX-258 (A JUSTIFIED EDIT, the ritual — her ruling: a key re-binds
+            // with zero clicks only the name its setup was copied FOR): "running
+            // the setup again" is the client's OWN setup, so the key carries its
+            // name; an "Any MCP client" copy waits for her OK (pinned beside, so
+            // the sentence's scope is said). U8's guide pass re-voices lesson 2.
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second,
+                                           copiedFor: "claude-code", standing: .unclaimed)
                     == .rebind, "running the setup again moves the name to the new key")
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .unclaimed)
+                    == .awaitRebind, "an Any-client copy under an approved name waits for her OK (VX-258)")
             #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .replaced)
                     == .refuse(.replaced), "a tool still using an older key is turned away")
             #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .unknown)

@@ -261,13 +261,16 @@ public final class MCPServerHost: @unchecked Sendable {
 
     /// Everything the tool list depends on, in one small value: the decided
     /// clients, the grants' stamps, the switches (the grants store is small
-    /// and bounded — the pending room and the log are capped).
+    /// and bounded — the pending room and the log are capped). VX-258: and
+    /// each decided client's binding — her Allow of a waiting setup changes
+    /// it, and the waiting connection is told its tools changed.
     static func grantsFingerprint(_ db: Database) throws -> String {
         try String.fetchOne(
             db,
             sql: """
                 SELECT
-                  (SELECT IFNULL(group_concat(id || ':' || state, ','), '') FROM mcp_client WHERE state <> 'pending')
+                  (SELECT IFNULL(group_concat(id || ':' || state || ':' || IFNULL(setup_key_hash, ''), ','), '')
+                   FROM mcp_client WHERE state <> 'pending')
                   || '|' || (SELECT COUNT(*) || ':' || IFNULL(MAX(created_at), '') || ':'
                              || IFNULL(MAX(revoked_at), '') || ':' || IFNULL(MAX(consumed_at), '') FROM mcp_grant)
                   || '|' || (SELECT IFNULL(group_concat(key || value, ','), '') FROM mcp_switch)

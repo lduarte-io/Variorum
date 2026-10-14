@@ -36,6 +36,29 @@ public struct MCPClient: Equatable, Sendable, Identifiable {
     }
 }
 
+/// **A setup waiting for her OK** (VX-258): a copied key a connection
+/// presented under a name that carries her approval, which it was not copied
+/// for. Her Allow binds it to the name (`allowMCPRebind`); her Don't allow
+/// forgets it (`declineMCPRebind`). The face reads these; the key's hash
+/// never leaves the store.
+public struct MCPRebindRequest: Equatable, Sendable, Identifiable {
+    public let id: String
+    public let clientID: String
+    public let clientName: String
+    /// What the waiting connection declared in `initialize` — what tells her
+    /// a stranger from the client she knows.
+    public let version: String?
+    public let askedAt: String
+
+    public init(id: String, clientID: String, clientName: String, version: String?, askedAt: String) {
+        self.id = id
+        self.clientID = clientID
+        self.clientName = clientName
+        self.version = version
+        self.askedAt = askedAt
+    }
+}
+
 /// One grant row.
 public struct MCPGrantRow: Equatable, Sendable, Identifiable {
     public let id: String
@@ -772,12 +795,20 @@ extension Queries {
     /// name AND the hash, so the reason belongs to its name only; a row the
     /// log's cap has pruned is forgotten, and the key reads unknown again —
     /// P-VX198-1).
+    /// VX-258: a key claimed by a connection and waiting for her OK stands
+    /// `awaiting` (its client named) — read after a binding, before the
+    /// unclaimed set; the replaced memory reads her Allow's rows too (an
+    /// allowed wait replaces a key exactly as a re-run setup does).
     public static func mcpSetupKeyStanding(
         _ db: Database, hash: String, name: String? = nil
     ) throws -> MCPSetupKeyRule.KeyStanding {
         if let clientID = try String.fetchOne(
             db, sql: "SELECT id FROM mcp_client WHERE setup_key_hash = ?", arguments: [hash]) {
             return .boundTo(clientID: clientID)
+        }
+        if let clientID = try String.fetchOne(
+            db, sql: "SELECT client_id FROM mcp_rebind_request WHERE key_hash = ?", arguments: [hash]) {
+            return .awaiting(clientID: clientID)
         }
         let pending = try Bool.fetchOne(
             db, sql: "SELECT EXISTS (SELECT 1 FROM mcp_setup_key WHERE key_hash = ?)", arguments: [hash]) ?? false
@@ -786,12 +817,35 @@ extension Queries {
             db,
             sql: """
                 SELECT EXISTS (SELECT 1 FROM mcp_activity
-                               WHERE act = ? AND client_name = ? AND target_kind = ? AND target_id = ?)
+                               WHERE act IN (SELECT value FROM json_each(?)) AND client_name = ?
+                                 AND target_kind = ? AND target_id = ?)
                 """,
-            arguments: [MCPSetupKeyRule.reboundAct, name, MCPSetupKeyRule.replacedTargetKind, hash]) ?? false {
+            arguments: [
+                String(decoding: try JSONEncoder().encode(MCPSetupKeyRule.replacingActs), as: UTF8.self), name,
+                MCPSetupKeyRule.replacedTargetKind, hash,
+            ]) ?? false {
             return .replaced
         }
         return .unknown
+    }
+
+    /// **The setups waiting for her OK** (VX-258 — the Waiting section's
+    /// re-bind rows; the face is VX-281's pane): each waiting key's request
+    /// id, the client it would bind, the version its connection declared and
+    /// when it first arrived, oldest first. Never the hash.
+    public static func mcpRebindRequests(_ db: Database) throws -> [MCPRebindRequest] {
+        try Row.fetchAll(
+            db,
+            sql: """
+                SELECT r.id, r.client_id, c.name, r.version, r.asked_at
+                FROM mcp_rebind_request r JOIN mcp_client c ON c.id = r.client_id
+                ORDER BY r.asked_at, r.id
+                """
+        ).map {
+            MCPRebindRequest(
+                id: $0["id"], clientID: $0["client_id"], clientName: $0["name"], version: $0["version"],
+                askedAt: $0["asked_at"])
+        }
     }
 
     /// How many copied keys wait unpresented (the drill's and the pins' read).

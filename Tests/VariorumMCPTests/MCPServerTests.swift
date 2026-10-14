@@ -93,9 +93,14 @@ final class ServerHarness: @unchecked Sendable {
     private let setupKeys = LockIsolated<[String: String]>([:])
 
     /// The setup key `name` connects with (minted on first use).
+    /// VX-258 (A JUSTIFIED EDIT, the ritual): a name's own key is copied FOR
+    /// it — the setup she copies from that client's own tab — so the name
+    /// takes it with zero clicks whether it is new, bound or approved and
+    /// unbound, exactly as every pin written before VX-258 assumed. A test
+    /// about an "Any MCP client" copy mints its own untagged key.
     func setupKey(for name: String) throws -> String {
         if let key = setupKeys.value[name] { return key }
-        let key = try operations.mintMCPSetupKey()
+        let key = try operations.mintMCPSetupKey(copiedFor: MCPSetupKeyRule.canCarry(name) ? name : nil)
         setupKeys.withValue { $0[name] = key }
         return key
     }

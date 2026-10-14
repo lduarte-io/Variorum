@@ -19,6 +19,13 @@ import VariorumMCPSocket
 /// (the pure `MCPSetupKeyRule`): a refusal answers the frame with one
 /// sentence and ends the connection; an admission replays the frame into the
 /// transport and serves exactly as before.
+///
+/// **VX-258: a key WAITING for her OK** (an "Any MCP client" copy under a name
+/// that carries her approval — `awaitRebind`) is admitted to a connection
+/// request's face: no tools, every call the request's sentence, no tool run at
+/// all — the two method handlers are the one choke point — until the name's
+/// bound key IS its key (her Allow), when it is told its tools changed and is
+/// served from then on, no reconnect.
 final class MCPSession: @unchecked Sendable {
     let id = UUID()
     let fd: Int32
@@ -30,9 +37,45 @@ final class MCPSession: @unchecked Sendable {
     private let operations: Operations
     private let lock = NSLock()
     private var name: String?
+    /// VX-258: the hash of the key this connection presented while that key
+    /// WAITS for her OK to take the name (`awaitRebind`); nil once she has
+    /// allowed it (the name's bound key IS this key) or when it never waited.
+    private var awaitingKey: String?
 
-    /// The client's self-declared name, once `initialize` has run.
-    var clientName: String? { lock.withLock { name } }
+    /// The client's self-declared name, once `initialize` has run — and,
+    /// VX-258, only once the connection IS that client: nil while its key
+    /// waits for her OK, so a waiting connection never counts as the name's
+    /// (the while-connected grants' lifetime, the pane's connected set).
+    var clientName: String? { lock.withLock { awaitingKey == nil ? name : nil } }
+
+    /// The name `initialize` declared, waiting or not.
+    private var declaredName: String? { lock.withLock { name } }
+
+    /// **VX-258 — does this connection still wait for her OK?** True while
+    /// its key waits; it flips, once and for good, when the name's bound key
+    /// IS this connection's key (her Allow). One indexed read per call.
+    private func awaitsHerOK() throws -> Bool {
+        guard let key = lock.withLock({ awaitingKey }), let name = declaredName else { return false }
+        let bound = try database.read { db in
+            try Queries.mcpClient(db, name: name).flatMap { try Queries.mcpSetupKeyHash(db, clientID: $0.id) }
+        }
+        guard bound == key else { return true }
+        lock.withLock { awaitingKey = nil }
+        return false
+    }
+
+    /// **What a waiting connection hears** (VX-258): exactly what a
+    /// connection REQUEST hears — no tools, and every call the pending
+    /// sentence (`MCPRefusalCopy.words(.clientPending, …)`, the same for every
+    /// target) — so its holder cannot tell a name that carries her approval
+    /// from a name never seen. A tool name no catalog knows answers as it
+    /// does for anyone ("Unknown tool").
+    private static func waitingAnswer(_ tool: String) -> MCPReadTools.Outcome {
+        guard MCPToolCatalog.all.contains(where: { $0.tool.name == tool }) else {
+            return MCPReadTools.Outcome(text: "Unknown tool: \(tool).", isError: true)
+        }
+        return MCPReadTools.Outcome(text: MCPRefusalCopy.words(.clientPending, .note), isError: true)
+    }
 
     /// **THE AI'S ADVICE** — what the server says about itself at `initialize`.
     /// Every client reads it before it holds a single grant (the honest frame
@@ -158,16 +201,27 @@ final class MCPSession: @unchecked Sendable {
                 fd, MCPHandshake.refusalResponse(toFirstFrame: opening.firstFrame, reason: reason))
             return
         }
+        // VX-258: a key waiting for her OK is admitted to a REQUEST's face —
+        // no tool runs for it until she allows it (the two handlers below are
+        // the one choke point every list and call passes).
+        if case .awaitRebind = admission.decision {
+            lock.withLock { awaitingKey = opening.presentedKey.map(MCPSetupKeyRule.hash) }
+        }
         let transport = MCPSocketTransport(fd: fd, replay: [opening.firstFrame])
         await server.withMethodHandler(ListTools.self) { [weak self] _ in
-            guard let self, let name = self.clientName else { return .init(tools: []) }
+            guard let self, let name = self.declaredName else { return .init(tools: []) }
+            if try self.awaitsHerOK() { return .init(tools: []) }
             let standing = try self.database.read { try MCPGrantAuthority.standing($0, clientName: name) }
             return .init(tools: MCPToolCatalog.listed(for: standing))
         }
         await server.withMethodHandler(CallTool.self) { [weak self] params in
             guard let self else { throw MCPError.internalError("The session ended.") }
-            guard let name = self.clientName else {
+            guard let name = self.declaredName else {
                 return .init(content: [.text(text: "Initialize first.", annotations: nil, _meta: nil)], isError: true)
+            }
+            if try self.awaitsHerOK() {
+                let waiting = Self.waitingAnswer(params.name)
+                return .init(content: [.text(text: waiting.text, annotations: nil, _meta: nil)], isError: waiting.isError)
             }
             // U2: the write rungs run on the session's executor (AF-8);
             // the reads stay where U1 built them.
@@ -201,8 +255,11 @@ final class MCPSession: @unchecked Sendable {
 
     /// The client's grants changed: ask it to re-read its tools (a signal —
     /// the list itself is re-derived from the rows on `tools/list`, P-4).
+    /// VX-258: a connection whose key still waits for her OK has nothing new
+    /// to read; the moment she allows it (the binding is part of the grants
+    /// fingerprint), it is told.
     func announceToolsChanged() async {
-        guard clientName != nil else { return }
+        guard declaredName != nil, (try? awaitsHerOK()) == false else { return }
         try? await server.notify(ToolListChangedNotification.message())
     }
 

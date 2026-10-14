@@ -40,7 +40,9 @@ struct MCPSetupKeyRebindTests {
             try ops.approveMCPClient(
                 client.id, granting: .init(rung: .read, scopeKind: .book, scopeID: book.id, duration: .always))
 
-            let rerun = try ops.mintMCPSetupKey()   // she copies the setup again and runs it
+            // VX-258 (A JUSTIFIED EDIT, the ritual — her ruling: a key re-binds with zero clicks only the name its setup was copied FOR): her
+            // second copy is from Claude Code's own tab.
+            let rerun = try ops.mintMCPSetupKey(copiedFor: "claude-code")   // she copies the setup again and runs it
             let rebound = try ops.admitMCPConnection(name: "claude-code", version: "2.2", presentedKey: rerun)
             #expect(rebound.decision.admits, "the newest copied setup is admitted, no Deny needed")
             #expect(rebound.client?.id == client.id && rebound.client?.state == .approved,
