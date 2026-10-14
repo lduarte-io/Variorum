@@ -111,7 +111,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-290 — the empty-block backspace's caret landing | IN-PROGRESS — **W1 RED ON OLD DONE, W2 MAC BATCH GREEN** (stage `vx282-u1` 21:58:14–22:01:26, released; record below). **W3, the walk, is HELD** on the coordinator's word (she may be on the Pro) — next: on the orchestrator's "W3 GO" + claim line, walk rows A–D, record, flip to DONE. Fix `385aa1fc`. No revert in flight. |
+| U1 | VX-290 — the empty-block backspace's caret landing | **DONE** — fix `385aa1fc`; W1 red on old + W2 the Mac batch green `be826a5d`; W3 the walk, every row held (this commit). Stage released 22:01:26 and 23:47:00. One observation for the orchestrator to ticket (the bar's word counter, not this unit's road). No revert in flight. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | IN-PROGRESS — **window run 22:59–23:39, claim `vx282-u2` HELD for U1's chained handover.** W1 red on old as designed (Mac 23/3, 9 issues; phone 2/1, 3 issues — all designed). **W2 Mac batch GREEN 190 tests / 26 suites.** **W3 walk HOLDS (Study): A italic at every keystroke incl. right after each space, B plain when the caret leaves / italic when it returns, C arithmetic plain.** **W2b phone FINDING: `leavingATrailingSpace…` hits the DEBUG desync fatal on the fixed product only — UIKit's `coordinateEditing` insert reports the selection mid-transaction, the settle's attribute write joins the edit's report, the verdict refuses.** NEXT: the one-line fix (settle never writes while `storage.editedMask` is non-empty), headless builds, then a phone re-run (W2b) + the Mac g1 re-run in a later window. Second voice not walked. No revert in flight. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | NOT-STARTED |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
@@ -315,8 +315,48 @@ instance before or after, no simulator). Logs: `notes/plans/vx282-screens/u1/log
   `UntouchedLineKeeperTests` `WholeBlockDeleteTests` `BoundaryClampTests` `CrossBlockCompoundTests`.
   **180 tests / 13 suites, all passed, 0 skipped** (every suite's ✔ line read in the logs; `** TEST EXECUTE
   SUCCEEDED **` ×2).
-- **W3 — HELD** by the coordinator until she confirms she is off the Pro; no "W3 GO" had reached this session when
-  W2 ended, so the claim was released, per the GO's instruction. PENDING.
+- **W3 — HELD** at W2's end (no "W3 GO" had reached this session), so the claim was released per the GO; the walk
+  ran in its own window below.
+
+**THE WALK, W3 — DONE, EVERY ROW HELD** (the coordinator's "W3 GO"; `Tools/stage` handed `vx282-u2` → **`vx282-u1`**
+in one chained call, claimed 23:41:01, RELEASED 23:47:00; `git pull --ff-only` first — U2's commits on the branch,
+NOT in the walked product, by the window's no-rebuild rule; `guard.sh --author` OK before every act; AX and screen
+capture probed first). The product: the EXISTING `DerivedData/vx282-u1` Debug app (the build of `385aa1fc`), pid
+16425, the DEV store (`io.lduarte.Variorum.debug`) — Standard, unlocked (no lock screen met), voice **Study**,
+appearance system (light), both as found and as left. No What's New sheet showed (`whatsNew.lastVersion` 0.9.5 =
+the product's). Staged through the shelf's quick-entry bar (`{t:"VX-290 walk"}alpha` ⇧⏎ `beta` ⏎ — opened in Write,
+`["alpha","beta"]`). Every key through `keys.sh` (System Events), ≥ 2 s apart except row E. **The evidence in each
+capture is the bottom bar's `block i/n`** (the caret's block and the count), the text, the masthead's tray count
+(⌫N) and the quiet receipt "Empty block deleted — ⌥⌘Z undoes it." Captures (the content column, downsized):
+`notes/plans/vx282-screens/u1/walk/`.
+- **A — her report: HELD.** ⌘→ to alpha's end (`A0`), ⏎⏎⏎ (`A1`: five blocks, block 4/5), ↑↑ into the FIRST empty
+  block with two empties below (`A2`: block 2/5) → **⌫: the caret moved UP to alpha's end** (`A3`: block 1/4, the
+  two empties still below, ⌫1, the receipt) → **⌫: `alph`** (`A4`: block 1/4, both empties untouched — nothing
+  eaten from underneath).
+- **B — the climb from the last empty block: HELD.** ↓↓ into the last empty (`B0`: block 3/4) → ⌫: the empty ABOVE
+  went and the caret's line moved up (`B1`: block 2/3, ⌫2 — #33(d)'s both-empty case, the shipped landing) → ⌫: the
+  caret's own block went into the line above, **the caret at `alph`'s end** (`B2`: block 1/2, ⌫3).
+- **C — the ⏎⌫ "oops": HELD.** ⏎ at `alph`'s end (`C0`: an empty block between, block 2/3) → ⌫: **back at `alph`'s
+  end** (`C1`: block 1/2, ⌫4) → ⌫: **`alp`** (`C2`: still two blocks — never "Blocks joined").
+- **D — forward-delete at a paragraph's end: HELD.** ⏎ then ↑ ⌘→ (`D0`: the caret at `alp`'s end, an empty block
+  below, block 1/3) → fn-⌦ (key code 117): the empty block went and **the caret STAYED at `alp`'s end** (`D1`: block
+  1/2, `beta` right below, ⌫5, the receipt).
+- **E — an extra row, the real fast double press: HELD.** ⏎⏎⏎ ↑↑ (`E0`: block 2/5) → two ⌫ 30 ms apart in ONE
+  System Events call (the README's model of a fast human double press): one empty carved, the second press deleted
+  a letter — **`al`**, block 1/4, two empties still below, ⌫6 (`E1`). The deferred road on real events.
+- **The two-⌫-in-one-turn refusal toast NEVER showed** — not in A–D (presses ≥ 2 s apart) and not in E (30 ms
+  apart: the second press took the deferred road, the flight's stash). The recorded same-turn shape stays a
+  test-only reach.
+- **Cleanup:** the walk note moved to the Trash by note ▾ ▸ Delete Note… ▸ Delete (the app's own SwiftUI confirm;
+  receipt "Note moved to the Trash — 30 days to put it back.") — **residue: the note "VX-290 walk" in the dev store's
+  Trash, with the six carved empty blocks in its tray**; our instance quit by identity
+  (`tell application id "io.lduarte.Variorum.debug" to quit`), `pgrep` empty after; no system popup or dialog met.
+- **SURPRISE, recorded for the orchestrator to ticket — NOT this unit's road:** the bottom bar's note word count
+  read **"1w in note"** while `alph`/`alp` and `beta` both stood on the page, after `B1` and after `D1` (each stayed
+  wrong across a 3–4 s recapture, and corrected at the next structural act); after `A3`, `B2`, `C1`, `E1` it read
+  the true 2w. `B1` is a carve whose landing is BYTE-IDENTICAL to the pre-VX-290 code (the block before the break,
+  `.startOf`), so the drop does not track this unit's change. The count is `EditorViewModel.publishPostWordCount` →
+  `ledger.totalWords(over: slots)` (the per-variant cached counts) — a different surface; observed, not traced.
 
 ### U2 — VX-296 (the italics flicker: a caret-aware live restyle)
 
