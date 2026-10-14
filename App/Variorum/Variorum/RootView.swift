@@ -90,6 +90,12 @@ struct RootView: View {
     /// object rather than a bare `@State` engine so the engine's doors can
     /// hold it weakly — a window closed mid-tour leaves no cycle behind.
     @State private var tourSlot = TourSlot()
+    /// **VX-326 — this shell's ONE opening ask** for the Bookcase quick
+    /// entry's caret (R102: the Bookcase opens with the cursor in the bar). A
+    /// shell opens on the Bookcase — at launch, after every unlock, in a new
+    /// window — and its first Bookcase bar claims this; later Bookcase mounts
+    /// in the same shell find it spent.
+    @State private var bookcaseOpeningFocus = QuickEntryOpeningFocus()
     // (Stage C's parked block target LEFT this view at 17o c/d/e round 1,
     // MAJOR-2: it is `ShellRouter.blockLanding` now — same per-window scope,
     // but on the object every navigation door already speaks to, so the
@@ -1158,7 +1164,8 @@ struct RootView: View {
                 starDoor: starDoor, wings: wings,
                 // 13s-b U1a: the tour offer's row — built HERE (composition)
                 // and rendered by the Bookcase alone ("Bookcase only").
-                offerLine: tourOfferLine)
+                offerLine: tourOfferLine,
+                openingFocus: bookcaseOpeningFocus)
                 // 13i-d U5: a new wing is a new board (its tasks restart).
                 .id("bookcase-\(shelf.wingID)")
         case .library:

@@ -99,6 +99,61 @@ nonisolated enum CaptureKeys {
     }
 }
 
+// MARK: - The opening ask (VX-326 — the ONE rule the box's opening ask obeys)
+
+/// **The shell's opening ask for the caret, decided once** (VX-326). When a
+/// shell opens on the Bookcase it asks for the caret in the quick entry (R102:
+/// *"the shelf opens with the cursor already IN the bar"*), and at launch that
+/// ask arrives BEFORE the box is in its window — the opening face is swapped
+/// for the shell, and SwiftUI puts the box in its window a pass after the
+/// bar's `.task` has asked (measured headlessly on the real module; the VX-282
+/// record § U6). The counted request (`takeFocus`) drops an ask it cannot
+/// serve; this one WAITS for the box's arrival, and then decides ONCE, on the
+/// facts of the box's own window:
+///
+/// - the keyboard is free — the window itself is the first responder (or
+///   nothing is) — and no sheet is on the window: **take** it;
+/// - anything else holds this window's keyboard (a field, another text, a
+///   sheet): **drop** the ask — never steal, never serve it later;
+/// - the box already holds it: nothing to do.
+///
+/// Other windows are never consulted: taking this window's first responder
+/// takes nothing from them (a key note window keeps its editor and stays key),
+/// and the caret is live the moment this window is key.
+nonisolated enum CaptureOpeningFocus {
+    enum Holder: Equatable {
+        /// The window itself, or nothing: the keyboard is free.
+        case nobody
+        case theBox
+        case someoneElse
+    }
+
+    struct Facts: Equatable {
+        var inWindow: Bool
+        var keyboard: Holder
+        var sheetOnWindow: Bool
+    }
+
+    enum Verdict: Equatable {
+        /// Not in a window yet — the arrival decides.
+        case wait
+        case take
+        /// Something else holds this window's keyboard: the ask is spent.
+        case drop
+        /// The box already holds the keyboard: the ask is spent, nothing done.
+        case alreadyHeld
+    }
+
+    static func verdict(_ facts: Facts) -> Verdict {
+        guard facts.inWindow else { return .wait }
+        switch facts.keyboard {
+        case .theBox: return .alreadyHeld
+        case .someoneElse: return .drop
+        case .nobody: return facts.sheetOnWindow ? .drop : .take
+        }
+    }
+}
+
 // MARK: - The look (the voice, as AppKit values)
 
 /// What a capture box wears, derived from the tokens its host already
@@ -148,6 +203,12 @@ struct CaptureTextView: NSViewRepresentable {
     /// again later — and a Bool would have to be lowered by the host
     /// between them, which is a second piece of state to get wrong.
     var focusRequest = 0
+    /// **The OPENING ask** (VX-326), counted like `focusRequest` but obeying
+    /// `CaptureOpeningFocus`: it waits for the box to be in its window, then
+    /// takes the caret only if this window's keyboard is free — never
+    /// stealing, never served late. Raised once by a shell opening on the
+    /// Bookcase (`QuickEntryBar`'s opening claim); 0 everywhere else.
+    var openingFocusRequest = 0
     /// Whether the caret is in this box, for the host's own chrome (the
     /// Terminal voice's blinking block cursor stands down when it is).
     /// Delivered on the next main-queue turn, never inside a view update
@@ -220,11 +281,13 @@ struct CaptureTextView: NSViewRepresentable {
         // `becomeFirstResponder`) would otherwise write the host's `@State`
         // inside SwiftUI's view update (the state-during-update class). The
         // MEASURED roads are the bar's re-raises — the padding tap and the
-        // title chip (`QuickEntryBar`); whether the Bookcase's `.task` raise
-        // can arrive with the box already windowed is UNTRACED (F-FR-1: in
-        // the hosted test window it lands window-less and `takeFocus` returns
-        // at its guard). The main queue is FIFO, so the reports keep their
-        // order and the last one delivered is the caret's latest truth.
+        // title chip (`QuickEntryBar`). The Bookcase's `.task` raise reaches
+        // `updateNSView` with the box still WINDOWLESS whenever the Bookcase
+        // is mounted into a window already showing something (a launch's swap,
+        // a navigation back) — F-FR-1, traced at VX-326 — so `takeFocus` drops
+        // it; a shell's OPENING ask takes the waiting road instead
+        // (`armOpeningFocus`). The main queue is FIFO, so the reports keep
+        // their order and the last one delivered is the caret's latest truth.
         view.onCaretChange = { [weak coordinator = context.coordinator] inBox in
             DispatchQueue.main.async {
                 coordinator?.parent.onFocusChange?(inBox)
@@ -232,11 +295,15 @@ struct CaptureTextView: NSViewRepresentable {
         }
         // A request already raised when the box is MADE (the pad's 1) is
         // served once, on its first arrival. A request raised later (the
-        // Bookcase's `.task`, a click on the padding, the title chip) takes
-        // the `takeFocus` road in `updateNSView` (VX-112's trace: the bar's
-        // request is always raised a turn after this, so its flag is false).
+        // Bookcase's `.task` on a later mount, a click on the padding, the
+        // title chip) takes the `takeFocus` road in `updateNSView` (VX-112's
+        // trace: the bar's request is always raised a turn after this, so its
+        // flag is false); a shell's OPENING ask takes `armOpeningFocus` (VX-326).
         view.wantsInitialFocus = focusRequest > 0
         context.coordinator.lastFocusRequest = focusRequest
+        // A box MADE after an opening ask was raised does not inherit it: the
+        // ask belonged to the box it was raised at (served once — VX-326).
+        context.coordinator.lastOpeningFocusRequest = openingFocusRequest
         // Spelling follows the app's ONE this-Mac setting (default `off`,
         // the shipped behaviour) rather than a second answer invented here.
         SpellcheckLevel.current.apply(to: view)
@@ -266,6 +333,10 @@ struct CaptureTextView: NSViewRepresentable {
         if focusRequest != context.coordinator.lastFocusRequest {
             context.coordinator.lastFocusRequest = focusRequest
             context.coordinator.takeFocus()
+        }
+        if openingFocusRequest != context.coordinator.lastOpeningFocusRequest {
+            context.coordinator.lastOpeningFocusRequest = openingFocusRequest
+            view.armOpeningFocus()
         }
     }
 
@@ -309,6 +380,7 @@ struct CaptureTextView: NSViewRepresentable {
         weak var view: CaptureNSTextView?
         let canary = FallbackCanary()
         var lastFocusRequest = 0
+        var lastOpeningFocusRequest = 0
         private var appliedStyle: CaptureTextStyle?
 
         /// **The box's own undo history** (VX-193 — VX-179 U3-g's mechanism,
@@ -456,6 +528,48 @@ final class CaptureNSTextView: NSTextView {
     /// shared capture box re-takes only focus it HELD, never steals.*
     private var heldKeyboardWhenDetached = false
 
+    /// **VX-326 — the opening ask, waiting to be decided.** Raised by
+    /// `armOpeningFocus()` (the representable's `openingFocusRequest`); decided
+    /// ONCE by `CaptureOpeningFocus` as soon as the box is in its window, and
+    /// lowered by that decision whatever it was. Read-only outside, for pins.
+    private(set) var openingFocusPending = false
+
+    /// The opening ask arrived. Decided on the next main-queue turn — never
+    /// inside SwiftUI's update or layout pass that delivered it, so the
+    /// window's keyboard is read after that pass settles (a swap removes the
+    /// face it replaced in the same pass that brings the box in).
+    func armOpeningFocus() {
+        openingFocusPending = true
+        decideOpeningFocusNextTurn()
+    }
+
+    private func decideOpeningFocusNextTurn() {
+        DispatchQueue.main.async { [weak self] in
+            self?.decideOpeningFocus()
+        }
+    }
+
+    private func decideOpeningFocus() {
+        guard openingFocusPending else { return }
+        let responder = window?.firstResponder
+        let keyboard: CaptureOpeningFocus.Holder =
+            responder == nil || responder === window ? .nobody
+            : responder === self ? .theBox
+            : .someoneElse
+        let verdict = CaptureOpeningFocus.verdict(.init(
+            inWindow: window != nil, keyboard: keyboard,
+            sheetOnWindow: window?.attachedSheet != nil))
+        switch verdict {
+        case .wait:
+            return
+        case .drop, .alreadyHeld:
+            openingFocusPending = false
+        case .take:
+            openingFocusPending = false
+            window?.makeFirstResponder(self)
+        }
+    }
+
     /// **Where the caret is** (17y B2, item (m)): true when this box becomes
     /// first responder, false when it resigns — reported the moment the
     /// caret ARRIVES, keystroke or none, so the host's Terminal block cursor
@@ -507,6 +621,11 @@ final class CaptureNSTextView: NSTextView {
             if window.firstResponder == nil || window.firstResponder === window {
                 window.makeFirstResponder(self)
             }
+        }
+        // VX-326: an opening ask that arrived before the box was in its
+        // window is decided now that it is (next turn, as at the ask).
+        if openingFocusPending {
+            decideOpeningFocusNextTurn()
         }
     }
 
