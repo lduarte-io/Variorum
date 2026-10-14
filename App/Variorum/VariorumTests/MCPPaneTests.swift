@@ -81,7 +81,8 @@ struct MCPPaneTests {
             defer { door.detach() }
             let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-mcp-pane-test-\(UUID().uuidString)"))
             defer { pasteboard.releaseGlobally() }
-            await door.copySetupCommand(to: pasteboard)
+            // VX-281 ladder R1-3 (the ritual): the copy names its client.
+            await door.copySetupCommand(for: .claudeCode, to: pasteboard)
             let copied = try #require(pasteboard.string(forType: .string))
             #expect(copied.contains("variorum-dev"), "the test host is the Debug build")
             #expect(copied.contains("/Contents/MacOS/variorum-mcp"))

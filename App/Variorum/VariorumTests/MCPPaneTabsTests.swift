@@ -392,6 +392,26 @@ struct MCPPaneTabsTests {
                     "the ✓'s question (the copied client's receipt landed) answers no — it never flashes beside Claude Code")
             #expect(pasteboard.string(forType: .string)?.contains("\"mcpServers\"") == true,
                     "her press completed: the copied client's setup is on the clipboard")
+            #expect(!door.copyLanded(for: .anyClient) && !door.copyLanded(for: .claudeCode),
+                    "the ✓ asks the door: no copy landed under the client shown")
+        }
+    }
+
+    /// The ✓'s question, plainly (VX-281 ladder R1-3 — a companion to the
+    /// pin above, green from the fix on): a copy that landed under the shown
+    /// client says yes; another client chosen since says no.
+    @Test func theCopyIconsCheckIsTheCopyThatLandedUnderTheShownClient() async throws {
+        try await withPaneWorld { session, _ in
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-vx281-check-\(UUID().uuidString)"))
+            defer { pasteboard.releaseGlobally() }
+            await door.copySetupCommand(for: .codex, to: pasteboard)
+            #expect(door.copyLanded(for: .codex), "Codex's copy landed under Codex")
+            #expect(!door.copyLanded(for: .claudeCode))
+            door.chooseSetupClient(.anyClient)
+            #expect(!door.copyLanded(for: .codex), "another client chosen since: no ✓")
         }
     }
 

@@ -509,7 +509,15 @@ final class MCPDoor {
     /// VX-232: the client copied IS the chosen one — the receipt this act
     /// speaks always names the client the menu shows (the pane's press
     /// copies the shown client, so from the pane this changes nothing).
-    func copySetupCommand(for client: MCPSetupClient = .claudeCode, to pasteboard: NSPasteboard = .general) async {
+    ///
+    /// **VX-281 ladder R1-3 — a choice made while the copy waits on its
+    /// key's mint** (a store write: the writer may be busy with a sync round,
+    /// an import, an MCP batch). Her press completes — the copied client's
+    /// setup lands on the clipboard — but its receipt lands only while the
+    /// menu still shows that client: the end state is exactly a copy followed
+    /// by a choice, which clears the receipt (`chooseSetupClient`). No
+    /// default client: every caller names the one it copies.
+    func copySetupCommand(for client: MCPSetupClient, to pasteboard: NSPasteboard = .general) async {
         if setupClient != client { setupClient = client }
         guard let runner else {
             note = Note(text: MCPPaneCopy.setupNeedsLibrary, place: .connect)
@@ -521,10 +529,19 @@ final class MCPDoor {
             pasteboard.clearContents()
             pasteboard.setString(
                 client.text(shimPath: Self.shimPath, isDebugBuild: Self.isDebugBuild, key: key), forType: .string)
+            guard setupClient == client else { return }
             note = Note(text: client.copiedReceipt, place: .connect)
         } catch {
             note = Note(text: MCPPaneCopy.refusal(error), place: .connect)
         }
+    }
+
+    /// **The copy icon's ✓ question** (VX-281 ladder R1-3): did a copy of
+    /// `client` land — its receipt standing under the menu — AND is `client`
+    /// still the one the menu shows? A ✓ beside another client's text would
+    /// say THAT text was copied.
+    func copyLanded(for client: MCPSetupClient) -> Bool {
+        setupClient == client && note == Note(text: client.copiedReceipt, place: .connect)
     }
 
     /// 13n-c U5: a copy receipt names ONE client's next step, so choosing

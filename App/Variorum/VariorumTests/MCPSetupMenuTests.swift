@@ -160,6 +160,11 @@ struct MCPSetupMenuTests {
             defer { door.detach() }
             let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-mcp-setup-test-\(UUID().uuidString)"))
             defer { pasteboard.releaseGlobally() }
+            // A JUSTIFIED EDIT (VX-281 ladder R1-3 — the ritual): the copy act
+            // has no default client any more (every caller names its own), so
+            // "the default stays Claude Code's" is the MENU's default — a
+            // fresh door's choice — read here before any copy moves it.
+            #expect(door.setupClient == .claudeCode, "the default is Claude Code's")
             var keys: [String] = []
             for client in MCPSetupClient.allCases {
                 await door.copySetupCommand(for: client, to: pasteboard)
@@ -174,9 +179,9 @@ struct MCPSetupMenuTests {
                         == .unclaimed, "the copy's key is kept, by hash, until a client presents it")
                 #expect(door.note == MCPDoor.Note(text: client.copiedReceipt, place: .connect))
             }
-            await door.copySetupCommand(to: pasteboard)
+            await door.copySetupCommand(for: .claudeCode, to: pasteboard)
             #expect(pasteboard.string(forType: .string)?.hasPrefix("claude mcp remove -s user variorum-dev") == true,
-                    "the default is Claude Code's")
+                    "Claude Code's copy is its command")
             #expect(Set(keys).count == 3, "every copy carries a fresh key")
             #expect(Set(MCPSetupClient.allCases.map(\.copiedReceipt)).count == 3, "three receipts, three next steps")
         }

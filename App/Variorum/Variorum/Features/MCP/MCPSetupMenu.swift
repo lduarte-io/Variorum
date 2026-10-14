@@ -46,9 +46,11 @@ struct MCPSetupMenu: View {
         VStack(alignment: .leading, spacing: 7) {
             MCPSetupCodeBlock(text: door.setupText(for: client), client: $client, tokens: tokens) {
                 // VX-168: the copy mints its key first (a store write).
+                // VX-281 R1-3: the ✓ asks the door whether THIS copy landed
+                // under the client still shown.
                 let copying = client
                 await door.copySetupCommand(for: copying)
-                return door.note == MCPDoor.Note(text: copying.copiedReceipt, place: .connect)
+                return door.copyLanded(for: copying)
             }
             ExplainerLine(line: client.summary, detail: client.sentence)
             if let note = door.note, note.place == .connect {
