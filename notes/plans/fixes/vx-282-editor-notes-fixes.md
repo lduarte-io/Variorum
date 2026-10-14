@@ -131,7 +131,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U1 | VX-290 — the empty-block backspace's caret landing | **DONE** — fix `385aa1fc`; W1 red on old + W2 the Mac batch green `be826a5d`; W3 the walk, every row held `a7a63949`. Stage released 22:01:26 and 23:47:00. One observation for the orchestrator to ticket (the bar's word counter, not this unit's road). No revert in flight. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #220. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #221). No claim held; no revert in flight. |
-| U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
+| U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — W1 red on old (the host suites + the model suites, ≈4 min; VX-229 decided here) · W2 the fixed batch (three groups, ≈12 min) · W3 the walk (7 rows incl. a live `heap` count, row 1 in both voices, ≈25 min) — ≈42 min.** VX-229: fix REVERTED `7d798f82` (offscreen artefact — the CORRECTION); expected HOLLOW. VX-257: fix `1ca8fe72`; QUESTIONS #223. VX-183: `a765683c`. VX-182: pins `f38fb93c` red on old (headless), fix `fd4c260c`, R-182 ran + restored. Pins hardened `dab712d8`. Core 2,801/320 + MCP 212/41 + workbook 40/6 headless green; the phone builds. Old products `DerivedData/vx282-u5-old-products` REBUILT (the named revert at `3a6bad6d` — done, restored, `git status` clean); fixed `DerivedData/vx282-u5` rebuilt at the tip. No claim held; no revert in flight. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **READY FOR STAGE — W1 red on old (`QuickEntryLaunchFocusTests` on `vx282-u6-old-products`, 1 issue expected, ≈3 min) · W2 the fixed batch on `vx282-u4` (three groups — the capture/quick-entry/pad suites with the four new ones, the tour suites, the shell-mount and launch/restore suites, ≈12 min) · W3 the walk (the old build's launch for the record; launch in both voices with a typed letter; a restored note window; the tour; the navigation-back scope line, ≈23 min) — ≈38 min.** Trace (headless, real module): the shell's ask reaches the box before its window and is spent (F-FR-1) — at launch and on every navigation back (O-U6-1, left as today). Pins `d35191b6` + correction `ee1facc9` (AppKit auto-selects a window's first text field when it is ordered in — the rig frees it) · fix `3cf0079b`. P-U6-1/2 → QUESTIONS #224. Products: old `vx282-u6-old-products` REBUILT by the revert named at `07f03fa5` (done, restored, `git status` clean); fixed `vx282-u4` rebuilt LAST (U4's final + U5 + U6 — u4b tests what U4 expects). No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
@@ -1074,10 +1074,10 @@ and 0 booted simulators at the start). Logs: `notes/plans/vx282-screens/u3/logs/
 
 **NOT DONE BY THIS UNIT (first line):** no live-road pin for ⌘Z — the test host has no key window (`WindowsTests`'
 header) and the headless trace of the live road did not converge, so the binding's live sync rests on the u4 walk
-alone; the u4b window (the fixed pins on old and new) has not run.
+alone; and no walk on the u4b pins (none owed — the app code changed by doc comments only after the u4 walk).
 
-**State: FIX LEG BUILT (headless, the coordinator's ruling, outcome (a)) — READY FOR STAGE u4b.** Implementer: an
-`opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Counts marked PENDING wait for u4b.
+**State: DONE** (the u4b window, 2026-10-14 05:20–05:22: W1b red on old exactly as predicted, W2b green — THE u4b
+WINDOW at the end of this section). Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14.
 
 **THE LEAD — the defect that is real in use (VX-193's sibling).** While the box's typing history was the WINDOW's undo
 manager, a programmatic clear left it standing; an EMPTY filing (three spaces and ⏎ — the box clears and keeps the caret)
@@ -1470,6 +1470,33 @@ to `notes/plans/vx282-screens/u4/logs/`:
   `CaptureFocusReattachTests` `CaptureTourFocusTests` → `u4b-w1b-red-on-old.log`. EXPECTED: 13 issues in 10 cases.
 - **W2b (≈4 min):** the same five suites on `-derivedDataPath DerivedData/vx282-u4` → `u4b-w2b.log`. EXPECTED: all green.
   (The rest of the u4 batch needs no re-run: the app code changed by doc comments only.)
+
+#### THE u4b WINDOW — RUN 2026-10-14 05:20:17 → 05:21:55 (claim `vx282-u4b`, handed from `coord-for-vx282`; HELD for U5's chained handover)
+
+`git pull --ff-only` first (up to date at `ece30a41` — U5, U6 and the merge of main on the branch; QUESTIONS renumbered,
+U4's entry is now #222). Nothing rebuilt (the coordinator's word): `DerivedData/vx282-u4` was last rebuilt by U6 with
+U4 + U5 + U6 code — U6 only adds a focus request these suites never touch — and `vx282-u4-old-products` is untouched since
+`a5a0adac`. `guard.sh --author` OK before each leg; no Variorum instance before or after (`pgrep -lx Variorum`).
+- **W1b — red on old** (`u4b-w1b-red-on-old.log`): "**10 tests in 5 suites failed … 13 issues**", no crash, no restart —
+  EXACTLY the prediction, cell for cell: `aProgrammaticClearEndsTheBoxsOwnHistory` 2 (the manager is the window's;
+  `canUndo` survives the clear — the `#require` stopped the old tree before its ⌘Z); `anEmptyFilingLeaves…` 1 (the bar's
+  `#require`); `aProgrammaticUndoAndRedoReachTheBinding` 3 (the binding after ⌘Z, after ⌘Z, after ⇧⌘Z — its non-vacuity
+  cells GREEN on old now: the explicit grouping gives two steps, so the redo half IS discriminated); `theBarFilesWhatTheBoxShows`
+  ×2 and `thePadFilesWhatTheBoxShows` ×2, 1 each (the store held "alpha beta" while the box showed "alpha"); the VX-112
+  cells 1 each (`aReleasedBox…(true)`, `aBoxThatHeld…(false)`, `aReattachNeverSteals…(true)`). GREEN on old:
+  `theFirstMountAutofocusStillLands` (both births) and the tour pin.
+- **W2b — the fixed product** (`u4b-w2b.log`): "**10 tests in 5 suites passed**" — every suite's ✔ line read, 0
+  skipped.
+- **Posture:** no app launched in this window; the dev store untouched (Standard, unlocked, Study, as the coordinator's
+  pre-check found it); **the claim `vx282-u4b` HELD** for U5's implementer.
+
+**U4 — DISPOSITIONS, FINAL.** VX-193's sibling (⌘Z after an empty filing replays the old ranges — `NSRangeException`
+in use on old): **FIXED** (`0c31fcc5`), pins `CaptureUndoHistoryTests` red on old / green fixed, verified in use. VX-193's
+headline (⌘Z leaves the binding stale): **NOT REPRODUCED IN USE** — the re-sync kept as a belt by the coordinator's
+ruling, outcome (a) (`079b0a15`), its guards `CaptureUndoSyncTests` + `CaptureHostsUndoFilingTests` red on old / green
+fixed on the programmatic-undo road. VX-112: **FIXED with the note** (`6bb9c7c9`) — her sighting was the Terminal block
+cursor; the box's own defects red on old / green fixed; the tour pin green both sides. P-U4-1 open (#222); P-U4-2
+withdrawn. Born for the orchestrator: O-U4-1 (untraced), O-U4-2, O-U4-3 (now this run's U6, VX-326).
 
 ### U5 — VX-229 · VX-257 · VX-183 · VX-182 (the comments family VX-179 left)
 
