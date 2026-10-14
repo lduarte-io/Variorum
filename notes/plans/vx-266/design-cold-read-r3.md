@@ -29,8 +29,8 @@ MAJOR 1 and MAJOR 5 re-read: today's Re-link reads the old shared key and re-lan
 mints when allowed). None is hollow, and none is disputed. The round-2 Fable reviewer (`variorum-vx-266-63`) weighed
 in on the three largest at her ask, and the settlement with it is recorded below.
 
-**The commits:** the Opus report `beed9951`; the design and phase-1 plan `c40fc195`; this record and the key maps
-follow.
+**The commits:** the Opus report `beed9951`; the design and phase-1 plan `c40fc195`; this record `e011ec1f`; the
+settlement's notes `37b7bb5d`; the key maps follow.
 
 ---
 
@@ -64,8 +64,30 @@ follow.
 
 ## The settlement with the round-2 Fable reviewer
 
-*Pending: the design's owner and the round-2 Fable reviewer (`variorum-vx-266-63`) are settling round 3's changes, as
-she asked. Their agreement — and how each report was handled — is recorded here when it's reached.*
+She asked that the round-2 Fable reviewer (`variorum-vx-266-63`) and the design's owner agree on the final design and
+on how the review reports were handled. Its settlement (2026-10-14), after reading the Opus report, these dispositions
+and the revised design at `c40fc195`:
+
+- **Every disposition agreed** — M1 to m16 and N1 to N7: *"none reads hollow, her two rulings are honored verbatim (the
+  frozen anchor with the new-words sentence kept; the release switch at her word with §3.15's deletions landing at it),
+  and the Opus report itself is the strongest round yet (M4 and M5 are real finds I'd have wanted caught before
+  build)."*
+- **The four points put to it, each traced:**
+  - (a) the follower's anchor under the outgoing key with its copied locks holds, with no missed reach; one note: a
+    silently-joined device's anchor opens with the words only, so its copies' *Opens with* line says the twelve words;
+  - (b) the lost actor's finish minting the account's key is sound (per-id names and the vault's CAS, at a press); one
+    sentence: a never-landed key wraps nothing and is left alone if it surfaces;
+  - (c) a successor adopting every section's retired ids is safe under O1; one edge: a living Mac cloned onto new
+    hardware can retire an Apple key the original still uses — nothing is lost, and Re-link's library arm heals it —
+    so a residue line and a fixed scenario;
+  - (d) m13's scoping is sound, and the guard blocks nothing legitimate.
+- **Its verdict:** *"With those three notes landed (one Opens-with wording, one orphan-item sentence, one clone residue
+  line + scenario), I consider round 3 settled and agree the design is final for round 4."* The notes landed at
+  `37b7bb5d`.
+
+**How the reports were handled**, as the two agreed: each report is recorded unedited; every finding is traced to a
+mechanism before anything changes, and fixed where real; what only she can decide goes to her, and her words are
+recorded verbatim; and each round's changes are settled between the two before the next cold read.
 
 **The ladder:** her process — *"run another Opus Max cold review on the *final* design ... then you can run another opus
 max cold review if any more majors were found (that would be the fifth round). stop at that point"*.
