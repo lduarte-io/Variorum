@@ -10,7 +10,7 @@ strictly sequential; the ladder's cold reviews are **`opus-reviewer` at max** (s
 arbitrates against the spec); **one `fable-reviewer` cold review over the whole run's diff** — the editor seam
 (VX-290 `EditorTextView` + `BlockRangeIndex`; VX-296's live-storage restyle) is the need CLAUDE.md names, and it
 lands at the run's end, where it covers the whole diff (cross-model flow for its findings: Fable makes the final
-call and implements its confirmed fixes). No agent runs concurrently with another.
+call; **since her process change of 2026-10-13 (CLAUDE.md "Two reviews" — Fable's budget goes to finding and judging, not typing) the OPUS IMPLEMENTER applies the confirmed fixes, red-on-old each with the suite green, and the reviewer writes a fix itself only for `Sync/` lines (none in this run) or a finding it marks FINDER-FIXES, followed by one implementer sanity pass; a final round's fixes get the orchestrator's line-by-line check**). No agent runs concurrently with another.
 
 **The kickoff is the runway's section** — `notes/plans/vx-33-release-runway.md` § "VX-282 — Run: Editor & notes
 fixes" (quoted whole below), plus §2's conflict map and §3's rules for every run. Each member's ticket body
