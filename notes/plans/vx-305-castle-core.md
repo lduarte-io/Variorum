@@ -554,10 +554,10 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   the executor's core — the session at unlock, this Mac's facts written in both homes, the plan runner (begin, steps,
   resume, the commit point, roll back before it, finish from the record after), the repairs with their preconditions
   verified — and the in-memory test world — WIP COMMITTED (compiling; the remaining acts stubbed in `Acts/Pending.swift`
-  until their pieces), its core tests NOT-STARTED; (b) the crossings — Use Castle, Use Standard, Replace All Keys, the
-  follows — WRITTEN; Use Castle's tests green (7 — the exact writes local and synced, a crash after EVERY write on
-  Touch ID, Always ask and synced Always ask, the plan dropped, the refusals: PENDING the full-suite run), Use
-  Standard's, Replace All Keys' and the follows' tests NOT-STARTED; (c) the account acts — set up sync, enroll, the four leaves, Move — NOT-STARTED;
+  until their pieces) — `9f694b5c`; its core tests (settle's plan cases, the failed seals, the repairs) NOT-STARTED;
+  (b) the crossings — Use Castle, Use Standard, Replace All Keys, the follows (the finish of a lost device's leave
+  included) — DONE, 26 tests in 4 suites green filtered (the exact writes; a crash after EVERY write — Touch ID,
+  Always ask, synced, plan dropped; the follower's hold; the refusals) — this commit; (c) the account acts — set up sync, enroll, the four leaves, Move — NOT-STARTED;
   (d) copies — open a copy, land, Send Library, plaintext export, the offer's delete — NOT-STARTED; (e) the key doors,
   device settings, the re-arm, confirm mode, create library, Re-link (both arms), the old shared key's move and
   retirement, the migration — NOT-STARTED; (f) U3's guards with their DEBUG mutation pins, the log scan, decision 35,

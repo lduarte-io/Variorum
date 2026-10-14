@@ -92,6 +92,13 @@ extension ActContext {
             format, accountID: snapshot.accountID, expectedRevision: snapshot.revision,
             proofMaster: held.masterSymmetricKey, device: deviceName)
         executor.noteFresh(written)
+        // This act's own write moved the revision: the rotation's first write
+        // takes this one (VX-109's door revision is the vault as this act
+        // left it, never a re-fetch past someone else's write).
+        var next = parameters
+        next.doorRevision = written.revision
+        next.oldCorpusKeyID = written.corpusKeyID
+        plan.parameters = next
         log("the account re-linked under a fresh key")
     }
 

@@ -97,19 +97,27 @@ extension ActContext {
     /// Idempotent: a key this act already minted is read back.
     func mintAppleKey(purpose: AppleKeyPurpose) throws -> AppleKeyMaterial {
         let stamped = purpose == .library ? parameters.ownAppleKeyID : parameters.accountAppleKeyID
-        if let stamped, let key = try leaves.apple.readAppleKey(id: stamped) { return key }
-        try requireAppleWriteAllowed()
-        let key = leaves.ids.mintAppleKey()
-        var next = parameters
-        if purpose == .library { next.ownAppleKeyID = key.id } else { next.accountAppleKeyID = key.id }
-        plan.parameters = next
-        try leaves.plans.writePlan(try plan.sealed(under: library.key))
-        try leaves.apple.addAppleKey(key)
-        try updateSection {
-            $0.recordingAppleKey(AppleKeyRecord(
-                id: key.id, purpose: purpose, accountID: purpose == .account ? accountID : nil, origin: .minted))
+        var key: AppleKeyMaterial
+        if let stamped, let minted = try leaves.apple.readAppleKey(id: stamped) {
+            key = minted
+        } else {
+            try requireAppleWriteAllowed()
+            key = leaves.ids.mintAppleKey()
+            var next = parameters
+            if purpose == .library { next.ownAppleKeyID = key.id } else { next.accountAppleKeyID = key.id }
+            plan.parameters = next
+            try leaves.plans.writePlan(try plan.sealed(under: library.key))
+            try leaves.apple.addAppleKey(key)
+            log("minted a fresh \(purpose.rawValue) Apple key")
         }
-        log("minted a fresh \(purpose.rawValue) Apple key")
+        // Recorded in this Mac's section — also on a resume after a crash
+        // between the add and the record.
+        if !library.section.appleKeys.contains(where: { $0.id == key.id }) {
+            try updateSection {
+                $0.recordingAppleKey(AppleKeyRecord(
+                    id: key.id, purpose: purpose, accountID: purpose == .account ? accountID : nil, origin: .minted))
+            }
+        }
         return key
     }
 

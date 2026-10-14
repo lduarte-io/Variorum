@@ -82,6 +82,10 @@ public struct ActParameters: Codable, Equatable, Sendable {
     /// A follower's anchor carries the master's road (false when the vault's
     /// master is still the Castle-era one — §3.4).
     public var includeMasterRoad: Bool?
+    /// Finishing a leave a lost device started (§3.9): the press stopped
+    /// waiting for the named key — a fresh account key is minted (the vault's
+    /// CAS keeps one).
+    public var mintsFreshAccountKey: Bool?
 
     public init(
         gate: GateStyle? = nil, synced: Bool? = nil, accountID: String? = nil, doorRevision: Int? = nil,

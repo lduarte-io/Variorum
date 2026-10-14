@@ -390,6 +390,11 @@ extension ActContext {
         var named: AppleKeyMaterial?
         if isLeave, let id = snapshot.format.appleKeyID {
             named = try leaves.apple.readAppleKey(id: id)
+            if named == nil, parameters.mintsFreshAccountKey == true {
+                // The finisher stopped waiting for the named key: a fresh
+                // account key, minted here, completes the leave instead.
+                named = try mintAppleKey(purpose: .account)
+            }
             if named == nil {
                 guard !executor.guards.leaveIDGatesCompletionOn else { throw ExecutorRefusal.waitingForNamedAppleKey }
             }

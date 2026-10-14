@@ -177,7 +177,7 @@ extension ActContext {
         let mayComplete: Bool
         if isLeave {
             let readable = try snapshot.format.appleKeyID.map { try leaves.apple.readAppleKey(id: $0) != nil } ?? false
-            mayComplete = readable || !executor.guards.leaveIDGatesCompletionOn
+            mayComplete = readable || parameters.mintsFreshAccountKey == true || !executor.guards.leaveIDGatesCompletionOn
         } else {
             mayComplete = snapshot.format.previousCorpusKey != nil
         }
@@ -217,8 +217,12 @@ extension ProtectionExecutor {
     /// `gate`: into Castle, this device's gate style — none chosen yet: Touch
     /// ID where a finger is enrolled, the item made at this press, else Always
     /// ask (§3.10).
+    /// `mintingIfTheNamedKeyNeverArrives`: FINISH LEAVING CASTLE, started on
+    /// another device (§3.9) — the press that stopped waiting for the key the
+    /// vault names mints a fresh account key to complete the leave.
     public func follow(
-        _ library: inout UnlockedLibrary, kind: FollowKind, typed: TypedSecrets, gate: GateStyle? = nil
+        _ library: inout UnlockedLibrary, kind: FollowKind, typed: TypedSecrets, gate: GateStyle? = nil,
+        mintingIfTheNamedKeyNeverArrives: Bool = false
     ) async throws -> ActOutcome {
         guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
         guard let account = record.account else { throw ExecutorRefusal.notSynced }
@@ -253,6 +257,7 @@ extension ProtectionExecutor {
             follow: FollowProgram.name(kind),
             newKind: kind == .intoCastle ? .castle : kind == .intoStandard ? .standard : record.mode,
             ownAppleKeyID: kind == .keysReplaced ? library.keyFile?.apple?.keyID : nil)
+        if mintingIfTheNamedKeyNeverArrives { parameters.mintsFreshAccountKey = true }
         if kind == .intoStandard {
             // The master's road is left out of the anchor when the vault's
             // master is still the Castle-era one this device's file holds (an

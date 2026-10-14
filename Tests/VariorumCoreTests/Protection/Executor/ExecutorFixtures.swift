@@ -38,13 +38,21 @@ final class EX {
     /// Apple wrap under the account's key and a silent sync-keys item. Castle:
     /// P and W, a Touch ID item (or none under Always ask); synced, a Castle
     /// vault and the sync keys the Castle way.
+    /// `joining`: another device of the same account — this device's own
+    /// library, on the same server and iCloud Keychain, holding the account's
+    /// keys (its section lists the account's Apple key as followed).
     init(_ mode: ProtectionMode, synced: Bool = false, gate: GateStyle? = nil, scheduledExport: Bool = false,
-         world: ExecutorWorld = ExecutorWorld(), account: String? = nil) throws {
+         world: ExecutorWorld? = nil, account: String? = nil, joining other: EX? = nil) throws {
+        let world = world ?? other.map { ExecutorWorld(icloud: $0.world.icloud, server: $0.world.server) } ?? ExecutorWorld()
         self.world = world
         self.mode = mode
         self.gate = mode == .castle ? (gate ?? .touchID) : gate
-        words = try PF.words()
-        p = try PF.passphraseKey(passphrase)
+        words = try other?.words ?? PF.words()
+        if let other, let vault = other.account.flatMap({ world.server.snapshot($0) }) {
+            p = try PassphraseKey.derive(other.passphrase, kdf: vault.format.kdf)
+        } else {
+            p = try PF.passphraseKey(passphrase)
+        }
         w = try PF.wordsKey(words)
         key = StoreKey.mint()
         self.account = synced ? (account ?? PF.id()) : nil
@@ -57,15 +65,26 @@ final class EX {
             deviceID: deviceID, hardwareMarker: "", settings: DeviceSettings(gateStyle: self.gate, scheduledExport: scheduledExport))
         if let own = ownApple { section = section.recordingAppleKey(AppleKeyRecord(id: own.id, purpose: .library, origin: .minted)) }
         var locks = NewKeyLocks(passphrase: p, words: w, apple: ownApple)
+        if let other { self.account = other.account }
         if let account = self.account {
-            let accountKey: AppleKeyMaterial? = mode == .standard ? AppleKeyMaterial.mint() : nil
-            if let accountKey {
-                accountApple = accountKey
-                world.icloud.keys[accountKey.id] = accountKey
-                section = section.recordingAppleKey(AppleKeyRecord(id: accountKey.id, purpose: .account, accountID: account, origin: .minted))
+            let format: KeyVaultFormat, material: DeviceKeyMaterial
+            if let other, let existing = world.server.snapshot(account) {
+                format = existing.format
+                material = try VaultModel.material(following: format, master: format.unwrapMaster(withPassphraseKey: p.key))
+                accountApple = other.accountApple
+                if let accountKey = other.accountApple {
+                    section = section.recordingAppleKey(AppleKeyRecord(id: accountKey.id, purpose: .account, accountID: account, origin: .followed))
+                }
+            } else {
+                let accountKey: AppleKeyMaterial? = mode == .standard ? AppleKeyMaterial.mint() : nil
+                if let accountKey {
+                    accountApple = accountKey
+                    world.icloud.keys[accountKey.id] = accountKey
+                    section = section.recordingAppleKey(AppleKeyRecord(id: accountKey.id, purpose: .account, accountID: account, origin: .minted))
+                }
+                (format, material) = try VaultModel.creating(passphrase: p, words: w, apple: accountKey, device: "Mac A", ids: world)
+                world.server.accounts[account] = ExecutorVault.Account(revision: 1, format: format, rows: 0, updatedAt: nil)
             }
-            let (format, material) = try VaultModel.creating(passphrase: p, words: w, apple: accountKey, device: "Mac A", ids: world)
-            world.server.accounts[account] = ExecutorVault.Account(revision: 1, format: format, rows: 0, updatedAt: nil)
             self.material = material
             locks.master = material.masterSymmetricKey
             locks.masterWordsCopy = format.masterWrappedByRecovery

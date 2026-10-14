@@ -18,8 +18,8 @@ typealias WorldState = (EX, UnlockedLibrary) -> Bool
 
 enum CrashHarness {
     /// The clean run's writes (the count the loop walks).
-    static func cleanRun(_ make: () throws -> EX, _ act: ActRun) async throws -> (EX, UnlockedLibrary) {
-        let fixture = try make()
+    static func cleanRun(_ make: () async throws -> EX, _ act: ActRun) async throws -> (EX, UnlockedLibrary) {
+        let fixture = try await make()
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
         try await act(fixture, executor, &library)
@@ -30,7 +30,7 @@ enum CrashHarness {
     /// resume FINISHES; with the plan dropped (a missing plan), the act rolls
     /// back before its commit point and finishes from the record after.
     static func everywhere(
-        _ make: () throws -> EX, act: ActRun, finished: WorldState, neverHappened: WorldState,
+        _ make: () async throws -> EX, act: ActRun, finished: WorldState, neverHappened: WorldState,
         dropPlan: Bool = false, typed: ((EX) -> TypedSecrets)? = nil,
         sourceLocation: SourceLocation = #_sourceLocation
     ) async throws {
@@ -42,7 +42,7 @@ enum CrashHarness {
         // rolled back, by design (the act named first, the plan after).
         let firstPlan = (clean.world.writes.firstIndex(of: .plan) ?? 0) + 1
         for crashAt in 1...count {
-            let fixture = try make()
+            let fixture = try await make()
             fixture.world.crashAfterWrites = crashAt
             let executor = fixture.executor()
             var library = try fixture.unlocked(executor)
