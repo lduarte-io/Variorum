@@ -47,7 +47,7 @@ implementer gets these dispositions and O-1…O-3. Round 2 is a fresh reviewer o
 - Wake rate: the held observations never wake on autosave columns. P1 holds (∝ books / per keystroke bounded).
 - Arrival X: no scene self-presents an ask; answer-once and deny-forgets are held.
 - The ⌘L monitor is window-scoped.
-- R-AIR-8's gates hold at every door.
+- VX-272's gates hold at every door.
 - The advice's bound, tool names, format markers, F5 and R2-8 are honored.
 - The setup menu: the Claude Code command is byte-unchanged; the JSON escaping is correct.
 - `PlaceLabels`' uniqueness holds; `SearchPicker`'s flat path is unchanged; `WingSwitcherMenu`'s acts are all reachable.

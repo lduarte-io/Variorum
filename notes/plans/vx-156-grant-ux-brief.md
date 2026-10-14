@@ -8,7 +8,7 @@ the Air) · VX-161's content is not in the repo (it was born at her Air round af
 
 Ticket VX-156 (+ VX-157, VX-158 face implications; agenda items for VX-159, VX-160, VX-163 and
 A-4) · branch `vx-156-grant-ux-design` · worktree `~/dev/variorum-grantux` · kickoff
-`notes/plans/vx-156-grant-ux-design-kickoff.md` (R-AIR-1 and R-AIR-2 RATIFIED there — designed to,
+`notes/plans/vx-156-grant-ux-design-kickoff.md` (VX-163 and VX-160 RATIFIED there — designed to,
 never re-opened). The drawn states: `notes/plans/vx-156-grant-ux-mockups.html` (section numbers
 below say "mockup §N"). The DRAFT phase plan: `notes/plans/phase-13n-c-mcp-launch-readiness-DRAFT.md`.
 
@@ -17,14 +17,14 @@ below say "mockup §N"). The DRAFT phase plan: `notes/plans/phase-13n-c-mcp-laun
 | # | Piece | Status |
 |---|---|---|
 | P0 | Worktree + preflight (read in full, never delegated) + the skeleton | DONE (`209c11f6`) |
-| P1 | This brief: per-item options, recommendation and why; chord candidates with the sweep evidence; open questions | DONE (`eacf600b`; amended in the P2 checkpoint — the A-4 pane-line gap found, a sixth R-AIR-1 sentence) |
+| P1 | This brief: per-item options, recommendation and why; chord candidates with the sweep evidence; open questions | DONE (`eacf600b`; amended in the P2 checkpoint — the A-4 pane-line gap found, a sixth VX-163 sentence) |
 | P2 | `notes/plans/vx-156-grant-ux-mockups.html` — one self-contained page, Study voice, light and dark, sentence case | DONE (`c7e753c0` + the render-check fixes `a8679ab8`) — §1–§11 per the §16 map; Study tokens verbatim from `VoiceTokens` (light/dark + a forced light/dark pair at §1); tag balance parsed clean, zero external fetches, no all-caps words but the MCP acronym and ruling ids; rendered OFFSCREEN for a check (QuickLook thumbnails of per-section scratchpad copies, light and dark — no browser, no app; the captures stay in the scratchpad), which caught three fixes now in: radio glyphs, the popover truncating the very title it disambiguates, two inherited styles |
 | P3 | `notes/plans/phase-13n-c-mcp-launch-readiness-DRAFT.md` — the DRAFT phase plan | DONE (`6356e5a5`) — U1 the grant road · U2 the keyboard and the quiet signals · U3 the wing on the wire; candidates VX-159, the A-4 secret, VX-161; sizing said plainly (launch cut U1 + U2, U3 if the week holds); 13s-a sequencing as three options (S1 recommended) |
 | P4 | Final pass: status flipped, PR "VX-156: grant UX design prep" opened | DONE — PR #147 (https://github.com/lduarte-io/Variorum/pull/147), merge waits for her sitting. **ROUND CLOSED (hard stop).** |
 
 ## THE SITTING AGENDA (carried verbatim from the kickoff)
 
-- (a) ~~The journal-trait Always question~~ **RATIFIED as R-AIR-1 above** — the
+- (a) ~~The journal-trait Always question~~ **RATIFIED as VX-163 above** — the
   agenda item becomes: the extra-worded confirm's wording (if any) for granting
   Always on a journal-trait book, presented as drawn options.
 - (b) VX-160's crossing-door shape — per-item NOTE move across wings via MCP
@@ -84,7 +84,7 @@ has no face here at all (P-13nb-U1-11: "Settings holds no note in hand").
   problem only moves into submenus (her "this is a disaster" verdict on flat corpus menus, manifest
   row 06, is the precedent against it).
 
-**Fenced places in the picker:** under R-AIR-1, the daily Journal and anything Private are never
+**Fenced places in the picker:** under VX-163, the daily Journal and anything Private are never
 offered (P-2 — the op would refuse them); a journal-trait book IS offered (§9 decides the words it
 wears). A fenced NOTE picked under "A note" is offered with the honest durations only (once ·
 while connected, never always — `MCPGrantRule.reaches`).
@@ -251,7 +251,7 @@ ticket means something else, only this section changes.
 - **C — nothing new.** A note or book target in another wing already lands there through her (f)
   "the wing follows the focused note" rule; a bare wing switch is not offered.
 
-## §9 — Agenda (a): R-AIR-1's extra-worded confirm (VX-163)
+## §9 — Agenda (a): VX-163's extra-worded confirm (VX-163)
 
 **The ruled outcome, restated for the faces:** the never-always fence keys on the daily Journal
 (its entries per-ask only) and on the Private mark. A journal-TRAIT book is grantable like any book.
@@ -293,7 +293,7 @@ build owes):**
 - **W2 — a second-step alert after the confirm** ("Share a journal-style book?" + the same
   sentence, "Share it" / "Cancel"). Heaviest; most deliberate.
 
-## §10 — Agenda (b): VX-160's crossing door (per-item NOTE move across wings, R-AIR-2)
+## §10 — Agenda (b): VX-160's crossing door (per-item NOTE move across wings, VX-160)
 
 **Her door, traced (`Operations+WingMove.swift`, `moveNoteToWing`):** ONE transaction — every live
 membership of the note in its source wing's books is SEVERED (listed in her confirm; a MEMBER of a
@@ -457,5 +457,5 @@ the A-4 secret (§12), VX-161.
 
 §1 the grant sheet with searchable pickers (+ §1b the duplicate rule before/after) · §2 grant from
 the Library · §3 the share chord · §4 the pending-ask badge + the Waiting list · §5 the MCP pane
-chord · §6 the wing switcher with its chord · §7 VX-158's faces · §8 R-AIR-1's confirm wordings ·
+chord · §6 the wing switcher with its chord · §7 VX-158's faces · §8 VX-163's confirm wordings ·
 §9 VX-160's crossing door + her sweep · §10 VX-159's payloads · §11 the A-4 options.

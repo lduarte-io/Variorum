@@ -3,7 +3,7 @@ import GRDB
 import MCP
 import VariorumCore
 
-/// **`move_note_to_wing`** (13n-c U6 — VX-160; R-AIR-2 ratified, R-AIR-9's R1;
+/// **`move_note_to_wing`** (13n-c U6 — VX-160; VX-160 ratified, VX-160's R1;
 /// the brief §10 · mockup §9). The author's own Move to Wing on the wire: her
 /// op (`Operations.mcpMoveNoteToWing` wraps `moveNoteToWing` — her severed
 /// books, her tag adoption by path, her refusals), ONE client-named undo entry

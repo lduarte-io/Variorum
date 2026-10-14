@@ -244,10 +244,23 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
     /// preferring the block after would delete the very block the caret
     /// sits in and never converge under repeated presses.
     func emptyBlockDeletion(replacing range: NSRange, isDeletion: Bool) -> Int? {
+        emptyBlockCarve(replacing: range, isDeletion: isDeletion)?.carved
+    }
+
+    /// The same carve, naming the entry ACROSS the separator too — the one
+    /// that survives (VX-290). Where the caret lands is where the deleted
+    /// line break was, and only the separator's two sides say where that is:
+    /// `survivor < carved` means the carved block sat AFTER the separator (the
+    /// caret goes to the survivor's END), `survivor > carved` that it sat
+    /// BEFORE it (the survivor's START). One walk, and the both-empty rule
+    /// above stays here, in one place.
+    func emptyBlockCarve(
+        replacing range: NSRange, isDeletion: Bool
+    ) -> (carved: Int, survivor: Int)? {
         guard let (before, after) = interEntrySeparatorPair(deleting: range, isDeletion: isDeletion)
         else { return nil }
-        if entries[before].length == 0 { return before }
-        if entries[after].length == 0 { return after }
+        if entries[before].length == 0 { return (before, after) }
+        if entries[after].length == 0 { return (after, before) }
         return nil
     }
 

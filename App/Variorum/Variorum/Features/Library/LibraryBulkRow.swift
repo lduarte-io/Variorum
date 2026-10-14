@@ -21,7 +21,7 @@ struct LibraryBulkRow: View {
     /// actually wears, so the Untag menu never offers an act that would do
     /// nothing (P-2); with none, there is no menu at all.
     let worn: [Tag]
-    /// 13n-c U3 — R-AIR-8: the share door only while an approved client exists.
+    /// 13n-c U3 — VX-272: the share door only while an approved client exists.
     let canShare: Bool
     let onTag: (String) -> Void
     let onUntag: (String) -> Void

@@ -205,7 +205,7 @@ struct MCPReadTools: Sendable {
             let live = standing.liveGrants
             let bookIDs = live.filter { $0.scopeKind == .book }.map(\.scopeID)
             let wingIDs = live.filter { $0.scopeKind == .wing }.map(\.scopeID)
-            // 13n-c R-AIR-12: a wing's GATHERINGS list beside its books —
+            // 13n-c VX-273: a wing's GATHERINGS list beside its books —
             // read facts under wing-level reach, never a grant target (the
             // prefilter's book ids can never name one; the rule decides each).
             let rows = try Row.fetchAll(
@@ -271,7 +271,7 @@ struct MCPReadTools: Sendable {
         return outcome
     }
 
-    /// **A gathering's `list_books` entry** (13n-c R-AIR-12): listed only when
+    /// **A gathering's `list_books` entry** (13n-c VX-273): listed only when
     /// the rule's `decideGathering` reaches it (wing-level reach on its wing);
     /// `notes` counts exactly what `list_notes(book_id:)` would emit — its
     /// assembly (the ONE membership function, through `assembleReading`)
@@ -322,7 +322,7 @@ struct MCPReadTools: Sendable {
         // — book order's key is a position, the recency listings' a stamp;
         // crossed, the keyset comparison pages garbage. Same words as an
         // undecodable cursor.
-        // 13n-c R-AIR-12: a book id may name a GATHERING, whose order is its
+        // 13n-c VX-273: a book id may name a GATHERING, whose order is its
         // assembly's — its own cursor shape, checked once the place is known.
         if let cursor, (bookID != nil) == (cursor.shape == .recency) {
             throw ArgumentFailure(message: Self.staleCursorMessage)
@@ -332,6 +332,9 @@ struct MCPReadTools: Sendable {
         let outcome: Outcome = try database.read { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
             var page: [PageRow]
+            // VX-184 U5 (P-VX196-5): a BOOK's chapters, in order — so a chapter
+            // with no notes filed is addressable too (the chapter acts).
+            var chapters: [[String: Any]]?
             if let bookID {
                 let place = try MCPGrantAuthority.readPlace(db, readingID: bookID)
                 let decision = MCPGrantAuthority.decide(standing, reading: place)
@@ -343,6 +346,14 @@ struct MCPReadTools: Sendable {
                     }
                     page = try bookPage(
                         db, bookID: bookID, includeArchived: includeArchived, after: cursor, limit: limit)
+                    chapters = try Row.fetchAll(
+                        db,
+                        sql: """
+                            SELECT id, name FROM reading_section WHERE reading_id = ? AND deleted_at IS NULL
+                            ORDER BY position, id
+                            """,
+                        arguments: [bookID]
+                    ).map { ["section_id": $0["id"] as String, "name": $0["name"] as String] }
                 case .gathering:
                     if let cursor, cursor.shape != .gathering {
                         return Outcome(text: Self.staleCursorMessage, isError: true)
@@ -381,6 +392,7 @@ struct MCPReadTools: Sendable {
                 notes.append(note)
             }
             var answer: [String: Any] = ["notes": notes]
+            if let chapters { answer["chapters"] = chapters }
             if full, let last = page.last { answer["next_cursor"] = last.cursor.encoded }
             return Outcome(text: try encode(answer), isError: false)
         }
@@ -434,7 +446,7 @@ struct MCPReadTools: Sendable {
         }
     }
 
-    /// **A GATHERING's notes in its own order** (13n-c R-AIR-12): its assembly
+    /// **A GATHERING's notes in its own order** (13n-c VX-273): its assembly
     /// (`assembleReading` — the ONE membership function; living notes only,
     /// so `include_archived` has nothing to add), resumed after the cursor's
     /// note. nil when that note is no longer in the assembly (it moved under
@@ -615,7 +627,7 @@ struct MCPReadTools: Sendable {
                 }
                 scopes = [SearchScope(wingID: facts.wingID, within: .note(id: noteID))]
             } else if let bookID {
-                // 13n-c R-AIR-12: a book OR a gathering (its own scope — the
+                // 13n-c VX-273: a book OR a gathering (its own scope — the
                 // search composer reads the ONE membership function).
                 let place = try MCPGrantAuthority.readPlace(db, readingID: bookID)
                 let facts = place.facts
@@ -692,7 +704,7 @@ struct MCPReadTools: Sendable {
             return isStandingAllow(decision, standing)
         }
         if let readingID = passage.readingID {
-            // 13n-c R-AIR-12: a gathering's own name reads as a fact under
+            // 13n-c VX-273: a gathering's own name reads as a fact under
             // wing-level reach, as it lists.
             return MCPGrantAuthority.decide(
                 standing, reading: try MCPGrantAuthority.readPlace(db, readingID: readingID)).isAllowed
@@ -835,7 +847,7 @@ struct PageCursor: Equatable, Sendable {
         case book = "b"
         /// Recency — `(touched, id)`, descending.
         case recency = "r"
-        /// 13n-c R-AIR-12: a GATHERING's assembly order — `(index, post id)`;
+        /// 13n-c VX-273: a GATHERING's assembly order — `(index, post id)`;
         /// resumes after the note it names.
         case gathering = "g"
     }

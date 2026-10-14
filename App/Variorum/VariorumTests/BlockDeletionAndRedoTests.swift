@@ -72,6 +72,46 @@ struct BlockDeletionAndRedoTests {
             replacing: NSRange(location: 2, length: 1), isDeletion: true) == 1)
     }
 
+    /// **VX-290 — the carve names its SURVIVOR, and naming it moved nothing.**
+    /// `emptyBlockDeletion` now forwards to `emptyBlockCarve`, which also
+    /// answers the entry across the separator (where the caret lands is where
+    /// the deleted break was, and only the separator's two sides say where).
+    /// Walked over EVERY one-character range of an irregular tiling — empties
+    /// at both edges, a run of three, texted neighbours: the carved entry is
+    /// what `emptyBlockDeletion` answers, the survivor is the separator's
+    /// other side, and an empty survivor only ever stands AFTER a carved
+    /// block (#33(d): of two empty neighbours the one before goes).
+    @Test func theCarveNamesTheSurvivorAcrossTheSeparatorAndTheAnswerIsUnchanged() {
+        let idx = index([0, 3, 0, 0, 0, 4, 0])
+        var carves = 0
+        for offset in 0..<idx.documentLength {
+            let range = NSRange(location: offset, length: 1)
+            let carve = idx.emptyBlockCarve(replacing: range, isDeletion: true)
+            #expect(carve?.carved == idx.emptyBlockDeletion(replacing: range, isDeletion: true),
+                    "the forward answers exactly what it answered at \(offset)")
+            guard let carve else { continue }
+            carves += 1
+            #expect(abs(carve.carved - carve.survivor) == 1, "the separator's two sides at \(offset)")
+            #expect(idx.entries[carve.carved].length == 0)
+            if idx.entries[carve.survivor].length == 0 {
+                #expect(carve.survivor > carve.carved, "both empty: the one BEFORE goes, at \(offset)")
+            }
+        }
+        // ""·"abc"·""·""·""·"abcd"·"" — separators at 0, 4, 5, 6, 7, 12:
+        // every one has an empty neighbour, so every one carves.
+        #expect(carves == 6)
+        // The two sides, named: ⌫ from inside the empty block after "abc"
+        // (the break at 4) carves it, and "abc" survives BEFORE it.
+        let up = idx.emptyBlockCarve(replacing: NSRange(location: 4, length: 1), isDeletion: true)
+        #expect(up?.carved == 2)
+        #expect(up?.survivor == 1)
+        // ⌦ from inside the first block (the break at 0) carves it, and
+        // "abc" survives AFTER it.
+        let down = idx.emptyBlockCarve(replacing: NSRange(location: 0, length: 1), isDeletion: true)
+        #expect(down?.carved == 0)
+        #expect(down?.survivor == 1)
+    }
+
     // MARK: - A7, THE CARVE CANNOT WIDEN
 
     @Test func aSeamBetweenTWOBLOCKSWITHTEXTIsNeverTheCarve() {
@@ -655,6 +695,258 @@ struct BlockDeletionAndRedoTests {
         where harness.session.status.spoken?.text.contains("Redid") != true {
             await Task.yield()
             try? await Task.sleep(for: .milliseconds(1))
+        }
+    }
+}
+
+// MARK: - VX-290 — the carve's caret lands where the deleted line break was
+
+/// **Her report, verbatim (2026-10-13), and the ruling it is:** *"when you're
+/// on an empty block in the write editor and there's a bunch of empty takes
+/// below it, clicking delete repeatedly eats the takes from underneath you,
+/// rather than moving you up into the previous line like writing editors
+/// typically do."*
+///
+/// **The traced mechanism** (the run record's U1 section): the carve deleted
+/// the right block — the caret's own empty one — and then landed the caret by
+/// the Delete Block door's rule, "the START of the block below", which is the
+/// very line the carved block had stood on. So the next ⌫ deleted the break
+/// in front of the NEXT block: another empty one carved, a texted one joined.
+/// The ruling: after carving the block AFTER the separator, the caret goes to
+/// the END of the block before it; after carving the block BEFORE it, to the
+/// START of the block after (unchanged). Delete Block and archive keep theirs.
+///
+/// Real key events through a real key window — `keyDown` →
+/// `interpretKeyEvents` → `deleteBackward:` / `deleteForward:` — because the
+/// stash that holds a key typed during the carve's flight lives in `keyDown`.
+/// The pins marked RED ON OLD were run against the one-line behavioural revert
+/// (the carve landing by `caretLandingAfterRemoving` again) in the stage
+/// window; the record names the run.
+@MainActor
+@Suite("VX-290 — the carve's caret lands where the deleted line break was", .serialized)
+struct CarveCaretLandingTests {
+    private func hosted(_ h: EditorHarness) throws -> (window: NSWindow, teardown: () -> Void) {
+        let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
+        hosted.window.makeFirstResponder(h.textView)
+        return hosted
+    }
+
+    private func caret(_ h: EditorHarness, entry i: Int, offset: Int) {
+        h.textView.setSelectedRange(
+            NSRange(location: h.model.index.range(ofEntryAt: i).location + offset, length: 0))
+        h.model.updateCaretContext()
+    }
+
+    /// ⌫ (`forward: false`) or ⌦ (`forward: true`) as a real key event.
+    private func delete(_ h: EditorHarness, _ window: NSWindow, forward: Bool = false) {
+        h.textView.keyDown(
+            with: CommandDeleteLineTraceTests.deleteEvent(
+                forward: forward, modifiers: [], windowNumber: window.windowNumber))
+    }
+
+    private func returnKey(_ h: EditorHarness, _ window: NSWindow) {
+        h.textView.keyDown(
+            with: ReturnKeyTraceTests.returnEvent(shift: false, windowNumber: window.windowNumber))
+    }
+
+    private func characterKey(_ h: EditorHarness, _ window: NSWindow, _ character: String) {
+        let event = NSEvent.keyEvent(
+            with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+            windowNumber: window.windowNumber, context: nil,
+            characters: character, charactersIgnoringModifiers: character,
+            isARepeat: false, keyCode: 7)!
+        h.textView.keyDown(with: event)
+    }
+
+    /// The caret, as the document offset and the block it stands in.
+    private func caretAt(_ h: EditorHarness) -> (location: Int, blockID: String?) {
+        (h.textView.selectedRange().location, h.model.caretBlockID)
+    }
+
+    // MARK: Her report
+
+    /// **RED ON OLD — her pin.** An empty block with empties below it, the
+    /// caret in the first: ⌫ carves it and the caret moves UP to the end of
+    /// the line above, so the second ⌫ deletes a letter there. On the old
+    /// landing the first ⌫ left the caret on the next empty block and the
+    /// second carved that one too (`["alpha", ""]`).
+    @Test func herReportBackspaceInAnEmptyBlockMovesUpIntoTheLineAbove() async throws {
+        try await withEditor(seedBlocks: ["alpha", "", "", ""]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+            let alphaID = try h.storeSlots()[0].blockID
+
+            caret(h, entry: 1, offset: 0)
+            delete(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", ""],
+                    "one empty block carved — the one the caret stood in")
+            let landed = caretAt(h)
+            #expect(landed.blockID == alphaID,
+                    "RED ON OLD: the caret moved UP into alpha, never down onto the next empty block")
+            #expect(landed.location == 5, "…at alpha's END, where the deleted line break was")
+
+            delete(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alph", "", ""],
+                    "RED ON OLD: the second ⌫ deletes a letter — it never eats the block below")
+        }
+    }
+
+    /// **RED ON OLD — the deferred fast press.** A second ⌫ typed while the
+    /// first carve's flight is up is stashed and replayed at the LANDED caret,
+    /// so it obeys the same landing. The writer is held so the window is
+    /// deterministic (`TypedReturnKeyTests.aKeystrokeDuringTheFlightIsDeferredNeverDropped`'s
+    /// shape). On the old landing the replay carved the next empty block.
+    @Test func aBackspaceTypedDuringTheCarvesFlightLandsAboveToo() async throws {
+        try await withEditor(seedBlocks: ["alpha", "", "", ""]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 1, offset: 0)
+            let database = h.database
+            let hold = Task.detached {
+                try database.write { _ in Thread.sleep(forTimeInterval: 0.4) }
+            }
+            try await Task.sleep(for: .milliseconds(30))  // let the hold take the writer
+            delete(h, window.window)
+            var spins = 0
+            while !h.model.structuralInFlight, spins < 3000 {
+                spins += 1
+                await Task.yield()
+                try await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(h.model.structuralInFlight, "the carve's flight is up, waiting on the writer")
+            delete(h, window.window)
+            #expect(h.textView.isDeferringKeystrokes, "the second ⌫ is stashed for the landing")
+            try await hold.value
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alph", "", ""],
+                    "RED ON OLD: the replayed ⌫ deleted a letter at alpha's end — no second block eaten")
+        }
+    }
+
+    // MARK: The everyday "oops"
+
+    /// **RED ON OLD.** ⏎ at the end of a paragraph with one below, then ⌫:
+    /// the empty block goes and the caret is back where it was, so a second
+    /// ⌫ deletes a letter. On the old landing the caret went to `beta`'s start
+    /// and the second ⌫ JOINED the two paragraphs ("Blocks joined").
+    @Test func returnThenBackspacePutsTheCaretBackWhereItWas() async throws {
+        try await withEditor(seedBlocks: ["alpha", "beta"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+            let alphaID = try h.storeSlots()[0].blockID
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "beta"],
+                    "the premise: ⏎ at alpha's end made an empty block below it")
+
+            delete(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta"])
+            let landed = caretAt(h)
+            #expect(landed.blockID == alphaID, "RED ON OLD: back in alpha, never at beta's start")
+            #expect(landed.location == 5, "…at alpha's end — exactly where the ⏎ was pressed")
+
+            delete(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alph", "beta"],
+                    "RED ON OLD: a letter goes — the two paragraphs are never joined")
+        }
+    }
+
+    // MARK: Forward-delete
+
+    /// **RED ON OLD.** ⌦ at a paragraph's end with an empty block below:
+    /// the empty block goes and the caret STAYS at the paragraph's end, so
+    /// what she types next continues the paragraph. On the old landing the
+    /// caret jumped down to `beta`'s start (`["alpha", "xbeta"]`).
+    @Test func forwardDeleteAtAParagraphsEndKeepsTheCaretThere() async throws {
+        try await withEditor(seedBlocks: ["alpha", "", "beta"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+            let alphaID = try h.storeSlots()[0].blockID
+
+            caret(h, entry: 0, offset: 5)
+            delete(h, window.window, forward: true)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta"],
+                    "the empty block below was carved")
+            let landed = caretAt(h)
+            #expect(landed.blockID == alphaID, "RED ON OLD: the caret stayed in alpha")
+            #expect(landed.location == 5)
+
+            characterKey(h, window.window, "x")
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alphax", "beta"],
+                    "RED ON OLD: the next letter continues alpha")
+        }
+    }
+
+    // MARK: The other side — unchanged (guards, green on both sides)
+
+    /// A GUARD: ⌫ at a paragraph's START with an empty block above carves the
+    /// block BEFORE the break, so the caret stays at the paragraph's start —
+    /// the line moves up under it. The shipped landing, kept by the ruling.
+    @Test func backspaceAtAParagraphsStartUnderAnEmptyBlockKeepsItsStart() async throws {
+        try await withEditor(seedBlocks: ["alpha", "", "beta"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+            let betaID = try h.storeSlots()[2].blockID
+
+            caret(h, entry: 2, offset: 0)
+            delete(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta"])
+            let landed = caretAt(h)
+            #expect(landed.blockID == betaID)
+            #expect(landed.location == 6, "beta's start, one line up")
+        }
+    }
+
+    /// A GUARD: ⌦ from inside an empty block carves it (the block BEFORE the
+    /// break), and the caret stays where it was — at the start of the
+    /// paragraph that moves up into its line.
+    @Test func forwardDeleteInsideAnEmptyBlockKeepsTheCaretOnItsLine() async throws {
+        try await withEditor(seedBlocks: ["alpha", "", "beta"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+            let betaID = try h.storeSlots()[2].blockID
+
+            caret(h, entry: 1, offset: 0)
+            delete(h, window.window, forward: true)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta"])
+            let landed = caretAt(h)
+            #expect(landed.blockID == betaID)
+            #expect(landed.location == 6)
+        }
+    }
+
+    /// A GUARD: the Delete Block and archive DOORS keep their own landing —
+    /// `caretLandingAfterRemoving`, the START of the block below — exactly as
+    /// the ruling says. The same caret a ⌫ would send UP (the empty block
+    /// between two paragraphs) goes DOWN through the doors.
+    @Test(arguments: [false, true])
+    func theDeleteAndArchiveDoorsKeepTheirOwnLanding(_ archive: Bool) async throws {
+        try await withEditor(seedBlocks: ["alpha", "", "beta"]) { h in
+            let betaID = try h.storeSlots()[2].blockID
+
+            caret(h, entry: 1, offset: 0)
+            if archive {
+                await h.model.archiveCaretBlock()
+            } else {
+                await h.model.deleteCaretBlock()
+            }
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta"])
+            let landed = caretAt(h)
+            #expect(landed.blockID == betaID, "archive \(archive): the door lands below, unchanged")
+            #expect(landed.location == 6)
         }
     }
 }

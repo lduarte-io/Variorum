@@ -256,14 +256,19 @@ extension MCPWriteTools {
     /// the once grants they spend stamped once (a once wing grant covering
     /// both is ONE write's grant — self-review find, red-on-old pinned: two
     /// sequential guards spent it in the first and refused the second).
-    private func guardBookAndNote(_ clientName: String, bookID: String, noteID: String) -> Operations.WriteGuard {
+    /// VX-184 U5: `rung` (default write new — every existing caller
+    /// unchanged): `remove_note_from_book` / `move_note_in_book` decide both
+    /// sides at EDIT.
+    func guardBookAndNote(
+        _ clientName: String, bookID: String, noteID: String, rung: MCPGrantRule.Rung = .writeNew
+    ) -> Operations.WriteGuard {
         { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
             let onBook = MCPGrantAuthority.decide(
-                standing, book: try Queries.mcpBookFacts(db, readingID: bookID), rung: .writeNew, consumes: true)
+                standing, book: try Queries.mcpBookFacts(db, readingID: bookID), rung: rung, consumes: true)
             guard case .allow(let bookGrant, let spendBook) = onBook else { throw Self.refused(onBook, .book) }
             let onNote = MCPGrantAuthority.decide(
-                standing, note: try Queries.mcpNoteFacts(db, noteID: noteID), rung: .writeNew, consumes: true)
+                standing, note: try Queries.mcpNoteFacts(db, noteID: noteID), rung: rung, consumes: true)
             guard case .allow(let noteGrant, let spendNote) = onNote else { throw Self.refused(onNote, .note) }
             let spend = Set([spendBook ? bookGrant : nil, spendNote ? noteGrant : nil].compactMap { $0 })
             for grantID in spend.sorted() { try grants.consumeMCPOnceGrant(db, grantID) }

@@ -73,7 +73,7 @@ nonisolated enum PrivateMarkCopy {
     static func clearedBook(_ name: String) -> String { "\u{201C}\(name)\u{201D} is no longer Private." }
 }
 
-// (13n-c U3 — R-AIR-6: the Bookcase's "shared with AI" text chip and its
+// (13n-c U3 — VX-271: the Bookcase's "shared with AI" text chip and its
 // copy RETIRED into the ONE shared icon, `MCPSharedIcon`, whose hover names
 // who reaches the book and how far.)
 

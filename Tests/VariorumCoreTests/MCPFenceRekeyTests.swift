@@ -5,7 +5,7 @@ import Testing
 
 @testable import VariorumCore
 
-// 13n-c U1 — THE FENCE RE-KEY (VX-163, R-AIR-1, her Air round 2026-10-11):
+// 13n-c U1 — THE FENCE RE-KEY (VX-163, her Air round 2026-10-11):
 // "for the default command J journal I think it's a fair choice but I am
 // questioning it being applied to all journal style books (especially since it
 // can be turned on and off for any book)." The never-always fence keys on (a)
@@ -20,7 +20,7 @@ import Testing
 // (`Queries.mcpNoteFacts` / `mcpBookFacts` / `mcpGrantableBooks`) and decides
 // through the ONE pure rule — never a parallel fence.
 
-@Suite("13n-c U1 — the fence re-key (R-AIR-1)")
+@Suite("13n-c U1 — the fence re-key (VX-163)")
 struct MCPFenceRekeyTests {
     private typealias Rule = MCPGrantRule
 
@@ -237,7 +237,7 @@ struct MCPFenceRekeyTests {
 
     // MARK: - R2-4 (U1 ladder round 2): "Use as Daily Journal" MOVES the fence
 
-    /// R-AIR-1's ruled outcome, named: the fence keys on the 'daily' MARKER,
+    /// VX-163's ruled outcome, named: the fence keys on the 'daily' MARKER,
     /// so designating another book moves it — the outgoing Journal is demoted
     /// to a journal-trait book and the notes she filed into it BY HAND become
     /// readable under a standing wing grant at once; its ⌘J entries (own

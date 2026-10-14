@@ -43,18 +43,34 @@ import GRDB
 ///   NULL = unbound (a client approved before VX-168, or released by Deny).
 /// Only hashes are stored: the key itself exists on the clipboard and in the
 /// client's own settings, never in the library.
+///
+/// **VX-188 — WHO WROTE A COMMENT** (`v1_27_mcp_comment_authors`; VX-184 U3,
+/// her ruling R-VX188-1: *"local only record is fine for clarity / for
+/// now"*): the family's SIXTH table, born LOCAL-ONLY on the same road — zero
+/// lockstep, the marker untouched (13).
+/// - `mcp_comment_author` — one row per comment a client added THROUGH THE
+///   DOOR (`add_comment`, `add_comments`), written in the comment's own
+///   transaction: the comment's id and the client's NAME (A-4's identity, the
+///   activity log's own key). The suggest rung's `delete_comment` deletes only
+///   a comment this record names as the caller's; an ABSENT row (a comment of
+///   hers, one synced from another Mac, one written before this table, one
+///   that travelled to a structural successor) is never the caller's. No
+///   foreign key to `block_comment`: that row is synced and the purge may one
+///   day remove it physically, while this one is local — a record naming a
+///   gone comment is harmless (nothing can delete a gone comment), a foreign
+///   key would block the purge.
 public enum MCPGrantSchema {
     /// The family's tables — the registration the completeness walk and the
     /// plaintext export consult.
     public static let tables: Set<String> = [
-        "mcp_client", "mcp_grant", "mcp_activity", "mcp_switch", "mcp_setup_key",
+        "mcp_client", "mcp_grant", "mcp_activity", "mcp_switch", "mcp_setup_key", "mcp_comment_author",
     ]
 
     /// The family in CHILD-FIRST order (`mcp_grant` references
     /// `mcp_client`) — the order a whole-family row strip must take with
     /// foreign keys on. Pinned to cover `tables` exactly.
     public static let childFirstOrder: [String] = [
-        "mcp_grant", "mcp_activity", "mcp_switch", "mcp_setup_key", "mcp_client",
+        "mcp_grant", "mcp_activity", "mcp_switch", "mcp_setup_key", "mcp_comment_author", "mcp_client",
     ]
 
     /// `v1_24_mcp_grants`' DDL — FROZEN with the migration that runs it (a
@@ -123,5 +139,19 @@ public enum MCPGrantSchema {
           minted_at TEXT NOT NULL
         );
         CREATE INDEX idx_mcp_setup_key_minted ON mcp_setup_key(minted_at);
+        """
+
+    /// `v1_27_mcp_comment_authors`' DDL (VX-188, VX-184 U3) — FROZEN with the
+    /// migration that runs it. The comment id is the key (ONE author per
+    /// comment); the client is named as it names itself (the identity every
+    /// grant and activity row already reads). Like the family's other keys it
+    /// needs no live-row clause: these rows are never synced, never
+    /// tombstoned.
+    static let v1_27DDL = """
+        CREATE TABLE mcp_comment_author (
+          comment_id  TEXT PRIMARY KEY,
+          client_name TEXT NOT NULL,
+          recorded_at TEXT NOT NULL
+        );
         """
 }

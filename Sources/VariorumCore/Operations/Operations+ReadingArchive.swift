@@ -39,15 +39,24 @@ extension Operations {
     /// archived (`readingAlreadyArchived` — PROVISIONAL P-13ie-U1-1).
     public func archiveReading(_ id: String) throws {
         try database.write { db in
-            var reading = try liveReading(db, id)
-            guard reading.archivedAt == nil else {
-                throw OperationError.readingAlreadyArchived(id: id)
-            }
-            let now = date.now
-            reading.archivedAt = now
-            reading.updatedAt = now
-            try reading.update(db)
+            _ = try archiveReadingRow(db, id)
         }
+    }
+
+    /// `archiveReading`'s row work inside a caller's transaction (VX-184 U5 —
+    /// `archive_book`, and its undo's redo). Byte-identical behaviour.
+    /// Returns the archive's stamp.
+    @discardableResult
+    func archiveReadingRow(_ db: Database, _ id: String) throws -> Date {
+        var reading = try liveReading(db, id)
+        guard reading.archivedAt == nil else {
+            throw OperationError.readingAlreadyArchived(id: id)
+        }
+        let now = date.now
+        reading.archivedAt = now
+        reading.updatedAt = now
+        try reading.update(db)
+        return now
     }
 
     /// **"Archive the book and its N notes"** — the OWNED book's second choice

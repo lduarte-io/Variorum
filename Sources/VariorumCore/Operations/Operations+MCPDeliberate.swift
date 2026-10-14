@@ -14,7 +14,17 @@ import GRDB
 //
 // THE UNDO STORY (argued in the run record's UNIT 2 RECORD): the two POINTER
 // acts register ONE client-named entry each (R-13n-6 — every MCP write
-// registers structural undo "exactly as her gestures do"; P-13nb-U2-4). The
+// registers structural undo "exactly as her gestures do"; P-13nb-U2-4), whose
+// pointer restores are COMPARE-AND-SET per slot (VX-184 ladder round 1 — the
+// undo-overwrite class): a slot is set back only while it still points where
+// the act left it (the redo: where the undo would leave it — the pre-act
+// pointer), so the UNDO never overwrites a take she chose since with her own ✓
+// (which registers no entry). The REDO does not yet keep that promise (VX-184
+// ladder round 2, 2026-10-13): if her ✓ put the slot BACK on its pre-act take,
+// ⌥⌘Z is quiet yet the entry still moves onto the redo stack (`UndoStack.undo`
+// pops any inverse that does not throw), and ⇧⌥⌘Z — finding the pre-act
+// pointer — re-chooses the client's take over hers. VX-276 owns the fix: the
+// redo keyed on what its inverse wrote. The
 // COMMIT registers NONE — exactly as her own commit registers none (AppSpec §9
 // excludes commits from structural undo): a commit is append-only (I5) and
 // `commit_point` carries no tombstone, so no inverse exists that would not
@@ -73,10 +83,12 @@ extension Operations {
     /// registers nothing, so no act lands that she could not see
     /// (PROVISIONAL P-VX168-U2-5 — the shown take, not the raw pointer).
     /// ONE undo entry, `undoLabel`: the slot's exact pre-image pointer back
-    /// (nil included), the redo the take again — `revertChosenPointers`, the
-    /// one pointer-restore brain the adopt doors share (a dead slot is the
-    /// world moving past the entry; a sealed note refuses and keeps it). A
-    /// pointer move: no text written, no touch, no churn — exactly as her ✓.
+    /// (nil included) while the slot still points at the act's take, the redo
+    /// the take again while it still points at the pre-image —
+    /// `revertChosenPointersIfUnchanged` (a dead slot, or a take she chose
+    /// since, is the world moving past the entry — quiet; past that check a
+    /// sealed note refuses and keeps it). A pointer move: no text written, no
+    /// touch, no churn — exactly as her ✓.
     @discardableResult
     public func chooseTake(
         _ variantID: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil
@@ -99,10 +111,44 @@ extension Operations {
             let previous = landed.previous
             undoStack?.register(
                 label: undoLabel,
-                inverse: { try $0.revertChosenPointers([(placementID: placementID, chosen: previous)]) },
-                redo: { try $0.revertChosenPointers([(placementID: placementID, chosen: variantID)]) })
+                inverse: {
+                    try $0.revertChosenPointersIfUnchanged([(placementID: placementID, from: variantID, to: previous)])
+                },
+                redo: {
+                    try $0.revertChosenPointersIfUnchanged([(placementID: placementID, from: previous, to: variantID)])
+                })
         }
         return landed.choice
+    }
+
+    /// One slot an MCP pointer act moved, as its entry replays it: set the
+    /// slot to `to` only while it reads `from`.
+    typealias PointerMove = (placementID: String, from: String?, to: String?)
+
+    /// `restoreChosenPointersIfUnchanged` in its own transaction.
+    func revertChosenPointersIfUnchanged(_ moves: [PointerMove]) throws {
+        try database.write { db in try restoreChosenPointersIfUnchanged(db, moves) }
+    }
+
+    /// **THE MCP POINTER ACTS' RESTORE, COMPARE-AND-SET** (VX-184 ladder round
+    /// 1 — the undo-overwrite class): each slot's `chosen_variant_id` becomes
+    /// `to` only while the slot is live and still reads `from`; a slot she has
+    /// re-chosen since (her ✓ registers no entry) is hers, and is skipped
+    /// quietly. Past that check a sealed note refuses (the pointer brain's
+    /// rule) — the whole transaction rolls back and the entry stays. HER adopt
+    /// doors keep `restoreChosenPointers` (their entries are hers, outside the
+    /// MCP family this pass covers — noted in the run record's sweep).
+    func restoreChosenPointersIfUnchanged(_ db: Database, _ moves: [PointerMove]) throws {
+        let now = date.now
+        for move in moves {
+            guard var placement = try ContainerBlock.fetchOne(db, key: move.placementID),
+                  placement.deletedAt == nil, placement.chosenVariantId == move.from
+            else { continue }
+            try ensureUnlocked(try liveContainer(db, placement.containerId))
+            placement.chosenVariantId = move.to
+            placement.updatedAt = now
+            try placement.update(db)
+        }
     }
 
     // MARK: - VX-174: a lens made the note (wholesale)
@@ -132,14 +178,17 @@ extension Operations {
     /// (PROVISIONAL P-VX168-U2-3 — her door mints one regardless).
     ///
     /// ONE undo entry, `undoLabel`, walking the WHOLE act back in ONE
-    /// transaction: the pointers' exact pre-images AND the preservation lens
+    /// transaction: the pointers' exact pre-images — each slot only while it
+    /// still shows the adopted take (a slot she re-chose since keeps her ✓ —
+    /// VX-184 ladder round 1, slot by slot) — AND the preservation lens
     /// tombstoned (its choices cascade on that stamp); the redo re-adopts the
-    /// exact pointers and revives exactly that lens with the choices that
-    /// died on the undo's stamp (PROVISIONAL P-VX168-U2-4 — her own door's
-    /// entry restores the pointers only, its lens left as "the lens class,
-    /// trivially deleted"; on the wire a minted lens is undoable — `save_lens`
-    /// — so the act's lens walks back with it). A sealed note refuses the
-    /// undo and keeps the entry (the pointer brain's rule).
+    /// exact pointers (each slot only while it still reads its pre-image) and
+    /// revives exactly that lens with the choices that died on the undo's
+    /// stamp (PROVISIONAL P-VX168-U2-4 — her own door's entry restores the
+    /// pointers only, its lens left as "the lens class, trivially deleted"; on
+    /// the wire a minted lens is undoable — `save_lens` — so the act's lens
+    /// walks back with it). A sealed note refuses the undo and keeps the entry
+    /// (the pointer brain's rule).
     @discardableResult
     public func adoptLensAsNote(
         _ lensID: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil
@@ -156,17 +205,18 @@ extension Operations {
             return (MCPLensAdoption(lensID: lensID, noteID: post.id, moved: moved.count, keptAs: kept), moved)
         }
         if let kept = landed.adoption.keptAs, !landed.moved.isEmpty {
-            let halves = adoptUndoHalves(landed.moved)
+            let back: [PointerMove] = landed.moved.map { (placementID: $0.placementID, from: $0.adopted, to: $0.previous) }
+            let again: [PointerMove] = landed.moved.map { (placementID: $0.placementID, from: $0.previous, to: $0.adopted) }
             let keptID = kept.id
             let undoneOn = LockIsolated<String?>(nil)
             undoStack?.register(
                 label: undoLabel,
                 inverse: { ops in
-                    if let stamp = try ops.revertLensAdoption(halves.previous, keptLensID: keptID) {
+                    if let stamp = try ops.revertLensAdoption(back, keptLensID: keptID) {
                         undoneOn.setValue(stamp)
                     }
                 },
-                redo: { try $0.reapplyLensAdoption(halves.adopted, keptLensID: keptID, undoneOn: undoneOn.value) })
+                redo: { try $0.reapplyLensAdoption(again, keptLensID: keptID, undoneOn: undoneOn.value) })
         }
         return landed.adoption
     }
@@ -188,26 +238,24 @@ extension Operations {
         return false
     }
 
-    /// The adoption's inverse, ONE transaction: the pointers back (the
-    /// pointer brain — sealed refuses whole), the preservation lens
-    /// tombstoned; returns that stamp (nil when she had already deleted it).
-    func revertLensAdoption(
-        _ previous: [(placementID: String, chosen: String?)], keptLensID: String
-    ) throws -> String? {
+    /// The adoption's inverse, ONE transaction: the pointers back where each
+    /// slot still shows the adopted take (the compare-and-set pointer brain —
+    /// sealed refuses whole), the preservation lens tombstoned; returns that
+    /// stamp (nil when she had already deleted it).
+    func revertLensAdoption(_ back: [PointerMove], keptLensID: String) throws -> String? {
         try database.write { db in
-            try restoreChosenPointers(db, previous)
+            try restoreChosenPointersIfUnchanged(db, back)
             return try tombstoneSavedLens(db, keptLensID)
         }
     }
 
     /// The adoption's redo, ONE transaction: the adopted pointers exactly,
-    /// and the preservation lens back with the choices that died on the
-    /// undo's stamp (a lens she deleted since stays deleted).
-    func reapplyLensAdoption(
-        _ adopted: [(placementID: String, chosen: String?)], keptLensID: String, undoneOn stamp: String?
-    ) throws {
+    /// each slot only while it still reads its pre-image, and the
+    /// preservation lens back with the choices that died on the undo's stamp
+    /// (a lens she deleted since stays deleted).
+    func reapplyLensAdoption(_ again: [PointerMove], keptLensID: String, undoneOn stamp: String?) throws {
         try database.write { db in
-            try restoreChosenPointers(db, adopted)
+            try restoreChosenPointersIfUnchanged(db, again)
             if let stamp { try reviveSavedLens(db, keptLensID, undoneOn: stamp) }
         }
     }

@@ -32,6 +32,9 @@ struct LibraryCatalogView: View {
     static let surfaceCapabilities: [CapabilityID] = [.tagNote, .deleteSelectedNotes, .mcpShareNotes]
         // 13n-c U4: a note row's pending-ask glyph (an ask waits on it).
         + MCPAskGlyph.surfaceCapabilities
+        // VX-268: the ONE shared icon on the note, book and gathering rows
+        // (List, Cards, the answer sheet) and its popover's Change… / Revoke.
+        + MCPSharedIcon.surfaceCapabilities
 
     /// **13n-c Stage B R1 B5 — the NOTE ROW's own context doors** (P-1's
     /// walk): `postRowMenu` renders the note-row grammar from
@@ -129,7 +132,7 @@ struct LibraryCatalogView: View {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     /// 13n-c U3: the window's road to the MCP door (nil in harness mounts —
-    /// no share door; R-AIR-8 — none without an approved client).
+    /// no share door; VX-272 — none without an approved client).
     @Environment(\.mcpShareRoad) private var mcpShareRoad
     @State private var tagSheetTarget: SidebarView.TagSheetTarget?
     /// 13i-d U5: the move's confirm (the books the note would leave).
@@ -264,6 +267,9 @@ struct LibraryCatalogView: View {
         .task(id: session.wing.currentID) { await model.search() }
         // 17y B3 item (l): the book rows' menu facts — the listed books only.
         .task(id: model.listedBookIDs) { await model.bookRowDoors.load(model.listedBookIDs) }
+        // VX-268: who reaches the listed books and gatherings — HELD while
+        // they are listed (a grant from a row's own menu shows at once).
+        .task(id: model.listedBookIDs) { await model.holdBookReach(model.listedBookIDs) }
         .bookRowDoors(model.bookRowDoors)
         .wingMoveConfirm($wingMove, wings: wings) { Task { await model.refresh() } }
         // 13i-c U4: the owned-by badge's facts — 17y B1 (k): the MODEL holds
@@ -972,7 +978,9 @@ struct LibraryCatalogView: View {
             // 13o U3: an ASSOCIATED book's row says why it is listed (the
             // tag-association join — the mockup's "#dream flows here").
             association: model.searchState.bookReasons[hit.id].map(LibrarySearchCopy.association),
-            onTitleTap: { openHit(hit) })
+            onTitleTap: { openHit(hit) },
+            // VX-268: who reaches the listed book or gathering (held).
+            reach: model.bookReach[hit.id] ?? [])
         // Row 33 (a): the WHOLE row is the target — the line used to be only
         // as wide as its words, so a click right of "book" was a dead click
         // and the panel kept whatever it was showing.
@@ -1061,6 +1069,9 @@ struct LibraryCatalogView: View {
                     .font(tokens.body)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
+                // VX-268: the ONE shared icon (nothing when nobody reaches
+                // it), then a waiting ask — the List row's order.
+                MCPSharedIcon(reaches: extras.reach, tokens: tokens)
                 // 13n-c U4: an ask waiting on this note (nothing when none).
                 MCPAskGlyph(.note(hit.id), tokens: tokens)
                 // 18h batch 1 (her row 9): the card's date slot is the SORT's
@@ -1188,7 +1199,9 @@ struct LibraryCatalogView: View {
                 badge: ownedByBadge(extras),
                 badgePostID: hit.id,
                 archived: hit.isArchived,
-                askTarget: .note(hit.id))
+                askTarget: .note(hit.id),
+                // VX-268: the row's own slice — held for the near window.
+                reach: extras.reach)
         }
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }
@@ -1222,7 +1235,7 @@ struct LibraryCatalogView: View {
             tagSheetTarget = .init(id: hit.id, title: hit.title)
         }
         // 13n-c U3 (VX-156 item 2; mockup §2): THE grant sheet pre-filled on
-        // this note — only while an approved client exists (R-AIR-8).
+        // this note — only while an approved client exists (VX-272).
         if let road = mcpShareRoad, road.canShare {
             Divider()
             Button(CapabilityRegistry.capability(.mcpShareHere).verb) {
@@ -1343,6 +1356,11 @@ struct CatalogBookLine: View {
     /// beside its name in the accent (the mockup's own); nil elsewhere.
     var association: String? = nil
     let onTitleTap: () -> Void
+    /// VX-268 — who reaches this book or gathering now (the ONE icon's
+    /// reaches — `LibraryCatalogModel.bookReach`; empty — the common case —
+    /// draws nothing, so the shipped alignment pins measure exactly what
+    /// they did).
+    var reach: [MCPPlaceReach] = []
 
     static let probeSpace = "catalog-book-line"
 
@@ -1357,6 +1375,13 @@ struct CatalogBookLine: View {
                 .font(tokens.body)
                 .baselineProbe("book.title", in: Self.probeSpace)
                 .onTapGesture(perform: onTitleTap)
+            // VX-268: the ONE shared icon (the Bookcase row's seat — right
+            // after the name), on the title's baseline. Its own button: the
+            // row's click never fires for it.
+            if !reach.isEmpty {
+                MCPSharedIcon(reaches: reach, tokens: tokens)
+                    .baselineProbe("book.shared", in: Self.probeSpace)
+            }
             if let association {
                 Text(tokens.chromeLabel(association))
                     .font(tokens.small)
@@ -1421,6 +1446,10 @@ struct CatalogNoteLine: View {
     /// title (nil, and a calm note, draw nothing — the shipped alignment pins
     /// measure exactly what they did).
     var askTarget: MCPAskTarget? = nil
+    /// VX-268 — who reaches this note now (the ONE icon's reaches, from the
+    /// row's own slice; empty — the common case — draws nothing, so the
+    /// shipped alignment pins measure exactly what they did).
+    var reach: [MCPPlaceReach] = []
 
     static let probeSpace = "catalog-note-line"
 
@@ -1437,6 +1466,12 @@ struct CatalogNoteLine: View {
                 .lineLimit(1)
                 .baselineProbe("note.title", in: Self.probeSpace)
                 .onTapGesture(perform: onTitleTap)
+            // VX-268: the ONE shared icon beside its sibling, the ask glyph
+            // (the Bookcase row's order — shared, then a waiting ask).
+            if !reach.isEmpty {
+                MCPSharedIcon(reaches: reach, tokens: tokens)
+                    .baselineProbe("note.shared", in: Self.probeSpace)
+            }
             if let askTarget {
                 MCPAskGlyph(askTarget, tokens: tokens)
             }

@@ -112,8 +112,12 @@ final class TakesStructureController {
     /// insert-below handover precedent, other direction). Flushes first,
     /// so a pending buffer never lands in a tombstoned variant; sealed
     /// posts refuse through the op, spoken.
-    func deleteFocusedBlock() async {
-        guard let slot = model.commandTargetSlot else {
+    ///
+    /// `blockID` NAMES the target where the caller knows it (VX-154: Write's
+    /// take panel names its own block — 13k K6's rule: a named target never
+    /// falls back to the routed one); nil keeps the routed target.
+    func deleteFocusedBlock(blockID: String? = nil) async {
+        guard let slot = targetSlot(named: blockID) else {
             model.refuse("Click into a block first — this removes the block you're in.")
             return
         }
@@ -153,8 +157,8 @@ final class TakesStructureController {
     /// Lenses' door onto the third verb, the same shape as `deleteFocusedBlock`
     /// above so the two acts cannot drift on their guards, their flush
     /// discipline, or their ring landing.
-    func archiveFocusedBlock() async {
-        guard let slot = model.commandTargetSlot else {
+    func archiveFocusedBlock(blockID: String? = nil) async {
+        guard let slot = targetSlot(named: blockID) else {
             model.refuse("Click into a block first — this sets the block you're in aside.")
             return
         }
@@ -687,7 +691,7 @@ final class TakesStructureController {
             return
         }
         guard let target = takeTarget(blockID: blockID, variantID: variantID) else {
-            model.refuse("Click into a take first — this moves that take into its own block.")
+            model.refuse(Self.clickIntoATakeToMoveIt)
             return
         }
         guard await model.flushPendingText() else { return }
@@ -736,6 +740,21 @@ final class TakesStructureController {
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
         }
+    }
+
+    /// The take-to-block door's no-take refusal — ONE literal for the routed
+    /// door and Write's take panel (VX-154), which refuses with it rather than
+    /// fall back to what the block shows (an act that takes a take OUT of the
+    /// fan needs the ring — ⌘⇧A's precedent).
+    static let clickIntoATakeToMoveIt =
+        "Click into a take first — this moves that take into its own block."
+
+    /// The block a block-scoped door addresses: the one the caller NAMES —
+    /// looked up in the board's projection, never replaced by the routed
+    /// target when it is gone (13k K6) — else the routed target.
+    private func targetSlot(named blockID: String?) -> Queries.RenderedBlock? {
+        guard let blockID else { return model.commandTargetSlot }
+        return model.projection.slots.first { $0.blockID == blockID }
     }
 
     /// The take a take-scoped routed act addresses: the pane you're in;

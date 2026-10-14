@@ -27,6 +27,12 @@ final class WingsModel {
 
     /// The live ADDITIONAL wings, in switcher order (Home is virtual).
     private(set) var wings: [Wing] = []
+    /// **VX-268 — who reaches each WING now** (the ONE icon on the switcher's
+    /// rows — ⌘L's sheet and the ▾ menu; "a shared wing never shows as shared
+    /// there"): `Queries.mcpWingReaches` — a wing grant on it or the open book,
+    /// `decideWing`'s read. Keyed by wing id, Home `''`. ∝ the wings × the
+    /// approved clients; never reads `container`.
+    private(set) var reach: [String: [MCPPlaceReach]] = [:]
 
     init(session: AppSession) {
         self.session = session
@@ -54,6 +60,15 @@ final class WingsModel {
     func load() async {
         if let value = try? await session.database.read({ try Queries.wings($0) }) {
             adopt(value)
+        }
+    }
+
+    /// VX-268 — hold every wing's reach (the main window's task, beside
+    /// `track` — the window that renders the switcher).
+    func watchSharing() async {
+        await MCPRowReach.hold(session, { try Queries.mcpWingReaches($0) }) { [weak self] value in
+            guard let self, self.reach != value else { return }
+            self.reach = value
         }
     }
 
@@ -91,7 +106,7 @@ final class WingsModel {
         session.wing.switchTo(id)
     }
 
-    // MARK: - 13n-c U4 — ⌘L and the cycling masthead (R-AIR-5/15)
+    // MARK: - 13n-c U4 — ⌘L and the cycling masthead (VX-157)
 
     /// The switcher's rows in the pure brain's shape (Home first).
     var switcherRows: [WingSwitcherBrain.Row] {
@@ -252,12 +267,12 @@ nonisolated enum WingCopy {
     static let deleteWingVerb = "Delete Wing\u{2026}"
     static let moveToWingVerb = "Move to Wing"
     static let copyToWingVerb = "Copy to Wing"
-    // 13n-c U4 (round 5 — the switcher joins the Library masthead; ⌘L, R-AIR-15):
+    // 13n-c U4 (round 5 — the switcher joins the Library masthead; ⌘L, VX-157):
     // the note says where wings live now, both mastheads and the chord.
     static let unavailableNote = "Wings live at the top of the Bookcase and the Library \u{2014} "
         + "\u{201C}Bookcase \u{00B7} \(WingWords.home) \u{25BE}\u{201D} \u{2014} and \u{2318}L switches between them."
 
-    // MARK: - 13n-c U4 — ⌘L and the cycling masthead (R-AIR-5/15; round 5)
+    // MARK: - 13n-c U4 — ⌘L and the cycling masthead (VX-157; round 5)
 
     /// ⌘L's menu verb (the View menu; the registry's `.switchWing`).
     static let switchWingVerb = "Switch Wing\u{2026}"

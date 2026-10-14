@@ -12,10 +12,14 @@ import Foundation
 /// one honest JSON-RPC error answering the client's `initialize`.
 ///
 /// When the socket cannot be reached it speaks ONE honest JSON-RPC error to
-/// the client's first request (its `initialize`) and exits: "Variorum must be
-/// open" when nothing is listening (R-13n-3), its own line when macOS blocks
-/// the connection (AF-1). It holds no store, no key and no grant — the app is
-/// the one process that ever touches the library.
+/// the client's `initialize` and exits: "Variorum must be open" when nothing
+/// is listening (R-13n-3), its own line when macOS blocks the connection
+/// (AF-1). VX-181: it reads the client's stdin through the SAME pre-initialize
+/// window the app's handshake reads (`MCPOpeningWindow` — VX-180), so a probe
+/// sent ahead of the `initialize` (Claude Code 2.1.296's `server/discover`) is
+/// answered as the open app answers it and the sentence lands on the
+/// `initialize`'s id — the request a client reports. It holds no store, no key
+/// and no grant — the app is the one process that ever touches the library.
 public enum MCPShim {
     /// What a run ended as.
     public enum Outcome: Equatable, Sendable {
@@ -84,11 +88,13 @@ public enum MCPShim {
     // MARK: - The refusal on the wire
 
     /// The JSON-RPC error answering the client's first message: its `id`
-    /// echoed when it carried one (a request), `null` otherwise.
+    /// echoed when it carried one (a request), `null` otherwise. VX-181 (the
+    /// VX-180 ladder's NIT 1): "an id it may echo" is
+    /// `MCPOpeningWindow.isEchoableID` — the window's own rule, one predicate.
     public static func refusalResponse(toFirstLine line: Data, message: String) -> Data {
         var id: Any = NSNull()
         if let object = try? JSONSerialization.jsonObject(with: line) as? [String: Any],
-           let requestID = object["id"], requestID is String || requestID is NSNumber {
+           let requestID = object["id"], MCPOpeningWindow.isEchoableID(requestID) {
             id = requestID
         }
         let response: [String: Any] = [
@@ -101,10 +107,19 @@ public enum MCPShim {
         return data + Data("\n".utf8)
     }
 
-    /// Read the client's first line (bounded), answer it with the refusal.
+    /// Read the client's opening through the pre-initialize window
+    /// (`MCPOpeningWindow` — VX-181: its requests answered on their own ids,
+    /// its notifications skipped, bounded), then answer the frame that ends
+    /// it — the `initialize` — with the refusal. A connection that ends or
+    /// overruns the line limit first hears the refusal on `id: null` (the
+    /// pre-VX-181 shim's answer to an unreadable first line).
     static func respondToFirstRequest(input: Int32, output: Int32, message: String) {
-        let line = readFirstLine(input, limit: 1 << 20)
-        writeAll(output, refusalResponse(toFirstLine: line, message: message))
+        let frame: Data
+        switch MCPOpeningWindow.read(from: input, answeringOn: output) {
+        case .frame(let opening): frame = opening
+        case .ended, .overLimit: frame = Data()
+        }
+        writeAll(output, refusalResponse(toFirstLine: frame, message: message))
     }
 
     /// Public besides the shim's own use: the app's over-cap refusal (round 1

@@ -57,16 +57,26 @@ extension Operations {
     /// `renameReading` parallel); a no-op rename writes nothing.
     public func renameSection(_ id: String, name: String) throws {
         try database.write { db in
-            var section = try liveSection(db, id)
-            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else {
-                throw OperationError.invalidSectionName(name: name)
-            }
-            guard section.name != trimmed else { return }
-            section.name = trimmed
-            section.updatedAt = date.now
-            try section.update(db)
+            _ = try renameSectionRow(db, id, name: name)
         }
+    }
+
+    /// `renameSection`'s row work inside a caller's transaction (VX-184 U5 —
+    /// `rename_chapter`). Byte-identical behaviour. Returns the PREVIOUS name
+    /// when it wrote, nil for a no-op.
+    @discardableResult
+    func renameSectionRow(_ db: Database, _ id: String, name: String) throws -> String? {
+        var section = try liveSection(db, id)
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            throw OperationError.invalidSectionName(name: name)
+        }
+        guard section.name != trimmed else { return nil }
+        let previous = section.name
+        section.name = trimmed
+        section.updatedAt = date.now
+        try section.update(db)
+        return previous
     }
 
     /// Tombstone the chapter. Memberships keep their `section_id` pointers
@@ -79,16 +89,25 @@ extension Operations {
     /// restoreContainer doctrine).
     public func deleteSection(_ id: String) throws {
         try database.write { db in
-            var section = try liveSection(db, id)
-            let reading = try liveReading(db, section.readingId)
-            guard !reading.locked else {
-                throw OperationError.lockedReading(id: reading.id)
-            }
-            let now = date.now
-            section.deletedAt = now
-            section.updatedAt = now
-            try section.update(db)
+            _ = try deleteSectionRow(db, id)
         }
+    }
+
+    /// `deleteSection`'s row work inside a caller's transaction (VX-184 U5 —
+    /// `delete_chapter`, and its undo's redo). Byte-identical behaviour.
+    /// Returns the tombstoned chapter (its `deletedAt` is the act's stamp).
+    @discardableResult
+    func deleteSectionRow(_ db: Database, _ id: String) throws -> ReadingSection {
+        var section = try liveSection(db, id)
+        let reading = try liveReading(db, section.readingId)
+        guard !reading.locked else {
+            throw OperationError.lockedReading(id: reading.id)
+        }
+        let now = date.now
+        section.deletedAt = now
+        section.updatedAt = now
+        try section.update(db)
+        return section
     }
 
     /// The chapter's resurrection door (the comment-restore parallel; NO
@@ -104,36 +123,53 @@ extension Operations {
     /// their (now live again) reading.
     public func restoreSection(_ id: String) throws {
         try database.write { db in
-            guard var section = try ReadingSection.fetchOne(db, key: id) else {
-                throw OperationError.sectionNotFound(id: id)
-            }
-            guard section.deletedAt != nil else {
-                throw OperationError.sectionNotDeleted(id: id)
-            }
-            let reading = try liveReading(db, section.readingId)
-            guard !reading.locked else {
-                throw OperationError.lockedReading(id: reading.id)
-            }
-            section.deletedAt = nil
-            section.updatedAt = date.now
-            try section.update(db)
+            try restoreSectionRow(db, id)
         }
+    }
+
+    /// `restoreSection`'s row work inside a caller's transaction (VX-184 U5 —
+    /// `delete_chapter`'s undo). Byte-identical behaviour.
+    func restoreSectionRow(_ db: Database, _ id: String) throws {
+        guard var section = try ReadingSection.fetchOne(db, key: id) else {
+            throw OperationError.sectionNotFound(id: id)
+        }
+        guard section.deletedAt != nil else {
+            throw OperationError.sectionNotDeleted(id: id)
+        }
+        let reading = try liveReading(db, section.readingId)
+        guard !reading.locked else {
+            throw OperationError.lockedReading(id: reading.id)
+        }
+        section.deletedAt = nil
+        section.updatedAt = date.now
+        try section.update(db)
     }
 
     /// Move the chapter within the book's chapter order (the movable-
     /// chapters ruling — sitting 2: "movable chapters is great").
     public func reorderSection(_ id: String, to insert: InsertPosition) throws {
         try database.write { db in
-            var section = try liveSection(db, id)
-            let reading = try liveReading(db, section.readingId)
-            guard !reading.locked else {
-                throw OperationError.lockedReading(id: reading.id)
-            }
-            section.position = try sectionPosition(
-                db, readingID: section.readingId, at: insert)
-            section.updatedAt = date.now
-            try section.update(db)
+            _ = try reorderSectionRow(db, id, to: insert)
         }
+    }
+
+    /// `reorderSection`'s row work inside a caller's transaction (VX-184 U5 —
+    /// `move_chapter`). Byte-identical behaviour. Returns the chapter's
+    /// position before and after.
+    func reorderSectionRow(
+        _ db: Database, _ id: String, to insert: InsertPosition
+    ) throws -> (from: String, to: String) {
+        var section = try liveSection(db, id)
+        let reading = try liveReading(db, section.readingId)
+        guard !reading.locked else {
+            throw OperationError.lockedReading(id: reading.id)
+        }
+        let from = section.position
+        section.position = try sectionPosition(
+            db, readingID: section.readingId, at: insert)
+        section.updatedAt = date.now
+        try section.update(db)
+        return (from, section.position)
     }
 
     /// Point a membership at a chapter (nil = unsectioned). The section

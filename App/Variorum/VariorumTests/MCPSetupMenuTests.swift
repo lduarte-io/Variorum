@@ -2,14 +2,14 @@
 //  MCPSetupMenuTests.swift
 //  VariorumTests (Mac)
 //
-//  13n-c U5 — R-AIR-13, THE SETUP MENU (the sitting record round 3: "the
+//  13n-c U5 — VX-274, THE SETUP MENU (the sitting record round 3: "the
 //  setup command grows a per-client menu: Claude Code · Codex · a generic
 //  path/JSON shape (the door is a standard MCP stdio server at one binary
 //  path; the pane says so)"). The three setups' words, each one's text as a
 //  client reads it (Claude Code's byte-unchanged from 13n-b; Codex's from the
 //  U5 record's cited syntax; the generic stanza PARSED back as JSON over
 //  awkward paths), the door copying the chosen one with its own receipt, the
-//  one stdio line, R-AIR-8 (no "AI" in the pane's words) and the search.
+//  one stdio line, VX-272 (no "AI" in the pane's words) and the search.
 //
 
 import AppKit
@@ -46,7 +46,7 @@ private func withSetupWorld<T>(
 }
 
 @MainActor
-@Suite("13n-c U5 — the setup menu (R-AIR-13)")
+@Suite("13n-c U5 — the setup menu (VX-274)")
 struct MCPSetupMenuTests {
     private static let releasePath = "/Applications/Variorum.app/Contents/MacOS/variorum-mcp"
 
@@ -85,7 +85,10 @@ struct MCPSetupMenuTests {
                 "a dev setup never replaces the real registration (P-13nb-U1-10)")
         #expect(MCPSetupClient.claudeCode.sentence == MCPPaneCopy.connectSentence)
         #expect(MCPPaneCopy.connectSentence.contains("replacing an earlier Variorum setup there"))
-        #expect(MCPSetupClient.claudeCode.copiedReceipt == MCPPaneCopy.copiedReceipt)
+        // VX-281 ladder R2-5: the receipt's own pin went with its alias
+        // (`MCPPaneCopy.copiedReceipt` WAS this value since R1-8 — the line
+        // compared it with itself); each client's receipt is pinned by the
+        // copy pins below, against the door's note.
     }
 
     /// Codex's setup (the U5 record's external fact: `codex mcp add <name>
@@ -160,6 +163,11 @@ struct MCPSetupMenuTests {
             defer { door.detach() }
             let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-mcp-setup-test-\(UUID().uuidString)"))
             defer { pasteboard.releaseGlobally() }
+            // A JUSTIFIED EDIT (VX-281 ladder R1-3 — the ritual): the copy act
+            // has no default client any more (every caller names its own), so
+            // "the default stays Claude Code's" is the MENU's default — a
+            // fresh door's choice — read here before any copy moves it.
+            #expect(door.setupClient == .claudeCode, "the default is Claude Code's")
             var keys: [String] = []
             for client in MCPSetupClient.allCases {
                 await door.copySetupCommand(for: client, to: pasteboard)
@@ -174,9 +182,9 @@ struct MCPSetupMenuTests {
                         == .unclaimed, "the copy's key is kept, by hash, until a client presents it")
                 #expect(door.note == MCPDoor.Note(text: client.copiedReceipt, place: .connect))
             }
-            await door.copySetupCommand(to: pasteboard)
+            await door.copySetupCommand(for: .claudeCode, to: pasteboard)
             #expect(pasteboard.string(forType: .string)?.hasPrefix("claude mcp remove -s user variorum-dev") == true,
-                    "the default is Claude Code's")
+                    "Claude Code's copy is its command")
             #expect(Set(keys).count == 3, "every copy carries a fresh key")
             #expect(Set(MCPSetupClient.allCases.map(\.copiedReceipt)).count == 3, "three receipts, three next steps")
         }
@@ -215,7 +223,7 @@ struct MCPSetupMenuTests {
 
     // MARK: - The words
 
-    /// R-AIR-13's line: the door is a standard MCP server over stdio, one
+    /// VX-274's line: the door is a standard MCP server over stdio, one
     /// program at one path — said once, above the menu.
     @Test func theOneLineSaysStdioOneProgramOnePath() {
         #expect(MCPPaneCopy.stdioLine.contains("standard MCP server"))
@@ -224,7 +232,7 @@ struct MCPSetupMenuTests {
         #expect(MCPDoor.shimPath.hasSuffix("/Contents/MacOS/variorum-mcp"))
     }
 
-    /// R-AIR-8: the pane's words say MCP and client, never "AI"; sentence
+    /// VX-272: the pane's words say MCP and client, never "AI"; sentence
     /// case (her standing rule — no word capitalized for emphasis).
     @Test func theSetupWordsCarryNoAIAndNoShoutedWord() {
         var words = [MCPPaneCopy.stdioLine, MCPPaneCopy.connectSection, MCPPaneCopy.keyLine,
@@ -282,7 +290,7 @@ struct MCPSetupMenuTests {
             for client in MCPSetupClient.allCases where client != .anyClient {
                 #expect(!text.localizedCaseInsensitiveContains(client.label), "\(client.label) in: \(text)")
             }
-            #expect(!text.contains("AI"), "R-AIR-8: settings-class wording")
+            #expect(!text.contains("AI"), "VX-272: settings-class wording")
         }
         #expect(!blurb.contains("the command that sets up Claude Code"))
     }

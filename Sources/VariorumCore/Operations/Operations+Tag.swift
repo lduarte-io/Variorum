@@ -144,14 +144,22 @@ extension Operations {
     }
 
     public func removeTag(_ tagID: String, fromPost postID: String) throws {
-        try database.write { db in
-            guard let id = try liveApplication(db, table: "post_tag", tagID: tagID,
-                                               targetColumn: "post_id", targetID: postID)
-            else { throw OperationError.tagNotApplied(tagID: tagID, targetID: postID) }
-            try db.execute(
-                sql: "UPDATE post_tag SET deleted_at = ? WHERE id = ?",
-                arguments: [DateFormatter.variorumISO8601.string(from: date.now), id])
-        }
+        try database.write { db in _ = try removePostTagApplication(db, tagID: tagID, postID: postID) }
+    }
+
+    /// `removeTag(_:fromPost:)`'s row body inside the caller's transaction
+    /// (VX-184 U3 — extracted byte-for-byte so the MCP door's `remove_tag`
+    /// takes HER road): the live application tombstoned — a NON-EVENT for
+    /// intake (no living book hears an un-tag; §19) — or `tagNotApplied`.
+    /// Returns the application's id (the door's undo restores that exact row).
+    func removePostTagApplication(_ db: Database, tagID: String, postID: String) throws -> String {
+        guard let id = try liveApplication(db, table: "post_tag", tagID: tagID,
+                                           targetColumn: "post_id", targetID: postID)
+        else { throw OperationError.tagNotApplied(tagID: tagID, targetID: postID) }
+        try db.execute(
+            sql: "UPDATE post_tag SET deleted_at = ? WHERE id = ?",
+            arguments: [DateFormatter.variorumISO8601.string(from: date.now), id])
+        return id
     }
 
     @discardableResult

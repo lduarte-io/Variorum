@@ -9,7 +9,7 @@ import Testing
 @testable import VariorumMCPSocket
 
 // 13n-c U6 — THE WING ON THE WIRE, the read side: `show_in_app`'s `wing`
-// target (VX-158 — the brief §8's A, mockup §7) and R-AIR-12's gatherings
+// target (VX-158 — the brief §8's A, mockup §7) and VX-273's gatherings
 // read as facts under a wing grant ("granting a wing grants access to
 // everything … unless it's deliberately marked private"; gatherings "do NOT
 // become separate grant targets").
@@ -22,7 +22,7 @@ private func spec(
 }
 
 private func call(
-    _ connection: (client: Client, fd: Int32), _ name: String, _ arguments: [String: Value]
+    _ connection: HarnessConnection, _ name: String, _ arguments: [String: Value]
 ) async throws -> (content: [Tool.Content], isError: Bool?) {
     try await connection.client.callTool(name: name, arguments: arguments)
 }
@@ -104,7 +104,7 @@ struct MCPWingReachServerTests {
         }
     }
 
-    // MARK: - R-AIR-12: gatherings, read facts under a wing grant
+    // MARK: - VX-273: gatherings, read facts under a wing grant
 
     /// The wing "variorum": a gathering of #parser notes, two plain members, a
     /// PRIVATE member (fenced — it must never list or count), a book.

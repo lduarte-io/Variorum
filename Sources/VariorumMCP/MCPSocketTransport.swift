@@ -20,6 +20,9 @@ actor MCPSocketTransport: Transport {
     /// The longest line accepted (a message bigger than this ends the
     /// connection). Generous for any document the read tools return in
     /// reverse; a request this size is not one an honest client sends.
+    /// VX-184 U1: EXACT — a line of `lineCap` bytes is served, one byte more
+    /// is over, however the stream arrives — and an over-cap message is
+    /// ANSWERED (one error on `id: null`) before the connection ends.
     static let lineCap = 16 * 1024 * 1024
 
     nonisolated let logger: Logger
@@ -45,9 +48,22 @@ actor MCPSocketTransport: Transport {
         let fd = self.fd
         let continuation = self.continuation
         for line in replay { continuation.yield(line) }
-        let reader = Thread {
-            MCPSocketTransport.readLines(fd: fd, cap: MCPSocketTransport.lineCap) { line in
+        let reader = Thread { [self] in
+            let end = MCPSocketTransport.readLines(fd: fd, cap: MCPSocketTransport.lineCap) { line in
                 continuation.yield(line)
+            }
+            if end == .overLimit {
+                // VX-184 U1: the over-cap answer goes through THIS actor, so
+                // it is serialized with the SDK's own writes (`send`) — never
+                // interleaved mid-frame — and it lands before the stream ends
+                // (the SDK then stops; the host closes). The wait is bounded:
+                // a peer that reads nothing cannot hold this thread.
+                let answered = DispatchSemaphore(value: 0)
+                Task {
+                    await self.answerOverLimit()
+                    answered.signal()
+                }
+                _ = answered.wait(timeout: .now() + 2)
             }
             continuation.finish()
         }
@@ -74,24 +90,51 @@ actor MCPSocketTransport: Transport {
 
     func receive() -> AsyncThrowingStream<Data, Swift.Error> { stream }
 
+    /// The over-cap answer (VX-184 U1 — the record's "Over-cap answers"): the
+    /// overrun message's id cannot be read, so it rides `id: null`, in the
+    /// door's refusal shape, naming the cap.
+    private func answerOverLimit() {
+        guard isConnected else { return }
+        let sentence = MCPHandshake.overLimitRefusal(limit: Self.lineCap, beforeInitialize: false)
+        _ = Self.writeAll(fd, MCPShim.refusalResponse(toFirstLine: Data(), message: sentence))
+    }
+
     // MARK: - The blocking halves (pure over a descriptor — pinned headless)
 
+    /// How a read loop ended.
+    enum ReadEnd: Equatable, Sendable {
+        /// EOF or an error.
+        case closed
+        /// A line ran past the cap.
+        case overLimit
+    }
+
     /// Read until EOF or error, yielding each complete non-empty line; a line
-    /// longer than `cap` ends the read.
-    static func readLines(fd: Int32, cap: Int, yield: (Data) -> Void) {
+    /// longer than `cap` ends the read. VX-184 U1: the cap is EXACT — a
+    /// complete line is measured too, so one whose newline arrives in the same
+    /// read as its overflowing bytes is over (pre-fix it was yielded whole) —
+    /// and only the NEW bytes of each read are scanned for a newline, so the
+    /// cost is linear in the stream (pre-fix every read re-scanned the whole
+    /// pending line: a 16 MiB message arriving ~8 KiB at a time was ~16 GB of
+    /// comparisons — never served in practice).
+    @discardableResult
+    static func readLines(fd: Int32, cap: Int, yield: (Data) -> Void) -> ReadEnd {
         var buffer = [UInt8](repeating: 0, count: 64 * 1024)
         var pending = Data()
         while true {
             let count = buffer.withUnsafeMutableBytes { read(fd, $0.baseAddress, $0.count) }
             if count < 0, errno == EINTR { continue }
-            guard count > 0 else { return }
-            pending.append(contentsOf: buffer[0..<count])
-            while let newline = pending.firstIndex(of: UInt8(ascii: "\n")) {
-                let line = pending[pending.startIndex..<newline]
-                if !line.isEmpty { yield(Data(line)) }
-                pending = Data(pending[(newline + 1)...])
+            guard count > 0 else { return .closed }
+            var start = 0
+            while let newline = buffer[start..<count].firstIndex(of: UInt8(ascii: "\n")) {
+                guard pending.count + (newline - start) <= cap else { return .overLimit }
+                pending.append(contentsOf: buffer[start..<newline])
+                if !pending.isEmpty { yield(pending) }
+                pending = Data()
+                start = newline + 1
             }
-            if pending.count > cap { return }
+            pending.append(contentsOf: buffer[start..<count])
+            if pending.count > cap { return .overLimit }
         }
     }
 

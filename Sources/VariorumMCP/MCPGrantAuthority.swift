@@ -67,7 +67,7 @@ struct MCPGrantAuthority: Sendable {
             target: .book(facts), rung: rung, consumes: consumes)
     }
 
-    /// 13n-c R-AIR-12: a GATHERING's decision — always READ, never consuming,
+    /// 13n-c VX-273: a GATHERING's decision — always READ, never consuming,
     /// wing-level reach only (`MCPGrantRule.decideGathering`); a missing one
     /// answers as any missing target. Never raises an ask: a gathering is no
     /// grant's scope, so no answer could mint one.
@@ -77,7 +77,7 @@ struct MCPGrantAuthority: Sendable {
             client: standing.state, grants: standing.grants, openBook: standing.openBook, gathering: facts)
     }
 
-    /// **A book id READ** (13n-c R-AIR-12): the tools that read a place by its
+    /// **A book id READ** (13n-c VX-273): the tools that read a place by its
     /// book id — `list_notes`, `search`, `show_in_app` — take a BOOK (its own
     /// grant's road, unchanged) or a GATHERING (read facts under wing-level
     /// reach). Every write tool keeps reading `mcpBookFacts` alone, so a

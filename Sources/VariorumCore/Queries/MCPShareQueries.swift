@@ -2,12 +2,13 @@ import Foundation
 import GRDB
 
 // THE MCP DOOR's SHARE FACES — the reads (13n-c U3: VX-156 items 2/3,
-// R-AIR-4/6/7). Three things the faces outside Settings ▸ MCP need, each
+// VX-270 · VX-271 · VX-164). Three things the faces outside Settings ▸ MCP need, each
 // derived from the grants store and the ONE rule — never a parallel fence:
 // - SHARED PLACES grouped by act (the exact-stamp doctrine — the bulk share
 //   writes N note grants on one `created_at`, read back as one row);
-// - the REACH of an approved client on a note or a book, with the WHY (the
-//   grant `MCPGrantRule.decide` itself would use — "readable through the
+// - the REACH of an approved client on a note, a book or (VX-185) a
+//   gathering, with the WHY (the grant `MCPGrantRule.decide` — for a
+//   gathering `decideGathering` — itself would use: "readable through the
 //   Home wing grant");
 // - the chord's derivation (⌥⌘A — the newest grant she made).
 
@@ -46,8 +47,8 @@ public struct MCPSharedGroup: Equatable, Sendable, Identifiable {
     public var isGroup: Bool { grantIDs.count > 1 }
 }
 
-/// **One approved client's reach on a place, and WHY** (13n-c U3 — R-AIR-6's
-/// popover, R-AIR-7's in-note indicator): the highest rung it reaches now and
+/// **One approved client's reach on a place, and WHY** (13n-c U3 — VX-271's
+/// popover, VX-164's in-note indicator): the highest rung it reaches now and
 /// the standing `MCPGrantRule.decide` itself authorizes it with.
 public struct MCPPlaceReach: Equatable, Sendable, Identifiable {
     public var id: String { client.id }
@@ -239,70 +240,124 @@ extension Queries {
     /// version or scraps note answers nobody. ∝ the approved clients.
     public static func mcpNoteReach(_ db: Database, noteID: String) throws -> [MCPPlaceReach] {
         guard let facts = try mcpNoteFacts(db, noteID: noteID) else { return [] }
-        return try mcpReach(db, target: .note(facts), ownKind: .note, ownID: noteID)
+        return try mcpReach(db, place: .note(facts))
     }
 
-    /// **Who reaches this BOOK, how far, and why** — the Bookcase icon's
-    /// popover and the Book Settings grant row. A fenced book answers nobody.
+    /// **Who reaches this BOOK — or GATHERING — how far, and why** — the
+    /// Bookcase icon's popover and the Book Settings grant row. A fenced book
+    /// or gathering answers nobody. VX-185: a gathering answers through ITS
+    /// rule (`decideGathering` — a wing grant on its wing or the open book,
+    /// VX-273 / R-VX185-1), so this read and `mcpBookReaches` agree for
+    /// every id the Bookcase draws.
     public static func mcpBookReach(_ db: Database, readingID: String) throws -> [MCPPlaceReach] {
-        guard let facts = try mcpBookFacts(db, readingID: readingID) else { return [] }
-        return try mcpReach(db, target: .book(facts), ownKind: .book, ownID: readingID)
+        guard let place = try mcpReachPlace(db, readingID: readingID) else { return [] }
+        return try mcpReach(db, place: place)
     }
 
-    /// **Every live book an approved client reaches now, with who and why**
-    /// — the Bookcase's icons (R-AIR-6; the old chip's `mcpReachableBookIDs`,
-    /// grown to say who and how far). One-shot; ∝ the books × the approved
-    /// clients (a handful), each client's grants read once.
-    public static func mcpBookReaches(_ db: Database) throws -> [String: [MCPPlaceReach]] {
-        let clients = try mcpClients(db, states: [.approved])
-        guard !clients.isEmpty else { return [:] }
-        let openBook = try mcpSwitch(db, .openBook)
-        let standings = try clients.map { ($0, try mcpGrants(db, clientID: $0.id)) }
-        guard openBook || standings.contains(where: { $0.1.contains(where: { $0.ruleGrant.isLive }) }) else {
-            return [:]
-        }
+    /// **Every live book AND GATHERING an approved client reaches now, with
+    /// who and why** — the Bookcase's icons (VX-271; the old chip's
+    /// `mcpReachableBookIDs`, grown to say who and how far) with `readingIDs`
+    /// nil, and since VX-268 the Library's LISTED book and gathering rows with
+    /// the listed ids. VX-185 (her report: a gathering never wore the icon
+    /// "even when you've shared the whole wing"): every reading is decided by
+    /// ITS kind's ONE rule — a book through `decide`, a gathering through
+    /// `decideGathering` (wing-level reach on its wing, or the open book —
+    /// never a note or book grant, R-VX185-1; a fenced one never). REACH, not
+    /// presentation: an archived reading stays in the map as the wire still
+    /// answers it by id; the Bookcase never draws an archived row of either
+    /// kind (`bookcaseReadings`). A dead id, a note's id or a fenced reading
+    /// answers nobody. One-shot or held; ∝ the readings (every live one, or
+    /// the ids given) × the approved clients (a handful), each client's grants
+    /// read once, one facts row per reading — never an assembly, never
+    /// `container`.
+    ///
+    /// **ONE function, ONE gate** (VX-281 ladder R1-6): the Bookcase's map and
+    /// the listed rows' map are the same read over different ids, behind the
+    /// same `mcpReachStandings` (VX-272's ≥1-approved-client rule, the open
+    /// book, a live grant) — so a gate change can never be made for one and
+    /// not the other.
+    public static func mcpBookReaches(
+        _ db: Database, readingIDs: [String]? = nil
+    ) throws -> [String: [MCPPlaceReach]] {
+        if let readingIDs, readingIDs.isEmpty { return [:] }
+        guard let standing = try mcpReachStandings(db) else { return [:] }
+        let ids = try readingIDs.map { Array(Set($0)) }
+            ?? String.fetchAll(
+                db, sql: "SELECT id FROM reading WHERE deleted_at IS NULL AND kind IN ('book', 'gathering')")
         var titles: [String: String?] = [:]
         var out: [String: [MCPPlaceReach]] = [:]
-        for id in try String.fetchAll(
-            db, sql: "SELECT id FROM reading WHERE deleted_at IS NULL AND kind = 'book'") {
-            guard let facts = try mcpBookFacts(db, readingID: id) else { continue }
-            let reaches = try standings.compactMap { client, rows in
-                try placeReach(
-                    db, client: client, rows: rows, openBook: openBook, target: .book(facts),
-                    ownKind: .book, ownID: id, titles: &titles)
-            }
-            if !reaches.isEmpty { out[id] = reaches.sorted { $0.clientName < $1.clientName } }
+        for id in ids {
+            guard let place = try mcpReachPlace(db, readingID: id) else { continue }
+            let found = try reaches(db, standing, place: place, titles: &titles)
+            if !found.isEmpty { out[id] = found }
         }
         return out
     }
 
-    static func mcpReach(
-        _ db: Database, target: MCPGrantRule.Target, ownKind: MCPGrantRule.ScopeKind, ownID: String
-    ) throws -> [MCPPlaceReach] {
+    /// **The place a reach is read on, and the ONE rule its kind answers to**
+    /// (VX-185). A note and a book are grant targets (`decide`); a gathering
+    /// is never a grant's scope (VX-273) and answers `decideGathering`.
+    enum MCPReachPlace {
+        case note(MCPGrantRule.NoteFacts)
+        case book(MCPGrantRule.BookFacts)
+        case gathering(MCPGrantRule.BookFacts)
+        /// VX-268: a wing (`''` = the virtual Home) — never fenced; its reach
+        /// is `decideWing`'s.
+        case wing(String)
+
+        /// The approved client's reach here — read off the kind's own rule.
+        func reach(grants: [MCPGrantRule.Grant], openBook: Bool) -> MCPGrantRule.Reach? {
+            switch self {
+            case .note(let facts): MCPGrantRule.reach(grants: grants, openBook: openBook, target: .note(facts))
+            case .book(let facts): MCPGrantRule.reach(grants: grants, openBook: openBook, target: .book(facts))
+            case .gathering(let facts): MCPGrantRule.reach(grants: grants, openBook: openBook, gathering: facts)
+            case .wing(let id): MCPGrantRule.reach(grants: grants, openBook: openBook, wing: id)
+            }
+        }
+
+        /// Whether a grant names THIS place itself (its why is then nil). A
+        /// gathering is never a grant's scope, so every reach on one names the
+        /// wider place — its wing — or the open book.
+        func isOwn(_ grant: MCPGrantRow) -> Bool {
+            switch self {
+            case .note(let facts): grant.scopeKind == .note && grant.scopeID == facts.id
+            case .book(let facts): grant.scopeKind == .book && grant.scopeID == facts.id
+            case .gathering: false
+            case .wing(let id): grant.scopeKind == .wing && grant.scopeID == id
+            }
+        }
+    }
+
+    /// A live book's or gathering's place (nil for anything else — a missing,
+    /// tombstoned or fenced-out id answers nobody, as before).
+    static func mcpReachPlace(_ db: Database, readingID: String) throws -> MCPReachPlace? {
+        if let facts = try mcpBookFacts(db, readingID: readingID) { return .book(facts) }
+        if let facts = try mcpGatheringFacts(db, readingID: readingID) { return .gathering(facts) }
+        return nil
+    }
+
+    static func mcpReach(_ db: Database, place: MCPReachPlace) throws -> [MCPPlaceReach] {
         let openBook = try mcpSwitch(db, .openBook)
         var titles: [String: String?] = [:]
         return try mcpClients(db, states: [.approved]).compactMap { client in
             try placeReach(
                 db, client: client, rows: try mcpGrants(db, clientID: client.id), openBook: openBook,
-                target: target, ownKind: ownKind, ownID: ownID, titles: &titles)
+                place: place, titles: &titles)
         }.sorted { $0.clientName < $1.clientName }
     }
 
     private static func placeReach(
         _ db: Database, client: MCPClient, rows: [MCPGrantRow], openBook: Bool,
-        target: MCPGrantRule.Target, ownKind: MCPGrantRule.ScopeKind, ownID: String,
-        titles: inout [String: String?]
+        place: MCPReachPlace, titles: inout [String: String?]
     ) throws -> MCPPlaceReach? {
-        guard let reach = MCPGrantRule.reach(
-            grants: rows.map(\.ruleGrant), openBook: openBook, target: target)
-        else { return nil }
+        guard let reach = place.reach(grants: rows.map(\.ruleGrant), openBook: openBook) else { return nil }
         guard case .grant(let ruled) = reach.standing,
               let grant = rows.first(where: { $0.id == ruled.id })
         else {
             return MCPPlaceReach(client: client, rung: reach.rung, grant: nil, throughTitle: nil)
         }
         var through: String?
-        if !(grant.scopeKind == ownKind && grant.scopeID == ownID) {
+        if !place.isOwn(grant) {
             let key = "\(grant.scopeKind.rawValue):\(grant.scopeID)"
             if let cached = titles[key] {
                 through = cached
@@ -312,6 +367,90 @@ extension Queries {
             }
         }
         return MCPPlaceReach(client: client, rung: reach.rung, grant: grant, throughTitle: through)
+    }
+
+    // MARK: - VX-268 — the ROWS' reads (the Library, the Pool, the Book Panel, the switcher)
+
+    /// The approved clients' standing, read ONCE for a whole batch of rows —
+    /// or nil when nothing can reach anything: no approved client (VX-272 —
+    /// "renders ONLY when ≥1 approved client exists"), or no approved client
+    /// holding a live grant while the open book is off. A nil answer means a
+    /// row read stops here, before reading one `container` or `reading` row.
+    struct MCPReachStandings {
+        let openBook: Bool
+        let standings: [(client: MCPClient, rows: [MCPGrantRow])]
+    }
+
+    static func mcpReachStandings(_ db: Database) throws -> MCPReachStandings? {
+        let clients = try mcpClients(db, states: [.approved])
+        guard !clients.isEmpty else { return nil }
+        let openBook = try mcpSwitch(db, .openBook)
+        let standings = try clients.map { (client: $0, rows: try mcpGrants(db, clientID: $0.id)) }
+        guard openBook || standings.contains(where: { $0.rows.contains(where: { $0.ruleGrant.isLive }) }) else {
+            return nil
+        }
+        return MCPReachStandings(openBook: openBook, standings: standings)
+    }
+
+    /// One place's reaches under a batch's standing, by client name — the ONE
+    /// `placeReach` every read shares (so a row, the Bookcase and the note's
+    /// own indicator can never disagree).
+    private static func reaches(
+        _ db: Database, _ standing: MCPReachStandings, place: MCPReachPlace,
+        titles: inout [String: String?]
+    ) throws -> [MCPPlaceReach] {
+        try standing.standings.compactMap { client, rows in
+            try placeReach(db, client: client, rows: rows, openBook: standing.openBook, place: place, titles: &titles)
+        }.sorted { $0.clientName < $1.clientName }
+    }
+
+    /// **Who reaches each of these NOTES, how far, and why** (VX-268 — the
+    /// rows the ask glyph marks: the Library's List, Cards, answer sheet and
+    /// Timeline, the Pool, the Book Panel). The batched twin of
+    /// `mcpNoteReach`: every id is decided by the SAME read off `decide`
+    /// (`placeReach`), so a row says exactly what the note's own indicator
+    /// says (pinned, id for id). A note no approved client reaches is ABSENT
+    /// (never an empty list); a missing, version or scraps id answers nobody.
+    ///
+    /// **P1 — ∝ the ids given (the rows SHOWN), never the corpus, never per
+    /// row:** the approved clients and their grants are read once, the
+    /// notes' facts in ONE batched read (`mcpNoteFacts(noteIDs:)` — two
+    /// statements however many ids), the why's titles once per wider place;
+    /// and when nothing can reach (no approved client — VX-272 — or no live
+    /// grant with the open book off) not one note is read.
+    public static func mcpNoteReaches(_ db: Database, noteIDs: [String]) throws -> [String: [MCPPlaceReach]] {
+        guard !noteIDs.isEmpty, let standing = try mcpReachStandings(db) else { return [:] }
+        let facts = try mcpNoteFacts(db, noteIDs: noteIDs)
+        var titles: [String: String?] = [:]
+        var out: [String: [MCPPlaceReach]] = [:]
+        for (id, note) in facts {
+            let found = try reaches(db, standing, place: .note(note), titles: &titles)
+            if !found.isEmpty { out[id] = found }
+        }
+        return out
+    }
+
+    /// **Who reaches each WING, how far, and why** (VX-268 — the switcher's
+    /// rows, ⌘L's sheet and the ▾ menu: "a shared wing never shows as shared
+    /// there"). Home (`''`, virtual) and every live wing, each read off
+    /// `MCPGrantRule.decideWing` — the rule `list_notes`, `create_note` and
+    /// `create_book` consult for a wing — exactly as `MCPGrantRule.reach` is
+    /// read off `decide` (`MCPReachPlace.wing`): a live wing grant on THAT
+    /// wing at its rung (its own place — no why), or the open book at read.
+    /// A note or book grant inside a wing never reaches the wing itself
+    /// (R-VX185-1's reading, one level up — P-VX281-U2-4). ∝ the wings × the
+    /// approved clients; reads no `container`, no `reading`.
+    public static func mcpWingReaches(_ db: Database) throws -> [String: [MCPPlaceReach]] {
+        guard let standing = try mcpReachStandings(db) else { return [:] }
+        let ids = [""] + (try String.fetchAll(
+            db, sql: "SELECT id FROM wing WHERE deleted_at IS NULL ORDER BY position, id"))
+        var titles: [String: String?] = [:]
+        var out: [String: [MCPPlaceReach]] = [:]
+        for id in ids {
+            let found = try reaches(db, standing, place: .wing(id), titles: &titles)
+            if !found.isEmpty { out[id] = found }
+        }
+        return out
     }
 
     // MARK: - ⌥⌘A's derivation

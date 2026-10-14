@@ -2,7 +2,7 @@
 //  MCPDoor+Share.swift
 //  Variorum (MAC ONLY)
 //
-//  13n-c U3 — THE SHARE ROAD's ACTS (VX-156 items 2/3; R-AIR-4). The door's
+//  13n-c U3 — THE SHARE ROAD's ACTS (VX-156 items 2/3; VX-270). The door's
 //  second file: everything a place-door, ⌥⌘A and a receipt's doors do — each
 //  through the session's runner (P2), each speaking on the WINDOW's status
 //  seam (a receipt that carries its Change… and Revoke › doors, or the
@@ -126,7 +126,7 @@ extension MCPDoor {
     /// once — never always by a key. No history ⇒ THE sheet with WHERE = this
     /// note (`openSheet` — the window's road); that client already reaching
     /// the note at the rung ⇒ the refusal, nothing written. The receipt
-    /// carries Change… (R-AIR-4) and Revoke ›.
+    /// carries Change… (VX-270) and Revoke ›.
     func shareThisNote(_ postID: String, openSheet: @escaping (MCPGrantOpening) -> Void) async {
         guard let session, let database, let runner else { return }
         let connectedNames = connected
@@ -165,7 +165,7 @@ extension MCPDoor {
 
     /// The receipt (app voice): what was shared, with whom, how far and for
     /// how long — carrying **Revoke ›** (the act's own grants, one act) and
-    /// **Change…** (R-AIR-4: the sheet pre-filled on exactly what landed;
+    /// **Change…** (VX-270: the sheet pre-filled on exactly what landed;
     /// confirming REPLACES it — T-U3-8).
     func speakShared(
         client: MCPClient, prefill: MCPGrantPrefill, place: String, rung: MCPGrantRule.Rung,

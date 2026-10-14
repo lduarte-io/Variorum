@@ -5,7 +5,7 @@
 //  both bars' note ▾, the Bookcase's book rows, the wing switcher's rows and
 //  its masthead word, the in-note indicator)
 //
-//  13n-c U4 — THE PENDING-ASK GLYPH (R-AIR-6, hers: "a pending-ask icon in the
+//  13n-c U4 — THE PENDING-ASK GLYPH (VX-271, hers: "a pending-ask icon in the
 //  same family"; VX-156 item 4 — the brief §5's face A, its "asks" chip
 //  superseded by this icon). `MCPSharedIcon.pendingSymbol` (the slot U3 left —
 //  since the Stage B fix pass's O-1 a different SILHOUETTE from the shared

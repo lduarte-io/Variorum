@@ -1,5 +1,7 @@
 # VX-184 — Run: MCP launch polish — kickoff + plan
 
+**STATUS: CLOSED 2026-10-13 — merged PR #157 (98c44900). Re-scoped at her word to U1–U5; U6 (the pane) and U7 (the AI's docs) moved to VX-246 (`notes/plans/mcp-pane-and-docs-kickoff.md`). The run record: `notes/plans/fixes/vx-184-mcp-launch-polish.md`.**
+
 **Her word, 2026-10-12 night:** every needed/known MCP improvement runs TONIGHT, together, before tomorrow's
 launch, and **the run runs all the way through** — her pre-run sitting (below) answered every question this plan
 would otherwise stop on. Born from the session that used the door most (her readme editorial session on the Air,
@@ -89,7 +91,7 @@ Her report: *"gatherings don't show as being shared with AI right now (the icon 
 you've shared the whole wing with AI. they definitely need to have the shared icon on them even if they're just a
 gathering … but if they're shared as part of the wing, that needs to be clear."* Cause: `Queries.mcpBookReaches`
 (`MCPShareQueries.swift` ~267) selects `kind = 'book'` only, yet a wing grant / the open book READS that wing's
-gatherings (R-AIR-12 — which stands: a gathering is never a grant's own scope; direct gathering sharing is VX-189,
+gatherings (VX-273 — which stands: a gathering is never a grant's own scope; direct gathering sharing is VX-189,
 post-launch). Build: the same icon whenever an approved client reaches the gathering through a wing grant or the
 open book (the one `decide`, never a parallel rule); the popover says why ("claude-code can read this through the
 wing “Home”"); Change…/Revoke act on that wing grant and say so; every reach surface treats gatherings the same.
@@ -139,7 +141,7 @@ the archived-book rule. One walk, dev store, held claim, both voices.
 
 - Preflight in full (CLAUDE.md's list) + `notes/plans/fixes/vx-180-discover-probe.md`,
   `notes/plans/fixes/vx-168-mcp-client-secret.md` (the handshake/secret records and U2's edit-act pattern) + the
-  13n-c plan (R-AIR-12, the reach queries, the chapter's U5/U6 records).
+  13n-c plan (VX-273, the reach queries, the chapter's U5/U6 records).
 - **Cold review: `fable-reviewer`** (the socket road is the secret's accept path; the permission core grows). One
   ladder over the whole run's diff, cap three. Pin-before-fix per member, red-on-old verified by revert.
 - Commits say `Part of VX-184` (and the member id), NO attribution trailers; push after every commit;

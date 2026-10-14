@@ -6,7 +6,7 @@ itself is hers, in the morning — this session only PREPARES it.**
 
 ## RATIFIED at the Air round (2026-10-11, her word in session — canon lands at the build's merge)
 
-- **R-AIR-1 — Journal-trait books may hold standing grants.** Her ruling, superseding
+- **VX-163 — Journal-trait books may hold standing grants.** Her ruling, superseding
   the blanket half of R-13n-4's "journals NEVER in a standing grant and never offered
   always": the never-always fence keys on (a) the **'daily'-marker Journal book** —
   constitutive, untouched, never offered Always, its entries per-ask only — and
@@ -18,7 +18,7 @@ itself is hers, in the morning — this session only PREPARES it.**
   (especially since it can be turned on and off for any book)." The exact classifier
   seam is the build's to trace (the U2 fold-classifier site); the ruled OUTCOME is
   as stated. Ticket: VX-163.
-- **R-AIR-2 — The per-item cross-wing NOTE move ships on the wire** (VX-160): her
+- **VX-160 — The per-item cross-wing NOTE move ships on the wire** (VX-160): her
   "I want per item move to be allowed via mcp" stands ratified, and it belongs to
   the NEXT build group. Shape questions (rung, dual-wing scope semantics, tag
   adoption) stay on the sitting agenda below.
@@ -29,35 +29,35 @@ itself is hers, in the morning — this session only PREPARES it.**
 ## ROUND 2 — her rulings at the Air sitting, 2026-10-11, over PR #147's mockups
 (This section IS the sitting record the 13n-c plan builds from; canon lands at the merge.)
 
-- **R-AIR-3 — the grant confirm's wording:** between the brief's W0 and W1 — her
+- **VX-269 — the grant confirm's wording:** between the brief's W0 and W1 — her
   sentence: *"Grant read in “dream journal” always, including to future entries."*
   The including-future-entries clause shows on EVERY book grant (membership is
   live — notes added later become visible), not only journal-trait books.
-- **R-AIR-4 — ⌥⌘A's confirmation carries a door:** the receipt lets you open a
+- **VX-270 — ⌥⌘A's confirmation carries a door:** the receipt lets you open a
   panel pre-filled on what was just shared, to change its details fast.
-- **R-AIR-5 — the wing switcher:** type to filter; click-without-typing CYCLES;
+- **VX-157 — the wing switcher:** type to filter; click-without-typing CYCLES;
   fast to click ("fast navigation is important"); the chord must be easier to
   type than ⌃⌘W — re-pick from the free rows of the sweep.
-- **R-AIR-6 — one consistent AI-shared ICON, not text:** the Bookcase's "shared
+- **VX-271 — one consistent AI-shared ICON, not text:** the Bookcase's "shared
   with AI" tag is too wordy and conflicts with tags; one icon everywhere, hover
   names it, click shows the permission; icon language matches the sidebar set
   (Bookcase/Library/Pool/Snippets); a pending-ask icon in the same family.
-- **R-AIR-7 — the in-note indicator (VX-164):** with MCP on, a note's upper right
+- **VX-164 — the in-note indicator (VX-164):** with MCP on, a note's upper right
   shows at a glance what an AI can reach — shared icon (click → the permission
   AND the WHY when reach comes from a wider grant: "readable through the Home
   wing grant"), lock when Private (click to change), pending-ask. "Never
   surprised, from within a note."
-- **R-AIR-8 — no "AI" in settings-class wording:** lean "grant MCP permissions"-
+- **VX-272 — no "AI" in settings-class wording:** lean "grant MCP permissions"-
   class copy (final words hers at the copy pass); every share/grant face renders
   ONLY when at least one approved client exists (extends 13n-b's Allow-AI-here
   unrendered-when-none, P-2); any zero-state face routes to Settings ▸ MCP —
   never a dead button.
-- **R-AIR-9 — VX-160 rungs:** R1 (edit at the source + write-new at the
+- **VX-160 — VX-160 rungs:** R1 (edit at the source + write-new at the
   destination wing) recommended AND both R1/R2 legal as options depending on
   what is selected/granted.
-- **R-AIR-10 — VX-159 presets:** the brief §10 shape accepted PROVISIONAL on her
+- **VX-159 — VX-159 presets:** the brief §10 shape accepted PROVISIONAL on her
   "I think it's fine" — presets on the existing tools, id + text addressing.
-- **R-AIR-11 — 13n-c scope:** everything discussed tonight builds EXCEPT what she
+- **VX-165 — 13n-c scope:** everything discussed tonight builds EXCEPT what she
   explicitly excluded: VX-161 stays filed-not-built. (A-4's per-setup secret:
   decision pending her read of the orchestrator's recommendation.)
 - **Also into VX-156's scope:** last-edited joins the picker context line's
@@ -73,19 +73,19 @@ itself is hers, in the morning — this session only PREPARES it.**
 
 ## ROUND 3 — her rulings closing the Air sitting, 2026-10-11
 
-- **R-AIR-12 — a wing grant covers the whole wing:** notes, books, AND gatherings
+- **VX-273 — a wing grant covers the whole wing:** notes, books, AND gatherings
   (readable as facts), minus anything fenced (daily-Journal entries, Private) —
   her words: "granting a wing grants access to everything … unless it's
   deliberately marked private." Gatherings do NOT become separate grant targets
   (she finds that confusing and unnecessary). If a wing grant doesn't surface
   gatherings today, that is a 13n-c build item, not a new concept.
-- **R-AIR-13 — the setup command grows a per-client menu:** Claude Code · Codex ·
+- **VX-274 — the setup command grows a per-client menu:** Claude Code · Codex ·
   a generic path/JSON shape (the door is a standard MCP stdio server at one
   binary path; the pane says so).
-- **R-AIR-14 — the per-setup secret BUILDS inside 13n-c** (her call, the dunk
+- **VX-168 — the per-setup secret BUILDS inside 13n-c** (her call, the dunk
   concern on record), scheduled so the launch never blocks on it; the honest
   pane sentence ships regardless.
-- **R-AIR-15 (RATIFIED — "i like Command L", round 4) — the wing chord is ⌘L:** press opens
+- **VX-157 (RATIFIED — "i like Command L", round 4) — the wing chord is ⌘L:** press opens
   the switcher, typing filters, holding ⌘ and tapping L cycles (the ⌘-tab
   idiom), release/return commits; the masthead switcher clicked without typing
   also cycles. Bare ⌘L verified free at every call site; the build re-verifies
@@ -190,7 +190,7 @@ here needs them). Work on branch `vx-156-grant-ux-design`; open a PR titled
    recommendation, and the why; chord candidates with sweep evidence; open
    questions. Repo-first, committed per piece with a LIVE STATUS block.
 3. **The sitting agenda at the top of the brief**, carrying (verbatim, hers):
-   - (a) ~~The journal-trait Always question~~ **RATIFIED as R-AIR-1 above** — the
+   - (a) ~~The journal-trait Always question~~ **RATIFIED as VX-163 above** — the
      agenda item becomes: the extra-worded confirm's wording (if any) for granting
      Always on a journal-trait book, presented as drawn options.
    - (b) VX-160's crossing-door shape — per-item NOTE move across wings via MCP
@@ -207,7 +207,7 @@ here needs them). Work on branch `vx-156-grant-ux-design`; open a PR titled
 4. **`notes/plans/phase-13n-c-mcp-launch-readiness-DRAFT.md`** — a DRAFT phase plan
    (marked DRAFT PENDING THE SITTING; the phase name is hers to keep or change) for
    the MCP launch-readiness round: the VX-156 round's build, VX-157, VX-158,
-   VX-160 (R-AIR-2), VX-163 (R-AIR-1), with VX-159, VX-161 and the A-4 per-client
+   VX-160, VX-163, with VX-159, VX-161 and the A-4 per-client
    token listed as CANDIDATES pending her morning nod. Sized in acceptance units
    per `notes/PhaseSizingGuidance.md`; honest about what fits a this-week launch
    and what should fall out; sequencing against 13s-a flagged as hers.

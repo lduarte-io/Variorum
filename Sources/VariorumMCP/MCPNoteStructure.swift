@@ -3,11 +3,13 @@ import GRDB
 import VariorumCore
 
 /// **`read_note` with `with_ids: true`** (13n-b U2 — AF-5): the note as
-/// structure — its blocks in order, each with its id, the SHOWN take's text
-/// (the read-time rule: the placement's chosen take while it is live, active
-/// and on this block, else the block default, else the fan's first), every
-/// live ACTIVE take (id, label, whether it is the one shown, text — archived
-/// takes are out of the fan, the export's rule) and its live comments. The ids
+/// structure — its blocks in order, each with its id, the id of the take it
+/// SHOWS (`shown_take_id` — the read-time rule: the placement's chosen take
+/// while it is live, active and on this block, else the block default, else
+/// the fan's first; VX-186 — the text itself rides once, on that take's
+/// entry), every live ACTIVE take (id, label, whether it is the one shown,
+/// text — archived takes are out of the fan, the export's rule) and its live
+/// comments. The ids
 /// are the REAL row ids: every later write revalidates them per call against
 /// current facts — and they are LIVE-WIRE ONLY (R-13nb-9, her doctrine: a
 /// merge or a divide mints new blocks, so an id goes stale under her
@@ -26,9 +28,9 @@ import VariorumCore
 ///   pointer reads unsectioned, the app's own rule);
 /// - **`lens_id`** (VX-168 U3 — VX-172, her mint 2026-10-11: "a missing human
 ///   action, not special agent tooling"): the note READ THROUGH one of its
-///   lenses — each block's `text` is the lens's take where it names one,
-///   else the shown take, and each block says which (`via: lens | chosen`);
-///   the takes' `chosen` stays the note's own fact;
+///   lenses — each block's `shown_take_id` is the lens's take where it names
+///   one, else the shown take, and each block says which (`via: lens |
+///   chosen`); the takes' `chosen` stays the note's own fact;
 /// - **`with_commits`** (R-13nb-7 — commits reached BY EXPLICIT ASK, never
 ///   ambient, never in the Level 0 text): each take carries its commits
 ///   newest first (`commit_id`, `kind`, `message`, `created_at`, `length`,
@@ -61,10 +63,10 @@ enum MCPNoteStructure {
         /// The tray's clock (the 30-day window is "now"-relative).
         var now = Date()
         /// VX-168 U3 (VX-172): read the note THROUGH this lens — each block's
-        /// `text` is the lens's take where the lens names one (a live ACTIVE
-        /// take of the block — her Lenses board's rule), else the shown take,
-        /// and each block says which: `via: "lens" | "chosen"`. The caller has
-        /// already checked the lens is a live lens of THIS note.
+        /// `shown_take_id` is the lens's take where the lens names one (a live
+        /// ACTIVE take of the block — her Lenses board's rule), else the shown
+        /// take, and each block says which: `via: "lens" | "chosen"`. The
+        /// caller has already checked the lens is a live lens of THIS note.
         var lensID: String?
     }
 
@@ -156,7 +158,6 @@ enum MCPNoteStructure {
             let fallback: String? = placement["default_variant_id"]
             let shown = [chosen, fallback].compactMap { $0 }.first { ids.contains($0) } ?? active.first?["id"]
             var entries: [[String: Any]] = []
-            var shownText = ""
             for take in fan {
                 let id: String = take["id"]
                 let text: String = take["working_text"]
@@ -168,25 +169,31 @@ enum MCPNoteStructure {
                     for (key, value) in parents[parent] ?? Self.beyondGrantParent { entry[key] = value }
                 }
                 entries.append(entry)
-                if id == shown { shownText = text }
             }
             // VX-172 — through a lens: the board's own rule
             // (`PaneTextAuthority.resolvedText`): the lens's pick where it is
             // a live ACTIVE take of this block, else the slot's shown take.
             // `chosen` on the takes stays the NOTE's fact — a lens is a view.
             var via: String?
+            var shownTakeID = shown
             if let lensPicks {
-                if let pick = lensPicks[blockID], let take = active.first(where: { ($0["id"] as String) == pick }) {
-                    shownText = take["working_text"]
+                if let pick = lensPicks[blockID], active.contains(where: { ($0["id"] as String) == pick }) {
+                    shownTakeID = pick
                     via = "lens"
                 } else {
                     via = "chosen"
                 }
             }
+            // VX-186 (VX-184 U3): the block NAMES the take it shows — the
+            // note's shown take, or the lens's where `via` says so — and the
+            // text crosses ONCE, on that take's own entry. (Until this unit
+            // the block also carried that text as its own `text`: every shown
+            // take's words went out twice.) A block with no live active take
+            // shows nothing and names nothing.
             var entry: [String: Any] = [
-                "block_id": blockID, "text": shownText, "takes": entries,
-                "comments": comments[blockID] ?? [],
+                "block_id": blockID, "takes": entries, "comments": comments[blockID] ?? [],
             ]
+            if let shownTakeID { entry["shown_take_id"] = shownTakeID }
             if let via { entry["via"] = via }
             if let name: String = placement["name"], !name.isEmpty { entry["name"] = name }
             if let lineage { entry["lineage"] = lineage[blockID] ?? [] }

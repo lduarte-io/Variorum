@@ -727,7 +727,8 @@ struct PurgeOpsTests {
             let post = try ops.createPost(title: "note", profile: .generic)
             let made = try ops.newBlock(in: post.id, text: "Prose.", at: .end)
             let comment = try ops.addComment(
-                toBlock: made.block.id, text: "the AI's note", undoLabel: "Claude's comment")
+                toBlock: made.block.id, text: "the AI's note", author: "claude",
+                undoLabel: "Claude's comment")
             #expect(try stack.undo(with: ops) == "Claude's comment")
             #expect(try db.deletedAt("block_comment", comment.id) != nil,
                     "the undo tombstones it onto the deleted fold")

@@ -118,7 +118,7 @@ struct TutorialMCPChapterTests {
 
     /// Seven lessons, the guide's appendix after the privacy chapter (P-13nc-U5-1),
     /// every lesson seeded under it. Three guards over the WHOLE chapter: the
-    /// gathering promise only where U6 (R-AIR-12) put it — lesson 3, with its
+    /// gathering promise only where U6 (VX-273) put it — lesson 3, with its
     /// truth pinned there — and her ruled "how to use it" (lesson 6's wing
     /// recipe, its truth pinned there); the pending mark by its ROLE, never its
     /// shape (O-1 may change the glyph); the app's vocabulary (commit, never
@@ -146,13 +146,13 @@ struct TutorialMCPChapterTests {
             for title in lessons {
                 let text = try await prose(db, guideID, title)
                 #expect(!text.isEmpty)
-                // 13n-c U6 (A JUSTIFIED EDIT, the ritual — U6 landed R-AIR-12):
+                // 13n-c U6 (A JUSTIFIED EDIT, the ritual — U6 landed VX-273):
                 // gatherings are taught in lesson 3, and named again only in
                 // her "how to use it" wing recipe (JOB 4 — the second justified
                 // edit; its truth is pinned in that lesson's test).
                 #expect(text.localizedCaseInsensitiveContains("gathering")
                             == (title == lessons[2] || title == lessons[5]),
-                        "\(title): gatherings under a wing grant are lesson 3's (R-AIR-12) and the wing recipe's")
+                        "\(title): gatherings under a wing grant are lesson 3's (VX-273) and the wing recipe's")
                 #expect(!text.localizedCaseInsensitiveContains("filled"),
                         "\(title): the pending mark is taught by its role, never its shape")
                 #expect(!text.localizedCaseInsensitiveContains("savepoint"))
@@ -272,14 +272,27 @@ struct TutorialMCPChapterTests {
             // falsified ("Variorum can't check that name") is true of the
             // build now — and pinned against the rule it describes.
             #expect(!text.contains("Variorum can't check that name"))
-            #expect(text.contains("a key that ties that name to it, so a second tool using the same name is turned away"))
+            // VX-198 (A JUSTIFIED EDIT, the ritual — R-VX184-5): "so a second
+            // tool using the same name is turned away" was falsified (the
+            // newest copied setup takes the name); the sentence says the rule
+            // as built, and is pinned against it here.
+            #expect(!text.contains("a second tool using the same name is turned away"))
+            #expect(text.contains("a key that ties that name to it. Running the setup again moves the name to the "
+                                  + "new key, and a tool still using an older key, or none, is turned away."))
             #expect(text.contains("where any program running as you can read it"), "K2's non-defeat, said")
             #expect(MCPPaneCopy.clientBoundary.contains("binds that name to it"), "L1 says the same")
+            #expect(MCPPaneCopy.clientBoundary.contains("running a newer setup moves the name to the new key"))
             #expect(MCPPaneCopy.clientBoundary.contains("any of them can read the key"))
             let bound = MCPSetupKeyRule.Client(id: "c", boundHash: MCPSetupKeyRule.hash("vmk1_first"))
-            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound,
-                                           presentedHash: MCPSetupKeyRule.hash("vmk1_second"), standing: .unclaimed)
-                    == .refuse(.notThisNamesKey), "a second tool under the name IS turned away")
+            let second = MCPSetupKeyRule.hash("vmk1_second")
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .unclaimed)
+                    == .rebind, "running the setup again moves the name to the new key")
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .replaced)
+                    == .refuse(.replaced), "a tool still using an older key is turned away")
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .unknown)
+                    == .refuse(.notThisNamesKey), "…as is one using a key never issued")
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: nil, standing: .unknown)
+                    == .refuse(.bare), "…or none")
 
             // THE TRUTH. "it can reach nothing yet": a connection request is
             // refused by the one rule, even with the open book on.
@@ -375,7 +388,7 @@ struct TutorialMCPChapterTests {
             #expect(!MCPGrantRule.Grant(
                 id: "g", rung: .read, scopeKind: .note, scopeID: loose, duration: .once,
                 consumedAt: "2026-07-01T00:00:00.000Z").isLive, "spent, it reaches nothing more")
-            // 13n-c U6 — the fourth card (R-AIR-12 + VX-160), prose then truth.
+            // 13n-c U6 — the fourth card (VX-273 + VX-160), prose then truth.
             #expect(text.contains("A wing grant also lets a client read that wing's gatherings"))
             #expect(text.contains("a gathering is never shared on its own"))
             #expect(text.contains("move a note to another wing only with edit where the note is and write new "
@@ -527,7 +540,7 @@ struct TutorialMCPChapterTests {
     @Test func lessonFiveSharingFromWhereYouAre() async throws {
         try await withGuideWorld { session, db, guideID in
             let text = try await prose(db, guideID, lessons[4])
-            #expect(text.contains("Once a client is approved"), "the doors render only then (R-AIR-8)")
+            #expect(text.contains("Once a client is approved"), "the doors render only then (VX-272)")
             #expect(text.contains("choose \(MCPShareCopy.shareVerb)"))
             #expect(CapabilityRegistry.capability(.mcpShareHere).verb == MCPShareCopy.shareVerb)
             #expect(text.contains(MCPShareCopy.shareNotes(3)), "the bulk door, by its own words")

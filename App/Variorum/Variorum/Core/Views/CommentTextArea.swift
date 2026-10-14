@@ -3,7 +3,10 @@
 //  Variorum (Mac)
 //
 //  VX-179 U3 — THE COMMENTS PANEL'S WRITING CONTROL (the F-U3-1 ruling,
-//  2026-10-12: option (a), the panel-private home).
+//  2026-10-12: option (a), the panel-private home — beside its one consumer,
+//  `CommentsPanel`; both moved to `Core/Views/` at VX-282's round-1 fix leg,
+//  R1-4, because the panel is consumed by two features — Editor and Takes —
+//  and CLAUDE.md's shared-home rule binds at the next touch).
 //
 //  ── WHY THIS REPLACED A `TextEditor` ────────────────────────────────────
 //  Her report: *"the comment pane's cursor to start typing in is misaligned"*
@@ -440,15 +443,20 @@ final class CommentTextAreaView: NSView {
     }
 
     /// A programmatic adopt (the panel clears a filed draft, restores a
-    /// parked one, reverts an edit) — the caret kept where it can be.
+    /// parked one, reverts an edit) — the caret kept where it can be. Text
+    /// arriving into an EMPTY area leaves the caret AFTER it (VX-257): a draft
+    /// restored into the composer is picked up where she stopped, exactly as
+    /// typing it would have left the caret.
     func adoptText(_ text: String, style: CommentTextStyle) {
         let selected = textView.selectedRange()
+        let arrivingIntoEmpty = textView.string.isEmpty
         textView.string = text
         let length = (text as NSString).length
         textView.textStorage?.setAttributes(
             style.typingAttributes, range: NSRange(location: 0, length: length))
         textView.typingAttributes = style.typingAttributes
-        textView.setSelectedRange(NSRange(location: min(selected.location, length), length: 0))
+        textView.setSelectedRange(NSRange(
+            location: arrivingIntoEmpty ? length : min(selected.location, length), length: 0))
         refreshPlaceholder()
         invalidateIntrinsicContentSize()
         needsLayout = true

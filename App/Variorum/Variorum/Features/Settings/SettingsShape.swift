@@ -111,7 +111,7 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         // true when the write rungs landed (U2) — a client may change what
         // it is granted now, up to edit.
         // 13n-c U4: + the asks waiting for an answer (arrival X).
-        // 13n-c Stage B R1 B7: the setup menu (U5, R-AIR-13) sets up Claude
+        // 13n-c Stage B R1 B7: the setup menu (U5, VX-274) sets up Claude
         // Code, Codex or any MCP client — the description says so. 13n-c O-4
         // (her ask — no provider hardwired outside the setup): it says "any MCP
         // client", naming none (PROVISIONAL, her copy pass).
@@ -301,11 +301,37 @@ nonisolated enum SettingsCatalog {
             // name finds it); "smart" is retired (§14).
             keywords: ["tag", "tags", "hierarchy", "rename", "promote", "gathering",
                        "label", "folder"]),
+        // VX-281 ladder R1-4 (R-VX184-6: the setup lives on the Connect tab):
+        // the Connect tab's own row — its title IS the section's words, so a
+        // search for the setup's words opens the pane ON Connect
+        // (`MCPPaneTab.holding`), never behind another tab.
+        // VX-281 ladder R2-3: listed AHEAD of the server switch's row, so a
+        // search tied between them (her client's name — "claude" — the
+        // switch's keyword and Connect's "claude code") goes to the setup
+        // (R1-4's rule; ties break by this order, `SettingsSearch.findings`).
+        SettingsRow(
+            id: "mcpConnect", pane: .mcp, title: MCPPaneCopy.connectSection,
+            blurb: "The setup for your MCP client, ready to copy: a command for a terminal, "
+                + "or settings to paste into the client.",
+            keywords: ["connect", "setup", "set up", "install", "command", "copy", "claude code",
+                       "codex", "json", "stdio"]),
+        // VX-281 ladder R2-3 — PROVISIONAL P-VX281-R2-1 (b): the Clients
+        // tab's own row (its title IS the tab's label), so a search for
+        // "client"/"clients" opens the pane ON Clients, where the client list
+        // lives (`MCPPaneTab.holding`) — its lead "Clients" outranks
+        // "Connect a client" for "client" (a prefix against a contains). No
+        // setup word among its keywords: every setup word still lands on
+        // Connect. Its blurb is new words (FOR VX-234).
+        SettingsRow(
+            id: "mcpClients", pane: .mcp, title: MCPPaneCopy.clientsSection,
+            blurb: "Every client you've approved or denied: whether it's connected now, how many "
+                + "grants it holds, and Change\u{2026} or Deny\u{2026} for each.",
+            keywords: ["approved", "denied", "deny"]),
         // 13n-b U1 (R-13n-5 — the pane speaks direct and technical): the
         // server toggle and the one open-book switch.
         SettingsRow(
             id: "mcpServer", pane: .mcp, title: MCPPaneCopy.enableTitle,
-            // 13n-c U5 (R-AIR-13): the setup menu names Codex and any MCP
+            // 13n-c U5 (VX-274): the setup menu names Codex and any MCP
             // client's JSON, so the search finds the pane by those words too.
             // 13n-c O-4 (her ask): the blurb names no provider ("any MCP
             // client", PROVISIONAL), and the search finds the pane by whatever
@@ -313,9 +339,11 @@ nonisolated enum SettingsCatalog {
             // vocabulary, never copy (her (e)).
             blurb: "A local server for any MCP client. Off by default; "
                 + "nothing is readable until you grant it. This Mac only.",
-            keywords: ["mcp", "ai", "claude", "claude code", "agent", "llm", "model context protocol",
-                       "server", "connect", "client", "share", "grant", "socket",
-                       "codex", "setup", "json", "stdio",
+            // VX-281 ladder R1-4: the setup menu's own words moved to
+            // `mcpConnect` (the setup lives on the Connect tab, so a search
+            // for them lands there); the provider names stay here (O-4).
+            keywords: ["mcp", "ai", "claude", "agent", "llm", "model context protocol",
+                       "server", "client", "share", "grant", "socket",
                        "anthropic", "openai", "chatgpt", "gpt", "cursor", "gemini", "copilot",
                        "windsurf", "ollama"]),
         // 13n-c U4 — WAITING (arrival X): where a client's ask waits besides
@@ -329,7 +357,7 @@ nonisolated enum SettingsCatalog {
                        "client", "permission"]),
         SettingsRow(
             id: "mcpOpenBook", pane: .mcp, title: MCPPaneCopy.openBookTitle,
-            // 13n-c U1 (R-AIR-1, J8): only THE daily Journal and anything
+            // 13n-c U1 (VX-163, J8): only THE daily Journal and anything
             // Private still ask — a journal-style book reads like any book.
             blurb: "The open book: every approved MCP client may read everything, always \u{2014} "
                 + "your daily Journal and anything Private still ask every time.",

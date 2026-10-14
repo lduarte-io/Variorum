@@ -579,6 +579,13 @@ struct CapabilityRegistryTests {
             // switcher menu, the indicator, Waiting) carry it in the lines
             // above.
             .union(WingSwitcherSheet.surfaceCapabilities)
+            // VX-268 (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line; VX-281 U2): the Library's Timeline rows render the ONE
+            // shared icon and its popover's doors. (The Library's List/Cards
+            // rows, the Pool's, the Book Panel's and ⌘L's rows declare it on
+            // the lines above — the union already held the acts through the
+            // Bookcase and the indicator.)
+            .union(TimelineView.surfaceCapabilities)
             // VX-221 (A JUSTIFIED EDIT, the same class — a new renderer is a
             // new line): Settings ▸ Tags renders the tag delete's visible row
             // door (Data Safety's comment above recorded the tag manager's
@@ -586,6 +593,13 @@ struct CapabilityRegistryTests {
             // create/rename stay open).
             // (VX-217's gathering note door rides `BookView`'s line above.)
             .union(TagManagerPane.surfaceCapabilities)
+            // VX-183 (the VX-282 run, U5 — A JUSTIFIED EDIT, the same class —
+            // a new renderer is a new line): the COMMENTS PANEL renders its six
+            // doors inline (Add · Save · Revert · Delete · Restore · Delete
+            // forever…), undeclared since 13u3 A2 (VX-179 U1's O-2). Its ONLY
+            // renderer — and the fold's purge door lives here by the evolved
+            // rule (a trash surface), never in the writing flow.
+            .union(CommentsPanel.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

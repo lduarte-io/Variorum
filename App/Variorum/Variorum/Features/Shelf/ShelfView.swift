@@ -44,7 +44,7 @@ struct ShelfView: View {
         .toggleStar, .editRule, .bindIntoBook, .makeBookFromGathering,
     ] + BookStateDoorSet.all + [.deleteBook]
         // 13n-c U3 (VX-156 item 2): "Share with AI…" — THE grant sheet
-        // pre-filled on this book (R-AIR-8: only with an approved client).
+        // pre-filled on this book (VX-272: only with an approved client).
         + [.mcpShareHere]
         // 13i-c U4: Duplicate Book… (§6 — shallow or with copies; an owned
         // book with copies only).
@@ -63,7 +63,7 @@ struct ShelfView: View {
     /// 13n-a (R-13n-8): the board's FILE DROP is the import door's second
     /// renderer — a folder dropped here becomes a book, a document a note.
     static let surfaceCapabilities: [CapabilityID] = [.importFiles]
-        // 13n-c U3 (R-AIR-6): the book rows' ONE shared icon and its popover.
+        // 13n-c U3 (VX-271): the book rows' ONE shared icon and its popover.
         + MCPSharedIcon.surfaceCapabilities
         // 13n-c U4: a book row's pending-ask glyph.
         + MCPAskGlyph.surfaceCapabilities
@@ -90,6 +90,10 @@ struct ShelfView: View {
     /// feature's model — it draws the view it is handed (the sidebar note
     /// box's road). nil (harness mounts, a retired offer at launch): no row.
     var offerLine: AnyView? = nil
+    /// VX-326 — the shell's opening ask for the quick entry's caret, handed
+    /// down by the shell that owns it (`RootView`); the bar claims it once.
+    /// nil (harness mounts): the bar's mount raise as it always was.
+    var openingFocus: QuickEntryOpeningFocus? = nil
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -304,7 +308,7 @@ struct ShelfView: View {
         .reportsMenuLifeEnds { model.orderMenuLifeEnded() }
         .task { await model.start() }
         .task { await model.refreshAggregates() }
-        // 13n-c U3 (R-AIR-6): the shared icons' held half.
+        // 13n-c U3 (VX-271): the shared icons' held half.
         .task { await model.watchSharing() }
         #if DEBUG
         .onAppear { BindDoorProbe.openShelfDoor = { openBindOffer($0) } }
@@ -684,16 +688,19 @@ struct ShelfView: View {
                             .font(tokens.body.weight(.semibold))
                             .foregroundStyle(tokens.ink)
                             .lineLimit(1)
-                        // 13n-c U3 — R-AIR-6: the ONE shared ICON replaces 13n-b's
+                        // 13n-c U3 — VX-271: the ONE shared ICON replaces 13n-b's
                         // "shared with AI" chip (P-13nb-U2-11's rule kept: an
                         // approved client reaches this book now, through any
                         // standing). Hover says who and how far; click shows
                         // the permission. Its own button — the row's open
-                        // never fires for it.
+                        // never fires for it. VX-185: a GATHERING's row wears
+                        // it too, under a wing grant on its wing or the open
+                        // book only (R-VX185-1) — the popover's why names the
+                        // wing, its Change…/Revoke act on that wing grant.
                         if let reach = model.aiReach[reading.id], !reach.isEmpty {
                             MCPSharedIcon(reaches: reach, tokens: tokens)
                         }
-                        // 13n-c U4 (R-AIR-6's family; arrival X): an ask
+                        // 13n-c U4 (VX-271's family; arrival X): an ask
                         // waiting on this book — hover names who and what,
                         // her press opens it. Its own button, like the icon.
                         MCPAskGlyph(.book(reading.id), tokens: tokens)
@@ -868,7 +875,7 @@ struct ShelfView: View {
             openSettings(reading.id)
         }
         // 13n-c U3 (VX-156 item 2; mockup §2): share THIS book — drawn only
-        // while an approved client exists (R-AIR-8) and only on a book a grant
+        // while an approved client exists (VX-272) and only on a book a grant
         // may name (never a gathering, the daily Journal or a Private book —
         // the op refuses those; P-2).
         if let road = mcpShareRoad, road.canShare, reading.kind == .book,
@@ -978,7 +985,7 @@ struct ShelfView: View {
     // MARK: - Quick entry (R3 — the shared bar; Library carries it too)
 
     private var entryBar: some View {
-        QuickEntryBar(session: session, onOpen: onOpen, autofocus: true)
+        QuickEntryBar(session: session, onOpen: onOpen, autofocus: true, openingFocus: openingFocus)
     }
 
     /// The ⌘K hint at the window's foot — and, at its trailing end, the

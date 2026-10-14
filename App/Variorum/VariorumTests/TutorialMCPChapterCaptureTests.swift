@@ -158,7 +158,7 @@ struct TutorialMCPChapterCaptureTests {
                         name: "u5-lesson-\(number + 1)-\(v).png", settle: 80)
                 }
 
-                // 2 — THE SETUP MENU (R-AIR-13), in the pane's grouped section:
+                // 2 — THE SETUP MENU (VX-274), in the pane's grouped section:
                 // each client chosen, then a copy's receipt under the button.
                 let door = MCPDoor(serverAllowed: false)
                 // VX-168: a copy mints its key in the library — the door is

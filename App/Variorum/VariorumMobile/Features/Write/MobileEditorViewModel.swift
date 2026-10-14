@@ -163,6 +163,12 @@ final class MobileEditorViewModel {
     /// DEBUG identity-audit failures — the obligation-1 oracle; asserts
     /// fire in debug, this counter lets tests observe without dying.
     @ObservationIgnored private(set) var identityAuditFailures = 0
+    /// **VX-296 — which line the markdown face last styled honouring the
+    /// caret** (the shared `MarkdownCaretRescue.Ledger`, the Mac's twin).
+    /// Noted at every character edit (`storageDidEdit`'s top) and settled
+    /// when UIKit reports the selection or the text change
+    /// (`settleMarkdownCaret`, from `MobileEditorGateDelegate`).
+    @ObservationIgnored private var markdownCaret = MarkdownCaretRescue.Ledger()
 
     // Idle-mint (the Mac's ratified clock — one clock since 18m U2, the
     // shared crystallizer's): a short quiet gap crystallizes the open tail —
@@ -1806,6 +1812,14 @@ final class MobileEditorViewModel {
     /// bypassed the gate (autocorrect, dictation, marked text) arrive here
     /// with no pending verdict and route by `fallbackVerdict`.
     func storageDidEdit(_ editedRange: NSRange, changeInLength delta: Int) {
+        // VX-296: EVERY character edit moves the markdown face's caret claim
+        // with the text (the suppressed programmatic writes included) and
+        // marks it for the next settle — the Mac's `storageDidEdit` line for
+        // line. Offsets only; nothing is written here.
+        markdownCaret.noteEdit(
+            replacing: NSRange(
+                location: editedRange.location, length: max(0, editedRange.length - delta)),
+            newLength: editedRange.length)
         guard !suppressEditProcessing else {
             // E1 — recorded so nothing that reaches storage is invisible to
             // the experiment (a pure append; the `return` is unchanged).
@@ -2045,6 +2059,30 @@ final class MobileEditorViewModel {
 
     private func syncTailText() {
         crystallizer.setText(openTailText)
+    }
+
+    /// **VX-296 — the markdown face honours her caret** (her ruling: fix
+    /// (a), caret-aware in the live editor only; the Mac's
+    /// `EditorViewModel.settleMarkdownCaret`, the same shared brain). The
+    /// keystroke road above stays caret-blind and byte-unchanged; this runs
+    /// when UIKit reports the selection or the text change
+    /// (`MobileEditorGateDelegate`) — after the edit's own restyle — so
+    /// `*hello |*` keeps its italic while her caret sits between the space
+    /// and the star, and the line re-reads caret-blind when she leaves. The
+    /// O(1) gate makes every other caret move free; a settle restyles at
+    /// most two LINES (P1). Attributes only: no character, no identity.
+    func settleMarkdownCaret() {
+        guard let storage else { return }
+        // VX-282 R1-7: a non-editable editor holds no caret of hers — the
+        // read tier's stood-down surface (another tab holds the pen), a gone
+        // note, the page under the open takes browser or comments sheet — so
+        // its selection is never honoured (the Mac pane's rule). A SEALED
+        // note stays editable here (the gate refuses its keystrokes and its
+        // caret is drawn), so its caret is honoured as she sees it.
+        let selection = textView.flatMap { $0.isEditable ? $0.selectedRange : nil }
+        MarkdownFace.settleCaret(
+            &markdownCaret, selection: selection, in: storage,
+            base: MobileEditorStyle.baseFont, palette: MobileEditorStyle.markdownPalette)
     }
 
     /// The one mutating door for programmatic slot/tail replacement.
@@ -2313,6 +2351,20 @@ final class MobileEditorGateDelegate: NSObject, UITextViewDelegate {
             in: range,
             replacement: text,
             isPaste: (textView as? MobileEditorTextView)?.isPasting == true)
+    }
+
+    /// VX-296: the caret has landed (a tap, a keystroke's caret move, a
+    /// programmatic placement) — the markdown face settles its honour of it.
+    func textViewDidChangeSelection(_ textView: UITextView) {
+        model?.settleMarkdownCaret()
+    }
+
+    /// VX-296: a typed edit has landed. Settled here too so the honour never
+    /// depends on UIKit's ordering of the two reports against the storage
+    /// edit's own (caret-blind) restyle — the second settle of a keystroke
+    /// finds nothing changed and writes nothing.
+    func textViewDidChange(_ textView: UITextView) {
+        model?.settleMarkdownCaret()
     }
 
     /// VM-10: a reveal's animation has ended — the scroll authority's

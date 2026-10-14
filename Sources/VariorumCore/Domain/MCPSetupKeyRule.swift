@@ -16,9 +16,14 @@ import Foundation
 /// The arms (each pinned by a state-transition test, `MCPSetupKeyTests`):
 /// - **No key (a bare shim, or any process that never ran a setup) → refuse**,
 ///   under ANY name, bound or not — her word: no grandfathering.
-/// - **A name bound to a key:** its own key → admit; any other key → refuse
-///   (two tools under one name told apart — a fresh key from a newer copy is
-///   still another key).
+/// - **A name bound to a key:** its own key → admit. **A FRESH key — minted
+///   by a Copy setup command and never yet presented — RE-BINDS the name**
+///   (VX-198, her R-VX184-5: "the newest copied setup wins" — re-running a
+///   client's setup is all it takes; approval and grants are untouched, since
+///   this rule decides identity only). The key it replaced then refuses with
+///   its own reason (`replaced`); a key bound to ANOTHER name, or one this
+///   library never minted, refuses as the impostor's (two tools under one
+///   name told apart: the one holding the newest setup is the name's).
 /// - **A name with no key bound** (approved before VX-168, released by Deny,
 ///   or a fresh name): a key minted by a copy and not yet presented CLAIMS it
 ///   — an UNKNOWN name becomes a connection request bound to the key (K2:
@@ -29,8 +34,9 @@ import Foundation
 ///   refuses.
 ///
 /// Every refusal answers the CLIENT with ONE sentence (no oracle telling a
-/// wrong key from a missing binding); `Refusal` exists for her Activity
-/// list, which speaks precisely.
+/// wrong key from a missing binding) — save `replaced`, whose own sentence
+/// only the replaced key's holder can hear (VX-198); `Refusal` exists for her
+/// Activity list, which speaks precisely.
 ///
 /// Recorded non-defeat (K2's own): the key lives in the client's settings,
 /// readable by any program running as her — it tells tools apart and turns
@@ -79,8 +85,12 @@ public enum MCPSetupKeyRule {
         case unclaimed
         /// Bound to the client with this id.
         case boundTo(clientID: String)
+        /// VX-198: this NAME was bound to it until a newer setup re-bound the
+        /// name — remembered by the rebind's own Activity row (P-VX198-1).
+        case replaced
         /// Never minted here, or no longer held (pushed past the cap, or
-        /// released by Deny or an adoption).
+        /// released by Deny or an adoption — or replaced longer ago than the
+        /// Activity log remembers).
         case unknown
     }
 
@@ -92,6 +102,9 @@ public enum MCPSetupKeyRule {
         /// A KNOWN name with no key bound claims this unclaimed key
         /// (R-VX168-1).
         case bind
+        /// VX-198 (R-VX184-5): a BOUND name presents a fresh, unclaimed key —
+        /// the newest copied setup — and takes it in place of the old one.
+        case rebind
         /// An UNKNOWN name claims this unclaimed key: a new connection
         /// request, bound to it (K2).
         case request
@@ -116,6 +129,11 @@ public enum MCPSetupKeyRule {
         case anotherNamesKey
         /// The name is bound to a different key (the impostor).
         case notThisNamesKey
+        /// VX-198: the key a newer setup replaced under this name — the
+        /// client hears its OWN sentence (`MCPHandshake.replacedRefusal`):
+        /// only the old key's holder can trigger it, and it tells that holder
+        /// only its own key's history, so it opens no oracle.
+        case replaced
     }
 
     /// **The one decision**, per connection.
@@ -129,11 +147,17 @@ public enum MCPSetupKeyRule {
         guard !name.isEmpty else { return .refuse(.unnamed) }
         guard let presentedHash else { return .refuse(.bare) }
         if let bound = client?.boundHash {
-            return bound == presentedHash ? .admit : .refuse(.notThisNamesKey)
+            if bound == presentedHash { return .admit }
+            switch standing {
+            case .unclaimed: return .rebind          // VX-198: the newest copied setup wins
+            case .replaced: return .refuse(.replaced)
+            case .boundTo, .unknown: return .refuse(.notThisNamesKey)
+            }
         }
         switch standing {
         case .unclaimed: return client == nil ? .request : .bind
         case .boundTo: return .refuse(.anotherNamesKey)
+        case .replaced: return .refuse(.replaced)
         case .unknown: return .refuse(.notIssued)
         }
     }
@@ -148,9 +172,18 @@ public enum MCPSetupKeyRule {
         case .notIssued: "connect_not_issued"
         case .anotherNamesKey: "connect_another_names_key"
         case .notThisNamesKey: "connect_not_this_names_key"
+        case .replaced: "connect_replaced_key"
         }
     }
 
     /// The act an existing name's FIRST key logs when it binds (allowed).
     public static let boundAct = "connect_bound"
+
+    /// VX-198: the act a REBIND logs (allowed). Its row is also the replaced
+    /// key's memory: `target_kind` = `replacedTargetKind`, `target_id` = the
+    /// REPLACED key's hash (a dead key's hash, never shown — the row carries
+    /// no title). PROVISIONAL P-VX198-1 (the memory's home).
+    public static let reboundAct = "connect_rebound"
+    /// The rebind row's target kind.
+    public static let replacedTargetKind = "setup_key"
 }

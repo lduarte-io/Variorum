@@ -120,7 +120,18 @@ final class MCPSession: @unchecked Sendable {
 
     /// Serve until the connection closes — after the handshake admits it.
     func run() async {
-        guard let opening = await MCPHandshake.opening(fd: fd) else { return }
+        let opening: MCPHandshake.Opening
+        switch await MCPHandshake.openingOutcome(fd: fd) {
+        case .opened(let opened): opening = opened
+        case .ended: return
+        case .overLimit:
+            // VX-184 U1 (the record's "Over-cap answers"): a line past the
+            // opening's cap is ANSWERED — one error on `id: null`, the same
+            // for every connection (nothing was decided) — then the host
+            // closes. No admission runs: no client, no key, nothing logged.
+            _ = MCPSocketTransport.writeAll(fd, MCPHandshake.overLimitResponse)
+            return
+        }
         let declared = MCPHandshake.initialize(opening.firstFrame)
         // Fail CLOSED: a store that cannot answer admits nobody — and says
         // THE STORE failed, never the key (ladder R1, F-1: the key advice
@@ -139,7 +150,12 @@ final class MCPSession: @unchecked Sendable {
             return
         }
         guard admission.decision.admits, let admitted = admission.client?.name else {
-            _ = MCPSocketTransport.writeAll(fd, MCPHandshake.refusalResponse(toFirstFrame: opening.firstFrame))
+            // VX-198: a replaced key hears its own sentence; every other
+            // refusal the one.
+            let reason: MCPSetupKeyRule.Refusal? =
+                if case .refuse(let reason) = admission.decision { reason } else { nil }
+            _ = MCPSocketTransport.writeAll(
+                fd, MCPHandshake.refusalResponse(toFirstFrame: opening.firstFrame, reason: reason))
             return
         }
         let transport = MCPSocketTransport(fd: fd, replay: [opening.firstFrame])

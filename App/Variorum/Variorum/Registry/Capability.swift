@@ -269,6 +269,14 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// `edit` and honestly grey in `read` (the enabled-into-nil class the
     /// registry exists to kill, from both sides).
     var readEditAttached = false
+    /// **Write's take panel is up** (VX-154, the VX-282 run). The panel is a
+    /// sheet over Write showing ONE block's takes; while it is up, the verbs
+    /// that cut, join or add blocks where she writes cannot act from it —
+    /// their results land on blocks the panel never shows — so they are grey
+    /// by this fact rather than live doors that fall through to Write's caret
+    /// beneath the sheet. Reported by the panel itself, the takes board's
+    /// attachment shape (a set of tokens on the router).
+    var writeTakesPanelAttached = false
     /// 13n-b U4 (AF-11 F-2): a connected AI client's write landed this
     /// session and has somewhere to show — "Show the AI's Last Change" acts.
     var aiLastChangeAvailable = false
@@ -603,6 +611,18 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case sealPost
     // Write-editor-scoped doors the menu renders
     case previousBlock, nextBlock, blockComments, callout, exportCaretBlock
+    // VX-183 (the VX-282 run, U5 — VX-179 U1's O-2): THE COMMENTS PANEL'S
+    // DOORS, declared at last. `blockComments` above is the door INTO the
+    // panel; these six are the acts the panel renders inline on its own rows
+    // (`.surface` — each acts on the comment it sits beside, never a routed
+    // context): the composer's Add; a live comment's Save and Revert (only
+    // while it holds unsaved changes) and Delete; a deleted comment's Restore
+    // and Delete forever… (the fold is a trash surface — the evolved purge
+    // rule). P-1's grow-as-touched letter: undeclared since 13u3 A2, they join
+    // as the panel's own work (VX-257) touches it. Which row renders which is
+    // the pure `CommentsPanelDoors` rule — gating as data.
+    case addComment, saveComment, revertComment, deleteComment
+    case restoreComment, deleteCommentForever
     // In-post find & replace (QoL batch 3 — L6). FIVE declarations rather
     // than one submenu-owning act: four of the five carry a KEY, and four
     // undeclared keys sitting in the one place keys are declared is exactly
@@ -961,23 +981,23 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// bars (`.bottomBar`), NOTE contexts only, and only when a client is
     /// there to offer (P-2).
     case mcpAllowHere
-    /// 13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; R-AIR-4/6/7/8).
-    /// Every one renders ONLY while an approved client exists (R-AIR-8 — the
+    /// 13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; VX-270 · VX-271 · VX-164 · VX-272).
+    /// Every one renders ONLY while an approved client exists (VX-272 — the
     /// window's `MCPShareRoad.canShare`; with none, no door, and the
     /// zero-state lives in Settings ▸ MCP). `mcpShareHere` — "Share with AI…"
     /// on a note row's and a book row's menu (`.contextMenu`, the row it is
     /// on); `mcpShareNotes` — the Library bulk bar's "Share N notes with AI…"
     /// (`.surface`, the ⌘-click pick); `mcpShareBook` — Book Settings' grant
     /// row's Share… (`.surface`); `mcpShareThisNote` — ⌥⌘A, the Edit menu
-    /// (`.menuBar`); `mcpShowSharing` — the ONE shared icon (R-AIR-6) on a
-    /// Bookcase row and in the note's indicator (R-AIR-7), whose click shows
+    /// (`.menuBar`); `mcpShowSharing` — the ONE shared icon (VX-271) on a
+    /// Bookcase row and in the note's indicator (VX-164), whose click shows
     /// the permission; `mcpChangeGrant` — that popover's Change…, which
     /// REPLACES the grant it names (T-U3-8; `mcpChangeClientAccess` stays the
     /// client row's additive Change…).
     case mcpShareHere, mcpShareNotes, mcpShareBook, mcpShareThisNote
     case mcpShowSharing, mcpChangeGrant
     /// 13n-c U4 — ASKS WAIT QUIETLY + THE KEYBOARD (VX-156 items 4/5, VX-157;
-    /// R-AIR-6/15). `mcpOpenAsk` — the pending-ask GLYPH's press (on the thing
+    /// VX-271 · VX-157). `mcpOpenAsk` — the pending-ask GLYPH's press (on the thing
     /// an ask names) and Settings ▸ MCP ▸ Waiting's Answer…, each opening THAT
     /// ask's sheet (`.surface` — it carries its ask; arrival X: an ask never
     /// opens itself). `mcpSettings` — ⌥⌘, "MCP Settings…" in the app menu
@@ -985,7 +1005,7 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// `switchWing` — ⌘L "Switch Wing…" (`.menuBar`, app-wide — the type-to-
     /// filter switcher with held-⌘ L cycling) and the masthead's wing word
     /// (`.surface` — a click without typing CYCLES to the next wing, her
-    /// R-AIR-5/15). The 13i-d note that switching "stays undeclared" held for
+    /// VX-157). The 13i-d note that switching "stays undeclared" held for
     /// the in-menu picker (a view choice); a CHORD and a cycling door are
     /// doors, and P-1 declares doors.
     case mcpOpenAsk, mcpSettings, switchWing

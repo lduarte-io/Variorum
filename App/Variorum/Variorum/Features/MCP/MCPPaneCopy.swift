@@ -29,16 +29,65 @@ nonisolated enum MCPPaneCopy {
     /// finding W-2: "no client can overwrite your text" stopped being true
     /// the moment edit could be granted, so the clause says when it can —
     /// and what guards it (R-13n-7's brackets). PROVISIONAL P-13nb-U3-17,
-    /// her words to re-voice at 13s-a. 13n-c U2 (R-AIR-8 — no "AI" in
+    /// her words to re-voice at 13s-a. 13n-c U2 (VX-272 — no "AI" in
     /// settings-class wording): "AI work" → "a client's work". 13n-c O-4 (her
     /// ask — no provider hardwired outside the setup): "clients like Claude
-    /// Code" → "MCP clients" (PROVISIONAL, her copy pass).
+    /// Code" → "MCP clients" (PROVISIONAL, her copy pass). VX-184 ladder
+    /// round 2 (doc-truth): "with a commit before and after every change" was
+    /// false once U4/U5 grew the edit rung — only a take's rewrite
+    /// (`edit_take`, `restore_commit`) is bracketed, and its "before" is
+    /// skipped when the take's latest commit already holds those words — so
+    /// the clause says the commits where they are true (VX-234's to re-voice).
     static let enableBlurb =
         "Runs a local MCP server while Variorum is open, so MCP clients can read "
         + "and write here through Variorum's own operations. Nothing is readable until you grant "
         + "it, every grant is revocable, and a client's work lands as takes beside your own \u{2014} a "
-        + "client changes your text only where you grant it edit, with a commit before and after "
-        + "every change."
+        + "client changes your text only where you grant it edit, and when it rewrites a take, the "
+        + "take's words before and after are kept as commits."
+
+    // MARK: - The one-line explainers (VX-281 U1 — R-VX184-6)
+    //
+    // Her ruling: "every explainer cut to one line with the full text behind
+    // an (i) popover". Each SUMMARY below is what the pane shows (one line —
+    // `ExplainerLine`, pinned to fit); its FULL text is the constant it
+    // summarizes, unchanged, in the (i)'s popover — so every truth pin on
+    // the full texts stands. Words AS BUILT; every one is on the run record's
+    // FOR VX-234 list (her Settings wording pass). Sentence case, no "AI"
+    // (VX-272), no provider (O-4).
+
+    /// The server's line (its whole text: `enableBlurb`).
+    static let enableSummary =
+        "A local MCP server while Variorum is open \u{2014} nothing is readable until you grant it."
+    /// L1's line (its whole text: `clientBoundary`): the binding AND what it
+    /// cannot promise, in L1's own words — never promising more (the VX-156
+    /// brief §12's condition on L1).
+    static let clientBoundarySummary =
+        "A setup key tells two clients apart \u{2014} not programs running as you."
+    /// The setup key's line (its whole text: `keyLine`), her R-VX184-5 words
+    /// kept ("running it again replaces the old setup").
+    static let keySummary =
+        "Each copy carries a fresh key, shown as dots; running it again replaces the old setup."
+    /// The door's one line (its whole text: `stdioLine`), above the path.
+    static let stdioSummary = "A standard MCP server over stdio \u{2014} one program, at this path:"
+
+    /// HOW MUCH's line in the grant sheet (its whole text: `rungDetail`, the
+    /// ask sheet's lead too). Read and write new already read as one line; the
+    /// suggest and edit sentences are cut. The edit line keeps exactly the
+    /// clause VX-184's ladder round 2 brought to the as-built reach — it names
+    /// nothing a note grant can't do (W-UX-14's rule) and never "every change".
+    static func rungSummary(_ rung: MCPGrantRule.Rung, scope: MCPGrantRule.ScopeKind? = nil) -> String {
+        switch rung {
+        case .read, .writeNew: rungDetail(rung, scope: scope)
+        case .suggest: "it can add new takes and comments beside your text \u{2014} it cannot touch a word you wrote"
+        case .edit: "it can also change, archive and delete what you shared, your own words included"
+        }
+    }
+
+    /// The Connect tab's label (R-VX184-6 — her four: Connect · Clients ·
+    /// Shared with AI · Activity; the other three are their sections' own
+    /// titles). Its section keeps "Connect a client" (`connectSection`), the
+    /// field guide's lesson 2 words.
+    static let connectTab = "Connect"
 
     /// The status line beside the toggle (mockup §2).
     static func status(_ state: MCPDoor.ServerState) -> String {
@@ -115,12 +164,16 @@ nonisolated enum MCPPaneCopy {
     /// TRUE-ER, never promising more (the brief's own condition):** the setup
     /// key now ties a name to its setup, and K2's recorded non-defeat — any
     /// program running as her can read the key — is said in the same breath.
-    /// PROVISIONAL P-VX168-U1-5, her copy pass.
+    /// PROVISIONAL P-VX168-U1-5, her copy pass. VX-198 (R-VX184-5 — the
+    /// newest copied setup wins): true of the new rule, no truer — running a
+    /// newer setup moves the name to its key, and a connection with any other
+    /// key (the one it replaced, one never issued, another client's) or none
+    /// is refused. PROVISIONAL P-VX198-2.
     static let clientBoundary =
         "A client names itself when it connects. Each setup copied here carries a key that binds "
-        + "that name to it, and a connection under the name without that key is refused. That tells "
-        + "two tools apart, not programs running as you: any of them can read the key in the "
-        + "client's settings."
+        + "that name to it \u{2014} running a newer setup moves the name to the new key \u{2014} and a "
+        + "connection under the name with any other key, or none, is refused. That tells two tools "
+        + "apart, not programs running as you: any of them can read the key in the client's settings."
 
     /// L1's room (VX-168): its four sentences run past the quiet captions'
     /// three lines at the pane's width.
@@ -131,19 +184,21 @@ nonisolated enum MCPPaneCopy {
     /// What the pane SHOWS where a copy's key goes: a key is minted only by
     /// the copy act and never displayed (the clipboard is its one road out).
     static let shownKey = "\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}"
-    /// The line under the shown setup. PROVISIONAL P-VX168-U1-5.
+    /// The line under the shown setup. PROVISIONAL P-VX168-U1-5. VX-198 (her
+    /// R-VX184-5 words, the kickoff's): "Running it again replaces the old
+    /// setup" — a re-run is the whole road; no Deny, no re-approval.
     static let keyLine =
         "Each copy carries a fresh setup key, shown here as dots, that ties a client's name to that "
-        + "setup. Run a setup again to give a client a new key."
+        + "setup. Running it again replaces the old setup."
     /// Copy setup command with no library open: the key it mints is kept in
     /// the library, so there is nowhere to keep one. PROVISIONAL.
     static let setupNeedsLibrary = "Open your library to copy a setup \u{2014} its key is kept there."
 
     // MARK: - Shared with AI
 
-    /// 13n-c U2 made it "Shared places" (R-AIR-8); HER SITTING (2026-10-11,
+    /// 13n-c U2 made it "Shared places" (VX-272); HER SITTING (2026-10-11,
     /// second round) REVERSED it in-pane — "I think Shared with AI is fine
-    /// inside the MCP pane actually. that's a place where it's fair": R-AIR-8
+    /// inside the MCP pane actually. that's a place where it's fair": VX-272
     /// stands app-wide, with her carve-out that inside the MCP pane itself
     /// "AI" is fair wording. Only this title changed; the client row's "N
     /// shared places" and the pane's other words stand.
@@ -224,7 +279,7 @@ nonisolated enum MCPPaneCopy {
 
     static let openBookSection = "Open book"
     static let openBookTitle = "Everything is readable, always"
-    /// 13n-c U1 (R-AIR-1, J8 — the VX-156 mockup §8's recommended words):
+    /// 13n-c U1 (VX-163, J8 — the VX-156 mockup §8's recommended words):
     /// only THE daily Journal and anything Private still ask.
     static let openBookDetail = "your daily Journal and anything Private still ask every time"
 
@@ -309,12 +364,57 @@ nonisolated enum MCPPaneCopy {
         case "save_commit": return "committing a take in \(at)"
         case "choose_take": return "choosing a take in \(at)"
         case "adopt_lens": return "making a lens of \(at) the note"
+        // VX-184 U3 — VX-173's batch doors (PROVISIONAL words, her copy pass).
+        case "add_takes": return "adding takes to \(at)"
+        case "add_comments": return "leaving comments in \(at)"
+        // VX-188 — a client deleting a comment (its own, at suggest).
+        case "delete_comment": return "deleting a comment in \(at)"
+        // VX-190 — un-tagging a note at edit.
+        case "remove_tag": return "removing a tag from \(at)"
+        // VX-187 — two notes linked as versions (the log names one side).
+        case "link_versions": return "linking \(at) and another note as versions"
+        // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
+        // P-U4-WORDS — her copy pass).
+        case "edit_comment": return "editing a comment in \(at)"
+        case "restore_comment": return "restoring a comment in \(at)"
+        case "delete_take": return "deleting a take in \(at)"
+        case "archive_take": return "archiving a take in \(at)"
+        case "unarchive_take": return "unarchiving a take in \(at)"
+        case "set_take_label": return "labeling a take in \(at)"
+        case "lock_take": return "locking a take in \(at)"
+        case "unlock_take": return "unlocking a take in \(at)"
+        case "restore_commit": return "restoring a commit in \(at)"
+        case "rename_commit": return "renaming a commit in \(at)"
+        case "rename_note": return "renaming \(at)"
+        case "delete_lens": return "deleting a lens of \(at)"
+        // VX-184 U5 — VX-196's edit parity across the library (PROVISIONAL
+        // words, P-U5-WORDS — her copy pass). The book acts log the BOOK; the
+        // chapter acts their chapter's book; the two-sided membership acts the
+        // side that refused (UXR1-1's rule); the note acts the note.
+        case "rename_book": return "renaming \(at)"
+        case "finish_book": return "finishing \(at)"
+        case "reopen_book": return "reopening \(at)"
+        case "archive_book": return "archiving \(at)"
+        case "unarchive_book": return "unarchiving \(at)"
+        case "delete_book": return "deleting \(at)"
+        case "remove_note_from_book":
+            return kind == "book" ? "taking a note out of \(at)" : "taking \(at) out of a book"
+        case "move_note_in_book":
+            return kind == "book" ? "moving a note in \(at)" : "moving \(at) in a book"
+        case "rename_chapter": return "renaming a chapter of \(at)"
+        case "delete_chapter": return "deleting a chapter of \(at)"
+        case "move_chapter": return "moving a chapter of \(at)"
+        case "delete_note": return "deleting \(at)"
+        case "archive_note": return "archiving \(at)"
+        case "unarchive_note": return "unarchiving \(at)"
         // VX-168 — a connection the setup key turned away, said precisely
         // here (the client hears one sentence for all of them).
         case "connect_bare": return "connecting without a setup key"
         case "connect_not_issued": return "connecting with a setup key this library doesn\u{2019}t hold"
         case "connect_another_names_key": return "connecting with another client\u{2019}s setup key"
         case "connect_not_this_names_key": return "connecting with a setup key other than its own"
+        // VX-198: the key a newer setup replaced (PROVISIONAL P-VX198-2).
+        case "connect_replaced_key": return "connecting with a setup a newer one replaced"
         case "connect_unnamed": return "connecting without a name"
         default: return "using " + spokenAct(act)
         }
@@ -376,8 +476,50 @@ nonisolated enum MCPPaneCopy {
         case "save_commit": return n == 1 ? "committed a take in \(at)" : "made \(n) commits in \(at)"
         case "choose_take": return n == 1 ? "chose a take in \(at)" : "chose \(n) takes in \(at)"
         case "adopt_lens": return "made a lens of \(at) the note" + times
+        // VX-184 U3 — VX-173's batch doors: one log row per CALL (the log is
+        // coarse — its row carries no item count; the receipt counts them).
+        case "add_takes": return "added takes to \(at)" + times
+        case "add_comments": return "left comments in \(at)" + times
+        case "delete_comment": return n == 1 ? "deleted a comment in \(at)" : "deleted \(n) comments in \(at)"
+        case "remove_tag": return "removed a tag from \(at)" + times
+        case "link_versions": return "linked \(at) and another note as versions" + times
+        // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
+        // P-U4-WORDS). A block's LAST take deleted is logged on the BLOCK
+        // (R-VX184-1 — the block went), so the line says so.
+        case "edit_comment": return n == 1 ? "edited a comment in \(at)" : "edited \(n) comments in \(at)"
+        case "restore_comment": return n == 1 ? "restored a comment in \(at)" : "restored \(n) comments in \(at)"
+        case "delete_take":
+            if kind == "block" { return "deleted a block in \(at) (its last take)" + times }
+            return n == 1 ? "deleted a take in \(at)" : "deleted \(n) takes in \(at)"
+        case "archive_take": return n == 1 ? "archived a take in \(at)" : "archived \(n) takes in \(at)"
+        case "unarchive_take": return n == 1 ? "unarchived a take in \(at)" : "unarchived \(n) takes in \(at)"
+        case "set_take_label": return n == 1 ? "labeled a take in \(at)" : "labeled \(n) takes in \(at)"
+        case "lock_take": return n == 1 ? "locked a take in \(at)" : "locked \(n) takes in \(at)"
+        case "unlock_take": return n == 1 ? "unlocked a take in \(at)" : "unlocked \(n) takes in \(at)"
+        case "restore_commit": return n == 1 ? "restored a commit in \(at)" : "restored \(n) commits in \(at)"
+        case "rename_commit": return n == 1 ? "renamed a commit in \(at)" : "renamed \(n) commits in \(at)"
+        case "rename_note": return "renamed a note to \(at)" + times
+        case "delete_lens": return n == 1 ? "deleted a lens of \(at)" : "deleted \(n) lenses of \(at)"
+        // VX-184 U5 — VX-196's edit parity across the library (PROVISIONAL
+        // words, P-U5-WORDS). A renamed book is logged under its NEW name.
+        case "rename_book": return "renamed a book to \(at)" + times
+        case "finish_book": return "finished \(at)" + times
+        case "reopen_book": return "reopened \(at)" + times
+        case "archive_book": return "archived \(at)" + times
+        case "unarchive_book": return "unarchived \(at)" + times
+        case "delete_book": return "deleted \(at)" + times
+        case "remove_note_from_book": return "took \(at) out of a book" + times
+        case "move_note_in_book": return n == 1 ? "moved a note in \(at)" : "moved \(n) notes in \(at)"
+        case "rename_chapter": return n == 1 ? "renamed a chapter of \(at)" : "renamed \(n) chapters of \(at)"
+        case "delete_chapter": return n == 1 ? "deleted a chapter of \(at)" : "deleted \(n) chapters of \(at)"
+        case "move_chapter": return n == 1 ? "moved a chapter of \(at)" : "moved \(n) chapters of \(at)"
+        case "delete_note": return "deleted \(at)" + times
+        case "archive_note": return "archived \(at)" + times
+        case "unarchive_note": return "unarchived \(at)" + times
         // VX-168: a known name's first setup key, bound as it connected.
         case "connect_bound": return "connected with a new setup, now bound to its name" + times
+        // VX-198 (R-VX184-5): the newest copied setup took the name.
+        case "connect_rebound": return "connected with a newer setup, which replaced its earlier one" + times
         default: return "used " + spokenAct(act) + times
         }
     }
@@ -394,8 +536,6 @@ nonisolated enum MCPPaneCopy {
         "Claude Code registers Variorum with one command. Copy it, run it in a terminal, then "
         + "start a new Claude Code session \u{2014} it adds Variorum for every folder (user scope), "
         + "replacing an earlier Variorum setup there."
-    static let copiedReceipt = "Copied. Run it in a terminal, then start a new Claude Code session."
-
     /// The name the client registers the server under: the Debug build's is
     /// its own, so a dev setup never replaces the real one in Claude Code's
     /// config (the A4 fence, extended to the client's registration).
@@ -426,12 +566,12 @@ nonisolated enum MCPPaneCopy {
         return "\"\(escaped)\""
     }
 
-    // MARK: - The setup menu (13n-c U5 — R-AIR-13: "Claude Code · Codex · a generic path/JSON shape")
+    // MARK: - The setup menu (13n-c U5 — VX-274: "Claude Code · Codex · a generic path/JSON shape")
 
-    /// **The one direct line** (R-AIR-13: "the pane says the door is a
+    /// **The one direct line** (VX-274: "the pane says the door is a
     /// standard MCP stdio server at one binary path"), above the menu, with
     /// the path itself under it. Direct and technical (R-13n-5); no "AI"
-    /// (R-AIR-8).
+    /// (VX-272).
     static let stdioLine =
         "Variorum's door is a standard MCP server that speaks over stdio: one program, at this path "
         + "inside the app."
@@ -490,9 +630,6 @@ nonisolated enum MCPPaneCopy {
         return escaped + "\""
     }
 
-    /// Copied receipts beside Claude Code's (`copiedReceipt`, unchanged).
-    static let copiedCodexReceipt = "Copied. Run it in a terminal, then start a new Codex session."
-    static let copiedJSONReceipt = "Copied. Paste it into your client's MCP settings, then restart the client."
     // O-4 SETUP COPY END
 
     // MARK: - The "all N" road (R-13n-10)
@@ -507,7 +644,7 @@ nonisolated enum MCPPaneCopy {
     /// chosen in WHO.
     static let sheetTitleChoosing = "Grant access"
     /// 13n-c U3: the one title rule — a client named or chosen, and Change…
-    /// (R-AIR-4 — the sheet replaces what it was opened on) says so.
+    /// (VX-270 — the sheet replaces what it was opened on) says so.
     static func sheetTitle(client: String?, changing: Bool) -> String {
         guard changing else { return client.map(sheetTitle) ?? sheetTitleChoosing }
         return client.map { "Change access \u{2014} \($0)" } ?? "Change access"
@@ -596,7 +733,7 @@ nonisolated enum MCPPaneCopy {
         name.map { "\u{201C}\($0)\u{201D} \u{2014} its notes, takes and tags" } ?? "choose a book"
     }
     static let thisWing = "A wing"
-    /// 13n-c U1 (R-AIR-1, J8 — mockup §8's words): a journal-style book is
+    /// 13n-c U1 (VX-163, J8 — mockup §8's words): a journal-style book is
     /// in the wing like any book; only the daily Journal and anything
     /// Private ask.
     static func wingDetail(_ name: String) -> String {
@@ -705,6 +842,18 @@ nonisolated enum MCPPaneCopy {
     /// (`create_book` is wing-only) and a note grant makes no new notes, so
     /// those claims are left out where they could never be true (the truth
     /// pin reads `MCPToolFacts`). PROVISIONAL words, her copy pass.
+    ///
+    /// VX-184 ladder round 2 (doc-truth) — EDIT: mockup §3's "it can also
+    /// edit takes — with a commit before and after every change" stopped
+    /// being true when U4/U5 grew the rung: it also deletes notes, books,
+    /// chapters, takes and blocks, archives and finishes books, rewrites her
+    /// comments and renames — and only a take's rewrite (`edit_take`,
+    /// `restore_commit`) keeps commits around the change (its "before"
+    /// skipped when the take's latest commit already holds those words, so
+    /// the words are still kept). The clause names no act a NOTE grant
+    /// can't do ("what you shared" holds at every scope — W-UX-14's rule).
+    /// It is also the ask sheet's lead for an edit ask (`MCPAskCopy.lead`).
+    /// As built, VX-234's to re-voice.
     static func rungDetail(_ rung: MCPGrantRule.Rung, scope: MCPGrantRule.ScopeKind? = nil) -> String {
         switch rung {
         case .read: "it can read and search what you shared"
@@ -718,7 +867,8 @@ nonisolated enum MCPPaneCopy {
             case .wing?, nil: "it can also make new notes, apply tags and build books"
             }
         case .edit:
-            "it can also edit takes \u{2014} with a commit before and after every change, so you "
+            "it can also change, archive and delete what you shared, your own words included \u{2014} "
+                + "when it rewrites a take, the take's words before and after are kept as commits, so you "
                 + "can always compare and come back"
         }
     }
@@ -731,7 +881,7 @@ nonisolated enum MCPPaneCopy {
         "\u{201C}Until it disconnects\u{201D} is offered while this client is connected."
 
     /// "Grant suggest in “the lightning thief” while connected" (mockup §3) —
-    /// and, since 13n-c's R-AIR-3, the clause that says membership is LIVE:
+    /// and, since 13n-c's VX-269, the clause that says membership is LIVE:
     /// her sentence, *"Grant read in “dream journal” always, including to
     /// future entries."*, on EVERY book grant ("notes added later become
     /// visible"); D-3 (PROVISIONAL P-13nc-3) gives a wing grant the parallel
@@ -753,7 +903,7 @@ nonisolated enum MCPPaneCopy {
     /// The confirm in its three parts, so the sheet can let ONLY the place
     /// compress (13n-c U1, the geometry oracle in the U1 record: a voiced
     /// button is one line and tail-truncates, which in Terminal's mono cut
-    /// R-AIR-3's clause off — the very words the ruling exists for). The verb,
+    /// VX-269's clause off — the very words the ruling exists for). The verb,
     /// rung, duration and clause never truncate; the place, shown whole in
     /// WHERE just above, takes what room is left.
     ///
@@ -789,7 +939,7 @@ nonisolated enum MCPPaneCopy {
         return "\(head)\u{2026}\(tail)"
     }
 
-    /// R-AIR-3's clause (book) and D-3's twin (wing), with its leading comma.
+    /// VX-269's clause (book) and D-3's twin (wing), with its leading comma.
     static func liveReachClause(_ scope: MCPGrantRule.ScopeKind) -> String {
         switch scope {
         case .book: ", including to future entries"
@@ -804,7 +954,7 @@ nonisolated enum MCPPaneCopy {
         switch error as? OperationError {
         case .mcpClientNotApproved?: "Approve the client before granting it access."
         case .mcpGrantScopeFenced?:
-            // 13n-c U1 (R-AIR-1, J8 — mockup §8's words).
+            // 13n-c U1 (VX-163, J8 — mockup §8's words).
             "Your daily Journal and Private notes are shared one ask at a time, never by a standing grant."
         case .mcpGrantScopeNotFound?: "That place no longer exists."
         case .mcpClientNotFound?: "That client no longer exists."
@@ -814,7 +964,7 @@ nonisolated enum MCPPaneCopy {
     }
 }
 
-/// **THE SETUP MENU's clients** (13n-c U5 — R-AIR-13, the sitting record round 3:
+/// **THE SETUP MENU's clients** (13n-c U5 — VX-274, the sitting record round 3:
 /// "Claude Code · Codex · a generic path/JSON shape"). ONE table: the menu's
 /// order, each client's label, its text (the command or the stanza), the
 /// sentence that says how to use it, and the receipt its copy speaks. The ONE
@@ -858,20 +1008,32 @@ nonisolated enum MCPSetupClient: String, CaseIterable, Identifiable, Sendable {
                 + "Codex session \u{2014} it adds Variorum for every folder (in ~/.codex/config.toml)."
         // VX-168: a client given only the path would run the shim with no
         // key — refused — so the sentence names the variable it also needs.
+        // VX-281 U1: the path now sits BELOW the code block (the setup comes
+        // first — R-VX184-6), so "the path above" became "the path below".
         case .anyClient:
             "Most MCP clients read their servers from an \u{201C}mcpServers\u{201D} list in JSON. Paste "
                 + "this into your client's MCP settings and restart it \u{2014} or give a client that "
-                + "asks for a command the path above, with the environment variable this sets."
+                + "asks for a command the path below, with the environment variable this sets."
         }
     }
 
-    var copiedReceipt: String {
+    /// VX-281 U1 (R-VX184-6): the sentence above cut to ONE line under the
+    /// code block — the whole sentence behind its (i). PROVISIONAL words
+    /// (VX-234), the receipts' own next steps.
+    var summary: String {
         switch self {
-        case .claudeCode: MCPPaneCopy.copiedReceipt
-        case .codex: MCPPaneCopy.copiedCodexReceipt
-        case .anyClient: MCPPaneCopy.copiedJSONReceipt
+        case .claudeCode: "Run it in a terminal, then start a new Claude Code session."
+        case .codex: "Run it in a terminal, then start a new Codex session."
+        case .anyClient: "Paste it into your client's MCP settings, then restart the client."
         }
     }
+
+    /// The copy's receipt: the client's one-line next step (`summary`) with
+    /// "Copied." in front — VX-281 ladder R1-8: one sentence, one constant
+    /// (they were two, word for word; the strings are byte-identical). That
+    /// a copy then says the next step on two adjacent lines is hers to word
+    /// (FOR VX-234).
+    var copiedReceipt: String { "Copied. " + summary }
     // O-4 SETUP COPY END
 }
 
@@ -909,7 +1071,7 @@ nonisolated enum MCPAskCopy {
         return "\(ask.clientName) asks to \(verb) here"
     }
 
-    /// **R-AIR-3 on the ask road** (13n-c U2 — the U1 ladder's F2: every
+    /// **VX-269 on the ask road** (13n-c U2 — the U1 ladder's F2: every
     /// book grant says its live reach, and an answer here MINTS one): her
     /// clause under a BOOK ask, D-3's twin under a WING ask, nothing for a
     /// note (one note). Every duration carries it (P-13nc-3) — so one line
@@ -932,7 +1094,7 @@ nonisolated enum MCPAskCopy {
     }
 
     /// The sentence under it: the fence's reason (mockup §4's journal line,
-    /// re-keyed by 13n-c's R-AIR-1 to THE daily Journal — VX-156 mockup §8's
+    /// re-keyed by 13n-c's VX-163 to THE daily Journal — VX-156 mockup §8's
     /// words; the Private twin), else what the rung would let it do.
     ///
     /// 13n-c Stage B R1 B2: a BOOK ask arrives only on an unfenced book (a
@@ -1019,6 +1181,14 @@ nonisolated enum MCPReceiptCopy {
             let short = "\(first.clientName) \(wingMovePhrase(first, titled: false))\(tail)"
             if short.count <= budget { return short }
         }
+        // VX-184 U5 (found by the faces pin at the stage window, red first): ONE
+        // owned book's delete keeps WHERE ITS NOTES WENT — her "Delete Book
+        // Only" receipt's point — dropping only the book's name (it is in the
+        // Trash; Open › has nowhere to go) before the count fallback.
+        if run.count == 1, first.act == .bookDelete, let whereNotesWent = first.detail {
+            let short = "\(first.clientName) deleted a book \u{2014} \(whereNotesWent)\(tail)"
+            if short.count <= budget { return short }
+        }
         // 13n-c U6, D-U6-1 (red-on-old): ONE act is "a change", never "1 changes".
         let made = run.count == 1 ? "made a change" : "made \(run.count) changes"
         return "\(first.clientName) \(made)\(tail)"
@@ -1067,7 +1237,11 @@ nonisolated enum MCPReceiptCopy {
         case .divide: return n == 1 ? "divided a block" : "divided \(n) blocks"
         case .merge: return n == 1 ? "merged two blocks" : "merged blocks \(n) times"
         case .move: return n == 1 ? "moved a block" : "moved \(n) blocks"
-        case .delete: return n == 1 ? "deleted a block" : "deleted \(n) blocks"
+        // VX-184 U4 (R-VX184-1): a block's LAST take deleted IS the block —
+        // `delete_block`'s act, its detail saying why.
+        case .delete:
+            return n == 1 ? receipts[0].detail.map { "deleted a block (\($0))" } ?? "deleted a block"
+                : "deleted \(n) blocks"
         case .blockName:
             return n == 1
                 ? (receipts[0].detail.map { "named a block \(quoted($0))" } ?? "cleared a block's name")
@@ -1098,6 +1272,85 @@ nonisolated enum MCPReceiptCopy {
         case .choice: return n == 1 ? "chose a take" : "chose \(n) takes"
         case .lensAdoption:
             return n == 1 ? "made the lens \(quoted(receipts[0].detail)) the note" : "adopted \(n) lenses"
+        // VX-184 U3 — VX-173's batch doors: a batch's receipt counts its
+        // ITEMS (`count`), and a run of batches sums them (PROVISIONAL words).
+        case .takes:
+            let total = receipts.reduce(0) { $0 + $1.count }
+            return total == 1 ? "added a take" : "added \(total) takes"
+        case .comments:
+            let total = receipts.reduce(0) { $0 + $1.count }
+            return total == 1 ? "left a comment" : "left \(total) comments"
+        // VX-188 — the client's own comment, deleted (PROVISIONAL words).
+        case .commentDelete: return n == 1 ? "deleted a comment" : "deleted \(n) comments"
+        // VX-190 — her un-tag, the client's (PROVISIONAL words).
+        case .untag: return n == 1 ? "removed the tag #\(receipts[0].detail ?? "")" : "removed \(n) tags"
+        // VX-187 — two notes made versions (PROVISIONAL words).
+        case .versionLink:
+            return n == 1
+                ? "linked \(quoted(receipts[0].targetTitle)) and \(quoted(receipts[0].detail)) as versions"
+                : "linked \(n) pairs of notes as versions"
+        // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
+        // P-U4-WORDS — her copy pass).
+        case .commentEdit: return n == 1 ? "edited a comment" : "edited \(n) comments"
+        case .commentRestore: return n == 1 ? "restored a comment" : "restored \(n) comments"
+        case .takeDelete: return n == 1 ? "deleted a take" : "deleted \(n) takes"
+        case .takeArchive: return n == 1 ? "archived a take" : "archived \(n) takes"
+        case .takeUnarchive: return n == 1 ? "unarchived a take" : "unarchived \(n) takes"
+        case .takeLabel:
+            return n == 1
+                ? (receipts[0].detail.map { "labeled a take \(quoted($0))" } ?? "cleared a take's label")
+                : "labeled \(n) takes"
+        case .takeLock: return n == 1 ? "locked a take" : "locked \(n) takes"
+        case .takeUnlock: return n == 1 ? "unlocked a take" : "unlocked \(n) takes"
+        case .commitRestore: return n == 1 ? "restored a commit" : "restored \(n) commits"
+        case .commitRename:
+            return n == 1
+                ? (receipts[0].detail.map { "renamed a commit \(quoted($0))" } ?? "cleared a commit's name")
+                : "renamed \(n) commits"
+        case .noteTitle:
+            return n == 1
+                ? (receipts[0].detail.map { "renamed the note \(quoted($0))" } ?? "cleared the note's title")
+                : "renamed \(n) notes"
+        case .lensDelete:
+            return n == 1 ? "deleted the lens \(quoted(receipts[0].detail))" : "deleted \(n) lenses"
+        // VX-184 U5 — VX-196's edit parity across the library (PROVISIONAL
+        // words, P-U5-WORDS — her copy pass). A book act's target is the BOOK
+        // (its name); a membership act's the NOTE, its detail the book; a
+        // chapter act's detail the chapter's name.
+        case .bookName:
+            return n == 1 ? "renamed the book \(quoted(receipts[0].detail))" : "renamed \(n) books"
+        case .bookFinish: return n == 1 ? "finished \(quoted(receipts[0].targetTitle))" : "finished \(n) books"
+        case .bookReopen: return n == 1 ? "reopened \(quoted(receipts[0].targetTitle))" : "reopened \(n) books"
+        case .bookArchive: return n == 1 ? "archived \(quoted(receipts[0].targetTitle))" : "archived \(n) books"
+        case .bookUnarchive:
+            return n == 1 ? "unarchived \(quoted(receipts[0].targetTitle))" : "unarchived \(n) books"
+        case .bookDelete:
+            guard n == 1 else { return "deleted \(n) books" }
+            // Her "Delete Book Only" on an OWNED book says where the notes went.
+            return "deleted the book \(quoted(receipts[0].targetTitle))"
+                + (receipts[0].detail.map { " \u{2014} \($0)" } ?? "")
+        case .bookRemove:
+            return n == 1
+                ? "took \(quoted(receipts[0].targetTitle)) out of \(quoted(receipts[0].detail))"
+                : "took \(n) notes out of books"
+        case .bookRelease:
+            return n == 1
+                ? "released \(quoted(receipts[0].targetTitle)) from \(quoted(receipts[0].detail))"
+                : "released \(n) notes from books"
+        case .bookOrder:
+            return n == 1 ? "moved a note in \(quoted(receipts[0].targetTitle))"
+                : "moved \(n) notes in \(quoted(receipts[0].targetTitle))"
+        case .chapterName:
+            return n == 1 ? "renamed a chapter \(quoted(receipts[0].detail))" : "renamed \(n) chapters"
+        case .chapterDelete:
+            return n == 1 ? "deleted the chapter \(quoted(receipts[0].detail))" : "deleted \(n) chapters"
+        case .chapterMove:
+            return n == 1 ? "moved the chapter \(quoted(receipts[0].detail))" : "moved \(n) chapters"
+        case .noteDelete:
+            return n == 1 ? "deleted \(quoted(receipts[0].targetTitle)) (it's in the Trash)" : "deleted \(n) notes"
+        case .noteArchive: return n == 1 ? "archived \(quoted(receipts[0].targetTitle))" : "archived \(n) notes"
+        case .noteUnarchive:
+            return n == 1 ? "unarchived \(quoted(receipts[0].targetTitle))" : "unarchived \(n) notes"
         }
     }
 

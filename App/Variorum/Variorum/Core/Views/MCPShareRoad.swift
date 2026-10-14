@@ -2,7 +2,7 @@
 //  MCPShareRoad.swift
 //  Variorum (MAC ONLY) — Core/Views (the shared home: every share face reads it)
 //
-//  13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; R-AIR-4/6/7/8). The
+//  13n-c U3 — GRANT FROM WHERE YOU ARE (VX-156 items 2/3; VX-270 · VX-271 · VX-164 · VX-272). The
 //  faces outside Settings ▸ MCP — the Library's bulk bar and note rows, every
 //  book row menu, Book Settings, the Bookcase's shared icon, the in-note
 //  indicator, ⌥⌘A's receipt — reach the MCP door through THIS road, built by
@@ -12,9 +12,9 @@
 //  (CLAUDE.md — state and ownership route through the parent; the
 //  `checkForUpdatesDoor` / `.environment(wings)` precedent).
 //
-//  R-AIR-8: every share face renders ONLY when at least one APPROVED client
+//  VX-272: every share face renders ONLY when at least one APPROVED client
 //  exists (`canShare`) — with none, no door; the zero-state lives in Settings ▸
-//  MCP. R-AIR-7: the in-note indicator also needs the server ON (`indicatorOn`).
+//  MCP. VX-164: the in-note indicator also needs the server ON (`indicatorOn`).
 //
 
 import SwiftUI
@@ -44,7 +44,7 @@ struct MCPGrantOpening: Identifiable, Equatable {
     /// WHERE, pre-filled; nil = the sheet's own start (`MCPGrantSheet.start`
     /// — nothing picked on the approval road, else the most recent book).
     var place: MCPGrantPrefill?
-    /// 13n-c U3 (R-AIR-4): the rung and duration pre-filled — Change… opens
+    /// 13n-c U3 (VX-270): the rung and duration pre-filled — Change… opens
     /// on exactly what was shared, to change it fast.
     var rung: MCPGrantRule.Rung? = nil
     var duration: MCPGrantRule.Duration? = nil
@@ -74,13 +74,15 @@ struct MCPGrantOpening: Identifiable, Equatable {
 /// with the same gates ARE the same road.
 @MainActor
 struct MCPShareRoad: Equatable {
-    /// At least one APPROVED client (R-AIR-8) — every share face's gate.
+    /// At least one APPROVED client (VX-272) — every share face's gate.
     let canShare: Bool
-    /// The server ON and at least one approved client (R-AIR-7) — the in-note
+    /// The server ON and at least one approved client (VX-164) — the in-note
     /// indicator's gate.
     let indicatorOn: Bool
-    /// Open THE grant sheet in this window, pre-filled.
-    let open: (MCPGrantOpening) -> Void
+    /// Open THE grant sheet in this window, pre-filled. (A `var` since VX-268:
+    /// a host already in a sheet — ⌘L's switcher — keeps it HERE, the
+    /// `answeringAsks` shape: `openingHere`.)
+    var open: (MCPGrantOpening) -> Void
     /// THE grant sheet as a view, for a host that must present it ITSELF — a
     /// sheet already up (Book Settings, T-U3-7). `done` dismisses it.
     let sheet: (MCPGrantOpening, @escaping () -> Void) -> AnyView
@@ -105,6 +107,16 @@ struct MCPShareRoad: Equatable {
         return road
     }
 
+    /// **VX-268 — this road with its grant sheet kept HERE**: a nested host
+    /// (⌘L's switcher — a sheet already up) presents THE grant sheet over
+    /// itself (`sheet`) when a row's popover asks Change…, instead of asking
+    /// the window to present one under it (T-U3-7's precedent, Book Settings).
+    func openingHere(_ open: @escaping (MCPGrantOpening) -> Void) -> MCPShareRoad {
+        var road = self
+        road.open = open
+        return road
+    }
+
     nonisolated static func == (lhs: MCPShareRoad, rhs: MCPShareRoad) -> Bool {
         lhs.canShare == rhs.canShare && lhs.indicatorOn == rhs.indicatorOn
     }
@@ -126,7 +138,7 @@ extension EnvironmentValues {
 /// **The share faces' words** (13n-c U3). The APP's voice where the face is
 /// app-wide (P-13n-1 — menus, the bulk bar, receipts: "Share with AI…", the
 /// mockup §2/§3 words); the settings-class faces (Book Settings' row, the
-/// permission popovers) carry no "AI" (R-AIR-8 — "Shared with", the client's
+/// permission popovers) carry no "AI" (VX-272 — "Shared with", the client's
 /// own name says who). Sentence case in every sentence; Title Case only where
 /// the menu bar and context menus already use it. PROVISIONAL P-13nc-U3-2 —
 /// her copy pass; every string here is 13s-a sweepable.
@@ -142,7 +154,7 @@ nonisolated enum MCPShareCopy {
     static let shareThisNote = "Share This Note with AI"
     static let shareThisNoteUnavailable =
         "Share This Note with AI acts on the note you have open \u{2014} open one first."
-    /// The zero-state's one sentence (R-AIR-8 — a share face renders only
+    /// The zero-state's one sentence (VX-272 — a share face renders only
     /// with an approved client; this is the registry's refusal copy).
     static let zeroState = "Sharing starts in Settings \u{25B8} MCP, once a client is approved."
     /// The icon's registry verb (its hover says who and how far).
@@ -164,7 +176,7 @@ nonisolated enum MCPShareCopy {
 
     // MARK: - The icon and its popover (settings-class)
 
-    /// The icon's hover: who reaches it and how far (R-AIR-6).
+    /// The icon's hover: who reaches it and how far (VX-271).
     static func iconHelp(_ reaches: [MCPPlaceReach]) -> String {
         "Shared with " + clients(reaches) + " \u{2014} click for details"
     }
@@ -174,7 +186,7 @@ nonisolated enum MCPShareCopy {
         "\(MCPRungWords.reach(reach.rung)) \u{00B7} \(MCPPaneCopy.durationWord(reach.duration))"
     }
     /// The WHY, when the reach comes from somewhere wider than the place
-    /// itself (R-AIR-7's "readable through the Home wing grant").
+    /// itself (VX-164's "readable through the Home wing grant").
     static func why(_ reach: MCPPlaceReach) -> String? {
         guard let grant = reach.grant else { return "through the open book" }
         guard let through = reach.throughTitle else { return nil }
@@ -202,7 +214,7 @@ nonisolated enum MCPShareCopy {
     }
     static let openBookNote = "The open book is switched in Settings \u{25B8} MCP."
 
-    // MARK: - The in-note indicator (R-AIR-7)
+    // MARK: - The in-note indicator (VX-164)
 
     static let lockHelp = "Private \u{2014} click to change"
     static func privateThrough(_ names: [String]) -> String { PrivateMarkCopy.throughBooks(names) }

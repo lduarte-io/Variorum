@@ -76,7 +76,32 @@ final class CommentsPanelModel {
         // the panel is presented, which are then discarded. The park
         // restore lives in `restoreParkedDraft()`, called from the panel's
         // `.task` — the installed lifecycle, once per real presentation.
+        #if DEBUG
+        // VX-229's pins ask which models of THEIR session are still alive
+        // (weakly held — a DEBUG-only record with no behaviour; a phantom's
+        // entry dies with the phantom).
+        Self.debugMade.removeAll { $0.model == nil }
+        Self.debugMade.append(DebugWeakModel(model: self))
+        #endif
     }
+
+    #if DEBUG
+    /// **VX-229 — every panel model this process made, held WEAKLY** (a pin's
+    /// road: a dismissed host's panel must let go of its model and its store
+    /// observation). Filtered by session, because suites run in one process
+    /// and harness ids repeat across them.
+    struct DebugWeakModel { weak var model: CommentsPanelModel? }
+    private static var debugMade: [DebugWeakModel] = []
+    static func debugAliveModels(of session: AppSession) -> [CommentsPanelModel] {
+        debugMade.removeAll { $0.model == nil }
+        return debugMade.compactMap(\.model).filter { $0.session === session }
+    }
+    #endif
+
+    /// Whether this model's store observation is running right now (VX-229 —
+    /// a dismissed panel must not keep re-reading its comments on every
+    /// write for the app's life).
+    @ObservationIgnored private(set) var isObserving = false
 
     /// **RUN A ladder round 2 (the MAJOR, binding 5's sweep) — the open of
     /// the SAME block's panel reads a REFUSED draft back**, amended twice
@@ -92,6 +117,9 @@ final class CommentsPanelModel {
     /// while parked is pruned by the first snapshot's `survivingDrafts` —
     /// over-preservation everywhere else, never loss.
     func restoreParkedDraft() {
+        // VX-257: this panel has OPENED — it has shown whatever the park held
+        // for its block, so its leaving may speak for that box.
+        opened = true
         guard let heldDraft = session.commentDraftPark.peek(forBlock: blockID) else { return }
         if let id = heldDraft.commentID {
             drafts[id] = heldDraft.text
@@ -99,9 +127,19 @@ final class CommentsPanelModel {
             addDraft = heldDraft.text
         }
         // The receipt register, deliberately — nothing is being refused;
-        // the line says why the box is not empty.
-        status = .receipt(CommentDraftPark.restoredNote)
+        // the line says why the box is not empty. Only for a REFUSED draft
+        // (VX-257): a comment she merely left half-typed was never refused,
+        // and "couldn't be saved" would say so falsely — her own words back
+        // in the box need no explaining.
+        if heldDraft.refused {
+            status = .receipt(CommentDraftPark.restoredNote)
+        }
     }
+
+    /// Set by `restoreParkedDraft()` — the open's first act. A model that
+    /// never opened (a phantom construction, or a close before the first
+    /// turn) has shown nothing of the park, so its leaving must not touch it.
+    @ObservationIgnored private var opened = false
 
     private(set) var comments: [BlockComment] = []
     private(set) var deleted: [BlockComment] = []
@@ -152,6 +190,8 @@ final class CommentsPanelModel {
 
     /// Live for the panel's lifetime — one block's notes, both lists.
     func start() async {
+        isObserving = true
+        defer { isObserving = false }
         do {
             for try await value in session.database.observe({ [blockID] db in
                 Snapshot(
@@ -300,6 +340,54 @@ final class CommentsPanelModel {
         }
     }
 
+    /// **THE PANEL'S ONE LEAVING BODY** — Close, `.onDisappear`, a popover
+    /// host's closing (VX-179 U3 FIX LEG 2's `commitDirtyEdits`, moved onto the
+    /// model so every road runs the same body and a pin can drive it). Every
+    /// comment with unsaved changes is committed; each commit captures this
+    /// model, so it lands even after the view is gone. A commit that would
+    /// write nothing writes nothing, so running this twice is harmless — and
+    /// the add draft's keeping (below) is the same each time.
+    func leave() {
+        keepAddDraftOnLeaving()
+        for id in dirtyCommentIDs {
+            Task { await self.commitEdit(id) }
+        }
+    }
+
+    /// **VX-257 — what she leaves in the composer is what comes back.** Her
+    /// ruling (2026-10-13, on P-VX179-R2-1, verbatim): *"yes, clicking away
+    /// should save your half typed comment on a draft."* QUESTIONS #215
+    /// option (a): the park holds it — never files it (#118(a) stands:
+    /// leaving still MINTS nothing) — and the next open of the same block's
+    /// panel puts it back (`restoreParkedDraft`, the park's peek).
+    ///
+    /// The box's state at the leaving IS the draft, so:
+    ///  · words in the box → parked for this block, verbatim (her trailing
+    ///    space and all), as a draft she LEFT — unless they are the very words
+    ///    the park holds as this block's REFUSED add draft, which stays the
+    ///    refusal (its "couldn't be saved" line keeps saying why);
+    ///  · an empty box (⎋'s clear, the first rung of the ladder whose second
+    ///    rung is the close; or emptied by hand) → a held ADD draft for this
+    ///    block is let go: she cleared it deliberately, and nothing comes
+    ///    back. A held EDIT draft is a different draft and stays.
+    /// Whitespace alone is nothing to keep (`CommentComposition`'s one trim
+    /// rule — the same test the Add door uses). ONE held draft, newest wins
+    /// (the park's #140(a) trade — PROVISIONAL P-U5-1).
+    private func keepAddDraftOnLeaving() {
+        guard opened else { return }
+        let park = session.commentDraftPark
+        switch CommentComposition.filing(addDraft) {
+        case .nothing:
+            park.clearIfHeld(blockID: blockID, commentID: nil)
+        case .file(let words):
+            if let held = park.held, held.refused, held.blockID == blockID,
+               held.commentID == nil, CommentComposition.filing(held.text) == .file(words) {
+                return  // the refused words, left as they were — still the refusal
+            }
+            park.park(blockID: blockID, text: addDraft, commentID: nil, refused: false)
+        }
+    }
+
     /// ⎋ in a comment: back to what is stored.
     func revertEdit(_ id: String) {
         drafts[id] = nil
@@ -373,6 +461,32 @@ final class CommentsPanelModel {
         }
     }
 
+    /// **THE PANEL'S DOORS, ONE DISPATCH** (VX-183). Every door the panel
+    /// renders acts through here, by its DECLARED id (`CommentsPanelDoors`'
+    /// ids, the registry's declarations) — so the doors the registry knows
+    /// and the acts the panel performs are one table, and a pin walks it.
+    /// `on` is the comment the door sits beside (nil for the composer's Add).
+    /// Delete forever only ASKS here (the Delete Now posture: the confirm is
+    /// the act, `deleteForever(_:)`).
+    func act(_ door: CapabilityID, on commentID: String? = nil) async {
+        switch (door, commentID) {
+        case (.addComment, _):
+            await fileAddDraft()
+        case (.saveComment, let id?):
+            await commitEdit(id)
+        case (.revertComment, let id?):
+            revertEdit(id)
+        case (.deleteComment, let id?):
+            await delete(id)
+        case (.restoreComment, let id?):
+            await restore(id)
+        case (.deleteCommentForever, let id?):
+            requestDeleteForever(id)
+        default:
+            assertionFailure("\(door) is not a comments panel door on \(commentID ?? "the composer")")
+        }
+    }
+
     /// Runs one operation and CLASSES what came back. Returns whether it
     /// landed, so the caller can speak its own receipt (a receipt says what
     /// happened, which only the door knows).
@@ -407,7 +521,7 @@ enum CommentsPanelCopy {
     /// VX-179 (R-VX179-3) — "Delete forever…" beside Restore in the deleted
     /// fold. Sentence case throughout (her no-shouty-caps rule); the ellipsis
     /// says the door asks before it acts.
-    static let deleteForeverVerb = "Delete forever…"
+    static var deleteForeverVerb: String { CapabilityRegistry.capability(.deleteCommentForever).verb }
     static let deleteForeverTitle = "Delete this comment forever?"
     /// The confirm's body names the two facts that make it permanent: the
     /// purge travels (the intent syncs — every device drops it), and no door
@@ -429,14 +543,16 @@ enum CommentsPanelCopy {
 
     // VX-179 U3 — every word the panel shows lives here (the pass's rule:
     // one place a pin reads and the walk sees; chrome goes through the
-    // voice's `chromeLabel` at the view).
+    // voice's `chromeLabel` at the view). VX-183: the six DOOR words are the
+    // registry's declared verbs, read from there — one source, so a door's
+    // word can only change where the door is declared.
     static let title = "Comments"
     static let close = "Close"
-    static let save = "Save"
-    static let revert = "Revert"
-    static let delete = "Delete"
-    static let restore = "Restore"
-    static let add = "Add"
+    static var save: String { CapabilityRegistry.capability(.saveComment).verb }
+    static var revert: String { CapabilityRegistry.capability(.revertComment).verb }
+    static var delete: String { CapabilityRegistry.capability(.deleteComment).verb }
+    static var restore: String { CapabilityRegistry.capability(.restoreComment).verb }
+    static var add: String { CapabilityRegistry.capability(.addComment).verb }
     static let cancel = "Cancel"
     /// The word before a deleted comment's date ("Deleted Oct 12, …"), and
     /// the fold's own noun.
@@ -492,6 +608,43 @@ enum CommentsPanelRefusalCopy {
             }
         }
         return OpsRefusalCopy.message(for: error)
+    }
+}
+
+// MARK: - The panel's doors (VX-183 — P-1, gating as data)
+
+/// **WHICH of the panel's declared doors a row renders** (VX-183 — VX-179
+/// U1's O-2). The six acts are declared once in the capability registry
+/// (`.surface` doors — each acts on the comment it sits beside); this is the
+/// per-row rule that used to be `if dirty { … }` inside the view, as a pure
+/// table a pin reads. Order is the row's reading order, left to right, and
+/// the emphasis is the voice's (`VoicedButtonStyle`): the door you probably
+/// want is primary, the rest quiet — present, never calling.
+nonisolated enum CommentsPanelDoors {
+    /// The composer's one door — enabled only when there is something to file
+    /// (`CommentComposition.filing`, the Add door's own test).
+    static let composer: [CapabilityID] = [.addComment]
+
+    /// A live comment's stamp line: Save and Revert only while it holds
+    /// unsaved changes, Delete always.
+    static func liveRow(dirty: Bool) -> [CapabilityID] {
+        dirty ? [.saveComment, .revertComment, .deleteComment] : [.deleteComment]
+    }
+
+    /// A deleted comment's row in the fold — a trash surface: Restore, the
+    /// door you probably want, then Delete forever… (it asks first).
+    static let deletedRow: [CapabilityID] = [.restoreComment, .deleteCommentForever]
+
+    /// Every door the panel can render — the registry walk's line.
+    static let all: [CapabilityID] = composer + liveRow(dirty: true) + deletedRow
+
+    enum Emphasis: Equatable { case primary, quiet }
+
+    static func emphasis(_ door: CapabilityID) -> Emphasis {
+        switch door {
+        case .addComment, .saveComment, .restoreComment: .primary
+        default: .quiet
+        }
     }
 }
 
@@ -734,6 +887,10 @@ struct CommentPanelKeyMonitor: NSViewRepresentable {
 /// the margin card in the gutter is a read face and a door. One live-text
 /// home for a comment, exactly as the page has one live editor.
 struct CommentsPanel: View {
+    /// The registry ids this panel renders INLINE (P-1's `.surface` door; the
+    /// walk unions every renderer) — VX-183, declared at last.
+    static let surfaceCapabilities: [CapabilityID] = CommentsPanelDoors.all
+
     let session: AppSession
     let blockID: String
     @State private var model: CommentsPanelModel
@@ -850,14 +1007,10 @@ struct CommentsPanel: View {
         .background(CommentPanelHostWatcher(onHostClosing: commitDirtyEdits))
     }
 
-    /// Commits every comment with unsaved changes — the panel's ONE leaving
-    /// body (Close, `.onDisappear`, a popover host's closing). The model is
-    /// captured, so a commit lands even after the view is gone.
+    /// The panel's ONE leaving body (Close, `.onDisappear`, a popover host's
+    /// closing) — the model's `leave()`.
     private func commitDirtyEdits() {
-        let model = model
-        for id in model.dirtyCommentIDs {
-            Task { await model.commitEdit(id) }
-        }
+        model.leave()
     }
 
     // MARK: Chrome
@@ -998,11 +1151,10 @@ struct CommentsPanel: View {
                     // click on the composer (the background's caret ask).
                     .allowsHitTesting(false)
                 Spacer(minLength: 8)
-                Button(tokens.chromeLabel(CommentsPanelCopy.add)) {
-                    Task { await model.fileAddDraft() }
+                ForEach(CommentsPanelDoors.composer, id: \.self) { door in
+                    doorButton(door, on: nil)
+                        .disabled(!model.isAddDraftFilable)
                 }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                .disabled(!model.isAddDraftFilable)
             }
         }
         .padding(.horizontal, Metrics.composerPadding)
@@ -1065,20 +1217,9 @@ struct CommentsPanel: View {
                     .lineLimit(1)
             }
             Spacer(minLength: 8)
-            if dirty {
-                Button(tokens.chromeLabel(CommentsPanelCopy.save)) {
-                    Task { await model.commitEdit(comment.id) }
-                }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                Button(tokens.chromeLabel(CommentsPanelCopy.revert)) {
-                    model.revertEdit(comment.id)
-                }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            ForEach(CommentsPanelDoors.liveRow(dirty: dirty), id: \.self) { door in
+                doorButton(door, on: comment.id)
             }
-            Button(tokens.chromeLabel(CommentsPanelCopy.delete)) {
-                Task { await model.delete(comment.id) }
-            }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
         }
         // The stamp starts where the row's writing starts — the area's own
         // first-line origin (its mark's column in Terminal, its text in Study).
@@ -1149,20 +1290,14 @@ struct CommentsPanel: View {
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)
                 Spacer(minLength: 8)
-                Button(tokens.chromeLabel(CommentsPanelCopy.restore)) {
-                    Task { await model.restore(comment.id) }
-                }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                 // VX-179 (R-VX179-3): the fold is a TRASH SURFACE — every row
                 // in it is already deleted — so the purge door may live here
                 // and nowhere in the writing. Quiet ink: present, never
                 // calling; the confirm is where the destructive register
-                // speaks.
-                Button(tokens.chromeLabel(CommentsPanelCopy.deleteForeverVerb)) {
-                    model.requestDeleteForever(comment.id)
+                // speaks. (The doors and their order: `CommentsPanelDoors`.)
+                ForEach(CommentsPanelDoors.deletedRow, id: \.self) { door in
+                    doorButton(door, on: comment.id)
                 }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                .help(CommentsPanelCopy.deleteForeverHelp)
             }
         }
         .padding(.leading, Metrics.firstLineOrigin.x)
@@ -1171,6 +1306,25 @@ struct CommentsPanel: View {
     }
 
     // MARK: Doors
+
+    /// **One declared door, rendered** (VX-183): its word is the registry's
+    /// verb, its emphasis the rule's, and it acts through the model's one
+    /// dispatch. Delete forever carries its tooltip (what it does, and that it
+    /// asks first).
+    @ViewBuilder
+    private func doorButton(_ door: CapabilityID, on commentID: String?) -> some View {
+        let button = Button(tokens.chromeLabel(CapabilityRegistry.capability(door).verb)) {
+            Task { await model.act(door, on: commentID) }
+        }
+        .buttonStyle(VoicedButtonStyle(
+            tokens: tokens,
+            role: CommentsPanelDoors.emphasis(door) == .primary ? .primary : .quiet))
+        if door == .deleteCommentForever {
+            button.help(CommentsPanelCopy.deleteForeverHelp)
+        } else {
+            button
+        }
+    }
 
     /// One writing area says the caret arrived or left (`CommentPanelFocus.
     /// after(report:inArea:current:)` — the rule, pinned).

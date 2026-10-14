@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Release runway</title>
+<style>
+:root {
+  --bg: #f6f4ef; --card: #fffdf9; --ink: #2a2925; --muted: #706c63; --line: #e2dccf; --wash: #efeadf;
+  --accent: #5a63b8;
+  --castle: #8a5a9e; --mcp: #2f7f73; --pane: #3f8f9f; --editor: #b45f3a; --lib: #4d6db0; --books: #96782c; --hers: #a8456a; --rel: #3b3a36;
+  --castle-w: #f1e8f5; --mcp-w: #e3f1ee; --pane-w: #e4f2f5; --editor-w: #f7e9e2; --lib-w: #e6ecf7; --books-w: #f4eedc; --hers-w: #f6e5ec; --rel-w: #ebe9e4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111110; --card: #1b1a18; --ink: #ece8df; --muted: #a8a397; --line: #34322d; --wash: #24221f;
+    --accent: #9aa2f0;
+    --castle: #c49ad6; --mcp: #6fc4b6; --pane: #7cc6d4; --editor: #e59a78; --lib: #8eaaea; --books: #d5b766; --hers: #e08aac; --rel: #d6d2c8;
+    --castle-w: #2a2130; --mcp-w: #1a2a27; --pane-w: #1a2a2e; --editor-w: #2e211b; --lib-w: #1c2333; --books-w: #2c2618; --hers-w: #2e1d25; --rel-w: #262522;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111110; --card: #1b1a18; --ink: #ece8df; --muted: #a8a397; --line: #34322d; --wash: #24221f;
+  --accent: #9aa2f0;
+  --castle: #c49ad6; --mcp: #6fc4b6; --pane: #7cc6d4; --editor: #e59a78; --lib: #8eaaea; --books: #d5b766; --hers: #e08aac; --rel: #d6d2c8;
+  --castle-w: #2a2130; --mcp-w: #1a2a27; --pane-w: #1a2a2e; --editor-w: #2e211b; --lib-w: #1c2333; --books-w: #2c2618; --hers-w: #2e1d25; --rel-w: #262522;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif; }
+main { max-width: 1120px; margin: 0 auto; padding: 36px 16px 72px; }
+h1 { font: 600 30px/1.2 "New York", "Iowan Old Style", Georgia, serif; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font: 600 19px/1.3 "New York", "Iowan Old Style", Georgia, serif; margin: 40px 0 12px; }
+h3 { font-size: 15px; margin: 0 0 4px; }
+p { margin: 0 0 10px; }
+.sub { color: var(--muted); margin: 0; }
+code { font: 12.5px ui-monospace, "SF Mono", Menlo, monospace; background: var(--wash); padding: 1px 5px; border-radius: 4px; }
+.callout { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--castle);
+  border-radius: 10px; padding: 16px 18px; margin: 24px 0 0; }
+.callout p:last-child { margin-bottom: 0; }
+.runs { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.run { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px 12px; border-top: 4px solid var(--c); }
+.run .num { font: 600 13px ui-monospace, "SF Mono", Menlo, monospace; color: var(--c); }
+.run h3 { font-size: 16px; margin: 2px 0 6px; }
+.run ul { margin: 6px 0 8px 18px; padding: 0; }
+.run li { margin: 2px 0; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--wash); color: var(--muted); white-space: nowrap; }
+.chip.go { background: var(--mcp-w); color: var(--mcp); }
+.chip.wait { background: var(--castle-w); color: var(--castle); }
+.chip.fable { background: var(--editor-w); color: var(--editor); }
+.lanes { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.grid { display: grid; grid-template-columns: 150px minmax(200px, 2fr) minmax(170px, 1.2fr) minmax(170px, 1.2fr); gap: 6px; min-width: 760px; }
+.hd { font-size: 12px; color: var(--muted); padding: 2px 6px 6px; border-bottom: 1px solid var(--line); }
+.lane { font-size: 13px; font-weight: 600; padding: 8px 6px; color: var(--c); align-self: center; }
+.bar { background: var(--w); border: 1px solid color-mix(in srgb, var(--c) 35%, transparent); color: var(--ink); border-radius: 8px; padding: 6px 8px; font-size: 12.5px; line-height: 1.4; }
+.bar b { color: var(--c); font-weight: 600; }
+.note { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+ol.deps { padding-left: 20px; } ol.deps li { margin: 6px 0; }
+.calls { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.box ul { margin: 6px 0 0 18px; padding: 0; } .box li { margin: 6px 0; }
+.rec { color: var(--muted); }
+table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); font-size: 13.5px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--wash); }
+tr:last-child td { border-bottom: 0; }
+.tbl { overflow-x: auto; border-radius: 12px; }
+footer { margin-top: 44px; color: var(--muted); font-size: 13px; }
+@media (max-width: 560px) { h1 { font-size: 25px; } .runs, .calls { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>Release runway</h1>
+  <p class="sub">Six numbers to track, what waits for what, and the calls that are yours · 13 October 2026</p>
+</header>
+
+<div class="callout">
+  <p><strong>Castle decides the date.</strong> Your gate: “I am gating public launch on castle being properly done no matter how long it takes.” The other five runs go in parallel and merge as they finish. They share one stage, and the coordinator queues it.</p>
+  <p>Every pre-launch ticket outside Castle now has a home in one of those five runs, or on your own track. This page shows order only. It doesn't predict how long anything takes.</p>
+</div>
+
+<h2>The six numbers</h2>
+<div class="runs">
+
+  <div class="run" style="--c: var(--castle)">
+    <div class="num">VX-266</div>
+    <h3>Castle & backups</h3>
+    <p>The custody and backup redesign. You're working it through with the Castle session now. Nothing builds until its merged design and plan file exist.</p>
+    <ul>
+      <li>Phases: <b>VX-305</b> headless core → <b>VX-306</b> open road + migration → <b>VX-307</b> the acts → <b>VX-308</b> accounts + key doors → <b>VX-309</b> copies + words.</li>
+      <li>Plus VX-212, designed with you separately.</li>
+    </ul>
+    <div class="meta"><span class="chip wait">your decisions first</span><span class="chip fable">Fable leads</span><span class="chip">the one custody slot</span></div>
+  </div>
+
+  <div class="run" style="--c: var(--mcp)">
+    <div class="num">VX-246</div>
+    <h3>MCP door fixes & AI docs</h3>
+    <ul>
+      <li>Security first: the setup-key hole (VX-258, the gate for any public build), the book-name oracle, comment authorship, the socket fd, the P1 breach.</li>
+      <li>The undo class: a redo after a quiet undo stays quiet (VX-276 + 277 + 119).</li>
+      <li>Your editor vs the wire, including the takes badge (VX-230).</li>
+      <li>The wire asks: insert blocks, take ids, lens by label, labels without "suggested", AI opens Compare, <b>duplicate_note</b>, and the agent conveniences.</li>
+      <li>The AI's docs come last.</li>
+    </ul>
+    <div class="meta"><span class="chip go">ready</span><span class="chip fable">Fable review</span><span class="chip">21 tickets</span></div>
+  </div>
+
+  <div class="run" style="--c: var(--pane)">
+    <div class="num">VX-281</div>
+    <h3>MCP settings pane & shared icon</h3>
+    <ul>
+      <li>The pane in tabs, with setup first and explainers behind (i).</li>
+      <li>The setup command in a proper code block with a copy icon.</li>
+      <li>The shared-with-AI icon on the Library's rows.</li>
+      <li>Split out so it can merge early, since your MCP-pane wording waits on it.</li>
+    </ul>
+    <div class="meta"><span class="chip go">ready</span><span class="chip">Opus</span><span class="chip">4 tickets</span></div>
+  </div>
+
+  <div class="run" style="--c: var(--editor)">
+    <div class="num">VX-282</div>
+    <h3>Editor & notes fixes</h3>
+    <ul>
+      <li>Your backspace bug (VX-290).</li>
+      <li>The italics flicker (VX-296): a space beside the * breaks the italics until the next letter.</li>
+      <li>The take panel's routed commands.</li>
+      <li>The quick-entry box: undo filing undone words, and the focus grab.</li>
+      <li>The comments leftovers.</li>
+    </ul>
+    <div class="meta"><span class="chip go">ready</span><span class="chip fable">Fable review</span><span class="chip">9 tickets</span></div>
+  </div>
+
+  <div class="run" style="--c: var(--lib)">
+    <div class="num">VX-283</div>
+    <h3>Sidebar & Library polish</h3>
+    <ul>
+      <li>Your Open list: it grows to the sync bar, and the scroll bar moves off the ✕.</li>
+      <li><b>⇧⌘W</b> closes the note and lands on the next one. You can also pick several notes to close at once, or Close All.</li>
+      <li>A drag with a line and a settle, which also fixes drops landing one row short.</li>
+      <li>Navigate-away and Library revivals.</li>
+      <li>The Library's controls row at the default window size, the exports, and the test reds.</li>
+    </ul>
+    <div class="meta"><span class="chip go">ready</span><span class="chip">Opus</span><span class="chip">16 tickets</span></div>
+  </div>
+
+  <div class="run" style="--c: var(--books)">
+    <div class="num">VX-284</div>
+    <h3>Books, gatherings & tags</h3>
+    <ul>
+      <li>The book's open doors land in Write at your block (VX-303).</li>
+      <li>Then an <b>“open in Write” door in the left box</b> in every book mode, plus takes badges and a Takes sheet in Index (VX-304).</li>
+      <li>Your gathering follow-ups, collecting sets the star, tag-delete undo, and disabled buttons that look disabled.</li>
+      <li>The bigger ▸ in the book view, plus small book fixes and two reds.</li>
+      <li>Last, with you: the menus clarity pass.</li>
+    </ul>
+    <div class="meta"><span class="chip go">ready</span><span class="chip">Opus</span><span class="chip">15 tickets</span></div>
+  </div>
+
+</div>
+
+<h2>The lanes</h2>
+<div class="lanes">
+  <div class="grid">
+    <div class="hd">Run</div><div class="hd">Its order, first to last</div><div class="hd">Waits for</div><div class="hd">Unblocks</div>
+
+    <div class="lane" style="--c: var(--castle)">VX-266 Castle</div>
+    <div class="bar" style="--c: var(--castle); --w: var(--castle-w)">Your decisions → merged design + plan → <b>VX-305</b> headless core → go/no-go → VX-306 → VX-307 → VX-308 → VX-309</div>
+    <div class="bar" style="--c: var(--castle); --w: var(--castle-w)">You and the Castle session</div>
+    <div class="bar" style="--c: var(--castle); --w: var(--castle-w)"><b>Launch.</b> Also your Protection and Data Safety wording.</div>
+
+    <div class="lane" style="--c: var(--mcp)">VX-246 MCP door</div>
+    <div class="bar" style="--c: var(--mcp); --w: var(--mcp-w)">Security → undo class → your editor vs the wire → wire asks → conveniences → <b>the AI's docs</b></div>
+    <div class="bar" style="--c: var(--mcp); --w: var(--mcp-w)">Nothing to start. Its docs unit waits for VX-281 to merge.</div>
+    <div class="bar" style="--c: var(--mcp); --w: var(--mcp-w)">The MCP guide page; any public build (VX-258)</div>
+
+    <div class="lane" style="--c: var(--pane)">VX-281 MCP pane</div>
+    <div class="bar" style="--c: var(--pane); --w: var(--pane-w)">Pane in tabs + code block → shared icon</div>
+    <div class="bar" style="--c: var(--pane); --w: var(--pane-w)">Nothing</div>
+    <div class="bar" style="--c: var(--hers); --w: var(--hers-w)"><b>Your</b> MCP-pane wording; VX-246's docs</div>
+
+    <div class="lane" style="--c: var(--editor)">VX-282 Editor</div>
+    <div class="bar" style="--c: var(--editor); --w: var(--editor-w)">Backspace → italics flicker → take panel → capture box → comments</div>
+    <div class="bar" style="--c: var(--editor); --w: var(--editor-w)">Nothing</div>
+    <div class="bar" style="--c: var(--editor); --w: var(--editor-w)">—</div>
+
+    <div class="lane" style="--c: var(--lib)">VX-283 Sidebar</div>
+    <div class="bar" style="--c: var(--lib); --w: var(--lib-w)">Open list + ⇧⌘W → the drag → navigate-away + revivals → Library polish → exports → reds</div>
+    <div class="bar" style="--c: var(--lib); --w: var(--lib-w)">Nothing (the light drag first, at your word)</div>
+    <div class="bar" style="--c: var(--lib); --w: var(--lib-w)">—</div>
+
+    <div class="lane" style="--c: var(--books)">VX-284 Books</div>
+    <div class="bar" style="--c: var(--books); --w: var(--books-w)">Gathering words + star + buttons → tag undo → <b>book doors (VX-303)</b> → <b>Index slice (VX-304)</b> → small fixes → VX-216 with you</div>
+    <div class="bar" style="--c: var(--books); --w: var(--books-w)">You, for the last unit only</div>
+    <div class="bar" style="--c: var(--books); --w: var(--books-w)">—</div>
+
+    <div class="lane" style="--c: var(--hers)">Yours</div>
+    <div class="bar" style="--c: var(--hers); --w: var(--hers-w)">Castle decisions · settings wording · tutorial & onboarding · Claude Desktop try · readme text · site pages · release notes</div>
+    <div class="bar" style="--c: var(--hers); --w: var(--hers-w)">MCP-pane wording waits for VX-281. The tutorial session goes either before VX-246's docs or after VX-246 merges.</div>
+    <div class="bar" style="--c: var(--rel); --w: var(--rel-w)"><b>The release</b>, at your word</div>
+  </div>
+  <p class="note">Order and dependencies only. How many runs go at once is the coordinator's call, because they share one stage.</p>
+</div>
+
+<h2>What waits for what</h2>
+<ol class="deps">
+  <li><strong>Castle:</strong> your decisions → one merged design and plan → the headless core → go/no-go → the rest. While it runs, nothing else may touch <code>Sync/</code>, custody or the Keychain.</li>
+  <li><strong>VX-281 merges → you reword the MCP pane.</strong> Every other pane can be reworded any time, except Protection and Data Safety, which wait for Castle's words.</li>
+  <li><strong>VX-246's docs run last,</strong> after its own door work and after VX-281 merges.</li>
+  <li><strong>The MCP guide page goes live</strong> before any build that links to it ships. VX-258 ships before any public build.</li>
+  <li><strong>Your tutorial session</strong> goes before VX-246 reaches its docs, or after it merges, because both edit the field guide.</li>
+  <li><strong>In VX-284,</strong> VX-303 comes before VX-304, and VX-216 comes last.</li>
+  <li><strong>Merges go one at a time:</strong> first ready, first merged, and the next rebases onto it.</li>
+</ol>
+
+<h2>Your calls</h2>
+<div class="calls">
+  <div class="box">
+    <h3>Answered tonight</h3>
+    <ul>
+      <li>Close Note is <strong>⇧⌘W</strong>, landing on the next note in the list (VX-287).</li>
+      <li>VX-303 is pre-launch and lands in <strong>Write</strong> at the block.</li>
+      <li>The book view's smallest version is pre-launch (VX-304). The rest comes after launch (VX-300).</li>
+      <li>Pre-launch: VX-175 yes, VX-249 yes, VX-296 yes. VX-138 no; it's saved.</li>
+      <li>My additions (VX-277, VX-119, VX-241) are approved.</li>
+      <li>Claude Desktop is your own try, outside the runs (VX-299).</li>
+      <li>Code blocks and the markdown mode come later.</li>
+      <li>Launch waits on Castle being properly done, however long that takes.</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>Answered later the same evening</h3>
+    <ul>
+      <li><strong>VX-288:</strong> the light drag first.</li>
+      <li><strong>VX-268:</strong> Pool and Book Panel rows in; block-level rows no; with the open book on, match the Bookcase.</li>
+      <li><strong>VX-298:</strong> any two notes; “related blocks only” off when they share no history; up to three; Open › opens Compare; <b>replace the columns</b>. Plus <b>duplicate_note</b> before launch (VX-311), since you were right that it's easy.</li>
+      <li><strong>VX-296:</strong> fix (a).</li>
+      <li><strong>QUESTIONS #218:</strong> everything kept as built. After launch: named pairs line rows up (VX-315), and an icon on AI-made commits (VX-316). The capacity count is fine. The wording goes to your Settings pass.</li>
+      <li><strong>Still open:</strong> nothing. VX-113 is in Castle's phase 3 (VX-307).</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Minted today</h2>
+<div class="tbl"><table>
+  <tr><th>Ticket</th><th>What</th><th>Where</th></tr>
+  <tr><td>VX-281 · 282 · 283 · 284</td><td>The four new run tickets</td><td>—</td></tr>
+  <tr><td>VX-285</td><td>Open list grows into the free space, stopping above the sync bar</td><td>VX-283</td></tr>
+  <tr><td>VX-286</td><td>The scroll bar draws over the ✕ (Starred's ★ too)</td><td>VX-283</td></tr>
+  <tr><td>VX-287</td><td>Close Note: ⇧⌘W, landing on the next note</td><td>VX-283</td></tr>
+  <tr><td>VX-288</td><td>Open list drag: a line, an end zone, a settle; drops land where they look</td><td>VX-283</td></tr>
+  <tr><td>VX-289</td><td>Select several rows and close them; Close All</td><td>VX-283</td></tr>
+  <tr><td>VX-290</td><td>Backspace in an empty block eats the blocks below</td><td>VX-282</td></tr>
+  <tr><td>VX-291</td><td>The book view's ▸ is too small, and a miss opens the note</td><td>VX-284</td></tr>
+  <tr><td>VX-292</td><td>Your tutorial & onboarding session</td><td>yours</td></tr>
+  <tr><td>VX-293</td><td>18e: markdown marks and a markdown mode (it had no ticket)</td><td>parked</td></tr>
+  <tr><td>VX-294</td><td>The privacy page, a v1 gate (the brief exists; the page doesn't)</td><td>yours</td></tr>
+  <tr><td>VX-295</td><td>Multi-line code blocks</td><td>after launch</td></tr>
+  <tr><td>VX-296</td><td>Italics flicker off while typing (a space beside the *)</td><td>VX-282</td></tr>
+  <tr><td>VX-297</td><td>Library Cards beachballs on a fast scroll</td><td>after launch</td></tr>
+  <tr><td>VX-298</td><td>The AI opens Compare with two (or more) notes</td><td>VX-246</td></tr>
+  <tr><td>VX-299</td><td>Claude Desktop: your own try</td><td>yours, outside the runs</td></tr>
+  <tr><td>VX-300</td><td>The book view made equal to the note's editor</td><td>after launch</td></tr>
+  <tr><td>VX-303</td><td>The book's open doors drop your block (a bug against the deep-link rule)</td><td>VX-284</td></tr>
+  <tr><td>VX-304</td><td>An “open in Write” door in the left box (every book mode); takes badges and a Takes sheet in Index</td><td>VX-284</td></tr>
+  <tr><td>VX-311</td><td>duplicate_note: your Duplicate as Version on the wire</td><td>VX-246</td></tr>
+  <tr><td>VX-312</td><td>From a book, ⌘1–⌘6 open the caret's note in that mode</td><td>after launch</td></tr>
+  <tr><td>VX-315</td><td>Named block pairs line Compare rows up</td><td>after launch</td></tr>
+  <tr><td>VX-316</td><td>An icon on AI-made commits (no name in them)</td><td>after launch</td></tr>
+</table></div>
+
+<h2>After launch</h2>
+<div class="box">
+  <ul>
+    <li>The rest of the book view, made equal to the note's editor (VX-300).</li>
+    <li>Code blocks (VX-295) and the markdown mode (VX-293).</li>
+    <li>The Cards beachball (VX-297), with the older scroll ticket (VX-17).</li>
+    <li>Your stack style (VX-138) and the live-pane root fix (VX-248).</li>
+    <li>⌘1–⌘6 from your caret inside a book (VX-312), named pairs in Compare (VX-315), and the AI-commit icon (VX-316).</li>
+    <li>Restoring a deleted tag (VX-238), the 15-star limit (VX-251), the Settings titlebar (VX-236), lenses on import (VX-262), and the colour picker (VX-219, yours).</li>
+  </ul>
+</div>
+
+<footer>
+  <p>The repo copy, which every run's kickoff reads, is <code>notes/plans/vx-33-release-runway.md</code>. Linear holds status; this page holds the order.</p>
+</footer>
+
+</main>
+</body>
+</html>

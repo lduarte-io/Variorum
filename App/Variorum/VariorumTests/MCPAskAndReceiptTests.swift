@@ -117,7 +117,7 @@ struct MCPAskAndReceiptTests {
                 == "claude-code asks to read “morning pages — oct 9”")
         #expect(MCPAskCopy.title(ask(rung: .writeNew, kind: .wing, title: "Home"))
                 == "claude-code asks to write new in the Home wing")
-        // 13n-c U1 (justified edit, the ritual — R-AIR-1, J8): the fence keys
+        // 13n-c U1 (justified edit, the ritual — VX-163, J8): the fence keys
         // on THE daily Journal now; the VX-156 mockup §8's words verbatim.
         #expect(MCPAskCopy.lead(ask(fence: .journal))
                 == "A daily Journal entry. Your daily Journal is only ever shared one ask at a time.",
@@ -170,7 +170,7 @@ struct MCPAskAndReceiptTests {
 
     // MARK: - The grant sheet's rungs (mockup §3)
 
-    /// 13n-c U1 (R-AIR-1, J8): the six shipped sentences R-AIR-1 made false,
+    /// 13n-c U1 (VX-163, J8): the six shipped sentences VX-163 made false,
     /// each in the VX-156 mockup §8's recommended words — only THE daily
     /// Journal and anything Private still ask; no sentence says "journals".
     @Test func theFenceSentencesNameTheDailyJournalNotEveryJournal() {
@@ -191,7 +191,7 @@ struct MCPAskAndReceiptTests {
         }
     }
 
-    /// 13n-c U1 — R-AIR-3, her sentence verbatim (her Air sitting, round 2):
+    /// 13n-c U1 — VX-269, her sentence verbatim (her Air sitting, round 2):
     /// *"Grant read in “dream journal” always, including to future entries."*
     /// — on EVERY book grant, every duration (membership is live); D-3's
     /// parallel clause on a wing grant; a note grant names one note, no clause.
@@ -277,13 +277,32 @@ struct MCPAskAndReceiptTests {
         // U3 (justified edit, the ritual): the server serves edit now, so the
         // sheet offers it (U2's pin: "never offered before it serves").
         #expect(MCPPaneCopy.offeredRungs == [.read, .suggest, .writeNew, .edit])
+        // VX-184 ladder round 2 (A JUSTIFIED EDIT, the ritual — doc-truth):
+        // mockup §3's edit sentence ("it can also edit takes — with a commit
+        // before and after every change, so you can always compare and come
+        // back") stopped being true when U4/U5 grew the rung — it deletes,
+        // archives, finishes and renames as well, none of it bracketed; only a
+        // take's rewrite (`edit_take`, `restore_commit`) keeps its words before
+        // and after as commits. The as-built clause (VX-234 re-voices it); it
+        // names nothing a note grant can't do (W-UX-14's rule), so it reads
+        // true at every scope, and no face promises "every change".
         #expect(MCPPaneCopy.rungDetail(.edit)
-                == "it can also edit takes — with a commit before and after every change, so you can always compare and come back",
-                "mockup §3's edit sentence")
+                == "it can also change, archive and delete what you shared, your own words included — when it "
+                + "rewrites a take, the take's words before and after are kept as commits, so you can always "
+                + "compare and come back",
+                "the edit rung as built")
+        for scope in [MCPGrantRule.ScopeKind.note, .book, .wing] {
+            let line = MCPPaneCopy.rungDetail(.edit, scope: scope)
+            #expect(!line.contains("book") && !line.contains("chapter"),
+                    "the book-level edit acts never act under a note grant (MCPToolFacts): \(line)")
+        }
+        #expect(MCPToolFacts.scopes(of: "delete_book") == [.book, .wing], "why the clause names no book")
+        #expect(!MCPPaneCopy.rungDetail(.edit).contains("every change"))
+        #expect(!MCPPaneCopy.enableBlurb.contains("every change"))
         #expect(MCPPaneCopy.rungDetail(.suggest)
                 == "it can add new takes and comments beside your text, and save a lens of its takes — it cannot touch a word you wrote")
         #expect(MCPPaneCopy.rungDetail(.writeNew) == "it can also make new notes, apply tags and build books")
-        // 13n-c U1 (justified edit, the ritual — R-AIR-3): a BOOK grant's
+        // 13n-c U1 (justified edit, the ritual — VX-269): a BOOK grant's
         // confirm carries her clause; the `scope` is a required argument now.
         #expect(MCPPaneCopy.confirm(
             verb: "Grant", rung: .suggest, scope: .book, place: "the lightning thief", duration: .connection)
@@ -291,10 +310,10 @@ struct MCPAskAndReceiptTests {
                 // PROVISIONAL P-13nc-U4-1): "while connected" → "until it
                 // disconnects".
                 == "Grant suggest in “the lightning thief” until it disconnects, including to future entries",
-                "mockup §3's confirm + R-AIR-3's clause")
+                "mockup §3's confirm + VX-269's clause")
         // U3 walk W-2 (justified edit, the ritual): the mockup's words stay,
         // and the sentence stays TRUE now that edit can be granted.
-        // 13n-c U2 (justified edit, the ritual — R-AIR-8: no "AI" in
+        // 13n-c U2 (justified edit, the ritual — VX-272: no "AI" in
         // settings-class wording): "AI work" → "a client's work".
         #expect(MCPPaneCopy.enableBlurb.contains("a client's work lands as takes beside your own"))
         #expect(MCPPaneCopy.enableBlurb.contains("only where you grant it edit"))
@@ -308,7 +327,7 @@ struct MCPAskAndReceiptTests {
         #expect(PrivateMarkCopy.rowWords == "Private — never shared with AI", "her word, R-13nb-4 (iv)")
         #expect(CapabilityRegistry.capability(.markNotePrivate).verb == PrivateMarkCopy.rowWords)
         // 13n-c U3 (A JUSTIFIED EDIT — a new renderer is a new door): the
-        // in-note indicator's LOCK popover renders the same toggle (R-AIR-7,
+        // in-note indicator's LOCK popover renders the same toggle (VX-164,
         // VX-164), so the act gains its `.surface` door beside the bars'.
         #expect(CapabilityRegistry.capability(.markNotePrivate).doors == [.bottomBar, .surface])
         #expect(MCPNoteIndicator.surfaceCapabilities.contains(.markNotePrivate))

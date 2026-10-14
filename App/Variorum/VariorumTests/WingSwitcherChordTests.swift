@@ -2,7 +2,7 @@
 //  WingSwitcherChordTests.swift
 //  VariorumTests (Mac)
 //
-//  13n-c U4 — ⌘L, THE WING SWITCHER (R-AIR-15, her ratified chord; R-AIR-5
+//  13n-c U4 — ⌘L, THE WING SWITCHER (VX-157, her ratified chord; VX-157
 //  "click-without-typing CYCLES … fast to click"; round 5, the Library
 //  masthead). The held-⌘ cycling cannot be walked while the session is
 //  locked, so its state transitions are pinned here (the brief's locked-

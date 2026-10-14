@@ -82,7 +82,7 @@ struct RootView: View {
     /// 13n-c U4 — the ask HER press opened in this window (a pending glyph —
     /// `ShellRouter.mcpAskRequest`); asks never present themselves.
     @State private var mcpAskSheetOpening: MCPAskOpening?
-    /// 13n-c U4 — ⌘L's wing switcher while it is up in this window (R-AIR-15).
+    /// 13n-c U4 — ⌘L's wing switcher while it is up in this window (VX-157).
     @State private var wingSwitcher: WingSwitcherModel?
     /// 13s-b U2 — THE TOUR, while one runs in THIS window (its `engine` is
     /// nil otherwise). Per window by construction (`RootView` is the window);
@@ -90,6 +90,12 @@ struct RootView: View {
     /// object rather than a bare `@State` engine so the engine's doors can
     /// hold it weakly — a window closed mid-tour leaves no cycle behind.
     @State private var tourSlot = TourSlot()
+    /// **VX-326 — this shell's ONE opening ask** for the Bookcase quick
+    /// entry's caret (R102: the Bookcase opens with the cursor in the bar). A
+    /// shell opens on the Bookcase — at launch, after every unlock, in a new
+    /// window — and its first Bookcase bar claims this; later Bookcase mounts
+    /// in the same shell find it spent.
+    @State private var bookcaseOpeningFocus = QuickEntryOpeningFocus()
     // (Stage C's parked block target LEFT this view at 17o c/d/e round 1,
     // MAJOR-2: it is `ShellRouter.blockLanding` now — same per-window scope,
     // but on the object every navigation door already speaks to, so the
@@ -396,7 +402,7 @@ struct RootView: View {
             mcpAskSheetOpening = mcp?.opening(request)
             router.mcpAskRequest = nil
         }
-        // 13n-c U4 — ⌘L, THE WING SWITCHER (R-AIR-15): opened in this window
+        // 13n-c U4 — ⌘L, THE WING SWITCHER (VX-157): opened in this window
         // by the menu's request; while it is up, the same request (the menu's
         // ⌘L before the sheet's monitor took the key) CYCLES it.
         .sheet(item: $wingSwitcher) { model in
@@ -538,6 +544,8 @@ struct RootView: View {
         .task { await pool.start() }
         .task(id: session.wing.currentID) { await stars.start() }
         .task { await wings.track() }
+        // VX-268: who reaches each wing — the switcher's rows (⌘L, the ▾ menu).
+        .task { await wings.watchSharing() }
         .onChange(of: session.wing.currentID) { _, wing in
             shelf = ShelfViewModel(session: session, wingID: wing)
         }
@@ -1158,7 +1166,8 @@ struct RootView: View {
                 starDoor: starDoor, wings: wings,
                 // 13s-b U1a: the tour offer's row — built HERE (composition)
                 // and rendered by the Bookcase alone ("Bookcase only").
-                offerLine: tourOfferLine)
+                offerLine: tourOfferLine,
+                openingFocus: bookcaseOpeningFocus)
                 // 13i-d U5: a new wing is a new board (its tasks restart).
                 .id("bookcase-\(shelf.wingID)")
         case .library:

@@ -2482,7 +2482,7 @@ enum TutorialSeeder {
         // interpolated from the constants `TutorialMCPChapterTests` ties each
         // door to (the H pattern), so a renamed door turns a lesson red. The
         // pending-ask mark is described by its ROLE ("a small mark"), never its
-        // shape (the Stage B fix pass may change the glyph — O-1). U6 (R-AIR-12
+        // shape (the Stage B fix pass may change the glyph — O-1). U6 (VX-273
         // + VX-160) adds lesson 3's fourth card: a wing grant reads the wing's
         // gatherings, and the per-item move across wings — each pinned. Her
         // ruled "how to use it" (the sitting's third round) seats sixth: four
@@ -2544,10 +2544,15 @@ enum TutorialSeeder {
 
             // VX-168: the sentence the setup key falsified ("Variorum can't
             // check that name"), made true of the build — and no truer: K2's
-            // recorded non-defeat said with it.
+            // recorded non-defeat said with it. VX-198 (R-VX184-5): "so a
+            // second tool using the same name is turned away" was falsified in
+            // its turn — the newest copied setup now takes the name — so the
+            // clause says the rule as built (a minimal truth fix; U7's quality
+            // pass re-voices the chapter).
             "One honest limit: a client names itself when it connects. The "
-            + "setup you copy carries a key that ties that name to it, so a "
-            + "second tool using the same name is turned away. But the key sits "
+            + "setup you copy carries a key that ties that name to it. Running "
+            + "the setup again moves the name to the new key, and a tool still "
+            + "using an older key, or none, is turned away. But the key sits "
             + "in the client's own settings, where any program running as you "
             + "can read it.",
         ])
