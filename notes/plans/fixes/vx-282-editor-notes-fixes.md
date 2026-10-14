@@ -3394,3 +3394,40 @@ empty; no launch, no walk; iPhone 17 Pro iOS 26.2, `-collect-test-diagnostics ne
 
 **READY FOR STAGE — c1decide: D (the decider, ≈1 min) → on H2 K + the whole phone target on the keyfix products, on H1 X +
 the whole phone target on the disable products; ≈12–15 min.**
+
+**THE c1decide WINDOW — RUN 2026-10-14 09:41:27 → 09:50:11 (claim `vx282-c1decide`, handed from `coord-for-vx282`;
+RELEASED).** Pre-checks 09:41 (no instance, no booted simulator); `guard.sh --author` OK before each leg; nothing rebuilt;
+no launch, no walk. Extract: `closeout/logs/c1-decide-extract.txt`.
+- **D — the decider (the phone settle OFF), 09:41:27–09:41:59: the verdict is SPLIT, by road — H2 by the plan's rule.**
+  - **The crash PERSISTS with the settle off:** `leavingATrailingSpaceBehindUnstylesTheSpanHonestly` hit the same DEBUG
+    fatal (`MobileEditorViewModel.swift:2001`) inside the test's `insertText("hello ")`, and the run restarted ⇒ the
+    insert-of-a-run desync in this posture is NOT the settle's — the settle is innocent there (H2).
+  - **R1-3's two desyncs are GONE with the settle off:** zero issues at `MobileMarkdownCaretTests.swift:193`; the pin's
+    only issues were its non-vacuity line (`:186`, "honoured before the replace" — red BY DESIGN with no honour), as were
+    `herFlow…`'s (`:84`) and `aStoodDownEditor…`'s (`:141`) ⇒ on the `replace(_:withText:)` road, in this posture, the
+    settle's write IS what broke the edit's binding (H1 for that road).
+  - By the plan's rule (crash OR desync persists ⇒ H2), the follow-on was K.
+- **K — the KEYFIX (settle ON, guard ON), 09:42:14–09:42:37: GREEN** — "**22 tests in 2 suites passed**", no crash, no
+  restart, 1 non-key warning (down from 7). The caret suite in the posture a real phone is always in — its window on the
+  foreground scene and key, any leftover first responder resigned first, its own resigned at teardown — passes WHOLE
+  after `MobileLivenessTests`: `leaving…` (no fatal) and R1-3's three replacements (no desync) included.
+- **The WHOLE phone target on the keyfix products, 09:42:44–09:50:03: AS EXPECTED** — "**824 tests in 129 suites failed …
+  5 issues (including 4 known)**", ONE launch, no restart, no fatal: the only red is the standing
+  `MobileStructuralTests.nothingUserFacingNamesTheMac` (`AcknowledgmentsCopy.swift`'s "(Mac only)", standing on main since
+  13n-b); the 4 known issues are the declared ones (`MobileTrashTests` 2 · `MobileTutorialWalkTests` 2); all
+  `MobileMarkdownCaretTests` green (`herFlow…`, `leaving…`, `aStoodDownEditor…`, R1-3's three cases). (The pre-fix whole
+  run read 552/79 only because its crash cost the rest of a launch.)
+- `xcrun simctl shutdown all` → **0 booted**; no instance; released at 09:50:11.
+
+**What the window establishes (for the orchestrator's ruling — nothing landed yet, at its word):**
+1. The insert-of-a-run desync (`leaving…`'s crash) happens in this polluted test posture with the settle OFF — a
+   pre-existing phone-gate gap the test posture exposes (an earlier suite's unresigned first responder + the hardware
+   keyboard's input session), not VX-296's. The gate gap is the orchestrator's VM ticket.
+2. The `replace` road's desync (R1-3's pin) in the same posture IS the settle's write (gone with the settle off) — but it
+   is ALSO gone with the settle ON once the caret suite stands in the real posture (K). So in the posture a phone is in,
+   the settle + the `pendingEdit` guard (`12d55d12`) hold; in the polluted posture the settle can still break a replace's
+   binding. Whether a real phone can ever reach the polluted posture (an unresigned responder holding the hardware
+   keyboard's session) is untraced.
+3. Ready to land on the ruling (none committed): the KEYFIX as a TEST-ONLY commit (`scratchpad/vx282-c1/keyfix.patch` —
+   `MobileMarkdownCaretTests.host`/`dismiss`); the DISABLE stays prepared (`disable-phone-settle.patch` + its products) if
+   the orchestrator prefers the settle off given finding 2. `12d55d12` stays for the ruling.
