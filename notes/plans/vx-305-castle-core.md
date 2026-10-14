@@ -536,7 +536,9 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   listed code). The pieces, each its own commit, flipped here as each lands:
   - (a) Names · the mode · the seal (HKDF + HMAC) and `Sealed<T>` — DONE (this commit; its 9 tests green, filtered run).
   - (b) the protection record (library facts, family tree, device sections, hardware marker) · what this Mac remembers ·
-    plans — NOT-STARTED.
+    plans — DONE (this commit; 18 tests green, filtered run). Landed with it, because what this Mac remembers mirrors
+    the key file: `KeyFile.swift` (format 3's values, wraps, roads and history opening) and `CastleAnchor.swift` (the
+    anchor's sealing and opening), and `ProtectionGuards` with U1's five guards — their own tests ride (c) and (e).
   - (c) key file format 3 (wraps, history, the Castle anchor, the master's words copy, the four crossings) —
     NOT-STARTED.
   - (d) the legacy readers (formats 1 and 2, the legacy mode reader, the old marker's read and clearing check, today's
