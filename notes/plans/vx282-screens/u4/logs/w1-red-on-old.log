@@ -1,0 +1,258 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -xctestrun DerivedData/vx282-u4-old-products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination platform=macOS "-only-testing:VariorumTests/CaptureUndoSyncTests" "-only-testing:VariorumTests/CaptureHostsUndoFilingTests" "-only-testing:VariorumTests/CaptureFocusReattachTests" "-only-testing:VariorumTests/CaptureTourFocusTests"
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64e, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:x86_64, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64e, variant:Mac Catalyst, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64, variant:Mac Catalyst, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:x86_64, variant:Mac Catalyst, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64e, variant:DriverKit, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64, variant:DriverKit, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64e, variant:Designed for [iPad,iPhone], id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:<device-udid>, name:My Mac }
+2026-10-14 01:54:11.032234-0600 Variorum[91318:58730058] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to <home>/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/io.lduarte.Variorum.debug.savedState
+2026-10-14 01:54:11.279521-0600 Variorum[91318:58730058] [global-hotkey] InstallEventHandler system=carbon status=0
+2026-10-14 01:54:11.279679-0600 Variorum[91318:58730058] [global-hotkey] RegisterEventHotKey system=carbon quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 01:54:11.522425-0600 Variorum[91318:58730420] [logging-persist] cannot open file at line 53009 of [8fa8248e30]
+2026-10-14 01:54:11.522450-0600 Variorum[91318:58730420] [logging-persist] os_unix.c:53009: (2) open(/private/var/db/DetachedSignatures) - No such file or directory
+Test Suite 'Selected tests' started at 2026-10-14 01:54:11.612.
+Test Suite 'VariorumTests.xctest' started at 2026-10-14 01:54:11.612.
+Test Suite 'VariorumTests.xctest' passed at 2026-10-14 01:54:11.612.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-14 01:54:11.613.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite "VX-193 — the capture box and its binding never disagree after ⌘Z" started.
+◇ Test anUndoAndARedoReachTheBinding() started.
+2026-10-14 01:54:11.797595-0600 Variorum[91318:58730058] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 01:54:11.897476-0600 Variorum[91318:58730058] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 01:54:11.897834-0600 Variorum[91318:58730058] [sample-library] sample library (the adventures of sherlock holmes): alreadySeeded
+2026-10-14 01:54:11.898022-0600 Variorum[91318:58730058] [starred-gathering] starred gathering: alreadySeeded
+2026-10-14 01:54:11.898178-0600 Variorum[91318:58730058] [sample-library] welcome arrangement: alreadySettled
+✘ Test anUndoAndARedoReachTheBinding() recorded an issue at CaptureUndoAndFocusTests.swift:213:9: Expectation failed: box.string == "first thought"
+↳ non-vacuity: ⌘Z undid her last words
+↳ box.string == "first thought" → false
+↳   box.string → ""
+✘ Test anUndoAndARedoReachTheBinding() recorded an issue at CaptureUndoAndFocusTests.swift:214:9: Expectation failed: rig.text == box.string
+↳ the binding follows the undo
+↳ rig.text == box.string → false
+↳   rig.text → "first thought and more"
+↳   box.string → ""
+✘ Test anUndoAndARedoReachTheBinding() recorded an issue at CaptureUndoAndFocusTests.swift:218:9: Expectation failed: rig.text == box.string
+↳ …all the way back to empty
+↳ rig.text == box.string → false
+↳   rig.text → "first thought and more"
+↳   box.string → ""
+✘ Test anUndoAndARedoReachTheBinding() recorded an issue at CaptureUndoAndFocusTests.swift:221:9: Expectation failed: box.string == "first thought"
+↳ non-vacuity: ⇧⌘Z brought her first words back
+↳ box.string == "first thought" → false
+↳   box.string → "first thought and more"
+✘ Test anUndoAndARedoReachTheBinding() failed after 0.600 seconds with 4 issues.
+↳ /// **RED ON OLD** (each binding expectation): ⌘Z and ⇧⌘Z move the box's
+↳ /// text without `textDidChange`, so the binding stayed on the last TYPED
+↳ /// text — the undone words, and after undo-undo-redo still the words she
+↳ /// had taken back.
+◇ Test aProgrammaticClearEndsTheBoxsOwnHistory() started.
+✘ Test aProgrammaticClearEndsTheBoxsOwnHistory() recorded an issue at CaptureUndoAndFocusTests.swift:238:9: Expectation failed: box.undoManager !== window.undoManager
+↳ the box's history is its own — never the window's, which other text shares
+↳ box.undoManager !== window.undoManager → false
+↳   box.undoManager → NSUndoManager<0x7cb0e12b50>
+↳     some → NSUndoManager<0x7cb0e12b50>
+↳   window.undoManager → NSUndoManager<0x7cb0e12b50>
+↳     some → NSUndoManager<0x7cb0e12b50>
+✘ Test aProgrammaticClearEndsTheBoxsOwnHistory() recorded an issue at CaptureUndoAndFocusTests.swift:244:13: Expectation failed: box.undoManager?.canUndo == false
+↳ the words left the box — there is nothing in it to undo into
+↳ box.undoManager?.canUndo == false → false
+↳   box.undoManager?.canUndo → true
+↳     some → true
+↳     some → false
+✘ Test aProgrammaticClearEndsTheBoxsOwnHistory() failed after 0.302 seconds with 2 issues.
+↳ /// **RED ON OLD** (the two `#require`/`#expect` on the history — the
+↳ /// `#require` stops the old tree BEFORE its ⌘Z, which raised
+↳ /// `NSRangeException` there): the host clears the box programmatically
+↳ /// (an EMPTY filing — a whitespace-only or tokens-only capture keeps the
+↳ /// box on screen with the caret in it), and the box's history ends with
+↳ /// the words it described. The history is the box's OWN, never the
+↳ /// window's (P-VX179-U3-4, carried: undo is per area).
+✘ Suite "VX-193 — the capture box and its binding never disagree after ⌘Z" failed after 0.903 seconds with 6 issues.
+◇ Suite "VX-193 — ⏎ files what the capture box shows after ⌘Z, in both hosts" started.
+◇ Test theBarFilesWhatTheBoxShows(_:) started.
+◇ Test case passing 1 argument gesture → .undo to theBarFilesWhatTheBoxShows(_:) started.
+✘ Test theBarFilesWhatTheBoxShows(_:) recorded an issue with 1 argument gesture → .undo at CaptureUndoAndFocusTests.swift:316:13: Expectation failed: box.string == Self.first
+↳ non-vacuity: the box shows her first words
+↳ box.string == Self.first → false
+↳   box.string → ""
+↳   Self.first → "alpha"
+✘ Test theBarFilesWhatTheBoxShows(_:) recorded an issue with 1 argument gesture → .undo at CaptureUndoAndFocusTests.swift:321:13: Expectation failed: try await self.blocks(db, postID) == [Self.first]
+↳ ⏎ files exactly what the box shows — never the undone words
+↳ try await self.blocks(db, postID) == [Self.first] → <not evaluated>
+​◇ Test case passing 1 argument gesture → .undoTwiceThenRedo to theBarFilesWhatTheBoxShows(_:) started.
+✘ Test theBarFilesWhatTheBoxShows(_:) recorded an issue with 1 argument gesture → .undoTwiceThenRedo at CaptureUndoAndFocusTests.swift:316:13: Expectation failed: box.string == Self.first
+↳ non-vacuity: the box shows her first words
+↳ box.string == Self.first → false
+↳   box.string → "alpha beta"
+↳   Self.first → "alpha"
+✘ Test theBarFilesWhatTheBoxShows(_:) recorded an issue with 1 argument gesture → .undoTwiceThenRedo at CaptureUndoAndFocusTests.swift:321:13: Expectation failed: try await self.blocks(db, postID) == [Self.first]
+↳ ⏎ files exactly what the box shows — never the undone words
+↳ try await self.blocks(db, postID) == [Self.first] → <not evaluated>
+​✘ Test theBarFilesWhatTheBoxShows(_:) with 2 test cases failed after 1.013 seconds with 4 issues.
+↳ /// **RED ON OLD — the bar (the Bookcase's and the Library's quick entry)
+↳ /// filed "alpha beta"**, the words she had undone, because ⏎ files the
+↳ /// binding (`QuickEntryModel.submit`) and the binding never heard the ⌘Z.
+◇ Test thePadFilesWhatTheBoxShows(_:) started.
+◇ Test case passing 1 argument gesture → .undo to thePadFilesWhatTheBoxShows(_:) started.
+✘ Test thePadFilesWhatTheBoxShows(_:) recorded an issue with 1 argument gesture → .undo at CaptureUndoAndFocusTests.swift:341:13: Expectation failed: box.string == Self.first
+↳ non-vacuity: the box shows her first words
+↳ box.string == Self.first → false
+↳   box.string → ""
+↳   Self.first → "alpha"
+✘ Test thePadFilesWhatTheBoxShows(_:) recorded an issue with 1 argument gesture → .undo at CaptureUndoAndFocusTests.swift:352:13: Expectation failed: try await self.blocks(db, postID) == [Self.first]
+↳ ⏎ files exactly what the box shows — never the undone words
+↳ try await self.blocks(db, postID) == [Self.first] → <not evaluated>
+​◇ Test case passing 1 argument gesture → .undoTwiceThenRedo to thePadFilesWhatTheBoxShows(_:) started.
+✘ Test thePadFilesWhatTheBoxShows(_:) recorded an issue with 1 argument gesture → .undoTwiceThenRedo at CaptureUndoAndFocusTests.swift:341:13: Expectation failed: box.string == Self.first
+↳ non-vacuity: the box shows her first words
+↳ box.string == Self.first → false
+↳   box.string → "alpha beta"
+↳   Self.first → "alpha"
+✘ Test thePadFilesWhatTheBoxShows(_:) recorded an issue with 1 argument gesture → .undoTwiceThenRedo at CaptureUndoAndFocusTests.swift:352:13: Expectation failed: try await self.blocks(db, postID) == [Self.first]
+↳ ⏎ files exactly what the box shows — never the undone words
+↳ try await self.blocks(db, postID) == [Self.first] → <not evaluated>
+​✘ Test thePadFilesWhatTheBoxShows(_:) with 2 test cases failed after 1.046 seconds with 4 issues.
+↳ /// **RED ON OLD — the pad filed "alpha beta"** by the same road
+↳ /// (`QuickNotePad.take` reads the binding; its ⌘⏎ button, its close and
+↳ /// its quit filing read the same binding).
+◇ Test anEmptyFilingLeavesNothingToUndoIntoInEitherHost() started.
+✘ Test anEmptyFilingLeavesNothingToUndoIntoInEitherHost() recorded an issue at CaptureUndoAndFocusTests.swift:380:21: Expectation failed: box.undoManager?.canUndo == false
+↳ nothing is left to undo into after the clear
+↳ box.undoManager?.canUndo == false → false
+↳   box.undoManager?.canUndo → true
+↳     some → true
+↳     some → false
+✘ Test anEmptyFilingLeavesNothingToUndoIntoInEitherHost() failed after 0.215 seconds with 1 issue.
+↳ /// **RED ON OLD (the `#require` — it stops the old tree before the ⌘Z
+↳ /// that raised there)**: an EMPTY filing — three spaces and ⏎ — clears
+↳ /// the box programmatically and leaves it on screen with the caret in it
+↳ /// (the bar stays on the Bookcase; the pad stays open on `.nothingToFile`).
+↳ /// The box's history ends with the words it described.
+✘ Suite "VX-193 — ⏎ files what the capture box shows after ⌘Z, in both hosts" failed after 2.276 seconds with 9 issues.
+◇ Suite "VX-112 — the capture box re-takes only the keyboard it held, never steals" started.
+◇ Test theFirstMountAutofocusStillLands(bornAsking:) started.
+◇ Test case passing 1 argument bornAsking → true to theFirstMountAutofocusStillLands(bornAsking:) started.
+​◇ Test case passing 1 argument bornAsking → false to theFirstMountAutofocusStillLands(bornAsking:) started.
+​✔ Test theFirstMountAutofocusStillLands(bornAsking:) with 2 test cases passed after 0.312 seconds.
+◇ Test aReleasedBoxStaysAwayAcrossAReattach(bornAsking:) started.
+◇ Test case passing 1 argument bornAsking → true to aReleasedBoxStaysAwayAcrossAReattach(bornAsking:) started.
+✘ Test aReleasedBoxStaysAwayAcrossAReattach(bornAsking:) recorded an issue with 1 argument bornAsking → true at CaptureUndoAndFocusTests.swift:437:9: Expectation failed: window.firstResponder !== box
+↳ released, then re-attached — the box never takes the keyboard back
+↳ window.firstResponder !== box → false
+↳   window.firstResponder → <Variorum.CaptureNSTextView: 0x7caa6e5e00>
+        Frame = {{0.00, 0.00}, {400.00, 22.00}}, Bounds = {{0.00, 0.00}, {400.00, 22.00}}
+        Horizontally resizable: NO, Vertically resizable: YES
+        MinSize = {400.00, 22.00}, MaxSize = {179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00, 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00}
+    
+↳     some → <Variorum.CaptureNSTextView: 0x7caa6e5e00>
+          Frame = {{0.00, 0.00}, {400.00, 22.00}}, Bounds = {{0.00, 0.00}, {400.00, 22.00}}
+          Horizontally resizable: NO, Vertically resizable: YES
+          MinSize = {400.00, 22.00}, MaxSize = {179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00, 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00}
+      
+↳       wantsInitialFocus → true
+↳   box → <Variorum.CaptureNSTextView: 0x7caa6e5e00>
+        Frame = {{0.00, 0.00}, {400.00, 22.00}}, Bounds = {{0.00, 0.00}, {400.00, 22.00}}
+        Horizontally resizable: NO, Vertically resizable: YES
+        MinSize = {400.00, 22.00}, MaxSize = {179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00, 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00}
+    
+↳     wantsInitialFocus → true
+​◇ Test case passing 1 argument bornAsking → false to aReleasedBoxStaysAwayAcrossAReattach(bornAsking:) started.
+​✘ Test aReleasedBoxStaysAwayAcrossAReattach(bornAsking:) with 2 test cases failed after 1.303 seconds with 1 issue.
+↳ /// **RED ON OLD for the pad's birth** (`bornAsking: true`): the "asked
+↳ /// ONCE" flag was never cleared, so after a release (the tour's, say) a
+↳ /// detach/re-attach put the caret back. GUARD for the bar's birth (its
+↳ /// flag was never set).
+◇ Test aBoxThatHeldTheKeyboardKeepsItAcrossAReattach(bornAsking:) started.
+◇ Test case passing 1 argument bornAsking → true to aBoxThatHeldTheKeyboardKeepsItAcrossAReattach(bornAsking:) started.
+​◇ Test case passing 1 argument bornAsking → false to aBoxThatHeldTheKeyboardKeepsItAcrossAReattach(bornAsking:) started.
+✘ Test aBoxThatHeldTheKeyboardKeepsItAcrossAReattach(bornAsking:) recorded an issue with 1 argument bornAsking → false at CaptureUndoAndFocusTests.swift:454:9: Expectation failed: window.firstResponder === box
+↳ re-attached, the box takes back what it held
+↳ window.firstResponder === box → false
+↳   window.firstResponder → <NSWindow: 0x7cb8542080>
+↳     some → <NSWindow: 0x7cb8542080>
+↳   box → <Variorum.CaptureNSTextView: 0x7cac42f700>
+        Frame = {{0.00, 0.00}, {400.00, 22.00}}, Bounds = {{0.00, 0.00}, {400.00, 22.00}}
+        Horizontally resizable: NO, Vertically resizable: YES
+        MinSize = {400.00, 22.00}, MaxSize = {179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00, 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00}
+    
+↳     wantsInitialFocus → false
+​✘ Test aBoxThatHeldTheKeyboardKeepsItAcrossAReattach(bornAsking:) with 2 test cases failed after 0.676 seconds with 1 issue.
+↳ /// **RED ON OLD for the bar's birth** (`bornAsking: false`): AppKit drops
+↳ /// a detached first responder to the window, and nothing re-took it —
+↳ /// the bar's caret was lost silently (TEXTKIT2 §3, 18l-c U7's class).
+↳ /// GUARD for the pad's birth (its never-cleared flag re-grabbed).
+◇ Test aReattachNeverStealsFromAnotherResponder(bornAsking:) started.
+◇ Test case passing 1 argument bornAsking → true to aReattachNeverStealsFromAnotherResponder(bornAsking:) started.
+✘ Test aReattachNeverStealsFromAnotherResponder(bornAsking:) recorded an issue with 1 argument bornAsking → true at CaptureUndoAndFocusTests.swift:468:9: Expectation failed: window.firstResponder !== box
+↳ another responder took the keyboard meanwhile — the box leaves it there
+↳ window.firstResponder !== box → false
+↳   window.firstResponder → <Variorum.CaptureNSTextView: 0x7cad950a00>
+        Frame = {{0.00, 0.00}, {400.00, 22.00}}, Bounds = {{0.00, 0.00}, {400.00, 22.00}}
+        Horizontally resizable: NO, Vertically resizable: YES
+        MinSize = {400.00, 22.00}, MaxSize = {179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00, 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00}
+    
+↳     some → <Variorum.CaptureNSTextView: 0x7cad950a00>
+          Frame = {{0.00, 0.00}, {400.00, 22.00}}, Bounds = {{0.00, 0.00}, {400.00, 22.00}}
+          Horizontally resizable: NO, Vertically resizable: YES
+          MinSize = {400.00, 22.00}, MaxSize = {179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00, 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00}
+      
+↳       wantsInitialFocus → true
+↳   box → <Variorum.CaptureNSTextView: 0x7cad950a00>
+        Frame = {{0.00, 0.00}, {400.00, 22.00}}, Bounds = {{0.00, 0.00}, {400.00, 22.00}}
+        Horizontally resizable: NO, Vertically resizable: YES
+        MinSize = {400.00, 22.00}, MaxSize = {179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00, 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.00}
+    
+↳     wantsInitialFocus → true
+​◇ Test case passing 1 argument bornAsking → false to aReattachNeverStealsFromAnotherResponder(bornAsking:) started.
+​✘ Test aReattachNeverStealsFromAnotherResponder(bornAsking:) with 2 test cases failed after 1.028 seconds with 1 issue.
+↳ /// **RED ON OLD for the pad's birth** (`bornAsking: true`): the old
+↳ /// arrival claim checked only that the box was not ALREADY first
+↳ /// responder, so it took the keyboard from whatever had it. GUARD for
+↳ /// the bar's birth.
+✘ Suite "VX-112 — the capture box re-takes only the keyboard it held, never steals" failed after 3.322 seconds with 3 issues.
+◇ Suite "VX-112 — the tour's steps 1–2 never put the caret back in the quick entry" started.
+◇ Test stepsOneAndTwoNeverPutTheCaretBackInTheQuickEntry() started.
+2026-10-14 01:54:18.284759-0600 Variorum[91318:58730058] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 01:54:18.284833-0600 Variorum[91318:58730058] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test stepsOneAndTwoNeverPutTheCaretBackInTheQuickEntry() passed after 6.511 seconds.
+✔ Suite "VX-112 — the tour's steps 1–2 never put the caret back in the quick entry" passed after 6.511 seconds.
+✘ Test run with 10 tests in 4 suites failed after 13.013 seconds with 18 issues.
+2026-10-14 01:54:42.093 xcodebuild[91275:58729773] [MT] IDETestOperationsObserverDebug: 33.733 elapsed -- Testing started completed.
+2026-10-14 01:54:42.093 xcodebuild[91275:58729773] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 01:54:42.093 xcodebuild[91275:58729773] [MT] IDETestOperationsObserverDebug: 33.733 sec, +33.733 sec -- end
+
+Test session results, code coverage, and logs:
+	<home>/Library/Developer/Xcode/DerivedData/Variorum-dzwimurbawdvtsgntremxemayfjw/Logs/Test/Test-Variorum-2026.10.14_01-54-08--0600.xcresult
+
+Failing tests:
+	CaptureUndoSyncTests.anUndoAndARedoReachTheBinding()
+	CaptureUndoSyncTests.anUndoAndARedoReachTheBinding()
+	CaptureUndoSyncTests.anUndoAndARedoReachTheBinding()
+	CaptureUndoSyncTests.anUndoAndARedoReachTheBinding()
+	CaptureUndoSyncTests.aProgrammaticClearEndsTheBoxsOwnHistory()
+	CaptureUndoSyncTests.aProgrammaticClearEndsTheBoxsOwnHistory()
+	-[CaptureHostsUndoFilingTests theBarFilesWhatTheBoxShows(_:)]
+	-[CaptureHostsUndoFilingTests theBarFilesWhatTheBoxShows(_:)]
+	-[CaptureHostsUndoFilingTests theBarFilesWhatTheBoxShows(_:)]
+	-[CaptureHostsUndoFilingTests thePadFilesWhatTheBoxShows(_:)]
+	-[CaptureHostsUndoFilingTests thePadFilesWhatTheBoxShows(_:)]
+	-[CaptureHostsUndoFilingTests thePadFilesWhatTheBoxShows(_:)]
+	CaptureHostsUndoFilingTests.anEmptyFilingLeavesNothingToUndoIntoInEitherHost()
+	-[CaptureFocusReattachTests aReleasedBoxStaysAwayAcrossAReattach(bornAsking:)]
+	-[CaptureFocusReattachTests aBoxThatHeldTheKeyboardKeepsItAcrossAReattach(bornAsking:)]
+	-[CaptureFocusReattachTests aReattachNeverStealsFromAnotherResponder(bornAsking:)]
+
+** TEST EXECUTE FAILED **
+
+Testing started

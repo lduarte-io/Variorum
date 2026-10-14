@@ -2521,7 +2521,8 @@ itself — close the takes panel first."
 first card — when nothing was clicked into, exactly the take being committed. Option: (b) hang it from the take's own card.
 Status: open — your eye in daily use.
 
-#221 — **VX-193 + VX-112 (U4), the capture box — two readings built PROVISIONAL** (the binding record is
+#221 — **VX-193 + VX-112 (U4), the capture box — one reading built PROVISIONAL (a second, P-U4-2, withdrawn at the
+walk)** (the binding record is
 `notes/plans/fixes/vx-282-editor-notes-fixes.md` § U4 — the traces, the pins, the walk). *(Numbering: the next free
 number when written; the merging session renumbers if a sibling run took it.)* Each is built as stated, with a line to
 reverse it:
@@ -2533,10 +2534,9 @@ safe (on the old tree it replayed the old words' ranges into the empty box — a
 shared history with the window (the old road — ⌘Z in an empty box then reaches whatever other text left on the window's
 stack); (c) the clear itself undoable (⌘Z after ⏎ brings the filed words back into the box — a duplicate-filing hazard,
 and after a completed filing the box is gone anyway).
-**P-U4-2 — a tour started AWAY from the Bookcase lands with the caret in the quick entry.** The tour takes you to the
-Bookcase and releases the keyboard as it arrives; the Bookcase's own "open with the cursor in the bar" (R102) then runs
-one moment later, so step 1 shows the caret in the bar (a keystroke there would start a note) — traced in the code; the walk checks it live. A tour started FROM the
-Bookcase — your walk's road — does not do this (no new Bookcase arrives). Built (a): unchanged — R102 stands, and the
-tour releases once, at its own arrival. Options: (b) the tour releases the keyboard again when its own trip to the
-Bookcase lands; (c) the bar's arrival autofocus stands down while a tour is running (it resumes after the tour).
-Status: open — your eye on your walk (VX-112 was yours to judge there).
+~~**P-U4-2 — a tour started away from the Bookcase lands with the caret in the quick entry.**~~ **WITHDRAWN at the U4
+walk (2026-10-14):** traced from the code's order, but not reproduced live — a tour started from a note landed on the
+Bookcase with the keyboard on the window, not in the bar. Nothing to decide. (And your VX-112 sighting itself: the
+blinking block in the Terminal voice's quick entry is its decorative block cursor, which shows exactly when the box does
+NOT have the caret — the tour's release turns it on; keystrokes there landed nowhere, in both voices.)
+Status: P-U4-1 open — your eye in daily use.

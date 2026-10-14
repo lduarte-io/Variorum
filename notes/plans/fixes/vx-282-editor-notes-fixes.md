@@ -131,7 +131,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U1 | VX-290 — the empty-block backspace's caret landing | **DONE** — fix `385aa1fc`; W1 red on old + W2 the Mac batch green `be826a5d`; W3 the walk, every row held `a7a63949`. Stage released 22:01:26 and 23:47:00. One observation for the orchestrator to ticket (the bar's word counter, not this unit's road). No revert in flight. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
-| U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — W1 red on old (old products) + W2 the Mac batch g1/g2 (fixed) + W3 a walk on the dev store (the bar, the pad, the tour in Terminal and Study, the away start), ≈42 min.** Traces `324bfda8`; pins ahead of the fix `c4f2a893` (+ the tour pin's isolation `bfd3ca38`); fix VX-193 `0c31fcc5`, VX-112 `6bb9c7c9`. Products built headless, TEST BUILD SUCCEEDED ×2: `DerivedData/vx282-u4-old-products` (pins over the pre-fix box, by the named revert `cdc842f0` — DONE and RESTORED, `git diff` empty) and `DerivedData/vx282-u4` (fixed). PROVISIONALs P-U4-1/2 (QUESTIONS #221). No claim held; no revert in flight. Every count PENDING. |
+| U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **WINDOW RUN (01:54–02:12, claim RELEASED) — NOT DONE: a fix leg + a ruling owed.** W1 red on old: every designated RED cell red (18 issues, 5 of them the pins' undo-granularity assumption); the tour pin green on old. W2: g1 54/14 with **10 issues, all the VX-193 pins' two-undo-groups assumption** (every binding/history cell, the whole VX-112 suite and the tour pin GREEN); g2 **92/17 green**. W3: **VX-193's headline NOT reproduced in USE on the old build** (the binding follows a real ⌘Z/⇧⌘Z — HOLLOW in use); **the sibling REPRODUCED in use on old** (`NSRangeException` logged, undo left broken) and **fixed in use**; **VX-112's sighting = the Terminal block cursor** (AX: the window focused, keys land nowhere, both voices); **P-U4-2 withdrawn** (not reproduced). Posture: Study restored, tour offer `completed`, one walk note in the Trash, Standard/unlocked, no instance. Code: traces `324bfda8`; pins `c4f2a893`/`bfd3ca38`; fix `0c31fcc5` (VX-193) + `6bb9c7c9` (VX-112). No claim held; no revert in flight. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
@@ -1071,7 +1071,7 @@ and 0 booted simulators at the start). Logs: `notes/plans/vx282-screens/u3/logs/
 
 ### U4 — VX-193 + VX-112 (the capture box: the undo desync and the focus re-grab)
 
-**State: READY FOR STAGE** (the window plan at the end of this section). Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Every count and every
+**State: WINDOW RUN 2026-10-14 — NOT CLOSED: the VX-193 pins need a fix leg and VX-193's headline a ruling (HOLLOW in use; the record's dispositions table at the end of this section). Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Every count and every
 "green"/"red" below is **PENDING** until it runs (headless) or the stage window runs it.
 
 **The surface:** `Core/Views/CaptureTextView.swift` (the ONE capture box, 13u3 UNIT C) and its two hosts —
@@ -1228,7 +1228,7 @@ defaults and reads `TourOracle` only when the slot reports THIS store's seeded b
 - **P-U4-1 — undo is the box's own, and a programmatic replacement ends it** (P-VX179-U3-4 carried, #215 still open
   there). Built (a). Options: (b) the window's shared history (⌘Z in an empty box reaches other text's stack); (c) the
   clear itself undoable (a duplicate-filing hazard).
-- **P-U4-2 — candidate 2, a tour started AWAY from the Bookcase lands with the caret in the bar** (traced by code
+- **P-U4-2 — WITHDRAWN at the walk (not reproduced live, `E1`).** Was: candidate 2, a tour started AWAY from the Bookcase lands with the caret in the bar (traced by code
   order; W3 checks it live). Built (a): unchanged — R102 stands, the tour releases once at its arrival. Options: (b) the
   tour releases again when its own navigation lands; (c) the bar's mount autofocus stands down while a tour runs.
 
@@ -1292,6 +1292,92 @@ From `App/Variorum/`; logs to `notes/plans/vx282-screens/u4/logs/`, captures to 
     before the window — a later tour never downgrades it, re-read after); quit OUR instance by identity (`tell
     application id "io.lduarte.Variorum.debug" to quit`), `pgrep` again; the dev store Standard and unlocked; release
     the claim.
+
+#### THE STAGE WINDOW — RUN 2026-10-14 01:54:02 → 02:12:15 (claim `vx282-u4`, handed from `coord-for-vx282`; RELEASED)
+
+`git pull --ff-only` first (already up to date; HEAD `e0bb014a`, U4's products unchanged — nothing rebuilt in the window,
+the coordinator's word). `guard.sh --author` OK before every leg; no Variorum instance and no booted simulator at the
+start or at the end. AX and screen-capture grants probed first (both true). Logs: `notes/plans/vx282-screens/u4/logs/`;
+captures: `notes/plans/vx282-screens/u4/walk/`.
+
+- **W1 — red on old** (`w1-red-on-old.log`, the old products): "Test run with **10 tests in 4 suites failed** … **18
+  issues**", no crash. **Every cell the pin table marks RED was red**: the binding cells (the box: after ⌘Z the box read
+  "" while the binding kept "first thought and more"; the bar and the pad filed the undone words while the box was
+  EMPTY), the history cells (the box's manager IS the window's; `canUndo` true after the clear — the `#require`s stopped
+  the old tree before its ⌘Z, as designed), and the three VX-112 cells (the pad's birth re-grabbed after a release and
+  stole from the field; the bar's birth lost the keyboard on a re-attach). **The tour pin was GREEN on old** — the
+  harness does not reproduce a re-grab on her road (the trace's prediction). **Five issues beyond the 13 predicted, all
+  non-vacuity cells:** in the test host the two typed chunks formed ONE undo group, so ⌘Z emptied the box instead of
+  leaving "first thought" — the pins' two-step assumption, not the defect. Consequence, stated: the `.undoTwiceThenRedo`
+  cases were red on old only through that granularity (the box and the binding AGREED there), so the redo half's
+  red-on-old is NOT discriminated by these pins.
+- **W2 — the fixed Mac batch:** g1 (`w2-g1.log`) "**54 tests in 14 suites**" — **10 issues, all in the two VX-193
+  suites and all the same granularity assumption**: `anUndoAndARedoReachTheBinding`'s two non-vacuity cells (its three
+  binding cells GREEN), and the hosts' four cases (`.undo`: the box emptied, the binding followed, ⏎ filed NOTHING — so
+  the `#require` on a filed note failed; `.undoTwiceThenRedo`: the box showed "alpha beta", the binding agreed, ⏎ filed
+  "alpha beta" ≠ the pin's "alpha"). GREEN on the fixed product: `aProgrammaticClearEndsTheBoxsOwnHistory`,
+  `anEmptyFilingLeavesNothingToUndoIntoInEitherHost`, the whole VX-112 suite (all eight cases), the tour pin, and the
+  other ten suites (12 of 14 suites ✔). g2 (`w2-g2.log`) "**92 tests in 17 suites passed**" — every suite's ✔ line read,
+  0 skipped. **So the fixed product never let the box and the binding disagree; the red is the PINS' (they must not
+  assume two undo groups in the test host).**
+- **W3 — the walk, the fixed Debug app (pids 92274, 92584, 95706 across relaunches) on the DEV store**, opened unlocked
+  ("Sync off (dev store)"), voice **Study**, appearance **system**, no What's New sheet; **plus the OLD Debug app
+  (`vx282-u4-old-products`, pids 92474, 94191, 95261 — one instance at a time, same dev store) — not in the plan,
+  launched because the first rows raised the question the walk exists to answer: does the old build show the symptom
+  in USE?** Captures by region / window id; the caret's truth read by AX (`AXFocusedUIElement`); keys through `keys.sh`.
+  - **App launch (both builds):** the Bookcase's quick entry is NOT autofocused at launch — AX reads the WINDOW focused
+    on the old build and the new alike (`00-launch.png`). Pre-existing, identical on both (O-U4-3 below).
+  - **VX-193's headline — NOT REPRODUCED IN USE ON THE OLD BUILD.** Old build, the bar: `old one` ← → ` two`, a real ⌘Z:
+    the box empties AND the placeholder comes back (`X0`) — the placeholder draws only when the BINDING is empty
+    (`QuickEntryBar.swift:229`) — and ⏎ files nothing (`X1`). Fresh old instance: `redo check`, ⌘Z (`X3`: placeholder
+    back), ⇧⌘Z (`X4`: the text back AND the title chip "name it “redo check”?", which reads the binding). **In the
+    running app the binding follows ⌘Z and ⇧⌘Z even before the fix**: the desync appears only where undo is driven
+    outside the live event road — VX-179's offscreen probe (O-U3-3), my windowless probe, and the test host's
+    `tryToPerform(undo:)`. Why the live road posts the change and those roads do not: NOT traced.
+  - **The sibling — REPRODUCED IN USE ON THE OLD BUILD.** Old build, the bar: three spaces, ⏎ (the box clears and keeps
+    the caret), a real ⌘Z → the old instance logged **`NSRangeException`** at 02:03:58 from `-[NSUndoTyping undoRedo:]` ←
+    `-[NSTextStorage(NSUndo) _undoRedoAttributedSubstringFromRange:]` ← `-[NSUndoManager undoNestedGroup]` ← the Edit
+    menu's key equivalent (AppKit caught it and the app continued — `X2`); afterwards ⌘Z in that box did NOTHING (typed
+    `redo check`, ⌘Z: the text stayed) — the undo stack left broken. **Fixed build, the same sequence: no exception
+    (zero `NSRangeException` lines for any fixed-build pid), and Edit ▸ Undo DISABLED — nothing to undo into** — in the bar
+    (`A8`) and in the pad (`B0`).
+  - **The fixed build in use (consistency, both hosts):** the bar — typed, ⌘Z (box and placeholder back), ⌘Z, ⇧⌘Z (text
+    back), ⌘Z, ⏎ → nothing filed, still on the Bookcase (`A0`–`A5`); the pad — `VX-193 pad`, ⌘Z (`B2`: placeholder back,
+    File It grey), ⇧⌘Z (`B3`: text, the chip, File It live), ⏎ → filed and closed; ⌘K finds the passage "VX-193 pad"
+    (`B5`) and the note reads exactly `VX-193 pad` (`B6`). Undo granularity is UNCHANGED from the old build: on both,
+    typing ← → typing coalesces into one ⌘Z step (NSTextView's own contiguous-typing coalescing; `A1`, `X0`).
+  - **VX-112, her road — the sighting is the Terminal block cursor (the third reading, CONFIRMED).** Terminal (switched by
+    ⌘K "Use Terminal Voice"): the caret in the bar (AX `AXTextArea`, `C1`) → Help ▸ Take the Tour → step 1: AX reads the
+    WINDOW focused, and **the accent block cursor blinks at the end of the bar's placeholder** (`C2`, `C2b`) — "the caret
+    block visible mid-tour", drawn exactly because the tour released the box; `x` typed → lands nowhere, the bar stays
+    empty (`C3`); next ⟶ → step 2: AX the window, `x` lands nowhere (`C4`). Study (no block cursor): the same at steps 1
+    and 2 — AX the window, both `x`s land nowhere (`D0`–`D3`). On the fixed build; the old build's harness run (W1's tour
+    pin, green on old) and the trace say the same of her road.
+  - **The away start (P-U4-2's premise) — NOT REPRODUCED:** a tour started from a note (`o museu`, Read ▸ edit) landed on
+    the Bookcase at step 1 with AX reading the WINDOW focused at 3 s and at 6 s (`E1`) — candidate 2's raise did not take
+    the caret on this road. P-U4-2 is WITHDRAWN (QUESTIONS #221 updated).
+  - **Cleanup / posture:** the ONE walk note (`2026-10-14`, body `VX-193 pad`, #quicknote) moved to the Trash by note ▾ ▸
+    Delete Note… ▸ Delete (receipt "Note moved to the Trash — 30 days to put it back.", `Z2`) — the dev store's residue;
+    no other note was filed by either build (every bar ⏎ in the walk filed nothing); every `x` landed nowhere; the voice
+    restored to **Study** by ⌘K "Use Study Voice" (`Z4`); appearance `system` (never touched); `variorum.tour.offer` read
+    `completed` before and after (each tour ended by its own "End tour"); no lock screen met (Standard, unlocked); no
+    system dialog; every instance quit by identity, `pgrep` empty after; 0 booted simulators; **the claim RELEASED at
+    02:12:15** (18 of 60 minutes).
+
+#### The dispositions, as the window leaves them (the orchestrator rules the open ones)
+
+| Row | Disposition |
+|---|---|
+| VX-193 — ⌘Z desyncs the binding, ⏎ files undone words | **HOLLOW IN USE** — not reproduced on the old build in the running app (`X0`/`X1`/`X3`/`X4`); real only on roads that drive undo outside the event loop (probes, the test host). The did-undo/redo observers added at `0c31fcc5` fix a road she cannot reach. **Owed: the orchestrator's ruling** — (a) keep them as a no-op belt (VX-179's panel carries the same pair) and re-frame their pins as the test-host road's guard; or (b) drop them and their binding pins (the contract's "a hollow row is recorded, not fixed"), keeping (c) below. My recommendation: (b), with one short live re-check that the binding still follows ⌘Z/⇧⌘Z with the box's own manager (the walk's fixed-build evidence ran WITH the observers, so it cannot tell which road synced). |
+| VX-193's sibling — ⌘Z after an empty filing replays the old ranges | **FIXED** (`0c31fcc5`: the box's own `UndoManager`, ended at every programmatic adopt) — red on old in the harness (W1) AND reproduced in use on the old build (the logged `NSRangeException`, the broken undo after), green fixed (W2) and verified in use fixed (no exception; Undo disabled) in both hosts. |
+| VX-112 — the quick-entry caret returns mid-tour | **Her sighting: HOLLOW** — the Terminal block cursor (drawn while the box does NOT hold the caret), proven live with AX and keystrokes in both voices. **The box's own defects behind the ruled rule: FIXED** (`6bb9c7c9`) — red on old by the direct release-and-reattach pins (the brief's accepted shape), green fixed, the first-mount autofocus unchanged. No live road for them was shown in the walk (none was sought beyond her road). |
+| P-U4-2 (candidate 2, the away start) | **WITHDRAWN** — not reproduced live (`E1`). |
+| The VX-193 pins | **DEFECTIVE — a fix leg owed** (headless + a ≈10-min window): they assume two undo groups that the test host never closes; the fix is single-chunk cells (or explicit grouping), per the ruling above. |
+
+**Observation O-U4-3 (pre-existing, both builds — not this unit's road):** the Bookcase's quick entry is not autofocused
+at app LAUNCH (AX reads the window focused; old and new alike) — the F-FR-1 shape the `CaptureFocusReportTests` header
+recorded as untraced (the `.task` raise landing while the box is windowless), now seen live at launch. Whether the
+mount raise lands on an ordinary (tour-less) navigation to the Bookcase was not checked.
 
 ## Ladder
 

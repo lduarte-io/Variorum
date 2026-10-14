@@ -1,0 +1,440 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -scheme Variorum -destination platform=macOS -derivedDataPath DerivedData/vx282-u4 "-only-testing:VariorumTests/CaptureMicrosyntaxDoorTests" "-only-testing:VariorumTests/CaptureMicrosyntaxLineEndingTests" "-only-testing:VariorumTests/CaptureLineEndingDoorTests" "-only-testing:VariorumTests/CRLFImportDoorTests" "-only-testing:VariorumTests/TitleSuggestionChipTests" "-only-testing:VariorumTests/CommentTextAreaMountedTests" "-only-testing:VariorumTests/CommentPanelGeometryRuleTests" "-only-testing:VariorumTests/SystemHotKeyChordTests" "-only-testing:VariorumTests/SystemHotKeyDeclarationTests" "-only-testing:VariorumTests/SystemHotKeyRoadTests" "-only-testing:VariorumTests/TourEntryTests" "-only-testing:VariorumTests/TourSpotlightTests" "-only-testing:VariorumTests/TourEngineTests" "-only-testing:VariorumTests/TourOfferLineTests" "-only-testing:VariorumTests/BookcaseQuickEntryPlacementTests" "-only-testing:VariorumTests/ShelfModelTests" "-only-testing:VariorumTests/PromoteAndPaletteTests"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  SQLCipher: https://github.com/sqlcipher/SQLCipher.swift.git @ 4.18.0
+  swift-nio: https://github.com/apple/swift-nio.git @ 2.104.0
+  EventSource: https://github.com/mattt/eventsource.git @ 1.5.1
+  swift-atomics: https://github.com/apple/swift-atomics.git @ 1.3.1
+  swift-log: https://github.com/apple/swift-log.git @ 1.16.1
+  swift-syntax: https://github.com/swiftlang/swift-syntax @ 602.0.0
+  combine-schedulers: https://github.com/pointfreeco/combine-schedulers @ 1.2.0
+  VariorumCore: <home>/dev/variorum-vx-282 @ local
+  xctest-dynamic-overlay: https://github.com/pointfreeco/xctest-dynamic-overlay @ 1.11.0
+  Sparkle: https://github.com/sparkle-project/Sparkle @ 2.10.0
+  mcp-swift-sdk: https://github.com/modelcontextprotocol/swift-sdk.git @ 0.12.1
+  GRDB: https://github.com/lduarte-io/GRDB.swift.git @ 7.11.1+sqlcipher.1
+  swift-concurrency-extras: https://github.com/pointfreeco/swift-concurrency-extras @ 1.4.1
+  swift-system: https://github.com/apple/swift-system.git @ 1.8.1
+  swift-dependencies: https://github.com/pointfreeco/swift-dependencies.git @ 1.14.1
+  swift-clocks: https://github.com/pointfreeco/swift-clocks @ 1.1.0
+  swift-collections: https://github.com/apple/swift-collections.git @ 1.7.2
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, id:<device-udid>, name:My Mac }
+{ platform:macOS, arch:x86_64, id:<device-udid>, name:My Mac }
+2026-10-14 01:57:58.781114-0600 Variorum[92107:58740439] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to <home>/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/io.lduarte.Variorum.debug.savedState
+2026-10-14 01:57:59.046653-0600 Variorum[92107:58740439] [global-hotkey] InstallEventHandler system=carbon status=0
+2026-10-14 01:57:59.046764-0600 Variorum[92107:58740439] [global-hotkey] RegisterEventHotKey system=carbon quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 01:57:59.367536-0600 Variorum[92107:58740785] [logging-persist] cannot open file at line 53009 of [8fa8248e30]
+2026-10-14 01:57:59.367557-0600 Variorum[92107:58740785] [logging-persist] os_unix.c:53009: (2) open(/private/var/db/DetachedSignatures) - No such file or directory
+Test Suite 'Selected tests' started at 2026-10-14 01:57:59.569.
+Test Suite 'VariorumTests.xctest' started at 2026-10-14 01:57:59.569.
+Test Suite 'VariorumTests.xctest' passed at 2026-10-14 01:57:59.569.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-14 01:57:59.569.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+2026-10-14 01:57:59.599862-0600 Variorum[92107:58740439] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite "13s-b U1a — the quick-entry box sits at the Bookcase's foot" started.
+◇ Test onAShortBoardTheBoxSitsAboveTheBarWithAirAboveIt() started.
+2026-10-14 01:57:59.659132-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:57:59.659583-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:57:59.659630-0600 Variorum[92107:58740439] This NSLayoutConstraint is being configured with a constant that exceeds internal limits.  A smaller value will be substituted, but this problem should be fixed. Break on BOOL _NSLayoutConstraintNumberExceedsLimit(void) to debug.  This will be logged only once.  This may break in the future.
+2026-10-14 01:57:59.695144-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:57:59.695256-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:57:59.719014-0600 Variorum[92107:58740439] [protection] apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries
+2026-10-14 01:57:59.719326-0600 Variorum[92107:58740439] [sample-library] sample library (the adventures of sherlock holmes): alreadySeeded
+2026-10-14 01:57:59.719467-0600 Variorum[92107:58740439] [starred-gathering] starred gathering: alreadySeeded
+2026-10-14 01:57:59.719595-0600 Variorum[92107:58740439] [sample-library] welcome arrangement: alreadySettled
+2026-10-14 01:58:00.219236-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:00.219628-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+[13s U1a entry placement] books 2 · root (0.0, 32.0, 900.0, 640.0) · entry (0.0, 580.0, 900.0, 66.0) · bar (0.0, 646.0, 900.0, 26.0) · window frame (900.0, 672.0) · content (900.0, 640.0)
+✔ Test onAShortBoardTheBoxSitsAboveTheBarWithAirAboveIt() passed after 1.083 seconds.
+◇ Test onABoardTallerThanTheWindowTheBoxStaysOnScreenAboveTheBar() started.
+2026-10-14 01:58:00.802680-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:00.802886-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:00.853943-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:00.854131-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:00.854324-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:00.854364-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:00.865064-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:00.865283-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:01.357356-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:01.357565-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:01.390525-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:01.390708-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+[13s U1a entry placement] books 40 · root (0.0, 32.0, 900.0, 640.0) · entry (0.0, 580.0, 900.0, 66.0) · bar (0.0, 646.0, 900.0, 26.0) · window frame (900.0, 672.0) · content (900.0, 640.0)
+✔ Test onABoardTallerThanTheWindowTheBoxStaysOnScreenAboveTheBar() passed after 1.177 seconds.
+✔ Suite "13s-b U1a — the quick-entry box sits at the Bookcase's foot" passed after 2.261 seconds.
+◇ Suite "18o U2 — P23: a CRLF text at the Mac's bulk doors" started.
+◇ Test aWindowsFileDroppedOnTheLibraryImportsOneBlockPerParagraph() started.
+2026-10-14 01:58:01.927556-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:01.927708-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:01.944767-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:01.944938-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+✔ Test aWindowsFileDroppedOnTheLibraryImportsOneBlockPerParagraph() passed after 0.076 seconds.
+◇ Test theQuickNotePadFilesACRLFTextOneBlockPerParagraph() started.
+✔ Test theQuickNotePadFilesACRLFTextOneBlockPerParagraph() passed after 0.038 seconds.
+◇ Test theShelfQuickEntryBarFilesACRLFTextOneBlockPerParagraph() started.
+✔ Test theShelfQuickEntryBarFilesACRLFTextOneBlockPerParagraph() passed after 0.038 seconds.
+◇ Test aCRLFPasteIntoTheOpenTailSegmentsLikeItsLFTwin() started.
+✔ Test aCRLFPasteIntoTheOpenTailSegmentsLikeItsLFTwin() passed after 0.001 seconds.
+◇ Test theTypedRoadKeepsAControlReturnAsContent() started.
+✔ Test theTypedRoadKeepsAControlReturnAsContent() passed after 0.001 seconds.
+✔ Suite "18o U2 — P23: a CRLF text at the Mac's bulk doors" passed after 0.155 seconds.
+◇ Suite "The capture microsyntax at both Mac doors (13u4 C1)" started.
+◇ Test theShelfBoxFilesATitledTaggedNoteWithTheTokensGone() started.
+✔ Test theShelfBoxFilesATitledTaggedNoteWithTheTokensGone() passed after 0.035 seconds.
+◇ Test aSmartBookKeyedOnTheTagCollectsTheNoteByTheStandingRules() started.
+✔ Test aSmartBookKeyedOnTheTagCollectsTheNoteByTheStandingRules() passed after 0.033 seconds.
+◇ Test aTokenMayNameATagThatDoesNotExistYet() started.
+✔ Test aTokenMayNameATagThatDoesNotExistYet() passed after 0.033 seconds.
+◇ Test severalTokensAllApply() started.
+✔ Test severalTokensAllApply() passed after 0.034 seconds.
+◇ Test aBareHashtagFilesAsTextAndTagsNothing() started.
+✔ Test aBareHashtagFilesAsTextAndTagsNothing() passed after 0.028 seconds.
+◇ Test aMalformedBraceFilesAsTypedText() started.
+✔ Test aMalformedBraceFilesAsTypedText() passed after 0.028 seconds.
+◇ Test aTokenThatCannotApplyNeverCostsHerTheNote() started.
+✔ Test aTokenThatCannotApplyNeverCostsHerTheNote() passed after 0.026 seconds.
+◇ Test aCaptureOfNothingButTokensFilesNothing() started.
+✔ Test aCaptureOfNothingButTokensFilesNothing() passed after 0.018 seconds.
+◇ Test aTitleTokenOutranksTheOfferedFirstWords() started.
+✔ Test aTitleTokenOutranksTheOfferedFirstWords() passed after 0.038 seconds.
+◇ Test thePadFilesATitledTaggedNoteWithTheTokensGone() started.
+✔ Test thePadFilesATitledTaggedNoteWithTheTokensGone() passed after 0.033 seconds.
+◇ Test thePadsCaptureOfNothingButTokensFilesNothing() started.
+✔ Test thePadsCaptureOfNothingButTokensFilesNothing() passed after 0.018 seconds.
+◇ Test aRefusedPadKeepsTheWholeCaptureTokensIncluded() started.
+✔ Test aRefusedPadKeepsTheWholeCaptureTokensIncluded() passed after 0.017 seconds.
+◇ Test theMintIsAskedForTheCleanedTextAndTheTokensTitle() started.
+✔ Test theMintIsAskedForTheCleanedTextAndTheTokensTitle() passed after 0.021 seconds.
+✔ Suite "The capture microsyntax at both Mac doors (13u4 C1)" passed after 0.368 seconds.
+◇ Suite "The capture microsyntax reads CRLF and CR (18o U3 — row 12b)" started.
+◇ Test aTokenOnlyCRLFLineLeavesWithItsLineBreak() started.
+✔ Test aTokenOnlyCRLFLineLeavesWithItsLineBreak() passed after 0.001 seconds.
+◇ Test anUnclosedTokenNeverScansAcrossACRLF() started.
+✔ Test anUnclosedTokenNeverScansAcrossACRLF() passed after 0.001 seconds.
+◇ Test aForeignLineEndingCaptureParsesExactlyAsItsLFTwin() started.
+✔ Test aForeignLineEndingCaptureParsesExactlyAsItsLFTwin() passed after 0.001 seconds.
+◇ Test theExoticSeparatorsStayContent() started.
+✔ Test theExoticSeparatorsStayContent() passed after 0.001 seconds.
+✔ Suite "The capture microsyntax reads CRLF and CR (18o U3 — row 12b)" passed after 0.001 seconds.
+◇ Suite "CRLF captures at both Mac capture doors (18o U3 — row 12b)" started.
+◇ Test theShelfBoxInventsNoBlankParagraphWhereACRLFTokenLineStood() started.
+✔ Test theShelfBoxInventsNoBlankParagraphWhereACRLFTokenLineStood() passed after 0.031 seconds.
+◇ Test anUnclosedTagAtACRLFNeverCostsHerTheCapture() started.
+✔ Test anUnclosedTagAtACRLFNeverCostsHerTheCapture() passed after 0.027 seconds.
+◇ Test thePadFilesACRLFCaptureLikeItsLFTwin() started.
+2026-10-14 01:58:02.478316-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:02.478407-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:02.495213-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:02.495305-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+✔ Test thePadFilesACRLFCaptureLikeItsLFTwin() passed after 0.036 seconds.
+◇ Test theOfferedTitleIsTheFirstLineOfACRLFCapture() started.
+✔ Test theOfferedTitleIsTheFirstLineOfACRLFCapture() passed after 0.041 seconds.
+✔ Suite "CRLF captures at both Mac capture doors (18o U3 — row 12b)" passed after 0.137 seconds.
+◇ Suite "The comments panel's text geometry and focus rule (VX-179 U3)" started.
+◇ Test theAreasGeometryIsOwnedAndItsFirstLineIsTheInset() started.
+✔ Test theAreasGeometryIsOwnedAndItsFirstLineIsTheInset() passed after 0.001 seconds.
+◇ Test aRowIsItsMeasuredTextInWholePoints() started.
+✔ Test aRowIsItsMeasuredTextInWholePoints() passed after 0.001 seconds.
+◇ Test theCaptureBoxOwnsItsOriginAndBothHostsReadIt() started.
+✔ Test theCaptureBoxOwnsItsOriginAndBothHostsReadIt() passed after 0.001 seconds.
+◇ Test aCaretReportFocusesItsAreaAndALeavingOneClearsOnlyItsOwn() started.
+✔ Test aCaretReportFocusesItsAreaAndALeavingOneClearsOnlyItsOwn() passed after 0.001 seconds.
+✔ Suite "The comments panel's text geometry and focus rule (VX-179 U3)" passed after 0.001 seconds.
+◇ Suite "The comment writing area, mounted offscreen (VX-179 U3)" started.
+◇ Test thePlaceholderLiesOnTheCaretsOwnLine(voice:) started.
+◇ Test case passing 1 argument voice → .terminal to thePlaceholderLiesOnTheCaretsOwnLine(voice:) started.
+​◇ Test case passing 1 argument voice → .study to thePlaceholderLiesOnTheCaretsOwnLine(voice:) started.
+​✔ Test thePlaceholderLiesOnTheCaretsOwnLine(voice:) with 2 test cases passed after 0.274 seconds.
+◇ Test thePlaceholderInkIsExactlyTheTypedInk(voice:) started.
+◇ Test case passing 1 argument voice → .terminal to thePlaceholderInkIsExactlyTheTypedInk(voice:) started.
+​◇ Test case passing 1 argument voice → .study to thePlaceholderInkIsExactlyTheTypedInk(voice:) started.
+2026-10-14 01:58:04.134587-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:04.134668-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:04.134844-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:04.134890-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+​✔ Test thePlaceholderInkIsExactlyTheTypedInk(voice:) with 2 test cases passed after 2.680 seconds.
+◇ Test theEmptyAreaTypesInTheStylesFontAndTheTwinFollowsTheText() started.
+2026-10-14 01:58:05.494920-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:05.495004-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:05.495190-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:05.495237-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+✔ Test theEmptyAreaTypesInTheStylesFontAndTheTwinFollowsTheText() passed after 0.651 seconds.
+◇ Test aRowIsItsTextWithNoDeadAir(voice:) started.
+◇ Test case passing 1 argument voice → .terminal to aRowIsItsTextWithNoDeadAir(voice:) started.
+2026-10-14 01:58:06.147371-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:06.147514-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:06.147730-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:06.147779-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+​◇ Test case passing 1 argument voice → .study to aRowIsItsTextWithNoDeadAir(voice:) started.
+​✔ Test aRowIsItsTextWithNoDeadAir(voice:) with 2 test cases passed after 0.558 seconds.
+◇ Test theMarkSitsOnTheTextsFirstBaseline() started.
+2026-10-14 01:58:06.714072-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:06.714406-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:06.714893-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:06.715054-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+✔ Test theMarkSitsOnTheTextsFirstBaseline() passed after 0.275 seconds.
+◇ Test aFocusRequestBeforeAWindowIsHeldAndServedOnArrival() started.
+2026-10-14 01:58:07.258129-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:07.258470-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:07.261361-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:07.261527-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:07.814815-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:07.815160-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:07.815910-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:07.816089-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:08.382280-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:08.382606-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:08.383226-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:08.383423-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+✔ Test aFocusRequestBeforeAWindowIsHeldAndServedOnArrival() passed after 1.836 seconds.
+◇ Test undoAfterTheAreaIsClearedForHerCannotReplayTheOldText() started.
+✔ Test undoAfterTheAreaIsClearedForHerCannotReplayTheOldText() passed after 0.924 seconds.
+◇ Test escapeFallsThroughToTheHostsClose() started.
+2026-10-14 01:58:09.747254-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:09.747538-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:09.748126-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:09.748275-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+✔ Test escapeFallsThroughToTheHostsClose() passed after 0.151 seconds.
+◇ Test theCaptureBoxLaysItsFirstLineAtItsOwnOrigin(voice:) started.
+◇ Test case passing 1 argument voice → .terminal to theCaptureBoxLaysItsFirstLineAtItsOwnOrigin(voice:) started.
+​◇ Test case passing 1 argument voice → .study to theCaptureBoxLaysItsFirstLineAtItsOwnOrigin(voice:) started.
+​✔ Test theCaptureBoxLaysItsFirstLineAtItsOwnOrigin(voice:) with 2 test cases passed after 0.274 seconds.
+✔ Suite "The comment writing area, mounted offscreen (VX-179 U3)" passed after 7.629 seconds.
+◇ Suite "Shelf ordering & quick entry (Phase 13, B2)" started.
+◇ Test orderingIsStarredFirstThenAToZ() started.
+✔ Test orderingIsStarredFirstThenAToZ() passed after 0.001 seconds.
+◇ Test dragAPostOntoABookAddsMembershipIdempotently() started.
+✔ Test dragAPostOntoABookAddsMembershipIdempotently() passed after 0.060 seconds.
+◇ Test finishAndExtentFacesCallTheOps() started.
+✔ Test finishAndExtentFacesCallTheOps() passed after 0.032 seconds.
+✔ Suite "Shelf ordering & quick entry (Phase 13, B2)" passed after 0.094 seconds.
+◇ Suite "Promote to book & palette (Phase 13, B2)" started.
+◇ Test promoteSpecIsExactlyTheR30Vocabulary() started.
+✔ Test promoteSpecIsExactlyTheR30Vocabulary() passed after 0.001 seconds.
+◇ Test paletteListsCommandsAndCatalogHitsAndExecutes() started.
+2026-10-14 01:58:10.295288-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:10.295442-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:10.295636-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:10.295687-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+✔ Test paletteListsCommandsAndCatalogHitsAndExecutes() passed after 0.035 seconds.
+◇ Test paletteArrowsMoveTheSelectionAndEnterRunsIt() started.
+✔ Test paletteArrowsMoveTheSelectionAndEnterRunsIt() passed after 0.032 seconds.
+◇ Test paletteBlockHitsNavigateToTheirHome() started.
+✔ Test paletteBlockHitsNavigateToTheirHome() passed after 0.039 seconds.
+◇ Test staleTagChipReadsNeverLand() started.
+✔ Test staleTagChipReadsNeverLand() passed after 0.025 seconds.
+◇ Test extentInputDistinguishesClearFromTypo() started.
+✔ Test extentInputDistinguishesClearFromTypo() passed after 0.001 seconds.
+◇ Test catalogScopeFilterIsExact() started.
+✔ Test catalogScopeFilterIsExact() passed after 0.019 seconds.
+✔ Suite "Promote to book & palette (Phase 13, B2)" passed after 0.153 seconds.
+◇ Suite "The system hot key's chord (13e E14)" started.
+◇ Test theDeclaredLabelIsExactlyTheChordTheSystemIsAskedFor() started.
+✔ Test theDeclaredLabelIsExactlyTheChordTheSystemIsAskedFor() passed after 0.001 seconds.
+◇ Test everyModifierGlyphCarriesItsOwnCarbonBit() started.
+✔ Test everyModifierGlyphCarriesItsOwnCarbonBit() passed after 0.001 seconds.
+◇ Test aLabelThatIsNotModifiersThenOneLetterIsRefused() started.
+✔ Test aLabelThatIsNotModifiersThenOneLetterIsRefused() passed after 0.001 seconds.
+◇ Test theLetterTableCoversTheAlphabetAndNothingElse() started.
+✔ Test theLetterTableCoversTheAlphabetAndNothingElse() passed after 0.001 seconds.
+✔ Suite "The system hot key's chord (13e E14)" passed after 0.001 seconds.
+◇ Suite "The system hot key's declaration (13e E14)" started.
+◇ Test theSystemHotKeysRegisterExactlyTheDeclaredGlobalDoors() started.
+✔ Test theSystemHotKeysRegisterExactlyTheDeclaredGlobalDoors() passed after 0.001 seconds.
+◇ Test theQuickNoteActCarriesTheSystemDoorBesideItsThreeOthers() started.
+✔ Test theQuickNoteActCarriesTheSystemDoorBesideItsThreeOthers() passed after 0.001 seconds.
+◇ Test everyDeclaredSystemChordIsReadableAndNamedInTheHelper() started.
+✔ Test everyDeclaredSystemChordIsReadableAndNamedInTheHelper() passed after 0.001 seconds.
+◇ Test noSystemChordShadowsAnInAppOneOrAnother() started.
+✔ Test noSystemChordShadowsAnInAppOneOrAnother() passed after 0.001 seconds.
+✔ Suite "The system hot key's declaration (13e E14)" passed after 0.001 seconds.
+◇ Suite "The system hot key's road (13e E14)" started.
+◇ Test installingAsksForEveryDeclaredChordAndRoutesThePress() started.
+2026-10-14 01:58:10.417548-0600 Variorum[92107:58740439] [global-hotkey] InstallEventHandler system=unlabeled status=0
+2026-10-14 01:58:10.417586-0600 Variorum[92107:58740439] [global-hotkey] RegisterEventHotKey system=unlabeled quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 01:58:10.417628-0600 Variorum[92107:58740439] [global-hotkey] hot key fired: quickNote (fire #1)
+✔ Test installingAsksForEveryDeclaredChordAndRoutesThePress() passed after 0.001 seconds.
+◇ Test aSecondInstallReplacesTheActionAndAsksForNothingNew() started.
+2026-10-14 01:58:10.417772-0600 Variorum[92107:58740439] [global-hotkey] InstallEventHandler system=unlabeled status=0
+2026-10-14 01:58:10.417794-0600 Variorum[92107:58740439] [global-hotkey] RegisterEventHotKey system=unlabeled quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 01:58:10.417806-0600 Variorum[92107:58740439] [global-hotkey] hot key fired: quickNote (fire #1)
+✔ Test aSecondInstallReplacesTheActionAndAsksForNothingNew() passed after 0.001 seconds.
+◇ Test aPressForAChordWeNeverRoutedIsIgnored() started.
+2026-10-14 01:58:10.417977-0600 Variorum[92107:58740439] [global-hotkey] InstallEventHandler system=unlabeled status=0
+2026-10-14 01:58:10.418000-0600 Variorum[92107:58740439] [global-hotkey] RegisterEventHotKey system=unlabeled quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test aPressForAChordWeNeverRoutedIsIgnored() passed after 0.001 seconds.
+◇ Test uninstallHandsEveryChordBackAndStopsAnsweringPresses() started.
+2026-10-14 01:58:10.420097-0600 Variorum[92107:58740439] [global-hotkey] InstallEventHandler system=unlabeled status=0
+2026-10-14 01:58:10.420121-0600 Variorum[92107:58740439] [global-hotkey] RegisterEventHotKey system=unlabeled quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+✔ Test uninstallHandsEveryChordBackAndStopsAnsweringPresses() passed after 0.002 seconds.
+◇ Test aRefusedRegistrationIsRecordedWithItsStatus() started.
+2026-10-14 01:58:10.420258-0600 Variorum[92107:58740439] [global-hotkey] InstallEventHandler system=unlabeled status=0
+2026-10-14 01:58:10.420279-0600 Variorum[92107:58740439] [global-hotkey] RegisterEventHotKey system=unlabeled quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=-9878
+✔ Test aRefusedRegistrationIsRecordedWithItsStatus() passed after 0.001 seconds.
+◇ Test theCarbonRoadItselfTakesAChordAndReleasesIt() started.
+✔ Test theCarbonRoadItselfTakesAChordAndReleasesIt() passed after 0.001 seconds.
+◇ Test theSummonOpensExactlyTheOnePadWindow() started.
+✔ Test theSummonOpensExactlyTheOnePadWindow() passed after 0.001 seconds.
+✔ Suite "The system hot key's road (13e E14)" passed after 0.003 seconds.
+◇ Suite "The title suggestion at capture (13u3 UNIT B — her item 4)" started.
+◇ Test theBarOffersAndFilesUntitledUnlessSheClicks() started.
+✔ Test theBarOffersAndFilesUntitledUnlessSheClicks() passed after 0.028 seconds.
+◇ Test oneClickMakesTheFirstWordsTheTitle() started.
+✔ Test oneClickMakesTheFirstWordsTheTitle() passed after 0.029 seconds.
+◇ Test theDecisionRidesTheTextAndResetsWithIt() started.
+✔ Test theDecisionRidesTheTextAndResetsWithIt() passed after 0.018 seconds.
+◇ Test anEmptiedBoxForgetsTheDecision() started.
+✔ Test anEmptiedBoxForgetsTheDecision() passed after 0.017 seconds.
+◇ Test thePadOffersTheSameNameAndFilesUntitledByDefault() started.
+✔ Test thePadOffersTheSameNameAndFilesUntitledByDefault() passed after 0.042 seconds.
+◇ Test theChipDrawsHerWordsVerbatimAndOnlyFoldsItsOwn() started.
+✔ Test theChipDrawsHerWordsVerbatimAndOnlyFoldsItsOwn() passed after 0.001 seconds.
+◇ Test aLongOpeningIsOfferedWithoutTheEllipsis() started.
+✔ Test aLongOpeningIsOfferedWithoutTheEllipsis() passed after 0.027 seconds.
+✔ Suite "The title suggestion at capture (13u3 UNIT B — her item 4)" passed after 0.165 seconds.
+◇ Suite "13s-b U1a — the first-open tour offer" started.
+◇ Test aFreshDeviceIsOfferedAndKeepsARowForTheLine() started.
+✔ Test aFreshDeviceIsOfferedAndKeepsARowForTheLine() passed after 0.001 seconds.
+◇ Test notNowShowsTheHelpRoadThenRetiresForGood() started.
+✔ Test notNowShowsTheHelpRoadThenRetiresForGood() passed after 0.155 seconds.
+◇ Test takingTheTourKeepsNothingUntilTheTourEnds() started.
+✔ Test takingTheTourKeepsNothingUntilTheTourEnds() passed after 0.007 seconds.
+◇ Test theWordsAreHersAndTheHelpRoadNamesTheMenusDoor() started.
+✔ Test theWordsAreHersAndTheHelpRoadNamesTheMenusDoor() passed after 0.001 seconds.
+◇ Test theHelpMenuCarriesTheTourDoorTheSentenceNames() started.
+✔ Test theHelpMenuCarriesTheTourDoorTheSentenceNames() passed after 0.005 seconds.
+◇ Test theLineSitsAboveTheBarOnTheRightAndItsLeavingMovesNothing() started.
+2026-10-14 01:58:10.823915-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:10.824102-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:10.860339-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:10.860508-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:10.860751-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:10.860802-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:10.860994-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:10.861048-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:10.870275-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:10.870466-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:11.202582-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:11.202926-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:11.378516-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:11.378776-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:11.395820-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:11.396010-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:11.411216-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:11.411441-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:11.411799-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:11.411881-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:11.704138-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:11.704517-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:11.966500-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:11.966876-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:11.967704-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:11.967940-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:11.968729-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:11.968868-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:12.516418-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:12.516849-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:12.520430-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:12.520727-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:12.544253-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:12.544580-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+✔ Test theLineSitsAboveTheBarOnTheRightAndItsLeavingMovesNothing() passed after 1.836 seconds.
+✔ Suite "13s-b U1a — the first-open tour offer" passed after 2.007 seconds.
+◇ Suite "13s-b U2 — the tour's ring" started.
+◇ Test theFirstCandidateOnScreenLightsAndDoorsCountTheirCopies() started.
+✔ Test theFirstCandidateOnScreenLightsAndDoorsCountTheirCopies() passed after 0.002 seconds.
+◇ Test theCardSitsBesideTheFirstGroupsRingUnlessItLivesInThePanel() started.
+✔ Test theCardSitsBesideTheFirstGroupsRingUnlessItLivesInThePanel() passed after 0.001 seconds.
+◇ Test aFoundAnchorIsPresentExactlyWhileItIsFound() started.
+✔ Test aFoundAnchorIsPresentExactlyWhileItIsFound() passed after 0.001 seconds.
+◇ Test anAnchoredDoorRingsItselfOnlyWhileLitAndJoinsALateTour() started.
+2026-10-14 01:58:13.069522-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:13.069863-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:13.070519-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:13.070763-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:13.102825-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:13.103208-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+✔ Test anAnchoredDoorRingsItselfOnlyWhileLitAndJoinsALateTour() passed after 0.841 seconds.
+◇ Test theRingClosesInsideTheViewport() started.
+✔ Test theRingClosesInsideTheViewport() passed after 0.001 seconds.
+◇ Test aKeepClearRegionReportsWhileATourRuns() started.
+✔ Test aKeepClearRegionReportsWhileATourRuns() passed after 0.102 seconds.
+◇ Test theBadgeLocatorFindsOnlyTheBadgeOfTheBlockAsked() started.
+✔ Test theBadgeLocatorFindsOnlyTheBadgeOfTheBlockAsked() passed after 0.102 seconds.
+✔ Suite "13s-b U2 — the tour's ring" passed after 1.051 seconds.
+◇ Suite "13s-b U2 — the tour engine's doors" started.
+◇ Test aStartAwayFromTheBookcaseTakesHerThereAndRingsTheSidebar() started.
+✔ Test aStartAwayFromTheBookcaseTakesHerThereAndRingsTheSidebar() passed after 0.025 seconds.
+◇ Test endTourFinishesOnceAsEndedAndTheSpotlightGoesDark() started.
+2026-10-14 01:58:13.672906-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:13.673044-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:13.673315-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:13.673359-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+✔ Test endTourFinishesOnceAsEndedAndTheSpotlightGoesDark() passed after 0.021 seconds.
+◇ Test theEndCardRecordsCompletionAndTheFieldGuideChoiceOpensIt() started.
+2026-10-14 01:58:13.695184-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:13.695278-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+✔ Test theEndCardRecordsCompletionAndTheFieldGuideChoiceOpensIt() passed after 0.021 seconds.
+◇ Test legThreeOpensThePoolsTuckedRunOnArrival() started.
+✔ Test legThreeOpensThePoolsTuckedRunOnArrival() passed after 0.018 seconds.
+◇ Test theWindowsFactsSpeakTheRulesWords() started.
+✔ Test theWindowsFactsSpeakTheRulesWords() passed after 0.001 seconds.
+✔ Suite "13s-b U2 — the tour engine's doors" passed after 0.088 seconds.
+◇ Suite "13s-b U2 — the tour starts in the real shell" started.
+◇ Test helpsDoorStartsTheTourAtStepOneAndEndTourRetiresTheOffer() started.
+2026-10-14 01:58:13.817267-0600 Variorum[92107:58740439] [global-hotkey] InstallEventHandler system=inert status=0
+2026-10-14 01:58:13.817334-0600 Variorum[92107:58740439] [global-hotkey] RegisterEventHotKey system=inert quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0
+2026-10-14 01:58:14.202659-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:14.203309-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:14.204140-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:14.204375-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:14.233728-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:14.234010-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:14.750938-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:14.751291-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:14.772488-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:14.772910-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:14.811648-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:14.812030-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:15.352181-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:15.352404-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:15.352726-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:15.352791-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:15.369678-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:15.369948-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:15.911445-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:15.911849-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:15.912551-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:15.912719-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:15.919076-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:15.919346-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:16.475337-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:16.475510-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:16.475786-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:16.475846-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:16.476071-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is infinity.
+2026-10-14 01:58:16.476126-0600 Variorum[92107:58740439] [AppKit] Invalid view geometry: width is too large.
+2026-10-14 01:58:16.658105-0600 Variorum[92107:58740439] [Invalid Configuration] Geometry action is cycling between duplicate values.
+✔ Test helpsDoorStartsTheTourAtStepOneAndEndTourRetiresTheOffer() passed after 3.037 seconds.
+✔ Suite "13s-b U2 — the tour starts in the real shell" passed after 3.037 seconds.
+✔ Test run with 92 tests in 17 suites passed after 17.159 seconds.
+2026-10-14 01:58:32.899 xcodebuild[92015:58738970] [MT] IDETestOperationsObserverDebug: 35.167 elapsed -- Testing started completed.
+2026-10-14 01:58:32.899 xcodebuild[92015:58738970] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 01:58:32.899 xcodebuild[92015:58738970] [MT] IDETestOperationsObserverDebug: 35.167 sec, +35.167 sec -- end
+
+Test session results, code coverage, and logs:
+	<home>/dev/variorum-vx-282/App/Variorum/DerivedData/vx282-u4/Logs/Test/Test-Variorum-2026.10.14_01-57-57--0600.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started
