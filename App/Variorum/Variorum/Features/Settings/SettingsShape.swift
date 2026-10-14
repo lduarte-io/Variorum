@@ -301,6 +301,32 @@ nonisolated enum SettingsCatalog {
             // name finds it); "smart" is retired (§14).
             keywords: ["tag", "tags", "hierarchy", "rename", "promote", "gathering",
                        "label", "folder"]),
+        // VX-281 ladder R1-4 (R-VX184-6: the setup lives on the Connect tab):
+        // the Connect tab's own row — its title IS the section's words, so a
+        // search for the setup's words opens the pane ON Connect
+        // (`MCPPaneTab.holding`), never behind another tab.
+        // VX-281 ladder R2-3: listed AHEAD of the server switch's row, so a
+        // search tied between them (her client's name — "claude" — the
+        // switch's keyword and Connect's "claude code") goes to the setup
+        // (R1-4's rule; ties break by this order, `SettingsSearch.findings`).
+        SettingsRow(
+            id: "mcpConnect", pane: .mcp, title: MCPPaneCopy.connectSection,
+            blurb: "The setup for your MCP client, ready to copy: a command for a terminal, "
+                + "or settings to paste into the client.",
+            keywords: ["connect", "setup", "set up", "install", "command", "copy", "claude code",
+                       "codex", "json", "stdio"]),
+        // VX-281 ladder R2-3 — PROVISIONAL P-VX281-R2-1 (b): the Clients
+        // tab's own row (its title IS the tab's label), so a search for
+        // "client"/"clients" opens the pane ON Clients, where the client list
+        // lives (`MCPPaneTab.holding`) — its lead "Clients" outranks
+        // "Connect a client" for "client" (a prefix against a contains). No
+        // setup word among its keywords: every setup word still lands on
+        // Connect. Its blurb is new words (FOR VX-234).
+        SettingsRow(
+            id: "mcpClients", pane: .mcp, title: MCPPaneCopy.clientsSection,
+            blurb: "Every client you've approved or denied: whether it's connected now, how many "
+                + "grants it holds, and Change\u{2026} or Deny\u{2026} for each.",
+            keywords: ["approved", "denied", "deny"]),
         // 13n-b U1 (R-13n-5 — the pane speaks direct and technical): the
         // server toggle and the one open-book switch.
         SettingsRow(
@@ -320,16 +346,6 @@ nonisolated enum SettingsCatalog {
                        "server", "client", "share", "grant", "socket",
                        "anthropic", "openai", "chatgpt", "gpt", "cursor", "gemini", "copilot",
                        "windsurf", "ollama"]),
-        // VX-281 ladder R1-4 (R-VX184-6: the setup lives on the Connect tab):
-        // the Connect tab's own row — its title IS the section's words, so a
-        // search for the setup's words opens the pane ON Connect
-        // (`MCPPaneTab.holding`), never behind another tab.
-        SettingsRow(
-            id: "mcpConnect", pane: .mcp, title: MCPPaneCopy.connectSection,
-            blurb: "The setup for your MCP client, ready to copy: a command for a terminal, "
-                + "or settings to paste into the client.",
-            keywords: ["connect", "setup", "set up", "install", "command", "copy", "claude code",
-                       "codex", "json", "stdio"]),
         // 13n-c U4 — WAITING (arrival X): where a client's ask waits besides
         // its icon; ⌥⌘, opens the pane there.
         SettingsRow(

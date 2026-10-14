@@ -218,8 +218,13 @@ struct MCPPaneTabsTests {
             "“open book” finds the MCP pane's row")
         #expect(MCPPaneTab.holding(findingLead: found.lead) == .shared, "the finding's own lead lands the tab")
         // VX-281 ladder R1-4 (A JUSTIFIED EDIT, the ritual): Connect's row joins.
-        #expect(AppSettingsView.rowIDsRendered[.mcp] == ["mcpServer", "mcpWaiting", "mcpConnect", "mcpOpenBook"])
+        // Ladder R2-3 (A JUSTIFIED EDIT, the ritual): the Clients tab's row joins.
+        #expect(AppSettingsView.rowIDsRendered[.mcp]
+                    == ["mcpServer", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"])
         #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpConnect")) == .connect)
+        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpClients")) == .clients)
+        #expect(SettingsCatalog.title("mcpClients") == MCPPaneTab.clients.label,
+                "the row's title is the tab's own label — the search names what the pane shows")
     }
 
     /// **VX-281 ladder R1-4 (RED ON OLD):** the setup's own words land on

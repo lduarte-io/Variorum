@@ -134,8 +134,9 @@ struct AppSettingsView: View {
         // VX-281 U1: the open book renders in the Shared with AI tab, and a
         // search finding it opens the pane on that tab (`MCPPaneTab.holding`).
         // VX-281 ladder R1-4: the Connect tab's section ("Connect a client"),
-        // where a search for the setup's words lands.
-        .mcp: ["mcpServer", "mcpWaiting", "mcpConnect", "mcpOpenBook"],
+        // where a search for the setup's words lands. Ladder R2-3: the Clients
+        // tab (its label is the row's title), where "client"/"clients" land.
+        .mcp: ["mcpServer", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"],
         .protection: ["protection"],
         .dataSafety: ["backups"],
         .diagnostics: ["crashReports"],

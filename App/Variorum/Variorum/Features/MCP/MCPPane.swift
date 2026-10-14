@@ -68,11 +68,14 @@ nonisolated enum MCPPaneTab: String, CaseIterable, Identifiable, Sendable {
     /// promise, `AppSettingsView.rowIDsRendered`: the search never names a
     /// row the pane does not show); the setup's words find Connect's own row
     /// and open it there (VX-281 ladder R1-4 — where R-VX184-6 put the
-    /// setup). nil: the row sits above the tabs (the server switch, Waiting)
-    /// or the finding is the pane itself.
+    /// setup); "client"/"clients" find the Clients tab's own row and open it
+    /// there (ladder R2-3 — PROVISIONAL P-VX281-R2-1 (b)). nil: the row sits
+    /// above the tabs (the server switch, Waiting) or the finding is the pane
+    /// itself.
     static func holding(findingLead lead: String) -> MCPPaneTab? {
         switch lead {
         case SettingsCatalog.title("mcpConnect"): .connect
+        case SettingsCatalog.title("mcpClients"): .clients
         case SettingsCatalog.title("mcpOpenBook"): .shared
         default: nil
         }

@@ -123,8 +123,11 @@ struct MCPPaneTests {
         // 13n-c U4 (A JUSTIFIED EDIT, the ritual — arrival X): the pane's
         // Waiting list is a catalog row too, so the search finds an ask.
         // VX-281 ladder R1-4 (A JUSTIFIED EDIT, the ritual): the Connect
-        // tab's row joins — the setup's words land there.
-        #expect(AppSettingsView.rowIDsRendered[.mcp] == ["mcpServer", "mcpWaiting", "mcpConnect", "mcpOpenBook"])
+        // tab's row joins — the setup's words land there. Ladder R2-3 (A
+        // JUSTIFIED EDIT, the ritual): the Clients tab's row joins —
+        // "client"/"clients" land there (PROVISIONAL P-VX281-R2-1 (b)).
+        #expect(AppSettingsView.rowIDsRendered[.mcp]
+                    == ["mcpServer", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"])
         #expect(SettingsCatalog.title("mcpServer") == "Enable the MCP server")
         for word in ["mcp", "claude", "claude code", "open book"] {
             #expect(SettingsSearch.findings(matching: word, in: SettingsSearch.settingsEntries)
