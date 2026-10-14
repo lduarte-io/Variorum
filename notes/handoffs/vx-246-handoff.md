@@ -1,6 +1,6 @@
 # VX-246 handoff — the MCP door's fixes: security, undo, your editor vs the AI, badges (2026-10-14)
 
-**Run:** VX-246 "Run: MCP door fixes & AI docs" · PR #162, merged to `main` as a merge commit («merge SHA») · the
+**Run:** VX-246 "Run: MCP door fixes & AI docs" · PR #162, merged to `main` as a merge commit (`712bbb4f`) · the
 record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md` (your rulings, the orchestrator's provisional rulings,
 every unit record, both ladder rounds, the stage log) · built overnight 2026-10-13/14 under your mandate: *"continue on
 through the night ending in a merge to main … Rule provisionally in my absence and leave me a handoff with any needed

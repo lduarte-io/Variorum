@@ -2639,7 +2639,7 @@ Status: answered except call 3, which is open.
 
 ## VX-246 — Run: MCP door fixes (2026-10-14)
 
-#226 — **THE VX-246 RATIFY BUNDLE (merged 2026-10-14, PR #162, merge commit «merge SHA»; the binding record is
+#226 — **THE VX-246 RATIFY BUNDLE (merged 2026-10-14, PR #162, merge commit 712bbb4f; the binding record is
 `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md` — her rulings during the run, ORCHESTRATOR'S PROVISIONAL
 RULINGS, each UNIT RECORD's PROVISIONALs block with its options, THE LADDER (Fable round 1 → Opus round 2, closed);
 your handoff `notes/handoffs/vx-246-handoff.md`).** Built overnight under your mandate (*"Rule provisionally in my
