@@ -96,6 +96,53 @@ public struct ProtectionGuards: Equatable, Sendable {
     /// of an account in either mode, a different library landing. Off:
     /// leaving an account and a landing keep the key (today's behaviour).
     public var rekeyAtEveryCrossing = true
+
+    // U3 — the guards in the executor (it also reads U2's
+    // `everyOwnKeyRetiredAtCastle`, `leaveIDGatesCompletion`,
+    // `castleKindCustodyThroughLeave`, `freshVaultBeforeAppleWrite`,
+    // `rekeyAtEveryCrossing`, `doorTimeVaultCheck`,
+    // `standardRecordNoDestructiveRepair` and `deleteOnSightByIDOnly` where
+    // it acts on the same rule).
+    /// A PLAN RESUMES ONLY WHEN THIS MAC'S SECTION NAMES IT (§3.6, VX-313):
+    /// a plan the section doesn't name — planted, or replayed from an earlier
+    /// act — is ignored. Off: any plan that verifies resumes.
+    public var planNamedBySection = true
+    /// EVERY REPAIR'S PRECONDITION VERIFIED BEFORE A DELETE (§3.3: "every
+    /// delete comes after its replacement has verified"). Off: a delete runs on
+    /// the assessment's word.
+    public var repairPreconditionsVerified = true
+    /// THE EXECUTOR NEVER MAKES A TOUCH ID ITEM FOR A REPAIR (§3.3, §3.10):
+    /// one is made only at a person's press. Off: `.makeTouchIDItem` runs.
+    public var repairNeverMakesTouchIDItem = true
+    /// PREPARE-THEN-COMMIT (§3.4, VX-235): the new key's custody item and key
+    /// file exist before the library is re-encrypted. Off: the swap runs
+    /// first and the key file after it.
+    public var prepareBeforeCommit = true
+    /// THE EXPORT-OFF STEP (§3.9, §3.12): entering Castle — by Use Castle or a
+    /// follow — turns this device's scheduled Markdown export off. Off: it
+    /// stays on.
+    public var exportOffAtCastle = true
+    /// A FOLLOWER'S ANCHOR LOCKED UNDER THE SECRET TYPED AT ITS FOLLOW
+    /// (§3.4, her 2026-10-14 confirm). Off: only the outgoing key and its
+    /// copied locks.
+    public var followerAnchorTypedLock = true
+    /// THE OLD-NAME ITEM DELETED ONLY BY ITS RECORDED ID (§3.5 point 5):
+    /// a new old-name item an older build minted later is left alone. Off:
+    /// whatever id the item carries now.
+    public var oldSharedKeyDeletedByRecordedID = true
+    /// A COPY'S ACT IN FLIGHT IS CLEARED WHENEVER IT'S OPENED (§3.6, §3.7).
+    /// Off: the copy's sections keep their acts.
+    public var copyActClearedOnOpen = true
+    /// THE MOVE KEEPS THE OLD WRAP (§3.5 point 2): a key of this Mac's own
+    /// beside the old shared key's wrap, never instead of it. Off: the old
+    /// wrap is dropped.
+    public var moveKeepsOldWrap = true
+    /// THE RETIREMENT RE-RUNS THE MOVES (§3.5 point 4) before the old key
+    /// goes. Off: it goes with no move first.
+    public var retirementRerunsMoves = true
+    /// THE FRESH PAIR AFTER THE MOVE (§3.5 point 2): the move ends with a
+    /// fresh backup pair of the live library. Off: none.
+    public var freshPairAfterMove = true
     #endif
 
     public var twoHomesOn: Bool {
@@ -253,6 +300,94 @@ public struct ProtectionGuards: Equatable, Sendable {
     public var rekeyAtEveryCrossingOn: Bool {
         #if DEBUG
         return rekeyAtEveryCrossing
+        #else
+        return true
+        #endif
+    }
+
+    public var planNamedBySectionOn: Bool {
+        #if DEBUG
+        return planNamedBySection
+        #else
+        return true
+        #endif
+    }
+
+    public var repairPreconditionsVerifiedOn: Bool {
+        #if DEBUG
+        return repairPreconditionsVerified
+        #else
+        return true
+        #endif
+    }
+
+    public var repairNeverMakesTouchIDItemOn: Bool {
+        #if DEBUG
+        return repairNeverMakesTouchIDItem
+        #else
+        return true
+        #endif
+    }
+
+    public var prepareBeforeCommitOn: Bool {
+        #if DEBUG
+        return prepareBeforeCommit
+        #else
+        return true
+        #endif
+    }
+
+    public var exportOffAtCastleOn: Bool {
+        #if DEBUG
+        return exportOffAtCastle
+        #else
+        return true
+        #endif
+    }
+
+    public var followerAnchorTypedLockOn: Bool {
+        #if DEBUG
+        return followerAnchorTypedLock
+        #else
+        return true
+        #endif
+    }
+
+    public var oldSharedKeyDeletedByRecordedIDOn: Bool {
+        #if DEBUG
+        return oldSharedKeyDeletedByRecordedID
+        #else
+        return true
+        #endif
+    }
+
+    public var copyActClearedOnOpenOn: Bool {
+        #if DEBUG
+        return copyActClearedOnOpen
+        #else
+        return true
+        #endif
+    }
+
+    public var moveKeepsOldWrapOn: Bool {
+        #if DEBUG
+        return moveKeepsOldWrap
+        #else
+        return true
+        #endif
+    }
+
+    public var retirementRerunsMovesOn: Bool {
+        #if DEBUG
+        return retirementRerunsMoves
+        #else
+        return true
+        #endif
+    }
+
+    public var freshPairAfterMoveOn: Bool {
+        #if DEBUG
+        return freshPairAfterMove
         #else
         return true
         #endif

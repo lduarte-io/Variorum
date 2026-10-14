@@ -22,6 +22,104 @@ public struct PlanStep: Codable, Equatable, Sendable {
     }
 }
 
+/// **The act's non-secret parameters a resume needs** (VX-305 U3, a recorded
+/// refinement of U1's plan: a plan "carries every fact a resume needs" — §3.9's
+/// follow — and never a secret, so what the press chose that is NOT a secret
+/// rides here, sealed with the plan). Every field is optional; each act reads
+/// its own.
+public struct ActParameters: Codable, Equatable, Sendable {
+    /// A new Castle key's gate, chosen at THIS press: Touch ID (an item made
+    /// at this press) or Always ask (none) — §3.10.
+    public var gate: GateStyle?
+    /// The act runs on the account (a vault write, a rotation).
+    public var synced: Bool?
+    /// The account the act writes the vault of.
+    public var accountID: String?
+    /// VX-109: the vault revision the door read — a rotation's first write
+    /// takes it, never a re-fetch.
+    public var doorRevision: Int?
+    /// The descriptor the typed passphrase is derived under: the door's
+    /// (reused by a re-key and the anchor), or a NEW passphrase's fresh one.
+    public var passphraseKDF: PassphraseKDF.Descriptor?
+    public var passphraseIsNew: Bool?
+    public var wordsAreNew: Bool?
+    /// Which secret a follow typed — "passphrase" or "words".
+    public var typedSecret: String?
+    /// A follow's kind — `FollowKind`'s name.
+    public var follow: String?
+    /// The new library key's kind.
+    public var newKind: ProtectionMode?
+    /// The library's account after the act (leaves: none; joins: the new one).
+    public var targetAccount: String?
+    /// Whether `targetAccount` is to be set (a leave clears it).
+    public var changesAccount: Bool?
+    /// A mode the act confirms or moves to.
+    public var targetMode: ProtectionMode?
+    /// The account Apple key a leave minted (its id is the vault's mark).
+    public var accountAppleKeyID: String?
+    /// This Mac's own Apple key the act minted for the library.
+    public var ownAppleKeyID: String?
+    /// Copies and folders.
+    public var copyID: String?
+    public var copyIDs: [String]?
+    public var destination: String?
+    /// Key files an act works through (Re-link's library arm).
+    public var keyFileIDs: [String]?
+    /// Device settings an act writes.
+    public var settings: DeviceSettings?
+    /// The account's corpus key id when the act began, and the new one a
+    /// rotation's first write carries — stamped in the plan BEFORE the write,
+    /// so a resume tells its own landed write from another device's rotation.
+    public var oldCorpusKeyID: String?
+    public var newCorpusKeyID: String?
+    /// This Mac's own Apple key the outgoing key file named at the door.
+    public var outgoingAppleKeyID: String?
+    /// The account's Apple key a rotation into Castle retires once it completes.
+    public var retiringAccountAppleKeyID: String?
+    /// Replace All Keys on an account still on the old shared key re-links
+    /// it first (§3.5 point 7).
+    public var relinksFirst: Bool?
+    /// A follower's anchor carries the master's road (false when the vault's
+    /// master is still the Castle-era one — §3.4).
+    public var includeMasterRoad: Bool?
+
+    public init(
+        gate: GateStyle? = nil, synced: Bool? = nil, accountID: String? = nil, doorRevision: Int? = nil,
+        passphraseKDF: PassphraseKDF.Descriptor? = nil, passphraseIsNew: Bool? = nil, wordsAreNew: Bool? = nil,
+        typedSecret: String? = nil, follow: String? = nil, newKind: ProtectionMode? = nil,
+        targetAccount: String? = nil, changesAccount: Bool? = nil, targetMode: ProtectionMode? = nil,
+        accountAppleKeyID: String? = nil, ownAppleKeyID: String? = nil, copyID: String? = nil,
+        copyIDs: [String]? = nil, destination: String? = nil, keyFileIDs: [String]? = nil,
+        settings: DeviceSettings? = nil, oldCorpusKeyID: String? = nil, newCorpusKeyID: String? = nil,
+        outgoingAppleKeyID: String? = nil, retiringAccountAppleKeyID: String? = nil
+    ) {
+        self.gate = gate
+        self.synced = synced
+        self.accountID = accountID
+        self.doorRevision = doorRevision
+        self.passphraseKDF = passphraseKDF
+        self.passphraseIsNew = passphraseIsNew
+        self.wordsAreNew = wordsAreNew
+        self.typedSecret = typedSecret
+        self.follow = follow
+        self.newKind = newKind
+        self.targetAccount = targetAccount
+        self.changesAccount = changesAccount
+        self.targetMode = targetMode
+        self.accountAppleKeyID = accountAppleKeyID
+        self.ownAppleKeyID = ownAppleKeyID
+        self.copyID = copyID
+        self.copyIDs = copyIDs
+        self.destination = destination
+        self.keyFileIDs = keyFileIDs
+        self.settings = settings
+        self.oldCorpusKeyID = oldCorpusKeyID
+        self.newCorpusKeyID = newCorpusKeyID
+        self.outgoingAppleKeyID = outgoingAppleKeyID
+        self.retiringAccountAppleKeyID = retiringAccountAppleKeyID
+    }
+}
+
 public struct ProtectionPlan: Codable, Equatable, Sendable {
     public static let currentFormat = 1
 
@@ -36,11 +134,13 @@ public struct ProtectionPlan: Codable, Equatable, Sendable {
     public var toFingerprint: String?
     public var steps: [PlanStep]
     public var createdAt: Date
+    /// What the press chose that a resume needs — never a secret (U3).
+    public var parameters: ActParameters?
 
     public init(
         format: Int = ProtectionPlan.currentFormat, libraryID: String, deviceID: String,
         sequence: Int, act: ProtectionAct, fromFingerprint: String? = nil,
-        toFingerprint: String? = nil, steps: [PlanStep], createdAt: Date
+        toFingerprint: String? = nil, steps: [PlanStep], createdAt: Date, parameters: ActParameters? = nil
     ) {
         self.format = format
         self.libraryID = libraryID
@@ -51,6 +151,7 @@ public struct ProtectionPlan: Codable, Equatable, Sendable {
         self.toFingerprint = toFingerprint
         self.steps = steps
         self.createdAt = createdAt
+        self.parameters = parameters
     }
 
     /// The first step not yet done — where a resume starts; nil when all are.
