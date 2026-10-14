@@ -135,7 +135,12 @@ extension ActContext {
         file.passphrase = envelope.passphrase
         file.words = envelope.recovery
         file.master = envelope.master
-        if envelope.master != nil, let account = accountID, let vault = executor.freshVaults[account] {
+        // §3.5a: the master's words copy is the recovery wrap of the master
+        // THIS file's master wrap is under — copied only while the vault's
+        // master is still that one (the vault's corpus key id is the one the
+        // file was last reconciled against: a rotation changes it). VX-305 U4.
+        if envelope.master != nil, let account = accountID, let vault = executor.freshVaults[account],
+           envelope.vaultCorpusKeyID == vault.corpusKeyID {
             file.masterWordsCopy = vault.format.masterWrappedByRecovery
         }
         // Today's Apple wrap is the OLD SHARED key's: it rides beside.
@@ -189,7 +194,21 @@ extension ProtectionExecutor {
     ) async throws -> ActOutcome {
         guard library.record == nil else { throw ExecutorRefusal.nothingToDo }
         let verdict = LegacyModeReader.read(inputs.legacyMode)
-        let (mode, confirmed) = verdict.migrationRecord
+        var (mode, confirmed) = verdict.migrationRecord
+        // §3.13 step 1: "a vault that moved while the library didn't is an
+        // ordinary follow". The vault's word is the ACCOUNT's mode; when this
+        // library's own custody shape says, unambiguously, that its key was
+        // born the other kind, the library is recorded by its key's kind and
+        // the follow (a key change) is owed — today's silent follow, which
+        // would make a Castle-born key Standard with no key change, is gone
+        // (§3.15). PROVISIONAL P-U4-4 (VX-305 U4, found by the scenario world).
+        if case .vault = verdict.source, inputs.legacyMode.rawKeyCustody != .unknown {
+            let shape = LegacyModeReader.shapeReading(inputs.legacyMode.keyFile, inputs.legacyMode.rawKeyCustody)
+            if shape != mode {
+                mode = shape
+                confirmed = true
+            }
+        }
         let at = now()
         let deviceID = inputs.carriedDeviceID ?? leaves.ids.mintID()
         var record = ProtectionRecord.minting(

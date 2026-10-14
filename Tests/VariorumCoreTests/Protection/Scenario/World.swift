@@ -417,6 +417,12 @@ final class SWorld {
     /// The device's keychain goes (replaced, wiped, signed into another Apple
     /// ID): its queued deletes never reach iCloud.
     func loseQueuedDeletes(_ device: SDevice) {
+        // Apple keys that lived only here (made while off, or queued and never
+        // uploaded) are gone with the keychain.
+        let cloud = device.appleAccount.flatMap { appleAccounts[$0]?.cloud } ?? [:]
+        for (name, replica) in device.keychain.synced where replica.item != nil && cloud[name]?.item == nil {
+            if let id = replica.item?.value.appleKey?.id { truth.lostAppleKeys.insert(id) }
+        }
         for (name, replica) in device.keychain.synced where replica.dirty && replica.item == nil {
             if case .own(let id)? = ProtectionNames.parseAppleKeyAccount(name.account, scope: Self.scope) {
                 truth.deletesNotCarried.insert(id)
@@ -621,7 +627,15 @@ final class SWorld {
         device.executor = executor
         var library = try executor.unlock(with: key, alsoInHand: also)
         device.library = library
-        _ = try await executor.settle(&library, typed: typed)
+        do {
+            _ = try await executor.settle(&library, typed: typed)
+        } catch let crash as SimulatedCrash {
+            throw crash
+        } catch {
+            // The lobby opens the library all the same; the act stays owed
+            // (promise 6 then says whether it may: only offline).
+            stepLog.append("  \(device.name): the act in flight couldn't settle now (\(error))")
+        }
         device.library = library
         if library.record == nil {
             let inputs = migrationInputs(device, library: library)

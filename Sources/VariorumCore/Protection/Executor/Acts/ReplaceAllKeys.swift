@@ -135,6 +135,17 @@ extension ProtectionExecutor {
            let id = vault.format.appleKeyID, let shared = try leaves.apple.readOldSharedAppleKey(), shared.id == id {
             parameters.relinksFirst = true
         }
+        // Decision 30, at the DOOR: a Standard Replace All Keys keeps the new
+        // master under the account's own Apple key, read here — never minted.
+        // With none readable (and no re-link first), it is refused before any
+        // write (refused from inside the plan, it left the act in flight with
+        // nothing able to finish it — VX-305 U4, found by the scenario world).
+        if record.mode == .standard, parameters.relinksFirst != true, let vault = freshVaults[account],
+           vault.format.masterWrappedByAppleHeld != nil {
+            guard let id = vault.format.appleKeyID, try leaves.apple.readAppleKey(id: id) != nil else {
+                throw ExecutorRefusal.appleKeyUnreadable
+            }
+        }
         return try await perform(
             ReplaceAllKeysProgram(), parameters: parameters, secrets: secrets, typed: typed,
             toKey: leaves.ids.mintLibraryKey(), library: &library)

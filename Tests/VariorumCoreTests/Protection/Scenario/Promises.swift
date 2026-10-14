@@ -628,7 +628,17 @@ extension SWorld {
         for name in device.keychain.names(service: LegacyItems.storeKeyService) {
             if let item = device.keychain.item(name), !item.touchID, let key = item.value.libraryKey { custody[PF.fp(key)] = key }
         }
-        let master: SymmetricKey? = library.record?.account.flatMap { todayMaster($0) }
+        // The master as the vault was READ this session (the line was computed
+        // from that reading — the account moving on since is promise 7's).
+        var masters: [SymmetricKey?] = [library.record?.account.flatMap { todayMaster($0) }]
+        if let account = library.record?.account, let read = device.executor?.freshVaults[account] {
+            for p in known(account).timeline.compactMap(\.passphrase) {
+                if let pk = passphraseKey(p, read.format.kdf), let m = try? read.format.unwrapMaster(withPassphraseKey: pk.key) {
+                    masters.append(m)
+                    break
+                }
+            }
+        }
         for copy in catalog.copies {
             guard let opens = assessment.opensWith[copy.id], let truthCopy = truth.copies[copy.id] else { continue }
             let holder = truthCopy.holder
@@ -637,8 +647,21 @@ extension SWorld {
             // former account that still opens it (§3.1 rule 2's last
             // exception) — a road elsewhere, by its own words, never here.
             for route in opens.routes where route.opener != .appleKeyNotReadableHere {
-                var book = SecretBook(custody: custody, apple: apple, oldShared: oldSharedKey(device), vaultMaster: master)
+                var book = SecretBook(custody: custody, apple: apple, oldShared: oldSharedKey(device), vaultMaster: masters.first ?? nil)
                 var candidates: [SecretBook] = []
+                // `.current` is "the secret that opens the live key file's own
+                // lock" (the route finder's definition) — on a device whose
+                // local copy lags a change made elsewhere, that's the secret it
+                // still holds, beside the account's newest (the vault road).
+                let livePassphrases = Array(Set(slotK.timeline.compactMap(\.passphrase) + [slotK.passphrase].compactMap { $0 }))
+                let liveWords = slotK.timeline.compactMap(\.words) + [slotK.words].compactMap { $0 }
+                switch route.opener {
+                case .passphrase(.current):
+                    for p in livePassphrases { var b = book; b.passphrases[.current] = p; candidates.append(b) }
+                case .words(.current):
+                    for w in liveWords { var b = book; b.words[.current] = w; candidates.append(b) }
+                default: break
+                }
                 switch route.opener {
                 case .passphrase(let day):
                     switch day {
@@ -655,6 +678,7 @@ extension SWorld {
                 default: break
                 }
                 if candidates.isEmpty { candidates = [book] }
+                candidates += candidates.flatMap { b in masters.dropFirst().map { var c = b; c.vaultMaster = $0; return c } }
                 let opened = candidates.contains { (try? walk(route, in: catalog, book: $0)).map { PF.fp($0) == copy.fingerprint || copy.candidateFingerprints.contains(PF.fp($0)) } == true }
                 if !opened {
                     violations.append(Violation(promise: 9, device: device.name, detail: "\(copy.id)'s line names \(route.opener), which doesn't open it"))

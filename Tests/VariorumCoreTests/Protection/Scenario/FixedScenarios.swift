@@ -68,6 +68,31 @@ struct MigrationScenarios {
         }
     }
 
+    /// §3.13 step 1's "a vault that moved while the library didn't is an
+    /// ordinary follow": a Mac still on today's build in Castle, its account
+    /// left Castle on another device; it migrates after. Its library is
+    /// recorded by its own key's kind — Castle — and the follow into Standard
+    /// (one secret typed, a fresh key, the anchor) is owed; the Castle-born key
+    /// never lands in a silent item or under an Apple key.
+    @Test func aVaultThatMovedWhileTheLibraryDidntIsAnOrdinaryFollow() async throws {
+        let world = try scenarioWorld { w in
+            let account = w.rng.uuid()
+            try w.todayAccount(account, mode: .castle)
+            try w.today(on: w.macA, TodaySpec(mode: .castle, gate: .touchID, account: account))
+            try w.today(on: w.macB, TodaySpec(mode: .castle, gate: .alwaysAsk, account: account))
+            w.macB.build = .older
+        }
+        let k0 = try #require(world.macB.slot?.fingerprint)
+        await world.done([.useStandard("macA"), .updateToNewBuild("macB"), .launch("macB")])
+        let record = try #require(world.macB.slot?.record)
+        #expect(record.mode == .castle && record.currentFingerprint == k0, "the migration took the vault's word over the library's own key")
+        #expect(world.owedFollow(world.macB) == .intoStandard)
+        #expect(!world.macB.keychain.local.contains { $0.key.service == ProtectionNames.custodyService && !$0.value.touchID && $0.value.value.libraryKey.map(PF.fp) == k0 })
+        await world.done([.follow("macB", .passphrase), .settle])
+        #expect(world.macB.slot?.record?.mode == .standard && world.macB.slot?.fingerprint != k0)
+        expectPromisesKept(world)
+    }
+
     /// "corner 45's ambiguous case: no custody repair until the notice is
     /// answered, and confirming Standard is a key change" — a VX-202 victim
     /// (recorded Castle, not confirmed, its key in today's silent item). Once
