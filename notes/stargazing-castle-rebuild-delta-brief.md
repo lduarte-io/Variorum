@@ -10,6 +10,10 @@ site agent only at that switch, by the author, with the release that carries it.
 wording, and the app's own sentences come from the copy file (`notes/plans/pre-13x-copy.md`) as phases 3–5 re-write
 it. As with the current briefs, the site agent writes the copy and this brief carries facts only.
 
+VX-329 also checks whether any device can still run an older build. While one can, the "I left Castle" entry carries
+the design's §8 transitional note: an older build's leave puts the Castle-era master under the old shared Apple key,
+so copies from before that leave can open through the Apple account until the old key is retired.
+
 The register stays the current briefs' one. Everyday answers name no key. The FAQ may say "the twelve words", "your
 Apple account" and "iCloud Keychain", and never "box".
 
@@ -42,8 +46,8 @@ two ways:
 - **"I moved to Castle, lost my passphrase and twelve words, and have an old backup and my iCloud."** The old backup
   **no longer opens** through the Apple account. Her ruling: *"I think it's fine for people to lose access to previosu
   backups if they lost their passphrase / words / touchID + they're going into castle, so long as they're adequately
-  warned about it."* The door says so before anything happens and offers *Export a plain copy first*. Only Markdown
-  exports remain readable.
+  warned about it."* The door says so before anything happens and offers *Export a plain copy first*. Only plain
+  exports you made remain readable: Markdown exports, or a plain copy exported at the door.
 - **"Someone has my old backups and my Apple account — and I've since moved to Castle."** They **can't open** those
   backups any more, apart from the exceptions above.
 - **"Moving to a new Mac" / Send Library.** The copy lands on the other Mac under a fresh key of its own, with an
