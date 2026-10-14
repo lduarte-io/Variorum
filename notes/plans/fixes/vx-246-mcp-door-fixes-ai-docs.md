@@ -862,8 +862,8 @@ the guide's lesson-2 sentence (U8) — a client's own setup re-run moves its nam
 
 ## U2 UNIT RECORD — the undo class: VX-276 · VX-277 · VX-119 (opus-implementer, from 2026-10-13 ~23:40 MDT)
 
-**What this unit has NOT done yet (said first; rewritten at every seam):** no code change, no pin, no stage window —
-this commit is the record, the LIVE STATUS and the design, written before code. Everything below "The design" is the
+**What this unit has NOT done yet (said first; rewritten at every seam):** no production code change, no stage window —
+the record, the design and the red pins (piece 1) are in. Everything below "The design" is the
 plan, not a claim.
 
 **Read in full before code (never delegated):** CLAUDE.md and its loaded canon (AppSpec §9's structural undo/redo
@@ -888,7 +888,7 @@ under `Sources/VariorumCore/Operations/` (each half says whether it changed anyt
 | piece | what | status |
 |---|---|---|
 | 0 | this record + LIVE STATUS + the design argued (before code) | DONE (this commit) |
-| 1 | the pins FIRST, on the pre-fix API: the five round-2 probes + one per family (revive, VX-277's adopt doors, Delete Block after Put back, VX-119's single-file import and copy ops, the partial-entry and mirror orders) → RED on the pre-fix tree, counts recorded | NOT-STARTED |
+| 1 | the pins FIRST, on the pre-fix API: the five round-2 probes + one per family (revive, VX-277's adopt doors, Delete Block after Put back, VX-119's single-file import and copy ops, the partial-entry and mirror orders) → RED on the pre-fix tree, counts recorded | DONE (this commit) — NEW `Tests/VariorumCoreTests/UndoQuietPressTests.swift`, 22 tests, pre-fix API only (`undo(with:)`/`redo(with:)`, rows read back), each checking its premise (her door registered nothing / cleared no future). **RED on the pre-fix tree (`748b21d9`'s sources): 22 of 22 failed, 22 issues — one each, every one the "her change stands" line, no premise line** (log `notes/plans/vx246-screens/u2/logs/p1-pins-red.log`, gitignored). By family: VX-276's five round-2 probes (`lockRedoAfterQuietUndo`, `finishRedoAfterQuietUndo`, `renameBackToOriginalThenQuietUndoThenRedo`, `deleteNoteRedoAfterHerPutBackAndAQuietUndo`, `deleteChapterRedoAfterHerRestoreAndAQuietUndo`) 5 · the revive family (add_comment, apply_tag, create_section, create_note, and add_note_to_book's seat in the other order — ⌥⌘Z wrote, her dismissal, ⇧⌥⌘Z) 5 · the mirror order (an undo after a quiet redo) 1 · the client's adopt over two slots (her ✓ back on one) 1 · VX-277: her adopt's undo over her later ✓ 1, her adopt's parts 1, Delete Block after her Put back 1 · VX-119: the single-file import 1, Duplicate as Version 1, the F1 stamp key (a tombstone on another stamp between ⌥⌘Z and ⇧⌥⌘Z) 1 · entries with parts in the mirror order: her merge (the merged block she put back) 1, the client's batch of takes 1, the client's rule over two columns 1, imported paste blocks 1 |
 | 2 | the rule in `UndoStack` (halves report whether they changed anything; a quiet half retires its entry; the compound tracks its legs) + every registration site converted (the compiler enumerates them) + the per-part entries' boxes + the Mac door's quiet words → GREEN, every existing undo/redo suite unmodified | NOT-STARTED |
 | 3 | red again BY REVERT (announced first, on a committed tree; restored and verified) | NOT-STARTED |
 | 4 | THE SWEEP TABLE complete — every one of the 85 registrations FIXED or SAFE with its reason | NOT-STARTED |
