@@ -678,6 +678,19 @@ refinement): `ProtectionFixtures`, `NamesAndSealTests` (9), `RecordModelTests` (
   to decide from the vault.
 - The one Sonnet lookup (external facts only, read-only) ran in the background while code was written.
 
+### ORCHESTRATOR NOTE after U1 (2026-10-14)
+
+- **U1 verified, not trusted:** the 18 U1 suites re-run by the orchestrator — `✔ Test run with 60 tests in 18 suites
+  passed` — and the commits, status flips and record spot-checked. The release-gap claim re-verified mechanically
+  (unguarded references to a `#if DEBUG`-only symbol).
+- **The release-build gap is FIXED — VX-345** (minted, triaged Bug · Confirmed · Pre-launch · High; the orchestrator's
+  own small fix, commit `f880263e`): the three Markdown P1-counter tests wrapped whole in `#if DEBUG`. Proof:
+  `swift test -c release --filter "KeyFileWrapTests|CastleAnchorTests|MarkdownSyntaxTests"` on THIS tree —
+  `✔ Test run with 29 tests in 3 suites passed`. §1 item 1's both-configurations road is open; the ticket closes with
+  the run's PR. The U1 record's "owner: the orchestrator" line is resolved here.
+- P-U1-1's phase-2 leaves (the sandboxed reads, the GeneratedUID lifecycle checks) ride §11's closeout into the
+  vx-306 plan.
+
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions)
 
 *(empty)*
