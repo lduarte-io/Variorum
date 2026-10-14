@@ -305,6 +305,9 @@ struct MCPCompareLandingTests {
             session.commandRouter.unregisterDetail(elsewhere)  // stale, a no-op
             let afterSwitch = try await herOwnCompare(session, db, on: world.anchor)
             expectHerColumns(afterSwitch, twin: world.twin)
+            // Her ⌘1 — back to Write; the board goes.
+            #expect(session.commandRouter.requestMode(.write))
+            session.commandRouter.noteMode(.write)
             afterSwitch.teardown()
 
             // (ii) The detail tears down with no successor before the board mounts.
