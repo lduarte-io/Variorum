@@ -1644,6 +1644,12 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         func noteLiveness(_ live: Bool) {
             let was = wasLive
             defer { wasLive = live }
+            // VX-296: a pane going READ keeps its selection but holds no
+            // caret of hers any more — the line it honoured is re-read
+            // caret-blind (the host has set `isEditable` already, so the
+            // settle reads no selection). Before the convergence occasion
+            // below, which measures what italics may have rewrapped.
+            if !live, was, let view { settleMarkdownCaret(in: view) }
             // 13c 1G: a liveness TRANSITION (either direction) is a
             // convergence occasion — "clicking into other blocks" moves the
             // ring, and the stale card's live→read flip is the one event it
@@ -1940,6 +1946,13 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         /// keeps, on the surface kind that has no storage delegate of its own.
         /// It observes and never gates: the verdict is always the default.
         private var pendingEditRange: NSRange?
+        /// VX-296: the same keystroke as the PRE-edit range it replaces and
+        /// the length of what replaces it — what moves the face's caret claim
+        /// with the text. Set and cleared beside `pendingEditRange`.
+        private var pendingEditReplaced: (old: NSRange, newLength: Int)?
+        /// VX-296: which line the markdown face last styled honouring this
+        /// pane's caret (the shared `MarkdownCaretRescue.Ledger`).
+        private var markdownCaret = MarkdownCaretRescue.Ledger()
 
         func textView(
             _ textView: NSTextView,
@@ -1949,11 +1962,17 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             pendingEditRange = NSRange(
                 location: affectedCharRange.location,
                 length: (replacementString as NSString?)?.length ?? 0)
+            pendingEditReplaced = (
+                affectedCharRange,
+                (replacementString as NSString?)?.length ?? affectedCharRange.length)
             return true
         }
 
         func textDidChange(_ notification: Notification) {
             guard let view else { return }
+            if let replaced = pendingEditReplaced {
+                markdownCaret.noteEdit(replacing: replaced.old, newLength: replaced.newLength)
+            }
             if let storage = view.textStorage {
                 // No recorded range (an edit that reached the storage by some
                 // other path) falls back to the caret's own lines — still
@@ -1962,13 +1981,37 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                     storage, range: pendingEditRange ?? view.selectedRange())
             }
             pendingEditRange = nil
+            pendingEditReplaced = nil
+            // VX-296: the keystroke's restyle above is caret-blind (byte-
+            // unchanged); the selection has landed by now (measured: AppKit
+            // posts the selection change, then this), so the caret's honour
+            // settles here — before the remeasure, since italics can rewrap.
+            settleMarkdownCaret(in: view)
             onEdit?(view.string)
             remeasure()
         }
 
         func textViewDidChangeSelection(_ notification: Notification) {
             guard let view else { return }
+            // VX-296: a caret move settles the face's honour of it. Mid-
+            // keystroke this notification PRECEDES `textDidChange`, whose own
+            // caret-blind restyle would undo a settle made here — so a pending
+            // edit leaves the settle to it.
+            if pendingEditReplaced == nil, settleMarkdownCaret(in: view) { remeasure() }
             onSelectionChange?(view.selectedRange())
+        }
+
+        /// VX-296 — the shared caret settle on this pane: its selection while
+        /// it is LIVE (editable), none while it reads (a read pane honours no
+        /// caret — a find step's selection, a click on its way to a focus
+        /// request). Returns whether a line was restyled.
+        @discardableResult
+        private func settleMarkdownCaret(in view: PaneTextView) -> Bool {
+            guard let storage = view.textStorage else { return false }
+            return MarkdownStyling.settleCaret(
+                &markdownCaret,
+                selection: view.isEditable ? view.selectedRange() : nil,
+                in: storage)
         }
 
         /// Measure and publish, through the ONE door. The Stage 4 gate's

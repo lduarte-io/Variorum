@@ -336,6 +336,11 @@ final class EditorViewModel {
     /// `desyncRecoveryCount`'s: zero, always, and any other value is a bug
     /// the pins are entitled to fail on.
     @ObservationIgnored private(set) var identityAuditFailures = 0
+    /// **VX-296 — which line the markdown face last styled honouring the
+    /// caret** (the shared `MarkdownCaretRescue.Ledger`). Noted at every
+    /// character edit (`storageDidEdit`'s top) and settled at every
+    /// selection change (`settleMarkdownCaret`).
+    @ObservationIgnored private var markdownCaret = MarkdownCaretRescue.Ledger()
     /// The surface-text truth per variant + word-count cache — the
     /// LEDGER (13b 1a, T3 slice: the echo-detection map moved into
     /// `EditorSurfaceLedger`, pure and unit-tested; the semantics are the
@@ -1215,6 +1220,17 @@ final class EditorViewModel {
         // itself waits for the layout pass that consumes the edit
         // (`overlayLayoutDidSettle`), never runs against pre-layout frames.
         overlayGeometryGeneration &+= 1
+        // VX-296: EVERY character edit moves the markdown face's caret claim
+        // with the text (the suppressed programmatic writes included — each
+        // re-derives its own lines caret-blind) and marks it for the next
+        // settle. Offsets only; nothing is written here — the caret this
+        // report would need is the PRE-edit one (measured: `didProcessEditing`
+        // runs before AppKit moves the selection), so the honour waits for
+        // the selection change (`settleMarkdownCaret`).
+        markdownCaret.noteEdit(
+            replacing: NSRange(
+                location: editedRange.location, length: max(0, editedRange.length - delta)),
+            newLength: editedRange.length)
         guard !suppressEditProcessing else { return }
         // THE BINDING (mobile round 2, batch 1 — the shared crash fix): the
         // gate's answer is consumed ONLY while it still describes the edit
@@ -3479,6 +3495,24 @@ final class EditorViewModel {
     // through a live door — `archiveCaretTake` in `EditorSessionTests`.)
 
     // MARK: - Caret + badges
+
+    /// **VX-296 — the markdown face honours her caret** (her ruling on the
+    /// ticket: fix (a), "your fix is good"). Runs on EVERY selection change
+    /// (`EditorSurfaceDelegate.textViewDidChangeSelection`), which AppKit
+    /// posts after every input-road edit — a typed letter, a forward-delete
+    /// that leaves the caret still — and on every caret move, with the
+    /// selection already landed (measured; `storageDidEdit` sees the
+    /// pre-edit one). While her caret sits between the space she just typed
+    /// and a closing marker (`*hello |*`), that line reads with the closer
+    /// still counting; when the caret leaves, the line it honoured is
+    /// re-read caret-blind. The O(1) gate makes every other caret move free,
+    /// and a settle restyles at most two LINES (P1). Attributes only: no
+    /// character, no block identity, nothing registered with text undo.
+    func settleMarkdownCaret() {
+        guard let textView, let storage = textView.textStorage else { return }
+        MarkdownStyling.settleCaret(
+            &markdownCaret, selection: textView.selectedRange(), in: storage)
+    }
 
     func updateCaretContext() {
         guard let textView else { return }

@@ -145,11 +145,30 @@ nonisolated enum MarkdownStyling {
     }
 
     /// Re-styles the LINES that `range` touches. Returns whether anything was
-    /// written (false = the zero-write fast path).
+    /// written (false = the zero-write fast path). `caret` — the live
+    /// editor's selection, nil everywhere but the caret settle (VX-296; the
+    /// shared core says what it changes).
     @discardableResult
-    static func restyle(_ storage: NSMutableAttributedString, range: NSRange) -> Bool {
+    static func restyle(
+        _ storage: NSMutableAttributedString, range: NSRange, caret: NSRange? = nil
+    ) -> Bool {
         MarkdownFace.restyle(
-            storage, range: range, base: EditorDocument.baseFont, palette: palette.face)
+            storage, range: range, base: EditorDocument.baseFont, palette: palette.face,
+            caret: caret)
+    }
+
+    /// **VX-296 — a live Mac surface's caret has settled** (the Write editor
+    /// and the book's inline editor through `EditorViewModel`, every live
+    /// pane through `PaneSurfaceView.Coordinator`). The shared core's
+    /// `settleCaret`, with this Mac's values.
+    @discardableResult
+    static func settleCaret(
+        _ ledger: inout MarkdownCaretRescue.Ledger, selection: NSRange?,
+        in storage: NSMutableAttributedString
+    ) -> Bool {
+        MarkdownFace.settleCaret(
+            &ledger, selection: selection, in: storage,
+            base: EditorDocument.baseFont, palette: palette.face)
     }
 
     /// **Re-derives the face on every line that already wears one — one

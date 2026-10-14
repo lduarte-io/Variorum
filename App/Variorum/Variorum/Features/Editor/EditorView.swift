@@ -855,6 +855,9 @@ extension EditorSurfaceDelegate: NSTextViewDelegate {
     }
 
     func textViewDidChangeSelection(_ notification: Notification) {
+        // VX-296: the face honours the landed caret first (attributes only),
+        // then the caret context reads the surface as she will see it.
+        model.settleMarkdownCaret()
         model.updateCaretContext()
     }
 }
