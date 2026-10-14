@@ -4279,3 +4279,25 @@ products). **The reviewer's batch recommendation for that window** (the orchestr
 changed source file is `TutorialSeeder.swift`, so the Tutorial* family (U1's G2 set) + `TutorialMCPChapterTests`
 alone red/green on the two products, plus `MCPHerEditorDoorTests` for F-4's warning count — the core doc edits
 (F-2/F-3) ride the headless package. Round 2 (`opus-reviewer` at max) then re-checks the fixes.
+
+### ROUND 1 — THE FIX PASS (the implementer's — opus-implementer, 2026-10-14)
+
+**What this pass does NOT do (said first):** it runs NO Mac test. F-1's red/green, F-4's warning count and the
+merge-moment whole-target run fold into ONE closeout window after round 2 (the orchestrator's call); this pass builds
+the two products that window runs and writes the window's first steps below. Zero `Sync/`, custody, Keychain or
+editor-seam lines; no product code beyond the lesson's one paragraph and two doc comments.
+
+**VX-292 re-check (before touching `TutorialSeeder`):** main's in-flight table (`origin/main` `fa3bc6e1`) lists only
+VX-246 and VX-282; no VX-292 branch exists on the remote; VX-282's branch touches none of this pass's files. Clear.
+
+#### LIVE STATUS — the fix pass's pieces (flipped in the same commit as each piece)
+
+| # | piece | state |
+|---|---|---|
+| 1 | F-1's pin, test-only (VX-258) | DONE (this commit) — `TutorialMCPChapterTests.lessonTwoConnectingAClient`: the old sentence's `contains` (`:280–281` at `4e5d2943`) replaced by the three designed lines — `!text.contains("Running the setup again moves the name")`, the whole new sentence's `contains`, and the guide half of the parity guard (`text.contains(oneRule)`); the L1 half (`MCPPaneCopy.clientBoundary.contains(oneRule)`) is a guard, green on both trees. The rule-side `decide` arms byte-unchanged. RED product next |
+| 1b | the RED product `DerivedData/vx246-r1-red` (`build-for-testing`, no claim) | NEXT |
+| 2 | F-1's lesson edit (VX-258) | — |
+| 3 | F-2 + F-3, the doc edits (VX-277) | — |
+| 4 | F-4, the harness (VX-275) | — |
+| 5 | the whole headless package green, with counts | — |
+| 6 | the FIXED product `DerivedData/vx246-final` | — |

@@ -277,8 +277,24 @@ struct TutorialMCPChapterTests {
             // newest copied setup takes the name); the sentence says the rule
             // as built, and is pinned against it here.
             #expect(!text.contains("a second tool using the same name is turned away"))
-            #expect(text.contains("a key that ties that name to it. Running the setup again moves the name to the "
-                                  + "new key, and a tool still using an older key, or none, is turned away."))
+            // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 ladder round 1,
+            // F-1): "Running the setup again moves the name to the new key"
+            // was falsified in its turn — only a CLIENT'S OWN setup (a key
+            // copied for its name) re-binds with zero clicks; an "Any MCP
+            // client" copy under a name she approved waits for her OK
+            // (`MCPSetupKeyRule.decide`'s `.unclaimed` arm, pinned below). The
+            // lesson now says L1's clause verbatim, and the parity guard holds
+            // the guide and the pane to the one rule.
+            #expect(!text.contains("Running the setup again moves the name"),
+                    "the unscoped re-run sentence (false for an Any-client copy since VX-258)")
+            #expect(text.contains("a key that ties that name to it. Running the client's own setup again moves the "
+                                  + "name to the new key; a setup copied for any MCP client waits for your OK before "
+                                  + "it takes a name you approved; and a tool still using an older key, or none, is "
+                                  + "turned away."))
+            let oneRule = "Running the client's own setup again moves the name to the new key; a setup copied for "
+                + "any MCP client waits for your OK before it takes a name you approved"
+            #expect(text.contains(oneRule), "the guide says L1's clause")
+            #expect(MCPPaneCopy.clientBoundary.contains(oneRule), "…and L1 says it (the parity guard)")
             #expect(text.contains("where any program running as you can read it"), "K2's non-defeat, said")
             #expect(MCPPaneCopy.clientBoundary.contains("binds that name to it"), "L1 says the same")
             // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 U1b): L1 scopes the
