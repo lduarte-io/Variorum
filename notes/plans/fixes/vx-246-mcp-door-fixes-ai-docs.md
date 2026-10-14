@@ -67,7 +67,7 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | **U7** — the agent's read-backs | VX-254 · VX-256 · VX-261 | write-reply digests (every take-writing tool, U5's and U6's new ones included); compact or paged `read_note`; the client's own recent acts | pins; a real-client live round | after U5 and U6, so the digests cover the new tools |
 | **U8** — the AI's docs (LAST) | VX-197 | the field guide's MCP chapter; `MCPSession.instructions` (bound 3,000); the tool descriptions; the stargazing brief's delta | the truth pins (`TutorialMCPChapterTests`, the advice's caps); the chapter walked in both voices; a real client reading the instructions | starts ONLY after VX-281 merges and main is merged in. Never concurrent with VX-292, her tutorial session (`TutorialSeeder`) |
 | **LADDER** | the whole run's diff | `opus-reviewer` at max, capped at three rounds (same-model flow) | — | plus a `fable-reviewer` cold review WHEN NEEDED (the editor-seam units), or once at the end if none was needed (her word at kickoff) |
-| **CLOSEOUT** | — | the merge (serialized through the coordinator), canon deltas, the QUESTIONS bundle, the handoff | — | the `/Applications` refresh waits for the next release (her word, relayed by the coordinator 2026-10-13) |
+| **CLOSEOUT** | — | the merge (serialized through the coordinator), canon deltas, the QUESTIONS bundle, the handoff | — | ~~the `/Applications` refresh waits for the next release (her word, relayed by the coordinator 2026-10-13)~~ *[superseded 2026-10-14 by her word to this session (her rulings section)]*: only the night's FINAL merge refreshes `/Applications`, and the coordinator decides who is last. VX-246 refreshes at its merge ONLY if the coordinator says it is last |
 
 ## Hard rules binding every unit
 
@@ -121,7 +121,7 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | U1 — the door's security and correctness | CORE DONE, headless green at `ab552c5a` (MCP 223/48 · core 2,800/324 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~678k context (the cutover rule). The rest is U1b, below. U1's Mac batch rides U2's stage window (orchestrator call, see THE ORCHESTRATOR ON U1's HAND-BACK) |
 | U1b — VX-258's face and U1's remainder | WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5), and U2's MCP walk legs W2/W3 (no detour needed once the face exists). Note for W2/W3: on an empty redo stack the Redo item is DISABLED (`EditorCommands.swift:576`, unchanged), so "nothing to redo" reads as a disabled item, never a toast (U2 STAGE RUN's finding 1) |
 | U2 — the undo class | **WINDOW 1 PROVEN 2026-10-14 00:23–00:38** (U2 STAGE RUN below): the Mac batch 1,084 tests / 148 suites green (1,078 + 6 gated skips, 0 failed — U1's G1–G3 included), W1 proven in both voices, the dev store restored cmp-SAME. Open only for W2/W3 in U1b's window. — Earlier: BUILT, headless green at `10223a2d` (MCP 223/48 · core 2,826/326 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~634–690k context (the cutover rule). Its stage window (the Mac batch with U1's groups, plus W1, her own door) goes to a FRESH runner; W2/W3 move to U1b's window. The acceptance closes when W1–W3 have run |
-| U3 — her editor vs the wire | IN-PROGRESS — implementer spawned from the U3 BRIEF below (2026-10-14 ~00:50) |
+| U3 — her editor vs the wire | BUILT, headless green at `61ec7723` (MCP 236/49 · core 2,826/326 · workbook 40/6; both Mac products built: `vx246-u3-red` is the red-on-old product, `vx246-u3` the fixed one). The implementer is retired at ~620k context (cutover). Its window (`vx246-u3`: the Mac pins red on old, the 215-suite batch, Claude Code by U1's detour, and the timing driver) goes to a FRESH runner. VX-323 (the wider class) was born and fixed here |
 | U4 — the faces after big writes | NOT-STARTED |
 | U5 — the write tools' shapes | NOT-STARTED |
 | U6 — Compare from the wire | NOT-STARTED |
@@ -164,6 +164,11 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
   proven in both voices, posture Standard/unlocked, cmp-SAME vs the A1 copy (Study voice), prefs 0 keys differ.
   Two notes went with it: the A1 copy `scale-prestage-20261014T062331Z` is the coordinator's to prune, and
   `defaults import` merges rather than replaces (re-export and diff).
+- ~00:58: the coordinator relayed her word (to vx-282, ~00:50): runs continue through the night to a merge, ONLY the
+  night's final merge refreshes `/Applications`, and the coordinator decides who is last. It asked whether we expect
+  to merge tonight. Answered by scope, with no time estimate (her rule): what is left in order, so VX-246 merges after
+  VX-281 and likely after VX-282.
+- ~01:40: REQUEST sent for `vx246-u3` (the runner's minutes to follow with READY).
 
 ## Cross-run coordination
 
@@ -186,6 +191,10 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
        reads the client from there.
     4. Waiting sits ABOVE the tabs, with connection requests beside it. The re-bind row goes there, next to the grant
        asks. The pane remembers its tab on the door (`paneTab`).
+    5. **FYI (2026-10-14 ~00:55):** its ladder's R1-3 fix also edits `MCPDoor.copySetupCommand(for:)`. It closes an
+       in-flight-copy receipt race and drops or re-aims that function's default argument. That is the function the face
+       passes the client name through, so U1b reads it AFTER their merge.
+  - **U3's MCPDoor hook:** vx-281 acknowledged it; no collision expected.
 - **VX-283** (VX-123's navigate-away road, VX-122's revival signal): U3 builds on the one navigate-away road
   (`.variorumNotesDeleted` → `WorkspaceModel.notesDeleted`). U4 checks VX-122's signal before inventing a refresh of
   its own (the runway, §2).
@@ -214,11 +223,29 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 - **VX-275, 2026-10-13 ~21:45 MDT, asked in chat.** The orchestrator proposed option (a): before a wire delete, flush
   her typing and navigate her pane away from the dead note, exactly as her own Delete door does. Her answer: *"yeah
   that's fine on that call."* U3 builds (a).
+- **HER OVERNIGHT WORD, 2026-10-14 ~01:05 MDT, to this session, verbatim:** *"I want you to continue on through the
+  night ending in a merge to main - the final merge in of the night can be the only one to do an applications refresh.
+  Rule provisionally in my absence and leave me a handoff with any needed information to note down."*
+  - The run continues unit by unit through the night, to a merge.
+  - The `/Applications` refresh happens only at the night's final merge, and the coordinator says which merge that is.
+  - The orchestrator rules provisionally where she would rule, never on the author-only list's irreversible acts (her
+    accounts or credentials, deleting or overwriting what she made, history rewrites, a synced schema lockstep deploy).
+    Every such ruling is logged in ORCHESTRATOR'S PROVISIONAL RULINGS below, for the handoff.
 - **P-VX258-2 (U1's bind arm) RATIFIED, 2026-10-13 ~23:35 MDT, in chat.** The orchestrator told her what was built:
   an approved client name with no key tied to it yet (after opening a library from another Mac, or after a deny and
   a re-approve) accepts a key copied from that client's own setup tab with no clicks; any other new key waits for her
   OK. Her answer: *"i ratify what you built"*. It covers only that call; P-VX260-1's option (b) isn't built yet and
   stays provisional. On VX-258 as a comment.
+
+## ORCHESTRATOR'S PROVISIONAL RULINGS (her delegation, 2026-10-14 ~01:05 — each for her ratification in the handoff)
+
+*(Process calls the orchestrator makes on its own authority are recorded in each unit's ORCHESTRATOR section. This
+list holds the calls that would otherwise have waited for her.)*
+
+1. **U3's W3b: a scripted client stands in for "a real client" on the timing leg.** Claude Code answers in seconds,
+   so it can't land a call inside her 500 ms autosave debounce. A stdlib Python driver on the real Debug shim proves
+   the keystroke-vs-act timing; W3a proves the real-client road with Claude Code. Ruled: both legs run, and the driver
+   leg counts as the timing evidence.
 
 ## Tickets minted from this run
 
@@ -227,6 +254,8 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | ticket | born | what | fate |
 |---|---|---|---|
 | VX-318 | U1's OWED 3 (the implementer, 2026-10-13) | MCP socket: a session's reader thread can read another socket's bytes after the host closes its descriptor. Same fd-reuse class as VX-279; traced by reading | a member (sub-issue of VX-246, Pre-launch); built in U1b with a red-first pin |
+| VX-323 | U3's trace of the wider class (the implementer, 2026-10-14) | MCP rewrites, restructures, freezes and copies read the stored row, never her pending typing (`edit_take`, `restore_commit`, `divide_block`, `merge_blocks`, `lock_take`/`archive_take`, `save_commit`/`save_version`) | a member, born and FIXED in U3 by the same pre-act flush as VX-275 (pins red-first) |
+| VX-324 | U3's OWED 2 (the implementer, 2026-10-14) | The Takes board's Lock / Archive / Delete-take doors may not flush her typing first. Her own doors; noticed, not reproduced | Todo, v1 release readiness, Bug. Probe red-first before any fix; NOT this run's |
 | VM-16 | U2's OWED 2 (the implementer, 2026-10-14) | The phone's undo door says "Undid: …" on a quiet press: `MobileUndoDoor` still calls `undo(with:)`/`redo(with:)`. The fix is the Mac door's two lines; the rule itself already reaches the phone | the VM board (Mobile — editor & capture faces, Backlog); it needs a simulator stage; related to VX-276 |
 
 ## UNIT BRIEFS (the orchestrator's; each unit's implementer is spawned from its brief)
@@ -1770,3 +1799,32 @@ Nothing. No pane word, receipt, refusal or tool description changed; a stale `ed
 5. **Canon at the merge (proposed, not written):** AppSpec §12's THE MCP DOOR line could gain one clause — "a wire act
    that meets a take she may be typing in (delete, lock/archive, edit/restore, divide/merge, commit/version) lands her
    pending typing first, as her own doors do, and a wire note delete sends every pane off the note".
+
+### THE ORCHESTRATOR ON U3's HAND-BACK (2026-10-14, ~01:40 MDT)
+
+- **Accepted as reported.** Green suites were not re-run (rule 6).
+  - The path check across `0e2bd140..61ec7723` finds: `Sources/VariorumMCP` (the hook and the per-job answer); one
+    core doc line; the app's `MCPDoor.swift` (9 lines, the hook construction) and the new `MCPDoor+HerEditor.swift`;
+    `EditorSurfaceController.swift` (+41: the external-removal caret landing); and the Mac and headless pins.
+  - There are zero lines in `Sync/`, `Persistence/`, custody, `Server/`, VX-281's lane, or vx-282's listed functions.
+  - The ONE editor-seam file is `EditorSurfaceController.renderFull` plus its pure `caretLanding(whenBlockLeft:…)`.
+    The Fable review owes it a look (OWED 4).
+- **vx-282 was told** about the new caret-landing occasion, the runway's "saying so". Its answer, ~01:45: no rule
+  collision. VX-290 left `caretLandingAfterRemoving`'s rule as it was (start of the block below, else end of the
+  block above; pinned by `CarveCaretLandingTests`' guard case); it changed only the seam carve's landing. Expect a
+  comment-only conflict near `caretLandingAfterRemoving`'s and `runDeleteBlock`'s doc comments. Keep both: their
+  wording plus our function.
+- **The cutover.** The implementer handed back at ~620k context, so a FRESH runner takes the window, as with U2.
+- **The PROVISIONALs stand as built.**
+  - P-VX275-1: `flushEveryOpenPost` rather than a per-note flush, because per-note would resolve ids before the
+    grant's decision (a timing oracle).
+  - P-VX275-2: the residual window is accepted and recorded.
+  - Both go into QUESTIONS at the merge.
+- **The OWED items.**
+  - OWED 1 is now **VX-323**, a member, born and fixed here.
+  - OWED 2 is now **VX-324**, Todo, outside the run: a probe comes first.
+  - OWED 3: VX-123 got a comment about the one road.
+  - OWED 4, the Fable review, is the orchestrator's, after the units.
+  - OWED 5, the §12 clause, goes to the closeout.
+- **The window runs whole** (W1 the red-on-old Mac pins, W2 the batch, W3a Claude Code by U1's detour, W3b the
+  driver). The editor-seam fix has never run on a Mac, so its evidence shouldn't wait for U1b.
