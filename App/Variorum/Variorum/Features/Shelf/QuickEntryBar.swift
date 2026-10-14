@@ -167,12 +167,36 @@ enum QuickEntryCopy {
     }
 }
 
+/// **VX-326 — a shell's ONE opening ask for the quick entry's caret.** The
+/// shell (`RootView` — one per window, and a fresh one after every unlock)
+/// owns one and hands it to its Bookcase; the FIRST Bookcase bar to mount in
+/// that shell claims it and asks through the capture box's opening road
+/// (`CaptureOpeningFocus`: wait for the window, take only a free keyboard,
+/// never steal). Every later Bookcase mount in the same shell — a navigation
+/// back — finds it spent and keeps the bar's mount raise exactly as it was
+/// (which still drops when it lands before the box is in its window — the
+/// VX-282 record's O-U6-1). A reference so the claim survives the Bookcase's
+/// own re-renders; it holds no state but the one bit.
+@MainActor
+final class QuickEntryOpeningFocus {
+    private(set) var spent = false
+
+    /// True exactly once.
+    func claim() -> Bool {
+        defer { spent = true }
+        return !spent
+    }
+}
+
 struct QuickEntryBar: View {
     let onOpen: (SidebarSelection) -> Void
     /// Batch 9 (R102): the shelf is the terminal home — it opens with the
     /// cursor already in the bar, so "start typing" is literal. Library
     /// leaves focus alone.
     var autofocus = false
+    /// VX-326: the shell's opening ask, when this bar may be the one to
+    /// claim it (the Bookcase's bar, handed the shell's claim); nil elsewhere.
+    var openingFocus: QuickEntryOpeningFocus?
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -187,6 +211,8 @@ struct QuickEntryBar: View {
     /// the shelf wants the caret here, and again whenever she clicks the
     /// box's padding rather than its text.
     @State private var focusRequest = 0
+    /// VX-326: the shell's opening ask, raised at most once (the claim).
+    @State private var openingFocusRequest = 0
     @State private var cursorOn = true
 
     /// **The box's bound** (13u3 UNIT C — the brief's "pick a sane max
@@ -207,10 +233,12 @@ struct QuickEntryBar: View {
     init(
         session: AppSession,
         onOpen: @escaping (SidebarSelection) -> Void,
-        autofocus: Bool = false
+        autofocus: Bool = false,
+        openingFocus: QuickEntryOpeningFocus? = nil
     ) {
         self.onOpen = onOpen
         self.autofocus = autofocus
+        self.openingFocus = openingFocus
         _box = State(initialValue: QuickEntryModel(session: session))
     }
 
@@ -262,6 +290,7 @@ struct QuickEntryBar: View {
                     style: CaptureTextStyle(tokens: tokens),
                     maxHeight: Self.maxBoxHeight,
                     focusRequest: focusRequest,
+                    openingFocusRequest: openingFocusRequest,
                     onFocusChange: { entryFocused = $0 },
                     onFile: { submit() })
             }
@@ -310,7 +339,17 @@ struct QuickEntryBar: View {
         .padding(.horizontal, 28)
         .padding(.vertical, 10)
         .task {
-            if autofocus { focusRequest += 1 }
+            guard autofocus else { return }
+            if openingFocus?.claim() == true {
+                // VX-326 — the shell opening on the Bookcase: this ask reaches
+                // the box before SwiftUI has put it in its window (the launch's
+                // swap), so it takes the box's waiting road — decided once the
+                // box is in its window, taking only a free keyboard.
+                openingFocusRequest += 1
+            } else {
+                // A later mount (a navigation back): the raise as it was.
+                focusRequest += 1
+            }
         }
     }
 

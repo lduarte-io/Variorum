@@ -136,10 +136,19 @@ nonisolated enum MarkdownFace {
     /// The range is widened by one unit before the line lookup so that an
     /// edit ending exactly at a line's end restyles the FOLLOWING line too.
     /// Two lines is still ∝ the edit.
+    ///
+    /// **`caret` — the live editor's selection (VX-296; nil = no caret, the
+    /// default every road but `settleCaret` takes).** Where it is an
+    /// insertion point inside these lines, the reading honours it
+    /// (`MarkdownSyntax.spans(in:caret:)`: a closer right at the caret still
+    /// closes); a non-empty selection, or one outside the lines, is the
+    /// caret-blind reading. Typed as the selection RANGE so the held 18e
+    /// brief (VX-293 — the faded marks' reveal rule, which wants the whole
+    /// selection) can take the same door.
     @discardableResult
     static func restyle(
         _ storage: NSMutableAttributedString, range: NSRange,
-        base: MarkdownFaceFont, palette: Palette
+        base: MarkdownFaceFont, palette: Palette, caret: NSRange? = nil
     ) -> Bool {
         let length = storage.length
         guard length > 0 else { return false }
@@ -150,8 +159,17 @@ nonisolated enum MarkdownFace {
         let lines = string.lineRange(for: NSRange(location: start, length: probeLength))
         guard lines.length > 0 else { return false }
 
+        // The caret as an offset INTO the lines' substring (the parser's own
+        // frame), or nil — the caret-blind reading.
+        let lineCaret = caret.flatMap { selection -> Int? in
+            guard selection.location != NSNotFound, selection.length == 0,
+                  selection.location >= lines.location,
+                  selection.location <= lines.location + lines.length
+            else { return nil }
+            return selection.location - lines.location
+        }
         let spans = MarkdownSyntax
-            .spans(in: string.substring(with: lines))
+            .spans(in: string.substring(with: lines), caret: lineCaret)
             .map { $0.shifted(by: lines.location) }
 
         // The face already applied over these lines (if any) — collected
@@ -195,6 +213,67 @@ nonisolated enum MarkdownFace {
             apply(span, to: storage, restore: restore, base: base, palette: palette)
         }
         return true
+    }
+
+    /// **VX-296 — the caret has settled on a LIVE surface** (her ruling on
+    /// the ticket: fix (a), caret-aware in the live editor only). Every live
+    /// surface's keystroke restyle stays caret-blind and byte-unchanged; this
+    /// is the one extra step each live surface takes when its caret settles —
+    /// after the keystroke's restyle, and on every caret move — so the
+    /// caret's honour lives in ONE place on both platforms:
+    ///   - the line a caret USED to honour is restyled caret-blind (she left
+    ///     the trailing space behind: the span honestly un-styles);
+    ///   - the caret's own line is restyled honouring it, where the O(1) gate
+    ///     says it could change the reading.
+    /// Nothing at all for a caret that neither sits at nor leaves a rescue
+    /// point — almost every caret move. Cost: at most two LINES (P1).
+    ///
+    /// `selection` nil = the surface holds no caret of hers (a pane gone
+    /// read), so any honour clears. ATTRIBUTES ONLY, like every write here:
+    /// no character, no block identity (TEXTKIT2 §3's stamp rule is about
+    /// identity stamps; the face's ranges are the tokenizer's own, inside
+    /// one line). Returns whether either line's restyle WROTE — not whether
+    /// the ledger planned (VX-282 round 2, F-3): a caret on a star no opener
+    /// pairs with (`hello |*x`) plans an honour that writes nothing, and every
+    /// consumer acts on this answer as "the face moved" (Write's overlay
+    /// generation and redraw, a pane's paint record and remeasure).
+    @discardableResult
+    static func settleCaret(
+        _ ledger: inout MarkdownCaretRescue.Ledger, selection: NSRange?,
+        in storage: NSTextStorage,
+        base: MarkdownFaceFont, palette: Palette
+    ) -> Bool {
+        // NEVER WHILE AN EDIT IS PENDING (the U2 stage window's W2b finding,
+        // traced from the crash report): UIKit's keyboard insert
+        // (`_insertText:fromKeyboard:` → `NSTextStorage coordinateEditing:`)
+        // can report the selection INSIDE its transaction. A restyle there
+        // joins the character edit in ONE `processEditing` report whose range
+        // starts at the line's first marker, the gate's armed edit no longer
+        // binds, the fallback verdict crosses the separator, and the route
+        // refuses — the surface desyncs. Skipping consumes NOTHING: the
+        // ledger is untouched (this guard sits before `settle`), the edit's
+        // own `processEditing` notes it, and the surface's post-edit report
+        // (`textViewDidChange` on the phone, `textDidChange` on a pane, the
+        // selection change AppKit posts after `processEditing` on the Mac)
+        // settles with the edit mark forcing the re-honour.
+        guard storage.editedMask.isEmpty else { return false }
+        guard let plan = ledger.settle(selection: selection, in: storage.string as NSString)
+        else { return false }
+        // One editing session for both lines: the storage reports ONE
+        // attribute edit (one layout invalidation — TEXTKIT2 §3's "the view
+        // jumps when attributes update" is paid once, not twice).
+        storage.beginEditing()
+        defer { storage.endEditing() }
+        let clearWrote = plan.clear.map {
+            restyle(
+                storage, range: NSRange(location: $0, length: 0),
+                base: base, palette: palette)
+        } ?? false
+        let honourWrote = plan.honour.map {
+            let caret = NSRange(location: $0, length: 0)
+            return restyle(storage, range: caret, base: base, palette: palette, caret: caret)
+        } ?? false
+        return clearWrote || honourWrote
     }
 
     // MARK: - One span

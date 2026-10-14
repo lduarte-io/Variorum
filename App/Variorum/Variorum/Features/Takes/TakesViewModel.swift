@@ -655,6 +655,10 @@ final class TakesViewModel {
     // MARK: - Focus (the ONE live editor migrates)
 
     func focus(_ pane: PaneKey) {
+        // VX-154: Write's take panel shows ONE block — a pane of any other
+        // block is one it never renders, so the ring never lands there (the
+        // board's structural arms park it on a survivor or a minted block).
+        guard ringMayStand(on: pane) else { return }
         // VX-227 (rider 1): any focus that is not the parked key's own
         // render-report ends a parked follow (`paneRendered` clears its park
         // before it comes through here).
@@ -699,6 +703,28 @@ final class TakesViewModel {
         parkedTransit = []
         authority.blur()
         Task { await autosave.flushNow() }
+    }
+
+    /// **VX-154 — the ONE block this model serves when it is Write's take
+    /// panel's** (set only by `WriteTakesPanel`; nil on the boards, where
+    /// nothing here changes). Two consequences of "the panel shows one block":
+    /// - the ring never stands outside it (`ringMayStand`): the board's
+    ///   delete/archive and take-to-block arms park the ring on a survivor or
+    ///   a minted block (`parkFocus`), a pane the panel never renders, and
+    ///   every ring key would then act on a block the panel does not show —
+    ///   this ticket's class, one step later;
+    /// - the archive receipt names the panel's own list ("archived takes"),
+    ///   never the board's "archived · n" disclosure the panel does not have.
+    @ObservationIgnored var writePanelBlockID: String?
+
+    /// May the ring land on `pane`? Always on the boards; on Write's take
+    /// panel only inside its block — a request for any other block BLURS the
+    /// ring instead (it never stays on a take the act just moved away), so a
+    /// key that follows meets the board's own "click into a take" refusals.
+    private func ringMayStand(on pane: PaneKey) -> Bool {
+        guard let scope = writePanelBlockID, pane.blockID != scope else { return true }
+        if authority.livePane != nil { blur() }
+        return false
     }
 
     // MARK: - VX-227 — THE PARKED FOLLOW (her R-VX214-1; the architect's F2)
@@ -1903,6 +1929,11 @@ final class TakesViewModel {
     func archiveTake(_ variantID: String) async {
         await run { ops in try ops.archiveVariant(variantID) }
         if status == nil {
+            // VX-154's rider: Write's take panel speaks its OWN list's name.
+            if writePanelBlockID != nil {
+                setReceipt(Self.writePanelArchiveReceipt)
+                return
+            }
             switch host {
             case .takes:
                 setReceipt("Take archived — never gone: "
@@ -1913,6 +1944,13 @@ final class TakesViewModel {
             }
         }
     }
+
+    /// VX-154's rider (PROVISIONAL copy — her copy pass, P-U3-6): Write's take
+    /// panel heads its archived list "archived takes" (`WriteTakesPanel`), so
+    /// its receipt names that list — the board's "archived · n" disclosure is
+    /// not in the panel.
+    static let writePanelArchiveReceipt =
+        "Take archived — never gone: \u{201C}archived takes\u{201D} below brings it back."
 
     func unarchiveTake(_ variantID: String) async {
         await run { ops in try ops.unarchiveVariant(variantID) }
@@ -2261,14 +2299,17 @@ final class TakesViewModel {
 
     /// The ⌘K row's body on the boards: the focused block's original, or the
     /// honest note where it has none (fire-and-speak — Write's twin).
-    func revealFocusedBlockOrigin() {
-        guard let slot = commandTargetSlot,
-              projection.unplacedOrigins[slot.blockID]?.isEmpty == false
+    /// `blockID` names the target where the caller knows it (VX-154: Write's
+    /// take panel names its own block); nil keeps the routed target,
+    /// byte-for-byte.
+    func revealFocusedBlockOrigin(blockID: String? = nil) {
+        guard let target = blockID ?? commandTargetSlot?.blockID,
+              projection.unplacedOrigins[target]?.isEmpty == false
         else {
             refuse(OriginPeekCopy.noOriginHere)
             return
         }
-        revealOriginBlock(ofBlock: slot.blockID)
+        revealOriginBlock(ofBlock: target)
     }
 
     /// **The Block History pane's pending target** (ledger row 17) — the
@@ -2385,14 +2426,15 @@ final class TakesViewModel {
         await structure.insertBlockBelowFocused()
     }
 
-    /// A8's delete-block door where takes live — the controller's.
-    func deleteFocusedBlock() async {
-        await structure.deleteFocusedBlock()
+    /// A8's delete-block door where takes live — the controller's. `blockID`
+    /// names the target (VX-154: Write's take panel's own block).
+    func deleteFocusedBlock(blockID: String? = nil) async {
+        await structure.deleteFocusedBlock(blockID: blockID)
     }
 
     /// 13j (her round-7 ruling): the archive door beside it, same controller.
-    func archiveFocusedBlock() async {
-        await structure.archiveFocusedBlock()
+    func archiveFocusedBlock(blockID: String? = nil) async {
+        await structure.archiveFocusedBlock(blockID: blockID)
     }
 
     /// 18c batch 3 (her U-6) — the board's three doors onto the newline
@@ -2418,12 +2460,15 @@ final class TakesViewModel {
 
     var commentsRequest: CommentsRequest?
 
-    func requestComments() {
-        guard let slot = commandTargetSlot else {
+    /// `blockID` names the target where the caller knows it (VX-154: Write's
+    /// take panel's own block — `applyCallout`'s 13k K6 shape); nil keeps the
+    /// routed target, byte-for-byte.
+    func requestComments(blockID: String? = nil) {
+        guard let target = blockID ?? commandTargetSlot?.blockID else {
             refuse("Click into a block first — comments live on the block you're in.")
             return
         }
-        commentsRequest = CommentsRequest(blockID: slot.blockID)
+        commentsRequest = CommentsRequest(blockID: target)
     }
 
     /// **13k K9 — the frame a block's takes region wears**, or nil where the
@@ -2534,6 +2579,9 @@ final class TakesViewModel {
     /// call. Internal for the choreographer; everything else focuses
     /// through `focus(_:)`.
     func landAuthorityFocus(_ pane: PaneKey) {
+        // VX-154: the panel's one-block rule holds at this door too (it is
+        // the N9 landing's, which the panel's model never runs — a belt).
+        guard ringMayStand(on: pane) else { return }
         parkedFollow = nil  // VX-227 (rider 1): a landing is a focus too
         parkedTransit = []
         // VX-170: the entry ring lands where she was — and if the `show ▾`

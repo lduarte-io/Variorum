@@ -336,6 +336,11 @@ final class EditorViewModel {
     /// `desyncRecoveryCount`'s: zero, always, and any other value is a bug
     /// the pins are entitled to fail on.
     @ObservationIgnored private(set) var identityAuditFailures = 0
+    /// **VX-296 — which line the markdown face last styled honouring the
+    /// caret** (the shared `MarkdownCaretRescue.Ledger`). Noted at every
+    /// character edit (`storageDidEdit`'s top) and settled at every
+    /// selection change (`settleMarkdownCaret`).
+    @ObservationIgnored private var markdownCaret = MarkdownCaretRescue.Ledger()
     /// The surface-text truth per variant + word-count cache — the
     /// LEDGER (13b 1a, T3 slice: the echo-detection map moved into
     /// `EditorSurfaceLedger`, pure and unit-tested; the semantics are the
@@ -791,6 +796,7 @@ final class EditorViewModel {
 
     /// Internal so tests can drive the header without the observation.
     func adoptHeader(_ value: Queries.ContainerHeader?) {
+        let wasNoteEditable = noteIsEditable
         header = value
         // The structural flight's non-editable fence must hold for the
         // WHOLE flight (review round 1, MINOR 2): the op's own touch stamp
@@ -799,9 +805,25 @@ final class EditorViewModel {
         // The flight's defer re-derives editability from the freshest
         // header at flight end.
         if !structuralInFlight {
-            textView?.isEditable = value.map { !$0.locked } ?? false
+            textView?.isEditable = noteIsEditable
         }
+        // VX-282 R1-7 (+ round 2, F-2): the caret's honour follows the NOTE's
+        // editability — a note SEALED while her caret sits at a rescue point
+        // re-reads that line caret-blind (no caret is drawn on a sealed page),
+        // and unsealed it honours the caret where it still stands. Keyed on
+        // the note, NOT on the view's `isEditable`, and run whether or not a
+        // flight is up: a seal delivered DURING a flight (sync racing an act)
+        // must clear at its arrival, because the flight's defer re-derives
+        // `isEditable` with no settle of its own and an act that refused under
+        // the seal lands no selection change either. Only on a flip: a header
+        // delivery rides every autosave's touch stamp.
+        if noteIsEditable != wasNoteEditable { settleMarkdownCaret() }
     }
+
+    /// The note's own editability, as its header decides it (a sealed note,
+    /// or none loaded, is not editable) — what `isEditable` reads outside a
+    /// structural flight, and what it will read again when the flight ends.
+    private var noteIsEditable: Bool { header.map { !$0.locked } ?? false }
 
     private func observeSlots() async {
         do {
@@ -1215,6 +1237,17 @@ final class EditorViewModel {
         // itself waits for the layout pass that consumes the edit
         // (`overlayLayoutDidSettle`), never runs against pre-layout frames.
         overlayGeometryGeneration &+= 1
+        // VX-296: EVERY character edit moves the markdown face's caret claim
+        // with the text (the suppressed programmatic writes included — each
+        // re-derives its own lines caret-blind) and marks it for the next
+        // settle. Offsets only; nothing is written here — the caret this
+        // report would need is the PRE-edit one (measured: `didProcessEditing`
+        // runs before AppKit moves the selection), so the honour waits for
+        // the selection change (`settleMarkdownCaret`).
+        markdownCaret.noteEdit(
+            replacing: NSRange(
+                location: editedRange.location, length: max(0, editedRange.length - delta)),
+            newLength: editedRange.length)
         guard !suppressEditProcessing else { return }
         // THE BINDING (mobile round 2, batch 1 — the shared crash fix): the
         // gate's answer is consumed ONLY while it still describes the edit
@@ -3479,6 +3512,61 @@ final class EditorViewModel {
     // through a live door — `archiveCaretTake` in `EditorSessionTests`.)
 
     // MARK: - Caret + badges
+
+    /// **VX-296 — the markdown face honours her caret** (her ruling on the
+    /// ticket: fix (a), "your fix is good"). Runs on EVERY selection change
+    /// (`EditorSurfaceDelegate.textViewDidChangeSelection`), which AppKit
+    /// posts after every input-road edit — a typed letter, a forward-delete
+    /// that leaves the caret still — and on every caret move, with the
+    /// selection already landed (measured; `storageDidEdit` sees the
+    /// pre-edit one). While her caret sits between the space she just typed
+    /// and a closing marker (`*hello |*`), that line reads with the closer
+    /// still counting; when the caret leaves, the line it honoured is
+    /// re-read caret-blind. The O(1) gate makes every other caret move free,
+    /// and a settle restyles at most two LINES (P1). Attributes only: no
+    /// character, no block identity, nothing registered with text undo.
+    func settleMarkdownCaret() {
+        guard let textView, let storage = textView.textStorage else { return }
+        let restyled = MarkdownStyling.settleCaret(
+            &markdownCaret, selection: holdsCaret(textView) ? textView.selectedRange() : nil,
+            in: storage)
+        // VX-282 R1-2: a settle writes ATTRIBUTES only, yet in a proportional
+        // voice an italic toggled on or off re-wraps its paragraph (Study's
+        // Iowan italic is ~14 % narrower than its roman) and moves every block
+        // below it — a geometry event with no character edit, so the overlay
+        // generation must hear it (N14's inputs: the storage's characters, the
+        // attach, a width reflow — and now a settle that restyled). Delivery
+        // rides N14's own road: the next display pass reports through
+        // `viewWillDraw` → `overlayLayoutDidSettle`, whose hop lands after the
+        // pass that laid the restyled line out. The pass is made CERTAIN here
+        // (`needsDisplay` — the line a caret LEFT may be off screen above the
+        // viewport, moving visible text with no glyph of its own to draw;
+        // one viewport redraw per restyling settle, which only a caret's
+        // arrival at or departure from a rescue point makes). Deliberately not
+        // a direct `overlayLayoutDidSettle()` the way the width road calls it:
+        // a direct hop can run BEFORE the layout pass that consumes the
+        // restyle — a note opening with its remembered caret at a rescue point
+        // — reading pre-layout frames and spending the generation, so the
+        // pass's own report then delivers nothing: N14's cold-mount class.
+        if restyled {
+            overlayGeometryGeneration &+= 1
+            textView.needsDisplay = true
+        }
+    }
+
+    /// VX-282 R1-7: does this surface hold a caret of hers? A non-editable
+    /// Write — a SEALED note, selectable but never typed in, no caret drawn —
+    /// holds none, so its selection is never honoured (the live pane's rule:
+    /// `PaneSurface`'s settle hands no selection while the pane reads). The
+    /// structural flight's few-ms fence is NOT the note's editability: the act
+    /// lands the caret INSIDE the flight (`applyStructuralResult`) and the
+    /// fence lifts after it with no selection change of its own, so during a
+    /// flight the NOTE decides (round 2, F-2 — a seal adopted mid-flight makes
+    /// the landing honour nothing; an unsealed note's landing at a rescue point
+    /// is honoured, as before).
+    private func holdsCaret(_ textView: NSTextView) -> Bool {
+        structuralInFlight ? noteIsEditable : textView.isEditable
+    }
 
     func updateCaretContext() {
         guard let textView else { return }

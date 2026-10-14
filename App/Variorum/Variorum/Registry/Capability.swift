@@ -269,6 +269,14 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// `edit` and honestly grey in `read` (the enabled-into-nil class the
     /// registry exists to kill, from both sides).
     var readEditAttached = false
+    /// **Write's take panel is up** (VX-154, the VX-282 run). The panel is a
+    /// sheet over Write showing ONE block's takes; while it is up, the verbs
+    /// that cut, join or add blocks where she writes cannot act from it —
+    /// their results land on blocks the panel never shows — so they are grey
+    /// by this fact rather than live doors that fall through to Write's caret
+    /// beneath the sheet. Reported by the panel itself, the takes board's
+    /// attachment shape (a set of tokens on the router).
+    var writeTakesPanelAttached = false
     /// 13n-b U4 (AF-11 F-2): a connected AI client's write landed this
     /// session and has somewhere to show — "Show the AI's Last Change" acts.
     var aiLastChangeAvailable = false
@@ -603,6 +611,18 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case sealPost
     // Write-editor-scoped doors the menu renders
     case previousBlock, nextBlock, blockComments, callout, exportCaretBlock
+    // VX-183 (the VX-282 run, U5 — VX-179 U1's O-2): THE COMMENTS PANEL'S
+    // DOORS, declared at last. `blockComments` above is the door INTO the
+    // panel; these six are the acts the panel renders inline on its own rows
+    // (`.surface` — each acts on the comment it sits beside, never a routed
+    // context): the composer's Add; a live comment's Save and Revert (only
+    // while it holds unsaved changes) and Delete; a deleted comment's Restore
+    // and Delete forever… (the fold is a trash surface — the evolved purge
+    // rule). P-1's grow-as-touched letter: undeclared since 13u3 A2, they join
+    // as the panel's own work (VX-257) touches it. Which row renders which is
+    // the pure `CommentsPanelDoors` rule — gating as data.
+    case addComment, saveComment, revertComment, deleteComment
+    case restoreComment, deleteCommentForever
     // In-post find & replace (QoL batch 3 — L6). FIVE declarations rather
     // than one submenu-owning act: four of the five carry a KEY, and four
     // undeclared keys sitting in the one place keys are declared is exactly
