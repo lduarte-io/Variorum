@@ -1662,7 +1662,13 @@ typed instead as ⌥e a and ⌥⇧9.
 
 ## U6a UNIT RECORD — Compare from the wire: VX-311 · VX-298 (opus-implementer, from 2026-10-14 ~15:40 MDT)
 
-**NOT DONE YET (the record's first line, per the contract): no product code, no pins.** This session read in, traced
+**NOT DONE YET (the build continuation's first line, per the contract — 2026-10-14 ~17:05 MDT): pieces 7–9 (the revert
+checks, the headless finals, the LIVE LEGS' final form) are NOT run; the build STOPPED after piece 6 for THE ONE OPEN
+DECISION below (the Compare landing's "one round" — its router clears are outside the lane go).** Pieces 2–6 are built,
+pinned red-first and green, and the Mac `build-for-testing` SUCCEEDED; no stage claimed, no app launched, no store
+touched. The continuation's exact steps are in LIVE STATUS rows 7–9.
+
+**(Piece 0's first line, kept:) NOT DONE YET (the record's first line, per the contract): no product code, no pins.** This session read in, traced
 both members, and wrote the design and its forks below. It STOPPED for the orchestrator's rulings (the brief reserves
 "which op `duplicate_note` wraps", "where the copy lands and what reach decides it", and the edges the tickets leave
 open), and for the LANE edits that need vx-283 told first (`Registry/CommandRouter.swift`, possibly
@@ -1700,9 +1706,9 @@ wire's `create_note`/`save_version` arms, `MCPWriteTools+WingMove.swift` (the tw
 | 4 | VX-311 fix: `Operations.duplicateNoteForClient` + `duplicate_note` on the wire (+ the app's words) | DONE (this commit) — **core:** NEW `Operations+MCPDuplicate.swift` — `duplicateNoteForClient(_:undoLabel:guardedBy:) -> PostCopyResult`: ONE `database.write`, the guard FIRST, then `duplicateAsVersionBody` (her door's body, piece 2's extraction); after it `registerMintedContainerEntry(label:)` (her door's own helper — the inverse answers `false` and retires the entry when the copy is already dead; the redo revives only on its undo's stamp). `Operations+MCPWrites.swift`: `MCPWriteAct.duplicate` (raw `"duplicate"` → "claude-code's duplicate"; undoable). **wire:** NEW `MCPWriteTools+DuplicateNote.swift` — `duplicateFencedWords` (D-311-3's sentence); `performDuplicateNote`: one snapshot read (standing, the note's facts and title, its RESOLVED wing's title), the note at READ (`consumes: true`) — a refusal logs the note and raises the note's ask at read; then THE FENCE (`facts.fence != nil` → the one sentence, logged on the note, NO ask — checked BEFORE the wing so no wing ask is raised for an act that can never land); then `decideWing(facts.wingID, .writeNew, consumes: true)` — a refusal logs the wing and raises the wing's write-new ask; then `land` (logged on the SOURCE note, `logsReceiptTitle: false`; nothing spent there) around `duplicateNoteForClient` guarded by `guardDuplicate` (both sides + the fence re-decided on ONE standing read inside the act's transaction; the once grants of both sides consumed as one sorted union there). The answer `{note_id, source_note_id, block_ids, blocks, landed}` (`MCPMintedBlocks.records(copy.blocks)`, `landedWords` — `move_note_to_wing`'s); the receipt `.duplicate`, target the COPY (its title), Open › `.note(copy)` (F-5 (a)). `MCPWriteTools.swift`: `Job.duplicateNote(noteID:)`, tool `duplicate_note`, `flushesHerEditorFirst` **true** (D-311-6's reason at the arm — the COPY class beside `save_version`), parse (`note_id` required) and perform. `MCPToolCatalog.swift`: `duplicateNote` in WRITE NEW, `scopes: [.wing]`, schema `note_id` only, `additionalProperties: false`, the description (FOR VX-234). **app (compiled at piece 8):** `MCPPaneCopy.swift` — refused "duplicating “X”" / on the wing side "duplicating a note in “X”" (UXR1-1's two-sided rule), allowed "duplicated “X”" (+ "(n times)"), the receipt phrase "duplicated “X”" / "made N duplicates". **Justified edits (the ritual):** `MCPServerTests` — the write-new set gains `duplicate_note`; `MCPWriteServerTests` — the suggest proof's completeness gains a `duplicate_note` call aimed at her note (refusing at the rung). **NEW-API PINS (green by construction, state):** NEW `Tests/VariorumCoreTests/MCPDuplicateNoteActsTests.swift`, 4 tests — `theRowsAreHerDuplicateAsVersionsExactly` (her door and the wire on one SEALED source in a wing with a book, a fan, a tag and a date: the two copies' shapes EQUAL — title, profile, date, wing, never locked, rendered takes, the tag, no book, one `derived_from` per block to its source block, one `version_of`) · `aThrowingGuardWritesNothing` · `oneEntryUndoesAndRedoesTheCopyAndACopySheDeletedStaysDeleted` (`undoReporting` changed/true, the copy tombstoned, the source never; redo the same copy; after her Delete the undo is QUIET and the entry RETIRES, both stacks empty, her stamp kept) · `theRecordsAreTheCopysLiveFans` (active takes in fan order with labels; an ARCHIVED chosen falls back to the default — read_note's rule; `sourceBlockID` per record; the archived take rides outside the record). **GREEN:** the VX-311 pins and the two justified-edit suites — **MCP 45 / 4 + core 4 / 1, EXIT 0** (`p4-pins-green.log`); the whole MCP target **272 / 58 with ONE issue**: `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` exceeded its 15 s bound (16.3 s) under load average 9 (another worktree building) — untouched by this change; **re-run alone it PASSED in 1.0 s, its suite 3/3** (`p4-mcp-target.log`, `p4-timelimit-rerun.log`); the finals (piece 8) re-run the whole package |
 | 5 | VX-298 pins (headless show + link receipt; the app's landing pins compiled) RED | DONE (this commit) — **headless** NEW `Tests/VariorumMCPTests/MCPShowCompareServerTests.swift`, 5 tests (the target read through `showCompareParts` — REFLECTION on the case label `compare` — so the file names no symbol the old tree lacks; the fake app is `MCPShowServerTests`' own): `aPairAndUpToThreePeersAreDeliveredInColumnOrderNeverSpendingAOnceGrant` (ONCE read grants only: A|B, then A|D,B,C in the named order, `shown: true`; each once grant still reads afterwards) · `theParseRefusesEveryMalformedCompareNamingWhatIsWrong` (8 forms: no `peer_ids`, no `note_id`, a non-array, `[]`, four, a non-string, a repeat, `note_id` among them — each its own sentence; nothing moved) · `anUnreachableAnchorOrPeerAnswersTheOneNotSharedShapeLoggedOnThatSide` (an unshared anchor, an unshared peer, an unknown peer after a readable one, a version's id → the ONE `notShared` note words; the activity row on the refusing note) · `anotherWingsPeerAndAnArchivedPeerRefuseAfterTheDecisionsAndAnArchivedAnchorShows` (another wing's peer → the wings sentence; an archived peer → “shelved” is archived…; an unreadable peer beside another wing's still answers not-shared — the decisions first; an ARCHIVED anchor shows, P-VX298-2) · `aCompareShowMovesNothingWhileSheIsAway`. APPENDED (nothing modified) to `MCPLinkVersionsServerTests`: `theReceiptsOpenOpensTheTwoInCompare` (the receipt's `show` is compare A|B). **RED on the old tree (`6a8423c4` + these files): 6 of 6 new tests failed, 25 issues** — every compare call answered the old `target must be …` sentence (the pair's `isError` `:96` and its JSON at `:82`; the eight parse forms `:137` ×8; not-shared ×4 `:165` and the log side ×4 `:167`; the wings `:195`, archived `:199`, decisions-first `:203`, the archived anchor `:207`/`:208`; away `:226`); the receipt's show `MCPLinkVersionsServerTests.swift:251` (it opened note A); the 3 existing link pins GREEN (`p5-pins-red.log`, `p5-pins-red.pairs`). **app** NEW `App/Variorum/VariorumTests/MCPCompareLandingTests.swift`, 5 tests — `thePostureOpensRelatedOnlyOnlyWhenEveryNamedPeerSharesLineage` (the pure rule: a pair with kin ON, none OFF, mixed OFF, all ON) · `aLandingReplacesTheColumnsExactlyAndReleasesADepartingPeersLivePane` (twin + an empty slot → stranger, other exactly; the twin's live pane released; `onNotesLeft == [[twin]]`; related-only off) · `theFirstProjectionHoldingEveryLandedPeerSetsThePostureOnce` (a projection without the peer decides nothing; the duplicate's pair ON; her toggle off survives a later projection; unrelated OFF with the column whole; mixed OFF) · `aParkedLandingIsConsumedOnlyByItsOwnNotesBoard` · `theNavigatorDeliversCompareOnHerOwnRoad` (`.navigate`, the landing parked, `applied == [.compare]`; a note that never registers → `partialShowWords`, nothing parked, no mode switch). **RED on the old tree BY COMPILATION — stated, not measured** (every symbol it names is absent there; the brief's honest form). Compiled by piece 8's `build-for-testing`; RUN in U6b's batch |
 *[removed for publication]*
-| 7 | revert checks (announced here first, committed before reverting) | NOT-STARTED |
-| 8 | headless finals (MCP · core · workbook) + `xcodebuild build-for-testing` into `App/Variorum/DerivedData/vx336-u6` | NOT-STARTED |
-| 9 | LIVE LEGS for U6b's window (final form) | DRAFT below |
+| 7 | revert checks (announced here first, committed before reverting) | NOT-STARTED — **after the ruling** (its outcome touches only app files, so these headless steps stand as written). **VX-311:** announce in this row and commit; on the committed tree `git show 6a8423c4 -- Sources/ \| git apply -R` (the fix's package files: `Operations+MCPDuplicate.swift` and `MCPWriteTools+DuplicateNote.swift` removed, `MCPWriteAct.duplicate`, the Job and the catalog entry reverted — VX-298's later catalog hunks are disjoint); move `Tests/VariorumCoreTests/MCPDuplicateNoteActsTests.swift` (new-API) aside to `notes/plans/vx336-screens/u6a/prerevert-311/`; KEEP the two justified edits → expect `p3-pins-red.pairs`' 16 pairs IDENTICAL (`diff` empty) plus each justified edit red on its edited line (`MCPServerTests` write-new set, `MCPWriteServerTests` completeness); restore (`git checkout HEAD -- Sources/ Tests/`, the aside folder removed, `git status` clean) and re-run green. **VX-298:** `git show a846a5f1 -- Sources/ \| git apply -R` (`MCPShowTool.swift`, the catalog's `show_in_app` + `link_versions` hunks, `MCPWriteTools+LinkVersions.swift`) → expect `p5-pins-red.pairs`' 25 pairs IDENTICAL; restore; green. (The app pins are red by compilation only — stated, not revert-run.) |
+| 8 | headless finals (MCP · core · workbook) + `xcodebuild build-for-testing` into `App/Variorum/DerivedData/vx336-u6` | NOT-STARTED — after the ruling: `swift build --build-tests` then `swift test --skip-build` on the whole package (expected, from U5b's finals 264/57 · 2,867/332 · 40/6: **MCP 278/59** — +7/+1 duplicate, +1 HerEditor, +5/+1 compare, +1 link — **core 2,871/333**, workbook 40/6; `MCPHarnessTimeLimitTests` is load-sensitive — two full-target runs this session exceeded its 15 s bound at load 9 and 67, each passing alone in ~1 s — run the finals on a quiet machine or re-run that suite alone and say so). The Mac `build-for-testing` from piece 6 STANDS unless the ruling changes app code (then re-run into the same folder). |
+| 9 | LIVE LEGS for U6b's window (final form) | DRAFT below — L1–L5 written for the design as built; finalized with the ruling (a leg for the orphaned landing only under (a)/(b)). **The Mac suites for U6b's batch (U6a's share) are listed below the draft** |
 
 ### THE ONE OPEN DECISION — the Compare landing's "one round" (found at piece 6; for the orchestrator)
 
@@ -1971,22 +1977,51 @@ consumed).
 
 ### PROVISIONALs (with their options — the orchestrator files them at the merge)
 
-- **P-VX311-1** (F-2) — a fenced source refuses `duplicate_note`: (a) refuse, the leg unnamed [recommended]; (b) carry the
-  own Private mark, refuse the membership legs; (c) allow.
-- **P-VX311-2** (F-1) — the copy lands bookless in the source's wing, wing-level write new: (a) [recommended]; (b) an
-  optional `book_id`; (c) the source's books.
-- **P-VX311-3** (F-3/F-4/F-5) — the answer's edges: active takes only [a] vs archived marked [b]; `source_block_id` [a]
-  vs none [b]; Open › to the copy [a] vs Compare [b].
-- **P-VX298-1** (F-9) — related blocks only ON only when every named peer shares lineage [a] vs OFF only when none does [b].
-- **P-VX298-2** (F-7) — an archived anchor shows [a] vs refuses [b]; an archived peer refuses either way (the picker's rule).
-- **P-VX298-3** (F-6) — `note_id` + `peer_ids` [a] vs `note_ids` [b].
+*(Every one RULED (a) by THE ORCHESTRATOR'S RULINGS ON U6a's FORKS and BUILT (a) — pieces 4 and 6; the options stay for
+her ratification in the QUESTIONS bundle at the merge.)*
 
-### FOR VX-234 (user-facing words, as PLANNED — final list when built)
+- **P-VX311-1** (F-2) — a fenced source refuses `duplicate_note`: **(a) refuse, the leg unnamed — BUILT** (checked after
+  the note's READ decision and BEFORE the wing's, so no wing ask is raised for an act that can never land; re-checked in
+  the guard; pinned `aFencedSourceUnderAPerAskGrantRefusesInOneSentenceAndMintsNothing`); (b) carry the own Private mark,
+  refuse the membership legs (ruled out by R-VX184-2); (c) allow.
+- **P-VX311-2** (F-1) — the copy lands bookless in the source's wing, wing-level write new: **(a) BUILT** (a book-level
+  write new hears the wing's refusal and raises the wing's ask — pinned `aBookLevelWriteNewHearsTheWingsRefusalAndAsksForTheWing`);
+  (b) an optional `book_id` filing the copy into that book at write new; (c) the source's books.
+- **P-VX311-3** (F-3/F-4/F-5) — the answer's edges: **active takes only [a] BUILT** vs archived marked [b];
+  **`source_block_id` [a] BUILT** vs none [b]; **Open › to the copy [a] BUILT** vs Compare [b].
+- **P-VX298-1** (F-9) — **related blocks only ON only when every named peer shares lineage [a] BUILT** (a mixed set opens
+  off) vs OFF only when none does [b].
+- **P-VX298-2** (F-7) — **an archived anchor shows [a] BUILT** vs refuses [b]; an archived peer refuses either way (the
+  picker's rule).
+- **P-VX298-3** (F-6) — **`note_id` + `peer_ids` [a] BUILT** vs `note_ids` [b].
 
-- Undo label "Undo claude-code's duplicate" / receipt "Undid: claude-code's duplicate"; the receipt line "claude-code
-  duplicated “X”" / "… made N duplicates"; Activity "duplicated “X”" / refused "duplicating “X”".
-- `duplicate_note`'s description; the fence sentence (D-311-3); `show_in_app`'s compare clause and its two refusals
-  (another wing, archived); `link_versions`' Open sentence.
+### FOR VX-234 (user-facing words, AS BUILT — pieces 4 and 6)
+
+**Her surfaces (the app's voice, P-13n-1):**
+- The undo family (`MCPWriteAct.duplicate`, raw "duplicate"): Edit ▸ "Undo claude-code's duplicate", the undo receipt
+  "Undid: claude-code's duplicate".
+- The write receipt (`MCPReceiptCopy`, `.duplicate`): "claude-code duplicated “u6a source” · ⌥⌘Z undoes" (a run of
+  several on one copy: "made N duplicates" — unreachable in practice, each copy its own target), with Open › opening the
+  copy.
+- Activity (`MCPPaneCopy`): allowed "duplicated “X”" (+ " (N times)"); refused on the note side "duplicating “X”", on the
+  wing side "duplicating a note in “X”" (UXR1-1's two-sided rule — e.g. "…was refused duplicating a note in “Home”").
+- Compare: NO new words (the board's own chip and honesty line; `show_in_app`'s Activity keeps "showed you “A”" /
+  "showing you “A”", logged on the anchor or the refusing note).
+
+**The wire (the MCP room's technical register):**
+- `duplicate_note`'s description (`MCPToolCatalog.duplicateNote`, quoted whole in the catalog).
+- The fence sentence: "This note is shared with you only per ask, so it can't be duplicated — a copy would reach further
+  than the note does. The author can duplicate it in Variorum."
+- `show_in_app`: the compare clause in its description; `target`'s sentence now ends "…, \"wing\" or \"compare\"."; the
+  parse's sentences — "target compare needs note_id and peer_ids (one to three other notes)." · "peer_ids must be an array
+  of note ids." · "peer_ids must name one to three other notes — Compare shows a note and up to three beside it." ·
+  "peer_ids must hold note ids (strings)." · "peer_ids names a note twice." · "peer_ids can't include note_id — it is the
+  first column already."; the refusals — "Those notes are in different wings — each wing is a separate library, so
+  Compare can't show them side by side." · "“X” is archived — Compare offers only notes in the library (unarchive_note
+  first)." (**the title QUOTED** — the design's draft had it bare; quoted as the wire's other sentences quote names).
+- `link_versions`' description: "The author's receipt for it opens the two side by side in Compare."
+- Not changed, for her eye: the write-new rung's consent sentence ("make new notes…") already covers a duplicate (a new
+  note); it names no duplicate, as it names no link or block insert.
 
 ### LIVE LEGS FOR U6b's WINDOW (DRAFT — the final form lands with piece 9; claim `vx336-u6`)
 
@@ -2010,13 +2045,38 @@ wing). Prompts on STDIN (`--allowedTools` swallows a trailing prompt). Variorum 
   them versions, related-only off (no lineage). Capture.
 - **L5 — the etiquette.** With another app frontmost, the L2 turn answers the not-frontmost sentence; nothing moves.
 
+### THE MAC SUITES FOR U6b's BATCH (U6a's share — every suite that reaches an app type this unit changed; grep of `App/Variorum/VariorumTests` at `a846a5f1`)
+
+- **Compare's board, model and brain** (`CompareViewModel` · `CompareComposition` · `CompareBoardView` · `CompareLanding`):
+  `MCPCompareLandingTests` (NEW) · `CompareCompositionTests` · `CompareViewModelTests` · `CompareAnchorWholeTests` ·
+  `CompareOnePlacementTests` · `CompareLensesAlignmentTests` · `CompareLeavingSavepointTests` (`land` leaves through
+  `onNotesLeft`) · `AutosaveRegistryLifecycleTests` · `CapabilityRegistryTests` · `SavepointSealedDoorTests` ·
+  `TutorialLookingActsTests` · `NavigationDoorsTests` · `TakesBoardSoakTests` · `ScrubAndOutlineTests`.
+- **The delivery** (`MCPNavigator`, `MCPShowTarget`): `MCPNavigationTests` · `MCPWingFacesTests` (its
+  `activitySpeaksEveryActInWordsNeverAToolID` walks `duplicate_note`).
+- **The words and the catalog's facts** (`MCPPaneCopy` · `MCPReceiptCopy` · `MCPToolFacts` · `MCPWriteAct`):
+  `MCPAsksWaitTests` · `MCPEditParityFacesTests` · `MCPEditFacesTests` · `MCPGrantSheetTests` ·
+  `MCPLibraryParityFacesTests` · `MCPAskAndReceiptTests` · `MCPDoorErgonomicsFacesTests` · `MCPPaneTests` ·
+  `MCPPaneTabsTests` · `MCPDeliberateFacesTests` · `MCPSetupMenuTests` · `MCPGrantSheetU2CaptureTests` ·
+  `MCPSetupKeyFacesTests` · `MCPRebindFaceTests` · `MCPShareFacesTests` · `TutorialMCPChapterCaptureTests` ·
+  `TutorialMCPChapterTests`.
+- **The router's landings** (`CommandRouter` — one additive observed property; 54 test files hold a router, these are
+  the ones that exercise its parked landings): `CommandRouterTests` · `StaleWriteIntentTests` · `TakesLandingTests` ·
+  `BlockHistoryPaletteDoorTests`.
+- **37 suites** (U6b adds VX-330's and VX-342's). Under ruling (a) the new router pin's suite joins.
+
 ### OWED (for the orchestrator)
 
-1. The rulings on F-1…F-9 (and P-VX311-1…3, P-VX298-1…3) before pieces 2–6.
-2. Telling vx-283 about the `CommandRouter.swift` property (and `Capability.swift` if F-lane (b)).
-3. **Context:** this session is at ~380k at this seam. The build (pieces 2–9) is likely past the ~450k line in this
-   session; a FRESH implementer can build from this record alone (every design item names its file and line).
-4. No ticket proposed yet (none needed so far).
+1. ~~The rulings on F-1…F-9~~ — DONE (`6502db0d`). ~~Telling vx-283 about the one property~~ — DONE (the build brief).
+2. **THE ONE OPEN DECISION's ruling** (the Compare landing's "one round": (a) three router lines beside the lens clears +
+   one app pin [recommended], (b) the navigator bounds the parcel, (c) accept) — and under (a), vx-283 told about three
+   more lines in `CommandRouter.swift`.
+3. Then pieces 7–9 (rows 7–9's exact steps) — by this session on resume, or a fresh implementer from this record alone.
+4. **A ticket to propose (not filed):** `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`
+   fails its 15 s bound under heavy machine load (16.3 s at load average 9, 16.7 s at 67 — two whole-MCP-target runs this
+   session), passing alone in ~1 s each time; a finals run on a busy Pro can read red for no product reason. Proposed
+   triage: **Debt · Test-only · Low**, not Pre-launch, project 13n (the harness's VX-132 home).
+5. **Context:** the build continuation stopped at ~205k (well inside the line); it can resume pieces 7–9 itself.
 
 ### THE ORCHESTRATOR'S RULINGS ON U6a's FORKS (2026-10-14 ~16:30 MDT — binding on pieces 2–9)
 
