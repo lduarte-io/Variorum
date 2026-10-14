@@ -74,9 +74,14 @@ extension Operations {
     /// sealed book renames (her op's posture). The same name writes nothing.
     /// ONE entry restoring the previous name exactly while the book still wears
     /// the act's name (no E13 re-check — the Put-back tolerance).
+    /// VX-259: `namesCountedBy` — the readings the guard counts (the wire
+    /// passes the ones the client can READ, so the guard never names a book it
+    /// cannot reach — her ruling: an accidental duplicate is fine); nil counts
+    /// every reading, E13 whole.
     @discardableResult
     public func renameBookForClient(
-        _ readingID: String, name: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil
+        _ readingID: String, name: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil,
+        namesCountedBy reach: BookNameReach? = nil
     ) throws -> MCPBookRename {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let newName = trimmed.isEmpty ? DisplayTitle.placeholder : trimmed
@@ -84,7 +89,7 @@ extension Operations {
             try guardian?(db)
             var reading = try liveReading(db, readingID)
             guard reading.name != newName else { return nil }
-            try requireBookNameFree(db, newName, excluding: readingID)
+            try requireBookNameFree(db, newName, excluding: readingID, counting: reach)
             let old = reading.name
             reading.name = newName
             reading.updatedAt = date.now

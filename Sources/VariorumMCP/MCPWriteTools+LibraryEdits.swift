@@ -294,7 +294,8 @@ extension MCPWriteTools {
             return try onBook(bookID, rung: .edit, job: job, clientName: clientName, spendsAfter: false) { _ in
                 let result = try ops.renameBookForClient(
                     bookID, name: name, undoLabel: label(.bookName),
-                    guardedBy: guardBooks(clientName, .edit) { _ in [bookID] })
+                    guardedBy: guardBooks(clientName, .edit) { _ in [bookID] },
+                    namesCountedBy: readableBooks(clientName))
                 // The receipt and the activity line name the book as it NOW reads.
                 return (["book_id": bookID, "name": result.name, "changed": result.changed],
                         result.changed

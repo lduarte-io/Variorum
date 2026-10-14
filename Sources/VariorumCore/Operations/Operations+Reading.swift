@@ -928,11 +928,22 @@ extension Operations {
         }
     }
 
+    /// **Which readings a name check counts** (VX-259): asked, inside the
+    /// check's own transaction, of each live reading whose name COLLIDES —
+    /// true counts it (the check refuses, naming it), false passes it by.
+    /// The MCP door passes "a reading this client can READ now", so a client
+    /// never learns of a book it cannot reach by renaming toward its name
+    /// (F-7). Her own doors pass nothing: every reading counts (E13 whole).
+    public typealias BookNameReach = (Database, _ readingID: String) throws -> Bool
+
     /// The guard's body at db level (13n-a: the folder IMPORT is a door that
     /// names a book — the folder's name — so `importBook` asks this inside
     /// its own transaction, before it mints anything). Byte-identical rule.
+    /// VX-259: `counting` narrows the readings that count (nil = every one —
+    /// her doors); it is asked only of a collider, so the scan's cost is
+    /// unchanged (a shelf, never a corpus).
     func requireBookNameFree(
-        _ db: Database, _ name: String, excluding readingID: String? = nil
+        _ db: Database, _ name: String, excluding readingID: String? = nil, counting counts: BookNameReach? = nil
     ) throws {
         let key = BookNaming.key(name)
         let rows = try Row.fetchAll(
@@ -942,6 +953,7 @@ extension Operations {
             guard id != readingID else { continue }
             let existing: String = row["name"]
             if BookNaming.key(existing) == key {
+                if let counts, try !counts(db, id) { continue }
                 throw OperationError.duplicateBookName(name: existing)
             }
         }

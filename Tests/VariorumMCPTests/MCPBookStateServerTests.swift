@@ -55,9 +55,15 @@ struct MCPBookStateServerTests {
         defer { h.tearDown() }
         try await h.within {
             let book = try h.operations.createReading(name: "drafts", kind: .book)
-            _ = try h.operations.createReading(name: "letters", kind: .book)
+            let letters = try h.operations.createReading(name: "letters", kind: .book)
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .book, book.id))
+            // VX-259 (A JUSTIFIED EDIT, the ritual — her ruling: the door's
+            // name check counts only books the client can READ): "letters" was
+            // a book this client could not reach, so its refusal below was the
+            // oracle VX-259 closes. The E13 leg now names a book it CAN read;
+            // the hidden-book road is `MCPBookNameReachServerTests`'.
+            _ = try h.approve("claude-code", spec(.read, .book, letters.id))
             let before = try h.hersAlone()
 
             let renamed = try await call(h, connection, "rename_book", [

@@ -140,7 +140,13 @@ struct MCPLibraryOnceServerTests {
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", nil)
             let clientID = try h.client("claude-code").id
-            _ = try h.operations.createReading(name: "taken", kind: .book)
+            let taken = try h.operations.createReading(name: "taken", kind: .book)
+            // VX-259 (A JUSTIFIED EDIT, the ritual — her ruling: the door's
+            // name check counts only books the client can READ): an
+            // unreachable "taken" no longer refuses a rename (it would be the
+            // oracle VX-259 closes); the representative E13 refusal names a
+            // book this client can read.
+            _ = try h.operations.grantMCPAccess(clientID, spec(.read, .book, taken.id, .always))
             let refusals: [(String, (World) -> [String: Value])] = [
                 ("rename_book", { ["book_id": .string($0.book.id), "name": .string("taken")] }),  // E13
                 ("reopen_book", { ["book_id": .string($0.book.id)] }),  // sealed, below

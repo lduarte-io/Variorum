@@ -385,7 +385,8 @@ struct MCPWriteTools: Sendable {
             }
         case .createBook(let name, let wingID):
             return try inWing(wingID, job: job, clientName: clientName) {
-                let book = try ops.createBook(named: name, inWing: wingID, undoLabel: label(.book))
+                let book = try ops.createBook(
+                    named: name, inWing: wingID, undoLabel: label(.book), namesCountedBy: readableBooks(clientName))
                 return (["book_id": book.id, "name": book.name],
                         MCPWriteReceipt(clientName: clientName, act: .book, targetID: book.id, targetTitle: book.name,
                                         show: .book(bookID: book.id, sectionID: nil)))
@@ -653,6 +654,26 @@ struct MCPWriteTools: Sendable {
         CROSS JOIN container_block cb ON cb.block_id = v.block_id AND cb.deleted_at IS NULL
         WHERE cb.container_id = ?
         """
+
+    /// **The books a name check counts on the wire** (VX-259 — VX-184's ladder
+    /// round 1; her ruling: "it's fine if an accidental book name duplicate is
+    /// made - there's no schema protection against it and we already ruled
+    /// that it's ok if that happens"): a reading counts only while THIS client
+    /// can READ it now — the one rule `list_books` reads (a book at read under
+    /// its grants or the open book, never a fenced one; a gathering under its
+    /// wing's reach) — so `rename_book` and `create_book` never refuse with,
+    /// or because of, a book the client cannot reach (F-7: anything it can't
+    /// reach answers as if it did not exist). Non-consuming: a name check
+    /// never spends a once grant. Asked inside the act's transaction, only of
+    /// a reading whose name collides.
+    func readableBooks(_ clientName: String) -> Operations.BookNameReach {
+        { db, readingID in
+            let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
+            return MCPGrantAuthority.decide(
+                standing, reading: try MCPGrantAuthority.readPlace(db, readingID: readingID)
+            ).isAllowed
+        }
+    }
 
     /// The lens's picks from take ids, resolved ONLY among the takes of THIS
     /// note's placed blocks — an id from anywhere else answers one way (no

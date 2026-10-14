@@ -659,13 +659,18 @@ extension Operations {
     /// tombstoned (memberships filed since die with it on its stamp and come
     /// back with it — `revertImportedBook`'s body over no notes), the redo
     /// reviving exactly that stamp.
+    /// VX-259: `namesCountedBy` — the readings the guard counts (the wire
+    /// passes the ones the client can READ — her ruling: an accidental
+    /// duplicate is fine, an oracle is not); nil counts every reading.
     @discardableResult
-    public func createBook(named name: String, inWing wingId: String, undoLabel: String) throws -> Reading {
+    public func createBook(
+        named name: String, inWing wingId: String, undoLabel: String, namesCountedBy reach: BookNameReach? = nil
+    ) throws -> Reading {
         let reading: Reading = try database.write { db in
             try requireLiveWing(db, wingId)
             let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
             let bookName = trimmed.isEmpty ? DisplayTitle.placeholder : trimmed
-            try requireBookNameFree(db, bookName)
+            try requireBookNameFree(db, bookName, counting: reach)
             let now = date.now
             let reading = Reading(
                 id: newID(), ownerId: currentOwnerID(), name: bookName, kind: .book,
