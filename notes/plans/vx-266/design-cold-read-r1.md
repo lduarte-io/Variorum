@@ -247,3 +247,22 @@ removal. No finding is disputed.
 **The ladder:** the MAJORs earn round 2, a fresh reviewer re-reading the fixes. Fable reviews it once the usage limit
 clears, as she was told when she picked Opus for round 1. Three calls are hers (design §9): M2's landing re-key, M3's
 leaving rules, and m21's refresh timing.
+
+### After round 1: her rulings on the PROVISIONAL calls (2026-10-13)
+
+- **M2 (a) revised at her ruling.** Her words: *"i think you should be able to land a Castle library with just the
+  passphrase OR the words - that's what we guarantee for being able to access it."* A fresh key at landing can carry
+  both secrets' roads only if both are typed, so with one secret the other would stop opening the library from then
+  on, which breaks that guarantee. So a landed library now **keeps the key it came with**:
+  - its passphrase alone, or its words alone, open it;
+  - in Standard it also gains an Apple key of the receiving Mac's own, so the sender entering Castle never strands it.
+    That keeps (a)'s fix.
+
+  The two copies share that key. This is rule 2's third exception, widened from "before this change" to every
+  hand-off. It is said at Send Library, where the sharing starts, and on Use Castle's sheet and the leave screen. The
+  record now notes every hand-off made or received, so those surfaces always know. (c) stands unchanged.
+- **M3 ruled as drawn:** *"so basically backups from when it was in standard still open to the standard account that
+  remains? i imagine that's fine"* (the nuance said back to her: every copy made while it synced, if the account
+  returns to Standard).
+- **The old shared key's shape confirmed** (no keep-for-now).
+- **m21's refresh timing:** asked; her answer pending.

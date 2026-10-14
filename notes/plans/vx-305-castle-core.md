@@ -171,7 +171,7 @@ Build everything in §3.2 of the design as values, with their codecs and their c
   - the words, as typed reasons for later phases to render.
 - **The rules it encodes:** design §3.3 (guards included), §3.5 (the old shared key: what still needs it, what its
   retirement would leave with no road, and what would then depend on an Apple key alone), §3.7 (the open rule's
-  verdicts, a different library landing under this Mac's own key), §3.8 (the four account situations, and the
+  verdicts — a different library keeping its key, with this Mac's own Apple key in Standard — and the record's hand-offs), §3.8 (the four account situations, and the
   leaving and joining rules), §3.10 (the Touch ID road, with VX-310's lobby rule as data: the button whenever a
   working Touch ID item exists, what pressing it says when Touch ID is only unusable for now, and which of the two
   lines shows when no item can work).
@@ -207,7 +207,8 @@ Build everything in §3.2 of the design as values, with their codecs and their c
     from the prepare to the swap;
   - the record names the act in flight; a plan resumes only when it's the one named; a missing or unmatched plan rolls
     the act back before its commit point and finishes it from the record after;
-  - a Castle library leaving an account re-keys; a different library lands under this Mac's own key;
+  - a Castle library leaving an account re-keys; a Standard landing mints this Mac's own Apple key; Send Library and
+    a landing note the hand-off in the record;
 - the Apple-key rules of §3.5:
   - names by id;
   - one minter, so followers wait, and the vault's CAS keeps one account key;
@@ -306,8 +307,8 @@ Each is a named test:
 - a silently-joined device losing its Keychain after the account entered Castle elsewhere: the words open its file;
 - a replayed plan and a replayed memory item, changing nothing; a whole-state rollback, opening nothing to the one who
   did it;
-- Send Library after this change: the receiver lands under a key of its own, and the sender entering Castle leaves it
-  whole;
+- Send Library after this change: a Castle copy lands with its passphrase alone, and with its words alone; a Standard
+  copy gains the receiver's own Apple key, so the sender entering Castle leaves it whole; the shared key said;
 - one library on two Macs from before this change: the stated exception, and the sheet naming the other Mac's key
   file;
 - a Castle library leaving its account by each of the four acts, then the account leaving Castle elsewhere: the

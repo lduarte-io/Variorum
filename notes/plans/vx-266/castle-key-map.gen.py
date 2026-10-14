@@ -556,7 +556,7 @@ OPEN_OLD = [
 OPEN_OTHER = [
     "<b>A Castle copy of this library from another Mac, into a Standard library here:</b> opening it runs Use Castle's own steps — your passphrase and words, a fresh key — or you cancel. Castle comes with a Castle library; a copy never lowers.",
     "<b>A copy whose key isn't in this library's history:</b> the restore list and the confirm mark it <i>“made on another Mac, or not by you”</i> before anything happens.",
-    "<b>A different library:</b> it keeps its own mode and lands under a key of this Mac's own — re-encrypted, its history empty, so no key is ever held by two Macs; in Castle the landing asks for its passphrase and words. The confirm says so concretely; the library you had joins your older libraries. <i>(PROVISIONAL, hers to confirm.)</i>",
+    "<b>A different library:</b> it keeps its own mode and the key it came with, so its passphrase alone or its words alone open it (her ruling); in Standard it also gets an Apple key of this Mac's own. The two copies share that key — said at Send Library and on Use Castle's sheet. The confirm says so concretely; the library you had joins your older libraries.",
     "<b>A plaintext export:</b> if it carries this library's ID it comes in under today's key and mode; otherwise it becomes a new library in Standard, and the confirm says so.",
 ]
 MIGRATE = [
@@ -632,7 +632,7 @@ CHECKLIST = [
     ("T-2", "Use Standard runs §‘Leaving Castle’ in order; its warning is said; other devices follow without asking", "executor tests · walk"),
     ("T-3", "Replace All Keys and the follow run as drawn; the old key joins the history; the refusal names a change made elsewhere", "executor tests · drills · walk"),
     ("T-4", "Opening an older backup brings it in under today's key and mode, never lowering it, nothing more typed", "fixed scenario VX-209 · restore drill · walk"),
-    ("T-5", "A Castle copy from another Mac raises a Standard library to Castle; an unknown-key copy is flagged; a different library keeps its own mode and lands under this Mac's own key, said concretely", "fixed scenarios (Send Library after this change) · walk"),
+    ("T-5", "A Castle copy from another Mac raises a Standard library to Castle; an unknown-key copy is flagged; a different library keeps its mode and its key (passphrase or words alone open it), gains this Mac's own Apple key in Standard, and the shared key is said at Send Library", "fixed scenarios (Send Library after this change) · walk"),
     ("T-6", "The migration runs as drawn: the fold, then keys of their own beside the old one for everything in Standard, then a fresh backup — removing no road", "migration drills per shape · her stores' byte-copies · scenario promise 12 · fixed scenarios (the window after the move; iCloud Keychain off)"),
     ("T-7", "Retiring the old shared key runs as drawn: the move again, the checks, the sheet listing exactly what would stop opening and every Standard thing with no passphrase or words, a vault still on it stopping the retirement; no keep-for-now; the door only on a library already in Castle before this change, gone once pressed", "fixed scenarios (two libraries on one Apple account; an older build's Re-link) · walk"),
     ("T-8", "A plaintext export lands under today's key and mode when it carries this library's ID, otherwise as a new library in Standard — said in the confirm", "fixed scenario · the restore drill"),
@@ -669,7 +669,7 @@ new design (your rulings of 2026-10-13). A companion to <code>second-opinion.htm
 <div class="okbox"><b>The whole idea in two lines.</b> In Castle, your Apple account opens nothing of this library —
 not the library, not any copy Variorum made of it on this Mac or a device of your account (the stated exceptions
 aside: a library already in Castle before this change, until it retires the old shared Apple key; copies from while a
-library synced with an account still in Standard; a library sent to another Mac without sync before this change). In Standard, it opens your library and every copy Variorum made of
+library synced with an account still in Standard; copies under a key shared with another Mac by Send Library). In Standard, it opens your library and every copy Variorum made of
 it. <i>In Castle = safe. Out of Castle = not safe.</i></div>
 <h2 id="cast">The cast</h2>
 <p>Every key is a random 256-bit number except your passphrase and words, which you hold. A <b>locked copy</b> is one key
@@ -719,7 +719,7 @@ password opens your library, or any copy Variorum made of it on this Mac or on a
 followed. In Standard, your Apple account — and anyone who can sign in to this Mac — opens your library and every copy
 Variorum made of it. <i>In Castle = safe. Out of Castle = not safe.</i> The stated exceptions — a library already in
 Castle before this change, until it retires the old shared Apple key; copies from while a library synced with an
-account still in Standard; and a library sent to another Mac without sync before this change — are said where they
+account still in Standard; and copies under a key shared with another Mac by Send Library — are said where they
 apply, and below.</div>
 <h2 id="cast">The cast</h2>
 {legend()}
@@ -750,7 +750,7 @@ libraries add the server column's facts.</p>
 <p class="lede">The stated exceptions, where the Castle column's red rows can still open something: a library already in
 Castle before this change, until it retires the old shared Apple key (its copies from before Castle; every Castle
 surface says so); copies made while a library synced with an account still in Standard (through that account); and
-copies of a library sent to another Mac without sync before this change (wherever that Mac's copy opens).</p>
+copies under a key shared with another Mac by Send Library (wherever that Mac's copy opens).</p>
 <h2 id="checklist">The acceptance checklist</h2>
 <p>Filled at the effort's close (phase 5). Every row needs its proof and a result; a row without one, or a mismatch,
 blocks the close.</p>
