@@ -15,6 +15,11 @@ import GRDB
 // (`editBlockComment`, when the words change) forgets the record in its own
 // transaction — the comment is hers from then on. Nothing else moves it: not a
 // client's `edit_comment`, not an undo or redo, not a delete or restore.
+// P-VX260-1, OPTION (b) (VX-246 U1b — v1_29): the record also keeps a DIGEST of
+// the words the client wrote (`MCPCommentWords`), and the comment is the
+// client's own only while its words still hash to it — so her edit on ANOTHER
+// device (arriving by sync, which runs no door here), or any client's rewrite,
+// makes deleting it need EDIT too. Acts that change no word leave it as it was.
 //
 // `deleteCommentForClient` is her own comment delete (`deleteBlockComment`'s
 // row body — a tombstone, the comment stays on its block's deleted-comments
@@ -22,11 +27,17 @@ import GRDB
 // transaction and ONE client-named undo entry — every MCP write registers one
 // (P-13nb-U2-4), though her own comment doors register none.
 extension Operations {
-    /// The record's write — inside the comment's own transaction.
-    func recordMCPCommentAuthor(_ db: Database, commentID: String, client: String) throws {
+    /// The record's write — inside the comment's own transaction. P-VX260-1
+    /// (b): with the digest of the words AS STORED (`text`, the inserted row's
+    /// own), the proof the comment is still the client's own.
+    func recordMCPCommentAuthor(_ db: Database, commentID: String, client: String, text: String) throws {
         try db.execute(
-            sql: "INSERT INTO mcp_comment_author (comment_id, client_name, recorded_at) VALUES (?, ?, ?)",
-            arguments: [commentID, client, DateFormatter.variorumISO8601.string(from: date.now)])
+            sql: """
+                INSERT INTO mcp_comment_author (comment_id, client_name, recorded_at, text_digest)
+                VALUES (?, ?, ?, ?)
+                """,
+            arguments: [commentID, client, DateFormatter.variorumISO8601.string(from: date.now),
+                        MCPCommentWords.digest(text)])
     }
 
     /// VX-260: her edit made the comment hers — the record is forgotten,
@@ -109,10 +120,27 @@ extension Queries {
     /// U4's edit rung consults the same fact): the client's name, or nil when
     /// no client is on file for it (hers, one synced from another Mac, one
     /// written before the record existed, one that travelled to a structural
-    /// successor — and, since VX-260, one she has edited since).
+    /// successor — and, since VX-260, one she has edited since). A FACT of
+    /// authorship; whether the comment is still the client's OWN is
+    /// `mcpCommentIsOwn` (P-VX260-1 (b) — its words unchanged).
     public static func mcpCommentAuthor(_ db: Database, commentID: String) throws -> String? {
         try String.fetchOne(
             db, sql: "SELECT client_name FROM mcp_comment_author WHERE comment_id = ?", arguments: [commentID])
+    }
+
+    /// **Is this comment still `client`'s own?** (P-VX260-1, option (b) —
+    /// VX-246 U1b): the record names the client AND the comment's words now
+    /// still hash to the digest written with them (`MCPCommentWords.isOwn` — a
+    /// NULL digest, from before `v1_29`, is unproven: never). One keyed read of
+    /// the record and one of the comment (∝ one comment).
+    public static func mcpCommentIsOwn(_ db: Database, commentID: String, client: String) throws -> Bool {
+        let record = try Row.fetchOne(
+            db, sql: "SELECT client_name, text_digest FROM mcp_comment_author WHERE comment_id = ?",
+            arguments: [commentID])
+        let text = try String.fetchOne(db, sql: "SELECT text FROM block_comment WHERE id = ?", arguments: [commentID])
+        return MCPCommentWords.isOwn(
+            recordedClient: record?["client_name"], recordedDigest: record?["text_digest"],
+            currentText: text, asker: client)
     }
 
     /// **The note a LIVE comment is on** — its block live-placed in a note

@@ -142,7 +142,7 @@ extension Operations {
                 do {
                     try requireBlock(db, item.blockID, placedIn: noteID)
                     let comment = try insertBlockComment(db, to: item.blockID, text: item.text)
-                    try recordMCPCommentAuthor(db, commentID: comment.id, client: client)
+                    try recordMCPCommentAuthor(db, commentID: comment.id, client: client, text: comment.text)
                     return comment
                 } catch {
                     throw MCPBatchItemRefusal(index: index, underlying: error)

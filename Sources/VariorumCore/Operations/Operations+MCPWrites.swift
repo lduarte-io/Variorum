@@ -241,7 +241,7 @@ extension Operations {
     ) throws -> BlockComment {
         let comment = try database.write { db in
             let comment = try insertBlockComment(db, to: blockID, text: text)
-            try recordMCPCommentAuthor(db, commentID: comment.id, client: client)
+            try recordMCPCommentAuthor(db, commentID: comment.id, client: client, text: comment.text)
             return comment
         }
         let commentID = comment.id
