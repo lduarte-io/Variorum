@@ -138,7 +138,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **DONE** — VX-229 DISMISSED AS HOLLOW in use (the u5b heap decider; the fix `ee86dd8c` reverted `7d798f82`; the runner's retention a known issue `c46f999d`, cause untraced) · VX-257 FIXED `1ca8fe72` (pins `7650b6ce`/`075473c2`, reshaped `dab712d8`/`eaf42b27`; QUESTIONS #223) · VX-183 FIXED `a765683c` · VX-182 FIXED `fd4c260c` (pins `f38fb93c`). Verified: core 2,801/320 + MCP 212/41 + workbook 40/6 headless; W1 / u5c red on old as designed; u5b g2 76/11, g3 23/2; **u5d g1 113 tests / 13 suites passed (9 known issues — the VX-229 runner fact)**; the u5b walk, every row held, both voices. Windows released 05:25:17, 05:57:46, 06:13:57, 06:19:43. Posture as found (Standard, unlocked, Study); no instance; no revert in flight. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **DONE** — pins `d35191b6` + correction `ee1facc9` · fix `3cf0079b` · window `a1967ac0` (logs) + the walk record. Stage window 05:27:17–05:38:17 (claim `vx282-u6`, RELEASED): W1 red on old exactly as predicted (3 tests, 1 issue — the launch pin's last cell) · W2 the fixed batch 148 tests / 43 suites green · W3 every row held (A0 old: the window; A/A' fixed: the caret in the bar at launch in Study and Terminal, a typed letter lands; C the tour never stolen from; D the navigation back as today — O-U6-1 seen live); row B's restored note window not reachable on this Mac (not restored), a new window walked in its place. P-U6-1/2 → QUESTIONS #224. Posture: Study, unlocked Standard, tour `completed`, the Bookcase, nothing filed. No claim held; no revert in flight. |
-| Ladder | round 1 `opus-reviewer` (0B/0M/6m/4n, dispositioned) → its FIX LEG; round 2 = the run's one `fable-reviewer` | IN-PROGRESS — round 1's fix leg (the `### ROUND 1 — FIX LEG` subsection) |
+| Ladder | round 1 `opus-reviewer` (0B/0M/6m/4n, dispositioned) → its FIX LEG; round 2 = the run's one `fable-reviewer` | IN-PROGRESS — round 1's fix leg: **READY FOR STAGE — r1fix, ≈35 min** (the `### ROUND 1 — FIX LEG` subsection: W1/W1b/W1c red-on-old + the R2-1 revert, W2 the fixed Mac batch, W2b the phone + R1-3's verdict, W2c only on a red R1-3) |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
 ## Stage traffic log (oct13coordinator protocol)
@@ -2596,36 +2596,232 @@ run 2,809/322 · MCP 212/41 · workbook 40/6 green · 21 stage logs spot-checked
 **NOT DONE BY THIS LEG (first line):** R1-8 (the closeout's whole-target run watches it) and the handoff are not this
 leg's. Every count and every "red"/"green" below is **PENDING** until the r1fix stage window runs it.
 
-**LIVE STATUS (this leg):**
+**LIVE STATUS (this leg):** READY FOR STAGE — r1fix (the plan at the end). No claim held; no revert in flight
+(`git diff` empty after every one, each verified); the side branch `vx-282-r1-3-guard` is NOT merged.
 
 | Finding | State |
 |---|---|
-| R1-1 find paint × the read-going settle | BUILT — pin `49ebe4c4`, fix `833b1ba7`; red-on-old + green PENDING the window |
-| R1-2 Write's overlays after a settle re-wrap | BUILT — pin `174b64f3` (road-honest at `9f9980cb`), fix `9f9980cb` (a deliberate refinement — see below); red-on-old + green PENDING |
-| R1-3 the phone's guard window (PIN FIRST) | PIN ONLY — `706008eb`; the guard prepared, NOT on the branch; the window decides |
-| R1-4 the comments panel to `Core/Views/` | DONE `b7fece88` (build green headless) |
-| R1-5 #220's disclosure line | DONE (this commit) |
-| R1-6 O-4 re-verified | DONE (this commit) — premise FALSE, the U3 line withdrawn; no ticket |
-| R1-7 a caret in a non-editable editor | BUILT — pins `ebd327d0`, fix `26c2e448`; red-on-old + green PENDING |
-| R1-9 the burst pins against R2-1's revert | NOT-STARTED — the revert product is built after the docs |
-| R1-10 the U5 record's adopt line | DONE (this commit) |
+| R1-1 find paint × the read-going settle | BUILT — pin `49ebe4c4`, fix `833b1ba7`; red-on-old (W1) + green (W2) PENDING |
+| R1-2 Write's overlays after a settle re-wrap | BUILT — pin `174b64f3` (made road-honest in `9f9980cb`), fix `9f9980cb` — a deliberate refinement of the agreed shape (below); W1 + W2 PENDING |
+| R1-3 the phone's guard window (PIN FIRST) | PIN ONLY on the branch — `706008eb`; the guard is the side branch's `47606e46`, its products built; W2b DECIDES |
+| R1-4 the comments panel to `Core/Views/` | DONE `b7fece88` (headless build green); W2 g3 PENDING |
+| R1-5 #220's disclosure line | DONE `f411c213` |
+| R1-6 O-4 re-verified | DONE `f411c213` — premise FALSE, U3's O-4 WITHDRAWN in the U3 record; no ticket |
+| R1-7 a caret in a non-editable editor | BUILT — pins `ebd327d0`, fix `26c2e448`; W1 + W1c + W2 + W2b PENDING |
+| R1-9 the burst pins against R2-1's revert | PRODUCTS BUILT (the revert named, applied, built, restored); W1b PENDING |
+| R1-10 the U5 record's adopt line | DONE `f411c213` |
 
-**Revert state: the three builds below are NAMED before any starts (each: commit first, apply to the working tree only,
-build, set the products aside, restore by `git checkout HEAD -- <file>`, verify `git diff` empty).**
-- **OLD-MAC (red-on-old products, rebuilt so they carry the FINAL pins — the R1-2 pin changed at `9f9980cb`):**
-  `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift` and `App/Variorum/Variorum/Surface/PaneSurface.swift`
-  back to `706008eb`'s (the pins commit — the pre-fix app); every test file and the R1-4 move stay at HEAD → build into
-  `DerivedData/vx282-u1`, its `Build/Products` cloned to `DerivedData/vx282-r1fix-old-products` (replacing the first
-  copy). The OLD-PHONE products need no rebuild: `DerivedData/vx282-r1fix-old-ios-products` is the build of `706008eb`
-  itself (every phone pin is final there; the phone's only fix is `26c2e448`).
-- **R2-1-REVERT (R1-9, test-only run):** in `EditorSurfaceController.replayDeferredKeystrokesIfIdle`, the 18c ladder's own
-  named revert — `guard !structuralInFlight, pendingCrossBlockTask == nil else { return }` → `guard !structuralInFlight
-  else { return }` (drain whenever no flight is up) → build into `DerivedData/vx282-u1`, cloned to
-  `DerivedData/vx282-r1fix-r21revert-products`.
-- **R1-3 GUARD (prepared, NOT on the run branch):** the one guard on a side branch `vx-282-r1-3-guard` (pushed), built
-  for the phone into `DerivedData/vx282-u2-ios`, cloned to `DerivedData/vx282-r1fix-guard-ios-products` — so a red
-  verdict's second window needs no build.
-Then the FIXED products are rebuilt at the run branch's tip into `DerivedData/vx282-u1` and `DerivedData/vx282-u2-ios`.
+#### R1-1 — the find paint the read-going settle erased (FIXED, pin PENDING)
+
+- **Mechanism, confirmed by re-reading the road:** `PaneSurfaceView.updateNSView` paints FIRST
+  (`paintFind(live: false)`, `PaneSurface.swift:1427` — it writes `.backgroundColor` over the matches and sets
+  `paintedFind = wanted`), then sets `isEditable = false`, then `noteLiveness(false)` → VX-296's settle
+  (`:1652`) re-reads the honoured line caret-blind through `MarkdownFaceCore.restyle`, whose clear loop removes
+  `.backgroundColor` over every face run it re-derives (`MarkdownFaceCore.swift:188-203` — the code chip's ownership rule,
+  13k K10), the match's paint inside the italic span included. The record still read "painted", so the update's closing
+  `paintFind(live: false)` (`:1527`) found `wanted == paintedFind` and wrote nothing. A regression of U2's (pre-VX-296 the
+  liveness note never restyled).
+- **The diff (`833b1ba7`, one file):** the coordinator's private `settleMarkdownCaret(in:)` calls `findPaintWasReset()`
+  when the settle restyled — the rule every other attribute-rewriting road in the coordinator already keeps (the face
+  change, the base-attribute refresh, a fresh string). Placed in the one settle helper, so the selection-change and
+  `textDidChange` settles carry it too (on a live pane `paintedFind` is already nil — a no-op there).
+- **The pin:** `PaneFindFaceTests.aPaneGoingReadAtACaretRescuePointKeepsItsMatchPainted` — the suite's rig, `*Hyde *`, one
+  match `{1,4}`, born live; the caret at 6 (non-vacuity: italic at 1); `isLive = false` → `.backgroundColor` at 1 ==
+  `matchTint` and the painted runs == `[{1,4}]`. **RED ON OLD expected** (2 issues: the colour, the runs) — W1.
+
+#### R1-2 — Write's overlays after a settle re-wrap (FIXED, a refinement of the agreed shape; pin PENDING)
+
+- **Mechanism, confirmed:** `EditorViewModel.settleMarkdownCaret` writes attributes only; `overlayGeometryGeneration`'s
+  inputs were the storage's character edits (`storageDidEdit`, `:1222`), the attach (`:427`), a width reflow (`:439`)
+  and the refont keeper (`:2321`). A settle that toggles an italic in Study re-wraps its paragraph — MEASURED headless
+  (a scratch AppKit program, not committed): Iowan Old Style 16 pt at the 680-pt measure, 200 words read 12 lines
+  italic and 14 roman (60 words: 4 vs 5; 300: 18 vs 21) — so every block below moves while the generation stands;
+  the display pass's `overlayLayoutDidSettle` returns at `overlayGenerationDelivered == overlayGeometryGeneration`
+  and the ⑂ badges, callout frames, seams, the indicator and the gutter cards keep the old layout's places until a
+  scroll, pointer or edit. (`ScrollAnchorController` refreshes only on a clip-bounds change or a live resize —
+  `EditorView.swift:978-1023` — so a re-wrap inside a page that does not scroll heals nothing.)
+- **The diff (`9f9980cb`, `EditorViewModel.swift` only):** when the settle restyled, the generation is bumped AND the
+  text view is asked to draw (`needsDisplay = true`); the restyle's own display pass then reports through
+  `viewWillDraw` → `overlayLayoutDidSettle`, whose hop lands after the pass that laid the restyled line out.
+  **Deliberately NOT the agreed "refont road's shape" (a direct `overlayLayoutDidSettle()` call)** — for the
+  orchestrator and the Fable round to judge: a direct hop is a `DispatchQueue.main.async` scheduled at once, and it can
+  run BEFORE the layout pass that consumes the restyle (traced case: a note opening with its remembered caret at a rescue
+  point — the settle runs at the open's caret placement, before the first viewport layout); it then reads pre-layout
+  fragment frames, sets `overlayGenerationDelivered` to the new generation, and the first real pass's report returns at
+  the guard — N14's own cold-mount class (badges on collapsed frames until a scroll). The width road calls directly
+  because a bare frame change guarantees no display pass; a restyle of visible text always draws, and the
+  `needsDisplay` belt makes the pass certain even when the line the caret LEFT is off screen above the viewport (moving
+  visible text with no glyph of its own to redraw). Cost: one viewport redraw per settle that restyled — only a caret's
+  arrival at or departure from a rescue point. Zero lines in `EditorSurfaceController` or `BlockDecor.swift` (VX-246's
+  lane — no stop owed).
+- **The pin:** `SettleRewrapOverlayTests.aSettleThatRewrapsAParagraphMovesTheBadgeBelowIt` (new suite in
+  `MarkdownCaretFaceTests.swift`, `.serialized`) — Write in a 900×700 window under Study chrome (the
+  `WriteFloatingViewportTests` rig: `EditorTypography.adopt` + `EditorSurface.Coordinator.applyChrome/install`, the
+  globals restored), `*<200 words> *` honoured at its rescue point (non-vacuity: Study's real italic at 1), a fanned block
+  below; the steady state by an explicit `refreshBadges()` (so the before is identical on both products); THE ACT: an
+  arrow past the closing star (no character changes — asserted), then display passes that FORCE NOTHING
+  (`displayIfNeeded` — so the pin proves the fix's own display request); `#require` the block moved > 10 pt (the
+  re-wrap); the badge's y within 1 pt of the block's laid-out fragment. **RED ON OLD expected** (1 issue: the badge) — W1.
+  An honest pin: the re-wrap is real in the host (Study's font ships), the act is the app's own key road.
+
+#### R1-3 — the phone's guard window (PIN FIRST — undecided until W2b)
+
+- **The question (the review's, SPECULATIVE):** the shared settle's guard is `storage.editedMask.isEmpty`, which reads
+  empty between `beginEditing` and the transaction's first change; if UIKit reports the selection inside
+  `coordinateEditing` before the character change on the `UITextInput.replace(_:withText:)` road (autocorrect, the
+  spelling Replace, dictation — only `insertText` was observed at U2), a settle at a rescue point writes inside the
+  transaction — W2b's desync class.
+- **The pin (`706008eb`, ALONE on the branch):** `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`
+  × `["Hello", "hi", "hello there"]` — the real `MobileEditorTextView` first responder in a key window, Study, the caret
+  at `*hello |*` (7, honoured — non-vacuity), `replace(<"hello">, withText:)`; under `withEditorAssertionsMuted` so a
+  desync reads as `desyncRecoveryCount`, never a crash. Asserts: no desync; the text; the identity audit; the face reads
+  as the landed caret says (honoured iff the caret still sits between the space and the star). The shorter and longer
+  replacements are mine, beside the review's same-length shape: they MOVE the caret, so a selection report is certain.
+- **Prepared, NOT applied:** the guard — `guard pendingEdit == nil else { return }` at the top of
+  `MobileEditorViewModel.settleMarkdownCaret` — is `47606e46` on the pushed side branch `vx-282-r1-3-guard` (the run tip
+  `e243a87d` + that one commit), its phone products built (`DerivedData/vx282-r1fix-guard-ios-products`). RED in W2b ⇒
+  the second window runs those products, then the commit is cherry-picked onto the run branch (byte-identical code);
+  GREEN ⇒ R1-3 DISMISSED AS HOLLOW, the side branch deleted, no fix.
+
+#### R1-4 — the comments panel moves to the shared home (DONE)
+
+`git mv` of `Features/Editor/CommentsPanel.swift` and `Features/Editor/CommentTextArea.swift` to `Core/Views/`
+(`b7fece88`; `git log --follow` carries the history). No code line changed; one header comment in `CommentTextArea.swift`
+says why it moved (VX-179's F-U3-1 Q-3 "panel-private home" kept — it stays beside its one consumer). The Xcode project
+uses synchronized folders (`PBXFileSystemSynchronizedRootGroup`, no `pbxproj` edit; no membership exception names
+either path); the Mac-only target (`MobileComments.swift` names `CommentsPanelModel` in a comment only). Path references
+elsewhere are history (records) or the strings workbook's frozen 2026-10-05 inventory keys, which the workbook reads from
+its doc, never from source. Headless `build-for-testing` green (the fixed tree).
+
+#### R1-5 — the #220 disclosure (DONE `f411c213`)
+
+QUESTIONS #220 gains a plain paragraph in her register: the approved wording said the grammar untouched; the caret rule
+lives in the grammar's module (`spans(in:caret:)` + `closerFlanks`), byte-identical with no caret (its own suites
+unchanged, the gate-soundness pin over every caret of nineteen texts), and why one grammar beats a second matcher, with
+the road back if she wants the file itself untouched. The handoff line is the closeout's (not this leg's).
+
+#### R1-6 — O-4 re-verified (DONE `f411c213`) — premise FALSE, withdrawn, no ticket
+
+Traced: `PaneMount.kind(of:focused:windowIsKey:)` (`WorkspaceNavigation.swift:85-87`) is consulted at `RootView.swift:1124`
+and `NoteWindowView.swift:92` with `WindowRegistry.isKey` — the sticky last-known-key among REGISTERED windows
+(`WindowRegistry.swift:108-120`). Exactly one window mounts Write (and so the take panel's sheet, `EditorView.swift:186`,
+and every routed handler); a window that stops being it re-renders read-cheap, and the panel's `.onDisappear`
+(`WriteTakesPanel.swift:267-272`) unregisters and detaches. The U3 record's O-4 line is struck through with the trace
+beside it. The orchestrator owes no ticket for it.
+
+#### R1-7 — a caret in a non-editable editor (FIXED, pins PENDING)
+
+- **Mechanism, confirmed:** both platforms' settles handed the face the selection whatever the editability, while the pane
+  hands none when not editable (`PaneSurface.swift:2009-2015`). The Mac's Write on a SEALED note is selectable and not
+  editable (`adoptHeader`, `EditorViewModel.swift:806-816` — no caret drawn): a click at a rescue point turned the italic on,
+  and a seal arriving while the caret sat there left the italic standing (nothing re-settled on the flip). The phone's
+  non-editable states are the stand-downs (`standDown`, the gone note, the page under the takes browser or the comments
+  sheet); a SEALED phone note stays editable (its gate refuses, its caret is drawn).
+- **The diff (`26c2e448`):** Mac — `holdsCaret = isEditable || structuralInFlight` gates the selection (the flight's
+  few-ms fence is the ONE non-editable state that still holds her caret: `runStructural` drops `isEditable`, the act
+  lands the caret INSIDE the flight — `applyStructuralResult`, `EditorSurfaceController.swift:3042-3049` — and the
+  defer lifts the fence with no selection change, so a plain `isEditable` gate would read a landing at a rescue point
+  caret-blind until her next move; read from the model's own forward, zero lines in `EditorSurfaceController`); and
+  `adoptHeader` re-settles when the editability FLIPS (sealing re-reads the honoured line; unsealing honours the caret
+  where it stands; a header delivery that does not flip — every autosave's touch stamp — settles nothing). Phone —
+  `isEditable` gates the selection; no flip-settle there (a stood-down surface is a hidden or covered page; its caret
+  comes back with the pen).
+- **The pins (`ebd327d0`):** Mac `MarkdownCaretFaceTests.aSealedNoteHonoursNoCaret` (`["*hello *", "next block"]`: honoured
+  while editable — non-vacuity; sealed → not editable, the span plain; a click at the rescue point → plain; unsealed →
+  honoured where the caret stands). Phone `MobileMarkdownCaretTests.aStoodDownEditorHonoursNoCaret` (honoured live; after
+  `standDown()` a selection at the rescue point, settled as the delegate settles, → plain). **RED ON OLD expected:** Mac 1–2
+  issues (the click certainly; the seal arrival unless the harness's reload re-renders the storage) — W1; phone 1 — W1c.
+
+#### R1-9 — the burst pins against R2-1's revert (products built; W1b PENDING)
+
+R2-1 = the 18c ladder's round-2 MAJOR (`use-report-round-2026-09-06.md:2019-2025`): the stash drained at the end of the
+NEWEST arming, not when the surface is IDLE; fixed at `0ce1040f` by `replayDeferredKeystrokesIfIdle`'s one drain rule
+(`guard !structuralInFlight, pendingCrossBlockTask == nil`). Its revert, as that ladder named it (`:2159`): the
+`pendingCrossBlockTask == nil` half removed. Built test-only (`DerivedData/vx282-r1fix-r21revert-products`, the fixed tip
+otherwise), restored, `git diff` empty. **Predicted by trace** (the window decides which pin carries R2-1): RED —
+`aBurstWithASeamBackspaceKeepsTheTextBehindTheReturnItFollowed` (the original R2-1 pin, `["alpha"]` → `["alphax", ""]`),
+`aBurstWithASeamBackspaceHoldsWhenTheCarveLandsBelow` (`["", "beta"]`: the carve's flight drains `x` at beta's start
+before the queued ⏎ acts → `["", "x", "beta"]`), and `aBurstWithASeamBackspaceAboveABlockLandsWhereTheBreakWas`
+(`["alpha", "beta"]`: the carve lands at alpha's end, its flight drains `x` there → `["alphax", "", "beta"]`).
+
+#### R1-10 — the U5 record's adopt line (DONE `f411c213`)
+
+The U5 line is struck through and corrected in place: the caret-at-end rule keys on an EMPTY area, so ANY adopt into
+one lands the caret at the end — the mount fill included (every area is born empty and its first `adopt` from
+`makeNSView` fills it, so a live comment row's edit area now opens with its caret at the comment's end), and a store
+arrival into an area she emptied likewise; an adopt into a non-empty area keeps the caret where it can be. Code
+unchanged.
+
+#### The products (no new full tree — three Products-only clones beside the two existing trees)
+
+| Products | Built from | For |
+|---|---|---|
+| `DerivedData/vx282-r1fix-old-products` (Mac, clone) | the tip with `EditorViewModel.swift` + `PaneSurface.swift` at `706008eb` (named; restored, diff empty) — FINAL pins over the pre-fix app; `nm`: no `holdsCaret` | W1 |
+| `DerivedData/vx282-r1fix-r21revert-products` (Mac, clone) | the fixed tip with R2-1's named revert (restored, diff empty) | W1b |
+| `DerivedData/vx282-r1fix-old-ios-products` (phone, clone) | `706008eb` itself (all phone pins final; the pre-fix phone) | W1c |
+| `DerivedData/vx282-r1fix-guard-ios-products` (phone, clone) | the side branch `47606e46` (tip + the R1-3 guard) | the second window, only on a red W2b |
+| `DerivedData/vx282-u1` (Mac, the existing tree) | the run tip (fixes + move) — `nm`: `holdsCaret` present | W2 |
+| `DerivedData/vx282-u2-ios` (phone, the existing tree) | the run tip (no guard) — three distinct phone dylibs by md5 | W2b |
+
+All six `TEST BUILD SUCCEEDED`; build logs `DerivedData/vx282-r1fix-*.log`. No `Sources/` file touched — no `swift test`
+owed. Zero `Sync/`, custody, Keychain, schema; the editor seam's `EditorSurfaceController`/`BlockRangeIndex`/
+`BlockDecor` untouched by the fixes (the R2-1 revert touched `EditorSurfaceController` in the working tree only, for one
+build, restored).
+
+#### THE r1fix WINDOW PLAN (≈35 min; runs only on the orchestrator's claim line; `guard.sh --author` before every leg)
+
+From `App/Variorum/`; logs to `notes/plans/vx282-screens/r1fix/logs/` (create it). `pgrep` first — no `/Applications`
+Variorum instance, none of ours; no booted simulator. No app launch and no walk: no fix changes anything she sees except
+by the pins' roads (an italic's honour in two non-editable states; a badge's place; a match's paint).
+- **W1 — red on old, Mac (≈4 min):** `xcodebuild test-without-building -xctestrun
+  DerivedData/vx282-r1fix-old-products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination 'platform=macOS'`
+  `-only-testing:VariorumTests/` × `PaneFindFaceTests` `SettleRewrapOverlayTests` `MarkdownCaretFaceTests`
+  `PaneMarkdownCaretFaceTests` → `w1-red-on-old.log`. EXPECTED RED: `aPaneGoingReadAtACaretRescuePointKeepsItsMatchPainted`
+  (2), `aSettleThatRewrapsAParagraphMovesTheBadgeBelowIt` (1), `aSealedNoteHonoursNoCaret` (1–2); everything else green.
+- **W1b — R1-9, the R2-1 revert (≈2 min):** the same with `-xctestrun
+  DerivedData/vx282-r1fix-r21revert-products/Variorum_Variorum_macosx27.0-arm64.xctestrun`
+  `-only-testing:VariorumTests/TypedReturnKeyTests` → `w1b-r21-revert.log`. Record EVERY red; predicted the three burst
+  pins above.
+- **W1c — red on old, phone (≈3 min incl. the boot):** `xcodebuild test-without-building -xctestrun
+  DerivedData/vx282-r1fix-old-ios-products/VariorumMobile_VariorumMobile_iphonesimulator27.0-arm64-x86_64.xctestrun
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' -collect-test-diagnostics never`
+  `-only-testing:VariorumMobileTests/MobileMarkdownCaretTests` → `w1c-phone-red-on-old.log`. EXPECTED RED:
+  `aStoodDownEditorHonoursNoCaret` (1). R1-3's three cases also run here — informative only (W2b decides).
+- **W2 — the fixed Mac batch, `-derivedDataPath DerivedData/vx282-u1` (≈18 min), five invocations (suite TYPE names,
+  grepped; the mounted popover/sheet suites kept apart, as at U5):**
+  (g1, `w2-g1.log` — the face, find, the panes) `PaneFindFaceTests` `MarkdownCaretFaceTests` `PaneMarkdownCaretFaceTests`
+  `SettleRewrapOverlayTests` `MarkdownFaceTests` `ProgrammaticReplaceFaceTests` `PaneSurfaceTests` `PanePublishDoorTests`
+  `TakePaneMeasureTests` `PaneRenderRestoreClipTests` `IdentityProjectionAuditWalkTests` `MacIdentityAuditWiringTests`
+  `EditorSessionTests` `ReviewRoundFixTests` `CommitFlowTests` `FanFlowTests`;
+  (g2, `w2-g2.log` — Write's overlays and geometry) `InlineEditorWindowTests` `ReadTierTests` `EditorWindowSmokeTests`
+  `IndicatorGutterTests` `BlockDecorGeometryTests` `ProseGutterTests` `EditorDecorTransactionTests` `RefontViewportTests`
+  `RefontGapTopTests` `WriteFloatingViewportTests` `UntouchedLineKeeperTests` `InlineHeightReportTests`;
+  (g3a, `w2-g3a.log` — the comments after the move) `CommentPanelHostSuites` `CommentPanelLeaveTests`
+  `CommentPanelDoorsTests` `CommentPanelParkTests` `CommentsPanelModelEditorTests` `CommentCompositionTests`
+  `CommentPanelKeysTests` `CapabilityRegistryTests`;
+  (g3b, `w2-g3b.log`) `CommentPanelFixLeg2Tests` `CommentTextAreaMountedTests` `CommentPanelGeometryRuleTests`
+  `CommentPanelWordsTests` `CommentCardLayoutTests` `CommentCardViewTests` `CommentCardControllerTests`
+  `MarginHoverCommentTests` `WriteTakesPanelRoutedCommandTests` `WriteTakesPanelKeysTests`;
+  (g4, `w2-g4.log` — Return and the carve: the flight fence in `holdsCaret`) `CarveCaretLandingTests`
+  `BlockDeletionAndRedoTests` `TypedReturnKeyTests` `ReturnKeyTraceTests` `SoftNewlineTests` `EditorEditRouteTableTests`
+  `SeamMergeTests` `CrossBlockCompoundTests`.
+  EXPECTED: all green; `CommentPanelHostSuites` "passed with N known issues" (the VX-229 runner fact, U5 — R1-8's watch is
+  the closeout's whole-target run, not this). Read every suite's ✔/✘ line and the skips (a wrong name runs 0 tests and
+  still "succeeds"; the nested `CommentPanelHostSuites` must show both child suites).
+- **W2b — the fixed phone + R1-3's VERDICT, `-derivedDataPath DerivedData/vx282-u2-ios` (≈4 min):** the W1c destination
+  and flags, `-only-testing:VariorumMobileTests/` × `MobileMarkdownCaretTests` `MobileMarkdownRenderTests`
+  `MobileMarkdownReturnTests` `MobileMarkdownActsTests` `MobileCheckboxTapTests` `MobileEditorMaterializationTests`
+  `MobileEditorRoutingTests` `MobileEditRoutingBindingTests` `MobileIdentityAuditSeparatorTests`
+  `MobileEditRoutingCrashTests` `MobileLivenessTests` → `w2b-phone.log`. **R1-3 DECIDES HERE:** the three
+  `aReplaceThroughTheInputRoad…` cases green ⇒ HOLLOW (no fix; the side branch goes); any red (`desyncRecoveryCount`)
+  ⇒ the window can continue at once into **W2c** (≈3 min): the same phone list on `-xctestrun
+  DerivedData/vx282-r1fix-guard-ios-products/VariorumMobile_VariorumMobile_iphonesimulator27.0-arm64-x86_64.xctestrun`
+  → `w2c-phone-guard.log`, all green expected; the cherry-pick of `47606e46` follows the window. Then `xcrun simctl
+  shutdown all`; 0 booted; release the claim.
+
+**READY FOR STAGE — r1fix: W1 (Mac red-on-old: R1-1, R1-2, R1-7) · W1b (R1-9, the R2-1 revert) · W1c (phone red-on-old,
+R1-7) · W2 (the fixed Mac batch, five groups) · W2b (the fixed phone batch + R1-3's verdict) · W2c only if W2b's R1-3 is
+red, ≈35 min (≈38 with W2c).**
 
 ## Closeout
 
