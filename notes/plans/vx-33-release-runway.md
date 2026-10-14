@@ -9,13 +9,16 @@ phases and blocks ALL of the remaining work that needs to be done before release
 just to help me get a handle on everything, figure out what can run in parallel / what needs to go in a
 particular order (like mcp settings pane redone before i reword settings would be nice), etc. … I want to
 focus my efforts on the changes that i have to live with and test out (esp with the MCP since that feature
-is new) … i do still want to get this released in the next couple of days … giving me just a handful phase
-numbers to keep track of."*
+is new) … giving me just a handful phase numbers to keep track of."*
 
 **How to read it.** Linear holds status. This file holds the order, the parallel lanes, and the overlaps
 every run must respect. A run's section below is its kickoff: `/run-phase vx-NNN` reads it together with the
-run ticket's sub-issues and CLAUDE.md. Nothing here changes canon or makes a product decision; anything that
-needs her word is listed in §6.
+run ticket's sub-issues and CLAUDE.md. Nothing here changes canon or makes a product decision; her rulings
+are quoted where they bind, and what is still hers is listed in §6.
+
+**No time predictions.** Her word (2026-10-13): *"let's not make predictions about length of time, coding
+time works differently in our new AI world."* This file states order and dependencies only. Sizes (S/M/L,
+units) are scope, not durations.
 
 ---
 
@@ -23,45 +26,34 @@ needs her word is listed in §6.
 
 | Run | What it is | Members | Cast (implement / cold review) | Can start |
 |---|---|---|---|---|
-| **VX-266** Castle & backups | the custody and backup redesign (project + flagship) | 17 | Fable leads and writes the `Sync/` lines; Opus implements the rest | after her decisions (§2) |
+| **VX-266** Castle & backups | the custody and backup redesign (project + flagship) | the Castle project | Fable leads and writes the `Sync/` lines; Opus implements the rest | after her Castle decisions |
 | **VX-246** MCP door fixes & AI docs | the door's security, correctness, wire asks, then the AI's docs last | 20 | Opus / **Fable** | now |
 | **VX-281** MCP settings pane & shared icon | the pane in tabs, the code block, the Library's shared icon | 4 | Opus / Opus | now |
-| **VX-282** Editor & notes fixes | backspace, take panel, capture box, comments family | 8 | Opus / **Fable** (editor seam) | now |
-| **VX-283** Sidebar & Library polish | the Open list, navigate-away, Library polish, exports | 14 | Opus / Opus | now |
-| **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's fixes, VX-216 last | 13 | Opus / Opus | now |
+| **VX-282** Editor & notes fixes | backspace, the italics flicker, take panel, capture box, comments family | 9 | Opus / **Fable** (editor seam) | now |
+| **VX-283** Sidebar & Library polish | the Open list, navigate-away, Library polish, exports, the test reds | 16 | Opus / Opus | now |
+| **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's doors and Index slice, VX-216 last | 15 | Opus / Opus | now |
 
 Plus **her own track** (§4) and **the release itself** (§5).
 
-**The honest timeline.**
-- **Everything except Castle** can close in about two days if the five runs start tonight. Each is one to
-  six units, and units run one implementer session at a time. They share one stage, so walks and Mac test runs
-  queue through the coordinator.
-- **Castle as designed** is one design sitting and then six phases in a row (the second opinion's §6). The
-  phases can't overlap: they depend on each other, and only one `Sync/`-or-custody effort may run at a time.
-  At roughly a day per phase (the migration phase is the riskiest, and the earlier custody build took twelve
-  implementer sessions), that's close to a week after her decisions.
-- **So Castle sets the launch date, not the other runs.** The go/no-go after Castle's headless first phase is
-  the designed moment to take the smaller "middle road" (proposal §12, about three phases) if the date matters
-  more. That choice is hers.
-- If the date is fixed at a couple of days, the only other road is shipping before Castle's redesign. Her own
-  reason for doing it before launch argues against that: *"I don't want this mess to propogate once I have
-  users in every conceivable configuration and state with backups in every conceivable configuration and
-  state."*
+**The date.** Her gate (2026-10-13, verbatim): *"I am gating public launch on castle being properly done no
+matter how long it takes though."* The Castle work decides the date. The other five runs proceed in
+parallel and merge as they finish. Every pre-launch ticket outside Castle has a home in one of them, or on
+her own track.
 
 ---
 
 ## 2. Order and lanes — what waits for what
 
-**Start tonight (no sitting needed):** VX-246, VX-281, VX-283. **Next, or tonight if the coordinator says the
-stage can take it:** VX-282, VX-284. **Castle** starts when §2's Castle steps are done.
+**Start now (no sitting needed):** VX-246, VX-281, VX-283, VX-282, VX-284. How many run at once is the
+coordinator's call: they share one stage. **Castle** starts when her Castle decisions are made.
 
 The dependencies, all of them:
-1. **Castle.** Her two-minute Keychain Access check → her rulings D1–D10 (the second opinion §7) → one merged
-   design + `notes/plans/vx-266-castle-backups-prelaunch.md` → phase 1 (headless core, no stage) → go/no-go →
-   phases 2–6. Castle is THE one `Sync/`-or-custody effort while it runs. No other run may touch
+1. **Castle.** Her decisions (the Keychain Access check, then D1–D10 in the second opinion §7) → one merged
+   design + `notes/plans/vx-266-castle-backups-prelaunch.md` → phase 1 (headless core) → go/no-go → the
+   remaining phases. Castle is THE one `Sync/`-or-custody effort while it runs. No other run may touch
    `Sources/VariorumCore/Sync/`, custody or the Keychain.
 2. **VX-281 merges → she rewords the MCP pane** (VX-234). Every other pane can be reworded any time, except
-   Protection and Data Safety, which wait for Castle's words phase (VX-264 changes them).
+   Protection and Data Safety, which wait for Castle's words (VX-264 changes them).
 3. **VX-281 merges, and VX-246's door units are done → VX-246's docs unit (VX-197) runs.** The docs teach
    the final wire and describe the pane's tabs. They run LAST, as the plan file already says.
 4. **VX-246's docs → the stargazing MCP guide.** The brief `notes/stargazing-mcp-guide-brief-2026-10-12.md`
@@ -71,8 +63,9 @@ The dependencies, all of them:
 6. **Her tutorial/onboarding session (VX-292)** runs before VX-246 reaches its docs unit, or after VX-246
    merges. Never at the same time: both edit `TutorialSeeder`. Castle's words phase edits the guide's Castle
    lessons too, so rebase onto whichever lands first.
-7. **VX-284's last unit (VX-216)** is author-attended. She joins one sitting on the book and gathering menus
-   and settings sheets after the run's other units land, because they touch the same sheets.
+7. **Inside VX-284:** VX-303 (the book's open doors) lands before VX-304 (the Index slice), which rides the
+   same landing road. VX-216 is last and author-attended: she joins one sitting on the book and gathering
+   menus and settings sheets after the run's other units land, because they touch the same sheets.
 8. **Closeouts serialize** (CLAUDE.md): first ready merges first, and the next rebases onto it.
 
 **Shared files to watch** (the conflict map — any two runs here rebase carefully):
@@ -80,6 +73,9 @@ The dependencies, all of them:
   sync applies and `deleteReadingWithNotes` through it; the new Close Note act moves the pane on) and
   VX-246 (VX-275 sends her editor away before a wire delete). Whichever lands second builds on the first's
   road, never a second road.
+- **Landing at a block:** VX-284 (VX-303 and VX-304 send book doors through `ShellRouter.adopt(landing:)` →
+  `jump`) and VX-283 (Close Note's landing on the next note). Both use the existing roads; neither invents
+  a new landing authority.
 - **Faces refreshing after writes:** VX-283's VX-122 (one revival signal for the Library) and VX-246's
   VX-231 (stale Bookcase counts after an MCP write) may share a cause. VX-246 checks VX-283's signal before
   inventing its own.
@@ -87,8 +83,9 @@ The dependencies, all of them:
 - **Settings:** VX-281 (the MCP pane), VX-284 (VX-240's "Opening your library…" face in the Settings
   scene's `.opening` arm), VX-266 (the Protection / Data Safety ceremonies), VX-234 (her wording).
 - **The undo stack:** VX-246 alone (VX-276 + VX-277 + VX-119 are one rule).
-- **The editor seam:** VX-282 (backspace) and VX-246 (VX-275's flush, VX-230's badge if the trace lands there)
-  both get Fable reviews; neither may change the other's landing rules without saying so.
+- **The markdown face and the editor seam:** VX-282 (VX-290's backspace landing; VX-296's caret-aware
+  restyle) and VX-246 (VX-275's flush; VX-230's badge if the trace lands there). All Fable-reviewed; none
+  changes another's landing or styling rules without saying so.
 
 **Capacity, said plainly.**
 - **The stage.** Five build runs plus Castle's drills share the Pro's stage (`Tools/stage`). The
@@ -109,12 +106,21 @@ Rules binding every run (on top of CLAUDE.md):
 - **Closeout.** Each run ends with the /Applications refresh at a zero-instance window, unless the
   coordinator folds the refreshes.
 - **No release** without her explicit word. She writes the notes.
+- **Blocked by a state another session made** (a Castle posture, a lock screen, a held claim): ask that
+  session or the coordinator for what's needed, such as the dev-Castle credentials at
+  `~/.variorum/dev-castle.env`. Never discard or reset a store to get past it. Her 2026-10-13 example: dev
+  runs paused at her Touch ID after another session had put the dev store in Castle, and sessions began
+  moving the whole dev store aside when one ask for the passphrase and words was all it took.
 
 ### VX-246 — Run: MCP door fixes & AI docs
 **Plan:** `notes/plans/mcp-pane-and-docs-kickoff.md` (its U6 section and the VX-268 bullet now belong to
 VX-281; everything else stands). **Members:** VX-258 · VX-259 · VX-260 · VX-279 · VX-280 · VX-276 ·
 VX-277 · VX-119 · VX-275 · VX-230 · VX-231 · VX-255 · VX-252 · VX-253 · VX-267 · VX-298 · VX-254 · VX-256 ·
-VX-261 · VX-197.
+VX-261 · VX-197. All pre-launch.
+
+**Her MCP list, accounted for:** every ticket on it is in VX-246 or VX-281, and both run before launch.
+Nothing on it is delayed except VX-262 (lenses on import), which stays parked at her word and was never in
+the run. VX-245's two MCP sites ride VX-281.
 
 **Suggested unit order** (one implementer session each; the orchestrator re-sizes at kickoff and tells her):
 1. **The door's security and correctness:** VX-258 (setup keys tied to their tab; the launch gate), VX-259,
@@ -128,9 +134,9 @@ VX-261 · VX-197.
    - VX-231: stale Bookcase counts.
    - Editor seam: read `notes/TEXTKIT2_NOTES.md`.
 4. **Wire asks:** VX-255 (insert blocks: write new appends at the end, edit inserts anywhere — ruled),
-   VX-252, VX-253 (ruled), VX-267 (labels drop "suggested"), and VX-298 (AI opens Compare — her six
-   calls are on the ticket).
-5. **Agent ergonomics** (not pre-launch, in the run at her word): VX-254, VX-256, VX-261.
+   VX-252, VX-253 (ruled), VX-267 (labels drop "suggested"), and VX-298 (AI opens Compare — her calls are on
+   the ticket).
+5. **Agent ergonomics:** VX-254, VX-256, VX-261.
 6. **LAST — the AI's docs** (VX-197). This unit starts only after VX-281 has merged and main is merged in.
 
 **Cast:** Opus implements; **Fable** cold-reviews, because VX-258 changes the key's accept path, VX-279 is the
@@ -142,9 +148,8 @@ truth pins.
 ### VX-281 — Run: MCP settings pane & shared icon
 **Plan:** `notes/plans/mcp-pane-and-docs-kickoff.md` — the **U6 section** and the **VX-268 bullet** under
 HER ADDITIONS (her kickoff calls are there). **Members:** VX-199 · VX-205 · VX-232 · VX-268, plus the two MCP
-sites of VX-245 (`MCPPane.swift:412`, `MCPGrantSheet.swift:285`). **VX-299 (Claude Desktop) joins if she
-picks (b) or (c):** the live round first, then the setup tab; post Desktop's client name to VX-258 so
-VX-246's re-bind table knows it.
+sites of VX-245 (`MCPPane.swift:412`, `MCPGrantSheet.swift:285`). Claude Desktop (VX-299) is NOT in this run:
+she tries it herself, outside the runs.
 
 **Units:** (1) the pane in tabs with the code block (VX-199/205/232 + the two VX-245 sites), walked in both
 voices; (2) the shared icon on every row that wears the ask glyph (VX-268), walked.
@@ -153,23 +158,29 @@ voices; (2) the shared icon on every row that wears the ask glyph (VX-268), walk
 wording list posted to VX-234. That list is her pickup for the MCP pane's words.
 
 ### VX-282 — Run: Editor & notes fixes
-**Members:** VX-290 (backspace) · VX-154 · VX-193 · VX-112 · VX-257 · VX-229 · VX-183 · VX-182.
+**Members:** VX-290 (backspace) · VX-296 (the italics flicker) · VX-154 · VX-193 · VX-112 · VX-257 · VX-229 ·
+VX-183 · VX-182.
 
 **Units:**
 1. **VX-290, the empty-block backspace.** Editor seam; its trace, ruling and pins are on the ticket. One
    ReturnKeyTrace pin flips by her report's ruling.
-2. **VX-154, the take panel's remaining routed commands.** The panel registration is the worked fix
+2. **VX-296, the italics flicker** (pre-launch at her word: *"it's a bit too buggy and annoying to
+   remain"*). The closer half of the flanking rule refuses a closing `*` with a space before it. Fix (a), the
+   recommendation: caret-aware in the live editor only; the grammar and the read pages are untouched.
+   Shared markdown face, so both platforms' live editors.
+3. **VX-154, the take panel's remaining routed commands.** The panel registration is the worked fix
    (`0deda5b4`, `2e5784ca`).
-3. **VX-193 + VX-112, the capture box pair.** VX-193: undo desync, so ⏎ files undone words — the comments
+4. **VX-193 + VX-112, the capture box pair.** VX-193: undo desync, so ⏎ files undone words — the comments
    panel's per-area UndoManager is the precedent. VX-112: the focus re-grab, her "not urgent", judged on her walk.
-4. **The comments family left by VX-179:**
+5. **The comments family left by VX-179:**
    - VX-229 first (the popover leak).
    - VX-257 rides the same release hook.
    - VX-183 (the registry).
    - VX-182 (the purge fence, a query).
 
-**Cast:** Opus / **Fable** (VX-290 is `EditorTextView` + `BlockRangeIndex`). Read `notes/TEXTKIT2_NOTES.md`.
-**Nothing mobile-visible** (the phone has no carve).
+**Cast:** Opus / **Fable** (VX-290 is `EditorTextView` + `BlockRangeIndex`; VX-296 restyles the live storage).
+Read `notes/TEXTKIT2_NOTES.md`. **Mobile-visible:** VX-296's shared face reaches the phone's live editor too
+(say so in the MOBILE PARITY line); VX-290 is Mac-only (the phone has no carve).
 
 ### VX-283 — Run: Sidebar & Library polish
 **Members:**
@@ -177,58 +188,59 @@ wording list posted to VX-234. That list is her pickup for the MCP pane's words.
   · VX-288 (the drag) · VX-289 (multi-select, Close All).
 - Navigation: VX-70 (the compact drag chip at the remaining rows, incl. the Open list's) · VX-123
   (navigate-away gaps).
-- Library: VX-122 (revivals) · VX-19 (Timeline) · VX-20 (dark heading band) · VX-121 (toasts vs quick entry).
+- Library: VX-122 (revivals) · VX-19 (Timeline) · VX-20 (dark heading band) · VX-121 (toasts vs quick entry)
+  · VX-175 (the controls row at the 1240-pt default window; pre-launch at her word).
 - Exports: VX-125 · VX-126.
-- VX-245 (its six non-MCP sites).
+- The reds: VX-245 (its six non-MCP sites) · VX-167 (two tests red only in wide parallel runs).
 
 **Units:**
-1. **The Open list's layout and closing:** VX-285, VX-286, VX-287, VX-289. **Her two calls on VX-287 come
-   first:** the chord, and where the pane lands.
-2. **The drag:** VX-288 (build shape S, then her walk decides on M) + VX-70.
+1. **The Open list's layout and closing:** VX-285, VX-286, VX-287, VX-289. **Her ruling on VX-287:** Close
+   Note = **⇧⌘W** (⌘W keeps closing the window), landing on **the next note in the list** — *"that way you
+   can close them all quickly."* Verify ⇧⌘W is free first.
+2. **The drag:** VX-288 (her call on its shape is still open — §6) + VX-70.
 3. **Navigate-away and Library revivals:** VX-123, VX-122 — one signal each, on the existing roads.
-4. **Library polish and the reds:** VX-19, VX-20, VX-121, VX-245.
+4. **Library polish:** VX-19, VX-20, VX-121, VX-175.
 5. **The exports:** VX-125, VX-126 — the format's one home stays `Domain/VariorumDocument`.
+6. **The reds:** VX-245, VX-167.
 
 **Cast:** Opus / Opus. **Pins that change by her ask:** `ShellChromeTests.theOpenStripWindowIsHerSevenAndAHalf`
 and the shared-constant pin in `StarredScrollTests` (Starred keeps its 7, her words).
 
 ### VX-284 — Run: Books, gatherings & tags
 **Members:**
-- Gatherings and tags: VX-250 (her copy, NOT terms; closes VX-240) · VX-240 · VX-241 (the planner's
-  addition) · VX-247 (tag-delete undo) · VX-111 (the shared-note notice).
+- Gatherings and tags: VX-250 (her copy, NOT terms; closes VX-240) · VX-240 · VX-241 · VX-249 (collecting
+  sets the star; pre-launch at her word) · VX-247 (tag-delete undo) · VX-111 (the shared-note notice).
 - The honest disabled button: VX-194.
-- The book view: VX-303 (the open doors drop her block, a bug against the deep-link rule — the planner's
-  addition) · VX-291 (the ▸ target) · VX-21 (Book Panel grips) · VX-69 (order popover Escape).
+- The book view: **VX-303** (every open door lands in Write at her block — a bug against the deep-link rule,
+  her words) · **VX-304** (Index takes badges, an in-place Takes sheet, "Takes" + "open in Write here" in the
+  box, Outline → Index keeps the block) · VX-291 (the ▸ target) · VX-21 (Book Panel grips) · VX-69 (order
+  popover Escape).
 - The reds: VX-77 · VX-115.
 - Last, with her: VX-216.
 
 **Units:**
-1. **VX-250 + VX-241 + VX-194:** one register for the gathering doors' words, and the style fix that makes
-   greying visible app-wide (fold the one-off gathering face back in).
+1. **VX-250 + VX-241 + VX-249 + VX-194:** one register for the gathering doors' words, the collect door's
+   star, and the style fix that makes greying visible app-wide (fold the one-off gathering face back in).
 2. **VX-247, tag-delete undo:** one structural entry with an exact-row redo; the bigger restore road stays
    VX-238.
-3. **The book view's fixes and reds:** VX-303 (every open door carries her block; her one call: land in
-   Write), VX-291, VX-21, VX-69, VX-77, VX-115, VX-111. If she says yes to VX-300's minimum slice, it joins
-   here as its own unit.
-4. **LAST, author-attended — VX-216,** the clarity pass on the book and gathering menus and settings sheets.
+3. **VX-303, the book's open doors:** every door lands in **Write, at her block** — her ruling: *"more
+   consistent and useful than the note's last used mode."*
+4. **VX-304, the Index slice** (after VX-303, on the same landing road).
+5. **The book view's small fixes and reds:** VX-291, VX-21, VX-69, VX-77, VX-115, VX-111.
+6. **LAST, author-attended — VX-216,** the clarity pass on the book and gathering menus and settings sheets.
    She can pull it out to run alone.
 
-**Cast:** Opus / Opus.
+**Cast:** Opus / Opus. The rest of the book view (landing inside Outline, Index → Outline at block level,
+the full Index bar) is **VX-300, after launch** at her word.
 
 ### VX-266 — Castle & backups (project; flagship)
 **Records:** `notes/plans/vx-266/` on branch `vx-266-castle-backups-before-launch` (worktree
-`~/dev/variorum-vx-266`): the design proposal, cold read 1, the second opinion (which now owns the design),
-its cold read, and the Apple facts.
+`~/dev/variorum-vx-266`). The second opinion owns the design, and she is working with the Castle session
+directly. Nothing builds before the plan file `notes/plans/vx-266-castle-backups-prelaunch.md` exists.
 
-**Next, in order:**
-1. Her Keychain Access check.
-2. Her rulings D1–D10 (each recorded with her words on the ticket the second opinion names).
-3. One merged design.
-4. The plan file `notes/plans/vx-266-castle-backups-prelaunch.md`.
-5. Six phases, with a go/no-go after the first.
-
-Nothing builds before the plan file exists. **Castle-adjacent tickets** for the sitting to place:
-- VX-113 (the changed-elsewhere passphrase refusal; her #205 ruling, pre-launch).
+**Castle-adjacent tickets** for the Castle work to place:
+- VX-113 (the changed-elsewhere passphrase refusal; her #205 ruling, pre-launch). It's the one pre-launch
+  ticket outside every run; its refusal is the follow's, which Castle rebuilds.
 - VX-81 (a macOS 27.0.1 crash in the re-key reopen; Backlog).
 - VX-152 (the lock path's reentrancy; Backlog).
 - VX-100 / VX-101 (Open Library's double passphrase ask and backups location; Backlog).
@@ -240,10 +252,11 @@ Nothing builds before the plan file exists. **Castle-adjacent tickets** for the 
 
 | What | When | Ticket |
 |---|---|---|
-| Castle: the Keychain check + D1–D10 | **first — it gates the long pole** | VX-266 |
+| Castle decisions, with the Castle session | now — they decide the date | VX-266 |
 | Settings wording, Editor through Acknowledgments | any time; **MCP pane after VX-281 merges**; Protection + Data Safety after Castle's words | VX-234 |
 | Tutorial & onboarding changes (the Air session) | before VX-246's docs unit, or after VX-246 merges | VX-292 |
 | VX-216's menus clarity sitting | when VX-284's other units have landed | VX-216 |
+| Claude Desktop: try it herself, then decide on a guide paragraph | outside every run | VX-299 |
 | Her readme and letter text | before launch, if the launch carries them | VX-105 |
 | The MCP guide page + the privacy page (her site agent) | after VX-246's docs (MCP); any time (privacy) | VX-197 · VX-294 |
 | The release notes (she writes them) | at release | — |
@@ -255,7 +268,7 @@ Nothing builds before the plan file exists. **Castle-adjacent tickets** for the 
 
 The launch build ships at her explicit word only, after:
 1. Every pre-launch run has merged.
-2. Castle has merged, or she has taken its cut line at the go/no-go.
+2. Castle is properly done — her gate, *"no matter how long it takes"*.
 3. VX-258 has shipped.
 4. The MCP guide page is live (R-VX184-4).
 5. The privacy page is live (VX-294, a canon v1 gate).
@@ -269,77 +282,47 @@ at a zero-instance window with no commits during it, then DMG first and appcast 
 
 ## 6. Her calls
 
-**Before the runs reach them:**
-- **VX-287, the Close Note chord:** ⌘W = Close Note with ⇧⌘W = Close Window (the Safari/Xcode convention;
-  costs on the ticket), or ⌃⌘W. Also: where the pane lands after a close (recommended: the next row, else
-  the previous, else the Library).
-- **VX-288, the drag:** shape S first and her walk decides on M (recommended), or M from the start.
-- **VX-268's kickoff calls** (on the ticket): the Pool and Book Panel rows (recommended in), Blocks-scope rows
-  (recommended no), and the open book (recommended: match the Bookcase).
-- **VX-298, AI opens Compare** (six calls on the ticket). Recommended:
+**Answered (2026-10-13 evening; each is on its ticket in her words):**
+- Close Note = **⇧⌘W**, landing on the next note (VX-287).
+- VX-303 is pre-launch and lands in **Write** at the block.
+- The book view's smallest version is pre-launch (VX-304); the rest waits until after launch (VX-300).
+- Pre-launch: **VX-175 yes, VX-249 yes, VX-296 yes; VX-138 no** (she only wanted to know it was saved).
+- The planner's additions (VX-277, VX-119, VX-241) are approved: *"your additions are fine."*
+- Claude Desktop is her own try, outside the runs (VX-299).
+- Code blocks (VX-295) and the held markdown mode (VX-293) come later.
+- Public launch is gated on Castle being properly done, however long it takes.
+
+**Still open — answerable any time; a run's kickoff will raise whichever reaches it first:**
+- **VX-288, the Open-list drag:** shape S first, with her walk deciding on M (recommended), or M from the start.
+- **VX-268's row calls** (on the ticket; VX-281):
+  - the Pool and Book Panel rows (recommended: in);
+  - Blocks-scope rows (recommended: no);
+  - the open book (recommended: match the Bookcase).
+- **VX-298, AI opens Compare** (six calls on the ticket; VX-246). Recommended:
   - any two notes her picker would offer, with no link required;
   - open with "related blocks only" off when the notes share no lineage;
   - up to three peers;
   - `link_versions`' "Open ›" opens Compare.
-  
+
   Undecided: replace the open columns or fill the empty ones. A `duplicate_note` tool would be its own
   ticket after launch.
-- **VX-299, Claude Desktop:** never tested, with no known blocker; the Any-client setup is already the
-  shape Desktop's config reads. (a) Out for launch, (b) verify live (about an hour, with her OK to edit
-  her Claude config) plus a docs paragraph, or (c) verify plus a Desktop setup tab (about half a day).
-  Recommended: (b) at least.
-- **VX-303 and VX-300, editing from the book view** (her report, 2026-10-13).
-  - **VX-303:** "Open in editor" lands at the note's top. Her words: *"it doesn't follow the existing
-    deep-link canon rule, it just doesn't work."* Five book doors pass only the note. Size S, no editor seam;
-    in VX-284 as the planner's addition. Her one call: land in Write at the block (the search-hit
-    precedent), or in the note's remembered mode.
-  - **VX-300, the rest.** Index ↔ Outline and "view in outline" forget the position; Index has no block
-    tools and no takes. Size L, about two sessions.
-    - **Minimum slice, a candidate for pre-launch** (one S–M Opus session, no editor seam): takes badges and
-      an in-place Takes sheet in Index; Takes and "open in Write here" in Index's box; Outline → Index
-      carries the block.
-    - **After launch** (Fable): landing at a block inside Outline, Index → Outline, Read at block level,
-      the full Index bar.
-    - **Her calls:** pre-launch for the slice; QUESTIONS #99(b) → option (ii); whether book editing
-      feeds the per-note memory; Read ▸ Scroll tracking (her A6 ruling removed it).
-
-**Pre-launch, yes or no** (none is labelled Pre-launch until she says so):
-- **VX-175, the Library controls row at the default 1240-pt window:** the search field squeezes and the info
-  panel is pushed off-window at the app's own default size. Recommended **yes** (first impression), riding VX-283.
-- **VX-249, collecting an existing note sets the star:** small; rides VX-284 with VX-250 if yes.
-- **VX-138, a stack fan style that doesn't repeat the chosen take** (her 2026-10-10 ask; today in 13q
-  Delight): one FanStyle option; would ride VX-282 if yes.
-- **VX-248, the live-pane root fix:** recommended **after launch**. VX-222 and VX-227 already closed every
-  reachable case, and this bends P-3 in the editor seam right before launch.
-- **VX-244 / VX-242, the Takes/Lenses edges:** recommended after launch (VX-216 may fold VX-244 in).
-- **VX-295, multi-line code blocks:** phase-sized (two units: editor seam, a format change, both platforms),
-  with eight design questions on the ticket. **After launch**, as she said for a big one, and designed after
-  her markdown-mode question in **VX-293** (18e, held), which it depends on.
-- **VX-296, the italics flicker** (her answer: *"every time theres a space next to this symbol * it stops
-  being in italics, once it's a character it's in italics again"*). Verified: the parser's flanking rule
-  refuses a closing `*` with a space before it (`MarkdownSyntax.swift:549-579`). The rule exists to keep
-  `2 * 3 * 4` plain, but the opener half alone already does that.
-  - **Recommended fix:** caret-aware, live editor only. While her caret sits at that closer, it still
-    counts. The grammar and the read pages stay as they are.
-  - **Size:** S–M, Fable-reviewed. Would ride VX-282. **Recommended pre-launch:** she hits it whenever she
-    types in italics.
-- **The planner's additions, hers to veto:** VX-277 and VX-119 (into VX-246, same rule as VX-276); VX-241
-  (into VX-284, same sentence as VX-250); VX-303 (into VX-284 — her "it just doesn't work", size S).
-
-**Answered by the record** (no call needed):
-- VX-217, the gathering foot's New note: **done** (VX-214, in 0.9.5).
-- VX-227: done, as she said.
-- VX-138 is her "stack without the chosen take" idea, recorded 2026-10-10.
-- Mobile is not in the v1 launch (canon: `notes/release-and-v1-strategy.md`, *"it is NOT in the v1 launch"*).
-  VM-15 stays on the VM board for Castle's sitting to weigh.
+- **VX-296's fix shape:** (a) caret-aware in the live editor only (recommended), or (b) drop the closer half
+  of the flanking rule app-wide, which changes her ruled grammar.
+- **QUESTIONS #218** (VX-184's provisionals), ideally before VX-246's kickoff.
+- **VX-113's home:** the Castle session's to place.
 
 ---
 
 ## 7. After launch — logged, not scheduled
 
-- VX-297: Library Cards beachballs on a fast scroll. Heavy cards built in bulk and big page landings mid-fling
-  are the likely causes. Diagnosis takes one session; relates to VX-17.
+- VX-300: the rest of the book view, made equal to the note's editor. Landing inside Outline and the full
+  Index bar get a Fable review.
+- VX-297: Library Cards beachballs on a fast scroll. Heavy cards built in bulk and big page landings
+  mid-fling are the likely causes; relates to VX-17.
 - VX-295: multi-line code blocks, and VX-293 (18e, whether a markdown mode exists at all).
+- VX-138: the stack fan style without the chosen take.
+- VX-248: the live-pane root fix.
+- VX-244 / VX-242: the Takes and Lenses edges.
 - VX-238: restoring a deleted tag (design first).
 - VX-251: the 15-star limit.
 - VX-236: the Settings titlebar bleed trace.
