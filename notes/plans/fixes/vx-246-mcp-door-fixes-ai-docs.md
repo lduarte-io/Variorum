@@ -1731,7 +1731,11 @@ min, claim 30):** steps 0, W1, W2 and the release — the live round then moves 
   recorded limit, below); (3) P-VX275-1 departs from the brief's wording (every open post, not `flushExistingAutosave` for
   the act's note) — argued, and the options are listed; (4) the flush runs before the grant decision, so an act that then
   refuses still flushed her text: harmless (her own text into her own store, what her debounce does 500 ms later), and
-  the timing it exposes is "something was pending somewhere", never which note.
+  the timing it exposes is "something was pending somewhere", never which note; (5) a wire flush IN FLIGHT at the very
+  instant she presses a structural gesture makes `runStructural`'s own flush find the coordinator busy, so it refuses
+  "Unsaved changes couldn't be written — resolve that first, then retry." — the SAME race her own debounce's flush has
+  always had (a debounce flush in flight at her press), one more occasion for it, milliseconds wide; recorded, not
+  pinned. **MOBILE PARITY:** nothing mobile-visible — the MCP door is Mac-only and the phone's editor is untouched.
 - **Recorded limits (not defects of this unit):** the residual window (P-VX275-2); her own Takes-board Lock / Archive /
   Delete-take doors run without a flush (`TakesViewModel.run` — "flushing before every ops call would make every board
   door pay") — the same refused-flush class may reach HER doors when she clicks within 500 ms of typing into that take
