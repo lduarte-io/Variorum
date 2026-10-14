@@ -4675,9 +4675,9 @@ whole Mac target.
 
 **Not done yet (first line, kept current):** PHASE A and PHASE B are DONE (main merged, headless and phone green,
 `vx246-final` rebuilt, THE CLOSEOUT WINDOW run and released — F-1 red → green, F-4 4 → 0, the whole Mac target with no
-new red). PHASE C has NOT started. NO shared ledger is touched (AppSpec, TEXTKIT2_NOTES,
-QUESTIONS, the master plan, the archives, MobileSoul): every one waits for PHASE C, on latest main. No Linear edit (the
-orchestrator's).
+new red). PHASE C is IN PROGRESS (### PHASE C below): main merged in again (VX-266's notes-only #161), the shared ledgers
+being applied one family per commit. No Linear edit, no merge, no `/Applications` refresh and no deletion of the branch,
+worktree or evidence here (the orchestrator's).
 
 | phase | what | state |
 |---|---|---|
@@ -4685,7 +4685,7 @@ orchestrator's).
 | A2 | ### CLOSEOUT DRAFTS below, exactly as they will land | DONE (this commit) |
 | A3 | the handoff draft `notes/handoffs/vx-246-handoff.md` (what to know first, her checklist, what shipped, how it was checked, the tickets, the other runs, left on disk; every «…» filled at PHASE C) | DONE (this commit) — **PHASE A DONE** |
 | B | merge `origin/main` (after VX-282) as a merge commit; headless package green; a fresh `vx246-final`; THE CLOSEOUT WINDOW's plan (claim `vx246-close`); READY | **READY** (### PHASE B below): main merged at `f3cc8d07` (`8c47f877`, no conflict); headless MCP 240/51 · core 2,860/330 · workbook 40/6; the phone builds (Release + Debug); `vx246-final` rebuilt on the merged tree; the u1b products deleted; THE CLOSEOUT WINDOW planned. **THE WINDOW RAN** (claim `vx246-close`, 10:28:00–11:09:46, RELEASED): F-1 red → green, F-4 4 → 0, the whole Mac target 4,695 / 773 with only VX-115 and VX-245/VX-283 standing — **PHASE B DONE** |
-| C | the drafts applied on latest main; the handoff finalized | after the window |
+| C | the drafts applied on latest main; the handoff finalized | IN PROGRESS (### PHASE C below) |
 
 **Found while drafting (for the orchestrator):**
 1. **U6 and U7 have no drafted brief in this record.** LIVE STATUS says "its brief is drafted for that run" for both,
@@ -5155,3 +5155,33 @@ merged tree `8c47f877` (tip `3c78ecc2`).
   0 differ); no new backup; no instance.**
 - **The A1 copy, the coordinator's to prune:** `…/Variorum-dev/Backups/safety-copies/scale-prestage-20261014T162804Z`.
 
+### PHASE C — THE MERGE-MOMENT LEDGERS (the closeout's PHASE C implementer — opus-implementer, from 2026-10-14 ~11:20 MDT)
+
+**What this phase does NOT do (said first):** no code change, no Mac test, no stage claim, no Linear edit, no merge of
+the PR, no `/Applications` refresh, no deletion of the branch, worktree or evidence (all the orchestrator's). Three
+placeholders stay for the orchestrator to fill after the merge and the refresh: «merge SHA», «refresh build» and, in
+the handoff only, «refresh A1 path».
+
+**Main moved again, notes only (the coordinator's call, option 1).** At PHASE C's first fetch `origin/main` was
+`c62eda7d`, not `f3cc8d07`: VX-266's design merged (PR #161, `2f5ac7a7`) with its merge-moment ledgers (`c62eda7d`) and
+a board snapshot (`e931900a`). PHASE C stopped and reported. The move is 51 files, ALL under `notes/` (zero `App/`,
+`Sources/`, `Server/` or `Tools/` lines; `git diff --name-only f3cc8d07 c62eda7d` read whole), and among this run's
+ledgers it touches only `notes/QUESTIONS.md`, where VX-266 took **#225**. `git merge-tree` read it clean. At the
+coordinator's word it merged in as a MERGE COMMIT, `7c4183f0` "Merge origin/main (VX-266's #161) into VX-246" (parents
+`8ad21268` + `c62eda7d`), with no conflict, and was pushed. **No rebuild:** the move carries no code, so THE CLOSEOUT
+WINDOW's results (`vx246-final`, the merged tree `8c47f877`) still describe exactly the code that merges. **The numbers
+move:** the bundle is **QUESTIONS #226** (drafted as #220; VX-282 took #220–#224, VX-266 #225), the MobileSoul row is
+**PL-55** (VX-282 took PL-54), and §14's roll is the **VX-180** entry (VX-282 rolled VX-168).
+
+#### LIVE STATUS — PHASE C's pieces (flipped in the same commit as each piece)
+
+| # | piece | state |
+|---|---|---|
+| 0 | main merged in again (`c62eda7d`, notes only) as a merge commit; pushed | DONE (`7c4183f0`) |
+| 1 | D1–D4: AppSpec §7, §9, §12 and §14 (VX-282 → "Before it"; the VX-180 entry rolled to `notes/AppSpecDeltaArchive.md`) | next |
+| 2 | D5: TEXTKIT2_NOTES §3 | — |
+| 3 | D6: QUESTIONS #226 | — |
+| 4 | D7: the master plan — VX-246's in-flight row retired, nothing else | — |
+| 5 | D8: MobileSoul PL-55 | — |
+| 6 | the handoff's final form | — |
+| 7 | D9: the record's and the kickoff plan's closing edits | — |
