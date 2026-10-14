@@ -73,6 +73,15 @@ final class TimelineViewModel {
         self.session = session
     }
 
+    /// **VX-281 ladder R1-1 — the rows whose reach the view HOLDS** (its
+    /// `.task(id:)` reads this). SEAM — the pre-fix answer: every row she has
+    /// loaded, however many pages.
+    var reachIDs: [String] { items.map(\.postID) }
+
+    /// A row came on screen / left it (the List's own reports).
+    func rowAppeared(_ id: String) {}
+    func rowDisappeared(_ id: String) {}
+
     /// VX-268 — hold the loaded rows' reach (the view's `.task(id:)` on their
     /// ids — a page loaded or a lens switched restarts it).
     func holdReach(_ ids: [String]) async {
@@ -155,10 +164,19 @@ struct TimelineView: View {
     }
 
     init(session: AppSession, now: Date = Date(), openPost: @escaping (String) -> Void) {
+        self.init(session: session, model: TimelineViewModel(session: session), now: now, openPost: openPost)
+    }
+
+    /// The pins' seam (VX-281 ladder R1-1/R1-5): a model the harness drives
+    /// by hand — the `LibraryCatalogView` shape.
+    init(
+        session: AppSession, model: TimelineViewModel, now: Date = Date(),
+        openPost: @escaping (String) -> Void
+    ) {
         self.session = session
         self.now = now
         self.openPost = openPost
-        _model = State(initialValue: TimelineViewModel(session: session))
+        _model = State(initialValue: model)
     }
 
     var body: some View {
@@ -203,7 +221,7 @@ struct TimelineView: View {
         .background(tokens.surface)
         .task { await model.reload() }
         // VX-268: who reaches the loaded rows — held, re-aimed per page.
-        .task(id: model.items.map(\.postID)) { await model.holdReach(model.items.map(\.postID)) }
+        .task(id: model.reachIDs) { await model.holdReach(model.reachIDs) }
     }
 
     /// **A timeline row, in the voice's own type** (row 54): the same
