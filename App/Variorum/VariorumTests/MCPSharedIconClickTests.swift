@@ -130,6 +130,27 @@ final class SharedIconCounter {
     var count = 0
 }
 
+/// R1-9's host: one row whose reach a pin empties and restores.
+@MainActor
+@Observable
+final class SharedIconReachBox {
+    var reaches: [MCPPlaceReach] = []
+}
+
+private struct SharedIconBoxHost: View {
+    let box: SharedIconReachBox
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text("a note an AI act moves")
+            MCPSharedIcon(reaches: box.reaches, tokens: .studyLight)
+            Spacer(minLength: 0)
+        }
+        .padding(24)
+        .frame(width: 420, height: 140, alignment: .topLeading)
+    }
+}
+
 @MainActor
 @Suite("VX-281 ladder R1 — the shared icon clicked on every host (R1-5), its own state (R1-9), ⌘L's Esc (R1-2)", .serialized)
 struct MCPSharedIconClickTests {
@@ -315,5 +336,48 @@ struct MCPSharedIconClickTests {
             defer { rig.close() }
             try await clickTheOneIcon(rig, client: "r15-pool", host: "Pool") { opens.count }
         }
+    }
+
+    // MARK: - R1-9 — the icon never presents itself (R-13nb-23/26g)
+
+    private func reach(_ client: String) -> [MCPPlaceReach] {
+        [MCPPlaceReach(
+            client: MCPClient(
+                id: "c-\(client)", name: client, version: "2", state: .approved,
+                firstSeenAt: "2026-07-01T00:00:00.000Z", lastSeenAt: "2026-07-01T00:00:00.000Z",
+                decidedAt: nil),
+            rung: .read, grant: nil, throughTitle: nil)]
+    }
+
+    /// **R1-9 (the reviewer's SPECULATIVE nit, settled here):** since VX-268 the
+    /// icon's calm state lives INSIDE the icon, so a host keeps the icon (and
+    /// its `shown`) while its reach empties. Her popover is up; an AI act takes
+    /// the reach away (spends a once grant, moves the note, removes it from the
+    /// granting book) — the button and its popover leave; the reach returns.
+    /// The popover must NOT present itself: only her press opens it
+    /// (never-present-yourself, R-13nb-23/26g). Red ⇒ the icon kept
+    /// `shown == true` across the empty spell; green on the pre-fix tree ⇒
+    /// SwiftUI wrote `false` back itself and the finding is HOLLOW.
+    @Test func anIconWhoseReachLeavesAndReturnsNeverPresentsItsPopoverByItself() async throws {
+        let name = "r19-client"
+        let box = SharedIconReachBox()
+        box.reaches = reach(name)
+        let rig = SharedIconRig(SharedIconBoxHost(box: box), width: 420, height: 140)
+        defer { rig.close() }
+        try await clickTheOneIcon(rig, client: name, host: "R1-9's row") { 0 }
+        #expect(MCPSharedIconProbe.presentations(of: name) == 1, "her press presented it once")
+
+        // The reach leaves while the popover is up…
+        box.reaches = []
+        await rig.poll(timeout: 1.5) { MCPSharedIconProbe.frames(in: rig.window).isEmpty }
+        #expect(MCPSharedIconProbe.frames(in: rig.window).isEmpty, "the calm icon draws nothing")
+        await rig.poll(timeout: 0.6) { false }
+
+        // …and comes back.
+        box.reaches = reach(name)
+        await rig.poll(timeout: 1.5) { MCPSharedIconProbe.frames(in: rig.window).count == 1 }
+        await rig.poll(timeout: 1.2) { MCPSharedIconProbe.presentations(of: name) > 1 }
+        #expect(MCPSharedIconProbe.presentations(of: name) == 1,
+                "the popover never presents itself when the reach returns (presented \(MCPSharedIconProbe.presentations(of: name))×, up now \(MCPSharedIconProbe.up[name] ?? 0))")
     }
 }
