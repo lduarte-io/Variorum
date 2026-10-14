@@ -158,6 +158,8 @@ struct WingSwitcherSheet: View {
     /// P-1: the rows switch (the `.switchWing` act's surface face) and carry
     /// the pending-ask glyph.
     static let surfaceCapabilities: [CapabilityID] = [.switchWing] + MCPAskGlyph.surfaceCapabilities
+        // VX-268: a wing row's ONE shared icon and its popover's doors.
+        + MCPSharedIcon.surfaceCapabilities
 
     let model: WingSwitcherModel
     let tokens: VoiceTokens
@@ -167,6 +169,9 @@ struct WingSwitcherSheet: View {
     @FocusState private var fieldFocused: Bool
     /// An ask opened from a row's glyph — presented OVER the switcher.
     @State private var nestedAsk: MCPAskOpening?
+    /// VX-268: THE grant sheet a row's shared icon opened (its popover's
+    /// Change…) — presented OVER the switcher, the nested ask's twin.
+    @State private var nestedGrant: MCPGrantOpening?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -209,8 +214,11 @@ struct WingSwitcherSheet: View {
         .frame(width: 440)
         .background(tokens.card)
         // A row's ask opens HERE (the switcher is a sheet already up).
-        // W-UX-1: the RAISE her press opened, never the bare id.
-        .environment(\.mcpShareRoad, road?.answeringAsks { nestedAsk = board.opening($0) })
+        // W-UX-1: the RAISE her press opened, never the bare id. VX-268: so
+        // does a row's Change… (THE grant sheet, over the switcher).
+        .environment(\.mcpShareRoad, road?
+            .answeringAsks { nestedAsk = board.opening($0) }
+            .openingHere { nestedGrant = $0 })
         .sheet(item: Binding(
             get: { nestedAsk.flatMap { board.waits($0) ? $0 : nil } },
             set: { if $0 == nil { nestedAsk = nil } })
@@ -244,6 +252,16 @@ struct WingSwitcherSheet: View {
     }
 
     private var rows: some View {
+        rowsList
+            // VX-268: a row's Change… opens THE grant sheet over the switcher
+            // (on the rows, beside the ask's sheet on the stack — one
+            // presenter per view).
+            .sheet(item: $nestedGrant) { opening in
+                road?.sheet(opening) { nestedGrant = nil }
+            }
+    }
+
+    private var rowsList: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 1) {
                 let visible = model.brain.visible
@@ -280,6 +298,10 @@ struct WingSwitcherSheet: View {
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)
             }
+            // VX-268: the ONE shared icon — a wing grant on it, or the open
+            // book (`WingsModel.reach`, decideWing's read) — then a waiting
+            // ask. Each its own button: the row's pick never fires for them.
+            MCPSharedIcon(reaches: model.wings.reach[row.id] ?? [], tokens: tokens)
             MCPAskGlyph(.wing(row.id), tokens: tokens)
             Spacer(minLength: 0)
         }

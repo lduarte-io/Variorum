@@ -419,9 +419,9 @@ final class BookPanelModel {
     private(set) var snapshot: Snapshot?
     private(set) var snapshotBookID: String?
     /// **VX-268 — who reaches each listed NOTE now** (the ONE icon on the
-    /// panel's note rows — her kickoff call: "the Book Panel's rows … IN").
-    /// SEAM (VX-281 U2 piece 1): the pre-fix behaviour — the panel read no
-    /// reach, so this stays empty.
+    /// panel's note rows — her kickoff call: "the Book Panel's rows … IN"):
+    /// `Queries.mcpNoteReaches` over the shown book's entries — ∝ the panel's
+    /// own window (`entryWindow`), held while the panel shows that book.
     private(set) var reach: [String: [MCPPlaceReach]] = [:]
 
     init(session: AppSession, postID: String) {
@@ -473,8 +473,14 @@ final class BookPanelModel {
     }
 
     /// VX-268 — hold the listed notes' reach (the view's `.task(id:)` on the
-    /// entry ids). SEAM (piece 1): reads nothing.
-    func holdReach(_ ids: [String]) async {}
+    /// entry ids — a book switch or a membership change restarts it; an
+    /// autosave never changes the ids).
+    func holdReach(_ ids: [String]) async {
+        await MCPRowReach.hold(session, { try Queries.mcpNoteReaches($0, noteIDs: ids) }) { [weak self] value in
+            guard let self, self.reach != value else { return }
+            self.reach = value
+        }
+    }
 
     func groups(for bookID: String) -> [BookPanelBrain.Group] {
         guard let snapshot = snapshot(for: bookID) else { return [] }

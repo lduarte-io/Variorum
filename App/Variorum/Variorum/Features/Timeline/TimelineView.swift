@@ -64,8 +64,9 @@ final class TimelineViewModel {
     private(set) var exhausted = false
     private(set) var lastError: String?
     /// **VX-268 — who reaches each LOADED row's note now** (the ONE icon on the
-    /// Timeline's rows — the ticket names Timeline). SEAM (VX-281 U2 piece 1):
-    /// the pre-fix behaviour — the Timeline read no reach, so this stays empty.
+    /// Timeline's rows — the ticket names Timeline): `Queries.mcpNoteReaches`
+    /// over the loaded rows — ∝ the pages she loaded (each "Load More" is her
+    /// act), the order of the Timeline's own reads; held while it shows.
     private(set) var reach: [String: [MCPPlaceReach]] = [:]
 
     init(session: AppSession) {
@@ -73,8 +74,13 @@ final class TimelineViewModel {
     }
 
     /// VX-268 — hold the loaded rows' reach (the view's `.task(id:)` on their
-    /// ids). SEAM (piece 1): reads nothing.
-    func holdReach(_ ids: [String]) async {}
+    /// ids — a page loaded or a lens switched restarts it).
+    func holdReach(_ ids: [String]) async {
+        await MCPRowReach.hold(session, { try Queries.mcpNoteReaches($0, noteIDs: ids) }) { [weak self] value in
+            guard let self, self.reach != value else { return }
+            self.reach = value
+        }
+    }
 
     func setLens(_ new: Lens) async {
         lens = new
@@ -125,6 +131,10 @@ final class TimelineViewModel {
 }
 
 struct TimelineView: View {
+    /// VX-268 (P-1's declared ⇔ rendered walk): a row's ONE shared icon and
+    /// its popover's Change… / Revoke.
+    static let surfaceCapabilities: [CapabilityID] = MCPSharedIcon.surfaceCapabilities
+
     let session: AppSession
     var openPost: (String) -> Void
     /// "now", for the relative rule (the `CatalogRowStamp` convention: a
@@ -192,6 +202,8 @@ struct TimelineView: View {
         }
         .background(tokens.surface)
         .task { await model.reload() }
+        // VX-268: who reaches the loaded rows — held, re-aimed per page.
+        .task(id: model.items.map(\.postID)) { await model.holdReach(model.items.map(\.postID)) }
     }
 
     /// **A timeline row, in the voice's own type** (row 54): the same
@@ -211,6 +223,9 @@ struct TimelineView: View {
                 .font(tokens.body)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
+            // VX-268: the ONE shared icon (nothing when nobody reaches the
+            // note) — its own button: the row's open never fires for it.
+            MCPSharedIcon(reaches: model.reach[item.postID] ?? [], tokens: tokens)
             // R3-2's rule, applied by hand because this row holds one hit
             // and not a catalog's: under the entry-date lens the trailing
             // stamp already SAYS the stated day, so the row never prints

@@ -1,7 +1,9 @@
 //
 //  MCPSharedIcon.swift
-//  Variorum (MAC ONLY) — Core/Views (the Bookcase rows and the note's
-//  indicator both render it)
+//  Variorum (MAC ONLY) — Core/Views (every place the waiting-ask glyph marks
+//  renders it: the Bookcase rows, the note's indicator, and since VX-268 the
+//  Library's note, book and gathering rows in List, Cards and Timeline, the
+//  Pool's rows, the Book Panel's rows and the wing switcher's rows)
 //
 //  13n-c U3 — THE ONE SHARED ICON (VX-271, hers: "one consistent AI-shared
 //  ICON, not text … hover names it, click shows the permission; icon language
@@ -66,22 +68,28 @@ struct MCPSharedIcon: View {
     static let rowWeight: Font.Weight = .semibold
 
     var body: some View {
-        Button {
-            shown.toggle()
-        } label: {
-            Image(systemName: Self.symbol)
-                .font(font ?? tokens.small)
-                .fontWeight(Self.rowWeight)
-                .imageScale(Self.rowScale)
-                .foregroundStyle(tokens.accent)
-                .padding(.horizontal, 2)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .help(MCPShareCopy.iconHelp(reaches))
-        .accessibilityLabel(MCPShareCopy.iconHelp(reaches))
-        .popover(isPresented: $shown, arrowEdge: arrowEdge) {
-            MCPReachPopover(reaches: reaches, road: road, onChanged: onChanged) { shown = false }
+        // VX-268: the calm state is NO view (the ask glyph's own rule) — a
+        // place no approved client reaches gains neither width nor spacing,
+        // so every host writes the icon once, unguarded, and a row nobody
+        // reaches measures exactly what it did.
+        if !reaches.isEmpty {
+            Button {
+                shown.toggle()
+            } label: {
+                Image(systemName: Self.symbol)
+                    .font(font ?? tokens.small)
+                    .fontWeight(Self.rowWeight)
+                    .imageScale(Self.rowScale)
+                    .foregroundStyle(tokens.accent)
+                    .padding(.horizontal, 2)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(MCPShareCopy.iconHelp(reaches))
+            .accessibilityLabel(MCPShareCopy.iconHelp(reaches))
+            .popover(isPresented: $shown, arrowEdge: arrowEdge) {
+                MCPReachPopover(reaches: reaches, road: road, onChanged: onChanged) { shown = false }
+            }
         }
     }
 }

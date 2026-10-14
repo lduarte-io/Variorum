@@ -343,6 +343,13 @@ final class LibraryCatalogModel {
     @ObservationIgnored var heldFacts: [String: Queries.OwnershipFacts] = [:]
     @ObservationIgnored var ownershipHold: Task<Void, Never>?
     @ObservationIgnored var heldNoteIDs: [String] = []
+    /// **VX-268 — who reaches the near window's notes** (the ONE shared icon
+    /// on the note rows — List, Cards, the answer sheet's heads), HELD beside
+    /// the owned-by facts over the SAME ids (`holdNearFacts`), so the held
+    /// region stays a few pages however deep she scrolls. The last answer
+    /// each note had; the rows read theirs through their own slice.
+    @ObservationIgnored var heldReach: [String: [MCPPlaceReach]] = [:]
+    @ObservationIgnored var reachHold: Task<Void, Never>?
     /// **Each built row's own observable slice** (17y B1 (k), measured — the
     /// `LibraryNoteRowExtras` reason). Made on a row's first build and kept:
     /// a row SwiftUI keeps alive holds its slice, so a slice is never
@@ -544,13 +551,22 @@ final class LibraryCatalogModel {
 
     /// **VX-268 — who reaches each LISTED book and gathering now** (the ONE
     /// icon on the Library's book rows — List, the capped region, the answer
-    /// sheet). SEAM (VX-281 U2 piece 1): the pre-fix behaviour — no listing
-    /// read reach, so this stays empty.
+    /// sheet): `Queries.mcpBookReaches(readingIDs:)`, the Bookcase map's own
+    /// rule for exactly the listed ids (a gathering by VX-185's truth). Held
+    /// while they are listed; the read touches `reading`, `wing` and the
+    /// grants store only — never `container`, so it never wakes at autosave
+    /// rate. ∝ the listed books (the Library lists its wing's books whole —
+    /// the Bookcase's own class).
     private(set) var bookReach: [String: [MCPPlaceReach]] = [:]
 
     /// VX-268 — hold the listed books' reach while they are listed (the
-    /// view's `.task(id: listedBookIDs)`). SEAM (piece 1): reads nothing.
-    func holdBookReach(_ ids: [String]) async {}
+    /// view's `.task(id: listedBookIDs)` — a new listing restarts it).
+    func holdBookReach(_ ids: [String]) async {
+        await MCPRowReach.hold(session, { try Queries.mcpBookReaches($0, readingIDs: ids) }) { [weak self] value in
+            guard let self, self.bookReach != value else { return }
+            self.bookReach = value
+        }
+    }
 
     init(session: AppSession, defaults: UserDefaults = .standard) {
         self.session = session
@@ -976,7 +992,8 @@ final class LibraryCatalogModel {
     func rowExtras(for id: String) -> LibraryNoteRowExtras {
         if let slice = rowSlices[id] { return slice }
         let slice = LibraryNoteRowExtras(
-            tags: tagsAsWritten[id] ?? [], card: cardsAsWritten[id], facts: heldFacts[id])
+            tags: tagsAsWritten[id] ?? [], card: cardsAsWritten[id], facts: heldFacts[id],
+            reach: heldReach[id] ?? [])
         rowSlices[id] = slice
         return slice
     }
@@ -987,6 +1004,18 @@ final class LibraryCatalogModel {
         for id in ids where heldFacts[id] != value[id] {
             heldFacts[id] = value[id]
             rowSlices[id]?.setFacts(value[id])
+        }
+    }
+
+    /// VX-268 — the held reach for `ids` lands in their slices — only the
+    /// notes whose reach changed hear it (a note absent from the answer is
+    /// reached by nobody).
+    func landReach(_ value: [String: [MCPPlaceReach]], for ids: [String]) {
+        for id in ids {
+            let reach = value[id] ?? []
+            guard (heldReach[id] ?? []) != reach else { continue }
+            heldReach[id] = reach.isEmpty ? nil : reach
+            rowSlices[id]?.setReach(reach)
         }
     }
 

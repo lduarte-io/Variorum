@@ -79,8 +79,10 @@ struct MCPShareRoad: Equatable {
     /// The server ON and at least one approved client (VX-164) — the in-note
     /// indicator's gate.
     let indicatorOn: Bool
-    /// Open THE grant sheet in this window, pre-filled.
-    let open: (MCPGrantOpening) -> Void
+    /// Open THE grant sheet in this window, pre-filled. (A `var` since VX-268:
+    /// a host already in a sheet — ⌘L's switcher — keeps it HERE, the
+    /// `answeringAsks` shape: `openingHere`.)
+    var open: (MCPGrantOpening) -> Void
     /// THE grant sheet as a view, for a host that must present it ITSELF — a
     /// sheet already up (Book Settings, T-U3-7). `done` dismisses it.
     let sheet: (MCPGrantOpening, @escaping () -> Void) -> AnyView
@@ -102,6 +104,16 @@ struct MCPShareRoad: Equatable {
     func answeringAsks(_ open: @escaping (String) -> Void) -> MCPShareRoad {
         var road = self
         road.answerAsk = open
+        return road
+    }
+
+    /// **VX-268 — this road with its grant sheet kept HERE**: a nested host
+    /// (⌘L's switcher — a sheet already up) presents THE grant sheet over
+    /// itself (`sheet`) when a row's popover asks Change…, instead of asking
+    /// the window to present one under it (T-U3-7's precedent, Book Settings).
+    func openingHere(_ open: @escaping (MCPGrantOpening) -> Void) -> MCPShareRoad {
+        var road = self
+        road.open = open
         return road
     }
 

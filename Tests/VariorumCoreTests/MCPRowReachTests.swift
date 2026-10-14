@@ -109,10 +109,11 @@ struct MCPRowReachTests {
             let twice = try db.read { try Queries.mcpNoteReaches($0, noteIDs: [own.id, own.id, "x"]) }
             #expect(twice.keys.sorted() == [own.id])
 
-            // Revoked: gone from the row.
+            // Revoked: claude-code leaves the row; codex's Home wing grant still reaches it.
             try ops.revokeMCPGrant(ownGrant)
             try agreesWithTheSingular(db, ids, "revoked")
-            #expect(try db.read { try Queries.mcpNoteReaches($0, noteIDs: [own.id]) }[own.id] == nil)
+            #expect(try db.read { try Queries.mcpNoteReaches($0, noteIDs: [own.id]) }[own.id]?.map(\.clientName)
+                    == ["codex"])
         }
     }
 
@@ -265,11 +266,13 @@ struct MCPRowReachTests {
             let inside = try note(ops, "inside", wing: elsewhere.id)
             let wingIDs = ["", variorum.id, elsewhere.id]
 
+            /// Agreement over the LIVE wings (a deleted wing has no row to draw).
             func agrees(_ label: String) throws {
                 let all = try db.read { try Queries.mcpWingReaches($0) }
                 try db.read { db in
                     let openBook = try Queries.mcpSwitch(db, .openBook)
-                    for wing in wingIDs {
+                    let live = [""] + (try Queries.wings(db)).map(\.id)
+                    for wing in live {
                         var expected: [String: (MCPGrantRule.Rung, String?)] = [:]
                         for client in try Queries.mcpClients(db, states: [.approved]) {
                             let rows = try Queries.mcpGrants(db, clientID: client.id).map(\.ruleGrant)

@@ -186,8 +186,10 @@ extension LibraryCatalogModel {
         guard ids != heldNoteIDs || ownershipHold == nil else { return }
         heldNoteIDs = ids
         ownershipHold?.cancel()
+        reachHold?.cancel()
         guard !ids.isEmpty else {
             ownershipHold = nil
+            reachHold = nil
             return
         }
         let session = session
@@ -203,12 +205,21 @@ extension LibraryCatalogModel {
                 // A failed read draws no new badge — silence, never a wrong mark.
             }
         }
+        // VX-268: who reaches the same notes — the ONE shared icon's reach,
+        // held over the SAME window (∝ a few pages, never the listing).
+        reachHold = Task { @MainActor [weak self] in
+            await MCPRowReach.hold(session, { try Queries.mcpNoteReaches($0, noteIDs: ids) }) { value in
+                self?.landReach(value, for: ids)
+            }
+        }
     }
 
-    /// The listing left the screen: the held observation ends with it.
+    /// The listing left the screen: the held observations end with it.
     func stopHoldingFacts() {
         ownershipHold?.cancel()
         ownershipHold = nil
+        reachHold?.cancel()
+        reachHold = nil
         heldNoteIDs = []
     }
 
