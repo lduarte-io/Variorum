@@ -265,4 +265,4 @@ leaving rules, and m21's refresh timing.
   remains? i imagine that's fine"* (the nuance said back to her: every copy made while it synced, if the account
   returns to Standard).
 - **The old shared key's shape confirmed** (no keep-for-now).
-- **m21's refresh timing:** asked; her answer pending.
+- **m21's refresh timing, ruled:** *"phase 2 can be copied on dev s tore and my store copies and then we can release it to my store / the store of my beta testers"* and *"my mac and phone can wait for phase 3 to be done"*.

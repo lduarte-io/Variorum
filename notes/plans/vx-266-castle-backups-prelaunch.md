@@ -822,8 +822,10 @@ pin alone.
 **The real-store refresh** — her `/Applications` app and her phone — **waits for phase 3's close.** Phase 2 makes the
 new storage live while the acts that write keys are still today's, and an old act pressed between the two phases would
 leave a key the new storage doesn't name. Phase 2's evidence runs on the dev store and on byte-copies of her stores.
-From phase 3 on, the refresh follows each phase's walk or drill. This exception to CLAUDE.md's refresh-after-every-
-change rule is hers to confirm (§9).
+From phase 3 on, the refresh follows each phase's walk or drill. **Her ruling, 2026-10-13:** *"phase 2 can be copied on
+dev s tore and my store copies and then we can release it to my store / the store of my beta testers"* and *"my mac and
+phone can wait for phase 3 to be done"* — so phase 2 lands on the dev store and her stores' copies only, and her Mac,
+her phone and her beta testers get the build once phase 3 is done.
 
 **The riskiest part** is phase 2's migration, which touches every existing store. **The cut lines, if ever needed:**
 the restore list's older-libraries section and the per-Mac far-folder subfolders (a filename tag would do).
@@ -937,7 +939,6 @@ drill), VX-152 (Lock reentrancy), VX-240 (a wrong instruction mid-act).
 
 ## 9. Open (decided at the phase that meets it, recorded PROVISIONAL, logged in QUESTIONS)
 
-- **The real-store refresh waits for phase 3's close** (§5; MINOR 21) — hers to confirm.
 - **The exact Touch ID re-arm and retirement-sheet copy:** her approval at phase 4 and phase 5's walks.
 - **A retention rule for older libraries:** kept as today until she rules.
 - **VX-212's design:** her sitting before phase 6.
