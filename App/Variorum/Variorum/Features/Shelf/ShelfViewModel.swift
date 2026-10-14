@@ -52,6 +52,13 @@ final class ShelfViewModel {
     /// members (one-shot — the read touches `container`, so it never rides
     /// the held snapshot; U1's P1 pin).
     private(set) var archivedCounts: [String: Int] = [:]
+    #if DEBUG
+    /// **VX-231's P1 witness:** how many times the one-shot half was read
+    /// (`refreshAggregates`). The one-shot is a STORE-WIDE read, so the pins
+    /// hold it to its occasions — appearance, the board's own acts, and a
+    /// held-snapshot move — and never autosave rate. Counted, never consulted.
+    @ObservationIgnored private(set) var oneShotReads = 0
+    #endif
     /// 13n-b U2 (P-13n-3) → 13n-c U3 (VX-271): the books — and since VX-185
     /// the gatherings, read through a wing grant or the open book — an
     /// approved MCP client reaches now, WITH who and why — the row's ONE shared icon
@@ -287,6 +294,9 @@ final class ShelfViewModel {
     /// reading and consulted per wing row); `bookcaseAggregates` is the
     /// wing's own. All one-shot — none rides the held snapshot.
     func refreshAggregates() async {
+        #if DEBUG
+        oneShotReads += 1
+        #endif
         let wing = wingID
         do {
             let (words, tags, rules, aggregates) = try await session.database.read { db in
