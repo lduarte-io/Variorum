@@ -319,7 +319,7 @@ struct FanBadgePlacementTests {
                 window.close()
             }
             let onScreenID = try h.storeSlots()[onScreen].blockID
-            func homeNow() -> Bool {
+            @MainActor func homeNow() -> Bool {
                 guard let badge = h.model.badges.first(where: { $0.blockID == onScreenID }),
                       let truth = firstFragment(entry: onScreen, model: h.model, textView: h.textView)
                 else { return false }
