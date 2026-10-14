@@ -120,10 +120,16 @@ private enum CommentHostRig {
             {
                 NSApp.sendEvent(event)
             }
-            RunLoop.main.run(until: Date().addingTimeInterval(0.005))
+            pump()
             await Task.yield()
             try? await Task.sleep(for: .milliseconds(10))
         }
+    }
+
+    /// The run loop's slice — a synchronous call (`RunLoop.run` is unavailable
+    /// from an async context; the routed suite's `pump()` shape).
+    private static func pump() {
+        RunLoop.main.run(until: Date().addingTimeInterval(0.005))
     }
 
     /// Turns until `predicate` holds (or the budget runs out); answers it.
@@ -412,6 +418,108 @@ struct CommentPanelReleaseTests {
                 #expect(CommentHostRig.alive(h.session).isEmpty,
                         "opening \(opening): the nested sheet's panel is gone")
             }
+        }
+    }
+}
+
+// MARK: - VX-257 — a host's closing keeps the half-typed comment
+
+/// Her ruling (2026-10-13, verbatim): *"yes, clicking away should save your
+/// half typed comment on a draft."* Each host's closing road, end to end
+/// through the product's presenter: the composer typed into by the real input
+/// road, the host closed by its binding (a popover's click away ends there —
+/// `NSPopover` closes → `willClose`; a sheet's programmatic dismissal tears its
+/// content down → `.onDisappear`), then a NEW presentation on the same block.
+/// The model-level cells — ⎋, another block, a refused draft, a panel that
+/// never opened — are `CommentPanelLeaveTests`.
+@MainActor
+@Suite("VX-257 — a host's closing keeps the half-typed comment; the reopen shows it", .serialized)
+struct CommentPanelHostLeavingTests {
+    private static let half = "half a thought, left by a click away "
+
+    private func seedComment(_ h: EditorHarness) async throws -> String {
+        let blockID = try h.storeSlots()[0].blockID
+        _ = try await h.session.runner.run { ops in
+            try ops.addBlockComment(to: blockID, text: "First note.")
+        }
+        return blockID
+    }
+
+    private func stored(_ h: EditorHarness, _ blockID: String) async throws -> [String] {
+        try await h.database.read { db in
+            try Queries.blockComments(db, blockID: blockID).map(\.text)
+        }
+    }
+
+    /// The reopened composer reads her words back, with the caret after them
+    /// (she picks up where she stopped), and nothing was filed.
+    private func expectRestored(
+        _ window: NSWindow?, _ h: EditorHarness, _ blockID: String, _ host: String
+    ) async throws {
+        let composer = try #require(CommentHostRig.composer(in: window), "premise: \(host) reopened a panel")
+        #expect(composer.textView.string == Self.half, "\(host): the half-typed comment is back")
+        #expect(composer.textView.selectedRange()
+                    == NSRange(location: (Self.half as NSString).length, length: 0),
+                "\(host): the caret sits after it")
+        #expect(try await stored(h, blockID) == ["First note."], "\(host): parking filed nothing")
+    }
+
+    /// **RED ON OLD — the popover (the Takes margin note's), her ruling's
+    /// road.**
+    @Test func aClickAwayFromThePopoverKeepsTheDraftForTheReopen() async throws {
+        try await withEditor(seedBlocks: ["A block."]) { h in
+            let blockID = try await seedComment(h)
+            let rig = await CommentPopoverRig(session: h.session, blockID: blockID)
+            defer { rig.tearDown() }
+            let opened = await rig.open()
+            let first = try #require(opened, "premise: the popover opened")
+            let composer = try #require(CommentHostRig.composer(in: first), "premise: a mounted panel")
+            CommentHostRig.type(Self.half, into: composer)
+            await CommentHostRig.turns()
+            try #require(composer.textView.string == Self.half, "premise: typed into the composer")
+            await rig.dismiss(first)
+
+            let reopened = await rig.open()
+            try await expectRestored(reopened, h, blockID, "the popover")
+            if let reopened { await rig.dismiss(reopened) }
+        }
+    }
+
+    /// **RED ON OLD — Write's / the Takes bar's sheet** (`.sheet(item:)`),
+    /// dismissed by its binding.
+    @Test func aSheetsClosingKeepsTheDraftForTheReopen() async throws {
+        try await withEditor(seedBlocks: ["A block."]) { h in
+            let blockID = try await seedComment(h)
+            let rig = await CommentSheetRig(session: h.session, blockID: blockID)
+            defer { rig.tearDown() }
+            let opened = await rig.open()
+            let composer = try #require(CommentHostRig.composer(in: opened), "premise: the sheet holds a panel")
+            CommentHostRig.type(Self.half, into: composer)
+            await CommentHostRig.turns()
+            try #require(composer.textView.string == Self.half, "premise: typed into the composer")
+            await rig.dismiss()
+
+            try await expectRestored(await rig.open(), h, blockID, "the sheet")
+            await rig.dismiss()
+        }
+    }
+
+    /// **RED ON OLD — the take panel's NESTED comments sheet** (U3's O-5: the
+    /// fourth host), closed by its request's binding.
+    @Test func theTakePanelsNestedSheetKeepsTheDraftForTheReopen() async throws {
+        try await withEditor(seedBlocks: ["A block."]) { h in
+            let blockID = try await seedComment(h)
+            let rig = await CommentTakePanelRig(session: h.session, postID: h.postID, blockID: blockID)
+            defer { rig.tearDown() }
+            let opened = await rig.openComments()
+            let composer = try #require(CommentHostRig.composer(in: opened), "premise: the nested sheet holds a panel")
+            CommentHostRig.type(Self.half, into: composer)
+            await CommentHostRig.turns()
+            try #require(composer.textView.string == Self.half, "premise: typed into the composer")
+            await rig.dismissComments()
+
+            try await expectRestored(await rig.openComments(), h, blockID, "the nested sheet")
+            await rig.dismissComments()
         }
     }
 }
