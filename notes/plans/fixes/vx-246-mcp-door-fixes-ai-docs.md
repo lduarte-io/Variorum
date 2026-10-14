@@ -3283,24 +3283,39 @@ a **75-min claim** asked (the plan's). Batch-only fallback (~30 min, claim 40): 
 
 ## U1b UNIT RECORD — VX-258's face and U1's remainder: VX-258 · VX-318 · VX-260 option (b), plus the carried live legs (opus-implementer, from 2026-10-14 ~05:00 MDT)
 
-**Not done yet (first line, kept current):** nothing built. PAUSED at its first step by the orchestrator's PAUSE (U4b's
-stage window got its GO) — piece 0's merge was NOT started, per the PAUSE's "not started on the merge yet: don't start it".
+**Not done yet (first line, kept current — the state at piece 0's close, 2026-10-14 ~06:20 MDT):** pieces 1–5 are not
+built; no stage window has run (no Mac test, no walk, no live round); no QUESTIONS, canon or ticket edit (the merge's).
 
-### LIVE STATUS — U1b's pieces
+**Machinery, said:** PAUSED once before piece 0 (`c0e23c47`, U4b's window took the stage; no merge was started), then
+resumed at the orchestrator's word after U4b's run, U4c's unit and its notes (`a2d84e77`). Since then the scope gained
+U4c's window (W1 its two pins, W2 its 13 suites, W3 the far-off-screen ⌘T walk) and ruling 2's REAL-CLIENT check only
+(ruling 2 itself is built and proven on her own door — U4b).
+
+**Read in full before code (never delegated):** CLAUDE.md and its loaded canon; this record's header, THE UNITS, the hard
+rules, LIVE STATUS, the Stage traffic log, Cross-run coordination, her rulings, ORCHESTRATOR'S PROVISIONAL RULINGS (rulings
+1–3), the U1b BRIEF; U1's UNIT RECORD whole and THE ORCHESTRATOR ON U1's HAND-BACK; U2's THE STAGE WINDOW (steps 4–6 are
+mine) and U2/U3/U4/U4b STAGE RUN whole; the U4c UNIT RECORD whole (its window rides mine) and THE ORCHESTRATOR ON U4c's
+HAND-BACK; `notes/plans/mcp-pane-and-docs-kickoff.md` whole; `notes/SessionResiliencyProtocol.md` whole; VX-281's record
+(`notes/plans/fixes/vx-281-mcp-settings-pane-shared-icon.md` — the header, rulings, FOR VX-234, U1's UNIT RECORD through
+its design and pieces) after the merge; **`notes/SyncSpec.md` in full, BEFORE piece 3's schema commit** (read 2026-10-14
+~06:10, this session).
+
+### LIVE STATUS — U1b's pieces (flipped in the same commit as each piece)
 
 | piece | what | status |
 |---|---|---|
-| 0 | merge `origin/main` (`fa3bc6e1`+, VX-281) into the branch — a merge commit; then headless finals + Mac `build-for-testing` into `App/Variorum/DerivedData/vx246-u1b` | PAUSED — NOT STARTED (no MERGE_HEAD; tree clean at `b6db1801` + this commit) |
-| 1 | the face (VX-258) | NOT-STARTED |
-| 2 | VX-318, red-first | NOT-STARTED |
-| 3 | P-VX260-1 option (b): its own schema commit, then the code, red-first | NOT-STARTED |
-| 4 | pins red by revert per member; headless finals + the Mac build | NOT-STARTED |
+| 0 | merge `origin/main` (`fa3bc6e1`, VX-281) into the branch — a merge commit; then headless finals + Mac `build-for-testing` into `App/Variorum/DerivedData/vx246-u1b` | DONE (`5be99e6d` the merge; this commit the record) — **NO CONFLICTS:** git's automatic merge joined the three files both sides touched — `App/Variorum/Variorum/Features/MCP/MCPDoor.swift` (ours: U3's hooks — `onWrite` → `landWireWrite`, `beforeWrite` → `flushHerEditorBeforeWrite`; theirs: VX-232's `setupClient` / `chooseSetupClient(_:)` and ladder R1-3's `copySetupCommand(for:)` with no default argument — both intact, read in the merged file), `.gitignore` (both screens folders kept), `notes/plans/mcp-pane-and-docs-kickoff.md` (their U6-done marks beside ours). **Headless finals on the merged tree** (`swift build --build-tests` then `swift test --skip-build`, EXIT 0, zero ✘; `u1b/logs/p0-finals.log`): **`VariorumMCPTests` 236 / 49 · `VariorumCoreTests` 2,834 / 328 · `StringsWorkbookTests` 40 / 6** — core +8 tests / +2 suites against U4c's 2,826/326, exactly what main brought (VX-281's core suites); MCP and the workbook unchanged. **The Mac `build-for-testing`** into `DerivedData/vx246-u1b` (an APFS clone of `vx246-u4c` — U4c's window rides this product, so the source product is spent; its OWED 5 noted) → `** TEST BUILD SUCCEEDED **`, EXIT 0 (`u1b/logs/p0-mac-build-for-testing.log`) |
+| 1 | VX-258's FACE — (a) the mint call site (THE MERGE GATE), (b) the re-bind row in Waiting, (c) the words, (d) L1 / `keyLine` truth | NOT-STARTED |
+| 2 | VX-318 — the trace first; a red-on-old pin; the fix only if the pin is red | NOT-STARTED |
+| 3 | P-VX260-1 option (b) — its own schema commit (v1_29, local-only), then the code, red-first | NOT-STARTED |
+| 4 | pins red again by revert per member; headless finals + the Mac build(s) | NOT-STARTED |
 | 5 | THE STAGE WINDOW plan (claim `vx246-u1b`) → READY | NOT-STARTED |
 
-**Continuation (for the resume):** `git pull` in the worktree (U4b's stage runner will have committed its run); read the
-brief's named sections in full (the U1b BRIEF, U1's UNIT RECORD, the orchestrator on U1's hand-back, U2's stage window
-steps 4–6, the U2/U3/U4 STAGE RUN sections, the kickoff file, the resiliency protocol); then piece 0 — `git merge
-origin/main` as a merge commit ("Merge origin/main (VX-281) into VX-246 … Part of VX-246"), never a rebase.
+**No revert is in flight.**
+
+**Continuation (for a resume):** piece 1 next — `MCPSetupClient.expectedName` inside its O-4 fence, `copySetupCommand`
+mints `copiedFor: client.expectedName`, the pins red-first (a Mac product built from the pins-only tree), then the
+Waiting row, the words and the truth lines.
 
 ## U4c UNIT RECORD — the inline editor's badge regression: VX-230 (opus-implementer, from 2026-10-14 ~05:35 MDT)
 
