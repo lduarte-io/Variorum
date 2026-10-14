@@ -102,6 +102,9 @@ struct MCPWriteTools: Sendable {
         case noteEdit(NoteEditJob)
         /// VX-184 U5 (VX-196): edit parity across the library (`MCPWriteTools+LibraryEdits`).
         case libraryEdit(LibraryEditJob)
+        /// VX-336 U5b (VX-255): blocks added to a note — at its end at write
+        /// new, anywhere at edit (`MCPWriteTools+InsertBlocks`).
+        case insertBlocks(noteID: String, place: BlockInsertPlace, blocks: [Operations.MCPNoteBlock])
 
         var tool: String {
             switch self {
@@ -122,6 +125,7 @@ struct MCPWriteTools: Sendable {
             case .applyTag: "apply_tag"
             case .createBook: "create_book"
             case .addNoteToBook: "add_note_to_book"
+            case .insertBlocks: "insert_blocks"
             }
         }
 
@@ -147,6 +151,14 @@ struct MCPWriteTools: Sendable {
             // no take's text: her flush lands where she typed it.
             case .addTake, .addComment, .saveLens, .createNote, .importNote, .importBook, .applyTag,
                  .createBook, .addNoteToBook, .deleteComment, .removeTag, .linkVersions:
+                false
+            // VX-255 (the run record's D8): new blocks, and no take's text
+            // read, rewritten, copied, frozen or tombstoned. Her caret's block
+            // survives the act (same take, live, unlocked, same place), so her
+            // flush lands where she typed and the editor's full render restores
+            // her caret by identity; her open tail stays below the stored
+            // blocks and crystallizes after the run, where the screen showed it.
+            case .insertBlocks:
                 false
             }
         }
@@ -232,6 +244,8 @@ struct MCPWriteTools: Sendable {
             return .addNoteToBook(
                 noteID: try requiredString(args, "note_id"), bookID: try requiredString(args, "book_id"),
                 sectionID: try optionalString(args, "section_id"))
+        case MCPToolCatalog.insertBlocks.name:
+            return try parseInsertBlocks(args)
         default:
             if let job = try parseEdit(name, args) { return .edit(job) }
             if let job = try parseCarriage(name, args) { return .carriage(job) }
@@ -248,8 +262,9 @@ struct MCPWriteTools: Sendable {
         }
     }
 
-    /// The structured payload: `[{text, name?, takes?: [{text, label?}]}]`.
-    private func noteBlocks(_ value: Value) throws -> [Operations.MCPNoteBlock] {
+    /// The structured payload: `[{text, name?, takes?: [{text, label?}]}]` —
+    /// `create_note`'s, and (VX-255) `insert_blocks`' one block parse.
+    func noteBlocks(_ value: Value) throws -> [Operations.MCPNoteBlock] {
         guard let items = value.arrayValue else { throw ArgumentFailure(message: "blocks must be an array.") }
         return try items.enumerated().map { index, item in
             guard let fields = item.objectValue, let text = fields["text"]?.stringValue else {
@@ -488,6 +503,9 @@ struct MCPWriteTools: Sendable {
             return try performNoteEdit(edit, job: job, ops: ops, clientName: clientName)
         case .libraryEdit(let edit):
             return try performLibraryEdit(edit, job: job, ops: ops, clientName: clientName)
+        case .insertBlocks(let noteID, let place, let blocks):
+            return try performInsertBlocks(
+                noteID: noteID, place: place, blocks: blocks, job: job, ops: ops, clientName: clientName)
         }
     }
 

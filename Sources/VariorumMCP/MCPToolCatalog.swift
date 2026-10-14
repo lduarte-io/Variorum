@@ -98,6 +98,9 @@ enum MCPToolCatalog {
         saveVersion, fileNoteInChapter, setBookRule,
         // VX-184 U3 — VX-187: two notes linked as versions by named pairs (R-VX187-1).
         linkVersions,
+        // VX-336 U5b — VX-255: blocks added to a note (write new at its end,
+        // edit anywhere — the call's rung read from its arguments).
+        insertBlocks,
     ]
     static let edit: [MCPToolDeclaration] = [
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
@@ -821,6 +824,66 @@ enum MCPToolCatalog {
                 ]),
             ]),
             "required": .array(["note_a", "note_b", "pairs"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-336 U5b — VX-255 insert_blocks
+
+    /// VX-255 (her ruling: write new adds at the end, edit anywhere): the rung
+    /// is read from the arguments — no anchor is write new; any anchor or the
+    /// start is edit (P-VX255-1/2). Declared at write new (listed from write
+    /// new up); the call's own rung is decided per call.
+    static let insertBlocks = MCPToolDeclaration(
+        name: "insert_blocks", rung: .writeNew, title: "Add blocks to a note",
+        description: """
+            Add blocks to a note that already exists, in the order given. With no after_block_id \
+            (or at: "end") they go at the note's END — write new on the note is enough. Placing them \
+            anywhere else needs edit: after_block_id puts them right after that block of the note \
+            (any block, the last one included) and at: "start" before its first block (read_note \
+            with with_ids: true gives the block ids). Each item is exactly one block, as in \
+            create_note's blocks: its shown text exactly (a blank line inside stays inside the one \
+            block), an optional name, and its other takes, never chosen, each label kept as given \
+            (an empty text is a blank take). One call carries at most 200 blocks. The whole call is \
+            one undo for the author. Returns JSON with the note_id, the new block_ids, and blocks: \
+            per block its block_id, the shown_take_id, and every take in fan order (take_id, and \
+            label where it has one), as create_note answers them.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note to add the blocks to."]),
+                "after_block_id": .object(["type": "string",
+                                           "description": "Put them right after this block of the note (needs edit)."]),
+                "at": .object(["type": "string", "enum": .array(["start", "end"]),
+                               "description": "start (needs edit) or end (the default)."]),
+                "blocks": .object([
+                    "type": "array", "minItems": 1, "maxItems": .int(MCPWriteTools.batchCap),
+                    "description": "The new blocks, in order (at most 200).",
+                    "items": .object([
+                        "type": "object",
+                        "properties": .object([
+                            "text": .object(["type": "string", "description": "The block's shown text."]),
+                            "name": .object(["type": "string", "description": "A name for the block."]),
+                            "takes": .object([
+                                "type": "array",
+                                "description": "Other takes, joining the block's fan (never chosen).",
+                                "items": .object([
+                                    "type": "object",
+                                    "properties": .object([
+                                        "text": .object(["type": "string",
+                                                         "description": "The take's text (empty: a blank take)."]),
+                                        "label": .object(["type": "string"]),
+                                    ]),
+                                    "required": .array(["text"]),
+                                ]),
+                            ]),
+                        ]),
+                        "required": .array(["text"]),
+                    ]),
+                ]),
+            ]),
+            "required": .array(["note_id", "blocks"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)

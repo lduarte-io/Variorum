@@ -313,6 +313,13 @@ struct MCPWriteServerTests {
             calls.append(("delete_note", ["note_id": .string(note.id)]))
             calls.append(("archive_note", ["note_id": .string(note.id)]))
             calls.append(("unarchive_note", ["note_id": .string(otherNote.id)]))
+            // VX-336 U5b (justified edit, the ritual — the proof's completeness
+            // grows with the catalog): VX-255's insert_blocks, at her note's end
+            // (write new) and after her block (edit), each refusing at the rung.
+            calls.append(("insert_blocks", ["note_id": .string(note.id),
+                                            "blocks": .array([.object(["text": .string("x")])])]))
+            calls.append(("insert_blocks", ["note_id": .string(note.id), "after_block_id": .string(one.block.id),
+                                            "blocks": .array([.object(["text": .string("x")])])]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).

@@ -418,6 +418,9 @@ nonisolated enum MCPPaneCopy {
         // VX-184 U3 — VX-173's batch doors (PROVISIONAL words, her copy pass).
         case "add_takes": return "adding takes to \(at)"
         case "add_comments": return "leaving comments in \(at)"
+        // VX-336 U5b — VX-255's blocks added to a note (PROVISIONAL words,
+        // her copy pass — the takes batch's family).
+        case "insert_blocks": return "adding blocks to \(at)"
         // VX-188 — a client deleting a comment (its own, at suggest).
         case "delete_comment": return "deleting a comment in \(at)"
         // VX-190 — un-tagging a note at edit.
@@ -531,6 +534,9 @@ nonisolated enum MCPPaneCopy {
         // coarse — its row carries no item count; the receipt counts them).
         case "add_takes": return "added takes to \(at)" + times
         case "add_comments": return "left comments in \(at)" + times
+        // VX-336 U5b — VX-255: one log row per CALL, the batches' rule (the
+        // receipt counts the blocks).
+        case "insert_blocks": return "added blocks to \(at)" + times
         case "delete_comment": return n == 1 ? "deleted a comment in \(at)" : "deleted \(n) comments in \(at)"
         case "remove_tag": return "removed a tag from \(at)" + times
         case "link_versions": return "linked \(at) and another note as versions" + times
@@ -1355,6 +1361,11 @@ nonisolated enum MCPReceiptCopy {
         case .comments:
             let total = receipts.reduce(0) { $0 + $1.count }
             return total == 1 ? "left a comment" : "left \(total) comments"
+        // VX-336 U5b — VX-255's blocks added to a note, counted and summed as
+        // the takes batch's are (PROVISIONAL words).
+        case .blocks:
+            let total = receipts.reduce(0) { $0 + $1.count }
+            return total == 1 ? "added a block" : "added \(total) blocks"
         // VX-188 — the client's own comment, deleted (PROVISIONAL words).
         case .commentDelete: return n == 1 ? "deleted a comment" : "deleted \(n) comments"
         // VX-190 — her un-tag, the client's (PROVISIONAL words).

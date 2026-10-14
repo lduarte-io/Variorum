@@ -64,6 +64,11 @@ extension Operations {
         // entry per batch, its label plural ("Undo claude-code's takes"); the
         // receipt counts the batch's items (`MCPWriteReceipt.count`).
         case takes, comments
+        // VX-336 U5b — VX-255's `insert_blocks` (write new at the note's end,
+        // edit anywhere): ONE entry per call, its label plural ("Undo
+        // claude-code's blocks" — the takes batch's twin); the receipt counts
+        // the blocks (`MCPWriteReceipt.count`).
+        case blocks
         // VX-184 U3 — VX-188's suggest-rung delete of a client's OWN comment
         // ("Undo claude-code's comment deletion").
         case commentDelete = "comment deletion"
