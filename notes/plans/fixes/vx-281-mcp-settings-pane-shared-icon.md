@@ -1,6 +1,6 @@
 # VX-281 — Run: MCP settings pane & shared icon — the run record
 
-**STATUS: OPEN — kickoff 2026-10-13 evening (orchestrator session variorum-75, Opus 5.5).**
+**STATUS: CLOSED 2026-10-14 — merged PR #159 (merge commit 0f5efe1c). Kickoff 2026-10-13 evening (orchestrator session vx-281, named variorum-75 at kickoff, Opus 5.5); built overnight under her mandate; the ladder closed at the cap (Opus R1 → Opus R2 → the end-of-run Fable R3). The ratify bundle is QUESTIONS #219; the handoff `notes/handoffs/vx-281-handoff.md`.**
 
 **Ticket · branch · worktree · PR:** VX-281 (a RUN; its sub-issues are the members) ·
 `vx-281-run-mcp-settings-pane-shared-icon` · `~/dev/variorum-vx-281` on the Pro · one PR `VX-281: …`, merge
@@ -131,7 +131,7 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 | U1 — the pane in tabs | **UNIT CLOSED — DONE** (2026-10-13 ~22:35 MDT, opus-implementer): VX-199 · VX-205 · VX-232 (FIXED red-first) · VX-245's two MCP sites (`3d00a166`); red on old 4 issues; Mac batch 250/31 (one issue — VX-283's six lint sites); the walk in both voices DONE, dev store restored `cmp`-SAME. 3 PROVISIONALs (P-VX281-U1-1…3) for QUESTIONS at the merge; the cold review is the ladder's. See the U1 UNIT RECORD |
 | U2 — the shared icon | **UNIT CLOSED — DONE** (2026-10-14 ~00:20 MDT, opus-implementer): VX-268 — the one icon on every row the ask glyph marks + the ticket's book/gathering and Timeline rows; red first (core 43, Mac 27 issues on the seam), Mac batch 812/149 (one issue — VX-115's standing pin); the walk in both voices DONE, the dev store restored `cmp`-SAME against the original. 5 PROVISIONALs (P-VX281-U2-1…5) for QUESTIONS at the merge; the cold review is the ladder's. See the U2 UNIT RECORD |
 | the ladder | **CLOSED at ROUND 3** (~03:45): rounds 1 + 2 closed; round 3, the end-of-run Fable round, 0B/0M/0m/2n — **F-1 FIXED** (`2870fa6f`, Fable confirmed), **F-2 DISMISSED AS HOLLOW** (Fable withdrew it on the implementer's trace). No further round. NEXT: the closeout — main merged in, the merged tip built, the merge-moment WHOLE-target Mac run (`vx281-merge`) |
-| closeout | IN-PROGRESS — main merged in (`bb05c642`, no conflict); the merged tip built (`DerivedData/vx281-merge`, deleted after); **the merge-moment WHOLE Mac target DONE: 4,590 tests / 748 suites, 10 issues incl. 5 known — three reds, all standing (VX-115, VX-245/VX-283's six sites, VX-167's `redoNeverAsks`), NO new red** (see Closeout); NEXT the orchestrator's ledgers, the PR's merge, the handoff |
+| closeout | **DONE** (2026-10-14 ~04:40): merged PR #159 (merge commit 0f5efe1c) at the coordinator's GO; the merge-moment ledgers on main (AppSpec §12 + §14 with 13n-c rolled, QUESTIONS #219, the in-flight row retired); the handoff; no `/Applications` refresh (not the night's last merge) |
 
 ## FOR VX-234 (every wording call this run makes, where it renders — posted to VX-234 at close)
 
@@ -1230,3 +1230,18 @@ final; the implementer applies; the orchestrator checks each fix line by line)*
 
   The 5 known issues are the declared `withKnownIssue` ones (`TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` 1; `IndexTierMetricsTests`' two line-for-line pins × Study/Terminal `overTwoBlankLines` 4) — VX-184's same five. VX-167's order-dependent `LibraryInfiniteScrollTests.aPageLandingReDrawsNoRowAlreadyBuilt` PASSED this run; VX-184's suspect `BookOutlineLandingTests.thePreMountConsultAsksForTheWayfarerAndAWidthMatchedMemory` PASSED. Against VX-184's merge-moment run (4,551 / 742, the same 10 issues incl. 5 known): +39 tests / +6 suites — this run's new pins. **A machine fact, said:** a VX-282 session's headless `build-for-testing` was running on the Pro when the run started (CPU load only — a build injects no events and needs no stage); no timing-class red appeared. The tree `vx281-merge` and the result bundle DELETED after (disk 38 GiB free).
 
+### The merge (orchestrator, 2026-10-14)
+
+- **Merged:** PR #159 → `main` as merge commit `0f5efe1c` (merge commit only), at the stage coordinator's MERGE GO
+  (origin/main verified an ancestor; MERGEABLE CLEAN; nobody else merging).
+- **The merge-moment ledgers, on latest main (the VX-184 precedent):** AppSpec §12's THE MCP DOOR line gains THE PANE AND
+  THE SHARED ICON; §14's newest entry is VX-281's, with 13n-c's entry rolled verbatim to `notes/AppSpecDeltaArchive.md`;
+  the ratify bundle is **QUESTIONS #219** (nine PROVISIONALs: P-VX281-U1-1…3, U2-1…5, R2-1); the in-flight row retired.
+- **No `/Applications` refresh:** her rule (the night's FINAL merge only refreshes), and the coordinator named VX-282 and
+  VX-246 after us.
+- **Linear:** VX-199 · VX-205 · VX-232 · VX-268 and the run ticket VX-281 Done; VX-245 keeps its six non-MCP sites
+  (VX-283's), the MCP hash posted; the FOR VX-234 list posted on VX-234; VX-197 carries the docs owed; **born VX-330**
+  (the Book Panel's collapsed one-note chapter row wears neither glyph — Backlog, project 13n).
+- **MOBILE PARITY:** nothing mobile-visible (the MCP door is Mac-only).
+- **Cleanup:** the worktree removed and the branch deleted (GitHub and local) after the merge; all DerivedData trees
+  already deleted; the walk/run evidence under the gitignored `notes/plans/vx281-screens/` deleted with the worktree.

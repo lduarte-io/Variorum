@@ -4,7 +4,8 @@
 
 **SPLIT 2026-10-13 (the release runway, `notes/plans/vx-33-release-runway.md`).** This file now serves TWO runs:
 - **VX-281 "Run: MCP settings pane & shared icon"** takes the **U6 section** and the **VX-268 bullet** under HER
-  ADDITIONS, and runs now, so the pane can merge early and her MCP-pane wording (VX-234) can follow it.
+  ADDITIONS, and runs now, so the pane can merge early and her MCP-pane wording (VX-234) can follow it. **DONE 2026-10-14 —
+  merged PR #159 (merge commit 0f5efe1c); the record `notes/plans/fixes/vx-281-mcp-settings-pane-shared-icon.md`.**
 - **VX-246, retitled "Run: MCP door fixes & AI docs"**, keeps everything else. That is: her other additions;
   VX-275 · VX-276 · VX-279 · VX-280 (minted after this file was written, from VX-184's ladder); VX-277 and
   VX-119 (the same undo rule as VX-276); and the AI-opens-Compare ask.
