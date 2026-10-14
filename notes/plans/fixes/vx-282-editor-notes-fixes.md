@@ -2,7 +2,7 @@
 
 **STATUS: OPEN — kickoff 2026-10-13 (evening).** Run ticket **VX-282** (project *v1 release readiness*) ·
 branch `vx-282-editor-notes-fixes` · worktree `~/dev/variorum-vx-282` on the Pro · PR `VX-282: …` (merge commit
-only). Shape: `/run-phase` on the run ticket, at her word. Orchestrator: session **variorum-da** (Opus 5.5).
+only). Shape: `/run-phase` on the run ticket, at her word. Orchestrator: session **vx-282** (named variorum-da at kickoff; Opus 5.5 at max).
 Cast — **her word at kickoff (2026-10-13, verbatim):** *"you're running as the orchestrator Opus at Max thinking -
 run implementers on xhigh and Opus cold review on Max. Run a fable cold review when you need to if you do & at the
 end of the phase if you didn't need that."* So: `opus-implementer` at **xhigh**, ONE fresh session per unit,
@@ -76,7 +76,12 @@ carries its own trace and pins (read them in Linear, or ask the orchestrator to 
 - **Overlap — VX-246** (session variorum-84): VX-275 (the flush before a wire delete) and VX-230 (a badge) may
   reach the editor seam. Neither run changes the other's landing or styling rules without saying so; the
   orchestrator tells variorum-84 before this run edits anything in its lane, and whichever merges second merges
-  main in first.
+  main in first. **Its reply (2026-10-13):** VX-246's editor-seam units come later in its run (its U3 VX-275 may reach the
+  block-range map, `EditorViewModel`'s projection deferral and a block tombstoned under a pending buffer —
+  near `BlockRangeIndex`/`EditorSurfaceController`; its U4 VX-230 is the fan-badge decoration layer, not the
+  markdown face); it messages this run's orchestrator (session **vx-282**) before editing
+  `EditorSurfaceController`, `BlockRangeIndex`, `EditorEditRoute`/`SeamCarvePlan` or the markdown face. Its
+  orchestrator session is now named **vx-246**.
 - **Overlap — VX-283/VX-284:** the navigate-away road and `ShellRouter.adopt(landing:)` are theirs; this run uses
   neither.
 
