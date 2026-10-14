@@ -285,7 +285,15 @@ at a zero-instance window with no commits during it, then DMG first and appcast 
   shape Desktop's config reads. (a) Out for launch, (b) verify live (about an hour, with her OK to edit
   her Claude config) plus a docs paragraph, or (c) verify plus a Desktop setup tab (about half a day).
   Recommended: (b) at least.
-- ⟨The book-view editing continuity: pre-launch, or the minimum slice.⟩
+- **VX-300, editing from the book view without losing her place** (her report, 2026-10-13):
+  - "Open in editor" lands at the note's top.
+  - Index ↔ Outline and "view in outline" forget the position.
+  - Index offers no block tools and no takes.
+  
+  Canon already allows the core fix (R-18l-1: deep links keep their targets). The size and a minimum
+  slice come from a read-only trace that was still running when this was written; the result lands on
+  the ticket. Then she decides pre-launch: likely a minimum slice riding VX-284 (the book surfaces),
+  or its own run.
 
 **Pre-launch, yes or no** (none is labelled Pre-launch until she says so):
 - **VX-175, the Library controls row at the default 1240-pt window:** the search field squeezes and the info
