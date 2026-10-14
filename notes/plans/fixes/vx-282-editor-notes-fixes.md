@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #220. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #221). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **u5b DONE (05:40–05:58, claim `vx282-u5b` RELEASED) — awaiting the coordinator's ruling on the reshapes.** W2: g1 110/12 with 4 issues (VX-257's two SHEET cells — runner-only, the binding road's `.onDisappear` never fires under the runner's retention; everything else incl. VX-183's pins, VX-257's popover and model cells green), g2 76/11 green, g3 23/2 green. W3: **the VX-229 heap decider — 0 · 0 · 0 after every set of cycles (popover, Write sheet, nested sheet), the open controls 1 · 1 · 1–2 ⇒ VX-229 HOLLOW IN USE, runner-only**; VX-257 rows 1–4 HOLD (popover click-away, ⎋⎋, Write's sheet, the nested sheet; row 1 in both voices); VX-183's doors HOLD (Add, Delete, Restore, Delete forever's confirm + Cancel, Save/Revert). Owed: reshape `CommentPanelReleaseTests` + VX-257's two sheet cells (no red pin left) — not started, at the coordinator's word. VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c`. Posture as found (Standard, unlocked, Study); no instance; no revert in flight. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS — u5c (the coordinator's narrow leg): the three cells reshaped `eaf42b27`; A NAMED REVERT IN FLIGHT for the old-products rebuild** — six files back to `7d798f82` and `CommentPanelDoorsTests.swift` set aside (the § u5c note); restore by `git checkout HEAD --`. VX-229 DISMISSED AS HOLLOW (final). VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c`. No claim held. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **DONE** — pins `d35191b6` + correction `ee1facc9` · fix `3cf0079b` · window `a1967ac0` (logs) + the walk record. Stage window 05:27:17–05:38:17 (claim `vx282-u6`, RELEASED): W1 red on old exactly as predicted (3 tests, 1 issue — the launch pin's last cell) · W2 the fixed batch 148 tests / 43 suites green · W3 every row held (A0 old: the window; A/A' fixed: the caret in the bar at launch in Study and Terminal, a typed letter lands; C the tour never stolen from; D the navigation back as today — O-U6-1 seen live); row B's restored note window not reachable on this Mac (not restored), a new window walked in its place. P-U6-1/2 → QUESTIONS #224. Posture: Study, unlocked Standard, tour `completed`, the Bookcase, nothing filed. No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
@@ -2359,6 +2359,38 @@ delivers, so no red pin stays in the suite.
 - **Posture as left:** our instance quit by identity (`tell application id "io.lduarte.Variorum.debug" to quit`;
   `pgrep -lx Variorum` and the anchor → none); no simulator; the dev store Standard (custody untouched), unlocked (no lock
   screen met), **voice Study** (as found), appearance untouched. **Claim `vx282-u5b` RELEASED 05:57:46** (status FREE).
+
+#### VX-229 — FINAL DISPOSITION (the coordinator's ruling, 2026-10-14 ~06:00)
+
+**DISMISSED AS HOLLOW IN USE.** The u5b heap table is decisive: zero models and zero observers alive after each close on
+all three roads (popover, Write's sheet, the take panel's nested sheet), with open controls of 1 · 1 · 1–2. W1's red was
+the runner's own retention (the long-lived main-thread autorelease pool under async test bodies — TEXTKIT2_NOTES §3's
+class). The fix (`ee86dd8c`) stays OUT (`7d798f82`). **O-U5-1 is an FYI for the handoff, no ticket:** VX-179's
+stale-monitor pin (`aDismissedPopoversPanelStopsListening`) and its `willClose` release rest on the same offscreen shape.
+
+#### u5c — the three reshaped cells (headless; the coordinator's narrow leg) — `eaf42b27`
+
+- **`CommentPanelReleaseTests` — now a GUARD of the app's real behaviour, not a red-on-old pin** (its header and the
+  suite title say so). The rig's turns are DRAINED (`drainedSlice()`: the queued events and a 10 ms run-loop slice inside
+  one `autoreleasepool`; no `Task.sleep`; a `Task.yield` between turns), every window lookup pooled, no window ever held;
+  each step's census printed (`VX-229 guard — …: models alive N, observing M`). Expected GREEN on both products (the
+  lifecycle code is the same on both — VX-229's fix is out).
+- **VX-257's two SHEET cells — still REAL pins of the sheet road, red on old.** After the binding dismissal,
+  `leaveTheDismissedSheet` waits (drained) for the panel to be let go — the sheet's own `.onDisappear` ran — and, where
+  the runner still keeps the dismissed panel alive after the wait, runs that panel's leaving body EXACTLY as the sheet's
+  `.onDisappear` calls it (`commitDirtyEdits()` → `leave()`), printing which road ran (`VX-257 the sheet: …`). Old
+  `leave()` drops the draft on either road ⇒ red on old; the fixed `leave()` parks it ⇒ green.
+- **What could not be settled headlessly (said plainly):** an ASYNC offscreen probe (the cycle as a `@MainActor` task under
+  `NSApp.run()`, the runner's shape) does NOT reproduce the runner's retention — both the old and the drained turns let the
+  panel go there (`asyncpanel.swift`) — so whether the drained turns make the RUNNER release is u5c's to show. The guard's
+  printed census will say it either way; the VX-257 sheet cells are robust to it by construction.
+
+**Named revert for the OLD products (before it starts):** the files that post-date `7d798f82` in the app and its test
+bundle go back to it for ONE build — `CommentsPanel.swift`, `CommentTextArea.swift`, `Registry/Capability.swift`,
+`Registry/CapabilityRegistry.swift`, `VariorumTests/CapabilityRegistryTests.swift`, `Sources/VariorumCore/Queries/
+RestoreCost.swift` (`git checkout 7d798f82 --`), and `VariorumTests/CommentPanelDoorsTests.swift` set aside to
+`scratchpad/vx282-u5/`; the reshaped `CommentPanelHostLifecycleTests.swift` stays (the pins as now). Restore by
+`git checkout HEAD -- <each>` (the Doors file included); `git status` clean.
 
 ## Ladder
 
