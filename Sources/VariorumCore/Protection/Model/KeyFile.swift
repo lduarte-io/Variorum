@@ -45,6 +45,11 @@ public enum KeyFileError: Error, Equatable, Sendable {
     case anchorDoesNotOpen
     /// The anchor's bundle failed to decrypt or decode (tampered).
     case anchorBundleUnreadable
+    /// A Castle key never has an Apple wrap (§3.3) — entering Castle refuses
+    /// an Apple lock for the new key.
+    case appleWrapOnACastleKey
+    /// A re-key to the key already current.
+    case newKeyIsTheCurrentKey
     /// A file whose format is not 3 where format 3 is required.
     case notFormat3(Int)
     /// A file written by a newer build — refused, never guessed.

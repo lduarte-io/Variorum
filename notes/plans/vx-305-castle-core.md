@@ -539,8 +539,8 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
     plans — DONE (this commit; 18 tests green, filtered run). Landed with it, because what this Mac remembers mirrors
     the key file: `KeyFile.swift` (format 3's values, wraps, roads and history opening) and `CastleAnchor.swift` (the
     anchor's sealing and opening), and `ProtectionGuards` with U1's five guards — their own tests ride (c) and (e).
-  - (c) key file format 3 (wraps, history, the Castle anchor, the master's words copy, the four crossings) —
-    NOT-STARTED.
+  - (c) key file format 3 (wraps, history, the Castle anchor, the master's words copy, the four crossings) — DONE
+    (this commit; 17 tests green, filtered run).
   - (d) the legacy readers (formats 1 and 2, the legacy mode reader, the old marker's read and clearing check, today's
     item names and values) — NOT-STARTED.
   - (e) `ProtectionGuards` for U1's guards + the secret / marker scans — NOT-STARTED.
