@@ -72,7 +72,9 @@ struct MCPWriteTools: Sendable {
     enum Job: Sendable {
         case addTake(blockID: String, text: String, label: String?)
         case addComment(blockID: String, text: String)
-        case saveLens(noteID: String, name: String, takeIDs: [String])
+        /// VX-253: the picks (`take_ids`) and, optionally, a rule that fills
+        /// every block the picks don't cover (`MCPWriteTools+LensRule`).
+        case saveLens(noteID: String, name: String, takeIDs: [String], rule: LensRule?)
         /// U3 (R-13nb-11 G-2): EITHER payload — plain prose, or the
         /// wire-document subset — and an optional entry date (R-13nb-26 (b)).
         case createNote(title: String?, payload: NotePayload, entryDate: String?, place: Place)
@@ -186,12 +188,17 @@ struct MCPWriteTools: Sendable {
         case MCPToolCatalog.addComment.name:
             return .addComment(blockID: try requiredString(args, "block_id"), text: try requiredText(args, "text"))
         case MCPToolCatalog.saveLens.name:
-            let takeIDs = try stringArray(args, "take_ids") ?? []
-            guard Set(takeIDs).count == takeIDs.count else {
+            let takeIDs = try stringArray(args, "take_ids")
+            if let takeIDs, Set(takeIDs).count != takeIDs.count {
                 throw ArgumentFailure(message: "take_ids lists a take twice.")
             }
+            // VX-253: three explicit fills, never a magic word — the picks,
+            // a label, or pin_chosen; the picks may ride either rule.
+            let rule = try parseLensRule(args)
+            guard takeIDs != nil || rule != nil else { throw ArgumentFailure(message: Self.noLensFillWords) }
             return .saveLens(
-                noteID: try requiredString(args, "note_id"), name: try requiredText(args, "name"), takeIDs: takeIDs)
+                noteID: try requiredString(args, "note_id"), name: try requiredText(args, "name"),
+                takeIDs: takeIDs ?? [], rule: rule)
         case MCPToolCatalog.createNote.name:
             let text = try optionalString(args, "text")
             let blocksValue = args["blocks"].flatMap { $0 == .null ? nil : $0 }
@@ -373,11 +380,23 @@ struct MCPWriteTools: Sendable {
                         MCPWriteReceipt(clientName: clientName, act: .comment, targetID: note, targetTitle: title,
                                         show: .note(noteID: note, blockID: blockID, select: nil)))
             }
-        case .saveLens(let noteID, let name, let takeIDs):
+        case .saveLens(let noteID, let name, let takeIDs, let rule):
             return try onNote(noteID, rung: .suggest, job: job, clientName: clientName) { title in
-                let picks = try picks(noteID: noteID, takeIDs: takeIDs)
+                var picks = try picks(noteID: noteID, takeIDs: takeIDs)
+                var answer: [String: Any] = [:]
+                // VX-253: the picks FIRST; the rule fills only the blocks they
+                // don't cover — inside this closure, so only after the decision
+                // allowed the note (an unreachable one never reaches the rule).
+                if let rule {
+                    let filled = try fillLens(rule, noteID: noteID, clientName: clientName, covered: Set(picks.keys))
+                    picks.merge(filled.picks) { pick, _ in pick }
+                    answer["unmatched_blocks"] = Array(filled.unmatched.prefix(Self.lensListCap))
+                    answer["unmatched_count"] = filled.unmatched.count
+                }
                 let lens = try ops.saveLens(post: noteID, name: name, picks: picks, undoLabel: label(.lens))
-                return (["lens_id": lens.id, "note_id": noteID],
+                answer["lens_id"] = lens.id
+                answer["note_id"] = noteID
+                return (answer,
                         MCPWriteReceipt(clientName: clientName, act: .lens, targetID: noteID,
                                         targetTitle: title, detail: lens.name,
                                         show: .lens(noteID: noteID, lensID: lens.id)))

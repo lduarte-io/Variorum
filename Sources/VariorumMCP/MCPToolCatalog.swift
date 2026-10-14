@@ -435,10 +435,24 @@ enum MCPToolCatalog {
 
     static let saveLens = MCPToolDeclaration(
         name: "save_lens", rung: .suggest, title: "Save a lens",
+        // VX-253 (VX-336 U5a): three explicit fills — take_ids, label, pin_chosen.
         description: """
-            Save a named lens on a note: a way of reading it that shows the given takes in place \
-            of the chosen ones (at most one take per block; other blocks show their chosen take). \
-            A lens never changes what the note shows by default. Returns JSON with the lens_id.
+            Save a named lens on a note: a way of reading it that shows other takes in place of \
+            the chosen ones, at most one take per block. A lens never changes what the note shows \
+            by default. Fill it explicitly, in any of three ways: take_ids (the take to show on \
+            each block you name), label (each block shows its take with that label), or \
+            pin_chosen: true (each block keeps the take the note shows now, even if the author \
+            later chooses another). take_ids may ride with label or pin_chosen: they are applied \
+            first, block by block, and the rule fills every other block; label and pin_chosen \
+            don't combine. A label matches a take's label exactly as stored, and your own \
+            suggested takes by their own part: "english" also matches "<your client name> · \
+            english" and older takes' "<your client name> · suggested · english" — never another \
+            client's. A block with no take of that label shows its chosen take and is listed in \
+            unmatched_blocks (the first 200; unmatched_count counts them all). If a block that \
+            take_ids doesn't cover has two or more takes with that label, nothing is saved: the \
+            refusal names those blocks and their matching takes — call again with the same label \
+            and take_ids for exactly those blocks. A label no take in the note wears is refused. \
+            Returns JSON with the lens_id.
             """,
         inputSchema: .object([
             "type": "object",
@@ -446,9 +460,16 @@ enum MCPToolCatalog {
                 "note_id": .object(["type": "string", "description": "The note."]),
                 "name": .object(["type": "string", "description": "The lens's name."]),
                 "take_ids": .object(["type": "array", "items": .object(["type": "string"]),
-                                     "description": "The takes the lens shows, one per block."]),
+                                     "description": "The take to show per block, one per block (applied first)."]),
+                "label": .object(["type": "string", "description": """
+                    Show each other block's take with this label (exactly as stored; your own \
+                    suggestions also by their own part).
+                    """]),
+                "pin_chosen": .object(["type": "boolean", "description": """
+                    true: each other block keeps the take the note shows now.
+                    """]),
             ]),
-            "required": .array(["note_id", "name", "take_ids"]),
+            "required": .array(["note_id", "name"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
