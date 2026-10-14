@@ -79,8 +79,11 @@ struct MCPWriteServerTests {
             let labels = try await h.database.read { db in
                 try String.fetchAll(db, sql: "SELECT label FROM variant WHERE label IS NOT NULL ORDER BY label")
             }
-            #expect(labels == ["claude-code · suggested · english", "claude-code · suggested · english"],
-                    "P-13n-3: the fan always says who")
+            // VX-267 (JUSTIFIED EDIT, the ritual — VX-336 U5a, her ruling: "isn't
+            // it obvious it's suggested if it's claude?"): an AI take's label is
+            // `<client> · <label>` now — "suggested" dropped; the who stays.
+            #expect(labels == ["claude-code · english", "claude-code · english"],
+                    "P-13n-3 as VX-267 re-voiced it: the fan always says who")
             #expect(h.undoStack.depth == 3 && h.undoStack.topLabel == "claude-code's lens")
             #expect(h.receipts.value.map(\.act) == [.take, .take, .lens])
 

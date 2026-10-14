@@ -119,8 +119,10 @@ struct MCPBatchDoorsServerTests {
             #expect(rows.map(\.text)
                     == ["First, in English.", "Second, in English.", "Third, in English.", "", "Fifth, in English.",
                         "First, again."])
-            #expect(rows.first?.label == "claude-code \u{00B7} suggested \u{00B7} english")
-            #expect(rows.count > 2 && rows[2].label == "claude-code \u{00B7} suggested")
+            // VX-267 (JUSTIFIED EDIT, the ritual — VX-336 U5a): `<client> · <label>`,
+            // or the client alone with no label ("suggested" dropped).
+            #expect(rows.first?.label == "claude-code \u{00B7} english")
+            #expect(rows.count > 2 && rows[2].label == "claude-code")
             #expect(rows.allSatisfy { $0.locked == 0 })
             let fanOrder = try await h.database.read { db in
                 try String.fetchAll(db, sql: """

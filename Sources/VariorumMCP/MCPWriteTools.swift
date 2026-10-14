@@ -746,14 +746,24 @@ struct MCPWriteTools: Sendable {
                                 show: .note(noteID: minted.post.id, blockID: nil, select: nil)))
     }
 
-    /// **The take label on an AI take** (P-13n-3's convention, hers to
-    /// re-voice at 13s-a): "<client> · suggested", then the client's own
-    /// label when it gives one — so the fan always says who.
+    /// **The take label on an AI take** (P-13n-3's convention, re-voiced by
+    /// her VX-267 ruling — *"why do we need claude-code * suggested * english.
+    /// isn't it obvious it's suggested if it's claude? seems like an extra
+    /// word."*): the client's name, then ` · ` and the client's own label when
+    /// it gives one (trimmed; a blank label is none) — so the fan always says
+    /// who. Worn only by the takes a client adds at SUGGEST, inside her
+    /// writing (`add_take`, `add_takes` — her VX-197 split); every other
+    /// take-writing tool stores a label exactly as given. Takes labelled
+    /// before VX-267 keep `‹client› · suggested · ‹label›` (labels are text —
+    /// no migration); the lens rule's matcher reads both forms.
     static func aiLabel(client: String, own: String?) -> String {
-        let base = "\(client) \u{00B7} suggested"
-        guard let own = own?.trimmingCharacters(in: .whitespacesAndNewlines), !own.isEmpty else { return base }
-        return "\(base) \u{00B7} \(own)"
+        guard let own = own?.trimmingCharacters(in: .whitespacesAndNewlines), !own.isEmpty else { return client }
+        return client + labelSeparator + own
     }
+
+    /// The separator inside an AI take's label (`aiLabel`'s) — a spaced
+    /// middle dot.
+    static let labelSeparator = " \u{00B7} "
 
     // MARK: - Shared pieces
 
