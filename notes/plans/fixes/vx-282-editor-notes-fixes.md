@@ -3330,3 +3330,30 @@ gitignored, extracts committed):
 - **State of the branch:** `12d55d12` (the `pendingEdit` guard) stays on the branch for now — a belt that is correct by
   construction (a settle never writes over an armed, unlanded edit) but has NOT fixed C-1; the orchestrator rules whether
   it stays. Nothing else changed. C-1 stays OPEN.
+
+#### C-1 — THE DECIDER LEG (the orchestrator's ruling: run the decider first; `12d55d12` stays on the branch for now)
+
+**A correction to the posture recorded above, from the logs (no run):** the "non-key window … manual keyboard" warning
+is NOT what distinguishes the red posture — it appears when `MobileMarkdownCaretTests` runs ALONE too (6–7 per green run:
+r1fix W2b, r2fix W2b, W1c), always naming the host app's 402×874 window as key and the test's 393×700 frame window as
+the first responder's. What differs is the PREDECESSOR: after `MobileLivenessTests` the same suite crashes and desyncs.
+The likeliest polluter by reading: `MobileLivenessTests.arrivalRaisesFocusBeforeTheObservationLoops`
+(`MobileLivenessTests.swift:1048-1081`) raises a surface to first responder (`arrive(focus: true)`) in a frame window and
+only HIDES that window at its end — the text view is never resigned, so a stale first responder (with the hardware
+keyboard's input session) outlives the test. Unproven; the keyfix product below tests the caret suite's own defence.
+
+**Named before any build starts — every edit applied to the working tree only, built, its `Build/Products` cloned aside,
+restored by `git checkout HEAD -- <file>`, `git diff` verified empty; the patches kept in the gitignored
+`scratchpad/vx282-c1/`; `DerivedData/vx282-u2-ios` rebuilt last as the GUARDED product (the branch tip):**
+1. **DECIDER** → `DerivedData/vx282-c1-decider-ios-products`: `MobileEditorViewModel.settleMarkdownCaret()` returns at
+   its top (the phone settle off; the `pendingEdit` guard and everything else as the tip). Product code, TEST-ONLY, never
+   committed.
+2. **KEYFIX (for H2)** → `DerivedData/vx282-c1-keyfix-ios-products`: a TEST-ONLY change in
+   `MobileMarkdownCaretTests.host(_:)` — the window is created on the foreground `UIWindowScene` and made key, so the
+   caret pins stand in the posture a real phone is always in (her editor's window IS the scene's key window), and each
+   test resigns its text view before hiding its window. The phone settle ON (the tip's product code).
+3. **DISABLE (for H1)** → `DerivedData/vx282-c1-disable-ios-products` + `scratchpad/vx282-c1/disable-phone-settle.patch`
+   (commit-ready, NOT committed): the orchestrator's provisional — the phone settle off (`settleMarkdownCaret()` returns
+   at its top, with the PROVISIONAL comment and the VM ticket's slot), and the three phone pins that need the honour
+   (`herFlow…`, `leavingATrailingSpace…`, `aStoodDownEditorHonoursNoCaret`) disabled with that reason; R1-3's pin stays
+   live (it needs no honour).
