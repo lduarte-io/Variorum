@@ -986,6 +986,26 @@ first — no `/Applications/Variorum.app` instance, none of ours).** From `App/V
   Then the walk note to the Trash (residue recorded), quit OUR instance by identity, `pgrep` again, the dev store left
   Standard and unlocked with its voice as found, release the claim.
 
+**THE STAGE WINDOW — RUN 2026-10-14 (the coordinator's GO, part 2 of its chained window: `Tools/stage release --who
+vx282-u2b && Tools/stage claim --who vx282-u3 …`, claimed 01:18:43; `git pull --ff-only` first — U2's and U4's commits on
+the branch, NOT in these products, by the no-rebuild rule; `guard.sh --author` OK before every leg; 0 Variorum instances
+and 0 booted simulators at the start). Logs: `notes/plans/vx282-screens/u3/logs/`.**
+- **W1 — RED ON OLD, AS DESIGNED** (`w1-red-on-old.log`, the old products, 01:18:55–01:19:51): "Test run with **23 tests
+  in 2 suites failed** … **46 issues**". All fifteen RED rows red, every issue on a designed expectation (the stand-in saw
+  the command; the ask/request/store/clipboard never moved; the nine `isEnabled` live; `closes == 0`; the receipt named
+  "archived · n"). GREEN on old: the two GUARDS (`theNoteCommandsStillReachWrite`, `whenThePanelClosesEveryCommandIsWritesAgain`)
+  and `WriteTakesPanelKeysTests` 6/6 (incl. the narrowed characterization). *(On old the two ring checks are red too —
+  the ring simply stays in take 2 when nothing acts; W1b is what isolates the guard.)*
+- **W1b — REVERT B, AS DESIGNED** (`w1b-revB.log`, the fix minus the ring guard, 01:20:02–01:20:37): "**17 tests in 1 suite
+  failed** … **2 issues**" — exactly `aTakeIntoABlockBelowMovesTheRingsTakeAndTheRingStaysHome` (`:409`, `focusedPane == nil`)
+  and `deleteBlockDeletesThePanelsBlockAndTheRingNeverLeavesIt` (`:500`, `focusedPane == nil`), one issue each; the other
+  fifteen green. The guard is load-bearing: without it the ring lands on the minted block / the survivor.
+- **W2 — THE FIXED MAC BATCH, GREEN** (`DerivedData/vx282-u3`, the build of `26ecec8c`): g1 (`w2-g1.log`, 01:20:42–01:22:13)
+  "**87 tests in 10 suites passed**"; g2 (`w2-g2.log`, 01:22:18–01:24:34) "**161 tests in 14 suites passed**" — **248 tests /
+  24 suites, 0 skipped** (every suite's ✔ line read; the two "skipped" grep hits are a test's NAME), `** TEST EXECUTE
+  SUCCEEDED **` ×2.
+- **W3 — the walk: IN PROGRESS.**
+
 ### U4 — VX-193 + VX-112 (the capture box: the undo desync and the focus re-grab)
 
 **State: READY FOR STAGE** (the window plan at the end of this section). Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Every count and every
