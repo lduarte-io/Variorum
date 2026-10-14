@@ -41,7 +41,13 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
   (menu + ⌘L sheet) are IN by the same parity (the scope audit on the ticket).
 - **Wording:** pane words ship AS BUILT; every wording call goes on the **FOR VX-234** list below (where it
   renders), posted to VX-234 at close. No QUESTIONS entry for pure pane wording. Sentence case, no shouty caps.
-- **Effort:** max for every implementer and reviewer (her VX-184 word, carried by the plan's rules).
+- **The cast and effort — HER KICKOFF REDIRECT (2026-10-13 evening, verbatim):** *"you're running as the
+  orchestrator Opus at Max thinking - run implementers on xhigh and Opus cold review on Max. Run a fable cold
+  review when you need to if you do & at the end of the phase if you didn't need that."* So: implementers
+  `opus-implementer` at **xhigh**; ladder rounds `opus-reviewer` at **max**; a **Fable** cold review
+  (`fable-reviewer`) whenever the diff earns one (an editor-seam, custody, `Sync/` or default's-meaning line),
+  and otherwise ONE Fable cold review at the end of the run. (This supersedes the plan file's "max for every
+  implementer" for this run.)
 
 ## The kickoff message (each implementer session receives this, plus its unit line)
 
@@ -99,8 +105,9 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
   rule (`Queries.mcpNoteReach` / `mcpBookReach`, gatherings by VX-185's `decideGathering` truth); P1 — reach is
   read in proportion to the rows shown, never the corpus; VX-272 — renders only with ≥1 approved client.
   **Evidence:** pins red-first; a Mac batch; the walk.
-- **Then:** the cold review (Opus, REVIEW_PROMPT verbatim, a fresh reviewer per round), the ladder, the
-  closeout. The run's last implementer applies the agreed fixes.
+- **Then:** the ladder — Opus cold review at max (REVIEW_PROMPT verbatim, a fresh reviewer per round), then the
+  end-of-run Fable cold review (her redirect above), then the closeout. The run's last implementer applies the
+  agreed fixes.
 
 ## LIVE STATUS
 
