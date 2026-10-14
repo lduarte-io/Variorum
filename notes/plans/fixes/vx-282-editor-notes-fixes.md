@@ -57,7 +57,11 @@ night's final merge (the stage coordinator calls the order — passed to vx-281 
 VX-319 (Write's word count one short after a carve — U1 walk, untraced) · VX-320 (File ▸ Export Block… hits the caret
 block under the take panel — U3 O-1) · VX-321 (Move Take into a Block Below's receipt "archived · n" — U3 O-3) ·
 VX-322 (the capture box's `entryFocused` may stay true across a re-attach to another responder — U4 O-U4-1, untraced) ·
-VX-325 (⌘K queues behind the take panel — U3 O-6). All in *12 — Hardening & perf validation*, Todo; pre-launch is hers.
+VX-325 (⌘K queues behind the take panel — U3 O-6) · VX-331 (the restore confirm's deleted-takes count has no 30-day
+window — U5 O-U5-2) · VX-332 (navigating back to the Bookcase never focuses quick entry — U6 O-U6-1) · VX-334 (⌃⌘↑/↓ act on
+Write's caret under the take panel — U3 O-2) · VX-335 (two ⌫ in one main-actor turn — U1). All in *12 — Hardening & perf
+validation*, Todo; pre-launch is hers. **VM-18** (the phone's comments sheet drops a half-typed comment — U5's MOBILE
+PARITY) in *Mobile — editor & capture faces*. **VX-326** joined the run as U6 at her word (her ticket from U4's O-U4-3).
 U4's O-U4-2 (the box's history left the window's shared undo stack under P-U4-1) — no symptom traced, no work: recorded.
 
 ## Her rulings that bind this run (from the tickets, verbatim where she wrote them)
@@ -2497,7 +2501,79 @@ Variorum` none; no app launched.
 
 ## Ladder
 
-*(Round findings verbatim, dispositions, fixes — repo-first before each next round.)*
+### ROUND 1 — `opus-reviewer` at max (her cast word), REVIEW_PROMPT verbatim, PHASE=VX-282 (plus one location/stage line), reviewed tip `3bfa9b2a`; read-only
+
+**Tally: 0 BLOCKER · 0 MAJOR · 6 MINOR (one SPECULATIVE) · 4 NIT.** The reviewer's own scope note, verbatim in substance:
+the diff is inside Fable's mandatory scope (`BlockRangeIndex`, `PaneSurface`'s coordinator, `SeamCarvePlan`,
+`runEmptyBlockDeletion`, `storageDidEdit`, the selection delegate; VX-296 writes attributes on live storage on both
+platforms) — this Opus round does not discharge it. **Agreed: round 2 is the run's one Fable cold review.**
+
+**The findings (condensed from the reviewer's text; mechanisms as it traced them):**
+- **R1-1 [MINOR]** `PaneSurface.swift:1427-1429/:1652/:1527/:1756`, `MarkdownFaceCore.swift:194` — a pane going READ
+  while its caret sits at a rescue point: `paintFind(live:false)` paints the match, then `noteLiveness(false)`'s VX-296
+  settle restyles the honoured line caret-blind and the face's clear loop removes `.backgroundColor` from every
+  face-styled run (the find paint included); nothing calls `findPaintWasReset()`, so the change-gated repaint writes
+  nothing — the match stays unpainted. A regression. Pin: `PaneFindFaceTests`' rig, `*Hyde *`, match {1,4}, caret 6,
+  flip read → `.backgroundColor` at 1 == `matchTint`. Fix: when the settle restyled, `findPaintWasReset()`.
+- **R1-2 [MINOR]** `EditorViewModel.swift:3511-3515` (vs `:1222`, `:2321`, `:3688-3692`) — a settle in Write can
+  re-wrap a line (Study's proportional italics) with no character edit, but `overlayGeometryGeneration` is not bumped,
+  so `overlayLayoutDidSettle` returns at its guard: badges, callout frames, seams, the editing indicator and gutter
+  cards keep stale positions until the next scroll/pointer/edit. Fix: bump the generation + `overlayLayoutDidSettle()`
+  when the settle restyled (the refont road's shape). Pin: Study metrics, a paragraph whose italic toggle changes its
+  line count, a fanned block below; after an arrow move off the rescue point + a display pass the badge frame matches.
+- **R1-3 [MINOR, SPECULATIVE]** `MobileEditorViewModel.swift:2074-2078`, `MarkdownFaceCore.swift:255` — the phone's
+  W2b guard reads `editedMask`, empty between `beginEditing` and the first change inside a transaction; if UIKit
+  reports the selection inside `coordinateEditing` BEFORE the character change (autocorrect, predictive/spelling
+  Replace, dictation — the iOS ordering is inferred, only `insertText` observed) at a rescue point, the settle writes
+  inside the transaction → the W2b class. Fix: also skip while `pendingEdit != nil`. Pin: caret at `*hello |*` (7),
+  `textView.replace(<"hello">, withText: "Hello")` — red ⇒ real; green ⇒ hollow.
+- **R1-4 [MINOR]** `Features/Editor/CommentsPanel.swift` — consumed by Editor AND Takes (now four hosts incl. U3's),
+  edited heavily at this touch, still in `Features/Editor/`: CLAUDE.md's shared-home rule says move it at the next
+  touch (with `CommentTextArea.swift`, its only consumer) to `Core/Views/`.
+- **R1-5 [MINOR]** `MarkdownSyntax.swift:204/:648`, QUESTIONS #220 — her approved fix (a)'s ticket wording said "the
+  grammar … untouched"; the build put the caret rule inside the grammar module (`spans(in:caret:)` + `closerFlanks`),
+  behaviour-faithful (nil caret byte-identical, exhaustively pinned) but undisclosed in her bundle. Fix: one line in
+  #220 / the handoff.
+- **R1-6 [MINOR]** the record's observations — deferred work owed tickets: O-U6-1, O-U5-2, the VM ticket for VX-257's
+  phone face, O-2 (⌃⌘↑/↓ move Write's caret beneath the take panel; the menu items stay live), U1's same-turn
+  double-⌫ refusal toast; and O-4's premise looks contradicted by `PaneMount.kind(…windowIsKey:)` (the live surface
+  mounts only in the key window) — verify before ticketing or correct the record.
+- **R1-7 [NIT]** `EditorViewModel.swift:3511-3515`, `MobileEditorViewModel.swift:2074-2078` (vs `PaneSurface.swift:2009-2015`)
+  — Write and the phone honour a caret in a NON-editable editor (a sealed note's Write is selectable): a click at a
+  rescue point turns the italic on with no drawn caret. Fix: gate on `isEditable` as the pane does. Pin: sealed post,
+  `setSelectedRange` at the rescue point → no face styling.
+- **R1-8 [NIT]** `CommentPanelHostLifecycleTests.swift` — the VX-229 non-intermittent known issues were measured only
+  in 13-suite batches; the closeout's whole-target run may release and fail them. Watch there.
+- **R1-9 [NIT]** `ReturnKeyTraceTests.swift:847-918` — R2-1's two burst pins are no longer proven against R2-1's
+  (the drain rule's) revert. Fix: one test-only run of both against that revert, or record which pin carries R2-1.
+- **R1-10 [NIT]** `CommentTextArea.swift:447-457` + the U5 record — the record's `adoptText` caret rule is inaccurate
+  (any adopt into an EMPTY area now lands the caret at the end, mount fills included). Correct the record line.
+
+**Clean bill (the reviewer's, condensed):** VX-290's landing for all six shapes, #33(d) tie-break in one place, the
+tail never the survivor, Delete Block/archive untouched, the stashed fast press, P1 · VX-296's nil-caret readers
+unchanged, the gate exhaustively sound, attributes-only settles never re-entering `storageDidEdit`, P1 · VX-154's
+exhaustive `handleRouted`, named targets never falling back, `ringMayStand` on both ring roads · VX-193/112's own
+UndoManager, observers removed at dismantle, re-take only when the window holds the keyboard · VX-326 decided once on
+the box's own window · VX-257/183/182's idempotent `leave()`, refused drafts stay refused, the doors byte-identical, the
+purge fence stamp-aware and index-backed · zero `Sync/`/custody/keychain/schema · no trailers · its own headless core
+run 2,809/322 · MCP 212/41 · workbook 40/6 green · 21 stage logs spot-checked against the record.
+
+**DISPOSITIONS (the orchestrator — same-model round: arbitrated against the spec; her overnight mandate stands):**
+- R1-1 **AGREED** — fix + the proposed pin, red-on-old.
+- R1-2 **AGREED** — fix (the refont road's shape) + a pin if one can be built honestly (Study metrics); if the test
+  host cannot reproduce the re-wrap, say so and keep the fix with its mechanism recorded.
+- R1-3 **AGREED, PIN FIRST** — the proposed simulator pin; red ⇒ the `pendingEdit` guard; green ⇒ recorded hollow,
+  no fix.
+- R1-4 **AGREED** — move `CommentsPanel.swift` + `CommentTextArea.swift` to `Core/Views/` (CLAUDE.md's rule binds at
+  this touch); no behaviour change.
+- R1-5 **AGREED** — the disclosure line in #220 and the handoff.
+- R1-6 **AGREED** — O-U6-1 = **VX-332**, O-U5-2 = **VX-331**, the phone face = **VM-18** (minted before this round);
+  O-2 = **VX-334**, the double-⌫ toast = **VX-335** (minted at this round); O-4 re-verified by the fixer — corrected in the record
+  if its premise is false, ticketed if it stands.
+- R1-7 **AGREED** — gate both settles on `isEditable` + the sealed-post pin.
+- R1-8 **AGREED (watch)** — the closeout's whole-target run reads those cells; if they fail, mark intermittent.
+- R1-9 **AGREED** — one test-only run of both burst pins against the drain-rule revert in the fix window.
+- R1-10 **AGREED** — the record line corrected.
 
 ## Closeout
 
