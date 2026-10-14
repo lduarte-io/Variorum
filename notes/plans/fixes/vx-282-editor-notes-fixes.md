@@ -369,7 +369,11 @@ with the landed caret (`{7, 0}`), then `textDidChange`. `didChangeSelection` als
 caret still (forward-delete) and for a same-range `setSelectedRange`; a raw storage edit AFTER the caret fires none.
 So the Write editor's keystroke restyle cannot know the landed caret, and the selection change is the reliable
 "the caret has settled" moment on the Mac. (The same probe: `moveRight(nil)`/`moveLeft(nil)` move a windowless TK2
-view's caret and post the selection change — the pins' caret-move road.)
+view's caret and post the selection change — the pins' caret-move road. And — the fact the settle leans on — the
+selection change is posted only AFTER the storage's `processEditing` has completed, for a raw insert before the
+caret, a full `setAttributedString` and typing alike: `editedMask == 0` and no `processEditing` frame on the stack
+inside the handler, and an attribute write made there is its own clean edit (`mask=1`). So the settle never writes
+inside a storage edit transaction — unlike the keystroke restyle, which by design writes inside `didProcessEditing`.)
 
 **The road chosen, and why.**
 - **The rule lives in the parser, behind an optional caret that defaults to today's reading.**
