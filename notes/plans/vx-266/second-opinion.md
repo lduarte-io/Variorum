@@ -29,6 +29,24 @@ Three helpers worked alongside me:
 
 ---
 
+> **Your rulings so far (2026-10-13, after reading this):**
+>
+> - **D3, retire the Apple key: yes** — now VX-301. Your words: *"going into castle means going into protection and I
+>   agree with deleting the iCloud key when they go into castle"*. Losing older backups along with the passphrase,
+>   words and Touch ID is acceptable *"so long as they're adequately warned about it. they can always export it as
+>   plaintext."*
+> - **D2, the key history under the current key: yes**, with the honest leave sentence — recorded on VX-263.
+> - **Your principle:** *"in castle = safe. out of castle = not safe … we do not need to contort ourselves to fit a
+>   halfway posture."*
+> - **Your Keychain Access check confirmed the gap.** The dev scope's Apple key was revealed with the login password,
+>   on the Pro and on the Air.
+> - **D4 is withdrawn** — it's redundant now that D3 is ruled (§2.2).
+> - **The cross-Mac backup bug** is ticketed as VX-302.
+> - **A visual companion** with diagrams of every posture, how each key is locked, and how moving between postures
+>   works: `castle-key-map.html` beside this file.
+>
+> D1 and D5–D10 are still yours to rule.
+
 ## The short version
 
 **The proposal's design is right, and I'd build it.** Working from first principles before reading it, I reached the
@@ -109,8 +127,8 @@ is yours to remake.
 6. **"Enrolled" meaning "sync keys are on this Mac",** with new rows stamped by whoever happens to be signed in.
 7. **Trusting anything stored on the Mac** — files or keychain items — to make a decision before unlock.
 
-§4 has each with what to do. **Your decisions** are in §7, each with my recommendation. **One check needs your hands
-first:**
+§4 has each with what to do. **Your decisions** are in §7, each with my recommendation. **One check needed your hands
+(done 2026-10-13 — confirmed on the Pro and the Air):**
 
 > 1. Open **Keychain Access** and search for `apple-key`.
 > 2. Open the item whose **Account** is `Variorum-dev-apple-key` (the dev store's). It's probably listed as
@@ -204,6 +222,20 @@ deliberate choice to trust your Apple account with the library again.
 re-accepts a reviewed blocker.
 
 ### 2.2 A library this Mac remembers in Castle never opens without asking
+
+> **Withdrawn after your D3 ruling (2026-10-13).** Once entering Castle deletes the Apple key, every copy of a Castle
+> library — wherever it is — opens only with Touch ID (through the history), the passphrase or the twelve words. So
+> this rule has nothing left to stop.
+>
+> - **The one leftover case:** a store whose owner declines the one-time question about today's shared key. They
+>   chose that, with the warning.
+> - **Planted files and edited settings** are §2.3's job (sealing), not this rule's.
+> - **Your question — the person who entered Castle, forgot everything, lost their writing and starts again.**
+>   Nothing stops them. *Start a New Library* makes a new library with its own key and nothing of the old one. The old
+>   library's copies stay unopenable, which is Castle's promise, said at the door. Variorum can later offer to clear
+>   the old library's leftovers (its key item, its backups) once you confirm you can't open them.
+>
+> The original text follows, for the record.
 
 **The gap.** Two places in the proposal accept a silent open first:
 
@@ -493,9 +525,9 @@ library-ID rule. §3 adds the Apple keys' naming, minting and retirement, and th
 | # | decision | my recommendation | where it would be recorded |
 |---|---|---|---|
 | D1 | The mode belongs to the library; opening a copy never lowers it (this reverses your "you'll be leaving Castle" yes) | yes | VX-209 |
-| D2 | The key history under the current key, re-accepting cold read 1's B1 with the honest leave sentence — or the proposal's separate history key | under the current key | VX-263 / VX-213 |
-| D3 | Retire the Apple key when entering Castle (keys named by id, one minter), including the one-time question for today's stores | yes, unless you want to keep the way back | a new ticket under VX-266 |
-| D4 | A library this Mac remembers in Castle never opens without asking, plus a *Forget this library on this Mac* door | yes | VX-228 |
+| D2 | The key history under the current key, re-accepting cold read 1's B1 with the honest leave sentence — or the proposal's separate history key | **ruled yes, 2026-10-13** | VX-263 (recorded) / VX-213 |
+| D3 | Retire the Apple key when entering Castle (keys named by id, one minter), including the one-time question for today's stores | **ruled yes, 2026-10-13** | VX-301 |
+| D4 | A library this Mac remembers in Castle never opens without asking | **withdrawn** — redundant under D3 | — |
 | D5 | Plans and protection-weakening settings are sealed with the library's key | yes | VX-235 |
 | D6 | Copies belong to a library and a Mac; retention acts only on this Mac's copies of this library | yes | a new ticket under VX-266 |
 | D7 | New writing belongs to the library's account | yes (both designs) | VX-264 or a new ticket |
