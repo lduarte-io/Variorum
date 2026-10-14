@@ -402,9 +402,37 @@ final class WorkspaceModel {
     @discardableResult
     func closeFocusedNote() -> SidebarSelection? {
         guard let id = closeNoteTarget else { return nil }
-        let landing = landingAfterClosing(id)
+        return closeRow(id)
+    }
+
+    /// **A ROW'S ✕ AND RIGHT-CLICK ▸ CLOSE** — her ruling at U1's READY
+    /// (2026-10-14, the record's "THE ✕ ON THE NOTE YOU'RE LOOKING AT"): asked
+    /// whether closing the row of the note she is looking at should behave
+    /// like ⌘⇧W, she chose *"Yes, same as ⇧⌘W"* — like closing the active tab
+    /// in Safari. Before it, the row left and the note stayed on screen with no
+    /// row (the defect the ticket names).
+    ///
+    /// `id`'s row closes, and a pane of this window SHOWING that note moves on:
+    /// - the FOCUSED pane: its landing (next · previous · the Library —
+    ///   `landingAfterClosing`) is RETURNED for the door to route through the
+    ///   shell, exactly ⌘⇧W's road (`closeFocusedNote` IS this, on the
+    ///   focused note);
+    /// - ANOTHER pane of a split: it lands on the Library IN PLACE, focus kept
+    ///   — Close All's road (`notesDeleted`'s), since an in-place landing is
+    ///   never a note (`select`'s own contract). PROVISIONAL P-U1-5 (the
+    ///   orchestrator's).
+    /// A row no pane shows just closes, as it always did (nil).
+    ///
+    /// VIEW-ONLY: the note is untouched (`closeNote`, the row-only primitive
+    /// beneath, keeps its own "closes a ROW and nothing else" contract).
+    @discardableResult
+    func closeRow(_ id: String) -> SidebarSelection? {
+        let focusedLanding = closeNoteTarget == id ? landingAfterClosing(id) : nil
+        for pane in panes where pane != focusedPane && selections[pane] == .post(id) {
+            select(.library, in: pane, takingFocus: false)
+        }
         closeNote(id)
-        return landing
+        return focusedLanding
     }
 
     /// **CLOSE ALL NOTES** (VX-289 — her triage word: *"close all now is

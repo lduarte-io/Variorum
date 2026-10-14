@@ -485,8 +485,8 @@ struct HelperView: View {
         ("the Open list",
          "The sidebar's list of notes this window has open, in the order you opened "
          + "them — ⌘⇧1 through ⌘⇧9 jump to them. Drag rows to rearrange; ✕ closes a "
-         + "ROW and nothing else (the note is untouched and comes back the next time "
-         + "you open it). ⌘⇧W closes the note you're in and moves on to the next one; "
+         + "ROW (the note is untouched and comes back the next time you open it). "
+         + "Closing the note you're in — its ✕, or ⌘⇧W — moves you on to the next one; "
          + "View ▸ Close All Notes empties the list."),
         ("context bar",
          "The thin line above a pane, always the same doors: ← back, the book "

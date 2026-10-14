@@ -352,7 +352,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | READY FOR STAGE — the ⌘⇧W menu check by AX, the Mac batch (215 suites), two behavioural reverts; ≈50 min (the U1 section's P5 plan) |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | READY FOR STAGE — the ⌘⇧W menu check by AX, the Mac batch (216 suites), three behavioural reverts (R-A · R-B · R-C); ≈55 min (the U1 section's P5 plan) |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -386,8 +386,10 @@ screenshot walk (a fresh walker's, after the stage window); any stage work until
   headless build-for-testing green; its pins PENDING the stage window; the chord's system half PENDING (P0).
 - P4 — VX-289 (Close All Notes: the Open list's right-click + the View-menu twin): DONE (same commit as P3 — one
   landing rule, one set of pins) — headless green; pins PENDING the stage window.
-- P5 — the stage window: **READY FOR STAGE** — the plan below (≈50 min); nothing of it has run. No revert is in
-  flight; the tree is clean at the commit carrying this line.
+- P6 — her ruling at READY, "THE ✕ ON THE NOTE YOU'RE LOOKING AT" (f02f63cb): DONE (the commit carrying this line) —
+  headless build-for-testing green; its red-on-old pin (R-C) and the batch PENDING the stage window.
+- P5 — the stage window: **READY FOR STAGE** — the plan below (≈55 min, R-C added); nothing of it has run. No revert
+  is in flight; the tree is clean at the commit carrying this line.
 
 **P0 — the ⇧⌘W check, the app's own half (2026-10-14, on `a2a27a10`) — FREE:**
 - `EditorCommands.keyEquivalent(for:)`: no `w` chord of any modifier set.
@@ -470,9 +472,10 @@ which removes the ROW only — an on-screen note stays shown with no row until o
   refusal instead); (ii) a note shown with NO row (its ✕ pressed while it stayed on screen) is still closable — the
   pane leaves it, landing on the LAST row (it reads as sitting past the end, where a re-open would put it). Options
   for (ii): (a) closable, lands on the last row [built]; (b) ⌘⇧W grey without a row; (c) closable, lands on the
-  Library. **Not changed:** the ✕ and the right-click "Close" keep closing the ROW only (the shipped act, its help
-  "the note itself is untouched") — whether a ✕ on the shown note's own row should also move the pane on is hers to
-  ask for; recorded, not built.
+  Library. ~~**Not changed:** the ✕ and the right-click "Close" keep closing the ROW only~~ — **SUPERSEDED by her
+  ruling at READY** ("THE ✕ ON THE NOTE YOU'RE LOOKING AT", *"Yes, same as ⇧⌘W"*): built as P6 below. (With it,
+  (ii)'s rowless note becomes rarer — a ✕ on the shown note now moves the pane — but it stays reachable: a ✕ on the
+  OTHER pane's note in a split leaves that pane on the Library, never rowless.)
 
 **P4 — VX-289, Close All Notes.** The trace: no selection model (VX-344 holds that half); `OpenNotes.close` closes
 one row. **Built:** `.closeAllNotes` ("Close All Notes", `[.menuBar, .contextMenu]`, keyless — the ruling named the
@@ -500,10 +503,39 @@ note-row grammar; the row menu renders the registry's verb (source read); the tw
 previous, Close All lands the Library, the menu's gates follow, the notes untouched). New acts, so exact-behaviour
 pins — no red-on-old owed (the brief).
 
+**P6 — her ruling at READY: the ✕ (and right-click ▸ Close) on the note you're looking at behaves like ⇧⌘W**
+(the record's "THE ✕ ON THE NOTE YOU'RE LOOKING AT", f02f63cb). The traced defect: the ✕ (`SidebarView.swift`'s
+openRow ✕) and right-click "Close" called `workspace.closeNote(noteID)` — the row-only primitive — so on the note the
+focused pane showed, the row left and the note stayed on screen with no row. **Built:**
+- `WorkspaceModel.closeRow(_:)` — closes the row; when the FOCUSED pane shows that note it RETURNS that pane's landing
+  (`landingAfterClosing`: next · previous · Library — ⇧⌘W's rule; `closeFocusedNote` is now `closeRow` on the
+  focused note, one act); when ANOTHER pane of a split shows it, that pane lands on the Library IN PLACE with the
+  focus kept (**PROVISIONAL P-U1-5, the orchestrator's** — Close All's P-U1-3 road; the Library rather than the next
+  note because an in-place landing is never a note — `select`'s own assert — so a next-note in-place landing would
+  widen that contract; options: (a) the Library in place [built]; (b) the next note in place, widening `select`'s
+  assert; (c) focus moves to that pane and it lands by ⇧⌘W's road); a row no pane shows just closes (nil). The
+  row-only primitive `closeNote` keeps its contract (`SavepointOnLeaveTests.closingAnOpenStripRowIsNotALeaving`
+  stays green; a comment there now says the ✕ door no longer calls it bare).
+- **The route, without touching `ShellRouter.swift`:** the ✕ and right-click ▸ Close both call ONE static door act,
+  `SidebarView.closeRow(_:in:selection:)`, which hands the landing to the column's own selection binding — whose
+  setter IS `RootView.adopt(_, in: focusedPane)` (`RootView.swift:714-721`), the very call `pendingSelection`'s
+  adoption makes (`:441-445`) and so the same `ShellRouter.adopt` → `WorkspaceModel.select` road ⇧⌘W takes; no new
+  landing authority, no RootView or ShellRouter edit for it. (Close All's right-click already rode the same binding.)
+- The ✕'s help: "Close this row — the note itself is untouched (closing the note you're in moves you on to the
+  next)"; the ⌘/ helper's "the Open list" entry says the ✕ and ⌘⇧W both move you on.
+- **Pins:** `WorkspaceCloseActTests` +3 (the shown note's row names ⇧⌘W's landing; another row moves nothing; the
+  other pane's note lands that pane in place, focus kept) and **`OpenListRowCloseDoorTests` (×4) — the RED-ON-OLD
+  pin:** `SidebarView.closeRow` driven through a binding built exactly as `RootView.selectionBinding` is
+  (`ShellRouter.adopt` into the focused pane): the ✕ on the shown note lands the pane on the next note and departs
+  the closed one; on the last row the previous, then the Library; on any other row nothing moves; and a source read
+  that both doors run the one act and none closes bare. **R-C** (the window's step 3) reverts the door's act to the
+  old `workspace.closeNote(noteID)`; expected RED: `theXOnTheNoteYouAreInMovesThePaneToTheNextNote` and
+  `theXOnTheLastRowLandsOnThePreviousThenTheLibrary` (the pane still shows the closed note). All PENDING.
+
 **Headless evidence (no stage):** `xcodebuild … -derivedDataPath DerivedData/vx283-u1 build-for-testing` → TEST
 BUILD SUCCEEDED on `9292d1db`'s code (no new warning in a touched file).
 
-**P5 — THE STAGE WINDOW PLAN (≈50 min; run in this order; the record flips per step):**
+**P5 — THE STAGE WINDOW PLAN (≈55 min; run in this order; the record flips per step):**
 0. *Preconditions (≈3 min).* `pgrep -lx Variorum`; `pgrep -lf "MacOS/Variorum$"` — discriminate by PATH, never touch
    a `/Applications` instance. The host's Accessibility trust checked before any System Events call (WalkKit's rule).
    `defaults export io.lduarte.Variorum.debug notes/plans/vx283-screens/u1/prefs-before.plist`. With ZERO dev
@@ -522,9 +554,9 @@ BUILD SUCCEEDED on `9292d1db`'s code (no new warning in a touched file).
    -derivedDataPath DerivedData/vx283-u1 test` with one `-only-testing:VariorumTests/<Suite>` per suite of every test
    file that exercises a changed source — the files matching `SidebarLayout|SidebarView|SidebarGeometry|OpenNotes|
    openNotes|closeNote|EditorCommands\.|HelperView|CapabilityRegistry\.doored|menuRendered|contextMenuCapabilities|
-   keyEquivalent\(for|RootView\(|CapabilityContext\(` (86 files → 215 top-level suites, incl. the six new ones);
+   keyEquivalent\(for|RootView\(|CapabilityContext\(` (86 files → 216 top-level suites, incl. the seven new ones);
    `pipestatus` checked; the "Test run with N tests" line AND its skipped lines recorded.
-3. *The red-on-old reverts (≈10 min) — each named here before it starts, restored by `git checkout --
+3. *The red-on-old reverts (≈15 min) — each named here before it starts, restored by `git checkout --
    App/Variorum/Variorum/Features/Library/SidebarView.swift`, verified by an empty `git diff`:*
    - **R-A (VX-285):** in `openGroup`, `.frame(maxHeight: maxHeight)` → `.frame(maxHeight:
      SidebarLayout.scrollingSectionMaxHeight(rowHeight: rowHeight))` and the `fixedSize` `vertical:` →
@@ -534,6 +566,10 @@ BUILD SUCCEEDED on `9292d1db`'s code (no new warning in a touched file).
    - **R-B (VX-286):** delete both `.padding(.horizontal, Self.scrollingSectionMargin)` lines and put
      `.padding(.horizontal, Self.groupPadding)` back on the two sections' VStacks (where the "(VX-286: …)" comments
      stand). Same suite. Expected: `bothScrollingSectionsKeepTheirBarInTheMargin` RED.
+   - **R-C (her ✕ ruling, P6):** the body of `SidebarView.closeRow(_:in:selection:)` → `workspace.closeNote(noteID)`
+     (the door's act before the ruling — the row alone). Run `-only-testing:VariorumTests/OpenListRowCloseDoorTests`.
+     Expected: `theXOnTheNoteYouAreInMovesThePaneToTheNextNote` and `theXOnTheLastRowLandsOnThePreviousThenTheLibrary`
+     RED (the pane still shows the closed note); `theXOnAnyOtherRowJustRemovesIt` green; the source read green.
 4. *Release (≈2 min).* Dev store copied back with zero dev instances and `cmp`-verified per file; prefs `defaults
    import` → re-export → diff against `prefs-before.plist` (delete any key the window added); `Tools/stage release`;
    the one-line release report ("dev store restored + verified, prefs diff clean, posture Standard/unlocked,

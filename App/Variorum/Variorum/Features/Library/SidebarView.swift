@@ -862,6 +862,26 @@ struct SidebarView: View {
         }
     }
 
+    /// **The ✕'s and right-click ▸ Close's ONE act** (VX-287 — her ruling at
+    /// U1's READY, *"Yes, same as ⇧⌘W"*). The workspace closes the row and
+    /// names where the FOCUSED pane lands when it was showing that note
+    /// (`WorkspaceModel.closeRow`); the landing enters the shell through the
+    /// column's own navigation road — the selection binding, whose setter is
+    /// `RootView.adopt(_, in: focusedPane)`, the very call `pendingSelection`'s
+    /// adoption makes (⌘⇧W's road) — so no new landing authority and no
+    /// `ShellRouter.swift` edit. A row no pane shows just closes, as before.
+    /// Static so a pin drives exactly what the two doors run.
+    static func closeRow(
+        _ noteID: String, in workspace: WorkspaceModel, selection: Binding<SidebarSelection?>
+    ) {
+        if let landing = workspace.closeRow(noteID) { selection.wrappedValue = landing }
+    }
+
+    /// The ✕'s help: still view-only, and now says where closing the note
+    /// you're in takes you.
+    static let closeRowHelp =
+        "Close this row — the note itself is untouched (closing the note you're in moves you on to the next)"
+
     /// The indicator's read key: the rows shown and the wing she stands in.
     private var openWingsKey: String {
         workspace.openNotes.shown.joined(separator: ",") + "|" + session.wing.currentID
@@ -900,11 +920,13 @@ struct SidebarView: View {
                         .foregroundStyle(tokens.faint)
                         .lineLimit(1)
                 }
-                Button("\u{2715}") { workspace.closeNote(noteID) }
+                // Her ruling at U1's READY: on the note you're looking at, the
+                // ✕ behaves like ⌘⇧W (the pane moves on) — `Self.closeRow`.
+                Button("\u{2715}") { Self.closeRow(noteID, in: workspace, selection: $selection) }
                     .buttonStyle(.plain)
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
-                    .help("Close this row — the note itself is untouched")
+                    .help(Self.closeRowHelp)
             }
             #if DEBUG
             // Row 13's oracle: the FIRST strip row's content edge — what the
@@ -959,7 +981,7 @@ struct SidebarView: View {
                     starDoor.toggle(.post(noteID))
                 }
             }
-            Button("Close") { workspace.closeNote(noteID) }
+            Button("Close") { Self.closeRow(noteID, in: workspace, selection: $selection) }
             // VX-289 (the VX-283 run): Close All Notes — every row closes; a
             // pane showing a note lands by ⌘⇧W's rule (the list empty: the
             // Library), through the column's own navigation road (the

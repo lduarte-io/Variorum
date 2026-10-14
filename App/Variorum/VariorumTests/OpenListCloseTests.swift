@@ -203,6 +203,36 @@ struct WorkspaceCloseActTests {
                 "the focused pane's landing is the door's to route")
     }
 
+    /// Her ruling at U1's READY (*"Yes, same as ⇧⌘W"*): the ✕'s act on the
+    /// note the focused pane shows names the same landing ⌘⇧W does.
+    @Test func closingTheShownNotesRowNamesTheSameLandingAsCloseNote() {
+        let workspace = makeWorkspace(open: ["a", "b", "c"], showing: "b")
+        #expect(workspace.closeRow("b") == .post("c"))
+        #expect(workspace.openNotes.ids == ["a", "c"])
+    }
+
+    /// …and a ✕ on any OTHER row just removes that row, as it always did.
+    @Test func closingAnotherRowMovesNothing() {
+        let workspace = makeWorkspace(open: ["a", "b", "c"], showing: "b")
+        #expect(workspace.closeRow("a") == nil)
+        #expect(workspace.openNotes.ids == ["b", "c"])
+        #expect(workspace.focusedSelection == .post("b"))
+    }
+
+    /// P-U1-5 (the orchestrator's): a row whose note the OTHER pane of a
+    /// split shows moves that pane to the Library in place, focus kept.
+    @Test func closingTheOtherPanesNoteLandsThatPaneInPlace() throws {
+        let workspace = makeWorkspace(open: ["a", "b"], showing: "a")
+        workspace.openBeside(.post("b"))  // focused: the new pane, on b
+        let focused = workspace.focusedPane
+        let other = try #require(workspace.panes.first { $0 != focused })
+        #expect(workspace.closeRow("a") == nil, "the focused pane has nothing to route")
+        #expect(workspace.selections[other] == .library, "the other pane left the closed note")
+        #expect(workspace.focusedPane == focused, "…without taking her focus")
+        #expect(workspace.focusedSelection == .post("b"))
+        #expect(workspace.openNotes.ids == ["b"])
+    }
+
     /// VIEW-ONLY, at the layer that could break it: the notes stay live.
     @Test func closingNeverTouchesTheStore() async throws {
         let db = try AppDatabase.inMemory()
@@ -306,6 +336,90 @@ struct OpenListCloseDoorTests {
         #expect(CapabilityRegistry.isEnabled(
             .closeAllNotes, in: CapabilityContext(openNoteCount: 1, windowKind: .full)))
         #expect(!CapabilityRegistry.capability(.closeAllNotes).unavailableNote.isEmpty)
+    }
+}
+
+// MARK: - The ✕'s door (her ruling at U1's READY) — RED ON OLD
+
+/// **THE ✕ ON THE NOTE YOU'RE LOOKING AT** — her ruling at U1's READY
+/// (2026-10-14): asked whether closing the row of the note she is looking at
+/// should behave like ⇧⌘W, she chose *"Yes, same as ⇧⌘W"*. The defect it
+/// fixes is the one the ticket names: the ✕ removed the row and the note
+/// stayed on screen with no row.
+///
+/// The pin drives `SidebarView.closeRow` — the exact act the ✕ and the
+/// right-click ▸ Close run (a source read below holds that) — with a binding
+/// built exactly as `RootView.selectionBinding` is (its setter is
+/// `ShellRouter.adopt` into the focused pane). RED ON OLD (R-C, the U1
+/// record): the door's old act was `workspace.closeNote(noteID)`, the row
+/// alone — the pane went on showing the closed note.
+@MainActor
+@Suite("VX-287 — the ✕ on the note you're looking at moves the pane on")
+struct OpenListRowCloseDoorTests {
+    /// The shell's own selection binding, as `RootView` builds it.
+    private func shellBinding(_ router: ShellRouter) -> Binding<SidebarSelection?> {
+        Binding(
+            get: { router.workspace.selections[router.workspace.focusedPane] },
+            set: { picked in
+                guard let picked else { return }
+                router.adopt(picked, in: router.workspace.focusedPane)
+            })
+    }
+
+    private func router(open ids: [String], showing: String) -> ShellRouter {
+        let router = ShellRouter()
+        for id in ids { router.adopt(.post(id)) }
+        router.adopt(.post(showing))
+        return router
+    }
+
+    @Test func theXOnTheNoteYouAreInMovesThePaneToTheNextNote() {
+        let router = router(open: ["a", "b", "c"], showing: "b")
+        var departed: [String] = []
+        router.workspace.onNotesLeft = { departed += $0 }
+        SidebarView.closeRow("b", in: router.workspace, selection: shellBinding(router))
+        #expect(router.workspace.focusedSelection == .post("c"),
+                "the pane moved on to the next note — not left on the closed one with no row")
+        #expect(router.workspace.openNotes.ids == ["a", "c"])
+        #expect(departed == ["b"], "closing the note you're in is a leaving (its savepoint)")
+    }
+
+    @Test func theXOnTheLastRowLandsOnThePreviousThenTheLibrary() {
+        let router = router(open: ["a", "b"], showing: "b")
+        SidebarView.closeRow("b", in: router.workspace, selection: shellBinding(router))
+        #expect(router.workspace.focusedSelection == .post("a"))
+        SidebarView.closeRow("a", in: router.workspace, selection: shellBinding(router))
+        #expect(router.workspace.focusedSelection == .library)
+        #expect(router.workspace.openNotes.ids.isEmpty)
+    }
+
+    @Test func theXOnAnyOtherRowJustRemovesIt() {
+        let router = router(open: ["a", "b", "c"], showing: "b")
+        var departed: [String] = []
+        router.workspace.onNotesLeft = { departed += $0 }
+        SidebarView.closeRow("c", in: router.workspace, selection: shellBinding(router))
+        #expect(router.workspace.focusedSelection == .post("b"), "the pane stays where she is")
+        #expect(router.workspace.openNotes.ids == ["a", "b"])
+        #expect(departed.isEmpty)
+    }
+
+    /// Both doors run the one act — read from `openRow`'s own body (a row's
+    /// button and context menu cannot be pressed headlessly).
+    @Test func theXAndRightClickCloseBothRunTheOneAct() throws {
+        let source = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Variorum/Features/Library/SidebarView.swift"),
+            encoding: .utf8)
+        let start = try #require(source.range(of: "private func openRow("))
+        let body = String(source[start.upperBound...].prefix(8_000))
+        let end = body.range(of: "\n    }\n")?.lowerBound ?? body.endIndex
+        let row = body[..<end]
+        let call = "Self.closeRow(noteID, in: workspace, selection: $selection)"
+        #expect(row.components(separatedBy: call).count - 1 == 2,
+                "the ✕ and right-click ▸ Close both run `closeRow`")
+        #expect(!row.contains("workspace.closeNote(noteID)"),
+                "no door closes the row bare any more")
     }
 }
 
