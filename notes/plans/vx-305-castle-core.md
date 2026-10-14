@@ -554,7 +554,11 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   the executor's core — the session at unlock, this Mac's facts written in both homes, the plan runner (begin, steps,
   resume, the commit point, roll back before it, finish from the record after), the repairs with their preconditions
   verified — and the in-memory test world — WIP COMMITTED (compiling; the remaining acts stubbed in `Acts/Pending.swift`
-  until their pieces) — `9f694b5c`; its core tests (settle's plan cases, the failed seals, the repairs) NOT-STARTED;
+  until their pieces) — `9f694b5c`; its core tests DONE — 14 in 2 suites green filtered (a planted, a replayed, an
+  unnamed and a stray plan each ignored and reported, the act rolling back; a memory item failing its seal losing to
+  the record's section; a plan never holding a secret; every repair's precondition verified before a delete; no repair
+  while an act is in flight; no Touch ID item by a repair; nothing destructive on a Standard record's word; delete on
+  sight by recorded id only; decision 35; the mirror never re-adding an Apple wrap) — the next commit after `8b3b1e39`;
   (b) the crossings — Use Castle, Use Standard, Replace All Keys, the follows (the finish of a lost device's leave
   included) — DONE, 26 tests in 4 suites green filtered (the exact writes; a crash after EVERY write — Touch ID,
   Always ask, synced, plan dropped; the follower's hold; the refusals) — this commit; (c) the account acts — set up sync, enroll, the four leaves, Move — NOT-STARTED;
