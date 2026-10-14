@@ -430,12 +430,22 @@ struct MCPSharedIconClickTests {
             try await clickTheOneIcon(rig, client: "r12-client", host: "⌘L's Home row") { closes.count }
             #expect((MCPSharedIconProbe.up["r12-client"] ?? 0) == 1, "the row's popover is up")
 
+            // "Gone" is AppKit's word — no visible popover window left (the
+            // content's own disappear record, `up`, rides the message).
+            func popoverGone() -> Bool {
+                !NSApp.windows.contains {
+                    $0.isVisible && String(describing: type(of: $0)).contains("Popover")
+                }
+            }
+            #expect(!popoverGone(), "non-vacuity: AppKit shows the row's popover before the Esc")
+
             let catcher = try #require(
                 Self.view(WingSwitcherKeyCatcher.CatcherView.self, in: rig.hosting), "the switcher's key catcher")
             #expect(catcher.onKey?(.escape) == true, "Esc is the switcher's to act on")
-            await rig.poll(timeout: 1.5) { (MCPSharedIconProbe.up["r12-client"] ?? 0) == 0 }
+            await rig.poll(timeout: 2) { popoverGone() }
             #expect(closes.count == 0, "the switcher stays — Esc took the row's popover")
-            #expect((MCPSharedIconProbe.up["r12-client"] ?? 0) == 0, "the popover is gone")
+            #expect(popoverGone(),
+                    "the popover is gone (up \(MCPSharedIconProbe.up["r12-client"] ?? 0); popover windows visible: \(NSApp.windows.filter { $0.isVisible && String(describing: type(of: $0)).contains("Popover") }.count))")
 
             #expect(catcher.onKey?(.escape) == true)
             #expect(closes.count == 1, "with nothing over the rows, Esc closes the switcher")
