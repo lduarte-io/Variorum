@@ -698,6 +698,9 @@ refinement): `ProtectionFixtures`, `NamesAndSealTests` (9), `RecordModelTests` (
   the run's PR. The U1 record's "owner: the orchestrator" line is resolved here.
 - P-U1-1's phase-2 leaves (the sandboxed reads, the GeneratedUID lifecycle checks) ride §11's closeout into the
   vx-306 plan.
+- **P-U1-1 CONFIRMED by her (2026-10-14, same day, to the orchestrator):** *"I think that seems fine to me on the
+  generatedUID, unless you have any particular concerns about it."* The orchestrator's answer: none beyond the two
+  checks already owed to phase 2's leaf — the choice stands, the checks stay owed. (Also on VX-340 as a comment.)
 
 ### U2 RECORD — assess, roads, the route finder, the catalog, retention (Opus implementer, 2026-10-14; one session, no deaths)
 
@@ -840,6 +843,19 @@ Each pushed to `origin/vx-305-castle-core` as it landed.
   a NEW passphrase always gets a fresh KDF descriptor (`PassphraseKey.derive`'s default), while a re-key and an anchor
   reuse the door's derived `PassphraseKey`. **U4** — `AWorld` and `walk`; the file-swap scenario (above).
 - The one Sonnet lookup was not used.
+
+### ORCHESTRATOR NOTE after U2 (2026-10-14)
+
+- **U2 verified, not trusted:** the full U1+U2 suite set re-run by the orchestrator — `✔ Test run with 154 tests in
+  35 suites passed` (the exact claimed count) — the worktree clean and level with origin, §7's flips in place.
+- **The one U1-model change reviewed and accepted:** `CastleAnchor.directFingerprints` — a kept anchor sealed inside
+  a later one still needs its own day's secrets, so the outer anchor's locks are never named as roads to the inner
+  anchor's keys. Additive, promise 9's honesty, recorded with its reason; no anchor exists on disk yet.
+- The perf-timing flake (`timelinePageIsFlatOrUnderBudgetInCorpusSize` under a ~16–20 load from other sessions) is
+  the known machine-load class, outside U2's surface; it passed alone twice and in the full re-run. No action.
+- U3's hand-forwards (the repair preconditions, `restoreKeyFileFromMirror`, `OwedAct.migrate`, `DoorSpec`,
+  `MovePlan`, the fresh-KDF-descriptor invariant) and U4's (the file-swap fixed scenario, `AWorld`/`walk`) are in
+  the U2 record above.
 
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions)
 
