@@ -119,9 +119,9 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | unit | status |
 |---|---|
 | U1 — the door's security and correctness | CORE DONE, headless green at `ab552c5a` (MCP 223/48 · core 2,800/324 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~678k context (the cutover rule). The rest is U1b, below. U1's Mac batch rides U2's stage window (orchestrator call, see THE ORCHESTRATOR ON U1's HAND-BACK) |
-| U1b — VX-258's face and U1's remainder | WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5), and U2's MCP walk legs W2/W3 (no detour needed once the face exists) |
-| U2 — the undo class | BUILT, headless green at `10223a2d` (MCP 223/48 · core 2,826/326 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~634–690k context (the cutover rule). Its stage window (the Mac batch with U1's groups, plus W1, her own door) goes to a FRESH runner; W2/W3 move to U1b's window. The acceptance closes when W1–W3 have run |
-| U3 — her editor vs the wire | NOT-STARTED |
+| U1b — VX-258's face and U1's remainder | WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5), and U2's MCP walk legs W2/W3 (no detour needed once the face exists). Note for W2/W3: on an empty redo stack the Redo item is DISABLED (`EditorCommands.swift:576`, unchanged), so "nothing to redo" reads as a disabled item, never a toast (U2 STAGE RUN's finding 1) |
+| U2 — the undo class | **WINDOW 1 PROVEN 2026-10-14 00:23–00:38** (U2 STAGE RUN below): the Mac batch 1,084 tests / 148 suites green (1,078 + 6 gated skips, 0 failed — U1's G1–G3 included), W1 proven in both voices, the dev store restored cmp-SAME. Open only for W2/W3 in U1b's window. — Earlier: BUILT, headless green at `10223a2d` (MCP 223/48 · core 2,826/326 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~634–690k context (the cutover rule). Its stage window (the Mac batch with U1's groups, plus W1, her own door) goes to a FRESH runner; W2/W3 move to U1b's window. The acceptance closes when W1–W3 have run |
+| U3 — her editor vs the wire | IN-PROGRESS — implementer spawned from the U3 BRIEF below (2026-10-14 ~00:50) |
 | U4 — the faces after big writes | NOT-STARTED |
 | U5 — the write tools' shapes | NOT-STARTED |
 | U6 — Compare from the wire | NOT-STARTED |
@@ -152,6 +152,18 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
   batch plus W1, her own door (~75 min). The MCP legs W2/W3 and their Deny → re-run → Approve detour (U2's step 4)
   move to U1b's window, where the face connects `claude-code` with no detour. REQUEST sent for claim `vx246-u2`.
   READY follows once the fresh runner has read in.
+- 2026-10-14 ~00:21: the coordinator queued `vx246-u2`. The stage was FREE, only vx-282's combined window was
+  pending, and the first READY would go first. Walks are cleared all night (she's off the Pro); an undismissable system
+  popup is reported to it word for word.
+- ~00:22: READY sent (built; the runner expects ~70 min; a 90-min claim asked).
+- ~00:23: **GO**, carrying `Tools/stage release --who coord-for-vx246 && Tools/stage claim --who vx246-u2 --reason
+  "VX-246 U2: 148-suite Mac batch + dev-store undo/redo walk (A1 prestage, verified restore)" --minutes 90`. Its
+  pre-checks: no Variorum instances, no booted sims, 64 GiB free; the dev store left Standard/unlocked/Study,
+  byte-identical after vx-281's walk at 00:14. Relayed to the runner verbatim.
+- 00:38:15: **RELEASE** (35 of 90 min). The result line went to the coordinator: 1,084 tests / 148 suites green, W1
+  proven in both voices, posture Standard/unlocked, cmp-SAME vs the A1 copy (Study voice), prefs 0 keys differ.
+  Two notes went with it: the A1 copy `scale-prestage-20261014T062331Z` is the coordinator's to prune, and
+  `defaults import` merges rather than replaces (re-export and diff).
 
 ## Cross-run coordination
 
@@ -404,6 +416,88 @@ VX-184's dated strike-throughs mark which of its verdicts were false.
 
 **Context:** if your context passes ~500k before the unit is done, stop at the next clean seam: committed, green, the
 continuation written in your LIVE STATUS. Then report; the orchestrator continues with a fresh session.
+
+**Out of scope:** every other unit's members; VX-318 and the rest of U1b; the guide (U8).
+
+### U3 BRIEF — her editor vs the wire (VX-275)
+
+**What binds.**
+- **The ticket, VERBATIM:**
+  > Found by VX-184's review ladder (round-1 finding on `delete_note`, traced read-only in the fix pass): **no MCP write
+  > coordinates with her open editor at all.** There is no flush in `Sources/VariorumMCP` and no hook for one. When a
+  > wire `delete_note` or `delete_block` tombstones the take she's typing in, her pending keystrokes are refused and live
+  > only in memory: ⌥⌘Z / Put back return the take WITHOUT them unless another flush happens that session, and quitting
+  > loses them. A wire `delete_note` also never sends the navigate-away her own Delete door sends (`NoteDeletion.swift`
+  > flushes first and says why). Fix: a pre-act hook (the app's flush + navigate-away) before a wire write tombstones
+  > what her editor shows. **The** `delete_block` **half reaches the editor seam, so the review is Fable's (CLAUDE.md)
+  > and the proof is a Mac run.** Trace + ticket-ready summary: the VX-184 run record
+  > `notes/plans/fixes/vx-184-mcp-launch-polish.md` § THE LADDER → ROUND 1 — FIX PASS.
+- **HER RULING** (this record's "Her rulings during the run"): option (a). Before a wire delete lands, the app saves
+  what she has typed and moves her pane off the deleted note, exactly as her own Delete door does. *"yeah that's fine
+  on that call."*
+- **The trace:** VX-184's record, THE `delete_note` / `delete_block` FLUSH TRACE (about line 2077 onward). It gives the
+  mechanism, the three needs, the residual window and the "plausibly wider" class.
+
+**The work.**
+1. **A pre-act seam on the wire.** Add a new `MCPHostHooks` hook that the server awaits BEFORE `executor.run`.
+   - It runs for every act that tombstones rows her editor may hold. Argue the act list in the record: `delete_note`,
+     `delete_block` and `delete_take` at least, and any book or chapter act that takes notes down with it.
+   - Wire it in `MCPDoor` to the app's flush, `AppSession.flushExistingAutosave`, the road her own doors use
+     (`NoteDeletion.report`).
+   - The flush is its own runner turn, so it runs BEFORE the act's turn, never inside it.
+2. **The navigate-away after a landed note death.** After a landed `delete_note`, and any wire act that leaves a note
+   dead, post on THE ONE ROAD: `.variorumNotesDeleted` → `WorkspaceModel.notesDeleted`. That is exactly what her Delete
+   door and her structural-undo door's WA-3 (`leaveNotesTheActLeftDead`) post. Never a second road: VX-283's VX-123
+   builds on this one later.
+3. **`delete_block` under her caret — THE EDITOR SEAM.** Read `notes/TEXTKIT2_NOTES.md` first.
+   - After the flush, the block's text is stored. The editor must then drop the dead block's range the way her own
+     Delete Block does: find that road and reuse it.
+   - The trace names `EditorViewModel`'s projection deferral (`applyPendingIfClean`'s guard) and the block-range map.
+   - Attribute stamps clamp to the verdict's range, and `runStructural` is the one structural door.
+4. **The wider class — trace it first.** VX-184's trace called it plausible but untraced. Every wire act that REWRITES
+   rows her open editor holds unflushed (`edit_take`, `restore_commit`, `divide_block`, `merge_blocks`, …) checks its
+   precondition against the STORED text, never her pending buffer, so her next flush can write her old buffer back over
+   the act.
+   - **If the trace holds,** the fix is the same seam: flush first, so the act's precondition sees her latest text and
+     a mismatch refuses with the existing stale-text refusal. Her own doors already flush before they act, so this
+     applies her rule to the wire; it is not new product behavior.
+   - Pin it red-first per family, and report it. I mint its ticket from your report.
+   - **If the trace fails,** record the pin that stayed green on both sides and leave it unfixed.
+5. **The residual window.** A keystroke typed between the flush and the act's turn stays pending. Argue in the record
+   what happens to it for a delete and for a rewrite. If it can't be closed cheaply, give options and mark it
+   PROVISIONAL.
+
+**Lanes.**
+- **vx-282's editor-seam work** is NOT on our branch: it is committed on `vx-282-editor-notes-fixes`, unmerged. Its
+  files are listed under Cross-run coordination above. Keep U3's editor edits out of those functions:
+  `storageDidEdit`'s top, `settleMarkdownCaret`, the selection delegate, `PaneSurface`'s coordinator, the markdown face,
+  `BlockRangeIndex`, `EditorEditRoute`/`SeamCarvePlan`, and `EditorSurfaceController`'s carve landing. If the fix needs
+  one of them, STOP and report; I coordinate with vx-282.
+- **`MCPDoor.swift`:** vx-281 changed it on its own branch (`setupClient`/`chooseSetupClient`, VX-232). Keep U3's edit
+  there to wiring the new hook.
+- **VX-281's lane** (`MCPPane*`, `MCPPaneCopy`, `MCPGrantSheet`, the shared icon): out.
+
+**Evidence that closes U3.**
+- **Pins**, red-first per family and red again by revert:
+  - headless: the seam's order — a fake host hook proving the flush ran before the act's turn, and the delete acts
+    calling it;
+  - Mac-level: a pending autosave plus a wire delete through the door leaves her bytes in the tombstone and moves her
+    pane off the dead note; a `delete_block` under a pending buffer lands her bytes first and the editor drops the
+    range;
+  - the wider class's pins, if its trace holds.
+- **The whole headless package green,** with counts.
+- **THE STAGE WINDOW plan** in your record (claim name `vx246-u3`): a Mac batch over every changed source file's
+  suites, and a live round on the dev store.
+  - The live round shows her pending keystrokes surviving a real client's `delete_note` and `delete_block`, and her
+    pane leaving the dead note, captured.
+  - The real client needs `claude-code` connected. Use U1's documented detour (Deny → re-run → Approve) or wait for
+    U1b's face; say which.
+  - From U2's run: on an empty redo stack the ⇧⌥⌘Z item is disabled, so no toast appears.
+
+**Fable.** This diff reaches the editor seam, so the run owes a `fable-reviewer` cold review (CLAUDE.md). It is the
+orchestrator's to run after the units; keep the record reviewable.
+
+**Context:** past ~500k, stop at the next clean seam (committed, green, the continuation written) and report.
 
 **Out of scope:** every other unit's members; VX-318 and the rest of U1b; the guide (U8).
 
