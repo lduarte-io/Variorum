@@ -101,6 +101,9 @@ enum MCPToolCatalog {
         // VX-336 U5b — VX-255: blocks added to a note (write new at its end,
         // edit anywhere — the call's rung read from its arguments).
         insertBlocks,
+        // VX-336 U6a — VX-311: her Duplicate as Version (read on the note,
+        // write new on its wing — the copy lands bookless there).
+        duplicateNote,
     ]
     static let edit: [MCPToolDeclaration] = [
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
@@ -887,6 +890,39 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-336 U6a — VX-311 duplicate_note
+
+    /// VX-311 (her Duplicate as Version; P-VX311-1…3): READ on the note and
+    /// WRITE NEW on its wing — the copy lands bookless in that wing's Pool, so
+    /// it acts only under a WING grant (`scopes: [.wing]` — the W-UX-14 truth
+    /// pin's sense: never listed to a client whose write new is a note or a
+    /// book alone, which could never land it).
+    static let duplicateNote = MCPToolDeclaration(
+        name: "duplicate_note", rung: .writeNew, title: "Duplicate a note",
+        description: """
+            Duplicate a note as it is now — the author's own Duplicate as Version: every block with \
+            every take (the chosen ones chosen), their comments and block names, and the note's \
+            tags, linked to the original block by block and as a version of it. So Variorum's \
+            Compare lines the copy up with the original row for row (a note made with create_note \
+            shares no history, so Compare shows it beside the original unaligned). The copy lands \
+            in no book, in the note's own wing (that wing's Pool). Needs read on the note and \
+            write new on its wing. A note shared with you only per ask can't be duplicated. The \
+            original is never changed. One undo for the author removes the copy. Returns JSON: \
+            the copy's note_id, its block_ids, and blocks — per block its block_id, the \
+            source_block_id it was copied from, the shown_take_id, and every take in fan order \
+            (take_id, and label where it has one), as create_note answers them — and where it \
+            landed.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note to duplicate."]),
+            ]),
+            "required": .array(["note_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.wing])
 
     // MARK: - VX-184 U3 — VX-190 remove_tag
 

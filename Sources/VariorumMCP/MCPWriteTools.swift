@@ -105,6 +105,9 @@ struct MCPWriteTools: Sendable {
         /// VX-336 U5b (VX-255): blocks added to a note — at its end at write
         /// new, anywhere at edit (`MCPWriteTools+InsertBlocks`).
         case insertBlocks(noteID: String, place: BlockInsertPlace, blocks: [Operations.MCPNoteBlock])
+        /// VX-336 U6a (VX-311): her Duplicate as Version on the wire — the copy
+        /// bookless in the source's wing (`MCPWriteTools+DuplicateNote`).
+        case duplicateNote(noteID: String)
 
         var tool: String {
             switch self {
@@ -126,6 +129,7 @@ struct MCPWriteTools: Sendable {
             case .createBook: "create_book"
             case .addNoteToBook: "add_note_to_book"
             case .insertBlocks: "insert_blocks"
+            case .duplicateNote: "duplicate_note"
             }
         }
 
@@ -160,6 +164,15 @@ struct MCPWriteTools: Sendable {
             // blocks and crystallizes after the run, where the screen showed it.
             case .insertBlocks:
                 false
+            // VX-311 (the run record's D-311-6, argued from VX-246 U3's COPY
+            // row): a duplicate COPIES every take of the note — `copyPlacements`
+            // reads the stored `working_text` rows — so it would miss her last
+            // words while answering success; her own Duplicate as Version
+            // flushes first (every door rides `AppSession.runCopying(from:)`,
+            // 13e E10's "THE COPY FAMILY'S ONE ENTRY"). The same class as
+            // `save_version`, so the same answer.
+            case .duplicateNote:
+                true
             }
         }
     }
@@ -246,6 +259,8 @@ struct MCPWriteTools: Sendable {
                 sectionID: try optionalString(args, "section_id"))
         case MCPToolCatalog.insertBlocks.name:
             return try parseInsertBlocks(args)
+        case MCPToolCatalog.duplicateNote.name:
+            return .duplicateNote(noteID: try requiredString(args, "note_id"))
         default:
             if let job = try parseEdit(name, args) { return .edit(job) }
             if let job = try parseCarriage(name, args) { return .carriage(job) }
@@ -506,6 +521,8 @@ struct MCPWriteTools: Sendable {
         case .insertBlocks(let noteID, let place, let blocks):
             return try performInsertBlocks(
                 noteID: noteID, place: place, blocks: blocks, job: job, ops: ops, clientName: clientName)
+        case .duplicateNote(let noteID):
+            return try performDuplicateNote(noteID: noteID, job: job, ops: ops, clientName: clientName)
         }
     }
 

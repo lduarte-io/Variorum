@@ -69,6 +69,10 @@ extension Operations {
         // claude-code's blocks" — the takes batch's twin); the receipt counts
         // the blocks (`MCPWriteReceipt.count`).
         case blocks
+        // VX-336 U6a — VX-311's `duplicate_note` (her Duplicate as Version on
+        // the wire): ONE entry ("Undo claude-code's duplicate"); the receipt
+        // names the copy and opens it (PROVISIONAL words, her copy pass).
+        case duplicate
         // VX-184 U3 — VX-188's suggest-rung delete of a client's OWN comment
         // ("Undo claude-code's comment deletion").
         case commentDelete = "comment deletion"

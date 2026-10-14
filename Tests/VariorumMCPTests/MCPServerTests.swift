@@ -254,9 +254,12 @@ struct MCPServerTests {
         // VX-336 U5b (justified edit, the ritual): write new gains VX-255's
         // insert_blocks (the call's rung read from its arguments — an anchor
         // or the start is edit).
+        // VX-336 U6a (justified edit, the ritual): write new gains VX-311's
+        // duplicate_note (read on the note, write new on its wing).
         #expect(Set(MCPToolCatalog.writeNew.map(\.name))
                 == ["create_note", "import_document", "apply_tag", "create_book", "add_note_to_book", "create_section",
-                    "save_version", "file_note_in_chapter", "set_book_rule", "link_versions", "insert_blocks"])
+                    "save_version", "file_note_in_chapter", "set_book_rule", "link_versions", "insert_blocks",
+                    "duplicate_note"])
         // 13n-c U6 (justified edit, the ritual): edit gains the per-item
         // note move across wings (VX-160). VX-168 U2 (justified
         // edit, the ritual): and the deliberate acts — VX-169's save_commit,
