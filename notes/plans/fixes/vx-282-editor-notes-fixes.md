@@ -112,7 +112,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-290 — the empty-block backspace's caret landing | IN-PROGRESS — **W1 RED ON OLD DONE, W2 MAC BATCH GREEN** (stage `vx282-u1` 21:58:14–22:01:26, released; record below). **W3, the walk, is HELD** on the coordinator's word (she may be on the Pro) — next: on the orchestrator's "W3 GO" + claim line, walk rows A–D, record, flip to DONE. Fix `385aa1fc`. No revert in flight. |
-| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | IN-PROGRESS — the trace re-done and recorded (below); next: the core parser + pins (headless), then the face, the Mac's two live roads, the phone. No revert in flight. |
+| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | IN-PROGRESS — core parser + gate + ledger DONE (`962a7305`, headless 106/7 green); the Mac + phone live pins committed AHEAD of the fix (`44ad276b` — the app code there is still pre-fix). NOW: building the red-on-old products FROM `44ad276b` itself (no revert — that tree is the pre-fix app over a nil-caret core that reads byte-identically) into `DerivedData/vx282-u2-old` (Mac) and `vx282-u2-old-ios` (phone); then the face + wiring. No revert in flight. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | NOT-STARTED |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
