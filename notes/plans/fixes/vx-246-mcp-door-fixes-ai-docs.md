@@ -3179,3 +3179,24 @@ a **75-min claim** asked (the plan's). Batch-only fallback (~30 min, claim 40): 
 | F | the fixture generated, then through File ▸ Import… (two long notes → the Pool; the folder → an unshelved book) | NOT-STARTED |
 | W3 | the walk, Study then Terminal: (a) Outline right after mount · (b) Outline after a width change, top and deep · (c) the spread's live left page (+ a width change) · (d) Write's width road · (e) ruling 2, her own Delete from pane 1 on the note in pane 2 | NOT-STARTED |
 | C | cleanup: the Debug app quit by bundle id; prefs 0 keys differ; `restore.sh` → "Restored (verified)" + cmp SAME; the fingerprint AFTER; the fixture deleted; `Tools/stage release --who vx246-u4b`; the result line | NOT-STARTED |
+
+## U1b UNIT RECORD — VX-258's face and U1's remainder: VX-258 · VX-318 · VX-260 option (b), plus the carried live legs (opus-implementer, from 2026-10-14 ~05:00 MDT)
+
+**Not done yet (first line, kept current):** nothing built. PAUSED at its first step by the orchestrator's PAUSE (U4b's
+stage window got its GO) — piece 0's merge was NOT started, per the PAUSE's "not started on the merge yet: don't start it".
+
+### LIVE STATUS — U1b's pieces
+
+| piece | what | status |
+|---|---|---|
+| 0 | merge `origin/main` (`fa3bc6e1`+, VX-281) into the branch — a merge commit; then headless finals + Mac `build-for-testing` into `App/Variorum/DerivedData/vx246-u1b` | PAUSED — NOT STARTED (no MERGE_HEAD; tree clean at `b6db1801` + this commit) |
+| 1 | the face (VX-258) | NOT-STARTED |
+| 2 | VX-318, red-first | NOT-STARTED |
+| 3 | P-VX260-1 option (b): its own schema commit, then the code, red-first | NOT-STARTED |
+| 4 | pins red by revert per member; headless finals + the Mac build | NOT-STARTED |
+| 5 | THE STAGE WINDOW plan (claim `vx246-u1b`) → READY | NOT-STARTED |
+
+**Continuation (for the resume):** `git pull` in the worktree (U4b's stage runner will have committed its run); read the
+brief's named sections in full (the U1b BRIEF, U1's UNIT RECORD, the orchestrator on U1's hand-back, U2's stage window
+steps 4–6, the U2/U3/U4 STAGE RUN sections, the kickoff file, the resiliency protocol); then piece 0 — `git merge
+origin/main` as a merge commit ("Merge origin/main (VX-281) into VX-246 … Part of VX-246"), never a rebase.
