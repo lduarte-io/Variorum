@@ -129,7 +129,7 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | U6 — Compare from the wire | **MOVED to the follow-on run** (ruling 3); its brief is drafted for that run |
 | U7 — the agent's read-backs | **MOVED to the follow-on run** (ruling 3); its brief is drafted for that run |
 | U8 — the AI's docs (LAST) | **MOVED to the follow-on run** (ruling 3), since the docs must describe U5–U7's tools. VX-281 has merged, so it is unblocked there |
-| LADDER | **ROUND 1 SPAWNED 2026-10-14 ~08:00:** the ONE Fable review, `fable-reviewer`, cold, REVIEW_PROMPT verbatim with PHASE=VX-246. — Plan: Round 1 is the ONE Fable review (`fable-reviewer`, cold, REVIEW_PROMPT verbatim) over the whole diff, under the cross-model flow as amended 2026-10-13: Fable makes the final call, the Opus implementer applies the fixes. Rounds 2 and 3 are `opus-reviewer` at max, re-checking the fixes. Capped at three rounds |
+| LADDER | **CLOSED AT ROUND 2 (2026-10-14 ~10:30).** **Round 1, the ONE Fable review:** 0 BLOCKER, 0 MAJOR, 1 MINOR, 3 NIT. All four were confirmed at the final calls, and the implementer fixed them (`a657d779`…`d5cbe625`). **Round 2, `opus-reviewer` at max:** 0 BLOCKER, 0 MAJOR, 2 MINOR, 5 NIT, with R2-2 deferred to VM-16. **The fixes:** round 2's go to the implementer, then the orchestrator's line-by-line check. F-1's red/green and F-4's warning count ride the closeout window. — Earlier: **ROUND 1 SPAWNED 2026-10-14 ~08:00:** the ONE Fable review, `fable-reviewer`, cold, REVIEW_PROMPT verbatim with PHASE=VX-246. — Plan: Round 1 is the ONE Fable review (`fable-reviewer`, cold, REVIEW_PROMPT verbatim) over the whole diff, under the cross-model flow as amended 2026-10-13: Fable makes the final call, the Opus implementer applies the fixes. Rounds 2 and 3 are `opus-reviewer` at max, re-checking the fixes. Capped at three rounds |
 | FABLE review (when needed, or once at the end) | Folded into the LADDER as its round 1. The editor-seam units (U3, U4, U4b, U4c) need it, and putting it first lets an Opus round re-check Fable's confirmed fixes |
 | CLOSEOUT | NOT-STARTED |
 
@@ -385,6 +385,9 @@ and v1_29 `mcp_comment_author.text_digest` (U1b). Marker 13 untouched, zero lock
   digest, and the pre-act flush and navigate-away (U3's OWED 5); TEXTKIT2_NOTES §3's measured facts (U4b's corrected
   proposal and U4c's harness fact);
 - the QUESTIONS bundle (the PROVISIONALs of every unit, and the orchestrator's rulings 1–3), from #220.
+- **NOT this merge's canon** (round 2's R2-7b): the kickoff plan's "instructions bound 2,000 → 3,000" and "the docs'
+  as-built teaching" belong to U8, so they travel with the follow-on run. `MCPSession.instructionsBound` stays `2_000`
+  here.
 - **for VX-234's wording pass, from U1b's live round:** while the ask is fresh, the re-bind row's detail reads
   "…with a setup that wasn't copied for it, now. It reaches…".
 
@@ -4332,3 +4335,79 @@ Nothing here writes the dev store beyond what the test host always does.
 | R1b *(cheap, optional — the same-window "before" for F-4)* | `vx246-r1-red` | `MCPHerEditorDoorTests` | 4/4 green, the summary reading "(including 4 warnings)" — the old harness (`vx246-r1-red` predates `22e8685f`) |
 | F1 | `vx246-final` | `TutorialMCPChapterTests` + the Tutorial* family: TutorialBookShapeTests · TutorialBooksLessonTests · TutorialBooksRitualTests · TutorialBuildFlavorTests · TutorialCurrencyTests · TutorialDeletionActsTests · TutorialDoorTests · TutorialFannedMatrixTests · TutorialFurnitureFoldTests · TutorialLibraryActsTests · TutorialLookingActsTests · TutorialPrivacyChapterTests · TutorialStructureActsTests · TutorialTakesActsTests · TutorialWherePlacesActsTests · TutorialWritingActsTests (+ TutorialMCPChapterCaptureTests, a gated capture — expected SKIPPED) + `MCPHerEditorDoorTests` | All green; `lessonTwoConnectingAClient` green (F-1 red → green). **No warnings in the summary** (F-4: 4 → 0; with R1b in the same window). Any red re-runs ALONE once, and standing reds are named |
 | … | `vx246-final` | the merge-moment whole target (the orchestrator's) | — |
+
+## THE LADDER — ROUND 2 (a fresh `opus-reviewer` at max, REVIEW_PROMPT verbatim, PHASE=VX-246; read-only — recorded here by the orchestrator, 2026-10-14 ~10:30 MDT)
+
+**The reviewer's scope note, verbatim in substance:** this round's diff, the fix pass `27c90400..d5cbe625`, stays
+outside Fable's mandatory scope: one lesson paragraph, two core doc comments, two Mac test files, and no `Sync/`,
+`Server/`, custody, editor-seam or schema lines.
+
+### Findings (as reported; severity-ranked)
+
+- **R2-1 [MINOR] · four "UNDO STORY" headers still say VX-276's redo hole is open.**
+  - **Where:** `Operations+MCPDeliberate.swift:22–27`, `Operations+MCPCarriage.swift:17–23`,
+    `Operations+MCPLibraryEdits.swift:31–42`, `Operations+MCPNoteEdits.swift:27–36`.
+  - **What:** each says "The REDO does not yet keep that promise … ⌥⌘Z is quiet yet the entry still moves onto the redo
+    stack (`UndoStack.undo` pops any inverse that does not throw) … VX-276 owns the fix."
+  - **Evidence:** false since U2. `UndoStack.undoReporting` (`UndoStack.swift:356–371`) runs `guard changed else
+    { return }`, and `redoReporting` mirrors it. Every half in these files now returns the truth. Same class as F-2/F-3.
+  - **Fix:** state the rule as built and drop the "pops any inverse" clause. Doc only.
+- **R2-2 [MINOR] · after U2, the phone's quiet-press receipt offers an action that runs a DIFFERENT entry.**
+  - **Where:** `MobileUndoDoor.swift:202/213` and `:246/251`, with `UndoStack.swift:346/382`.
+  - **Mechanism:** `undo(with:)` returns the label for a quiet press too, so `runUndo` reports "Undid: X" with
+    `action: .redo`. But X was retired, so the offered Redo runs `redoEntries.last` (an earlier-undone Y), or "No
+    structural change to redo". The mirror holds for a quiet redo.
+  - **Before U2,** the same taps re-applied X over her change (VX-276's bug). On the phone the class has MOVED, not gone.
+  - **Fix:** not in this run (the phone's surface; a simulator stage). Amend VM-16 and the MOBILE PARITY line. VM-16's
+    two-line fix (`undoReporting`/`redoReporting`, a refusal, no ping-pong action on a quiet outcome) should land WITH
+    OR BEFORE the phone takes this core.
+  - **The pin (VM-16's):** X then Y registered, Y undone, X reversed by an undo-less door, then ⌥⌘Z. The report must
+    carry no `.redo` action.
+- **R2-3 [NIT] · `UndoStack.swift:435–446` · `private enum LegState` sits between `removeAll()`'s doc comment and
+  its declaration,** so that doc attaches to `LegState`. **Fix:** move `LegState` above the doc comment.
+- **R2-4 [NIT] · `MCPWriteTools+CommentDelete.swift:16` and `Operations+MCPCommentAuthors.swift:119` name
+  `Queries.mcpCommentAuthor` as `delete_comment`'s read.** Since U1b, `deleteRung` reads `Queries.mcpCommentIsOwn`, and
+  `mcpCommentAuthor` has no production caller. **Fix:** name `mcpCommentIsOwn`; re-word :119.
+- **R2-5 [NIT] · `ShelfViewModel.swift:289–292` · the single-flight claim** ("a burst of joins … reads the store once
+  or twice") **is false for a paced MCP client.** Each `add_note_to_book` arrives seconds apart, so each triggers a
+  store-wide `bookWordCounts` read while the Bookcase is mounted. The P1 argument ("membership rate, never per
+  keystroke", pinned) stands. **Fix:** correct the sentence, debounce, or re-read only the moved books.
+- **R2-6 [NIT] · `InlineEditorWindowTests.swift:126` · a diagnostic `print(…block 40 laid out = …)` stays in a
+  permanent pin,** printing into every Mac batch. Its evidence is proven. **Fix:** drop it.
+- **R2-7 [NIT] · record hygiene.**
+  - (a) The LIVE STATUS LADDER row still reads "ROUND 1 SPAWNED".
+  - (b) The kickoff plan's "Canon deltas owed at THIS run's merge" (the instructions bound 2,000 → 3,000, "the docs'
+    as-built teaching") belong to U8 and moved with ruling 3. `MCPSession.instructionsBound` is still `2_000`, so this
+    merge's canon pass must not apply them.
+
+**On round 1's fixes:**
+- **F-1 CONFIRMED FIXED,** statically; its run is owed to the closeout window.
+- **F-2 and F-3 CONFIRMED FIXED.** R2-1 is F-2's same-file neighbour.
+- **F-4:** the shape is sound; its 4 → 0 evidence is owed to the window.
+- **The `finish_book` reopen-then-refinish residual is ACCEPTED, no fix:** the undo writes only its own pre-image, and
+  a stamp would be a schema change, out of proportion.
+
+**The clean bill** (summarized; the full text is in the round-2 hand-back):
+- the path and commits, with zero trailers;
+- 81 core and 28 MCP targeted pins green on `d5cbe625`;
+- U2's stack rule and a wide spot-check of halves;
+- VX-258's `decide`, admission, allow and prune paths, with O-4's fence held;
+- VX-259/260/279/280's mechanisms;
+- U3's exhaustive act table, the flush order and the caret landing;
+- ruling 2's in-place landing.
+
+### ROUND 2 — dispositions (orchestrator; same-model arbitration)
+
+- **The ladder CLOSES at round 2:** no new BLOCKER or MAJOR, so there is no round 3.
+- **R2-1 AGREED** (doc only) → the implementer.
+- **R2-2 AGREED as a finding, DEFERRED to VM-16, amended now.**
+  - It is the phone's door, outside this run's surface, and needs a simulator stage.
+  - The MOBILE PARITY line names it, and the handoff says VM-16 should land WITH or BEFORE the phone takes this core.
+- **R2-3, R2-4, R2-5 and R2-6 AGREED** → the implementer.
+  - R2-5 gets the sentence corrected; debouncing is a design change with no defect behind it.
+  - R2-4 re-words the query's doc and keeps the query, which tests read.
+- **R2-7 AGREED, the orchestrator's own:**
+  - (a) LIVE STATUS updated with this record.
+  - (b) THE RUN AS IT MERGES' owed list now says the bound and the as-built teaching travel with the follow-on run.
+- **This is the FINAL round, so no later reviewer reads these fixes.** The orchestrator checks them line by line
+  against each finding (CLAUDE.md "Two reviews").
