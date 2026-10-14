@@ -2470,3 +2470,140 @@ her VX-181 launch-gate call only (the kickoff prompt is ready; she runs it with 
 ## VX-281 — Run: MCP settings pane & shared icon (2026-10-14)
 
 #219 — **THE VX-281 RATIFY BUNDLE (merged 2026-10-14, PR #159 0f5efe1c; the binding record is `notes/plans/fixes/vx-281-mcp-settings-pane-shared-icon.md` — her binding rulings (R-VX184-6, VX-205, her VX-268 kickoff calls, her cast redirect, her cross-model rule, her overnight mandate), the U1 and U2 UNIT RECORDs, THE LADDER (Opus round 1 → Opus round 2 → the end-of-run Fable round, closed at the cap); your handoff `notes/handoffs/vx-281-handoff.md`).** Each was built as stated under your overnight mandate ("rule provisionally in my absence"), with a line to reverse it. **U1 (the pane in tabs):** **P-VX281-U1-1** — connection requests sit ABOVE the tabs, beside Waiting (your ruling places Waiting, not the requests); options: (b) at the head of Clients with the tab's label carrying the pending count, (c) at the head of Clients, nothing more · **P-VX281-U1-2** — "remembered per session" means this app run (your pick lives on the app-lived door; survives switching panes, closing Settings and a lock; cleared only by quitting; never stored or synced); options: (b) the library session (cleared at lock/unlock), (c) persisted per Mac · **P-VX281-U1-3** — the tab row heads the chosen tab's content INSIDE the one scrolling form (every other Settings pane's idiom; a long Shared with AI tab scrolls the tab row away); option: (b) a pinned tab bar with only the tab's content scrolling. **U2 (the shared icon, VX-268):** **P-VX281-U2-1** — a wing's ▾ menu row carries ONE mark and a waiting ask outranks the shared icon (a menu row hosts one image, no popover; the icon's door on a wing is ⌘L's row); options: (b) the shared mark wins, (c) neither in the menu — ⌘L only · **P-VX281-U2-2** — the masthead wing WORD wears no shared icon (its ask glyph marks every wing's asks, so there is no place to match); option: (b) the word also wears the current wing's shared icon · **P-VX281-U2-3** — rows take the Bookcase's gate: a row wears the icon while an approved client reaches it, server switch aside (with the server OFF, rows show standing reach while the in-note indicator hides — P-13nc-U3-7's split carried); option: (b) rows and the Bookcase hide while the server is off · **P-VX281-U2-4** — a wing row's reach is `decideWing`'s: a wing grant or the open book; note or book grants inside a wing never icon the wing (R-VX185-1 one level up); option: (b) any grant reaching anything in the wing icons it · **P-VX281-U2-5** — ⌘L's Change… opens the grant sheet OVER the switcher (the nested-host precedent); option: (b) close the switcher, then open it on the window. **The ladder:** **P-VX281-R2-1** — a Settings search for "client"/"clients" lands on the Clients tab, through a new `mcpClients` catalog row (the word names your tab and the list lives there; every setup word — setup, connect, codex, json, stdio, claude — still lands on Connect, which follows from R-VX184-6 and needed no call); options: (a) Connect (the row "Connect a client" contains the word), (c) no landing — the pane's normal opening rule. **Not provisional, for your eye:** the edit rung's (i) popover shows its sentence in the line's lowercase fragment form · the icon reads large beside the Book Panel's small type · the Pool's tucked run stays open across a wing switch · the Book Panel's collapsed one-note chapter row stands for a note but shows neither glyph (filed as VX-330, Backlog) — the first two ride VX-234 with the run's wording list (U1-1…U1-11, R1-4w, R1-8w, R2-3w, posted there). Cross-refs: VX-199 · VX-205 · VX-232 · VX-268 · VX-245 (its two MCP sites, `3d00a166`) · VX-234 · VX-246 (VX-197's docs teach the tabs and the icon; VX-258's face builds on the tabbed pane). Status: open — your eye; the handoff's checklist leads with this bundle.
+
+
+## VX-282 — Run: Editor & notes fixes (2026-10-13)
+
+#220 — **VX-296 (U2), the caret-aware markdown face — three readings built PROVISIONAL** (the binding record is
+`notes/plans/fixes/vx-282-editor-notes-fixes.md` § U2; your ruling on the ticket, fix (a), "your fix is good": while
+your caret sits right after the space that disqualifies a closer, the closer still counts, in the live editor only).
+*(Numbering: the next free number on main when written; a sibling run merging first may take it — the merging
+session renumbers.)* Each is built as stated, with a line to reverse it:
+**P-U2-1 — the OPENER side is NOT caret-aware.** Built: (a) closer only — your ruling's letter, and what typing words
+forward inside a pair produces (the space always lands before the closer). The opener still flips when you backspace
+the FIRST word away (`*| world*`) or type a space right after the opening star. Options: (b) the mirror too — a caret
+right after an opening star whose next character is a space also counts; arithmetic stays plain at every caret
+position either way (one caret can never rescue both halves), but a star typed in the middle of a line that has a
+later closer (`5 *| 3 and *wow*`) would show a long wrong italic for as long as the caret sits there.
+**P-U2-2 — the rule covers every closer the flanking rule governs, not only `*`.** Built: (a) `*` italic, `**` bold,
+`~~` strikethrough, and `_` italic (which shares the rule) — ⌘B's pair flickered worse than ⌘I's (`**two |**` read as
+an italic over `two *` with a stray dimmed star, then bold again at the next letter). Option: (b) the italic star
+only, your report's literal case.
+**P-U2-3 — ⌘I/⌘B still read the caret-blind grammar.** At `*hello |*` the face now shows italics, but ⌘I does what it
+always did at that one spot: it inserts a new `**` pair (one letter later, at `*hello w|*`, ⌘I unwraps the span).
+Built: (a) unchanged — the acts are among "every other reader" your ruling left untouched. Option: (b) the acts read
+the caret-aware reading when nothing is selected, so ⌘I unwraps what the face shows.
+**Said plainly, so it isn't a surprise (the run's round-1 review, R1-5):** the fix you approved was worded "the grammar
+… untouched", but the caret rule was built INSIDE the grammar's module — `MarkdownSyntax.spans(in:caret:)` takes an
+optional caret, and the closers ask one new question (`closerFlanks`: no space before me, or the caret sits exactly
+here). With no caret — every reader except the live editors: the read pages, export, the phone's read page, search,
+⌘B/⌘I — the reading is byte-for-byte what it was (the grammar's own suites run unchanged and green, and a pin walks
+every caret position of nineteen texts to show a caret changes nothing except where it sits right after a space and
+right before a closing mark — `*`, `~` or `_`). **One more thing it does there, so it isn't a surprise either (the run's round-2 review, F-1):**
+when that star is an INNER one, the rule can reshape a span that already read fine — `*foo *bar*` reads as one italic
+over `foo *bar`, but with your caret just before the inner star it reads as an italic `foo ` and a plain `bar*`, and
+`*2 * 3 = 6*` does the same with the caret before the middle star; it changes only WHILE the caret sits there, and goes
+back the moment it moves. Option (b), if you'd rather it never did that: the caret rescues a star only where no span
+already covers it, so a stable span is never shortened. It lives there so
+there is ONE grammar with one extra input, rather than a second matcher in the face that could drift from it. If you'd
+rather the grammar file itself stayed untouched, the rule can move out into the face at the cost of that second copy.
+Status: open — your eye in daily use.
+
+#221 — **VX-154 (U3), Write's take panel answers every routed command about a block or a take on ITS block — seven
+readings built PROVISIONAL** (the binding record is `notes/plans/fixes/vx-282-editor-notes-fixes.md` § U3 — the command
+table, the traced mechanism, the pins). *(Numbering: the next free number when written; the merging session renumbers if
+a sibling run took it.)* Each is built as stated, with a line to reverse it:
+**P-U3-1 — ⌘S in the panel with no take clicked into commits the take the block shows**, and the ring moves onto it first
+so you see which take you are committing. Built (a): P-VX150-1's rule (#210, ratified for ⌘T), and what ⌘S already did
+when the panel was the caret block's. Options: (b) refuse, as the Takes board does ("Click into a take first — ⌘S commits
+the take you're in."); (c) commit the shown take without moving the ring.
+**P-U3-2 — which block acts the panel does and which go grey.** Built (a): the panel acts on its own block for Delete
+Block, Archive Block, Move Take into a Block Below and Turn All Takes into Blocks (you see the result in the panel: its
+"no longer in the note" face, takes leaving its list); the nine verbs that cut, join or add blocks where you write
+(Divide, Divide choosing takes, Extract, Make Block, Merge, Merge choosing takes, Delete in Every Take, New Block Below,
+New Block at End) are grey while the panel is up. Options: (b) those nine close the panel and run in Write at the panel's
+block (needs new editor machinery, not built); (c) grey the four block acts too, so the panel never changes the note's
+blocks; (d) act on all of them as the Takes board does (their results land on blocks the panel doesn't show).
+**P-U3-3 — Move Take into a Block Below (⌥⌘⏎) needs a take clicked into**; with none it refuses as the Takes board does.
+Option: (b) move the take the block shows (that is the chosen take — the riskier default).
+**P-U3-4 — ⌘⇧T over the panel closes it** (the toggle's close half — ⌘⇧T opens it). Before, it swapped the panel to the
+block your Write caret is in when the panel came from another block's ⑂ badge. Options: (b) keep the swap; (c) nothing.
+**P-U3-5 — a callout set from the panel is silent** (as everywhere — the frame is the feedback), and the panel draws no
+frame, so you see it on the page when the panel closes. Options: (b) a receipt in the panel; (c) the panel wears the frame.
+**P-U3-6 — copy (your copy pass):** the panel's archive receipt "Take archived — never gone: “archived takes” below brings
+it back." (the ticket's rider — it named the board's "archived · n") and the grey verbs' line "That works in the note
+itself — close the takes panel first."
+**P-U3-7 — the note's own commands still reach Write while the panel is up** (seal, ⌘⇧S, Versions, the tray, Find,
+⌘⇧L). The ones that show something show it beneath or after the panel. Options: (b) grey them while the panel is up;
+(c) the panel shows them itself.
+**P-U3-8 — where ⌘S's name field sits in the panel** (the walk's finding): under the panel's header, so it covers the
+first card — when nothing was clicked into, exactly the take being committed. Option: (b) hang it from the take's own card.
+Status: open — your eye in daily use.
+
+#222 — **VX-193 + VX-112 (U4), the capture box — one reading built PROVISIONAL (a second, P-U4-2, withdrawn at the
+walk)** (the binding record is
+`notes/plans/fixes/vx-282-editor-notes-fixes.md` § U4 — the traces, the pins, the walk). *(Numbering: the next free
+number when written; the merging session renumbers if a sibling run took it.)* Each is built as stated, with a line to
+reverse it:
+**P-U4-1 — undo in the quick-entry bar and the quick-note pad is the BOX's own, and filing ends it** (your comments
+panel's P-VX179-U3-4, #215 — still open there — carried to the capture box). ⌘Z in the box undoes the box's typing and
+nothing else; after the box is cleared for you (a note filed, or an empty filing — three spaces and ⏎ — which keeps the
+box on screen) there is nothing to undo into. Built (a): the panel's rule; it is also what makes ⌘Z after an empty filing
+safe (on the old tree it replayed the old words' ranges into the empty box — an exception, measured). Options: (b) one
+shared history with the window (the old road — ⌘Z in an empty box then reaches whatever other text left on the window's
+stack); (c) the clear itself undoable (⌘Z after ⏎ brings the filed words back into the box — a duplicate-filing hazard,
+and after a completed filing the box is gone anyway).
+~~**P-U4-2 — a tour started away from the Bookcase lands with the caret in the quick entry.**~~ **WITHDRAWN at the U4
+walk (2026-10-14):** traced from the code's order, but not reproduced live — a tour started from a note landed on the
+Bookcase with the keyboard on the window, not in the bar. Nothing to decide. (And your VX-112 sighting itself: the
+blinking block in the Terminal voice's quick entry is its decorative block cursor, which shows exactly when the box does
+NOT have the caret — the tour's release turns it on; keystrokes there landed nowhere, in both voices.)
+Status: P-U4-1 open — your eye in daily use.
+
+#223 — **VX-257 (U5), your half-typed comment survives a click away — four readings built PROVISIONAL** (the binding
+record is `notes/plans/fixes/vx-282-editor-notes-fixes.md` § U5; your ruling on P-VX179-R2-1, #215: *"yes, clicking away
+should save your half typed comment on a draft."*). When the comments panel closes, whatever is in its box is kept for
+that block and comes back when you open the block's comments again; ⎋ still clears it deliberately (its first press
+empties the box, its second closes, so nothing is kept); keeping never files a comment (#118(a) stands).
+*(Numbering: the next free number when written; the merging session renumbers if a sibling run took it.)* Each is built
+as stated, with a line to reverse it:
+**P-U5-1 — the panel keeps ONE draft at a time, the newest.** Leaving block B's comments with words in the box replaces
+a draft kept for block A — including one the store refused (a sealed note's). That is the park's existing one-draft rule
+(#140(a)), now reached by a click away too. Options: (b) one kept draft PER BLOCK (the park becomes a small per-block
+table — on the phone's park too); (c) a refused draft is never displaced by a merely unfinished one.
+**P-U5-2 — Close keeps the draft too**, not only a click away: every way out except ⎋⎋ keeps what is in the box (one
+leaving road for all of them). Option: (b) the Close button abandons the draft, as ⎋⎋ does.
+**P-U5-3 — a kept draft comes back silently, with the caret after it**, ready to go on typing. A refused draft still
+comes back with its line (*"the comment that couldn't be saved — here to try again"*). Options: (b) a line of its own for
+a kept draft (say, "your unfinished comment — still here"); (c) the caret at the start, as a refused draft's restore had
+it.
+**P-U5-4 — emptying the box and leaving lets a kept draft go — a refused one included.** So ⎋⎋ after a refused draft
+comes back abandons it; before, the refused words came back on every open until they landed (#140(b)). Option: (b) an
+emptied box leaves a REFUSED draft kept; only an unfinished one goes.
+Recorded, not a question: your ruling supersedes #140(c) on the Mac ("a draft typed and never submitted still dies with
+the close"). The phone is unchanged — its comments sheet still drops an unsubmitted draft on close (your ruling named the
+Mac popover); a VM ticket is the orchestrator's to mint.
+Status: open — your eye in daily use.
+
+#224 — **VX-326 (U6), the Bookcase's quick entry takes the caret when the app opens — two readings built PROVISIONAL**
+(the binding record is `notes/plans/fixes/vx-282-editor-notes-fixes.md` § U6 — the trace, the pins, the walk; your
+word: *"yeah you can fix this ticket if you think it's an annoying issue"*). What was wrong: the Bookcase asked for the
+caret before its box was in the window, the ask was spent, and nothing tried again — so the app opened with the
+keyboard nowhere. Now the ask waits until the box is in its window and takes the caret only if nothing else in that
+window has the keyboard (never from a field, never under a sheet); it is decided once. *(Numbering: the next free
+number when written; the merging session renumbers if a sibling run took it.)* Each is built as stated, with a line to
+reverse it:
+**P-U6-1 — the ask is decided when the box reaches its window, on that window alone.** Built (a): if nothing in the
+Bookcase's window holds the keyboard and no sheet is on it, the caret goes into the quick entry; other windows are not
+consulted. So if a note opened in its own window comes back at launch in front, that note keeps its keyboard, and when
+you click over to the main window the caret is already in the quick entry. Options: (b) wait until the main window
+itself becomes the front window and decide then, dropping the ask if another window came to the front first; (c) as
+(a), but drop the ask whenever another window of the app is in front at that moment (then the quick entry is not ready
+when you click over).
+**P-U6-2 — only a window that OPENS on the Bookcase asks.** Built (a): launching, unlocking, and a new window each put
+the caret in the quick entry; coming BACK to the Bookcase from a note or the Library does not (it never did — measured:
+that road drops the ask the same way, and it is left exactly as it was). Options: (b) every arrival at the Bookcase puts
+the caret there — "the shelf opens with the cursor already in the bar" (R102) read for every visit — which needs the
+quick entry to stay out of the way while the tour runs (a tour started from a note walks you to the Bookcase); (c) only
+the app's very first window at launch (not after an unlock, not a new window).
+Status: open — your eye in daily use.

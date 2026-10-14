@@ -187,9 +187,13 @@ struct CommentPanelParkTests {
     }
 
     /// **PIN (d) — THE GUARD (green on both sides, by design).** A draft
-    /// she typed and never filed is her ordinary abandon — ⎋'s clear and
-    /// the panel's close keep nothing, exactly as ruled (#118(a); the ⎋
-    /// ladder), so the park can never widen into a general draft-keeper.
+    /// she typed and never filed is not parked by TYPING: the park is
+    /// written at a refusal or at the panel's LEAVING, never per keystroke.
+    /// (RULED-CHANGE, VX-282 U5 — this doc only: it said "the panel's close
+    /// keeps nothing"; her VX-257 ruling — *"yes, clicking away should save
+    /// your half typed comment on a draft"* — makes the leaving keep a
+    /// non-empty box, pinned in `CommentPanelLeaveTests`. ⎋'s clear stays her
+    /// deliberate abandon there; filing on leaving stays ruled out, #118(a).)
     @Test func anUnsubmittedDraftStaysHerOrdinaryAbandon() async throws {
         try await withPanelWorld { session, _ in
             let seed = try await seedPanelPost(session)

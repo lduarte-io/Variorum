@@ -176,6 +176,23 @@ nonisolated enum CapabilityRegistry {
 
     private static let always: @Sendable (CapabilityContext) -> Capability.Availability = { _ in .act }
 
+    /// **VX-154 (the VX-282 run) — the verbs that act where she writes are
+    /// GREY while Write's take panel is up.** The panel is a sheet over Write
+    /// showing ONE block's takes. Cutting, joining or adding blocks lands on
+    /// blocks it never shows; the Takes board carries most of these to Write by
+    /// a mode switch, which a sheet over Write cannot make; and the board's
+    /// native insert/divide hand the ring to a block the panel does not render.
+    /// So while the panel is up these doors are not live (P-2: a door that can
+    /// never act in its context isn't rendered) — and the panel consumes any
+    /// dispatch that still reaches it, so none falls to Write's caret beneath
+    /// the sheet. The rule wraps each verb's own rule: with the panel down,
+    /// nothing changes.
+    private static func outsideWritesTakesPanel(
+        _ rule: @escaping @Sendable (CapabilityContext) -> Capability.Availability
+    ) -> @Sendable (CapabilityContext) -> Capability.Availability {
+        { ctx in ctx.writeTakesPanelAttached ? .unavailable : rule(ctx) }
+    }
+
     /// 18l-c U7: what ⌘F / ⌘G / ⇧⌘G answer where nothing can find. The find
     /// acts in Write AND on the Takes board now, so the note names both — a
     /// refusal must be true (P-2). (The replace half keeps its own note: it is
@@ -192,7 +209,7 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧D", takesAccess: .native,
             unavailableNote: "Dividing happens inside a note — open one first.",
-            availability: divideAvailability),
+            availability: outsideWritesTakesPanel(divideAvailability)),
         // 13j J4 — **the divide CEREMONY's own door** (her sitting round-4
         // ruling). The default flipped to the duplicating divide, so the W
         // ceremony needs a summonable name and a key of its own; it keeps
@@ -217,25 +234,25 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌥⌘⇧D", takesAccess: .native,
             unavailableNote: "Dividing happens inside a note — open one first.",
-            availability: divideAvailability),
+            availability: outsideWritesTakesPanel(divideAvailability)),
         Capability(
             id: .extract, verb: "Extract Selection", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧E", takesAccess: .moveAndExecute,
             unavailableNote: "Extracting happens inside a note — open one first.",
-            availability: structural),
+            availability: outsideWritesTakesPanel(structural)),
         Capability(
             id: .makeBlock, verb: "Make Block from Selection", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧K", takesAccess: .moveAndExecute,
             unavailableNote: "Making a block happens inside a note — open one first.",
-            availability: structural),
+            availability: outsideWritesTakesPanel(structural)),
         Capability(
             id: .merge, verb: "Merge Blocks", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧M", takesAccess: .moveAndExecute,
             unavailableNote: "Merging happens inside a note — open one first.",
-            availability: structural),
+            availability: outsideWritesTakesPanel(structural)),
         // 13j J4b — **the merge CEREMONY's own door** (same ruling, same
         // shape). It keeps `merge`'s availability and `moveAndExecute`
         // access: the PAIRING sheet mounts in Write alone, so summoning it
@@ -245,13 +262,13 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .contextMenu, .bottomBar, .surface, .palette],
             shortcutLabel: "⌥⌘⇧M", takesAccess: .moveAndExecute,
             unavailableNote: "Merging happens inside a note — open one first.",
-            availability: structural),
+            availability: outsideWritesTakesPanel(structural)),
         Capability(
             id: .deleteInEveryTake, verb: "Delete in Every Take", scope: .block,
             doors: [.menuBar, .contextMenu],
             shortcutLabel: nil, takesAccess: .moveAndExecute,
             unavailableNote: "Delete in Every Take works on a selection inside a note.",
-            availability: structural),
+            availability: outsideWritesTakesPanel(structural)),
         // 13u4 UNIT C2 — her item 9, ruled R-13u4-4: the selected span leaves
         // the take it is in and becomes a take of its own on the same block,
         // with the quiet savepoint of the take it left as her cover for the
@@ -294,7 +311,7 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .bottomBar, .palette],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Blocks are born inside a note — open one first.",
-            availability: takeFamily),  // NIT-3: the one named rule, not a copy
+            availability: outsideWritesTakesPanel(takeFamily)),  // NIT-3: the one named rule, not a copy
         // 13b 4D (N28's second half — the Takes trap's insert door; S4-13:
         // editor parity, native in BOTH Write and Takes by construction).
         // The minted block is EMPTY (its one live variant, empty text — I10
@@ -312,7 +329,7 @@ nonisolated enum CapabilityRegistry {
             // legibility mandate refuses.
             shortcutLabel: "⌘⇧⏎", takesAccess: .native,
             unavailableNote: "Blocks are born inside a note — open one first.",
-            availability: takeFamily),  // the one named rule, not a copy
+            availability: outsideWritesTakesPanel(takeFamily)),  // the one named rule, not a copy
         // 13c 1B (A8 — her item: "I don't seem to have the ability to
         // delete / archive empty blocks?"). `deleteBlock` has existed in
         // Operations since Phase 2 and had exactly ONE face app-wide (the
@@ -1099,6 +1116,60 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "Comments live on a block — open a note first.",
             // The bars' block menus carry the door in Write/Takes/Lenses.
             availability: takeFamily),  // NIT-3: the one named rule, not a copy
+        // VX-183 (the VX-282 run, U5 — VX-179 U1's O-2): THE PANEL'S OWN SIX
+        // DOORS. `.surface` acts — each sits on the row whose comment it acts
+        // on (the `.restoreTake` / `.deleteNow` shape), so no menu, bar or
+        // palette door exists and none may grow without a ruling. The verbs
+        // ARE the panel's words (sentence case, her no-shouty-caps rule — the
+        // panel renders `verb`, so a word changed here changes there and
+        // nowhere else). Available wherever the panel is open: the panel IS
+        // the context (`always`, the `.deleteNow` posture); which row shows
+        // which door is `CommentsPanelDoors` — per-row state, as data. Every
+        // write refuses in the operations' own words (the seal, a race), the
+        // panel speaking them (P-2). Keys: ⌘⏎ and ⎋ are the panel's local
+        // monitor's (Add/Save and the ⎋ ladder), not menu keys — the
+        // composer's hint line says them, so no `shortcutLabel` is declared.
+        Capability(
+            id: .addComment, verb: "Add", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A comment is added in its block's comments panel — Comments… (⌘⇧') opens it.",
+            availability: always),
+        Capability(
+            id: .saveComment, verb: "Save", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A comment is saved where it is edited — its block's comments panel.",
+            availability: always),
+        Capability(
+            id: .revertComment, verb: "Revert", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Revert puts an edited comment back — in its block's comments panel.",
+            availability: always),
+        Capability(
+            id: .deleteComment, verb: "Delete", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A comment is deleted from its block's comments panel — it waits under Deleted there.",
+            availability: always),
+        Capability(
+            id: .restoreComment, verb: "Restore", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A deleted comment waits under Deleted in its block's comments panel.",
+            availability: always),
+        // The comment's PURGE door — the evolved rule's letter: purge doors
+        // live in trash surfaces, never in the writing flow, and the panel's
+        // deleted fold is one (it lists only what is already deleted — her
+        // R-VX179-3 placement). Confirms every time (the Delete Now posture).
+        Capability(
+            id: .deleteCommentForever, verb: "Delete forever\u{2026}", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Delete forever lives under Deleted in a block's comments panel — "
+                + "only for a comment already deleted, and it asks first.",
+            availability: always),
         // 13c Stage 1 ladder, R2-2 — her A13(a), ruled into the friction
         // batch by K2 and built here: "callouts (a) in Takes/Compare/Lenses
         // + a shortcut". Both halves were ONE declaration edit plus the

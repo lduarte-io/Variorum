@@ -90,6 +90,10 @@ struct ShelfView: View {
     /// feature's model — it draws the view it is handed (the sidebar note
     /// box's road). nil (harness mounts, a retired offer at launch): no row.
     var offerLine: AnyView? = nil
+    /// VX-326 — the shell's opening ask for the quick entry's caret, handed
+    /// down by the shell that owns it (`RootView`); the bar claims it once.
+    /// nil (harness mounts): the bar's mount raise as it always was.
+    var openingFocus: QuickEntryOpeningFocus? = nil
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -981,7 +985,7 @@ struct ShelfView: View {
     // MARK: - Quick entry (R3 — the shared bar; Library carries it too)
 
     private var entryBar: some View {
-        QuickEntryBar(session: session, onOpen: onOpen, autofocus: true)
+        QuickEntryBar(session: session, onOpen: onOpen, autofocus: true, openingFocus: openingFocus)
     }
 
     /// The ⌘K hint at the window's foot — and, at its trailing end, the

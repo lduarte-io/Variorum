@@ -266,6 +266,51 @@ struct PaneFindFaceTests {
         #expect(window.firstResponder !== pane, "a read pane does not reclaim")
     }
 
+    // MARK: - VX-282 R1-1 — the read-going caret settle owns the runs it re-reads
+
+    private static func isItalic(_ pane: PaneTextView, at index: Int) -> Bool {
+        (pane.textStorage?.attribute(.font, at: index, effectiveRange: nil) as? NSFont)?
+            .fontDescriptor.symbolicTraits.contains(.italic) ?? false
+    }
+
+    /// **RED ON OLD (the round-1 review's R1-1).** A pane goes READ while its
+    /// caret sits at a VX-296 rescue point (`*Hyde |*` — the ring moved to
+    /// another pane, or a find step's landing left this one). The update paints
+    /// the match FIRST (`paintFind(live: false)`), then the liveness note's
+    /// settle re-reads the honoured line caret-blind — and the face's clear
+    /// owns `.backgroundColor` on every face run it re-derives, the match's
+    /// paint included. The paint record still said "painted", so the
+    /// change-gated repaint at the update's end wrote nothing and the match
+    /// stood unpainted. The settle now says what it rewrote
+    /// (`findPaintWasReset`), and the repaint lands.
+    @Test func aPaneGoingReadAtACaretRescuePointKeepsItsMatchPainted() async throws {
+        let rig = PaneRig(
+            text: "*Hyde *",
+            face: PaneFindFace(
+                matches: [NSRange(location: 1, length: 4)], current: nil,
+                matchTint: Self.matchTint, currentTint: Self.currentTint,
+                request: nil, fieldHoldsKeyboard: false))
+        rig.isLive = true
+        let (window, pane, _) = try await Self.mount(rig)
+        defer { window.orderOut(nil) }
+        await Self.settle(window)
+        // Her caret between the space and the closing star: the span is
+        // honoured — italic (non-vacuity: the settle has a line to re-read).
+        pane.setSelectedRange(NSRange(location: 6, length: 0))
+        await Self.settle(window)
+        #expect(Self.isItalic(pane, at: 1), "non-vacuity: the live pane honours the caret at the rescue point")
+        #expect(Self.paintedRuns(pane).isEmpty, "a LIVE pane wears no paint")
+
+        rig.isLive = false
+        await Self.settle(window)
+        #expect(!pane.isEditable, "the pane went read")
+        #expect(!Self.isItalic(pane, at: 1), "the read-going settle re-read the line caret-blind")
+        #expect(Self.background(pane, at: 1) == Self.matchTint,
+                "RED ON OLD: the match stays painted after the settle re-read its line")
+        #expect(Self.paintedRuns(pane) == [NSRange(location: 1, length: 4)],
+                "exactly the match, painted")
+    }
+
     @Test func aRequestSelectsInAnAlreadyLivePaneAndABornRequestIsNotAStep() async throws {
         // Born live WITH a request outstanding: the baseline — nothing acts.
         let rig = PaneRig(

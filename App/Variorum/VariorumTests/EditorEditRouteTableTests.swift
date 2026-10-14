@@ -205,8 +205,51 @@ struct EditorEditRouteTableTests {
         let note = Note([slot("b0", text: "alpha"), slot("b1", text: ""), slot("b2", text: "beta")])
         let seam = NSRange(location: 5, length: 1)
         #expect(note.route(seam, arms: Self.mac).route
-            == .carveEmptyBlock(.init(blockID: "b1", variantID: "v-b1", entryIndex: 1)))
+            == .carveEmptyBlock(.init(
+                blockID: "b1", variantID: "v-b1", entryIndex: 1, landing: .endOf(blockID: "b0"))))
         #expect(note.route(seam, arms: Self.phone).route == .refuse(.seamKeystrokeDeclined))
+    }
+
+    /// **VX-290 — the carve names where the caret lands: where the deleted
+    /// line break was** (her report, the ruling). The plan carries the SIDE,
+    /// by the surviving block's identity: a block carved AFTER the separator
+    /// sends the caret to the END of the block before it, a block carved
+    /// BEFORE it to the START of the block after. Which block goes is
+    /// untouched (#33(d): of two empty neighbours, the one before wins).
+    @Test func theCarvesLandingIsWhereTheDeletedBreakWas() {
+        func carve(_ texts: [String], separatorAt offset: Int) -> SeamCarvePlan.EmptyBlockDeletion? {
+            let note = Note(texts.enumerated().map { slot("b\($0.offset)", text: $0.element) })
+            guard case .carveEmptyBlock(let plan) = note.route(
+                NSRange(location: offset, length: 1), arms: Self.mac).route
+            else { return nil }
+            return plan
+        }
+        // "alpha\n\nbeta": ⌫ from inside the empty block deletes the break at
+        // 5 — the caret goes up to alpha's end; ⌦ from inside it deletes the
+        // break at 6 — the caret stays at the line beta moves up into.
+        let backspace = carve(["alpha", "", "beta"], separatorAt: 5)
+        #expect(backspace?.blockID == "b1")
+        #expect(backspace?.landing == .endOf(blockID: "b0"))
+        let forward = carve(["alpha", "", "beta"], separatorAt: 6)
+        #expect(forward?.blockID == "b1")
+        #expect(forward?.landing == .startOf(blockID: "b2"))
+        // Her report's shape: an empty block with more empties below it.
+        let hers = carve(["alpha", "", "", ""], separatorAt: 5)
+        #expect(hers?.blockID == "b1")
+        #expect(hers?.landing == .endOf(blockID: "b0"))
+        // Both neighbours empty: the one BEFORE goes (#33(d)) and the caret
+        // keeps its own block's start — that line moves up.
+        let bothEmpty = carve(["alpha", "", ""], separatorAt: 6)
+        #expect(bothEmpty?.blockID == "b1")
+        #expect(bothEmpty?.landing == .startOf(blockID: "b2"))
+        // An empty FIRST block, ⌫ from the start of the paragraph below.
+        let first = carve(["", "beta"], separatorAt: 0)
+        #expect(first?.blockID == "b0")
+        #expect(first?.landing == .startOf(blockID: "b1"))
+        // The last block, no block below: the end of the one above, as before.
+        let last = carve(["alpha", ""], separatorAt: 5)
+        #expect(last?.blockID == "b1")
+        #expect(last?.landing == .endOf(blockID: "b0"))
     }
 
     /// **A lone separator between two TEXTED blocks** — #34's geometry.

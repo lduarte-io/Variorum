@@ -847,14 +847,59 @@ struct TypedReturnKeyTests {
     }
 
     /// **RED-ON-OLD (round 2, R2-1 — the carve's OTHER landing arm, the
-    /// implementer's rider):** with a block below, the seam carve lands the
-    /// caret at `beta`'s START, so the early-drained `x` read `"xbeta"` and
-    /// the queued act then met the divide door's refusal (`["alpha",
-    /// "xbeta"]`). One pin per landing arm, so the fix is never read as
-    /// caret-position-specific. Typed slowly: ⏎ makes the block between, ⌫
-    /// carves it (the caret to `beta`'s start), ⏎ at `beta`'s start pushes
-    /// it down with an empty block above, `x` lands in `beta`.
+    /// implementer's rider):** when the carve lands the caret at the START of
+    /// the block below, the early-drained `x` read `"xbeta"` and the queued
+    /// act then re-derived inside it. One pin per landing arm, so the fix is
+    /// never read as caret-position-specific.
+    ///
+    /// **RE-POINTED at VX-290 (her report's ruling), purpose kept.** The pin's
+    /// first shape (`["alpha", "beta"]`, ⏎ at alpha's end) no longer lands
+    /// below — a ⌫ that carves the block AFTER the break now lands at the end
+    /// of the block before it (the flipped pin right below carries that
+    /// shape). The carve lands BELOW only when it takes the block BEFORE the
+    /// break, so this arm now types into an empty FIRST block's neighbour:
+    /// ⏎ at `beta`'s start pushes it down with an empty block above, ⌫ carves
+    /// that block (the caret stays at `beta`'s start — the landing below), ⏎
+    /// pushes `beta` down again, and `x` lands in `beta`. An early drain would
+    /// type `x` at beta's start BEFORE the queued ⏎ acts — the same
+    /// misordering the first shape caught, on this landing arm. **Re-proven
+    /// against R2-1's own named revert at VX-282's round-1 fix leg (R1-9,
+    /// the r1fix window):** with the drain's `pendingCrossBlockTask == nil`
+    /// half removed this pin goes red (two entries where three belong), as do
+    /// its sibling above and the flipped pin below — each of the three burst
+    /// pins carries R2-1 on its own landing.
     @Test func aBurstWithASeamBackspaceHoldsWhenTheCarveLandsBelow() async throws {
+        try await withEditor(seedBlocks: ["", "beta"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 1, offset: 0)
+            returnKey(h, window.window)
+            deleteKey(h, window.window)
+            returnKey(h, window.window)
+            characterKey(h, window.window, "x")  // all four in one turn
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["", "", "xbeta"],
+                    "the second ⏎ at beta's start pushes it down; the x lands in beta")
+            #expect(h.model.index.entries.count == 3)
+            // `last`, not `[2]`: under a revert there may be two entries and
+            // a pin must FAIL there, never take the runner down with it.
+            #expect(h.model.caretBlockID == h.model.index.entries.last?.blockID)
+        }
+    }
+
+    /// **FLIPPED BY RULING (VX-290 — her report: "moving you up into the
+    /// previous line like writing editors typically do").** This was the
+    /// shape above until the ruling: ⏎ at the end of `alpha` (above `beta`)
+    /// makes an empty block, ⌫ carves it — and the caret now lands at
+    /// `alpha`'s END, where the deleted break was, never at `beta`'s start. So
+    /// the second ⏎ makes the empty block below `alpha` again and `x` lands in
+    /// it: `["alpha", "x", "beta"]`, where the old landing read
+    /// `["alpha", "", "xbeta"]`. It is still a burst pin — the four keys in
+    /// one turn must read what typing them slowly does — and it is VX-290's
+    /// red-on-old on the deferred road.
+    @Test func aBurstWithASeamBackspaceAboveABlockLandsWhereTheBreakWas() async throws {
         try await withEditor(seedBlocks: ["alpha", "beta"]) { h in
             let window = try hosted(h)
             defer { window.teardown() }
@@ -866,12 +911,12 @@ struct TypedReturnKeyTests {
             characterKey(h, window.window, "x")  // all four in one turn
             await h.flush()
 
-            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "xbeta"],
-                    "the second ⏎ at beta's start pushes it down; the x lands in beta")
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "x", "beta"],
+                    "⏎ ⌫ ⏎ x at alpha's end: the ⌫ put the caret back at alpha's end, the x in the new block")
             #expect(h.model.index.entries.count == 3)
-            // `last`, not `[2]`: under the revert there are two entries and
-            // a pin must FAIL there, never take the runner down with it.
-            #expect(h.model.caretBlockID == h.model.index.entries.last?.blockID)
+            // `dropFirst().first`, not `[1]`: a pin must fail, never trap.
+            #expect(h.model.caretBlockID == h.model.index.entries.dropFirst().first?.blockID,
+                    "the caret is in the block the second ⏎ made")
         }
     }
 

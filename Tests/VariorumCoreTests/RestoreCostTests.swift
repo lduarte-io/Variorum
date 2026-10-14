@@ -197,6 +197,61 @@ struct RestoreCostTests {
         }
     }
 
+    /// **RED-ON-OLD (VX-182 — VX-179 U1's O-1: the same fence, applied to
+    /// population 2).** A take she already deleted forever (Delete Now on the
+    /// tray's take row — its purge intent standing until the janitor's
+    /// horizon) is no longer "waiting in Block History": the History face and
+    /// the tray both fence it out (`Queries.deletedTakes`), so no door brings
+    /// it back, and the restore's confirm must not count it as something the
+    /// road would take from her. Without the `NOT EXISTS` arm the count stays 2.
+    @Test func aTakeDeletedForeverIsNotCountedAsStillRestorable() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note", profile: .generic)
+            let block = try ops.newBlock(in: note.id, text: "A paragraph.", at: .end)
+            let gone = try ops.branchVariant(block.block.id, from: block.variant.id)
+            let waiting = try ops.branchVariant(block.block.id, from: block.variant.id)
+            try ops.deleteVariant(gone.id)
+            try ops.deleteVariant(waiting.id)
+            #expect(try db.read { try Queries.restoreCost($0, of: note.id) }.deletedTakes == 2)
+
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "variant", rowID: gone.id)])
+
+            let cost = try db.read { try Queries.restoreCost($0, of: note.id) }
+            #expect(cost.deletedTakes == 1,
+                    "the confirm counts only what Block History can still put back")
+        }
+    }
+
+    /// **The fence is STAMP-AWARE (GUARD — green on both sides by design;
+    /// the stamp clause is what keeps it green on the fix).** A take whose
+    /// Delete Now was asked, then PUT BACK (`restoreVariant` voids the intent
+    /// — 13j ladder B, B1) and deleted again, is restorable again — Block
+    /// History lists it — so the confirm counts it. An any-state fence (no
+    /// stamp clause) would hide it, the B1 limbo the Trash's arm was made
+    /// stamp-aware to close.
+    @Test func aTakePutBackAndDeletedAgainCountsAgain() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note", profile: .generic)
+            let block = try ops.newBlock(in: note.id, text: "A paragraph.", at: .end)
+            let take = try ops.branchVariant(block.block.id, from: block.variant.id)
+            try ops.deleteVariant(take.id)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "variant", rowID: take.id)])
+            try ops.restoreVariant(take.id)
+            try ops.deleteVariant(take.id)
+
+            let cost = try db.read { try Queries.restoreCost($0, of: note.id) }
+            #expect(cost.deletedTakes == 1, "the re-deleted take waits in Block History again")
+            // The History face's own read, asked as of the moment of the
+            // re-delete (the harness's world is stamped on its own clock).
+            let listed = try db.read { db -> [Variant] in
+                let row = try #require(try Variant.fetchOne(db, key: take.id))
+                let stamp = try #require(row.deletedAt)
+                return try Queries.deletedTakes(db, blockID: block.block.id, now: stamp)
+            }
+            #expect(listed.map(\.id) == [take.id], "…exactly as its History lists it")
+        }
+    }
+
     // MARK: - The set-aside originals (population 4)
 
     /// **THE MIRROR'S DRIFT GUARD.** `Queries.setAsideOriginals` writes

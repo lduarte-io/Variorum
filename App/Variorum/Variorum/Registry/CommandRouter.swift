@@ -668,6 +668,31 @@ final class CommandRouter {
         readEditAttached = !readEditTokens.isEmpty
     }
 
+    // MARK: - Write's take panel (VX-154, the VX-282 run)
+
+    /// Write's take panel reports itself here while it is up — the takes
+    /// board's shape exactly, for its reason: availability must track the
+    /// surface that actually answers, and while the panel is the LIFO top the
+    /// verbs that act where she writes cannot act from it
+    /// (`CapabilityContext.writeTakesPanelAttached`). A SET of tokens (mount
+    /// order is SwiftUI's; a flag would be cleared by a departing teardown).
+    @ObservationIgnored private var writeTakesPanelTokens: Set<UUID> = []
+
+    /// Observable so menu enablement re-evaluates when the panel comes and goes.
+    private(set) var writeTakesPanelAttached = false
+
+    func attachWriteTakesPanel() -> UUID {
+        let token = UUID()
+        writeTakesPanelTokens.insert(token)
+        writeTakesPanelAttached = true
+        return token
+    }
+
+    func detachWriteTakesPanel(_ token: UUID) {
+        writeTakesPanelTokens.remove(token)
+        writeTakesPanelAttached = !writeTakesPanelTokens.isEmpty
+    }
+
     // MARK: - Surface command handlers (LIFO — last mounted wins)
 
     @ObservationIgnored private var handlers: [(token: UUID, handler: (RoutedCommand) -> Bool)] = []
@@ -766,6 +791,7 @@ final class CommandRouter {
             writeEditorOwnsScrollView: writeEditorOwnsScrollView(),
             takesBoardAttached: takesBoardAttached,
             readEditAttached: readEditAttached,
+            writeTakesPanelAttached: writeTakesPanelAttached,
             aiLastChangeAvailable: aiLastChangeAvailable(),
             undoAvailable: undoAvailable(),
             redoAvailable: redoAvailable(),

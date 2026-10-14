@@ -186,8 +186,11 @@ struct EditorView: View {
         .sheet(item: $model.fanPanel) { panel in
             // Sitting 9 (R87): the FanPanel is retired — Write's take
             // machinery is the same v2 card grammar as everywhere else,
-            // scoped to this block.
-            WriteTakesPanel(session: session, postID: postID, blockID: panel.blockID)
+            // scoped to this block. VX-154: the panel closes itself (⌘⇧T, the
+            // toggle's close half) through this sheet's own binding.
+            WriteTakesPanel(
+                session: session, postID: postID, blockID: panel.blockID,
+                onClose: { model.fanPanel = nil })
         }
         .sheet(isPresented: $saveLensPrompt) {
             LensNameSheet(title: "Save current choices as a lens") { name in
@@ -867,6 +870,9 @@ extension EditorSurfaceDelegate: NSTextViewDelegate {
     }
 
     func textViewDidChangeSelection(_ notification: Notification) {
+        // VX-296: the face honours the landed caret first (attributes only),
+        // then the caret context reads the surface as she will see it.
+        model.settleMarkdownCaret()
         model.updateCaretContext()
     }
 }
