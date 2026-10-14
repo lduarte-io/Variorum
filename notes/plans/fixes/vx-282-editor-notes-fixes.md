@@ -3259,3 +3259,43 @@ after unexpected exit…"; the totals include both launches; the crashed test ha
 
 **3 — Close:** `xcrun simctl shutdown all` → **0 booted**; no instance; `Tools/stage release --who vx282-merge` at
 09:29:57. The dev store untouched (no app launch). The fix leg's R1-3 row is RE-OPENED below by this run.
+
+#### C-1 FIX LEG (the coordinator's ruling: a fix leg first, no merge with C-1)
+
+**The ruling (verbatim in substance):** a DEBUG crash in the phone target cannot land on main, and in Release the same
+road drops unsaved typing. **R1-3 is RE-OPENED and CONFIRMED** by the deterministic two-suite repro; that repro on the
+current product — `MobileLivenessTests` then `MobileMarkdownCaretTests`: the crash in
+`leavingATrailingSpaceBehindUnstylesTheSpanHonestly` + the two desyncs (`"hi"`, `"hello there"`) — IS the red-on-old
+evidence, already observed in the merged-tip window (09:29:17–09:29:52, `reruns-extract.txt`). The two load-dependent
+Mac reds are the orchestrator's to ticket.
+
+**The fix — `12d55d12`:** the guard prepared at the round-1 fix leg, `47606e46`, restored by cherry-pick (the object
+resolved), its comment brought to the finding and the commit message stating the mechanism and the repro as the pin
+(amended before its first push): `MobileEditorViewModel.settleMarkdownCaret` opens with `guard pendingEdit == nil else
+{ return }` — never while the gate has armed an edit that has not landed. **Mechanism (inferred from the outcome; the
+window's leg (a) decides it):** in the non-key posture UIKit reports the selection inside `coordinateEditing` BEFORE
+the character change — after the gate armed `pendingEdit`, while `editedMask` is still empty — so the shared face's
+guard let the settle write, the attribute edit joined the character edit in one `processEditing` report widened to the
+line, the armed edit no longer bound, and the route refused (the desync). Skipping consumes nothing: `storageDidEdit`
+consumes the arming and notes the edit; the post-edit report settles with the ledger's edit mark. Phone only — the
+Mac's selection change posts after `processEditing` (U2's measurement), so its tree is unaffected and not rebuilt.
+
+**The product:** `DerivedData/vx282-u2-ios` rebuilt from `12d55d12` — TEST BUILD SUCCEEDED
+(`DerivedData/vx282-c1-ios-build.log`). The Mac tree is untouched.
+
+**THE c1fix WINDOW PLAN (≈15 min; on the orchestrator's claim line; `guard.sh --author` first; `pgrep -lx Variorum`
+empty; no launch, no walk):** from `App/Variorum/`, logs to `notes/plans/vx282-screens/closeout/logs/` (`*.full.log`
+gitignored, extracts committed):
+- **(a) the two-suite repro on the fixed product (≈1 min):** `xcodebuild test-without-building -scheme VariorumMobile
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' -derivedDataPath DerivedData/vx282-u2-ios
+  -collect-test-diagnostics never -only-testing:VariorumMobileTests/MobileLivenessTests
+  -only-testing:VariorumMobileTests/MobileMarkdownCaretTests` → `c1-repro.full.log`. EXPECTED green: no crash, no
+  restart, zero desyncs for `"hi"` and `"hello there"`. **If still red: STOP** — the guard is not the cause; record,
+  shut the simulator down, release, report (the orchestrator rules between disabling the phone settle and a deeper
+  trace).
+- **(b) the WHOLE phone target on the fixed product (≈9 min):** the same destination/flags, no `-only-testing` →
+  `c1-phone-whole.full.log`. EXPECTED: only the standing `MobileStructuralTests.nothingUserFacingNamesTheMac` and the 4
+  declared known issues; no crash, no restart.
+- Then `xcrun simctl shutdown all` → 0 booted; release; record; report.
+
+**READY FOR STAGE — c1fix: (a) the two-suite repro, (b) the whole phone target, ≈15 min.**
