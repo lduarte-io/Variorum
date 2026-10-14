@@ -5125,6 +5125,19 @@ its log `closeout/logs/<step>.log` ending in `XCODEBUILD EXIT n`.
 A1 copy and cleanup. If the coordinator needs a split, the window splits cleanly at the seam after F1b (A1 kept, the
 claim kept or re-claimed; the whole target needs the A1 copy taken before it either way).
 
+#### THE CLOSEOUT WINDOW — RESULTS (claim `vx246-close`, the coordinator's GO; its pre-checks 10:27: `origin/main` `f3cc8d07` contained, no Variorum instance, no booted simulator, 69 GiB free, the dev store Standard/unlocked)
+
+| step | state |
+|---|---|
+| 0 | DONE (10:27:56–10:28:00) — HEAD `3c78ecc2` (pushed, clean); `origin/main` `f3cc8d07` re-fetched; `git diff --name-only a4235afb..HEAD -- App Sources` EMPTY; `guard.sh --author` OK (idle 2,578 s); `pgrep -lx Variorum` empty; 0 booted simulators. The GO's exact line run: `Tools/stage release --who coord-for-vx246 && Tools/stage claim --who vx246-close --reason "VX-246 closeout: F-1 pin + Tutorial* + WHOLE Mac target on merged tree 8c47f877 (A1)" --minutes 75` → **STAGE CLAIMED 10:28:00 MDT, 75 min** (expires 11:43) |
+| 1 | DONE (10:28) — `a1.sh` → **`…/Variorum-dev/Backups/safety-copies/scale-prestage-20261014T162804Z`** (`closeout/a1-path.txt`), five files each `cmp`-verified (sha256 prefixes: sqlite `c17923414b2e` · wal `7f2fcf1ec90d` · shm `e4e2b900d45c` · keys `3af4704371ff` / `7e12a1b85890`; `closeout/store-hash-pre.txt` — the sqlite as VX-282's merged-tip run left it at 08:50, the wal/shm at 09:17/09:19); prefs exported, **1,596 keys**, `appearanceChoice` = system (`prefs-pre.plist`); `Backups/` listed (70 lines, `backups-pre.txt`) |
+| R1 | DONE (10:28:09–10:28:~50) — **RED EXACTLY AS DESIGNED** (`closeout/logs/r1.log`, `r1.xcresult`; `vx246-r1-red`): "✘ Test run with **8 tests in 1 suite** failed after 5.908 seconds with **3 issues**", EXIT 65 — `lessonTwoConnectingAClient` RED with exactly 3 issues: **`:288`** `!text.contains("Running the setup again moves the name")` · **`:290`** the whole new sentence's `contains` · **`:296`** `text.contains(oneRule)`; **`:297`** (L1's half, `MCPPaneCopy.clientBoundary.contains(oneRule)`) NOT red; the other 7 tests GREEN. No failure anywhere else, so the pin carries no defect |
+| R1b | DONE (–10:29:25) — `vx246-r1-red`, `MCPHerEditorDoorTests` ALONE: "✔ Test run with **4 tests in 1 suite passed** after 0.517 seconds **with 4 warnings**", EXIT 0 (`r1b.log`) — the 4 warnings are the old harness's: "⚠︎ Test «unknown» recorded a warning at WithRandomNumberGenerator.swift:59:1 … `@Dependency(\.withRandomNumberGenerator)` has no test implementation, but was accessed from a test context" ×4 (F-4's "before"; Swift Testing words a passing run "with 4 warnings", a failing one "(including N warnings)") |
+| F1a | DONE (10:29:34–~10:31:50) — `vx246-final`, the 18 Tutorial* suites: "✔ Test run with **128 tests in 18 suites passed** after 96.121 seconds", EXIT 0 (`f1a.log`, `f1a.xcresult`) — **`lessonTwoConnectingAClient` ✔ (F-1 RED → GREEN, the merged product)**; `TutorialMCPChapterCaptureTests` SKIPPED as gated (its suite and `captureTheChapterAndTheSetupMenu()` "skipped" — counted in the 128); **0 warnings**, 0 ✘ |
+| F1b | DONE (–10:31:58) — `vx246-final`, `MCPHerEditorDoorTests` ALONE: "✔ Test run with **4 tests in 1 suite passed** after 0.406 seconds." — **NO warning** (0 `⚠︎` lines), EXIT 0 (`f1b.log`) — **F-4: 4 → 0**, the same shape as R1b |
+| W | IN-PROGRESS — started DETACHED 10:32:08 (`guard.sh --author` OK, idle 2,830 s; `pgrep -lx Variorum` empty), polled in the foreground → `closeout/logs/whole.log`, `whole.xcresult` |
+| C | NOT-STARTED |
+
 **The result line (to fill at RELEASE):** claim `vx246-close` «from–to», RELEASED («n» of 75 min) — R1 «…» · R1b «…» ·
 F1a «…» · F1b «…» · W «N tests / M suites, I issues incl. K known; the reds, attributed» · posture «Standard/unlocked,
 cmp-SAME vs A1; prefs «n» keys, 0 differ» · the A1 copy «path», the coordinator's to prune.
