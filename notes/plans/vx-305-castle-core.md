@@ -558,10 +558,12 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   unnamed and a stray plan each ignored and reported, the act rolling back; a memory item failing its seal losing to
   the record's section; a plan never holding a secret; every repair's precondition verified before a delete; no repair
   while an act is in flight; no Touch ID item by a repair; nothing destructive on a Standard record's word; delete on
-  sight by recorded id only; decision 35; the mirror never re-adding an Apple wrap) — the next commit after `8b3b1e39`;
+  sight by recorded id only; decision 35; the mirror never re-adding an Apple wrap) — `53e94d82`;
   (b) the crossings — Use Castle, Use Standard, Replace All Keys, the follows (the finish of a lost device's leave
   included) — DONE, 26 tests in 4 suites green filtered (the exact writes; a crash after EVERY write — Touch ID,
-  Always ask, synced, plan dropped; the follower's hold; the refusals) — this commit; (c) the account acts — set up sync, enroll, the four leaves, Move — NOT-STARTED;
+  Always ask, synced, plan dropped; the follower's hold; the refusals) — `8b3b1e39`; (c) the account acts — set up
+  sync, enroll by the joining rules, the three leaves (This Mac Only carrying a mode while signed out), Move — DONE,
+  13 tests in 2 suites green filtered — `843ef37c`;
   (d) copies — open a copy, land, Send Library, plaintext export, the offer's delete — NOT-STARTED; (e) the key doors,
   device settings, the re-arm, confirm mode, create library, Re-link (both arms), the old shared key's move and
   retirement, the migration — NOT-STARTED; (f) U3's guards with their DEBUG mutation pins, the log scan, decision 35,
