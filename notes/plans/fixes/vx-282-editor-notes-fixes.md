@@ -112,7 +112,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-290 — the empty-block backspace's caret landing | **DONE** — fix `385aa1fc`; W1 red on old + W2 the Mac batch green `be826a5d`; W3 the walk, every row held `a7a63949`. Stage released 22:01:26 and 23:47:00. One observation for the orchestrator to ticket (the bar's word counter, not this unit's road). No revert in flight. |
-| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **READY FOR STAGE — u2b: phone W2b suites (-collect-test-diagnostics never) + Mac g1, ≈12 min.** The W2b fix built: `MarkdownFace.settleCaret` never writes while `storage.editedMask` is non-empty (before the ledger, so a skip consumes nothing); the trace of why a skipped settle is never lost is recorded; the red pin is `MobileMarkdownCaretTests.leavingATrailingSpaceBehindUnstylesTheSpanHonestly` (red on the pre-guard product by its crash). Rebuilt headless into the EXISTING `vx282-u2` + `vx282-u2-ios` only. Earlier: W1 red on old as designed, W2 Mac 190/26 green, W3 walk holds (Study). No claim held; no revert in flight. |
+| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **READY FOR STAGE — W1 red on old (old products) + W1b revert B (the ring guard) + W2 the Mac batch g1/g2 (fixed) + W3 a short walk on the dev store (both voices), ≈42 min.** Record `4e5d3464`; seams `04e0369f`; pins ahead of the fix `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Three product sets built headless, TEST BUILD SUCCEEDED: `DerivedData/vx282-u3-old-products`, `…-revB-products`, `DerivedData/vx282-u3` (fixed). Revert B DONE and RESTORED (`git diff` empty). PROVISIONALs P-U3-1…7 (QUESTIONS #220). No claim held; no revert in flight. Every count PENDING. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — W1 red on old (old products) + W2 the Mac batch g1/g2 (fixed) + W3 a walk on the dev store (the bar, the pad, the tour in Terminal and Study, the away start), ≈42 min.** Traces `324bfda8`; pins ahead of the fix `c4f2a893` (+ the tour pin's isolation `bfd3ca38`); fix VX-193 `0c31fcc5`, VX-112 `6bb9c7c9`. Products built headless, TEST BUILD SUCCEEDED ×2: `DerivedData/vx282-u4-old-products` (pins over the pre-fix box, by the named revert `cdc842f0` — DONE and RESTORED, `git diff` empty) and `DerivedData/vx282-u4` (fixed). PROVISIONALs P-U4-1/2 (QUESTIONS #221). No claim held; no revert in flight. Every count PENDING. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
@@ -360,8 +360,15 @@ capture is the bottom bar's `block i/n`** (the caret's block and the count), the
 
 ### U2 — VX-296 (the italics flicker: a caret-aware live restyle)
 
-**State: IN-PROGRESS.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-13. Every count and
-every "green"/"red" below is **PENDING** until it is run (headless) or until the stage window runs it.
+**NOT DONE in this unit (stated first):** the walk ran in ONE voice (Study, the dev store's own) — the second voice
+was not walked (the Settings voice switch was not cheap in the window); the phone has no walk (its pins drive the
+real `MobileEditorTextView` in a key window); the opener side and ⌘I/⌘B stay caret-blind by PROVISIONAL choice
+(P-U2-1/P-U2-3, QUESTIONS #219).
+
+**State: DONE** (2026-10-14 01:17 — every row verified: headless core, W1 red on old, W2 + u2b green, W3 walk).
+Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-13/14. Fix commits: `962a7305` (core parser +
+gate + ledger) · `75b45ca9` (face + the Mac's two live roads) · `657bb57c` (the phone) · `cb2251c4` (the
+pending-edit guard, the W2b finding's fix). Pins ahead of the fix: `44ad276b`.
 
 **The ruling being built:** fix **(a)**, her word on the ticket — *"296: your fix is good"*: caret-aware, LIVE
 EDITOR ONLY. While her caret sits right after the whitespace that disqualifies a closer, the closer still counts;
@@ -710,6 +717,26 @@ the run is a first boot and a fresh install (budgeted).**
    `MacIdentityAuditWiringTests` `EditorSessionTests` `ReviewRoundFixTests` `CommitFlowTests` `FanFlowTests` →
    `u2b-w2-g1.log`. EXPECTED: 106 tests / 13 suites green, as at W2.
 4. `xcrun simctl shutdown all`; confirm 0 booted; release the claim (unless told to hold it).
+
+**THE u2b WINDOW — RUN 2026-10-14, 01:14:41 → 01:17:22 (the coordinator's GO, part 1 of a chained window; claim
+`vx282-u2b`, HELD at the end for U3's chained handover; `guard.sh --author` OK before each leg; at the start no
+Variorum instance, no booted simulator, the simulators freshly erased — iPhone 17 Pro iOS 26.2 present; nothing
+rebuilt — the products built at `cb2251c4`).**
+- **The phone, W2b re-run — GREEN** (`u2b-w2b-phone.log`, `-collect-test-diagnostics never`, a first boot and fresh
+  install, ≈ 70 s in all): "**Test run with 59 tests in 10 suites passed**", ONE launch (0 "Restarting after
+  unexpected exit"), `** TEST EXECUTE SUCCEEDED **`. **THE RED PIN IS GREEN:**
+  `MobileMarkdownCaretTests.leavingATrailingSpaceBehindUnstylesTheSpanHonestly` ✔ (it crashed on the pre-guard
+  product) — and it asserts the italic on the line right after `insertText("hello ")`, so the skipped mid-transaction
+  settle WAS re-run after UIKit's transaction closed (the trace's inference, now observed). `herFlow…` ✔. All ten
+  suites ✔: the four `MobileMarkdown*` suites, `MobileMarkdownCaretTests`, materialization & identity, routing &
+  autosave, the verdict binding, the identity separator check, the crash reproductions.
+- **The Mac g1 re-run (the shared settle changed) — GREEN** (`u2b-w2-g1.log`): "**Test run with 106 tests in 13 suites
+  passed**", 0 skipped, `** TEST EXECUTE SUCCEEDED **` — identical to W2's g1. W2's g2 (84/13) ran before the guard
+  and was not re-run, per the u2b plan: its panes settle through the same shared face, but on the Mac the guard never
+  trips (the selection change and `textDidChange` both arrive after `processEditing`, measured), and the pane suites in
+  g1 (`PaneMarkdownCaretFaceTests`) re-ran green through it.
+- `xcrun simctl shutdown all` → **0 booted**; 0 Variorum instances; **the claim `vx282-u2b` still HELD** (~23 min left
+  at 01:17) for U3's chained handover.
 
 ### U3 — VX-154 (the take panel's remaining routed commands)
 
