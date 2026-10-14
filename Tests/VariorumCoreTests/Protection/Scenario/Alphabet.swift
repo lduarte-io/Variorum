@@ -876,6 +876,7 @@ extension SWorld {
         let leaf = DeviceLeaves(world: self, device: device)
         guard let slot = device.slot else { throw WorldRefusal.noLibrary }
         let memoryName = KName.memory(Self.scope, slot.libraryID)
+        if slot.record?.mode == .standard { truth.tamperedStandard[device.name] = slot.fingerprint }
         lock(device)
         switch tamper {
         case .plantAppleWrap:

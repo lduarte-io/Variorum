@@ -98,6 +98,11 @@ struct Truth {
     /// Masters an older build's leave put under the old shared key (§8's
     /// residue — this build never adds to it).
     var olderExposedMasters: Set<Data> = []
+    /// Devices whose STANDARD key file a login-password holder rewrote, with
+    /// the key it was then under — rule 3: in Standard that person can rewrite
+    /// anything, and no repair acts on a Standard record's word (§3.3), so
+    /// promise 3's own-key wording waits for the next key change.
+    var tamperedStandard: [String: String] = [:]
     /// Apple key ids whose deliberate delete never reached iCloud: made while
     /// the device's switch was off, or queued and lost with its keychain (a
     /// replaced, wiped or re-Apple-ID'd device) — §8's residue (PROVISIONAL
@@ -833,6 +838,9 @@ final class DeviceLeaves: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysL
                 facts.append(LegacyItemFact(kind: .silent(account: name.account), fingerprint: item.value.libraryKey.map(PF.fp)))
             }
         }
+        for name in device.keychain.names(service: LegacyItems.syncCustodyService) where name.account.hasPrefix(scope) {
+            facts.append(LegacyItemFact(kind: .syncCustody(account: name.account), fingerprint: nil))
+        }
         for name in device.keychain.names(service: LegacyItems.escrowService) {
             guard let key = device.keychain.item(name)?.value.libraryKey else { continue }
             facts.append(LegacyItemFact(kind: .escrow(libraryID: name.account), fingerprint: PF.fp(key)))
@@ -844,10 +852,12 @@ final class DeviceLeaves: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysL
         switch kind {
         case .silent(let account), .gated(let account): return KName(service: LegacyItems.storeKeyService, account: account)
         case .escrow(let libraryID): return KName.escrow(libraryID)
+        case .syncCustody(let account): return KName(service: LegacyItems.syncCustodyService, account: account)
         }
     }
 
     func readLegacyItem(_ kind: LegacyItemFact.Kind) throws -> StoreKey? {
+        if case .syncCustody = kind { return nil }
         guard let item = device.keychain.item(legacyName(kind)) else { return nil }
         return world.pressRead(device, item)?.libraryKey
     }

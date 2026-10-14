@@ -331,7 +331,7 @@ public enum AssessRules {
                 } else if case .silent = item.kind {
                     faults.append(.silentItemIsOnlyRoad(fingerprint: fingerprint))
                 }
-            case .gated:
+            case .gated, .syncCustody:
                 continue
             }
         }

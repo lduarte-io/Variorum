@@ -30,6 +30,18 @@ struct AccountScenarios {
     /// (unlocked offline, then back online — pre-13x §3.3's offline unlock):
     /// each derives the account's keys at its door with the secret typed
     /// there, and never leaves an act in flight it can't finish.
+    /// A synced Standard library migrated from today's build enters Castle:
+    /// today's per-store sync custody item — silent, holding the account's
+    /// Standard-era master — goes with the crossing, so no login-password
+    /// holder opens a pre-Castle copy's master wrap with it (promise 2).
+    @Test func todaysSyncCustodyGoesWhenTheLibraryEntersCastle() async throws {
+        let (world, _) = try syncedWorld(.standard, devices: ["macA"])
+        await world.done([.launch("macA"), .backup("macA"), .useCastle("macA", .alwaysAsk, newWords: false), .settle])
+        let library = try #require(world.macA.slot?.libraryID)
+        #expect(world.macA.keychain.local[KName.legacySync(SWorld.scope, library, gated: false)] == nil)
+        expectPromisesKept(world)
+    }
+
     @Test func theKeyDoorsOnAnAlwaysAskDeviceUnlockedOffline() async throws {
         for door in [Action.changePassphrase("macA"), .regenerateWords("macA")] {
             let (world, _) = try syncedWorld(.castle, devices: ["macA"], gate: .alwaysAsk)

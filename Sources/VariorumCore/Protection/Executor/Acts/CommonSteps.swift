@@ -230,11 +230,19 @@ extension ActContext {
         }
         guard sweepForCastle else { return }
         for item in try leaves.legacyItems.legacyItems() {
+            // Today's per-store sync custody holds the account's sync keys of
+            // today's road — the Standard-era master opens every pre-Castle key
+            // file's master wrap. It goes with the crossing (the act has filed
+            // the account's keys its own way). VX-305 U4, found by the world.
+            if case .syncCustody = item.kind {
+                try leaves.legacyItems.deleteLegacyItem(item.kind)
+                continue
+            }
             guard let fingerprint = item.fingerprint, tree.contains(fingerprint) || fingerprint == plan.fromFingerprint,
                   historyHolds(fingerprint) else { continue }
             switch item.kind {
             case .silent, .escrow: try leaves.legacyItems.deleteLegacyItem(item.kind)
-            case .gated: continue
+            case .gated, .syncCustody: continue
             }
         }
         for (id, file) in try leaves.keyFiles.legacyKeyFilesBesideLibrary() {

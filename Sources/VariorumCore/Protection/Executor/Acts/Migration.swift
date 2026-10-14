@@ -162,7 +162,7 @@ extension ActContext {
                 if let held = try leaves.legacyItems.readLegacyItem(item.kind), Self.fp(held) != current {
                     folded.append((held, .castle))
                 }
-            case .gated:
+            case .gated, .syncCustody:
                 continue
             }
         }

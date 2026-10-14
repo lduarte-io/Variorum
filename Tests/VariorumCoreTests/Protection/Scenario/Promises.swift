@@ -409,6 +409,7 @@ extension SWorld {
     func standardMeansStandard(_ device: SDevice) -> [Violation] {
         guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
               record.mode == .standard, record.modeConfirmed else { return [] }
+        if truth.tamperedStandard[device.name] == record.currentFingerprint { return [] }
         guard let live = liveKeyFile(device), live.fingerprint == record.currentFingerprint, let wrap = live.apple else {
             return [Violation(promise: 3, device: device.name, detail: "no Apple wrap of the current key")]
         }
@@ -549,7 +550,7 @@ extension SWorld {
         for device in devices where device.build == .new {
             guard let was = before[device.name] else { continue }
             let now = posture(device)
-            guard was.libraryID == now.libraryID, was.mode != nil else { continue }
+            guard was.libraryID == now.libraryID, was.mode != nil, now.mode != nil else { continue }
             let changed = was.mode != now.mode || was.account != now.account
             guard changed else { continue }
             if deliberate(action, on: device.name) || crashedBefore.contains(device.name) { continue }
@@ -574,6 +575,10 @@ extension SWorld {
         switch action {
         case .crash(let inner, _): return deliberate(inner, on: name)
         case .settle: return true
+        // Files replaced from outside the app (promise 10 judges a tamper in
+        // Castle; promise 4 judges what the app does).
+        case .timeMachineRollback(let d), .deleteContainerAndOpenOldCopy(let d), .tamper(let d, _): return d == name
+        case .cloneMac(_, let d): return d == name
         case .useCastle(let d, _, _), .useStandard(let d), .follow(let d, _), .finishLeave(let d, _), .turnOnSync(let d),
              .move(let d), .thisMacOnly(let d, _), .stopSyncingHere(let d, _), .deleteAccountHere(let d), .resumeSync(let d),
              .answerCorner45(let d, _), .confirmMode(let d), .land(let d, _), .openOlderLibrary(let d), .replaceAllKeys(let d, _):
@@ -630,8 +635,9 @@ extension SWorld {
         }
         // The master as the vault was READ this session (the line was computed
         // from that reading — the account moving on since is promise 7's).
-        var masters: [SymmetricKey?] = [library.record?.account.flatMap { todayMaster($0) }]
-        if let account = library.record?.account, let read = device.executor?.freshVaults[account] {
+        let vaultAccount = device.session.accountID ?? library.record?.account
+        var masters: [SymmetricKey?] = [vaultAccount.flatMap { todayMaster($0) }]
+        if let account = vaultAccount, let read = device.executor?.freshVaults[account] {
             for p in known(account).timeline.compactMap(\.passphrase) {
                 if let pk = passphraseKey(p, read.format.kdf), let m = try? read.format.unwrapMaster(withPassphraseKey: pk.key) {
                     masters.append(m)

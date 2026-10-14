@@ -129,6 +129,10 @@ public struct LegacyItemFact: Hashable, Sendable {
         case gated(account: String)
         /// The 13p escrow item (a raw key in iCloud Keychain, by library ID).
         case escrow(libraryID: String)
+        /// Today's per-store sync custody (`<scope>-<libraryID>-sync`, and its
+        /// `-sync-biometric` twin) — the account's sync keys of today's road,
+        /// the master among them. Entering Castle removes it (VX-305 U4).
+        case syncCustody(account: String)
     }
 
     public var kind: Kind
