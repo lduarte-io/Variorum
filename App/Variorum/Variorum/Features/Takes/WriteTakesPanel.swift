@@ -51,6 +51,9 @@ struct WriteTakesPanel: View {
     @State private var archived: [Variant] = []
     /// VX-135: the panel's routed-command registration (see `handleRouted`).
     @State private var commandToken: UUID?
+    /// VX-154: the panel's report to the registry while it is up (the verbs
+    /// that act where she writes are grey for as long as it holds).
+    @State private var attachToken: UUID?
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     @Environment(\.dismiss) private var dismiss
@@ -93,7 +96,11 @@ struct WriteTakesPanel: View {
         self.postID = postID
         self.blockID = blockID
         self.onClose = onClose
-        _model = State(initialValue: model ?? TakesViewModel(session: session, postID: postID))
+        let panelModel = model ?? TakesViewModel(session: session, postID: postID)
+        // VX-154: this model serves ONE block — its ring never stands
+        // outside it, and its archive receipt names this panel's list.
+        panelModel.writePanelBlockID = blockID
+        _model = State(initialValue: panelModel)
     }
 
     private var slot: Queries.RenderedBlock? {
@@ -109,6 +116,15 @@ struct WriteTakesPanel: View {
             HStack {
                 Text("Takes — block \(String(blockID.prefix(8)))")
                     .font(.headline)
+                    // VX-154: ⌘S's optional name, asked IN the panel (the
+                    // Takes bar's ask, its own presentation here — Write's
+                    // would hang off its bar beneath this sheet).
+                    .savepointNameAsk(
+                        Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
+                        tokens: tokens, arrowEdge: .bottom
+                    ) { _, name in
+                        Task { await model.fileSavepoint(named: name) }
+                    }
                 Spacer()
                 Button("Open Takes mode") {
                     // 13b 1b: composed routing (P-4) — and the ring lands
@@ -199,10 +215,14 @@ struct WriteTakesPanel: View {
         // beneath this sheet, and its `.choose` arm OPENS the caret block's
         // panel — already open — so the take whose pane is live here was never
         // chosen. Registered on appear, the panel is the LIFO top. VX-150: the
-        // other take keys are claimed too (`handleRouted`); every other
-        // command falls through to Write unchanged.
+        // other take keys are claimed too (`handleRouted`). VX-154: so is
+        // every other command about a block or a take — on THIS block — and
+        // the panel tells the registry it is up, so the verbs that act where
+        // she writes are grey while it is; only the note's own commands
+        // still reach Write.
         .onAppear {
             commandToken = session.commandRouter.registerHandler { handleRouted($0) }
+            attachToken = session.commandRouter.attachWriteTakesPanel()
         }
         .sheet(item: Binding(
             get: { model.takeLabelRequest },
@@ -212,9 +232,44 @@ struct WriteTakesPanel: View {
                 Task { await model.setTakeLabel(request.variantID, label: label) }
             }
         }
+        // VX-154: the presentations the panel's routed arms raise — the Takes
+        // bar's own (`TakesBottomBar`'s sheets, the same model requests), so
+        // a door pressed here acts HERE (P-2) instead of queueing a sheet
+        // behind this one on the caret block. Block History's NAMED home is
+        // the post detail's inspector (`requestBlockHistory` asks the router
+        // first); this sheet is the fallback where none is mounted.
+        .sheet(item: Binding(
+            get: { model.commentsRequest },
+            set: { model.commentsRequest = $0 })
+        ) { target in
+            CommentsPanel(session: session, blockID: target.blockID)
+        }
+        .sheet(item: Binding(
+            get: { model.blockHistoryRequest },
+            set: { model.blockHistoryRequest = $0 })
+        ) { request in
+            BlockHistoryPane(
+                session: session, request: request,
+                onOpenTray: { blockID in
+                    model.blockHistoryRequest = nil
+                    model.trayRequest = TrayRequest(postID: postID, revealBlockID: blockID)
+                },
+                onJump: { request in model.blockHistoryRequest = request })
+        }
+        .sheet(item: Binding(
+            get: { model.trayRequest },
+            set: { model.trayRequest = $0 })
+        ) { request in
+            TrayPanel(
+                session: session, postID: request.postID,
+                revealBlockID: request.revealBlockID)
+        }
         .onDisappear {
             if let commandToken {
                 session.commandRouter.unregisterHandler(commandToken)
+            }
+            if let attachToken {
+                session.commandRouter.detachWriteTakesPanel(attachToken)
             }
             model.teardown()
         }
@@ -231,10 +286,115 @@ struct WriteTakesPanel: View {
     /// panel, the mints grew the caret block from the take Write shows there,
     /// and ⌘⇧A archived that shown take rather than the one the ring is in.
     /// Each arm is the Takes board's own body, passed this panel's column so
-    /// the ring lands on a card the panel renders. ⌘⇧T, ⎋ and ⌘⇧L are not
-    /// take acts on a block and still reach Write.
+    /// the ring lands on a card the panel renders. ⎋ and ⌘⇧L are not take
+    /// acts on a block and still reach Write.
+    ///
+    /// **VX-154 — every OTHER command about a block or a take is the panel's
+    /// too.** Falling through, each reached Write's caret arm beneath the
+    /// sheet: ⌘S asked for the caret's take, comments/callout/copy/history/
+    /// origin/delete/archive addressed the caret block, the take↔block pair
+    /// moved the caret's shown take, the structural verbs cut and joined at
+    /// Write's caret, and ⌘⇧T swapped the sheet to the caret block's panel.
+    /// The rule (the run record's § U3): the board's own arm with THIS block
+    /// named; a take-needing act takes the ring's take — with no ring, ⌘S
+    /// takes what the block shows (P-VX150-1's rule) while ⌥⌘⏎ refuses
+    /// (⌘⇧A's); the verbs that cut, join or add blocks where she writes are
+    /// grey while the panel is up and refuse here; ⌘⇧T closes the panel. The
+    /// note's own commands (seal, versions, ⌘⇧S, the tray, find, ⌘⇧L) still
+    /// reach Write — the same note either way.
     private func handleRouted(_ command: RoutedCommand) -> Bool {
-        guard case .takes(let takes) = command else { return false }
+        switch command {
+        case .takes(let takes):
+            return handleTakesKey(takes)
+        // Every arm below: a block that has left the note acts on nothing —
+        // the panel's one gone rule (VX-150's ladder), its own face's line.
+        case .commit:
+            guard let slot else { return refuseBlockGone() }
+            commitRingTakeElseShown(slot: slot)
+        case .comments:
+            guard slot != nil else { return refuseBlockGone() }
+            model.requestComments(blockID: blockID)
+        case .callout(let edit):
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.applyCallout(edit, blockID: blockID) }
+        case .copyAllTakes:
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.copyAllTakes(blockID: blockID) }
+        case .takeToBlockBelow:
+            guard slot != nil else { return refuseBlockGone() }
+            // The ring's take, named — never what's shown (PROVISIONAL
+            // P-U3-3: an act that takes a take OUT of the fan needs the
+            // ring, ⌘⇧A's precedent; the board's own sentence).
+            guard let ring = ringTakeID else {
+                model.refuse(TakesStructureController.clickIntoATakeToMoveIt)
+                return true
+            }
+            Task { await model.moveTakeIntoBlockBelow(blockID: blockID, variantID: ring) }
+        case .takesToBlocks:
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.turnTakesIntoBlocks(blockID: blockID) }
+        case .showBlockHistory:
+            guard slot != nil else { return refuseBlockGone() }
+            model.requestBlockHistory(blockID: blockID)
+        case .showOriginBlock:
+            guard slot != nil else { return refuseBlockGone() }
+            model.revealFocusedBlockOrigin(blockID: blockID)
+        case .deleteBlock:
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.deleteFocusedBlock(blockID: blockID) }
+        case .archiveBlock:
+            guard slot != nil else { return refuseBlockGone() }
+            Task { await model.archiveFocusedBlock(blockID: blockID) }
+        // The verbs that cut, join or add blocks where she writes: GREY while
+        // the panel is up (the registry's `outsideWritesTakesPanel`), so a
+        // dispatch only reaches here by a road that bypasses the menu — and it
+        // is consumed with the panel's line, never handed to Write's caret.
+        case .structural, .deleteInEveryTake, .insertBlockBelow, .addBlockAtEnd:
+            model.refuse(Self.actsInTheNoteNote)
+        // The NOTE's own commands — the same note the panel shows — and
+        // `.pageFan`, which the registry greys in Write (the board's alone).
+        case .toggleSeal, .saveNoteVersion, .showNoteVersions, .showNoteTray, .find, .pageFan:
+            return false
+        }
+        return true
+    }
+
+    /// The take the panel's ring is in — nil when no card is live (the ring
+    /// never stands outside this block: `TakesViewModel.writePanelBlockID`).
+    private var ringTakeID: String? {
+        model.focusedPane.flatMap { $0.blockID == blockID ? $0.variantID : nil }
+    }
+
+    /// ⌘S (VX-154): the take the ring is in; with no ring, the take the block
+    /// SHOWS (PROVISIONAL P-U3-1 — P-VX150-1's ratified rule for ⌘T, and what
+    /// Write's caret arm committed when the panel was the caret block's). The
+    /// ring moves onto that take FIRST, so the take being committed is the one
+    /// wearing the ring and the filing — which commits the take the ring is in
+    /// at ⏎ — agrees with the ask. The ask is the Takes board's
+    /// (`askSavepointName`: its seal refusal, its field), presented here.
+    private func commitRingTakeElseShown(slot: Queries.RenderedBlock) {
+        if ringTakeID == nil, let shown = slot.variantID {
+            model.focus(.init(columnID: column.id, blockID: blockID, variantID: shown))
+        }
+        model.askSavepointName()
+    }
+
+    /// The panel's line for a verb that acts in the note itself, should one
+    /// reach it while it is grey (PROVISIONAL copy — her copy pass, P-U3-6).
+    static let actsInTheNoteNote = "That works in the note itself — close the takes panel first."
+
+    /// How the panel closes itself (VX-154's ⌘⇧T): the host's road, else
+    /// `dismiss`.
+    private func closePanel() {
+        if let onClose {
+            onClose()
+        } else {
+            dismiss()
+        }
+    }
+
+    /// The take keys (VX-135 · VX-150 · VX-154's ⌘⇧T).
+    private func handleTakesKey(_ takes: TakesCommand) -> Bool {
         switch takes {
         // Ladder r1 (the escalated finding): NO take key acts on a block
         // that has left the note — one rule, one sentence, the mints' guard
@@ -281,7 +441,14 @@ struct WriteTakesPanel: View {
         case .blankChoose:
             guard slot != nil else { return refuseBlockGone() }
             Task { await model.newBlankTakeAsChosen(blockID: blockID, preferredColumnID: column.id) }
-        case .toggleFan, .closeAll, .saveLens:
+        // VX-154 (PROVISIONAL P-U3-4): ⌘⇧T — "open/close takes at the block
+        // you're in" — CLOSES the panel, the toggle's close half (the board's
+        // ⌘⇧T closes a bloom the same way). Falling through it reached
+        // Write's `openCaretFan`, which swapped this sheet for the CARET
+        // block's panel when the panel came from another block's ⑂ badge.
+        case .toggleFan:
+            closePanel()
+        case .closeAll, .saveLens:
             return false
         }
         return true
