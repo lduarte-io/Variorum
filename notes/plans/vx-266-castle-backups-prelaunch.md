@@ -1022,7 +1022,8 @@ retired-key clause, 3 and 7 once the world settles (propagation done, followers 
   Castle;
 - **a memory item that turns up on new hardware:** a new device identity is minted there, and it takes over its
   predecessor's Apple keys — a replacement Mac entering Castle retires its predecessor's own key;
-- **a living Mac cloned onto new hardware** (Quick Start or Migration Assistant, the original still in use): the clone
+- **a living Mac cloned onto new hardware** (Quick Start, Migration Assistant, or a Time Machine restore to another Mac,
+  the original still in use): the clone
   gets its own identity; if either Mac enters Castle and retires the Apple key they share, the other heals with
   Re-link's library arm, and nothing stops opening;
 - **the memory item deleted alone** on an Always-ask Castle Mac where a finger has been enrolled: the Mac finds its own
