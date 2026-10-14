@@ -15,12 +15,15 @@ import GRDB
 // (the date, the filing, the rule's columns) is COMPARE-AND-SET: it writes
 // only while the row still reads the value its act left there, so the UNDO
 // never overwrites what she set since (VX-184 ladder round 1, the
-// undo-overwrite class). The REDO does not yet keep that promise (VX-184
-// ladder round 2, 2026-10-13): when she has set a value BACK to the pre-act one
-// herself, ⌥⌘Z is quiet yet the entry still moves onto the redo stack
-// (`UndoStack.undo` pops any inverse that does not throw), and the redo —
-// checking only for that pre-act value — re-applies the client's act over
-// hers. VX-276 owns the fix: the redo keyed on what its inverse wrote.
+// undo-overwrite class). The REDO keeps the same promise (VX-246 U2 —
+// VX-276): each half answers whether it wrote, and the stack RETIRES an entry
+// whose half was quiet (`UndoStack`'s header) — so when she has set a value
+// BACK to the pre-act one herself, ⌥⌘Z is quiet, the entry retires, and no
+// ⇧⌥⌘Z re-applies the client's act over hers. Where an entry has PARTS it
+// keeps them: `set_book_rule` records the columns its last half changed (a
+// column she set back between ⌥⌘Z and ⇧⌥⌘Z is never re-written), and
+// `save_version`'s redo revives the version only while it is dead on its
+// undo's own stamp (`registerMintedContainerEntry`).
 extension Operations {
     // MARK: - EDIT: put back (the tray — R-13nb-14's named IN)
 

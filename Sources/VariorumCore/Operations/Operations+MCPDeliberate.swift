@@ -19,13 +19,14 @@ import GRDB
 // undo-overwrite class): a slot is set back only while it still points where
 // the act left it (the redo: where the undo would leave it — the pre-act
 // pointer), so the UNDO never overwrites a take she chose since with her own ✓
-// (which registers no entry). The REDO does not yet keep that promise (VX-184
-// ladder round 2, 2026-10-13): if her ✓ put the slot BACK on its pre-act take,
-// ⌥⌘Z is quiet yet the entry still moves onto the redo stack (`UndoStack.undo`
-// pops any inverse that does not throw), and ⇧⌥⌘Z — finding the pre-act
-// pointer — re-chooses the client's take over hers. VX-276 owns the fix: the
-// redo keyed on what its inverse wrote. The
-// COMMIT registers NONE — exactly as her own commit registers none (AppSpec §9
+// (which registers no entry). The REDO keeps the same promise (VX-246 U2 —
+// VX-276 · VX-277): each half answers whether it moved a slot, and the stack
+// RETIRES an entry whose half was quiet (`UndoStack`'s header) — so when her ✓
+// put a slot BACK on its pre-act take, ⌥⌘Z is quiet, the entry retires, and no
+// ⇧⌥⌘Z re-chooses the client's take over hers. Each entry also keeps its
+// PARTS: the slots its last half moved (`registerPointerEntry`), and for
+// `adopt_lens` the kept lens's stamp as well, so each half acts only on what
+// its partner changed. The COMMIT registers NONE — exactly as her own commit registers none (AppSpec §9
 // excludes commits from structural undo): a commit is append-only (I5) and
 // `commit_point` carries no tombstone, so no inverse exists that would not
 // destroy a row (S2). The brackets `edit_take` writes already stay when ⌥⌘Z

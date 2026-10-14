@@ -4411,3 +4411,21 @@ outside Fable's mandatory scope: one lesson paragraph, two core doc comments, tw
   - (b) THE RUN AS IT MERGES' owed list now says the bound and the as-built teaching travel with the follow-on run.
 - **This is the FINAL round, so no later reviewer reads these fixes.** The orchestrator checks them line by line
   against each finding (CLAUDE.md "Two reviews").
+
+### ROUND 2 — THE FIX PASS (the implementer's — opus-implementer, 2026-10-14)
+
+**What this pass does NOT do (said first):** it runs NO Mac test (the closeout window's, as in round 1's pass). Every fix
+is doc, test or code placement only, so none carries a pin (the orchestrator's call). R2-2 is VM-16's and R2-7 was the
+orchestrator's; neither is touched here. Zero `Sync/`, custody, Keychain, editor-seam or schema lines.
+
+#### LIVE STATUS — the round-2 pieces (flipped in the same commit as each piece)
+
+| # | finding | state |
+|---|---|---|
+| 1 | R2-1 — the four UNDO STORY headers (VX-276) | DONE (this commit) — `Operations+MCPDeliberate.swift`, `Operations+MCPCarriage.swift`, `Operations+MCPLibraryEdits.swift`, `Operations+MCPNoteEdits.swift`: each header's "does not yet keep that promise … (`UndoStack.undo` pops any inverse that does not throw) … VX-276 owns the fix" is replaced by the rule as built. Each half answers whether it wrote, and the stack RETIRES an entry whose half was quiet (`UndoStack`'s header), so her put-back makes ⌥⌘Z quiet and no ⇧⌥⌘Z re-applies the client's act. Plus the family's own parts and stamps, from THE SWEEP TABLE: **Deliberate** — the slots record (`registerPointerEntry`) and `adopt_lens`' kept-lens stamp; **Carriage** — `set_book_rule`'s columns record and `save_version`'s stamp-keyed redo (`registerMintedContainerEntry`); **LibraryEdits** — the stamp-keyed inverses, the two self-keyed redos (`unarchive_book`, `reremoveMembership`), and the recorded `finish_book` residual (accepted again at round 2); **NoteEdits** — the lock's truthful toggle, the stamp-keyed halves (`restoreCommentForClient`) and `restore_commit`'s parts (`registerStructuralEntry`). A re-grep of `Sources` and `App` finds no "pops any inverse", "VX-276 owns the fix", "does not yet keep" or "still moves the entry" left |
+| 2 | R2-3 — `LegState` above `removeAll()`'s doc (VX-276) | — |
+| 3 | R2-4 — `delete_comment`'s read named right (VX-260) | — |
+| 4 | R2-5 — the Bookcase follower's sentence (VX-231) | — |
+| 5 | R2-6 — the diagnostic `print` dropped (VX-230) | — |
+| 6 | the headless package green, with counts | — |
+| 7 | `vx246-final` rebuilt on the new tip (`vx246-r1-red` untouched — F-1's red product) | — |

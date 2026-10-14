@@ -24,15 +24,16 @@ import GRDB
 // its act left there — checked FIRST, before the seal — so the UNDO never
 // overwrites what she wrote since through her own undo-less door (VX-184 ladder
 // round 1; the lock's undo needs no check — two-valued, her divergence can only
-// be the value its inverse writes). THE REDO DOES NOT YET KEEP THAT PROMISE
-// (VX-184 ladder round 2, 2026-10-13): when she has put a row BACK to its
+// be the value its inverse writes). THE REDO KEEPS THE SAME PROMISE (VX-246
+// U2 — VX-276): each half answers whether it wrote (the lock's toggle too —
+// `setVariantLockRows`' own answer), and the stack RETIRES an entry whose half
+// was quiet (`UndoStack`'s header) — so when she has put a row BACK to its
 // pre-act state herself (her unlock, her old label or words again, her
-// unarchive, her re-archive), ⌥⌘Z is quiet yet still moves the entry onto the
-// redo stack (`UndoStack.undo` pops any inverse that does not throw), and each
-// redo here checks only for that pre-act state — so ⇧⌥⌘Z re-applies the
-// client's act over hers. VX-276 owns the fix: the redo keyed on what its
-// inverse wrote (`restoreCommentForClient`'s shape below — its redo runs only
-// on the stamp its inverse recorded). The insurance commits two acts write on
+// unarchive, her re-archive), ⌥⌘Z is quiet, the entry retires, and no ⇧⌥⌘Z
+// re-applies the client's act over hers. The stamp-keyed halves stay keyed
+// (`restoreCommentForClient`'s shape below — its redo runs only on the stamp
+// its inverse recorded), and `restore_commit` keeps its text as the entry's
+// PARTS (`registerStructuralEntry`). The insurance commits two acts write on
 // the way (`lock_take` on a dirty take — her lock's own rule;
 // `restore_commit`'s brackets) STAY when ⌥⌘Z walks the act back: commits are
 // append-only (I5), exactly as `edit_take`'s brackets stay (P-13nb-U3-2).

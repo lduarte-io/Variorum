@@ -28,18 +28,19 @@ import GRDB
 // only while the row still reads the value its act left there, so the UNDO
 // never overwrites a name or place she gave it since through her own
 // undo-less door — checked FIRST, before any refusal (VX-184 ladder round 1,
-// the undo-overwrite class). THE REDOS DO NOT YET KEEP THAT PROMISE (VX-184
-// ladder round 2, 2026-10-13): after she has put a row BACK herself (her
-// reopen or finish, her unarchive, her Put back, her chapter restore, the old
-// name or place again), ⌥⌘Z is quiet yet still moves the entry onto the redo
-// stack (`UndoStack.undo` pops any inverse that does not throw), and the redos
-// here — `refinishBook`, `reopenBookAgain`, `rearchiveBook`, `redeleteBook`,
-// `redeleteChapter`, `redeleteNote`, `restoreNoteArchived`, each
-// compare-and-set restorer — check only for the pre-act state her reversal
-// produced, so ⇧⌥⌘Z re-applies the client's act over hers. (Keyed redos are
-// safe: `unarchive_book`'s runs only on the archive's original stamp; her
-// re-add of a removed note mints a new row, so `reremoveMembership` is quiet.)
-// VX-276 owns the fix: the redo keyed on what its inverse wrote.
+// the undo-overwrite class). THE REDOS KEEP THE SAME PROMISE (VX-246 U2 —
+// VX-276): each half answers whether it wrote, and the stack RETIRES an entry
+// whose half was quiet (`UndoStack`'s header) — so after she has put a row
+// BACK herself (her reopen or finish, her unarchive, her Put back, her chapter
+// restore, the old name or place again), ⌥⌘Z is quiet, the entry retires, and
+// no ⇧⌥⌘Z re-applies the client's act over hers. The inverses keep their
+// stamps (above), and two redos are keyed on their own: `unarchive_book`'s
+// runs only on the archive's original stamp, and `reremoveMembership` acts
+// only on the act's own row (her re-add of a removed note mints a new one).
+// One residual stays, recorded (VX-184's; accepted again at VX-246's ladder
+// round 2): her reopen-then-refinish BEFORE ⌥⌘Z is indistinguishable from the
+// act's finish — `reading` carries no finish stamp — so `finish_book`'s undo
+// then reopens the book, writing only the act's own pre-image.
 //
 // PRIVATE, SEAL and OWN stay HERS ALONE (R-VX184-2): nothing here writes
 // `ai_private_at`, `sealed_at`, a note's seal or `owned`, and neither
