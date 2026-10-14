@@ -77,25 +77,7 @@ struct MigrationProgram: ActProgram {
             let resolution = marker.resolve(.init(opensUnder: ctx.library.fingerprint, newKeyFileLanded: landed))
             ctx.log("today's marker: \(resolution == .neverHappened ? "the act never happened" : "its commit happened") — cleared")
             try ctx.leaves.library.clearLegacyRotationMarker(with: key)
-        case "custodyItems":
-            // Only a confirmed mode adds the per-key items; an unconfirmed one
-            // keeps today's custody shape.
-            guard record.modeConfirmed else { return }
-            let items = try ctx.leaves.custody.custodyItems()
-            switch record.mode {
-            case .standard:
-                if !items.contains(CustodyItemFact(fingerprint: ctx.library.fingerprint, itemClass: .silent)) {
-                    try ctx.leaves.custody.writeCustody(key, itemClass: .silent)
-                }
-            case .castle:
-                // A Touch ID item where today's gated item stood (the choice
-                // she made then); none under Always ask.
-                let gated = try ctx.leaves.legacyItems.legacyItems().contains { if case .gated = $0.kind { return true } else { return false } }
-                if gated, ctx.library.section.settings.gateStyle == .touchID,
-                   !items.contains(CustodyItemFact(fingerprint: ctx.library.fingerprint, itemClass: .touchid)) {
-                    try ctx.leaves.custody.writeCustody(key, itemClass: .touchid)
-                }
-            }
+        case "custodyItems": try ctx.addPerKeyCustodyItems()
         case "keyFile": try ctx.migrateKeyFile()
         case "removeEscrow":
             guard let live = ctx.library.keyFile, live.fingerprint == ctx.library.fingerprint else { return }
@@ -128,6 +110,33 @@ struct MigrationProgram: ActProgram {
             // guard off, the move's pair is not taken).
             if ctx.executor.guards.freshPairAfterMoveOn { try ctx.freshBackup() }
         default: throw ExecutorRefusal.nothingToDo
+        }
+    }
+}
+
+extension ActContext {
+    /// §3.13 step 4: the per-key custody items, each of its key's kind — only
+    /// once the mode is confirmed (an unconfirmed mode keeps today's custody
+    /// shape). Run by the migration, and by the confirmation that comes later
+    /// (VX-305 U4).
+    func addPerKeyCustodyItems() throws {
+        let record = try requireRecord()
+        let key = library.key
+        guard record.modeConfirmed else { return }
+        let items = try leaves.custody.custodyItems()
+        switch record.mode {
+        case .standard:
+            if !items.contains(CustodyItemFact(fingerprint: library.fingerprint, itemClass: .silent)) {
+                try leaves.custody.writeCustody(key, itemClass: .silent)
+            }
+        case .castle:
+            // A Touch ID item where today's gated item stood (the choice
+            // she made then); none under Always ask.
+            let gated = try leaves.legacyItems.legacyItems().contains { if case .gated = $0.kind { return true } else { return false } }
+            if gated, library.section.settings.gateStyle == .touchID,
+               !items.contains(CustodyItemFact(fingerprint: library.fingerprint, itemClass: .touchid)) {
+                try leaves.custody.writeCustody(key, itemClass: .touchid)
+            }
         }
     }
 }

@@ -65,16 +65,31 @@ struct TouchIDRearmProgram: ActProgram {
 
 struct ConfirmModeProgram: ActProgram {
     let act = ProtectionAct.confirmMode
-    func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] { ["confirm"] }
-    func finishingSteps(_ library: UnlockedLibrary) -> [String] { ["confirm"] }
+    /// Confirming runs what the migration deferred while the mode was
+    /// unconfirmed (§3.13 steps 4 and 7): the per-key custody items, and — a
+    /// Standard library — this Mac's own Apple key with its fresh pair (VX-305
+    /// U4, found by the scenario world: confirming only flipped the flag, and
+    /// nothing ever minted that key).
+    func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] { ["confirm", "custodyItems", "moves"] }
+    func finishingSteps(_ library: UnlockedLibrary) -> [String] { ["confirm", "custodyItems", "moves"] }
 
     func run(_ step: String, _ ctx: ActContext) async throws {
-        guard var record = ctx.library.record else { throw ExecutorRefusal.recordMissing }
-        guard !record.modeConfirmed else { return }
-        record.modeConfirmed = true
-        try ctx.leaves.library.writeRecord(record, with: ctx.library.key)
-        ctx.library.record = record
-        try ctx.rememberNewKey()
+        switch step {
+        case "confirm":
+            guard var record = ctx.library.record else { throw ExecutorRefusal.recordMissing }
+            guard !record.modeConfirmed else { return }
+            record.modeConfirmed = true
+            try ctx.leaves.library.writeRecord(record, with: ctx.library.key)
+            ctx.library.record = record
+            try ctx.rememberNewKey()
+        case "custodyItems": try ctx.addPerKeyCustodyItems()
+        case "moves":
+            // Decision 35: a synced library's own Apple key only on a fresh read.
+            if let record = ctx.library.record, record.mode == .standard, let account = record.account,
+               !ctx.executor.readThisSession(account) { return }
+            try await ctx.executor.moveOffSharedKey(ctx, freshPair: true)
+        default: throw ExecutorRefusal.nothingToDo
+        }
     }
 }
 
@@ -120,6 +135,9 @@ extension ProtectionExecutor {
         guard !record.modeConfirmed else { throw ExecutorRefusal.nothingToDo }
         let born = library.familyTree.entry(library.fingerprint)?.kind ?? record.mode
         guard mode == born, mode == record.mode else { throw ExecutorRefusal.wrongMode(record.mode) }
+        if let account = record.account, configuration.session.accountID == account {
+            _ = try await readVault(accountID: account)
+        }
         return try await perform(
             ConfirmModeProgram(), parameters: ActParameters(targetMode: mode), secrets: ActSecrets(), library: &library)
     }

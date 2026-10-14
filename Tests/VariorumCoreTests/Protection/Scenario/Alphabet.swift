@@ -1007,6 +1007,9 @@ extension SWorld {
                 let assessment = assessed(device)
                 for act in assessment.acts {
                     switch act {
+                    case .confirmMode(_, isKeyChange: false):
+                        // The vault answered: phase 2's lobby confirms with no question.
+                        _ = await apply(.confirmMode(device.name))
                     case .follow:
                         _ = await apply(.follow(device.name, .passphrase))
                     case .relinkLibraryArm:

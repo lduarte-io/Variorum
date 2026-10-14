@@ -93,6 +93,24 @@ struct MigrationScenarios {
         expectPromisesKept(world)
     }
 
+    /// "signed out with keys": a synced Standard library migrated while
+    /// signed out is recorded NOT YET CONFIRMED (§3.13 step 2) — no custody
+    /// repair, nothing Apple-reachable written. Signed in, the vault answers
+    /// Standard; confirming it runs what the migration deferred — the per-key
+    /// item and this Mac's own Apple key (step 7: "once its mode is confirmed
+    /// Standard") — so promise 3 settles.
+    @Test func signedOutWithKeysThenTheVaultAnswers() async throws {
+        let (world, account) = try syncedWorld(.standard, devices: ["macA"])
+        await world.done([.signOut("macA"), .launch("macA")])
+        let record = try #require(world.macA.slot?.record)
+        #expect(record.mode == .standard && !record.modeConfirmed)
+        #expect(world.liveKeyFile(world.macA)?.apple == nil, "an Apple write before the mode was confirmed")
+        await world.done([.signIn("macA", account: account), .launch("macA"), .settle])
+        #expect(world.macA.slot?.record?.modeConfirmed == true)
+        #expect(world.liveKeyFile(world.macA)?.apple != nil)
+        expectPromisesKept(world)
+    }
+
     /// "corner 45's ambiguous case: no custody repair until the notice is
     /// answered, and confirming Standard is a key change" — a VX-202 victim
     /// (recorded Castle, not confirmed, its key in today's silent item). Once
