@@ -106,7 +106,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-290 — the empty-block backspace's caret landing | NOT-STARTED |
+| U1 | VX-290 — the empty-block backspace's caret landing | IN-PROGRESS — trace re-done and recorded (U1 record below); next: the fix + pins (headless build-for-testing), then READY FOR STAGE. No revert in flight. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | NOT-STARTED |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | NOT-STARTED |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
@@ -128,6 +128,62 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 *(Each unit's implementer writes its section here: the traced mechanism with file:line, the pins (red-on-old,
 how verified), the diff summary, headless counts, the stage window's Mac counts and walk, PROVISIONAL calls,
 anything for the author. PENDING until verified.)*
+
+### U1 — VX-290 (the empty-block backspace's caret landing)
+
+**State: IN-PROGRESS.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-13. Every count and
+every "green"/"red" below is **PENDING** until the stage window runs it.
+
+**The trace, re-done in this session against `5e2e22a7` (every file:line the ticket names verified; the code
+agrees with the ticket's mechanism):**
+1. ⌫ with the caret at an EMPTY block's start proposes deleting the one separator before it. A separator is owned
+   by no entry, so `BlockRangeIndex.verdict` answers `.refuse(.crossesBlockBoundary)` and the gate
+   (`EditorViewModel.shouldChangeText`, `EditorViewModel.swift:1097-1124`) refuses the keystroke and asks the one
+   route (`EditorEditRoute.route`, `EditorEditRoute.swift:294-344`). The Mac's `.emptyBlockCarve` arm (`:307-311`)
+   → `SeamCarvePlan.emptyBlockDeletion` (`:430-450`) → `BlockRangeIndex.emptyBlockDeletion`
+   (`BlockRangeIndex.swift:246-252`) names the EMPTY neighbour of the separator — the one BEFORE it when both are
+   empty (QUESTIONS #33(d)). **Which block goes is right**: with text above, it is the caret's own empty block.
+2. `performCrossBlockRoute` schedules `runEmptyBlockDeletion` for the next main-actor turn
+   (`EditorViewModel.swift:1162-1165` → `EditorSurfaceController.scheduleCrossBlockCompound`, `:2038-2060`).
+3. **The caret is what goes wrong.** `runEmptyBlockDeletion` (`EditorSurfaceController.swift:2319-2331`) lands the
+   caret by `caretLandingAfterRemoving(_ i:)` (`:1282-1287`) — "the START of the block below, else the END of the
+   block above" — the Delete Block and archive doors' helper (`:1116`, `:1131`). It is told only WHICH entry
+   left, never which SIDE of the deleted separator it sat on. With any block below, the caret lands at that
+   block's start — which, the carved line gone, sits on the very visual line the caret was on.
+   `applyStructuralResult` places it by identity (`:3016-3022`).
+4. So the next ⌫ deletes the separator between the block above and the block now under the caret: another empty
+   block carves (her report — *"eats the takes from underneath you"*), and a texted one is #34's seam merge
+   ("Blocks joined"). Only the LAST empty block lands correctly (no block below → the end of the block above).
+   **Fast presses take the same road:** a key typed while the carve's flight is up is stashed
+   (`EditorTextView.keyDown`, `:85-98`; armed at `runStructural`, `EditorSurfaceController.swift:2932`) and replayed
+   at the LANDED caret once the chain is idle (`replayDeferredKeystrokesIfIdle`, `:2071-2074`, from the chain's
+   tail, `:2049-2058`) — the same wrong landing.
+5. **The ⏎⌫ "oops":** ⏎ at the end of `alpha` (above `beta`) makes an empty block below (R-13u4-2); ⌫ carves it
+   and lands at `beta`'s start; a second ⌫ is then #34's seam merge — the two paragraphs JOIN.
+6. **Forward-delete:** ⌦ at a paragraph's end deletes the separator AFTER it; an empty block below is that
+   separator's `after` neighbour → the same helper → the caret moves DOWN to the next block's start.
+7. A fanned empty block never carves (`SeamCarvePlan.emptyBlockDeletion`'s fan guard, `EditorEditRoute.swift:443`;
+   the diagnosis speaks `.seamBesideFan`) — so the eating stops at a block with takes. Verified.
+
+**Where the code and the ticket differ (the code wins; recorded):**
+- The flipping pin the ticket names `ReturnKeyTraceTests.aBurstWithASeamBackspaceHoldsWhenTheCarveLandsBelow`
+  lives in the suite TYPE `TypedReturnKeyTests` (file `ReturnKeyTraceTests.swift:857`).
+- The 18l note (`phase-18l-navigation-feel.md:1056`) calls the old landing "the carve's ruled landing (13c 1B)".
+  Traced: it was the 13c 1B helper's own doc ("what the eye expects when the seam above the caret closes"), not
+  one of QUESTIONS #33's five ratified calls — nothing ruled the landing before her VX-290 report, as the ticket
+  says.
+- `runDeleteBlock`'s doc (`EditorSurfaceController.swift:1128-1129`) says the carve shares its body; it has not
+  since 13c R3-1 gave the carve its own one-transaction body. Corrected in passing (a doc line only).
+- **Recorded, not fixed (pre-existing, independent of the landing):** two ⌫ key events delivered in ONE main-actor
+  turn (before the first's scheduled turn runs — a test can do this; not seen on hardware, where the scheduled
+  turn runs between key events and the flight then stashes the second key) plan the SAME carve against the
+  unchanged index; the second is refused inside `deleteBlock`'s transaction (`blockNotFound` — the block is already
+  gone) and a refusal toast shows. No data is touched.
+
+**The ruling being built:** her report (QUESTIONS #33(d) already decides WHICH block goes): *the caret lands where
+the deleted line break was* — after carving the block AFTER the separator, at the END of the block before it;
+after carving the block BEFORE the separator, at the START of the block after it (unchanged). Delete Block and
+archive keep `caretLandingAfterRemoving`. Mac-only (the phone has no carve).
 
 ## Ladder
 
