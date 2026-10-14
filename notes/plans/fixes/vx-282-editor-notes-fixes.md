@@ -146,6 +146,20 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
   MCP calls or real-app launches without her recorded word.
 - 2026-10-13 — REQUEST sent early for `vx282-u1` (≈40 min: the Mac batch + the red-on-old revert run + a short walk); coordinator: queued FIRST, nobody ahead; zero-slot recorded for VX-282; at READY it checks she isn't using the Pro before the walk part (if she is, the GO covers batch + revert, the walk gets its own short GO).
 
+## The merge of main (orchestrator, 2026-10-14 ~05:00)
+
+`ece30a41` merged `origin/main` at `fa3bc6e1` (VX-281's merge `0f5efe1c` + its ledgers + handoff) into the branch. One
+conflict, `notes/QUESTIONS.md`: VX-281's #219 stands first; this run's entries renumbered **#219–#223 → #220–#224**
+(this record follows). On the merged tip, headless: `build-for-testing` **TEST BUILD SUCCEEDED** (into
+`DerivedData/vx282-u1`, U1's tree reused; `vx282-screens/merge/merged-build.log`) · `swift test` **VariorumCoreTests
+2,809 / 322 · VariorumMCPTests 212 / 41 · workbook 40 / 6, all green** (`merged-swift-test.log`). The unit windows ran on
+their pre-merge products (unit evidence); the closeout's Mac run covers the merged tip.
+
+**Machinery honesty (orchestrator):** at ~05:26 U5's implementer was still writing its u5b plan (a record-only commit,
+`c5d9e1aa`, no stage use) when U6 received its GO — two agents briefly ran at once, against the strictly-sequential
+rule. Nothing collided (U5 touched only the record; U6 pulled and pushed cleanly). Cause: the orchestrator misread a
+completion notice for U5's previous turn as the end of the resumed one.
+
 ## Unit records
 
 *(Each unit's implementer writes its section here: the traced mechanism with file:line, the pins (red-on-old,
