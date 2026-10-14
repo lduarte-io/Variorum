@@ -159,7 +159,7 @@ guidance. Each unit's evidence is named before its spawn.
 |---|---|
 | U5a — the label pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): legs A–D all passed in a real Claude Code 2.1.300 round on the dev store — the new `claude-code · english` label on Takes cards in both voices, `save_lens` by label refusing the ambiguous block and its `take_ids` retry, the legacy form matched as its own, `pin_chosen` holding. Built at `590c0cb8` (U5a UNIT RECORD) |
 | U5b — the block-writing pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): the 31-suite Mac batch green (251 tests, 0 failed, 7 gated skips); V252-a (create_note's `blocks` = read_note's records; filed under its chapter), V255-a/b/c (the end at write new with her ⌥⌘Z/⇧⌥⌘Z; any anchor at write new hears the rung sentence and asks her; anywhere at edit), D8-a passed; D8-b's open tail is unreachable from the keyboard (THE ORCHESTRATOR ON U5's WINDOW). The store was restored cmp-SAME. Built `7a15376c`…`93edbc2e` (U5b UNIT RECORD, three sessions) |
-| U6 — Compare from the wire (+ VX-330, VX-342) | NOT-STARTED — split U6a (VX-311 + VX-298) / U6b (VX-330 + VX-342 + U6's window), THE ORCHESTRATOR ON U5's WINDOW |
+| U6 — Compare from the wire (+ VX-330, VX-342) | U6a DESIGNED, FORKS RULED (U6a UNIT RECORD piece 0 `bf5adcca`; THE ORCHESTRATOR'S RULINGS ON U6a's FORKS). Pieces 2–9 go to a FRESH implementer. U6b (VX-330 + VX-342 + the window) follows |
 | U7 — the agent's read-backs | NOT-STARTED |
 | U8 — the AI's docs (LAST) | NOT-STARTED |
 | LADDER | NOT-STARTED |
@@ -1978,3 +1978,42 @@ wing). Prompts on STDIN (`--allowedTools` swallows a trailing prompt). Variorum 
 3. **Context:** this session is at ~380k at this seam. The build (pieces 2–9) is likely past the ~450k line in this
    session; a FRESH implementer can build from this record alone (every design item names its file and line).
 4. No ticket proposed yet (none needed so far).
+
+### THE ORCHESTRATOR'S RULINGS ON U6a's FORKS (2026-10-14 ~16:30 MDT — binding on pieces 2–9)
+
+The design D-311-1…8 and D-298-1…8 is ACCEPTED as written, with these rulings. The PROVISIONALs go to QUESTIONS at the
+merge with the record's options.
+
+- **D-311-1: `duplicate_note` wraps `duplicateAsVersion`, CONFIRMED.** Save-then-promote differs in tags, date, commits
+  and undo, as traced. The op's body is extracted ONCE (`duplicateAsVersionBody`), so her door and the wire can't drift.
+- **F-1: (a), PROVISIONAL P-VX311-2.** The copy lands bookless in the source's wing; the rungs are READ on the source and
+  WRITE NEW on that wing (`decideWing`, `move_note_to_wing`'s two-sided guard). This is the ticket's letter: *"write new
+  where the copy lands, which is wherever her door puts it."* **The consequence, for her eye in the bundle:** a client
+  whose write-new reach is only a BOOK can't duplicate; the refusal and the wing's ask say so honestly. Option (b), an
+  optional `book_id` filing the copy into that book at write new, is recorded for her.
+- **F-2: (a), PROVISIONAL P-VX311-1.** A fenced source refuses, minting nothing, with the record's one sentence that
+  names no leg. The copy would shed two of the three fence legs, so an unrefused copy would expand the writer's own
+  reach (P-13nb-U4-16's principle). Option (b) is ruled out by R-VX184-2 (no MCP road writes `ai_private_at`).
+- **F-3 (a), F-4 (a), F-5 (a), PROVISIONAL P-VX311-3.**
+  - The answer lists ACTIVE takes in fan order (equal to `read_note(with_ids)`).
+  - Each record carries `source_block_id` (one optional field on the shared encoder; every other answer is
+    byte-unchanged).
+  - Open › opens the COPY, like every note-minting act. Her Compare-Open answer (5) was `link_versions`'.
+- **F-6: (a), PROVISIONAL P-VX298-3.** `target: "compare"`, `note_id` plus `peer_ids` (1–3).
+- **F-7: (a), PROVISIONAL P-VX298-2.** An archived anchor may show (she can open one and press ⌘5). An archived peer
+  refuses, by her picker's rule.
+- **F-8: (a), the orchestrator's (architecture).** The BOARD decides "related blocks only" from its own projection when
+  the landing arrives. The target carries no posture (P-4: signals, never decisions), and the wire's read and
+  `link_versions`' cost stay ∝ what they name (P1).
+- **F-9: (a), PROVISIONAL P-VX298-1.** ON only when EVERY named peer shares lineage with the anchor, else OFF. Her answers
+  (2) and (4) together: no column the AI named opens filtered empty. A pure function on the board's brain, pinned.
+- **Lanes:**
+  - **(a):** `CompareLanding` lives in `Features/Takes/CompareBoardView.swift`, and the registry gains ONE stored property,
+    `CommandRouter.pendingCompareLanding`.
+  - **vx-283 is TOLD by the orchestrator before the build edits `CommandRouter.swift`** (sent with this ruling; its answer
+    is recorded in Cross-run coordination). The builder makes that one edit only after the orchestrator's go, which comes
+    in its brief.
+  - Nothing in `WorkspaceModel`, `ShellRouter` or `ShellActions.swift`.
+- **Next:** a FRESH `opus-implementer` builds pieces 2–9 from this record: the U6a UNIT RECORD and these rulings. Its live
+  legs L1–L5 go to U6b's window.
+
