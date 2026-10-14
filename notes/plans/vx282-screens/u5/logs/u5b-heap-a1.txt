@@ -1,8 +1,0 @@
-       2        160      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.Array<VariorumCore.BlockComment>>  Swift   libswiftCore.dylib
-       1         80      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.Dictionary<Swift.String, Swift.String>>  Swift   libswiftCore.dylib
-       1         80      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.Int>  Swift   libswiftCore.dylib
-       1         80      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.Optional<Swift.String>>  Swift   libswiftCore.dylib
-       1         80      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.Optional<Variorum.RecoveryStatus>>  Swift   libswiftCore.dylib
-       1         80      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.Set<Swift.String>>  Swift   libswiftCore.dylib
-       1         80      80.0   Swift.ReferenceWritableKeyPath<Variorum.CommentsPanelModel, Swift.String>  Swift   libswiftCore.dylib
-       1         48      48.0   Swift._ContiguousArrayStorage<Variorum.CommentsPanelModel.DebugWeakModel>  Swift   libswiftCore.dylib

@@ -74,4 +74,4 @@ notes/plans/vx184-screens/
 notes/plans/vx281-screens/
 
 # VX-282 closeout: the merged-tip run's full logs are large; their extracts are committed
-notes/plans/vx282-screens/closeout/logs/*.full.log
+notes/plans/vx282-screens/
