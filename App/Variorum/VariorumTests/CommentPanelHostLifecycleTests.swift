@@ -9,14 +9,17 @@
 //  VX-229 — DISMISSED AS HOLLOW IN USE (the coordinator's ruling, 2026-10-14,
 //  on the u5b heap decider): in the running app every dismissed host — the
 //  popover, Write's sheet, the take panel's nested sheet — lets go of its
-//  panel within seconds (model 0, its store observer 0, its areas 0 after
-//  every set of cycles; 1 · 1 · 1–2 while open). The runner's own retention
-//  kept dismissed panels alive at W1 (the long-lived main-thread autorelease
-//  pool under async test bodies — TEXTKIT2_NOTES §3's class). So
-//  `CommentPanelReleaseTests` is a GUARD of the app's real behaviour, in the
-//  DRAINED-POOL shape: every turn's AppKit/SwiftUI work runs inside its own
-//  `autoreleasepool` (no `Task.sleep` slice outside one), and no test ever
-//  holds a presented window.
+//  panel within ~2 s (`heap` on the Debug app: model 0, its store observer 0,
+//  its areas 0 after every set of three cycles; 1 · 1 · 1–2 while open — the
+//  table is in the run record § U5). THE TEST RUNNER DOES NOT: it keeps every
+//  dismissed host's panel alive and observing for the test's lifetime
+//  (W1, u5c: 1 → 2 → 3 per opening), even with every turn drained in its own
+//  `autoreleasepool` (u5c) — its cause is UNTRACED (not the pool this rig
+//  drains). So `CommentPanelReleaseTests` keeps running and printing its census,
+//  and each alive/observing expectation sits inside a NON-INTERMITTENT
+//  `withKnownIssue` naming that runner fact: the suite stays green while the
+//  runner retains, and FAILS LOUDLY the day the runner starts releasing — the
+//  signal to turn the cells back into plain guards of the app's behaviour.
 //
 //  Every host constructs the panel exactly as the app does —
 //  `CommentsPanel(session:blockID:)`, no model passed in — and the pins read
@@ -389,7 +392,7 @@ struct CommentPanelHostSuites {
 // MARK: - VX-229 — a dismissed host lets go of its panel
 
 @MainActor
-@Suite("VX-229 (GUARD) — a dismissed comments host lets go of its panel's model and observation", .serialized)
+@Suite("VX-229 (GUARD, a known issue in the runner) — a dismissed comments host lets go of its panel", .serialized)
 struct CommentPanelReleaseTests {
     private func seedComment(_ h: EditorHarness) async throws -> String {
         let blockID = try h.storeSlots()[0].blockID
@@ -408,7 +411,9 @@ struct CommentPanelReleaseTests {
     /// what the running app showed (0 · 0 · 0 after every set of cycles). The
     /// drained-pool turns are what make the runner model the app here (W1's red
     /// was the runner's own retention). Each step's census is printed to the
-    /// log.
+    /// log. The alive/observing expectations are a KNOWN ISSUE in this runner
+    /// (the file's header) — non-intermittent, so the day the runner releases,
+    /// this cell fails loudly and goes back to a plain guard.
     @Test func aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() async throws {
         try await withEditor(seedBlocks: ["A block."]) { h in
             let blockID = try await seedComment(h)
@@ -436,9 +441,11 @@ struct CommentPanelReleaseTests {
             await CommentHostRig.turns(until: { CommentHostRig.alive(h.session).isEmpty }, max: 150)
             print("VX-229 guard — popover, after the wait: \(CommentHostRig.census(h.session))")
             let alive = CommentHostRig.alive(h.session)
-            #expect(alive.filter(\.isObserving).isEmpty,
-                    "no dismissed panel still observes the store (\(alive.filter(\.isObserving).count) do)")
-            #expect(alive.isEmpty, "no dismissed panel's model is still alive (\(alive.count) are)")
+            withKnownIssue("the test runner keeps a dismissed popover's panel alive for the test's lifetime; the running app releases it within ~2 s (VX-282 u5b heap: 0·0·0 after every close)", isIntermittent: false) {
+                #expect(alive.filter(\.isObserving).isEmpty,
+                        "no dismissed panel still observes the store (\(alive.filter(\.isObserving).count) do)")
+                #expect(alive.isEmpty, "no dismissed panel's model is still alive (\(alive.count) are)")
+            }
 
             // The symptom: a later write is re-read by every stale panel.
             _ = try await h.session.runner.run { ops in
@@ -446,7 +453,9 @@ struct CommentPanelReleaseTests {
             }
             await CommentHostRig.turns(30)
             let rereads = CommentHostRig.alive(h.session).filter { $0.comments.count == 2 }
-            #expect(rereads.isEmpty, "a later write is re-read by no dismissed panel (\(rereads.count) did)")
+            withKnownIssue("the test runner keeps a dismissed popover's panel alive for the test's lifetime; the running app releases it within ~2 s (VX-282 u5b heap: 0·0·0 after every close)", isIntermittent: false) {
+                #expect(rereads.isEmpty, "a later write is re-read by no dismissed panel (\(rereads.count) did)")
+            }
         }
     }
 
@@ -469,8 +478,10 @@ struct CommentPanelReleaseTests {
                 await rig.dismiss()
                 await CommentHostRig.turns(until: { CommentHostRig.alive(h.session).isEmpty }, max: 150)
                 print("VX-229 guard — sheet, after dismissal \(opening): \(CommentHostRig.census(h.session))")
-                #expect(CommentHostRig.alive(h.session).isEmpty,
-                        "opening \(opening): the dismissed sheet's panel is gone")
+                let alive = CommentHostRig.alive(h.session)
+                withKnownIssue("the test runner keeps a dismissed sheet's panel alive for the test's lifetime; the running app releases it within ~2 s (VX-282 u5b heap: 0·0·0 after every close)", isIntermittent: false) {
+                    #expect(alive.isEmpty, "opening \(opening): the dismissed sheet's panel is gone")
+                }
             }
         }
     }
@@ -493,8 +504,10 @@ struct CommentPanelReleaseTests {
                 await rig.dismissComments()
                 await CommentHostRig.turns(until: { CommentHostRig.alive(h.session).isEmpty }, max: 150)
                 print("VX-229 guard — nested sheet, after dismissal \(opening): \(CommentHostRig.census(h.session))")
-                #expect(CommentHostRig.alive(h.session).isEmpty,
-                        "opening \(opening): the nested sheet's panel is gone")
+                let alive = CommentHostRig.alive(h.session)
+                withKnownIssue("the test runner keeps a dismissed sheet's panel alive for the test's lifetime; the running app releases it within ~2 s (VX-282 u5b heap: 0·0·0 after every close)", isIntermittent: false) {
+                    #expect(alive.isEmpty, "opening \(opening): the nested sheet's panel is gone")
+                }
             }
         }
     }
