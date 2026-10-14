@@ -131,7 +131,7 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | U8 — the AI's docs (LAST) | **MOVED to the follow-on run** (ruling 3), since the docs must describe U5–U7's tools. VX-281 has merged, so it is unblocked there |
 | LADDER | **CLOSED AT ROUND 2 (2026-10-14 ~10:30).** **Round 1, the ONE Fable review:** 0 BLOCKER, 0 MAJOR, 1 MINOR, 3 NIT. All four were confirmed at the final calls, and the implementer fixed them (`a657d779`…`d5cbe625`). **Round 2, `opus-reviewer` at max:** 0 BLOCKER, 0 MAJOR, 2 MINOR, 5 NIT, with R2-2 deferred to VM-16. **The fixes:** round 2's go to the implementer, then the orchestrator's line-by-line check. F-1's red/green and F-4's warning count ride the closeout window. — Earlier: **ROUND 1 SPAWNED 2026-10-14 ~08:00:** the ONE Fable review, `fable-reviewer`, cold, REVIEW_PROMPT verbatim with PHASE=VX-246. — Plan: Round 1 is the ONE Fable review (`fable-reviewer`, cold, REVIEW_PROMPT verbatim) over the whole diff, under the cross-model flow as amended 2026-10-13: Fable makes the final call, the Opus implementer applies the fixes. Rounds 2 and 3 are `opus-reviewer` at max, re-checking the fixes. Capped at three rounds |
 | FABLE review (when needed, or once at the end) | Folded into the LADDER as its round 1. The editor-seam units (U3, U4, U4b, U4c) need it, and putting it first lets an Opus round re-check Fable's confirmed fixes |
-| CLOSEOUT | NOT-STARTED |
+| CLOSEOUT | IN-PROGRESS (2026-10-14 ~11:20) — a FRESH closeout implementer from the CLOSEOUT BRIEF below. **The merge order (the coordinator): VX-282 merges first; VX-246 is the night's LAST merge and owns the ONE `/Applications` refresh.** VX-336 "Run: MCP wire tools & AI docs" is minted with U5–U8's members re-parented |
 
 **No revert is in flight unless a unit's record says so.**
 
@@ -1021,6 +1021,81 @@ navigate-away never takes her focus).
   in pane 2. Pane 2 goes to the Library and her caret stays in pane 1, captured in both voices.
 - **Lanes:** this is VX-283's road (VX-123), and VX-123 carries a comment about it. Neither vx-281 nor vx-282 lists
   `WorkspaceModel`.
+
+### CLOSEOUT BRIEF — VX-246 (the fix units; ruling 3)
+
+The closeout ritual per CLAUDE.md ("Build workflow" → closeout) and the run-phase skill's step 6, for THIS run's scope
+(ruling 3): U1 + U1b, U2, U3, U4 + U4b + U4c. Every edit lands on the branch. The shared ledgers (`notes/QUESTIONS.md`,
+the master plan's in-flight table and closeout paragraph, AppSpec §14's delta line) are touched ONLY at the merge
+moment, on LATEST main merged in. The order:
+
+1. **Main merged in again: it WILL move.** The coordinator's order is that VX-282 merges BEFORE us. Wait for the
+   coordinator's "main moved" broadcast (relayed by the orchestrator), then merge `origin/main` in as a MERGE COMMIT.
+   Resolve conflicts keeping both meanings; expected ones are `EditorSurfaceController.swift` doc comments near
+   `caretLandingAfterRemoving` and `runDeleteBlock` (keep vx-282's wording plus our function) and possibly
+   `EditorView.swift`. Then headless green, and a fresh Mac build of the final tree into `vx246-final`. `vx246-r1-red`
+   stays F-1's red product.
+2. **THE CLOSEOUT WINDOW** (one claim, through the orchestrator):
+   - F-1's pin red on `vx246-r1-red`;
+   - F-1 / the Tutorial* family / `MCPHerEditorDoorTests` (warnings 4 → 0) green on the final product;
+   - THE WHOLE Mac target on the final merged tree (VX-184's merge-moment form), with the standing reds named
+     (VX-115, VX-167 under parallelism, VX-245's sites);
+   - the A1 copy, a verified restore, and prefs diffed.
+3. **Canon, exactly as built and ruled** (a contract line plus a pointer to this record, never a paragraph of history):
+   - **AppSpec §7:** the grants-family bullet gains v1_28 (`mcp_rebind_request`) and v1_29
+     (`mcp_comment_author.text_digest`), local-only, marker 13, zero lockstep.
+   - **AppSpec §9:** the structural undo/redo bullet gains U2's contract line (U2's OWED 3: "a half runs only after its
+     partner changed something: an undo that finds its act's result already gone changes nothing, says so, and
+     retires its entry; a redo re-applies exactly what its undo un-did (parts and stamps included), so it never writes
+     over a change of hers").
+   - **AppSpec §12, THE MCP DOOR,** on top of VX-281's lines:
+     - A-4 as VX-258 built it: a client's own setup re-binds its name with zero clicks; any other fresh key under an
+       approved name waits for her OK, admitted with no reach; Deny and an adoption drop the waits; the bind arm the
+       same (her ratification).
+     - The book-name check against readable books only (VX-259).
+     - Her edit makes a comment hers, by the words' digest (VX-260, PROVISIONAL).
+     - The pre-act flush before every wire act that meets a take she may be typing in, and the navigate-away on the
+       one road (VX-275/VX-323; U3's OWED 5 clause).
+     - A navigate-away never takes her focus (ruling 2, PROVISIONAL).
+   - **TEXTKIT2_NOTES §3:** the measured facts — U4's unlaid-fragment fact as U4b CORRECTED it (never U4's false
+     sentence) and U4c's harness fact. Note: the U4b runner's "in use" paragraph is FALSE; keep it out.
+4. **QUESTIONS, from #220 at the merge moment:**
+   - every PROVISIONAL with its options: P-VX258-1 and -3…-8, P-VX260-1 (b) and -2, P-VX275-1/2, P-VX276-1…4,
+     P-VX277-1;
+   - P-VX258-2 marked ANSWERED (her ratification);
+   - the orchestrator's provisional rulings 1–3, for her ratification.
+5. **The master plan:**
+   - retire VX-246's in-flight row;
+   - write the one-paragraph closeout, rolling the outgoing one into `notes/PhaseCloseoutArchive.md`;
+   - roll AppSpec §14's outgoing delta into `notes/AppSpecDeltaArchive.md`;
+   - add the MOBILE PARITY line: VM-16 and VM-17 are minted, and nothing else is mobile-visible. VX-260's digest rides
+     her shared comment door, and the phone holds no record.
+6. **Linear:**
+   - close the members at the merge: VX-258, VX-259, VX-260, VX-279, VX-280, VX-276, VX-277, VX-119, VX-275, VX-323,
+     VX-230, VX-231;
+   - VX-318 → Canceled, as hollow (the pin is kept as a guard);
+   - the FOLLOW-ON RUN is **VX-336** "Run: MCP wire tools & AI docs", already minted by the orchestrator (Todo, 13n),
+     with VX-267, VX-253, VX-252, VX-255, VX-311, VX-298, VX-254, VX-256, VX-261 and VX-197 re-parented under it;
+   - VX-246 → Done at the merge.
+7. **The plan file** (`notes/plans/mcp-pane-and-docs-kickoff.md`):
+   - the STATUS banner says VX-246 merged its fix units and the follow-on run carries U5–U8;
+   - the kickoff blockquote is re-aimed at the follow-on run (its members, its record to be minted, and the drafted U5–U7
+     briefs living in VX-246's record).
+8. **The handoff** `notes/handoffs/vx-246-handoff.md`, LAST before the PR, her checklist at the top:
+   - the ratify list: the PROVISIONALs and rulings 1–3;
+   - the release-notes line (`WhatsNew/ReleaseNotes-0.9.5.md:9`), hers;
+   - the VX-234 words list;
+   - the tickets minted: VX-318 (hollow), VX-323, VX-324, VX-327, VX-328, VX-333, VM-16, VM-17;
+   - the follow-on run's kickoff;
+   - the gates: VX-184's build "hers alone" lifts with VX-258; the stargazing page gate stays with U8, now in the
+     follow-on run.
+9. **We are the NIGHT'S LAST MERGE** (the coordinator, 2026-10-14), so VX-246 owns the ONE `/Applications` refresh
+   after the merge, in a separate stage window under the coordinator's rule card. The orchestrator runs it with a
+   runner. The handoff says what she gets in that build.
+10. **The PR** `VX-246: MCP door fixes (security, undo, editor vs wire, faces)`, merged as a MERGE COMMIT, serialized
+   through the coordinator. Push. Delete the branch (GitHub and local) and the worktree. Delete ALL run evidence
+   (`notes/plans/vx246-screens/`, DerivedData). The `/Applications` refresh happens ONLY if the coordinator says we
+   are the night's last merge.
 
 ## UNIT RECORDS
 
