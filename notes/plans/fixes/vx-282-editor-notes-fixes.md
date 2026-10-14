@@ -1,3 +1,13 @@
+- **W2 — the fixed batch, `-derivedDataPath DerivedData/vx282-u5` (≈12 min), THREE groups (suite TYPE names, grepped;
+  the mounted popover/sheet suites kept in separate invocations — Swift Testing runs suites in parallel in one process):**
+  (g1) `CommentPanelHostSuites` `CommentPanelLeaveTests` `CommentPanelDoorsTests` `CommentPanelParkTests`
+  `CommentsPanelModelEditorTests` `CommentCompositionTests` `CommentPanelKeysTests` `CommentsAndReorderTests`
+  `CapabilityRegistryTests` `TrashSurfaceTests` `NoteVersionsPaneTests` → `w2-g1.log`; (g2) `CommentPanelFixLeg2Tests`
+  `CommentTextAreaMountedTests` `CommentPanelGeometryRuleTests` `CommentPanelWordsTests` `CommentCardLayoutTests`
+  `CommentCardViewTests` `CommentCardControllerTests` `MarginHoverCommentTests` `IndicatorGutterTests` `ProseGutterTests`
+  `BlockDecorGeometryTests` → `w2-g2.log`; (g3) `WriteTakesPanelRoutedCommandTests` `WriteTakesPanelKeysTests` →
+  `w2-g3.log`. EXPECTED: all green. Read every suite's ✔/✘ line and the skips (a wrong name runs 0 tests and still
+  "succeeds"; the nested `CommentPanelHostSuites` must show BOTH child suites' ✔ lines).
 # VX-282 — Run: Editor & notes fixes
 
 **STATUS: OPEN — kickoff 2026-10-13 (evening).** Run ticket **VX-282** (project *v1 release readiness*) ·
@@ -132,7 +142,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS — the OLD-PRODUCTS REBUILD, a NAMED REVERT IN FLIGHT:** for the hardened pins (`CommentPanelHostSuites`), the app/test files that post-date `7d798f82` go back to it for one build — `CommentsPanel.swift` `CommentTextArea.swift` `Registry/Capability.swift` `Registry/CapabilityRegistry.swift` `VariorumTests/CapabilityRegistryTests.swift` `Sources/VariorumCore/Queries/RestoreCost.swift` (`git checkout 7d798f82 --`), and `VariorumTests/CommentPanelDoorsTests.swift` moved aside to `scratchpad/vx282-u5/`; restore by `git checkout HEAD -- <each>` (the Doors file included), `git status` clean. Then the fixed rebuild; then READY FOR STAGE again. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — W1 red on old (the host suites + the model suites, ≈4 min; VX-229 decided here) · W2 the fixed batch (three groups, ≈12 min) · W3 the walk (7 rows incl. a live `heap` count, row 1 in both voices, ≈25 min) — ≈42 min.** VX-229: fix REVERTED `7d798f82` (offscreen artefact — the CORRECTION); expected HOLLOW. VX-257: fix `1ca8fe72`; QUESTIONS #222. VX-183: `a765683c`. VX-182: pins `f38fb93c` red on old (headless), fix `fd4c260c`, R-182 ran + restored. Pins hardened `dab712d8`. Core 2,801/320 + MCP 212/41 + workbook 40/6 headless green; the phone builds. Old products `DerivedData/vx282-u5-old-products` REBUILT (the named revert at `3a6bad6d` — done, restored, `git status` clean); fixed `DerivedData/vx282-u5` rebuilt at the tip. No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -1776,14 +1786,14 @@ restored by `git checkout -- Sources/VariorumCore/Queries/RestoreCost.swift`, `g
   offers (if expired tombstones are not otherwise removed — not checked). Comments agree on both sides (neither is
   windowed). Pre-existing; not VX-182's fence; a ticket candidate.
 
-#### THE WINDOW PLAN (≈40 min; runs only on the orchestrator's claim line; `guard.sh --author` before every leg)
+#### THE WINDOW PLAN (≈42 min; runs only on the orchestrator's claim line; `guard.sh --author` before every leg)
 
 From `App/Variorum/`; logs to `notes/plans/vx282-screens/u5/logs/`, captures to `notes/plans/vx282-screens/u5/`. `pgrep`
 first — no `/Applications/Variorum.app` instance, none of ours.
 - **W1 — red on old (≈4 min):** `xcodebuild test-without-building -xctestrun
   DerivedData/vx282-u5-old-products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination 'platform=macOS'`
-  with `-only-testing:VariorumTests/` × `CommentPanelReleaseTests` `CommentPanelLeaveTests` `CommentPanelHostLeavingTests`
-  `CommentPanelParkTests` → `w1-red-on-old.log`. EXPECTED: VX-257 RED — `CommentPanelLeaveTests`
+  with `-only-testing:VariorumTests/` × `CommentPanelHostSuites` (the serialized parent of `CommentPanelReleaseTests` and
+  `CommentPanelHostLeavingTests` — `dab712d8`) `CommentPanelLeaveTests` `CommentPanelParkTests` → `w1-red-on-old.log`. EXPECTED: VX-257 RED — `CommentPanelLeaveTests`
   `leavingWithAHalfTyped…` (1), `escapeAfterARestore…` (1, its premise), `anotherBlocks…` (2); `CommentPanelHostLeavingTests`
   all three (2 each: the text, the caret) — **10 issues in 6 cases**; GREEN — the three model guards and
   `CommentPanelParkTests` (8). **VX-229 — THE DECIDING CELL:** `CommentPanelReleaseTests` EXPECTED GREEN on old (hollow) —
