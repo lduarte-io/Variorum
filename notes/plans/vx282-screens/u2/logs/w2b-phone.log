@@ -1,0 +1,211 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -scheme VariorumMobile -destination "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2" -derivedDataPath DerivedData/vx282-u2-ios "-only-testing:VariorumMobileTests/MobileMarkdownCaretTests" "-only-testing:VariorumMobileTests/MobileMarkdownRenderTests" "-only-testing:VariorumMobileTests/MobileMarkdownReturnTests" "-only-testing:VariorumMobileTests/MobileMarkdownActsTests" "-only-testing:VariorumMobileTests/MobileCheckboxTapTests" "-only-testing:VariorumMobileTests/MobileEditorMaterializationTests" "-only-testing:VariorumMobileTests/MobileEditorRoutingTests" "-only-testing:VariorumMobileTests/MobileEditRoutingBindingTests" "-only-testing:VariorumMobileTests/MobileIdentityAuditSeparatorTests" "-only-testing:VariorumMobileTests/MobileEditRoutingCrashTests"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  swift-log: https://github.com/apple/swift-log.git @ 1.16.1
+  GRDB: https://github.com/lduarte-io/GRDB.swift.git @ 7.11.1+sqlcipher.1
+  swift-atomics: https://github.com/apple/swift-atomics.git @ 1.3.1
+  swift-syntax: https://github.com/swiftlang/swift-syntax @ 602.0.0
+  combine-schedulers: https://github.com/pointfreeco/combine-schedulers @ 1.2.0
+  xctest-dynamic-overlay: https://github.com/pointfreeco/xctest-dynamic-overlay @ 1.11.0
+  swift-collections: https://github.com/apple/swift-collections.git @ 1.7.2
+  VariorumCore: <home>/dev/variorum-vx-282 @ local
+  EventSource: https://github.com/mattt/eventsource.git @ 1.5.1
+  Sparkle: https://github.com/sparkle-project/Sparkle @ 2.10.0
+  mcp-swift-sdk: https://github.com/modelcontextprotocol/swift-sdk.git @ 0.12.1
+  swift-system: https://github.com/apple/swift-system.git @ 1.8.1
+  swift-dependencies: https://github.com/pointfreeco/swift-dependencies.git @ 1.14.1
+  SQLCipher: https://github.com/sqlcipher/SQLCipher.swift.git @ 4.18.0
+  swift-clocks: https://github.com/pointfreeco/swift-clocks @ 1.1.0
+  swift-concurrency-extras: https://github.com/pointfreeco/swift-concurrency-extras @ 1.4.1
+  swift-nio: https://github.com/apple/swift-nio.git @ 2.104.0
+
+2026-10-13 23:19:46.823095-0600 VariorumMobile[10410:58178781] [General] Failed to send CA Event for app launch measurements for ca_event_type: 0 event_name: com.apple.app_launch_measurement.FirstFramePresentationMetric
+2026-10-13 23:19:46.958156-0600 VariorumMobile[10410:58178791] [General] Failed to send CA Event for app launch measurements for ca_event_type: 1 event_name: com.apple.app_launch_measurement.ExtendedLaunchMetrics
+Test Suite 'Selected tests' started at 2026-10-13 23:19:47.892.
+Test Suite 'VariorumMobileTests.xctest' started at 2026-10-13 23:19:47.893.
+Test Suite 'VariorumMobileTests.xctest' passed at 2026-10-13 23:19:47.893.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-13 23:19:47.893.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64-apple-ios17.0-simulator
+◇ Suite "Mobile edit routing — the crash reproductions (round 2, M1)" started.
+◇ Test aCoalescedDeleteWiderThanItsTailVerdictHealsInsteadOfTrapping() started.
+2026-10-13 23:19:47.953900-0600 VariorumMobile[10410:58178489] [protection] apple key reconcile: verified Optional(true) · wrote this pass: false · landing failed: false
+2026-10-13 23:19:47.964544-0600 VariorumMobile[10410:58178489] [protection] apple key reconcile: verified Optional(true) · wrote this pass: false · landing failed: false
+✔ Test aCoalescedDeleteWiderThanItsTailVerdictHealsInsteadOfTrapping() passed after 0.081 seconds.
+◇ Test aCoalescedDeleteWiderThanItsBlockVerdictHealsInsteadOfTrapping() started.
+✔ Test aCoalescedDeleteWiderThanItsBlockVerdictHealsInsteadOfTrapping() passed after 0.040 seconds.
+◇ Test aVerdictArmedBeforeTheTailClosedIsNotApplied() started.
+✔ Test aVerdictArmedBeforeTheTailClosedIsNotApplied() passed after 0.043 seconds.
+✔ Suite "Mobile edit routing — the crash reproductions (round 2, M1)" passed after 0.166 seconds.
+◇ Suite "Mobile edit routing — the verdict is bound to its edit (round 2, M1)" started.
+◇ Test theFixtureIsTheTracesDocument() started.
+✔ Test theFixtureIsTheTracesDocument() passed after 0.035 seconds.
+◇ Test aStaleVerdictIsNotAppliedToTheNextEdit() started.
+✔ Test aStaleVerdictIsNotAppliedToTheNextEdit() passed after 0.039 seconds.
+◇ Test aComposedTransactionWiderThanItsApprovalIsNotConsumed() started.
+✔ Test aComposedTransactionWiderThanItsApprovalIsNotConsumed() passed after 0.040 seconds.
+◇ Test anArmingThatStillDescribesItsEditIsHonored() started.
+✔ Test anArmingThatStillDescribesItsEditIsHonored() passed after 0.039 seconds.
+◇ Test theTailGesturesSurviveTheBinding() started.
+✔ Test theTailGesturesSurviveTheBinding() passed after 0.031 seconds.
+◇ Test aStaleOpenTailArmingNeverBindsAGateLessCharacter() started.
+✔ Test aStaleOpenTailArmingNeverBindsAGateLessCharacter() passed after 0.036 seconds.
+◇ Test theLeadingRunAttachmentDisarmsAStaleArming() started.
+✔ Test theLeadingRunAttachmentDisarmsAStaleArming() passed after 0.037 seconds.
+✔ Suite "Mobile edit routing — the verdict is bound to its edit (round 2, M1)" passed after 0.260 seconds.
+◇ Suite "Mobile identity audit — the separator check (round 2, M15 Q2)" started.
+◇ Test aSeparatorOffsetLandingOnProseFires() started.
+✔ Test aSeparatorOffsetLandingOnProseFires() passed after 0.033 seconds.
+◇ Test anEmptyEntrysSeparatorIsAuditedToo() started.
+✔ Test anEmptyEntrysSeparatorIsAuditedToo() passed after 0.035 seconds.
+◇ Test aBlockWhoseTextEndsWithANewlineNeverFires() started.
+✔ Test aBlockWhoseTextEndsWithANewlineNeverFires() passed after 0.031 seconds.
+◇ Test aBlockOfNothingButNewlinesNeverFires() started.
+✔ Test aBlockOfNothingButNewlinesNeverFires() passed after 0.034 seconds.
+◇ Test emptyBlocksNeverFire() started.
+✔ Test emptyBlocksNeverFire() passed after 0.035 seconds.
+◇ Test anEmptyLastBlockUnderAnOpenTailNeverFires() started.
+✔ Test anEmptyLastBlockUnderAnOpenTailNeverFires() passed after 0.029 seconds.
+✔ Suite "Mobile identity audit — the separator check (round 2, M15 Q2)" passed after 0.201 seconds.
+◇ Suite "Mobile Write editor — materialization & identity (S1 batch 1)" started.
+◇ Test materializationTilesBlocksSeparatorsAndAttributes() started.
+✔ Test materializationTilesBlocksSeparatorsAndAttributes() passed after 0.030 seconds.
+◇ Test aTypedInsertionIsReStampedFromTheIndex() started.
+✔ Test aTypedInsertionIsReStampedFromTheIndex() passed after 0.028 seconds.
+◇ Test aSystemPathEditWithNoGateCallStillRoutesAndReStamps() started.
+✔ Test aSystemPathEditWithNoGateCallStillRoutesAndReStamps() passed after 0.031 seconds.
+✔ Suite "Mobile Write editor — materialization & identity (S1 batch 1)" passed after 0.090 seconds.
+◇ Suite "Mobile Write editor — routing & autosave (S1 batch 1)" started.
+◇ Test aBlockEditAutosavesExactlyItsVariantWithBlockScopedCost() started.
+✔ Test aBlockEditAutosavesExactlyItsVariantWithBlockScopedCost() passed after 0.035 seconds.
+◇ Test aReplacementCostCountsBothSides() started.
+✔ Test aReplacementCostCountsBothSides() passed after 0.027 seconds.
+◇ Test aCrossBlockEditRefusesTheKeystrokeAndActsInstead() started.
+✔ Test aCrossBlockEditRefusesTheKeystrokeAndActsInstead() passed after 0.061 seconds.
+◇ Test aSealedNoteRefusesEveryEdit() started.
+✔ Test aSealedNoteRefusesEveryEdit() passed after 0.029 seconds.
+◇ Test aLockedTakeRefusesWithItsOwnMessage() started.
+✔ Test aLockedTakeRefusesWithItsOwnMessage() passed after 0.031 seconds.
+✔ Suite "Mobile Write editor — routing & autosave (S1 batch 1)" passed after 0.185 seconds.
+◇ Suite "VX-296 — the caret-aware face in the phone's Write editor" started.
+◇ Test herFlowTypingInsideAnItalicPairNeverDropsTheItalicAtASpace() started.
+2026-10-13 23:19:48.926239-0600 VariorumMobile[10410:58178489] [View] First responder issue detected: non-key window attempting reload - allowing due to manual keyboard (first responder window is <UIWindow: 0x11cf307e0; frame = (0 0; 393 700); autoresize = W+H; gestureRecognizers = <NSArray: 0x600000d06970>; layer = <UIWindowLayer: 0x6000017cd000>>, key window is <UIWindow: 0x101b30560; frame = (0 0; 402 874); gestureRecognizers = <NSArray: 0x600000c3c9f0>; layer = <UIWindowLayer: 0x600001729b00>>)
+✔ Test herFlowTypingInsideAnItalicPairNeverDropsTheItalicAtASpace() passed after 0.114 seconds.
+◇ Test leavingATrailingSpaceBehindUnstylesTheSpanHonestly() started.
+2026-10-13 23:19:48.968391-0600 VariorumMobile[10410:58178489] Unbalanced calls to begin/end appearance transitions for <UIViewController: 0x11cf31710>.
+2026-10-13 23:19:48.999244-0600 VariorumMobile[10410:58178489] [View] First responder issue detected: non-key window attempting reload - allowing due to manual keyboard (first responder window is <UIWindow: 0x101c69440; frame = (0 0; 393 700); autoresize = W+H; gestureRecognizers = <NSArray: 0x600000cfe640>; layer = <UIWindowLayer: 0x60000172ad40>>, key window is <UIWindow: 0x101b30560; frame = (0 0; 402 874); gestureRecognizers = <NSArray: 0x600000c3c9f0>; layer = <UIWindowLayer: 0x600001729b00>>)
+VariorumMobile/MobileEditorViewModel.swift:2001: Fatal error: mobile editor surface desynced from the block index
+2026-10-13 23:19:49.001847-0600 VariorumMobile[10410:58178489] VariorumMobile/MobileEditorViewModel.swift:2001: Fatal error: mobile editor surface desynced from the block index
+
+Restarting after unexpected exit, crash, or test timeout; summary will include totals from previous launches.
+
+Test Suite 'Selected tests' started at 2026-10-13 23:20:12.170.
+Test Suite 'VariorumMobileTests.xctest' started at 2026-10-13 23:20:12.171.
+Test Suite 'VariorumMobileTests.xctest' passed at 2026-10-13 23:20:12.171.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-13 23:20:12.171.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+2026-10-13 23:20:12.188874-0600 VariorumMobile[10595:58180232] [protection] apple key reconcile: verified Optional(true) · wrote this pass: false · landing failed: false
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64-apple-ios17.0-simulator
+◇ Suite "VX-296 — the caret-aware face in the phone's Write editor" started.
+✔ Suite "VX-296 — the caret-aware face in the phone's Write editor" passed after 0.001 seconds.
+◇ Suite "Mobile markdown — render (display == stored; S1 batch 2)" started.
+◇ Test faceStylesWithoutTouchingStoredBytes() started.
+✔ Test faceStylesWithoutTouchingStoredBytes() passed after 0.178 seconds.
+◇ Test restyleFollowsTheKeystrokeAndClearsGhosts() started.
+2026-10-13 23:20:12.372848-0600 VariorumMobile[10595:58180232] [protection] apple key reconcile: verified Optional(true) · wrote this pass: false · landing failed: false
+✔ Test restyleFollowsTheKeystrokeAndClearsGhosts() passed after 0.045 seconds.
+◇ Test indentedHeadingStaysPlainText() started.
+✔ Test indentedHeadingStaysPlainText() passed after 0.036 seconds.
+◇ Test perEditRescanIsLineScoped() started.
+✔ Test perEditRescanIsLineScoped() passed after 0.049 seconds.
+✔ Suite "Mobile markdown — render (display == stored; S1 batch 2)" passed after 0.311 seconds.
+◇ Suite "Mobile markdown — the ⏎ door (K5/K8; S1 batch 2)" started.
+◇ Test textedBulletLineContinuesWithItsLead() started.
+✔ Test textedBulletLineContinuesWithItsLead() passed after 0.056 seconds.
+◇ Test checkedCheckboxContinuesUnchecked() started.
+✔ Test checkedCheckboxContinuesUnchecked() passed after 0.037 seconds.
+◇ Test nestedItemContinuesAtItsOwnLevel() started.
+✔ Test nestedItemContinuesAtItsOwnLevel() passed after 0.036 seconds.
+◇ Test midLineReturnIsOrdinary() started.
+✔ Test midLineReturnIsOrdinary() passed after 0.034 seconds.
+◇ Test headingNeverContinues() started.
+✔ Test headingNeverContinues() passed after 0.035 seconds.
+◇ Test emptyItemAtLevelZeroExitsTheList() started.
+✔ Test emptyItemAtLevelZeroExitsTheList() passed after 0.047 seconds.
+◇ Test emptyNestedItemOutdentsFirstThenExits() started.
+✔ Test emptyNestedItemOutdentsFirstThenExits() passed after 0.036 seconds.
+◇ Test selectionsReturnIsOrdinary() started.
+✔ Test selectionsReturnIsOrdinary() passed after 0.035 seconds.
+◇ Test tailCrystallizationKeepsAListLinesIndent_adjudicationPin() started.
+✔ Test tailCrystallizationKeepsAListLinesIndent_adjudicationPin() passed after 0.035 seconds.
+◇ Test pastedNestedListKeepsItsIndent_adjudicationPin() started.
+✔ Test pastedNestedListKeepsItsIndent_adjudicationPin() passed after 0.032 seconds.
+◇ Test sealedNoteRefusesTheContinuation() started.
+✔ Test sealedNoteRefusesTheContinuation() passed after 0.035 seconds.
+✔ Suite "Mobile markdown — the ⏎ door (K5/K8; S1 batch 2)" passed after 0.424 seconds.
+◇ Suite "Mobile markdown — Tab, ⇧Tab and the acts (K8/M11; S1 batch 2)" started.
+◇ Test tabIndentsAListLineByOneUnit() started.
+✔ Test tabIndentsAListLineByOneUnit() passed after 0.041 seconds.
+◇ Test tabOutsideAListIsTheOrdinaryKey() started.
+✔ Test tabOutsideAListIsTheOrdinaryKey() passed after 0.033 seconds.
+◇ Test mixedIndentRunOutdentsByTheOneSharedUnit() started.
+✔ Test mixedIndentRunOutdentsByTheOneSharedUnit() passed after 0.045 seconds.
+◇ Test multiLineSelectionIndentsOnlyListLines() started.
+✔ Test multiLineSelectionIndentsOnlyListLines() passed after 0.048 seconds.
+◇ Test boldTogglesAndLandsInTheStore() started.
+✔ Test boldTogglesAndLandsInTheStore() passed after 0.058 seconds.
+◇ Test strikethroughCodeAndLinkLandInTheStore() started.
+✔ Test strikethroughCodeAndLinkLandInTheStore() passed after 0.041 seconds.
+◇ Test emptySelectionBoldIsTheCaretGesture() started.
+✔ Test emptySelectionBoldIsTheCaretGesture() passed after 0.034 seconds.
+◇ Test headingCycleClimbsThenClears() started.
+✔ Test headingCycleClimbsThenClears() passed after 0.033 seconds.
+◇ Test headingLongPressPicksDirectlyAndClearClears() started.
+✔ Test headingLongPressPicksDirectlyAndClearClears() passed after 0.065 seconds.
+◇ Test headingActAtDepthMintsAWorkingColumnZeroHeading() started.
+✔ Test headingActAtDepthMintsAWorkingColumnZeroHeading() passed after 0.034 seconds.
+◇ Test listLeadsKeepTheIndentWhenRelead() started.
+✔ Test listLeadsKeepTheIndentWhenRelead() passed after 0.037 seconds.
+◇ Test actsRefuseOnASealedNote() started.
+✔ Test actsRefuseOnASealedNote() passed after 0.034 seconds.
+◇ Test aWidenedAttributeFixReportNeverPoisonsTheSeparator() started.
+✔ Test aWidenedAttributeFixReportNeverPoisonsTheSeparator() passed after 0.054 seconds.
+◇ Test theBarRestsOnThreeDoorsAndAaExpandsTheStripInPlace() started.
+✔ Test theBarRestsOnThreeDoorsAndAaExpandsTheStripInPlace() passed after 0.045 seconds.
+◇ Test theVisibleOutdentButtonUnindentsOnAPlainTap() started.
+✔ Test theVisibleOutdentButtonUnindentsOnAPlainTap() passed after 0.051 seconds.
+✔ Suite "Mobile markdown — Tab, ⇧Tab and the acts (K8/M11; S1 batch 2)" passed after 0.660 seconds.
+◇ Suite "Mobile markdown — the checkbox tap (L9's phone twin; S1 batch 2)" started.
+◇ Test tapInsideTheBoxTogglesBothWaysPreservingTheCaret() started.
+✔ Test tapInsideTheBoxTogglesBothWaysPreservingTheCaret() passed after 0.050 seconds.
+◇ Test tapOutsideTheBoxIsNeverConsumed() started.
+✔ Test tapOutsideTheBoxIsNeverConsumed() passed after 0.037 seconds.
+◇ Test sealedNoteConsumesTheTapButRefusesTheEdit() started.
+✔ Test sealedNoteConsumesTheTapButRefusesTheEdit() passed after 0.034 seconds.
+✔ Suite "Mobile markdown — the checkbox tap (L9's phone twin; S1 batch 2)" passed after 0.123 seconds.
+✔ Test run with 33 tests in 5 suites passed after 1.521 seconds.
+2026-10-13 23:30:14.093 xcodebuild[9688:58180213]  IDETestOperationsObserverDebug: Failure collecting diagnostics from simulator: Timed out after 600.0 seconds while waiting for a response from the invoked process
+2026-10-13 23:30:14.161 xcodebuild[9688:58173188] [MT] IDETestOperationsObserverDebug: 643.654 elapsed -- Testing started completed.
+2026-10-13 23:30:14.162 xcodebuild[9688:58173188] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-13 23:30:14.162 xcodebuild[9688:58173188] [MT] IDETestOperationsObserverDebug: 643.655 sec, +643.655 sec -- end
+
+Test session results, code coverage, and logs:
+	<home>/dev/variorum-vx-282/App/Variorum/DerivedData/vx282-u2-ios/Logs/Test/Test-VariorumMobile-2026.10.13_23-19-30--0600.xcresult
+
+Failing tests:
+	MobileMarkdownCaretTests.leavingATrailingSpaceBehindUnstylesTheSpanHonestly()
+
+** TEST EXECUTE FAILED **
+
+Testing started
+EXIT 65
