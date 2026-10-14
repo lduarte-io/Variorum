@@ -24,6 +24,44 @@ import SwiftUI
 import VariorumCore
 import VariorumMCP
 
+/// **VX-281 U1 — R-VX184-6's four tabs, in her order** (Connect · Clients ·
+/// Shared with AI · Activity). Pure, so the opening rule and the search's
+/// landing are pinned without mounting anything.
+nonisolated enum MCPPaneTab: String, CaseIterable, Identifiable, Sendable {
+    case connect, clients, shared, activity
+
+    var id: String { rawValue }
+
+    /// The tab's label — Connect's own word; the other three are their
+    /// sections' titles (one name per place, said once).
+    var label: String {
+        switch self {
+        case .connect: MCPPaneCopy.connectTab
+        case .clients: MCPPaneCopy.clientsSection
+        case .shared: MCPPaneCopy.sharedSection
+        case .activity: MCPPaneCopy.activitySection
+        }
+    }
+
+    /// **Where the pane opens** (her ruling): on her pick this session when
+    /// she made one (`MCPDoor.paneTab`); else on Connect while no client is
+    /// approved — setting one up is all there is to do — and on Clients once
+    /// one is.
+    static func opening(remembered: MCPPaneTab?, approvedCount: Int) -> MCPPaneTab {
+        if let remembered { return remembered }
+        return approvedCount > 0 ? .clients : .connect
+    }
+
+    /// **The tab a Settings search finding lands on** — the open-book row
+    /// lives in Shared with AI, so the search opens it there (the catalog's
+    /// promise, `AppSettingsView.rowIDsRendered`: the search never names a
+    /// row the pane does not show). nil: the row sits above the tabs (the
+    /// server switch, Waiting) or the finding is the pane itself.
+    static func holding(findingLead lead: String) -> MCPPaneTab? {
+        lead == SettingsCatalog.title("mcpOpenBook") ? .shared : nil
+    }
+}
+
 struct MCPPane: View {
     let door: MCPDoor
     @State private var granting: MCPGrantOpening?
