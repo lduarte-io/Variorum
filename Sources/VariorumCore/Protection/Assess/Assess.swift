@@ -225,12 +225,25 @@ public enum AssessRules {
         // wins, the retired ids and the tree are unions).
         do {
             let memory = unlocked.memory
-            let stale = memory == nil
+            var stale = memory == nil
                 || memory?.currentFingerprint != record.currentFingerprint
                 || memory?.keyEpoch != record.keyEpoch
                 || memory?.familyTree != unlocked.familyTree
                 || memory?.deviceSection != unlocked.thisMac
                 || (record.modeConfirmed && memory?.lastConfirmed != ConfirmedFacts(mode: record.mode, account: record.account))
+            // The key file and its mirror, for the current key: the file never
+            // shrinks to match the mirror's word, nor the mirror to the file's.
+            if let mirror = memory?.keyFileMirror, mirror.fingerprint == unlocked.currentFingerprint {
+                if let live = liveKeyFile(facts, unlocked) {
+                    if mirrorHoldsMore(mirror, than: live) {
+                        repairs.append(.restoreKeyFileFromMirror)
+                    } else if live != mirror {
+                        stale = true
+                    }
+                } else {
+                    repairs.append(.restoreKeyFileFromMirror)
+                }
+            }
             if stale { repairs.append(.refreshMemory) }
             if unlocked.recordSection != unlocked.thisMac { repairs.append(.refreshRecordSection) }
         }
@@ -255,6 +268,17 @@ public enum AssessRules {
                             repairs: &repairs, faults: &faults)
         }
         return (repairs, faults)
+    }
+
+    /// Does the sealed mirror hold a road the live file (same key) lost — a
+    /// secret or master lock, a history entry, the anchor? Apple wraps are
+    /// left out: they leave legitimately and a repair never re-adds one.
+    static func mirrorHoldsMore(_ mirror: KeyFile, than live: KeyFile) -> Bool {
+        let roads: Set<KeyFileRoad> = [.passphrase, .words, .master, .masterThroughWords]
+        if !mirror.roads.intersection(roads).isSubset(of: live.roads) { return true }
+        if !Set(mirror.history.map(\.fingerprint)).isSubset(of: Set(live.history.map(\.fingerprint))) { return true }
+        if mirror.anchor != nil && live.anchor == nil { return true }
+        return !Set(mirror.keptAnchors.map(\.outgoingFingerprint)).isSubset(of: Set(live.keptAnchors.map(\.outgoingFingerprint)))
     }
 
     /// The precondition under which a key's copy may go: the current key's

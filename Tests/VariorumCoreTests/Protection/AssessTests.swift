@@ -506,7 +506,8 @@ struct AssessRepairTests {
                 case .makeTouchIDItem, .deleteTouchIDItem:
                     Issue.record("\(repair) — a guard's bug shape with every guard on")
                 case .deleteSilentItem, .deleteLegacyItem, .deleteLegacyKeyFile, .deleteRetiredAppleKey,
-                     .deleteRetiredOldSharedKey, .landAppleWrap, .refreshMemory, .refreshRecordSection, .recordAlwaysAskQuietly:
+                     .deleteRetiredOldSharedKey, .landAppleWrap, .refreshMemory, .refreshRecordSection,
+                     .restoreKeyFileFromMirror, .recordAlwaysAskQuietly:
                     continue
                 }
             }
@@ -521,6 +522,52 @@ struct AssessRepairTests {
         world.memoryAbsent = false
         world.recordSection = world.section.bumped()
         #expect(try world.assessed().repairs.contains(.refreshRecordSection))
+    }
+
+    /// The key file and the sealed mirror agree — never by shrinking: a file
+    /// that lost a road (or went missing) is written back from the mirror; a
+    /// file that changed a wrap (a key door) is followed by the mirror.
+    @Test func theKeyFileAndItsMirrorAgreeNeverByShrinking() throws {
+        var world = try AWorld(.castle)
+        var memory = world.agreeingMemory
+        memory.keyFileMirror = world.liveFile
+        world.memory = memory
+        #expect(!(try world.assessed().repairs.contains(.restoreKeyFileFromMirror)))
+        #expect(!(try world.assessed().repairs.contains(.refreshMemory)))
+        // A words wrap removed from the file: written back.
+        var stripped = world.liveFile
+        stripped.words = nil
+        let full = world.liveFile
+        world.liveFile = stripped
+        #expect(try world.assessed().repairs.contains(.restoreKeyFileFromMirror))
+        // The passphrase changed by a key door: the mirror follows.
+        world.liveFile = try full.settingPassphrase(try PF.passphraseKey("changed"), for: world.key)
+        let changed = try world.assessed().repairs
+        #expect(changed.contains(.refreshMemory) && !changed.contains(.restoreKeyFileFromMirror))
+        // The file deleted: written back.
+        var noFile = try AWorld(.castle)
+        var mirrored = noFile.agreeingMemory
+        mirrored.keyFileMirror = noFile.liveFile
+        noFile.memory = mirrored
+        var facts = try noFile.facts()
+        facts.catalog = Catalog()
+        #expect(assess(facts).repairs.contains(.restoreKeyFileFromMirror))
+    }
+
+    /// One Apple key per library per Mac and one per account: the library's
+    /// wrap lands only under this Mac's own key for it — never the account's.
+    @Test func theLibraryWrapNeverLandsUnderTheAccountsKey() throws {
+        var world = try AWorld(.standard)
+        world.liveFile = world.liveFile.droppingApple()
+        let accountKey = PF.id()
+        world.section = DeviceSection(
+            deviceID: CF.macA, hardwareMarker: "marker", settings: DeviceSettings(gateStyle: nil),
+            appleKeys: [AppleKeyRecord(id: accountKey, purpose: .account, accountID: PF.id(), origin: .followed)])
+        world.recordSection = world.section
+        world.appleKeys.readable = [accountKey]
+        let assessed = try world.assessed()
+        #expect(!assessed.repairs.contains { if case .landAppleWrap = $0 { return true } else { return false } })
+        #expect(assessed.movePlan.liveLibrary, "the move (an act) gives it a key of its own")
     }
 
     @Test func aSilentSyncKeysItemWhileTheyReachACastleEraKeyIsReported() throws {

@@ -84,7 +84,8 @@ public enum Retention {
                 kept = keepDailiesAndWeeklies(dated, dailies: policy.dailies, weeklies: policy.weeklies)
             }
             // An undated copy (no stamp to reason about) is never pruned.
-            keep += candidates.map(\.id).filter { kept.contains($0) || !dated.map(\.id).contains($0) }
+            let datedIDs = Set(dated.map(\.id))
+            keep += candidates.map(\.id).filter { kept.contains($0) || !datedIDs.contains($0) }
             prune += dated.map(\.id).filter { !kept.contains($0) }
         }
         let legacyFlat = catalog.copies.filter { $0.kind == .legacyFlatBackup }.map(\.id)

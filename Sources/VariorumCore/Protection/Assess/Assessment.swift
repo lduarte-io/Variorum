@@ -192,6 +192,12 @@ public enum Repair: Hashable, Sendable {
     /// Always: the record's home of this Mac's section is behind the newer
     /// home — written forward (the same reconciliation).
     case refreshRecordSection
+    /// Always: the live key file is missing, or lost a road the sealed mirror
+    /// in what this Mac remembers still holds (a passphrase, words or master
+    /// lock, a history entry, the anchor) — it is written back from the
+    /// mirror. Never an Apple wrap: those leave legitimately (a retirement, a
+    /// re-key) and are never re-added by a repair.
+    case restoreKeyFileFromMirror
     /// §3.10: this device's choice says Touch ID and no item exists — Always
     /// ask is recorded quietly (a settings write; never an item).
     case recordAlwaysAskQuietly
