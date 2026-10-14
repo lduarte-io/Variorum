@@ -75,6 +75,20 @@ import GRDB
 ///   forgotten. A foreign key to `mcp_client` (both rows are this family's
 ///   and local; a waiting row only ever names an approved client, which no
 ///   cap ever deletes).
+///
+/// **P-VX260-1, OPTION (b) — THE WORDS A CLIENT WROTE** (`v1_29_mcp_comment_words`;
+/// VX-246 U1b, THE ORCHESTRATOR ON U1's HAND-BACK — her VX-260 rule: "Once she
+/// has edited an AI's comment, deleting it needs EDIT", wherever she edits): ONE
+/// column on `mcp_comment_author`, born LOCAL-ONLY on the family's road — zero
+/// lockstep, the marker untouched (13).
+/// - `mcp_comment_author.text_digest` — a digest of the comment's words as the
+///   client wrote them (`MCPCommentWords.digest`), written in the comment's own
+///   transaction beside the record. The comment is the client's OWN only while
+///   its words still hash to it: any change to the words — her edit on any
+///   device (arriving by sync, which runs no door here), another client's — and
+///   deleting it needs EDIT. NULL = UNPROVEN (a record written before this
+///   column): never the client's own (the strict reading — the record may name
+///   a comment she has rewritten since, on any device, and nothing can tell).
 public enum MCPGrantSchema {
     /// The family's tables — the registration the completeness walk and the
     /// plaintext export consult.
@@ -189,5 +203,14 @@ public enum MCPGrantSchema {
         );
         CREATE UNIQUE INDEX uq_mcp_rebind_request_client ON mcp_rebind_request(client_id);
         CREATE UNIQUE INDEX uq_mcp_rebind_request_key ON mcp_rebind_request(key_hash);
+        """
+
+    /// `v1_29_mcp_comment_words`' DDL (P-VX260-1 option (b), VX-246 U1b) —
+    /// FROZEN with the migration that runs it. Hex SHA-256 over a
+    /// domain-separated encoding of the words (`MCPCommentWords.digest`);
+    /// nullable, NO backfill — a record that predates the column stays NULL,
+    /// which reads as UNPROVEN (never the client's own).
+    static let v1_29DDL = """
+        ALTER TABLE mcp_comment_author ADD COLUMN text_digest TEXT;
         """
 }

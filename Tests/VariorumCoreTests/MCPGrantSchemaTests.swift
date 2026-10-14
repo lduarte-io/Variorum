@@ -114,7 +114,10 @@ struct MCPGrantSchemaTests {
                     && !SyncSchema.derivedTables.contains("mcp_comment_author"),
                     "its own family's registration, never sync machinery or a derived index")
             let columns = try Row.fetchAll(db, sql: "PRAGMA table_info(mcp_comment_author)").map { $0["name"] as String }
-            #expect(columns == ["comment_id", "client_name", "recorded_at"], "an id, a name, a stamp — nothing else")
+            // P-VX260-1 (b) (A JUSTIFIED EDIT, the ritual — VX-246 U1b): v1_29
+            // adds the digest of the words the client wrote (local-only).
+            #expect(columns == ["comment_id", "client_name", "recorded_at", "text_digest"],
+                    "an id, a name, a stamp, the words' digest — nothing else")
             #expect(try Row.fetchAll(db, sql: "PRAGMA foreign_key_list(mcp_comment_author)").isEmpty,
                     "no foreign key to the synced comment row")
             #expect(try String.fetchAll(db, sql: """
@@ -202,6 +205,54 @@ struct MCPGrantSchemaTests {
             #expect(try db.tableExists("mcp_rebind_request"))
             #expect(try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM mcp_rebind_request") == 0)
             #expect(try String.fetchOne(db, sql: "SELECT state FROM mcp_client WHERE id = 'cl1'") == "approved")
+        }
+    }
+
+    // MARK: - P-VX260-1 (b): the words a client wrote (v1_29, local-only — the v1_24 road)
+
+    /// `v1_29_mcp_comment_words` adds ONE nullable column on the family's road:
+    /// no `sync_version` (the table stays outside the sync registry), no
+    /// trigger, never the outbox, the marker 13 — and a record write carrying
+    /// a digest never reaches the outbox either.
+    @Test func theWordsDigestIsLocalOnlyLikeItsTable() throws {
+        #expect(SyncSchema.lockstepVersion == 13, "a local-only migration never moves the marker")
+        let db = try AppDatabase.inMemory()
+        try db.read { (db: Database) throws in
+            let columns = try Row.fetchAll(db, sql: "PRAGMA table_info(mcp_comment_author)")
+            let digest = try #require(columns.first { $0["name"] == "text_digest" }, "the digest column")
+            #expect((digest["notnull"] as Int) == 0, "nullable — NULL reads as unproven")
+            #expect(SyncSchema.table(named: "mcp_comment_author") == nil)
+            #expect(try String.fetchAll(db, sql: """
+                SELECT name FROM sqlite_master WHERE type = 'trigger' AND tbl_name = 'mcp_comment_author'
+                """).isEmpty)
+        }
+        try db.write { db in
+            let before = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") ?? -1
+            try db.execute(sql: """
+                INSERT INTO mcp_comment_author (comment_id, client_name, recorded_at, text_digest)
+                  VALUES ('cm9', 'claude-code', ?, 'abc')
+                """, arguments: [stamp])
+            #expect(try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") == before,
+                    "a digest write never reaches the outbox")
+        }
+    }
+
+    /// A store at v1_28 keeps every authorship record, each with NO digest —
+    /// NULL, unproven (no backfill: the record cannot say whether its comment
+    /// was rewritten since, on another device).
+    @Test func aStoreBeforeTheDigestKeepsItsRecordsUnproven() throws {
+        let queue = try DatabaseQueue()
+        try AppDatabase.migrator.migrate(queue, upTo: "v1_28_mcp_rebind_requests")
+        try queue.write { db in
+            try db.execute(sql: """
+                INSERT INTO mcp_comment_author (comment_id, client_name, recorded_at) VALUES ('cm1', 'claude-code', ?)
+                """, arguments: [stamp])
+        }
+        try AppDatabase.migrator.migrate(queue)
+        try queue.read { (db: Database) throws in
+            let row = try #require(try Row.fetchOne(db, sql: "SELECT * FROM mcp_comment_author WHERE comment_id = 'cm1'"))
+            #expect(row["client_name"] as String == "claude-code", "the record is kept")
+            #expect((row["text_digest"] as String?) == nil, "and arrives unproven")
         }
     }
 
