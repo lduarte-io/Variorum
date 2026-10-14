@@ -121,8 +121,8 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | U1 — the door's security and correctness | CORE DONE, headless green at `ab552c5a` (MCP 223/48 · core 2,800/324 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~678k context (the cutover rule). The rest is U1b, below. U1's Mac batch rides U2's stage window (orchestrator call, see THE ORCHESTRATOR ON U1's HAND-BACK) |
 | U1b — VX-258's face and U1's remainder | WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5), and U2's MCP walk legs W2/W3 (no detour needed once the face exists). Note for W2/W3: on an empty redo stack the Redo item is DISABLED (`EditorCommands.swift:576`, unchanged), so "nothing to redo" reads as a disabled item, never a toast (U2 STAGE RUN's finding 1) |
 | U2 — the undo class | **WINDOW 1 PROVEN 2026-10-14 00:23–00:38** (U2 STAGE RUN below): the Mac batch 1,084 tests / 148 suites green (1,078 + 6 gated skips, 0 failed — U1's G1–G3 included), W1 proven in both voices, the dev store restored cmp-SAME. Open only for W2/W3 in U1b's window. — Earlier: BUILT, headless green at `10223a2d` (MCP 223/48 · core 2,826/326 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~634–690k context (the cutover rule). Its stage window (the Mac batch with U1's groups, plus W1, her own door) goes to a FRESH runner; W2/W3 move to U1b's window. The acceptance closes when W1–W3 have run |
-| U3 — her editor vs the wire | BUILT, headless green at `61ec7723` (MCP 236/49 · core 2,826/326 · workbook 40/6; both Mac products built: `vx246-u3-red` is the red-on-old product, `vx246-u3` the fixed one). The implementer is retired at ~620k context (cutover). Its window (`vx246-u3`: the Mac pins red on old, the 215-suite batch, Claude Code by U1's detour, and the timing driver) goes to a FRESH runner. VX-323 (the wider class) was born and fixed here |
-| U4 — the faces after big writes | IN-PROGRESS — implementer spawned from the U4 BRIEF below (2026-10-14 ~02:10), under the PAUSE protocol (U3's window may interrupt it at a clean seam) |
+| U3 — her editor vs the wire | **WINDOW PROVEN 2026-10-14 02:18–02:54** (U3 STAGE RUN below): W1 red on old 7/8 (17 issues) as designed; W2 1,470 tests / 215 suites green, the one failure VX-167's standing `redoNeverAsks` (alone: green); W3a (a real Claude Code, both voices) and W3b (53 ms / 51 ms after her last keystroke) proven; the store restored cmp-SAME. Finding A (a wire note delete in the OTHER pane moves her focus) is ruled provisionally (ruling 2) and fixed after U4's plan, its proof riding U4's window. — Earlier: BUILT, headless green at `61ec7723` (MCP 236/49 · core 2,826/326 · workbook 40/6; both Mac products built: `vx246-u3-red` is the red-on-old product, `vx246-u3` the fixed one). The implementer is retired at ~620k context (cutover). Its window (`vx246-u3`: the Mac pins red on old, the 215-suite batch, Claude Code by U1's detour, and the timing driver) goes to a FRESH runner. VX-323 (the wider class) was born and fixed here |
+| U4 — the faces after big writes | BUILT, PAUSED at `3d1c5dd6` for U3's window (~499k context). VX-230 traced: TK2 reports unlaid paragraphs as empty frames at the top-left, so badges piled at block 1; fixed in `EditorViewModel.refreshBadges`. VX-231 traced: the Bookcase word count was re-read only on appear and its own buttons; fixed in `ShelfViewModel.start`. Mac pins are written but not run, and both products are built. Next: the same implementer writes piece 6 (the batch list and THE STAGE WINDOW plan), then a FRESH session adds ruling 2's fix and runs U4's window with its proof |
 | U5 — the write tools' shapes | NOT-STARTED |
 | U6 — Compare from the wire | NOT-STARTED |
 | U7 — the agent's read-backs | NOT-STARTED |
@@ -172,6 +172,13 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 - ~01:50: the coordinator queued `vx246-u3`: vx282-u3 (on stage) → vx281-r1fix (critical path) → vx282-u4 → us, if
   we're READY by then, else whoever is READY first. It accepted the guards and asked for the user-scope fingerprint
   verdict (SAME) in the release's posture line.
+- ~02:16: **GO for `vx246-u3`**, carrying `Tools/stage release --who coord-for-vx246 && Tools/stage claim --who vx246-u3
+  --reason "VX-246 U3: pins + 215-suite batch + dev-store live round (A1, MCP fingerprint)" --minutes 90`. The
+  coordinator held the stage 15 min while U4's implementer paused at a clean seam (3d1c5dd6). Its pre-checks: no
+  instances, no sims, 50 GiB free; the dev store Standard/unlocked/Study, the tour offer completed (vx-282's walk, 02:12).
+- 02:54:00: **RELEASE** (36 of 90 min). The result lines went to the coordinator with the posture: Standard/unlocked,
+  cmp-SAME vs A1; prefs 0 differ; the MCP fingerprint SAME; the `-s local` server gone. The A1 copy
+  `scale-prestage-20261014T081813Z` is the coordinator's to prune.
 - ~02:05: the U3 runner is READY (348b1a78: both products match the tree, 215 suites listed, her user-scope servers
   fingerprinted). READY sent with a 90-min claim. U4's implementer starts meanwhile, under a PAUSE protocol: at the
   GO, it stops at a clean seam (committed, pushed, the tree clean) before the runner claims, so only one agent runs
@@ -253,6 +260,18 @@ list holds the calls that would otherwise have waited for her.)*
    so it can't land a call inside her 500 ms autosave debounce. A stdlib Python driver on the real Debug shim proves
    the keystroke-vs-act timing; W3a proves the real-client road with Claude Code. Ruled: both legs run, and the driver
    leg counts as the timing evidence.
+2. **A navigate-away never takes her focus** (U3 STAGE RUN's finding A, 2026-10-14 ~03:00).
+   - **The defect:** `WorkspaceModel.notesDeleted` sends each pane that shows a dead note to the Library through
+     `select(.library, in:)`, and `select` also moves the focus there (`focusedPane = pane`). So when a client deletes
+     the note in the pane she is NOT typing in, her focus jumps to that pane and her own note drops to the read tier.
+     U3's wire road newly reaches this; her own Delete door shares the road.
+   - **Ruled:** a pane showing a dead note goes to the Library IN PLACE, and the focus stays where it was. Only a pane
+     that is itself focused stays focused, as now.
+   - **Why:** her ruling (a) is "navigate away as her own Delete door does". The door's intent is to leave the dead
+     note, never to move her typing elsewhere, and a calm surface never steals the caret.
+   - **The side effect, said:** her own door deleting from one pane a note open in the OTHER pane no longer moves her
+     focus either.
+   - **Built:** after U4's plan, red-first, with its proof in U4's window.
 
 ## Tickets minted from this run
 
@@ -263,6 +282,8 @@ list holds the calls that would otherwise have waited for her.)*
 | VX-318 | U1's OWED 3 (the implementer, 2026-10-13) | MCP socket: a session's reader thread can read another socket's bytes after the host closes its descriptor. Same fd-reuse class as VX-279; traced by reading | a member (sub-issue of VX-246, Pre-launch); built in U1b with a red-first pin |
 | VX-323 | U3's trace of the wider class (the implementer, 2026-10-14) | MCP rewrites, restructures, freezes and copies read the stored row, never her pending typing (`edit_take`, `restore_commit`, `divide_block`, `merge_blocks`, `lock_take`/`archive_take`, `save_commit`/`save_version`) | a member, born and FIXED in U3 by the same pre-act flush as VX-275 (pins red-first) |
 | VX-324 | U3's OWED 2 (the implementer, 2026-10-14) | The Takes board's Lock / Archive / Delete-take doors may not flush her typing first. Her own doors; noticed, not reproduced | Todo, v1 release readiness, Bug. Probe red-first before any fix; NOT this run's |
+| VX-327 | U4's OWED (the implementer, 2026-10-14) | Callouts, comment cards and seams may read TK2's empty frames for unlaid paragraphs the same way the badges did, and pile at the top in the book view's editor after a width change | Todo, v1 release readiness, Bug. Probe red-first before any fix; NOT this run's |
+| VX-328 | U3 STAGE RUN's finding B (the runner, 2026-10-14) | With a split open, the Library catalog in the right pane draws past the divider and clips the left pane's header (both voices) | Todo, v1 release readiness, Bug; possibly VX-283's. NOT this run's |
 | VM-16 | U2's OWED 2 (the implementer, 2026-10-14) | The phone's undo door says "Undid: …" on a quiet press: `MobileUndoDoor` still calls `undo(with:)`/`redo(with:)`. The fix is the Mac door's two lines; the rule itself already reaches the phone | the VM board (Mobile — editor & capture faces, Backlog); it needs a simulator stage; related to VX-276 |
 
 ## UNIT BRIEFS (the orchestrator's; each unit's implementer is spawned from its brief)
@@ -2179,3 +2200,20 @@ at keystroke rate. A note's words changing by EDITING (no membership move) stays
 order on the inline surface); VX-231 is a refresh trigger the one-shot tier never had. Both were first seen right
 after a big MCP write, and in both the write is incidental: any long fanned note shows VX-230; any outside membership
 change shows VX-231.
+
+### THE ORCHESTRATOR ON U3's WINDOW (2026-10-14, ~03:00 MDT)
+
+- **Accepted.** U3's acceptance evidence is complete: the red-on-old Mac pins, the batch, the real-client leg in both
+  voices, and the timing leg. VX-275 and VX-323 close at the merge.
+- **Finding A** (her focus moves when a client deletes the note in the other pane) is ruled provisionally as ruling 2
+  in ORCHESTRATOR'S PROVISIONAL RULINGS. Its fix comes after U4's plan, red-first, and its proof rides U4's window.
+- **Finding B** (the split view's Library catalog overdraws the divider) is now **VX-328**, outside the run.
+- **Finding C** (the live pre-fix app didn't strand `delete_block`'s words) is dispositioned by trace. It fits
+  VX-184's FLUSH TRACE, step (5): her bytes stay pending in memory and land if a later flush runs in the same session.
+  Put back's door flushes, so the in-session red contrast was rescued. The loss shows at QUIT, which the
+  `delete_note` red contrast exercised and the `delete_block` one didn't.
+  - The deterministic pins hold the debounce still and prove the mechanism (red on old, by revert).
+  - The fixed product's live legs (W3a's caret landing, W3b's 53 ms) stand either way.
+  - Not traced further. The Fable review may weigh it.
+- **The harness warnings** (`@Dependency(\.withRandomNumberGenerator)` has no test implementation, raised while the new
+  door pins run) are noise, not a failure. The ladder may ask for the dependency to be pinned in the suite.
