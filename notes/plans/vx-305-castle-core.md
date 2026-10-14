@@ -544,8 +544,10 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   - (d) the legacy readers (formats 1 and 2, the legacy mode reader, the old marker's read and clearing check, today's
     item names and values) — DONE (this commit; 9 tests green, filtered run — the mode reader checked against a verbatim
     transcription of today's `Posture.derive` over the whole 360-point input space).
-  - (e) `ProtectionGuards` for U1's guards + the secret / marker scans — NOT-STARTED.
-  - (f) the record (§8), both configurations' runs — NOT-STARTED.
+  - (e) `ProtectionGuards` for U1's guards + the secret / marker scans — DONE (this commit; 7 tests green, filtered
+    run — each of U1's five guards red with its off-switch, DEBUG only).
+  - (f) the record (§8), both configurations' runs — IN-PROGRESS (the U1 suites: 60 tests in 18 suites; the record
+    next, the counts PENDING the runs).
 - U2 — assess, roads, route finder, catalog, retention: **NOT-STARTED.**
 - U3 — the executor and the acts: **NOT-STARTED.**
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
