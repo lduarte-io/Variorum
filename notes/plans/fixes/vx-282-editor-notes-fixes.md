@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #220. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #221). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — u5d: W2c g1 (13 suites) on fixed, ≈5 min.** The VX-229 cells are KNOWN ISSUES (the coordinator's ruling — non-intermittent `withKnownIssue` naming the runner fact; census still printed); VX-257's sheet cells unchanged; fixed tree rebuilt (TEST BUILD SUCCEEDED). u5c (06:12–06:14, released): VX-257 red on old as designed; the guard red under the drained shape (the runner retains 1 → 2 → 3, cause untraced). VX-229 DISMISSED AS HOLLOW in use (final). VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c`. No claim held; no revert in flight. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **DONE** — VX-229 DISMISSED AS HOLLOW in use (the u5b heap decider; the fix `ee86dd8c` reverted `7d798f82`; the runner's retention a known issue `c46f999d`, cause untraced) · VX-257 FIXED `1ca8fe72` (pins `7650b6ce`/`075473c2`, reshaped `dab712d8`/`eaf42b27`; QUESTIONS #223) · VX-183 FIXED `a765683c` · VX-182 FIXED `fd4c260c` (pins `f38fb93c`). Verified: core 2,801/320 + MCP 212/41 + workbook 40/6 headless; W1 / u5c red on old as designed; u5b g2 76/11, g3 23/2; **u5d g1 113 tests / 13 suites passed (9 known issues — the VX-229 runner fact)**; the u5b walk, every row held, both voices. Windows released 05:25:17, 05:57:46, 06:13:57, 06:19:43. Posture as found (Standard, unlocked, Study); no instance; no revert in flight. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **DONE** — pins `d35191b6` + correction `ee1facc9` · fix `3cf0079b` · window `a1967ac0` (logs) + the walk record. Stage window 05:27:17–05:38:17 (claim `vx282-u6`, RELEASED): W1 red on old exactly as predicted (3 tests, 1 issue — the launch pin's last cell) · W2 the fixed batch 148 tests / 43 suites green · W3 every row held (A0 old: the window; A/A' fixed: the caret in the bar at launch in Study and Terminal, a typed letter lands; C the tour never stolen from; D the navigation back as today — O-U6-1 seen live); row B's restored note window not reachable on this Mac (not restored), a new window walked in its place. P-U6-1/2 → QUESTIONS #224. Posture: Study, unlocked Standard, tour `completed`, the Bookcase, nothing filed. No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
@@ -1514,14 +1514,13 @@ withdrawn. Born for the orchestrator: O-U4-1 (untraced), O-U4-2, O-U4-3 (now thi
 
 ### U5 — VX-229 · VX-257 · VX-183 · VX-182 (the comments family VX-179 left)
 
-**NOT DONE BY THIS UNIT YET (first line):** **two mounted test cells are RED on the shipped code and must not stay in the
-suite** — VX-229's `CommentPanelReleaseTests` (red in the runner, HOLLOW in the app — the u5b heap decider below) and
-VX-257's two SHEET cells in `CommentPanelHostLeavingTests` (red in the runner for the same harness reason; the sheet roads
-HOLD in use) — reshaping them waits on the coordinator's ruling (no fix leg started, at its word); the phone has no
-VX-257 change (MOBILE PARITY below).
+**NOT DONE BY THIS UNIT (first line):** the phone has no VX-257 change (its sheet still drops an unsubmitted draft —
+MOBILE PARITY below); in the RUNNER the VX-229 cells are KNOWN ISSUES (the runner keeps dismissed panels alive, cause
+untraced) and VX-257's two sheet cells reach the leaving body by their fallback road (the binding dismissal's own
+`.onDisappear` is not reachable there — in the app the sheet roads were walked through Close and ⎋⎋, not the binding
+road); O-U5-2 (the confirm's 30-day window) is untraced, a ticket candidate.
 
-**State: u5b DONE — VX-229 HOLLOW IN USE (the app's heap); VX-257 and VX-183 hold in use; three runner-red cells owed a
-reshape at the coordinator's ruling.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Counts marked
+**State: DONE (2026-10-14 06:20).** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Counts marked
 PENDING wait for the window. **Revert state: no behavioural revert in flight** (R-182 ran and was restored; `git diff`
 empty).
 
@@ -2472,6 +2471,29 @@ recorded here.** VX-257's two sheet cells unchanged (their fallback road held at
 13 suites — the VX-229 cells passing WITH their known issues recorded (the log's known-issue lines; the census still
 printed), VX-257's three host cells green (the sheet cells printing their road). A VX-229 cell failing with "known issue was
 not recorded" means the runner RELEASED — record it (good news: un-wrap at the next touch).
+
+#### THE u5d WINDOW — RUN 2026-10-14 06:17:54 → 06:19:43 (claim `vx282-u5d`, chained from `coord-for-vx282`; RELEASED) — U5's last leg
+
+`git pull --ff-only` (nothing rebuilt — the fixed products built at `c46f999d`); `guard.sh --author` OK; `pgrep -lx
+Variorum` none; no app launched.
+- **W2c — g1 on the FIXED products** (`u5d-w2-g1.log`, 06:17:59–06:19:37): "**113 tests in 13 suites passed … with 9 known
+  issues**", `** TEST EXECUTE SUCCEEDED **`, zero ✘. Every suite ✔ (VX-183's doors, the registry walk, VX-257's mounted and
+  model suites, the park, the panel model/composition/keys, reorder, Trash, Versions); the VX-229 suite and its parent
+  "passed with 9 known issues" — exactly the wrapped expectations: the popover cell `:445` (observing) `:447` (alive) `:457`
+  (re-reads), the sheet cell `:483` ×3, the nested sheet `:509` ×3. The census (the runner's fact, unchanged): *popover after
+  dismissal 1/2/3: models alive 1/2/3, observing 1/2/3; after the wait: 3, 3; sheet 1/2/3: 1/2/3 alive and observing;
+  nested sheet 1/2/3: the same.* VX-257's sheet cells: *"the runner kept 1 dismissed panel(s) alive — the cell ran the
+  leaving body as the sheet's .onDisappear calls it"* (both) — and passed.
+- **Claim `vx282-u5d` RELEASED 06:19:43** (status FREE). No instance; the dev store untouched.
+
+#### U5 — DISPOSITIONS (final)
+
+| member | disposition | evidence |
+|---|---|---|
+| VX-229 | **DISMISSED AS HOLLOW IN USE** (the coordinator's ruling) — the fix `ee86dd8c` reverted `7d798f82` | the u5b heap decider (0 · 0 · 0 after every close, all three roads; open controls 1 · 1 · 1–2); the runner's retention a recorded known issue (`c46f999d`), cause untraced; O-U5-1 an FYI |
+| VX-257 | **FIXED** `1ca8fe72` (pins `7650b6ce` + `075473c2`, reshaped `dab712d8`/`eaf42b27`) | red on old: W1 10 issues / 6 cases, u5c W1c 6 / 3; green fixed: u5d 113/13; the walk (u5b rows 1–4 + 7, both voices); PROVISIONALs P-U5-1…4 → QUESTIONS **#223** |
+| VX-183 | **FIXED** (declared) `a765683c` — debt, no red-on-old owed | `CommentPanelDoorsTests` + the walk line green (u5b g1, u5d); the walk's row 5 (Add, Delete, Restore, Delete forever's confirm + Cancel, Save/Revert) |
+| VX-182 | **FIXED** `fd4c260c` (pins `f38fb93c`) | headless: red on old 1 issue, green 8/1; R-182 discriminating revert ran and restored; whole core 2,801/320 |
 
 ## Ladder
 
