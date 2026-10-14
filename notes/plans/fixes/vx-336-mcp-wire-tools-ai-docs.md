@@ -158,7 +158,7 @@ guidance. Each unit's evidence is named before its spawn.
 | unit | status |
 |---|---|
 | U5a — the label pair | **BUILT, headless green at `590c0cb8`** (U5a UNIT RECORD): VX-267 and VX-253 fixed, each pin red on old and red again by revert; MCP 251/54 · core 2,860/330 · workbook 40/6 (the orchestrator re-ran the seven pin suites: 35 tests green). No app file moved. Its acceptance closes in U5b's window (LIVE LEGS A–C, D optional). Implementer retired (~437k) |
-| U5b — the block-writing pair | NOT-STARTED — the next spawn |
+| U5b — the block-writing pair | **DESIGNED, FORKS RULED** (U5b UNIT RECORD piece 0 `9b05e442`; THE ORCHESTRATOR'S RULINGS ON U5b's FORKS below). Pieces 1–8 go to a FRESH implementer (the designer's context was ~468k at its stop) |
 | U6 — Compare from the wire (+ VX-342) | NOT-STARTED |
 | U7 — the agent's read-backs | NOT-STARTED |
 | U8 — the AI's docs (LAST) | NOT-STARTED |
@@ -170,6 +170,10 @@ guidance. Each unit's evidence is named before its spawn.
 ## Stage traffic log (the oct13coordinator protocol)
 
 - *(Newest first from here.)*
+- 2026-10-14 ~14:05: REQUEST `vx336-u5` (~60–75 min: the batch, SEAM, then the live round) sent early; the coordinator
+  queued it. Ahead of it in READY order: vx-283's `vx283-u1` (~35 min batch), then `vx283-u1-walk` (~45 min). We may get
+  the gap between them. A short window slots in only at our SEAM, never mid-round. At the GO it checks the dev store
+  was left restored and unlocked.
 - 2026-10-14 ~13:22: the kickoff announcement went to oct13coordinator; it answered: in the queue, zero-slot recorded,
   the queue empty, ask early. Its protocol and live-round facts are in Hard rules above. Main had moved to `8a0b766f`
   (PR #164, notes/.claude only) — already on this branch. Merges serialize through it (at the merge ask it checks
@@ -184,8 +188,13 @@ guidance. Each unit's evidence is named before its spawn.
 - **VX-292** (her tutorial/onboarding session): NOT running (her kickoff answer 3). U8 re-checks before it spawns;
   whichever lands second rebases onto the first.
 - **VX-234** (her Settings wording review, MCP included): every unit's FOR VX-234 list is posted there at the closeout.
-- **VX-283 / VX-284**: not started. VX-283 shares the navigate-away road (`.variorumNotesDeleted`); this run adds no
-  second road.
+- **VX-283** (Sidebar & Library polish, `~/dev/variorum-vx-283`, branch `vx-283-sidebar-library-polish`) is LIVE since
+  2026-10-14. Its surfaces: `SidebarView`, `SidebarLayout`, `WorkspaceModel`, a Close Note act (the registry and
+  `EditorCommands`), the toasts, the Library's controls row, six `.fixedSize()` sites. **Overlap:** U6's VX-342 edits
+  `Registry/ShellActions.swift`, and U6's Compare target may reach `WorkspaceModel`/`ShellRouter`. Before U6 edits any
+  of those, the orchestrator messages vx-283; whoever merges second merges main in first. It also shares the
+  navigate-away road (`.variorumNotesDeleted`), where this run adds no second road.
+- **VX-284**: not started.
 
 ## Her rulings during the run (verbatim; each also on its ticket)
 
@@ -363,7 +372,9 @@ any time (one word). VX-311 and VX-298 are ruled pre-launch; each ticket is the 
    the panel's other row shapes in the record (instance × glyph: FIXED or provably SAFE) so no sibling shape is left.
 
 **Lanes.** Compare's board is no other run's surface. If a trace reaches the editor seam (vx-282's merged files are
-main's now, but the seam rule stands): STOP and report.
+main's now, but the seam rule stands): STOP and report. **VX-283 is live** (Cross-run coordination). Before editing
+`Registry/ShellActions.swift` (VX-342), `WorkspaceModel`, `ShellRouter` or any registry file, say so in the record and
+STOP for the orchestrator, who tells vx-283 first.
 
 **Evidence that closes U6.** Pins red-first per member, red again by revert; headless green with counts; THE STAGE
 WINDOW plan (claim `vx336-u6`; minutes; a batch-only fallback): a Mac batch over every changed source file's suites; a
@@ -1054,3 +1065,45 @@ label "‹client›'s blocks".)*
 2. *(Recorded, not proposed for this run:)* `import_document` could take a `section_id` too (one document into a
    chapter) — not asked by VX-252; a client files it with `file_note_in_chapter` after. A ticket only if the orchestrator
    wants one.
+
+### THE ORCHESTRATOR'S RULINGS ON U5b's FORKS (2026-10-14 ~14:35 MDT — binding on pieces 1–8)
+
+The design D1–D10 is ACCEPTED as written, with these rulings on its forks. The "PROVISIONAL" ones are the ones she would
+otherwise rule (her away-mode answer); each goes to QUESTIONS at the merge with the options the record lists.
+
+- **D1, the shared answer shape: CONFIRMED.** It is `blocks: [{block_id, shown_take_id, takes: [{take_id, label?}]}]`:
+  every take an object, the shown one included, in fan order, built from what the op minted (no second read).
+  `MCPMintedBlocks` is THE encoder. U6's `duplicate_note` reuses it, and U7's VX-254 adds a per-take field to the take
+  objects.
+- **F-1: (a), PROVISIONAL P-VX255-1.** The rung is read from the arguments. No anchor (or `at: "end"`) lands at the
+  note's end at write new; any `after_block_id`, the last block included, needs edit. Her ruling names a place ("add
+  blocks at the end"). (a) is one legible rule, decided before any read of the note's order, and it never flips rung or
+  lands above her newest paragraph as her typing crystallizes. (b) is the option.
+- **F-1b: (a), PROVISIONAL P-VX255-2.** `at: "start"` (`move_block`'s word) at edit; `at: "end"` is accepted as the
+  default's spelling; `after_block_id` with `at` refuses at the parse. Options (b) `before_block_id`, (c) no start door.
+- **F-2: (a), PROVISIONAL P-VX252-1.** `import_document`'s BOOK form keeps its answer (`book_id`, `note_ids`,
+  `chapter_ids`). Closing it the same way would answer ∝ the whole book, about 0.8M characters for her bilingual book,
+  breaking P1's spirit and the output cap VX-256 exists to respect. A client reads a book's notes as needed (U7's paged
+  `read_note`). The single-document form closes as D3 says. Options (b) and (c) are recorded.
+- **F-3: (a), the orchestrator's (the fence, not a product call).** The book is decided first, so an unreachable book
+  answers the one not-shared sentence, byte-identical with or without `section_id`. Then every `section_id` that isn't a
+  live chapter of THAT book answers the ONE existing sentence its siblings speak (`add_note_to_book`,
+  `file_note_in_chapter`). Hidden is never told from missing, and a client with a mistyped chapter in a book it can
+  write in isn't told the book is unshared. This corrects the U5b BRIEF's wording ("answers the one not-shared shape"):
+  the brief's intent is the no-oracle rule, which (a) keeps exactly. (c) is an oracle and is rejected.
+- **F-4: (a), PROVISIONAL P-VX255-3.** `blocks` only, the ruled shape (`insert_blocks(note_id, after_block_id?,
+  blocks)`). A plain `text` payload segmented by the note's default, option (b), is recorded and not built.
+- **F-5: (a), PROVISIONAL P-VX255-4.** At most 200 blocks per call (`batchCap`), stated in the description and refused
+  by naming it. The act runs on her runner while her note may be open, and `insert_blocks` exists partly to write big
+  documents in chunks. (b), no cap, is recorded.
+- **F-6: (a), the orchestrator's (compatibility).** `block_ids` stays beside `blocks`, so every existing caller and pin
+  is byte-unchanged.
+- **D8 (`flushesHerEditorFirst` = false) is ACCEPTED** as argued. U5's live round adds one leg: while her caret types
+  in a note, a client's `insert_blocks` at its end lands below her typing tail, and her tail crystallizes after the
+  AI's run. Captured.
+- **OWED 2 (`import_document` + `section_id`):** not asked and not mandated, so no ticket. A client files with
+  `file_note_in_chapter`.
+- **Next:** a FRESH `opus-implementer` (xhigh) builds pieces 1–8 from this record alone: the U5b BRIEF, the U5b UNIT
+  RECORD's design and these rulings. It then writes THE STAGE WINDOW (`vx336-u5`, with U5a's LIVE LEGS A–C, D optional,
+  and D8's leg) and reports READY.
+
