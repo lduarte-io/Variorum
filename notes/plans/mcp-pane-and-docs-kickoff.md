@@ -2,6 +2,17 @@
 
 **STATUS: PLANNED, not started (written 2026-10-13 at VX-184's re-scope; she adds items before kickoff).**
 
+**SPLIT 2026-10-13 (the release runway, `notes/plans/vx-33-release-runway.md`).** This file now serves TWO runs:
+- **VX-281 "Run: MCP settings pane & shared icon"** takes the **U6 section** and the **VX-268 bullet** under HER
+  ADDITIONS, and runs now, so the pane can merge early and her MCP-pane wording (VX-234) can follow it.
+- **VX-246, retitled "Run: MCP door fixes & AI docs"**, keeps everything else. That is: her other additions;
+  VX-275 · VX-276 · VX-279 · VX-280 (minted after this file was written, from VX-184's ladder); VX-277 and
+  VX-119 (the same undo rule as VX-276); and the AI-opens-Compare ask.
+- **U7 (the docs) stays LAST in VX-246, and starts only after VX-281 has merged**, because the docs describe
+  the pane's tabs.
+- The runway's VX-246 section carries the suggested unit order.
+- Every rule under "Rules binding this run" binds both runs.
+
 ## Kickoff message (for `/run-phase vx-246`)
 
 > Run VX-246 "Run: MCP pane, docs & door fixes" (retitled 2026-10-13 at her word; the plan file keeps its
