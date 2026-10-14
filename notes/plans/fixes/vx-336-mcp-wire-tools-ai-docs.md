@@ -797,9 +797,9 @@ never rendered); the Activity line for a refused or landed `save_lens` uses the 
 
 **What this unit has NOT done (said first; updated at every piece):** (1) **the build is in progress** — VX-252 is whole
 (pieces 1–3); VX-255 is the SECOND continuation's (pieces 4–8, below): its pins red on old (piece 4), its fix green
-(piece 5), red again by revert and restored (piece 6); the headless finals and the Mac build are piece 7's; each LIVE
-STATUS row says what landed; (2) no stage window, no Mac build, no live round yet
-(THE STAGE WINDOW is written at READY, after the build); (3) the guide and `MCPSession.instructions` untouched (U8's — the
+(piece 5), red again by revert and restored (piece 6), the headless finals green and the Mac product built (piece 7),
+THE STAGE WINDOW written and READY reported (piece 8); (2) **no stage window has run: no Mac batch, no live round, no
+capture yet** — U5's acceptance (U5a's included) closes only in that window; (3) the guide and `MCPSession.instructions` untouched (U8's — the
 doc-truth sweep below finds nothing false); (4) no `notes/QUESTIONS.md` entry and no canon edit (the merge's). Everything
 below "The design" is the ruled plan; a claim is only what a LIVE STATUS row says DONE with its log.
 
@@ -808,7 +808,7 @@ the U5b BRIEF and THE ORCHESTRATOR'S RULINGS ON U5b's FORKS alone (the designer 
 the cited code before relying on any line: the design's pointers hold (`perform`'s `createNote` arm 404–415, `noteAnswer`
 757–766, `mintDocument` 213–248 keeping only `minted.block.id` at 237, the parse's silence on `section_id` 202–214).
 
-**THE SECOND CONTINUATION (pieces 4–8): a FRESH opus-implementer (xhigh), from 2026-10-14 ~15:20 MDT,** built from THE
+**THE SECOND CONTINUATION (pieces 4–8): a FRESH opus-implementer (xhigh), from 2026-10-14 ~14:37 MDT,** built from THE
 CONTINUATION'S BUILD PLAN below, this record's design D4–D10, THE ORCHESTRATOR'S RULINGS ON U5b's FORKS and U5a's LIVE
 LEGS; read in its own context: this record (header, Hard rules, LIVE STATUS, Stage traffic log, Cross-run coordination,
 the U5b BRIEF, this UNIT RECORD whole, U5a's LIVE LEGS), `notes/MCPSpec.md` whole, VX-246's SWEEP TABLE rows 2–13, its U3
@@ -870,8 +870,8 @@ An app file moves ⇒ a Mac `build-for-testing` (into `App/Variorum/DerivedData/
 | 4 | VX-255 — the pins on the OLD tree (wire: end at write new, anchor/start refused at write new with the rungTooLow family, anywhere at edit, one undo walks it back whole and redo returns it, a sealed note refuses, anchor of another note refused alike, the fence), RED by absence | DONE (this commit) — NEW `Tests/VariorumMCPTests/MCPInsertBlocksServerTests.swift`, 8 tests in 2 suites, wire only (`MCPWriteAct.blocks` is read as `act.rawValue == "blocks"`, the anchor sentence as a literal, so the file compiles on the old tree): 1 `writeNewAddsTheBlocksAtTheNotesEndInOrderAndOneUndoWalksThemBack` (three blocks — a fan with a labelled and a blank take, a named one, an empty one — after her three, in order; the answer's `blocks` == `read_note with_ids`' last three records, `block_ids`; labels as given; the name; ONE `claude-code's blocks`; the receipt `blocks` ×3, Open › the first new block; `last_touched_at` moved; ⌥⌘Z → all three dead, none trayed, her three untouched; ⇧⌥⌘Z → the same ids in place; `at: "end"` the same) · 2 `writeNewWithAnyAnchorHearsTheRungsSentenceAndAsksHerForEdit` (her LAST block as anchor, and `at: "start"` → the rungTooLow sentence + asked, her ask at edit on the note, nothing minted) · 3 `editAddsTheBlocksRightAfterAnyBlockOrAtTheStart` · 4 `anAnchorThatIsntABlockOfThisNoteAnswersOneSentenceAndMintsNothing` (a readable note's block and `no-such-block`, byte-identical) · 5 `malformedCallsAreRefusedAtTheParseNamingWhatIsWrong` (8 forms — both anchors, also on a note that doesn't exist; `at: "middle"`; an empty `after_block_id`; no `blocks`; `[]`; 201; a block without text) · 6 `aSealedNoteRefusesAndALockedTakeAtTheAnchorNeverDoes` · 7 `anUnreachableNoteAnswersTheOneNotSharedSentenceWhateverTheCallNames` · 8 `MCPInsertBlocksHerEditorTests.herTypingInTheBlockItLandsAfterIsNeverFlushedOrMoved` (D8; `HerOpenEditor` + `TurnLogExecutor` copied). **RED on the old tree (`41e91f87`'s sources): 8 of 8 failed, 26 issues, 17 distinct test × line pairs** — every call answered `Unknown tool: insert_blocks.` (30 times in the log); each red sits on its designed line: an answer `isError` (`:133`, `:239`, `:345`, `:475`, `:489`), its JSON (three "Caught error … Code=3840" at the `@Test` lines `:107`, `:225`, `:322` — `json(…)` of the absent tool's text throws inside the shared helper, the answer's own line), the sentences (`:213` ×2, `:275`, `:313` ×8, `:338`, `:381`), the ask (`:215` ×2), the turn log (`:474` — `[]`, the parse refused before any turn), the landings (`:479`, `:493`); **no premise line.** **On the plan's "7 and 8 green on both sides":** an ABSENT tool cannot be green on its own answer, so cases 7 and 8 each carry GUARD lines that held on the old tree, exactly as designed — 7's byte-identity across the three forms (`Set(said).count == 1`) and nothing minted; 8's no flush asked (`:473`, `:488`) and her words where she typed them (`:477`, `:491`) — beside the lines that need the tool (7's sentence `:381`; 8's turn log and landings). Recorded, not a contradiction (no decision needed). Log `notes/plans/vx336-screens/u5b/logs/p4-pins-red.log` + `p4-pins-red.pairs` (gitignored) |
 | 5 | VX-255 — the fix (the act, the wire, the catalog, `MCPWriteAct.blocks`, the app's words) + justified edits (the catalog set, the suggest proof), GREEN | DONE (this commit) — **core:** NEW `Sources/VariorumCore/Operations/Operations+MCPInsertBlocks.swift` — `insertBlocks(_:intoNote:at:undoLabel:guardedBy:) -> [MintedBlockTakes]` exactly as the build plan: `emptyImport` on `[]`; ONE `database.write` — the guard FIRST, `livePost` + `ensureUnlocked` (a sealed post refuses; no take touched, so a locked take never does), one clock read, per block `containerPosition` (`.after` re-resolved in the transaction → `blockNotPlaced`), `mintFanBlock(texts: [text] + takes, defaultIndex: 0, chosenIndex: 0, labels: [nil] + labels)` (blank takes kept), the trimmed non-empty name (`createStructuredNote`'s finish), `registerTextChange(charDelta: text.count)` (newBlock's stamp rule), `at = .after(this block)`; after the write ONE `registerStructuralEntry(label:, minting: [MintedPreImage])` (newBlock's helper — the SWEEP TABLE rows 2–13's road; each half answers `!changed.isEmpty`). `Operations+MCPWrites.swift` — `MCPWriteAct` gains `case blocks` (raw `"blocks"` → "claude-code's blocks"; `isUndoable` true) beside `takes, comments`. **wire:** NEW `Sources/VariorumMCP/MCPWriteTools+InsertBlocks.swift` — `BlockInsertPlace {end, start, after}` (`rung`: end → write new, start/after → edit; `insert`), `anchorNotThisNotesWords`, `parseInsertBlocks` (note_id; an empty `after_block_id`; `at`'s value; both; `blocks` required / an array / non-empty / ≤ `batchCap` with `overCapWords`; then `noteBlocks`), `performInsertBlocks` (`onNote` at the call's rung, `spendsAfter: false`; the anchor checked AFTER the decision by `placedBlocks` (∝ one id); the act guarded by `guardNotes` at the same rung; a `blockNotPlaced` naming the anchor → the same sentence; the answer `{note_id, block_ids, blocks}` (VX-252's records); the receipt `.blocks`, `count`, Open › the first new block). `MCPWriteTools.swift` — `noteBlocks` no longer `private`; `Job.insertBlocks(noteID:place:blocks:)`, tool `insert_blocks`, `flushesHerEditorFirst` **false** with D8's reason at the arm; `parse` and `perform` route it. `MCPToolCatalog.swift` — `insertBlocks` (write new, everyScope; schema `note_id`, `after_block_id`, `at` enum, `blocks` minItems 1 / maxItems `batchCap`, create_note's block item copied; the description says the end at write new, any anchor or the start at edit, one block per item with a blank line inside, takes unchosen with labels as given and a blank take legal, at most 200, one undo, the answer as create_note's — no pronoun), joining `writeNew` after `linkVersions`. **app:** `MCPPaneCopy.swift` — `refusedPhrase` "adding blocks to ‹X›", `activityPhrase` "added blocks to ‹X›" + times (one row per call), the receipt `phrase` `.blocks` summed like `.takes` ("added a block" / "added N blocks") — the ONE exhaustive switch over `MCPWriteAct` in the app (grep: no other). **JUSTIFIED EDITS (the ritual comment in place):** `MCPServerTests.everyDeclaredToolIsHandledAndEveryHandledToolDeclared` (the write-new set gains `insert_blocks`); `MCPWriteServerTests.aSuggestGrantProvablyCannotModifyAnExistingTake` (two calls appended — at her note's end, and after her block — each refusing at the rung; the completeness line now sees the tool). The grep for other exact tool sets in the MCP and Mac tests found none (`MCPToolFacts.toolNames` is derived from the catalog; `activitySpeaksEveryActInWordsNeverAToolID` walks it and now meets real words). **NEW-API core pins (green by construction):** `Tests/VariorumCoreTests/MCPInsertBlocksActsTests.swift`, 4 tests — the run's order at end / start / after; born as given (one block with a blank line inside, the fan and labels, chosen AND default, none locked, the trimmed name, a blank name none, the touch); the ONE entry (untouched → gone, no `last_container_id`; the exact-id redo; a block she typed into → TRAYED, its sibling gone); the refusals (`emptyImport`, an anchor of another note and a dead one → `blockNotPlaced`, a locked anchor take lands, a sealed note → `lockedPost`, nothing minted). **GREEN:** the pins 8/8 (2 suites) + the core file 4/4 (`p5-pins-green.log`); the whole MCP target **264 / 57**, EXIT 0, zero ✘ (= 256/55 + this unit's 8/2) (`p5-mcp-target.log`). No warning in a touched file. **The VX-255 revert check is ANNOUNCED here (piece 6 runs it on this commit's tree).** |
 | 6 | VX-255 — red again BY REVERT | DONE (announced `3e9f625d`, recorded in this commit) — on the committed tree `3e9f625d`: the three package source files back to the pins commit `7a15376c` (`git checkout 7a15376c -- Operations+MCPWrites.swift MCPToolCatalog.swift MCPWriteTools.swift`), the three NEW files (`Operations+MCPInsertBlocks.swift`, `MCPWriteTools+InsertBlocks.swift`, `MCPInsertBlocksActsTests.swift`) moved aside to `notes/plans/vx336-screens/u5b/prerevert-255/` (`git diff HEAD --stat`: those six, +2/−432); the two justified edits KEPT (they assert the new tool); `MCPPaneCopy.swift` is app-only (outside `swift test`) → **RED again: 10 tests in 4 suites failed, 28 issues** — the 8 pins' **26 issues, the test × line set IDENTICAL to piece 4's** (26 pairs, `diff p4-pins-red.pairs p6-revert-red.pairs` empty), and each justified edit red on its edited line (`MCPServerTests.swift:257` the write-new set; `MCPWriteServerTests.swift:334` the completeness line) (`p6-revert-red.log`). **RESTORED:** `git checkout HEAD -- Sources/ Tests/`, the aside folder removed, `git status` clean, `git diff HEAD` empty → **14/14 green** (the 10 + the core file's 4) (`p6-restored.log`) |
-| 7 | headless finals (MCP · core · workbook) + the Mac `build-for-testing` (`DerivedData/vx336-u5`) | IN-PROGRESS — **the headless finals DONE** on `96c84c05`'s sources (`swift test --skip-build`, the whole package): **MCP 264 / 57 · core 2,867 / 332 · workbook 40 / 6**, EXIT 0, zero ✘ (= U5a's 251/54 · 2,860/330 · 40/6 + VX-252's 5/1 · 3/1 + VX-255's 8/2 · 4/1; the counts include the standing gated skips) (`p7-package.log`). **The Mac `build-for-testing` PENDING** (an app file moved — `MCPPaneCopy.swift`; into `App/Variorum/DerivedData/vx336-u5`, 71 GiB free at the start; detached to `mac-build-for-testing.log`, polled in the foreground) |
-| 8 | THE STAGE WINDOW plan (claim `vx336-u5`; Mac batch; the live round incl. U5a's LEGS A–C, D optional; A1 + restore; fingerprint) → READY | NOT-STARTED |
+*[removed for publication]*
+| 8 | THE STAGE WINDOW plan (claim `vx336-u5`; Mac batch; the live round incl. U5a's LEGS A–C, D optional; A1 + restore; fingerprint) → READY | DONE (this commit) — **THE STAGE WINDOW** below the build plan (steps 0–13: guards; the 31-suite Mac batch FIRST, then the SEAM; A1 + prefs + the fingerprint, its one-liner reproducing VX-246's `bc64543e2f4e8e58`; the tab key into a scratch `--mcp-config`, never her user scope; V252-a, V255-a/b/c, D8-a/b, U5a's LEGS A–C (D optional), the Terminal pass; cleanup to cmp SAME, prefs 0 differ, fingerprint SAME). **~95 minutes of work, a 110-minute claim; batch-only fallback ~15 (claim 20).** **READY reported; the stage is NOT claimed** (the orchestrator relays the coordinator's GO and its exact claim line) |
 
 **No revert is in flight** (pieces 3 and 6 ran and RESTORED — `git status` clean, `git diff HEAD` empty).
 
@@ -1017,7 +1017,176 @@ calls `insert_blocks` at its end → the AI's run lands BELOW her typing tail an
 before/after); then U5a's LIVE LEGS A–C (D optional) exactly as its record writes them (the fixture "vx336 u5a" through
 her quick entry; leg A the label `claude-code · english` in Takes, both voices; leg B the ambiguity refusal and its
 `take_ids` retry; leg C the legacy form). Minutes: estimate per leg (~100 of work, the U1b window's shape) and a
-batch-only fallback. Then build the products, report **READY**, end the turn. (agent ergonomics, ruled; a pure addition).** Inputs → output: a client
+batch-only fallback. Then build the products, report **READY**, end the turn.
+
+### THE STAGE WINDOW — the plan (runs ONLY on the orchestrator's GO, under the exact claim line it relays — expected `vx336-u5`)
+
+**What this window does NOT do (said first):** no product code is written or changed, before the claim or under it — a
+red that needs code is RECORDED and REPORTED, never fixed here (U5a's rule: "a red here is a finding, never a fix under
+the claim"); no rebuild (if `git diff --name-only c9c7f637..HEAD -- Sources App Package.swift` is not empty at the GO, or
+the coordinator says VX-306 has merged and main must come in first: STOP before any launch and report — the rebuild is an
+implementer's); no canon, QUESTIONS or ticket edits; never her real store, never `/Applications/Variorum.app`, never her
+USER-scope MCP registrations (no copied setup line is ever run as copied — only its key is taken).
+
+**The products (built at piece 7, READY):** `App/Variorum/DerivedData/vx336-u5/Build/Products/` from `c9c7f637`'s
+sources — **TEST BUILD SUCCEEDED, XCB-EXIT 0**, no warning in a touched file (`u5b/logs/mac-build-for-testing.log`): the
+*[removed for publication]*
+`Debug/Variorum.app/Contents/MacOS/variorum-mcp`, the test bundle and `Variorum_Variorum_macosx27.0-arm64.xctestrun`. The
+product carries U5a's and U5b's sources (`MCPWriteTools+InsertBlocks`, the receipt's `.blocks`, the Activity words — read
+from the dylib's strings at READY).
+
+**Minutes:** the batch ~10 · SEAM · A1 + prefs + fingerprint ~4 · launch, connect and grant ~5 · the fixture book ~2 ·
+V252-a ~6 · V255-a ~8 · V255-b ~5 · the re-grant ~2 · V255-c ~5 · D8 ~10 · U5a's LIVE LEGS A–C ~17 (D +3) · the Terminal
+pass ~10 · cleanup ~8 → **~95 of work; ask a 110-minute claim.** **Batch-only fallback (~15 min, claim 20):** steps 0, 1,
+the SEAM and 13's quit/prefs/release (nothing launched by the window, so no A1 is needed — U1b's precedent) — U5's
+acceptance then stays OPEN for every live leg.
+
+**Evidence:** `notes/plans/vx336-screens/u5/` (gitignored): `logs/`, the turn answers `<leg>.json`, captures `live/s/`
+(Study) and `live/t/` (Terminal). Keys redacted to their first 9 characters in every record and capture name.
+
+0. **Guards, every step.** `Tools/WalkKit/guard.sh --author` before anything touches the GUI (her `/Applications/Variorum.app`
+   absent — exit 3 ⇒ STOP, never quit or kill it; exit 4 ⇒ someone at the machine, STOP); the STRICT instance guard,
+   `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"`, both empty before the launch (the loose `-f
+   "Variorum.app/Contents/MacOS"` matches another session's headless xcodebuild — and `Tools/ScaleFixture/restore.sh`
+   uses that loose form inside, so if it STOPs with exit 3 on a stranger's xcodebuild line, wait for that build to end;
+   never edit the script); then the claim line EXACTLY as the GO relays it; `Tools/stage status` never inside an `&&`
+   chain (it exits 1 while a claim is held); `guard.sh <devpid> x y` before each click; ≥ 2.6 s between synthetic events;
+   region captures; HEAD at the GO recorded.
+1. **The Mac batch (~10 min) — FIRST, before the A1 copy** (the Hard rules' SEAM order; the A1 copy then holds the batch's
+   test-host side effects, as at U1b). From `App/Variorum/`: `xcodebuild test-without-building -scheme Variorum
+   -destination 'platform=macOS' -derivedDataPath DerivedData/vx336-u5 -resultBundlePath
+   ../../notes/plans/vx336-screens/u5/u5-batch.xcresult` + one `-only-testing:VariorumTests/<Suite>` per suite below,
+   detached to `notes/plans/vx336-screens/u5/logs/u5-batch.log` and POLLED in the foreground. **The 31 suites** — every
+   Mac test file reaching a type U5a or U5b changed (grepped in `App/Variorum/VariorumTests` for `MCPPaneCopy`,
+   `MCPReceiptCopy`, `MCPWriteAct`, `MCPToolFacts`, `activityLine`, `DocumentImport`, `createNote(`,
+   `createStructuredNote`, `importDocument`, `importNote`, `aiLabel`, `saveLens`/`save_lens`, `insert_blocks`,
+   `create_note`, `import_document`, `add_takes`, `"add_take"`, `MCPWriteTools`, `MCPToolCatalog`, `MCPServerHost`,
+   `MCPDoor`, `MintedBlockTakes`): BookcaseOutsideWriteTests · CapabilityRegistryTests · DocumentImportDoorTests ·
+   MCPAskAndReceiptTests · MCPAsksWaitCaptureTests · MCPAsksWaitTests · MCPDeliberateFacesTests ·
+   MCPDoorErgonomicsFacesTests · MCPEditFacesTests · MCPEditParityFacesTests · MCPGrantSheetCaptureTests ·
+   MCPGrantSheetTests · MCPGrantSheetU2CaptureTests · MCPHerEditorDoorTests · MCPLibraryParityFacesTests ·
+   MCPNavigationTests · MCPPaneTabsCaptureTests · MCPPaneTabsTests · MCPPaneTests · MCPRebindFaceTests ·
+   MCPSetupKeyFacesTests · MCPSetupMenuTests · MCPSetupTabKeyTests · MCPShareFacesCaptureTests · MCPShareFacesTests ·
+   MCPWingFacesTests · TutorialMCPChapterCaptureTests · TutorialMCPChapterTests · VX206ProtectionLandingTests ·
+   WriteTakesPanelKeysTests · WriteTakesPanelRoutedCommandTests (the suite in `WriteTakesPanelRoutedTests.swift`).
+   **Expected:** green; the `*CaptureTests` skip (env-gated); `MCPWingFacesTests.activitySpeaksEveryActInWordsNeverAToolID`
+   now walks `insert_blocks` and meets its words. Known noise, not a red: «Issues recorded without an associated test»
+   ×4 (`@Dependency(\.withRandomNumberGenerator)` — U3's door-pin harness noise). A red: re-run that suite ALONE once; a
+   red that reproduces is a FINDING — recorded and reported; the live round continues only if the red is outside every
+   type this run changed (else cleanup, release, report). VX-115's standing `BookCollectingDoorsTests` is not in the set.
+   **→ THE SEAM:** record the batch's counts in this record, commit, push, KEEP the claim, report "SEAM" through the
+   orchestrator (the coordinator may slot a short window in; re-claim on its word if it takes the stage).
+2. **A1 prestage copy + prefs + fingerprint (~4 min).** The copy exactly as `Tools/ScaleFixture/stage.sh` makes it (its
+   copy loop only — never its launch): `variorum.sqlite`, `-wal`, `-shm` and every `variorum-keys-*.json` from
+   `~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Application Support/Variorum-dev/` into
+   `…/Variorum-dev/Backups/safety-copies/scale-prestage-<UTC yyyymmddTHHMMSSZ>/` (the name MUST start
+   `scale-prestage-` — `restore.sh` refuses any other), each `cmp`-verified, its sha256 prefixes recorded; the
+   `castle-W1-20261013` folder (her W-1 repro) is LEFT ALONE. `defaults export io.lduarte.Variorum.debug
+   …/u5/prefs-pre.plist` (key count recorded). `Backups/` listed. **Her user-scope servers** — names + the sha256
+   prefix of the sorted compact `mcpServers` JSON, never values: `python3 -I -c 'import json,hashlib,os;
+   d=json.load(open(os.path.expanduser("~/.claude.json"))).get("mcpServers",{}); print(sorted(d),
+   hashlib.sha256(json.dumps(d,sort_keys=True,separators=(",",":")).encode()).hexdigest()[:16])'` — **READY's read
+   (~15:00 MDT): `['linear-server', 'variorum']`, `bc64543e2f4e8e58`** (= VX-246's windows'; the method reproduces it).
+   Re-read after every registration change and after cleanup.
+3. **Launch, connect, grant (~5 min).** `open -n …/vx336-u5/Build/Products/Debug/Variorum.app`; a What's New sheet → its
+   own button; a lock screen → `source ~/.variorum/dev-castle.env`, those values only, and the posture restored before
+   release. Study expected (capture the launch). App menu ▸ MCP Settings… → the switch ON. **Connect ▸ Claude Code ▸ the
+   copy icon** → from the clipboard take ONLY the key (`vmk2_claude-code_…`); never run the copied line. Write a scratch
+   config OUTSIDE the repo (the runner's scratchpad): `u5-mcp.json` = `{"mcpServers":{"variorum-dev":{"command":"<the
+   shim's absolute path>","env":{"VARIORUM_MCP_KEY":"<the key>"}}}}` (U5a's `u5a-mcp.json` IS this file). Every turn
+   below, from a scratch project directory: `claude -p --strict-mcp-config --mcp-config <scratch>/u5-mcp.json
+   --output-format json --allowedTools "<the leg's list>" "<the prompt>"`, its answer tee'd to `…/u5/<leg>.json`. A first
+   turn (`mcp__variorum-dev__list_books`) BINDS the tab key with zero clicks (Activity "claude-code connected with a new
+   setup, now bound to its name" or "…a newer setup, which replaced its earlier one"); if the restored store doesn't
+   know claude-code, it arrives in Waiting as a connection request → Approve… (alone — zero reach). **THE GRANT for steps
+   5–7:** claude-code's Shared-with-AI row ▸ Change… (with no row to change: ⌥⌘A from the Bookcase) ▸ **A wing · Home ·
+   Write new · Always** (capture the sheet and the row).
+4. **The fixture book (~2 min):** Bookcase ▸ + New Book → **"vx336 u5b"** (Home, unshelved). Capture.
+5. **V252-a — `create_note` answers its ids and files into a chapter (~6 min, WRITE NEW).** ONE turn, allowed
+   `mcp__variorum-dev__list_books,mcp__variorum-dev__create_section,mcp__variorum-dev__create_note,mcp__variorum-dev__read_note`:
+   > In Variorum, find the book named "vx336 u5b" (list_books). Make a chapter named "um" in it with create_section. Then
+   > call create_note with that book_id, the new chapter's section_id, title "u5b ch 1", and blocks [{"text": "Olá.",
+   > "takes": [{"text": "Hello.", "label": "english"}]}, {"text": "Adeus.", "name": "the end"}]. Then call read_note on
+   > the new note with with_ids true. Reply with create_note's answer verbatim, and say whether its blocks (each
+   > block_id, shown_take_id, and every take's take_id and label) match what read_note reports.
+   **Expected:** create_note lands; its keys `block_ids`, `blocks`, `note_id`, `section_id` (= the new chapter's id),
+   `tag_ids`; `blocks` two records — the first `{"block_id", "shown_take_id", "takes": [{"take_id"}, {"take_id", "label":
+   "english"}]}`, the second one take — equal to read_note's with-ids records; the client says they match.
+   **Her face:** the receipt "claude-code made the note “u5b ch 1”" with Open › and ⌥⌘Z (capture); the book (Bookcase ▸
+   vx336 u5b ▸ Outline or Index) shows "u5b ch 1" UNDER the chapter "um", never in "unfiled" (capture).
+6. **V255-a — `insert_blocks` at the end at WRITE NEW, then her ⌥⌘Z and ⇧⌥⌘Z (~8 min).** Open "u5b ch 1" in Write
+   (BEFORE: Olá. / Adeus. — capture). ONE turn, allowed
+   `mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note,mcp__variorum-dev__insert_blocks`:
+   > In Variorum, find the note "u5b ch 1" in the book "vx336 u5b" (list_notes with that book). Call insert_blocks on it
+   > with NO after_block_id and NO at, and blocks [{"text": "Três."}, {"text": "Quatro.", "takes": [{"text": "Four.",
+   > "label": "english"}]}]. Then read_note with with_ids true. Reply with insert_blocks' answer verbatim and the note's
+   > blocks in order (block_id and shown text).
+   **Expected:** lands; the answer `{"block_ids": [2 ids], "blocks": [2 records — "Quatro."'s takes [{"take_id"},
+   {"take_id", "label": "english"}]], "note_id"}`; the order **Olá. / Adeus. / Três. / Quatro.** **Her face:** Write
+   shows the four blocks (capture); the receipt **"claude-code added 2 blocks"** · Open › · ⌥⌘Z (capture); Settings ▸
+   MCP ▸ Activity **"claude-code added blocks to “u5b ch 1”"** (capture). **Her undo, the note focused in Write:** the
+   Edit menu reads **"Undo claude-code's blocks"** (capture the menu) → ⌥⌘Z → Três. and Quatro. GONE, her two untouched
+   (capture) → ⇧⌥⌘Z → both BACK, in place (capture).
+7. **V255-b — write new with an anchor hears the rung's sentence, and she is asked (~5 min).** ONE turn, allowed as 6:
+   > In Variorum, on the note "u5b ch 1" (book "vx336 u5b"), call read_note with with_ids true. Then call insert_blocks
+   > with after_block_id set to the FIRST block's id and blocks [{"text": "Entre."}]. Then call insert_blocks again with
+   > at "start" and blocks [{"text": "Início."}]. Quote both answers verbatim. Do not retry or work around a refusal.
+   **Expected:** both `isError`, each EXACTLY **"This client may only read, suggest and write new here. Variorum has
+   asked the author — call again once they answer."**; nothing minted (Write still shows the four — capture). **Her
+   face:** Settings ▸ MCP's Waiting (above the tabs): claude-code asking for **edit** on "u5b ch 1" (capture), the
+   note's pending-ask mark where it shows; Activity "claude-code was refused adding blocks to “u5b ch 1”" (capture).
+   Answer the ask **Don't allow** (or Esc) — the edit grant comes by step 8, not by this ask (capture Waiting cleared).
+8. **The re-grant (~2 min):** claude-code's wing row ▸ Change… ▸ **A wing · Home · Edit · Always** (U5a's legs need it;
+   suggest is inside edit). Capture the row.
+9. **V255-c — anywhere at EDIT (~5 min).** ONE turn, allowed as 6:
+   > In Variorum, on the note "u5b ch 1", call read_note with with_ids true. Call insert_blocks with after_block_id set to
+   > the FIRST block's id and blocks [{"text": "Entre."}]. Then call insert_blocks with at "start" and blocks [{"text":
+   > "Início."}]. Then read_note again and reply with the blocks' shown texts in order.
+   **Expected:** both land; the order **Início. / Olá. / Entre. / Adeus. / Três. / Quatro.** **Her face:** Write (capture).
+10. **D8 — her typing beside the AI's run (~10 min; the orchestrator's added leg).** A turn here is STARTED DETACHED
+    (`nohup claude -p … > …/u5/<leg>.json &`) so her keys can be typed while it runs, and its answer file is polled in the
+    foreground.
+    - **D8-a — her caret in the block the run lands after:** Bookcase quick entry `{t:"u5b d8"}Her first line.` ⏎ → a
+      one-block note in Home; open it in Write; click at the END of "Her first line." and type ` She keeps typing` (no
+      Return) — BEFORE (capture, the caret after "typing"). Start ONE turn, allowed
+      `mcp__variorum-dev__list_notes,mcp__variorum-dev__insert_blocks`:
+      > In Variorum, find the note "u5b d8" (list_notes), then call insert_blocks on it with no after_block_id and
+      > blocks [{"text": "The AI's paragraph."}]. Reply with the answer verbatim.
+      While it runs, type ` and more.` (her block). **Expected AFTER (capture):** the AI's block BELOW hers; her block
+      reads **"Her first line. She keeps typing and more."**; her caret still at its end; ` Still here.` typed then lands
+      in HER block (capture).
+    - **D8-b — her open TAIL:** the note's segmentation chip OFF (Write's bar — ⏎ is then content), at the end of her
+      block press ⏎ and type `Her tail line` (no ⏎) — the open tail; BEFORE (capture). Start ONE turn as D8-a with text
+      "The AI's second paragraph." **Expected AFTER (capture):** the AI's paragraph sits below her stored blocks and her
+      tail line still below it on the page; then ⏎ → the tail crystallizes; ONE read turn (`list_notes,read_note`, "reply
+      with the blocks' shown texts in order") → **Her first line. She keeps typing and more. Still here. / The AI's
+      paragraph. / The AI's second paragraph. / Her tail line** — her tail after the AI's run, where the screen showed it.
+      If the chip isn't found within 2 minutes, D8-b is recorded NOT RUN (D8-a carries the caret case of the ruled leg).
+11. **U5a's LIVE LEGS A–C (D optional) (~17 min, +3)** — EXACTLY as the U5a UNIT RECORD's "LIVE LEGS FOR U5b's WINDOW"
+    writes them (its fixture "vx336 u5a" through her quick entry; leg A's "claude-code · english" cards in Takes, captured
+    in Study now and in Terminal at step 12; leg B's ambiguity refusal and its `take_ids` retry; leg C's legacy form; D's
+    `pin_chosen` if minutes remain), on `u5-mcp.json`, answers tee'd to `…/u5/u5a-<leg>.json`.
+12. **The Terminal pass (~10 min):** Settings ▸ General ▸ Theme → Terminal (U1b's AX road: the two unnamed radios read
+    `0, 1` → press the first). Capture in Terminal: U5a leg A's card label; "u5b ch 1" in Write (V255-c's order); then ONE
+    turn (allowed as 6) `insert_blocks` on "u5b ch 1" with blocks [{"text": "Fim."}] → the receipt **"claude-code added a
+    block"** (capture) → her ⌥⌘Z → "Fim." gone (capture). Flip back to Study.
+13. **Cleanup (~8 min):** the scratch config and every key deleted, the clipboard emptied, a whole-key grep (each key in
+    full) over `…/vx336-screens/u5/`, `~/.claude.json`, the scratch project's transcripts and `notes/` → 0 files; no
+    `-s local` registration was made (if one was: `claude mcp remove -s local variorum-dev`, then `claude mcp get
+    variorum-dev` → "No MCP server named …"); her user-scope fingerprint AFTER = BEFORE; the Debug app quit BY BUNDLE ID
+    (`osascript -e 'tell application id "io.lduarte.Variorum.debug" to quit'`), the strict guard empty, no shim left;
+    prefs: `defaults import io.lduarte.Variorum.debug prefs-pre.plist`, then re-export and diff, `defaults delete` every key
+    the window ADDED (import merges), until **0 added · 0 removed · 0 changed**; `Tools/ScaleFixture/restore.sh "<the A1
+    dir>"` → "Restored (verified)", a second `cmp` of every file SAME and the sha256 set equal to the A1 copy's (the store
+    Standard, unlocked, Study, claude-code's pre-window binding and grants back with it); `Backups/` unchanged (no new
+    backup from the launch); a stray `default.profraw` removed; the tree clean; `Tools/stage release --who vx336-u5`;
+    **THE RESULT LINE** for the coordinator: claim times; the batch's counts; each leg PROVEN or RED (a red with its
+    answer and capture); the posture (Standard/unlocked, cmp SAME vs A1, prefs 0 differ, fingerprint SAME); the A1 path
+    (the coordinator's to prune).
+
+### The traces (written before code)
+
+**VX-252 — the write mints ids it never says (agent ergonomics, ruled; a pure addition).** Inputs → output: a client
 calls `create_note(book_id, title, blocks: [{text: "Olá.", takes: [{text: "Hello.", label: "english"}]}, …])` →
 `MCPWriteTools.perform`'s `.createNote` arm (`MCPWriteTools.swift:404–415`) → `ops.createStructuredNote` →
 `mintNoteEntry` (`Operations+MCPWrites.swift:517–558`) → `mintDocument` (`Operations+DocumentImport.swift:213–248`) →
@@ -1267,6 +1436,37 @@ receipt are the existing `create_note` words.
    versions of it") will UNDERSELL once `insert_blocks` lands (write new on a note may then add blocks at its end). Not
    false (the sentence never claims to be the whole list) and pinned exactly by `MCPAskAndReceiptTests`; the guide and
    `MCPSession.instructions` likewise undersell (U8's).
+5. *(The second continuation, at READY.)* **3 is DONE:** pieces 4–8 landed (`7a15376c` · `3e9f625d` · `96c84c05` ·
+   `c9c7f637` · this commit); READY is reported. **The GO:** relay the coordinator's exact claim line `vx336-u5` (a
+   110-minute claim asked; batch-only fallback 20) to whoever runs THE STAGE WINDOW — this implementer if resumed, else a
+   fresh stage runner from that section alone.
+6. **No ticket is proposed by pieces 4–8.** The P-VX255-1…4 PROVISIONALs stand as filed above (built as their (a)); the
+   FOR VX-234 list carries `insert_blocks`' words as built.
+7. **For the cold reviewer's attention (no change asked):** (i) `noteBlocks` (`MCPWriteTools.swift`) lost its `private`
+   so `+InsertBlocks` calls create_note's one block parse — a visibility widening inside the target, nothing public;
+   (ii) the record's THE TRACES heading had been overwritten by the first continuation's build-plan tail (its seam
+   commit `0ca63296`); this commit restores the two lost lines verbatim from `9b05e442` — a record repair, no meaning
+   changed; (iii) the D8 argument stays read-only analysis of the editor seam (no seam line moved); the window's D8 leg is
+   its use-shaped evidence.
+
+### SELF-ASSESSMENT — VX-255 (the second continuation's, pre-stage)
+
+- **What is proven headless:** the rung rule (end = write new; any anchor or the start = edit, with the asked sentence
+  and her ask — never the not-shared shape for a readable note); the order wherever the run lands; the answer equal to
+  read_note's records; one client-named entry, untouched → vanish, worked-on → tray, exact-id redo; the parse's eight
+  refusals before any decision; a sealed note refuses and a locked anchor take never does; the fence byte-identical
+  across forms; D8's no-flush with her words landing where she typed and the run below her block. Red on old by absence
+  (8/8, 26 issues), red again by revert with an identical test × line set, green after; the package green.
+- **What is NOT proven until the window:** the Mac faces (Activity, receipt, the Edit menu's "Undo claude-code's
+  blocks", her Waiting ask) and a REAL client reading the description and calling the tool; D8 against her live editor
+  (the headless pin models her coordinator, not `EditorTextView`'s render and caret restore).
+- **Judgment calls inside the ruled design (not forks):** the parse order (note_id · an empty anchor · `at`'s value ·
+  both · blocks) — a call wrong in two ways hears the first; a `blockNotPlaced` from the op is translated only when it
+  names THE ANCHOR (any other id would be a run-internal impossibility and keeps the room's words); the empty-`text` block
+  is legal (an empty block is a block her ⏎ makes too) — the plan's case 1 pins it.
+- **Risk I see:** a finished (not sealed) book's member takes an insert at write new — the same as `add_takes` and her
+  own doors (Finished freezes assembly, not text); an ARCHIVED note takes one too (`livePost` passes it, as every
+  in-note wire act does). Both follow the existing door family; neither is new behaviour.
 
 ### THE ORCHESTRATOR'S RULINGS ON U5b's FORKS (2026-10-14 ~14:35 MDT — binding on pieces 1–8)
 
