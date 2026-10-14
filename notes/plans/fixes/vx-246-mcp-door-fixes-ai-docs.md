@@ -123,20 +123,29 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | U2 — the undo class | **WINDOW 1 PROVEN 2026-10-14 00:23–00:38** (U2 STAGE RUN below): the Mac batch 1,084 tests / 148 suites green (1,078 + 6 gated skips, 0 failed — U1's G1–G3 included), W1 proven in both voices, the dev store restored cmp-SAME. Open only for W2/W3 in U1b's window. — Earlier: BUILT, headless green at `10223a2d` (MCP 223/48 · core 2,826/326 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~634–690k context (the cutover rule). Its stage window (the Mac batch with U1's groups, plus W1, her own door) goes to a FRESH runner; W2/W3 move to U1b's window. The acceptance closes when W1–W3 have run |
 | U3 — her editor vs the wire | **WINDOW PROVEN 2026-10-14 02:18–02:54** (U3 STAGE RUN below): W1 red on old 7/8 (17 issues) as designed; W2 1,470 tests / 215 suites green, the one failure VX-167's standing `redoNeverAsks` (alone: green); W3a (a real Claude Code, both voices) and W3b (53 ms / 51 ms after her last keystroke) proven; the store restored cmp-SAME. Finding A (a wire note delete in the OTHER pane moves her focus) is ruled provisionally (ruling 2) and fixed after U4's plan, its proof riding U4's window. — Earlier: BUILT, headless green at `61ec7723` (MCP 236/49 · core 2,826/326 · workbook 40/6; both Mac products built: `vx246-u3-red` is the red-on-old product, `vx246-u3` the fixed one). The implementer is retired at ~620k context (cutover). Its window (`vx246-u3`: the Mac pins red on old, the 215-suite batch, Claude Code by U1's detour, and the timing driver) goes to a FRESH runner. VX-323 (the wider class) was born and fixed here |
 | U4 — the faces after big writes | **WINDOW RUN 2026-10-14 03:05–03:41** (U4 STAGE RUN below). **VX-231 PROVEN** (the Bookcase row follows an outside join live, in both voices). **VX-230 PARTLY:** Write is proven (no disc, block 1 bare, scrolled badges at home, first launch clean), but the book view's INLINE editor still misplaces badges after a width change and drops them right after mount (W2's red reproduces alone; seen live in both voices). Two pins are hollow as written, and one characterization pin is defective. → **U4b** below. — Earlier: READY FOR STAGE at `dcfb6123`: piece 6 written (271-suite batch, THE STAGE WINDOW plan for `vx246-u4`, self-assessment, OWED). Products: `vx246-u4-red` (U4's pins, no fix) and `vx246-u4` (both fixes). The window goes to a FRESH runner; its step 6 (ruling 2's proof) moves to U5's window, where ruling 2 is built (orchestrator call). — Earlier: BUILT, PAUSED at `3d1c5dd6` for U3's window (~499k context). VX-230 traced: TK2 reports unlaid paragraphs as empty frames at the top-left, so badges piled at block 1; fixed in `EditorViewModel.refreshBadges`. VX-231 traced: the Bookcase word count was re-read only on appear and its own buttons; fixed in `ShelfViewModel.start`. Mac pins are written but not run, and both products are built. Next: the same implementer writes piece 6 (the batch list and THE STAGE WINDOW plan), then a FRESH session adds ruling 2's fix and runs U4's window with its proof |
-| U4b — the inline editor's badges, and ruling 2 | **READY FOR STAGE** at `63410c1a` (U4b UNIT RECORD). The re-trace corrected the runner's: the inline height lands on SwiftUI's NEXT pass, and U4's forced `.ensuresLayout` read poisoned the layout, measured up to 1,662 pt off. Fixed in `refreshBadges` plus the one cleared `remeasure` call (`5aaf01b4`); ruling 2 is `select(_:in:takingFocus:)` (`cd843647`). Pins red-first, three products built, headless unchanged. Its window (`vx246-u4b`, 75 min) is run by the SAME session (~250k), queued after U1b's merge commit |
-| U5 — the write tools' shapes | NEXT, after U4b. *(9edd8439's "spawned" was premature: U4's GO came first, so U5 never started.)* VX-267/253/252/255 are already In Progress. Ruling 2 moved from U5's piece 0 to U4b; U5's live round adds the real-client check of it |
-| U6 — Compare from the wire | NOT-STARTED |
-| U7 — the agent's read-backs | NOT-STARTED |
-| U8 — the AI's docs (LAST) | NOT-STARTED — waits for VX-281's merge |
-| LADDER (`opus-reviewer` at max) | NOT-STARTED |
-| FABLE review (when needed, or once at the end) | NOT-STARTED |
+| U4b — the inline editor's badges, and ruling 2 | **WINDOW RUN 2026-10-14 04:42–05:16** (U4b STAGE RUN below). W1a/W1b were red on old exactly as designed, so the re-designed phantom pin is no longer hollow. **The walk passed in both voices:** the Outline right after mount, the width change top and deep, the spread's live page, and Write. **RULING 2 IS PROVEN** on her own Delete door. **W2 found ONE REAL REGRESSION from U4b's `refreshBadges`:** `InlineEditorWindowTests.inlineBadgesCoverTheWholePostNotJustTheClippedViewport` (an off-screen fan made with no text change stays unbadged on the inline surface). → **U4c.** — Earlier: READY FOR STAGE at `63410c1a` (U4b UNIT RECORD). The re-trace corrected the runner's: the inline height lands on SwiftUI's NEXT pass, and U4's forced `.ensuresLayout` read poisoned the layout, measured up to 1,662 pt off. Fixed in `refreshBadges` plus the one cleared `remeasure` call (`5aaf01b4`); ruling 2 is `select(_:in:takingFocus:)` (`cd843647`). Pins red-first, three products built, headless unchanged. Its window (`vx246-u4b`, 75 min) is run by the SAME session (~250k), queued after U1b's merge commit |
+| U4c — the inline badge regression | IN-PROGRESS — a FRESH implementer from the U4c BRIEF below (2026-10-14 ~05:30), then a short window (`vx246-u4c`) |
+| U5 — the write tools' shapes | **MOVED to the follow-on run** (ORCHESTRATOR'S PROVISIONAL RULINGS, ruling 3); its brief travels with it. — Earlier: NEXT, after U4b. *(9edd8439's "spawned" was premature: U4's GO came first, so U5 never started.)* VX-267/253/252/255 are already In Progress. Ruling 2 moved from U5's piece 0 to U4b; U5's live round adds the real-client check of it |
+| U6 — Compare from the wire | **MOVED to the follow-on run** (ruling 3); its brief is drafted for that run |
+| U7 — the agent's read-backs | **MOVED to the follow-on run** (ruling 3); its brief is drafted for that run |
+| U8 — the AI's docs (LAST) | **MOVED to the follow-on run** (ruling 3), since the docs must describe U5–U7's tools. VX-281 has merged, so it is unblocked there |
+| LADDER | NOT-STARTED. Round 1 is the ONE Fable review (`fable-reviewer`, cold, REVIEW_PROMPT verbatim) over the whole diff, under the cross-model flow as amended 2026-10-13: Fable makes the final call, the Opus implementer applies the fixes. Rounds 2 and 3 are `opus-reviewer` at max, re-checking the fixes. Capped at three rounds |
+| FABLE review (when needed, or once at the end) | Folded into the LADDER as its round 1. The editor-seam units (U3, U4, U4b, U4c) need it, and putting it first lets an Opus round re-check Fable's confirmed fixes |
 | CLOSEOUT | NOT-STARTED |
 
 **No revert is in flight unless a unit's record says so.**
 
 ## Stage traffic log (the oct13coordinator protocol)
 
-- *(Newest first from here.)* 2026-10-14 ~04:15: **VX-281 merged**, the coordinator relaying: `0f5efe1c`, then the
+- *(Newest first from here.)* 2026-10-14 05:16:26: **RELEASE `vx246-u4b`** (34 of 75 min). The result lines went to
+  the coordinator. W2 found ONE REAL REGRESSION, now U4c's. Posture: Standard/unlocked, cmp-SAME vs A1; prefs 1,567
+  keys, 0 differ; fingerprint SAME. The A1 copy `scale-prestage-20261014T104214Z` is the coordinator's to prune. A guard
+  note: vx-282's headless build command line matches `pgrep -f 'Variorum.app/Contents/MacOS'`, so use
+  `pgrep -lx Variorum`.
+- ~04:40: **GO for `vx246-u4b`** (nobody ahead; a 20-min hold), carrying `Tools/stage release --who coord-for-vx246 &&
+  Tools/stage claim --who vx246-u4b --reason "VX-246 U4b: red-on-old x2 + 304-suite batch + inline-editor walk both
+  voices (A1)" --minutes 75`. U1b paused before its merge (`c0e23c47`, no MERGE_HEAD).
+- ~04:15: **VX-281 merged**, the coordinator relaying: `0f5efe1c`, then the
   ledgers at `3d42df78` (QUESTIONS #219; AppSpec §12/§14) and the handoff at `fa3bc6e1`. Main is to be merged in
   before our merge, and our merge-moment ledger edits land on top of VX-281's §12/§14 lines.
 
@@ -274,6 +283,21 @@ list holds the calls that would otherwise have waited for her.)*
    so it can't land a call inside her 500 ms autosave debounce. A stdlib Python driver on the real Debug shim proves
    the keystroke-vs-act timing; W3a proves the real-client road with Claude Code. Ruled: both legs run, and the driver
    leg counts as the timing evidence.
+3. **Tonight's merge scope (2026-10-14 ~05:25).** Her word: *"continue on through the night ending in a merge to
+   main."*
+   - **The constraint:** the cast runs one agent at a time. Each unit has needed its own build, pins and stage
+     window, and sometimes a follow-up (U4b, U4c). The whole-diff ladder and the closeout come after the last unit.
+   - **Ruled:** VX-246 merges the units that FIX the door and her editor: U1 with U1b (the merge gate), U2, U3, and
+     U4 with U4b and U4c. They go through the ladder and the closeout.
+   - **U5, U6, U7 and U8 move to a follow-on run:** VX-267 · VX-253 · VX-252 · VX-255 · VX-311 · VX-298 · VX-254 ·
+     VX-256 · VX-261 · VX-197. At the closeout it is minted as its own run ticket with these members re-parented. It
+     carries this record's drafted briefs for U5–U7 and the plan's U7 (the docs), and she kicks it off.
+   - **Why this seam:**
+     - U1–U4 are pre-launch DEFECTS: security, undo, lost typing, wrong faces.
+     - U5–U8 are new wire SHAPES plus the docs that must describe them, so they belong together.
+     - The diff stays reviewable, her build gets the fixes at the night's merge, and VX-258's arrival lifts VX-184's
+       "hers alone" gate.
+   - **Nothing is dropped:** every member keeps its ruling and its ticket.
 2. **A navigate-away never takes her focus** (U3 STAGE RUN's finding A, 2026-10-14 ~03:00).
    - **The defect:** `WorkspaceModel.notesDeleted` sends each pane that shows a dead note to the Library through
      `select(.library, in:)`, and `select` also moves the focus there (`focusedPane = pane`). So when a client deletes
@@ -667,6 +691,44 @@ orchestrator's to run after the units; keep the record reviewable.
 **Context:** past ~500k, stop at the next clean seam (committed, green, the continuation written) and report.
 
 **Out of scope:** every other unit's members; U1b; the guide (U8).
+
+### U4c BRIEF — the inline editor's badge regression (VX-230)
+
+- **The regression,** from U4b STAGE RUN's W2, reproduced alone: `InlineEditorWindowTests.inlineBadgesCoverTheWholePostNotJustTheClippedViewport`
+  fails at `:78` (badges `[]` where block 40's badge was expected) and at `:80`.
+  - It was green in U3's and U4's W2, and turned red with U4b's `refreshBadges` change: no forced layout, only
+    `.layoutAvailable` fragments badge, and the inline region is the whole post.
+- **The runner's trace,** by reading and not yet verified:
+  - Branching a take leaves the chosen take's text unchanged. So `reload()` takes the `.adoptEcho` arm (`slots = new`,
+    then `refreshBadges()`) with no storage edit.
+  - No remeasure follows, so U4b's re-run inside `remeasure` never fires on this road.
+  - The read then finds block 40 unlaid. The remeasure's earlier whole walk had laid it out, so something in between
+    un-laid it, most likely the display pass in `pump()`.
+  - The deciding number is block 40's fragment state at `:76`.
+- **What it means in use:** in the book view's inline editor, a fan made far off-screen with no text change (an MCP
+  `add_take`, a sync arrival, a take branched from a panel) can stay unbadged until her next keystroke or a width
+  change.
+- **The constraint from U4b's re-trace — never reintroduce it:** a forced `.ensuresLayout` read from mid-document
+  POISONS positions, measured up to 1,662 pt off. The settle net and the remeasure's whole walk give exact positions.
+- **The work:**
+  - Verify the trace with bare TK2 probes; U4b's are in `notes/plans/vx246-screens/u4b/probes/`, and they need no
+    stage.
+  - Then fix it so every road that changes which blocks are fanned WITHOUT a storage edit gets its badges at settled
+    positions on the inline surface. Never use a forced mid-document read.
+  - Leave Write unchanged unless the trace shows the same gap there, and say which.
+- **Pins:** the regressed test IS the red-first pin; it was red on `vx246-u4b` in W2. If the in-use road isn't
+  already covered, add a pin that makes a fan off-screen with no text change through the op the MCP road uses, red on
+  `vx246-u4b`.
+- **Lanes:** as U4b's. The one cleared `remeasure` call in `EditorView.swift` may be extended; vx-282's two touches
+  stay out of bounds. Read `notes/TEXTKIT2_NOTES.md` first.
+- **Evidence and THE STAGE WINDOW plan** (claim `vx246-u4c`; a short one):
+  - **W1:** the new pin on `vx246-u4b`, red.
+  - **W2:** the inline-editor and badge suites, `FanBadgePlacementTests` and the regressed suite on `vx246-u4c`,
+    green.
+  - **W3,** a short walk in both voices: in the book's Outline, a take branched on a block far off-screen, through
+    her own door, wears its badge at its own line when scrolled to.
+  - The headless package should be unchanged.
+- **Context:** this is a small unit. Past ~500k, stop at a clean seam.
 
 ### U1b BRIEF — VX-258's face and U1's remainder (VX-258 · VX-318 · VX-260's option (b)), plus the carried live legs
 
