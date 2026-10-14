@@ -239,3 +239,268 @@ the orchestrator's word.
 ## UNIT RECORDS
 
 *(each written by its implementer from its first commit, under its own heading below)*
+
+## U1 UNIT RECORD — the door's security and correctness: VX-258 · VX-259 · VX-260 · VX-279 · VX-280 (opus-implementer, from 2026-10-13 ~21:30 MDT)
+
+**What this unit did NOT do (said first — rewritten at each checkpoint; the state at THIS commit):** nothing is built yet.
+This commit is the record, the LIVE STATUS and the traces, written before any code. Everything below the traces is
+the plan, not a claim.
+
+**Read in full before code (never delegated):** CLAUDE.md and its loaded canon (AppSpec §12's THE MCP DOOR line);
+this run record whole (the U1 BRIEF, the hard rules); the plan `notes/plans/mcp-pane-and-docs-kickoff.md` whole; the
+runway `notes/plans/vx-33-release-runway.md` §2 and §3 (VX-246); VX-184's record — its U1 UNIT RECORD whole (VX-198's
+re-bind design, the live-round form) and THE LADDER whole (round 1's MAJOR and MINORs, her three rulings, both fix
+passes, round 2's host finding and P1 notes); `notes/SessionResiliencyProtocol.md` whole; the five tickets (VX-258,
+VX-259, VX-260, VX-279, VX-280 — no comments on any). Code read: `MCPServerHost`, `MCPSession`, `MCPHandshake` (the
+refusals), `MCPPreamble`, `Domain/MCPSetupKeyRule`, `Operations+MCPSetupKeys`, `Operations+MCPGrants` (contact,
+approve, Deny, the adoption release), `Queries` (the setup-key reads), `MCPGrantSchema` + the v1_24/26/27 migrations,
+`MCPGrantAuthority` + `MCPRefusalCopy`, `MCPReadTools.listBooks`, `MCPWriteTools` (`picks`, `perform`'s `saveLens` and
+`createBook` arms), `MCPWriteTools+Batches` (`placedBlocksSQL`, the P1 precedent) + `MCPPreCheckPlanTests`,
+`MCPWriteTools+LibraryEdits` (`onBook`, `guardBooks`, `rename_book`), `Operations+MCPLibraryEdits.renameBookForClient`,
+`Operations+MCPWrites.createBook`, `Operations+Reading.requireBookNameFree`, `Operations+Comments` (her comment doors),
+`Operations+MCPCommentAuthors`, `MCPWriteTools+CommentDelete`, `Operations+MCPWrites.addComment` and its undo halves,
+`Operations+MCPBatches.addComments`; the app's `MCPDoor.copySetupCommand` and `MCPPaneCopy`'s `MCPSetupClient` and
+Activity words (READ ONLY — VX-281's lane and the brief's STOP); the setup-key test suites (core, socket, the Mac's
+`MCPSetupKeyFacesTests`, `MCPSetupMenuTests`, `TutorialMCPChapterTests`' rule pin) and `MCPProviderNeutralityTests`
+(O-4's sweep of every string literal under `Sources/`).
+
+**Surfaces (planned):** `Sources/VariorumMCP/{MCPServerHost,MCPSession,MCPWriteTools,MCPWriteTools+LibraryEdits}.swift`
+· `Sources/VariorumCore/{Domain/MCPSetupKeyRule,Operations/Operations+MCPSetupKeys,Operations/Operations+MCPGrants,
+Operations/Operations+MCPLibraryEdits,Operations/Operations+MCPWrites,Operations/Operations+Reading,
+Operations/Operations+Comments,Queries/MCPGrantQueries,Persistence/MCPGrantSchema,Persistence/Migrations}.swift` ·
+tests. ZERO `Sync/`, custody/Keychain, editor seam, `Server/`. ONE local-only schema change (VX-258's waiting re-binds,
+v1_28 on the grants family's road) — its own commit, SyncSpec read in full first. ZERO edits under
+`App/Variorum/Variorum/Features/MCP/` (the brief's STOP) — VX-258's face, its Activity words and the one-line mint call
+site are OWED below.
+
+### LIVE STATUS — U1's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this record + LIVE STATUS + the traces and the designs (before code); `notes/plans/vx246-screens/` gitignored (`git check-ignore` verified) | DONE (this commit) |
+| 1 | VX-279 — the seam (the session closes its own connection; behaviour-identical), the pin `hangUpAfterCloseLeavesAReusedDescriptorAlone` (the round-2 probe `hangUpAfterCloseShutsDownAReusedDescriptor`), RED on the seam tree | NOT-STARTED |
+| 2 | VX-279 — the fix (deregister under the host lock before the close; one per-session lock over closed/close/shutdown), GREEN; red again by revert; the whole MCP target repeated under concurrent load, pre-fix and post-fix | NOT-STARTED |
+| 3 | VX-280 — `picks`' statement named (`picksSQL`, behaviour-identical), the plan pin, RED | NOT-STARTED |
+| 4 | VX-280 — the fix (`json_each` drives through `CROSS JOIN`s, `uq_cblock_ownership` sought), GREEN, the lens suites unmodified as the parity proof; red again by revert | NOT-STARTED |
+| 5 | VX-259 — the server pins (a Private book, another wing's book; `rename_book` and `create_book`), RED | NOT-STARTED |
+| 6 | VX-259 — the fix (the wire's name check counts only books the client can read; her doors keep the full guard), GREEN; red again by revert | NOT-STARTED |
+| 7 | VX-260 — the pins (core: her edit clears the record; socket: a suggest delete after her edit hears her sentence), RED | NOT-STARTED |
+| 8 | VX-260 — the fix, GREEN; red again by revert | NOT-STARTED |
+| 9 | VX-258 — the red pins on the PRE-FIX API (the VX-168 impostor restored: a fresh MINT under a bound, approved name takes nothing; the same for a known approved UNBOUND name), RED | NOT-STARTED |
+| 10 | VX-258 — SyncSpec read in full; the schema commit (v1_28, the waiting re-binds — local-only, the grants family's road) with its schema pins | NOT-STARTED |
+| 11 | VX-258 — the core: the tab tag in the key, `decide`'s arms, the waiting re-bind (admitted with no reach until she allows), the ops her answer calls (allow / don't allow), Deny and the adoption tidy; the state-transition pins and the justified edits; GREEN | NOT-STARTED |
+| 12 | VX-258 — red again by revert | NOT-STARTED |
+| 13 | headless finals (the whole package) + the Mac `build-for-testing` | NOT-STARTED |
+| 14 | STOP — VX-281's lane (VX-258's face, its Activity words, the mint call site); THE STAGE WINDOW plan; the report | NOT-STARTED |
+
+**No revert is in flight** (every revert below is announced in this record, on a committed tree, before it runs).
+
+### The traces (written before code)
+
+**VX-279 — the host's fd reuse (inputs → wrong state).** `MCPServerHost.serve` (`MCPServerHost.swift:179–183`) runs
+each session as `Task { await session.run(); close(fd); self?.ended(session) }`: the descriptor is CLOSED while the
+session is still in `sessions` — `ended` removes it only after, under the host lock. `stop()` (`:104–126`) snapshots
+`sessions.values` under the lock, wakes and waits (up to 2 s) for the accept thread, closes the listener and the wake
+pipe, unlinks the socket, and only then calls `hangUp()` on every session in the snapshot — a bare
+`shutdown(fd, SHUT_RDWR)` (`MCPSession.swift:210–212`) on the number the session was born with. A session whose `run()`
+ended in that window (its client hung up; the server's stop itself; the over-cap close) has already freed its number;
+POSIX hands the lowest free number to the next descriptor the PROCESS opens (any thread — another test's harness
+client, the next session's `accept`, a store file), and the stale `hangUp()` then shuts THAT socket down: its reader
+sees EOF ("Client disconnected"), its peer's next read is empty ("Unable to parse empty data"). In tests (Swift
+Testing runs the MCP suites in parallel in ONE process, each with its own host) that is round 2's 4-in-14 load flake;
+in production `MCPDoor.stopServer` (the switch off, a lock, quit) can shut down an unrelated in-process socket. The
+mechanism needs no help from the session: `hangUp()` has no way to know its number was closed.
+**The fix (the ticket's):** (1) the session owns its descriptor's end — `closeConnection()` and `hangUp()` share ONE
+per-session lock and a `closed` flag: a close runs once, and a hang-up after it is a no-op (a hang-up before it shuts
+down the session's OWN socket, which is the point of it); (2) the host deregisters the session under the host lock
+BEFORE it closes the descriptor, so a stop that snapshots after the session ended never sees it. Either half alone
+leaves a window ((1) is the one that closes it by construction; (2) keeps `connectedClientNames` and the
+while-connected accounting off a dead session).
+**The pin:** the round-2 reviewer's probe, rebuilt (its scratch clone is gone): a session over one end of a
+socketpair; the session's connection closed by the host's road; a fresh socketpair opened until one end reuses the
+number; then `hangUp()`; the fresh pair must still carry bytes both ways. **It needs a seam to compile on both sides:**
+today the host closes with a raw `close(fd)` the session never sees, so a pin that closes "the way the host does" must
+call a session method. Piece 1 adds `MCPSession.closeConnection()` with EXACTLY today's behaviour (a bare `close`, no
+flag) and routes the host through it — a behaviour-identical refactor — and the pin is run RED on that tree. Piece 2's
+fix changes only the method's body and the host's order; reverting piece 2 is the red-by-revert.
+
+**VX-280 — `save_lens`'s picks check reads the whole note (P1).** `MCPWriteTools.picks(noteID:takeIDs:)`
+(`MCPWriteTools.swift:638`) resolves the given take ids with `json_each(?) j JOIN variant v ON v.id = j.value …
+JOIN container_block cb ON cb.block_id = v.block_id … WHERE cb.container_id = ?` — plain JOINs, so the planner is free
+to drive from the note's placements (`idx_cblock_order (container_id=?)`) and probe the ids inside: cost ∝ the note's
+blocks, not the ≤N ids given (round 2's fix pass measured exactly this shape on a replica and named it, NOT fixed).
+**The fix:** the precedent `placedBlocksSQL` — the ids drive through `CROSS JOIN` (SQLite keeps a `CROSS JOIN`'s left
+table outside its right), each id → its take by primary key → its block's ONE live placement through
+`uq_cblock_ownership` (`block_id=?`, partial on `deleted_at IS NULL`). Both joins become `CROSS JOIN`, so no order but
+`j → v → cb` is legal. Membership per id is unchanged (a live take of a block live-placed in this note), so every
+refusal ("take_id … isn't a take of this note.", the two-takes-of-one-block sentence) is byte-identical. **The pin:**
+the statement named `picksSQL` (piece 3, behaviour-identical) and pinned ON THE PLAN (`MCPPreCheckPlanTests`' form):
+the plan starts `SCAN j`, seeks `uq_cblock_ownership`, never `idx_cblock_order`, never scans a table.
+
+**VX-259 — the book-name oracle.** `rename_book` → `Operations.renameBookForClient` (`Operations+MCPLibraryEdits.swift:78`)
+and `create_book` → `Operations.createBook(named:inWing:)` (`Operations+MCPWrites.swift:663`) both call
+`requireBookNameFree(db, name)` (`Operations+Reading.swift:934`), which scans EVERY live, unarchived reading in every
+wing — Private books, the daily Journal, gatherings, other wings — and throws `duplicateBookName(name: <the stored
+name>)`; the wire words it through `hooks.refusalWords` (the app's `BookNameCopy.refusal(existing:)` — "A book named
+“<exact stored name>” already exists…"). So a client with edit on ONE book learns that a book it cannot reach exists,
+and its exact casing, by renaming toward the name — against F-7 and the advice's "Anything you can't reach answers
+exactly as if it did not exist". **Her ruling:** an accidental duplicate is fine (no schema protection, ruled before);
+the door's check compares only against books the client can READ; her own doors keep the full guard. **The fix:**
+`requireBookNameFree` gains an optional COUNTS predicate (nil = every reading — her doors, unchanged); the two MCP ops
+take it from the wire; the wire passes "a reading this client can READ now" — the one rule the listing already reads
+(`MCPGrantAuthority.decide(standing, reading: readPlace(db, id))`: a book at read under its grants/the open book, a
+gathering under `decideGathering`), asked only of the readings whose name COLLIDES (the scan stays a shelf-sized pass;
+the rule runs on the colliders, normally none or one). A readable collider still refuses with its name (the client can
+read it — no oracle). **The pins (socket road):** a Private book "secret"; an edit grant on another book;
+`rename_book(other, "Secret")` LANDS and its answer names only the client's own "Secret" (never "secret", the hidden
+casing); likewise a book of another wing; `create_book("Secret")` in a wing the client writes into lands beside the
+hidden one; a READABLE collider still refuses (the control).
+
+**VX-260 — her edit makes an AI's comment hers.** The suggest rung's `delete_comment` (`MCPWriteTools+CommentDelete`)
+needs SUGGEST when `Queries.mcpCommentAuthor` names the caller and EDIT otherwise (`deleteRung`). The record
+(`mcp_comment_author`, v1_27) is written when a client adds a comment and NEVER touched again: her comment edit
+(`editBlockComment` → `rewriteComment`) leaves it, so a suggest client deletes a comment she has rewritten — the
+lesson-3 promise "Suggest … can't change a word you wrote" broken (round 1's MINOR; recoverable by her restore).
+**Her ruling** (her pick of round 1's option (b), "Your edit makes it yours" — the finding's text: "her edit of the
+comment clears the record (a one-line hook in her edit path)"). **The road, argued:**
+- **(a) her edit clears the record — CHOSEN** (the ruled option, literally): `editBlockComment` deletes the comment's
+  `mcp_comment_author` row in the SAME transaction as the rewrite, and only when the text really changed
+  (`rewriteComment` returns nil on a no-op, so a no-op edit writes nothing — the record stays). Exact: nothing else
+  moves authorship — the client's own undo/redo of its add (`reapplyAddedComment` bumps `updated_at`), her delete and
+  restore (both bump `updated_at`), a client's `edit_comment` (`rewriteComment` through `editCommentForClient`, whose
+  header says the record is untouched) — none is her edit, and none changes who wrote it.
+- (b) the delete compares the comment's `updated_at` with the record's `recorded_at` — REJECTED: every write bumps
+  `updated_at`, so the client's own add-undo-redo (`reapplyAddedComment`, the brief's "revive stamp"), her delete +
+  restore, a sync apply, would each make the comment "not its own" though nobody edited a word; making those not count
+  needs the revive roads to rewrite the record — the record then becomes a mutable mirror of the comment, which it was
+  ruled not to be ("a fact about authorship").
+- (c) a text digest on the record (a local-only column) — the comment is the client's while its words are still the
+  ones it wrote: catches HER EDIT ON ANOTHER DEVICE too (a)'s gap, below — but it is a schema change beyond the ruled
+  option and treats any client's later edit as hers. Logged as the PROVISIONAL's option.
+**(a)'s gap, said plainly:** the record is LOCAL to the Mac whose door wrote it; her edit of the same comment on
+another Mac (or the phone) arrives by sync, whose apply never runs `editBlockComment` (and `Sync/` is out of bounds),
+so on THIS Mac the record still names the client. PROVISIONAL P-VX260-1.
+**The pins:** core — a client's comment, her `editBlockComment` → the record is gone; her no-op edit (same text) →
+the record stays; a client's `editCommentForClient` → the record stays. Socket — client X (suggest) adds C; she edits
+C; X's `delete_comment(C)` answers her R-VX188-2 sentence byte-exact and C stays live; the control (no edit) still
+deletes.
+
+**VX-258 — setup keys tied to their tab; an Any-client re-bind waits for her OK.** `MCPDoor.copySetupCommand(for:)`
+mints through `Operations.mintMCPSetupKey()` (`Operations+MCPSetupKeys.swift:26`), which takes no client: every copy —
+Claude Code's tab, Codex's, "Any MCP client" — pends one UNTAGGED hash in `mcp_setup_key`. `MCPSetupKeyRule.decide`
+(`MCPSetupKeyRule.swift:144`) returns `.rebind` for a bound name presenting any `.unclaimed` key, and
+`admitMCPConnection`'s `.rebind` arm (`Operations+MCPSetupKeys.swift:91–107`) binds the key and leaves the client's
+approval and grants untouched. So an "Any MCP client" copy given to a tool that calls itself `claude-code` (by accident
+or design) is ADMITTED AS claude-code, with every grant, no ask. **The same hole stands one arm over (found on this
+trace, not named by round 1):** a KNOWN, APPROVED, UNBOUND name — every client after she adopts a library
+(`landMCPAfterAdoption` releases every binding, grants kept), any client approved before VX-168 that never reconnected,
+a client she Denied and approved again — takes `.bind` for any unclaimed key, with the same effect (approval and grants
+inherited, no ask). Her ruling's words — "i don't want everyone who isn't using claude or codex to be vulnerable to
+this. the best protection at each level" — cover both arms; the bind arm's half is PROVISIONAL P-VX258-2.
+**The design (argued; built in pieces 9–12):**
+1. **Where the tab tag lives — INSIDE the key text (option one, chosen).** A key copied for one client's tab is
+   `vmk2_<name>_<43 base64url>`; an "Any MCP client" copy keeps today's `vmk1_<43>` (every key minted before VX-258 is
+   one too). The stored hash (`MCPSetupKeyRule.hash` — SHA-256 over the whole key as presented) covers the tag, so a
+   holder who edits the tag presents a key whose hash no mint ever stored: `.unknown`, refused. No schema for the tag;
+   the tag can never drift from its key; the parse is pure. Option two (a local-only `mcp_setup_key.tab` column) costs a
+   schema change, loses the tag the moment a key is claimed, and buys nothing the hash does not already guarantee.
+   **The tag carries the client NAME, not the tab** — the app's setup menu (`MCPSetupClient`, inside O-4's fence in
+   `MCPPaneCopy.swift`) knows each tab's expected `clientInfo.name` and passes it to the mint; `Sources/` stays
+   provider-neutral (O-4's sweep forbids a provider's name in any `Sources/` literal outside a fence, and fences live
+   only in the app). The name must be 1–64 characters of `[A-Za-z0-9._-]` (shell-, TOML- and JSON-safe as written).
+2. **The arms (`decide`, the new inputs: the name the key was copied for, and whether the name is APPROVED).** The
+   tag only ever ADDS a privilege — the zero-click right for its own name; it never makes a key weaker than an
+   untagged one. "A name that carries reach" = a known client in state approved.
+
+   | name | presented key | decision |
+   |---|---|---|
+   | bound, approved | its own key | admit (unchanged) |
+   | bound, approved | unclaimed, copied for THIS name | **rebind**, zero clicks (R-VX184-5 as she ruled it) |
+   | bound, approved | unclaimed, untagged ("Any MCP client", or minted before VX-258) | **await her OK** — admitted with NO reach (below) |
+   | bound, approved | unclaimed, copied for ANOTHER name | **await her OK** (PROVISIONAL P-VX258-1: never weaker than an Any key; (b) refuse) |
+   | known, approved, UNBOUND | unclaimed, copied for THIS name | bind (R-VX168-1's "just re-run the setup", unchanged) |
+   | known, approved, UNBOUND | unclaimed, untagged or another name's | **await her OK** (PROVISIONAL P-VX258-2 — the bind arm's half of the hole) |
+   | known, NOT approved (pending, denied) | unclaimed, any tag | bind / rebind as today (no reach to inherit — her approval still decides) |
+   | unknown | unclaimed, any tag | request (unchanged — first contact is always her approval) |
+   | the name whose wait holds this key | the waiting key | still waiting (no new ask, nothing logged) |
+   | any other name | a key waiting under another name | refuse — another name's key (one sentence) |
+   | any | replaced / bound elsewhere / unknown / bare / unnamed | unchanged refusals |
+
+   **A tab key under an UNKNOWN name** is a connection request, as any fresh key is: first contact carries no reach and
+   always waits for her approval, and refusing it would dead-end a client whose real name differs from the tab's (a
+   renamed client, a mistaken mapping) on its FIRST connection. **Under a DIFFERENT bound name** it waits for her OK
+   like an Any key (P-VX258-1).
+3. **The waiting re-bind — admitted, with no reach until she allows.** A client on first contact today is ADMITTED as
+   a pending request: tools/list empty, every call "This client's connection request is waiting in Variorum ▸ Settings
+   ▸ MCP. Nothing is readable until the author approves it." The waiting key gets EXACTLY that face — so its holder
+   cannot tell "the name I claimed is a known approved client" from "I am new here" (the no-oracle letter), and Claude
+   Code-style clients show the server connected with no tools, then gain them when she allows, with no reconnect (the
+   advice's own promise: "Tools appear only for what they have shared (re-announced when that changes)"). Mechanics:
+   the admission CLAIMS the key (it leaves the unclaimed set — K2's "the first name that presents it binds to it") into
+   a local-only `mcp_rebind_request` row (client, key hash, when — one per client; a newer wait for the same name
+   replaces the older, whose key is then forgotten); the SESSION remembers it is waiting and short-circuits every
+   tools/list (empty) and tools/call (the pending sentence) BEFORE any tool runs — one choke point, so no tool's grant
+   read can leak reach — until the client's bound hash IS its key (her Allow); it does not count as a connection of
+   the name for the while-connected grants or the pane's "connected" set while it waits (it is not that client yet).
+   Her Allow → `allowMCPRebind(id)`: one transaction — the name's bound key replaced by (or bound to) the waiting key,
+   the row gone, logged `connect_rebind_allowed` with the REPLACED key's hash as the target (so the replaced key still
+   hears its own sentence — VX-198's memory, unchanged), the tool list re-announced to every session (the grants
+   fingerprint gains the binding). Her Don't allow → `declineMCPRebind(id)`: the row gone, the key forgotten (it was
+   never anyone's), logged `connect_rebind_declined`; the name keeps its own key, so the real client never notices.
+   **What the client hears:** while it waits, the pending sentence (above), the same as any connection request; after
+   "Don't allow", its next connection hears the ONE refusal sentence (its key reads as never issued — no oracle); a
+   still-open waiting session stays connected and reaches nothing. Deny of the client drops its waiting row; an
+   adoption drops them all (the release road's companion).
+   **Recorded residual (P-VX258-3):** a call with MALFORMED arguments — first contact answers the tool's argument error
+   (each tool parses before it decides), the waiting session answers the pending sentence (it short-circuits first) — so
+   a holder of an unclaimed key can still tell the two apart by sending a malformed call. Strictly better than every
+   shipped posture (VX-168 refused the same probe outright, VX-198 admitted it with full reach), and bounded (each probe
+   spends one key she copied; the bit learned is "this name is an approved client here"). Option (b) closes it at the
+   cost of routing the waiting session through every tool with a pending standing (22 grant reads).
+4. **The VX-168 impostor pin returns (red-first, pre-fix API only):** a fresh MINT (untagged) presented under the
+   bound, approved `claude-code` → the name keeps its own key and the presenter reaches nothing (core: the bound hash
+   unchanged; socket: `read_note` on her shared note refused, the tool list empty, the real key still served).
+5. **Activity in words:** the new acts (`connect_rebind_waiting`, `connect_rebind_allowed`, `connect_rebind_declined`)
+   are worded in `MCPPaneCopy.activityLine` — VX-281's lane — so they are OWED with the face; until then her Activity
+   falls back to "used connect rebind waiting" (`spokenAct`), never an error.
+6. **`clientInfo.name` per tab:** Claude Code — `claude-code` (VX-184 U1's live round: "claude-code connected with a new
+   setup, now bound to its name", Claude Code 2.1.296; re-verified live in this unit's stage window on 2.1.299). Codex —
+   NOT installed on the Pro (`which codex` empty, 2026-10-13); the name comes from an external lookup (the one Sonnet
+   lookup agent, read-only), recorded below when it returns.
+
+### The pins and the red counts
+
+*(filled per piece — every count read from the log, never inferred)*
+
+### THE STAGE WINDOW — the plan
+
+*(PENDING — written at piece 14)*
+
+### SELF-ASSESSMENT
+
+*(PENDING)*
+
+### PROVISIONALs (with their options — the orchestrator files them at the merge)
+
+- **P-VX258-1 — a tab key under ANOTHER known approved name:** (a) as designed — it waits for her OK, as an untagged
+  key does (a tag only ever adds the zero-click right for its own name); (b) refuse it (`notThisNamesKey`, the one
+  sentence) — stricter, but a client whose real name differs from its tab's (a rename, a mistaken mapping) then has
+  no road but the Any tab.
+- **P-VX258-2 — the BIND arm (a known, approved, UNBOUND name — after an adoption, a Deny-then-approve, or a client
+  approved before VX-168):** (a) as designed — an untagged (or another name's) key waits for her OK there too, the same
+  hole closed the same way; a key copied for this name binds at once (R-VX168-1 unchanged for the tabs); (b) leave the
+  bind arm as VX-168 built it (R-VX168-1's letter for every key) — the MAJOR's hole stays open for unbound approved
+  names.
+- **P-VX258-3 — the malformed-arguments residual** (above): (a) as designed — the waiting session short-circuits before
+  any tool; (b) route it through every tool with a pending standing, closing the residual.
+- **P-VX260-1 — her edit on another device:** (a) as designed — only her edit on THIS Mac (the record's own Mac)
+  clears the record; (b) a text digest on the record (a local-only column): any change to the words, from any device
+  or client, makes deleting need edit; (c) the `updated_at` compare (rejected above).
+
+### FOR VX-234 (user-facing words, as built)
+
+*(PENDING — none yet)*
+
+### OWED
+
+*(PENDING)*
