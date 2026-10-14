@@ -30,8 +30,8 @@
 > - `Sources/VariorumCore/Sync/CorpusRotation.swift` (the marker and the rotation);
 > - `App/Variorum/Shared/` — `StoreProtection.swift`, `StoreLaunchGate.swift`, `StoreKeyGuard.swift`,
 >   `KeychainCustody.swift`, `EncryptionKeychain.swift`, `AppleKeyCustody.swift`, `ProtectionController.swift`
->   (`reconcile`), `PostureSwitch.swift` (the runner), `LibraryOpenModel.swift`, `StoreBackup.swift`,
->   `BackupRetention.swift`.
+>   (`reconcile`, `healAppleHeldCopy`), `AppleRelinkModel.swift` (17m's Re-link door — what an older build does to the
+>   vault), `PostureSwitch.swift` (the runner), `LibraryOpenModel.swift`, `StoreBackup.swift`, `BackupRetention.swift`.
 >
 > **Do:** the unit named NEXT in this plan's LIVE STATUS — one unit per session — per its section below.
 >
@@ -102,14 +102,15 @@ launch."* It needs all of the following:
 Sources/VariorumCore/Protection/
   Model/      ProtectionRecord · KeyFile (format 3: wraps + history; readers for formats 1 and 2) ·
               DeviceMemory (+ sealed fields, + key-file mirror) · Plan (+ seal) · Seal (HKDF + HMAC) ·
-              Names (custody item, sync-keys item, memory item, Apple key: <scope>-apple-key-<id>, legacy name)
+              Names (custody item, sync-keys item, memory item, Apple key: <scope>-apple-key-<id>, the old
+              shared name)
   Assess/     Facts · Assessment · assess(_:) · Roads · RouteFinder · Catalog (one name parser; attribution
               to library + Mac) · Retention (per library per Mac; legacy flat files never pruned)
   Executor/   Leaves (protocols: Custody, SyncKeys, AppleKeys, Vault, LibraryFile, KeyFileStore, MemoryStore,
               PlanStore, Backups, Clock, IDs, Biometry/LAEnvironment) · Executor (repairs + plan runner) ·
               Acts/ (one file per act: EnterCastle, LeaveCastle, ReplaceAllKeys, Follow, OpenCopy, Migration,
-              LegacyAppleKeyQuestion, SetUpSync, Enroll, Move, ThisMacOnly, StopSyncingHere, ChangePassphrase,
-              RegenerateWords, GateStyle, TouchIDRearm)
+              MoveOffSharedKey, RetireSharedKey, RelinkApple, SetUpSync, Enroll, Move, ThisMacOnly,
+              StopSyncingHere, ChangePassphrase, RegenerateWords, GateStyle, TouchIDRearm)
 Tests/VariorumCoreTests/Protection/
   ModelTests · AssessTests · RouteFinderTests · CatalogTests · RetentionTests · ExecutorTests (per act,
   per step, per crash point) · Scenario/ (World, Fakes, Alphabet, Promises, Generator, FixedScenarios,
@@ -128,11 +129,14 @@ Tests/VariorumCoreTests/Protection/
 
 Build everything in §3.2 of the design as values, with their codecs and their crypto:
 
-- **The protection record**, as a value and its fields. The SQLite table comes in phase 2.
+- **The protection record**, as a value and its fields, including the Apple key ids it has retired. The SQLite table
+  comes in phase 2.
 - **Key file format 3:**
   - the current key's wraps — passphrase with its KDF descriptor, words, master, Apple key with its id;
   - the history: every older key wrapped directly under the current key, with fingerprint, epoch and retirement date;
-  - re-keying: L → L′ re-wraps the whole history under L′ and adds L.
+  - the master's twelve-words copy (design §3.5a), when the file has a master wrap;
+  - re-keying: L → L′ re-wraps the whole history under L′ and adds L;
+  - the same format serves another library's key file in `Backups/<library8>/` (design §3.5).
 - **Readers for formats 1 and 2.** Old key files are read forever, and the catalog and route finder use them.
 - **What this Mac remembers:** its fields, the key-file mirror and the sealed subset.
 - **Plans,** sealed under the key in hand, naming its fingerprint.
@@ -159,10 +163,13 @@ Build everything in §3.2 of the design as values, with their codecs and their c
   - every door with its reason;
   - the repairs owed and the acts owed;
   - the words, as typed reasons for later phases to render.
-- **The rules it encodes:** design §3.3 (guards included), §3.7 (the open rule's verdicts), §3.8 (the four account
-  situations), §3.10 (the Touch ID road, with VX-310's lobby rule as data: when a button is offered, when a reason
-  is shown instead, and never a line with no finger enrolled).
-- **The route finder** over a catalog, for every copy kind.
+- **The rules it encodes:** design §3.3 (guards included, the vault's move-back repair among the repairs), §3.5 (the
+  old shared key: what still needs it, and what its retirement would leave with no road), §3.7 (the open rule's
+  verdicts), §3.8 (the four account situations), §3.10 (the Touch ID road, with VX-310's lobby rule as data: the
+  button whenever a Touch ID item exists, what pressing it says when Touch ID is only unusable for now, and which of
+  the two lines shows when no item can work).
+- **The route finder** over a catalog, for every copy kind — and the same finder with the old shared key taken away,
+  which is how the retirement's checks list what would stop opening.
 - **The catalog's one name parser,** covering every filename today's builds have written. Read the three existing
   parsers and keep their union.
 - **Attribution and retention** per design §3.7.
@@ -173,7 +180,8 @@ Build everything in §3.2 of the design as values, with their codecs and their c
 - every road combination;
 - every copy kind against every library state;
 - retention over a shared folder holding two Macs' and two libraries' copies, where nothing foreign is pruned;
-- the route finder's words agree with the roads it found.
+- the route finder's words agree with the roads it found;
+- the retirement's list: every copy whose only road is the old shared key is on it, and nothing else is.
 
 ---
 
@@ -188,11 +196,14 @@ Build everything in §3.2 of the design as values, with their codecs and their c
     before the library is re-encrypted;
 - the Apple-key rules of §3.5:
   - names by id;
-  - one minter, so followers wait;
-  - retire on entering Castle;
-  - delete on sight;
+  - one minter, so followers wait, and the vault's CAS keeps one account key;
+  - retire on entering Castle, recording each retired id;
+  - delete on sight, by recorded id only;
   - a fresh key on leaving;
-  - the legacy question only after the fold.
+  - Re-link mints a fresh account key, never re-landing under the old shared key;
+  - the old shared key: the moves off it (folds first, other libraries' copies, the live library, the fresh pair), the
+    vault's move-back repair, and its retirement as Use Castle's last step — the checks run again first, *keep it for
+    now* when the list isn't empty, and its own door on a store already in Castle.
 
 **Its leaves are protocols.** U3 tests against simple in-memory leaves; U4 brings the realistic fakes.
 
@@ -220,6 +231,8 @@ The design's §4.1, whole:
   - an iCloud Keychain with a propagation delay, delete propagation and no recovery;
   - file systems with copies, Time Machine rollback and container deletion;
   - a vault with CAS, the key proof and the rotation fields;
+- **an older build as an actor** on any device: it reads and mints only the old shared key, writes its wraps under it,
+  and its Re-link re-lands the account's vault copy under it;
 - real key files and wraps, with test-speed KDF parameters (the existing test descriptors), and stand-in library
   files keyed by their key fingerprint and carrying their record.
 
@@ -238,7 +251,10 @@ Every shape today's builds leave, built as fixtures from the old formats:
 - signed out with keys;
 - a deleted account;
 - a stuck VX-235 marker;
-- the legacy shared Apple key with pre-Castle copies;
+- the old shared Apple key with pre-Castle copies;
+- older libraries of other libraries, in Standard and in Castle, and libraries this Mac holds only backups of;
+- Standard libraries with no passphrase and no words;
+- a device that joined sync without typing a secret;
 - two Macs sharing an iCloud Drive backup folder.
 
 ### The promises
@@ -258,7 +274,16 @@ Each is a named test:
 - the planted plan;
 - the edited gate style plus an enrolled finger;
 - the cross-Mac prune (VX-302);
-- the legacy fold, then retirement — no stranded copy;
+- the old key's fold, then retirement — no stranded copy;
+- two libraries on one Apple account: a Mac entering Castle beside a second Mac's local-only Standard library with no
+  passphrase — the second Mac updated, and not;
+- an older library of another library, Standard with no passphrase, opening after retirement on its own key; and one
+  whose library later entered Castle, whose pre-Castle copies stop opening through the Apple account;
+- the window after the move: the Mac lost right after moving off the old key, its fresh pair opening elsewhere;
+- an older build's Re-link putting the account back on the old key: the repair moves it off again, and the retirement
+  re-checks before deleting;
+- one local-only library on two Macs (sent, no sync), one entering Castle: the other's own key never deleted;
+- a silently-joined device losing its Keychain after the account entered Castle elsewhere: the words open its file;
 - a follow while the fresh Apple key hasn't arrived (no second key minted);
 - the lid closed at Castle entry;
 - a biometry change, then the re-arm question;
@@ -268,7 +293,9 @@ Each is a named test:
 ### Mutation pins
 
 Each fixed scenario that guards against a known bug runs once more with its guard switched off (`ProtectionGuards`,
-DEBUG only) and **must fail**. That is the red-on-old for new code. Record the failing assertion for each.
+DEBUG only) and **must fail**. That is the red-on-old for new code. Record the failing assertion for each. The guards
+include the retirement's re-run of the moves, its refusal while a vault it can read names the old key, delete on sight
+by recorded id only, and the fresh pair after the move.
 
 ### The generator
 

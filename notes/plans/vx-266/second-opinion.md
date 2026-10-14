@@ -1,5 +1,11 @@
 # Castle, backups and restores — a second opinion
 
+> **Where these decisions live now (2026-10-13).** This document numbers its decisions D1–D10. The binding design,
+> `notes/plans/vx-266-castle-backups-prelaunch.md`, cites tickets only (her word). The trace:
+> D1 → VX-209 · D2 → VX-263 · D3 → VX-301 (the old shared key's retirement reshaped after the first designer's review —
+> design §3.5, PROVISIONAL) · D4 → withdrawn, recorded on VX-266 · D5 → VX-313 · D6 → VX-302 · D7 → VX-314 ·
+> D8 → VX-265 / VX-210 · D9 → VX-212 · D10 → VX-266 (the phases).
+
 **For:** VX-266 and its 17 tickets. **What this is:** an independent assessment of the design proposal
 (`design-proposal.md` beside this file, as revised after its cold read), written 2026-10-13 at your request. It is not
 a ruling: nothing is built and no ticket is changed by it.
