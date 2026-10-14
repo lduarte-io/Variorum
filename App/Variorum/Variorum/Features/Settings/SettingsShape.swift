@@ -313,11 +313,23 @@ nonisolated enum SettingsCatalog {
             // vocabulary, never copy (her (e)).
             blurb: "A local server for any MCP client. Off by default; "
                 + "nothing is readable until you grant it. This Mac only.",
-            keywords: ["mcp", "ai", "claude", "claude code", "agent", "llm", "model context protocol",
-                       "server", "connect", "client", "share", "grant", "socket",
-                       "codex", "setup", "json", "stdio",
+            // VX-281 ladder R1-4: the setup menu's own words moved to
+            // `mcpConnect` (the setup lives on the Connect tab, so a search
+            // for them lands there); the provider names stay here (O-4).
+            keywords: ["mcp", "ai", "claude", "agent", "llm", "model context protocol",
+                       "server", "client", "share", "grant", "socket",
                        "anthropic", "openai", "chatgpt", "gpt", "cursor", "gemini", "copilot",
                        "windsurf", "ollama"]),
+        // VX-281 ladder R1-4 (R-VX184-6: the setup lives on the Connect tab):
+        // the Connect tab's own row — its title IS the section's words, so a
+        // search for the setup's words opens the pane ON Connect
+        // (`MCPPaneTab.holding`), never behind another tab.
+        SettingsRow(
+            id: "mcpConnect", pane: .mcp, title: MCPPaneCopy.connectSection,
+            blurb: "The setup for your MCP client, ready to copy: a command for a terminal, "
+                + "or settings to paste into the client.",
+            keywords: ["connect", "setup", "set up", "install", "command", "copy", "claude code",
+                       "codex", "json", "stdio"]),
         // 13n-c U4 — WAITING (arrival X): where a client's ask waits besides
         // its icon; ⌥⌘, opens the pane there.
         SettingsRow(

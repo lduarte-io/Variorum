@@ -133,7 +133,9 @@ struct AppSettingsView: View {
         // 13n-c U4: Waiting renders while an ask waits (the catalog row says so).
         // VX-281 U1: the open book renders in the Shared with AI tab, and a
         // search finding it opens the pane on that tab (`MCPPaneTab.holding`).
-        .mcp: ["mcpServer", "mcpWaiting", "mcpOpenBook"],
+        // VX-281 ladder R1-4: the Connect tab's section ("Connect a client"),
+        // where a search for the setup's words lands.
+        .mcp: ["mcpServer", "mcpWaiting", "mcpConnect", "mcpOpenBook"],
         .protection: ["protection"],
         .dataSafety: ["backups"],
         .diagnostics: ["crashReports"],

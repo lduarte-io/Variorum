@@ -66,10 +66,16 @@ nonisolated enum MCPPaneTab: String, CaseIterable, Identifiable, Sendable {
     /// **The tab a Settings search finding lands on** — the open-book row
     /// lives in Shared with AI, so the search opens it there (the catalog's
     /// promise, `AppSettingsView.rowIDsRendered`: the search never names a
-    /// row the pane does not show). nil: the row sits above the tabs (the
-    /// server switch, Waiting) or the finding is the pane itself.
+    /// row the pane does not show); the setup's words find Connect's own row
+    /// and open it there (VX-281 ladder R1-4 — where R-VX184-6 put the
+    /// setup). nil: the row sits above the tabs (the server switch, Waiting)
+    /// or the finding is the pane itself.
     static func holding(findingLead lead: String) -> MCPPaneTab? {
-        lead == SettingsCatalog.title("mcpOpenBook") ? .shared : nil
+        switch lead {
+        case SettingsCatalog.title("mcpConnect"): .connect
+        case SettingsCatalog.title("mcpOpenBook"): .shared
+        default: nil
+        }
     }
 }
 
@@ -293,7 +299,9 @@ struct MCPPane: View {
         } header: {
             VStack(alignment: .leading, spacing: 6) {
                 tabRow
-                Text(MCPPaneCopy.connectSection)
+                // The catalog's row (VX-281 R1-4): the search's label and the
+                // section's are one.
+                Text(SettingsCatalog.title("mcpConnect"))
             }
         }
     }
