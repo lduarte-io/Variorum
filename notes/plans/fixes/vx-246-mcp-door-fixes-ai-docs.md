@@ -122,7 +122,7 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
 | U1b — VX-258's face and U1's remainder | WAITS for VX-281's merge, then a FRESH implementer: the face incl. the mint call site (**THE MERGE GATE** — U1's core must not merge or reach her build without it), VX-318 (OWED 3), P-VX260-1 rebuilt as option (b), the live round (U1's legs 0–5), and U2's MCP walk legs W2/W3 (no detour needed once the face exists). Note for W2/W3: on an empty redo stack the Redo item is DISABLED (`EditorCommands.swift:576`, unchanged), so "nothing to redo" reads as a disabled item, never a toast (U2 STAGE RUN's finding 1) |
 | U2 — the undo class | **WINDOW 1 PROVEN 2026-10-14 00:23–00:38** (U2 STAGE RUN below): the Mac batch 1,084 tests / 148 suites green (1,078 + 6 gated skips, 0 failed — U1's G1–G3 included), W1 proven in both voices, the dev store restored cmp-SAME. Open only for W2/W3 in U1b's window. — Earlier: BUILT, headless green at `10223a2d` (MCP 223/48 · core 2,826/326 · workbook 40/6; the Mac build-for-testing built). The implementer is retired at ~634–690k context (the cutover rule). Its stage window (the Mac batch with U1's groups, plus W1, her own door) goes to a FRESH runner; W2/W3 move to U1b's window. The acceptance closes when W1–W3 have run |
 | U3 — her editor vs the wire | BUILT, headless green at `61ec7723` (MCP 236/49 · core 2,826/326 · workbook 40/6; both Mac products built: `vx246-u3-red` is the red-on-old product, `vx246-u3` the fixed one). The implementer is retired at ~620k context (cutover). Its window (`vx246-u3`: the Mac pins red on old, the 215-suite batch, Claude Code by U1's detour, and the timing driver) goes to a FRESH runner. VX-323 (the wider class) was born and fixed here |
-| U4 — the faces after big writes | NOT-STARTED |
+| U4 — the faces after big writes | IN-PROGRESS — implementer spawned from the U4 BRIEF below (2026-10-14 ~02:10), under the PAUSE protocol (U3's window may interrupt it at a clean seam) |
 | U5 — the write tools' shapes | NOT-STARTED |
 | U6 — Compare from the wire | NOT-STARTED |
 | U7 — the agent's read-backs | NOT-STARTED |
@@ -169,6 +169,13 @@ a token pass, a lockstep event or a posture model), so the run sits inside the t
   to merge tonight. Answered by scope, with no time estimate (her rule): what is left in order, so VX-246 merges after
   VX-281 and likely after VX-282.
 - ~01:40: REQUEST sent for `vx246-u3` (the runner's minutes to follow with READY).
+- ~01:50: the coordinator queued `vx246-u3`: vx282-u3 (on stage) → vx281-r1fix (critical path) → vx282-u4 → us, if
+  we're READY by then, else whoever is READY first. It accepted the guards and asked for the user-scope fingerprint
+  verdict (SAME) in the release's posture line.
+- ~02:05: the U3 runner is READY (348b1a78: both products match the tree, 215 suites listed, her user-scope servers
+  fingerprinted). READY sent with a 90-min claim. U4's implementer starts meanwhile, under a PAUSE protocol: at the
+  GO, it stops at a clean seam (committed, pushed, the tree clean) before the runner claims, so only one agent runs
+  at a time.
 
 ## Cross-run coordination
 
@@ -529,6 +536,98 @@ orchestrator's to run after the units; keep the record reviewable.
 **Context:** past ~500k, stop at the next clean seam (committed, green, the continuation written) and report.
 
 **Out of scope:** every other unit's members; VX-318 and the rest of U1b; the guide (U8).
+
+### U4 BRIEF — the faces after big writes (VX-230 · VX-231)
+
+**What binds, per member** (each ticket is the record; her words are verbatim).
+
+1. **VX-230: the fan badge after big writes.** Her word: a pre-release fix.
+   - **The ticket, VERBATIM:**
+     > **In VX-246 at her word** (2026-10-13: *"I want that fix added to the upcoming session."*). Her new observation:
+     > *"I found that going into takes mode and expanding and closing it fixed it, which makes it seem even more like a
+     > chrome issue."* Lead: a stale badge face after an MCP write, not wrong data. Possibly the same root cause as
+     > VX-231 (a face not refreshed after an MCP write).
+     >
+     > Noticed in VX-184 U1's live round (2026-10-13, dev store): Block 001 of a 300-block MCP-written note wore a darker
+     > ⑂2 badge with exactly one take in the store, surviving scroll-away-and-back; the six truly fanned blocks badged
+     > correctly. Mechanism unverified, nothing fixed. Record: notes/plans/fixes/vx-184-mcp-launch-polish.md (U1 OWED 3a).
+     >
+     > **Her real-store sighting (2026-10-13 ~02:23, her report + screenshot shot-20261013-022301.png):** same
+     > first-block signature in her own work — an MCP-connected Claude added blocks and takes to a note in "o ladrão de
+     > raios"; the FIRST block's take badge (a REAL take — the fan exists) renders as a fully black filled disc, while
+     > every other block's ⑂2 badge renders normally. Her caret was in block 1 (the focused/live block); U1's sighting
+     > also had the landing focused on block 1 (⌥⌘O). Two readings to keep apart until traced: (a) a RENDERING defect —
+     > the badge on the first/focused block draws dark/black; (b) U1's original phantom-badge reading (a badge where the
+     > store holds one take). Possibly one bug (U1's "darker ⑂2" may have been the same black rendering, with the take
+     > count separately right or wrong), possibly two. **Her word: pre-release fix.**
+   - **Her further observation, 2026-10-13 evening, VERBATIM:** *"the black mark on takes is there even when you
+     haven't been in the book it's just there on first launch, then resolves a little, then is fixed. and it appears
+     even in the book view where it shouldn't, like all the takes are gathered on top of the first one is what it
+     looks like."*
+   - **Her screenshots** (on the Pro; read them):
+     - `~/shots/shot-20261013-174949.png`: the book "o ladrão de raios", Outline mode, chapter 1's first block
+       (the chapter's opening Portuguese line) wearing the dark disc at the right edge.
+     - `~/shots/shot-20261013-022301.png`: her real-store sighting.
+   - **The lead to test FIRST** (the orchestrator's comment on the ticket; a hypothesis, NOT a traced mechanism):
+     - The fan badges of MANY fanned blocks are placed at the FIRST block's position before TextKit 2's lazy viewport
+       layout reaches their blocks. They move to their real places as layout catches up, and the overlapping
+       translucent badges darken into one black disc.
+     - If so, the MCP write is incidental: the trigger is a note with many fanned blocks below the fold. U1's "⑂2 on a
+       single-take block" would then be a neighbour's badge drawn in the wrong place.
+     - It reaches the decoration layer and TK2 geometry, which is THE EDITOR SEAM.
+     - The pin to try first: open a note whose fanned blocks start below the viewport, and assert that no badge rect
+       sits at another block's position.
+     - Her clue stands: a Takes-mode expand/collapse clears it, because that re-runs layout. So does "even in the book
+       view where it shouldn't": trace which book surface draws badges at all, and whether it should.
+2. **VX-231: the Bookcase row counts read stale right after a large note joins a book.**
+   - **The ticket, VERBATIM:**
+     > **Possibly the same root cause as VX-230:** a face not refreshed after an MCP write (both seen right after big
+     > MCP writes). **Joined VX-246 at her word (2026-10-13: "yes, add VX-231 to VX-246. all MCP fixes together.")** —
+     > investigate beside VX-230.
+     >
+     > Noticed in VX-184 U1's live round (2026-10-13, dev store): immediately after the 32k-word MCP-written note joined
+     > the book, its Bookcase row read '7 notes · 3 ch · 120w'. Mechanism unverified, nothing fixed. Record:
+     > notes/plans/fixes/vx-184-mcp-launch-polish.md (U1 OWED 3b).
+   - **Check VX-122 before inventing a refresh** (the runway's §2). VX-122 is in VX-283, which has not started: "A
+     live Library misses revivals — Put back, structural redo, and sync restores all fail to refresh it … Fix wants
+     ONE revival signal or an observation that covers restores." Its trace is in `notes/plans/phase-13n-a-document-format.md`
+     (WALK-FIX PASS, WA-4).
+     - If VX-231's cause is a count or projection that isn't re-read after a write, prefer the existing observation
+       roads over a new notification.
+     - If the fix would BE VX-122's one revival signal, STOP and report: that's VX-283's ticket, and I coordinate.
+
+**THE EDITOR SEAM.** Read `notes/TEXTKIT2_NOTES.md` in full BEFORE any edit there.
+- Decorations stay off the live storage, and you never touch TK1 APIs (`.layoutManager` silently downgrades).
+- Attribute stamps clamp to the verdict's range.
+- The Fable review is the orchestrator's to run after the units; keep the record reviewable.
+
+**Lanes.**
+- **vx-282's editor-seam work** is NOT on our branch. Stay out of its listed functions (Cross-run coordination above).
+- **vx-282's answer, 2026-10-14 ~02:00: none of its units touch the badge's road.** It plans no change to
+  `BlockDecor.swift`, the gutter cards, `ProseGutter`, any decoration overlay, or the TK2 geometry they read.
+  - Its remaining U5: `CommentsPanel.swift`, `CommentPanelHostWatcher`, `Shared/CommentDraftPark.swift`,
+    `Registry/Capability.swift`, `CapabilityRegistry.swift` and `Queries/RestoreCost.swift`.
+  - Already built there: `Core/Views/CaptureTextView.swift`; `CommandRouter.swift`; `Features/Takes/WriteTakesPanel.swift`,
+    `TakesViewModel.swift` and `TakesStructureController.swift`; one line in `EditorView.swift`.
+  - Stay out of those files. If the fix needs one of them, STOP and report.
+- **VX-281's lane** is out.
+
+**Evidence that closes U4.**
+- **Pins**, red-first per member and red again by revert. For VX-230, the badge-geometry pin above. For VX-231, a
+  count pin; if its trace finds no defect, record it as hollow.
+- **The whole headless package green,** with counts.
+- **THE STAGE WINDOW plan** in your record (claim `vx246-u4`; minutes; a batch-only fallback):
+  - a Mac batch over every changed source file's suites;
+  - a walk in BOTH voices on the dev store with a large note with many fanned blocks below the fold, and a book like
+    hers (two takes on most blocks).
+  - **What the walk shows:** the badges right at first open and first launch, with no dark disc and no badge on a
+    single-take block; the book views as ruled; the Bookcase row's counts right after a big note joins a book.
+  - **The fixture** is yours to build on the dev store. The trace decides whether a real MCP write is needed; if one
+    is, `claude-code` connects by U1's documented detour (Deny → re-run → Approve).
+
+**Context:** past ~500k, stop at the next clean seam (committed, green, the continuation written) and report.
+
+**Out of scope:** every other unit's members; U1b; the guide (U8).
 
 ## UNIT RECORDS
 
