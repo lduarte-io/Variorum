@@ -160,6 +160,30 @@ private func settle(_ condition: @MainActor () -> Bool) async throws -> Bool {
     return condition()
 }
 
+/// The door's own executor — her `OperationsRunner`, unchanged — with the
+/// position jitter's RNG in scope (VX-246 ladder round 1, F-4 — the headless
+/// harness's `SeededExecutor` precedent, `MCPServerTests.swift`).
+/// `FractionalIndex.between` reads `\.withRandomNumberGenerator` from the
+/// CALLER's context, and the served session's task, spawned from the host's
+/// accept `Thread`, carries none of the pin's task-locals — so a wire write
+/// that mints a position (a divide) read the live RNG and raised the
+/// "has no test implementation" warning, unattributed, in every Mac batch.
+/// Only the RNG is set: the runner's captured `Operations` keep the
+/// harness's own clock and ids. Task-locals carry across the actor hop to
+/// the runner (the same task), so the body still runs on her runner.
+private struct ScopedRandomExecutor: MCPWriteExecutor {
+    let inner: any MCPWriteExecutor
+    let rng: WithRandomNumberGenerator
+
+    func run<T: Sendable>(_ body: @Sendable (Operations) throws -> T) async throws -> T {
+        try await withDependencies {
+            $0.withRandomNumberGenerator = rng
+        } operation: {
+            try await inner.run(body)
+        }
+    }
+}
+
 /// `withEditor`'s world (EditorTestSupport — the same process-fresh Terminal
 /// typography and voice row), with two differences: her coordinator is minted
 /// FIRST with a debounce that never fires by itself, and the real door serves
@@ -179,6 +203,8 @@ private func withDoorEditor<T>(
     let db = try AppDatabase.inMemory()
     let start = Date(timeIntervalSince1970: 1_782_864_000)
     let tick = LockIsolated(0)
+    // F-4: ONE seeded RNG, shared by the pin's scope and the served side.
+    let rng = WithRandomNumberGenerator(SeededGenerator(seed: 275))
     return try await withDependencies {
         $0.database = db
         $0.uuid = .incrementing
@@ -189,7 +215,7 @@ private func withDoorEditor<T>(
             }
             return start.addingTimeInterval(Double(seconds))
         }
-        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 275))
+        $0.withRandomNumberGenerator = rng
     } operation: { @MainActor in
         let session = AppSession(database: db)
         try session.operations.setThemeVoice(.terminal)
@@ -214,7 +240,8 @@ private func withDoorEditor<T>(
         try editor.reload()
 
         // The real door, on a SHORT socket home of its own (AF-1's length
-        // guard — MCPPaneTests' precedent), its writes on her runner.
+        // guard — MCPPaneTests' precedent), its writes on her runner (with
+        // the pin's RNG in scope — F-4, `ScopedRandomExecutor`).
         let directory = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("vh-\(UUID().uuidString.prefix(6))", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }
@@ -222,7 +249,7 @@ private func withDoorEditor<T>(
         let door = MCPDoor(serverAllowed: true) { database, executor in
             MCPServerHost(
                 database: database, operations: grants, directory: directory, version: "test",
-                executor: executor)
+                executor: ScopedRandomExecutor(inner: executor, rng: rng))
         }
         door.attach(session: session)
         defer { door.detach() }
