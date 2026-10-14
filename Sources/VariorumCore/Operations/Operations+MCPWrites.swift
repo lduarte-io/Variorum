@@ -414,12 +414,18 @@ extension Operations {
     /// able to set the date on a note"*): the minted note's date, `yyyy-MM-dd`
     /// (a malformed key refuses `invalidEntryDate` and mints nothing), set in
     /// the same transaction.
+    ///
+    /// `section` (VX-252 — VX-336 U5b D2): file the new membership under that
+    /// CHAPTER of the destination book in the same transaction — a live section
+    /// of THAT book (`sectionNotFound` / `sectionNotInReading`, checked before
+    /// anything is minted; a wing destination has no chapter). The note's ONE
+    /// undo entry takes the filing with it, and the redo returns it filed.
     @discardableResult
     public func createNote(
         title: String?, text: String, entryDate: String? = nil, in destination: MCPNoteDestination,
-        undoLabel: String
+        section: String? = nil, undoLabel: String
     ) throws -> DocumentImport {
-        try mintNoteEntry(undoLabel: undoLabel) { db in
+        try mintNoteEntry(undoLabel: undoLabel, section: section) { db in
             let blocks = SegmentationRules
                 .bulkSegments(text, mode: try Queries.defaultSegmentation(db))
                 .map { VariorumDocument.Block(text: $0) }
@@ -465,10 +471,12 @@ extension Operations {
     /// block as an empty line. Until this unit it was silently DROPPED (the
     /// format's rule, P-13nb-U3-9's "empty-text takes drop" — superseded at
     /// this door only; the file doors keep it).
+    ///
+    /// `section` (VX-252): `createNote`'s — the chapter of the destination book.
     @discardableResult
     public func createStructuredNote(
         title: String?, entryDate: String?, blocks: [MCPNoteBlock],
-        in destination: MCPNoteDestination, undoLabel: String
+        in destination: MCPNoteDestination, section: String? = nil, undoLabel: String
     ) throws -> DocumentImport {
         let trimmed = title?.trimmingCharacters(in: .whitespacesAndNewlines)
         let document = VariorumDocument.NamedDocument(
@@ -477,7 +485,7 @@ extension Operations {
                 title: (trimmed?.isEmpty ?? true) ? nil : trimmed, tagPaths: [],
                 blocks: blocks.map { VariorumDocument.Block(text: $0.text, alternates: $0.takes) }))
         return try mintNoteEntry(
-            undoLabel: undoLabel, keepingBlankTakes: true
+            undoLabel: undoLabel, keepingBlankTakes: true, section: section
         ) { _ in document } destination: { destination } finish: { db, minted in
             for (blockID, block) in zip(minted.blockIDs, blocks) {
                 let name = block.name?.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -514,9 +522,14 @@ extension Operations {
     /// entry date), written on the minted rows in the SAME transaction,
     /// before the note joins a book (so the hand-add's gates see the note
     /// as it will stand).
+    /// `section` (VX-252): the chapter of the destination BOOK the membership
+    /// is filed under — her New Note in a Book's order (`newPostInReading`):
+    /// the book's gates, then the chapter, checked BEFORE the mint; the pointer
+    /// rides the membership row the hand-add wrote, in this transaction.
     private func mintNoteEntry(
         undoLabel: String,
         keepingBlankTakes: Bool = false,
+        section sectionID: String? = nil,
         document: (Database) throws -> VariorumDocument.NamedDocument,
         destination: () -> MCPNoteDestination,
         finish: (Database, MintedDocument) throws -> Void = { _, _ in }
@@ -530,9 +543,17 @@ extension Operations {
                 let book = try liveReading(db, id)
                 guard book.kind == .book else { throw OperationError.wrongReadingKind(id: id, expected: .book) }
                 guard !book.locked else { throw OperationError.lockedReading(id: id) }
+                if let sectionID {
+                    let section = try liveSection(db, sectionID)
+                    guard section.readingId == id else {
+                        throw OperationError.sectionNotInReading(sectionID: sectionID, readingID: id)
+                    }
+                }
                 wing = try Queries.wingIsLive(db, id: book.wingId) ? book.wingId : ""
                 bookID = id
             case .wing(let id):
+                // A wing holds no chapters: a section here names none.
+                if let sectionID { throw OperationError.sectionNotFound(id: sectionID) }
                 try requireLiveWing(db, id)
                 wing = id
             }
@@ -544,13 +565,17 @@ extension Operations {
                 // gates, its outflow) — BEFORE the header's tags, so this
                 // book's own pair is decided and the tagging act is heard by
                 // the OTHER living books (`newPostInReading`'s order).
-                _ = try addPostToReading(db, minted.post.id, to: bookID, at: .end)
+                var membership = try addPostToReading(db, minted.post.id, to: bookID, at: .end)
+                if let sectionID {
+                    membership.sectionId = sectionID
+                    try membership.update(db)
+                }
             }
             let tagIDs = try applyDocumentTags(
                 db, named.document.tagPaths, to: minted.post.id, wingId: wing, now: now)
             return DocumentImport(
                 post: minted.post, blockIDs: minted.blockIDs,
-                alternateCount: minted.alternateCount, tagIDs: tagIDs)
+                alternateCount: minted.alternateCount, tagIDs: tagIDs, blocks: minted.blocks)
         }
         let postID = result.post.id
         registerMintedContainerEntry(label: undoLabel, postID)

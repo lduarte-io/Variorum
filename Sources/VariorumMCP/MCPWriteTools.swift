@@ -77,7 +77,8 @@ struct MCPWriteTools: Sendable {
         case saveLens(noteID: String, name: String, takeIDs: [String], rule: LensRule?)
         /// U3 (R-13nb-11 G-2): EITHER payload — plain prose, or the
         /// wire-document subset — and an optional entry date (R-13nb-26 (b)).
-        case createNote(title: String?, payload: NotePayload, entryDate: String?, place: Place)
+        /// VX-252: an optional chapter of the book (`section_id`).
+        case createNote(title: String?, payload: NotePayload, entryDate: String?, place: Place, sectionID: String?)
         case importNote(VariorumDocument.NamedDocument, place: Place)
         case importBook(VariorumDocument.Book, wingID: String)
         case applyTag(noteID: String, path: String)
@@ -209,9 +210,15 @@ struct MCPWriteTools: Sendable {
             case (.some, .some): throw ArgumentFailure(message: "Pass text or blocks, not both.")
             case (nil, nil): throw ArgumentFailure(message: "Pass text (plain prose) or blocks (structured).")
             }
+            // VX-252 (D2): a chapter is a chapter OF the book the note joins —
+            // said at the parse, before any decision (independent of any target).
+            let sectionID = try optionalString(args, "section_id")
+            if sectionID != nil, try optionalString(args, "book_id") == nil {
+                throw ArgumentFailure(message: Self.sectionWithoutBookWords)
+            }
             return .createNote(
                 title: try optionalString(args, "title"), payload: payload,
-                entryDate: try entryDate(args), place: try place(args))
+                entryDate: try entryDate(args), place: try place(args), sectionID: sectionID)
         case MCPToolCatalog.importDocument.name:
             return try parseImport(args)
         case MCPToolCatalog.applyTag.name:
@@ -401,17 +408,24 @@ struct MCPWriteTools: Sendable {
                                         targetTitle: title, detail: lens.name,
                                         show: .lens(noteID: noteID, lensID: lens.id)))
             }
-        case .createNote(let title, let payload, let entryDate, let place):
+        case .createNote(let title, let payload, let entryDate, let place, let sectionID):
+            // VX-252 (F-3): the BOOK is decided first (`into`), so an
+            // unreachable book answers the one not-shared sentence whatever
+            // `section_id` names; inside, every id that isn't a live chapter of
+            // THAT book speaks the one sentence its siblings speak
+            // (`MCPWireRefusalCopy`) — hidden is never told from missing.
             return try into(place, job: job, clientName: clientName) { destination in
                 let minted: Operations.DocumentImport = switch payload {
                 case .text(let text):
                     try ops.createNote(
-                        title: title, text: text, entryDate: entryDate, in: destination, undoLabel: label(.note))
+                        title: title, text: text, entryDate: entryDate, in: destination, section: sectionID,
+                        undoLabel: label(.note))
                 case .blocks(let blocks):
                     try ops.createStructuredNote(
-                        title: title, entryDate: entryDate, blocks: blocks, in: destination, undoLabel: label(.note))
+                        title: title, entryDate: entryDate, blocks: blocks, in: destination, section: sectionID,
+                        undoLabel: label(.note))
                 }
-                return try noteAnswer(minted, act: .note, clientName: clientName)
+                return try noteAnswer(minted, act: .note, clientName: clientName, sectionID: sectionID)
             }
         case .importNote(let named, let place):
             return try into(place, job: job, clientName: clientName) { destination in
@@ -754,16 +768,30 @@ struct MCPWriteTools: Sendable {
         return picks
     }
 
+    /// A minted note's answer: its id, `block_ids` (kept — F-6), its tags, and
+    /// VX-252's `blocks` — every block's shown take and every take it was born
+    /// with (`MCPMintedBlocks`, the one shape). `section_id` echoes a chapter
+    /// the note was filed under (`add_note_to_book`'s echo).
     func noteAnswer(
-        _ minted: Operations.DocumentImport, act: Operations.MCPWriteAct, clientName: String
+        _ minted: Operations.DocumentImport, act: Operations.MCPWriteAct, clientName: String,
+        sectionID: String? = nil
     ) throws -> Act {
         let title = try database.read { db in
             try Queries.mcpScopeTitle(db, kind: .note, id: minted.post.id, calendar: calendar)
         }
-        return (["note_id": minted.post.id, "block_ids": minted.blockIDs, "tag_ids": minted.tagIDs],
+        var answer: [String: Any] = [
+            "note_id": minted.post.id, "block_ids": minted.blockIDs, "tag_ids": minted.tagIDs,
+            "blocks": MCPMintedBlocks.records(minted.blocks),
+        ]
+        if let sectionID { answer["section_id"] = sectionID }
+        return (answer,
                 MCPWriteReceipt(clientName: clientName, act: act, targetID: minted.post.id, targetTitle: title,
                                 show: .note(noteID: minted.post.id, blockID: nil, select: nil)))
     }
+
+    /// VX-252 (D2): `create_note`'s `section_id` without a book to be a chapter of.
+    static let sectionWithoutBookWords =
+        "section_id goes with book_id: it files the note under a chapter of the book the note joins."
 
     /// **The take label on an AI take** (P-13n-3's convention, re-voiced by
     /// her VX-267 ruling — *"why do we need claude-code * suggested * english.

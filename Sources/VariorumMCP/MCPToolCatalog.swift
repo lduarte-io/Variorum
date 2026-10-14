@@ -484,7 +484,11 @@ enum MCPToolCatalog {
             each paragraph becomes a block) OR blocks (structured: each block's shown text exactly \
             — a blank line inside it stays inside the one block — with an optional name and its \
             other takes, each with an optional label). entry_date (yyyy-MM-dd) sets the \
-            note's date, e.g. for old journal entries. Returns JSON with the note_id and its block_ids.
+            note's date, e.g. for old journal entries. section_id (with book_id) files the note \
+            under one of that book's chapters in the same call (list_notes or create_section \
+            gives chapter ids). Returns JSON with the note_id, its block_ids, and blocks: per \
+            block its block_id, the shown_take_id, and every take in fan order (take_id, and \
+            label where it has one), the shown one included — no read_note needed to learn them.
             """,
         inputSchema: .object([
             "type": "object",
@@ -518,6 +522,8 @@ enum MCPToolCatalog {
                 ]),
                 "entry_date": .object(["type": "string", "description": "The note's date, yyyy-MM-dd."]),
                 "book_id": .object(["type": "string", "description": "Create it in this book."]),
+                "section_id": .object(["type": "string",
+                                       "description": "File it under this chapter of book_id (with book_id only)."]),
                 "wing_id": .object(["type": "string", "description": "Create it bookless in this wing."]),
             ]),
             "additionalProperties": false,
@@ -532,7 +538,9 @@ enum MCPToolCatalog {
             sections as extra takes; with {v:2} first in the header, "--- next block ---" lines \
             separate the blocks and blank lines stay inside them. Either one `document` into a shared book (book_id) or wing \
             (wing_id), or a whole `book` {name, chapters: [{name, documents}], documents} into a \
-            shared wing. One import is one undo for the author. Returns JSON with the new ids.
+            shared wing. One import is one undo for the author. Returns JSON with the new ids — \
+            for one document also blocks, as create_note answers them (each block's shown_take_id \
+            and every take's take_id and label); for a book, its book_id, note_ids and chapter_ids.
             """,
         inputSchema: .object([
             "type": "object",

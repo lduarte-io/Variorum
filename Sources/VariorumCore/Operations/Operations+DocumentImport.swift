@@ -57,6 +57,33 @@ extension Operations {
         public let alternateCount: Int
         /// The tags applied, in header order (adopted or minted).
         public let tagIDs: [String]
+        /// VX-252 (VX-336 U5b): every minted block with EVERY take it was born
+        /// with, in document order — what the act minted, said back so a caller
+        /// never reads the note again to learn an id the write itself made.
+        public let blocks: [MintedBlockTakes]
+    }
+
+    /// **One minted block, as the act minted it** (VX-252 — the run record's
+    /// U5b D1, the shared answer shape's core half): its id, the take it SHOWS
+    /// (at mint the in-place text — chosen AND default), and every take in fan
+    /// order, the shown one included. Built from the rows the mint returned,
+    /// never a second read (no race, ∝ the write).
+    public struct MintedBlockTakes: Equatable, Sendable {
+        public let blockID: String
+        public let shownTakeID: String
+        public let takes: [MintedTake]
+
+        init(_ minted: MintedFanBlock, shownIndex: Int = 0) {
+            blockID = minted.block.id
+            shownTakeID = minted.variants[shownIndex].id
+            takes = minted.variants.map { MintedTake(id: $0.id, label: $0.label) }
+        }
+    }
+
+    /// One minted take: its id and its stored label (nil = unlabeled).
+    public struct MintedTake: Equatable, Sendable {
+        public let id: String
+        public let label: String?
     }
 
     /// What one folder import minted.
@@ -82,7 +109,7 @@ extension Operations {
                 db, named.document.tagPaths, to: minted.post.id, wingId: wingId, now: now)
             return DocumentImport(
                 post: minted.post, blockIDs: minted.blockIDs,
-                alternateCount: minted.alternateCount, tagIDs: tagIDs)
+                alternateCount: minted.alternateCount, tagIDs: tagIDs, blocks: minted.blocks)
         }
         let postID = result.post.id
         registerMintedContainerEntry(label: Self.importUndoLabel, postID)
@@ -197,6 +224,8 @@ extension Operations {
         let post: Container
         let blockIDs: [String]
         let alternateCount: Int
+        /// VX-252: each block with every take it was born with.
+        let blocks: [MintedBlockTakes]
     }
 
     /// The note and its blocks, inside the caller's transaction. A document
@@ -220,6 +249,7 @@ extension Operations {
         var post = try insertPost(db, title: title, profile: nil, entryDate: nil, wingId: wingId)
 
         var blockIDs: [String] = []
+        var blocks: [MintedBlockTakes] = []
         var alternateCount = 0
         var renderedLength = 0
         var position: String?
@@ -235,6 +265,7 @@ extension Operations {
                 defaultIndex: 0, chosenIndex: 0,
                 labels: [nil] + takes.map(\.label), now: now)
             blockIDs.append(minted.block.id)
+            blocks.append(MintedBlockTakes(minted))
             alternateCount += takes.count
             renderedLength += block.text.count
         }
@@ -244,7 +275,7 @@ extension Operations {
         post.baselineLength = renderedLength
         post.updatedAt = now
         try post.update(db)
-        return MintedDocument(post: post, blockIDs: blockIDs, alternateCount: alternateCount)
+        return MintedDocument(post: post, blockIDs: blockIDs, alternateCount: alternateCount, blocks: blocks)
     }
 
     /// The header's tags onto the note: each path's segments (`TagPath` —
