@@ -2524,11 +2524,16 @@ name.
      the Sample Library** (its door; the store is restored at cleanup). Capture `live/s/W0-bookcase`.
    - **W1 — the grant: the BOOK, at READ.** claude-code ▸ Change… (with no row yet: ⌥⌘A from the Bookcase, or the book's
      row menu ▸ Share with AI…) ▸ **A book · the adventures of sherlock holmes · Read · Always** (capture the sheet
-     `W1-grant-sheet` and the Shared-with-AI row `W1-grant-row`). The Bookcase row wears the shared icon (`W1-bookcase-icon`).
+     `W1-grant-sheet` and the Shared-with-AI tab `W1-grant-row`). The Bookcase row wears the shared icon (`W1-bookcase-icon`).
+     **Read the Shared-with-AI tab first:** if any OTHER claude-code grant (the restored store's standing ones) reaches
+     Home or this book at SUGGEST or above, W3's `add_take` would land rather than ask — then W3 uses `edit_take` on that
+     block's take instead (its text as `expected_text`; the edit rung), and if even that lands, ⌥⌘Z it and record W3 NOT
+     RUN (the waiting mark's evidence is then the mount pin `theCollapsedChapterRowWears…` alone).
    - **W2 — the panel, Study.** Open the book's first story (its title read from the Bookcase / the book's Index) in
-     Write; the masthead's **Book Panel** door (`book.closed`). **Expected (capture `W2-panel-study`):** every chapter row
-     is a COLLAPSED one-note row (sherlock's shape) and EVERY one wears the shared icon right after its name — the open
-     story's row with the voice's marker; no row bare (the pre-fix face wore none — VX-281 U2's walk, OWED item 5). Click
+     Write; the masthead's **Book Panel** door (`book.closed`). **Expected (capture `W2-panel-study`):** sherlock's chapter
+     rows are COLLAPSED one-note rows (each chapter heads its one story) and EVERY one wears the shared icon right after
+     its name — the open story's row with the voice's marker (the pre-fix face wore none — VX-281 U2's walk, OWED item
+     5). Any chapter that is NOT collapsed shows a bare heading over its marked note rows (the sweep's SAFE rows). Click
      ONE row's icon (not the open story's) → its popover: "Shared with" · claude-code · "read · always" · "through “the
      adventures of sherlock holmes”" · Change… · "Revoke the grant on “the adventures of sherlock holmes”" (capture
      `W2-popover-study`); Escape by `keys.sh` → the popover gone, the panel still showing the SAME note (the row's open
@@ -2552,8 +2557,9 @@ name.
      (or Esc) → the mark leaves the row, the icon stays (capture `W4-mark-gone`). Theme back to **Study** (capture
      `live/s/W4-back-study`).
 7. **VX-342's word, once on the Mac (~5 min).** Bookcase quick entry `{t:"u6b undo"}One two three four.` ⏎ → the note
-   in Write; click between "two" and "three" and press ⏎ (the chip ON: a divide at the caret — "One two" / "three
-   four."); click at the end of "One two" and type ` more` (an edit to the take the divide's inverse would overwrite).
+   in Write; click at the END of the line, then ← ×11 by `keys.sh` (key code 123) so the caret sits before "three", and
+   press ⏎ (the segmentation chip ON: a divide at the caret — "One two" / "three four."); click at the end of the FIRST
+   block and type ` more` (an edit to the take the divide's inverse would overwrite), then wait ~3 s (autosave).
    The Edit menu's structural undo names the entry (read it); **⌥⌘Z → the A12 warning (capture `live/s/V342-warning`):**
    "Undo <label>?" over the detail "One take has been edited since — undoing puts back the text as it was **before** the
    <label lowercased>, so that writing is set aside. It is committed first, …" — the word lowercase. **Cancel** →
