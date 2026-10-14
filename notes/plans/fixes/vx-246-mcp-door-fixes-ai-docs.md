@@ -4125,3 +4125,119 @@ legs and walks.
 wasn't copied for it, now. It reaches…" while fresh (the ‹age› slot renders "now"; `10`, `13`, `t/01`); (2) **VX-328** seen again — the half-width
 Library draws past the divider over pane 1 (`73`); (3) the dev `claude-code` was approved but UNBOUND at the window's start, so leg 1's first copy
 proved the BIND arm (P-VX258-2's), and the REPLACE arm was proven at 2b's re-run.
+
+## THE LADDER — ROUND 1 (the Fable cold review, 2026-10-14)
+
+**The reviewer:** `fable-reviewer`, cold, REVIEW_PROMPT verbatim (PHASE=VX-246), zero implementation context.
+**What it read itself:** this record whole (4,127 lines); the kickoff plan + the runway's naming (no "Review foci"
+section exists in either — checked); CLAUDE.md's loaded canon; `notes/SyncSpec.md` IN FULL (the diff carries two
+schema steps); `notes/TEXTKIT2_NOTES.md` whole (the diff carries the editor seam); the whole branch diff
+`main...HEAD` (103 files), file by file for every production surface. **What it ran itself:** the targeted headless
+pins (89 tests / 19 suites green: the VX-258 tab/wait/impostor suites, VX-259's reach, VX-260's words, the undo-class
+pins, the schema pins, the wire suites incl. `MCPPicksPlanTests`, `MCPServerHostReuseTests`,
+`MCPReaderAfterCloseTests`), then the WHOLE headless package: **MCP 240/51 · core 2,841/329 · workbook 40/6 — green,
+exactly the U1b finals.** Its own path check: zero lines under `Sync/`, custody/Keychain/`Crypto/`, `Server/`
+(`git diff --name-only` filter); marker 13 untouched; zero commit trailers on the branch.
+
+### Findings (severity-ranked; `[severity] · file:line · what · evidence · fix`)
+
+- **F-1 [MINOR — MERGE-GATING by the orchestrator's own ruling] ·
+  `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:2554` · the field guide's MCP lesson 2 still
+  teaches the pre-VX-258 key rule.** Evidence (doc-truth, traced): the lesson says "…the setup again moves the name
+  to the new key…" unqualified, while `MCPSetupKeyRule.decide`'s `.unclaimed` arm now answers `.awaitRebind` for any
+  key not copied for an APPROVED name — a reader following lesson 2 with the Any-client tab watches the tool wait
+  with no reach, not bind. THE ORCHESTRATOR ON U1b's HAND-BACK already rules tonight's merge must not ship without
+  the truth edit; this finding formalizes it into this fix pass. **Fix:** the minimal truth edit (scope the sentence
+  to a client's OWN setup; add that an Any-client setup waits for her OK), with `TutorialMCPChapterTests`' lesson
+  pin moved with it — the pin red on the unedited tree (the lesson's sentence against the rule as built), green
+  after. U8 re-voices the chapter later; this is the truth stopgap.
+- **F-2 [NIT] · `Sources/VariorumCore/Operations/Operations+MCPDeliberate.swift:157–159` · stale doc: "HER adopt
+  doors keep `restoreChosenPointers`".** False since U2 (THE SWEEP TABLE rows 37–39): her adopt doors now register
+  through `registerPointerEntry` and the unconditional helpers (`restoreChosenPointers`, `revertChosenPointers`,
+  `adoptUndoHalves`) were deleted. A future reader could re-introduce VX-277's class on this comment's authority.
+  Doc edit only; no pin (clarity class).
+- **F-3 [NIT] · `Sources/VariorumCore/Operations/Operations+UndoInverses.swift:17` · the header's example names
+  `revertChosenPointers`, which no longer exists.** Doc edit only (name `restoreChosenPointersIfUnchanged`, or drop
+  the example).
+- **F-4 [NIT] · `App/Variorum/VariorumTests/MCPHerEditorDoorTests.swift` (harness) · the door pins raise 4
+  unattributed `@Dependency(\.withRandomNumberGenerator) has no test implementation` warnings in every Mac batch**
+  (recorded as noise at the U3, U4, U4b and U1b windows — the served socket's side reads the dependency outside the
+  pin's `withDependencies` scope). Pin the dependency in the suite's harness so batch triage stays clean. Test-only.
+
+No BLOCKER, no MAJOR. No FINDER-FIXES: every fix is the implementer's (no `Sync/` line; nothing needs the
+reviewer's own hands).
+
+### Dispositions on the items this record routed to the Fable review
+
+- **VX-318 "reader past close" — HOLLOW: CONFIRMED.** The ordering was re-traced independently (serve → `run()`
+  returns only after the SDK loop ends → the loop ends only on the transport stream's finish → the reader's own
+  finish precedes it; `ended` deregisters then closes under the one lock), and the pin's detection power stands on
+  its positive control. The pin stays as the ordering's guard.
+- **U4c's harness-defect disposition (VX-230's regressed pin) — CONFIRMED.** The probes' two facts (a nested run
+  loop runs no main-queue hop; the pin's own report widened the frame) explain the red; the corrected pin asserts
+  strictly more (the line, both no-text-change roads, no refresh after adoption), and the live W3 arbiter passed in
+  both voices. Right call under the hallucination guard.
+- **U3 STAGE RUN's Finding C (the red product's live `delete_block` not stranding) — disposition ACCEPTED.** The
+  deterministic pins hold the debounce and carry the mechanism red-on-old/by-revert; the in-session rescue fits the
+  VX-184 trace's step 5; the fixed product's live legs stand either way.
+- **`add_note_to_book`'s seat residual (sweep row 82) — DISMISSED, not a bug.** The undo's demote-to-arrival
+  necessarily unseats; an arrival row carries no member position/section semantics of hers to preserve, and a later
+  re-seat lands END-unsectioned by intake's own rule. No pin could show a user-visible loss beyond the act's
+  legitimate reversal. Stays recorded, unfixed.
+- **The two deliberate behaviour changes (U2 risk 2) — SOUND.** `revertDeleteVariant`/`revertArchiveVariant` quiet
+  on a live/active take (the old default-pointer re-assert overwrote what her Put back's own road set);
+  `restorePlacementLocation` writing nothing when already there. Each makes the half's answer the truth the stack
+  now acts on.
+- **Every PROVISIONAL stands as built** (P-VX258-1…8, P-VX260-1/2, P-VX275-1/2, P-VX276-1…4, P-VX277-1):
+  each is the defensible pick; P-VX260-2's NULL-means-unproven is the correct strict reading (a backfill would
+  bless exactly the class the rule exists to catch); P-VX275-1's every-open-post flush is right (a per-note resolve
+  would be a timing oracle before the grant decision).
+
+### The clean bill (checked and found solid, line-level)
+
+- **VX-258:** `MCPSetupKeyRule.decide` verified arm-by-arm against the design table (zero-click only for
+  `copiedFor == name` under hash-verified unclaimed standing; unapproved names keep today's arms; `.awaiting`
+  re-presentation and other-name refusals exact); the tag authenticated by the whole-key hash, parsed from the
+  right past the fixed-length random; `admitMCPConnection`'s awaitRebind claim/replace/log; `allowMCPRebind`
+  re-checking approval in-transaction and logging the replaced hash (VX-198's memory via `replacingActs`);
+  `declineMCPRebind` forgetting the key (→ the ONE refusal); Deny and the adoption release dropping waits; the
+  session's ONE choke point (both handlers; `awaitsHerOK` zero-cost when not waiting, flips once); a waiting
+  connection never counted as the name's (`clientName` nil); the no-oracle letter held ("Unknown tool: …"
+  byte-identical to `MCPReadTools`'; the pending sentence target-independent; P-VX258-3's malformed-args residual
+  stands as recorded); the fingerprint carrying bindings so her Allow re-announces; the face (row, words,
+  capabilities, `waitingCount`), the merge-gate pin driving the REAL mint call site.
+- **Schema:** v1_28 + v1_29 genuinely LOCAL-ONLY against SyncSpec read in full — own commits ahead of the code, no
+  `sync_version`, no outbox trigger, outside the sync registry, export strips the family, marker 13, zero lockstep;
+  the FK to `mcp_client` safe (approved clients never cap-pruned).
+- **VX-259:** `requireBookNameFree(counting:)` asked only of colliders; the wire's predicate is the listing's own
+  rule, non-consuming; her doors nil (E13 whole); no oracle in either direction; the two justified pin edits
+  (readable colliders) correct.
+- **VX-260:** the digest domain-separated and byte-exact; both add doors write it from the INSERTED row's text;
+  `deleteRung` reads `mcpCommentIsOwn`; her edit's forget only when `rewriteComment` wrote; the this-Mac
+  forget-vs-digest asymmetry is the safe direction.
+- **VX-279:** one per-session lock over `hangUp`/`closeConnection`; deregister-then-close in `ended`; the host-gone
+  branch still closes; `stop()`'s snapshot hangUp is a no-op after a close.
+- **VX-280:** `picksSQL`'s double `CROSS JOIN` (ids → take by PK → `uq_cblock_ownership`), plan-pinned, refusals
+  parity-pinned on the wire.
+- **U2:** the stack rule (quiet retires; redo mirror; compound leg states surviving a throwing leg for retry);
+  per-parts records spot-checked at the riskiest sites (structural parts + `only`, diverge's `DivergeUndone`,
+  conversion's stamp box, span-to-take's two parts, batches' `BatchParts`, pointer entries' slots record,
+  minted-container's F1 stamp); the value family's compare-and-set kept; the Mac door's refusal on a quiet press
+  (§12's letter); `insuring:` lists preserved exactly (3 sites, same as main).
+- **U3:** the hook awaited after parse, before `executor.run`; `flushesHerEditorFirst` exhaustive per family and
+  matching the argued act table exactly (lock-only on `lock_take`); `landWireWrite` posting THE ONE road then the
+  receipt; the pre-grant flush residual accepted as argued; `renderFull`'s caret landing pure, identity-first,
+  computed from the OLD tiling before the rewrite, no attribute stamp, no TK1 (TEXTKIT2_NOTES honored).
+- **U4/U4b/U4c + ruling 2:** `refreshBadges`' `.layoutAvailable` gate with no forced layout on either surface (the
+  poison rule); the whole-post inline region honest against the 24-pt mount frame; the ONE `remeasure` re-run
+  (unconditional, post-walk, dead after uninstall); P1 held (O(fans); the budget pin 4.89 ms); `ShelfViewModel`'s
+  single-flight follower on the held snapshot (MainActor-isolated; the P1 witness DEBUG-only);
+  `select(_:in:takingFocus:)`'s assert + the `paneShowing` branch unreachable for non-note destinations, the
+  focused-subject signal raised only when her subject changed.
+- **Process:** red-on-old per member with revert verification recorded per piece; the live rounds' evidence
+  consistent with the code as merged; the whole headless package re-run green by this reviewer; no history
+  rewrites; no trailers; U5–U8's code confirmed absent from the branch (ruling 3's seam is real).
+
+**Next:** the findings go to the implementer verbatim (the cross-model flow as amended 2026-10-13); its
+agree/dispute returns to this reviewer for the final call; the implementer applies the confirmed fixes (F-1 with
+its truth pin red-first), the suite green, then round 2 (`opus-reviewer` at max) re-checks them.
