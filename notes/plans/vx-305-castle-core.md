@@ -531,7 +531,18 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
 
 ## 7. LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 
-- U1 — the model: **NEXT.**
+- U1 — the model: **IN-PROGRESS** (implementer session started 2026-10-14; the reading done — CLAUDE.md and its canon,
+  the resiliency protocol, the design whole, this plan whole, SyncSpec §3, pre-13x §1–§7 and §14, the Apple facts, the
+  listed code). The pieces, each its own commit, flipped here as each lands:
+  - (a) Names · the mode · the seal (HKDF + HMAC) and `Sealed<T>` — NOT-STARTED.
+  - (b) the protection record (library facts, family tree, device sections, hardware marker) · what this Mac remembers ·
+    plans — NOT-STARTED.
+  - (c) key file format 3 (wraps, history, the Castle anchor, the master's words copy, the four crossings) —
+    NOT-STARTED.
+  - (d) the legacy readers (formats 1 and 2, the legacy mode reader, the old marker's read and clearing check, today's
+    item names and values) — NOT-STARTED.
+  - (e) `ProtectionGuards` for U1's guards + the secret / marker scans — NOT-STARTED.
+  - (f) the record (§8), both configurations' runs — NOT-STARTED.
 - U2 — assess, roads, route finder, catalog, retention: **NOT-STARTED.**
 - U3 — the executor and the acts: **NOT-STARTED.**
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
