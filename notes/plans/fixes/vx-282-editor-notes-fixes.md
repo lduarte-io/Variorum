@@ -2878,6 +2878,57 @@ unlocked). `git pull --ff-only` first (the tip `7444caf8`, the products' code); 
 - **After the window (doc only, no rebuild owed):** `ReturnKeyTraceTests`' re-pointed pin's doc and the U1 record's line
   now say it was re-proven against R2-1's revert.
 
+
+### ROUND 2 — the run's ONE `fable-reviewer` cold review (REVIEW_PROMPT verbatim, PHASE=VX-282 + the location/stage line), reviewed tip `88353e0d`; read-only
+
+**Tally: 0 BLOCKER · 0 MAJOR · 2 MINOR · 3 NIT (one SPECULATIVE).** It discharges the editor-seam mandate round 1
+deferred and re-checked every round-1 fix (R1-2's display-pass refinement JUDGED SOUND — "strictly better than the
+agreed direct hop"). No new BLOCKER/MAJOR ⇒ **no round 3** (the ladder rule). The findings, as the reviewer wrote them
+(condensed only where marked):
+- **F-1 [MINOR]** `notes/QUESTIONS.md` #220 (+ `MarkdownSyntax.swift:629-651`) — the caret rescue can RE-SHAPE an
+  existing, stable span: `closingSingle`/`closingPair` return the EARLIEST closer `closerFlanks` accepts, so a rescued
+  interior marker beats the later real closer. `*foo *bar*` reads caret-blind as one italic over `foo *bar`; with the
+  caret at offset 5 it reads italic `*foo *` + plain `bar*`, flickering back whole on leaving (same class:
+  `*2 * 3 = 6*`). A NEW visible flicker class on spans that never flickered — the ruled rule's letter, recorded only
+  in a test comment (`MarkdownCaretRescueTests.swift:119-131`); #220's "a caret only ever changes the reading at the
+  one spot" reads as rescue-only. Fix: doc-only — two sentences in #220 + the U2 record's edges, plus the optional
+  narrowing she could rule ((b): rescue only when no caret-blind span already covers that marker). No pin owed.
+- **F-2 [MINOR]** `EditorSurfaceController.swift:2963` vs `EditorViewModel.swift:804-815, 3557-3558` — R1-7's
+  residual: a seal arriving DURING a structural flight (`adoptHeader` skips the editable write and the flip-settle
+  under `!structuralInFlight`); the landing's settle honours the caret (the flight fence); the flight's defer
+  re-derives `isEditable = false` directly with no selection change — the sealed, caret-less page keeps the italic
+  until her next click. Fix: one line in `runStructural`'s defer after the editable re-derive —
+  `model.settleMarkdownCaret()`. Pin: hold a flight open, adopt a locked header during it, land a selection at the
+  rescue point, end the flight, assert plain — red on current code. Narrow reach (a remote seal racing a few-ms
+  flight), self-healing.
+- **F-3 [NIT]** `MarkdownFaceCore.swift:237-271` (consumers `EditorViewModel.swift:3541-3548`,
+  `PaneSurface.swift:2000, 2017-2024`) — `settleCaret` answers "restyled" whenever the LEDGER planned, not whether
+  either inner `restyle` wrote: a caret at a gate-positive point no opener pairs with (`hello *|`) makes Write bump the
+  overlay generation + redraw and a pane run `findPaintWasReset()` + `remeasure()` per such move. Cost-only. Fix:
+  return `clearWrote || honourWrote`. Take or record.
+- **F-4 [NIT, SPECULATIVE]** `PaneSurface.swift:1965-1967, 2000` — a `shouldChangeTextIn` never followed by
+  `textDidChange` would leave `pendingEditReplaced` set and skip pure-caret settles until the next keystroke; no
+  concrete road named (marked text/IME post `textDidChange`). Belt optional. Take or record.
+- **F-5 [NIT]** `EditorViewModel.swift:3519-3548` — the settle's CLEAR of a line far above the viewport (caret parked
+  at a rescue point, she scrolls away, then clicks) re-wraps it in Study and nudges the page under the pointer — the
+  same physics as any attribute re-wrap, a new occasion VX-296 adds, recorded nowhere. Fix: a line in the U2 record's
+  edges (doc-only).
+
+**Clean bill (condensed):** the seam fence (zero `Sync/`/custody/keychain/schema/`Server/`; `EditorTextView`
+untouched; `BlockRangeIndex` a pure widening) · no trailers across all 100 run commits · U1's survivor-identity landing
+on all six shapes, P1, the walk incl. the real double press · U2's fix (a) as ruled, the byte-identical nil caret
+(re-run green), the exact gate, the over-claiming ledger, attributes-only ≤2-line settles never re-entering
+`storageDidEdit`, the W2b guard on every input road · every R1 fix re-checked (R1-1/R1-2/R1-7/R1-3/R1-4/R1-9/R1-5/6/10)
+· U3's exhaustive `handleRouted`, the one grey wrapper, `ringMayStand` at both doors · U4's own UndoManager, observers
+dismantled, re-take-only-what-it-held · U5's heap decider, the tightly-scoped known issues, `leave()` idempotent, the
+doors as data, VX-182's fence textually the standing family's · U6's pure once-decided opening rule · every PROVISIONAL
+with a reversal line (#220–#224), every deferred observation ticketed.
+
+**THE CROSS-MODEL FLOW (her rule of 2026-10-13):** findings → the implementer verbatim (agree/dispute) → the reviewer's
+final call → the IMPLEMENTER applies the confirmed fixes (red-on-old per bug-class fix, the suite green); the reviewer
+writes no fix (no `Sync/` lines exist; it marked nothing FINDER-FIXES); this being the final round, its fixes get the
+orchestrator's line-by-line check against each finding. Responses and the final call: PENDING below.
+
 ## Closeout
 
 *(Pending.)*
