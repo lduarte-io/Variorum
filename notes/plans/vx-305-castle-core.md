@@ -417,6 +417,10 @@ Each is a named test:
   Castle;
 - a memory item that turns up on new hardware: a new device identity, taking over its predecessor's Apple keys — a
   replacement Mac entering Castle retires its predecessor's own key;
+- a living Mac cloned onto new hardware, the original still in use: either entering Castle costs the other its Apple
+  road, which Re-link's library arm heals, and nothing stops opening;
+- a silently-joined device leaving Castle by its follow: its anchor opens with the words only, and its copies'
+  *Opens with* line says so;
 - the memory item deleted alone on an Always-ask Castle Mac with an enrolled finger: nothing changes;
 - a Standard library's own Apple key lost (iCloud Keychain reset, a switch of Apple ID): Re-link's library arm, then
   promise 3 settles — local-only too;

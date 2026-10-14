@@ -300,7 +300,9 @@ its phase.
     the device's key file copied beside it: the passphrase or words that device held it under, and the Castle-era
     master with its words copy (§3.5a). The follow needs no secret for this, because the library is open and the
     outgoing key is in hand. If the vault's master is still the Castle-era one — an older build left without changing
-    it, and put it under the old shared Apple key — the master's road is left out.
+    it, and put it under the old shared Apple key — the master's road is left out. A device that joined sync without
+    typing a secret held its key under the master alone (§3.5a), so its anchor opens with the words only, and its
+    copies' *Opens with* line says the twelve words, not the passphrase.
 
   It lives in the key file, so it rides frozen into every later backup pair, and every later re-key carries it
   unchanged. There is one at a time.
@@ -542,7 +544,8 @@ open its file. So:
     lands with nothing typed, with this Mac's own Apple key, and the passphrase and words are offered as Standard offers
     them; if they're declined, the confirm says the landed library opens through this Mac and its Apple account
     only. The sent pair is never written and keeps its own locks; the library you had goes to your older libraries.
-    No key is ever held by two Macs. **A synced pair** lands held, as today: a secret made new at its landing becomes
+    No act of Variorum's ever leaves a key held by two Macs; a Mac cloned onto new hardware while the original stays
+    in use is the one way two hold it (§8). **A synced pair** lands held, as today: a secret made new at its landing becomes
     the account's at Resume Sync, through the account's own forgot road with the secret just typed, and the landing
     says so. **Decision 33's asymmetry, stated:** a landing accepts one secret, because her
     guarantee is that either one lands it; raising your own library to Castle keeps both typed.
@@ -633,7 +636,9 @@ open its file. So:
     the account's fresh Apple key to the vault**, its previous-corpus-key window closed, so no Castle-era corpus key
     ever sits under anything Apple-reachable; then the new sync keys move to a silent item, and the old ones' Touch ID
     item goes. If this device never finishes, another device of the account finishes it at a press, minting the
-    account's key if this one's never arrived (the vault's CAS keeps one). These are `Sync/` lines: Fable's, phase 3.
+    account's key if this one's never arrived (the vault's CAS keeps one). A key the lost device minted that never
+    landed wraps nothing; if it ever surfaces in iCloud, it is left alone, as an older build's re-minted old key is
+    (§3.5 point 5). These are `Sync/` lines: Fable's, phase 3.
   - The new library key: its silent item, then the new key file (this Mac's fresh Apple key, P, W, plus the new master
     when synced; an empty history; the anchor), then the record written into the staged file, then the swap. Copies
     pause from the prepare to the swap.
@@ -1017,6 +1022,9 @@ retired-key clause, 3 and 7 once the world settles (propagation done, followers 
   Castle;
 - **a memory item that turns up on new hardware:** a new device identity is minted there, and it takes over its
   predecessor's Apple keys — a replacement Mac entering Castle retires its predecessor's own key;
+- **a living Mac cloned onto new hardware** (Quick Start or Migration Assistant, the original still in use): the clone
+  gets its own identity; if either Mac enters Castle and retires the Apple key they share, the other heals with
+  Re-link's library arm, and nothing stops opening;
 - **the memory item deleted alone** on an Always-ask Castle Mac where a finger has been enrolled: the Mac finds its own
   device section by its hardware, and nothing changes — no Touch ID item, no question;
 - **a Standard library's own Apple key lost** (iCloud Keychain reset, or a switch of Apple ID): the assessment offers
@@ -1257,6 +1265,10 @@ followed into Castle — VX-301 and the follow's typed secret settle it: the pho
     retired, it opens only on that Mac. The sheet lists the ones this Mac holds and says it for the rest.
   - another Variorum account still in Standard on the same Apple account: after the old key is retired, it sets up
     new devices with its passphrase until it's re-linked. The sheet says so.
+  - a Mac cloned onto new hardware while the original stays in use shares the library's key and its Apple key with
+    the original until either one crosses a line or retires that key. If one enters Castle, the other's Apple road
+    goes, and the other heals with Re-link's library arm; its silent item and its passphrase and words keep opening
+    it meanwhile.
 
 ---
 
