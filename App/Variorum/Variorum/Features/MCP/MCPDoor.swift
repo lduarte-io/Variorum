@@ -69,6 +69,14 @@ final class MCPDoor {
         /// whole row count (the "all N ›" road's N).
         var activity: [MCPActivityFace.Line] = []
         var activityCount = 0
+        /// **VX-258 (VX-246 U1b) — the setups waiting for her OK**
+        /// (`Queries.mcpRebindRequests`): a key presented under a name she
+        /// approved, which it was not copied for — Waiting's re-bind rows,
+        /// oldest first. At most one per client (`uq_mcp_rebind_request_client`),
+        /// so the read is ∝ the clients, never the library, and Waiting lists
+        /// them all. Reading the table here is what puts it in the snapshot's
+        /// observed region (GRDB tracks what the fetch reads).
+        var rebinds: [MCPRebindRequest] = []
 
         /// The shown acts' rows (each act's titled members) — the shape the
         /// pane's pins have read since 13n-b.
@@ -493,6 +501,46 @@ final class MCPDoor {
         act { try $0.revokeMCPGrant(grantID) }
     }
 
+    // MARK: - A setup waiting for her OK (VX-258 — VX-246 U1b)
+
+    /// **Allow** — the waiting setup takes the client's name, its approval
+    /// and grants untouched (`allowMCPRebind`): the name's key moves to it,
+    /// and a connection still holding it is told its tools changed (the
+    /// host's grants fingerprint carries every binding), no reconnect. The
+    /// row leaves with the store; a gone ask says so where she pressed.
+    func allowRebind(_ requestID: String) {
+        answerRebind { _ = try $0.allowMCPRebind(requestID) }
+    }
+
+    /// **Don't allow** — the waiting setup's key is forgotten
+    /// (`declineMCPRebind`); the name keeps its own, so the client she knows
+    /// never notices, and the turned-down setup's next connection hears the
+    /// one refusal sentence.
+    func declineRebind(_ requestID: String) {
+        answerRebind { _ = try $0.declineMCPRebind(requestID) }
+    }
+
+    /// Her answer's road: the op through the runner (P2), and a refusal
+    /// (`mcpRebindRequestNotFound` — answered elsewhere, its client denied,
+    /// an adopted library) said BY WAITING, where she pressed (W-UX-8's
+    /// place — Settings has no status seam). No receipt: the row leaving and
+    /// her Activity line are the answer, as Approve's and Deny's are.
+    private func answerRebind(_ body: @escaping @Sendable (Operations) throws -> Void) {
+        guard let runner else { return }
+        if note?.place == .waiting { note = nil }
+        Task { @MainActor [weak self] in
+            do {
+                try await runner.run(body)
+            } catch {
+                self?.note = Note(text: MCPPaneCopy.refusal(error), place: .waiting)
+            }
+        }
+    }
+
+    /// What waits on her in Waiting: the asks AND the setups (⌥⌘,'s landing
+    /// counts both — VX-258).
+    var waitingCount: Int { waiting.count + snapshot.rebinds.count }
+
     /// 13n-c U3: a Shared places row ONE act minted — Revoke covers every
     /// member, in one act.
     func revoke(grantIDs: [String]) {
@@ -522,6 +570,14 @@ final class MCPDoor {
     /// menu still shows that client: the end state is exactly a copy followed
     /// by a choice, which clears the receipt (`chooseSetupClient`). No
     /// default client: every caller names the one it copies.
+    ///
+    /// **VX-258 (VX-246 U1b — THE MERGE GATE): the key is minted FOR the
+    /// copied tab's client** (`MCPSetupClient.expectedName` — Claude Code's,
+    /// Codex's; nil for "Any MCP client"), so that client's own setup, run
+    /// again, takes its approved name with zero clicks, while any other fresh
+    /// key under a name she approved waits for her OK in Waiting. The client
+    /// is the one this act just made the menu's choice (`setupClient`), read
+    /// once before the mint's await.
     func copySetupCommand(for client: MCPSetupClient, to pasteboard: NSPasteboard = .general) async {
         if setupClient != client { setupClient = client }
         guard let runner else {
@@ -529,8 +585,9 @@ final class MCPDoor {
             return
         }
         clearConnectNote()
+        let copiedFor = setupClient.expectedName
         do {
-            let key = try await runner.run { try $0.mintMCPSetupKey() }
+            let key = try await runner.run { try $0.mintMCPSetupKey(copiedFor: copiedFor) }
             pasteboard.clearContents()
             pasteboard.setString(
                 client.text(shimPath: Self.shimPath, isDebugBuild: Self.isDebugBuild, key: key), forType: .string)
@@ -1036,7 +1093,8 @@ final class MCPDoor {
             approvedCount: try Queries.mcpClientCount(db, states: [.approved]),
             activity: Array(MCPActivityFace.lines(try Queries.mcpActivity(db, limit: activityWindow))
                 .prefix(activityCap)),
-            activityCount: try Queries.mcpActivityCount(db))
+            activityCount: try Queries.mcpActivityCount(db),
+            rebinds: try Queries.mcpRebindRequests(db))
     }
 
     /// One client's row (13n-c U2, R2-3): its reaching and inert grants.

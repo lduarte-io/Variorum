@@ -25,7 +25,12 @@ struct MCPSetupKeyFacesTests {
 
     /// Her words (the kickoff's R-VX184-5 line), under every client's setup.
     @Test func theSetupLineSaysARerunReplacesTheOldSetup() {
-        #expect(MCPPaneCopy.keyLine.hasSuffix("Running it again replaces the old setup."))
+        // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 U1b): her R-VX184-5
+        // words as she ruled them at VX-258 — a CLIENT'S OWN setup, run again,
+        // replaces the old one; an "Any MCP client" copy waits for her OK.
+        #expect(MCPPaneCopy.keyLine.contains("Running a client's own setup again replaces the old one"))
+        #expect(MCPPaneCopy.keyLine.hasSuffix(
+            "a setup copied for any MCP client waits for your OK before it takes a name you approved."))
         #expect(!MCPPaneCopy.keyLine.contains("Deny"), "no Deny on the everyday road")
     }
 

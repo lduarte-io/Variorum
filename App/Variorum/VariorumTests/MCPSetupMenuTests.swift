@@ -172,7 +172,13 @@ struct MCPSetupMenuTests {
             for client in MCPSetupClient.allCases {
                 await door.copySetupCommand(for: client, to: pasteboard)
                 let copied = try #require(pasteboard.string(forType: .string))
-                let key = try #require(copied.firstMatch(of: #/vmk1_[A-Za-z0-9_-]{43}/#).map { String($0.output) })
+                // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 U1b, the merge
+                // gate): each tab's copy mints its key FOR its client's name
+                // (`vmk2_<name>_…`); "Any MCP client"'s stays untagged
+                // (`vmk1_…`) — read per client, the tag checked by the rule.
+                let key = try #require(
+                    copied.firstMatch(of: #/vmk(?:1|2_[A-Za-z0-9._-]+?)_[A-Za-z0-9_-]{43}/#).map { String($0.output) })
+                #expect(MCPSetupKeyRule.copiedFor(key) == client.expectedName, "\(client.label)'s copy is for its client")
                 keys.append(key)
                 #expect(copied == client.text(shimPath: MCPDoor.shimPath, isDebugBuild: true, key: key),
                         "the test host is Debug")

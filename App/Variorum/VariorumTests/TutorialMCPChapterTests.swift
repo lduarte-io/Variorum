@@ -281,7 +281,11 @@ struct TutorialMCPChapterTests {
                                   + "new key, and a tool still using an older key, or none, is turned away."))
             #expect(text.contains("where any program running as you can read it"), "K2's non-defeat, said")
             #expect(MCPPaneCopy.clientBoundary.contains("binds that name to it"), "L1 says the same")
-            #expect(MCPPaneCopy.clientBoundary.contains("running a newer setup moves the name to the new key"))
+            // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 U1b): L1 scopes the
+            // re-run to the client's OWN setup and says the Any-client wait (the
+            // guide's lesson 2 is U8's to re-voice — the follow-on run's).
+            #expect(MCPPaneCopy.clientBoundary.contains("Running the client's own setup again moves the name to the new key"))
+            #expect(MCPPaneCopy.clientBoundary.contains("a setup copied for any MCP client waits for your OK"))
             #expect(MCPPaneCopy.clientBoundary.contains("any of them can read the key"))
             let bound = MCPSetupKeyRule.Client(id: "c", boundHash: MCPSetupKeyRule.hash("vmk1_first"))
             let second = MCPSetupKeyRule.hash("vmk1_second")

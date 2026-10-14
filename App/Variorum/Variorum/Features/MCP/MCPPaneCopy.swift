@@ -64,9 +64,11 @@ nonisolated enum MCPPaneCopy {
     static let clientBoundarySummary =
         "A setup key tells two clients apart \u{2014} not programs running as you."
     /// The setup key's line (its whole text: `keyLine`), her R-VX184-5 words
-    /// kept ("running it again replaces the old setup").
+    /// kept ("running it again replaces the old setup"). VX-258 (VX-246 U1b):
+    /// scoped to the truth — a CLIENT'S OWN setup, run again, replaces the old
+    /// one; an "Any MCP client" copy waits for her OK (said in the (i)).
     static let keySummary =
-        "Each copy carries a fresh key, shown as dots; running it again replaces the old setup."
+        "Each copy carries a fresh key; running a client's own setup again replaces the old one."
     /// The door's one line (its whole text: `stdioLine`), above the path.
     static let stdioSummary = "A standard MCP server over stdio \u{2014} one program, at this path:"
 
@@ -112,6 +114,19 @@ nonisolated enum MCPPaneCopy {
     static func requestTitle(_ name: String) -> String { "Connection request \u{2014} \(name)" }
     static func requestDetail(firstSeen: String) -> String {
         "First seen \(firstSeen). No access until approved."
+    }
+
+    // MARK: - A setup waiting for her OK (VX-258 — VX-246 U1b; PROVISIONAL words, VX-234)
+
+    /// Waiting's re-bind row: a connection presented, under the name of a
+    /// client she approved, a setup key that was not copied for that client.
+    static func rebindTitle(_ name: String) -> String { "New setup for \(name)" }
+    /// Who connected (the version it declared — what tells a stranger from
+    /// the client she knows), when, and what each answer does.
+    static func rebindDetail(name: String, version: String?, firstSeen: String) -> String {
+        let declared = version.map { " (version \($0))" } ?? ""
+        return "Connected as \(name)\(declared) with a setup that wasn't copied for it, \(firstSeen). "
+            + "It reaches nothing until you allow it; allowing moves the name, with its grants, to this setup."
     }
 
     // MARK: - Clients
@@ -168,12 +183,19 @@ nonisolated enum MCPPaneCopy {
     /// newest copied setup wins): true of the new rule, no truer — running a
     /// newer setup moves the name to its key, and a connection with any other
     /// key (the one it replaced, one never issued, another client's) or none
-    /// is refused. PROVISIONAL P-VX198-2.
+    /// is refused. PROVISIONAL P-VX198-2. VX-258 (VX-246 U1b — her ruling,
+    /// "tie keys to their tab … the re-bind waits for my ok"): true of the
+    /// rule as built, no truer — the client's OWN setup, run again, moves the
+    /// name; a setup copied for any MCP client waits for her OK before it
+    /// takes a name she approved (a waiting connection is admitted with no
+    /// reach, so it is neither "moved" nor "refused"); any other key, or
+    /// none, is refused. Its one-line summary stays true as it was.
     static let clientBoundary =
         "A client names itself when it connects. Each setup copied here carries a key that binds "
-        + "that name to it \u{2014} running a newer setup moves the name to the new key \u{2014} and a "
-        + "connection under the name with any other key, or none, is refused. That tells two tools "
-        + "apart, not programs running as you: any of them can read the key in the client's settings."
+        + "that name to it. Running the client's own setup again moves the name to the new key; a setup "
+        + "copied for any MCP client waits for your OK before it takes a name you approved; any other "
+        + "key, or none, is refused. That tells two tools apart, not programs running as you: any of "
+        + "them can read the key in the client's settings."
 
     /// L1's room (VX-168): its four sentences run past the quiet captions'
     /// three lines at the pane's width.
@@ -187,9 +209,14 @@ nonisolated enum MCPPaneCopy {
     /// The line under the shown setup. PROVISIONAL P-VX168-U1-5. VX-198 (her
     /// R-VX184-5 words, the kickoff's): "Running it again replaces the old
     /// setup" — a re-run is the whole road; no Deny, no re-approval.
+    /// VX-258 (VX-246 U1b): "running it again" is now the CLIENT'S OWN
+    /// setup (a key copied for its name); an "Any MCP client" copy under a
+    /// name she approved waits for her OK — said here, under every client's
+    /// code block, so neither tab's line promises the other's road.
     static let keyLine =
         "Each copy carries a fresh setup key, shown here as dots, that ties a client's name to that "
-        + "setup. Running it again replaces the old setup."
+        + "setup. Running a client's own setup again replaces the old one; a setup copied for any MCP "
+        + "client waits for your OK before it takes a name you approved."
     /// Copy setup command with no library open: the key it mints is kept in
     /// the library, so there is nowhere to keep one. PROVISIONAL.
     static let setupNeedsLibrary = "Open your library to copy a setup \u{2014} its key is kept there."
@@ -299,12 +326,36 @@ nonisolated enum MCPPaneCopy {
     /// tool's raw id (PROVISIONAL words, her copy pass).
     static func activityLine(_ line: MCPActivityFace.Line) -> String {
         let target = line.targetTitle.map { "\u{201C}\($0)\u{201D}" }
+        if let setup = rebindPhrase(line) { return setup }
         guard line.allowed else {
             let times = line.count > 1 ? " (\(line.count) times)" : ""
             return "\(line.clientName) was refused "
                 + refusedPhrase(line.act, target: target, kind: line.targetKind) + times
         }
         return "\(line.clientName) \(activityPhrase(line.act, count: line.count, target: target, kind: line.targetKind))"
+    }
+
+    /// **VX-258 (VX-246 U1b) — a setup waiting for her OK, said in words**
+    /// (PROVISIONAL words, VX-234). The wait is logged as not allowed (it
+    /// reaches nothing — P-VX258-5), but it is no refusal of the client, so it
+    /// reads as the ask it is; her two answers say what she did. nil for any
+    /// other act.
+    private static func rebindPhrase(_ line: MCPActivityFace.Line) -> String? {
+        let times = line.count > 1 ? " (\(line.count) times)" : ""
+        switch line.act {
+        case MCPSetupKeyRule.awaitingAct:
+            return "\(line.clientName) asked to use a setup that wasn't copied for it" + times
+        case MCPSetupKeyRule.rebindAllowedAct:
+            // The row's target is the key the allowed setup replaced (nil
+            // when the name had none bound).
+            let replaced = line.targetKind == MCPSetupKeyRule.replacedTargetKind
+            return "\(line.clientName) took the new setup you allowed"
+                + (replaced ? ", which replaced its earlier one" : "") + times
+        case MCPSetupKeyRule.rebindDeclinedAct:
+            return "\(line.clientName)\u{2019}s new setup wasn\u{2019}t allowed" + times
+        default:
+            return nil
+        }
     }
 
     /// UX-fix ladder UXR1-1 — the noun a line falls back on when its
@@ -959,6 +1010,10 @@ nonisolated enum MCPPaneCopy {
         case .mcpGrantScopeNotFound?: "That place no longer exists."
         case .mcpClientNotFound?: "That client no longer exists."
         case .mcpGrantNotFound?: "That grant no longer exists."
+        // VX-258 (VX-246 U1b): her Allow / Don't allow on a setup no longer
+        // waiting — answered elsewhere, its client denied, a library adopted.
+        // PROVISIONAL words (VX-234).
+        case .mcpRebindRequestNotFound?: "That setup isn't waiting any more."
         default: "Couldn't do that: \(error)"
         }
     }
@@ -981,6 +1036,26 @@ nonisolated enum MCPSetupClient: String, CaseIterable, Identifiable, Sendable {
         case .claudeCode: "Claude Code"
         case .codex: "Codex"
         case .anyClient: "Any MCP client"
+        }
+    }
+
+    /// **VX-258 — the name this tab's client declares in its `initialize`**
+    /// (`clientInfo.name`). A copy from this tab mints a key CARRYING it
+    /// (`MCPDoor.copySetupCommand` → `mintMCPSetupKey(copiedFor:)`), so the
+    /// client's OWN setup, run again, takes its name with zero clicks; "Any
+    /// MCP client" names nobody, and its copy takes a name she approved only
+    /// by her OK (Waiting). Claude Code's: seen live (VX-184 U1's round,
+    /// 2.1.296; re-read at VX-246 U1b's window, leg 0). Codex's: an EXTERNAL
+    /// LOOKUP of its source, never seen live (Codex is not installed on the
+    /// Pro) — `codex-rs/codex-mcp/src/rmcp_client.rs`,
+    /// `Implementation::new("codex-mcp-client", …)` (the VX-246 record, U1's
+    /// trace item 6). A client whose real name differs connects as a request
+    /// (an unknown name) or waits for her OK (a known one) — never refused.
+    var expectedName: String? {
+        switch self {
+        case .claudeCode: "claude-code"
+        case .codex: "codex-mcp-client"
+        case .anyClient: nil
         }
     }
 

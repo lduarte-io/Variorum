@@ -305,8 +305,12 @@ struct MCPPaneTabsTests {
         }
         // The whole texts stand as they were (their own truth pins read them):
         // her R-VX184-5 words, L1's caveat, the stdio facts.
-        #expect(MCPPaneCopy.keyLine.hasSuffix("Running it again replaces the old setup."))
-        #expect(MCPPaneCopy.keySummary.hasSuffix("running it again replaces the old setup."), "her words, in the line")
+        // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 U1b): her R-VX184-5
+        // words scoped as she ruled VX-258 — the client's OWN setup, run
+        // again, replaces the old one (the Any-client wait behind the (i)).
+        #expect(MCPPaneCopy.keyLine.contains("Running a client's own setup again replaces the old one"))
+        #expect(MCPPaneCopy.keySummary.hasSuffix("running a client's own setup again replaces the old one."),
+                "her words, in the line")
         #expect(MCPPaneCopy.clientBoundary.contains("not programs running as you"))
         #expect(MCPPaneCopy.clientBoundarySummary.contains("not programs running as you"),
                 "L1's line never promises more than L1")
