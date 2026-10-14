@@ -188,6 +188,7 @@ struct MarkdownCaretRescueTests {
                 "a newline before the marker puts it at a line's start")
     }
 
+    #if DEBUG  // MarkdownScanCount is a DEBUG-only oracle (VX-345)
     @Test func theScanCostIsTheLineHandedIn() {
         // P1: the caret adds no scan — the reading walks exactly what it was
         // handed, as the caret-blind one does.
@@ -196,6 +197,7 @@ struct MarkdownCaretRescueTests {
         _ = MarkdownSyntax.spans(in: text, caret: 7)
         #expect(MarkdownScanCount.current == (text as NSString).length)
     }
+    #endif
 
     // MARK: - The ledger (the live surface's bookkeeping)
 
