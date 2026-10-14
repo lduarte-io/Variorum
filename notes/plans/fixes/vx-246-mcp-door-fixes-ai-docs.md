@@ -859,3 +859,128 @@ the guide's lesson-2 sentence (U8) — a client's own setup re-run moves its nam
     - It is still PROVISIONAL, with options (a)/(b)/(c) kept for her.
 - **OWED 3 is now VX-318,** a member of this run, built in U1b.
 - **OWED 5, the canon at the merge,** is carried to the closeout as written.
+
+## U2 UNIT RECORD — the undo class: VX-276 · VX-277 · VX-119 (opus-implementer, from 2026-10-13 ~23:40 MDT)
+
+**What this unit has NOT done yet (said first; rewritten at every seam):** no code change, no pin, no stage window —
+this commit is the record, the LIVE STATUS and the design, written before code. Everything below "The design" is the
+plan, not a claim.
+
+**Read in full before code (never delegated):** CLAUDE.md and its loaded canon (AppSpec §9's structural undo/redo
+bullet, §12's one status seam — "a door that did nothing speaks a refusal"); this run record's header, THE UNITS, the
+hard rules, LIVE STATUS, Cross-run coordination, the U2 BRIEF (the three tickets quoted verbatim) and U1's UNIT RECORD
+(its THE STAGE WINDOW, which this unit's window also runs); the plan `notes/plans/mcp-pane-and-docs-kickoff.md` whole;
+the runway §2–§3; VX-184's record — THE LADDER whole from ROUND 1 through ROUND 2's FIX PASS (the SWEEP TABLE, its
+ROUND 2 READING, the ADJACENT CLASS, round 2's redo finding and dispositions); `notes/plans/13na-ladder-round1.md`
+(F1 and the VX-119 adjunct); `notes/SessionResiliencyProtocol.md` whole; `UndoStack.swift` whole. Code read: the two
+doors that press ⌥⌘Z / ⇧⌥⌘Z (`ShellActions.structuralUndo/Redo`, the phone's `MobileUndoDoor`),
+`StructuralUndoCopy`, `Operations+UndoInverses` whole, and every `undoStack?.register(` site (85, in 27 files) with
+the halves it names — read as the sweep proceeds and listed in THE SWEEP TABLE.
+
+**Surfaces (planned):** `Sources/VariorumCore/Operations/UndoStack.swift` (the rule), the registration sites' halves
+under `Sources/VariorumCore/Operations/` (each half says whether it changed anything), the Mac door
+`App/Variorum/Variorum/Registry/ShellActions.swift` (what a quiet press says) and `App/Variorum/Shared/StructuralUndoCopy.swift`
+(its words), tests. ZERO `Sync/`, custody/Keychain, schema, `Server/`, editor seam, VX-281's lane. The phone's door
+(`VariorumMobile/…/MobileUndoDoor.swift`) is NOT touched (see "What she sees" — a MOBILE PARITY owed line).
+
+### LIVE STATUS — U2's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | this record + LIVE STATUS + the design argued (before code) | DONE (this commit) |
+| 1 | the pins FIRST, on the pre-fix API: the five round-2 probes + one per family (revive, VX-277's adopt doors, Delete Block after Put back, VX-119's single-file import and copy ops, the partial-entry and mirror orders) → RED on the pre-fix tree, counts recorded | NOT-STARTED |
+| 2 | the rule in `UndoStack` (halves report whether they changed anything; a quiet half retires its entry; the compound tracks its legs) + every registration site converted (the compiler enumerates them) + the per-part entries' boxes + the Mac door's quiet words → GREEN, every existing undo/redo suite unmodified | NOT-STARTED |
+| 3 | red again BY REVERT (announced first, on a committed tree; restored and verified) | NOT-STARTED |
+| 4 | THE SWEEP TABLE complete — every one of the 85 registrations FIXED or SAFE with its reason | NOT-STARTED |
+| 5 | headless finals (core · MCP · workbook) + the Mac `build-for-testing` | NOT-STARTED |
+| 6 | THE STAGE WINDOW plan (claim `vx246-u2`; the Mac batch incl. U1's three groups; the Edit-menu walk with a real `claude -p` turn; a batch-only fallback) → READY | NOT-STARTED |
+
+**No revert is in flight.**
+
+### The mechanism, traced (inputs → wrong state)
+
+`UndoStack.undo` (`UndoStack.swift:280–295`) runs the top entry's inverse and, whenever the inverse does not THROW,
+moves the entry onto the redo stack. Every inverse in the house is written to be QUIET on divergence — it returns
+without writing when the world has moved past its entry (`revertDeleteBlock` at a live block, every compare-and-set
+restorer, every stamp-keyed revival) so the stack never wedges. So a quiet inverse is indistinguishable, to the stack,
+from one that wrote. The redo half then runs against whatever the rows read NOW, and nearly every redo checks only that
+its rows are back in the pre-act state. Her undo-less doors (the recovery and metadata class: Put back from the tray or
+the Trash, restore a chapter or comment, unarchive, reopen/finish, rename, her ✓, lock/unlock, the rule editor's Save)
+produce exactly that pre-act state. So: act → her reversal by an undo-less door → ⌥⌘Z (quiet, but popped onto the redo
+stack) → ⇧⌥⌘Z writes the act over hers. The same holds in the MIRROR order (⌥⌘Z writes → she changes it by an undo-less
+door → ⇧⌥⌘Z quiet but moved back onto the undo stack → ⌥⌘Z un-does her change) and for PARTS of a multi-part entry
+(an adopt over several slots: her ✓ back on ONE slot makes the undo partial, and the redo re-chooses that slot over
+her). VX-119's case is the same shape on the mint family: import a file → she deletes the note (`deleteContainer`
+clears the redo future, not the undo stack) → ⌥⌘Z (`revertMintedContainer`: already dead, quiet) → ⇧⌥⌘Z
+(`reapplyMintedContainer`: still dead → `restoreContainer`) brings back the note she deleted.
+
+### The design, argued
+
+**1. Where the rule lives — the STACK, with every half saying whether it changed anything (the brief's (a), carrying
+(b) where an entry has parts).**
+- **(a) In `UndoStack` (CHOSEN, as the rule's home).** Each half returns `Bool` — "this half changed something".
+  `undo` moves an entry onto the redo stack only when its inverse changed something; a QUIET inverse RETIRES the entry
+  (it leaves the undo stack and never reaches the redo stack — there is nothing for its redo to put back). `redo`
+  mirrors it exactly: a re-apply that changed something moves the entry back onto the undo stack; a quiet one retires
+  it (there is nothing for its next undo to take back). So the stack itself guarantees the rule's two halves for every
+  entry at once: **a half only ever runs after its partner changed something**, so a redo after a quiet undo never
+  runs, and an undo after a quiet redo never runs. ONE mechanism, in ONE file; the entry types change from
+  `(Operations) throws -> Void` to `(Operations) throws -> Bool`, so EVERY registration site must answer the question —
+  the compiler enumerates the sweep, and a future registration cannot forget it (it cannot compile without saying what
+  its halves changed).
+- **(b) Per entry, for entries with PARTS (CARRIED inside (a)).** A whole-entry Bool is exact for an entry with one
+  part (its compare-and-set or stamp key already decides that one part). An entry with several parts (an adopt over N
+  slots; a rule over three columns; a merge's minted block and released placements; a batch of N takes or comments;
+  N imported blocks) can be PARTIAL: the undo writes some parts and finds others already moved by her. Its redo must
+  then put back exactly the parts the undo took back — no more. Those entries keep a per-entry box of WHICH parts the
+  last half changed (the house precedent: `importBook`'s F1 stamp box, `save_lens`'s `undoneOn:`, `restoreCommentForClient`)
+  and each half acts only on the parts its partner changed; the half's `Bool` is "changed any part". The COMPOUND
+  (`withCompound`) does the same for its legs inside the stack: it records which legs' halves changed something and
+  runs only those legs' partners next.
+- **(c) Rejected: detect writes in the database** (`total_changes()` or a GRDB transaction observer around the half) —
+  zero edits per site, but it counts incidental writes (an `updated_at` bump, an insurance commit) as "changed", races
+  any other writer on the shared connection, and gives no per-part answer; the rule would be implicit where a reviewer
+  cannot read it.
+- **Weighed, the redo-future rules:** (1) any new structural act still clears the redo future (unchanged — `register`);
+  (2) undoing a `redo: nil` entry that CHANGED something still ends the redo future (unchanged); (3) a QUIET half
+  retires only its own entry and leaves the other stack as it was — it adds no history and abandons no future (the
+  redo stack's remaining entries were undone by presses that did change something, and each of them re-applies only
+  over its own undo's result, so none of them can reach over hers either). Options for (3) — PROVISIONAL P-VX276-1
+  below.
+- **The compare-and-set on the UNDO side stays** (VX-184 round 1's fix, the brief's word): it is what makes an inverse
+  quiet when she changed the value to something NEW; the stack rule covers the order round 2 found (her change BACK to
+  the pre-act value). Both are needed: the stack rule alone would let an undo overwrite a third value of hers.
+- **How many files:** 27 files, 85 sites — every one converted and dispositioned in THE SWEEP TABLE. A site whose
+  halves were already exact (keyed on what the partner wrote) still converts: its halves return the truth.
+
+**2. What she sees on a quiet press (AppSpec §12: a door that did nothing speaks a REFUSAL).**
+- Today a quiet ⌥⌘Z says the RECEIPT "Undid: <label>" though nothing changed, and leaves an Edit-menu "Redo <label>"
+  that would write the act over her change. After: the stack reports the outcome (`UndoStack.Outcome` — the label and
+  whether it changed anything; the old `undo(with:) -> String?` / `redo(with:) -> String?` keep returning the label so
+  every existing caller and pin reads unchanged), and the Mac door speaks a REFUSAL on a quiet press —
+  "Nothing to undo — <label> was already undone or changed since." / "Nothing to redo — it changed again after <label>
+  was undone." (words AS BUILT, the FOR VX-234 list). The entry is retired, so the Edit menu moves on to the next entry
+  and never offers a redo that would do nothing.
+- MCP entries keep their client-named labels ("claude-code's book rename") in both sentences.
+- **The phone's door (`MobileUndoDoor`) is NOT changed here** (out of this unit's surface; no simulator stage): the core
+  rule reaches the phone the moment it ships (its stack is the same `UndoStack`), but on a quiet press the phone still
+  speaks its receipt "Undid: <label>" and offers Redo, which then finds nothing (or the next entry). A MOBILE PARITY
+  owed line (OWED, below).
+
+**3. The revive direction (VX-119, VX-276's adjacent class).** The mint and revive entries' redos already revive by a
+stamp where the house keyed them (`importBook`'s F1 box, `save_lens`, `create_book`, `link_versions`,
+`restore_comment`); under the stack rule a quiet inverse retires its entry, so the redo of a revival NEVER runs after
+an undo that tombstoned nothing (R2-1's nil rule, enforced by the stack instead of by each box). Where a redo revives
+by CURRENT state (`reapplyMintedContainer`, `reapplyAddedComment`, `reapplyAppliedTag`, `flipCreatedSection`,
+`reapplyAddedMembership`, …) the redo is ALSO keyed on the stamp its own inverse wrote (the F1 shape), so a row that
+died since on another stamp — her Trash, a sync tombstone from another device, which clears no redo future — is never
+revived by it.
+
+**PROVISIONAL P-VX276-1 — what a QUIET half does to the stacks:** (a) AS BUILT — it retires its own entry and leaves
+the other stack as it was; (b) it retires its entry AND ends the redo future, as undoing a `redo: nil` entry does —
+stricter, but it throws away redos her earlier presses earned; (c) the entry moves on marked quiet and its partner is a
+no-op — the house precedent's letter (`restoreCommentForClient`'s quiet redo), but the Edit menu then offers a
+"Redo <label>" that does nothing (a false offer).
+
+**PROVISIONAL P-VX276-2 — a quiet press's words and kind:** (a) AS BUILT — a refusal (it toasts), naming the entry;
+(b) a quiet receipt (a muted line). (a) is §12's letter: a door that did nothing speaks a refusal.
