@@ -143,6 +143,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — W1 red on old (the host suites + the model suites, ≈4 min; VX-229 decided here) · W2 the fixed batch (three groups, ≈12 min) · W3 the walk (7 rows incl. a live `heap` count, row 1 in both voices, ≈25 min) — ≈42 min.** VX-229: fix REVERTED `7d798f82` (offscreen artefact — the CORRECTION); expected HOLLOW. VX-257: fix `1ca8fe72`; QUESTIONS #222. VX-183: `a765683c`. VX-182: pins `f38fb93c` red on old (headless), fix `fd4c260c`, R-182 ran + restored. Pins hardened `dab712d8`. Core 2,801/320 + MCP 212/41 + workbook 40/6 headless green; the phone builds. Old products `DerivedData/vx282-u5-old-products` REBUILT (the named revert at `3a6bad6d` — done, restored, `git status` clean); fixed `DerivedData/vx282-u5` rebuilt at the tip. No claim held; no revert in flight. |
+| U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **IN-PROGRESS — the trace DONE (headless, recorded below): the shell's ask for the caret reaches the box before the box is in its window and is dropped (F-FR-1), at launch AND on every navigation back to the Bookcase. Next: the pins (red-on-old, ahead of the fix), the fix, the products.** No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -1832,6 +1833,16 @@ first — no `/Applications/Variorum.app` instance, none of ours.
      click-away and reopen (capture) → restore the voice found.
   Then the walk note to the Trash (residue recorded), quit OUR instance by identity, `pgrep` again, the dev store left
   Standard and unlocked with its voice as found, release the claim.
+
+### U6 — VX-326 (the Bookcase's quick entry isn't focused at launch)
+
+**NOT DONE BY THIS UNIT YET (first line):** no Mac test has RUN and no walk — every app-target pin is PENDING the stage
+window; the fix is not yet built.
+
+**State: IN-PROGRESS.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-14. Counts marked PENDING
+wait for the window. **Revert state: no behavioural revert in flight.**
+
+#### The trace (headless, against `c2b3ba72`) — PENDING its write-up in this section's next commit
 
 ## Ladder
 
