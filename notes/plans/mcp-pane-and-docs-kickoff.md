@@ -1,5 +1,10 @@
 # VX-246 — Run: MCP pane, docs & door fixes — kickoff + plan
 
+**STATUS (VX-336): STARTED 2026-10-14 at her kickoff (`/architect-phase vx-336`, the Pro).** Her kickoff answers (the
+cast, the five-unit sizing U5a → U5b → U6 → U7 → U8, VX-292 not running, rule-provisionally-and-continue) and the
+re-aimed unit briefs live in the run record `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` — read it first. This
+file stays the plan: the rulings below bind as written.
+
 **STATUS: VX-246 CLOSED 2026-10-14 — it merged its FIX units (U1 + U1b, U2, U3, U4 + U4b + U4c: the door's security
 and correctness, the undo class, her editor vs the wire, the faces after big writes) through PR #162 "VX-246: MCP
 door fixes (security, undo, editor vs wire, faces)"; its record is `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`.
