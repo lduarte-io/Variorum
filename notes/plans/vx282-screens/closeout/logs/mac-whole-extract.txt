@@ -1,0 +1,89 @@
+# VX-282 closeout — the WHOLE Mac target (merged tip; products = ddcfda66's build), extract of mac-whole.full.log (gitignored)
+start 08:40:16
+end 09:16:55
+✘ Test run with 4666 tests in 767 suites failed after 2162.878 seconds with 21 issues (including 14 known issues).
+
+## Every failed test
+✘ Test theSettingsDoorIsOneActOnBothRoads() failed after 0.001 seconds with 1 issue.
+✘ Test everyBareFixedSizeStatesItsLinePolicy() failed after 0.326 seconds with 1 issue.
+✘ Test redoNeverAsks() failed after 4.720 seconds with 3 issues.
+✘ Test aShortRowStraddlingTheFoldComesBackAboveIt() failed after 3.512 seconds with 1 issue.
+✘ Test run with 4666 tests in 767 suites failed after 2162.878 seconds with 21 issues (including 14 known issues).
+
+## Every issue (non-known)
+✘ Test theSettingsDoorIsOneActOnBothRoads() recorded an issue at BookCollectingDoorsTests.swift:101:9: Expectation failed: BookView.surfaceCapabilities == [.openBookSettings]
+✘ Test everyBareFixedSizeStatesItsLinePolicy() recorded an issue at ChromeLineLimitTests.swift:104:9: Expectation failed: offenders.isEmpty
+✘ Test redoNeverAsks() recorded an issue at DestructiveUndoWarningTests.swift:141:13: Expectation failed: slots == ["First sentence.", "Second one."]
+✘ Test redoNeverAsks() recorded an issue at DestructiveUndoWarningTests.swift:142:13: Expectation failed: h.session.undoStack.redoDepth == 0
+✘ Test redoNeverAsks() recorded an issue at DestructiveUndoWarningTests.swift:143:13: Expectation failed: h.session.status.spoken?.text.contains("Redid") == true
+✘ Test aShortRowStraddlingTheFoldComesBackAboveIt() recorded an issue at TakesArticleScrollTests.swift:1803:13: Expectation failed: restIsReached(second.board.articleRestore)
+✘ Test randomizedBoardSoakHoldsEveryInvariant(seed:) recorded an issue with 1 argument seed → 21 at TakesBoardSoakTests.swift:168:13: Expectation failed: count == fanCount
+
+## ChromeLineLimit offenders
+  Core/Views/SearchPicker.swift:503 — .fixedSize()
+  Features/Takes/TakesShowFaces.swift:185 — .fixedSize()
+  Features/Library/LibraryBulkRow.swift:93 — .fixedSize()
+  Features/Library/LibraryBulkRow.swift:101 — .fixedSize()
+  Features/Library/LibraryBulkRow.swift:109 — .fixedSize()
+  Features/Library/LibraryBulkRow.swift:113 — .fixedSize()
+
+## The two non-standing reds' messages
+✘ Test aShortRowStraddlingTheFoldComesBackAboveIt() recorded an issue at TakesArticleScrollTests.swift:1803:13: Expectation failed: restIsReached(second.board.articleRestore)
+↳ the restore settled on the row's own report (9 aims)
+✘ Test randomizedBoardSoakHoldsEveryInvariant(seed:) recorded an issue with 1 argument seed → 21 at TakesBoardSoakTests.swift:168:13: Expectation failed: count == fanCount
+↳ [seed 21 step 14 expand] block 0001 strips 4 cards for a fan of 5
+↳ count == fanCount → false
+↳   count → 4
+↳   fanCount → 5
+
+## Known issues (━)
+━ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() recorded a known issue at CommentPanelHostLifecycleTests.swift:445:17: Expectation failed: alive.filter(\.isObserving).isEmpty
+━ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() recorded a known issue at CommentPanelHostLifecycleTests.swift:447:17: Expectation failed: alive.isEmpty
+━ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() recorded a known issue at CommentPanelHostLifecycleTests.swift:457:17: Expectation failed: rereads.isEmpty
+━ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() passed after 10.926 seconds with 3 known issues.
+━ Test aDismissedSheetLetsGoOfItsPanel() recorded a known issue at CommentPanelHostLifecycleTests.swift:483:21: Expectation failed: alive.isEmpty
+━ Test aDismissedSheetLetsGoOfItsPanel() recorded a known issue at CommentPanelHostLifecycleTests.swift:483:21: Expectation failed: alive.isEmpty
+━ Test aDismissedSheetLetsGoOfItsPanel() recorded a known issue at CommentPanelHostLifecycleTests.swift:483:21: Expectation failed: alive.isEmpty
+━ Test aDismissedSheetLetsGoOfItsPanel() passed after 14.044 seconds with 3 known issues.
+━ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() recorded a known issue at CommentPanelHostLifecycleTests.swift:509:21: Expectation failed: alive.isEmpty
+━ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() recorded a known issue at CommentPanelHostLifecycleTests.swift:509:21: Expectation failed: alive.isEmpty
+━ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() recorded a known issue at CommentPanelHostLifecycleTests.swift:509:21: Expectation failed: alive.isEmpty
+━ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() passed after 15.207 seconds with 3 known issues.
+━ Suite "VX-229 (GUARD, a known issue in the runner) — a dismissed comments host lets go of its panel" passed after 40.179 seconds with 9 known issues.
+━ Suite "VX-282 U5 — the comments panel's hosts" passed after 54.999 seconds with 9 known issues.
+━ Test theBookIndexsLivePaneIsItsReadTierLineForLine(_:_:) recorded a known issue with 2 arguments voice → .terminal, shape → overTwoBlankLines at IndexTierMetricsTests.swift:274:13: Expectation failed: abs(shift - expectedShift) <= 0.5
+━ Test theBookIndexsLivePaneIsItsReadTierLineForLine(_:_:) recorded a known issue with 2 arguments voice → .study, shape → overTwoBlankLines at IndexTierMetricsTests.swift:274:13: Expectation failed: abs(shift - expectedShift) <= 0.5
+​━ Test theBookIndexsLivePaneIsItsReadTierLineForLine(_:_:) with 10 test cases passed after 8.202 seconds with 2 known issues.
+━ Test theReadEditLivePaneIsItsReadTierLineForLine(_:_:) recorded a known issue with 2 arguments voice → .terminal, shape → overTwoBlankLines at IndexTierMetricsTests.swift:274:13: Expectation failed: abs(shift - expectedShift) <= 0.5
+━ Test theReadEditLivePaneIsItsReadTierLineForLine(_:_:) recorded a known issue with 2 arguments voice → .study, shape → overTwoBlankLines at IndexTierMetricsTests.swift:274:13: Expectation failed: abs(shift - expectedShift) <= 0.5
+​━ Test theReadEditLivePaneIsItsReadTierLineForLine(_:_:) with 10 test cases passed after 8.563 seconds with 2 known issues.
+━ Suite "18l-c U5 — the index tiers speak ONE metrics vocabulary" passed after 16.766 seconds with 4 known issues.
+━ Test escWithNoBuiltPaneForTheRingIsANamedBoundary() recorded a known issue at TakesFindBoardTests.swift:431:17: Expectation failed: window.firstResponder is PaneTextView
+━ Test escWithNoBuiltPaneForTheRingIsANamedBoundary() passed after 4.234 seconds with 1 known issue.
+━ Suite "18l-c U7 — search in Takes, on a mounted board" passed after 11.926 seconds with 1 known issue.
+
+## R1-8 — the VX-229 cells (CommentPanelReleaseTests)
+━ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() recorded a known issue at CommentPanelHostLifecycleTests.swift:445:17: Expectation failed: alive.filter(\.isObserving).isEmpty
+━ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() recorded a known issue at CommentPanelHostLifecycleTests.swift:447:17: Expectation failed: alive.isEmpty
+━ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() recorded a known issue at CommentPanelHostLifecycleTests.swift:457:17: Expectation failed: rereads.isEmpty
+━ Test aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() passed after 10.926 seconds with 3 known issues.
+━ Test aDismissedSheetLetsGoOfItsPanel() recorded a known issue at CommentPanelHostLifecycleTests.swift:483:21: Expectation failed: alive.isEmpty
+━ Test aDismissedSheetLetsGoOfItsPanel() recorded a known issue at CommentPanelHostLifecycleTests.swift:483:21: Expectation failed: alive.isEmpty
+━ Test aDismissedSheetLetsGoOfItsPanel() recorded a known issue at CommentPanelHostLifecycleTests.swift:483:21: Expectation failed: alive.isEmpty
+━ Test aDismissedSheetLetsGoOfItsPanel() passed after 14.044 seconds with 3 known issues.
+━ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() recorded a known issue at CommentPanelHostLifecycleTests.swift:509:21: Expectation failed: alive.isEmpty
+━ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() recorded a known issue at CommentPanelHostLifecycleTests.swift:509:21: Expectation failed: alive.isEmpty
+━ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() recorded a known issue at CommentPanelHostLifecycleTests.swift:509:21: Expectation failed: alive.isEmpty
+━ Test theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() passed after 15.207 seconds with 3 known issues.
+◇ Suite "17y (r) — the № census panel floats over the board" started.
+✔ Suite "17y (r) — the № census panel floats over the board" passed after 2.898 seconds.
+VX-229 guard — popover, after dismissal 1: models alive 1, observing 1
+VX-229 guard — popover, after dismissal 2: models alive 2, observing 2
+VX-229 guard — popover, after dismissal 3: models alive 3, observing 3
+VX-229 guard — popover, after the wait: models alive 3, observing 3
+VX-229 guard — sheet, after dismissal 1: models alive 1, observing 1
+VX-229 guard — sheet, after dismissal 2: models alive 2, observing 2
+VX-229 guard — sheet, after dismissal 3: models alive 3, observing 3
+VX-229 guard — nested sheet, after dismissal 1: models alive 1, observing 1
+VX-229 guard — nested sheet, after dismissal 2: models alive 2, observing 2
+VX-229 guard — nested sheet, after dismissal 3: models alive 3, observing 3

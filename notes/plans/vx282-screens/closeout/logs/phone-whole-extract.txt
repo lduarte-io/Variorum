@@ -1,0 +1,35 @@
+# VX-282 closeout — the WHOLE phone target (merged tip; products = ddcfda66's build), extract of phone-whole.full.log (gitignored)
+start 09:20:48
+end 09:28:40
+✘ Test run with 552 tests in 79 suites failed after 263.196 seconds with 7 issues (including 4 known issues).
+
+## The crash (the run restarted after it)
+◇ Test herFlowTypingInsideAnItalicPairNeverDropsTheItalicAtASpace() started.
+2026-10-14 09:23:58.033342-0600 VariorumMobile[75135:60186499] [View] First responder issue detected: non-key window attempting reload - allowing due to manual keyboard (first responder window is <UIWindow: 0x1020c3350; frame = (0 0; 393 700); autoresize = W+H
+◇ Test leavingATrailingSpaceBehindUnstylesTheSpanHonestly() started.
+2026-10-14 09:23:58.083669-0600 VariorumMobile[75135:60186499] [View] First responder issue detected: non-key window attempting reload - allowing due to manual keyboard (first responder window is <UIWindow: 0x111afafe0; frame = (0 0; 393 700); autoresize = W+H
+VariorumMobile/MobileEditorViewModel.swift:2001: Fatal error: mobile editor surface desynced from the block index
+2026-10-14 09:23:58.085581-0600 VariorumMobile[75135:60186499] VariorumMobile/MobileEditorViewModel.swift:2001: Fatal error: mobile editor surface desynced from the block index
+Restarting after unexpected exit, crash, or test timeout; summary will include totals from previous launches.
+
+## Every failed test / issue
+✘ Test aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:) recorded an issue with 1 argument replacement → "hi" at MobileMarkdownCaretTests.swift:193:17: Expectation failed: model.desyncRecoveryCount == 0
+✘ Test aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:) recorded an issue with 1 argument replacement → "hello there" at MobileMarkdownCaretTests.swift:193:17: Expectation failed: model.desyncRecoveryCount == 0
+​✘ Test aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:) with 3 test cases failed after 0.167 seconds with 2 issues.
+✘ Test nothingUserFacingNamesTheMac() recorded an issue at MobileStructuralTests.swift:1156:9: Expectation failed: offenders.isEmpty
+✘ Test nothingUserFacingNamesTheMac() failed after 1.456 seconds with 1 issue.
+✘ Test run with 552 tests in 79 suites failed after 263.196 seconds with 7 issues (including 4 known issues).
+↳   model.desyncRecoveryCount → 1
+↳   model.desyncRecoveryCount → 1
+✘ Test nothingUserFacingNamesTheMac() recorded an issue at MobileStructuralTests.swift:1156:9: Expectation failed: offenders.isEmpty
+↳ no user-facing mobile string names the Mac — found ["AcknowledgmentsCopy.swift: \"door that lets a client you approve reach your library (Mac only).\"", "AcknowledgmentsCopy.swift: \"Apple\'s logging API, which the MCP SDK speaks through (Mac only).\"", "AcknowledgmentsCopy.swift: \"Apple\'s system-call interfaces, which the MCP SDK builds on (Mac only).\"", "AcknowledgmentsCopy.swift: \"A server-sent-events parser the MCP SDK carries (Mac only).\"", "LibraryOpenCopy.swift: \"Your current library steps aside first — a dated copy stays on this Mac \"", "LibraryOpenCopy.swift: \"Send Library t
+
+## Known issues
+━ Test anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor() recorded a known issue at MobileTrashTests.swift:781:17: Issue recorded
+━ Test anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor() recorded a known issue at MobileTrashTests.swift:780:36: Issue recorded
+━ Test anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor() passed after 0.451 seconds with 2 known issues.
+━ Suite "Mobile Trash — PR2's recovery surface" passed after 32.723 seconds with 2 known issues.
+━ Test theFannedDivideLessonLandsTheDuplicateShape() recorded a known issue at MobileTutorialWalkTests.swift:1026:17: Expectation failed: try await db.read { try fanCount($0, blockID: slot.blockID) } 
+━ Test theFannedDivideLessonLandsTheDuplicateShape() recorded a known issue at MobileTutorialWalkTests.swift:1038:17: Expectation failed: texts.contains(ferryText)
+━ Test theFannedDivideLessonLandsTheDuplicateShape() passed after 0.216 seconds with 2 known issues.
+━ Suite "Mobile tutorial walk — structure" passed after 0.670 seconds with 2 known issues.

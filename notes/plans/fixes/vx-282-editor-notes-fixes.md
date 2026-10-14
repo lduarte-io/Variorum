@@ -2622,7 +2622,7 @@ no claim held, no revert in flight (`git diff` empty after every named revert, e
 |---|---|
 | R1-1 find paint × the read-going settle | **FIXED** `833b1ba7` — pin `49ebe4c4`: W1 red on old (2 issues: the colour, the runs), W2 g1 green |
 | R1-2 Write's overlays after a settle re-wrap | **FIXED** `9f9980cb` (a deliberate refinement of the agreed shape — below, for the Fable round) — pin `174b64f3`/`9f9980cb`: W1 red on old (1 issue: badge 318 vs block 340 — the block moved 22 pt, one line), W2 g1 green |
-| R1-3 the phone's guard window (PIN FIRST) | **DISMISSED AS HOLLOW** — the pin `706008eb` green on the current product (W2b) and on old (W1c), all three replacements; no fix; the guard branch deleted; the pin stays as a guard |
+| R1-3 the phone's guard window (PIN FIRST) | ~~DISMISSED AS HOLLOW~~ **RE-OPENED at the closeout's merged-tip run (C-1):** green ALONE (W2b, W1c — the test's window key), RED in the whole phone target and in a deterministic two-suite repro (a non-key window; `"hi"`/`"hello there"` desync) — the orchestrator's call; the guard `47606e46` survives as an object |
 | R1-4 the comments panel to `Core/Views/` | **DONE** `b7fece88` — W2 g3a + g3b green (73/10 with the 9 VX-229 known issues; 67/10) |
 | R1-5 #220's disclosure line | **DONE** `f411c213` |
 | R1-6 O-4 re-verified | **DONE** `f411c213` — premise FALSE, U3's O-4 WITHDRAWN in the U3 record; no ticket |
@@ -3149,8 +3149,9 @@ merged-tip run.)*
 
 ### CLOSEOUT — THE MERGED-TIP RUN (prepared headless by the round-1/round-2 fix legs' `opus-implementer`, 2026-10-14)
 
-**State: READY FOR STAGE — closeout, ≈60 min** (the Mac whole target ≈40 — VX-281's took 2,325 s; the phone whole target
-≈10 incl. the boot and install; margins). Nothing has run yet; every count below is PENDING.
+**State: RUN 2026-10-14 08:40:10 → 09:29:57 (claim `vx282-merge`, handed from `coord-for-vx282`; RELEASED) — ONE
+FINDING TRACES TO THIS BRANCH (C-1, the phone), recorded, NOT fixed; the closeout waits on the orchestrator.** The
+results are at the end of this subsection; the plan as it was written follows.
 
 **The tip is the merged tip, and the products are its build — no rebuild.** `origin/main` is `fa3bc6e1`, an ancestor of
 the branch (`git merge-base --is-ancestor` ✓; merged at `ece30a41`). `git diff --stat ddcfda66 HEAD -- App Sources Tests`
@@ -3189,3 +3190,72 @@ launch beyond the test hosts, no walk):** from `App/Variorum/`:
    shutdown all` → 0 booted.
 3. Release the claim; write the results here (the extracts committed); report.
 
+#### THE MERGED-TIP RUN — RESULTS (the coordinator's GO; pre-checks 08:40: origin/main `fa3bc6e1`, no instance, no booted simulator, the dev store Standard and unlocked)
+
+`guard.sh --author` OK before every leg; `pgrep -lx Variorum` empty throughout; nothing rebuilt; no app launch beyond the
+test hosts, no walk, no popup. Extracts committed (`notes/plans/vx282-screens/closeout/logs/*-extract.txt`, `*.times`);
+the full logs on disk, gitignored.
+
+**1 — THE WHOLE MAC TARGET** (`mac-whole`, 08:40:16–09:16:55, 2,163 s): "**4,666 tests in 767 suites failed … 21 issues
+(including 14 known)**". Against VX-281's 4,590 / 748 (10 issues incl. 5 known): +76 tests / +19 suites — this run's pins.
+**Every red, attributed:**
+- `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (1) — **STANDING on main, VX-115.**
+- `ChromeLineLimitTests.everyBareFixedSizeStatesItsLinePolicy` (1) — **STANDING, VX-245/VX-283:** EXACTLY the six
+  non-MCP sites VX-281 left (`SearchPicker.swift:503`, `TakesShowFaces.swift:185`, `LibraryBulkRow.swift:93/101/109/113`);
+  this branch added none.
+- `DestructiveUndoWarningTests.redoNeverAsks` (3, `:141-143`) — **STANDING, VX-167** (in-process parallelism).
+- `TakesArticleScrollTests.aShortRowStraddlingTheFoldComesBackAboveIt` (1, `:1803` — "the restore settled on the row's
+  own report (9 aims)") — **NEW, LOAD-DEPENDENT, NOT TRACED TO THIS BRANCH:** green ALONE twice on the same product
+  (with the soak below, 43/2 ×2, 09:17–09:20); a settle-convergence pin (`maxTurns: 20`) over plain prose
+  (`TakesArticleScrollTests.proseText` — no marker the VX-296 settle could honour); this branch's Takes lines are inert
+  on a board (U3: `writePanelBlockID` nil ⇒ `ringMayStand` true, named targets nil ⇒ the routed target). First sighting
+  — it passed in VX-184's and VX-281's whole runs. For the orchestrator: a watch/ticket candidate, not a fix of this run.
+- `TakesBoardSoakTests.randomizedBoardSoakHoldsEveryInvariant(seed: 21)` (1, `:168` — "[seed 21 step 14 expand] block
+  0001 strips 4 cards for a fan of 5") — **NEW, LOAD-DEPENDENT, NOT TRACED:** a seeded soak (deterministic actions) that is
+  green alone twice ⇒ the mounted strip had not caught up with the model under the whole target's load; the soak's typed
+  text carries no marker; the same Takes-inertness argument. Same disposition.
+- **The 14 known issues:** VX-184's same five (`TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` 1 ·
+  `IndexTierMetricsTests` × Study/Terminal `overTwoBlankLines` 4) + the 9 VX-229 cells.
+- **R1-8 — the VX-229 cells, read exactly:** the runner did NOT release the panels in the whole-target run either —
+  `CommentPanelReleaseTests` printed "models alive 1, observing 1 → 2, 2 → 3, 3" after each dismissal for the popover (and
+  "after the wait: 3, 3"), the sheet and the nested sheet, and each cell recorded its declared known issues (popover 3:
+  `:445` observing, `:447` alive, `:457` rereads; sheet 3 × `:483`; nested sheet 3 × `:509`) and PASSED as known issues —
+  9, exactly as at u5d. No "known issue was not recorded" anywhere: the non-intermittent wrappers hold in the whole target.
+
+**2 — THE WHOLE PHONE TARGET** (`phone-whole`, 09:20:48–09:28:40, iPhone 17 Pro iOS 26.2, `-collect-test-diagnostics
+never`): "**552 tests in 79 suites failed … 7 issues (including 4 known)**" — with ONE CRASH and a restart ("Restarting
+after unexpected exit…"; the totals include both launches; the crashed test has no result). **Every red, attributed:**
+- **C-1 — TRACES TO THIS BRANCH (VX-296's phone face, U2 + R1-3).**
+  - `MobileMarkdownCaretTests.leavingATrailingSpaceBehindUnstylesTheSpanHonestly` hit the DEBUG desync fatal —
+    `MobileEditorViewModel.swift:2001: Fatal error: mobile editor surface desynced from the block index` — U2's W2b crash
+    shape, back.
+  - `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` RED for `"hi"` and
+    `"hello there"` (`:193`, `desyncRecoveryCount → 1` each; `"Hello"` green) — **R1-3's window, real in this posture.**
+    R1-3's "hollow" verdict (r1fix W2b and W1c, the suite run ALONE) does not hold: it was decided only in the posture
+    where the test's window is key.
+  - **The posture, reproduced deterministically** (`reruns-extract.txt`, 09:29:17–09:29:52, the same product):
+    `MobileLivenessTests` then `MobileMarkdownCaretTests` → the same crash in `leaving…` and the same two R1-3 desyncs.
+    Every phone test in that posture logs "[View] First responder issue detected: non-key window attempting reload —
+    allowing due to manual keyboard (first responder window is <UIWindow…>)": a window left by an earlier suite stays
+    key, the test's text view is first responder in a NON-key window, and UIKit's keyboard/replace roads then take a
+    different path. Alone (W2b ×2, u2b), the test's window is key and both are green.
+  - **Mechanism — partly traced, the decider named.** The outcome says the shared settle's `editedMask` guard
+    (`MarkdownFaceCore.swift`, the U2 W2b fix) did not stop a write that broke the edit's binding — consistent with
+    UIKit reporting the selection inside its transaction BEFORE the first character change (where `editedMask` is still
+    empty), the round-1 review's R1-3 mechanism. NOT proven: that the settle is the cause rather than a pre-existing
+    phone-gate behaviour in the non-key posture that only this branch's new pins exercise (on `main` neither the phone
+    settle nor these pins exist, so `main` cannot show it). **The decider:** the posture repro on a product with
+    R1-3's prepared guard — `47606e46` (`guard pendingEdit == nil else { return }` in
+    `MobileEditorViewModel.settleMarkdownCaret`; its branch was deleted at the r1fix verdict but the commit object is
+    still in this worktree's repository, `git cat-file -t 47606e46` → `commit`) — and, if that is not enough, with the
+    phone settle disabled. Whether a real phone reaches the non-key posture (the log names a manual/hardware keyboard)
+    is untraced.
+  - **Not fixed** (the coordinator's word: record, release, report).
+- `MobileStructuralTests.nothingUserFacingNamesTheMac` (1, `:1156`) — **STANDING on main:** its offenders are
+  `AcknowledgmentsCopy.swift`'s "(Mac only)" strings (the MCP SDK and its logging dependency) — four at `fa3bc6e1`, the
+  file last changed at 13n-b (`14763773`), untouched by this branch.
+- **The 4 known issues** (declared): `MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`
+  2 · `MobileTutorialWalkTests.theFannedDivideLessonLandsTheDuplicateShape` 2.
+
+**3 — Close:** `xcrun simctl shutdown all` → **0 booted**; no instance; `Tools/stage release --who vx282-merge` at
+09:29:57. The dev store untouched (no app launch). The fix leg's R1-3 row is RE-OPENED below by this run.
