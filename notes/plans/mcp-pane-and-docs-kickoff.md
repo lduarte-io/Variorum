@@ -1,6 +1,8 @@
 # VX-246 — Run: MCP pane, docs & door fixes — kickoff + plan
 
-**STATUS: PLANNED, not started (written 2026-10-13 at VX-184's re-scope; she adds items before kickoff).**
+**STATUS: IN PROGRESS — VX-246 kicked off 2026-10-13, 21:20 MDT (orchestrator variorum-84). Its live state is the
+run record `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`: the units, the cast she set at kickoff, LIVE STATUS.
+(Written 2026-10-13 at VX-184's re-scope.)**
 
 **SPLIT 2026-10-13 (the release runway, `notes/plans/vx-33-release-runway.md`).** This file now serves TWO runs:
 - **VX-281 "Run: MCP settings pane & shared icon"** takes the **U6 section** and the **VX-268 bullet** under HER
@@ -15,14 +17,29 @@
 
 ## Kickoff message (for `/run-phase vx-246`)
 
-> Run VX-246 "Run: MCP pane, docs & door fixes" (retitled 2026-10-13 at her word; the plan file keeps its
-> original name because tickets point at it). Members are its sub-issues in Linear: VX-199 · VX-205 · VX-232
-> (U6), VX-197 (U7), and everything under **HER ADDITIONS** below. One branch
-> `vx-246-mcp-pane-docs-fixes`, one PR `VX-246: …` (merge commit), record `notes/plans/fixes/vx-246-mcp-pane-docs-fixes.md`,
-> members close individually. Read this file in full. Then read VX-184's record
-> (`notes/plans/fixes/vx-184-mcp-launch-polish.md`): its U1–U5 UNIT RECORDs say what the door now does, and their
-> OWED sections are routed here. The binding rulings below are hers, verbatim where quoted. U7 runs LAST,
-> over the as-built state.
+> Run VX-246, "Run: MCP door fixes & AI docs" (retitled twice on 2026-10-13 at her word; the plan file keeps its
+> original name because tickets point at it).
+>
+> **Members:** its 21 sub-issues in Linear, the runway's list (`notes/plans/vx-33-release-runway.md` §3): VX-258 ·
+> VX-259 · VX-260 · VX-279 · VX-280 · VX-276 · VX-277 · VX-119 · VX-275 · VX-230 · VX-231 · VX-267 · VX-253 · VX-252 ·
+> VX-255 · VX-311 · VX-298 · VX-254 · VX-256 · VX-261 · VX-197 (U7 below). The U6 section and the VX-268 bullet are
+> VX-281's, not this run's.
+>
+> **Coordinates:** one branch `vx-246-mcp-door-fixes-ai-docs`; one PR `VX-246: …` (merge commit); the record
+> `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`, whose THE UNITS table is the build order. Members close
+> individually.
+>
+> **Reading, in order:**
+> 1. This file, in full.
+> 2. The runway's VX-246 section and its conflict map (§2).
+> 3. VX-184's record (`notes/plans/fixes/vx-184-mcp-launch-polish.md`): its U1–U5 UNIT RECORDs say what the door now
+>    does, THE LADDER is where most members were found and ruled, and its OWED sections are routed here.
+>
+> The binding rulings below, and on each member's ticket, are hers, verbatim where quoted. U7 (the docs) runs LAST,
+> over the as-built state, after VX-281 merges.
+>
+> *(The kickoff orchestrator updated this message on 2026-10-13 to match the split: members, branch and record names.
+> The earlier text named VX-281's U6 members and the pre-split branch.)*
 
 ## Why this run exists (her words, 2026-10-13)
 
