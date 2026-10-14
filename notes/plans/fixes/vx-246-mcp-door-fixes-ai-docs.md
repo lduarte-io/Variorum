@@ -4673,17 +4673,18 @@ whole Mac target.
 
 ## CLOSEOUT RECORD (the closeout implementer — opus-implementer, from 2026-10-14 ~11:30 MDT)
 
-**Not done yet (first line, kept current):** PHASE A is DONE — the kickoff plan re-aimed (`bb958d51`), the drafts below
-and the handoff draft. NO shared ledger is touched (AppSpec, TEXTKIT2_NOTES, QUESTIONS, the master plan, the archives,
-MobileSoul): every one waits for PHASE C, on latest main. No merge of main yet (PHASE B, after the coordinator's "main
-moved"); no Mac build or test; no claim; no Linear edit (the orchestrator's).
+**Not done yet (first line, kept current):** PHASE A is DONE; PHASE B is READY (main merged, headless and phone green,
+`vx246-final` rebuilt) but THE CLOSEOUT WINDOW has NOT run — no claim yet, no Mac test, so F-1's red/green, F-4's
+4 → 0 and the merge-moment whole target are still owed. NO shared ledger is touched (AppSpec, TEXTKIT2_NOTES,
+QUESTIONS, the master plan, the archives, MobileSoul): every one waits for PHASE C, on latest main. No Linear edit (the
+orchestrator's).
 
 | phase | what | state |
 |---|---|---|
 | A1 | the kickoff plan: STATUS banner (VX-246 closed with its fix units; VX-336 carries U5–U8), SPLIT AGAIN note, the kickoff message re-aimed at VX-336, DONE marks | DONE (`bb958d51`) |
 | A2 | ### CLOSEOUT DRAFTS below, exactly as they will land | DONE (this commit) |
 | A3 | the handoff draft `notes/handoffs/vx-246-handoff.md` (what to know first, her checklist, what shipped, how it was checked, the tickets, the other runs, left on disk; every «…» filled at PHASE C) | DONE (this commit) — **PHASE A DONE** |
-| B | merge `origin/main` (after VX-282) as a merge commit; headless package green; a fresh `vx246-final`; THE CLOSEOUT WINDOW's plan (claim `vx246-close`); READY | waits for "main moved" |
+| B | merge `origin/main` (after VX-282) as a merge commit; headless package green; a fresh `vx246-final`; THE CLOSEOUT WINDOW's plan (claim `vx246-close`); READY | **READY** (### PHASE B below): main merged at `f3cc8d07` (`8c47f877`, no conflict); headless MCP 240/51 · core 2,860/330 · workbook 40/6; the phone builds (Release + Debug); `vx246-final` rebuilt on the merged tree; the u1b products deleted; THE CLOSEOUT WINDOW planned. **The window itself waits for the GO** |
 | C | the drafts applied on latest main; the handoff finalized | after the window |
 
 **Found while drafting (for the orchestrator):**
@@ -5010,8 +5011,8 @@ no history rewrite; no commit trailer. No product code is written: the merge is 
 | 1 | merge `origin/main` at `f3cc8d07` (VX-282's PR #160 merge `19be2f01` + its ledgers `3ddec585` + its handoff) as a MERGE COMMIT | DONE (`8c47f877`) — see "The merge" below |
 | 2 | the headless package green, with counts (MCP, core, workbook) | DONE — on `60e3e9e8` (the merged tree; no source after `8c47f877`): `swift build --build-tests` EXIT 0 (10:08:15–10:08:58), then `swift test --skip-build` **EXIT 0 (10:08:58–10:13:28): `VariorumMCPTests` 240 / 51 · `VariorumCoreTests` 2,860 / 330 · `StringsWorkbookTests` 40 / 6**, zero ✘. The core delta over the branch's own finals (2,841 / 329) is exactly VX-282's (+19 tests, +1 suite: main's base `fa3bc6e1` 2,790/321 → VX-282's 2,809/322); MCP and the workbook unchanged. Log `vx246-screens/closeout/logs/headless.log` (gitignored) |
 | 3 | a headless phone build (`VariorumMobile`, iOS Simulator SDK, `build` — launches nothing, boots nothing, no claim) | DONE — on `fb5e52f1`'s tree (the merged code): `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vx246-phone build` → **`** BUILD SUCCEEDED **`, EXIT 0** (10:14:07–10:17:02). The scheme's build action is its Launch configuration, **Release** (`Release-iphonesimulator`), which compiles out `#if DEBUG`; so the same command with `-configuration Debug` (the configuration the phone's tests and DEBUG oracles use) ran too → **`** BUILD SUCCEEDED **`, EXIT 0** (10:17:34–10:18:41). Both compiled `Shared/StructuralUndoCopy.swift`, `MobileUndoDoor.swift` and the core's `UndoStack.swift` (the phone's calls — `withCompound(label:operations:)`, `undo(with:)`/`redo(with:)` — keep their signatures after U2). 37 + 53 warnings, NONE in a file this branch touches (the only phone-side file it touches is `StructuralUndoCopy.swift`; the warnings sit in EncryptionSession, SecretCheck, LibraryAdoption, BackupRestoreCandidates, VariorumRecord, MobileStructural/EditorStyle/Callout and the spike — standing). No simulator booted (`simctl list devices booted`: 0). The phone products were deleted after (3.2 GB; nothing reads them). Logs `vx246-screens/closeout/logs/phone-build{,-debug}.log`. This proves the phone COMPILES against U2's core; VM-16 (the phone door's quiet-press receipt, R2-2) stays VM-16's |
-| 4 | `vx246-final` rebuilt on the merged tree (`build-for-testing`, no claim); the u1b products' fate | NOT-STARTED |
-| 5 | THE CLOSEOUT WINDOW's plan (claim `vx246-close`) → READY | NOT-STARTED |
+| 4 | `vx246-final` rebuilt on the merged tree (`build-for-testing`, no claim); the u1b products' fate | DONE — see "The products (piece 4)" below: the three u1b products DELETED first (the kept two proven independent of them), then `vx246-final` rebuilt in place on `a4235afb`'s tree → **`** TEST BUILD SUCCEEDED **`, EXIT 0** (10:19:47–10:22:05) |
+| 5 | THE CLOSEOUT WINDOW's plan (claim `vx246-close`) → READY | DONE (this commit) — THE CLOSEOUT WINDOW below; **READY reported; the stage is NOT claimed** (the orchestrator relays the GO's exact line) |
 
 **Machinery note (honesty, 10:07):** the first push after the merge ran `git pull --rebase` first (the run's habit), and
 with a LOCAL merge commit that linearizes: git began replaying VX-282's commits one by one onto `ac035da0` and stopped
@@ -5046,3 +5047,85 @@ becomes **#225**, the next free on the merged tree), **MobileSoul PL-54** (ours 
 the VX-168 entry** — VX-282's entry now leads §14 ("Most recent canon deltas — VX-282", then VX-281, VX-184, VX-179,
 VX-180), so ours leads with "Before it — **VX-282**…" and OUR roll is the **VX-180** entry (D4's own fallback). D6, D8
 and D4's numbers move accordingly; every number is re-read on latest main at PHASE C.
+
+#### The products (piece 4)
+
+**The clone trap, checked before anything was deleted.** `vx246-r1-red` was an APFS clone of `vx246-u1b`, and
+`vx246-final` a clone of `vx246-r1-red` (the round-1 fix pass, pieces 1b and 6), each with its
+`SourcePackages/workspace-state.json` re-pointed at the time. Read now:
+- **`workspace-state.json`:** both name only five absolute paths — the worktree root and their OWN
+  `SourcePackages/{artifacts/…/Sparkle.xcframework, artifacts/…/SQLCipher.xcframework, checkouts/swift-syntax,
+  prebuilts/swift-syntax/…}`. Zero mentions of any `vx246-u1b*` product.
+- **`Build/Products` (what `test-without-building` runs):** `grep -rlaF 'DerivedData/vx246-u1b'` over both → **0 files**
+  (`-u1b-red` / `-u1b-revert` likewise 0), with a POSITIVE CONTROL: each tree's own root (`DerivedData/vx246-final`,
+  `DerivedData/vx246-r1-red`) is named in 51 files of its own `Build/Products`, so the grep reads the binaries. Each
+  `.xctestrun` and `info.plist`: 0.
+- **What still names `vx246-u1b`:** only build-HISTORY — `Build/Intermediates.noindex/XCBuildData/build.db`'s stale
+  nodes (1,631 / 1,612 hits), older `*.xcbuilddata` descriptions and `registered-launchservices.txt` (3 lines each). The
+  NEWEST build description of `vx246-final` (`ac8706ec…`, the round-2 build) names none. Those stale nodes are the
+  "Stale file … outside of the allowed root paths" class the round-1 builds already showed: the build system declines
+  to touch another root.
+
+**So the u1b products were deleted** (`vx246-u1b`, `vx246-u1b-red`, `vx246-u1b-revert`; the brief's condition — the
+kept products' `workspace-state.json` repaired — holds, and their products never read the u1b roots), and deleted
+BEFORE the rebuild, so the rebuild itself proves `vx246-final` needs nothing of them (70 GiB free after; APFS shared
+most of the blocks). `vx246-r1-red` stays exactly as built at `a657d779` (08:28; not rebuilt): its dylib still carries
+the UNEDITED lesson-2 chunk ("the setup again moves the name to the new key, and a tool still" — 1 hit), its test bundle
+the OLD harness (`ScopedRandomExecutor` 0 symbols) and F-1's pin; the merge did not touch `TutorialSeeder.swift` or
+`TutorialMCPChapterTests.swift` (`git diff a657d779 HEAD -- …/TutorialMCPChapterTests.swift` empty), so its red stays
+the right "before" for R1, and F-1's three designed lines are still `:288`, `:290`, `:296` (`:297` L1's guard).
+
+**`vx246-final` rebuilt in place on the merged tree** (`a4235afb`; `git status` clean): `xcodebuild -scheme Variorum
+-destination 'platform=macOS' -derivedDataPath DerivedData/vx246-final build-for-testing` → **`** TEST BUILD SUCCEEDED
+**`, EXIT 0** (10:19:47–10:22:05, an incremental build over main's changed files; 0 "Stale file" lines). Log
+`vx246-screens/closeout/logs/final-build-for-testing.log` (gitignored). **The product checked:**
+- binaries fresh (`Variorum.debug.dylib`, `Variorum`, the test bundle 10:22; the shim `variorum-mcp` 10:20);
+- BOTH sides' symbols in the dylib: ours `static EditorSurfaceController.caretLanding(whenBlockLeft:oldEntries:survivors:)`,
+  `MCPRebindRowView`; vx-282's `EditorSurfaceController.caretLanding(afterCarving:)`,
+  `CapabilityRegistry.outsideWritesTakesPanel(_:)`, `PaneSurfaceRepresentable.Coordinator.settleMarkdownCaret(in:)`;
+- the NEW lesson chunk ("Running the client's own setup again moves the name" — 1 hit) and not the old one (0);
+- the test bundle: every closeout-window suite present (the 18 Tutorial suites, `MCPHerEditorDoorTests` with
+  `ScopedRandomExecutor`), vx-282's pins (`MarkdownCaretFaceTests`, `WriteTakesPanelRoutedTests`,
+  `CommentPanelDoorsTests` …), the standing-red suites (`BookCollectingDoorsTests`, `DestructiveUndoWarningTests`,
+  `ChromeLineLimitTests`); R2-6's diagnostic print absent ("block 40 laid out" — 0).
+- **Warnings:** 90 unique; in files this branch touches only two, both STANDING: `InlineEditorWindowTests.swift:48`'s
+  forced cast (on main, both round-1 builds showed it) and `NoteDeletionDoorsTests.swift:478`'s Sendable capture (the
+  line is `39df7947`, 2026-08-24; round 1's full build showed it too).
+
+#### THE CLOSEOUT WINDOW (runs ONLY on the orchestrator's GO, under the exact claim line it relays — expected `vx246-close`)
+
+**What the window does NOT do (said first):** no walk, no MCP client, no Debug launch beyond what the test host does,
+no rebuild, no product or test change; a red that needs code is recorded and reported, never fixed under the claim. No
+user-scope MCP fingerprint is taken: nothing in the window registers a client.
+
+**The tree at READY:** HEAD is this commit; `git diff --name-only a4235afb..HEAD -- App Sources` is EMPTY (record-only
+commits since the build). At the GO: re-check that diff is still empty and `origin/main` still `f3cc8d07` (a docs-only
+main move needs a merge but no rebuild — said in the record; a code move STOPS the window and goes back to the
+orchestrator).
+
+**The scripts** (gitignored, `notes/plans/vx246-screens/closeout/`; each `zsh -n` clean; their exact commands are also
+written here so the record alone can finish the window): `a1.sh`, `run-r1.sh`, `run-f1.sh`, `run-whole.sh`. Every
+`xcodebuild` is, from `App/Variorum`, `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS'
+-derivedDataPath DerivedData/<product> -resultBundlePath <closeout>/<step>.xcresult [-only-testing:VariorumTests/<Suite>…]`,
+its log `closeout/logs/<step>.log` ending in `XCODEBUILD EXIT n`.
+
+| step | what | expected |
+|---|---|---|
+| 0 | the GO's exact line run ALONE (never `Tools/stage status` inside an `&&` chain — it exits 1 under a held claim); `Tools/WalkKit/guard.sh --author` (her `/Applications` app absent, HID idle ≥ 2 s; exit 3 ⇒ STOP and report, never quit or kill her app); `pgrep -lx Variorum` empty (never the `-f` form — a headless build's command line matches it); the tree check above | the claim held; guards OK |
+| 1 | **A1 FIRST** (`a1.sh`): refuses while any Variorum process runs; copies `variorum.sqlite`, `-wal`, `-shm` and both `variorum-keys-*.json` into `…/Variorum-dev/Backups/safety-copies/scale-prestage-<UTC ts>/` (the name `restore.sh` accepts), each `cmp`-verified, sha256 prefixes to `store-hash-pre.txt`, the path to `a1-path.txt`; `defaults export io.lduarte.Variorum.debug prefs-pre.plist` (keys counted); `Backups/` listed (`backups-pre.txt`) | "A1 prestage copy (verified…)", five files; the prefs count read |
+| R1 | `run-r1.sh` part 1 — `vx246-r1-red`, `-only-testing:VariorumTests/TutorialMCPChapterTests` | `lessonTwoConnectingAClient` **RED with exactly 3 issues, at `:288`, `:290` and `:296`** (the old sentence still rendered; the new sentence absent; the guide lacking L1's clause); `:297` (L1's half) green; every other test in the suite green. A failure anywhere else is a defect of the pin, not of the lesson — recorded and reported |
+| R1b | `run-r1.sh` part 2 — `vx246-r1-red`, `MCPHerEditorDoorTests` ALONE | 4/4 green, the summary reading **"(including 4 warnings)"** — the old harness's `@Dependency(\.withRandomNumberGenerator)` reads (F-4's "before") |
+| F1a | `run-f1.sh` part 1 — `vx246-final`, the Tutorial* family (U1's G2 set, 18 suites): TutorialMCPChapterTests · TutorialMCPChapterCaptureTests · TutorialBookShapeTests · TutorialBooksLessonTests · TutorialBooksRitualTests · TutorialBuildFlavorTests · TutorialCurrencyTests · TutorialDeletionActsTests · TutorialDoorTests · TutorialFannedMatrixTests · TutorialFurnitureFoldTests · TutorialLibraryActsTests · TutorialLookingActsTests · TutorialPrivacyChapterTests · TutorialStructureActsTests · TutorialTakesActsTests · TutorialWherePlacesActsTests · TutorialWritingActsTests | all green; `lessonTwoConnectingAClient` **GREEN** (F-1 red → green); TutorialMCPChapterCaptureTests SKIPPED (gated — read the skip lines, Swift Testing counts skips in N). Any red re-runs ALONE once; standing reds named |
+| F1b | `run-f1.sh` part 2 — `vx246-final`, `MCPHerEditorDoorTests` ALONE (R1b's exact shape) | 4/4 green with **NO "(including N warnings)"** (F-4: 4 → 0). A surviving warning gets its read site traced before anything else moves |
+| W | `run-whole.sh` — **THE MERGE-MOMENT WHOLE Mac target** on `vx246-final`, VX-282's closeout form (no `-only-testing`; the scheme's ONE testable is `VariorumTests`, so it equals VX-281's `-only-testing:VariorumTests`). Started DETACHED (`nohup … &`), then POLLED in the foreground (`grep -q 'XCODEBUILD EXIT' logs/whole.log`, 5 s sleeps, repeated past the Bash timeout) — never a turn ended while it runs | **Reds standing on main only, each attributed from its issue text:** VX-115 `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (1, `:101`) · VX-245/VX-283 `ChromeLineLimitTests.everyBareFixedSizeStatesItsLinePolicy` (1 — EXACTLY the six non-MCP sites `SearchPicker.swift:503`, `TakesShowFaces.swift:185`, `LibraryBulkRow.swift:93/101/109/113`; this branch adds no `fixedSize`, to be confirmed from the text) · VX-167 `DestructiveUndoWarningTests.redoNeverAsks` (≤ 3, `:141–143`, in-process parallelism) · **VX-337**'s two load-dependent Takes flakes MAY appear (`TakesArticleScrollTests.aShortRowStraddlingTheFoldComesBackAboveIt`, `TakesBoardSoakTests.randomizedBoardSoakHoldsEveryInvariant(seed: 21)` — first seen in VX-282's run, green alone). **Known issues:** VX-184's five (`TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` 1 · `IndexTierMetricsTests` Study/Terminal `overTwoBlankLines` 4) + VX-229's nine (`CommentPanelReleaseTests`) = 14, as at VX-282's run. **Counts are READ, not predicted** (VX-282's merged tip: 4,666 tests / 767 suites, 21 issues incl. 14 known; this run adds the branch's pins). **Any red outside that list is a FINDING:** re-run ALONE once; read it; trace whether this branch's diff (`fa3bc6e1..ac035da0`, plus the merge's own resolution) reaches it; record and report — no fix under the claim |
+| C | **cleanup:** no instance (`pgrep -lx Variorum` empty; a lingering Debug test host is quit BY BUNDLE ID — `osascript -e 'tell application id "io.lduarte.Variorum.debug" to quit'` — never a kill, never her app); **prefs:** `defaults export … prefs-post.plist`, diff against `prefs-pre.plist` (added · removed · changed), then `defaults import io.lduarte.Variorum.debug prefs-pre.plist` + `defaults delete io.lduarte.Variorum.debug <key>` for every added key (import MERGES), re-export, diff again until **0 added · 0 removed · 0 changed**; **the dev store:** `Tools/ScaleFixture/restore.sh "$(cat a1-path.txt)"` → **"Restored (verified)"**, a second `cmp` of all five files against the A1 copy **SAME**, the sha256 set equal to `store-hash-pre.txt` (`store-hash-restored.txt`); `Backups/` re-listed (no new backup beyond the A1 dir); no stray `default.profraw` (`git status` clean); then `Tools/stage release --who vx246-close`, and `Tools/stage status` (alone) → STAGE FREE; the result line | posture as handed over (Standard, unlocked, Study in the store); RELEASED |
+
+**Minutes:** the claim asked is **75 min**, sized from MEASURED runs, not predicted: the same whole target took 2,325 s
+(VX-281's merge run) and 2,163 s (VX-282's); U1b's 279-suite batch 457 s; plus R1/R1b/F1 (four small runs) and the
+A1 copy and cleanup. If the coordinator needs a split, the window splits cleanly at the seam after F1b (A1 kept, the
+claim kept or re-claimed; the whole target needs the A1 copy taken before it either way).
+
+**The result line (to fill at RELEASE):** claim `vx246-close` «from–to», RELEASED («n» of 75 min) — R1 «…» · R1b «…» ·
+F1a «…» · F1b «…» · W «N tests / M suites, I issues incl. K known; the reds, attributed» · posture «Standard/unlocked,
+cmp-SAME vs A1; prefs «n» keys, 0 differ» · the A1 copy «path», the coordinator's to prune.
+
