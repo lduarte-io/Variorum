@@ -2321,7 +2321,7 @@ glyph's DEBUG probe) — no registry file, no editor-seam file.
 | # | piece | status |
 |---|---|---|
 | 0 | read-in, the traces, the design, the sweep table | DONE (this commit) |
-| 1 | VX-330 SEAM + harness: `BookPanelBrain.markedNote` with the OLD behaviour (a chapter line stands for no note), ONE face helper on both rows, the ask glyph's DEBUG probe | NOT-STARTED |
+| 1 | VX-330 SEAM + harness: `BookPanelBrain.markedNote` with the OLD behaviour (a chapter line stands for no note), ONE face helper on both rows, the ask glyph's DEBUG probe | DONE (this commit) — `BookPanelModel.swift`: `BookPanelBrain.markedNote(_:)` (a note line → its note; `.chapter` → nil, marked SEAM; `.unfiled` → nil). `BookPanelView.swift`: ONE helper `noteMarks(for:)` (`MCPSharedIcon(reaches: model.reach[id])` then `MCPAskGlyph(.note(id))` when `markedNote` names a note); `noteRow` draws its pair through it (the same two views on the same reads — behaviour unchanged) and `chapterRow` calls it after the chapter's name (draws nothing at the seam). `Core/Views/MCPAskGlyph.swift`: the DEBUG anchor `MCPAskGlyphProbe` (the icon's R1-5 shape — an AppKit view behind the button, `hitTest → nil`; Release draws exactly what it drew). Compiled at piece 6 |
 | 2 | VX-330 pins (pure + two mounts), red on the seam by assertion — PENDING for the window's red run | NOT-STARTED |
 | 3 | VX-330 fix (one line: a collapsed chapter line stands for its note) | NOT-STARTED |
 | 4 | VX-342 pins (Mac + phone, new pure suites), red on the old words by assertion | NOT-STARTED |

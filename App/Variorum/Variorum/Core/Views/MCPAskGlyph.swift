@@ -18,6 +18,7 @@
 //  — the ask's arrival changes this glyph and nothing else (R-13nb-23/26g).
 //
 
+import AppKit
 import SwiftUI
 
 struct MCPAskGlyph: View {
@@ -85,6 +86,63 @@ struct MCPAskGlyph: View {
             .buttonStyle(.plain)
             .help(Self.help(subject, asks))
             .accessibilityLabel(Self.help(subject, asks))
+            .askGlyphAnchorProbe()
         }
+    }
+}
+
+#if DEBUG
+/// **VX-330 (RUN VX-336, U6b) — the glyph's DEBUG oracle** (a no-op outside
+/// DEBUG; `MCPSharedIconProbe`'s shape, VX-281 ladder R1-5): where each drawn
+/// pending-ask glyph sits in its WINDOW, through an AppKit anchor behind its
+/// button that is never a click target. In-process, SwiftUI builds no
+/// accessibility nodes, so a pin that finds and presses the glyph on a host
+/// row needs its own road to the glyph's frame — this is it.
+@MainActor
+enum MCPAskGlyphProbe {
+    final class Anchor {
+        weak var view: NSView?
+        init(_ view: NSView) { self.view = view }
+    }
+
+    /// The glyphs' anchors — dead ones pruned on every append, so the list
+    /// stays ∝ the glyphs alive.
+    static var anchors: [Anchor] = []
+
+    /// The glyphs drawn in `window` now, in window coordinates.
+    static func frames(in window: NSWindow) -> [NSRect] {
+        anchors.removeAll { $0.view == nil }
+        return anchors.compactMap(\.view)
+            .filter { $0.window === window && !$0.isHiddenOrHasHiddenAncestor }
+            .map { $0.convert($0.bounds, to: nil) }
+    }
+}
+
+/// The anchor behind the glyph's button: transparent to every click.
+private struct MCPAskGlyphAnchor: NSViewRepresentable {
+    final class AnchorView: NSView {
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    }
+
+    func makeNSView(context: Context) -> AnchorView {
+        let view = AnchorView()
+        MCPAskGlyphProbe.anchors.removeAll { $0.view == nil }
+        MCPAskGlyphProbe.anchors.append(.init(view))
+        return view
+    }
+
+    func updateNSView(_ view: AnchorView, context: Context) {}
+}
+#endif
+
+extension View {
+    /// The glyph's place, for the DEBUG pins (a no-op outside DEBUG).
+    @ViewBuilder
+    fileprivate func askGlyphAnchorProbe() -> some View {
+        #if DEBUG
+        background(MCPAskGlyphAnchor())
+        #else
+        self
+        #endif
     }
 }

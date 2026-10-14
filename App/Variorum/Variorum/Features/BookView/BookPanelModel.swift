@@ -219,6 +219,31 @@ nonisolated enum BookPanelBrain {
         return lines
     }
 
+    /// **VX-330 — the note a line STANDS FOR**, whose two MCP marks it wears
+    /// (the ONE shared icon, then a waiting ask — `BookPanelView.noteMarks`).
+    /// Her words, verbatim: *"combined chapter / note headings don't show any
+    /// AI symbol but that's how the example sherlock holmes looks and i think
+    /// people might share that book with AI as an example so i want it fixed
+    /// pre launch."*
+    ///
+    /// A note line stands for its note. A COLLAPSED one-note chapter line IS
+    /// that note's row (row 8: its click opens the note in its book, its menu
+    /// carries the note's menu), so it stands for that note too — VX-268's
+    /// parity rule ("wherever the ask glyph marks a place, the shared icon
+    /// marks it too") reaching the one row it missed. A plain chapter heading
+    /// and "unfiled" stand for no place an AI can be granted or ask about — a
+    /// chapter is no grant scope (`MCPGrantRule.ScopeKind`) and no ask target
+    /// (`MCPAskTarget`) — so they wear neither mark.
+    static func markedNote(_ line: Line) -> String? {
+        switch line {
+        case .note(let entry, _): entry.postID
+        // SEAM (U6b piece 1): the old face's answer — no chapter row wore a
+        // mark. Piece 3 flips the collapsed case.
+        case .chapter: nil
+        case .unfiled: nil
+        }
+    }
+
     /// Move Up / Move Down — the twin of dragging a note onto its
     /// neighbour: WITHIN its own group (its chapter, or unfiled), where the
     /// book's MANUAL order is what she sees. nil at the group's edge, and
