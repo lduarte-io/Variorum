@@ -3357,3 +3357,40 @@ restored by `git checkout HEAD -- <file>`, `git diff` verified empty; the patche
    at its top, with the PROVISIONAL comment and the VM ticket's slot), and the three phone pins that need the honour
    (`herFlow…`, `leavingATrailingSpace…`, `aStoodDownEditorHonoursNoCaret`) disabled with that reason; R1-3's pin stays
    live (it needs no honour).
+
+**Built — all four TEST BUILD SUCCEEDED; every edit restored (`git diff` empty after each); the patches in
+`scratchpad/vx282-c1/` (`decider.patch`, `keyfix.patch`, `disable-phone-settle.patch`); fingerprints (md5, app dylib /
+test binary) confirm each differs exactly where named:**
+
+| Products | App (`VariorumMobile.debug.dylib`) | Tests | Built log |
+|---|---|---|---|
+| `DerivedData/vx282-u2-ios` — the GUARDED tip (`a5314a3e`, code = `12d55d12`) | `7d891e87` | `a07c703e` | `vx282-c1-guarded-build.log` |
+| `DerivedData/vx282-c1-decider-ios-products` — the settle off | `e19eec74` (differs) | `a07c703e` (= tip) | `vx282-c1-decider-build.log` |
+| `DerivedData/vx282-c1-keyfix-ios-products` — the caret suite's window on the scene, key; resign on teardown | `7d891e87` (= tip) | `749a08dc` (differs) | `vx282-c1-keyfix-build.log` |
+| `DerivedData/vx282-c1-disable-ios-products` — the provisional settle-off + three pins disabled | `54122113` (differs) | `81e86b0f` (differs) | `vx282-c1-disable-build.log` |
+
+The DISABLE patch carries `VM-<ticket>` placeholders (the orchestrator mints the ticket; the number is substituted in
+the commit). The KEYFIX's fallback `UIWindow(frame:)` draws iOS 26's deprecation warning (the scene road is the one used).
+
+**THE c1decide WINDOW PLAN (≈12–15 min; on the orchestrator's claim line; `guard.sh --author` first; `pgrep -lx Variorum`
+empty; no launch, no walk; iPhone 17 Pro iOS 26.2, `-collect-test-diagnostics never`; every run `test-without-building
+-xctestrun <products>/VariorumMobile_VariorumMobile_iphonesimulator27.0-arm64-x86_64.xctestrun`; logs `closeout/logs/`):**
+- **D — THE DECIDER (≈1 min):** the decider products, `-only-testing:VariorumMobileTests/MobileLivenessTests
+  -only-testing:VariorumMobileTests/MobileMarkdownCaretTests` → `c1-decider.full.log`. **Read ONLY two things** (with the
+  settle off, the honour-dependent pins — `herFlow…`'s and `leaving…`'s italic expectations, `aStoodDownEditor…`'s
+  non-vacuity — fail BY DESIGN and decide nothing): (1) does `leavingATrailingSpace…` still hit the DEBUG fatal / does
+  the run restart; (2) R1-3's `"hi"` / `"hello there"` `desyncRecoveryCount`. **Crash or desync persists ⇒ H2** (the settle
+  is innocent); **no crash and zero desyncs ⇒ H1** (the settle is the cause).
+- **On H2 → K (≈1 min, then ≈9):** the KEYFIX products (settle ON, guard ON), the same two suites → `c1-keyfix.full.log`:
+  expected ALL green, no crash, no restart. Green ⇒ the WHOLE phone target on the keyfix products → `c1-keyfix-whole.full.log`:
+  expected only the standing `nothingUserFacingNamesTheMac` + the 4 declared known issues. After the window the keyfix
+  lands as a TEST-ONLY commit (`keyfix.patch`); the gate gap gets the orchestrator's VM ticket. **K red ⇒ STOP**, record,
+  release, report.
+- **On H1 → X (≈1 min, then ≈9):** the DISABLE products, the same two suites → `c1-disable.full.log`: expected green (the
+  three pins skipped as disabled, R1-3's pin green, no crash) ⇒ the WHOLE phone target on the disable products →
+  `c1-disable-whole.full.log`: expected only the standing red + the 4 known issues. After the window the disable lands
+  from `disable-phone-settle.patch` with the VM number (PROVISIONAL), and the orchestrator rules on `12d55d12`.
+- Then `xcrun simctl shutdown all` → 0 booted; release; record; report.
+
+**READY FOR STAGE — c1decide: D (the decider, ≈1 min) → on H2 K + the whole phone target on the keyfix products, on H1 X +
+the whole phone target on the disable products; ≈12–15 min.**
