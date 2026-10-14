@@ -271,8 +271,12 @@ struct MCPGrantSheet: View {
                 .pickerStyle(.radioGroup)
                 .horizontalRadioGroupLayout()
                 .labelsHidden()
-                // W-UX-14: the rung said for the place picked.
-                quiet(MCPPaneCopy.rungDetail(rung, scope: scope))
+                // W-UX-14: the rung said for the place picked. VX-281 U1
+                // (R-VX184-6): ONE line — the whole sentence (the edit rung's
+                // as-built reach, VX-184 round 2) behind its (i).
+                ExplainerLine(
+                    line: MCPPaneCopy.rungSummary(rung, scope: scope),
+                    detail: MCPPaneCopy.rungDetail(rung, scope: scope))
 
                 section(MCPPaneCopy.howLongSection)
                 Picker(MCPPaneCopy.howLongSection, selection: $duration) {
@@ -282,6 +286,8 @@ struct MCPGrantSheet: View {
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
+                // P-8 (VX-245): a segmented control's labels are one line.
+                .lineLimit(1)
                 .fixedSize()
                 ForEach(durationWhys, id: \.self) { why in
                     quiet(why)

@@ -43,6 +43,11 @@ final class PoolPostsModel {
     /// card family later.
     private(set) var snippets: [String: String] = [:]
     private(set) var lastError: String?
+    /// **VX-268 — who reaches each DRAWN note now** (the ONE icon on the Pool's
+    /// rows — her kickoff call: "Pool rows … IN"): `Queries.mcpNoteReaches`
+    /// over `drawnIDs` — ∝ the Pool's own window (`window` loose rows, plus the
+    /// tucked run while it shows), held while the page shows.
+    private(set) var reach: [String: [MCPPlaceReach]] = [:]
 
     /// Bounded like every held listing (the observeLibrary discipline).
     nonisolated static let window = 200
@@ -110,6 +115,15 @@ final class PoolPostsModel {
     /// shows — so the chips/previews reads stay bounded by what is on screen.
     var drawnIDs: [String] {
         posts.map(\.postID) + (showsTucked ? tucked.map(\.postID) : [])
+    }
+
+    /// VX-268 — hold the drawn rows' reach (the view's `.task(id: drawnIDs)`
+    /// restarts it when the rows change).
+    func holdReach(_ ids: [String]) async {
+        await MCPRowReach.hold(session, { try Queries.mcpNoteReaches($0, noteIDs: ids) }) { [weak self] value in
+            guard let self, self.reach != value else { return }
+            self.reach = value
+        }
     }
 
     private func loadTags() async {
@@ -211,6 +225,8 @@ struct PoolPostsView: View {
     static let surfaceCapabilities: [CapabilityID] = [.tagNote]
         // 13n-c U4: a note row's pending-ask glyph.
         + MCPAskGlyph.surfaceCapabilities
+        // VX-268: the ONE shared icon on a note row and its popover's doors.
+        + MCPSharedIcon.surfaceCapabilities
 
     let session: AppSession
     let model: PoolPostsModel
@@ -334,6 +350,8 @@ struct PoolPostsView: View {
         }
         .background(tokens.surface)
         .task(id: model.session.wing.currentID) { await model.start() }
+        // VX-268: who reaches the drawn rows — held, re-aimed as they change.
+        .task(id: model.drawnIDs) { await model.holdReach(model.drawnIDs) }
         .wingMoveConfirm($wingMove, wings: wings)
         .onDisappear { model.tuckAway() }
         #if DEBUG
@@ -416,6 +434,9 @@ struct PoolPostsView: View {
                             .font(tokens.body)
                             .foregroundStyle(tokens.ink)
                             .lineLimit(1)
+                        // VX-268: the ONE shared icon (nothing when nobody
+                        // reaches it), then a waiting ask — the Bookcase's order.
+                        MCPSharedIcon(reaches: model.reach[item.postID] ?? [], tokens: tokens)
                         // 13n-c U4: an ask waiting on this note.
                         MCPAskGlyph(.note(item.postID), tokens: tokens)
                         // The quiet day — suppressed when the lead already IS

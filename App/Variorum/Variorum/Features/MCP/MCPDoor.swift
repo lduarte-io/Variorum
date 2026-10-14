@@ -187,6 +187,32 @@ final class MCPDoor {
     @ObservationIgnored var settingsRequestAdopted = 0
     @ObservationIgnored var settingsRequestScrolled = 0
 
+    // MARK: - The pane's session memory (VX-281 U1 — never stored, never synced)
+
+    /// R-VX184-6 — the tab of Settings ▸ MCP she last picked THIS session
+    /// (this app run; the door is app-lived): nil until she picks, and the
+    /// pane then opens by the rule (`MCPPaneTab.opening` — Connect while no
+    /// client is approved, else Clients). Read when the pane mounts, so it
+    /// survives the pane going away (another pane, Settings closing).
+    @ObservationIgnored var paneTab: MCPPaneTab?
+
+    /// **VX-232 — the setup menu's chosen client lives HERE, beside the
+    /// receipt it explains** (`note`, place `.connect`). It was the pane's
+    /// view state, so anything that remounted the pane (a voice flip through
+    /// General — VX-184 U1's live round — another pane, Settings closing)
+    /// brought the menu back on Claude Code under the Any-client receipt the
+    /// door still held. Session memory like `paneTab`.
+    private(set) var setupClient: MCPSetupClient = .claudeCode
+
+    /// The menu's choice (her press on a client). A receipt names ONE
+    /// client's next step, so choosing another clears it — a refusal at the
+    /// pane's head stays (`clearConnectNote`).
+    func chooseSetupClient(_ client: MCPSetupClient) {
+        guard client != setupClient else { return }
+        setupClient = client
+        clearConnectNote()
+    }
+
     /// U4 (R-13nb-23 (a), AF-11 F-2) — THE AI's LAST CHANGE this session:
     /// where the most recent write receipt's "Open ›" goes. Observable, so
     /// "Show the AI's Last Change" (⌥⌘O) greys and ungreys with it;
@@ -479,7 +505,20 @@ final class MCPDoor {
     /// chosen setup CARRYING it. The clipboard is written only once the key
     /// is kept: a setup whose key the library never kept would only be
     /// refused. No library open → nowhere to keep a key → said, nothing copied.
-    func copySetupCommand(for client: MCPSetupClient = .claudeCode, to pasteboard: NSPasteboard = .general) async {
+    ///
+    /// VX-232: the client copied IS the chosen one — the receipt this act
+    /// speaks always names the client the menu shows (the pane's press
+    /// copies the shown client, so from the pane this changes nothing).
+    ///
+    /// **VX-281 ladder R1-3 — a choice made while the copy waits on its
+    /// key's mint** (a store write: the writer may be busy with a sync round,
+    /// an import, an MCP batch). Her press completes — the copied client's
+    /// setup lands on the clipboard — but its receipt lands only while the
+    /// menu still shows that client: the end state is exactly a copy followed
+    /// by a choice, which clears the receipt (`chooseSetupClient`). No
+    /// default client: every caller names the one it copies.
+    func copySetupCommand(for client: MCPSetupClient, to pasteboard: NSPasteboard = .general) async {
+        if setupClient != client { setupClient = client }
         guard let runner else {
             note = Note(text: MCPPaneCopy.setupNeedsLibrary, place: .connect)
             return
@@ -490,15 +529,25 @@ final class MCPDoor {
             pasteboard.clearContents()
             pasteboard.setString(
                 client.text(shimPath: Self.shimPath, isDebugBuild: Self.isDebugBuild, key: key), forType: .string)
+            guard setupClient == client else { return }
             note = Note(text: client.copiedReceipt, place: .connect)
         } catch {
             note = Note(text: MCPPaneCopy.refusal(error), place: .connect)
         }
     }
 
+    /// **The copy icon's ✓ question** (VX-281 ladder R1-3): did a copy of
+    /// `client` land — its receipt standing under the menu — AND is `client`
+    /// still the one the menu shows? A ✓ beside another client's text would
+    /// say THAT text was copied.
+    func copyLanded(for client: MCPSetupClient) -> Bool {
+        setupClient == client && note == Note(text: client.copiedReceipt, place: .connect)
+    }
+
     /// 13n-c U5: a copy receipt names ONE client's next step, so choosing
     /// another client in the menu clears it (a "Copied … Claude Code" caption
     /// under Codex's text would be a lie). A refusal at the head stays.
+    /// (VX-281 U1: the menu's choice reaches it through `chooseSetupClient`.)
     func clearConnectNote() {
         if note?.place == .connect { note = nil }
     }

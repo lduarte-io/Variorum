@@ -27,6 +27,12 @@ final class WingsModel {
 
     /// The live ADDITIONAL wings, in switcher order (Home is virtual).
     private(set) var wings: [Wing] = []
+    /// **VX-268 — who reaches each WING now** (the ONE icon on the switcher's
+    /// rows — ⌘L's sheet and the ▾ menu; "a shared wing never shows as shared
+    /// there"): `Queries.mcpWingReaches` — a wing grant on it or the open book,
+    /// `decideWing`'s read. Keyed by wing id, Home `''`. ∝ the wings × the
+    /// approved clients; never reads `container`.
+    private(set) var reach: [String: [MCPPlaceReach]] = [:]
 
     init(session: AppSession) {
         self.session = session
@@ -54,6 +60,15 @@ final class WingsModel {
     func load() async {
         if let value = try? await session.database.read({ try Queries.wings($0) }) {
             adopt(value)
+        }
+    }
+
+    /// VX-268 — hold every wing's reach (the main window's task, beside
+    /// `track` — the window that renders the switcher).
+    func watchSharing() async {
+        await MCPRowReach.hold(session, { try Queries.mcpWingReaches($0) }) { [weak self] value in
+            guard let self, self.reach != value else { return }
+            self.reach = value
         }
     }
 
