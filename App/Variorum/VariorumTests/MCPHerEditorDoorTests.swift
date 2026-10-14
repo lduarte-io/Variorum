@@ -258,7 +258,8 @@ struct MCPHerEditorDoorTests {
             let token = NotificationCenter.default.addObserver(
                 forName: .variorumNotesDeleted, object: nil, queue: .main
             ) { note in
-                heard.withValue { $0 = (note.userInfo?["postIDs"] as? [String]) ?? [] }
+                let ids = (note.userInfo?["postIDs"] as? [String]) ?? []
+                heard.setValue(ids)
             }
             defer { NotificationCenter.default.removeObserver(token) }
             let workspace = WorkspaceModel()
