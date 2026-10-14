@@ -256,34 +256,40 @@ extension Queries {
 
     /// **Every live book AND GATHERING an approved client reaches now, with
     /// who and why** — the Bookcase's icons (VX-271; the old chip's
-    /// `mcpReachableBookIDs`, grown to say who and how far). VX-185 (her
-    /// report: a gathering never wore the icon "even when you've shared the
-    /// whole wing"): every live reading is decided by ITS kind's ONE rule — a
-    /// book through `decide`, a gathering through `decideGathering` (wing-level
-    /// reach on its wing, or the open book — never a note or book grant,
-    /// R-VX185-1; a fenced one never). REACH, not presentation: an archived
-    /// reading stays in the map as the wire still answers it by id; the
-    /// Bookcase never draws an archived row of either kind
-    /// (`bookcaseReadings`). One-shot or held; ∝ the readings × the approved
-    /// clients (a handful), each client's grants read once, one facts row per
-    /// reading — never an assembly, never `container`.
-    public static func mcpBookReaches(_ db: Database) throws -> [String: [MCPPlaceReach]] {
-        let clients = try mcpClients(db, states: [.approved])
-        guard !clients.isEmpty else { return [:] }
-        let openBook = try mcpSwitch(db, .openBook)
-        let standings = try clients.map { ($0, try mcpGrants(db, clientID: $0.id)) }
-        guard openBook || standings.contains(where: { $0.1.contains(where: { $0.ruleGrant.isLive }) }) else {
-            return [:]
-        }
+    /// `mcpReachableBookIDs`, grown to say who and how far) with `readingIDs`
+    /// nil, and since VX-268 the Library's LISTED book and gathering rows with
+    /// the listed ids. VX-185 (her report: a gathering never wore the icon
+    /// "even when you've shared the whole wing"): every reading is decided by
+    /// ITS kind's ONE rule — a book through `decide`, a gathering through
+    /// `decideGathering` (wing-level reach on its wing, or the open book —
+    /// never a note or book grant, R-VX185-1; a fenced one never). REACH, not
+    /// presentation: an archived reading stays in the map as the wire still
+    /// answers it by id; the Bookcase never draws an archived row of either
+    /// kind (`bookcaseReadings`). A dead id, a note's id or a fenced reading
+    /// answers nobody. One-shot or held; ∝ the readings (every live one, or
+    /// the ids given) × the approved clients (a handful), each client's grants
+    /// read once, one facts row per reading — never an assembly, never
+    /// `container`.
+    ///
+    /// **ONE function, ONE gate** (VX-281 ladder R1-6): the Bookcase's map and
+    /// the listed rows' map are the same read over different ids, behind the
+    /// same `mcpReachStandings` (VX-272's ≥1-approved-client rule, the open
+    /// book, a live grant) — so a gate change can never be made for one and
+    /// not the other.
+    public static func mcpBookReaches(
+        _ db: Database, readingIDs: [String]? = nil
+    ) throws -> [String: [MCPPlaceReach]] {
+        if let readingIDs, readingIDs.isEmpty { return [:] }
+        guard let standing = try mcpReachStandings(db) else { return [:] }
+        let ids = try readingIDs.map { Array(Set($0)) }
+            ?? String.fetchAll(
+                db, sql: "SELECT id FROM reading WHERE deleted_at IS NULL AND kind IN ('book', 'gathering')")
         var titles: [String: String?] = [:]
         var out: [String: [MCPPlaceReach]] = [:]
-        for id in try String.fetchAll(
-            db, sql: "SELECT id FROM reading WHERE deleted_at IS NULL AND kind IN ('book', 'gathering')") {
+        for id in ids {
             guard let place = try mcpReachPlace(db, readingID: id) else { continue }
-            let reaches = try standings.compactMap { client, rows in
-                try placeReach(db, client: client, rows: rows, openBook: openBook, place: place, titles: &titles)
-            }
-            if !reaches.isEmpty { out[id] = reaches.sorted { $0.clientName < $1.clientName } }
+            let found = try reaches(db, standing, place: place, titles: &titles)
+            if !found.isEmpty { out[id] = found }
         }
         return out
     }
@@ -441,27 +447,6 @@ extension Queries {
         var out: [String: [MCPPlaceReach]] = [:]
         for (id, note) in facts {
             let found = try reaches(db, standing, place: .note(note), titles: &titles)
-            if !found.isEmpty { out[id] = found }
-        }
-        return out
-    }
-
-    /// **Who reaches each of these BOOKS and GATHERINGS, how far, and why**
-    /// (VX-268 — the Library's listed book and gathering rows). The listing's
-    /// twin of the Bookcase's `mcpBookReaches(db)`: each id decided by ITS
-    /// kind's ONE rule (a book through `decide`, a gathering through
-    /// `decideGathering` — VX-185, R-VX185-1), so the two maps agree for every
-    /// id (pinned). A dead id, a note's id or a fenced reading answers
-    /// nobody. ∝ the ids given — the listed rows (the Library lists its
-    /// wing's books whole: the Bookcase's own class) — one facts row each,
-    /// never an assembly, never `container`.
-    public static func mcpBookReaches(_ db: Database, readingIDs: [String]) throws -> [String: [MCPPlaceReach]] {
-        guard !readingIDs.isEmpty, let standing = try mcpReachStandings(db) else { return [:] }
-        var titles: [String: String?] = [:]
-        var out: [String: [MCPPlaceReach]] = [:]
-        for id in Set(readingIDs) {
-            guard let place = try mcpReachPlace(db, readingID: id) else { continue }
-            let found = try reaches(db, standing, place: place, titles: &titles)
             if !found.isEmpty { out[id] = found }
         }
         return out
