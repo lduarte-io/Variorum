@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #220. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #221). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **STOPPED AFTER W1 — awaiting the orchestrator's re-plan.** Window 05:23:19–05:25:17 (claim `vx282-u5`, RELEASED): W1 red on old — VX-257 10 issues / 6 cases exactly as predicted, its guards + `CommentPanelParkTests` green; **VX-229 RED ON OLD in the runner (3 alive · 3 observing · 3 re-reads — the leak is real; the CORRECTION's "hollow" was wrong for the runner) and the SHEET guards red on old too** (a model alive after each dismissal, both sheet shapes). W2/W3 NOT run; no app launched; dev store untouched. VX-229's fix (`ee86dd8c`, popover-only) is OUT of the tree and owed again, now with a sheet road. VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c` (headless red→green) — their stage runs PENDING. No claim held; no revert in flight. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — u5b: W2 the fixed batch minus `CommentPanelReleaseTests` (three groups) + W3 the walk with row 6 as the VX-229 DECIDER (`heap` on our pid: a baseline, then 3 popover · 3 Write-sheet · 3 nested-sheet cycles), then the VX-257/VX-183 rows and row 1 in both voices — ≈40 min.** No rebuild (the products built at `c2b3ba72`); the VX-229 fix stays out. W1 (05:23–05:25, released): VX-257 red on old as predicted; VX-229 and the sheet guards red on old in the runner — the coordinator's ruling: not yet proof, the app decides. VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c`. No claim held; no revert in flight. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **READY FOR STAGE — W1 red on old (`QuickEntryLaunchFocusTests` on `vx282-u6-old-products`, 1 issue expected, ≈3 min) · W2 the fixed batch on `vx282-u4` (three groups — the capture/quick-entry/pad suites with the four new ones, the tour suites, the shell-mount and launch/restore suites, ≈12 min) · W3 the walk (the old build's launch for the record; launch in both voices with a typed letter; a restored note window; the tour; the navigation-back scope line, ≈23 min) — ≈38 min.** Trace (headless, real module): the shell's ask reaches the box before its window and is spent (F-FR-1) — at launch and on every navigation back (O-U6-1, left as today). Pins `d35191b6` + correction `ee1facc9` (AppKit auto-selects a window's first text field when it is ordered in — the rig frees it) · fix `3cf0079b`. P-U6-1/2 → QUESTIONS #224. Products: old `vx282-u6-old-products` REBUILT by the revert named at `07f03fa5` (done, restored, `git status` clean); fixed `vx282-u4` rebuilt LAST (U4's final + U5 + U6 — u4b tests what U4 expects). No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
@@ -2155,6 +2155,51 @@ anchor: no instance; no booted simulator. Log: `notes/plans/vx282-screens/u5/log
   window) and pumps its own event loop; the runner is the active dev-store app inside `NSApplication.run`. Something in
   the second — not traced — keeps a dismissed host's panel alive. The undrained-pool and held-window effects measured
   offscreen are real effects of those probes, but they are not why the runner leaks.
+
+#### THE u5b WINDOW PLAN (≈40 min; the coordinator's re-plan, 2026-10-14 ~05:30 — no rebuild, the current products; the VX-229 fix stays out)
+
+**The coordinator's ruling on W1's red (recorded):** the runner's red is NOT yet proof of a leak in the APP —
+TEXTKIT2_NOTES §3 records that under async test bodies the runner's long-lived main-thread autorelease pool can keep a
+dropped mounted view alive past its test; the drained-pool offscreen probe saw every panel released; the app's run loop
+drains a pool per event; the sheet guards' reds fit the same hypothesis; and a HELD window does keep content alive and
+observing, so if SwiftUI's popover machinery holds the window the app leaks too. **The running app decides (W3 row 6).**
+
+From `App/Variorum/`; logs to `notes/plans/vx282-screens/u5/logs/`, captures to `notes/plans/vx282-screens/u5/`.
+`guard.sh --author` before every leg; `pgrep -lx Variorum` / the `MacOS/Variorum$` anchor (never a loose `pgrep -f`).
+- **W2 — the fixed batch, `-derivedDataPath DerivedData/vx282-u5`, three groups, `CommentPanelReleaseTests` EXCLUDED (it is
+  the question, not a guard):**
+  (g1) `CommentPanelHostSuites/CommentPanelHostLeavingTests` (the nested path; if it runs 0 tests, the fallback is
+  `-only-testing:VariorumTests/CommentPanelHostSuites -skip-testing:VariorumTests/CommentPanelHostSuites/CommentPanelReleaseTests`
+  — the log must show the VX-257 suite's ✔ lines and NO Release-suite line) `CommentPanelLeaveTests`
+  `CommentPanelDoorsTests` `CommentPanelParkTests` `CommentsPanelModelEditorTests` `CommentCompositionTests`
+  `CommentPanelKeysTests` `CommentsAndReorderTests` `CapabilityRegistryTests` `TrashSurfaceTests` `NoteVersionsPaneTests`
+  → `u5b-w2-g1.log`; (g2) as the § U5 plan (`CommentPanelFixLeg2Tests` … `BlockDecorGeometryTests`) → `u5b-w2-g2.log`;
+  (g3) `WriteTakesPanelRoutedCommandTests` `WriteTakesPanelKeysTests` → `u5b-w2-g3.log`. EXPECTED all green.
+- **W3 — the walk, the FIXED Debug app on the DEV store, with the VX-229 decider first** (so no panel has opened before
+  the baseline). `heap` only ever against OUR pid; if it needs a prompt, skip it, say so — VX-229 stays undecided.
+  - **Step 0:** launch, dismiss a What's New sheet by its own button, record the voice; stage `{t:"VX-229 walk"}alpha`
+    ⇧⏎ `beta` ⏎ through the shelf's quick entry (it opens in Write). **heap (a0):** `heap <pid> 2>&1 | grep -E
+    "CommentsPanelModel|ValueConcurrentObserver|ValueWriteOnlyObserver"` → `u5b-heap-a0.txt` (the panel model's count; the
+    GRDB observers as a whole — the panel's observation is a `ValueObservation` on the pool, no class of its own, so its
+    count is read as the observer total's DELTA).
+  - **Row 6a:** give `alpha` its first comment (caret in `alpha`, ⌘⇧', type `first`, ⌘⏎, Close) → wait 2 s → **heap
+    (a1)** — one sheet cycle.
+  - **Row 6b — the popover:** ⌘2 (Takes) → `alpha`'s margin note → click away, ×3 → wait 2 s → **heap (b)**.
+  - **Row 6c — Write's sheet:** ⌘1, caret in `alpha` → ⌘⇧' → Close, ×3 → wait 2 s → **heap (c)**.
+  - **Row 6d — the take panel's nested sheet:** caret in `beta`, ⌘T (a fan), ⌘↑; `beta`'s ⑂ badge → the panel; ⌘⇧' →
+    Close, ×3 → wait 2 s → **heap (d)**; ⌘⇧T closes the panel → wait 2 s → **heap (d2)**.
+  - **The functional symptom:** a comment added after the cycles, and whether anything shows N re-reads — the panel's
+    re-read leaves no visible or logged trace, so there is no honest signal for it in the app; recorded as such, not
+    invented.
+  - **The reading (the coordinator's rule):** counts that grow by ≈ one per cycle ⇒ the leak is REAL in the app (a fix leg
+    for the popover AND sheet roads follows, with a rebuild and a short re-run); counts that stay at the live panel's one
+    or zero ⇒ VX-229 is HOLLOW in use and the runner's red is a harness artefact ⇒ `CommentPanelReleaseTests` is reshaped
+    to the drained-pool shape the probe used (honest, green on the shipped code — never a red pin left in the suite).
+  - **Then rows 1–5 and 7 of the § U5 plan** (VX-257: the popover click-away keeps the draft and the reopen shows it; ⎋⎋
+    leaves nothing; Write's sheet; the nested sheet. VX-183: Add, Delete, Restore, Delete forever's confirm, Cancel. Row 1
+    in the second voice), on the same note.
+  - Then the walk note to the Trash, quit OUR instance by identity, `pgrep` again; the dev store Standard, unlocked, the
+    voice as found (Study); release the claim.
 
 ## Ladder
 
