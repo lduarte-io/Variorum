@@ -28,11 +28,13 @@ member keeping its ruling and its ticket:
 - **U7 — the agent's read-backs:** VX-254 · VX-256 · VX-261;
 - **U8 — the AI's docs, LAST:** VX-197. Its plan is this file's "U7: the AI's docs" section below (VX-246 renumbered
   it U8 when it sized the run).
+- **Joined 2026-10-14 at her word:** VX-342, the undo-overwrite warning's "BEFORE" in capitals. Her words: *"if it's a
+  tiny wording issue you can add it to the 336 run i suppose."*
 
 ## Kickoff message (for `/run-phase vx-336`)
 
 > Run VX-336, "Run: MCP wire tools & AI docs". It is VX-246's follow-on, minted at VX-246's closeout (2026-10-14) under
-> the orchestrator's provisional ruling 3, which she ratifies or reverses at the VX-246 bundle, `notes/QUESTIONS.md` #226.
+> the orchestrator's provisional ruling 3, which she RATIFIED on 2026-10-14 (`notes/QUESTIONS.md` #226, ratified whole).
 > VX-246 merged the door's FIX units; this run carries its other four units, unstarted. This plan file keeps its
 > original name because tickets point at it.
 >
@@ -41,6 +43,9 @@ member keeping its ruling and its ticket:
 > - **U6 — Compare from the wire:** VX-311 · VX-298;
 > - **U7 — the agent's read-backs:** VX-254 · VX-256 · VX-261 (after U5 and U6, so the digests cover the new tools);
 > - **U8 — the AI's docs, LAST:** VX-197 (this file's "U7: the AI's docs" section is its plan).
+> - **Also, joined at her word (2026-10-14):** VX-342, the undo-overwrite warning's "BEFORE" in capitals. It is a
+>   one-word copy fix in `ShellActions.discardingUndoDetail`; check the shared question and the phone's door. It rides
+>   whichever unit touches the Mac's chrome first.
 >
 > **Coordinates:** a fresh branch named for the run ticket, in its own worktree (`~/dev/variorum-vx-336`); one PR
 > `VX-336: …` (merge commit); a fresh run record `notes/plans/fixes/vx-336-<slug>.md`, minted at kickoff. Members close
@@ -51,8 +56,8 @@ member keeping its ruling and its ticket:
 > - **### U5 BRIEF**: VX-267 first (VX-253's matcher needs its form), then VX-253, VX-252, VX-255, every member ruled
 >   and quoted. Its old piece 0 (ruling 2: a navigate-away never takes her focus) is DONE at VX-246 (built in U4b,
 >   proven on her own door and with a real client), so skip it.
-> - **U6 and U7 have their THE UNITS rows only.** Their briefs are this run's orchestrator's to write, from the rows,
->   the tickets and HER ADDITIONS below.
+> - **### U6 BRIEF and ### U7 BRIEF** are drafted too. They were added to that record at VX-246's closeout, as drafts:
+>   re-read them against main as it stands, with the tickets and HER ADDITIONS below.
 > - **U8's brief** is this file's "U7: the AI's docs" section.
 >
 > **Carried facts (each binding):**
