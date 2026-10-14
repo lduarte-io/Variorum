@@ -1022,6 +1022,137 @@ navigate-away never takes her focus).
 - **Lanes:** this is VX-283's road (VX-123), and VX-123 carries a comment about it. Neither vx-281 nor vx-282 lists
   `WorkspaceModel`.
 
+*(The U6 and U7 BRIEFS below were drafted by the orchestrator during the night and added to this record at the
+closeout, 2026-10-14 ~12:00, for VX-336's orchestrator. The PHASE A closeout implementer caught that LIVE STATUS
+called them drafted while only U5's was in the file. They are drafts: VX-336's kickoff re-reads them against main as it
+stands then.)*
+
+### U6 BRIEF — Compare from the wire (VX-311 · VX-298)
+
+**Order:** VX-311 first, so an AI can make a lineage-aligned draft; then VX-298, so it can open Compare on it. Both
+are ruled pre-launch; each ticket is the record, quoted here.
+
+1. **VX-311: `duplicate_note`, her Duplicate as Version on the wire.**
+   - **Her words, verbatim:** *"the duplicate note tool should be easy? if you save the note as a version and
+     immediately promote the version it duplicates the note. so i feel like that is actually not hard to accomplish
+     and idk if duplicate note tool needs to be its own post launch ticket."*
+   - **Why it matters:** Compare lines rows up by shared `derived_from` lineage (`Queries.blockKinship`). A
+     `create_note` draft shares none, so Compare opens to empty columns. A duplicate keeps block-by-block lineage,
+     so an AI's alternate draft lines up row by row against the original.
+   - **The build wraps her own op.** `duplicateAsVersion` (AppSpec §9) makes per-block copies carrying comments,
+     presentation and `block.name`, plus a `version_of` edge, in one transaction with ONE client-named ⌥⌘Z.
+     - Her other road, `saveNoteVersion` then `promoteNoteVersion` at once, composes the same result from two acts.
+     - Argue which the tool wraps. The direct op is one transaction and is her visible door.
+   - **Access:**
+     - the READ rung on the source, plus WRITE NEW where the copy lands, which is wherever her door puts it;
+     - an unreachable source gets the ONE not-shared answer, with no oracle;
+     - it returns the new note's id and take ids, in VX-252's shape (U5's).
+   - **The undo entry** follows U2's rule, and the tool answers U3's `flushesHerEditorFirst`. A copy reads her
+     latest words, so argue it from U3's `save_version` row.
+   - No schema, no `Sync/`, no custody.
+2. **VX-298: `show_in_app` opens Compare with two or more notes side by side.**
+   - **HER ANSWERS, 2026-10-13, verbatim where quoted:**
+     1. Any two notes her picker would offer, with no link required: YES.
+     2. "Related blocks only" opens OFF when the pair shares no lineage: *"related blocks only off when they have no
+        history - that's fine"*.
+     3. Up to three peers: YES.
+     4. **Replace the open columns.** Her pick: the board shows exactly what the AI named, A with B beside it. Her
+        earlier columns were only a view, so nothing is lost.
+     5. `link_versions`' "Open ›" opens Compare A|B: YES.
+     6. `duplicate_note` is pre-launch (VX-311, above).
+   - **The trace** is the ticket's, read it whole. In brief:
+     - `show_in_app`'s targets and `MCPShowRule`'s etiquette are in `Sources/VariorumMCP/MCPShowTool.swift`. The tool
+       needs only the read rung, never spends a once grant, moves only while Variorum is frontmost in a full window,
+       refuses in words otherwise, and never queues.
+     - Her Compare is ⌘5 (`CompareBoardView`), with its "Compare with" picker (`Core/Views/NotePicker.swift`). No
+       `version_of` link is required.
+   - **The build:**
+     - a `.compare(noteID, peerIDs)` target;
+     - a read check on each note in order, where the first refusal gives the ONE not-shared answer (`link_versions`'
+       order);
+     - then: the same wing, and only notes her picker would offer;
+     - delivery on the lens target's model (`MCPNavigator`), filling the columns the way `makeOutlinePost` does, with
+       "related blocks only" OFF when the notes share no lineage;
+     - the catalog entry and its Activity words.
+     - **Activity words:** if they live in VX-281's lane (`MCPPaneCopy.swift` …), record them as OWED for U1b; don't
+       edit there.
+
+**Lanes.** VX-281's lane (`MCPPane*`, `MCPPaneCopy`, `MCPGrantSheet`, the shared icon) is out. Note that its own
+branch edits `MCPDoor.swift`, so keep any `MCPDoor` edit minimal. Compare's board is no other run's surface; if a
+trace reaches vx-282's listed editor files, STOP and report.
+
+**Evidence that closes U6.**
+- **Pins**, red-first per member and red again by revert.
+- **The whole headless package green,** with counts.
+- **THE STAGE WINDOW plan** in your record (claim `vx246-u6`; minutes; a batch-only fallback):
+  - a Mac batch over every changed source file's suites;
+  - a REAL-client live round on the dev store. `claude -p` turns: `duplicate_note` an existing note, edit the copy,
+    `show_in_app` with a Compare target naming the pair (rows line up), then an unrelated pair (opens with "related
+    blocks only" off), and `link_versions`' Open ›.
+  - **The Compare board walked in BOTH voices** with captures.
+  - `claude-code` connects by U1's documented detour (Deny → re-run → Approve), registered `-s local` in a scratch
+    project only; her user-scope servers are fingerprinted before and after.
+  - `show_in_app` moves only while Variorum is frontmost, so the walk keeps it in front.
+
+**Context:** past ~500k, stop at the next clean seam (committed, green, the continuation written) and report.
+
+**Out of scope:** every other unit's members; U1b; the guide (U8), beyond doc-truth for any description this unit
+makes false.
+
+### U7 BRIEF — the agent's read-backs (VX-254 · VX-256 · VX-261)
+
+**Why after U5 and U6:** the digests must cover every take-writing tool, U5's and U6's new ones included
+(`insert_blocks`, `create_note`'s new answer, `duplicate_note`). Each ticket is the record, quoted here. Source for all
+three: `notes/mcp-agent-notes-2026-10-13-bilingual-book.md`, the agent's own notes from her bilingual-book build.
+
+1. **VX-254: content digests on write replies.**
+   - `create_note`, `import_document` and `edit_take`, and the batch adds, answer a short digest per take of the
+     STORED text (e.g. SHA-256 of the exact UTF-8 bytes, no normalization). An agent then compares it with a digest of
+     its SOURCE and proves the write without pulling 130k characters back.
+   - Her run's one transcription slip ("beliscáu" → "beliscou", ch. 11) was caught only by a full read-back.
+   - Its cost is proportional to the write's size (P1-clean). The descriptions state the algorithm and the byte rule.
+   - **Scope by the class rule:** EVERY tool that writes a take's text answers it, and the record lists them.
+     U5's `insert_blocks` and U6's `duplicate_note` are on the list.
+2. **VX-256: a compact or paged `read_note`.**
+   - A big chapter's `read_note with_ids` was 100–133k characters. That is over Claude Code's tool-output cap: it
+     spilled to a file, and an agent without a filesystem couldn't verify its work. VX-184's VX-186 dedupe helps,
+     leaving ~65k.
+   - Add an ids-only form (block, take and label ids, no text) and/or block-range paging, so any client reads a big
+     note in pieces. Argue which, or both. Its cost is proportional to the page (P1-friendly).
+   - Keep the ONE not-shared answer and `read_note`'s existing forms byte-unchanged where not asked for.
+3. **VX-261: a read tool listing the client's OWN recent acts.**
+   - **The chosen road,** her word: *"if you think that a read tool listing the client's own recent acts from the
+     activity log suffices then that's fine"*. It is a read tool over the existing activity log that answers the
+     CALLER'S OWN recent acts: the act, the target id, the title it wrote, and when. No schema.
+   - It covers recovery after a dropped call, and resuming a long job after the agent's own context is lost.
+   - **Mind the oracle:** answer only what the client itself sent or was told at act time, never the CURRENT state of
+     a target that has since become unreachable.
+   - The log is capped at 500 rows, which is fine for recovery.
+   - Not chosen, recorded only: an idempotency token on creating calls.
+
+**Lanes and words.**
+- Tool descriptions live in `Sources/VariorumMCP` (ours).
+- If a new tool's Activity words live in VX-281's lane, record them as OWED for U1b.
+- If VX-281's merge has already landed and main is merged in, the OWED words may be written here instead. Say which
+  in the record.
+- Wording ships as built and goes on the FOR VX-234 list.
+
+**Evidence that closes U7.**
+- **Pins**, red-first per member and red again by revert. A new field or tool is red by its absence.
+- **The whole headless package green,** with counts.
+- **THE STAGE WINDOW plan** in your record (claim `vx246-u7`; minutes; a batch-only fallback):
+  - a Mac batch over every changed source file's suites;
+  - a REAL-client live round on the dev store. `claude -p` turns: a write whose reply digest the turn checks
+    against its own source digest; a big note read in pages or ids-only that stays under the client's output cap;
+    and the recent-acts tool after a deliberately dropped call.
+  - `claude-code` connects by U1's documented detour (Deny → re-run → Approve), registered `-s local` in a scratch
+    project only; her user-scope servers are fingerprinted before and after. If U1b's face has landed by then, use
+    leg 1's tab key instead.
+
+**Context:** past ~500k, stop at the next clean seam (committed, green, the continuation written) and report.
+
+**Out of scope:** every other unit's members; U1b; the guide (U8), beyond doc-truth.
+
 ### CLOSEOUT BRIEF — VX-246 (the fix units; ruling 3)
 
 The closeout ritual per CLAUDE.md ("Build workflow" → closeout) and the run-phase skill's step 6, for THIS run's scope
@@ -4849,3 +4980,18 @@ The closeout paragraph's MOBILE PARITY sentence (if D7b lands) names PL-54 as ab
   the kickoff sentence.
 - LIVE STATUS's CLOSEOUT row: the window's result line, the ledgers' commit, the refresh build.
 - "Tickets minted from this run": a VX-336 row (the follow-on run, minted by the orchestrator at the closeout).
+
+### THE ORCHESTRATOR ON PHASE A's FOUR FINDINGS (2026-10-14 ~12:00 MDT)
+
+1. **The U6/U7 briefs:** the closeout implementer was right. They had been drafted only in the orchestrator's
+   scratchpad. They are now in the record, above the CLOSEOUT BRIEF, marked as drafts for VX-336, so the plan's re-aimed
+   kickoff line can say they are drafted.
+2. **The master plan: option (a), RETIRE THE ROW ONLY.**
+   - CLAUDE.md says "Bug fixes and tech debt never go in the master plan", and this merge is fix units only (ruling 3).
+   - The latest two precedents did the same: VX-184 at `b228e51c` and VX-281 at `3d42df78` retired their rows and
+     wrote no paragraph.
+   - D7 shrinks to the row's retirement. The run's story lives in this record, AppSpec §14's entry and the handoff.
+3. **A headless phone build: APPROVED, and added to PHASE B.** U2 changed the core undo API and
+   `Shared/StructuralUndoCopy.swift`. Compile `VariorumMobile` (an `xcodebuild build` for the iOS Simulator SDK, which
+   launches nothing, so it needs no claim). VM-16's door fix stays VM-16's; this only proves the phone still compiles.
+4. **The numbers** (QUESTIONS #220, PL-54, §14's roll): re-checked on latest main at PHASE C, as proposed.
