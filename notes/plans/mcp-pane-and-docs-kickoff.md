@@ -292,6 +292,15 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
     doors keep the full guard.
   - **VX-260 (Pre-launch):** her edit makes an AI's comment hers; a suggest delete then needs edit
     and hears her R-VX188-2 sentence.
+- **VX-330 JOINS VX-336 (her word, 2026-10-14, mid-run, verbatim):** *"I want you to add VX-330 to somewhere in the run
+  - you can choose where it would slot in best. It's an issue where combined chapter / note headings don't show any AI
+  symbol but that's how the example sherlock holmes looks and i think people might share that book with AI as an
+  example so i want it fixed pre launch."* The Book Panel's collapsed one-note chapter row (the chapter heading and its
+  one note shown as one row, as every chapter of the seeded sherlock reads) wears neither `MCPAskGlyph` nor
+  `MCPSharedIcon`; both go on that row, the same as the panel's note rows, through the one `MCPRowReach` hold (P1:
+  reach read for the rows drawn). **Promoted to Pre-launch.** **Slotted (the orchestrator, at her delegation): U6**, the
+  run's first unit with app-side code and a both-voices walk with a real client connected — the setting its proof needs —
+  and it lands before U8, so the guide's shared-icon sentence describes the panel as fixed.
 
 ## Rules binding this run
 
