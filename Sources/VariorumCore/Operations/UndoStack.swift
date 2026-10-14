@@ -432,6 +432,9 @@ public final class UndoStack: @unchecked Sendable {
         if hadFuture { notifyChange() }
     }
 
+    /// A compound leg's place in the undo↔redo ping-pong (VX-246 U2).
+    private enum LegState: Sendable { case applied, reverted, retired }
+
     /// Empties BOTH stacks. **No production caller, deliberately (17f/P44):**
     /// no app road clears undo history — a session's stack dies with its
     /// process, and a "forget my undo history" door is product behaviour
@@ -440,9 +443,6 @@ public final class UndoStack: @unchecked Sendable {
     /// `VariorumCoreTests` is a separate module. Kept, not removed: it is the
     /// only way to return a stack to its birth state, and a test-support seam
     /// that says so is not dead code.
-    /// A compound leg's place in the undo↔redo ping-pong (VX-246 U2).
-    private enum LegState: Sendable { case applied, reverted, retired }
-
     public func removeAll() {
         lock.withLock {
             entries.removeAll()
