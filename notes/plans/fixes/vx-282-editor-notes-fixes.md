@@ -3144,4 +3144,48 @@ R1-8 (the VX-229 known issues under the whole-target run) is the closeout's watc
 
 ## Closeout
 
-*(Pending.)*
+*(The orchestrator's sections — finals, the ratify list, MOBILE PARITY, the merge — follow; the implementer writes the
+merged-tip run.)*
+
+### CLOSEOUT — THE MERGED-TIP RUN (prepared headless by the round-1/round-2 fix legs' `opus-implementer`, 2026-10-14)
+
+**State: READY FOR STAGE — closeout, ≈60 min** (the Mac whole target ≈40 — VX-281's took 2,325 s; the phone whole target
+≈10 incl. the boot and install; margins). Nothing has run yet; every count below is PENDING.
+
+**The tip is the merged tip, and the products are its build — no rebuild.** `origin/main` is `fa3bc6e1`, an ancestor of
+the branch (`git merge-base --is-ancestor` ✓; merged at `ece30a41`). `git diff --stat ddcfda66 HEAD -- App Sources Tests`
+is EMPTY — every commit after `ddcfda66` is notes/logs — and both trees were last built from `ddcfda66`'s code:
+`DerivedData/vx282-u1` (Mac; `nm`: round 2's `noteIsEditable` present) and `DerivedData/vx282-u2-ios` (phone; built
+after `ddcfda66`, the shared face's F-3 included). No `Sources/` line changed this run after U5's VX-182 (core 2,809/322 ·
+MCP 212/41 · workbook 40/6 on the merged tip at ~05:00, the merge-of-main record) — no `swift test` owed.
+
+**The schemes' test actions (read, so the plain command runs exactly the unit bundles):** `Variorum.xcscheme`'s ONE
+testable is `VariorumTests`; `VariorumMobile.xcscheme`'s ONE is `VariorumMobileTests` — no UI-test bundle rides either,
+so no `-only-testing` is equivalent to VX-281's `-only-testing:VariorumTests`, and nothing launches the app beyond the
+test host.
+
+**Logs:** the full logs are LARGE (VX-281's whole log was gitignored with its folder), so the full `*.full.log` files stay
+on disk under `notes/plans/vx282-screens/closeout/logs/` and are gitignored (one `.gitignore` line, this commit); what is
+committed is an extract per run — the run line, every `✘`, every known-issue (`━`) line with its text, and the VX-229
+cells' lines — `*-extract.txt`.
+
+**THE WINDOW (on the orchestrator's claim line; `guard.sh --author` before each leg; `pgrep -lx Variorum` empty; no app
+launch beyond the test hosts, no walk):** from `App/Variorum/`:
+1. **The WHOLE Mac target (≈40 min):** `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS'
+   -derivedDataPath DerivedData/vx282-u1` → `…/closeout/logs/mac-whole.full.log`. **Expected standing reds on main,
+   nothing else:** VX-115 `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (1) · VX-245/VX-283's remaining
+   `ChromeLineLimitTests.everyBareFixedSizeStatesItsLinePolicy` sites (1; VX-281 left six non-MCP sites — this run added
+   no `fixedSize`, to be confirmed from the issue text) · VX-167 `DestructiveUndoWarningTests.redoNeverAsks` (in-process
+   parallelism, ≤3). VX-281's finals for comparison: 4,590 tests / 748 suites, 10 issues incl. 5 known; this run adds its
+   own pins (the count delta is read, not predicted). **Any red outside those is a FINDING:** read it, trace whether this
+   branch's diff (`fa3bc6e1..HEAD`) reaches it, report it — no fix in the window. **R1-8:** the VX-229 known-issue
+   cells (`CommentPanelReleaseTests` under `CommentPanelHostSuites`) — if the runner RELEASED the panels in this run,
+   their non-intermittent `withKnownIssue` blocks report "known issue was not recorded" as a failure; either way the
+   cells' census lines and outcome are recorded exactly, and reported, not fixed.
+2. **The WHOLE phone target (≈10 min):** `xcodebuild test-without-building -scheme VariorumMobile -destination
+   'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' -derivedDataPath DerivedData/vx282-u2-ios
+   -collect-test-diagnostics never` → `…/closeout/logs/phone-whole.full.log`. Expected green (the phone compiles the
+   shared EditorBrain and markdown face this run changed); any red is read and traced the same way. Then `xcrun simctl
+   shutdown all` → 0 booted.
+3. Release the claim; write the results here (the extracts committed); report.
+
