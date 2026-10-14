@@ -214,6 +214,20 @@ extension SWorld {
         return images.sorted { $0.0 < $1.0 }
     }
 
+    /// An Apple account's iCloud Keychain as it will be once it carries what
+    /// its devices have already done — every queued add and delete of a
+    /// device whose switch is on applied (the newer version of a name wins).
+    func eventualCloud(_ appleAccount: String) -> [KName: KItem] {
+        guard let account = appleAccounts[appleAccount] else { return [:] }
+        var cloud = account.cloud
+        for device in devices where device.appleAccount == appleAccount && device.iCloudOn {
+            for (name, replica) in device.keychain.synced where replica.dirty && replica.version > (cloud[name]?.version ?? 0) {
+                cloud[name] = AppleAccountFake.Entry(item: replica.item, version: replica.version)
+            }
+        }
+        return cloud.compactMapValues(\.item)
+    }
+
     /// THE ATTACKER on `device`: a login-password holder there (every item's
     /// secret but a Touch ID item's; every file; the bound account's vault
     /// through the session) and, with `appleAccount`, the Apple account's whole
@@ -222,7 +236,7 @@ extension SWorld {
         var seeds = Seeds()
         let section = device.library?.section
         var items = Array(device.keychain.local.values) + device.keychain.synced.values.compactMap(\.item)
-        if appleAccount, let id = device.appleAccount, let account = appleAccounts[id] { items += account.liveItems.values }
+        if appleAccount, let id = device.appleAccount { items += eventualCloud(id).values }
         let retired = section?.retiredAppleKeyIDs ?? []
         let oldSharedStanding = section?.oldSharedKeyStillStanding ?? false
         for item in items where !item.touchID {
@@ -447,6 +461,7 @@ extension SWorld {
     func nothingStranded() -> [Violation] {
         var violations: [Violation] = []
         var reachCache: [String: [String: StoreKey]] = [:]
+        var catalogCache: [String: Catalog] = [:]
         for (id, copy) in truth.copies.sorted(by: { $0.key < $1.key }) {
             let device = device(copy.madeOn)
             guard let (fs, path) = DeviceLeaves(world: self, device: device).resolve(id), let image = fs.files[path]?.library else {
@@ -458,14 +473,30 @@ extension SWorld {
             reachCache[device.name] = reached
             if reached[image.fingerprint] != nil { continue }
             // A Standard copy made with no passphrase or words, once its own
-            // Apple key and this Mac's are both gone.
-            if case .format3(let pair)? = fs.files[SPath.pair(of: path)]?.keyFile, pair.passphrase == nil, pair.words == nil,
-               pair.master == nil, [pair.apple?.keyID, pair.sharedApple?.keyID].compactMap({ $0 }).allSatisfy(truth.lostAppleKeys.contains) {
-                continue
-            }
+            // Apple key and this Mac's are both gone (promise 5's exception).
+            let catalog = catalogCache[device.name] ?? self.catalog(device)
+            catalogCache[device.name] = catalog
+            let serving = catalog.copies.first { $0.id == id }.map { catalog.servingKeyFiles(of: $0) } ?? []
+            if !serving.isEmpty, serving.allSatisfy({ secretless($0.document) }) { continue }
             violations.append(Violation(promise: 5, device: device.name, detail: "the copy \(id) (\(f8(image.fingerprint))) opens by no road"))
         }
         return violations
+    }
+
+    /// A key file with no passphrase, words or master lock whose Apple keys
+    /// are all gone (an Apple-ID switch, an iCloud Keychain reset).
+    func secretless(_ document: KeyFileDocument?) -> Bool {
+        switch document {
+        case .format3(let file)?:
+            guard file.passphrase == nil, file.words == nil, file.master == nil else { return false }
+            return [file.apple?.keyID, file.sharedApple?.keyID].compactMap { $0 }.allSatisfy(truth.lostAppleKeys.contains)
+        case .legacy(let legacy)?:
+            let envelope = legacy.envelope
+            guard envelope.passphrase == nil, envelope.recovery == nil, envelope.master == nil else { return false }
+            return envelope.appleKeyID.map(truth.lostAppleKeys.contains) ?? true
+        case nil:
+            return false
+        }
     }
 
     /// PROMISE 11 — own copies only: retention prunes only this Mac's copies

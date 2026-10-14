@@ -67,4 +67,29 @@ struct MigrationScenarios {
             expectPromisesKept(world, name)
         }
     }
+
+    /// "corner 45's ambiguous case: no custody repair until the notice is
+    /// answered, and confirming Standard is a key change" — a VX-202 victim
+    /// (recorded Castle, not confirmed, its key in today's silent item). Once
+    /// she answers Standard, the leave's new key takes nothing, and nothing a
+    /// login-password holder reads — today's silent item included — opens the
+    /// copies from before it (promise 13).
+    @Test func corner45sAmbiguousCase() async throws {
+        let world = try scenarioWorld { w in
+            try w.today(on: w.macA, TodaySpec(mode: .castle, gate: .alwaysAsk, silentInCastle: true))
+        }
+        let k0 = try #require(world.macA.slot?.fingerprint)
+        await world.done([.launch("macA")])
+        let record = try #require(world.macA.slot?.record)
+        #expect(record.mode == .castle && !record.modeConfirmed)
+        #expect(world.assessed(world.macA).acts.contains(.corner45Notice))
+        // No custody repair until the notice is answered: today's item stays.
+        let bound = KName.legacyBound(SWorld.scope, record.libraryID)
+        #expect(world.macA.keychain.local[bound] != nil)
+        await world.done([.backup("macA"), .settle, .answerCorner45("macA", .standard)])
+        let after = try #require(world.macA.slot?.record)
+        #expect(after.mode == .standard && after.currentFingerprint != k0, "confirming Standard is a key change")
+        #expect(world.macA.keychain.local[bound] == nil, "today's silent item still holds the Castle-era key after the leave")
+        expectPromisesKept(world)
+    }
 }

@@ -213,6 +213,21 @@ extension ActContext {
             if item.itemClass == .silent, sweepForCastle, !historyHolds(item.fingerprint) { continue }
             try leaves.custody.deleteCustody(fingerprint: item.fingerprint, itemClass: item.itemClass)
         }
+        // A LEAVE: the outgoing Castle key's custody goes with its key — today's
+        // per-library-ID SILENT item holding it too (corner 45's ambiguous case,
+        // recorded Castle not yet confirmed, keeps today's custody until it is;
+        // answering Standard is this key change, and from it on nothing a
+        // login-password holder reads may open a copy from before the leave —
+        // promise 13). Only once the anchor, written first, holds that key.
+        // PROVISIONAL P-U4-2 (VX-305 U4, found by the scenario world).
+        if !sweepForCastle, let from = plan.fromFingerprint, library.record?.mode == .standard,
+           library.familyTree.entry(from)?.kind == .castle,
+           live?.anchor?.directFingerprints.contains(from) == true {
+            for item in try leaves.legacyItems.legacyItems() {
+                guard case .silent = item.kind, item.fingerprint == from else { continue }
+                try leaves.legacyItems.deleteLegacyItem(item.kind)
+            }
+        }
         guard sweepForCastle else { return }
         for item in try leaves.legacyItems.legacyItems() {
             guard let fingerprint = item.fingerprint, tree.contains(fingerprint) || fingerprint == plan.fromFingerprint,

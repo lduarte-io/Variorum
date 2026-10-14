@@ -34,7 +34,12 @@ extension SWorld {
             moveBefore = (d, openableCopies(d))
         }
         var result = await apply(action)
+        let kind = String(String(describing: action).prefix { $0 != "(" })
+        let tag: String
+        switch result { case .done: tag = "done"; case .crashed: tag = "crashed"; case .refused: tag = "refused" }
+        stats[kind, default: [:]][tag, default: 0] += 1
         if case .crash = action, result == .crashed, let name = action.device { crashed.insert(name) }
+        for device in devices { adoptPending(device) }
         var found: [Violation] = []
         if case .tamper(let name, let tamper) = action {
             // The next open is when a planted or replayed thing would act.
@@ -46,6 +51,7 @@ extension SWorld {
             }
         }
         if case .launch(let name) = action, result == .done { crashed.remove(name) }
+        for device in devices { adoptPending(device) }
         if action == .settle { crashed.removeAll() }
         found += checkPromises(settled: action == .settle)
         found += noSilentChange(action, before: before, crashedBefore: crashedBefore)
@@ -323,6 +329,7 @@ struct GeneratorTests {
     @Test func seededSequencesKeepEveryPromise() async throws {
         let started = Date()
         var steps = 0, sequences = 0
+        var stats: [String: [String: Int]] = [:]
         for seedIndex in 0..<GeneratorCounts.seeds {
             let seed = GeneratorCounts.firstSeed + UInt64(seedIndex)
             var generator = ScenarioGenerator(seed: seed)
@@ -331,6 +338,7 @@ struct GeneratorTests {
                 let (generated, world) = try await generator.sequence(seed: sequenceSeed, maxSteps: GeneratorCounts.maxSteps)
                 sequences += 1
                 steps += generated.actions.count
+                for (kind, counts) in world.stats { for (tag, n) in counts { stats[kind, default: [:]][tag, default: 0] += n } }
                 guard let (violation, _) = world.violations.first else { continue }
                 let minimal = try await ScenarioGenerator.shrink(generated, promise: violation.promise)
                 let replayed = try await ScenarioGenerator.replay(generated, actions: minimal)
@@ -344,6 +352,12 @@ struct GeneratorTests {
             }
         }
         let seconds = Date().timeIntervalSince(started)
+        if GeneratorCounts.soak || ProcessInfo.processInfo.environment["PROTECTION_STATS"] == "1" {
+            for kind in stats.keys.sorted() {
+                let c = stats[kind]!
+                print("  \(kind): done \(c["done"] ?? 0), refused \(c["refused"] ?? 0), crashed \(c["crashed"] ?? 0)")
+            }
+        }
         print("PROTECTION GENERATOR: \(GeneratorCounts.seeds) seeds × \(GeneratorCounts.sequences) sequences, \(sequences) sequences, \(steps) steps, max \(GeneratorCounts.maxSteps) steps, \(String(format: "%.1f", seconds)) s\(GeneratorCounts.soak ? " (SOAK)" : "")")
     }
 }

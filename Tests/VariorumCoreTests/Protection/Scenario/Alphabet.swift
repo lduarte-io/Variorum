@@ -276,6 +276,7 @@ extension SWorld {
                 let words = (makeNewWords || k.words == nil) ? self.newWords() : k.words!
                 let passphrase = k.passphrase ?? self.newPassphrase()
                 let typed = TypedSecrets(passphrase: passphrase, words: words, wordsAreNew: words != k.words)
+                self.choose(d, holder: holder, passphrase: passphrase, words: words)
                 let outcome = try await executor.useCastle(&library, typed: typed, gate: gate, moves: self.moveSubjects(d))
                 k.passphrase = passphrase
                 k.words = words
@@ -291,6 +292,7 @@ extension SWorld {
                 let holder = self.slotHolder(d)!
                 let k = self.known(holder)
                 let words = makeNewWords ? self.newWords() : k.words
+                if makeNewWords { self.choose(d, holder: holder, passphrase: nil, words: words) }
                 let outcome = try await executor.replaceAllKeys(
                     &library, typed: TypedSecrets(passphrase: k.passphrase, words: words, wordsAreNew: makeNewWords))
                 if makeNewWords { self.setKnown(holder, passphrase: k.passphrase, words: words) }
@@ -344,6 +346,7 @@ extension SWorld {
                     var k = self.known(own)
                     let p = k.passphrase ?? self.newPassphrase(), w = k.words ?? self.newWords()
                     let typed = TypedSecrets(passphrase: p, words: w, wordsAreNew: k.words == nil)
+                    self.choose(d, holder: own, passphrase: p, words: w)
                     let outcome = try await executor.setUpSync(&library, typed: typed)
                     k.passphrase = p
                     k.words = w
@@ -374,6 +377,7 @@ extension SWorld {
                 if forgot, library.record?.mode == .standard {
                     fresh = self.newPassphrase()
                     typed = TypedSecrets(words: typed.words, newPassphrase: fresh)
+                    self.choose(d, holder: self.holder(d, account: nil, libraryID: library.record!.libraryID), passphrase: fresh, words: nil)
                 }
                 let account = library.record?.account
                 let outcome = try await executor.leaveAccount(.stopSyncingHere, &library, typed: typed)
@@ -422,6 +426,7 @@ extension SWorld {
                 let holder = self.slotHolder(d)!
                 let k = self.known(holder)
                 let fresh = self.newPassphrase()
+                self.choose(d, holder: holder, passphrase: fresh, words: nil)
                 let outcome = try await executor.changePassphrase(&library, current: k.passphrase ?? "", new: fresh)
                 self.setKnown(holder, passphrase: fresh, words: k.words)
                 return outcome
@@ -432,6 +437,7 @@ extension SWorld {
                 let holder = self.slotHolder(d)!
                 let k = self.known(holder)
                 let fresh = self.newPassphrase()
+                self.choose(d, holder: holder, passphrase: fresh, words: nil)
                 let authorization: ResetAuthorization
                 switch via {
                 case .touchID: authorization = .touchID
@@ -448,6 +454,7 @@ extension SWorld {
                 let holder = self.slotHolder(d)!
                 let k = self.known(holder)
                 let fresh = self.newWords()
+                self.choose(d, holder: holder, passphrase: nil, words: fresh)
                 let outcome = try await executor.regenerateWords(&library, passphrase: k.passphrase ?? "", newWords: fresh)
                 self.setKnown(holder, passphrase: k.passphrase, words: fresh)
                 return outcome
@@ -550,6 +557,7 @@ extension SWorld {
             let d = device(name)
             loseQueuedDeletes(d)
             truth.lostAppleKeys.formUnion(readableAppleKeys(d).keys)
+            if let shared = oldSharedKey(d) { truth.lostAppleKeys.insert(shared.id) }
             d.keychain.synced.removeAll()
             d.appleAccount = to
             syncICloud(d)
@@ -558,6 +566,7 @@ extension SWorld {
             guard let id = d.appleAccount, let account = appleAccounts[id] else { throw WorldRefusal.notOpen }
             for other in devices where other.appleAccount == id {
                 truth.lostAppleKeys.formUnion(readableAppleKeys(other).keys)
+                if let shared = oldSharedKey(other) { truth.lostAppleKeys.insert(shared.id) }
                 other.keychain.synced.removeAll()
             }
             truth.lostAppleKeys.formUnion(account.cloud.keys.compactMap {

@@ -232,22 +232,37 @@ struct DeviceFactsTests {
     }
 
     /// VX-340: a second macOS login on the same Mac never finds the first
-    /// login's section — it starts its own identity and adopts nothing.
+    /// login's section — it starts its own identity: its own device id and
+    /// `<mac8>`, never the first login's settings or its own keys' list. (VX-305
+    /// U4, PROVISIONAL P-U4-3: a slot holding the first login's library files is
+    /// a CLONE — §8's residue — and, like a replacement Mac whose memory item
+    /// stayed behind, takes over only what §3.5 needs no predecessor for: the
+    /// Apple key its live key file's wrap names and every retired id, starting
+    /// on Always ask. A copy opened from the other login lands under a fresh
+    /// key and adopts nothing — the scenario world's VX-340 scenario.)
     @Test func aSecondMacOSLoginStartsItsOwnIdentity() {
         let salt = HardwareMarker.mintSalt()
+        let firstOwn = PF.id(), retired = PF.id(), wrapped = PF.id()
         let firstLogin = section(PF.id(), marker: HardwareMarker.compute(PF.macA, salt: salt), version: 4)
-            .recordingAppleKey(AppleKeyRecord(id: PF.id(), purpose: .library, origin: .minted))
-            .retiringAppleKey(id: PF.id(), purpose: .library, origin: .minted, at: PF.day(1))
+            .recordingAppleKey(AppleKeyRecord(id: firstOwn, purpose: .library, origin: .minted))
+            .retiringAppleKey(id: retired, purpose: .library, origin: .minted, at: PF.day(1))
         let minted = PF.id()
         let found = DeviceFacts.thisMacsSection(
             memory: nil, recordSections: [firstLogin],
             marker: HardwareMarker.compute(PF.macASecondLogin, salt: salt),
-            keyFileOwnAppleKeyIDs: [PF.id()], mintDeviceID: { minted })
+            keyFileOwnAppleKeyIDs: [wrapped], mintDeviceID: { minted })
         #expect(found.resolution == .newIdentity(predecessorID: nil))
         #expect(found.section.deviceID == minted)
-        #expect(found.section.appleKeys.isEmpty, "adopts nothing — not even the key file's wrap id")
-        #expect(found.section.settings == .noChoiceYet)
         #expect(found.section.mac8 != firstLogin.mac8)
+        #expect(!found.section.appleKeys.contains { $0.id == firstOwn }, "never the first login's own keys' list")
+        #expect(Set(found.section.appleKeys.map(\.id)) == [wrapped, retired])
+        #expect(found.section.retiredAppleKeyIDs == [retired])
+        #expect(found.section.settings == .newIdentity)
+        // With no record sections at all (nothing knows the library yet), nothing is taken over.
+        let bare = DeviceFacts.thisMacsSection(
+            memory: nil, recordSections: [], marker: HardwareMarker.compute(PF.macASecondLogin, salt: salt),
+            keyFileOwnAppleKeyIDs: [wrapped], mintDeviceID: { minted })
+        #expect(bare.section.appleKeys.isEmpty && bare.section.settings == .noChoiceYet)
     }
 
     /// A memory item that turns up on new hardware: a new identity, taking

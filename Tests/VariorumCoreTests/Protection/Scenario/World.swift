@@ -153,6 +153,9 @@ final class SDevice {
     var lastOutcome: ActOutcome?
     /// Hand-off folders Send Library brought here, oldest first.
     var incoming: [String] = []
+    /// New secrets she chose at an act that hasn't finished (a crash): which
+    /// one the locks end up under is read back once nothing is in flight.
+    var pending: [(holder: String, passphrase: String?, words: [String]?)] = []
 
     init(name: String, isPhone: Bool, machine: MachineIdentity) {
         self.name = name
@@ -240,6 +243,8 @@ final class SWorld {
     var crashed: Set<String> = []
     /// Every promise violation, with the log line it surfaced at.
     var violations: [(Violation, Int)] = []
+    /// Each action kind's outcomes (the generator's coverage).
+    var stats: [String: [String: Int]] = [:]
 
     /// Two Macs and a phone on Apple account 1 (the phone and Mac A share a
     /// login identity? never: each device its own hardware and login).
@@ -290,6 +295,50 @@ final class SWorld {
     }
 
     func newPassphrase() -> String { "passphrase-\(rng.int(100_000..<999_999))" }
+
+    /// A secret she chose, now known to her whatever the act's fate — the
+    /// candidate set the lock oracle tries; it becomes CURRENT when a lock
+    /// says so (`adoptPending`).
+    func choose(_ device: SDevice, holder: String, passphrase: String?, words: [String]?) {
+        if let passphrase, !truth.allPassphrases.contains(passphrase) { truth.allPassphrases.append(passphrase) }
+        if let words, !truth.allWords.contains(words) { truth.allWords.append(words) }
+        device.pending.append((holder, passphrase, words))
+    }
+
+    /// After a step: a pending secret whose lock now holds — the live key
+    /// file's, or the account vault's — becomes current; with nothing in
+    /// flight, what's left is dropped (the act rolled back).
+    func adoptPending(_ device: SDevice) {
+        guard !device.pending.isEmpty else { return }
+        let inFlight = device.library?.section.actInFlight != nil || device.container.files[SPath.plan] != nil
+        var remaining: [(holder: String, passphrase: String?, words: [String]?)] = []
+        for choice in device.pending {
+            var adopted = false
+            var k = known(choice.holder)
+            let isAccount = server.accounts[choice.holder] != nil
+            if let p = choice.passphrase, p != k.passphrase {
+                var opens = false
+                if isAccount, let vault = server.snapshot(choice.holder), let pk = passphraseKey(p, vault.format.kdf) {
+                    opens = (try? vault.format.unwrapMaster(withPassphraseKey: pk.key)) != nil
+                } else if let wrap = liveKeyFile(device)?.passphrase, let pk = passphraseKey(p, wrap.kdf) {
+                    opens = Lock.unwrap(wrap.wrapped, under: pk.key) != nil
+                }
+                if opens { k.passphrase = p; adopted = true }
+            }
+            if let w = choice.words, w != k.words, let wk = wordsKey(w) {
+                var opens = false
+                if isAccount, let vault = server.snapshot(choice.holder) {
+                    opens = (try? vault.format.unwrapMaster(withRecoveryKey: wk)) != nil
+                } else if let blob = liveKeyFile(device)?.words {
+                    opens = Lock.unwrap(blob, under: wk) != nil
+                }
+                if opens { k.words = w; adopted = true }
+            }
+            if adopted { setKnown(choice.holder, passphrase: k.passphrase, words: k.words) }
+            if !adopted, inFlight { remaining.append(choice) }
+        }
+        device.pending = remaining
+    }
 
     func newWords() -> [String] {
         let entropy = rng.bytes(16)

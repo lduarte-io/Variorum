@@ -398,7 +398,21 @@ public enum DeviceFacts {
             guard let section = recordSection(id) else { return fresh() }
             return (section, resolution)
         case .newIdentity(let predecessorID):
-            guard let predecessorID else { return fresh() }
+            guard let predecessorID else {
+                // New hardware (or a new login) whose memory item didn't come
+                // along — Migration Assistant reportedly doesn't carry Local
+                // Items (the Apple facts §3.7) — opening a library the record
+                // already knows: no predecessor can be named, but §3.5's other
+                // two takeovers need none — the Apple key ids ITS LIVE KEY
+                // FILE's wraps name as its own, and every id any section lists
+                // as retired ("a retired key is dead everywhere"). It starts on
+                // Always ask (§3.10: no act, no press). PROVISIONAL P-U4-3
+                // (VX-305 U4, found by the scenario world).
+                guard !recordSections.isEmpty else { return fresh() }
+                return (takingOver(
+                    predecessor: nil, allSections: recordSections, newDeviceID: mintDeviceID(), marker: marker,
+                    keyFileOwnAppleKeyIDs: keyFileOwnAppleKeyIDs), resolution)
+            }
             let predecessor = reconcile(
                 record: recordSection(predecessorID), memory: memory?.deviceSection, guards: guards)
             return (takingOver(
