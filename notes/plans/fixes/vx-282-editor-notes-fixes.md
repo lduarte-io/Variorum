@@ -1,13 +1,3 @@
-- **W2 — the fixed batch, `-derivedDataPath DerivedData/vx282-u5` (≈12 min), THREE groups (suite TYPE names, grepped;
-  the mounted popover/sheet suites kept in separate invocations — Swift Testing runs suites in parallel in one process):**
-  (g1) `CommentPanelHostSuites` `CommentPanelLeaveTests` `CommentPanelDoorsTests` `CommentPanelParkTests`
-  `CommentsPanelModelEditorTests` `CommentCompositionTests` `CommentPanelKeysTests` `CommentsAndReorderTests`
-  `CapabilityRegistryTests` `TrashSurfaceTests` `NoteVersionsPaneTests` → `w2-g1.log`; (g2) `CommentPanelFixLeg2Tests`
-  `CommentTextAreaMountedTests` `CommentPanelGeometryRuleTests` `CommentPanelWordsTests` `CommentCardLayoutTests`
-  `CommentCardViewTests` `CommentCardControllerTests` `MarginHoverCommentTests` `IndicatorGutterTests` `ProseGutterTests`
-  `BlockDecorGeometryTests` → `w2-g2.log`; (g3) `WriteTakesPanelRoutedCommandTests` `WriteTakesPanelKeysTests` →
-  `w2-g3.log`. EXPECTED: all green. Read every suite's ✔/✘ line and the skips (a wrong name runs 0 tests and still
-  "succeeds"; the nested `CommentPanelHostSuites` must show BOTH child suites' ✔ lines).
 # VX-282 — Run: Editor & notes fixes
 
 **STATUS: OPEN — kickoff 2026-10-13 (evening).** Run ticket **VX-282** (project *v1 release readiness*) ·
@@ -1800,15 +1790,16 @@ first — no `/Applications/Variorum.app` instance, none of ours.
   `CommentPanelParkTests` (8). **VX-229 — THE DECIDING CELL:** `CommentPanelReleaseTests` EXPECTED GREEN on old (hollow) —
   if `aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation` is RED on old, the leak is real in the runner: report it,
   and the fix comes back (`ee86dd8c`'s surface split) with a rebuild and a W2 re-run. Its two sheet guards: green.
-- **W2 — the fixed batch, `-derivedDataPath DerivedData/vx282-u5` (≈10 min), two groups (suite TYPE names, grepped):**
-  (g1) `CommentPanelReleaseTests` `CommentPanelHostLeavingTests` `CommentPanelLeaveTests` `CommentPanelDoorsTests`
-  `CommentPanelParkTests` `CommentsPanelModelEditorTests` `CommentCompositionTests` `CommentPanelKeysTests`
-  `CommentPanelGeometryRuleTests` `CommentTextAreaMountedTests` `CommentPanelWordsTests` `CommentPanelFixLeg2Tests`
-  `CommentsAndReorderTests` → `w2-g1.log`; (g2) `CapabilityRegistryTests` `TrashSurfaceTests`
-  `WriteTakesPanelRoutedCommandTests` `WriteTakesPanelKeysTests` `CommentCardLayoutTests` `CommentCardViewTests`
-  `CommentCardControllerTests` `MarginHoverCommentTests` `IndicatorGutterTests` `ProseGutterTests`
-  `BlockDecorGeometryTests` `NoteVersionsPaneTests` → `w2-g2.log`. EXPECTED: all green. Read every suite's ✔/✘ line and
-  the skips.
+- **W2 — the fixed batch, `-derivedDataPath DerivedData/vx282-u5` (≈12 min), THREE groups (suite TYPE names, grepped;
+  the mounted popover/sheet suites kept in separate invocations — Swift Testing runs suites in parallel in one process):**
+  (g1) `CommentPanelHostSuites` `CommentPanelLeaveTests` `CommentPanelDoorsTests` `CommentPanelParkTests`
+  `CommentsPanelModelEditorTests` `CommentCompositionTests` `CommentPanelKeysTests` `CommentsAndReorderTests`
+  `CapabilityRegistryTests` `TrashSurfaceTests` `NoteVersionsPaneTests` → `w2-g1.log`; (g2) `CommentPanelFixLeg2Tests`
+  `CommentTextAreaMountedTests` `CommentPanelGeometryRuleTests` `CommentPanelWordsTests` `CommentCardLayoutTests`
+  `CommentCardViewTests` `CommentCardControllerTests` `MarginHoverCommentTests` `IndicatorGutterTests` `ProseGutterTests`
+  `BlockDecorGeometryTests` → `w2-g2.log`; (g3) `WriteTakesPanelRoutedCommandTests` `WriteTakesPanelKeysTests` →
+  `w2-g3.log`. EXPECTED: all green. Read every suite's ✔/✘ line and the skips (a wrong name runs 0 tests and still
+  "succeeds"; the nested `CommentPanelHostSuites` must show BOTH child suites' ✔ lines).
 - **W3 — the walk (≈25 min), `DerivedData/vx282-u5/Build/Products/Debug/Variorum.app` on the DEV store only** (dismiss a
   What's New sheet with its own button if shown; the voice as found, recorded; Study if it is the dev store's). Stage a
   note through the shelf's quick-entry bar: `{t:"VX-257 walk"}alpha` ⇧⏎ `beta` ⏎ → it opens in Write; give `alpha` one
