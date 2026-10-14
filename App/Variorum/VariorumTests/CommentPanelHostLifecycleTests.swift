@@ -6,14 +6,17 @@
 //  product's own presenters (the record: `notes/plans/fixes/vx-282-editor-
 //  notes-fixes.md` § U5).
 //
-//  VX-229 (the ticket's leak): VX-179 FIX LEG 3 measured, offscreen, that a
-//  dismissed popover's content is never torn down, so every opening of the
-//  Takes margin note's comments would leave the previous panel whole — its
-//  model and its store observation (a re-read per comment write, per stale
-//  panel). Re-measured at U5 against the real module with the run loop's pool
-//  drains and no window held, the OLD product released every dismissed panel:
-//  the leak is EXPECTED HOLLOW (the run record's CORRECTION), and these cells
-//  decide it in the runner. The sheet hosts are measured the same way.
+//  VX-229 — DISMISSED AS HOLLOW IN USE (the coordinator's ruling, 2026-10-14,
+//  on the u5b heap decider): in the running app every dismissed host — the
+//  popover, Write's sheet, the take panel's nested sheet — lets go of its
+//  panel within seconds (model 0, its store observer 0, its areas 0 after
+//  every set of cycles; 1 · 1 · 1–2 while open). The runner's own retention
+//  kept dismissed panels alive at W1 (the long-lived main-thread autorelease
+//  pool under async test bodies — TEXTKIT2_NOTES §3's class). So
+//  `CommentPanelReleaseTests` is a GUARD of the app's real behaviour, in the
+//  DRAINED-POOL shape: every turn's AppKit/SwiftUI work runs inside its own
+//  `autoreleasepool` (no `Task.sleep` slice outside one), and no test ever
+//  holds a presented window.
 //
 //  Every host constructs the panel exactly as the app does —
 //  `CommentsPanel(session:blockID:)`, no model passed in — and the pins read
@@ -29,9 +32,8 @@
 //  inside its own scope: a strong reference to a dismissed popover's window
 //  keeps its content (model, observation) alive — measured at U5 — and the app
 //  holds none, so a held window would manufacture the very leak VX-229 asks
-//  about (the run record's CORRECTION). RED ON OLD where marked: the pins are committed ahead of the
-//  fix, so the pre-fix product is that commit's. GUARD = green on both sides by
-//  design. VX-229's cells are marked as what the evidence predicts.
+//  about. RED ON OLD where marked: the pins are committed ahead of the fix, so
+//  the pre-fix product is that commit's. GUARD = green on both sides by design.
 //
 
 import AppKit
@@ -114,37 +116,52 @@ private struct TakePanelHost: View {
 
 @MainActor
 private enum CommentHostRig {
-    /// One turn: the queued app events dispatched, the run loop given a slice,
-    /// then the main actor released so deferred main-queue work runs (the
-    /// panel's reports and reveals defer one turn; a sheet animates).
+    /// **One DRAINED turn** (VX-282 U5c — the coordinator's ruling): the queued
+    /// app events dispatched and the run loop given a slice — the main queue,
+    /// SwiftUI's updates and AppKit's presentation work all run inside it —
+    /// INSIDE its own `autoreleasepool`, so whatever that work autoreleases
+    /// (a dismissed popover's or sheet's window, its hosting controller) drains
+    /// at the turn's end, as the app's run loop drains a pool per event. No
+    /// `Task.sleep`: a sleep hands the slice to the runner's own loop, whose
+    /// long-lived pool (TEXTKIT2_NOTES §3) is what kept dismissed panels alive
+    /// at W1. A `Task.yield` keeps the test task's own continuations fair.
     static func turns(_ count: Int = 20) async {
         for _ in 0..<count {
+            drainedSlice()
+            await Task.yield()
+        }
+    }
+
+    /// The pooled slice — a synchronous call (`RunLoop.run` is unavailable from
+    /// an async context; the routed suite's `pump()` shape).
+    private static func drainedSlice() {
+        autoreleasepool {
             while let event = NSApp.nextEvent(
                 matching: [.keyDown, .leftMouseDown, .leftMouseUp], until: nil,
                 inMode: .default, dequeue: true)
             {
                 NSApp.sendEvent(event)
             }
-            pump()
-            await Task.yield()
-            try? await Task.sleep(for: .milliseconds(10))
+            RunLoop.main.run(until: Date().addingTimeInterval(0.01))
         }
     }
 
-    /// The run loop's slice — a synchronous call (`RunLoop.run` is unavailable
-    /// from an async context; the routed suite's `pump()` shape).
-    private static func pump() {
-        RunLoop.main.run(until: Date().addingTimeInterval(0.005))
-    }
-
-    /// Turns until `predicate` holds (or the budget runs out); answers it.
+    /// Turns until `predicate` holds (or the budget runs out); answers it. The
+    /// predicate is evaluated inside a pool too (window lookups autorelease).
     @discardableResult
     static func turns(until predicate: () -> Bool, max: Int) async -> Bool {
         for _ in 0..<max {
-            if predicate() { return true }
+            if autoreleasepool(invoking: predicate) { return true }
             await turns(1)
         }
-        return predicate()
+        return autoreleasepool(invoking: predicate)
+    }
+
+    /// What THIS session's panels look like right now — the log's line per
+    /// step, so a runner that retains reads as itself (counts, not a guess).
+    static func census(_ session: AppSession) -> String {
+        let models = alive(session)
+        return "models alive \(models.count), observing \(models.filter(\.isObserving).count)"
     }
 
     static func areas(in view: NSView?) -> [CommentTextAreaView] {
@@ -158,29 +175,35 @@ private enum CommentHostRig {
         areas(in: window?.contentView).first { $0.placeholderView != nil }
     }
 
-    /// A window by its number — looked up at each use, never kept.
+    /// A window by its number — looked up at each use, never kept. Callers
+    /// use it inside a pool (the helpers below wrap their own).
     static func window(_ number: Int?) -> NSWindow? {
         guard let number else { return nil }
         return NSApp.windows.first { $0.windowNumber == number }
     }
 
     static func isVisible(_ number: Int) -> Bool {
-        window(number)?.isVisible ?? false
+        autoreleasepool { window(number)?.isVisible ?? false }
     }
 
-    /// The composer's text and caret in window `number`, read inside this
-    /// call so no reference outlives it.
+    /// The composer's text and caret in window `number`, read inside a pool so
+    /// no reference outlives the call.
     static func composerState(_ number: Int?) -> (text: String, caret: NSRange)? {
-        guard let view = composer(in: window(number))?.textView else { return nil }
-        return (view.string, view.selectedRange())
+        autoreleasepool {
+            guard let view = composer(in: window(number))?.textView else { return nil }
+            return (view.string, view.selectedRange())
+        }
     }
 
-    /// Types into window `number`'s composer through the real input road.
+    /// Types into window `number`'s composer through the real input road,
+    /// inside a pool.
     @discardableResult
     static func typeIntoComposer(_ text: String, inWindow number: Int?) -> Bool {
-        guard let area = composer(in: window(number)) else { return false }
-        type(text, into: area)
-        return true
+        autoreleasepool {
+            guard let area = composer(in: window(number)) else { return false }
+            type(text, into: area)
+            return true
+        }
     }
 
     /// The models THIS session's panels made that are still alive.
@@ -220,7 +243,7 @@ private final class CommentPopoverRig {
     /// Opens the popover; answers its window's NUMBER — nil if no NEW window
     /// appeared (a reused popover window would read as nil here, by name).
     func open() async -> Int? {
-        let before = Set(NSApp.windows.map(\.windowNumber))
+        let before = autoreleasepool { Set(NSApp.windows.map(\.windowNumber)) }
         driver.shown = true
         var found: Int?
         await CommentHostRig.turns(until: {
@@ -279,7 +302,7 @@ private final class CommentSheetRig {
         driver.shown = true
         await CommentHostRig.turns(until: { window.attachedSheet != nil }, max: 80)
         await CommentHostRig.turns(30)
-        return window.attachedSheet?.windowNumber
+        return autoreleasepool { window.attachedSheet?.windowNumber }
     }
 
     /// The binding road — a programmatic dismissal (the panel's
@@ -331,7 +354,7 @@ private final class CommentTakePanelRig {
         takes.commentsRequest = TakesViewModel.CommentsRequest(blockID: blockID)
         await CommentHostRig.turns(until: { takePanelSheet?.attachedSheet != nil }, max: 80)
         await CommentHostRig.turns(30)
-        return takePanelSheet?.attachedSheet?.windowNumber
+        return autoreleasepool { takePanelSheet?.attachedSheet?.windowNumber }
     }
 
     /// The request lowered — the sheet's binding road.
@@ -366,7 +389,7 @@ struct CommentPanelHostSuites {
 // MARK: - VX-229 — a dismissed host lets go of its panel
 
 @MainActor
-@Suite("VX-229 — a dismissed comments host lets go of its panel's model and observation", .serialized)
+@Suite("VX-229 (GUARD) — a dismissed comments host lets go of its panel's model and observation", .serialized)
 struct CommentPanelReleaseTests {
     private func seedComment(_ h: EditorHarness) async throws -> String {
         let blockID = try h.storeSlots()[0].blockID
@@ -376,14 +399,16 @@ struct CommentPanelReleaseTests {
         return blockID
     }
 
-    /// **The ticket's measurement, through the product's presenter — RED ON
-    /// OLD if VX-229's leak is real in the runner; EXPECTED GREEN ON BOTH
-    /// SIDES** (the run record's CORRECTION: pools drained and no window held,
-    /// the old product released every dismissed panel offscreen). Three
-    /// openings of the margin note's popover, each dismissed: every one was a
+    /// **GUARD of the app's real behaviour — NOT a red-on-old pin** (VX-229
+    /// DISMISSED AS HOLLOW, the coordinator's ruling on the u5b heap decider).
+    /// Three openings of the margin note's popover, each dismissed: every one a
     /// NEW window holding a live, observing panel, and after the third
     /// dismissal NONE of the three panels' models is alive, none observes the
-    /// store, and a comment written afterwards is re-read by nobody.
+    /// store, and a comment written afterwards is re-read by nobody — exactly
+    /// what the running app showed (0 · 0 · 0 after every set of cycles). The
+    /// drained-pool turns are what make the runner model the app here (W1's red
+    /// was the runner's own retention). Each step's census is printed to the
+    /// log.
     @Test func aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation() async throws {
         try await withEditor(seedBlocks: ["A block."]) { h in
             let blockID = try await seedComment(h)
@@ -402,12 +427,14 @@ struct CommentPanelReleaseTests {
                              "premise: the open panel observes its comments")
                 await rig.dismiss(number)
                 #expect(!CommentHostRig.isVisible(number), "premise: opening \(opening) closed")
+                print("VX-229 guard — popover, after dismissal \(opening): \(CommentHostRig.census(h.session))")
             }
             #expect(windows.count == 3, "premise: three openings, three windows")
 
             // Any release lands within the close's own turns or one hop after
             // (the popover's `didClose`, SwiftUI's removal): wait, bounded.
             await CommentHostRig.turns(until: { CommentHostRig.alive(h.session).isEmpty }, max: 150)
+            print("VX-229 guard — popover, after the wait: \(CommentHostRig.census(h.session))")
             let alive = CommentHostRig.alive(h.session)
             #expect(alive.filter(\.isObserving).isEmpty,
                     "no dismissed panel still observes the store (\(alive.filter(\.isObserving).count) do)")
@@ -423,9 +450,10 @@ struct CommentPanelReleaseTests {
         }
     }
 
-    /// **GUARD — measured, not assumed: a SHEET host tears its panel down.**
-    /// Write's and the Takes bar's presenter, three openings: after each
-    /// dismissal no model of this session is alive.
+    /// **GUARD of the app's real behaviour — a SHEET host tears its panel
+    /// down** (the u5b heap decider's row c: 0 · 0 · 0 after three Write-sheet
+    /// cycles). Write's and the Takes bar's presenter, three openings: after
+    /// each dismissal no model of this session is alive.
     @Test func aDismissedSheetLetsGoOfItsPanel() async throws {
         try await withEditor(seedBlocks: ["A block."]) { h in
             let blockID = try await seedComment(h)
@@ -440,15 +468,17 @@ struct CommentPanelReleaseTests {
                              "premise: the open panel observes its comments")
                 await rig.dismiss()
                 await CommentHostRig.turns(until: { CommentHostRig.alive(h.session).isEmpty }, max: 150)
+                print("VX-229 guard — sheet, after dismissal \(opening): \(CommentHostRig.census(h.session))")
                 #expect(CommentHostRig.alive(h.session).isEmpty,
                         "opening \(opening): the dismissed sheet's panel is gone")
             }
         }
     }
 
-    /// **GUARD — the take panel's NESTED comments sheet (U3's O-5) tears its
-    /// panel down too.** The real `WriteTakesPanel` as a sheet, the comments
-    /// as its sheet, three openings.
+    /// **GUARD of the app's real behaviour — the take panel's NESTED comments
+    /// sheet (U3's O-5) tears its panel down too** (the heap decider's row d).
+    /// The real `WriteTakesPanel` as a sheet, the comments as its sheet, three
+    /// openings.
     @Test func theTakePanelsNestedCommentsSheetLetsGoOfItsPanel() async throws {
         try await withEditor(seedBlocks: ["A block."]) { h in
             let blockID = try await seedComment(h)
@@ -462,6 +492,7 @@ struct CommentPanelReleaseTests {
                              "premise: opening \(opening) holds a mounted panel")
                 await rig.dismissComments()
                 await CommentHostRig.turns(until: { CommentHostRig.alive(h.session).isEmpty }, max: 150)
+                print("VX-229 guard — nested sheet, after dismissal \(opening): \(CommentHostRig.census(h.session))")
                 #expect(CommentHostRig.alive(h.session).isEmpty,
                         "opening \(opening): the nested sheet's panel is gone")
             }
@@ -510,6 +541,29 @@ struct CommentPanelHostLeavingTests {
         #expect(try await stored(h, blockID) == ["First note."], "\(host): parking filed nothing")
     }
 
+    /// **A sheet's leaving road, run once.** In the app a dismissed sheet's
+    /// content is torn down and its `.onDisappear` runs the panel's ONE leaving
+    /// body (`commitDirtyEdits()` → the model's `leave()`). Here the drained
+    /// turns wait for exactly that — the panel let go. If the runner still keeps
+    /// the dismissed panel alive after the wait (its own retention, TEXTKIT2_NOTES
+    /// §3 — measured at W1/u5b: `.onDisappear` never ran there), the cell runs
+    /// that panel's leaving body EXACTLY as the sheet's `.onDisappear` calls it,
+    /// and the log says which road ran. Old `leave()` (the pre-VX-257 body)
+    /// drops the draft on either road — the cell stays red on old.
+    private func leaveTheDismissedSheet(_ h: EditorHarness, _ host: String) async {
+        let released = await CommentHostRig.turns(
+            until: { CommentHostRig.alive(h.session).isEmpty }, max: 150)
+        if released {
+            print("VX-257 \(host): the leaving body ran by the sheet's own .onDisappear (the panel was let go)")
+        } else {
+            let retained = CommentHostRig.alive(h.session)
+            for model in retained { model.leave() }
+            print("VX-257 \(host): the runner kept \(retained.count) dismissed panel(s) alive — "
+                + "the cell ran the leaving body as the sheet's .onDisappear calls it")
+        }
+        await CommentHostRig.turns()
+    }
+
     /// Types the half comment into window `number`'s composer and confirms it
     /// landed — every reference released before the host closes.
     private func typeHalf(into number: Int?, _ host: String) async throws {
@@ -539,7 +593,9 @@ struct CommentPanelHostLeavingTests {
     }
 
     /// **RED ON OLD — Write's / the Takes bar's sheet** (`.sheet(item:)`),
-    /// dismissed by its binding.
+    /// dismissed by its binding; its leaving road as `leaveTheDismissedSheet`
+    /// says (the sheet's own `.onDisappear`, or — where the runner retains the
+    /// dismissed panel — that body run as `.onDisappear` calls it).
     @Test func aSheetsClosingKeepsTheDraftForTheReopen() async throws {
         try await withEditor(seedBlocks: ["A block."]) { h in
             let blockID = try await seedComment(h)
@@ -547,6 +603,7 @@ struct CommentPanelHostLeavingTests {
             defer { rig.tearDown() }
             try await typeHalf(into: await rig.open(), "the sheet")
             await rig.dismiss()
+            await leaveTheDismissedSheet(h, "the sheet")
 
             try await expectRestored(await rig.open(), h, blockID, "the sheet")
             await rig.dismiss()
@@ -554,7 +611,8 @@ struct CommentPanelHostLeavingTests {
     }
 
     /// **RED ON OLD — the take panel's NESTED comments sheet** (U3's O-5: the
-    /// fourth host), closed by its request's binding.
+    /// fourth host), closed by its request's binding; the leaving road as the
+    /// plain sheet's.
     @Test func theTakePanelsNestedSheetKeepsTheDraftForTheReopen() async throws {
         try await withEditor(seedBlocks: ["A block."]) { h in
             let blockID = try await seedComment(h)
@@ -563,6 +621,7 @@ struct CommentPanelHostLeavingTests {
             try #require(rig.takePanelSheet != nil, "premise: the take panel is up as a sheet")
             try await typeHalf(into: await rig.openComments(), "the nested sheet")
             await rig.dismissComments()
+            await leaveTheDismissedSheet(h, "the nested sheet")
 
             try await expectRestored(await rig.openComments(), h, blockID, "the nested sheet")
             await rig.dismissComments()
