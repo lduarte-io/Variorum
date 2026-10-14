@@ -648,6 +648,17 @@ final class SWorld {
         }
         if let account = library.record?.account, device.session.accountID == account, device.online {
             _ = try? await executor.readVault(accountID: account)
+            // The lobby's Always-ask duty (pre-13x §3.3, phase 2's): with no
+            // sync-keys item, the account's keys come from the vault through
+            // the secret typed at the unlock, held for the session.
+            let leaf = DeviceLeaves(world: self, device: device)
+            let held = [ProtectionNames.CustodyClass.touchid, .silent].contains { (try? leaf.readSyncKeys(accountID: account, itemClass: $0)) != nil }
+            if !held, device.sessionMemory[account] == nil, let vault = server.snapshot(account) {
+                var master: SymmetricKey?
+                if let p = typed.passphrase, let pk = passphraseKey(p, vault.format.kdf) { master = try? vault.format.unwrapMaster(withPassphraseKey: pk.key) }
+                if master == nil, let w = typed.words, let wk = wordsKey(w) { master = try? vault.format.unwrapMaster(withRecoveryKey: wk) }
+                if let master { device.sessionMemory[account] = try? VaultModel.material(following: vault.format, master: master) }
+            }
         }
         try await runRepairs(device)
         return device.library!

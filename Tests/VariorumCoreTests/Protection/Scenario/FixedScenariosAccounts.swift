@@ -26,6 +26,19 @@ func syncedWorld(_ mode: ProtectionMode, devices names: [String] = ["macA"], see
 
 @Suite("VX-305 U4 fixed — accounts: leaves, joins, Replace All Keys, the signed-out screens")
 struct AccountScenarios {
+    /// The key doors on an Always-ask device whose session holds no sync keys
+    /// (unlocked offline, then back online — pre-13x §3.3's offline unlock):
+    /// each derives the account's keys at its door with the secret typed
+    /// there, and never leaves an act in flight it can't finish.
+    @Test func theKeyDoorsOnAnAlwaysAskDeviceUnlockedOffline() async throws {
+        for door in [Action.changePassphrase("macA"), .regenerateWords("macA")] {
+            let (world, _) = try syncedWorld(.castle, devices: ["macA"], gate: .alwaysAsk)
+            await world.done([.goOffline("macA"), .launch("macA"), .goOnline("macA"), door])
+            #expect(world.macA.library?.section.actInFlight == nil, "\(door) left its act in flight")
+            expectPromisesKept(world, "\(door)")
+        }
+    }
+
     /// "Replace All Keys on an account still on the old shared key, its follow,
     /// and a new device joining one (its key file under its own key)" — and,
     /// where the account's Apple key can't be read here (decision 30's road

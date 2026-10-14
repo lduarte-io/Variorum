@@ -98,6 +98,7 @@ extension ProtectionExecutor {
             guard VaultModel.master(of: vault.format, passphrase: typed, words: nil) != nil else {
                 throw ExecutorRefusal.passphraseDoesNotOpen
             }
+            try holdSyncKeysForTheSession(account: account, vault: vault, passphrase: typed, words: nil)
         } else {
             _ = try verifiedPassphrase(current, against: library.keyFile)
         }
@@ -123,8 +124,31 @@ extension ProtectionExecutor {
         }
         var words: WordsKey?
         if case .words(let typed) = authorization { words = try WordsKey.derive(typed) }
-        return try await keyDoor(.resetPassphrase, &library, newPassphrase: new, words: words,
-                                 parameters: try await keyDoorParameters(library))
+        let parameters = try await keyDoorParameters(library)
+        if let account = parameters.accountID, let vault = freshVaults[account] {
+            try holdSyncKeysForTheSession(account: account, vault: vault, passphrase: nil, words: words)
+        }
+        return try await keyDoor(.resetPassphrase, &library, newPassphrase: new, words: words, parameters: parameters)
+    }
+
+    /// A synced key door re-wraps the vault under the account's master, which
+    /// the act reads from custody or this session — and an Always-ask device
+    /// unlocked offline holds none yet (pre-13x §3.3). The door derives the
+    /// account's keys from the vault with the secret typed THERE and holds them
+    /// for the session, so the act never begins without what its vault step
+    /// needs (it began, then refused inside its plan, leaving the act in flight
+    /// with nothing able to finish it — VX-305 U4, found by the scenario
+    /// world). Nothing is written to disk; a relock drops them.
+    func holdSyncKeysForTheSession(account: String, vault: VaultSnapshot, passphrase: PassphraseKey?, words: WordsKey?) throws {
+        for itemClass in [ProtectionNames.CustodyClass.touchid, .silent] {
+            if let held = try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: itemClass),
+               held.corpusKeyID == vault.corpusKeyID { return }
+        }
+        if let held = leaves.syncKeys.sessionSyncKeys(accountID: account), held.corpusKeyID == vault.corpusKeyID { return }
+        guard let master = VaultModel.master(of: vault.format, passphrase: passphrase, words: words) else {
+            throw ExecutorRefusal.secretsRequired(.changePassphrase)
+        }
+        leaves.syncKeys.holdInSession(try VaultModel.material(following: vault.format, master: master), accountID: account)
     }
 
     /// **New words** — asking the passphrase.
