@@ -106,7 +106,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-290 — the empty-block backspace's caret landing | IN-PROGRESS — fix + pins committed (`385aa1fc`), both schemes build headless. **REVERT IN FLIGHT (working tree only, uncommitted):** `EditorSurfaceController.swift` `runEmptyBlockDeletion`'s landing line → `caretLandingAfterRemoving(plan.entryIndex)`, built into `DerivedData/vx282-u1-revert`; restore = `git checkout -- App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift` from `385aa1fc`, verify `git diff` empty. |
+| U1 | VX-290 — the empty-block backspace's caret landing | **READY FOR STAGE** — the Mac batch (the reverted products' red-on-old run of `CarveCaretLandingTests` + `TypedReturnKeyTests` + `EditorEditRouteTableTests`, then the fixed products' 13 suites in two `-only-testing` groups) + a SHORT WALK on the dev-store Debug build (rows A–D in the U1 record's window plan), ≈40 min. Fix `385aa1fc`; both product sets built; the revert build is DONE AND RESTORED (`git diff` empty) — no revert in flight. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | NOT-STARTED |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | NOT-STARTED |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
@@ -243,6 +243,45 @@ handed off; the window runs `test-without-building` against both product sets.
 **Headless:** `xcodebuild build-for-testing -scheme Variorum` (DerivedData `vx282-u1`) — TEST BUILD SUCCEEDED;
 `xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'` — BUILD SUCCEEDED. No core
 package file touched, so no `swift test` owed.
+
+**The revert build — DONE, RESTORED.** The one line applied to the working tree only (named in LIVE STATUS first,
+`13555701`), `build-for-testing` into `App/Variorum/DerivedData/vx282-u1-revert` — TEST BUILD SUCCEEDED; restored by
+`git checkout -- App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift` from `385aa1fc`; `git diff`
+empty, the landing line verified present. The fixed products were rebuilt after the restore
+(`DerivedData/vx282-u1`, TEST BUILD SUCCEEDED). Both `.xctestrun` files exist.
+
+**THE WINDOW PLAN (≈40 min; runs only on the orchestrator's claim line; `guard.sh --author` before every step).**
+Logs and captures go to `notes/plans/vx282-screens/u1/` (`logs/` for the runs). From `App/Variorum/`:
+- **W1 — red-on-old (≈3 min):** `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS'
+  -derivedDataPath DerivedData/vx282-u1-revert -only-testing:VariorumTests/CarveCaretLandingTests
+  -only-testing:VariorumTests/TypedReturnKeyTests -only-testing:VariorumTests/EditorEditRouteTableTests`.
+  EXPECTED: in `CarveCaretLandingTests` the four RED-ON-OLD pins red and the three guards (five cases) green; in
+  `TypedReturnKeyTests` ONLY `aBurstWithASeamBackspaceAboveABlockLandsWhereTheBreakWas` red; the table suite green
+  (its pins pin the plan, which the revert leaves in place).
+- **W2 — the fixed Mac batch (≈8 min), two groups on `DerivedData/vx282-u1`:** (g1) `CarveCaretLandingTests`
+  `BlockDeletionAndRedoTests` `TypedReturnKeyTests` `ReturnKeyTraceTests` `SoftNewlineTests`
+  `EditorEditRouteTableTests` `SeamMergeTests`; (g2) `WriteTopAirTests` `WriteFloatingViewportTests`
+  `UntouchedLineKeeperTests` `WholeBlockDeleteTests` `BoundaryClampTests` `CrossBlockCompoundTests`. (Suite TYPE names,
+  grepped: `ReturnKeyTraceTests.swift` holds three suites; `WriteFloatingViewportTests.swift` two — both carve users;
+  `CrossBlockCompoundTests.swift`'s two other suites never reach the carve and are not named.) Read the counts
+  and the skips in the logs (a wrong name runs 0 tests and still "succeeds").
+- **W3 — the walk (≈20 min), the `vx282-u1` Debug app on the DEV store only** (`pgrep` first: no
+  `/Applications/Variorum.app` instance, none of ours; dismiss a What's New sheet if shown). Stage the note through
+  the shelf's quick-entry bar (`keys.sh` — full strings land there; the TK2 editor drops synthetic prose):
+  `{t:"VX-290 walk"}alpha` ⇧⏎ ⇧⏎ `beta` ⏎; open it by ⌘K. In Write, keys only (`keys.sh`, ≥ 2 s apart; captures
+  by region, before and after each row):
+  - **A (her report):** caret to alpha's end (⌘↑ then ⌘→), ⏎ ⏎ ⏎ (three empty blocks, the caret in the last),
+    ↑ ↑ (the caret in the FIRST empty block, empties below) → ⌫: the caret goes UP to alpha's end (the editing
+    indicator on alpha, the receipt "Empty block deleted"), two empties stay below → ⌫: `alph`.
+  - **B (the climb):** ↓ ↓ (the caret in the last empty block) → ⌫: the empty ABOVE goes and the caret's line
+    moves up → ⌫: the caret's own block goes into the line above, the caret at `alph`'s end.
+  - **C (the ⏎⌫ oops):** ⏎ at `alph`'s end → ⌫: back at `alph`'s end → ⌫: `alp` (never "Blocks joined").
+  - **D (forward-delete):** ⏎ (an empty block below `alp`), ↑ then ⌘→ (back at `alp`'s end) → fn-⌦ (key code 117):
+    the empty block goes and the caret STAYS at `alp`'s end, `beta` right below.
+  Then move the walk note to the Trash (residue recorded), quit OUR instance by identity, re-check `pgrep`, leave
+  the dev store as found (Standard, unlocked), release the claim. Voice: the dev store's current one, recorded — the
+  landing is a caret position with no face of its own (no chrome, no voice-dependent code on the road); the
+  mounted pins run under the harness's Terminal metrics.
 
 ## Ladder
 
