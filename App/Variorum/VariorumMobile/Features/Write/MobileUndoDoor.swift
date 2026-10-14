@@ -280,7 +280,7 @@ final class MobileUndoDoor {
         let subject = warning.bufferCount == 1
             ? "One take has been edited since"
             : "\(warning.bufferCount) takes have been edited since"
-        return "\(subject) — undoing puts back the text as it was BEFORE the "
+        return "\(subject) — undoing puts back the text as it was before the "
             + "\(warning.label.lowercased()), so that writing is set aside. "
             + "It is saved first, so you can bring it back from the block's "
             + "Block History at any time."
