@@ -237,9 +237,7 @@ nonisolated enum BookPanelBrain {
     static func markedNote(_ line: Line) -> String? {
         switch line {
         case .note(let entry, _): entry.postID
-        // SEAM (U6b piece 1): the old face's answer — no chapter row wore a
-        // mark. Piece 3 flips the collapsed case.
-        case .chapter: nil
+        case .chapter(_, let collapsed): collapsed?.postID
         case .unfiled: nil
         }
     }
