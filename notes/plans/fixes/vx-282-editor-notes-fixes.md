@@ -143,7 +143,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — W1 red on old (the host suites + the model suites, ≈4 min; VX-229 decided here) · W2 the fixed batch (three groups, ≈12 min) · W3 the walk (7 rows incl. a live `heap` count, row 1 in both voices, ≈25 min) — ≈42 min.** VX-229: fix REVERTED `7d798f82` (offscreen artefact — the CORRECTION); expected HOLLOW. VX-257: fix `1ca8fe72`; QUESTIONS #222. VX-183: `a765683c`. VX-182: pins `f38fb93c` red on old (headless), fix `fd4c260c`, R-182 ran + restored. Pins hardened `dab712d8`. Core 2,801/320 + MCP 212/41 + workbook 40/6 headless green; the phone builds. Old products `DerivedData/vx282-u5-old-products` REBUILT (the named revert at `3a6bad6d` — done, restored, `git status` clean); fixed `DerivedData/vx282-u5` rebuilt at the tip. No claim held; no revert in flight. |
-| U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **IN-PROGRESS — REVERT NAMED, STARTING: the OLD products are rebuilt with the corrected pins (`ee1facc9`). The revert: `CaptureTextView.swift`, `QuickEntryBar.swift`, `ShelfView.swift`, `RootView.swift` checked out from `d35191b6` (the pre-fix app) and `VariorumTests/QuickEntryOpeningFocusTests.swift` set aside (deleted from the working tree) for ONE build into `vx282-u4`; `Build/Products` then replaces `vx282-u6-old-products`; RESTORE by `git checkout HEAD -- <the five files>`, verified by `git status` clean; then the fixed products rebuilt LAST.** Pins `d35191b6` + correction `ee1facc9` · fix `3cf0079b`. No claim held. |
+| U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **READY FOR STAGE — W1 red on old (`QuickEntryLaunchFocusTests` on `vx282-u6-old-products`, 1 issue expected, ≈3 min) · W2 the fixed batch on `vx282-u4` (three groups — the capture/quick-entry/pad suites with the four new ones, the tour suites, the shell-mount and launch/restore suites, ≈12 min) · W3 the walk (the old build's launch for the record; launch in both voices with a typed letter; a restored note window; the tour; the navigation-back scope line, ≈23 min) — ≈38 min.** Trace (headless, real module): the shell's ask reaches the box before its window and is spent (F-FR-1) — at launch and on every navigation back (O-U6-1, left as today). Pins `d35191b6` + correction `ee1facc9` (AppKit auto-selects a window's first text field when it is ordered in — the rig frees it) · fix `3cf0079b`. P-U6-1/2 → QUESTIONS #223. Products: old `vx282-u6-old-products` REBUILT by the revert named at `07f03fa5` (done, restored, `git status` clean); fixed `vx282-u4` rebuilt LAST (U4's final + U5 + U6 — u4b tests what U4 expects). No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -1943,10 +1943,16 @@ a first open" is about popups; W-U1a-1 is about the TOUR's start).
   way), a new window — asks through the opening road; every later Bookcase mount in that shell (a navigation back, a
   wing switch's remount) finds the claim spent and keeps today's raise. PROVISIONAL **P-U6-2**.
 
-#### The pins — `VariorumTests/QuickEntryLaunchFocusTests.swift` (new)
+#### The pins — `VariorumTests/QuickEntryLaunchFocusTests.swift` (red-on-old) + `QuickEntryOpeningFocusTests.swift` (the fix's guards), both new
 
-**Committed AHEAD of the fix (`d35191b6`) — the OLD products are the build of that commit.** The production shell in the
-launch's own shape: `LaunchShell` is `mainWindowContent`'s switch in miniature (an opening face, then `RootView` when
+**Committed AHEAD of the fix (`d35191b6`), CORRECTED before any run (`ee1facc9`) — the OLD products are those pins over
+the pre-fix app.** The correction, a harness fact measured offscreen: **AppKit makes a window's first text field its
+first responder the moment the window is first ordered in** (key or not — a `.prohibited` probe's non-key window; the
+log shows `makeFirstResponder(NSTextView)` during the order-in). The first rig kept a stand-in field in the launch
+window, so the field held the keyboard from the start and the launch pin would have failed on BOTH sides. The rig now
+frees the keyboard right after ordering in (the launch's own state — the opening face holds nothing) and the launch pin
+asserts that premise; the field pin puts the field there itself. The fix's guard suites moved to their own file at the
+same commit so the old products build from the pins file alone. The production shell in the launch's own shape: `LaunchShell` is `mainWindowContent`'s switch in miniature (an opening face, then `RootView` when
 "ready"); the window (`LaunchWindow`) reports key when the pin says so and posts AppKit's own `didBecomeKey`
 (`WindowsTests`' road — this host never makes a window key); every settle only SUSPENDS (no forced layout, no nested
 run loop), so SwiftUI's own pass decides when the box reaches its window — the forced layout of the other suites'
@@ -1954,11 +1960,13 @@ settles inserts the box before the ask and would make the pin vacuous.
 
 | Suite · test | Asserts | Old | Fixed |
 |---|---|---|---|
-| `QuickEntryLaunchFocusTests` · `theShellOpeningOnTheBookcasePutsTheCaretInItsQuickEntry` | opening face → ready; the Bookcase's box arrives in the window; the window turns key → the box is the first responder | **RED (1 issue — the last cell)** | green |
+| `QuickEntryLaunchFocusTests` · `theShellOpeningOnTheBookcasePutsTheCaretInItsQuickEntry` | the opening face holds no keyboard (premise); → ready; the Bookcase's box arrives in the window; the window turns key → the box is the first responder | **RED (1 issue — the last cell)** | green |
 | `QuickEntryLaunchFocusTests` · `aFieldHoldingTheKeyboardKeepsItAcrossTheOpening` | a field holds the keyboard before the shell opens → it keeps it through the opening, the key moment and a re-attach of the box | GUARD (green — the ask is dropped windowless) | green (dropped: `.someoneElse`) |
 | `QuickEntryLaunchFocusTests` · `aSheetOnTheWindowAtTheOpeningKeepsTheKeyboardFromTheQuickEntry` | a sheet on the window when the shell opens → the box never takes the keyboard, during it or after it closes | GUARD (green) | green (dropped: the sheet) |
 
-**Added WITH the fix (`3cf0079b`) — they name what the old tree lacks, so they are GUARDS of the fixed product:**
+**Added WITH the fix (`3cf0079b`; in `QuickEntryOpeningFocusTests.swift` since `ee1facc9`) — they name what the old tree
+lacks, so they are GUARDS of the fixed product (the box rig frees its keyboard after ordering in, the same harness fact,
+and its two "free keyboard" cases assert it):**
 
 | Suite · test | Asserts |
 |---|---|
@@ -1979,12 +1987,20 @@ ask lands in the first-content order exactly as the counted one did).
 
 #### The products (no new full tree, as briefed)
 
-- **Old:** `App/Variorum/DerivedData/vx282-u6-old-products` — `build-for-testing` of `d35191b6` (the pins over the pre-fix
-  app — U4's and U5's final code included) into `vx282-u4`, TEST BUILD SUCCEEDED; `Build/Products` APFS-cloned out
-  (`cp -c`, ≈456 MB logical). Its test bundle carries the pins (`nm`: 58 `QuickEntryLaunchFocusTests` symbols); its app
-  dylib carries no `openingFocus` symbol.
-- **Fixed:** `App/Variorum/DerivedData/vx282-u4` — rebuilt LAST at `3cf0079b`, TEST BUILD SUCCEEDED; no new warning in a
-  touched file (the five `ShelfView.swift` warnings in the log are pre-existing lines — `+` on `Text`, `placement`).
+- **Old:** `App/Variorum/DerivedData/vx282-u6-old-products` — the corrected pins (`ee1facc9`) over the PRE-FIX app, by the
+  revert NAMED first at `07f03fa5`: `CaptureTextView.swift`, `QuickEntryBar.swift`, `ShelfView.swift`, `RootView.swift`
+  checked out from `d35191b6` and `QuickEntryOpeningFocusTests.swift` set aside, `build-for-testing` into `vx282-u4`
+  (TEST BUILD SUCCEEDED), `Build/Products` APFS-cloned out (`cp -c`, ≈456 MB logical) replacing the first old products,
+  then RESTORED by `git checkout HEAD --` (`git status` clean). `nm`: the app dylib carries 0 `openingFocus` symbols; the
+  test bundle carries the pins (42 `QuickEntryLaunchFocusTests` symbols, the rig's `keyboardIsFree`) and no guard suite.
+- **Fixed:** `App/Variorum/DerivedData/vx282-u4` — rebuilt LAST, after the restore (the code of `ee1facc9`), TEST BUILD
+  SUCCEEDED; `nm`: 232 `openingFocus` symbols in the app dylib, the three guard suites in the test bundle. No new warning
+  in a touched file (the five `ShelfView.swift` warnings in the log are pre-existing lines — `+` on `Text`, `placement`).
+- **Offscreen replay of the pins' two rig shapes on the real module** (the probe road above, the window holding a field
+  that is freed after ordering in, then the launch swap): old products — the launch shape ends on the WINDOW
+  (`lastFocusRequest = 1`, no `makeFirstResponder(box)`), the field shape on the field; fixed — the launch shape ends on
+  the CAPTURE BOX (`makeFirstResponder(box)` one turn after its arrival), the field shape on the field. What the pins
+  will assert, seen once before the stage.
   **For U4's u4b:** this tree now holds U4's final code + U5's committed code + U6 (additive); U4's five suites test
   what they tested (the undo suites and the reattach suite never touch the opening ask; `CaptureTourFocusTests`' shell
   mount takes the caret by the opening road where it took it by the counted one — the offscreen replay's "first
