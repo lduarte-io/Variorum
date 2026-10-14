@@ -3948,3 +3948,91 @@ Nothing. No word changed.
   (`SourcePackages/workspace-state.json`) into the product they were cloned from. Deleting a finished unit's tree (the
   coordinator's disk ask) broke builds in its clones until U1b repaired its three products' files. Before deleting a
   product, check that no live product was cloned from it, or fix the clone's `workspace-state.json`.
+
+## U1b STAGE RUN — the whole window (a fresh stage runner, from 2026-10-14 ~07:00 MDT)
+
+**What this run does NOT do (said first):** no product code is written or changed, under the claim or before it; a red
+that needs code is recorded and reported, never fixed here. Leg 5 (Codex) is N/A: `codex` is not installed (`which
+codex` empty at READY). No canon, QUESTIONS or ticket edits. No rebuild: the window runs the three products exactly as
+built. The copied setup line (`claude mcp remove -s user …; claude mcp add -s user …`) is never run as copied: only its
+key is taken, and it is registered `-s local` in a scratch project (or written to a scratch `--mcp-config` JSON).
+
+**Read in full before READY (never delegated):** this record's header, Hard rules, LIVE STATUS, the Stage traffic log,
+Cross-run coordination's facts, her rulings, ORCHESTRATOR'S PROVISIONAL RULINGS (rulings 1–3); U1's THE STAGE WINDOW
+(legs 0–5, step 2's A1 text, step 5's detour) and THE ORCHESTRATOR ON U1's HAND-BACK; U2's THE STAGE WINDOW (steps 4–6,
+W2/W3) and THE ORCHESTRATOR ON U2's HAND-BACK; U2, U3, U4 and U4b STAGE RUN whole (the A1 copy BEFORE the batch;
+`defaults import` merges, so re-export and diff; the batch detached and polled in the foreground; `Tools/stage status`
+exits 1 under a held claim, never in an `&&` chain; `pgrep -lx Variorum`, never the `-f` form; the copied setup line
+edits USER scope); the U1b UNIT RECORD whole (THE STAGE WINDOW plan, the products table, PROVISIONALs, FOR VX-234, OWED)
+and THE ORCHESTRATOR ON U1b's HAND-BACK; the U4c UNIT RECORD whole (its W1–W3) and THE ORCHESTRATOR ON U4c's HAND-BACK;
+`notes/SessionResiliencyProtocol.md`; `Tools/stage`, `Tools/WalkKit/` (README, `guard.sh`, `click.sh`, `keys.sh`),
+`Tools/ScaleFixture/` (`stage.sh`'s copy loop, `restore.sh`); U1b's `run-w1-red.sh`, `run-u4c-w1.sh`,
+`run-w2-batch.sh`, `stage-suites.txt`, `driver-u1b.py`, `gen_fixture.py` and U4c's scripts; the memory notes
+walk-driving-lessons and walk-restores-dev-store-posture. Code read for the live round: `MCPSetupMenu` (the code block,
+the client picker, the copy icon "Copy setup command"), `MCPPaneCopy` (`setupCommand` / `setupJSON` — where the key sits
+in each form; `MCPSetupClient.expectedName`), `MCPPane` (the switch, Waiting and the requests ABOVE the four tabs, the
+re-bind row's Allow / Don't allow), the Settings pane order (MCP is the seventh), and the wire tools' schemas the driver
+calls (`read_note` `with_ids`, `add_comments`, `delete_comment`).
+
+**The build check (before READY):**
+- **No source moved since the products were built.** HEAD `5f033dcb`; `git diff --name-only edfc0f12..HEAD -- Sources
+  App` is EMPTY (and `24cef7bd..HEAD -- App` / `-- Sources` too; record-only commits since). No
+  `.swift`/plist/pbxproj/xcstrings/entitlements/`Package.swift` under `Sources` or `App/Variorum` is newer than
+  `vx246-u1b`'s `Variorum.debug.dylib` (06:44:28). The shim (`variorum-mcp`, 06:00) is current: no file under
+  `App/Variorum/VariorumMCPShim` or `Sources/VariorumMCPSocket` is newer, and their last commit is VX-181's. The test
+  edits since `9df5e874` (the red product's tree) are the face's justified edits, carried by `vx246-u1b`. The tree is
+  clean.
+- **Each product is what its name says, read from its symbols** (`nm -n` + `swift-demangle --simplified`, size = the
+  next text symbol's address minus this one's; `scratchpad/u1b/syms.py`), matching the U1b products table exactly:
+  - `vx246-u1b`: `MCPDoor.copySetupCommand(for:to:)` fragments {208, 220, 272, 616, 660} (+ its closure #1 188 and a
+    partial apply 40, not in the table's set), `MCPSetupClient.expectedName.getter` 248, `MCPRebindRowView` 33 symbols,
+    `static Queries.mcpCommentIsOwn(_:commentID:client:)` 1,400.
+  - `vx246-u1b-revert`: fragments {196, 220, 248, 580, 660} (+ closure #1 172), `expectedName` 248, the row 33 symbols,
+    `mcpCommentIsOwn` 1,400.
+  - `vx246-u1b-red`: fragments {192, 212, 220, 544, 608} (+ closure #1 172), NO `expectedName`, NO row, NO
+    `mcpCommentIsOwn`.
+  - Test bundles: `MCPSetupTabKeyTests` in all three; `MCPRebindFaceTests` in `vx246-u1b` and `-revert` only; U4c's
+    `aFanAddedFarOffScreenMidReflowIsBadgedByTheQueuedRemeasure` in all three. **→ no rebuild.**
+- **The clone-paths trap, checked (THE ORCHESTRATOR ON U1b's HAND-BACK):** each product's
+  `SourcePackages/workspace-state.json` names 5 absolute paths, every one EXISTS and every DerivedData path lies inside
+  that product's own folder (the worktree root, `SourcePackages/artifacts/…/Sparkle.xcframework`,
+  `…/SQLCipher.xcframework`, `SourcePackages/checkouts/…`). Each `Build/Products/Debug` still holds `Sparkle.framework`
+  and `SQLCipher.framework`, each app bundle embeds both, and each product has its `.xctestrun`. The app is signed
+  *[removed for publication]*
+- **The W2 list:** `stage-suites.txt` 279 unique names, every one found in `vx246-u1b`'s test bundle symbols (0
+  missing); U4c's 13 suites are all inside it; VX-115's `BookCollectingDoorsTests` is in the set; VX-167's
+  `DestructiveUndoWarningTests` and VX-245's `ChromeLineLimit…` are not. The three run scripts parse (`zsh -n`); the
+  driver compiles (`py_compile`).
+- **Host and tools:** grants probed with no prompt, `AX: true SCREEN: true`; `walk-cap` / `walk-scroll` compiled into
+  the scratchpad; `Tools/WalkKit/wl2` present; Claude Code **2.1.299**, Python 3.12.13, `cliclick` present; `codex` not
+  installed. Free disk **63 GiB**. No Variorum instance (`pgrep -lx Variorum` empty).
+- **Her user-scope MCP servers (names + a sha256 prefix of the sorted, compact `mcpServers` JSON, never values):**
+  `['linear-server', 'variorum']`, **`bc64543e2f4e8e58`** — the same as U3's, U4's and U4b's windows
+  (`u1b/userscope-ready.txt`). Re-read at the window's start, after every add/remove, and after cleanup.
+
+**Process choices (the earlier runs' lessons applied):** the A1 copy, the prefs export and the fingerprint come FIRST,
+before W1 (the test host is the dev-store app); W1a/W1b and U4c's W1 in the foreground; W2 detached to its log and
+POLLED in the foreground; every GUI act through `click.sh` / `keys.sh`, at least 2.6 s apart; region captures; the Debug
+app quit BY BUNDLE ID; the prefs restored by import, then a re-export and a diff, deleting every key the window added,
+until 0 differ; keys redacted to their first 9 characters in every record and capture name.
+
+**Minutes:** ~100 of work expected (the plan's: A1 + prefs + fingerprint ~3 · W1 ~3 · U4c-W1 ~2 · W2 ~12 · the fixture
+~5 · the live round, Study ~45 · Terminal ~20 · U4c's W3 both voices ~14 · cleanup ~8); a **120-min claim** asked.
+Batch-only fallback (~25 min, claim 35): steps 1, W1, U4c-W1, W2, cleanup — the acceptance then stays OPEN for the live
+legs and walks.
+
+### LIVE STATUS — the stage run's steps
+
+| step | what | status |
+|---|---|---|
+| R | read-in, the build check, the fingerprint, this section → READY | DONE (this commit) — READY reported; the stage is NOT claimed (the orchestrator relays the GO's exact line) |
+| 0 | guards on every step; the claim from the GO's line; HEAD at the GO | NOT-STARTED |
+| 1 | A1 prestage copy (every store file + key files, each `cmp`-verified, sha256 recorded) + `defaults export` + the `Backups/` listing + her user-scope fingerprint BEFORE | NOT-STARTED |
+| W1 | `run-w1-red.sh` — W1a (`vx246-u1b-red`: `MCPSetupTabKeyTests` 3 of 4 red, the Any control green) + W1b (`vx246-u1b-revert`: the same 3 red, the control green, `MCPRebindFaceTests` 8/8 green); a red on a `premise:` line or a `#require` ⇒ a harness defect, that leg stopped and reported | NOT-STARTED |
+| U4c-W1 | `run-u4c-w1.sh` on `vx246-u1b` — the two pins GREEN + the host's line `VX-230 U4c [after pump(), no hop run]: block 40 laid out = false` | NOT-STARTED |
+| W2 | `run-w2-batch.sh` — 279 suites on `vx246-u1b`; a red re-run alone once; standing reds named (VX-115 in the set) | NOT-STARTED |
+| F | the fixture (`gen_fixture.py`) through File ▸ Import… — ONLY `vx230-book` | NOT-STARTED |
+| L-S | the live round, Study: legs 0, 1, the grant, 2a, 2b, 3, 4; U2's W2 and W3; ruling 2's real-client check; U4c's W3 (block 40) | NOT-STARTED |
+| V | the voice switch to Terminal | NOT-STARTED |
+| L-T | Terminal: legs 2c, 2d; U4c's W3 (block 45); leg 5 N/A | NOT-STARTED |
+| C | cleanup: registrations removed, fingerprint AFTER, keys/clipboard/grep = 0, the app quit by bundle id, prefs 0 differ, `restore.sh` + cmp SAME, `Tools/stage release --who vx246-u1b`, the result line | NOT-STARTED |
