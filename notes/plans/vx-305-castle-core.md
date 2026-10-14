@@ -547,7 +547,7 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   commit. The U1+U2 suites: 154 tests in 35 suites green in Debug; 134 in 32 green under `swift test -c release` (the
   three DEBUG-only mutation suites compiled out). The full core suite in Debug: one perf-timing issue under a load
   average of ~16–20 (other sessions on the Pro), green twice in isolation — the record's first line.
-- U3 — the executor and the acts: **NOT-STARTED.**
+- U3 — the executor and the acts: **NEXT.**
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
 - The go/no-go record: **NOT-STARTED.**
 
@@ -766,9 +766,9 @@ a Keychain, a file or the network, and nothing calls a writing leaf):
   `Assessment.swift` (`LobbyRoads`); the open rule is its own file; the catalog's parser is its own file.
 
 **Tests** — `Tests/VariorumCoreTests/Protection/`: `CatalogTests` (`CatalogNameTests` 3, `CatalogAttributionTests` 4),
-`RetentionTests` (5 + `RetentionGuardMutationTests` 1, DEBUG), `RouteFinderTests` (`RouteFinderRoadTests` 7,
+`RetentionTests` (5 + `RetentionGuardMutationTests` 1, DEBUG), `RouteFinderTests` (`RouteFinderRoadTests` 8,
 `AnchorSentenceTests` 3, `RetirementRoutesTests` 1 — with `walk`, which opens every named opener's witness road with
-the real secret of its day), `AssessTests` (`AssessAccountTests` 5, `AssessVaultTests` 8, `AssessModeTests` 7,
+the real secret of its day), `AssessTests` (`AssessAccountTests` 6, `AssessVaultTests` 8, `AssessModeTests` 7,
 `AssessTouchIDTests` 6, `AssessRepairTests` 13, `AssessDoorTests` 5, `AssessOldSharedKeyTests` 3), `OpenRuleTests` 6,
 `AssessGuardTests` (`AssessGuardsOnTests` 1, `AssessGuardMutationTests` 14, DEBUG), `AssessFixtures` (`AWorld`). Every
 bullet of §4's test list has its test (the suite and test names read as the plan's sentences).
