@@ -1125,8 +1125,9 @@ final class EditorSurfaceController {
         if landed { model.showReceipt(BlockSelectionCopy.archivedNote(home: homeKind)) }
     }
 
-    /// The one delete-block body both doors use: the menu/bar act above and
-    /// A7's empty-block backspace below.
+    /// The delete-block body behind the menu/bar act above. (A7's
+    /// empty-block backspace has had its own one-transaction body since 13c
+    /// R3-1, and its own caret landing since VX-290 — `runEmptyBlockDeletion`.)
     private func runDeleteBlock(_ blockID: String, entryIndex: Int, note: String) async {
         let landing = caretLandingAfterRemoving(entryIndex)
         let landed = await runStructural { ops in
@@ -1264,9 +1265,9 @@ final class EditorSurfaceController {
     /// controller's spelling of it.
     ///
     /// *(Its single-INDEX sibling below is deliberately untouched: it serves
-    /// Mac-only doors — A7's empty-block carve, delete/archive-caret-block —
-    /// and the phone has no consumer for it, so hoisting it would be a Mac
-    /// refactor riding a mobile batch. Recorded rather than done.)*
+    /// Mac-only doors — delete/archive-caret-block — and the phone has no
+    /// consumer for it, so hoisting it would be a Mac refactor riding a mobile
+    /// batch. Recorded rather than done.)*
     private func caretLandingAfterRemoving(
         _ blockIDs: [String]
     ) -> (blockID: String, offset: Int) {
@@ -1279,6 +1280,11 @@ final class EditorSurfaceController {
     /// no survivor — naming the departed block leaves the caret wherever
     /// the fresh-post re-render put it, which is the honest answer and a
     /// harmless no-op in `applyStructuralResult`.
+    ///
+    /// The Delete Block and archive doors' rule, and theirs alone since
+    /// VX-290: A7's seam carve lands where the deleted line break was
+    /// (`caretLanding(afterCarving:)`), which this helper cannot know — it is
+    /// told which entry leaves, never which side of a separator it sat on.
     private func caretLandingAfterRemoving(_ i: Int) -> (blockID: String, offset: Int) {
         let entries = model.index.entries
         if i + 1 < entries.count { return (entries[i + 1].blockID, 0) }
@@ -2317,7 +2323,7 @@ final class EditorSurfaceController {
     /// fail fast, don't refuse noisily — but the authorization is the
     /// operation's now, where it cannot be a snapshot.
     func runEmptyBlockDeletion(_ plan: EmptyBlockDeletion) async {
-        let landing = caretLandingAfterRemoving(plan.entryIndex)
+        let landing = caretLanding(afterCarving: plan)
         let landed = await runStructural { ops in
             try ops.deleteBlock(
                 plan.blockID,
@@ -2327,6 +2333,28 @@ final class EditorSurfaceController {
         }
         if landed {
             model.showReceipt("Empty block deleted — ⌥⌘Z undoes it.")
+        }
+    }
+
+    /// **VX-290 — the carve's caret lands where the deleted line break was**
+    /// (her report, the ruling; the plan names which side survived —
+    /// `SeamCarvePlan.EmptyBlockDeletion.Landing`). Before this the carve
+    /// borrowed the Delete Block door's "start of the block below", which put
+    /// the caret on the line the carved block had occupied, so each further ⌫
+    /// — a deferred fast press included, which replays at this landing —
+    /// carved the next block down. The END offset is the survivor's length
+    /// as the surface holds it now, read at this call as the doors read
+    /// theirs: a key that reached the survivor before this turn stays behind
+    /// the caret.
+    private func caretLanding(
+        afterCarving plan: EmptyBlockDeletion
+    ) -> (blockID: String, offset: Int) {
+        switch plan.landing {
+        case .startOf(let blockID):
+            return (blockID, 0)
+        case .endOf(let blockID):
+            let length = model.index.entries.first { $0.blockID == blockID }?.length ?? 0
+            return (blockID, length)
         }
     }
 

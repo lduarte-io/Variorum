@@ -106,7 +106,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-290 — the empty-block backspace's caret landing | IN-PROGRESS — trace re-done and recorded (U1 record below); next: the fix + pins (headless build-for-testing), then READY FOR STAGE. No revert in flight. |
+| U1 | VX-290 — the empty-block backspace's caret landing | IN-PROGRESS — fix + pins committed, both schemes build headless; next: the reverted build into its own DerivedData (then restored), then READY FOR STAGE. No revert in flight. |
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | NOT-STARTED |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | NOT-STARTED |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
@@ -184,6 +184,65 @@ agrees with the ticket's mechanism):**
 the deleted line break was* — after carving the block AFTER the separator, at the END of the block before it;
 after carving the block BEFORE the separator, at the START of the block after it (unchanged). Delete Block and
 archive keep `caretLandingAfterRemoving`. Mac-only (the phone has no carve).
+
+**The fix (three production files, no new authority, zero schema/`Sync/`/custody):**
+- `BlockRangeIndex.emptyBlockCarve(replacing:isDeletion:)` — the carve's ONE walk now returns
+  `(carved, survivor)`: the empty entry that goes AND the entry across the deleted separator.
+  `emptyBlockDeletion` forwards to it (`?.carved`), so #33(d)'s both-empty rule stays in one place and every
+  existing answer is unchanged (pinned at every one-character range of an irregular tiling). The regions, the
+  verdict and the tiling are untouched.
+- `SeamCarvePlan.EmptyBlockDeletion` gains `landing: Landing` — `.endOf(blockID:)` when the carved block sat
+  AFTER the separator (⌫ from inside it, ⌦ at the end of the block before), `.startOf(blockID:)` when it sat
+  BEFORE it (⌫ at the start of the block after, ⌦ from inside it). Named by the SURVIVING block's id, never an
+  offset (the surface re-renders between the plan and the landing). Pure: the table suite pins it.
+- `EditorSurfaceController.runEmptyBlockDeletion` lands by `caretLanding(afterCarving:)` instead of
+  `caretLandingAfterRemoving(plan.entryIndex)`: `.startOf` → `(id, 0)`; `.endOf` → `(id, the survivor's length as
+  the index holds it at the call)` — the doors' posture (read at the call, just before `runStructural` arms the
+  stash), so a key that reached the survivor before this turn stays behind the caret. The deferred-key road needs
+  nothing of its own: the stash replays at whatever this lands. Delete Block / archive still call
+  `caretLandingAfterRemoving` (doc updated: theirs alone now); `runDeleteBlock`'s stale "both doors" doc corrected.
+- **Cost (P1):** `.endOf` resolves the survivor by one identity scan of the entries, at act time only (never per
+  typed character in a block). The same act already re-renders the whole surface (`seam: nil` → `renderFull`) and
+  `applyStructuralResult` already scans for the caret block by identity, so the order of the act is unchanged.
+- **The phone:** `MobileEditorViewModel` matches `.carveEmptyBlock` without binding (`:1694`), so the added field
+  changes nothing there; the `VariorumMobile` scheme builds (generic iOS Simulator, headless).
+
+**The pins (RED ON OLD = run against the one-line behavioural revert below; PENDING until the stage window):**
+- `CarveCaretLandingTests` (a new `.serialized` suite in `BlockDeletionAndRedoTests.swift` — it hosts a real key
+  window and drives `keyDown`, as every real-key suite does):
+  - `herReportBackspaceInAnEmptyBlockMovesUpIntoTheLineAbove` — her pin: `["alpha","","",""]`, caret in the first
+    empty block, ⌫ ⌫ → `["alph","",""]`; after the first ⌫ the caret is at alpha's end (5). **RED ON OLD.**
+  - `aBackspaceTypedDuringTheCarvesFlightLandsAboveToo` — the deferred fast press (writer held, the second ⌫
+    stashed during the flight) → `["alph","",""]`. **RED ON OLD.**
+  - `returnThenBackspacePutsTheCaretBackWhereItWas` — the ⏎⌫ "oops" on `["alpha","beta"]`: the caret back at
+    alpha's end, a second ⌫ → `["alph","beta"]` (old: the paragraphs joined). **RED ON OLD.**
+  - `forwardDeleteAtAParagraphsEndKeepsTheCaretThere` — ⌦ at alpha's end over an empty block, then `x` →
+    `["alphax","beta"]` (old: `["alpha","xbeta"]`). **RED ON OLD.**
+  - Guards (green both sides): `backspaceAtAParagraphsStartUnderAnEmptyBlockKeepsItsStart`,
+    `forwardDeleteInsideAnEmptyBlockKeepsTheCaretOnItsLine` (the BEFORE-side landing, unchanged), and
+    `theDeleteAndArchiveDoorsKeepTheirOwnLanding(false/true)` (the doors still land at the block below's start).
+- `TypedReturnKeyTests` (`ReturnKeyTraceTests.swift`):
+  - **FLIPPED BY RULING:** the old `aBurstWithASeamBackspaceHoldsWhenTheCarveLandsBelow` shape (`["alpha","beta"]`,
+    ⏎ ⌫ ⏎ x in one turn) now lives as `aBurstWithASeamBackspaceAboveABlockLandsWhereTheBreakWas`, expecting
+    `["alpha","x","beta"]` (was `["alpha","","xbeta"]`). **RED ON OLD.**
+  - **RE-POINTED, purpose kept:** `aBurstWithASeamBackspaceHoldsWhenTheCarveLandsBelow` keeps its name and its R2-1
+    job (one burst pin per landing arm) on a shape that still lands BELOW: `["","beta"]`, ⏎ ⌫ ⏎ x at beta's start →
+    `["","","xbeta"]`. Green both sides by design (not re-run against R2-1's own revert — the re-point keeps the
+    arm, it does not re-prove R2-1).
+- New-API pins (cannot be red-on-old — the API is new; they pin the pure decision): `EditorEditRouteTableTests
+  .theCarvesLandingIsWhereTheDeletedBreakWas` (six shapes, both sides, #33(d)'s both-empty case) and
+  `BlockDeletionAndRedoTests.theCarveNamesTheSurvivorAcrossTheSeparatorAndTheAnswerIsUnchanged`. The table
+  suite's `aLoneEmptySeparatorIsTheMacsCarveAndThePhonesRefusal` gained the field (mechanical).
+
+**The revert planned for red-on-old (one line):** `EditorSurfaceController.runEmptyBlockDeletion`'s
+`let landing = caretLanding(afterCarving: plan)` → `let landing = caretLandingAfterRemoving(plan.entryIndex)` —
+built into its OWN DerivedData (`App/Variorum/DerivedData/vx282-u1-revert`) BEFORE the window and restored at once
+(`git checkout --` from the commit, verified by `git diff`), so the tree is never reverted while the turn is
+handed off; the window runs `test-without-building` against both product sets.
+
+**Headless:** `xcodebuild build-for-testing -scheme Variorum` (DerivedData `vx282-u1`) — TEST BUILD SUCCEEDED;
+`xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'` — BUILD SUCCEEDED. No core
+package file touched, so no `swift test` owed.
 
 ## Ladder
 

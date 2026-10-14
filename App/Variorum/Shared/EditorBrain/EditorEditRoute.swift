@@ -425,6 +425,30 @@ nonisolated enum SeamCarvePlan {
         let blockID: String
         let variantID: String
         let entryIndex: Int
+        /// Where the caret lands once the block is gone (VX-290).
+        let landing: Landing
+
+        /// **VX-290 — her report is the ruling** (2026-10-13): *"when you're
+        /// on an empty block in the write editor and there's a bunch of empty
+        /// takes below it, clicking delete repeatedly eats the takes from
+        /// underneath you, rather than moving you up into the previous line
+        /// like writing editors typically do."* **The caret lands where the
+        /// deleted line break was.** Named by the SURVIVING block's identity,
+        /// never an offset: the surface re-renders from the store between
+        /// this plan and the landing, and the survivor's id is still true
+        /// afterwards. The Delete Block and archive doors keep their own rule
+        /// (`EditorSurfaceController.caretLandingAfterRemoving`).
+        enum Landing: Sendable, Equatable {
+            /// The carved block sat AFTER the separator — ⌫ from inside it,
+            /// or ⌦ at the end of the block before it: the caret lands at the
+            /// END of the block before (it moves up into the previous line,
+            /// and a second ⌫ deletes a letter there).
+            case endOf(blockID: String)
+            /// The carved block sat BEFORE the separator — ⌫ at the start of
+            /// the block after it, or ⌦ from inside it: the START of the
+            /// block after (the shipped landing, unchanged).
+            case startOf(blockID: String)
+        }
     }
 
     static func emptyBlockDeletion(
@@ -434,8 +458,9 @@ nonisolated enum SeamCarvePlan {
         slots: [Queries.RenderedBlock]
     ) -> EmptyBlockDeletion? {
         guard replacement.isEmpty,
-              let i = index.emptyBlockDeletion(replacing: range, isDeletion: true)
+              let carve = index.emptyBlockCarve(replacing: range, isDeletion: true)
         else { return nil }
+        let i = carve.carved
         let entry = index.entries[i]
         guard entry.editable, let variantID = entry.variantID else { return nil }
         // No fan: a block with several takes carries text in the ones you
@@ -446,7 +471,10 @@ nonisolated enum SeamCarvePlan {
         // no text to lose"; a third kind of unshown prose extends
         // `carriesUnshownText`, never this line.
         guard !slots[i].carriesUnshownText else { return nil }
-        return EmptyBlockDeletion(blockID: entry.blockID, variantID: variantID, entryIndex: i)
+        let survivor = index.entries[carve.survivor].blockID
+        return EmptyBlockDeletion(
+            blockID: entry.blockID, variantID: variantID, entryIndex: i,
+            landing: carve.survivor < i ? .endOf(blockID: survivor) : .startOf(blockID: survivor))
     }
 
     /// The pair a seam keystroke would join. Geometry + liveness only — the
