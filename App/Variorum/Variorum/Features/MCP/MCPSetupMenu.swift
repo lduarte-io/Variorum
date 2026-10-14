@@ -87,6 +87,9 @@ struct MCPSetupCodeBlock: View {
     /// THE copy act (`.mcpCopySetupCommand`) — true once the copy landed.
     let copy: () async -> Bool
     @State private var copied = false
+    /// VX-281 ladder F-1: each flash's generation — only the latest flash's
+    /// expiry clears the ✓, so an earlier one never cuts a later one short.
+    @State private var flashGeneration = 0
 
     /// How long the ✓ stands after a copy lands.
     static let copiedFlash: Duration = .seconds(1.6)
@@ -147,9 +150,11 @@ struct MCPSetupCodeBlock: View {
 
     private func flash() {
         copied = true
+        flashGeneration += 1
+        let generation = flashGeneration
         Task {
             try? await Task.sleep(for: Self.copiedFlash)
-            copied = false
+            if flashGeneration == generation { copied = false }
         }
     }
 }
