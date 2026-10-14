@@ -180,6 +180,86 @@ struct MCPSharedRowsTests {
         }
     }
 
+    // MARK: - VX-281 ladder R2-1: the near hold follows where note rows are DRAWN
+
+    /// **R2-1 (RED ON THE TIP):** in Timeline mode the Library stays mounted
+    /// (its body swaps to `TimelineView`), and its near-window holds stayed
+    /// up over rows it draws nowhere — with live reach, the reach batch reads
+    /// `container`, so it re-ran at autosave rate beside the Timeline's own
+    /// window. The holds now follow where note rows are DRAWN (List, Cards,
+    /// the answer sheet — never the Timeline), re-aimed on the view's own mode
+    /// road (`.onChange(of: model.mode)` → `modeChanged()`, mirrored here).
+    @Test func theLibrarysNearHoldFollowsTheRowsItDrawsAndNeverHoldsUnderTheTimeline() async throws {
+        try await withSession { session, _ in
+            let ops = session.operations
+            try approved(ops)
+            let notes = try (0..<3).map { try note(ops, "note \($0)") }
+            try ops.setMCPSwitch(.openBook, on: true)   // live reach: the note read touches `container`
+
+            let model = LibraryCatalogModel(session: session, defaults: try defaults("r21"))
+            await model.search()
+            defer { model.stopHoldingFacts() }
+            #expect(model.reachHold != nil && model.ownershipHold != nil,
+                    "List draws note rows: the near window's facts are held")
+            #expect(try await settle { model.rowExtras(for: notes[0].id).reach.first?.viaOpenBook == true })
+
+            // The picker writes the mode; the view's onChange asks `modeChanged()`.
+            func pick(_ mode: LibraryCatalogModel.Mode) async {
+                let moved = model.pickMode(mode)
+                let owesARead = model.modeChanged()
+                if moved || owesARead { await model.search() }
+            }
+
+            await pick(.timeline)
+            #expect(model.reachHold == nil, "the Timeline draws no Library note row: no reach is held for one")
+            #expect(model.ownershipHold == nil, "…nor its owned-by facts")
+            // A re-read while the Timeline shows (a wing switch, a row act) never re-arms them.
+            await model.search()
+            await model.refresh()
+            #expect(model.reachHold == nil && model.ownershipHold == nil,
+                    "a re-read under the Timeline holds nothing (reach \(model.reachHold != nil), owned-by \(model.ownershipHold != nil))")
+
+            // A note marked Private while the Timeline shows…
+            _ = try ops.setNotePrivate(notes[1].id, true)
+            // …and back to a mode that draws rows (Cards): held again, the truth landing fresh.
+            await pick(.notes)
+            #expect(model.reachHold != nil && model.ownershipHold != nil, "Cards draws note rows: held again")
+            #expect(try await settle { model.rowExtras(for: notes[1].id).reach.isEmpty },
+                    "the re-hold lands what is true now (the Private note: nobody)")
+            #expect(model.rowExtras(for: notes[2].id).reach.first?.viaOpenBook == true)
+        }
+    }
+
+    /// **R2-1's MOUNTED leg (RED ON THE TIP):** the real `LibraryCatalogView`,
+    /// its mode written as its picker writes it — the onChange road ends the
+    /// holds, never a mirror of it.
+    @Test func theLibraryViewEndsItsNoteHoldsWhenItShowsTheTimeline() async throws {
+        try await withSession { session, _ in
+            let ops = session.operations
+            try approved(ops)
+            for index in 0..<3 { _ = try note(ops, "note \(index)") }
+            try ops.setMCPSwitch(.openBook, on: true)
+
+            let model = LibraryCatalogModel(session: session, defaults: try defaults("r21-mounted"))
+            defer { model.stopHoldingFacts() }
+            let rig = SharedIconRig(LibraryCatalogView(
+                session: session, model: model, library: LibraryViewModel(session: session),
+                tags: TagsViewModel(session: session), onOpen: { _ in }))
+            defer { rig.close() }
+            #expect(await rig.poll(timeout: 6) { model.reachHold != nil && !model.noteHits.isEmpty },
+                    "List mounted: its rows' reach is held")
+
+            _ = model.pickMode(.timeline)
+            #expect(await rig.poll(timeout: 3) { model.reachHold == nil && model.ownershipHold == nil },
+                    "the Timeline shows: the Library holds nothing for rows it does not draw (reach \(model.reachHold != nil), owned-by \(model.ownershipHold != nil))")
+            await rig.poll(timeout: 0.6) { false }
+            #expect(model.reachHold == nil, "…and nothing re-arms it while the Timeline shows")
+
+            _ = model.pickMode(.list)
+            #expect(await rig.poll(timeout: 3) { model.reachHold != nil }, "List again: held again")
+        }
+    }
+
     // MARK: - The Pool's rows
 
     @Test func thePoolsDrawnRowsHoldTheirReach() async throws {
