@@ -834,9 +834,22 @@ open its file. So:
 It runs once, at first unlock on the new build, **as a plan** — and on a Release build only once she has turned the
 new system on at release (§5):
 
-1. **Finish anything in flight with today's runner** — its finish path, kept read-and-finish-only for one release
-   after the switch (§3.15). VX-235's stuck marker is cleared on proof that the switch never happened: the library
-   still opens under its old key, and the new key file never landed.
+1. **Finish anything in flight with today's runner** — its finish path, kept for one release after the switch
+   (§3.15), so most stores a crash left mid-act on the last old build finish the old way. VX-235's stuck marker is
+   cleared on proof that the switch never happened: the library still opens under its old key, and the new key file
+   never landed. **Past that release** a store can still arrive with an old marker — one that skipped the release, or
+   a copy carrying it — so the migration resolves it from what's on disk:
+   - it opens the library by whatever road opens it (§3.3);
+   - if the library still opens under its old key and the new key never landed, the act never happened; otherwise its
+     commit happened;
+   - either way the marker is cleared, and the migration carries on from the files as they are, under its usual guards:
+     the mode from the vault where it can read it, otherwise not yet confirmed, with no custody repair until it is
+     (step 2). What the old act left undone after its commit is the migration's own work anyway: the fold, the per-key
+     items, and the Castle repairs once the history holds each key;
+   - a synced rotation still standing on the server is finished by the new engine with nothing new needed. An old
+     build's rotation carries no Apple key id, so it reads as Use Castle's or a Castle Replace All Keys does: any
+     device completes it, never with an Apple copy (§3.9);
+   - a vault that moved while the library didn't is an ordinary follow.
 2. **Work out the mode once with today's rules** — the legacy mode reader (§3.15), a pure function of today's
    inputs.
    - A synced library with the vault in reach takes the vault's word; without it, the mode is recorded as *not yet
@@ -930,8 +943,11 @@ store's next unlock, and copies made before this change exist forever:
   migration's step 2 calls it once per store, and opening a copy with no record calls it for as long as such copies
   exist (§3.7). It decides nothing else and writes nothing;
 - **the fold's reads** of today's per-library-ID custody items and the 13p escrow items (§3.13 step 6), reading only;
-- **the `RotationMarker` read and today's runner's finish path**, so the migration's step 1 can finish an act a
-  crash left in flight on the last old build — kept for one release after the switch, then deleted.
+- **the `RotationMarker`'s read and its clearing check**, forever: the marker lives inside the library file, and
+  copies carrying it exist forever, just as copies with no record do;
+- **today's runner's finish path**, so the migration's step 1 can finish an act a crash left in flight on the last old
+  build — kept for one release after the switch, then deleted. Past that release, step 1 resolves an old marker from
+  what's on disk, with nothing of today's writing code.
 
 The phase-1 plan's legacy readers (formats 1 and 2, and a copy with no record worked out by today's rules) are these.
 
@@ -1133,6 +1149,10 @@ retired-key clause, 3 and 7 once the world settles (propagation done, followers 
   Re-link's library arm, and after it promise 3 settles — for a local-only library too;
 - **today's Standard-waiting and exposed libraries through the migration:** each current key takes the mode step 2
   records, and promise 2 holds for whatever is recorded Castle;
+- **an old build's crashed act, migrated after today's finish runner is gone:** the act never happened, so the marker
+  is cleared; its commit happened, so the marker is cleared, the library migrates from disk, and no custody repair
+  runs until the mode is confirmed; and a synced store whose old rotation still stands on the server, completed by
+  the new engine with no Apple copy;
 - **a Time Machine rollback past a re-key:** this library's later copies still read as its own (the family tree's two
   homes);
 - **a synced pair landed with a passphrase made new:** at Resume Sync it becomes the account's, through the account's
@@ -1204,7 +1224,7 @@ The cast, in every phase:
 | **1 — the headless core** | VX-305 | `Sources/VariorumCore/Protection/`: the record with its family tree and device sections, key file v3 with the history and the anchor, what the Mac remembers and its seals, the custody/Apple-key/vault interfaces, `assess`, the executor and sealed plans, the catalog and route finder with attribution and retention, and §4.1's scenario world | **one phase-sized unit** (the posture model), built in four sessions (model · assess and routes · executor · the world). Evidence: the generated runs green across seeds; every fixed scenario green; every mutation pin red without its guard. **GO / NO-GO at close** — a quality gate; her word is "go even if it delays launch" | VX-228 (corner 45's model), VX-235 (plans), VX-263 (the history, the anchor, the family tree), VX-302 (attribution), VX-313 (this Mac's facts in two homes, sealed plans) |
 | **2 — the open road and the migration** | VX-306 | the route and lobby on roads; per-key items, what the Mac remembers, the record and key file v3 going live; the migration (§3.13); the phone builds and opens — **on in Debug builds only, like every phase's new code, until her release switch** (VX-329, §5 below) | two units (the open road · the migration). Evidence: the migration drill per §3.13 shape; the Keychain leg on a throwaway scope; the dev store under a held claim; her stores rehearsed on byte-copies; the restore drill | VX-228, VX-235 (the migration clears today's stuck markers), VX-209 (the open rule's road), VX-263 (the fold), VX-301 (keys of their own beside the old shared key, the fresh pair), VX-213 (the leftover key file), VX-310 (the lobby's Touch ID); the device identity's new home and hardware marker (second opinion §2.5) |
 | **3 — the acts** | VX-307 | Use Castle (its checks at the door; the export-off step), Use Standard (a key change: the anchor; history flows into Castle, never out), Replace All Keys and the follow (every follow typing one secret) on sealed plans; the Apple keys' lifecycle (VX-301); the `Sync/` lines (VX-107, VX-109, the marker leaving the library file — `SyncEngine.refuseIfRekeyIncomplete` reads the plan — the leave marked in the vault by the account key's id with no wrap, and its one completing write — made only by a device that reads that key — adding the account's Apple copy; sync keys held by what they reach, on every device, through the window); every Apple key of this Mac's own retired at entering Castle; the old shared key's checks and retirement; copies pausing between an act's prepare and its swap; VX-233's drill healed | one road per session. Evidence: each road's drill; the posture drill green; convergence suites for the Apple-key mint/wait/delete rules | VX-235 (prepare-then-commit, the record naming the act), VX-263 (the anchor, leaving Castle), VX-301, VX-313, VX-107, VX-108, VX-109, VX-113, VX-233 |
-| **4 — accounts and the key doors** | VX-308 | the binding and rows owned by it (VX-314); the four situations; the one-road signed-out screens both ways; Stop syncing here; Move; setup, enroll and connect; every leave re-keying, in both modes (§3.8), carrying any anchor; change passphrase, new words and the reset road, with every door that replaces a secret while an anchor exists saying its sentence (§3.9); the Touch ID re-arm (only after a press fails on an item that exists; a new device identity starting on Always ask, §3.10); the gate style in this Mac's facts; Re-link minting a fresh account key, and its library arm; the one presenter | one door per session. Evidence: each door's drill; the account-sequence walk (signed in, out, into another account, back) | VX-314, VX-313, VX-263 (the anchor carried by every leave; the per-door sentences), VX-301 (Re-link and its library arm), VX-264 (the signed-out screen, the leaving rules), VX-239, VX-243 |
+| **4 — accounts and the key doors** | VX-308 | the binding and rows owned by it (VX-314); the four situations; the one-road signed-out screens both ways; Stop syncing here; Move; setup, enroll and connect; every leave re-keying, in both modes (§3.8), carrying any anchor; change passphrase, new words and the reset road, with every door that replaces a secret while an anchor exists saying its sentence (§3.9); the Touch ID re-arm (only after a press fails on an item that exists; a new device identity starting on Always ask, §3.10); the gate style in this Mac's facts; Re-link minting a fresh account key, and its library arm; the one presenter | one door per session. Evidence: each door's drill; the account-sequence walk (signed in, out, into another account, back) | VX-314, VX-313, VX-263 (the anchor carried by every leave; the per-door sentences), VX-301 (Re-link and its library arm), VX-264 (the signed-out screen, the leaving rules), VX-310 (the re-arm), VX-239, VX-243 |
 | **5 — copies and words** | VX-309 | the restore list over the catalog (older libraries included); Open Library and the open rule (the family tree deciding "ours"; a different library landing under a fresh key, the other secret typed or made new); Send Library with no sharing sentence; the plaintext export's ID; retention per library and Mac; the Castle offer under VX-301, with the old shared key's sheet and notice; the *Opens with* line everywhere; Data Safety and `RESTORE.md`; the field guide's try-it-yourself line; VX-211; VX-264's and VX-210's words; the lock-time copy named from the file's own key; adoption writing the key file before the store lands | two units (copies · words). Evidence: walks in both voices; the restore drill; **the key-map table (§4.3)** | VX-209, VX-210, VX-211, VX-263 (the route finder's words), VX-264, VX-265, VX-301 (the sheet's words), VX-302, VX-317, VX-213 (the record corrections, the privacy text) |
 | **6 — VX-212** | VX-212 | designed with her first (§3.14), then built under Fable | one repair rule. Evidence: convergence suites plus one live two-device round | VX-212 |
 | **the release switch — at her word** | VX-329 | the new system on in Release builds, in one change in one place; §3.15's deletions; the legacy readers kept | its own run and ladder. Evidence: the scenario suite and soak under `swift test -c release`; the real-scope branch rehearsed before her live stores migrate (§9), every Apple key id it mints logged; a Release build of the switch's change on byte-copies of her stores behind the A1 rail; the restore drill; a Fable cold review of the switch's diff; her acceptance on both Macs and the phone | VX-329 |
@@ -1286,7 +1306,7 @@ the restore list's older-libraries section and the per-Mac far-folder subfolders
 | VX-113 the changed-elsewhere refusal | §3.9: the follow names the change | 3 |
 | VX-313 seals | §3.6: this Mac's facts in two sealed homes, newer wins, the device section found by its hardware marker; plans sealed and named by the act in flight; copies carry only the library's facts; no repair makes a Touch ID item; the claims scoped to Castle | 1 (the model), 3, 4 |
 | VX-314 rows owned by the library's account | §3.8 | 4 |
-| VX-310 the lobby's Touch ID | §3.10: the button whenever an item exists; the stored hash a hint (the re-arm question that follows a failed press is phase 4's door, asked only when the item exists) | 2 |
+| VX-310 the lobby's Touch ID | §3.10: the button whenever an item exists; the stored hash a hint; the re-arm question that follows a failed press, asked only when the item exists (phase 4's door) | 2, 4 |
 | VX-317 Resume Sync's banner | clears only when the hold marker is gone | 5 |
 | VX-329 the release switch | §5: the new system on in Release at her word; §3.15's deletions and legacy readers; its own run and evidence | after 5 |
 | VX-266 flagship | this file | — |

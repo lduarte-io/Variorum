@@ -1402,7 +1402,7 @@ OPEN_OTHER = [
     "<b>A copy with no record</b> — anything made before this change — has its mode worked out once with today's rules, as the migration does. An exposed-era Standard copy with no passphrase or words is never defaulted to Castle.",
 ]
 MIGRATE = [
-    "Anything in flight finishes first, with today's runner; a stuck switch marker is cleared on proof that the switch never happened.",
+    "Anything in flight finishes first, with today's runner; a stuck switch marker is cleared on proof that the switch never happened. Past the one release that keeps today's finish path, an old marker is resolved from what's on disk — the act never happened, or its commit did — then cleared, and the migration carries on from the files under its usual guards; an old rotation still on the server carries no Apple key id, so any device completes it, never with an Apple copy.",
     "The mode is worked out once with today's rules: a synced library takes the vault's word, and without it the mode is recorded as not yet confirmed. Corner 45's ambiguous case records Castle, not yet confirmed, with a one-time notice — the floor sentence, <b>Export a plain copy first</b>, and Use Standard offered as the key change it now is. <b>Until the mode is confirmed, no custody repair runs in either direction</b>: the library keeps today's custody shape, and nothing Apple-reachable is written. Confirming a mode the current key wasn't born in is a key change, never a move.",
     "The record, this Mac's memory (sealed, with this Mac's section in both homes) and the device identity are written — the identity carried over from the sync-keys item, with a hardware marker, so no new device cursor is created. The family tree's first entries: the current key takes the mode step 2 records; every older key the fold reaches is attributed by its key file — an Apple lock marks a Standard key, none a Castle key, and an unknown one counts as Castle's, the safe side, which strands nothing since all stay openable through the history; and every fingerprint the catalog's key files name for this library is listed, reached or not, so its own copies read as its own.",
     "Per-key custody items are added, each of its key's kind; the old per-library items stay, unread, for one release (entering Castle removes them once the history holds their key).",
@@ -1671,8 +1671,8 @@ who-can-open table.</div>
 <h3>Existing stores, once (the migration)</h3>
 <p class="lede">It runs once, at first unlock on the new build, as a plan. The whole new system stays off in Release builds
 until her word at release — the release switch, VX-329, where today's code splits: its deciding and writing roles die
-there, while its read-only legacy readers stay (today's mode rule, the old items' reads, and today's finish path for one
-release), so this migration can still run after the switch. On a Release build it runs only once she has turned the new
+there, while its legacy readers stay, read-only (today's mode rule, the old items' reads, and the old marker's read and
+clearing check), with today's finish path kept one release more, so this migration can still run after the switch. On a Release build it runs only once she has turned the new
 system on.</p>
 {steps(MIGRATE)}
 <h3 id="shared">The old shared Apple key (stores from before this change)</h3>{steps(SHARED)}

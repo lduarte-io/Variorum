@@ -107,7 +107,8 @@ Sources/VariorumCore/Protection/
   Model/      ProtectionRecord (the library's facts + the family tree + one device section per device) ·
               KeyFile (format 3: wraps + history + the Castle anchor; readers for formats 1 and 2) ·
               LegacyReaders (read-only, outliving the release switch — design §3.15: today's mode rule as one
-              pure function, and the reads of today's per-library-ID items and 13p escrow items) ·
+              pure function; the reads of today's per-library-ID items and 13p escrow items; and the old
+              `RotationMarker`'s read with its clearing check) ·
               DeviceMemory (+ sealed fields, + key-file mirror, + the device section's second home, + the hardware
               marker) · Plan (+ seal) · Seal (HKDF + HMAC) · Names (custody item by fingerprint and kind, sync-keys
               item, memory item, Apple key: <scope>-apple-key-<id> per library per Mac and per account, the old
@@ -172,6 +173,9 @@ Build everything in §3.2 of the design as values, with their codecs and their c
 - **The legacy mode reader:** today's mode rule (`Posture.derive`'s inputs and corner 45's test) as one pure,
   read-only function — the migration calls it once per store, and a copy with no record calls it forever (design
   §3.7, §3.15). It decides nothing else and writes nothing.
+- **The old marker's read and clearing check:** the in-file `RotationMarker` read forever, and the evidence that
+  resolves it from disk — the act never happened (the library opens under its old key, the new key never landed) or
+  its commit happened (design §3.13 step 1, §3.15).
 - **What this Mac remembers:** the device identity with its hardware marker (also kept in the device section), the
   biometry state hash (a hint, never a verdict), the vault facts, the key-file mirror (wraps, history and anchor), the
   family tree's mirror, and the device section's second home — sealed whole.
@@ -481,6 +485,9 @@ Each is a named test:
 - a Standard library's own Apple key lost (iCloud Keychain reset, a switch of Apple ID): Re-link's library arm, then
   promise 3 settles — local-only too;
 - today's Standard-waiting and exposed libraries through the migration: the current key takes step 2's mode;
+- an old build's crashed act, migrated after today's finish runner is gone: never happened, so cleared; its commit
+  happened, so cleared, migrated from disk with no custody repair until the mode is confirmed; and a synced store
+  whose old rotation still stands on the server, completed by the new engine with no Apple copy;
 - a Time Machine rollback past a re-key: this library's later copies still read as its own;
 - a synced pair landed with a passphrase made new: it becomes the account's at Resume Sync.
 
