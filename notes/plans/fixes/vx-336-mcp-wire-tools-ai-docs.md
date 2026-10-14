@@ -485,7 +485,10 @@ lens rule resolves to picks; `Operations.saveLens` and its undo entry are untouc
 | 7 | headless finals (MCP · core · workbook) | NOT-STARTED |
 | 8 | LIVE LEGS FOR U5b's WINDOW + FOR VX-234 + PROVISIONALs + self-assessment → the report | NOT-STARTED |
 
-**No revert is in flight.**
+**A REVERT IS ANNOUNCED (piece 3, VX-267):** on the committed tree `38587d5b`, `Sources/VariorumMCP/MCPWriteTools.swift`
+goes back to the pins commit `df9cca89` (`git checkout df9cca89 -- Sources/VariorumMCP/MCPWriteTools.swift`), the pins
+kept; the four label pins run; then RESTORED with `git checkout HEAD -- Sources/VariorumMCP/MCPWriteTools.swift` and
+`git diff HEAD` read empty. A successor finding `git diff HEAD -- Sources` non-empty mid-piece restores exactly that.
 
 ### The traces (written before code)
 
