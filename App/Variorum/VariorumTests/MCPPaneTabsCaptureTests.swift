@@ -183,6 +183,7 @@ struct MCPPaneTabsCaptureTests {
                         await door.copySetupCommand(for: .anyClient, to: pasteboard)
                     }
                     door.paneTab = tab
+                    door.requestSettings()  // ⌥⌘, — the window opens AT the MCP pane
                     door.enqueue(MCPAsk(clientName: "claude-code", scopeKind: .note, scopeID: world.parser.id,
                                         title: "parser notes", rung: .edit, fence: nil),
                                  now: Date().addingTimeInterval(-300))
@@ -198,6 +199,7 @@ struct MCPPaneTabsCaptureTests {
                         quiet.attach(session: session)
                         defer { quiet.detach() }
                         quiet.paneTab = .clients
+                        quiet.requestSettings()
                         await capture(
                             AppSettingsView(session: session, mcp: quiet), size: size, dark: false,
                             name: "u1-clients-nothing-waiting-\(v).png", settle: 80)
