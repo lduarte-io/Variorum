@@ -112,7 +112,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-290 — the empty-block backspace's caret landing | IN-PROGRESS — **W1 RED ON OLD DONE, W2 MAC BATCH GREEN** (stage `vx282-u1` 21:58:14–22:01:26, released; record below). **W3, the walk, is HELD** on the coordinator's word (she may be on the Pro) — next: on the orchestrator's "W3 GO" + claim line, walk rows A–D, record, flip to DONE. Fix `385aa1fc`. No revert in flight. |
-| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | NOT-STARTED |
+| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | IN-PROGRESS — the trace re-done and recorded (below); next: the core parser + pins (headless), then the face, the Mac's two live roads, the phone. No revert in flight. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | NOT-STARTED |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
@@ -317,6 +317,58 @@ instance before or after, no simulator). Logs: `notes/plans/vx282-screens/u1/log
   SUCCEEDED **` ×2).
 - **W3 — HELD** by the coordinator until she confirms she is off the Pro; no "W3 GO" had reached this session when
   W2 ended, so the claim was released, per the GO's instruction. PENDING.
+
+### U2 — VX-296 (the italics flicker: a caret-aware live restyle)
+
+**State: IN-PROGRESS.** Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-13. Every count and
+every "green"/"red" below is **PENDING** until it is run (headless) or until the stage window runs it.
+
+**The ruling being built:** fix **(a)**, her word on the ticket — *"296: your fix is good"*: caret-aware, LIVE
+EDITOR ONLY. While her caret sits right after the whitespace that disqualifies a closer, the closer still counts;
+when she leaves a trailing space behind, the span honestly un-styles. The grammar's meaning for every non-live
+reader (read pages, export, the phone's read page, search, ⌘B/⌘I's toggle, anything else that parses) is unchanged.
+Option (b) (dropping the closer half app-wide) is NOT authorized and is not built.
+
+**The trace, re-done in this session against `a8c4756c` (the ticket's pointers verified; the code agrees):**
+1. The minimal flanking rule — `Sources/VariorumCore/Domain/MarkdownSyntax.swift:549-555` (the doc: no whitespace
+   after an opener, none before a closer; the reason, `2 * 3 * 4`). Its three closers each refuse a candidate whose
+   previous character is whitespace: `closingPair` (`**`, `~~`, `:556-568`, the test at `:562`), `closingSingle`
+   (`*`, `:570-580`, the test at `:576`), and `closingUnderscore` (`_`, `:477-490`, the test at `:483`).
+2. Her flow: ⌘I with no selection writes `**` with the caret between (`MarkdownEditing.wrapPlan`'s caret gesture,
+   `MarkdownEditing.swift:436-441`, `:463-468`). Typing `hello` reads `*hello*` — italic. Typing a SPACE reads
+   `*hello *`: the closer is refused (`:576`), there is no other closer, and the span is gone. Typing `w` reads
+   `*hello w*` — italic again. Every word boundary flips it.
+3. She SEES each flip because every live editor re-parses the edited LINES on every keystroke, caret-blind:
+   - **the Write editor and the book's inline editor** (one road — `InlineEditorSurface` wires the same
+     `EditorSurfaceDelegate`, `EditorView.swift:559-581`): `EditorViewModel.storageDidEdit` →
+     `MarkdownStyling.restyle(storage, range: editedRange)` (`EditorViewModel.swift:1312-1320`);
+   - **every live pane** (Takes cards, Lenses columns, Index rows, Read's edit face, Write's take panel, Blocks,
+     Canvas — all `PaneSurface`): `Coordinator.textDidChange` → `MarkdownStyling.restyle(storage, range:
+     pendingEditRange ?? view.selectedRange())` (`PaneSurface.swift:1955-1967`);
+   - **the phone's Write editor**: `MobileEditorViewModel.storageDidEdit` → `MarkdownFace.restyle(storage, range:
+     editedRange, …)` (`MobileEditorViewModel.swift:1906-1915`). The phone's takes card editor wears no face
+     (no `MarkdownFace` call under `VariorumMobile/Features/Takes/`).
+   All three call the ONE shared face (`Shared/MarkdownFace/MarkdownFaceCore.swift`, `restyle` `:139-198`), which
+   tokenizes with `MarkdownSyntax.spans(in:)` (`:153-155`) and so inherits the closer rule.
+4. **The opener side** flips the same way only when whitespace follows the opening star: `*| world*` after she
+   backspaces the first word away, or a space typed right after the opener. Typing words forward inside the pair
+   never produces it (traced: the caret is always right of the last typed character, and the opener is followed
+   by the first one). See PROVISIONAL P-U2-1.
+5. Every other face road is caret-less by nature and untouched: the full-render doors (`EditorDocument.materialize`
+   → `MarkdownStyling.style`, `EditorDocument.swift:88`; the phone's `:765`, `:837`), the structural rewrites
+   (`applySeamEdit` `EditorViewModel.swift:938`, `programmaticReplace` `:4066`, the phone's `:2073`), the
+   voice/palette roads (`EditorTypography.swift:475`, `:489`; the pane's `style`/`restyleFacedLines` at
+   `PaneSurface.swift:1395`, `:1468`, `:1520`, `:1553`, `:1579`), the read tier (`ReadPostViewModel.swift:265` —
+   non-editable), and every non-face parser reader (`MarkdownRendering.swift:246`, `TypedArrows.swift:83`,
+   `MarkdownEditing.swift:186/214/289/336`, `MobileMarkdownActs.swift:116`).
+
+**A measured fact the design rests on (a headless AppKit probe, an offscreen TK2 `NSTextView`, no window — the
+scratch program is not committed):** during `insertText`, the storage delegate's `didProcessEditing` sees the
+PRE-edit selection (a space typed at 6 reports `edited={6, 2}` with `sel={6, 0}`), then `didChangeSelection` fires
+with the landed caret (`{7, 0}`), then `textDidChange`. `didChangeSelection` also fires for an edit that leaves the
+caret still (forward-delete) and for a same-range `setSelectedRange`; a raw storage edit AFTER the caret fires none.
+So the Write editor's keystroke restyle cannot know the landed caret, and the selection change is the reliable
+"the caret has settled" moment on the Mac.
 
 ## Ladder
 
