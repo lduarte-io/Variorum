@@ -980,6 +980,11 @@ Phase 5's closeout — the last before VX-212's own phase — carries **the map 
 naming the test, drill or walk that proves the code matches it, and its result. An element with no proof, or a
 mismatch, blocks the effort's close. If a phase changes the design, the map changes in the same commit, at her word.
 
+**The companion explainer**, `notes/plans/vx-266/castle-map-fable.html` — the plain-language page the round-2 Fable
+reviewer made at her ask (the rules in a sentence, the four crossings, who opens what) — is second to the maps: it
+proves nothing, and wherever it and the maps differ, the maps win. At phase 5's closeout, when the field-guide question
+in §9 is decided, it is re-verified against the maps, or deleted.
+
 ---
 
 ## 5. The phases (each its own run, ticket, branch, ladder and closeout; one sitting ruled them all)
@@ -1158,5 +1163,6 @@ followed into Castle — VX-301 and the follow's typed secret settle it: the pho
 - **A retention rule for older libraries:** kept as today until she rules.
 - **VX-212's design:** her sitting before phase 6.
 - **Whether a release version of the key map ships** in the field guide's encryption chapter: after phase 5, re-voiced
-  and verified against the shipped build.
+  and verified against the shipped build. The companion explainer (§4.3) is its first draft, re-verified or deleted
+  then.
 - **The cast at each kickoff** (§5).
