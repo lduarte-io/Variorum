@@ -518,10 +518,10 @@ affordance that lags is a surprise). The batch is two statements however many ro
 
 | Host | Read | Scales with | Wakes at autosave? |
 |---|---|---|---|
-| the Library's note rows (List, Cards, the answer sheet's heads) | `mcpNoteReaches` over the NEAR WINDOW (`nearNoteIDs` — the pages around what is on screen, ≤ 3 × 80), beside the owned-by facts, re-aimed at page boundaries | the window, never the listing (however deep she scrolls) | only with live reach; and the Library is never on screen beside an editor |
+| the Library's note rows (List, Cards, the answer sheet's heads) | `mcpNoteReaches` over the NEAR WINDOW (`nearNoteIDs` — the pages around what is on screen, ≤ 3 × 80), beside the owned-by facts, re-aimed at page boundaries | the window, never the listing (however deep she scrolls) | only with live reach — and then also while it sits in a split pane beside a note being edited (list surfaces mount whole in every pane — `RootView.paneDetail`): one window batch per autosave. NEW cost on this host: its owned-by hold reads no `container` |
 | the Library's book + gathering rows | `mcpBookReaches(readingIDs:)` over `listedBookIDs` | the listed books (the Library lists its wing's books whole — the Bookcase's own class) | never (`reading`, `wing`, the grants store) |
-| the Timeline's rows | `mcpNoteReaches` over the LOADED rows | the pages she loaded (each "Load More" is her act — the order of the Timeline's own reads) | only with live reach; never beside an editor |
-| the Pool's rows | `mcpNoteReaches` over `drawnIDs` | the Pool's own window (200 loose, + the tucked run while shown) | only with live reach |
+| the Timeline's rows | `mcpNoteReaches` over the LOADED rows | the pages she loaded (each "Load More" is her act — the order of the Timeline's own reads) | only with live reach (a split pane beside an editor included) |
+| the Pool's rows | `mcpNoteReaches` over `drawnIDs` | the Pool's own window (200 loose, + the tucked run while shown) | only with live reach (its listing already re-reads `container` per autosave over the same window) |
 | the Book Panel's rows | `mcpNoteReaches` over the panel's entries | the panel's own window (`entryWindow` = 300) — the panel's snapshot already re-runs per autosave over the same window | only with live reach (the one host beside an editor — one batch per autosave, the snapshot's own class) |
 | the wing switcher (⌘L's rows, the ▾ menu) | `mcpWingReaches` | the wings × the approved clients | never (no `container`, no `reading`) |
 
