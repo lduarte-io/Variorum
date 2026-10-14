@@ -370,8 +370,10 @@ screenshot walk (a fresh walker's, after the stage window); any stage work until
 - P0 — the ⇧⌘W collision check (VX-287's FIRST step): IN-PROGRESS — the app-code sweep is DONE and FREE (below);
   the system-provided half (AppKit's own File-menu items under window tabbing) is PENDING an external lookup and the
   stage window's AX enumeration of the Debug app's menus.
-- P1 — VX-286 (the scroll bar rides in the margin, Open + Starred): NOT-STARTED.
-- P2 — VX-285 (the Open list grows to the sync footer; the constant splits): NOT-STARTED.
+- P1 — VX-286 (the scroll bar rides in the margin, Open + Starred): DONE (the commit carrying this line; hash
+  in the next flip) — headless build green; its mounted pin and the behavioural revert are PENDING the stage window.
+- P2 — VX-285 (the Open list grows to the sync footer; the constant splits): DONE (same commit as P1 — the two
+  share `SidebarView.openGroup`'s lines) — headless build green; pins + revert PENDING the stage window.
 - P3 — VX-287 (Close Note ⌘⇧W, landing next / previous / the Library): NOT-STARTED.
 - P4 — VX-289 (Close All Notes: the Open list's right-click + the View-menu twin): NOT-STARTED.
 - P5 — the stage window (the Mac batch + the red-on-old reverts): NOT-STARTED.
@@ -395,6 +397,42 @@ screenshot walk (a fresh walker's, after the stage window); any stage work until
   All", i.e. AppKit re-titles File ▸ Close and may insert a "Close Window" item while a window is in a native tab
   group. Whether that item wears ⇧⌘W (and whether it appears in this SwiftUI app) is being checked; if it does,
   that is a collision in the tabbed state and goes to the orchestrator BEFORE the chord ships.
+  The external lookup (one Sonnet subagent, read-only) came back INCONCLUSIVE: no Apple source says AppKit (rather
+  than each app) inserts File ▸ Close Window, nor which chord it wears; ⇧⌘W for Close Window is the convention
+  (Safari, Chromium's own menu code, Pages's two items under tabs), and ⇧⌘W is not on Apple's system-wide shortcut
+  list. So the system half is decided by MEASUREMENT: the stage window's FIRST step enumerates the Debug app's
+  File / View / Window menus by AX — one window, then two windows merged into tabs (Window ▸ Merge All Windows) —
+  and looks for any other item wearing ⇧⌘W. A hit = STOP and report before the batch runs.
+
+**P1 — VX-286, the trace verified on this tip (`a2a27a10`):** each row fills the group's width with the ✕ only
+`rowPadding` (8 pt) in (`SidebarView.swift:435-446` rowChrome, `:811-815` the ✕); the group's `groupPadding` (12 pt)
+was applied OUTSIDE the scroll view (`:761`), so the scroll view's trailing edge was the rows' and macOS's overlay
+bar drew on the ✕; Starred the same (`:491-503`, `:523`, the ★ at `:552-556`). **The fix:** the margin moved INSIDE
+both scroll views as the scroll content's padding (`scrollingSectionMargin` = the group's own 12 pt), the headers
+carry the margin themselves; the rows land on the same edge at the same width. **Pin:**
+`OpenListLayoutMountTests.bothScrollingSectionsKeepTheirBarInTheMargin` (each section's scroll view reaches a whole
+margin past its first row; the rows still sit one margin in) — RED ON OLD expected (gap 0), PENDING.
+
+**P2 — VX-285, the trace verified on this tip:** the strip's scroll view was capped at `rowHeight × 7.5`
+(`SidebarView.swift:749-752`, `SidebarLayout.swift:160,182-191`) whatever the window; the empty room below was the
+outer last-resort scroll's (`SidebarView.swift:283-311`); the sync footer is OUTSIDE that scroll (the column's
+`bottom`, composed by `RootView.statusRows` at `RootView.swift:594-611`). **The fix:** a pure
+`SidebarLayout.openListMaxHeight(visibleHeight:listTop:bottomPadding:rowHeight:)` = the outer scroll's visible height
+− the list's MEASURED top in the column content's named space − the content's bottom padding, rounded down, floored
+at `openListFloorRows` (3½); `openListRowsFit` replaces the `count <= 7` switch. The shared window SPLIT:
+`scrollingSectionWindow` (7) and its `scrollingSection…` functions are Starred's alone; `openStripWindow` /
+`openStripMaxHeight` are gone; the fit test still counts the strip at seven (`openListFitRows` — VX-285 changes how
+far the list grows, never when the column compresses). Two measurements feed it (`columnScrollHeight` on the outer
+scroll, `openListTop` on the list) — nothing above the list depends on its height, so no feedback loop. **The two
+pins changed BY HER ASK, edited in place with a VX-285 annotation:** `ShellChromeTests.theOpenStripWindowIsHerSevenAndAHalf`,
+`StarredScrollTests.theWindowIsOneConstantForBothScrollingSections`. **New pins:** `OpenListHeightTests` (pure ×4)
+and `OpenListLayoutMountTests.inATallColumnTheListRunsDownToTheFooterAndStops` (RED ON OLD expected: 225 pt and
+empty column below) + `…inAShortColumnTheListTakesItsFloorAndTheColumnScrolls` (RED ON OLD expected: 7½ rows, not
+3½) — PENDING.
+
+**PROVISIONAL P-U1-4 — the floor's number.** The record says "floored at a few rows" and names none. Built: 3½ rows
+(three and the half row that says there is more — Starred's own idiom). Options: (a) 3½ [built]; (b) 3 whole rows;
+(c) 5½. Her eye at the walk decides.
 
 ## Ladder
 

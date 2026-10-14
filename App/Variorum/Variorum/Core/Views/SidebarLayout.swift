@@ -143,30 +143,30 @@ nonisolated enum SidebarLayout {
         groupHeaderHeight + CGFloat(railRows) * rowHeight
     }
 
-    /// How many rows a SCROLLING sidebar section shows before it scrolls in
-    /// place. **ONE constant for the two sections that have one**, because
-    /// two sections carrying one ruled number must not drift:
+    /// How many rows **STARRED** shows before it scrolls in place (13u2 item
+    /// 10 — her words: *"I'm fine with where starred items are on the mac but
+    /// make sure in 13u that it says that starred items should only show up
+    /// to like 7 items and then it should start scrolling"*; placement
+    /// unchanged, a bounded-list fix only).
     ///
-    /// - the **Open strip** (Act 10 item 9's ruled window), and
-    /// - **Starred** (13u2 item 10 — her words: *"I'm fine with where starred
-    ///   items are on the mac but make sure in 13u that it says that starred
-    ///   items should only show up to like 7 items and then it should start
-    ///   scrolling"*; placement unchanged, a bounded-list fix only).
-    ///
-    /// Act 10 item 9 called its own window "the starred precedent's ~7" —
-    /// **which the starred section did not actually have**: it rendered every
-    /// starred row, unbounded, and the column compressed to fit them. This is
-    /// the precedent made real.
+    /// **VX-285 SPLIT THE CONSTANT** (the VX-283 run, U1). It was ONE constant
+    /// for two sections — Starred and the Open strip (Act 10 item 9's ruled
+    /// window, *"the starred precedent's ~7"*) — so the two could not drift.
+    /// Her VX-285 ask is that they now DIFFER, and on purpose: *"Open tabs
+    /// should extend the full height of the screen that they can (until the
+    /// synced portion of the bottom row starts, wherever that is)"*, while
+    /// Starred keeps its ~7 in her own words above. So this window is
+    /// Starred's alone; the Open list's height is `openListMaxHeight` below.
+    /// The `scrollingSection…` names stay (Starred is the one scrolling
+    /// section with a window), and the strip's `openStripWindow` /
+    /// `openStripMaxHeight` names are GONE rather than left answering 7 —
+    /// a name still reading seven would be the old cap, lying.
     static let scrollingSectionWindow = 7
-
-    /// The Open strip's name for it (kept so the strip's own call sites and
-    /// pins read as they did).
-    static var openStripWindow: Int { scrollingSectionWindow }
 
     /// Whether the column compresses its rows: true only when the
     /// generous layout for `rows` rows would not fit in `columnHeight`.
     /// `rows` counts every row the column is about to draw (areas, rail,
-    /// starred, and the strip's rows up to its window).
+    /// starred, and the strip's rows up to `openListFitRows`).
     static func compressesRows(columnHeight: CGFloat, rows: Int, headedGroups: Int = 3) -> Bool {
         guard columnHeight > 0 else { return false }
         let generous = CGFloat(rows) * generousRowHeight + chromeHeight(headedGroups: headedGroups)
@@ -179,26 +179,91 @@ nonisolated enum SidebarLayout {
             ? compactRowHeight : generousRowHeight
     }
 
-    /// A scrolling section's tallest form: the ruled window plus half a row,
-    /// so a scrollable section visibly shows there is more below.
+    /// Starred's tallest form: the ruled window plus half a row, so a
+    /// scrollable section visibly shows there is more below.
     static func scrollingSectionMaxHeight(rowHeight: CGFloat) -> CGFloat {
         rowHeight * (CGFloat(scrollingSectionWindow) + 0.5)
     }
 
-    /// The Open strip's name for it (its call sites and pins read unchanged).
-    static func openStripMaxHeight(rowHeight: CGFloat) -> CGFloat {
-        scrollingSectionMaxHeight(rowHeight: rowHeight)
-    }
-
-    /// How many rows a scrolling section contributes to the fit test — its
-    /// own rows, capped at the window it scrolls inside.
+    /// How many rows Starred contributes to the fit test — its own rows,
+    /// capped at the window it scrolls inside.
     static func scrollingSectionRowsCounted(rows: Int) -> Int {
         min(rows, scrollingSectionWindow)
     }
 
-    /// The Open strip's name for it.
+    // MARK: - The Open list's height (VX-285 — the VX-283 run, U1)
+    //
+    // Her words (2026-10-13): *"I don't like that the open tabs cut off like
+    // this - they should extend further down if there's the space for it
+    // (though they should always stop before the syncing area begins."*
+    //
+    // The traced mechanism the old shape had: the strip's scroll view was
+    // capped at `rowHeight × 7.5` (225 pt at the generous pitch) whatever
+    // the window, so a tall window left the outer last-resort scroll's
+    // unused room standing empty below an eighth row clipped mid-text. The
+    // sync footer is OUTSIDE that outer scroll (`SidebarView`'s `bottom`,
+    // composed by `RootView.statusRows`), so "stop before the syncing area"
+    // is exactly "stop at the bottom of the outer scroll's visible height".
+    //
+    // So the list's tallest form is the room left under it: the outer
+    // scroll's VISIBLE height, less where the list's top sits in the
+    // column's content (MEASURED — what stands above it varies: starred, the
+    // rail or the note box, the areas), less the content's bottom padding.
+    // Filled exactly, the column's content is exactly the visible height, so
+    // the outer scroll stays inert at every ordinary size.
+
+    /// The column content's bottom padding — the air under the last group,
+    /// and the last term of the Open list's height (`openListMaxHeight`).
+    static let contentBottomPadding: CGFloat = 12
+
+    /// The Open list's FLOOR, in rows: in a window too short to give it this
+    /// much, the list takes this anyway and the outer last-resort scroll
+    /// carries the rest (the record's "short windows fall back to the outer
+    /// scroll"). Three rows and the half row that says there is more —
+    /// Starred's own "visibly shows there is more" idiom. PROVISIONAL
+    /// (P-U1-4): the record says "a few rows" and names no number.
+    static let openListFloorRows: CGFloat = 3.5
+
+    /// **The Open list's tallest form** (VX-285): the room between where it
+    /// starts and the bottom of the column's visible scroll — the sync
+    /// footer's top edge — floored at `openListFloorRows`. Rounded DOWN so
+    /// the filled column can never come out a fraction taller than what it
+    /// shows (which would wake the outer scroll's bounce for a hair).
+    ///
+    /// `visibleHeight` is the outer scroll's visible height and `listTop`
+    /// the list's top in the column's content space (the content's own top
+    /// padding included). Either one unmeasured (0 — the first pass before
+    /// geometry lands) answers the floor: a list that has not been measured
+    /// never claims room it may not have.
+    static func openListMaxHeight(
+        visibleHeight: CGFloat, listTop: CGFloat, bottomPadding: CGFloat, rowHeight: CGFloat
+    ) -> CGFloat {
+        let floor = rowHeight * openListFloorRows
+        guard visibleHeight > 0, listTop > 0 else { return floor }
+        return max((visibleHeight - listTop - bottomPadding).rounded(.down), floor)
+    }
+
+    /// **Do the Open list's rows fit its tallest form?** (VX-285 — the old
+    /// `count <= 7` switch, which only ever asked about the old window.)
+    /// True ⇒ the list hugs its rows; false ⇒ it takes `maxHeight` and
+    /// scrolls in place.
+    static func openListRowsFit(rows: Int, rowHeight: CGFloat, maxHeight: CGFloat) -> Bool {
+        CGFloat(rows) * rowHeight <= maxHeight
+    }
+
+    /// How many of the Open list's rows the column's FIT TEST counts — the
+    /// question of whether the whole column draws at the generous or the
+    /// compact pitch. **Seven, deliberately UNCHANGED by VX-285:** her ask
+    /// moves how far the list may grow, not when the column compresses, so
+    /// the compression thresholds read exactly as they did before the split.
+    /// (Counting the list at its floor instead would keep the generous pitch
+    /// in more short windows, with fewer rows showing — a different trade,
+    /// and not one she asked for.)
+    static let openListFitRows = 7
+
+    /// The Open strip's rows in the fit test, capped at `openListFitRows`.
     static func openStripRowsCounted(openNotes: Int) -> Int {
-        scrollingSectionRowsCounted(rows: openNotes)
+        min(openNotes, openListFitRows)
     }
 
     /// The whole column's row count, for the fit test. **Starred is capped

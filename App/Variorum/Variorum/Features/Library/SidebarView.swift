@@ -205,6 +205,15 @@ struct SidebarView: View {
     /// The column's height, as laid out — the fit test's input
     /// (`SidebarLayout`). Zero on the first pass, which never compresses.
     @State private var columnHeight: CGFloat = 0
+    /// **VX-285's two measurements** — the Open list's height is a pure
+    /// function of them (`SidebarLayout.openListMaxHeight`): the outer
+    /// scroll's VISIBLE height (the column above the sync footer) and where
+    /// the list's top sits in the column's content. Both zero until geometry
+    /// lands, which answers the list's floor.
+    @State private var columnScrollHeight: CGFloat = 0
+    @State private var openListTop: CGFloat = 0
+    /// The column content's named space (VX-285): where `openListTop` is read.
+    private nonisolated static let columnContentSpace = "sidebar.column.content"
     /// 17y B3 item (f): the Open rows living in ANOTHER wing → that wing's
     /// name (the indicator). Read once per (rows, current wing) — bounded by
     /// the Open list.
@@ -264,6 +273,14 @@ struct SidebarView: View {
             columnHeight: columnHeight, rows: rowCount, headedGroups: headedGroupCount)
     }
 
+    /// VX-285: the Open list's tallest form — the room down to the sync
+    /// footer, from the two measurements above.
+    private var openListMaxHeight: CGFloat {
+        SidebarLayout.openListMaxHeight(
+            visibleHeight: columnScrollHeight, listTop: openListTop,
+            bottomPadding: SidebarLayout.contentBottomPadding, rowHeight: rowHeight)
+    }
+
     var body: some View {
 #if DEBUG
         // The round-end Fable pass, MAJOR-1's oracle: how many times THIS
@@ -300,11 +317,24 @@ struct SidebarView: View {
                     }
                     openGroup
                 }
-                .padding(.top, 14)
-                .padding(.bottom, 12)
+                .padding(.top, SidebarLayout.topPadding)
+                .padding(.bottom, SidebarLayout.contentBottomPadding)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                // VX-285: the column content's own space — the Open list's
+                // top is read here, unmoved by the outer scroll's offset.
+                .coordinateSpace(.named(Self.columnContentSpace))
             }
             .scrollBounceBehavior(.basedOnSize)
+            // VX-285's first measurement: the outer scroll's VISIBLE height —
+            // everything above the sync footer (which sits outside it, below).
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                columnScrollHeight = $0
+            }
+            #if DEBUG
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                SidebarGeometry.columnScrollFrames[SidebarGeometry.bodyKey(for: workspace)] = frame
+            }
+            #endif
             if let bottom {
                 Divider().overlay(tokens.line)
                 bottom
@@ -369,6 +399,20 @@ struct SidebarView: View {
     //  private aliases: this file's own call sites keep reading two words.)
     private static var groupPadding: CGFloat { SidebarLayout.groupPadding }
     private static var rowPadding: CGFloat { SidebarLayout.rowPadding }
+
+    /// **VX-286 — where a scrolling section's side margin lives: INSIDE its
+    /// scroll view.** Her words (2026-10-13): *"the scroll bar on there goes
+    /// over the x out button"* · *"the tab close x gets hidden behind the
+    /// scroll"*. The traced mechanism: macOS draws an OVERLAY scroll bar over
+    /// the scroll view's own trailing edge, and both scrolling sections
+    /// (Starred, the Open list) took the group's `groupPadding` OUTSIDE their
+    /// scroll view — so the scroll view's trailing edge was the rows' own,
+    /// and the bar landed on the last thing in each row: the Open list's ✕
+    /// (8 pt in) and Starred's ★. With the margin as the scroll CONTENT's
+    /// padding, the scroll view spans the column and the bar rides in the
+    /// margin beside the rows. The rows land exactly where they did — same
+    /// edge, same width — which is why this is the group's own number.
+    private static var scrollingSectionMargin: CGFloat { SidebarLayout.groupPadding }
 
     /// Row 13 (17o batch d): the header ROW's pitch, and the air between the
     /// words and the first row's wash. Her punchlist 3 and its follow-up:
@@ -487,14 +531,18 @@ struct SidebarView: View {
         if !items.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
                 header(StarCopy.sectionHeader)
+                    // VX-286: the group's side margin moved off the group (see
+                    // `scrollingSectionMargin`), so the header carries its own.
+                    .padding(.horizontal, Self.groupPadding)
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
                             ForEach(items, id: \.target) { item in
-                                starredRow(item)
+                                starredRow(item, first: item.target == items.first?.target)
                                     .id(item.target)
                             }
                         }
+                        .padding(.horizontal, Self.scrollingSectionMargin)
                     }
                     .scrollBounceBehavior(.basedOnSize)
                     .frame(maxHeight: SidebarLayout.scrollingSectionMaxHeight(rowHeight: rowHeight))
@@ -517,10 +565,16 @@ struct SidebarView: View {
                         SidebarGeometry.starredSectionHeights[
                             SidebarGeometry.bodyKey(for: workspace)] = height
                     }
+                    // VX-286's oracle: the section's scroll view as drawn —
+                    // where its overlay scroll bar rides.
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                        SidebarGeometry.recordSection(.starred, scroll: frame, for: workspace)
+                    }
                     #endif
                 }
             }
-            .padding(.horizontal, Self.groupPadding)
+            // (VX-286: the `.padding(.horizontal, groupPadding)` that stood
+            //  here put the margin OUTSIDE the scroll view — it moved inside.)
             // 17y B3 item (l): the starred books' facts (≤ the star cap) and
             // what their row menus present.
             .task(id: starredBookIDs) { await bookRowDoors?.load(starredBookIDs) }
@@ -534,7 +588,7 @@ struct SidebarView: View {
         stars.items.filter { $0.target.kind == .reading }.map(\.target.id)
     }
 
-    private func starredRow(_ item: Queries.StarredItem) -> some View {
+    private func starredRow(_ item: Queries.StarredItem, first: Bool) -> some View {
         let destination = StarTargeting.selection(for: item.target)
         let current = selection == destination
         return rowChrome(selected: current) {
@@ -561,6 +615,12 @@ struct SidebarView: View {
                 }
             }
         }
+        #if DEBUG
+        // VX-286's oracle: the first row's box — the ★ sits at its trailing end.
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { box in
+            if first { SidebarGeometry.recordSection(.starred, firstRow: box, for: workspace) }
+        }
+        #endif
         .onTapGesture { selection = destination }
         .contextMenu {
             // 17y B3 item (l): a starred BOOK's row carries the book row menu
@@ -735,8 +795,13 @@ struct SidebarView: View {
         let shown = workspace.openNotes.shown
         if !shown.isEmpty {
             separator
+            // VX-285: the list's tallest form is the room left above the sync
+            // footer (`SidebarLayout.openListMaxHeight`), read once per pass.
+            let maxHeight = openListMaxHeight
             VStack(alignment: .leading, spacing: 0) {
                 header(WorkspaceNaming.openSectionHeader)
+                    // VX-286: the header carries the group's margin itself now.
+                    .padding(.horizontal, Self.groupPadding)
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
@@ -745,11 +810,31 @@ struct SidebarView: View {
                                     .id(noteID)
                             }
                         }
+                        // VX-286: the margin INSIDE the scroll, so the overlay
+                        // scroll bar rides beside the ✕, never over it.
+                        .padding(.horizontal, Self.scrollingSectionMargin)
                     }
                     .scrollBounceBehavior(.basedOnSize)
-                    .frame(maxHeight: SidebarLayout.openStripMaxHeight(rowHeight: rowHeight))
+                    .frame(maxHeight: maxHeight)
+                    // VX-285: hug the rows while they FIT the room; past it,
+                    // take the room and scroll in place (the `count <= 7`
+                    // switch asked only about the old window).
                     .fixedSize(
-                        horizontal: false, vertical: shown.count <= SidebarLayout.openStripWindow)
+                        horizontal: false,
+                        vertical: SidebarLayout.openListRowsFit(
+                            rows: shown.count, rowHeight: rowHeight, maxHeight: maxHeight))
+                    // VX-285's second measurement: where the list STARTS in
+                    // the column's content. Nothing above it depends on the
+                    // list's own height, so this can never feed back.
+                    .onGeometryChange(for: CGFloat.self) {
+                        $0.frame(in: .named(Self.columnContentSpace)).minY
+                    } action: { openListTop = $0 }
+                    #if DEBUG
+                    // VX-285/286's oracle: the list's scroll view as drawn.
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                        SidebarGeometry.recordSection(.open, scroll: frame, for: workspace)
+                    }
+                    #endif
                     // The newcomer reveal: the most-recently-opened note
                     // scrolls into view the moment it joins — "a newly
                     // opened note never lands hidden", made literal.
@@ -758,7 +843,8 @@ struct SidebarView: View {
                     }
                 }
             }
-            .padding(.horizontal, Self.groupPadding)
+            // (VX-286: the `.padding(.horizontal, groupPadding)` that stood
+            //  here put the margin OUTSIDE the scroll view — it moved inside.)
             // 17y (f): which open notes live in another wing (the indicator).
             .task(id: openWingsKey) {
                 let ids = workspace.openNotes.shown
@@ -833,6 +919,8 @@ struct SidebarView: View {
             if ordinal == 1 {
                 SidebarGeometry.recordFirstRowBox(
                     WorkspaceNaming.openSectionHeader, box, in: session.debugProbeScope)
+                // VX-286's oracle: the ✕ sits at this box's trailing end.
+                SidebarGeometry.recordSection(.open, firstRow: box, for: workspace)
             }
         }
         #endif
@@ -947,6 +1035,49 @@ enum SidebarGeometry {
     /// list outgrows the window, which is a claim about a rectangle — and
     /// the section's own scroll view is the only thing that can answer it.
     static var starredSectionHeights: [String: CGFloat] = [:]
+
+    /// **VX-285 / VX-286 (the VX-283 run, U1) — the two SCROLLING sections
+    /// as drawn**, keyed by the column's workspace (an owner already, the
+    /// `starredSectionHeights` key). Her two asks are claims about
+    /// rectangles: the scroll bar rides in the margin BESIDE the rows (the
+    /// section's scroll view reaches past its first row's trailing edge),
+    /// and the Open list runs down to the sync footer and stops there (its
+    /// bottom against the column scroll's bottom, `columnScrollFrames`).
+    enum ScrollingSection: String, Sendable {
+        case starred, open
+    }
+
+    struct SectionDraw: Equatable, Sendable {
+        /// The section's scroll view, in global coordinates.
+        var scroll: CGRect?
+        /// Its FIRST row's box (the wash's rectangle), in global coordinates.
+        var firstRow: CGRect?
+    }
+
+    static var sectionDraws: [String: [ScrollingSection: SectionDraw]] = [:]
+    /// The column's outer scroll — the visible column ABOVE the sync footer.
+    static var columnScrollFrames: [String: CGRect] = [:]
+
+    static func recordSection(
+        _ section: ScrollingSection, scroll: CGRect, for workspace: WorkspaceModel
+    ) {
+        sectionDraws[bodyKey(for: workspace), default: [:]][section, default: SectionDraw()]
+            .scroll = scroll
+    }
+
+    static func recordSection(
+        _ section: ScrollingSection, firstRow: CGRect, for workspace: WorkspaceModel
+    ) {
+        sectionDraws[bodyKey(for: workspace), default: [:]][section, default: SectionDraw()]
+            .firstRow = firstRow
+    }
+
+    /// A pin clears ITS OWN column's rows and no other (the keying rule).
+    static func forgetSections(for workspace: WorkspaceModel) {
+        let key = bodyKey(for: workspace)
+        sectionDraws[key] = nil
+        columnScrollFrames[key] = nil
+    }
     /// 18d batch 1: what the NOTE BOX drew — the whole box, and its header's
     /// words. The geometry oracle compares these two rectangles against the
     /// rail's, because "the box is measured to take up the same amount of
