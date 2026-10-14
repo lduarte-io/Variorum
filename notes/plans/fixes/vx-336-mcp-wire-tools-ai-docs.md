@@ -2322,13 +2322,13 @@ glyph's DEBUG probe) — no registry file, no editor-seam file.
 |---|---|---|
 | 0 | read-in, the traces, the design, the sweep table | DONE (this commit) |
 | 1 | VX-330 SEAM + harness: `BookPanelBrain.markedNote` with the OLD behaviour (a chapter line stands for no note), ONE face helper on both rows, the ask glyph's DEBUG probe | DONE (this commit) — `BookPanelModel.swift`: `BookPanelBrain.markedNote(_:)` (a note line → its note; `.chapter` → nil, marked SEAM; `.unfiled` → nil). `BookPanelView.swift`: ONE helper `noteMarks(for:)` (`MCPSharedIcon(reaches: model.reach[id])` then `MCPAskGlyph(.note(id))` when `markedNote` names a note); `noteRow` draws its pair through it (the same two views on the same reads — behaviour unchanged) and `chapterRow` calls it after the chapter's name (draws nothing at the seam). `Core/Views/MCPAskGlyph.swift`: the DEBUG anchor `MCPAskGlyphProbe` (the icon's R1-5 shape — an AppKit view behind the button, `hitTest → nil`; Release draws exactly what it drew). Compiled at piece 6 |
-| 2 | VX-330 pins (pure + two mounts), red on the seam by assertion — PENDING for the window's red run | WRITTEN (this commit) — NEW `App/Variorum/VariorumTests/BookPanelMCPMarksTests.swift`, suite `BookPanelMCPMarksTests` (3 tests, `.serialized`): `aLineThatStandsForANoteWearsItsMarksAndAHeadingWearsNone` (pure — `BookPanelTests`' grouping fixture; `lines.map(markedNote) == [nil, p1, p2, p3, nil, p4]`, the collapsed `.chapter(two, collapsed: e3)` → `p3`, a plain heading and `unfiled` → nil) · `theCollapsedChapterRowWearsItsNotesIconAndWaitingAskAndEachPressIsItsOwn` (MOUNTED in R1-5's `SharedIconRig`: sherlock's shape — a chapter "a scandal in bohemia" holding its one same-named note, the open note unfiled; a note READ grant on the story; the window's board carrying one ask on it and a road recording her presses; the collapsed row draws ONE waiting ask — her press answers `ask-vx330` — and ONE shared icon on the same row, icon first — her press presents its popover; the row's open, `.variorumOpenBookAtPost`, never fires) · `underABookGrantEveryNotesRowWearsBothMarksTheCollapsedChapterRowIncluded` (MOUNTED: a collapsed chapter, a plain heading over two notes, `unfiled` over the open note; a BOOK grant + an ask on each of the four notes → exactly 4 icons and 4 asks on 4 distinct rows, never a fifth). **Expected red on the seam (the red product): test 1 — the `lines.map` and the collapsed `== "p3"` expectations (2 issues); test 2 — the glyph and icon `drawn` expectations and their `#require`s (it stops at the glyph's `#require`); test 3 — `drawn` (3 icons · 3 asks) and both `== 4` expectations and the four-rows line. PENDING — the window's red run on `vx336-u6b-red`, green on `vx336-u6`** |
+| 2 | VX-330 pins (pure + two mounts), red on the seam by assertion — PENDING for the window's red run | WRITTEN (this commit) — NEW `App/Variorum/VariorumTests/BookPanelMCPMarksTests.swift`, suite `BookPanelMCPMarksTests` (3 tests, `.serialized`): `aLineThatStandsForANoteWearsItsMarksAndAHeadingWearsNone` (pure — `BookPanelTests`' grouping fixture; `lines.map(markedNote) == [nil, p1, p2, p3, nil, p4]`, the collapsed `.chapter(two, collapsed: e3)` → `p3`, a plain heading and `unfiled` → nil) · `theCollapsedChapterRowWearsItsNotesIconAndWaitingAskAndEachPressIsItsOwn` (MOUNTED in R1-5's `SharedIconRig`: sherlock's shape — a chapter "a scandal in bohemia" holding its one same-named note, the open note unfiled; a note READ grant on the story; the window's board carrying one ask on it and a road recording her presses; the collapsed row draws ONE waiting ask — her press answers `ask-vx330` — and ONE shared icon on the same row, icon first — her press presents its popover; the row's open, `.variorumOpenBookAtPost`, never fires) · `underABookGrantEveryNotesRowWearsBothMarksTheCollapsedChapterRowIncluded` (MOUNTED: a collapsed chapter, a plain heading over two notes, `unfiled` over the open note; a BOOK grant + an ask on each of the four notes → exactly 4 icons and 4 asks on 4 distinct rows, never a fifth). **Expected red on the seam (the red product): test 1 — the `lines.map` and the collapsed `== "p3"` expectations (2 issues); test 2 — the glyph and icon `drawn` expectations and their `#require`s (it stops at the glyph's `#require`); test 3 — the decision's count at `:289` (three lines stand for notes), `drawn` (3 icons · 3 asks), both `== 4` expectations and the four-rows line (exact pairs: THE STAGE WINDOW step 2). PENDING — the window's red run on `vx336-u6b-red`, green on `vx336-u6`** |
 | 3 | VX-330 fix (one line: a collapsed chapter line stands for its note) | DONE (this commit) — `BookPanelBrain.markedNote`: `case .chapter(_, let collapsed): collapsed?.postID` (the SEAM line and its comment gone). Nothing else: the face helper, the hold and the reads are piece 1's / VX-281's. Green PENDING for the window (`vx336-u6`) |
 | 4 | VX-342 pins (Mac + phone, new pure suites), red on the old words by assertion | WRITTEN (this commit) — NEW `App/Variorum/VariorumTests/UndoWarningWordsTests.swift` (suite `UndoWarningWordsTests`, 1 test) and NEW `App/Variorum/VariorumMobileTests/MobileUndoWarningWordsTests.swift` (suite `MobileUndoWarningWordsTests`, 1 test): `theWarningsDetailSaysBeforeInLowercaseAndShoutsNothing` — for the labels Divide (1 take) · Make Block (3) (· the Mac adds an MCP label, `claude-code's blocks`) the door's detail contains "as it was before the <label lowercased>," and no word of two letters or more written all in capitals; the shared question held to the same (green on both trees). (A pin-authoring compile error met at piece 6's first phone build and fixed in the pin, never the code: `MobileUndoDoor` is main-actor isolated, so the phone suite is `@MainActor` — `e10d3f57`.) **Expected red on the old words: the `contains` and the no-shouting expectations for each label — Mac 6 issues, phone 4. PENDING — the window's red runs (Mac `vx336-u6b-red`, phone `vx336-u6b-ios-red` on a simulator), green on `vx336-u6` / `vx336-u6b-ios`** |
 | 5 | VX-342 fix ("BEFORE" → "before", both doors) | DONE (this commit) — `Registry/ShellActions.swift` `discardingUndoDetail` (the brief's lane go; vx-283 told) and `VariorumMobile/Features/Write/MobileUndoDoor.swift` `discardingUndoDetail`: one word each, nothing else in either file. `Shared/StructuralUndoCopy.swift` checked whole — already sentence case, untouched. Green PENDING for the window (Mac `vx336-u6`, phone `vx336-u6b-ios`) |
 | 6 | the products: `vx336-u6` rebuilt from the final tree; `vx336-u6b-red` (my two fixes reverted); phone `vx336-u6b-ios` + `vx336-u6b-ios-red` | DONE — four `build-for-testing` products, each **TEST BUILD SUCCEEDED, XCB-EXIT 0, zero `error:`, no warning in a touched file** (logs `notes/plans/vx336-screens/u6b/logs/`), 56–63 GiB free throughout. **NO REVERT EVER APPLIED:** the pins were committed AHEAD of both fixes (pieces 2 and 4 before 3 and 5), so the red products are built from the committed pre-fix tree itself (vx-282 U2's precedent), and `git diff` from each red tree to the final shows ONLY the fix lines (the collapsed case's one line + its SEAM comment; the two words; the Mac red's tree also lacks the phone pin's `@MainActor` line, which is outside the Mac product). **Mac red `App/Variorum/DerivedData/vx336-u6b-red` — from `99dd1177`** (U6a's final + the seam + both members' pins, no fix; `mac-red-build.log`): its app dylib carries "as it was BEFORE the " ×1, its test bundle `BookPanelMCPMarksTests` (442 symbols) and `UndoWarningWordsTests` (39). **Phone red `vx336-u6b-ios-red` — from `e10d3f57`** (the same + the phone pin's `@MainActor`; `generic/platform=iOS Simulator`; `ios-red-build-2.log` — the first attempt, `ios-red-build.log`, failed on the pin-authoring error recorded at row 4): `VariorumMobile.debug.dylib` "BEFORE" ×2 (the fat binary's two slices), "before" ×0. **Mac final `vx336-u6` — rebuilt in place from `006e45f8`** (U6a's `c30fa9a7` products + U6b; incremental; `mac-final-build.log`): "as it was before the " ×1, `MCPAskGlyphProbe` in the app dylib (71 symbols). **Phone final `vx336-u6b-ios` — from `006e45f8`** (`ios-final-build.log`): "before" ×2, "BEFORE" ×0. `vx336-u6-red` (U6a's — the router clears reverted at `c30fa9a7`) is KEPT AS BUILT for its one red run. Each Mac product: the Debug app `io.lduarte.Variorum.debug`, `Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`; each phone product `Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.0-arm64-x86_64.xctestrun`. **Headless:** U6b changes no package line (`git diff --stat 48e250e0..HEAD -- Sources Tests Package.swift` is empty), so U6a's finals stand for the package (MCP 278/59 · core 2,871/333 · workbook 40/6, `48e250e0`'s row 8) — no `swift test` re-run owed |
 | 7 | the batch's suite list (grep), every name verified in the test bundles | DONE — **125 Mac suites** (`notes/plans/vx336-screens/u6b/batch-suites.txt`): U6a's 38 (its THE MAC SUITES list, verbatim) ∪ every suite type with a `@Test` in every Mac test file naming a type U6b changed — `BookPanel*` (`BookPanelBrain`/`BookPanelView`/`BookPanelModel`, one file pair), `MCPAskGlyph`, `ShellActions` — plus the two new pin suites (95; 8 already in U6a's). **Every one of the 125 is a real type in BOTH Mac test bundles** (`nm -j` + `swift-demangle --simplified`, ≥ 20 symbols each — a name that matches nothing runs 0 tests silently). **Phone:** `MobileUndoWarningWordsTests` (the pin, 45 symbols), `MobileUndoDoorTests` (886 — the A12 alert renders the changed sentence) and `MobileRefusalTableTests` (320 — the other suite calling `MobileUndoDoor` in code), present in both phone bundles. Expected standing reds met by this set (not U6b's): VX-115's `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (Todo on the board); VX-167's order-dependent `DestructiveUndoWarningTests.redoNeverAsks` (Parked — red only in wide parallel runs) |
-| 8 | THE STAGE WINDOW plan (claim `vx336-u6`) → READY | NOT-STARTED |
+| 8 | THE STAGE WINDOW plan (claim `vx336-u6`) → READY | DONE (this commit) — THE STAGE WINDOW below: ~105 min of work, a 130-minute claim; batch-only fallback ~30 min (claim 35) |
 
 ### The traces (written before code)
 
@@ -2401,3 +2401,193 @@ no "⌘"), so each door gets a small new pin.
 | the header — the shown book's name, or the switcher menu | `header` | no | no | **OUTSIDE the parity rule** — the ask glyph never marks it (VX-268's site list row 5 is the panel's NOTE rows). It names a place (a book), so it is observed for the orchestrator in OWED, not built |
 | "appears in N gatherings" and the gathering names it opens | `gatheringsLine` | no | no | **OUTSIDE the parity rule** — no ask targets a gathering (`MCPAskTarget`); observed in OWED with the header |
 | "Showing the first 300 notes…", "This note is in no book…" | `contents`, `body` | no | no | **SAFE** — words, not places |
+
+### THE STAGE WINDOW — the plan (claim `vx336-u6`; runs ONLY on the orchestrator's GO, under the exact claim line it relays)
+
+**What this window does NOT do (said first):** no product code is written or changed, before the claim or under it — a
+red that needs code is RECORDED as a FINDING and reported, never fixed here; no rebuild (if `git diff --name-only
+006e45f8..HEAD -- Sources App Package.swift` is not empty at the GO, or the coordinator says VX-306 has merged and main
+must come in first: STOP before any launch and report — the rebuild is an implementer's, row 6's exact steps); no canon,
+QUESTIONS or ticket edits; never her real store, never `/Applications/Variorum.app`, never her USER-scope MCP
+registrations (a copied setup line is never run as copied — only its key is taken); `castle-W1-20261013` left alone.
+
+**The products (row 6; all on disk, nothing to build):** from `App/Variorum/`:
+- `DerivedData/vx336-u6` — THE FINAL TREE (`006e45f8`: U6a + U6b): the batch, the green runs, the app launched for the
+  live round and both walks (`Build/Products/Debug/Variorum.app`, `io.lduarte.Variorum.debug`, its shim
+  `Contents/MacOS/variorum-mcp`).
+- `DerivedData/vx336-u6-red` — U6a's (`c30fa9a7`, only the router's three clears reverted): ONE red run, never launched.
+- `DerivedData/vx336-u6b-red` — U6b's Mac red (`99dd1177`, the pre-fix tree): ONE red run, never launched.
+- `DerivedData/vx336-u6b-ios` / `vx336-u6b-ios-red` — the phone, final (`006e45f8`) and red (`e10d3f57`):
+  simulator runs only.
+
+**Minutes:** guards ~2 · the Mac batch ~12 · the Mac red runs ~4 · the phone red + green ~10 (a first simulator boot) ·
+SEAM · A1 + prefs + fingerprint ~4 · launch, connect, bind ~5 · VX-330's walk in both voices ~19 · VX-342's word ~5 ·
+U6a's grant + L0–L5 ~26 · U6a's Terminal pass ~6 · cleanup ~10 → **~105 of work; ask a 130-minute claim.** **Batch-only
+fallback (~30 min, claim 35):** steps 0–3 and the SEAM, then step 11's release lines that apply (nothing launched, so no
+A1 — U1b's precedent); U6's acceptance then stays OPEN for every live leg and both walks.
+
+**Evidence:** `notes/plans/vx336-screens/u6/` (gitignored — U6a's legs' folder): `logs/`, the turn answers `<leg>.json`,
+captures `live/s/` (Study) and `live/t/` (Terminal). Keys redacted to their first 9 characters in every record and capture
+name.
+
+0. **Guards, every step (U5b's step 0, unchanged).** `Tools/WalkKit/guard.sh --author` before anything touches the GUI
+   (exit 3 ⇒ STOP, never quit or kill her app; exit 4 ⇒ someone at the machine, STOP); the STRICT instance guard
+   `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both empty before any launch (`restore.sh` uses the loose form
+   inside — a stranger's xcodebuild line makes it exit 3: wait for that build, never edit the script); no simulator booted
+   (`xcrun simctl list devices booted` — none); the claim line EXACTLY as the GO relays it; `Tools/stage status` never in
+   an `&&` chain; `guard.sh <devpid> x y` before each click; ≥ 2.6 s between synthetic events; region captures; HEAD at the
+   GO recorded; `Tools/WalkKit/wl2` present in this worktree (compiled at U5 — re-compile if missing; `guard.sh <pid>` needs
+   it).
+1. **THE MAC BATCH (~12 min) — FIRST.** From `App/Variorum/`: `xcodebuild test-without-building -scheme Variorum
+   -destination 'platform=macOS' -derivedDataPath DerivedData/vx336-u6 -resultBundlePath
+   ../../notes/plans/vx336-screens/u6/u6-batch.xcresult` + one `-only-testing:VariorumTests/<Suite>` per suite below,
+   detached to `…/u6/logs/u6-batch.log` and POLLED in the foreground (a `grep -q` loop on `** TEST EXECUTE` — never
+   `tail -f | grep -m1`). **The 125 suites:** U6a's 38 (THE MAC SUITES FOR U6b's BATCH, verbatim) and these 87 (every
+   suite in a Mac test file naming a type U6b changed — row 7; the 125 names, one per line, also at
+   `notes/plans/vx336-screens/u6b/batch-suites.txt`): AutosaveRegistryReleaseGuardTests · AutosaveRegistryReleaseTests ·
+   BlockDeletionAndRedoTests · CarveCaretLandingTests · BlockHistoryPaneTests · BookArchiveDeclarationTests ·
+   BookArchiveDoorActTests · BookSettingsArchiveRowTests · ArchivedBooksGroupTests · ArchivedMarkTests ·
+   ComesBackReceiptTests · WingContentsArchivedWordsTests · BookAnchorTests · BookCarryTests · PagedAnchorReportTests ·
+   BookChooserOrderTests · ContextBarTests · AscentDoorTests · AscentRoutingTests · MultiBookEditNoteRuleTests ·
+   MultiBookEditNoteTriggerTests · DivergeDoorTests · BookCollectingDoorsTests · BookPanelDragGateTests ·
+   BookPanelMCPMarksTests · BookPanelBrainTests · BookPanelDeclarationTests · BookPanelActingTests ·
+   BookViewDropGateTests · CanvasAndPoolTests · CanvasTakesSwitcherTests · CanvasBoardGeometryTests ·
+   CanvasRealizationTests · CanvasHostedRealizationTests · CanvasOrderAndOverviewTests · CanvasFocusedBlockFactTests ·
+   StatusCenterTests · MoveAndExecuteTests · SealDoorTests · BlockTOCStatusTests · TakesWordCountTests ·
+   DestructiveUndoWarningTests · DocumentImportDoorTests · DragTypeDeclarationTests · EncryptionBookDoorTests ·
+   FormattingSurfacesTests · MCPSharedIconClickTests · MCPSharedRowsRulesTests · MCPSharedRowsTests ·
+   NoteBoxGeometryTests · NoteBoxCompositionTests · NoteVersionsPaneTests · QuickNoteMintTests · QuickNoteDoorTests ·
+   QuickNoteWindowTests · QuickNoteWordTests · RecoveryDoorsTests · SampleLibraryTests · EncryptionExplainedSeedTests ·
+   SampleLibraryWelcomeTests · SealedBookMemberDoorTests · ShellConfirmTests · StarTargetingTests ·
+   StarDeclarationTests · StarActingTests · TrayPanelMoveTests · TutorialBookShapeTests · TutorialDoorTests ·
+   TutorialWritingActsTests · TutorialTakesActsTests · TutorialStructureActsTests · TutorialLibraryActsTests ·
+   TutorialDeletionActsTests · TutorialWherePlacesActsTests · TutorialPrivacyChapterTests · TutorialFannedMatrixTests ·
+   UndoWarningWordsTests · UnfiledWordTests · WindowRegistryTests · PaneMountWindowTests · NoteOnlyWindowTests ·
+   IndependentWorkspaceTests · TwoWindowMountTests · WindowUnmountTests · CreationTargetTests ·
+   WriteTakesPanelChooseTests · WriteTakesPanelKeysTests.
+   **Expected:** green, the gated `*CaptureTests` skipping (read the `skipped:` lines — Swift Testing's "N tests passed"
+   counts skips); **`MCPCompareLandingTests` 7/7, `BookPanelMCPMarksTests` 3/3, `UndoWarningWordsTests` 1/1 GREEN** (the
+   pins' green-on-new); `MCPWingFacesTests.activitySpeaksEveryActInWordsNeverAToolID` walks `duplicate_note`. **Standing
+   reds, not U6's (named if met):** VX-115's `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (Todo — stale
+   on main since 13o U3); VX-167's `DestructiveUndoWarningTests.redoNeverAsks` (Parked — red only in wide parallel runs;
+   re-run that suite ALONE once). Known noise, not a red: «Issues recorded without an associated test». Any other red:
+   re-run that suite ALONE once; a red that reproduces is a FINDING — recorded and reported; the live round continues only
+   if it is outside every type this run changed (else cleanup, release, report).
+2. **THE MAC RED RUNS (~4 min) — the pins' red-on-old.** From `App/Variorum/`, each detached to its log and polled:
+   - **U6a's:** `xcodebuild test-without-building -xctestrun
+     DerivedData/vx336-u6-red/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination 'platform=macOS'
+     -only-testing:VariorumTests/MCPCompareLandingTests` → `logs/u6a-red.log`. **Expected EXACTLY: 7 tests, 2 failed, 5
+     passed, 9 issues** — `aLandingSheOutrunsWithAnotherModeIsDroppedAndHerOwnCompareKeepsHerColumns` at
+     `MCPCompareLandingTests.swift:272`, `:239`, `:241`; `aLandingWhoseNoteLeavesBeforeTheBoardTakesItIsDroppedAndHerOwnCompareKeepsHerColumns`
+     at `:300`, `:239`, `:241`, `:317`, `:239`, `:241` (U6a row 6a).
+   - **U6b's:** `xcodebuild test-without-building -xctestrun
+     DerivedData/vx336-u6b-red/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination 'platform=macOS'
+     -only-testing:VariorumTests/BookPanelMCPMarksTests -only-testing:VariorumTests/UndoWarningWordsTests` →
+     `logs/u6b-red.log`. **Expected EXACTLY: 4 tests, 4 failed, 15 issues** — VX-330 (`BookPanelMCPMarksTests.swift`):
+     `aLineThatStandsForANoteWearsItsMarksAndAHeadingWearsNone` at `:83`, `:85`;
+     `theCollapsedChapterRowWearsItsNotesIconAndWaitingAskAndEachPressIsItsOwn` at `:233`, `:235` (the `#require` ends
+     it — no glyph drew); `underABookGrantEveryNotesRowWearsBothMarksTheCollapsedChapterRowIncluded` at `:289`, `:308`,
+     `:309`, `:310`, `:314` (three icons, three asks); VX-342 (`UndoWarningWordsTests.swift`):
+     `theWarningsDetailSaysBeforeInLowercaseAndShoutsNothing` at `:34` ×3, `:36` ×3. Every other expectation in those
+     tests GREEN there (the reach holds, the fixtures' shapes, the questions). The same four GREEN in step 1's batch =
+     red-on-old and green-on-new for both members on the Mac. Any other pair is a finding.
+3. **THE PHONE (~10 min) — VX-342's phone pin, red then green** (a phone pin changed, so it runs on a simulator under
+   the claim; the phone line makes this run mobile-visible). `xcrun simctl list devices available | grep iPhone` — take
+   an iPhone 17 Pro on iOS 27.x if listed, else 26.2 (the products are generic-simulator builds, deployment iOS 26); record
+   its UDID. From `App/Variorum/`, each detached and polled, both with `-collect-test-diagnostics never` (vx-282's
+   lesson: without it a run loses 600 s collecting diagnostics):
+   - **red:** `xcodebuild test-without-building -xctestrun
+     DerivedData/vx336-u6b-ios-red/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.0-arm64-x86_64.xctestrun
+     -destination 'platform=iOS Simulator,id=<UDID>' -collect-test-diagnostics never
+     -only-testing:VariorumMobileTests/MobileUndoWarningWordsTests` → `logs/u6b-ios-red.log`. **Expected EXACTLY: 1 test,
+     1 failed, 4 issues** — `MobileUndoWarningWordsTests.swift:35` ×2, `:37` ×2.
+   - **green:** the same against `DerivedData/vx336-u6b-ios/…xctestrun` with `-only-testing:VariorumMobileTests/` ×3 —
+     `MobileUndoWarningWordsTests` `MobileUndoDoorTests` `MobileRefusalTableTests` → `logs/u6b-ios.log`. **Expected: all
+     green in ONE launch** (no "Restarting after unexpected exit"; read the ✔/✘ lines per suite).
+   - `xcrun simctl shutdown <UDID>`; confirm 0 booted.
+   **→ THE SEAM:** record steps 1–3's counts in this record, commit, push, KEEP the claim, report "SEAM" through the
+   orchestrator; the A1 copy waits for the coordinator's one word ("continue" or "release for X").
+4. **A1 prestage copy + prefs + fingerprint (~4 min) — U5b's step 2, exactly.** `stage.sh`'s copy loop only (the five
+   store files into `…/Variorum-dev/Backups/safety-copies/scale-prestage-<UTC yyyymmddTHHMMSSZ>/`, each `cmp`-verified,
+   sha256 prefixes recorded → `u6/store-hash-pre.txt`, the path → `u6/a1-path.txt`); `defaults export
+   io.lduarte.Variorum.debug …/u6/prefs-pre.plist` (key count); `Backups/` listed; her user-scope servers' names + the
+   sha256 prefix (U5b step 2's `python3 -I` line) — expected `['linear-server', 'variorum']`, `bc64543e2f4e8e58`; the
+   clipboard saved (`pbpaste > <scratch>/clip-before.txt`).
+5. **Launch, connect, bind (~5 min) — U5b's step 3, exactly** (`open -n DerivedData/vx336-u6/Build/Products/Debug/Variorum.app`;
+   a What's New sheet → its own button; Study expected — capture `live/s/00-launch`; MCP Settings ▸ the switch ON;
+   Connect ▸ Claude Code ▸ the copy icon → ONLY the key into `<scratch>/keys/u6-mcp.json` per U6a's LIVE LEGS' form; the
+   first turn binds with zero clicks — Activity "…bound to its name" or "…replaced its earlier one"; an unknown name →
+   Waiting ▸ Approve… alone). Every turn per U6a's LIVE LEGS form (prompts on STDIN). **No grant yet** — VX-330's walk
+   makes its own.
+6. **VX-330's WALK — sherlock's Book Panel in BOTH voices (~19 min).**
+   - **W0 — sherlock present.** Bookcase: "the adventures of sherlock holmes" (Home; owned). Absent ⇒ Help ▸ **Restore
+     the Sample Library** (its door; the store is restored at cleanup). Capture `live/s/W0-bookcase`.
+   - **W1 — the grant: the BOOK, at READ.** claude-code ▸ Change… (with no row yet: ⌥⌘A from the Bookcase, or the book's
+     row menu ▸ Share with AI…) ▸ **A book · the adventures of sherlock holmes · Read · Always** (capture the sheet
+     `W1-grant-sheet` and the Shared-with-AI row `W1-grant-row`). The Bookcase row wears the shared icon (`W1-bookcase-icon`).
+   - **W2 — the panel, Study.** Open the book's first story (its title read from the Bookcase / the book's Index) in
+     Write; the masthead's **Book Panel** door (`book.closed`). **Expected (capture `W2-panel-study`):** every chapter row
+     is a COLLAPSED one-note row (sherlock's shape) and EVERY one wears the shared icon right after its name — the open
+     story's row with the voice's marker; no row bare (the pre-fix face wore none — VX-281 U2's walk, OWED item 5). Click
+     ONE row's icon (not the open story's) → its popover: "Shared with" · claude-code · "read · always" · "through “the
+     adventures of sherlock holmes”" · Change… · "Revoke the grant on “the adventures of sherlock holmes”" (capture
+     `W2-popover-study`); Escape by `keys.sh` → the popover gone, the panel still showing the SAME note (the row's open
+     never fired — her click opened only the popover).
+   - **W3 — a waiting ask on one story.** ONE turn, allowed
+     `mcp__variorum-dev__list_books,mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note,mcp__variorum-dev__add_take`,
+     answer → `u6/w3-ask.json`:
+     > In Variorum, find the book "the adventures of sherlock holmes" (list_books), then list its notes (list_notes with
+     > that book_id). Take its THIRD note: call read_note on it with with_ids true, then call add_take on its first block
+     > with text "A take the AI suggests." Reply with each answer verbatim. Do not retry or work around a refusal.
+     **Expected:** `add_take` `isError`, "This client may only read here." + the asked sentence ("Variorum has asked the
+     author — call again once they answer." — read from the answer, U5's V255-b form); nothing written. **Her face
+     (capture `W3-panel-ask-study`):** that story's collapsed chapter row wears the WAITING MARK (`questionmark.bubble`)
+     right after its shared icon; every other row the icon alone. Settings ▸ MCP ▸ Waiting: "claude-code asks to suggest
+     in “<that story>”" (capture `W3-waiting`). Leave the ask WAITING for W4.
+   - **W4 — Terminal.** Settings ▸ General ▸ Theme → **Terminal** (U1b's AX road / a pointer click on the segmented
+     control, as U5's step 12). Back to the same note's Book Panel (capture `live/t/W4-panel-ask-terminal`: every
+     collapsed row's icon, the third story's waiting mark). One row's icon → its popover in Terminal (capture
+     `W4-popover-terminal`); Escape. **Her press on the waiting mark** → THE ask's sheet opens in this window
+     ("claude-code asks to suggest in “…”" · Once · Always · Don't allow — capture `W4-ask-sheet`) → **Don't allow**
+     (or Esc) → the mark leaves the row, the icon stays (capture `W4-mark-gone`). Theme back to **Study** (capture
+     `live/s/W4-back-study`).
+7. **VX-342's word, once on the Mac (~5 min).** Bookcase quick entry `{t:"u6b undo"}One two three four.` ⏎ → the note
+   in Write; click between "two" and "three" and press ⏎ (the chip ON: a divide at the caret — "One two" / "three
+   four."); click at the end of "One two" and type ` more` (an edit to the take the divide's inverse would overwrite).
+   The Edit menu's structural undo names the entry (read it); **⌥⌘Z → the A12 warning (capture `live/s/V342-warning`):**
+   "Undo <label>?" over the detail "One take has been edited since — undoing puts back the text as it was **before** the
+   <label lowercased>, so that writing is set aside. It is committed first, …" — the word lowercase. **Cancel** →
+   nothing changed (Write still "One two more" / "three four." — capture `V342-cancelled`). (If the ⏎ made no divide,
+   use the block ▾ menu's or ⌘K's divide at the caret — the warning is the point.)
+8. **U6a's GRANT + LIVE LEGS L0–L5 (~26 min) — EXACTLY as U6a's "LIVE LEGS FOR U6b's WINDOW (FINAL)" writes them**
+   (THE GRANT: claude-code's Shared-with-AI row ▸ Change… ▸ **A wing · Home · Edit · Always** — "Confirming replaces
+   the grant you opened this from": from W1's book row it REPLACES the sherlock book grant, which is fine — the wing
+   grant reaches the book; then L0 the fixture through the wire, L1a `duplicate_note` + her ⌥⌘Z/⇧⌥⌘Z, L1b the AI edits
+   the copy, L2 Compare on the pair from the Bookcase, L3 the stranger on the mounted board, L4 `link_versions`' Open ›,
+   L5 not frontmost; Variorum frontmost for every `show_in_app` turn but L5; ids by substitution; every capture named
+   there, into `live/s/`).
+9. **U6a's TERMINAL PASS (~6 min) — exactly as written there** (Theme → Terminal; L2's and L3's turns again → `live/t/L2-terminal`,
+   `L3-terminal`; back to Study).
+10. **Cleanup (~10 min) — U5b's step 13, exactly:** the scratch config and every key deleted, the clipboard restored
+    from `clip-before.txt` (`pbpaste | cmp - clip-before.txt` SAME), a whole-key grep (each key in full) over
+    `…/vx336-screens/u6/`, `~/.claude.json`, the scratch project's transcripts and `notes/` → 0 files; no `-s local`
+    registration (`claude mcp get variorum-dev` in the scratch project → "No MCP server named …"); her user-scope
+    fingerprint AFTER = BEFORE (`bc64543e2f4e8e58`); the Debug app quit BY BUNDLE ID, the strict guard empty, no shim
+    left, 0 simulators booted; prefs `defaults import …/u6/prefs-pre.plist`, re-export, diff, `defaults delete` every key
+    the window ADDED (import merges) until **0 added · 0 removed · 0 changed**; `Tools/ScaleFixture/restore.sh "<the A1
+    dir>"` → "Restored (verified)", a second `cmp` of every file SAME and the sha256 set equal to the A1 copy's (Standard,
+    unlocked, Study, claude-code's pre-window binding and grants back — sherlock's grant, the fixture notes, the copy, the
+    scratch undo note all gone with it); `Backups/` unchanged; `castle-W1-20261013` untouched; a stray `default.profraw`
+    removed; the tree clean.
+11. **Release + THE RESULT LINE:** `Tools/stage release --who vx336-u6`; then one line to the coordinator: claim times;
+    the batch's counts; each red run EXACT or not; the phone runs; VX-330's walk (W2–W4) PROVEN or RED; VX-342's word
+    seen; each U6a leg PROVEN or RED; posture (Standard/unlocked, cmp SAME vs A1, prefs 0 differ, fingerprint SAME, 0
+    simulators booted); the A1 path (the coordinator's to prune).
+
+**The coordinator's machinery facts, carried (Hard rules + THE ORCHESTRATOR ON U5's WINDOW):** the strict instance
+forms only; `Tools/stage status` exits 1 while held — never in `&&`; the What's New sheet dismissed by its own button;
+`defaults import` MERGES (re-export and diff); the dev store is Standard/unlocked — a lock screen means `source
+~/.variorum/dev-castle.env`, those values only, posture restored before release; a window of an hour or more runs its
+tests FIRST and pings SEAM before the A1; the Castle heads-up (VX-306 merged ⇒ merge main first, STOP here); `claude -p
+--allowedTools <list>` swallows a trailing prompt (prompts on STDIN); System Events drops non-ASCII (every fixture here is
+ASCII); `Tools/WalkKit/wl2` per worktree; a system popup Variorum can't dismiss = STOP, its exact words reported.
