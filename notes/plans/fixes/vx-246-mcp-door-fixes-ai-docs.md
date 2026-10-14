@@ -2529,3 +2529,39 @@ claim** asked. Batch-only fallback (~25 min, claim 35): steps 1, W1, W2, cleanup
 - **Posture: Standard/unlocked, cmp-SAME vs A1** (Study voice in the restored store); prefs re-exported and diffed, 0 keys
   differ. Her user-scope MCP fingerprint is SAME (`bc64543e2f4e8e58`).
 - The A1 copy `scale-prestage-20261014T090551Z` is the coordinator's to prune.
+
+**THE TRACE OF THE ONE REAL RED (read-only, after the release; by reading, NOT verified by a run — the orchestrator's to take
+up).** The red: `theBookEditorPutsEveryBadgeHomeAfterAWidthChange` on the fixed product. After the width change, 51 of 80
+badges remain, each above its block's line by 7 pt growing to 657 pt down the post, and none stacked. The same class shows
+live in both voices (W3 (d)/(e)). The fixed `refreshBadges` (`EditorViewModel.swift`) does three things on the inline surface
+(`scrollView == nil`):
+- it reads each fanned block's first fragment with `[.ensuresLayout]`;
+- it keeps a frame only in `.layoutAvailable`;
+- it keeps a badge only when the frame `intersects(visible)`, where `visible = viewportBounds(of:)` = **`textView.bounds`**.
+
+Two candidate mechanisms, both consistent with the evidence:
+- **(A) The missing badges.** The badge hop runs from the width door BEFORE the coordinator's remeasure, which is what grows
+  the text view's HEIGHT to the narrower (taller) post. So at the hop, `textView.bounds` still has the old height, and every
+  fanned block laid out below that old height fails `intersects(visible)` and gets no badge. Nothing re-runs the pass after the
+  remeasure (no generation bump; no scroll observer on this surface), so they stay missing. That is 29 of 80 in the pin, the
+  bottom third. The live "only block 1 badged after mount" (Outline in Terminal; the spread's live page, both voices) may be the
+  same class: a pass that ran before the inline surface's height settled.
+- **(B) The misplaced badges.** The frames the hop reads are not the final layout's: the drift grows down the post, as if every
+  fragment above contributed a stale line count. The fix's premise, "a mid-document `.ensuresLayout` read is positionally exact"
+  (`probes/probe4`), was measured on a document laid out cold, not right after a width change. After the hop, the remeasure
+  lays the whole post out again at the final width and, again, no badge pass follows.
+  - Live, after narrowing and widening back, the deep badges sit BELOW their lines: positions from the narrower layout.
+  - In the pin (narrowing only) they sit ABOVE: positions from a wider layout.
+  - Either way, it is the last pass's stale read.
+
+**The common factor:** the fix makes the hop's read force layout, but it does not make the hop run AFTER the layout the inline
+surface settles on. That is the U4 trace's own "not built, argued" item 3 (a re-run after
+`InlineEditorSurface.Coordinator.remeasure`), set aside because `EditorView.swift` is on vx-282's file list. Not fixed here; the
+cure's shape is the orchestrator's call (and vx-282's lane, if it lands in `EditorView.swift`).
+
+**The other W1/W2 deviations, for the orchestrator:**
+- The two deep-fan Write pins (`aBadgeNeverSitsAtAnotherBlocksPlace`, `aWidthChangeInWriteKeepsEachBadgeHome`) are green on
+  both trees: hollow as written, because their deep fans are ESTIMATED by TK2 in the harness and never read `.zero`.
+- The characterization's `:397` does not hold in the test host on either tree.
+
+Both are pin defects, not product defects. Write's own faces walked clean in both voices.
