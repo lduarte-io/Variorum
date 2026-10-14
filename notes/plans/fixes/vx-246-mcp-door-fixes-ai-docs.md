@@ -1828,3 +1828,64 @@ Nothing. No pane word, receipt, refusal or tool description changed; a stale `ed
   - OWED 5, the §12 clause, goes to the closeout.
 - **The window runs whole** (W1 the red-on-old Mac pins, W2 the batch, W3a Claude Code by U1's detour, W3b the
   driver). The editor-seam fix has never run on a Mac, so its evidence shouldn't wait for U1b.
+
+## U3 STAGE RUN — the whole window (a fresh stage runner, from 2026-10-14 ~01:35 MDT)
+
+**What this run does NOT do (said first):** no product code is written or changed, under the claim or before it. A red
+that needs code is recorded and reported, never fixed here. U1b's face is not on this branch, so W3a takes U1's detour
+(Deny → re-run → Approve), never the Claude Code tab's tagged key. No canon, QUESTIONS or ticket edits.
+
+**Read in full before READY (never delegated):** this record's header, Hard rules, LIVE STATUS, the Stage traffic log,
+ORCHESTRATOR'S PROVISIONAL RULINGS (ruling 1 — W3b's scripted client); U1's THE STAGE WINDOW (step 2's A1 text, step 5's
+Deny → re-run → Approve detour); U2 STAGE RUN whole; U3's UNIT RECORD whole (THE STAGE WINDOW, THE ORCHESTRATOR ON U3's
+HAND-BACK); `notes/SessionResiliencyProtocol.md`; `Tools/stage`, `Tools/WalkKit/` (README, `guard.sh`, `click.sh`,
+`keys.sh`, `wl2`, the two Swift helpers), `Tools/ScaleFixture/` (`stage.sh`'s copy loop, `restore.sh`); U3's
+`run-w1-red.sh`, `run-w2-batch.sh`, `stage-suites-215.txt`, `driver.py`; the memory notes walk-driving-lessons and
+walk-restores-dev-store-posture. Code read for the window: the Mac pins' harness (`MCPHerEditorDoorTests` — in-memory
+store, its own socket home); the pane's Clients rows, request rows and setup menu (`MCPPane.swift`); the grant sheet
+(`MCPGrantSheet.swift` — the approval's "nothing yet" place, the radio groups); the setup command's text
+(`MCPPaneCopy.setupCommand`).
+
+**The build check (before READY):**
+- **No source moved since either product was built.** `git diff --name-only e43024c1..HEAD -- Sources App` is EMPTY.
+  No `.swift`/plist/pbxproj/xcstrings/`Package.swift` under `Sources` or `App/Variorum` is newer than the fixed product's
+  `Variorum.debug.dylib` (01:18:46). No test file moved since the red product's commit (`git diff --name-only
+  29a53c38..HEAD -- App/Variorum/VariorumTests Tests` empty). The tree is clean.
+- **Each product is what its name says, read from its symbols** (`nm` + `swift demangle`):
+  - `DerivedData/vx246-u3-red` (dylib 01:11:43, before the fix commit `9a96d46c` at 01:13:45): the seam present
+    (`flushHerEditorBeforeWrite` 7), the fix ABSENT (`flushesHerEditorFirst` 0, `caretLanding(whenBlockLeft:…)` 0), both
+    pin suites in its test bundle.
+  - `DerivedData/vx246-u3` (dylib 01:18:46): the seam 7, the wire fix (`flushesHerEditorFirst` 28), the editor-seam
+    fix (`caretLanding(whenBlockLeft:…)` 15), both pin suites.
+  - **→ no rebuild.**
+- **The W2 list:** `run-w2-batch.sh`'s 215 `-only-testing` names diffed against `stage-suites-215.txt`: IDENTICAL, 215
+  unique.
+- **Host and tools:** grants probed with no prompt, `AX: true SCREEN: true`; `walk-cap`/`walk-scroll` compiled into the
+  scratchpad; `Tools/WalkKit/wl2` present; Claude Code 2.1.299, Python 3.12.13, `cliclick` present. Free disk **47 GiB**.
+- **Her user-scope MCP servers, read now (names + a sha256 prefix of the `mcpServers` block, never values):**
+  `['linear-server', 'variorum']`, `bc64543e2f4e8e58`. No user-scope `variorum-dev` exists, so a scratch project's
+  `-s local variorum-dev` shadows nothing of hers. Re-read at the window's start and after cleanup.
+- **Never run the copied setup line as copied:** it begins `claude mcp remove -s user variorum-dev; claude mcp add -s
+  user …`. Only its key is taken (from the clipboard, redacted to 9 characters in every record); the registration is
+  rebuilt `-s local` in a scratch project.
+
+**Process choices (U2's lessons applied):**
+- **The A1 copy, the prefs export and the user-scope fingerprint come FIRST, before W1** (the test host is the dev-store
+  app).
+- **W1 and W2 run detached to their logs and are POLLED IN THE FOREGROUND.**
+- **Every GUI act goes through `click.sh`/`keys.sh`,** at least 2.6 s apart. **The Debug app is quit by bundle id.**
+- **The prefs are restored by import, then a re-export and a diff,** deleting every key the window added, until 0 differ.
+
+### LIVE STATUS — the stage run's steps
+
+| step | what | status |
+|---|---|---|
+| R | read-in, the build check, this section → READY | DONE (this commit) — READY reported; the stage is NOT claimed (the orchestrator relays the GO's exact line) |
+| 0 | guards on every step; the claim from the GO's line | NOT-STARTED |
+| 1 | A1 prestage copy (every store file + key files, each `cmp`-verified, sha256 recorded) + `defaults export io.lduarte.Variorum.debug` + her user-scope fingerprint BEFORE | NOT-STARTED |
+| W1 | `run-w1-red.sh` — the eight Mac pins against `vx246-u3-red`; expected `MCPHerEditorDoorTests` 4/4 red, `ExternalBlockRemovalCaretTests` 3/4 red + the survivor characterization green; every issue read against its designed line | NOT-STARTED |
+| W2 | `run-w2-batch.sh` — 215 suites on `vx246-u3`; a red re-run alone once; standing reds named (VX-167, VX-245, VX-115) | NOT-STARTED |
+| 3 | launch `vx246-u3` (`open -n`); a What's New sheet closed by its own button; a lock screen per the env file | NOT-STARTED |
+| W3a | a REAL Claude Code turn, Study then Terminal: U1's detour (Deny → copy → `-s local` → `claude mcp list` → Approve), two scratch notes shared Edit · Always, two panes, ONE `claude -p --strict-mcp-config` turn (delete_block under her caret, delete_note of the other pane's note), captures, Put back ×2 | NOT-STARTED |
+| W3b | the timing driver on the REAL shim (`vx275-driver`, Any MCP client key, Home wing Edit · Always): delete_block and delete_note each fired within ms of keys.sh's last keystroke; the answer inside 0.5 s; Put back shows " pending words" | NOT-STARTED |
+| 6 | cleanup: `-s local` registrations removed, her user-scope fingerprint AFTER identical, keys/scratch deleted, the clipboard emptied, a whole-key grep = 0; the Debug app quit by bundle id; prefs 0 keys differ; `restore.sh` → "Restored (verified)" + a second `cmp` = SAME; `Tools/stage release`; the result line | NOT-STARTED |
