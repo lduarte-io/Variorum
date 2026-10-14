@@ -32,18 +32,21 @@ public enum CatalogPlace: String, Codable, Sendable, CaseIterable {
 
 /// One file the leaf listed: its root, the folders below the root, its
 /// name, and — for every name `CatalogNames.parseFile` calls a key file —
-/// its bytes (nil when it could not be read).
+/// its bytes (nil when it could not be read) and its modification date
+/// (today's `StoreKeyEnvelope.locate` rule picks the newest of several).
 public struct CatalogEntry: Equatable, Sendable {
     public var place: CatalogPlace
     public var folders: [String]
     public var name: String
     public var bytes: Data?
+    public var modifiedAt: Date?
 
-    public init(place: CatalogPlace, folders: [String] = [], name: String, bytes: Data? = nil) {
+    public init(place: CatalogPlace, folders: [String] = [], name: String, bytes: Data? = nil, modifiedAt: Date? = nil) {
         self.place = place
         self.folders = folders
         self.name = name
         self.bytes = bytes
+        self.modifiedAt = modifiedAt
     }
 
     public var id: String { Catalog.id(place: place, folders: folders, name: name) }
@@ -123,8 +126,10 @@ public struct CatalogKeyFile: Equatable, Sendable, Identifiable {
     /// anchors.
     public var heldFingerprints: [String] { document?.heldFingerprints ?? [] }
     /// The day the file was frozen, when its place says (a snapshot pair's
-    /// stamp; a set-aside file's epoch).
+    /// stamp; a set-aside file's epoch; an aside folder's stamp).
     public var frozenAt: Date?
+    /// Its modification date, as listed.
+    public var modifiedAt: Date?
 }
 
 public struct CatalogCopy: Equatable, Sendable, Identifiable {
@@ -264,7 +269,7 @@ public struct Catalog: Equatable, Sendable {
             keyFiles.append(CatalogKeyFile(
                 id: entry.id, place: entry.place, folders: entry.folders, name: entry.name, role: role,
                 document: entry.bytes.flatMap { try? KeyFileDocument.decode($0) },
-                mac: mac(entry.place, location), frozenAt: frozenAt(name)))
+                mac: mac(entry.place, location), frozenAt: frozenAt(name, location), modifiedAt: entry.modifiedAt))
         }
         var copies: [CatalogCopy] = []
         for (entry, location, name) in placed {
@@ -305,10 +310,18 @@ public struct Catalog: Equatable, Sendable {
         return place == .container ? .thisMacsContainer : .unattributed
     }
 
-    private static func frozenAt(_ name: CatalogNames.FileName) -> Date? {
+    /// The day a key file was frozen: a snapshot pair's stamp, a set-aside
+    /// file's epoch, an aside folder's stamp (its files moved there whole on
+    /// that day). Nil where its place doesn't say (the live file, a folder
+    /// key file written once when absent).
+    private static func frozenAt(_ name: CatalogNames.FileName, _ location: Location) -> Date? {
         switch name {
         case .snapshotKeyFile(let stamp, _): return stamp
         case .setAsideKeyFile(_, let at): return at
+        default: break
+        }
+        switch location {
+        case .previousLibrary(let stamp), .adoptionSafety(let stamp): return stamp
         default: return nil
         }
     }
@@ -373,6 +386,11 @@ public struct Catalog: Equatable, Sendable {
                 ?? readable.lazy.flatMap(\.heldFingerprints).first { StoreKeyEnvelope.shortFingerprint($0) == fp8 }
         } else if readable.count == 1 || (readable.first.map { CatalogNames.parseFile($0.name) == .keyFile } ?? false) {
             fingerprint = readable.first?.fingerprint
+        } else if readable.count > 1, readable.allSatisfy({ $0.modifiedAt != nil }) {
+            // Today's `StoreKeyEnvelope.locate` rule for several of today's
+            // files beside one store: the most recently modified opens it (a
+            // state only a re-key produces — the move and the copy keep dates).
+            fingerprint = readable.max { ($0.modifiedAt!, $0.name) < ($1.modifiedAt!, $1.name) }?.fingerprint
         }
         let candidates = fingerprint.map { [$0] } ?? Array(Set(readable.compactMap(\.fingerprint))).sorted()
         let libraries = Set(readable.compactMap(\.library))

@@ -142,6 +142,12 @@ public struct CastleAnchor: Codable, Equatable, Sendable {
     /// anchors hold — named in the clear (fingerprints are not secret), so the
     /// catalog knows what an anchor holds without opening it.
     public var heldFingerprints: [String]
+    /// The keys opening THIS anchor yields directly — the outgoing one and
+    /// its history — named in the clear (VX-305 U2, a recorded refinement:
+    /// a kept anchor sealed inside this one still needs ITS own secrets of
+    /// its day, so the route finder must not name this anchor's locks for
+    /// the keys only a kept anchor holds — promise 9's honesty).
+    public var directFingerprints: [String]
     /// AES-256-GCM (combined) under the anchor key.
     public var bundle: Data
     public var locks: AnchorLocks
@@ -222,12 +228,14 @@ public struct CastleAnchor: Codable, Equatable, Sendable {
             anchorLocks.outgoingKey = try Lock.wrap(anchorBytes, under: SymmetricKey(data: outgoingKey.data))
             anchorLocks.copiedLocks = CopiedLocks.copying(from: keyFile, includeMasterRoad: includeMasterRoad)
         }
-        var held = [outgoingKeyFile.fingerprint] + history.map(\.fingerprint)
+        let direct = [outgoingKeyFile.fingerprint] + history.map(\.fingerprint)
+        var held = direct
         for anchor in kept { held += anchor.heldFingerprints }
-        var seen = Set<String>()
+        var seen = Set<String>(), seenDirect = Set<String>()
         return CastleAnchor(
             madeAt: madeAt, madeBy: madeBy, outgoingFingerprint: outgoingKeyFile.fingerprint,
             outgoingEpoch: outgoingKeyFile.epoch, heldFingerprints: held.filter { seen.insert($0).inserted },
+            directFingerprints: direct.filter { seenDirect.insert($0).inserted },
             bundle: sealed, locks: anchorLocks)
     }
 

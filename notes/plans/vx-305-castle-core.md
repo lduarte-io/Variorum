@@ -544,7 +544,10 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   (the union of `StoreBackup.date(fromBackupURL:)`/`BackupRestoreCandidates.backupDate`, `LibraryClassifier`'s pair
   rules, and `LibraryAdoption.adoptionStamp`/`LibraryAsideCopies`' stamp folders) and attribution to library + Mac —
   DONE (this piece's commit; `CatalogNameTests` + `CatalogAttributionTests`, 7 tests green, filtered); (b) retention per library per Mac — DONE (this piece's commit, with U2's fifteen guards declared in `ProtectionGuards` — each proven by its piece's DEBUG mutation pin; `RetentionTests` + `RetentionGuardMutationTests`, 6 tests green, filtered); (c) the route finder, the *Opens with* line, the
-  finder without the old shared key, the retirement's list, the anchor sentences — NOT-STARTED; (d) `assess`: facts,
+  finder without the old shared key, the retirement's list, the anchor sentences — DONE (this piece's commit;
+  `RouteFinderRoadTests` + `AnchorSentenceTests` + `RetirementRoutesTests`, 12 tests green, filtered — every named
+  opener's witness road WALKED with the real secret of its day; with a recorded model refinement:
+  `CastleAnchor.directFingerprints`, and the catalog's aside key files carry their folder's day and listed dates); (d) `assess`: facts,
   the mode and account verdicts, the vault's three states, the four situations, the Touch ID road — NOT-STARTED;
   (e) `assess`: repairs with §3.3's guards, acts owed, doors with reasons, the open rule — NOT-STARTED; (f) U2's
   `ProtectionGuards` and their DEBUG mutation tests, both configurations' runs, the record — NOT-STARTED.

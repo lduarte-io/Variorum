@@ -290,7 +290,8 @@ struct CatalogAttributionTests {
         #expect(names.contains("variorum-backup-seed-drill-1.sqlite"))
         #expect(catalog.foreign.contains { $0.folders == ["Backups", "zzzz"] })
         #expect(!names.contains("note.md"), "an export is hers, not foreign to a copy's place")
-        #expect(!catalog.copies.contains { $0.name.contains("a1") || $0.name.contains("seed") })
+        #expect(!catalog.copies.contains { $0.name.hasPrefix("variorum-backup-a1-") || $0.name.contains("seed-drill") })
+        #expect(!catalog.copies.contains { $0.folders == ["Backups", "zzzz"] })
     }
 
     /// Today's pair rules: a pair that disagrees with the name's fp8 is not
