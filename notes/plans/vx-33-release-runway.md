@@ -240,13 +240,20 @@ the full Index bar) is **VX-300, after launch** at her word.
 `~/dev/variorum-vx-266`). The second opinion owns the design, and she is working with the Castle session
 directly. Nothing builds before the plan file `notes/plans/vx-266-castle-backups-prelaunch.md` exists.
 
-**Castle-adjacent tickets** for the Castle work to place:
-- VX-113 (the changed-elsewhere passphrase refusal; her #205 ruling, pre-launch). It's the one pre-launch
-  ticket outside every run; its refusal is the follow's, which Castle rebuilds.
-- VX-81 (a macOS 27.0.1 crash in the re-key reopen; Backlog).
-- VX-152 (the lock path's reentrancy; Backlog).
-- VX-100 / VX-101 (Open Library's double passphrase ask and backups location; Backlog).
-- VM-15 (a sibling phone that hasn't followed into Castle; pre-launch-labelled on the VM board).
+**The phases** (the Castle session's tickets, 2026-10-13; each phase's plan is written just-in-time):
+- **VX-305**, phase 1 — the headless core. Covers VX-228, VX-235, VX-263, VX-302 and VX-313's seals. It ends at a
+  go/no-go, which is a quality gate, not a schedule gate.
+- **VX-306**, phase 2 — the open road and the migration, including the lobby's Touch ID (VX-310).
+- **VX-307**, phase 3 — entering and leaving Castle, Replace All Keys, the follow. Covers VX-107, VX-108, VX-109,
+  VX-113, VX-233 and VX-301; the `Sync/` lines are Fable's.
+- **VX-308**, phase 4 — accounts and the key doors. Covers VX-239, VX-243, VX-264 and VX-314.
+- **VX-309**, phase 5 — copies and words. Covers VX-210, VX-211, VX-213, VX-264, VX-265, VX-301 and VX-302.
+- **VX-212** — the poison-row case, designed with her separately.
+- **VX-209** (with VX-228) is the root bug the whole rebuild closes.
+
+**Still outside Castle (Backlog), for the Castle session to weigh:** VX-81 (a macOS 27.0.1 crash in the re-key
+reopen), VX-152 (the lock path's reentrancy), VX-100 / VX-101 (Open Library's double passphrase ask and backups
+location), and VM-15 (a sibling phone that hasn't followed into Castle; VM board).
 
 ---
 
@@ -255,7 +262,7 @@ directly. Nothing builds before the plan file `notes/plans/vx-266-castle-backups
 | What | When | Ticket |
 |---|---|---|
 | Castle decisions, with the Castle session | now — they decide the date | VX-266 |
-| Settings wording, Editor through Acknowledgments | any time; **MCP pane after VX-281 merges**; Protection + Data Safety after Castle's words | VX-234 |
+| Settings wording, Editor through Acknowledgments (pre-launch) | any time; **MCP pane after VX-281 merges**; Protection + Data Safety after Castle's words (VX-309) | VX-234 |
 | Tutorial & onboarding changes (the Air session) | before VX-246's docs unit, or after VX-246 merges | VX-292 |
 | VX-216's menus clarity sitting | when VX-284's other units have landed | VX-216 |
 | Claude Desktop: try it herself, then decide on a guide paragraph | outside every run | VX-299 |
@@ -308,7 +315,7 @@ at a zero-instance window with no commits during it, then DMG first and appcast 
 - VX-304 gains the left-box "open in Write" door in every book mode (her ask).
 - After launch: VX-312, ⌘1–⌘6 working from the caret inside a book (her ask).
 
-**Still open:** VX-113's home, for the Castle session to place. Nothing else is waiting on her.
+**Still open:** nothing. VX-113 is in Castle's phase 3 (VX-307); she told the Castle session.
 
 ---
 
