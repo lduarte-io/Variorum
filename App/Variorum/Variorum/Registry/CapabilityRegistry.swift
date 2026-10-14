@@ -176,6 +176,23 @@ nonisolated enum CapabilityRegistry {
 
     private static let always: @Sendable (CapabilityContext) -> Capability.Availability = { _ in .act }
 
+    /// **VX-154 (the VX-282 run) — the verbs that act where she writes are
+    /// GREY while Write's take panel is up.** The panel is a sheet over Write
+    /// showing ONE block's takes. Cutting, joining or adding blocks lands on
+    /// blocks it never shows; the Takes board carries most of these to Write by
+    /// a mode switch, which a sheet over Write cannot make; and the board's
+    /// native insert/divide hand the ring to a block the panel does not render.
+    /// So while the panel is up these doors are not live (P-2: a door that can
+    /// never act in its context isn't rendered) — and the panel consumes any
+    /// dispatch that still reaches it, so none falls to Write's caret beneath
+    /// the sheet. The rule wraps each verb's own rule: with the panel down,
+    /// nothing changes.
+    private static func outsideWritesTakesPanel(
+        _ rule: @escaping @Sendable (CapabilityContext) -> Capability.Availability
+    ) -> @Sendable (CapabilityContext) -> Capability.Availability {
+        { ctx in ctx.writeTakesPanelAttached ? .unavailable : rule(ctx) }
+    }
+
     /// 18l-c U7: what ⌘F / ⌘G / ⇧⌘G answer where nothing can find. The find
     /// acts in Write AND on the Takes board now, so the note names both — a
     /// refusal must be true (P-2). (The replace half keeps its own note: it is
@@ -192,7 +209,7 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧D", takesAccess: .native,
             unavailableNote: "Dividing happens inside a note — open one first.",
-            availability: divideAvailability),
+            availability: outsideWritesTakesPanel(divideAvailability)),
         // 13j J4 — **the divide CEREMONY's own door** (her sitting round-4
         // ruling). The default flipped to the duplicating divide, so the W
         // ceremony needs a summonable name and a key of its own; it keeps
@@ -217,25 +234,25 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌥⌘⇧D", takesAccess: .native,
             unavailableNote: "Dividing happens inside a note — open one first.",
-            availability: divideAvailability),
+            availability: outsideWritesTakesPanel(divideAvailability)),
         Capability(
             id: .extract, verb: "Extract Selection", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧E", takesAccess: .moveAndExecute,
             unavailableNote: "Extracting happens inside a note — open one first.",
-            availability: structural),
+            availability: outsideWritesTakesPanel(structural)),
         Capability(
             id: .makeBlock, verb: "Make Block from Selection", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧K", takesAccess: .moveAndExecute,
             unavailableNote: "Making a block happens inside a note — open one first.",
-            availability: structural),
+            availability: outsideWritesTakesPanel(structural)),
         Capability(
             id: .merge, verb: "Merge Blocks", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧M", takesAccess: .moveAndExecute,
             unavailableNote: "Merging happens inside a note — open one first.",
-            availability: structural),
+            availability: outsideWritesTakesPanel(structural)),
         // 13j J4b — **the merge CEREMONY's own door** (same ruling, same
         // shape). It keeps `merge`'s availability and `moveAndExecute`
         // access: the PAIRING sheet mounts in Write alone, so summoning it
@@ -245,13 +262,13 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .contextMenu, .bottomBar, .surface, .palette],
             shortcutLabel: "⌥⌘⇧M", takesAccess: .moveAndExecute,
             unavailableNote: "Merging happens inside a note — open one first.",
-            availability: structural),
+            availability: outsideWritesTakesPanel(structural)),
         Capability(
             id: .deleteInEveryTake, verb: "Delete in Every Take", scope: .block,
             doors: [.menuBar, .contextMenu],
             shortcutLabel: nil, takesAccess: .moveAndExecute,
             unavailableNote: "Delete in Every Take works on a selection inside a note.",
-            availability: structural),
+            availability: outsideWritesTakesPanel(structural)),
         // 13u4 UNIT C2 — her item 9, ruled R-13u4-4: the selected span leaves
         // the take it is in and becomes a take of its own on the same block,
         // with the quiet savepoint of the take it left as her cover for the
@@ -294,7 +311,7 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .bottomBar, .palette],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Blocks are born inside a note — open one first.",
-            availability: takeFamily),  // NIT-3: the one named rule, not a copy
+            availability: outsideWritesTakesPanel(takeFamily)),  // NIT-3: the one named rule, not a copy
         // 13b 4D (N28's second half — the Takes trap's insert door; S4-13:
         // editor parity, native in BOTH Write and Takes by construction).
         // The minted block is EMPTY (its one live variant, empty text — I10
@@ -312,7 +329,7 @@ nonisolated enum CapabilityRegistry {
             // legibility mandate refuses.
             shortcutLabel: "⌘⇧⏎", takesAccess: .native,
             unavailableNote: "Blocks are born inside a note — open one first.",
-            availability: takeFamily),  // the one named rule, not a copy
+            availability: outsideWritesTakesPanel(takeFamily)),  // the one named rule, not a copy
         // 13c 1B (A8 — her item: "I don't seem to have the ability to
         // delete / archive empty blocks?"). `deleteBlock` has existed in
         // Operations since Phase 2 and had exactly ONE face app-wide (the

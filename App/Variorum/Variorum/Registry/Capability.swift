@@ -269,6 +269,14 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// `edit` and honestly grey in `read` (the enabled-into-nil class the
     /// registry exists to kill, from both sides).
     var readEditAttached = false
+    /// **Write's take panel is up** (VX-154, the VX-282 run). The panel is a
+    /// sheet over Write showing ONE block's takes; while it is up, the verbs
+    /// that cut, join or add blocks where she writes cannot act from it —
+    /// their results land on blocks the panel never shows — so they are grey
+    /// by this fact rather than live doors that fall through to Write's caret
+    /// beneath the sheet. Reported by the panel itself, the takes board's
+    /// attachment shape (a set of tokens on the router).
+    var writeTakesPanelAttached = false
     /// 13n-b U4 (AF-11 F-2): a connected AI client's write landed this
     /// session and has somewhere to show — "Show the AI's Last Change" acts.
     var aiLastChangeAvailable = false
