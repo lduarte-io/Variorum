@@ -632,6 +632,16 @@ struct MCPWriteTools: Sendable {
         try database.write { db in try grants.consumeMCPOnceGrant(db, grantID) }
     }
 
+    /// The statement `picks` resolves the given take ids with — two
+    /// placeholders: the ids as a JSON array, then the note. (VX-280's
+    /// pin reads its plan, `MCPPicksPlanTests`.)
+    static let picksSQL = """
+        SELECT v.id, v.block_id FROM json_each(?) j
+        JOIN variant v ON v.id = j.value AND v.deleted_at IS NULL
+        JOIN container_block cb ON cb.block_id = v.block_id AND cb.deleted_at IS NULL
+        WHERE cb.container_id = ?
+        """
+
     /// The lens's picks from take ids, resolved ONLY among the takes of THIS
     /// note's placed blocks — an id from anywhere else answers one way (no
     /// oracle on take ids), and two takes of one block refuse.
@@ -639,15 +649,7 @@ struct MCPWriteTools: Sendable {
         let owners: [String: String] = try database.read { db in
             let json = String(decoding: try JSONEncoder().encode(takeIDs), as: UTF8.self)
             var owners: [String: String] = [:]
-            for row in try Row.fetchAll(
-                db,
-                sql: """
-                    SELECT v.id, v.block_id FROM json_each(?) j
-                    JOIN variant v ON v.id = j.value AND v.deleted_at IS NULL
-                    JOIN container_block cb ON cb.block_id = v.block_id AND cb.deleted_at IS NULL
-                    WHERE cb.container_id = ?
-                    """,
-                arguments: [json, noteID]) {
+            for row in try Row.fetchAll(db, sql: Self.picksSQL, arguments: [json, noteID]) {
                 owners[row["id"]] = row["block_id"]
             }
             return owners
