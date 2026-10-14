@@ -115,7 +115,7 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 |---|---|
 | kickoff: worktree, branch, in-flight row (main 94f0a2fb), tickets In Progress, this record | DONE (orchestrator) |
 | U1 — the pane in tabs | **UNIT CLOSED — DONE** (2026-10-13 ~22:35 MDT, opus-implementer): VX-199 · VX-205 · VX-232 (FIXED red-first) · VX-245's two MCP sites (`3d00a166`); red on old 4 issues; Mac batch 250/31 (one issue — VX-283's six lint sites); the walk in both voices DONE, dev store restored `cmp`-SAME. 3 PROVISIONALs (P-VX281-U1-1…3) for QUESTIONS at the merge; the cold review is the ladder's. See the U1 UNIT RECORD |
-| U2 — the shared icon | **IN-PROGRESS** (opus-implementer, from 2026-10-13 ~23:00 MDT) — the U2 UNIT RECORD below carries the trace, the site list, the design and the pieces |
+| U2 — the shared icon | **IN-PROGRESS** (opus-implementer, from 2026-10-13 ~22:30 MDT) — the U2 UNIT RECORD below carries the trace, the site list, the design and the pieces |
 | the ladder | NOT-STARTED |
 | closeout | NOT-STARTED |
 
@@ -513,7 +513,7 @@ The ask glyph (`MCPAskGlyph`) is rendered at nine hosts. Against each, this unit
 | # | Piece | State |
 |---|---|---|
 | 0 | this record: the trace, the site list, the design | DONE (this commit) |
-| 1 | THE SEAM + THE PINS, red-first: the final API with the PRE-FIX BEHAVIOUR behind it (no surface reads reach, no row draws it, the core reads answer nothing) + the core pins + the Mac pins; the core pins RED headless; the seam tree built for testing | NOT-STARTED |
+| 1 | THE SEAM + THE PINS, red-first: the final API with the PRE-FIX BEHAVIOUR behind it (no surface reads reach, no row draws it, the core reads answer nothing) + the core pins + the Mac pins; the core pins RED headless; the seam tree built for testing | IN-PROGRESS — committed (this commit): the seam (`Queries.mcpNoteReaches` / `mcpBookReaches(readingIDs:)` / `mcpWingReaches` answering `[:]`; `LibraryNoteRowExtras.reach` never set, `LibraryCatalogModel.bookReach` + `holdBookReach` empty, `PoolPostsModel` / `BookPanelModel` / `TimelineViewModel` `.reach` + `holdReach` empty, `BookPanelModel.entryIDs(for:)`, `WingsModel.reach` + `watchSharing` empty; `CatalogNoteLine` / `CatalogBookLine` take `reach:` and draw nothing) + **core `MCPRowReachTests` 6 tests — RED on the seam headless: 6/6 failed, 43 issues** (`swift test --filter MCPRowReachTests`, log `vx281-screens/u2/logs/core-pins-seam.log`; every positive leg; the guards — VX-272's empty map, no `container` read — green by nature, each paired with a red control) + Mac `MCPSharedRowsTests` 10 tests (the hosts' holds, the open book, VX-272, the two List lines' faces on the title's baseline). REMAINS: build the seam tree for testing (`DerivedData/vx281-u2-old`); its Mac red run is STAGE WINDOW 1's |
 | 2 | THE FIX: the core reads; the icon's calm state; the hosts' held reads and faces; the declarations and their ritual pins | NOT-STARTED |
 | 3 | headless finals + the fixed tree built for testing | NOT-STARTED |
 | 4 | STAGE WINDOW 1 — red on the seam tree, the Mac batch on the fixed tree | NOT-STARTED |

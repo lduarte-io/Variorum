@@ -43,6 +43,10 @@ final class PoolPostsModel {
     /// card family later.
     private(set) var snippets: [String: String] = [:]
     private(set) var lastError: String?
+    /// **VX-268 — who reaches each DRAWN note now** (the ONE icon on the Pool's
+    /// rows — her kickoff call: "Pool rows … IN"). SEAM (VX-281 U2 piece 1):
+    /// the pre-fix behaviour — the Pool read no reach, so this stays empty.
+    private(set) var reach: [String: [MCPPlaceReach]] = [:]
 
     /// Bounded like every held listing (the observeLibrary discipline).
     nonisolated static let window = 200
@@ -111,6 +115,10 @@ final class PoolPostsModel {
     var drawnIDs: [String] {
         posts.map(\.postID) + (showsTucked ? tucked.map(\.postID) : [])
     }
+
+    /// VX-268 — hold the drawn rows' reach (the view's `.task(id: drawnIDs)`).
+    /// SEAM (piece 1): reads nothing.
+    func holdReach(_ ids: [String]) async {}
 
     private func loadTags() async {
         let ids = drawnIDs

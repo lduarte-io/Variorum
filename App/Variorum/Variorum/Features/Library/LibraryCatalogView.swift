@@ -1343,6 +1343,11 @@ struct CatalogBookLine: View {
     /// beside its name in the accent (the mockup's own); nil elsewhere.
     var association: String? = nil
     let onTitleTap: () -> Void
+    /// VX-268 — who reaches this book or gathering now (the ONE icon's
+    /// reaches; empty — the common case — draws nothing, so the shipped
+    /// alignment pins measure exactly what they did). SEAM (VX-281 U2 piece
+    /// 1): carried, not yet drawn — the pre-fix face.
+    var reach: [MCPPlaceReach] = []
 
     static let probeSpace = "catalog-book-line"
 
@@ -1421,6 +1426,10 @@ struct CatalogNoteLine: View {
     /// title (nil, and a calm note, draw nothing — the shipped alignment pins
     /// measure exactly what they did).
     var askTarget: MCPAskTarget? = nil
+    /// VX-268 — who reaches this note now (the ONE icon's reaches, from the
+    /// row's own slice; empty — the common case — draws nothing). SEAM
+    /// (VX-281 U2 piece 1): carried, not yet drawn — the pre-fix face.
+    var reach: [MCPPlaceReach] = []
 
     static let probeSpace = "catalog-note-line"
 

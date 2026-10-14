@@ -358,6 +358,28 @@ extension Queries {
         return MCPPlaceReach(client: client, rung: reach.rung, grant: grant, throughTitle: through)
     }
 
+    // MARK: - VX-268 — the ROWS' reads (the Library, the Pool, the Book Panel, the switcher)
+
+    /// **Who reaches each of these NOTES, how far, and why** (VX-268) — the
+    /// batched twin of `mcpNoteReach`, for rows. SEAM (VX-281 U2 piece 1): the
+    /// PRE-FIX behaviour — no row read reach, so this answers nothing yet.
+    public static func mcpNoteReaches(_ db: Database, noteIDs: [String]) throws -> [String: [MCPPlaceReach]] {
+        [:]
+    }
+
+    /// **Who reaches each of these BOOKS and GATHERINGS** (VX-268 — the
+    /// Library's listed book rows). SEAM (piece 1): the pre-fix behaviour —
+    /// no listing read reach.
+    public static func mcpBookReaches(_ db: Database, readingIDs: [String]) throws -> [String: [MCPPlaceReach]] {
+        [:]
+    }
+
+    /// **Who reaches each WING** (VX-268 — the switcher's rows). SEAM (piece
+    /// 1): the pre-fix behaviour — no wing reach was read anywhere.
+    public static func mcpWingReaches(_ db: Database) throws -> [String: [MCPPlaceReach]] {
+        [:]
+    }
+
     // MARK: - ⌥⌘A's derivation
 
     /// **The newest grant she made** (13n-c U3 — the brief §4: "the newest

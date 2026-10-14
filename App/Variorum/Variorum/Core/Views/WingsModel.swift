@@ -27,6 +27,11 @@ final class WingsModel {
 
     /// The live ADDITIONAL wings, in switcher order (Home is virtual).
     private(set) var wings: [Wing] = []
+    /// **VX-268 — who reaches each WING now** (the ONE icon on the switcher's
+    /// rows — ⌘L's sheet and the ▾ menu; "a shared wing never shows as shared
+    /// there"). Keyed by wing id, Home `''`. SEAM (VX-281 U2 piece 1): the
+    /// pre-fix behaviour — no wing reach was read, so this stays empty.
+    private(set) var reach: [String: [MCPPlaceReach]] = [:]
 
     init(session: AppSession) {
         self.session = session
@@ -56,6 +61,10 @@ final class WingsModel {
             adopt(value)
         }
     }
+
+    /// VX-268 — hold every wing's reach (the main window's task, beside
+    /// `track`). SEAM (VX-281 U2 piece 1): reads nothing.
+    func watchSharing() async {}
 
     // MARK: - What the faces read
 

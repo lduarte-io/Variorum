@@ -542,6 +542,16 @@ final class LibraryCatalogModel {
     /// The book hits' ids, in listing order — what the row menus' facts read.
     var listedBookIDs: [String] { bookHits.map(\.id) }
 
+    /// **VX-268 — who reaches each LISTED book and gathering now** (the ONE
+    /// icon on the Library's book rows — List, the capped region, the answer
+    /// sheet). SEAM (VX-281 U2 piece 1): the pre-fix behaviour — no listing
+    /// read reach, so this stays empty.
+    private(set) var bookReach: [String: [MCPPlaceReach]] = [:]
+
+    /// VX-268 — hold the listed books' reach while they are listed (the
+    /// view's `.task(id: listedBookIDs)`). SEAM (piece 1): reads nothing.
+    func holdBookReach(_ ids: [String]) async {}
+
     init(session: AppSession, defaults: UserDefaults = .standard) {
         self.session = session
         self.defaults = defaults
@@ -1021,15 +1031,24 @@ final class LibraryNoteRowExtras {
     private(set) var tags: [Tag]
     private(set) var card: NoteCards.Card?
     private(set) var facts: Queries.OwnershipFacts?
+    /// VX-268 — who reaches this note now, how far and why (the ONE icon's
+    /// reaches — `Queries.mcpNoteReaches`, held for the near window with the
+    /// facts); empty when no approved client reaches it.
+    private(set) var reach: [MCPPlaceReach]
 
-    init(tags: [Tag], card: NoteCards.Card?, facts: Queries.OwnershipFacts?) {
+    init(
+        tags: [Tag], card: NoteCards.Card?, facts: Queries.OwnershipFacts?,
+        reach: [MCPPlaceReach] = []
+    ) {
         self.tags = tags
         self.card = card
         self.facts = facts
+        self.reach = reach
     }
 
     // Equal writes never notify (an @Observable setter always would).
     func setTags(_ value: [Tag]) { if value != tags { tags = value } }
     func setCard(_ value: NoteCards.Card?) { if value != card { card = value } }
     func setFacts(_ value: Queries.OwnershipFacts?) { if value != facts { facts = value } }
+    func setReach(_ value: [MCPPlaceReach]) { if value != reach { reach = value } }
 }

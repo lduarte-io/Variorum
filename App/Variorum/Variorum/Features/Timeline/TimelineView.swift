@@ -63,10 +63,18 @@ final class TimelineViewModel {
     private(set) var items: [Queries.TimelineItem] = []
     private(set) var exhausted = false
     private(set) var lastError: String?
+    /// **VX-268 — who reaches each LOADED row's note now** (the ONE icon on the
+    /// Timeline's rows — the ticket names Timeline). SEAM (VX-281 U2 piece 1):
+    /// the pre-fix behaviour — the Timeline read no reach, so this stays empty.
+    private(set) var reach: [String: [MCPPlaceReach]] = [:]
 
     init(session: AppSession) {
         self.session = session
     }
+
+    /// VX-268 — hold the loaded rows' reach (the view's `.task(id:)` on their
+    /// ids). SEAM (piece 1): reads nothing.
+    func holdReach(_ ids: [String]) async {}
 
     func setLens(_ new: Lens) async {
         lens = new

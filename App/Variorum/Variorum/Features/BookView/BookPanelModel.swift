@@ -418,6 +418,11 @@ final class BookPanelModel {
     /// The shown book's contents, keyed by the book they describe.
     private(set) var snapshot: Snapshot?
     private(set) var snapshotBookID: String?
+    /// **VX-268 — who reaches each listed NOTE now** (the ONE icon on the
+    /// panel's note rows — her kickoff call: "the Book Panel's rows … IN").
+    /// SEAM (VX-281 U2 piece 1): the pre-fix behaviour — the panel read no
+    /// reach, so this stays empty.
+    private(set) var reach: [String: [MCPPlaceReach]] = [:]
 
     init(session: AppSession, postID: String) {
         self.session = session
@@ -459,6 +464,17 @@ final class BookPanelModel {
     func snapshot(for bookID: String) -> Snapshot? {
         snapshotBookID == bookID ? snapshot : nil
     }
+
+    /// The notes the panel lists for `bookID` (its entry window) — the ids
+    /// the reach hold reads (VX-268).
+    func entryIDs(for bookID: String?) -> [String] {
+        guard let bookID, let snapshot = snapshot(for: bookID) else { return [] }
+        return snapshot.entries.map(\.postID)
+    }
+
+    /// VX-268 — hold the listed notes' reach (the view's `.task(id:)` on the
+    /// entry ids). SEAM (piece 1): reads nothing.
+    func holdReach(_ ids: [String]) async {}
 
     func groups(for bookID: String) -> [BookPanelBrain.Group] {
         guard let snapshot = snapshot(for: bookID) else { return [] }
