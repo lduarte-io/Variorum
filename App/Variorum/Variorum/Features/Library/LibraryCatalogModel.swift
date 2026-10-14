@@ -492,6 +492,10 @@ final class LibraryCatalogModel {
     /// is the one thing an `onChange` could not work out for itself.
     func modeChanged() -> Bool {
         clearSelection()
+        // VX-281 ladder R2-1: the near window's held facts follow the rows the
+        // mode DRAWS — entering the Timeline ends them, leaving re-holds them
+        // (`holdNearFacts`' gate; synchronous like the clear above).
+        holdNearFacts()
         guard !showsCatalogControls, editedOn != nil else { return false }
         // R3-6: through the one door the field's `private(set)` exists to
         // force — nil takes the same path today, but two writers of one field

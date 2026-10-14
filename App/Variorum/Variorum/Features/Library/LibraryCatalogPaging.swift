@@ -173,11 +173,35 @@ extension LibraryCatalogModel {
 
     // MARK: - The held facts (the near window's ownership badges)
 
+    /// **VX-281 ladder R2-1 — the modes that DRAW the Library's note rows**
+    /// (pure): List and Cards, and the answer sheet either one shows when the
+    /// field asks. The Timeline draws none of them — it is its own view,
+    /// holding its own window (`TimelineViewModel.reachIDs`). Exhaustive, so
+    /// a mode added later is a decision here, never a silent hold.
+    nonisolated static func drawsNoteRows(_ mode: Mode) -> Bool {
+        switch mode {
+        case .list, .notes: true
+        case .timeline: false
+        }
+    }
+
     /// Observe the owned-by facts of the near window's notes — and nothing
     /// else: re-aimed only when the window's ids change (a page boundary, a
     /// new page in the window, a re-read), so the held region stays a few
     /// pages however deep she scrolls.
+    ///
+    /// **Only while the mode draws note rows** (VX-281 ladder R2-1). The view
+    /// stays MOUNTED under the Timeline (its body swaps its content), so its
+    /// appear/disappear never ended the holds there — and with live reach the
+    /// reach batch reads `container`, re-running at autosave rate over rows
+    /// drawn nowhere. Every road in passes this gate: a read, a landed page,
+    /// the window moving, and the mode changing (`modeChanged()`, which
+    /// re-aims — entering the Timeline ends both holds, leaving re-holds them).
     func holdNearFacts() {
+        guard Self.drawsNoteRows(mode) else {
+            stopHoldingFacts()
+            return
+        }
         let ids = nearNoteIDs
         guard ids != heldNoteIDs || ownershipHold == nil else { return }
         heldNoteIDs = ids
