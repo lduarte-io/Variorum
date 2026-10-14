@@ -95,6 +95,14 @@ struct Truth {
     /// Devices on an older build when the old shared key was retired (promise
     /// 5's exception).
     var olderWhenRetired: Set<String> = []
+    /// Masters an older build's leave put under the old shared key (§8's
+    /// residue — this build never adds to it).
+    var olderExposedMasters: Set<Data> = []
+    /// Apple key ids whose deliberate delete never reached iCloud: made while
+    /// the device's switch was off, or queued and lost with its keychain (a
+    /// replaced, wiped or re-Apple-ID'd device) — §8's residue (PROVISIONAL
+    /// P-U4-1: after a leave, nothing in Standard deletes them on sight).
+    var deletesNotCarried: Set<String> = []
     /// Every copy retention pruned: who, under which Mac, for which library.
     var prunes: [(by: String, mac8: String, library: String, copy: CatalogCopy)] = []
     /// Every copy opened into a library: the record before and after.
@@ -228,6 +236,10 @@ final class SWorld {
     var wordsDerived: [String: WordsKey] = [:]
     /// Whose secrets a sent pair was locked under, by hand-off folder.
     var senderHolders: [String: String] = [:]
+    /// Devices whose last act crashed (their next launch finishes it).
+    var crashed: Set<String> = []
+    /// Every promise violation, with the log line it surfaced at.
+    var violations: [(Violation, Int)] = []
 
     /// Two Macs and a phone on Apple account 1 (the phone and Mac A share a
     /// login identity? never: each device its own hardware and login).
@@ -342,11 +354,26 @@ final class SWorld {
     /// device at their next sync, with no recovery; with it off it reaches
     /// only this device, and the cloud's copy comes back when sync does.
     func deleteSynced(_ device: SDevice, _ name: KName) {
-        guard device.keychain.synced[name]?.item != nil else { return }
+        guard let item = device.keychain.synced[name]?.item else { return }
+        let id = item.value.appleKey?.id
         if device.iCloudOn, device.appleAccount != nil {
             device.keychain.synced[name] = DeviceKeychain.Replica(item: nil, version: nextSyncVersion(), dirty: true)
+            if let id { truth.deletesNotCarried.remove(id) }
         } else {
             device.keychain.synced[name] = nil
+            if let id { truth.deletesNotCarried.insert(id) }
+        }
+    }
+
+    /// The device's keychain goes (replaced, wiped, signed into another Apple
+    /// ID): its queued deletes never reach iCloud.
+    func loseQueuedDeletes(_ device: SDevice) {
+        for (name, replica) in device.keychain.synced where replica.dirty && replica.item == nil {
+            if case .own(let id)? = ProtectionNames.parseAppleKeyAccount(name.account, scope: Self.scope) {
+                truth.deletesNotCarried.insert(id)
+            } else if name == KName.oldShared(Self.scope), let id = appleAccounts[device.appleAccount ?? ""]?.cloud[name]?.item?.value.appleKey?.id {
+                truth.deletesNotCarried.insert(id)
+            }
         }
     }
 

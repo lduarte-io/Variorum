@@ -548,6 +548,7 @@ extension SWorld {
             syncICloud(device(name))
         case .switchAppleID(let name, let to):
             let d = device(name)
+            loseQueuedDeletes(d)
             truth.lostAppleKeys.formUnion(readableAppleKeys(d).keys)
             d.keychain.synced.removeAll()
             d.appleAccount = to
@@ -566,6 +567,7 @@ extension SWorld {
             account.cloud.removeAll()
         case .wipeKeychain(let name):
             let d = device(name)
+            loseQueuedDeletes(d)
             d.keychain = DeviceKeychain()
             lock(d)
             syncICloud(d)
@@ -574,6 +576,7 @@ extension SWorld {
             lock(d)
             d.machine = MachineIdentity(hardware: rng.uuid().uppercased(), login: d.machine.login)
             let memory = d.keychain.local.filter { $0.key.service == ProtectionNames.memoryService }
+            loseQueuedDeletes(d)
             d.keychain = DeviceKeychain()
             if carriesMemory { d.keychain.local = memory }
             d.biometry = BiometryFake(generation: d.biometry.generation + 100)
@@ -581,6 +584,7 @@ extension SWorld {
         case .cloneMac(let from, let to):
             let source = device(from), clone = device(to)
             lock(clone)
+            loseQueuedDeletes(clone)
             clone.container = FolderFS()
             clone.container.files = source.container.files
             clone.machine = MachineIdentity(hardware: rng.uuid().uppercased(), login: source.machine.login)

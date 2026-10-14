@@ -88,9 +88,16 @@ extension ProtectionExecutor {
     /// `freshPair`: the move ends with its fresh backup pair (the migration
     /// takes its own, as its last step).
     func moveOffSharedKey(_ ctx: ActContext, freshPair: Bool) async throws {
-        guard let shared = try leaves.apple.readOldSharedAppleKey() else { return }
+        // The gifts open another library's key through the old shared key, so
+        // they need it readable; the live library's own key doesn't — a
+        // Standard library whose Apple copy never landed (today's exposed and
+        // Standard-waiting shapes, confirmed Standard) gains this Mac's own
+        // key all the same (§3.13 step 7: "give everything this Mac holds in
+        // Standard a key of its own" — VX-305 U4, found by the scenario world).
+        let shared = try leaves.apple.readOldSharedAppleKey()
         var moved = false
-        for catalogID in ctx.parameters.keyFileIDs ?? [] {
+        for catalogID in shared == nil ? [] : ctx.parameters.keyFileIDs ?? [] {
+            guard let shared else { break }
             guard let document = try leaves.keyFiles.readKeyFile(catalogID: catalogID) else { continue }
             let libraryID = document.libraryID
             guard libraryID != ctx.library.record?.libraryID else { continue }

@@ -324,6 +324,7 @@ extension SWorld {
                 masterKey: material.masterSymmetricKey, appleKey: shared.key, appleKeyID: shared.id)
             _ = try server.update(updated, accountID: account, expectedRevision: vault.revision, proofMaster: material.masterSymmetricKey)
             truth.olderBuildLeaveKeys.insert(material.corpusKeyID)
+            truth.olderExposedMasters.insert(material.masterKey)
         }
         try file.envelope.setAppleWrappedCopy(key: key, under: shared.key, appleKeyID: shared.id)
         device.container.files[file.path] = .keyFile(.legacy(LegacyKeyFile(envelope: file.envelope)))
