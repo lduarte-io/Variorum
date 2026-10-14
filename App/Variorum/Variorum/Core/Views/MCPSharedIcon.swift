@@ -123,7 +123,11 @@ enum MCPSharedIconProbe {
     static var anchors: [Anchor] = []
     /// Every presentation, in order, by the first reaching client's name.
     static var presented: [String] = []
-    /// The popovers up now, by the first reaching client's name.
+    /// Each popover's content appearances minus its disappearances, by the
+    /// first reaching client's name. Reliable for "went up" only: SwiftUI did
+    /// not report a dismissed popover's content leaving (VX-281 STAGE WINDOW
+    /// R1b), so a pin asks AppKit whether a popover is gone (no visible
+    /// popover window).
     static var up: [String: Int] = [:]
 
     /// The icons drawn in `window` now, in window coordinates.
