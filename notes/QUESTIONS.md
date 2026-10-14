@@ -2635,3 +2635,93 @@ next morning, before the merge:
 *(Numbering: the next free number on main when written; a sibling run merging first may take it — the merging session
 renumbers.)*
 Status: answered except call 3, which is open.
+
+
+## VX-246 — Run: MCP door fixes (2026-10-14)
+
+#226 — **THE VX-246 RATIFY BUNDLE (merged 2026-10-14, PR #162, merge commit «merge SHA»; the binding record is
+`notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md` — her rulings during the run, ORCHESTRATOR'S PROVISIONAL
+RULINGS, each UNIT RECORD's PROVISIONALs block with its options, THE LADDER (Fable round 1 → Opus round 2, closed);
+your handoff `notes/handoffs/vx-246-handoff.md`).** Built overnight under your mandate (*"Rule provisionally in my
+absence and leave me a handoff with any needed information to note down."*). Each was built as stated, with a line
+to reverse it.
+- **Setup keys (VX-258, U1 and U1b):**
+  - **P-VX258-1** — a key from one client's tab presented under ANOTHER approved name waits for your OK, as an
+    Any-client key does (a tag only ever adds the zero-click right for its own name). Option: (b) refuse it with the
+    one sentence — stricter, but a client whose real name differs from its tab's then has only the Any tab.
+  - **P-VX258-2 — ANSWERED.** The bind arm (an approved name with no key tied to it — after opening a library from
+    another Mac, a Deny then an approve, or a client approved before VX-168) takes a key copied from that client's own
+    tab with no clicks, and any other new key waits for your OK. Your word, 2026-10-13: *"i ratify what you built"*.
+  - **P-VX258-3** — a waiting connection sees no tools, every known tool answers the pending sentence, and an
+    unknown name hears "Unknown tool" as anyone would. Residual: a MALFORMED call to a known tool still tells a waiting
+    connection from a first-contact one. Options: (b) route the waiting session through every tool's standing read
+    (closes the residual; touches every tool); (c) refuse the waiting connection at the handshake with its own
+    sentence (simplest, but tells its holder the name is approved, and needs a reconnect after your Allow).
+  - **P-VX258-4** — one waiting setup per name: a newer one replaces the older, whose key is forgotten. Option: (b)
+    one row per key — several asks for one name that you cannot tell apart.
+  - **P-VX258-5** — the wait is logged once in Activity as not allowed; a re-presentation logs nothing, and a waiting
+    connection's calls log nothing. Option: (b) log it as connected, and/or log its calls one by one.
+  - **P-VX258-6** — the key's tag is the client's name in plain text (`vmk2_<name>_…`; 1–64 of letters, digits, `.`
+    `_` `-`; a name outside that is refused at the copy). Option: (b) an encoded tag that carries any name and that
+    nobody can read.
+  - **P-VX258-7** — the "New setup for ‹name›" row leads Waiting, above the connection requests, with Allow and
+    Don't allow equal and quiet. Options: (b) after the requests; (c) Allow styled as the primary button (set aside:
+    the press hands a stranger the name's grants).
+  - **P-VX258-8** — Activity words the wait as an ask: "‹name› asked to use a setup that wasn't copied for it".
+    Option: (b) the refusal form, "‹name› was refused connecting with a setup that wasn't copied for it".
+- **Comments (VX-260, U1 and U1b):**
+  - **P-VX260-1** — your edit on ANOTHER device. As built: (a) your edit on this Mac forgets the AI's authorship
+    record, AND (b) the record keeps a digest of the words the client wrote, so any change to them from any device or
+    client makes deleting it need EDIT. Options: (a) alone (comments you edit on the phone or the Air stay deletable at
+    suggest); (c) compare `updated_at` (set aside: an undo, a delete and Put back, and every sync apply bump it with
+    no word changed). Accepted residual: an edit-level client's own rewrite also ends its suggest-level ownership.
+  - **P-VX260-2** — a record from before the digest existed counts as UNPROVEN, so deleting that comment needs EDIT.
+    Options: (b) backfill the digest from today's words (would bless a comment you already rewrote on another device
+    or under the earlier build); (c) trust the old record (the hole stays open for every comment written before this
+    build).
+- **Her editor vs the wire (VX-275, U3):**
+  - **P-VX275-1** — before every listed act the door flushes EVERY open note's pending typing. Options: (b) only the
+    act's own note, resolved from its ids before the act (a read outside the act's transaction, and a timing oracle
+    on notes the client can't reach); (c) (b) after the grant decides, by splitting the act into turns (re-opens the
+    gap the decide-and-act guard closed).
+  - **P-VX275-2** — the remaining window (a keystroke typed in the milliseconds between the flush and the act meets
+    the old behaviour, narrowed to those characters) is accepted and recorded. Options: (b) a keyboard fence over
+    every open editor for each wire act's flight (an editor-seam change; your typing pauses for each AI write);
+    (c) refuse a wire delete or freeze while the app holds unsaved typing for that take.
+- **The undo class (VX-276 · VX-277 · VX-119, U2):**
+  - **P-VX276-1** — a quiet half retires its own entry and leaves the other stack as it was. Options: (b) it also ends
+    the redo future (throws away redos your earlier presses earned); (c) the entry moves on marked quiet and its
+    partner does nothing (the Edit menu then offers a "Redo …" that does nothing).
+  - **P-VX276-2** — a quiet press speaks a refusal (a toast) naming the entry: "Nothing to undo — ‹label› was already
+    undone or changed since." / "Nothing to redo — it changed again after ‹label› was undone." Option: (b) a quiet
+    receipt. (When nothing is left to redo, the Redo item is simply disabled and no sentence is spoken.)
+  - **P-VX276-3** — an entry with several parts (slots, columns, blocks, rows, a merge's mint and its sources) moves
+    back and forth only the parts its partner moved, while your change to another part stands. Option: (b) any
+    divergence makes the whole entry quiet (simpler; the parts you never touched become un-undoable).
+  - **P-VX276-4** — every revive is keyed on its own undo's stamp: a row deleted on any other stamp (your Trash after a
+    Put back, another device's delete) is never brought back by a redo. Option: (b) revive any dead row the entry names
+    (would let a redo undo another device's delete).
+  - **P-VX277-1** — your own adopt doors (✓ Make this the note) undo per block: a block is restored only while it still
+    shows the adopted take. Option: (b) restore every block unconditionally (your later ✓ on an adopted block is
+    overwritten by your own ⌥⌘Z).
+- **The orchestrator's provisional rulings (ORCHESTRATOR'S PROVISIONAL RULINGS in the record):**
+  - **Ruling 1** — on U3's timing leg a scripted client stood in for "a real client": Claude Code answers in seconds
+    and can't land a call inside your 500 ms autosave pause, so a small driver on the real Debug shim proved the
+    timing (answered 53 ms and 51 ms after the last keystroke), and a real Claude Code turn proved the rest. Option:
+    (b) require a real client for the timing leg (not reachable with a model-driven client).
+  - **Ruling 2** — a navigate-away never takes your focus: when a note is deleted while it shows in a pane you are NOT
+    typing in, that pane goes to the Library in place and your caret stays where it is — on every road, your own
+    Delete door included. Option: (b) as before: the re-routed pane takes the focus.
+  - **Ruling 3** — the night's merge carried the four FIX units (U1–U4 and their follow-ups); U5–U8 (the wire tools'
+    shapes, Compare from the wire, the agent's read-backs, the AI's docs) moved to **VX-336 "Run: MCP wire tools & AI
+    docs"**, unstarted, every member keeping its ruling. Option: (b) hold the merge until all eight units land.
+- **For your eye, not provisional:** 0.9.5's release notes (`ReleaseNotes-0.9.5.md:9`, "Running a client's setup
+  again simply replaces the old setup…") now hold only for a client's own tab — the next notes are yours · Codex's
+  client name (`codex-mcp-client`) is an outside lookup never seen live (Codex isn't installed); if it's wrong, a
+  Codex re-run waits for one Allow, never a refusal · comments a client wrote before this build need EDIT to delete
+  (P-VX260-2's cost) · two residuals stay recorded, unchanged: `finish_book`'s reopen-then-refinish (books carry no
+  finish stamp) and `add_note_to_book`'s seat undo (dismissed at round 1 as the act's own reversal) · the pane words
+  (U1b-1…8, the two quiet-press refusals, the re-bind row's "…, now. It reaches…") ride VX-234. Cross-refs: VX-258 ·
+  VX-259 · VX-260 · VX-275 · VX-276 · VX-277 · VX-119 · VX-323 · VX-336 · VM-16.
+*(Numbering: drafted as #220; VX-282 took #220–#224 and VX-266 #225 on main before this merge.)*
+Status: open — your eye; the handoff's checklist leads with this bundle.
