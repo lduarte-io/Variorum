@@ -81,13 +81,15 @@ struct MCPPaneTests {
             defer { door.detach() }
             let pasteboard = NSPasteboard(name: NSPasteboard.Name("variorum-mcp-pane-test-\(UUID().uuidString)"))
             defer { pasteboard.releaseGlobally() }
-            await door.copySetupCommand(to: pasteboard)
+            // VX-281 ladder R1-3 (the ritual): the copy names its client.
+            await door.copySetupCommand(for: .claudeCode, to: pasteboard)
             let copied = try #require(pasteboard.string(forType: .string))
             #expect(copied.contains("variorum-dev"), "the test host is the Debug build")
             #expect(copied.contains("/Contents/MacOS/variorum-mcp"))
             #expect(copied.contains("VARIORUM_MCP_KEY=vmk1_"), "a fresh key rides the copy")
             #expect(door.setupCommand.contains(MCPPaneCopy.shownKey), "the shown command masks it")
-            #expect(door.note == MCPDoor.Note(text: MCPPaneCopy.copiedReceipt, place: .connect),
+            // VX-281 ladder R2-5: the client's own receipt (the alias is gone).
+            #expect(door.note == MCPDoor.Note(text: MCPSetupClient.claudeCode.copiedReceipt, place: .connect),
                     "the receipt sits under its button, never below the fold")
         }
     }
@@ -121,7 +123,12 @@ struct MCPPaneTests {
         #expect(SettingsPane.mcp.title == "MCP", "R-13n-5 named it")
         // 13n-c U4 (A JUSTIFIED EDIT, the ritual — arrival X): the pane's
         // Waiting list is a catalog row too, so the search finds an ask.
-        #expect(AppSettingsView.rowIDsRendered[.mcp] == ["mcpServer", "mcpWaiting", "mcpOpenBook"])
+        // VX-281 ladder R1-4 (A JUSTIFIED EDIT, the ritual): the Connect
+        // tab's row joins — the setup's words land there. Ladder R2-3 (A
+        // JUSTIFIED EDIT, the ritual): the Clients tab's row joins —
+        // "client"/"clients" land there (PROVISIONAL P-VX281-R2-1 (b)).
+        #expect(AppSettingsView.rowIDsRendered[.mcp]
+                    == ["mcpServer", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"])
         #expect(SettingsCatalog.title("mcpServer") == "Enable the MCP server")
         for word in ["mcp", "claude", "claude code", "open book"] {
             #expect(SettingsSearch.findings(matching: word, in: SettingsSearch.settingsEntries)

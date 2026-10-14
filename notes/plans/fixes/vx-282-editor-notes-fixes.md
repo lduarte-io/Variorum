@@ -129,11 +129,11 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-290 — the empty-block backspace's caret landing | **DONE** — fix `385aa1fc`; W1 red on old + W2 the Mac batch green `be826a5d`; W3 the walk, every row held `a7a63949`. Stage released 22:01:26 and 23:47:00. One observation for the orchestrator to ticket (the bar's word counter, not this unit's road). No revert in flight. |
-| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. Claim `vx282-u2b` HELD for U3's handover. |
-| U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
+| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #220. Claim `vx282-u2b` HELD for U3's handover. |
+| U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #221). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — W1 red on old (the host suites + the model suites, ≈4 min; VX-229 decided here) · W2 the fixed batch (three groups, ≈12 min) · W3 the walk (7 rows incl. a live `heap` count, row 1 in both voices, ≈25 min) — ≈42 min.** VX-229: fix REVERTED `7d798f82` (offscreen artefact — the CORRECTION); expected HOLLOW. VX-257: fix `1ca8fe72`; QUESTIONS #222. VX-183: `a765683c`. VX-182: pins `f38fb93c` red on old (headless), fix `fd4c260c`, R-182 ran + restored. Pins hardened `dab712d8`. Core 2,801/320 + MCP 212/41 + workbook 40/6 headless green; the phone builds. Old products `DerivedData/vx282-u5-old-products` REBUILT (the named revert at `3a6bad6d` — done, restored, `git status` clean); fixed `DerivedData/vx282-u5` rebuilt at the tip. No claim held; no revert in flight. |
-| U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **READY FOR STAGE — W1 red on old (`QuickEntryLaunchFocusTests` on `vx282-u6-old-products`, 1 issue expected, ≈3 min) · W2 the fixed batch on `vx282-u4` (three groups — the capture/quick-entry/pad suites with the four new ones, the tour suites, the shell-mount and launch/restore suites, ≈12 min) · W3 the walk (the old build's launch for the record; launch in both voices with a typed letter; a restored note window; the tour; the navigation-back scope line, ≈23 min) — ≈38 min.** Trace (headless, real module): the shell's ask reaches the box before its window and is spent (F-FR-1) — at launch and on every navigation back (O-U6-1, left as today). Pins `d35191b6` + correction `ee1facc9` (AppKit auto-selects a window's first text field when it is ordered in — the rig frees it) · fix `3cf0079b`. P-U6-1/2 → QUESTIONS #223. Products: old `vx282-u6-old-products` REBUILT by the revert named at `07f03fa5` (done, restored, `git status` clean); fixed `vx282-u4` rebuilt LAST (U4's final + U5 + U6 — u4b tests what U4 expects). No claim held; no revert in flight. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — W1 red on old (the host suites + the model suites, ≈4 min; VX-229 decided here) · W2 the fixed batch (three groups, ≈12 min) · W3 the walk (7 rows incl. a live `heap` count, row 1 in both voices, ≈25 min) — ≈42 min.** VX-229: fix REVERTED `7d798f82` (offscreen artefact — the CORRECTION); expected HOLLOW. VX-257: fix `1ca8fe72`; QUESTIONS #223. VX-183: `a765683c`. VX-182: pins `f38fb93c` red on old (headless), fix `fd4c260c`, R-182 ran + restored. Pins hardened `dab712d8`. Core 2,801/320 + MCP 212/41 + workbook 40/6 headless green; the phone builds. Old products `DerivedData/vx282-u5-old-products` REBUILT (the named revert at `3a6bad6d` — done, restored, `git status` clean); fixed `DerivedData/vx282-u5` rebuilt at the tip. No claim held; no revert in flight. |
+| U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **READY FOR STAGE — W1 red on old (`QuickEntryLaunchFocusTests` on `vx282-u6-old-products`, 1 issue expected, ≈3 min) · W2 the fixed batch on `vx282-u4` (three groups — the capture/quick-entry/pad suites with the four new ones, the tour suites, the shell-mount and launch/restore suites, ≈12 min) · W3 the walk (the old build's launch for the record; launch in both voices with a typed letter; a restored note window; the tour; the navigation-back scope line, ≈23 min) — ≈38 min.** Trace (headless, real module): the shell's ask reaches the box before its window and is spent (F-FR-1) — at launch and on every navigation back (O-U6-1, left as today). Pins `d35191b6` + correction `ee1facc9` (AppKit auto-selects a window's first text field when it is ordered in — the rig frees it) · fix `3cf0079b`. P-U6-1/2 → QUESTIONS #224. Products: old `vx282-u6-old-products` REBUILT by the revert named at `07f03fa5` (done, restored, `git status` clean); fixed `vx282-u4` rebuilt LAST (U4's final + U5 + U6 — u4b tests what U4 expects). No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -381,7 +381,7 @@ capture is the bottom bar's `block i/n`** (the caret's block and the count), the
 **NOT DONE in this unit (stated first):** the walk ran in ONE voice (Study, the dev store's own) — the second voice
 was not walked (the Settings voice switch was not cheap in the window); the phone has no walk (its pins drive the
 real `MobileEditorTextView` in a key window); the opener side and ⌘I/⌘B stay caret-blind by PROVISIONAL choice
-(P-U2-1/P-U2-3, QUESTIONS #219).
+(P-U2-1/P-U2-3, QUESTIONS #220).
 
 **State: DONE** (2026-10-14 01:17 — every row verified: headless core, W1 red on old, W2 + u2b green, W3 walk).
 Implementer: an `opus-implementer` session (Opus 5.5, xhigh), 2026-10-13/14. Fix commits: `962a7305` (core parser +
@@ -545,7 +545,7 @@ ever applied; `git status` clean.
 suites passed** (VX-184's closeout baseline 2,782/319 + this unit's 17/1), VariorumMCPTests 212/41, workbook 40/6 —
 all green. The markdown suites alone at `962a7305`: 106/7.
 
-**PROVISIONALs (QUESTIONS #219 — the number is main's next free one; renumbered at the merge if taken):**
+**PROVISIONALs (QUESTIONS #220 — the number is main's next free one; renumbered at the merge if taken):**
 - **P-U2-1 — the opener side is not caret-aware.** Built (a) closer only — the ruling's letter and her typing flow
   (forward typing inside a pair only ever puts the space before the closer; traced). The opener flips only when the
   FIRST word is backspaced away (`*| world*`) or a space is typed right after the opening star. Option (b) the mirror:
@@ -919,7 +919,7 @@ pre-fix app) · `DerivedData/vx282-u3-revB-products` (the fix minus the guard) �
 `26ecec8c`, the fixed product). All three **TEST BUILD SUCCEEDED**; zero warnings in the touched files. No core or
 `Shared/` file touched — no `swift test` and no phone build owed.
 
-**PROVISIONALs (QUESTIONS #220):**
+**PROVISIONALs (QUESTIONS #221):**
 - **P-U3-1 — ⌘S with no take clicked into commits what the block shows**, the ring moved onto it first. Built (a): P-VX150-1's
   ratified rule, and what Write's caret arm committed when the panel was the caret block's (no regression there).
   Options: (b) refuse as the Takes board does ("Click into a take first — ⌘S commits the take you're in."); (c) ask for the
@@ -1097,7 +1097,7 @@ guards of the programmatic-undo road.
 while the box does NOT hold the caret (the walk, both voices, AX-proven); the box's own defects — the never-cleared
 "asked once" flag (the pad's re-grab after a release, stealing from another responder) and the bar's silent loss of a
 held keyboard on a re-attach — are fixed (`6bb9c7c9`) and red on old by the direct release-and-reattach pins (W1), green
-fixed (W2). P-U4-2 withdrawn (QUESTIONS #221 updated).
+fixed (W2). P-U4-2 withdrawn (QUESTIONS #222 updated).
 
 **The surface:** `Core/Views/CaptureTextView.swift` (the ONE capture box, 13u3 UNIT C) and its two hosts —
 `Features/Shelf/QuickEntryBar.swift` (the Bookcase's and the Library's bar) and `Features/QuickNote/QuickNoteView.swift`
@@ -1248,7 +1248,7 @@ defaults and reads `TourOracle` only when the slot reports THIS store's seeded b
 - No core file touched → no `swift test` owed. No phone file touched → no phone build owed (`Core/Views/` is Mac-only;
   the phone's capture is a SwiftUI `TextField`, its own road — `MobileQuickNote.swift:1229`).
 
-#### PROVISIONALs (QUESTIONS #221)
+#### PROVISIONALs (QUESTIONS #222)
 
 - **P-U4-1 — undo is the box's own, and a programmatic replacement ends it** (P-VX179-U3-4 carried, #215 still open
   there). Built (a). Options: (b) the window's shared history (⌘Z in an empty box reaches other text's stack); (c) the
@@ -1380,7 +1380,7 @@ captures: `notes/plans/vx282-screens/u4/walk/`.
     pin, green on old) and the trace say the same of her road.
   - **The away start (P-U4-2's premise) — NOT REPRODUCED:** a tour started from a note (`o museu`, Read ▸ edit) landed on
     the Bookcase at step 1 with AX reading the WINDOW focused at 3 s and at 6 s (`E1`) — candidate 2's raise did not take
-    the caret on this road. P-U4-2 is WITHDRAWN (QUESTIONS #221 updated).
+    the caret on this road. P-U4-2 is WITHDRAWN (QUESTIONS #222 updated).
   - **Cleanup / posture:** the ONE walk note (`2026-10-14`, body `VX-193 pad`, #quicknote) moved to the Trash by note ▾ ▸
     Delete Note… ▸ Delete (receipt "Note moved to the Trash — 30 days to put it back.", `Z2`) — the dev store's residue;
     no other note was filed by either build (every bar ⏎ in the walk filed nothing); every `x` landed nowhere; the voice
@@ -1460,7 +1460,7 @@ pre-fix box by the NAMED revert (`git checkout c4f2a893 -- CaptureTextView.swift
 `Build/Products` replaced, restored by `git checkout HEAD --`, `git diff` empty; its dylib carries neither member's
 symbols — `nm`). Nothing else rebuilt; no core or phone file touched.
 
-**5. P-U4-1 stays open in #221** (the per-box history — the sibling's fix); P-U4-2 withdrawn there.
+**5. P-U4-1 stays open in #222** (the per-box history — the sibling's fix); P-U4-2 withdrawn there.
 
 **THE u4b WINDOW PLAN (≈8 min; on the orchestrator's claim line; `guard.sh --author` first).** From `App/Variorum/`, logs
 to `notes/plans/vx282-screens/u4/logs/`:
@@ -1657,7 +1657,7 @@ All PENDING the stage window (W1 on the old products, W2 on the fixed). The stan
 RUN A's) are expected green and unmodified in body: refusals still park at refusal time, peek, and clear on the same
 draft's landing.
 
-**PROVISIONALs (QUESTIONS #222 — under the VX-282 heading; renumbered at the merge if a sibling took it):**
+**PROVISIONALs (QUESTIONS #223 — under the VX-282 heading; renumbered at the merge if a sibling took it):**
 - **P-U5-1 — ONE held draft, newest wins** (the park's #140(a) trade, now reached by a click away as well as by a
   refusal): leaving block B's panel with words in it replaces a draft held for block A — refused or left. Built (a) the
   park as it is. Options: (b) one held draft PER BLOCK (the park grows to a small per-block table, both platforms' type —
@@ -1999,7 +1999,7 @@ ask lands in the first-content order exactly as the counted one did).
 - No core file touched → no `swift test` owed. No phone file touched → no phone build owed (`Core/Views/` and the
   Bookcase are Mac-only; the phone's capture is its own road). MOBILE PARITY: nothing mobile-visible.
 
-#### PROVISIONALs (QUESTIONS #223)
+#### PROVISIONALs (QUESTIONS #224)
 
 - **P-U6-1 — the opening ask is decided when the box reaches its window, on that window's facts alone.** Built (a):
   take the caret when this window's keyboard is free and no sheet is on it, else drop; other windows never consulted

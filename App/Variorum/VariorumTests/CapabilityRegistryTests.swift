@@ -579,6 +579,13 @@ struct CapabilityRegistryTests {
             // switcher menu, the indicator, Waiting) carry it in the lines
             // above.
             .union(WingSwitcherSheet.surfaceCapabilities)
+            // VX-268 (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line; VX-281 U2): the Library's Timeline rows render the ONE
+            // shared icon and its popover's doors. (The Library's List/Cards
+            // rows, the Pool's, the Book Panel's and ⌘L's rows declare it on
+            // the lines above — the union already held the acts through the
+            // Bookcase and the indicator.)
+            .union(TimelineView.surfaceCapabilities)
             // VX-221 (A JUSTIFIED EDIT, the same class — a new renderer is a
             // new line): Settings ▸ Tags renders the tag delete's visible row
             // door (Data Safety's comment above recorded the tag manager's

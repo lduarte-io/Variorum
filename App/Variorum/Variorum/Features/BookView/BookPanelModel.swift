@@ -418,6 +418,11 @@ final class BookPanelModel {
     /// The shown book's contents, keyed by the book they describe.
     private(set) var snapshot: Snapshot?
     private(set) var snapshotBookID: String?
+    /// **VX-268 — who reaches each listed NOTE now** (the ONE icon on the
+    /// panel's note rows — her kickoff call: "the Book Panel's rows … IN"):
+    /// `Queries.mcpNoteReaches` over the shown book's entries — ∝ the panel's
+    /// own window (`entryWindow`), held while the panel shows that book.
+    private(set) var reach: [String: [MCPPlaceReach]] = [:]
 
     init(session: AppSession, postID: String) {
         self.session = session
@@ -458,6 +463,23 @@ final class BookPanelModel {
     /// The contents, but only if they are `bookID`'s.
     func snapshot(for bookID: String) -> Snapshot? {
         snapshotBookID == bookID ? snapshot : nil
+    }
+
+    /// The notes the panel lists for `bookID` (its entry window) — the ids
+    /// the reach hold reads (VX-268).
+    func entryIDs(for bookID: String?) -> [String] {
+        guard let bookID, let snapshot = snapshot(for: bookID) else { return [] }
+        return snapshot.entries.map(\.postID)
+    }
+
+    /// VX-268 — hold the listed notes' reach (the view's `.task(id:)` on the
+    /// entry ids — a book switch or a membership change restarts it; an
+    /// autosave never changes the ids).
+    func holdReach(_ ids: [String]) async {
+        await MCPRowReach.hold(session, { try Queries.mcpNoteReaches($0, noteIDs: ids) }) { [weak self] value in
+            guard let self, self.reach != value else { return }
+            self.reach = value
+        }
     }
 
     func groups(for bookID: String) -> [BookPanelBrain.Group] {

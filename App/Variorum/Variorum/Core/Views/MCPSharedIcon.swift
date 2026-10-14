@@ -1,7 +1,9 @@
 //
 //  MCPSharedIcon.swift
-//  Variorum (MAC ONLY) — Core/Views (the Bookcase rows and the note's
-//  indicator both render it)
+//  Variorum (MAC ONLY) — Core/Views (every place the waiting-ask glyph marks
+//  renders it: the Bookcase rows, the note's indicator, and since VX-268 the
+//  Library's note, book and gathering rows in List, Cards and Timeline, the
+//  Pool's rows, the Book Panel's rows and the wing switcher's rows)
 //
 //  13n-c U3 — THE ONE SHARED ICON (VX-271, hers: "one consistent AI-shared
 //  ICON, not text … hover names it, click shows the permission; icon language
@@ -29,6 +31,7 @@
 //  grant to change or revoke: its row says where the switch lives.
 //
 
+import AppKit
 import SwiftUI
 import VariorumCore
 
@@ -53,8 +56,15 @@ struct MCPSharedIcon: View {
     var arrowEdge: SwiftUI.Edge = .bottom
     /// After a Revoke lands (a one-shot face re-reads; a held one ignores it).
     var onChanged: () -> Void = {}
+    /// **VX-281 ladder R1-2:** a host that must KNOW when the popover is up
+    /// holds its state here — ⌘L's sheet, whose Esc takes a row's popover
+    /// before the switcher. nil (every other host): the icon's own.
+    var isPresented: Binding<Bool>? = nil
     @Environment(\.mcpShareRoad) private var road
     @State private var shown = false
+
+    /// Whose state the popover rides: the host's when it holds one.
+    private var presented: Binding<Bool> { isPresented ?? $shown }
 
     /// **13n-c UX walk W-UX-7 — the glyph's weight at row size.** The dotted
     /// triangle's strokes are hairlines; at `tokens.small` beside a row's
@@ -66,23 +76,119 @@ struct MCPSharedIcon: View {
     static let rowWeight: Font.Weight = .semibold
 
     var body: some View {
-        Button {
-            shown.toggle()
-        } label: {
-            Image(systemName: Self.symbol)
-                .font(font ?? tokens.small)
-                .fontWeight(Self.rowWeight)
-                .imageScale(Self.rowScale)
-                .foregroundStyle(tokens.accent)
-                .padding(.horizontal, 2)
-                .contentShape(Rectangle())
+        // VX-268: the calm state is NO view (the ask glyph's own rule) — a
+        // place no approved client reaches gains neither width nor spacing,
+        // so every host writes the icon once, unguarded, and a row nobody
+        // reaches measures exactly what it did.
+        if !reaches.isEmpty {
+            Button {
+                presented.wrappedValue.toggle()
+            } label: {
+                Image(systemName: Self.symbol)
+                    .font(font ?? tokens.small)
+                    .fontWeight(Self.rowWeight)
+                    .imageScale(Self.rowScale)
+                    .foregroundStyle(tokens.accent)
+                    .padding(.horizontal, 2)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(MCPShareCopy.iconHelp(reaches))
+            .accessibilityLabel(MCPShareCopy.iconHelp(reaches))
+            .popover(isPresented: presented, arrowEdge: arrowEdge) {
+                MCPReachPopover(reaches: reaches, road: road, onChanged: onChanged) {
+                    presented.wrappedValue = false
+                }
+                .sharedIconPopoverProbe(reaches)
+            }
+            .sharedIconAnchorProbe()
         }
-        .buttonStyle(.plain)
-        .help(MCPShareCopy.iconHelp(reaches))
-        .accessibilityLabel(MCPShareCopy.iconHelp(reaches))
-        .popover(isPresented: $shown, arrowEdge: arrowEdge) {
-            MCPReachPopover(reaches: reaches, road: road, onChanged: onChanged) { shown = false }
+    }
+}
+
+#if DEBUG
+/// **VX-281 ladder R1-5 — the icon's DEBUG oracle** (a no-op outside DEBUG):
+/// where each drawn icon sits in its WINDOW (an AppKit anchor behind the
+/// button — never a click target), and which popovers presented and are up,
+/// by the first reaching client's name. In-process, SwiftUI builds no
+/// accessibility nodes (`ComposedSliders`' measured note), so a pin that
+/// clicks the icon needs its own road to the icon's frame — this is it.
+@MainActor
+enum MCPSharedIconProbe {
+    final class Anchor {
+        weak var view: NSView?
+        init(_ view: NSView) { self.view = view }
+    }
+
+    /// The icons' anchors — dead ones pruned on every append (VX-281 ladder
+    /// R2-4), so the list stays ∝ the icons alive however long a DEBUG run
+    /// scrolls (a recycled List row mounts a fresh anchor).
+    static var anchors: [Anchor] = []
+    /// How many times each popover presented, by the first reaching client's
+    /// name — a COUNT per name (VX-281 ladder R2-4: ∝ the distinct names, so a
+    /// DEBUG run that opens popovers all day holds a handful of entries).
+    static var presented: [String: Int] = [:]
+    /// Each popover's content appearances minus its disappearances, by the
+    /// first reaching client's name. Reliable for "went up" only: SwiftUI did
+    /// not report a dismissed popover's content leaving (VX-281 STAGE WINDOW
+    /// R1b), so a pin asks AppKit whether a popover is gone (no visible
+    /// popover window).
+    static var up: [String: Int] = [:]
+
+    /// The icons drawn in `window` now, in window coordinates.
+    static func frames(in window: NSWindow) -> [NSRect] {
+        anchors.removeAll { $0.view == nil }
+        return anchors.compactMap(\.view)
+            .filter { $0.window === window && !$0.isHiddenOrHasHiddenAncestor }
+            .map { $0.convert($0.bounds, to: nil) }
+    }
+
+    static func presentations(of client: String) -> Int {
+        presented[client] ?? 0
+    }
+}
+
+/// The anchor behind the icon's button: transparent to every click.
+private struct MCPSharedIconAnchor: NSViewRepresentable {
+    final class AnchorView: NSView {
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    }
+
+    func makeNSView(context: Context) -> AnchorView {
+        let view = AnchorView()
+        MCPSharedIconProbe.anchors.removeAll { $0.view == nil }
+        MCPSharedIconProbe.anchors.append(.init(view))
+        return view
+    }
+
+    func updateNSView(_ view: AnchorView, context: Context) {}
+}
+#endif
+
+extension View {
+    /// The icon's place, for the DEBUG click pins (a no-op outside DEBUG).
+    @ViewBuilder
+    fileprivate func sharedIconAnchorProbe() -> some View {
+        #if DEBUG
+        background(MCPSharedIconAnchor())
+        #else
+        self
+        #endif
+    }
+
+    /// The popover's presentations, for the DEBUG pins (a no-op outside DEBUG).
+    @ViewBuilder
+    fileprivate func sharedIconPopoverProbe(_ reaches: [MCPPlaceReach]) -> some View {
+        #if DEBUG
+        let name = reaches.first?.clientName ?? ""
+        onAppear {
+            MCPSharedIconProbe.presented[name, default: 0] += 1
+            MCPSharedIconProbe.up[name, default: 0] += 1
         }
+        .onDisappear { MCPSharedIconProbe.up[name, default: 0] -= 1 }
+        #else
+        self
+        #endif
     }
 }
 

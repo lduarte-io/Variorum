@@ -544,6 +544,8 @@ struct RootView: View {
         .task { await pool.start() }
         .task(id: session.wing.currentID) { await stars.start() }
         .task { await wings.track() }
+        // VX-268: who reaches each wing — the switcher's rows (⌘L, the ▾ menu).
+        .task { await wings.watchSharing() }
         .onChange(of: session.wing.currentID) { _, wing in
             shelf = ShelfViewModel(session: session, wingID: wing)
         }

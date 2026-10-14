@@ -29,6 +29,8 @@ struct BookPanelView: View {
     static let surfaceCapabilities: [CapabilityID] = [.openBookAtNote, .removeRuleTag]
         // 13n-c U4: a note row's pending-ask glyph (the book TOC's rows).
         + MCPAskGlyph.surfaceCapabilities
+        // VX-268: the ONE shared icon on a note row and its popover's doors.
+        + MCPSharedIcon.surfaceCapabilities
 
     let session: AppSession
     let postID: String
@@ -53,12 +55,24 @@ struct BookPanelView: View {
         session: AppSession, postID: String, membership: NoteMembershipModel,
         recentBookIDs: [String] = [], onClose: (() -> Void)? = nil
     ) {
+        self.init(
+            session: session, postID: postID, membership: membership,
+            model: BookPanelModel(session: session, postID: postID),
+            recentBookIDs: recentBookIDs, onClose: onClose)
+    }
+
+    /// The pins' seam (VX-281 ladder R1-5): a model the harness drives by
+    /// hand — the `PoolPostsView` / `LibraryCatalogView` shape.
+    init(
+        session: AppSession, postID: String, membership: NoteMembershipModel,
+        model: BookPanelModel, recentBookIDs: [String] = [], onClose: (() -> Void)? = nil
+    ) {
         self.session = session
         self.postID = postID
         self.membership = membership
         self.recentBookIDs = recentBookIDs
         self.onClose = onClose
-        _model = State(initialValue: BookPanelModel(session: session, postID: postID))
+        _model = State(initialValue: model)
     }
 
     private var tokens: VoiceTokens {
@@ -90,6 +104,10 @@ struct BookPanelView: View {
         // The shown book's contents, held while it shows — a switch restarts.
         .task(id: shown?.id) {
             if let id = shown?.id { await model.observe(bookID: id) }
+        }
+        // VX-268: who reaches the listed notes — held over the entry ids.
+        .task(id: model.entryIDs(for: shown?.id)) {
+            await model.holdReach(model.entryIDs(for: shown?.id))
         }
     }
 
@@ -273,6 +291,10 @@ struct BookPanelView: View {
                     .foregroundStyle(isThis ? tokens.ink : tokens.muted)
                     .lineLimit(1)
                     .truncationMode(.tail)
+                // VX-268: the ONE shared icon (nothing when nobody reaches
+                // it), then a waiting ask — the Bookcase's order. Each its
+                // own button: the row's open never fires for them.
+                MCPSharedIcon(reaches: model.reach[entry.postID] ?? [], tokens: tokens)
                 // 13n-c U4: an ask waiting on this note (its own button — the
                 // row's open never fires for it, U3's nested-icon proof).
                 MCPAskGlyph(.note(entry.postID), tokens: tokens)

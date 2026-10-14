@@ -19,13 +19,75 @@
 //  each answered by her press (Answer… opens its sheet); ⌥⌘, opens this pane
 //  scrolled to them. Nothing in the app presents an ask by itself.
 //
+//  VX-281 U1 — IN TABS (R-VX184-6, her pick: "just clicking on it, you
+//  wouldn't know without scrolling down where the command to set it up is …
+//  as a settings pane, it has a LOT of text"): the server switch and its
+//  status on top; Waiting (and Connection requests) above the tabs whenever
+//  something waits on her; then Connect · Clients · Shared with AI ·
+//  Activity — opening on Connect while no client is approved, else on
+//  Clients, her pick remembered for the session (`MCPPaneTab`,
+//  `MCPDoor.paneTab`). Every explainer is ONE line with the whole text behind
+//  an (i) (`ExplainerLine`). The setup menu is its own file
+//  (`MCPSetupMenu.swift` — the code block, VX-205).
+//
 
 import SwiftUI
 import VariorumCore
 import VariorumMCP
 
+/// **VX-281 U1 — R-VX184-6's four tabs, in her order** (Connect · Clients ·
+/// Shared with AI · Activity). Pure, so the opening rule and the search's
+/// landing are pinned without mounting anything.
+nonisolated enum MCPPaneTab: String, CaseIterable, Identifiable, Sendable {
+    case connect, clients, shared, activity
+
+    var id: String { rawValue }
+
+    /// The tab's label — Connect's own word; the other three are their
+    /// sections' titles (one name per place, said once).
+    var label: String {
+        switch self {
+        case .connect: MCPPaneCopy.connectTab
+        case .clients: MCPPaneCopy.clientsSection
+        case .shared: MCPPaneCopy.sharedSection
+        case .activity: MCPPaneCopy.activitySection
+        }
+    }
+
+    /// **Where the pane opens** (her ruling): on her pick this session when
+    /// she made one (`MCPDoor.paneTab`); else on Connect while no client is
+    /// approved — setting one up is all there is to do — and on Clients once
+    /// one is.
+    static func opening(remembered: MCPPaneTab?, approvedCount: Int) -> MCPPaneTab {
+        if let remembered { return remembered }
+        return approvedCount > 0 ? .clients : .connect
+    }
+
+    /// **The tab a Settings search finding lands on** — the open-book row
+    /// lives in Shared with AI, so the search opens it there (the catalog's
+    /// promise, `AppSettingsView.rowIDsRendered`: the search never names a
+    /// row the pane does not show); the setup's words find Connect's own row
+    /// and open it there (VX-281 ladder R1-4 — where R-VX184-6 put the
+    /// setup); "client"/"clients" find the Clients tab's own row and open it
+    /// there (ladder R2-3 — PROVISIONAL P-VX281-R2-1 (b)). nil: the row sits
+    /// above the tabs (the server switch, Waiting) or the finding is the pane
+    /// itself.
+    static func holding(findingLead lead: String) -> MCPPaneTab? {
+        switch lead {
+        case SettingsCatalog.title("mcpConnect"): .connect
+        case SettingsCatalog.title("mcpClients"): .clients
+        case SettingsCatalog.title("mcpOpenBook"): .shared
+        default: nil
+        }
+    }
+}
+
 struct MCPPane: View {
     let door: MCPDoor
+    /// VX-281 U1 (R-VX184-6): the tab on screen — opened by the rule (her
+    /// pick this session, else Connect while no client is approved, else
+    /// Clients) and remembered on the door whenever she picks.
+    @State private var tab: MCPPaneTab
     @State private var granting: MCPGrantOpening?
     @State private var full: FullList?
     /// 13n-c Stage B R1 B3 — the act whose whole member list is open (a
@@ -33,9 +95,6 @@ struct MCPPane: View {
     @State private var members: MCPSharedGroup?
     /// 13n-c U4 — the ask Waiting's Answer… opened (her press).
     @State private var answering: MCPAskOpening?
-    /// 13n-c U5 (VX-274) — the setup menu's chosen client (the pane's
-    /// view state; Claude Code first, as 13n-b shipped it).
-    @State private var setupClient: MCPSetupClient = .claudeCode
     /// 13n-c U2 — the shared rows' distinguishers (the ONE rule over the
     /// offered books — the same label the sheet's picker shows), read once per
     /// change of the shared set, never per render.
@@ -43,10 +102,19 @@ struct MCPPane: View {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
+    init(door: MCPDoor) {
+        self.door = door
+        _tab = State(initialValue: MCPPaneTab.opening(
+            remembered: door.paneTab, approvedCount: door.snapshot.approvedCount))
+    }
+
     /// P-1: the acts this surface renders (the grant sheet's confirm
     /// included), declared once and walked.
     static let surfaceCapabilities: [CapabilityID] = [
         .mcpApproveClient, .mcpDenyClient, .mcpChangeClientAccess, .mcpRevokeClient,
+        // VX-281 U1 (VX-205): `.mcpCopySetupCommand`'s door is the code
+        // block's copy icon now — the act's new face, its verb the icon's
+        // help and accessibility name (`MCPSetupCodeBlock`).
         .mcpRevokeGrant, .mcpCopySetupCommand, .mcpGrantAccess,
         // 13n-c U4: Waiting's Answer… (arrival X — the brief §5).
         .mcpOpenAsk,
@@ -84,6 +152,8 @@ struct MCPPane: View {
     }
 
     /// ⌥⌘, — scrolled to Waiting when an ask waits (each request once).
+    /// VX-281 U1: Waiting sits ABOVE the tabs (R-VX184-6), so whichever tab
+    /// is on screen, the landing is the same.
     private func landAtWaiting(_ proxy: ScrollViewProxy) {
         let request = door.settingsRequest
         guard request > door.settingsRequestScrolled else { return }
@@ -97,6 +167,12 @@ struct MCPPane: View {
         }
     }
 
+    /// **The pane, top to bottom (VX-281 U1 — R-VX184-6, her pick):** the
+    /// server switch and its status; WAITING whenever an ask waits;
+    /// CONNECTION REQUESTS whenever one waits (beside Waiting — both wait on
+    /// her answer; PROVISIONAL P-VX281-U1-1); then the tab row heading the
+    /// chosen tab — Connect · Clients · Shared with AI · Activity. Every
+    /// explainer is one line with the whole text behind its (i).
     private var form: some View {
         Form {
             Section {
@@ -107,11 +183,7 @@ struct MCPPane: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
-                Text(MCPPaneCopy.enableBlurb)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(6)
-                    .fixedSize(horizontal: false, vertical: true)
+                ExplainerLine(line: MCPPaneCopy.enableSummary, detail: MCPPaneCopy.enableBlurb)
                 // A refusal from any act lands where she is looking first
                 // (the walk's second finding: a caption at the form's foot
                 // sat below the fold).
@@ -121,8 +193,8 @@ struct MCPPane: View {
             }
             // 13n-c U4 — WAITING (arrival X; mockup §4/§5): the asks a client
             // raised past its grant, newest first, each answered by HER press
-            // (Answer… opens its sheet here). Above the requests: it is the
-            // list that holds a client's work up.
+            // (Answer… opens its sheet here). Above the tabs (R-VX184-6):
+            // whatever tab she is on, what waits on her is in sight.
             // 13n-c UX walk W-UX-8: Waiting also stays while its own caption
             // speaks — a press on its only row whose place is gone says so
             // HERE, where she pressed, not at the pane's head.
@@ -143,52 +215,21 @@ struct MCPPane: View {
                     distinguishers = await door.placeDistinguishers()
                 }
             }
+            // VX-281 U1 (PROVISIONAL P-VX281-U1-1): a connection request waits
+            // on her answer as an ask does, so it sits above the tabs too — a
+            // client set up from Connect asks to connect right here, never
+            // hidden behind Clients.
             if door.snapshot.pendingCount > 0 {
                 Section(MCPPaneCopy.requestsSection) {
                     ForEach(door.snapshot.pending) { request in requestRow(request) }
                     allRoad(door.snapshot.pendingCount, shown: door.snapshot.pending.count, .requests)
                 }
             }
-            Section(MCPPaneCopy.clientsSection) {
-                if door.snapshot.clients.isEmpty {
-                    quiet(MCPPaneCopy.noClients)
-                } else {
-                    ForEach(door.snapshot.clients) { row in clientRow(row) }
-                    allRoad(door.snapshot.clientCount, shown: door.snapshot.clients.count, .clients)
-                }
-                // 13n-c U2 — L1 (the VX-156 brief §12; mockup §11): the A-4
-                // boundary, said where clients are listed (VX-168: true-er,
-                // and longer — its own line room).
-                quiet(MCPPaneCopy.clientBoundary, lines: MCPPaneCopy.clientBoundaryLines)
-            }
-            Section(MCPPaneCopy.sharedSection) {
-                if door.snapshot.sharedGroups.isEmpty {
-                    quiet(MCPPaneCopy.nothingShared)
-                } else {
-                    // 13n-c U3 (VX-156 item 2; mockup §2): ONE ROW PER ACT —
-                    // a bulk share's notes read as "3 notes", Revoke covering
-                    // every member.
-                    ForEach(door.snapshot.sharedGroups) { group in sharedGroup(group) }
-                    allRoad(door.snapshot.sharedCount, shown: door.snapshot.sharedGroups.count, .shared)
-                }
-            }
-            .task(id: door.snapshot.sharedGroups.map(\.id)) { distinguishers = await door.placeDistinguishers() }
-            Section(MCPPaneCopy.openBookSection) {
-                Toggle(SettingsCatalog.title("mcpOpenBook"), isOn: Binding(
-                    get: { door.snapshot.openBook },
-                    set: { door.setOpenBook($0) }))
-                quiet(MCPPaneCopy.openBookDetail)
-            }
-            Section(MCPPaneCopy.activitySection) {
-                if door.snapshot.activity.isEmpty {
-                    quiet(MCPPaneCopy.noActivity)
-                } else {
-                    ForEach(door.snapshot.activity) { line in MCPActivityRowView(line: line) }
-                    allRoad(door.snapshot.activityCount, shown: door.snapshot.activity.map(\.count).reduce(0, +), .activity)
-                }
-            }
-            Section(MCPPaneCopy.connectSection) {
-                MCPSetupMenu(door: door, client: $setupClient, tokens: tokens)
+            switch tab {
+            case .connect: connectTab
+            case .clients: clientsTab
+            case .shared: sharedTab
+            case .activity: activityTab
             }
         }
         .formStyle(.grouped)
@@ -218,6 +259,110 @@ struct MCPPane: View {
                 members = nil
                 granting = opening
             }
+        }
+    }
+
+    // MARK: - The tabs (VX-281 U1 — R-VX184-6)
+
+    /// The tab row — her four, one segmented control, centred over the tab's
+    /// content as its header. A pick is remembered for the session.
+    private var tabRow: some View {
+        HStack {
+            Spacer(minLength: 0)
+            Picker(SettingsPane.mcp.title, selection: Binding(
+                get: { tab },
+                set: { picked in
+                    tab = picked
+                    door.paneTab = picked
+                })) {
+                ForEach(MCPPaneTab.allCases) { option in
+                    Text(option.label).tag(option)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            // P-8: a segmented control's labels are one line.
+            .lineLimit(1)
+            .fixedSize()
+            Spacer(minLength: 0)
+        }
+        .padding(.bottom, 4)
+    }
+
+    /// CONNECT — the setup first (her "you wouldn't know without scrolling
+    /// down where the command to set it up is"): the code block, its lines.
+    /// Its section keeps "Connect a client" (the field guide's lesson 2).
+    @ViewBuilder private var connectTab: some View {
+        Section {
+            // VX-232: the menu's choice is the door's (`MCPDoor.setupClient`).
+            MCPSetupMenu(
+                door: door,
+                client: Binding(get: { door.setupClient }, set: { door.chooseSetupClient($0) }),
+                tokens: tokens)
+        } header: {
+            VStack(alignment: .leading, spacing: 6) {
+                tabRow
+                // The catalog's row (VX-281 R1-4): the search's label and the
+                // section's are one.
+                Text(SettingsCatalog.title("mcpConnect"))
+            }
+        }
+    }
+
+    /// CLIENTS — every decided client (Change… / Deny…), its "all N ›", and
+    /// L1's one line (the A-4 boundary, whole behind its (i)).
+    @ViewBuilder private var clientsTab: some View {
+        Section {
+            if door.snapshot.clients.isEmpty {
+                quiet(MCPPaneCopy.noClients)
+            } else {
+                ForEach(door.snapshot.clients) { row in clientRow(row) }
+                allRoad(door.snapshot.clientCount, shown: door.snapshot.clients.count, .clients)
+            }
+            // 13n-c U2 — L1 (the VX-156 brief §12; mockup §11): the A-4
+            // boundary, said where clients are listed (VX-168: true-er).
+            ExplainerLine(line: MCPPaneCopy.clientBoundarySummary, detail: MCPPaneCopy.clientBoundary)
+        } header: {
+            tabRow
+        }
+    }
+
+    /// SHARED WITH AI — one row per act (Change… · Revoke), its "all N ›",
+    /// then the Open book switch (the one share-everything control).
+    @ViewBuilder private var sharedTab: some View {
+        Section {
+            if door.snapshot.sharedGroups.isEmpty {
+                quiet(MCPPaneCopy.nothingShared)
+            } else {
+                // 13n-c U3 (VX-156 item 2; mockup §2): ONE ROW PER ACT —
+                // a bulk share's notes read as "3 notes", Revoke covering
+                // every member.
+                ForEach(door.snapshot.sharedGroups) { group in sharedGroup(group) }
+                allRoad(door.snapshot.sharedCount, shown: door.snapshot.sharedGroups.count, .shared)
+            }
+        } header: {
+            tabRow
+        }
+        .task(id: door.snapshot.sharedGroups.map(\.id)) { distinguishers = await door.placeDistinguishers() }
+        Section(MCPPaneCopy.openBookSection) {
+            Toggle(SettingsCatalog.title("mcpOpenBook"), isOn: Binding(
+                get: { door.snapshot.openBook },
+                set: { door.setOpenBook($0) }))
+            quiet(MCPPaneCopy.openBookDetail)
+        }
+    }
+
+    /// ACTIVITY — the coarse log's newest lines and its "all N ›".
+    @ViewBuilder private var activityTab: some View {
+        Section {
+            if door.snapshot.activity.isEmpty {
+                quiet(MCPPaneCopy.noActivity)
+            } else {
+                ForEach(door.snapshot.activity) { line in MCPActivityRowView(line: line) }
+                allRoad(door.snapshot.activityCount, shown: door.snapshot.activity.map(\.count).reduce(0, +), .activity)
+            }
+        } header: {
+            tabRow
         }
     }
 
@@ -373,80 +518,6 @@ struct MCPWaitingRowView: View {
             Button(CapabilityRegistry.capability(.mcpOpenAsk).verb, action: answer)
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
         }
-    }
-}
-
-/// **CONNECT A CLIENT — the setup menu** (13n-c U5 — VX-274; her R-13nb-5
-/// "Copy setup command" grows a per-client menu). Top to bottom: the one
-/// direct line (a standard MCP server over stdio, one program) with its path
-/// shown whole and selectable; the menu — Claude Code · Codex · Any MCP
-/// client, all three in sight (a segmented row: a pop-up would hide two of
-/// the three, the discoverability her mandate asks for); the chosen client's
-/// one sentence; the ONE declared act, which copies the chosen text with its
-/// own receipt beneath it; and that text, selectable — VX-168: its setup key
-/// shown masked (each copy mints a fresh one), with the one line saying so.
-/// Its own view so the locked-session harness can draw it alone.
-struct MCPSetupMenu: View {
-    let door: MCPDoor
-    @Binding var client: MCPSetupClient
-    let tokens: VoiceTokens
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(MCPPaneCopy.stdioLine)
-                .font(.callout)
-                .lineLimit(3)
-                .fixedSize(horizontal: false, vertical: true)
-            Text(verbatim: MCPDoor.shimPath)
-                .font(.system(size: 11, design: .monospaced))
-                .textSelection(.enabled)
-                .lineLimit(4)
-                .fixedSize(horizontal: false, vertical: true)
-            Picker(MCPPaneCopy.connectSection, selection: $client) {
-                ForEach(MCPSetupClient.allCases) { option in
-                    Text(option.label).tag(option)
-                }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .fixedSize()
-            .padding(.top, 4)
-            Text(client.sentence)
-                .font(.callout)
-                .lineLimit(4)
-                .fixedSize(horizontal: false, vertical: true)
-            HStack {
-                Button(CapabilityRegistry.capability(.mcpCopySetupCommand).verb) {
-                    // VX-168: the copy mints its key first (a store write).
-                    Task { await door.copySetupCommand(for: client) }
-                }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                Spacer(minLength: 0)
-            }
-            if let note = door.note, note.place == .connect {
-                Text(note.text)
-                    .font(.caption.weight(.semibold))
-                    .lineLimit(4)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            // Shown WHOLE and selectable (R-13nb-5; VX-168: the key masked) — a Debug
-            // build's DerivedData path runs four lines at this width (the
-            // walk's first finding: three lines clipped it); the JSON stanza
-            // is eight lines before the path wraps.
-            Text(verbatim: door.setupText(for: client))
-                .font(.system(size: 11, design: .monospaced))
-                .textSelection(.enabled)
-                .lineLimit(16)
-                .fixedSize(horizontal: false, vertical: true)
-            // VX-168 (K2): the shown text masks the key; each copy mints one.
-            Text(MCPPaneCopy.keyLine)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(3)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        // A receipt names ONE client's next step — another choice clears it.
-        .onChange(of: client) { _, _ in door.clearConnectNote() }
     }
 }
 

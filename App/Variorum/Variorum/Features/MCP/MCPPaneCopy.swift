@@ -45,6 +45,50 @@ nonisolated enum MCPPaneCopy {
         + "client changes your text only where you grant it edit, and when it rewrites a take, the "
         + "take's words before and after are kept as commits."
 
+    // MARK: - The one-line explainers (VX-281 U1 — R-VX184-6)
+    //
+    // Her ruling: "every explainer cut to one line with the full text behind
+    // an (i) popover". Each SUMMARY below is what the pane shows (one line —
+    // `ExplainerLine`, pinned to fit); its FULL text is the constant it
+    // summarizes, unchanged, in the (i)'s popover — so every truth pin on
+    // the full texts stands. Words AS BUILT; every one is on the run record's
+    // FOR VX-234 list (her Settings wording pass). Sentence case, no "AI"
+    // (VX-272), no provider (O-4).
+
+    /// The server's line (its whole text: `enableBlurb`).
+    static let enableSummary =
+        "A local MCP server while Variorum is open \u{2014} nothing is readable until you grant it."
+    /// L1's line (its whole text: `clientBoundary`): the binding AND what it
+    /// cannot promise, in L1's own words — never promising more (the VX-156
+    /// brief §12's condition on L1).
+    static let clientBoundarySummary =
+        "A setup key tells two clients apart \u{2014} not programs running as you."
+    /// The setup key's line (its whole text: `keyLine`), her R-VX184-5 words
+    /// kept ("running it again replaces the old setup").
+    static let keySummary =
+        "Each copy carries a fresh key, shown as dots; running it again replaces the old setup."
+    /// The door's one line (its whole text: `stdioLine`), above the path.
+    static let stdioSummary = "A standard MCP server over stdio \u{2014} one program, at this path:"
+
+    /// HOW MUCH's line in the grant sheet (its whole text: `rungDetail`, the
+    /// ask sheet's lead too). Read and write new already read as one line; the
+    /// suggest and edit sentences are cut. The edit line keeps exactly the
+    /// clause VX-184's ladder round 2 brought to the as-built reach — it names
+    /// nothing a note grant can't do (W-UX-14's rule) and never "every change".
+    static func rungSummary(_ rung: MCPGrantRule.Rung, scope: MCPGrantRule.ScopeKind? = nil) -> String {
+        switch rung {
+        case .read, .writeNew: rungDetail(rung, scope: scope)
+        case .suggest: "it can add new takes and comments beside your text \u{2014} it cannot touch a word you wrote"
+        case .edit: "it can also change, archive and delete what you shared, your own words included"
+        }
+    }
+
+    /// The Connect tab's label (R-VX184-6 — her four: Connect · Clients ·
+    /// Shared with AI · Activity; the other three are their sections' own
+    /// titles). Its section keeps "Connect a client" (`connectSection`), the
+    /// field guide's lesson 2 words.
+    static let connectTab = "Connect"
+
     /// The status line beside the toggle (mockup §2).
     static func status(_ state: MCPDoor.ServerState) -> String {
         switch state {
@@ -492,8 +536,6 @@ nonisolated enum MCPPaneCopy {
         "Claude Code registers Variorum with one command. Copy it, run it in a terminal, then "
         + "start a new Claude Code session \u{2014} it adds Variorum for every folder (user scope), "
         + "replacing an earlier Variorum setup there."
-    static let copiedReceipt = "Copied. Run it in a terminal, then start a new Claude Code session."
-
     /// The name the client registers the server under: the Debug build's is
     /// its own, so a dev setup never replaces the real one in Claude Code's
     /// config (the A4 fence, extended to the client's registration).
@@ -588,9 +630,6 @@ nonisolated enum MCPPaneCopy {
         return escaped + "\""
     }
 
-    /// Copied receipts beside Claude Code's (`copiedReceipt`, unchanged).
-    static let copiedCodexReceipt = "Copied. Run it in a terminal, then start a new Codex session."
-    static let copiedJSONReceipt = "Copied. Paste it into your client's MCP settings, then restart the client."
     // O-4 SETUP COPY END
 
     // MARK: - The "all N" road (R-13n-10)
@@ -969,20 +1008,32 @@ nonisolated enum MCPSetupClient: String, CaseIterable, Identifiable, Sendable {
                 + "Codex session \u{2014} it adds Variorum for every folder (in ~/.codex/config.toml)."
         // VX-168: a client given only the path would run the shim with no
         // key — refused — so the sentence names the variable it also needs.
+        // VX-281 U1: the path now sits BELOW the code block (the setup comes
+        // first — R-VX184-6), so "the path above" became "the path below".
         case .anyClient:
             "Most MCP clients read their servers from an \u{201C}mcpServers\u{201D} list in JSON. Paste "
                 + "this into your client's MCP settings and restart it \u{2014} or give a client that "
-                + "asks for a command the path above, with the environment variable this sets."
+                + "asks for a command the path below, with the environment variable this sets."
         }
     }
 
-    var copiedReceipt: String {
+    /// VX-281 U1 (R-VX184-6): the sentence above cut to ONE line under the
+    /// code block — the whole sentence behind its (i). PROVISIONAL words
+    /// (VX-234), the receipts' own next steps.
+    var summary: String {
         switch self {
-        case .claudeCode: MCPPaneCopy.copiedReceipt
-        case .codex: MCPPaneCopy.copiedCodexReceipt
-        case .anyClient: MCPPaneCopy.copiedJSONReceipt
+        case .claudeCode: "Run it in a terminal, then start a new Claude Code session."
+        case .codex: "Run it in a terminal, then start a new Codex session."
+        case .anyClient: "Paste it into your client's MCP settings, then restart the client."
         }
     }
+
+    /// The copy's receipt: the client's one-line next step (`summary`) with
+    /// "Copied." in front — VX-281 ladder R1-8: one sentence, one constant
+    /// (they were two, word for word; the strings are byte-identical). That
+    /// a copy then says the next step on two adjacent lines is hers to word
+    /// (FOR VX-234).
+    var copiedReceipt: String { "Copied. " + summary }
     // O-4 SETUP COPY END
 }
 

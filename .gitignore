@@ -71,3 +71,4 @@ notes/plans/vx184-screens/
 
 # Code-coverage raw profiles (written when tests run with coverage on) — machine output, never committed
 *.profraw
+notes/plans/vx281-screens/
