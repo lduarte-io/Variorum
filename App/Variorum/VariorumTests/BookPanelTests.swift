@@ -203,7 +203,13 @@ struct BookPanelDeclarationTests {
         #expect(BookPanelView.contextMenuCapabilities.contains(.removeFromBook))
         // 13n-c U4 (A JUSTIFIED EDIT — a new act on the same renderer): a
         // note row's pending-ask glyph (`.mcpOpenAsk`, arrival X).
-        #expect(BookPanelView.surfaceCapabilities == [.openBookAtNote, .removeRuleTag, .mcpOpenAsk])
+        // VX-268 (A JUSTIFIED EDIT, the same class — VX-281 U2, her kickoff
+        // call "the Book Panel's rows … IN"): a note row's ONE shared icon
+        // (`.mcpShowSharing`) and its popover's Change… / Revoke.
+        #expect(BookPanelView.surfaceCapabilities == [
+            .openBookAtNote, .removeRuleTag, .mcpOpenAsk,
+            .mcpShowSharing, .mcpChangeGrant, .mcpRevokeGrant,
+        ])
         #expect(CapabilityRegistry.capability(.moveNoteUpInBook).verb == BookPanelCopy.moveNoteUpVerb)
     }
 }

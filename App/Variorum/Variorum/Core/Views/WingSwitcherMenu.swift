@@ -57,6 +57,15 @@ struct WingSwitcherMenu: View {
         .switchWing,
     ] + MCPAskGlyph.surfaceCapabilities
 
+    /// **A menu row's ONE mark** (VX-268 — pure, pinned): the pending glyph
+    /// while an ask waits on the wing, else the shared icon while an approved
+    /// client reaches it, else none. A menu row carries one image, and a
+    /// waiting ask is the one that wants her (P-VX281-U2-1).
+    static func rowMark(asking: Bool, shared: Bool) -> String? {
+        if asking { return MCPSharedIcon.pendingSymbol }
+        return shared ? MCPSharedIcon.symbol : nil
+    }
+
     /// 13i-d U5b — which of the CURRENT wing's acts the menu draws (DATA,
     /// P-1/P-2, pinned): none on Home — virtual, never renamed or deleted,
     /// and never the bulk move's source (it holds the daily Journal, R-13id-6
@@ -171,11 +180,17 @@ struct WingSwitcherMenu: View {
                     // 13n-c U4: a wing an ask waits on wears its pending glyph
                     // here too (the glyph's press road is the masthead word's,
                     // ⌘L's row and Settings ▸ MCP ▸ Waiting — a menu row's
-                    // press switches the wing, as it always has).
-                    if asks.asks(.wing(row.id)).isEmpty {
-                        Text(row.name).tag(row.id)
+                    // press switches the wing, as it always has). VX-268: a
+                    // wing an approved client reaches wears the shared icon
+                    // the same way — a MARK only (a menu row hosts no
+                    // popover; ⌘L's row is the icon's door). One image per
+                    // row: a waiting ask outranks it (P-VX281-U2-1).
+                    if let mark = Self.rowMark(
+                        asking: !asks.asks(.wing(row.id)).isEmpty,
+                        shared: !(wings.reach[row.id] ?? []).isEmpty) {
+                        Label(row.name, systemImage: mark).tag(row.id)
                     } else {
-                        Label(row.name, systemImage: MCPSharedIcon.pendingSymbol).tag(row.id)
+                        Text(row.name).tag(row.id)
                     }
                 }
             } label: {

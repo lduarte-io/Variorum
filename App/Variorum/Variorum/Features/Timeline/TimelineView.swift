@@ -63,9 +63,89 @@ final class TimelineViewModel {
     private(set) var items: [Queries.TimelineItem] = []
     private(set) var exhausted = false
     private(set) var lastError: String?
+    /// **VX-268 — who reaches each row's note now** (the ONE icon on the
+    /// Timeline's rows — the ticket names Timeline): `Queries.mcpNoteReaches`,
+    /// HELD over the near window (`reachIDs`); a row outside it keeps its last
+    /// answer until she scrolls back (the Library's own rule).
+    private(set) var reach: [String: [MCPPlaceReach]] = [:]
+
+    /// **VX-281 ladder R1-1 — the near window** (`NearWindow`, the Library's
+    /// own rule, over this list's 50-row pages): the pages around the rows on
+    /// screen. Only a page boundary moves it.
+    private(set) var nearPages: ClosedRange<Int> = 0...1
+    /// The rows on screen now, by position (the List's own reports).
+    @ObservationIgnored private var visible: Set<Int> = []
+    /// Each loaded row's position, rebuilt whenever the rows change.
+    @ObservationIgnored private var positions: [String: Int] = [:]
 
     init(session: AppSession) {
         self.session = session
+    }
+
+    /// **VX-281 ladder R1-1 — the rows whose reach the view HOLDS** (its
+    /// `.task(id:)` reads this): the near window's rows — the pages around
+    /// what is on screen, never every page she has loaded. U2 held them ALL,
+    /// and the read touches `container` (rewritten at autosave rate), so each
+    /// "Load More" grew a batch that re-ran on every keystroke's save while the
+    /// Timeline stood beside an editor — the P1 shape `AppDatabase.observe`
+    /// forbids ("a held observation's fetch must itself be viewport-shaped").
+    var reachIDs: [String] {
+        let start = nearPages.lowerBound * pageSize
+        let end = min(items.count, (nearPages.upperBound + 1) * pageSize)
+        guard start < end else { return [] }
+        return items[start..<end].map(\.postID)
+    }
+
+    /// A row came on screen (the List's own report) — moves the window when
+    /// it crosses a page.
+    func rowAppeared(_ id: String) {
+        guard let position = positions[id] else { return }
+        visible.insert(position)
+        moveWindow()
+    }
+
+    /// A row left the screen. The window never shrinks to an empty screen
+    /// between two rows' reports (the Library's rule).
+    func rowDisappeared(_ id: String) {
+        guard let position = positions[id] else { return }
+        visible.remove(position)
+        if !visible.isEmpty { moveWindow() }
+    }
+
+    private func moveWindow() {
+        let next = NearWindow.pages(visible: visible, count: items.count, pageSize: pageSize)
+        if next != nearPages { nearPages = next }
+    }
+
+    /// The rows changed (a page landed, a lens switched): re-index them and
+    /// let the window settle on the listing as it now stands.
+    private func rowsChanged() {
+        var index: [String: Int] = [:]
+        index.reserveCapacity(items.count)
+        for (position, item) in items.enumerated() { index[item.postID] = position }
+        positions = index
+        if items.isEmpty { visible = [] }
+        visible = visible.filter { $0 < items.count }
+        moveWindow()
+    }
+
+    /// VX-268 — hold the window's reach (the view's `.task(id: reachIDs)` —
+    /// a page boundary crossed, a page landed in the window or a lens
+    /// switched restarts it). Only the held rows' answers land; a row outside
+    /// keeps its last one.
+    func holdReach(_ ids: [String]) async {
+        await MCPRowReach.hold(session, { try Queries.mcpNoteReaches($0, noteIDs: ids) }) { [weak self] value in
+            self?.landReach(value, for: ids)
+        }
+    }
+
+    private func landReach(_ value: [String: [MCPPlaceReach]], for ids: [String]) {
+        var next = reach
+        for id in ids {
+            let found = value[id] ?? []
+            next[id] = found.isEmpty ? nil : found
+        }
+        if next != reach { reach = next }
     }
 
     func setLens(_ new: Lens) async {
@@ -76,6 +156,7 @@ final class TimelineViewModel {
     func reload() async {
         items = []
         exhausted = false
+        rowsChanged()
         await loadMore()
     }
 
@@ -95,6 +176,7 @@ final class TimelineViewModel {
                 }
                 exhausted = page.count < limit
                 items = page
+                rowsChanged()
             case .entryDate, .lastTouched, .lastMajorRevision:
                 let order: Queries.TimelineOrder = switch lens {
                 case .entryDate: .entryDate
@@ -108,6 +190,7 @@ final class TimelineViewModel {
                 }
                 exhausted = page.count < pageSize
                 items += page
+                rowsChanged()
             }
             lastError = nil
         } catch {
@@ -117,6 +200,10 @@ final class TimelineViewModel {
 }
 
 struct TimelineView: View {
+    /// VX-268 (P-1's declared ⇔ rendered walk): a row's ONE shared icon and
+    /// its popover's Change… / Revoke.
+    static let surfaceCapabilities: [CapabilityID] = MCPSharedIcon.surfaceCapabilities
+
     let session: AppSession
     var openPost: (String) -> Void
     /// "now", for the relative rule (the `CatalogRowStamp` convention: a
@@ -137,10 +224,19 @@ struct TimelineView: View {
     }
 
     init(session: AppSession, now: Date = Date(), openPost: @escaping (String) -> Void) {
+        self.init(session: session, model: TimelineViewModel(session: session), now: now, openPost: openPost)
+    }
+
+    /// The pins' seam (VX-281 ladder R1-1/R1-5): a model the harness drives
+    /// by hand — the `LibraryCatalogView` shape.
+    init(
+        session: AppSession, model: TimelineViewModel, now: Date = Date(),
+        openPost: @escaping (String) -> Void
+    ) {
         self.session = session
         self.now = now
         self.openPost = openPost
-        _model = State(initialValue: TimelineViewModel(session: session))
+        _model = State(initialValue: model)
     }
 
     var body: some View {
@@ -164,6 +260,10 @@ struct TimelineView: View {
                         row(item)
                     }
                     .buttonStyle(.plain)
+                    // VX-281 R1-1: the rows on screen move the reach window
+                    // (the Library's near window, `NearWindow`).
+                    .onAppear { model.rowAppeared(item.postID) }
+                    .onDisappear { model.rowDisappeared(item.postID) }
                 }
                 if !model.exhausted {
                     Button(tokens.chromeLabel("Load More")) {
@@ -184,6 +284,9 @@ struct TimelineView: View {
         }
         .background(tokens.surface)
         .task { await model.reload() }
+        // VX-268: who reaches the rows — held over the near window (VX-281
+        // R1-1), re-aimed only when the window crosses a page.
+        .task(id: model.reachIDs) { await model.holdReach(model.reachIDs) }
     }
 
     /// **A timeline row, in the voice's own type** (row 54): the same
@@ -203,6 +306,9 @@ struct TimelineView: View {
                 .font(tokens.body)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
+            // VX-268: the ONE shared icon (nothing when nobody reaches the
+            // note) — its own button: the row's open never fires for it.
+            MCPSharedIcon(reaches: model.reach[item.postID] ?? [], tokens: tokens)
             // R3-2's rule, applied by hand because this row holds one hit
             // and not a catalog's: under the entry-date lens the trailing
             // stamp already SAYS the stated day, so the row never prints

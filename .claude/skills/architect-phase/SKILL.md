@@ -283,6 +283,12 @@ session with trace + revert-verified pins; round 2 re-reviews (fresh
 reviewer); new BLOCKER/MAJOR ⇒ round 3; hard cap three rounds;
 disputes adjudicated by you against the canonical docs — the spec
 outranks both agents; every finding gets a written disposition.
+Cross-model (a Fable reviewer, an Opus implementer): the reviewer makes
+the final call on each finding and the IMPLEMENTER applies the confirmed
+fixes (red-on-old pins), re-checked by the next fresh reviewer; a final
+round's fixes get your line-by-line check; the reviewer writes a fix
+itself only for `Sync/` lines or a finding it marks FINDER-FIXES (her
+ruling 2026-10-13 — /run-phase rule 4 carries the full flow).
 
 ## Environment (bind by reference + the invariants)
 

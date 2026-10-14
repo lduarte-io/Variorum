@@ -41,14 +41,10 @@ extension LibraryCatalogModel {
     /// **The near window** (pure): the pages holding the visible rows, one
     /// page beyond on each side — a page boundary is the only thing that moves
     /// it. Nothing visible yet (a fresh listing) is the first page and the next.
+    /// The rule itself is `NearWindow`'s (the shared home since VX-281's
+    /// ladder R1-1 — the Timeline's reach hold moves by it too).
     nonisolated static func window(visible: Set<Int>, count: Int) -> ClosedRange<Int> {
-        let lastPage = max(0, (count - 1) / pageSize)
-        guard let low = visible.min(), let high = visible.max() else {
-            return 0...min(1, lastPage)
-        }
-        let from = max(0, low / pageSize - 1)
-        let to = min(lastPage, high / pageSize + 1)
-        return from...max(from, to)
+        NearWindow.pages(visible: visible, count: count, pageSize: pageSize)
     }
 
     /// Rebuild the position index after the listing changed (a read; a page).
@@ -177,17 +173,43 @@ extension LibraryCatalogModel {
 
     // MARK: - The held facts (the near window's ownership badges)
 
+    /// **VX-281 ladder R2-1 — the modes that DRAW the Library's note rows**
+    /// (pure): List and Cards, and the answer sheet either one shows when the
+    /// field asks. The Timeline draws none of them — it is its own view,
+    /// holding its own window (`TimelineViewModel.reachIDs`). Exhaustive, so
+    /// a mode added later is a decision here, never a silent hold.
+    nonisolated static func drawsNoteRows(_ mode: Mode) -> Bool {
+        switch mode {
+        case .list, .notes: true
+        case .timeline: false
+        }
+    }
+
     /// Observe the owned-by facts of the near window's notes — and nothing
     /// else: re-aimed only when the window's ids change (a page boundary, a
     /// new page in the window, a re-read), so the held region stays a few
     /// pages however deep she scrolls.
+    ///
+    /// **Only while the mode draws note rows** (VX-281 ladder R2-1). The view
+    /// stays MOUNTED under the Timeline (its body swaps its content), so its
+    /// appear/disappear never ended the holds there — and with live reach the
+    /// reach batch reads `container`, re-running at autosave rate over rows
+    /// drawn nowhere. Every road in passes this gate: a read, a landed page,
+    /// the window moving, and the mode changing (`modeChanged()`, which
+    /// re-aims — entering the Timeline ends both holds, leaving re-holds them).
     func holdNearFacts() {
+        guard Self.drawsNoteRows(mode) else {
+            stopHoldingFacts()
+            return
+        }
         let ids = nearNoteIDs
         guard ids != heldNoteIDs || ownershipHold == nil else { return }
         heldNoteIDs = ids
         ownershipHold?.cancel()
+        reachHold?.cancel()
         guard !ids.isEmpty else {
             ownershipHold = nil
+            reachHold = nil
             return
         }
         let session = session
@@ -203,12 +225,21 @@ extension LibraryCatalogModel {
                 // A failed read draws no new badge — silence, never a wrong mark.
             }
         }
+        // VX-268: who reaches the same notes — the ONE shared icon's reach,
+        // held over the SAME window (∝ a few pages, never the listing).
+        reachHold = Task { @MainActor [weak self] in
+            await MCPRowReach.hold(session, { try Queries.mcpNoteReaches($0, noteIDs: ids) }) { value in
+                self?.landReach(value, for: ids)
+            }
+        }
     }
 
-    /// The listing left the screen: the held observation ends with it.
+    /// The listing left the screen: the held observations end with it.
     func stopHoldingFacts() {
         ownershipHold?.cancel()
         ownershipHold = nil
+        reachHold?.cancel()
+        reachHold = nil
         heldNoteIDs = []
     }
 
