@@ -538,23 +538,15 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   18 suites green in Debug; 55 in 17 green under `-c release` (the DEBUG-only mutation suite compiled out) — run on a
   scratch copy, because the core test target does not build under `-c release` on main today (a pre-existing gap, the
   record's first line). The full core suite green in Debug.
-- U2 — assess, roads, route finder, catalog, retention: **IN-PROGRESS** (Opus implementer, 2026-10-14; reading done —
-  CLAUDE.md and canon, the resiliency protocol, the design whole, this plan whole, SyncSpec §3, pre-13x §1–§7 and §14,
-  the Apple facts, the listed core and app files). Pieces, each its own commit: (a) the catalog — the one name parser
-  (the union of `StoreBackup.date(fromBackupURL:)`/`BackupRestoreCandidates.backupDate`, `LibraryClassifier`'s pair
-  rules, and `LibraryAdoption.adoptionStamp`/`LibraryAsideCopies`' stamp folders) and attribution to library + Mac —
-  DONE (this piece's commit; `CatalogNameTests` + `CatalogAttributionTests`, 7 tests green, filtered); (b) retention per library per Mac — DONE (this piece's commit, with U2's fifteen guards declared in `ProtectionGuards` — each proven by its piece's DEBUG mutation pin; `RetentionTests` + `RetentionGuardMutationTests`, 6 tests green, filtered); (c) the route finder, the *Opens with* line, the
-  finder without the old shared key, the retirement's list, the anchor sentences — DONE (this piece's commit;
-  `RouteFinderRoadTests` + `AnchorSentenceTests` + `RetirementRoutesTests`, 12 tests green, filtered — every named
-  opener's witness road WALKED with the real secret of its day; with a recorded model refinement:
-  `CastleAnchor.directFingerprints`, and the catalog's aside key files carry their folder's day and listed dates); (d) `assess`: facts,
-  the mode and account verdicts, the vault's three states, the four situations, the Touch ID road — DONE (WIP
-  `570583d9`, tests in this piece's commit); (e) `assess`: repairs with §3.3's guards, acts owed, doors with reasons,
-  the old shared key's checks and the move's subjects, the open rule — DONE (this piece's commit; the seven
-  `Assess…Tests` suites + `OpenRuleTests`, 50 tests green, filtered); (f) U2's
-  `ProtectionGuards` and their DEBUG mutation tests — DONE (this piece's commit: `AssessGuardsOnTests` +
-  `AssessGuardMutationTests`, 15 tests green, filtered — each of the fourteen assess/open-rule guards red with its
-  switch off; retention's fifteenth beside its suite); both configurations' runs and the record — IN-PROGRESS (PENDING).
+- U2 — assess, roads, route finder, catalog, retention: **DONE** (2026-10-14; the record is §8's U2 record). Pieces:
+  (a) the catalog — the one name parser and attribution — `84ed6d5f`; (b) retention per library per Mac, and U2's
+  guards declared — `93d5ab48`; (c) the route finder, the *Opens with* line, the finder without the old shared key, the
+  retirement's routes, the anchor sentences (with the recorded `CastleAnchor.directFingerprints` refinement) —
+  `5ae90bff`; (d/e) `assess` and the open rule — WIP `570583d9`, tests `bc11f39c`, self-review `b1e07a80`, the key
+  file's agreement with its mirror `5f96dc32`; (f) the guards' DEBUG mutation pins — `4e576689`; the record — this
+  commit. The U1+U2 suites: 154 tests in 35 suites green in Debug; 134 in 32 green under `swift test -c release` (the
+  three DEBUG-only mutation suites compiled out). The full core suite in Debug: one perf-timing issue under a load
+  average of ~16–20 (other sessions on the Pro), green twice in isolation — the record's first line.
 - U3 — the executor and the acts: **NOT-STARTED.**
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
 - The go/no-go record: **NOT-STARTED.**
@@ -706,6 +698,148 @@ refinement): `ProtectionFixtures`, `NamesAndSealTests` (9), `RecordModelTests` (
   the run's PR. The U1 record's "owner: the orchestrator" line is resolved here.
 - P-U1-1's phase-2 leaves (the sandboxed reads, the GeneratedUID lifecycle checks) ride §11's closeout into the
   vx-306 plan.
+
+### U2 RECORD — assess, roads, the route finder, the catalog, retention (Opus implementer, 2026-10-14; one session, no deaths)
+
+**Not done, first:** (1) the full core suite's Debug run met ONE issue — `PerfBenchmarkTests`'
+`timelinePageIsFlatOrUnderBudgetInCorpusSize` (a P1 timing bound on the timeline query, nothing of Protection's) under
+a load average of ~16–20 from other sessions on the Pro; re-run alone it passed twice (`✔ Test run with 1 test in 1
+suite passed after 21.060 seconds.` / `…20.509 seconds.`). Recorded, not chased: a timing bound under load, outside
+U2's surface. (2) The QUESTIONS entries for the PROVISIONAL calls below wait for the closeout, as U1's did (CLAUDE.md
+keeps `notes/QUESTIONS.md` to merge moments on latest main; §11 lists them). (3) The file swap by a login-password
+holder — a memory item sealed under a key the open can't reach, beside an older library file — is not modelled by
+`assess` (it reads only VERIFIED homes); hand-forward to U3/U4 (its fixed scenario).
+
+**What shipped** — `Sources/VariorumCore/Protection/Assess/` (pure: plain values in, plain values out; nothing reads
+a Keychain, a file or the network, and nothing calls a writing leaf):
+- `CatalogNames.swift` — THE ONE NAME PARSER: the union of today's three — the backup-name parser
+  (`StoreBackup.date(fromBackupURL:)`, restated in core as `BackupRestoreCandidates.backupDate`: the stamp exact, the
+  tail empty or `-` + eight lowercase hex — and only those, 18k C7), the pair rules (`LibraryClassifier`'s
+  `<snapshot>.keys.json`, `StoreKeyEnvelope`'s `variorum-keys-<fp16>.json` / `variorum-keys.json`, both set-aside
+  writers' `.stale-<epoch>.json`) and the stamp-folder qualifier (`LibraryAdoption.adoptionStamp` /
+  `LibraryAsideCopies`: `Previous Libraries/<stamp>/`, `variorum-adopt-safety-<stamp>/`) — plus the slot's
+  `variorum.sqlite` and sidecars, `RESTORE.md`, `md-exports/`, the hand-off folder and this build's own names. The
+  classifier's looser `isBackupNamed` is a routing hint for a PICKED file, never an acceptance of the name as the app's.
+- `Catalog.swift` — the listing (two roots: the container's store folder, the far folder's `Variorum/`; key files'
+  bytes and dates) → copies (backup · legacy flat · previous library · adoption safety copy) and key files (live ·
+  beside the library · set aside · snapshot pair · folder file · this Mac's own key file for a library · aside copy),
+  each copy attributed to its LIBRARY from its serving key file and its MAC from its `Backups/<library8>/<mac8>/`
+  subfolder (a container copy outside one is this Mac's by place; a far folder's is unattributed); today's pair rules
+  restated for the serving key file; names no build writes listed as foreign, never touched.
+- `Retention.swift` — per library per Mac (VX-302): only this Mac's copies of this library, the container's newest 14,
+  the far folder's 14 dailies + 4 weeklies (today's `BackupRetention.keep` restated); legacy flat files listed, never
+  pruned.
+- `RouteFinder.swift` — every road to a key (custody, every catalogued key file's locks, the history, every anchor a
+  catalogued file carries — a follower's copied locks and outgoing-key lock included — Apple wraps readable here, the
+  current master proven by §3.5a's words copy), each named opener with a WITNESS road of exact locks; the *Opens with*
+  line as typed reasons naming a secret by its provable day (`SecretDay`: `.current`, `.of(day)` — an anchor's own
+  lock, typed and verified at its act — and `.heldHere(until:)` — a frozen file's or a copied lock: what this Mac held
+  then); an unpinned copy names only what opens every candidate; `withoutOldSharedKey()`; the retirement's route-based
+  half (`retirementRoutes`: still needs it · would stop opening · an Apple key alone · other Macs' key files); the
+  anchor sentence of every door that replaces a secret.
+- `Facts.swift`, `Assessment.swift`, `Assess.swift` — `assess(_:guards:)`: the launch verdict; the mode confirmed or
+  not (the record; the legacy reader for a library with no record; a hint only before unlock); §3.8's four situations;
+  §3.9's vault in three states (the leave's id gating its completion, Castle-kind sync keys through the window, the
+  unfinished leave's finish door, a follower's hold); §3.10's Touch ID road as data (the button whenever an item for the
+  current key exists and a finger is enrolled; the press saying why; the quiet line; the changed line after a failed
+  press; the re-arm question only after a press failed on an item that exists; a Touch ID choice with no item recording
+  Always ask quietly); §3.3's repairs with their guards and preconditions (verified before any delete), faults, acts
+  owed (the migration, the follow, confirming the mode — a key change when the current key wasn't born in it — corner
+  45's notice, the fault's re-key, Re-link's library arm, the old shared key's one ask, the re-arm question); every door
+  with its reason or its spec (what it asks for, whether it re-keys, which own Apple keys it retires, its words); the old
+  shared key's checks at the door and the move's subjects.
+- `OpenRule.swift` — §3.7's verdicts: ours by the family tree (never the history) taking the library's current mode
+  (never lowered) and key, flagged when foreign; a Castle copy not in the tree raising a Standard library; a different
+  library landing under a fresh key with one secret then the other (none through a readable Apple key); a copy with no
+  record read by today's rule; plaintext exports; every copy's act in flight cleared.
+- `ProtectionGuards.swift` — U2's fifteen guards (off-switches `#if DEBUG` only): `pruneOwnCopiesOnly`,
+  `noRepairMakesTouchID`, `noRearmWithoutItem`, `ownLineByFamilyTree`, `neverLowerOnOpen`, `doorTimeVaultCheck`,
+  `deleteOnSightByIDOnly`, `everyOwnKeyRetiredAtCastle`, `leaveIDGatesCompletion`, `castleKindCustodyThroughLeave`,
+  `giftsOnlyForThisMacsCopies`, `unconfirmedModeNoCustodyRepair`, `standardRecordNoDestructiveRepair`,
+  `freshVaultBeforeAppleWrite`, `rekeyAtEveryCrossing`.
+- **A recorded model refinement (U1's value, additive):** `CastleAnchor.directFingerprints` — the keys opening THIS
+  anchor yields directly (the outgoing key and its history). A kept anchor sealed inside a later one still needs its own
+  day's secrets, so the route finder must not name the outer anchor's locks for keys only the inner holds (promise 9);
+  `heldFingerprints` keeps its meaning. No anchor exists on disk yet, so the field is non-optional. The catalog's key
+  files carry `frozenAt` (an aside folder's stamp included) and the listing's `modifiedAt` (today's newest-modified rule).
+- **Shape refinements, recorded:** §2's `Roads` lives in `RouteFinder.swift` (`Route`, `RouteStep`, `Opener`) and
+  `Assessment.swift` (`LobbyRoads`); the open rule is its own file; the catalog's parser is its own file.
+
+**Tests** — `Tests/VariorumCoreTests/Protection/`: `CatalogTests` (`CatalogNameTests` 3, `CatalogAttributionTests` 4),
+`RetentionTests` (5 + `RetentionGuardMutationTests` 1, DEBUG), `RouteFinderTests` (`RouteFinderRoadTests` 7,
+`AnchorSentenceTests` 3, `RetirementRoutesTests` 1 — with `walk`, which opens every named opener's witness road with
+the real secret of its day), `AssessTests` (`AssessAccountTests` 5, `AssessVaultTests` 8, `AssessModeTests` 7,
+`AssessTouchIDTests` 6, `AssessRepairTests` 13, `AssessDoorTests` 5, `AssessOldSharedKeyTests` 3), `OpenRuleTests` 6,
+`AssessGuardTests` (`AssessGuardsOnTests` 1, `AssessGuardMutationTests` 14, DEBUG), `AssessFixtures` (`AWorld`). Every
+bullet of §4's test list has its test (the suite and test names read as the plan's sentences).
+- Debug, U1+U2 filtered (the 35 protection suites): `✔ Test run with 154 tests in 35 suites passed after 0.227 seconds.`
+  (U2: 94 tests in 17 suites.)
+- Release (`swift test -c release --filter …`, on THIS tree — VX-345 holds): `✔ Test run with 134 tests in 32 suites
+  passed after 0.135 seconds.` (the three DEBUG-only mutation suites compiled out: 154 − 20, 35 − 3). Wall 515 s, the
+  release build included.
+- Full core suite, Debug (`swift test`, 308 s wall): `✘ Test run with 3014 tests in 365 suites failed after 192.845
+  seconds with 1 issue.` (the perf flake above) · `✔ Test run with 240 tests in 51 suites passed after 22.135
+  seconds.` · `✔ Test run with 40 tests in 6 suites passed after 49.449 seconds.`
+- The guards are live: each of U2's fifteen, switched off, lets its bug through (`AssessGuardMutationTests`,
+  `RetentionGuardMutationTests`).
+
+**PROVISIONAL calls (for QUESTIONS at the closeout):**
+- **P-U2-1 — a Touch ID item while the library is in Standard.** Chosen: (a) reported (`Fault.touchIDItemInStandard`),
+  never deleted by a repair — §3.3's "no repair deletes anything … on a Standard record's word alone" outranks the
+  Standard list's "No Touch ID item for a Standard key"; it goes at the next act a person presses. Others: (b) delete it
+  when corroborated beyond the record (its key a Standard key in the memory's sealed tree too); (c) delete it as a
+  repair (the literal list — unsafe under a file swap).
+- **P-U2-2 — a silent sync-keys item for the library's account while its keys reach a Castle-era key.** Chosen: (a)
+  reported (`Fault.silentSyncKeysWhileCastleWay`); the acts re-file sync keys (phase 3). Others: (b) a Castle repair
+  deleting it once the Castle-way item or the session holds the keys; (c) read §3.3's "no silent item for any key the
+  library has had" as covering sync keys.
+- **P-U2-3 — "here" in the retirement sheet's second item.** Chosen: (a) copies attributed to this Mac (its container,
+  its `<mac8>` subfolders) and a far folder's unattributed legacy copy, which the catalog can't say is another Mac's;
+  another Mac's attributed copies never. Others: (b) this Mac's attributed copies only; (c) every copy in the catalog.
+- **P-U2-4 — the door stop while signed out.** Chosen: (a) the record's account stops Use Castle only when this device
+  last KNEW its vault on the old key (an account-purpose Apple key record in its section with the old key's id); unknown
+  ⇒ listed as an account it can't check, not a stop. Others: (b) unknown stops too (blocks every signed-out Use Castle on
+  a once-synced library); (c) never stop while signed out (list only).
+- **P-U2-5 — a frozen key file's lock names "what this Mac held then".** Chosen: (a) a backup pair's or an aside copy's
+  passphrase or words lock reads `.heldHere(until: day)`; `.of(day)` ("you had on 12 October") is earned only by an
+  anchor's own locks, typed and verified at the act; `.current` only when provable. Others: (b) name every frozen lock
+  by its day (untrue on a device whose passphrase changed elsewhere — §8's residue); (c) name no days.
+- **P-U2-6 — "the secret you're replacing" in the anchor sentences.** Chosen: (a) provable only for the passphrase (the
+  anchor's lock under the live file's descriptor) — `AnchorSentence.replacedSecretOpensIt` true or nil — and where it
+  isn't provable the sentence names the day's secret ("the words you had on 12 October", always true). Others: (b) say
+  "you're replacing" always (untrue after a second words change); (c) add a words-era marker to key files (a format
+  change).
+- **P-U2-7 — the key file and its sealed mirror agree, never by shrinking.** Chosen: (a) a missing live key file, or one
+  that lost a passphrase, words or master lock, a history entry or the anchor, is written back from the mirror; the
+  mirror follows a file a key door changed; an Apple wrap is never re-added by a repair (they leave legitimately).
+  Others: (b) the mirror always wins (undoes an interrupted key door's write the wrong way); (c) the file always wins (a
+  deleted wrap loses roads for good).
+- **P-U2-8 — Re-link's account door is offered** when the account's vault key isn't readable here OR the vault is still
+  on the old shared key (§3.5 point 4 names Re-link as that account's way through). Other: (b) only when unreadable.
+
+**Commits:** `bbd3f406` (LIVE STATUS opened) · `84ed6d5f` (a) · `93d5ab48` (b) · `5ae90bff` (c) · `570583d9` (d/e WIP) ·
+`bc11f39c` (d/e tests) · `b1e07a80` (self-review) · `4e576689` (f) · `5f96dc32` (the mirror) · the record's own commit.
+Each pushed to `origin/vx-305-castle-core` as it landed.
+
+**Machinery notes:**
+- "The three existing parsers" read as: the backup-name parser (`StoreBackup.date(fromBackupURL:)` and its core
+  restatement `BackupRestoreCandidates.backupDate`), `LibraryClassifier`'s pair rules with `StoreKeyEnvelope`'s
+  key-file names, and `LibraryAdoption.adoptionStamp` / `LibraryAsideCopies`. `CatalogNameTests` pins agreement with
+  each on a corpus of the app's names and adversarial ones.
+- A lock-time copy and a backup share today's name: the catalog lists a lock-time copy as a legacy flat snapshot; the
+  open rule clears every copy's act in flight, so the difference changes nothing here (phase 5 names it from the file's
+  own key).
+- `assess` reads only VERIFIED homes: the leaf verifies the record's device section, the memory and the plan with the
+  key in hand and passes values; a home that failed its seal arrives as nil.
+- The route finder never opens anything; `walk` (RouteFinderTests) opens each witness road with real secrets — U4's
+  promise-9 checker can reuse it. Swift Testing's `#require` can't nest (a recursive-expansion error), hence its `need`.
+- Hand-forwards: **U3** — every `Repair`'s precondition is the executor's to VERIFY before a delete;
+  `restoreKeyFileFromMirror`; `OwedAct.migrate`; the `DoorSpec` fields (requirements, re-keys, the own Apple keys to
+  retire, the old shared key's retirement, Replace All Keys' re-link first); the move's subjects (`MovePlan`);
+  `AssessRules.retireOldSharedKeyNudge`; and the invariant the route finder's `.current` passphrase reading rests on —
+  a NEW passphrase always gets a fresh KDF descriptor (`PassphraseKey.derive`'s default), while a re-key and an anchor
+  reuse the door's derived `PassphraseKey`. **U4** — `AWorld` and `walk`; the file-swap scenario (above).
+- The one Sonnet lookup was not used.
 
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions)
 
