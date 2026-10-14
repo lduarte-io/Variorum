@@ -7,14 +7,27 @@
 //  Library's quick-entry bar, and the quick-note pad). The binding record
 //  is `notes/plans/fixes/vx-282-editor-notes-fixes.md` § U4.
 //
-//  VX-193 — THE UNDO DESYNC. AppKit sends no `textDidChange` for an undo or
-//  a redo (measured — VX-179 U3-g on the real box, and again at U4 with a
-//  windowless probe), so after ⌘Z the box showed one text while the binding
-//  — the thing both hosts FILE — still held the words she had undone, and ⏎
-//  filed them. Its sibling, same mechanism class (VX-179 U3-g's first half):
-//  the box's typing history lived in the WINDOW's undo manager and survived
-//  a programmatic clear, so ⌘Z after an empty filing replayed ranges of the
-//  old text against the new one (`NSRangeException`, measured).
+//  VX-193 — LEAD: THE SIBLING, the defect that is real in use. The box's
+//  typing history lived in the WINDOW's undo manager and survived a
+//  programmatic clear, so ⌘Z after an EMPTY filing (three spaces and ⏎ — the
+//  box clears and keeps the caret) replayed ranges of the old text against
+//  the new one: `NSRangeException` from `NSUndoTyping undoRedo:`, reproduced
+//  in use on the pre-fix build at the U4 walk (AppKit caught it; the box's
+//  undo was dead afterwards). Fixed: the box owns its history and a
+//  programmatic replacement ends it.
+//
+//  VX-193 — THE TICKET'S HEADLINE (⌘Z leaves the binding stale, ⏎ files the
+//  undone words): NOT REPRODUCED IN USE. On the pre-fix build in the running
+//  app a real ⌘Z / ⇧⌘Z kept the binding in step (the U4 walk). The desync
+//  exists only where undo is driven OUTSIDE the live event road — this test
+//  host (whose windows are never key: `WindowsTests`' header), VX-179's
+//  offscreen probe, U4's windowless probes — where AppKit posts no
+//  `textDidChange` for an undo or a redo (measured; why the live road differs
+//  did not converge headlessly). The box keeps its did-undo/did-redo re-sync
+//  as a BELT — VX-179's comments panel carries the same pair on the same
+//  basis — and the cells below that drive undo through `undo:`/`redo:` here
+//  are GUARDS OF THAT BELT on the programmatic-undo road, not pins of a
+//  symptom she can meet.
 //
 //  VX-112 — THE FOCUS RE-GRAB. The box's initial focus request ("asked
 //  ONCE, on arrival") was never cleared, so a box made with one re-claimed
@@ -107,18 +120,30 @@ private enum CaptureRig {
         content.addSubview(host)
     }
 
-    /// Her typing, one undo group per call: the box takes the words through
-    /// the real text view, and coalescing is broken after them so the next
-    /// call is its own ⌘Z step (a caret move does the same for her).
+    /// Typing, ONE UNDO STEP PER CALL — made explicit. This host dispatches no
+    /// events, so an undo manager's by-event groups never close between two
+    /// calls and both chunks would undo together (the u4 window's W1/W2 found
+    /// exactly that: ⌘Z emptied the box). Each chunk is its own group here,
+    /// opened and closed around the real `insertText`, with by-event grouping
+    /// restored at once (probed headlessly on the box's own manager and on a
+    /// window's: two steps, the redo restoring the first chunk), and typing
+    /// coalescing broken after it so the next chunk is a new typing action.
     static func type(_ text: String, into box: NSTextView, window: NSWindow) async {
+        let history = box.undoManager
+        history?.groupsByEvent = false
+        history?.beginUndoGrouping()
         box.insertText(text, replacementRange: box.selectedRange())
-        await settle(window, turns: 3)
+        history?.endUndoGrouping()
+        history?.groupsByEvent = true
         box.breakUndoCoalescing()
+        await settle(window, turns: 3)
     }
 
-    /// ⌘Z and ⇧⌘Z by their own road: the action travels up the responder
-    /// chain from the first responder to the window, which undoes through
-    /// the first responder's undo manager.
+    /// ⌘Z and ⇧⌘Z by the PROGRAMMATIC road: the action sent up the responder
+    /// chain from the box to the window, which undoes through the first
+    /// responder's undo manager. Not the live keyboard road (this host has no
+    /// key window — `WindowsTests`' header) — the road on which AppKit posts
+    /// no `textDidChange`, i.e. the belt's road.
     static func undo(_ box: NSTextView, window: NSWindow) async {
         _ = box.tryToPerform(Selector(("undo:")), with: nil)
         await settle(window, turns: 3)
@@ -192,43 +217,19 @@ private func withCaptureWorld<T>(
     }
 }
 
-// MARK: - VX-193, the bare box
+// MARK: - VX-193's sibling — the box owns its history (the defect real in use)
 
 @MainActor
-@Suite("VX-193 — the capture box and its binding never disagree after ⌘Z", .serialized)
-struct CaptureUndoSyncTests {
-    /// **RED ON OLD** (each binding expectation): ⌘Z and ⇧⌘Z move the box's
-    /// text without `textDidChange`, so the binding stayed on the last TYPED
-    /// text — the undone words, and after undo-undo-redo still the words she
-    /// had taken back.
-    @Test func anUndoAndARedoReachTheBinding() async throws {
-        let (window, box, _, rig) = try await mountBox(focusRequest: 0)
-        defer { CaptureRig.close(window) }
-        window.makeFirstResponder(box)
-        await CaptureRig.type("first thought", into: box, window: window)
-        await CaptureRig.type(" and more", into: box, window: window)
-        #expect(rig.text == "first thought and more", "typing reaches the binding (as ever)")
-
-        await CaptureRig.undo(box, window: window)
-        #expect(box.string == "first thought", "non-vacuity: ⌘Z undid her last words")
-        #expect(rig.text == box.string, "the binding follows the undo")
-
-        await CaptureRig.undo(box, window: window)
-        #expect(box.string.isEmpty)
-        #expect(rig.text == box.string, "…all the way back to empty")
-
-        await CaptureRig.redo(box, window: window)
-        #expect(box.string == "first thought", "non-vacuity: ⇧⌘Z brought her first words back")
-        #expect(rig.text == box.string, "…and the binding follows the redo")
-    }
-
-    /// **RED ON OLD** (the two `#require`/`#expect` on the history — the
-    /// `#require` stops the old tree BEFORE its ⌘Z, which raised
-    /// `NSRangeException` there): the host clears the box programmatically
-    /// (an EMPTY filing — a whitespace-only or tokens-only capture keeps the
-    /// box on screen with the caret in it), and the box's history ends with
-    /// the words it described. The history is the box's OWN, never the
-    /// window's (P-VX179-U3-4, carried: undo is per area).
+@Suite("VX-193's sibling — the capture box owns its undo history, and a programmatic clear ends it",
+       .serialized)
+struct CaptureUndoHistoryTests {
+    /// **RED ON OLD** (the identity cell and the `#require` — which stops the
+    /// old tree BEFORE its ⌘Z, the one that raised `NSRangeException` there):
+    /// the host clears the box programmatically (an EMPTY filing — a
+    /// whitespace-only or tokens-only capture keeps the box on screen with the
+    /// caret in it), and the box's history ends with the words it described.
+    /// The history is the box's OWN, never the window's (P-VX179-U3-4,
+    /// carried: undo is per area — P-U4-1).
     @Test func aProgrammaticClearEndsTheBoxsOwnHistory() async throws {
         let (window, box, _, rig) = try await mountBox(focusRequest: 0)
         defer { CaptureRig.close(window) }
@@ -247,118 +248,19 @@ struct CaptureUndoSyncTests {
         await CaptureRig.undo(box, window: window)
         #expect(box.string.isEmpty && rig.text.isEmpty, "⌘Z after the clear changes nothing")
 
-        // The history starts over with her next words, and stays in sync.
+        // The history starts over with her next words.
         await CaptureRig.type("new", into: box, window: window)
         await CaptureRig.undo(box, window: window)
-        #expect(box.string.isEmpty && rig.text.isEmpty, "the new words undo alone, binding and all")
-    }
-}
-
-// MARK: - VX-193, in both hosts (what ⏎ FILES)
-
-@MainActor
-@Suite("VX-193 — ⏎ files what the capture box shows after ⌘Z, in both hosts", .serialized)
-struct CaptureHostsUndoFilingTests {
-    /// The two gestures her report and the brief name: ⌘Z, and ⌘Z ⌘Z ⇧⌘Z.
-    /// Either way the box shows the FIRST words, and that is what must file.
-    enum Gesture: String, CaseIterable, Sendable {
-        case undo
-        case undoTwiceThenRedo
-    }
-
-    private static let first = "alpha"
-    private static let second = " beta"
-
-    private func perform(_ gesture: Gesture, on box: NSTextView, window: NSWindow) async {
-        await CaptureRig.type(Self.first, into: box, window: window)
-        await CaptureRig.type(Self.second, into: box, window: window)
-        switch gesture {
-        case .undo:
-            await CaptureRig.undo(box, window: window)
-        case .undoTwiceThenRedo:
-            await CaptureRig.undo(box, window: window)
-            await CaptureRig.undo(box, window: window)
-            await CaptureRig.redo(box, window: window)
-        }
-    }
-
-    private func blocks(_ db: AppDatabase, _ postID: String) async throws -> [String] {
-        try await db.read { try Queries.renderPost($0, containerID: postID) }
-            .compactMap(\.text)
-    }
-
-    private func livePostIDs(_ db: AppDatabase) async throws -> [String] {
-        try await db.read {
-            try String.fetchAll(
-                $0, sql: "SELECT id FROM container WHERE kind = 'post' AND deleted_at IS NULL")
-        }
-    }
-
-    /// **RED ON OLD — the bar (the Bookcase's and the Library's quick entry)
-    /// filed "alpha beta"**, the words she had undone, because ⏎ files the
-    /// binding (`QuickEntryModel.submit`) and the binding never heard the ⌘Z.
-    @Test(arguments: Gesture.allCases)
-    func theBarFilesWhatTheBoxShows(_ gesture: Gesture) async throws {
-        try await withCaptureWorld(seed: 41) { session, db in
-            let opened = OpenedNote()
-            let hosting = NSHostingView(rootView: QuickEntryBar(
-                session: session,
-                onOpen: { selection in
-                    if case .post(let id) = selection { opened.postID = id }
-                }))
-            let (window, _) = CaptureRig.window(hosting: hosting, size: NSSize(width: 600, height: 160))
-            defer { CaptureRig.close(window) }
-            await CaptureRig.settle(window, turns: 15) { CaptureRig.box(in: hosting) != nil }
-            let box = try #require(CaptureRig.box(in: hosting))
-            window.makeFirstResponder(box)
-
-            await perform(gesture, on: box, window: window)
-            #expect(box.string == Self.first, "non-vacuity: the box shows her first words")
-
-            box.keyDown(with: CaptureKeysTests.returnEvent(windowNumber: window.windowNumber))
-            await CaptureRig.settle(window, turns: 100) { opened.postID != nil }
-            let postID = try #require(opened.postID, "⏎ filed and opened a note")
-            #expect(try await self.blocks(db, postID) == [Self.first],
-                    "⏎ files exactly what the box shows — never the undone words")
-        }
-    }
-
-    /// **RED ON OLD — the pad filed "alpha beta"** by the same road
-    /// (`QuickNotePad.take` reads the binding; its ⌘⏎ button, its close and
-    /// its quit filing read the same binding).
-    @Test(arguments: Gesture.allCases)
-    func thePadFilesWhatTheBoxShows(_ gesture: Gesture) async throws {
-        try await withCaptureWorld(seed: 43) { session, db in
-            let hosting = NSHostingView(rootView: QuickNoteView(
-                session: session, windows: WindowRegistry()))
-            let (window, _) = CaptureRig.window(hosting: hosting, size: NSSize(width: 360, height: 260))
-            defer { CaptureRig.close(window) }
-            await CaptureRig.settle(window, turns: 15) { CaptureRig.box(in: hosting) != nil }
-            let box = try #require(CaptureRig.box(in: hosting))
-            window.makeFirstResponder(box)
-
-            await perform(gesture, on: box, window: window)
-            #expect(box.string == Self.first, "non-vacuity: the box shows her first words")
-
-            box.keyDown(with: CaptureKeysTests.returnEvent(windowNumber: window.windowNumber))
-            var posts: [String] = []
-            for _ in 0..<100 {
-                posts = try await livePostIDs(db)
-                if !posts.isEmpty { break }
-                await CaptureRig.settle(window, turns: 1)
-            }
-            let postID = try #require(posts.first, "⏎ filed a note")
-            #expect(posts.count == 1, "one summon, one note")
-            #expect(try await self.blocks(db, postID) == [Self.first],
-                    "⏎ files exactly what the box shows — never the undone words")
-        }
+        #expect(box.string.isEmpty, "the new words undo alone")
     }
 
     /// **RED ON OLD (the `#require` — it stops the old tree before the ⌘Z
-    /// that raised there)**: an EMPTY filing — three spaces and ⏎ — clears
-    /// the box programmatically and leaves it on screen with the caret in it
-    /// (the bar stays on the Bookcase; the pad stays open on `.nothingToFile`).
-    /// The box's history ends with the words it described.
+    /// that raised there)**: an EMPTY filing — three spaces and ⏎ — clears the
+    /// box programmatically and leaves it on screen with the caret in it (the
+    /// bar stays on the Bookcase; the pad stays open on `.nothingToFile`). The
+    /// box's history ends with the words it described. The U4 walk reproduced
+    /// the old tree's exception IN USE (the bar: three spaces, ⏎, a real ⌘Z —
+    /// `NSRangeException` from `NSUndoTyping undoRedo:`, undo dead after).
     @Test func anEmptyFilingLeavesNothingToUndoIntoInEitherHost() async throws {
         try await withCaptureWorld(seed: 47) { session, db in
             let bar = NSHostingView(rootView: QuickEntryBar(session: session, onOpen: { _ in }))
@@ -382,7 +284,148 @@ struct CaptureHostsUndoFilingTests {
                 await CaptureRig.undo(box, window: window)
                 #expect(box.string.isEmpty, "⌘Z after the clear brings nothing back")
             }
-            #expect(try await livePostIDs(db).isEmpty, "nothing was filed by either door")
+            #expect(try await CaptureStore.livePostIDs(db).isEmpty, "nothing was filed by either door")
+        }
+    }
+}
+
+/// The store reads the host cells share.
+@MainActor
+private enum CaptureStore {
+    static func blocks(_ db: AppDatabase, _ postID: String) async throws -> [String] {
+        try await db.read { try Queries.renderPost($0, containerID: postID) }
+            .compactMap(\.text)
+    }
+
+    static func livePostIDs(_ db: AppDatabase) async throws -> [String] {
+        try await db.read {
+            try String.fetchAll(
+                $0, sql: "SELECT id FROM container WHERE kind = 'post' AND deleted_at IS NULL")
+        }
+    }
+}
+
+// MARK: - VX-193's belt — the programmatic-undo road (NOT the live road)
+
+@MainActor
+@Suite("VX-193's belt — on the programmatic-undo road the capture box's binding follows ⌘Z and ⇧⌘Z",
+       .serialized)
+struct CaptureUndoSyncTests {
+    /// **A GUARD OF THE BELT, red on old ON THIS ROAD (each binding cell).**
+    /// Undo and redo driven by `undo:`/`redo:` in this host move the box's
+    /// text with NO `textDidChange` (measured), so without the box's
+    /// did-undo/did-redo re-sync the binding stays on the last TYPED text.
+    /// In USE — a real ⌘Z/⇧⌘Z in the running app — the pre-fix build's binding
+    /// followed (the U4 walk): this pins the belt, not a symptom she can meet.
+    @Test func aProgrammaticUndoAndRedoReachTheBinding() async throws {
+        let (window, box, _, rig) = try await mountBox(focusRequest: 0)
+        defer { CaptureRig.close(window) }
+        window.makeFirstResponder(box)
+        await CaptureRig.type("first thought", into: box, window: window)
+        await CaptureRig.type(" and more", into: box, window: window)
+        #expect(rig.text == "first thought and more", "typing reaches the binding (as ever)")
+
+        await CaptureRig.undo(box, window: window)
+        #expect(box.string == "first thought", "non-vacuity: ⌘Z undid the last words")
+        #expect(rig.text == box.string, "the binding follows the undo")
+
+        await CaptureRig.undo(box, window: window)
+        #expect(box.string.isEmpty, "non-vacuity: …and the first ones")
+        #expect(rig.text == box.string, "…all the way back to empty")
+
+        await CaptureRig.redo(box, window: window)
+        #expect(box.string == "first thought", "non-vacuity: ⇧⌘Z brought the first words back")
+        #expect(rig.text == box.string, "…and the binding follows the redo")
+    }
+}
+
+// MARK: - VX-193's belt in both hosts — what ⏎ FILES after a programmatic ⌘Z
+
+@MainActor
+@Suite("VX-193's belt in both hosts — ⏎ files what the capture box shows after a programmatic ⌘Z",
+       .serialized)
+struct CaptureHostsUndoFilingTests {
+    /// The two gestures: ⌘Z, and ⌘Z ⌘Z ⇧⌘Z. Either way the box shows the
+    /// FIRST words, and that is what must file.
+    enum Gesture: String, CaseIterable, Sendable {
+        case undo
+        case undoTwiceThenRedo
+    }
+
+    private static let first = "alpha"
+    private static let second = " beta"
+
+    private func perform(_ gesture: Gesture, on box: NSTextView, window: NSWindow) async {
+        await CaptureRig.type(Self.first, into: box, window: window)
+        await CaptureRig.type(Self.second, into: box, window: window)
+        switch gesture {
+        case .undo:
+            await CaptureRig.undo(box, window: window)
+        case .undoTwiceThenRedo:
+            await CaptureRig.undo(box, window: window)
+            await CaptureRig.undo(box, window: window)
+            await CaptureRig.redo(box, window: window)
+        }
+    }
+
+    /// **A GUARD OF THE BELT, red on old ON THIS ROAD — the bar filed "alpha
+    /// beta"** while the box showed "alpha", because ⏎ files the binding
+    /// (`QuickEntryModel.submit`) and, on this road, the binding never heard
+    /// the ⌘Z. (In use the pre-fix bar's binding followed — the U4 walk.)
+    @Test(arguments: Gesture.allCases)
+    func theBarFilesWhatTheBoxShows(_ gesture: Gesture) async throws {
+        try await withCaptureWorld(seed: 41) { session, db in
+            let opened = OpenedNote()
+            let hosting = NSHostingView(rootView: QuickEntryBar(
+                session: session,
+                onOpen: { selection in
+                    if case .post(let id) = selection { opened.postID = id }
+                }))
+            let (window, _) = CaptureRig.window(hosting: hosting, size: NSSize(width: 600, height: 160))
+            defer { CaptureRig.close(window) }
+            await CaptureRig.settle(window, turns: 15) { CaptureRig.box(in: hosting) != nil }
+            let box = try #require(CaptureRig.box(in: hosting))
+            window.makeFirstResponder(box)
+
+            await perform(gesture, on: box, window: window)
+            #expect(box.string == Self.first, "non-vacuity: the box shows the first words")
+
+            box.keyDown(with: CaptureKeysTests.returnEvent(windowNumber: window.windowNumber))
+            await CaptureRig.settle(window, turns: 100) { opened.postID != nil }
+            let postID = try #require(opened.postID, "⏎ filed and opened a note")
+            #expect(try await CaptureStore.blocks(db, postID) == [Self.first],
+                    "⏎ files exactly what the box shows")
+        }
+    }
+
+    /// **A GUARD OF THE BELT, red on old ON THIS ROAD — the pad filed "alpha
+    /// beta"** by the same road (`QuickNotePad.take` reads the binding; its
+    /// ⌘⏎ button, its close and its quit filing read the same binding).
+    @Test(arguments: Gesture.allCases)
+    func thePadFilesWhatTheBoxShows(_ gesture: Gesture) async throws {
+        try await withCaptureWorld(seed: 43) { session, db in
+            let hosting = NSHostingView(rootView: QuickNoteView(
+                session: session, windows: WindowRegistry()))
+            let (window, _) = CaptureRig.window(hosting: hosting, size: NSSize(width: 360, height: 260))
+            defer { CaptureRig.close(window) }
+            await CaptureRig.settle(window, turns: 15) { CaptureRig.box(in: hosting) != nil }
+            let box = try #require(CaptureRig.box(in: hosting))
+            window.makeFirstResponder(box)
+
+            await perform(gesture, on: box, window: window)
+            #expect(box.string == Self.first, "non-vacuity: the box shows the first words")
+
+            box.keyDown(with: CaptureKeysTests.returnEvent(windowNumber: window.windowNumber))
+            var posts: [String] = []
+            for _ in 0..<100 {
+                posts = try await CaptureStore.livePostIDs(db)
+                if !posts.isEmpty { break }
+                await CaptureRig.settle(window, turns: 1)
+            }
+            let postID = try #require(posts.first, "⏎ filed a note")
+            #expect(posts.count == 1, "one summon, one note")
+            #expect(try await CaptureStore.blocks(db, postID) == [Self.first],
+                    "⏎ files exactly what the box shows")
         }
     }
 }

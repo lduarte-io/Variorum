@@ -312,33 +312,39 @@ struct CaptureTextView: NSViewRepresentable {
         private var appliedStyle: CaptureTextStyle?
 
         /// **The box's own undo history** (VX-193 — VX-179 U3-g's mechanism,
-        /// carried from the comments panel's `CommentTextArea` unchanged).
-        /// Two defects lived in the box while its typing history was the
-        /// WINDOW's (the text view's default): ⌘Z moved the box's text
-        /// without `textDidChange`, so the binding — the thing both hosts
-        /// FILE — kept the words she had undone and ⏎ filed them; and a
-        /// programmatic clear (a completed hand-off, an EMPTY filing that
-        /// leaves the box on screen) left that history standing, so ⌘Z then
-        /// replayed ranges of the old text against the new one
-        /// (`NSRangeException`, measured). Undo is PER BOX and a
-        /// programmatic replacement ends it (P-VX179-U3-4, carried — PROVISIONAL
-        /// here as P-U4-1): ⌘Z in the box undoes the box's own typing and
-        /// nothing that other text left on the window's stack. ⌘Z still
-        /// arrives by AppKit's road — `undo:` travels to the window, which
-        /// undoes through the first responder's `undoManager`, answered here.
+        /// carried from the comments panel's `CommentTextArea`). The defect it
+        /// fixes, real IN USE: while the box's typing history was the WINDOW's
+        /// (the text view's default), a programmatic clear — a completed
+        /// hand-off, or an EMPTY filing that leaves the box on screen with the
+        /// caret in it — left that history standing, so ⌘Z then replayed
+        /// ranges of the old text against the new one: `NSRangeException`
+        /// from `NSUndoTyping undoRedo:`, reproduced on the pre-fix build at
+        /// the VX-282 U4 walk (AppKit caught it; the box's undo was dead
+        /// afterwards). Undo is PER BOX and a programmatic replacement ends it
+        /// (P-VX179-U3-4, carried — PROVISIONAL here as P-U4-1): ⌘Z in the box
+        /// undoes the box's own typing and nothing that other text left on the
+        /// window's stack. ⌘Z still arrives by AppKit's road — `undo:` travels
+        /// to the window, which undoes through the first responder's
+        /// `undoManager`, answered here.
         let undoHistory = UndoManager()
         private var undoObservers: [NSObjectProtocol] = []
 
         init(_ parent: CaptureTextView) {
             self.parent = parent
             super.init()
-            // **An undo or a redo is an edit the binding must hear.** AppKit
-            // sends no `textDidChange` for either (measured — VX-179 U3-g on
-            // this box, and again at VX-193). This manager is the box's own,
-            // so its two notifications are exactly "this box's text was
-            // undone or redone" — and they arrive SYNCHRONOUSLY inside
-            // `undo()` (measured at VX-193), so no view update can run in
-            // between and re-adopt the stale binding over the undo.
+            // **A BELT: an undo or a redo is an edit the binding must hear.**
+            // In the running app a real ⌘Z / ⇧⌘Z already kept the binding in
+            // step on the pre-fix build (the VX-282 U4 walk), but where undo
+            // is driven outside the live event road — offscreen, in the test
+            // host — AppKit posts no `textDidChange` for either (measured at
+            // VX-179 U3-g and VX-193; why the live road differs did not
+            // converge headlessly). VX-179's comments panel carries the same
+            // pair on the same basis. This manager is the box's own, so its two
+            // notifications are exactly "this box's text was undone or redone";
+            // they arrive SYNCHRONOUSLY inside `undo()` (measured), so no view
+            // update can run in between and re-adopt a stale binding over the
+            // undo; and the write is guarded — when the binding already
+            // follows, nothing is written.
             for name in [Notification.Name.NSUndoManagerDidUndoChange,
                          .NSUndoManagerDidRedoChange] {
                 undoObservers.append(NotificationCenter.default.addObserver(
