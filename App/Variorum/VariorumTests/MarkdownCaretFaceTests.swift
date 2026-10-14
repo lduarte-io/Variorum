@@ -313,3 +313,134 @@ struct PaneMarkdownCaretFaceTests {
         #expect(!anyFace(storage, 0..<8))
     }
 }
+
+// MARK: - VX-282 R1-2 — a caret settle that re-wraps moves the overlays with it
+
+/// **Write's overlays after a settle re-wrap (the round-1 review's R1-2).** A
+/// settle restyles ATTRIBUTES ONLY — no character edit — yet in Study's
+/// proportional italic (Iowan's italic is ~14 % narrower than its roman) an
+/// honoured span that un-styles re-wraps its paragraph LONGER and pushes every
+/// block below it down. The overlays (⑂ badges, the decor layer) re-run once
+/// per `overlayGeometryGeneration` on the display pass that lays the storage
+/// out (N14's settle hop); the generation's inputs were the storage's
+/// CHARACTER edits, the attach and a width reflow — so the settle's re-wrap
+/// left the badge where the old layout put it until the next scroll, pointer
+/// or edit.
+@MainActor
+@Suite("VX-282 R1-2 — a caret settle that re-wraps moves the overlays", .serialized)
+struct SettleRewrapOverlayTests {
+    private func pump(_ seconds: TimeInterval = 0.02) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    /// Display passes and the queue turns behind them — the road N14's
+    /// settle hop rides (a display pass reports through `viewWillDraw`, the
+    /// hop lands on the next turn).
+    private func draw(_ h: EditorHarness) async {
+        for _ in 0..<4 {
+            h.textView.needsDisplay = true
+            h.textView.window?.display()
+            pump()
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+    }
+
+    /// Ground truth: entry `i`'s first layout fragment, laid out, in view
+    /// coordinates — the frame `refreshBadges` reads.
+    private func fragmentY(_ h: EditorHarness, entry i: Int) -> CGFloat? {
+        guard let layoutManager = h.textView.textLayoutManager,
+              let contentManager = layoutManager.textContentManager,
+              let location = contentManager.location(
+                contentManager.documentRange.location,
+                offsetBy: h.model.index.range(ofEntryAt: i).location)
+        else { return nil }
+        var frame: CGRect?
+        layoutManager.enumerateTextLayoutFragments(from: location, options: [.ensuresLayout]) {
+            frame = $0.layoutFragmentFrame
+            return false
+        }
+        return frame.map { $0.origin.y + h.textView.textContainerOrigin.y }
+    }
+
+    private func badgeY(_ h: EditorHarness, _ blockID: String) -> CGFloat? {
+        h.model.badges.first { $0.blockID == blockID }?.frame.origin.y
+    }
+
+    /// **RED ON OLD.** An italic paragraph honoured at her caret (`*… |*`),
+    /// a fanned block below it; an arrow past the closing star un-styles the
+    /// span (the trailing space left behind), the paragraph re-wraps longer
+    /// and the fanned block moves down — and after the display pass the ⑂
+    /// badge stands on the block's NEW place.
+    @Test func aSettleThatRewrapsAParagraphMovesTheBadgeBelowIt() async throws {
+        let current = EditorTypography.current
+        let adopted = EditorTypography.isAdopted
+        let palette = MarkdownStyling.palette
+        defer {
+            EditorTypography.current = current
+            EditorTypography.isAdopted = adopted
+            MarkdownStyling.palette = palette
+        }
+        let chrome = EditorSurfaceChrome(voice: .study, dark: false, inlineComments: false)
+        let vocabulary = ["quietly", "the", "morning", "harbour", "lantern", "over",
+                          "a", "gentle", "river", "and", "wandering", "birds"]
+        let words = (0..<200).map { vocabulary[$0 % vocabulary.count] }.joined(separator: " ")
+        let paragraph = "*" + words + " *"
+        let paragraphLength = (paragraph as NSString).length
+        try await withEditor(seedBlocks: [paragraph, "A fanned block."]) { h in
+            // The block below carries a fan, so it wears a ⑂ badge.
+            let slots = try h.storeSlots()
+            let fanned = slots[1].blockID
+            _ = try h.session.operations.branchVariant(fanned, from: try #require(slots[1].variantID))
+            try h.reload()
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 900, height: 700),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let scrollView = try #require(h.textView.enclosingScrollView)
+            let coordinator = EditorSurface.Coordinator(model: h.model)
+            defer {
+                coordinator.uninstall()
+                window.orderOut(nil)
+                window.close()
+            }
+            window.contentView = scrollView
+            window.orderFrontRegardless()
+            pump()
+            EditorTypography.adopt(chrome.typography)
+            coordinator.applyChrome(chrome, to: h.textView, scrollView: scrollView)
+            coordinator.install(scrollView: scrollView, textView: h.textView)
+            window.makeFirstResponder(h.textView)
+            await draw(h)
+
+            // Her caret between the last space and the closing star: honoured.
+            let storage = try #require(h.textView.textStorage)
+            h.textView.setSelectedRange(NSRange(location: paragraphLength - 1, length: 0))
+            await draw(h)
+            #expect(isItalic(storage, at: 1),
+                    "non-vacuity: Study's real italic honours the caret at the rescue point")
+            // The steady state, the same on both sides of the fix: the overlays
+            // delivered against the honoured layout.
+            h.model.refreshBadges()
+            let before = try #require(fragmentY(h, entry: 1))
+            #expect(abs((badgeY(h, fanned) ?? -1) - before) < 1,
+                    "steady: the badge sits on the honoured layout")
+
+            // THE ACT: an arrow past the closing star. No character changes;
+            // the span un-styles and the paragraph re-wraps.
+            let text = h.documentText
+            h.textView.moveRight(nil)
+            #expect(h.textView.selectedRange() == NSRange(location: paragraphLength, length: 0))
+            #expect(h.documentText == text, "attributes only — no character edit")
+            #expect(!isItalic(storage, at: 1), "the trailing space left behind: the span un-styled")
+            await draw(h)
+
+            let after = try #require(fragmentY(h, entry: 1))
+            try #require(after - before > 10,
+                         "non-vacuity: the roman paragraph re-wrapped longer (\(before) → \(after))")
+            let badge = badgeY(h, fanned)
+            #expect(abs((badge ?? -1) - after) < 1,
+                    "RED ON OLD: the ⑂ badge follows the re-wrapped layout (badge \(String(describing: badge)), block \(after))")
+        }
+    }
+}
