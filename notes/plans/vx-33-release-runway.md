@@ -279,7 +279,7 @@ VX-102, VX-104, VX-152, VX-240, and VM-15 (VM board).
 
 | What | When | Ticket |
 |---|---|---|
-| Castle's overnight calls | **answered 2026-10-14** — except call 3, how the migration is rehearsed on her real keychain (her pick; lands on VX-329) | VX-266 · VX-329 |
+| Castle's overnight calls | **answered 2026-10-14**, call 3 included (spare login → Air → Pro → phone) | VX-266 · VX-329 |
 | Castle phase 1 kickoff (`/architect-phase vx-305` recommended) | at her word | VX-305 |
 | The Castle release switch | at her word, after phase 5 at the earliest | VX-329 |
 | Settings wording, Editor through Acknowledgments (pre-launch) | any time; **MCP pane after VX-281 merges**; Protection + Data Safety after Castle's words (VX-309) | VX-234 |
@@ -341,8 +341,10 @@ at a zero-instance window with no commits during it, then DMG first and appcast 
 - Today-road small fixes for VX-302 and VX-317 → VX-338 and VX-339; VX-209 and the rest wait.
 - The Touch ID re-arm question only after a failed press; a replacement Mac starts on Always ask — confirmed.
 
-**Still open:** Castle's call 3 — how the migration's real-scope branch is rehearsed before her live stores migrate
-(her pick; recorded on VX-329). VX-113 is in Castle's phase 3 (VX-307).
+- Call 3, the rehearsal: a spare macOS login on her Apple ID first, then the Air as canary, then the Pro, then the
+  phone (VX-329; it surfaced VX-340, two logins sharing one device identity).
+
+**Still open:** nothing. VX-113 is in Castle's phase 3 (VX-307).
 
 ---
 

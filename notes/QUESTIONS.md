@@ -2624,7 +2624,13 @@ next morning, before the merge:
 3. **How the migration's real-scope branch is rehearsed before her live stores migrate** (design §5, §9). She asked to
    decide it now (*"call 3 - we can decide this now. what are my options?"*). The options, as laid out to her: (a) a
    spare macOS user on the same Apple ID; (b) the Air first, as a canary; (c) the rehearsal taken as the first leg of
-   the real migration. Whatever runs logs every Apple key id it mints. **OPEN — her pick, recorded on VX-329.**
+   the real migration. Whatever runs logs every Apple key id it mints. **DECIDED the same morning:** *"I'll go with
+   your recommendation on 1, then air, then pro, then phone … i REALLY want this phase to be thoroughly tested before
+   release."* A spare macOS login on her Apple ID first, then the Air as canary, then the Pro, then the phone, with
+   her extra legs (a new Mac from a Castle library; a test account Standard → Castle → set aside → her real Castle
+   account brought in). The rehearsal answers "not yet" to retiring the old shared key, which is retired once,
+   after the phone. The details are on VX-329, for its plan. The case surfaced **VX-340** (two logins on one Mac would
+   share one device identity), to be settled before the rehearsal.
 4. **Today's bugs in Release until the switch.** RULED: *"yeah we can do the small bug fix."* Today-road fixes for
    VX-302 → **VX-338** and VX-317 → **VX-339**, as one small RUN at her word. VX-209, VX-107, VX-108, VX-109, VX-113 and
    VX-213 wait for the rebuild.
@@ -2634,7 +2640,7 @@ next morning, before the merge:
    phase 4's walk.
 *(Numbering: the next free number on main when written; a sibling run merging first may take it — the merging session
 renumbers.)*
-Status: answered except call 3, which is open.
+Status: answered, all six.
 
 
 ## VX-246 — Run: MCP door fixes (2026-10-14)
