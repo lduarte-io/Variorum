@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #220. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #221). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **DONE** — traces `324bfda8`; pins `c4f2a893` → `079b0a15`; fix VX-193 `0c31fcc5` (the box's own undo history; the re-sync kept as a belt, outcome (a) at `079b0a15`), VX-112 `6bb9c7c9`. u4 window (01:54–02:12): W2 g2 92/17 green; the walk — the sibling reproduced in use on old (`NSRangeException`) and fixed in use, the headline not reproduced in use, her VX-112 sighting = the Terminal block cursor, P-U4-2 withdrawn. u4b window (05:20–05:22): W1b red on old 13 issues / 10 cases exactly as predicted, W2b 10 tests / 5 suites green. PROVISIONAL P-U4-1 (#222). Claim `vx282-u4b` HELD for U5's chained handover. No revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **u5c STOPPED AFTER W1c (06:12:37–06:13:57, claim `vx282-u5c` RELEASED) — awaiting the coordinator.** W1c on old: VX-257's three host cells red as designed (6 issues; the sheet cells took the fallback road — the runner kept the dismissed panel alive); **the VX-229 GUARD RED under the drained shape — the census: models alive AND observing 1 → 2 → 3 on the popover, the sheet and the nested sheet** (9 issues) ⇒ the runner retains dismissed hosts whatever the pools; the guard cannot be honest-green in this runner as built. W2c NOT run. VX-229 DISMISSED AS HOLLOW in use (final). VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c`. No claim held; no revert in flight. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **READY FOR STAGE — u5d: W2c g1 (13 suites) on fixed, ≈5 min.** The VX-229 cells are KNOWN ISSUES (the coordinator's ruling — non-intermittent `withKnownIssue` naming the runner fact; census still printed); VX-257's sheet cells unchanged; fixed tree rebuilt (TEST BUILD SUCCEEDED). u5c (06:12–06:14, released): VX-257 red on old as designed; the guard red under the drained shape (the runner retains 1 → 2 → 3, cause untraced). VX-229 DISMISSED AS HOLLOW in use (final). VX-257 `1ca8fe72` · VX-183 `a765683c` · VX-182 `fd4c260c`. No claim held; no revert in flight. |
 | U6 | VX-326 — the Bookcase's quick entry isn't focused at launch (joined overnight at her word) | **DONE** — pins `d35191b6` + correction `ee1facc9` · fix `3cf0079b` · window `a1967ac0` (logs) + the walk record. Stage window 05:27:17–05:38:17 (claim `vx282-u6`, RELEASED): W1 red on old exactly as predicted (3 tests, 1 issue — the launch pin's last cell) · W2 the fixed batch 148 tests / 43 suites green · W3 every row held (A0 old: the window; A/A' fixed: the caret in the bar at launch in Study and Terminal, a typed letter lands; C the tour never stolen from; D the navigation back as today — O-U6-1 seen live); row B's restored note window not reachable on this Mac (not restored), a new window walked in its place. P-U6-1/2 → QUESTIONS #224. Posture: Study, unlocked Standard, tour `completed`, the Bookcase, nothing filed. No claim held; no revert in flight. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
@@ -2447,6 +2447,31 @@ From `App/Variorum/`, logs to `notes/plans/vx282-screens/u5/logs/`:
     be an honest green guard in this runner as built; VX-257's sheet cells are robust to it (they ran the fallback road).
 - **STOPPED** at the coordinator's rule (a red guard ⇒ record, release, report; no fix in the window): **W2c NOT run.**
   **Claim `vx282-u5c` RELEASED 06:13:57** (status FREE). No app launched; the dev store untouched.
+
+#### u5d — the VX-229 cells as KNOWN ISSUES (the coordinator's ruling after u5c) — headless
+
+**The ruling:** wrap the VX-229 cells as Swift Testing known issues — the repo's precedent for a measured harness/platform
+fact (`IndexTierMetricsTests`' and `TakesFindBoardTests`' non-intermittent `withKnownIssue` cases). Built: in
+`CommentPanelReleaseTests` every alive/observing expectation — the popover cell's alive and observing checks and its
+re-read check, and each sheet's and nested sheet's per-opening alive check — sits inside `withKnownIssue("the test runner
+keeps a dismissed popover's/sheet's panel alive for the test's lifetime; the running app releases it within ~2 s (VX-282
+u5b heap: 0·0·0 after every close)", isIntermittent: false)`. The cells keep running and printing their census; the
+premises (a new window, a mounted observing panel, each close) stay plain. **The suite stays green while the runner
+retains, and each cell FAILS LOUDLY the day the runner starts releasing — the signal to turn it back into a plain guard.**
+The file's header says VX-229 was dismissed as hollow in use (the heap table above is the evidence) and that **the runner's
+retention cause is UNTRACED** (not the autorelease pool the drained rig drains — u5c). **No ticket for the runner fact; it is
+recorded here.** VX-257's two sheet cells unchanged (their fallback road held at u5c). Rebuilt ONLY the fixed tree
+(`DerivedData/vx282-u5` — TEST BUILD SUCCEEDED; the old products not needed).
+
+#### THE u5d WINDOW PLAN (≈5 min; on the orchestrator's claim line; `guard.sh --author` first; no app launch)
+
+**W2c — g1 on the fixed products** (`-derivedDataPath DerivedData/vx282-u5`), `-only-testing:VariorumTests/` ×
+`CommentPanelHostSuites` `CommentPanelLeaveTests` `CommentPanelDoorsTests` `CommentPanelParkTests`
+`CommentsPanelModelEditorTests` `CommentCompositionTests` `CommentPanelKeysTests` `CommentsAndReorderTests`
+`CapabilityRegistryTests` `TrashSurfaceTests` `NoteVersionsPaneTests` → `u5d-w2-g1.log`. EXPECTED: all green, 113 tests /
+13 suites — the VX-229 cells passing WITH their known issues recorded (the log's known-issue lines; the census still
+printed), VX-257's three host cells green (the sheet cells printing their road). A VX-229 cell failing with "known issue was
+not recorded" means the runner RELEASED — record it (good news: un-wrap at the next touch).
 
 ## Ladder
 
