@@ -38,13 +38,14 @@
 //  anything could be stolen; on the fixed one it is dropped because something
 //  else holds the keyboard).
 //
-//  THE FIX'S OWN PINS (added with the fix — they name what the old tree does
-//  not have, so they are GUARDS of the fixed product): the rule as a table
-//  (`CaptureOpeningFocusRuleTests`); the box's opening road — waits for its
-//  window, takes only a free keyboard, never late, served once
-//  (`CaptureOpeningFocusBoxTests`); and the scope — the opening ask is the
-//  shell's, once; a navigation back to the Bookcase keeps the bar's mount
-//  raise exactly as it was (`QuickEntryOpeningScopeTests`).
+//  THE FIX'S OWN PINS live in `QuickEntryOpeningFocusTests.swift` (they name
+//  what the old tree does not have, so they are GUARDS of the fixed product
+//  and the old products are built without that file).
+//
+//  HARNESS FACT (measured for this file): AppKit makes a window's first text
+//  field its first responder the moment the window is first ordered in, key
+//  or not — so the rig frees the keyboard right after, and every pin that
+//  wants another responder holding it puts it there itself.
 //
 
 import AppKit
@@ -62,12 +63,12 @@ import VariorumCore
 /// while the store opens, the shell once it is ready.
 @MainActor
 @Observable
-private final class LaunchBoot {
+final class LaunchFocusBoot {
     var ready = false
 }
 
-private struct LaunchShell: View {
-    let boot: LaunchBoot
+struct LaunchFocusShell: View {
+    let boot: LaunchFocusBoot
     let session: AppSession
     let router: ShellRouter
 
@@ -82,7 +83,7 @@ private struct LaunchShell: View {
 
 /// A window that is KEY when the pin says so — `isKeyWindow` answers it and
 /// AppKit's own notification is posted, as on a click (`WindowsTests`' road).
-private final class LaunchWindow: NSWindow {
+final class LaunchFocusWindow: NSWindow {
     private var simulatedKey = false
 
     override var isKeyWindow: Bool { simulatedKey || super.isKeyWindow }
@@ -94,7 +95,7 @@ private final class LaunchWindow: NSWindow {
 }
 
 @MainActor
-private enum LaunchRig {
+enum LaunchFocusRig {
     /// Suspends only — the app's own run loop runs SwiftUI's passes and the
     /// main queue between turns (no forced layout, no nested run loop).
     static func settle(turns: Int = 40, until predicate: () -> Bool = { false }) async {
@@ -116,16 +117,16 @@ private enum LaunchRig {
 
     /// The shell's window: the launch face over a hosting view, beside a
     /// stand-in for ANOTHER responder (a field), ordered in (never key here).
-    static func window(boot: LaunchBoot, session: AppSession, router: ShellRouter)
-        -> (LaunchWindow, NSTextField)
+    static func window(boot: LaunchFocusBoot, session: AppSession, router: ShellRouter)
+        -> (LaunchFocusWindow, NSTextField)
     {
         let size = NSSize(width: 1100, height: 720)
-        let window = LaunchWindow(
+        let window = LaunchFocusWindow(
             contentRect: NSRect(x: 40, y: 40, width: size.width, height: size.height + 40),
             styleMask: [.titled, .resizable], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         let content = NSView(frame: NSRect(x: 0, y: 0, width: size.width, height: size.height + 40))
-        let hosting = NSHostingView(rootView: LaunchShell(boot: boot, session: session, router: router))
+        let hosting = NSHostingView(rootView: LaunchFocusShell(boot: boot, session: session, router: router))
         hosting.frame = NSRect(x: 0, y: 40, width: size.width, height: size.height)
         hosting.autoresizingMask = [.width, .height]
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
@@ -133,7 +134,18 @@ private enum LaunchRig {
         content.addSubview(field)
         window.contentView = content
         window.makeKeyAndOrderFront(nil)
+        // AppKit selects a window's first text field as its first responder
+        // the moment the window is first ordered in (measured — a key window
+        // or not). The launch's window holds nothing (its opening face has no
+        // field), so the stand-in starts OFF the keyboard; a pin that wants it
+        // there puts it there.
+        window.makeFirstResponder(nil)
         return (window, field)
+    }
+
+    /// The keyboard is free: the window itself, or nothing, is first responder.
+    static func keyboardIsFree(_ window: NSWindow) -> Bool {
+        window.firstResponder == nil || window.firstResponder === window
     }
 
     static func close(_ window: NSWindow) {
@@ -168,20 +180,21 @@ struct QuickEntryLaunchFocusTests {
     /// for the shell, the window key afterwards — ends with the caret in the
     /// Bookcase's quick entry. On the old tree the window keeps the keyboard.
     @Test func theShellOpeningOnTheBookcasePutsTheCaretInItsQuickEntry() async throws {
-        try await LaunchRig.world(seed: 326) { session in
-            let boot = LaunchBoot()
-            let (window, _) = LaunchRig.window(boot: boot, session: session, router: ShellRouter())
-            defer { LaunchRig.close(window) }
-            await LaunchRig.settle(turns: 10)
-            #expect(LaunchRig.windowedBox(window) == nil, "the opening face: no shell yet")
+        try await LaunchFocusRig.world(seed: 326) { session in
+            let boot = LaunchFocusBoot()
+            let (window, _) = LaunchFocusRig.window(boot: boot, session: session, router: ShellRouter())
+            defer { LaunchFocusRig.close(window) }
+            await LaunchFocusRig.settle(turns: 10)
+            #expect(LaunchFocusRig.windowedBox(window) == nil, "the opening face: no shell yet")
+            #expect(LaunchFocusRig.keyboardIsFree(window), "the opening face holds no keyboard (the launch's state)")
 
             boot.ready = true  // `AppBootstrap.finish` — the store is ready
-            await LaunchRig.settle(turns: 300) { LaunchRig.windowedBox(window) != nil }
-            let box = try #require(LaunchRig.windowedBox(window), "the shell mounted the Bookcase's bar")
-            await LaunchRig.settle(turns: 20)
+            await LaunchFocusRig.settle(turns: 300) { LaunchFocusRig.windowedBox(window) != nil }
+            let box = try #require(LaunchFocusRig.windowedBox(window), "the shell mounted the Bookcase's bar")
+            await LaunchFocusRig.settle(turns: 20)
 
             window.simulateBecomingKey()
-            await LaunchRig.settle(turns: 20) { window.firstResponder === box }
+            await LaunchFocusRig.settle(turns: 20) { window.firstResponder === box }
             #expect(window.firstResponder === box, """
                 the shell opened on the Bookcase and its quick entry holds the caret \
                 (the keyboard is on \(String(describing: window.firstResponder)))
@@ -192,23 +205,23 @@ struct QuickEntryLaunchFocusTests {
     /// GUARD: another responder holding the window's keyboard when the shell
     /// opens keeps it — the ask is dropped, never served later.
     @Test func aFieldHoldingTheKeyboardKeepsItAcrossTheOpening() async throws {
-        try await LaunchRig.world(seed: 327) { session in
-            let boot = LaunchBoot()
-            let (window, field) = LaunchRig.window(boot: boot, session: session, router: ShellRouter())
-            defer { LaunchRig.close(window) }
-            await LaunchRig.settle(turns: 10)
+        try await LaunchFocusRig.world(seed: 327) { session in
+            let boot = LaunchFocusBoot()
+            let (window, field) = LaunchFocusRig.window(boot: boot, session: session, router: ShellRouter())
+            defer { LaunchFocusRig.close(window) }
+            await LaunchFocusRig.settle(turns: 10)
             window.makeFirstResponder(field)
-            await LaunchRig.settle(turns: 3)
+            await LaunchFocusRig.settle(turns: 3)
             let holder = window.firstResponder
             #expect(holder !== window && !(holder is CaptureNSTextView),
                     "non-vacuity: the field holds the keyboard before the shell opens")
 
             boot.ready = true
-            await LaunchRig.settle(turns: 300) { LaunchRig.windowedBox(window) != nil }
-            let box = try #require(LaunchRig.windowedBox(window), "the shell mounted the Bookcase's bar")
-            await LaunchRig.settle(turns: 20)
+            await LaunchFocusRig.settle(turns: 300) { LaunchFocusRig.windowedBox(window) != nil }
+            let box = try #require(LaunchFocusRig.windowedBox(window), "the shell mounted the Bookcase's bar")
+            await LaunchFocusRig.settle(turns: 20)
             window.simulateBecomingKey()
-            await LaunchRig.settle(turns: 20)
+            await LaunchFocusRig.settle(turns: 20)
             #expect(window.firstResponder !== box, "the quick entry never takes the keyboard from the field")
             #expect(window.firstResponder === holder, "the field keeps it")
 
@@ -218,7 +231,7 @@ struct QuickEntryLaunchFocusTests {
             let superview = try #require(scroll.superview)
             scroll.removeFromSuperview()
             superview.addSubview(scroll)
-            await LaunchRig.settle(turns: 20)
+            await LaunchFocusRig.settle(turns: 20)
             #expect(window.firstResponder === holder, "still the field's after a re-attach")
         }
     }
@@ -226,265 +239,29 @@ struct QuickEntryLaunchFocusTests {
     /// GUARD: a sheet on the window when the shell opens holds the keyboard;
     /// the quick entry does not take it, during the sheet or after it closes.
     @Test func aSheetOnTheWindowAtTheOpeningKeepsTheKeyboardFromTheQuickEntry() async throws {
-        try await LaunchRig.world(seed: 328) { session in
-            let boot = LaunchBoot()
-            let (window, _) = LaunchRig.window(boot: boot, session: session, router: ShellRouter())
-            defer { LaunchRig.close(window) }
+        try await LaunchFocusRig.world(seed: 328) { session in
+            let boot = LaunchFocusBoot()
+            let (window, _) = LaunchFocusRig.window(boot: boot, session: session, router: ShellRouter())
+            defer { LaunchFocusRig.close(window) }
             let sheet = NSWindow(
                 contentRect: NSRect(x: 0, y: 0, width: 300, height: 120),
                 styleMask: [.titled], backing: .buffered, defer: false)
             sheet.isReleasedWhenClosed = false
             window.beginSheet(sheet, completionHandler: nil)
-            await LaunchRig.settle(turns: 60) { window.attachedSheet === sheet }
+            await LaunchFocusRig.settle(turns: 60) { window.attachedSheet === sheet }
             try #require(window.attachedSheet === sheet, "non-vacuity: the sheet is on the window")
 
             boot.ready = true
-            await LaunchRig.settle(turns: 300) { LaunchRig.windowedBox(window) != nil }
-            let box = try #require(LaunchRig.windowedBox(window), "the shell mounted the Bookcase's bar")
-            await LaunchRig.settle(turns: 20)
+            await LaunchFocusRig.settle(turns: 300) { LaunchFocusRig.windowedBox(window) != nil }
+            let box = try #require(LaunchFocusRig.windowedBox(window), "the shell mounted the Bookcase's bar")
+            await LaunchFocusRig.settle(turns: 20)
             #expect(window.firstResponder !== box, "the sheet holds the keyboard; the quick entry leaves it")
 
             window.endSheet(sheet)
-            await LaunchRig.settle(turns: 30) { window.attachedSheet == nil }
+            await LaunchFocusRig.settle(turns: 30) { window.attachedSheet == nil }
             window.simulateBecomingKey()
-            await LaunchRig.settle(turns: 20)
+            await LaunchFocusRig.settle(turns: 20)
             #expect(window.firstResponder !== box, "a dropped ask is not served when the sheet closes")
-        }
-    }
-}
-
-// MARK: - The rule, as a table (VX-326 — the fix's own pins; GUARDS)
-
-@Suite("VX-326 — the capture box's opening ask: the rule")
-struct CaptureOpeningFocusRuleTests {
-    private typealias Rule = CaptureOpeningFocus
-
-    @Test func outOfItsWindowTheAskWaits() {
-        for keyboard: Rule.Holder in [.nobody, .theBox, .someoneElse] {
-            for sheet in [false, true] {
-                #expect(Rule.verdict(.init(inWindow: false, keyboard: keyboard, sheetOnWindow: sheet)) == .wait)
-            }
-        }
-    }
-
-    @Test func inItsWindowTheAskTakesOnlyAFreeKeyboard() {
-        #expect(Rule.verdict(.init(inWindow: true, keyboard: .nobody, sheetOnWindow: false)) == .take)
-        #expect(Rule.verdict(.init(inWindow: true, keyboard: .someoneElse, sheetOnWindow: false)) == .drop,
-                "never steals from another responder")
-        #expect(Rule.verdict(.init(inWindow: true, keyboard: .nobody, sheetOnWindow: true)) == .drop,
-                "a sheet on the window holds its keyboard")
-        #expect(Rule.verdict(.init(inWindow: true, keyboard: .someoneElse, sheetOnWindow: true)) == .drop)
-        #expect(Rule.verdict(.init(inWindow: true, keyboard: .theBox, sheetOnWindow: false)) == .alreadyHeld)
-    }
-}
-
-// MARK: - The box's opening road (the fix's own pins; GUARDS)
-
-/// A host for the bare box with both of its asks.
-@MainActor
-@Observable
-private final class OpeningBoxRig {
-    var text = ""
-    var focusRequest = 0
-    var openingFocusRequest = 0
-}
-
-private struct OpeningBoxRigView: View {
-    @Bindable var rig: OpeningBoxRig
-
-    var body: some View {
-        CaptureTextView(
-            text: $rig.text, style: CaptureTextStyle(tokens: .terminalLight), maxHeight: 160,
-            focusRequest: rig.focusRequest, openingFocusRequest: rig.openingFocusRequest,
-            onFile: {})
-            .frame(width: 400, height: 60)
-    }
-}
-
-@MainActor
-private struct MountedBox {
-    let window: NSWindow
-    let content: NSView
-    let hosting: NSView
-    let field: NSTextField
-    let box: CaptureNSTextView
-    let rig: OpeningBoxRig
-
-    static func mount() async throws -> MountedBox {
-        let rig = OpeningBoxRig()
-        let hosting = NSHostingView(rootView: OpeningBoxRigView(rig: rig))
-        let window = NSWindow(
-            contentRect: NSRect(x: 80, y: 80, width: 420, height: 120),
-            styleMask: [.titled], backing: .buffered, defer: false)
-        window.isReleasedWhenClosed = false
-        let content = NSView(frame: NSRect(x: 0, y: 0, width: 420, height: 120))
-        hosting.frame = NSRect(x: 0, y: 40, width: 420, height: 80)
-        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
-        content.addSubview(hosting)
-        content.addSubview(field)
-        window.contentView = content
-        window.makeKeyAndOrderFront(nil)
-        await LaunchRig.settle(turns: 100) { LaunchRig.windowedBox(window) != nil }
-        let box = try #require(LaunchRig.windowedBox(window), "the box mounted")
-        return MountedBox(window: window, content: content, hosting: hosting, field: field, box: box, rig: rig)
-    }
-
-    /// The host out of the window and back — SwiftUI's re-parent shape
-    /// (`PaneFindFaceTests.reparent`), with the pin's act in between.
-    func detach() { hosting.removeFromSuperview() }
-    func reattach() { content.addSubview(hosting) }
-
-    func close() { LaunchRig.close(window) }
-}
-
-@MainActor
-@Suite("VX-326 — the capture box's opening ask waits for its window, takes only a free keyboard, once",
-       .serialized)
-struct CaptureOpeningFocusBoxTests {
-    /// The launch's order, driven at the box: the ask arrives while the box
-    /// is OUT of its window; it waits, and the arrival decides (a free
-    /// keyboard: the caret).
-    @Test func anAskArmedOutOfTheWindowIsDecidedOnArrival() async throws {
-        let mounted = try await MountedBox.mount()
-        defer { mounted.close() }
-        let (window, box) = (mounted.window, mounted.box)
-        mounted.detach()
-        #expect(box.window == nil, "non-vacuity: the box is out of its window")
-        box.armOpeningFocus()
-        await LaunchRig.settle(turns: 5)
-        #expect(box.openingFocusPending, "the ask waits for the window")
-        #expect(window.firstResponder !== box)
-
-        mounted.reattach()
-        await LaunchRig.settle(turns: 20) { window.firstResponder === box }
-        #expect(window.firstResponder === box, "arrived on a free keyboard — the caret is the box's")
-        #expect(!box.openingFocusPending, "decided, once")
-    }
-
-    /// Never steals, never late: a field takes the keyboard while the ask
-    /// waits; the arrival drops it, and no later re-attach or release serves it.
-    @Test func anAskNeverStealsAndIsNeverServedLate() async throws {
-        let mounted = try await MountedBox.mount()
-        defer { mounted.close() }
-        let (window, box) = (mounted.window, mounted.box)
-        mounted.detach()
-        box.armOpeningFocus()
-        window.makeFirstResponder(mounted.field)
-        let holder = window.firstResponder
-        #expect(holder !== window && holder !== box, "non-vacuity: the field holds the keyboard")
-
-        mounted.reattach()
-        await LaunchRig.settle(turns: 20)
-        #expect(window.firstResponder === holder, "the field keeps it")
-        #expect(!box.openingFocusPending, "the ask is spent — dropped")
-
-        window.makeFirstResponder(nil)  // the keyboard freed later
-        mounted.detach()
-        mounted.reattach()
-        await LaunchRig.settle(turns: 20)
-        #expect(window.firstResponder !== box, "a dropped ask is never served later")
-    }
-
-    /// Through the representable: an ask raised with the box in a window whose
-    /// keyboard is free takes the caret; served ONCE — a release and a
-    /// re-attach afterwards leave it away (VX-112's contract, unchanged).
-    @Test func anAskOnAFreeWindowTakesTheCaretAndIsServedOnce() async throws {
-        let mounted = try await MountedBox.mount()
-        defer { mounted.close() }
-        let (window, box) = (mounted.window, mounted.box)
-        #expect(window.firstResponder !== box, "nothing has asked yet")
-        mounted.rig.openingFocusRequest += 1
-        await LaunchRig.settle(turns: 20) { window.firstResponder === box }
-        #expect(window.firstResponder === box)
-
-        window.makeFirstResponder(nil)  // the release (the tour's own act)
-        mounted.detach()
-        mounted.reattach()
-        await LaunchRig.settle(turns: 20)
-        #expect(window.firstResponder !== box, "released, the box stays away — the ask was served once")
-    }
-
-    /// Through the representable: a sheet on the window holds its keyboard —
-    /// the ask is dropped, and closing the sheet does not serve it.
-    @Test func anAskWithASheetOnTheWindowIsDropped() async throws {
-        let mounted = try await MountedBox.mount()
-        defer { mounted.close() }
-        let (window, box) = (mounted.window, mounted.box)
-        let sheet = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 300, height: 80),
-            styleMask: [.titled], backing: .buffered, defer: false)
-        sheet.isReleasedWhenClosed = false
-        window.beginSheet(sheet, completionHandler: nil)
-        await LaunchRig.settle(turns: 60) { window.attachedSheet === sheet }
-        try #require(window.attachedSheet === sheet, "non-vacuity: the sheet is on the window")
-
-        mounted.rig.openingFocusRequest += 1
-        await LaunchRig.settle(turns: 20)
-        #expect(window.firstResponder !== box)
-        #expect(!box.openingFocusPending, "dropped")
-        window.endSheet(sheet)
-        await LaunchRig.settle(turns: 30) { window.attachedSheet == nil }
-        #expect(window.firstResponder !== box, "the sheet's close serves nothing")
-    }
-}
-
-// MARK: - The shell's ONE opening ask (the fix's own pins; GUARDS)
-
-@MainActor
-@Suite("VX-326 — the opening ask is the shell's, once; a navigation back keeps the bar's raise as it was",
-       .serialized)
-struct QuickEntryOpeningScopeTests {
-    @Test func theClaimIsTrueExactlyOnce() {
-        let claim = QuickEntryOpeningFocus()
-        #expect(!claim.spent)
-        #expect(claim.claim())
-        #expect(claim.spent)
-        #expect(!claim.claim())
-        #expect(!claim.claim())
-    }
-
-    /// The shell opens on the Bookcase (the opening ask served); a navigation
-    /// to the Library and back mounts a new Bookcase bar, which finds the
-    /// claim spent and raises the counted request exactly as before — the
-    /// opening road is not taken again.
-    @Test func aNavigationBackToTheBookcaseKeepsTheBarsRaiseAsItWas() async throws {
-        try await LaunchRig.world(seed: 329) { session in
-            let boot = LaunchBoot()
-            let router = ShellRouter()
-            let (window, _) = LaunchRig.window(boot: boot, session: session, router: router)
-            defer { LaunchRig.close(window) }
-            await LaunchRig.settle(turns: 10)
-            boot.ready = true
-            await LaunchRig.settle(turns: 300) { LaunchRig.windowedBox(window) != nil }
-            let first = try #require(LaunchRig.windowedBox(window))
-            await LaunchRig.settle(turns: 20) { window.firstResponder === first }
-            #expect(window.firstResponder === first, "the shell's opening: the caret in the quick entry")
-            let firstAsks = try #require(first.delegate as? CaptureTextView.Coordinator)
-            #expect(firstAsks.lastOpeningFocusRequest == 1 && firstAsks.lastFocusRequest == 0,
-                    "the opening took the opening road")
-
-            // The Library carries a quick-entry bar of its own (no autofocus):
-            // its box is told apart by identity.
-            router.pendingSelection = .library
-            await LaunchRig.settle(turns: 300) {
-                router.workspace.focusedSelection == .library
-                    && LaunchRig.windowedBox(window).map { $0 !== first } == true
-            }
-            #expect(router.workspace.focusedSelection == .library)
-            let libraryBox = LaunchRig.windowedBox(window)
-            await LaunchRig.settle(turns: 20)
-            router.pendingSelection = .shelf
-            await LaunchRig.settle(turns: 300) {
-                router.workspace.focusedSelection == .shelf
-                    && LaunchRig.windowedBox(window).map { $0 !== first && $0 !== libraryBox } == true
-            }
-            let second = try #require(LaunchRig.windowedBox(window), "back on the Bookcase")
-            #expect(second !== first && second !== libraryBox, "a new Bookcase bar mounted")
-            await LaunchRig.settle(turns: 20)
-            let secondAsks = try #require(second.delegate as? CaptureTextView.Coordinator)
-            #expect(secondAsks.lastOpeningFocusRequest == 0, "the claim was spent — no second opening ask")
-            #expect(secondAsks.lastFocusRequest == 1, "the bar's mount raise, as it was")
-            #expect(!second.openingFocusPending)
         }
     }
 }
