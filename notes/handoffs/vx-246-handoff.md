@@ -80,7 +80,7 @@ information to note down."*
 - **Only the fixes merged.** The night's merge carried the four units that fix the door and your editor. The new wire
   tools and the AI's docs (the other four units) moved to a new run, **VX-336 "Run: MCP wire tools & AI docs"**,
   which hasn't started. That split was a provisional call made overnight (ruling 3 above), so you can reverse it.
-- **Your app in `/Applications` is refreshed** (this was the night's last merge): «refresh build», a Release build of
+- **Your app in `/Applications` is refreshed** (this was the night's last merge): **0.9.5 (7503)**, a Release build of
   merged `main`, with an A1 copy of your real store first. It also carries VX-282's editor and notes fixes, which
   merged just before this one.
 - **Nothing to do for the AI clients you already use.** A client whose key you approved keeps connecting with it. If
@@ -164,7 +164,11 @@ information to note down."*
 - The dev store's A1 copy from the closeout window, which the dev store was restored from and verified the same:
   `~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Application Support/Variorum-dev/Backups/safety-copies/scale-prestage-20261014T162804Z`.
   The earlier windows' copies are the stage coordinator's to prune.
-- Your real store's A1 copy from the refresh: «refresh A1 path».
+- Your real store's A1 copy from the refresh: `~/Library/Containers/io.lduarte.Variorum/Data/Library/Application Support/Variorum/Backups/safety-copies/vx246-refresh-20261014T172650Z/`
+  (seven files, each `cmp`-identical: the store, wal and shm, the three key files, and the empty `store.sqlite`). The
+  replaced 0.9.4 (7045) is in your Trash as `Variorum-7045-replaced-by-vx246.app`, restorable. The new build's first
+  launch may sweep a lingering silent key copy on your real store (F6, cleared by the stage coordinator). That first
+  launch is yours; nothing launched the app tonight.
 - Nothing else: the run's screenshots, logs and build folders are deleted after the merge.
 
 **MOBILE PARITY:** PL-55 in `notes/MobileSoul.md` — the undo rule reaches the phone through shared code and VM-16 must
