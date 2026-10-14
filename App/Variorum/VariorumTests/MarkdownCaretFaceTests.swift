@@ -205,9 +205,11 @@ struct MarkdownCaretFaceTests {
 
             // The seal lands in the store; its header has not reached the editor.
             try h.session.operations.lockPost(h.postID)
-            let sealed = try #require(try h.database.read { [postID = h.postID] in
-                try Queries.containerHeader($0, containerID: postID)
-            })
+            let postID = h.postID
+            let header = try await h.database.read { db in
+                try Queries.containerHeader(db, containerID: postID)
+            }
+            let sealed = try #require(header)
             #expect(sealed.locked)
 
             let database = h.database
