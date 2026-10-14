@@ -541,7 +541,7 @@ affordance that lags is a surprise). The batch is two statements however many ro
 | 2 | THE FIX: the core reads; the icon's calm state; the hosts' held reads and faces; the declarations and their ritual pins | DONE (`c3946402`; COMPILED — `DerivedData/vx281-u2`, `** TEST BUILD SUCCEEDED **`, `logs/build-fixed.log`, no new warning in a touched file — the two seen are pre-existing lines, identical in the seam build): core `mcpReachStandings` + the three reads + `MCPReachPlace.wing` (read off `decideWing`) — **core GREEN headless: `MCPRowReachTests` 6/6 + `MCPShareTests` + `MCPGatheringReach*` = 30 tests / 4 suites** (`logs/core-pins-fixed.log`; two PIN-AUTHORING errors found by the first green run and fixed in the pins, not the code: line 115 forgot codex's Home wing grant still reaches the note — now asserts claude-code LEAVES and codex stays; the wing agreement iterated a deleted wing, which has no row — now iterates the live wings); app: `MCPSharedIcon`'s calm state = no view, `MCPRowReach.hold` (Core/Views), the Library's near-window reach hold + listed-book hold + row faces (List line, card, book line), Pool / Book Panel / Timeline holds + faces, `WingsModel.watchSharing` (RootView task), ⌘L's row icon + `MCPShareRoad.openingHere` + the nested grant sheet, the ▾ menu's `rowMark`, the declarations; ritual pins `BookPanelTests` (exact set) + `CapabilityRegistryTests` (the walk's Timeline line); new design suite `MCPSharedRowsRulesTests` (3: the calm icon takes no width or spacing; the menu row's one mark; every host declares the icon's acts, the menu none) |
 | 3 | headless finals + the fixed tree built for testing | DONE (this commit) — the whole package `swift test` on the fixed tree: **`VariorumMCPTests` 212/41 · core 2,788/320 (VX-184's 2,782/319 + `MCPRowReachTests` 6/1) · workbook 40/6 — 0 failures**; skips = the standing gated nine (read, `logs/headless-finals.log`) |
 | 4 | STAGE WINDOW 1 — red on the seam tree, the Mac batch on the fixed tree | **READY FOR STAGE** (this commit) — the plan below ("STAGE WINDOW 1 — the plan"); the stage NOT claimed (the orchestrator relays the claim line) |
-| 5 | STAGE WINDOW 2 — the walk | NOT-STARTED |
+| 5 | STAGE WINDOW 2 — the walk | PLANNED (the plan below, "STAGE WINDOW 2 — the walk: the plan") — runs after window 1 is green, under the claim the orchestrator relays |
 | 6 | close: self-assessment, PROVISIONALs, OWED | NOT-STARTED |
 
 ### STAGE WINDOW 1 — the plan (runs ONLY under the claim the orchestrator relays — expected `vx281-u2`, ~30 min)
@@ -562,6 +562,91 @@ affordance that lags is a surprise). The batch is two statements however many ro
    the latter is not in this set). Log `logs/b-batch.log`; `skipped:` lines read (the gated capture harnesses and
    rigs skip).
 3. Release the claim at once; record the counts; a red that is this unit's is fixed before window 2 (the walk).
+
+### STAGE WINDOW 2 — the walk: the plan (runs ONLY under the claim the orchestrator relays — expected `vx281-u2-walk`, ~65 min; AFTER window 1 is green)
+
+**The build:** `DerivedData/vx281-u2/Build/Products/Debug/Variorum.app` (`io.lduarte.Variorum.debug`, HEAD's app
+sources). **Captures:** `notes/plans/vx281-screens/u2/walk/` (gitignored), region or window-id captures, every one
+READ. **Driving (the walk lessons + U1's walker facts):** every click through `Tools/WalkKit/click.sh <devpid> x y`,
+every key through `Tools/WalkKit/keys.sh <devpid> '<System Events>'` (never cliclick keys — and Escape reaches a
+popover only this way); guarded steps ≥ 2.5 s apart, every helper's exit code CHECKED; row y re-read from a fresh
+capture after every voice flip; an alert's buttons pressed by their AX `description`; quit ONLY by identity
+(`tell application id "io.lduarte.Variorum.debug" to quit`), then `pgrep -fl 'Variorum.app/Contents/MacOS'`. A
+SYSTEM popup or dialog that Variorum itself can't dismiss (a permission prompt, a Keychain ask) = STOP: capture its
+exact text, keep the claim, report — never click through it.
+
+**Setup (S0–S6):**
+- **S0 — guards:** `Tools/WalkKit/guard.sh --author` OK (her `/Applications/Variorum.app` absent — present ⇒ STOP,
+  never quit it); `pgrep -fl 'Variorum.app/Contents/MacOS'` empty; the claim held; `Tools/WalkKit/wl2` compiled in
+  this worktree (it is — U1's fact: without it the guard silently skips its window check).
+- **S1 — helpers** into the scratchpad: `swiftc -O` of `capture-windows.swift` and `scroll.swift`.
+- **S2 — saves:** the Debug prefs `defaults export io.lduarte.Variorum.debug <scratch>/prefs-before.plist` (and its
+  `appearanceChoice` noted); her clipboard as text (`pbpaste > <scratch>/clip-before.txt`); and MY OWN A1 prestage
+  copy of the dev store (every `variorum.sqlite*` + `variorum-keys-*.json` →
+  `…/Variorum-dev/Backups/safety-copies/vx281-u2-prestage-<ts>/`, each `cmp`-verified) — the fallback restore
+  source if anything happens before the staging script runs.
+- **S3 — light appearance:** if `appearanceChoice` is not `light`, `defaults write io.lduarte.Variorum.debug
+  appearanceChoice light` (a LOCAL pref; S2's export puts it back).
+- **S4 — the staging:** `Tools/ScaleFixture/stage.sh notes=30,long=1,books=20,shelves=3,wing=2
+  <home>/dev/variorum-vx-281/DerivedData/vx281-u2` — its OWN A1 copy (every store file + the key
+  files → `…/safety-copies/scale-prestage-<ts>/`, `cmp`-verified; the dir printed and recorded), then the Debug app
+  launched with the fixture (VX-185's world, minted once in ~1 min, `ScaleFixture: minted …` in the log via
+  `/usr/bin/log`): Home's 30 notes and 20 books on 3 shelves; the wing **"variorum"** (gathering "parser things",
+  "the lexer", "the grammar", the PRIVATE "a private parser note", the archived pair) with, for EVERY approved client,
+  edit · Home · always + write new · variorum · always; the control wing **"elsewhere"** (gathering "every draft",
+  book "the drafts book", "a draft about rivers" / "a draft about doors" in it) with read · always note grants on
+  both notes and a book grant on the book — NO wing grant there.
+- **S5 — first look:** the What's New sheet, if any, closed with its own button; the dev store opened **Standard,
+  unlocked** (a lock screen ⇒ STOP and report — no credential is used in this walk); the voice read (Study
+  expected). Settings ▸ MCP ▸ Clients: at least ONE approved client (the fixture's grants need one — the dev store
+  carried four after VX-184's walk). **None ⇒ STOP-and-adapt:** quit, restore (C2), and report — the fallback (U1's
+  scripted client through the Debug shim, approved with Nothing yet, the fixture re-staged) needs a new A1 and is
+  the orchestrator's call.
+- **S6 — the clients named** (Clients tab capture `s00`) — the popovers below list each.
+
+**THE WALK — Study (light). Every site, wearing the icon where a client reaches it, BARE where it must:**
+
+| Leg | Do | Expect (capture) |
+|---|---|---|
+| W1 — the Bookcase (unchanged host, the control) | Home's Bookcase | every book + the Home gatherings wear the icon (Home wing grant) (`s01`) |
+| W2 — the Library, List, Home | sidebar Library; scope All; mode List | every NOTE row wears the icon right after its title (before any ask glyph); the BOOK and GATHERING rows wear it after the name (`s02`). Click a note row's icon → the popover: "Shared with" · each client "edit · always" · "through the Home wing grant" · Change… · "Revoke the Home wing grant" (`s03`); Escape (keys.sh) closes it |
+| W3 — Cards | mode Cards | every card wears it after its lead (`s04`) |
+| W4 — Timeline | mode Timeline | every row wears it after its title (`s05`) |
+| W5 — the answer sheet | a word from a card's preview typed in the Library field | the note heads and the book rows wear it (`s06`) |
+| W5b — Blocks scope (OUT, her call) | scope Blocks with the same word | the BLOCK lines (passages) wear NO icon — only a note head, itself a note row, does (`s07`); the field cleared |
+| W6 — ⌘L | keys.sh ⌘L | the rows: Home WEARS it, "variorum" WEARS it, **"elsewhere" BARE** (note + book grants inside a wing never share the wing — P-VX281-U2-4) (`s08`). Click "variorum"'s icon → its popover: "write new · always", NO why (its own grant), Change… · Revoke (`s09`). **Change… → THE grant sheet OVER the switcher** ("Change access — ‹client›", "Confirming replaces the grant you opened this from.", WHERE a wing · variorum, write new · always) (`s10`) → **Cancel** (nothing written) → the switcher still up → Escape closes it |
+| W7 — the ▾ menu | the Bookcase masthead's wing ▾ | the rows Home and variorum carry the shared MARK, "elsewhere" plain (`s11`); Escape |
+| W8 — "elsewhere" in the Library | ⌘L → type "else" → Return ("Now in “elsewhere”"); Library, List | "a draft about rivers" / "a draft about doors" WEAR it — popover "read · always", NO why, plain "Revoke" (`s12`, `s13`); "the drafts book" WEARS it; **"every draft" (the gathering) BARE** — R-VX185-1 (`s12`) |
+| W9 — the Book Panel | open "a draft about rivers"; open its Book Panel (the book TOC, found from the capture) | both rows of "the drafts book" WEAR it (`s14`) |
+| W10 — the Pool | ⌘L → "variorum"; sidebar Pool; masthead "show" (the tucked run) | "the lexer" and "the grammar" WEAR it; **"a private parser note" BARE** (Private — the fence) (`s15`); then ⌘L → Home: the Pool's loose rows WEAR it (`s16`) |
+| W11 — the open book | ⌘L → "elsewhere"; ⌥⌘, → Settings ▸ MCP ▸ Shared with AI ▸ the Open book ON (`s17`); back to the Library | **"every draft" now WEARS it**, its popover "read · always" · "through the open book" · "The open book is switched in Settings ▸ MCP." (`s18`); ⌘L: "elsewhere" now WEARS it (`s19`); the Open book OFF → "every draft" BARE again (`s20`) |
+| W12 — Revoke from a row (held) | "a draft about doors"'s icon → the first client's "Revoke" | the popover re-opened lists one client fewer, with no refresh (`s21`) |
+
+**THE WALK — Terminal (light)** — the voice switched in Settings ▸ General (a synced setting the restore puts
+back); the icon's tint is the voice's accent, so the faces again: W2 (List + the popover — `t01`, `t02`), W3 (Cards
+— `t03`), W4 (Timeline — `t04`), W6 (⌘L, the bare "elsewhere", the popover — `t05`, `t06`), W8 + W9 ("elsewhere" in
+the Library, the Book Panel — `t07`, `t08`), W10 (the Pool — `t09`).
+
+**W13 — VX-272, last (Terminal):** Settings ▸ MCP ▸ Clients ▸ **Deny…** each approved client (each confirm's title
+read by accessibility before its Deny is pressed by description) → the Library List, Cards, ⌘L and the Bookcase:
+**no icon anywhere** (`t10`, `t11`, `t12`) — the ≥1-approved-client rule, live.
+
+**Cleanup (C1–C6):**
+- **C1:** quit the dev instance by identity; `pgrep` empty.
+- **C2:** `Tools/ScaleFixture/restore.sh "<S4's scale-prestage dir>"` → "Restored (verified)" (it removes the
+  fixture-era WAL first, copies back, `cmp`s every file); then each restored file `cmp`ed against S2's own prestage
+  copy too — every one SAME. This puts back the fixture, the grants, the denials, the open-book flips, the voice and
+  every act.
+- **C3 — prefs:** `defaults import io.lduarte.Variorum.debug <scratch>/prefs-before.plist`, a fresh export diffed
+  against it — **identical** (the walk moves the window frames, `wing.current`, the backup log, `IdleCommitSweepMark`;
+  the appearance pref goes back with it).
+- **C4 — clipboard:** `pbcopy < clip-before.txt`, then `pbpaste | cmp - clip-before.txt` — SAME. (This walk copies
+  nothing; the save is insurance.)
+- **C5 — POSTURE AS LEFT:** the dev store's files `cmp`-SAME with the prestage, so it is exactly as S5 saw it —
+  **Standard, unlocked**, Study. No relaunch to "check" (a launch writes a WAL and a backup — it would un-SAME what
+  was just verified). Her clipboard and the Debug prefs restored. No Variorum instance left.
+- **C6:** the claim RELEASED at once; the record's U2 rows flipped with the counts, the captures listed, the one-line
+  result for the coordinator.
 
 ## The ladder
 
