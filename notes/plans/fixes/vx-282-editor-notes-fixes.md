@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS** — VX-229: fix REVERTED `7d798f82` (its offscreen evidence was an artefact — CORRECTION below); pins reshaped; expected HOLLOW, W1 decides. VX-257: pins `7650b6ce`; fix (this commit), offscreen replay red-on-old → fixed; stage PENDING. Old products `DerivedData/vx282-u5-old-products` = the build of `7d798f82` (no revert in flight). VX-183 NEXT; VX-182 NOT-STARTED. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS** — VX-229: fix REVERTED `7d798f82` (its offscreen evidence was an artefact — CORRECTION below); pins reshaped; expected HOLLOW, W1 decides. VX-257: pins `7650b6ce`; fix (this commit), offscreen replay red-on-old → fixed; stage PENDING. Old products `DerivedData/vx282-u5-old-products` = the build of `7d798f82` (no revert in flight). VX-183: declared + rendered from the rule (this commit), pins PENDING the stage. VX-182 NEXT. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -1672,6 +1672,43 @@ draft's landing.
 its sheet has its own park instance (refusal-only), and its close roads (the dim-tap, Done, the projection's auto-close)
 still drop an unsubmitted draft. Her ruling named the Mac popover. The shared type's two additions default to the phone's
 behaviour. A VM ticket candidate for the phone's own click-away (for the orchestrator).
+
+#### VX-183 — the panel's doors, declared (debt, not a bug — no red-on-old pin owed)
+
+**What was true (against `d9e1eaf2`):** the panel rendered six doors inline — the composer's Add
+(`CommentsPanel.swift`, the composer's foot), a live row's Save and Revert inside `if dirty { … }` then Delete
+(`stampLine`), a deleted row's Restore and Delete forever… (`deletedRow`) — each a hand-built `Button` with a
+`CommentsPanelCopy` word, and NONE declared in the capability registry (`CommentsPanel` had no `surfaceCapabilities`;
+VX-179 U1's O-2). P-1: every act declared once, surfaces render FROM the registry, gating is data; the grow-as-touched
+precision brings them in as panel work touches them (VX-257 did). Nothing behaved wrongly — so, per the brief, no
+red-on-old pin: the pins below hold the declaration whole and prove nothing moved.
+
+**Built (`Registry/Capability.swift`, `Registry/CapabilityRegistry.swift`, `CommentsPanel.swift`; one walk line in
+`CapabilityRegistryTests`):**
+- Six ids — `addComment`, `saveComment`, `revertComment`, `deleteComment`, `restoreComment`, `deleteCommentForever` — each
+  a `.surface` act, `.block` scope, `takesAccess: .native` (R118 — the Takes board hosts the panel natively), keyless
+  (⌘⏎ and ⎋ are the panel's local monitor's, said by the composer's hint line — not menu keys), `availability: always`
+  (the panel IS the context — the `.deleteNow` posture), an `unavailableNote` naming the road. **The verbs are the
+  panel's words** ("Add", "Save", "Revert", "Delete", "Restore", "Delete forever…") and `CommentsPanelCopy`'s six door
+  words now READ them from the registry — one source.
+- **Gating as data:** `CommentsPanelDoors` — `composer` `[add]`; `liveRow(dirty:)` `[save, revert, delete]` /
+  `[delete]`; `deletedRow` `[restore, deleteForever]`; `emphasis(_:)` (primary: add, save, restore; quiet: the rest).
+  The view renders each row by iterating the rule through ONE builder (`doorButton(_:on:)` — the registry's verb, the
+  rule's emphasis, Delete forever's tooltip) — the same doors, order, words and emphasis as before. The Add door's
+  enablement stays `CommentComposition.filing`'s pure answer (`isAddDraftFilable`).
+- **One dispatch:** `CommentsPanelModel.act(_:on:)` — every rendered door acts through it by its declared id (Delete
+  forever only ASKS there; the confirm is the act, unchanged). A non-panel id is a DEBUG assertion.
+- `CommentsPanel.surfaceCapabilities = CommentsPanelDoors.all`; the registry walk unions it (a JUSTIFIED EDIT — a new
+  renderer is a new line), so declared ⇔ rendered holds by construction — and the fold's purge door is walked as living
+  in a trash surface only.
+
+**Pins — `CommentPanelDoorsTests` (new) + the walk line (all PENDING the stage; none red-on-old by design):**
+`eachDoorIsDeclaredOnceAsASurfaceActInThePanelsOwnWords` (each declaration's door set, scope, Takes access, no chord, the
+shipped word — and the copy reading it) · `theRowsRenderTheSameDoorsInTheSameOrder` (the rule's table = the old
+if-statements, emphasis included; the panel declares exactly the six) · `deleteForeverIsATrashSurfaceDoorOnly` ·
+`everyDoorActsThroughTheOneDispatch` (Add files, Revert puts back, Save writes, Delete folds, Restore returns, Delete
+forever asks and the confirm takes it — against the store) · `CapabilityRegistryTests
+.theSurfacesRenderExactlyTheDeclaredSurfaceActs` (its new line). The walk (W3) presses each door live.
 
 ## Ladder
 

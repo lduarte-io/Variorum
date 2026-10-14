@@ -1116,6 +1116,60 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "Comments live on a block — open a note first.",
             // The bars' block menus carry the door in Write/Takes/Lenses.
             availability: takeFamily),  // NIT-3: the one named rule, not a copy
+        // VX-183 (the VX-282 run, U5 — VX-179 U1's O-2): THE PANEL'S OWN SIX
+        // DOORS. `.surface` acts — each sits on the row whose comment it acts
+        // on (the `.restoreTake` / `.deleteNow` shape), so no menu, bar or
+        // palette door exists and none may grow without a ruling. The verbs
+        // ARE the panel's words (sentence case, her no-shouty-caps rule — the
+        // panel renders `verb`, so a word changed here changes there and
+        // nowhere else). Available wherever the panel is open: the panel IS
+        // the context (`always`, the `.deleteNow` posture); which row shows
+        // which door is `CommentsPanelDoors` — per-row state, as data. Every
+        // write refuses in the operations' own words (the seal, a race), the
+        // panel speaking them (P-2). Keys: ⌘⏎ and ⎋ are the panel's local
+        // monitor's (Add/Save and the ⎋ ladder), not menu keys — the
+        // composer's hint line says them, so no `shortcutLabel` is declared.
+        Capability(
+            id: .addComment, verb: "Add", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A comment is added in its block's comments panel — Comments… (⌘⇧') opens it.",
+            availability: always),
+        Capability(
+            id: .saveComment, verb: "Save", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A comment is saved where it is edited — its block's comments panel.",
+            availability: always),
+        Capability(
+            id: .revertComment, verb: "Revert", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Revert puts an edited comment back — in its block's comments panel.",
+            availability: always),
+        Capability(
+            id: .deleteComment, verb: "Delete", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A comment is deleted from its block's comments panel — it waits under Deleted there.",
+            availability: always),
+        Capability(
+            id: .restoreComment, verb: "Restore", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A deleted comment waits under Deleted in its block's comments panel.",
+            availability: always),
+        // The comment's PURGE door — the evolved rule's letter: purge doors
+        // live in trash surfaces, never in the writing flow, and the panel's
+        // deleted fold is one (it lists only what is already deleted — her
+        // R-VX179-3 placement). Confirms every time (the Delete Now posture).
+        Capability(
+            id: .deleteCommentForever, verb: "Delete forever\u{2026}", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Delete forever lives under Deleted in a block's comments panel — "
+                + "only for a comment already deleted, and it asks first.",
+            availability: always),
         // 13c Stage 1 ladder, R2-2 — her A13(a), ruled into the friction
         // batch by K2 and built here: "callouts (a) in Takes/Compare/Lenses
         // + a shortcut". Both halves were ONE declaration edit plus the
