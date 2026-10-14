@@ -1659,3 +1659,322 @@ typed instead as ⌥e a and ⌥⇧9.
   - Before ANY edit to `WorkspaceModel`, `ShellRouter`, `Registry/ShellActions.swift` or a registry file, the
     implementer records it and stops; the orchestrator tells vx-283 first.
 
+
+## U6a UNIT RECORD — Compare from the wire: VX-311 · VX-298 (opus-implementer, from 2026-10-14 ~15:40 MDT)
+
+**NOT DONE YET (the record's first line, per the contract): no product code, no pins.** This session read in, traced
+both members, and wrote the design and its forks below. It STOPPED for the orchestrator's rulings (the brief reserves
+"which op `duplicate_note` wraps", "where the copy lands and what reach decides it", and the edges the tickets leave
+open), and for the LANE edits that need vx-283 told first (`Registry/CommandRouter.swift`, possibly
+`Registry/Capability.swift`). No trace reached the editor seam (the Compare board's cells are `PaneSurface` panes over
+`PaneTextAuthority`, but the design only calls the board model's existing slot API — no seam file is edited).
+
+**Read in (in full, this session's own context):** CLAUDE.md + its canon; this record's header, Hard rules, LIVE STATUS,
+Cross-run coordination, Her rulings, the U6 BRIEF, THE ORCHESTRATOR ON U5's WINDOW, U5b's D1 + its RULINGS + D6;
+`notes/MCPSpec.md`; `notes/SessionResiliencyProtocol.md`'s implementer section; VX-246's U3 act table (the COPY row). Code:
+`MCPShowTool.swift`, `MCPNavigator.swift`, `MCPDoor.swift` (agentShow/openShow), `CompareBoardView.swift` (the model
+whole, the view's lifecycle), `NotePicker.swift`, `Queries.notePickerNotes`, `Queries.blockKinship` + the lineage walk,
+`versionPeerPosts`/`versionPeerSplit`, `MCPWriteTools+LinkVersions.swift`, `Operations+Versions.swift` (duplicate, the
+copy machine), `Operations+NoteVersions.swift` (save/promote), `Operations+MCPCarriage.swift` (`saveVersion`), the
+wire's `create_note`/`save_version` arms, `MCPWriteTools+WingMove.swift` (the two-sided guard), `MCPMintedBlocks.swift`,
+`MintedBlockTakes`, `copyFan`, `registerMintedContainerEntry`, `mcpNoteFacts` + the fence legs, `MCPGrantRule.decide`.
+
+### LIVE STATUS — U6a's pieces (flipped in the same commit as each piece)
+
+| # | piece | status |
+|---|---|---|
+| 0 | read-in, the traces, the design, the forks, the lane flags, the draft live legs | DONE (this commit) |
+| 1 | the orchestrator's rulings on F-1…F-9 + the lane edits told to vx-283 | PENDING (the orchestrator) |
+| 2 | VX-311 seam (core): the copy machine says what it minted (`PlacementCopyOutcome`/`PostCopyResult` carry `[MintedBlockTakes]`; `MintedBlockTakes` gains `sourceBlockID`; `duplicateAsVersion`'s body extracted, behaviour unchanged) + the encoder's one field | NOT-STARTED — D-311-3/4 |
+| 3 | VX-311 pins (core acts + wire), RED on the seam tree | NOT-STARTED — D-311-8 |
+| 4 | VX-311 fix: `Operations.duplicateNoteForClient` + `duplicate_note` on the wire (+ the app's words) | NOT-STARTED — D-311-1…7 |
+| 5 | VX-298 pins (headless show + link receipt; the app's landing pins compiled) RED | NOT-STARTED — D-298-8 |
+| 6 | VX-298 fix: `.compare` target (wire), its delivery and the board's landing (app), link_versions' Open › | NOT-STARTED — D-298-1…7; lane edits only after piece 1 |
+| 7 | revert checks (announced here first, committed before reverting) | NOT-STARTED |
+| 8 | headless finals (MCP · core · workbook) + `xcodebuild build-for-testing` into `App/Variorum/DerivedData/vx336-u6` | NOT-STARTED |
+| 9 | LIVE LEGS for U6b's window (final form) | DRAFT below |
+
+### The traces (written before code)
+
+**VX-311 — why a `create_note` draft opens Compare empty.** Compare's rows align by `Queries.blockKinship(anchor, other)`
+(`TakesQueries.swift:235`): each placed block of `other` maps to its nearest kin among `anchor`'s placed blocks by walking
+`derived_from` edges ONLY (`Lineage.swift`'s `lineageWalk`, `e.type = 'derived_from'`). A `create_note` draft mints fresh
+blocks with no edge to anything → `kinship[peer] = [:]` → `CompareViewModel.compositionInputs` with `relatedOnly` ON (her
+default, #47(c)) filters every peer block away (`CompareComposition.relatedOnly`) → the peer column is empty and the
+board's honesty line shows. Even `link_versions` doesn't fix it: its `version_of` edges are not walked by kinship (its own
+description says so). Her Duplicate as Version (`Operations.duplicateAsVersion`, `Operations+Versions.swift:209`) runs
+`copyPost` → `copyPlacements`, which inserts ONE `derived_from` edge per copied block (`insertLineageEdge(from: copy, to:
+source)`, `:792`) plus one `version_of` anchor (`:653`) — so every copy block has kin at depth 1 and Compare aligns row
+for row. The wire has no road to that op today (no tool; `save_version`'s copy is born archived + sealed and lives only
+in Note ▸ Versions — `mcpNoteFacts` reads a version as nil, so a client can't even address it).
+
+**VX-298 — why the AI can't open Compare.** `show_in_app`'s targets (`MCPShowTarget`, `MCPShowTool.swift:13`) are note ·
+takes · lens · book · wing; the parse refuses any other `target` (`:173`). Delivery (`MCPNavigator.deliver`) has no
+Compare road: the board (`CompareBoardView`, mode `.compare`) fills its peer columns only from her picker
+(`setPeer(slotID:postID:)`), `makeOutlinePost` (`peerSlots[index].postID = …`, `:810`), or the one-time auto-fill of the
+first same-wing version peer (`adopt`, `:373`). `link_versions`' receipt carries `show: .note(noteID: noteA, …)`
+(`MCPWriteTools+LinkVersions.swift:118`), so its Open › opens note A in whatever mode it remembers — never A|B.
+
+### The design — VX-311 `duplicate_note` (argued; the forks it leaves are below, NOT built until ruled)
+
+**D-311-1 — WHICH OP IT WRAPS: `duplicateAsVersion`, the direct op (argued; the brief's "argue which").** Her other road
+(`saveNoteVersion` then `promoteNoteVersion`) is NOT the same result, measured against the code:
+- **tags:** `duplicateAsVersion` rides the note's tags (`copyLiveTags`, 17y item (c), her ruling); `mintNoteVersion`
+  copies none, and `promoteNoteVersion` adds none → the promoted copy is untagged;
+- **the date:** `mintNoteVersion` drops `entry_date` (V3 — "a saved moment is not a day"); the duplicate keeps it;
+- **commits:** `mintNoteVersion` seals, so it auto-commits every dirty copied take first (LR1-2); the duplicate's takes
+  are born with no commits (the copy doctrine);
+- **undo:** `saveNoteVersion` registers ONE entry, `promoteNoteVersion` NONE — two acts, and ⌥⌘Z would tombstone a note
+  she now sees as live but registered as a "Save a Version"; the wire would need two transactions or a new composite;
+- **her door:** Duplicate as Version is the visible door (the Takes board's ▾, the Library row, the chip's menu), and its
+  copy machine is the one Compare's kinship reads.
+So the tool wraps `duplicateAsVersion` exactly — ONE transaction, ONE client-named ⌥⌘Z, `saveVersion`'s precedent beside
+`saveNoteVersion` (`Operations+MCPCarriage.swift:86`: the op's own body with the caller's `WriteGuard` FIRST inside the
+transaction and the client's label). Her own words ("save the note as a version and immediately promote the version")
+describe the EFFECT she wants — a duplicate — and this is her own door for it.
+
+**D-311-2 — WHERE THE COPY LANDS, AND WHAT REACH DECIDES IT (FORK F-1; (a) recommended).** Her door's copy lands
+**bookless in the source's wing** — that wing's Pool: `copyPost` sets `wingId: source.wingId` (`:642`) and "reading
+memberships … deliberately do NOT ride" (`:191`). So the reach is `move_note_to_wing`'s two-sided shape
+(`MCPWriteTools+WingMove.swift`, R1), applied:
+- the SOURCE: the note at **READ** through the ordinary rule (any note, book or wing grant reaching it; the open book;
+  `consumes: true` — a copy reads its content, so a once READ grant is spent by it, AF-7 as amended);
+- the LANDING: the source's (resolved) wing at **WRITE NEW** through `decideWing` — a wing grant on THAT wing. A book
+  grant can never name where a bookless note lands, and the open book is read only (R1's words). So a client whose
+  write-new reach is a BOOK can't duplicate: honest, since the copy lands outside the book.
+- **the snapshot** decides both and raises ONE ask (the source's READ ask, or else the wing's WRITE NEW ask); the act runs
+  behind a guard that decides both AGAIN on one standing read inside its own write transaction and stamps the once grants
+  of both sides there as ONE union (both spend or neither; a refused act spends nothing) — `guardWingMove`'s shape.
+- An unreachable source (missing, tombstoned, a version, a scraps group, unshared, fenced without a per-ask grant)
+  answers the ONE not-shared shape, byte-identical — the rule's own `missingTarget`/`notShared`; nothing is minted.
+- **F-1 options:** (a) as above — her door's landing, wing-level write new (RECOMMENDED: no invention, R1's precedent);
+  (b) an optional `book_id`: the copy also joins that book at its end, decided `into(.book)` at write new (a book-level
+  client could then duplicate — but no door of hers files a duplicate into a book; it would be a new act, and Diverge,
+  her one book-level copy door, swaps the membership instead); (c) the copy joins every book the source is in (rejected:
+  not her door; an owned book would refuse or fork).
+
+**D-311-3 — THE FENCE: a fenced source refuses (FORK F-2; (a) recommended, PROVISIONAL P-VX311-1).** Traced: the copy
+keeps the fence's leg 1 (`profile = 'journal'` rides `copyPost`), but LOSES legs 2 and 3 — membership in THE daily
+Journal and membership in a Private book do not ride (no memberships do), and the note's OWN Private mark doesn't ride
+either (`copyPost`'s `Container(…)` never sets `ai_private_at`). So a client holding a per-ask grant on a Private note
+(or a daily-Journal member) plus wing write new could duplicate it into an UNFENCED copy — readable afterwards under the
+wing grant forever (after its once grant is spent), by every other client with wing reach, and by the open book. That
+expands the writer's own reach (P-13nb-U4-16's principle) and opens her fence from the wire. For an UNFENCED source no
+expansion exists: a wing grant already reaches every unfenced note of its wing, so the copy's reach ⊆ the source's.
+- **(a) RECOMMENDED:** a fenced source the client CAN read (its live per-ask grant) refuses at the snapshot and again in
+  the guard, minting nothing, with one sentence that names no leg (FOR VX-234): *"This note is shared with you only per
+  ask, so it can't be duplicated — a copy would reach further than the note does. The author can duplicate it in
+  Variorum."* No oracle opens for an UNREACHED fenced note (it never gets past the rule: the one not-shared shape). The
+  holder learns only that its note is per-ask — which its own grant's road already implies (a per-ask grant is never
+  "always").
+- (b) carry the source's OWN Private mark onto the copy, and refuse only the membership legs (rejected by R-VX184-2's
+  letter: "no MCP road writes `ai_private_at`", a copied mark included);
+- (c) allow, as her own door does (rejected: the expansion above).
+
+**D-311-4 — THE ANSWER: U5b's D1 records, from what the copy MINTED (FORK F-3 and F-4 on two edges).**
+```json
+{"note_id": "<copy>", "source_note_id": "<source>", "block_ids": ["…"],
+ "blocks": [{"block_id": "…", "source_block_id": "…", "shown_take_id": "…", "takes": [{"take_id": "…", "label": "…"}]}],
+ "landed": "the Pool of Home"}
+```
+- **Built from the copy machine's own rows, never a second read** (D1's ruling): `copyPlacements` already holds, per
+  block, `copied.variants` (in source fan order), `copyIDs`, `chosenCopyID` and `defaultCopyID` (`:769–782`). The seam:
+  `PlacementCopyOutcome` gains `minted: [MintedBlockTakes]`, appended per copied block (additive — every caller of the
+  copy machine is byte-unchanged in rows); `PostCopyResult` gains `blocks: [MintedBlockTakes]` (a `var` with a default,
+  outside its custom `==`, so every existing construction compiles unchanged); `MintedBlockTakes` gains
+  `sourceBlockID: String?` (nil for every mint) and an internal memberwise init.
+- **`shown_take_id`** = the read-time rule applied to the minted rows: the chosen copy while it is an ACTIVE take, else
+  the default copy (an archived chosen renders the default — AppSpec §7's fallback, read_note's own,
+  `MCPNoteStructure.swift:152`). D1's note that a copy's shown take need not be first in its fan is exactly this case.
+- **`takes`** (F-3): (a) RECOMMENDED — the copy's ACTIVE takes, in the store's fan order (sorted by the copies' own
+  `(fan_position, id)`, so the records equal what `read_note(with_ids)` will list — the V252-a equality, pinned); archived
+  copies ride the note (her door) but are out of the fan, as read_note's resting answer has them. (b) every copied take,
+  archived ones marked `"archived": true` (read_note's `include_archived` vocabulary — one more field on the shared
+  encoder).
+- **`source_block_id`** (F-4): (a) RECOMMENDED — each record names the block it was copied from, so a client that read
+  the source with ids can edit "the copy of block X" without positional guessing (U5b's "nothing anywhere is positional").
+  One optional field on THE encoder (`MCPMintedBlocks.records` emits it only when set; `create_note`/`insert_blocks`
+  answers byte-unchanged). (b) no mapping (the client reads the copy, or matches by order).
+- `block_ids` kept beside `blocks` (F-6's compatibility reading — every minted-note answer carries it); `landed` says
+  where the copy is, in `move_note_to_wing`'s words (`landedWords`: "the Pool of Home" / "the Pool of “X”").
+
+**D-311-5 — THE UNDO ENTRY: `registerMintedContainerEntry`, her door's own helper (U2's rule, answered).** Not
+`registerStructuralEntry` (D6's block-level helper): `duplicateAsVersion` registers through `registerMintedContainerEntry`
+(the VX-119 single-container pair, `Operations+UndoInverses.swift:546`), and the wire keeps it with the client's label.
+U2's question is answered by the helper: the inverse returns `false` when it tombstoned nothing (the copy already dead —
+her Delete, a sync tombstone), which RETIRES the entry; the redo revives only while the copy is dead on the stamp its own
+undo wrote. ⌥⌘Z on a copy she has typed in tombstones the whole copy into the Trash (her door's doctrine: "deleted posts
+are recoverable — nothing typed becomes unreachable"); Put back returns it whole. A NEW
+`Operations.MCPWriteAct.duplicate = "duplicate"` → "Undo claude-code's duplicate" / "Undid: claude-code's duplicate";
+`isUndoable` true (not a commit).
+
+**D-311-6 — `flushesHerEditorFirst`: TRUE, argued from U3's COPY row.** VX-246's U3 act table: `save_version` is IN
+because "the commit / the version misses her last words while answering success … her own Save Version flushes first".
+A duplicate is the same class — `copyPlacements` reads stored `working_text` rows — and her own Duplicate as Version
+flushes first: every door rides `AppSession.runCopying(from:)` (13e E10, "THE COPY FAMILY'S ONE ENTRY": "a row
+duplicated while its post is open and dirty must carry what she just typed"). So `Job.duplicateNote` answers `true`
+(a new top-level case in the exhaustive switch), and the flush runs in its own turn before the act's, whatever id the
+call names (P-VX275-1).
+
+**D-311-7 — THE WIRE.** NEW `Sources/VariorumMCP/MCPWriteTools+DuplicateNote.swift`: `Job.duplicateNote(noteID:)` (parse:
+`note_id` required; `additionalProperties: false`); `performDuplicateNote` (the snapshot's two decisions, the fence
+check, `land` spending nothing after the act — the guard spends inside the transaction); `guardDuplicate` (both sides + the fence, one
+standing read, one union). NEW core `Operations.duplicateNoteForClient(_:undoLabel:guardedBy:) -> PostCopyResult` in a
+NEW `Operations+MCPDuplicate.swift` — `duplicateAsVersion`'s transaction body extracted ONCE into an internal
+`duplicateAsVersionBody(_:_:)` that both call (so the two can never drift), the guard FIRST. Catalog: `duplicateNote` in
+WRITE NEW, `scopes: [.wing]` (it acts only under a wing grant — the W-UX-14 truth pin's sense), description below (FOR
+VX-234). The receipt: act `.duplicate`, target the COPY (`targetTitle` = its title), `show` per FORK F-5. App: the
+Activity words (`MCPPaneCopy`: "duplicating “X”" / "duplicated “X”"), the receipt phrase ("duplicated “X”" / "made N
+duplicates"). Answer P1: ∝ the copied note (the write itself); the decisions ∝ one note + one wing.
+
+**FORK F-5 — duplicate_note's Open ›:** (a) RECOMMENDED — the COPY (`.note(copy)`, every note-minting act's receipt);
+(b) Compare source | copy (`.compare(source, [copy])` — what the copy is for, but her answers (5) ruled Open › → Compare
+only for `link_versions`; the client can call `show_in_app` with the compare target when she asks).
+
+**D-311-8 — the pins (red-first; a new tool is red by its absence).** Core `Tests/VariorumCoreTests/
+MCPDuplicateNoteActsTests.swift`: the rows equal `duplicateAsVersion`'s (bookless in the source's wing, tags ride, one
+`derived_from` per block, one `version_of`, a sealed source legal, the copy never locked); a throwing guard writes
+nothing (the guard first); ONE entry labeled as given, its undo tombstoning the copy and its redo reviving it on the
+stamp, a copy she deleted staying deleted; the records equal the copy's live fans (active, fan order, labels, a shown
+take falling back past an archived chosen, `source_block_id`). Wire `Tests/VariorumMCPTests/
+MCPDuplicateNoteServerTests.swift`: read on the note + write new on the wing lands, `blocks` == `read_note(with_ids)`'s
+records of the copy, and `Queries.blockKinship(source, copy)` maps EVERY copy block (the VX-311 point); the unreachable
+source answers byte-identically to an unknown id and mints nothing; read on the note with only a BOOK write-new grant
+hears the wing's refusal and raises the wing's write-new ask; a fenced source under a live per-ask grant hears F-2's
+sentence and mints nothing; once grants on both sides spend as one union, a refused act spends nothing; the label on
+the stack and the receipt's act and show. `MCPHerEditorServerTests` (APPENDED, nothing modified): `duplicate_note`
+asks for her flush by name and the copy carries her latest words. Justified edits (the ritual): `MCPServerTests`' write
+new set and `MCPWriteServerTests`' suggest-proof completeness gain `duplicate_note`.
+
+### The design — VX-298 `show_in_app`'s Compare target + `link_versions`' Open ›
+
+**D-298-1 — THE TARGET: `.compare(noteID: String, peerIDs: [String])` (FORK F-6 on the wire's words).** (a)
+RECOMMENDED: `target: "compare"`, `note_id` (the first column — the note whose Compare opens) and `peer_ids` (one to three
+other notes, in column order — her board holds four, `addPeerSlot`'s cap; her answer (3)). The parse refuses, before any
+read: no `peer_ids`, not an array, empty, more than three, a non-string, a repeat, or `note_id` among them. (b) one list
+`note_ids` of two to four, the first the anchor.
+
+**D-298-2 — THE DECISION (read, never spending; the brief's order).** On ONE read: the anchor at READ, then each peer in
+order (`decide(…, rung: .read, consumes: false)`); the FIRST refusal answers with that note's refusal — the ONE
+not-shared shape for anything unreachable, byte-identical to an unknown id (`link_versions`' order, no ask raised:
+`show_in_app`'s own refusal road). Only after every note is decided (so nothing is told about a note the client can't
+read): (1) the SAME WING — every peer's resolved wing (`facts.wingID`) equals the anchor's, else one sentence (FOR VX-234:
+"Those notes are in different wings — each wing is a separate library, so Compare can't show them side by side."); (2)
+only notes HER PICKER WOULD OFFER — `Queries.notePickerNotes`' WHERE: a live, non-archived post of the anchor's wing, not
+the anchor (versions are archived, so `mcpNoteFacts` already answers them nil → not-shared); so an ARCHIVED peer refuses
+(FOR VX-234: "\(title) is archived — Compare offers only notes in the library (unarchive_note first).") — FORK F-7: (a)
+the anchor may be archived (she can open an archived note and press ⌘5; the picker's rule binds the PEERS), (b) refuse an
+archived anchor too. Cost ∝ the named notes (≤ 4 facts reads + one archived read), never the corpus. Logged on the
+refusing side, else on the anchor ("showed you “A”").
+
+**D-298-3 — WHERE "related blocks only" IS DECIDED (FORK F-8; (a) recommended).** (a) The BOARD decides it when the
+landing lands, from its OWN projection — the kinship it computes to draw the rows anyway (`CompareViewModel.read` →
+`projection.kinship`, "verbatim, never re-derived view-side"). The target carries no posture (P-4: a signal, never a
+decision), the wire's read stays ∝ facts, and `link_versions`' receipt stays ∝ its pairs (VX-184 ladder round 2's P1
+shape — option (b) would make every `link_versions` call walk both notes' whole lineage just to word an Open › she may
+never press). (b) The wire computes it (`blockKinship` per peer in the decision's read) and the target carries
+`relatedOnly`: pinnable headless, at that cost.
+
+**D-298-4 — THE POSTURE RULE (FORK F-9; (a) recommended, PROVISIONAL P-VX298-1).** Her answer (2): *"related blocks only
+off when they have no history - that's fine"*; her answer (4): the board shows exactly what the AI named. (a)
+RECOMMENDED: ON only when EVERY named peer shares lineage with the anchor (`!kinship[peer].isEmpty` for each); otherwise
+OFF — so no named column opens filtered empty. (b) OFF only when NO peer shares any (a mixed set keeps her default ON,
+its unrelated columns showing the honesty note). One pure function on the board's pure brain:
+`CompareComposition.landingShowsRelatedOnly(peerKinships:) -> Bool` (app-side, beside `relatedOnly`), pinned in the app
+suite.
+
+**D-298-5 — THE DELIVERY (the lens target's model).** `MCPNavigator.deliver` gains `.compare(noteID, peerIDs)`: open the
+anchor (`open(noteID, in:)`, the mount wait), re-check `stillStanding()`, park the landing on the router
+(`commandRouter.pendingCompareLanding = CompareLanding(postID: noteID, peerIDs: peerIDs)`), then
+`requestMode(.compare, postID: noteID)`; a refused request clears the landing and answers false (→ `partialShowWords`).
+The board consumes it on appear and on change (the Lenses board's `consumePendingLensLanding` pattern; post-stamped, one
+round, a landing for another note left alone). `CompareViewModel.land(peers:)`: `autoFilled = true`; any departing
+column's live pane released through the model's existing `releaseLivePane(leavingPost:)` (4C's NIT-1); `peerSlots =
+peers.map { PeerSlot(postID: $0) }` — REPLACING the open columns (her answer (4)); the departed peers leave through the
+board's own leaving road (`onNotesLeft` in `peerSlots.didSet`, 18o U4); `relatedOnly = false` while the lineage is read
+(nothing named is hidden), and the first projection holding every landed peer applies D-298-4 once (later projections
+never flip it). No seam file is edited: the model's own slot API only.
+
+**D-298-6 — `link_versions`' Open › opens Compare A|B (her answer (5)).** The receipt's `show` becomes `.compare(noteID:
+noteA, peerIDs: [noteB])` — her press delivers it through `MCPDoor.openShow` (no etiquette gate: she is at the app), and
+⌥⌘O's last change follows. The posture comes from the board (D-298-3 (a)), so the call's cost is unchanged.
+
+**D-298-7 — the catalog and the words.** `show_in_app`'s description gains the target (FOR VX-234): *"…, "compare"
+(note_id + peer_ids — one to three other notes in the same wing: Variorum's Compare with note_id first and each peer
+beside it, replacing the columns open; rows line up where the notes share history, as duplicate_note's copies do, and
+"related blocks only" opens off when they don't) …"*; its schema: `target`'s enum gains "compare", a `peer_ids` array
+(1–3 strings). Activity: logged on the anchor, the existing words ("showed you “A”") — FOR VX-234 whether Compare is
+named. `link_versions`' description gains: "The receipt's Open opens the two in Compare."
+
+**D-298-8 — the pins (red-first).** Headless `Tests/VariorumMCPTests/MCPShowCompareServerTests.swift`: a read-shared pair
+delivers `.compare(A, [B])` and up to three peers in order, never spending a once grant; the parse's refusals; the anchor
+unreachable and a peer unreachable each answer the one not-shared shape byte-identically (logged on that side), nothing
+delivered; another wing's peer and an archived peer refuse in words AFTER the decisions; a version's id answers
+not-shared; not frontmost moves nothing. `MCPLinkVersionsServerTests` (appended): the receipt's `show == .compare(A,
+[B])`. All red on the old tree by absence ("target must be …") or by the old `.note(A)`. App (`App/Variorum/VariorumTests/
+MCPCompareLandingTests.swift`, compiled by build-for-testing here, RUN in U6b's batch — red on the old tree by
+compilation, the symbols absent): the landing replaces the columns exactly (a live pane on a departing peer released),
+a landing for another note is left alone, the posture rule (OFF for an unrelated pair, ON for a duplicate's pair, the
+mixed case per F-9), and `MCPNavigator` delivering `.compare` (the anchor opened, the mode Compare, the landing
+consumed).
+
+### LANES — the edits that need vx-283 told FIRST (the brief's rule; NOT made)
+
+- **`App/Variorum/Variorum/Registry/CommandRouter.swift`:** ONE stored property beside `pendingLensLanding` —
+  `var pendingCompareLanding: CompareLanding?` (observed, so a mounted board consumes it). Required by D-298-5: the
+  router is the session's choreography-intent home (`pendingWriteIntent`, `pendingTakesLanding`, `pendingLensLanding`),
+  and a feature never holds a sibling's model.
+- **`CompareLanding`'s home:** (a) RECOMMENDED — `Features/Takes/CompareBoardView.swift`, beside its consumer, so the
+  registry is touched in ONE file by three lines; (b) `Registry/Capability.swift` beside `LensLanding` (the precedent's
+  placement — a second registry file).
+- **Not touched:** `WorkspaceModel`, `ShellRouter` (the delivery uses `router.adopt` as the lens target does — a call,
+  no edit), `Registry/ShellActions.swift` (VX-342 is U6b's), any other registry file.
+
+### PROVISIONALs (with their options — the orchestrator files them at the merge)
+
+- **P-VX311-1** (F-2) — a fenced source refuses `duplicate_note`: (a) refuse, the leg unnamed [recommended]; (b) carry the
+  own Private mark, refuse the membership legs; (c) allow.
+- **P-VX311-2** (F-1) — the copy lands bookless in the source's wing, wing-level write new: (a) [recommended]; (b) an
+  optional `book_id`; (c) the source's books.
+- **P-VX311-3** (F-3/F-4/F-5) — the answer's edges: active takes only [a] vs archived marked [b]; `source_block_id` [a]
+  vs none [b]; Open › to the copy [a] vs Compare [b].
+- **P-VX298-1** (F-9) — related blocks only ON only when every named peer shares lineage [a] vs OFF only when none does [b].
+- **P-VX298-2** (F-7) — an archived anchor shows [a] vs refuses [b]; an archived peer refuses either way (the picker's rule).
+- **P-VX298-3** (F-6) — `note_id` + `peer_ids` [a] vs `note_ids` [b].
+
+### FOR VX-234 (user-facing words, as PLANNED — final list when built)
+
+- Undo label "Undo claude-code's duplicate" / receipt "Undid: claude-code's duplicate"; the receipt line "claude-code
+  duplicated “X”" / "… made N duplicates"; Activity "duplicated “X”" / refused "duplicating “X”".
+- `duplicate_note`'s description; the fence sentence (D-311-3); `show_in_app`'s compare clause and its two refusals
+  (another wing, archived); `link_versions`' Open sentence.
+
+### LIVE LEGS FOR U6b's WINDOW (DRAFT — the final form lands with piece 9; claim `vx336-u6`)
+
+Setup as U5's window (`vx336-u5`'s worked form: the Debug app, the tab key bound with zero clicks, a scratch `-s local`
+registration, her user-scope fingerprint before/after). Grants: Home · Edit · Always (covers read + write new on the
+wing). Prompts on STDIN (`--allowedTools` swallows a trailing prompt). Variorum FRONTMOST for every `show_in_app` leg
+(it moves nothing otherwise).
+- **L1 — duplicate an existing note, then edit the copy.** Fixture: a Home note "u6a source" with three blocks, block 2
+  fanned (two takes, the second chosen). Turn: `list_notes` → `duplicate_note(note_id)` → `edit_take` on the copy's block
+  1 shown take ("…edited by the AI"). Expect: the answer's `blocks` — three records, block 2's `shown_take_id` its second
+  take, each with `source_block_id`; `landed` "the Pool of Home"; the receipt "claude-code duplicated “u6a source”" with
+  Open ›; the copy in the Pool with the source's tags; the source untouched. Capture: the Pool row, the copy in Write.
+- **L2 — `show_in_app` Compare on the pair (rows line up).** Turn: `show_in_app(target: "compare", note_id: source,
+  peer_ids: [copy])`. Expect `{"shown": true}`; the window in Compare, source first, copy beside it, every row aligned
+  with lineage rails, "related blocks only: on", the edited block reading the AI's words. Capture in BOTH voices (Study,
+  then Terminal).
+- **L3 — an unrelated pair.** Fixture: a `create_note` draft "u6a stranger". Turn: `show_in_app` compare source |
+  stranger. Expect the board showing both whole, "related blocks only: off", no rails. Capture both voices.
+- **L4 — `link_versions`' Open › opens Compare A|B.** Turn: `link_versions(source, stranger, pairs: [block 1 ↔ its
+  block 1])`; she presses the receipt's Open › (or ⌥⌘O). Expect Compare with A then B, the relationship line naming
+  them versions, related-only off (no lineage). Capture.
+- **L5 — the etiquette.** With another app frontmost, the L2 turn answers the not-frontmost sentence; nothing moves.
+
+### OWED (for the orchestrator)
+
+1. The rulings on F-1…F-9 (and P-VX311-1…3, P-VX298-1…3) before pieces 2–6.
+2. Telling vx-283 about the `CommandRouter.swift` property (and `Capability.swift` if F-lane (b)).
+3. **Context:** this session is at ~380k at this seam. The build (pieces 2–9) is likely past the ~450k line in this
+   session; a FRESH implementer can build from this record alone (every design item names its file and line).
+4. No ticket proposed yet (none needed so far).
