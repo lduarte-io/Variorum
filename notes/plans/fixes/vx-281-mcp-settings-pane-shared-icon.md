@@ -130,7 +130,7 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 | kickoff: worktree, branch, in-flight row (main 94f0a2fb), tickets In Progress, this record | DONE (orchestrator) |
 | U1 — the pane in tabs | **UNIT CLOSED — DONE** (2026-10-13 ~22:35 MDT, opus-implementer): VX-199 · VX-205 · VX-232 (FIXED red-first) · VX-245's two MCP sites (`3d00a166`); red on old 4 issues; Mac batch 250/31 (one issue — VX-283's six lint sites); the walk in both voices DONE, dev store restored `cmp`-SAME. 3 PROVISIONALs (P-VX281-U1-1…3) for QUESTIONS at the merge; the cold review is the ladder's. See the U1 UNIT RECORD |
 | U2 — the shared icon | **UNIT CLOSED — DONE** (2026-10-14 ~00:20 MDT, opus-implementer): VX-268 — the one icon on every row the ask glyph marks + the ticket's book/gathering and Timeline rows; red first (core 43, Mac 27 issues on the seam), Mac batch 812/149 (one issue — VX-115's standing pin); the walk in both voices DONE, the dev store restored `cmp`-SAME against the original. 5 PROVISIONALs (P-VX281-U2-1…5) for QUESTIONS at the merge; the cold review is the ladder's. See the U2 UNIT RECORD |
-| the ladder | ROUND 1 CLOSED (~01:55); **ROUND 2 CLOSED** (~03:02 — 0B/0M/1m/4n: R2-1, R2-3 FIXED red-first; R2-2 DISMISSED AS HOLLOW; R2-4, R2-5 FIXED (cleanliness); the batch 657/91 with VX-283's six lint sites the one standing issue — see ROUND 2 — THE FIX PASS); NEXT the end-of-run FABLE round (her redirect) as the run's final round, its fixes by this same implementer |
+| the ladder | ROUNDS 1 + 2 CLOSED; **ROUND 3 — the end-of-run FABLE round — DONE** (~03:30, 0B/0M/0m/2n, recorded below); its two NIT fixes IN-PROGRESS (the implementer, under her cross-model rule) |
 | closeout | NOT-STARTED |
 
 ## FOR VX-234 (every wording call this run makes, where it renders — posted to VX-234 at close)
@@ -1157,6 +1157,64 @@ Every run goes through `notes/plans/vx281-screens/r2/run.sh <tree> <log> <suites
 2. **R2-2's call:** RED ⇒ `run.sh vx281-r2-n22 c-r22-patched MCPSharedIconClickTests` (expected all GREEN), the patch is committed (`git apply notes/plans/vx281-screens/r2/r22-ondisappear.patch`, `R2-2: …`), and the batch runs on `vx281-r2-n22`. GREEN ⇒ **HOLLOW**, the patch discarded, the batch runs on `vx281-r2-new`.
 3. **THE BATCH:** `run.sh <tree> b-batch @batch` (the 91 suites). **Standing reds, not ours (named if met):** VX-115's `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (not in this set); VX-167's order-dependent `LibraryInfiniteScrollTests` pair; `ChromeLineLimitTests`' six VX-283 sites.
 4. **Release the claim at once**; then the record — the verdicts per finding, the counts; delete the three trees.
+
+### ROUND 3 — THE END-OF-RUN FABLE COLD REVIEW (a fresh `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-281), 2026-10-14 ~03:30
+
+**Her redirect's Fable round** (no diff line earned an earlier one: the run touches no `Sync/`, custody, editor seam,
+schema or default's meaning). **Diff reviewed:** `a9ebe0a4..6ee71aa4` whole, round 2's four un-re-reviewed fixes
+line by line against their findings. **Tally: 0 BLOCKER · 0 MAJOR · 0 MINOR · 2 NIT** — "No new round is owed on
+this account; neither NIT needs a pin (both are cleanliness — no red-on-old test exists for either)." This is the
+run's FINAL round (the ladder's third, the cap): its fixes are read by no later round, so the orchestrator checks
+each line by line against its finding (her 2026-10-13 rule). The findings, verbatim:
+
+**F-1 [NIT] · `App/Variorum/Variorum/Features/MCP/MCPSetupMenu.swift:148–154`** · Overlapping ✓ flashes cut the
+second one short · `flash()` sets `copied = true` and spawns an unkeyed 1.6 s sleep that sets it `false`; a second
+copy inside the window spawns a second sleep, and the FIRST timer's expiry clears the second copy's ✓ after as
+little as a frame (press at t=0, again at t=1.5 → the ✓ drops at t=1.6, not t=3.1). Cosmetic, traced, unpinnable
+in any non-flaky way · Fix: a generation counter (`flashGeneration += 1; let g = …; after the sleep, if
+flashGeneration == g { copied = false }`).
+
+**F-2 [NIT] · `App/Variorum/Variorum/Features/MCP/MCPDoor.swift:520` (`copySetupCommand(for:)`)** · A direct caller
+naming a client other than the shown one leaves the OLD client's receipt standing under the NEW menu choice for
+the mint's duration · `if setupClient != client { setupClient = client }` changes the menu without clearing a
+standing `.connect` receipt (`chooseSetupClient` would); until the awaited mint returns and the end-state guard
+lands the new receipt, the pane shows exactly the VX-232 lie, transiently. Unreachable from any shipped face (the
+pane's icon always copies the shown client; only tests call with another) — a hazard for a future caller, not a
+live bug · Fix: route the change through `chooseSetupClient(client)` (keeps the no-op guard; clears a stale
+receipt), end-state guard unchanged.
+
+**Investigated and FALSIFIED by the reviewer (recorded so nobody re-chases it):** a candidate MINOR — the Settings
+search landing writing `mcp?.paneTab` (`AppSettingsView.swift:341`) while the MCP pane is already shown, with
+`paneTab` `@ObservationIgnored` and read only at `MCPPane.init` (`MCPPane.swift:108`). The mechanism does not
+complete: while a query is typed, `detail` swaps `paneBody` for `SettingsResultsPane` (`:331–344`, a different
+branch, so `MCPPane`'s identity dies), and `onOpen` sets `query = ""` before `pane = finding.pane`, so the pane
+always REMOUNTS through its init and adopts the just-written tab. The read-at-mount design is sound.
+
+**The reviewer's clean bill (condensed):** the lanes — zero `Sync/`, custody/keychain, editor-seam, schema,
+`Server/`, `Persistence/`, `Sources/VariorumMCP` lines; `MCPGrantRule.swift` untouched (R1-7's new
+`MCPGrantRule+Wing.swift` read-off faithful to `decideWing`); `SettingsShape.swift` edits only the two new MCP rows
++ the keyword move; no default changed meaning · round 2's fixes line by line (R2-1's pure exhaustive
+`drawsNoteRows` gating every re-arming road, the mounted pin on the real view, the answer sheet never un-held;
+R2-3's ranks verified in code, every landing as ruled, title==label pinned; R2-4 bounded, DEBUG-only, Release
+byte-equal; R2-5 no stale references) · round 2's evidence re-verified from its logs (8 issues exactly; R2-2's
+pins green, no patch committed; 657/91 with VX-283's six) and `git diff e55440e4..HEAD` excluding notes EMPTY ·
+one rule, one gate (`mcpReachStandings` nil before any `container`/`reading` read; shared `placeReach`;
+non-consuming probes; re-ran `MCPRowReachTests` + `MCPWingReachRuleTests` 8/8, O-4 2/2) · P1 (every hold sized to
+its host; the SQL-trace pins read; the autosave-rate wake bounded and equality-guarded; listed-books and wing
+holds never touch `container`) · R1's fixes sound at the tip · U1 against R-VX184-6 / VX-205 / VX-232 (every old
+section re-homed — the removals diffed against the tabs; the fit pins measure every line) · faces and
+declarations (the calm icon is no view; icon before the ask glyph; the menu's one-mark rule; every host declares
+`surfaceCapabilities`) · hygiene (no trailers across 63 commits; no literal colour; sentence case; SyncSpec §5
+read tolerance; the PROVISIONALs and FOR VX-234 rows complete; the closeout's OWED correctly deferred to the
+merge).
+
+**Round 3 dispositions** *(cross-model, her 2026-10-13 rule: the implementer agrees/disputes; Fable's call is
+final; the implementer applies; the orchestrator checks each fix line by line)*
+
+| # | Sev | Disposition | What changed (hash) | Orchestrator's line-by-line check |
+|---|---|---|---|---|
+| F-1 | NIT | PENDING | | |
+| F-2 | NIT | PENDING | | |
 
 ## Closeout
 
