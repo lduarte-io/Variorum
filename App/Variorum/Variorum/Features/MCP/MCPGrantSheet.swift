@@ -282,6 +282,8 @@ struct MCPGrantSheet: View {
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
+                // P-8 (VX-245): a segmented control's labels are one line.
+                .lineLimit(1)
                 .fixedSize()
                 ForEach(durationWhys, id: \.self) { why in
                     quiet(why)

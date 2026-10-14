@@ -409,6 +409,8 @@ struct MCPSetupMenu: View {
             }
             .pickerStyle(.segmented)
             .labelsHidden()
+            // P-8 (VX-245): a segmented control's labels are one line.
+            .lineLimit(1)
             .fixedSize()
             .padding(.top, 4)
             Text(client.sentence)

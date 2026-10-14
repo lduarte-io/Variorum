@@ -216,9 +216,9 @@ lines; `SettingsShape.swift` untouched; `TutorialSeeder` untouched (VX-197's lan
 
 | # | Piece | State |
 |---|---|---|
-| 1 | this record opened (traces, design) | DONE (this commit) |
-| 2 | VX-232's red-on-old pin + the geometry oracle, committed on the OLD pane; the old tree built for the red run | NOT-STARTED |
-| 3 | VX-245 — the two MCP `.fixedSize()` sites to `.lineLimit(1)` | NOT-STARTED |
+| 1 | this record opened (traces, design) | DONE (`05b5977b`) |
+| 2 | VX-232's red-on-old pin + the geometry oracle, committed on the OLD pane; the old tree built for the red run | DONE (`341e8991`, `98a74f96`) — `MCPPaneTabsTests` (`aRemountedPaneShowsTheClientItsCopyReceiptNames`, `aFreshPaneOpensOnConnectWithItsCodeBlockInSight(voice:)`); the OLD tree built from `98a74f96` (old pane + the two pins) into `DerivedData/vx281-u1-old` (`** TEST BUILD SUCCEEDED **`) — the red run is STAGE WINDOW 1's (PENDING) |
+| 3 | VX-245 — the two MCP `.fixedSize()` sites to `.lineLimit(1)` | DONE (this commit) — the lint's rule replicated over the source (`scratchpad/u1/lint.py`, the suite's exact rule: a code line's bare `.fixedSize()` needs `lineLimit(` within the four lines above or on its line): **old tree `98a74f96` → 89 sites, 8 offenders** (exactly VX-245's list, `MCPPane.swift:412` and `MCPGrantSheet.swift:285` among them); **this commit → 89 sites, 6 offenders** — `SearchPicker.swift:503`, `TakesShowFaces.swift:185`, `LibraryBulkRow.swift:93/101/109/113`, all VX-283's, untouched. The suite stays red on those six (recorded, not this run's); the Mac run reads it at STAGE WINDOW 1 (PENDING) |
 | 4 | `ExplainerLine` + the one-line summaries (`MCPPaneCopy`) + FOR VX-234 rows | NOT-STARTED |
 | 5 | VX-232's fix — the door holds the setup choice and the tab memory | NOT-STARTED |
 | 6 | VX-205 — the setup menu as the code block (`MCPSetupMenu.swift`) | NOT-STARTED |
