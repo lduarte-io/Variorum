@@ -112,7 +112,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-290 — the empty-block backspace's caret landing | IN-PROGRESS — **W1 RED ON OLD DONE, W2 MAC BATCH GREEN** (stage `vx282-u1` 21:58:14–22:01:26, released; record below). **W3, the walk, is HELD** on the coordinator's word (she may be on the Pro) — next: on the orchestrator's "W3 GO" + claim line, walk rows A–D, record, flip to DONE. Fix `385aa1fc`. No revert in flight. |
-| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | IN-PROGRESS — core parser + gate + ledger DONE (`962a7305`, headless 106/7 green); the Mac + phone live pins committed AHEAD of the fix (`44ad276b` — the app code there is still pre-fix). NOW: building the red-on-old products FROM `44ad276b` itself (no revert — that tree is the pre-fix app over a nil-caret core that reads byte-identically) into `DerivedData/vx282-u2-old` (Mac) and `vx282-u2-old-ios` (phone); then the face + wiring. No revert in flight. |
+| U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **READY FOR STAGE — W1 red-on-old (Mac + phone), W2 the Mac batch (2 groups, 26 suite types), W2b the phone batch (10 suite types), W3 the walk rows A–C (+ the second voice), ≈45 min without U1's walk.** Fix `75b45ca9` (face + Mac) + `657bb57c` (phone); core `962a7305`; pins `44ad276b` (ahead of the fix). Headless: core 2,799/320 · MCP 212/41 · workbook 40/6 green; the four products built (old/fixed × Mac/phone). No revert in flight (none needed). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | NOT-STARTED |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | NOT-STARTED |
 | U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | NOT-STARTED |
@@ -368,7 +368,175 @@ PRE-edit selection (a space typed at 6 reports `edited={6, 2}` with `sel={6, 0}`
 with the landed caret (`{7, 0}`), then `textDidChange`. `didChangeSelection` also fires for an edit that leaves the
 caret still (forward-delete) and for a same-range `setSelectedRange`; a raw storage edit AFTER the caret fires none.
 So the Write editor's keystroke restyle cannot know the landed caret, and the selection change is the reliable
-"the caret has settled" moment on the Mac.
+"the caret has settled" moment on the Mac. (The same probe: `moveRight(nil)`/`moveLeft(nil)` move a windowless TK2
+view's caret and post the selection change — the pins' caret-move road.)
+
+**The road chosen, and why.**
+- **The rule lives in the parser, behind an optional caret that defaults to today's reading.**
+  `MarkdownSyntax.spans(in:caret:)` (`caret: Int? = nil`): the three closers consult one predicate,
+  `closerFlanks` — "not preceded by whitespace, OR the caret sits exactly here". The opener half is untouched. Every
+  existing caller passes no caret and reads byte-for-byte as before (the core markdown suites unchanged and green;
+  the exhaustive gate-soundness pin below). The alternative — a second matcher in the face — is the two-brains class
+  the one-tokenizer rule exists to kill; substituting a placeholder for the space before the caret would also flip
+  `_`'s word-start rule. So: one grammar, one extra input, nil = untouched for every non-live reader.
+- **The live surfaces keep their keystroke restyle caret-blind and byte-unchanged, and gain ONE settle step.** The
+  keystroke road cannot know the landed caret (measured above), so rather than guess it, every live surface runs
+  `MarkdownFace.settleCaret` when its caret has settled: an O(1) gate (`MarkdownCaretRescue.point` — the grapheme at
+  the caret is `*`/`~`/`_` and the one before it is same-line whitespace; the exact necessary condition of the
+  parser's rescue, pinned exhaustively) decides whether the caret could change the reading at all, and a tiny ledger
+  (`MarkdownCaretRescue.Ledger` — which line was last styled honouring a caret, shifted at every character edit,
+  OVER-claiming rather than ever under-claiming) decides which lines to restyle: the line a caret left (caret-blind)
+  and the line it arrived at (honouring it). Almost every caret move restyles nothing; the worst case is two LINES
+  (P1, pinned by scan count). Both platforms run the one brain.
+- **The caret parameter is the SELECTION RANGE at the face** (`restyle(…, caret: NSRange?)`), so the held 18e brief
+  (VX-293 — the faded marks' reveal rule wants the whole selection and a caret-move restyle occasion) can take this
+  door and this settle occasion as they are. None of 18e's feature is built.
+
+**Every live restyle occasion, and what each now does (Mac):**
+- **The Write editor + the book's inline editor** (`EditorViewModel`; the inline editor wires the same
+  `EditorSurfaceDelegate`): `storageDidEdit`'s top notes EVERY character edit in the ledger (suppressed programmatic
+  writes too — full renders, seam edits, `programmaticReplace`), before the suppress guard; the keystroke restyle at
+  `:1312-1320` is unchanged; `EditorSurfaceDelegate.textViewDidChangeSelection` now calls `settleMarkdownCaret()`
+  before `updateCaretContext()`. Paste, undo, ⌘I/⌘B, find-replace and the structural rewrites all end in a selection
+  change on this view, so each settles there.
+- **Every live pane** (`PaneSurfaceView.Coordinator` — Takes, Lenses, Index, Read's edit face, Write's take panel,
+  Blocks, Canvas): `shouldChangeTextIn` records the pre-edit range beside the existing `pendingEditRange`;
+  `textDidChange` notes it, keeps its caret-blind restyle, then settles (the selection has landed by then, measured)
+  before its remeasure (italics can rewrap); `textViewDidChangeSelection` settles on a pure caret move (skipped while
+  an edit is in flight — `textDidChange` follows and settles) and remeasures when a line was restyled; `noteLiveness`
+  clears the honour when a pane goes READ (a read pane honours no caret: the settle reads no selection while
+  `isEditable` is false).
+- **Unchanged, by nature caret-blind:** the full-render/materialize doors, the seam/programmatic rewrites' own
+  restyles, the voice/palette/appearance re-faces, the pane's refont/ink/face/read-adopt roads, the read tier, and
+  every non-face reader of the grammar (rendering, export, search, `TypedArrows`, `MarkdownEditing`'s acts).
+
+**The phone** (`MobileEditorViewModel` — its Write editor is the phone's only face wearer; the takes card editor
+wears none): `storageDidEdit`'s top notes every character edit (the Mac's line, before the suppress guard); the
+keystroke restyle at `:1906-1915` is unchanged; `settleMarkdownCaret()` runs the shared settle; and the ONE gate
+delegate (`MobileEditorGateDelegate`) gains `textViewDidChangeSelection` and `textViewDidChange`, each calling it — both,
+so the honour never depends on UIKit's ordering of the two reports against the storage edit's own restyle (a second
+settle with nothing changed writes nothing). **Mobile branch facts (for the catch-up's merge):** the long-lived
+`mobile` branch exists only locally (`~/dev/variorum-mobile`; no `origin/mobile` ref), and `git log main..mobile`
+lists ZERO commits — its tip `28ee417a` is the merge-base — so no file this unit touches has diverged there.
+
+**The diff (seven source files changed, one new core file, three new test files):**
+- `Sources/VariorumCore/Domain/MarkdownSyntax.swift` — `spans(in:caret:)`, `closerFlanks`, the caret threaded to the
+  three closers. `Sources/VariorumCore/Domain/MarkdownCaretRescue.swift` (new) — `point(in:selection:)`, `Restyle`,
+  `Ledger` (`noteEdit`, `settle`). *(Both outside the run's declared surfaces list, which names the face and the live
+  call sites; the brief allowed the parser's optional caret.)*
+- `App/Variorum/Shared/MarkdownFace/MarkdownFaceCore.swift` — `restyle(…, caret:)` (nil = byte-unchanged) and
+  `settleCaret` (one editing session for its ≤ 2 lines). `Theme/MarkdownStyling.swift` — the Mac forwards.
+- `Features/Editor/EditorViewModel.swift` (the ledger, the edit note, `settleMarkdownCaret`) ·
+  `Features/Editor/EditorView.swift` (the delegate's one call) · `Surface/PaneSurface.swift` (the coordinator) ·
+  `VariorumMobile/Features/Write/MobileEditorViewModel.swift` (the ledger, the note, the settle, the delegate's two
+  callbacks).
+- Zero `Sync/`, custody, Keychain, schema; nothing in `BlockRangeIndex`, `EditorTextView`, `EditorSurfaceController`,
+  `EditorEditRoute`/`SeamCarvePlan`, or `runStructural`. The settle writes ATTRIBUTES ONLY on ranges the tokenizer
+  computes inside one line (no identity attribute, no character, nothing registered with text undo).
+
+**The pins.**
+- **Core, headless — `MarkdownCaretRescueTests` (17 tests; NEW API, so not red-on-old by construction; GREEN):**
+  her `*hello |*` italic with the caret at `|` and plain everywhere else and caret-blind; `*hello w*` italic at every
+  caret; the family (`**hello **` caret-blind reads ITALIC over `hello *` today — bold with the caret; `~~gone ~~`;
+  `_so _`, `_so _x` still refused); the opener never rescued (`* hello*` at every caret); no opener, no rescue;
+  **arithmetic plain at EVERY caret position** (`2 * 3 * 4`, `2 ** 3 ** 4`, `a ~~ b ~~ c`, `2 _ 3 _ 4`, `x * y`, `* *`,
+  `**bold** and 2 * 3 * 4`); `*foo *bar*` byte-identical with no caret; **the gate's soundness** (19 texts × every
+  caret: wherever the gate says nil, the caret-aware reading IS the caret-blind one); graphemes (a combining space; a
+  caret inside a surrogate pair); the gate answers only an insertion point; the scan cost; the ledger (her typing
+  flow, leaving, going read, one line restyled once, the same-offset re-honour after an edit, edits elsewhere and the
+  widened report).
+- **Mac — `MarkdownCaretFaceTests` (the Write editor, `withEditor`, real `insertText` + arrow actions):**
+  `herFlowTypingInsideAnItalicPairNeverDropsTheItalicAtASpace` (⌘I's `**` + "hello world again" one keystroke at a
+  time; display == stored; every character of the block keeps its ID, the separator none; the audit never fires) —
+  **RED ON OLD**; `aBoldPairStaysBoldAtASpaceToo` — **RED ON OLD**; `leavingATrailingSpaceBehindUnstylesTheSpanHonestly`
+  (→ plain, ← italic, a selection plain, a click into the next block plain) — **RED ON OLD** (its italic expectations);
+  `arithmeticStaysPlainAtEveryCaretPositionAndAsItIsTyped` — GUARD, green both sides;
+  `aCaretMoveCostsAtMostTwoLinesAndNothingWhereItCannotMatter` (400 lines in one block: zero scans for moves that
+  cannot matter, ≤ 2 lines onto a rescue point, ≤ 4 lines between two) — its non-vacuity expectation **RED ON OLD**,
+  the rest green both sides.
+- **Mac — `PaneMarkdownCaretFaceTests` (a live pane in a borderless window, `.serialized`):**
+  `aLivePaneKeepsTheItalicWhileHerCaretSitsAfterTheSpace` — **RED ON OLD**;
+  `aPaneThatLosesTheCaretOrGoesReadUnstylesTheSpan` (→ plain, ← italic, the pane going read with its caret still parked
+  at the rescue point → plain, a caret placed in a read pane → plain) — **RED ON OLD** (its italic expectations).
+- **Phone — `MobileMarkdownCaretTests` (the real `MobileEditorTextView` in a key window, first responder,
+  `insertText`; Study, whose face has a real italic — a non-vacuity `#require`):** her flow — **RED ON OLD**;
+  leaving a trailing space — **RED ON OLD** (its italic expectations).
+- **Unchanged and expected green:** `MarkdownFaceTests`, `ProgrammaticReplaceFaceTests`, the identity audit suites
+  (`IdentityProjectionAuditWalkTests`, `MacIdentityAuditWiringTests`), the phone's `MobileMarkdown*Tests` and its
+  identity suite — the brief's "the existing face and parser suites green and UNCHANGED".
+
+**The red-on-old products — NO REVERT.** The pins were committed AHEAD of the fix (`44ad276b`), and that commit's
+app code is the pre-fix app over a core whose nil-caret reading is byte-identical (proven headless), so its products
+ARE the old tree: `xcodebuild build-for-testing` → `App/Variorum/DerivedData/vx282-u2-old` (Mac) and
+`vx282-u2-old-ios` (phone, `generic/platform=iOS Simulator`) — both **TEST BUILD SUCCEEDED**. The fixed products
+(the tree at `657bb57c`): `DerivedData/vx282-u2` and `vx282-u2-ios` — both **TEST BUILD SUCCEEDED**. No revert was
+ever applied; `git status` clean.
+
+**Headless counts:** `swift test` (whole core package, at the fix's tree): **VariorumCoreTests 2,799 tests / 320
+suites passed** (VX-184's closeout baseline 2,782/319 + this unit's 17/1), VariorumMCPTests 212/41, workbook 40/6 —
+all green. The markdown suites alone at `962a7305`: 106/7.
+
+**PROVISIONALs (QUESTIONS #219 — the number is main's next free one; renumbered at the merge if taken):**
+- **P-U2-1 — the opener side is not caret-aware.** Built (a) closer only — the ruling's letter and her typing flow
+  (forward typing inside a pair only ever puts the space before the closer; traced). The opener flips only when the
+  FIRST word is backspaced away (`*| world*`) or a space is typed right after the opening star. Option (b) the mirror:
+  arithmetic stays plain at every caret either way (one caret can never rescue both halves — an opener needs a
+  non-space right of it, a rescued closer a space left of it), but a star typed mid-line before a later closer
+  (`5 *| 3 and *wow*`) would show a long wrong italic while the caret sits there.
+- **P-U2-2 — every closer of the flanking family, not only `*`.** Built (a) `*`, `**`, `~~` and `_`; ⌘B's pair
+  flickered worse than ⌘I's (bold → an italic over `two *` with a stray star → bold). Option (b) the italic star only.
+- **P-U2-3 — ⌘I/⌘B keep reading the caret-blind grammar.** At `*hello |*` the face shows italics, but ⌘I does what it
+  always did at that one spot (inserts a new pair; one letter later it unwraps). Built (a) unchanged — the acts are
+  among the "every other reader" the ruling left untouched. Option (b) the acts read the caret-aware reading when
+  nothing is selected.
+
+**Edges recorded, not built (the accepted posture):**
+- A whole-surface re-face (a voice, palette or appearance switch; a pane's refont/ink/face road) is caret-blind: a
+  rescue in force at that instant returns at her next keystroke or caret move.
+- A raw programmatic storage write AFTER the caret on its own line, with no selection change, re-reads that line
+  caret-blind until the next keystroke or caret move (no such road is known on the caret's own block mid-typing).
+- The emphasis-nesting sibling the ticket names (`*a **b** c*`) is untouched — "ticket it if she ever hits it".
+
+**THE WINDOW PLAN (runs only on the orchestrator's claim line; `guard.sh --author` before every leg; no
+`/Applications/Variorum.app` instance before or after, no simulator booted by anyone else).** Logs and captures go to
+`notes/plans/vx282-screens/u2/` (`logs/` for the runs). From `App/Variorum/`:
+- **W1 — red on old (≈8 min):**
+  (Mac) `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+  DerivedData/vx282-u2-old -only-testing:VariorumTests/MarkdownCaretFaceTests
+  -only-testing:VariorumTests/PaneMarkdownCaretFaceTests -only-testing:VariorumTests/MarkdownFaceTests`.
+  EXPECTED: red in `herFlow…`, `aBoldPair…`, `leaving…` (italic expectations), `aCaretMoveCosts…` (its `arriving > 0`
+  only), `aLivePaneKeeps…`, `aPaneThatLoses…` (italic expectations); GREEN `arithmeticStays…` and the whole of
+  `MarkdownFaceTests`.
+  (Phone) `xcodebuild test-without-building -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone
+  17 Pro,OS=26.2' -derivedDataPath DerivedData/vx282-u2-old-ios -only-testing:VariorumMobileTests/MobileMarkdownCaretTests`.
+  EXPECTED: both tests red on their italic expectations, the identity expectations green.
+- **W2 — the Mac batch, fixed product `DerivedData/vx282-u2` (≈10 min), two groups (suite TYPE names, grepped):**
+  (g1) `MarkdownCaretFaceTests` `PaneMarkdownCaretFaceTests` `MarkdownFaceTests` `ProgrammaticReplaceFaceTests`
+  `MarkdownActsTests` `FormattingSurfacesTests` `MarkdownPaletteWritersTests` `IdentityProjectionAuditWalkTests`
+  `MacIdentityAuditWiringTests` `EditorSessionTests` `ReviewRoundFixTests` `CommitFlowTests` `FanFlowTests`;
+  (g2) `PaneSurfaceTests` `PanePublishDoorTests` `PaneFindFaceTests` `TakePaneMeasureTests` `TakePaneDurabilityTests`
+  `TakesCardHeightTests` `PaneRenderRestoreClipTests` `PlainPasteRuleTests` `PlainPasteDoorTests`
+  `IndexClickCaretTests` `InlineHeightReportTests` `WriteFloatingViewportTests` `UntouchedLineKeeperTests`.
+  Read the counts and the skips in the logs (a wrong name runs 0 tests and still "succeeds").
+- **W2b — the phone, fixed product `DerivedData/vx282-u2-ios` (≈6 min, the same simulator):**
+  `MobileMarkdownCaretTests` `MobileMarkdownRenderTests` `MobileMarkdownReturnTests` `MobileMarkdownActsTests`
+  `MobileCheckboxTapTests` `MobileEditorMaterializationTests` `MobileEditorRoutingTests` `MobileEditRoutingBindingTests`
+  `MobileIdentityAuditSeparatorTests` `MobileEditRoutingCrashTests`. Shut the simulator down after (`xcrun simctl
+  shutdown`), by the device id the run booted.
+- **W3 — the walk (≈20 min), the Debug app `DerivedData/vx282-u2/Build/Products/Debug/Variorum.app` on the DEV store
+  only** (`pgrep` first; dismiss a What's New sheet if shown). Stage the note through the shelf's quick-entry bar
+  (full strings land there): `{t:"VX-296 walk"}*hello*`; open it by ⌘K. In Write, keys only (`keys.sh`, one key per
+  call, ≥ 2 s apart; region captures before and after each row):
+  - **A (her flow):** the caret between `hello` and the closing star (⌘↑ then → ×6) → SPACE: capture — `hello ` stays
+    italic (right after the space) → `w`: capture (mid-word, italic) → `o` → SPACE: capture (italic again).
+  - **B (leaving):** → past the star: capture — the span is plain, the trailing space left behind → ←: capture —
+    italic again → a click on the note's title or another line: capture — plain.
+  - **C (arithmetic):** ⌘→, ⏎ (a new block), type `2 * 3 * 4` key by key: capture — no italics, no dimmed stars.
+  If synthetic keys drop characters in the TK2 editor (the walk kit's 13u3 note), stage A's states through the quick
+  entry instead (`*hello *`) and walk the caret half (B) only — the typing half is the pins'. Voice: the dev store's
+  current voice (recorded); then Study↔Terminal via Settings ▸ Appearance's AX road and repeat A's space capture and
+  B's leave capture; restore the voice found. Then the walk note to the Trash (residue recorded), quit OUR instance by
+  identity, re-check `pgrep`, leave the dev store Standard and unlocked, release the claim.
 
 ## Ladder
 
