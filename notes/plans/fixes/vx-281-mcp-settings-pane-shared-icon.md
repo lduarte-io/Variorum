@@ -115,7 +115,7 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 |---|---|
 | kickoff: worktree, branch, in-flight row (main 94f0a2fb), tickets In Progress, this record | DONE (orchestrator) |
 | U1 — the pane in tabs | **UNIT CLOSED — DONE** (2026-10-13 ~22:35 MDT, opus-implementer): VX-199 · VX-205 · VX-232 (FIXED red-first) · VX-245's two MCP sites (`3d00a166`); red on old 4 issues; Mac batch 250/31 (one issue — VX-283's six lint sites); the walk in both voices DONE, dev store restored `cmp`-SAME. 3 PROVISIONALs (P-VX281-U1-1…3) for QUESTIONS at the merge; the cold review is the ladder's. See the U1 UNIT RECORD |
-| U2 — the shared icon | NOT-STARTED |
+| U2 — the shared icon | **IN-PROGRESS** (opus-implementer, from 2026-10-13 ~23:00 MDT) — the U2 UNIT RECORD below carries the trace, the site list, the design and the pieces |
 | the ladder | NOT-STARTED |
 | closeout | NOT-STARTED |
 
@@ -403,6 +403,122 @@ U1-11 is listed in the FOR VX-234 section above.
    - `ExplainerLine.swift`;
    - `AppSettingsView.swift`'s search landing;
    - the pins in `MCPPaneTabsTests` and the harness `MCPPaneTabsCaptureTests`.
+
+## U2 UNIT RECORD — the shared icon wherever the ask glyph is: VX-268 (opus-implementer, 2026-10-13 night)
+
+Implementer: Opus (`claude-opus-5-5`), fresh session, HEAD at start `afb7deb4`. **No revert is in flight** unless a
+line below says so.
+
+**Read in full before code (never delegated):** this record whole (incl. the U1 UNIT RECORD and its walker facts);
+`notes/plans/mcp-pane-and-docs-kickoff.md` (the U6 section, the binding rulings, the rules, the VX-268 bullet);
+`notes/plans/vx-33-release-runway.md` §2–§3; `notes/SessionResiliencyProtocol.md`; the 13n-c plan's rulings list
+(VX-271 · VX-164 · VX-272 · VX-273), §3 U3 + U4, the U3 and U4 UNIT RECORDs (the icon's birth, the glyph's nine
+hosts, P-13nc-U3-7's gate split, P-13nc-U4-3's menu-row mark), the PROVISIONALs list; VX-184's U2 UNIT RECORD
+(VX-185 — `decideGathering`, R-VX185-1, the archived-book rule, the 1,024-case agreement pin); the VX-268 ticket and
+its kickoff comment on the board (her calls, verbatim in "Her rulings" above — and the ticket's own audit line:
+*"The note's own bars need nothing (the in-note indicator already carries the shared icon there)."*); the walk
+lessons. Code: `Queries/MCPShareQueries.swift` whole, `Queries/MCPGrantQueries.swift` (the facts, the fence
+fragments, clients, grants), `Domain/MCPGrantRule.swift` whole (`decide`, `reach` ×2, `decideWing`,
+`decideGathering`, `reaches`, `best`); app — `MCPSharedIcon`, `MCPAskGlyph`, `MCPAskBoard`, `MCPShareRoad`,
+`MCPNoteIndicator`, `ShelfView`/`ShelfViewModel` (the Bookcase host), `LibraryCatalogView` +
+`LibraryCatalogModel` + `LibraryCatalogPaging` + `LibrarySearchSheet` (the near-window hold, the row slices),
+`TimelineView`, `PoolPostsView`, `BookPanelView` + `BookPanelModel`, `WingsModel`, `WingSwitcherMenu`,
+`WingSwitcherSheet`, `RootView`'s road + switcher host, `BookSettingsSheet`'s nested grant host, the registry's
+`.mcpShowSharing`/`.mcpChangeGrant`; the suites `MCPGatheringReachTests`, `MCPGatheringIconTests`,
+`LibraryRowAlignmentTests`, `LibraryInfiniteScrollTests`' harness, `CapabilityRegistryTests`' `.surface` walk.
+
+### The trace (VX-268 — bug class; made before any code)
+
+**Inputs → wrong output.** An APPROVED client reaches a note (its own note grant, a book grant on a book it is a
+member of, a wing grant on its wing) or the open book is ON; the note is listed in the Library (List, Cards, the
+answer sheet, Timeline), the Pool, or a Book Panel. Or a client holds a wing grant on a wing (or the open book is on)
+and the wing is listed in the switcher (its ▾ menu, ⌘L). **No row wears the icon.** Her report, verbatim on the
+ticket: *"claude-code reaches two books, the Bookcase wears the icon on both, and the Library shows nothing on those
+books or on their notes."*
+
+**The mechanism, to the line.** The ONE icon (`MCPSharedIcon`) has exactly two hosts, each fed by its own held read:
+`ShelfView.shelfRow` (~l.696, `ShelfViewModel.aiReach` ← `Queries.mcpBookReaches`) and `MCPNoteIndicator` (l.88,
+`Queries.mcpNoteReach`). Every other place the ask glyph marks carries the glyph alone and NO reach read:
+- the Library's note rows — the List line `CatalogNoteLine` (`LibraryCatalogView.swift:1441`, built by `postRow`
+  :1179 — also the answer sheet's note heads) and the Cards card (`noteCard`, :1065). The model's near-window hold
+  observes `Queries.ownershipFacts` only (`LibraryCatalogPaging.swift:184–207`);
+- the Library's BOOK and GATHERING rows (`CatalogBookLine`, :1338) wear neither mark (the ticket names them);
+- the Timeline's rows (`TimelineView.row`) wear neither (U4: "not built … the Library's Timeline rows"; the ticket
+  names Timeline);
+- the Pool's rows (`PoolPostsView.swift:420`; the model reads tags and snippets only);
+- the Book Panel's note rows (`BookPanelView.swift:278`; the model holds the table of contents only);
+- the ⌘L sheet's wing rows (`WingSwitcherSheet.swift:283`) and the ▾ menu's wing rows (`WingSwitcherMenu.swift:178`,
+  the pending symbol as the row's image); `WingsModel` reads `Queries.wings` only.
+
+And the core has no read these rows could use at their scale: `mcpNoteReach(db, noteID:)` is SINGULAR (one facts read
+per note — per row); `mcpBookReaches(db)` decides EVERY live reading of every wing (the Bookcase's class, not a
+listing's); and nothing reads a WING's reach at all — `decideWing` has no read-off.
+
+**Not the cause, checked:** the icon and its popover are place-blind (`MCPReachPopover` renders a reach's rung,
+duration, why, Change… on the reach's grant, Revoke); the one rule already answers every place correctly through
+the singular reads. The gap is the rows' reads and their faces, nothing in the rule.
+
+### The site list — the parity re-audit (code, `afb7deb4`)
+
+The ask glyph (`MCPAskGlyph`) is rendered at nine hosts. Against each, this unit's call:
+
+| # | Host (the ask glyph's line) | The shared icon | Why |
+|---|---|---|---|
+| 1 | the in-note indicator (`MCPNoteIndicator.swift:90`) | ALREADY THERE (13n-c U3) | unchanged |
+| 2 | the Bookcase rows (`ShelfView.swift:702`) | ALREADY THERE (13n-c U3, VX-185) | unchanged |
+| 3 | the Library — note rows in List (`:1441`), Cards (`:1065`) and the answer sheet's heads (List's line) | **IN** | the ticket |
+| 3b | the Library — BOOK and GATHERING rows (`CatalogBookLine`; List, the capped region, the answer sheet) | **IN** | the ticket names them (no ask glyph there) |
+| 3c | the Library — Timeline rows | **IN** | the ticket names Timeline (no ask glyph there) |
+| 4 | the Pool rows (`PoolPostsView.swift:420`) | **IN** | her kickoff call |
+| 5 | the Book Panel's note rows (`BookPanelView.swift:278`) | **IN** | her kickoff call |
+| 6 | the wing switcher's ⌘L sheet rows (`WingSwitcherSheet.swift:283`) | **IN** — the icon with hover + popover | the ticket ("a shared wing never shows as shared there") |
+| 7 | the wing switcher's ▾ menu rows (`WingSwitcherMenu.swift:178`) | **IN** — as the row's MARK (a menu row hosts no popover; the ask glyph is a mark there too, P-13nc-U4-3) | the ticket; P-VX281-U2-1 |
+| 8 | the commit bar's note ▾ (`CommitBar.swift:781`) | OUT | the ticket's own audit: *"The note's own bars need nothing (the in-note indicator already carries the shared icon there)."* |
+| 9 | the Takes bottom bar's note ▾ (`TakesBottomBar.swift:405`) | OUT | the same line |
+| — | the masthead wing WORD's `.anyWing` glyph (`WingSwitcherMenu.swift:97/125`) | OUT | it marks every wing's asks, not one place — no place-parity; P-VX281-U2-2 |
+| — | the Library's Blocks-scope rows | OUT | her kickoff call ("the note's own indicator already says it") |
+
+### The design (each call said; PROVISIONALs listed below)
+
+1. **Core — three batched reads on the ONE road, in `Queries/MCPShareQueries.swift` only** (the share faces' reads;
+   zero lines in `Domain/MCPGrantRule.swift`, the wire, `Sync/`, the schema):
+   - `mcpNoteReaches(_:noteIDs:)` — the batched twin of `mcpNoteReach`: the approved clients and their grants read
+     ONCE, the notes' facts in ONE batched read (`mcpNoteFacts(noteIDs:)` — two statements for the page), every id
+     decided by the SAME read off `decide` (`placeReach`). Pinned to agree with the singular for every id.
+   - `mcpBookReaches(_:readingIDs:)` — the existing map, given the listed ids (nil = every live reading, the
+     Bookcase's call byte-unchanged): books through `decide`, gatherings through `decideGathering` (VX-185).
+   - `mcpWingReaches(_:)` — Home and the live wings, each read off `decideWing` exactly as `MCPGrantRule.reach` is
+     read off `decide` (from the top rung down; `.allow(grantID)` names the grant, nil the open book) — a new
+     `MCPReachPlace.wing` beside `.note` / `.book` / `.gathering`; its own wing grant is the place's own (no why).
+   - One shared gate, `mcpReachStandings`: no approved client (VX-272), or no approved client holding a live grant
+     with the open book off ⇒ nil, and not one `container` row is read.
+2. **The icon's calm state draws NO view** (`MCPSharedIcon` with no reaches — the ask glyph's own rule), so every
+   host writes it once, unguarded.
+3. **The hosts, each with a HELD read ∝ what it shows (P1 — said per site in "P1, per site" below)**, each placing
+   the icon right after the row's name and before the ask glyph (the Bookcase's order).
+4. **The open book matches the Bookcase** — by construction: every read decides through the rule, and the rule
+   reaches every unfenced place under the open book.
+5. **The gate is the Bookcase's** (P-VX281-U2-3): a row wears the icon while an approved client reaches it, the
+   server switch aside.
+6. **Declarations (P-1's declared ⇔ rendered):** `LibraryCatalogView`, `TimelineView`, `PoolPostsView`,
+   `BookPanelView` and `WingSwitcherSheet` add `MCPSharedIcon.surfaceCapabilities`; the ▾ menu does NOT (a menu
+   row's mark is no door — its press switches the wing, as it always has).
+
+### P1, per site (how each read scales)
+
+*(filled as each host lands — PENDING)*
+
+### LIVE STATUS — U2's pieces (flipped in the same commit as each piece)
+
+| # | Piece | State |
+|---|---|---|
+| 0 | this record: the trace, the site list, the design | DONE (this commit) |
+| 1 | THE SEAM + THE PINS, red-first: the final API with the PRE-FIX BEHAVIOUR behind it (no surface reads reach, no row draws it, the core reads answer nothing) + the core pins + the Mac pins; the core pins RED headless; the seam tree built for testing | NOT-STARTED |
+| 2 | THE FIX: the core reads; the icon's calm state; the hosts' held reads and faces; the declarations and their ritual pins | NOT-STARTED |
+| 3 | headless finals + the fixed tree built for testing | NOT-STARTED |
+| 4 | STAGE WINDOW 1 — red on the seam tree, the Mac batch on the fixed tree | NOT-STARTED |
+| 5 | STAGE WINDOW 2 — the walk | NOT-STARTED |
+| 6 | close: self-assessment, PROVISIONALs, OWED | NOT-STARTED |
 
 ## The ladder
 
