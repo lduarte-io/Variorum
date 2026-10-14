@@ -11,6 +11,10 @@ import GRDB
 // names itself. It is a fact about authorship, never a permission: WHO may
 // delete is the server's decision (the pure grant rule on the note, then the
 // record — the wire's guard); these ops decide nothing about clients.
+// VX-260 (her pick, "Your edit makes it yours"): HER edit of the comment
+// (`editBlockComment`, when the words change) forgets the record in its own
+// transaction — the comment is hers from then on. Nothing else moves it: not a
+// client's `edit_comment`, not an undo or redo, not a delete or restore.
 //
 // `deleteCommentForClient` is her own comment delete (`deleteBlockComment`'s
 // row body — a tombstone, the comment stays on its block's deleted-comments
@@ -23,6 +27,13 @@ extension Operations {
         try db.execute(
             sql: "INSERT INTO mcp_comment_author (comment_id, client_name, recorded_at) VALUES (?, ?, ?)",
             arguments: [commentID, client, DateFormatter.variorumISO8601.string(from: date.now)])
+    }
+
+    /// VX-260: her edit made the comment hers — the record is forgotten,
+    /// inside her edit's own transaction (`editBlockComment`). A comment with
+    /// no record is no client's own (R-VX188-2's refusal at suggest).
+    func forgetMCPCommentAuthor(_ db: Database, commentID: String) throws {
+        try db.execute(sql: "DELETE FROM mcp_comment_author WHERE comment_id = ?", arguments: [commentID])
     }
 
     /// **`delete_comment`'s act** — her comment delete, exactly: the comment
@@ -94,7 +105,7 @@ extension Queries {
     /// U4's edit rung consults the same fact): the client's name, or nil when
     /// no client is on file for it (hers, one synced from another Mac, one
     /// written before the record existed, one that travelled to a structural
-    /// successor).
+    /// successor — and, since VX-260, one she has edited since).
     public static func mcpCommentAuthor(_ db: Database, commentID: String) throws -> String? {
         try String.fetchOne(
             db, sql: "SELECT client_name FROM mcp_comment_author WHERE comment_id = ?", arguments: [commentID])

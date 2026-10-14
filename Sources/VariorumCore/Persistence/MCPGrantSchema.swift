@@ -54,7 +54,8 @@ import GRDB
 ///   activity log's own key). The suggest rung's `delete_comment` deletes only
 ///   a comment this record names as the caller's; an ABSENT row (a comment of
 ///   hers, one synced from another Mac, one written before this table, one
-///   that travelled to a structural successor) is never the caller's. No
+///   that travelled to a structural successor — and, since VX-260, one she has
+///   EDITED: her edit removes its row) is never the caller's. No
 ///   foreign key to `block_comment`: that row is synced and the purge may one
 ///   day remove it physically, while this one is local — a record naming a
 ///   gone comment is harmless (nothing can delete a gone comment), a foreign

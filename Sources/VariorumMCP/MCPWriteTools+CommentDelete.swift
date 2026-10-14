@@ -16,7 +16,8 @@ import VariorumCore
 /// - then the LOCAL-ONLY authorship record (`Queries.mcpCommentAuthor`) must
 ///   name THIS client. Anything else — her comment, another client's, one with
 ///   no record (written before the record existed, synced from another Mac,
-///   travelled to a structural successor) — refuses with HER RULED SENTENCE,
+///   travelled to a structural successor, or — VX-260 — one SHE has edited
+///   since: her edit makes it hers) — refuses with HER RULED SENTENCE,
 ///   verbatim (`notYourCommentWords`): a rungTooLow-family refusal, never the
 ///   not-shared shape, because the client CAN read that comment (13n-c's R2-6
 ///   precedent). It opens no oracle: it says only that the comment is not on
