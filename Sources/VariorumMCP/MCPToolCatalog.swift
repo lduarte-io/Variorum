@@ -806,7 +806,8 @@ enum MCPToolCatalog {
             (Compare lines its rows up by the notes' shared history, not by these pairs). Needs \
             write new on both notes, which must be in the same wing. One call carries at most 200 \
             pairs. All or nothing: a pair that names the wrong note, repeats, or is already linked \
-            is refused, named. One undo for the author removes every pair. Returns JSON.
+            is refused, named. One undo for the author removes every pair. The author's receipt for \
+            it opens the two side by side in Compare. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -1618,13 +1619,18 @@ enum MCPToolCatalog {
             block, and select — words in that block's shown take — selects them with the find \
             bar ready), "takes" (note_id + block_id: the note's Takes, that block's takes open), \
             "lens" (note_id + lens_id: the Lenses board showing that lens), "book" (book_id, \
-            optionally section_id: that chapter) or "wing" (wing_id; "" is Home: Variorum switches \
-            to that wing, as its own wing switcher does). Returns JSON, or why nothing moved.
+            optionally section_id: that chapter), "wing" (wing_id; "" is Home: Variorum switches \
+            to that wing, as its own wing switcher does) or "compare" (note_id + peer_ids — one to \
+            three other notes in the same wing: Variorum's Compare with note_id first and each peer \
+            beside it, replacing the columns open; rows line up where the notes share history, as \
+            duplicate_note's copies do, and "related blocks only" opens off when they don't). \
+            Returns JSON, or why nothing moved.
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
-                "target": .object(["type": "string", "enum": .array(["note", "takes", "lens", "book", "wing"]),
+                "target": .object(["type": "string",
+                                   "enum": .array(["note", "takes", "lens", "book", "wing", "compare"]),
                                    "description": "What to show (default note)."]),
                 "note_id": .object(["type": "string"]),
                 "block_id": .object(["type": "string"]),
@@ -1633,6 +1639,11 @@ enum MCPToolCatalog {
                 "book_id": .object(["type": "string"]),
                 "section_id": .object(["type": "string", "description": "A chapter of the book."]),
                 "wing_id": .object(["type": "string", "description": "The wing (\"\" is Home)."]),
+                "peer_ids": .object([
+                    "type": "array", "minItems": 1, "maxItems": .int(MCPShowTool.comparePeerCap),
+                    "items": .object(["type": "string"]),
+                    "description": "target compare: the notes beside note_id, in column order (one to three).",
+                ]),
             ]),
             "additionalProperties": false,
         ]),

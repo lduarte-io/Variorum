@@ -241,4 +241,16 @@ nonisolated enum CompareComposition {
         }
         return (anchorBlocks.filter(keptAnchors.contains), keptPeers)
     }
+
+    /// **"Related blocks only" for a WIRE LANDING** (VX-298, VX-336 U6a — the
+    /// run record's D-298-4, F-9 (a), PROVISIONAL P-VX298-1). Her answers: (2)
+    /// *"related blocks only off when they have no history - that's fine"*; (4)
+    /// the board shows exactly what the AI named. ON only when EVERY named peer
+    /// shares lineage with the anchor — its kinship (`Queries.blockKinship`, the
+    /// same map the rails and `relatedOnly` read) is non-empty — else OFF, so no
+    /// column the AI named opens filtered empty. A landing always names a peer,
+    /// so an empty list is no landing (OFF). Pure: one pass over the peers' maps.
+    static func landingShowsRelatedOnly(peerKinships: [[String: String]]) -> Bool {
+        !peerKinships.isEmpty && peerKinships.allSatisfy { !$0.isEmpty }
+    }
 }

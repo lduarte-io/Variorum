@@ -736,6 +736,9 @@ final class CommandRouter {
     /// 13n-b U4: a landing on the Lenses board (show this saved lens) —
     /// observed, so a board already mounted consumes it too.
     var pendingLensLanding: LensLanding?
+    /// VX-298 (VX-336 U6a): a landing on the Compare board (these notes beside
+    /// the anchor) — observed, like the lens landing.
+    var pendingCompareLanding: CompareLanding?
 
     // MARK: - Composition wiring (set once by the session)
 
