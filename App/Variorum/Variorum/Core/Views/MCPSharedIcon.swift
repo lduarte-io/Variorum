@@ -120,9 +120,14 @@ enum MCPSharedIconProbe {
         init(_ view: NSView) { self.view = view }
     }
 
+    /// The icons' anchors — dead ones pruned on every append (VX-281 ladder
+    /// R2-4), so the list stays ∝ the icons alive however long a DEBUG run
+    /// scrolls (a recycled List row mounts a fresh anchor).
     static var anchors: [Anchor] = []
-    /// Every presentation, in order, by the first reaching client's name.
-    static var presented: [String] = []
+    /// How many times each popover presented, by the first reaching client's
+    /// name — a COUNT per name (VX-281 ladder R2-4: ∝ the distinct names, so a
+    /// DEBUG run that opens popovers all day holds a handful of entries).
+    static var presented: [String: Int] = [:]
     /// Each popover's content appearances minus its disappearances, by the
     /// first reaching client's name. Reliable for "went up" only: SwiftUI did
     /// not report a dismissed popover's content leaving (VX-281 STAGE WINDOW
@@ -139,7 +144,7 @@ enum MCPSharedIconProbe {
     }
 
     static func presentations(of client: String) -> Int {
-        presented.filter { $0 == client }.count
+        presented[client] ?? 0
     }
 }
 
@@ -151,6 +156,7 @@ private struct MCPSharedIconAnchor: NSViewRepresentable {
 
     func makeNSView(context: Context) -> AnchorView {
         let view = AnchorView()
+        MCPSharedIconProbe.anchors.removeAll { $0.view == nil }
         MCPSharedIconProbe.anchors.append(.init(view))
         return view
     }
@@ -176,7 +182,7 @@ extension View {
         #if DEBUG
         let name = reaches.first?.clientName ?? ""
         onAppear {
-            MCPSharedIconProbe.presented.append(name)
+            MCPSharedIconProbe.presented[name, default: 0] += 1
             MCPSharedIconProbe.up[name, default: 0] += 1
         }
         .onDisappear { MCPSharedIconProbe.up[name, default: 0] -= 1 }
