@@ -117,6 +117,9 @@ final class CommentsPanelModel {
     /// while parked is pruned by the first snapshot's `survivingDrafts` —
     /// over-preservation everywhere else, never loss.
     func restoreParkedDraft() {
+        // VX-257: this panel has OPENED — it has shown whatever the park held
+        // for its block, so its leaving may speak for that box.
+        opened = true
         guard let heldDraft = session.commentDraftPark.peek(forBlock: blockID) else { return }
         if let id = heldDraft.commentID {
             drafts[id] = heldDraft.text
@@ -124,9 +127,19 @@ final class CommentsPanelModel {
             addDraft = heldDraft.text
         }
         // The receipt register, deliberately — nothing is being refused;
-        // the line says why the box is not empty.
-        status = .receipt(CommentDraftPark.restoredNote)
+        // the line says why the box is not empty. Only for a REFUSED draft
+        // (VX-257): a comment she merely left half-typed was never refused,
+        // and "couldn't be saved" would say so falsely — her own words back
+        // in the box need no explaining.
+        if heldDraft.refused {
+            status = .receipt(CommentDraftPark.restoredNote)
+        }
     }
+
+    /// Set by `restoreParkedDraft()` — the open's first act. A model that
+    /// never opened (a phantom construction, or a close before the first
+    /// turn) has shown nothing of the park, so its leaving must not touch it.
+    @ObservationIgnored private var opened = false
 
     private(set) var comments: [BlockComment] = []
     private(set) var deleted: [BlockComment] = []
@@ -332,10 +345,46 @@ final class CommentsPanelModel {
     /// model so every road runs the same body and a pin can drive it). Every
     /// comment with unsaved changes is committed; each commit captures this
     /// model, so it lands even after the view is gone. A commit that would
-    /// write nothing writes nothing, so running this twice is harmless.
+    /// write nothing writes nothing, so running this twice is harmless — and
+    /// the add draft's keeping (below) is the same each time.
     func leave() {
+        keepAddDraftOnLeaving()
         for id in dirtyCommentIDs {
             Task { await self.commitEdit(id) }
+        }
+    }
+
+    /// **VX-257 — what she leaves in the composer is what comes back.** Her
+    /// ruling (2026-10-13, on P-VX179-R2-1, verbatim): *"yes, clicking away
+    /// should save your half typed comment on a draft."* QUESTIONS #215
+    /// option (a): the park holds it — never files it (#118(a) stands:
+    /// leaving still MINTS nothing) — and the next open of the same block's
+    /// panel puts it back (`restoreParkedDraft`, the park's peek).
+    ///
+    /// The box's state at the leaving IS the draft, so:
+    ///  · words in the box → parked for this block, verbatim (her trailing
+    ///    space and all), as a draft she LEFT — unless they are the very words
+    ///    the park holds as this block's REFUSED add draft, which stays the
+    ///    refusal (its "couldn't be saved" line keeps saying why);
+    ///  · an empty box (⎋'s clear, the first rung of the ladder whose second
+    ///    rung is the close; or emptied by hand) → a held ADD draft for this
+    ///    block is let go: she cleared it deliberately, and nothing comes
+    ///    back. A held EDIT draft is a different draft and stays.
+    /// Whitespace alone is nothing to keep (`CommentComposition`'s one trim
+    /// rule — the same test the Add door uses). ONE held draft, newest wins
+    /// (the park's #140(a) trade — PROVISIONAL P-U5-1).
+    private func keepAddDraftOnLeaving() {
+        guard opened else { return }
+        let park = session.commentDraftPark
+        switch CommentComposition.filing(addDraft) {
+        case .nothing:
+            park.clearIfHeld(blockID: blockID, commentID: nil)
+        case .file(let words):
+            if let held = park.held, held.refused, held.blockID == blockID,
+               held.commentID == nil, CommentComposition.filing(held.text) == .file(words) {
+                return  // the refused words, left as they were — still the refusal
+            }
+            park.park(blockID: blockID, text: addDraft, commentID: nil, refused: false)
         }
     }
 

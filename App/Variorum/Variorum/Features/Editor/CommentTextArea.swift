@@ -440,15 +440,20 @@ final class CommentTextAreaView: NSView {
     }
 
     /// A programmatic adopt (the panel clears a filed draft, restores a
-    /// parked one, reverts an edit) — the caret kept where it can be.
+    /// parked one, reverts an edit) — the caret kept where it can be. Text
+    /// arriving into an EMPTY area leaves the caret AFTER it (VX-257): a draft
+    /// restored into the composer is picked up where she stopped, exactly as
+    /// typing it would have left the caret.
     func adoptText(_ text: String, style: CommentTextStyle) {
         let selected = textView.selectedRange()
+        let arrivingIntoEmpty = textView.string.isEmpty
         textView.string = text
         let length = (text as NSString).length
         textView.textStorage?.setAttributes(
             style.typingAttributes, range: NSRange(location: 0, length: length))
         textView.typingAttributes = style.typingAttributes
-        textView.setSelectedRange(NSRange(location: min(selected.location, length), length: 0))
+        textView.setSelectedRange(NSRange(
+            location: arrivingIntoEmpty ? length : min(selected.location, length), length: 0))
         refreshPlaceholder()
         invalidateIntrinsicContentSize()
         needsLayout = true

@@ -132,7 +132,7 @@ The Pro's stage is coordinated tonight by the session **oct13coordinator**. **On
 | U2 | VX-296 — the italics flicker, caret-aware live restyle (Mac + phone) | **DONE** — fix `962a7305` (core) · `75b45ca9` (face + Mac) · `657bb57c` (phone) · `cb2251c4` (the pending-edit guard); pins `44ad276b`. Verified: core 2,799/320 headless; W1 red on old as designed; Mac W2 190/26 + u2b g1 106/13 green; phone u2b 59/10 green in one launch (the red pin `leavingATrailingSpace…` now green); W3 walk holds (Study only — the second voice not walked). PROVISIONALs P-U2-1/2/3 → QUESTIONS #219. Claim `vx282-u2b` HELD for U3's handover. |
 | U3 | VX-154 — the take panel's remaining routed commands (+ the archive-receipt rider nit) | **DONE** — record `4e5d3464`; seams `04e0369f`; pins `fa90e851`; the fix `ae2277b7` (the registry fact) + `26ecec8c` (the panel). Stage window 01:18:43–01:35:12 (claim `vx282-u3`, RELEASED): W1 red on old as designed (23/2, 46 issues) · W1b revert B as designed (only the two ring checks red) · W2 the fixed batch 248 tests / 24 suites green · W3 every row held, both voices (logs `4c9ced16`/`38af3061`; the walk record below). P-U3-1…8 (QUESTIONS #220). No claim held; no revert in flight. |
 | U4 | VX-193 + VX-112 — the capture box's undo desync and focus re-grab | **READY FOR STAGE — u4b: W1b the five U4 suites on the old products (13 issues expected) + W2b the same on the fixed build (green expected), ≈8 min.** Fix leg `079b0a15` (outcome (a): the observers kept as a belt — the live road could not be settled headlessly; the pins' undo grouping made explicit; the sibling leads). Old products rebuilt by the revert named at `a5a0adac` (DONE, RESTORED, `git diff` empty). VX-112 closed as fixed with the note; P-U4-2 withdrawn. Earlier: the u4 window (01:54–02:12, released) — W2 g2 92/17 green; the walk: the sibling reproduced in use on old and fixed in use; the headline not reproduced in use; her VX-112 sighting = the Terminal block cursor. No claim held; no revert in flight. |
-| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS** — VX-229: the fix `ee86dd8c` is being REVERTED — its offscreen evidence was an artefact (CORRECTION below); expected HOLLOW, W1 decides; pins being reshaped. VX-257: pins `7650b6ce`; fix built, UNCOMMITTED, saved at `scratchpad/vx282-u5/vx257-fix-uncommitted.patch` (re-applied after the old-products rebuild). VX-183 / VX-182 NOT-STARTED. **In flight:** `CommentsPanel.swift` + `CommentTextArea.swift` going back to `7650b6ce`. |
+| U5 | VX-229 → VX-257 → VX-183 → VX-182 — the comments family | **IN-PROGRESS** — VX-229: fix REVERTED `7d798f82` (its offscreen evidence was an artefact — CORRECTION below); pins reshaped; expected HOLLOW, W1 decides. VX-257: pins `7650b6ce`; fix (this commit), offscreen replay red-on-old → fixed; stage PENDING. Old products `DerivedData/vx282-u5-old-products` = the build of `7d798f82` (no revert in flight). VX-183 NEXT; VX-182 NOT-STARTED. |
 | Ladder | `fable-reviewer`, REVIEW_PROMPT verbatim, PHASE=VX-282 | NOT-STARTED |
 | Closeout | canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh per the coordinator | NOT-STARTED |
 
@@ -1582,6 +1582,96 @@ popover — the live count of `CommentsPanelModel` instances.
 seams only) for `CommentsPanel.swift` and `CommentTextArea.swift`; VX-257's fix, built but UNCOMMITTED, is kept at
 `scratchpad/vx282-u5/vx257-fix-uncommitted.patch` (gitignored, in the worktree) with whole-file copies beside it, and
 is re-applied after the old products are rebuilt. The probes are kept in the same folder.
+
+**The correction, executed:** `7d798f82` — the code back to `7650b6ce`'s (`CommentsPanel.swift`; `CommentTextArea.swift`
+unchanged by VX-229), the pins reshaped (window NUMBERS only), the OLD products rebuilt from that commit
+(`DerivedData/vx282-u5-old-products`, replaced — `nm`: neither VX-229's surface nor VX-257's keeping in its dylib).
+**The re-measurement, offscreen, pools drained, the theme in the environment, typed** (`idpanel.swift theme type`): after
+each of three dismissals no model of the session alive — OLD `[] [] []`, the tree with VX-257's fix `[] [] []`.
+**VX-229 disposition: PENDING W1 — expected DISMISSED AS HOLLOW.** If W1's popover cell is red on old, the fix comes
+back by `git revert 7d798f82`'s code half (the surface split at `ee86dd8c`) and W2 re-runs on a rebuilt product.
+
+#### VX-257 — the trace (against `d9e1eaf2`)
+
+1. The panel's add draft lives on its per-presentation model (`CommentsPanelModel.addDraft`, bound to the composer —
+   `CommentsPanel.swift`, the composer's `CommentTextArea(text: $model.addDraft …)`).
+2. The park (`Shared/CommentDraftPark.swift`) held REFUSED drafts only: `fileAddDraft` / `commitEdit` park the SUBMITTED
+   text at refusal time; the open's `.task` reads it back (`restoreParkedDraft`, a peek).
+3. Every closing road runs ONE leaving body — Close (`close()`), the sheet's `.onDisappear`, the popover's `willClose`
+   (`CommentPanelHostWatcher`, VX-179 FIX LEG 2) — and that body committed dirty in-place EDITS only. The add draft was
+   deliberately left alone (#118(a): leaving never FILES it), so it went wherever the model went: gone with a sheet's
+   torn-down content, gone with a released popover's (and — on VX-179's offscreen picture — "alive in a stale panel",
+   which the CORRECTION above shows was the probe's artefact; the reopen is a new model either way). The reopen's box is
+   empty: her half-typed comment is lost on a click away (W4-OBS-1, walked live at VX-179's stage window 4).
+4. No host parks differently today: there is ONE parking road (refusal time, in the model) and ONE leaving road (the
+   model's body, since `7650b6ce`'s seam) — so the fix is one road, not two.
+
+#### VX-257 — the fix (`CommentsPanel.swift`'s model, `Shared/CommentDraftPark.swift`, `CommentTextArea.swift`)
+
+- **The leaving body keeps the composer** (`CommentsPanelModel.leave()` → `keepAddDraftOnLeaving()`): words in the box
+  → parked for the block, verbatim, as a draft she LEFT (`Held.refused == false`) — unless they are the very words the
+  park holds as this block's REFUSED add draft (that stays the refusal, with its line); an EMPTY box (⎋'s clear rung —
+  the ladder's close rung comes after it — or emptied by hand) → a held ADD draft for the block is let go (`clearIfHeld`
+  — a held EDIT draft is another draft and stays). Whitespace alone is nothing (`CommentComposition.filing`, the Add
+  door's own test). Never files: no operation runs (#118(a) stands).
+- **A panel that never opened touches nothing** (`opened`, set by `restoreParkedDraft()` — the open's first act): a
+  phantom construction or a close before the first turn has shown nothing of the park.
+- **The restore speaks the refusal's line only for a refusal** (`Held.refused`): her own words back in the box need no
+  explaining, and "couldn't be saved" would be false.
+- **The caret after a restored draft** (`CommentTextAreaView.adoptText`): text arriving into an EMPTY area leaves the
+  caret after it — what typing it would have done — so a restored draft is picked up where she stopped. Every other
+  programmatic adopt (a clear, a revert, a store arrival) keeps the caret where it can be, as before.
+- **The shared park type** gains `Held.refused` (default `true`) and `park(…refused:)` (default `true`): every existing
+  park — the phone's included — is unchanged in behaviour and in source.
+- Every host is covered by construction: the popover (its `willClose` → the leaving body), the `.sheet(item:)` hosts —
+  Write's and the Takes bar's — and the take panel's NESTED sheet (U3's O-5) (their teardown's `.onDisappear` → the same
+  body), and Close in any of them (`close()` → the same body).
+
+**Offscreen replay against the real module** (`realpanel.swift leave` — type `half a thought ` into the popover's composer,
+dismiss, reopen ×2): FIXED — parked `refused: false`, both reopenings show `half a thought ` with the caret at 15 (its
+end); OLD — park `nil`, both reopenings empty.
+
+**The pins.**
+
+| Test | Asserts | Old |
+|---|---|---|
+| `CommentPanelLeaveTests.leavingWithAHalfTypedCommentKeepsItForTheSameBlock` | leave with a half draft → held verbatim for the block, `refused == false`; the reopen restores it with NO line; nothing filed | RED |
+| `…escapeClearsAndTheReopenIsEmpty` | ⎋'s clear then the leaving → nothing held, the reopen empty; a whitespace-only box keeps nothing | GUARD |
+| `…escapeAfterARestoreAbandonsTheDraftForGood` | left → restored → ⎋-cleared → left → nothing held, the reopen empty | RED (at its restore premise) |
+| `…anotherBlocksPanelGetsNoForeignDraft` | A left → B's open is empty, no line; B left empty → A still held; A's reopen restores | RED (the held half) |
+| `…aRefusedDraftLeftAsItWasKeepsItsLine` | a sealed note's refusal, then the leaving with the same words → still held as the refusal; the reopen speaks the line | GUARD |
+| `…aPanelThatNeverOpenedLeavesTheParkAlone` | a refused draft held; a never-opened model's leaving → still held | GUARD (the `opened` rule's own line keeps it — removing it would clear the park here) |
+| `CommentPanelHostLeavingTests.aClickAwayFromThePopoverKeepsTheDraftForTheReopen` | the margin note's popover: type, close by the binding (a click away's road), reopen → the words back, the caret after them, nothing filed | RED |
+| `…aSheetsClosingKeepsTheDraftForTheReopen` | the `.sheet(item:)` host, the same | RED |
+| `…theTakePanelsNestedSheetKeepsTheDraftForTheReopen` | the real `WriteTakesPanel` as a sheet, its comments sheet, the same | RED |
+| `CommentPanelParkTests.anUnsubmittedDraftStaysHerOrdinaryAbandon` | DOC ONLY edited (RULED-CHANGE — "the panel's close keeps nothing" is no longer true); its body (typing alone parks nothing) unchanged | GUARD |
+
+All PENDING the stage window (W1 on the old products, W2 on the fixed). The standing park pins (`CommentPanelParkTests`,
+RUN A's) are expected green and unmodified in body: refusals still park at refusal time, peek, and clear on the same
+draft's landing.
+
+**PROVISIONALs (QUESTIONS #222 — under the VX-282 heading; renumbered at the merge if a sibling took it):**
+- **P-U5-1 — ONE held draft, newest wins** (the park's #140(a) trade, now reached by a click away as well as by a
+  refusal): leaving block B's panel with words in it replaces a draft held for block A — refused or left. Built (a) the
+  park as it is. Options: (b) one held draft PER BLOCK (the park grows to a small per-block table, both platforms' type —
+  a change to the phone's park semantics too); (c) a REFUSED draft outranks a left one (a click away elsewhere never
+  displaces refusal insurance).
+- **P-U5-2 — Close keeps the draft too** (every closing except ⎋⎋, whose first rung empties the box): her ruling names a
+  click away; the brief's reading is "any dismissal other than ⎋", and one leaving body serves every road. Option: (b)
+  Close abandons the draft as ⎋⎋ does.
+- **P-U5-3 — a restored LEFT draft speaks no line**, and comes back with the caret after it. Options: (b) a line of its own
+  ("your unfinished comment — still here"); (c) the caret at the start, as a refused draft's restore had it.
+- **P-U5-4 — an emptied box at leaving lets a held ADD draft go, a REFUSED one included** (⎋⎋ after a refusal's restore
+  abandons it). This supersedes #140(b)'s Mac arm ("⎋-clear and close: the next open brings back the SUBMITTED text the
+  store refused") — under VX-257 the box's state at leaving is the draft. Option: (b) an emptied box leaves a REFUSED
+  draft held (#140(b) as it was), only a LEFT draft goes.
+- **Recorded, not a PROVISIONAL (her ruling):** #140(c) ("a draft typed and never submitted still dies with the close")
+  is superseded on the Mac by VX-257.
+
+**MOBILE PARITY (VX-257):** the phone is UNCHANGED — `VariorumMobile/Features/Write/MobileComments.swift` byte-unchanged;
+its sheet has its own park instance (refusal-only), and its close roads (the dim-tap, Done, the projection's auto-close)
+still drop an unsubmitted draft. Her ruling named the Mac popover. The shared type's two additions default to the phone's
+behaviour. A VM ticket candidate for the phone's own click-away (for the orchestrator).
 
 ## Ladder
 
