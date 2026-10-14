@@ -48,6 +48,13 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
   (`fable-reviewer`) whenever the diff earns one (an editor-seam, custody, `Sync/` or default's-meaning line),
   and otherwise ONE Fable cold review at the end of the run. (This supersedes the plan file's "max for every
   implementer" for this run.)
+- **The cross-model fix rule — HER PROCESS CHANGE (2026-10-13, now CLAUDE.md "Two reviews"; the history in
+  `notes/ProcessHistory.md`):** in the end-of-run Fable round, Fable's findings go to the Opus implementer
+  verbatim, its agree/dispute returns to Fable, and Fable makes the final call. The **implementer** then applies
+  the confirmed fixes (red-on-old per finding, the suite green). Fable writes a fix itself only for a `Sync/`
+  line or a finding it marks FINDER-FIXES (one line saying why), followed by one implementer sanity pass over
+  its diff. That round's fixes are the run's last, so no later round reads them: the orchestrator checks each
+  one line by line against its finding. *"Fable's budget goes to finding and judging, not typing."*
 
 ## The kickoff message (each implementer session receives this, plus its unit line)
 
