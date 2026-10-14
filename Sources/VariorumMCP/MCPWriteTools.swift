@@ -41,6 +41,15 @@ struct MCPWriteTools: Sendable {
         let args = arguments ?? [:]
         do {
             let job = try parse(name, args)
+            // VX-275 (her ruling (a) — the VX-246 record's U3): an act that
+            // meets a take her open editor may hold unflushed waits for HER
+            // FLUSH first — its own turn, before the act's, never inside it —
+            // so her typing is in the rows the act reads, rewrites, copies,
+            // freezes or tombstones. Whatever the target (the flush's cost
+            // never depends on the id named), and only once the call parsed.
+            if job.flushesHerEditorFirst, let beforeWrite = hooks.beforeWrite {
+                await beforeWrite(job.tool)
+            }
             let result: Result<Landed, Refused> = try await executor.run { ops in
                 try self.perform(job, ops: ops, clientName: clientName)
             }
@@ -110,6 +119,32 @@ struct MCPWriteTools: Sendable {
             case .applyTag: "apply_tag"
             case .createBook: "create_book"
             case .addNoteToBook: "add_note_to_book"
+            }
+        }
+
+        /// **VX-275 — does this act meet a take her open editor may hold
+        /// unflushed?** True for the act list the VX-246 record's U3 trace
+        /// argues, tool by tool: an act that TOMBSTONES her take (her flush
+        /// would then be refused — her bytes stranded in memory), FREEZES it
+        /// (a lock or an archive refuses her flush the same way), REWRITES or
+        /// RESTRUCTURES it (it reads the STORED row, so her flush would write
+        /// her old buffer over the act, or into a block it released), or
+        /// COPIES it (a commit or a version would miss her last words — her
+        /// own ⌘S and Save Version flush first). Every family answers through
+        /// an exhaustive switch, so a new tool cannot compile without saying.
+        var flushesHerEditorFirst: Bool {
+            switch self {
+            case .edit(let job): job.flushesHerEditorFirst
+            case .carriage(let job): job.flushesHerEditorFirst
+            case .deliberate(let job): job.flushesHerEditorFirst
+            case .batch(let job): job.flushesHerEditorFirst
+            case .noteEdit(let job): job.flushesHerEditorFirst
+            case .libraryEdit(let job): job.flushesHerEditorFirst
+            // New takes, comments, lenses, notes, books, tags and links touch
+            // no take's text: her flush lands where she typed it.
+            case .addTake, .addComment, .saveLens, .createNote, .importNote, .importBook, .applyTag,
+                 .createBook, .addNoteToBook, .deleteComment, .removeTag, .linkVersions:
+                false
             }
         }
     }

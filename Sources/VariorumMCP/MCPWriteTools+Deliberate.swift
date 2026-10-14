@@ -31,6 +31,16 @@ extension MCPWriteTools {
             case .adoptLens: MCPToolCatalog.adoptLens.name
             }
         }
+
+        /// VX-275 (`Job.flushesHerEditorFirst`): a COMMIT copies the take (her
+        /// ⌘S flushes first — `commitCaret`); a choice or an adoption moves
+        /// pointers only, and her flush lands in the take she typed in.
+        var flushesHerEditorFirst: Bool {
+            switch self {
+            case .commit: true
+            case .choose, .adoptLens: false
+            }
+        }
     }
 
     // MARK: - Arguments (parsed BEFORE the executor)

@@ -31,6 +31,16 @@ extension MCPWriteTools {
             case .setBookRule: MCPToolCatalog.setBookRule.name
             }
         }
+
+        /// VX-275 (`Job.flushesHerEditorFirst`): a VERSION copies the note
+        /// (her Save Version flushes first — `VersionActs`); the rest touch no
+        /// take's text (`put_back` revives a take or block she is not typing in).
+        var flushesHerEditorFirst: Bool {
+            switch self {
+            case .saveVersion: true
+            case .putBackBlock, .putBackTake, .setEntryDate, .fileInChapter, .setBookRule: false
+            }
+        }
     }
 
     // MARK: - Arguments (parsed BEFORE the executor)

@@ -387,8 +387,9 @@ extension Operations {
     /// `restoreCommitRows` (her body — the churn hers exactly), and "after
     /// <client>'s restore" of the restored text, stamped one millisecond later
     /// so the history reads before → after. Her own road writes no savepoint
-    /// (it flushes her editor's pending keystrokes first — the wire has none to
-    /// flush); the client's insures what would otherwise be reachable only by
+    /// (it flushes her editor's pending keystrokes first — and since VX-275 so
+    /// does the wire's door, before this act's turn, so the "before" commit
+    /// holds what she last typed); the client's insures what would otherwise be reachable only by
     /// ⌥⌘Z while the session lives. ONE entry: the buffer back to its
     /// pre-restore text (the fourth occasion insures a buffer she edited
     /// since), the redo the restore again — exact pre-images. The brackets stay.

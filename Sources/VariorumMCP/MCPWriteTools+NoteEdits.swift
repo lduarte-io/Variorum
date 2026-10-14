@@ -45,6 +45,28 @@ extension MCPWriteTools {
             case .deleteLens: MCPToolCatalog.deleteLens.name
             }
         }
+
+        /// VX-275 (`Job.flushesHerEditorFirst`): the note-edit acts that meet
+        /// her take's text.
+        var flushesHerEditorFirst: Bool {
+            switch self {
+            // TOMBSTONE: the take (or, its block's last, the block) dies.
+            case .deleteTake: true
+            // FREEZE: an archived take refuses her flush as a dead one does.
+            case .archiveTake: true
+            // FREEZE: a locked take refuses her flush; its insurance commit
+            // must hold what she typed. Unlocking freezes nothing.
+            case .lockTake(_, let locked): locked
+            // REWRITE: the restore writes the commit over the STORED row, and
+            // its "before" commit insures what it replaces.
+            case .restoreCommit: true
+            // Comments, labels, commit names, the title and lenses: drafts or
+            // metadata, never the take's text.
+            case .editComment, .restoreComment, .unarchiveTake, .setTakeLabel, .renameCommit, .renameNote,
+                 .deleteLens:
+                false
+            }
+        }
     }
 
     // MARK: - The wire's own refusals (P-U4-WORDS, 13s-a sweepable)
