@@ -170,8 +170,23 @@ final class WorkspaceModel {
     /// a pane whose history is never seeded shows no chip, silently. The
     /// shell's `onChange` stays as a harmless net (re-visiting the current
     /// destination is a no-op by construction).
+    ///
+    /// **`takingFocus` (VX-246's ruling 2, provisional: "a navigate-away never
+    /// takes her focus").** Every door she presses takes the focus to the pane
+    /// it fills, which is the default and unchanged. `notesDeleted` passes
+    /// `false`: a pane leaving a tombstone lands IN PLACE, and the focus, with
+    /// the one live surface `PaneMount` gives it, stays where she is. The
+    /// focused-subject signal is then raised only when the landing pane IS the
+    /// focused one, because only then did what she looks at change. It still
+    /// funnels through here, so the recording and the departures stay one
+    /// write. Its destinations are never notes, so the same-note rule above
+    /// (which moves focus) cannot meet it; that is asserted.
     @discardableResult
-    func select(_ destination: SidebarSelection, in pane: PaneID? = nil) -> SelectionOutcome {
+    func select(
+        _ destination: SidebarSelection, in pane: PaneID? = nil, takingFocus: Bool = true
+    ) -> SelectionOutcome {
+        assert(takingFocus || destination.noteID == nil,
+               "an in-place landing is never a note (the same-note rule moves focus)")
         let pane = pane ?? focusedPane
         if let existing = paneShowing(destination), existing != pane {
             reportingFocusMove { focusedPane = existing }
@@ -183,11 +198,14 @@ final class WorkspaceModel {
         // argument, applied to the leaving half).
         reportingDepartures {
             selections[pane] = destination
-            focusedPane = pane
+            if takingFocus { focusedPane = pane }
             visit(destination, in: pane)
         }
         // 17y (f): an OPEN — followed even when it re-opens what is shown.
-        onFocusedSubjectChanged(focusedSelection)
+        // An in-place landing in a pane she is not in changed nothing she sees.
+        if takingFocus || pane == focusedPane {
+            onFocusedSubjectChanged(focusedSelection)
+        }
         return .adopted
     }
 
@@ -364,11 +382,17 @@ final class WorkspaceModel {
     ///
     /// Returns whether this window showed any of them, so a caller can decide
     /// whether it has anything to say.
+    ///
+    /// **The landing never takes her focus** (VX-246's ruling 2, provisional;
+    /// `select`'s `takingFocus`). Each pane leaves the tombstone IN PLACE, and
+    /// the focused pane stays focused. A client deleting the note in the pane
+    /// she is not typing in, or her own Delete aimed from one pane at the note
+    /// in the other, no longer moves her caret's pane to the read tier.
     @discardableResult
     func notesDeleted(_ ids: [String]) -> Bool {
         let gone = Set(ids)
         let showing = panes.filter { selections[$0]?.noteID.map(gone.contains) == true }
-        for pane in showing { select(.library, in: pane) }
+        for pane in showing { select(.library, in: pane, takingFocus: false) }
         for id in ids { openNotes.close(id) }
         rememberOpenNotesIfClaimed()
         return !showing.isEmpty
