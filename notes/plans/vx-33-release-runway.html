@@ -90,12 +90,13 @@ footer { margin-top: 44px; color: var(--muted); font-size: 13px; }
   <div class="run" style="--c: var(--castle)">
     <div class="num">VX-266</div>
     <h3>Castle & backups</h3>
-    <p>The custody and backup redesign. You're working it through with the Castle session now. Nothing builds until its merged design and plan file exist.</p>
+    <p>The custody and backup redesign. The design and phase 1's plan merged on 14 October (PR #161). Every phase stays in Debug builds until your release switch.</p>
     <ul>
       <li>Phases: <b>VX-305</b> headless core → <b>VX-306</b> open road + migration → <b>VX-307</b> the acts → <b>VX-308</b> accounts + key doors → <b>VX-309</b> copies + words.</li>
-      <li>Plus VX-212, designed with you separately.</li>
+      <li>Then <b>VX-212</b> (phase 6, designed with you first) and <b>VX-329</b>, the release switch, at your word.</li>
+      <li>Today-road fixes first, at your word: <b>VX-338</b> (shared backup folders) and <b>VX-339</b> (Resume Sync's banner).</li>
     </ul>
-    <div class="meta"><span class="chip wait">your decisions first</span><span class="chip fable">Fable leads</span><span class="chip">the one custody slot</span></div>
+    <div class="meta"><span class="chip wait">phase 1 at your word</span><span class="chip fable">Fable on every Sync/ line</span><span class="chip">the one custody slot</span></div>
   </div>
 
   <div class="run" style="--c: var(--mcp)">
@@ -170,8 +171,8 @@ footer { margin-top: 44px; color: var(--muted); font-size: 13px; }
     <div class="hd">Run</div><div class="hd">Its order, first to last</div><div class="hd">Waits for</div><div class="hd">Unblocks</div>
 
     <div class="lane" style="--c: var(--castle)">VX-266 Castle</div>
-    <div class="bar" style="--c: var(--castle); --w: var(--castle-w)">Your decisions → merged design + plan → <b>VX-305</b> headless core → go/no-go → VX-306 → VX-307 → VX-308 → VX-309</div>
-    <div class="bar" style="--c: var(--castle); --w: var(--castle-w)">You and the Castle session</div>
+    <div class="bar" style="--c: var(--castle); --w: var(--castle-w)">Design merged ✓ → <b>VX-305</b> headless core → go/no-go → VX-306 → VX-307 → VX-308 → VX-309 → VX-212 → <b>VX-329</b> switch</div>
+    <div class="bar" style="--c: var(--castle); --w: var(--castle-w)">Your word at each kickoff and at the switch</div>
     <div class="bar" style="--c: var(--castle); --w: var(--castle-w)"><b>Launch.</b> Also your Protection and Data Safety wording.</div>
 
     <div class="lane" style="--c: var(--mcp)">VX-246 MCP door</div>
@@ -200,7 +201,7 @@ footer { margin-top: 44px; color: var(--muted); font-size: 13px; }
     <div class="bar" style="--c: var(--books); --w: var(--books-w)">—</div>
 
     <div class="lane" style="--c: var(--hers)">Yours</div>
-    <div class="bar" style="--c: var(--hers); --w: var(--hers-w)">Castle decisions · settings wording · tutorial & onboarding · Claude Desktop try · readme text · site pages · release notes</div>
+    <div class="bar" style="--c: var(--hers); --w: var(--hers-w)">Castle call 3 (the rehearsal) · settings wording · tutorial & onboarding · Claude Desktop try · readme text · site pages · release notes</div>
     <div class="bar" style="--c: var(--hers); --w: var(--hers-w)">MCP-pane wording waits for VX-281. The tutorial session goes either before VX-246's docs or after VX-246 merges.</div>
     <div class="bar" style="--c: var(--rel); --w: var(--rel-w)"><b>The release</b>, at your word</div>
   </div>
@@ -209,7 +210,7 @@ footer { margin-top: 44px; color: var(--muted); font-size: 13px; }
 
 <h2>What waits for what</h2>
 <ol class="deps">
-  <li><strong>Castle:</strong> your decisions → one merged design and plan → the headless core → go/no-go → the rest. While it runs, nothing else may touch <code>Sync/</code>, custody or the Keychain.</li>
+  <li><strong>Castle:</strong> the design is merged → the headless core → go/no-go → the rest → your release switch (VX-329). Debug builds only until then. While it runs, nothing else may touch <code>Sync/</code>, custody or the Keychain.</li>
   <li><strong>VX-281 merges → you reword the MCP pane.</strong> Every other pane can be reworded any time, except Protection and Data Safety, which wait for Castle's words.</li>
   <li><strong>VX-246's docs run last,</strong> after its own door work and after VX-281 merges.</li>
   <li><strong>The MCP guide page goes live</strong> before any build that links to it ships. VX-258 ships before any public build.</li>
@@ -242,6 +243,16 @@ footer { margin-top: 44px; color: var(--muted); font-size: 13px; }
       <li><strong>VX-296:</strong> fix (a).</li>
       <li><strong>QUESTIONS #218:</strong> everything kept as built. After launch: named pairs line rows up (VX-315), and an icon on AI-made commits (VX-316). The capacity count is fine. The wording goes to your Settings pass.</li>
       <li><strong>Still open:</strong> nothing. VX-113 is in Castle's phase 3 (VX-307).</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>Answered 14 October (Castle's overnight calls)</h3>
+    <ul>
+      <li>A device that follows you out of Castle also locks its old copies under the secret you type there: confirmed.</li>
+      <li>The new code ships dormant in Release until your switch: confirmed.</li>
+      <li>Small fixes now for shared backup folders (VX-338) and Resume Sync's banner (VX-339). VX-209 and the rest wait.</li>
+      <li>Touch ID's re-arm question only after a failed press; a replacement Mac starts on Always ask: confirmed.</li>
+      <li><strong>Still open:</strong> call 3, how the migration is rehearsed on your real keychain (VX-329).</li>
     </ul>
   </div>
 </div>

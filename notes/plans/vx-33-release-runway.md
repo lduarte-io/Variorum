@@ -26,7 +26,7 @@ units) are scope, not durations.
 
 | Run | What it is | Members | Cast (implement / cold review) | Can start |
 |---|---|---|---|---|
-| **VX-266** Castle & backups | the custody and backup redesign (project + flagship) | the Castle project | Fable leads and writes the `Sync/` lines; Opus implements the rest | after her Castle decisions |
+| **VX-266** Castle & backups | the custody and backup redesign (project + flagship) | the Castle project | hers at each kickoff; every `Sync/` line is Fable's | design merged 2026-10-14 (PR #161); phase 1 at her word |
 | **VX-246** MCP door fixes & AI docs | the door's security, correctness, wire asks, then the AI's docs last | 21 | Opus / **Fable** | now |
 | **VX-281** MCP settings pane & shared icon | the pane in tabs, the code block, the Library's shared icon | 4 | Opus / Opus | now |
 | **VX-282** Editor & notes fixes | backspace, the italics flicker, take panel, capture box, comments family | 9 | Opus / **Fable** (editor seam) | now |
@@ -45,12 +45,13 @@ her own track.
 ## 2. Order and lanes — what waits for what
 
 **Start now (no sitting needed):** VX-246, VX-281, VX-283, VX-282, VX-284. How many run at once is the
-coordinator's call: they share one stage. **Castle** starts when her Castle decisions are made.
+coordinator's call: they share one stage. **Castle**'s design merged 2026-10-14 (PR #161); phase 1 (VX-305) starts at
+her word.
 
 The dependencies, all of them:
-1. **Castle.** Her decisions (the Keychain Access check, then D1–D10 in the second opinion §7) → one merged
-   design + `notes/plans/vx-266-castle-backups-prelaunch.md` → phase 1 (headless core) → go/no-go → the
-   remaining phases. Castle is THE one `Sync/`-or-custody effort while it runs. No other run may touch
+1. **Castle.** The design is merged (`notes/plans/vx-266-castle-backups-prelaunch.md`, PR #161, 2026-10-14) →
+   phase 1 (VX-305, headless core) → go/no-go → phases 2–5 → phase 6 (VX-212) → **the release switch (VX-329), at
+   her word**. Every phase runs in Debug builds only until the switch; Release keeps today's road. Castle is THE one `Sync/`-or-custody effort while it runs. No other run may touch
    `Sources/VariorumCore/Sync/`, custody or the Keychain.
 2. **VX-281 merges → she rewords the MCP pane** (VX-234). Every other pane can be reworded any time, except
    Protection and Data Safety, which wait for Castle's words (VX-264 changes them).
@@ -243,24 +244,34 @@ and the shared-constant pin in `StarredScrollTests` (Starred keeps its 7, her wo
 the full Index bar) is **VX-300, after launch** at her word.
 
 ### VX-266 — Castle & backups (project; flagship)
-**Records:** `notes/plans/vx-266/` on branch `vx-266-castle-backups-before-launch` (worktree
-`~/dev/variorum-vx-266`). The second opinion owns the design, and she is working with the Castle session
-directly. Nothing builds before the plan file `notes/plans/vx-266-castle-backups-prelaunch.md` exists.
+**Records:** the design `notes/plans/vx-266-castle-backups-prelaunch.md` (merged 2026-10-14, PR #161, merge commit
+2f5ac7a7), phase 1's plan `notes/plans/vx-305-castle-core.md` (kickoff message at its top), the research and review
+records in `notes/plans/vx-266/`, and the handoff `notes/handoffs/vx-266-design-handoff.md`.
 
-**The phases** (the Castle session's tickets, 2026-10-13; each phase's plan is written just-in-time):
-- **VX-305**, phase 1 — the headless core. Covers VX-228, VX-235, VX-263, VX-302 and VX-313's seals. It ends at a
-  go/no-go, which is a quality gate, not a schedule gate.
-- **VX-306**, phase 2 — the open road and the migration, including the lobby's Touch ID (VX-310).
-- **VX-307**, phase 3 — entering and leaving Castle, Replace All Keys, the follow. Covers VX-107, VX-108, VX-109,
-  VX-113, VX-233 and VX-301; the `Sync/` lines are Fable's.
-- **VX-308**, phase 4 — accounts and the key doors. Covers VX-239, VX-243, VX-264 and VX-314.
-- **VX-309**, phase 5 — copies and words. Covers VX-210, VX-211, VX-213, VX-264, VX-265, VX-301 and VX-302.
-- **VX-212** — the poison-row case, designed with her separately.
-- **VX-209** (with VX-228) is the root bug the whole rebuild closes.
+**The phases** (design §5; each its own run, branch, ladder and closeout, merging to main as it closes; each later
+phase's plan is written just-in-time):
+- **VX-305**, phase 1 — the headless core. Ends at a go/no-go, a quality gate (her word: go even if it delays launch).
+- **VX-306**, phase 2 — the open road and the migration (incl. the lobby's Touch ID, VX-310).
+- **VX-307**, phase 3 — Use Castle, Use Standard, Replace All Keys, the follow; the Apple keys' lifecycle (VX-301);
+  the `Sync/` lines are Fable's.
+- **VX-308**, phase 4 — accounts and the key doors.
+- **VX-309**, phase 5 — copies and words (the restore list, Open Library, the *Opens with* line, Data Safety).
+- **VX-212**, phase 6 — the poison-row case, designed with her first; whether the release waits for it is hers.
+- **VX-329 — the release switch, at her word**, after phase 5 at the earliest: the new system on in Release builds in
+  one change, the migration on her Macs, phone and testers' stores at their next unlock, §3.15's deletions.
 
-**Still outside Castle (Backlog), for the Castle session to weigh:** VX-81 (a macOS 27.0.1 crash in the re-key
-reopen), VX-152 (the lock path's reentrancy), VX-100 / VX-101 (Open Library's double passphrase ask and backups
-location), and VM-15 (a sibling phone that hasn't followed into Castle; VM board).
+**Debug-only until the switch** (her ruling, 2026-10-14: *"dormant in release is what i meant"*): the new code
+compiles into Release builds but stays dormant there. Other efforts' refreshes and beta builds carry no new Castle
+behavior. **The dev store:** once phase 2's migration and phase 3's first act have run on it, a Debug build from a
+branch cut before phase 2's merge can't open it. Efforts merge main before walking the dev store.
+
+**Today-road fixes before the switch** (her ruling, 2026-10-14: *"yeah we can do the small bug fix"*): **VX-338**
+(two Macs sharing a backup folder prune each other's backups; VX-302's) and **VX-339** (Resume Sync's banner; VX-317's),
+as one small RUN on today's code, at her word. They touch no `Sync/`, custody or Keychain lines. VX-209 and the rest
+wait for the rebuild.
+
+**Still outside Castle (Backlog), settled in passing by the design (§6), hers to fold in:** VX-81, VX-100, VX-101,
+VX-102, VX-104, VX-152, VX-240, and VM-15 (VM board).
 
 ---
 
@@ -268,7 +279,9 @@ location), and VM-15 (a sibling phone that hasn't followed into Castle; VM board
 
 | What | When | Ticket |
 |---|---|---|
-| Castle decisions, with the Castle session | now — they decide the date | VX-266 |
+| Castle's overnight calls | **answered 2026-10-14** — except call 3, how the migration is rehearsed on her real keychain (her pick; lands on VX-329) | VX-266 · VX-329 |
+| Castle phase 1 kickoff (`/architect-phase vx-305` recommended) | at her word | VX-305 |
+| The Castle release switch | at her word, after phase 5 at the earliest | VX-329 |
 | Settings wording, Editor through Acknowledgments (pre-launch) | any time; **MCP pane after VX-281 merges**; Protection + Data Safety after Castle's words (VX-309) | VX-234 |
 | Tutorial & onboarding changes (the Air session) | before VX-246's docs unit, or after VX-246 merges | VX-292 |
 | VX-216's menus clarity sitting | when VX-284's other units have landed | VX-216 |
@@ -284,7 +297,7 @@ location), and VM-15 (a sibling phone that hasn't followed into Castle; VM board
 
 The launch build ships at her explicit word only, after:
 1. Every pre-launch run has merged.
-2. Castle is properly done — her gate, *"no matter how long it takes"*.
+2. Castle is properly done — her gate, *"no matter how long it takes"* — through its release switch (VX-329).
 3. VX-258 has shipped.
 4. The MCP guide page is live (R-VX184-4).
 5. The privacy page is live (VX-294, a canon v1 gate).
@@ -322,7 +335,14 @@ at a zero-instance window with no commits during it, then DMG first and appcast 
 - VX-304 gains the left-box "open in Write" door in every book mode (her ask).
 - After launch: VX-312, ⌘1–⌘6 working from the caret inside a book (her ask).
 
-**Still open:** nothing. VX-113 is in Castle's phase 3 (VX-307); she told the Castle session.
+**Answered 2026-10-14 (Castle's overnight calls, VX-266 design §9):**
+- A follower's anchor is also locked under the secret typed at its follow — confirmed.
+- "Off in Release" = the new code ships dormant in Release until the switch — confirmed.
+- Today-road small fixes for VX-302 and VX-317 → VX-338 and VX-339; VX-209 and the rest wait.
+- The Touch ID re-arm question only after a failed press; a replacement Mac starts on Always ask — confirmed.
+
+**Still open:** Castle's call 3 — how the migration's real-scope branch is rehearsed before her live stores migrate
+(her pick; recorded on VX-329). VX-113 is in Castle's phase 3 (VX-307).
 
 ---
 

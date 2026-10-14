@@ -2607,3 +2607,31 @@ the caret there — "the shelf opens with the cursor already in the bar" (R102) 
 quick entry to stay out of the way while the tour runs (a tour started from a note walks you to the Bookcase); (c) only
 the app's very first window at launch (not after an unlock, not a new window).
 Status: open — your eye in daily use.
+
+
+## VX-266 — Castle & backups before launch: the design (2026-10-14)
+
+#225 — **THE VX-266 OVERNIGHT CALLS (the design merged 2026-10-14, PR #161 2f5ac7a7; the binding record is
+`notes/plans/vx-266-castle-backups-prelaunch.md` §9, the reasons and options in `notes/handoffs/vx-266-design-handoff.md`).**
+Six calls were made provisionally overnight at her word (*"ruling provisionally where needed"*). She answered them the
+next morning, before the merge:
+1. **A follower's anchor is also locked under the secret typed at its follow** (design §3.4, rule 5 in §3.1). Copies a
+   device made before the leave open with the secret typed there to follow, as well as with whatever opened that
+   device that day. CONFIRMED: *"i think that's fine, i'm good to confirm it either way."*
+2. **"Off in Release" means the new code ships dormant in Release builds** (design §5). The core compiles and is
+   tested in both configurations from phase 1, and the switch flips the wiring. CONFIRMED: *"dormant in release is what
+   i meant."*
+3. **How the migration's real-scope branch is rehearsed before her live stores migrate** (design §5, §9). She asked to
+   decide it now (*"call 3 - we can decide this now. what are my options?"*). The options, as laid out to her: (a) a
+   spare macOS user on the same Apple ID; (b) the Air first, as a canary; (c) the rehearsal taken as the first leg of
+   the real migration. Whatever runs logs every Apple key id it mints. **OPEN — her pick, recorded on VX-329.**
+4. **Today's bugs in Release until the switch.** RULED: *"yeah we can do the small bug fix."* Today-road fixes for
+   VX-302 → **VX-338** and VX-317 → **VX-339**, as one small RUN at her word. VX-209, VX-107, VX-108, VX-109, VX-113 and
+   VX-213 wait for the rebuild.
+5. **The Touch ID re-arm question asks only after a press fails on an item that exists** (design §3.10). CONFIRMED:
+   *"that's fine on calls 5 and 6."*
+6. **A new device identity starts on Always ask** (design §3.10). CONFIRMED, as for 5; the exact words stay hers at
+   phase 4's walk.
+*(Numbering: the next free number on main when written; a sibling run merging first may take it — the merging session
+renumbers.)*
+Status: answered except call 3, which is open.
