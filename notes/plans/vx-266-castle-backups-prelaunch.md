@@ -1354,6 +1354,20 @@ followed into Castle — VX-301 and the follow's typed secret settle it: the pho
   (the vault reads: a wrap — Standard; an id with no wrap — leaving Castle, in progress; neither — Castle), and only
   a device that reads that key completes it, adding the wrap once the previous corpus key is cleared. VX-212 adds its
   own line.
+- **`notes/plans/pre-13x-copy.md` (the copy file, the one source of the app's words):** every entry whose fact this
+  design changes is re-written by the phase that changes the behaviour behind it, and published only when Release
+  runs it (VX-329). That covers:
+  - the cards (rule 3's login-password truth);
+  - the ceremonies (Use Castle's door and checks; Use Standard's rule 5; the follow's one typed secret);
+  - the lobby's re-arm question;
+  - the key doors' sentences;
+  - the backups and older-copy lines;
+  - the tutorial chapter;
+  - the FAQ's entries on old backups after Castle, lost secrets with an old backup, leaving Castle, a new Mac and
+    restoring;
+  - the privacy-brief lines.
+
+  The design handoff lists each surface with its phase.
 - **OverallModel:** none. No invariant is relaxed.
 
 ---
