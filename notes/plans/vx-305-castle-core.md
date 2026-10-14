@@ -545,8 +545,8 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   `5ae90bff`; (d/e) `assess` and the open rule — WIP `570583d9`, tests `bc11f39c`, self-review `b1e07a80`, the key
   file's agreement with its mirror `5f96dc32`; (f) the guards' DEBUG mutation pins — `4e576689`; the record — this
   commit. The U1+U2 suites: 154 tests in 35 suites green in Debug; 134 in 32 green under `swift test -c release` (the
-  three DEBUG-only mutation suites compiled out). The full core suite in Debug: one perf-timing issue under a load
-  average of ~16–20 (other sessions on the Pro), green twice in isolation — the record's first line.
+  three DEBUG-only mutation suites compiled out). The full core suite green in Debug (its first run met one
+  perf-timing issue under load, green alone and on the re-run — the record's first line).
 - U3 — the executor and the acts: **NEXT.**
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **NOT-STARTED.**
 - The go/no-go record: **NOT-STARTED.**
@@ -701,11 +701,10 @@ refinement): `ProtectionFixtures`, `NamesAndSealTests` (9), `RecordModelTests` (
 
 ### U2 RECORD — assess, roads, the route finder, the catalog, retention (Opus implementer, 2026-10-14; one session, no deaths)
 
-**Not done, first:** (1) the full core suite's Debug run met ONE issue — `PerfBenchmarkTests`'
-`timelinePageIsFlatOrUnderBudgetInCorpusSize` (a P1 timing bound on the timeline query, nothing of Protection's) under
-a load average of ~16–20 from other sessions on the Pro; re-run alone it passed twice (`✔ Test run with 1 test in 1
-suite passed after 21.060 seconds.` / `…20.509 seconds.`). Recorded, not chased: a timing bound under load, outside
-U2's surface. (2) The QUESTIONS entries for the PROVISIONAL calls below wait for the closeout, as U1's did (CLAUDE.md
+**Not done, first:** (1) nothing of the unit — but the full core suite's FIRST Debug run met one issue outside U2's
+surface: `PerfBenchmarkTests`' `timelinePageIsFlatOrUnderBudgetInCorpusSize` (a P1 timing bound on the timeline query)
+under a load average of ~16–20 from other sessions on the Pro; alone it passed twice, and the full suite's re-run, with
+the load down, was green (the counts below). (2) The QUESTIONS entries for the PROVISIONAL calls below wait for the closeout, as U1's did (CLAUDE.md
 keeps `notes/QUESTIONS.md` to merge moments on latest main; §11 lists them). (3) The file swap by a login-password
 holder — a memory item sealed under a key the open can't reach, beside an older library file — is not modelled by
 `assess` (it reads only VERIFIED homes); hand-forward to U3/U4 (its fixed scenario).
@@ -777,9 +776,10 @@ bullet of §4's test list has its test (the suite and test names read as the pla
 - Release (`swift test -c release --filter …`, on THIS tree — VX-345 holds): `✔ Test run with 134 tests in 32 suites
   passed after 0.135 seconds.` (the three DEBUG-only mutation suites compiled out: 154 − 20, 35 − 3). Wall 515 s, the
   release build included.
-- Full core suite, Debug (`swift test`, 308 s wall): `✘ Test run with 3014 tests in 365 suites failed after 192.845
-  seconds with 1 issue.` (the perf flake above) · `✔ Test run with 240 tests in 51 suites passed after 22.135
-  seconds.` · `✔ Test run with 40 tests in 6 suites passed after 49.449 seconds.`
+- Full core suite, Debug (`swift test`, the re-run, 266 s wall): `✔ Test run with 3014 tests in 365 suites passed
+  after 196.513 seconds.` · `✔ Test run with 240 tests in 51 suites passed after 22.459 seconds.` · `✔ Test run with 40
+  tests in 6 suites passed after 44.775 seconds.` (The first run, under load: `✘ Test run with 3014 tests in 365 suites
+  failed after 192.845 seconds with 1 issue.` — the perf bound above.)
 - The guards are live: each of U2's fifteen, switched off, lets its bug through (`AssessGuardMutationTests`,
   `RetentionGuardMutationTests`).
 
