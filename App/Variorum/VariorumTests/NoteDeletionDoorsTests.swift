@@ -411,6 +411,52 @@ struct NoteDeletionNavigateAwayTests {
         #expect(workspace.openNotes.ids.isEmpty)
     }
 
+    /// **VX-246's ruling 2 (the orchestrator's, provisional under her
+    /// overnight delegation): A NAVIGATE-AWAY NEVER TAKES HER FOCUS.** She
+    /// types in pane 1; the note open in pane 2 is deleted (a client's
+    /// `delete_note` on the wire, or her own Delete from pane 1). Pane 2
+    /// leaves the tombstone for the Library IN PLACE. Her focus, and the one
+    /// live surface `PaneMount` gives the focused pane, stay in pane 1, and no
+    /// focused-subject change is announced, because nothing she is looking at
+    /// changed.
+    ///
+    /// **RED on old:** `notesDeleted` went through `select(.library, in:)`,
+    /// which also wrote `focusedPane = pane` (`WorkspaceModel.select`). So the
+    /// focus jumped to pane 2 and her note dropped to the read tier (U3 STAGE
+    /// RUN's finding A, live).
+    ///
+    /// The second arm is unchanged by the ruling ("only a pane that is itself
+    /// focused stays focused, as now"): the FOCUSED pane on a dead note lands
+    /// on the Library, keeps the focus, and announces its new subject once.
+    @Test func aNavigateAwayNeverTakesHerFocus() throws {
+        let workspace = WorkspaceModel()
+        var announced: [SidebarSelection?] = []
+        workspace.onFocusedSubjectChanged = { announced.append($0) }
+        workspace.select(.post("hers"))
+        workspace.openBeside(.post("doomed"))
+        workspace.focus(.primary)
+        let other = try #require(workspace.panes.first { $0 != .primary })
+        #expect(workspace.focusedPane == .primary, "premise: her caret's pane is focused")
+        #expect(workspace.selections[other] == .post("doomed"), "premise: the other pane shows the doomed note")
+        announced.removeAll()
+
+        #expect(workspace.notesDeleted(["doomed"]))
+
+        #expect(workspace.focusedPane == .primary,
+                "the focus stays where she is — the navigate-away never takes it")
+        #expect(workspace.selections[.primary] == .post("hers"), "her pane still shows her note")
+        #expect(workspace.selections[other] == .library,
+                "the pane that showed the tombstone went to the Library, in place")
+        #expect(announced.isEmpty,
+                "no focused-subject change is announced: what she looks at did not change (\(announced))")
+
+        // As now: the focused pane itself on a dead note.
+        #expect(workspace.notesDeleted(["hers"]))
+        #expect(workspace.focusedPane == .primary, "a focused pane on a dead note keeps the focus")
+        #expect(workspace.selections[.primary] == .library)
+        #expect(announced == [.library], "and its new subject is announced once (\(announced))")
+    }
+
     /// A window showing none of them is inert — the signal reaches every
     /// window, so "does nothing here" has to be true, not merely likely.
     @Test func aWindowShowingNoneOfThemIsUntouched() {

@@ -25,6 +25,25 @@
 //  characterization by design (green on both trees — the mechanism's evidence
 //  and a point-release tripwire, TEXTKIT2_NOTES §5).
 //
+//  **U4b (the inline editor's remainder) — the trace re-run by measurement**
+//  (the run record's U4b UNIT RECORD; bare-rig probes 5–9, macOS 27.0). Two
+//  facts the U4 fix did not know:
+//  - **A layout that runs AHEAD of unlaid predecessors poisons the next whole
+//    walk.** U4's own sparse mid-document `.ensuresLayout` badge read, or a
+//    viewport pass over a mid-document window, places those fragments at
+//    estimated offsets. The whole `.ensuresLayout` walk after it does not move
+//    them: 996 pt off cold, 1,662 pt after 700 → 420. The next viewport pass
+//    re-positions every fragment to the settled layout. (The poison
+//    characterization below.)
+//  - **The inline region is the frame SwiftUI last applied.** It starts at 24 pt
+//    at mount, and the remeasure's report lands on SwiftUI's next pass, never
+//    synchronously.
+//  So the badges were read off a poisoned layout or clipped to a stale frame,
+//  and nothing re-ran them after the settle net's heal. The mount pin and the
+//  kept width pin are red on U4's tree (`DerivedData/vx246-u4b-red`). The
+//  re-designed phantom pin is red on the tree before U4
+//  (`DerivedData/vx246-u4b-red-pre-u4`).
+//
 
 import AppKit
 import Foundation
@@ -152,17 +171,28 @@ struct FanBadgePlacementTests {
     }
 
     /// **U1's sighting (VX-184 leg (d)) — the phantom on a ONE-take block 1.**
-    /// A long note, block 1 unfanned, one fanned block on screen and four far
-    /// below the fold. Opened in Write at its top: the on-screen fan wears its
-    /// badge at its own line; the four TK2 has not laid out wear NONE (the
-    /// function's own contract — "until scrolled to") — never four badges at
-    /// block 1's place. RED on the pre-fix tree: the four sit at the container
-    /// origin, so they stack (duplicates) and sit on block 1 (the phantom).
+    /// A long note, block 1 unfanned, one fanned block on screen and a BAND of
+    /// fanned blocks just past the viewport. Opened in Write at its top: the
+    /// on-screen fan wears its badge at its own line; a fan TK2 has not laid
+    /// out wears NONE (the function's own contract — "until scrolled to") —
+    /// never a badge at block 1's place. RED on the tree before U4's fix: every
+    /// `.none` fan's `.zero` frame sits at the container origin, so they stack
+    /// (duplicates) on block 1 (the phantom).
+    ///
+    /// **U4b's re-design (the pin was HOLLOW as first written).** Its fans were
+    /// far below the fold (40/70/100/119). TK2 ESTIMATES fragments that far
+    /// down, and an estimated fragment's guessed frame lies below the viewport,
+    /// so it never intersected and the old tree was green too (U4's W1). The
+    /// band (entries 5–30) is where TK2 leaves fragments in `.none` with a
+    /// `.zero` frame, like `blockOnesBadgeIsItsOwnAlone`'s red entries 8–18 at
+    /// W1. The premise names that trigger state, so if TK2 ever estimates the
+    /// whole band, the premise goes RED loudly instead of the pin going hollow
+    /// again.
     @Test func aBadgeNeverSitsAtAnotherBlocksPlace() async throws {
         try await withEditor(seedBlocks: longNote(120)) { h in
             let onScreen = 2
-            let deep = [40, 70, 100, 119]
-            try fan(h, entries: [onScreen] + deep)
+            let band = Array(5...30)
+            try fan(h, entries: [onScreen] + band)
             let (window, coordinator) = try mountWrite(h)
             defer {
                 coordinator.uninstall()
@@ -179,14 +209,19 @@ struct FanBadgePlacementTests {
             await pump(window)
 
             // Non-vacuity: the on-screen fan is badged at home, and at least
-            // one deep fan is genuinely NOT laid out (the sightings' state).
+            // one fan of the band is in the defect's TRIGGER state — not laid
+            // out, its frame `.zero` (an estimate would be hollow, see above).
             let truth = try #require(firstFragment(entry: onScreen, model: h.model, textView: h.textView))
             #expect(h.model.badges.contains { $0.blockID == onScreenID && abs($0.frame.minY - truth.frame.minY) < 1 },
                     "premise: the on-screen fanned block wears its badge at its own line")
-            let unlaid = deep.filter { firstFragment(entry: $0, model: h.model, textView: h.textView)?.laidOut == false }
-            #expect(!unlaid.isEmpty, "premise: fanned blocks below the fold that TK2 has not laid out exist")
+            let zeroed = band.filter { i in
+                guard let read = firstFragment(entry: i, model: h.model, textView: h.textView) else { return false }
+                return !read.laidOut && read.frame.size == .zero
+            }
+            #expect(!zeroed.isEmpty,
+                    "premise: a fanned block past the viewport reads TK2's unlaid `.zero` frame (the trigger state)")
 
-            try expectEveryBadgeHome(h, fanned: Set([onScreen] + deep), "Write, the note's top")
+            try expectEveryBadgeHome(h, fanned: Set([onScreen] + band), "Write, the note's top")
         }
     }
 
@@ -298,50 +333,77 @@ struct FanBadgePlacementTests {
         }
     }
 
-    /// **Write after a WIDTH change** (a window resize, the sidebar opening).
-    /// The width change returns every fragment to "not laid out"; the badge
-    /// hop it queues may run before the next layout. After the app's own
-    /// roads (the hop, the scroll-anchor controller's width road, the display
-    /// passes): the on-screen fan wears its badge at its NEW line, and no
-    /// unlaid fan stands anywhere. RED on the pre-fix tree on the stack /
-    /// phantom lines (the deep fans at the origin); on the fixed tree it is
-    /// also the evidence that Write's width road ends with the on-screen
-    /// badge home (the record's "not built, argued" item 3).
-    @Test func aWidthChangeInWriteKeepsEachBadgeHome() async throws {
-        try await withEditor(seedBlocks: longNote(120)) { h in
-            let onScreen = 3
-            let deep = [40, 70, 100, 119]
-            try fan(h, entries: [onScreen] + deep)
-            let (window, coordinator) = try mountWrite(h)
+    // (U4b: `aWidthChangeInWriteKeepsEachBadgeHome` is RECORDED HOLLOW AND
+    //  REMOVED. It pinned Write's width road, and that road has no old-tree
+    //  defect to be red against: green on the tree before U4 at W1, its deep
+    //  fans estimated and its end state clean. Re-designing it red would only
+    //  borrow `aBadgeNeverSitsAtAnotherBlocksPlace`'s band mechanism, one red
+    //  pinned twice. Write's width road is carried by the U4b window's walk
+    //  row instead. The run record's U4b UNIT RECORD has the disposition.)
+
+    /// **The book's live editor right after it MOUNTS** (her Terminal `d3`:
+    /// only block 1 wore a ⑂ on the Outline's live editor; the spread's live
+    /// page in both voices, `e2`). The inline editor mounts at the app's
+    /// shape:
+    /// - SwiftUI hands the wrapper its width (a width change, 600 → 700 here)
+    ///   and the height `EditorView.inlineHeight` starts at, 24 pt.
+    /// - The coordinator's height report writes SwiftUI's `@Binding`, and the
+    ///   frame lands on the NEXT main-queue turn, never inside the report.
+    /// After the hops, every fanned block wears its badge at its own line.
+    ///
+    /// **RED on U4's tree** (`vx246-u4b-red`): every badge pass ran while the
+    /// frame was still 24 pt tall and clipped to it, so block 1 alone was
+    /// badged. The frame then grew with no width change and no storage edit,
+    /// so nothing re-ran the pass.
+    ///
+    /// The ASYNC report is load-bearing: a fix that re-ran the pass inside the
+    /// remeasure but kept the frame's clip would still read the 24-pt frame
+    /// here, as it would in the app.
+    @Test func theBookEditorBadgesEveryFanRightAfterItMounts() async throws {
+        try await withInlineEditor(seedBlocks: longNote(120)) { h in
+            let fanned = (0..<120).filter { $0 % 3 != 2 }  // 80 of 120
+            try fan(h, entries: fanned)
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 700, height: 300),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let container = NSView(frame: NSRect(x: 0, y: 0, width: 700, height: 300))
+            window.contentView = container
+            let textView = h.textView
+            // THE MOUNT: SwiftUI's width, and the `@State` height it starts at.
+            textView.frame = NSRect(x: 0, y: 0, width: 700, height: 24)
+            container.addSubview(textView)
+            let coordinator = InlineEditorSurface.Coordinator(model: h.model)
+            coordinator.install(textView: textView) { [weak textView] height in
+                // The binding's write; SwiftUI applies the frame on its next
+                // pass, after the report has returned.
+                DispatchQueue.main.async {
+                    textView?.frame = NSRect(x: 0, y: 0, width: 700, height: height)
+                }
+            }
+            window.orderFrontRegardless()
             defer {
                 coordinator.uninstall()
                 window.orderOut(nil)
                 window.close()
             }
-            let onScreenID = try h.storeSlots()[onScreen].blockID
-            @MainActor func homeNow() -> Bool {
-                guard let badge = h.model.badges.first(where: { $0.blockID == onScreenID }),
-                      let truth = firstFragment(entry: onScreen, model: h.model, textView: h.textView)
-                else { return false }
-                return truth.laidOut && abs(badge.frame.minY - truth.frame.minY) < 1
+            let slots = try h.storeSlots()
+            @MainActor func everyFanHome() -> Bool {
+                h.model.badges.count == fanned.count && fanned.allSatisfy { i in
+                    guard let badge = h.model.badges.first(where: { $0.blockID == slots[i].blockID }),
+                          let truth = firstFragment(entry: i, model: h.model, textView: textView)
+                    else { return false }
+                    return truth.laidOut && abs(badge.frame.minY - truth.frame.minY) < 1
+                }
             }
-            await pumpUntil(window) { homeNow() }
-            await pump(window)
-            let before = try #require(firstFragment(entry: onScreen, model: h.model, textView: h.textView))
-
-            window.setContentSize(NSSize(width: 480, height: 600))
-            await pumpUntil(window) {
-                guard let truth = firstFragment(entry: onScreen, model: h.model, textView: h.textView)
-                else { return false }
-                return abs(truth.frame.minY - before.frame.minY) > 1 && homeNow()
-            }
+            await pumpUntil(window) { textView.frame.height > 24 && everyFanHome() }
             await pump(window)
 
-            let after = try #require(firstFragment(entry: onScreen, model: h.model, textView: h.textView))
-            #expect(abs(after.frame.minY - before.frame.minY) > 1,
-                    "non-vacuity: the narrowing moved the on-screen fan's block")
-            #expect(homeNow(), "the on-screen fan wears its badge at its NEW line after the width change")
-            try expectEveryBadgeHome(h, fanned: Set([onScreen] + deep), "Write, after a width change")
+            #expect(textView.frame.height > 300,
+                    "premise: the frame took the reported height (the post stands far taller than the 24-pt mount frame)")
+            #expect(h.model.badges.count == fanned.count,
+                    "every fanned block wears its badge right after the mount — \(h.model.badges.count) of \(fanned.count), not block 1 alone")
+            try expectEveryBadgeHome(h, fanned: Set(fanned), "the book editor, right after it mounts")
         }
     }
 
@@ -352,6 +414,15 @@ struct FanBadgePlacementTests {
     /// change returns a laid-out fragment to exactly that; (2) a `.zero` rect
     /// at the container origin `intersects` a viewport holding that point —
     /// so a geometry read that skips the state check places it there.
+    ///
+    /// **U4b's correction:** this pin also claimed that "a fragment far below
+    /// the viewport is not laid out", read at the document's LAST fragment.
+    /// That line failed on both trees at U4's window (its `:397`). The test
+    /// host lays out the document's last fragment in the viewport pass, as U4's
+    /// own probe output showed (`p159 state=3`). The line is removed, not
+    /// re-aimed: the badge road depends on no fact about which fragments the
+    /// viewport pass happens to lay out, and a fragment picked to sit just
+    /// past the viewport would pin TextKit's overdraw guess, not a contract.
     @Test func textKitReportsAnUnlaidFragmentAsZeroAndAZeroRectIntersects() throws {
         let scrollView = NSScrollView(frame: NSRect(x: 0, y: 0, width: 700, height: 500))
         let textView = NSTextView(usingTextLayoutManager: true)
@@ -384,8 +455,6 @@ struct FanBadgePlacementTests {
             }
             return found
         }
-        let deepOffset = (textView.string as NSString).length - 40
-
         let coldFirst = try #require(fragment(atOffset: 0))
         #expect(coldFirst.state == NSTextLayoutFragment.State.none && coldFirst.layoutFragmentFrame == .zero,
                 "cold: an unlaid fragment reads .zero / .none")
@@ -393,8 +462,6 @@ struct FanBadgePlacementTests {
         layoutManager.textViewportLayoutController.layoutViewport()
         let laidFirst = try #require(fragment(atOffset: 0))
         #expect(laidFirst.state == .layoutAvailable, "the viewport's first fragment is laid out")
-        let deep = try #require(fragment(atOffset: deepOffset))
-        #expect(deep.state != .layoutAvailable, "a fragment far below the viewport is not laid out")
 
         textView.setFrameSize(NSSize(width: 360, height: textView.frame.height))
         let afterWidth = try #require(fragment(atOffset: 0))
@@ -405,5 +472,109 @@ struct FanBadgePlacementTests {
         #expect(CGRect.zero.offsetBy(dx: origin.x, dy: origin.y)
                     .intersects(scrollView.contentView.bounds),
                 "a .zero rect at the container origin 'intersects' the viewport (CGRect's degenerate-rect rule)")
+    }
+
+    /// **U4b's mechanism — a CHARACTERIZATION, green on both trees by design**
+    /// (no product code; the evidence behind removing U4's forcing read, and a
+    /// point-release tripwire, TEXTKIT2_NOTES §5). The rig is probe 7/9's
+    /// exactly (`notes/plans/vx246-screens/u4b/probes/`): an inline-shaped bare
+    /// TK2 view with a 24-pt frame in an un-ordered window, the pins' own text.
+    ///
+    /// The facts:
+    /// 1. A whole `.ensuresLayout` walk with nothing laid out ahead of it is
+    ///    exact (cold: 11,570 pt measured).
+    /// 2. A sparse mid-document `.ensuresLayout` read first lays those
+    ///    fragments out ahead of their predecessors, at estimated offsets. This
+    ///    is what U4's badge read did on the inline surface. The whole walk
+    ///    after it does NOT re-position them: 10,574 pt, a deep fragment 996 pt
+    ///    off.
+    /// 3. ONE viewport pass re-positions every fragment to the clean walk's
+    ///    place.
+    ///
+    /// This is TEXTKIT2_NOTES §3's 18l finding ("the first full measure after a
+    /// reflow can be 1–5 % off the layout the next display pass settles to")
+    /// with its mechanism identified, and it is why the inline badge pass must
+    /// run AFTER the settle net's heal, never ahead of the whole walk.
+    @Test func textKitPlacesAFragmentLaidOutAheadOfItsPredecessorsOffItsSettledPlace() throws {
+        let blocks = longNote(120)
+        let text = blocks.joined(separator: "\n")
+        let style = NSMutableParagraphStyle()
+        style.paragraphSpacing = 8
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 15), .paragraphStyle: style,
+        ]
+        var starts = [0]
+        for block in blocks.dropLast() { starts.append(starts.last! + (block as NSString).length + 1) }
+        let fans = (0..<120).filter { $0 % 3 != 2 }
+        let deep = 118
+
+        func rig() -> (NSWindow, NSTextView) {
+            let textView = NSTextView(usingTextLayoutManager: true)
+            textView.textContainerInset = NSSize(width: 8, height: 8)
+            textView.isVerticallyResizable = false
+            textView.isHorizontallyResizable = false
+            textView.textContainer?.widthTracksTextView = true
+            textView.textContainer?.size = NSSize(width: 0, height: CGFloat.greatestFiniteMagnitude)
+            let container = NSView(frame: NSRect(x: 0, y: 0, width: 700, height: 300))
+            let window = NSWindow(
+                contentRect: NSRect(x: -5000, y: -5000, width: 700, height: 300),
+                styleMask: [.borderless], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            window.contentView = container
+            textView.frame = NSRect(x: 0, y: 0, width: 700, height: 24)
+            container.addSubview(textView)
+            textView.textStorage?.setAttributedString(NSAttributedString(string: text, attributes: attributes))
+            return (window, textView)
+        }
+        func fragmentY(_ textView: NSTextView, paragraph p: Int, ensuring: Bool) -> CGFloat? {
+            guard let layoutManager = textView.textLayoutManager,
+                  let contentManager = layoutManager.textContentManager,
+                  let location = contentManager.location(
+                    contentManager.documentRange.location, offsetBy: starts[p])
+            else { return nil }
+            var y: CGFloat?
+            layoutManager.enumerateTextLayoutFragments(
+                from: location, options: ensuring ? [.ensuresLayout] : []
+            ) {
+                y = $0.layoutFragmentFrame.minY
+                return false
+            }
+            return y
+        }
+        func wholeWalk(_ textView: NSTextView) -> CGFloat {
+            var bottom: CGFloat = 0
+            textView.textLayoutManager?.enumerateTextLayoutFragments(from: nil, options: [.ensuresLayout]) {
+                bottom = max(bottom, $0.layoutFragmentFrame.maxY)
+                return true
+            }
+            return bottom
+        }
+
+        let (cleanWindow, clean) = rig()
+        let (poisonedWindow, poisoned) = rig()
+        defer {
+            cleanWindow.close()
+            poisonedWindow.close()
+        }
+        let cleanBottom = wholeWalk(clean)
+        let cleanDeep = try #require(fragmentY(clean, paragraph: deep, ensuring: false))
+
+        for p in fans { _ = fragmentY(poisoned, paragraph: p, ensuring: true) }  // U4's read, ahead of the walk
+        let poisonedBottom = wholeWalk(poisoned)
+        let poisonedDeep = try #require(fragmentY(poisoned, paragraph: deep, ensuring: false))
+        #expect(abs(poisonedBottom - cleanBottom) > 100,
+                "a whole walk after a read ahead of unlaid predecessors stands off the clean walk (\(poisonedBottom) vs \(cleanBottom))")
+        #expect(abs(poisonedDeep - cleanDeep) > 100,
+                "and a deep fragment's place with it (\(poisonedDeep) vs \(cleanDeep))")
+
+        poisoned.textLayoutManager?.textViewportLayoutController.layoutViewport()
+        let settledDeep = try #require(fragmentY(poisoned, paragraph: deep, ensuring: false))
+        #expect(abs(settledDeep - cleanDeep) < 1,
+                "one viewport pass re-positions it to the clean walk's place (\(settledDeep) vs \(cleanDeep))")
+        let worst = fans.map { p in
+            abs((fragmentY(poisoned, paragraph: p, ensuring: false) ?? -1)
+                - (fragmentY(clean, paragraph: p, ensuring: false) ?? -2))
+        }.max() ?? 0
+        #expect(worst < 1, "every fan's place, not only the deep one (worst \(worst) pt)")
     }
 }
