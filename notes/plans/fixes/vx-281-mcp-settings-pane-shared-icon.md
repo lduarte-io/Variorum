@@ -122,7 +122,7 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 |---|---|
 | kickoff: worktree, branch, in-flight row (main 94f0a2fb), tickets In Progress, this record | DONE (orchestrator) |
 | U1 — the pane in tabs | **UNIT CLOSED — DONE** (2026-10-13 ~22:35 MDT, opus-implementer): VX-199 · VX-205 · VX-232 (FIXED red-first) · VX-245's two MCP sites (`3d00a166`); red on old 4 issues; Mac batch 250/31 (one issue — VX-283's six lint sites); the walk in both voices DONE, dev store restored `cmp`-SAME. 3 PROVISIONALs (P-VX281-U1-1…3) for QUESTIONS at the merge; the cold review is the ladder's. See the U1 UNIT RECORD |
-| U2 — the shared icon | **IN-PROGRESS** (opus-implementer, from 2026-10-13 ~22:30 MDT) — the U2 UNIT RECORD below carries the trace, the site list, the design and the pieces |
+| U2 — the shared icon | **UNIT CLOSED — DONE** (2026-10-14 ~00:20 MDT, opus-implementer): VX-268 — the one icon on every row the ask glyph marks + the ticket's book/gathering and Timeline rows; red first (core 43, Mac 27 issues on the seam), Mac batch 812/149 (one issue — VX-115's standing pin); the walk in both voices DONE, the dev store restored `cmp`-SAME against the original. 5 PROVISIONALs (P-VX281-U2-1…5) for QUESTIONS at the merge; the cold review is the ladder's. See the U2 UNIT RECORD |
 | the ladder | NOT-STARTED |
 | closeout | NOT-STARTED |
 
@@ -145,6 +145,8 @@ VX-246's docs unit (VX-197) waits on THIS run's merge, because the docs describe
 | U1-9 | "More about this" | the (i)'s tooltip and VoiceOver name, everywhere `ExplainerLine` renders | |
 | U1-10 | "Copy setup command" — now the copy ICON's tooltip and VoiceOver name, no longer a button's visible label | the Connect tab's code block, upper right | her R-13nb-5 words, unchanged; the field guide's lesson 2 ("press Copy setup command") is VX-197's to re-say for the icon (OWED) |
 | U1-11 | the rung's (i) popover shows the sentence in the line's own fragment form ("it can also change, archive and delete…" — lowercase, no closing period) | the grant sheet's HOW MUCH (i) on suggest and edit (`terminal-07`) | words unchanged (VX-184 round 2's as-built clause); whether the popover should read as a capitalized sentence is hers |
+
+**U2 — the shared icon (VX-268): no new words.** The icon, its hover and its popover are 13n-c's, unchanged; the ▾ menu's row mark is an image. One taste note for her pass: the icon reads large beside the Book Panel's small type (`vx281-screens/u2/walk/s16`).
 
 ## Unit records
 
@@ -416,6 +418,59 @@ U1-11 is listed in the FOR VX-234 section above.
 Implementer: Opus (`claude-opus-5-5`), fresh session, HEAD at start `afb7deb4`. **No revert is in flight** unless a
 line below says so.
 
+### UNIT CLOSED (2026-10-14 ~00:20 MDT — the U2 implementer, Opus `claude-opus-5-5`)
+
+**What this unit did NOT do (said first):**
+1. **The Blocks-scope rows were not walked with a row on screen.** The fixture holds no named block and no
+   block-level tag, so the Blocks scope listed "Nothing matches." (`s07`). Their evidence is the code: `blockLine` is
+   untouched and draws no icon, as her call says.
+2. **The Terminal note-row popover click missed** (`t05` — no popover drew). The popover's Terminal face is walked on
+   ⌘L's row (`t03`); the Study note-row popover is `s03`.
+3. **Light appearance only** (no dark). The icon's tint is the voice's accent token, in both voices.
+4. **Not staged on the dev store:** a waiting ask beside the shared icon on one row, and a wing menu row carrying
+   both. The order is code (shared, then the ask glyph — the Bookcase's), and the menu's one-mark rule is pinned
+   (`MCPSharedRowsRulesTests`).
+5. **Hover tooltips were not captured.** A tooltip is not drawn into a capture, and its words are the existing
+   icon's (`MCPShareCopy.iconHelp`, unchanged).
+6. **The autosave-rate re-run of a note hold** (with live reach — the P1 table above) was argued and pinned headless
+   (statements don't grow with rows; nothing reads `container` without reach), not measured live.
+7. **Nothing written to `notes/QUESTIONS.md` or canon** (merge-time — OWED), **and no cold review yet** (the run's ladder).
+
+Everything else in the U2 row is DONE and evidenced:
+- **The trace.** Written to the line before any code.
+- **The seam + pins, red first.** Core 6/6 red (43 issues) headless; Mac 9/9 red (27 issues) on the seam tree.
+- **The fix, green.**
+  - Core 30/4 with the existing reach suites; headless finals MCP 212/41 · core 2,788/320 · workbook 40/6.
+  - The Mac batch: 812 tests / 149 suites, the one issue VX-115's standing pin.
+- **THE WALK in both voices** (below):
+  - every site wears the icon where an approved client reaches it;
+  - bare where it must be (the "elsewhere" wing row, the "every draft" gathering, the Private notes);
+  - Change… opens over ⌘L; Revoke is held;
+  - the open book matches the Bookcase;
+  - no icon anywhere once every client is denied.
+- **The dev store restored `cmp`-SAME against the ORIGINAL copy.** Prefs identical, clipboard SAME.
+
+**Commits (branch `vx-281-run-mcp-settings-pane-shared-icon`):**
+- `c281f6b2` the record opens
+- `68cc4ab1` the seam + the pins (red-first)
+- `c3946402` the fix
+- `de1f4a1d` compiled + headless finals + window 1's plan
+- `9cd3d42a` the P1 table corrected
+- `3e31f78b` window 2's plan
+- `fe1afac7` window 1 recorded
+- this commit (the walk + the close)
+
+**Surfaces, by path:**
+- core — `Sources/VariorumCore/Queries/MCPShareQueries.swift` only;
+- app — `Core/Views/{MCPRowReach (new), MCPSharedIcon, MCPShareRoad, WingsModel, WingSwitcherMenu, WingSwitcherSheet}`,
+  `Features/Library/{LibraryCatalogView, LibraryCatalogModel, LibraryCatalogPaging}`, `Features/Pool/PoolPostsView`,
+  `Features/BookView/{BookPanelModel, BookPanelView}`, `Features/Timeline/TimelineView`, `RootView` (one `.task`);
+- tests — `Tests/VariorumCoreTests/MCPRowReachTests` (new), `VariorumTests/{MCPSharedRowsTests,
+  MCPSharedRowsRulesTests}` (new), and the ritual edits in `BookPanelTests` and `CapabilityRegistryTests`.
+
+Zero lines in: `Sync/`, custody/keychain, the editor seam, schema, the MCP wire (`Sources/VariorumMCP`),
+`Domain/MCPGrantRule.swift`, `SettingsShape.swift`, `TutorialSeeder`.
+
 **Read in full before code (never delegated):** this record whole (incl. the U1 UNIT RECORD and its walker facts);
 `notes/plans/mcp-pane-and-docs-kickoff.md` (the U6 section, the binding rulings, the rules, the VX-268 bullet);
 `notes/plans/vx-33-release-runway.md` §2–§3; `notes/SessionResiliencyProtocol.md`; the 13n-c plan's rulings list
@@ -541,8 +596,160 @@ affordance that lags is a surprise). The batch is two statements however many ro
 | 2 | THE FIX: the core reads; the icon's calm state; the hosts' held reads and faces; the declarations and their ritual pins | DONE (`c3946402`; COMPILED — `DerivedData/vx281-u2`, `** TEST BUILD SUCCEEDED **`, `logs/build-fixed.log`, no new warning in a touched file — the two seen are pre-existing lines, identical in the seam build): core `mcpReachStandings` + the three reads + `MCPReachPlace.wing` (read off `decideWing`) — **core GREEN headless: `MCPRowReachTests` 6/6 + `MCPShareTests` + `MCPGatheringReach*` = 30 tests / 4 suites** (`logs/core-pins-fixed.log`; two PIN-AUTHORING errors found by the first green run and fixed in the pins, not the code: line 115 forgot codex's Home wing grant still reaches the note — now asserts claude-code LEAVES and codex stays; the wing agreement iterated a deleted wing, which has no row — now iterates the live wings); app: `MCPSharedIcon`'s calm state = no view, `MCPRowReach.hold` (Core/Views), the Library's near-window reach hold + listed-book hold + row faces (List line, card, book line), Pool / Book Panel / Timeline holds + faces, `WingsModel.watchSharing` (RootView task), ⌘L's row icon + `MCPShareRoad.openingHere` + the nested grant sheet, the ▾ menu's `rowMark`, the declarations; ritual pins `BookPanelTests` (exact set) + `CapabilityRegistryTests` (the walk's Timeline line); new design suite `MCPSharedRowsRulesTests` (3: the calm icon takes no width or spacing; the menu row's one mark; every host declares the icon's acts, the menu none) |
 | 3 | headless finals + the fixed tree built for testing | DONE (this commit) — the whole package `swift test` on the fixed tree: **`VariorumMCPTests` 212/41 · core 2,788/320 (VX-184's 2,782/319 + `MCPRowReachTests` 6/1) · workbook 40/6 — 0 failures**; skips = the standing gated nine (read, `logs/headless-finals.log`) |
 | 4 | STAGE WINDOW 1 — red on the seam tree, the Mac batch on the fixed tree | **DONE** (claim `vx281-u2`, 23:49:18–23:55:20 MDT, handed over from `coord-for-vx281` by the coordinator's exact line; `guard.sh --author` OK before each run, no Variorum instance before or after; released the moment (b) ended, before anything else). **(a) RED ON THE SEAM** (`DerivedData/vx281-u2-old`, built from `68cc4ab1`; `logs/a-red-on-seam.log`): **9 tests / 1 suite — ALL 9 RED, 27 issues** — the Library's note + book holds (8), the open book (8), the Pool (1), the Book Panel (2), the Timeline (1), the wings (2), VX-272 (3 — its control legs; the guard green as stated), and both faces (1 each — the shared probe nil: no icon drawn). The seam tree then DELETED (the coordinator's leave; disk). **(b) THE BATCH ON THE FIXED TREE** (`DerivedData/vx281-u2`, `9cd3d42a`'s sources; `logs/b-batch.log`): **812 tests / 149 suites, ONE issue — VX-115's standing `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads`** (`BookView.surfaceCapabilities == [.openBookSettings]`, red on main since 13o U3 — not this unit's). Every other test green: **`MCPSharedRowsTests` 9/9 and `MCPSharedRowsRulesTests` 3/3 GREEN** (the same nine red on the seam, green here), the two ritual pins (`BookPanelTests`' exact set, `CapabilityRegistryTests`' `.surface` walk) green, VX-185's `MCPGatheringIconTests` and 13n-c's `MCPShareFacesTests` green, the Library's alignment/paging/infinite-scroll suites green (VX-167's order-dependent pair NOT met). Skips read: the gated capture harnesses (13n-c U1–U4, VX-281 U1) and the opt-in rigs (the List-face rig, the singleton-window oracles) only. **Nothing to fix.** |
-| 5 | STAGE WINDOW 2 — the walk | **READY FOR STAGE** — window 1 green; the plan below ("STAGE WINDOW 2 — the walk: the plan"), under the claim the orchestrator relays (expected `vx281-u2-walk`, ~65 min) |
-| 6 | close: self-assessment, PROVISIONALs, OWED | NOT-STARTED |
+| 5 | STAGE WINDOW 2 — the walk | **DONE** (claim `vx281-u2-walk`, 23:56:51–00:14:25 MDT, handed over from `coord-for-vx281` by the coordinator's exact line; guards clean at every step, no system popup) — THE WALK below; 57 captures in `notes/plans/vx281-screens/u2/walk/` (gitignored), every one read; the dev store restored `cmp`-SAME against the ORIGINAL copy, the prefs identical, the clipboard SAME |
+| 6 | close: self-assessment, PROVISIONALs, OWED | DONE (this commit) — **UNIT CLOSED** (the banner atop this record) |
+
+### THE WALK (STAGE WINDOW 2 — 2026-10-13 23:56:51 → 2026-10-14 00:14:25 MDT, claim `vx281-u2-walk`)
+
+**Setup:**
+- The Debug app is built from `DerivedData/vx281-u2` (pid 25045), light appearance (staged by the local pref).
+- **The ORIGINAL safety copy:** `…/safety-copies/vx281-u2-prestage-20261014T055702Z/` — five files, each `cmp`-SAME
+  (sqlite `9bb8eef87116`, wal `c5beb92c1cf8`, shm `7ce060b13cfa`, key files `3af4704371ff` / `7e12a1b85890`).
+- **The staging script's own copy:** `…/scale-prestage-20261014T055709Z/`, then the fixture,
+  `notes=30,long=1,books=20,shelves=3,wing=2`.
+- The dev store opened **Standard, unlocked**, in Study, with no What's New sheet.
+- **Four approved clients** (`s00`: claude-code, u1-walk, u2-walk, u3-walk), so the coordinator's no-client road was
+  not needed.
+
+**The legs:**
+
+| Leg | Study | Terminal | Seen |
+|---|---|---|---|
+| W1 — the Bookcase (the control) | `s01` | `t16` (after W13) | every book and the Home gatherings wear it (Study); bare once no client is approved (Terminal) |
+| W2 — the Library, List, Home | `s02`, `s03`/`s03b` | `t04` | every BOOK row and NOTE row wears it right after the title, on its line. The popover, per client: "read, suggest, write new and edit · always", "through the Home wing grant", Change… · "Revoke the Home wing grant" |
+| W3 — Cards | `s04` | `t06`/`t06b` | every card wears it after its lead |
+| W4 — Timeline | `s05` | `t07` | every row wears it, across wings (the Timeline's stamp lenses aren't wing-scoped): the drafts via their note grants, the lexer/grammar via variorum's wing grant — and **"a private parser note" BARE** (the Private fence) |
+| W5 — the answer sheet ("river") | `s06` | — | the book rows and the note heads wear it — and **"Fixture 0000 — on the river at dusk" BARE** (the fixture marks its first note Private, `ScaleFixture.swift:336` — the fence, a second time) |
+| W5b — Blocks scope | `s07` | — | "Nothing matches." (no block rows in this fixture — NOT-DONE 1) |
+| W6 — ⌘L | `s08`, `s09`, `s10`, `s10b`/`s10c` | `t02`, `t03` | rows: Home and variorum WEAR it, **"elsewhere" BARE** (P-VX281-U2-4). variorum's popover: "read, suggest and write new · always", no why, Change… · Revoke. **Change… opened THE grant sheet OVER the switcher** ("Change access — claude-code", "Confirming replaces the grant you opened this from.", A wing · variorum · Write new · Always); **Cancel** → the switcher back, nothing written |
+| W7 — the ▾ menu | `s11` | — | Home and variorum carry the shared MARK, "elsewhere" plain |
+| W8 — "elsewhere" | `s12`, `s13` | `t01`/`t01b` | "Now in “elsewhere”." Both drafts wear it ("read · always", no why, plain Revoke); "the drafts book" wears it; **"every draft" (the gathering) BARE** — R-VX185-1 |
+| W12 — Revoke, held | `s14` | — | claude-code's Revoke on "a draft about doors" → the popover re-opened with NO refresh: claude-code now "read · always · through “the drafts book”" with "Revoke the grant on “the drafts book”" — the book grant still reaches the note |
+| W9 — the Book Panel | `s15`, `s16` | `t08`/`t08b` | "the drafts book"'s two rows wear it; the in-note indicator's icon top right |
+| W10 — the Pool | `s17`/`s17b` (variorum, tucked), `s18`/`s18b` (Home) | `t09`/`t09b` | the lexer and the grammar wear it, **"a private parser note" BARE**; Home's tucked and loose rows wear it |
+| W11 — the open book | `s19`, `s20`, `s21`/`s21b`, `s22`, `s23`, `s24`, `s25`/`s25b` | — | Open book ON → **"every draft" WEARS it**, its popover per client "read · always · through the open book · The open book is switched in Settings ▸ MCP."; ⌘L's "elsewhere" now wears it. Open book OFF → "every draft" bare again (held) |
+| W13 — VX-272 | — | `t10`, `t11`, `t12`, `t13`, `t14`, `t15`, `t16` | Settings ▸ MCP ▸ Clients → each client's Deny… (every confirm read by accessibility first: "Deny claude-code? … Its 7 grants are revoked now…", then u3-, u2-, u1-walk) → **no icon anywhere**: ⌘L's rows, the Library's Timeline (the same rows `t07` showed iconed), the Bookcase |
+
+**Driving slips, said plainly. None wrote the store:**
+1. **A popover's Escape closed the ⌘L switcher with it.** The follow-on "home" ⏎ then landed nowhere (`t04`'s first
+   capture still showed "elsewhere"; the search and quick-entry fields were empty). Re-done with ⌘L.
+2. **A Library click hit Home's taller sidebar** (its Starred section) and opened the "quicknotes" gathering
+   (`t15`'s first capture). It was a navigation only. Re-done.
+3. **The Terminal note-row icon click missed** (NOT-DONE 2).
+
+**Observed, not this unit's** (each for the orchestrator to weigh):
+- The Pool's tucked run stays shown across a wing switch (`s18`) — the model is RootView's, and it tucks only when the
+  page disappears.
+- The field guide's card text still says only "On the Bookcase, a small icon beside a book means a client can reach
+  it" (`s04`) → VX-197's truth pass.
+- The icon reads large beside the Book Panel's small type (`s16`) — the ONE icon's own size (W-UX-7's
+  `rowScale`) — a taste note for her.
+
+**Cleanup:**
+- Quit by identity; no instance left.
+- `restore.sh` reported "Restored (verified)", and then **all five store files were `cmp`-SAME against the ORIGINAL
+  copy** (the very first). The store folder held the same five files; the launch wrote no new backup; no socket left.
+- **The Debug prefs:** `defaults import` MERGES, so one key the walk created survived it
+  (`currentBlock.<pane id>` — the opened draft's caret memory). I deleted it, and a fresh export is **IDENTICAL** to
+  the pre-walk export (`appearanceChoice` back to `system`).
+- **Her clipboard was restored** (text, `cmp`-SAME).
+- **POSTURE AS LEFT:** the dev store is **Standard, unlocked**, Study, byte-identical to its pre-walk state; no
+  Variorum instance.
+- **Stage RELEASED** at 00:14:25.
+
+### PROVISIONALs (non-wording; the orchestrator files them in QUESTIONS at the merge)
+
+- **P-VX281-U2-1 — a wing's ▾ menu row carries ONE mark, and a waiting ask outranks the shared icon.** A menu row
+  hosts one image and no popover; the icon's door on a wing is ⌘L's row. (`WingSwitcherMenu.rowMark`, pinned.) Options:
+  - **(a) The ask's mark wins (BUILT).**
+  - (b) The shared mark wins.
+  - (c) The menu shows neither — ⌘L only.
+- **P-VX281-U2-2 — the masthead wing WORD wears no shared icon.** The word's ask glyph marks every wing's asks
+  (`.anyWing`), not one place, so there is no place-parity; the ticket names the switcher's ROWS. Options:
+  - **(a) Rows only (BUILT).**
+  - (b) The word also wears the CURRENT wing's shared icon.
+- **P-VX281-U2-3 — rows take the Bookcase's gate.** A row wears the icon while an approved client reaches it, server
+  switch aside (P-13nc-U3-7's split carried). With the server OFF, rows show standing reach while the in-note
+  indicator hides. Options:
+  - **(a) The Bookcase's gate (BUILT).**
+  - (b) Rows (and the Bookcase) hide while the server is off.
+- **P-VX281-U2-4 — a wing row's reach is `decideWing`'s:** a wing grant on it (its rung and duration) or the open book
+  (read). Note or book grants inside a wing never icon the wing — R-VX185-1's reading, one level up; walked: "elsewhere"
+  bare under its note and book grants (`s08`). Options:
+  - **(a) `decideWing` (BUILT).**
+  - (b) Any grant reaching anything in the wing icons it.
+- **P-VX281-U2-5 — ⌘L's Change… opens THE grant sheet OVER the switcher,** the nested-host precedent (Book Settings
+  T-U3-7, U4's asks); walked (`s10`, `s10b`). Options:
+  - **(a) Over the switcher (BUILT).**
+  - (b) Close the switcher, then open it on the window.
+
+**Argued, not provisional:**
+- **Note holds read `container`, so they re-run per autosave while reach is live.** Correct the moment a note is
+  marked Private, moved or trashed (the P1 table). A named-region hold would leave a "shared" icon on a note just
+  marked Private.
+- **The row's order** is the Bookcase's: name, the shared icon, then the ask glyph.
+
+### SELF-ASSESSMENT
+
+**Against VX-268 and her kickoff calls:**
+- Every place the ask glyph marks a place now wears the ONE icon with its hover and popover: the Library's note rows
+  (List, Cards, the answer sheet), the Pool's rows, the Book Panel's rows, and ⌘L's rows (the menu's rows as a mark).
+- So do the ticket's own additions: the Library's book and gathering rows, and Timeline.
+- **Her calls held:**
+  - Pool and Book Panel rows are IN; Blocks-scope rows are OUT.
+  - **The open book matches the Bookcase** (W11 — the same rule, so the same answer).
+  - With no approved client, nothing (W13).
+- **Reach comes only through the one rule:**
+  - notes through `decide` (pinned id-for-id against the singular read);
+  - books and gatherings through each kind's rule (pinned against the Bookcase's own map);
+  - wings read off `decideWing` (pinned against it at every rung).
+- **Bare where it must be:** the fence held live four times (two Private notes, the Private-member Pool row, the
+  Timeline), as did R-VX185-1 (the gathering) and P-4 (the wing row).
+
+**Against the spec and the seams:** zero `Sync/`, custody, editor seam, schema, wire or `MCPGrantRule` lines.
+Chrome plus core reads, with Swift Testing state pins. P1:
+- every read is sized to what its host shows;
+- the batch's statements don't grow with the rows (pinned);
+- with no live reach, no note is read at all (pinned).
+
+**Risks I see:**
+1. **The autosave-rate re-run of the note holds while reach is live.** This is new cost on the Library, Pool and
+   Timeline when one sits beside an editor in a split pane: one bounded batch per autosave. It is argued, not
+   measured.
+2. **⌘L's nested grant sheet:** macOS hides the switcher while the grant sheet is up and re-shows it after (its window
+   id changed). The walk saw it come back intact, but it is AppKit's behaviour, not ours.
+3. **The Timeline's hold** is sized to the rows she loaded (her own "Load More" pages), not to a window.
+4. **The icon's size in the Book Panel's small type** — a taste note for her.
+
+**The trace discipline:** the bug was traced to the line before code. The pins were red first, on a seam that carried
+the old behaviour (core 43 issues, Mac 27), then green on the fix. Two pin-authoring errors are recorded as such.
+
+### OWED (for the orchestrator)
+
+1. **The cold review** — Opus at max, then the end-of-run Fable round (her redirect). The map:
+   - `MCPShareQueries.swift` — `mcpReachStandings`, the three reads, `MCPReachPlace.wing`/`wingReach`. Is anything
+     read off a rule other than its kind's own? Does any read touch `container` without reach?
+   - `LibraryCatalogPaging.holdNearFacts` / `LibraryCatalogModel.landReach` — the slices, the near window.
+   - `MCPRowReach.hold` and the four hosts' `.task(id:)` re-aims.
+   - `MCPSharedIcon`'s calm state.
+   - `WingSwitcherSheet`'s nested grant sheet; `MCPShareRoad.openingHere`.
+   - `WingSwitcherMenu.rowMark`.
+   - The declarations and the two ritual pin edits.
+2. **QUESTIONS at the merge:** P-VX281-U2-1…5 (options above).
+3. **Canon at the merge** — AppSpec §12, THE MCP DOOR line (or the Bookcase icon line). The ONE shared icon marks:
+   - every Library row an approved client reaches — notes, books and gatherings, in List, Cards, the answer sheet
+     and Timeline;
+   - the Pool's and the Book Panel's rows;
+   - the wing switcher's rows (⌘L with its popover; the ▾ menu as a mark);
+   - by the one rule, with the Bookcase's gate.
+
+   Not marked: Blocks-scope rows and the note's own bars. MOBILE PARITY: **nothing mobile-visible.**
+4. **VX-197 (U7, the docs):** field-guide lesson 7 (and the card text `s04` shows), "a small icon beside a book
+   means a client can reach it", should say the icon marks notes, books, gatherings and wings wherever they're listed.
+5. **A follow-up to weigh (not filed from the branch):** the Book Panel's collapsed one-note chapter row stands for a
+   note but wears NEITHER glyph (the ask glyph never sat there either) — parity for both, if wanted.
+6. **`DerivedData/vx281-u2` is DELETED** at this close (3.2 GB). Nothing needs it: any later Mac run builds the
+   reviewed tip fresh.
 
 ### STAGE WINDOW 1 — the plan (runs ONLY under the claim the orchestrator relays — expected `vx281-u2`, ~30 min)
 
