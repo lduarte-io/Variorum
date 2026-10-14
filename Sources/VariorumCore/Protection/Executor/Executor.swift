@@ -178,6 +178,8 @@ public final class ProtectionExecutor {
     /// The vault as read THIS SESSION, per account — decision 35's "fresh
     /// vault read". Only this executor's own fetches go here.
     public internal(set) var freshVaults: [String: VaultSnapshot] = [:]
+    /// Every account whose vault this session has read (present or absent).
+    var vaultsReadThisSession: Set<String> = []
 
     public init(leaves: ExecutorLeaves, configuration: ExecutorConfiguration, guards: ProtectionGuards = .all) {
         self.leaves = leaves
@@ -198,6 +200,7 @@ public final class ProtectionExecutor {
     public func readVault(accountID: String) async throws -> VaultSnapshot? {
         let snapshot = try await leaves.vault.fetchVault(accountID: accountID)
         if let snapshot { freshVaults[accountID] = snapshot } else { freshVaults[accountID] = nil }
+        vaultsReadThisSession.insert(accountID)
         return snapshot
     }
 
@@ -205,6 +208,12 @@ public final class ProtectionExecutor {
     func freshVault(for account: String?) -> VaultSnapshot? {
         guard let account, configuration.session.accountID == account else { return nil }
         return freshVaults[account]
+    }
+
+    /// Whether this session has read `account`'s vault — present, or absent
+    /// (sync setup's read finds none, and that is the account's word too).
+    func readThisSession(_ account: String) -> Bool {
+        configuration.session.accountID == account && vaultsReadThisSession.contains(account)
     }
 
     // MARK: - Unlock: every home verified with the key in hand

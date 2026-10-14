@@ -18,10 +18,6 @@ func MoveOffSharedKeyProgram() -> PendingProgram { PendingProgram(act: .moveOffS
 func RetireSharedKeyProgram() -> PendingProgram { PendingProgram(act: .retireSharedKey) }
 func RelinkAppleProgram() -> PendingProgram { PendingProgram(act: .relinkApple) }
 func CreateLibraryProgram() -> PendingProgram { PendingProgram(act: .createLibrary) }
-func SetUpSyncProgram() -> PendingProgram { PendingProgram(act: .setUpSync) }
-func EnrollProgram() -> PendingProgram { PendingProgram(act: .enroll) }
-func MoveProgram() -> PendingProgram { PendingProgram(act: .move) }
-func LeaveAccountProgram(act: ProtectionAct) -> PendingProgram { PendingProgram(act: act) }
 func KeyDoorProgram(act: ProtectionAct) -> PendingProgram { PendingProgram(act: act) }
 func DeviceSettingsProgram() -> PendingProgram { PendingProgram(act: .deviceSettings) }
 func TouchIDRearmProgram() -> PendingProgram { PendingProgram(act: .touchIDRearm) }

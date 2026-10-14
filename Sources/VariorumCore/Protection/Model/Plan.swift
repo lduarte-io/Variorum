@@ -86,6 +86,12 @@ public struct ActParameters: Codable, Equatable, Sendable {
     /// waiting for the named key — a fresh account key is minted (the vault's
     /// CAS keeps one).
     public var mintsFreshAccountKey: Bool?
+    /// The library's key kind before the act (the account family's crossing).
+    public var fromKind: ProtectionMode?
+    /// Whether the act re-keys the library (every leave does — §3.8).
+    public var rekeys: Bool?
+    /// The account this Mac stops using (its sync keys forgotten).
+    public var forgetsAccount: String?
 
     public init(
         gate: GateStyle? = nil, synced: Bool? = nil, accountID: String? = nil, doorRevision: Int? = nil,

@@ -504,5 +504,6 @@ extension ProtectionExecutor {
     /// Note a vault this executor wrote as its freshest read.
     func noteFresh(_ snapshot: VaultSnapshot) {
         freshVaults[snapshot.accountID] = snapshot
+        vaultsReadThisSession.insert(snapshot.accountID)
     }
 }

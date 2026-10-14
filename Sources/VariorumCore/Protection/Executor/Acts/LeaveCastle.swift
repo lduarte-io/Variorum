@@ -88,7 +88,7 @@ extension ActContext {
     /// fresh vault read for its account this session.
     func requireAppleWriteAllowed() throws {
         guard executor.guards.freshVaultBeforeAppleWriteOn, let account = library.record?.account ?? accountID else { return }
-        guard executor.freshVault(for: account) != nil else { throw ExecutorRefusal.needsFreshVault }
+        guard executor.readThisSession(account) else { throw ExecutorRefusal.needsFreshVault }
     }
 
     /// **Mint a fresh Apple key** — always under a fresh id (one minter,
