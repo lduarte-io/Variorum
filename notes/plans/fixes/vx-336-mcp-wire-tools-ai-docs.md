@@ -6439,8 +6439,9 @@ wrong-output mechanism.
 
 ## CLOSEOUT RECORD — PHASE A (the closeout implementer — opus-implementer, from 2026-10-15 ~02:00 MDT)
 
-**Not done (first line, kept current):** PHASE B (the closeout window) and PHASE C (the merge-moment ledgers, the PR,
-the merge, the release, the refresh, the cleanup) are later sessions; ladder round 2 has not run; no shared ledger on
+**Not done (first line, kept current):** PHASE A is DONE (items 1–9 below). PHASE B (the closeout window) and PHASE C
+(the merge-moment ledgers, the kits' deletion, the PR, the merge, the release, the refresh, the cleanup) are later
+sessions; ladder round 2 has not run; no shared ledger on
 main is touched (QUESTIONS, the master plan, AppSpec §14, MobileSoul, the finals ledger — their DRAFTS are below); no
 Linear edit, no ticket minted (proposals are in OWED); no product code, no test beyond a headless `swift build`, no
 `xcodebuild`, no stage, no store.
@@ -6467,8 +6468,8 @@ states (below).
 | 5 | the MOBILE PARITY draft (D5) | DONE (this commit) — D5 below (PL-56 unless taken) |
 | 6 | RULINGS RECONCILED (D6), remainders proposed in OWED | DONE (this commit) — D6 below: 24 rulings; REMAINDERS rows 11, 14, 15, 16 (+ row 12's optional evidence gap) → OWED T1–T5 |
 | 7 | the handoff draft `notes/handoffs/vx-336-handoff.md` (D7) | DONE (this commit) — the file in the branch; D7 below lists its «…» fills |
-| 8 | the STATUS lines drafted closed (D8) | NOT-STARTED |
-| 9 | the kits' deletion and PHASE C's own steps written into the PHASE C draft (D9) | NOT-STARTED |
+| 8 | the STATUS lines drafted closed (D8) | DONE (this commit) — D8 below |
+| 9 | the kits' deletion and PHASE C's own steps written into the PHASE C draft (D9) | DONE (this commit) — D9 below: the kits `git rm -r` in-branch BEFORE the merge; the evidence and DerivedData after it. **PHASE A DONE** |
 
 ### ITEM 1 — `notes/MCPSpec.md`, in-branch (R1-2's fix; round 2 reads it)
 
@@ -6783,3 +6784,76 @@ left on disk, MOBILE PARITY, and the fresh-session pointer. **PHASE C fills ever
 the release (version, build, who cut it — this run or VX-283 — and where its notes are); round 2's result; the closeout
 window's counts; the refresh's A1 path and the replaced app, if this run refreshed; the tickets minted from OWED T1–T5;
 the bundle's number if renumbered; and it deletes the italic DRAFT line under the title.
+
+#### D8 — the STATUS lines, drafted CLOSED (flipped at PHASE C)
+
+- **The plan's banner** (`notes/plans/mcp-pane-and-docs-kickoff.md`, line 3): replace the exact bold sentence
+  `**STATUS (VX-336): STARTED 2026-10-14 at her kickoff (\`/architect-phase vx-336\`, the Pro).**` with
+  > **STATUS (VX-336): CLOSED 2026-10-15 — merged as «PR #N» (merge commit «sha»); every unit this file planned
+  > (U5–U8, with VX-330 and VX-342) shipped, and U9 (VX-361 · VX-362 · VX-363) joined; the record
+  > `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` (its CLOSEOUT RECORD), the handoff
+  > `notes/handoffs/vx-336-handoff.md`, the ratify bundle QUESTIONS #227. Nothing in this plan remains open.**
+
+  and keep the sentences after it as they stand (the history of the file).
+- **This record's STATUS** (lines 3–4): replace the exact text `**STATUS: OPEN — kicked off 2026-10-14 ~13:15 MDT` with
+  `**STATUS: CLOSED 2026-10-15 — merged as «PR #N» (merge commit «sha»); the CLOSEOUT RECORD at the end names what landed
+  where. Kicked off 2026-10-14 ~13:15 MDT`, and the line's last sentence `This file is the live state; read its LIVE
+  STATUS first on any resume.**` with `This file was the live state while it ran.**`
+- **This record's LIVE STATUS, the CLOSEOUT row:** `| CLOSEOUT | NOT-STARTED |` → `| CLOSEOUT | **DONE 2026-10-15** —
+  PHASE A (the in-branch canon + the drafts, the CLOSEOUT RECORD) · PHASE B («the window's result line») · PHASE C (the
+  ledgers' commits «…»; «PR #N» merged «sha»; «the release and the refresh, or VX-283's») |`, and the LADDER row gains
+  round 2's result.
+- **"Tickets minted from this run":** one row per ticket the orchestrator mints from OWED T1–T5, as the table's other rows.
+
+#### D9 — PHASE C's own steps (in this order; the kits FIRST, before the PR merges)
+
+1. **Delete the run's two kits in the branch, before the PR merges** — they must not reach main:
+   `git rm -r notes/plans/fixes/vx-336-u7-kit notes/plans/fixes/vx-336-u9-sweep` (25 tracked files: the u7 kit's six
+   scripts and its 17 prompts, the u9 sweep's `callgraph.py` and its JSON), its own commit ("VX-336: the closeout deletes
+   the run's test kits before the merge. Part of VX-336"), pushed. Their last tree stays reachable from the merge commit's
+   second parent (last touched at `e454a8ef`), which is what the record's mentions of them point at.
+2. **Merge latest `origin/main` into the branch** (PHASE B did it once; again if main moved), then apply D1–D5 and D8 on
+   that tree, one family per commit, VX-246's precedent: QUESTIONS (D1) · AppSpec §14 + the archive roll (D2) · the
+   finals ledger (D3, with PHASE B's counts and round 2's tally) · the master plan row (D4) · MobileSoul (D5) · the STATUS
+   lines (D8).
+3. **Renumber if a sibling merged first:** if #227 or PL-56 is taken on main, use the next free and change it everywhere
+   it appears — D1's heading, D2's entry, D8's banner, the handoff (four places) and `notes/MCPSpec.md`'s one "QUESTIONS
+   #227" (grep for it). D2b's VX-283-first case decides which entry rolls.
+4. **Finalize the handoff** (D7's fill list) and delete its DRAFT line.
+5. **The PR** `VX-336: MCP wire tools & AI docs` (merge commit, never squash), the merge ask to the coordinator, then —
+   if this run merges last — the 0.9.7 release and the `/Applications` refresh under the coordinator's rule card
+   (CLOSEOUT BRIEF item 9's notes section, merged with VX-283's; see OWED 4 on one of its lines).
+6. **After the merge:** delete the gitignored evidence (`notes/plans/vx336-screens/`), every `App/Variorum/DerivedData/vx336-*`
+   folder (`vx336-u9` is kept until then for the ladder), the worktree and the branch (GitHub and local); the dev-store
+   A1 copies are the coordinator's to prune (the handoff lists them).
+7. **Linear (the orchestrator):** the members close one by one; VX-234 gets the handoff's consolidated wording list; every
+   ticket this run filed is checked against the labeling rule (the "Tickets minted" table carries each one's fields;
+   VX-363's and VX-357's Pre-launch are hers); OWED T1–T5 minted or declined.
+
+### OWED (PHASE A → the orchestrator)
+
+1. **Tickets proposed by the reconcile (D6) — the orchestrator mints, never an assignee:**
+   - **T1 (D6 row 11) — the four take-text writers that answer no digest** (`divide_block`, `merge_blocks`,
+     `save_version`, the book import), VX-254's "every tool" letter. Held by P-VX254-1/2 in #227: mint now in the Needs
+     Lillian state (it waits on her answer), or let her answer decide. Improvement · Confirmed · MCP · Low.
+   - **T2 (D6 row 14) — the field guide's MCP lesson 3 names the edit rung's remaining acts one by one** (locking a take,
+     renaming a commit, deleting a lens, naming a block, taking a note out of a book, putting back from the tray, setting
+     a note's date, restoring a deleted comment). Improvement · Confirmed · MCP · Low · Wording.
+   - **T3 (D6 row 15) — an MCP parity audit against R-VX184-1:** the keyboard doors the wire still lacks — at least moving
+     a span to a new take, renaming a tag, extract, the copy-takes-to-both divide and word targets (callouts are VX-147's).
+     Improvement · Confirmed · MCP · Low; Pre-launch is hers.
+   - **T4 (D6 row 16) — the wire's refusal chain still speaks a non-`OperationError` raw** (`String(describing:)`, e.g. a
+     database error such as the import's former "SQLite error 19"). Improvement · Suspected · MCP · Low.
+   - **T5 (D6 row 12, optional) — measure another MCP client's tool-output cap against `read_note`'s 32,000-character
+     page** (only Claude Code 2.1.300 was measured; Codex isn't installed). Exploration · MCP · Low.
+2. **MCPSpec's VX-246 block still reads "PROVISIONAL #226"** in five places, though #226 was ratified whole on
+   2026-10-14. Not changed here (another run's canon, not this brief's); the orchestrator's call whether PHASE C writes
+   "ratified #226".
+3. **MobileSoul on main has two rows named PL-53** (VX-143's and VX-168's) — a numbering note, not this run's to fix.
+4. **The 0.9.7 notes' sixth bullet** says "every refusal an AI can meet is in plain words" — true of every
+   `OperationError` (the sweep), not of a non-operation error (T4). Suggested at PHASE C: "every refusal the door knows
+   of is now in plain words" (the handoff's wording).
+5. **The board snapshot** (`~/dev/variorum/notes/TICKETS.md`) predates VX-352…VX-365; the filed-ticket check (D9 step 7)
+   reads Linear itself.
+6. **No `swift build` was run:** PHASE A changed no source, test or package file (`git diff --name-only 93d707eb..HEAD`
+   = `notes/` only); PHASE B's headless finals run on the merged tree.
