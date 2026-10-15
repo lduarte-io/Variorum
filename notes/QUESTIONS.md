@@ -2885,4 +2885,6 @@ renumbers. #227 was free at the merge.)*
   - **P-VX255-1 → RATIFIED (a)** (no anchor only). **P-VX362-1 → RATIFIED as built** (the sentences; a repeat
     `apply_tag` answers done, nothing changed). **P-VX256-1 → RATIFIED (a)** (32,000 characters of answer; e1–e4 as
     built).
+  - **Batch 2 → all RATIFIED as built:** P-VX253-1 (keep `take_ids`) · P-VX253-2 (refuse; the empty-`take_ids` note
+    (d) not taken) · P-VX252-1 (ids only) · P-VX361-1 (one `tag_ids` list).
 Status: open — your eye; the handoff's checklist leads with this bundle.
