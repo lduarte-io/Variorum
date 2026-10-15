@@ -153,8 +153,18 @@ extension ActContext {
             return
         }
         let passphrase = try requirePassphrase()
-        let apple = try parameters.accountAppleKeyID.flatMap { try leaves.apple.readAppleKey(id: $0) }
-        if parameters.newKind == .standard, apple == nil { throw ExecutorRefusal.appleKeyUnreadable }
+        var apple = try parameters.accountAppleKeyID.flatMap { try leaves.apple.readAppleKey(id: $0) }
+        if parameters.newKind == .standard, apple == nil {
+            // The account key this act minted is gone — its keychain replaced or
+            // reset, or the Apple ID switched, before iCloud Keychain carried it
+            // — and no vault names it (none exists yet): one minter, a fresh
+            // one, the lost id recorded retired (it wraps nothing). A resume
+            // never sticks on it (VX-305 U4, the soak's seed 6).
+            if let lost = parameters.accountAppleKeyID {
+                try updateSection { $0.retiringAppleKey(id: lost, purpose: .account, accountID: account, origin: .minted, at: now) }
+            }
+            apple = try mintAppleKey(purpose: .account)
+        }
         let (format, fresh) = try VaultModel.creating(
             passphrase: passphrase, words: secrets.words, apple: apple, device: deviceName, ids: leaves.ids)
         var stamped = parameters

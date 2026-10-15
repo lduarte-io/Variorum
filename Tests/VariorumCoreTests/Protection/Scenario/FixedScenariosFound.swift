@@ -657,4 +657,22 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 6 (sequence 739, the closer's soak): Set Up Sync (Standard)
+    /// crashed right after minting the account's fresh Apple key, then the Mac
+    /// switched Apple ID before iCloud Keychain carried it — the key exists
+    /// nowhere and no vault names it, yet the resume's vault step demanded it
+    /// and stuck in flight. One minter: the act mints afresh (the lost id
+    /// recorded retired — it wraps nothing), as the leave's own key does.
+    @Test func aSetUpWhoseAccountKeyWasLostMintsAfresh() async throws {
+        let world = try Self.start("two Macs sharing an iCloud Drive backup folder", seed: 6000757)
+        for action in [Action.signIn("macA", account: "00000000-0000-4000-8000-000000000000"),
+                       .crash(.turnOnSync("macA"), afterWrites: 8), .switchAppleID("macA", to: SWorld.appleB)] {
+            await world.step(action)
+        }
+        await world.done([.launch("macA")])
+        #expect(world.macA.library?.section.actInFlight == nil, "Set Up Sync stuck on its lost account key")
+        await world.done([.settle])
+        expectPromisesKept(world)
+    }
 }
