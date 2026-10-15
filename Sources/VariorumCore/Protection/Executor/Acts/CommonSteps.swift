@@ -525,14 +525,24 @@ extension ActContext {
         if executor.guards.retirementRerunsMovesOn {
             try await executor.moveOffSharedKey(self, freshPair: true)
         }
-        if executor.guards.doorTimeVaultCheckOn, let account = executor.configuration.session.accountID,
-           let vault = try await executor.readVault(accountID: account),
-           vault.format.masterWrappedByAppleHeld != nil,
-           let id = vault.format.appleKeyID, id == (recorded?.id ?? readable?.id) {
-            leaves.diagnostics.report(.oldSharedKeyStayed(account: account))
-            outcome.notices.append(.oldSharedKeyStayed(account: account))
-            log("the old shared key stays — a vault it can read names it")
-            return
+        // The session's vault, read now — or, offline, not read at all: the
+        // signed-out case's twin, this device's own knowledge standing in for
+        // it too (VX-305 U4, the soak's seed 15 — a throw here stuck the
+        // retirement in flight).
+        var sessionVaultRead = false
+        if executor.guards.doorTimeVaultCheckOn, let account = executor.configuration.session.accountID {
+            let vault: VaultSnapshot??
+            do { vault = .some(try await executor.readVault(accountID: account)) } catch where ProtectionExecutor.vaultOutOfReach(error) { vault = nil }
+            if let vault {
+                sessionVaultRead = true
+                if let vault, vault.format.masterWrappedByAppleHeld != nil,
+                   let id = vault.format.appleKeyID, id == (recorded?.id ?? readable?.id) {
+                    leaves.diagnostics.report(.oldSharedKeyStayed(account: account))
+                    outcome.notices.append(.oldSharedKeyStayed(account: account))
+                    log("the old shared key stays — a vault it can read names it")
+                    return
+                }
+            }
         }
         // Signed out (or in another account), the vault can't be read — this
         // device's own knowledge stands in (P-U2-4, at the act): an account it
@@ -544,7 +554,7 @@ extension ActContext {
             let rotated = act == .enterCastle && parameters.synced == true ? accountID : nil
             if let stays = library.section.appleKeys.first(where: {
                 $0.purpose == .account && $0.id == shared && $0.retiredAt == nil && $0.accountID != nil && $0.accountID != rotated
-                    && $0.accountID != executor.configuration.session.accountID
+                    && ($0.accountID != executor.configuration.session.accountID || !sessionVaultRead)
             })?.accountID {
                 leaves.diagnostics.report(.oldSharedKeyStayed(account: stays))
                 outcome.notices.append(.oldSharedKeyStayed(account: stays))

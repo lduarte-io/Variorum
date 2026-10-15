@@ -840,4 +840,20 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 15 (sequence 25, the closer's soak): the old shared key's
+    /// retirement crashed at its begin on a device that had gone offline; its
+    /// resume's door-time vault check threw on the unreachable vault and the
+    /// local act stuck in flight (promise 6). Offline is the signed-out case's
+    /// twin (P-U2-4): the vault can't be read, so this device's own knowledge
+    /// stands in.
+    @Test func anOfflineRetirementResumeTakesItsOwnKnowledge() async throws {
+        let world = try Self.start("a synced Standard account, a device that joined without a secret", seed: 15000070)
+        for action in [Action.useCastle("phone", .alwaysAsk, newWords: true), .follow("macA", .passphrase),
+                       .crash(.goOffline("macA"), afterWrites: 23), .crash(.retireOldSharedKey("macA"), afterWrites: 3),
+                       .backup("macA")] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }
