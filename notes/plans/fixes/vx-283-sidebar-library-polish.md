@@ -914,7 +914,11 @@ lines — below); any stage work until the orchestrator hands over a claim.
   row ("her own scrolling is never pulled back"). A pitch flip keeps the count, so it still re-asks (and the row-height
   axis re-asks anyway). Options: (a) content changes with an unchanged count [built]; (b) every content change (the
   ruling's literal list, with the ✕ pull-back); (c) content changes only while a settled ask is pending.
-  NEXT: R-F's prebuilt tree, then READY FOR STAGE.
+  **R-F — REVERT IN FLIGHT (headless, no stage) until this line says otherwise; check `git diff` first:** the
+  application reverted to the proxy's anchor road (a `ScrollViewReader` inside the modifier, the anchor fraction
+  `(row × pitch − target) / (viewport − pitch)` through `proxy.scrollTo(id, anchor:)`, unanimated; no
+  `.scrollPosition`) — `git apply notes/plans/vx283-screens/u1b/reverts/R-F.patch` → `build-for-testing` into
+  `DerivedData/vx283-u1b-rf` → `git checkout -- …/SidebarSectionWindow.swift` → `git diff` empty.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
