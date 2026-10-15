@@ -2842,7 +2842,7 @@ the end of this U7 section. Claims stay PENDING until read from a log.
 | 1b — VX-254: `MintedTake.text` + the encoder's `sha256` | DONE (this commit) — BUILDER A's RECORD |
 | 2 — VX-254: the flat answers (`add_take`, `add_takes`' `takes[]`, `edit_take`, `restore_commit`); `divide_block`/`merge_blocks` answer NO digest (F-254-2 (b), ruled) | DONE (this commit): P-254-2…10 red-on-old (9 failed, 50 issues) then 10/10 green |
 | 3 — VX-254: descriptions, pins red by absence, revert run, the U+0000 CHECK | DONE (this commit): descriptions `5852e474`; the U+0000 CHECK FOUND truncation (BUILDER A's RECORD); the whole MCP suite 293/61 green (1 known issue) + the touched core suites 171/42 green; THE REVERT RUN (announced `badcf3b7`): the eight product files back to `54cc62a5` → `MCPWriteDigestServerTests` 10 of 11 FAILED, 52 issues (the guard green); restored by `git checkout HEAD -- Sources` (status clean) → 15/15 green in both digest suites (1 known issue). No revert in flight. |
-| 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | DONE (`c22a57d2` + this commit): 11 pins red by absence (11 failed, 24 issues) then green; PROVISIONAL P-VX261-6 built; THE REVERT RUN (announced `fdd82382`): arm (a) the product back to `b0175aeb` → 11 of 11 failed, 24 issues; arm (b) `hidesTarget` forced false → exactly the two hidden-target pins failed (7 issues), nine green; restored (status clean) → 35/35 green (`MCPOwnActivityServerTests`, `MCPServerTests`, `MCPWriteServerTests`). No revert in flight. The Mac pin's run is THE WINDOW's (PENDING). NEXT the headless finals and `build-for-testing` (PENDING) |
+| 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | DONE (`c22a57d2` + this commit): 11 pins red by absence (11 failed, 24 issues) then green; PROVISIONAL P-VX261-6 built; THE REVERT RUN (announced `fdd82382`): arm (a) the product back to `b0175aeb` → 11 of 11 failed, 24 issues; arm (b) `hidesTarget` forced false → exactly the two hidden-target pins failed (7 issues), nine green; restored (status clean) → 35/35 green (`MCPOwnActivityServerTests`, `MCPServerTests`, `MCPWriteServerTests`). No revert in flight. The Mac pin's run is THE WINDOW's (PENDING). The headless finals GREEN (core 2,871/333 · MCP 304/62, 1 known issue · workbook 40/6) and `build-for-testing` SUCCEEDED into `vx336-u7a` (BUILDER A's RECORD). **BUILDER A STOPPED at this seam; builder B (VX-256 + THE STAGE WINDOW) is next.** |
 | 5 — VX-256: `read_note` paging + `ids_only` (pins, revert) | NOT-STARTED — D-256-* |
 | 6 — THE STAGE WINDOW plan (claim `vx336-u7`), headless + Mac build-for-testing, READY | NOT-STARTED — the draft below |
 
@@ -3676,3 +3676,90 @@ they compile on the old tree):
 - Justified edits (the ritual, each commented in place): `MCPServerTests` (the read list; the book grant's exact tool
   set) and `MCPWriteServerTests` (the suggest grant's exact tool set; the suggest proof's every-door completeness
   subtracts this tool, which names no note, block or take).
+
+**THE HEADLESS FINALS (builder A's stop seam, read from the logs at `29481994`):** `VariorumCoreTests` 2,871 tests / 333
+suites green · `VariorumMCPTests` 304 / 62 green with 1 known issue (the U+0000 pin, by design) · `StringsWorkbookTests`
+40 / 6 green. **The Mac build:** `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+App/Variorum/DerivedData/vx336-u7a build-for-testing` → `** TEST BUILD SUCCEEDED **` (cold, 2.5 GB; 68 GiB free before).
+No `xcodebuild test`, no launch, no store touched.
+
+**THE MAC SUITES FOR THE WINDOW** (grep of `App/Variorum/VariorumTests` for `MCPPaneCopy`, `MCPActivityFace`,
+`activityLine`, `MCPToolFacts`, `MintedTake`, `MintedBlockTakes`, `mcpActivity`, `MCPActivityRow`, `DocumentImport`,
+`listTools`, `MCPServerHost`, `MCPReadTools`, `MCPWriteTools`, `callTool` — 19 suites; the phone's: none):
+MCPAskAndReceiptTests · MCPAsksWaitTests · MCPDeliberateFacesTests · MCPDoorErgonomicsFacesTests · MCPEditFacesTests ·
+MCPEditParityFacesTests · MCPGrantSheetTests · MCPGrantSheetU2CaptureTests · MCPHerEditorDoorTests ·
+MCPLibraryParityFacesTests · MCPPaneTabsTests · MCPPaneTests · MCPRebindFaceTests · MCPSetupKeyFacesTests ·
+MCPSetupMenuTests · MCPShareFacesTests · MCPWingFacesTests (the new `listMyActivitySpeaksItsOwnWords` in it) ·
+TutorialMCPChapterCaptureTests · TutorialMCPChapterTests. (`MCPToolFacts.toolNames` now includes `list_my_activity`, so
+every walk over it reaches the new words; the grant sheets' W-UX-14 truth pins read its scopes.)
+
+**PROVISIONALs (builder A's — the orchestrator files them at the merge with these options):**
+- **P-VX261-6 (NEW, built — the hidden-target rule's two missed row classes):** the refused rows of `rename_chapter`,
+  `delete_chapter`, `move_chapter` and `delete_take` answer no `target_*` in `list_my_activity`.
+  - (a) refused rows target-less, allowed rows keep the logged target (the answer told the client that id) — BUILT;
+  - (b) target-less on both outcomes (the strictest "never sent" letter; an allowed row's book or block id then gone);
+  - (c) those acts LOG the id the client sent (the section, the take) — the cleanest log, but her pane's lines and
+    coalescing change (her face, VX-234).
+- The ruled ones stand as the orchestrator ruled them: P-VX254-1 (divide and merge answer NO digest), P-VX254-2,
+  P-VX261-1…4, and P-VX261-5 (b) (RULED).
+- Two small built choices, said for the eye (not forks): `list_my_activity`'s `limit` CLAMPS to 1–200 like
+  `list_notes` (never refuses); its `next_cursor` comes back only while rows remain (one extra row read), VX-256's
+  D-256-3 rule rather than `list_notes`' full-page rule.
+
+**FOR VX-234 (user-facing words, AS BUILT):**
+- **Activity (`MCPPaneCopy.swift`):** allowed "‹client› checked its recent activity" (+ " (N times)"); refused
+  "‹client› was refused checking its recent activity".
+- **Tool descriptions (model-facing; U8 polishes):**
+  - the shared digest sentence (`MCPToolCatalog.digestSentence`, on all eight answering tools): "Each sha256 is the
+    SHA-256 of that take's text exactly as stored, as UTF-8 bytes, in lowercase hex — nothing normalized or trimmed — so
+    a digest of your own text proves it landed byte for byte."
+  - `add_take`: "Returns JSON with the new take_id and its sha256." · `add_takes`: "…and takes: per item its take_id,
+    block_id, label as stored, and sha256." · `create_note` / `insert_blocks`: "(take_id, label where it has one, and
+    sha256)"; `create_note` adds "With text, Variorum splits the prose into blocks by its own setting; to verify byte for
+    byte, send blocks." · `import_document`: "(… take_id, label and sha256); for a book, its book_id, note_ids and
+    chapter_ids (no sha256 — check a book's notes with read_note)." · `duplicate_note`: "(take_id, label where it has
+    one, and sha256 — equal to its source take's)" · `edit_take` / `restore_commit`: "Returns JSON with the commit ids
+    and sha256, the take's text as it now stands."
+  - `list_my_activity` (title "List my recent activity"): "What this client did in Variorum, newest first, from its
+    activity log: each act's tool, whether it was allowed or refused, when, and the id it named (for a note or book it
+    made, the book or wing it was made in). An allowed act also says what its target was called at the time; a refused
+    one never does, and names only an id you sent. Use it after a dropped call or a lost context to learn whether a call
+    landed — for a made note, look for its title with list_notes (two rows with one title mean two notes). It lists
+    every session under this client's name since the author last approved it, never another client's. Reads join with
+    include_reads: true. The log keeps the library's last 500 acts across all clients. Paged — pass next_cursor back as
+    cursor. Returns JSON." Inputs: "Also list reads (default false)." · "next_cursor from the previous page." · "Page
+    size (default 50)."
+
+**SELF-ASSESSMENT (builder A's).** Both members built as designed and ruled; every pin red on the old tree and red again
+by revert, the hidden-target rule by a narrow revert of its own. What I'd have a reviewer press on: (1) P-VX261-6 —
+the design's trace missed two resolved-id row classes; I closed the fence for their refusals by the ruled F7 principle
+and kept allowed rows, which is a call the orchestrator should look at; the table in `MCPOwnActivity.hidesTarget` must
+grow with any future act that logs a resolved id (said in its doc comment; nothing enforces it mechanically). (2) The
+U+0000 finding makes "exactly as stored" untrue for one byte; the descriptions do not caveat it (I did not want to
+document a bug as behavior) — the orchestrator's ticket decides. (3) The digest is of the act's in-memory row by design;
+the pins tie it to `read_note` byte for byte in every answering tool, so a future op that rewrote text after returning
+its row would be caught. (4) The Mac words pin is unrun here (the window's).
+
+**OWED (builder A → the orchestrator):**
+1. **The U+0000 ticket** (yours to mint — proposed: Bug · Confirmed · MCP, or the store's Area since the bind is
+   store-wide · Medium; never an assignee): the store keeps a text only up to its first NUL (GRDB's −1 bind length), so
+   every door answers success on a truncated take, and the wire's `sha256` digests the bytes sent. The pin to flip on
+   the fix: `MCPWriteDigestServerTests.aTakeHoldingUPlus0000IsStoredTruncatedSoItsDigestOverclaims`.
+2. **P-VX261-6** for your ruling (options above); built (a).
+3. **Optional, for her eye:** `edit_take` / `restore_commit`'s no-op test is Swift canonical equality, so an NFC↔NFD
+   re-spelling answers `changed: false` (the digest then honestly differs) — proposed Improvement · Suspected · MCP · Low.
+4. **Builder B's window:** the 19 Mac suites above; `MCPWingFacesTests.listMyActivitySpeaksItsOwnWords` GREEN on the
+   final tree (its red-on-old is by construction — the old table's fallback said "used list my activity"; a red run
+   needs a build without the two `MCPPaneCopy` lines, if the window wants one). `App/Variorum/DerivedData/vx336-u7a`
+   (2.5 GB) is built at `29481994` + this record commit — reusable for builder B's `build-for-testing` or deleted.
+5. **The live legs (draft L1, L4, L5) match what was built:** L4's expected row is `create_note · allowed ·
+   target_kind wing · target_id "" · title …`; L5's refused `read_note` row carries `target_kind note`, the sent id, no
+   title. The draft's "`MCPWingFacesTests.activitySpeaksEveryActInWordsNeverAToolID` walks the new tool, red by
+   absence" is wrong (green on the old tree) — the new words pin replaces it.
+6. **U8 / MCPSpec at the merge (carried, plus):** the instructions' "Tools appear only for what they have shared" is
+   now untrue (an approved client sees `list_my_activity` at zero reach); MCPSpec's contract lines for the digest (the
+   definition; the eight answering tools; none for divide, merge, save_version or a book import) and for
+   `list_my_activity` (own = the name since its approval; as logged; refused rows untitled; resolved-target refusals
+   target-less; listed when approved).
+7. `MCPHarnessTimeLimitTests`' never-answers pin overran twice in the full MCP runs at load 21–26 (16.4 s, 20.3 s) and
+   passed alone — VX-353, already filed; nothing new.
