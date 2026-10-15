@@ -394,7 +394,7 @@ trailer of any kind.
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN — awaiting U2's walk for P-U1e-1** (the fade ramp rides U2): U1 built + walked; U1b/U1c fix legs; U1d (her memo rulings) window GREEN (434/96, R-I/R-J red as named, 01:44–01:50) and re-walk HOLD on R0–R3, R5–R8 (R6 her scroll never pulled back); R4's 7–9-pt slice → P-U1e-1 built in U2's leg, verified by U2's window + walk. |
-| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **TEST PART GREEN; THE WALK FAILED D1/D2: a real system drag never draws the line or lands** (a regression against main's per-row road; the pins cannot post a drag). D5 (P-U1e-1) HOLDS by eye; D6 holds. **→ U2b TRACE-FIRST leg — IN FLIGHT** (a fresh implementer; T1 DONE: G1 the payload's drag-start state never set, G2 the source's copy-only mask — both near-certain, the run confirms; T2's instrument next; the floor: back to main's road). |
+| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **TEST PART GREEN; THE WALK FAILED D1/D2: a real system drag never draws the line or lands** (a regression against main's per-row road; the pins cannot post a drag). D5 (P-U1e-1) HOLDS by eye; D6 holds. **→ U2b: READY FOR STAGE — U2b trace run, ≈10 min** (T1 `a73a891b`: G1 — `dragging` is never set while the drag hovers, since the payload that sets it is a promise loaded only at a drop; G2 — `.move` against SwiftUI's copy-only source. T2 `688f79c7` + `DerivedData/vx283-u2b` + `u2b/window.sh` pre · drag · restore; the floor: back to main's road). |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's band traced (U3c: the segmented pickers answered two ways after a search) → **P-U3c-1 built and PROVEN** (window 16:43–16:54: pins 23/3 green; R-P exactly 4 red; U3b's 103-suite batch 513 green). **OWED: D8's re-walk** on `vx283-u3c` (folded with U2b's). |
 | Ladder | `fable-reviewer` at xhigh (her word, superseding opus at max), fresh per round, cross-model | **ROUND 1 DONE** (tip 448f9450; findings in the Ladder section, `9ef6fba3`): 0 BLOCKER · 0 MAJOR · 2 MINOR (R1-1 this table — fixed here; R1-2 sequencing — the windows owed) · 4 NIT (R1-3…6 → the implementer). Round 2 re-reviews the fixes + the U2/U3b window results. |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
@@ -3556,10 +3556,11 @@ for the implementer's T3.
 result rather than directly under the U2b ruling, so that block keeps its own heading.
 
 **LIVE STATUS (per piece)**
-- B0 — T1, the headless trace (below): DONE (this commit).
-- B1 — T2, the DEBUG-only instrument (`OpenListDragTrace`) + its probes: IN FLIGHT.
-- B2 — `DerivedData/vx283-u2b` built (`build-for-testing`) + `notes/plans/vx283-screens/u2b/window.sh`: PENDING.
-- B3 — READY FOR STAGE: PENDING.
+- B0 — T1, the headless trace (below): DONE (`a73a891b`).
+- B1 — T2, the DEBUG-only instrument (`OpenListDragTrace`) + its probes: DONE (`688f79c7`).
+- B2 — `DerivedData/vx283-u2b` built (`build-for-testing`, TEST BUILD SUCCEEDED, the code of `688f79c7`, no warning in
+  a touched file) + `notes/plans/vx283-screens/u2b/window.sh` (gitignored, `zsh -n` clean): DONE.
+- B3 — **READY FOR STAGE — U2b trace run, ≈10 min** (this commit). T3 waits for the run and the orchestrator's resume.
 
 #### T1 — the code trace: every gate between AppKit's drag session and the line (paths under `App/Variorum/Variorum/`)
 
@@ -3647,6 +3648,127 @@ The gates, in the order a drag meets them:
 reason no drop would land even with a line.** Neither is "beyond doubt": G1 rests on SwiftUI's undocumented timing,
 inferred from AppKit's promise log, and G2 on an SDK default plus the intersection rule. So T2's run must CONFIRM both.
 It does so with probes that test the fix's two halves without building one (below).
+
+#### T2 — the instrument (`688f79c7`; DEBUG only, nothing in a Release path; no fix in it)
+
+`OpenListDragTrace` (`Features/Library/OpenListDrag.swift`, the `#if DEBUG` tail) is **OFF unless the marker file
+`~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Caches/vx283-u2b-drag.on` exists**. The window's `pre`
+clears it, `launch` writes it and `restore` removes it, so no test run and no other launch writes a line.
+- **Where the lines go:** every line goes to BOTH
+  - the file `~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Caches/vx283-u2b-drag.log` (each line
+    stamped wall-clock ms + system uptime + the flags in force); and
+  - the unified log, subsystem **`io.lduarte.variorum.vx283-u2b`**, category `openListDrag`, level notice, public. It
+    interleaves there with AppKit's own `DragAndDrop` lines.
+- **The read commands:**
+  - `cat ~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Caches/vx283-u2b-drag.log`
+  - `log show --start '<launch time>' --debug --info --style compact --predicate 'processIdentifier == <PID> AND
+    (subsystem == "io.lduarte.variorum.vx283-u2b" OR category == "DragAndDrop" OR category == "Pasteboard")'`
+  - `window.sh read` runs both: `u2b/logs/trace.log`, `trace-counts.txt` (per drag), `trace-key.txt`,
+    `unified-<pid>.log`.
+- **What it logs:**
+  - the rows' and the end zone's `validateDrop` (the answer, `hasItemsConforming`, and the drag pasteboard's TYPES —
+    never its data, since reading data would resolve the promise and change the road), `dropEntered`, `dropUpdated`
+    (one line per CHANGE of its answer, the repeats counted), `dropExited` and `performDrop`, each with the gate's
+    inputs: `dragging`, the dragged index, `listID`, `hover`, the window, the gap, `lineTop`, rows and pitch;
+  - the source: `SOURCE payload evaluated` (with `main=` and `dragging` before), `SOURCE preview appeared`;
+  - `STATE began` / `ended`;
+  - `DOOR perform` (gap, `knownNothing`, the providers' types), its `loadTransferable` outcome, `DOOR land` / `land
+    REFUSED`;
+  - `LINE drawn at` / `LINE gone`;
+  - `COLUMN import drop performed` (the outer `.fileURL`/`.plainText` target);
+  - `ENDZONE laid out`;
+  - the AppKit HIT CHAIN under the pointer: each view's class and its registered drag-type count, `+OURS` where
+    `io.lduarte.variorum.open-note-row` is registered. It's taken at the preview's appearance and at each Open
+    row's hover-enter;
+  - **every Open row's frame in SCREEN points** (`ROW n=<ordinal> id=… screen=x,y,w,h`, re-logged when the app or
+    window becomes active), which is what the window aims from.
+- **The marker's words are FLAGS**, re-read on every call, so the window changes them between drags:
+  - `trace` observes only.
+  - **Probes for T1's two gates.** They test each half of a fix without building one; they are not product
+    behaviour, never ship, and are marker-gated:
+    - `load` — a delegate's `dropEntered` loads the payload at once, so if loading works mid-drag the source's
+      payload closure, and so `began`, runs WHILE the drag hovers;
+    - `copy` — the proposal offers `.copy` where it would offer `.move`.
+  - Two SOURCE flags are read once at LAUNCH (each attaches a modifier to every Open row at body time; with neither,
+    the row is exactly as shipped):
+    - `session` logs `onDragSessionUpdated`'s phases (macOS 26);
+    - `allowmove` attaches `DragConfiguration(allowMove: true)`.
+
+#### The window — `notes/plans/vx283-screens/u2b/window.sh` (run from anywhere; every path is absolute)
+
+`window.sh pre` → `window.sh drag` → `window.sh restore`. Products: `DerivedData/vx283-u2b`.
+- **pre**
+  - the strict pgreps (expect none) and `guard.sh --author`;
+  - App/ clean;
+  - the product present;
+  - Debug prefs exported to `u2b/prefs-before.plist`;
+  - the dev store's three files copied to `u2b/store-before/<UTC>/`;
+  - the marker and the trace cleared.
+- **drag** — about 3 min of pointer driving, all `cliclick`, no keys. Every press is preceded by `guard.sh <pid> x y`.
+  1. `launch "trace"`: write the marker, `open -n` the product, wait for the `ROW n=5` lines, activate it, and save a
+     full-screen launch capture to `u2b/caps/` (a What's New sheet would show there; if one blocks, `aim` fails and
+     stops — dismiss it with its own button and run the rest by hand).
+  2. `aim`, the conversion check: move to row 2's computed centre from two rows above. It needs row 2's own `HOVER
+     n=2 id=…` line before any press, else STOP.
+  3. Five drags, each the same path. Press row 2 (30 % in, mid-height) → down to row 3's LOWER quarter-line (the gap
+     after row 3, "the row just below"), hold 0.8 s → row 5's UPPER quarter-line, hold → back to row 3's lower,
+     hold → release. A sidebar-region capture (cursor included) is taken at each hold, and before, at release +0,
+     +0.3 s and +1.5 s (`u2b/caps/<drag>-*.png`), with a before/after pixel diff:
+     - **A** `trace`
+     - **B** `trace load`
+     - **C** `trace load copy`
+     - `quit` (SIGTERM to the PID), then `launch "trace session allowmove"` + `aim`
+     - **D** `trace session allowmove`
+     - **E** `trace session allowmove load`
+     - `quit`
+  4. `read`.
+- **restore**
+  - quit if still alive;
+  - the trace copied, then the marker and trace removed from the container;
+  - the store copied back + `cmp`;
+  - added prefs keys deleted, `defaults import`, re-export, the diff printed ("PREFS CLEAN");
+  - castle-W1 counted.
+
+The sub-steps run by hand too: `launch "<flags>"` · `aim` · `seg <label> "<flags>"` · `quit` · `read`. The aim needs
+no `walk-cap`: it comes from the trace's own ROW lines and is verified by the row's own HOVER line before any press.
+
+#### What each answer means (read `logs/trace-counts.txt` first, then `trace-key.txt`)
+
+- **A — the shipped road:**
+  - **G1 CONFIRMED** if: `validateDrop → true`, `dropEntered`, and `dropUpdated → forbidden` with `dragging=nil`;
+    NO `SOURCE payload evaluated` (and no `STATE began`) anywhere in A; no `performDrop`; the after capture
+    unchanged.
+  - **G1 REFUTED** if `SOURCE payload evaluated` + `STATE began` land at the drag's START, before the first
+    `dropEntered`. Then:
+    - if `lineTop` is non-nil and the answer is `→ move` with `LINE drawn`, but no `performDrop`: G2 alone refuses
+      the drop, and a LINE drawn that the capture doesn't show is a separate render fault.
+  - **No ROWS/END line at all → H1** (registration or hit-test). Read the hit chains:
+    - no view `+OURS` → a registration gap;
+    - the hosting view `+OURS` → SwiftUI's own hit test.
+  - **`validateDrop → false` → (a)**, the type. Read `dragPboard=` and `conforms=`.
+  - **`COLUMN import drop performed` → the outer import target took the drop.**
+- **B — load + .move:**
+  - **The load works mid-drag** if `PROBE load → success`, then `SOURCE payload evaluated` + `STATE began` WHILE
+    hovering, then `→ move` with `lineTop` set and `LINE drawn`. Loading on entry is then a viable G1 fix. At the
+    release:
+    - **no `performDrop` (a slide-back) → G2 CONFIRMED**;
+    - **`performDrop` + `DOOR land` → G2 HOLLOW.**
+  - **The load doesn't work mid-drag** if `PROBE load → FAILURE`, or the outcome arrives only at exit or release
+    (the lookup found a macOS 15 forum report of exactly that). Loading on entry is then not a G1 fix.
+- **C — load + .copy:**
+  - **`performDrop` + `DOOR land` and the list changed → copy lands**, so G2's fix is to propose `.copy` (the cursor
+    shows the ＋, as main's road did).
+  - Still refused → something else; read the log.
+- **D — the source's session:**
+  - **`SESSION … phase=initial` / `active` before the first `dropEntered` → `onDragSessionUpdated` is a viable
+    drag-start signal for G1.** Its `ended` phase could also clear `dragging` (the U2 record's known edge).
+  - No SESSION lines → not viable.
+  - The delegates still answer `forbidden` (the logger sets no state).
+- **E — load + .move with `allowMove` on the source:**
+  - **`performDrop` + `DOOR land` (where B was refused) → `allowMove` makes `.move` legal**, G2's other fix. The
+    log also shows the ORDER of `SESSION phase=ended(…)` against `ROWS performDrop` (the U2 record's unverified
+    order).
+  - Refused → `allowMove` doesn't open `.move` to a DropDelegate.
 
 ## Ladder
 
