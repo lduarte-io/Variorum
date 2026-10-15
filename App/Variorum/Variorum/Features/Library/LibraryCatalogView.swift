@@ -602,7 +602,13 @@ struct LibraryCatalogView: View {
                     .frame(width: 28)
                 }
             }
-            HStack(spacing: 10) {
+            // VX-175 (P-U3-2, ruled): ONE line when it fits — placed exactly
+            // as the old HStack — else search · scope over mode · sort · when,
+            // the SAME views either way (never `ViewThatFits`: two copies of
+            // the field would swap on the re-flow the panel's opening makes,
+            // dropping her caret). The order below IS the flow's order: the
+            // field first, scope second (`LibraryControlsFlow`).
+            LibraryControlsFlow(spacing: 10, lineSpacing: 8) {
                 TextField(tokens.chromeLabel("Search books, notes, blocks…"),
                           text: Binding(get: { model.query }, set: { value in
                               model.query = value
@@ -611,6 +617,7 @@ struct LibraryCatalogView: View {
                     .textFieldStyle(.roundedBorder)
                     .font(tokens.small)
                     .frame(maxWidth: 320)
+                    .libraryGeometryProbe(.searchField)
                 // 17y B-WALK W-2 (her ruling): picking All while in Cards
                 // moves the view to List — the model's door decides.
                 Picker("", selection: Binding(get: { model.scope }, set: { model.pickScope($0); Task { await model.search() } })) {
@@ -698,6 +705,7 @@ struct LibraryCatalogView: View {
                     .offset(y: Self.segmentedLabelDrop)
                 }
             }
+            .libraryGeometryProbe(.controls)
             // 13n-c UX walk W-UX-3 (T-1): the bulk doors on a ROW OF THEIR
             // OWN under the controls while several notes are picked. In the
             // controls' row they ran out of width at the default window and

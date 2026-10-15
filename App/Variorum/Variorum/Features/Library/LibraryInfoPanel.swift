@@ -586,6 +586,11 @@ enum LibraryPanelOracle {
     /// (F's (a)).
     static var messageFrame: CGRect? { frameStore[.message] }
     static var quickEntryFrame: CGRect? { frameStore[.quickEntry] }
+    /// VX-175: the controls row (search · scope · mode · sort · when) and its
+    /// search field — the row must fit the list column, the field never a
+    /// sliver (`LibraryControlsGeometryTests`).
+    static var controlsFrame: CGRect? { frameStore[.controls] }
+    static var searchFieldFrame: CGRect? { frameStore[.searchField] }
     /// A book row's LINE — its width must span the row (row 33 (a)).
     static var bookLineFrame: CGRect? { frameStore[.bookLine] }
     /// 17y B1 (k): the capped books region (only when the books are split
@@ -633,6 +638,8 @@ enum LibraryPanelOracle {
 /// stores the frames is DEBUG-only.
 enum LibraryProbeSlot: Hashable {
     case root, divider, panel, message, quickEntry, bookLine
+    /// VX-175: the controls row and its search field.
+    case controls, searchField
     case noteRow(String)
     /// 17y B1 (k): the capped books List and the list beside it.
     case booksRegion, notesRegion

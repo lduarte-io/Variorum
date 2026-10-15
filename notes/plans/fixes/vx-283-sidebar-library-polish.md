@@ -1880,7 +1880,29 @@ the orchestrator rules on its composition (below — the brief's composition doe
   (label `before`) and once fixed (label `after`), the `BWALK|` log chunks reassembled into
   `notes/plans/vx283-screens/u3/rig/` — the geometry dump's "uniform horizontal runs" give the pinned band's rgb.
   All PENDING the stage window.
-- Q5 — VX-175 (the controls row): **STOPPED FOR A RULING — composition (below).** Nothing built; the turn ended with the question (2026-10-15).
+- Q5 — VX-175 (the controls row): DONE (this commit) — built to the orchestrator's ruling (76ccfc45: (C) on a
+  one-identity `Layout`); headless build-for-testing green (the two `probeSpace` Sendable warnings in the build are
+  pre-existing — the same two lines warn in this session's first build, before any VX-175 edit). **Built:**
+  `Features/Library/LibraryControlsFlow.swift` (new) — `LibraryControlsFlowRule` (pure: `distribute`, the HStack's
+  own least-flexible-first equal-share distribution; `fitsOneLine`, one line only if the line fits AND the field
+  (child 0) keeps at least its ideal — its prompt's width; `arrange`, both arrangements, each line distributed as an
+  HStack, left-aligned, children centred on their line) and `LibraryControlsFlow: Layout` (the field, scope, then
+  mode · sort · when; it asks each subview for its narrowest, widest, ideal and per-width size, and places by the
+  rule; `lineOneCount` 2). `LibraryCatalogView.header`'s controls `HStack(spacing: 10)` is now
+  `LibraryControlsFlow(spacing: 10, lineSpacing: 8)` over the SAME views in the same order (no control's
+  construction changed — the source-read pins on that file keep their strings); the field and the row gain DEBUG
+  probes (`LibraryProbeSlot.searchField` / `.controls`, read as `LibraryPanelOracle.searchFieldFrame` /
+  `.controlsFrame`). The minimum the row now reports is its WIDER LINE, never the sum, so the column no longer
+  overflows into the panel. One honest note: the field's ideal is what SwiftUI reports for it — its prompt, in the
+  harness; if a long typed query grows it, the row may re-flow while she types, keeping her caret (the reason for
+  the one-identity layout). **Pins:** `LibraryControlsFlowRuleTests` (pure ×8, guards — wide = the HStack's widths;
+  the field squeezed first; the decision; the 631-pt wrap with every frame; the wide one-line frames; 981 = one
+  line; the ideal / minimum queries; Timeline's mode alone) and the geometry oracle `LibraryControlsGeometryTests`
+  (the real catalog mounted at the default window's library width, 1029 pt, both voices): with the panel open the
+  catalog and the panel's right edge stay inside the window, the row stays left of the panel's divider, the field
+  keeps its prompt's width — **RED ON OLD planned as R-L** (`LibraryControlsFlow(spacing: 10, lineSpacing: 8) {` →
+  `HStack(spacing: 10) {` in `LibraryCatalogView.header`); guards: panel closed at 1029 → one line, the field whole;
+  1229 pt (a 1440 window) → one line, the field 320 at the header's 24-pt inset. All PENDING the stage window.
 - Q6 — the stage window: NOT-STARTED — one window after VX-175 is built (the suite list, the reverts R-T · R-V · R-D · VX-175's, the rig's dark pass, the lint).
 
 **Q5 — VX-175: THE COMPOSITION QUESTION (for the orchestrator's ruling; nothing built).** The brief's P-U3-2 puts the
