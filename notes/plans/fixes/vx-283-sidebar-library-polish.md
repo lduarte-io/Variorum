@@ -1398,7 +1398,11 @@ leg traces and PROPOSES; the architect rules before anything ships. Any stage wo
   against the real `SidebarLayout.swift` (all 8 cadences land 36; the R-H patch ends short at 7 of 8); the probe on the
   ruled modifier: the mounted pin's logic GREEN 3/3, the rig-settle replica reads 36 3/3, 4 backstop timers a beat
   (the discrete requests) where there were 23–36. Write-up below ("T5 — P-U1c-1, AS BUILT"). The mounted runs are T7's.
-- T6 — R-H prebuilt (the trigger back to the 0.5-pt step rule) + headless rebuilds: NOT-STARTED.
+- T6 — R-H + R-H′ prebuilt: IN-PROGRESS — **a revert is applied to the tree while this line says so**: each patch
+  (`notes/plans/vx283-screens/u1c/reverts/R-H.patch`, `R-Hp.patch`, gitignored) is applied, built into
+  `DerivedData/vx283-u1c-rh` / `-rhp`, and restored by `git checkout --` from `4e8a5f08`, verified by an empty
+  `git diff`. R-H = `readingAsk`'s viewport arm back to `abs(new.viewport − old.viewport) > 0.5` AND the modifier's
+  `.revealNow` back to `requestReveal("viewport")`; R-H′ = the threshold only.
 - T7 — the closing window (the 93-suite batch + the mount suite ×5 + R-H + the store and prefs restore): NOT-STARTED.
 
 **T1 — WHAT THE PROBE ESTABLISHED** (scratchpad `u1c-probe/`: `main.swift` compiled with the REAL
