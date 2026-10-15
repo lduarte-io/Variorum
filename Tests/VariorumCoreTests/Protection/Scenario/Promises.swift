@@ -848,6 +848,11 @@ extension SWorld {
             // after an account), the account's, the copy's.
             var k = known(holder)
             let own = known(self.holder(device, account: nil, libraryID: library.record?.libraryID ?? ""))
+            // The copy's OWN library's secrets on this device — the slot may
+            // hold another library now (a landing set this one aside), and an
+            // anchor written at its leave is locked with its own secrets of
+            // that day (the closer's soak, seed 4 sequence 410).
+            let copyOwn = known(self.holder(device, account: nil, libraryID: truthCopy.libraryID))
             k.timeline += own.timeline + slotK.timeline
             // A frozen key file's own locks are what the Mac that froze it held
             // that library under — any holder of a copy of that library (two
@@ -885,12 +890,14 @@ extension SWorld {
                 // locked with the account's secrets as typed then.)
                 case .passphrase(.of(let date)):
                     let accounts = server.accounts.keys.map { known($0).at(date).passphrase }
-                    for p in ([known(holder).at(date).passphrase, slotK.at(date).passphrase, own.at(date).passphrase] + accounts).compactMap({ $0 }) {
+                    for p in ([known(holder).at(date).passphrase, slotK.at(date).passphrase, own.at(date).passphrase,
+                               copyOwn.at(date).passphrase] + accounts).compactMap({ $0 }) {
                         var b = book; b.passphrases[.of(date)] = p; candidates.append(b)
                     }
                 case .words(.of(let date)):
                     let accounts = server.accounts.keys.map { known($0).at(date).words }
-                    for w in ([known(holder).at(date).words, slotK.at(date).words, own.at(date).words] + accounts).compactMap({ $0 }) {
+                    for w in ([known(holder).at(date).words, slotK.at(date).words, own.at(date).words,
+                               copyOwn.at(date).words] + accounts).compactMap({ $0 }) {
                         var b = book; b.words[.of(date)] = w; candidates.append(b)
                     }
                 default: break

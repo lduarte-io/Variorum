@@ -550,4 +550,21 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 4 (sequence 410, the closer's soak) — a CHECKER finding: a library
+    /// that left its account (keeping the account's passphrase as its own),
+    /// the account's passphrase then changed on another device, a leave from
+    /// Castle here, then a landing that set the library aside — its pre-leave
+    /// copy's line names the leave day's passphrase, its OWN (the anchor's
+    /// lock), which the checker looked for only among the slot's and the
+    /// account's. The copy's own library's secrets now count.
+    @Test func anAsideLibrarysCopyNamesItsOwnLeaveDay() async throws {
+        let world = try Self.start("a phone on an older build beside a synced Castle Mac", seed: 4000422)
+        for action in [Action.updateToNewBuild("phone"), .stopSyncingHere("macA", forgotPassphrase: false), .changePassphrase("phone"),
+                       .crash(.useStandard("macA"), afterWrites: 7), .sendLibrary(from: "phone", to: "macA"),
+                       .land("macA", .passphraseWordsTyped)] {
+            await world.step(action, words: true)
+        }
+        expectPromisesKept(world)
+    }
 }
