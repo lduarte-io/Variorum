@@ -1808,7 +1808,7 @@ screenshot walk (a fresh walker's); any stage work until the orchestrator hands 
 the orchestrator rules on its composition (below — the brief's composition does not fit the window the ticket names).
 
 **LIVE STATUS (per piece)**
-- Q1 — VX-245 (the six bare `fixedSize` sites): DONE (this commit) — the lint's offenders confirmed on the tip
+- Q1 — VX-245 (the six bare `fixedSize` sites): DONE (`21c28027`) — the lint's offenders confirmed on the tip
   `3fa8ebd6` by a line-for-line replica of `everyBareFixedSizeStatesItsLinePolicy` (90 sites, exactly the six the
   record names; the two MCP sites already gone, VX-281); each now states `.lineLimit(1)` (all six are labels — no
   prose site among them); the replica reads 0 offenders. The lint itself (the red-to-green pin, red on the tip by
@@ -1818,6 +1818,49 @@ the orchestrator rules on its composition (below — the brief's composition doe
 - Q4 — VX-20 (the dark pinned heading): NOT-STARTED.
 - Q5 — VX-175 (the controls row): **STOPPED FOR A RULING — composition (below).** Nothing built.
 - Q6 — the stage window: NOT-STARTED.
+
+**Q5 — VX-175: THE COMPOSITION QUESTION (for the orchestrator's ruling; nothing built).** The brief's P-U3-2 puts the
+search field alone on line 1 and scope · mode · sort · when on line 2. Measured, line 2 alone does not fit the very
+window the ticket names in Terminal:
+- **The room** at the 1240-pt default with the info panel open (the `LibraryBulkRowGeometryTests.room` arithmetic):
+  1240 − sidebar 210 − seam 1 = 1029; panel `LibraryPanelLayout.width` = 349; list 679 − the header's 2 × 24 padding
+  = **631 pt** (617 pt at the 230-pt sidebar the 13n-c walk had). Panel closed: 981 pt.
+- **The controls' widths** — a standalone SwiftUI harness (scratch, not committed: the row's own controls rebuilt with
+  each voice's `small` font, the segmented pickers' labels, `VoicedMenu`'s chrome for sort, the when door's chrome),
+  cross-checked against the 13o capture `notes/plans/13o-screens/01-library.png` (Terminal, 1440 pt: field 320, scope
+  253 in its 280 frame, mode 216 in its 230, sort 163 + 10, when 43 + 10 — the harness agrees within ~10 pt) and
+  against the 13n-c walk's push (92 / 136 pt at 617 pt ⇒ a real one-line minimum of ≈709 / ≈753, ≈75 pt above the
+  harness's 639 / 675: the real field's floor is a sliver of ≈75 pt where the harness's is 1 pt; everything else
+  agrees). Minimum widths, Terminal / Study:
+  - **(A) the brief's line 2 — scope · mode · sort · when: 665 / 629 pt.** Terminal overflows the 631-pt room by ≈35
+    pt (the panel still pushed off at the default window); Study fits by 2 pt (and overflows by ≈12 at a 230-pt
+    sidebar). Holding it would need a third line (field / scope · mode / sort · when) — a four-row header.
+  - **(B) field · sort · when / scope · mode:** line 1 = 407 / 357 (the field floored at 160), line 2 = 419 / 432.
+    Fits with ≈200 pt to spare; but sort and when JUMP from the row's end to before scope whenever the window crosses
+    the break.
+  - **(C) field · scope / mode · sort · when — RECOMMENDED:** line 1 = 399 / 403, line 2 = 427 / 386. Fits with ≈200
+    pt to spare, both voices. The one-line ORDER is kept — the row just breaks after scope, so nothing jumps when it
+    re-flows — and the break falls on the row's own seam: field and scope say WHAT is searched (the field's own words
+    name scope's kinds, "Search books, notes, blocks…"); mode · sort · when say HOW it is shown, and sort and when
+    already stand down WITH the mode (Timeline hides both — `model.showsCatalogControls`).
+- **The mechanism (a second, smaller call):** `ViewThatFits` (the `LibraryBulkRow` precedent) builds each candidate
+  separately, so the row would hold TWO search fields and swap them as it re-flows — and the re-flow's commonest
+  trigger is the info panel OPENING on a row click while the field may hold her caret (the column narrows ⇒ two
+  lines ⇒ a fresh field, caret gone). RECOMMENDED instead: a small two-line flow `Layout` over ONE set of subviews
+  (field, scope, then the mode · sort · when group) — the field keeps its identity and caret across the re-flow; one
+  line places them as today's `HStack` does (the trailing group at its maximum first, scope up to its 280, the field
+  the rest up to 320 — the HStack's own least-flexible-first order, so a wide window is unchanged); the break is a
+  pure function (one line iff the field's ideal + scope's minimum + the group's minimum + spacing ≤ the room),
+  pinned headless. The field's ideal is its own prompt's width, so "never a sliver" reads "the field never truncates
+  its own words while the row is one line" — PROVISIONAL, and no magic number. At the default window the row is one
+  line with the panel closed (≈887 / ≈814 of 981 pt) and two with it open; with the panel open it stays two lines up
+  to ≈1,570 pt (Terminal) / ≈1,500 pt (Study) — the range where today's one line squeezes the field toward its
+  sliver (the 13n-c walk's 1380-pt "just fits").
+- **Evidence planned once ruled:** the row extracted into its own view (`LibraryControlsRow`, the `LibraryBulkRow`
+  shape, so it is measurable); a geometry oracle `LibraryControlsRowGeometryTests` (both voices, at the 631-pt room
+  and at a wide 1181-pt room: the row fits; at the room the field ≥ its prompt; at the wide room one line) — RED ON
+  OLD by behavioural revert (today's flat `HStack` at 631 pt reports its overflowing minimum); the break function's
+  pure pins; the walk's captures at 1240 with the panel open and at a wide window, both voices.
 
 ## Ladder
 
