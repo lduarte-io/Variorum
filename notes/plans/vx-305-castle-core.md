@@ -559,8 +559,8 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   for a closer session** (Opus implementer, 2026-10-14, at `e281b846`; the record is §8's "U4 RECORD — PARTIAL",
   whose first paragraph is the exact remaining work). Done: (a) the world; (b) today's stores + the older build; (c) the
   alphabet + the promises; (d) every sentence of §6's fixed-scenario list a named test, with her 2026-10-14 legacy cut
-  applied (three superseded, two re-pointed — marked in place), plus 27 generator findings pinned red-on-old
-  (`FixedScenariosFound.swift`, `FixedScenariosCorners.swift`); (e) the mutation pins — 21 after the cut, each green
+  applied (three superseded, two re-pointed — marked in place), plus 23 code bugs found since the first record, each
+  pinned red-on-old (`FixedScenariosFound.swift`, `FixedScenariosCorners.swift`, `FixedScenariosMore.swift`); (e) the mutation pins — 21 after the cut, each green
   guarded and FAILING with its guard off; (f) the generator + `PROTECTION_SOAK=1` — seeds 1–20 × 60 green (each on the
   tree of its day), seed 1 × 1000 green at `f1cad906` (44,873 steps, 357.8 s Debug). The protection set Debug: 376
   tests in 65 suites green at `e281b846`. NOT DONE: the soak's seeds 2–20 × 1000 (seed 2 fails at sequence 432 — an
@@ -1114,13 +1114,13 @@ sync keys in a leave's window) · leaveIDGatesCompletion (the previous key clear
 deleteOnSightByIDOnly (another Mac's own key deleted) · ownLineByFamilyTree (the own Castle-era copy refused as
 foreign) · libraryFileLosesToMemory (a replayed library file lowers the mode — U4's own guard).
 
-**The code bugs the world found — 34, each pinned red-on-old by the named test (watched failing on the tree before its
+**The code bugs the world found — 37, each pinned red-on-old by the named test (watched failing on the tree before its
 fix), then fixed; U1–U3's suites green after each.** Before the partial record (14): the move skipping the live
 library's own key; corner 45's leave keeping today's silent item (P-U4-2); a replacement Mac taking over nothing
 (P-U4-3); the migration taking the vault's word over the custody shape (P-U4-4) and copying a mismatched words copy;
 Replace All Keys refusing inside its plan; the key doors stuck offline on Always ask; key file + memory both deleted;
 today's sync custody surviving Use Castle; the doors blind to a moved account; the key doors without a follow-owed
-check; ConfirmMode skipping the deferred steps; the settings act's plan-less finish; a stray staged file. Since (20):
+check; ConfirmMode skipping the deferred steps; the settings act's plan-less finish; a stray staged file. Since (23):
 This Mac Only into Castle (signed out) retiring the old shared key an account still stood on
 (`thisMacOnlyCastleFromAStandardAccount`); a library file replayed alone in Castle lowering the mode
 (`aLibraryFileReplayedAloneInCastle` — new repair `rekeyOlderLibraryFile`, guard `libraryFileLosesToMemory`, P-U4-6);
