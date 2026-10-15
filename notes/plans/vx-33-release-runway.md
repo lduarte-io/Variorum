@@ -220,7 +220,11 @@ and the shared-constant pin in `StarredScrollTests` (Starred keeps its 7, her wo
 ### VX-284 — Run: Books, gatherings & tags
 **Members:**
 - Gatherings and tags: VX-250 (her copy, NOT terms; closes VX-240) · VX-240 · VX-241 · VX-249 (collecting
-  sets the star; pre-launch at her word) · VX-247 (tag-delete undo) · VX-111 (the shared-note notice).
+  sets the star; pre-launch at her word) · VX-247 (tag-delete undo) · VX-111 (the shared-note notice) ·
+  **VX-372** (joined 2026-10-15 at her word, pre-launch: a direct duplicate door in the registry, Duplicate with tags /
+  without tags, and a duplicate with tags joins the books those tags collect; it reaches the AI's `duplicate_note`
+  through the shared body and coordinates with VX-371 in the sweep VX-348 — its unit placement and any split are
+  hers at the kickoff).
 - The honest disabled button: VX-194.
 - The book view: **VX-303** (every open door lands in Write at her block — a bug against the deep-link rule,
   her words) · **VX-304** (an "open in Write" door in the left note box in every book mode — her ask: the title's
