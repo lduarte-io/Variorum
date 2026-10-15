@@ -226,4 +226,21 @@ struct GeneratorFoundScenarios {
         #expect(world.phone.library?.section.ownLibraryAppleKeyIDsToRetire.isEmpty == true)
         expectPromisesKept(world)
     }
+    /// Seed 1 (sequence 772): landing a synced Standard pair — it lands held,
+    /// writing nothing Apple-reachable until Resume Sync reads its account's
+    /// vault; a crash mid-landing then settles (before its commit point it
+    /// rolls back — the pair's key is never stored), never stuck on a read the
+    /// held landing can't make; landed whole on a second press.
+    @Test func aSyncedStandardPairLandsHeldAndFinishes() async throws {
+        let world = try Self.start("a device that joined without a secret", seed: 1000775)
+        await world.step(.createLibrary("macB", secrets: true))
+        await world.step(.sendLibrary(from: "macA", to: "macB"))
+        await world.step(.crash(.land("macB", .passphraseWordsMadeNew), afterWrites: 8))
+        await world.done([.launch("macB")])
+        #expect(world.macB.library?.section.actInFlight == nil, "the landing stuck in flight")
+        await world.done([.land("macB", .passphraseWordsMadeNew)])
+        #expect(world.macB.slot?.record?.account != nil && world.liveKeyFile(world.macB)?.apple == nil,
+                "a held landing wrote an Apple wrap")
+        expectPromisesKept(world)
+    }
 }

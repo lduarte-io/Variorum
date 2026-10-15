@@ -590,8 +590,9 @@ final class SWorld {
             // the plan's descriptor locks — the vault's, or her library's (a
             // change made elsewhere since the press is not yet hers here).
             let accountTimeline = device.session.accountID.map { self.known($0).timeline.compactMap(\.passphrase) } ?? []
+            // (…and any she ever chose — a landing's pair's, made her own.)
             let candidates = [typed.passphrase].compactMap { $0 } + known.timeline.compactMap(\.passphrase).reversed()
-                + accountTimeline.reversed()
+                + accountTimeline.reversed() + truth.allPassphrases.reversed()
             let planKDF: PassphraseKDF.Descriptor? = {
                 guard case .plan(let sealed)? = device.container.files[SPath.plan],
                       let plan = try? ProtectionCoding.decoder().decode(ProtectionPlan.self, from: sealed.payload) else { return nil }

@@ -103,7 +103,11 @@ struct LandProgram: ActProgram {
     let act = ProtectionAct.land
 
     func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] {
-        ["stageCopy", "custodyItem"] + (parameters.newKind == .standard ? ["mintOwnAppleKey"] : [])
+        // A synced pair lands HELD: nothing Apple-reachable until Resume Sync
+        // reads its account's vault (decision 35) — no own Apple key at the
+        // landing (asking for that read mid-act stuck the landing in flight —
+        // VX-305 U4, found by the scenario world).
+        ["stageCopy", "custodyItem"] + (parameters.newKind == .standard && parameters.synced != true ? ["mintOwnAppleKey"] : [])
             + ["keyFile", "recordIntoStaged", "swap", "memory"]
     }
 
@@ -133,7 +137,7 @@ struct LandProgram: ActProgram {
             let key = try ctx.requireToKey()
             if ctx.library.keyFile?.fingerprint == ActContext.fp(key) { return }
             guard let landing = ctx.landingRecord else { throw ActRollback(refusal: .secretsRequired(ctx.act)) }
-            let apple = kind == .standard ? try ctx.ownAppleKey() : nil
+            let apple = kind == .standard && ctx.parameters.synced != true ? try ctx.ownAppleKey() : nil
             let locks = NewKeyLocks(passphrase: ctx.secrets.passphrase, words: ctx.secrets.words, apple: apple)
             try ctx.executor.writeLiveKeyFile(
                 try KeyFile.building(libraryID: landing.libraryID, key: key, epoch: 1, locks: locks), &ctx.library)

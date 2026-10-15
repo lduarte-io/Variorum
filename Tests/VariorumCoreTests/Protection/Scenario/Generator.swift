@@ -37,7 +37,9 @@ extension SWorld {
             if !d.isOpen { _ = try? await launch(d) }
             moveBefore = (d, openableCopies(d))
         }
-        switch action {
+        var inner = action
+        if case .crash(let wrapped, _) = action { inner = wrapped }
+        switch inner {
         case .timeMachineRollback(let name), .tamper(let name, .replayLibraryFile), .tamper(let name, .replayKeyFile),
              .deleteContainerAndOpenOldCopy(let name):
             if let was = before[name] { truth.beforeRollback[name] = (was.mode, was.account) }
