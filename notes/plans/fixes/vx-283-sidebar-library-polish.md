@@ -364,7 +364,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | READY FOR WALK — batch 1326 tests: 1323 green · 1 skipped · 2 red (one mine, fixed headless — P7's `CapabilityRegistryTests` run PENDING, ≈3 min; one pre-existing on main, `BookCollectingDoorsTests:101`); R-A · R-B · R-C all red-on-old as expected |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b IN PROGRESS — the walk ran (W0–W11 hold); the orchestrator's eye sent F-1 (the current row cut) · F-2 (the edge fade, P-U1-6) · F-3 (the doubled separator) to U1b: F-3 recorded and left (older than U1), F-1/F-2 headless work next (see "U1b — the fix leg"). U1's batch: 1326 tests, 1323 green · 1 skipped · 2 red (P7 fixed headless — its `CapabilityRegistryTests` run rides U1b's window; `BookCollectingDoorsTests:101` red on main) |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -849,6 +849,36 @@ right-click "Close" / "Close All Notes"; the landings are right.
 U1's section; pins where the mechanism allows; the Mac batch over the changed files' suites on a claim; then a
 re-walk of W2/W3/W4/W5 in the scrolled states (Study + Terminal, light + dark) and twenty rapid opens for F-1, plus
 W9's menu — by a fresh Opus walker; U1 closes when those screenshots look right.
+
+### U1b — the fix leg (F-1 · F-2 · F-3)
+
+**Implementer:** a fresh Opus 5.5 at xhigh (2026-10-14, evening), worktree `~/dev/variorum-vx-283`, DerivedData
+`App/Variorum/DerivedData/vx283-u1` (U1's tree, reused). **Not done by this session (first line, per the brief):**
+the screenshot re-walk (a fresh walker's); F-3's separator is RECORDED AND LEFT (older than U1, not adjacent to its
+lines — below); any stage work until the orchestrator hands over a claim.
+
+**LIVE STATUS (per piece)**
+- Q0 — this record + F-3's trace and disposition: DONE (this commit).
+- Q1 — F-1 + F-2's pure brain (`SidebarLayout`: the edge bands, the reveal decision) + its pure pins: NOT-STARTED.
+- Q2 — the view: one shared scrolling-section window for Open AND Starred (the edge-fade mask, the reveal on a
+  current-row change and on a viewport-height change, the DEBUG oracle) + the mounted pins: NOT-STARTED.
+- Q3 — headless `build-for-testing` green, then READY FOR STAGE (the batch + the reverts): NOT-STARTED.
+
+**F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
+- The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
+  ENDS with a `Divider()` after Close Split (`:1023`), and the next items (Toggle Sidebar, then the `after: .sidebar`
+  group's Find Anything… / Switch Wing…, `:485`) belong to other command groups, which SwiftUI separates with its
+  own separator — so the menu draws the group's trailing `Divider()` AND the group boundary's separator back to back:
+  the two hairlines between Close Split and Toggle Sidebar in `W9-study-light-1-view-menu-notes-open.png` (the
+  walker's AX read: two separators in a row).
+- `git blame`: that trailing `Divider()` is `07d9f583` (2026-07-30, 13f batch 4 — the split's doors), unchanged since.
+  U1's View-menu lines (`9292d1db`, `:999-1011`) are the two buttons Close Note / Close All Notes inserted BETWEEN the
+  Open Notes submenu and the pre-existing `Divider()` at `:1012`; U1 added no `Divider()` anywhere in the file (its
+  whole `EditorCommands` diff: a capability-list line, the `keyEquivalent` case, the two buttons, the two static
+  acts). Between U1's last line and the doubled pair stand `:1012`'s divider, Open Beside and Close Split — not
+  adjacent. So the double has shown on `main` since 2026-07-30.
+- **For the orchestrator:** the fix is one line (delete `:1023`'s trailing `Divider()`; the group boundary keeps
+  its own separator) — a ticket's, not this leg's.
 
 ## Ladder
 
