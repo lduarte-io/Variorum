@@ -426,7 +426,11 @@ struct SidebarSectionWindowMountTests {
             #expect(depth >= 12, "half a row at either pitch: \(depth)")
             #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: 0, bottom: depth),
                     "at the top: \(String(describing: rig.open?.fades))")
-            await rig.go(.post(rig.notes[9]))
+            // Row 15 (420…450) lies below the fold of the 351-pt list, so the
+            // reveal scrolls it in and leaves rows above AND below. (U1b's
+            // window: row 10, the first draft's pick, stood clear at offset 0 —
+            // nothing scrolled — a pin fault, recorded.)
+            await rig.go(.post(rig.notes[14]))
             depth = rig.depth(rig.open, rows: 20)
             #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: depth, bottom: depth),
                     "mid-list: \(String(describing: rig.open?.fades))")

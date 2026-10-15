@@ -366,7 +366,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: the window ran (21:24–21:29) — batch 408 tests, 3 red: the lint (U3's VX-245, on main), one U1b pin fault, one real F-1 residual (Starred's revealed last row 1 pt short after the pitch flip); R-D/R-E red where needed. Q5 (headless): the residual's fix + the pin fault, then a short re-run window, then the re-walk. F-3 → VX-359 (U3 rider). |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **READY FOR STAGE** (≈12 min — the 92-suite batch re-run; Q6). The first window (21:24–21:29): batch 408 tests, 3 red — U3's VX-245 lint, a U1b pin fault, a real F-1 residual (a reveal resolved mid-animation, 1 pt short); R-D/R-E red where needed. Q5 fixed the residual and the pin headless. Then the re-walk. F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -879,9 +879,11 @@ lines — below); any stage work until the orchestrator hands over a claim.
   Open fade pin's mid-list row needs no scroll) and one REAL RESIDUAL of F-1 (Starred's revealed last row 1 pt short
   after the pitch flip); R-D and R-E red where the brief needs them. Store and prefs restored and verified; the two
   revert trees deleted (the coordinator's ask).
-- Q5 — the residual's fix (headless, after the window, told to the orchestrator): IN-PROGRESS — the reveal stays
-  owed until a reading shows the row clear (bounded re-issues), and its scroll is issued without animation; the pin
-  fault fixed; then a short re-run window.
+- Q5 — the residual's fix + the pin fault (headless, AFTER the window — the orchestrator told in the report): DONE
+  (this commit) — headless `build-for-testing` green; the re-run PENDING a short window (Q6).
+- Q6 — **READY FOR STAGE** (≈12 min): the same 92-suite batch, `test-without-building` on `DerivedData/vx283-u1`
+  (now this commit's code); no revert (the residual's red-on-old IS the window above: the Starred pin red at
+  `62d5a4a1`); the same restore. Then READY FOR WALK.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
@@ -1069,6 +1071,29 @@ lines — below); any stage work until the orchestrator hands over a claim.
   (`prefs-after-restore.plist`), diff CLEAN (1602 = 1602). `Backups/safety-copies/` holds only `castle-W1-20261013`,
   untouched; no new backup. Zero dev instances throughout; `DerivedData/vx283-u1b-rd` and `-re` deleted;
   `vx283-u1` kept for the walker. Claim released 21:29:47.
+
+**Q5 — THE RESIDUAL, TRACED AND FIXED (headless, after the window):**
+- **The mechanism, measured offscreen** (the scratchpad probe — a standalone process, a never-shown window, no app,
+  store or prefs — now with the column's own animation): when a current-row change and a viewport change ride ONE
+  animated transaction (`withAnimation(.easeInOut(duration: 0.22))`, the rail's), a `scrollTo` issued during the
+  transition is resolved against the scroll view's PRESENTATION frame — the pre-animation height — and once the
+  animation ends no reading arrives (SwiftUI's model already holds the target height). Q2's modifier, the
+  owed-until-a-clear-reading variant tried first, and the old reveal ALL rested wrong: e.g. the last row revealed at
+  offset 249 (= 600 − the OLD 351) while the viewport settled at 251 — the row hidden. That is the window's 1-pt
+  Starred residual and, at a larger amplitude, very likely the walker's O-1 (a 15-pt cut).
+- **The fix** (`SidebarSectionWindow.swift`): every reveal request (mount's first reading, a current-row change, a
+  viewport-height change) asks TWICE — at once, and again `transitionSettle` (300 ms, past the 0.22-s rail
+  animation) later, through an `onChange` on a bumped `@State` so the second ask runs with the section's FRESH rows,
+  current row and pitch; a later request supersedes an earlier one's second ask (an episode counter). Both scrolls are
+  issued UNANIMATED (a transaction with animations disabled), so a scroll lands on the layout it was computed against.
+  The probe, re-run: every step clear, the three animated ones included (349…600, 349…540, 354…585).
+- **PROVISIONAL P-U1b-5 — the settle delay.** 300 ms after the request, past the column's 0.22-s animation; in an
+  animated arrival the row may sit short for that moment, then settles in. Options: (a) an immediate ask + one ask
+  after 300 ms [built]; (b) only the delayed ask (no early scroll; the list holds still through the slide); (c) tie the
+  second ask to the animation's completion (SwiftUI exposes completion only to the animation's own author — the
+  column, a wider change).
+- **The pin fault:** `theOpenListFadesOnlyTheEdgesWithMoreBeyond`'s mid-list step now opens row 15 (index 14,
+  420…450), below the 351-pt list's fold.
 
 ## Ladder
 
