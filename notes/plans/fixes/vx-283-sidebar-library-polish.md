@@ -1369,17 +1369,30 @@ it is built. The instrumentation is DEBUG-only and is removed (or kept as an ora
 leg traces and PROPOSES; the architect rules before anything ships. Any stage work waits for the orchestrator's claim.
 
 **LIVE STATUS (per piece)**
-- T0 — this section: DONE (this commit).
+- T0 — this section: DONE (`3ffad691`).
 - T1 — the headless offscreen probe (a standalone process, never-shown window; the column's implicit animation on the
-  sections' frames and the 30 → 24 pitch flip, as the real column has them): DONE — findings below ("T1 — WHAT THE
-  PROBE ESTABLISHED"); the mounted rig's confirmation is T3's.
+  sections' frames and the 30 → 24 pitch flip, as the real column has them): DONE (`43a002dd`) — findings below ("T1 —
+  WHAT THE PROBE ESTABLISHED"); the mounted rig's confirmation is T3's.
 - T2 — the DEBUG-only instrumentation in `SidebarSectionWindow` (`SidebarSectionTrace`, a sink off by default: every
   reading, request + trigger, reveal + inputs + the anchor handed the proxy, settled check) + the env-gated harness
   `SidebarSectionWindowMountTests.traceTheNinthStarsOpen` (`TEST_RUNNER_VARIORUM_U1C_TRACE=1`; asserts nothing; the
   Starred pin's road with the trace, the pin's oracle per `SectionRig.settle`-shaped iteration, AppKit's frame /
   clip-bounds / document-frame notifications from Starred's scroll view, the moment the settle WOULD return, to 1.5 s):
-  DONE (this commit) — headless `build-for-testing` green (`DerivedData/vx283-u1`), no new warning in a touched file.
-  The only shipping-path change is two `StaticString` labels threaded through `requestReveal`/`reveal`.
+  DONE (`43a002dd`) — headless `build-for-testing` green (`DerivedData/vx283-u1`), no new warning in a touched file.
+  The only shipping-path change is two `StaticString` labels threaded through `requestReveal`/`reveal`. **Grown
+  (`2e011d0f`):** the harness's UNDRIVEN twin `traceTheNinthStarsOpenUndriven` (no forced layout — the frames come
+  from the display, as in use) and the PROPOSED pin `theNinthStarIsClearTheMomentTheBeatEnds` (env-gated
+  `TEST_RUNNER_VARIORUM_U1C_PIN=1` until the ruling); `build-for-testing` green again, products in
+  `DerivedData/vx283-u1`.
+- T1b — the candidates measured in the probe (scratchpad copies only; nothing in the repo): DONE — below ("T1b").
+- T3 — the stage window: **READY FOR STAGE — from `App/Variorum/`: `TEST_RUNNER_VARIORUM_U1C_TRACE=1
+  TEST_RUNNER_VARIORUM_U1C_PIN=1 xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+  DerivedData/vx283-u1 test-without-building -only-testing:VariorumTests/SidebarSectionWindowMountTests
+  -test-iterations 3` (the six pins + the two harnesses + the proposed pin, ×3), ≈8 min with the store/prefs copy
+  and restore.** Expected: the proposed pin RED on HEAD; the Starred pin red or green by the race; the traces
+  printed (`[U1c]`).
+- T4 — the proposal with the trace as its evidence, and the pin: DRAFTED below ("T4 — THE PROPOSAL"), PENDING T3's
+  mounted confirmation.
 
 **T1 — WHAT THE PROBE ESTABLISHED** (scratchpad `u1c-probe/`: `main.swift` compiled with the REAL
 `Core/Views/SidebarLayout.swift` and the instrumented REAL `Features/Library/SidebarSectionWindow.swift`, the app's own
@@ -1412,8 +1425,61 @@ an AppKit `HostingScrollView`; the probe observes its frame, clip bounds and doc
    later** and landed 36; in runs 1 and 3 the backstop fired first (the settle returned at 0.735 s, reading 36). So the
    pin reads before or after the backstop by chance: Q9's green (R-F) and Q11's red on the SAME code are this race.
    In use there is no early reader: the row sits cut for ≈0.2–0.3 s after the beat, then snaps (unanimated) into place.
-- T3 — the stage window (the trace test in the mounted rig): NOT-STARTED.
-- T4 — the proposal with the trace as its evidence, and the pin that would go red on HEAD: NOT-STARTED.
+
+**T1b — THE CANDIDATES, MEASURED IN THE PROBE** (scratch copies of the modifier or the column; `cut` = 216 − (offset +
+viewport) over the ninth row, read from every reading; an AppKit 1-ms poll of a marker heading the areas group gives
+where the groups below Starred actually ARE, frame by frame):
+- **(a) Starred's frame chain OUT of the implicit animation** (`.transaction { $0.animation = nil }` after its
+  `.fixedSize`): the viewport jumps 225 → 180 in ONE reading; all three commit-time reveals answer target 36 and the row
+  lands at once. **The visual cost, measured:** Starred's bottom snaps 269 → 224 at the commit while the areas below
+  glide 288 → 243 over the beat — a band opening to **64 pt** (the separator's 19 + 45) under Starred and closing over
+  0.22 s: the section SNAPS while everything under it eases (row 24's sidebar half: *"nothing on the left ever
+  snaps"*). Also seen in that run, unexplained: the section's content settled at **221**, not 216 (the lazy stack's
+  estimate for its once-unrealized ninth row surviving the un-animated pass) — 5 pt of content below the last row, so a
+  bottom fade would draw.
+- **(b) the settled reveal forced to read fresh geometry:** the trace shows it ALREADY does — a reading arrives at the
+  beat's very end (`vp 180.002 → 180.000`), the backstop reads it and lands exactly. Its defect is its TIMING (0.30 s
+  after the last request, ≈0.2–0.27 s after the beat ends), not its input. (b) would change nothing.
+- **(c1) the viewport arm of the trigger re-asks on EVERY reading whose viewport differs** (`new.viewport !=
+  old.viewport` in place of `abs(new.viewport − old.viewport) > 0.5`; nothing else changed): the row lands at exactly
+  **36 on the beat's final reading**, 1–2 ms after it (+0.227…0.247 s), in **4/4 runs** at both the rig's cadence and
+  the fine one — before the backstop and before the rig's settle can return. Mid-beat it trails the shrink by ONE
+  reading (a reading shows the shrink before that reading's reveal lands): transient cuts of 1.25–7.4 pt at the probe's
+  irregular cadence; at a display's 120 Hz one mid-ease frame steps ≈2–3.5 pt.
+- **(c4) `.defaultScrollAnchor(.bottom, for: .sizeChanges)`** (the scroll view holding its bottom on a resize): does
+  NOT hold through the animated resize — cut 4.5 and 12.5 pt at the beat's end. Rejected.
+- **The proposed pin's logic, run in the probe** (forced layout + 4-ms turns for 1 s; the row must stand where it
+  settles 100–150 ms after the viewport reaches its settled height): **HEAD RED 4/4** (offsets 22–28.5 standing there);
+  **(c1) GREEN 4/4**.
+
+**T4 — THE PROPOSAL (DRAFT — PENDING T3's mounted confirmation; nothing built):**
+- **The traced mechanism, in one breath:** the rail's implicit animation delivers Starred's 45-pt viewport shrink as a
+  stream of per-frame readings with its top held; the trigger re-asks only when ONE reading's viewport step exceeds 0.5
+  pt, so the ease's slow tail — every step below that — shrinks the viewport under an offset nothing moves again, and
+  the row ends the beat cut by the tail's sum; the settled backstop lands it exactly but 0.30 s after the last request,
+  which is after the rig's settle can return (the flake) and, in use, a visible ≈0.2–0.3-s cut followed by a snap. The
+  3-pt slack widened it because a bigger slack makes more of the middle's re-asks answer NONE.
+- **RECOMMENDED — (c1):** the viewport arm re-asks on every reading whose viewport differs at all (the content arm and
+  its unchanged-count guard, P-U1b-7, stay). The 0.5-pt step threshold protected nothing a viewport change can do: her
+  scroll moves only the offset (still never a re-ask); `revealOffset` is idempotent (nil while the row is clear), so a
+  re-ask per frame scrolls only while the row is actually cut; P1 holds (O(rows) per reading, rows ≤ the Open cap 20 /
+  the star cap, ≈25–60 readings a beat). Effect: the row rides the shrinking edge through the beat (one reading behind)
+  and stands exactly at the edge when the beat ends. The Open list shares the modifier, so its own tail (the
+  248.58…249.33-of-249 landings in U1b's windows) goes too. **Two sub-calls for the architect:** (i) the backstop —
+  keep it as ruled (P-U1b-5; in this road it then reads clear and does nothing), or retire it (the trace shows the
+  beat's final reading DOES arrive, refuting Q5's "no reading arrives after the transition" for this road — T3 to
+  confirm in the mounted rig); (ii) every viewport re-ask today goes through `requestReveal`, so (c1) schedules one
+  sleeping backstop Task per frame of the beat — keep (cheap, superseded by the episode counter), or let the viewport
+  arm call `reveal` directly.
+- **Not recommended:** (a) — exact, but the section snaps while the column eases (the 64-pt band) and the content
+  settled 5 pt long in the probe; (b) — addresses nothing; (c4) — does not hold.
+- **The pins:** (1) **`SidebarSectionWindowMountTests.theNinthStarIsClearTheMomentTheBeatEnds`** — WRITTEN, env-gated
+  until the ruling (the fix's commit removes the gate): RED on HEAD, GREEN on (c1) in the probe 4/4 each; red-on-old by
+  reverting the trigger's one line. (2) To write with the fix — a PURE pin: the trigger as a `SidebarLayout` decision,
+  driven through a simulated ease-in-out shrink (top held, the 0.5-pt pixel grid AppKit rounds the offset to), asserting
+  the row ends exactly at the edge — deterministic, no clock; red under the revert to the consecutive-step rule. (3) The
+  existing `starredFadesWhereMoreLiesBeyondAndNowhereWhenItHoldsEverything` stops flaking: the landing (≈+0.25 s)
+  precedes the rig's settle's ≥ 0.5-s return.
 
 ## Ladder
 
