@@ -2816,3 +2816,687 @@ scratch project directory in the scratchpad, prompts on STDIN, each answer tee'd
   shape: ONE design session for all three members (narrow reading; its forks ruled by the orchestrator), then fresh
   builders, then a runner.
 
+
+## U7 UNIT RECORD — the agent's read-backs: VX-254 · VX-256 · VX-261 (design)
+
+*(opus-implementer as DESIGNER, piece 0 only, from 2026-10-14 ~19:00 MDT; HEAD at start `5c48547f`.)*
+
+**NOT DONE here (said first):** no product code, no pins, no test run, no stage. Every build piece below is NOT-STARTED
+and waits for the orchestrator's rulings on THE FORKS. No subagent was spawned, so one external fact is UNVERIFIED and
+marked so: Claude Code's MCP tool-output cap (recalled as 25,000 tokens by default, `MAX_MCP_OUTPUT_TOKENS`; past it the
+reply lands in a file — the bilingual-book notes saw that at 100–133k characters). The live round measures it. The
+designer stopped at ~370k context, past the 350k line; the design is complete for all three members, and what remains
+is in OWED.
+
+### LIVE STATUS — U7's pieces
+
+| piece | status |
+|---|---|
+| 0 — traces, design, forks (this section) | DONE (this commit) |
+| 1 — VX-254: `MCPTextDigest` + `MintedTake.text` + the encoder's `sha256` | NOT-STARTED — D-254-1/2 |
+| 2 — VX-254: the flat answers (`add_take`, `add_takes`, `edit_take`, `restore_commit`) + `divide_block`/`merge_blocks` per F-254-2 | NOT-STARTED — D-254-2/3 |
+| 3 — VX-254: descriptions, pins red by absence, revert run | NOT-STARTED — D-254-6 |
+| 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | NOT-STARTED — D-261-* |
+| 5 — VX-256: `read_note` paging + `ids_only` (pins, revert) | NOT-STARTED — D-256-* |
+| 6 — THE STAGE WINDOW plan (claim `vx336-u7`), headless + Mac build-for-testing, READY | NOT-STARTED — the draft below |
+
+### The traces (read in this session; file:line at `5c48547f`)
+
+**T-254 — what a write answers today.** No answer carries anything that proves the stored bytes.
+- **Records:** `create_note`, `import_document` (one document), `insert_blocks` and `duplicate_note` answer U5b's D1
+  records through ONE encoder, `MCPMintedBlocks.records` (`MCPMintedBlocks.swift:26–41`). It is fed by
+  `Operations.MintedBlockTakes` / `MintedTake {id, label}` (`Operations+DocumentImport.swift:71–101`). Those are built from
+  the mint's own `Variant` rows (`:83–87`, `Operations+Versions.swift:836–838`), which hold `workingText`, so a digest
+  needs no second read.
+- **Flat answers:**
+  - `add_take` answers `{take_id, block_id, note_id}` (`MCPWriteTools.swift:402–410`; the op returns the `Variant`,
+    `Operations+MCPWrites.swift:147–186`, its text stored verbatim);
+  - `add_takes` answers `{note_id, take_ids}` (`MCPWriteTools+Batches.swift:154–161`, the ops return `[Variant]`);
+  - `edit_take` answers `{take_id, block_id, note_id, changed, before/after_commit_id}`
+    (`MCPWriteTools+Edit.swift:159–176`; `MCPTakeEdit.take` is the post-edit `Variant`, `Operations+MCPEdits.swift:38–48`);
+  - `restore_commit` answers likewise (`MCPWriteTools+NoteEdits.swift:286–304`; `MCPCommitRestore.take`, `:370–379`).
+- **Block ids only, no take ids at all:**
+  - `divide_block` (`MCPWriteTools+Edit.swift:178–195`);
+  - `merge_blocks` (`:197–206`).
+- **Facts the digest rule must state:**
+  - **The plain-prose payload is segmented by her setting.** `create_note`'s `text` goes through
+    `SegmentationRules.bulkSegments(text, mode: defaultSegmentation)` (`Operations+MCPWrites.swift:438–440`), so its blocks
+    are the library's segments, not the client's lines.
+  - **The file doors drop blank takes** (`Operations+DocumentImport.swift:255`).
+  - **A divided half is seam-trimmed.** `BoundarySnapping.seamTrimmedHalves` (`BoundarySnapping.swift:214–233`) trims
+    whitespace at the cut and re-adds newlines by a rule, so a client cannot reproduce a half's bytes. A merge's join IS
+    reproducible (`a + "\n" + b`, R-13u4-3).
+  - **The store's own hashes are domain-separated:** `MCPCommentWords.digest` (`MCPCommentWords.swift:21–24`) and
+    `MCPSetupKeyRule.hash` (`MCPSetupKeyRule.swift:128–131`). A plain SHA-256 on the wire therefore never equals, or
+    reveals, either.
+
+**T-256 — why ids-only alone cannot fix it.**
+- **How the read works now:** `read_note` with ids is ONE write transaction (`MCPReadTools.swift:114`, the once stamp
+  atomic with the read, `:150`). It builds the WHOLE note (`MCPNoteStructure.read`, `:88–227`): every placement (`:94–102`),
+  every take's text (`:106–117`), comments, carriage. Nothing bounds it, so it is ∝ the note.
+- **Measured on her 253-block, two-take chapter (encoded the way `encode` sorts its keys):** a block's ids and keys are
+  ≈ 280 characters, and its two texts ≈ 250 (≈ 64k of text / 253).
+  - The full form: ≈ 134k, matching her 100–133k.
+  - An ids-only WHOLE note: ≈ 71k — ids are half the answer for short paragraphs. With a 64-hex digest per take it is
+    ≈ 109k.
+  - A 1,000-block note is ≈ 280k ids-only.
+- **So an ids-only form shrinks a note but never bounds it.** Only a PAGE is bounded.
+- **Two smaller facts:**
+  - The keyset is index-served: `idx_cblock_order(container_id, position)` (AppSpec §7; the read's own `ORDER BY
+    cb.position, cb.id`).
+  - Lens picks are index-served per block: `uq_lens_choice_live(lens_id, block_id)` (`Migrations.swift:227`).
+    `effectiveLensSelection` reads a lens's picks whole (`LensQueries.swift:47–65`).
+- **Two precedents:** `list_notes`' opaque keyset cursor and its stale-cursor sentence (`MCPReadTools.swift:43–45,
+  838–878`), and AF-10 (d)'s bounded commit-text budget (`MCPNoteStructure.swift:494–533`).
+
+**T-261 — what the activity log holds.**
+- **Shape:** `mcp_activity(id INTEGER PK, client_name, act, target_kind, target_id, target_title, outcome, at)`
+  (`MCPGrantSchema.swift:140–149`). It has no index but the PK and is capped at 500 rows across ALL clients
+  (`Operations+MCPGrants.swift:43, 350–365`). The reader is `Queries.mcpActivity` (`MCPGrantQueries.swift:375–385`).
+- **Who writes it:** `MCPWriteTools.log`/`land` (`MCPWriteTools.swift:707–731, 852–860`), the reads' `log`/`logAfter`
+  (`MCPReadTools.swift:751–769`), `MCPShowTool` (`:116–128`) and the connection doors (`Operations+MCPSetupKeys.swift:103–214`).
+
+**Seven findings:**
+- **F1 — a REFUSED row records the real title of a target that exists.** `onNote` computes the title whenever the note
+  exists (`MCPWriteTools.swift:571–578`; reads `MCPReadTools.swift:118–120`; `noteIntoBook`, `into` and `inWing` alike),
+  so a refused row's title is that of a note the client was told is not shared. Answered as is, it would be an oracle
+  twice over: the title, and title-present-versus-absent (hidden versus missing).
+- **F2 — connection-admission rows sit under the client's NAME** (`connect_*`). They include a stranger's refused
+  presentation under that name. `connect_rebound` and `connect_rebind_allowed` carry a REPLACED key's hash as `target_id`
+  (`MCPSetupKeyRule.swift:270–290`). None is a tool act.
+- **F3 — a creating act records the PLACE, not what it made.**
+  - `create_note` and `import_document` record kind `book`/`wing` with the place's id (`into`/`inWing`,
+    `MCPWriteTools.swift:648–697`), titled with the MADE note's title (`land`'s `logsReceiptTitle`, `:717`).
+  - `create_book` records the wing, `create_section` the book, `save_version` the note, and `duplicate_note` the SOURCE
+    (`logsReceiptTitle: false`, `MCPWriteTools+DuplicateNote.swift:85`).
+  - No row holds a minted id.
+- **F4 — the pane coalesces on (client, act, target_kind, target_id, allowed)** (`MCPPaneCopy.swift:1487–1500`). That
+  is why 25 `create_note`s into one book read "made 25 notes". Changing what a creating act records changes her face.
+- **F5 — some connections log nothing, others log refused rows.** A waiting setup's calls hear the pending sentence and
+  log nothing (`MCPSession.swift`, `waitingAnswer` and the `CallTool` handler). A pending client's calls log refused
+  rows under its name.
+- **F6 — approval and Deny.** `decided_at` is stamped only on the move to approved (`Operations+MCPGrants.swift:101–105`).
+  Deny revokes every grant and releases the key (`:125–144`).
+- **F7 — one row records an id the client did not send:** `duplicate_note`'s wing-side refusal records the source's
+  resolved wing (`MCPWriteTools+DuplicateNote.swift:79`). It is readable to that client at that moment, because its read
+  on the note had just been allowed and `list_notes` shows `wing_id`.
+
+**Every other row's id is an argument the client sent.**
+- It is `note_id`, `block_id`, `take_id`, `commit_id`, `comment_id`, `lens_id`, `book_id` or `wing_id`, through
+  `onNote`'s `logged:` (`+Edit :162`, `+NoteEdits :163–344`, `+Deliberate :73–104`, `+Carriage :125/160`,
+  `+CommentDelete :53`).
+- Every ALLOWED row's title is one the client could read at act time. Rungs are cumulative, and every write is decided at
+  or above read on the logged target. The two-sided acts decide both sides (`noteIntoBook`, `+WingMove`,
+  `+LinkVersions`, `+DuplicateNote`).
+
+### VX-254 — content digests on write replies
+
+**D-254-1 — THE DIGEST.**
+- **Key and value:** a take's `sha256` is the SHA-256 of the take's STORED text, as its UTF-8 bytes, in lowercase hex
+  (64 characters).
+  - No Unicode normalization: NFC "é" and NFD "é" digest differently.
+  - No trimming, no newline conversion, and no domain prefix. That is deliberate: a client computes it with any stock tool
+    (`shasum -a 256`, `hashlib.sha256(s.encode()).hexdigest()`), unlike the store's own domain-separated hashes (T-254).
+- **The empty take** digests to `e3b0c442…b855` (SHA-256 of nothing), so a blank take is answered and recognizable.
+- **One home:** `Sources/VariorumMCP/MCPTextDigest.swift` holds `static func sha256(_ text: String) -> String` (CryptoKit,
+  `Data(text.utf8)`). It is the wire's only digest function; the encoder, the flat answers and VX-256's `ids_only` all
+  call it.
+- **"Stored" means the text the act WROTE** — the value it bound, read from the op's returned rows, never a second read
+  (D1's rule: no race, ∝ the write). OWED 2 pins that this equals what a read returns.
+
+**D-254-2 — WHERE IT RIDES.**
+- **The encoder (one change for every record answer):**
+  - `Operations.MintedTake` gains `text: String`, the minted row's `workingText`. Its three constructions pass `$0.workingText`:
+    `Operations+DocumentImport.swift:86` and `Operations+Versions.swift:838`, plus `MCPInsertBlocks` through `:83–87`.
+  - `MCPMintedBlocks.records` emits `"sha256": MCPTextDigest.sha256(take.text)` on EVERY take object.
+  - So the take object becomes `{take_id, label?, sha256}`. `create_note`, `import_document` (one document), `insert_blocks`
+    and `duplicate_note` all carry it with no per-tool code.
+  - Text never rides the wire answer; the core value holds it only to hash.
+- **The flat answers each gain ONE key, `sha256`, computed from the returned row:**
+  - `add_take` → `take.workingText`;
+  - `edit_take` → `edit.take.workingText`. On `changed: false` it is the digest of the current text, which equals the
+    text sent;
+  - `restore_commit` → `result.take.workingText`, which equals the commit's text.
+- **`add_takes`** gains `takes: [{take_id, block_id, label?, sha256}]` in the items' order (F-254-5). D1's take object plus
+  its block; `label` is the label as STORED, the `aiLabel` form. `take_ids` stays beside it, byte-unchanged (F-6's
+  compatibility ruling).
+- **`divide_block` / `merge_blocks`** answer per F-254-2.
+
+**D-254-3 — THE SWEEP TABLE** (every catalog tool; "writes take text" = writes a variant's `working_text`).
+
+| tool | writes take text? | digest answered / why not |
+|---|---|---|
+| `create_note` | yes (each block's take 0 and its takes) | **yes**, the encoder. `blocks` verifies byte-for-byte; `text` is split by her segmentation setting, so the description says to verify by `blocks` |
+| `import_document`, one document | yes | **yes**, the encoder (minted takes only; the format drops blank takes) |
+| `import_document`, book form | yes | **no** (F-254-4 (a)): P-VX252-1 ruled this answer stays `book_id, note_ids, chapter_ids` because a per-take list is ∝ the whole book (her bilingual book ≈ 7,700 takes ≈ 0.6M characters with digests). Verify each note by VX-256's `ids_only` pages |
+| `insert_blocks` | yes | **yes**, the encoder |
+| `duplicate_note` | yes (byte copies of the ACTIVE takes; archived copies ride unlisted, P-VX311-3) | **yes**, the encoder. A copy's digest equals its source take's, so a client checks the copy against what it read |
+| `add_take` | yes | **yes**, flat `sha256` |
+| `add_takes` | yes | **yes**, `takes[]` objects (F-254-5) |
+| `edit_take` | yes | **yes**, flat `sha256` |
+| `restore_commit` | yes (the commit's text into the take) | **yes**, flat `sha256` (equals the commit's text, which the client may read `with_commits`) |
+| `divide_block` | yes (the cut halves) | **F-254-2 (a): yes**, `blocks` records for the two resulting blocks. The halves are seam-trimmed, so their digests say what was stored, and the records end the read-again a divide forces today |
+| `merge_blocks` | yes (the joined take; carried takes are byte copies) | **F-254-2 (a): yes**, `blocks` records for the merged block. The join is reproducible: sha256(a + "\n" + b) |
+| `save_version` | yes (a full family copy, sealed + archived) | **no** (F-254-3 (a)): its takes are a sealed moment no write can address; the answer is one id; digests would grow it ∝ the note. `read_note(version_id, ids_only)` pages give every one |
+| `lock_take` | no (its insurance commit copies the text; a commit is not a take) | no, writes no take text |
+| `save_commit` | no (a commit) | no, writes no take text; the commit holds the take's current text, which `ids_only` digests |
+| `put_back` | no (a tombstone flip; the take returns as it was) | no, writes no take text |
+| `choose_take` · `adopt_lens` · `archive_take` · `unarchive_take` · `delete_take` · `set_take_label` · `unlock_take` | no (pointers, statuses, labels) | no, writes no take text |
+| `delete_block` · `move_block` · `set_block_name` · `move_note_to_wing` | no | no, writes no take text |
+| comments: `add_comment(s)` · `edit_comment` · `restore_comment` · `delete_comment` | comment text, not a take's | no; outside the class (a take's text). VX-260's comment digest is a different, domain-separated, local record |
+| notes/books/chapters/tags/lenses/rules: `rename_note` · `set_entry_date` · `delete/archive/unarchive_note` · `create_book` · `create_section` · `add_note_to_book` · `file_note_in_chapter` · `set_book_rule` · `apply_tag` · `remove_tag` · `link_versions` · `save_lens` · `delete_lens` · `rename_commit` · every book act · every chapter act | no | no, writes no take text |
+| the reads (`list_books` · `list_notes` · `read_note` · `search` · `export_note` · `show_in_app`) | no | n/a; `read_note`'s `ids_only` carries `sha256` (VX-256) |
+
+**D-254-4 — COST AND THE ORACLE.**
+- **Cost:** one SHA-256 pass per take the act wrote, over bytes the act already holds in memory. That is ∝ the write
+  (∝ the copied note for `duplicate_note`, an act ∝ the note already). No query is added.
+- **The oracle:** a digest is a function of text the caller may already read, so it adds no reach. Case by case:
+  - every client-sent write (`create`, `import`, `insert`, `add`, `edit`) digests the caller's own words;
+  - `duplicate_note` needs read on the source;
+  - `divide`, `merge` and `restore_commit` need edit on the note (cumulative, so ≥ read).
+- **No digest of a take the caller cannot read appears anywhere.** The encoder lists only active copies (P-VX311-3), and
+  every answer is behind the act's decided reach. The plain wire hash cannot collide with or reveal the store's
+  domain-separated hashes.
+
+**D-254-5 — flush and undo.**
+- **No act changes.** The answer's contents don't change whether the act meets her text, so every
+  `flushesHerEditorFirst` answer stands as built:
+  - `edit_take`, `restore_commit`, `divide`, `merge`, `duplicate_note`: true;
+  - `add_take(s)`, `create_note`, `import_document`, `insert_blocks`: false.
+  For the true ones, the digest is of what the act wrote AFTER her flush landed.
+- **No undo registration changes.**
+
+**D-254-6 — THE PINS** (wire, `ServerHarness`; each red by absence on the old tree, red again by revert).
+- **The digest definition — P-254-1:**
+  - `MCPTextDigest.sha256("")` = e3b0…b855, and `"abc"` = ba7816bf…15ad;
+  - NFC "é" ≠ NFD "é";
+  - "beliscou" ≠ "beliscáu";
+  - each value equals `shasum -a 256` of the same bytes (vectors computed by the builder, quoted in the test).
+- **The record answers:**
+  - **P-254-2 — `create_note` (blocks):** every take object's `sha256` = the digest of the text SENT (curly quotes, em
+    dash, an embedded newline, a trailing space, an emoji, an NFD é, a blank take). Each also equals the digest of
+    `read_note(with_ids)`'s text for that `take_id`.
+  - **P-254-3 — `create_note` (text):** each record's digest = the digest of `read_note`'s text.
+  - **P-254-4:** the same for `import_document`, one document.
+  - **P-254-5:** the same for `insert_blocks`.
+  - **P-254-6 — `duplicate_note`:** each copy take's `sha256` = the digest of its SOURCE take's text (matched through
+    `source_block_id`).
+- **The flat answers:**
+  - **P-254-7 — `add_take`:** `sha256` = the digest of the sent text; a blank take gives e3b0….
+  - **P-254-8 — `add_takes`:** `takes[i]` = `{take_id: take_ids[i], block_id: items[i].block_id, sha256}`, with
+    `take_ids` byte-unchanged.
+  - **P-254-9 — `edit_take`:** the new text's digest; on `changed: false`, the current text's.
+  - **P-254-10 — `restore_commit`:** `sha256` = the digest of the commit's text.
+- **P-254-11 (only if F-254-2 (a)):**
+  - `divide_block`'s `blocks`: both resulting blocks, every active take, digests equal to `read_note`'s texts after the
+    divide (a single-take divide and a fanned keep-on-top divide);
+  - `merge_blocks`' record: the joined take's digest = sha256(a + "\n" + b), and a carried take's = its source's.
+- **GUARDS (green on both sides, by design — not red pins):**
+  - G-254-1: the book form's answer is byte-unchanged (no `sha256`);
+  - G-254-2: every existing answer key is unchanged. `MCPMintedAnswerServerTests` projects records (`BlockRecord`), so it
+    stays green unedited. Any pin found comparing a whole answer string is a named, justified edit.
+
+### VX-256 — a compact / paged `read_note`
+
+**D-256-1 — WHICH: BOTH, with paging the load-bearing half** (F-256-1 (a)).
+- **Ids-only alone fails the ticket's "any client reads a big note in pieces"** (T-256). Her chapter's ids alone are
+  ≈ 71k characters, and any note a few times larger is past any cap.
+- **Paging alone meets the ticket.**
+- **`ids_only` with digests is the cheap verification read.** It covers what no write reply digests:
+  - a book-form import (F-254-4);
+  - a `save_version` (F-254-3);
+  - a note after a dropped call;
+  - her own note.
+  It halves the pages a structural read needs, and a client compares a whole note to its source without pulling text.
+- **Both are explicit asks, never ambient.**
+
+**D-256-2 — THE PARAMETERS** (`read_note` only; `export_note` untouched).
+- **`limit`** (integer 1–200): blocks per page. **`cursor`** (string): the previous page's `next_cursor`. Passing either
+  asks for pages: it implies `with_ids`, as `with_commits` does. With `cursor` alone the limit defaults to 50
+  (`list_notes`' default and maximum; the names are `list_notes`').
+- **The page ends at the FIRST of:**
+  - `limit` blocks;
+  - a take-text budget of **32,000 characters** (F-256-2 (a), PROVISIONAL), counted over the page's takes' text and,
+    under `with_commits`, its commits' text.
+  A page always holds at least one whole block, so a single block bigger than the budget is a page of its own. The
+  budget never applies without `limit`/`cursor`, which keeps the unpaged form byte-unchanged.
+- **`ids_only`** (boolean, implies `with_ids`, combines with paging or not): every TAKE entry drops `text` and carries
+  `sha256` (D-254-1) instead.
+  - Everything else is unchanged: comments keep their text, and so do explicit asks (`with_commits`, lineage's released
+    originals, the tray).
+  - The budget then counts only commit or tray text, so `limit` governs.
+  - The description says ids_only is cap-safe only paged: a whole note ids-only is ≈ 109k for her chapter.
+
+**D-256-3 — THE ANSWER: the `with_ids` object, per page.**
+- **Every page** carries the note's header (`note_id`, `title`, `entry_date`, `books`, the `lens_id` / `version_id`
+  echoes — ∝ 1 and the note's memberships) and THIS page's `blocks`, each exactly as the unpaged form says it.
+- **`next_cursor`** comes back only while blocks remain. Its absence is the end.
+- **The first page** (no cursor) adds `block_count`, the note's live blocks now (F-256-5 (a)).
+- **The cursor** is opaque and new: base64 of `n\n<container id>\n<position>\n<placement id>`. It keys on the
+  placement's `(position, id)`, the read's own order, and names the note or version it pages.
+- **It resumes only that container.** An undecodable cursor, `list_notes`' shapes, or another note's cursor all answer
+  `MCPReadTools.staleCursorMessage`.
+
+**D-256-4 — THE INTERPLAY.**
+- **`with_ids`:** implied by paging and by `ids_only`.
+- **`lens_id`:** every page reads through the lens. Per block the pick comes from `lens_choice` on THAT block, served by
+  `uq_lens_choice_live` and ∝ the page; the builder adds a page-scoped variant of `effectiveLensSelection`. `via` and
+  `shown_take_id` are as unpaged.
+- **`include_archived`:** archived takes join each paged block's takes, as unpaged.
+- **`with_lineage`:** the page's blocks' edges and parents (the queries already take the block ids).
+- **`with_commits`:** the page's takes' commits, under the PAGE budget (past it `text_omitted`, AF-10 (d)'s shape).
+- **`commit_ids`** must be commits of THIS PAGE's takes. Otherwise it refuses "commit_id X isn't a commit of a take on
+  this page." (PROVISIONAL words). The page with that take is where its text rides.
+- **`with_tray`, `with_versions`** (note-wide lists, capped at 200) ride the FIRST page only.
+- **`with_lenses`:** the lens list (`lens_id`, `name`) on every page, each lens's `picks` restricted to the page's blocks,
+  and `dangling_picks` on the first page only (F-256-7 (a)).
+- **`version_id`:** pages the saved version the same way; the cursor names the version.
+- **No parameter given:** every existing form, the Level 0 text included, is byte-unchanged (F-256-4 (a)). The text form
+  is the round-trip format `import_document` reads, and a fragment of it would not import.
+
+**D-256-5 — COST per page (∝ the page).**
+- **The page query** is the placements range with `(cb.position, cb.id) > (:pos, :id) … ORDER BY cb.position, cb.id
+  LIMIT :limit`, on `idx_cblock_order`. Takes, comments, lineage, commits and lens picks follow by `json_each(page block
+  ids)`, the existing statements.
+- **Not ∝ the page, and why it is acceptable:**
+  - `books` is ∝ the note's memberships (small, as unpaged);
+  - `block_count` is one index count over the note's placements, first page only — "the note's blocks" is the Hard
+    rules' named allowance;
+  - the budget trims after the fetch, so a page reads ≤ `limit` blocks' takes.
+- **Builder pin:** the plan through `idx_cblock_order` (an `EXPLAIN QUERY PLAN` pin, the `MCPPicksPlanTests` precedent).
+
+**D-256-6 — THE ONE NOT-SHARED SHAPE, AND WHAT IS BYTE-UNCHANGED.**
+- **Order (`list_notes`' discipline):**
+  1. The parse, independent of any target: `limit`'s range, the cursor's DECODE, and `ids_only`'s type.
+  2. The decision on the note, exactly as today. An unreachable note answers the ONE refusal, byte-identical with or
+     without `limit`/`cursor`/`ids_only`, and identical for a missing id.
+  3. Only then the cursor's container check (stale).
+  A cursor of an unreachable note sent with a readable note says "stale". A readable note's cursor sent with an
+  unreachable note says not-shared. Neither tells anything about the other note.
+- **`lens_id`'s and `version_id`'s existing checks** keep their order and words.
+
+**D-256-7 — STABILITY WHILE THE NOTE CHANGES (not a snapshot, said plainly; F-256-6 (a)).**
+- **Each page is one transaction, consistent in itself.** Between pages, her typing or another client may change the
+  note, and a page shows the note as it is THEN.
+- **The keyset's exact behaviour:**
+  - a block added before the cursor is not seen;
+  - one added after it is;
+  - a block moved from after the cursor to before it is missed;
+  - one moved from before to after is seen twice;
+  - a deleted block, the cursor's own included, never breaks the resume (the key is a position, not a live row);
+  - a divide of an already-read block mints its second half after it, which is seen. The read first half is stale, the
+    ids-live doctrine.
+- **No change token is added:** `last_touched_at` misses labels, choices and comments (`touchContainer`'s callers,
+  `Operations+Variant.swift:635`), so it would promise more than it delivers.
+- **What the description says:** pages are read one at a time; if the note may have changed, read it again, and compare
+  `ids_only` digests to tell cheaply. A write with a stale id is refused, as ever.
+
+**D-256-8 — ONCE GRANTS.** A once read grant is spent by its first read (AF-7, `MCPReadTools.swift:150`), so under a once
+grant the FIRST page spends it and page 2 refuses, as any second read does today. This is the existing rule, unchanged.
+The description says "a note shared once is read in one call". It is recorded for her eye (P-VX256-3) because a big note
+shared once still can't be read under the cap.
+
+**D-256-9 — flush and undo.** `read_note` is not a `Job`: `MCPReadTools` never consults `flushesHerEditorFirst`.
+- A page reads stored rows, so her unflushed typing isn't in them, exactly as the unpaged read and the ids-live
+  doctrine already say.
+- The flush exists so an ACT never overwrites or strands her typing. A read cannot. Making pages flush would queue every
+  page behind her runner (P2's spirit).
+- No undo: a read registers none.
+
+**D-256-10 — THE PINS** (wire; red by absence unless marked GUARD).
+- **Paging:**
+  - **P-256-1 — pages tile the note:** a 7-block note with `limit: 3` reads as 3 + 3 + 1, with `next_cursor` on the first
+    two only. The concatenated `blocks` equal the unpaged `with_ids` blocks entry for entry, in order.
+  - **P-256-2 — the budget:** blocks of 20k characters page one per page, the first block always whole, and a single 40k
+    block is a page alone.
+  - **P-256-3 — `ids_only`:** no take `text`; `sha256` = the digest of the unpaged text per `take_id`; everything else
+    equals `with_ids`.
+- **Cursors and the fence:**
+  - **P-256-4 — stale cursors:** an undecodable cursor, a `list_notes` cursor and another note's cursor each answer the
+    stale sentence.
+  - **P-256-5 — the fence:** an unreachable note answers byte-identically with paging, without it, and as a missing id,
+    with a cursor of a readable note passed.
+- **Change and grants:**
+  - **P-256-6 — stability:** with a block inserted before the cursor and one after between pages, the second page shows
+    the after-one only; a deleted cursor block still resumes.
+  - **P-256-7 — once:** page 1 spends the once grant; page 2 refuses.
+- **Composition:**
+  - **P-256-8 — `lens_id` + paging:** per block, `via`/`shown_take_id` equal the unpaged lens read; `with_lenses`' picks
+    are restricted to the page.
+  - **P-256-9 — the commit asks:** `with_commits` + paging rides the page budget; a `commit_ids` entry off the page is
+    refused.
+  - **P-256-10 — `version_id` + paging** tiles the version.
+  - **P-256-11 — the plan pin** (D-256-5).
+- **GUARD G-256-1:** every existing `read_note`/`export_note` form is byte-unchanged with no new parameter
+  (`MCPReadShapeServerTests`' existing pins stay green unedited).
+
+### VX-261 — `list_my_activity`, the client's own recent acts
+
+**D-261-1 — NAME, RUNG, LISTING.**
+- **Name and rung:** `list_my_activity` (F-261-1 (a); the pane's own word, "Activity"; verb-first like `list_notes`).
+  Rung READ, all scope kinds, `readOnlyHint` true.
+- **Listing:** for EVERY APPROVED client, no grant needed (F-261-2 (a)). The declaration gains one flag,
+  `listedWhenApproved: true`, and `isListed` reads it before the grant check (`MCPToolCatalog.swift:44–49`).
+- **Why no grant:** the case it exists for is a lost reach. A "until you disconnect" grant ends at the disconnect and
+  "reconnecting does not restore it" (`MCPSession.instructions`), so a client recovering from a dropped call often holds
+  nothing. P-2's "no door that can never act" holds, because this door always acts for an approved client: its own history.
+- **The refusals:** a pending or denied client gets the standing's own sentence (`list_books`' guard,
+  `MCPReadTools.swift:202–204`). A waiting setup hears the pending sentence before any tool runs (F5).
+
+**D-261-2 — THE ANSWER** (newest first; the row as LOGGED, nothing else):
+```json
+{"acts": [
+  {"tool": "create_note", "outcome": "allowed", "at": "2026-10-14T19:02:11.123Z",
+   "target_kind": "book", "target_id": "…", "title": "Capítulo 11"},
+  {"tool": "read_note", "outcome": "refused", "at": "…", "target_kind": "note", "target_id": "…"}],
+ "next_cursor": "…"}
+```
+- `tool` is the row's act. A target field is omitted when the row has none. `title` appears only on ALLOWED rows that
+  have one.
+- **Inputs:** `limit` (1–200, default 50), `cursor`, `include_reads` (default false).
+- **Excluded always:**
+  - this tool's own rows;
+  - every non-tool row: `connect_*` and any act not in `MCPToolFacts.toolNames`.
+- **Reads:** by default the read-rung tools' rows (`list_books`, `list_notes`, `read_note`, `export_note`, `search`,
+  `show_in_app`) are excluded too, so the listing is about acts that changed something. `include_reads: true` adds them
+  (F-261-5 (a)).
+- **The minted-id gap, said in the description (F-261-6 (a), F3):** a creating act's row names the PLACE it made
+  something in, with what it made's name at the time. To recover a made note, the client looks for that title in
+  `list_notes(book_id or wing_id)`. Two rows with one title mean two notes were made.
+
+**D-261-3 — WHAT "OWN" KEYS ON: the client NAME, since its current approval** (F-261-3 (a)).
+- **A-4's ruled honest boundary is the argument:** the name IS the identity.
+  - Grants hang on the name.
+  - "Until you disconnect" is name-scoped: later sessions count.
+  - The setup key binds to the name.
+  - The log records the name and nothing finer (no session column).
+  So two sessions under one name are ONE client to the door, holding the same grants, and each may see the other's acts.
+- **This adds no reach:** every allowed row's title was readable under the SAME name's grants at act time, and refused
+  rows carry none (D-261-4).
+- **Per-session keying would defeat the purpose:** recovery after a dropped call happens in a NEW session (the old
+  connection is dead), and per-session keying would hide exactly the acts it must find. It would also need a schema.
+- **The era cut:** rows logged before `mcp_client.decided_at` are never listed (the one indexed client read, F6).
+  - Deny is her "stop trusting this client" act: it revokes every grant and releases the key.
+  - A re-approved name starts with zero reach (APPROVAL IS ALONE), so it starts with no history either. Whatever program
+    holds the name after her next approval reads nothing from before it.
+- **What a pending client's refused calls do:** they predate its approval and stay out.
+
+**D-261-4 — THE ORACLE RULE, PROVEN BY ROW CLASS** (answer only what the client sent or was told at act time; never the
+CURRENT state of a target).
+- **The answer is a pure projection of `mcp_activity` rows:** no join to any store table, no "is it still there", no
+  current title. A target that became unreachable, was renamed or was deleted reads exactly as it did at act time. A
+  pin renames and then deletes the target and sees an identical row (P-261-5).
+- **What each field is:**
+  - `tool` — the tool it called (sent);
+  - `outcome` — what it was told;
+  - `at` — when it called;
+  - `target_kind` / `target_id` — the argument it sent. The one exception, F7's wing on `duplicate_note`'s wing-side
+    refusal, is an id the client could read at that moment (recorded PROVISIONAL P-VX261-5; the builder may omit
+    `target_*` on that one row class instead — option (b));
+  - `title` — ALLOWED rows only. The act was decided at ≥ read on its target, so the title was readable then (T-261's
+    last paragraph), and for a made note or book it is the name the client itself gave.
+- **Refused rows NEVER carry a title (F1).** With it gone, a refused act on a HIDDEN note and one on a MISSING id log the
+  same act, kind and id, so the rows are byte-identical. That is the one-not-shared shape carried into the log
+  (P-261-4).
+- **Excluded rows:**
+  - connection rows (F2) are not the client's acts. Some are a stranger's attempts under the name, and two carry a
+    replaced key's hash;
+  - this tool's own rows.
+
+**D-261-5 — REFUSED ACTS: listed, title-less** (F-261-4 (a)). "Did my call land?" is exactly what a refused row answers.
+Leaving refusals out would make a refused call indistinguishable from a dropped one.
+
+**D-261-6 — LIMIT, PAGING, COST.**
+- **The cursor:** a keyset on `id` (`id < :after`), opaque base64 `a\n<id>`; a stale or foreign cursor answers the
+  stale sentence.
+- **The statement:**
+  ```sql
+  SELECT id, act, target_kind, target_id, target_title, outcome, at FROM mcp_activity
+  WHERE client_name = ? AND at >= ? AND act IN (SELECT value FROM json_each(?))
+    AND (? IS NULL OR id < ?)
+  ORDER BY id DESC LIMIT ?
+  ```
+- **Cost:** ∝ the cap (≤ 501 rows), never the corpus. No index is needed; the table is bounded by construction.
+- **The answer** is read in one read snapshot, and its activity line is written after (the F3 pattern, `logAfter`).
+- **The cap, said in the description:** 500 rows across ALL clients. VX-256's pages each log a read row, and a long paged
+  read pushes older rows out sooner.
+
+**D-261-7 — flush, undo, log.**
+- Not a `Job`: it reads only the log, nothing of her text, so no flush. No undo.
+- It is logged like every read (target-less). Its rows never list in its own answer, and the pane speaks them (FOR
+  VX-234).
+
+**D-261-8 — THE PINS** (wire; red by absence).
+- **What lists:**
+  - **P-261-1:** after `create_note` into a book and an `edit_take`, the tool lists both newest first, with
+    `tool`/`outcome`/`at`/target as logged and `title` as logged.
+  - **P-261-2:** another client's rows never list.
+  - **P-261-3:** `connect_rebound` and `connect_not_this_names_key` rows under the same name never list.
+- **The oracle:**
+  - **P-261-4:** a refused `read_note` on an existing unshared note and one on a missing id answer byte-identical
+    entries (an injected clock), and neither has a title.
+  - **P-261-5:** an allowed row's title survives a rename and a delete of its target unchanged (act-time, never current).
+- **Who may read:**
+  - **P-261-6:** after Deny and re-approval, earlier rows never list.
+  - **P-261-7:** an approved client with ZERO grants has the tool listed and answered; pending and denied clients are
+    refused with their sentences; a waiting setup hears the pending sentence.
+- **The answer's shape:**
+  - **P-261-8:** reads are absent by default and present with `include_reads`; the tool's own rows are absent.
+  - **P-261-9:** `limit`/`next_cursor` tile the rows.
+- **The Mac suite:** `MCPWingFacesTests.activitySpeaksEveryActInWordsNeverAToolID` walks the new tool, red by absence of
+  its words.
+- **Catalog:** `MCPServerTests`' declared ⇔ handled walk includes it in `MCPReadTools.handledToolNames`.
+
+### THE FORKS — proposed, for the orchestrator's ruling (my pick first)
+
+**VX-254**
+- **F-254-1 — the field:**
+  - (a) `sha256`, lowercase hex, plain SHA-256 of the stored UTF-8 bytes, nothing normalized;
+  - (b) `digest` + `digest_algorithm`;
+  - (c) base64 (44 characters; stock tools default to hex).
+- **F-254-2 — `divide_block` / `merge_blocks`:**
+  - (a) answer D1 `blocks` records (with `sha256`) for the resulting blocks. This keeps the class rule, and the records
+    end the forced re-read after a divide or merge.
+    - The core cost: `MCPDivideResult`/`MCPMergeResult` gain `blocks: [MintedBlockTakes]`, built from
+      `DivideWResult.first/second.variants`, `MergeResult.variant` and `MergeCeremonyResult.variants`.
+    - A single-take divide's first half is the SOURCE take rewritten, which `DivideResult` does not return. It gains the
+      updated source `Variant` (one construction, `Operations+Structural.swift:248`).
+    - Additive: existing keys are unchanged.
+  - (b) no digest: the halves are derived by a seam rule the client cannot reproduce, and it sent no words. Verify with
+    `ids_only` pages (zero build).
+- **F-254-3 — `save_version`:**
+  - (a) none (sealed, unaddressable, ∝ the note; `ids_only` on `version_id`);
+  - (b) records, as `duplicate_note`.
+- **F-254-4 — the book-form import:**
+  - (a) none (P-VX252-1's ruled answer; `ids_only` pages per note);
+  - (b) per-note `blocks` (∝ the book, which P-VX252-1's argument rejects);
+  - (c) a per-note aggregate digest (no canonical form a client can reproduce).
+- **F-254-5 — `add_takes`:**
+  - (a) `takes: [{take_id, block_id, label?, sha256}]` beside `take_ids`;
+  - (b) a parallel `sha256s` array (positional, against U5b's no-positional rule).
+
+**VX-256**
+- **F-256-1:**
+  - (a) BOTH: keyset paging plus `ids_only` with digests;
+  - (b) paging only;
+  - (c) ids-only only. It fails at scale: ≈ 71k for her chapter.
+- **F-256-2 — the page bound:**
+  - (a) `limit` (default 50, max 200) AND a 32,000-character take-text budget, never splitting a block;
+  - (b) `limit` only. Not cap-safe for long paragraphs: 50 × 2k characters = 100k;
+  - (c) a budget only.
+- **F-256-3 — `ids_only` carries `sha256`:**
+  - (a) yes;
+  - (b) ids alone;
+  - (c) a separate `with_digests` flag (orthogonal, one more ask).
+- **F-256-4 — the Level 0 text form:**
+  - (a) unpaged and byte-unchanged; paging implies `with_ids`;
+  - (b) paged documents (a fragment wouldn't import).
+- **F-256-5 — `block_count`:**
+  - (a) the first page only;
+  - (b) every page (∝ the note per page);
+  - (c) none.
+- **F-256-6 — a change signal:**
+  - (a) none, the ids-live doctrine said plainly;
+  - (b) `edited` (`last_touched_at`) per page, which misses labels, choices and comments.
+- **F-256-7 — note-wide carriage under paging:**
+  - (a) tray and versions on the first page; the lens list on every page with page-scoped picks; `dangling_picks` on the
+    first page;
+  - (b) the carriage asks refuse with paging.
+
+**VX-261**
+- **F-261-1 — the name:**
+  - (a) `list_my_activity`;
+  - (b) `list_my_acts`;
+  - (c) `recent_acts`.
+- **F-261-2 — listing:**
+  - (a) every approved client, no grant needed;
+  - (b) only while it holds a live grant (it then can't recover after a while-connected grant ends).
+- **F-261-3 — "own":**
+  - (a) the name, since its current approval (`decided_at`);
+  - (b) the name, every retained row.
+- **F-261-4 — refused acts:**
+  - (a) listed, never with a title;
+  - (b) not listed (a refusal then looks like a drop).
+- **F-261-5 — reads:**
+  - (a) excluded by default, `include_reads` adds them;
+  - (b) always listed.
+- **F-261-6 — the minted-id gap:**
+  - (a) the row as logged (a creating act names its place), with the recovery road said;
+  - (b) creating acts LOG the made note or book as their target. No schema, but the pane's coalescing changes
+    ("made 25 notes" becomes 25 lines), her face, for VX-234;
+  - (c) a local-only `result_id` column (a schema, outside the brief's "no schema").
+
+### PROVISIONALs (proposed — the orchestrator files the ruled ones at the merge)
+- **VX-254:**
+  - **P-VX254-1:** divide and merge answer records (if F-254-2 (a)).
+  - **P-VX254-2:** `save_version` and the book-form import answer no digests (F-254-3/4 (a)).
+- **VX-256:**
+  - **P-VX256-1:** the page bound: 50 default, 200 max, 32,000-character budget.
+  - **P-VX256-2:** pages are not a snapshot (D-256-7).
+  - **P-VX256-3:** a once grant reads one page (the existing rule's consequence, for her eye).
+  - **P-VX256-4:** `commit_ids` binds to the page, with the words.
+- **VX-261:**
+  - **P-VX261-1:** own = the name since its current approval.
+  - **P-VX261-2:** listed for any approved client.
+  - **P-VX261-3:** refused rows listed, title-less.
+  - **P-VX261-4:** a creating act's row names its place.
+  - **P-VX261-5:** F7's row keeps its target, or option (b) omits it.
+
+### FOR VX-234 (planned words — to be written AS BUILT by the builder)
+- **Activity (`MCPPaneCopy`):**
+  - `list_my_activity` allowed: "‹client› checked its recent activity" (+ the times suffix);
+  - refused: "‹client› was refused checking its recent activity" (the `refusedPhrase` pattern).
+- **Tool descriptions (model-facing; the docs pass U8 polishes):**
+  - **The digest sentence**, shared by every answering tool: "…and sha256: the SHA-256 of the take's text exactly as
+    stored, as UTF-8 bytes, in lowercase hex — nothing normalized or trimmed — so a digest of your own text proves it
+    landed byte for byte."
+  - **`create_note` adds:** "(with text, Variorum splits the prose into blocks by its own setting; to verify byte for
+    byte, send blocks)."
+  - **`read_note` adds:** "Big notes read in pages: pass limit (blocks per page, up to 200), then each answer's
+    next_cursor as cursor until none comes back; a page also ends once its takes' text passes about 32,000 characters
+    (a block is never split), and the first page says block_count. Pages are read one at a time, not as a snapshot — if
+    the note may have changed, read again. ids_only: true gives each take without its text, with its sha256 instead —
+    page it to check a whole note against your source cheaply. A note shared once is read in one call."
+  - **`list_my_activity`:** "What this client did, newest first, from Variorum's activity log: each act's tool, allowed
+    or refused, when, and the id it named (for a note or book it made, the book or wing it was made in); an allowed act
+    also says what its target was called at the time — refused ones never do. Use it after a dropped call or a lost
+    context to learn whether a call landed (a made note: look for its title with list_notes). Every session under this
+    client's name, since the author last approved it; never another client's. Reads join with include_reads: true. The
+    log keeps the library's last 500 acts across all clients. Paged — pass next_cursor back as cursor. Returns JSON."
+
+### THE SPLIT for the builders (one fresh `opus-implementer` each, strictly in order)
+- **Builder A — VX-254 (pieces 1–3) + VX-261 (piece 4).** VX-254's sweep is wide but shallow: one encoder field, four flat
+  keys, and F-254-2's core result types if ruled (a). VX-261 is self-contained: one query, one catalog flag, one handler,
+  one pane phrase. Together they are the "answer shapes and the log" half.
+  - It reads: this record's U7 section; `MCPWriteTools*.swift`; `MCPMintedBlocks`; `Operations+DocumentImport/Versions/
+    MCPInsertBlocks/MCPEdits`; the `Structural` divide/merge results; `MCPReadTools` (for the handler's home);
+    `MCPToolCatalog`; `MCPGrantQueries`' activity section; `MCPPaneCopy`'s activity tables.
+  - It lands `MCPTextDigest` FIRST (builder B's `ids_only` calls it).
+  - Seam: committed, headless green (`swift test --filter VariorumMCPTests` + the touched core suites), the revert runs
+    recorded.
+- **Builder B — VX-256 (piece 5) + THE STAGE WINDOW (piece 6).** VX-256 is the deepest single design: seven interacting
+  parameters in `MCPReadTools.readNote` + `MCPNoteStructure.read`. The window needs every member's legs final, so the
+  last builder writes it.
+  - It reads: this U7 section; `MCPReadTools`; `MCPNoteStructure`; `LensQueries`; the U5b/U6 STAGE WINDOW plans as the
+    template.
+  - It writes THE STAGE WINDOW from the draft below, runs `xcodebuild build-for-testing` into
+    `App/Variorum/DerivedData/vx336-u7`, and reports READY.
+- **If A runs long**, VX-261 moves to B whole (it shares no file with VX-254 except the catalog and `MCPReadTools`'
+  dispatch).
+
+### THE LIVE LEGS for U7's window (DRAFT — builder B finalizes; claim `vx336-u7`)
+- **Turn mechanics:**
+  - Every turn: `claude -p --strict-mcp-config --mcp-config <scratch>/u7-mcp.json --output-format stream-json` (or
+    `json`), its PROMPT ON STDIN, `--allowedTools` listing only the leg's MCP tools plus `Bash(python3:*)` where a digest
+    is computed. The answer is tee'd to `notes/plans/vx336-screens/u7/<leg>.json`.
+  - NEVER `claude mcp list`. Her user-scope fingerprint is taken before and after.
+  - Only the setup KEY is taken from the Connect tab, registered in the scratch config (U5's step 3).
+- **Fixture road:**
+  - `Tools/ScaleFixture/stage.sh notes=10,long=300 App/Variorum/DerivedData/vx336-u7`. It takes the A1 `scale-prestage-*`
+    copy itself and launches the Debug app minting "scale fixture · long note": 300 blocks, a long paragraph every 25th,
+    ≈ 105k characters unpaged with ids.
+  - `Tools/ScaleFixture/restore.sh <dir>` restores it at cleanup, cmp-verified.
+  - Its internal pgrep is the loose form: wait out any stranger's xcodebuild line, never edit the script.
+- **The grant:** claude-code · a wing · Home · Edit · Always.
+
+**The legs:**
+- **L1 — VX-254, a write proves itself.**
+  1. One turn has python write `src.json`: six strings, namely curly quotes and an em dash; "beliscou"; an NFD "é";
+     an emoji; a line with an embedded newline; a trailing space.
+  2. It then `create_note`s them as `blocks` in Home (the model transcribes them — the very failure under test) and
+     computes `hashlib.sha256(s.encode()).hexdigest()` of each source string.
+  3. It reports MATCH or MISMATCH per take against the reply's `sha256`.
+  4. A control: the digest of "beliscáu" against the "beliscou" take must MISMATCH.
+  - **Pass:** all MATCH and the control MISMATCHes.
+  - **Then:** `edit_take` one take, `add_take` a blank take (e3b0…), and `duplicate_note` the note. Each reply's digests
+    match the local ones, and the copy's equal the source's.
+- **L2 — VX-256, the big note in pages.**
+  1. One turn: `list_notes(wing_id: "")` finds "scale fixture · long note".
+  2. It reads it with `read_note(limit: 50)`, following `next_cursor` to the end.
+  3. It reports: pages, the block total against `block_count` (300), unique `block_id`s, and the largest page's character
+     count.
+  - **Pass:** every tool result came back INLINE — the stream-json shows no saved-to-file notice — and the total = 300.
+  - **Optional baseline:** one unpaged `with_ids` read in its own turn shows the spill.
+- **L3 — VX-256, `ids_only` verifies.** In the SAME turn as L2 (its texts in context), or with L2's texts saved by
+  python:
+  - `read_note(ids_only: true, limit: 100)` pages;
+  - per `take_id`, the reply's `sha256` against python's digest of the text L2 read.
+  - **Pass:** all 300 MATCH, every page inline.
+- **L4 — VX-261, a dropped call.**
+  1. Turn A (background, a unique scratch config path as its pgrep marker) is told: `create_note` "vx336 u7 dropped" in
+     Home, THEN run Bash `sleep 120`, then report.
+  2. The runner kills that process ~60 s after launch, so the reply never surfaces and the session is gone.
+  3. Turn B, a FRESH session under the same name: "you may have done something in Variorum in the last ten minutes; use
+     list_my_activity to say what landed".
+  - **Pass:** B reports `create_note` · allowed · target_kind wing, id "" · title "vx336 u7 dropped", then finds its id
+    with `list_notes`. The runner captures the note in the Library and the Activity line.
+- **L5 — VX-261, refused and own.**
+  1. Turn C: `read_note` on a made-up UUID (refused).
+  2. `list_my_activity(include_reads: true)` shows it refused with NO title, and shows L1–L4's acts.
+  3. The pane's Activity tab shows "claude-code checked its recent activity" in BOTH voices (captures `live/s/`, `live/t/`).
+- **Optional L6:** Deny then re-approve claude-code (the setup re-run binds the key), then `list_my_activity` lists
+  nothing from before.
+- **The Mac batch:** the suites reaching `MCPPaneCopy`, `activityLine`, `MCPToolFacts`, `MCPToolCatalog`,
+  `MintedBlockTakes`, `MCPDivideResult`/`MCPMergeResult` and `DivideResult` (grep at build time; U5's 31-suite list is the
+  starting set), `MCPWingFacesTests` included.
+- **Sizing and fallback:** ≈ 75 minutes; ask 95. Batch-only fallback: 20.
+- **The Castle heads-up:** if VX-306 has merged, merge main and rebuild before any launch (the coordinator asks at the
+  GO).
+
+### OWED (for the orchestrator)
+1. **The rulings on every fork above** before any build piece starts (the architect-phase "implementer proposes,
+   architect rules").
+2. **P-254-NUL, a builder check.** Does a take holding U+0000 survive the store byte-for-byte? GRDB reads TEXT back
+   through a C string. Pin it: the reply digest must equal the digest of `read_note`'s text.
+   - If it truncates, that is a latent door bug outside U7: ticket it (Bug · Suspected · MCP · Medium).
+   - The digest stays computed from the act's rows, and the description must then not overclaim.
+3. **U8's doc truth.**
+   - `MCPSession.instructions`' "Tools appear only for what they have shared" becomes untrue once `list_my_activity` is
+     listed with zero reach (F-261-2 (a)).
+   - The instructions (bound 3,000 at U8) should name paging, `sha256` and `list_my_activity` in one line each.
+   - The field guide's MCP chapter likewise.
+4. **MCPSpec at the merge:** contract lines for the digest (definition and the answering tools), paged and `ids_only`
+   `read_note`, and `list_my_activity` (own, the oracle rule, the era cut, title-less refusals).
+5. **The cap fact** (UNVERIFIED here): the live round records the measured inline-versus-file threshold. If 32,000 trips
+   it, P-VX256-1's number moves before the merge.
+6. **No ticket minted.** If F-261-6 is ruled (a), the idempotency token stays "not chosen, recorded only" (the brief).
