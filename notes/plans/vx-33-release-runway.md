@@ -31,7 +31,7 @@ units) are scope, not durations.
 | **VX-281** MCP settings pane & shared icon | the pane in tabs, the code block, the Library's shared icon | 4 | Opus / Opus | now |
 | **VX-282** Editor & notes fixes | backspace, the italics flicker, take panel, capture box, comments family | 9 | Opus / **Fable** (editor seam) | now |
 | **VX-283** Sidebar & Library polish | the Open list, Library polish, the red lint (trimmed at her 2026-10-14 triage) | 9 | Opus / Opus | in progress |
-| **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's doors and Index slice, VX-216 last | 15 | Opus / Opus | now |
+| **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's doors and Index slice, VX-216 last | 16 | Opus / Opus | now |
 
 Plus **her own track** (§4) and **the release itself** (§5).
 
