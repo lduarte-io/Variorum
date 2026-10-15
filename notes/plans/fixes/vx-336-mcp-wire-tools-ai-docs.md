@@ -172,7 +172,7 @@ guidance. Each unit's evidence is named before its spawn.
 | U8 — the AI's docs (LAST) | **PROVEN 2026-10-14 23:07–23:33** (U8 STAGE RUN). 66-suite batch 432/429, 0 failed; the red run exact on the old seed; Restore Tutorial minted a fresh guide (the old one in the Trash with 30 days); the chapter walked word for word in Study and Terminal; the instructions read from bytes at 2,969 with the link last; **U7c's RE-PROBE: all three pages INLINE** (71 blocks / 31,825 · the same · ids_only 115 / 31,751). The organization ask did the advice unprompted (a book with a tag rule + outflow, a summary note filed) but met two pre-existing wire truths → **U9** (VX-361, VX-362) |
 | U9 — wire truths from U8's round | **PROVEN 2026-10-15 00:57–01:12** (U9 STAGE RUN). 121-suite Mac batch 771/765, 0 failed; the Mac red exact (20 issues, the ten R/E cases); the phone red exact (5) and green 120/15 on one simulator; the real-client turn 6/6 from the bytes (VX-361: `tag_ids`/`tags` carry the outflow tag; VX-362: `apply_tag` → `changed:false`, the add refused in words; the import's collision gone; no `Refused:`/Swift case anywhere); the faces in both voices. Built `4ff629ad`…`e454a8ef` (U9 UNIT RECORD) |
 | LADDER | **CLOSED AT ROUND 2 (2026-10-15 ~02:00).** R1 (Fable xhigh): 0B · 1M (evidence, closed by U9's window) · 2m · 2n, no code fix. R2 (a fresh Fable xhigh): 0B · 0M · 1m · 3n, so no round 3 is earned. R2-1's fix (the Compare landing posture) goes to PHASE B's implementer with a pin; as the final round's fix it gets the orchestrator's line-by-line check |
-| CLOSEOUT | NOT-STARTED |
+| CLOSEOUT | PHASE A DONE (`93d707eb`…`d3f36598`); PHASE B BUILT, READY FOR THE WINDOW (`2317a67e`…`5c1a73bf`: main merged in by `fc6bf20b` after the recorded rebase slip; R2-1 pinned `65ba0704` + fixed `e919f576`; R2-2 `cf619bcc`; headless MCP 349/67 · core 2,872/333 · workbook 40/6; products `vx336-close`, `-red`, `-ios`). The closeout window (`vx336-close`, ~57 min, 75 asked) goes to a FRESH runner; then PHASE C |
 
 **No revert is in flight unless a unit's record says so.**
 
@@ -7167,3 +7167,34 @@ suites (one sim), dev store A1 first"`.
      deleted.
    - The R2-1 pin and fix go in the handoff's "how it was checked" line (round 2's one fix).
 5. **The top LIVE STATUS table** (the orchestrator's) still reads `| CLOSEOUT | NOT-STARTED |`. Not changed here.
+
+### THE ORCHESTRATOR'S LINE-BY-LINE CHECK OF R2-1's FIX (the final round's fix; no later round reads it — CLAUDE.md "Two reviews", 2026-10-15 ~02:45 MDT)
+
+`e919f576` changes ONE file (`CompareBoardView.swift`, +19/−1). Checked against R2-1's mechanism and the fix shape the
+orchestrator ruled.
+- **`peerSlots.didSet`** clears `landingPostureFor` only when a DEPARTED peer is one the landing named. `land` sets the
+  toggle and then arms (`relatedOnly = false; landingPostureFor = named`) BEFORE it replaces the columns. The columns
+  that replacement drops are filtered `!named.contains(departing)`, so they are never named and the round stays armed.
+  A named peer leaving later (the review's deleted-peer road) ends it. Correct.
+- **`relatedOnly.didSet`** clears on ANY set, ahead of its guard:
+  - her manual toggle ends the round (the fix's point);
+  - `land`'s own `relatedOnly = false` runs BEFORE it arms, so it clears only a previous landing's round, which is
+    correct (a new landing replaces the old);
+  - `adopt` disarms (`landingPostureFor = nil`) BEFORE its `relatedOnly =` write, so the clear finds nil.
+
+  No ordering hole.
+- **`teardown()`** clears it: the board going ends a round, unapplied. Correct.
+- **The doc comment** on `landingPostureFor` states the three endings. Nothing else changed; D-298-5's apply-once-in-adopt
+  path is untouched.
+- **The pin** (`65ba0704`): four tests, each meeting exactly one ending plus the review's whole story. Expected red on
+  `vx336-close-red`: 11 tests, 4 failed, 4 issues. That red, and the green on the final product, are the closeout window's.
+- **VERDICT:** R2-1's fix matches its finding line for line. The ladder is CLOSED.
+
+**The merge slip (PHASE B piece 1), recorded for her handoff.** An unpushed merge commit met the protocol's
+`git pull --rebase`, which flattened it: main's ten notes-only commits were replayed onto the branch under new hashes.
+- **Nothing pushed was rewritten and nothing was force-pushed.** The repair `fc6bf20b` is a real merge of `origin/main`,
+  so main is an ancestor again (checked: `git merge-base --is-ancestor origin/main HEAD`).
+- **The cost:** after the PR merges, main's history carries those ten notes commits twice (identical content). Removing
+  the copies would need a force-push, which is author-only, and none is proposed.
+- **PHASE C's rule:** push a merge of main with a plain `git push` (or `git pull --rebase=merges`), never a plain
+  `pull --rebase` over an unpushed merge.
