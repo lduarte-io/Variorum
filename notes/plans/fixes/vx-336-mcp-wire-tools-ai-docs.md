@@ -7369,3 +7369,67 @@ handoff (for form); `notes/SessionResiliencyProtocol.md`'s implementer section.
 | 10 | the handoff finished (D7's fills) | DONE (this commit) — the DRAFT line deleted; filled: the release (cut by this run, VX-283 not at its closeout; the notes are the CLOSEOUT BRIEF's 0.9.7 section; a short "The release (0.9.7)" section added), round 2's result with R2-1 in plain words, the closeout window's counts and the headless finals, the closing tickets (VX-366…VX-370) in the filed list, the closeout's A1 copy among the six, the kits' removal; **added at the brief's word:** the merge slip in plain words ("What to know"), and the filed-and-open tickets grouped by priority from the Tickets-minted table (VX-352…VX-370, VM-20) with the three it fixed (VX-361/362/363) moved under What shipped; MobileSoul's two older PL-53 rows noted. **Left marked for the post-merge fill:** «PR #N» (filled below once the PR opens), «sha», the release's «build N», the refresh's A1 «path» and the replaced app's «name» |
 | 11 | the PR opened (not merged): `git status` clean, `swift build` green, main an ancestor | DONE — before opening: `git status` clean; `git fetch` then `git merge-base --is-ancestor origin/main HEAD` **TRUE** (main still `ebd16909`); headless `swift build` **Build complete**, exit 0. **PR #166** https://github.com/lduarte-io/Variorum/pull/166 (`VX-336: MCP wire tools & AI docs`, base `main`), opened at `e60ceda4`, NOT merged (the orchestrator asks the coordinator). The handoff names it (this commit). One other PR is open on the repo: #165, the coordinator's own handoff branch (`coordinator-oct15-handoff`) — not ours |
 | 12 | the MERGE (orchestrator, at the coordinator's GO 15:31 MDT) | DONE — re-checked MERGEABLE · CLEAN at head `91e68bbd`, `origin/main` `ebd16909` an ancestor; `gh pr merge 166 --merge` → merge commit **`4f47720d`**; the post-merge fill (this notes commit on main): «PR #N» → PR #166 and «sha» → `4f47720d` at QUESTIONS #227's head, AppSpec §14's entry, the plan's banner, this record's STATUS and the top CLOSEOUT row, the handoff's line 3. Still owed: the release (0.9.7) under the coordinator's release window, the `/Applications` refresh, «build N» / the A1 «path» / the replaced app «name» in the handoff, cleanup, Linear. |
+
+## THE RELEASE BRIEF — 0.9.7 and the `/Applications` refresh (the orchestrator, 2026-10-15 ~15:45 MDT, after the merge)
+
+**Who runs it:** ONE fresh release runner (opus-implementer, xhigh), spawned by the orchestrator AFTER the coordinator's
+release GO and AFTER the orchestrator has run the GO's exact claim line itself. The runner never messages the
+coordinator; it reports to the orchestrator. Why it's this run's: the coordinator's overnight ruling (2) — the last
+merger cuts the release, and VX-283 had not reached its closeout; her overnight word authorizes the release and waives
+the notes review (*"write notes on what was updated (I don't have to review those notes, it's fine), and push a release
+to the website so I can try the new things out tomorrow morning"*). 0.9.7 carries VX-336 alone (the only code merged
+since 0.9.6's bump `9cf3758e`; PR #164 is notes-only).
+
+**Where:** the MAIN checkout `~/dev/variorum` on `main` (releases are cut from main; the bump commit is this run's one
+sanctioned code-side commit on main). The site repo: `~/dev/stargazing.tech/stargazing-tech` (nested folder), whose
+runbook `notes/variorum-releases.md` governs the site side, DMG FIRST.
+
+**Rules, every step:** zero-instance check `pgrep -lx Variorum` before EVERY act that builds, installs or touches a
+store — any instance ABORTS the step (report and stop; never quit or kill anything). Main is FROZEN from the bump commit
+until release.sh has stamped: no other commit on main in that span (the build number is the commit count; the stamp
+assertion refuses on drift). Never delete anything that isn't yours. Nothing launched — not the Release app, not the
+Debug app. No real-store MCP calls. No field-guide re-seed. Synchronous foreground waits only; records as you go.
+
+**Steps:**
+1. **Preflight:** `git -C ~/dev/variorum status` clean apart from `default.profraw`; `git pull --ff-only`; HEAD is
+   `origin/main`. Move `~/dev/variorum/default.profraw` aside to `/tmp/default.profraw-vx336-<UTC stamp>` (NEVER delete it —
+   the coordinator's ruling (4)). Re-check the tree is clean.
+2. **The bump commit:** MARKETING_VERSION `0.9.6` → `0.9.7` in BOTH app configurations of
+   `App/Variorum/Variorum.xcodeproj/project.pbxproj` (Debug `io.lduarte.Variorum.debug` and Release `io.lduarte.Variorum`
+   — today's lines ~789 and ~825; the `1.0` lines are other targets, leave them). Add
+   `App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-0.9.7.md`, copied byte-for-byte from
+   `/private/tmp/claude-501/-<home>-dev-variorum/81f24e90-2906-476a-9fa1-94a6c2676eb5/scratchpad/ReleaseNotes-0.9.7.final.md`
+   (each bullet on ONE line — the VX-343 parser trap; a Feedback section, 0.9.6's form). Commit both in ONE commit, no
+   trailer, message in 0.9.6's form (`9cf3758e`): "0.9.7: release notes (written at her overnight delegation, review
+   waived — "I don't have to review those notes, it's fine") + MARKETING_VERSION 0.9.6 -> 0.9.7 (both app
+   configurations). The release carries VX-336." Push.
+3. **The release:** zero instances; `Tools/Release/release.sh --version 0.9.7` from `~/dev/variorum`, foreground,
+   logged to a file. It may ask her Keychain once (make-appcast) — if it blocks on a prompt you can't answer, stop and
+   report. On a failure, stop and report the exact output; a notes change after the stamp means a FRESH run.
+   Artifacts land in `~/Library/Developer/Variorum/Releases/0.9.7/` (+ the feed dir). Record the build number
+   (CFBundleVersion), the stamped SHA, the DMG path and its sha256.
+4. **The site, DMG first** (the runbook's "Each release" order): `npx wrangler r2 object put
+   variorum-downloads/variorum/Variorum-0.9.7.dmg --remote --file <the feed DMG> --content-type
+   application/x-apple-diskimage --cache-control "public, max-age=31536000, immutable"` → `Tools/Release/verify-published.sh
+   dmg <the feed DMG>` PASS (a transient per-POP 404 right after upload: wait and re-verify, NEVER re-upload) → copy the
+   feed's `appcast.xml` to `public/variorum/appcast.xml` → bump `src/data/variorum.json` (`version` 0.9.7, `dmg`
+   `https://dl.stargazing.tech/variorum/Variorum-0.9.7.dmg`) → `npm run build && npm run deploy` →
+   `Tools/Release/verify-published.sh appcast` PASS → commit (appcast + variorum.json) and push in the site repo. THAT repo's
+   commits DO carry the attribution trailer lines (its own convention). Confirm `https://stargazing.tech/variorum/mcp`
+   still answers 200 (cache-busted, `-L`).
+5. **The `/Applications` refresh (the coordinator's rule card, ruling (2)):** zero instances. (a) A1 safety copy of her
+   REAL store + key files FIRST: `~/Library/Containers/io.lduarte.Variorum/Data/Library/Application Support/Variorum/`'s
+   `variorum.sqlite` (+ `-wal`, `-shm`), `store.sqlite`, and every `variorum-keys*.json` into a new
+   `Backups/safety-copies/vx336-refresh-<UTC stamp>/` beside them; `cmp` every file against its source (all SAME); if the
+   A1 can't be taken, STOP and hold for her. (b) Install the EXACT build the website serves: mount the feed DMG you
+   verified in step 4 (read-only, `hdiutil attach -nobrowse -readonly`), copy `Variorum.app` to a staging name beside the
+   old one (`/Applications/Variorum-0.9.7-staged.app`), detach. `codesign --verify --deep --strict` and `spctl -a -vv` on
+   the staged app; its CFBundleShortVersionString is 0.9.7 and CFBundleVersion is step 3's build. (c) zero instances again;
+   move the OLD `/Applications/Variorum.app` to the Trash (Finder's trash via `osascript -e 'tell application "Finder" to
+   delete POSIX file "/Applications/Variorum.app"'`, or `mv` into `~/.Trash/` under a dated name), then rename the staged app
+   to `/Applications/Variorum.app`. (d) Verify again: codesign + spctl on the installed app, its version/build, and the
+   store files untouched (cmp SAME against the A1). Nothing launched.
+6. **Report** (to the orchestrator, one block): the bump commit SHA; the build number and stamped SHA; the DMG sha256;
+   both verify-published PASS lines; the site commit; the mcp page's status; the A1 path; the replaced app's name in the
+   Trash; codesign/spctl results; `pgrep -lx Variorum` empty at the end; `default.profraw`'s new path. Then STOP —
+   no further commits on main (the orchestrator fills the handoff).
