@@ -376,7 +376,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **STOPPED — Q11 not green** (22:05–22:08): batch 413, 2 red — VX-245's lint and the Starred pin (0.5 pt short on HEAD — the same code R-F ran green: FLAKY); R-G red as expected but uninformative. A new trace is needed — a fresh successor's (leads in Q11). Every other U1b pin green. F-3 → VX-359 (U3 rider). |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **U1d (her two memo rulings: follow only on her acts; the fade reshaped) — READY FOR STAGE** (≈15 min): the 96-suite batch, the mount suite ×5, R-I and R-J (prebuilt), the restore — the U1d section's LIVE STATUS. Then the re-walk of R2–R6. |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **READY FOR STAGE — the closing window** (≈15 min; the U3 section's Q6): the first window's batch green but for two of my own pins (test defects, fixed headless — test files only); R-ALL prebuilt in `vx283-u3-revert` and the tree restored; `vx283-u3` holds the current products for the walker |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -2167,8 +2167,23 @@ session (first line):** any stage work until the orchestrator hands over a claim
   offscreen (0.8): DONE (`74a7d787`) — replica green headless; the run PENDING.
 - D3 — the modifier wired to both (`onScrollPhaseChange`; the DEBUG phase seam) + the mounted pins: DONE (`74a7d787`)
   — headless `build-for-testing` green (`DerivedData/vx283-u1d`, no warning in a touched file); the runs PENDING.
-- D4 — the reverts R-I and R-J, each named here BEFORE it is applied, prebuilt into their own DerivedData and restored:
-  IN-PROGRESS — R-I next (the tree is clean at the commit after this record).
+- D4 — the reverts R-I and R-J, each named below BEFORE it was applied: DONE — each patch applied, built
+  (`DerivedData/vx283-u1d-ri`, `-rj`: TEST BUILD SUCCEEDED), restored by `git checkout --`; **no revert is in the tree**
+  (`git diff` empty). Patches: `notes/plans/vx283-screens/u1d/reverts/R-I.patch`, `R-J.patch` (gitignored).
+  `DerivedData/vx283-u1d` holds HEAD's products (`74a7d787`'s code).
+- D5 — **READY FOR STAGE** (≈15 min), the script `notes/plans/vx283-screens/u1d/window.sh` (gitignored), from
+  `App/Variorum/`, in order: (0) `pre` — strict pgreps, the Debug prefs exported, the dev store's three files copied
+  to `u1d/store-before/<UTC>/` with zero dev instances; (1) `batch` — `xcodebuild … -derivedDataPath
+  DerivedData/vx283-u1d test-without-building` with one `-only-testing:VariorumTests/<Suite>` per line of
+  `u1d/batch-suites.txt` (96 suites: every top-level suite of the 32 test files referencing `SidebarLayout|SidebarView|
+  SidebarGeometry|SidebarSectionWindow|RootView(` + `NoLiteralColourTests`, `ChromeLineLimitTests`,
+  `CapabilityRegistryTests`; the new `SidebarSectionFollowTests` among them) — expected ALL green, the "Test run with
+  N tests" line and its skipped lines recorded; (2) `mount` — `SidebarSectionWindowMountTests -test-iterations 5`,
+  expected 5/5 green (the two U1c harnesses skipped); (3) `ri` — R-I's products, `SidebarSectionFollowTests` +
+  `SidebarSectionWindowMountTests`, expected RED exactly the three R-I names below; (4) `rj` — R-J's products,
+  `SidebarSectionWindowRuleTests` + `SidebarSectionWindowMountTests`, expected RED exactly the three R-J names below;
+  (5) `restore` — the store copied back and `cmp`-verified, prefs diffed (added keys deleted by hand, `defaults
+  import`, re-export, diff clean), castle-W1 untouched; the two revert DerivedData folders deleted; release.
 
 **THE TRACE (R6 — U1c's tip, `App/Variorum/Variorum/…`).** Every road that moved a section by itself was gated by
 nothing but "an offset-only reading asks nothing": `Features/Library/SidebarSectionWindow.swift`'s geometry action
