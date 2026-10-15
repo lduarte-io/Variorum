@@ -364,7 +364,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b IN PROGRESS — the walk ran (W0–W11 hold); the orchestrator's eye sent F-1 (the current row cut) · F-2 (the edge fade, P-U1-6) · F-3 (the doubled separator) to U1b: F-3 recorded and left (older than U1), F-1/F-2 headless work next (see "U1b — the fix leg"). U1's batch: 1326 tests, 1323 green · 1 skipped · 2 red (P7 fixed headless — its `CapabilityRegistryTests` run rides U1b's window; `BookCollectingDoorsTests:101` red on main) |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **READY FOR STAGE** (≈25 min — the 92-suite batch + R-D/R-E prebuilt; see "U1b — the fix leg") — F-1 + F-2 built and pinned headless (`c3140a92f`, `871d86982`), F-3 recorded and left (older than U1); then the re-walk (W2/W3/W4/W5 scrolled, 20 rapid opens, W9). U1's batch: 1326 tests, 1323 green · 1 skipped · 2 red (P7 fixed headless — its `CapabilityRegistryTests` run rides U1b's batch; `BookCollectingDoorsTests:101` red on main) |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -866,11 +866,12 @@ lines — below); any stage work until the orchestrator hands over a claim.
   the reveal on a current-row change, on mount and on every viewport-height change; the DEBUG oracles) + the mounted
   pins (`SidebarSectionWindowMountTests` ×6): DONE (this commit) — headless `build-for-testing` green; the runs and
   the reverts PENDING the stage window. The full write-up (trace, build, pins, PROVISIONALs) lands with Q3.
-- Q3 — headless `build-for-testing` green (HEAD's products in `DerivedData/vx283-u1`), then the reverts' products
-  PREBUILT HEADLESS so the stage window only runs tests: **REVERT IN FLIGHT (headless, no stage) — R-D then R-E,
-  each `git apply notes/plans/vx283-screens/u1b/reverts/R-?.patch` → `build-for-testing` into
-  `DerivedData/vx283-u1b-rd` / `-re` → restored by `git checkout -- <file>` → `git diff` empty.** If this line still
-  reads IN FLIGHT, check `git diff` first. Then READY FOR STAGE.
+- Q3 — headless evidence: DONE. `build-for-testing` green for HEAD (`DerivedData/vx283-u1`, the Q2 code) and for
+  both reverts, PREBUILT so the window only runs tests: R-D's products in `DerivedData/vx283-u1b-rd`, R-E's in
+  `DerivedData/vx283-u1b-re` (each patch applied, built, restored by `git checkout --`, `git diff` empty — **no revert
+  is in the tree**). The patches: `notes/plans/vx283-screens/u1b/reverts/R-D.patch`, `R-E.patch` (gitignored).
+- Q4 — **READY FOR STAGE** — the window below (≈25 min): the batch, the two prebuilt reverts, the restore. The
+  screenshot re-walk is a fresh walker's, after it.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
@@ -887,6 +888,135 @@ lines — below); any stage work until the orchestrator hands over a claim.
   adjacent. So the double has shown on `main` since 2026-07-30.
 - **For the orchestrator:** the fix is one line (delete `:1023`'s trailing `Divider()`; the group boundary keeps
   its own separator) — a ticket's, not this leg's.
+
+**F-1 — THE TRACE (U1's tip `358f4e04`, `App/Variorum/Variorum/…`):**
+- The Open list's only reveal was `Features/Library/SidebarView.swift:844-849` — `.onChange(of:
+  workspace.openNotes.recency.first) { proxy.scrollTo(newest) }`: anchor nil, i.e. "the minimum scroll that makes
+  the row wholly visible", computed against the viewport standing WHEN the scroll is processed. Nothing ever ran it
+  again.
+- That viewport is `.frame(maxHeight: openListMaxHeight)` (`:824`), a pure function (`:284-288`) of two MEASURED
+  `@State` values (`columnScrollHeight`, `openListTop` — `:219-220`) that `onGeometryChange` writes (`:336-338`,
+  `:835-837`), i.e. a layout pass AFTER the change that moved them, and of `rowHeight` (`:277-280`), itself a function
+  of the measured column height and the row count.
+- Opening a note from a place inserts the rail (`:310-312`): `openListTop` grows by the rail's whole group, and the
+  fit test gains seven rail rows (`:263-268`) — in the walk's 1010-pt window that flips the column's pitch 30 → 24
+  (the O-1 captures' rows are 24 pt) — all under the rail's 0.22-s animation (`:359`). So the list's viewport changes
+  height AFTER the reveal was issued, and a scroll view that changes height keeps its top: a row revealed at the
+  bottom of the taller, pre-settle viewport is cut by the difference, and stays cut. Which pass the scroll lands in is
+  timing — hence once in ~40.
+- A second road to the same end, DETERMINISTIC: back to the note she was already in (⌥⌘[ to the Library, then
+  back). `OpenNotes.opened` (`Workspace/WorkspaceNavigation.swift:318-320`) leaves `recency.first` where it is, so
+  the reveal never runs — while the Library's taller list (no rail) has clamped the offset, and the rail's return
+  shrinks the viewport under the row: hidden. A third: on mount (launch, a new window) `onChange` never fires for the
+  initial value, so a restored strip's current note below the fold opens hidden.
+- Starred had the same class: a minimal `scrollTo` on a selection change (`:558-564`), its viewport `7.5 × rowHeight`
+  (`:554`) shrinking when the pitch flips.
+- **Headless corroboration (no stage: a standalone probe process with an offscreen, never-shown window, built in the
+  session scratchpad — no app, no store, no prefs):** `onScrollGeometryChange` reports once initially (old = new)
+  and on every change; `scrollTo(id, anchor:)` lands the row's top at `y × (viewport − rowHeight)`; a viewport that
+  shrinks keeps its offset. With the OLD reveal, the current row (row 18 of 20) went from wholly visible at the bottom
+  edge to wholly hidden after a 251 → 191-pt shrink (window 319…510, the row at 540…570), and stayed hidden after a
+  grow-then-shrink (the Library round trip: window 90…341); with the NEW window every step ended with the row clear
+  of the fades (e.g. 394…585 after the shrink, 334…585 after the round trip).
+
+**F-1 + F-2 — THE BUILD** (`c3140a92f` pure, `871d86982` view):
+- `Core/Views/SidebarLayout.swift` (pure): `ScrollWindow` (offset · viewport · content), `EdgeFades`,
+  `edgeFadeRows` = 0.5, `edgeFades(_:depth:)` (each edge as deep as the content beyond it, capped at the half row;
+  nothing below half a point), `revealAnchor(row:rows:rowHeight:window:depth:)` (nil when the row stands wholly in
+  view clear of both fades; else the `UnitPoint.y` that lands it one fade's depth inside the edge it was beyond —
+  none past the first row or the last).
+- `Features/Library/SidebarSectionWindow.swift` (NEW — one modifier for BOTH sections, so they cannot drift):
+  `onScrollGeometryChange` → the window (held by reference: a scroll's frames re-render nothing) and the fades
+  (state: re-renders only when they change); the reveal runs when OWED (mount, a current-row change) or when the
+  viewport's height changed; `onChange(of: current)` makes it owed and asks at once from the window as last read.
+  The fade is an OVERLAY painted from `tokens.room` (the column's own background): no hits, hidden from
+  accessibility, rows never move.
+- `Features/Library/SidebarView.swift`: Starred and the Open list apply it inside their `ScrollViewReader`s (Open's
+  `current` = the selection's note when it has a row, `currentOpenRow`; Starred's = the starred item the selection
+  names); the two old reveals are gone; DEBUG oracles — each section's window from its OWN `onScrollGeometryChange`
+  (independent of the modifier, so a revert still measures), and the fades the modifier drew (`SectionDraw.window` /
+  `.fades`).
+- **Consequences, stated:** (1) the Open list's reveal follows the CURRENT row, not the newest — every open takes the
+  pane's focus, so the newcomer is the current row; a ✕ on a newest row that is NOT the current one no longer scrolls
+  the list to the next-newest (it did; it pulled the current row away). (2) The current row is revealed on mount.
+- **PROVISIONAL P-U1b-1 — the reveal's air.** With F-2's fades, a minimal reveal would leave the current row under
+  the bottom fade, half washed out; so it lands one fade's depth (half a row) inside an edge that has more beyond it
+  (none at the list's ends). Options: (a) a fade's depth of air [built]; (b) the old minimal reveal, under the fade;
+  (c) a whole row of air.
+- **PROVISIONAL P-U1b-2 — which height changes re-reveal.** Every viewport-height change re-reveals the current row,
+  including a window resize after she scrolled the current row out of view (a scroll of hers is never pulled back —
+  a scroll changes no height). Options: (a) every height change [built — "wholly in view after … a height change",
+  the brief]; (b) only when the row was in view before the change; (c) only the app's own changes (the rail, the
+  pitch), never a resize.
+- **PROVISIONAL P-U1b-3 — the fade eases in.** Each edge's depth is the content beyond it, capped at the half row,
+  so the top fade grows over the first half row of scroll instead of popping in whole. Options: (a) eased [built];
+  (b) full depth the moment anything lies beyond; (c) full depth with an animated arrival.
+- **PROVISIONAL P-U1b-4 — overlay, not the strip's mask.** The Bookcase strip's fade (`BookcaseStrip.names`) is an
+  alpha MASK over content that rests on the room; the sidebar's is the same gradient PAINTED FROM `tokens.room` as an
+  overlay — it reads identically (the room is what a mask would reveal) and draws from the voice's room token
+  directly, with no `.black`/`.clear` alpha stops and no reliance on a shape's default fill. Options: (a) the room
+  overlay [built]; (b) the strip's mask, verbatim; (c) a shared fade helper for both (touches the Bookcase — another
+  surface).
+
+**Pins (all PENDING the window):**
+- `SidebarSectionWindowRuleTests` ×9 (pure): the half-row depth; the edges fade only where more lies beyond; the
+  fade eases in; a window holding everything fades nowhere; a clear row is left alone; a row under the bottom fade is
+  revealed clear of it; first/last land on the edges; **the reveal is a fixed point from every window** (every row,
+  three window sizes, every 7 pt of offset: lands clear, and a second ask moves nothing); nothing before a reading.
+- `SidebarSectionWindowMountTests` ×6 (a mounted column bound to the workspace exactly as `RootView` binds it):
+  `returningToTheNoteYouWereInRevealsItsRow` (**RED ON OLD expected**, R-D — the deterministic road);
+  `aShorterListKeepsTheCurrentRowInView` (**RED ON OLD expected** under R-D AND under R-E alone — the mechanism);
+  `aNewNoteOpenedFromThePlacesLandsWhollyInView` (the walker's road — exact-behaviour; the old code raced, so R-D's
+  result is recorded as observed, not claimed); `aCloseNoteLandingRevealsTheNextRowClearOfTheFades`
+  (exact-behaviour — the old minimal reveal reached that row too, so GREEN under R-D is expected: not a red-on-old
+  pin); `theOpenListFadesOnlyTheEdgesWithMoreBeyond` and
+  `starredFadesWhereMoreLiesBeyondAndNowhereWhenItHoldsEverything` (F-2's geometry oracle — **RED under R-D**, no
+  fade recorded).
+
+**THE STAGE WINDOW (≈25 min; run in this order, from `App/Variorum/`; the record flips per step):**
+0. *Preconditions.* `pgrep -lx Variorum`; `pgrep -lf "MacOS/Variorum$"` (discriminate by path; never touch a
+   `/Applications` instance). `defaults export io.lduarte.Variorum.debug
+   notes/plans/vx283-screens/u1b/prefs-before.plist`. With ZERO dev instances, copy `variorum.sqlite{,-wal,-shm}`
+   from the dev container's `Variorum-dev/` into `notes/plans/vx283-screens/u1b/store-before/<UTC stamp>/` (never the
+   key files, `Backups/`, `Previous Libraries/`; castle-W1 untouched).
+1. *The batch* — `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx283-u1
+   test-without-building` + one `-only-testing:VariorumTests/<Suite>` per line of
+   `notes/plans/vx283-screens/u1b/batch-suites.txt` (92 suites: every top-level suite of the 31 test files that
+   reference `SidebarLayout|SidebarView|SidebarGeometry|SidebarSectionWindow|RootView(`, plus `NoLiteralColourTests`,
+   `ChromeLineLimitTests` and `CapabilityRegistryTests` — P7's pending run rides here). The 92:
+   AscentDoorTests AscentRoutingTests BookAnchorTests BookCarryTests BookChooserOrderTests BookNoteBoxSubjectTests
+   BookPanelActingTests BookPanelBrainTests BookPanelDeclarationTests BookRowMenuTests CapabilityRegistryTests
+   CaptureFocusReattachTests CaptureHostsUndoFilingTests CaptureTourFocusTests CaptureUndoHistoryTests
+   CaptureUndoSyncTests ChromeLineLimitTests ContextBarTests CreationTargetTests DebugOracleOwnershipTests
+   DebugOracleScopingTests DebugOracleTwoWindowTests DivergeDoorTests DragTypeDeclarationTests IAAndTrashShapeTests
+   IndependentWorkspaceTests MultiBookEditNoteRuleTests MultiBookEditNoteTriggerTests NavigationDoorsTests
+   NavigationHistoryTests NoLiteralColourTests NoteBoxCompositionTests NoteBoxCopyTests NoteBoxGeometryTests
+   NoteBoxHeightTests NoteBoxSlotTests NoteBoxStateTests NoteDeleteConfirmEdgeTests NoteDeletionActTests
+   NoteDeletionDeclarationTests NoteDeletionNavigateAwayTests NoteOnlyWindowTests OneTimeCodeAutoFillTests
+   OpenListCloseDoorTests OpenListCloseShellTests OpenListHeightTests OpenListLandingTests OpenListLayoutMountTests
+   OpenListRowCloseDoorTests OpenNotesTests PagedAnchorReportTests PaneBookBlurTests PaneFocusCatcherTests
+   PaneHeldModeTests PaneLayoutTests PaneMountTests PaneMountWindowTests PaneSplitDoorTests PaneSplitModelTests
+   PaneUnmountTests PostDetailModeMemoryTests PostDetailRoutingTests QuickEntryLaunchFocusTests ShellChromeTests
+   ShellLandingDoorTests ShellLandingMountTests ShellLandingRuleTests SidebarLayoutTests
+   SidebarSectionWindowMountTests SidebarSectionWindowRuleTests SidebarSmokeTests StarActingTests
+   StarDeclarationTests StarTargetingTests StarredScrollLayoutTests StarredScrollMountTests TourEndCardAsideGateTests
+   TourEndCardTests TourEngineTests TourEntryTests TourPoolTuckTests TourScriptTests TourSpotlightTests
+   TutorialCurrencyTests TwoWindowMountTests WindowRegistryTests WindowUnmountTests WingSwitcherTests
+   WorkspaceCloseActTests WorkspaceModelTests WorkspaceNamingTests WriteTakesPanelTests.
+   `pipestatus` checked; the "Test run with N tests" line AND its skipped lines recorded. (The products are the Q2
+   code, identical to HEAD; `test` instead of `test-without-building` would only re-check them.)
+2. *R-D (prebuilt — the pre-U1b reveals in BOTH sections, U1b's oracles kept)* — `… -derivedDataPath
+   DerivedData/vx283-u1b-rd test-without-building -only-testing:VariorumTests/SidebarSectionWindowMountTests`.
+   Expected RED: `returningToTheNoteYouWereInRevealsItsRow`, `aShorterListKeepsTheCurrentRowInView`,
+   `theOpenListFadesOnlyTheEdgesWithMoreBeyond`, `starredFadesWhereMoreLiesBeyondAndNowhereWhenItHoldsEverything`;
+   GREEN: `aCloseNoteLandingRevealsTheNextRowClearOfTheFades`; observed: `aNewNoteOpenedFromThePlacesLandsWhollyInView`.
+3. *R-E (prebuilt — only the viewport-height re-reveal removed)* — the same with `DerivedData/vx283-u1b-re`.
+   Expected RED: `aShorterListKeepsTheCurrentRowInView`; observed: `returningToTheNoteYouWereInRevealsItsRow` (it
+   turns on which callback lands first); the rest GREEN.
+4. *Release.* The dev store copied back with zero dev instances and `cmp`-verified per file; prefs `defaults import`
+   → delete any key the suites added → re-export → diff against `prefs-before.plist`; `Tools/stage release`; the
+   one-line release report. (The known red `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` is VX-115's
+   and not in this batch.)
 
 ## Ladder
 
