@@ -377,14 +377,16 @@ trailer of any kind.
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN — awaiting U2's walk for P-U1e-1** (the fade ramp rides U2): U1 built + walked; U1b/U1c fix legs; U1d (her memo rulings) window GREEN (434/96, R-I/R-J red as named, 01:44–01:50) and re-walk HOLD on R0–R3, R5–R8 (R6 her scroll never pulled back); R4's 7–9-pt slice → P-U1e-1 built in U2's leg, verified by U2's window + walk. |
-| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **BUILT, READY FOR STAGE — the folded claim `vx283-u2`** (test part: the 144-suite batch, two mount suites ×3, R-K/R-N; SEAM; one walk with U3's W2). PENDING: every pin's run, the reverts, the walk (the ladder ran ahead — R1-2). |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN** (closing window R-ALL red as named; walk HOLD). **U3b (P-U3-5) BUILT, READY FOR STAGE in the folded `vx283-u2` claim** (103-suite batch, R-S, then W2's re-walk). PENDING: U3b's run + W2. |
+| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **TEST PART GREEN** (claim `vx283-u2` 15:31–15:50): batch 722/144 with only VX-115 red; the mounts green ×5; R-K exactly 16 red; R-N exactly 4 red. **NEXT: the walk D1–D7** (a fresh Opus at xhigh) after vx-336's 0.9.7 window. |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's window (15:41–15:50): batch 511/103 with ONE real red — the closed-panel sweep still flips in a band (Terminal 940–960, Study 840–880: sort states two lines, typed/empty-again one); R-S six red as named (the closed cell red on both sides). **U3c — TRACE-FIRST leg** (a fresh implementer, the ruling below); D8 (W2's re-check) waits for it. |
 | Ladder | `fable-reviewer` at xhigh (her word, superseding opus at max), fresh per round, cross-model | **ROUND 1 DONE** (tip 448f9450; findings in the Ladder section, `9ef6fba3`): 0 BLOCKER · 0 MAJOR · 2 MINOR (R1-1 this table — fixed here; R1-2 sequencing — the windows owed) · 4 NIT (R1-3…6 → the implementer). Round 2 re-reviews the fixes + the U2/U3b window results. |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
 
 ## Stage traffic log (oct13coordinator protocol)
 
 *(The orchestrator appends each REQUEST / READY / GO / RELEASE here.)*
+
+- 2026-10-15 15:32 GO `vx283-u2` (the coordinator; HID idle 3 h, her word "Now, I'm off the Pro"). 15:31:45 claimed (95 min). 15:50:46 RELEASED at the SEAM — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched"; the stage to `vx336-release` (0.9.7). REQUEST sent: `vx283-walk` (≈55 min) after it.
 
 ## Unit records
 
