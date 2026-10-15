@@ -6461,7 +6461,7 @@ states (below).
 | # | item | state |
 |---|---|---|
 | 1 | `notes/MCPSpec.md` in-branch: the bound ≤3,000, the link, a contract line + pointer for every new surface; AppSpec §12 checked | DONE (this commit) — ### ITEM 1 below; AppSpec §12 UNCHANGED (argued there) |
-| 2 | the QUESTIONS bundle draft (D1) | NOT-STARTED |
+| 2 | the QUESTIONS bundle draft (D1) | DONE (this commit) — D1 below (#227 unless taken) |
 | 3 | the AppSpec §14 draft + the roll + the finals ledger text (D2, D3) | NOT-STARTED |
 | 4 | the master plan draft: retire VX-336's in-flight row only (D4) | NOT-STARTED |
 | 5 | the MOBILE PARITY draft (D5) | NOT-STARTED |
@@ -6517,3 +6517,140 @@ oracle-clean); "a book rule an AI writes BELLS" — untouched; "the shared icon 
 VX-330 added no read; "`show_in_app` moves things only while Variorum is frontmost and never queues" — the compare
 landing's router clears keep it unqueued. §9's lines are untouched too (`importBook`'s new parameter defaults to her
 doors' full guard).
+
+### CLOSEOUT DRAFTS (exactly as they will land at PHASE C; each anchor quoted)
+
+*(Numbers are the next free ones on main at `ebd16909`: QUESTIONS **#227**, MobileSoul **PL-56**. VX-283 is live and may
+merge first; PHASE C re-reads main and renumbers every draft, and MCPSpec's one "#227", if a sibling took it — D9.)*
+
+#### D1 — `notes/QUESTIONS.md`, the bundle (a new section at the end of the file; #227 unless taken)
+
+Anchor: after the last line of the file (on `ebd16909`, the VX-246 section's "Status: open — your eye; the handoff's
+checklist leads with this bundle."), one blank line, then:
+
+> ## VX-336 — Run: MCP wire tools & AI docs (2026-10-15)
+>
+> #227 — **THE VX-336 RATIFY BUNDLE (merged 2026-10-15, «PR #N», merge commit «sha»; the binding record is
+> `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` — her rulings during the run, the ORCHESTRATOR'S PROVISIONAL
+> RULINGS, each UNIT RECORD's PROVISIONALs with their options and the orchestrator's rulings on its forks, THE LADDER;
+> your handoff `notes/handoffs/vx-336-handoff.md`).** Built through the evening and the night under your away-mode answer
+> (*"Rule provisionally, continue"*) and your overnight word (*"rule provisionally overnight in my absence and leave me a
+> handoff in the morning"*). Each was built as stated below, with a line to reverse it.
+> - **The ones most worth your eye:**
+>   - **Two pre-launch calls, yours to make:** **VX-363** — an AI could learn the name of a book it can't read by
+>     importing a book with the same name. Fixed in this run; filed High. Is it Pre-launch? · **VX-357** — text holding
+>     the invisible character U+0000 is stored cut off at it, on every door (yours and the AI's), and the AI's new
+>     fingerprint then vouches for the whole text. Not fixed (Todo, Medium). Is it Pre-launch?
+>   - **P-VX311-2 — where an AI's duplicate lands, and who may make one.** As built: like your Duplicate as Version, the
+>     copy lands in no book, in the note's own wing's Pool, so the AI needs Read on the note and Write new on the whole
+>     wing; an AI whose Write new reaches only a book can't duplicate (it asks you for the wing). Options: (b) an
+>     optional `book_id` that also files the copy into that book at Write new (no door of yours does that today);
+>     (c) the copy joins every book the original is in (not your door; an owned book would refuse or fork).
+>   - **P-VX255-1 — "at the end" for `insert_blocks`.** As built: with Write new an AI adds paragraphs only at the very
+>     end of a note, by giving no anchor at all; naming any block, even the last one, needs Edit. Your ruling names a
+>     place ("add blocks at the end"), the rule is decided before the note is read, and it never flips while you type
+>     new paragraphs at the end. Option: (b) naming the note's current last block also counts as the end at Write new.
+>   - **P-VX362-1 — the new refusal sentences you may see, on the Mac and the phone** (they replace raw dumps like
+>     "Refused: alreadyInReading(…)"): "That note is already in this book." · "This book is at its note limit." · "That
+>     comment is already back." · "A chapter needs a name." · "That note isn't there any more — it may have just been
+>     deleted." · "That isn't a book — a gathering shows the notes its rule matches and holds none of its own." · "That's
+>     already a book — only a gathering binds into one." · "That tag isn't there any more — nothing changed." · "That
+>     block is already in a note — nothing changed." (and a block not in its note speaks the existing "not placed"
+>     sentence). The first two and the bind sentence are your own doors' words already. And `apply_tag` on a tag the
+>     note already wears now answers "done, nothing changed" (`changed: false`): no undo entry, no confirmation line, the
+>     Activity line as for any landed act, and a once grant spent as by any landed call (your rulings don't say; this
+>     follows the door's rule for every other act that changes nothing). Options: (b) your VX-234 pass rewords any of
+>     these; (c) a worded refusal for the second `apply_tag` instead ("That note already wears the tag … — nothing
+>     changed.") — set aside, since your seven tag doors treat it as done; (d) the not-shared sentence for the "isn't
+>     there any more" class — set aside, since every such refusal follows a decision that allowed the target.
+>   - **P-VX256-1 — how big a page of a long note is.** Your first real-client round showed a page ended by 32,000
+>     characters of TEXT came to about 65,000 characters of answer, which Claude Code saves to a file instead of
+>     reading. Re-ruled and rebuilt: a page ends at `limit` blocks or before the WHOLE ANSWER would pass 32,000
+>     characters (all three re-probes then arrived whole: 71 blocks · 71 · 115 with `ids_only`). Options: (b) a higher
+>     bound nearer the measured limit (e.g. 40,000: fewer pages, `ids_only` pages close to the client's default);
+>     (c) one bound for prose and another for `ids_only`. Its four edges, each built as (i): **e1** the first page
+>     always carries its first block, even when the note-wide lists alone fill it ((ii) a first page with no block;
+>     (iii) the note-wide lists on a page of their own) · **e2** characters are counted as UTF-16 units, what the
+>     client counts ((ii) Unicode characters, looser on emoji; (iii) UTF-8 bytes) · **e3** old commits' text rides
+>     newest first until the first that doesn't fit ((ii) keep scanning for smaller older ones) · **e4** an asked-for
+>     commit too large for its page's room refuses with "…isn't a commit of a take on this page", and rides where its
+>     block starts a page ((ii) always keep it, the page then past the bound; (iii) as (i), with words naming the cursor
+>     to ask from). A finding, no change: no page can hold 200 blocks under this bound (about 150 at the smallest), so a
+>     `limit` above about 150 never ends a page.
+> - **Labels and lenses (VX-267, VX-253):**
+>   - **P-VX253-1** — the per-block picks your ruling names keep the wire's existing name, `take_ids` (now optional).
+>     Options: (b) rename them `picks`; (c) accept both names.
+>   - **P-VX253-2** — a lens label that no take of the note wears refuses ("No take in this note is labelled … — nothing
+>     was saved."), so a typo never leaves you a lens a Suggest client can't delete. Options: (b) save it anyway, every
+>     block listed as unmatched; (c) refuse only when no `take_ids` were given either; (d) (the review's note, round 1)
+>     also refuse an EMPTY `take_ids`, which still saves an empty lens today, unchanged.
+> - **Notes an AI makes (VX-252, VX-361):**
+>   - **P-VX252-1** — a whole book imported at once answers only its book, note and chapter ids, not every block's
+>     takes (that answer would run to about 0.8 million characters for your bilingual book; the AI reads notes as
+>     needed). Options: (b) every note's block records; (c) every note's block ids only.
+>   - **P-VX361-1** — a new note's answer lists every tag it wears once it lands (`tag_ids`, with their paths in
+>     `tags`): the header's first, then the tags a book adds to notes made in it. Option: (b) keep `tag_ids` as the
+>     header's only and add `outflow_tag_ids` (the field that misled the AI in your organization round would then stay
+>     empty).
+> - **Adding paragraphs to a note (VX-255):** **P-VX255-1** is above. **P-VX255-2** — "at the start" is `at: "start"`
+>   at Edit (`move_block`'s word); options (b) a `before_block_id`, (c) no start door. **P-VX255-3** — paragraphs come
+>   as blocks only; option (b) also plain text split by the note's own setting. **P-VX255-4** — at most 200 a call,
+>   said in the description; option (b) no cap.
+> - **Duplicating and Compare (VX-311, VX-298):** **P-VX311-2** is above.
+>   - **P-VX311-1** — a note shared with the AI only per ask (a daily Journal entry, anything Private) can't be
+>     duplicated by it: the copy would lose the protection and stay readable afterwards. One sentence says so without
+>     naming why. Options: (b) carry the note's Private mark onto the copy (ruled out: no AI road may write Private);
+>     (c) allow it, as your own door does.
+>   - **P-VX311-3** — the answer lists the copy's active takes only, each block says which block it was copied from,
+>     and the confirmation's Open › opens the copy. Options: (b) archived takes listed too, marked; no source mapping;
+>     Open › opening Compare.
+>   - **P-VX298-1** — "related blocks only" opens on only when every note the AI names shares history with the first;
+>     otherwise off, so no column it names opens empty. Option: (b) off only when none shares any.
+>   - **P-VX298-2** — the first note may be archived (you can open one and press ⌘5); the others may not (your
+>     picker's rule). Option: (b) refuse an archived first note too.
+>   - **P-VX298-3** — the target is a `note_id` plus one to three `peer_ids`. Option: (b) one list of two to four.
+> - **An AI checking its own work (VX-254, VX-256, VX-261):** **P-VX256-1** is above.
+>   - **P-VX254-1** — dividing and merging answer no fingerprint (the AI sent no words; the halves come from the seam
+>     rule, and it can check with `ids_only` pages). Option: (b) answer block records with fingerprints (changes the
+>     result types your own editor doors share).
+>   - **P-VX254-2** — saving a version and importing a whole book answer no fingerprints. Options: (b) records as
+>     `duplicate_note` answers (a version); every note's records (a book).
+>   - **P-VX256-2** — pages are read one at a time, not as a snapshot; the description says to read again if the note
+>     may have changed. **P-VX256-3** — a note shared once is read in one call, so a once grant reads one page.
+>     **P-VX256-4** — a commit asked for by id must be on the page being read ("commit_id … isn't a commit of a take on
+>     this page.").
+>   - **P-VX261-1** — "its own acts" means every session under the client's name since you last approved it. Option:
+>     (b) every row the log still keeps under that name. **P-VX261-2** — any approved client may list its own acts with
+>     nothing shared (recovering after a dropped "until it disconnects" grant is the case it exists for). Option: (b)
+>     only while it holds a grant. **P-VX261-3** — refused acts are listed, never with a title. Option: (b) not listed
+>     (a refusal then looks like a dropped call). **P-VX261-4** — an act that made something names where it was made;
+>     the AI finds the made note by its title. Options: (b) log the made note itself (your Activity's "made 25 notes"
+>     would become 25 lines); (c) a new local-only column (a schema change). **P-VX261-5** (ruled (b) by the
+>     orchestrator) — a refused duplicate's wing-side row shows no target, since the AI never sent the wing's id;
+>     option (a) keep it. **P-VX261-6** — likewise every refused row of the chapter acts and of `delete_take`, which log
+>     an id the AI didn't send; allowed rows keep it. Options: (b) no target on allowed rows either; (c) log the id the
+>     AI sent (your Activity's lines would change).
+> - **The guide (VX-197):** **P-VX197-U8b-1** — the chapter stays seven lessons; lesson 3 grew from four paragraphs to
+>   eight to name every step's acts. Options: (b) split lesson 3 in two; (c) a new lesson "what a client can do".
+>   **P-VX197-U8b-2** — two new recipes (a revision with Compare; a long job checked as it goes) join your four in "how
+>   to use it". Options: (b) facts only, in lessons 3 and 7; (c) one combined recipe.
+> - **The orchestrator's provisional rulings (ORCHESTRATOR'S PROVISIONAL RULINGS in the record):**
+>   - **Ruling 1** — two problems your first organization round met (VX-361: a note's answer said it had no tags when
+>     its book had tagged it; VX-362: one refusal arrived as a raw Swift dump) were fixed in this run, before the review,
+>     as unit U9. Option: (b) ticket them for later and merge without them.
+>   - **Ruling 2** — U9's design found VX-363 (above), the same class VX-246 closed for renaming and making books, and
+>     fixed it in the run. Option: (b) ticket it for later.
+>   - **Ruling 3 — superseded by your word.** It would have shipped tonight's release without the guide link while the
+>     page was missing; you said to publish the page ourselves (*"just go ahead and do the stargazing MCP link
+>     yourself"*), so the page went live first and the link stays.
+> - **For your eye, not provisional:** the page `https://stargazing.tech/variorum/mcp` is live with stand-in copy
+>   marked PLACEHOLDER for your words (your site repo's DECISIONS #86 and PLAN.md's content-owed list) · the release
+>   notes for 0.9.7 were written without your review, at your word for tonight · every word your app shows that this run
+>   added or changed is on VX-234's list (the handoff gathers them) · two worded refusals speak Mac-door words to an AI
+>   ("…since you picked it", "…if it's sealed, unseal it.") — on VX-234's list too · an open Library didn't show two
+>   notes an AI made until re-entered (a comment on VX-122, not a new ticket). Cross-refs: VX-267 · VX-253 · VX-252 ·
+>   VX-255 · VX-311 · VX-298 · VX-330 · VX-342 · VX-254 · VX-256 · VX-261 · VX-197 · VX-361 · VX-362 · VX-363 · VX-357 ·
+>   VX-358 · VX-364 · VX-365 · VX-352 · VX-353 · VX-354 · VX-355 · VX-356 · VM-20.
+> *(Numbering: the next free number on main when written; a sibling run merging first may take it — the merging session
+> renumbers.)*
+> Status: open — your eye; the handoff's checklist leads with this bundle.
