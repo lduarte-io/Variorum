@@ -6971,10 +6971,10 @@ and `MCPCompareLandingTests.swift` whole.
 |---|---|---|
 | 1 | merge `origin/main` (a merge commit); headless `swift build` | DONE — **`fc6bf20b`** merges `origin/main` `ebd16909` (notes, `.claude` and `CLAUDE.md` only: 7 files, no file touched by both sides, **no conflict**); `origin/main` is an ancestor of the branch (`git merge-base --is-ancestor`). **VX-306 (Castle phase 2) has NOT merged** (no such commit on main), so the dev store is not migrated and a product from this tree opens it. `swift build` complete on the merged tree. **A SLIP, repaired without rewriting anything** — the first merge `994d0083` was flattened by `pull --rebase` before its push (### The merge slip, below) |
 | 2 | R2-1's pin, alone (red on the pre-fix tree — RUN in the window) | DONE (`65ba0704`, the test file alone) — four state-transition tests appended to `MCPCompareLandingTests` (### R2-1 below). **The red product `vx336-close-red` is built from exactly this tree** (`build-for-testing` started from the uncommitted pin, then committed with no other source change: TEST BUILD SUCCEEDED, XCB-EXIT 0, 0 `error:`, 0 warnings in the touched file — `close/logs/build-mac-red.log`; the four test names found in its `VariorumTests` binary by `nm -j` + `swift-demangle`). **Expected red (PENDING — the window's run): 11 tests, 4 failed, 4 issues**, one at each new test's LAST `#expect`; the suite's other 7 green |
-| 3 | R2-1's fix (the three clears of `landingPostureFor`) | NOT-STARTED |
-| 4 | R2-2's clause in `MCPWireRefusalSweepTests.swift`'s comment | NOT-STARTED |
-| 5 | headless finals (MCP · core · workbook) | NOT-STARTED |
-| 6 | the products: `vx336-close` (final), `vx336-close-red` (the pin-only tree), `vx336-close-ios` (final, phone); `vx336-u9` deleted | NOT-STARTED |
+| 3 | R2-1's fix (the three clears of `landingPostureFor`) | DONE (`e919f576`, `CompareBoardView.swift` alone, +18 lines incl. comments) — the three clears, nothing else (### R2-1 below). Compiled in `vx336-close` (piece 6). **Green PENDING — the window's run** |
+| 4 | R2-2's clause in `MCPWireRefusalSweepTests.swift`'s comment | DONE (`cf619bcc`) — the U-graph comment (`:127–130`) now says the call-graph json is "kept in the VX-336 branch's history at `e454a8ef` and removed from main at the run's closeout" (checked: `git ls-tree e454a8ef` lists `callgraph-35f9cd70.json`). A comment only |
+| 5 | headless finals (MCP · core · workbook) | IN-PROGRESS |
+*[removed for publication]*
 | 7 | THE CLOSEOUT WINDOW plan (claim `vx336-close`); READY | NOT-STARTED |
 
 ### The merge slip (piece 1) — what happened, what it costs, what was done
@@ -6999,3 +6999,57 @@ and `MCPCompareLandingTests.swift` whole.
 - **For PHASE C (its D9 step 2 merges main again if it moved):** merge, then push the merge commit with a plain
   `git push` after `git fetch` shows the upstream unmoved, or use `git pull --rebase=merges`. Never a plain
   `pull --rebase` while a merge commit is unpushed.
+
+### R2-1 — the trace, the pin, the fix (VX-298)
+
+**The mechanism (traced in the code at `8551a856`, before the pin):** `land(peers:)` (`CompareBoardView.swift`) sets
+`relatedOnly = false`, then `landingPostureFor = named`, then replaces the columns. `adopt` applies the posture only when
+`landed.allSatisfy { new.peers[$0] != nil }`, then sets `landingPostureFor = nil`. Nothing else wrote
+`landingPostureFor`. So a named peer that never enters a projection leaves it armed, as do columns she changes and the
+board's own teardown (the `@State` model outlives `onDisappear` when a host keeps it). Any LATER projection that happens
+to hold every named peer then sets `relatedOnly` to the landing's posture, over her own toggle. That is the queued-move
+class R-13nb-23 forbids.
+
+**The pin (`65ba0704`, `App/Variorum/VariorumTests/MCPCompareLandingTests.swift`, a new MARK section; the world is the
+suite's own: the anchor, its duplicate (lineage), a stranger and another, unrelated):**
+1. `aNamedPeerThatNeverProjectsLeavesNoArmedPostureToOverwriteHerToggle`, **the review's story whole.**
+   - The landing names the duplicate and the stranger.
+   - The stranger is deleted (`deleteContainer`) and its column leaves (`removePeerSlot`).
+   - A projection without it decides nothing.
+   - She toggles ON.
+   - She restores the stranger (`restoreContainer`) and re-adds it (`addPeerSlot` + `setPeer`).
+   - Then a projection holding both arrives. Old tree: the mixed-set posture sets OFF over her ON.
+2. `aTornDownBoardNeverAppliesItsLandingsPostureAfterwards`, **the brief's teardown case.** The landing names the
+   duplicate, `teardown()` runs before any projection, then a projection holding the duplicate arrives (the model reused).
+   Old tree: the posture sets ON.
+3. `herOwnToggleBeforeTheFirstProjectionEndsTheLandingsRound` isolates the manual-set clear. The landing names the
+   stranger, she toggles ON before the first projection (one deferred while a buffer settles is adopted at the settle),
+   then the projection arrives. Old tree: OFF over her ON.
+4. `aNamedPeersColumnLeavingEndsTheLandingsRound` isolates the departure clear. The landing names the duplicate; she
+   swaps that column to the stranger (`setPeer`), then later adds the duplicate back as a column. Old tree: the posture
+   sets ON.
+
+Each fails on the old tree at its LAST `#expect` with one issue, and every earlier `#expect` holds on both trees.
+**Expected on `vx336-close-red`: 11 tests, 4 failed, 4 issues; on `vx336-close`: 11/11 green** (PENDING — the window).
+Because each of cases 2–4 meets exactly one ending, removing any one clear reds exactly one case (2 → teardown,
+3 → the toggle, 4 → departure). Case 1 needs either the departure clear or the toggle clear.
+
+**The fix (`e919f576`, `CompareBoardView.swift` only; the orchestrator's line-by-line check is owed, as the final round's
+fix):**
+- `teardown()`: `landingPostureFor = nil`, beside `observation?.cancel()`.
+- `peerSlots.didSet`: after the leaving signal, if any departed peer is one the armed landing named,
+  `landingPostureFor = nil`. `land` arms BEFORE it replaces the columns, and the peers that replacement drops are by
+  construction not named, so a landing never disarms itself.
+- `relatedOnly.didSet`: `landingPostureFor = nil` FIRST, ahead of the existing `guard`, so ANY set ends the round,
+  as the disposition's "any manual `relatedOnly` set" reads. The model's own two writes are ordered so this never ends
+  a round they mean to keep: `land` writes the toggle BEFORE it arms, and `adopt` disarms BEFORE it writes.
+  The view's only write is the chip's `model.relatedOnly.toggle()`.
+- The `landingPostureFor` doc comment names the three endings.
+
+**Existing pins re-read against the fix (all expected green, the window confirms):**
+- `theFirstProjectionHoldingEveryLandedPeerSetsThePostureOnce` sets the toggle only AFTER the posture lands (already
+  nil).
+- `aLandingReplacesTheColumnsExactly…`: the twin departs but was never named.
+- `aParkedLandingIsConsumed…`, the delivery pin and the two router-round pins never toggle by hand and never drop a
+  named column before their projection.
+- `CompareBoardTests` and `CompareLensesCorrectionTests` set `relatedOnly` with no landing armed: a no-op clear.
