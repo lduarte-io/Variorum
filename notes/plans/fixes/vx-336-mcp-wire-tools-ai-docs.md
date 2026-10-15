@@ -4178,6 +4178,37 @@ round are the window's — PENDING.
 - **U8a resumes after U7c**, so its descriptions and instructions match the final bound; a FRESH U8a continuation takes it
   (its harness count was ~398k at the pause).
 
+## U7c UNIT RECORD — the page budget bounds the whole answer (VX-256; opus-implementer, from 2026-10-14 ~21:20 MDT)
+
+**NOT DONE (said first):** nothing below is done until its LIVE STATUS line says so. No subagent is spawned. No
+`xcodebuild test`, no Mac build, no launch, no store touched (headless `swift build` / `swift test` only). The
+re-probe is NOT run here; it rides U8b's window (written below for that runner).
+
+**Read in full in this session (never delegated):** this record's header and Hard rules; THE ORCHESTRATOR ON U7's
+WINDOW (the ruling); the U7 STAGE RUN (its cap table, steps 7–8, THE RESULT LINE); the U7 UNIT RECORD's D-256-1…10;
+BUILDER B's RECORD whole (its build plan, pins, revert run, PROVISIONALs, FOR VX-234, OWED); `notes/MCPSpec.md` whole;
+`notes/SessionResiliencyProtocol.md`'s implementer section; the kit's `measure.py`, `turn.sh`, `tee-shim.sh` and the
+L2b/L3 prompts; code: `MCPReadTools.swift` whole, `MCPNoteStructure.swift` whole, `MCPToolCatalog.readNote`,
+`MCPSession`'s tool-result wrapping (`.text(outcome.text)` — the content text IS the serialized answer),
+`MCPPagedReadServerTests.swift` and `MCPPagedReadPlanTests.swift` whole, the `text`/`json` harness helpers.
+
+**The ruling, as this unit builds it (THE ORCHESTRATOR ON U7's WINDOW, P-VX256-1 re-ruled, PROVISIONAL):** a page ends
+at `limit` blocks, or as soon as adding the next block would carry the SERIALIZED ANSWER past 32,000 characters —
+counted on the very JSON text the tool returns (the content the client receives and measured as "65,807 characters").
+A block is never split; a single block larger than what the page has left comes alone. `limit` 50 / 200 stand. The
+first page's note-wide carriage counts toward its budget. `ids_only` pages are bounded the same. Every form without the
+paging parameters is byte-unchanged, and so is the one not-shared shape.
+
+### LIVE STATUS — U7c's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | read-in; this record | DONE (this commit) |
+| 1 | the pins on the OLD tree (Tests only) → RED, counts read from the run's own output | NOT-STARTED |
+| 2 | the product: the answer budget (`MCPNoteStructure`, `MCPReadTools`'s shared encoder + the version echoes) + `read_note`'s description; builder B's budget pins re-pinned (each edit commented) → GREEN | NOT-STARTED |
+| 3 | the revert check (announced here and committed BEFORE it runs; restore verified) | NOT-STARTED |
+| 4 | headless finals (whole package) · the measured page sizes · FOR VX-234 · PROVISIONAL · the RE-PROBE for U8b · OWED | NOT-STARTED |
+
 ## U8a UNIT RECORD — the model-facing words: `MCPSession.instructions`, the tool descriptions, the stargazing brief's delta (VX-197; opus-implementer, from 2026-10-14 ~20:40 MDT)
 
 **NOT DONE (said first): no code, no pins and no brief edit yet.** This session read in, then PAUSED at the
