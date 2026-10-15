@@ -647,6 +647,61 @@ BUILD SUCCEEDED on `9292d1db`'s code (no new warning in a touched file).
    the one-line release report ("dev store restored + verified, prefs diff clean, posture Standard/unlocked,
    castle-W1 untouched").
 
+#### U1 — THE WALK PLAN (the orchestrator's; her walk rule — a fresh Opus at xhigh, screenshots of every changed area)
+
+Products: the Debug app from U1's tree, `App/Variorum/DerivedData/vx283-u1/Build/Products/Debug/Variorum.app`
+(bundle `io.lduarte.Variorum.debug`, the DEV store). If the product is missing or older than the U1 tip, build it
+headless first (`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx283-u1
+build`, run from `App/Variorum/`) — a build needs no claim, a launch does. Screens go to
+`notes/plans/vx283-screens/u1/`, named `<row>-<voice>-<appearance>.png`. **Sidebar rows are REGION captures** at
+the display's native 2× (`screencapture -x -R x,y,w,h <file>` in points, the sidebar's rect read from `walk-cap`'s
+window bounds) — a whole-window capture shrinks the ✕ to a few pixels. A whole-window capture rides beside each
+row for context. Hover state (the ✕ shows on the hovered row) needs the pointer parked on the row before capture
+(`cliclick m:x,y`, then capture).
+
+- **W0 — preconditions.** Strict instance checks (`pgrep -lx Variorum`; `pgrep -lf "MacOS/Variorum$"`) show no
+  dev instance. The host's Accessibility + Screen Recording trust (WalkKit README's CHECK THE HOST FIRST). Debug
+  prefs exported. The dev store's three files copied to `notes/plans/vx283-screens/u1/store-before/` (the walk
+  protocol). Note the posture: Standard, unlocked, the voice and appearance it had.
+- **W1 — launch and seed.** Launch, dismiss What's New. Open at least 15 notes so the Open list overflows
+  (Library rows, ⌘K, whatever the dev store offers; every write is undone by the store restore). Star at least 9
+  notes for W4 (the same).
+- **W2 — the tall list (VX-285), Study light.** The window at its tallest. Capture the sidebar: the Open list runs
+  down to just above the sync footer and stops there; no row hides under the footer; no empty band between the list
+  and the footer when the rows overflow. Then with fewer notes open (say 4): the list hugs its rows.
+- **W3 — the scroll bar (VX-286).** Scroll the Open list with `walk-scroll` and capture DURING the scroll (overlay
+  bars show only while scrolling): the bar sits in the margin and every ✕ is clear of it. Park the pointer on a
+  row next to the bar so its ✕ shows, and capture. Same for Starred (W4's stars) — the ★ clear of the bar.
+- **W4 — Starred keeps its 7.** With 9+ stars, Starred shows about 7½ rows and scrolls in place; capture.
+- **W5 — the short window.** Shrink the window's height until the list can't fit its rows: it keeps at least 3½
+  rows, the sidebar's outer scroll carries the rest, the sync footer is never covered. Capture.
+- **W6 — ⇧⌘W repeatedly (VX-287).** Open a note from the MIDDLE of the list. Press ⇧⌘W (via `keys.sh`) and
+  capture: its row is gone and the pane shows the NEXT note. Press again a few times (capturing each). From the
+  LAST row: the pane lands on the PREVIOUS note. Keep pressing until the list is empty: the pane lands on the
+  Library. ⇧⌘W with the Library showing does nothing (the menu item is grey — capture the View menu).
+- **W7 — the ✕ (her ruling).** Reopen several notes. A ✕ on the row of the note you're looking at moves the pane
+  to the next note; a ✕ on any OTHER row only removes that row (the pane stays). Right-click ▸ Close behaves the
+  same. Capture before and after each.
+- **W8 — Close All Notes (VX-289).** From the Open list's right-click (capture the menu open) and from View ▸ Close
+  All Notes: the list empties, the pane lands on the Library.
+- **W9 — the View menu and ⌘W.** Capture View ▸ showing Close Note ⇧⌘W and Close All Notes. Then File ▸ New
+  Window and ⌘W: only that window closes (⌘W is unchanged).
+- **W10 — the other voice and dark.** Repeat W2, W3 and W4's captures in Terminal light, then Study dark and
+  Terminal dark (Settings ▸ Appearance; prefs are restored after).
+- **W11 — restore and release.** Quit YOUR instance. Copy the three store files back, verify each with `cmp`.
+  `defaults import`, re-export, diff against the W0 export (delete any key the walk added). Posture Standard,
+  unlocked, castle-W1 untouched. Release (`Tools/stage release --who vx283-u1-walk`) — or hand back to the orchestrator if it says the claim continues.
+
+Each row's WALK RECORD line: what was done · the screenshot file(s) · HOLDS / DOES NOT HOLD (and what's wrong).
+
+Notes for the walker: the coordinator's popup rule binds (a system popup you can't dismiss → stop, report its
+words). ⇧⌘W in a window merged into macOS TABS is macOS's Close Window by her ruling — not a finding; walk in an
+ordinary window. The products' tip: the U1 tree at `358f4e04` (the last code change, P7, is test-only).
+
+#### U1 — WALK RECORD
+
+*(The walker writes one line per row here.)*
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
