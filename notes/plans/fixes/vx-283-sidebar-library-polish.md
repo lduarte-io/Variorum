@@ -2170,7 +2170,10 @@ session (first line):** any stage work until the orchestrator hands over a claim
 - D4 — the reverts R-I and R-J, each named below BEFORE it was applied: DONE — each patch applied, built
   (`DerivedData/vx283-u1d-ri`, `-rj`: TEST BUILD SUCCEEDED), restored by `git checkout --`; **no revert is in the tree**
   (`git diff` empty). Patches: `notes/plans/vx283-screens/u1d/reverts/R-I.patch`, `R-J.patch` (gitignored).
-  `DerivedData/vx283-u1d` holds HEAD's products (`74a7d787`'s code).
+  **All three trees REBUILT at `d5900981`** (a test-only rig fix: `SectionRig.scrollView(_:)` now finds a section's
+  AppKit scroll view by its own scroll reading — clip height = viewport, document height = content, both equal at
+  rest per U1c's trace — instead of assuming a SwiftUI-global ↔ AppKit-window convention no pin had verified): each
+  TEST BUILD SUCCEEDED, each revert restored, `git diff` empty. `DerivedData/vx283-u1d` holds HEAD's products.
 - D5 — **READY FOR STAGE** (≈15 min), the script `notes/plans/vx283-screens/u1d/window.sh` (gitignored), from
   `App/Variorum/`, in order: (0) `pre` — strict pgreps, the Debug prefs exported, the dev store's three files copied
   to `u1d/store-before/<UTC>/` with zero dev instances; (1) `batch` — `xcodebuild … -derivedDataPath
