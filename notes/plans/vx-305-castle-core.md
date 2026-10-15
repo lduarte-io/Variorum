@@ -1270,6 +1270,28 @@ ruling", never silently.
   U2's unit pin had the wrong reading and its restatement is the fix, not a relaxation.
 - U3's executor scaffolding KEPT beside the scenario world (two harnesses, more coverage; the ladder may consolidate).
 
+### HER RULING, 2026-10-15 — THE LEGACY CUT WIDENED: NO OLD BUILDS
+
+**Her words, verbatim:** *"yeah i mean we do need to make sure that it doesn't ruin my existing store for sure, but
+no old backups or builds have to be considered."* (This supersedes the "the older-build ACTOR stays" scoping in the
+sitting block above, which predated her widening.)
+
+**The precise line (the orchestrator's scoping, said back to her):**
+- **STAYS — the don't-ruin-my-store half:** every state an old build has ALREADY LEFT in a current store is a
+  migration INPUT and stays fully handled — stuck markers, a rotation still standing on the server, today's custody
+  shapes, corner 45, escrow items. Her stores could carry any of them on migration day.
+- **DROPS — old builds as LIVE, CONCURRENT ACTORS after the switch:** an un-updated device completing a rotation, an
+  older build's Re-link re-landing a vault, the last-step-race arms, and §3.15's "today's runner's finish path kept
+  for one release" (the migration ALWAYS resolves old acts from disk evidence — U1's clearing check). Handled by
+  PROCEDURE: the switch (VX-329) updates every device before any crossing — her rehearsal order already does — and
+  the public only ever arrives on the new build.
+- **U4/closer deltas:** the older-build actor leaves the GENERATOR's alphabet; the already-green older-build fixed
+  scenarios are kept as free robustness, marked "beyond scope, kept while green"; anything red that traces only to
+  live old-build interference is recorded as superseded by this ruling, never fixed.
+- **Lands:** the design's §3.15/§4.1/§8 amendments at the merge moment; VX-306's plan drops the old-runner keep;
+  VX-307's plan drops the old-build interference choreography; VX-329's plan carries the update-every-device-first
+  procedure line.
+
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions)
 
 *(empty)*
