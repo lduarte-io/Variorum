@@ -2425,7 +2425,105 @@ the list follows again**; R7 regressions (the footer stop, the bar beside the �
 
 #### U1d — RE-WALK RECORD
 
-*(The walker writes one line per row here.)*
+**Walker:** a fresh Opus 5.5 at xhigh (not an implementer of any U1 leg), 2026-10-15 01:51 → 02:16, on the
+orchestrator's claim `vx283-u1d-walk`; the Debug app `App/Variorum/DerivedData/vx283-u1d/…/Variorum.app` (built 01:39,
+not rebuilt), PID 78993, discriminated by path. Screens in the gitignored `notes/plans/vx283-screens/u1d/walk/`
+(sidebar rows as 2× region captures of the sidebar rect 60,36 240×1010; `-window` beside the key ones; `-zoom-*` 3×
+nearest-neighbour crops of the edges). Every image cited was opened and looked at; the edge verdicts are also
+pixel-measured (luminance per scanline across the row band). Hand scrolls are `walk-scroll` (line units) plus a
+scratch pixel-unit twin of it (`pxscroll`, the same CGEvent wheel road with `.pixel` units — for exact offsets).
+
+- **R0 — preconditions.** Both strict pgreps empty; her app absent; the host `AX: true SCREEN: true`. Store copy +
+  prefs export were the orchestrator's (`u1d-walk/`), not redone. Posture at launch: Standard, unlocked (the
+  Bookcase came up), voice **Study**, appearance **follow system** (light); no What's New sheet showed. Window AX-set
+  to 1380 × 1010 at (60, 36). · HOLDS.
+- **R1 — seed.** 14 notes open + 1 star at launch; the twenty opens of R5a filled the Open list to its 20-row cap;
+  8 notes starred through Library ▸ right-click ▸ Star (9 starred: `R3-seeded-study-light.png`). · done.
+- **R2 — the Open list's three states (Study light).** Top `R6-study-light-d-1-after-open.png` / `R2a-study-light.png`
+  (the first row whole under the header, no top fade; the bottom partial row "the bookcase" / "gatherings & arrivals"
+  a faint ghost); middle `R2b-study-light.png` (+`-zoom-top`: "how to use it" a ghost under the header); end
+  `R2c-study-light.png` / `R6-study-light-a-t90.png` (the top partial faded, the last row whole, no bottom fade). The
+  ✕-inside-the-fade click was NOT re-walked (time). · HOLDS — but see O-1 (the middle state's bottom).
+- **R3 — Starred (9 stars).** `R3top-<room>.png`: at its top, 7 whole rows and the half row "what the door is" a
+  faint ghost, no top fade; `R3end-<room>.png`: at its end, "seeing, answering, undoing" a ghost under the header, the
+  last row whole, no bottom fade — all four rooms (`R3top-<room>-zoom-bottom.png`, `R3end-<room>-zoom-top.png`). ·
+  HOLDS (the half row is clipped through its letters but faded to a ghost — U1b's O-4 look, reads soft).
+- **R4 — the shallow overflow, four rooms.** The Library-view list does not overflow at 1010 pt, so the state was
+  made exactly: hand scroll to the end, then ONE pixel-unit wheel event of 5 px up — the list 5 pt short of its end
+  (the R-J pin's state): `R4shallow-study-light.png`, `-terminal-light`, `-terminal-dark`, `-study-dark` (+`-zoom-top`,
+  `-zoom-bottom` each). In every room the last row "export: it's all yours" is WHOLE, descenders intact, lightening
+  faintly toward the edge; the top row softened by the full-strength top fade; the fade matches each room (no band,
+  seam or box, black rooms included); each stayed put 14 s (`-t14`, byte-identical). · HOLDS for the 5-pt state.
+  **But the same edge 7–9 pt short of the end SLICES** — `R4shallow7-study-light.png` / `R4shallow9-study-light.png`
+  (+`-zoom-bottom`): the bottom row (here the current row, its wash pill) is cut by a hard horizontal edge through its
+  descenders and pill — reads "exnort: it's all vours". Measured: at 7 pt beyond the content at the clip line keeps
+  ~60% of its contrast (bold ink 53 → 131 at the edge, room 247; the pill 230 → 247 in one scanline); at 9 pt ~53%.
+  That is the formula as built — opacity at the edge = (beyond / 15) × 0.8 = 0.37 at 7 pt, 0.48 at 9 pt — so the
+  half-row-deep fade is there but too weak at the clip to soften a cut through letters. The same look met naturally
+  in Starred: `R5d-study-light-1010-zoom-starred.png` (Starred hand-scrolled to its end in the Library view, then a
+  note opened — the pitch 30 → 24 left it a few points short): "What's true in everv mode", the descenders cut under
+  a light fade. · **DOES NOT HOLD** for overflows of roughly 6–12 pt (the clip falls through descenders while the
+  eased strength is still low) — measured in Study light only (the other rooms not re-captured at 7–9 pt; their row
+  pitch reads the same in the captures, so the same cut is expected there, unproven).
+- **R5 — the current row wholly in view.** (a) TWENTY rapid opens from the Library (sidebar ▸ Library, a title
+  click, capture at 2.6 s; ~7 s per open; 18 new rows appended at the bottom, 2 re-opens revealed mid-list — "what
+  the door is", "seeing, answering, undoing"): `R5a-01-study-light.png` … `R5a-20-study-light.png` (+`-window` each).
+  **20 of 20 show the current row wholly in view**, never cut, never under a fade. **The half-hidden partial row is a
+  faint GHOST, never an empty band:** `R5a-19-study-light-zoom-bottom.png` ("the bookcase" readable at ~20–35%
+  contrast down to the clip, where U1b's capture had 23 pt of empty room) and `R5a-10-study-light-zoom-top.png` (the
+  top partial a ghost under the header); the same ghost in all four rooms (`R2a-<room>-zoom-bottom.png`,
+  `R2b-<room>-zoom-top.png`). (c) A deep row opened from the list (`R5c-study-light-0-opened-deep.png`, "the seal",
+  whole) → ⇧⌘W → `R5c-study-light-1-shiftcmdw.png` (landed on "export: it's all yours", whole). (d) Following, the
+  window to 640 then 480 and back to 1010 (`R5d-study-light-640.png`, `-480.png`, `-1010.png`): at 640 and 480 the
+  column overflows and the Open list sits below the fold (the outer column not scrolled — not re-checked there); back
+  at 1010 the current row is whole at the list's bottom. (b) not re-walked (time). · HOLDS.
+- **R6 — her own scrolling is never pulled back.** (1) The current row revealed near the top, then `walk-scroll`
+  40 lines down (the current row off-view): `R6-study-light-a-before.png` → `-t02`, `-t10`, `-t20`, `-t40`, `-t60`,
+  `-t90.png` — **the six captures BYTE-IDENTICAL** through 90 s, HID idle 89 s at the end (no input). (2) To the top
+  then one wheel line (a middle state, the current row off-view above): `R6-study-light-b-t02/-t20/-t60.png`
+  byte-identical through 60 s. (3) Then a resize while scrolled away — 1010 → 760 (`R6-study-light-c-resize760-t02/
+  -t10.png`, `-window`: the offset kept, the current row still off-view, not revealed) → back to 1010
+  (`-back1010-t02`, `-t20.png`): **byte-identical to the pre-resize capture**, and stayed 20 s more. (4) Her next act
+  — ⌘⇧1 opening "o museu", off-view above: `R6-study-light-d-0-before-act.png` → `-d-1-after-open.png`: the list
+  FOLLOWED to the top, the row whole, the bottom partial a ghost. Also in Terminal light (where U1b's pull-backs were
+  met right after a voice flip): to the top after the flip, `R6-terminal-light-top-t02/-t25.png` byte-identical; and
+  every room's shallow state stayed 14 s. · HOLDS.
+- **R7 — nothing regressed (Study light).** `R7-study-light-tall.png` (+`-window`, `-zoom-bottom`): the tall list stops
+  just above the sync footer, the last row whole, nothing under the footer. `R7-study-light-scrolling.png`
+  (+`-zoom`, captured mid-scroll): the overlay bar at x ≈ 442–453 px of the 480-px sidebar, every ✕ ending by ~420 px
+  — in the margin beside the ✕. · HOLDS.
+- **R8 — restore and release.** MY instance quit by identity (`tell application id … to quit`); both strict pgreps
+  empty after. With zero dev instances the three store files were copied back from `u1d-walk/store-before/` and each
+  `cmp`-verified byte-identical (the `.sqlite` was already identical; `-wal` and `-shm` had changed). No new file in
+  `Backups/` (its mtime Oct 14 09:17); `castle-W1-20261013` untouched (its files Oct 13). Prefs: the walk ADDED 18
+  `currentBlock.*` keys (each deleted by hand) and CHANGED 6 (`openNotes.remembered.ids`/`.recency`, both window
+  frames, the backup log, the idle-sweep mark); `defaults import` of `prefs-before.plist`, re-export
+  (`u1d-walk/prefs-after-restore.plist`), diff CLEAN (1602 = 1602, none added, removed or changed). The voice (a store
+  setting) and appearance (`system`) were also set back in Settings before quitting. Posture Standard/unlocked
+  throughout. · HOLDS.
+
+**OBSERVATIONS (outside the verdicts — for the orchestrator's eye):**
+- **O-1 — a sliver no deeper than a row's top padding still leaves an empty band.** The middle state ("to the top,
+  then one wheel line") in the Library view lands with ~4 pt of the next row in view — its top padding, no ink:
+  `R2b-<room>-zoom-bottom.png` (all four rooms) and `R6-study-light-b-zoom-bottom.png` show the last whole row
+  ("the classics walk" / "membership, not ownership") UNFADED, then ~26 pt of plain room down to the footer hairline,
+  with two to seven rows below — pixel-measured, no ink in the band. The bottom reads as the list's end (the end
+  state's own gap is ~20 pt). The implementer recorded this edge ("a sliver thinner than its row's top padding shows
+  no ink under any cap — that is the clip, not the fade"); it is O-3's empty band in a narrower offset window. Her
+  ruling's "a hint of the next row always shows" is not met there; whether it matters is a call above the walk.
+- **O-2 — R4's slice is the strength ease meeting the clip** (the DOES NOT HOLD above): at the edge the paint is
+  `strength × 0.8` with strength = beyond / half-row, so between ~6 and ~12 pt beyond the cut through descenders keeps
+  half or more of its contrast. At ≥ 15 pt beyond the edge keeps 20% (the cap — a faint clipped ghost, reads soft);
+  at ≤ ~5 pt the clip falls in the row's bottom padding (nothing to slice). So the visible slice lives in a band of
+  offsets a hand scroll lands in often.
+- **O-3 — Starred keeps its points across the pitch flip after a hand scroll.** Hand-scrolled to its end in the
+  Library view (30-pt rows), Starred in the note view (24-pt rows) sits a row short of its end, both edges faded —
+  by design under the follow rule (not following; no current row in Starred), noted because that is how it met O-2's
+  slice without any further input.
+- O-4 — at 640/480 pt the outer column overflows and the Open list is below the fold; R5(d) checked the row only
+  after returning to 1010 (U1b's walk had scrolled the outer column; not repeated).
+- The fade takes the room's colour in all four rooms — no grey band over black in either dark room
+  (`R4shallow-*-dark-zoom-*`, `R2a-*-dark-zoom-bottom.png`).
 
 ### U2 — the drag (VX-288, the light version + the compact chip on the Open list's rows)
 
