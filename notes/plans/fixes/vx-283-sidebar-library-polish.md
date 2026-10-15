@@ -2542,8 +2542,14 @@ and the chip are walk evidence); edge auto-scroll during a drag (the M shape, ou
 - E2 — the delivery (one drop delegate on the list's rows + the end-zone band; the drag state; the insertion line as
   an overlay above the edge fade; the settle) + the chip (the Bookcase's grab canvas moved to `Core/Views/`, reused) +
   the door, face and mounted pins: DONE (`5e1f43eb`) — headless `build-for-testing` green; the runs PENDING the window.
-- E3 — R-K named below BEFORE it is applied (this commit); then prebuilt into `DerivedData/vx283-u2-rk` and restored:
-  IN-PROGRESS — **R-K is NOT yet in the tree.**
+- E3 — R-K named below before it was applied; applied, prebuilt into `DerivedData/vx283-u2-rk` (TEST BUILD SUCCEEDED
+  on `5e1f43eb`'s code; patch `notes/plans/vx283-screens/u2/reverts/R-K.patch`, gitignored), restored by `git checkout
+  --`, `git diff` empty: DONE. To be REBUILT on the tip after E4 (the ramp), so the revert tree is HEAD minus R-K only.
+- E4 — **P-U1e-1, the orchestrator's added piece (VX-286):** the fade's strength ramps over the row's text padding —
+  DONE (`6bc31673`, its own commit; the section below the reverts); R-N named below BEFORE it is applied (this
+  commit) — **R-N is NOT yet in the tree.**
+- E5 — the three trees on the tip (`vx283-u2` HEAD, `-rk`, `-rn`), restored and `git diff` empty; READY FOR STAGE:
+  NOT-STARTED.
 
 **THE TRACE (this tip, `9643aaf6`; paths under `App/Variorum/Variorum/`):** the Open row drags with the system drag
 and each row is its OWN drop target (`Features/Library/SidebarView.swift:1032-1041`): `.draggable(OpenNoteDragToken)`
@@ -2688,6 +2694,40 @@ commit, `git diff` empty after):**
   `noLineBeforeTheListIsReadOrWithoutADragOfItsOwn`, `theEndZoneIsTheRoomUnderTheRowsCapped`,
   `theEndZoneLandsTheLastSlot`, `aDropOnItsOwnPlaceOffersNothingAndMovesNothing`, `aDropActsOnlyOnTheListItsDragBeganIn`,
   `aReleaseThatOffersNothingRefuses`, `aDropSettlesInPlaceAndNeverMovesTheList`, `theEndZoneTakesTheRoom…`.
+
+**P-U1e-1 — THE ORCHESTRATOR'S ADDED PIECE (VX-286; the ruling "U1d — THE ORCHESTRATOR'S EYE AND RULING ON THE
+RE-WALK", `796a2f25`), riding this leg as its own commit `6bc31673`:** the edge fade's STRENGTH reaches full over the
+row's own text padding, not over the half row; the depth (the half row) and the ease-in stay.
+- **The measurement (offscreen, scratchpad only — `ImageRenderer` at 4×, the row's own shape: a 13-pt title in the
+  navigation font, 8 pt side padding, centred in the row):** the line box is **16 pt** in both voices (Study
+  `.system(size: 13)`, Terminal the same size monospaced: `NSLayoutManager.defaultLineHeight` 16.0, ascender 12.57,
+  descender 2.74, no leading), so the row's text padding is `(rowHeight − 16) / 2` = **7 pt at 30, 4 pt at 24**. The
+  first INK, both voices, regular and semibold, over "export: it's all yours" / "Hdlkbt fgjpqy" / "note 7": **7.25–7.5 pt
+  above a 30-pt row's bottom** (the descenders) and 9.25–10.5 below its top; **4.25–4.5 above a 24-pt row's bottom**
+  and 6.25–7.5 below its top. So the padding ends before any ink at every pitch, voice and weight (the orchestrator's
+  "≈ 6 pt" is these two, 7 and 4, per pitch).
+- **The build (`Core/Views/SidebarLayout.swift`):** `rowTextLineHeight = 16` (the measured line box, its reason at the
+  line); `edgeFadeRampDistance(rowHeight:)` = `max(1, (rowHeight − 16) / 2)`; `edgeFades(_:depth:ramp:)` — the
+  strength is `min(1, beyond / ramp)`, the ramp read from the pitch the depth is half of unless one is given (so
+  `SidebarSectionWindow.swift` and every caller are untouched). Consequences: R4 at 30 pt — 5 pt short eases (5/7 of
+  the cap), 7 · 9 · 12 whole; at 24 pt, 4 pt beyond is whole; the first fade past the 0.5-pt slack is 7 % (30 pt) /
+  12.5 % (24 pt) of the cap — a ramp over a few points, never a pop; O-1's ≈4-pt band now fades whole at 24 pt.
+- **PROVISIONAL P-U1e-1** (the orchestrator's; recorded there). P-U1d-2 ("linear over the half row") is SUPERSEDED by
+  it — linear over the text padding.
+- **The pins (`VariorumTests/SidebarSectionWindowTests.swift`) — changed IN PLACE by the ruling, each annotated:**
+  `theFadeIsAlwaysHalfARowDeepAndItsStrengthEasesIn` (4 pt above: 4/7; 3 pt below: 3/7; 8 pt below: whole; the first
+  fade < 10 %; the ease's step bounded by 0.1/7 per 0.1 pt); `theFadeIsNeverFullySolid` (the compact 5-pt state is
+  whole AT THE CAP now; a new 3-pt faint state, 3/4 of the cap); the mounted `aShallowOverflowFadesTheWholeHalfRowFaintly`
+  (the strength is `beyond / ramp`). **NEW `theFadeIsWholeBeforeTheClipReachesInk`** — the line box 16; the ramp 7 at
+  30, 4 at 24; at the MEASURED first ink (7.25 / 9.25 at 30, 4.25 / 6.25 at 24) both edges whole; R4's 5 · 7 · 9 · 12 pt
+  short at 30 (5/7, 1, 1, 1). Headless replica (the real `SidebarLayout.swift` + the RuleTests' bodies, scratchpad):
+  **8734 checks, 0 failed**; under R-N **exactly the three pure pins below red**.
+- **THE REVERT, named BEFORE it is applied — R-N** (the orchestrator's message called it "R-K"; R-K was already this
+  leg's drop-rule revert, so the ramp's is **R-N**): in `edgeFades`, `strength: min(1, beyond / max(reach, 1))` →
+  `strength: min(1, beyond / depth)` (U1d's half-row ramp). Products: `DerivedData/vx283-u2-rn`. Expected RED, exactly:
+  `SidebarSectionWindowRuleTests.theFadeIsWholeBeforeTheClipReachesInk`, `.theFadeIsAlwaysHalfARowDeepAndItsStrengthEasesIn`,
+  `.theFadeIsNeverFullySolid`, `SidebarSectionWindowMountTests.aShallowOverflowFadesTheWholeHalfRowFaintly`; every
+  other pin of the two suites GREEN.
 
 #### U1d — THE ORCHESTRATOR'S EYE AND RULING ON THE RE-WALK (2026-10-15 ~02:25 — P-U1e-1)
 
