@@ -647,6 +647,16 @@ struct LibraryCatalogView: View {
                     }
                 }
                 .pickerStyle(.segmented)
+                // VX-175 (P-U3c-1): fixed horizontally, so the segmented
+                // control answers its NATURAL width in every state. Unfixed,
+                // it answered in two modes in one model state (the U3c trace):
+                // rigid at its natural width, or — after a landed search,
+                // until a sort pick — squeezed below it (scope 254 → 220.5 pt,
+                // Terminal), which moved the controls row's wrap decision and
+                // cramped its segments. Now P-U3-5's "the wrap reads stable
+                // widths only" holds for both pickers. (The swept P-8 lint is
+                // the bare form; a segmented control is no label that wraps.)
+                .fixedSize(horizontal: true, vertical: false)
                 .frame(maxWidth: 280)
                 // 18h batch 2: a day names NOTES — books and blocks carry no
                 // edit stamp and stand down while one is armed, so the scope
@@ -670,6 +680,9 @@ struct LibraryCatalogView: View {
                     }
                 }
                 .pickerStyle(.segmented)
+                // VX-175 (P-U3c-1): fixed horizontally — the scope picker's
+                // reason above (unfixed: 224 → 180 pt Terminal after a search).
+                .fixedSize(horizontal: true, vertical: false)
                 .frame(maxWidth: 230)
                 // 18h batch 1 (her row 10): the notes' order, hers to
                 // choose. The Timeline mode is its own order by definition,
