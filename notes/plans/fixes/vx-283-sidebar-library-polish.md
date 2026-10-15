@@ -3018,8 +3018,15 @@ DEBUG-only trace hook, off unless the probe turns it on.
   the env-gated suite `LibraryControlsU3cProbe` (asserts nothing); `build-for-testing` green on `vx283-u3c`
   (`notes/plans/vx283-screens/u3c/logs/bft3.log`, no warning in either file); the window script
   `notes/plans/vx283-screens/u3c/window.sh` (gitignored). **READY FOR STAGE — the window below.** Its output PENDING.
-- T3 — the proposal: DONE (this commit, below) — the mechanism read off the probe's trace; the fix shape and the pin
-  PROPOSED. **Nothing built: awaiting the orchestrator's ruling.**
+- T3 — the proposal: DONE (`822ff4d1`, below); RULED P-U3c-1 (`ae582c53`).
+- B1 — the pins, red-first: DONE (`032ee08a`) — `aSearchNeverSqueezesTheSegmentedControlsOrFlipsTheRow` ×2, the pure
+  GUARD `atTheProbesInAppWidthsTheDefaultWindowIsOneLineClosed`, the stale "≈934 / ≈834" comment annotated in place.
+- B2 — the fix: DONE (`378e2261`) — the two `.fixedSize(horizontal: true, vertical: false)` lines; `build-for-testing`
+  green on `vx283-u3c`.
+- B3 — **R-P IN FLIGHT** (a successor reading this with a dirty tree: restore FIRST — `git checkout --
+  App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift`, then `git diff --quiet`): the two
+  `.fixedSize(horizontal: true, vertical: false)` lines deleted from the committed tip `378e2261`, nothing else;
+  `DerivedData/vx283-u3c-rv` APFS-cloned from `vx283-u3c` and built.
 
 **T1 — THE TRACE (this tip; the product code is U3b's `8dbae3d6` plus the DEBUG hook; paths under
 `App/Variorum/Variorum/` unless named).**
