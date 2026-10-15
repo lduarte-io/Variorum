@@ -1072,7 +1072,14 @@ final class DeviceLeaves: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysL
     }
 
     func deleteAppleKey(id: String) throws {
-        guard device.keychain.synced[KName.apple(scope, id)]?.item != nil else { return }
+        guard device.keychain.synced[KName.apple(scope, id)]?.item != nil else {
+            // A delete that can't reach the key — it lives in an Apple account
+            // this device isn't signed into now (§3.1 rule 2's last exception,
+            // until this Mac comes back to it): P-U4-1's class, its delete
+            // never carried (the closer's soak, seed 6 sequence 485).
+            world.truth.deletesNotCarried.insert(id)
+            return
+        }
         world.deleteSynced(device, KName.apple(scope, id))
         try wrote("apple- \(id.prefix(8))")
     }
@@ -1080,7 +1087,12 @@ final class DeviceLeaves: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysL
     func readOldSharedAppleKey() throws -> AppleKeyMaterial? { world.oldSharedKey(device) }
 
     func deleteOldSharedAppleKey(id: String) throws -> Bool {
-        guard let shared = world.oldSharedKey(device), shared.id == id else { return false }
+        guard let shared = world.oldSharedKey(device), shared.id == id else {
+            // Likewise (P-U4-1's class): the retirement recorded, its delete
+            // never reaching the key where it lives.
+            world.truth.deletesNotCarried.insert(id)
+            return false
+        }
         world.deleteSynced(device, KName.oldShared(scope))
         try wrote("shared- \(id.prefix(8))")
         return true

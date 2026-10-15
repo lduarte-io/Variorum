@@ -638,4 +638,23 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 6 (sequence 485, the closer's soak) — a CHECKER finding, P-U4-1's
+    /// class: a silently-joined device's This Mac Only into Castle (the old
+    /// shared key kept: the account stood on it), an Apple-ID switch, a leave,
+    /// Use Castle (its retirement of the old shared key recorded, its delete
+    /// unable to reach the key in the former Apple account), back to that
+    /// Apple ID, and a leave straight away — the old key, still standing in
+    /// that account, opens the pre-Castle copies' shared wraps. A retirement
+    /// whose delete can't reach its key is a delete never carried (P-U4-1,
+    /// chosen (b): the stated residue).
+    @Test func aRetirementThatCouldNotReachItsKeyIsADeleteNeverCarried() async throws {
+        let world = try Self.start("a synced Standard account, a device that joined without a secret", seed: 6000503)
+        for action in [Action.thisMacOnly("phone", .castle), .switchAppleID("phone", to: SWorld.appleB), .useStandard("phone"),
+                       .replaceAllKeys("macA", newWords: false), .useCastle("phone", .alwaysAsk, newWords: false),
+                       .switchAppleID("phone", to: SWorld.appleA), .useStandard("phone"), .settle] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }
