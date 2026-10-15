@@ -67,12 +67,6 @@ struct SidebarSectionWindowRuleTests {
         #expect(SidebarLayout.edgeFades(window(at: 342), depth: depth) == Fades(top: 15, bottom: 8))
         #expect(SidebarLayout.edgeFades(window(at: 0.3), depth: depth) == Fades(top: 0, bottom: 15),
                 "a rounding hair beyond an edge is not more")
-        // P-U1b-8: under the edge slack an edge is AT the edge (no fade); at it, the fade begins.
-        let slack = SidebarLayout.edgeSlack
-        #expect(SidebarLayout.edgeFades(window(at: slack - 0.5), depth: depth) == Fades(top: 0, bottom: 15),
-                "under the slack: at the top, no fade")
-        #expect(SidebarLayout.edgeFades(window(at: slack), depth: depth) == Fades(top: slack, bottom: 15),
-                "at the slack: the fade begins")
     }
 
     @Test func aWindowThatHoldsEverythingFadesNowhere() {
@@ -140,16 +134,10 @@ struct SidebarSectionWindowRuleTests {
             row: 8, rows: 9, rowHeight: 24, window: after,
             depth: SidebarLayout.edgeFadeDepth(rowHeight: 24))
         #expect(landed == 36)
-        // P-U1b-8 (the edge slack): the re-run's resting place (34, 2 pt short) is AT the end —
-        // inside the slack, clear; 4 pt short (32) is not, and the exact answer is the end.
         #expect(SidebarLayout.revealOffset(
             row: 8, rows: 9, rowHeight: 24, window: Window(offset: 34, viewport: 180, content: 216),
-            depth: SidebarLayout.edgeFadeDepth(rowHeight: 24)) == nil,
-                "2 pt short is inside the edge slack: clear, nothing moves")
-        #expect(SidebarLayout.revealOffset(
-            row: 8, rows: 9, rowHeight: 24, window: Window(offset: 32, viewport: 180, content: 216),
             depth: SidebarLayout.edgeFadeDepth(rowHeight: 24)) == 36,
-                "4 pt short is past the slack: the exact answer is the end")
+                "the re-run's resting place (34) is not clear, and the exact answer is the end")
         #expect(SidebarLayout.revealOffset(
             row: 8, rows: 9, rowHeight: 24, window: Window(offset: 36, viewport: 180, content: 216),
             depth: SidebarLayout.edgeFadeDepth(rowHeight: 24)) == nil, "…and from there nothing moves")
@@ -172,9 +160,9 @@ struct SidebarSectionWindowRuleTests {
                     }
                     let fades = SidebarLayout.edgeFades(landed, depth: depth)
                     let top = CGFloat(row) * pitch
-                    #expect(top >= landed.offset + fades.top - SidebarLayout.edgeSlack,
+                    #expect(top >= landed.offset + fades.top - 0.5,
                             "row \(row) from \(start) (window \(viewport)): top \(top) under the top fade")
-                    #expect(top + pitch <= landed.offset + viewport - fades.bottom + SidebarLayout.edgeSlack,
+                    #expect(top + pitch <= landed.offset + viewport - fades.bottom + 0.5,
                             "row \(row) from \(start) (window \(viewport)): bottom under the bottom fade")
                     #expect(SidebarLayout.revealOffset(
                         row: row, rows: rows, rowHeight: pitch, window: landed, depth: depth) == nil,
@@ -366,7 +354,7 @@ private final class SectionRig {
         let bottom = top + rowHeight
         let clearTop = window.offset + fades.top
         let clearBottom = window.offset + window.viewport - fades.bottom
-        if top >= clearTop - SidebarLayout.edgeSlack, bottom <= clearBottom + SidebarLayout.edgeSlack { return nil }
+        if top >= clearTop - 0.5, bottom <= clearBottom + 0.5 { return nil }
         return "row \(row + 1) of \(shown.count) spans \(top)…\(bottom); the window shows \(window.offset)…"
             + "\(window.offset + window.viewport) with fades \(fades.top)/\(fades.bottom)"
     }
