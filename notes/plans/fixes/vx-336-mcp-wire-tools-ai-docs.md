@@ -6975,7 +6975,7 @@ and `MCPCompareLandingTests.swift` whole.
 | 4 | R2-2's clause in `MCPWireRefusalSweepTests.swift`'s comment | DONE (`cf619bcc`) — the U-graph comment (`:127–130`) now says the call-graph json is "kept in the VX-336 branch's history at `e454a8ef` and removed from main at the run's closeout" (checked: `git ls-tree e454a8ef` lists `callgraph-35f9cd70.json`). A comment only |
 | 5 | headless finals (MCP · core · workbook) | DONE (02:11:39–02:18:05; `swift build --build-tests` then the whole package `swift test --skip-build` on `cf619bcc`'s sources = the merged final tree, `close/logs/finals.log`, SWIFT-TEST-EXIT 0; load averages 42–47 from other sessions) — **VariorumMCPTests 349 tests / 67 suites PASSED, 1 known issue** (VX-357's `aTakeHoldingUPlus0000IsStoredTruncatedSoItsDigestOverclaims`, by design); **VX-353's `aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` PASSED this run** (no overrun, so no re-run owed) · **VariorumCoreTests 2,872 / 333 PASSED** (282.7 s) · **StringsWorkbookTests 40 / 6 PASSED**. 0 `✘`. The 9 skip lines (the gated measurement suites, the live-server integration test) are IDENTICAL to U9's finals' set. The same counts as U9's `c2f77ce9` finals: `git diff --name-only c2f77ce9 HEAD -- Sources Tests Package.swift` is EMPTY — the merge and PHASE B moved no package source |
 *[removed for publication]*
-| 7 | THE CLOSEOUT WINDOW plan (claim `vx336-close`); READY | NOT-STARTED |
+| 7 | THE CLOSEOUT WINDOW plan (claim `vx336-close`); READY | DONE — ### THE CLOSEOUT WINDOW below (steps 0–C, the scripts in `close/`, READY's reads). **READY: ~57 min of work, a 75-minute claim.** The window itself is NOT run (the orchestrator's GO) |
 
 ### The merge slip (piece 1) — what happened, what it costs, what was done
 
@@ -7053,3 +7053,80 @@ fix):**
 - `aParkedLandingIsConsumed…`, the delivery pin and the two router-round pins never toggle by hand and never drop a
   named column before their projection.
 - `CompareBoardTests` and `CompareLensesCorrectionTests` set `relatedOnly` with no landing armed: a no-op clear.
+
+### THE CLOSEOUT WINDOW — the plan (claim `vx336-close`; runs ONLY on the orchestrator's GO, under the exact claim line it relays)
+
+**What this window does NOT do (said first):**
+- No walk, no MCP client, no live round, no app launch beyond the test host, no rebuild, no product or test change.
+- **Never `claude mcp list` (nor `claude mcp get`).** Nothing registers a client; the fingerprint is read only by the
+  one-liner, before and after.
+- A red that needs code is RECORDED as a FINDING and reported, never fixed under the claim.
+- Never her real store, never `/Applications/Variorum.app`.
+- `castle-W1-20261013` is left alone. ONE simulator, shut down after the phone run.
+
+**No SEAM:** the work is under an hour, and the coordinator's guard puts the A1 FIRST, since every Mac run's test host
+opens the dev store. A batch-only fallback is this same window: it is tests only.
+
+**The tree, the products, the evidence:**
+- **At the GO:** `git diff --name-only cf619bcc..HEAD -- App Sources Tests Package.swift` must be EMPTY (record-only
+  commits since the build).
+- **If `origin/main` moved:**
+  - a notes-only move: say so here, and PHASE C merges it with no rebuild;
+  - a code move, or **VX-306 (Castle phase 2) merged** (it migrates the dev store): STOP before step 1 and report.
+- **The products** (`App/Variorum/DerivedData/`, PHASE B piece 6), never rebuilt here:
+  - `vx336-close`: the final tree, `cf619bcc`;
+  - `vx336-close-red`: the pin-only tree, `65ba0704`;
+  - `vx336-close-ios`: the final tree, phone.
+- **Evidence** goes to `notes/plans/vx336-screens/close/` (gitignored): `logs/`, the `.xcresult` bundles,
+  `prefs-*.plist`, `a1-path.txt`, `store-hash-*.txt`, `backups-*.txt`, `userscope-*.txt`.
+- **The scripts** (there now, each `zsh -n` clean):
+  - `a1.sh`;
+  - `run-mac.sh <step> <product> [Suite …]` (no suite = the whole target);
+  - `run-phone.sh`;
+  - `prefs-diff.py`, dry-run on U9's own pair: "keys 1602 · added 0 · removed 0 · changed 0", U9's result.
+- **The commands, so this record alone can run the window.** Mac runs are from `App/Variorum`:
+  - `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+    DerivedData/<product> -resultBundlePath <close>/<step>.xcresult [-only-testing:VariorumTests/<Suite>…]`, its log
+    `close/logs/<step>.log` ending `XCODEBUILD EXIT n`;
+  - the phone: `run-phone.sh`'s `-xctestrun …/VariorumMobile_VariorumMobile_iphonesimulator27.0-arm64-x86_64.xctestrun
+    *[removed for publication]*
+    the 15 `-only-testing:VariorumMobileTests/<Suite>` (U9's step 1c, exactly).
+- **Every long run** is started DETACHED (`(nohup zsh <script> … >/dev/null 2>&1 &)`) and POLLED in the foreground:
+  `for i in $(seq 1 115); do grep -q 'XCODEBUILD EXIT' <log> && break; sleep 5; done`, repeated past the Bash timeout.
+  Never `tail -f | grep -m1`, never a turn ended while a run is going.
+
+**READY's reads (PHASE B, 2026-10-15 ~02:20 MDT, read-only):**
+- **Instances:** `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both EMPTY. vx-283's Debug app, pid 78993, was
+  running at ~02:10 and had quit by 02:19 — not ours, never touched.
+*[removed for publication]*
+- **The stage:** HELD by `oct13coordinator` ("HOLD: coordinator queue", claimed 02:16:49), not ours.
+- **Her user-scope servers:** **`['linear-server', 'variorum']` `bc64543e2f4e8e58`**, the SAME as U5–U9's windows.
+- **The dev store:** `variorum.sqlite` 00:03 · `-wal` 00:03 · `-shm` 01:01, the two key files. The sha256 prefixes
+  (sqlite `c17923414b2e` · wal `7f2fcf1ec90d` · shm `e4e2b900d45c` · keys `3af4704371ff` / `7e12a1b85890`) EQUAL
+  U5–U9's A1 set. `Backups/` holds 57 entries; `safety-copies/` holds only `castle-W1-20261013` (the earlier A1s have
+  been pruned).
+- **Disk:** 48 GiB free.
+
+| step | what | expected |
+|---|---|---|
+| 0 | **Guards and the claim.** The GO's exact line, run ALONE (`Tools/stage status` is never in an `&&` chain; it exits 1 under a held claim). Then `Tools/WalkKit/guard.sh --author` (her `/Applications` app absent; HID idle ≥ 2 s — exit 3 or 4 ⇒ STOP and report, never quit or kill her app); both strict guards EMPTY; 0 booted simulators; HEAD and the tree check above recorded | the claim held; guards OK |
+| 1 | **A1 FIRST — `zsh close/a1.sh`.** It refuses while any `Variorum.app/Contents/MacOS` process runs. It exports the prefs (`prefs-pre.plist`, keys counted), lists `Backups/` (`backups-pre.txt`) and the store (`store-listing-pre.txt`), and reads the fingerprint (`userscope-pre.txt`). Then ONE copy by `stage.sh`'s copy loop, no launch: `sqlite`, `-wal`, `-shm` and both `variorum-keys-*.json` into `…/Variorum-dev/Backups/safety-copies/scale-prestage-<UTC>/`, each `cmp`-verified; the path goes to `a1-path.txt` and the sha256 prefixes to `store-hash-pre.txt` | "A1 prestage copy (verified)", five files, hashes = READY's; prefs about 1,602 keys; fingerprint `bc64543e2f4e8e58` |
+| R | **R2-1 RED — `run-mac.sh red vx336-close-red MCPCompareLandingTests`** | **EXACTLY "Test run with 11 tests in 1 suite failed … with 4 issues"**, one issue in each of the four R2-1 tests at its last `#expect`: `aNamedPeerThatNeverProjects…` `:369` · `aTornDownBoard…` `:390` · `herOwnToggle…` `:407` · `aNamedPeersColumnLeaving…` `:431`. The suite's other 7 tests green. Any other count or line is a FINDING about the pin (recorded, reported; nothing changed) |
+| G | **R2-1 GREEN — `run-mac.sh green vx336-close MCPCompareLandingTests`** | "✔ Test run with 11 tests in 1 suite passed" — the four R2-1 tests and U6a's seven |
+| W | **THE MERGE-MOMENT WHOLE Mac target — `run-mac.sh whole vx336-close`** (no `-only-testing`; the scheme's one testable is `VariorumTests` — both xctestruns list only it). `guard.sh --author` and the strict guard first. Detached, polled. Afterwards a lingering test host is quit BY BUNDLE ID (`osascript -e 'tell application id "io.lduarte.Variorum.debug" to quit'`), never killed | **Counts are READ, not predicted** (VX-246's merged tip: 4,695 tests / 773 suites, 16 issues incl. 14 known; main's app tree has moved since only by the 0.9.6 release's version bump and notes — VX-340's PR #163 was notes-only — and this branch adds 18 tests in 4 new Mac suites plus edits to `MCPWingFacesTests` and `TutorialMCPChapterTests`, so about 4,713+ / 777). **The standing reds, named from their issue text:** **VX-115** `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (1 at `:101`) · **VX-245/VX-283** `ChromeLineLimitTests.everyBareFixedSizeStatesItsLinePolicy` (exactly the six non-MCP sites `SearchPicker.swift:503`, `TakesShowFaces.swift:185`, `LibraryBulkRow.swift:93/101/109/113`; this branch adds no `.fixedSize` — checked) · **VX-167** `DestructiveUndoWarningTests.redoNeverAsks` (≤ 3 at `:141–143`, in-process parallelism; may pass) · **VX-337**'s two load flakes may appear (`TakesArticleScrollTests.aShortRowStraddlingTheFoldComesBackAboveIt`, `TakesBoardSoakTests.randomizedBoardSoakHoldsEveryInvariant(seed: 21)`) · VX-353 is a headless MCP test (green at piece 5) and should not appear here. **The known issues:** VX-184's 5 + VX-229's 9 = 14, as at VX-246's run (this branch adds no `withKnownIssue`). The gated skips are read from the bundle. **Any OTHER red is re-run ALONE once** (`run-mac.sh rerun-<Suite> vx336-close <Suite>`): a red that reproduces is a FINDING — read it, trace whether this branch's diff (`074c0f94..HEAD`, the merge's included) reaches it, record and report, no fix |
+*[removed for publication]*
+| C | **Cleanup and release.** (1) No instance: both strict guards EMPTY (a lingering test host quit by bundle id). (2) **Prefs:** `defaults export io.lduarte.Variorum.debug close/prefs-window.plist`; `python3 -I close/prefs-diff.py close/prefs-pre.plist close/prefs-window.plist` (names only) → `defaults import io.lduarte.Variorum.debug close/prefs-pre.plist`, then `defaults delete io.lduarte.Variorum.debug <key>` for EVERY added key (import MERGES); re-export to `prefs-post.plist` and diff again until **0 added · 0 removed · 0 changed**. (3) **The dev store:** `Tools/ScaleFixture/restore.sh "$(cat close/a1-path.txt)"` → "Restored (verified)"; a second `cmp` of all five files against the A1 copy SAME; the sha256 set (`store-hash-restored.txt`) EQUAL to `store-hash-pre.txt`. (4) `Backups/` re-listed (`backups-post.txt`), names unchanged; `safety-copies/` = castle-W1 (untouched) + this window's A1. (5) The fingerprint AFTER (`userscope-post.txt`) = BEFORE. (6) 0 simulators booted. (7) No stray `default.profraw`; `git status` clean. (8) `Tools/stage release --who vx336-close`, then `Tools/stage status` run ALONE → STAGE FREE. (9) **THE RESULT LINE** for the coordinator: claim times; R's exact red; G; W's counts with the standing reds named; P; the posture; the A1 path, the coordinator's to prune | Standard, unlocked, Study in the store (as handed over); RELEASED |
+
+**Minutes (sized from MEASURED runs):**
+- 0 + 1: ~3.
+- R + G: ~4 (two one-suite runs; each test-host launch about 30 s).
+- **W: ~37–40.** The same whole target took 2,157 s at VX-246's run and 2,325 s at VX-281's; this branch adds 18 tests.
+- One or two re-runs alone: ~3.
+- P: ~4 (a simulator boot plus U9's 63 s run).
+- C: ~5.
+
+That is **~57 of work; ask a 75-minute claim**, VX-246's size, which used 42. If the load from other sessions stretches
+W, `Tools/stage renew --who vx336-close --minutes 20` extends our own claim before it expires.
+
+**The reason line for the claim:** `"VX-336 closeout: R2-1 pin red/green + WHOLE Mac target on merged tree + 15 phone
+suites (one sim), dev store A1 first"`.
