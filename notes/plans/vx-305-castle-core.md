@@ -579,9 +579,12 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   suites green; `41c9d63f`). (j) THE SOAK — IN PROGRESS, seed by seed, Debug: findings so far triaged and committed
   one by one (code bugs with red-on-old pins: the landing resumed at its swap `e7ce22d6`, a Mac replaced mid-act with
   no memory `81924cae`, Re-link unoffered after a replacement `3bff0ba5`; checker findings fixed in the world;
-  P-U4-12/13 recorded; the pre-migration snapshot class superseded by her cut). Seeds 3 and 4 green × 1000 on their
-  trees; seeds 1–2 to re-run on the final tree. NEXT: seeds 5–20, then 1–2 again, then Release — PENDING; (k) the
-  runs — PENDING; (l) the final record — PENDING.
+  P-U4-12/13 recorded; the pre-migration snapshot class superseded by her cut). Through seed 15 every finding is
+  triaged and committed (code bugs pinned red-on-old; checker/world findings fixed in the world; P-U4-14 at
+  `d69e28f3`; the seed-9 model gap — reopening this Mac's own set-aside library — DEFERRED and RATIFIED to phase
+  5/VX-309 by the orchestrator). The tree `8dd79259` is the soak's current tree: seeds 15 and 16 green × 1000 on it.
+  NEXT: seeds 17–20, then seeds 1–14 again on the final tree, then the 20 under `-c release` — PENDING; (k) the runs
+  — PENDING; (l) the final record — PENDING.
 - The go/no-go record: **NOT-STARTED.**
 
 ---
