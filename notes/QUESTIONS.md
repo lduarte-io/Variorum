@@ -2894,4 +2894,12 @@ renumbers. #227 was free at the merge.)*
   - **Batch 5 → all RATIFIED as built:** P-VX254-1 and P-VX254-2 (no fingerprints from divide, merge, `save_version`,
     the book import — so **VX-366 is closed as decided**, Canceled with the reason) · P-VX256-2/3/4 · P-VX261-1 (since
     the client's last approval).
-Status: open — your eye; the handoff's checklist leads with this bundle.
+  - **The rest → RATIFIED as built** (*"the rest of the questions are ratified"*): P-VX261-2…6 · P-VX197-U8b-1/2 ·
+    orchestrator's rulings 1 and 2.
+  - **P-VX311-2's follow-on promoted, the same sitting:** VX-371 is now Medium, Pre-launch, a child of the sweep VX-348
+    (*"it seems like a small change and I feel like it should be done. it seems weird to me that if an AI creates a
+    note it can put it in a book with write new but it can't do that for a note it duplicated."*). The shape:
+    `duplicate_note` gains an optional `book_id` (and `section_id`) like `create_note`, at Write new on that book. Her
+    question about tags is answered on the ticket: a duplicate wears the original's tags as copied rows, so no
+    tag-collecting book seats it or rings for it (P-17y-B3-c1); gatherings show it at once.
+Status: RATIFIED 2026-10-15 — every item above answered; P-VX311-2 to be extended by VX-371 (pre-launch).
