@@ -622,4 +622,20 @@ extension GeneratorFoundScenarios {
         #expect(world.phone.library?.section.actInFlight == nil, "the change of passphrase stuck in flight")
         expectPromisesKept(world)
     }
+
+    /// Seed 6 (sequence 338, the closer's soak): New Words crashed after its
+    /// vault write; another device then left Castle for the account (a new
+    /// master); the relaunch's resume refreshed the live key file's master
+    /// words copy from the vault — the NEW master's, beside a master lock
+    /// still under the old one — so the "your account" line named a road that
+    /// opens nothing (promise 9). §3.5a: the copy is refreshed only while its
+    /// master is current — now checked against the file's own master lock.
+    @Test func newWordsResumedPastAnotherDevicesLeaveKeepsTheWordsCopyHonest() async throws {
+        let world = try Self.start("a phone on an older build beside a synced Castle Mac", seed: 6000356)
+        for action in [Action.updateToNewBuild("phone"), .crash(.regenerateWords("phone"), afterWrites: 4),
+                       .useStandard("macA"), .useStandard("phone")] {
+            await world.step(action, words: true)
+        }
+        expectPromisesKept(world)
+    }
 }

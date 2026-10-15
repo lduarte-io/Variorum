@@ -62,8 +62,14 @@ struct KeyDoorProgram: ActProgram {
             default:
                 guard let words = ctx.secrets.words else { throw ExecutorRefusal.secretsRequired(act) }
                 file = try file.settingWords(words, for: ctx.library.key)
-                // §3.5a: the master's words copy refreshed while that master is current.
-                if let account = ctx.accountID, let vault = ctx.executor.freshVaults[account] {
+                // §3.5a: the master's words copy refreshed while that master is
+                // current — the vault's master must be the one this file's
+                // master lock is under (a resume after another device replaced
+                // the account's keys put the NEW master's copy beside the old
+                // master's lock — VX-305 U4, the soak's seed 6).
+                if let account = ctx.accountID, let vault = ctx.executor.freshVaults[account],
+                   let master = VaultModel.master(of: vault.format, passphrase: nil, words: words),
+                   (try? file.open(master: master)) != nil {
                     file = file.refreshingMasterWordsCopy(vault.format.masterWrappedByRecovery)
                 }
             }
