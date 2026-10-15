@@ -2845,8 +2845,8 @@ the end of this U7 section. Claims stay PENDING until read from a log.
 | 2 — VX-254: the flat answers (`add_take`, `add_takes`' `takes[]`, `edit_take`, `restore_commit`); `divide_block`/`merge_blocks` answer NO digest (F-254-2 (b), ruled) | DONE (this commit): P-254-2…10 red-on-old (9 failed, 50 issues) then 10/10 green |
 | 3 — VX-254: descriptions, pins red by absence, revert run, the U+0000 CHECK | DONE (this commit): descriptions `5852e474`; the U+0000 CHECK FOUND truncation (BUILDER A's RECORD); the whole MCP suite 293/61 green (1 known issue) + the touched core suites 171/42 green; THE REVERT RUN (announced `badcf3b7`): the eight product files back to `54cc62a5` → `MCPWriteDigestServerTests` 10 of 11 FAILED, 52 issues (the guard green); restored by `git checkout HEAD -- Sources` (status clean) → 15/15 green in both digest suites (1 known issue). No revert in flight. |
 | 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | DONE (`c22a57d2` + this commit): 11 pins red by absence (11 failed, 24 issues) then green; PROVISIONAL P-VX261-6 built; THE REVERT RUN (announced `fdd82382`): arm (a) the product back to `b0175aeb` → 11 of 11 failed, 24 issues; arm (b) `hidesTarget` forced false → exactly the two hidden-target pins failed (7 issues), nine green; restored (status clean) → 35/35 green (`MCPOwnActivityServerTests`, `MCPServerTests`, `MCPWriteServerTests`). No revert in flight. The Mac pin's run is THE WINDOW's (PENDING). The headless finals GREEN (core 2,871/333 · MCP 304/62, 1 known issue · workbook 40/6) and `build-for-testing` SUCCEEDED into `vx336-u7a` (BUILDER A's RECORD). **BUILDER A STOPPED at this seam; builder B (VX-256 + THE STAGE WINDOW) is next.** |
-| 5 — VX-256: `read_note` paging + `ids_only` (pins, revert) | NOT-STARTED — D-256-* |
-| 6 — THE STAGE WINDOW plan (claim `vx336-u7`), headless + Mac build-for-testing, READY | NOT-STARTED — the draft below |
+| 5 — VX-256: `read_note` paging + `ids_only` (pins, revert) | IN-PROGRESS — **BUILDER B** (opus-implementer, from 2026-10-14 ~20:00 MDT; HEAD at start `b5d838e1`). The build plan is BUILDER B's RECORD (end of this U7 section). Next: the wire pins, red on `b5d838e1` |
+| 6 — THE STAGE WINDOW plan (claim `vx336-u7`), headless + Mac build-for-testing, READY | NOT-STARTED — builder B's, after piece 5 (the draft below) |
 
 ### The traces (read in this session; file:line at `5c48547f`)
 
@@ -3780,3 +3780,46 @@ its row would be caught. (4) The Mac words pin is unrun here (the window's).
 - **Next:** builder B, VX-256 plus THE STAGE WINDOW (`vx336-u7`) with the 19 Mac suites carried. It may reuse or replace
   `DerivedData/vx336-u7a`; the window runs one final product.
 
+
+### BUILDER B's RECORD (VX-256 + THE STAGE WINDOW; opus-implementer, from 2026-10-14 ~20:00 MDT)
+
+**NOT DONE by builder B (said first):** everything below is NOT-STARTED until its line says otherwise. No subagent is
+spawned (the brief); no `xcodebuild test`, no launch, no store touched before the GO.
+
+**Read in full in this session:** the run record's header, Hard rules, LIVE STATUS and the U7 BRIEF; the U7 UNIT RECORD
+whole (the traces, D-254/256/261, THE FORKS, PROVISIONALs, FOR VX-234, THE SPLIT, the live-leg draft, OWED, THE
+ORCHESTRATOR'S RULINGS ON U7's FORKS, BUILDER A's RECORD, THE ORCHESTRATOR ON BUILDER A's STOP); U5b's THE STAGE WINDOW,
+the U5 STAGE RUN, THE ORCHESTRATOR ON U5's and ON U6's WINDOW; `notes/MCPSpec.md`; the resiliency protocol's implementer
+section; `MCPReadTools`, `MCPNoteStructure`, `LensQueries`, `MCPToolCatalog`'s read rung, `MCPReadShapeServerTests`,
+`MCPPicksPlanTests`, the harness (`MCPServerTests`' `ServerHarness`), `Tools/ScaleFixture/{stage,restore}.sh` and
+`ScaleFixture.swift`.
+
+**THE BUILD PLAN (the rulings applied to code; re-verified pointers at `b5d838e1`):**
+- **The parse** (`MCPReadTools.readNote`, inside `if !plain` — `export_note` untouched): `limit` (`optionalInt`, CLAMPED
+  1–200 like `list_notes` and `list_my_activity`), `cursor` (decoded by a new `NotePageCursor`, base64 of
+  `n\n<container id>\n<position>\n<placement id>`; undecodable → `staleCursorMessage`, thrown before the transaction
+  exactly as `list_notes` does), `ids_only` (`optionalBool`). Either of `limit`/`cursor` asks for pages (cursor alone =
+  50); paging and `ids_only` each imply `with_ids`.
+- **The order (D-256-6):** the parse → the note's decision exactly as today (the ONE refusal, byte-identical) → the
+  `version_id` and `lens_id` checks, their order and words kept → NEW: the cursor's container must be the container
+  paged (`version_id ?? note_id`), else the stale sentence, logged refused like the version check → the once spend → the
+  read. A stale cursor never spends a once grant.
+- **The page (`MCPNoteStructure.read`, `Options.page`/`Options.idsOnly`):** ONE keyset statement on `idx_cblock_order`
+  (exposed as `MCPNoteStructure.pageSQL` for the plan pin), `limit + 1` rows (the extra says blocks remain); the takes for
+  the first `limit`; then the budget walk — a block joins while the page's take text (its fan as emitted, archived takes
+  included under `include_archived`; zero under `ids_only`) plus, on the first page, the tray's text stays ≤ 32,000
+  characters (`pageTextBudget`, PROVISIONAL P-VX256-1), the first block always whole; comments, lineage, parents,
+  commits and lens picks are then read for the page's blocks only. Commits ride newest-first across the PAGE within what
+  the budget has left (`text_omitted` past it; `commit_ids` always ride); a `commit_ids` entry off the page refuses
+  "commit_id X isn't a commit of a take on this page." (P-VX256-4; the unpaged words unchanged).
+- **The answer:** the with_ids object per page; `next_cursor` only while blocks remain (the last page block's placement
+  `(position, id)`, naming the container); `block_count` on the first page only (one index count); `with_tray` and
+  `with_versions` on the first page only; `with_lenses` on every page with picks for the page's blocks (a page-scoped
+  `Queries.effectiveLensSelection(_:lens:blocks:)` on `uq_lens_choice_live`) and `dangling_picks` on the first page only;
+  `lens_id` reads each page through the lens by the same page-scoped picks. `ids_only`: every take entry carries
+  `sha256` (`MCPTextDigest`) in place of `text`; comments, commits, tray and lineage keep their text.
+- **No flush, no undo** (D-256-9): `read_note` is not a `Job`.
+- **The pins** (`Tests/VariorumMCPTests/MCPPagedReadServerTests.swift`, wire, compiling on the old tree; then
+  `MCPPagedReadPlanTests.swift`, red by absence of the SQL): P-256-1…4 and 6–10 red; P-256-5 (the fence) and G-256-1
+  (every form without the new asks byte-unchanged — a golden-byte pin) are GUARDS, green on both sides by design; a
+  catalog pin for the three new inputs; P-256-11 the plan.
