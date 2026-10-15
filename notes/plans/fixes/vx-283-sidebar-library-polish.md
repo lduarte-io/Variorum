@@ -366,7 +366,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **READY FOR STAGE** (≈12 min — the 93-suite batch re-run; Q6). The first window (21:24–21:29): batch 408 tests, 3 red — U3's VX-245 lint, a U1b pin fault, a real F-1 residual (a reveal resolved mid-animation, 1 pt short); R-D/R-E red where needed. Q5 fixed the residual and the pin; Q7 built the ruling on P-U1b-5 (the settle derived from the rail's one beat, pinned). Then the re-walk. F-3 → VX-359 (U3 rider). |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **STOPPED — the re-run (21:40–21:43) is not green**: 410 tests, 2 red — VX-245's lint (U3's, on main) and the Starred fade pin, the revealed last starred row 2 pt short after a pitch flip (the F-1 residual, narrowed but not gone; hypothesis + options in "THE RE-RUN'S RESULTS"). Awaiting the orchestrator. Every other U1b pin green. F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -883,10 +883,10 @@ lines — below); any stage work until the orchestrator hands over a claim.
   (this commit) — headless `build-for-testing` green; the re-run PENDING a short window (Q6).
 - Q7 — the orchestrator's ruling on P-U1b-5 (the settle derived from the rail's ONE transition constant, pinned):
   DONE (this commit) — headless `build-for-testing` green; its pins run in Q6.
-- Q6 — **READY FOR STAGE** (≈12 min): the batch — now **93 suites** (the 92 + `SidebarTransitionBeatTests`),
-  `test-without-building` on `DerivedData/vx283-u1` (this commit's code); no revert (the residual's red-on-old IS the
-  first window: the Starred pin red at `62d5a4a1`); the same restore. Expected: VX-245's lint the only red. Then READY
-  FOR WALK.
+- Q6 — the re-run window: DONE (claim `vx283-u1b2` 21:40:19 → released 21:43:09) — **NOT GREEN: the Starred pin is
+  still red** (2 pt short — "THE RE-RUN'S RESULTS" below). **STOPPED at the orchestrator's rule** ("if anything
+  besides VX-245's lint is red, record it exactly and stop"): nothing fixed; NOT READY FOR WALK; awaiting the
+  orchestrator. Store and prefs restored and verified.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
@@ -1107,6 +1107,35 @@ lines — below); any stage work until the orchestrator hands over a claim.
   half, U3's file), not the sidebar's beat.
 - **The pin fault:** `theOpenListFadesOnlyTheEdgesWithMoreBeyond`'s mid-list step now opens row 15 (index 14,
   420…450), below the 351-pt list's fold.
+
+**THE RE-RUN'S RESULTS (Q6 — 2026-10-14 21:40–21:43, products at `dffcde59`, HEAD's code; log
+`notes/plans/vx283-screens/u1b/logs/batch-q6.log`, gitignored):**
+- **The batch** (93 suites, `test-without-building`): **"✘ Test run with 410 tests in 93 suites failed after 86.579
+  seconds with 2 issues."** 408 passed · 2 failed · **no skipped lines**.
+  1. `ChromeLineLimitTests.everyBareFixedSizeStatesItsLinePolicy` (`:104`) — VX-245's lint, U3's, red on main (as
+     before).
+  2. **`SidebarSectionWindowMountTests.starredFadesWhereMoreLiesBeyondAndNowhereWhenItHoldsEverything`
+     (`SidebarSectionWindowTests.swift:516`) — STILL RED:** "the ninth star revealed: EdgeFades(top: 12.0, bottom:
+     2.0) over ScrollWindow(offset: 34.0, viewport: 180.0, content: 216.0)" — the last starred row (192…216) rests
+     **2 pt short** of the window's end (36), the bottom edge fading 2 pt. (Before Q5 it read 35 — 1 pt short.)
+- **Everything else U1b pins is green:** the pure rules ×9 and the beat ×2; `returningToTheNoteYouWereInRevealsItsRow`
+  (resting at 249.006 of 249), `aShorterListKeepsTheCurrentRowInView` (204.0 — exact), the walker's road, the
+  ⇧⌘W landing, `theOpenListFadesOnlyTheEdgesWithMoreBeyond` (the pin fault fixed).
+- **What differs in the red case — an UNTRACED hypothesis, not acted on:** only the Starred step changes its ROW
+  HEIGHTS inside the transition (the open adds the rail and a fourth Open row, so the column's pitch flips 30 → 24;
+  Starred's window goes 225 → 180, its content 270 → 216), and its target row was never realized at the new pitch
+  before the reveal. The Open-list pins (no pitch flip at 900 pt) land exact, and the offscreen probe (fixed 30-pt
+  rows) never showed it. So the proxy's `scrollTo(id, anchor:)` may resolve the lazy stack's STALE position estimate
+  for that row — and even the settled second ask (300 ms later) lands short, after which nothing asks again. To trace
+  before any fix (the probe can reproduce a pitch flip offscreen).
+- **Options for the orchestrator (none built):** (a) after the settled ask, keep asking on READINGS while the row is
+  not clear (bounded; settle-time only, so it never fights her); (b) scroll by an exact OFFSET computed from the row
+  model (`ScrollPosition.scrollTo(y:)`), not the proxy's id lookup; (c) both.
+- **Restore:** the dev store's three files byte-identical before the copy-back (the test host writes no store), copied
+  back from `store-before/20261015T034027Z/`, `cmp`-verified each. Prefs: 9 keys ADDED (deleted by hand; one
+  `surfaceSize.outline.*` key needed a second delete after the import), 2 CHANGED (`IdleCommitSweepMark.Variorum-dev`,
+  `variorum.backup.log`); `defaults import` of `prefs-before-q6.plist`, re-export, diff CLEAN (1602 = 1602).
+  `castle-W1-20261013` untouched (the only safety copy); zero dev instances throughout.
 
 #### U1b — THE RE-WALK PLAN (the orchestrator's; her walk rule — a fresh Opus at xhigh)
 
