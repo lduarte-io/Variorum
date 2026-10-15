@@ -224,7 +224,17 @@ struct ScenarioGenerator {
         var roll = rng.int(0..<weights.reduce(0, +))
         var kind = 0
         while roll >= weights[kind] { roll -= weights[kind]; kind += 1 }
-        let action = make(kind, name, other, account)
+        var action = make(kind, name, other, account)
+        // HER RULING (the legacy cut, 2026-10-14, widened 2026-10-15 — "no old
+        // backups or builds have to be considered"): a Time Machine snapshot
+        // of a store that has not yet migrated (no record) is a backup from
+        // BEFORE the switch — an old backup. Restored over the migrated store,
+        // it brings back today's shape for a second migration that knows
+        // nothing of the first one's keys (the closer's soak, seed 3 sequence
+        // 724: the first migration's own Apple key never retired at a later
+        // Use Castle) — superseded by the ruling, never generated. The open
+        // goes first; snapshots of the migrated store stay fully in scope.
+        if case .timeMachineSnapshot = action, d.slot?.record == nil { action = .launch(name) }
         if kind != 45, rng.chance(12) { return .crash(action, afterWrites: rng.int(1..<24)) }
         return action
     }

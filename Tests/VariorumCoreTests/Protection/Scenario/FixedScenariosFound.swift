@@ -248,6 +248,9 @@ struct GeneratorFoundScenarios {
     /// its Standard key (Apple-wrapped) while the account reads Castle and the
     /// Castle sweep took today's silent item: the migration records the key's
     /// Standard birth and owes the follow, never "Castle" over an Apple wrap.
+    /// BEYOND SCOPE, KEPT WHILE GREEN: a snapshot of today's (pre-migration)
+    /// files is a backup from before the switch — an old backup (her legacy
+    /// cut, 2026-10-14, widened 2026-10-15); the generator no longer takes one.
     @Test func aRollbackPastUseCastleToTodaysFilesKeepsTheKeysBirth() async throws {
         let world = try Self.start("a device that joined without a secret", seed: 1000855)
         await world.done([.timeMachineSnapshot("macA"), .useCastle("macA", .touchID, newWords: false), .timeMachineRollback("macA"),
