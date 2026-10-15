@@ -71,6 +71,10 @@ public struct UnlockedLibrary {
     public var keyFile: KeyFile?
     /// The family tree at open (its two homes unioned).
     public var familyTree: FamilyTree
+    /// The other keys the lobby's road reached on the way (the live key file's
+    /// current key when the library opened through its history) — what the
+    /// older-library-file repair re-encrypts under.
+    public var keysInHand: [StoreKey] = []
 
     public var fingerprint: String { StoreKeyEnvelope.fingerprint(of: key) }
 
@@ -253,9 +257,11 @@ public final class ProtectionExecutor {
             memory: memory, recordSections: sections, marker: record.marker(for: configuration.machine),
             keyFileOwnAppleKeyIDs: [liveFile?.apple?.keyID].compactMap { $0 },
             mintDeviceID: { self.leaves.ids.mintID() }, guards: guards)
-        return UnlockedLibrary(
+        var unlocked = UnlockedLibrary(
             key: key, record: record, section: section, resolution: resolution, memory: memory, keyFile: liveFile,
             familyTree: FamilyTree.atOpen(record: record.familyTree, memory: memory?.familyTree, guards: guards))
+        unlocked.keysInHand = alsoInHand
+        return unlocked
     }
 
     func liveFormat3() throws -> KeyFile? {

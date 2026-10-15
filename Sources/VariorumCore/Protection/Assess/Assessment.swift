@@ -202,6 +202,15 @@ public enum Repair: Hashable, Sendable {
     /// copy's frozen key file of the CURRENT key is catalogued — the newest is
     /// put back as the live file (its Apple wraps never re-added). VX-305 U4.
     case restoreKeyFileFromCopy(keyFileID: String)
+    /// Always, first: the library file is OLDER than what this Mac remembers
+    /// — a library file replayed alone (§3.6, promise 10): the memory names a
+    /// newer key epoch and current key, the live key file is that key's, and
+    /// its history holds the file's key. The file is re-encrypted under the
+    /// current key and takes the memory's facts (the current key's kind as
+    /// the mode; the account last confirmed) — the open rule's same-library
+    /// branch applied to the slot (§3.7: never lowers the mode, never keeps
+    /// its own key). PROVISIONAL P-U4-6. VX-305 U4.
+    case rekeyOlderLibraryFile(toFingerprint: String)
     /// §3.10: this device's choice says Touch ID and no item exists — Always
     /// ask is recorded quietly (a settings write; never an item).
     case recordAlwaysAskQuietly

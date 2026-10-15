@@ -366,6 +366,13 @@ extension SWorld {
             fail("a login-password holder reaches the current key \(f8(record.currentFingerprint))", 8)
         }
         for (id, image) in imagesOn(device) where image.libraryID == record.libraryID && id != "container:\(SPath.slot)" {
+            // "any copy made on this Mac or on a device of its account that has
+            // followed": a pair another Mac sent here (its own Standard copy,
+            // under its own key) isn't one.
+            if let made = truth.copies[id], made.madeOn != device.name, record.account == nil || made.holder != record.account {
+                continue
+            }
+            if senders.contains(where: { id.hasPrefix("container:\($0.key)/") && $0.value != device.name }) { continue }
             if attacker[image.fingerprint] != nil, !exempt.contains(image.fingerprint), !truth.listedBySheet.contains(id) {
                 fail("a login-password holder opens the copy \(id) (\(f8(image.fingerprint)))")
             }

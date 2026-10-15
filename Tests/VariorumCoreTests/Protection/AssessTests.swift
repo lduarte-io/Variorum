@@ -507,7 +507,7 @@ struct AssessRepairTests {
                     Issue.record("\(repair) — a guard's bug shape with every guard on")
                 case .deleteSilentItem, .deleteLegacyItem, .deleteLegacyKeyFile, .deleteRetiredAppleKey,
                      .deleteRetiredOldSharedKey, .landAppleWrap, .refreshMemory, .refreshRecordSection,
-                     .restoreKeyFileFromMirror, .restoreKeyFileFromCopy, .recordAlwaysAskQuietly:
+                     .restoreKeyFileFromMirror, .restoreKeyFileFromCopy, .recordAlwaysAskQuietly, .rekeyOlderLibraryFile:
                     continue
                 }
             }

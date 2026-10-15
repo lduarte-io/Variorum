@@ -206,6 +206,10 @@ public protocol DiagnosticsLeaf: AnyObject {
 
 /// What Diagnostics lists — typed, so no entry can carry a secret.
 public enum ProtectionDiagnostic: Equatable, Sendable {
+    /// A library file older than what this Mac remembers (a library file
+    /// replayed alone, §3.6) — re-encrypted under the current key, the
+    /// memory's facts kept (VX-305 U4). Eight-character prefixes only.
+    case olderLibraryFileRekeyed(older8: String, current8: String)
     /// A plan on disk this Mac's section doesn't name, or one failing its
     /// seal — ignored (§3.6).
     case planIgnored(PlanIgnoredReason)

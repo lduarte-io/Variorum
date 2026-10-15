@@ -143,7 +143,24 @@ public struct ProtectionGuards: Equatable, Sendable {
     /// THE FRESH PAIR AFTER THE MOVE (§3.5 point 2): the move ends with a
     /// fresh backup pair of the live library. Off: none.
     public var freshPairAfterMove = true
+
+    // U4 — the guards the scenario world's bugs added.
+    /// A LIBRARY FILE REPLAYED ALONE LOSES TO THE MEMORY (§3.6, promise 10 —
+    /// VX-305 U4, found by the scenario world): a library file older than what
+    /// this Mac remembers (the memory names a newer key, the live key file is
+    /// that key's and its history holds the file's) is re-encrypted under the
+    /// current key and takes the memory's facts. Off: the replayed record wins
+    /// — its mode, its account, its key.
+    public var libraryFileLosesToMemory = true
     #endif
+
+    public var libraryFileLosesToMemoryOn: Bool {
+        #if DEBUG
+        return libraryFileLosesToMemory
+        #else
+        return true
+        #endif
+    }
 
     public var twoHomesOn: Bool {
         #if DEBUG

@@ -405,6 +405,19 @@ extension SWorld {
                 let typed = TypedSecrets(passphrase: own.passphrase ?? acct.passphrase, words: own.words ?? acct.words)
                 return try await executor.resumeSyncAfterLanding(&library, typed: typed)
             }
+            // A secret made new at the landing became the account's (the
+            // account's forgot road, as the landing said): the truth follows
+            // whatever now opens the vault.
+            if let account = d.library?.record?.account, let vault = server.snapshot(account) {
+                let own = known(holder(d, account: nil, libraryID: d.library!.record!.libraryID)), acct = known(account)
+                let p = [own.passphrase, acct.passphrase].compactMap { $0 }.first { p in
+                    passphraseKey(p, vault.format.kdf).map { (try? vault.format.unwrapMaster(withPassphraseKey: $0.key)) != nil } == true
+                }
+                let w = [own.words, acct.words].compactMap { $0 }.first { w in
+                    wordsKey(w).map { (try? vault.format.unwrapMaster(withRecoveryKey: $0)) != nil } == true
+                }
+                if p != acct.passphrase || w != acct.words { setKnown(account, passphrase: p ?? acct.passphrase, words: w ?? acct.words) }
+            }
         case .follow(let name, let typing):
             let d = device(name)
             try await act(d) { executor, library in
@@ -477,6 +490,7 @@ extension SWorld {
             let folder = "\(CatalogNames.handOffPrefix)\(CatalogNames.stampString(clock).prefix(10))"
             try await act(sender) { executor, library in try await executor.sendLibrary(&library, to: folder) }
             senderHolders[folder] = slotHolder(sender)
+            senders[folder] = from
             for path in sender.container.paths(under: folder + "/") { receiver.container.files[path] = sender.container.files[path] }
             receiver.incoming.append(folder)
         case .land(let name, let typing):
@@ -610,6 +624,11 @@ extension SWorld {
             clone.session = source.session
             clone.build = source.build
             clone.biometry = BiometryFake(generation: source.biometry.generation + 50)
+            // The same libraries, so the same secrets: a local library's
+            // holder is per device in the world's bookkeeping.
+            for (holder, known) in truth.known where holder.hasSuffix("@\(from)") {
+                truth.known[String(holder.dropLast(from.count)) + to] = known
+            }
             syncICloud(clone)
         case .goOffline(let name): device(name).online = false
         case .goOnline(let name): device(name).online = true

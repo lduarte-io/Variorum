@@ -74,6 +74,7 @@ extension ProtectionExecutor {
         case .refreshRecordSection: return "refreshRecordSection"
         case .restoreKeyFileFromMirror: return "restoreKeyFileFromMirror"
         case .restoreKeyFileFromCopy: return "restoreKeyFileFromCopy"
+        case .rekeyOlderLibraryFile: return "rekeyOlderLibraryFile"
         case .recordAlwaysAskQuietly: return "recordAlwaysAskQuietly"
         case .makeTouchIDItem: return "makeTouchIDItem"
         case .deleteTouchIDItem: return "deleteTouchIDItem"
@@ -206,17 +207,8 @@ extension ProtectionExecutor {
             try writeMemory(&library)
             return nil
 
-        case .restoreKeyFileFromCopy(let id):
-            guard try liveFormat3() == nil else { return .nothingThere }
-            guard case .format3(var copy)? = try leaves.keyFiles.readKeyFile(catalogID: id),
-                  copy.fingerprint == library.fingerprint, copy.libraryID == library.record?.libraryID
-            else { return .preconditionDoesNotVerify }
-            // Never an Apple wrap re-added: those leave legitimately.
-            copy.apple = nil
-            copy.sharedApple = nil
-            try writeLiveKeyFile(copy, &library)
-            try writeMemory(&library)
-            return nil
+        case .rekeyOlderLibraryFile(let to):
+            return try rekeyOlderLibraryFile(to: to, &library)
 
         case .recordAlwaysAskQuietly:
             guard library.section.settings.gateStyle == .touchID else { return .nothingThere }
@@ -237,5 +229,56 @@ extension ProtectionExecutor {
             try leaves.custody.deleteCustody(fingerprint: fingerprint, itemClass: .touchid)
             return nil
         }
+    }
+}
+
+extension ProtectionExecutor {
+    /// The library file is older than what this Mac remembers (§3.6, promise
+    /// 10): verified with the keys in hand — the memory (sealed, verified at
+    /// unlock) names `to` at a newer epoch, the live key file is `to`'s, and
+    /// its history opens with `to` to exactly the key the file is under — the
+    /// file is re-encrypted under `to` and its record takes the memory's facts.
+    /// Idempotent: a crash before the swap leaves the older file (the staged
+    /// one is discarded at the next open and this runs again); after it, the
+    /// file is current and nothing is owed. PROVISIONAL P-U4-6. VX-305 U4.
+    func rekeyOlderLibraryFile(to: String, _ library: inout UnlockedLibrary) throws -> RepairSkip? {
+        guard let record = library.record, let memory = library.memory, memory.currentFingerprint == to,
+              memory.keyEpoch > record.keyEpoch, let live = library.keyFile, live.fingerprint == to,
+              let newKey = ([library.key] + library.keysInHand).first(where: { Self.fp($0) == to }),
+              let older = try? live.historyKey(library.fingerprint, currentKey: newKey),
+              Self.fp(older) == library.fingerprint
+        else { return .preconditionDoesNotVerify }
+        if try leaves.library.stagedFingerprint() != to {
+            try leaves.library.stageReencryption(from: library.key, to: newKey)
+        }
+        let reach = reach(key: newKey, keyFile: live, extra: [library.key])
+        var next = record
+        // The current key's kind is the mode (§3.2); the account and the
+        // confirmation are what this Mac last confirmed for that mode.
+        next.mode = library.familyTree.entry(to)?.kind ?? memory.lastConfirmed?.mode ?? record.mode
+        if let confirmed = memory.lastConfirmed, confirmed.mode == next.mode {
+            next.modeConfirmed = true
+            next.account = confirmed.account
+        } else {
+            next.modeConfirmed = false
+        }
+        next.currentFingerprint = to
+        next.keyEpoch = memory.keyEpoch
+        next.familyTree = library.familyTree.union(record.familyTree)
+        let others = record.verifiedSections(reach: reach).filter { $0.deviceID != library.section.deviceID }
+        next.deviceSections = try (others + [library.section]).map {
+            try Sealed.sealing($0, purpose: .deviceSection, libraryID: next.libraryID, key: newKey)
+        }
+        try leaves.library.writeStagedRecord(next, with: newKey)
+        try leaves.library.swapStaged(setAside: false)
+        library.key = newKey
+        library.keysInHand = []
+        guard let written = try leaves.library.readRecord(with: newKey) else { throw ExecutorRefusal.recordMissing }
+        library.record = written
+        library.familyTree = library.familyTree.union(written.familyTree)
+        leaves.diagnostics.report(.olderLibraryFileRekeyed(older8: String(Self.fp(older).prefix(8)), current8: String(to.prefix(8))))
+        log("the library file was older than this Mac remembers — re-encrypted under \(to.prefix(8)), the memory's facts kept")
+        try writeMemory(&library)
+        return nil
     }
 }

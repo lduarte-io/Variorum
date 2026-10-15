@@ -244,6 +244,8 @@ final class SWorld {
     var wordsDerived: [String: WordsKey] = [:]
     /// Whose secrets a sent pair was locked under, by hand-off folder.
     var senderHolders: [String: String] = [:]
+    /// Send Library's folder → the Mac that sent it.
+    var senders: [String: String] = [:]
     /// Devices whose last act crashed (their next launch finishes it).
     var crashed: Set<String> = []
     /// Every promise violation, with the log line it surfaced at.

@@ -221,6 +221,15 @@ public enum AssessRules {
         // A library with no record yet: the migration is owed, and it does its
         // own steps — no repair runs before it (§3.13).
         guard let record = unlocked.record else { return (repairs, faults) }
+        // FIRST: a library file older than what this Mac remembers (a library
+        // file replayed alone, §3.6) loses to the memory — before any repair
+        // moves toward its stale record.
+        if guards.libraryFileLosesToMemoryOn, let memory = unlocked.memory, memory.keyEpoch > record.keyEpoch,
+           memory.currentFingerprint != record.currentFingerprint,
+           let live = liveKeyFile(facts, unlocked), live.fingerprint == memory.currentFingerprint,
+           live.history.contains(where: { $0.fingerprint == unlocked.currentFingerprint }) {
+            return ([.rekeyOlderLibraryFile(toFingerprint: memory.currentFingerprint)], faults)
+        }
         // ALWAYS: the two homes agree — nothing lost by construction (newer
         // wins, the retired ids and the tree are unions).
         do {
