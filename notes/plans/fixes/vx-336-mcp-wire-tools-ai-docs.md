@@ -4137,6 +4137,59 @@ round are the window's — PENDING.
 5. **No ticket minted by builder B.** None proposed.
 
 
+## U8a UNIT RECORD — the model-facing words: `MCPSession.instructions`, the tool descriptions, the stargazing brief's delta (VX-197; opus-implementer, from 2026-10-14 ~20:40 MDT)
+
+**NOT DONE (said first): no code, no pins and no brief edit yet.** This session read in, then PAUSED at the
+orchestrator's word (U7's window took its GO) before its first product or test commit. Nothing is in flight; `git status`
+is clean.
+
+**Read in full in this session (never delegated):** this record's header, Hard rules, LIVE STATUS, Her rulings, the U8
+BRIEF (its SPLIT and the U7 carries), the U5a UNIT RECORD (traces, design, FOR VX-234, OWED), U5b's design D1–D10, its
+FORKS, PROVISIONALs, FOR VX-234, OWED and THE ORCHESTRATOR'S RULINGS ON U5b's FORKS, THE ORCHESTRATOR ON U5's WINDOW,
+U6a's design (D-311-*, D-298-*), PROVISIONALs, FOR VX-234, OWED, its RULINGS and its ONE OPEN DECISION's ruling, U6b's
+FOR VX-234 and OWED, THE ORCHESTRATOR ON U6's WINDOW, U7's FORKS and THE ORCHESTRATOR'S RULINGS ON U7's FORKS, BUILDER A's
+RECORD, THE ORCHESTRATOR ON BUILDER A's STOP, BUILDER B's RECORD (its PROVISIONALs, FOR VX-234, OWED);
+`notes/plans/mcp-pane-and-docs-kickoff.md` ("U7: the AI's docs", HER ADDITIONS, R-VX184-2/3/4); `notes/MCPSpec.md`
+whole; `notes/stargazing-mcp-guide-brief-2026-10-12.md` whole; `notes/SessionResiliencyProtocol.md`'s implementer
+section; code: `MCPSession.swift` whole, `MCPToolCatalog.swift` whole, `MCPAdviceServerTests`,
+`MCPWireNeutralityTests`, `MCPProviderNeutralityTests`, and for the truth checks `editTakeUnderInsurance` and
+`restoreCommitForClient` (the dedupe: `isDirty`), `commitTakeForClient`, `MCPWriteTools.aiLabel` / `noteBlocks` (labels
+trimmed, no prefix), `MCPWriteTools+CommentDelete` (VX-260), `readableBooks` (VX-259), `MCPBookFacts.matchesWaitWords`,
+`MCPNoteStructure`'s comment read (live comments only — VX-148), `MCPOwnActivityServerTests` P-261-7.
+
+### LIVE STATUS — U8a's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | read-in; this record | DONE (this commit) |
+| P | **PAUSED** at the orchestrator's word (U7's window has its GO), 2026-10-14 ~20:45 MDT: committed, pushed, `git status` clean; resumed after U7's RELEASE | PAUSED (this commit) |
+| 1 | the pins on the OLD tree (Tests/ only): the advice (bound 3,000; the tools line; every new claim; the link) + the descriptions' truth (edit_take's deduped before-commit; the label rule per take-writing tool; `<your client name>`; delete_comment's VX-260 clause; rename_book's VX-259 rule) → RED | NOT-STARTED |
+| 2 | the instructions (new text with the old bound → RED on the bound; then 3,000 → GREEN) | NOT-STARTED |
+| 3 | the descriptions → GREEN | NOT-STARTED |
+| 4 | revert checks (announced, committed first) | NOT-STARTED |
+| 5 | the stargazing brief's FURTHER delta, one send-ready message | NOT-STARTED |
+| 6 | headless finals (the MCP target) + the instructions' final text whole + FOR VX-234 + OWED for U8b | NOT-STARTED |
+
+**For the orchestrator, said before any Sources line moves (no action taken):** U7's runner checks at its step 0 that
+`git diff --name-only cfda547a..HEAD -- Sources App Package.swift` is empty. U8a's pieces 2–3 commit to
+`Sources/VariorumMCP/MCPSession.swift` and `MCPToolCatalog.swift` (model-facing strings and the bound constant only). The
+U7 product is built from `cfda547a` and stays the one under test, but that check would then read non-empty. So U8a orders
+its pieces to keep Sources last (record, Tests-only pins and the brief first), and leaves the call to the orchestrator.
+
+**The truth findings so far (read, not yet pinned or changed):**
+- `edit_take` promises a "before" commit, but `editTakeUnderInsurance` writes none when `isDirty` is false: the take's
+  latest commit already holds its words, or the take is blank and was never committed. The answer then has no
+  `before_commit_id`. `restore_commit` already says its dedupe and is true (a take with a commit to restore is never
+  uncommitted).
+- `delete_comment` (VX-184's words) misses VX-260: a comment whose words anyone has changed since is refused at suggest too.
+- `rename_book` says "a name another live book already wears … is refused, as the author's rename is": since VX-259 only
+  books this client can READ count, unlike her rename.
+- `<your name>` (edit_take, restore_commit, save_commit) means the client name, which save_lens calls `<your client
+  name>`; a model may read "your name" as its own. To be made consistent.
+- The label rule is unstated on create_note, import_document, duplicate_note and set_take_label, and add_take/add_takes
+  state it without its form (VX-197's split, VX-267's form).
+
+
 ## U7 STAGE RUN — the whole window (a fresh stage runner, from 2026-10-14)
 
 **What this run does NOT do (said first):** no product code is written or changed, before the claim or under it. A red
