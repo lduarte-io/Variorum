@@ -4206,7 +4206,7 @@ paging parameters is byte-unchanged, and so is the one not-shared shape.
 | 0 | read-in; this record | DONE (this commit) |
 | 1 | the pins on the OLD tree (Tests only) → RED, counts read from the run's own output | DONE (this commit) — see THE PINS below: 22 tests, 9 failed, 18 issues on `0b1be274`'s product |
 | 2 | the product: the answer budget (`MCPNoteStructure`, `MCPReadTools`'s shared encoder + the version echoes) + `read_note`'s description; builder B's budget pins re-pinned (each edit commented) → GREEN | DONE (this commit) — the four suites 24/24 green (read from the log; THE DESIGN AS BUILT and THE GREEN RUN below); one more of builder B's pins re-pinned (the clamp, a FINDING); the whole package's finals are piece 4's, PENDING |
-| 3 | the revert check (announced here and committed BEFORE it runs; restore verified) | NOT-STARTED |
+| 3 | the revert check (announced here and committed BEFORE it runs; restore verified) | IN-PROGRESS — ANNOUNCED (THE REVERT CHECK below, this commit); the arms run next on the committed tree, then `git checkout HEAD -- Sources` and the restore verified |
 | 4 | headless finals (whole package) · the measured page sizes · FOR VX-234 · PROVISIONAL · the RE-PROBE for U8b · OWED | NOT-STARTED |
 
 ### THE DESIGN AS BUILT (piece 2 — the ruling applied to code; no fork: every choice below follows the ruling's letter)
@@ -4283,6 +4283,29 @@ that no 900-character text had room — which is the rule working; the pin's "so
 | P-U7c-4 the carriage | 1 / 31,160 · 11 / 24,511 |
 | P-U7c-4b the crowded first page | **1 / 32,443 (the floor)** · 3 / 795 |
 | P-U7c-5 the composed asks | 14 / 31,779 · 14 / 31,624 · 14 / 31,632 · 14 / 31,636 · 4 / 23,836 |
+
+### P-U7c-7 (added after the green run, before the revert check)
+
+**`aVersionPageWeighsItsEchoes`** — no earlier pin told the version echoes apart (sherlock's version pages land hundreds
+of characters from the boundary), so this one is calibrated: a twin note's version is read whole and its echoes measured
+(`version_id`, `version_of`, `saved_at` — **142 characters**), and the probe's first take is lengthened (+1,422) so its
+version's two-block page lands HALF the echoes' width past 32,000 — within it without them. Green on the fixed tree:
+**[1, 1]**, page 1 = 31,989. Red on the old tree is the revert check's arm (a), and on the echoes-outside shape its arm (b).
+
+### THE REVERT CHECK (piece 3 — ANNOUNCED here and committed BEFORE any arm runs; every count read from that arm's own output)
+
+The tree under test is this commit's. Each arm changes `Sources/VariorumMCP/` in the WORKING TREE only (never committed),
+runs `swift test --filter 'MCPPageAnswerBudgetServerTests|MCPPagedReadServerTests|MCPReadFormsUnchangedServerTests|MCPPagedReadPlanTests'`
+(25 tests in 4 suites), and is undone by `git checkout HEAD -- Sources` before the next:
+- **Arm (a) — the product back:** `MCPNoteStructure.swift`, `MCPReadTools.swift`, `MCPToolCatalog.swift` from `b3b66903`
+  (builder B's product, the pins' red tree). EXPECTED: the eight new pins RED, and the three re-pinned (P-256-2, F-256-7,
+  P-256-1b) RED; the other 14 green.
+- **Arm (b) — the echoes set AFTER the read** (`MCPReadTools`' old shape: the structure read without `echo:`, the four
+  keys set on its result): EXPECTED exactly P-U7c-7 RED.
+- **Arm (c) — the final measurement removed** (`fitPage` returns its first assembly): EXPECTED all GREEN — the
+  arithmetic alone is exact; the measurement is the bound's guarantee, not its mechanism.
+- **Arm (d) — the lens picks unweighed** (each pick's size taken as 0): EXPECTED P-U7c-5 RED (its pages over the budget).
+- **Restore:** `git checkout HEAD -- Sources`, `git status` clean, the four suites green again.
 
 ### THE PINS — RED ON THE OLD TREE (piece 1; read from the run's own output)
 

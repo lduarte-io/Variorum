@@ -483,6 +483,68 @@ struct MCPPageAnswerBudgetServerTests {
         }
     }
 
+    // MARK: - P-U7c-7: a version page weighs its echoes
+
+    /// A saved version's answer carries `version_id`, `version_of` and `saved_at` beside its
+    /// blocks, and the budget weighs them as the wire sends them: a version whose two blocks
+    /// fit 32,000 WITHOUT those echoes but not with them reads as one block, then one. The
+    /// note is calibrated on a twin (same shape, same id widths): its version's two-block
+    /// page is measured, and the probe's first block is lengthened so the page lands half
+    /// the echoes' width past the budget. Before U7c the take text alone decided (two
+    /// blocks, ≈ 32k of text), and an answer that set the echoes after the read would seat
+    /// both — RED either way.
+    @Test func aVersionPageWeighsItsEchoes() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let book = try h.operations.createReading(name: "drafts", kind: .book)
+            func twin(_ first: Int) throws -> (note: String, version: String) {
+                let note = try h.operations.createPost(title: "echoes")
+                _ = try h.operations.addPostToReading(note.id, to: book.id)
+                _ = try h.operations.newBlock(in: note.id, text: String(repeating: "a", count: first), registeringUndo: false)
+                _ = try h.operations.newBlock(in: note.id, text: "b", registeringUndo: false)
+                return (note.id, try h.operations.saveNoteVersion(note.id).post.id)
+            }
+            let calibration = try twin(30_000)
+            let probe = try twin(30_000)  // minted now so its ids and stamps are as wide as the calibration's
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.book, book.id))
+
+            let measured = try await pages(connection, [
+                "note_id": .string(calibration.note), "version_id": .string(calibration.version), "limit": 10,
+            ])
+            try #require(measured.count == 1 && measured[0].blocks.count == 2, "the calibration fits whole")
+            var bare = measured[0].json
+            for key in ["version_id", "version_of", "saved_at"] { bare[key] = nil }
+            let echoes = measured[0].size - answerSize(canonical(bare))
+            try #require(echoes > 60, "the echoes are \(echoes) characters")
+            // Lengthen the probe's first take so its two-block page lands half the echoes'
+            // width past the budget: within it without them, past it with them.
+            let grow = answerBudget - measured[0].size + echoes / 2
+            let first = try await h.database.read { db in
+                try #require(try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT v.id FROM container_block cb JOIN variant v ON v.block_id = cb.block_id
+                        WHERE cb.container_id = ? AND cb.deleted_at IS NULL ORDER BY cb.position, cb.id LIMIT 1
+                        """,
+                    arguments: [probe.version]))
+            }
+            try await h.database.write { db in
+                try db.execute(
+                    sql: "UPDATE variant SET working_text = working_text || ? WHERE id = ?",
+                    arguments: [String(repeating: "a", count: grow), first])
+            }
+            let read = try await pages(connection, [
+                "note_id": .string(probe.note), "version_id": .string(probe.version), "limit": 10,
+            ])
+            print("U7c P-7 the echoes: \(echoes) characters; the probe grew \(grow) — \(sizes(read))")
+            #expect(read.map(\.blocks.count) == [1, 1], "with its echoes the two blocks do not fit")
+            try expectTheBudgetRule(read, limit: 10) { try cursor(h, container: probe.version, block: $0) }
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - P-U7c-6: the description says it
 
     /// `read_note`'s description says the page bound as built: the answer, about 32,000
