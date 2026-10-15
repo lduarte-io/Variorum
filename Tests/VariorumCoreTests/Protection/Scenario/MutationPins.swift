@@ -243,5 +243,106 @@ struct ScenarioMutationPins {
             return (world, !macBsCopies.isEmpty)
         }
     }
+    /// "the passphrase changed during Castle on another device, which then
+    /// leaves Castle: a follower that never had the new passphrase typed
+    /// follows typing it, and its anchor opens with it".
+    @Test func aFollowersAnchorOpensWithTheSecretTypedAtItsFollow() async throws {
+        try await mutationPin("the follower's anchor opens with the passphrase typed at its follow", off: { $0.followerAnchorTypedLock = false }) { guards in
+            let (world, account) = try syncedWorld(.castle, devices: ["macA", "phone"], guards: guards)
+            await world.done([.launch("phone"), .launch("macA"), .changePassphrase("macA"), .useStandard("macA"), .follow("phone", .passphrase)])
+            let typed = world.known(account).passphrase ?? ""
+            return (world, world.liveKeyFile(world.phone)?.anchor?.opens(with: .passphrase(typed), floor: PF.floor) == true)
+        }
+    }
+
+    /// "Castle-kind custody through a leave's rotation on every device": a
+    /// crash in the leave's window finds its sync keys the Castle way.
+    @Test func castleKindCustodyThroughALeavesWindow() async throws {
+        try await mutationPin("no silent sync keys in a leave's window", off: { $0.castleKindCustodyThroughLeave = false }) { guards in
+            // The write after which the window's keys are filed, from a clean run.
+            let (clean, _) = try syncedWorld(.castle, devices: ["macA"], gate: .alwaysAsk)
+            await clean.done([.launch("macA")])
+            let start = clean.stepLog.count
+            await clean.done([.useStandard("macA")])
+            let writes = clean.stepLog[start...].filter { $0.contains("✎") }
+            let window = max(1, writes.firstIndex { $0.contains("reencrypt") } ?? 1)
+            let (world, account) = try syncedWorld(.castle, devices: ["macA"], gate: .alwaysAsk, guards: guards)
+            await world.done([.launch("macA")])
+            await world.step(.crash(.useStandard("macA"), afterWrites: window))
+            let silent = world.macA.keychain.local[KName.syncKeys(SWorld.scope, account, .silent)] != nil
+            return (world, !silent)
+        }
+    }
+
+    /// "a follower meeting a rotation in progress … never clears the previous
+    /// key while the vault's id stands with no wrap" (the leave's id gating its
+    /// completion).
+    @Test func theLeavesIDGatesItsCompletion() async throws {
+        try await mutationPin("the previous key stands while the id has no wrap", off: { $0.leaveIDGatesCompletion = false }) { guards in
+            let (clean, _) = try syncedWorld(.castle, devices: ["macA"])
+            await clean.done([.launch("macA")])
+            let start = clean.stepLog.count
+            await clean.done([.useStandard("macA")])
+            let writes = clean.stepLog[start...].filter { $0.contains("✎") }
+            let firstVault = (writes.firstIndex { $0.contains("vault") } ?? 0) + 1
+            let (world, account) = try syncedWorld(.castle, devices: ["macA", "phone"], guards: guards)
+            await world.done([.launch("macA"), .launch("phone")])
+            await world.step(.crash(.useStandard("macA"), afterWrites: firstVault))
+            // The named key never reaches the phone (macA never synced).
+            await world.step(.follow("phone", .passphrase))
+            let vault = try #require(world.server.snapshot(account))
+            let leaving = vault.format.appleKeyID != nil && vault.format.masterWrappedByAppleHeld == nil
+            return (world, !leaving || vault.format.previousCorpusKey != nil)
+        }
+    }
+
+    /// "the old key's fold, then retirement — no stranded copy": the
+    /// retirement runs the moves again, so another library's copy keeps a road
+    /// of this Mac's own when the old shared key goes.
+    @Test func theRetirementRerunsTheMoves() async throws {
+        try await mutationPin("another library's copy keeps a road of this Mac's own", off: { $0.retirementRerunsMoves = false }) { guards in
+            let world = try scenarioWorld(guards: guards) { w in
+                try w.today(on: w.macA, TodaySpec(mode: .castle, gate: .touchID, olderKeys: [.standard]))
+                w.ensureOldShared(SWorld.appleA)
+            }
+            await world.done([.launch("macA")])
+            try world.todayOtherLibrary(on: world.macA, mode: .standard, passphrase: false, words: false)
+            await world.done([.retireOldSharedKey("macA"), .settle])
+            let gifts = world.macA.container.files.keys.filter { $0.hasPrefix("Backups/") && $0.hasSuffix(SPath.liveKeyFile) }
+            return (world, !gifts.isEmpty)
+        }
+    }
+
+    /// "delete on sight, by recorded id only": a Mac in Castle never deletes
+    /// another Mac's own Apple key it can see (that Mac's library is in
+    /// Standard under a key of its own).
+    @Test func deleteOnSightByRecordedIDOnly() async throws {
+        try await mutationPin("another Mac's own Apple key survives", off: { $0.deleteOnSightByIDOnly = false }) { guards in
+            let world = try scenarioWorld(guards: guards) { w in
+                try w.today(on: w.macA, TodaySpec(mode: .standard))
+                try w.today(on: w.macB, TodaySpec(mode: .standard))
+            }
+            await world.done([.launch("macB"), .settle, .useCastle("macA", .touchID, newWords: false), .settle, .launch("macA"),
+                              .syncICloud("macA"), .syncICloud("macB")])
+            let macBsKey = world.liveKeyFile(world.macB)?.apple?.keyID
+            return (world, macBsKey.map { world.readableAppleKeys(world.macB)[$0] != nil } == true)
+        }
+    }
+
+    /// "this library's own Castle-era copy restored after a leave: ours by
+    /// the family tree, opening with the passphrase or words, taking the
+    /// Standard mode, with no raise".
+    @Test func ownCastleEraCopyRestoredAfterALeave() async throws {
+        try await mutationPin("its own Castle-era copy opens as its own", off: { $0.ownLineByFamilyTree = false }) { guards in
+            let world = try scenarioWorld(guards: guards) { try $0.today(on: $0.macA, TodaySpec(mode: .castle, gate: .touchID)) }
+            await world.done([.launch("macA"), .backup("macA"), .useStandard("macA")])
+            let castleEra = world.truth.copies.filter { $0.value.mode == .castle && $0.key.hasPrefix("container:Backups/") }.keys.sorted().first
+            let catalog = world.catalog(world.macA)
+            let n = catalog.copies.filter { $0.library == world.macA.slot?.libraryID && $0.kind != .previousLibrary }
+                .sorted { ($0.stamp ?? .distantPast) > ($1.stamp ?? .distantPast) }.firstIndex { $0.id == castleEra } ?? 0
+            let result = await world.step(.restoreBackup("macA", newest: n))
+            return (world, result == .done && world.macA.slot?.record?.mode == .standard)
+        }
+    }
 }
 #endif
