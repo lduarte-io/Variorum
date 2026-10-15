@@ -4207,7 +4207,7 @@ paging parameters is byte-unchanged, and so is the one not-shared shape.
 | 1 | the pins on the OLD tree (Tests only) → RED, counts read from the run's own output | DONE (this commit) — see THE PINS below: 22 tests, 9 failed, 18 issues on `0b1be274`'s product |
 | 2 | the product: the answer budget (`MCPNoteStructure`, `MCPReadTools`'s shared encoder + the version echoes) + `read_note`'s description; builder B's budget pins re-pinned (each edit commented) → GREEN | DONE (this commit) — the four suites 24/24 green (read from the log; THE DESIGN AS BUILT and THE GREEN RUN below); one more of builder B's pins re-pinned (the clamp, a FINDING); the whole package's finals are piece 4's, PENDING |
 | 3 | the revert check (announced here and committed BEFORE it runs; restore verified) | DONE (this commit) — announced in `39fb5320` before any arm ran; four arms on that tree, each undone by `git checkout HEAD -- Sources`; the restore verified (status clean, 25/25 green) — THE REVERT CHECK's results below |
-| 4 | headless finals (whole package) · the measured page sizes · FOR VX-234 · PROVISIONAL · the RE-PROBE for U8b · OWED | IN-PROGRESS — the record parts written (this commit: PROVISIONALs, FOR VX-234, THE RE-PROBE + the kit's three prompts and two env overrides, SELF-ASSESSMENT, OWED); the whole-package finals PENDING (`swift test`, next) |
+| 4 | headless finals (whole package) · the measured page sizes · FOR VX-234 · PROVISIONAL · the RE-PROBE for U8b · OWED | DONE (this commit) — the record parts in `4ba742a1`; THE HEADLESS FINALS below (read from the logs, at `4ba742a1`) |
 
 ### THE DESIGN AS BUILT (piece 2 — the ruling applied to code; no fork: every choice below follows the ruling's letter)
 
@@ -4348,8 +4348,8 @@ measured as UTF-16 code units, see D-U7c-3):
 - **P-U7c-4 `theFirstPagesCarriageCountsTowardItsAnswer`** — a 28,000-character tray + a version + a lens (its
   `dangling_picks`) on page 1: one 2,000-character block fits, a second would not; page 1 ≤ 32,000; the next page holds
   several; tray/versions on page 1 only.
-- **P-U7c-4b `theFirstPageHoldsOneBlockWhenItsCarriageLeavesNoRoom`** — the one-block floor over the carriage (P-U7c-1
-  PROVISIONAL below): a 31,800-character tray, page 1 still carries its first block (over the budget), later pages within.
+- **P-U7c-4b `theFirstPageHoldsOneBlockWhenItsCarriageLeavesNoRoom`** — the one-block floor over the carriage (the
+  PROVISIONAL's edge (e1), below): a 31,800-character tray, page 1 still carries its first block (over the budget), later pages within.
 - **P-U7c-5 `lensPicksLineageAndCommitsAllCountTowardThePage`** — 60 two-take blocks, eight lenses each picking every
   block, three 900-character commits on every take, read `with_lenses` + `with_lineage` + `with_commits` at `limit: 200`:
   every page within and full, tiling (commit text set aside), each lens's picks exactly the page's blocks, commit text
@@ -4377,6 +4377,16 @@ seated 2 blocks, **33,366** — 3 issues); P-U7c-4b (page 1 seated all 4, 32,957
 87,984 — 2 issues); P-U7c-6 (2 issues, the words); the re-pinned P-256-2 ([3, 1]) and F-256-7 (2 blocks; 1 + 1
 issues). The other 13 GREEN (builder B's unchanged pins and both guards). The live round's 65,807 vs this run's 65,712:
 the same 161-block page; the ids and the book's name differ.
+
+### THE HEADLESS FINALS (piece 4 — the whole package, one target per run, at `4ba742a1`; read from the logs)
+
+- **VariorumMCPTests: 329 tests in 66 suites PASSED, 1 known issue** (VX-357's U+0000 pin
+  `aTakeHoldingUPlus0000IsStoredTruncatedSoItsDigestOverclaims`, by design) — builder B's 321 / 65 + this unit's
+  eight-test suite. **`MCPHarnessTimeLimitTests` green this run** (no VX-353 overrun; one run, nothing to re-run).
+- **VariorumCoreTests: 2,871 tests in 333 suites PASSED** (201 s).
+- **StringsWorkbookTests: 40 tests in 6 suites PASSED.**
+- No existing pin edited beyond the three re-pins recorded above (P-256-2, F-256-7, P-256-1b); no Mac file changed, so
+  no Mac build or suite is U7c's.
 
 ### PROVISIONALs (the orchestrator files them at the merge)
 
