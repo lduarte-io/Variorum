@@ -6460,7 +6460,7 @@ states (below).
 
 | # | item | state |
 |---|---|---|
-| 1 | `notes/MCPSpec.md` in-branch: the bound ≤3,000, the link, a contract line + pointer for every new surface; AppSpec §12 checked | NOT-STARTED |
+| 1 | `notes/MCPSpec.md` in-branch: the bound ≤3,000, the link, a contract line + pointer for every new surface; AppSpec §12 checked | DONE (this commit) — ### ITEM 1 below; AppSpec §12 UNCHANGED (argued there) |
 | 2 | the QUESTIONS bundle draft (D1) | NOT-STARTED |
 | 3 | the AppSpec §14 draft + the roll + the finals ledger text (D2, D3) | NOT-STARTED |
 | 4 | the master plan draft: retire VX-336's in-flight row only (D4) | NOT-STARTED |
@@ -6469,3 +6469,51 @@ states (below).
 | 7 | the handoff draft `notes/handoffs/vx-336-handoff.md` (D7) | NOT-STARTED |
 | 8 | the STATUS lines drafted closed (D8) | NOT-STARTED |
 | 9 | the kits' deletion and PHASE C's own steps written into the PHASE C draft (D9) | NOT-STARTED |
+
+### ITEM 1 — `notes/MCPSpec.md`, in-branch (R1-2's fix; round 2 reads it)
+
+Four in-place edits and one new block, each a contract line with a pointer, nothing of history:
+1. **The binding records** (line 5) gain `vx-336-mcp-wire-tools-ai-docs.md`.
+2. **The docs clause:** `MCPSession.instructions` "(≤2,000 characters, …)" → "(≤3,000 characters — R-VX184-3, raised at
+   VX-336 — …)". Checked: `MCPSession.instructionsBound = 3_000` (`MCPSession.swift:166`); the instructions as read from
+   the code end "The guide to this door: https://stargazing.tech/variorum/mcp" (`:158`), 2,969 characters by U8a's pin.
+3. **The shared icon's rows:** "Book Panel rows" gains "(a collapsed one-note chapter row is its note's row and wears its
+   marks — VX-330, built at VX-336)" — U6b's OWED 3 wording.
+4. **The pre-act flush list** gains `duplicate_note` ("since VX-336 … a copy reads her latest words") — checked:
+   `Job.flushesHerEditorFirst` answers `true` for `.duplicateNote` and `false` for `.insertBlocks`
+   (`MCPWriteTools.swift:146–176`).
+5. **NEW block "THE WIRE TOOLS AND THE AI'S DOCS (VX-336 …)"** before "Level 0 is 13n-a's format", one bold head per
+   surface the brief names: the AI label form (VX-267) · `save_lens`' fills (VX-253) · the minted answers, `section_id`
+   and `tag_ids`/`tags` (VX-252, VX-361) · `insert_blocks` (VX-255) · `duplicate_note` (VX-311) · Compare from the wire
+   and `link_versions`' Open › (VX-298) · the `sha256` digest (VX-254) · paged and `ids_only` `read_note` (VX-256) ·
+   `list_my_activity` (VX-261) · `apply_tag`'s `changed: false` (VX-362 (a)) · the refusal sweep (VX-362 (b)) · the
+   book import's name check (VX-363) · the docs, the link and the chapter (VX-197). Every provisional choice is named by
+   its P- id; the block's head names the bundle as **QUESTIONS #227** (the next free number on main at `ebd16909`;
+   PHASE C renumbers here if a sibling run takes it first — D9).
+
+**Every number and rule checked against the code at this commit's tree:** `batchCap = 200`
+(`MCPWriteTools+Batches.swift:52`); `comparePeerCap = 3` (`MCPShowTool.swift:210`); `pageAnswerBudget = 32_000`
+(`MCPNoteStructure.swift:112`) and `read_note`'s `limit` 1–200 default 50 (the catalog's schema and description);
+`lensListCap = carriageCap = 200` for `unmatched_blocks` and the ambiguity list, with `unmatched_count` /
+`ambiguous_count` (`MCPWriteTools.swift:437–438`, `MCPWriteTools+LensRule.swift:211`); `sectionWithoutBookWords`
+(`MCPWriteTools.swift:865`); `duplicate_note`'s answer keys `source_note_id` and `landed`
+(`MCPWriteTools+DuplicateNote.swift:93–95`), its `rung: .writeNew`, `scopes: [.wing]`; `list_my_activity`'s
+`listedWhenApproved: true`, `limit` 1–200 default 50, `include_reads` (the catalog, `:361–386`) and the log's cap
+`mcpActivityCap = 500` (`Operations+MCPGrants.swift:43`); `MCPOwnActivity.hidesTarget` — a refused row of
+`duplicate_note` on its wing side and EVERY refused row of the three chapter acts and `delete_take` (so the block says
+"`delete_take`", not only its last-take case); the eight tools carrying `digestSentence` (`addTake`, `addTakes`,
+`createNote`, `importDocument`, `editTake`, `insertBlocks`, `duplicateNote`, `restoreCommit`, plus `readNote`'s
+`ids_only`); `show_in_app`'s `compare` enum and description; the chapter title `TutorialSeeder.mcpChapter = "AI & the
+MCP door"`.
+
+**AppSpec §12 — UNCHANGED (no contract line there is now false).** Read against the as-built run, line by line:
+"every AI write is one of §9's operations with the grant check inside the op's own transaction and ONE ⌥⌘Z entry naming
+the client" — `insert_blocks` and `duplicate_note` are new MCP wrappers in the operations layer on §9 roads (newBlock's
+mint, `duplicateAsVersion`'s body), exactly as VX-184's batches were, each with its guard inside and one entry;
+`apply_tag`'s `changed: false` writes nothing, so it is no write; "her pending typing lands first" — `duplicate_note`
+joins the flushing family (MCPSpec's list, item 4); "Private, Seal and Own are hers alone" — nothing here writes them;
+"the fence … ONE byte-identical not-shared shape" — truer now (VX-363 closed a leak; P-VX261-5/6 keep the activity list
+oracle-clean); "a book rule an AI writes BELLS" — untouched; "the shared icon reads reach only for the rows DRAWN" —
+VX-330 added no read; "`show_in_app` moves things only while Variorum is frontmost and never queues" — the compare
+landing's router clears keep it unqueued. §9's lines are untouched too (`importBook`'s new parameter defaults to her
+doors' full guard).
