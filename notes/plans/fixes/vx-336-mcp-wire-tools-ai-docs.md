@@ -4117,3 +4117,100 @@ round are the window's — PENDING.
    and `ids_only` ("check a whole note against your source cheaply") beside the digests and `list_my_activity`.
 4. **FOR VX-234:** the coalesced "read “X” (N times)" line for a paged read (above).
 5. **No ticket minted by builder B.** None proposed.
+
+
+## U7 STAGE RUN — the whole window (a fresh stage runner, from 2026-10-14)
+
+**What this run does NOT do (said first):** no product code is written or changed, before the claim or under it. A red
+that needs code is RECORDED as a FINDING and reported, never fixed here, and so is a page that spills past the client's
+cap (the orchestrator rules whether the budget or the limit moves). No rebuild: the window runs the `vx336-u7` product
+exactly as builder B's piece 6 built it. No canon, QUESTIONS or ticket edits. Never her real store, never
+`/Applications/Variorum.app`, never her USER-scope MCP registrations: the copied setup line is never run as copied; only
+its key is taken, into a scratch config in the runner's scratchpad, OUTSIDE the repo, deleted at cleanup. **Never `claude
+mcp list` (nor `claude mcp get`).** `castle-W1-20261013` left alone. The plan is BUILDER B's RECORD → THE STAGE WINDOW
+(steps 0–13), run as written, with its kit `notes/plans/fixes/vx-336-u7-kit/`.
+
+**Read in full before READY (never delegated):**
+- this record's header, Hard rules, LIVE STATUS, Stage traffic log and Cross-run coordination;
+- the U7 UNIT RECORD's LIVE STATUS, THE LIVE LEGS draft, THE ORCHESTRATOR'S RULINGS ON U7's FORKS, BUILDER A's RECORD,
+  THE ORCHESTRATOR ON BUILDER A's STOP, and BUILDER B's RECORD whole (THE STAGE WINDOW included);
+- THE ORCHESTRATOR ON U5's WINDOW and ON U6's WINDOW, the U5 STAGE RUN and the U6 STAGE RUN whole;
+- every kit file (`turn.sh`, `tee-shim.sh`, `drop-relay.py`, `measure.py`, `verify-digests.py`, the eleven prompts);
+- `Tools/stage`; `Tools/WalkKit/` (README, `guard.sh`, `click.sh`, `keys.sh`, `wl2.swift`); `Tools/ScaleFixture/`
+  (`stage.sh` whole, `restore.sh`);
+- `notes/SessionResiliencyProtocol.md` (the implementer rules and the addenda); the memory note walk-driving-lessons.
+
+**The build check (READY, 2026-10-14 ~20:31 MDT):**
+- **The product matches the tree.** HEAD `d4106244`. `git diff --name-only cfda547a..HEAD -- Sources App Package.swift`
+  is EMPTY (since `cfda547a` only this record, the kit and `notes/plans/mcp-pane-and-docs-kickoff.md` changed). The tree is
+  clean. No `.swift`, plist, pbxproj, xcstrings, entitlements, xcconfig or `Package.swift` under `Sources`, `App/Variorum` or
+  the root is newer than the product's `Variorum.debug.dylib` (20:16:27).
+- **The product exists:** `App/Variorum/DerivedData/vx336-u7/Build/Products/Debug/Variorum.app`, signed
+  *[removed for publication]*
+  `Contents/PlugIns/VariorumTests.xctest` (20:16:26), and `Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`
+  (20:16:27). The dylib carries both builders' words: "isn't a commit of a take on this page" ×1, "about 32,000
+  characters" ×1, "ids_only" ×2, "checked its recent activity" ×1, "list_my_activity" ×1.
+- **The 21 suites are real type names in the test bundle** (`nm -j` + `swift-demangle --simplified`, matched as
+  `<Suite>.` on a word edge; a `-only-testing` name that matches no type runs 0 tests silently). All 21 of THE STAGE
+  WINDOW's step-1 list are found, ≥ 121 symbols each (the least is `MCPSetupKeyFacesTests`). Builder A's Mac pin
+  `listMyActivitySpeaksItsOwnWords` is present (51 symbols), and so is `activitySpeaksEveryActInWordsNeverAToolID` (44).
+
+**Host and tools:** `AX: true SCREEN: true` (a compiled non-prompting probe). `walk-cap` and `walk-scroll` are compiled
+into the runner's scratchpad `bin/`. `Tools/WalkKit/wl2` is present in this worktree (arm64, compiled at U5). Claude Code
+**2.1.300**; `cliclick` 5.1. Free disk **64 GiB**. No simulator booted.
+
+**Her user-scope MCP servers (names + a sha256 prefix of the sorted compact `mcpServers` JSON, never values):**
+`['linear-server', 'variorum']`, **`bc64543e2f4e8e58`** — SAME as builder B's READY read and U5's and U6's windows.
+
+**The instances and the stage at READY — NOT ours:** `Tools/stage status` → **STAGE HELD by `vx283-u1-walk`** (VX-283
+U1: "CapabilityRegistryTests re-run + Open list screenshot walk on the Debug dev store, both voices, light/dark", claimed
+20:15:31 for 65 min, expiring ~21:20). Its Debug instance is running: **pid 93969**,
+`…/variorum-vx-283/…/DerivedData/vx283-u1/…/Variorum.app/Contents/MacOS/Variorum` (both strict guards show it). It is
+vx-283's under its own claim, never touched here. Our product's shim is not running (`pgrep -lf variorum-mcp` empty).
+The dev store is in that walk's use (`-wal` 20:19); the coordinator checks its restore at our GO. The strict guards must
+read EMPTY at our step 0, or the window stops.
+
+**The dev store (read-only listing at READY):** `variorum.sqlite` (14 Oct 08:50), `-wal` 20:19, `-shm` 20:17 (vx-283's
+walk). Key files: `variorum-keys-b831b428ce0d67b1.json` and `variorum-keys-e86ed514dc8dab5a.json`. `Backups/` holds 57
+entries; `Backups/safety-copies/` holds only `castle-W1-20261013` (left alone). **Main:** VX-306 has NOT merged
+(`origin/main` `ebd16909` is ahead of this branch by notes, `.claude` and `CLAUDE.md` only), so no rebuild is owed.
+
+**Process choices (the earlier windows' lessons applied):**
+- The Mac batch FIRST, detached to its log and POLLED in the foreground (a `grep -q` loop, never `tail -f | grep -m1`).
+  Then the SEAM.
+- Prefs, `Backups/` and the fingerprint BEFORE `stage.sh` (its launch writes prefs). `stage.sh`'s copy is the window's
+  ONLY A1.
+- Every GUI act goes through `click.sh` / `keys.sh` (keys only by System Events), at least 2.6 s apart. Captures are
+  region captures. `á` and `·` are never typed.
+- The Debug app is quit BY BUNDLE ID. Prefs are restored by import, then re-export, diff, and delete every added key
+  until 0 differ.
+- Keys are redacted to their first 9 characters in every record and capture name.
+- **`U7_SCRATCH` is a FRESH subdirectory of the runner's scratchpad, `…/scratchpad/u7w`.** The scratchpad is shared with
+  this run's earlier runners (U6's `proj/` and its stray `default.profraw` are still there). A fresh directory keeps this
+  window's `keys/`, `proj/` and configs apart from theirs, and makes the cleanup grep and the no-`mcpServers` check name
+  only this window's paths. The kit's `turn.sh` reads only `$U7_SCRATCH`, so nothing in the kit changes.
+- Every turn goes through the kit's `turn.sh` (prompt on STDIN, `--strict-mcp-config`), with the evidence in the
+  gitignored `notes/plans/vx336-screens/u7/`.
+- **The cap is read from BYTES:** `measure.py` compares the server's answer from the tee with the tool_result the model
+  received from the stream-json. The client's own wording never decides it.
+
+### LIVE STATUS — the stage run's steps
+
+| step | what | status |
+|---|---|---|
+| R | read-in, the build check, the fingerprint, this section → READY | DONE (this commit) — READY reported; the stage is NOT claimed (the orchestrator relays the coordinator's GO and its exact line) |
+| 0 | guards; the claim from the GO's line; HEAD at the GO | NOT-STARTED |
+| 1 | the Mac batch (21 suites on `vx336-u7`, `test-without-building`, detached + polled) | NOT-STARTED |
+| SEAM | the batch's counts recorded, committed, pushed; the claim KEPT; turn ended "SEAM" | NOT-STARTED |
+| 2 | prefs export, `Backups/` listing, the fingerprint BEFORE (before the fixture's launch) | NOT-STARTED |
+| 3 | `stage.sh notes=10,long=300` — the ONE A1 (cmp + sha256 recorded) and the launch; the mint polled | NOT-STARTED |
+| 4 | connect (the Claude Code tab key → `$U7_SCRATCH/keys/u7.key`), the bind turn, THE GRANT Home · Edit · Always | NOT-STARTED |
+| 5 | L1 — VX-254: a write proves its words (create_note · edit_take · add_take "" · duplicate_note; `verify-digests.py L1`) | NOT-STARTED |
+| 6 | L2a — VX-256: the long note in pages of 50 (`measure.py L2a`); Activity's coalesced line | NOT-STARTED |
+| 7 | L2b — THE CAP: sherlock's "The Red-Headed League" at limit 200, 50, and whole (each measured alone; 150/100 if 200 spills) | NOT-STARTED |
+| 8 | L3 — VX-256: `ids_only` pages of 100 verified (`verify-digests.py L3-100 --texts L2a`); then the 200-block ids-only cap | NOT-STARTED |
+| 9 | L4 — VX-261: a dropped call (the relay holds create_note's answer; the turn killed) → a fresh session's `list_my_activity` | NOT-STARTED |
+| 10 | L5 — VX-261: a refused read, then `list_my_activity` with and without reads; Activity in Study | NOT-STARTED |
+| 11 | the Terminal pass (Activity in Terminal) → back to Study | NOT-STARTED |
+| 12 | L6 — NOT in this window (the plan: builder A's headless P-261-6 is its evidence) | NOT IN THIS WINDOW (by the plan) |
+| 13 | cleanup → quit by bundle id, the key grep 0 and `keys/` deleted, the clipboard emptied, no `mcpServers` for the scratch project, fingerprint SAME, prefs 0 differ, `restore.sh` cmp-SAME + sha256 set equal, `Backups/` unchanged, castle-W1 untouched; release; THE RESULT LINE | NOT-STARTED |
