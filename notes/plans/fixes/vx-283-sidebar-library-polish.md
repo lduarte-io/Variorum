@@ -2789,9 +2789,10 @@ over a claim; the sidebar (not mine).
   `DerivedData/vx283-u3b-rv` APFS-cloned from `vx283-u3b` and built (`build-for-testing` succeeded; the log shows
   `LibraryControlsFlow.swift` and `LibraryCatalogView.swift` recompiled), RESTORED by `git checkout --` the two files,
   `git diff --quiet` empty. **No revert in flight.** The window script `notes/plans/vx283-screens/u3b/window.sh`
-  (gitignored) written. **R-S REBUILD — STARTING** (after `1fc34c2e`, a test-only premise check in the sweep pin):
-  the same two edits applied to the tree from the committed tip, `vx283-u3b-rv` re-cloned from the rebuilt
-  `vx283-u3b`; a successor finding a dirty tree: `git checkout --` the two files first.
+  (gitignored) written. **R-S REBUILT — DONE** (after `1fc34c2e`, a test-only premise check in the sweep pin: every
+  room's catalog must be the width it asked for): `vx283-u3b` rebuilt (`build-for-testing` succeeded); the same two
+  edits applied from the committed tip `0c4708a7`, `vx283-u3b-rv` re-cloned from it and built (succeeded; both reverted
+  files recompiled), RESTORED, `git diff --quiet` empty. **No revert in flight.**
 - **S5 — READY FOR STAGE** (≈15 min; ≈11 without the optional step). `window.sh` from any directory, in order:
   `pre` (instances, App/ clean, prefs export, the store's three files into `u3b/store-before/<UTC>/`) · `batch` (≈6
   min — `test-without-building` on `vx283-u3b`, **103 suites** = every suite in the 45 test files naming a type of the
