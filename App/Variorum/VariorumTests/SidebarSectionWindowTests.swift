@@ -582,21 +582,21 @@ private final class SectionRig {
             + "\(window.offset + window.viewport) with fades \(fades.top.depth)/\(fades.bottom.depth)"
     }
 
-    /// U1d: a section's AppKit scroll view — the one whose window rectangle is
-    /// the section's drawn scroll frame (SwiftUI's global space is the content
-    /// view's, top-left; AppKit's window space is bottom-left).
+    /// U1d: a section's AppKit scroll view — the one whose clip view and
+    /// document match the section's OWN scroll reading (its visible height is
+    /// the clip's, its content height the document's), so no coordinate
+    /// convention between SwiftUI and AppKit is assumed.
     func scrollView(_ draw: SidebarGeometry.SectionDraw?) -> NSScrollView? {
-        guard let frame = draw?.scroll else { return nil }
+        guard let window = draw?.window, window.isMeasured else { return nil }
         func all(_ view: NSView) -> [NSScrollView] {
             var found: [NSScrollView] = []
             if let scroll = view as? NSScrollView { found.append(scroll) }
             for sub in view.subviews { found += all(sub) }
             return found
         }
-        let height = hosting.bounds.height
         return all(hosting).first { scroll in
-            let box = scroll.convert(scroll.bounds, to: nil)
-            return abs((height - box.maxY) - frame.minY) < 1 && abs(box.height - frame.height) < 1
+            abs(scroll.contentView.bounds.height - window.viewport) < 1
+                && abs((scroll.documentView?.frame.height ?? -10) - window.content) < 2
         }
     }
 
