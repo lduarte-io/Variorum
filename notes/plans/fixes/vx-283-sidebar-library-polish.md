@@ -3561,7 +3561,8 @@ result rather than directly under the U2b ruling, so that block keeps its own he
 - B1 — T2, the DEBUG-only instrument (`OpenListDragTrace`) + its probes: DONE (`688f79c7`).
 - B2 — `DerivedData/vx283-u2b` built (`build-for-testing`, TEST BUILD SUCCEEDED, the code of `688f79c7`, no warning in
   a touched file) + `notes/plans/vx283-screens/u2b/window.sh` (gitignored, `zsh -n` clean): DONE.
-- B3 — **READY FOR STAGE — U2b trace run, ≈10 min** (this commit). T3 waits for the run and the orchestrator's resume.
+- B3 — **READY FOR STAGE — U2b trace run, ≈10 min** (`d60087ee`); RUN 17:06–17:08 by the orchestrator (`68a7f5f4`).
+- B4 — T3, THE PROPOSAL (`#### U2b — T3, THE PROPOSAL` below): DONE (this commit). Nothing built; the ruling next.
 
 #### T1 — the code trace: every gate between AppKit's drag session and the line (paths under `App/Variorum/Variorum/`)
 
@@ -3800,6 +3801,180 @@ drag landed (all five lists byte-identical).**
   `dragging` never cleared, since no delegate's `ended`/`exit` ran; the row's gesture gated) or the road (the walk's
   seven variations each started a drag, but with other acts between them). It is owed to T3: the proposal must name
   it, and the re-walk must drag twice in a row.
+
+#### U2b — T3, THE PROPOSAL (the implementer, after the trace run; nothing built — the ruling first)
+
+**First line: no code was built for T3.** One script fix, gitignored: `window.sh read` called zsh's BUILTIN `log`,
+not `/usr/bin/log`, so both `unified-*.log` files hold only "too many arguments". It is fixed for the next window.
+The file trace (`trace.log`) is complete.
+
+**What the run PROVED (from `trace.log`):**
+- **The source works.** At the drag's start the payload is evaluated on the main thread and `began` runs (A
+  17:06:47.394, D 17:07:53.892). The chip preview appears, and in D the session reports `initial` → `active` (×27)
+  → `ended with operation cancel` 1.8 s after the release.
+- **The rows' drop delegate is NEVER CONSULTED:** zero `validateDrop`, which SwiftUI calls before anything else.
+  So the delegate attached at `SidebarView.swift:863` (the line numbers here are at `d60087ee`, with the trace hooks
+  in) is not reached at all. It is not being reached and then answering `.forbidden`.
+- **The `[reg 0]` hit chain proves less than it seems.** The chain under the rows runs up to the ROOT
+  `AppKitWindowHostingView[reg 0]`. That same root hosting view carries drop targets that are live in this window:
+  the Bookcase's `dropDestination`s react to the same `cliclick` road (the walk's control, same build), and the
+  column's import `onDrop` (`SidebarView.swift:381`) sits in the root's own graph. So on macOS 27 SwiftUI's drop
+  registration is not visible through `NSView.registeredDraggedTypes` at all: it lives on the window or in SwiftUI's
+  own routing. The run cannot say that "no view under the pointer is registered" is the mechanism. What it does show
+  is the result: the drag is never offered to this delegate. (The instrument's `+OURS` test is therefore
+  uninformative. I designed that test; T1 trusted the reading.)
+
+**1 — Why the delegate is never offered the drag: the candidates.** The placements, compared:
+- **Ours:** a legacy `onDrop(of:delegate:)` on the `LazyVStack` at the ROOT of the ScrollView's content
+  (`SidebarView.swift:847` `ScrollView {` → `:848` `LazyVStack` → `:862-864` `.contentShape(Rectangle())` +
+  `.onDrop(of: OpenListDropDoor.types, delegate: OpenListRowsDrop(…))`). Around the ScrollView:
+  - U1b's `SidebarSectionWindow` wraps it in a `ScrollViewReader`, with an overlay that has
+    `.allowsHitTesting(false)` (`SidebarSectionWindow.swift:143-207`, `:328`; attached at `SidebarView.swift:889`);
+  - the line's overlay, also `.allowsHitTesting(false)` (`:895`; `OpenListDrag.swift`'s `OpenListInsertionLine`);
+  - the end zone, a second legacy delegate outside the ScrollView (`:922` → `:993-994`).
+
+  The hit chain shows the content hosted in SwiftUI's scroll machinery, nested twice: the Open list's
+  `HostingScrollView` → `DocumentView` → `PlatformGroupContainer`, inside the sidebar's outer last-resort scroll.
+- **Main's road, which landed:** `.draggable(token)` + a Transferable `.dropDestination(for: OpenNoteDragToken.self)`
+  ON EACH ROW, inside the same `ScrollViewReader { ScrollView { LazyVStack { ForEach … } } }`, nested in the same
+  outer scroll (main `591bb8e8` `SidebarView.swift:740-748`, `:844-853`).
+- **The Bookcase's working targets:** `BookcaseDropSite`, a Transferable `.dropDestination(for:) … isTargeted:` on
+  each strip name, header and row (`Features/Shelf/BookcaseStrip.swift:88-100`). Its import drop is a legacy
+  delegate on the BOARD, outside its ScrollView (`Features/Shelf/ShelfView.swift:187` scroll, `:219-229` drop).
+- **The book navigator,** the precedent U2 cited for the line: a Transferable `.dropDestination(for:) … isTargeted:`
+  on each row, its 2-pt `tokens.ring` line drawn as an overlay at the hovered row's TOP, and a 28-pt end zone that is
+  also a `dropDestination` (`Features/BookView/BookView.swift:838-855`, `:861-875`).
+- **The Blocks area:** a legacy `onDrop` on the ScrollView itself, outside its content
+  (`Features/Pool/BlocksAreaView.swift:370`, `:397`).
+
+**The pattern:** every live drop target INSIDE a scroll's content in this app is a Transferable `dropDestination` on
+a row or item. Every legacy `onDrop` sits ON or ABOVE a scroll view. Ours is the only legacy delegate inside a
+scroll's content, and the only target of any kind on a scroll content's ROOT. The candidates, none proven alone:
+- **C1 — placement:** a drop modifier on the scroll content's ROOT is not routed once the content is hosted in the
+  scroll's `PlatformGroupContainer` (`:862-864`). Taps on a container usually reach a root modifier, so this is the
+  least likely of the three.
+- **C2 — the API inside scroll content:** on macOS 27, the legacy `onDrop(of:delegate:)` road is never routed
+  inside a ScrollView's content, while the Transferable `dropDestination` road is. No in-app precedent either way;
+  this is the fact the pattern above points at.
+- **C3 — type routing on the legacy road:** the legacy road may filter by the drag pasteboard's declared types, and
+  ours is present only as a PROMISE beside SwiftUI's private `dyn.*` flavors (the walk's AppKit log). The
+  Transferable road matches Transferable drags itself.
+- **Not a candidate:**
+  - the section window's and the line's overlays: both have hit testing off, and main had a `ScrollViewReader` too;
+  - the type's declaration: `VariorumInfo.plist`, and main used the same identifier.
+
+**2 — The second drag that never starts:**
+- **NOT our stale `dragging`.** Nothing on the source path reads it (`SidebarView.swift:1120-1146`,
+  `Core/Views/DragChipCanvas.swift:116-132`). And in B, C and E the press never became a drag inside SwiftUI's
+  source: no payload, no preview, no session.
+- **What the evidence draws:**
+  - in this window, both failures were the SAME row (row 2), pressed again 5 s after its own drag was REJECTED;
+  - in the walk, every consecutive drag started, and each was on a DIFFERENT row: D2a row 2 → D2b row 1 → D2c row 2
+    again, with D2b between and ~30 s after D2a → D2d row 10 → D3 row 3 (`D2bcd-D3-study-light-strip.png`, the
+    chip in every mid panel);
+  - an Apple forum thread (801278, iOS 26, via the lookup) reports exactly this: the same item's drag closure does
+    not fire again after a rejected drop, working on iOS 18.
+
+  So the candidate is **SwiftUI's drag source refusing to restart on the SAME source view right after its own
+  session ended in cancel**: a framework behaviour, not our code.
+- **The one difference that is the road's alone:** `cliclick dd:` warps the pointer and presses, with no
+  mouse-moved, so the row sees no hover between the drags. A hand never does that.
+- **Product or road is UNDECIDED.** The next window decides it (steps below). If it is the product, the fold-in fix
+  (PROVISIONAL, built only on the ruling) is:
+  - give the row's drag-source content a fresh identity when its session ends. An inner `.id(dragGeneration)` on
+    the content carrying the drag, never the row's outer `.id(noteID)` that the section window's `scrollTo` reads.
+  - the trigger is `onDragSessionUpdated` (macOS 26), proven in this run to deliver `ended with operation cancel`.
+    The same callback clears `dragging`, which also closes U2's known stale-`dragging` edge.
+
+**3 — The fix (inside the ruled light version; the chip stays on the Open list's rows only).** Move the Open list's
+drop onto the road that is proven on this very list and in this window:
+- **F1, recommended:** each Open row carries a Transferable drop, in the macOS 26 session form:
+  - `dropDestination(for: OpenNoteDragToken.self, isEnabled:action:)`;
+  - `onDropSessionUpdated { session in … }` for the hover, whose `DropSession.location` is the pointer in the ROW's
+    space;
+  - `dropConfiguration { _ in … }` for the operation.
+
+  The hover goes in as `state.hoverRows(contentY: CGFloat(index) * rowHeight + session.location.y)`, which is the
+  same content-space input the pure rule already takes. So `SidebarLayout.OpenListDrop` (the half-row rule, the
+  false-offer nils, the line's place, the end zone's height), `OpenListInsertionLine` and every pure and mount pin
+  stay as they are. The other pieces:
+  - **the end zone** becomes the same Transferable destination (the book navigator's own end zone is one);
+  - **the action** receives the decoded tokens, so no `loadTransferable` and none of R1-4's "accepted and silent"
+    cases;
+  - **G2:** the destination asks for `.move` where the line is drawn and `.forbidden` elsewhere, and the row's
+    source declares `.dragConfiguration(DragConfiguration(allowMove: true))`, the SDK's own road to a move (copy-only
+    is the macOS default);
+  - **the session's end** clears `dragging` (via `onDragSessionUpdated`, folded in from item 2);
+  - the legacy `OpenListRowsDrop` / `OpenListEndZoneDrop` delegates go; `OpenListDropDoor.perform` takes tokens.
+- **F2, the proven fallback inside the light version** (if F1's session location does not arrive while hovering):
+  the book navigator's road exactly. A per-row Transferable `dropDestination(for:action:isTargeted:)` marks the
+  hovered row; the line sits at that row's TOP and the drop lands BEFORE it (the gap = the row's index, through the
+  same `destination` rule, so no line at the dragged row's own two gaps); the 28-pt end zone takes the last slot.
+  Line and landing always agree. The half-row refinement is what is lost: to put a row just below its neighbour you
+  hover the row after the neighbour. `.copy` is the operation, main's road and the same badge.
+- **The floor, unchanged:** main's per-row road (a drop before the hovered row, no line, no settle); its line, chip
+  and settle become a ticket.
+
+**4 — The pins:**
+- **An AppKit-level "a view under the rows registers the row type" pin CANNOT be written.**
+  `registeredDraggedTypes` reads 0 at every level of this window's chain, even above live targets, and the test host
+  cannot post a drag. **Only the walk proves delivery.**
+- **P-T3-1 (source read, red-on-old):**
+  - the Open row's own drop is the Transferable road (inside `openRow`: `dropDestination(for: OpenNoteDragToken.self`
+    and `onDropSessionUpdated` — or, under F2, `isTargeted:`);
+  - no `onDrop(of:` anywhere in `openGroup`;
+  - the row's source carries `dragConfiguration(DragConfiguration(allowMove: true))` (F1).
+
+  RED on the current tree: it has `.onDrop(of: OpenListDropDoor.types, delegate: OpenListRowsDrop(` and no
+  `allowMove`. Named revert R-T: restore `:862-864`'s legacy attachment → red. `OpenListDragFaceTests.
+  theRowDragsItsChipAndTheListIsTheOneDrop` is edited in place by the ruling, annotated: its "no row is its own drop
+  target" assertion inverts, because the rows are the targets again and the location now decides the half.
+- **P-T3-2 (pure, red-on-old by a named revert), F1:** the row-local location → the gap, for every row and both
+  halves: `OpenListDrop.contentY(row:yInRow:rowHeight:)` = index × pitch + y, fed to `gap(at:)`. Revert R-U: drop the
+  index term (every row maps to row 0's gaps) → red. Under F2: `gap(forTargetedRow:)` = the row's index, and the
+  existing `destination` rule's own-gap nils.
+- **P-T3-3 (state, red-on-old):** the session's end clears the drag: `began(a)` → `sessionEnded()` → `dragging ==
+  nil`, and a foreign row hovering after a cancel draws no line (U2's known edge, now pinnable). Revert R-V: the
+  `.ended` handling removed → red.
+- **The door pins that build an `NSItemProvider`** (`aReleaseReadsThePayloadAndLandsIt`,
+  `aReleaseThatOffersNothingRefuses`) move to the token-taking door, edited in place.
+- **The mount pins** (`OpenListDragMountTests`) drive `began` and the hover through the state, as before. They prove
+  the line DRAWS where the rule says. They cannot prove delivery.
+- **G2's mask has no headless pin.** Only a real drop proves `.move` is allowed; P-T3-1 pins the declaration.
+
+**5 — A second window IS needed before building** (two unknowns: F1's per-row session location while hovering, and
+whether the second-drag failure is the product). It is a short PROBE build:
+- **The probe build** goes into `DerivedData/vx283-u2c`. It keeps the T2 instrument and adds two DEBUG-only,
+  launch-flagged roads: `rowsdd` (F1 as specified above, with `allowmove` on the source) and `navigator` (F2).
+  With neither flag the build is the shipped tree.
+- **launch `trace rowsdd`:**
+  - **G1** (the gate): row 2 → row 3's lower quarter, hold, then row 5's upper quarter, hold, then release at
+    row 5's upper quarter. Expect `SESSION`/`DROP-SESSION` lines carrying the location, `LINE drawn`, the action,
+    `DOOR land`, and the list changed.
+  - **G2, drag twice in a row, after an ACCEPTED drop:** the row now at row 2 is pressed again at once (warp, no
+    move) → down → release.
+  - **G3, drag twice in a row, after a REJECTED drop:** row 4 → release over its own place (`.forbidden`, a
+    slide-back); then row 4 at once, no move.
+  - **G4:** the same as G3, but between the two drags `cliclick m:` off the list and back onto row 4 (a hover cycle,
+    as a hand makes).
+  - **G5:** the same as G3, but wait 10 s between the drags.
+- **launch `trace navigator`:**
+  - **H1:** row 2 → row 5's middle → release; expect the line at row 5's top and a landing before it.
+  - **H2:** the end zone: release below the last row; expect the last slot.
+  - **H3:** drag twice in a row (as G3).
+- **Reading the results:**
+  - G1 landing with lines → F1 is confirmed.
+  - G1 with no session location but a landing → F1 is out; F2 if H1 and H2 land.
+  - G3 fails and G4 starts → the road (cliclick's warp). Nothing to fix; the re-walk drags with a hover between.
+  - G3 and G4 fail, G5 starts → the product, time-bound.
+  - All three fail → the product; the fold-in fix above.
+- **Its window script:** `u2c/window.sh`, the same shape, run as pre · drag · restore. It calls `/usr/bin/log`
+  explicitly. It aims from the trace's ROW lines, as this run did; this run proved the aim (AIM OK ×2).
+
+**The probe window's alternative, for the orchestrator to weigh:** build F1 at once, with F2 and the generation
+workaround held in reserve, and make its first stage window the confirmation (G1–G5 on the product build). It costs
+less if F1 works, and the same as the probe road if it does not. I recommend the PROBE road: two unknowns, both on
+an API this app has never used, and the ruling asked to confirm before building.
 
 ## Ladder
 
