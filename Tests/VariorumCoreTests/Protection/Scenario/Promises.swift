@@ -598,7 +598,9 @@ extension SWorld {
         let now = posture(device)
         var violations: [Violation] = []
         func fail(_ what: String) { violations.append(Violation(promise: 10, device: device.name, detail: "after \(tamper): \(what)")) }
-        if now.libraryID == was.libraryID {
+        // The stated limit (§3.6): both homes rolled back together return this
+        // Mac — the library file's record with it — to that earlier state.
+        if now.libraryID == was.libraryID, tamper != .replayBothHomes {
             if now.mode != .castle { fail("the mode is \(now.mode.map { "\($0)" } ?? "unknown")") }
             if now.account != was.account { fail("the account changed") }
         }

@@ -14,6 +14,22 @@ import Testing
 
 @Suite("VX-305 U4 fixed — devices: Touch ID, replacement and cloned Macs, two logins, replays")
 struct DeviceScenarios {
+    /// A crash at every write of this Mac's settings acts (the gate style, the
+    /// re-arm), then a relaunch: each finishes or rolls back (promise 6) —
+    /// the plan-less finish needs nothing only the press had.
+    @Test func aCrashAtEveryWriteOfASettingsChangeSettles() async throws {
+        for act in [Action.setGate("macA", .alwaysAsk), .setScheduledExport("macA", true), .setIdleLock("macA", minutes: 30)] {
+            for n in 1...8 {
+                let world = try scenarioWorld { w in try w.today(on: w.macA, TodaySpec(mode: .castle, gate: .touchID)) }
+                await world.done([.launch("macA")])
+                await world.step(.crash(act, afterWrites: n))
+                await world.step(.launch("macA"))
+                #expect(world.macA.library?.section.actInFlight == nil, "\(act) crashed after write \(n): still in flight")
+                expectPromisesKept(world, "\(act) after write \(n)")
+            }
+        }
+    }
+
     /// "the key file and memory item both deleted on a local-only Castle
     /// library: the lobby still opens it" — through the newest pair's key
     /// file; the live key file comes back from that pair (its Apple wraps
