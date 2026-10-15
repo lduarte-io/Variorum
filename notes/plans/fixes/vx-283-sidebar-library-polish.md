@@ -378,7 +378,7 @@ trailer of any kind.
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **STOPPED — Q11 not green** (22:05–22:08): batch 413, 2 red — VX-245's lint and the Starred pin (0.5 pt short on HEAD — the same code R-F ran green: FLAKY); R-G red as expected but uninformative. A new trace is needed — a fresh successor's (leads in Q11). Every other U1b pin green. F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | FIRST WINDOW RUN (00:50–00:57, released): the 187-suite batch green but for TWO of my own new pins (test defects, traced — the U3 section's Q6); fixing them headless (test files only), then the closing window (the two suites, the rig's dark pass, R-ALL) |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **READY FOR STAGE — the closing window** (≈15 min; the U3 section's Q6): the first window's batch green but for two of my own pins (test defects, fixed headless — test files only); R-ALL prebuilt in `vx283-u3-revert` and the tree restored; `vx283-u3` holds the current products for the walker |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
 
@@ -1948,9 +1948,30 @@ the orchestrator rules on its composition (below — the brief's composition doe
   R-L `LibraryCatalogView.swift`) applied to the working tree; `DerivedData/vx283-u3-revert` cloned from `vx283-u3`
   (APFS clone) and built there with `build-for-testing` — `vx283-u3` is never touched by the revert (the walker's
   products). Restore: `git checkout --` the four files, then `git diff` empty. A successor reading this with a dirty
-  tree: the reverts are in flight — restore them before anything else.
+  tree: the reverts are in flight — restore them before anything else. **DONE:** applied, cloned, built
+  (`build-for-testing` succeeded in `vx283-u3-revert`; the log shows the four reverted files compiled), RESTORED —
+  `git checkout --` the four files, `git diff --quiet` empty. No revert in flight.
+- **THE CLOSING WINDOW — READY FOR STAGE (≈15 min; tip `<this commit>`, product code unchanged since `e6ed9b66`):**
+  0. Preconditions (≈3 min): the two strict `pgrep`s; `defaults export … notes/plans/vx283-screens/u3/prefs-before-w2.plist`;
+     with zero dev instances, the three store files into `notes/plans/vx283-screens/u3/store-before/<UTC stamp>/`.
+  1. The fixed pins (≈2 min), `vx283-u3`, `test-without-building -only-testing:VariorumTests/LibraryControlsFlowRuleTests
+     -only-testing:VariorumTests/LibraryControlsGeometryTests -only-testing:VariorumTests/StatusToastPlacementRuleTests
+     -only-testing:VariorumTests/StatusToastPlacementShellTests` — every suite of the two touched test files (they share no
+     helper with any other file). Expected: all green.
+  2. The rig's dark pass, fixed (≈3 min), `vx283-u3`: `TEST_RUNNER_VARIORUM_LIBRARY_LIST_FACE=1
+     TEST_RUNNER_VARIORUM_LIBRARY_LIST_FACE_APPEARANCE=dark TEST_RUNNER_VARIORUM_LIBRARY_LIST_FACE_LABEL=after xcodebuild …
+     -derivedDataPath DerivedData/vx283-u3 test-without-building -only-testing:VariorumTests/LibraryListFaceRigTests`, the
+     log reassembled by `notes/plans/vx283-screens/u3/tools/bwalk_extract.py` into `u3/rig/after`.
+  3. R-ALL (≈5 min), `vx283-u3-revert`, `test-without-building -only-testing:VariorumTests/ViewMenuSeparatorTests
+     -only-testing:VariorumTests/StatusToastPlacementShellTests -only-testing:VariorumTests/LibraryListHeaderDarkFaceTests
+     -only-testing:VariorumTests/LibraryControlsGeometryTests` — expected RED exactly as step 3 of the first plan names
+     (ViewMenuSeparator's one test; the Bookcase + Library toast cells, the note cell green; the four dark-face cells,
+     light green; the panel-open controls cell ×2 voices, closed / wide green); then the rig again with `…_LABEL=before`
+     → `u3/rig/before`. Then `rm -rf App/Variorum/DerivedData/vx283-u3-revert` (`vx283-u3` kept for the walker).
+  4. Release (≈2 min): the store copied back and `cmp`-verified; prefs: delete the keys the suites added, import,
+     re-export, diff clean; `Tools/stage release --who <claim>`; the one-line release result.
 
-(The plan below as first written; the closing window's plan follows.)
+(The plan below as first written.)
 
 **Q6 — THE STAGE WINDOW PLAN (≈25 min; run in this order; the record flips per step; all commands from
 `App/Variorum/`, DerivedData `vx283-u3`, zsh `pipestatus` checked, the "Test run with N tests" line AND its skipped
