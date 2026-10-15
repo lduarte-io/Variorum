@@ -70,6 +70,7 @@ retitled to Close All; VX-288 notes the chip; the run and its nine members In Pr
 | VX-175 | The Library's controls row pushes the info panel off the 1240-pt default window | U3 | NOT-STARTED |
 | VX-20 | The dark heading band (her #188(m): the bands match) | U3 | NOT-STARTED |
 | VX-245 | The line-limit lint red on main — its six non-MCP sites | U3 | NOT-STARTED |
+| VX-359 | The View menu's doubled separator after Close Split (born at U1b's F-3 trace — `EditorCommands.swift:1023`, `07d9f583`; a one-line rider, the orchestrator's call, told to her) | U3 | NOT-STARTED |
 
 ## Her rulings that bind this run (verbatim where she wrote them)
 
@@ -271,6 +272,7 @@ every input axis — hover, scroll, list change — never computed before layout
   plus its hairline — the ladder record's option 2), light unchanged. The List-face rig's dark switch
   (`TEST_RUNNER_VARIORUM_LIBRARY_LIST_FACE_APPEARANCE=dark`) is the evidence tool; a pin on the colour source if
   the face exposes one.
+- VX-359 (rider, born at U1b): delete the extra `Divider()` at `EditorCommands.swift:1023` (SwiftUI already separates command groups); a source-read or menu-structure pin if one is honest; the walk captures the View menu.
 - **Evidence:** the lint red→green; the pins named above; the Mac batch; **the Opus walk** — the Bookcase with a
   refusal toast up (clear of the box), the Library at 1240 pt with the info panel open in Study and Terminal (and
   at a wide window, unchanged), the List's pinned heading in dark in both voices, the six lint sites' surfaces
