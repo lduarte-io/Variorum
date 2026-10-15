@@ -358,7 +358,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | STOPPED — the ⇧⌘W check found a COLLISION in tabbed windows (AppKit's File ▸ Close Window ⇧⌘W); her call on the chord; the batch and reverts not yet run |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | READY FOR WALK — batch 1326 tests: 1323 green · 1 skipped · 2 red (one mine, fixed headless — P7's `CapabilityRegistryTests` run PENDING, ≈3 min; one pre-existing on main, `BookCollectingDoorsTests:101`); R-A · R-B · R-C all red-on-old as expected |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -381,24 +381,61 @@ author — PENDING until verified. The walker appends the WALK RECORD under it.)
 screenshot walk (a fresh walker's, after the stage window); any stage work until the orchestrator hands over a claim.
 
 **LIVE STATUS (per piece)**
-- P0 — the ⇧⌘W collision check (VX-287's FIRST step): **COLLISION FOUND (measured, stage window 2026-10-14
-  15:03–15:06)** — the app-code half is FREE, but in the TABBED state AppKit's own File ▸ "Close Window" wears ⇧⌘W
-  and takes the chord from View ▸ Close Note (below). Per the brief: restored, released, STOPPED — the chord is
-  the author's call; nothing was rebound.
-- P1 — VX-286 (the scroll bar rides in the margin, Open + Starred): DONE (`2f2daba2`) — headless build green; its
-  mounted pin and the behavioural revert are PENDING the stage window.
-- P2 — VX-285 (the Open list grows to the sync footer; the constant splits): DONE (`2f2daba2` — the same commit as
-  P1; the two share `SidebarView.openGroup`'s lines) — headless build green; pins + revert PENDING the stage window.
-- P3 — VX-287 (Close Note ⌘⇧W, landing next / previous / the Library): DONE (`9292d1db`) —
-  headless build-for-testing green; its pins PENDING the stage window; the chord's system half PENDING (P0).
-- P4 — VX-289 (Close All Notes: the Open list's right-click + the View-menu twin): DONE (same commit as P3 — one
-  landing rule, one set of pins) — headless green; pins PENDING the stage window.
-- P6 — her ruling at READY, "THE ✕ ON THE NOTE YOU'RE LOOKING AT" (f02f63cb): DONE (`bc80a9fb`) —
-  headless build-for-testing green; its red-on-old pin (R-C) and the batch PENDING the stage window.
-- P5 — the stage window: **STOPPED AT STEP 1 (the collision), as the plan says.** Claim `vx283-u1` 15:03:37 →
-  released 15:06:22. Ran: step 0 (preconditions, the store copy, the prefs export), step 1 (the menu check), step 4
-  (restore + verify). NOT run: step 2 (the 216-suite batch) and step 3 (R-A · R-B · R-C) — every pin of the unit is
-  still PENDING. No revert is in flight; the tree is clean.
+- P0 — the ⇧⌘W collision check (VX-287's FIRST step): **DONE — RULED.** The app-code half is FREE; the system half
+  measured a collision in TABBED windows only (AppKit's own File ▸ Close Window ⇧⌘W takes the chord there — the
+  window of 15:03–15:06), and **her ruling "Keep ⇧⌘W, live with it"** (f606484fb, "⇧⌘W VS MACOS WINDOW TABS") settles
+  it: ⇧⌘W ships; in a tabbed window it is macOS's Close Window; nothing about window tabbing changes.
+- P1 — VX-286 (the scroll bar rides in the margin, Open + Starred): DONE (`2f2daba2`) — VERIFIED: green in the
+  batch, RED under **R-B** (both sections, gap 0), green restored.
+- P2 — VX-285 (the Open list grows to the sync footer; the constant splits): DONE (`2f2daba2`) — VERIFIED: green in
+  the batch, RED under **R-A** (tall 225 pt; short 180 pt ≠ the 84-pt floor), green restored.
+- P3 — VX-287 (Close Note ⌘⇧W, landing next / previous / the Library): DONE (`9292d1db`) — VERIFIED green in the
+  batch, EXCEPT the registry walk's `noActIsUnavailableInEveryContext` (RED for `.closeNote` and `.closeAllNotes` —
+  my gates were missing from the walk's sampled contexts); the fixture is fixed HEADLESS after the window (P7) and
+  its one-suite run is PENDING.
+- P4 — VX-289 (Close All Notes): DONE (`9292d1db`) — VERIFIED as P3 (the same walk line is the one PENDING).
+- P6 — her ruling at READY, "THE ✕ ON THE NOTE YOU'RE LOOKING AT" (f02f63cb): DONE (`bc80a9fb`) — VERIFIED: green
+  in the batch, RED under **R-C** (the pane stayed on the closed note), green restored.
+- P5 — the stage window: **DONE (the second window, claim `vx283-u1` 20:02:37 → released 20:12:05).** The batch and
+  the three reverts ran (results below); the store and prefs restored and verified. No revert in flight.
+- P7 — the walk's sampled contexts (`CapabilityRegistryTests.sampledContexts` gains the two close gates — the
+  justified-edit ritual every gate has followed): DONE (the commit carrying this line) — headless build-for-testing
+  green; **PENDING one stage run of `-only-testing:VariorumTests/CapabilityRegistryTests` (≈3 min — it can ride the
+  walker's window).**
+
+**P5 — THE STAGE WINDOW'S RESULTS (2026-10-14 20:02–20:12, tip `f606484fb` — code identical to `5887cf43`):**
+- **The batch** — `xcodebuild … -derivedDataPath DerivedData/vx283-u1 test` with 216 `-only-testing` suites (the
+  86-file selection): **"✘ Test run with 1326 tests in 216 suites failed after 220.351 seconds with 3 issues."**
+  1323 passed · 2 failed · 1 skipped — the skipped lines: `Suite "13n-c U4 — asks wait + the keyboard, captured (a
+  harness)" skipped` / `Test captureTheAsksAndTheKeyboard() skipped` (an env-gated capture harness, by design).
+  - **RED, MINE — `CapabilityRegistryTests.swift:105:13`** (`noActIsUnavailableInEveryContext`), two issues:
+    "Expectation failed: reachable — .closeNote can act SOMEWHERE" and "… .closeAllNotes can act SOMEWHERE". The
+    walk samples contexts and asks each act to be reachable in one; mine need a FULL window plus a note in the pane
+    / an open row, and no sampled context had both. Fixed headless after the window (P7) — not inside it.
+  - **RED, PRE-EXISTING — `BookCollectingDoorsTests.swift:101:9`** (`theSettingsDoorIsOneActOnBothRoads`):
+    "Expectation failed: BookView.surfaceCapabilities == [.openBookSettings] — the book masthead's gear is the book's
+    own door". `BookView.surfaceCapabilities` has declared `[.openBookSettings] + [.searchThisBook] +
+    [.newNoteInGathering]` since 13o U3 and VX-217; the pin still expects one. Neither file is touched by this run,
+    and both are byte-identical to `origin/main` (`git diff HEAD origin/main` empty for them) — red on main; for the
+    orchestrator to ticket.
+- **R-A (VX-285)** — the 7½-row cap and the `count <= 7` switch restored in `openGroup`;
+  `OpenListLayoutMountTests`: **RED** `inATallColumnTheListRunsDownToTheFooterAndStops` (list 225 pt in a 735-pt
+  column — "list.height > window7 + row.height", "list.maxY >= floorOfFooter - 1.5") and **RED**
+  `inAShortColumnTheListTakesItsFloorAndTheColumnScrolls` (180 pt ≠ 3½ × 24); `bothScrollingSectionsKeepTheirBarInTheMargin`
+  green. Restored (`git checkout --`, `git diff` empty).
+- **R-B (VX-286)** — the margin back outside both scroll views; same suite: **RED**
+  `bothScrollingSectionsKeepTheirBarInTheMargin` ×2 (open: scroll (12, 206) = row (12, 206); starred the same — gap 0);
+  the two VX-285 pins green. Restored, `git diff` empty.
+- **R-C (the ✕ ruling)** — `SidebarView.closeRow`'s body back to `workspace.closeNote(noteID)`;
+  `OpenListRowCloseDoorTests`: **RED** `theXOnTheNoteYouAreInMovesThePaneToTheNextNote` (`OpenListCloseTests.swift:381`
+  "focusedSelection == .post("c")", `:384` "departed == ["b"]") and **RED**
+  `theXOnTheLastRowLandsOnThePreviousThenTheLibrary` (`:390`, `:392`); the other-row pin and the source read green.
+  Restored, `git diff` empty.
+- **Restore:** the dev store's three files byte-identical before the copy-back (the test host writes no store);
+  copied back from `store-before/<stamp>/` and `cmp`-verified. The suites wrote real Debug prefs (9 keys ADDED —
+  `surfaceSize.outline.*`, `currentBlock.*`; 3 CHANGED — a surface size, the backup log, the idle-sweep mark): the
+  added keys deleted by hand, `defaults import` of `prefs-before-w2.plist`, re-export, diff clean. No new backup;
+  `castle-W1-20261013` untouched; no app launched beyond the test host; zero dev instances at release.
 
 **P0 — the ⇧⌘W check, the app's own half (2026-10-14, on `a2a27a10`) — FREE:**
 - `EditorCommands.keyEquivalent(for:)`: no `w` chord of any modifier set.
