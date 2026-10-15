@@ -856,4 +856,20 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 15 (sequence 938, the closer's soak): Use Standard (local)
+    /// crashed after writing its anchor into the current key file; her Time
+    /// Machine restore then took that key file back (no anchor) while the
+    /// memory still named the act and its plan said the anchor was done — the
+    /// resume met "the anchor written first" missing and stuck in flight
+    /// (promise 6). A resume whose live outgoing file lost the anchor its plan
+    /// recorded writes it again, first, before the new key file.
+    @Test func aLeaveResumedAfterARestoreTookItsAnchorWritesItAgain() async throws {
+        let world = try Self.start("older libraries of other libraries, and backups only", seed: 15000983)
+        for action in [Action.useCastle("macA", .alwaysAsk, newWords: false), .timeMachineSnapshot("macA"),
+                       .crash(.useStandard("macA"), afterWrites: 7), .timeMachineRollback("macA"), .launch("macA")] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }

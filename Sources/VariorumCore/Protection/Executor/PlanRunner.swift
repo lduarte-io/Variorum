@@ -456,6 +456,19 @@ extension ProtectionExecutor {
                 waitsFor = account
             }
         }
+        // THE ANCHOR FIRST, still: a leave whose live OUTGOING key file lost
+        // the anchor its plan recorded written (her Time Machine restore took
+        // the file back past the step) writes it again before anything for the
+        // new key — the step is idempotent, the secrets are in hand (VX-305
+        // U4, the soak's seed 15: the resume stuck on "anchor not written
+        // first").
+        if let index = ctx.plan.steps.firstIndex(where: { $0.name == "anchor" && $0.done }),
+           let live = ctx.library.keyFile, live.fingerprint == plan.fromFingerprint,
+           live.fingerprint == ctx.library.fingerprint,
+           live.anchor.map({ $0.outgoingFingerprint != live.fingerprint || $0.outgoingEpoch != live.epoch }) ?? true {
+            ctx.plan.steps[index].done = false
+            log("\(plan.act.rawValue): the anchor its plan recorded is gone from the live key file — written again first")
+        }
         do {
             try reachNewKey(ctx, program)
             try await drive(program, ctx)
