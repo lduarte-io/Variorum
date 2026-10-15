@@ -168,7 +168,7 @@ guidance. Each unit's evidence is named before its spawn.
 | U5a — the label pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): legs A–D all passed in a real Claude Code 2.1.300 round on the dev store — the new `claude-code · english` label on Takes cards in both voices, `save_lens` by label refusing the ambiguous block and its `take_ids` retry, the legacy form matched as its own, `pin_chosen` holding. Built at `590c0cb8` (U5a UNIT RECORD) |
 | U5b — the block-writing pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): the 31-suite Mac batch green (251 tests, 0 failed, 7 gated skips); V252-a (create_note's `blocks` = read_note's records; filed under its chapter), V255-a/b/c (the end at write new with her ⌥⌘Z/⇧⌥⌘Z; any anchor at write new hears the rung sentence and asks her; anywhere at edit), D8-a passed; D8-b's open tail is unreachable from the keyboard (THE ORCHESTRATOR ON U5's WINDOW). The store was restored cmp-SAME. Built `7a15376c`…`93edbc2e` (U5b UNIT RECORD, three sessions) |
 | U6 — Compare from the wire (+ VX-330, VX-342) | **PROVEN 2026-10-14 17:52–18:35** (U6 STAGE RUN). The 125-suite batch: 790 tests, 786 passed, 2 gated skips, 2 standing reds (VX-115, VX-167; neither on U6's paths). Every red run exact: U6a's router clears (9 pairs), U6b Mac (15), the phone (4), the phone green 18/3. The live round passed in both voices: L0–L5 (`duplicate_note` with her ⌥⌘Z/⇧⌥⌘Z, the AI's edit on the copy, Compare aligned on lineage with related-only on, an unrelated pair with it off, `link_versions`' Open › opening Compare, not-frontmost moving nothing); VX-330's walk (all twelve of sherlock's collapsed chapter rows wear the shared icon, the waiting mark on one, pressed, Don't allow clearing it); VX-342's "before" seen. The store was restored cmp-SAME. Built: U6a `2836171c`…`48e250e0`, U6b `12efb039`…`a1a094dc` |
-| U7 — the agent's read-backs | DESIGNED, FORKS RULED (U7 UNIT RECORD piece 0 `01860640`; THE ORCHESTRATOR'S RULINGS ON U7's FORKS). Builder A (VX-254 + VX-261) next, then builder B (VX-256 + the window plan), then a runner |
+| U7 — the agent's read-backs | Builder A DONE (`54cc62a5`…`ff43e84c`): VX-254 + VX-261 built, pinned, revert-checked; MCP 304/62 (1 known issue: VX-357's U+0000 pin) · core 2,871/333 · workbook 40/6; the orchestrator re-ran the pins, 50 green. Builder B (VX-256 + the window plan) next |
 | U8 — the AI's docs (LAST) | NOT-STARTED |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
@@ -241,6 +241,8 @@ guidance. Each unit's evidence is named before its spawn.
 
 | ticket | born | what | fate |
 |---|---|---|---|
+| VX-357 | U7 builder A's U+0000 check | Text containing U+0000 is stored truncated at the NUL (GRDB binds text with length -1); VX-254's digest overclaims for such a take | Todo, 13n, Bug · Confirmed · MCP · Medium; Pre-launch is her call; pinned as a known issue |
+| VX-358 | U7 builder A's OWED 3 | `edit_take` / `restore_commit` treat an NFC↔NFD re-spelling as no change, so the digest differs from what the client sent | Todo, 13n, Improvement · Suspected · MCP · Low |
 | VX-355 | U6 STAGE RUN (the runner's note 2) | The Pool has no bottom bar, so receipts (an AI's, her undo's) show nowhere while it's open | Todo, 13n, Improvement · Confirmed · Library & sidebar · Low |
 | VX-356 | U6 STAGE RUN (the runner's note 4) | Book Panel in Study: the open note's collapsed chapter row shows no open-note marker (Terminal shows "›") | Todo, 13n, Improvement · Suspected · Books · Low |
 | VX-354 | U6b's sweep (OWED 2) | Book Panel: the header's book name and its gatherings names wear neither MCP glyph (outside VX-268's parity and VX-330) | Todo, 13n, Improvement · Confirmed · MCP · Low; Pre-launch is her call |
@@ -3763,3 +3765,18 @@ its row would be caught. (4) The Mac words pin is unrun here (the window's).
    target-less; listed when approved).
 7. `MCPHarnessTimeLimitTests`' never-answers pin overran twice in the full MCP runs at load 21–26 (16.4 s, 20.3 s) and
    passed alone — VX-353, already filed; nothing new.
+
+### THE ORCHESTRATOR ON BUILDER A's STOP (2026-10-14 ~19:45 MDT)
+
+- **Verified:** the tree is clean at `ff43e84c`, and the orchestrator re-ran the digest, own-activity and catalog suites
+  headless: 50 tests, green, with the one known issue (U+0000).
+- **P-VX261-6 (a) stands, PROVISIONAL.** On the four acts whose refused rows log a LOOKED-UP id (the three chapter acts
+  log the chapter's book, and `delete_take` on a last take logs its block), refused rows answer no `target_*`, and allowed
+  rows keep it, since their answer told the client the id. This is the strict oracle rule, the same class as P-VX261-5.
+  Builder A's catch corrects the design's "every logged id is one the client sent".
+- **U+0000 → VX-357** (Bug · Confirmed · MCP · Medium; Pre-launch is HER call, flagged in the bundle). The digest sentence
+  stays as built. The known-issue pin marks it, and the fix belongs to that ticket: refuse, strip, or store faithfully.
+- **NFC↔NFD → VX-358** (Improvement · Suspected · Low).
+- **Next:** builder B, VX-256 plus THE STAGE WINDOW (`vx336-u7`) with the 19 Mac suites carried. It may reuse or replace
+  `DerivedData/vx336-u7a`; the window runs one final product.
+
