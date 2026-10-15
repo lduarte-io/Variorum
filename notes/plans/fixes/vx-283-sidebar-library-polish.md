@@ -2905,6 +2905,85 @@ Restore: `git checkout --` the two files, then `git diff --quiet`. **Expected RE
 mounted cells. (If the field-editor cell stays green on old, the keystroke road does not move the field's cell in the
 harness — recorded as such; the binding-road cells carry the red.)
 
+#### U2 + U3b — THE STAGE WINDOW (run by the orchestrator, claim `vx283-u2` 15:31:45 → SEAM, RELEASED 15:50:46)
+
+The coordinator's GO came at 15:32 (her word at ~10:55: "Now, I'm off the Pro"). Products were the tip-built trees
+(`vx283-u2`, `vx283-u3b`, both built at `8dbae3d6` code; the revert trees prebuilt). The pre-GO state: no instances
+(strict forms), no sims, load 5.5. The superseded trees `vx283-u1d` and `vx283-u3` were deleted first (5.3 GB).
+- **U2 `window.sh`:**
+  - pre: tree clean at `0ddb357e`, store copied (`store-before/20261015T213200Z`), prefs exported.
+  - **batch: 722 tests / 144 suites, exactly ONE red:** `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads`
+    (VX-115, red on main, untouched here). 9 skipped, all opt-in harnesses.
+  - **mount: `OpenListDragMountTests` + `SidebarSectionWindowMountTests` green on five passes.** The `-test-iterations 3`
+    run took 73 s (three repeats; Swift Testing prints one summary), plus two separate runs at 24.5 s each, 14/2 each.
+  - **R-K: exactly the 16 named RED, the 9 named GREEN** (25 tests / 3 suites; `logs/rk.log`). Tree deleted.
+  - **R-N: exactly the 4 named RED** (`theFadeIsWholeBeforeTheClipReachesInk`,
+    `theFadeIsAlwaysHalfARowDeepAndItsStrengthEasesIn`, `theFadeIsNeverFullySolid`,
+    `aShallowOverflowFadesTheWholeHalfRowFaintly`); the other 23 green (27 / 2; `logs/rn.log`). Tree deleted.
+  - restore: the three files byte-identical even before the copy-back (the suites write their own stores), restored
+    + `cmp`. The nine added keys (`currentBlock.*`, `surfaceSize.outline.*`) deleted, import, re-export: PREFS CLEAN.
+  - **U2's test part is GREEN, and every pin is red-on-old as named.**
+- **U3b `window.sh`:**
+  - pre: `App/` clean at `0ddb357e`, store `store-before/20261015T214144Z`.
+  - **batch: 511 tests / 103 suites, ONE red — U3b's own pin
+    `LibraryControlsGeometryTests.withThePanelClosedEachWidthHasOneLineCount`, both voices.** Its other five mounted
+    cells, both stable-widths tests, every pure pin and U3's six cells are green.
+  - The sweep (`logs/batch.log`, `[VX-175 U3b sweep]` lines), with the room = the catalog width − 48:
+    - **Terminal 940 and 960:** the four sort states (edited·newest, title·A–Z, created·newest, created·oldest) are TWO
+      lines (56 pt); typed a word, typed past the prompt and EMPTY AGAIN are ONE line (24 pt).
+    - **Study 840, 860 and 880:** the same split.
+    - Every other room has one answer per voice: two lines at or below 920 (Terminal) and 820 (Study), one line from 980
+      (Terminal) and 900 (Study).
+    - The states run in order (edited·newest → title → created·newest → created·oldest → a typed word → past the
+      prompt → empty again). So **"empty again" (the field empty, the last pick created·oldest) is one line, where
+      "created·oldest" before the typing was two.** Either the slot still shows something other than the door after
+      the field clears, or the row's answer depends on its history.
+  - **R-S: the six named cells RED** (3 mounted tests × 2 voices; 19 tests / 3 suites; `logs/rv.log`), the rest green.
+    But **the closed-panel cell is red on BOTH sides**, for different cells:
+    - on old, "typed a word" went one line with the field under its prompt (173 of 211.5 / 138.5 of 175) across the
+      sweep;
+    - on the fix, the field is never under its floor, but the band above remains.
+  - So the fix closed W2's F-1/F-2 everywhere the pins reached except this band. The pin is not hollow: it
+    discriminates, and it shows the fix incomplete. Tree deleted.
+  - restore: identical before copy-back, restored + `cmp`; nine added keys deleted; PREFS CLEAN; castle-W1 present.
+- **Why it matters in use:** the dev store's ≈240-pt sidebar puts Terminal's closed row at ≈951, inside the band. So
+  W2's flip on typing would still show there. **D8 is deferred** to a re-walk after U3c (below); the walk carries
+  D1–D7.
+- RELEASE line sent at the SEAM: "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1
+  untouched". The coordinator's word at the SEAM was "release for vx336-release": vx-336's 0.9.7 window runs before
+  our walk.
+- **The merge from main (branch-only, during the release window):** `6860bd54` merges `origin/main` at **`591bb8e8`**.
+  Its message names `9e6df7b4`; the two commits past it are VX-336 release-brief notes only. There was one conflict,
+  `.gitignore`, resolved with both screens lines kept; `CommandRouter.swift` auto-merged.
+- **A record slip:** commit `d9741021`'s message says it carries this section and the U3c ruling. It carried only the
+  LIVE STATUS rows and the stage log (an Edit refused unseen); this section lands in the next commit.
+
+#### U3c — THE ORCHESTRATOR'S RULING ON THE CLOSED-PANEL RED (2026-10-15 ~15:55 — a TRACE-FIRST leg, a fresh implementer)
+
+The window's red is a real residual of P-U3-5, not a hollow pin (above). P-5 applies: this is the third pushback on
+VX-175's row (U3's W2, U3b, now this). So **no guessed fix.** A fresh `opus-implementer` at xhigh runs a trace-first
+leg on the merged tip, in the U1c shape (trace, propose, the architect rules, then build).
+- **T1 — read the code (headless).** Find what differs between a sort state and the typed / empty-again states, at
+  one catalog width, in the controls row and its container:
+  - `LibraryCatalogView`'s row: the `isSearching` branch, and whether `isSearching` / `searchState.isAnswering`
+    persists after `ask("")`;
+  - any child that appears, disappears or changes its reported floor, widest or ideal width;
+  - `LibraryControlsFlow`'s `arrangement` and its decision inputs, and any Layout cache;
+  - the harness's `pick` / `ask` settle: is the read taken before the async `search()` re-renders?
+  Name each candidate with file:line.
+- **T2 — a DEBUG-only probe (headless build), then READY FOR STAGE.** Add a narrowed mounted probe: ONE room per voice
+  inside the band (Terminal 950, Study 860), the seven states in the sweep's order plus a sort pick after "empty
+  again". For each state, print `isSearching`, the slot's branch, each subview's floor / widest / `sizeThatFits` ideal,
+  the proposal width, the decision, and the measured height, read after a settle that waits for the search to land.
+  Build-for-testing into `DerivedData/vx283-u3c`, commit, push, and END THE TURN with the exact window (≈10 min). The
+  orchestrator runs it at the next claim.
+- **T3 — THE PROPOSAL** (after the run): the traced mechanism with file:line; the fix shape inside P-U3-5 and VX-175's
+  composition ruling (search · scope / mode · sort · when as ONE Layout, never `ViewThatFits`); the pin, red-on-old,
+  named with its revert. **Nothing is built before the orchestrator rules.** If the mechanism is the harness (a read
+  before the settle) and the product is stable, say so: the pin is fixed, and the product is not.
+- The cast: one implementer at a time; the U2 walker (D1–D7) may run beside it, since a walker is not an implementer
+  (precedent: U1d's walk beside U2's build).
+
 #### U2 + U3b — THE WALK PLAN (the folded `vx283-u2` claim's walk; a fresh Opus at xhigh; her rule)
 
 Products: U2's Debug app `DerivedData/vx283-u2` (the drag + P-U1e-1 + the R1 fixes) for D1–D7; U3b's
