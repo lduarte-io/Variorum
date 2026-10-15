@@ -378,7 +378,7 @@ trailer of any kind.
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **U1d (her two memo rulings: follow only on her acts; the fade reshaped) — READY FOR STAGE** (≈15 min): the 96-suite batch, the mount suite ×5, R-I and R-J (prebuilt), the restore — the U1d section's LIVE STATUS. Then the re-walk of R2–R6. |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp, the orchestrator's added piece) | **READY FOR STAGE** (≈15 min): the 144-suite batch, the two mount suites ×3, R-K and R-N (prebuilt), the restore — the U2 section's E6. Then the walk. |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **READY FOR STAGE — the closing window** (≈15 min; the U3 section's Q6): the first window's batch green but for two of my own pins (test defects, fixed headless — test files only); R-ALL prebuilt in `vx283-u3-revert` and the tree restored; `vx283-u3` holds the current products for the walker |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **U3b (P-U3-5 — the controls row reads stable widths only; the walk's W2 F-1/F-2) — IN-PROGRESS** (headless; the U3b section's LIVE STATUS). U3's W1 W3 W4 W5 hold (the walk record). |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
 
@@ -2771,6 +2771,20 @@ near-empty band (≈4 pt of a row's padding beyond the edge) a visible fade over
 "there is more" hint. Rides U2's leg as a separate piece (U2's implementer already works in `SidebarLayout.swift`):
 pure pins for the ramp, R-K (revert to the half-row ramp) red on them; U2's walk re-checks R4 at 5/7/9/12 pt short in
 two rooms and O-1's state.
+
+### U3b — the controls row, stable (VX-175 — P-U3-5, the walk's W2 F-1 and F-2)
+
+**Implementer:** Opus 5.5 at xhigh (fresh session, 2026-10-15). Worktree `~/dev/variorum-vx-283`, DerivedData
+`App/Variorum/DerivedData/vx283-u3b` (the revert tree's `vx283-u3b-rv`). **Not done by this session (the record's first
+line, per the brief):** any stage work (the batch, the revert run, the re-walk of W2) — until the orchestrator hands
+over a claim; the sidebar (not mine).
+
+**LIVE STATUS (per piece)**
+- S0 — the trace, verified on this tip (`bf09054b`): IN-PROGRESS (below).
+- S1 — the rule reads stable widths (the field's prompt floor, the sort slot at its widest): NOT-STARTED.
+- S2 — the stable widths measured and handed to the layout; the relevance label one line: NOT-STARTED.
+- S3 — the pins (pure + mounted), headless build-for-testing: NOT-STARTED.
+- S4 — the revert tree (R-S) prebuilt, the window script, READY FOR STAGE: NOT-STARTED.
 
 ## Ladder
 
