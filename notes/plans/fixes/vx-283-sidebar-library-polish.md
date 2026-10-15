@@ -366,7 +366,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **READY FOR STAGE** (≈15 min — Q9: the 93-suite batch + R-F prebuilt, then the restore) — the orchestrator's ruling P-U1b-6 built (`a347f992`: the reveal as an exact pure offset set through a `ScrollPosition`, re-asked on every input axis; the offscreen probe lands the flip exactly). Then the re-walk. F-3 → VX-359 (U3 rider). |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **STOPPED — Q9 not green** (21:53–21:56): batch 413 tests, 2 red — VX-245's lint and the Starred pin (HEAD's absolute `ScrollPosition` road rests 1.5 pt short); **R-F (the proxy road with every P-U1b-6 axis) all GREEN**, inverting the expectation. Awaiting the orchestrator (options in Q9). P-U1b-7 accepted (a). F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -918,15 +918,33 @@ lines — below); any stage work until the orchestrator hands over a claim.
   modifier, the anchor fraction `(row × pitch − target) / (viewport − pitch)` through `proxy.scrollTo(id, anchor:)`,
   unanimated; no `.scrollPosition`) — patch `notes/plans/vx283-screens/u1b/reverts/R-F.patch` applied, built into
   `DerivedData/vx283-u1b-rf` (green), restored by `git checkout --`; **no revert is in the tree** (`git diff` empty).
-- Q9 — **READY FOR STAGE** (≈15 min): (0) prefs export + the dev store's three files copied (zero dev instances);
-  (1) the 93-suite batch, `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
-  DerivedData/vx283-u1 test-without-building` + one `-only-testing:VariorumTests/<Suite>` per line of
-  `notes/plans/vx283-screens/u1b/batch-suites.txt` (products at `a347f992`'s code = HEAD's) — expected: VX-245's lint
-  the only red; (2) **R-F** — `… -derivedDataPath DerivedData/vx283-u1b-rf test-without-building
-  -only-testing:VariorumTests/SidebarSectionWindowMountTests` — expected RED:
-  `starredFadesWhereMoreLiesBeyondAndNowhereWhenItHoldsEverything` (the proxy road short after the flip); then DELETE
-  `DerivedData/vx283-u1b-rf` (keep `vx283-u1` for the walker); (3) the store restored (`cmp`), prefs import → delete
-  added keys → re-export → diff; release. Then READY FOR WALK.
+- Q9 — the window: DONE (claim `vx283-u1b3` 21:53:35 → released 21:56:35) — **NOT GREEN, STOPPED at the
+  orchestrator's rule; nothing fixed. The result INVERTS the ruling's expectation: HEAD's absolute `ScrollPosition`
+  road rests short; R-F's proxy road (with every new axis) is GREEN.**
+  - **The batch** (93 suites, products at `a347f992` = HEAD's code): **"✘ Test run with 413 tests in 93 suites failed
+    after 85.803 seconds with 2 issues."** 411 passed · 2 failed · no skipped lines. (1) VX-245's lint
+    (`ChromeLineLimitTests.swift:104`, U3's, on main). (2) **`starredFadesWhereMoreLiesBeyondAndNowhereWhenItHolds
+    Everything` (`SidebarSectionWindowTests.swift:544`) STILL RED:** "the ninth star revealed: EdgeFades(top: 12.0,
+    bottom: 1.5) over ScrollWindow(offset: 34.5, viewport: 180.0, content: 216.0)" — 1.5 pt short of 36. Every other
+    U1b pin green (the return rested at 248.69 of 249 — non-integer again; the shorter window 210 → clear).
+  - **R-F** (prebuilt — the application on the proxy's anchor road, everything else of P-U1b-6 kept): **"✔ Test run
+    with 6 tests in 1 suite passed after 10.384 seconds."** — ALL GREEN, **the Starred pin included** (expected RED).
+    The return rested at 249.16. `DerivedData/vx283-u1b-rf` deleted; `vx283-u1` kept.
+  - **Reading (untraced — for the orchestrator, not acted on):** the axes are what fixed it (R-F carries them all);
+    the absolute road itself is what still misses. The leading suspect is `ScrollPosition`'s VALUE semantics: a
+    re-ask computing the same target (36) as the binding already holds (`position.scrollTo(y: 36)` from the first
+    ask) may change nothing SwiftUI can see, so after the flip nudges the real offset to 34.5 the identical re-ask
+    never reaches the scroll view; the proxy's `scrollTo` is imperative and lands every time. Untested; the offscreen
+    probe (which passed with `ScrollPosition`) has no lazy-stack re-estimate after the flip.
+  - **Options (none built):** (a) keep every axis (P-U1b-6's half that R-F shows works) and apply through the proxy
+    (R-F's road, as prebuilt — green); (b) keep the absolute road but force a distinct value per ask (e.g. reset the
+    position before `scrollTo(y:)`) — needs a trace first; (c) both roads.
+  - **Restore:** the dev store's three files byte-identical before the copy-back, copied back from
+    `store-before/20261015T035344Z/`, `cmp`-verified; prefs: 9 keys ADDED (deleted; one `surfaceSize.outline.*` key
+    needed a second delete after the import), 2 CHANGED (the idle-sweep mark, the backup log) — import, re-export,
+    diff CLEAN (1602 = 1602); `castle-W1-20261013` untouched; zero dev instances throughout.
+- **P-U1b-7 — ACCEPTED (a) by the orchestrator (2026-10-14, the Q9 GO):** a content-height change re-asks only when
+  the row count did not change, so a ✕ on another row never pulls her scrolled list back.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
