@@ -378,7 +378,7 @@ trailer of any kind.
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **STOPPED — Q11 not green** (22:05–22:08): batch 413, 2 red — VX-245's lint and the Starred pin (0.5 pt short on HEAD — the same code R-F ran green: FLAKY); R-G red as expected but uninformative. A new trace is needed — a fresh successor's (leads in Q11). Every other U1b pin green. F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **READY FOR STAGE** (tip `e6ed9b66`) — all five members built headless (VX-175 to the ruling at 76ccfc45), build-for-testing green; the window (≈25 min): the 187-suite batch, the rig's dark pass, ONE combined revert R-ALL (R-V + R-T + R-D + R-L), restore — the U3 section's Q6 plan |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | FIRST WINDOW RUN (00:50–00:57, released): the 187-suite batch green but for TWO of my own new pins (test defects, traced — the U3 section's Q6); fixing them headless (test files only), then the closing window (the two suites, the rig's dark pass, R-ALL) |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
 
@@ -1903,7 +1903,36 @@ the orchestrator rules on its composition (below — the brief's composition doe
   keeps its prompt's width — **RED ON OLD planned as R-L** (`LibraryControlsFlow(spacing: 10, lineSpacing: 8) {` →
   `HStack(spacing: 10) {` in `LibraryCatalogView.header`); guards: panel closed at 1029 → one line, the field whole;
   1229 pt (a 1440 window) → one line, the field 320 at the header's 24-pt inset. All PENDING the stage window.
-- Q6 — the stage window: **READY FOR STAGE — the plan below (≈25 min), tip `e6ed9b66`; no revert in flight.**
+- Q6 — the stage window: **FIRST WINDOW RUN AND STOPPED** (claim `vx283-u3` 00:50:28–00:56:58, RELEASED; steps 0–1 of the
+  plan below, then stopped on the orchestrator's rule — two unexpected reds, both in MY new pins). No revert ran.
+  - **Step 1, the batch** (`test-without-building` on `vx283-u3`, tip `a4ef7665`, 187 suites; log gitignored at
+    `notes/plans/vx283-screens/u3/batch.log`): **"✘ Test run with 1113 tests in 187 suites failed after 246.959 seconds
+    with 2 issues."** Skipped (by design): the opt-in rig suite and the 18k C4 singleton-windows suite. GREEN among the
+    rest: `ChromeLineLimitTests` (**VX-245's lint red→green** — red on the tip by batch 418), `ViewMenuSeparatorTests`,
+    `StatusToastPlacementRuleTests`, `LibraryListHeaderDarkFaceTests`, `LibraryControlsFlowRuleTests` but one cell,
+    `LibraryBulkRowGeometryTests`, and **`LibraryControlsGeometryTests` ×6** — measured: at 1029 pt with the panel open
+    the row is two lines (610 × 56 pt) in both voices, the field 320 pt (prompt 211.5 Terminal / 175 Study), the panel
+    at x 680–1029 (inside); at 1029 closed one line (field 222 / 268); at 1229 one line, the field 320 at x 24
+    (controls 1097 / 1045 wide). **The toast cells on the Bookcase and the Library GREEN** — measured: the card's foot
+    8 pt above the band's top (780 vs 788; 806 vs 814), centred on it.
+  - **RED 1 (my pin, a test defect):** `LibraryControlsFlowRuleTests.theIdealIsOneLineAndTheMinimumIsTheWiderLine`
+    (`LibraryControlsFlowTests.swift:116`) — "Expectation failed: minimum.size.width == max(75 + 10 + 228, 180 + 10 +
+    174 + 10 + 53)", the values printing `427.0` and `427`. Mechanism: inside `#expect` the right-hand `max(…)` of
+    integer literals was typed `Int`, and the macro's comparison of a `CGFloat` with an `Int` answered false. The
+    layout's number is right.
+  - **RED 2 (my pin, a test defect):** `StatusToastPlacementShellTests.aToastOverANoteRestsWhereItAlwaysHas`
+    (`StatusToastPlacementTests.swift:200`) — "the toast rests 46 pt above the window's foot (card foot 838.0 of
+    832.0)", off by 52. Mechanism: the cell measured against the HOSTING VIEW's height (832), but in this harness the
+    shell's foot sits 52 pt lower in the same `.global` space (the Bookcase band's foot read 858 in an 832-pt host).
+    The Bookcase / Library cells compare card and band in one space and are unaffected.
+  - **Observation (not chased, the orchestrator's word):** in this mount — a titled 1240 × 800 window whose content
+    view reads 832 tall — `RootView` lays out with its foot ≈52 pt below the host's height in `.global`. A harness
+    fact; no product claim rests on it.
+  - Restore: the store's three files byte-identical before the copy-back (the host writes no store), copied back and
+    `cmp`-verified; the suites ADDED 9 prefs keys (`currentBlock.*` ×5, `surfaceSize.outline.*` ×4) — deleted, imported,
+    re-exported, diff clean; zero instances; `castle-W1` untouched.
+
+(The plan below as first written; the closing window's plan follows the fixes.)
 
 **Q6 — THE STAGE WINDOW PLAN (≈25 min; run in this order; the record flips per step; all commands from
 `App/Variorum/`, DerivedData `vx283-u3`, zsh `pipestatus` checked, the "Test run with N tests" line AND its skipped
