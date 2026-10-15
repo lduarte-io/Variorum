@@ -615,10 +615,31 @@ final class SWorld {
                 return plan.parameters?.passphraseKDF
             }()
             let vault = device.session.accountID.flatMap { server.snapshot($0) }
+            // The locks under the plan's own descriptor this Mac holds — the
+            // live key file's, or (her Time Machine restore took the live one
+            // back past the press) the memory's mirror of it: the press's
+            // passphrase is the one that opens them (the closer's soak, seed 5
+            // sequence 626).
+            let planLocks: [StoreKeyEnvelope.PassphraseWrap] = {
+                guard let kdf = planKDF else { return [] }
+                var files = [liveKeyFile(device)].compactMap { $0 }
+                if let libraryID = device.slot?.libraryID,
+                   case .memory(let sealed)? = device.keychain.local[KName.memory(Self.scope, libraryID)]?.value,
+                   let memory = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload),
+                   let mirror = memory.keyFileMirror {
+                    files.append(mirror)
+                }
+                return files.compactMap(\.passphrase).filter { $0.kdf == kdf }
+            }()
             if let kdf = planKDF, let vault, vault.format.kdf == kdf,
                let opens = candidates.first(where: { p in
                    passphraseKey(p, kdf).map { (try? vault.format.unwrapMaster(withPassphraseKey: $0.key)) != nil } == true
                }) {
+                typed = TypedSecrets(passphrase: opens, words: typed.words)
+            } else if let kdf = planKDF, !planLocks.isEmpty,
+                      let opens = candidates.first(where: { p in
+                          passphraseKey(p, kdf).map { pk in planLocks.contains { Lock.unwrap($0.wrapped, under: pk.key) != nil } } == true
+                      }) {
                 typed = TypedSecrets(passphrase: opens, words: typed.words)
             } else if let wrap = liveKeyFile(device)?.passphrase,
                       let opens = candidates.first(where: { p in

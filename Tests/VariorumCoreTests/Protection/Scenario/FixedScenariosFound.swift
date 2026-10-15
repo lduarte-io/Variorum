@@ -604,4 +604,22 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 5 (sequence 626, the closer's soak) — a CHECKER (world) finding:
+    /// a change of passphrase crashed after its key file and memory writes,
+    /// then her Time Machine restore took the key file back past the press —
+    /// the memory (newer) still names the act and its plan; at the resume she
+    /// types the passphrase her press took, the one that opens the locks under
+    /// the plan's descriptor this Mac holds (the memory's mirror now), not the
+    /// restored file's older one. The act then finishes.
+    @Test func aKeyDoorResumedAfterATimeMachineRestoreFinishes() async throws {
+        let world = try Self.start("Standard-waiting", seed: 5000641)
+        for action in [Action.createLibrary("phone", secrets: true), .timeMachineSnapshot("phone"),
+                       .crash(.changePassphrase("phone"), afterWrites: 7), .timeMachineRollback("phone"),
+                       .crash(.backup("phone"), afterWrites: 8)] {
+            await world.step(action)
+        }
+        #expect(world.phone.library?.section.actInFlight == nil, "the change of passphrase stuck in flight")
+        expectPromisesKept(world)
+    }
 }
