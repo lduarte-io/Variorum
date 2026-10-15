@@ -2442,9 +2442,10 @@ and the chip are walk evidence); edge auto-scroll during a drag (the M shape, ou
   (this commit) — a headless REPLICA (the real `SidebarLayout.swift` + `OpenNotes` compiled beside the pins' bodies,
   scratchpad only): 1165 checks, 0 failed; with R-K's patch (below) 229 failed. The suite's run PENDING the window.
 - E2 — the delivery (one drop delegate on the list's rows + the end-zone band; the drag state; the insertion line as
-  an overlay above the edge fade; the settle) + the chip (the Bookcase's grab canvas moved to `Core/Views/`, reused):
-  NOT-STARTED.
-- E3 — headless `build-for-testing` green; the behavioural revert prebuilt; READY FOR STAGE: NOT-STARTED.
+  an overlay above the edge fade; the settle) + the chip (the Bookcase's grab canvas moved to `Core/Views/`, reused) +
+  the door, face and mounted pins: DONE (`5e1f43eb`) — headless `build-for-testing` green; the runs PENDING the window.
+- E3 — R-K named below BEFORE it is applied (this commit); then prebuilt into `DerivedData/vx283-u2-rk` and restored:
+  IN-PROGRESS — **R-K is NOT yet in the tree.**
 
 **THE TRACE (this tip, `9643aaf6`; paths under `App/Variorum/Variorum/`):** the Open row drags with the system drag
 and each row is its OWN drop target (`Features/Library/SidebarView.swift:1032-1041`): `.draggable(OpenNoteDragToken)`
@@ -2472,6 +2473,123 @@ arithmetic, and their comment still says "the drag route itself is AppKit's insi
 - The settle: the move lands inside an animation on the column's one beat (`SidebarLayout.railTransition`).
 - The chip: the Bookcase's compact title chip at the grab point (R-LWP-3's `BookDragSource` canvas), moved to the
   shared home and reused on the Open list's rows only.
+
+**THE BUILD (`ff91d897` the rule, `5e1f43eb` the delivery and the chip; paths under `App/Variorum/Variorum/`):**
+- `Core/Views/SidebarLayout.swift` — `OpenListDrop` (pure): `gap(at:rowHeight:rows:)` (the half of the row decides;
+  the midpoint counts as lower, as the editor's block drag settles; above the rows 0, below them the end);
+  `gap(for: Hover, offset:…)` (a hover is held in the VIEWPORT — `.rows(viewportY:)` — or `.end`);
+  `destination(gap:dragged:rows:)` (the onMove destination IS the gap; nil at the dragged row's own two gaps or off the
+  list); `lineTop(hover:dragged:rows:rowHeight:window:)` (the line's top in the viewport, every input an argument; nil
+  with no hover, no drag of this list's, no reading, no pitch or a no-change gap; held inside the rows at both ends and
+  inside the window); `endZoneHeight(…)` (the room under the rows above the bottom padding, from VX-285's own two
+  measurements, capped at 28 pt; 0 when the rows fill the list or before measurement).
+- `Features/Library/OpenListDrag.swift` (NEW) — `OpenListDragState` (`@Observable`: which row a drag of THIS list's
+  began on, the hover, the list's window copied in only while a drag hovers — an ordinary scroll re-renders nothing);
+  `OpenListDropDoor` (`types`, the `settle` animation, `proposal` — `.move` where the line is drawn, `.forbidden`
+  where a drop changes nothing so the image slides back — `perform` and the one landing act `land(token:atGap:…)`);
+  `OpenListRowsDrop` / `OpenListEndZoneDrop` (`DropDelegate`s); `OpenListInsertionLine` (the overlay: 2 pt,
+  `tokens.ring`, across the rows' width, placed by LAYOUT so its frame is where it draws, no hits, hidden from
+  accessibility; a DEBUG tap reports its global frame).
+- `Features/Library/SidebarView.swift` — the token gains `listID` (and goes `nonisolated` + `Sendable`, the
+  Bookcase tokens' shape; `contentType` named once); `@State openListDrag`; the list's CONTENT carries the one drop
+  (`.contentShape` + `.onDrop(…OpenListRowsDrop)`); a non-DEBUG `onScrollGeometryChange` feeds the state (the line's
+  scroll axis); `.overlay { openListLine(shown) }` right after `SidebarSectionWindow` — ABOVE the edge fade; the END
+  ZONE (`openListEndZone`) is the group's last child under the list (Color.clear, its own drop); the row trades
+  `.draggable` + its per-row `.dropDestination` for `ChipDragSource` (the payload records the drag's start and names
+  the list) with `Self.openRowChip` as its image. DEBUG oracles: `SidebarGeometry.openListDrags` / `openListLines` /
+  `openListEndZones` (keyed by the column's workspace, cleared by `forgetSections`).
+- `Core/Views/DragChipCanvas.swift` (NEW) + `Features/Shelf/ShelfView.swift` — **the Bookcase's chip machinery
+  MOVED to the shared home at its second consumer** (CLAUDE.md's placement rule): `DragChipPlacement` (the pure
+  placement, verbatim), `DragChipCanvas` (the private `GrabCanvas`, verbatim), `DragTitleChip` (the chip's face, a
+  `font` parameter), `ChipDragSource` (the grab-tracking drag source, generic). A parity move: `BookDragChip`,
+  `BookDragSource.chipCenter` / `.placement` / `.canvas` keep their names and answers (now forwarding), and
+  `BookDragSource`'s body rides `ChipDragSource`; `BookcaseDragFaceTests` untouched. **A file outside the declared
+  lanes (`ShelfView.swift`), touched only by this parity move — said here for the orchestrator.**
+- **Not touched:** `SidebarSectionWindow.swift` (no hook was needed — P-U2-1 below), `WorkspaceModel.move`/
+  `OpenNotes.move` (their arithmetic was right; the bug was the gap fed to them), `ShellActions`, `ShellRouter.swift`,
+  the editor seam, `Sync/`, custody, schema.
+
+**PROVISIONALs (U2):**
+- **P-U2-1 — following and the drag (the brief's ask).** A drop is neither her ACT (it changes no current row) nor
+  her HAND (it reports no scroll phase), and it never scrolls the list: the rows rearrange in place under the pointer;
+  a list that FOLLOWS keeps following (a later resize, rail or pitch change keeps the current row in view, as ruled); a
+  list she scrolled away stays where she put it. During the drag nothing moves the list either (no phase, no geometry
+  change; edge auto-scroll is the M shape, out of scope). Consequence, stated: a row moved from below the current row
+  to above it shifts the current row down one — it can sit under the bottom fade until her next act or a following
+  input. No hook into `SidebarSectionWindow` was needed. Options: (a) [built]; (b) a drop ends following like a hand
+  scroll (then even a resize leaves a shifted current row cut); (c) a drop re-reveals the current row at once while
+  following (the list can jump up to a row right after the drop, under the pointer, fighting the settle).
+- **P-U2-2 — the end zone's extent:** the room under the rows, capped at the book navigator's 28 pt; absent when the
+  rows fill the list (scrolled to its end, the last row's lower half is the end slot). Options: (a) [built]; (b) all
+  the room below the list down to the footer; (c) a fixed 28-pt zone always in the layout (it would move the list's
+  stop above the footer — VX-285's ruled height — and U1's pins).
+- **P-U2-3 — a drop acts only on the list its drag began in** (the token names its list): a row dragged in from
+  another window's Open list is refused there, with no line. Before, the row-level target moved that window's row of
+  the same note if it had one. Options: (a) refuse [built]; (b) accept, moving this window's row of that note;
+  (c) accept and OPEN the note in this window's list at the drop (new behaviour).
+- **P-U2-4 — the settle:** `.snappy` over the column's one beat (`SidebarLayout.railTransition`, 0.22 s — her
+  "snap into place"). Options: (a) [built]; (b) `.easeInOut` over the beat (the rail's curve); (c) a spring with a
+  visible bounce.
+- **P-U2-5 — the chip's face:** the row's title alone, semibold in the sidebar's navigation font, on the surface with
+  a hairline (the Bookcase chip's look at the sidebar's register); no ordinal, no wing name. Options: (a) [built];
+  (b) the Bookcase's body size; (c) carry the ⌘⇧n ordinal.
+- **P-U2-6 — the line's reach and layer:** across the rows' full width (the wash's rectangle — the book navigator's
+  span), drawn ABOVE the edge fade (a line at a faded edge is never dimmed); a boundary just past a scrolled edge
+  shows AT that edge. Options: (a) [built]; (b) under the fade, inside the scroll content; (c) inset to the rows' text
+  edge (the editor's bar spans the text).
+- **A known edge, not provisional:** a drag released OUTSIDE the list leaves the list's `dragging` stale until its
+  next drag begins — harmless (the hover clears on exit, and a drop is decided by the PAYLOAD's list id), except that a
+  row dragged in from another window's list after such a cancel would draw a line where the drop then does nothing.
+  The session-end callback that would clear it (`onDragSessionUpdated`) was deliberately not used: its order against
+  `performDrop` is unverified, and the wrong order would break every drop.
+
+**PINS (`App/Variorum/VariorumTests/OpenListDragTests.swift`, NEW; all PENDING the stage window):**
+- `OpenListDropRuleTests` ×14 (pure): the half names the gap; **the row just below is reachable · a downward drop no
+  longer lands one row short · the last slot is reachable** (the ticket's three, RED ON OLD); an upward drop; the
+  dragged row's own gaps offer nothing; **every drop lands beside the row under the pointer** (exhaustive: 1…6 rows,
+  every dragged row, every target, both halves at six depths — RED ON OLD); the line on the boundary; the line follows
+  the hover · a scroll under a still pointer · a change of the list (the delivery law, pure); no line before a reading
+  or without a drag of its own; the line stays inside the window; the end zone's height.
+- `OpenListDropDoorTests` ×8: a drop lands where its line was drawn (RED ON OLD); the end zone lands the last slot
+  (and the last row over it offers nothing); a drop on its own place offers nothing and moves nothing; a drop acts only
+  on its own list (P-U2-3); a scroll under a still pointer moves the gap through the state; moving between the rows and
+  the end zone never blanks the line (either exit order); **a release reads the PAYLOAD from a real `NSItemProvider`
+  and lands it** (the whole road after AppKit, short of the pointer); a release that offers nothing refuses and ends the
+  drag.
+- `OpenListDragFaceTests` ×2: the Open row's chip rendered at three grab points — its ink centred on the grab, whole,
+  one line (`BookcaseDragFaceTests`' render helpers); a source read — the row drags through `ChipDragSource` with its
+  chip and has NO `dropDestination` of its own; the list's content is the one drop; the end zone and the line are
+  wired; the Bookcase reads the same machinery and no second canvas exists.
+- `OpenListDragMountTests` ×3 (a mounted column, `SidebarSectionWindowTests`' host shape, its own rig):
+  **`theLineDrawsWhereTheDropWouldLandOnEveryAxis`** — the overlay/sink law AS DRAWN: the line where the rule says;
+  the hover moving; the list's clip view scrolled 1.5 rows under a STILL pointer (redrawn where the rule now says, and
+  it really moved); a row above closing (re-derived); the list changing so the gap under the pointer becomes the
+  dragged row's own (the line goes); the pointer on the dragged row (none); the drag leaving (none).
+  **`aDropSettlesInPlaceAndNeverMovesTheList`** (P-U2-1 — exact behaviour: the current row revealed, a drop above it,
+  the window's offset unchanged; scrolled to the top, a drop leaves it there). **`theEndZoneTakesTheRoomUnderTheRows…`**
+  — 28 pt directly under the rows, inside the column above the footer's air; absent with twenty rows.
+
+**Headless evidence:** `build-for-testing` → **TEST BUILD SUCCEEDED** (`DerivedData/vx283-u2`, `5e1f43eb`'s code; no
+warning in a touched line — the three in `ShelfView.swift` are older `Text +` lines). The pure suite replicated
+against the real `SidebarLayout.swift` + `OpenNotes` (scratchpad): **1165 checks, 0 failed**; under R-K **229 failed —
+exactly the 11 pure pins named below**. The `fixedSize` lint replicated over the tree: 90 sites, 0 offenders.
+
+**THE REVERT (named BEFORE it is applied; prebuilt into its own DerivedData, restored by `git checkout --` from the
+commit, `git diff` empty after):**
+- **R-K (the traced bug — drop-before-the-row-under-the-pointer, no end slot):** in `Core/Views/SidebarLayout.swift`,
+  `OpenListDrop.gap(at:)` — the three lines from `guard row < rows else { return rows }` through `return within >=
+  rowHeight / 2 ? row + 1 : row` become `return min(row, rows - 1)`. Products: `DerivedData/vx283-u2-rk`. Expected
+  RED, exactly (16): `OpenListDropRuleTests` — `theHalfOfTheRowUnderThePointerNamesTheGap`,
+  `theRowJustBelowIsReachable`, `aDownwardDropNoLongerLandsOneRowShort`, `theLastSlotIsReachable`,
+  `anUpwardDropLandsWhereItLooks`, `everyDropLandsBesideTheRowUnderThePointer`,
+  `theLineSitsOnTheBoundaryTheHoverNames`, `theLineFollowsTheHover`, `theLineFollowsAScrollUnderAStillPointer`,
+  `theLineFollowsAChangeOfTheList`, `theLineStaysInsideTheWindow`; `OpenListDropDoorTests` —
+  `aDropLandsWhereTheLineWasDrawn`, `aScrollUnderAStillPointerMovesTheGap`,
+  `movingBetweenTheRowsAndTheEndZoneKeepsTheLine`, `aReleaseReadsThePayloadAndLandsIt`; `OpenListDragMountTests` —
+  `theLineDrawsWhereTheDropWouldLandOnEveryAxis`. GREEN (the rule's other arms): `theDraggedRowsOwnGapsOfferNothing`,
+  `noLineBeforeTheListIsReadOrWithoutADragOfItsOwn`, `theEndZoneIsTheRoomUnderTheRowsCapped`,
+  `theEndZoneLandsTheLastSlot`, `aDropOnItsOwnPlaceOffersNothingAndMovesNothing`, `aDropActsOnlyOnTheListItsDragBeganIn`,
+  `aReleaseThatOffersNothingRefuses`, `aDropSettlesInPlaceAndNeverMovesTheList`, `theEndZoneTakesTheRoom…`.
 
 ## Ladder
 
