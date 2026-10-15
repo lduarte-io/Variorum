@@ -2780,11 +2780,95 @@ line, per the brief):** any stage work (the batch, the revert run, the re-walk o
 over a claim; the sidebar (not mine).
 
 **LIVE STATUS (per piece)**
-- S0 — the trace, verified on this tip (`bf09054b`): IN-PROGRESS (below).
-- S1 — the rule reads stable widths (the field's prompt floor, the sort slot at its widest): NOT-STARTED.
-- S2 — the stable widths measured and handed to the layout; the relevance label one line: NOT-STARTED.
-- S3 — the pins (pure + mounted), headless build-for-testing: NOT-STARTED.
-- S4 — the revert tree (R-S) prebuilt, the window script, READY FOR STAGE: NOT-STARTED.
+- S0 — the trace, verified on this tip (`bf09054b`): DONE (below).
+- S1 + S2 — the rule reads stable widths; the widths measured and handed down; the relevance label one line: DONE
+  (`3ab7ad9e`). Headless `build-for-testing` green on `vx283-u3b` (cloned from `vx283-u2`); no new warning in the three
+  files (the two `probeSpace` Sendable warnings are the pre-existing pair U3 recorded).
+- S3 — the pins: DONE (`ed58c2ac`), compiled in the same build. All PENDING the stage window.
+- S4 — the revert tree **R-S** (named below, BEFORE it is applied), the window script, READY FOR STAGE: IN-PROGRESS.
+
+**S0 — THE TRACE (this tip; offscreen measures from a scratch `NSHostingController` probe in the voices' own `small`
+faces — the numbers in brackets).**
+- **F-1.** `LibraryControlsFlow.swift:148` (before) took the field's ideal as `sizeThatFits(.unspecified)`. A
+  `.roundedBorder` field answers with its `NSTextFieldCell`'s `cellSize` — the PLACEHOLDER's width while empty, the TYPED
+  TEXT's once she types [Terminal 211.5 → 40.5 pt for "wing"; Study 175 → 38; the bare cell gives the same numbers].
+  The decision (`:90` → `:77`, `field >= fieldIdeal − 0.5`) then passed for a field squeezed to its typed word's
+  width. And the relevance label (`LibraryCatalogView.swift`, the `isSearching` branch) had no line limit and no
+  `fixedSize` [its width at a zero proposal: 0, 266 pt tall — one character per line], so in the HStack's
+  least-flexible-first order (`:51-65`) it took a share of what was left. At the default window with the panel open
+  (631 pt), typing: when 53 · mode 180 · scope 228.5 · the label ≈62 (three lines) · the field ≈68 — total 631, the
+  field ≥ its 40-pt "ideal" → ONE line. Empty: the ideal is 211.5 → two lines. So every keystroke re-flowed the row
+  (the walker's "relevanc / e · best / first", Terminal).
+- **F-2.** The same input: the decision compares the field's HStack share with its live ideal, and the sort slot's
+  live words feed the share (title · A–Z 103 · date · … 160 · edited · … 174 · created · … 181 · relevance 157, Terminal).
+  The old rule's one-line threshold, by these numbers, moves from ≈856 pt (title) to ≈934 pt (created) and to ≈699 pt
+  once typed. The walker's room was ≈951 pt (the capture's column reads ≈999 pt wide at a ≈240-pt sidebar) and the
+  in-app Terminal row runs ≈20 pt wider than this harness (U3's first window measured the field 222 at the 981-pt room
+  where these numbers give 242; Study matched exactly, 268), so Terminal sat a few points from its threshold and any
+  moving input flipped it. **Not traced:** which input moved on "nothing but a scroll of the list" (the decision's only
+  moving inputs were the field's ideal and the sort's words; neither is a scroll's) — the fix removes every moving
+  input but the width, so it no longer matters which.
+
+**S1 + S2 — THE BUILD (`3ab7ad9e`, P-U3-5 items 1–4).**
+- `LibraryControlsFlowRule.Child` loses `ideal` and gains `floor` (the field's) and `widest` (a changing label's).
+  `fitsOneLine(_ children:width:spacing:)` counts each `widest` child as a RIGID control of that width, distributes
+  the line as the HStack does, and passes only if it fits AND the floor child keeps its floor. The PLACEMENT is
+  unchanged — the HStack's distribution with LIVE widths, so a wide window is byte-for-byte as before; since the live
+  label is never wider than counted, and in the HStack's order a narrower fixed child only leaves the field more, a
+  line judged to fit never puts the field under its floor (pinned over every width 300–1400 and every form).
+- `LibraryControlsFlow` reads the two numbers as LAYOUT VALUES (`FloorKey`, `WidestKey`; `.libraryControlsFloor(_:)`
+  on the field, `.libraryControlsWidest(_:)` on both sort-slot branches) — never asking the field.
+- `LibraryControlsStableWidths` (new, same file): `fieldFloor` = the prompt through an `NSTextFieldCell` configured
+  as the field draws (rounded bezel, editable, the field's font, the prompt as placeholder) — the empty field's own
+  ideal by construction, no magic number; `sortWidest` = the widest of every sort × direction as the `sort ▾` door
+  draws it (`chromeLabel(doorLabel) + " ▾"`, rounded up to a whole point as a `Text` sizes itself, + `VoicedMenu`'s
+  10-pt chrome) and the relevance label (no chrome). The font is the voice's `small`, resolved in the view's own
+  `fontResolutionContext` (`Font.resolve(in:).ctFont`); memoized per face + strings, so a keystroke re-renders
+  without re-measuring. Measured: Terminal floor 211.5, widest 181 ("created · newest first ▾"); Study 175 / 134.
+- `LibraryCatalogView`: `static let searchPrompt` (one home for the field and its floor — the tutorial's source pin
+  still finds "Search books, notes, blocks" in this file); the relevance label `.lineLimit(1)` + `.fixedSize()` (P-8:
+  never a wrapped label; it holds its words, so it is a fixed child like the door). **The sort door and `when ▾`
+  already carried `.lineLimit(1)` + `.fixedSize()` at their homes** (`VoicedMenu`, `Theme/VoiceControls.swift:160-161`;
+  `LibraryWhenDoor.swift:158-159`) and `when ▾`'s words never vary (`LibraryDayFace.closedLabel`), so neither needed a
+  change or a `widest`. A DEBUG probe `LibraryProbeSlot.sortSlot` (`LibraryInfoPanel.swift`) on both branches.
+- **What the decision now gives** (by the offscreen numbers; the mounted pins print the in-app ones): one line from
+  ≈934 pt (Terminal) / ≈834 pt (Study) of row width, whatever is typed or picked. The default window (210-pt sidebar):
+  panel OPEN (631) — two lines, both voices; CLOSED (981) — one line, both voices (Terminal's in-app margin ≈7 pt by
+  U3's measure). A wider sidebar (the dev store's ≈240) can take Terminal's closed row to two lines — stably.
+- **Unchanged by the ruling, said so:** Timeline drops sort and when, so its row is judged without them and may be one
+  line where List's is two — a MODE change is her act and changes the row's contents (U3's `inTimelineLineTwoIsTheModeAlone`
+  stands); the ruling's stability set is typing, a sort pick and a search.
+
+**S3 — THE PINS (`ed58c2ac`, `VariorumTests/LibraryControlsFlowTests.swift`).**
+- `LibraryControlsFlowRuleTests` (pure): U3's `oneLineOnlyWhileTheFieldKeepsItsPromptAndTheLineFits` CHANGED IN PLACE
+  by the ruling (the decision takes the children; the same three claims), U3's `row` gains the field's `floor` and the
+  sort's `widest: 181` (every other U3 pin's numbers unchanged); NEW `theDecisionIsOneAnswerPerWidthWhateverTheSortSlotShows`
+  (×2 voices: every form, every width 300–1400 by 0.5 — one answer, one threshold), `aOneLineRowNeverPutsTheFieldUnderItsFloor`
+  (×2), `atTheMeasuredWidthsTheDefaultWindowHasOneAnswerPerPanelState`.
+- `LibraryControlsStableWidthsTests` (new, app-hosted, no window): `theFloorIsTheEmptyFieldsOwnIdealNeverTheTypedText`
+  (×2 — against the SwiftUI field's own ideal; the typed one ≥ 50 pt smaller), `theSortSlotIsCountedAtItsWidestForm`
+  (×2 — every real `LibrarySortMenu` form and the relevance label ≤ the counted widest, the widest equal to it: keeps
+  `voicedMenuChrome` and the rounding honest).
+- `LibraryControlsGeometryTests` (mounted; its seeded titles now carry several words so typed questions keep the
+  selected row listed and the panel open): **RED ON OLD (R-S)** `typingWithThePanelOpenNeverChangesTheLineCount` (×2 —
+  typed for real through the field editor, "pick" → … → past the prompt; the line count, the field ≥ its prompt, the
+  relevance label ≤ 20 pt tall, the row in its column; also the counted floor = the MOUNTED empty field's own cell
+  width; a fallback to the binding road is logged if keystrokes do not reach the model in the host),
+  `withThePanelClosedEachWidthHasOneLineCount` (×2 — rooms 760…1000 by 20, seven states each: three sort forms, a
+  typed word, a question past the prompt, empty), `withThePanelOpenTheDefaultWindowHasOneLineCount` (×2 — the seven
+  states plus all eight sort × direction forms). U3's six cells unchanged (guards).
+
+**R-S — THE BEHAVIOURAL REVERT (named before it is applied; from the committed tip):**
+1. `LibraryControlsFlow.swift`, `arrangement(…)`: `floor: subview[FloorKey.self],` → `floor: subview[FloorKey.self].map
+   { _ in subview.sizeThatFits(.unspecified).width },` (the old ideal road, on the same child) and `widest:
+   subview[WidestKey.self])` → `widest: nil)`.
+2. `LibraryCatalogView.swift`, the relevance label: delete `.lineLimit(1)` and `.fixedSize()`.
+Products `DerivedData/vx283-u3b-rv` (an APFS clone of `vx283-u3b`, then `build-for-testing`); `vx283-u3b` untouched.
+Restore: `git checkout --` the two files, then `git diff --quiet`. **Expected RED, exactly:** the six new mounted cells
+(`typingWithThePanelOpenNeverChangesTheLineCount`, `withThePanelClosedEachWidthHasOneLineCount`,
+`withThePanelOpenTheDefaultWindowHasOneLineCount`, ×2 voices); GREEN: every pure pin, both stable-widths tests, U3's six
+mounted cells. (If the field-editor cell stays green on old, the keystroke road does not move the field's cell in the
+harness — recorded as such; the binding-road cells carry the red.)
 
 ## Ladder
 
