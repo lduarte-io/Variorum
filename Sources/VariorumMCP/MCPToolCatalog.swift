@@ -248,9 +248,9 @@ enum MCPToolCatalog {
             shown_take_id is that take and via says which ("lens" or "chosen"), and chosen still \
             marks the note's own chosen take. Big notes read in pages: pass limit (blocks per page, \
             1–200), then each answer's next_cursor as cursor until none comes back (a cursor alone \
-            reads 50). A page also ends once its takes' text passes about 32,000 characters — a \
-            block is never split — and commit text rides in what is left of that; the first page \
-            says block_count. Pages imply with_ids; with_tray and with_versions ride the first page, \
+            reads 50). A page also ends once the answer reaches about 32,000 characters (a block is \
+            never split; a single larger block comes alone), and commit text rides in what is left \
+            of that; the first page says block_count. Pages imply with_ids; with_tray and with_versions ride the first page, \
             and each page's lenses pick only among its own blocks. Pages are read one at a time, \
             not as a snapshot — if the note may have changed, read it again. A note shared once is \
             read in one call. ids_only: true gives each take without its text, with its sha256 \

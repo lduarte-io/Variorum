@@ -42,9 +42,11 @@ import VariorumCore
 /// **VX-256 (VX-336 U7 — D-256-1…9, F-256-1…7 (a)) pages it:** with `page` the
 /// read is ONE keyset page of the note's placements in its own order
 /// (`(position, placement id)` on `idx_cblock_order` — `pageSQL`), ending at
-/// the FIRST of `page.limit` blocks or `pageTextBudget` characters of take text
-/// (the first page also counting its tray's), never splitting a block and
-/// always holding one; every carriage ask reads for THAT page's blocks only
+/// the FIRST of `page.limit` blocks or the next block carrying the SERIALIZED
+/// ANSWER past `pageAnswerBudget` characters (U7c — the first page's carriage
+/// counted; `fitPage`), never splitting a block and always holding one, so a
+/// block larger than its page has left comes alone; every carriage ask reads
+/// for THAT page's blocks only
 /// (∝ the page, P1), the note-wide lists (`with_tray`, `with_versions`,
 /// `dangling_picks`) riding the first page, which also says `block_count`;
 /// `next_cursor` comes back only while blocks remain. Pages are NOT a snapshot
@@ -96,12 +98,35 @@ enum MCPNoteStructure {
         var after: NotePageCursor?
     }
 
-    /// The take text one PAGE carries before it ends (VX-256 — F-256-2 (a),
-    /// PROVISIONAL P-VX256-1, measured against the real client's cap at the
-    /// live round): counted over the page's takes' text (none under `idsOnly`)
-    /// and the first page's tray; a page always holds at least one whole
-    /// block. Commit text rides within what is left (`text_omitted` past it).
-    static let pageTextBudget = 32_000
+    /// The characters one PAGE's ANSWER carries before it ends (VX-256 —
+    /// F-256-2 (a); RE-RULED at U7c, P-VX256-1 PROVISIONAL — THE ORCHESTRATOR
+    /// ON U7's WINDOW: the live round measured the client's inline cap between
+    /// 43,062 and 50,984 characters of answer, and a take-text budget let a
+    /// page's ids and records carry it to ≈ 2× its text). A page ends at
+    /// `page.limit` blocks or as soon as adding the next block would carry the
+    /// SERIALIZED answer (`answerText` — the very JSON the tool returns) past
+    /// this many characters (`answerSize`), the first page's note-wide carriage
+    /// included; a page always holds one whole block, so a block larger than
+    /// what its page has left comes alone. Commit text rides within what is
+    /// left (`text_omitted` past it).
+    static let pageAnswerBudget = 32_000
+
+    /// **The serialized answer** — the ONE encoding `read_note` sends
+    /// (`MCPReadTools.encode` calls it) and the page budget measures (U7c): a
+    /// sorted-keys compact JSON object. An answer holding a non-JSON value
+    /// refuses as `MCPAnswerEncodingFailure` (U4: never an Objective-C
+    /// exception that would take the app down).
+    static func answerText(_ object: [String: Any]) throws -> String {
+        guard JSONSerialization.isValidJSONObject(object) else { throw MCPAnswerEncodingFailure() }
+        return String(decoding: try JSONSerialization.data(
+            withJSONObject: object, options: [.sortedKeys, .withoutEscapingSlashes]), as: UTF8.self)
+    }
+
+    /// An answer's size in the budget's unit (U7c): UTF-16 code units — the
+    /// "characters" a JavaScript client such as Claude Code counts, and never
+    /// fewer than Unicode scalars or Swift Characters, so "about 32,000
+    /// characters" holds under every reading of the word.
+    static func answerSize(_ text: String) -> Int { text.utf16.count }
 
     /// **ONE PAGE of the note's placements** (VX-256 — D-256-5): the keyset
     /// `(position, placement id) > (cursor)` written as a RANGE on `position`
@@ -141,10 +166,14 @@ enum MCPNoteStructure {
     /// originals, and its other saved moments) as the note's own family
     /// instead of stubbing the very note whose grant authorized the call as
     /// `beyond_grant`; the `books` answer stays the live-note read's alone.
+    /// `echo` (U7c): keys the CALLER's answer carries beside the structure —
+    /// a version read's `version_id`, `version_of`, `note_id` (the live note's)
+    /// and `saved_at` — set on the answer here so a PAGE's budget weighs them
+    /// as the wire will send them.
     static func read(
         _ db: Database, noteID: String, calendar: Calendar,
         standing: MCPGrantAuthority.Standing? = nil, options: Options = Options(),
-        versionOf liveNoteID: String? = nil
+        versionOf liveNoteID: String? = nil, echo: [String: String] = [:]
     ) throws -> [String: Any] {
         let title = try Queries.mcpScopeTitle(db, kind: .note, id: noteID, calendar: calendar) ?? ""
         // VX-256: a page is the first page when it resumes after nothing; the
@@ -152,8 +181,8 @@ enum MCPNoteStructure {
         let page = options.page
         let firstPage = page?.after == nil
         var placements: [Row]
-        /// Blocks remain past this page (a page only): the extra row read, or
-        /// the budget ending the page early.
+        /// Blocks remain past this page's CANDIDATES (a page only): the extra
+        /// row read, or the cost bound below ending the candidates early.
         var remains = false
         if let page {
             let after = page.after
@@ -189,20 +218,21 @@ enum MCPNoteStructure {
             takes[row["block_id"], default: []].append(row)
         }
         // The note's tray rides the FIRST page (VX-256 — F-256-7 (a)); read
-        // here so a page counts its text toward the budget.
+        // here so a page weighs it.
         let trayAnswer = options.withTray && firstPage ? try tray(db, noteID: noteID, now: options.now) : nil
-        var commitBudget = commitTextBudget
         if page != nil {
-            // VX-256 — THE BUDGET WALK (F-256-2 (a)): a block joins while the
-            // page's take text (its fan as emitted; none under ids_only) plus
-            // the first page's tray stays within the budget — the first block
-            // always, whole. Commit text then rides within what is left.
-            var used = trayAnswer.map(Self.textLength(ofTray:)) ?? 0
+            // U7c — THE COST BOUND (never the page rule; `fitPage` is): the
+            // answer carries every take's text verbatim (escaping only adds),
+            // so no block past the point where the take text alone — plus the
+            // first page's tray text — passes the budget can ride, the first
+            // block excepted. The carriage below is read only for the blocks
+            // before it (∝ what can be on the page; none under ids_only).
+            var used = trayAnswer.map(Self.textSize(ofTray:)) ?? 0
             var kept = 0
             for placement in placements {
                 let fan = takes[placement["block_id"] as String] ?? []
-                let chars = options.idsOnly ? 0 : fan.reduce(0) { $0 + ($1["working_text"] as String).count }
-                if kept > 0, used + chars > pageTextBudget { break }
+                let chars = options.idsOnly ? 0 : fan.reduce(0) { $0 + answerSize($1["working_text"] as String) }
+                if kept > 0, used + chars > pageAnswerBudget { break }
                 used += chars
                 kept += 1
             }
@@ -213,7 +243,6 @@ enum MCPNoteStructure {
                 let onPage = Set(blockIDs)
                 takes = takes.filter { onPage.contains($0.key) }
             }
-            commitBudget = max(0, pageTextBudget - used)
         }
         let json = String(decoding: try JSONEncoder().encode(blockIDs), as: UTF8.self)
         let lineage = options.withLineage
@@ -237,10 +266,10 @@ enum MCPNoteStructure {
             arguments: [json]) {
             comments[row["block_id"], default: []].append(["comment_id": row["id"] as String, "text": row["text"] as String])
         }
-        let commitLists = options.withCommits || !options.commitIDs.isEmpty
-            ? try commits(
-                db, takeIDs: takes.values.flatMap { $0.map { $0["id"] as String } }, options: options,
-                budget: commitBudget, onPage: page != nil)
+        // The unpaged read's commits, under the note-wide budget; a PAGE reads
+        // its commits once its blocks are weighed (`fitPage`, U7c).
+        let commitLists = page == nil && (options.withCommits || !options.commitIDs.isEmpty)
+            ? try commits(db, takeIDs: takes.values.flatMap { $0.map { $0["id"] as String } }, options: options)
             : nil
         // VX-172: the lens's EFFECTIVE picks — the very read her Lenses board
         // makes (`Queries.takesProjection.lensSelections`): a pick whose take
@@ -337,22 +366,180 @@ enum MCPNoteStructure {
             answer["versions"] = versions.entries
             if versions.truncated { answer["versions_truncated"] = true }
         }
-        if page != nil {
-            if firstPage {
-                answer["block_count"] = try Int.fetchOne(db, sql: blockCountSQL, arguments: [noteID]) ?? 0
-            }
-            if remains, let last = placements.last {
-                answer["next_cursor"] = NotePageCursor(
-                    containerID: noteID, position: last["position"], placementID: last["placement_id"]).encoded
-            }
+        for (key, value) in echo { answer[key] = value }
+        guard page != nil else { return answer }
+        if firstPage {
+            answer["block_count"] = try Int.fetchOne(db, sql: blockCountSQL, arguments: [noteID]) ?? 0
         }
-        return answer
+        return try fitPage(
+            db, answer: answer, placements: placements, remains: remains, containerID: noteID, options: options)
     }
 
-    /// The characters of text a tray answer carries (its blocks' and takes').
-    private static func textLength(ofTray tray: [String: Any]) -> Int {
+    /// **THE PAGE, FITTED TO ITS ANSWER** (VX-256 re-ruled at U7c — P-VX256-1,
+    /// PROVISIONAL; the run record's U7c UNIT RECORD, D-U7c-1…6). `answer` is
+    /// the page with every CANDIDATE block (`blocks`, each lens's `picks` for
+    /// all of them) and its header — the first page's carriage and the
+    /// caller's echoes included. The page keeps the first `k` blocks, `k` the
+    /// largest the rule allows: block 1 always (whole — a block larger than
+    /// what the page has left comes ALONE); each next block only while the
+    /// answer with it — its entry, its lens picks, the moved `next_cursor` —
+    /// stays within `pageAnswerBudget`, sized exactly piece by piece on the
+    /// very encoding the wire sends (`answerText`: an object's sorted, compact
+    /// JSON is its pieces' JSON joined by commas). Commits (`with_commits` /
+    /// `commit_ids`) are read for the weighed blocks' takes and weigh with them
+    /// as metadata (an asked commit with its text, every other `text_omitted`),
+    /// the page shrinking while it is over; then unasked texts ride newest-first
+    /// across the page within what is left, and the first that does not fit
+    /// ends them. The finished answer is measured once more and the page
+    /// shrinks if it is over — the bound holds by that check, never by the
+    /// arithmetic alone. ∝ the page (P1): every piece is one candidate's.
+    private static func fitPage(
+        _ db: Database, answer header: [String: Any], placements: [Row], remains: Bool, containerID: String,
+        options: Options
+    ) throws -> [String: Any] {
+        let budget = pageAnswerBudget
+        var entries = header["blocks"] as? [[String: Any]] ?? []
+        let count = entries.count
+        let lensEntries = header["lenses"] as? [[String: Any]]
+        let rank = Dictionary(
+            entries.enumerated().map { ($1["block_id"] as? String ?? "", $0) }, uniquingKeysWith: { first, _ in first })
+        /// The resume point after a `k`-block page, while blocks remain.
+        func cursor(after k: Int) -> String? {
+            guard k > 0, k < count || remains else { return nil }
+            return NotePageCursor(
+                containerID: containerID, position: placements[k - 1]["position"],
+                placementID: placements[k - 1]["placement_id"]).encoded
+        }
+        /// The answer of a `k`-block page: the first `k` of `list`, each lens's
+        /// picks among them, the cursor after them.
+        func assemble(_ k: Int, _ list: [[String: Any]]) -> [String: Any] {
+            var answer = header
+            answer["blocks"] = Array(list.prefix(k))
+            if let lensEntries {
+                answer["lenses"] = lensEntries.map { lens -> [String: Any] in
+                    var lens = lens
+                    lens["picks"] = (lens["picks"] as? [[String: Any]] ?? [])
+                        .filter { (rank[$0["block_id"] as? String ?? ""] ?? count) < k }
+                    return lens
+                }
+            }
+            answer["next_cursor"] = cursor(after: k)
+            return answer
+        }
+        guard count > 0 else { return assemble(0, entries) }
+
+        // THE PIECES, each measured on the wire's encoding: the page with no
+        // block, no pick and no cursor (`base` — its `[]`s already counted);
+        // each block's entry (+ 1 comma after the first); each lens pick (+ 1
+        // comma after its lens's first, which `firsts` takes back); the cursor
+        // pair (+ 1 comma — the answer always holds other keys).
+        let base = answerSize(try answerText(assemble(0, entries)))
+        var lengths = try entries.map { answerSize(try answerText($0)) }
+        var picks = [Int](repeating: 0, count: count)
+        var firsts = [Int](repeating: 0, count: count)
+        for lens in lensEntries ?? [] {
+            let ranked = try (lens["picks"] as? [[String: Any]] ?? []).compactMap { pick -> (Int, Int)? in
+                guard let at = rank[pick["block_id"] as? String ?? ""] else { return nil }
+                return (at, answerSize(try answerText(pick)) + 1)
+            }
+            for (at, size) in ranked { picks[at] += size }
+            if let first = ranked.map(\.0).min() { firsts[first] += 1 }
+        }
+        func cursorSize(after k: Int) throws -> Int {
+            guard let cursor = cursor(after: k) else { return 0 }
+            return answerSize(try answerText(["next_cursor": cursor])) - 2 + 1
+        }
+        /// The exact size of a `k`-block page's answer (k ≥ 1).
+        func size(_ k: Int) throws -> Int {
+            var total = base + (k - 1)
+            for index in 0..<k { total += lengths[index] + picks[index] - firsts[index] }
+            return total + (try cursorSize(after: k))
+        }
+        var k = 1
+        var running = base + lengths[0] + picks[0] - firsts[0]  // a 1-block page, before its cursor
+        while k < count {
+            let grown = running + 1 + lengths[k] + picks[k] - firsts[k]
+            guard grown + (try cursorSize(after: k + 1)) <= budget else { break }
+            running = grown
+            k += 1
+        }
+
+        let commitsAsked = options.withCommits || !options.commitIDs.isEmpty
+        let asked = Set(options.commitIDs)
+        var rows: [Row] = []
+        func takeIDs(_ entry: [String: Any]) -> [String] {
+            (entry["takes"] as? [[String: Any]] ?? []).compactMap { $0["take_id"] as? String }
+        }
+        if commitsAsked {
+            // The weighed blocks' commits, as metadata — newest first across
+            // the page (an asked one with its text, every other text_omitted) —
+            // and the page weighed again with them, shrinking while it is over.
+            rows = try commitRows(db, takeIDs: entries.prefix(k).flatMap(takeIDs))
+            var lists: [String: [[String: Any]]] = [:]
+            for row in rows {
+                lists[row["variant_id"], default: []].append(commitEntry(row, withText: asked.contains(row["id"])))
+            }
+            for index in 0..<k {
+                entries[index] = withCommitLists(entries[index], lists)
+                lengths[index] = answerSize(try answerText(entries[index]))
+            }
+            while k > 1, try size(k) > budget { k -= 1 }
+        }
+        while true {
+            var list = Array(entries.prefix(k))
+            if commitsAsked {
+                let onPage = Set(list.flatMap(takeIDs))
+                let pageRows = rows.filter { onPage.contains($0["variant_id"]) }
+                let known = Set(pageRows.map { $0["id"] as String })
+                if let stranger = options.commitIDs.first(where: { !known.contains($0) }) {
+                    throw MCPReadTools.ArgumentFailure(message: "commit_id \(stranger) isn't a commit of a take on this page.")
+                }
+                // Commit text rides in what is left of the page's budget.
+                var left = budget - (try size(k))
+                let omitted = answerSize(try answerText(["text_omitted": true]))
+                var riding: Set<String> = []
+                for row in pageRows where !asked.contains(row["id"]) {
+                    let delta = answerSize(try answerText(["text": row["text"] as String])) - omitted
+                    guard delta <= left else { break }
+                    riding.insert(row["id"])
+                    left -= delta
+                }
+                var lists: [String: [[String: Any]]] = [:]
+                for row in pageRows {
+                    let id: String = row["id"]
+                    lists[row["variant_id"], default: []].append(
+                        commitEntry(row, withText: asked.contains(id) || riding.contains(id)))
+                }
+                list = list.map { withCommitLists($0, lists) }
+            }
+            let fitted = assemble(k, list)
+            // The bound holds by this measurement: the sizes above are exact,
+            // so the page never shrinks here — unless they were not.
+            if k == 1 { return fitted }
+            if answerSize(try answerText(fitted)) <= budget { return fitted }
+            k -= 1
+        }
+    }
+
+    /// A block entry with each of its takes carrying its commit list (`[]`
+    /// when it has none — the unpaged form's shape).
+    private static func withCommitLists(
+        _ entry: [String: Any], _ lists: [String: [[String: Any]]]
+    ) -> [String: Any] {
+        var entry = entry
+        entry["takes"] = (entry["takes"] as? [[String: Any]] ?? []).map { take -> [String: Any] in
+            var take = take
+            take["commits"] = lists[take["take_id"] as? String ?? ""] ?? []
+            return take
+        }
+        return entry
+    }
+
+    /// The UTF-16 characters of text a tray answer carries (its blocks' and
+    /// takes') — the cost bound's share of the first page's carriage.
+    private static func textSize(ofTray tray: [String: Any]) -> Int {
         ["blocks", "takes"].reduce(0) { total, key in
-            total + (tray[key] as? [[String: Any]] ?? []).reduce(0) { $0 + (($1["text"] as? String)?.count ?? 0) }
+            total + (tray[key] as? [[String: Any]] ?? []).reduce(0) { $0 + answerSize(($1["text"] as? String) ?? "") }
         }
     }
 
@@ -624,51 +811,61 @@ enum MCPNoteStructure {
     }
 
     /// Each take's commits, newest first, with texts riding newest-first
-    /// across the note until the budget is spent; `commitIDs` always ride
-    /// with text and must be commits of these takes. VX-256: a PAGE passes
-    /// what its budget has left and `onPage` (the takes are the page's, so a
-    /// stranger "isn't a commit of a take on this page" — P-VX256-4).
+    /// across the note until `commitTextBudget` is spent; `commitIDs` always
+    /// ride with text and must be commits of these takes. The UNPAGED read's
+    /// (a PAGE weighs its commits with its blocks — `fitPage`, U7c; there a
+    /// stranger "isn't a commit of a take on this page", P-VX256-4).
     static func commits(
-        _ db: Database, takeIDs: [String], options: Options, budget: Int = commitTextBudget, onPage: Bool = false
+        _ db: Database, takeIDs: [String], options: Options
     ) throws -> [String: [[String: Any]]] {
-        let json = String(decoding: try JSONEncoder().encode(takeIDs), as: UTF8.self)
-        let rows = try Row.fetchAll(
+        let rows = try commitRows(db, takeIDs: takeIDs)
+        let known = Set(rows.map { $0["id"] as String })
+        if let stranger = options.commitIDs.first(where: { !known.contains($0) }) {
+            throw MCPReadTools.ArgumentFailure(message: "commit_id \(stranger) isn't a commit of this note.")
+        }
+        let asked = Set(options.commitIDs)
+        var budget = commitTextBudget
+        var lists: [String: [[String: Any]]] = [:]
+        for row in rows {
+            let id: String = row["id"]
+            let text: String = row["text"]
+            let rides: Bool
+            if asked.contains(id) {
+                rides = true
+            } else if text.count <= budget {
+                rides = true
+                budget -= text.count
+            } else {
+                rides = false
+                budget = 0
+            }
+            lists[row["variant_id"], default: []].append(commitEntry(row, withText: rides))
+        }
+        return lists
+    }
+
+    /// These takes' commits, newest first across them.
+    private static func commitRows(_ db: Database, takeIDs: [String]) throws -> [Row] {
+        try Row.fetchAll(
             db,
             sql: """
                 SELECT c.id, c.variant_id, c.kind, c.message, c.created_at, c.text FROM json_each(?) j
                 JOIN commit_point c ON c.variant_id = j.value
                 ORDER BY c.created_at DESC, c.id DESC
                 """,
-            arguments: [json])
-        let known = Set(rows.map { $0["id"] as String })
-        if let stranger = options.commitIDs.first(where: { !known.contains($0) }) {
-            throw MCPReadTools.ArgumentFailure(message: onPage
-                ? "commit_id \(stranger) isn't a commit of a take on this page."
-                : "commit_id \(stranger) isn't a commit of this note.")
-        }
-        let asked = Set(options.commitIDs)
-        var budget = budget
-        var lists: [String: [[String: Any]]] = [:]
-        for row in rows {
-            let id: String = row["id"]
-            let text: String = row["text"]
-            var entry: [String: Any] = [
-                "commit_id": id, "kind": row["kind"] as String, "created_at": row["created_at"] as String,
-                "length": text.count,
-            ]
-            if let message: String = row["message"] { entry["message"] = message }
-            if asked.contains(id) {
-                entry["text"] = text
-            } else if text.count <= budget {
-                entry["text"] = text
-                budget -= text.count
-            } else {
-                entry["text_omitted"] = true
-                budget = 0
-            }
-            lists[row["variant_id"], default: []].append(entry)
-        }
-        return lists
+            arguments: [String(decoding: try JSONEncoder().encode(takeIDs), as: UTF8.self)])
+    }
+
+    /// One commit's entry: its text when it rides, else `text_omitted`.
+    private static func commitEntry(_ row: Row, withText: Bool) -> [String: Any] {
+        let text: String = row["text"]
+        var entry: [String: Any] = [
+            "commit_id": row["id"] as String, "kind": row["kind"] as String,
+            "created_at": row["created_at"] as String, "length": text.count,
+        ]
+        if let message: String = row["message"] { entry["message"] = message }
+        if withText { entry["text"] = text } else { entry["text_omitted"] = true }
+        return entry
     }
 }
 

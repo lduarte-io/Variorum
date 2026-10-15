@@ -151,6 +151,12 @@ struct MCPPagedReadServerTests {
 
     /// `cursor` alone reads 50; `limit` clamps to 1…200 like `list_notes`; an empty note
     /// is one empty page; a page that ends exactly at the note's end says no cursor.
+    ///
+    /// U7c re-pin (P-VX256-1 re-ruled): `limit: 1000` read [200, 5] — but under the answer
+    /// budget no 200-block page fits (the smallest block entry, its two ids and its take's,
+    /// is ≈ 207 characters, so ≈ 150 blocks reach 32,000), so the clamp is no longer seen as
+    /// a 200-block page. It is pinned as what it is — the parse: `limit: 1000` reads exactly
+    /// as `limit: 200` does, page for page.
     @Test func aCursorAloneReadsFiftyAndTheLimitClamps() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
@@ -169,7 +175,13 @@ struct MCPPagedReadServerTests {
             #expect(blocks(fifty).first?["block_id"] as? String == w.blockIDs[3])
 
             let big = try await pages(connection, ["note_id": .string(w.note.id), "limit": 1000])
-            #expect(big.map { blocks($0).count } == [200, 5], "the limit clamps to 200")
+            // U7c re-pin: [200, 5] → the limit-200 read's own pages (see the doc comment).
+            let twoHundred = try await pages(connection, ["note_id": .string(w.note.id), "limit": 200])
+            #expect(big.map { blocks($0).map { $0["block_id"] as? String ?? "" } }
+                        == twoHundred.map { blocks($0).map { $0["block_id"] as? String ?? "" } },
+                    "the limit clamps to 200: 1000 reads as 200 does")
+            #expect(big.flatMap(blocks).count == 205 && big.allSatisfy { blocks($0).count < 200 },
+                    "every block read; the answer budget ends each page before 200")
             let small = try json(try await call(connection, ["note_id": .string(w.note.id), "limit": 0]))
             #expect(blocks(small).count == 1, "the limit clamps up to 1")
 

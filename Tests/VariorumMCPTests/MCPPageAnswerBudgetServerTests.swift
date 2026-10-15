@@ -414,12 +414,13 @@ struct MCPPageAnswerBudgetServerTests {
     // MARK: - P-U7c-5: the composed asks
 
     /// Lens picks, lineage and commits all live in the answer, so they all count: a note of
-    /// 60 two-take blocks, eight lenses each picking every block, every take carrying three
-    /// 900-character commits, read `with_lenses`, `with_lineage` and `with_commits` at `limit:
-    /// 200` — every page within 32,000 and full, the blocks tiling the note (compared with
-    /// commit text set aside: which commit texts ride is each page's own budget), each page's
-    /// picks only its own blocks', and commit text riding only in what each page has left.
-    /// Before U7c none of the picks, records or commit metadata counted — RED.
+    /// 60 two-take blocks, eight lenses each picking every block, every take carrying two
+    /// 900-character commits and a short newest one, read `with_lenses`, `with_lineage` and
+    /// `with_commits` at `limit: 200` — every page within 32,000 and full, the blocks tiling
+    /// the note (compared with commit text set aside: which commit texts ride is each page's
+    /// own budget), each page's picks only its own blocks', and commit text riding only in
+    /// what each page has left (the newest, short, rides; the first that does not fit ends
+    /// them). Before U7c none of the picks, records or commit metadata counted — RED.
     @Test func lensPicksLineageAndCommitsAllCountTowardThePage() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
@@ -436,7 +437,8 @@ struct MCPPageAnswerBudgetServerTests {
                 let other = try h.operations.branchVariant(minted.block.id, from: minted.variant.id)
                 for take in [minted.variant.id, other.id] {
                     for round in 0..<3 {
-                        try h.operations.autosave(take, text: String(repeating: "\(round)", count: 900), charDelta: 900)
+                        let words = round == 2 ? "round 2, short." : String(repeating: "\(round)", count: 900)
+                        try h.operations.autosave(take, text: words, charDelta: 900)
                         _ = try h.operations.commit(take, message: "round \(round)")
                     }
                 }

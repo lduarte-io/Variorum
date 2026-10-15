@@ -4205,9 +4205,84 @@ paging parameters is byte-unchanged, and so is the one not-shared shape.
 |---|---|---|
 | 0 | read-in; this record | DONE (this commit) |
 | 1 | the pins on the OLD tree (Tests only) → RED, counts read from the run's own output | DONE (this commit) — see THE PINS below: 22 tests, 9 failed, 18 issues on `0b1be274`'s product |
-| 2 | the product: the answer budget (`MCPNoteStructure`, `MCPReadTools`'s shared encoder + the version echoes) + `read_note`'s description; builder B's budget pins re-pinned (each edit commented) → GREEN | NOT-STARTED |
+| 2 | the product: the answer budget (`MCPNoteStructure`, `MCPReadTools`'s shared encoder + the version echoes) + `read_note`'s description; builder B's budget pins re-pinned (each edit commented) → GREEN | DONE (this commit) — the four suites 24/24 green (read from the log; THE DESIGN AS BUILT and THE GREEN RUN below); one more of builder B's pins re-pinned (the clamp, a FINDING); the whole package's finals are piece 4's, PENDING |
 | 3 | the revert check (announced here and committed BEFORE it runs; restore verified) | NOT-STARTED |
 | 4 | headless finals (whole package) · the measured page sizes · FOR VX-234 · PROVISIONAL · the RE-PROBE for U8b · OWED | NOT-STARTED |
+
+### THE DESIGN AS BUILT (piece 2 — the ruling applied to code; no fork: every choice below follows the ruling's letter)
+
+- **D-U7c-1 — THE RULE (`MCPNoteStructure.fitPage`).** The page's candidates are read as before (≤ `limit` placements,
+  one keyset statement), each candidate's block entry is built, and the page keeps the first `k`: block 1 always, whole;
+  each next block only while the answer WITH it — its entry, its lens picks, the `next_cursor` moved to it (or gone, at
+  the note's end) — stays ≤ `pageAnswerBudget` = 32,000 (renamed from `pageTextBudget`: its meaning changed). The sizes
+  are exact, piece by piece, on the wire's encoding: a sorted, compact JSON object is its pieces' JSON joined by commas,
+  so the page with no block, pick or cursor (`base` — the header and every note-wide list) + each entry (+ a comma) +
+  each pick (+ a comma after its lens's first) + the cursor pair (+ a comma) IS the answer's size. **The finished
+  answer is then measured once more** and the page shrinks if it is over — the bound holds by that measurement, never
+  by the arithmetic alone (the pins' fullness check shows the arithmetic never needs it).
+- **D-U7c-2 — WHERE IT IS MEASURED: the one encoder.** `MCPNoteStructure.answerText` is the serialization the tool
+  sends (`MCPReadTools.encode` now delegates to it — byte-identical, the same options and the same U4 guard), and a
+  version read's echoes (`version_id`, `version_of`, `note_id` = the live note's, `saved_at`) now ride INTO the read
+  (`read(…, echo:)`) instead of being set on its result, so a version page weighs them as the wire sends them (P-U7c-1's
+  version leg: 72 blocks / 31,990).
+- **D-U7c-3 — THE UNIT: UTF-16 code units** (`answerSize` = `utf16.count`). The description says "characters"; the
+  client that measured the cap (Claude Code, JavaScript) counts UTF-16 units ("65,807 characters"), and UTF-16 units are
+  never fewer than Unicode scalars (Python's `len`, the kit's `measure.py`) or Swift Characters — so "about 32,000
+  characters" holds under every reading. Sherlock's prose is BMP-only, so the three counts agree there.
+- **D-U7c-4 — THE CARRIAGE.** Everything on the first page that is not a block — `block_count`, the tray, the versions,
+  each lens's name and `dangling_picks`, `books`, `entry_date`, the echoes — is in `base`, so it counts toward page 1's
+  budget (P-U7c-4: a 28,000-character tray leaves room for one 2,000-character block, page 1 = 31,160). Each lens's
+  `picks` grow with the page (the picks list on every page — P-U7c-5's eight lenses). **The one-block floor stands over
+  the carriage:** when page 1's carriage alone leaves no room, page 1 still carries its first block, past the budget
+  (P-U7c-4b: 32,443) — the PROVISIONAL's open edge (a), below.
+- **D-U7c-5 — COMMITS ("commit text rides in what is left of that", kept).** With `with_commits` / `commit_ids`, the
+  weighed blocks' commits are read (for the blocks the first fit kept — never the whole candidate set) and weigh WITH
+  their blocks as metadata — an asked commit (`commit_ids`) with its text, every other `text_omitted` — the page
+  shrinking while over; a `commit_ids` entry off the final page refuses "commit_id X isn't a commit of a take on this
+  page." (P-VX256-4's words, unchanged); then unasked texts ride newest-first across the page while the answer stays
+  within, and the FIRST that does not fit ends them (a newest-first prefix; the unpaged read's own walk — under
+  `commitTextBudget`, with its empty-text quirk — is untouched). An asked commit whose text is larger than the budget
+  makes its block a lone oversize block, on the page where that block comes first.
+- **D-U7c-6 — THE COST BOUND (P1).** The old take-text walk survives as a COST bound, never the page rule: the answer
+  carries every take's text verbatim (escaping only adds), so no block past the point where take text alone (+ page 1's
+  tray text) passes 32,000 can ride; comments, lineage, parents and lens picks are read only for the blocks before it
+  (none cut under `ids_only`, where `limit` bounds the read — ≤ 200 blocks). Every piece measured is one candidate's: ∝
+  the page. The plan pin (P-256-11) is untouched and green.
+- **D-U7c-7 — BYTE-UNCHANGED.** Every form without `limit`/`cursor` takes the unpaged road exactly as before (its reads,
+  its `commitTextBudget`, its words) — G-256-1's golden bytes green UNEDITED; the fence's one shape — P-256-5 green
+  unedited; `export_note` untouched.
+- **A FINDING, for the orchestrator (no product change — `limit`'s 200 stands as ruled):** under a 32,000-character
+  answer no 200-block page can exist — the smallest block entry (its id, its shown take's id, one take's id and an empty
+  text) is ≈ 207 characters, so ≈ 150 blocks reach the budget, and prose or `ids_only` pages end far sooner
+  (sherlock: 72–81 blocks with text, 99–116 `ids_only`). `limit` above ≈ 150 is therefore never what ends a page; the
+  description's "limit (blocks per page, 1–200)" stays true (the page ALSO ends at the answer bound). Builder B's clamp
+  pin is re-pinned accordingly (below).
+
+### THE GREEN RUN (piece 2; read from the log)
+
+`swift test --filter 'MCPPageAnswerBudgetServerTests|MCPPagedReadServerTests|MCPReadFormsUnchangedServerTests|MCPPagedReadPlanTests'`
+→ **"Test run with 24 tests in 4 suites passed"** (the 22 of the red run + the two plan pins). One more of builder B's
+pins needed a justified re-pin on the fixed tree (commented in the file): **P-256-1b `aCursorAloneReadsFiftyAndTheLimitClamps`**
+read `limit: 1000` as [200, 5]; no 200-block page fits the answer (the FINDING above), so the clamp is pinned as what it
+is — the parse: `limit: 1000` reads page for page as `limit: 200`, every block read, every page under 200 blocks.
+P-U7c-5's fixture gained a short newest commit per take (its first green run showed every page so full of metadata
+that no 900-character text had room — which is the rule working; the pin's "some ride" half needed a text that fits).
+
+**THE MEASURED PAGES (characters = UTF-16 units, from the run's own prints):**
+
+| pin | pages (blocks / answer characters) |
+|---|---|
+| P-U7c-1 the fixture | 215 blocks · 49,007 characters of take text · the unpaged with-ids answer 93,708 |
+| P-U7c-1 `limit: 200` | 72 / **31,952** · 81 / 31,818 · 62 / 30,672 (was 161 / 65,712 · 54 / 28,388) |
+| P-U7c-1 `limit: 100` | 72 / 31,952 · 81 / 31,818 · 62 / 30,672 (was 100 / 42,967 · 100 / 43,049 · 15 / 8,450) |
+| P-U7c-1 `limit: 50` | 50 / 21,275 · 50 / 22,022 · 50 / 18,038 · 50 / 25,381 · 15 / 8,450 (the limit governs) |
+| P-U7c-1 a version, `limit: 200` | 72 / 31,990 · 81 / 31,856 · 62 / 30,710 |
+| P-U7c-2 `ids_only`, `limit: 200` | 116 / **31,928** · 99 / 27,125 (was 200 / 54,812 · 15 / 4,277) |
+| P-U7c-3 the quoted block | 1 / 511 · **1 / 34,486 (alone, oversize)** · 2 / 589 |
+| P-U7c-3 the commented block, `ids_only` | 1 / 571 · **1 / 40,618 (alone, oversize)** · 2 / 702 |
+| P-U7c-4 the carriage | 1 / 31,160 · 11 / 24,511 |
+| P-U7c-4b the crowded first page | **1 / 32,443 (the floor)** · 3 / 795 |
+| P-U7c-5 the composed asks | 14 / 31,779 · 14 / 31,624 · 14 / 31,632 · 14 / 31,636 · 4 / 23,836 |
 
 ### THE PINS — RED ON THE OLD TREE (piece 1; read from the run's own output)
 

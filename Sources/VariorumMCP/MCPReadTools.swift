@@ -185,20 +185,20 @@ struct MCPReadTools: Sendable {
                     // call — address honestly instead of wearing the
                     // beyond-grant stub; the `books` answer stays suppressed
                     // (a moment is membered nowhere, and the key is the live
-                    // read's).
-                    var shaped = try MCPNoteStructure.read(
+                    // read's). U7c: the version's echoes ride INTO the read, so
+                    // a page's answer budget weighs them as the wire sends them.
+                    var echo = ["version_id": versionID, "version_of": noteID, "note_id": noteID]
+                    if let savedAt = try String.fetchOne(
+                        db, sql: "SELECT created_at FROM container WHERE id = ?", arguments: [versionID]) {
+                        echo["saved_at"] = savedAt
+                    }
+                    text = try encode(try MCPNoteStructure.read(
                         db, noteID: versionID, calendar: calendar, standing: standing,
                         options: MCPNoteStructure.Options(
                             withCommits: options.withCommits, commitIDs: options.commitIDs,
                             includeArchived: options.includeArchived, withLineage: options.withLineage,
                             now: options.now, idsOnly: options.idsOnly, page: options.page),
-                        versionOf: noteID)
-                    shaped["version_id"] = versionID
-                    shaped["version_of"] = noteID
-                    shaped["note_id"] = noteID
-                    shaped["saved_at"] = try String.fetchOne(
-                        db, sql: "SELECT created_at FROM container WHERE id = ?", arguments: [versionID])
-                    text = try encode(shaped)
+                        versionOf: noteID, echo: echo))
                 } else {
                     text = try Queries.variorumDocumentText(db, postID: versionID)
                 }
@@ -853,12 +853,9 @@ struct MCPReadTools: Sendable {
     private func encode(_ object: [String: Any]) throws -> String {
         // U4: an answer holding a non-JSON value (a `Date`, say) would raise
         // an Objective-C exception and take the APP down — refuse it as an
-        // error instead.
-        guard JSONSerialization.isValidJSONObject(object) else {
-            throw MCPAnswerEncodingFailure()
-        }
-        return String(decoding: try JSONSerialization.data(
-            withJSONObject: object, options: [.sortedKeys, .withoutEscapingSlashes]), as: UTF8.self)
+        // error instead. U7c: the ONE encoding, shared with the page budget
+        // that measures it (`MCPNoteStructure.answerText`).
+        try MCPNoteStructure.answerText(object)
     }
 
     // MARK: - Arguments
