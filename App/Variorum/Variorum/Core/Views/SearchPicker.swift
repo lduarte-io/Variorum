@@ -500,6 +500,8 @@ struct SearchPickerPanel: View {
                                     role: arrangement.id == currentArrangement?.id ? .primary : .quiet))
                         }
                     }
+                    // P-8 (VX-245): each arrangement's word is a one-line label.
+                    .lineLimit(1)
                     .fixedSize()
                 }
             }

@@ -368,7 +368,7 @@ trailer of any kind.
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **STOPPED — Q11 not green** (22:05–22:08): batch 413, 2 red — VX-245's lint and the Starred pin (0.5 pt short on HEAD — the same code R-F ran green: FLAKY); R-G red as expected but uninformative. A new trace is needed — a fresh successor's (leads in Q11). Every other U1b pin green. F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | IN-PROGRESS (headless; Opus implementer, 2026-10-15) — the section "U3 — the Library and the red lint" carries the per-piece LIVE STATUS |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
 
@@ -1799,6 +1799,25 @@ behaviour was never written whole — so here it is.
      orchestrator's critique, not hers). Lowest risk.
 
 Asked of her at this memo; the build follows her answers (U1d). U3 runs meanwhile (independent surfaces).
+
+### U3 — the Library and the red lint (VX-121 · VX-175 · VX-20 · VX-245 · VX-359)
+
+**Implementer:** Opus 5.5 at xhigh (fresh session, 2026-10-15). Worktree `~/dev/variorum-vx-283`, DerivedData
+`App/Variorum/DerivedData/vx283-u3`. **Not done by this session (the record's first line, per the brief):** the
+screenshot walk (a fresh walker's); any stage work until the orchestrator hands over a claim; VX-175's build until
+the orchestrator rules on its composition (below — the brief's composition does not fit the window the ticket names).
+
+**LIVE STATUS (per piece)**
+- Q1 — VX-245 (the six bare `fixedSize` sites): DONE (this commit) — the lint's offenders confirmed on the tip
+  `3fa8ebd6` by a line-for-line replica of `everyBareFixedSizeStatesItsLinePolicy` (90 sites, exactly the six the
+  record names; the two MCP sites already gone, VX-281); each now states `.lineLimit(1)` (all six are labels — no
+  prose site among them); the replica reads 0 offenders. The lint itself (the red-to-green pin, red on the tip by
+  its own batch 418) — PENDING the stage window.
+- Q2 — VX-359 (the View menu's trailing `Divider()`): NOT-STARTED.
+- Q3 — VX-121 (toasts clear of the quick-entry band): NOT-STARTED.
+- Q4 — VX-20 (the dark pinned heading): NOT-STARTED.
+- Q5 — VX-175 (the controls row): **STOPPED FOR A RULING — composition (below).** Nothing built.
+- Q6 — the stage window: NOT-STARTED.
 
 ## Ladder
 
