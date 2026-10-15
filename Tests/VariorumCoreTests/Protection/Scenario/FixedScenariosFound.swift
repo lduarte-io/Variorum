@@ -456,4 +456,25 @@ extension GeneratorFoundScenarios {
         #expect(world.liveKeyFile(world.macB)?.apple == nil, "a held landing wrote an Apple wrap")
         expectPromisesKept(world)
     }
+
+    /// Seed 2 (sequence 647, the closer's soak): Use Castle crashed right
+    /// after writing its new key file into the live place, then the Mac was
+    /// REPLACED with no memory item (Migration Assistant never carries one) —
+    /// the new identity rightly ignores its predecessor's act, but the
+    /// outgoing key file lived only in the lost memory's mirror, so the live
+    /// place kept a key file of a key the library never had and the Standard
+    /// library had no Apple road (promise 3). The plan now carries the
+    /// outgoing key file (sealed, no secret in it), and an open that meets a
+    /// plan it won't resume restores the current key's file from it — the
+    /// new identity taking over its wrap's key (§3.5) — before the plan goes.
+    @Test func aMacReplacedMidUseCastleWithNoMemoryGetsItsKeyFileBack() async throws {
+        let world = try Self.start("Standard-waiting", seed: 2000653)
+        for action in [Action.createLibrary("macB", secrets: false),
+                       .crash(.useCastle("macB", .alwaysAsk, newWords: false), afterWrites: 5),
+                       .replaceMac("macB", carriesMemory: false), .settle] {
+            await world.step(action)
+        }
+        #expect(world.liveKeyFile(world.macB)?.fingerprint == world.macB.slot?.fingerprint, "another key's file stayed live")
+        expectPromisesKept(world)
+    }
 }

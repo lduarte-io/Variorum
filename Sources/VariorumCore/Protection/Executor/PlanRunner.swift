@@ -230,6 +230,10 @@ extension ProtectionExecutor {
         if let inFlight = library.section.actInFlight { throw ExecutorRefusal.actInFlight(inFlight.act) }
         if program.needsLiveKeyFile, library.keyFile?.fingerprint != library.fingerprint { throw ExecutorRefusal.noLiveKeyFile }
         let at = now()
+        var parameters = parameters
+        if toKey != nil, let outgoing = library.keyFile, outgoing.fingerprint == library.fingerprint {
+            parameters.outgoingKeyFile = outgoing
+        }
         let (section, sequence) = library.section.beginningAct(
             program.act, from: library.fingerprint, to: toKey.map(Self.fp), at: at)
         // The act in flight, named in both homes FIRST: a crash before the
@@ -304,6 +308,17 @@ extension ProtectionExecutor {
                     // Guard off (DEBUG mutation pins only): a plan nothing
                     // names resumes — the planted and the replayed plan.
                     return .resumed(try await resume(plan, &library, typed: typed))
+                }
+                // An act no identity here can resume — a Mac replaced mid-act
+                // (its predecessor's) — left another key's file in the live
+                // place: before the plan goes, the current key gets its own
+                // file back from what the plan carried (the roll back's restore
+                // — the memory's mirror went with the old Mac; VX-305 U4, the
+                // soak's seed 2). Only a plan that verifies, only the current
+                // key's own file.
+                if let outgoing = Self.outgoingKeyFile(verified(), for: library), library.keyFile?.fingerprint != library.fingerprint {
+                    try writeLiveKeyFile(outgoing, &library)
+                    log("settle: the current key's own file restored from an act no identity here resumes")
                 }
                 leaves.diagnostics.report(.planIgnored(.noActInFlight))
                 log("settle: a plan this Mac's section doesn't name — ignored")
@@ -382,6 +397,13 @@ extension ProtectionExecutor {
         case VaultRefusal.unreachable, VaultRefusal.notSignedIn: return true
         default: return false
         }
+    }
+
+    /// The current key's own file a re-key's plan carried, when it is that.
+    static func outgoingKeyFile(_ plan: ProtectionPlan?, for library: UnlockedLibrary) -> KeyFile? {
+        guard let outgoing = plan?.parameters?.outgoingKeyFile, outgoing.fingerprint == library.fingerprint,
+              outgoing.libraryID == (library.record?.libraryID ?? outgoing.libraryID) else { return nil }
+        return outgoing
     }
 
     func resume(_ plan: ProtectionPlan, _ library: inout UnlockedLibrary, typed: TypedSecrets) async throws -> ActOutcome {

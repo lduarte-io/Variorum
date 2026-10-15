@@ -100,6 +100,12 @@ public struct ActParameters: Codable, Equatable, Sendable {
     /// like `newCorpusKeyID`, so a resume that can't reach the vault knows the
     /// write may have landed and never rolls back over it.
     public var accountWriteBegun: Bool?
+    /// A re-key's OUTGOING key file, as the act found it live — the same copy
+    /// what this Mac remembers mirrors (sealed with the plan; a key file holds
+    /// no secret). A Mac replaced mid-act whose memory item didn't come along
+    /// (Migration Assistant never carries it) has only this to give the
+    /// current key its own file back (VX-305 U4, the soak's seed 2).
+    public var outgoingKeyFile: KeyFile?
 
     public init(
         gate: GateStyle? = nil, synced: Bool? = nil, accountID: String? = nil, doorRevision: Int? = nil,

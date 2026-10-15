@@ -267,9 +267,20 @@ public final class ProtectionExecutor {
         // The executor serves the slot's library (a landing changes it).
         configuration.libraryID = record.libraryID
         let sections = record.verifiedSections(reach: reach)
+        // The key file a new identity's takeover reads (§3.5: "the Apple key
+        // ids its live key file's wraps name"): the live one — or, when the
+        // live place holds another key's file and a plan that verifies carried
+        // this key's own (an act its predecessor began), that one, which the
+        // settle then restores (VX-305 U4, the soak's seed 2).
+        var ownFile = liveFile
+        if liveFile?.fingerprint != StoreKeyEnvelope.fingerprint(of: key), let sealed = try leaves.plans.readPlan(),
+           let plan = try? sealed.open(purpose: .plan, libraryID: record.libraryID, reach: reach),
+           let outgoing = plan.parameters?.outgoingKeyFile, outgoing.fingerprint == StoreKeyEnvelope.fingerprint(of: key) {
+            ownFile = outgoing
+        }
         let (section, resolution) = DeviceFacts.thisMacsSection(
             memory: memory, recordSections: sections, marker: record.marker(for: configuration.machine),
-            keyFileOwnAppleKeyIDs: [liveFile?.apple?.keyID].compactMap { $0 },
+            keyFileOwnAppleKeyIDs: [ownFile?.apple?.keyID].compactMap { $0 },
             mintDeviceID: { self.leaves.ids.mintID() }, guards: guards)
         var unlocked = UnlockedLibrary(
             key: key, record: record, section: section, resolution: resolution, memory: memory, keyFile: liveFile,
