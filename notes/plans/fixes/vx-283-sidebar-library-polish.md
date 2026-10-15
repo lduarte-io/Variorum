@@ -3058,12 +3058,17 @@ DEBUG-only trace hook, off unless the probe turns it on.
    228.5 — this IS U3b's "the in-app Terminal row runs ≈20 pt wider". With scope ≈ 262–270 the decision's threshold
    (sort counted 181, `when` 53, field floor 211.5, spacing 40) falls at ≈ 967–978: two lines at 960, one at 980 —
    **exactly the sort states.** Study's sort states (two at 880, one at 900) need scope ∈ (≈264, ≈277] by the same
-   sum. So **the SORT states obey the decision**, with the scope control answering ≈262–277. **The TYPED states and
-   "empty again" do not:** one line at Terminal 940 / two at 920 needs scope ∈ (≈219, ≈232.5]; Study one at 840 / two
-   at 820 needs scope ∈ (≈224, ≈237] — the offscreen harness's own 228.5 / 233. Both voices fit ONE two-valued input:
-   **the scope picker's answer below its natural width — ≈262–277 in the sort states, ≈225–237 after a search.**
-   (The mode picker moving instead, or the ORDER flipping as the field's zero-proposal answer follows its text, fits
-   only with less natural numbers.) Arithmetic, not proof: the probe's decision steps print what each child took.
+   sum. So **the SORT states obey the decision**, with the scope control answering ≈262–277 (and, in Study, mode
+   served before scope — scope first cannot reach that band). **The TYPED states and "empty again" do not**, and two
+   fits exist (every permutation of the three flexible children checked): **(A)** the same order, the scope's answer
+   two-valued — one line at Terminal 940 / two at 920 needs scope ∈ (≈219, ≈232.5], Study 840 / 820 needs (≈224,
+   ≈237] — the offscreen harness's own 228.5 / 233; or **(B)** the ORDER flipping, scope served before mode after a
+   search (its flexibility, its own ∞-minus-zero answer, dropping under mode's), with scope ∈ (≈223, ≈243] in Terminal
+   and (≈248, ≈268] in Study — Study's fits ONE scope width ≈265 in both states, Terminal's needs a ~2-pt move (inside
+   the slop of these widths). No fit keeps scope at ≈262 in Terminal's typed states with the order unchanged. **Either
+   way the moving input is a live AppKit answer P-U3-5 did not stabilize — the scope picker's width or the
+   flexibilities that order the distribution.** Arithmetic, not proof: the probe's decision steps print the order (the
+   step sequence) and what each child took.
 6. **Where a two-valued answer could come from** (candidates, unproven — the probe's AppKit lines and per-pass child
    answers tell them apart): (a) the NSSegmentedControl's reported size follows how it was last LAID OUT (its frame /
    segment widths) — a feedback loop through the row's own placement: placed wide, it answers wide (two lines hold);
